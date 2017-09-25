@@ -35,35 +35,6 @@
         }, 
         {
             "source": {
-                "index": 1, 
-                "name": "C_load745", 
-                "weight": 1, 
-                "px": 421.83665276961256, 
-                "py": 534.6743575490914, 
-                "objectType": "load", 
-                "y": 534.6743575490914, 
-                "x": 421.83665276961256, 
-                "fixed": true, 
-                "chargeMultiple": 1, 
-                "treeIndex": 235
-            }, 
-            "target": {
-                "index": 0, 
-                "name": "C_node775", 
-                "weight": 2, 
-                "px": 427.31372158414996, 
-                "py": 531.6125479086157, 
-                "objectType": "gridNode", 
-                "y": 531.6125479086157, 
-                "x": 427.31372158414996, 
-                "fixed": true, 
-                "chargeMultiple": 1, 
-                "treeIndex": 237
-            }, 
-            "objectType": "parentChild"
-        }, 
-        {
-            "source": {
                 "index": 2, 
                 "name": "C_load744", 
                 "weight": 3, 
@@ -1144,35 +1115,6 @@
         }, 
         {
             "source": {
-                "index": 39, 
-                "name": "B_load745", 
-                "weight": 1, 
-                "px": 568.8693968233446, 
-                "py": 544.7756213928517, 
-                "objectType": "load", 
-                "y": 544.7756213928517, 
-                "x": 568.8693968233446, 
-                "fixed": true, 
-                "chargeMultiple": 1, 
-                "treeIndex": 161
-            }, 
-            "target": {
-                "index": 38, 
-                "name": "B_node775", 
-                "weight": 2, 
-                "px": 563.4741152049962, 
-                "py": 541.577214045153, 
-                "objectType": "gridNode", 
-                "y": 541.577214045153, 
-                "x": 563.4741152049962, 
-                "fixed": true, 
-                "chargeMultiple": 1, 
-                "treeIndex": 163
-            }, 
-            "objectType": "parentChild"
-        }, 
-        {
-            "source": {
                 "index": 40, 
                 "name": "B_load744", 
                 "weight": 3, 
@@ -2250,35 +2192,6 @@
                 "treeIndex": 89
             }, 
             "objectType": "fromTo"
-        }, 
-        {
-            "source": {
-                "index": 77, 
-                "name": "A_load745", 
-                "weight": 1, 
-                "px": 531.6519915927511, 
-                "py": 411.20101748862453, 
-                "objectType": "load", 
-                "y": 411.20101748862453, 
-                "x": 531.6519915927511, 
-                "fixed": true, 
-                "chargeMultiple": 1, 
-                "treeIndex": 87
-            }, 
-            "target": {
-                "index": 76, 
-                "name": "A_node775", 
-                "weight": 2, 
-                "px": 531.3124391496813, 
-                "py": 417.4507823630986, 
-                "objectType": "gridNode", 
-                "y": 417.4507823630986, 
-                "x": 531.3124391496813, 
-                "fixed": true, 
-                "chargeMultiple": 1, 
-                "treeIndex": 89
-            }, 
-            "objectType": "parentChild"
         }, 
         {
             "source": {
@@ -3712,17 +3625,6 @@
             "length": "320", 
             "configuration": "lc_7231"
         }, 
-        "161": {
-            "phases": "\"ABCD\"", 
-            "name": "B_load745", 
-            "parent": "B_node775", 
-            "object": "load", 
-            "voltage_B": "-240.000000 -138.564065j", 
-            "voltage_C": "-0.000000+277.128129j", 
-            "voltage_A": "240.000000 -138.564065j", 
-            "nominal_voltage": "480", 
-            "constant_power_A": "4200+2100j"
-        }, 
         "0": {
             "timezone": "EST+5EDT", 
             "stoptime": "'2000-01-01 0:00:20'", 
@@ -4209,17 +4111,6 @@
             "voltage_A": "2400.000000 -1385.640646j", 
             "nominal_voltage": "4800", 
             "constant_power_A": "42000.000000+21000.000000j"
-        }, 
-        "87": {
-            "phases": "\"ABCD\"", 
-            "name": "A_load745", 
-            "parent": "A_node775", 
-            "object": "load", 
-            "voltage_B": "-240.000000 -138.564065j", 
-            "voltage_C": "-0.000000+277.128129j", 
-            "voltage_A": "240.000000 -138.564065j", 
-            "nominal_voltage": "480", 
-            "constant_power_A": "4200+2100j"
         }, 
         "84": {
             "phases": "\"ABCD\"", 
@@ -5217,17 +5108,6 @@
             "voltage_A": "2400.000000 -1385.640646j", 
             "nominal_voltage": "4800"
         }, 
-        "235": {
-            "phases": "\"ABCD\"", 
-            "name": "C_load745", 
-            "parent": "C_node775", 
-            "object": "load", 
-            "voltage_B": "-240.000000 -138.564065j", 
-            "voltage_C": "-0.000000+277.128129j", 
-            "voltage_A": "240.000000 -138.564065j", 
-            "nominal_voltage": "480", 
-            "constant_power_A": "4200+2100j"
-        }, 
         "236": {
             "phases": "\"ABC\"", 
             "from": "C_node709", 
@@ -5649,19 +5529,6 @@
             "fixed": true, 
             "chargeMultiple": 1, 
             "treeIndex": 237
-        }, 
-        {
-            "index": 1, 
-            "name": "C_load745", 
-            "weight": 1, 
-            "px": 421.83665276961256, 
-            "py": 534.6743575490914, 
-            "objectType": "load", 
-            "y": 534.6743575490914, 
-            "x": 421.83665276961256, 
-            "fixed": true, 
-            "chargeMultiple": 1, 
-            "treeIndex": 235
         }, 
         {
             "index": 2, 
@@ -6145,19 +6012,6 @@
             "treeIndex": 163
         }, 
         {
-            "index": 39, 
-            "name": "B_load745", 
-            "weight": 1, 
-            "px": 568.8693968233446, 
-            "py": 544.7756213928517, 
-            "objectType": "load", 
-            "y": 544.7756213928517, 
-            "x": 568.8693968233446, 
-            "fixed": true, 
-            "chargeMultiple": 1, 
-            "treeIndex": 161
-        }, 
-        {
             "index": 40, 
             "name": "B_load744", 
             "weight": 3, 
@@ -6637,19 +6491,6 @@
             "fixed": true, 
             "chargeMultiple": 1, 
             "treeIndex": 89
-        }, 
-        {
-            "index": 77, 
-            "name": "A_load745", 
-            "weight": 1, 
-            "px": 531.6519915927511, 
-            "py": 411.20101748862453, 
-            "objectType": "load", 
-            "y": 411.20101748862453, 
-            "x": 531.6519915927511, 
-            "fixed": true, 
-            "chargeMultiple": 1, 
-            "treeIndex": 87
         }, 
         {
             "index": 78, 

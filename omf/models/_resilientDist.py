@@ -83,10 +83,10 @@ def convertToGFM(gfmInputTemplate, feederModel):
 				'line_code' : '', #*
 				'length' : 1.0, #* Units match line code entries.
 				# 'has_switch' : False,
-				# 'construction_cost': 100,
+				'construction_cost': float(gfmInputTemplate['lineUnitCost']),
 				'harden_cost': float(gfmInputTemplate['hardeningUnitCost']), # Russel: this exists unless its a trans.
 				'switch_cost': float(gfmInputTemplate['switchCost']), # taken from rdtInTrevor.json.
-				'can_harden': True, # Not seen in rdtInTrevor.json.
+				'can_harden': False, # Not seen in rdtInTrevor.json.
 				'can_add_switch': True, # Not seen in rdtInTrevor.json.
 				# 'num_poles' : 2,
 				# 'capacity' : 5780, # MVA capacity.
@@ -211,8 +211,9 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			# newLoad.pop('is_critical',None)
 			gfmJson['loads'].append(newLoad)
 	# Generator creation:
+	genCands = gfmInputTemplate['generatorCandidates'].strip().replace(' ', '').split(',')
 	for key, gens in jsonTree.iteritems():
-		if gens.get('bustype','').lower() == 'swing':
+		if gens.get('name','') in genCands:
 			genID = gens.get('name','')+'_gen'
 			for elem in gfmJson['buses']:
 				if elem['id'][0:-4] == genID[0:-4]:
@@ -221,14 +222,15 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			genObj = dict({
 	 			'id': gens.get('name','')+'_gen', #*
 				'node_id': busID, #*
-				# 'is_new': False, # Whether or not new generation can be built.
-				# 'microgrid_cost': 1.5, # Per MW capacity of building DG.
-				# 'max_microgrid': 0, # Max additional capacity for this gen.
-				# 'microgrid_fixed_cost': 0, # One-time fixed cost for building DG.
+				'is_new': True, # Whether or not new generation can be built.
+				'microgrid_cost': 1.5, # Per MW capacity of building DG.
+				'max_microgrid': 0, # Max additional capacity for this gen.
+				'microgrid_fixed_cost': 0, # One-time fixed cost for building DG.
 				'has_phase': has_phase, #*
 				'max_reactive_phase': max_reactive_phase, #*
 				'max_real_phase': max_real_phase #*
 			})
+			gfmJson['generators'].append(genObj)
 			# BUG: GENERATORS ADDED TO ALL SWING BUSES: gfmJson['generators'].append(genObj)
 	# Return 
 	return gfmJson
@@ -282,7 +284,9 @@ def work(modelDir, inputDict):
 		'hardeningCandidates' : inputDict['hardeningCandidates'],
 		'switchCandidates'	: inputDict['switchCandidates'],
 		'hardeningUnitCost' : inputDict['hardeningUnitCost'],
-		'switchCost' : inputDict['switchCost']
+		'switchCost' : inputDict['switchCost'],
+		'generatorCandidates' : inputDict['generatorCandidates'],
+		'lineUnitCost' : inputDict['lineUnitCost']
 
 	}
 	gfmJson = convertToGFM(gfmInputTemplate, feederModel)
