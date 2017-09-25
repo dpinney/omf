@@ -84,10 +84,10 @@ def convertToGFM(gfmInputTemplate, feederModel):
 				'length' : 1.0, #* Units match line code entries.
 				# 'has_switch' : False,
 				# 'construction_cost': 100,
-				# 'harden_cost': 100000, # Russel: this exists unless its a trans.
-				# 'switch_cost': 15, # taken from rdtInTrevor.json.
-				'can_harden': False, # Not seen in rdtInTrevor.json.
-				# 'can_add_switch': False, # Not seen in rdtInTrevor.json.
+				'harden_cost': float(gfmInputTemplate['hardeningUnitCost']), # Russel: this exists unless its a trans.
+				'switch_cost': float(gfmInputTemplate['switchCost']), # taken from rdtInTrevor.json.
+				'can_harden': True, # Not seen in rdtInTrevor.json.
+				'can_add_switch': True, # Not seen in rdtInTrevor.json.
 				# 'num_poles' : 2,
 				# 'capacity' : 5780, # MVA capacity.
 				'is_transformer' : False,
@@ -280,7 +280,10 @@ def work(modelDir, inputDict):
 		'maxDGPerGenerator' : float(inputDict["maxDGPerGenerator"]),
 		'newLineCandidates' : inputDict['newLineCandidates'],
 		'hardeningCandidates' : inputDict['hardeningCandidates'],
-		'switchCandidates'	: inputDict['switchCandidates']
+		'switchCandidates'	: inputDict['switchCandidates'],
+		'hardeningUnitCost' : inputDict['hardeningUnitCost'],
+		'switchCost' : inputDict['switchCost']
+
 	}
 	gfmJson = convertToGFM(gfmInputTemplate, feederModel)
 	gfmInputFilename = 'gfmInput.json'
