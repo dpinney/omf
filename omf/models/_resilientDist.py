@@ -211,8 +211,11 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			# newLoad.pop('is_critical',None)
 			gfmJson['loads'].append(newLoad)
 	# Generator creation:
+	genCands = gfmInputTemplate['generatorCandidates'].strip().replace(' ', '').split(',')
+	print genCands
 	for key, gens in jsonTree.iteritems():
-		if gens.get('bustype','').lower() == 'swing':
+		if gens.get('name','') in genCands:
+			print 'HIHIHIHIHHI'
 			genID = gens.get('name','')+'_gen'
 			for elem in gfmJson['buses']:
 				if elem['id'][0:-4] == genID[0:-4]:
@@ -221,14 +224,15 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			genObj = dict({
 	 			'id': gens.get('name','')+'_gen', #*
 				'node_id': busID, #*
-				# 'is_new': False, # Whether or not new generation can be built.
-				# 'microgrid_cost': 1.5, # Per MW capacity of building DG.
-				# 'max_microgrid': 0, # Max additional capacity for this gen.
-				# 'microgrid_fixed_cost': 0, # One-time fixed cost for building DG.
+				'is_new': True, # Whether or not new generation can be built.
+				'microgrid_cost': 1.5, # Per MW capacity of building DG.
+				'max_microgrid': 0, # Max additional capacity for this gen.
+				'microgrid_fixed_cost': 0, # One-time fixed cost for building DG.
 				'has_phase': has_phase, #*
 				'max_reactive_phase': max_reactive_phase, #*
 				'max_real_phase': max_real_phase #*
 			})
+			gfmJson['generators'].append(genObj)
 			# BUG: GENERATORS ADDED TO ALL SWING BUSES: gfmJson['generators'].append(genObj)
 	# Return 
 	return gfmJson
@@ -282,7 +286,8 @@ def work(modelDir, inputDict):
 		'hardeningCandidates' : inputDict['hardeningCandidates'],
 		'switchCandidates'	: inputDict['switchCandidates'],
 		'hardeningUnitCost' : inputDict['hardeningUnitCost'],
-		'switchCost' : inputDict['switchCost']
+		'switchCost' : inputDict['switchCost'],
+		'generatorCandidates' : inputDict['generatorCandidates']
 
 	}
 	gfmJson = convertToGFM(gfmInputTemplate, feederModel)
