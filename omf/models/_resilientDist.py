@@ -86,7 +86,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 				# 'construction_cost': 100,
 				'harden_cost': float(gfmInputTemplate['hardeningUnitCost']), # Russel: this exists unless its a trans.
 				'switch_cost': float(gfmInputTemplate['switchCost']), # taken from rdtInTrevor.json.
-				'can_harden': True, # Not seen in rdtInTrevor.json.
+				'can_harden': False, # Not seen in rdtInTrevor.json.
 				'can_add_switch': True, # Not seen in rdtInTrevor.json.
 				# 'num_poles' : 2,
 				# 'capacity' : 5780, # MVA capacity.
