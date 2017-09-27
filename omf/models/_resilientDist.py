@@ -83,7 +83,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 				'line_code' : '', #*
 				'length' : 1.0, #* Units match line code entries.
 				# 'has_switch' : False,
-				# 'construction_cost': 100,
+				'construction_cost': float(gfmInputTemplate['lineUnitCost']),
 				'harden_cost': float(gfmInputTemplate['hardeningUnitCost']), # Russel: this exists unless its a trans.
 				'switch_cost': float(gfmInputTemplate['switchCost']), # taken from rdtInTrevor.json.
 				'can_harden': False, # Not seen in rdtInTrevor.json.
@@ -285,7 +285,8 @@ def work(modelDir, inputDict):
 		'switchCandidates'	: inputDict['switchCandidates'],
 		'hardeningUnitCost' : inputDict['hardeningUnitCost'],
 		'switchCost' : inputDict['switchCost'],
-		'generatorCandidates' : inputDict['generatorCandidates']
+		'generatorCandidates' : inputDict['generatorCandidates'],
+		'lineUnitCost' : inputDict['lineUnitCost']
 
 	}
 	gfmJson = convertToGFM(gfmInputTemplate, feederModel)

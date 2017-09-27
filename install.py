@@ -31,10 +31,13 @@ if platform.system() == 'Linux':
 		os.system("python setup.py develop")
 # if Windows run these commands:
 elif platform.system()=='Windows':
+	print 'Windows 32bit'
+	# Need to manually download and install Python 2.7 and set python as a path variable, Git, Chocolatey 
+	# Download Pygraphviz whl and place it in the omf directory
 	# git clone https://github.com/dpinney/omf.git
 	workDir = os.getcwd()
-	chocoString = '@"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString("https://chocolatey.org/install.ps1"))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"'
-	os.system(chocoString)
+	# chocoString = "@'%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe' -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command 'iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))' && SET 'PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin'"
+	# os.system(chocoString)
 	os.system("choco install -y git")
 	os.system("choco install -y wget")
 	os.system("choco install -y python2")
@@ -43,16 +46,34 @@ elif platform.system()=='Windows':
 	os.system("choco install -y ffmpeg")
 	os.system("choco install -y graphviz")
 	os.system("choco install -y pip")
+	# Sometimes refreshenv doesnt properly update the path variables and pip doesnt work. 
+	# Testing timeout and using refresh multiple times
+	os.system("timeout 5")
 	os.system("refreshenv")
+	os.system("timeout 5")
+	os.system("refreshenv")
+	os.system("timeout 5")
+	# Manually setting path for pip and other scripts
+	os.system('setx PATH "%PATH%;C:\Python27\Scripts')
 	os.system("cd " + workDir)
-	# wget pygraphviz 
-	# pip install whl
-	os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2-win32.exe")
-	os.system("gridlabd-3.2-win32.exe/silent")
+	for file in os.listdir(workDir):
+		if file.endswith('.whl'):
+			whlFile = file
+	os.system("pip install " + whlFile)
+	# Sometimes wget has a hard time downloading gridlabD
+	if platform.architecture()[0] == '32bit':
+		os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2-win32.exe")
+		os.system("gridlabd-3.2-win32.exe/silent")
+	elif platform.architecture()[1] == '64bit':
+		# Note: has not been tested yet, only 32bit has
+		os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2-x64.exe")
+		os.system("gridlabd-3.2-x64.exe/silent")
 	os.system("cd omf")
+	os.system("refreshenv")
 	os.system("pip install -r requirements.txt")
 	os.system("pip install setuptools==33.1.1")
 	os.system("python setup.py develop")
 # if Mac run these commands:
 elif platform.system()=="Darwin":
-	print 'Mac'
+	print 'Mac OSX'
+
