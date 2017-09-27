@@ -26,10 +26,12 @@ with open(pJoin(__neoMetaModel__._myDir,modelName+".html"),"r") as tempFile:
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	outData = {}
-	feederName = inputDict["feederName1"]
+	# feederName = inputDict["feederName1"]
+	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
+	inputDict["feederName1"] = feederName
 	# Create voltage drop plot.
 	# print "*DEBUG: feederName:", feederName
-	omd = json.load(open(pJoin(modelDir,feederName+'.omd')))
+	omd = json.load(open(pJoin(modelDir,feederName + '.omd')))
 	if inputDict.get("layoutAlgorithm", "geospatial") == "geospatial":
 		neato = False
 	else:
