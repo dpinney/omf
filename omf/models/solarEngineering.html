@@ -168,7 +168,7 @@
 				localHighChart["series"] = [powerSeries, lossesSeries, DGSeries]
 				localHighChart["yAxis"]= [{"title":{"text": "Power (W)", "style": {"color": "gray"}}}]
 				new Highcharts.Chart(localHighChart);
-			</script>s
+			</script>
 		</div>
 		<p class="reportTitle postRun">Transmission Voltage <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="swingVoltageReport" class="tightContent postRun">
@@ -247,7 +247,7 @@
 				localHighChart["chart"]["width"] = 1000
 				localHighChart["chart"]["height"] = 150
 				localHighChart["series"] = [swingPF]
-				localHighChart["yAxis"]= [{"title":{"text":"Voltage (V)","style":{"color":"black"}}}]
+				localHighChart["yAxis"]= [{"title":{"text":"Per Unit (PU)","style":{"color":"black"}},"min":0,"max":1}]
 				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
@@ -604,6 +604,16 @@
 		<div id="gridlabDWarningsBlock" class="tightContent postRun detailsContainer" style="position: relative;">
 				<pre id="stderr" style="font-size:13px; text-align:left; padding-left: 10px;overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
 			<script>gebi("stderr").innerHTML = allOutputData.stderr</script>
+		</div>
+		<p class="reportTitle postRun">Gridlab-D Violation Summary <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="gridlabDViolationSummary" class="tightContent postRun detailsContainer" style="position: relative;">
+				<pre id="vioSum" style="font-size:13px; text-align:left; padding-left: 10px;overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
+			<script>gebi("vioSum").innerHTML = allOutputData.violationSummary</script>
+		</div>
+		<p class="reportTitle postRun">Gridlab-D Violation Log <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="gridlabDViolationLog" class="tightContent postRun detailsContainer" style="position: relative;">
+				<pre id="vioLog" style="font-size:13px; height: 400px; text-align:left; overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
+			<script>gebi("vioLog").innerHTML = allOutputData.violationLog</script>
 		</div>
 	</div>
 </body>

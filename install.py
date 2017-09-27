@@ -31,7 +31,6 @@ if platform.system() == 'Linux':
 		os.system("python setup.py develop")
 # if Windows run these commands:
 elif platform.system()=='Windows':
-	print 'Windows 32bit'
 	# Need to manually download and install Python 2.7 and set python as a path variable, Git, Chocolatey 
 	# Download Pygraphviz whl and place it in the omf directory
 	# git clone https://github.com/dpinney/omf.git
