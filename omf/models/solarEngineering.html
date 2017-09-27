@@ -247,7 +247,7 @@
 				localHighChart["chart"]["width"] = 1000
 				localHighChart["chart"]["height"] = 150
 				localHighChart["series"] = [swingPF]
-				localHighChart["yAxis"]= [{"title":{"text":"Per Unit (PU)","style":{"color":"black"}},"min":0,"max":1}]
+				localHighChart["yAxis"]= [{"title":{"text":"Per Unit (PU)","style":{"color":"black"}},"min":0,"max":1.1}]
 				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
@@ -605,7 +605,7 @@
 				<pre id="stderr" style="font-size:13px; text-align:left; padding-left: 10px;overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
 			<script>gebi("stderr").innerHTML = allOutputData.stderr</script>
 		</div>
-		<p class="reportTitle postRun">Gridlab-D Violation Summary <a target="_self" class="toggle">Hide / Show</a></p>
+<!-- 		<p class="reportTitle postRun">Gridlab-D Violation Summary <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="gridlabDViolationSummary" class="tightContent postRun detailsContainer" style="position: relative;">
 				<pre id="vioSum" style="font-size:13px; text-align:left; padding-left: 10px;overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
 			<script>gebi("vioSum").innerHTML = allOutputData.violationSummary</script>
@@ -614,6 +614,6 @@
 		<div id="gridlabDViolationLog" class="tightContent postRun detailsContainer" style="position: relative;">
 				<pre id="vioLog" style="font-size:13px; height: 400px; text-align:left; overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
 			<script>gebi("vioLog").innerHTML = allOutputData.violationLog</script>
-		</div>
+		</div> -->
 	</div>
 </body>
