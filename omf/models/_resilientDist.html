@@ -329,6 +329,7 @@
 					for(var j = 0; j < rdtOutput.design_solution.lines.length; j++) {
 						line = rdtOutput.design_solution.lines[j];
 						var hardened = "Hardened";
+						var switchBuilt = ", Switch built";
 						lineCost = lineData[j][1];
 						if(line.hardened == false) {
 							hardened = "Unhardened";
@@ -337,8 +338,11 @@
 							hardened = "Not a Hardening Candidate";
 							lineCost = "0";
 						}
+						if(line.switch_built == false) {
+							switchBuilt = ", Switch not built";
+						}
 						lineID = lineData[j][0];
-						htmlCollector = htmlCollector + "<tr><td>" + lineID + "</td><td>Line</td><td>" + hardened + "</td><td>$" +  lineCost + "</td></tr>";
+						htmlCollector = htmlCollector + "<tr><td>" + lineID + "</td><td>Line</td><td>" + hardened + switchBuilt + "</td><td>$" +  lineCost + "</td></tr>";
 						totalCost = parseFloat(lineCost.replace(/\,/g,'')) + totalCost;
 					}
 					if(rdtOutput.design_solution.is_feasible == true) {
