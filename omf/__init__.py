@@ -9,8 +9,14 @@ omfDir = _os.path.dirname(__file__)
 _sys.path.append(omfDir)
 
 # Import sub-packages.
-import feeder
 import solvers
 import models
+import anonymization
+import calibrate
+import cymeToGridlab
+import feeder
+import loadModeling
+import loadModelingAmi
 import milToGridlab
+import network
 import weather
