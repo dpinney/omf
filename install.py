@@ -1,5 +1,5 @@
 import platform, os
-# Use os.system('pass command as string')
+# All installations require git to clone the omf
 if platform.system() == 'Linux':
 	# if Ubuntu run these commands:
 	if platform.linux_distribution()[0]=="Ubuntu":
@@ -9,9 +9,13 @@ if platform.system() == 'Linux':
 		python-pydot ffmpeg mdbtools python-cairocffi")
 		os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2.0-1.x86_64.rpm")
 		os.system("sudo alien gridlabd-3.2.0-1.x86_64.rpm")
-		os.system("sudo dpkg -i gridlabd-3.2.0-1.x86_64.deb")
+		for file in os.listdir(workDir):
+			if file.endswith('.deb'):
+				debFile = file		
+		os.system("sudo dpkg -i " + debFile)
 		os.system("sudo apt-get install -f")
 		os.system("cd omf")
+		os.system("pip install -r requirements.txt")
 		os.system("sudo python setup.py develop")
 	# if CentOS 7 run these commands:
 	elif platform.linux_distribution()[0]=="CentOS Linux":
@@ -23,7 +27,7 @@ if platform.system() == 'Linux':
 		os.system("sudo rpm -Uvh http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-1.el7.nux.noarch.rpm")
 		os.system("sudo yum install ffmpeg ffmpeg-devel -y")
 		os.system("sudo yum install python-pip")
-		os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2.0-1.x86_64.rpm")
+		os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2.0-1.x86_64.rpm")
 		os.system("rpm -Uvh gridlabd-3.2.0-1.x86_64.rpm")
 		os.system("cd omf")
 		os.system("pip install -r requirements.txt")
@@ -33,6 +37,7 @@ if platform.system() == 'Linux':
 elif platform.system()=='Windows':
 	# Need to manually download and install Python 2.7 and set python as a path variable, Git, Chocolatey 
 	# Download Pygraphviz whl and place it in the omf directory
+	# Use wget to download omf from github
 	# git clone https://github.com/dpinney/omf.git
 	workDir = os.getcwd()
 	# chocoString = "@'%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe' -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command 'iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))' && SET 'PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin'"
@@ -52,6 +57,8 @@ elif platform.system()=='Windows':
 	os.system("timeout 5")
 	os.system("refreshenv")
 	os.system("timeout 5")
+	# Possible start a new process after refreshenv, maybe look for anothey way to refresh 
+	# env variables in python
 	# Manually setting path for pip and other scripts
 	os.system('setx PATH "%PATH%;C:\Python27\Scripts')
 	os.system("cd " + workDir)
@@ -74,5 +81,14 @@ elif platform.system()=='Windows':
 	os.system("python setup.py develop")
 # if Mac run these commands:
 elif platform.system()=="Darwin":
-	print 'Mac OSX'
+	# Install homebrew
+	# os.system('/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
+	# os.system('brew install wget python ffmpeg git graphviz')
+	# os.system('brew link --overwrite python')
+	# os.system('cd omf')
+	# os.system('pip install -r requirements.txt')
+	# os.system('python setup.py develop')
+
+
+
 
