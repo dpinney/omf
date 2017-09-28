@@ -97,8 +97,10 @@ def getByKeyVal(tree, key, value, getAll=False):
 
 def addScaledRandomHouses(inFeed):
 	''' Take a feeder, translate each triplex_node under a meter in to a scaled, semi-randomized house object. '''
-	houseArchetypes = omf.feeder.parse('./scratch/uploads/houseArchetypes.glm')
-	childrenArchetypes = omf.feeder.parse('./scratch/uploads/houseChildren.glm')
+	housePath = os.path.join(omf.omfDir, 'scratch', 'uploads', 'houseArchetypes.glm')
+	houseArchetypes = omf.feeder.parse(housePath)
+	childrenPath = os.path.join(omf.omfDir, 'scratch', 'uploads', 'houseChildren.glm')
+	childrenArchetypes = omf.feeder.parse(childrenPath)
 	tripNodeKeys = getByKeyVal(inFeed, 'object', 'triplex_node', getAll=True)
 	tripLoadKeys = [k for k in tripNodeKeys if 'parent' in inFeed[k]]
 	maxKey = omf.feeder.getMaxKey(inFeed) + 1
@@ -124,9 +126,10 @@ def addScaledRandomHouses(inFeed):
 			maxKey += 1
 
 def _tests():
-	testFeed = omf.feeder.parse('./scratch/uploads/inTest_R4-25.00-1_CLEAN.glm')
+	testFeedPath = os.path.join(omf.omfDir, 'scratch', 'uploads', 'inTest_R4-25.00-1_CLEAN.glm')
+	testFeed = omf.feeder.parse(testFeedPath)
 	addScaledRandomHouses(testFeed)
-	outFilePath = './scratch/inTest_R4_modified.glm'
+	outFilePath = os.path.join(omf.omfDir, 'scratch', 'uploads', 'inTest_R4_modified.glm')
 	with open(outFilePath,'w+') as outFile:
 		outFile.write(omf.feeder.sortedWrite(testFeed))
 	print 'Brooklyn test:', houseSpecs(40.71418, -73.96125), '\n'
