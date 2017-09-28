@@ -27,12 +27,8 @@ with open(pJoin(__neoMetaModel__._myDir,modelName+".html"),"r") as tempFile:
 
 def work(modelDir,inputDict):
 	'''This reads a glm file, changes the method of powerflow and reruns'''
-	with open(pJoin(modelDir,'allInputData.json')) as inputFile:
-		feederName = json.load(inputFile).get('feederName1','feeder1')
+	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict["feederName1"] = feederName
-
-	#read pre-calibrated feeder and run cvrdynamic
-	feederName = inputDict.get('feederName1','feeder1')
 	feederPath = pJoin(modelDir,feederName+'.omd')
 	# Reads a pre-calibrated feeder.
 	outData = {}

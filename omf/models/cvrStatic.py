@@ -26,10 +26,8 @@ with open(pJoin(__neoMetaModel__._myDir,modelName+".html"),"r") as tempFile:
 def work(modelDir, inputDict):
 	''' Run the model in the foreground. WARNING: can take about a minute. '''
 	# Global vars, and load data from the model directory.
-	with open(pJoin(modelDir,'allInputData.json')) as inputFile:
-		feederName = json.load(inputFile).get('feederName1','feeder1')
+	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict["feederName1"] = feederName
-	feederName = inputDict.get('feederName1','feeder1')
 	feederPath = pJoin(modelDir,feederName+'.omd')
 	feederJson = json.load(open(feederPath))
 	tree = feederJson.get("tree",{})

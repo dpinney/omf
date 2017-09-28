@@ -121,8 +121,7 @@ def roundSig(x, sig=3):
 def run(modelDir, inputDict):
 	''' Run the model in a separate process. web.py calls this to run the model.
 	This function will return fast, but results take a while to hit the file system.'''
-	with open(pJoin(modelDir,'allInputData.json')) as inputFile:
-		inJson = json.load(inputFile)
+	inJson = inputDict
 	feederList = []
 	for key in inJson.keys():
 		if 'feederName' in key: 
@@ -373,7 +372,6 @@ def runForeground(modelDir, inputDict):
 				return web.send_link(email, message, user)
 			except Exception, e:
 				print "ERROR: Failed sending model status email to user: ", email, ", with exception: \n", e
-
 	except Exception, e:
 		# If input range wasn't valid delete output, write error to disk.
 		cancel(modelDir)
