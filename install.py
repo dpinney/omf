@@ -81,6 +81,7 @@ elif platform.system()=='Windows':
 	os.system("python setup.py develop")
 # if Mac run these commands:
 elif platform.system()=="Darwin":
+	print 'Mac'
 	# Install homebrew
 	# os.system('/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
 	# os.system('brew install wget python ffmpeg git graphviz')
@@ -88,7 +89,3 @@ elif platform.system()=="Darwin":
 	# os.system('cd omf')
 	# os.system('pip install -r requirements.txt')
 	# os.system('python setup.py develop')
-
-
-
-
