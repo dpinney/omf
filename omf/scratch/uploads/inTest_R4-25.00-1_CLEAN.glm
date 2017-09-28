@@ -8954,7 +8954,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_141;
 	parent R4-25-00-1_tm_1;
-	power_1 8000+1624.8j;
+	power_12 8000+1624.8j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -8965,7 +8965,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_142;
 	parent R4-25-00-1_tm_2;
-	power_1 9000+1827.9j;
+	power_12 9000+1827.9j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -8976,7 +8976,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_143;
 	parent R4-25-00-1_tm_3;
-	power_1 4000+812.4j;
+	power_12 4000+812.4j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -8987,7 +8987,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_144;
 	parent R4-25-00-1_tm_4;
-	power_1 3000+609.3j;
+	power_12 3000+609.3j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -8998,7 +8998,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_145;
 	parent R4-25-00-1_tm_5;
-	power_1 7000+1421.7j;
+	power_12 7000+1421.7j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9009,7 +9009,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_146;
 	parent R4-25-00-1_tm_6;
-	power_1 18000+3655.8j;
+	power_12 18000+3655.8j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9020,7 +9020,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_147;
 	parent R4-25-00-1_tm_7;
-	power_1 15000+3046.5j;
+	power_12 15000+3046.5j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9031,7 +9031,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_148;
 	parent R4-25-00-1_tm_8;
-	power_1 6000+1218.6j;
+	power_12 6000+1218.6j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9042,7 +9042,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_149;
 	parent R4-25-00-1_tm_9;
-	power_1 8000+1624.8j;
+	power_12 8000+1624.8j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9053,7 +9053,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_150;
 	parent R4-25-00-1_tm_10;
-	power_1 7000+1421.7j;
+	power_12 7000+1421.7j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9064,7 +9064,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_151;
 	parent R4-25-00-1_tm_11;
-	power_1 1000+203.1j;
+	power_12 1000+203.1j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9075,7 +9075,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_152;
 	parent R4-25-00-1_tm_12;
-	power_1 2000+406.2j;
+	power_12 2000+406.2j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9086,7 +9086,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_153;
 	parent R4-25-00-1_tm_13;
-	power_1 10000+2031j;
+	power_12 10000+2031j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9097,7 +9097,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_154;
 	parent R4-25-00-1_tm_14;
-	power_1 16000+3249.6j;
+	power_12 16000+3249.6j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9108,7 +9108,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_155;
 	parent R4-25-00-1_tm_15;
-	power_1 10000+2031j;
+	power_12 10000+2031j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9119,7 +9119,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_156;
 	parent R4-25-00-1_tm_16;
-	power_1 5000+1015.5j;
+	power_12 5000+1015.5j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9130,7 +9130,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_157;
 	parent R4-25-00-1_tm_17;
-	power_1 7000+1421.7j;
+	power_12 7000+1421.7j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9141,7 +9141,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_158;
 	parent R4-25-00-1_tm_18;
-	power_1 3000+609.3j;
+	power_12 3000+609.3j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9152,7 +9152,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_159;
 	parent R4-25-00-1_tm_19;
-	power_1 6000+3000j;
+	power_12 6000+3000j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9163,7 +9163,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_160;
 	parent R4-25-00-1_tm_20;
-	power_1 13000+2640.3j;
+	power_12 13000+2640.3j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9174,7 +9174,7 @@ object triplex_node {
 	voltage_1 120;
 	name R4-25-00-1_tn_161;
 	parent R4-25-00-1_tm_21;
-	power_1 2300+1200j;
+	power_12 2300+1200j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9185,7 +9185,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_162;
 	parent R4-25-00-1_tm_22;
-	power_1 2300+1200j;
+	power_12 2300+1200j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9196,7 +9196,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_163;
 	parent R4-25-00-1_tm_23;
-	power_1 6000+1218.6j;
+	power_12 6000+1218.6j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9207,7 +9207,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_164;
 	parent R4-25-00-1_tm_24;
-	power_1 2000+406.2j;
+	power_12 2000+406.2j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9218,7 +9218,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_165;
 	parent R4-25-00-1_tm_25;
-	power_1 11000+2234.1j;
+	power_12 11000+2234.1j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9229,7 +9229,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_166;
 	parent R4-25-00-1_tm_26;
-	power_1 9000+1827.9j;
+	power_12 9000+1827.9j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9240,7 +9240,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_167;
 	parent R4-25-00-1_tm_27;
-	power_1 12000+2437.2j;
+	power_12 12000+2437.2j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9251,7 +9251,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_168;
 	parent R4-25-00-1_tm_28;
-	power_1 6000+1218.6j;
+	power_12 6000+1218.6j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9262,7 +9262,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_169;
 	parent R4-25-00-1_tm_29;
-	power_1 12000+2437.2j;
+	power_12 12000+2437.2j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9273,7 +9273,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_170;
 	parent R4-25-00-1_tm_30;
-	power_1 16000+3249.6j;
+	power_12 16000+3249.6j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9284,7 +9284,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_171;
 	parent R4-25-00-1_tm_31;
-	power_1 4000+2000j;
+	power_12 4000+2000j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9295,7 +9295,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_172;
 	parent R4-25-00-1_tm_32;
-	power_1 7000+1421.7j;
+	power_12 7000+1421.7j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9306,7 +9306,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_173;
 	parent R4-25-00-1_tm_33;
-	power_1 8000+1624.8j;
+	power_12 8000+1624.8j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9317,7 +9317,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_174;
 	parent R4-25-00-1_tm_34;
-	power_1 3000+609.3j;
+	power_12 3000+609.3j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9328,7 +9328,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_175;
 	parent R4-25-00-1_tm_35;
-	power_1 15000+3046.5j;
+	power_12 15000+3046.5j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9339,7 +9339,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_176;
 	parent R4-25-00-1_tm_36;
-	power_1 10000+2031j;
+	power_12 10000+2031j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9350,7 +9350,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_177;
 	parent R4-25-00-1_tm_37;
-	power_1 3000+609.3j;
+	power_12 3000+609.3j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9361,7 +9361,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_178;
 	parent R4-25-00-1_tm_38;
-	power_1 4000+2000j;
+	power_12 4000+2000j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9372,7 +9372,7 @@ object triplex_node {
 	voltage_1 120;
 	name R4-25-00-1_tn_179;
 	parent R4-25-00-1_tm_39;
-	power_1 2300+1200j;
+	power_12 2300+1200j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9383,7 +9383,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_180;
 	parent R4-25-00-1_tm_40;
-	power_1 9000+1827.9j;
+	power_12 9000+1827.9j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9394,7 +9394,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_181;
 	parent R4-25-00-1_tm_41;
-	power_1 2300+1200j;
+	power_12 2300+1200j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9405,7 +9405,7 @@ object triplex_node {
 	voltage_1 120;
 	name R4-25-00-1_tn_182;
 	parent R4-25-00-1_tm_42;
-	power_1 2300+1200j;
+	power_12 2300+1200j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9416,7 +9416,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_183;
 	parent R4-25-00-1_tm_43;
-	power_1 22000+4468.2j;
+	power_12 22000+4468.2j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9427,7 +9427,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_184;
 	parent R4-25-00-1_tm_44;
-	power_1 2300+1200j;
+	power_12 2300+1200j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9438,7 +9438,7 @@ object triplex_node {
 	voltage_1 120;
 	name R4-25-00-1_tn_185;
 	parent R4-25-00-1_tm_45;
-	power_1 2300+1200j;
+	power_12 2300+1200j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9449,7 +9449,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_186;
 	parent R4-25-00-1_tm_46;
-	power_1 2000+406.2j;
+	power_12 2000+406.2j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9460,7 +9460,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_187;
 	parent R4-25-00-1_tm_47;
-	power_1 2300+1200j;
+	power_12 2300+1200j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9471,7 +9471,7 @@ object triplex_node {
 	voltage_1 120;
 	name R4-25-00-1_tn_188;
 	parent R4-25-00-1_tm_48;
-	power_1 2300+1200j;
+	power_12 2300+1200j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9482,7 +9482,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_189;
 	parent R4-25-00-1_tm_49;
-	power_1 2300+1200j;
+	power_12 2300+1200j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9493,7 +9493,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_190;
 	parent R4-25-00-1_tm_50;
-	power_1 4000+812.4j;
+	power_12 4000+812.4j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9504,7 +9504,7 @@ object triplex_node {
 	voltage_1 120;
 	name R4-25-00-1_tn_191;
 	parent R4-25-00-1_tm_51;
-	power_1 2300+1200j;
+	power_12 2300+1200j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9515,7 +9515,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_192;
 	parent R4-25-00-1_tm_52;
-	power_1 2300+1200j;
+	power_12 2300+1200j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9526,7 +9526,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_193;
 	parent R4-25-00-1_tm_53;
-	power_1 8000+1624.8j;
+	power_12 8000+1624.8j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9537,7 +9537,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_194;
 	parent R4-25-00-1_tm_54;
-	power_1 1000+203.1j;
+	power_12 1000+203.1j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9548,7 +9548,7 @@ object triplex_node {
 	voltage_1 120;
 	name R4-25-00-1_tn_195;
 	parent R4-25-00-1_tm_55;
-	power_1 8000+1624.8j;
+	power_12 8000+1624.8j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9559,7 +9559,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_196;
 	parent R4-25-00-1_tm_56;
-	power_1 2300+1200j;
+	power_12 2300+1200j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9570,7 +9570,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_197;
 	parent R4-25-00-1_tm_57;
-	power_1 2300+1200j;
+	power_12 2300+1200j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9581,7 +9581,7 @@ object triplex_node {
 	voltage_1 120;
 	name R4-25-00-1_tn_198;
 	parent R4-25-00-1_tm_58;
-	power_1 13000+2640.3j;
+	power_12 13000+2640.3j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9592,7 +9592,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_199;
 	parent R4-25-00-1_tm_59;
-	power_1 2300+1200j;
+	power_12 2300+1200j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9603,7 +9603,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_200;
 	parent R4-25-00-1_tm_60;
-	power_1 2300+1200j;
+	power_12 2300+1200j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9614,7 +9614,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_201;
 	parent R4-25-00-1_tm_61;
-	power_1 6000+1218.6j;
+	power_12 6000+1218.6j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9625,7 +9625,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_202;
 	parent R4-25-00-1_tm_62;
-	power_1 4000+812.4j;
+	power_12 4000+812.4j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9636,7 +9636,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_203;
 	parent R4-25-00-1_tm_63;
-	power_1 4000+812.4j;
+	power_12 4000+812.4j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9647,7 +9647,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_204;
 	parent R4-25-00-1_tm_64;
-	power_1 9000+1827.9j;
+	power_12 9000+1827.9j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9658,7 +9658,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_205;
 	parent R4-25-00-1_tm_65;
-	power_1 8000+1624.8j;
+	power_12 8000+1624.8j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9669,7 +9669,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_206;
 	parent R4-25-00-1_tm_66;
-	power_1 11000+2234.1j;
+	power_12 11000+2234.1j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9680,7 +9680,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_207;
 	parent R4-25-00-1_tm_67;
-	power_1 6000+1218.6j;
+	power_12 6000+1218.6j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9691,7 +9691,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_208;
 	parent R4-25-00-1_tm_68;
-	power_1 4000+812.4j;
+	power_12 4000+812.4j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9702,7 +9702,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_209;
 	parent R4-25-00-1_tm_69;
-	power_1 10000+2031j;
+	power_12 10000+2031j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9713,7 +9713,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_210;
 	parent R4-25-00-1_tm_70;
-	power_1 4000+812.4j;
+	power_12 4000+812.4j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9724,7 +9724,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_211;
 	parent R4-25-00-1_tm_71;
-	power_1 15000+7500j;
+	power_12 15000+7500j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9735,7 +9735,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_212;
 	parent R4-25-00-1_tm_72;
-	power_1 11000+2234.1j;
+	power_12 11000+2234.1j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9746,7 +9746,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_213;
 	parent R4-25-00-1_tm_73;
-	power_1 29000+5889.9j;
+	power_12 29000+5889.9j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9757,7 +9757,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_214;
 	parent R4-25-00-1_tm_74;
-	power_1 2000+406.2j;
+	power_12 2000+406.2j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9768,7 +9768,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_215;
 	parent R4-25-00-1_tm_75;
-	power_1 4000+812.4j;
+	power_12 4000+812.4j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9779,7 +9779,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_216;
 	parent R4-25-00-1_tm_76;
-	power_1 16000+3249.6j;
+	power_12 16000+3249.6j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9790,7 +9790,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_217;
 	parent R4-25-00-1_tm_77;
-	power_1 6000+1218.6j;
+	power_12 6000+1218.6j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9801,7 +9801,7 @@ object triplex_node {
 	voltage_1 120;
 	name R4-25-00-1_tn_218;
 	parent R4-25-00-1_tm_78;
-	power_1 5000+1015.5j;
+	power_12 5000+1015.5j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9812,7 +9812,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_219;
 	parent R4-25-00-1_tm_79;
-	power_1 1000+203.1j;
+	power_12 1000+203.1j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9823,7 +9823,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_220;
 	parent R4-25-00-1_tm_80;
-	power_1 4000+2000j;
+	power_12 4000+2000j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9834,7 +9834,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_221;
 	parent R4-25-00-1_tm_81;
-	power_1 12000+2437.2j;
+	power_12 12000+2437.2j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9845,7 +9845,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_222;
 	parent R4-25-00-1_tm_82;
-	power_1 3000+609.3j;
+	power_12 3000+609.3j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9856,7 +9856,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_223;
 	parent R4-25-00-1_tm_83;
-	power_1 8000+1624.8j;
+	power_12 8000+1624.8j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9867,7 +9867,7 @@ object triplex_node {
 	voltage_1 120;
 	name R4-25-00-1_tn_224;
 	parent R4-25-00-1_tm_84;
-	power_1 17000+3452.7j;
+	power_12 17000+3452.7j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9878,7 +9878,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_225;
 	parent R4-25-00-1_tm_85;
-	power_1 8000+1624.8j;
+	power_12 8000+1624.8j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9889,7 +9889,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_226;
 	parent R4-25-00-1_tm_86;
-	power_1 8000+1624.8j;
+	power_12 8000+1624.8j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9900,7 +9900,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_227;
 	parent R4-25-00-1_tm_87;
-	power_1 7000+1421.7j;
+	power_12 7000+1421.7j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9911,7 +9911,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_228;
 	parent R4-25-00-1_tm_88;
-	power_1 9000+1827.9j;
+	power_12 9000+1827.9j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9922,7 +9922,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_229;
 	parent R4-25-00-1_tm_89;
-	power_1 11000+2234.1j;
+	power_12 11000+2234.1j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9933,7 +9933,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_230;
 	parent R4-25-00-1_tm_90;
-	power_1 11000+2234.1j;
+	power_12 11000+2234.1j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9944,7 +9944,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_231;
 	parent R4-25-00-1_tm_91;
-	power_1 6000+1218.6j;
+	power_12 6000+1218.6j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9955,7 +9955,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_232;
 	parent R4-25-00-1_tm_92;
-	power_1 5000+1015.5j;
+	power_12 5000+1015.5j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9966,7 +9966,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_233;
 	parent R4-25-00-1_tm_93;
-	power_1 5000+1015.5j;
+	power_12 5000+1015.5j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9977,7 +9977,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_234;
 	parent R4-25-00-1_tm_94;
-	power_1 14000+2843.4j;
+	power_12 14000+2843.4j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9988,7 +9988,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_235;
 	parent R4-25-00-1_tm_95;
-	power_1 4000+812.4j;
+	power_12 4000+812.4j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -9999,7 +9999,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_236;
 	parent R4-25-00-1_tm_96;
-	power_1 5000+1015.5j;
+	power_12 5000+1015.5j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10010,7 +10010,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_237;
 	parent R4-25-00-1_tm_97;
-	power_1 9000+1827.9j;
+	power_12 9000+1827.9j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10021,7 +10021,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_238;
 	parent R4-25-00-1_tm_98;
-	power_1 1000+203.1j;
+	power_12 1000+203.1j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10032,7 +10032,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_239;
 	parent R4-25-00-1_tm_99;
-	power_1 8000+1624.8j;
+	power_12 8000+1624.8j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10043,7 +10043,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_240;
 	parent R4-25-00-1_tm_100;
-	power_1 7000+1421.7j;
+	power_12 7000+1421.7j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10054,7 +10054,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_241;
 	parent R4-25-00-1_tm_101;
-	power_1 14000+2843.4j;
+	power_12 14000+2843.4j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10065,7 +10065,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_242;
 	parent R4-25-00-1_tm_102;
-	power_1 2000+406.2j;
+	power_12 2000+406.2j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10076,7 +10076,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_243;
 	parent R4-25-00-1_tm_103;
-	power_1 13000+2640.3j;
+	power_12 13000+2640.3j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10087,7 +10087,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_244;
 	parent R4-25-00-1_tm_104;
-	power_1 8000+1624.8j;
+	power_12 8000+1624.8j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10098,7 +10098,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_245;
 	parent R4-25-00-1_tm_105;
-	power_1 3000+609.3j;
+	power_12 3000+609.3j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10109,7 +10109,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_246;
 	parent R4-25-00-1_tm_106;
-	power_1 10000+2031j;
+	power_12 10000+2031j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10120,7 +10120,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_247;
 	parent R4-25-00-1_tm_107;
-	power_1 4000+2000j;
+	power_12 4000+2000j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10131,7 +10131,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_248;
 	parent R4-25-00-1_tm_108;
-	power_1 7000+1421.7j;
+	power_12 7000+1421.7j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10142,7 +10142,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_249;
 	parent R4-25-00-1_tm_109;
-	power_1 12000+2437.2j;
+	power_12 12000+2437.2j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10153,7 +10153,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_250;
 	parent R4-25-00-1_tm_110;
-	power_1 7000+1421.7j;
+	power_12 7000+1421.7j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10164,7 +10164,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_251;
 	parent R4-25-00-1_tm_111;
-	power_1 1000+203.1j;
+	power_12 1000+203.1j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10175,7 +10175,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_252;
 	parent R4-25-00-1_tm_112;
-	power_1 2000+406.2j;
+	power_12 2000+406.2j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10186,7 +10186,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_253;
 	parent R4-25-00-1_tm_113;
-	power_1 1000+203.1j;
+	power_12 1000+203.1j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10197,7 +10197,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_254;
 	parent R4-25-00-1_tm_114;
-	power_1 6000+1218.6j;
+	power_12 6000+1218.6j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10208,7 +10208,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_255;
 	parent R4-25-00-1_tm_115;
-	power_1 6000+3000j;
+	power_12 6000+3000j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10219,7 +10219,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_256;
 	parent R4-25-00-1_tm_116;
-	power_1 10000+5000j;
+	power_12 10000+5000j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10230,7 +10230,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_257;
 	parent R4-25-00-1_tm_117;
-	power_1 1000+203.1j;
+	power_12 1000+203.1j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10241,7 +10241,7 @@ object triplex_node {
 	voltage_1 120;
 	name R4-25-00-1_tn_258;
 	parent R4-25-00-1_tm_118;
-	power_1 13000+2640.3j;
+	power_12 13000+2640.3j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10252,7 +10252,7 @@ object triplex_node {
 	voltage_1 120;
 	name R4-25-00-1_tn_259;
 	parent R4-25-00-1_tm_119;
-	power_1 5000+1015.5j;
+	power_12 5000+1015.5j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10263,7 +10263,7 @@ object triplex_node {
 	voltage_1 -60-103.92j;
 	name R4-25-00-1_tn_260;
 	parent R4-25-00-1_tm_120;
-	power_1 4000+2000j;
+	power_12 4000+2000j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10274,7 +10274,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_261;
 	parent R4-25-00-1_tm_121;
-	power_1 7000+1421.7j;
+	power_12 7000+1421.7j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10285,7 +10285,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_262;
 	parent R4-25-00-1_tm_122;
-	power_1 4000+2000j;
+	power_12 4000+2000j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10296,7 +10296,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_263;
 	parent R4-25-00-1_tm_123;
-	power_1 1000+203.1j;
+	power_12 1000+203.1j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10307,7 +10307,7 @@ object triplex_node {
 	voltage_1 120;
 	name R4-25-00-1_tn_264;
 	parent R4-25-00-1_tm_124;
-	power_1 1000+203.1j;
+	power_12 1000+203.1j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10318,7 +10318,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_265;
 	parent R4-25-00-1_tm_125;
-	power_1 4000+812.4j;
+	power_12 4000+812.4j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10329,7 +10329,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_266;
 	parent R4-25-00-1_tm_126;
-	power_1 10000+2031j;
+	power_12 10000+2031j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10340,7 +10340,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_267;
 	parent R4-25-00-1_tm_127;
-	power_1 7000+1421.7j;
+	power_12 7000+1421.7j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10351,7 +10351,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_268;
 	parent R4-25-00-1_tm_128;
-	power_1 16000+3249.6j;
+	power_12 16000+3249.6j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10362,7 +10362,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_269;
 	parent R4-25-00-1_tm_129;
-	power_1 2000+406.2j;
+	power_12 2000+406.2j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10373,7 +10373,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_270;
 	parent R4-25-00-1_tm_130;
-	power_1 11000+2234.1j;
+	power_12 11000+2234.1j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10384,7 +10384,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_271;
 	parent R4-25-00-1_tm_131;
-	power_1 18000+3655.8j;
+	power_12 18000+3655.8j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10395,7 +10395,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_272;
 	parent R4-25-00-1_tm_132;
-	power_1 4000+812.4j;
+	power_12 4000+812.4j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10406,7 +10406,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_273;
 	parent R4-25-00-1_tm_133;
-	power_1 1000+203.1j;
+	power_12 1000+203.1j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10417,7 +10417,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_274;
 	parent R4-25-00-1_tm_134;
-	power_1 16000+3249.6j;
+	power_12 16000+3249.6j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10428,7 +10428,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_275;
 	parent R4-25-00-1_tm_135;
-	power_1 7000+1421.7j;
+	power_12 7000+1421.7j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10439,7 +10439,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_276;
 	parent R4-25-00-1_tm_136;
-	power_1 9000+1827.9j;
+	power_12 9000+1827.9j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10450,7 +10450,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_277;
 	parent R4-25-00-1_tm_137;
-	power_1 8000+1624.8j;
+	power_12 8000+1624.8j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10461,7 +10461,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_278;
 	parent R4-25-00-1_tm_138;
-	power_1 6000+3000j;
+	power_12 6000+3000j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10472,7 +10472,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_279;
 	parent R4-25-00-1_tm_139;
-	power_1 14000+2843.4j;
+	power_12 14000+2843.4j;
 	nominal_voltage 120;
 	voltage_N 0;
 };
@@ -10483,7 +10483,7 @@ object triplex_node {
 	voltage_1 -60+103.92j;
 	name R4-25-00-1_tn_280;
 	parent R4-25-00-1_tm_140;
-	power_1 10000+5000j;
+	power_12 10000+5000j;
 	nominal_voltage 120;
 	voltage_N 0;
 };

@@ -110,7 +110,7 @@ def addScaledRandomHouses(inFeed):
 	maxKey += 1
 	for tripKey in tripLoadKeys:
 		tMeter = inFeed[getByKeyVal(inFeed, 'name', inFeed[tripKey]['parent'])]
-		tPower = float(inFeed[tripKey]['power_1'].replace('j','').split('+')[0])
+		tPower = float(inFeed[tripKey]['power_12'].replace('j','').split('+')[0])
 		newHouse = dict(random.choice(houseArchetypes.values()))
 		newHouse['name'] += '_' + str(tripKey)
 		newHouse['parent'] = tMeter['name']
