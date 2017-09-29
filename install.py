@@ -65,14 +65,18 @@ elif platform.system()=='Windows':
 	os.system("cd " + workDir)
 	# Sometimes wget has a hard time downloading gridlabD
 	if platform.architecture()[0] == '32bit':
-		os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2-win32.exe")
-		os.system("gridlabd-3.2-win32.exe/silent")
-		os.system("wget --no-check-certificate https://github.com/dpinney/omf/tree/master/omf/static/pygraphviz-1.3.1-cp27-none-win32.whl")
+		if 'gridlabd-3.2-win32.exe' not in os.listdir(workDir):	
+			os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2-win32.exe")
+			os.system("gridlabd-3.2-win32.exe/silent")
+		if 'pygraphviz-1.3.1-cp27-none-win32.whl' not in os.listdir(workDir):
+			os.system("wget --no-check-certificate https://github.com/dpinney/omf/blob/master/omf/static/pygraphviz-1.3.1-cp27-none-win32.whl")
 	elif platform.architecture()[1] == '64bit':
 		# Note: has not been tested yet, only 32bit has
-		os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2-x64.exe")
-		os.system("gridlabd-3.2-x64.exe/silent")
-		os.system("wget --no-check-certificate https://github.com/dpinney/omf/tree/master/omf/static/pygraphviz-1.3.1-cp27-none-win_amd64.whl")
+		if 'gridlabd-3.2-x64.exe' not in os.listdir(workDir):	
+			os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2-x64.exe")
+			os.system("gridlabd-3.2-x64.exe/silent")
+		if 'pygraphviz-1.3.1-cp27-none-win_amd64.whl' not in os.listdir(workDir):
+		os.system("wget --no-check-certificate https://github.com/dpinney/omf/blob/master/omf/static/pygraphviz-1.3.1-cp27-none-win_amd64.whl")
 	for file in os.listdir(workDir):
 		if file.endswith('.whl'):
 			whlFile = file
