@@ -6,9 +6,10 @@ if platform.system() == 'Linux':
 		# git clone https://github.com/dpinney/omf.git
 		os.system("sudo apt-get install python-pip git unixodbc-dev libfreetype6-dev \
 		pkg-config python-dev python-numpy alien python-pygraphviz \
-		python-pydot ffmpeg mdbtools python-cairocffi")
+		python-pydot ffmpeg mdbtools python-cairocffi python-tk")
 		os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2.0-1.x86_64.rpm")
 		os.system("sudo alien gridlabd-3.2.0-1.x86_64.rpm")
+		workDir = os.getcwd()
 		for file in os.listdir(workDir):
 			if file.endswith('.deb'):
 				debFile = file		
@@ -62,18 +63,20 @@ elif platform.system()=='Windows':
 	# Manually setting path for pip and other scripts
 	os.system('setx PATH "%PATH%;C:\Python27\Scripts')
 	os.system("cd " + workDir)
+	# Sometimes wget has a hard time downloading gridlabD
+	if platform.architecture()[0] == '32bit':
+		os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2-win32.exe")
+		os.system("gridlabd-3.2-win32.exe/silent")
+		os.system("wget --no-check-certificate https://github.com/dpinney/omf/tree/master/omf/static/pygraphviz-1.3.1-cp27-none-win32.whl")
+	elif platform.architecture()[1] == '64bit':
+		# Note: has not been tested yet, only 32bit has
+		os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2-x64.exe")
+		os.system("gridlabd-3.2-x64.exe/silent")
+		os.system("wget --no-check-certificate https://github.com/dpinney/omf/tree/master/omf/static/pygraphviz-1.3.1-cp27-none-win_amd64.whl")
 	for file in os.listdir(workDir):
 		if file.endswith('.whl'):
 			whlFile = file
 	os.system("pip install " + whlFile)
-	# Sometimes wget has a hard time downloading gridlabD
-	if platform.architecture()[0] == '32bit':
-		os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2-win32.exe")
-		os.system("gridlabd-3.2-win32.exe/silent")
-	elif platform.architecture()[1] == '64bit':
-		# Note: has not been tested yet, only 32bit has
-		os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2-x64.exe")
-		os.system("gridlabd-3.2-x64.exe/silent")
 	os.system("cd omf")
 	os.system("refreshenv")
 	os.system("pip install -r requirements.txt")
