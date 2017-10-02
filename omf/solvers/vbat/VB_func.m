@@ -63,7 +63,7 @@ P_upper
 disp('\n')
 E_UL
     
-    %% write output file
+%% write output file
 % if ischar(paraFile)
 %     plotname = num2str(strrep(paraFile,'.csv',''));
 % else
@@ -71,13 +71,13 @@ E_UL
 % end
 % plotname = num2str(strrep(paraFile,'.csv',''));
 % output_file = strcat('VB_output_', plotname, '.csv');
-output_file = 'VB_output.csv';
-fid = fopen(output_file,'w');
-fprintf(fid, 'upper_power(kW), lower_power(kW), upper_energy(kWh), lower_energy(kWh)\n');
-for i = 1:length(P_upper)
-    fprintf(fid, '%f, %f, %f, %f\n', P_upper(i), -P_lower(i), E_UL(i), -E_UL(i));    
-end
-fclose(fid);
+% output_file = 'VB_output.csv';
+% fid = fopen(output_file,'w');
+% fprintf(fid, 'upper_power(kW), lower_power(kW), upper_energy(kWh), lower_energy(kWh)\n');
+% for i = 1:length(P_upper)
+%     fprintf(fid, '%f, %f, %f, %f\n', P_upper(i), -P_lower(i), E_UL(i), -E_UL(i));    
+% end
+% fclose(fid);
 
 % %% plot
 % plotname = strrep(plotname,'_',' ');
