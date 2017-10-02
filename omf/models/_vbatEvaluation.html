@@ -1,0 +1,176 @@
+<head>
+	<title>Open Modeling Framework</title>
+	<meta charset="utf-8">
+	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
+	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	<style>
+		table {width: 80%;margin-left:auto; margin-right:auto;}
+		td {padding:2px; text-align: center;border-top: 1px solid #ccc;}
+		th {padding:2px; text-align: center}
+	</style>
+	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
+	<!-- Library Imports -->
+	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
+	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
+	<!-- Data  Imports -->
+	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
+	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
+	<script>modelStatus="{{modelStatus}}"</script>
+	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
+</head>
+<body onload="init()">
+	<div id="header">
+		<div id="headInnerBlock">
+			<div id="menuLeft">
+				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
+				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
+			</div>
+		</div>
+	</div>
+	<p class="reportTitle">Model Input</p>
+	<div id="input" class="content">
+		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+			<!-- Required Inputs -->
+			<div class="shortInput">
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-transmission" target="blank">Help?</a></label>
+				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Model Name</label>
+				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+			</div>
+			<div class="shortInput runningInline postRunInline">
+				<label>User</label>
+				<input type="text" id="user" name="user" readonly/>
+			</div>
+			<div class="shortInput runningInline postRunInline ">
+				<label>Created</label>
+				<input type="text" id="created" name="created" readonly/>
+			</div>
+			<div class="shortInput postRunInline">
+				<label>Run Time</label>
+				<input type="text" id="runTime" name="runTime" readonly/>
+			</div>
+			<!-- Model Specific Inputs -->
+			<div class="wideInput">
+				<p class="inputSectionHeader">Simulation Specs</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Algorithm<span class="classic">The MATPOWER powerflow solver method. Can be set to NR (Newton Raphson), FDXB (Fast-Decoupled XB Version), FDBX (Fast-Decoupled BX Version) or GS (Gauss Seidel). These are the solution algorithms supported by MATPOWER.</span></label>
+				<select id="algorithm" name="algorithm">
+					<option value="NR" selected="selected">NR</option>
+					<option value="FDXB">FDXB</option>
+					<option value="FDBX">FDBX</option>
+					<option value="GS">GS</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Model<span class="classic">The powerflow formulation, set to AC or DC.</span></label>
+				<select id="model" name="model">
+					<option value="AC">AC</option>
+					<option value="DC">DC</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Tolerance<span class="classic">The termination tolerance for powerflow, in units P and Q dispatch per unit.</span></label>
+				<input type="text" id="tolerance" name="tolerance" value="0.00000001" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Iteration<span class="classic">The maximum number of iterations for the solver algorithm specified above.</span></label>
+				<input type="text" id="iteration" name="iteration" value="1000" required="required" pattern="^(\d{2,}|[1-9])(\.\d+)?$">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Generation Limit<span class="classic">Whether or not to set power limits on the generators in the system. 0 denotes "do not enforce", 1 denotes "enforce with simultaneous bus type conversion" and 2 denotes "enforce with one-at-a-time bus type conversion".</span></label>
+				<select id="model" name="model">
+					<option value="0" selected="selected">0</option>
+					<option value="1">1</option>
+					<option value="2">2</option>
+				</select>
+			</div>
+			<!-- Required Buttons -->
+			<div class="wideInput" style="text-align:right">
+				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
+				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
+				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
+				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
+				<button id="runButton" type="submit" class="stoppedInline postRunInline">Run Model</button>
+			</div>
+		</form>
+	</div>
+	<div id ="runIndicator" class="content running">
+		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
+	</div>
+	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
+		<pre id='errorText'></pre>
+		<script type="text/javascript">
+		if (typeof(allInputData.stderr) !== 'undefined') {
+			gebi('stopIndicator').style.visibility = 'visible'
+			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
+		</script>
+	</div>
+	<!-- Output tables, graphs, etc. -->
+	<div id="output" class="postRun">
+		<p class="reportTitle postRun" style="page-break-before:always">Power Available</p>
+		<div id="powerReport" class="tightContent postRun">
+			<div id="powerChart"></div>
+			<script>
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{
+						"series":{
+							"animation":false,
+							// "pointStart":Date.parse(allOutputData.startDate),
+							"shadow":false,
+							"pointInterval":3600000},
+						"line":{"marker":{"enabled":false}}},
+					"xAxis":{"maxZoom":108000000,
+						"tickColor":"gray",
+						"type":"datetime",
+						"lineColor":"gray"},
+					"yAxis":{
+						"title":{"text":"Power (kW)","style":{"color":"gray"}},
+						// "min":allOutputData.differenceMin
+					},
+					"title":{"text":null},
+					"series":[
+						{"name":"Historical","marker":{"enabled":false},"color":"red","data":allOutputData.minPowerSeries},
+						{"name":"After Program","marker":{"enabled":false},"color":"purple","data":allOutputData.maxPowerSeries},
+					],
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"powerChart","type":"line","marginRight":20, "height":750,"width":1000},
+					"tooltip":false,
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
+		</div>
+		<p class="reportTitle postRun" style="page-break-before:always">Energy Available</p>
+		<div id="energyReport" class="tightContent postRun">
+			<div id="energyChart"></div>
+			<script>
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{
+						"series":{
+							"animation":false,
+							//"pointStart":Date.parse(allOutputData.startDate),
+							"shadow":false,
+							"pointInterval":3600000},
+						"line":{"marker":{"enabled":false}}},
+					"xAxis":{"maxZoom":108000000,
+						"tickColor":"gray",
+						"type":"datetime",
+						"lineColor":"gray"},
+					"yAxis":{
+						"title":{"text":"Power (kW)","style":{"color":"gray"}},
+						//"min":allOutputData.differenceMin
+					},
+					"title":{"text":null},
+					"series":[
+						{"name":"Historical","marker":{"enabled":false},"color":"red","data":allOutputData.minEnergySeries},
+						{"name":"After Program","marker":{"enabled":false},"color":"purple","data":allOutputData.maxEnergySeries},
+					],
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"energyChart","type":"line","marginRight":20, "height":750,"width":1000},
+					"tooltip":false,
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
+		</div>
+	</div>
+</body>

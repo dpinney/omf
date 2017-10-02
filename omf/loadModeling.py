@@ -55,7 +55,7 @@ def gldHouse(lat, lon, addressOverride=None, pureRandom=False):
 		newHouse = dict(random.choice(houseArchetypes.values()))
 		newHouse['name'] = 'REPLACE_ME'
 		newHouse['parent'] = 'REPLACE_ME'
-		newHouse['schedule_skew'] = str(random.gauss(2000,100))
+		newHouse['schedule_skew'] = str(random.gauss(2000,600))
 		# NOTE: average size of US house used below is from http://money.cnn.com/2014/06/04/real_estate/american-home-size/
 		newHouse['floor_area'] = str(random.gauss(2600,500))
 	else:
@@ -81,7 +81,7 @@ def gldHouse(lat, lon, addressOverride=None, pureRandom=False):
 			elif intNewAge >= 1990: newHouse = houseMaker('R1_SingleFamilyHome_1990-2005')
 		newHouse['name'] = addressOverride
 		newHouse['parent'] = 'REPLACE_ME'
-		newHouse['schedule_skew'] = str(random.gauss(2000,100))
+		newHouse['schedule_skew'] = str(random.gauss(2000,500))
 		newHouse['floor_area'] = newSpecs.get('sqft', '2700')
 	return newHouse
 
@@ -114,8 +114,10 @@ def addScaledRandomHouses(inFeed):
 		newHouse = dict(random.choice(houseArchetypes.values()))
 		newHouse['name'] += '_' + str(tripKey)
 		newHouse['parent'] = tMeter['name']
-		newHouse['schedule_skew'] = str(random.gauss(2000,100))
+		newHouse['schedule_skew'] = str(random.gauss(2000,500))
 		newHouse['floor_area'] = str(0.50*tPower)
+		newHouse['latitude'] = tMeter.get('latitude','0.0')
+		newHouse['longitude'] = tMeter.get('longitude','0.0')
 		inFeed[maxKey] = newHouse
 		maxKey += 1
 		for childKey in childrenArchetypes:
