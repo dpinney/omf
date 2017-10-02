@@ -29,3 +29,7 @@
 % VB_func(94128,2,0)
 
 disp('Running VB_test.m')
+disp(num2str([1,4,5,3]))
+[1,4,5];
+% fid = fopen('blah.csv','w');
+% fprintf(fid, 'jiewflj wliejf lwijef')
