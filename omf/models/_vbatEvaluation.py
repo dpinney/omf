@@ -8,6 +8,7 @@ from os.path import join as pJoin
 from jinja2 import Template
 import __neoMetaModel__
 from __neoMetaModel__ import *
+import random
 
 # Model metadata:
 fileName = os.path.basename(__file__)
@@ -21,6 +22,12 @@ with open(pJoin(__neoMetaModel__._myDir,modelName + ".html"),"r") as tempFile:
 def work(modelDir, inputDict):
 	''' Run the model in its directory.'''
 	outData = {}
+	# Run VBAT code.
+	# Format results to go in chart.
+	outData["minPowerSeries"] = [random.uniform(0.0,10.0) for x in xrange(8760)]
+	outData["maxPowerSeries"] = [random.uniform(15.0,40.0) for x in xrange(8760)]
+	outData["minEnergySeries"] = [random.uniform(0.0,2.0) for x in xrange(8760)]
+	outData["maxEnergySeries"] = [random.uniform(3.0,20.0) for x in xrange(8760)]
 	# Stdout/stderr.
 	outData["stdout"] = "Success"
 	outData["stderr"] = ""

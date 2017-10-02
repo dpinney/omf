@@ -112,21 +112,65 @@
 	</div>
 	<!-- Output tables, graphs, etc. -->
 	<div id="output" class="postRun">
-		<p class="reportTitle">Powerflow Voltage (P.U.) Map</p>
-		<div class="tightContent" style="overflow: auto">
-			<img id="transmissionChart" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%; max-height: 100%;"/>
-			<script>gebi("transmissionChart").src = "data:image/png;base64," + allOutputData.chart</script>
+		<p class="reportTitle postRun" style="page-break-before:always">Power Available</p>
+		<div id="powerReport" class="tightContent postRun">
+			<div id="powerChart"></div>
+			<script>
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{
+						"series":{
+							"animation":false,
+							// "pointStart":Date.parse(allOutputData.startDate),
+							"shadow":false,
+							"pointInterval":3600000},
+						"line":{"marker":{"enabled":false}}},
+					"xAxis":{"maxZoom":108000000,
+						"tickColor":"gray",
+						"type":"datetime",
+						"lineColor":"gray"},
+					"yAxis":{
+						"title":{"text":"Power (kW)","style":{"color":"gray"}},
+						// "min":allOutputData.differenceMin
+					},
+					"title":{"text":null},
+					"series":[
+						{"name":"Historical","marker":{"enabled":false},"color":"red","data":allOutputData.minPowerSeries},
+						{"name":"After Program","marker":{"enabled":false},"color":"purple","data":allOutputData.maxPowerSeries},
+					],
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"powerChart","type":"line","marginRight":20, "height":750,"width":1000},
+					"tooltip":false,
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
 		</div>
-		<p class="reportTitle">Detailed Powerflow Results</p>
-		<div class="tightContent" style="overflow: auto">
-			<div id="tables">
-				<table id="resultsTable" style="width:100%"></table>
-				<script>
-					var htmlCollector = "<tr><th>Component Name</th><th>Voltage (PU)</th><th>Real Power (MW)</th><th>Reactive Power (MVARS)</th></tr>";
-					htmlCollector = htmlCollector + parseEqualDict(allOutputData.tableData['volts'], allOutputData.tableData['powerReal'], allOutputData.tableData['powerReact'])
-					gebi("resultsTable").innerHTML = htmlCollector; 
-				</script>
-			</div>
+		<p class="reportTitle postRun" style="page-break-before:always">Energy Available</p>
+		<div id="energyReport" class="tightContent postRun">
+			<div id="energyChart"></div>
+			<script>
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{
+						"series":{
+							"animation":false,
+							//"pointStart":Date.parse(allOutputData.startDate),
+							"shadow":false,
+							"pointInterval":3600000},
+						"line":{"marker":{"enabled":false}}},
+					"xAxis":{"maxZoom":108000000,
+						"tickColor":"gray",
+						"type":"datetime",
+						"lineColor":"gray"},
+					"yAxis":{
+						"title":{"text":"Power (kW)","style":{"color":"gray"}},
+						//"min":allOutputData.differenceMin
+					},
+					"title":{"text":null},
+					"series":[
+						{"name":"Historical","marker":{"enabled":false},"color":"red","data":allOutputData.minEnergySeries},
+						{"name":"After Program","marker":{"enabled":false},"color":"purple","data":allOutputData.maxEnergySeries},
+					],
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"energyChart","type":"line","marginRight":20, "height":750,"width":1000},
+					"tooltip":false,
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
 		</div>
 	</div>
 </body>
