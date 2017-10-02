@@ -1,217 +1,227 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="UTF-8">
-	<title>Network #{{ networkNum }} from {{ modelName }}</title>
-	<script type='text/javascript' src='/static/svg-pan-zoom.js'></script>
-	<script type="text/javascript" src="/static/omf.js"></script>
-	<script type="text/javascript" src="/static/jquery-1.9.1.js"></script>
-	<link rel="stylesheet" href="/static/omf.css" />
-	<link rel="shortcut icon" href="/static/favicon.ico" />
-	<style>
-		* { font-family: Helvetica, Arial, Sans-Serif;}
-		div.divButton {
-			-webkit-touch-callout: none;
-			-webkit-user-select: none;
-			-khtml-user-select: none;
-			-moz-user-select: none;
-			-ms-user-select: none;
-			user-select: none;
-			cursor: pointer;
-			cursor: hand;
-			position:fixed;
-			width:30px;
-			height:30px;
-			text-align:center;
-			font-size:30px;
-			line-height:30px;
-			color:white;
-		}
-		div#tableScroller {
-			overflow-y: auto;
-			overflow-x: hidden;
-			position: fixed;
-			width: 315px;
-			top: 55px;
-			right: 5px;
-			max-height:90%;
-		}
-		table {
-			width: 300px;
-			border:1px solid black;
-			border-collapse: collapse;
-			text-align: left;
-			table-layout:fixed;
-		}
-		body {margin:0px;}
-		td {
-			background:white;
-			color:black;
-			word-wrap:break-word;
-		}
-		th {
-			background:black;
-			color:white;
-		}
-		svg {
-			position: absolute;
-			left: 0%;
-			top: 0%;
-			width: 100%;
-			height: 100%;
-			z-index: -1;
-		}
-		#saveButton {
-			float:right;
-		}
-		input[type='submit'] {padding:4px 6px 4px; float:right;}
-		input {
-			width:140px;
-		}
-		/* Load Spinner */
-		.loader {
-			margin: 60px auto;
-			font-size: 10px;
-			position: relative;
-			text-indent: -9999em;
-			border-top: 1.1em solid rgba(255, 255, 255, 0.2);
-			border-right: 1.1em solid rgba(255, 255, 255, 0.2);
-			border-bottom: 1.1em solid rgba(255, 255, 255, 0.2);
-			border-left: 1.1em solid #ffffff;
-			-webkit-transform: translateZ(0);
-			-ms-transform: translateZ(0);
-			transform: translateZ(0);
-			-webkit-animation: load8 1.1s infinite linear;
-			animation: load8 1.1s infinite linear;
-		}
-		.loader,
-		.loader:after {
-			border-radius: 50%;
-			width: 10em;
-			height: 10em;
-		}
-		@-webkit-keyframes load8 {
-			0% {
-			-webkit-transform: rotate(0deg);
-			transform: rotate(0deg);
-			}
-			100% {
-			-webkit-transform: rotate(360deg);
-			transform: rotate(360deg);
-			}
-		}
-		@keyframes load8 {
-			0% {
-			-webkit-transform: rotate(0deg);
-			transform: rotate(0deg);
-			}
-			100% {
-			-webkit-transform: rotate(360deg);
-			transform: rotate(360deg);
-			}
-		}
-		table.importOptions {font-size:10pt;width:100%; text-align:left; margin-left:5px;display:inline;border:none;background:transparent;color:black;}
-		table.importOptions tr td th {text-align:left;width:40%;border:none;background:transparent;color:black;}
-	</style>
-	<script>networkData={% if networkData %}{{networkData | safe}}{% else %}null{% endif %}</script>
-	<!-- <script>networkData="{{networkData}}"</script> -->
-	<!-- <script>console.log(networkData)</script> -->
+        <meta charset="UTF-8">
+        <title>Network #{{ networkNum }} from {{ modelName }}</title>
+        <script type='text/javascript' src='/static/svg-pan-zoom.js'></script>
+        <script type="text/javascript" src="/static/omf.js"></script>
+        <script type="text/javascript" src="/static/jquery-1.9.1.js"></script>
+        <link rel="stylesheet" href="/static/omf.css" />
+        <link rel="shortcut icon" href="/static/favicon.ico" />
+        <style>
+                * { font-family: Helvetica, Arial, Sans-Serif;}
+                div.divButton {
+                        -webkit-touch-callout: none;
+                        -webkit-user-select: none;
+                        -khtml-user-select: none;
+                        -moz-user-select: none;
+                        -ms-user-select: none;
+                        user-select: none;
+                        cursor: pointer;
+                        cursor: hand;
+                        position:fixed;
+                        width:30px;
+                        height:30px;
+                        text-align:center;
+                        font-size:30px;
+                        line-height:30px;
+                        color:white;
+                }
+                div#tableScroller {
+                        overflow-y: auto;
+                        overflow-x: hidden;
+                        position: fixed;
+                        width: 315px;
+                        top: 55px;
+                        right: 5px;
+                        max-height:90%;
+                }
+                table {
+                        width: 300px;
+                        border:1px solid black;
+                        border-collapse: collapse;
+                        text-align: left;
+                        table-layout:fixed;
+                }
+                body {margin:0px;}
+                td {
+                        background:white;
+                        color:black;
+                        word-wrap:break-word;
+                }
+                th {
+                        background:black;
+                        color:white;
+                }
+                svg {
+                        position: absolute;
+                        left: 0%;
+                        top: 0%;
+                        width: 100%;
+                        height: 100%;
+                        z-index: -1;
+                }
+                #saveButton {
+                        float:right;
+                }
+                input[type='submit'] {padding:4px 6px 4px; float:right;}
+                input {
+                        width:140px;
+                }
+                /* Load Spinner */
+                .loader {
+                        margin: 60px auto;
+                        font-size: 10px;
+                        position: relative;
+                        text-indent: -9999em;
+                        border-top: 1.1em solid rgba(255, 255, 255, 0.2);
+                        border-right: 1.1em solid rgba(255, 255, 255, 0.2);
+                        border-bottom: 1.1em solid rgba(255, 255, 255, 0.2);
+                        border-left: 1.1em solid #ffffff;
+                        -webkit-transform: translateZ(0);
+                        -ms-transform: translateZ(0);
+                        transform: translateZ(0);
+                        -webkit-animation: load8 1.1s infinite linear;
+                        animation: load8 1.1s infinite linear;
+                }
+                .loader,
+                .loader:after {
+                        border-radius: 50%;
+                        width: 10em;
+                        height: 10em;
+                }
+                @-webkit-keyframes load8 {
+                        0% {
+                        -webkit-transform: rotate(0deg);
+                        transform: rotate(0deg);
+                        }
+                        100% {
+                        -webkit-transform: rotate(360deg);
+                        transform: rotate(360deg);
+                        }
+                }
+                @keyframes load8 {
+                        0% {
+                        -webkit-transform: rotate(0deg);
+                        transform: rotate(0deg);
+                        }
+                        100% {
+                        -webkit-transform: rotate(360deg);
+                        transform: rotate(360deg);
+                        }
+                }
+                table.importOptions {font-size:10pt;width:100%; text-align:left; margin-left:5px;display:inline;border:none;background:transparent;color:black;}
+                table.importOptions tr td th {text-align:left;width:40%;border:none;background:transparent;color:black;}
+        </style>
+        <script>networkData={% if networkData %}{{networkData | safe}}{% else %}null{% endif %}</script>
+        <!-- <script>networkData="{{networkData}}"</script> -->
+        <!-- <script>console.log(networkData)</script> -->
 </head>
 <body onkeypress='hotkeys()' onload="finishPastActions();" style='width:100%;height:100%'>
-	<!-- Start Controls -->
-	<div style='background:dimgray; top:55px; left:5px' class='divButton' onclick='window.panZoom.zoomIn()' title='Zoom In'>+</div>
-	<div style='background:dimgray; top:95px; left:5px' class='divButton' onclick='window.panZoom.zoomOut()' title='Zoom Out'>-</div>
-	<div style='background:dimgray; top:135px; left:5px' class='divButton' onclick='window.panZoom.reset()' title='Reset Zoom'>R</div>
-	<div style='background:dimgray; top:175px; left:5px;' class='divButton' onclick='scaleTo(parseFloat(prompt("Scale line thickness by this multiple:","1.0")))' title='Zoom To'>S</div>
-	<!-- End Controls -->
-	<svg id='svgContainer' xmlns='http://www.w3.org/2000/svg' style='width:100%;height:100%;background-color:white;' onclick='svgClick(event)' onmousedown='mouseDown(event)' onmouseup='mouseUp(event)'>
-		<style type="text/css">
-			<![CDATA[
-			line {stroke:black;}
-			line.parentChild {stroke:LightGrey;}
-			circle {stroke:white; fill:gray;}
-			rect {stroke:white; fill:DarkGrey;}
-			line.selected, circle.selected, rect.selected {stroke:lime;}
-			]]>
-		</style>
-	</svg>
-	<!-- Menu Bar: ADD -->
-	<div id="header">
-		<div id="menuLeft" style="margin-top:-5px"> <!--HACK: override padding from header.-->
-			&nbsp;<span contenteditable="false" id='networkName' name='networkName' style="font-weight:bold;">{{ networkName }}</span>
-			<br>
-			&nbsp;from&#8220;<span id = 'modelNameHeader'>{{ modelName }}</span>&#8221;
-		</div>
-		<div id="menuRight">
-			<div id="fileDiv">
-				<div class='buttonGroup'>
-					{% if is_admin or not public %}
-					<button id="fileOps" class='pill' onclick='dropPill(this, "File")'>File ▾</button>
-					<ul id='newObjectMenu' class='menu right'>
-						<li><a href='javascript:saveNetwork();'>Save</a></li>
-						<li><a href='javascript:renameNetwork();'>Rename</a></li>
-						<li><a href='javascript:showModal("blankNetworkModal");'>New Blank Network...</a></li>
-						<li><a href='javascript:showModal("matpowerModal");'>MATPOWER Import...</a></li>
-					</ul>
-					{% endif %}
-				</div>
-			</div>
-		</div>
-	</div>
-	<div id='blankNetworkModal' class= 'modal'>
-		<div class="modalContent" id='blankModal'>
-			<form onsubmit='event.preventDefault(); return startConversion("networkNameNew",1);' action='/newBlankNetwork/{{ owner }}' id='newnetwork' enctype='multipart/form-data' method='post'>
-				<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
-				<input type="hidden" id="networkNum" name="networkNum" value="{{ networkNum }}" />
-				<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
-				<table class='importOptions'>
-				<th style="background:transparent;color:black;">Blank Network</th>
-					<tr>
-						<td>Name</td>
-						<td><input type='text' id='networkNameNew' name='networkNameNew' required/></td>
-					</tr>
-					<tr>
-						<td><a id='modalCancel' href="#" onclick='closeModal("blankNetworkModal")' style="text-align:center;font-size:10pt;">Cancel</a></td>
-						<td><input type='submit' value='Create' style='min-width:45px;'/></td>
-					</tr>
-				</table>
-			</form>
-		</div>
-	</div>
-	<div id="matpowerModal" class= 'modal'>
-		<div class="modalContent" id='milModal' style='width:350px;'>
-			<form onsubmit='event.preventDefault(); return startConversion("networkNameM", 2);' action="/matpowerImport/{{ owner }}" id='matpower' enctype='multipart/form-data' method='post'>
-				<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
-				<input type="hidden" id="networkNum" name="networkNum" value="{{ networkNum }}" />
-				<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
-				<table class='importOptions'>
-				<th style="background:transparent;color:black;">MATPOWER Conversion</th>
-					<tr>
-						<td>Name</td>
-						<td><input type='text' id='networkNameM' name='networkNameM' required/></td>
-					</tr>
-					<tr>
-						<td>Data File (.m)</td>
-						<td><input type='file' name='matFile' accept = '.m' required/></td>
-					</tr>
-					<tr>
-						<td><a id='modalCancel' href="#" onclick='closeModal("matpowerModal")' style="text-align:center;font-size:10pt;">Cancel</a></td>
-						<td><input type='submit' value='Import' style='min-width:45px;'/></td>
-					</tr>
-				</table>
-			</form>
-			<iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
-		</div>
-	</div>
-	<div id='tableScroller'></div>
-	</body>
-	<script type='text/javascript'>
-		function loadingStuff() {
-			buildNetwork();
-			document.getElementById('loadingMessage').style.display = 'none'
-		}
-		setTimeout(loadingStuff,100)
-	</script>
+        <!-- Start Controls -->
+        <div style='background:dimgray; top:55px; left:5px' class='divButton' onclick='window.panZoom.zoomIn()' title='Zoom In'>+</div>
+        <div style='background:dimgray; top:95px; left:5px' class='divButton' onclick='window.panZoom.zoomOut()' title='Zoom Out'>-</div>
+        <div style='background:dimgray; top:135px; left:5px' class='divButton' onclick='window.panZoom.reset()' title='Reset Zoom'>R</div>
+        <div style='background:dimgray; top:175px; left:5px;' class='divButton' onclick='scaleTo(parseFloat(prompt("Scale line thickness by this multiple:","1.0")))' title='Zoom To'>S</div>
+        <!-- End Controls -->
+        <svg id='svgContainer' xmlns='http://www.w3.org/2000/svg' style='width:100%;height:100%;min-width:1000px;background-color:white;' onclick='svgClick(event)' onmousedown='mouseDown(event)' onmouseup='mouseUp(event)'>
+                <style type="text/css">
+                        <![CDATA[
+                        line {stroke:black;}
+                        line.parentChild {stroke:LightGrey;}
+                        circle {stroke:white; fill:gray;}
+                        rect {stroke:white; fill:DarkGrey;}
+                        line.selected, circle.selected, rect.selected {stroke:lime;}
+                        ]]>
+                </style>
+        </svg>
+        <!-- Menu Bar: ADD -->
+        <div id="header">
+                <div id="menuLeft" style="margin-top:-5px"> <!--HACK: override padding from header.-->
+                        &nbsp;<span contenteditable="false" id='networkName' name='networkName' style="font-weight:bold;">{{ networkName }}</span>
+                        <br>
+                        &nbsp;from&#8220;<span id = 'modelNameHeader'>{{ modelName }}</span>&#8221;
+                </div>
+                <div id="menuRight">
+                        <div id="addDiv" style="display:inline-block">
+                                <div class="buttonGroup">
+                                        <button id="addOps" class='pill' onclick='dropPill(this, "Add");'>Add ▾</button>
+                                        <ul id='newObjectMenu' class='menu right' style="">
+                                                <li><a href='javascript:newNode("bus");'>Bus</a></li>
+                                                <!--<li><a href='javascript:newLink();'>Line</a></li>-->
+                                                <li><a href='javascript:newGen();'>Generator</a></li>
+                                        </ul>
+                                </div>
+                        </div>
+                        <div id="fileDiv" style="display:inline-block">
+                                <div class='buttonGroup'>
+                                        {% if is_admin or not public %}
+                                        <button id="fileOps" class='pill' onclick='dropPill(this, "File")'>File ▾</button>
+                                        <ul class='menu right'>
+                                                <li><a href='javascript:saveNetwork();'>Save</a></li>
+                                                <li><a href='javascript:renameNetwork();'>Rename</a></li>
+                                                <li><a href='javascript:showModal("blankNetworkModal");'>New Blank Network...</a></li>
+                                                <li><a href='javascript:showModal("matpowerModal");'>MATPOWER Import...</a></li>
+                                        </ul>
+                                        {% endif %}
+                                </div>
+                        </div>
+                </div>
+        </div>
+        <div id='blankNetworkModal' class= 'modal'>
+                <div class="modalContent" id='blankModal'>
+                        <form onsubmit='event.preventDefault(); return startConversion("networkNameNew",1);' action='/newBlankNetwork/{{ owner }}' id='newnetwork' enctype='multipart/form-data' method='post'>
+                                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+                                <input type="hidden" id="networkNum" name="networkNum" value="{{ networkNum }}" />
+                                <input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
+                                <table class='importOptions'>
+                                <th style="background:transparent;color:black;">Blank Network</th>
+                                        <tr>
+                                                <td>Name</td>
+                                                <td><input type='text' id='networkNameNew' name='networkNameNew' required/></td>
+                                        </tr>
+                                        <tr>
+                                                <td><a id='modalCancel' href="#" onclick='closeModal("blankNetworkModal")' style="text-align:center;font-size:10pt;">Cancel</a></td>
+                                                <td><input type='submit' value='Create' style='min-width:45px;'/></td>
+                                        </tr>
+                                </table>
+                        </form>
+                </div>
+        </div>
+        <div id="matpowerModal" class= 'modal'>
+                <div class="modalContent" id='milModal' style='width:350px;'>
+                        <form onsubmit='event.preventDefault(); return startConversion("networkNameM", 2);' action="/matpowerImport/{{ owner }}" id='matpower' enctype='multipart/form-data' method='post'>
+                                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+                                <input type="hidden" id="networkNum" name="networkNum" value="{{ networkNum }}" />
+                                <input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
+                                <table class='importOptions'>
+                                <th style="background:transparent;color:black;">MATPOWER Conversion</th>
+                                        <tr>
+                                                <td>Name</td>
+                                                <td><input type='text' id='networkNameM' name='networkNameM' required/></td>
+                                        </tr>
+                                        <tr>
+                                                <td>Data File (.m)</td>
+                                                <td><input type='file' name='matFile' accept = '.m' required/></td>
+                                        </tr>
+                                        <tr>
+                                                <td><a id='modalCancel' href="#" onclick='closeModal("matpowerModal")' style="text-align:center;font-size:10pt;">Cancel</a></td>
+                                                <td><input type='submit' value='Import' style='min-width:45px;'/></td>
+                                        </tr>
+                                </table>
+                        </form>
+                        <iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
+                </div>
+        </div>
+        <div id='tableScroller'></div>
+        </body>
+        <script type='text/javascript'>
+                function loadingStuff() {
+                        buildNetwork();
+                        document.getElementById('loadingMessage').style.display = 'none'
+                }
+                setTimeout(loadingStuff,100)
+        </script>
 </html>
 
 <!-- ******** Javascript ******** -->
@@ -229,662 +239,704 @@ var newType = '';
 var newBusGenObj = {};
 // Functions
 function saveSvg() {
-	// Redirect to an .svg file that the user can save.
-	alert('We are redirecting you to a static version of the SVG that you can save as a .svg file.')
-	svg = document.getElementById('svgContainer').outerHTML
-	b64 = btoa(svg)
-	window.location = 'data:image/svg+xml;base64,\n' + b64
+        // Redirect to an .svg file that the user can save.
+        alert('We are redirecting you to a static version of the SVG that you can save as a .svg file.')
+        svg = document.getElementById('svgContainer').outerHTML
+        b64 = btoa(svg)
+        window.location = 'data:image/svg+xml;base64,\n' + b64
 }
 function addRectangle(x,y,width, height, id,myClass) {
-	svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0]
-	aRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
-	aRect.setAttribute('x',x)
-	aRect.setAttribute('y',y)
-	aRect.setAttribute('width', width)
-	aRect.setAttribute('height', height)
-	aRect.setAttribute('id', id)
-	aRect.setAttribute('class', myClass)
-	aRect.setAttribute('stroke-width', 0.5)
-	svgOb.appendChild(aRect)
+        svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0]
+        aRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+        aRect.setAttribute('x',x)
+        aRect.setAttribute('y',y)
+        aRect.setAttribute('width', width)
+        aRect.setAttribute('height', height)
+        aRect.setAttribute('id', id)
+        aRect.setAttribute('class', myClass)
+        aRect.setAttribute('stroke-width', 0.5)
+        svgOb.appendChild(aRect)
 }
 function addCircle(x,y,r,id,myClass) {
-	svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0]
-	aCirc = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
-	aCirc.setAttribute('cx',x)
-	aCirc.setAttribute('cy',y)
-	aCirc.setAttribute('r',r)
-	aCirc.setAttribute('id', id)
-	aCirc.setAttribute('class', myClass)
-	aCirc.setAttribute('stroke-width', 0.5)
-	svgOb.appendChild(aCirc)
+        svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0]
+        aCirc = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+        aCirc.setAttribute('cx',x)
+        aCirc.setAttribute('cy',y)
+        aCirc.setAttribute('r',r)
+        aCirc.setAttribute('id', id)
+        aCirc.setAttribute('class', myClass)
+        aCirc.setAttribute('stroke-width', 0.5)
+        svgOb.appendChild(aCirc)
 }
 function addLine(x1,y1,x2,y2,id,myClass) {
-	svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0]
-	aLine = document.createElementNS('http://www.w3.org/2000/svg', 'line')
-	aLine.setAttribute('x1',x1)
-	aLine.setAttribute('y1',y1)
-	aLine.setAttribute('x2',x2)
-	aLine.setAttribute('y2',y2)
-	aLine.setAttribute('id',id)
-	aLine.setAttribute('class',myClass)
-	if (myClass.indexOf('p2') !== -1) {
-		w = 2
-	}
-	else if (myClass.indexOf('p3') !== -1) {
-		w = 3
-	}
-	else if (myClass.indexOf('parentChild') !== -1) {
-		w = 0.5
-	}
-	else {
-		w = 1
-	}
-	aLine.setAttribute('stroke-width', w)
-	svgOb.appendChild(aLine)
+        svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0]
+        aLine = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+        aLine.setAttribute('x1',x1)
+        aLine.setAttribute('y1',y1)
+        aLine.setAttribute('x2',x2)
+        aLine.setAttribute('y2',y2)
+        aLine.setAttribute('id',id)
+        aLine.setAttribute('class',myClass)
+        if (myClass.indexOf('p2') !== -1) {
+                w = 2
+        }
+        else if (myClass.indexOf('p3') !== -1) {
+                w = 3
+        }
+        else if (myClass.indexOf('parentChild') !== -1) {
+                w = 0.5
+        }
+        else {
+                w = 1
+        }
+        aLine.setAttribute('stroke-width', w)
+        svgOb.appendChild(aLine)
 }
 function buildNetwork() {
-	// Find the size we need for the full chart.
-	maxLon = 100, maxLat = 100
-	for (num in networkData.bus) {
-		if (networkData.bus[num][String(parseInt(num)+1)]['longitude'] > maxLon) {maxLon = networkData.bus[num][String(parseInt(num)+1)]['longitude']}
-		if (networkData.bus[num][String(parseInt(num)+1)]['latitude'] > maxLat) {maxLat = networkData.bus[num][String(parseInt(num)+1)]['latitude']}
-	}
-	//console.log("maxLon:", maxLon, " maxLat:", maxLat)
-	maxLon = Math.round(maxLon + 20.0)
-	maxLat = Math.round(maxLat + 20.0)
-	svgOb = document.getElementById('svgContainer')
-	svgOb.setAttribute('width', maxLon)
-	svgOb.setAttribute('height', maxLat)
-	svgOb.setAttribute('viewBox','-10.0 -10.0 ' + maxLon + ' ' + maxLat)
-	// Attach the pan/zoom behavior.
-	window.panZoom = svgPanZoom('#svgContainer', {
-		zoomEnabled: true,
-		controlIconsEnabled: false,
-		fit: true,
-		center: true
-	})
-	// Go through and add all lines first
-	for (num in networkData.branch) {
-		try {
-			anOb = networkData.branch[num][String(parseInt(num)+1)]
-			fNum = networkData.branch[num][String(parseInt(num)+1)]['fbus']
-			tNum = networkData.branch[num][String(parseInt(num)+1)]['tbus']
-			fromOb = networkData.bus[parseInt(fNum)-1][fNum]
-			toOb = networkData.bus[parseInt(tNum)-1][tNum]
-			addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],"branch_"+String(parseInt(num)+1),"branch" + ' p' + phaseCount(anOb))
-		} catch(e) {}
-	}
-	// Add buses after all lines
-	for (num in networkData.bus) {
-		try {
-			anOb = networkData.bus[num][String(parseInt(num)+1)]
-			addCircle(anOb['longitude'], anOb['latitude'],5,"bus_"+String(parseInt(num)+1),"bus")
-		} catch(e) {}
-	}
-	// Draw generators over busses
-	for (num in networkData.gen) {
-		try {
-			anOb = networkData.gen[num][String(parseInt(num)+1)]
-			var longitude = networkData.bus[String(parseInt(anOb['bus'])-1)][anOb['bus']]['longitude']
-			var latitude = networkData.bus[String(parseInt(anOb['bus'])-1)][anOb['bus']]['latitude']
-			var width = 4
-			addRectangle(longitude-width/2,latitude-width/2,width,width,"gen_"+String(parseInt(num)+1),"gen")	
-		} catch(e) {}
-	}
+        // Find the size we need for the full chart.
+        maxLon = 100, maxLat = 100
+        for (num in networkData.bus) {
+                if (networkData.bus[num][String(parseInt(num)+1)]['longitude'] > maxLon) {maxLon = networkData.bus[num][String(parseInt(num)+1)]['longitude']}
+                if (networkData.bus[num][String(parseInt(num)+1)]['latitude'] > maxLat) {maxLat = networkData.bus[num][String(parseInt(num)+1)]['latitude']}
+        }
+        //console.log("maxLon:", maxLon, " maxLat:", maxLat)
+        maxLon = Math.round(maxLon + 20.0)
+        maxLat = Math.round(maxLat + 20.0)
+        svgOb = document.getElementById('svgContainer')
+        svgOb.setAttribute('width', maxLon)
+        svgOb.setAttribute('height', maxLat)
+        svgOb.setAttribute('viewBox','-10.0 -10.0 ' + maxLon + ' ' + maxLat)
+        // Attach the pan/zoom behavior.
+        window.panZoom = svgPanZoom('#svgContainer', {
+                zoomEnabled: true,
+                controlIconsEnabled: false,
+                fit: true,
+                center: true
+        })
+        // Go through and add all lines first
+        for (num in networkData.branch) {
+                try {
+                        anOb = networkData.branch[num][String(parseInt(num)+1)]
+                        fNum = networkData.branch[num][String(parseInt(num)+1)]['fbus']
+                        tNum = networkData.branch[num][String(parseInt(num)+1)]['tbus']
+                        fromOb = networkData.bus[parseInt(fNum)-1][fNum]
+                        toOb = networkData.bus[parseInt(tNum)-1][tNum]
+                        addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],"branch_"+String(parseInt(num)+1),"branch" + ' p' + phaseCount(anOb))
+                } catch(e) {}
+        }
+        // Add buses after all lines
+        for (num in networkData.bus) {
+                try {
+                        anOb = networkData.bus[num][String(parseInt(num)+1)]
+                        addCircle(anOb['longitude'], anOb['latitude'],5,"bus_"+String(parseInt(num)+1),"bus")
+                } catch(e) {}
+        }
+        // Draw generators over busses
+        for (num in networkData.gen) {
+                try {
+                        anOb = networkData.gen[num][String(parseInt(num)+1)]
+                        var longitude = networkData.bus[String(parseInt(anOb['bus'])-1)][anOb['bus']]['longitude']
+                        var latitude = networkData.bus[String(parseInt(anOb['bus'])-1)][anOb['bus']]['latitude']
+                        var width = 4
+                        addRectangle(longitude-width/2,latitude-width/2,width,width,"gen_"+String(parseInt(num)+1),"gen")
+                } catch(e) {}
+        }
 }
 function mouseDown(event) {
-	downX = event.pageX
-	downY = event.pageY
+        downX = event.pageX
+        downY = event.pageY
 }
 function mouseUp(event) {
-	upX = event.pageX
-	upY = event.pageY
+        upX = event.pageX
+        upY = event.pageY
 }
 
 function clickLatLon(event) {
-	// Return real lat/lon location of current click.
-	var pan = window.panZoom.getPan();
-	//var zoom = panZoom.getZoom();
-	var sizes = window.panZoom.getSizes();
-	var zoom = sizes.realZoom;
-	var x, y, pt;
-	var svg = document.getElementById('svgContainer');
-	var pt = svg.createSVGPoint();
-	pt.x = event.clientX;
-	pt.y = event.clientY;
-	pt = pt.matrixTransform(svg.getScreenCTM().inverse());
-	x = pt.x;
-	y = pt.y;
-	x = (x - pan.x) / zoom;
-	y = (y - pan.y) / zoom;
-	return [x,y];
+        // Return real lat/lon location of current click.
+        var pan = window.panZoom.getPan();
+        //var zoom = panZoom.getZoom();
+        var sizes = window.panZoom.getSizes();
+        var zoom = sizes.realZoom;
+        var x, y, pt;
+        var svg = document.getElementById('svgContainer');
+        var pt = svg.createSVGPoint();
+        pt.x = event.clientX;
+        pt.y = event.clientY;
+        pt = pt.matrixTransform(svg.getScreenCTM().inverse());
+        x = pt.x;
+        y = pt.y;
+        x = (x - pan.x) / zoom;
+        y = (y - pan.y) / zoom;
+        return [x,y];
 }
 
 function svgClick(event) {
-	latLon = clickLatLon(event);
-	// console.log('CLICKLOC',latLon[0],latLon[1]);
-	//console.log("debug: screen ", event.screenX, event.screenY, "page ", event.pageX, event.pageY)
-	if ( (downX!==upX) || (downY!==upY) ) {
-		return
-	}
-	if (!event.altKey) {
-		for (i=0; i<selection.length; i++) {
-			selection[i].classList.remove('selected')
-		}
-		selection = []
-	}
-	event.target.classList.add('selected')
-	if ( event.target.id != 'svgContainer') {
-	 var clickType = event.target.id.split("_")[0]
-	 var clickID = event.target.id.split("_")[1]
-	 //console.log('clicked ', clickType, ' with id', clickID)
-		if (selection.indexOf(networkData[clickType][parseInt(clickID)-1]) === -1){
-			//this is where you have to t\determine selection and delete from array and stuff
-			tableDestroy()
-			tableCreate(networkData[clickType][parseInt(clickID)-1][clickID])
-			selection.push(event.target)
-		}
-	}
-	else {
-		tableDestroy()
-	}
-	// ALT-SELECTION
-	if (selection.length >= 2) {
-		//console.log('selected more than one element')
-		tableDestroy()
-		selectionTable()
-	}
-	previousTarget = event.target
+        latLon = clickLatLon(event);
+        // console.log('CLICKLOC',latLon[0],latLon[1]);
+        //console.log("debug: screen ", event.screenX, event.screenY, "page ", event.pageX, event.pageY)
+        if ( (downX!==upX) || (downY!==upY) ) {
+                return
+        }
+        if (!event.altKey) {
+                for (i=0; i<selection.length; i++) {
+                        selection[i].classList.remove('selected')
+                }
+                selection = []
+        }
+        event.target.classList.add('selected')
+        if ( event.target.id != 'svgContainer') {
+         var clickType = event.target.id.split("_")[0]
+         var clickID = event.target.id.split("_")[1]
+         //console.log('clicked ', clickType, ' with id', clickID)
+                if (selection.indexOf(networkData[clickType][parseInt(clickID)-1]) === -1){
+                        //this is where you have to t\determine selection and delete from array and stuff
+                        tableDestroy()
+                        tableCreate(networkData[clickType][parseInt(clickID)-1][clickID])
+                        selection.push(event.target)
+                }
+        }
+        else {
+                tableDestroy()
+        }
+        // ALT-SELECTION
+        if (selection.length >= 2) {
+                //console.log('selected more than one element')
+                tableDestroy()
+                selectionTable()
+        }
+        previousTarget = event.target
 }
 function phaseCount(p) {
-	total = 0
-	if ("rateA" in p){
-		if (parseInt(p["rateA"]) > 0){total++}
-	}
-	if ("rateB" in p){
-		if (parseInt(p["rateB"]) > 0){total++}
-	}
-	if ("rateC" in p){
-		if (parseInt(p["rateC"]) > 0){total++}
-	}
-	return total
+        total = 0
+        if ("rateA" in p){
+                if (parseInt(p["rateA"]) > 0){total++}
+        }
+        if ("rateB" in p){
+                if (parseInt(p["rateB"]) > 0){total++}
+        }
+        if ("rateC" in p){
+                if (parseInt(p["rateC"]) > 0){total++}
+        }
+        return total
 }
 function hotkeys() {
-	// IE8 and earlier
-	if (window.event) {
-		x = event.keyCode
-	}
-	// IE9/Firefox/Chrome/Opera/Safari
-	else if (event.which) {
-		x = event.which
-	}
-	keychar = String.fromCharCode(x);
-	if (event.target.type != 'text') {
-		// Dispatch the key:
-		if (keychar == '-') {
-			zoomOut()
-		}
-		else if (keychar == '=') {
-			zoomIn()
-		}
-	}
+        // IE8 and earlier
+        if (window.event) {
+                x = event.keyCode
+        }
+        // IE9/Firefox/Chrome/Opera/Safari
+        else if (event.which) {
+                x = event.which
+        }
+        keychar = String.fromCharCode(x);
+        if (event.target.type != 'text') {
+                // Dispatch the key:
+                if (keychar == '-') {
+                        zoomOut()
+                }
+                else if (keychar == '=') {
+                        zoomIn()
+                }
+        }
 }
 function tableCreate(inputObject) {
-	tabScroll = document.getElementById('tableScroller')
-	tbl = document.createElement('table')
-	// Show what type of thing you clicked/
-	whatClicked = document.createElement('tr')
-	var clickType = event.target.id.split("_")[0]
-	var clickID = event.target.id.split("_")[1]
-	whatClicked.innerHTML = '<th>'+clickType.charAt(0).toUpperCase()+clickType.slice(1);+'</th>'
-	whatClicked.innerHTML += '<th>'+String(clickID)+'</th>'
-	tbl.appendChild(whatClicked)
-	// Put in the header.
-	headRow = document.createElement('tr')
-	headRow.innerHTML = '<th style="text-align: left;padding: 0px 0px 0px 11px;"><button onclick="tablePlus(this)">+</button></th>'
-	headRow.innerHTML += '<th><button id="deleteButton" onclick="deleteOb()">Delete</button><button id="saveButton" onclick="tableSave(this)">Save</button></th>'
-	tbl.appendChild(headRow)
-	// Put the object in.
-	var notAllowed = ['bus_i', 'bus', 'fbus', 'tbus', 'latitude', 'longitude'] //disabled because doesn't render in real time, and on-change causes lines to sometimes render improperly.
-	for (key in inputObject) {
-		if (!(notAllowed.indexOf(key) > -1)) {
-			row = document.createElement('tr')
-			row.innerHTML = '<td><button onclick="tableDel(this)">&#215;</button><input style="width:112px" value=' + key + '></input></td>'
-			row.innerHTML += '<td><input value="' + inputObject[key] + '"></input></td>'
-			tbl.appendChild(row)
-		}
-	}
-	tabScroll.appendChild(tbl)
+        tabScroll = document.getElementById('tableScroller')
+        tbl = document.createElement('table')
+        // Show what type of thing you clicked/
+        whatClicked = document.createElement('tr')
+        var clickType = event.target.id.split("_")[0]
+        var clickID = event.target.id.split("_")[1]
+        whatClicked.innerHTML = '<th>'+clickType.charAt(0).toUpperCase()+clickType.slice(1);+'</th>'
+        whatClicked.innerHTML += '<th>'+String(clickID)+'</th>'
+        tbl.appendChild(whatClicked)
+        // Put in the header.
+        headRow = document.createElement('tr')
+        headRow.innerHTML = '<th style="text-align: left;padding: 0px 0px 0px 11px;"><button onclick="tablePlus(this)">+</button></th>'
+        // if(String(clickType) == "bus") {
+        //      headRow.innerHTML += '<th><button id="moveBusButton" onclick="moveBus()">Move</button></th>'
+        // }
+
+
+        headRow.innerHTML += '<th><button id="deleteButton" onclick="deleteOb()">Delete</button><button id="saveButton" onclick="tableSave(this)">Save</button></th>'
+        tbl.appendChild(headRow)
+        // Put the object in.
+        var notAllowed = ['bus_i', 'bus', 'fbus', 'tbus', 'latitude', 'longitude'] //disabled because doesn't render in real time, and on-change causes lines to sometimes render improperly.
+        for (key in inputObject) {
+                if (!(notAllowed.indexOf(key) > -1)) {
+                        row = document.createElement('tr')
+                        row.innerHTML = '<td><button onclick="tableDel(this)">&#215;</button><input style="width:112px" value=' + key + '></input></td>'
+                        row.innerHTML += '<td><input value="' + inputObject[key] + '"></input></td>'
+                        tbl.appendChild(row)
+                }
+        }
+        tabScroll.appendChild(tbl)
 }
 function tableDel(me) {
-	myRow = me.parentElement.parentElement
-	myTable = myRow.parentElement
-	myTable.removeChild(myRow)
+        myRow = me.parentElement.parentElement
+        myTable = myRow.parentElement
+        myTable.removeChild(myRow)
 }
 function tablePlus(me) {
-	myTable = me.parentElement.parentElement.parentElement
-	newRow = myTable.insertRow(2)
-	newRow.innerHTML = '<td><button onclick="tableDel(this)">&#215;</button><input style="width:112px"></input></td>'
-	newRow.innerHTML += '<td><input></input></td>'
+        myTable = me.parentElement.parentElement.parentElement
+        newRow = myTable.insertRow(2)
+        newRow.innerHTML = '<td><button onclick="tableDel(this)">&#215;</button><input style="width:112px"></input></td>'
+        newRow.innerHTML += '<td><input></input></td>'
 }
 function tableSave(me) {
-	var tbl = me.parentElement.parentElement.parentElement
-	var toJson = {}
-	// convert HTML table to JSON
-	for (var i = 1; i < tbl.rows.length; i++) {
-		var key = tbl.rows[i].cells[0].lastElementChild.value
-		if (key !== '') {
-			toJson[key] = tbl.rows[i].cells[1].lastElementChild.value
-		}
-	}
-	// Update tree with new values
-	var clickType = previousTarget.id.split("_")[0]
-	var clickID = previousTarget.id.split("_")[1]
-	for (key in toJson) {
-		networkData[clickType][parseInt(clickID)-1][clickID][key] = toJson[key]
-	}
-	// Delete properties from tree
-	for (key in networkData[clickType][parseInt(clickID)-1][clickID]) {
-		// HACK: DON'T DELETE DATA THAT OBJECTS MUST CONTAIN VIA CHECKING THE NAMES.
-		if (!toJson.hasOwnProperty(key) && key!='latitude' && key!='longitude' && key!='bus_i' && key!='fbus' && key!='tbus' && key!='bus') {
-			delete networkData[clickType][parseInt(clickID)-1][clickID][key]
-		}
-	}
-	unsavedChanges = true;
-	alert('Updated object: ' + previousTarget.id)
-	tableDestroy()
+        var tbl = me.parentElement.parentElement.parentElement
+        var toJson = {}
+        // convert HTML table to JSON
+        for (var i = 1; i < tbl.rows.length; i++) {
+                var key = tbl.rows[i].cells[0].lastElementChild.value
+                if (key !== '') {
+                        toJson[key] = tbl.rows[i].cells[1].lastElementChild.value
+                }
+        }
+        // Update tree with new values
+        var clickType = previousTarget.id.split("_")[0]
+        var clickID = previousTarget.id.split("_")[1]
+        for (key in toJson) {
+                networkData[clickType][parseInt(clickID)-1][clickID][key] = toJson[key]
+        }
+        // Delete properties from tree
+        for (key in networkData[clickType][parseInt(clickID)-1][clickID]) {
+                // HACK: DON'T DELETE DATA THAT OBJECTS MUST CONTAIN VIA CHECKING THE NAMES.
+                if (!toJson.hasOwnProperty(key) && key!='latitude' && key!='longitude' && key!='bus_i' && key!='fbus' && key!='tbus' && key!='bus') {
+                        delete networkData[clickType][parseInt(clickID)-1][clickID][key]
+                }
+        }
+        unsavedChanges = true;
+        alert('Updated object: ' + previousTarget.id)
+        tableDestroy()
 }
 function tableDestroy() {
-	tabScroll = document.getElementById('tableScroller')
-	kid = tabScroll.children[0]
-	if (!(kid === undefined)) {tabScroll.removeChild(kid)}
+        tabScroll = document.getElementById('tableScroller')
+        kid = tabScroll.children[0]
+        if (!(kid === undefined)) {tabScroll.removeChild(kid)}
 }
 function deleteOb() {
-	var clickType = previousTarget.id.split("_")[0]
-	var clickID = previousTarget.id.split("_")[1]
-	// Delete Lines
-	if (clickType === 'branch') {
-		previousTarget.remove()
-		networkData[clickType][parseInt(clickID)-1][clickID] = {}
-	}
-	//Delete Squares
-	if (clickType === 'gen') {
-		previousTarget.remove()
-		networkData[clickType][parseInt(clickID)-1][clickID] = {}
-	}
-	// Delete Circles
-	if (clickType === 'bus') {
-		gens = 0
-		for (i = 0, limit = (networkData.gen).length; i < limit; i++) {
-			if (parseInt(networkData.gen[i][String(i+1)]['bus']) === parseInt(clickID)) {
-				gens++
-			}
-		}
-		// Check for connected lines
-		lines = 0
-		for (i = 0, limit = (networkData.branch).length; i < limit; i++) {
-			if ( (parseInt(networkData.branch[i][String(i+1)]['fbus']) === parseInt(clickID))
-				|| (parseInt(networkData.branch[i][String(i+1)]['tbus']) === parseInt(clickID)) ) {
-				lines++
-			}
-		}
-		if (lines > 0 || gens > 0) {
-			alert('Cannot delete circles with components still connected')
-		}
-		else {
-			previousTarget.remove()
-		}
-	}
-	unsavedChanges=true
-	tableDestroy()
+        var clickType = previousTarget.id.split("_")[0]
+        var clickID = previousTarget.id.split("_")[1]
+        // Delete Lines
+        if (clickType === 'branch') {
+                previousTarget.remove()
+                networkData[clickType][parseInt(clickID)-1][clickID] = {}
+        }
+        //Delete Squares
+        if (clickType === 'gen') {
+                previousTarget.remove()
+                networkData[clickType][parseInt(clickID)-1][clickID] = {}
+        }
+        // Delete Circles
+        if (clickType === 'bus') {
+                gens = 0
+                for (i = 0, limit = (networkData.gen).length; i < limit; i++) {
+                        if (parseInt(networkData.gen[i][String(i+1)]['bus']) === parseInt(clickID)) {
+                                gens++
+                        }
+                }
+                // Check for connected lines
+                lines = 0
+                for (i = 0, limit = (networkData.branch).length; i < limit; i++) {
+                        if ( (parseInt(networkData.branch[i][String(i+1)]['fbus']) === parseInt(clickID))
+                                || (parseInt(networkData.branch[i][String(i+1)]['tbus']) === parseInt(clickID)) ) {
+                                lines++
+                        }
+                }
+                if (lines > 0 || gens > 0) {
+                        alert('Cannot delete circles with components still connected')
+                }
+                else {
+                        previousTarget.remove()
+                }
+        }
+        unsavedChanges=true
+        tableDestroy()
 }
 function scaleTo(x) {
-	if (!x) {
-		return
-	}
-	circles = document.getElementsByTagName('circle')
-	lines = document.getElementsByTagName('line')
-	// Scale Circles
-	for (i = 0; i < circles.length; i++) {
-		circles[i].setAttribute('r', 2*x)
-		circles[i].setAttribute('stroke-width', 0.5*x)
-	}
-	// Scale Lines
-	for (i = 0; i < lines.length; i++) {
-		if (lines[i].getAttribute('class').indexOf('p2') !== -1) {
-			lines[i].setAttribute('stroke-width', 2*x)
-		}
-		else if (lines[i].getAttribute('class').indexOf('p3') !== -1) {
-			lines[i].setAttribute('stroke-width', 3*x)
-		}
-		else if (lines[i].getAttribute('class').indexOf('parentChild') !== -1) {
-			lines[i].setAttribute('stroke-width', 0.5*x)
-		}
-		else {
-			lines[i].setAttribute('stroke-width', x)
-		}
-	}
+        if (!x) {
+                return
+        }
+        circles = document.getElementsByTagName('circle')
+        lines = document.getElementsByTagName('line')
+        // Scale Circles
+        for (i = 0; i < circles.length; i++) {
+                circles[i].setAttribute('r', 2*x)
+                circles[i].setAttribute('stroke-width', 0.5*x)
+        }
+        // Scale Lines
+        for (i = 0; i < lines.length; i++) {
+                if (lines[i].getAttribute('class').indexOf('p2') !== -1) {
+                        lines[i].setAttribute('stroke-width', 2*x)
+                }
+                else if (lines[i].getAttribute('class').indexOf('p3') !== -1) {
+                        lines[i].setAttribute('stroke-width', 3*x)
+                }
+                else if (lines[i].getAttribute('class').indexOf('parentChild') !== -1) {
+                        lines[i].setAttribute('stroke-width', 0.5*x)
+                }
+                else {
+                        lines[i].setAttribute('stroke-width', x)
+                }
+        }
 }
 function selectionTable() {
-	tabScroll = document.getElementById('tableScroller')
-	tbl = document.createElement('table')
-	// Put in the header.
-	headRow = document.createElement('tr')
-	headRow.innerHTML = '<th>Selected Elements</th>'
-	tbl.appendChild(headRow)
-	currentSel = selection[selection.length - 1].id
-	// If user was alt+clicking a selected thing, deselect it.
-	for (i = 0; i < selection.length; i++) {
-		if(selection[i].id == currentSel  && i != selection.length-1) {
-			selection[i].classList.remove('selected')
-			selection.splice(i, 1)
-			selection.splice(selection.length - 1, 1)
-			//console.log(selection)
-			continue
-		}
-	}
-	// Put the object in.
-	for (i = 0; i < selection.length; i++) {
-		row = document.createElement('tr')
-		row.innerHTML = '<td>' + selection[i].id + '</td>'
-		tbl.appendChild(row)
-	}
-	tabScroll.appendChild(tbl)
-	// Remove header if we have deselected the last item.
-	if (selection.length == 0) {
-		tableDestroy()
-	}
+        tabScroll = document.getElementById('tableScroller')
+        tbl = document.createElement('table')
+        // Put in the header.
+        headRow = document.createElement('tr')
+        headRow.innerHTML = '<th>Selected Elements</th>'
+        tbl.appendChild(headRow)
+        currentSel = selection[selection.length - 1].id
+        // If user was alt+clicking a selected thing, deselect it.
+        for (i = 0; i < selection.length; i++) {
+                if(selection[i].id == currentSel  && i != selection.length-1) {
+                        selection[i].classList.remove('selected')
+                        selection.splice(i, 1)
+                        selection.splice(selection.length - 1, 1)
+                        //console.log(selection)
+                        continue
+                }
+        }
+        // Put the object in.
+        for (i = 0; i < selection.length; i++) {
+                row = document.createElement('tr')
+                row.innerHTML = '<td>' + selection[i].id + '</td>'
+                tbl.appendChild(row)
+        }
+        tabScroll.appendChild(tbl)
+        // Remove header if we have deselected the last item.
+        if (selection.length == 0) {
+                tableDestroy()
+        }
 }
 function newNode(typeOfNode) {
-	//console.log('new bus length',(networkData.bus).length+1)
-	newID = (networkData[typeOfNode].length)+1
-	newType = typeOfNode
-	newBusGenObj = {}
-	// If gen was clicked, create that too.
-	if (newType==='gen'){
-		//console.log('new gen length',(networkData.gen).length+1)
-		newBusGenObj[String(newID)] = {
-			longitude: "0",
-			latitude: "0",
-			bus: "100",
-			Pg: "23.54",
-			Qg: "0",
-			Qmax: "150",
-			Qmin: "-20",
-			Vg: "1",
-			mBase: "100",
-			status: "1",
-			Pmax: "80",
-			Pmin: "0",
-			Pc1: "0",
-			Pc2: "0",
-			Qc1min: "0",
-			Qc1max: "0",
-			Qc2min: "0",
-			Qc2max: "0",
-			ramp_agc: "0",
-			ramp_10: "0",
-			ramp_30: "0",
-			ramp_q: "0",
-			apf: "0"
-		}
-	}else{
-		//console.log('new bus length',(networkData.bus).length+1)
-		newBusGenObj[String(newID)] = {
-			longitude: "0",
-			latitude: "0",
-			bus_i: String(newID),
-			type: "3",
-			Pd: "0",
-			Qd: "0",
-			Gs: "0",
-			Bs: "0",
-			area: "1",
-			Vm: "1",
-			Va: "0",
-			baseKV: "135",
-			zone: "1",
-			Vmax: "1.05",
-			Vmin: "0.95"
-		}
-	}
-	// Click location to add
-	clickTarget = document.getElementById('svgContainer')
-	clickTarget.addEventListener('click', clickLocate, false)
+        //console.log('new bus length',(networkData.bus).length+1)
+        newID = (networkData[typeOfNode].length)+1
+        newBusGenObj = {}
+        //console.log('new bus length',(networkData.bus).length+1)
+        newBusGenObj[String(newID)] = {
+                longitude: "0",
+                latitude: "0",
+                bus_i: String(newID),
+                type: "3",
+                Pd: "0",
+                Qd: "0",
+                Gs: "0",
+                Bs: "0",
+                area: "1",
+                Vm: "1",
+                Va: "0",
+                baseKV: "135",
+                zone: "1",
+                Vmax: "1.05",
+                Vmin: "0.95"
+        }
+        // Click location to add
+        clickTarget = document.getElementById('svgContainer')
+        clickTarget.addEventListener('click', clickLocate, false)
 }
 function clickLocate() {
-	var xloc = event.pageX
-	var yloc = event.pageY
-	// Save to tree
-	networkData[newType][newID-1] = newBusGenObj
-	networkData[newType][newID-1][String(newID)].longitude = xloc
-	networkData[newType][newID-1][String(newID)].latitude = yloc
-	// Draw on svg
-	x = networkData[newType][newID-1][String(newID)].longitude
-	y = networkData[newType][newID-1][String(newID)].latitude
-	r = 2
-	addCircle(x,y,r,newType+"_"+String(newID),newType)
-	clickTarget.removeEventListener('click', clickLocate, false)
+        var xloc = event.pageX
+        var yloc = event.pageY
+        coords = clickLatLon(event)
+        xloc = coords[0]
+        yloc = coords[1]
+        newType = "bus"
+        // Save to tree
+        networkData[newType][newID-1] = newBusGenObj
+        networkData[newType][newID-1][String(newID)].longitude = xloc
+        networkData[newType][newID-1][String(newID)].latitude = yloc
+        // Draw on svg
+        x = networkData[newType][newID-1][String(newID)].longitude
+        y = networkData[newType][newID-1][String(newID)].latitude
+        r = 5
+        addCircle(x,y,r,newType+"_"+String(newID),newType)
+        clickTarget.removeEventListener('click', clickLocate, false)
 }
+
+function moveBus() {
+        clickTarget = document.getElementById('svgContainer')
+        clickTarget.addEventListener('click', moveBusListener, false)
+}
+
+function moveBusListener() {
+        console.log(previousTarget)
+        currSel = previousTarget
+        selectionIDSplit = currSel.id.split("_")
+        selBusID = parseInt(selectionIDSplit[1])
+        selBus = networkData["bus"][selBusID - 1][String(selBusID)]
+        coords = clickLatLon(event)
+        console.log(coords)
+        selBus.longitude = coords[0]
+        selBus.latitude = coords[1]
+
+        console.log(networkData['bus'])
+        clickTarget.removeEventListener('click', moveBusListener, false)
+}
+
+function newGen() {
+        currSel = selection[0]
+        selectionIDSplit = currSel.id.split("_")
+        if(selection.length === 1 && String(selectionIDSplit[0]) == "bus") {
+                newID = (networkData["gen"].length)+1
+                newGenObj = {}
+                selBusID = parseInt(selectionIDSplit[1])
+                selBus = networkData["bus"][selBusID - 1][String(selBusID)]
+                newGenObj[String(newID)] = {
+                        longitude: selBus.longitude,
+                        latitude: selBus.latitude,
+                        bus: String(selBusID),
+                        Pg: "23.54",
+                        Qg: "0",
+                        Qmax: "150",
+                        Qmin: "-20",
+                        Vg: "1",
+                        mBase: "100",
+                        status: "1",
+                        Pmax: "80",
+                        Pmin: "0",
+                        Pc1: "0",
+                        Pc2: "0",
+                        Qc1min: "0",
+                        Qc1max: "0",
+                        Qc2min: "0",
+                        Qc2max: "0",
+                        ramp_agc: "0",
+                        ramp_10: "0",
+                        ramp_30: "0",
+                        ramp_q: "0",
+                        apf: "0"
+                }
+                addRectangle(selBus.longitude - 4/2, selBus.latitude - 4/2, 4, 4, "gen_" + newID, "gen")
+                networkData["gen"][newID - 1] = newGenObj
+                //console.log(networkData["gen"])
+        }
+
+}
+
 function newLink() {
-	if (selection.length === 2) {
-		var newCompID = (networkData.branch).length
-		var fBus = parseInt(selection[0].id.split("_")[1])
-		var tBus = parseInt(selection[1].id.split("_")[1])
-		var newLink = {}
-		newLink[String(newCompID)] = {
-			r: "0.02",
-			x: "0.06",
-			b: "0.03",
-			rateA: "130",
-			rateB: "130",
-			rateC: "130",
-			ratio: "0",
-			angle: "0",
-			status: "1",
-			angmin: "-360.0",
-			angmax: "360.0"
-		}
-		newLink[newCompID]['fBus'] = fBus;
-		newLink[newCompID]['tBus'] = tBus;
-		// Save to tree
-		networkData.branch[newCompID-1] = newLink;
-		// Draw on svg
-		x1 = networkData.bus[fbus-1][String(fBus)].longitude
-		y1 = networkData.bus[fbus-1][String(fBus)].latitude
-		x2 = networkData.bus[tbus-1][String(tBus)].longitude
-		y2 = networkData.bus[tbus-1][String(tBus)].latitude
-		addLine(x1,y1,x2,y2,newCompID,"branch")
-	}
+        busOne = selection[0].id.split("_")
+        busTwo = selection[1].id.split("_")
+        if (selection.length === 2 && String(busOne[0]) == "bus" && String(busTwo[0]) == "bus") {
+                var newCompID = (networkData.branch).length
+                var fBusID = parseInt(busOne[1])
+                var tBusID = parseInt(busTwo[1])
+                var newLink = {}
+                newLink[String(newCompID)] = {
+                        r: "0.02",
+                        x: "0.06",
+                        b: "0.03",
+                        rateA: "130",
+                        rateB: "130",
+                        rateC: "130",
+                        ratio: "0",
+                        angle: "0",
+                        status: "1",
+                        angmin: "-360.0",
+                        angmax: "360.0",
+                }
+                newLink[newCompID]['fBus'] = fBusID;
+                newLink[newCompID]['tBus'] = tBusID;
+                // Save to tree
+                networkData.branch[newCompID-1] = newLink;
+                // Draw on svg
+                x1 = networkData.bus[fBusID-1][String(fBusID)].longitude
+                y1 = networkData.bus[fBusID-1][String(fBusID)].latitude
+                x2 = networkData.bus[tBusID-1][String(tBusID)].longitude
+                y2 = networkData.bus[tBusID-1][String(tBusID)].latitude
+                addLine(x1,y1,x2,y2,newCompID,"branch" + ' p' + phaseCount(newLink[newCompID]))
+                //NEED TO REDRAW BUSSES AS WELL SO THAT THE LINES DONT OVERLAP
+        }
 }
 // Modal and conversion functions.
 function showModal(element){
-	gebi(element).style.display = 'block'
+        gebi(element).style.display = 'block'
 }
 function closeModal(element){
-	gebi(element).style.display = 'none'
+        gebi(element).style.display = 'none'
 }
 function startConversion(elementName, nextAction) {
-	// Additional check, required for Safari browsers
-	var newName = document.getElementById(elementName).value;
-	if (true) {
-		var modelName = "{{ modelName }}"
-		$.ajax({
-			url: "/uniqObjName/Network/" + "{{ owner }}" + "/" + newName + "/" + modelName
-		}).done(function (data) {
-			if (data.exists) {
-				alert("You already have a Network named '" + newName + "', please choose a different name.")
-			}
-			else{
-				if (nextAction == 1){
-					newnetwork.submit()
-				}
-				else{
-					gebi('matpower').submit();
-					showProgressDialog('spinner','Converting network','conversion');
-					setTimeout(checkConversion,5000); // Set an initial delay because it takes time to create conversion files.
-				}
-			}
-		})
-	}
+        // Additional check, required for Safari browsers
+        var newName = document.getElementById(elementName).value;
+        if (true) {
+                var modelName = "{{ modelName }}"
+                $.ajax({
+                        url: "/uniqObjName/Network/" + "{{ owner }}" + "/" + newName + "/" + modelName
+                }).done(function (data) {
+                        if (data.exists) {
+                                alert("You already have a Network named '" + newName + "', please choose a different name.")
+                        }
+                        else{
+                                if (nextAction == 1){
+                                        newnetwork.submit()
+                                }
+                                else{
+                                        gebi('matpower').submit();
+                                        showProgressDialog('spinner','Converting network','conversion');
+                                        setTimeout(checkConversion,5000); // Set an initial delay because it takes time to create conversion files.
+                                }
+                        }
+                })
+        }
 }
 function showProgressDialog(progressType, dialogMessage, cancelType) {
-	// Make the elements.
-	background = document.createElement('div')
-	background.id = 'progressBackground'
-	background.style.zIndex = '9998'
-	progContent = document.createElement('div')
-	progContent.id = 'progressContent'
-	progContent.style.zIndex = '9999'
-	progressText = document.createElement('h2')
-	progressText.id = 'progressText'
-	progressText.textContent = dialogMessage
-	document.body.appendChild(background)
-	document.body.appendChild(progContent)
-	// If progressType type is spinner create and show the spinner
-	if (progressType == 'spinner'){
-		spinner = document.createElement('img')
-		spinner.src = '/static/spinner.gif'
-		progContent.appendChild(spinner)
-		progContent.appendChild(progressText)
-		var cancelBtn = document.createElement("BUTTON");
-		var t = document.createTextNode("cancel");
-		cancelBtn.style.marginTop = '5px';
-		cancelBtn.style.background= 'crimson'
-		cancelBtn.appendChild(t);
-		progContent.appendChild(cancelBtn);
-	}
-	// If cancelType is not none, add an onclick even to the cancel button to cancel the conversion
-	if (cancelType != 'none'){
-		cancelType = (typeof cancelType === 'undefined') ? 'no' : cancelType;
-		cancelBtn.onclick = function() {
-			if (cancelType == 'conversion'){
-				if (confirm('Are you sure you want to cancel the conversion?')) {
-					newnetwork.submit();
-				}
-			}
-			else if(cancelType == 'none'){
-				cancelBtn.style.display = 'none'
-			}
-			else
-			{
-				// stop rendering feeder, show file menu, etc.y
-				removeProgressDialog()
-			}
-		};
-	}
+        // Make the elements.
+        background = document.createElement('div')
+        background.id = 'progressBackground'
+        background.style.zIndex = '9998'
+        progContent = document.createElement('div')
+        progContent.id = 'progressContent'
+        progContent.style.zIndex = '9999'
+        progressText = document.createElement('h2')
+        progressText.id = 'progressText'
+        progressText.textContent = dialogMessage
+        document.body.appendChild(background)
+        document.body.appendChild(progContent)
+        // If progressType type is spinner create and show the spinner
+        if (progressType == 'spinner'){
+                spinner = document.createElement('img')
+                spinner.src = '/static/spinner.gif'
+                progContent.appendChild(spinner)
+                progContent.appendChild(progressText)
+                var cancelBtn = document.createElement("BUTTON");
+                var t = document.createTextNode("cancel");
+                cancelBtn.style.marginTop = '5px';
+                cancelBtn.style.background= 'crimson'
+                cancelBtn.appendChild(t);
+                progContent.appendChild(cancelBtn);
+        }
+        // If cancelType is not none, add an onclick even to the cancel button to cancel the conversion
+        if (cancelType != 'none'){
+                cancelType = (typeof cancelType === 'undefined') ? 'no' : cancelType;
+                cancelBtn.onclick = function() {
+                        if (cancelType == 'conversion'){
+                                if (confirm('Are you sure you want to cancel the conversion?')) {
+                                        newnetwork.submit();
+                                }
+                        }
+                        else if(cancelType == 'none'){
+                                cancelBtn.style.display = 'none'
+                        }
+                        else
+                        {
+                                // stop rendering feeder, show file menu, etc.y
+                                removeProgressDialog()
+                        }
+                };
+        }
 }function removeProgressDialog() {
-	if (gebi('progressBackground')!=null)
-		document.body.removeChild(gebi('progressBackground'))
-	if (gebi('progressContent')!=null)
-		document.body.removeChild(gebi('progressContent'))
+        if (gebi('progressBackground')!=null)
+                document.body.removeChild(gebi('progressBackground'))
+        if (gebi('progressContent')!=null)
+                document.body.removeChild(gebi('progressContent'))
 }
 function finishPastActions(){
-	showProgressDialog('spinner','Loading Network', 'loading');
-	var modelName = '{{modelName}}'
-	// Check conversion.
-	$.ajax({
-		url: "/checkConversion/" + modelName
-	}).done(function (data) {
-		if (data.exists == true) {
-			showProgressDialog('spinner','Converting network','conversion');
-			checkConversion()
-		}
-	})
-	// Send network name to model and remove loading dialog.
-	window.opener.$(window.opener.document).trigger('mainWindow', "{{ modelName }};"+"networkName{{networkNum}};"+lastNetworkName);
-	setTimeout(removeProgressDialog,500) // hard cap.
+        showProgressDialog('spinner','Loading Network', 'loading');
+        var modelName = '{{modelName}}'
+        // Check conversion.
+        $.ajax({
+                url: "/checkConversion/" + modelName
+        }).done(function (data) {
+                if (data.exists == true) {
+                        showProgressDialog('spinner','Converting network','conversion');
+                        checkConversion()
+                }
+        })
+        // Send network name to model and remove loading dialog.
+        window.opener.$(window.opener.document).trigger('mainWindow', "{{ modelName }};"+"networkName{{networkNum}};"+lastNetworkName);
+        setTimeout(removeProgressDialog,500) // hard cap.
 }
 function checkConversion() {
-	var conversionStatus = 'converting';
-		// Check every 5 seconds for a feeder & refresh.
-		var setInterval = window.setInterval(function pingAPI(){
-			var modelName = '{{modelName}}'
-			$.ajax({
-				url: "/checkConversion/" + modelName
-			}).done(function (data) {
-				if (data.exists) {
-					conversionStatus = 'converting'
-				}
-				else {
-					conversionStatus = 'done';
-				}
-			})
-			if (conversionStatus == "done"){
-				savePoster("{{ networkName }}", "{{ modelName }}", "{{ owner }}");
-				alert("Conversion complete.")
-				window.location.reload();
-			}
-			//console.log("Converting...")
-			return pingAPI;
-		}(), 5000);
+        var conversionStatus = 'converting';
+                // Check every 5 seconds for a feeder & refresh.
+                var setInterval = window.setInterval(function pingAPI(){
+                        var modelName = '{{modelName}}'
+                        $.ajax({
+                                url: "/checkConversion/" + modelName
+                        }).done(function (data) {
+                                if (data.exists) {
+                                        conversionStatus = 'converting'
+                                }
+                                else {
+                                        conversionStatus = 'done';
+                                }
+                        })
+                        if (conversionStatus == "done"){
+                                savePoster("{{ networkName }}", "{{ modelName }}", "{{ owner }}");
+                                alert("Conversion complete.")
+                                window.location.reload();
+                        }
+                        //console.log("Converting...")
+                        return pingAPI;
+                }(), 5000);
 }
 function saveNetwork() {
-	gebi("fileOps").click();
-	savePoster("{{ networkName }}", "{{ modelName }}", "{{ owner }}")
-	alert("Network saved to disk.")
+        gebi("fileOps").click();
+        savePoster("{{ networkName }}", "{{ modelName }}", "{{ owner }}")
+        alert("Network saved to disk.")
 }
 function savePoster(name, modelName, user) {
-	networkObject = {
-		mpcVersion: networkData.mpcVersion,
-		baseMVA: networkData.baseMVA,
-		bus: networkData.bus,
-		gen: networkData.gen,
-		branch: networkData.branch,
-	}
-	payload = {
-		'name': name,
-		'networkObjectJson': JSON.stringify(networkObject),
-		"_csrf_token": "{{ csrf_token() }}",
-		ref: "{{ ref }}"
-	}
-	unsavedChanges=false
-	post_to_url("/saveNetwork/" + user + "/" + modelName + "/" + name, payload)
+        networkObject = {
+                mpcVersion: networkData.mpcVersion,
+                baseMVA: networkData.baseMVA,
+                bus: networkData.bus,
+                gen: networkData.gen,
+                branch: networkData.branch,
+        }
+        payload = {
+                'name': name,
+                'networkObjectJson': JSON.stringify(networkObject),
+                "_csrf_token": "{{ csrf_token() }}",
+                ref: "{{ ref }}"
+        }
+        unsavedChanges=false
+        post_to_url("/saveNetwork/" + user + "/" + modelName + "/" + name, payload)
 }
 function renameNetwork() {
-	if (unsavedChanges){
-		alert('You have unsaved changes. Please save the network before proceeding.')
-	}
-	else{
-		var newName = prompt("Rename the network to",lastNetworkName)
-		while (! /^[\w\s]+$/.test(newName) || /^\s+$/.test(newName)){
-			newName = prompt("Only letters, digits and underscore are allowed.\nPlease enter a different name", "{{ networkName }}")
-		}
-		if (newName){
-			checkNetworkName(newName)
-		}
-	}
+        if (unsavedChanges){
+                alert('You have unsaved changes. Please save the network before proceeding.')
+        }
+        else{
+                var newName = prompt("Rename the network to",lastNetworkName)
+                while (! /^[\w\s]+$/.test(newName) || /^\s+$/.test(newName)){
+                        newName = prompt("Only letters, digits and underscore are allowed.\nPlease enter a different name", "{{ networkName }}")
+                }
+                if (newName){
+                        checkNetworkName(newName)
+                }
+        }
 }
 function checkNetworkName(newName) {
-	// Additional check, required for Safari browsers
-	if (true) {
-		var modelName = "{{ modelName }}"
-		$.ajax({
-			url: "/uniqObjName/Network/" + "{{ owner }}" + "/" + newName + "/" + modelName
-		}).done(function (data) {
-			if (data.exists) {
-				alert("You already have a Network named '" + newName + "', please choose a different name.")
-				renameNetwork()
-			}
-			else{
-				gebi("fileOps").click();
-				post_to_url("/renameNetwork/" + "{{ owner }}" + "/" + "{{ modelName }}" + "/" + lastNetworkName + "/" + newName + "/" + "{{ networkNum }}")
-				document.getElementById('networkName').innerHTML = newName;
-				lastNetworkName = newName; //permits multiple name changes without forcing page refresh.
-				// Send updated name to model.
-				window.opener.$(window.opener.document).trigger('mainWindow', "{{ modelName }};"+"networkName{{networkNum}};"+lastNetworkName);
-				clickCloseEvent("File","fileOps")
-			}
-		})
-	}
+        // Additional check, required for Safari browsers
+        if (true) {
+                var modelName = "{{ modelName }}"
+                $.ajax({
+                        url: "/uniqObjName/Network/" + "{{ owner }}" + "/" + newName + "/" + modelName
+                }).done(function (data) {
+                        if (data.exists) {
+                                alert("You already have a Network named '" + newName + "', please choose a different name.")
+                                renameNetwork()
+                        }
+                        else{
+                                gebi("fileOps").click();
+                                post_to_url("/renameNetwork/" + "{{ owner }}" + "/" + "{{ modelName }}" + "/" + lastNetworkName + "/" + newName + "/" + "{{ networkNum }}")
+                                document.getElementById('networkName').innerHTML = newName;
+                                lastNetworkName = newName; //permits multiple name changes without forcing page refresh.
+                                // Send updated name to model.
+                                window.opener.$(window.opener.document).trigger('mainWindow', "{{ modelName }};"+"networkName{{networkNum}};"+lastNetworkName);
+                                clickCloseEvent("File","fileOps")
+                        }
+                })
+        }
 }
 //ADD PROMPT TO SAVE CHANGES BEFORE EXIT
 {% if is_admin or not public %}
-	window.onbeforeunload = function(e) {
-		var confirmationMessage = 'It looks like you have been editing something. ';
-		confirmationMessage += 'If you leave before saving, your changes will be lost.';
-		if (unsavedChanges) return confirmationMessage;
-	};
+        window.onbeforeunload = function(e) {
+                var confirmationMessage = 'It looks like you have been editing something. ';
+                confirmationMessage += 'If you leave before saving, your changes will be lost.';
+                if (unsavedChanges) return confirmationMessage;
+        };
 {% endif %}
 </script>
 <script type='text/javascript'>clickCloseEvent("File","fileOps")</script>
