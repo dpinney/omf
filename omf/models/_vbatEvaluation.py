@@ -24,8 +24,13 @@ def work(modelDir, inputDict):
 	outData = {}
 	# Run VBAT code.
 	vbatPath = os.path.join(omf.omfDir,'solvers','vbat')
-	command = 'octave --no-gui --eval "addpath(genpath(\'FULLPATH\'));VB_func(ARGS)"'\
+	if platform.system() == "Windows":
+		octBin = 'c:\\Octave\\Octave-4.2.1\\bin\\octave-cli'
+	else:
+		octBin = 'octave'
+	command = 'OCTBIN --no-gui --eval "addpath(genpath(\'FULLPATH\'));VB_func(ARGS)"'\
 	 	.replace('FULLPATH', vbatPath)\
+	 	.replace('OCTBIN',octBin)\
 	 	.replace('ARGS', '98158,1,[1,2,3,4,5,6,7]')
 	# VB_func(out_temp,device_type, device_parameters)
 	myOut = subprocess.check_output(command, shell=True)
