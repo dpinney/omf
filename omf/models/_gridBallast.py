@@ -156,6 +156,7 @@ def work(modelDir, inputDict):
 	# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
 	rawOut = gridlabd.runInFilesystem(tree, attachments=feederJson["attachments"], 
 		keepFiles=True, workDir=pJoin(modelDir))
+	# rawOut = gridlabd.anaDataTree(pJoin(modelDir), lambda x:True)
 	outData = {}
 	# Std Err and Std Out
 	outData['stderr'] = rawOut['stderr']
@@ -286,22 +287,22 @@ def work(modelDir, inputDict):
 	if 'allZIPloadDemand.csv' in rawOut:
 		outData['gridBallast']['ZIPloadDemand'] = {}
 		for key in rawOut['allZIPloadDemand.csv']:
-			if key.startswith('ZIPload'):
+			if (key.startswith('ZIPload')) or (key.startswith('responsive')) or (key.startswith('unresponsive')):
 				outData['gridBallast']['ZIPloadDemand'][key] = rawOut.get('allZIPloadDemand.csv')[key]
 	if 'eachZIPloadPower.csv' in rawOut:
 				outData['gridBallast']['ZIPloadPower'] = {}
 				for key in rawOut['eachZIPloadPower.csv']:
-					if key.startswith('ZIPload'):
+					if (key.startswith('ZIPload')) or (key.startswith('responsive')) or (key.startswith('unresponsive')):
 						outData['gridBallast']['ZIPloadPower'][key] = rawOut.get('eachZIPloadPower.csv')[key]
 	if 'allWaterheaterOn.csv' in rawOut:
 		outData['gridBallast']['waterheaterOn'] = {}
 		for key in rawOut['allWaterheaterOn.csv']:
-			if key.startswith('waterheater'):
+			if (key.startswith('waterheater')) or (key.startswith('waterHeater')):
 				outData['gridBallast']['waterheaterOn'][key] = rawOut.get('allWaterheaterOn.csv')[key]
 	if 'allWaterheaterTemp.csv' in rawOut:
 		outData['gridBallast']['waterheaterTemp'] = {}
 		for key in rawOut['allWaterheaterTemp.csv']:
-			if key.startswith('waterheater'):
+			if (key.startswith('waterheater')) or (key.startswith('waterHeater')):
 				outData['gridBallast']['waterheaterTemp'][key] = rawOut.get('allWaterheaterTemp.csv')[key]
 	# System check - linux doesn't support newer GridLAB-D versions
 	if sys.platform == 'linux2':
@@ -325,7 +326,9 @@ def work(modelDir, inputDict):
 	outData['gridBallast']['eventStart'] = str(eventStart)
 	outData['gridBallast']['eventEnd'] = str(eventEnd)
 	# Convert string to date
-	dateTimeStamps = [datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S %Z') for x in outData['timeStamps']]	
+	# HACK: remove timezones, inconsistency in matching format
+	timeStampsDebug = [x[:19] for x in outData['timeStamps']]
+	dateTimeStamps = [datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S') for x in timeStampsDebug]	
 	eventEndIdx =  dateTimeStamps.index(eventEnd)
 	# Recovery Time
 	whOn = outData['gridBallast']['waterheaterOn']
@@ -333,7 +336,8 @@ def work(modelDir, inputDict):
 	whOnZip = zip(*whOnList)
 	whOnSum = [sum(x) for x in whOnZip]
 	anyOn = [x > 0 for x in whOnSum]
-	tRecIdx = anyOn.index(True, eventEndIdx)
+	# tRecIdx = anyOn.index(True, eventEndIdx)
+	tRecIdx = anyOn.index(True)
 	tRec = dateTimeStamps[tRecIdx]
 	recoveryTime = tRec - eventEnd
 	outData['gridBallast']['recoveryTime'] = str(recoveryTime)
@@ -559,7 +563,8 @@ def new(modelDir):
 	defaultInputs = {
 		"modelType": modelName,
 		"zipCode": "59001",
-		"feederName1": "Olin Barre GH EOL Solar GridBallast",
+		# "feederName1": "Olin Barre GH EOL Solar GridBallast",
+		"feederName1": "UCS Egan Debugged Housed",
 		"simStartDate": "2012-01-01 12:00:00",
 		"simLength": "180",
 		"simLengthUnits": "minutes", #hours
