@@ -139,10 +139,15 @@
 							"shadow":false,
 							"pointInterval":3600000},
 						"line":{"marker":{"enabled":false}}},
-					"xAxis":{"maxZoom":108000000,
+					"xAxis":{
+						"maxZoom":108000000,
 						"tickColor":"gray",
+						"dateTimeLabelFormats":{
+							"month": '%b %e'
+						},
 						"type":"datetime",
-						"lineColor":"gray"},
+						"lineColor":"gray"
+					},
 					"yAxis":{
 						"title":{"text":"Power (kW)","style":{"color":"gray"}},
 						// "min":allOutputData.differenceMin
@@ -169,13 +174,15 @@
 							"shadow":false,
 							"pointInterval":3600000},
 						"line":{"marker":{"enabled":false}}},
-					"xAxis":{"maxZoom":108000000,
-						"gridLineWidth": 0,
-						"minorGridLineWidth": 0,
-						"lineColor": 'transparent',
-						"labels":{"enabled": false},
-				   		"minorTickLength": 0,
-				   		"tickLength": 0},
+					"xAxis":{
+						"maxZoom":108000000,
+						"tickColor":"gray",
+						"dateTimeLabelFormats":{
+							"month": '%b %e'
+						},
+						"type":"datetime",
+						"lineColor":"gray"
+					},
 					"yAxis":{
 						"title":{"text":"Energy (kWh)","style":{"color":"gray"}},
 						//"min":allOutputData.differenceMin
