@@ -1,17 +1,22 @@
 import platform, os
-# Use os.system('pass command as string')
+# All installations require git to clone the omf
 if platform.system() == 'Linux':
 	# if Ubuntu run these commands:
 	if platform.linux_distribution()[0]=="Ubuntu":
 		# git clone https://github.com/dpinney/omf.git
 		os.system("sudo apt-get install python-pip git unixodbc-dev libfreetype6-dev \
 		pkg-config python-dev python-numpy alien python-pygraphviz \
-		python-pydot ffmpeg mdbtools python-cairocffi")
+		python-pydot ffmpeg mdbtools python-cairocffi python-tk")
 		os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2.0-1.x86_64.rpm")
 		os.system("sudo alien gridlabd-3.2.0-1.x86_64.rpm")
-		os.system("sudo dpkg -i gridlabd-3.2.0-1.x86_64.deb")
+		workDir = os.getcwd()
+		for file in os.listdir(workDir):
+			if file.endswith('.deb'):
+				debFile = file		
+		os.system("sudo dpkg -i " + debFile)
 		os.system("sudo apt-get install -f")
 		os.system("cd omf")
+		os.system("pip install -r requirements.txt")
 		os.system("sudo python setup.py develop")
 	# if CentOS 7 run these commands:
 	elif platform.linux_distribution()[0]=="CentOS Linux":
@@ -23,7 +28,7 @@ if platform.system() == 'Linux':
 		os.system("sudo rpm -Uvh http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-1.el7.nux.noarch.rpm")
 		os.system("sudo yum install ffmpeg ffmpeg-devel -y")
 		os.system("sudo yum install python-pip")
-		os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2.0-1.x86_64.rpm")
+		os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2.0-1.x86_64.rpm")
 		os.system("rpm -Uvh gridlabd-3.2.0-1.x86_64.rpm")
 		os.system("cd omf")
 		os.system("pip install -r requirements.txt")
@@ -33,6 +38,7 @@ if platform.system() == 'Linux':
 elif platform.system()=='Windows':
 	# Need to manually download and install Python 2.7 and set python as a path variable, Git, Chocolatey 
 	# Download Pygraphviz whl and place it in the omf directory
+	# Use wget to download omf from github
 	# git clone https://github.com/dpinney/omf.git
 	workDir = os.getcwd()
 	# chocoString = "@'%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe' -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command 'iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))' && SET 'PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin'"
@@ -52,21 +58,29 @@ elif platform.system()=='Windows':
 	os.system("timeout 5")
 	os.system("refreshenv")
 	os.system("timeout 5")
+	# Possible start a new process after refreshenv, maybe look for anothey way to refresh 
+	# env variables in python
 	# Manually setting path for pip and other scripts
 	os.system('setx PATH "%PATH%;C:\Python27\Scripts')
 	os.system("cd " + workDir)
+	# Sometimes wget has a hard time downloading gridlabD
+	if platform.architecture()[0] == '32bit':
+		if 'gridlabd-3.2-win32.exe' not in os.listdir(workDir):	
+			os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2-win32.exe")
+			os.system("gridlabd-3.2-win32.exe/silent")
+		if 'pygraphviz-1.3.1-cp27-none-win32.whl' not in os.listdir(workDir):
+			os.system("wget --no-check-certificate https://github.com/dpinney/omf/blob/master/omf/static/pygraphviz-1.3.1-cp27-none-win32.whl")
+	elif platform.architecture()[1] == '64bit':
+		# Note: has not been tested yet, only 32bit has
+		if 'gridlabd-3.2-x64.exe' not in os.listdir(workDir):	
+			os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2-x64.exe")
+			os.system("gridlabd-3.2-x64.exe/silent")
+		if 'pygraphviz-1.3.1-cp27-none-win_amd64.whl' not in os.listdir(workDir):
+		os.system("wget --no-check-certificate https://github.com/dpinney/omf/blob/master/omf/static/pygraphviz-1.3.1-cp27-none-win_amd64.whl")
 	for file in os.listdir(workDir):
 		if file.endswith('.whl'):
 			whlFile = file
 	os.system("pip install " + whlFile)
-	# Sometimes wget has a hard time downloading gridlabD
-	if platform.architecture()[0] == '32bit':
-		os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2-win32.exe")
-		os.system("gridlabd-3.2-win32.exe/silent")
-	elif platform.architecture()[1] == '64bit':
-		# Note: has not been tested yet, only 32bit has
-		os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2-x64.exe")
-		os.system("gridlabd-3.2-x64.exe/silent")
 	os.system("cd omf")
 	os.system("refreshenv")
 	os.system("pip install -r requirements.txt")
@@ -74,5 +88,11 @@ elif platform.system()=='Windows':
 	os.system("python setup.py develop")
 # if Mac run these commands:
 elif platform.system()=="Darwin":
-	print 'Mac OSX'
-
+	print 'Mac'
+	# Install homebrew
+	# os.system('/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
+	# os.system('brew install wget python ffmpeg git graphviz')
+	# os.system('brew link --overwrite python')
+	# os.system('cd omf')
+	# os.system('pip install -r requirements.txt')
+	# os.system('python setup.py develop')
