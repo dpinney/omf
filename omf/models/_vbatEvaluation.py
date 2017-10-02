@@ -23,6 +23,12 @@ def work(modelDir, inputDict):
 	''' Run the model in its directory.'''
 	outData = {}
 	# Run VBAT code.
+	vbatPath = os.path.join(omf.omfDir,'solvers','vbat')
+	command = 'octave --no-gui --eval "addpath(genpath(\'FULLPATH\'));VB_func(ARGS)"'\
+		.replace('FULLPATH', vbatPath)\
+		.replace('ARGS', '98158,1,0')
+	out = os.system(command)
+	# VB_func(out_temp,device_type, device_parameters)
 	# Format results to go in chart.
 	outData["minPowerSeries"] = [random.uniform(0.0,10.0) for x in xrange(8760)]
 	outData["maxPowerSeries"] = [random.uniform(15.0,40.0) for x in xrange(8760)]
