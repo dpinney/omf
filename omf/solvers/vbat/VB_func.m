@@ -58,9 +58,9 @@ switch device_type
         [P_upper, P_lower, E_UL] = VB_core_WH(paraFile);
 end
 P_lower
-disp('\n')
+disp('n')
 P_upper
-disp('\n')
+disp('n')
 E_UL
     
 %% write output file

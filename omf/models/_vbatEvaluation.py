@@ -31,15 +31,35 @@ def work(modelDir, inputDict):
 	command = 'OCTBIN --no-gui --eval "addpath(genpath(\'FULLPATH\'));VB_func(ARGS)"'\
 	 	.replace('FULLPATH', vbatPath)\
 	 	.replace('OCTBIN',octBin)\
-	 	.replace('ARGS', '98158,1,[1,2,3,4,5,6,7]')
+		.replace('ARGS', inputDict['zipcode'] + ',' + inputDict['load_type'] +',[' + inputDict['capacitance'] + ','+ inputDict['resistance'] + 
+			',' + inputDict['power'] + ',' + inputDict['cop'] + ',' + inputDict['deadband'] + ',' + inputDict['setpoint'] + ',' +
+			inputDict['number_devices'] + ']')
+		#+ inputDict[''] + ',
+	#	.replace('ARGS', inputDict['zipcode'] + ',' + inputDict['load_type'] +',[1,2,3,4,5,6,7]')
+
 	# VB_func(out_temp,device_type, device_parameters)
 	myOut = subprocess.check_output(command, shell=True)
-	# print 'OUTPUT!!!!\n', myOut, 'ENDOUTPUT!!!!!'
+	#print 'OUTPUT!!!!\n', myOut, 'ENDOUTPUT!!!!!'
+	P_lower = myOut.partition("P_lower =\n\n")[2]
+	P_lower = P_lower.partition("\n\nn")[0]
+	P_lower = map(float,P_lower.split('\n'))
+
+	P_upper = myOut.partition("P_upper =\n\n")[2]
+	P_upper = P_upper.partition("\n\nn")[0]
+	P_upper = map(float,P_upper.split('\n'))
+
+	E_UL = myOut.partition("E_UL =\n\n")[2]
+	E_UL = E_UL.partition("\n\n")[0]
+	E_UL = map(float,E_UL.split('\n'))
+	#print E_UL
+
+	#print inputDict
 	# Format results to go in chart.
-	outData["minPowerSeries"] = [random.uniform(0.0,10.0) for x in xrange(8760)]
-	outData["maxPowerSeries"] = [random.uniform(15.0,40.0) for x in xrange(8760)]
-	outData["minEnergySeries"] = [random.uniform(0.0,2.0) for x in xrange(8760)]
-	outData["maxEnergySeries"] = [random.uniform(3.0,20.0) for x in xrange(8760)]
+	outData["minPowerSeries"] = [-1*x for x in P_lower]
+	#outData["minPowerSeries"] = P_lower
+	outData["maxPowerSeries"] = P_upper
+	outData["minEnergySeries"] = [-1*x for x in E_UL]
+	outData["maxEnergySeries"] = E_UL
 	# Stdout/stderr.
 	outData["stdout"] = "Success"
 	outData["stderr"] = ""
@@ -49,11 +69,15 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		"user": "admin",
-		"algorithm": "NR",
-		"model": "AC",
-		"tolerance": "0.00000001",
-		"iteration": 10,
-		"genLimits": 0,
+		"load_type": "1",
+		"zipcode": "94128",
+		"number_devices": "50",
+		"power": "5.6",
+		"capacitance": "2",
+		"resistance": "2",
+		"cop": "2.5",
+		"setpoint": "22.5",
+		"deadband": "0.625",
 		"modelType":modelName}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	return creationCode
