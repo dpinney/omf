@@ -106,16 +106,16 @@ def addScaledRandomHouses(inFeed):
 	maxKey = omf.feeder.getMaxKey(inFeed) + 1
 	inFeed[maxKey] = {'omftype': 'module', 'argument': 'residential'}
 	maxKey += 1
-	inFeed[maxKey] = {'omftype': '#include','argument': '\"../schedulesResponsiveLoads.glm\"'}
+	inFeed[maxKey] = {'omftype': '#include','argument': '\"schedulesResponsiveLoads.glm\"'}
 	maxKey += 1
 	for tripKey in tripLoadKeys:
 		tMeter = inFeed[getByKeyVal(inFeed, 'name', inFeed[tripKey]['parent'])]
-		tPower = float(inFeed[tripKey]['power_12'].replace('j','').split('+')[0])
+		tPower = complex(inFeed[tripKey]['power_12']).real
 		newHouse = dict(random.choice(houseArchetypes.values()))
 		newHouse['name'] += '_' + str(tripKey)
 		newHouse['parent'] = tMeter['name']
 		newHouse['schedule_skew'] = str(random.gauss(2000,100))
-		newHouse['floor_area'] = str(0.50*float(tPower))
+		newHouse['floor_area'] = str(0.50*tPower)
 		inFeed[maxKey] = newHouse
 		maxKey += 1
 		for childKey in childrenArchetypes:
@@ -124,6 +124,7 @@ def addScaledRandomHouses(inFeed):
 			newChild['parent'] = newHouse['name']
 			inFeed[maxKey] = newChild
 			maxKey += 1
+		del inFeed[tripKey]
 
 def _tests():
 	testFeedPath = os.path.join(omf.omfDir, 'scratch', 'uploads', 'inTest_R4-25.00-1_CLEAN.glm')
