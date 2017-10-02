@@ -57,16 +57,21 @@ switch device_type
     case 4
         [P_upper, P_lower, E_UL] = VB_core_WH(paraFile);
 end
-
+P_lower
+disp('\n')
+P_upper
+disp('\n')
+E_UL
     
     %% write output file
-if ischar(paraFile)
-    plotname = num2str(strrep(paraFile,'.csv',''));
-else
-    plotname = num2str(paraFile);
-end
+% if ischar(paraFile)
+%     plotname = num2str(strrep(paraFile,'.csv',''));
+% else
+%     plotname = num2str(paraFile);
+% end
 % plotname = num2str(strrep(paraFile,'.csv',''));
-output_file = strcat('VB_output_', plotname, '.csv');
+% output_file = strcat('VB_output_', plotname, '.csv');
+output_file = 'VB_output.csv';
 fid = fopen(output_file,'w');
 fprintf(fid, 'upper_power(kW), lower_power(kW), upper_energy(kWh), lower_energy(kWh)\n');
 for i = 1:length(P_upper)
@@ -74,24 +79,24 @@ for i = 1:length(P_upper)
 end
 fclose(fid);
 
-%% plot
-plotname = strrep(plotname,'_',' ');
-
-figure
-subplot(2,1,1)
-plot(P_upper)
-hold on
-plot(-P_lower,'r')
-plot(zeros(length(P_upper),1),'k--')
-title(strcat(plotname,' Power'))
-ylabel('Power (kW)')
-xlabel('Time (timestep)')
-subplot(2,1,2)
-plot(E_UL)
-
-hold on
-plot(-E_UL,'r')
-plot(zeros(length(E_UL),1),'k--')
-title(strcat(plotname,' Energy'))
-ylabel('Energy (kWh)')
-xlabel('Time (timestep)')
+% %% plot
+% plotname = strrep(plotname,'_',' ');
+% 
+% figure
+% subplot(2,1,1)
+% plot(P_upper)
+% hold on
+% plot(-P_lower,'r')
+% plot(zeros(length(P_upper),1),'k--')
+% title(strcat(plotname,' Power'))
+% ylabel('Power (kW)')
+% xlabel('Time (timestep)')
+% subplot(2,1,2)
+% plot(E_UL)
+% 
+% hold on
+% plot(-E_UL,'r')
+% plot(zeros(length(E_UL),1),'k--')
+% title(strcat(plotname,' Energy'))
+% ylabel('Energy (kWh)')
+% xlabel('Time (timestep)')
