@@ -34,10 +34,7 @@ def work(modelDir, inputDict):
 		.replace('ARGS', inputDict['zipcode'] + ',' + inputDict['load_type'] +',[' + inputDict['capacitance'] + ','+ inputDict['resistance'] + 
 			',' + inputDict['power'] + ',' + inputDict['cop'] + ',' + inputDict['deadband'] + ',' + inputDict['setpoint'] + ',' +
 			inputDict['number_devices'] + ']')
-		#+ inputDict[''] + ',
-	#	.replace('ARGS', inputDict['zipcode'] + ',' + inputDict['load_type'] +',[1,2,3,4,5,6,7]')
 
-	# VB_func(out_temp,device_type, device_parameters)
 	myOut = subprocess.check_output(command, shell=True)
 	#print 'OUTPUT!!!!\n', myOut, 'ENDOUTPUT!!!!!'
 	P_lower = myOut.partition("P_lower =\n\n")[2]
@@ -51,12 +48,10 @@ def work(modelDir, inputDict):
 	E_UL = myOut.partition("E_UL =\n\n")[2]
 	E_UL = E_UL.partition("\n\n")[0]
 	E_UL = map(float,E_UL.split('\n'))
-	#print E_UL
 
 	#print inputDict
 	# Format results to go in chart.
 	outData["minPowerSeries"] = [-1*x for x in P_lower]
-	#outData["minPowerSeries"] = P_lower
 	outData["maxPowerSeries"] = P_upper
 	outData["minEnergySeries"] = [-1*x for x in E_UL]
 	outData["maxEnergySeries"] = E_UL
