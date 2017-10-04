@@ -37,7 +37,7 @@ def work(modelDir, inputDict):
 		.replace('ARGS', inputDict['zipcode'] + ',' + inputDict['load_type'] +',[' + inputDict['capacitance'] + ','+ inputDict['resistance'] + 
 			',' + inputDict['power'] + ',' + inputDict['cop'] + ',' + inputDict['deadband'] + ',' + inputDict['setpoint'] + ',' +
 			inputDict['number_devices'] + ']')
-	myOut = subprocess.check_output(command, shell=True)
+	myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
 	P_lower = myOut.partition("P_lower =\n\n")[2]
 	P_lower = P_lower.partition("\n\nn")[0]
 	P_lower = map(float,P_lower.split('\n'))
