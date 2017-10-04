@@ -124,6 +124,9 @@ def addScaledRandomHouses(inFeed):
 			newChild = dict(childrenArchetypes[childKey])
 			newChild['name'] += '_' + str(tripKey) + '_' + str(childKey)
 			newChild['parent'] = newHouse['name']
+			newChild['latitude'] = tMeter.get('latitude','0.0')
+			newChild['longitude'] = tMeter.get('longitude','0.0')
+			newChild['schedule_skew'] = str(random.gauss(8000,1000))
 			inFeed[maxKey] = newChild
 			maxKey += 1
 		del inFeed[tripKey]
