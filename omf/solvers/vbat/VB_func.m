@@ -21,14 +21,9 @@ end
 if device_type == 3
     temperature_a = 20*ones(8760,1);
 else
-    %if isempty(version('-release')) == 1
-        tempData = csvread(out_temp);
-        tempData(1,:)=[];
-        temperature_a=tempData(:,2);
-    %else
-        %tempData = xlsread(out_temp);
-        %temperature_a=tempData(:,2);
-    %end
+    tempData = csvread(out_temp);
+    %tempData(1,:)=[];
+    temperature_a=tempData(:,2);
 end
 
 switch device_type
