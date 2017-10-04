@@ -24,32 +24,29 @@ def work(modelDir, inputDict):
 	outData = {}
 	# Run VBAT code.
 	vbatPath = os.path.join(omf.omfDir,'solvers','vbat')
-	if platform.system() == "Windows":
+	plat = platform.system()
+	if plat == "Windows":
 		octBin = 'c:\\Octave\\Octave-4.2.1\\bin\\octave-cli'
+	elif plat == "Darwin":
+		octBin = 'octave --no-window-system'
 	else:
-		octBin = 'octave'
-	command = 'OCTBIN --no-gui --eval "addpath(genpath(\'FULLPATH\'));VB_func(ARGS)"'\
+		octBin = 'octave --no-window-system'
+	command = 'OCTBIN --eval "addpath(genpath(\'FULLPATH\'));VB_func(ARGS)"'\
 	 	.replace('FULLPATH', vbatPath)\
 	 	.replace('OCTBIN',octBin)\
 		.replace('ARGS', inputDict['zipcode'] + ',' + inputDict['load_type'] +',[' + inputDict['capacitance'] + ','+ inputDict['resistance'] + 
 			',' + inputDict['power'] + ',' + inputDict['cop'] + ',' + inputDict['deadband'] + ',' + inputDict['setpoint'] + ',' +
 			inputDict['number_devices'] + ']')
-
 	myOut = subprocess.check_output(command, shell=True)
-	#print 'OUTPUT!!!!\n', myOut, 'ENDOUTPUT!!!!!'
 	P_lower = myOut.partition("P_lower =\n\n")[2]
 	P_lower = P_lower.partition("\n\nn")[0]
 	P_lower = map(float,P_lower.split('\n'))
-
 	P_upper = myOut.partition("P_upper =\n\n")[2]
 	P_upper = P_upper.partition("\n\nn")[0]
 	P_upper = map(float,P_upper.split('\n'))
-
 	E_UL = myOut.partition("E_UL =\n\n")[2]
 	E_UL = E_UL.partition("\n\n")[0]
 	E_UL = map(float,E_UL.split('\n'))
-
-	#print inputDict
 	# Format results to go in chart.
 	outData["minPowerSeries"] = [-1*x for x in P_lower]
 	outData["maxPowerSeries"] = P_upper
