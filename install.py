@@ -4,9 +4,20 @@ if platform.system() == 'Linux':
 	# if Ubuntu run these commands:
 	if platform.linux_distribution()[0]=="Ubuntu":
 		# git clone https://github.com/dpinney/omf.git
-		os.system("sudo apt-get install python-pip git unixodbc-dev libfreetype6-dev \
+		ubWorkDir = os.getcwd()
+		os.system("sudo apt-get update")
+		os.system("sudo apt-get install wget python-pip git unixodbc-dev libfreetype6-dev \
 		pkg-config python-dev python-numpy alien python-pygraphviz \
 		python-pydot ffmpeg mdbtools python-cairocffi python-tk")
+		os.system("sudo apt-get install build-essential checkinstall")
+		os.system("sudo apt-get install libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev")
+		os.system("cd /usr/src")
+		os.system("wget https://www.python.org/ftp/python/2.7.13/Python-2.7.13.tgz")
+		os.system("tar xzf Python-2.7.13.tgz")
+		os.system("cd Python-2.7.13")
+		os.system("sudo ./configure")
+		os.system("sudo make altinstall")
+		os.system("cd " + ubWorkDir)
 		os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2.0-1.x86_64.rpm")
 		os.system("sudo alien gridlabd-3.2.0-1.x86_64.rpm")
 		workDir = os.getcwd()
@@ -21,6 +32,7 @@ if platform.system() == 'Linux':
 	# if CentOS 7 run these commands:
 	elif platform.linux_distribution()[0]=="CentOS Linux":
 		# git clone https://github.com/dpinney/omf.git
+		centWorkDir = os.getcwd()
 		os.system("sudo yum -y install wget git graphviz gcc xerces-c python-devel tkinter 'graphviz-devel.x86_64'")
 		os.system("yum --enablerepo=extras install epel-release")
 		os.system("sudo yum -y install mdbtools")
@@ -30,6 +42,13 @@ if platform.system() == 'Linux':
 		os.system("sudo yum -y install python-pip")
 		os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2.0-1.x86_64.rpm")
 		os.system("rpm -Uvh gridlabd-3.2.0-1.x86_64.rpm")
+		os.system("cd /usr/src")
+		os.system("wget https://www.python.org/ftp/python/2.7.13/Python-2.7.13.tgz")
+		os.system("tar xzf Python-2.7.13.tgz")
+		os.system("cd Python-2.7.13")
+		os.system("./configure")
+		os.system("make altinstall")
+		os.system("cd " + centWorkDir)
 		os.system("cd omf")
 		os.system("pip install -r requirements.txt")
 		os.system("pip install --ignore-installed six")
