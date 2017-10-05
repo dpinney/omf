@@ -51,9 +51,9 @@ switch device_type
     case 4
         [P_upper, P_lower, E_UL] = VB_core_WH(paraFile);
 end
-P_lower
+P_lower = P_lower'
 disp('n')
-P_upper
+P_upper = P_upper'
 disp('n')
 E_UL
     
@@ -73,7 +73,7 @@ E_UL
 % end
 % fclose(fid);
 
-% %% plot
+%% plot
 % plotname = strrep(plotname,'_',' ');
 % 
 % figure

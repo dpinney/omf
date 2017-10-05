@@ -38,6 +38,9 @@ def work(modelDir, inputDict):
 			',' + inputDict['power'] + ',' + inputDict['cop'] + ',' + inputDict['deadband'] + ',' + inputDict['setpoint'] + ',' +
 			inputDict['number_devices'] + ']')
 	myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
+	print (inputDict['zipcode'] + ',' + inputDict['load_type'] +',[' + inputDict['capacitance'] + ','+ inputDict['resistance'] + 
+			',' + inputDict['power'] + ',' + inputDict['cop'] + ',' + inputDict['deadband'] + ',' + inputDict['setpoint'] + ',' +
+			inputDict['number_devices'] + ']')
 	P_lower = myOut.partition("P_lower =\n\n")[2]
 	P_lower = P_lower.partition("\n\nn")[0]
 	P_lower = map(float,P_lower.split('\n'))
@@ -61,9 +64,9 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		"user": "admin",
-		"load_type": "1",
+		"load_type": "4",
 		"zipcode": "94128",
-		"number_devices": "50",
+		"number_devices": "20",
 		"power": "5.6",
 		"capacitance": "2",
 		"resistance": "2",

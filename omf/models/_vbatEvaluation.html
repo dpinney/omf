@@ -75,7 +75,7 @@
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Number of devices<span class="classic">The termination tolerance for powerflow, in units P and Q dispatch per unit.</span></label>
+				<label class="tooltip">Number of devices<span class="classic">The termination tolerance for powerflow, in units P and Q dispatch per unit. Note that for 'Water Heater' you must input at 20 or more devices</span></label>
 				<input type="text" id="number_devices" name="number_devices" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
@@ -154,8 +154,8 @@
 					},
 					"title":{"text":null},
 					"series":[
-						{"name":"Max Power","marker":{"enabled":false},"color":"red","data":allOutputData.minPowerSeries},
-						{"name":"Min Power","marker":{"enabled":false},"color":"purple","data":allOutputData.maxPowerSeries},
+						{"name":"Min Power","marker":{"enabled":false},"color":"red","data":allOutputData.minPowerSeries},
+						{"name":"Max Power","marker":{"enabled":false},"color":"purple","data":allOutputData.maxPowerSeries},
 					],
 					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"powerChart","type":"line","marginRight":20, "height":750,"width":1000},
 					"tooltip":false,
