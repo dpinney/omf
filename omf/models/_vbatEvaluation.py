@@ -38,7 +38,7 @@ def work(modelDir, inputDict):
 			',' + inputDict['power'] + ',' + inputDict['cop'] + ',' + inputDict['deadband'] + ',' + inputDict['setpoint'] + ',' +
 			inputDict['number_devices'] + ']')
 	myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
-	print myOut
+	#print myOut
 	P_lower = myOut.partition("P_lower =\n\n")[2]
 	P_lower = P_lower.partition("\n\nn")[0]
 	P_lower = map(float,P_lower.split('\n'))
