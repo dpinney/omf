@@ -58,37 +58,52 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Algorithm<span class="classic">The MATPOWER powerflow solver method. Can be set to NR (Newton Raphson), FDXB (Fast-Decoupled XB Version), FDBX (Fast-Decoupled BX Version) or GS (Gauss Seidel). These are the solution algorithms supported by MATPOWER.</span></label>
-				<select id="algorithm" name="algorithm">
-					<option value="NR" selected="selected">NR</option>
-					<option value="FDXB">FDXB</option>
-					<option value="FDBX">FDBX</option>
-					<option value="GS">GS</option>
+				<label class="tooltip">Load Type<span class="classic">Device to be used in calculations</span></label>
+				<select id="load_type" name="load_type">
+					<option value="1" selected="selected">Air Conditioner</option>
+					<option value="2">Heat Pump</option>
+					<option value="3">Refrigerator</option>
+					<option value="4">Water Heater</option>
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Model<span class="classic">The powerflow formulation, set to AC or DC.</span></label>
-				<select id="model" name="model">
-					<option value="AC">AC</option>
-					<option value="DC">DC</option>
+				<label class="tooltip">Zip Code<span class="classic">Zip code of temperature data to be used</span></label>
+				<select id="zipcode" name="zipcode">
+					<option value="94128">94128 - San Francisco Intl Airport</option>
+					<option value="97218">97218 - Portland Intl Airport</option>
+					<option value="98158">98158 - Seattle Intl Airport </option>
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Tolerance<span class="classic">The termination tolerance for powerflow, in units P and Q dispatch per unit.</span></label>
-				<input type="text" id="tolerance" name="tolerance" value="0.00000001" pattern="^\d+\.?\d*?$" required="required">
+				<label class="tooltip">Number of devices<span class="classic">The termination tolerance for powerflow, in units P and Q dispatch per unit. Note that for 'Water Heater' you must input at 20 or more devices</span></label>
+				<input type="text" id="number_devices" name="number_devices" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Iteration<span class="classic">The maximum number of iterations for the solver algorithm specified above.</span></label>
-				<input type="text" id="iteration" name="iteration" value="1000" required="required" pattern="^(\d{2,}|[1-9])(\.\d+)?$">
+				<label class="tooltip">Rated Power(kW)<span class="classic">power</span></label>
+				<input type="text" id="power" name="power" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Generation Limit<span class="classic">Whether or not to set power limits on the generators in the system. 0 denotes "do not enforce", 1 denotes "enforce with simultaneous bus type conversion" and 2 denotes "enforce with one-at-a-time bus type conversion".</span></label>
-				<select id="model" name="model">
-					<option value="0" selected="selected">0</option>
-					<option value="1">1</option>
-					<option value="2">2</option>
-				</select>
+				<label class="tooltip">Thermal Capacitance(kWh/&degC)<span class="classic">capacitance</span></label>
+				<input type="text" id="capacitance" name="capacitance" pattern="^\d+\.?\d*?$" required="required">
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Thermal Resistance(&degC/kW)<span class="classic">resistance</span></label>
+				<input type="text" id="resistance" name="resistance" pattern="^\d+\.?\d*?$" required="required">
+			</div>			
+			<div class="shortInput">
+				<label class="tooltip">COP<span class="classic">cop</span></label>
+				<input type="text" id="cop" name="cop" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Temperature Setpoint(&degC)<span class="classic">setpoint</span></label>
+				<input type="text" id="setpoint" name="setpoint" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Temperature Deadband(&degC)<span class="classic">deadband</span></label>
+				<input type="text" id="deadband" name="deadband" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+
+
 			<!-- Required Buttons -->
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
@@ -124,18 +139,23 @@
 							"shadow":false,
 							"pointInterval":3600000},
 						"line":{"marker":{"enabled":false}}},
-					"xAxis":{"maxZoom":108000000,
+					"xAxis":{
+						"maxZoom":108000000,
 						"tickColor":"gray",
+						"dateTimeLabelFormats":{
+							"month": '%b %e'
+						},
 						"type":"datetime",
-						"lineColor":"gray"},
+						"lineColor":"gray"
+					},
 					"yAxis":{
 						"title":{"text":"Power (kW)","style":{"color":"gray"}},
 						// "min":allOutputData.differenceMin
 					},
 					"title":{"text":null},
 					"series":[
-						{"name":"Historical","marker":{"enabled":false},"color":"red","data":allOutputData.minPowerSeries},
-						{"name":"After Program","marker":{"enabled":false},"color":"purple","data":allOutputData.maxPowerSeries},
+						{"name":"Min Power","marker":{"enabled":false},"color":"red","data":allOutputData.minPowerSeries},
+						{"name":"Max Power","marker":{"enabled":false},"color":"purple","data":allOutputData.maxPowerSeries},
 					],
 					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"powerChart","type":"line","marginRight":20, "height":750,"width":1000},
 					"tooltip":false,
@@ -154,18 +174,23 @@
 							"shadow":false,
 							"pointInterval":3600000},
 						"line":{"marker":{"enabled":false}}},
-					"xAxis":{"maxZoom":108000000,
+					"xAxis":{
+						"maxZoom":108000000,
 						"tickColor":"gray",
+						"dateTimeLabelFormats":{
+							"month": '%b %e'
+						},
 						"type":"datetime",
-						"lineColor":"gray"},
+						"lineColor":"gray"
+					},
 					"yAxis":{
-						"title":{"text":"Power (kW)","style":{"color":"gray"}},
+						"title":{"text":"Energy (kWh)","style":{"color":"gray"}},
 						//"min":allOutputData.differenceMin
 					},
 					"title":{"text":null},
 					"series":[
-						{"name":"Historical","marker":{"enabled":false},"color":"red","data":allOutputData.minEnergySeries},
-						{"name":"After Program","marker":{"enabled":false},"color":"purple","data":allOutputData.maxEnergySeries},
+						{"name":"Max Energy","marker":{"enabled":false},"color":"red","data":allOutputData.minEnergySeries},
+						{"name":"Min Energy","marker":{"enabled":false},"color":"purple","data":allOutputData.maxEnergySeries},
 					],
 					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"energyChart","type":"line","marginRight":20, "height":750,"width":1000},
 					"tooltip":false,

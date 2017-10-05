@@ -3,16 +3,16 @@ function [P_upper_wh, P_lower_wh, E_UL_wh] = VB_core_WH(paraFile)
 % Last update time: September 19, 2017
 % This function is used to characterize VB capacity from a population of WH considering water draw
 
-if ischar(paraFile) == 1
-    if isempty(version('-release')) == 1
-        para = csvread(paraFile);
-        para(1,:)=[];
-    else
-        para = xlsread(paraFile);
-    end
-else
+% if ischar(paraFile) == 1
+%     if isempty(version('-release')) == 1
+%         para = csvread(paraFile);
+%         para(1,:)=[];
+%     else
+%         para = xlsread(paraFile);
+%     end
+% else
     para = repmat(paraFile(1:6),paraFile(7),1);
-end
+% end
 
 N_wh = size(para,1); % number of TCL
 C_wh = para(:,1); % thermal capacitance
@@ -48,7 +48,23 @@ for i = 1:N_wh
     water_draw(:,i) = circshift(m_water(:, k), [1, unidrnd(15)-15]) + m_water(:, k)*0.1*(rand-0.5);
 end
 
-Po=-(theta_a*ones(1,N_wh)-ones(T,1)*theta_s_wh')./(ones(T,1)*R_wh')-4.2*water_draw.*((55-32)*5/9 -ones(T,1)*theta_s_wh');
+if paraFile(7) <20
+    water_draw(:,paraFile(7)+1:end) = [];
+end
+
+Po=-(theta_a*ones(1,N_wh)-ones(T,1)*theta_s_wh')./(ones(T,1)*R_wh')-4.2*...
+    water_draw.*((55-32)*5/9 -ones(T,1)*theta_s_wh');
+
+% Po = -(repmat(theta_a,1,N_wh)-repmat(theta_s_wh',T,1))./repmat((R_wh'),T,1)...
+%     - 4.2*water_draw.*((55-32).*5/9 - repmat(theta_s_wh',T,1));
+
+
+% Po = zeros(T, N_wh);
+% for t = 1:T
+%     for i = 1:N_wh
+%         Po(t, i) = -(theta_a(t)-theta_s_wh(i))/R_wh(i) - 4.2*water_draw(t, i)*((55-32)*5/9 - theta_s_wh(i));
+%     end
+% end
 
 % Po_total is the analytically predicted aggregate baseline power
 Po_total = sum(Po,2);
@@ -77,8 +93,8 @@ Po_total_sim = zeros(T,1);
 Po_total_sim(1) = sum(m(:,1).*P_wh);
 
 for t=1:1:T-1
-        theta(:,t+1) = (1-h./(C_wh*3600)./R_wh).*theta(:,t) + h./(C_wh*3600)./R_wh*theta_a(t)...
-            + h./(C_wh*3600).*m(:,t).*P_wh + h*4.2.*water_draw(t,:)'.*((55-32)*5/9 - theta(:,t))./(C_wh*3600);
+    theta(:,t+1) = (1-h./(C_wh*3600)./R_wh).*theta(:,t) + h./(C_wh*3600)./R_wh*theta_a(t)...
+        + h./(C_wh*3600).*m(:,t).*P_wh + h*4.2.*water_draw(t,:)'.*((55-32)*5/9 - theta(:,t))./(C_wh*3600);
       m(theta(:,t+1) > theta_upper_wh,t+1)=0;
       m(theta(:,t+1) < theta_lower_wh,t+1)=1;
       m(theta(:,t+1) >= theta_lower_wh & theta(:,t+1) <= theta_upper_wh,t+1)=m(theta(:,t+1) >= theta_lower_wh & theta(:,t+1) <= theta_upper_wh,t);
@@ -103,5 +119,9 @@ P_lower_wh1 = reshape(P_lower_wh1, [60,8760]);
 P_lower_wh = mean(P_lower_wh1);
 % extract hourly data from minute output for energy
 E_UL_wh = E_UL_wh1(60:60:length(E_UL_wh1));
+
+if paraFile(7) ==1
+    E_UL_wh = zeros(8760,1);
+end
 
 end

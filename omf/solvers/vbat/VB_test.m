@@ -24,12 +24,14 @@
 
 % VB_func(98158,1,0)
 
-VB_func(97218,2,[1,2,3,4,5,6,7])
+% VB_func(94128,1,[5.6,100,2,2.5,22.5,.625,50])
+
+VB_func(94128,4,[2,2,5.6,2.5,0.625,22.5,1])
 
 % VB_func(94128,2,0)
 
-disp('Running VB_test.m')
-disp(num2str([1,4,5,3]))
-[1,4,5];
+% disp('Running VB_test.m')
+% disp(num2str([1,4,5,3]))
+% [1,4,5];
 % fid = fopen('blah.csv','w');
 % fprintf(fid, 'jiewflj wliejf lwijef')

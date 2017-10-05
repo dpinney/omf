@@ -48,9 +48,9 @@ def getDataNames():
 				publicFeeders.append({'name': file.strip('.omd'), 'model': dirpath.split('/')[-1]})		
 	return {"climates":sorted(climates), "feeders":feeders, "networks":networks, "publicFeeders":publicFeeders, "currentUser":currUser}
 
-@app.before_request
-def csrf_protect():
-	pass
+# @app.before_request
+# def csrf_protect():
+# 	pass
 	## NOTE: when we fix csrf validation this needs to be uncommented.
 	# if request.method == "POST":
 	#	token = session.get("_csrf_token", None)
@@ -1164,7 +1164,6 @@ def uniqObjName(objtype, owner, name, modelName=False):
 	return jsonify(exists=os.path.exists(path))
 
 if __name__ == "__main__":
-	URL = "http://localhost:5000"
 	template_files = ["templates/"+ x  for x in safeListdir("templates")]
 	model_files = ["models/" + x for x in safeListdir("models")]
 	app.run(debug=True, host="127.0.0.1", extra_files=template_files + model_files)

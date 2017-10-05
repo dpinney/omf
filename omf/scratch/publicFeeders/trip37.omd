@@ -3307,7 +3307,7 @@
     "hiddenNodes": [], 
     "tree": {
         "216": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "C_load722", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3318,7 +3318,7 @@
             "nominal_voltage": "4800"
         }, 
         "217": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "C_load724", 
             "constant_impedance_B": "438.857143+219.428571j", 
             "object": "load", 
@@ -3328,7 +3328,7 @@
             "nominal_voltage": "4800"
         }, 
         "214": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "C_load718", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3338,7 +3338,7 @@
             "constant_impedance_A": "221.915014+104.430595j"
         }, 
         "215": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "C_load720", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3348,7 +3348,7 @@
             "nominal_voltage": "4800"
         }, 
         "212": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "C_load713", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3359,7 +3359,7 @@
         }, 
         "213": {
             "constant_current_A": "3.541667 -1.666667j", 
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "C_load714", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3369,7 +3369,7 @@
             "nominal_voltage": "4800"
         }, 
         "210": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "C_load701", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3381,7 +3381,7 @@
             "nominal_voltage": "4800"
         }, 
         "211": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "C_load712", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3391,7 +3391,7 @@
             "nominal_voltage": "4800"
         }, 
         "165": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_node702", 
             "name": "C_node702-705", 
             "object": "underground_line", 
@@ -3400,7 +3400,7 @@
             "configuration": "lc_7241"
         }, 
         "218": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "C_load725", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3410,7 +3410,7 @@
             "constant_power_B": "42000.000000+21000.000000j"
         }, 
         "219": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "C_load727", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3420,7 +3420,7 @@
             "nominal_voltage": "4800"
         }, 
         "133": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "B_node709", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3429,7 +3429,7 @@
             "nominal_voltage": "4800"
         }, 
         "132": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "B_node708", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3438,7 +3438,7 @@
             "nominal_voltage": "4800"
         }, 
         "131": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "B_node707", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3447,7 +3447,7 @@
             "nominal_voltage": "4800"
         }, 
         "130": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "B_node706", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3456,7 +3456,7 @@
             "nominal_voltage": "4800"
         }, 
         "137": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "B_load712", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3466,7 +3466,7 @@
             "nominal_voltage": "4800"
         }, 
         "136": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "B_load701", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3478,7 +3478,7 @@
             "nominal_voltage": "4800"
         }, 
         "135": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "B_node711", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3487,7 +3487,7 @@
             "nominal_voltage": "4800"
         }, 
         "134": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "B_node710", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3497,7 +3497,7 @@
         }, 
         "139": {
             "constant_current_A": "3.541667 -1.666667j", 
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "B_load714", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3507,7 +3507,7 @@
             "nominal_voltage": "4800"
         }, 
         "138": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "B_load713", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3517,7 +3517,7 @@
             "nominal_voltage": "4800"
         }, 
         "166": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_node702", 
             "name": "C_node702-713", 
             "object": "underground_line", 
@@ -3526,7 +3526,7 @@
             "configuration": "lc_7231"
         }, 
         "24": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_node705", 
             "name": "A_node705-742", 
             "object": "underground_line", 
@@ -3535,7 +3535,7 @@
             "configuration": "lc_7241"
         }, 
         "25": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_node705", 
             "name": "A_node705-712", 
             "object": "underground_line", 
@@ -3544,7 +3544,7 @@
             "configuration": "lc_7241"
         }, 
         "26": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_node706", 
             "name": "A_node706-725", 
             "object": "underground_line", 
@@ -3553,7 +3553,7 @@
             "configuration": "lc_7241"
         }, 
         "27": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_node707", 
             "name": "A_node707-724", 
             "object": "underground_line", 
@@ -3562,7 +3562,7 @@
             "configuration": "lc_7241"
         }, 
         "20": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_node703", 
             "name": "A_node703-727", 
             "object": "underground_line", 
@@ -3571,7 +3571,7 @@
             "configuration": "lc_7241"
         }, 
         "21": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_node703", 
             "name": "A_node703-730", 
             "object": "underground_line", 
@@ -3580,7 +3580,7 @@
             "configuration": "lc_7231"
         }, 
         "22": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_node704", 
             "name": "A_node704-714", 
             "object": "underground_line", 
@@ -3589,7 +3589,7 @@
             "configuration": "lc_7241"
         }, 
         "23": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_node704", 
             "name": "A_node704-720", 
             "object": "underground_line", 
@@ -3598,7 +3598,7 @@
             "configuration": "lc_7231"
         }, 
         "160": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "B_load744", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3608,7 +3608,7 @@
             "constant_power_A": "42000.000000+21000.000000j"
         }, 
         "28": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_node707", 
             "name": "A_node707-722", 
             "object": "underground_line", 
@@ -3617,7 +3617,7 @@
             "configuration": "lc_7241"
         }, 
         "29": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_node708", 
             "name": "A_node708-733", 
             "object": "underground_line", 
@@ -3655,7 +3655,7 @@
             "conductor_B": "ug_lc_7210"
         }, 
         "163": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "B_node775", 
             "object": "node", 
             "voltage_B": "-240.000000 -138.564065j", 
@@ -3664,7 +3664,7 @@
             "nominal_voltage": "480"
         }, 
         "227": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "C_load735", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3674,7 +3674,7 @@
             "nominal_voltage": "4800"
         }, 
         "120": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_load737", 
             "name": "B_node737-738", 
             "object": "underground_line", 
@@ -3683,7 +3683,7 @@
             "configuration": "lc_7231"
         }, 
         "121": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_load738", 
             "name": "B_node738-711", 
             "object": "underground_line", 
@@ -3692,7 +3692,7 @@
             "configuration": "lc_7231"
         }, 
         "122": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_load744", 
             "name": "B_node744-728", 
             "object": "underground_line", 
@@ -3701,7 +3701,7 @@
             "configuration": "lc_7241"
         }, 
         "123": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_node781", 
             "name": "B_node781-701", 
             "object": "underground_line", 
@@ -3710,7 +3710,7 @@
             "configuration": "lc_7211"
         }, 
         "124": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_load744", 
             "name": "B_node744-729", 
             "object": "underground_line", 
@@ -3719,7 +3719,7 @@
             "configuration": "lc_7241"
         }, 
         "125": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "B_node781", 
             "object": "node", 
             "bustype": "SWING", 
@@ -3729,7 +3729,7 @@
             "nominal_voltage": "4800"
         }, 
         "126": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "B_node702", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3738,7 +3738,7 @@
             "nominal_voltage": "4800"
         }, 
         "127": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "B_node703", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3747,7 +3747,7 @@
             "nominal_voltage": "4800"
         }, 
         "128": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "B_node704", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3756,7 +3756,7 @@
             "nominal_voltage": "4800"
         }, 
         "129": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "B_node705", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3765,7 +3765,7 @@
             "nominal_voltage": "4800"
         }, 
         "167": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_node702", 
             "name": "C_node702-703", 
             "object": "underground_line", 
@@ -3774,7 +3774,7 @@
             "configuration": "lc_7221"
         }, 
         "118": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_load734", 
             "name": "B_node734-737", 
             "object": "underground_line", 
@@ -3783,7 +3783,7 @@
             "configuration": "lc_7231"
         }, 
         "59": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "A_node709", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3792,7 +3792,7 @@
             "nominal_voltage": "4800"
         }, 
         "58": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "A_node708", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3801,7 +3801,7 @@
             "nominal_voltage": "4800"
         }, 
         "55": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "A_node705", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3810,7 +3810,7 @@
             "nominal_voltage": "4800"
         }, 
         "54": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "A_node704", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3819,7 +3819,7 @@
             "nominal_voltage": "4800"
         }, 
         "57": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "A_node707", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3828,7 +3828,7 @@
             "nominal_voltage": "4800"
         }, 
         "56": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "A_node706", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3837,7 +3837,7 @@
             "nominal_voltage": "4800"
         }, 
         "51": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "A_node781", 
             "object": "node", 
             "bustype": "SWING", 
@@ -3847,7 +3847,7 @@
             "nominal_voltage": "4800"
         }, 
         "50": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_load744", 
             "name": "A_node744-729", 
             "object": "underground_line", 
@@ -3856,7 +3856,7 @@
             "configuration": "lc_7241"
         }, 
         "53": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "A_node703", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3865,7 +3865,7 @@
             "nominal_voltage": "4800"
         }, 
         "52": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "A_node702", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3874,7 +3874,7 @@
             "nominal_voltage": "4800"
         }, 
         "164": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_load701", 
             "name": "C_node701-702", 
             "object": "underground_line", 
@@ -3883,7 +3883,7 @@
             "configuration": "lc_7221"
         }, 
         "201": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "C_node703", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3892,7 +3892,7 @@
             "nominal_voltage": "4800"
         }, 
         "199": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "C_node781", 
             "object": "node", 
             "bustype": "SWING", 
@@ -3902,7 +3902,7 @@
             "nominal_voltage": "4800"
         }, 
         "179": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_node709", 
             "name": "C_node709-731", 
             "object": "underground_line", 
@@ -3911,7 +3911,7 @@
             "configuration": "lc_7231"
         }, 
         "200": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "C_node702", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -3920,7 +3920,7 @@
             "nominal_voltage": "4800"
         }, 
         "195": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_load738", 
             "name": "C_node738-711", 
             "object": "underground_line", 
@@ -3929,7 +3929,7 @@
             "configuration": "lc_7231"
         }, 
         "194": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_load737", 
             "name": "C_node737-738", 
             "object": "underground_line", 
@@ -3938,7 +3938,7 @@
             "configuration": "lc_7231"
         }, 
         "197": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_node781", 
             "name": "C_node781-701", 
             "object": "underground_line", 
@@ -3947,7 +3947,7 @@
             "configuration": "lc_7211"
         }, 
         "178": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_node708", 
             "name": "C_node708-732", 
             "object": "underground_line", 
@@ -3956,7 +3956,7 @@
             "configuration": "lc_7241"
         }, 
         "191": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_load733", 
             "name": "C_node733-734", 
             "object": "underground_line", 
@@ -3965,7 +3965,7 @@
             "configuration": "lc_7231"
         }, 
         "190": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_load730", 
             "name": "C_node730-709", 
             "object": "underground_line", 
@@ -3974,7 +3974,7 @@
             "configuration": "lc_7231"
         }, 
         "193": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_load734", 
             "name": "C_node734-710", 
             "object": "underground_line", 
@@ -3983,7 +3983,7 @@
             "configuration": "lc_7241"
         }, 
         "192": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_load734", 
             "name": "C_node734-737", 
             "object": "underground_line", 
@@ -3992,7 +3992,7 @@
             "configuration": "lc_7231"
         }, 
         "115": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_load727", 
             "name": "B_node727-744", 
             "object": "underground_line", 
@@ -4001,7 +4001,7 @@
             "configuration": "lc_7231"
         }, 
         "114": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_load720", 
             "name": "B_node720-706", 
             "object": "underground_line", 
@@ -4010,15 +4010,15 @@
             "configuration": "lc_7231"
         }, 
         "88": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_node709", 
-            "name": "A_\"xform709-775\"", 
+            "name": "A_xform709-775", 
             "object": "transformer", 
             "to": "A_node775", 
             "configuration": "trans_conf_400"
         }, 
         "89": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "A_node775", 
             "object": "node", 
             "voltage_B": "-240.000000 -138.564065j", 
@@ -4027,7 +4027,7 @@
             "nominal_voltage": "480"
         }, 
         "111": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_load713", 
             "name": "B_node713-704", 
             "object": "underground_line", 
@@ -4036,7 +4036,7 @@
             "configuration": "lc_7231"
         }, 
         "110": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_node711", 
             "name": "B_node711-740", 
             "object": "underground_line", 
@@ -4045,7 +4045,7 @@
             "configuration": "lc_7241"
         }, 
         "113": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_load720", 
             "name": "B_node720-707", 
             "object": "underground_line", 
@@ -4054,7 +4054,7 @@
             "configuration": "lc_7241"
         }, 
         "112": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_load714", 
             "name": "B_node714-718", 
             "object": "underground_line", 
@@ -4063,7 +4063,7 @@
             "configuration": "lc_7241"
         }, 
         "82": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "A_load738", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -4073,7 +4073,7 @@
             "constant_power_A": "126000.000000+62000.000000j"
         }, 
         "83": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "A_load740", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -4083,7 +4083,7 @@
             "nominal_voltage": "4800"
         }, 
         "80": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "A_load736", 
             "constant_impedance_B": "438.857143+219.428571j", 
             "object": "load", 
@@ -4094,7 +4094,7 @@
         }, 
         "81": {
             "constant_current_A": "29.166667 -14.583333j", 
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "A_load737", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -4103,7 +4103,7 @@
             "nominal_voltage": "4800"
         }, 
         "86": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "A_load744", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -4113,7 +4113,7 @@
             "constant_power_A": "42000.000000+21000.000000j"
         }, 
         "84": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "A_load741", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -4123,7 +4123,7 @@
             "nominal_voltage": "4800"
         }, 
         "85": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "A_load742", 
             "constant_impedance_B": "221.915014+104.430595j", 
             "object": "load", 
@@ -4134,7 +4134,7 @@
             "constant_impedance_A": "2304.000000+1152.000000j"
         }, 
         "198": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_load744", 
             "name": "C_node744-729", 
             "object": "underground_line", 
@@ -4143,7 +4143,7 @@
             "configuration": "lc_7241"
         }, 
         "206": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "C_node708", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -4152,7 +4152,7 @@
             "nominal_voltage": "4800"
         }, 
         "226": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "C_load734", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -4176,7 +4176,7 @@
             "conductor_gmr": "0.036800"
         }, 
         "177": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_node708", 
             "name": "C_node708-733", 
             "object": "underground_line", 
@@ -4196,7 +4196,7 @@
         }, 
         "225": {
             "constant_current_A": "17.708333 -8.333333j", 
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "C_load733", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -4205,7 +4205,7 @@
             "nominal_voltage": "4800"
         }, 
         "108": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_node710", 
             "name": "B_node710-736", 
             "object": "underground_line", 
@@ -4214,7 +4214,7 @@
             "configuration": "lc_7241"
         }, 
         "109": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_node711", 
             "name": "B_node711-741", 
             "object": "underground_line", 
@@ -4223,7 +4223,7 @@
             "configuration": "lc_7231"
         }, 
         "102": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_node707", 
             "name": "B_node707-722", 
             "object": "underground_line", 
@@ -4232,7 +4232,7 @@
             "configuration": "lc_7241"
         }, 
         "103": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_node708", 
             "name": "B_node708-733", 
             "object": "underground_line", 
@@ -4241,7 +4241,7 @@
             "configuration": "lc_7231"
         }, 
         "100": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_node706", 
             "name": "B_node706-725", 
             "object": "underground_line", 
@@ -4250,7 +4250,7 @@
             "configuration": "lc_7241"
         }, 
         "101": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_node707", 
             "name": "B_node707-724", 
             "object": "underground_line", 
@@ -4259,7 +4259,7 @@
             "configuration": "lc_7241"
         }, 
         "106": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_node709", 
             "name": "B_node709-708", 
             "object": "underground_line", 
@@ -4268,7 +4268,7 @@
             "configuration": "lc_7231"
         }, 
         "107": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_node710", 
             "name": "B_node710-735", 
             "object": "underground_line", 
@@ -4277,7 +4277,7 @@
             "configuration": "lc_7241"
         }, 
         "104": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_node708", 
             "name": "B_node708-732", 
             "object": "underground_line", 
@@ -4286,7 +4286,7 @@
             "configuration": "lc_7241"
         }, 
         "105": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_node709", 
             "name": "B_node709-731", 
             "object": "underground_line", 
@@ -4295,7 +4295,7 @@
             "configuration": "lc_7231"
         }, 
         "39": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_load720", 
             "name": "A_node720-707", 
             "object": "underground_line", 
@@ -4304,7 +4304,7 @@
             "configuration": "lc_7241"
         }, 
         "38": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_load714", 
             "name": "A_node714-718", 
             "object": "underground_line", 
@@ -4313,7 +4313,7 @@
             "configuration": "lc_7241"
         }, 
         "33": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_node710", 
             "name": "A_node710-735", 
             "object": "underground_line", 
@@ -4322,7 +4322,7 @@
             "configuration": "lc_7241"
         }, 
         "32": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_node709", 
             "name": "A_node709-708", 
             "object": "underground_line", 
@@ -4331,7 +4331,7 @@
             "configuration": "lc_7231"
         }, 
         "31": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_node709", 
             "name": "A_node709-731", 
             "object": "underground_line", 
@@ -4340,7 +4340,7 @@
             "configuration": "lc_7231"
         }, 
         "30": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_node708", 
             "name": "A_node708-732", 
             "object": "underground_line", 
@@ -4349,7 +4349,7 @@
             "configuration": "lc_7241"
         }, 
         "37": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_load713", 
             "name": "A_node713-704", 
             "object": "underground_line", 
@@ -4358,7 +4358,7 @@
             "configuration": "lc_7231"
         }, 
         "36": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_node711", 
             "name": "A_node711-740", 
             "object": "underground_line", 
@@ -4367,7 +4367,7 @@
             "configuration": "lc_7241"
         }, 
         "35": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_node711", 
             "name": "A_node711-741", 
             "object": "underground_line", 
@@ -4376,7 +4376,7 @@
             "configuration": "lc_7231"
         }, 
         "34": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_node710", 
             "name": "A_node710-736", 
             "object": "underground_line", 
@@ -4385,7 +4385,7 @@
             "configuration": "lc_7241"
         }, 
         "205": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "C_node707", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -4394,7 +4394,7 @@
             "nominal_voltage": "4800"
         }, 
         "223": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "C_load731", 
             "constant_impedance_B": "221.915014+104.430595j", 
             "object": "load", 
@@ -4404,7 +4404,7 @@
             "nominal_voltage": "4800"
         }, 
         "176": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_node707", 
             "name": "C_node707-722", 
             "object": "underground_line", 
@@ -4413,7 +4413,7 @@
             "configuration": "lc_7241"
         }, 
         "60": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "A_node710", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -4422,7 +4422,7 @@
             "nominal_voltage": "4800"
         }, 
         "61": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "A_node711", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -4431,7 +4431,7 @@
             "nominal_voltage": "4800"
         }, 
         "62": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "A_load701", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -4443,7 +4443,7 @@
             "nominal_voltage": "4800"
         }, 
         "63": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "A_load712", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -4453,7 +4453,7 @@
             "nominal_voltage": "4800"
         }, 
         "64": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "A_load713", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -4464,7 +4464,7 @@
         }, 
         "65": {
             "constant_current_A": "3.541667 -1.666667j", 
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "A_load714", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -4474,7 +4474,7 @@
             "nominal_voltage": "4800"
         }, 
         "66": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "A_load718", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -4484,7 +4484,7 @@
             "constant_impedance_A": "221.915014+104.430595j"
         }, 
         "67": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "A_load720", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -4494,7 +4494,7 @@
             "nominal_voltage": "4800"
         }, 
         "68": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "A_load722", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -4505,7 +4505,7 @@
             "nominal_voltage": "4800"
         }, 
         "69": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "A_load724", 
             "constant_impedance_B": "438.857143+219.428571j", 
             "object": "load", 
@@ -4515,7 +4515,7 @@
             "nominal_voltage": "4800"
         }, 
         "175": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_node707", 
             "name": "C_node707-724", 
             "object": "underground_line", 
@@ -4524,7 +4524,7 @@
             "configuration": "lc_7241"
         }, 
         "174": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_node706", 
             "name": "C_node706-725", 
             "object": "underground_line", 
@@ -4533,7 +4533,7 @@
             "configuration": "lc_7241"
         }, 
         "173": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_node705", 
             "name": "C_node705-712", 
             "object": "underground_line", 
@@ -4542,7 +4542,7 @@
             "configuration": "lc_7241"
         }, 
         "172": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_node705", 
             "name": "C_node705-742", 
             "object": "underground_line", 
@@ -4551,7 +4551,7 @@
             "configuration": "lc_7241"
         }, 
         "171": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_node704", 
             "name": "C_node704-720", 
             "object": "underground_line", 
@@ -4560,7 +4560,7 @@
             "configuration": "lc_7231"
         }, 
         "170": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_node704", 
             "name": "C_node704-714", 
             "object": "underground_line", 
@@ -4569,7 +4569,7 @@
             "configuration": "lc_7241"
         }, 
         "203": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "C_node705", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -4578,7 +4578,7 @@
             "nominal_voltage": "4800"
         }, 
         "222": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "C_load730", 
             "constant_impedance_C": "221.915014+104.430595j", 
             "object": "load", 
@@ -4588,7 +4588,7 @@
             "nominal_voltage": "4800"
         }, 
         "181": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_node710", 
             "name": "C_node710-735", 
             "object": "underground_line", 
@@ -4597,7 +4597,7 @@
             "configuration": "lc_7241"
         }, 
         "182": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_node710", 
             "name": "C_node710-736", 
             "object": "underground_line", 
@@ -4606,7 +4606,7 @@
             "configuration": "lc_7241"
         }, 
         "183": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_node711", 
             "name": "C_node711-741", 
             "object": "underground_line", 
@@ -4615,7 +4615,7 @@
             "configuration": "lc_7231"
         }, 
         "180": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_node709", 
             "name": "C_node709-708", 
             "object": "underground_line", 
@@ -4628,15 +4628,15 @@
             "filename": "trip37 xVoltDump.csv"
         }, 
         "162": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_node709", 
-            "name": "B_\"xform709-775\"", 
+            "name": "B_xform709-775", 
             "object": "transformer", 
             "to": "B_node775", 
             "configuration": "trans_conf_400"
         }, 
         "187": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_load720", 
             "name": "C_node720-707", 
             "object": "underground_line", 
@@ -4645,7 +4645,7 @@
             "configuration": "lc_7241"
         }, 
         "184": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_node711", 
             "name": "C_node711-740", 
             "object": "underground_line", 
@@ -4668,7 +4668,7 @@
             "conductor_gmr": "0.008830"
         }, 
         "220": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "C_load728", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -4680,7 +4680,7 @@
             "nominal_voltage": "4800"
         }, 
         "186": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_load714", 
             "name": "C_node714-718", 
             "object": "underground_line", 
@@ -4689,7 +4689,7 @@
             "configuration": "lc_7241"
         }, 
         "188": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_load720", 
             "name": "C_node720-706", 
             "object": "underground_line", 
@@ -4698,7 +4698,7 @@
             "configuration": "lc_7231"
         }, 
         "189": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_load727", 
             "name": "C_node727-744", 
             "object": "underground_line", 
@@ -4707,7 +4707,7 @@
             "configuration": "lc_7231"
         }, 
         "202": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "C_node704", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -4716,7 +4716,7 @@
             "nominal_voltage": "4800"
         }, 
         "196": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_load744", 
             "name": "C_node744-728", 
             "object": "underground_line", 
@@ -4726,7 +4726,7 @@
         }, 
         "221": {
             "constant_current_A": "8.750000 -4.375000j", 
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "C_load729", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -4735,7 +4735,7 @@
             "nominal_voltage": "4800"
         }, 
         "185": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_load713", 
             "name": "C_node713-704", 
             "object": "underground_line", 
@@ -4744,7 +4744,7 @@
             "configuration": "lc_7231"
         }, 
         "99": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_node705", 
             "name": "B_node705-712", 
             "object": "underground_line", 
@@ -4753,7 +4753,7 @@
             "configuration": "lc_7241"
         }, 
         "98": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_node705", 
             "name": "B_node705-742", 
             "object": "underground_line", 
@@ -4762,7 +4762,7 @@
             "configuration": "lc_7241"
         }, 
         "168": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_node703", 
             "name": "C_node703-727", 
             "object": "underground_line", 
@@ -4771,7 +4771,7 @@
             "configuration": "lc_7241"
         }, 
         "169": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_node703", 
             "name": "C_node703-730", 
             "object": "underground_line", 
@@ -4781,7 +4781,7 @@
         }, 
         "229": {
             "constant_current_A": "29.166667 -14.583333j", 
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "C_load737", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -4790,7 +4790,7 @@
             "nominal_voltage": "4800"
         }, 
         "228": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "C_load736", 
             "constant_impedance_B": "438.857143+219.428571j", 
             "object": "load", 
@@ -4800,7 +4800,7 @@
             "nominal_voltage": "4800"
         }, 
         "91": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_node702", 
             "name": "B_node702-705", 
             "object": "underground_line", 
@@ -4809,7 +4809,7 @@
             "configuration": "lc_7241"
         }, 
         "90": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_load701", 
             "name": "B_node701-702", 
             "object": "underground_line", 
@@ -4818,7 +4818,7 @@
             "configuration": "lc_7221"
         }, 
         "93": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_node702", 
             "name": "B_node702-703", 
             "object": "underground_line", 
@@ -4827,7 +4827,7 @@
             "configuration": "lc_7221"
         }, 
         "92": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_node702", 
             "name": "B_node702-713", 
             "object": "underground_line", 
@@ -4836,7 +4836,7 @@
             "configuration": "lc_7231"
         }, 
         "95": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_node703", 
             "name": "B_node703-730", 
             "object": "underground_line", 
@@ -4845,7 +4845,7 @@
             "configuration": "lc_7231"
         }, 
         "94": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_node703", 
             "name": "B_node703-727", 
             "object": "underground_line", 
@@ -4854,7 +4854,7 @@
             "configuration": "lc_7241"
         }, 
         "97": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_node704", 
             "name": "B_node704-720", 
             "object": "underground_line", 
@@ -4863,7 +4863,7 @@
             "configuration": "lc_7231"
         }, 
         "96": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_node704", 
             "name": "B_node704-714", 
             "object": "underground_line", 
@@ -4888,7 +4888,7 @@
             "conductor_B": "ug_lc_7230"
         }, 
         "13": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_node711", 
             "name": "TIE_A_to_C", 
             "object": "underground_line", 
@@ -4908,7 +4908,7 @@
             "name": "trans_conf_400"
         }, 
         "15": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_node711", 
             "name": "TIE_B_to_A", 
             "object": "underground_line", 
@@ -4917,7 +4917,7 @@
             "configuration": "lc_7231"
         }, 
         "14": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_node710", 
             "name": "TIE_C_to_B", 
             "object": "underground_line", 
@@ -4926,7 +4926,7 @@
             "configuration": "lc_7231"
         }, 
         "17": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_node702", 
             "name": "A_node702-705", 
             "object": "underground_line", 
@@ -4935,7 +4935,7 @@
             "configuration": "lc_7241"
         }, 
         "16": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_load701", 
             "name": "A_node701-702", 
             "object": "underground_line", 
@@ -4944,7 +4944,7 @@
             "configuration": "lc_7221"
         }, 
         "19": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_node702", 
             "name": "A_node702-703", 
             "object": "underground_line", 
@@ -4953,7 +4953,7 @@
             "configuration": "lc_7221"
         }, 
         "18": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_node702", 
             "name": "A_node702-713", 
             "object": "underground_line", 
@@ -4962,7 +4962,7 @@
             "configuration": "lc_7231"
         }, 
         "117": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_load733", 
             "name": "B_node733-734", 
             "object": "underground_line", 
@@ -4971,7 +4971,7 @@
             "configuration": "lc_7231"
         }, 
         "116": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_load730", 
             "name": "B_node730-709", 
             "object": "underground_line", 
@@ -4980,7 +4980,7 @@
             "configuration": "lc_7231"
         }, 
         "204": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "C_node706", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -4990,7 +4990,7 @@
         }, 
         "151": {
             "constant_current_A": "17.708333 -8.333333j", 
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "B_load733", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -4999,7 +4999,7 @@
             "nominal_voltage": "4800"
         }, 
         "150": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "B_load732", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5009,7 +5009,7 @@
             "nominal_voltage": "4800"
         }, 
         "153": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "B_load735", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5019,7 +5019,7 @@
             "nominal_voltage": "4800"
         }, 
         "152": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "B_load734", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5030,7 +5030,7 @@
         }, 
         "155": {
             "constant_current_A": "29.166667 -14.583333j", 
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "B_load737", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5039,7 +5039,7 @@
             "nominal_voltage": "4800"
         }, 
         "154": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "B_load736", 
             "constant_impedance_B": "438.857143+219.428571j", 
             "object": "load", 
@@ -5049,7 +5049,7 @@
             "nominal_voltage": "4800"
         }, 
         "157": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "B_load740", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5059,7 +5059,7 @@
             "nominal_voltage": "4800"
         }, 
         "156": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "B_load738", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5069,7 +5069,7 @@
             "constant_power_A": "126000.000000+62000.000000j"
         }, 
         "159": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "B_load742", 
             "constant_impedance_B": "221.915014+104.430595j", 
             "object": "load", 
@@ -5080,7 +5080,7 @@
             "constant_impedance_A": "2304.000000+1152.000000j"
         }, 
         "158": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "B_load741", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5090,7 +5090,7 @@
             "nominal_voltage": "4800"
         }, 
         "234": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "C_load744", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5100,7 +5100,7 @@
             "constant_power_A": "42000.000000+21000.000000j"
         }, 
         "207": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "C_node709", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5109,15 +5109,15 @@
             "nominal_voltage": "4800"
         }, 
         "236": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "C_node709", 
-            "name": "C_\"xform709-775\"", 
+            "name": "C_xform709-775", 
             "object": "transformer", 
             "to": "C_node775", 
             "configuration": "trans_conf_400"
         }, 
         "237": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "C_node775", 
             "object": "node", 
             "voltage_B": "-240.000000 -138.564065j", 
@@ -5126,7 +5126,7 @@
             "nominal_voltage": "480"
         }, 
         "230": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "C_load738", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5136,7 +5136,7 @@
             "constant_power_A": "126000.000000+62000.000000j"
         }, 
         "231": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "C_load740", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5146,7 +5146,7 @@
             "nominal_voltage": "4800"
         }, 
         "232": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "C_load741", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5156,7 +5156,7 @@
             "nominal_voltage": "4800"
         }, 
         "233": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "C_load742", 
             "constant_impedance_B": "221.915014+104.430595j", 
             "object": "load", 
@@ -5167,7 +5167,7 @@
             "constant_impedance_A": "2304.000000+1152.000000j"
         }, 
         "224": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "C_load732", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5177,7 +5177,7 @@
             "nominal_voltage": "4800"
         }, 
         "48": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_load744", 
             "name": "A_node744-728", 
             "object": "underground_line", 
@@ -5186,7 +5186,7 @@
             "configuration": "lc_7241"
         }, 
         "49": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_node781", 
             "name": "A_node781-701", 
             "object": "underground_line", 
@@ -5195,7 +5195,7 @@
             "configuration": "lc_7211"
         }, 
         "46": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_load737", 
             "name": "A_node737-738", 
             "object": "underground_line", 
@@ -5204,7 +5204,7 @@
             "configuration": "lc_7231"
         }, 
         "119": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "B_load734", 
             "name": "B_node734-710", 
             "object": "underground_line", 
@@ -5213,7 +5213,7 @@
             "configuration": "lc_7241"
         }, 
         "44": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_load734", 
             "name": "A_node734-737", 
             "object": "underground_line", 
@@ -5222,7 +5222,7 @@
             "configuration": "lc_7231"
         }, 
         "45": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_load734", 
             "name": "A_node734-710", 
             "object": "underground_line", 
@@ -5231,7 +5231,7 @@
             "configuration": "lc_7241"
         }, 
         "42": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_load730", 
             "name": "A_node730-709", 
             "object": "underground_line", 
@@ -5240,7 +5240,7 @@
             "configuration": "lc_7231"
         }, 
         "43": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_load733", 
             "name": "A_node733-734", 
             "object": "underground_line", 
@@ -5249,7 +5249,7 @@
             "configuration": "lc_7231"
         }, 
         "40": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_load720", 
             "name": "A_node720-706", 
             "object": "underground_line", 
@@ -5258,7 +5258,7 @@
             "configuration": "lc_7231"
         }, 
         "41": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "from": "A_load727", 
             "name": "A_node727-744", 
             "object": "underground_line", 
@@ -5293,7 +5293,7 @@
             "conductor_B": "ug_lc_7220"
         }, 
         "146": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "B_load728", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5306,7 +5306,7 @@
         }, 
         "147": {
             "constant_current_A": "8.750000 -4.375000j", 
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "B_load729", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5315,7 +5315,7 @@
             "nominal_voltage": "4800"
         }, 
         "144": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "B_load725", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5325,7 +5325,7 @@
             "constant_power_B": "42000.000000+21000.000000j"
         }, 
         "145": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "B_load727", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5335,7 +5335,7 @@
             "nominal_voltage": "4800"
         }, 
         "142": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "B_load722", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5346,7 +5346,7 @@
             "nominal_voltage": "4800"
         }, 
         "143": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "B_load724", 
             "constant_impedance_B": "438.857143+219.428571j", 
             "object": "load", 
@@ -5356,7 +5356,7 @@
             "nominal_voltage": "4800"
         }, 
         "140": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "B_load718", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5366,7 +5366,7 @@
             "constant_impedance_A": "221.915014+104.430595j"
         }, 
         "141": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "B_load720", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5376,7 +5376,7 @@
             "nominal_voltage": "4800"
         }, 
         "209": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "C_node711", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5385,7 +5385,7 @@
             "nominal_voltage": "4800"
         }, 
         "208": {
-            "phases": "\"ABC\"", 
+            "phases": "ABC", 
             "name": "C_node710", 
             "object": "node", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5394,7 +5394,7 @@
             "nominal_voltage": "4800"
         }, 
         "148": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "B_load730", 
             "constant_impedance_C": "221.915014+104.430595j", 
             "object": "load", 
@@ -5404,7 +5404,7 @@
             "nominal_voltage": "4800"
         }, 
         "149": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "B_load731", 
             "constant_impedance_B": "221.915014+104.430595j", 
             "object": "load", 
@@ -5415,7 +5415,7 @@
         }, 
         "77": {
             "constant_current_A": "17.708333 -8.333333j", 
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "A_load733", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5424,7 +5424,7 @@
             "nominal_voltage": "4800"
         }, 
         "76": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "A_load732", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5434,7 +5434,7 @@
             "nominal_voltage": "4800"
         }, 
         "75": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "A_load731", 
             "constant_impedance_B": "221.915014+104.430595j", 
             "object": "load", 
@@ -5444,7 +5444,7 @@
             "nominal_voltage": "4800"
         }, 
         "74": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "A_load730", 
             "constant_impedance_C": "221.915014+104.430595j", 
             "object": "load", 
@@ -5455,7 +5455,7 @@
         }, 
         "73": {
             "constant_current_A": "8.750000 -4.375000j", 
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "A_load729", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5464,7 +5464,7 @@
             "nominal_voltage": "4800"
         }, 
         "72": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "A_load728", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5476,7 +5476,7 @@
             "nominal_voltage": "4800"
         }, 
         "71": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "A_load727", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5486,7 +5486,7 @@
             "nominal_voltage": "4800"
         }, 
         "70": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "A_load725", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5496,7 +5496,7 @@
             "constant_power_B": "42000.000000+21000.000000j"
         }, 
         "79": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "A_load735", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 
@@ -5506,7 +5506,7 @@
             "nominal_voltage": "4800"
         }, 
         "78": {
-            "phases": "\"ABCD\"", 
+            "phases": "ABCN", 
             "name": "A_load734", 
             "object": "load", 
             "voltage_B": "-2400.000000 -1385.640646j", 

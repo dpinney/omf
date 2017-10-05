@@ -21,15 +21,9 @@ end
 if device_type == 3
     temperature_a = 20*ones(8760,1);
 else
-    if isempty(version('-release')) == 1
-        tempData = csvread(out_temp);
-        tempData(1,:)=[];
-        temperature_a=tempData(:,2);
-    else
-        tempData = xlsread(out_temp);
-        temperature_a=tempData(:,2);
-    end
-    
+    tempData = csvread(out_temp);
+    %tempData(1,:)=[];
+    temperature_a=tempData(:,2);
 end
 
 switch device_type
@@ -57,10 +51,10 @@ switch device_type
     case 4
         [P_upper, P_lower, E_UL] = VB_core_WH(paraFile);
 end
-P_lower
-disp('\n')
-P_upper
-disp('\n')
+P_lower = P_lower'
+disp('n')
+P_upper = P_upper'
+disp('n')
 E_UL
     
 %% write output file
@@ -79,7 +73,7 @@ E_UL
 % end
 % fclose(fid);
 
-% %% plot
+%% plot
 % plotname = strrep(plotname,'_',' ');
 % 
 % figure

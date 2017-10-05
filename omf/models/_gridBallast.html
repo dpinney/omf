@@ -199,6 +199,8 @@
         localHighChart["chart"]["height"] = 150
         localHighChart["series"] = [powerSeries, lossesSeries, DGSeries]
         localHighChart["yAxis"]["title"] = {"text": "Power (W)", "style": {"color": "gray"}}
+        localHighChart['xAxis']['min'] = new Date(allOutputData.timeStamps[0]).getTime()
+        localHighChart['xAxis']['max'] = new Date(allOutputData.timeStamps[allOutputData.timeStamps.length-1]).getTime()
         new Highcharts.Chart(localHighChart);
       </script>
     </div>
@@ -437,6 +439,8 @@
               {"color": 'gray', "dashStyle": 'ShortDash', "width": 2, "value": 114, "zIndex": 0},
               {"color": 'gray', "dashStyle": 'ShortDash', "width": 2, "value": 126, "zIndex": 0}],
             "title":{"text":"Volts (V)", "style":{"color":"gray"}}}
+          localHighChart['xAxis']['min'] = new Date(allOutputData.timeStamps[0]).getTime()
+          localHighChart['xAxis']['max'] = new Date(allOutputData.timeStamps[allOutputData.timeStamps.length-1]).getTime()
           new Highcharts.Chart(localHighChart)
       </script>
     </div>
