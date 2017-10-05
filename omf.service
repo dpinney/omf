@@ -1,0 +1,10 @@
+[Unit]
+Description=Open Modeling Framework
+After=syslog.target
+
+[Service]
+ExecStart=cd /omf/omf/;python webProd.py
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
