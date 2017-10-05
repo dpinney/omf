@@ -1164,7 +1164,6 @@ def uniqObjName(objtype, owner, name, modelName=False):
 	return jsonify(exists=os.path.exists(path))
 
 if __name__ == "__main__":
-	URL = "http://localhost:5000"
 	template_files = ["templates/"+ x  for x in safeListdir("templates")]
 	model_files = ["models/" + x for x in safeListdir("models")]
 	app.run(debug=True, host="127.0.0.1", extra_files=template_files + model_files)

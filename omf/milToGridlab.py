@@ -1,8 +1,8 @@
 ''' Convert a Milsoft Windmil feeder model into an OMF-compatible version. '''
-
 import feeder, csv, random, math, copy, locale
 from StringIO import StringIO
 from os.path import join as pJoin
+
 def convert(stdString,seqString):
     ''' Take in a .std and .seq strings from Milsoft and spit out a (json dict, int, int).'''
     def csvToArray(csvString):
@@ -656,8 +656,13 @@ def convert(stdString,seqString):
                 percent_z = safeGet(trans_config, 6, 3)
                 x_r_ratio = safeGet(trans_config, 9, 5)
             # Set the shunt impedance
-            if float(no_load_loss) > 0.0:
-                r_shunt = float(transList[10])*float(transList[10])*1000/float(no_load_loss)
+            print no_load_loss
+            try: 
+                f_no_load_loss = float(no_load_loss)
+            except:
+                f_no_load_loss = 0.0
+            if f_no_load_loss > 0.0:
+                r_shunt = float(transList[10])*float(transList[10])*1000/f_no_load_loss
                 x_shunt = r_shunt*float(x_r_ratio)
                 transformer[myIndex+1]['shunt_impedance'] = str(r_shunt) + '+' + str(x_shunt) + 'j'
             # Set series impedance
