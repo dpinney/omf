@@ -48,9 +48,9 @@ def getDataNames():
 				publicFeeders.append({'name': file.strip('.omd'), 'model': dirpath.split('/')[-1]})		
 	return {"climates":sorted(climates), "feeders":feeders, "networks":networks, "publicFeeders":publicFeeders, "currentUser":currUser}
 
-@app.before_request
-def csrf_protect():
-	pass
+# @app.before_request
+# def csrf_protect():
+# 	pass
 	## NOTE: when we fix csrf validation this needs to be uncommented.
 	# if request.method == "POST":
 	#	token = session.get("_csrf_token", None)
