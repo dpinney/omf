@@ -51,11 +51,18 @@ switch device_type
     case 4
         [P_upper, P_lower, E_UL] = VB_core_WH(paraFile);
 end
-P_lower = P_lower'
+
+if device_type == 4
+    P_lower = P_lower';
+    P_upper = P_upper';
+end
+
+P_lower
 disp('n')
-P_upper = P_upper'
+P_upper
 disp('n')
 E_UL
+disp('')
     
 %% write output file
 % if ischar(paraFile)
