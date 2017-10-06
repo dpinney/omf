@@ -26,16 +26,16 @@ else
     temperature_a=tempData(:,2);
 end
 
-switch device_type
-    case 1
-        paraFile = 'para_AC.csv';
-    case 2
-        paraFile = 'para_HP.csv';
-    case 3
-        paraFile = 'para_RG.csv';
-    case 4
-        paraFile = 'para_WH.csv';
-end
+%switch device_type
+%    case 1
+%        paraFile = 'para_AC.csv';
+%    case 2
+%        paraFile = 'para_HP.csv';
+%    case 3
+%        paraFile = 'para_RG.csv';
+%    case 4
+%        paraFile = 'para_WH.csv';
+%end
 
 if device_parameters ~= 0
 	paraFile = device_parameters;
