@@ -58,10 +58,12 @@ def work(modelDir, inputDict):
 		pass
 	else:
 		# HACK: tree[10:19] is empty
-		tree[10] = {'omftype':'#include', 'argument':'\"hot_water_demand.glm\"'}
-		tree[11] = {'omftype':'#include', 'argument':'\"lock_mode_schedule.glm\"'}
+		# tree[14,20,27,28,47] empty for UCS Egan
+		tree[14] = {'omftype':'#include', 'argument':'\"hot_water_demand.glm\"'}
+		tree[20] = {'omftype':'#include', 'argument':'\"lock_mode_schedule.glm\"'}
+		tree[27] = {'omftype':'#include', 'argument':'\"controller_priority_schedule.glm\"'}
 		# Attach frequency player
-		tree[12] = {'omftype':'class player', 'argument':'{double value;}'}
+		tree[28] = {'omftype':'class player', 'argument':'{double value;}'}
 		tree[feeder.getMaxKey(tree)+1] = {'object':'player', 'file':'frequency.PLAYER', 'property':'value', 'name':'frequency', 'loop':0}
 		# Set up GridBallast Controls
 		totalWH = 0
@@ -76,10 +78,10 @@ def work(modelDir, inputDict):
 	 			# Frequency control parameters
 	 			tree[key]['enable_freq_control'] = 'true'
 	 			tree[key]['measured_frequency'] = 'frequency.value'
-	 			tree[key]['freq_lowlimit'] = 59.9
-	 			tree[key]['freq_uplimit'] = 60.1
+	 			tree[key]['freq_lowlimit'] = 59
+	 			tree[key]['freq_uplimit'] = 61
 	 			tree[key]['heat_mode'] = 'ELECTRIC'
-	 			# tree[key]['average_delay_time'] = 120
+	 			# tree[key]['average_delay_time'] = 60
 	 			# Voltage control parameters
 	 			# tree[key]['enable_volt_control'] = 'true'
 	 			# tree[key]['volt_lowlimit'] = 240.4
@@ -87,8 +89,11 @@ def work(modelDir, inputDict):
 	 			# Lock Mode parameters
 	 			# tree[key]['enable_lock'] = 'temp_lock_enable'
 	 			# tree[key]['lock_STATUS'] = 'temp_lock_status'
-	 			tree[key]['controller_priority'] = 3214 #default:therm>lock>freq>volt
-	 			# tree[key]['controller_priority'] = 2413 #freq>therm>lock>volt
+	 			# Controller Priority: a.lock, b.freq, c.volt, d.therm
+	 			# tree[key]['controller_priority'] = 3214 #default:therm>lock>freq>volt
+	 			# tree[key]['controller_priority'] = 1324 #therm>freq>volt>lock
+	 			# tree[key]['controller_priority'] = 1423 #freq>therm>volt>lock
+	 			tree[key]['controller_priority'] = 'controller_priority'
 		 		# fix waterheater property demand to water_demand for newer GridLAB-D versions
 		 		if 'demand' in tree[key]:
 		 			# tree[key]['water_demand'] = tree[key]['demand']
@@ -100,11 +105,11 @@ def work(modelDir, inputDict):
 		 		totalZIP += 1
 	 			gbZIP += 1
 		 		# Frequency control parameters
-	 			tree[key]['enable_freq_control'] = 'true'
-	 			tree[key]['measured_frequency'] = 'frequency.value'
-	 			tree[key]['freq_lowlimit'] = 59.9
-	 			tree[key]['freq_uplimit'] = 60.1
-	 			# tree[key]['average_delay_time'] = 120
+	 			# tree[key]['enable_freq_control'] = 'true'
+	 			# tree[key]['measured_frequency'] = 'frequency.value'
+	 			# tree[key]['freq_lowlimit'] = 59
+	 			# tree[key]['freq_uplimit'] = 61
+	 			# tree[key]['average_delay_time'] = 60
 	 			# Voltage control parameters
 	 			# tree[key]['enable_volt_control'] = 'true'
 	 			# tree[key]['volt_lowlimit'] = 240.4
@@ -112,8 +117,8 @@ def work(modelDir, inputDict):
 	 			# Lock Mode parameters
 	 			# tree[key]['enable_lock'] = 'temp_lock_enable'
 	 			# tree[key]['lock_STATUS'] = 'temp_lock_status'
-	 			tree[key]['controller_priority'] = 3214 #default:therm>lock>freq>volt
-	 			# tree[key]['controller_priority'] = 2413 #freq>therm>lock>volt
+	 			# tree[key]['controller_priority'] = 4321 #default:lock>freq>volt>therm
+	 			# tree[key]['controller_priority'] = 2431 #freq>volt>lock>therm
 	 			# tree[key]['groupid'] = 'fan'
 
 	# Attach collector for total network load
@@ -156,7 +161,6 @@ def work(modelDir, inputDict):
 	# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
 	rawOut = gridlabd.runInFilesystem(tree, attachments=feederJson["attachments"], 
 		keepFiles=True, workDir=pJoin(modelDir))
-	# rawOut = gridlabd.anaDataTree(pJoin(modelDir), lambda x:True)
 	outData = {}
 	# Std Err and Std Out
 	outData['stderr'] = rawOut['stderr']
@@ -336,8 +340,7 @@ def work(modelDir, inputDict):
 	whOnZip = zip(*whOnList)
 	whOnSum = [sum(x) for x in whOnZip]
 	anyOn = [x > 0 for x in whOnSum]
-	# tRecIdx = anyOn.index(True, eventEndIdx)
-	tRecIdx = anyOn.index(True)
+	tRecIdx = anyOn.index(True, eventEndIdx)
 	tRec = dateTimeStamps[tRecIdx]
 	recoveryTime = tRec - eventEnd
 	outData['gridBallast']['recoveryTime'] = str(recoveryTime)
@@ -364,7 +367,7 @@ def work(modelDir, inputDict):
 	whTempList = whTemp.values()
 	whTempZip = zip(*whTempList)
 	whTempDrops = []
-	LOWER_LIMIT_TEMP = 133 # Used for calculating quality of service.
+	LOWER_LIMIT_TEMP = 110 # Used for calculating quality of service. Typical hot shower temp = 105 F.
 	for time in whTempZip:
 		tempDrop = sum([t < LOWER_LIMIT_TEMP for t in time])
 		whTempDrops.append(tempDrop)
@@ -564,7 +567,8 @@ def new(modelDir):
 		"modelType": modelName,
 		"zipCode": "59001",
 		# "feederName1": "Olin Barre GH EOL Solar GridBallast",
-		"feederName1": "UCS Egan Debugged Housed",
+		"feederName1": "UCS Egan Housed",
+		# "feederName1": "Connexus West End Housed Schedule Connected",
 		"simStartDate": "2012-01-01 12:00:00",
 		"simLength": "180",
 		"simLengthUnits": "minutes", #hours
