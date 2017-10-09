@@ -37,9 +37,9 @@ end
 %        paraFile = 'para_WH.csv';
 %end
 
-if device_parameters ~= 0
+% if device_parameters ~= 0
 	paraFile = device_parameters;
-end
+% end
 
 switch device_type
     case 1
