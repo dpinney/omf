@@ -219,7 +219,7 @@
 		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
 	</div>
 	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
-		<pre id='errorText'></pre>
+		<pre id='errorText' style='overflow-x:scroll'></pre>
 		<script type="text/javascript">
 		if (typeof(allInputData.stderr) !== 'undefined') {	
 			gebi('stopIndicator').style.visibility = 'visible'
