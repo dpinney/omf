@@ -28,7 +28,6 @@ def work(modelDir, inputDict):
 	# Run VBAT code.
 	vbatPath = os.path.join(omf.omfDir,'solvers','vbat')
 	plat = platform.system()
-
 	if inputDict['load_type'] =="4":
 		numDevices = int(inputDict['number_devices'])
 		if numDevices == 1:
