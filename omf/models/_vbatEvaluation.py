@@ -9,7 +9,10 @@ from jinja2 import Template
 import __neoMetaModel__
 from __neoMetaModel__ import *
 import random
+#trying something
+import ctypes  # An included library with Python install.   
 
+	
 # Model metadata:
 fileName = os.path.basename(__file__)
 modelName = fileName[0:fileName.rfind('.')]
@@ -25,6 +28,20 @@ def work(modelDir, inputDict):
 	# Run VBAT code.
 	vbatPath = os.path.join(omf.omfDir,'solvers','vbat')
 	plat = platform.system()
+
+	if inputDict['load_type'] =="4":
+		numDevices = int(inputDict['number_devices'])
+		if numDevices == 1:
+			runTimeDuration = 2
+		elif numDevices >1 and numDevices <10:
+			runTimeDuration = 3.5
+		elif numDevices >10 and numDevices <50:
+			runTimeDuration = 6
+		else :
+			runTimeDuration = (numDevices-numDevices%50)*.2
+		#runTimeDuration = int(inputDict['number_devices'])*2
+		messageBox = ctypes.windll.user32.MessageBoxW
+		returnValue = messageBox(0,u"This configuration will take an approximate run time of: " + str(runTimeDuration) +" minutes",u"Warning!",0x40 | 0x0)
 	if plat == "Windows":
 		octBin = 'c:\\Octave\\Octave-4.2.1\\bin\\octave-cli'
 	elif plat == "Darwin":
@@ -38,7 +55,6 @@ def work(modelDir, inputDict):
 			',' + inputDict['power'] + ',' + inputDict['cop'] + ',' + inputDict['deadband'] + ',' + inputDict['setpoint'] + ',' +
 			inputDict['number_devices'] + ']')
 	myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
-	#print myOut
 	P_lower = myOut.partition("P_lower =\n\n")[2]
 	P_lower = P_lower.partition("\n\nn")[0]
 	P_lower = map(float,P_lower.split('\n'))
