@@ -24,5 +24,5 @@ if __name__ == "__main__":
 		host="0.0.0.0", 
 		extra_files=template_files + model_files, 
 		processes=4,
-		# ssl_context=('omfDevCert.pem','omfDevKey.pem'),
+		ssl_context=('omfDevCert.pem','omfDevKey.pem'),
 	)

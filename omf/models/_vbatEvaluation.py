@@ -44,7 +44,7 @@ def work(modelDir, inputDict):
 	if plat == "Windows":
 		octBin = 'c:\\Octave\\Octave-4.2.1\\bin\\octave-cli'
 	elif plat == "Darwin":
-		octBin = 'octave --no-window-system'
+		octBin = 'octave --no-gui'
 	else:
 		octBin = 'octave --no-window-system'
 	command = 'OCTBIN --eval "addpath(genpath(\'FULLPATH\'));VB_func(ARGS)"'\
