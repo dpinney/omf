@@ -1,7 +1,7 @@
 ''' Run micot-GFM, micot-RDT, and GridLAB-D to determine an optimal distribution resiliency investment. '''
 
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math
-import traceback, copy, platform
+import traceback, copy, platform, re
 from os.path import join as pJoin
 from jinja2 import Template
 from matplotlib import pyplot as plt
@@ -192,23 +192,49 @@ def convertToGFM(gfmInputTemplate, feederModel):
 					newBus['x'] = busNode.get('x')/5000.0
 	# Load creation:
 	objToFind = ['load']
+	phaseNames = {'A':0, 'B':1, 'C':2}
 	for key, loads in jsonTree.iteritems():
 		if loads.get('object','') in objToFind:
 			newLoad = dict({
 				'id': '', #*
 				'node_id': '', #*
 				'is_critical': False, 
-				'max_real_phase': [], #*
-				'max_reactive_phase': [], #*
-				'has_phase': [] #*
+				'max_real_phase': [0,0,0], #*
+				'max_reactive_phase': [0,0,0], #*
+				'has_phase': [False, False, False] #*
 			})
 			newLoad['id'] = loads.get('name','')+'_lod'
 			for elem in gfmJson['buses']:
 				if elem['id'][0:-4] == newLoad['id'][0:-4]:
 					busID = elem['id']
 			newLoad['node_id'] = busID
-			numPhases, newLoad['has_phase'], newLoad['max_real_phase'], newLoad['max_reactive_phase'] = getNodePhases(loads, 10)
-			# newLoad.pop('is_critical',None)
+			#numPhases, newLoad['has_phase'], newLoad['max_real_phase'], newLoad['max_reactive_phase'] = getNodePhases(loads, 10)
+			voltage = float(loads.get('nominal_voltage','4800'))
+			for phaseName, index in phaseNames.iteritems():
+				impedance = 'constant_impedance_' + phaseName
+				power = 'constant_power_' + phaseName
+				current = 'constant_current_' + phaseName
+				if impedance in loads:
+					constImped = re.split(r'[+ ]', loads.get(impedance,''))
+					realImpedance = float(constImped[0])
+					reactiveImpedance = float(constImped[1][:-1])
+					newLoad['max_real_phase'][index] = (voltage*voltage)/realImpedance
+					newLoad['max_reactive_phase'][index] = (voltage*voltage)/reactiveImpedance
+					newLoad['has_phase'][index] = True
+				if current in loads:
+					constCurr = re.split(r'[+ ]', loads.get(current,''))
+					realCurr = float(constCurr[0])
+					reactiveCurr = float(constCurr[1][:-1])
+					newLoad['max_real_phase'][index] = voltage*realCurr
+					newLoad['max_reactive_phase'][index] = voltage*reactiveCurr
+					newLoad['has_phase'][index] = True
+				if power in loads:
+					constPower = re.split(r'[+ ]', loads.get(power,''))
+					realPower = float(constPower[0])
+					reactivePower = float(constPower[1][:-1])
+					newLoad['max_real_phase'][index] = realPower
+					newLoad['max_reactive_phase'][index] = reactivePower
+					newLoad['has_phase'][index] = True
 			gfmJson['loads'].append(newLoad)
 	# Generator creation:
 	genCands = gfmInputTemplate['generatorCandidates'].strip().replace(' ', '').split(',')
