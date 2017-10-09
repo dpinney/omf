@@ -52,6 +52,10 @@
 				<label>Run Time</label>
 				<input type="text" id="runTime" name="runTime" readonly/>
 			</div>
+			<div class="shortInput">
+				<label>Estimated Run Time</label>
+				<input type="text" id="estimatedRunTime" name="estimatedRunTime" readonly/>
+			</div>
 			<!-- Model Specific Inputs -->
 			<div class="wideInput">
 				<p class="inputSectionHeader">Simulation Specs</p>
@@ -75,8 +79,8 @@
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Number of devices<span class="classic">The termination tolerance for powerflow, in units P and Q dispatch per unit. Note that for 'Water Heater' you must input at 20 or more devices</span></label>
-				<input type="text" id="number_devices" name="number_devices" pattern="^\d+\.?\d*?$" required="required">
+				<label class="tooltip">Number of devices<span class="classic">The termination tolerance for powerflow, in units P and Q dispatch per unit. Devices must be less than 100 million for all devices. For Water Heater expect 10 minutes per 50 device</span></label>
+				<input type="text" id="number_devices" name="number_devices" pattern="[1-9][0-9]{0,8}" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Rated Power(kW)<span class="classic">power</span></label>
@@ -91,7 +95,7 @@
 				<input type="text" id="resistance" name="resistance" pattern="^\d+\.?\d*?$" required="required">
 			</div>			
 			<div class="shortInput">
-				<label class="tooltip">COP<span class="classic">cop</span></label>
+				<label class="tooltip">COP<span class="classic">Coefficient of Power</span></label>
 				<input type="text" id="cop" name="cop" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
@@ -189,8 +193,8 @@
 					},
 					"title":{"text":null},
 					"series":[
-						{"name":"Max Energy","marker":{"enabled":false},"color":"red","data":allOutputData.minEnergySeries},
-						{"name":"Min Energy","marker":{"enabled":false},"color":"purple","data":allOutputData.maxEnergySeries},
+						{"name":"Min Energy","marker":{"enabled":false},"color":"red","data":allOutputData.minEnergySeries},
+						{"name":"Max Energy","marker":{"enabled":false},"color":"purple","data":allOutputData.maxEnergySeries},
 					],
 					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"energyChart","type":"line","marginRight":20, "height":750,"width":1000},
 					"tooltip":false,

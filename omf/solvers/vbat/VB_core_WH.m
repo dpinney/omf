@@ -48,19 +48,12 @@ for i = 1:N_wh
     water_draw(:,i) = circshift(m_water(:, k), [1, unidrnd(15)-15]) + m_water(:, k)*0.1*(rand-0.5);
 end
 
+if paraFile(7) <20
+    water_draw(:,paraFile(7)+1:end) = [];
+end
+
 Po=-(theta_a*ones(1,N_wh)-ones(T,1)*theta_s_wh')./(ones(T,1)*R_wh')-4.2*...
     water_draw.*((55-32)*5/9 -ones(T,1)*theta_s_wh');
-
-% Po = -(repmat(theta_a,1,N_wh)-repmat(theta_s_wh',T,1))./repmat((R_wh'),T,1)...
-%     - 4.2*water_draw.*((55-32).*5/9 - repmat(theta_s_wh',T,1));
-
-
-% Po = zeros(T, N_wh);
-% for t = 1:T
-%     for i = 1:N_wh
-%         Po(t, i) = -(theta_a(t)-theta_s_wh(i))/R_wh(i) - 4.2*water_draw(t, i)*((55-32)*5/9 - theta_s_wh(i));
-%     end
-% end
 
 % Po_total is the analytically predicted aggregate baseline power
 Po_total = sum(Po,2);
@@ -115,5 +108,9 @@ P_lower_wh1 = reshape(P_lower_wh1, [60,8760]);
 P_lower_wh = mean(P_lower_wh1);
 % extract hourly data from minute output for energy
 E_UL_wh = E_UL_wh1(60:60:length(E_UL_wh1));
+
+if paraFile(7) ==1
+    E_UL_wh = zeros(8760,1);
+end
 
 end

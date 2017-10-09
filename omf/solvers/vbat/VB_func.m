@@ -26,20 +26,20 @@ else
     temperature_a=tempData(:,2);
 end
 
-switch device_type
-    case 1
-        paraFile = 'para_AC.csv';
-    case 2
-        paraFile = 'para_HP.csv';
-    case 3
-        paraFile = 'para_RG.csv';
-    case 4
-        paraFile = 'para_WH.csv';
-end
+%switch device_type
+%    case 1
+%        paraFile = 'para_AC.csv';
+%    case 2
+%        paraFile = 'para_HP.csv';
+%    case 3
+%        paraFile = 'para_RG.csv';
+%    case 4
+%        paraFile = 'para_WH.csv';
+%end
 
-if device_parameters ~= 0
+% if device_parameters ~= 0
 	paraFile = device_parameters;
-end
+% end
 
 switch device_type
     case 1
@@ -51,11 +51,18 @@ switch device_type
     case 4
         [P_upper, P_lower, E_UL] = VB_core_WH(paraFile);
 end
-P_lower = P_lower'
+
+if device_type == 4
+    P_lower = P_lower';
+    P_upper = P_upper';
+end
+
+P_lower
 disp('n')
-P_upper = P_upper'
+P_upper
 disp('n')
 E_UL
+disp('')
     
 %% write output file
 % if ischar(paraFile)
