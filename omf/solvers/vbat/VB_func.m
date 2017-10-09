@@ -8,7 +8,7 @@
 % 4 is WH
 
 function VB_func(out_temp,device_type, device_parameters)
-
+try
 switch out_temp
     case 94128
         out_temp = 'outdoor_temperature_zipCode_94128.csv';
@@ -63,6 +63,10 @@ P_upper
 disp('n')
 E_UL
 disp('')
+catch ME
+    disp('Got the error:')
+    rethrow(ME)
+end
     
 %% write output file
 % if ischar(paraFile)
