@@ -28,7 +28,6 @@ def work(modelDir, inputDict):
 	# Run VBAT code.
 	vbatPath = os.path.join(omf.omfDir,'solvers','vbat')
 	plat = platform.system()
-
 	if inputDict['load_type'] =="4":
 		numDevices = int(inputDict['number_devices'])
 		if numDevices == 1:
@@ -40,8 +39,14 @@ def work(modelDir, inputDict):
 		else :
 			runTimeDuration = (numDevices-numDevices%50)*.2
 		#runTimeDuration = int(inputDict['number_devices'])*2
-		messageBox = ctypes.windll.user32.MessageBoxW
-		returnValue = messageBox(0,u"This configuration will take an approximate run time of: " + str(runTimeDuration) +" minutes",u"Warning!",0x40 | 0x0)
+		# messageBox = ctypes.windll.user32.MessageBoxW
+		# returnValue = messageBox(0,u"This configuration will take an approximate run time of: " + str(runTimeDuration) +" minutes",u"Warning!",0x40 | 0x0)
+		inputDict['runTimeEstimate'] = "This configuration will take an approximate run time of: " + str(runTimeDuration) +" minutes."
+		#HACK: dump input immediately to show runtime estimate.
+	else:
+		inputDict['runTimeEstimate'] = "This configuration will take an approximate run time of: 10 seconds."
+	with open(pJoin(modelDir,'allInputData.json'), 'w') as dictFile:
+		json.dump(inputDict, dictFile, indent=4)
 	if plat == "Windows":
 		octBin = 'c:\\Octave\\Octave-4.2.1\\bin\\octave-cli'
 	elif plat == "Darwin":

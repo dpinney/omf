@@ -115,7 +115,8 @@
 		</form>
 	</div>
 	<div id ="runIndicator" class="content running">
-		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
+		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.<br>
+		{{allInputData[allInputData.find('"runTimeEstimate"') + 20:allInputData.find('seconds.", ') + 8]}}
 	</div>
 	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
 		<pre id='errorText' style='overflow-x:scroll'></pre>
