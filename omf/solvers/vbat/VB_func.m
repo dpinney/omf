@@ -16,6 +16,8 @@ switch out_temp
         out_temp = 'outdoor_temperature_zipCode_97218.csv';
     case 98158
         out_temp = 'outdoor_temperature_zipCode_98158.csv';
+    case 'default'
+        out_temp = 'outdoor_temperature.csv';
 end
 
 if device_type == 3
