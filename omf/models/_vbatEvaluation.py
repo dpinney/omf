@@ -56,24 +56,32 @@ def work(modelDir, inputDict):
 		.replace('ARGS', inputDict['zipcode'] + ',' + inputDict['load_type'] +',[' + inputDict['capacitance'] + ','+ inputDict['resistance'] + 
 			',' + inputDict['power'] + ',' + inputDict['cop'] + ',' + inputDict['deadband'] + ',' + inputDict['setpoint'] + ',' +
 			inputDict['number_devices'] + ']')
-	myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
-	P_lower = myOut.partition("P_lower =\n\n")[2]
-	P_lower = P_lower.partition("\n\nn")[0]
-	P_lower = map(float,P_lower.split('\n'))
-	P_upper = myOut.partition("P_upper =\n\n")[2]
-	P_upper = P_upper.partition("\n\nn")[0]
-	P_upper = map(float,P_upper.split('\n'))
-	E_UL = myOut.partition("E_UL =\n\n")[2]
-	E_UL = E_UL.partition("\n\n")[0]
-	E_UL = map(float,E_UL.split('\n'))
-	# Format results to go in chart.
-	outData["minPowerSeries"] = [-1*x for x in P_lower]
-	outData["maxPowerSeries"] = P_upper
-	outData["minEnergySeries"] = [-1*x for x in E_UL]
-	outData["maxEnergySeries"] = E_UL
-	# Stdout/stderr.
-	outData["stdout"] = "Success"
-	outData["stderr"] = ""
+	try:
+		myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
+		P_lower = myOut.partition("P_lower =\n\n")[2]
+		P_lower = P_lower.partition("\n\nn")[0]
+		P_lower = map(float,P_lower.split('\n'))
+		P_upper = myOut.partition("P_upper =\n\n")[2]
+		P_upper = P_upper.partition("\n\nn")[0]
+		P_upper = map(float,P_upper.split('\n'))
+		E_UL = myOut.partition("E_UL =\n\n")[2]
+		E_UL = E_UL.partition("\n\n")[0]
+		E_UL = map(float,E_UL.split('\n'))
+		# Format results to go in chart.
+		outData["minPowerSeries"] = [-1*x for x in P_lower]
+		outData["maxPowerSeries"] = P_upper
+		outData["minEnergySeries"] = [-1*x for x in E_UL]
+		outData["maxEnergySeries"] = E_UL
+		# Stdout/stderr.
+		outData["stdout"] = "Success"
+		outData["stderr"] = ""
+	except:
+		outData["stderr"] = "Failed"
+		#messageError = myOut.partition("message = ")[2]
+		#messageError = messageError.partition("\n")[0]
+		#outData["stdout"] = str(messageError)\
+		outData["stdout"] = "myOut"
+		print myOut
 	return outData
 
 def new(modelDir):
@@ -82,7 +90,7 @@ def new(modelDir):
 		"user": "admin",
 		"load_type": "1",
 		"zipcode": "94128",
-		"number_devices": "50",
+		"number_devices": "50000000000000000",
 		"power": "5.6",
 		"capacitance": "2",
 		"resistance": "2",
