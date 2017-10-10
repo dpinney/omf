@@ -64,10 +64,9 @@ disp('n')
 E_UL
 disp('')
 catch error
-    disp('Got the error:')
+%     disp('Got the error:')
 %     x = rethrow(error);
-    error
-
+    disp(error)
 end
     
 %% write output file
