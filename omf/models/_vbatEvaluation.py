@@ -90,7 +90,7 @@ def new(modelDir):
 		"user": "admin",
 		"load_type": "1",
 		"zipcode": "94128",
-		"number_devices": "50000000000000000",
+		"number_devices": "100",
 		"power": "5.6",
 		"capacitance": "2",
 		"resistance": "2",
