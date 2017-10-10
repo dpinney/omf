@@ -38,9 +38,6 @@ def work(modelDir, inputDict):
 			runTimeDuration = 6
 		else :
 			runTimeDuration = (numDevices-numDevices%50)*.2
-		#runTimeDuration = int(inputDict['number_devices'])*2
-		# messageBox = ctypes.windll.user32.MessageBoxW
-		# returnValue = messageBox(0,u"This configuration will take an approximate run time of: " + str(runTimeDuration) +" minutes",u"Warning!",0x40 | 0x0)
 		inputDict['runTimeEstimate'] = 'This configuration will take an approximate run time of: ' + str(runTimeDuration) +' minutes.'
 		#HACK: dump input immediately to show runtime estimate.
 	else:
