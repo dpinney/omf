@@ -60,10 +60,16 @@
 			<div class="shortInput">
 				<label class="tooltip">Load Type<span class="classic">Device to be used in calculations</span></label>
 				<select id="load_type" name="load_type">
-					<option value="1" selected="selected">Air Conditioner</option>
-					<option value="2">Heat Pump</option>
-					<option value="3">Refrigerator</option>
-					<option value="4">Water Heater</option>
+					<option value="1" id="AC" onselect="defaultValuesAC()">Air Conditioner</option>
+					<!--<script type="text/javascript">
+						gebi('load_type')
+						function defaultValuesAC(){
+						gebi('power').innerHTML = '100000';
+						location.reload();}
+					</script>-->
+					<option value="2" id="HP">Heat Pump</option>
+					<option value="3" id="RG">Refrigerator</option>
+					<option value="4" id="WH">Water Heater</option>
 				</select>
 			</div>
 			<div class="shortInput">

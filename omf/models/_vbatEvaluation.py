@@ -101,6 +101,16 @@ def new(modelDir):
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	return creationCode
 
+#def defaultValuesAC():
+#	power = "1000",
+#	capacitance = "2",
+#	resistance = "2",
+#	cop = "2.5",
+#	setpoint = "22.5",
+#	deadband = "0.625",
+#	return power,capacitance,resistance,cop,setpoint,deadband
+
+
 def _simpleTest():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
