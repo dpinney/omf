@@ -81,7 +81,7 @@ def work(modelDir, inputDict):
 		#messageError = messageError.partition("\n")[0]
 		#outData["stdout"] = str(messageError)\
 		outData["stdout"] = "myOut"
-		print myOut
+		#print myOut
 	return outData
 
 def new(modelDir):
@@ -89,7 +89,7 @@ def new(modelDir):
 	defaultInputs = {
 		"user": "admin",
 		"load_type": "1",
-		"zipcode": "94128",
+		"zipcode": "'default'",
 		"number_devices": "100",
 		"power": "5.6",
 		"capacitance": "2",
