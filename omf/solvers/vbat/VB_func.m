@@ -63,9 +63,11 @@ P_upper
 disp('n')
 E_UL
 disp('')
-catch ME
+catch error
     disp('Got the error:')
-    rethrow(ME)
+%     x = rethrow(error);
+    error
+
 end
     
 %% write output file
