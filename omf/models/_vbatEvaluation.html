@@ -59,17 +59,45 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Load Type<span class="classic">Device to be used in calculations</span></label>
-				<select id="load_type" name="load_type">
-					<option value="1" id="AC" onselect="defaultValuesAC()">Air Conditioner</option>
-					<!--<script type="text/javascript">
-						gebi('load_type')
-						function defaultValuesAC(){
-						gebi('power').innerHTML = '100000';
-						location.reload();}
-					</script>-->
-					<option value="2" id="HP">Heat Pump</option>
-					<option value="3" id="RG">Refrigerator</option>
-					<option value="4" id="WH">Water Heater</option>
+				<select id="load_type" onchange="loadDefaultParameters()" name="load_type">
+				<script type="text/javascript">
+					function loadDefaultParameters(){
+						var x = gebi('load_type').value;
+						if (x == 1){ //AC
+							gebi('capacitance').value = '2';
+							gebi('resistance').value = '2';
+							gebi('power').value = '5.6';
+							gebi('cop').value = '2.5';
+							gebi('deadband').value = '0.625';
+							gebi('setpoint').value = '22.5';
+						} else if (x == 2){ //HP
+							gebi('capacitance').value = '2';
+							gebi('resistance').value = '2';
+							gebi('power').value = '5.6';
+							gebi('cop').value = '3.5';
+							gebi('deadband').value = '0.625';
+							gebi('setpoint').value = '19.5';
+						} else if (x == 3) { //RG
+							gebi('capacitance').value = '.6';
+							gebi('resistance').value = '90';
+							gebi('power').value = '0.3';
+							gebi('cop').value = '2';
+							gebi('deadband').value = '1.5';
+							gebi('setpoint').value = '2.5';
+						} else { //WH
+							gebi('capacitance').value = '.4';
+							gebi('resistance').value = '120';
+							gebi('power').value = '4.5';
+							gebi('cop').value = '1';
+							gebi('deadband').value = '3';
+							gebi('setpoint').value = '48.5';
+						}
+					}
+				</script>
+					<option value="1">Air Conditioner</option>
+					<option value="2">Heat Pump</option>
+					<option value="3">Refrigerator</option>
+					<option value="4">Water Heater</option>
 				</select>
 			</div>
 			<div class="shortInput">
