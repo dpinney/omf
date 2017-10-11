@@ -1,0 +1,988 @@
+{
+    "attachments": {}, 
+    "links": [
+        {
+            "source": {
+                "index": 1, 
+                "fixed": true, 
+                "name": "bus1", 
+                "weight": 2, 
+                "px": 498.5623175733876, 
+                "py": 493.1128975604595, 
+                "y": 493.1128975604595, 
+                "x": 498.5623175733876, 
+                "treeIndex": 3, 
+                "chargeMultiple": 1, 
+                "objectType": "gridNode swingNode"
+            }, 
+            "objectType": "fromTo", 
+            "target": {
+                "index": 4, 
+                "fixed": true, 
+                "name": "bus4", 
+                "weight": 3, 
+                "px": 498.568813211926, 
+                "py": 498.6898225258043, 
+                "y": 498.6898225258043, 
+                "x": 498.568813211926, 
+                "treeIndex": 6, 
+                "chargeMultiple": 1, 
+                "objectType": "gridNode"
+            }, 
+            "treeIndex": 13
+        }, 
+        {
+            "source": {
+                "index": 4, 
+                "fixed": true, 
+                "name": "bus4", 
+                "weight": 3, 
+                "px": 498.568813211926, 
+                "py": 498.6898225258043, 
+                "y": 498.6898225258043, 
+                "x": 498.568813211926, 
+                "treeIndex": 6, 
+                "chargeMultiple": 1, 
+                "objectType": "gridNode"
+            }, 
+            "objectType": "fromTo", 
+            "target": {
+                "index": 5, 
+                "fixed": true, 
+                "name": "bus5", 
+                "weight": 2, 
+                "px": 494.33971029302796, 
+                "py": 502.6784119722501, 
+                "y": 502.6784119722501, 
+                "x": 494.33971029302796, 
+                "treeIndex": 7, 
+                "chargeMultiple": 1, 
+                "objectType": "load"
+            }, 
+            "treeIndex": 15
+        }, 
+        {
+            "source": {
+                "index": 5, 
+                "fixed": true, 
+                "name": "bus5", 
+                "weight": 2, 
+                "px": 494.33971029302796, 
+                "py": 502.6784119722501, 
+                "y": 502.6784119722501, 
+                "x": 494.33971029302796, 
+                "treeIndex": 7, 
+                "chargeMultiple": 1, 
+                "objectType": "load"
+            }, 
+            "objectType": "fromTo", 
+            "target": {
+                "index": 6, 
+                "fixed": true, 
+                "name": "bus6", 
+                "weight": 3, 
+                "px": 493.2403186828426, 
+                "py": 508.3838059996874, 
+                "y": 508.3838059996874, 
+                "x": 493.2403186828426, 
+                "treeIndex": 8, 
+                "chargeMultiple": 1, 
+                "objectType": "gridNode"
+            }, 
+            "treeIndex": 17
+        }, 
+        {
+            "source": {
+                "index": 3, 
+                "fixed": true, 
+                "name": "bus3", 
+                "weight": 2, 
+                "px": 488.70108562272026, 
+                "py": 511.66347586189056, 
+                "y": 511.66347586189056, 
+                "x": 488.70108562272026, 
+                "treeIndex": 5, 
+                "chargeMultiple": 1, 
+                "objectType": "gridNode"
+            }, 
+            "objectType": "fromTo", 
+            "target": {
+                "index": 6, 
+                "fixed": true, 
+                "name": "bus6", 
+                "weight": 3, 
+                "px": 493.2403186828426, 
+                "py": 508.3838059996874, 
+                "y": 508.3838059996874, 
+                "x": 493.2403186828426, 
+                "treeIndex": 8, 
+                "chargeMultiple": 1, 
+                "objectType": "gridNode"
+            }, 
+            "treeIndex": 19
+        }, 
+        {
+            "source": {
+                "index": 6, 
+                "fixed": true, 
+                "name": "bus6", 
+                "weight": 3, 
+                "px": 493.2403186828426, 
+                "py": 508.3838059996874, 
+                "y": 508.3838059996874, 
+                "x": 493.2403186828426, 
+                "treeIndex": 8, 
+                "chargeMultiple": 1, 
+                "objectType": "gridNode"
+            }, 
+            "objectType": "fromTo", 
+            "target": {
+                "index": 7, 
+                "fixed": true, 
+                "name": "bus7", 
+                "weight": 2, 
+                "px": 498.8578228935318, 
+                "py": 509.8752785679735, 
+                "y": 509.8752785679735, 
+                "x": 498.8578228935318, 
+                "treeIndex": 9, 
+                "chargeMultiple": 1, 
+                "objectType": "load"
+            }, 
+            "treeIndex": 21
+        }, 
+        {
+            "source": {
+                "index": 7, 
+                "fixed": true, 
+                "name": "bus7", 
+                "weight": 2, 
+                "px": 498.8578228935318, 
+                "py": 509.8752785679735, 
+                "y": 509.8752785679735, 
+                "x": 498.8578228935318, 
+                "treeIndex": 9, 
+                "chargeMultiple": 1, 
+                "objectType": "load"
+            }, 
+            "objectType": "fromTo", 
+            "target": {
+                "index": 8, 
+                "fixed": true, 
+                "name": "bus8", 
+                "weight": 3, 
+                "px": 504.3323801119032, 
+                "py": 508.00630564213844, 
+                "y": 508.00630564213844, 
+                "x": 504.3323801119032, 
+                "treeIndex": 10, 
+                "chargeMultiple": 1, 
+                "objectType": "gridNode"
+            }, 
+            "treeIndex": 23
+        }, 
+        {
+            "source": {
+                "index": 8, 
+                "fixed": true, 
+                "name": "bus8", 
+                "weight": 3, 
+                "px": 504.3323801119032, 
+                "py": 508.00630564213844, 
+                "y": 508.00630564213844, 
+                "x": 504.3323801119032, 
+                "treeIndex": 10, 
+                "chargeMultiple": 1, 
+                "objectType": "gridNode"
+            }, 
+            "objectType": "fromTo", 
+            "target": {
+                "index": 2, 
+                "fixed": true, 
+                "name": "bus2", 
+                "weight": 2, 
+                "px": 509.10346912636214, 
+                "py": 510.86863007353446, 
+                "y": 510.86863007353446, 
+                "x": 509.10346912636214, 
+                "treeIndex": 4, 
+                "chargeMultiple": 1, 
+                "objectType": "gridNode"
+            }, 
+            "treeIndex": 25
+        }, 
+        {
+            "source": {
+                "index": 8, 
+                "fixed": true, 
+                "name": "bus8", 
+                "weight": 3, 
+                "px": 504.3323801119032, 
+                "py": 508.00630564213844, 
+                "y": 508.00630564213844, 
+                "x": 504.3323801119032, 
+                "treeIndex": 10, 
+                "chargeMultiple": 1, 
+                "objectType": "gridNode"
+            }, 
+            "objectType": "fromTo", 
+            "target": {
+                "index": 9, 
+                "fixed": true, 
+                "name": "bus9", 
+                "weight": 2, 
+                "px": 502.98820659119474, 
+                "py": 502.3900674285172, 
+                "y": 502.3900674285172, 
+                "x": 502.98820659119474, 
+                "treeIndex": 11, 
+                "chargeMultiple": 1, 
+                "objectType": "load"
+            }, 
+            "treeIndex": 27
+        }, 
+        {
+            "source": {
+                "index": 9, 
+                "fixed": true, 
+                "name": "bus9", 
+                "weight": 2, 
+                "px": 502.98820659119474, 
+                "py": 502.3900674285172, 
+                "y": 502.3900674285172, 
+                "x": 502.98820659119474, 
+                "treeIndex": 11, 
+                "chargeMultiple": 1, 
+                "objectType": "load"
+            }, 
+            "objectType": "fromTo", 
+            "target": {
+                "index": 4, 
+                "fixed": true, 
+                "name": "bus4", 
+                "weight": 3, 
+                "px": 498.568813211926, 
+                "py": 498.6898225258043, 
+                "y": 498.6898225258043, 
+                "x": 498.568813211926, 
+                "treeIndex": 6, 
+                "chargeMultiple": 1, 
+                "objectType": "gridNode"
+            }, 
+            "treeIndex": 29
+        }, 
+        {
+            "source": {
+                "index": 19, 
+                "fixed": true, 
+                "name": "gen1_bus1", 
+                "weight": 1, 
+                "px": 498.8178508465718, 
+                "py": 487.7511396864791, 
+                "y": 487.7511396864791, 
+                "x": 498.8178508465718, 
+                "treeIndex": 30, 
+                "chargeMultiple": 1, 
+                "objectType": "load"
+            }, 
+            "target": {
+                "index": 1, 
+                "fixed": true, 
+                "name": "bus1", 
+                "weight": 2, 
+                "px": 498.5623175733876, 
+                "py": 493.1128975604595, 
+                "y": 493.1128975604595, 
+                "x": 498.5623175733876, 
+                "treeIndex": 3, 
+                "chargeMultiple": 1, 
+                "objectType": "gridNode swingNode"
+            }, 
+            "objectType": "parentChild"
+        }, 
+        {
+            "source": {
+                "index": 20, 
+                "fixed": true, 
+                "name": "gen1_bus2", 
+                "weight": 1, 
+                "px": 513.5671358175146, 
+                "py": 513.8661742508317, 
+                "y": 513.8661742508317, 
+                "x": 513.5671358175146, 
+                "treeIndex": 31, 
+                "chargeMultiple": 1, 
+                "objectType": "load"
+            }, 
+            "target": {
+                "index": 2, 
+                "fixed": true, 
+                "name": "bus2", 
+                "weight": 2, 
+                "px": 509.10346912636214, 
+                "py": 510.86863007353446, 
+                "y": 510.86863007353446, 
+                "x": 509.10346912636214, 
+                "treeIndex": 4, 
+                "chargeMultiple": 1, 
+                "objectType": "gridNode"
+            }, 
+            "objectType": "parentChild"
+        }, 
+        {
+            "source": {
+                "index": 21, 
+                "fixed": true, 
+                "name": "gen1_bus3", 
+                "weight": 1, 
+                "px": 484.7923880706016, 
+                "py": 515.4000384007725, 
+                "y": 515.4000384007725, 
+                "x": 484.7923880706016, 
+                "treeIndex": 32, 
+                "chargeMultiple": 1, 
+                "objectType": "load"
+            }, 
+            "target": {
+                "index": 3, 
+                "fixed": true, 
+                "name": "bus3", 
+                "weight": 2, 
+                "px": 488.70108562272026, 
+                "py": 511.66347586189056, 
+                "y": 511.66347586189056, 
+                "x": 488.70108562272026, 
+                "treeIndex": 5, 
+                "chargeMultiple": 1, 
+                "objectType": "gridNode"
+            }, 
+            "objectType": "parentChild"
+        }
+    ], 
+    "hiddenNodes": [], 
+    "tree": {
+        "24": {
+            "c22": "0.0000 nF/mile", 
+            "z22": "0.0000+74.3906j Ohm/mile", 
+            "z33": "0.0000+74.3906j Ohm/mile", 
+            "object": "line_configuration", 
+            "z11": "0.0000+74.3906j Ohm/mile", 
+            "c11": "0.0000 nF/mile", 
+            "c33": "0.0000 nF/mile", 
+            "name": "line_config_8_2"
+        }, 
+        "25": {
+            "phases": "ABC", 
+            "from": "bus8", 
+            "name": "line_8_2", 
+            "object": "overhead_line", 
+            "to": "bus2", 
+            "length": "1 mile", 
+            "configuration": "line_config_8_2"
+        }, 
+        "26": {
+            "c22": "681.9493 nF/mile", 
+            "z22": "38.0880+191.6303j Ohm/mile", 
+            "z33": "38.0880+191.6303j Ohm/mile", 
+            "object": "line_configuration", 
+            "z11": "38.0880+191.6303j Ohm/mile", 
+            "c11": "681.9493 nF/mile", 
+            "c33": "681.9493 nF/mile", 
+            "name": "line_config_8_9"
+        }, 
+        "27": {
+            "phases": "ABC", 
+            "from": "bus8", 
+            "name": "line_8_9", 
+            "object": "overhead_line", 
+            "to": "bus9", 
+            "length": "1 mile", 
+            "configuration": "line_config_8_9"
+        }, 
+        "20": {
+            "c22": "465.7759 nF/mile", 
+            "z22": "14.1640+119.9772j Ohm/mile", 
+            "z33": "14.1640+119.9772j Ohm/mile", 
+            "object": "line_configuration", 
+            "z11": "14.1640+119.9772j Ohm/mile", 
+            "c11": "465.7759 nF/mile", 
+            "c33": "465.7759 nF/mile", 
+            "name": "line_config_6_7"
+        }, 
+        "21": {
+            "phases": "ABC", 
+            "from": "bus6", 
+            "name": "line_6_7", 
+            "object": "overhead_line", 
+            "to": "bus7", 
+            "length": "1 mile", 
+            "configuration": "line_config_6_7"
+        }, 
+        "22": {
+            "c22": "332.0603 nF/mile", 
+            "z22": "10.1171+85.6980j Ohm/mile", 
+            "z33": "10.1171+85.6980j Ohm/mile", 
+            "object": "line_configuration", 
+            "z11": "10.1171+85.6980j Ohm/mile", 
+            "c11": "332.0603 nF/mile", 
+            "c33": "332.0603 nF/mile", 
+            "name": "line_config_7_8"
+        }, 
+        "23": {
+            "phases": "ABC", 
+            "from": "bus7", 
+            "name": "line_7_8", 
+            "object": "overhead_line", 
+            "to": "bus8", 
+            "length": "1 mile", 
+            "configuration": "line_config_7_8"
+        }, 
+        "28": {
+            "c22": "392.2323 nF/mile", 
+            "z22": "11.9025+101.1713j Ohm/mile", 
+            "z33": "11.9025+101.1713j Ohm/mile", 
+            "object": "line_configuration", 
+            "z11": "11.9025+101.1713j Ohm/mile", 
+            "c11": "392.2323 nF/mile", 
+            "c33": "392.2323 nF/mile", 
+            "name": "line_config_9_4"
+        }, 
+        "29": {
+            "phases": "ABC", 
+            "from": "bus9", 
+            "name": "line_9_4", 
+            "object": "overhead_line", 
+            "to": "bus4", 
+            "length": "1 mile", 
+            "configuration": "line_config_9_4"
+        }, 
+        "1": {
+            "omftype": "#set", 
+            "argument": "double_format=%+.12lg#set complex_format=%+.12lg%+.12lg%cmodule tape"
+        }, 
+        "0": {
+            "timezone": "PST8", 
+            "stoptime": "'2013-08-01 0:00:00'", 
+            "starttime": "'2013-08-01 0:00:00'", 
+            "clock": "clock"
+        }, 
+        "3": {
+            "phases": "ABC", 
+            "name": "bus1", 
+            "object": "node", 
+            "bustype": "SWING", 
+            "voltage_B": "199.1858-120.0000d kV", 
+            "voltage_C": "199.1858+120.0000d kV", 
+            "voltage_A": "199.1858+0.0000d kV", 
+            "nominal_voltage": "199186"
+        }, 
+        "2": {
+            "solver_method": "NR", 
+            "line_capacitance": "true", 
+            "line_limits": "FALSE", 
+            "module": "powerflow", 
+            "NR_iteration_limit": "100", 
+            "maximum_voltage_error": "1e-8"
+        }, 
+        "5": {
+            "phases": "ABC", 
+            "name": "bus3", 
+            "object": "node", 
+            "bustype": "PQ", 
+            "voltage_B": "199.1858-115.2289d kV", 
+            "voltage_C": "199.1858+124.7711d kV", 
+            "voltage_A": "199.1858+4.7711d kV", 
+            "nominal_voltage": "199186"
+        }, 
+        "4": {
+            "phases": "ABC", 
+            "name": "bus2", 
+            "object": "node", 
+            "bustype": "PQ", 
+            "voltage_B": "199.1858-110.3313d kV", 
+            "voltage_C": "199.1858+129.6687d kV", 
+            "voltage_A": "199.1858+9.6687d kV", 
+            "nominal_voltage": "199186"
+        }, 
+        "7": {
+            "phases": "ABC", 
+            "name": "bus5", 
+            "object": "load", 
+            "bustype": "PQ", 
+            "voltage_B": "194.3002-124.0173d kV", 
+            "voltage_C": "194.3002+115.9827d kV", 
+            "voltage_A": "194.3002-4.0173d kV", 
+            "nominal_voltage": "199186", 
+            "constant_power_B": "30.0000+10.0000j MVA", 
+            "constant_power_A": "30.0000+10.0000j MVA", 
+            "constant_power_C": "30.0000+10.0000j MVA"
+        }, 
+        "6": {
+            "phases": "ABC", 
+            "name": "bus4", 
+            "object": "node", 
+            "bustype": "PQ", 
+            "voltage_B": "196.5978-122.4066d kV", 
+            "voltage_C": "196.5978+117.5934d kV", 
+            "voltage_A": "196.5978-2.4066d kV", 
+            "nominal_voltage": "199186"
+        }, 
+        "9": {
+            "phases": "ABC", 
+            "name": "bus7", 
+            "object": "load", 
+            "bustype": "PQ", 
+            "voltage_B": "196.3265-119.3785d kV", 
+            "voltage_C": "196.3265+120.6215d kV", 
+            "voltage_A": "196.3265+0.6215d kV", 
+            "nominal_voltage": "199186", 
+            "constant_power_B": "33.3333+11.6667j MVA", 
+            "constant_power_A": "33.3333+11.6667j MVA", 
+            "constant_power_C": "33.3333+11.6667j MVA"
+        }, 
+        "8": {
+            "phases": "ABC", 
+            "name": "bus6", 
+            "object": "node", 
+            "bustype": "PQ", 
+            "voltage_B": "199.8582-118.0744d kV", 
+            "voltage_C": "199.8582+121.9256d kV", 
+            "voltage_A": "199.8582+1.9256d kV", 
+            "nominal_voltage": "199186"
+        }, 
+        "11": {
+            "phases": "ABC", 
+            "name": "bus9", 
+            "object": "load", 
+            "bustype": "PQ", 
+            "voltage_B": "190.7446-124.3499d kV", 
+            "voltage_C": "190.7446+115.6501d kV", 
+            "voltage_A": "190.7446-4.3499d kV", 
+            "nominal_voltage": "199186", 
+            "constant_power_B": "41.6667+16.6667j MVA", 
+            "constant_power_A": "41.6667+16.6667j MVA", 
+            "constant_power_C": "41.6667+16.6667j MVA"
+        }, 
+        "10": {
+            "phases": "ABC", 
+            "name": "bus8", 
+            "object": "node", 
+            "bustype": "PQ", 
+            "voltage_B": "198.4260-116.2009d kV", 
+            "voltage_C": "198.4260+123.7991d kV", 
+            "voltage_A": "198.4260+3.7991d kV", 
+            "nominal_voltage": "199186"
+        }, 
+        "13": {
+            "phases": "ABC", 
+            "from": "bus1", 
+            "name": "line_1_4", 
+            "object": "overhead_line", 
+            "to": "bus4", 
+            "length": "1 mile", 
+            "configuration": "line_config_1_4"
+        }, 
+        "12": {
+            "c22": "0.0000 nF/mile", 
+            "z22": "0.0000+68.5584j Ohm/mile", 
+            "z33": "0.0000+68.5584j Ohm/mile", 
+            "object": "line_configuration", 
+            "z11": "0.0000+68.5584j Ohm/mile", 
+            "c11": "0.0000 nF/mile", 
+            "c33": "0.0000 nF/mile", 
+            "name": "line_config_1_4"
+        }, 
+        "15": {
+            "phases": "ABC", 
+            "from": "bus4", 
+            "name": "line_4_5", 
+            "object": "overhead_line", 
+            "to": "bus5", 
+            "length": "1 mile", 
+            "configuration": "line_config_4_5"
+        }, 
+        "14": {
+            "c22": "352.1176 nF/mile", 
+            "z22": "20.2343+109.5030j Ohm/mile", 
+            "z33": "20.2343+109.5030j Ohm/mile", 
+            "object": "line_configuration", 
+            "z11": "20.2343+109.5030j Ohm/mile", 
+            "c11": "352.1176 nF/mile", 
+            "c33": "352.1176 nF/mile", 
+            "name": "line_config_4_5"
+        }, 
+        "17": {
+            "phases": "ABC", 
+            "from": "bus5", 
+            "name": "line_5_6", 
+            "object": "overhead_line", 
+            "to": "bus6", 
+            "length": "1 mile", 
+            "configuration": "line_config_5_6"
+        }, 
+        "16": {
+            "c22": "797.8362 nF/mile", 
+            "z22": "46.4198+202.3425j Ohm/mile", 
+            "z33": "46.4198+202.3425j Ohm/mile", 
+            "object": "line_configuration", 
+            "z11": "46.4198+202.3425j Ohm/mile", 
+            "c11": "797.8362 nF/mile", 
+            "c33": "797.8362 nF/mile", 
+            "name": "line_config_5_6"
+        }, 
+        "19": {
+            "phases": "ABC", 
+            "from": "bus3", 
+            "name": "line_3_6", 
+            "object": "overhead_line", 
+            "to": "bus6", 
+            "length": "1 mile", 
+            "configuration": "line_config_3_6"
+        }, 
+        "18": {
+            "c22": "0.0000 nF/mile", 
+            "z22": "0.0000+69.7486j Ohm/mile", 
+            "z33": "0.0000+69.7486j Ohm/mile", 
+            "object": "line_configuration", 
+            "z11": "0.0000+69.7486j Ohm/mile", 
+            "c11": "0.0000 nF/mile", 
+            "c33": "0.0000 nF/mile", 
+            "name": "line_config_3_6"
+        }, 
+        "31": {
+            "phases": "ABC", 
+            "name": "gen1_bus2", 
+            "parent": "bus2", 
+            "object": "load", 
+            "nominal_voltage": "199186", 
+            "constant_power_B": "-54.3333-4.8200j MVA", 
+            "constant_power_A": "-54.3333-4.8200j MVA", 
+            "constant_power_C": "-54.3333-4.8200j MVA"
+        }, 
+        "30": {
+            "phases": "ABC", 
+            "name": "gen1_bus1", 
+            "parent": "bus1", 
+            "object": "load", 
+            "nominal_voltage": "199186", 
+            "constant_power_B": "-23.9849-8.0230j MVA", 
+            "constant_power_A": "-23.9849-8.0230j MVA", 
+            "constant_power_C": "-23.9849-8.0230j MVA"
+        }, 
+        "34": {
+            "object": "currdump", 
+            "mode": "rect", 
+            "filename": "xOUT_9T_current_dump.csv"
+        }, 
+        "33": {
+            "object": "voltdump", 
+            "mode": "rect", 
+            "filename": "xOUT_9T_voltage_dump.csv"
+        }, 
+        "32": {
+            "phases": "ABC", 
+            "name": "gen1_bus3", 
+            "parent": "bus3", 
+            "object": "load", 
+            "nominal_voltage": "199186", 
+            "constant_power_B": "-28.3333+1.2163j MVA", 
+            "constant_power_A": "-28.3333+1.2163j MVA", 
+            "constant_power_C": "-28.3333+1.2163j MVA"
+        }
+    }, 
+    "nodes": [
+        {
+            "index": 0, 
+            "treeIndex": 2, 
+            "weight": 0, 
+            "px": 474.8528727717471, 
+            "py": 492.8565018622566, 
+            "y": 492.8565018622566, 
+            "x": 474.8528727717471, 
+            "fixed": true, 
+            "chargeMultiple": 1
+        }, 
+        {
+            "index": 1, 
+            "fixed": true, 
+            "name": "bus1", 
+            "weight": 2, 
+            "px": 498.5623175733876, 
+            "py": 493.1128975604595, 
+            "y": 493.1128975604595, 
+            "x": 498.5623175733876, 
+            "treeIndex": 3, 
+            "chargeMultiple": 1, 
+            "objectType": "gridNode swingNode"
+        }, 
+        {
+            "index": 2, 
+            "fixed": true, 
+            "name": "bus2", 
+            "weight": 2, 
+            "px": 509.10346912636214, 
+            "py": 510.86863007353446, 
+            "y": 510.86863007353446, 
+            "x": 509.10346912636214, 
+            "treeIndex": 4, 
+            "chargeMultiple": 1, 
+            "objectType": "gridNode"
+        }, 
+        {
+            "index": 3, 
+            "fixed": true, 
+            "name": "bus3", 
+            "weight": 2, 
+            "px": 488.70108562272026, 
+            "py": 511.66347586189056, 
+            "y": 511.66347586189056, 
+            "x": 488.70108562272026, 
+            "treeIndex": 5, 
+            "chargeMultiple": 1, 
+            "objectType": "gridNode"
+        }, 
+        {
+            "index": 4, 
+            "fixed": true, 
+            "name": "bus4", 
+            "weight": 3, 
+            "px": 498.568813211926, 
+            "py": 498.6898225258043, 
+            "y": 498.6898225258043, 
+            "x": 498.568813211926, 
+            "treeIndex": 6, 
+            "chargeMultiple": 1, 
+            "objectType": "gridNode"
+        }, 
+        {
+            "index": 5, 
+            "fixed": true, 
+            "name": "bus5", 
+            "weight": 2, 
+            "px": 494.33971029302796, 
+            "py": 502.6784119722501, 
+            "y": 502.6784119722501, 
+            "x": 494.33971029302796, 
+            "treeIndex": 7, 
+            "chargeMultiple": 1, 
+            "objectType": "load"
+        }, 
+        {
+            "index": 6, 
+            "fixed": true, 
+            "name": "bus6", 
+            "weight": 3, 
+            "px": 493.2403186828426, 
+            "py": 508.3838059996874, 
+            "y": 508.3838059996874, 
+            "x": 493.2403186828426, 
+            "treeIndex": 8, 
+            "chargeMultiple": 1, 
+            "objectType": "gridNode"
+        }, 
+        {
+            "index": 7, 
+            "fixed": true, 
+            "name": "bus7", 
+            "weight": 2, 
+            "px": 498.8578228935318, 
+            "py": 509.8752785679735, 
+            "y": 509.8752785679735, 
+            "x": 498.8578228935318, 
+            "treeIndex": 9, 
+            "chargeMultiple": 1, 
+            "objectType": "load"
+        }, 
+        {
+            "index": 8, 
+            "fixed": true, 
+            "name": "bus8", 
+            "weight": 3, 
+            "px": 504.3323801119032, 
+            "py": 508.00630564213844, 
+            "y": 508.00630564213844, 
+            "x": 504.3323801119032, 
+            "treeIndex": 10, 
+            "chargeMultiple": 1, 
+            "objectType": "gridNode"
+        }, 
+        {
+            "index": 9, 
+            "fixed": true, 
+            "name": "bus9", 
+            "weight": 2, 
+            "px": 502.98820659119474, 
+            "py": 502.3900674285172, 
+            "y": 502.3900674285172, 
+            "x": 502.98820659119474, 
+            "treeIndex": 11, 
+            "chargeMultiple": 1, 
+            "objectType": "load"
+        }, 
+        {
+            "index": 10, 
+            "fixed": true, 
+            "name": "line_config_1_4", 
+            "weight": 0, 
+            "px": 503.0732371796994, 
+            "py": 474.1791836567786, 
+            "y": 474.1791836567786, 
+            "x": 503.0732371796994, 
+            "treeIndex": 12, 
+            "chargeMultiple": 1, 
+            "objectType": "line_configuration"
+        }, 
+        {
+            "index": 11, 
+            "fixed": true, 
+            "name": "line_config_4_5", 
+            "weight": 0, 
+            "px": 521.374802249912, 
+            "py": 486.6783731505242, 
+            "y": 486.6783731505242, 
+            "x": 521.374802249912, 
+            "treeIndex": 14, 
+            "chargeMultiple": 1, 
+            "objectType": "line_configuration"
+        }, 
+        {
+            "index": 12, 
+            "fixed": true, 
+            "name": "line_config_5_6", 
+            "weight": 0, 
+            "px": 472.7386658822431, 
+            "py": 507.0364416158217, 
+            "y": 507.0364416158217, 
+            "x": 472.7386658822431, 
+            "treeIndex": 16, 
+            "chargeMultiple": 1, 
+            "objectType": "line_configuration"
+        }, 
+        {
+            "index": 13, 
+            "fixed": true, 
+            "name": "line_config_3_6", 
+            "weight": 0, 
+            "px": 513.7624505358837, 
+            "py": 478.5770429614615, 
+            "y": 478.5770429614615, 
+            "x": 513.7624505358837, 
+            "treeIndex": 18, 
+            "chargeMultiple": 1, 
+            "objectType": "line_configuration"
+        }, 
+        {
+            "index": 14, 
+            "fixed": true, 
+            "name": "line_config_6_7", 
+            "weight": 0, 
+            "px": 491.0903908564836, 
+            "py": 475.4300042300833, 
+            "y": 475.4300042300833, 
+            "x": 491.0903908564836, 
+            "treeIndex": 20, 
+            "chargeMultiple": 1, 
+            "objectType": "line_configuration"
+        }, 
+        {
+            "index": 15, 
+            "fixed": true, 
+            "name": "line_config_7_8", 
+            "weight": 0, 
+            "px": 525.3436870780127, 
+            "py": 512.294017508302, 
+            "y": 512.294017508302, 
+            "x": 525.3436870780127, 
+            "treeIndex": 22, 
+            "chargeMultiple": 1, 
+            "objectType": "line_configuration"
+        }, 
+        {
+            "index": 16, 
+            "fixed": true, 
+            "name": "line_config_8_2", 
+            "weight": 0, 
+            "px": 502.43352548815056, 
+            "py": 528.4523335351222, 
+            "y": 528.4523335351222, 
+            "x": 502.43352548815056, 
+            "treeIndex": 24, 
+            "chargeMultiple": 1, 
+            "objectType": "line_configuration"
+        }, 
+        {
+            "index": 17, 
+            "fixed": true, 
+            "name": "line_config_8_9", 
+            "weight": 0, 
+            "px": 481.01135082958564, 
+            "py": 482.06755250430103, 
+            "y": 482.06755250430103, 
+            "x": 481.01135082958564, 
+            "treeIndex": 26, 
+            "chargeMultiple": 1, 
+            "objectType": "line_configuration"
+        }, 
+        {
+            "index": 18, 
+            "fixed": true, 
+            "name": "line_config_9_4", 
+            "weight": 0, 
+            "px": 525.5099837554112, 
+            "py": 497.26914865278434, 
+            "y": 497.26914865278434, 
+            "x": 525.5099837554112, 
+            "treeIndex": 28, 
+            "chargeMultiple": 1, 
+            "objectType": "line_configuration"
+        }, 
+        {
+            "index": 19, 
+            "fixed": true, 
+            "name": "gen1_bus1", 
+            "weight": 1, 
+            "px": 498.8178508465718, 
+            "py": 487.7511396864791, 
+            "y": 487.7511396864791, 
+            "x": 498.8178508465718, 
+            "treeIndex": 30, 
+            "chargeMultiple": 1, 
+            "objectType": "load"
+        }, 
+        {
+            "index": 20, 
+            "fixed": true, 
+            "name": "gen1_bus2", 
+            "weight": 1, 
+            "px": 513.5671358175146, 
+            "py": 513.8661742508317, 
+            "y": 513.8661742508317, 
+            "x": 513.5671358175146, 
+            "treeIndex": 31, 
+            "chargeMultiple": 1, 
+            "objectType": "load"
+        }, 
+        {
+            "index": 21, 
+            "fixed": true, 
+            "name": "gen1_bus3", 
+            "weight": 1, 
+            "px": 484.7923880706016, 
+            "py": 515.4000384007725, 
+            "y": 515.4000384007725, 
+            "x": 484.7923880706016, 
+            "treeIndex": 32, 
+            "chargeMultiple": 1, 
+            "objectType": "load"
+        }
+    ], 
+    "hiddenLinks": [], 
+    "layoutVars": {
+        "gravity": 0.1, 
+        "friction": 0.9, 
+        "charge": -5, 
+        "linkDistance": 5, 
+        "linkStrength": 5, 
+        "theta": 0.8
+    }
+}

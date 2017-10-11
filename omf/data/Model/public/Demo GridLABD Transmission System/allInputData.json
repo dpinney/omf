@@ -1,0 +1,7 @@
+{
+    "created": "2017-10-11 16:10:33.344052", 
+    "layoutAlgorithm": "forceDirected", 
+    "modelType": "voltageDrop", 
+    "feederName1": "ieee9bus", 
+    "runTime": "0:00:00"
+}
