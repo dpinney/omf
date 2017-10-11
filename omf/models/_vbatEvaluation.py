@@ -74,7 +74,7 @@ def work(modelDir, inputDict):
 		outData["maxEnergySeries"] = E_UL
 		# Stdout/stderr.
 		outData["stdout"] = "Success"
-		inputDict["stderr"] = ""
+		#inputDict["stderr"] = ""
 	except:
 		outData["stdout"] = "Failure"
 		inputDict["stderr"] = myOut
