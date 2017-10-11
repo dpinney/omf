@@ -90,9 +90,14 @@ elif platform.system()=='Windows':
 elif platform.system()=="Darwin":
 	print 'Mac'
 	# Install homebrew
-	# os.system('/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
-	# os.system('brew install wget python ffmpeg git graphviz')
-	# os.system('brew link --overwrite python')
-	# os.system('cd omf')
-	# os.system('pip install -r requirements.txt')
-	# os.system('python setup.py develop')
+	os.system('/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
+	os.system('brew install wget python ffmpeg git graphviz')
+	os.system('brew link --overwrite python')
+	# Works for gridlab version 3.2, will need to update when we use gridlabd v4
+	os.system('wget -O gridlabd.dmg --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd_3.2.0.dmg')
+	os.system('sudo hdiutil attach gridlabd.dmg')
+	os.system('sudo installer -package /Volumes/GridLAB-D\ 3.2.0/gridlabd.mpkg -target /')
+	os.system('sudo hdiutil detach /Volumes/GridLAB-D\ 3.2.0')
+	os.system('cd omf')
+	os.system('pip install -r requirements.txt')
+	os.system('python setup.py develop')
