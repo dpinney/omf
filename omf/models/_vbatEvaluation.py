@@ -56,24 +56,36 @@ def work(modelDir, inputDict):
 		.replace('ARGS', inputDict['zipcode'] + ',' + inputDict['load_type'] +',[' + inputDict['capacitance'] + ','+ inputDict['resistance'] + 
 			',' + inputDict['power'] + ',' + inputDict['cop'] + ',' + inputDict['deadband'] + ',' + inputDict['setpoint'] + ',' +
 			inputDict['number_devices'] + ']')
-	with open(pJoin(modelDir,'stderr.txt'),'w') as stderr:
-		myOut = subprocess.check_output(command, shell=True, cwd=vbatPath, stderr=stderr)
-	P_lower = myOut.partition("P_lower =\n\n")[2]
-	P_lower = P_lower.partition("\n\nn")[0]
-	P_lower = map(float,P_lower.split('\n'))
-	P_upper = myOut.partition("P_upper =\n\n")[2]
-	P_upper = P_upper.partition("\n\nn")[0]
-	P_upper = map(float,P_upper.split('\n'))
-	E_UL = myOut.partition("E_UL =\n\n")[2]
-	E_UL = E_UL.partition("\n\n")[0]
-	E_UL = map(float,E_UL.split('\n'))
-	# Format results to go in chart.
-	outData["minPowerSeries"] = [-1*x for x in P_lower]
-	outData["maxPowerSeries"] = P_upper
-	outData["minEnergySeries"] = [-1*x for x in E_UL]
-	outData["maxEnergySeries"] = E_UL
-	# Stdout/stderr.
-	outData["stdout"] = "Success"
+	try:
+		myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
+		P_lower = myOut.partition("P_lower =\n\n")[2]
+		P_lower = P_lower.partition("\n\nn")[0]
+		P_lower = map(float,P_lower.split('\n'))
+		P_upper = myOut.partition("P_upper =\n\n")[2]
+		P_upper = P_upper.partition("\n\nn")[0]
+		P_upper = map(float,P_upper.split('\n'))
+		E_UL = myOut.partition("E_UL =\n\n")[2]
+		E_UL = E_UL.partition("\n\n")[0]
+		E_UL = map(float,E_UL.split('\n'))
+		# Format results to go in chart.
+		outData["minPowerSeries"] = [-1*x for x in P_lower]
+		outData["maxPowerSeries"] = P_upper
+		outData["minEnergySeries"] = [-1*x for x in E_UL]
+		outData["maxEnergySeries"] = E_UL
+		# Stdout/stderr.
+		outData["stdout"] = "Success"
+		#inputDict["stderr"] = ""
+	except:
+		outData["stdout"] = "Failure"
+		inputDict["stderr"] = myOut
+		#outData["stderr"] = myOut
+		#with open(os.path.join(modelDir,'stderr.txt'),'w') as errorFile:
+		#	errorFile.write(myOut)
+		#with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
+		#	json.dump(inputDict, inFile, indent=4)
+		'''inJson = json.load(open(pJoin(modelDir,"allInputData.json")))
+			inJson["stderr"] = myOut
+			allInputData = json.dumps(inJson)'''
 	return outData
 
 def new(modelDir):
