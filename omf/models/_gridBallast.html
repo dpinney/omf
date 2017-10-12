@@ -564,14 +564,14 @@
             'color': 'red',
             'dashStyle': 'dash',
             'value': new Date(allOutputData.gridBallast.eventStart),
-            'width': 1.5,
+            'width': 1,
             'label': {'text':'Event Start'}
           },
           {
             'color': 'red',
             'dashStyle': 'dash',
             'value': new Date(allOutputData.gridBallast.eventEnd),
-            'width': 1.5,
+            'width': 1,
             'label': {'text':'Event End'}
           }
         ]
@@ -579,7 +579,73 @@
         new Highcharts.Chart(localHighChart);
       </script>
     </div>
-    <p class="reportTitle postRun">Availability Details <a target="_self" class="toggle">Hide / Show</a></p>
+    <p class="reportTitle postRun">Availability Magnitude <a target="_self" class="toggle">Hide / Show</a></p>
+    <div id="magnitudeReport" class="tightContent postRun">
+      <div id="magnitudeChart"></div>
+      <script type="text/javascript">
+        var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+        localHighChart['chart']['renderTo'] = 'magnitudeChart'
+        localHighChart['chart']['type'] = 'line'
+        localHighChart['chart']['width'] = 1000
+        localHighChart['chart']['height'] = 250
+        localHighChart['series'] = [
+          {
+            'showInLegend': false,
+            'data': allOutputData.gridBallast.availabilityMagnitude,
+            'color': 'gray'
+          }
+          // {
+          //   'showInLegend': false,
+          //   'data': allOutputData.gridBallast.totalNetworkLoad,
+          //   'color': 'gray'
+          // }
+        ]
+        localHighChart['xAxis']['title'] = {'text': ''}
+        localHighChart['xAxis']['min'] = new Date(allOutputData.timeStamps[0]).getTime()
+        localHighChart['xAxis']['max'] = new Date(allOutputData.timeStamps[allOutputData.timeStamps.length-1]).getTime()
+        localHighChart['xAxis']['plotLines'] = [
+          {
+            'color': 'red',
+            'dashStyle': 'dash',
+            'value': new Date(allOutputData.gridBallast.eventStart),
+            'width': 1,
+            'label': {'text':'Event Start'}
+          },
+          {
+            'color': 'red',
+            'dashStyle': 'dash',
+            'value': new Date(allOutputData.gridBallast.eventEnd),
+            'width': 1,
+            'label': {'text':'Event End'}
+          }
+        ]
+        localHighChart['yAxis']['title'] = {'text': 'Total GridBallast Load (kW)'}
+        localHighChart['yAxis']['plotLines'] = [
+          {
+            'color': 'red',
+            'dashStyle': 'dash',
+            'value': Math.max(...allOutputData.gridBallast.availabilityMagnitude),
+            'width': 1,
+            'label': {
+              'text':'MAX',
+              'style': {'color': 'red'}
+            }
+          },
+          {
+            'color': 'red',
+            'dashStyle': 'dash',
+            'value': Math.min(...allOutputData.gridBallast.availabilityMagnitude),
+            'width': 1,
+            'label': {
+              'text':'MIN',
+              'style': {'color': 'red'}
+            }
+          },
+        ]
+        new Highcharts.Chart(localHighChart);
+      </script>
+    </div>
+    <p class="reportTitle postRun">Availability Percent <a target="_self" class="toggle">Hide / Show</a></p>
     <div id="availabilityReport" class="tightContent postRun">
       <div id="availabilityChart"></div>
       <script type="text/javascript">
@@ -591,7 +657,7 @@
         localHighChart['series'] = [
           {
             'showInLegend': false,
-            'data': allOutputData.gridBallast.availabilityMagnitude,
+            'data': allOutputData.gridBallast.availabilityPercent,
             'color': 'gray'
           }
         ]
@@ -603,39 +669,49 @@
             'color': 'red',
             'dashStyle': 'dash',
             'value': new Date(allOutputData.gridBallast.eventStart),
-            'width': 1.5,
+            'width': 1,
             'label': {'text':'Event Start'}
           },
           {
             'color': 'red',
             'dashStyle': 'dash',
             'value': new Date(allOutputData.gridBallast.eventEnd),
-            'width': 1.5,
+            'width': 1,
             'label': {'text':'Event End'}
-          },
-          {
-            'color': 'red',
-            'dashStyle': 'dash',
-            'value': new Date(allOutputData.gridBallast.recoveryTime),
-            'width': 1.5,
-            'label': {'text': 'tRecovery'}
           }
         ]
-        localHighChart['yAxis']['title'] = {'text': 'Total Load (kW)'}
+        localHighChart['yAxis']['title'] = {'text': 'GridBallast Load (% of Net Load)'}
         localHighChart['yAxis']['plotLines'] = [
           {
             'color': 'red',
             'dashStyle': 'dash',
-            'value': Math.max(...allOutputData.gridBallast.availabilityMagnitude),
-            'width': 1.5,
-            'label': {'text':'MAX'}
+            'value': Math.max(...allOutputData.gridBallast.availabilityPercent),
+            'width': 1,
+            'label': {
+              'text':'MAX',
+              'style': {'color': 'red'}
+            }
           },
           {
             'color': 'red',
             'dashStyle': 'dash',
-            'value': Math.min(...allOutputData.gridBallast.availabilityMagnitude),
-            'width': 1.5,
-            'label': {'text':'MIN'}
+            'value': Math.min(...allOutputData.gridBallast.availabilityPercent),
+            'width': 1,
+            'label': {
+              'text':'MIN',
+              'style': {'color': 'red'}
+            }
+          },
+          {
+            'color': 'gray',
+            'dashStyle': 'dash',
+            'value': 5.0,
+            'width': 1,
+            'label': {
+              'text':'RMT',
+              'align': 'right',
+              'style': {'color': 'gray'}
+            }
           }
         ]
         new Highcharts.Chart(localHighChart);
@@ -665,21 +741,21 @@
             'color': 'red',
             'dashStyle': 'dash',
             'value': new Date(allOutputData.gridBallast.eventStart),
-            'width': 1.5,
+            'width': 1,
             'label': {'text':'Event Start'}
           },
           {
             'color': 'red',
             'dashStyle': 'dash',
             'value': new Date(allOutputData.gridBallast.eventEnd),
-            'width': 1.5,
+            'width': 1,
             'label': {'text':'Event End'}
           },
           // {
           //   'color': 'red',
           //   'dashStyle': 'dash',
           //   'value': new Date(allOutputData.gridBallast.recoveryTime),
-          //   'width': 1.5,
+          //   'width': 1,
           //   'label': {'text': 'tRecovery'}
           // }
         ]

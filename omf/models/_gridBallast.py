@@ -57,13 +57,19 @@ def work(modelDir, inputDict):
 	if sys.platform == 'linux2':
 		pass
 	else:
+		# # tree[14,20,27,28,47] empty for UCS Egan
+		# tree[14] = {'omftype':'#include', 'argument':'\"hot_water_demand.glm\"'}
+		# tree[20] = {'omftype':'#include', 'argument':'\"lock_mode_schedule.glm\"'}
+		# tree[27] = {'omftype':'#include', 'argument':'\"control_priority_schedule.glm\"'}
+		# # Attach frequency player
+		# tree[28] = {'omftype':'class player', 'argument':'{double value;}'}
+		
 		# HACK: tree[10:19] is empty
-		# tree[14,20,27,28,47] empty for UCS Egan
-		tree[14] = {'omftype':'#include', 'argument':'\"hot_water_demand.glm\"'}
-		tree[20] = {'omftype':'#include', 'argument':'\"lock_mode_schedule.glm\"'}
-		tree[27] = {'omftype':'#include', 'argument':'\"controller_priority_schedule.glm\"'}
+		tree[11] = {'omftype':'#include', 'argument':'\"hot_water_demand.glm\"'}
+		tree[12] = {'omftype':'#include', 'argument':'\"lock_mode_schedule.glm\"'}
+		tree[13] = {'omftype':'#include', 'argument':'\"control_priority_schedule.glm\"'}
 		# Attach frequency player
-		tree[28] = {'omftype':'class player', 'argument':'{double value;}'}
+		tree[14] = {'omftype':'class player', 'argument':'{double value;}'}
 		tree[feeder.getMaxKey(tree)+1] = {'object':'player', 'file':'frequency.PLAYER', 'property':'value', 'name':'frequency', 'loop':0}
 		# Set up GridBallast Controls
 		totalWH = 0
@@ -90,10 +96,9 @@ def work(modelDir, inputDict):
 	 			# tree[key]['enable_lock'] = 'temp_lock_enable'
 	 			# tree[key]['lock_STATUS'] = 'temp_lock_status'
 	 			# Controller Priority: a.lock, b.freq, c.volt, d.therm
-	 			# tree[key]['controller_priority'] = 3214 #default:therm>lock>freq>volt
-	 			# tree[key]['controller_priority'] = 1324 #therm>freq>volt>lock
+	 			tree[key]['controller_priority'] = 3214 #default:therm>lock>freq>volt
 	 			# tree[key]['controller_priority'] = 1423 #freq>therm>volt>lock
-	 			tree[key]['controller_priority'] = 'controller_priority'
+	 			# tree[key]['controller_priority'] = 'control_priority'
 		 		# fix waterheater property demand to water_demand for newer GridLAB-D versions
 		 		if 'demand' in tree[key]:
 		 			# tree[key]['water_demand'] = tree[key]['demand']
@@ -105,10 +110,10 @@ def work(modelDir, inputDict):
 		 		totalZIP += 1
 	 			gbZIP += 1
 		 		# Frequency control parameters
-	 			# tree[key]['enable_freq_control'] = 'true'
-	 			# tree[key]['measured_frequency'] = 'frequency.value'
-	 			# tree[key]['freq_lowlimit'] = 59
-	 			# tree[key]['freq_uplimit'] = 61
+	 			tree[key]['enable_freq_control'] = 'true'
+	 			tree[key]['measured_frequency'] = 'frequency.value'
+	 			tree[key]['freq_lowlimit'] = 59
+	 			tree[key]['freq_uplimit'] = 61
 	 			# tree[key]['average_delay_time'] = 60
 	 			# Voltage control parameters
 	 			# tree[key]['enable_volt_control'] = 'true'
@@ -117,7 +122,7 @@ def work(modelDir, inputDict):
 	 			# Lock Mode parameters
 	 			# tree[key]['enable_lock'] = 'temp_lock_enable'
 	 			# tree[key]['lock_STATUS'] = 'temp_lock_status'
-	 			# tree[key]['controller_priority'] = 4321 #default:lock>freq>volt>therm
+	 			tree[key]['controller_priority'] = 4321 #default:lock>freq>volt>therm
 	 			# tree[key]['controller_priority'] = 2431 #freq>volt>lock>therm
 	 			# tree[key]['groupid'] = 'fan'
 
@@ -135,6 +140,7 @@ def work(modelDir, inputDict):
 	tree[feeder.getMaxKey(tree)+1] = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'is_waterheater_on', 'interval':60, 'file':'allWaterheaterOn.csv'}
 	# Attach recorder for waterheater tank temperatures
 	tree[feeder.getMaxKey(tree)+1] = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'temperature', 'interval':60, 'file':'allWaterheaterTemp.csv'}
+	
 	# Attach recorders for system voltage map:
 	stub = {'object':'group_recorder', 'group':'"class=node"', 'interval':60}
 	for phase in ['A','B','C']:
@@ -285,9 +291,9 @@ def work(modelDir, inputDict):
 	# Print gridBallast Outputs to allOutputData.json
 	outData['gridBallast'] = {}
 	if 'allMeterPower.csv' in rawOut:
-		outData['gridBallast']['totalNetworkLoad'] = rawOut.get('allMeterPower.csv')['sum(measured_real_power)']
+		outData['gridBallast']['totalNetworkLoad'] = [x/1000 for x in rawOut.get('allMeterPower.csv')['sum(measured_real_power)']]
 	if ('allZIPloadPower.csv' in rawOut) and ('allWaterheaterLoad.csv' in rawOut):
-		outData['gridBallast']['availabilityMagnitude'] = [x + y for x, y in zip(rawOut.get('allWaterheaterLoad.csv')['sum(actual_load)'], rawOut.get('allZIPloadPower.csv')['sum(base_power)'])]
+		outData['gridBallast']['availabilityMagnitude'] = [x[0] + x[1] for x in zip(rawOut.get('allWaterheaterLoad.csv')['sum(actual_load)'], rawOut.get('allZIPloadPower.csv')['sum(base_power)'])]
 	if 'allZIPloadDemand.csv' in rawOut:
 		outData['gridBallast']['ZIPloadDemand'] = {}
 		for key in rawOut['allZIPloadDemand.csv']:
@@ -349,15 +355,20 @@ def work(modelDir, inputDict):
 	outData['gridBallast']['offDuration'] = str(offDuration)
 	# Reserve Magnitude Target (RMT)
 	availMag = outData['gridBallast']['availabilityMagnitude']
-	totNetLoad = outData['gridBallast']['totalNetworkLoad']
-	rmt = 100*1000*sum(availMag)/sum(totNetLoad)
-	outData['gridBallast']['rmt'] = rmt
+	totalNetLoad = outData['gridBallast']['totalNetworkLoad']
+	availPerc = [100*x[0]/x[1] for x in zip(availMag,totalNetLoad)]
+	outData['gridBallast']['availabilityPercent'] = availPerc
+	# rmt = 100*sum(availMag)/sum(totalNetLoad)
+	outData['gridBallast']['rmt'] = 5.0
 	# Reserve Magnitude Variability Tolerance (RMVT)
-	avgAvailMag = sum(availMag)/len(availMag)
-	rmvtMax = max(availMag)/avgAvailMag
-	rmvtMin = min(availMag)/avgAvailMag
-	rmvt = rmvtMax - rmvtMin
-	outData['gridBallast']['rmvt'] = rmvt
+	# avgAvailMag = sum(availMag)/len(availMag)
+	# rmvtMax = max(availMag)/avgAvailMag
+	# rmvtMin = min(availMag)/avgAvailMag
+	# rmvt = rmvtMax - rmvtMin
+	if min(availPerc) > 7.0:
+		outData['gridBallast']['rmvt'] = 0
+	else:
+		outData['gridBallast']['rmvt'] = 5.0 - min(availPerc)
 	# Availability
 	notAvail = float(availMag.count(0))/len(outData['timeStamps'])
 	avail = (1-notAvail)*100
@@ -568,7 +579,7 @@ def new(modelDir):
 		"zipCode": "59001",
 		# "feederName1": "Olin Barre GH EOL Solar GridBallast",
 		"feederName1": "UCS Egan Housed",
-		# "feederName1": "Connexus West End Housed Schedule Connected",
+		# "feederName1": "Connexus West End Final Fixed",
 		"simStartDate": "2012-01-01 12:00:00",
 		"simLength": "180",
 		"simLengthUnits": "minutes", #hours
