@@ -64,6 +64,40 @@ def work(modelDir, inputDict):
 		copyStub['property'] = 'voltage_' + phase
 		copyStub['file'] = phase.lower() + 'nVoltDump.csv'
 		tree[feeder.getMaxKey(tree) + 1] = copyStub
+	# Attach current recorder for overhead_lines
+	currentStub = {'object':'group_recorder', 'group':'"class=overhead_line"', 'interval':3600}
+	for phase in ['A','B','C']:
+		copyCurrentStub = dict(currentStub)
+		copyCurrentStub['property'] = 'current_out_' + phase
+		copyCurrentStub['file'] = 'OH_line_current_phase' + phase + '.csv'
+		tree[feeder.getMaxKey(tree) + 1] = copyCurrentStub
+	rating_stub = {'object':'group_recorder', 'group':'"class=overhead_line"', 'interval':3600}
+	copyRatingStub = dict(rating_stub)
+	copyRatingStub['property'] = 'continuous_rating'
+	copyRatingStub['file'] = 'OH_line_cont_rating.csv'
+	tree[feeder.getMaxKey(tree) + 1] = copyRatingStub
+	flow_stub = {'object':'group_recorder', 'group':'"class=overhead_line"', 'interval':3600}
+	copyFlowStub = dict(flow_stub)
+	copyFlowStub['property'] = 'flow_direction'
+	copyFlowStub['file'] = 'OH_line_flow_direc.csv'
+	tree[feeder.getMaxKey(tree) + 1] = copyFlowStub
+	# Attach current recorder for underground_lines
+	currentStubOH = {'object':'group_recorder', 'group':'"class=underground_line"', 'interval':3600}
+	for phase in ['A','B','C']:
+		copyCurrentStubOH = dict(currentStubOH)
+		copyCurrentStubOH['property'] = 'current_out_' + phase
+		copyCurrentStubOH['file'] = 'UG_line_current_phase' + phase + '.csv'
+		tree[feeder.getMaxKey(tree) + 1] = copyCurrentStubOH
+	ug_rating_stub = {'object':'group_recorder', 'group':'"class=underground_line"', 'interval':3600}
+	copyUGRatingStub = dict(ug_rating_stub)
+	copyUGRatingStub['property'] = 'continuous_rating'
+	copyUGRatingStub['file'] = 'UG_line_cont_rating.csv'
+	tree[feeder.getMaxKey(tree) + 1] = copyUGRatingStub
+	ug_flow_stub = {'object':'group_recorder', 'group':'"class=underground_line"', 'interval':3600}
+	ugCopyFlowStub = dict(ug_flow_stub)
+	ugCopyFlowStub['property'] = 'flow_direction'
+	ugCopyFlowStub['file'] = 'UG_line_flow_direc.csv'
+	tree[feeder.getMaxKey(tree) + 1] = ugCopyFlowStub
 	# And get meters for system voltage map:
 	stub = {'object':'group_recorder', 'group':'"class=triplex_meter"', 'interval':3600}
 	for phase in ['1','2']:
@@ -99,7 +133,7 @@ def work(modelDir, inputDict):
 						'node_instantaneous_voltage_limit_lower':0,'line_thermal_limit_upper':1,'echo':'false','node_continuous_voltage_limit_upper':1.05,
 						'interval':30,'line_thermal_limit_lower':0,'summary':'Violation_Summary.csv','inverter_v_chng_interval':60,
 						'xfrmr_thermal_limit_upper':2,'inverter_v_chng_per_interval_upper_bound':0.050}
-	# tree[feeder.getMaxKey(tree) + 1] = violationRecorder
+	tree[feeder.getMaxKey(tree) + 1] = violationRecorder
 	feeder.adjustTime(tree=tree, simLength=float(inputDict["simLength"]),
 		simLengthUnits=inputDict["simLengthUnits"], simStartDate=inputDict["simStartDate"])
 	# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
@@ -273,24 +307,85 @@ def work(modelDir, inputDict):
 		outData['minVoltBand'] = minVoltBand
 		outData['maxVoltBand'] = maxVoltBand
 	# Violation Summary and Log
-	# violationData = ''
-	# violationArray = []
-	# with open(pJoin(modelDir,"Violation_Summary.csv")) as vioSum:
-	# 	reader = csv.reader(vioSum)
-	# 	for row in reader:
-	# 		violationArray.append(row)	
-	# for row in violationArray[4:]:
-	# 	violationData += str(' '.join(row)) + "\n"
-	# outData["violationSummary"] = violationData
-	# violationLogArray = []
-	# violationLog = ''
-	# with open(pJoin(modelDir,"Violation_Log.csv")) as vioLog:
-	# 	logger = csv.reader(vioLog)
-	# 	for row in logger:
-	# 		violationLogArray.append(row)
-	# for row in violationLogArray[6:]:
-	# 	violationLog += str(' '.join(row)) + "\n"
-	# outData['violationLog'] = violationLog
+	violationData = ''
+	violationArray = []
+	with open(pJoin(modelDir,"Violation_Summary.csv")) as vioSum:
+		reader = csv.reader(vioSum)
+		for row in reader:
+			violationArray.append(row)	
+	for row in violationArray[4:]:
+		violationData += str(' '.join(row)) + "\n"
+	outData["violationSummary"] = violationData
+	violationLogArray = []
+	violationLog = ''
+	with open(pJoin(modelDir,"Violation_Log.csv")) as vioLog:
+		logger = csv.reader(vioLog)
+		for row in logger:
+			violationLogArray.append(row)
+	for row in violationLogArray[6:]:
+		violationLog += str(' '.join(row)) + "\n"
+	outData['violationLog'] = violationLog
+	# Line current calculations
+	# Overhead Lines
+	ohCurrents = {}
+	for key in rawOut['OH_line_current_phaseA.csv']:
+		ohCurrents[str(key)] = {} 
+		if key != '# timestamp':
+			currentArray = []
+			# Finding currents of all phases on the line
+			for i,current in enumerate(rawOut['OH_line_current_phaseA.csv'][key]):
+				currA = current
+				currB = rawOut['OH_line_current_phaseB.csv'][key][i]
+				currC = rawOut['OH_line_current_phaseC.csv'][key][i]
+				flowDir = rawOut['OH_line_flow_direc.csv'][key][i]
+				lineRating = rawOut['OH_line_cont_rating.csv'][key][i]
+				if 'R' in flowDir:
+					direction = -1
+				else :
+					direction = 1
+				if type(current) is str: 
+					currA = currA.replace('i','j')
+					currB = currB.replace('i','j')
+					currC = currC.replace('i','j')
+					currA = complex(currA)
+					currB = complex(currB)
+					currC = complex(currC)
+					# if arctan(imaginary/real)>90(2nd quad) or >270(3rd quad) == reverse
+					# Find max current from 3-phases and add to current steps
+					maxCurrent = max(abs(currA),abs(currB),abs(currC))
+					directedCurrent = maxCurrent/lineRating * direction
+					currentArray.append(directedCurrent)
+			ohCurrents[str(key)] = {'current_steps':currentArray}
+	# Underground Lines
+	ugCurrents = {}
+	for key in rawOut['UG_line_current_phaseA.csv']:
+		ugCurrents[str(key)] = {} 
+		if key != '# timestamp':
+			currentArray = []
+			for i,current in enumerate(rawOut['UG_line_current_phaseA.csv'][key]):
+				currA = current
+				currB = rawOut['UG_line_current_phaseB.csv'][key][i]
+				currC = rawOut['UG_line_current_phaseC.csv'][key][i]
+				flowDir = rawOut['UG_line_flow_direc.csv'][key][i]
+				lineRating = rawOut['UG_line_cont_rating.csv'][key][i]
+				if 'R' in flowDir:
+					direction = -1
+				else :
+					direction = 1
+				if type(current) is str: 
+					currA = currA.replace('i','j')
+					currB = currB.replace('i','j')
+					currC = currC.replace('i','j')
+					currA = complex(currA)
+					currB = complex(currB)
+					currC = complex(currC)
+					# if arctan(imaginary/real)>90(2nd quad) or >270(3rd quad) == reverse
+					# Find max current from 3-phases and add to current steps
+					maxCurrent = max(abs(currA),abs(currB),abs(currC))
+					directedCurrent = maxCurrent/lineRating * direction
+					currentArray.append(directedCurrent)
+			ugCurrents[str(key)] = {'current_steps':currentArray}
+	print ohCurrents
 	# What percentage of our keys have lat lon data?
 	latKeys = [tree[key]['latitude'] for key in tree if 'latitude' in tree[key]]
 	latPerc = 1.0*len(latKeys)/len(tree)
