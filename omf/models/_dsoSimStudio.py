@@ -141,8 +141,8 @@ def new(modelDir):
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
-		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "scratch", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
-		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "scratch", "publicFeeders", defaultInputs["feederName2"]+'.omd'), pJoin(modelDir, defaultInputs["feederName2"]+'.omd'))
+		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
+		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName2"]+'.omd'), pJoin(modelDir, defaultInputs["feederName2"]+'.omd'))
 		shutil.copy(pJoin(__neoMetaModel__._omfDir,"static","SimpleNetwork.json"),pJoin(modelDir,"case9.omt"))
 	except:
 		return False

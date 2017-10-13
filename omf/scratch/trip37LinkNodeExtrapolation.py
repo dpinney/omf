@@ -16,7 +16,7 @@ from omf.weather import zipCodeToClimateName
 
 def highLow():
 	feederName = "Simple Market System"
-	with open(pJoin(__neoMetaModel__._omfDir, "scratch", "publicFeeders", feederName + '.omd'), "r") as jsonIn:
+	with open(pJoin(__neoMetaModel__._omfDir, "static", "publicFeeders", feederName + '.omd'), "r") as jsonIn:
 		feederModel = json.load(jsonIn)
 
 	highestX = -100000000000
@@ -45,7 +45,7 @@ def highLow():
 
 def function():
 	feederName = "trip37"
-	with open(pJoin(__neoMetaModel__._omfDir, "scratch", "publicFeeders", feederName + '.omd'), "r") as jsonIn:
+	with open(pJoin(__neoMetaModel__._omfDir, "static", "publicFeeders", feederName + '.omd'), "r") as jsonIn:
 		feederModel = json.load(jsonIn)
 
 	linkTemplate = {
@@ -166,7 +166,7 @@ def function():
 
 	print typeDict
 	modelName = "resilientDist"
-	with open(pJoin(__neoMetaModel__._omfDir, "scratch", "publicFeeders", feederName + '_new.omd'), 'w') as outfile:
+	with open(pJoin(__neoMetaModel__._omfDir, "static", "publicFeeders", feederName + '_new.omd'), 'w') as outfile:
 		json.dump(feederModel, outfile, indent = 4)
 
 
