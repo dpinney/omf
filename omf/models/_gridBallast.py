@@ -76,8 +76,8 @@ def work(modelDir, inputDict):
 		totalZIP = 0
 		gbWH = 0
 		gbZIP = 0
-		# Waterheater Controller properties
 		for key in tree.keys():
+			# Waterheater Controller properties
 			if ('name' in tree[key]) and (tree[key].get('object') == 'waterheater'):
 		 		totalWH += 1
 	 			gbWH += 1
@@ -104,27 +104,27 @@ def work(modelDir, inputDict):
 		 			# tree[key]['water_demand'] = tree[key]['demand']
 		 			tree[key]['water_demand'] = 'weekday_hotwater*1'
 		 			del tree[key]['demand']
-		# ZIPload Controller properties
-		for key in tree.keys():
+			# ZIPload Controller properties
 			if ('name' in tree[key]) and (tree[key].get('object') == 'ZIPload'):
 		 		totalZIP += 1
-	 			gbZIP += 1
-		 		# Frequency control parameters
-	 			tree[key]['enable_freq_control'] = 'true'
-	 			tree[key]['measured_frequency'] = 'frequency.value'
-	 			tree[key]['freq_lowlimit'] = 59
-	 			tree[key]['freq_uplimit'] = 61
-	 			# tree[key]['average_delay_time'] = 60
-	 			# Voltage control parameters
-	 			# tree[key]['enable_volt_control'] = 'true'
-	 			# tree[key]['volt_lowlimit'] = 240.4
-	 			# tree[key]['volt_uplimit'] = 241.4
-	 			# Lock Mode parameters
-	 			# tree[key]['enable_lock'] = 'temp_lock_enable'
-	 			# tree[key]['lock_STATUS'] = 'temp_lock_status'
-	 			tree[key]['controller_priority'] = 4321 #default:lock>freq>volt>therm
-	 			# tree[key]['controller_priority'] = 2431 #freq>volt>lock>therm
-	 			# tree[key]['groupid'] = 'fan'
+				if tree[key]['name'].startswith('responsive'):
+		 			gbZIP += 1
+			 		# Frequency control parameters
+		 			tree[key]['enable_freq_control'] = 'true'
+		 			tree[key]['measured_frequency'] = 'frequency.value'
+		 			tree[key]['freq_lowlimit'] = 59
+		 			tree[key]['freq_uplimit'] = 61
+		 			# tree[key]['average_delay_time'] = 60
+		 			# Voltage control parameters
+		 			# tree[key]['enable_volt_control'] = 'true'
+		 			# tree[key]['volt_lowlimit'] = 240.4
+		 			# tree[key]['volt_uplimit'] = 241.4
+		 			# Lock Mode parameters
+		 			# tree[key]['enable_lock'] = 'temp_lock_enable'
+		 			# tree[key]['lock_STATUS'] = 'temp_lock_status'
+		 			tree[key]['controller_priority'] = 4321 #default:lock>freq>volt>therm
+		 			# tree[key]['controller_priority'] = 2431 #freq>volt>lock>therm
+		 			# tree[key]['groupid'] = 'fan'
 
 	# Attach collector for total network load
 	tree[feeder.getMaxKey(tree)+1] = {'object':'collector', 'group':'"class=triplex_meter"', 'property':'sum(measured_real_power)', 'interval':60, 'file':'allMeterPower.csv'}
@@ -291,7 +291,7 @@ def work(modelDir, inputDict):
 	# Print gridBallast Outputs to allOutputData.json
 	outData['gridBallast'] = {}
 	if 'allMeterPower.csv' in rawOut:
-		outData['gridBallast']['totalNetworkLoad'] = [x/1000 for x in rawOut.get('allMeterPower.csv')['sum(measured_real_power)']]
+		outData['gridBallast']['totalNetworkLoad'] = [x / 1000 for x in rawOut.get('allMeterPower.csv')['sum(measured_real_power)']] #Convert W to kW
 	if ('allZIPloadPower.csv' in rawOut) and ('allWaterheaterLoad.csv' in rawOut):
 		outData['gridBallast']['availabilityMagnitude'] = [x[0] + x[1] for x in zip(rawOut.get('allWaterheaterLoad.csv')['sum(actual_load)'], rawOut.get('allZIPloadPower.csv')['sum(base_power)'])]
 	if 'allZIPloadDemand.csv' in rawOut:
@@ -335,6 +335,8 @@ def work(modelDir, inputDict):
 	eventEnd = eventStart + eventDuration
 	outData['gridBallast']['eventStart'] = str(eventStart)
 	outData['gridBallast']['eventEnd'] = str(eventEnd)
+	outData['gridBallast']['xMin'] = str(eventStart - datetime.timedelta(minutes=30))
+	outData['gridBallast']['xMax'] = str(eventEnd + datetime.timedelta(minutes=30))
 	# Convert string to date
 	# HACK: remove timezones, inconsistency in matching format
 	timeStampsDebug = [x[:19] for x in outData['timeStamps']]
@@ -353,26 +355,21 @@ def work(modelDir, inputDict):
 	# Waterheaters Off-Duration
 	offDuration = tRec - eventStart
 	outData['gridBallast']['offDuration'] = str(offDuration)
-	# Reserve Magnitude Target (RMT)
+	# Reserve Magnitude (RM)
 	availMag = outData['gridBallast']['availabilityMagnitude']
 	totalNetLoad = outData['gridBallast']['totalNetworkLoad']
-	availPerc = [100*x[0]/x[1] for x in zip(availMag,totalNetLoad)]
-	outData['gridBallast']['availabilityPercent'] = availPerc
-	# rmt = 100*sum(availMag)/sum(totalNetLoad)
-	outData['gridBallast']['rmt'] = 5.0
+	availPerc = [x[0]/x[1] for x in zip(availMag,totalNetLoad)]
+	outData['gridBallast']['availabilityPercent'] = [100 * x for x in availPerc] #Convert fraction to percent
+	outData['gridBallast']['rm'] = [1 - x for x in availPerc]
+	# Average RM during event
+	eventRM = [1 - x[1] for x in zip(dateTimeStamps, availPerc) if (x[0] >= eventStart) and (x[0] <= eventEnd)]
+	outData['gridBallast']['rmAvg'] = np.mean(eventRM)
 	# Reserve Magnitude Variability Tolerance (RMVT)
-	# avgAvailMag = sum(availMag)/len(availMag)
-	# rmvtMax = max(availMag)/avgAvailMag
-	# rmvtMin = min(availMag)/avgAvailMag
-	# rmvt = rmvtMax - rmvtMin
-	if min(availPerc) > 7.0:
-		outData['gridBallast']['rmvt'] = 0
-	else:
-		outData['gridBallast']['rmvt'] = 5.0 - min(availPerc)
+	outData['gridBallast']['rmvt'] = np.var(outData['gridBallast']['rm'])
 	# Availability
-	notAvail = float(availMag.count(0))/len(outData['timeStamps'])
-	avail = (1-notAvail)*100
-	outData['gridBallast']['availability'] = avail
+	rmt = 0.07
+	available = [x[1] > rmt for x in zip(dateTimeStamps, availPerc) if (x[0] < eventStart) or (x[0] > eventEnd)]
+	outData['gridBallast']['availability'] = 100.0 * sum(available) / (int(inputDict['simLength']) - int(eventLength[1]))
 	# Waterheater Temperature Drop calculations
 	whTemp = outData['gridBallast']['waterheaterTemp']
 	whTempList = whTemp.values()
@@ -585,7 +582,7 @@ def new(modelDir):
 		"simLengthUnits": "minutes", #hours
 		"eventType": "ramping", #unramping, overfrequency, underfrequency
 		"eventTime": "2012-01-01 14:00",
-		"eventLength": "00:05"
+		"eventLength": "00:11"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:

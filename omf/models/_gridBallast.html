@@ -551,7 +551,6 @@
         localHighChart['series'] = [
           {
             'showInLegend': false,
-            // 'data': allOutputData.gridBallast.waterheaterTempDrops
             'data': allOutputData.gridBallast.qualityDrops,
             'color': 'gray'
           }
@@ -594,11 +593,6 @@
             'data': allOutputData.gridBallast.availabilityMagnitude,
             'color': 'gray'
           }
-          // {
-          //   'showInLegend': false,
-          //   'data': allOutputData.gridBallast.totalNetworkLoad,
-          //   'color': 'gray'
-          // }
         ]
         localHighChart['xAxis']['title'] = {'text': ''}
         localHighChart['xAxis']['min'] = new Date(allOutputData.timeStamps[0]).getTime()
@@ -705,11 +699,72 @@
           {
             'color': 'gray',
             'dashStyle': 'dash',
-            'value': 5.0,
+            'value': 7.0,
             'width': 1,
             'label': {
               'text':'RMT',
               'align': 'right',
+              'style': {'color': 'gray'}
+            }
+          }
+        ]
+        new Highcharts.Chart(localHighChart);
+      </script>
+    </div>
+    <p class="reportTitle postRun">Event Chart <a target="_self" class="toggle">Hide / Show</a></p>
+    <div id="eventReport" class="tightContent postRun">
+      <div id="eventChart"></div>
+      <script type="text/javascript">
+        var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+        localHighChart['chart']['renderTo'] = 'eventChart'
+        localHighChart['chart']['type'] = 'line'
+        localHighChart['chart']['width'] = 1000
+        localHighChart['chart']['height'] = 250
+        localHighChart['series'] = [
+          {
+            'showInLegend': false,
+            'data': allOutputData.gridBallast.rm,
+            'color': 'gray'
+          }
+        ]
+        localHighChart['xAxis']['title'] = {'text': ''}
+        localHighChart['xAxis']['min'] = new Date(allOutputData.gridBallast.xMin).getTime()
+        localHighChart['xAxis']['max'] = new Date(allOutputData.gridBallast.xMax).getTime()
+        localHighChart['xAxis']['plotLines'] = [
+          {
+            'color': 'red',
+            'dashStyle': 'dash',
+            'value': new Date(allOutputData.gridBallast.eventStart),
+            'width': 1,
+            'label': {'text':'Event Start'}
+          },
+          {
+            'color': 'red',
+            'dashStyle': 'dash',
+            'value': new Date(allOutputData.gridBallast.eventEnd),
+            'width': 1,
+            'label': {'text':'Event End'}
+          }
+        ]
+        localHighChart['yAxis']['title'] = {'text': 'Reserve Magnitude'}
+        localHighChart['yAxis']['plotLines'] = [
+          {
+            'color': 'gray',
+            'dashStyle': 'dash',
+            'value': allOutputData.gridBallast.rmAvg + allOutputData.gridBallast.rmvt,
+            'width': 1,
+            'label': {
+              'text':'avgRM + RMVT',
+              'style': {'color': 'gray'}
+            }
+          },
+          {
+            'color': 'gray',
+            'dashStyle': 'dash',
+            'value': allOutputData.gridBallast.rmAvg - allOutputData.gridBallast.rmvt,
+            'width': 1,
+            'label': {
+              'text':'avgRM - RMVT',
               'style': {'color': 'gray'}
             }
           }
@@ -750,14 +805,7 @@
             'value': new Date(allOutputData.gridBallast.eventEnd),
             'width': 1,
             'label': {'text':'Event End'}
-          },
-          // {
-          //   'color': 'red',
-          //   'dashStyle': 'dash',
-          //   'value': new Date(allOutputData.gridBallast.recoveryTime),
-          //   'width': 1,
-          //   'label': {'text': 'tRecovery'}
-          // }
+          }
         ]
         localHighChart['yAxis']['title'] = {'text': 'System Frequency (Hz)'}
         new Highcharts.Chart(localHighChart);
@@ -779,6 +827,11 @@
               <td>Initial Response Time</td>
               <td>< 1 second</td>
               <td id="responseTime">---</td>
+            </tr>
+            <tr>
+              <td>Average Reserve Magnitude (% of load during event)</td>
+              <td>---</td>
+              <td id="rmAvg"></td>
             </tr>
             <tr>
               <td>Reserve Magnitude Target (RMT, % of load)</td>
@@ -839,10 +892,9 @@
         </table>
       </div>
       <script type="text/javascript">
-        // var tRec = new Date(allOutputData.gridBallast.recoveryTime)
-        // document.getElementById('recoveryTime').innerHTML = tRec.toTimeString().substr(0,8)
-        document.getElementById('rmt').innerHTML = allOutputData.gridBallast.rmt.toFixed(3) + ' %'
-        document.getElementById('rmvt').innerHTML = allOutputData.gridBallast.rmvt.toFixed(3) + ' %'
+        document.getElementById('rmAvg').innerHTML = 100 * allOutputData.gridBallast.rmAvg.toFixed(3) + ' %'
+        document.getElementById('rmt').innerHTML = '7.000 %'
+        document.getElementById('rmvt').innerHTML = 100 * allOutputData.gridBallast.rmvt.toFixed(3) + ' %'
         document.getElementById('offDuration').innerHTML = allOutputData.gridBallast.offDuration
         document.getElementById('availability').innerHTML = allOutputData.gridBallast.availability.toFixed(3) + ' %'
         document.getElementById('recoveryTime').innerHTML = allOutputData.gridBallast.recoveryTime
