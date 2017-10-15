@@ -456,13 +456,13 @@ def _tests():
 	print 'Parsed a test glm file with', keyLen, 'keys.'
 	assert keyLen == 41
 	# Recorder Attachment Test
-	with open('scratch/publicFeeders/Olin Barre Geo.omd') as inFile:
+	with open('static/publicFeeders/Olin Barre Geo.omd') as inFile:
 		tree = json.load(inFile)['tree']
 	attachRecorders(tree, 'Regulator', 'object', 'regulator')
 	attachRecorders(tree, 'Voltage', 'object', 'node')
 	print 'All the objects after recorder attach: ', set([ob.get('object','') for ob in tree.values()])
 	# Testing The De-Embedding
-	with open('scratch/publicFeeders/13 Node Embedded DO NOT SAVE.omd') as inFile:
+	with open('static/publicFeeders/13 Node Embedded DO NOT SAVE.omd') as inFile:
 		tree = json.load(inFile)['tree']
 	fullyDeEmbed(tree)
 	embeddedDicts = 0
@@ -473,21 +473,21 @@ def _tests():
 	print 'Number of objects still embedded:', embeddedDicts
 	assert embeddedDicts == 0, 'Some objects failed to disembed.'
 	# groupSwingKids test
-	with open('scratch/publicFeeders/13 Node Ref Feeder Flat.omd') as inFile:
+	with open('static/publicFeeders/13 Node Ref Feeder Flat.omd') as inFile:
 		tree = json.load(inFile)['tree']
 	groupSwingKids(tree)
 	for ob in tree.values():
 		if ob.get('object','') == 'collector':
 			print 'Swing collector:', ob
 	# Time Adjustment Test
-	with open('scratch/publicFeeders/Simple Market System.omd') as inFile:
+	with open('static/publicFeeders/Simple Market System.omd') as inFile:
 		tree = json.load(inFile)['tree']
 	adjustTime(tree, 100, 'hours', '2000-09-01')
 	for ob in tree.values():
 		if ob.get('object','') in ['recorder','collector']:
 			print 'Time-adjusted collector:', ob 
 	# Graph Test
-	with open('scratch/publicFeeders/Olin Barre Geo.omd') as inFile:
+	with open('static/publicFeeders/Olin Barre Geo.omd') as inFile:
 		tree = json.load(inFile)['tree']
 	nxG = treeToNxGraph(tree)
 	x = latLonNxGraph(nxG)

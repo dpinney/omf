@@ -46,7 +46,7 @@ XXX Implement def distModifyTriplexLengths()
 XXX Implement def distModifyConductorLengths()
 	XXX no overhead_lines in Simple Market System
 	XXX no underground_lines in Simple Market System
-	XXX Use new test circuit /scratch/publicFeeders/Olin Barre GH.omd
+	XXX Use new test circuit /static/publicFeeders/Olin Barre GH.omd
 	XXX debug for overhead and underground
 	XXX Refactor triplex and overhead/underground into two separate functions
 XXX Debug/Rewrite Test cases

@@ -491,7 +491,7 @@ def new(modelDir):
 	feederKeys = [key for key in defaultInputs if key.startswith("feederName")]
 	for key in feederKeys:
 		try:
-			shutil.copyfile(pJoin(_omfDir, "scratch", "publicFeeders", defaultInputs[key]+'.omd'), pJoin(modelDir, defaultInputs[key] + '.omd'))
+			shutil.copyfile(pJoin(_omfDir, "static", "publicFeeders", defaultInputs[key]+'.omd'), pJoin(modelDir, defaultInputs[key] + '.omd'))
 		except:
 			return False
 	return creationCode

@@ -313,7 +313,7 @@ def _tests():
 	except: pass	
 	print "Currently working in: ", workDir
 	scadaPath = pJoin("scratch","uploads", "FrankScada.csv")
-	feederPath = pJoin("scratch", "publicFeeders","ABEC Frank pre calib.omd")
+	feederPath = pJoin("static", "publicFeeders","ABEC Frank pre calib.omd")
 	simDate = dt.datetime.strptime("4/13/2011 09:00:00", "%m/%d/%Y %H:%M:%S") # Spring peak.
 	simStartDate = {"Date":simDate,"timeZone":"PST"}
 	simLength = 24
