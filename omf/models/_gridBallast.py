@@ -64,6 +64,7 @@ def work(modelDir, inputDict):
 		# # Attach frequency player
 		# tree[28] = {'omftype':'class player', 'argument':'{double value;}'}
 		
+		print feeder.getMaxKey(tree)
 		# HACK: tree[10:19] is empty
 		tree[11] = {'omftype':'#include', 'argument':'\"hot_water_demand.glm\"'}
 		tree[12] = {'omftype':'#include', 'argument':'\"lock_mode_schedule.glm\"'}
@@ -365,7 +366,7 @@ def work(modelDir, inputDict):
 	eventRM = [1 - x[1] for x in zip(dateTimeStamps, availPerc) if (x[0] >= eventStart) and (x[0] <= eventEnd)]
 	outData['gridBallast']['rmAvg'] = np.mean(eventRM)
 	# Reserve Magnitude Variability Tolerance (RMVT)
-	outData['gridBallast']['rmvt'] = np.var(outData['gridBallast']['rm'])
+	outData['gridBallast']['rmvt'] = np.std(eventRM)
 	# Availability
 	rmt = 0.07
 	available = [x[1] > rmt for x in zip(dateTimeStamps, availPerc) if (x[0] < eventStart) or (x[0] > eventEnd)]
