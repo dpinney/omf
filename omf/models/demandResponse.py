@@ -433,7 +433,7 @@ def new(modelDir):
 		"retailCost": "0.1",
 		"WholesaleEnergyCost": "0.07",
 		"fileName":"FrankScadaValidCSV.csv",
-		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"scratch","uploads","FrankScadaValidCSV.csv")).read(),
+		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidCSV.csv")).read(),
 		"DrPurchInstallCost": "100000",
 		"runTime": "0:00:03",
 		"SubstitutionPriceElasticity": "-0.09522",

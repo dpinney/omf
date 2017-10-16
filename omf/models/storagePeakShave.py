@@ -269,7 +269,7 @@ def new(modelDir):
 		"dischargeRate": "5",
 		"modelType": modelName,
 		"chargeRate": "5",
-		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"scratch","uploads","FrankScadaValidCSV.csv")).read(),
+		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidCSV.csv")).read(),
 		"fileName": "FrankScadaValidCSV.csv",
 		"dispatchStrategy": "optimal",
 		"cellCost": "7140",

@@ -7,7 +7,7 @@ from math import sqrt
 
 amiData = []
 amiKeys = []
-csvFile = './uploads/TitaniumAMI.csv'
+csvFile = '../static/testFiles/TitaniumAMI.csv'
 csvDict = csv.DictReader(open(csvFile,'r'))
 for row in csvDict:
 	for value in row:
@@ -58,7 +58,7 @@ for row in newlist:
 		tempList = []
 		tempList.append(row)
 
-with open('./uploads/newAmi.csv', 'wb') as csv_file:
+with open('../static/testFiles/newAmi.csv', 'wb') as csv_file:
     	writer = csv.DictWriter(csv_file, fieldnames=['meterName','phase','readDateTime','wh','var'] ,extrasaction='ignore', delimiter = ',')
     	writer.writeheader()
     	writer.writerows(hourlyList)

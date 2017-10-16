@@ -429,9 +429,9 @@ def new(modelDir):
 		"nonCriticalLoadMet": "0.0",
 		"chanceConstraint": "1.0",
 		"phaseVariation": "0.15",
-		"weatherImpacts": open(pJoin(__neoMetaModel__._omfDir,"scratch","uploads","wf_clip.asc")).read(),
+		"weatherImpacts": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","wf_clip.asc")).read(),
 		"weatherImpactsFileName": "wf_clip.asc",
-		"xrMatrices":open(pJoin(__neoMetaModel__._omfDir,"scratch","uploads","lineCodesTrip37.json")).read(),
+		"xrMatrices":open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","lineCodesTrip37.json")).read(),
 		"xrMatricesFileName":"lineCodesTrip37.json",
 		"simulationDate": "2012-01-01",
 		"simulationZipCode": "64735"

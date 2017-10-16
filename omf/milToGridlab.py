@@ -1275,7 +1275,7 @@ def _latCount(name):
     print name, 'COUNT', nameCount, 'LAT COUNT', latCount, 'SUCCESS RATE', 1.0*latCount/nameCount
 
 def _tests(testFiles, openPrefix, outPrefix, testAttachments, keepFiles=True):
-    ''' Test convert every windmil feeder we have (in scratch/uploads). Return number of exceptions we hit. '''
+    ''' Test convert every windmil feeder we have (in static/testFiles). Return number of exceptions we hit. '''
     import os, json, traceback, shutil
     from solvers import gridlabd
     from matplotlib import pyplot as plt
@@ -1348,7 +1348,7 @@ def _tests(testFiles, openPrefix, outPrefix, testAttachments, keepFiles=True):
     return exceptionCount
 
 if __name__ == "__main__":
-    openPrefix = './scratch/uploads/'
+    openPrefix = './static/testFiles/'
     outPrefix = './scratch/milToGridlabTests/'
     testAttachments = {'schedules.glm':'', 'climate.tmy2':open('./data/Climate/KY-LEXINGTON.tmy2','r').read()}
     testFiles = [('UE yadkin tabernacle.std','UE yadkin tabernacle.seq')]

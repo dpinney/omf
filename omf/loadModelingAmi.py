@@ -85,9 +85,9 @@ def _tests():
 	except:
 		pass # no output there.
 	# Generate new output:
-	glmPath = omf.omfDir + '/scratch/uploads/Input - IEEE 13 Node.glm'
-	omdPath = omf.omfDir + '/scratch/uploads/Input - IEEE 13 Node.omd'
-	amiPath = omf.omfDir + '/scratch/uploads/Input - AMI measurements 13 node.csv'
+	glmPath = omf.omfDir + '/static/testFiles/Input - IEEE 13 Node.glm'
+	omdPath = omf.omfDir + '/static/testFiles/Input - IEEE 13 Node.omd'
+	amiPath = omf.omfDir + '/static/testFiles/Input - AMI measurements 13 node.csv'
 	writeNewGlmAndPlayers(omdPath, amiPath, outFolder)
 
 if __name__ == '__main__':

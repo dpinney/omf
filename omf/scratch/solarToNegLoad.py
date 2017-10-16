@@ -3,8 +3,8 @@ from os.path import basename
 import os
 
 # TODO: Put into callable function, with glmFile and playerFolderPath as input
-glmFile = './uploads/solarToNegLoads.glm'
-playerFolderPath = './uploads/solarToNegLoadPlayerFiles/'
+glmFile = '../static/testFiles/solarToNegLoads.glm'
+playerFolderPath = '../static/testFiles/solarToNegLoadPlayerFiles/'
 solarObjs = []
 dieselObjs = []
 solarKeys = []
@@ -75,5 +75,5 @@ for row in dieselObjs:
 newTree = feeder.sortedWrite(tree)
 fileName = basename(glmFile)[:-4]
 # Write new glm to file
-with open('./uploads/'+fileName+'Neg.glm','w+') as outFile:
+with open('../static/testFiles/'+fileName+'Neg.glm','w+') as outFile:
 	outFile.write(newTree)

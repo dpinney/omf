@@ -1369,10 +1369,10 @@ def _find_SPCT_rating(load_str):
 		return str(past_rating)
 	
 def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
-	print 'network_db',network_db
 	if (test==False):
 		network_db_path = modelDir + network_db 
-		network_db = network_db_path     
+		network_db = network_db_path 
+		print 'network_db',network_db
 	else:
 		network_db = Path(network_db).resolve()     
 	conductor_data_csv = None
@@ -2529,6 +2529,6 @@ def _tests(testFile, modelDir, outPrefix, keepFiles=True ):
 	return exceptionCount    
 if __name__ == '__main__':
 	testFile = ["Titanium.mdb"]
-	modelDir = './scratch/uploads/'
-	outPrefix = './scratch/cymeToGridlabTests/' 
+	modelDir = './static/testFiles/'
+	outPrefix = './static/testFiles/cymeToGridlabTests/' 
 	_tests(testFile, modelDir, outPrefix)

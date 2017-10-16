@@ -246,7 +246,7 @@ def new(modelDir):
 		"airport": 'IAD',
 		"created": "2015-06-12 17:20:39.308239",
 		"modelType": modelName,
-		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"scratch","uploads","FrankScadaShort.csv")).read(),
+		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaShort.csv")).read(),
 		"fileName": "FrankScadaShort.csv"
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
