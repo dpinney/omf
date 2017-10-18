@@ -115,7 +115,7 @@ end
 % hold on
 % plot(-P_lower,'r')
 % plot(zeros(length(P_upper),1),'k--')
-%                 % title(strcat(plotname,' Power'))
+% title(strcat(plotname,' Power'))
 % ylabel('Power (kW)')
 % xlabel('Time (timestep)')
 % subplot(2,1,2)
@@ -124,6 +124,6 @@ end
 % hold on
 % plot(-E_UL,'r')
 % plot(zeros(length(E_UL),1),'k--')
-%                     % title(strcat(plotname,' Energy'))
+% title(strcat(plotname,' Energy'))
 % ylabel('Energy (kWh)')
 % xlabel('Time (timestep)')
