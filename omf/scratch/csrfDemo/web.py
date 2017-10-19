@@ -409,7 +409,7 @@ def milImportBackground(owner, feederName, stdString, seqString):
 	[newFeeder["tree"], xScale, yScale] = milToGridlab.convert(stdString, seqString)
 	newFeeder["layoutVars"]["xScale"] = xScale
 	newFeeder["layoutVars"]["yScale"] = yScale
-	with open("./schedules.glm","r") as schedFile:
+	with open("./static/schedules.glm","r") as schedFile:
 		newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
 	with open("data/Feeder/" + owner + "/" + feederName + ".json", "w") as outFile:
 		json.dump(newFeeder, outFile, indent=4)
@@ -435,7 +435,7 @@ def gridlabImportBackground(owner, feederName, glmString):
  	newFeeder["tree"] = feeder.parse(glmString, False)
  	newFeeder["layoutVars"]["xScale"] = 0
  	newFeeder["layoutVars"]["yScale"] = 0
-	with open("./schedules.glm","r") as schedFile:
+	with open("./static/schedules.glm","r") as schedFile:
 		newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
 	with open("data/Feeder/" + owner + "/" + feederName + ".json", "w") as outFile:
 		json.dump(newFeeder, outFile, indent=4)
@@ -462,7 +462,7 @@ def cymeImportBackground(owner, feederName, mdbNetString, mdbEqString):
 	[newFeeder["tree"], xScale, yScale] = cymeToGridlab.convertCymeModel(mdbNetString, mdbEqString)
 	newFeeder["layoutVars"]["xScale"] = xScale
 	newFeeder["layoutVars"]["yScale"] = yScale
-	with open("./schedules.glm","r") as schedFile:
+	with open("./static/schedules.glm","r") as schedFile:
 		newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
 	with open("data/Feeder/" + owner + "/" + feederName + ".json", "w") as outFile:
 		json.dump(newFeeder, outFile, indent=4)

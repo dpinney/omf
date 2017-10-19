@@ -469,7 +469,7 @@ def milImportBackground(owner, modelName, feederName, feederNum, stdString, seqS
 	[newFeeder["tree"], xScale, yScale] = milToGridlab.convert(stdString, seqString)
 	newFeeder["layoutVars"]["xScale"] = xScale
 	newFeeder["layoutVars"]["yScale"] = yScale
-	with open("./schedules.glm","r") as schedFile:
+	with open("./static/schedules.glm","r") as schedFile:
 		newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
 	try: os.remove(feederDir)
 	except: pass
@@ -556,7 +556,7 @@ def gridlabImportBackground(owner, modelName, feederName, feederNum, glmString):
 		newFeeder["tree"] = feeder.parse(glmString, False)
 		newFeeder["layoutVars"]["xScale"] = 0
 		newFeeder["layoutVars"]["yScale"] = 0
-		with open("./schedules.glm","r") as schedFile:
+		with open("./static/schedules.glm","r") as schedFile:
 			newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
 		try: os.remove(feederDir)
 		except: pass
@@ -736,7 +736,7 @@ def cymeImportBackground(owner, modelName, feederName, feederNum, mdbNetString):
 	[newFeeder["tree"], xScale, yScale] = cymeToGridlab.convertCymeModel(mdbNetString, modelDir)
 	newFeeder["layoutVars"]["xScale"] = xScale
 	newFeeder["layoutVars"]["yScale"] = yScale
-	with open("./schedules.glm","r") as schedFile:
+	with open("./static/schedules.glm","r") as schedFile:
 		newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
 	try: os.remove(feederDir)
 	except: pass
