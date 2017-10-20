@@ -348,14 +348,9 @@ def work(modelDir, inputDict):
 				else :
 					direction = 1
 				if type(current) is str: 
-					currA = currA.replace('i','j')
-					currB = currB.replace('i','j')
-					currC = currC.replace('i','j')
-					currA = complex(currA)
-					currB = complex(currB)
-					currC = complex(currC)
-					# if arctan(imaginary/real)>90(2nd quad) or >270(3rd quad) == reverse
-					# Find max current from 3-phases and add to current steps
+					currA = stringToMag(currA)
+					currB = stringToMag(currB)
+					currC = stringToMag(currC)
 					maxCurrent = max(abs(currA),abs(currB),abs(currC))
 					directedCurrent = maxCurrent/lineRating * direction
 					currentArray.append(directedCurrent)
@@ -377,14 +372,9 @@ def work(modelDir, inputDict):
 				else :
 					direction = 1
 				if type(current) is str: 
-					currA = currA.replace('i','j')
-					currB = currB.replace('i','j')
-					currC = currC.replace('i','j')
-					currA = complex(currA)
-					currB = complex(currB)
-					currC = complex(currC)
-					# if arctan(imaginary/real)>90(2nd quad) or >270(3rd quad) == reverse
-					# Find max current from 3-phases and add to current steps
+					currA = stringToMag(currA)
+					currB = stringToMag(currB)
+					currC = stringToMag(currC)
 					maxCurrent = max(abs(currA),abs(currB),abs(currC))
 					directedCurrent = maxCurrent/lineRating * direction
 					currentArray.append(directedCurrent)
