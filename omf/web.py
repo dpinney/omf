@@ -42,10 +42,10 @@ def getDataNames():
 				networks.append({'name': file.strip('.omt'), 'model': 'DRPOWER'})
 	# Public feeders too.
 	publicFeeders = []
-	for (dirpath, dirnames, filenames) in os.walk(os.path.join(_omfDir, "data","Model", "public")):
+	for (dirpath, dirnames, filenames) in os.walk(os.path.join(_omfDir, "static","publicFeeders")):
 		for file in filenames:
 			if '.omd' in file and file != 'feeder.omd':
-				publicFeeders.append({'name': file.strip('.omd'), 'model': dirpath.split('/')[-1]})		
+				publicFeeders.append({'name': file[:-4], 'model': dirpath.split('/')[-1]})		
 	return {"climates":sorted(climates), "feeders":feeders, "networks":networks, "publicFeeders":publicFeeders, "currentUser":currUser}
 
 # @app.before_request
@@ -913,9 +913,12 @@ def removeFeeder(owner, modelName, feederNum, feederName=None):
 @flask_login.login_required
 def loadFeeder(frfeederName, frmodelName, modelName, feederNum, frUser, owner):
 	'''Load a feeder from one model to another.'''
-	if frUser != "public": frUser = User.cu()
+	if frUser != "public": 
+		frUser = User.cu()
+		frmodelDir = "./data/Model/" + frUser + "/" + frmodelName
+	elif frUser == "public":
+		frmodelDir = "./static/publicFeeders"
 	print "Entered loadFeeder with info: frfeederName %s, frmodelName: %s, modelName: %s, feederNum: %s"%(frfeederName, frmodelName, str(modelName), str(feederNum))
-	frmodelDir = "./data/Model/" + frUser + "/" + frmodelName
 	modelDir = "./data/Model/" + owner + "/" + modelName
 	with open(modelDir + "/allInputData.json") as inJson:
 		feederName = json.load(inJson).get('feederName'+str(feederNum))
@@ -1156,7 +1159,7 @@ def uniqObjName(objtype, owner, name, modelName=False):
 	if objtype == "Model":
 		path = "data/Model/" + owner + "/" + name
 	elif objtype == "Feeder":
-		path = "data/Model/" + owner + "/" + modelName + "/" + name + ".omd"
+		path = "static/publicFeeders/" + name + ".omd"
 		if name == 'feeder': return jsonify(exists=True)
 	elif objtype == "Network":
 		path = "data/Model/" + owner + "/" + modelName + "/" + name + ".omt"
