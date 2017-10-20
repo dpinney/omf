@@ -282,7 +282,11 @@ def work(modelDir, inputDict):
 			reader = csv.reader(downFile)
 			downData = [x for x in reader]
 	FIRST_DATA_ROW = 9
-	stringToMag = lambda s:abs(complex(s.replace('d','j')))
+	def stringToMag(s):
+		if 'd' in s:
+			return complex(s.replace('d','j')).real
+		elif 'j' in s or 'i' in s:
+			return abs(complex(s.replace('i','j')))
 	cleanDown = [stringToMag(x[1]) for x in downData[FIRST_DATA_ROW:-1]]
 	swingTimestamps = [x[0] for x in subData[FIRST_DATA_ROW:-1]]
 	cleanSub = [stringToMag(x[1]) for x in subData[FIRST_DATA_ROW:-1]]
@@ -344,14 +348,9 @@ def work(modelDir, inputDict):
 				else :
 					direction = 1
 				if type(current) is str: 
-					currA = currA.replace('i','j')
-					currB = currB.replace('i','j')
-					currC = currC.replace('i','j')
-					currA = complex(currA)
-					currB = complex(currB)
-					currC = complex(currC)
-					# if arctan(imaginary/real)>90(2nd quad) or >270(3rd quad) == reverse
-					# Find max current from 3-phases and add to current steps
+					currA = stringToMag(currA)
+					currB = stringToMag(currB)
+					currC = stringToMag(currC)
 					maxCurrent = max(abs(currA),abs(currB),abs(currC))
 					directedCurrent = maxCurrent/lineRating * direction
 					currentArray.append(directedCurrent)
@@ -373,14 +372,9 @@ def work(modelDir, inputDict):
 				else :
 					direction = 1
 				if type(current) is str: 
-					currA = currA.replace('i','j')
-					currB = currB.replace('i','j')
-					currC = currC.replace('i','j')
-					currA = complex(currA)
-					currB = complex(currB)
-					currC = complex(currC)
-					# if arctan(imaginary/real)>90(2nd quad) or >270(3rd quad) == reverse
-					# Find max current from 3-phases and add to current steps
+					currA = stringToMag(currA)
+					currB = stringToMag(currB)
+					currC = stringToMag(currC)
 					maxCurrent = max(abs(currA),abs(currB),abs(currC))
 					directedCurrent = maxCurrent/lineRating * direction
 					currentArray.append(directedCurrent)
@@ -438,7 +432,8 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 				except:
 					continue # the nodeName doesn't have the phase we're looking for.
 				# HACK: Gridlab complex number format sometimes uses i, sometimes j, sometimes d. WTF?
-				if type(voltStep) is str: voltStep = voltStep.replace('i','j')
+				if type(voltStep) is str:
+					voltStep = voltStep.replace('i','j')
 				v = complex(voltStep)
 				phaseVolt = abs(v)
 				if phaseVolt != 0.0:
