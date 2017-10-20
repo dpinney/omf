@@ -282,7 +282,11 @@ def work(modelDir, inputDict):
 			reader = csv.reader(downFile)
 			downData = [x for x in reader]
 	FIRST_DATA_ROW = 9
-	stringToMag = lambda s:abs(complex(s.replace('d','j')))
+	def stringToMag(s):
+		if 'd' in s:
+			return complex(s.replace('d','j')).real
+		elif 'j' in s or 'i' in s:
+			return abs(complex(s.replace('i','j')))
 	cleanDown = [stringToMag(x[1]) for x in downData[FIRST_DATA_ROW:-1]]
 	swingTimestamps = [x[0] for x in subData[FIRST_DATA_ROW:-1]]
 	cleanSub = [stringToMag(x[1]) for x in subData[FIRST_DATA_ROW:-1]]
@@ -438,7 +442,8 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 				except:
 					continue # the nodeName doesn't have the phase we're looking for.
 				# HACK: Gridlab complex number format sometimes uses i, sometimes j, sometimes d. WTF?
-				if type(voltStep) is str: voltStep = voltStep.replace('i','j')
+				if type(voltStep) is str:
+					voltStep = voltStep.replace('i','j')
 				v = complex(voltStep)
 				phaseVolt = abs(v)
 				if phaseVolt != 0.0:
