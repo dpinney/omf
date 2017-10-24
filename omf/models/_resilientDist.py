@@ -215,23 +215,26 @@ def convertToGFM(gfmInputTemplate, feederModel):
 				power = 'constant_power_' + phaseName
 				current = 'constant_current_' + phaseName
 				if impedance in loads:
-					constImped = re.split(r'[+ ]', loads.get(impedance,''))
-					realImpedance = float(constImped[0])
-					reactiveImpedance = float(constImped[1][:-1])
+					constImpedRaw = loads.get(impedance,'').replace(' ','')
+					constImped = complex(constImpedRaw)
+					realImpedance = constImped.real
+					reactiveImpedance = constImped.imag
 					newLoad['max_real_phase'][index] = (voltage*voltage)/realImpedance
 					newLoad['max_reactive_phase'][index] = (voltage*voltage)/reactiveImpedance
 					newLoad['has_phase'][index] = True
 				if current in loads:
-					constCurr = re.split(r'[+ ]', loads.get(current,''))
-					realCurr = float(constCurr[0])
-					reactiveCurr = float(constCurr[1][:-1])
+					constCurrRaw = loads.get(current,'').replace(' ','')
+					constCurr = complex(constCurrRaw)
+					realCurr = constCurr.real
+					reactiveCurr = constCurr.imag
 					newLoad['max_real_phase'][index] = voltage*realCurr
 					newLoad['max_reactive_phase'][index] = voltage*reactiveCurr
 					newLoad['has_phase'][index] = True
 				if power in loads:
-					constPower = re.split(r'[+ ]', loads.get(power,''))
-					realPower = float(constPower[0])
-					reactivePower = float(constPower[1][:-1])
+					constPowerRaw = loads.get(power,'').replace(' ','')
+					constPower = complex(constPowerRaw)
+					realPower = constPower.real
+					reactivePower = constPower.imag
 					newLoad['max_real_phase'][index] = realPower
 					newLoad['max_reactive_phase'][index] = reactivePower
 					newLoad['has_phase'][index] = True

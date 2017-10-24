@@ -455,12 +455,12 @@ function tableCreate(inputObject) {
         // Put in the header.
         headRow = document.createElement('tr')
         headRow.innerHTML = '<th style="text-align: left;padding: 0px 0px 0px 11px;"><button onclick="tablePlus(this)">+</button></th>'
-        //if(String(clickType) == "bus") {
-        //	headRow.innerHTML += '<th><button id="moveBusButton" onclick="moveBus()">Move</button><button id="deleteButton" onclick="deleteOb()">Delete</button><button id="saveButton" onclick="tableSave(this)">Save</button></th>'
-        //}
-        //else {
+        if(String(clickType) == "bus") {
+        	headRow.innerHTML += '<th><button id="moveBusButton" onclick="moveBus()">Move</button><button id="deleteButton" onclick="deleteOb()">Delete</button><button id="saveButton" onclick="tableSave(this)">Save</button></th>'
+        }
+        else {
         	headRow.innerHTML += '<th><button id="deleteButton" onclick="deleteOb()">Delete</button><button id="saveButton" onclick="tableSave(this)">Save</button></th>'
-        //}
+        }
         tbl.appendChild(headRow)
         // Put the object in.
         var notAllowed = ['bus_i', 'bus', 'fbus', 'tbus', 'latitude', 'longitude'] //disabled because doesn't render in real time, and on-change causes lines to sometimes render improperly.
@@ -664,28 +664,43 @@ function moveBus() {
 }
 
 function moveBusListener() {
-        console.log(lastElementSelected)
         currSel = lastElementSelected
         selectionIDSplit = currSel.id.split("_")
         selBusID = parseInt(selectionIDSplit[1])
         selBus = networkData["bus"][selBusID - 1][String(selBusID)]
         coords = clickLatLon(event)
-        console.log(coords)
         networkData["bus"][selBusID - 1][String(selBusID)].longitude = coords[0]
         networkData["bus"][selBusID - 1][String(selBusID)].latitude = coords[1]
-        console.log(networkData['bus'])
         for (num in networkData.branch) {
                 try {
-                        //anOb = networkData.branch[num][String(parseInt(num)+1)]
-                        fNum = networkData.branch[num][String(parseInt(num)+1)]['fbus']
-                        tNum = networkData.branch[num][String(parseInt(num)+1)]['tbus']
-                        if(fNum == selBusID || tNum == selBusID) {
+                        selBranch = networkData.branch[num][String(parseInt(num)+1)]
+                        fBusID = networkData.branch[num][String(parseInt(num)+1)]['fbus']
+                        tBusID= networkData.branch[num][String(parseInt(num)+1)]['tbus']
+                        if(fBusID == selBusID || tBusID == selBusID) {
+                        	document.getElementById("branch_" + String(parseInt(num)+1)).remove()
+                        	fromBus = networkData.bus[parseInt(fBusID)-1][fBusID]
+                        	toBus = networkData.bus[parseInt(tBusID)-1][tBusID]
+                        	x1 = fromBus['longitude']
+                        	y1 = fromBus['latitude']
+                        	x2 = toBus['longitude']
+                        	y2 = toBus['latitude']
+                        	addLine(x1,y1,x2,y2,"branch_"+String(parseInt(num)+1),"branch" + ' p' + phaseCount(selBranch))
+                        	// Redraw buses
+                        	r = 5
+                	        document.getElementById('bus_' + fBusID).remove()
+                	        document.getElementById('bus_' + tBusID).remove()
+                	        addCircle(x1,y1,r,"bus_"+String(fBusID),"bus")
+                		addCircle(x2,y2,r,"bus_"+String(tBusID),"bus")
 
                         }
-                        //fromOb = networkData.bus[parseInt(fNum)-1][fNum]
-                        //toOb = networkData.bus[parseInt(tNum)-1][tNum]
-                        //addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],"branch_"+String(parseInt(num)+1),"branch" + ' p' + phaseCount(anOb))
                 } catch(e) {}
+        }
+        for(gen in networkData.gen) {
+                busGenID = networkData.gen[gen][String(parseInt(gen)+1)]['bus']
+                if(busGenID == selBusID) {
+                        document.getElementById("gen_" + String(parseInt(gen)+1)).remove() 
+                        addRectangle(coords[0] - 4/2, coords[1] - 4/2, 4, 4, "gen_" + newID, "gen")
+                }
         }
         clickTarget.removeEventListener('click', moveBusListener, false)
 }
