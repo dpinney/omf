@@ -57,14 +57,8 @@ def work(modelDir, inputDict):
 	if sys.platform == 'linux2':
 		pass
 	else:
-		# # tree[14,20,27,28,47] empty for UCS Egan
-		# tree[14] = {'omftype':'#include', 'argument':'\"hot_water_demand.glm\"'}
-		# tree[20] = {'omftype':'#include', 'argument':'\"lock_mode_schedule.glm\"'}
-		# tree[27] = {'omftype':'#include', 'argument':'\"control_priority_schedule.glm\"'}
-		# # Attach frequency player
-		# tree[28] = {'omftype':'class player', 'argument':'{double value;}'}
-		
-		print feeder.getMaxKey(tree)
+		# print feeder.getMaxKey(tree)
+		# tree[14,20,27,28,47] empty for UCS Egan, add climate object to tree[14]
 		# HACK: tree[10:19] is empty
 		tree[11] = {'omftype':'#include', 'argument':'\"hot_water_demand.glm\"'}
 		tree[12] = {'omftype':'#include', 'argument':'\"lock_mode_schedule.glm\"'}
@@ -576,8 +570,8 @@ def new(modelDir):
 		"modelType": modelName,
 		"zipCode": "59001",
 		# "feederName1": "Olin Barre GH EOL Solar GridBallast",
-		"feederName1": "UCS Egan Housed",
-		# "feederName1": "Connexus West End Final Fixed",
+		"feederName1": "UCS Egan Housed Solar",
+		# "feederName1": "Connexus West End Final Fixed Solar",
 		"simStartDate": "2012-01-01 12:00:00",
 		"simLength": "180",
 		"simLengthUnits": "minutes", #hours
