@@ -31,9 +31,3 @@
 VB_func('ALTURAS',1,[2,2,5.6,2.5,0.625,22.5,1])
 
 % VB_func(94128,2,0)
-
-% disp('Running VB_test.m')
-% disp(num2str([1,4,5,3]))
-% [1,4,5];
-% fid = fopen('blah.csv','w');
-% fprintf(fid, 'jiewflj wliejf lwijef')
