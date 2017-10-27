@@ -12,7 +12,7 @@ peakDemand = max(demand)
 #time at which peak demand is reached
 peakDemandHour = demand.index(peakDemand)
 
-peakWidth = 3
+peakWidth = 2
 startingPeakHour = peakDemandHour - peakWidth/2
 endingPeakHour = peakDemandHour + peakWidth/2
 
@@ -37,7 +37,7 @@ peakCutOff[endingPeakHour] = 0'''
 print demand
 print peakCutOff
 
-energyShaved = peakWidth*(peakDemand-demand[startingPeakHour])/2
+energyShaved = peakWidth*(peakDemand-demand[startingPeakHour])/2 #assuming peak is a triangle we calculate the area to get the energy
 print "The energy shaved is: " + str(energyShaved) + " kWh"
 
 adjustedDemand = map(sub,demand,peakCutOff)
