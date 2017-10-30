@@ -106,7 +106,7 @@ demand[24] = 1000
 plt.plot(*zip(*sorted(demand.items())))
 plt.ylabel('Demand in kW')
 plt.xlabel('Hour of the day')
-plt.axis([0,24,0,2200])
+plt.axis([0,24,-200,2200])
 
 
 #peak demand
@@ -118,8 +118,7 @@ for x in demand:
 print str(peakDemand) + ' kW is reached at: ' + str(peakDemandHour)
 
 
-
-peakWidth = 4
+peakWidth = 4.5
 startingPeakHour = peakDemandHour - peakWidth/2
 endingPeakHour = peakDemandHour + peakWidth/2
 
@@ -130,23 +129,25 @@ print ("Since the peak is reached at: " + str(peakDemandHour)
 powerThreshold = demand[startingPeakHour]
 print "The power threshold for the peak usage region is: " + str(powerThreshold) + " kW"
 
-
+powerBattery = collections.OrderedDict()
 adjustedDemand = collections.OrderedDict()
 energyShaved = 0
 for x in demand:
 	if x>=startingPeakHour and x<=endingPeakHour:
 		adjustedDemand[x] = powerThreshold
 		energyShaved = float(energyShaved) + (float(demand[x]) - float(powerThreshold))*24/float(len(demand))
+		powerBattery[x] = demand[x]-powerThreshold
 	else:
 		adjustedDemand[x] = demand[x]
+		powerBattery[x] = 0
 
 print "The energy shaved is: " + str(energyShaved) + " kWh"
 #print demand
 
 
 
-
 plt.plot(*zip(*sorted(adjustedDemand.items())))
+plt.plot(*zip(*sorted(powerBattery.items())))
 		#powerShaved = 
 '''
 peakCutOff =[0]*24
