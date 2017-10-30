@@ -108,15 +108,17 @@ plt.ylabel('Demand in kW')
 plt.xlabel('Hour of the day')
 plt.axis([0,24,-200,2200])
 
-
+accuracyFactor = 0.05
 #peak demand
 peakDemand = 0
 for x in demand:
 	if demand[x] > peakDemand:
 		peakDemand = demand[x]
 		peakDemandHour = x
-print str(peakDemand) + ' kW is reached at: ' + str(peakDemandHour)
+print str(peakDemand) + " kW is reached at: " + str(peakDemandHour)
 
+print "The next peak will be between: " + str((1-accuracyFactor)*peakDemand) + " and " + str((1+accuracyFactor)*peakDemand) + " kW"
+print "It will be reached between: " + str((1-accuracyFactor)*peakDemandHour) + " and " + str((1+accuracyFactor)*peakDemandHour) + " O'clock"
 
 peakWidth = 4.5
 startingPeakHour = peakDemandHour - peakWidth/2
@@ -148,6 +150,8 @@ print "The energy shaved is: " + str(energyShaved) + " kWh"
 
 plt.plot(*zip(*sorted(adjustedDemand.items())))
 plt.plot(*zip(*sorted(powerBattery.items())))
+
+
 		#powerShaved = 
 '''
 peakCutOff =[0]*24
