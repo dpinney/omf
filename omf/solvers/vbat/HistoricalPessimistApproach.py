@@ -106,7 +106,7 @@ demand[23.25] = 1005
 demand[23.5] = 1002
 demand[23.75] = 1000
 
-plt.plot(*zip(*sorted(demand.items())))
+firstSet = plt.plot(*zip(*sorted(demand.items())),label='Demand')
 plt.ylabel('Demand in kW')
 plt.xlabel('Hour of the day')
 plt.axis([0,23.75,-200,2200])
@@ -150,11 +150,20 @@ print "The energy shaved is: " + str(energyShaved) + " kWh"
 
 fig = plt.gcf()
 ax = fig.gca()
-ellipse = Ellipse((peakDemandHour,peakDemand),peakWidth*accuracyFactor,8*(peakDemand-powerThreshold)*accuracyFactor,0.0,color ='r')
+ellipse = Ellipse((peakDemandHour,peakDemand),peakWidth*accuracyFactor,
+	8*(peakDemand-powerThreshold)*accuracyFactor,0.0,color ='r',label='Estimated Future Peak Range')
+
+plt.gca().add_artist(plt.legend(handles=[ellipse],loc=1)) #plt.gca().add_artist(plt.legend(handles=[ellipse],loc=1))
 
 ax.add_artist(ellipse)
-plt.plot(*zip(*sorted(adjustedDemand.items())))
-plt.plot(*zip(*sorted(powerBattery.items())))
+plt.plot(*zip(*sorted(adjustedDemand.items())),label='Adjusted Demand')
+plt.plot(*zip(*sorted(powerBattery.items())),label="Battery Power Status")
+
+
+handles, labels = ax.get_legend_handles_labels()
+
+#plt.legend(handles = [ellipse])
+ax.legend(handles, labels,loc=2)
 
 
 plt.grid()
