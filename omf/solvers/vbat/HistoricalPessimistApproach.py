@@ -123,7 +123,7 @@ print str(peakDemand) + " kW is reached at: " + str(peakDemandHour)
 print "The next peak will be between: " + str((1-accuracyFactor)*peakDemand) + " and " + str((1+accuracyFactor)*peakDemand) + " kW"
 print "It will be reached between: " + str((1-accuracyFactor)*peakDemandHour) + " and " + str((1+accuracyFactor)*peakDemandHour) + " O'clock"
 
-peakWidth = 4.5
+peakWidth = 4
 startingPeakHour = peakDemandHour - peakWidth/2
 endingPeakHour = peakDemandHour + peakWidth/2
 
@@ -141,12 +141,24 @@ for x in demand:
 	if x>=startingPeakHour and x<=endingPeakHour:
 		adjustedDemand[x] = powerThreshold
 		energyShaved = float(energyShaved) + (float(demand[x]) - float(powerThreshold))*24/float(len(demand))
-		powerBattery[x] = demand[x]-powerThreshold
+		powerBattery[x] = powerThreshold - demand[x]
 	else:
 		adjustedDemand[x] = demand[x]
 		powerBattery[x] = 0
 
 print "The energy shaved is: " + str(energyShaved) + " kWh"
+
+
+chargingHours = 1
+energyToStore = energyShaved/(chargingHours*len(demand)/24)
+print energyToStore
+for x in adjustedDemand:
+	if x >= startingPeakHour-chargingHours and x<startingPeakHour:
+		if energyShaved > 0:
+			energyShaved = energyShaved - energyToStore
+			powerBattery[x] = energyToStore
+			adjustedDemand[x] = adjustedDemand[x] + energyToStore
+			print x
 
 fig = plt.gcf()
 ax = fig.gca()
