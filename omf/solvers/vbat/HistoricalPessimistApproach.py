@@ -1,11 +1,15 @@
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+from matplotlib.patches import Circle,Ellipse
 from operator import sub
 import collections
+import numpy as np
+
 #The demand:
 #demand = [1000,1000,1000,1000,1000,1025,1050,1075,1125,1200,1450,1750,1900,2000,1900,1750,1450,1200,1125,1075,1050,1025,1000,1000]
 
 demand = collections.OrderedDict()
+demand[0] = 1000
 demand[0.25] = 1000
 demand[0.5] = 1000
 demand[0.75] = 1000
@@ -101,14 +105,13 @@ demand[23] = 1009
 demand[23.25] = 1005
 demand[23.5] = 1002
 demand[23.75] = 1000
-demand[24] = 1000
 
 plt.plot(*zip(*sorted(demand.items())))
 plt.ylabel('Demand in kW')
 plt.xlabel('Hour of the day')
-plt.axis([0,24,-200,2200])
+plt.axis([0,23.75,-200,2200])
 
-accuracyFactor = 0.05
+accuracyFactor = 0.15
 #peak demand
 peakDemand = 0
 for x in demand:
@@ -144,39 +147,15 @@ for x in demand:
 		powerBattery[x] = 0
 
 print "The energy shaved is: " + str(energyShaved) + " kWh"
-#print demand
 
+fig = plt.gcf()
+ax = fig.gca()
+ellipse = Ellipse((peakDemandHour,peakDemand),peakWidth*accuracyFactor,8*(peakDemand-powerThreshold)*accuracyFactor,0.0,color ='r')
 
-
+ax.add_artist(ellipse)
 plt.plot(*zip(*sorted(adjustedDemand.items())))
 plt.plot(*zip(*sorted(powerBattery.items())))
 
 
-		#powerShaved = 
-'''
-peakCutOff =[0]*24
-cutOff = demand[startingPeakHour]
-
-for x in xrange(0,23):
-	if demand[x] < cutOff:
-		peakCutOff[x] = 0
-	else:
-		peakCutOff[x] = demand[x]-cutOff
-
-print demand
-print peakCutOff
-
-energyShaved = peakWidth*(peakDemand-demand[startingPeakHour])/2 #assuming peak is a triangle we calculate the area to get the energy
-print "The energy shaved is: " + str(energyShaved) + " kWh"
-
-adjustedDemand = map(sub,demand,peakCutOff)
-
-#red_patch = mpatches.Patch(color='red', label='The red data')
-
-#plt.legend(red_patch)
-
 plt.grid()
-plt.plot(peakCutOff)
-plt.plot(adjustedDemand)
-'''
 plt.show()
