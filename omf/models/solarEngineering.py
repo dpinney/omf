@@ -133,7 +133,7 @@ def work(modelDir, inputDict):
 						'node_instantaneous_voltage_limit_lower':0,'line_thermal_limit_upper':1,'echo':'false','node_continuous_voltage_limit_upper':1.05,
 						'interval':30,'line_thermal_limit_lower':0,'summary':'Violation_Summary.csv','inverter_v_chng_interval':60,
 						'xfrmr_thermal_limit_upper':2,'inverter_v_chng_per_interval_upper_bound':0.050}
-	# tree[feeder.getMaxKey(tree) + 1] = violationRecorder
+	tree[feeder.getMaxKey(tree) + 1] = violationRecorder
 	feeder.adjustTime(tree=tree, simLength=float(inputDict["simLength"]),
 		simLengthUnits=inputDict["simLengthUnits"], simStartDate=inputDict["simStartDate"])
 	# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
@@ -282,11 +282,6 @@ def work(modelDir, inputDict):
 			reader = csv.reader(downFile)
 			downData = [x for x in reader]
 	FIRST_DATA_ROW = 9
-	def stringToMag(s):
-		if 'd' in s:
-			return complex(s.replace('d','j')).real
-		elif 'j' in s or 'i' in s:
-			return abs(complex(s.replace('i','j')))
 	cleanDown = [stringToMag(x[1]) for x in downData[FIRST_DATA_ROW:-1]]
 	swingTimestamps = [x[0] for x in subData[FIRST_DATA_ROW:-1]]
 	cleanSub = [stringToMag(x[1]) for x in subData[FIRST_DATA_ROW:-1]]
@@ -311,74 +306,24 @@ def work(modelDir, inputDict):
 		outData['minVoltBand'] = minVoltBand
 		outData['maxVoltBand'] = maxVoltBand
 	# Violation Summary and Log
-	# violationData = ''
-	# violationArray = []
-	# with open(pJoin(modelDir,"Violation_Summary.csv")) as vioSum:
-	# 	reader = csv.reader(vioSum)
-	# 	for row in reader:
-	# 		violationArray.append(row)	
-	# for row in violationArray[4:]:
-	# 	violationData += str(' '.join(row)) + "\n"
-	# outData["violationSummary"] = violationData
-	# violationLogArray = []
-	# violationLog = ''
-	# with open(pJoin(modelDir,"Violation_Log.csv")) as vioLog:
-	# 	logger = csv.reader(vioLog)
-	# 	for row in logger:
-	# 		violationLogArray.append(row)
-	# for row in violationLogArray[6:]:
-	# 	violationLog += str(' '.join(row)) + "\n"
-	# outData['violationLog'] = violationLog
-	# Line current calculations
-	# Overhead Lines
-	ohCurrents = {}
-	for key in rawOut['OH_line_current_phaseA.csv']:
-		ohCurrents[str(key)] = {} 
-		if key != '# timestamp':
-			currentArray = []
-			# Finding currents of all phases on the line
-			for i,current in enumerate(rawOut['OH_line_current_phaseA.csv'][key]):
-				currA = current
-				currB = rawOut['OH_line_current_phaseB.csv'][key][i]
-				currC = rawOut['OH_line_current_phaseC.csv'][key][i]
-				flowDir = rawOut['OH_line_flow_direc.csv'][key][i]
-				lineRating = rawOut['OH_line_cont_rating.csv'][key][i]
-				if 'R' in flowDir:
-					direction = -1
-				else :
-					direction = 1
-				if type(current) is str: 
-					currA = stringToMag(currA)
-					currB = stringToMag(currB)
-					currC = stringToMag(currC)
-					maxCurrent = max(abs(currA),abs(currB),abs(currC))
-					directedCurrent = maxCurrent/lineRating * direction
-					currentArray.append(directedCurrent)
-			ohCurrents[str(key)] = {'current_steps':currentArray}
-	# Underground Lines
-	ugCurrents = {}
-	for key in rawOut['UG_line_current_phaseA.csv']:
-		ugCurrents[str(key)] = {} 
-		if key != '# timestamp':
-			currentArray = []
-			for i,current in enumerate(rawOut['UG_line_current_phaseA.csv'][key]):
-				currA = current
-				currB = rawOut['UG_line_current_phaseB.csv'][key][i]
-				currC = rawOut['UG_line_current_phaseC.csv'][key][i]
-				flowDir = rawOut['UG_line_flow_direc.csv'][key][i]
-				lineRating = rawOut['UG_line_cont_rating.csv'][key][i]
-				if 'R' in flowDir:
-					direction = -1
-				else :
-					direction = 1
-				if type(current) is str: 
-					currA = stringToMag(currA)
-					currB = stringToMag(currB)
-					currC = stringToMag(currC)
-					maxCurrent = max(abs(currA),abs(currB),abs(currC))
-					directedCurrent = maxCurrent/lineRating * direction
-					currentArray.append(directedCurrent)
-			ugCurrents[str(key)] = {'current_steps':currentArray}
+	violationData = ''
+	violationArray = []
+	with open(pJoin(modelDir,"Violation_Summary.csv")) as vioSum:
+		reader = csv.reader(vioSum)
+		for row in reader:
+			violationArray.append(row)	
+	for row in violationArray[4:]:
+		violationData += str(' '.join(row)) + "\n"
+	outData["violationSummary"] = violationData
+	violationLogArray = []
+	violationLog = ''
+	with open(pJoin(modelDir,"Violation_Log.csv")) as vioLog:
+		logger = csv.reader(vioLog)
+		for row in logger:
+			violationLogArray.append(row)
+	for row in violationLogArray[6:]:
+		violationLog += str(' '.join(row)) + "\n"
+	outData['violationLog'] = violationLog
 	# What percentage of our keys have lat lon data?
 	latKeys = [tree[key]['latitude'] for key in tree if 'latitude' in tree[key]]
 	latPerc = 1.0*len(latKeys)/len(tree)
@@ -443,6 +388,64 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 					allVolts.append(phaseVolt)
 			# HACK: Take average of all phases to collapse dimensionality.
 			nodeVolts[step][nodeName] = avg(allVolts)
+	# Line current calculations
+	lineCurrents = {}
+	if os.path.exists(pJoin(modelDir,'OH_line_current_phaseA.csv')):
+		for step, stamp in enumerate(rawOut['OH_line_current_phaseA.csv']['# timestamp']):
+			lineCurrents[step] = {} 
+			currentArray = []
+			# Finding currents of all phases on the line
+			for key in [x for x in rawOut.get('OH_line_current_phaseA.csv',{}).keys() if x != '# timestamp']:
+				currA = rawOut['OH_line_current_phaseA.csv'][key][step]
+				currB = rawOut['OH_line_current_phaseB.csv'][key][step]
+				currC = rawOut['OH_line_current_phaseC.csv'][key][step]
+				flowDir = rawOut['OH_line_flow_direc.csv'][key][step]
+				lineRating = rawOut['OH_line_cont_rating.csv'][key][step]
+				if 'R' in flowDir:
+					direction = -1
+				else :
+					direction = 1
+				if type(currA) is str: 
+					currA = stringToMag(currA)
+					currB = stringToMag(currB)
+					currC = stringToMag(currC)
+					maxCurrent = max(abs(currA),abs(currB),abs(currC))
+					directedCurrent = float(maxCurrent/lineRating * direction)
+				for objt in tree:
+					if 'name' in tree[objt].keys():
+						if tree[objt]['name'] == str(int(key)):
+							keyTup = (tree[objt]['to'],tree[objt]['from'])
+				lineCurrents[step][keyTup] = directedCurrent
+	# Underground Lines
+	if os.path.exists(pJoin(modelDir,'UG_line_current_phaseA.csv')):
+		for step, stamp in enumerate(rawOut['UG_line_current_phaseA.csv']['# timestamp']):
+			currentArray = []
+			# Finding currents of all phases on the line
+			for key in [x for x in rawOut.get('UG_line_current_phaseA.csv',{}).keys() if x != '# timestamp']:
+				currA = rawOut['UG_line_current_phaseA.csv'][key][step]
+				currB = rawOut['UG_line_current_phaseB.csv'][key][step]
+				currC = rawOut['UG_line_current_phaseC.csv'][key][step]
+				flowDir = rawOut['UG_line_flow_direc.csv'][key][step]
+				lineRating = rawOut['UG_line_cont_rating.csv'][key][step]
+				if 'R' in flowDir:
+					direction = -1
+				else :
+					direction = 1
+				if type(currA) is str: 
+					currA = stringToMag(currA)
+					currB = stringToMag(currB)
+					currC = stringToMag(currC)
+					maxCurrent = max(abs(currA),abs(currB),abs(currC))
+					directedCurrent = float(maxCurrent/lineRating * direction)
+				for objt in tree:
+					if 'name' in tree[objt].keys():
+						if tree[objt]['name'] == str(int(key)):
+							keyTup = (tree[objt]['to'],tree[objt]['from'])
+				lineCurrents[step][keyTup] = directedCurrent
+		for step in lineCurrents:
+			for edge in fGraph.edges():
+				if edge not in lineCurrents[step].keys():
+					lineCurrents[step][edge] = 0
 	# Draw animation.
 	voltChart = plt.figure(figsize=(15,15))
 	plt.axes(frameon = 0)
@@ -451,7 +454,16 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 	voltChart.gca().set_aspect('equal')
 	custom_cm = matplotlib.colors.LinearSegmentedColormap.from_list('custColMap',[(0.0,'blue'),(0.25,'darkgray'),(0.75,'darkgray'),(1.0,'yellow')])
 	custom_cm.set_under(color='black')
-	edgeIm = nx.draw_networkx_edges(fGraph, positions)
+	current_cm = matplotlib.colors.LinearSegmentedColormap.from_list('custColMap',[(0.0,'green'),(0.999999,'green'),(1.0,'red')])
+	# current_cm = matplotlib.colors.LinearSegmentedColormap.from_list('custColMap',[(-1.0,'green'),(0.0, 'gray'),(1.0,'red'),(1.0,'red')])
+	# use edge color to set color and dashness of overloaded/negative currents
+	if len(lineCurrents)>0:
+		edgeIm = nx.draw_networkx_edges(fGraph, 
+			pos = positions,
+			edge_color = [lineCurrents[0].get(n,0) for n in fGraph.edges()],
+			edge_cmap = current_cm)
+	else:	
+		edgeIm = nx.draw_networkx_edges(fGraph, positions)
 	nodeIm = nx.draw_networkx_nodes(fGraph,
 		pos = positions,
 		node_color = [nodeVolts[0].get(n,0) for n in fGraph.nodes()],
@@ -464,6 +476,9 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 	plt.title(rawOut['aVoltDump.csv']['# timestamp'][0])
 	def update(step):
 		nodeColors = np.array([nodeVolts[step].get(n,0) for n in fGraph.nodes()])
+		if len(lineCurrents)>0:
+			edgeColors = np.array([lineCurrents[step].get(n,0) for n in fGraph.edges()])
+			edgeIm.set_array(edgeColors)
 		plt.title(rawOut['aVoltDump.csv']['# timestamp'][step])
 		nodeIm.set_array(nodeColors)
 		return nodeColors,
@@ -548,6 +563,12 @@ def _groupBy(inL, func):
 		else:
 			newL.append([item])
 	return newL
+
+def stringToMag(s):
+	if 'd' in s:
+		return complex(s.replace('d','j')).real
+	elif 'j' in s or 'i' in s:
+		return abs(complex(s.replace('i','j')))
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
