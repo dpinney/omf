@@ -356,14 +356,16 @@ def _readCymeSource(feederId, type, modelDir):
 			for row in feeder_db_net:             
 				if row.NetworkId == feederId:
 					feeder_id = feederId
-			feederId_equivalent = "SOURCE_" + feeder_id          
-			for row in feeder_db:         
-				if feederId_equivalent in row.NodeId:
+			feederId_equivalent = "SOURCE_" + feeder_id
+			for row in feeder_db:
+				if row.NodeId in feederId_equivalent: #jfk.  logic was backwards.
 					feeder_id = feederId
 					cymsource[_fixName(row.NodeId)] = copy.deepcopy(CYMEQUIVALENTSOURCE)
 					cymsource[_fixName(row.NodeId)]['name'] = _fixName(row.NodeId)
-					cymsource[_fixName(row.NodeId)]['nominal_voltage'] = str(float(row.OperatingVoltage1)*1000.0/math.sqrt(3))
-					swingBus = _fixName(row.NodeId)    
+					#jfk. Differentiating between nominal voltage and voltage setpoint at the source.  Otherwise, per unit calcs get messy later.  Also, more accurate for capacitors.
+					cymsource[_fixName(row.NodeId)]['nominal_voltage'] = str(float(row.KVLL)*1000.0/math.sqrt(3)) #jfk.
+					cymsource[_fixName(row.NodeId)]['source_voltage'] = str(float(row.OperatingVoltage1)*1000.0) #jfk
+					swingBus = _fixName(row.NodeId)
 	print 'swingbus',swingBus
 	return cymsource, feeder_id, swingBus
 
