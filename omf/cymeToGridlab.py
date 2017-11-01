@@ -1748,7 +1748,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	for x in cymsource.keys():
 		meters[x] = { 'object' : 'meter',
 						 'name' : '{:s}'.format(cymsource[x]['name']),
-						 'bustype' : 'SWING',
+						 # 'bustype' : 'SWING',
 						 'nominal_voltage' : cymsource[x]['nominal_voltage'],
 						 'latitude' : cymnode[x]['latitude'],
 						 'longitude' : cymnode[x]['longitude']}
@@ -2720,6 +2720,40 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 				pass
 	print modelDir
 	checkMissingNodes(nodes, cymsectiondevice, objectList, feeder_id, modelDir, cymsection)
+
+
+	#jfk.  add regulator to source
+	biggestkey = max(glmTree.keys())
+	glmTree[biggestkey+1] = {'object': 'node',
+				   'name': 'sourcenode',
+				   'phases': 'ABC',
+					'nominal_voltage': cymsource[_fixName(swingBus)]['nominal_voltage'],
+					'bustype': 'SWING'}
+
+	glmTree[biggestkey+2] = {'object': 'regulator',
+					   'name': 'sourceregulator',
+					   'phases': 'ABC',
+					   'from': 'sourcenode',
+					   'to': 'n' + swingBus,
+					   'configuration': 'ss_regconfiguration'}
+
+	glmTree[biggestkey+3] = {'object': 'regulator_configuration',
+						'name': 'ss_regconfiguration',
+						'band_center': cymsource[_fixName(swingBus)]['source_voltage'],
+						'Control': 'OUTPUT_VOLTAGE',
+						'connect_type': 'WYE_WYE',
+						'raise_taps': '50', #want to be very close to desired voltage for agreement with cyme
+						'lower_taps': '50',
+						'band_width': '2.0', #bandwidth should be very small for all voltage levels
+						'regulation': '0.1',
+						'dwell_time': '5',
+						'tap_pos_A': '0',
+						'tap_pos_B': '0',
+						'tap_pos_C': '0',
+						'time_delay': '30.0',
+						'control_level': 'INDIVIDUAL'}
+
+
 	return glmTree, x_scale, y_scale
 	
 def _tests(testFile, modelDir, outPrefix, keepFiles=True ):
