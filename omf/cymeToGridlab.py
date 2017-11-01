@@ -1569,6 +1569,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	# PV CONFIGS
 	cymeqphotovoltaic = _readEqPhotovoltaic(feeder_id,modelDir)
 	# BATTERY
+	#jfk.  todo: these lines throw an error.  I comment them out because I don't have batteries.
 	cymbattery = _readCymeBattery(feeder_id, modelDir)
 	# BATTERY CONFIGS
 	cymeqbattery = _readEqBattery(feeder_id,modelDir)
