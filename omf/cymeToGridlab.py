@@ -2094,7 +2094,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 												'to' : cymsectiondevice[swObj]['to'],
 												'operating_mode' : 'BANKED'}
 				if cymswitch[swObj]['status'] == 0:
-					status = 'CLOSED'
+					status = 'OPEN'#jfk.  This was CLOSED.  Must have been a typo?
 				else:
 					status = 'CLOSED'
 				for phase in swObjs[swObj]['phases']:
