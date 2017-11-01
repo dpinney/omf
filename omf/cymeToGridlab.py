@@ -1471,7 +1471,7 @@ def _readCymeGenerator(feederId, modelDir):
 	return cymeGenerator
 
 def _find_SPCT_rating(load_str):
-		spot_load = abs(complex(load_str))                           
+		spot_load = abs(complex(load_str))/1000.0 #jfk.  needs to be in kVA for transformer rating estimation
 		spct_rating = [5,10,15,25,30,37.5,50,75,87.5,100,112.5,125,137.5,150,162.5,175,187.5,200,225,250,262.5,300,337.5,400,412.5,450,500,750,1000,1250,1500,2000,2500,3000,4000,5000]
 		past_rating = max(spct_rating)
 		for rating in spct_rating:
