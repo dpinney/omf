@@ -2668,7 +2668,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 			else:
 				deleteKeys.append(x)
 				for y in glmTree.keys():
-					if glmTree[y].get['name', ''] == glmTree[x]['to']:
+					if glmTree[y].get('name', '') == glmTree[x]['to']:#jfk was glmTree[y].get['name', '']  #typo with the brackets
 						deleteKeys.append(y)
 	for key in deleteKeys:
 		del glmTree[key]
