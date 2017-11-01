@@ -2113,7 +2113,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 										'to' : cymsectiondevice[rcl]['to'],
 										'operating_mode' : 'BANKED'}
 				if cymrecloser[rcl]['status'] == 0:
-					status = 'CLOSED'
+					status = 'OPEN' # was 'CLOSED'  #jfk.  Mistake seemed intentional. Maybe it was just a typo?
 				else:
 					status = 'CLOSED'
 				for phase in rcls[rcl]['phases']:
