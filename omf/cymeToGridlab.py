@@ -32,6 +32,7 @@ import matplotlib
 matplotlib.pyplot.switch_backend('Agg')
 import numpy as np
 from numpy.linalg import inv
+import platform
 
 
 m2ft = 1.0/0.3048             # Conversion factor for meters to feet
@@ -70,21 +71,45 @@ class Map(dict):
 def _csvDump(database_file, modelDir):
 	# Get the list of table names with "mdb-tables"
 	print "database", database_file
-	table_names = subprocess.Popen(["mdb-tables", "-1", database_file], 
-								   stdout=subprocess.PIPE).communicate()[0]
-	tables = table_names.split('\n')
-	if not os.path.isdir((pJoin(modelDir,'cymeCsvDump'))):
-		os.makedirs((pJoin(modelDir,'cymeCsvDump')))
-	# Dump each table as a CSV file using "mdb-export",
-	# converting " " in table names to "_" for the CSV filenames.
-	for table in tables:
-		if table != '':
-			filename = table.replace(" ","_") + ".csv"
-			file = open(pJoin(modelDir,'cymeCsvDump',filename), 'w+')
-			contents = subprocess.Popen(["mdb-export", database_file, table],
-										stdout=subprocess.PIPE).communicate()[0]
-			file.write(contents)
-			file.close()
+
+	if platform.system() == 'Linux':
+		table_names = subprocess.Popen(["mdb-tables", "-1", database_file],
+									   stdout=subprocess.PIPE).communicate()[0]
+		tables = table_names.split('\n')
+		if not os.path.isdir((pJoin(modelDir,'cymeCsvDump'))):
+			os.makedirs((pJoin(modelDir,'cymeCsvDump')))
+		# Dump each table as a CSV file using "mdb-export",
+		# converting " " in table names to "_" for the CSV filenames.
+		for table in tables:
+			if table != '':
+				filename = table.replace(" ","_") + ".csv"
+				file = open(pJoin(modelDir,'cymeCsvDump',filename), 'w+')
+				contents = subprocess.Popen(["mdb-export", database_file, table],
+											stdout=subprocess.PIPE).communicate()[0]
+				file.write(contents)
+				file.close()
+	elif platform.system() == 'Windows':
+		#The following code uses mdb-tables in Windows 10, but requires the creators update and ubuntu
+		#One big problem:  after this function dumps the csv files, python crashes. So I have to run this routine twice.
+		originaldir = os.getcwd()#bash command below wouldn't work if I appended path to database_file
+		os.chdir(modelDir)
+		table_names = subprocess.Popen(["bash", "-c", "mdb-tables -1 " + database_file], stdout=subprocess.PIPE).communicate()[0]
+		tables = table_names.split('\n')
+
+		if not os.path.isdir((pJoin(modelDir,'cymeCsvDump'))):
+			os.makedirs((pJoin(modelDir,'cymeCsvDump')))
+		# Dump each table as a CSV file using "mdb-export",
+		# converting " " in table names to "_" for the CSV filenames.
+		for table in tables:
+			if table != '':
+				filename = table.replace(" ","_") + ".csv"
+				file = open(pJoin(modelDir,'cymeCsvDump',filename), 'w+')
+
+				contents = subprocess.Popen(["bash", "-c", "mdb-export " + database_file + " " +table],
+											stdout=subprocess.PIPE).communicate()[0]
+				file.write(contents)
+				file.close()
+		os.chdir(originaldir)
 
 def _findNetworkId(csvFile):
 	csvDict = csv.DictReader(open(csvFile,'r'))
