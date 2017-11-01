@@ -99,11 +99,23 @@ def _findNetworkId(csvFile):
 	# If single source network, select the only source
 		return networks[0]
 
+#jfk. helper function for _fixName
+def _isfloat(value):
+  try:
+    float(value)
+    return True
+  except:
+    return False
+
+#jfk.  Ensure that all names start with a letter.  Not critical, but reduces gridlabd warnings.
 def _fixName(name):
 	'''Function that replaces characters not allowed in name with _'''
 	badChar = [' ', '-', '\\', '//', '/', ':', '.', "'\'", '&']
 	for char in badChar:
 		name = name.replace(char, '_')
+	#jfk.  Don't allow names that start with a number
+	if _isfloat(name[0]):
+		name = 'x'+name
 	return name
 
 def _convertPhase(int_phase):
