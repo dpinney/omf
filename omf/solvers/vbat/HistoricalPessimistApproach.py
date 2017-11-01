@@ -156,7 +156,8 @@ print "The energy shaved is: " + str(energyShaved) + " kWh"
 
 
 ###### USER VARIABLE ######
-chargingHours = 2
+chargingHours = 3
+percentLossPerTick = 0.05
 ###### USER VARIABLE ######
 
 numberOfChargingSteps = (chargingHours*len(demand)/24)
@@ -167,20 +168,23 @@ for x in adjustedDemand:
 		if energyShaved > 0:
 
 
-			if numberOfChargingSteps > 1:
-				energyToStore = energyShaved/2
-				
+			'''if numberOfChargingSteps > 1:
+				energyToStore = (powerThreshold-demand[x])/2
+				#energyToStore = energyShaved/2	
 			else:
-				energyToStore = energyShaved
+				energyToStore = energyShaved'''
+
+			energyToStore = (powerThreshold-demand[x])/2
 
 			numberOfChargingSteps = numberOfChargingSteps-1
-			energyShaved = energyShaved - energyToStore
+			energyShaved = (energyShaved - energyToStore)
 			adjustedDemand[x] = adjustedDemand[x] + energyToStore
 			powerBattery[x] = energyToStore
 
-			'''energyShaved = energyShaved - energyToStore
-			adjustedDemand[x] = adjustedDemand[x] + energyToStore'''
-			print x
+	energyShaved = energyShaved*(1+percentLossPerTick)
+	print energyShaved
+
+
 
 fig = plt.gcf()
 ax = fig.gca()
