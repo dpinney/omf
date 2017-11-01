@@ -1662,7 +1662,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 				pv_sections[cymsectiondevice[device]['section_name']] = [device] #jfk
 			else:
 				pv_sections[cymsectiondevice[device]['section_name']].append(device)
-		elif cymsectiondevice[device]['device_type'] == 47:
+		elif cymsectiondevice[device]['device_type'] == 47 or cymsectiondevice[device]['device_type'] == 5: #jfk.  added check for 5, another transformer device
 			transformer_sections[cymsectiondevice[device]['section_name']] = device
 		elif cymsectiondevice[device]['device_type'] == 48:
 			if dbflag == 0:
@@ -1705,6 +1705,8 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	cymreactor, reactorIds =_readCymeReactors(feeder_id, modelDir) #jfk
 	# -23-CYME CYMEQREACTORS********************************************************************************************
 	cymeqreactor =_readEqReactors(feeder_id, modelDir)
+	# -24-CYME CYMEQTRANSFORMER********************************************************************************************
+	cymeqxfmr =_readEqXfmr(feeder_id, modelDir)
 
 
 	# Check number of sources
@@ -2399,10 +2401,10 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	# Create transformer and transformer configuration dictionaries
 	xfmr_cfgs = {}
 	xfmrs = {}
-	for  xfmr in cymsectiondevice.keys():
+	for xfmr in cymsectiondevice.keys():
 		if cymsectiondevice[xfmr]['device_type'] == 47:
 			if xfmr not in cymxfmr.keys():
-				print "There is no xmfr spec for ", xmfr, " in the network database provided.\n"                
+				print "There is no xmfr spec for ", xfmr, " in the network database provided.\n"
 			else:
 				xfmrEq = cymxfmr[xfmr]['equipment_name']
 				if xfmrEq == xfmr:
@@ -2418,7 +2420,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 				if 'C' in ph:
 					phNum += 1.0
 				if xfmrEq not in cymeqautoxfmr.keys():
-					print "There is no xmfr spec for ", xmfrEq, " in the network database provided.\n"                    
+					print "There is no xmfr spec for ", xfmrEq, " in the network database provided.\n"
 				else:
 					if xfmrEq not in xfmr_cfgs.keys():
 						xfmr_cfgs[xfmrEq] = {'object' : 'transformer_configuration',
@@ -2431,6 +2433,47 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 						for phase in ph:
 							if phase not in ['N', 'D']:
 								xfmr_cfgs[xfmrEq]['power{:s}_rating'.format(phase)] = '{:0.6f}'.format(cymeqautoxfmr[xfmrEq]['PrimaryRatedCapacity']/phNum)
+				if xfmr not in xfmrs.keys():
+					xfmrs[xfmr] = {'object' : 'transformer',
+											'name' : xfmr,
+											'phases' : ph,
+											'from' : cymsectiondevice[xfmr]['from'],
+											'to' : cymsectiondevice[xfmr]['to'],
+											'configuration' : xfmrEq + suffix}
+		#jfk.  this block is nearly identical to the above.
+		elif cymsectiondevice[xfmr]['device_type'] == 5:
+			if xfmr not in cymxfmr.keys():
+				print "There is no xmfr spec for ", xfmr, " in the network database provided.\n"
+			else:
+				xfmrEq = cymxfmr[xfmr]['equipment_name']
+				if xfmrEq == xfmr:
+					suffix = 'cfg'
+				else:
+					suffix = ''
+				ph = cymsectiondevice[xfmr]['phases'].replace('N', '')
+				phNum = 0
+				if 'A' in ph:
+					phNum += 1.0
+				if 'B' in ph:
+					phNum += 1.0
+				if 'C' in ph:
+					phNum += 1.0
+				if xfmrEq not in cymeqxfmr.keys():
+					print "There is no xmfr spec for ", xfmrEq, " in the network database provided.\n"
+				else:
+					if xfmrEq not in xfmr_cfgs.keys():
+						xfmr_cfgs[xfmrEq] = {'object' : 'transformer_configuration',
+															'name' : xfmrEq + suffix,
+															'connect_type' : 'WYE_WYE',
+															'primary_voltage' : '{:0.6f}'.format(cymeqxfmr[xfmrEq]['PrimaryVoltage']*math.sqrt(3)), #jfk
+															'secondary_voltage' : '{:0.6f}'.format(cymeqxfmr[xfmrEq]['SecondaryVoltage']*math.sqrt(3)), #jfk
+															# 'resistance': '0.000000001',
+											 				# 'reactance': '0.0000000006',
+															'impedance' : cymeqxfmr[xfmrEq]['impedance'],
+															'power_rating' : '{:0.0f}'.format(cymeqxfmr[xfmrEq]['PrimaryRatedCapacity'])}
+						for phase in ph:
+							if phase not in ['N', 'D']:
+								xfmr_cfgs[xfmrEq]['power{:s}_rating'.format(phase)] = '{:0.6f}'.format(cymeqxfmr[xfmrEq]['PrimaryRatedCapacity']/phNum)
 				if xfmr not in xfmrs.keys():
 					xfmrs[xfmr] = {'object' : 'transformer',
 											'name' : xfmr,
