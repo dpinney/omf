@@ -641,6 +641,9 @@ def _readCymeSectionDevice(feederId, modelDir):
 				cymsectiondevice[row.DeviceNumber]['device_type'] = int(row.DeviceType)
 				cymsectiondevice[row.DeviceNumber]['section_name'] = row.SectionId
 				cymsectiondevice[row.DeviceNumber]['location'] = int(row.Location)
+			else:
+				#jfk. A better fix is needed.
+				print 'Found duplicate device ID: ' + row.DeviceNumber + '.  Rename device in Cyme or the device will be overwritten.'
 	return cymsectiondevice
 
 def _splitLinkObjects(sectionDict, deviceDict, linkDict, overheadDict, undergroundDict):
