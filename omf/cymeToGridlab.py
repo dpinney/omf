@@ -2693,8 +2693,9 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 					nv = volt_dict[glm_dict[x]['from']]  
 					for y in glm_dict.keys():
 						if glm_dict[y].get('name', '') == cnfg:
-							glmTree[y]['band_center'] = nv
-							glmTree[y]['band_width'] = str(float(glmTree[y]['band_width'])*float(glmTree[y]['band_center']))
+							pass
+							# glmTree[y]['band_center'] = nv
+							# glmTree[y]['band_width'] = str(float(glmTree[y]['band_width'])*float(glmTree[y]['band_center']))
 				else:              
 					volt_dict[glm_dict[x]['to']] = volt_dict[glm_dict[x]['from']]
 			elif 'parent' in glm_dict[x].keys() and glm_dict[x]['parent'] in volt_dict.keys() and glm_dict[x]['name'] not in volt_dict.keys():
