@@ -817,7 +817,7 @@ def _readCymeShuntCapacitor(feederId, modelDir):
 						  'capacitor_B' : None,
 						  'capacitor_C' : None,
 						  'capacitor_ABC' : None,
-						  'kv_line_neutral' : None,
+						  'kV_line_neutral' : None, #kV. for consistency
 						  'control' : None,
 						  'voltage_set_high' : None,
 						  'voltage_set_low' : None,
@@ -825,7 +825,9 @@ def _readCymeShuntCapacitor(feederId, modelDir):
 						  'VAr_set_low' : None,
 						  'current_set_high' : None,
 						  'current_set_low' : None,
-						  'pt_phase' : None}
+						  'pt_phase' : None,
+						  'remote_sense': None,
+						  'control_level': None}
 						  
 	shuntcapacitor_db =_csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMSHUNTCAPACITOR.csv"),feederId)                    
 	if len(shuntcapacitor_db) == 0:
@@ -842,7 +844,7 @@ def _readCymeShuntCapacitor(feederId, modelDir):
 					cymshuntcapacitor[row.DeviceNumber] = copy.deepcopy(CYMSHUNTCAPACITOR)
 					cymshuntcapacitor[row.DeviceNumber]['name'] = row.DeviceNumber          
 					cymshuntcapacitor[row.DeviceNumber]['equipment_name'] = row.EquipmentId
-					cymshuntcapacitor[row.DeviceNumber]['phases'] = _convertPhase(int(row.Phase))
+					cymshuntcapacitor[row.DeviceNumber]['phases'] = 'ABC' # _convertPhase(int(row.Phase)) #jfk. Painful change.  Phase doesn't exist in my capacitor tables.
 					cymshuntcapacitor[row.DeviceNumber]['status'] = row.Status
 					if float(row.KVARA) == 0.0 and float(row.KVARA) == 0.0 and float(row.KVARA) == 0.0 and float(row.KVARABC) > 0.0:                
 						cymshuntcapacitor[row.DeviceNumber]['capacitor_A'] = float(row.KVARABC)*1000/3
@@ -869,12 +871,14 @@ def _readCymeShuntCapacitor(feederId, modelDir):
 						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = _convertPhase(int(row.Phase))   
 					elif int(row.CapacitorControlType) == 7:
 						cymshuntcapacitor[row.DeviceNumber]['control'] = 'VOLT'
-						cymshuntcapacitor[row.DeviceNumber]['voltage_set_high'] = row.OnValue
-						cymshuntcapacitor[row.DeviceNumber]['voltage_set_low'] = row.OffValue
-						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = _convertPhase(int(row.Phase))   
+						controlledphase = _convertPhase(int(row.ControlledPhase)).replace('N','')
+						cymshuntcapacitor[row.DeviceNumber]['voltage_set_low'] = float(row['OnValue'+controlledphase])
+						cymshuntcapacitor[row.DeviceNumber]['voltage_set_high'] = float(row['OffValue'+controlledphase])
+						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = controlledphase
+						cymshuntcapacitor[row.DeviceNumber]['remote_sense'] = _fixName(row.ControlledNodeId)
 					else:
 						cymshuntcapacitor[row.DeviceNumber]['control'] = 'MANUAL'
-						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = _convertPhase(int(row.Phase))
+						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = 'ABC' # _convertPhase(int(row.Phase)) #doesn't exist
 						cymshuntcapacitor[row.DeviceNumber]['voltage_set_high'] = float(row.KVLN)*1000 
 						cymshuntcapacitor[row.DeviceNumber]['voltage_set_low'] = float(row.KVLN)*1000 
 			else:
@@ -888,6 +892,13 @@ def _readCymeShuntCapacitor(feederId, modelDir):
 					cymshuntcapacitor[row.DeviceNumber]['equipment_name'] = row.EquipmentId
 					cymshuntcapacitor[row.DeviceNumber]['phases'] = "ABCN"
 					cymshuntcapacitor[row.DeviceNumber]['status'] = row.Status
+					if row.SwitchingMode == '2':
+						cymshuntcapacitor[row.DeviceNumber]['control_level'] =  'BANK'
+					elif row.SwitchingMode == '1':
+						cymshuntcapacitor[row.DeviceNumber]['control_level'] =  'INDIVIDUAL'
+					else:
+						print 'could not find capacitor switching mode.  defaulting to INDIVIDUAL'
+						cymshuntcapacitor[row.DeviceNumber]['control_level'] =  'INDIVIDUAL'
 					if float(row.SwitchedKVARA) > 0.0:
 						cymshuntcapacitor[row.DeviceNumber]['capacitor_A'] = float(row.SwitchedKVARA)*1000
 					if float(row.SwitchedKVARB) > 0.0:
@@ -895,27 +906,29 @@ def _readCymeShuntCapacitor(feederId, modelDir):
 					if float(row.SwitchedKVARC) > 0.0:
 						cymshuntcapacitor[row.DeviceNumber]['capacitor_C'] = float(row.SwitchedKVARC)*1000
 					if float(row.KVLN) > 0.0:
-						cymshuntcapacitor[row.DeviceNumber]['kV_line_neutral'] = float(row.KVLN)*1000    
+						cymshuntcapacitor[row.DeviceNumber]['kV_line_neutral'] = float(row.KVLN)*1000
 					if int(row.CapacitorControlType) == 2:
 						cymshuntcapacitor[row.DeviceNumber]['control'] = 'VAR'
 						cymshuntcapacitor[row.DeviceNumber]['VAr_set_high'] = float(row.OnValueA)*1000
 						cymshuntcapacitor[row.DeviceNumber]['VAr_set_low'] = float(row.OffValueA)*1000
-						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = "ABCN"            
+						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = "ABCN"
 					elif int(row.CapacitorControlType) == 3:
 						cymshuntcapacitor[row.DeviceNumber]['control'] = 'CURRENT'
 						cymshuntcapacitor[row.DeviceNumber]['current_set_high'] = row.OnValueA
 						cymshuntcapacitor[row.DeviceNumber]['current_set_low'] = row.OffValueA
-						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = "ABCN" 
+						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = "ABCN"
 					elif int(row.CapacitorControlType) == 7:
 						cymshuntcapacitor[row.DeviceNumber]['control'] = 'VOLT'
-						cymshuntcapacitor[row.DeviceNumber]['voltage_set_high'] = row.OnValueA
-						cymshuntcapacitor[row.DeviceNumber]['voltage_set_low'] = row.OffValueA
-						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = "ABCN"              
+						controlledphase = _convertPhase(int(row.ControlledPhase)).replace('N','')
+						cymshuntcapacitor[row.DeviceNumber]['voltage_set_low'] = float(row['OnValue'+controlledphase])
+						cymshuntcapacitor[row.DeviceNumber]['voltage_set_high'] = float(row['OffValue'+controlledphase])
+						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = controlledphase#row.Phase doesn't exist
+						cymshuntcapacitor[row.DeviceNumber]['remote_sense'] = _fixName(row.ControlledNodeId)
 					else:
 						cymshuntcapacitor[row.DeviceNumber]['control'] = 'MANUAL'
 						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = "ABCN"
-						cymshuntcapacitor[row.DeviceNumber]['voltage_set_high'] = float(row.KVLN)*1000 
-						cymshuntcapacitor[row.DeviceNumber]['voltage_set_low'] = float(row.KVLN)*1000                 
+						cymshuntcapacitor[row.DeviceNumber]['voltage_set_high'] = float(row.KVLN)*1000
+						cymshuntcapacitor[row.DeviceNumber]['voltage_set_low'] = float(row.KVLN)*1000
 	return cymshuntcapacitor
 
 def _determineLoad( l_type, l_v1, l_v2, conKVA):
