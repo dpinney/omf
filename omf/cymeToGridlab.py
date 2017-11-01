@@ -2241,7 +2241,8 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 			elif load not in tpns.keys():
 				if cymsectiondevice[load]['name'] not in loadNames:
 					loadNames.append(cymsectiondevice[load]['name'])
-					for phase in cymsectiondevice[load]['phases']:
+					# for phase in cymsectiondevice[load]['phases']: #jfk.  was looking for phases that don't correspond to loads
+					for phase in cymcustomerload[load]['phases']: #jfk
 						if phase not in ['N', 'D']:
 							try:
 								spctRating = _find_SPCT_rating(str(cymcustomerload[load]['constant_power_{:s}'.format(phase)]))
