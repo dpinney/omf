@@ -800,7 +800,7 @@ def _readCymeRegulator(feederId, modelDir):
 				cymregulator[row.DeviceNumber] = copy.deepcopy(CYMREGULATOR)
 				cymregulator[row.DeviceNumber]['name'] = row.DeviceNumber          
 				cymregulator[row.DeviceNumber]['equipment_name'] = row.EquipmentId
-				cymregulator[row.DeviceNumber]['band_width'] = float(row.BandWidth)/120.0
+				# cymregulator[row.DeviceNumber]['band_width'] = float(row.BandWidth)/120.0 #does not exist in database.  now forwardbandwidth in regulator equipment
 				cymregulator[row.DeviceNumber]['regulation'] = float(row.BoostPercent)/100.0
 				cymregulator[row.DeviceNumber]['tap_pos_A'] = row.TapPositionA
 				cymregulator[row.DeviceNumber]['tap_pos_B'] = row.TapPositionB
@@ -1293,6 +1293,8 @@ def _readEqRegulator(feederId, modelDir):
 				cymeqregulator[row.EquipmentId]['name'] = row.EquipmentId           
 				cymeqregulator[row.EquipmentId]['raise_taps'] = str(int(float(row.NumberOfTaps) * 0.5))
 				cymeqregulator[row.EquipmentId]['lower_taps'] = str(int(float(row.NumberOfTaps) * 0.5))
+				cymeqregulator[row.EquipmentId]['nominal_voltage'] = row.RatedKVLN
+				cymeqregulator[row.EquipmentId]['bandwidth'] = row.ForwardBandwidth
 	return cymeqregulator
 
 def _readEqThreeWAutoXfmr(feederId, modelDir):
