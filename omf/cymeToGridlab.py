@@ -2563,7 +2563,8 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 											'to' : cymsectiondevice[xfmr]['to'],
 											'configuration' : xfmrEq + suffix}
 	#Add dictionaries to feeder tree object
-	genericHeaders = [    {"timezone":"PST+8PDT","stoptime":"'2000-01-01 00:00:00'","starttime":"'2000-01-01 00:00:00'","clock":"clock"},
+	#jfk.  giving an hour for everything to settle down.  needed for regulators and verification
+	genericHeaders = [    {"timezone":"PST+8PDT","stoptime":"'2000-01-01 01:00:00'","starttime":"'2000-01-01 00:00:00'","clock":"clock"},
 						{"omftype":"#set","argument":"minimum_timestep=60"},
 						{"omftype":"#set","argument":"profiler=1"},
 						{"omftype":"#set","argument":"relax_naming_rules=1"},
