@@ -2141,15 +2141,30 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 				caps[cap] = {'object' : 'capacitor',
 										'name' : cap,
 										'phases' : cymsectiondevice[cap]['phases'],
+							 			'phases_connected' : cymsectiondevice[cap]['phases'],#jfk
 										'parent' : cymsectiondevice[cap]['parent'],
-										'control_level' : 'INDIVIDUAL',
-										'control' : 'MANUAL',
-										'cap_nominal_voltage' : str(feeder_VLN),
+										# 'control_level' : 'INDIVIDUAL', #jfk
+										'control' : cymshuntcapacitor[cap]['control'],#'MANUAL',
+										# 'cap_nominal_voltage' : str(feeder_VLN),
+							 			'nominal_voltage': cymshuntcapacitor[cap]['kV_line_neutral'],
 										'time_delay' : '2',
 										'dwell_time' : '3',
 										'latitude' : str(float(nodes[cymsectiondevice[cap]['parent']]['latitude']) + random.uniform(-5, 5)),
 										'longitude' : str(float(nodes[cymsectiondevice[cap]['parent']]['longitude']) + random.uniform(-5, 5))}
-				if cymshuntcapacitor[cap]['status'] == 0:
+
+				#This needs to be expanded for other control types too.
+				if caps[cap]['control'] == 'VOLT':
+					caps[cap]['remote_sense'] = 'n' + cymshuntcapacitor[cap]['remote_sense']#jfk.  hacky.  have to add 'n' because it's added later to nodes.
+					caps[cap]['voltage_set_high'] =str(cymshuntcapacitor[cap]['voltage_set_high']*(1/120.0)*float(feeder_VLN))
+					caps[cap]['voltage_set_low'] = str(cymshuntcapacitor[cap]['voltage_set_low']*(1/120.0)*float(feeder_VLN))
+					caps[cap]['pt_phase'] = cymshuntcapacitor[cap]['pt_phase']
+					caps[cap]['control_level'] = cymshuntcapacitor[cap]['control_level']
+					for phase in caps[cap]['phases']:
+						if phase not in ['N', 'D']:
+							caps[cap]['capacitor_{:s}'.format(phase)] = str(cymshuntcapacitor[cap]['capacitor_{:s}'.format(phase)])
+
+
+				if cymshuntcapacitor[cap]['status'] == '1':
 					status = 'OPEN'
 				else:
 					status = 'CLOSED'
