@@ -1375,6 +1375,38 @@ def _readEqAutoXfmr(feederId, modelDir):
 				cymeqautoxfmr[row.EquipmentId]['impedance'] = '{:0.6f}{:+0.6f}j'.format(r, x)
 	return cymeqautoxfmr
 
+def _readEqXfmr(feederId, modelDir):
+	cymeqxfmr = {}
+	CYMEQXFMR = { 'name' : None,
+					 'PrimaryRatedCapacity' : None,
+					 'PrimaryVoltage' : None,
+					 'SecondaryVoltage' : None,
+					 'impedance' : None}
+	# cymeqautoxfmr_db = equipmentDatabase.execute("SELECT EquipmentId, NominalRatingKVA, PrimaryVoltageKVLL, SecondaryVoltageKVLL, PosSeqImpedancePercent, XRRatio FROM CYMEQAUTOTRANSFORMER").fetchall()
+	cymeqxfmr_db =_csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMEQTRANSFORMER.csv"),feederId)
+	if len(cymeqxfmr_db) == 0:
+		warnings.warn("No average transformer equipment information was found in CYMEQTRANSFORMER for feeder id: {:s}.".format(feederId), RuntimeWarning)
+	else:
+		for row in cymeqxfmr_db:
+			row.EquipmentId = _fixName(row.EquipmentId)
+			if row.EquipmentId not in cymeqxfmr.keys():
+				cymeqxfmr[row.EquipmentId] = copy.deepcopy(CYMEQXFMR)
+				cymeqxfmr[row.EquipmentId]['name'] = row.EquipmentId
+				cymeqxfmr[row.EquipmentId]['PrimaryRatedCapacity'] = float(row.NominalRatingKVA)
+				cymeqxfmr[row.EquipmentId]['PrimaryVoltage'] = float(row.PrimaryVoltageKVLL)*1000.0/math.sqrt(3.0)
+				cymeqxfmr[row.EquipmentId]['SecondaryVoltage'] = float(row.SecondaryVoltageKVLL)*1000.0/math.sqrt(3.0)
+				if cymeqxfmr[row.EquipmentId]['PrimaryVoltage'] == cymeqxfmr[row.EquipmentId]['SecondaryVoltage']:
+					cymeqxfmr[row.EquipmentId]['SecondaryVoltage'] += 0.001
+				z1mag = float(row.PosSeqImpedancePercent)/100.0
+				r = z1mag/math.sqrt(1+(float(row.XRRatio))**2)
+				if r == 0.0:
+					r = 0.000333
+					x = 0.00222
+				else:
+					x = r*float(row.XRRatio)
+				cymeqxfmr[row.EquipmentId]['impedance'] = '{:0.6f}{:+0.6f}j'.format(r, x)
+	return cymeqxfmr
+
 def _readCymePhotovoltaic(feederId, modelDir):
 	cymePhotovoltaic = {}
 	CYMEPHOTOVOLTAIC = { 'name': None,
