@@ -2602,6 +2602,13 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	toNodes = []
 	fromNodes = []
 	for key in glmTree.keys():
+		#jfk.  dont want phase information to be passed on by open switches
+		#I have scenarios like:  phaseC -/ - phaseB
+		if glmTree[key].get('object','') == 'switch':
+			if 'OPEN' in glmTree[key].values():
+				continue
+
+
 		if 'to' in glmTree[key].keys():
 			ph = LinkedNodes.get(glmTree[key]['from'], '')
 			LinkedNodes[glmTree[key]['from']] = ph + glmTree[key]['phases']
