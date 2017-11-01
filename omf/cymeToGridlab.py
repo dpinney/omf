@@ -648,32 +648,39 @@ def _readCymeSectionDevice(feederId, modelDir):
 
 def _splitLinkObjects(sectionDict, deviceDict, linkDict, overheadDict, undergroundDict):
 	'''Split multiple link objects from the line that they are folded into'''
+	#jfk.  Several changes in here related to the following problem.  Old code assume that each section (linkDict) would
+	#only have one device or link object per section.  I found that this wasn't true for solar PV and switches.
+	#Later in the code, linkDicts for these objects have lists as their values.
+	#This code now reflects this possiblity.  But it makes it kind of inconsistent and hacky.
 	for link in linkDict.keys():
 		if link in overheadDict.keys() or link in undergroundDict.keys(): # if true the link is embedded in a line object and must be separated
 			lineId = link
-			newLinkId = linkDict[link]
-			if deviceDict[newLinkId]['location'] == 1: # device is at the from side of a section
-				sectionDict[newLinkId] = copy.deepcopy(sectionDict[lineId])
-				sectionDict[newLinkId]['name'] = newLinkId
-				sectionDict[newLinkId]['to'] = 'node' + newLinkId
-				sectionDict[newLinkId]['toX'] = str(float(sectionDict[lineId]['fromX']) + random.uniform(-10,10))
-				sectionDict[newLinkId]['toY'] = str(float(sectionDict[lineId]['fromY']) + random.uniform(-10,10))
-				sectionDict[lineId]['from'] = 'node' + newLinkId
-				sectionDict[lineId]['fromX'] = sectionDict[newLinkId]['toX']
-				sectionDict[lineId]['fromY'] = sectionDict[newLinkId]['toY']
-			else: # device is at the to side of a section
-				sectionDict[newLinkId] = copy.deepcopy(sectionDict[lineId])
-				sectionDict[newLinkId]['name'] = newLinkId
-				sectionDict[newLinkId]['from'] = 'node' + newLinkId
-				sectionDict[newLinkId]['fromX'] = str(float(sectionDict[lineId]['toX']) + random.uniform(-10,10))
-				sectionDict[newLinkId]['fromY'] = str(float(sectionDict[lineId]['toY']) + random.uniform(-10,10))
-				sectionDict[lineId]['to'] = 'node' + newLinkId
-				sectionDict[lineId]['toX'] = sectionDict[newLinkId]['fromX']
-				sectionDict[lineId]['toY'] = sectionDict[newLinkId]['fromY']
-			for phase in ['N', 'D']:
-				sectionDict[newLinkId]['phases'] = sectionDict[newLinkId]['phases'].replace(phase, '')
-			deviceDict[newLinkId]['section_name'] = newLinkId
-			deviceDict[newLinkId]['location'] = 0
+			newLinkIds = linkDict[link] #jfk
+			if type(newLinkIds) != list: #jfk
+				newLinkIds = [newLinkIds]
+			for newLinkId in newLinkIds:#jfk
+				if deviceDict[newLinkId]['location'] == 1: # device is at the from side of a section
+					sectionDict[newLinkId] = copy.deepcopy(sectionDict[lineId])
+					sectionDict[newLinkId]['name'] = newLinkId
+					sectionDict[newLinkId]['to'] = 'node' + newLinkId
+					sectionDict[newLinkId]['toX'] = str(float(sectionDict[lineId]['fromX']) + random.uniform(-10,10))
+					sectionDict[newLinkId]['toY'] = str(float(sectionDict[lineId]['fromY']) + random.uniform(-10,10))
+					sectionDict[lineId]['from'] = 'node' + newLinkId
+					sectionDict[lineId]['fromX'] = sectionDict[newLinkId]['toX']
+					sectionDict[lineId]['fromY'] = sectionDict[newLinkId]['toY']
+				else: # device is at the to side of a section
+					sectionDict[newLinkId] = copy.deepcopy(sectionDict[lineId])
+					sectionDict[newLinkId]['name'] = newLinkId
+					sectionDict[newLinkId]['from'] = 'node' + newLinkId
+					sectionDict[newLinkId]['fromX'] = str(float(sectionDict[lineId]['toX']) + random.uniform(-10,10))
+					sectionDict[newLinkId]['fromY'] = str(float(sectionDict[lineId]['toY']) + random.uniform(-10,10))
+					sectionDict[lineId]['to'] = 'node' + newLinkId
+					sectionDict[lineId]['toX'] = sectionDict[newLinkId]['fromX']
+					sectionDict[lineId]['toY'] = sectionDict[newLinkId]['fromY']
+				for phase in ['N', 'D']:
+					sectionDict[newLinkId]['phases'] = sectionDict[newLinkId]['phases'].replace(phase, '')
+				deviceDict[newLinkId]['section_name'] = newLinkId
+				deviceDict[newLinkId]['location'] = 0
 
 def _findParents(sectionDict, deviceDict, loadDict):
 	'''store parent information for load type objects'''
@@ -1618,7 +1625,11 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 		elif cymsectiondevice[device]['device_type'] == 12:
 			sectionalizer_sections[cymsectiondevice[device]['section_name']] = device
 		elif cymsectiondevice[device]['device_type'] == 13:
-			switch_sections[cymsectiondevice[device]['section_name']] = device
+			if cymsectiondevice[device]['section_name'] not in switch_sections.keys():
+				switch_sections[cymsectiondevice[device]['section_name']] = [device] #jfk. could use default dict to make this cleaner
+			else:
+				switch_sections[cymsectiondevice[device]['section_name']].append(device)
+			# switch_sections[cymsectiondevice[device]['section_name']] = device #sometimes have two switches on a section!  this overwrite the first!
 		elif cymsectiondevice[device]['device_type'] == 14:
 			fuse_sections[cymsectiondevice[device]['section_name']] = device
 		elif cymsectiondevice[device]['device_type'] == 16:
@@ -1631,7 +1642,10 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 		elif cymsectiondevice[device]['device_type'] == 37:
 			syncgen_sections[cymsectiondevice[device]['section_name']] = device
 		elif cymsectiondevice[device]['device_type'] == 45:
-			pv_sections[cymsectiondevice[device]['section_name']] = device
+			if cymsectiondevice[device]['section_name'] not in pv_sections.keys():
+				pv_sections[cymsectiondevice[device]['section_name']] = [device] #jfk
+			else:
+				pv_sections[cymsectiondevice[device]['section_name']].append(device)
 		elif cymsectiondevice[device]['device_type'] == 47:
 			transformer_sections[cymsectiondevice[device]['section_name']] = device
 		elif cymsectiondevice[device]['device_type'] == 48:
