@@ -557,6 +557,47 @@ def _readCymeQOverheadLine(feederId, modelDir):
 				cymeqoverheadline[row.EquipmentId]['conductor_N'] = _fixName(row.NeutralConductorId)
 	return cymeqoverheadline, spacingIds
 
+#jfk.  PECO has several reactors in their networks.
+def _readCymeReactors(feederId, modelDir):
+	cymseriesreactor = {}
+	CYMSERIESREACTOR = { 'name' : None,
+						 'configuration': None}
+
+	reactorIds = []
+	seriesreactor_db = _csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMSERIESREACTOR.csv"),feederId)
+	if len(seriesreactor_db) == 0:
+		warnings.warn("No series reactor objects were found in CYMSERIESREACTOR for feeder_id: {:s}.".format(feederId), RuntimeWarning)
+	else:
+		for row in seriesreactor_db:
+			row.DeviceNumber = _fixName(row.DeviceNumber)
+			if _fixName(row.EquipmentId) not in reactorIds:
+				reactorIds.append(_fixName(row.EquipmentId))
+			if row.DeviceNumber not in cymseriesreactor.keys():
+				cymseriesreactor[row.DeviceNumber] = copy.deepcopy(CYMSERIESREACTOR)
+				cymseriesreactor[row.DeviceNumber]['name'] = _fixName(row.DeviceNumber)
+				cymseriesreactor[row.DeviceNumber]['configuration'] = _fixName(row.EquipmentId)
+
+	return cymseriesreactor, reactorIds
+
+#jfk
+def _readEqReactors(feederId, modelDir):
+	cymeqreactor = {}
+	CYMEQREACTOR = { 'name' : None,
+					 'reactance': None}
+
+	cymeqreactor_db = _csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMEQSERIESREACTOR.csv"),feederId)
+
+	if len(cymeqreactor_db) == 0:
+		warnings.warn("No reactor equipment was found in CYMEQREACTOR for feeder_id: {:s}.".format(feederId), RuntimeWarning)
+	else:
+		for row in cymeqreactor_db:
+			row.EquipmentId = _fixName(row.EquipmentId)
+			if row.EquipmentId not in cymeqreactor.keys():
+				cymeqreactor[row.EquipmentId] = copy.deepcopy(CYMEQREACTOR)
+				cymeqreactor[row.EquipmentId]['name'] = row.EquipmentId
+				cymeqreactor[row.EquipmentId]['reactance'] = row.ReactanceOhms
+	return cymeqreactor
+
 def _readCymeSection(feederId, modelDir):
 	'''store information from CYMSECTION'''
 	cymsection = {}                         # Stores information found in CYMSECTION in the network database
@@ -1439,6 +1480,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	overheadline_sections = {}
 	undergroundline_sections = {}
 	sx_section = []
+	reactor_sections = {}
 	pv_sections = {}
 	load_sections = {}
 	threewxfmr_sections = {}
@@ -1577,7 +1619,8 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 		elif cymsectiondevice[device]['device_type'] == 14:
 			fuse_sections[cymsectiondevice[device]['section_name']] = device
 		elif cymsectiondevice[device]['device_type'] == 16:
-			sx_section.append(cymsectiondevice[device]['section_name'])
+			# sx_section.append(cymsectiondevice[device]['section_name']) #this was not needed for PECO files
+			reactor_sections[cymsectiondevice[device]['section_name']] = device
 		elif cymsectiondevice[device]['device_type'] == 17:
 			capacitor_sections[cymsectiondevice[device]['section_name']] = device
 		elif cymsectiondevice[device]['device_type'] == 20:
@@ -1601,7 +1644,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 			_findParents(cymsection, cymsectiondevice, x)
 	# split out fuses, regulators, transformers, switches, reclosers, and sectionalizers from the lines.
 	# mj debug: check these phases
-	for x in [fuse_sections, regulator_sections, threewxfmr_sections, threewautoxfmr_sections, transformer_sections, switch_sections, recloser_sections, sectionalizer_sections]:
+	for x in [fuse_sections, regulator_sections, threewxfmr_sections, threewautoxfmr_sections, transformer_sections, switch_sections, recloser_sections, sectionalizer_sections, reactor_sections]:
 		if len(x) > 0:
 			_splitLinkObjects(cymsection, cymsectiondevice, x, overheadline_sections, undergroundline_sections)          
 	# -14-CYME CYMTRANSFORMER**********************************************************************************************************************************************************************
@@ -1624,7 +1667,13 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	# -20-CYME CYMEQTHREEWINDAUTOTRANSFORMER**********************************************************************************************************************************************************************
 	cymeq3wautoxfmr = _readEqThreeWAutoXfmr(feeder_id, modelDir)
 	# -21-CYME CYMEQAUTOTRANSFORMER**********************************************************************************************************************************************************************
-	cymeqautoxfmr = _readEqAutoXfmr(feeder_id, modelDir)    
+	cymeqautoxfmr = _readEqAutoXfmr(feeder_id, modelDir)
+	# -22-CYME CYME REACTORS********************************************************************************************
+	cymreactor, reactorIds =_readCymeReactors(feeder_id, modelDir) #jfk
+	# -23-CYME CYMEQREACTORS********************************************************************************************
+	cymeqreactor =_readEqReactors(feeder_id, modelDir)
+
+
 	# Check number of sources
 	meters = {}
 	if len(cymsource) > 1:
@@ -2032,6 +2081,24 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 					status = 'GOOD'
 				for phase in fuses[fuse]['phases']:
 					fuses[fuse]['phase_{:s}_status'.format(phase)] = status
+
+	#jfk.  added all this reactor code
+	reactors = {}
+	for reactor in cymsectiondevice.keys():
+		if cymsectiondevice[reactor]['device_type'] == 16:
+			if reactor not in cymreactor.keys():
+				print "There is no reactor spec for ", reactor, " in the network database provice. \n"
+			elif reactor not in reactors.keys():
+				reactors[reactor] = {'object' : 'series_reactor',
+										'name' : reactor,
+										'phases' : cymsectiondevice[reactor]['phases'].replace('N', ''),
+										'from' : cymsectiondevice[reactor]['from'],
+										'to' : cymsectiondevice[reactor]['to']}
+				equipmentId = cymreactor[reactor]['configuration']
+				Zohms = float(cymeqreactor[equipmentId]['reactance'])
+				for ph in reactors[reactor]['phases']:
+					reactors[reactor]['phase_' + ph + '_reactance'] = '{:0.6f}'.format(Zohms)
+
 	# Create capacitor dictionaries
 	caps = {}
 	for cap in cymsectiondevice.keys():
@@ -2330,7 +2397,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	for headId in xrange(len(genericHeaders)):
 		glmTree[headId] = genericHeaders[headId]
 	key = len(glmTree)
-	objectList = [ohl_conds, ugl_conds, ohl_spcs, ohl_configs , ugl_sps, ohl_cfgs, ugl_cfgs, xfmr_cfgs, spct_cfgs, reg_cfgs, meters, nodes, loads, tpms, tpns, ohls, ugls, xfmrs, spcts, regs, swObjs, rcls, sxnlrs, fuses, caps, bat_sec, pv_sec, gen_secs]
+	objectList = [ohl_conds, ugl_conds, ohl_spcs, ohl_configs , ugl_sps, ohl_cfgs, ugl_cfgs, xfmr_cfgs, spct_cfgs, reg_cfgs, meters, nodes, loads, tpms, tpns, ohls, ugls, xfmrs, spcts, regs, swObjs, rcls, sxnlrs, fuses, caps, bat_sec, pv_sec, gen_secs, reactors]
 	for objDict in objectList:
 		if len(objDict) > 0:
 			for obj in objDict.keys():
@@ -2348,7 +2415,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	# FINISHED CONVERSION FROM THE DATABASES****************************************************************************************************************************************************   
 	for key in glmTree.keys():
 		# if ('from' in glmTree[key].keys() and 'to' not in glmTree[key].keys()) or ('to' in glmTree[key].keys() and 'from' not in glmTree[key].keys()):
-		if 'object' in glmTree[key].keys() and glmTree[key]['object'] in ['overhead_line','underground_line','regulator','transformer','switch','fuse'] and ('to' not in glmTree[key].keys() or 'from' not in glmTree[key].keys()):
+		if 'object' in glmTree[key].keys() and glmTree[key]['object'] in ['overhead_line','underground_line','regulator','transformer','switch','fuse', 'series_reactor'] and ('to' not in glmTree[key].keys() or 'from' not in glmTree[key].keys()):
 			#print ('Deleting malformed link')
 			#print [glmTree[key]['name'], glmTree[key]['object']]
 			del glmTree[key]
@@ -2473,7 +2540,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	
 	# Delete neutrals from links with no neutrals
 	for x in glmTree.keys():
-		if 'object' in glmTree[x].keys() and glmTree[x]['object'] in ['underground_line', 'regulator', 'transformer', 'switch', 'fuse', 'capacitor']:
+		if 'object' in glmTree[x].keys() and glmTree[x]['object'] in ['underground_line', 'regulator', 'transformer', 'switch', 'fuse', 'capacitor', 'series_reactor']:
 			glmTree[x]['phases'] = glmTree[x]['phases'].replace('N', '')
 		elif 'object' in glmTree[x].keys() and glmTree[x]['object'] == 'overhead_line':
 			if glmTree[x]['configuration'] not in ohl_neutral:
