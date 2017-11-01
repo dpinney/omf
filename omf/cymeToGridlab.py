@@ -30,6 +30,8 @@ from matplotlib import pyplot as plt
 from pathlib import Path
 import matplotlib
 matplotlib.pyplot.switch_backend('Agg')
+import numpy as np
+from numpy.linalg import inv
 
 
 m2ft = 1.0/0.3048             # Conversion factor for meters to feet
@@ -1115,7 +1117,16 @@ def _readUgConfiguration(feederId, modelDir):
 							   'distance_AN' : 0.0,
 							   'distance_BC' : 0.5,
 							   'distance_BN' : 0.0,
-							   'distance_CN' : 0.0}
+							   'distance_CN' : 0.0,
+							   'z11': 0 + 1j,
+							   'z12': 0 + 1j,
+							   'z13': 0 + 1j,
+							   'z21': 0 + 1j,
+							   'z22': 0 + 1j,
+							   'z23': 0 + 1j,
+							   'z31': 0 + 1j,
+							   'z32': 0 + 1j,
+							   'z33': 0 + 1j}
 	try:
 		undergroundcable = _csvToDictList(pJoin(modelDir,'cymeCsvDump','CYMEQCABLE.csv'),feederId)
 		undergroundcableconductor = _csvToDictList(pJoin(modelDir,'cymeCsvDump','CYMEQCABLECONDUCTOR.csv'),feederId)
@@ -1125,6 +1136,9 @@ def _readUgConfiguration(feederId, modelDir):
 	if len(undergroundcable) == 0:
 		warnings.warn("No underground_line configuration objects were found in CYMEQCABLE for feeder_id: {:s}.".format(feederId), RuntimeWarning)
 	else:
+		#declare some conversion matrices for impedance conversion later
+		a_s = 1*np.exp(1j*np.deg2rad(120))
+		As = np.array([[1, 1, 1],[1, a_s**2, a_s],[1, a_s, a_s**2]])
 		for row in undergroundcable:
 			row.EquipmentId = _fixName(row.EquipmentId)
 			if row.EquipmentId not in cymcsvundergroundcable.keys():
@@ -1133,12 +1147,28 @@ def _readUgConfiguration(feederId, modelDir):
 				cymcsvundergroundcable[row.EquipmentId]['rating.summer_continuous'] = row.FirstRating
 				if row.OverallDiameter is not None:
 					cymcsvundergroundcable[row.EquipmentId]['outer_diameter'] = row.OverallDiameter
-				cymcsvundergroundcable[row.EquipmentId]['conductor_resistance'] = row.PositiveSequenceResistance
-				if row.ArmorOuterDiameter is not None:
+				cymcsvundergroundcable[row.EquipmentId]['conductor_resistance'] = row.PositiveSequenceResistance#leaving as is since z matrix overwrites
+				if row.ArmorOuterDiameter is not None and row.ArmorOuterDiameter != '' and float(row.ArmorOuterDiameter) != 0.0:#jfk
 					cymcsvundergroundcable[row.EquipmentId]['conductor_diameter'] = row.ArmorOuterDiameter
 					cymcsvundergroundcable[row.EquipmentId]['conductor_gmr'] = float(row.ArmorOuterDiameter)/3
+
+				#conversion from cyme's ZeroSequenceResistance/Reactance -> Gridlabd's self/mutual impedances
+				z00 =  complex(float(row.ZeroSequenceResistance),float(row.ZeroSequenceReactance))
+				z11 =  complex(float(row.PositiveSequenceResistance),float(row.PositiveSequenceReactance))
+				Z012 = np.array([[z00, 0, 0], [0, z11, 0],[0, 0, z11]])*5280/(m2ft*1000)
+				Zabc = As.dot(Z012).dot(inv(As))
+				cymcsvundergroundcable[row.EquipmentId]['z11'] = '{:0.6f}'.format(Zabc[0][0].real) + '{:+0.6f}'.format(Zabc[0][0].imag)+'j'
+				cymcsvundergroundcable[row.EquipmentId]['z12'] = '{:0.6f}'.format(Zabc[0][1].real) + '{:+0.6f}'.format(Zabc[0][1].imag)+'j'
+				cymcsvundergroundcable[row.EquipmentId]['z13'] = '{:0.6f}'.format(Zabc[0][2].real) + '{:+0.6f}'.format(Zabc[0][2].imag)+'j'
+				cymcsvundergroundcable[row.EquipmentId]['z21'] = '{:0.6f}'.format(Zabc[1][0].real) + '{:+0.6f}'.format(Zabc[1][0].imag)+'j'
+				cymcsvundergroundcable[row.EquipmentId]['z22'] = '{:0.6f}'.format(Zabc[1][1].real) + '{:+0.6f}'.format(Zabc[1][1].imag)+'j'
+				cymcsvundergroundcable[row.EquipmentId]['z23'] = '{:0.6f}'.format(Zabc[1][2].real) + '{:+0.6f}'.format(Zabc[1][2].imag)+'j'
+				cymcsvundergroundcable[row.EquipmentId]['z31'] = '{:0.6f}'.format(Zabc[2][0].real) + '{:+0.6f}'.format(Zabc[2][0].imag)+'j'
+				cymcsvundergroundcable[row.EquipmentId]['z32'] = '{:0.6f}'.format(Zabc[2][1].real) + '{:+0.6f}'.format(Zabc[2][1].imag)+'j'
+				cymcsvundergroundcable[row.EquipmentId]['z33'] = '{:0.6f}'.format(Zabc[2][2].real) + '{:+0.6f}'.format(Zabc[2][2].imag)+'j'
+
 				# Still missing these properties, will have default values for all objects
-				# cymcsvundergroundcable[row.EquipmentId]['neutral_resistance'] = row.ZeroSequenceResistance 
+				# cymcsvundergroundcable[row.EquipmentId]['neutral_resistance'] = row.ZeroSequenceResistance
 				# cymcsvundergroundcable[row.EquipmentId]['distance_AB'] = row.OverallDiameter
 				# cymcsvundergroundcable[row.EquipmentId]['distance_AC'] = row.OverallDiameter
 				# cymcsvundergroundcable[row.EquipmentId]['distance_AN'] = row.OverallDiameter
@@ -1146,6 +1176,7 @@ def _readUgConfiguration(feederId, modelDir):
 				# cymcsvundergroundcable[row.EquipmentId]['distance_BC'] = row.OverallDiameter
 				# cymcsvundergroundcable[row.EquipmentId]['distance_CN'] = row.OverallDiameter
 	for row in undergroundcableconductor:
+		row.EquipmentId = _fixName(row.EquipmentId) #jfk.  was missing _fixName
 		if row.EquipmentId in cymcsvundergroundcable.keys():
 			cymcsvundergroundcable[row.EquipmentId]['neutral_diameter'] = row.Diameter
 			cymcsvundergroundcable[row.EquipmentId]['neutral_strands'] = row.NumberOfStrands
