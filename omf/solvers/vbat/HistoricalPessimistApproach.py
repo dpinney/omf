@@ -111,7 +111,10 @@ plt.ylabel('Demand in kW')
 plt.xlabel('Hour of the day')
 plt.axis([0,23.75,-200,2200])
 
+###### USER VARIABLES ######
 accuracyFactor = 0.15
+###### USER VARIABLES ######
+
 #peak demand
 peakDemand = 0
 for x in demand:
@@ -123,7 +126,9 @@ print str(peakDemand) + " kW is reached at: " + str(peakDemandHour)
 print "The next peak will be between: " + str((1-accuracyFactor)*peakDemand) + " and " + str((1+accuracyFactor)*peakDemand) + " kW"
 print "It will be reached between: " + str((1-accuracyFactor)*peakDemandHour) + " and " + str((1+accuracyFactor)*peakDemandHour) + " O'clock"
 
+###### USER VARIABLES ######
 peakWidth = 4
+###### USER VARIABLES ######
 startingPeakHour = peakDemandHour - peakWidth/2
 endingPeakHour = peakDemandHour + peakWidth/2
 
@@ -149,15 +154,32 @@ for x in demand:
 print "The energy shaved is: " + str(energyShaved) + " kWh"
 
 
-chargingHours = 1
-energyToStore = energyShaved/(chargingHours*len(demand)/24)
-print energyToStore
+
+###### USER VARIABLE ######
+chargingHours = 2
+###### USER VARIABLE ######
+
+numberOfChargingSteps = (chargingHours*len(demand)/24)
+energyShaved = 4*energyShaved
+
 for x in adjustedDemand:
 	if x >= startingPeakHour-chargingHours and x<startingPeakHour:
 		if energyShaved > 0:
+
+
+			if numberOfChargingSteps > 1:
+				energyToStore = energyShaved/2
+				
+			else:
+				energyToStore = energyShaved
+
+			numberOfChargingSteps = numberOfChargingSteps-1
 			energyShaved = energyShaved - energyToStore
-			powerBattery[x] = energyToStore
 			adjustedDemand[x] = adjustedDemand[x] + energyToStore
+			powerBattery[x] = energyToStore
+
+			'''energyShaved = energyShaved - energyToStore
+			adjustedDemand[x] = adjustedDemand[x] + energyToStore'''
 			print x
 
 fig = plt.gcf()
