@@ -2132,7 +2132,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 										'to' : cymsectiondevice[sxnlr]['to'],
 										'operating_mode' : 'BANKED'}
 				if cymsectionalizer[sxnlr]['status'] == 0:
-					status = 'CLOSED'
+					status = 'OPEN' # 'CLOSED' #jfk
 				else:
 					status = 'CLOSED'
 				for phase in sxnlrs[sxnlr]['phases']:
