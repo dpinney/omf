@@ -2204,48 +2204,91 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 																										'power_12' : cymcustomerload[load]['constant_power_{:s}'.format(phase)],
 																										'latitude' : str(float(tpms['tpm{:s}{:s}'.format(load, phase)]['latitude']) + random.uniform(-5, 5)),
 																										'longitude' : str(float(tpms['tpm{:s}{:s}'.format(load, phase)]['longitude']) + random.uniform(-5, 5))}
+	#jfk.  I can't find the band_center anywhere in the cyme databaes files.
+	#Unfortunately, the only way to deal with this is by looking at the cyme user interfrace.
 	# Create regulator and regulator configuration dictionaries
+	#Now, I just have the values hardcoded in.  For example...
+	regulator_bandcenters = {'REG_BOYD_000_105581299': 126, #newlinville
+							'REG_HIGHLAND_000_105563434': 126,
+							'REG_PARKESBURG_001_105599479': 126,
+							'REG_PARKESBURG_002_105581381': 126,
+							'REG_2449_36H5B19983': 124,
+							'REG_7305_45D3A4_0806': 124,
+							'REG_7526_45D3C3': 124,
+							'REG_40701_52B3F3': 124,
+							'REG_STOTTSVILLE_000_105581307': 125,
+							'6': 126, #chestnust
+							'BOOT_JACK_000_105622980': 125, #bootjack
+							'REG_BOOT_JACK_000_105622980': 125,
+							'REG_4631_52D4C7': 124,
+							'REG_4955_52C4H83614': 124,
+							'REG_41221_52D4C7': 124,
+							'REG_49925_52D4C8': 124,
+							'REG_60926_52E3A8': 124}
+
 	reg_cfgs = {}
 	regs = {}
 	for reg in cymsectiondevice.keys():
 		if cymsectiondevice[reg]['device_type'] == 4:
 			if reg not in cymregulator.keys():
-				print "There is no regulator spec for ", reg, " in the network database provided.\n"                
+				print "There is no regulator spec for ", reg, " in the network database provided.\n"
 			else:
 				regEq = cymregulator[reg]['equipment_name']
-				if regEq == reg:
-					suffix = 'cfg'
-				else:
-					suffix = ''
 				if regEq not in cymeqregulator.keys():
 					raiseTaps = '16'
 					lowerTaps = '16'
 				else:
 					raiseTaps = cymeqregulator[regEq]['raise_taps']
 					lowerTaps = cymeqregulator[regEq]['lower_taps']
+
+				reg_nominalvoltage = float(cymeqregulator[regEq]['nominal_voltage'])*1000
+				reg_bandwidth = str(float(cymeqregulator[regEq]['bandwidth'])*float(reg_nominalvoltage)/120.0)
+
+
+				#jfk.  deprecated with new naming.
+				# if regEq == reg:
+				# 	suffix = 'cfg'
+				# else:
+				# 	suffix = ''
+
+				#jfk.  Need to have separate regulator configurations for each regulator
+				# Cyme holds tap position in regulator, but Gridlabd holds tap position in configuration
+				regEq = regEq +'_' + reg
+				if reg in regulator_bandcenters.keys():
+					band_center120 = regulator_bandcenters[reg]
+				else:
+					print 'Warning: Bandcenter info not provided.  Setting bandcenter to 1.05'
+					band_center120 = 126.0
+
+				print 'Regulators hardcoded to OUTPUT_VOLTAGE!!'
 				ph = cymsectiondevice[reg]['phases'].replace('N', '')
 				if regEq not in reg_cfgs.keys():
 					reg_cfgs[regEq] = {'object' : 'regulator_configuration',
-													'name' : regEq + suffix,
+													'name' : regEq, #jfk
 													'connect_type' : 'WYE_WYE',
-													'band_center' : str(feeder_VLN),
-													'band_width' : str(cymregulator[reg]['band_width']),
+													'band_center' : str(float(reg_nominalvoltage)*(band_center120/120.0)),
+													'band_width' : reg_bandwidth,
 													'regulation' : str(cymregulator[reg]['regulation']),
 													'time_delay' : '30.0',
 													'dwell_time' : '5',
-													'Control' : 'OUTPUT_VOLTAGE',
+													'Control' : 'OUTPUT_VOLTAGE', #'MANUAL' #
 													'control_level' : 'INDIVIDUAL',
 													'raise_taps' : raiseTaps,
 													'lower_taps' : lowerTaps}
+
 					for phase in ph:
 						reg_cfgs[regEq]['tap_pos_{:s}'.format(phase)] = str(cymregulator[reg]['tap_pos_{:s}'.format(phase)])
+
+
+
 				if reg not in reg_cfgs.keys():
 					regs[reg] = {'object' : 'regulator',
 										'name' : reg,
 										'phases' : ph,
 										'from' : cymsectiondevice[reg]['from'],
 										'to' : cymsectiondevice[reg]['to'],
-										'configuration' : regEq + suffix}
+										'configuration' : regEq} #jfk
+
 	# Create photovoltaic, inverter, and meter dictionaries
 	pv_sec = {}
 	for pv in cymsectiondevice.keys():
