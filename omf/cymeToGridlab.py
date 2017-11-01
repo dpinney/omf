@@ -2469,8 +2469,8 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 						xfmr_cfgs[xfmrEq] = {'object' : 'transformer_configuration',
 															'name' : xfmrEq + suffix,
 															'connect_type' : 'WYE_WYE',
-															'primary_voltage' : '{:0.6f}'.format(cymeqautoxfmr[xfmrEq]['PrimaryVoltage']),
-															'secondary_voltage' : '{:0.6f}'.format(cymeqautoxfmr[xfmrEq]['SecondaryVoltage']),
+															'primary_voltage' : '{:0.6f}'.format(cymeqautoxfmr[xfmrEq]['PrimaryVoltage']*math.sqrt(3)), #jfk
+															'secondary_voltage' : '{:0.6f}'.format(cymeqautoxfmr[xfmrEq]['SecondaryVoltage']*math.sqrt(3)), #jfk
 															'impedance' : cymeqautoxfmr[xfmrEq]['impedance'],
 															'power_rating' : '{:0.0f}'.format(cymeqautoxfmr[xfmrEq]['PrimaryRatedCapacity'])}
 						for phase in ph:
