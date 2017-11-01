@@ -2009,7 +2009,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 		if cymsectiondevice[ugl]['device_type'] == 1:
 			ph = cymsectiondevice[ugl]['phases'].replace('N', '')
 			if ugl not in cymundergroundline.keys():
-				print "There is no line spec for ", ug1, " in the network database provided.\n"  
+				print "There is no line spec for ", ugl, " in the network database provided.\n"
 			else:
 				phs = 0
 				if 'A' in ph:
@@ -2033,9 +2033,19 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 				elif phs == 7:
 					config_name = cymundergroundline[ugl]['cable_id'] + 'phABC'
 				if config_name not in ugl_cfgs.keys():
+					cableid = cymundergroundline[ugl]['cable_id']
 					ugl_cfgs[config_name] = {'object' : 'line_configuration',
 																'name' : config_name,
-																'spacing' : cymundergroundline[ugl]['cable_id'] + 'sps'}
+																'spacing' : cymundergroundline[ugl]['cable_id'] + 'sps', #jfk
+																'z11': cymcsvundergroundcable[cableid]['z11'],
+																'z12': cymcsvundergroundcable[cableid]['z12'],
+																'z13': cymcsvundergroundcable[cableid]['z13'],
+																'z21': cymcsvundergroundcable[cableid]['z21'],
+																'z22': cymcsvundergroundcable[cableid]['z22'],
+																'z23': cymcsvundergroundcable[cableid]['z23'],
+																'z31': cymcsvundergroundcable[cableid]['z31'],
+																'z32': cymcsvundergroundcable[cableid]['z32'],
+																'z33': cymcsvundergroundcable[cableid]['z33']}
 					for phase in ph:
 						if phase != 'D' or phase != 'N':
 							ugl_cfgs[config_name]['conductor_{:s}'.format(phase)] = cymundergroundline[ugl]['cable_id'] + 'cond'
