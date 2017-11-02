@@ -102,7 +102,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			newLine['line_code'] = lineCount
 			# Calculate harden_cost, 10.
 			# newLine['capacity'] = 1000000000 # Set it arbitrarily high.
-			if line.get('name','') in hardCands:
+			if (line.get('name','') in hardCands) or (newLine['harden_cost'] != 0):
 				newLine['can_harden'] = True
 			if line.get('name','') in switchCands:
 				newLine['has_switch'] = True
@@ -219,24 +219,24 @@ def convertToGFM(gfmInputTemplate, feederModel):
 					constImped = complex(constImpedRaw)
 					realImpedance = constImped.real
 					reactiveImpedance = constImped.imag
-					newLoad['max_real_phase'][index] = (voltage*voltage)/realImpedance
-					newLoad['max_reactive_phase'][index] = (voltage*voltage)/reactiveImpedance
+					newLoad['max_real_phase'][index] = abs((voltage*voltage)/realImpedance)/1000000
+					newLoad['max_reactive_phase'][index] = abs((voltage*voltage)/reactiveImpedance)/1000000
 					newLoad['has_phase'][index] = True
 				if current in loads:
 					constCurrRaw = loads.get(current,'').replace(' ','')
 					constCurr = complex(constCurrRaw)
 					realCurr = constCurr.real
 					reactiveCurr = constCurr.imag
-					newLoad['max_real_phase'][index] = voltage*realCurr
-					newLoad['max_reactive_phase'][index] = voltage*reactiveCurr
+					newLoad['max_real_phase'][index] = abs(voltage*realCurr)/1000000
+					newLoad['max_reactive_phase'][index] = abs(voltage*reactiveCurr)/1000000
 					newLoad['has_phase'][index] = True
 				if power in loads:
 					constPowerRaw = loads.get(power,'').replace(' ','')
 					constPower = complex(constPowerRaw)
 					realPower = constPower.real
 					reactivePower = constPower.imag
-					newLoad['max_real_phase'][index] = realPower
-					newLoad['max_reactive_phase'][index] = reactivePower
+					newLoad['max_real_phase'][index] = abs(realPower)/1000000
+					newLoad['max_reactive_phase'][index] = abs(reactivePower)/1000000
 					newLoad['has_phase'][index] = True
 			gfmJson['loads'].append(newLoad)
 	# Generator creation:
@@ -253,12 +253,16 @@ def convertToGFM(gfmInputTemplate, feederModel):
 				'node_id': busID, #*
 				'is_new': True, # Whether or not new generation can be built.
 				'microgrid_cost': 1.5, # Per MW capacity of building DG.
-				'max_microgrid': 0, # Max additional capacity for this gen.
+				'max_microgrid': 5000.0, # Max additional capacity for this gen.
 				'microgrid_fixed_cost': 0, # One-time fixed cost for building DG.
 				'has_phase': has_phase, #*
-				'max_reactive_phase': max_reactive_phase, #*
-				'max_real_phase': max_real_phase #*
+				'max_reactive_phase': [0.0,0.0,0.0], #*
+				'max_real_phase': [0.0,0.0,0.0] #*
 			})
+			if(genObj['node_id'] in ['A_load701_bus', 'B_load701_bus','C_load701_bus']):
+				genObj['max_reactive_phase'] = [1e30,1e30,1e30]
+				genObj['max_real_phase'] = [1e30,1e30,1e30]
+			
 			gfmJson['generators'].append(genObj)
 			# BUG: GENERATORS ADDED TO ALL SWING BUSES: gfmJson['generators'].append(genObj)
 	# Return 
@@ -306,7 +310,7 @@ def work(modelDir, inputDict):
 		'phase_variation' : float(inputDict['phaseVariation']),
 		'chance_constraint' : float(inputDict['chanceConstraint']),
 		'critical_load_met' : float(inputDict['criticalLoadMet']),
-		'total_load_met' : (float(inputDict['criticalLoadMet']) + float(inputDict['nonCriticalLoadMet'])),
+		'total_load_met' : 1.0,#(float(inputDict['criticalLoadMet']) + float(inputDict['nonCriticalLoadMet'])),
 		'xrMatrices' : inputDict["xrMatrices"],
 		'maxDGPerGenerator' : float(inputDict["maxDGPerGenerator"]),
 		'newLineCandidates' : inputDict['newLineCandidates'],
@@ -426,7 +430,7 @@ def new(modelDir):
 		"maxDGPerGenerator": "5000.0",
 		"hardeningCandidates": "A_node705-742,A_node705-712,A_node706-725",
 		"newLineCandidates": "TIE_A_to_C,TIE_C_to_B,TIE_B_to_A",
-		"generatorCandidates": "A_node706,A_node707,A_node708,B_node704,B_node705,B_node703",
+		"generatorCandidates": "A_node706,A_node707,A_node708,B_node704,B_node705,B_node703,A_load701,B_load701,C_load701",
 		"switchCandidates" : "A_node705-742,A_node705-712",
 		"criticalLoadMet": "0.98",
 		"nonCriticalLoadMet": "0.0",
