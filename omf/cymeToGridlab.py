@@ -859,25 +859,25 @@ def _readCymeShuntCapacitor(feederId, modelDir):
 						  'pt_phase' : None,
 						  'remote_sense': None,
 						  'control_level': None}
-						  
-	shuntcapacitor_db =_csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMSHUNTCAPACITOR.csv"),feederId)                    
+
+	shuntcapacitor_db =_csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMSHUNTCAPACITOR.csv"),feederId)
 	if len(shuntcapacitor_db) == 0:
 		warnings.warn("No capacitor objects were found in CYMSHUNTCAPACITOR for feeder_id: {:s}".format(feederId), RuntimeWarning)
 	else:
 	# if shunt capacitor table has KVARBC as a column use this block:
 		for row in shuntcapacitor_db:
-			if row.SwitchedKVARA is None:
+			if row.SwitchedKVARA is None or float(row.SwitchedKVARA)==0.0:
 				row.DeviceNumber = _fixName(row.DeviceNumber)
 				if row.EquipmentId is None:
 					row.EquipmentId = 'DEFAULT'
 				row.EquipmentId = _fixName(row.EquipmentId)
 				if row.DeviceNumber not in cymshuntcapacitor.keys():
 					cymshuntcapacitor[row.DeviceNumber] = copy.deepcopy(CYMSHUNTCAPACITOR)
-					cymshuntcapacitor[row.DeviceNumber]['name'] = row.DeviceNumber          
+					cymshuntcapacitor[row.DeviceNumber]['name'] = row.DeviceNumber
 					cymshuntcapacitor[row.DeviceNumber]['equipment_name'] = row.EquipmentId
 					cymshuntcapacitor[row.DeviceNumber]['phases'] = 'ABC' # _convertPhase(int(row.Phase)) #jfk. Painful change.  Phase doesn't exist in my capacitor tables.
 					cymshuntcapacitor[row.DeviceNumber]['status'] = row.Status
-					if float(row.KVARA) == 0.0 and float(row.KVARA) == 0.0 and float(row.KVARA) == 0.0 and float(row.KVARABC) > 0.0:                
+					if float(row.KVARA) == 0.0 and float(row.KVARA) == 0.0 and float(row.KVARA) == 0.0 and float(row.KVARABC) > 0.0:
 						cymshuntcapacitor[row.DeviceNumber]['capacitor_A'] = float(row.KVARABC)*1000/3
 						cymshuntcapacitor[row.DeviceNumber]['capacitor_B'] = float(row.KVARABC)*1000/3
 						cymshuntcapacitor[row.DeviceNumber]['capacitor_C'] = float(row.KVARABC)*1000/3
@@ -889,17 +889,17 @@ def _readCymeShuntCapacitor(feederId, modelDir):
 						if float(row.KVARC) > 0.0:
 							cymshuntcapacitor[row.DeviceNumber]['capacitor_C'] = float(row.KVARC)*1000
 					if float(row.KVLN) > 0.0:
-						cymshuntcapacitor[row.DeviceNumber]['kV_line_neutral'] = float(row.KVLN)*1000    
+						cymshuntcapacitor[row.DeviceNumber]['kV_line_neutral'] = float(row.KVLN)*1000
 					if int(row.CapacitorControlType) == 2:
 						cymshuntcapacitor[row.DeviceNumber]['control'] = 'VAR'
 						cymshuntcapacitor[row.DeviceNumber]['VAr_set_high'] = float(row.OnValue)*1000
 						cymshuntcapacitor[row.DeviceNumber]['VAr_set_low'] = float(row.OffValue)*1000
-						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = _convertPhase(int(row.Phase))      
+						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = _convertPhase(int(row.Phase))
 					elif int(row.CapacitorControlType) == 3:
 						cymshuntcapacitor[row.DeviceNumber]['control'] = 'CURRENT'
 						cymshuntcapacitor[row.DeviceNumber]['current_set_high'] = row.OnValue
 						cymshuntcapacitor[row.DeviceNumber]['current_set_low'] = row.OffValue
-						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = _convertPhase(int(row.Phase))   
+						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = _convertPhase(int(row.Phase))
 					elif int(row.CapacitorControlType) == 7:
 						cymshuntcapacitor[row.DeviceNumber]['control'] = 'VOLT'
 						controlledphase = _convertPhase(int(row.ControlledPhase)).replace('N','')
@@ -910,8 +910,8 @@ def _readCymeShuntCapacitor(feederId, modelDir):
 					else:
 						cymshuntcapacitor[row.DeviceNumber]['control'] = 'MANUAL'
 						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = 'ABC' # _convertPhase(int(row.Phase)) #doesn't exist
-						cymshuntcapacitor[row.DeviceNumber]['voltage_set_high'] = float(row.KVLN)*1000 
-						cymshuntcapacitor[row.DeviceNumber]['voltage_set_low'] = float(row.KVLN)*1000 
+						cymshuntcapacitor[row.DeviceNumber]['voltage_set_high'] = float(row.KVLN)*1000
+						cymshuntcapacitor[row.DeviceNumber]['voltage_set_low'] = float(row.KVLN)*1000
 			else:
 				row.DeviceNumber = _fixName(row.DeviceNumber)
 				if row.EquipmentId is None:
@@ -919,7 +919,7 @@ def _readCymeShuntCapacitor(feederId, modelDir):
 				row.EquipmentId = _fixName(row.EquipmentId)
 				if row.DeviceNumber not in cymshuntcapacitor.keys():
 					cymshuntcapacitor[row.DeviceNumber] = copy.deepcopy(CYMSHUNTCAPACITOR)
-					cymshuntcapacitor[row.DeviceNumber]['name'] = row.DeviceNumber          
+					cymshuntcapacitor[row.DeviceNumber]['name'] = row.DeviceNumber
 					cymshuntcapacitor[row.DeviceNumber]['equipment_name'] = row.EquipmentId
 					cymshuntcapacitor[row.DeviceNumber]['phases'] = "ABCN"
 					cymshuntcapacitor[row.DeviceNumber]['status'] = row.Status
@@ -1577,7 +1577,9 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	# Open the network database file
 	# net_db = _openDatabase(network_db)
 	# Dumping csv's to folder
-	_csvDump(str(network_db), modelDir)
+	# _csvDump(str(network_db), modelDir)
+	# import pdb
+	# pdb.set_trace()
 	# feeder_id =_csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMNETWORK.csv"),columns=['NetworkId'])
 	feeder_id = _findNetworkId(pJoin(modelDir,'cymeCsvDump',"CYMNETWORK.csv"))
 	# -1-CYME CYMSOURCE *********************************************************************************************************************************************************************
