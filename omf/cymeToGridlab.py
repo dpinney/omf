@@ -1327,7 +1327,9 @@ def _readEqRegulator(feederId, modelDir):
 	cymeqregulator = {}                           # Stores information found in CYMEQREGULATOR in the equipment database
 	CYMEQREGULATOR = { 'name' : None,             # Information structure for each object found in CYMEQREGULATOR
 					   'raise_taps' : None,
-					   'lower_taps' : None}
+					   'lower_taps' : None,
+					   'nominal_voltage': None,
+					   'bandwidth': None}
 	# cymeqregulator_db = equipmentDatabase.execute("SELECT EquipmentId, NumberOfTaps FROM CYMEQREGULATOR").fetchall()
 	cymeqregulator_db =_csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMEQREGULATOR.csv"),feederId)
 
