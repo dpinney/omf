@@ -93,6 +93,7 @@ def _csvDump(database_file, modelDir):
 		#One big problem:  after this function dumps the csv files, python crashes. So I have to run this routine twice.
 		originaldir = os.getcwd()#bash command below wouldn't work if I appended path to database_file
 		os.chdir(modelDir)
+		database_file = database_file.split('\\')[-1]
 		table_names = subprocess.Popen(["bash", "-c", "mdb-tables -1 " + database_file], stdout=subprocess.PIPE).communicate()[0]
 		tables = table_names.split('\n')
 
@@ -711,12 +712,17 @@ def _findParents(sectionDict, deviceDict, loadDict):
 	'''store parent information for load type objects'''
 	for loadsection in loadDict.keys():
 		lineId = loadsection
-		loaddevice = loadDict[lineId]
-		if deviceDict[loaddevice]['location'] == 2:
-			deviceDict[loaddevice]['parent'] = sectionDict[lineId]['to']
+		# loaddevice = loadDict[lineId]
+		if type(loadDict[lineId]) != list:
+			loaddevices = [loadDict[lineId]]
 		else:
-			deviceDict[loaddevice]['parent'] = sectionDict[lineId]['from']
-		deviceDict[loaddevice]['phases'] = sectionDict[lineId]['phases']
+			loaddevices = loadDict[lineId]
+		for loaddevice in loaddevices:
+			if deviceDict[loaddevice]['location'] == 2:
+				deviceDict[loaddevice]['parent'] = sectionDict[lineId]['to']
+			else:
+				deviceDict[loaddevice]['parent'] = sectionDict[lineId]['from']
+			deviceDict[loaddevice]['phases'] = sectionDict[lineId]['phases']
 
 def _readCymeSwitch(feederId, modelDir):
 	cymswitch = {}                          # Stores information found in CYMSWITCH in the network database
