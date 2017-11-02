@@ -1026,6 +1026,10 @@ def _readCymeCustomerLoad(feederId, modelDir):
 			if row.DeviceNumber not in cymcustomerload.keys():
 				# check for 0 load
 				[load_real, load_imag] = _determineLoad(int(row.LoadValueType), float(row.LoadValue1), float(row.LoadValue2), row.ConnectedKVA)
+				if row.Status == '1': #jfk.  Set disconnected loads to zero.
+					load_real = 0
+					load_imag = 0
+
 				cymcustomerload[row.DeviceNumber] = copy.deepcopy(CYMCUSTOMERLOAD)
 				cymcustomerload[row.DeviceNumber]['name'] = row.DeviceNumber            
 				cymcustomerload[row.DeviceNumber]['phases'] = _cleanPhases(_convertPhase(int(row.Phase)))
