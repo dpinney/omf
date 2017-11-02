@@ -156,7 +156,7 @@ print "The energy shaved is: " + str(energyShaved) + " kWh"
 
 
 ###### USER VARIABLE ######
-chargingHours = 3
+chargingHours = 2
 percentLossPerTick = 0.05
 ###### USER VARIABLE ######
 
@@ -182,8 +182,16 @@ for x in adjustedDemand:
 			powerBattery[x] = energyToStore
 
 	energyShaved = energyShaved*(1+percentLossPerTick)
-	print energyShaved
+	#print energyShaved
 
+
+energyLosses = collections.OrderedDict()
+energyLosses[0]=0
+percentLosses = 0.01 #equivalent to .0406 a year
+for x in powerBattery:
+	if x>0:
+		energyLosses[x] =  (energyLosses[x-.25]+powerBattery[x])*(1-percentLosses)
+		print energyLosses[x]
 
 
 fig = plt.gcf()
@@ -194,8 +202,9 @@ ellipse = Ellipse((peakDemandHour,peakDemand),peakWidth*accuracyFactor,
 plt.gca().add_artist(plt.legend(handles=[ellipse],loc=1)) #plt.gca().add_artist(plt.legend(handles=[ellipse],loc=1))
 
 ax.add_artist(ellipse)
+plt.plot(*zip(*sorted(energyLosses.items())),label='Energy Dissipation')
 plt.plot(*zip(*sorted(adjustedDemand.items())),label='Adjusted Demand')
-plt.plot(*zip(*sorted(powerBattery.items())),label="Battery Power Status")
+plt.plot(*zip(*sorted(powerBattery.items())),label='Battery Charge Rate')
 
 
 handles, labels = ax.get_legend_handles_labels()
