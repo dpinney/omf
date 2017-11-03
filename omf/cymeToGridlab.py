@@ -570,7 +570,7 @@ def _readCymeQOverheadLine(feederId, modelDir):
 	spacingIds = []
 	cymeqoverheadline_db =_csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMEQOVERHEADLINE.csv"),feederId)
 	if len(cymeqoverheadline_db) == 0:
-		warnings.warn("No conductor objects were found in CYMEQCONDUCTOR for feeder_id: {:s}.".format(feederId), RuntimeWarning)
+		warnings.warn("No overheadline objects were found in CYMEQCONDUCTOR for feeder_id: {:s}.".format(feederId), RuntimeWarning)
 	else:
 		for row in cymeqoverheadline_db:
 			row.EquipmentId = _fixName(row.EquipmentId)
