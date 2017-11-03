@@ -1165,11 +1165,11 @@ def _readEqOverheadLineUnbalanced(feederId, modelDir):
 																			'z32' : None,
 																			'z33' : None}
 	# ug_line_db = networkDatabase.execute("SELECT EquipmentId, SelfResistanceA, SelfResistanceB, SelfResistanceC, SelfReactanceA, SelfReactanceB, SelfReactanceC, MutualResistanceAB, MutualResistanceBC, MutualResistanceCA, MutualReactanceAB, MutualReactanceBC, MutualReactanceCA FROM CYMEQOVERHEADLINEUNBALANCED WHERE EquipmentId = '{:s}'".format("LINE606")).fetchall()
-	ug_line_db =_csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMEQOVERHEADLINEUNBALANCED.csv"),feederId)
-	if len(ug_line_db) == 0:
+	oh_line_db =_csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMEQOVERHEADLINEUNBALANCED.csv"),feederId)
+	if len(oh_line_db) == 0:
 		warnings.warn("No underground_line configuration objects were found in CYMEQOVERHEADLINEUNBALANCED for feeder_id: {:s}.".format(feederId), RuntimeWarning)
 	else:
-		for row in ug_line_db:
+		for row in oh_line_db:
 			row.EquipmentId = _fixName(row.EquipmentId)
 			if row.EquipmentId not in cymeqoverheadlineunbalanced.keys():
 				cymeqoverheadlineunbalanced[row.EquipmentId] = copy.deepcopy(CYMEQOVERHEADLINEUNBALANCED)
