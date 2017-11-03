@@ -30,6 +30,9 @@ from matplotlib import pyplot as plt
 from pathlib import Path
 import matplotlib
 matplotlib.pyplot.switch_backend('Agg')
+import numpy as np
+from numpy.linalg import inv
+import platform
 
 
 m2ft = 1.0/0.3048             # Conversion factor for meters to feet
@@ -68,21 +71,46 @@ class Map(dict):
 def _csvDump(database_file, modelDir):
 	# Get the list of table names with "mdb-tables"
 	print "database", database_file
-	table_names = subprocess.Popen(["mdb-tables", "-1", database_file], 
-								   stdout=subprocess.PIPE).communicate()[0]
-	tables = table_names.split('\n')
-	if not os.path.isdir((pJoin(modelDir,'cymeCsvDump'))):
-		os.makedirs((pJoin(modelDir,'cymeCsvDump')))
-	# Dump each table as a CSV file using "mdb-export",
-	# converting " " in table names to "_" for the CSV filenames.
-	for table in tables:
-		if table != '':
-			filename = table.replace(" ","_") + ".csv"
-			file = open(pJoin(modelDir,'cymeCsvDump',filename), 'w+')
-			contents = subprocess.Popen(["mdb-export", database_file, table],
-										stdout=subprocess.PIPE).communicate()[0]
-			file.write(contents)
-			file.close()
+
+	if platform.system() == 'Linux':
+		table_names = subprocess.Popen(["mdb-tables", "-1", database_file],
+									   stdout=subprocess.PIPE).communicate()[0]
+		tables = table_names.split('\n')
+		if not os.path.isdir((pJoin(modelDir,'cymeCsvDump'))):
+			os.makedirs((pJoin(modelDir,'cymeCsvDump')))
+		# Dump each table as a CSV file using "mdb-export",
+		# converting " " in table names to "_" for the CSV filenames.
+		for table in tables:
+			if table != '':
+				filename = table.replace(" ","_") + ".csv"
+				file = open(pJoin(modelDir,'cymeCsvDump',filename), 'w+')
+				contents = subprocess.Popen(["mdb-export", database_file, table],
+											stdout=subprocess.PIPE).communicate()[0]
+				file.write(contents)
+				file.close()
+	elif platform.system() == 'Windows':
+		#The following code uses mdb-tables in Windows 10, but requires the creators update and ubuntu
+		#One big problem:  after this function dumps the csv files, python crashes. So I have to run this routine twice.
+		originaldir = os.getcwd()#bash command below wouldn't work if I appended path to database_file
+		os.chdir(modelDir)
+		database_file = database_file.split('\\')[-1]
+		table_names = subprocess.Popen(["bash", "-c", "mdb-tables -1 " + database_file], stdout=subprocess.PIPE).communicate()[0]
+		tables = table_names.split('\n')
+
+		if not os.path.isdir((pJoin(modelDir,'cymeCsvDump'))):
+			os.makedirs((pJoin(modelDir,'cymeCsvDump')))
+		# Dump each table as a CSV file using "mdb-export",
+		# converting " " in table names to "_" for the CSV filenames.
+		for table in tables:
+			if table != '':
+				filename = table.replace(" ","_") + ".csv"
+				file = open(pJoin(modelDir,'cymeCsvDump',filename), 'w+')
+
+				contents = subprocess.Popen(["bash", "-c", "mdb-export " + database_file + " " +table],
+											stdout=subprocess.PIPE).communicate()[0]
+				file.write(contents)
+				file.close()
+		os.chdir(originaldir)
 
 def _findNetworkId(csvFile):
 	csvDict = csv.DictReader(open(csvFile,'r'))
@@ -97,11 +125,23 @@ def _findNetworkId(csvFile):
 	# If single source network, select the only source
 		return networks[0]
 
+#jfk. helper function for _fixName
+def _isfloat(value):
+  try:
+    float(value)
+    return True
+  except:
+    return False
+
+#jfk.  Ensure that all names start with a letter.  Not critical, but reduces gridlabd warnings.
 def _fixName(name):
 	'''Function that replaces characters not allowed in name with _'''
 	badChar = [' ', '-', '\\', '//', '/', ':', '.', "'\'", '&']
 	for char in badChar:
 		name = name.replace(char, '_')
+	#jfk.  Don't allow names that start with a number
+	if _isfloat(name[0]):
+		name = 'x'+name
 	return name
 
 def _convertPhase(int_phase):
@@ -342,14 +382,16 @@ def _readCymeSource(feederId, type, modelDir):
 			for row in feeder_db_net:             
 				if row.NetworkId == feederId:
 					feeder_id = feederId
-			feederId_equivalent = "SOURCE_" + feeder_id          
-			for row in feeder_db:         
-				if feederId_equivalent in row.NodeId:
+			feederId_equivalent = "SOURCE_" + feeder_id
+			for row in feeder_db:
+				if row.NodeId in feederId_equivalent: #jfk.  logic was backwards.
 					feeder_id = feederId
 					cymsource[_fixName(row.NodeId)] = copy.deepcopy(CYMEQUIVALENTSOURCE)
 					cymsource[_fixName(row.NodeId)]['name'] = _fixName(row.NodeId)
-					cymsource[_fixName(row.NodeId)]['nominal_voltage'] = str(float(row.OperatingVoltage1)*1000.0/math.sqrt(3))
-					swingBus = _fixName(row.NodeId)    
+					#jfk. Differentiating between nominal voltage and voltage setpoint at the source.  Otherwise, per unit calcs get messy later.  Also, more accurate for capacitors.
+					cymsource[_fixName(row.NodeId)]['nominal_voltage'] = str(float(row.KVLL)*1000.0/math.sqrt(3)) #jfk.
+					cymsource[_fixName(row.NodeId)]['source_voltage'] = str(float(row.OperatingVoltage1)*1000.0) #jfk
+					swingBus = _fixName(row.NodeId)
 	print 'swingbus',swingBus
 	return cymsource, feeder_id, swingBus
 
@@ -528,7 +570,7 @@ def _readCymeQOverheadLine(feederId, modelDir):
 	spacingIds = []
 	cymeqoverheadline_db =_csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMEQOVERHEADLINE.csv"),feederId)
 	if len(cymeqoverheadline_db) == 0:
-		warnings.warn("No conductor objects were found in CYMEQCONDUCTOR for feeder_id: {:s}.".format(feederId), RuntimeWarning)
+		warnings.warn("No overheadline objects were found in CYMEQCONDUCTOR for feeder_id: {:s}.".format(feederId), RuntimeWarning)
 	else:
 		for row in cymeqoverheadline_db:
 			row.EquipmentId = _fixName(row.EquipmentId)
@@ -540,6 +582,47 @@ def _readCymeQOverheadLine(feederId, modelDir):
 				cymeqoverheadline[row.EquipmentId]['spacing'] = _fixName(row.ConductorSpacingId)
 				cymeqoverheadline[row.EquipmentId]['conductor_N'] = _fixName(row.NeutralConductorId)
 	return cymeqoverheadline, spacingIds
+
+#jfk.  PECO has several reactors in their networks.
+def _readCymeReactors(feederId, modelDir):
+	cymseriesreactor = {}
+	CYMSERIESREACTOR = { 'name' : None,
+						 'configuration': None}
+
+	reactorIds = []
+	seriesreactor_db = _csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMSERIESREACTOR.csv"),feederId)
+	if len(seriesreactor_db) == 0:
+		warnings.warn("No series reactor objects were found in CYMSERIESREACTOR for feeder_id: {:s}.".format(feederId), RuntimeWarning)
+	else:
+		for row in seriesreactor_db:
+			row.DeviceNumber = _fixName(row.DeviceNumber)
+			if _fixName(row.EquipmentId) not in reactorIds:
+				reactorIds.append(_fixName(row.EquipmentId))
+			if row.DeviceNumber not in cymseriesreactor.keys():
+				cymseriesreactor[row.DeviceNumber] = copy.deepcopy(CYMSERIESREACTOR)
+				cymseriesreactor[row.DeviceNumber]['name'] = _fixName(row.DeviceNumber)
+				cymseriesreactor[row.DeviceNumber]['configuration'] = _fixName(row.EquipmentId)
+
+	return cymseriesreactor, reactorIds
+
+#jfk
+def _readEqReactors(feederId, modelDir):
+	cymeqreactor = {}
+	CYMEQREACTOR = { 'name' : None,
+					 'reactance': None}
+
+	cymeqreactor_db = _csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMEQSERIESREACTOR.csv"),feederId)
+
+	if len(cymeqreactor_db) == 0:
+		warnings.warn("No reactor equipment was found in CYMEQREACTOR for feeder_id: {:s}.".format(feederId), RuntimeWarning)
+	else:
+		for row in cymeqreactor_db:
+			row.EquipmentId = _fixName(row.EquipmentId)
+			if row.EquipmentId not in cymeqreactor.keys():
+				cymeqreactor[row.EquipmentId] = copy.deepcopy(CYMEQREACTOR)
+				cymeqreactor[row.EquipmentId]['name'] = row.EquipmentId
+				cymeqreactor[row.EquipmentId]['reactance'] = row.ReactanceOhms
+	return cymeqreactor
 
 def _readCymeSection(feederId, modelDir):
 	'''store information from CYMSECTION'''
@@ -584,47 +667,62 @@ def _readCymeSectionDevice(feederId, modelDir):
 				cymsectiondevice[row.DeviceNumber]['device_type'] = int(row.DeviceType)
 				cymsectiondevice[row.DeviceNumber]['section_name'] = row.SectionId
 				cymsectiondevice[row.DeviceNumber]['location'] = int(row.Location)
+			else:
+				#jfk. A better fix is needed.
+				print 'Found duplicate device ID: ' + row.DeviceNumber + '.  Rename device in Cyme or the device will be overwritten.'
 	return cymsectiondevice
 
 def _splitLinkObjects(sectionDict, deviceDict, linkDict, overheadDict, undergroundDict):
 	'''Split multiple link objects from the line that they are folded into'''
+	#jfk.  Several changes in here related to the following problem.  Old code assume that each section (linkDict) would
+	#only have one device or link object per section.  I found that this wasn't true for solar PV and switches.
+	#Later in the code, linkDicts for these objects have lists as their values.
+	#This code now reflects this possiblity.  But it makes it kind of inconsistent and hacky.
 	for link in linkDict.keys():
 		if link in overheadDict.keys() or link in undergroundDict.keys(): # if true the link is embedded in a line object and must be separated
 			lineId = link
-			newLinkId = linkDict[link]
-			if deviceDict[newLinkId]['location'] == 1: # device is at the from side of a section
-				sectionDict[newLinkId] = copy.deepcopy(sectionDict[lineId])
-				sectionDict[newLinkId]['name'] = newLinkId
-				sectionDict[newLinkId]['to'] = 'node' + newLinkId
-				sectionDict[newLinkId]['toX'] = str(float(sectionDict[lineId]['fromX']) + random.uniform(-10,10))
-				sectionDict[newLinkId]['toY'] = str(float(sectionDict[lineId]['fromY']) + random.uniform(-10,10))
-				sectionDict[lineId]['from'] = 'node' + newLinkId
-				sectionDict[lineId]['fromX'] = sectionDict[newLinkId]['toX']
-				sectionDict[lineId]['fromY'] = sectionDict[newLinkId]['toY']
-			else: # device is at the to side of a section
-				sectionDict[newLinkId] = copy.deepcopy(sectionDict[lineId])
-				sectionDict[newLinkId]['name'] = newLinkId
-				sectionDict[newLinkId]['from'] = 'node' + newLinkId
-				sectionDict[newLinkId]['fromX'] = str(float(sectionDict[lineId]['toX']) + random.uniform(-10,10))
-				sectionDict[newLinkId]['fromY'] = str(float(sectionDict[lineId]['toY']) + random.uniform(-10,10))
-				sectionDict[lineId]['to'] = 'node' + newLinkId
-				sectionDict[lineId]['toX'] = sectionDict[newLinkId]['fromX']
-				sectionDict[lineId]['toY'] = sectionDict[newLinkId]['fromY']
-			for phase in ['N', 'D']:
-				sectionDict[newLinkId]['phases'] = sectionDict[newLinkId]['phases'].replace(phase, '')
-			deviceDict[newLinkId]['section_name'] = newLinkId
-			deviceDict[newLinkId]['location'] = 0
+			newLinkIds = linkDict[link] #jfk
+			if type(newLinkIds) != list: #jfk
+				newLinkIds = [newLinkIds]
+			for newLinkId in newLinkIds:#jfk
+				if deviceDict[newLinkId]['location'] == 1: # device is at the from side of a section
+					sectionDict[newLinkId] = copy.deepcopy(sectionDict[lineId])
+					sectionDict[newLinkId]['name'] = newLinkId
+					sectionDict[newLinkId]['to'] = 'node' + newLinkId
+					sectionDict[newLinkId]['toX'] = str(float(sectionDict[lineId]['fromX']) + random.uniform(-10,10))
+					sectionDict[newLinkId]['toY'] = str(float(sectionDict[lineId]['fromY']) + random.uniform(-10,10))
+					sectionDict[lineId]['from'] = 'node' + newLinkId
+					sectionDict[lineId]['fromX'] = sectionDict[newLinkId]['toX']
+					sectionDict[lineId]['fromY'] = sectionDict[newLinkId]['toY']
+				else: # device is at the to side of a section
+					sectionDict[newLinkId] = copy.deepcopy(sectionDict[lineId])
+					sectionDict[newLinkId]['name'] = newLinkId
+					sectionDict[newLinkId]['from'] = 'node' + newLinkId
+					sectionDict[newLinkId]['fromX'] = str(float(sectionDict[lineId]['toX']) + random.uniform(-10,10))
+					sectionDict[newLinkId]['fromY'] = str(float(sectionDict[lineId]['toY']) + random.uniform(-10,10))
+					sectionDict[lineId]['to'] = 'node' + newLinkId
+					sectionDict[lineId]['toX'] = sectionDict[newLinkId]['fromX']
+					sectionDict[lineId]['toY'] = sectionDict[newLinkId]['fromY']
+				for phase in ['N', 'D']:
+					sectionDict[newLinkId]['phases'] = sectionDict[newLinkId]['phases'].replace(phase, '')
+				deviceDict[newLinkId]['section_name'] = newLinkId
+				deviceDict[newLinkId]['location'] = 0
 
 def _findParents(sectionDict, deviceDict, loadDict):
 	'''store parent information for load type objects'''
 	for loadsection in loadDict.keys():
 		lineId = loadsection
-		loaddevice = loadDict[lineId]
-		if deviceDict[loaddevice]['location'] == 2:
-			deviceDict[loaddevice]['parent'] = sectionDict[lineId]['to']
+		# loaddevice = loadDict[lineId]
+		if type(loadDict[lineId]) != list:
+			loaddevices = [loadDict[lineId]]
 		else:
-			deviceDict[loaddevice]['parent'] = sectionDict[lineId]['from']
-		deviceDict[loaddevice]['phases'] = sectionDict[lineId]['phases']
+			loaddevices = loadDict[lineId]
+		for loaddevice in loaddevices:
+			if deviceDict[loaddevice]['location'] == 2:
+				deviceDict[loaddevice]['parent'] = sectionDict[lineId]['to']
+			else:
+				deviceDict[loaddevice]['parent'] = sectionDict[lineId]['from']
+			deviceDict[loaddevice]['phases'] = sectionDict[lineId]['phases']
 
 def _readCymeSwitch(feederId, modelDir):
 	cymswitch = {}                          # Stores information found in CYMSWITCH in the network database
@@ -733,7 +831,7 @@ def _readCymeRegulator(feederId, modelDir):
 				cymregulator[row.DeviceNumber] = copy.deepcopy(CYMREGULATOR)
 				cymregulator[row.DeviceNumber]['name'] = row.DeviceNumber          
 				cymregulator[row.DeviceNumber]['equipment_name'] = row.EquipmentId
-				cymregulator[row.DeviceNumber]['band_width'] = float(row.BandWidth)/120.0
+				# cymregulator[row.DeviceNumber]['band_width'] = float(row.BandWidth)/120.0 #does not exist in database.  now forwardbandwidth in regulator equipment
 				cymregulator[row.DeviceNumber]['regulation'] = float(row.BoostPercent)/100.0
 				cymregulator[row.DeviceNumber]['tap_pos_A'] = row.TapPositionA
 				cymregulator[row.DeviceNumber]['tap_pos_B'] = row.TapPositionB
@@ -750,7 +848,7 @@ def _readCymeShuntCapacitor(feederId, modelDir):
 						  'capacitor_B' : None,
 						  'capacitor_C' : None,
 						  'capacitor_ABC' : None,
-						  'kv_line_neutral' : None,
+						  'kV_line_neutral' : None, #kV. for consistency
 						  'control' : None,
 						  'voltage_set_high' : None,
 						  'voltage_set_low' : None,
@@ -758,26 +856,28 @@ def _readCymeShuntCapacitor(feederId, modelDir):
 						  'VAr_set_low' : None,
 						  'current_set_high' : None,
 						  'current_set_low' : None,
-						  'pt_phase' : None}
-						  
-	shuntcapacitor_db =_csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMSHUNTCAPACITOR.csv"),feederId)                    
+						  'pt_phase' : None,
+						  'remote_sense': None,
+						  'control_level': None}
+
+	shuntcapacitor_db =_csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMSHUNTCAPACITOR.csv"),feederId)
 	if len(shuntcapacitor_db) == 0:
 		warnings.warn("No capacitor objects were found in CYMSHUNTCAPACITOR for feeder_id: {:s}".format(feederId), RuntimeWarning)
 	else:
 	# if shunt capacitor table has KVARBC as a column use this block:
 		for row in shuntcapacitor_db:
-			if row.SwitchedKVARA is None:
+			if row.SwitchedKVARA is None or float(row.SwitchedKVARA)==0.0:
 				row.DeviceNumber = _fixName(row.DeviceNumber)
 				if row.EquipmentId is None:
 					row.EquipmentId = 'DEFAULT'
 				row.EquipmentId = _fixName(row.EquipmentId)
 				if row.DeviceNumber not in cymshuntcapacitor.keys():
 					cymshuntcapacitor[row.DeviceNumber] = copy.deepcopy(CYMSHUNTCAPACITOR)
-					cymshuntcapacitor[row.DeviceNumber]['name'] = row.DeviceNumber          
+					cymshuntcapacitor[row.DeviceNumber]['name'] = row.DeviceNumber
 					cymshuntcapacitor[row.DeviceNumber]['equipment_name'] = row.EquipmentId
-					cymshuntcapacitor[row.DeviceNumber]['phases'] = _convertPhase(int(row.Phase))
+					cymshuntcapacitor[row.DeviceNumber]['phases'] = 'ABC' # _convertPhase(int(row.Phase)) #jfk. Painful change.  Phase doesn't exist in my capacitor tables.
 					cymshuntcapacitor[row.DeviceNumber]['status'] = row.Status
-					if float(row.KVARA) == 0.0 and float(row.KVARA) == 0.0 and float(row.KVARA) == 0.0 and float(row.KVARABC) > 0.0:                
+					if float(row.KVARA) == 0.0 and float(row.KVARA) == 0.0 and float(row.KVARA) == 0.0 and float(row.KVARABC) > 0.0:
 						cymshuntcapacitor[row.DeviceNumber]['capacitor_A'] = float(row.KVARABC)*1000/3
 						cymshuntcapacitor[row.DeviceNumber]['capacitor_B'] = float(row.KVARABC)*1000/3
 						cymshuntcapacitor[row.DeviceNumber]['capacitor_C'] = float(row.KVARABC)*1000/3
@@ -789,27 +889,29 @@ def _readCymeShuntCapacitor(feederId, modelDir):
 						if float(row.KVARC) > 0.0:
 							cymshuntcapacitor[row.DeviceNumber]['capacitor_C'] = float(row.KVARC)*1000
 					if float(row.KVLN) > 0.0:
-						cymshuntcapacitor[row.DeviceNumber]['kV_line_neutral'] = float(row.KVLN)*1000    
+						cymshuntcapacitor[row.DeviceNumber]['kV_line_neutral'] = float(row.KVLN)*1000
 					if int(row.CapacitorControlType) == 2:
 						cymshuntcapacitor[row.DeviceNumber]['control'] = 'VAR'
 						cymshuntcapacitor[row.DeviceNumber]['VAr_set_high'] = float(row.OnValue)*1000
 						cymshuntcapacitor[row.DeviceNumber]['VAr_set_low'] = float(row.OffValue)*1000
-						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = _convertPhase(int(row.Phase))      
+						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = _convertPhase(int(row.Phase))
 					elif int(row.CapacitorControlType) == 3:
 						cymshuntcapacitor[row.DeviceNumber]['control'] = 'CURRENT'
 						cymshuntcapacitor[row.DeviceNumber]['current_set_high'] = row.OnValue
 						cymshuntcapacitor[row.DeviceNumber]['current_set_low'] = row.OffValue
-						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = _convertPhase(int(row.Phase))   
+						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = _convertPhase(int(row.Phase))
 					elif int(row.CapacitorControlType) == 7:
 						cymshuntcapacitor[row.DeviceNumber]['control'] = 'VOLT'
-						cymshuntcapacitor[row.DeviceNumber]['voltage_set_high'] = row.OnValue
-						cymshuntcapacitor[row.DeviceNumber]['voltage_set_low'] = row.OffValue
-						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = _convertPhase(int(row.Phase))   
+						controlledphase = _convertPhase(int(row.ControlledPhase)).replace('N','')
+						cymshuntcapacitor[row.DeviceNumber]['voltage_set_low'] = float(row['OnValue'+controlledphase])
+						cymshuntcapacitor[row.DeviceNumber]['voltage_set_high'] = float(row['OffValue'+controlledphase])
+						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = controlledphase
+						cymshuntcapacitor[row.DeviceNumber]['remote_sense'] = _fixName(row.ControlledNodeId)
 					else:
 						cymshuntcapacitor[row.DeviceNumber]['control'] = 'MANUAL'
-						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = _convertPhase(int(row.Phase))
-						cymshuntcapacitor[row.DeviceNumber]['voltage_set_high'] = float(row.KVLN)*1000 
-						cymshuntcapacitor[row.DeviceNumber]['voltage_set_low'] = float(row.KVLN)*1000 
+						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = 'ABC' # _convertPhase(int(row.Phase)) #doesn't exist
+						cymshuntcapacitor[row.DeviceNumber]['voltage_set_high'] = float(row.KVLN)*1000
+						cymshuntcapacitor[row.DeviceNumber]['voltage_set_low'] = float(row.KVLN)*1000
 			else:
 				row.DeviceNumber = _fixName(row.DeviceNumber)
 				if row.EquipmentId is None:
@@ -817,10 +919,17 @@ def _readCymeShuntCapacitor(feederId, modelDir):
 				row.EquipmentId = _fixName(row.EquipmentId)
 				if row.DeviceNumber not in cymshuntcapacitor.keys():
 					cymshuntcapacitor[row.DeviceNumber] = copy.deepcopy(CYMSHUNTCAPACITOR)
-					cymshuntcapacitor[row.DeviceNumber]['name'] = row.DeviceNumber          
+					cymshuntcapacitor[row.DeviceNumber]['name'] = row.DeviceNumber
 					cymshuntcapacitor[row.DeviceNumber]['equipment_name'] = row.EquipmentId
 					cymshuntcapacitor[row.DeviceNumber]['phases'] = "ABCN"
 					cymshuntcapacitor[row.DeviceNumber]['status'] = row.Status
+					if row.SwitchingMode == '2':
+						cymshuntcapacitor[row.DeviceNumber]['control_level'] =  'BANK'
+					elif row.SwitchingMode == '1':
+						cymshuntcapacitor[row.DeviceNumber]['control_level'] =  'INDIVIDUAL'
+					else:
+						print 'could not find capacitor switching mode.  defaulting to INDIVIDUAL'
+						cymshuntcapacitor[row.DeviceNumber]['control_level'] =  'INDIVIDUAL'
 					if float(row.SwitchedKVARA) > 0.0:
 						cymshuntcapacitor[row.DeviceNumber]['capacitor_A'] = float(row.SwitchedKVARA)*1000
 					if float(row.SwitchedKVARB) > 0.0:
@@ -828,27 +937,29 @@ def _readCymeShuntCapacitor(feederId, modelDir):
 					if float(row.SwitchedKVARC) > 0.0:
 						cymshuntcapacitor[row.DeviceNumber]['capacitor_C'] = float(row.SwitchedKVARC)*1000
 					if float(row.KVLN) > 0.0:
-						cymshuntcapacitor[row.DeviceNumber]['kV_line_neutral'] = float(row.KVLN)*1000    
+						cymshuntcapacitor[row.DeviceNumber]['kV_line_neutral'] = float(row.KVLN)*1000
 					if int(row.CapacitorControlType) == 2:
 						cymshuntcapacitor[row.DeviceNumber]['control'] = 'VAR'
 						cymshuntcapacitor[row.DeviceNumber]['VAr_set_high'] = float(row.OnValueA)*1000
 						cymshuntcapacitor[row.DeviceNumber]['VAr_set_low'] = float(row.OffValueA)*1000
-						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = "ABCN"            
+						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = "ABCN"
 					elif int(row.CapacitorControlType) == 3:
 						cymshuntcapacitor[row.DeviceNumber]['control'] = 'CURRENT'
 						cymshuntcapacitor[row.DeviceNumber]['current_set_high'] = row.OnValueA
 						cymshuntcapacitor[row.DeviceNumber]['current_set_low'] = row.OffValueA
-						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = "ABCN" 
+						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = "ABCN"
 					elif int(row.CapacitorControlType) == 7:
 						cymshuntcapacitor[row.DeviceNumber]['control'] = 'VOLT'
-						cymshuntcapacitor[row.DeviceNumber]['voltage_set_high'] = row.OnValueA
-						cymshuntcapacitor[row.DeviceNumber]['voltage_set_low'] = row.OffValueA
-						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = "ABCN"              
+						controlledphase = _convertPhase(int(row.ControlledPhase)).replace('N','')
+						cymshuntcapacitor[row.DeviceNumber]['voltage_set_low'] = float(row['OnValue'+controlledphase])
+						cymshuntcapacitor[row.DeviceNumber]['voltage_set_high'] = float(row['OffValue'+controlledphase])
+						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = controlledphase#row.Phase doesn't exist
+						cymshuntcapacitor[row.DeviceNumber]['remote_sense'] = _fixName(row.ControlledNodeId)
 					else:
 						cymshuntcapacitor[row.DeviceNumber]['control'] = 'MANUAL'
 						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = "ABCN"
-						cymshuntcapacitor[row.DeviceNumber]['voltage_set_high'] = float(row.KVLN)*1000 
-						cymshuntcapacitor[row.DeviceNumber]['voltage_set_low'] = float(row.KVLN)*1000                 
+						cymshuntcapacitor[row.DeviceNumber]['voltage_set_high'] = float(row.KVLN)*1000
+						cymshuntcapacitor[row.DeviceNumber]['voltage_set_low'] = float(row.KVLN)*1000
 	return cymshuntcapacitor
 
 def _determineLoad( l_type, l_v1, l_v2, conKVA):
@@ -915,6 +1026,10 @@ def _readCymeCustomerLoad(feederId, modelDir):
 			if row.DeviceNumber not in cymcustomerload.keys():
 				# check for 0 load
 				[load_real, load_imag] = _determineLoad(int(row.LoadValueType), float(row.LoadValue1), float(row.LoadValue2), row.ConnectedKVA)
+				if row.Status == '1': #jfk.  Set disconnected loads to zero.
+					load_real = 0
+					load_imag = 0
+
 				cymcustomerload[row.DeviceNumber] = copy.deepcopy(CYMCUSTOMERLOAD)
 				cymcustomerload[row.DeviceNumber]['name'] = row.DeviceNumber            
 				cymcustomerload[row.DeviceNumber]['phases'] = _cleanPhases(_convertPhase(int(row.Phase)))
@@ -1050,11 +1165,11 @@ def _readEqOverheadLineUnbalanced(feederId, modelDir):
 																			'z32' : None,
 																			'z33' : None}
 	# ug_line_db = networkDatabase.execute("SELECT EquipmentId, SelfResistanceA, SelfResistanceB, SelfResistanceC, SelfReactanceA, SelfReactanceB, SelfReactanceC, MutualResistanceAB, MutualResistanceBC, MutualResistanceCA, MutualReactanceAB, MutualReactanceBC, MutualReactanceCA FROM CYMEQOVERHEADLINEUNBALANCED WHERE EquipmentId = '{:s}'".format("LINE606")).fetchall()
-	ug_line_db =_csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMEQOVERHEADLINEUNBALANCED.csv"),feederId)
-	if len(ug_line_db) == 0:
+	oh_line_db =_csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMEQOVERHEADLINEUNBALANCED.csv"),feederId)
+	if len(oh_line_db) == 0:
 		warnings.warn("No underground_line configuration objects were found in CYMEQOVERHEADLINEUNBALANCED for feeder_id: {:s}.".format(feederId), RuntimeWarning)
 	else:
-		for row in ug_line_db:
+		for row in oh_line_db:
 			row.EquipmentId = _fixName(row.EquipmentId)
 			if row.EquipmentId not in cymeqoverheadlineunbalanced.keys():
 				cymeqoverheadlineunbalanced[row.EquipmentId] = copy.deepcopy(CYMEQOVERHEADLINEUNBALANCED)
@@ -1115,7 +1230,16 @@ def _readUgConfiguration(feederId, modelDir):
 							   'distance_AN' : 0.0,
 							   'distance_BC' : 0.5,
 							   'distance_BN' : 0.0,
-							   'distance_CN' : 0.0}
+							   'distance_CN' : 0.0,
+							   'z11': 0 + 1j,
+							   'z12': 0 + 1j,
+							   'z13': 0 + 1j,
+							   'z21': 0 + 1j,
+							   'z22': 0 + 1j,
+							   'z23': 0 + 1j,
+							   'z31': 0 + 1j,
+							   'z32': 0 + 1j,
+							   'z33': 0 + 1j}
 	try:
 		undergroundcable = _csvToDictList(pJoin(modelDir,'cymeCsvDump','CYMEQCABLE.csv'),feederId)
 		undergroundcableconductor = _csvToDictList(pJoin(modelDir,'cymeCsvDump','CYMEQCABLECONDUCTOR.csv'),feederId)
@@ -1125,6 +1249,9 @@ def _readUgConfiguration(feederId, modelDir):
 	if len(undergroundcable) == 0:
 		warnings.warn("No underground_line configuration objects were found in CYMEQCABLE for feeder_id: {:s}.".format(feederId), RuntimeWarning)
 	else:
+		#declare some conversion matrices for impedance conversion later
+		a_s = 1*np.exp(1j*np.deg2rad(120))
+		As = np.array([[1, 1, 1],[1, a_s**2, a_s],[1, a_s, a_s**2]])
 		for row in undergroundcable:
 			row.EquipmentId = _fixName(row.EquipmentId)
 			if row.EquipmentId not in cymcsvundergroundcable.keys():
@@ -1133,12 +1260,28 @@ def _readUgConfiguration(feederId, modelDir):
 				cymcsvundergroundcable[row.EquipmentId]['rating.summer_continuous'] = row.FirstRating
 				if row.OverallDiameter is not None:
 					cymcsvundergroundcable[row.EquipmentId]['outer_diameter'] = row.OverallDiameter
-				cymcsvundergroundcable[row.EquipmentId]['conductor_resistance'] = row.PositiveSequenceResistance
-				if row.ArmorOuterDiameter is not None:
+				cymcsvundergroundcable[row.EquipmentId]['conductor_resistance'] = row.PositiveSequenceResistance#leaving as is since z matrix overwrites
+				if row.ArmorOuterDiameter is not None and row.ArmorOuterDiameter != '' and float(row.ArmorOuterDiameter) != 0.0:#jfk
 					cymcsvundergroundcable[row.EquipmentId]['conductor_diameter'] = row.ArmorOuterDiameter
 					cymcsvundergroundcable[row.EquipmentId]['conductor_gmr'] = float(row.ArmorOuterDiameter)/3
+
+				#conversion from cyme's ZeroSequenceResistance/Reactance -> Gridlabd's self/mutual impedances
+				z00 =  complex(float(row.ZeroSequenceResistance),float(row.ZeroSequenceReactance))
+				z11 =  complex(float(row.PositiveSequenceResistance),float(row.PositiveSequenceReactance))
+				Z012 = np.array([[z00, 0, 0], [0, z11, 0],[0, 0, z11]])*5280/(m2ft*1000)
+				Zabc = As.dot(Z012).dot(inv(As))
+				cymcsvundergroundcable[row.EquipmentId]['z11'] = '{:0.6f}'.format(Zabc[0][0].real) + '{:+0.6f}'.format(Zabc[0][0].imag)+'j'
+				cymcsvundergroundcable[row.EquipmentId]['z12'] = '{:0.6f}'.format(Zabc[0][1].real) + '{:+0.6f}'.format(Zabc[0][1].imag)+'j'
+				cymcsvundergroundcable[row.EquipmentId]['z13'] = '{:0.6f}'.format(Zabc[0][2].real) + '{:+0.6f}'.format(Zabc[0][2].imag)+'j'
+				cymcsvundergroundcable[row.EquipmentId]['z21'] = '{:0.6f}'.format(Zabc[1][0].real) + '{:+0.6f}'.format(Zabc[1][0].imag)+'j'
+				cymcsvundergroundcable[row.EquipmentId]['z22'] = '{:0.6f}'.format(Zabc[1][1].real) + '{:+0.6f}'.format(Zabc[1][1].imag)+'j'
+				cymcsvundergroundcable[row.EquipmentId]['z23'] = '{:0.6f}'.format(Zabc[1][2].real) + '{:+0.6f}'.format(Zabc[1][2].imag)+'j'
+				cymcsvundergroundcable[row.EquipmentId]['z31'] = '{:0.6f}'.format(Zabc[2][0].real) + '{:+0.6f}'.format(Zabc[2][0].imag)+'j'
+				cymcsvundergroundcable[row.EquipmentId]['z32'] = '{:0.6f}'.format(Zabc[2][1].real) + '{:+0.6f}'.format(Zabc[2][1].imag)+'j'
+				cymcsvundergroundcable[row.EquipmentId]['z33'] = '{:0.6f}'.format(Zabc[2][2].real) + '{:+0.6f}'.format(Zabc[2][2].imag)+'j'
+
 				# Still missing these properties, will have default values for all objects
-				# cymcsvundergroundcable[row.EquipmentId]['neutral_resistance'] = row.ZeroSequenceResistance 
+				# cymcsvundergroundcable[row.EquipmentId]['neutral_resistance'] = row.ZeroSequenceResistance
 				# cymcsvundergroundcable[row.EquipmentId]['distance_AB'] = row.OverallDiameter
 				# cymcsvundergroundcable[row.EquipmentId]['distance_AC'] = row.OverallDiameter
 				# cymcsvundergroundcable[row.EquipmentId]['distance_AN'] = row.OverallDiameter
@@ -1146,6 +1289,7 @@ def _readUgConfiguration(feederId, modelDir):
 				# cymcsvundergroundcable[row.EquipmentId]['distance_BC'] = row.OverallDiameter
 				# cymcsvundergroundcable[row.EquipmentId]['distance_CN'] = row.OverallDiameter
 	for row in undergroundcableconductor:
+		row.EquipmentId = _fixName(row.EquipmentId) #jfk.  was missing _fixName
 		if row.EquipmentId in cymcsvundergroundcable.keys():
 			cymcsvundergroundcable[row.EquipmentId]['neutral_diameter'] = row.Diameter
 			cymcsvundergroundcable[row.EquipmentId]['neutral_strands'] = row.NumberOfStrands
@@ -1183,7 +1327,9 @@ def _readEqRegulator(feederId, modelDir):
 	cymeqregulator = {}                           # Stores information found in CYMEQREGULATOR in the equipment database
 	CYMEQREGULATOR = { 'name' : None,             # Information structure for each object found in CYMEQREGULATOR
 					   'raise_taps' : None,
-					   'lower_taps' : None}
+					   'lower_taps' : None,
+					   'nominal_voltage': None,
+					   'bandwidth': None}
 	# cymeqregulator_db = equipmentDatabase.execute("SELECT EquipmentId, NumberOfTaps FROM CYMEQREGULATOR").fetchall()
 	cymeqregulator_db =_csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMEQREGULATOR.csv"),feederId)
 
@@ -1197,6 +1343,8 @@ def _readEqRegulator(feederId, modelDir):
 				cymeqregulator[row.EquipmentId]['name'] = row.EquipmentId           
 				cymeqregulator[row.EquipmentId]['raise_taps'] = str(int(float(row.NumberOfTaps) * 0.5))
 				cymeqregulator[row.EquipmentId]['lower_taps'] = str(int(float(row.NumberOfTaps) * 0.5))
+				cymeqregulator[row.EquipmentId]['nominal_voltage'] = row.RatedKVLN
+				cymeqregulator[row.EquipmentId]['bandwidth'] = row.ForwardBandwidth
 	return cymeqregulator
 
 def _readEqThreeWAutoXfmr(feederId, modelDir):
@@ -1263,6 +1411,38 @@ def _readEqAutoXfmr(feederId, modelDir):
 					x = r*float(row.XRRatio)
 				cymeqautoxfmr[row.EquipmentId]['impedance'] = '{:0.6f}{:+0.6f}j'.format(r, x)
 	return cymeqautoxfmr
+
+def _readEqXfmr(feederId, modelDir):
+	cymeqxfmr = {}
+	CYMEQXFMR = { 'name' : None,
+					 'PrimaryRatedCapacity' : None,
+					 'PrimaryVoltage' : None,
+					 'SecondaryVoltage' : None,
+					 'impedance' : None}
+	# cymeqautoxfmr_db = equipmentDatabase.execute("SELECT EquipmentId, NominalRatingKVA, PrimaryVoltageKVLL, SecondaryVoltageKVLL, PosSeqImpedancePercent, XRRatio FROM CYMEQAUTOTRANSFORMER").fetchall()
+	cymeqxfmr_db =_csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMEQTRANSFORMER.csv"),feederId)
+	if len(cymeqxfmr_db) == 0:
+		warnings.warn("No average transformer equipment information was found in CYMEQTRANSFORMER for feeder id: {:s}.".format(feederId), RuntimeWarning)
+	else:
+		for row in cymeqxfmr_db:
+			row.EquipmentId = _fixName(row.EquipmentId)
+			if row.EquipmentId not in cymeqxfmr.keys():
+				cymeqxfmr[row.EquipmentId] = copy.deepcopy(CYMEQXFMR)
+				cymeqxfmr[row.EquipmentId]['name'] = row.EquipmentId
+				cymeqxfmr[row.EquipmentId]['PrimaryRatedCapacity'] = float(row.NominalRatingKVA)
+				cymeqxfmr[row.EquipmentId]['PrimaryVoltage'] = float(row.PrimaryVoltageKVLL)*1000.0/math.sqrt(3.0)
+				cymeqxfmr[row.EquipmentId]['SecondaryVoltage'] = float(row.SecondaryVoltageKVLL)*1000.0/math.sqrt(3.0)
+				if cymeqxfmr[row.EquipmentId]['PrimaryVoltage'] == cymeqxfmr[row.EquipmentId]['SecondaryVoltage']:
+					cymeqxfmr[row.EquipmentId]['SecondaryVoltage'] += 0.001
+				z1mag = float(row.PosSeqImpedancePercent)/100.0
+				r = z1mag/math.sqrt(1+(float(row.XRRatio))**2)
+				if r == 0.0:
+					r = 0.000333
+					x = 0.00222
+				else:
+					x = r*float(row.XRRatio)
+				cymeqxfmr[row.EquipmentId]['impedance'] = '{:0.6f}{:+0.6f}j'.format(r, x)
+	return cymeqxfmr
 
 def _readCymePhotovoltaic(feederId, modelDir):
 	cymePhotovoltaic = {}
@@ -1360,7 +1540,7 @@ def _readCymeGenerator(feederId, modelDir):
 	return cymeGenerator
 
 def _find_SPCT_rating(load_str):
-		spot_load = abs(complex(load_str))                           
+		spot_load = abs(complex(load_str))/1000.0 #jfk.  needs to be in kVA for transformer rating estimation
 		spct_rating = [5,10,15,25,30,37.5,50,75,87.5,100,112.5,125,137.5,150,162.5,175,187.5,200,225,250,262.5,300,337.5,400,412.5,450,500,750,1000,1250,1500,2000,2500,3000,4000,5000]
 		past_rating = max(spct_rating)
 		for rating in spct_rating:
@@ -1394,6 +1574,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	overheadline_sections = {}
 	undergroundline_sections = {}
 	sx_section = []
+	reactor_sections = {}
 	pv_sections = {}
 	load_sections = {}
 	threewxfmr_sections = {}
@@ -1402,7 +1583,9 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	# Open the network database file
 	# net_db = _openDatabase(network_db)
 	# Dumping csv's to folder
-	_csvDump(str(network_db), modelDir)
+	# _csvDump(str(network_db), modelDir)
+	# import pdb
+	# pdb.set_trace()
 	# feeder_id =_csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMNETWORK.csv"),columns=['NetworkId'])
 	feeder_id = _findNetworkId(pJoin(modelDir,'cymeCsvDump',"CYMNETWORK.csv"))
 	# -1-CYME CYMSOURCE *********************************************************************************************************************************************************************
@@ -1457,6 +1640,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	# PV CONFIGS
 	cymeqphotovoltaic = _readEqPhotovoltaic(feeder_id,modelDir)
 	# BATTERY
+	#jfk.  todo: these lines throw an error.  I comment them out because I don't have batteries.
 	cymbattery = _readCymeBattery(feeder_id, modelDir)
 	# BATTERY CONFIGS
 	cymeqbattery = _readEqBattery(feeder_id,modelDir)
@@ -1528,11 +1712,16 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 		elif cymsectiondevice[device]['device_type'] == 12:
 			sectionalizer_sections[cymsectiondevice[device]['section_name']] = device
 		elif cymsectiondevice[device]['device_type'] == 13:
-			switch_sections[cymsectiondevice[device]['section_name']] = device
+			if cymsectiondevice[device]['section_name'] not in switch_sections.keys():
+				switch_sections[cymsectiondevice[device]['section_name']] = [device] #jfk. could use default dict to make this cleaner
+			else:
+				switch_sections[cymsectiondevice[device]['section_name']].append(device)
+			# switch_sections[cymsectiondevice[device]['section_name']] = device #sometimes have two switches on a section!  this overwrite the first!
 		elif cymsectiondevice[device]['device_type'] == 14:
 			fuse_sections[cymsectiondevice[device]['section_name']] = device
 		elif cymsectiondevice[device]['device_type'] == 16:
-			sx_section.append(cymsectiondevice[device]['section_name'])
+			# sx_section.append(cymsectiondevice[device]['section_name']) #this was not needed for PECO files
+			reactor_sections[cymsectiondevice[device]['section_name']] = device
 		elif cymsectiondevice[device]['device_type'] == 17:
 			capacitor_sections[cymsectiondevice[device]['section_name']] = device
 		elif cymsectiondevice[device]['device_type'] == 20:
@@ -1540,8 +1729,11 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 		elif cymsectiondevice[device]['device_type'] == 37:
 			syncgen_sections[cymsectiondevice[device]['section_name']] = device
 		elif cymsectiondevice[device]['device_type'] == 45:
-			pv_sections[cymsectiondevice[device]['section_name']] = device
-		elif cymsectiondevice[device]['device_type'] == 47:
+			if cymsectiondevice[device]['section_name'] not in pv_sections.keys():
+				pv_sections[cymsectiondevice[device]['section_name']] = [device] #jfk
+			else:
+				pv_sections[cymsectiondevice[device]['section_name']].append(device)
+		elif cymsectiondevice[device]['device_type'] == 47 or cymsectiondevice[device]['device_type'] == 5: #jfk.  added check for 5, another transformer device
 			transformer_sections[cymsectiondevice[device]['section_name']] = device
 		elif cymsectiondevice[device]['device_type'] == 48:
 			if dbflag == 0:
@@ -1556,7 +1748,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 			_findParents(cymsection, cymsectiondevice, x)
 	# split out fuses, regulators, transformers, switches, reclosers, and sectionalizers from the lines.
 	# mj debug: check these phases
-	for x in [fuse_sections, regulator_sections, threewxfmr_sections, threewautoxfmr_sections, transformer_sections, switch_sections, recloser_sections, sectionalizer_sections]:
+	for x in [fuse_sections, regulator_sections, threewxfmr_sections, threewautoxfmr_sections, transformer_sections, switch_sections, recloser_sections, sectionalizer_sections, reactor_sections]:
 		if len(x) > 0:
 			_splitLinkObjects(cymsection, cymsectiondevice, x, overheadline_sections, undergroundline_sections)          
 	# -14-CYME CYMTRANSFORMER**********************************************************************************************************************************************************************
@@ -1579,7 +1771,15 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	# -20-CYME CYMEQTHREEWINDAUTOTRANSFORMER**********************************************************************************************************************************************************************
 	cymeq3wautoxfmr = _readEqThreeWAutoXfmr(feeder_id, modelDir)
 	# -21-CYME CYMEQAUTOTRANSFORMER**********************************************************************************************************************************************************************
-	cymeqautoxfmr = _readEqAutoXfmr(feeder_id, modelDir)    
+	cymeqautoxfmr = _readEqAutoXfmr(feeder_id, modelDir)
+	# -22-CYME CYME REACTORS********************************************************************************************
+	cymreactor, reactorIds =_readCymeReactors(feeder_id, modelDir) #jfk
+	# -23-CYME CYMEQREACTORS********************************************************************************************
+	cymeqreactor =_readEqReactors(feeder_id, modelDir)
+	# -24-CYME CYMEQTRANSFORMER********************************************************************************************
+	cymeqxfmr =_readEqXfmr(feeder_id, modelDir)
+
+
 	# Check number of sources
 	meters = {}
 	if len(cymsource) > 1:
@@ -1587,7 +1787,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	for x in cymsource.keys():
 		meters[x] = { 'object' : 'meter',
 						 'name' : '{:s}'.format(cymsource[x]['name']),
-						 'bustype' : 'SWING',
+						 # 'bustype' : 'SWING',
 						 'nominal_voltage' : cymsource[x]['nominal_voltage'],
 						 'latitude' : cymnode[x]['latitude'],
 						 'longitude' : cymnode[x]['longitude']}
@@ -1848,7 +2048,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 		if cymsectiondevice[ugl]['device_type'] == 1:
 			ph = cymsectiondevice[ugl]['phases'].replace('N', '')
 			if ugl not in cymundergroundline.keys():
-				print "There is no line spec for ", ug1, " in the network database provided.\n"  
+				print "There is no line spec for ", ugl, " in the network database provided.\n"
 			else:
 				phs = 0
 				if 'A' in ph:
@@ -1872,9 +2072,19 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 				elif phs == 7:
 					config_name = cymundergroundline[ugl]['cable_id'] + 'phABC'
 				if config_name not in ugl_cfgs.keys():
+					cableid = cymundergroundline[ugl]['cable_id']
 					ugl_cfgs[config_name] = {'object' : 'line_configuration',
 																'name' : config_name,
-																'spacing' : cymundergroundline[ugl]['cable_id'] + 'sps'}
+																'spacing' : cymundergroundline[ugl]['cable_id'] + 'sps', #jfk
+																'z11': cymcsvundergroundcable[cableid]['z11'],
+																'z12': cymcsvundergroundcable[cableid]['z12'],
+																'z13': cymcsvundergroundcable[cableid]['z13'],
+																'z21': cymcsvundergroundcable[cableid]['z21'],
+																'z22': cymcsvundergroundcable[cableid]['z22'],
+																'z23': cymcsvundergroundcable[cableid]['z23'],
+																'z31': cymcsvundergroundcable[cableid]['z31'],
+																'z32': cymcsvundergroundcable[cableid]['z32'],
+																'z33': cymcsvundergroundcable[cableid]['z33']}
 					for phase in ph:
 						if phase != 'D' or phase != 'N':
 							ugl_cfgs[config_name]['conductor_{:s}'.format(phase)] = cymundergroundline[ugl]['cable_id'] + 'cond'
@@ -1923,7 +2133,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 												'to' : cymsectiondevice[swObj]['to'],
 												'operating_mode' : 'BANKED'}
 				if cymswitch[swObj]['status'] == 0:
-					status = 'CLOSED'
+					status = 'OPEN'#jfk.  This was CLOSED.  Must have been a typo?
 				else:
 					status = 'CLOSED'
 				for phase in swObjs[swObj]['phases']:
@@ -1942,7 +2152,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 										'to' : cymsectiondevice[rcl]['to'],
 										'operating_mode' : 'BANKED'}
 				if cymrecloser[rcl]['status'] == 0:
-					status = 'CLOSED'
+					status = 'OPEN' # was 'CLOSED'  #jfk.  Mistake seemed intentional. Maybe it was just a typo?
 				else:
 					status = 'CLOSED'
 				for phase in rcls[rcl]['phases']:
@@ -1961,7 +2171,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 										'to' : cymsectiondevice[sxnlr]['to'],
 										'operating_mode' : 'BANKED'}
 				if cymsectionalizer[sxnlr]['status'] == 0:
-					status = 'CLOSED'
+					status = 'OPEN' # 'CLOSED' #jfk
 				else:
 					status = 'CLOSED'
 				for phase in sxnlrs[sxnlr]['phases']:
@@ -1987,6 +2197,24 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 					status = 'GOOD'
 				for phase in fuses[fuse]['phases']:
 					fuses[fuse]['phase_{:s}_status'.format(phase)] = status
+
+	#jfk.  added all this reactor code
+	reactors = {}
+	for reactor in cymsectiondevice.keys():
+		if cymsectiondevice[reactor]['device_type'] == 16:
+			if reactor not in cymreactor.keys():
+				print "There is no reactor spec for ", reactor, " in the network database provice. \n"
+			elif reactor not in reactors.keys():
+				reactors[reactor] = {'object' : 'series_reactor',
+										'name' : reactor,
+										'phases' : cymsectiondevice[reactor]['phases'].replace('N', ''),
+										'from' : cymsectiondevice[reactor]['from'],
+										'to' : cymsectiondevice[reactor]['to']}
+				equipmentId = cymreactor[reactor]['configuration']
+				Zohms = float(cymeqreactor[equipmentId]['reactance'])
+				for ph in reactors[reactor]['phases']:
+					reactors[reactor]['phase_' + ph + '_reactance'] = '{:0.6f}'.format(Zohms)
+
 	# Create capacitor dictionaries
 	caps = {}
 	for cap in cymsectiondevice.keys():
@@ -1997,15 +2225,30 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 				caps[cap] = {'object' : 'capacitor',
 										'name' : cap,
 										'phases' : cymsectiondevice[cap]['phases'],
+							 			'phases_connected' : cymsectiondevice[cap]['phases'],#jfk
 										'parent' : cymsectiondevice[cap]['parent'],
-										'control_level' : 'INDIVIDUAL',
-										'control' : 'MANUAL',
-										'cap_nominal_voltage' : str(feeder_VLN),
+										# 'control_level' : 'INDIVIDUAL', #jfk
+										'control' : cymshuntcapacitor[cap]['control'],#'MANUAL',
+										# 'cap_nominal_voltage' : str(feeder_VLN),
+							 			'nominal_voltage': cymshuntcapacitor[cap]['kV_line_neutral'],
 										'time_delay' : '2',
 										'dwell_time' : '3',
 										'latitude' : str(float(nodes[cymsectiondevice[cap]['parent']]['latitude']) + random.uniform(-5, 5)),
 										'longitude' : str(float(nodes[cymsectiondevice[cap]['parent']]['longitude']) + random.uniform(-5, 5))}
-				if cymshuntcapacitor[cap]['status'] == 0:
+
+				#This needs to be expanded for other control types too.
+				if caps[cap]['control'] == 'VOLT':
+					caps[cap]['remote_sense'] = 'n' + cymshuntcapacitor[cap]['remote_sense']#jfk.  hacky.  have to add 'n' because it's added later to nodes.
+					caps[cap]['voltage_set_high'] =str(cymshuntcapacitor[cap]['voltage_set_high']*(1/120.0)*float(feeder_VLN))
+					caps[cap]['voltage_set_low'] = str(cymshuntcapacitor[cap]['voltage_set_low']*(1/120.0)*float(feeder_VLN))
+					caps[cap]['pt_phase'] = cymshuntcapacitor[cap]['pt_phase']
+					caps[cap]['control_level'] = cymshuntcapacitor[cap]['control_level']
+					for phase in caps[cap]['phases']:
+						if phase not in ['N', 'D']:
+							caps[cap]['capacitor_{:s}'.format(phase)] = str(cymshuntcapacitor[cap]['capacitor_{:s}'.format(phase)])
+
+
+				if cymshuntcapacitor[cap]['status'] == '1':
 					status = 'OPEN'
 				else:
 					status = 'CLOSED'
@@ -2037,7 +2280,8 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 			elif load not in tpns.keys():
 				if cymsectiondevice[load]['name'] not in loadNames:
 					loadNames.append(cymsectiondevice[load]['name'])
-					for phase in cymsectiondevice[load]['phases']:
+					# for phase in cymsectiondevice[load]['phases']: #jfk.  was looking for phases that don't correspond to loads
+					for phase in cymcustomerload[load]['phases']: #jfk
 						if phase not in ['N', 'D']:
 							try:
 								spctRating = _find_SPCT_rating(str(cymcustomerload[load]['constant_power_{:s}'.format(phase)]))
@@ -2073,48 +2317,91 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 																										'power_12' : cymcustomerload[load]['constant_power_{:s}'.format(phase)],
 																										'latitude' : str(float(tpms['tpm{:s}{:s}'.format(load, phase)]['latitude']) + random.uniform(-5, 5)),
 																										'longitude' : str(float(tpms['tpm{:s}{:s}'.format(load, phase)]['longitude']) + random.uniform(-5, 5))}
+	#jfk.  I can't find the band_center anywhere in the cyme databaes files.
+	#Unfortunately, the only way to deal with this is by looking at the cyme user interfrace.
 	# Create regulator and regulator configuration dictionaries
+	#Now, I just have the values hardcoded in.  For example...
+	regulator_bandcenters = {'REG_BOYD_000_105581299': 126, #newlinville
+							'REG_HIGHLAND_000_105563434': 126,
+							'REG_PARKESBURG_001_105599479': 126,
+							'REG_PARKESBURG_002_105581381': 126,
+							'REG_2449_36H5B19983': 124,
+							'REG_7305_45D3A4_0806': 124,
+							'REG_7526_45D3C3': 124,
+							'REG_40701_52B3F3': 124,
+							'REG_STOTTSVILLE_000_105581307': 125,
+							'6': 126, #chestnust
+							'BOOT_JACK_000_105622980': 125, #bootjack
+							'REG_BOOT_JACK_000_105622980': 125,
+							'REG_4631_52D4C7': 124,
+							'REG_4955_52C4H83614': 124,
+							'REG_41221_52D4C7': 124,
+							'REG_49925_52D4C8': 124,
+							'REG_60926_52E3A8': 124}
+
 	reg_cfgs = {}
 	regs = {}
 	for reg in cymsectiondevice.keys():
 		if cymsectiondevice[reg]['device_type'] == 4:
 			if reg not in cymregulator.keys():
-				print "There is no regulator spec for ", reg, " in the network database provided.\n"                
+				print "There is no regulator spec for ", reg, " in the network database provided.\n"
 			else:
 				regEq = cymregulator[reg]['equipment_name']
-				if regEq == reg:
-					suffix = 'cfg'
-				else:
-					suffix = ''
 				if regEq not in cymeqregulator.keys():
 					raiseTaps = '16'
 					lowerTaps = '16'
 				else:
 					raiseTaps = cymeqregulator[regEq]['raise_taps']
 					lowerTaps = cymeqregulator[regEq]['lower_taps']
+
+				reg_nominalvoltage = float(cymeqregulator[regEq]['nominal_voltage'])*1000
+				reg_bandwidth = str(float(cymeqregulator[regEq]['bandwidth'])*float(reg_nominalvoltage)/120.0)
+
+
+				#jfk.  deprecated with new naming.
+				# if regEq == reg:
+				# 	suffix = 'cfg'
+				# else:
+				# 	suffix = ''
+
+				#jfk.  Need to have separate regulator configurations for each regulator
+				# Cyme holds tap position in regulator, but Gridlabd holds tap position in configuration
+				regEq = regEq +'_' + reg
+				if reg in regulator_bandcenters.keys():
+					band_center120 = regulator_bandcenters[reg]
+				else:
+					print 'Warning: Bandcenter info not provided.  Setting bandcenter to 1.05'
+					band_center120 = 126.0
+
+				print 'Regulators hardcoded to OUTPUT_VOLTAGE!!'
 				ph = cymsectiondevice[reg]['phases'].replace('N', '')
 				if regEq not in reg_cfgs.keys():
 					reg_cfgs[regEq] = {'object' : 'regulator_configuration',
-													'name' : regEq + suffix,
+													'name' : regEq, #jfk
 													'connect_type' : 'WYE_WYE',
-													'band_center' : str(feeder_VLN),
-													'band_width' : str(cymregulator[reg]['band_width']),
+													'band_center' : str(float(reg_nominalvoltage)*(band_center120/120.0)),
+													'band_width' : reg_bandwidth,
 													'regulation' : str(cymregulator[reg]['regulation']),
 													'time_delay' : '30.0',
 													'dwell_time' : '5',
-													'Control' : 'OUTPUT_VOLTAGE',
+													'Control' : 'OUTPUT_VOLTAGE', #'MANUAL' #
 													'control_level' : 'INDIVIDUAL',
 													'raise_taps' : raiseTaps,
 													'lower_taps' : lowerTaps}
+
 					for phase in ph:
 						reg_cfgs[regEq]['tap_pos_{:s}'.format(phase)] = str(cymregulator[reg]['tap_pos_{:s}'.format(phase)])
+
+
+
 				if reg not in reg_cfgs.keys():
 					regs[reg] = {'object' : 'regulator',
 										'name' : reg,
 										'phases' : ph,
 										'from' : cymsectiondevice[reg]['from'],
 										'to' : cymsectiondevice[reg]['to'],
-										'configuration' : regEq + suffix}
+										'configuration' : regEq} #jfk
+
 	# Create photovoltaic, inverter, and meter dictionaries
 	pv_sec = {}
 	for pv in cymsectiondevice.keys():
@@ -2196,10 +2483,10 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	# Create transformer and transformer configuration dictionaries
 	xfmr_cfgs = {}
 	xfmrs = {}
-	for  xfmr in cymsectiondevice.keys():
+	for xfmr in cymsectiondevice.keys():
 		if cymsectiondevice[xfmr]['device_type'] == 47:
 			if xfmr not in cymxfmr.keys():
-				print "There is no xmfr spec for ", xmfr, " in the network database provided.\n"                
+				print "There is no xmfr spec for ", xfmr, " in the network database provided.\n"
 			else:
 				xfmrEq = cymxfmr[xfmr]['equipment_name']
 				if xfmrEq == xfmr:
@@ -2215,19 +2502,60 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 				if 'C' in ph:
 					phNum += 1.0
 				if xfmrEq not in cymeqautoxfmr.keys():
-					print "There is no xmfr spec for ", xmfrEq, " in the network database provided.\n"                    
+					print "There is no xmfr spec for ", xfmrEq, " in the network database provided.\n"
 				else:
 					if xfmrEq not in xfmr_cfgs.keys():
 						xfmr_cfgs[xfmrEq] = {'object' : 'transformer_configuration',
 															'name' : xfmrEq + suffix,
 															'connect_type' : 'WYE_WYE',
-															'primary_voltage' : '{:0.6f}'.format(cymeqautoxfmr[xfmrEq]['PrimaryVoltage']),
-															'secondary_voltage' : '{:0.6f}'.format(cymeqautoxfmr[xfmrEq]['SecondaryVoltage']),
+															'primary_voltage' : '{:0.6f}'.format(cymeqautoxfmr[xfmrEq]['PrimaryVoltage']*math.sqrt(3)), #jfk
+															'secondary_voltage' : '{:0.6f}'.format(cymeqautoxfmr[xfmrEq]['SecondaryVoltage']*math.sqrt(3)), #jfk
 															'impedance' : cymeqautoxfmr[xfmrEq]['impedance'],
 															'power_rating' : '{:0.0f}'.format(cymeqautoxfmr[xfmrEq]['PrimaryRatedCapacity'])}
 						for phase in ph:
 							if phase not in ['N', 'D']:
 								xfmr_cfgs[xfmrEq]['power{:s}_rating'.format(phase)] = '{:0.6f}'.format(cymeqautoxfmr[xfmrEq]['PrimaryRatedCapacity']/phNum)
+				if xfmr not in xfmrs.keys():
+					xfmrs[xfmr] = {'object' : 'transformer',
+											'name' : xfmr,
+											'phases' : ph,
+											'from' : cymsectiondevice[xfmr]['from'],
+											'to' : cymsectiondevice[xfmr]['to'],
+											'configuration' : xfmrEq + suffix}
+		#jfk.  this block is nearly identical to the above.
+		elif cymsectiondevice[xfmr]['device_type'] == 5:
+			if xfmr not in cymxfmr.keys():
+				print "There is no xmfr spec for ", xfmr, " in the network database provided.\n"
+			else:
+				xfmrEq = cymxfmr[xfmr]['equipment_name']
+				if xfmrEq == xfmr:
+					suffix = 'cfg'
+				else:
+					suffix = ''
+				ph = cymsectiondevice[xfmr]['phases'].replace('N', '')
+				phNum = 0
+				if 'A' in ph:
+					phNum += 1.0
+				if 'B' in ph:
+					phNum += 1.0
+				if 'C' in ph:
+					phNum += 1.0
+				if xfmrEq not in cymeqxfmr.keys():
+					print "There is no xmfr spec for ", xfmrEq, " in the network database provided.\n"
+				else:
+					if xfmrEq not in xfmr_cfgs.keys():
+						xfmr_cfgs[xfmrEq] = {'object' : 'transformer_configuration',
+															'name' : xfmrEq + suffix,
+															'connect_type' : 'WYE_WYE',
+															'primary_voltage' : '{:0.6f}'.format(cymeqxfmr[xfmrEq]['PrimaryVoltage']*math.sqrt(3)), #jfk
+															'secondary_voltage' : '{:0.6f}'.format(cymeqxfmr[xfmrEq]['SecondaryVoltage']*math.sqrt(3)), #jfk
+															# 'resistance': '0.000000001',
+											 				# 'reactance': '0.0000000006',
+															'impedance' : cymeqxfmr[xfmrEq]['impedance'],
+															'power_rating' : '{:0.0f}'.format(cymeqxfmr[xfmrEq]['PrimaryRatedCapacity'])}
+						for phase in ph:
+							if phase not in ['N', 'D']:
+								xfmr_cfgs[xfmrEq]['power{:s}_rating'.format(phase)] = '{:0.6f}'.format(cymeqxfmr[xfmrEq]['PrimaryRatedCapacity']/phNum)
 				if xfmr not in xfmrs.keys():
 					xfmrs[xfmr] = {'object' : 'transformer',
 											'name' : xfmr,
@@ -2274,7 +2602,8 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 											'to' : cymsectiondevice[xfmr]['to'],
 											'configuration' : xfmrEq + suffix}
 	#Add dictionaries to feeder tree object
-	genericHeaders = [    {"timezone":"PST+8PDT","stoptime":"'2000-01-01 00:00:00'","starttime":"'2000-01-01 00:00:00'","clock":"clock"},
+	#jfk.  giving an hour for everything to settle down.  needed for regulators and verification
+	genericHeaders = [    {"timezone":"PST+8PDT","stoptime":"'2000-01-01 01:00:00'","starttime":"'2000-01-01 00:00:00'","clock":"clock"},
 						{"omftype":"#set","argument":"minimum_timestep=60"},
 						{"omftype":"#set","argument":"profiler=1"},
 						{"omftype":"#set","argument":"relax_naming_rules=1"},
@@ -2285,7 +2614,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	for headId in xrange(len(genericHeaders)):
 		glmTree[headId] = genericHeaders[headId]
 	key = len(glmTree)
-	objectList = [ohl_conds, ugl_conds, ohl_spcs, ohl_configs , ugl_sps, ohl_cfgs, ugl_cfgs, xfmr_cfgs, spct_cfgs, reg_cfgs, meters, nodes, loads, tpms, tpns, ohls, ugls, xfmrs, spcts, regs, swObjs, rcls, sxnlrs, fuses, caps, bat_sec, pv_sec, gen_secs]
+	objectList = [ohl_conds, ugl_conds, ohl_spcs, ohl_configs , ugl_sps, ohl_cfgs, ugl_cfgs, xfmr_cfgs, spct_cfgs, reg_cfgs, meters, nodes, loads, tpms, tpns, ohls, ugls, xfmrs, spcts, regs, swObjs, rcls, sxnlrs, fuses, caps, bat_sec, pv_sec, gen_secs, reactors]
 	for objDict in objectList:
 		if len(objDict) > 0:
 			for obj in objDict.keys():
@@ -2303,7 +2632,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	# FINISHED CONVERSION FROM THE DATABASES****************************************************************************************************************************************************   
 	for key in glmTree.keys():
 		# if ('from' in glmTree[key].keys() and 'to' not in glmTree[key].keys()) or ('to' in glmTree[key].keys() and 'from' not in glmTree[key].keys()):
-		if 'object' in glmTree[key].keys() and glmTree[key]['object'] in ['overhead_line','underground_line','regulator','transformer','switch','fuse'] and ('to' not in glmTree[key].keys() or 'from' not in glmTree[key].keys()):
+		if 'object' in glmTree[key].keys() and glmTree[key]['object'] in ['overhead_line','underground_line','regulator','transformer','switch','fuse', 'series_reactor'] and ('to' not in glmTree[key].keys() or 'from' not in glmTree[key].keys()):
 			#print ('Deleting malformed link')
 			#print [glmTree[key]['name'], glmTree[key]['object']]
 			del glmTree[key]
@@ -2312,6 +2641,13 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	toNodes = []
 	fromNodes = []
 	for key in glmTree.keys():
+		#jfk.  dont want phase information to be passed on by open switches
+		#I have scenarios like:  phaseC -/ - phaseB
+		if glmTree[key].get('object','') == 'switch':
+			if 'OPEN' in glmTree[key].values():
+				continue
+
+
 		if 'to' in glmTree[key].keys():
 			ph = LinkedNodes.get(glmTree[key]['from'], '')
 			LinkedNodes[glmTree[key]['from']] = ph + glmTree[key]['phases']
@@ -2371,7 +2707,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 			else:
 				deleteKeys.append(x)
 				for y in glmTree.keys():
-					if glmTree[y].get['name', ''] == glmTree[x]['to']:
+					if glmTree[y].get('name', '') == glmTree[x]['to']:#jfk was glmTree[y].get['name', '']  #typo with the brackets
 						deleteKeys.append(y)
 	for key in deleteKeys:
 		del glmTree[key]
@@ -2396,8 +2732,9 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 					nv = volt_dict[glm_dict[x]['from']]  
 					for y in glm_dict.keys():
 						if glm_dict[y].get('name', '') == cnfg:
-							glmTree[y]['band_center'] = nv
-							glmTree[y]['band_width'] = str(float(glmTree[y]['band_width'])*float(glmTree[y]['band_center']))
+							pass
+							# glmTree[y]['band_center'] = nv
+							# glmTree[y]['band_width'] = str(float(glmTree[y]['band_width'])*float(glmTree[y]['band_center']))
 				else:              
 					volt_dict[glm_dict[x]['to']] = volt_dict[glm_dict[x]['from']]
 			elif 'parent' in glm_dict[x].keys() and glm_dict[x]['parent'] in volt_dict.keys() and glm_dict[x]['name'] not in volt_dict.keys():
@@ -2428,7 +2765,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	
 	# Delete neutrals from links with no neutrals
 	for x in glmTree.keys():
-		if 'object' in glmTree[x].keys() and glmTree[x]['object'] in ['underground_line', 'regulator', 'transformer', 'switch', 'fuse', 'capacitor']:
+		if 'object' in glmTree[x].keys() and glmTree[x]['object'] in ['underground_line', 'regulator', 'transformer', 'switch', 'fuse', 'capacitor', 'series_reactor']:
 			glmTree[x]['phases'] = glmTree[x]['phases'].replace('N', '')
 		elif 'object' in glmTree[x].keys() and glmTree[x]['object'] == 'overhead_line':
 			if glmTree[x]['configuration'] not in ohl_neutral:
@@ -2442,6 +2779,40 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 				pass
 	print modelDir
 	checkMissingNodes(nodes, cymsectiondevice, objectList, feeder_id, modelDir, cymsection)
+
+
+	#jfk.  add regulator to source
+	biggestkey = max(glmTree.keys())
+	glmTree[biggestkey+1] = {'object': 'node',
+				   'name': 'sourcenode',
+				   'phases': 'ABC',
+					'nominal_voltage': cymsource[_fixName(swingBus)]['nominal_voltage'],
+					'bustype': 'SWING'}
+
+	glmTree[biggestkey+2] = {'object': 'regulator',
+					   'name': 'sourceregulator',
+					   'phases': 'ABC',
+					   'from': 'sourcenode',
+					   'to': 'n' + swingBus,
+					   'configuration': 'ss_regconfiguration'}
+
+	glmTree[biggestkey+3] = {'object': 'regulator_configuration',
+						'name': 'ss_regconfiguration',
+						'band_center': cymsource[_fixName(swingBus)]['source_voltage'],
+						'Control': 'OUTPUT_VOLTAGE',
+						'connect_type': 'WYE_WYE',
+						'raise_taps': '50', #want to be very close to desired voltage for agreement with cyme
+						'lower_taps': '50',
+						'band_width': '2.0', #bandwidth should be very small for all voltage levels
+						'regulation': '0.1',
+						'dwell_time': '5',
+						'tap_pos_A': '0',
+						'tap_pos_B': '0',
+						'tap_pos_C': '0',
+						'time_delay': '30.0',
+						'control_level': 'INDIVIDUAL'}
+
+
 	return glmTree, x_scale, y_scale
 	
 def _tests(testFile, modelDir, outPrefix, keepFiles=True ):
