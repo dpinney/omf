@@ -6,8 +6,6 @@ import collections
 import numpy as np
 
 #The demand:
-#demand = [1000,1000,1000,1000,1000,1025,1050,1075,1125,1200,1450,1750,1900,2000,1900,1750,1450,1200,1125,1075,1050,1025,1000,1000]
-
 demand = collections.OrderedDict()
 demand[0] = 1000
 demand[0.25] = 1000
@@ -139,17 +137,17 @@ print ("Since the peak is reached at: " + str(peakDemandHour)
 powerThreshold = demand[startingPeakHour]
 print "The power threshold for the peak usage region is: " + str(powerThreshold) + " kW"
 
-powerBattery = collections.OrderedDict()
+chargeRate = collections.OrderedDict()
 adjustedDemand = collections.OrderedDict()
 energyShaved = 0
 for x in demand:
 	if x>=startingPeakHour and x<=endingPeakHour:
 		adjustedDemand[x] = powerThreshold
 		energyShaved = float(energyShaved) + (float(demand[x]) - float(powerThreshold))*24/float(len(demand))
-		powerBattery[x] = powerThreshold - demand[x]
+		chargeRate[x] = powerThreshold - demand[x]
 	else:
 		adjustedDemand[x] = demand[x]
-		powerBattery[x] = 0
+		chargeRate[x] = 0
 
 print "The energy shaved is: " + str(energyShaved) + " kWh"
 
@@ -157,61 +155,86 @@ print "The energy shaved is: " + str(energyShaved) + " kWh"
 
 ###### USER VARIABLE ######
 chargingHours = 2
-percentLossPerTick = 0.05
+percentLossPerTick = 0.5
 ###### USER VARIABLE ######
 
 numberOfChargingSteps = (chargingHours*len(demand)/24)
 energyShaved = 4*energyShaved
+stateOfCharge = collections.OrderedDict()
 
 for x in adjustedDemand:
+	stateOfCharge[x] = 0
+
+#charging
+energyStored = collections.OrderedDict()
+
+placeHolder = 0
+
+for x in adjustedDemand:
+	if (powerThreshold - adjustedDemand[x]) < (powerThreshold-adjustedDemand[0]):
+		energyStored[x] = powerThreshold - adjustedDemand[x]
+	else:
+		energyStored[x] = 0
+	placeHolder = x
+
+print endingPeakHour
+
+while placeHolder >= 0:
+	if placeHolder <= endingPeakHour and energyShaved > 0:
+		stateOfCharge[placeHolder] = powerThreshold - adjustedDemand[placeHolder] + stateOfCharge[placeHolder+0.25]*(1+percentLossPerTick)
+		energyShaved = energyShaved - stateOfCharge[placeHolder]
+		adjustedDemand[placeHolder] = powerThreshold
+		#adjustedDemand[placeHolder] = adjustedDemand[placeHolder] + stateOfCharge[placeHolder]
+	placeHolder = placeHolder - 0.25
+
+'''
+for x in adjustedDemand:
+	if x <= startingPeakHour:
+		stateOfCharge[x] = energyShaved#[x]
+	elif x > startingPeakHour and x<endingPeakHour:
+		stateOfCharge[x] = stateOfCharge[x-.25]*(1+percentLossPerTick) + chargeRate[x]	
+	else:
+		stateOfCharge[x] = 0'''
+
+
+
+
+
+'''for x in adjustedDemand:
 	if x >= startingPeakHour-chargingHours and x<startingPeakHour:
 		if energyShaved > 0:
-
-
-			'''if numberOfChargingSteps > 1:
-				energyToStore = (powerThreshold-demand[x])/2
-				#energyToStore = energyShaved/2	
-			else:
-				energyToStore = energyShaved'''
 
 			energyToStore = (powerThreshold-demand[x])/2
 
 			numberOfChargingSteps = numberOfChargingSteps-1
 			energyShaved = (energyShaved - energyToStore)
 			adjustedDemand[x] = adjustedDemand[x] + energyToStore
-			powerBattery[x] = energyToStore
-
+			chargeRate[x] = energyToStore
 	energyShaved = energyShaved*(1+percentLossPerTick)
-	#print energyShaved
+'''
 
-
-energyLosses = collections.OrderedDict()
-energyLosses[0]=0
-percentLosses = 0.01 #equivalent to .0406 a year
-for x in powerBattery:
+#stateOfCharge = collections.OrderedDict()
+#stateOfCharge[0]=0
+#percentLosses = 0.01 #equivalent to .0406 a year
+'''for x in chargeRate:
 	if x>0:
-		energyLosses[x] =  (energyLosses[x-.25]+powerBattery[x])*(1-percentLosses)
-		print energyLosses[x]
+		stateOfCharge[x] =  (stateOfCharge[x-.25]+chargeRate[x])*(1-percentLosses)
+		print stateOfCharge[x]'''
 
 
 fig = plt.gcf()
 ax = fig.gca()
+
 ellipse = Ellipse((peakDemandHour,peakDemand),peakWidth*accuracyFactor,
 	8*(peakDemand-powerThreshold)*accuracyFactor,0.0,color ='r',label='Estimated Future Peak Range')
 
-plt.gca().add_artist(plt.legend(handles=[ellipse],loc=1)) #plt.gca().add_artist(plt.legend(handles=[ellipse],loc=1))
-
+plt.gca().add_artist(plt.legend(handles=[ellipse],loc=1))
 ax.add_artist(ellipse)
-plt.plot(*zip(*sorted(energyLosses.items())),label='Energy Dissipation')
+plt.plot(*zip(*sorted(stateOfCharge.items())),label='State of Charge')
 plt.plot(*zip(*sorted(adjustedDemand.items())),label='Adjusted Demand')
-plt.plot(*zip(*sorted(powerBattery.items())),label='Battery Charge Rate')
-
+plt.plot(*zip(*sorted(chargeRate.items())),label='Charge Rate')
 
 handles, labels = ax.get_legend_handles_labels()
-
-#plt.legend(handles = [ellipse])
 ax.legend(handles, labels,loc=2)
-
-
 plt.grid()
 plt.show()
