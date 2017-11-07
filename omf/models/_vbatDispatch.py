@@ -80,12 +80,17 @@ def work(modelDir, inputDict):
 		E_UL = myOut.partition("E_UL =\n\n")[2]
 		E_UL = E_UL.partition("\n\n")[0]
 		E_UL = map(float,E_UL.split('\n'))
+		demandAdjustedList = []
+		for x,y in zip(P_upper,demandList):
+			demandAdjusted = y-x
+			demandAdjustedList.append(demandAdjusted)
 		# Format results to go in chart.
 		outData["minPowerSeries"] = [-1*x for x in P_lower]
 		outData["maxPowerSeries"] = P_upper
 		outData["minEnergySeries"] = [-1*x for x in E_UL]
 		outData["maxEnergySeries"] = E_UL
 		outData["demand"] = demandList
+		outData["demandAdjusted"] =demandAdjustedList
 		# Stdout/stderr.
 		outData["stdout"] = "Success"
 		#inputDict["stderr"] = ""
