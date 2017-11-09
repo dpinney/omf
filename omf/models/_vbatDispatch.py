@@ -81,6 +81,7 @@ def work(modelDir, inputDict):
 		E_UL = E_UL.partition("\n\n")[0]
 		E_UL = map(float,E_UL.split('\n'))
 		demandAdjustedList = []
+		print sum(P_upper)
 		for x,y in zip(P_upper,demandList):
 			demandAdjusted = y-x
 			demandAdjustedList.append(demandAdjusted)
@@ -90,7 +91,7 @@ def work(modelDir, inputDict):
 		outData["minEnergySeries"] = [-1*x for x in E_UL]
 		outData["maxEnergySeries"] = E_UL
 		outData["demand"] = demandList
-		outData["demandAdjusted"] =demandAdjustedList
+		outData["demandAdjusted"] = demandAdjustedList
 		# Stdout/stderr.
 		outData["stdout"] = "Success"
 		#inputDict["stderr"] = ""
