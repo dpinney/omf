@@ -81,7 +81,6 @@ def work(modelDir, inputDict):
 		E_UL = E_UL.partition("\n\n")[0]
 		E_UL = map(float,E_UL.split('\n'))
 		demandAdjustedList = []
-		print sum(P_upper)
 		for x,y in zip(P_upper,demandList):
 			demandAdjusted = y-x
 			demandAdjustedList.append(demandAdjusted)
@@ -98,7 +97,6 @@ def work(modelDir, inputDict):
 	except:
 		outData["stdout"] = "Failure"
 		inputDict["stderr"] = myOut
-
 	return outData
 
 def new(modelDir):
@@ -114,19 +112,13 @@ def new(modelDir):
 		"cop": "2.5",
 		"setpoint": "22.5",
 		"deadband": "0.625",
+		"demandChargeCost":"10",
+		"electricityCost":"10",
+		"projectionLength":"15",
+		"discountRate":"2",
 		"modelType":modelName}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	return creationCode
-
-#def defaultValuesAC():
-#	power = "1000",
-#	capacitance = "2",
-#	resistance = "2",
-#	cop = "2.5",
-#	setpoint = "22.5",
-#	deadband = "0.625",
-#	return power,capacitance,resistance,cop,setpoint,deadband
-
 
 def _simpleTest():
 	# Location

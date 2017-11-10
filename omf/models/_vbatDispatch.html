@@ -1157,6 +1157,22 @@
 				<label class="tooltip">Temperature Deadband(&degC)<span class="classic">deadband</span></label>
 				<input type="text" id="deadband" name="deadband" pattern="^\d+\.?\d*?$" required="required">
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Demand Charge Cost($/kW)<span class="classic">demandChargeCost</span></label>
+				<input type="text" id="demandChargeCost" name="demandChargeCost" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Electricity Cost($/kW)<span class="classic">electricityCost</span></label>
+				<input type="text" id="electricityCost" name="electricityCost" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Financial Projection Length(years)<span class="classic">projectionLength</span></label>
+				<input type="text" id="projectionLength" name="projectionLength" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Discount Rate(%)<span class="classic">discountRate</span></label>
+				<input type="text" id="discountRate" name="discountRate" pattern="^\d+\.?\d*?$" required="required">
+			</div>
 			<!-- Required Buttons -->
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
