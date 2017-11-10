@@ -78,10 +78,12 @@ def work(modelDir, inputDict):
 				hours.append(hour.partition(',')[0])
 	peakDemand = [0]*12
 	peakAdjustedDemand = [0]*12
+	energyMonthly = [0]*12
+	energyAdjustedMonthly = [0]*12
 	for x in range(8760):
 		if demandList[x] > peakDemand[int(dates[x][:2])-1]: #month number, -1 gives the index of peakDemand
 			peakDemand[int(dates[x][:2])-1] = demandList[x]
-	print "Peak Demand is: " + str(peakDemand)
+		energyMonthly[int(dates[x][:2])-1] += demandList[x]
 	try:
 		myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
 		P_lower = myOut.partition("P_lower =\n\n")[2]
@@ -98,7 +100,7 @@ def work(modelDir, inputDict):
 		for x in range(8760):
 			if demandAdjustedList[x] > peakAdjustedDemand[int(dates[x][:2])-1]:
 				peakAdjustedDemand[int(dates[x][:2])-1] = demandAdjustedList[x]
-		print "Adjusted Peak Demand is: " + str(peakAdjustedDemand)
+			energyAdjustedMonthly[int(dates[x][:2])-1] += demandAdjustedList[x]
 		# Format results to go in chart.
 		outData["minPowerSeries"] = [-1*x for x in P_lower]
 		outData["maxPowerSeries"] = P_upper
@@ -106,6 +108,10 @@ def work(modelDir, inputDict):
 		outData["maxEnergySeries"] = E_UL
 		outData["demand"] = demandList
 		outData["demandAdjusted"] = demandAdjustedList
+		outData["peakDemand"] = peakDemand
+		outData["peakAdjustedDemand"] = peakAdjustedDemand
+		outData["energyMonthly"] = energyMonthly
+		outData["energyAdjustedMonthly"] = energyAdjustedMonthly
 		# Stdout/stderr.
 		outData["stdout"] = "Success"
 		#inputDict["stderr"] = ""
