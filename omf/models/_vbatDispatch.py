@@ -62,6 +62,9 @@ def work(modelDir, inputDict):
 	rel_path = 'static\\testFiles\\FrankScadaValidCSV.csv'
 	abs_file_path = os.path.join(script_dir, rel_path)
 	demandList = []
+	demandAdjustedList = []
+	dates = []
+	hours = []
 	with open(abs_file_path, 'r') as f:
 		for line in f.readlines():
 			demand = line.partition(',')[2]
@@ -69,6 +72,16 @@ def work(modelDir, inputDict):
 			if demand != 'power':
 				demand = float(demand)
 				demandList.append(demand)
+			if line != 'timestamp,power\n':
+				dates.append(line.partition(' ')[0])
+				hour = line.partition(' ')[2]
+				hours.append(hour.partition(',')[0])
+	peakDemand = [0]*12
+	peakAdjustedDemand = [0]*12
+	for x in range(8760):
+		if demandList[x] > peakDemand[int(dates[x][:2])-1]: #month number, -1 gives the index of peakDemand
+			peakDemand[int(dates[x][:2])-1] = demandList[x]
+	print "Peak Demand is: " + str(peakDemand)
 	try:
 		myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
 		P_lower = myOut.partition("P_lower =\n\n")[2]
@@ -80,10 +93,12 @@ def work(modelDir, inputDict):
 		E_UL = myOut.partition("E_UL =\n\n")[2]
 		E_UL = E_UL.partition("\n\n")[0]
 		E_UL = map(float,E_UL.split('\n'))
-		demandAdjustedList = []
 		for x,y in zip(P_upper,demandList):
-			demandAdjusted = y-x
-			demandAdjustedList.append(demandAdjusted)
+			demandAdjustedList.append(y-x)
+		for x in range(8760):
+			if demandAdjustedList[x] > peakAdjustedDemand[int(dates[x][:2])-1]:
+				peakAdjustedDemand[int(dates[x][:2])-1] = demandAdjustedList[x]
+		print "Adjusted Peak Demand is: " + str(peakAdjustedDemand)
 		# Format results to go in chart.
 		outData["minPowerSeries"] = [-1*x for x in P_lower]
 		outData["maxPowerSeries"] = P_upper
