@@ -125,15 +125,15 @@ def work(modelDir, inputDict):
 		downNodeRecord = {'object':'recorder', 'property':'voltage_A','file':'firstDownlineVoltsA.csv','parent':downLineNode, 'interval':60}
 		tree[feeder.getMaxKey(tree) + 1] = downNodeRecord
 	# Violation recorder to display to users 
-	violationRecorder = {'object':'violation_recorder','node_continuous_voltage_limit_lower':0.95,'file':'Violation_Log.csv',
-						'secondary_dist_voltage_rise_lower_limit':-0.042,'substation_pf_lower_limit':0.85,'substation_breaker_C_limit':300,
-						'secondary_dist_voltage_rise_upper_limit':0.025,'substation_breaker_B_limit':300,'violation_flag':'ALLVIOLATIONS',
-						'node_instantaneous_voltage_limit_upper':1.1, 'inverter_v_chng_per_interval_lower_bound':-0.05, 'virtual_substation':swingN,
-						'substation_breaker_A_limit':300, 'xfrmr_thermal_limit_lower':0,'node_continuous_voltage_interval':300,'strict':'false',
-						'node_instantaneous_voltage_limit_lower':0,'line_thermal_limit_upper':1,'echo':'false','node_continuous_voltage_limit_upper':1.05,
-						'interval':30,'line_thermal_limit_lower':0,'summary':'Violation_Summary.csv','inverter_v_chng_interval':60,
-						'xfrmr_thermal_limit_upper':2,'inverter_v_chng_per_interval_upper_bound':0.050}
-	tree[feeder.getMaxKey(tree) + 1] = violationRecorder
+	# violationRecorder = {'object':'violation_recorder','node_continuous_voltage_limit_lower':0.95,'file':'Violation_Log.csv',
+	# 					'secondary_dist_voltage_rise_lower_limit':-0.042,'substation_pf_lower_limit':0.85,'substation_breaker_C_limit':300,
+	# 					'secondary_dist_voltage_rise_upper_limit':0.025,'substation_breaker_B_limit':300,'violation_flag':'ALLVIOLATIONS',
+	# 					'node_instantaneous_voltage_limit_upper':1.1, 'inverter_v_chng_per_interval_lower_bound':-0.05, 'virtual_substation':swingN,
+	# 					'substation_breaker_A_limit':300, 'xfrmr_thermal_limit_lower':0,'node_continuous_voltage_interval':300,'strict':'false',
+	# 					'node_instantaneous_voltage_limit_lower':0,'line_thermal_limit_upper':1,'echo':'false','node_continuous_voltage_limit_upper':1.05,
+	# 					'interval':30,'line_thermal_limit_lower':0,'summary':'Violation_Summary.csv','inverter_v_chng_interval':60,
+	# 					'xfrmr_thermal_limit_upper':2,'inverter_v_chng_per_interval_upper_bound':0.050}
+	# tree[feeder.getMaxKey(tree) + 1] = violationRecorder
 	feeder.adjustTime(tree=tree, simLength=float(inputDict["simLength"]),
 		simLengthUnits=inputDict["simLengthUnits"], simStartDate=inputDict["simStartDate"])
 	# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
@@ -306,24 +306,24 @@ def work(modelDir, inputDict):
 		outData['minVoltBand'] = minVoltBand
 		outData['maxVoltBand'] = maxVoltBand
 	# Violation Summary and Log
-	violationData = ''
-	violationArray = []
-	with open(pJoin(modelDir,"Violation_Summary.csv")) as vioSum:
-		reader = csv.reader(vioSum)
-		for row in reader:
-			violationArray.append(row)	
-	for row in violationArray[4:]:
-		violationData += str(' '.join(row)) + "\n"
-	outData["violationSummary"] = violationData
-	violationLogArray = []
-	violationLog = ''
-	with open(pJoin(modelDir,"Violation_Log.csv")) as vioLog:
-		logger = csv.reader(vioLog)
-		for row in logger:
-			violationLogArray.append(row)
-	for row in violationLogArray[6:]:
-		violationLog += str(' '.join(row)) + "\n"
-	outData['violationLog'] = violationLog
+	# violationData = ''
+	# violationArray = []
+	# with open(pJoin(modelDir,"Violation_Summary.csv")) as vioSum:
+	# 	reader = csv.reader(vioSum)
+	# 	for row in reader:
+	# 		violationArray.append(row)	
+	# for row in violationArray[4:]:
+	# 	violationData += str(' '.join(row)) + "\n"
+	# outData["violationSummary"] = violationData
+	# violationLogArray = []
+	# violationLog = ''
+	# with open(pJoin(modelDir,"Violation_Log.csv")) as vioLog:
+	# 	logger = csv.reader(vioLog)
+	# 	for row in logger:
+	# 		violationLogArray.append(row)
+	# for row in violationLogArray[6:]:
+	# 	violationLog += str(' '.join(row)) + "\n"
+	# outData['violationLog'] = violationLog
 	# What percentage of our keys have lat lon data?
 	latKeys = [tree[key]['latitude'] for key in tree if 'latitude' in tree[key]]
 	latPerc = 1.0*len(latKeys)/len(tree)
