@@ -259,12 +259,28 @@ def convertToGFM(gfmInputTemplate, feederModel):
 				'max_reactive_phase': [0.0,0.0,0.0], #*
 				'max_real_phase': [0.0,0.0,0.0] #*
 			})
-			if(genObj['node_id'] in ['A_load701_bus', 'B_load701_bus','C_load701_bus']):
-				genObj['max_reactive_phase'] = [1e30,1e30,1e30]
-				genObj['max_real_phase'] = [1e30,1e30,1e30]
-			
 			gfmJson['generators'].append(genObj)
 			# BUG: GENERATORS ADDED TO ALL SWING BUSES: gfmJson['generators'].append(genObj)
+	#find swing nodes from .OMD
+	for node in jsonNodes:
+		if(node.get('objectType') == "gridNode swingNode"):
+			genID = node.get('name','')+'_gen'
+			for elem in gfmJson['buses']:
+				if elem['id'][0:-4] == genID[0:-4]:
+					busID = elem['id']
+			numPhases, has_phase, max_real_phase, max_reactive_phase = getNodePhases(gens, gfmInputTemplate['maxDGPerGenerator'])
+			genObj = dict({
+	 			'id': node.get('name','')+'_gen', #*
+				'node_id': busID, #*
+				'is_new': True, # Whether or not new generation can be built.
+				'microgrid_cost': 1.5, # Per MW capacity of building DG.
+				'max_microgrid': 5000.0, # Max additional capacity for this gen.
+				'microgrid_fixed_cost': 0, # One-time fixed cost for building DG.
+				'has_phase': has_phase, #*
+				'max_reactive_phase': [1e30,1e30,1e30], #*
+				'max_real_phase': [1e30,1e30,1e30] #*
+			})
+			gfmJson['generators'].append(genObj)
 	# Return 
 	return gfmJson
 
@@ -346,12 +362,12 @@ def work(modelDir, inputDict):
 	outData["generatorData"] = '{:,.2f}'.format(float(inputDict["dgUnitCost"]) * float(inputDict["maxDGPerGenerator"]))
 	outData['gfmRawOut'] = rdtJsonAsString
 	# Run GridLAB-D first time to generate xrMatrices.
-	if platform.system() == "Windoze":
+	if platform.system() == "Windows":
 		omdPath = pJoin(modelDir, feederName + ".omd")
 		with open(omdPath, "r") as omd:
 			omd = json.load(omd)
 		#REMOVE NEWLINECANDIDATES
-		'''deleteList = []
+		deleteList = []
 		newLines = inputDict["newLineCandidates"].strip().replace(' ', '').split(',')
 		for newLine in newLines:
 			for omdObj in omd["tree"]:
@@ -361,11 +377,10 @@ def work(modelDir, inputDict):
 		for delItem in deleteList:
 			print delItem
 			del omd["tree"][delItem]
-		'''
 		#Load a blank glm file and use it to write to it
 		feederPath = pJoin(modelDir, 'feeder.glm')
 		with open(feederPath, 'w') as glmFile:
-			toWrite =  omf.feeder.sortedWrite(omd['tree']) + "object jsondump {\n\tfilename_dump_reliability test_JSON_dump1.json;\n\twrite_reliability true;\n\tfilename_dump_line test_JSON_dump2.json;\n\twrite_line true; };\n"# + "object jsonreader {\n\tfilename " + insertRealRdtOutputNameHere + ";\n};"
+			toWrite =  omf.feeder.sortedWrite(omd['tree']) + "object jsondump {\n\tfilename_dump_reliability test_JSON_dump1.json;\n\twrite_reliability true;\n\tfilename_dump_line test_JSON_dump2.json;\n\twrite_line true;\n};\n"# + "object jsonreader {\n\tfilename " + insertRealRdtOutputNameHere + ";\n};"
 			glmFile.write(toWrite)		
 		#Write attachments from omd, if no file, one will be created
 		for fileName in omd['attachments']:
@@ -377,11 +392,15 @@ def work(modelDir, inputDict):
 		proc = subprocess.Popen(['gridlabd', 'feeder.glm'], stdout=subprocess.PIPE, shell=True, cwd=modelDir)
 		(out, err) = proc.communicate()
 		accumulator = ""
-		'''with open(pJoin(modelDir, "test_JSON_dump1.json"), "r") as gldOut:
-			accumulator = json.load(gldOut)'''
+		#with open(pJoin(modelDir, "test_JSON_dump1.json"), "r") as gldOut:
+		#	accumulator = json.load(gldOut)
 		with open(pJoin(modelDir, "test_JSON_dump2.json"), "r") as gldOut:
 			accumulator = json.load(gldOut)
 		outData['gridlabdRawOut'] = accumulator
+		'''rdtJson["line_codes"] = accumulator["properties"]["line_codes"]
+		rdtJson["lines"] = accumulator["properties"]["lines"]
+		with open(pJoin(modelDir, rdtInputFilePath), "w") as outFile:
+			json.dump(rdtJson, outFile, indent=4)'''
 	else:
 		tree = feederModel.get("tree",{})
 		attachments = feederModel.get("attachments",{})
@@ -430,7 +449,7 @@ def new(modelDir):
 		"maxDGPerGenerator": "5000.0",
 		"hardeningCandidates": "A_node705-742,A_node705-712,A_node706-725",
 		"newLineCandidates": "TIE_A_to_C,TIE_C_to_B,TIE_B_to_A",
-		"generatorCandidates": "A_node706,A_node707,A_node708,B_node704,B_node705,B_node703,A_load701,B_load701,C_load701",
+		"generatorCandidates": "A_node706,A_node707,A_node708,B_node704,B_node705,B_node703",
 		"switchCandidates" : "A_node705-742,A_node705-712",
 		"criticalLoadMet": "0.98",
 		"nonCriticalLoadMet": "0.0",
