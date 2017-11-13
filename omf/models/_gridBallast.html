@@ -467,7 +467,7 @@
           "plotOptions":{
             "series":{"animation": false, "pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},
             "line":{"marker":{"enabled":true}}},
-          "xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
+          "xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray", 'min' : new Date(allOutputData.timeStamps[0]).getTime(), 'max' : new Date(allOutputData.timeStamps[allOutputData.timeStamps.length-1]).getTime() },
           "title":{"text":null},
           "series":irradianceSeriesData,
           "yAxis":{"title":{"text":"Irradiance ( W / m^2 )","style":{"color":"gray"}}, "min":0},
@@ -489,7 +489,7 @@
           "plotOptions":{
             "series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},
             "line":{"marker":{"enabled":false}}},
-          "xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
+          "xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray", 'min' : new Date(allOutputData.timeStamps[0]).getTime(), 'max' : new Date(allOutputData.timeStamps[allOutputData.timeStamps.length-1]).getTime() },
           "title":{"text":null},
           "series":climateSeriesData,
           "yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},
@@ -746,7 +746,7 @@
             'label': {'text':'Event End'}
           }
         ]
-        localHighChart['yAxis']['title'] = {'text': 'Reserve Magnitude'}
+        localHighChart['yAxis']['title'] = {'text': 'Reserve Magnitude (%)'}
         localHighChart['yAxis']['plotLines'] = [
           {
             'color': 'gray',
@@ -892,9 +892,9 @@
         </table>
       </div>
       <script type="text/javascript">
-        document.getElementById('rmAvg').innerHTML = 100 * allOutputData.gridBallast.rmAvg.toFixed(3) + ' %'
+        document.getElementById('rmAvg').innerHTML = allOutputData.gridBallast.rmAvg.toFixed(3) + ' %'
         document.getElementById('rmt').innerHTML = '7.000 %'
-        document.getElementById('rmvt').innerHTML = 100 * allOutputData.gridBallast.rmvt.toFixed(3) + ' %'
+        document.getElementById('rmvt').innerHTML = allOutputData.gridBallast.rmvt.toFixed(3) + ' %'
         document.getElementById('offDuration').innerHTML = allOutputData.gridBallast.offDuration
         document.getElementById('availability').innerHTML = allOutputData.gridBallast.availability.toFixed(3) + ' %'
         document.getElementById('recoveryTime').innerHTML = allOutputData.gridBallast.recoveryTime

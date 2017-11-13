@@ -353,16 +353,16 @@ def work(modelDir, inputDict):
 	# Reserve Magnitude (RM)
 	availMag = outData['gridBallast']['availabilityMagnitude']
 	totalNetLoad = outData['gridBallast']['totalNetworkLoad']
-	availPerc = [x[0]/x[1] for x in zip(availMag,totalNetLoad)]
-	outData['gridBallast']['availabilityPercent'] = [100 * x for x in availPerc] #Convert fraction to percent
-	outData['gridBallast']['rm'] = [1 - x for x in availPerc]
+	availPerc = [100 * x[0]/x[1] for x in zip(availMag,totalNetLoad)]
+	outData['gridBallast']['availabilityPercent'] = availPerc
+	outData['gridBallast']['rm'] = [100 - x for x in availPerc]
 	# Average RM during event
-	eventRM = [1 - x[1] for x in zip(dateTimeStamps, availPerc) if (x[0] >= eventStart) and (x[0] <= eventEnd)]
+	eventRM = [100 - x[1] for x in zip(dateTimeStamps, availPerc) if (x[0] >= eventStart) and (x[0] <= eventEnd)]
 	outData['gridBallast']['rmAvg'] = np.mean(eventRM)
 	# Reserve Magnitude Variability Tolerance (RMVT)
 	outData['gridBallast']['rmvt'] = np.std(eventRM)
 	# Availability
-	rmt = 0.07
+	rmt = 7
 	available = [x[1] > rmt for x in zip(dateTimeStamps, availPerc) if (x[0] < eventStart) or (x[0] > eventEnd)]
 	outData['gridBallast']['availability'] = 100.0 * sum(available) / (int(inputDict['simLength']) - int(eventLength[1]))
 	# Waterheater Temperature Drop calculations
@@ -569,8 +569,8 @@ def new(modelDir):
 	defaultInputs = {
 		"modelType": modelName,
 		"zipCode": "59001",
-		# "feederName1": "Olin Barre GH EOL Solar GridBallast",
-		"feederName1": "UCS Egan Housed Solar",
+		"feederName1": "Olin Barre GH EOL Solar GridBallast",
+		# "feederName1": "UCS Egan Housed Solar",
 		# "feederName1": "Connexus West End Final Fixed Solar",
 		"simStartDate": "2012-01-01 12:00:00",
 		"simLength": "180",
