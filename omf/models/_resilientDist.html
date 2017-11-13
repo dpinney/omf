@@ -359,8 +359,8 @@
 
 					for(var j = 0; j < rdtOutput.scenario_solution.length; j++) {
 						scenario = rdtOutput.scenario_solution[j]; 
-						critLoadMetDict[scenario.id] = scenario.critical_load_met;
-						nonCritLoadMetDict[scenario.id] = scenario.non_critical_load_met;
+						critLoadMetDict[scenario.id] = scenario.critical_load_met.toFixed(2);
+						nonCritLoadMetDict[scenario.id] = scenario.non_critical_load_met.toFixed(2);
 					}
 					for(var j = 0; j < gfmOutput.scenarios.length; j++) {
 						htmlCollector = "<tr><th>Device ID</th><th>Type</th><th>Result</th></tr>";
