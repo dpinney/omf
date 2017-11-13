@@ -389,10 +389,9 @@ function svgClick(event) {
          var clickType = event.target.id.split("_")[0]
          var clickID = event.target.id.split("_")[1]
          lastElementSelected = event.target
-         console.log(lastElementSelected)
-         //console.log('clicked ', clickType, ' with id', clickID)
+         //console.log(lastElementSelected)
+         console.log('clicked ', clickType, ' with id', clickID)
                 if (selection.indexOf(networkData[clickType][parseInt(clickID)-1]) === -1){
-                        //this is where you have to t\determine selection and delete from array and stuff
                         tableDestroy()
                         tableCreate(networkData[clickType][parseInt(clickID)-1][clickID])
                         selection.push(event.target)
@@ -671,6 +670,8 @@ function moveBusListener() {
         coords = clickLatLon(event)
         networkData["bus"][selBusID - 1][String(selBusID)].longitude = coords[0]
         networkData["bus"][selBusID - 1][String(selBusID)].latitude = coords[1]
+        console.log(coords[0])
+        console.log(coords[1])
         for (num in networkData.branch) {
                 try {
                         selBranch = networkData.branch[num][String(parseInt(num)+1)]
@@ -699,7 +700,7 @@ function moveBusListener() {
                 busGenID = networkData.gen[gen][String(parseInt(gen)+1)]['bus']
                 if(busGenID == selBusID) {
                         document.getElementById("gen_" + String(parseInt(gen)+1)).remove() 
-                        addRectangle(coords[0] - 4/2, coords[1] - 4/2, 4, 4, "gen_" + newID, "gen")
+                        addRectangle(coords[0] - 4/2, coords[1] - 4/2, 4, 4, "gen_" + String(parseInt(gen)+1), "gen")
                 }
         }
         clickTarget.removeEventListener('click', moveBusListener, false)
