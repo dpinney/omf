@@ -112,6 +112,29 @@ def work(modelDir, inputDict):
 		outData["peakAdjustedDemand"] = peakAdjustedDemand
 		outData["energyMonthly"] = energyMonthly
 		outData["energyAdjustedMonthly"] = energyAdjustedMonthly
+		energyCost = [0]*12
+		energyCostAdjusted = [0]*12
+		demandCharge = [0]*12
+		demandChargeAdjusted = [0]*12
+		totalCost = [0]*12
+		totalCostAdjusted = [0]*12
+		savings = [0]*12
+		for x in range(12):
+			energyCost[x] = energyMonthly[x]*float(inputDict["electricityCost"])
+			energyCostAdjusted[x] = energyAdjustedMonthly[x]*float(inputDict["electricityCost"])
+			demandCharge[x] = peakDemand[x]*float(inputDict["demandChargeCost"])
+			demandChargeAdjusted[x] = peakAdjustedDemand[x]*float(inputDict["demandChargeCost"])
+			totalCost[x] = energyCost[x] + demandCharge[x]
+			totalCostAdjusted[x] = energyCostAdjusted[x] + demandChargeAdjusted[x]
+			savings[x] = totalCost[x] - totalCostAdjusted[x]
+		#print savings
+		outData["energyCost"] = energyCost
+		outData["energyCostAdjusted"] = energyCostAdjusted
+		outData["demandCharge"] = demandCharge
+		outData["demandChargeAdjusted"] = demandChargeAdjusted
+		outData["totalCost"] = totalCost
+		outData["totalCostAdjusted"] = totalCostAdjusted
+		outData["savings"] = savings
 		# Stdout/stderr.
 		outData["stdout"] = "Success"
 		#inputDict["stderr"] = ""
@@ -119,7 +142,6 @@ def work(modelDir, inputDict):
 		outData["stdout"] = "Failure"
 		inputDict["stderr"] = myOut
 	return outData
-
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
@@ -133,14 +155,13 @@ def new(modelDir):
 		"cop": "2.5",
 		"setpoint": "22.5",
 		"deadband": "0.625",
-		"demandChargeCost":"10",
-		"electricityCost":"10",
+		"demandChargeCost":"20",
+		"electricityCost":"0.06",
 		"projectionLength":"15",
 		"discountRate":"2",
 		"modelType":modelName}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	return creationCode
-
 def _simpleTest():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
@@ -158,6 +179,5 @@ def _simpleTest():
 	runForeground(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
 	renderAndShow(modelLoc)
-
 if __name__ == '__main__':
 	_simpleTest ()

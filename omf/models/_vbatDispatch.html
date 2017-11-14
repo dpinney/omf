@@ -1162,7 +1162,7 @@
 				<input type="text" id="demandChargeCost" name="demandChargeCost" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Electricity Cost($/kW)<span class="classic">electricityCost</span></label>
+				<label class="tooltip">Energy Cost($/kWh)<span class="classic">electricityCost</span></label>
 				<input type="text" id="electricityCost" name="electricityCost" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
@@ -1301,6 +1301,71 @@
 					"tooltip":false,
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
+		</div>
+		<p class="reportTitle postRun">Monthly Cost Comparison</p>
+		<div id="levelizedCostReport" class="tightContent postRun">
+			<div id="levelizedCostTableDiv" style="display:inline-block; width:1000px; height:700px; overflow-y:hidden; overflow-x:auto;">
+				<table id="monthlySummaryTable" style="margin:5px;">
+					<style>td, th {padding:7 0 5 20;text-align: left;font-size:0.7em;}</style>
+					<div id="tableHead">
+						<thead>
+							<th></th>
+							<th>Jan</th>
+							<th>Feb</th>
+							<th>Mar</th>
+							<th>Apr</th>
+							<th>May</th>
+							<th>Jun</th>
+							<th>Jul</th>
+							<th>Aug</th>
+							<th>Sep</th>
+							<th>Oct</th>
+							<th>Nov</th>
+							<th>Dec</th>
+						</thead>
+					</div>
+				</table>
+				<script id="globalOutputScripting">
+					function insertMetric(tableId, name, vector) {
+						// Add a vector to a table as a row.
+						table = gebi(tableId)
+						newRow = table.insertRow()
+						newRow.insertCell().innerHTML = "<div id=\"metric\">" + name + "</div>"
+						for (i=0; i<vector.length; i++) {
+							cell = newRow.insertCell()
+							cell.innerHTML = delimitNumbers(vector[i].toFixed(0))
+						}
+					}
+				</script>
+				<script>
+					insertMetric("monthlySummaryTable","Peak Demand (kW)", allOutputData.peakDemand)
+					insertMetric("monthlySummaryTable","Adjusted Peak Demand (kW)", allOutputData.peakAdjustedDemand)
+					insertMetric("monthlySummaryTable","Energy (kWh)", allOutputData.energyMonthly)
+					insertMetric("monthlySummaryTable","Adjusted Energy (kW)", allOutputData.energyAdjustedMonthly)
+					insertMetric("monthlySummaryTable","Energy Cost ($)", allOutputData.energyCost)
+					insertMetric("monthlySummaryTable","Energy Cost using VBAT ($)", allOutputData.energyCostAdjusted)
+					insertMetric("monthlySummaryTable","Demand Charge ($)", allOutputData.demandCharge)
+					insertMetric("monthlySummaryTable","Demand Charge using VBAT ($)", allOutputData.demandChargeAdjusted)
+					insertMetric("monthlySummaryTable","Total Cost ($)", allOutputData.totalCost)
+					insertMetric("monthlySummaryTable","Total Cost using VBAT ($)", allOutputData.totalCostAdjusted)
+					insertMetric("monthlySummaryTable","Savings ($)", allOutputData.savings)
+				</script>
+				<script>
+					table = gebi("monthlySummaryTable")
+					newRow = table.insertRow()
+					newRow.insertCell().innerHTML = ""
+					newRow = table.insertRow()
+					//newRow.insertCell().innerHTML = "<div id=\"SPP\">Financial Calculations:</div>"
+					//newRow.insertCell().innerHTML = "<div id=\"SPP\">NPV:</div>"
+					cell = newRow.insertCell()
+					cell.innerHTML = "$" + delimitNumbers(allOutputData.NPV.toFixed(0))
+					cell = newRow.insertCell()
+					cell.innerHTML + ""
+					newRow.insertCell().innerHTML = "<div id=\"SPP\">SPP:</div>"
+					cell = newRow.insertCell()
+					cell.innerHTML = delimitNumbers(allOutputData.SPP.toFixed(3))
+				</script>
+			</div>
 		</div>
 	</div>
 </body>
