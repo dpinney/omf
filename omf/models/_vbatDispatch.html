@@ -1158,6 +1158,10 @@
 				<input type="text" id="deadband" name="deadband" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Unit Cost ($ per unit)<span class="classic">unitDeviceCost</span></label>
+				<input type="text" id="unitDeviceCost" name="unitDeviceCost" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Demand Charge Cost($/kW)<span class="classic">demandChargeCost</span></label>
 				<input type="text" id="demandChargeCost" name="demandChargeCost" pattern="^\d+\.?\d*?$" required="required">
 			</div>
@@ -1304,7 +1308,7 @@
 		</div>
 		<p class="reportTitle postRun">Monthly Cost Comparison</p>
 		<div id="levelizedCostReport" class="tightContent postRun">
-			<div id="levelizedCostTableDiv" style="display:inline-block; width:1000px; height:700px; overflow-y:hidden; overflow-x:auto;">
+			<div id="levelizedCostTableDiv" style="display:inline-block; width:1200px; height:700px; overflow-y:hidden; overflow-x:auto;">
 				<table id="monthlySummaryTable" style="margin:5px;">
 					<style>td, th {padding:7 0 5 20;text-align: left;font-size:0.7em;}</style>
 					<div id="tableHead">
@@ -1341,7 +1345,7 @@
 					insertMetric("monthlySummaryTable","Peak Demand (kW)", allOutputData.peakDemand)
 					insertMetric("monthlySummaryTable","Adjusted Peak Demand (kW)", allOutputData.peakAdjustedDemand)
 					insertMetric("monthlySummaryTable","Energy (kWh)", allOutputData.energyMonthly)
-					insertMetric("monthlySummaryTable","Adjusted Energy (kW)", allOutputData.energyAdjustedMonthly)
+					insertMetric("monthlySummaryTable","Adjusted Energy (kWh)", allOutputData.energyAdjustedMonthly)
 					insertMetric("monthlySummaryTable","Energy Cost ($)", allOutputData.energyCost)
 					insertMetric("monthlySummaryTable","Energy Cost using VBAT ($)", allOutputData.energyCostAdjusted)
 					insertMetric("monthlySummaryTable","Demand Charge ($)", allOutputData.demandCharge)
@@ -1351,19 +1355,20 @@
 					insertMetric("monthlySummaryTable","Savings ($)", allOutputData.savings)
 				</script>
 				<script>
-					table = gebi("monthlySummaryTable")
-					newRow = table.insertRow()
-					newRow.insertCell().innerHTML = ""
+
+					//table = gebi("monthlySummaryTable")
+					//newRow = table.insertRow()
+					//newRow.insertCell().innerHTML = ""
 					newRow = table.insertRow()
 					//newRow.insertCell().innerHTML = "<div id=\"SPP\">Financial Calculations:</div>"
-					//newRow.insertCell().innerHTML = "<div id=\"SPP\">NPV:</div>"
+					newRow.insertCell().innerHTML = "<div id=\"SPP\">NPV:</div>"
 					cell = newRow.insertCell()
 					cell.innerHTML = "$" + delimitNumbers(allOutputData.NPV.toFixed(0))
-					cell = newRow.insertCell()
-					cell.innerHTML + ""
-					newRow.insertCell().innerHTML = "<div id=\"SPP\">SPP:</div>"
-					cell = newRow.insertCell()
-					cell.innerHTML = delimitNumbers(allOutputData.SPP.toFixed(3))
+					//cell = newRow.insertCell()
+					//cell.innerHTML + ""
+					//newRow.insertCell().innerHTML = "<div id=\"SPP\">SPP:</div>"
+					//cell = newRow.insertCell()
+					//cell.innerHTML = delimitNumbers(allOutputData.SPP.toFixed(3))
 				</script>
 			</div>
 		</div>

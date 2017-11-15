@@ -80,6 +80,16 @@ def work(modelDir, inputDict):
 	peakAdjustedDemand = [0]*12
 	energyMonthly = [0]*12
 	energyAdjustedMonthly = [0]*12
+	energyCost = [0]*12
+	energyCostAdjusted = [0]*12
+	demandCharge = [0]*12
+	demandChargeAdjusted = [0]*12
+	totalCost = [0]*12
+	totalCostAdjusted = [0]*12
+	savings = [0]*12
+	cashFlow = 0
+	cashFlowList = [0]*int(inputDict["projectionLength"])
+	NPV = 0
 	for x in range(8760):
 		if demandList[x] > peakDemand[int(dates[x][:2])-1]: #month number, -1 gives the index of peakDemand
 			peakDemand[int(dates[x][:2])-1] = demandList[x]
@@ -112,13 +122,6 @@ def work(modelDir, inputDict):
 		outData["peakAdjustedDemand"] = peakAdjustedDemand
 		outData["energyMonthly"] = energyMonthly
 		outData["energyAdjustedMonthly"] = energyAdjustedMonthly
-		energyCost = [0]*12
-		energyCostAdjusted = [0]*12
-		demandCharge = [0]*12
-		demandChargeAdjusted = [0]*12
-		totalCost = [0]*12
-		totalCostAdjusted = [0]*12
-		savings = [0]*12
 		for x in range(12):
 			energyCost[x] = energyMonthly[x]*float(inputDict["electricityCost"])
 			energyCostAdjusted[x] = energyAdjustedMonthly[x]*float(inputDict["electricityCost"])
@@ -127,7 +130,15 @@ def work(modelDir, inputDict):
 			totalCost[x] = energyCost[x] + demandCharge[x]
 			totalCostAdjusted[x] = energyCostAdjusted[x] + demandChargeAdjusted[x]
 			savings[x] = totalCost[x] - totalCostAdjusted[x]
-		#print savings
+			cashFlow += savings[x]
+		cashFlowList[0] = cashFlow
+		for x in range(int(inputDict["projectionLength"])):
+			if x >0:
+				cashFlowList[x] = cashFlowList[x-1]/(1+float(inputDict["discountRate"])/100)
+		print cashFlowList
+		for x in cashFlowList:
+			NPV +=x
+		NPV -= float(inputDict["unitDeviceCost"])*float(inputDict["number_devices"])
 		outData["energyCost"] = energyCost
 		outData["energyCostAdjusted"] = energyCostAdjusted
 		outData["demandCharge"] = demandCharge
@@ -135,6 +146,7 @@ def work(modelDir, inputDict):
 		outData["totalCost"] = totalCost
 		outData["totalCostAdjusted"] = totalCostAdjusted
 		outData["savings"] = savings
+		outData["NPV"] = NPV
 		# Stdout/stderr.
 		outData["stdout"] = "Success"
 		#inputDict["stderr"] = ""
@@ -159,6 +171,7 @@ def new(modelDir):
 		"electricityCost":"0.06",
 		"projectionLength":"15",
 		"discountRate":"2",
+		"unitDeviceCost":"100",
 		"modelType":modelName}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	return creationCode
