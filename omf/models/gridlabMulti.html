@@ -119,7 +119,7 @@
 						var feederNum = key.substring(10,key.length)
 						// alert(feederNum)
 						var container = gebi("feederContainer")
-						var feederBlockText = '<div class="feederList shortInput"><label for="FEEDERNUM"><span class="feeder-number">FEEDERNAME</span></label>PLUSMINUS<br><button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,FEEDERNUM);" style="display:inline-block;">Open Editor</button></div>'
+						var feederBlockText = '<div class="feederList shortInput"><label for="FEEDERNUM"><span class="feeder-number">FEEDERNAME</span></label>PLUSMINUS<br><input type="hidden" id="feederNameFEEDERNUM" name="feederNameFEEDERNUM" value="FEEDERNAME"><button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,FEEDERNUM);" style="display:inline-block;">Open Editor</button></div>'
 						// First feeder has add button, the rest have minus:
 						var addButton = '<a class="add-feeder postRunInline stoppedInline" onclick="addFeeder()" title="Add feeder">&#x2295;</a>'
 						var remButton = '<a class="remove-feeder postRunInline stoppedInline" onclick="remFeeder()" title="Remove feeder">&#8854;</a>'
