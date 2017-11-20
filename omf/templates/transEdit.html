@@ -295,7 +295,6 @@ function addLine(x1,y1,x2,y2,id,myClass) {
 }
 function buildNetwork() {
         // Find the size we need for the full chart.
-        console.log(networkData)
         maxLon = 100, maxLat = 100
         for (num in networkData.bus) {
                 if (networkData.bus[num][String(parseInt(num)+1)]['longitude'] > maxLon) {maxLon = networkData.bus[num][String(parseInt(num)+1)]['longitude']}
@@ -390,8 +389,7 @@ function svgClick(event) {
          var clickType = event.target.id.split("_")[0]
          var clickID = event.target.id.split("_")[1]
          lastElementSelected = event.target
-         console.log(lastElementSelected)
-         console.log('clicked ', clickType, ' with id', clickID)
+         //console.log('clicked ', clickType, ' with id', clickID)
                 if (selection.indexOf(networkData[clickType][parseInt(clickID)-1]) === -1){
                         tableDestroy()
                         tableCreate(networkData[clickType][parseInt(clickID)-1][clickID])
@@ -597,7 +595,6 @@ function selectionTable() {
                         selection[i].classList.remove('selected')
                         selection.splice(i, 1)
                         selection.splice(selection.length - 1, 1)
-                        //console.log(selection)
                         continue
                 }
         }
@@ -695,27 +692,30 @@ function moveBusListener() {
                                 document.getElementById('bus_' + fBusID).remove()
                                 addCircle(x1,y1,r,"bus_"+String(fBusID),"bus")       
                         }
+                        for(gen in networkData.gen) {
+                                busGenID = networkData.gen[gen][String(parseInt(gen)+1)]['bus']
+                                if(busGenID == fBusID) {
+                                        document.getElementById("gen_" + String(parseInt(gen)+1)).remove() 
+                                        addRectangle(x1 - 4/2, y1 - 4/2, 4, 4, "gen_" + String(parseInt(gen)+1), "gen")
+                                }
+                                if(busGenID == tBusID) {
+                                        document.getElementById("gen_" + String(parseInt(gen)+1)).remove() 
+                                        addRectangle(x2- 4/2, y2 - 4/2, 4, 4, "gen_" + String(parseInt(gen)+1), "gen")
+                                }
+                        }
                 }
         }
 
         document.getElementById('bus_' + selBusID).remove()
         addCircle(coords[0],coords[1],r,"bus_"+String(selBusID),"bus")
-
         for(gen in networkData.gen) {
                 busGenID = networkData.gen[gen][String(parseInt(gen)+1)]['bus']
                 if(busGenID == selBusID) {
                         document.getElementById("gen_" + String(parseInt(gen)+1)).remove() 
                         addRectangle(coords[0] - 4/2, coords[1] - 4/2, 4, 4, "gen_" + String(parseInt(gen)+1), "gen")
                 }
-                if(busGenID == fBusID) {
-                        document.getElementById("gen_" + String(parseInt(gen)+1)).remove() 
-                        addRectangle(x1 - 4/2, y1 - 4/2, 4, 4, "gen_" + String(parseInt(gen)+1), "gen")
-                }
-                if(busGenID == tBusID) {
-                        document.getElementById("gen_" + String(parseInt(gen)+1)).remove() 
-                        addRectangle(x2- 4/2, y2 - 4/2, 4, 4, "gen_" + String(parseInt(gen)+1), "gen")
-                }
         }
+       
         clickTarget.removeEventListener('click', moveBusListener, false)
 }
 
