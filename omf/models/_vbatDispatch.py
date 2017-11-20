@@ -133,7 +133,6 @@ def work(modelDir, inputDict):
 			cashFlow += savings[x]
 		cashFlowList[0] = cashFlow
 		SPP = float(inputDict["unitDeviceCost"])*float(inputDict["number_devices"])/cashFlow
-		print SPP
 		for x in range(int(inputDict["projectionLength"])):
 			if x >0:
 				cashFlowList[x] = cashFlowList[x-1]/(1+float(inputDict["discountRate"])/100)
