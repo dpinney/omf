@@ -132,10 +132,11 @@ def work(modelDir, inputDict):
 			savings[x] = totalCost[x] - totalCostAdjusted[x]
 			cashFlow += savings[x]
 		cashFlowList[0] = cashFlow
+		SPP = float(inputDict["unitDeviceCost"])*float(inputDict["number_devices"])/cashFlow
+		print SPP
 		for x in range(int(inputDict["projectionLength"])):
 			if x >0:
 				cashFlowList[x] = cashFlowList[x-1]/(1+float(inputDict["discountRate"])/100)
-		print cashFlowList
 		for x in cashFlowList:
 			NPV +=x
 		NPV -= float(inputDict["unitDeviceCost"])*float(inputDict["number_devices"])
@@ -147,6 +148,7 @@ def work(modelDir, inputDict):
 		outData["totalCostAdjusted"] = totalCostAdjusted
 		outData["savings"] = savings
 		outData["NPV"] = NPV
+		outData["SPP"] = SPP#int(format(SPP,'.2f'))
 		# Stdout/stderr.
 		outData["stdout"] = "Success"
 		#inputDict["stderr"] = ""

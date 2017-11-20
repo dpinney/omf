@@ -1299,7 +1299,7 @@
 					"title":{"text":null},
 					"series":[
 						{"name":"Demand","marker":{"enabled":false},"color":"red","data":allOutputData.demand},
-						{"name":"Max Energy","marker":{"enabled":false},"color":"purple","data":allOutputData.demandAdjusted},
+						{"name":"Demand after VBAT reduction","marker":{"enabled":false},"color":"purple","data":allOutputData.demandAdjusted},
 					],
 					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"demandChart","type":"column","marginRight":20, "height":750,"width":1000},
 					"tooltip":false,
@@ -1361,9 +1361,14 @@
 					//newRow.insertCell().innerHTML = ""
 					newRow = table.insertRow()
 					//newRow.insertCell().innerHTML = "<div id=\"SPP\">Financial Calculations:</div>"
-					newRow.insertCell().innerHTML = "<div id=\"SPP\">NPV:</div>"
+					newRow.insertCell().innerHTML = "<div id=\"NPV\">NPV:</div>"
 					cell = newRow.insertCell()
 					cell.innerHTML = "$" + delimitNumbers(allOutputData.NPV.toFixed(0))
+					newRow = table.insertRow()
+					//newRow.insertCell().innerHTML = "<div id=\"SPP\">Financial Calculations:</div>"
+					newRow.insertCell().innerHTML = "<div id=\"SPP\">SPP:</div>"
+					cell = newRow.insertCell()
+					cell.innerHTML = delimitNumbers(allOutputData.SPP.toFixed(3))
 					//cell = newRow.insertCell()
 					//cell.innerHTML + ""
 					//newRow.insertCell().innerHTML = "<div id=\"SPP\">SPP:</div>"
