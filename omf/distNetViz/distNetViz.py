@@ -97,7 +97,6 @@ def main():
 			print "<script id='panZoomInsert'>\n" + pzData # load up the new feeder.
 		else:
 			print line.rstrip()
-
 	# webbrowser.open_new("file://" + tempDir + '/viewer.html')
 	os.system('open -a "Google Chrome" ' + '"file://' + tempDir + '/viewer.html"')
 
