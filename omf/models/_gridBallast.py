@@ -357,13 +357,13 @@ def work(modelDir, inputDict):
 	outData['gridBallast']['availabilityPercent'] = availPerc
 	outData['gridBallast']['rm'] = [100 - x for x in availPerc]
 	# Average RM during event
-	eventRM = [100 - x[1] for x in zip(dateTimeStamps, availPerc) if (x[0] >= eventStart) and (x[0] <= eventEnd)]
+	eventRM = [100 - x[1] for x in zip(dateTimeStamps, availPerc) if (x[0] == eventStart) or (x[0] == eventEnd)]
 	outData['gridBallast']['rmAvg'] = np.mean(eventRM)
 	# Reserve Magnitude Variability Tolerance (RMVT)
 	outData['gridBallast']['rmvt'] = np.std(eventRM)
 	# Availability
 	rmt = 7
-	available = [x[1] > rmt for x in zip(dateTimeStamps, availPerc) if (x[0] < eventStart) or (x[0] > eventEnd)]
+	available = [x[1] > rmt for x in zip(dateTimeStamps, availPerc) if (x[0] <= eventStart) or (x[0] > eventEnd)]
 	outData['gridBallast']['availability'] = 100.0 * sum(available) / (int(inputDict['simLength']) - int(eventLength[1]))
 	# Waterheater Temperature Drop calculations
 	whTemp = outData['gridBallast']['waterheaterTemp']
