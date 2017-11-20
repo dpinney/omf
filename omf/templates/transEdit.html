@@ -225,7 +225,7 @@
 		<div class='modalContent' id='anonymizeModalContent' style='width:475px'>
 			<div style='font-weight:bold; font-size:14pt'>Anonymization</div>
 			<br>
-			<form onsubmit='anonymize();' action='/anonymizeTran/{{owner}}/{{feederName}}' id='anonymize' enctype='multipart/form-data' method='post'>
+			<form onsubmit='anonymize();' action='/anonymizeTrans/{{owner}}/{{networkName}}' id='anonymize' enctype='multipart/form-data' method='post'>
 				<input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
 				<input type='hidden' id='modelName' name='modelName' value='{{modelName}}'/>
 				<div id='anonymizeInputs' align='left'>
@@ -1046,9 +1046,9 @@ function startCheck(checkUrl) {
 	}, 5000)
 }
 function anonymize() {
-	showProgressDialog('spinner', 'Anonymizing Feeder')
-	startProcess('/anonymizeTran/{{owner}}/{{networkName}}')
-	startCheck('/checkAnonymizeTran/{{owner}}/{{modelName}}')
+	showProgressDialog('spinner', 'Anonymizing Network')
+	startProcess('/anonymizeTrans/{{owner}}/{{networkName}}')
+	startCheck('/checkAnonymizeTrans/{{owner}}/{{modelName}}')
 }
 //ADD PROMPT TO SAVE CHANGES BEFORE EXIT
 {% if is_admin or not public %}
