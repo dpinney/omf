@@ -25,7 +25,7 @@ def main():
 	if argCount == 1:
 		# print 'Running tests. Normal usage: distNetViz -f <Path_to_feeder.glm or .omd>'
 		# FEEDER_PATH = 'DEC Robinsonville Debugged.omd'
-		FEEDER_PATH = '../static/publicFeeders/Simple Market System.omd'
+		FEEDER_PATH = '../../static/publicFeeders/Simple Market System.omd'
 		DO_FORCE_LAYOUT = True
 	elif argCount == 2:
 		DO_FORCE_LAYOUT = False
