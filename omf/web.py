@@ -1089,6 +1089,57 @@ def checkAnonymize(owner, modelName):
 	# checks to see if PID file exists, if theres no PID file process is done.
 	return jsonify(exists=os.path.exists(pidPath))
 
+@app.route("/anonymizeTrans/<owner>/<networkName>", methods=["POST"])
+@flask_login.login_required
+def anonymizeTrans(owner, networkName):
+	modelName = request.form.get('modelName')
+	modelDir = 'data/Model/' + owner + '/' + modelName
+	omtPath = modelDir + '/' + networkName + '.omt'	
+	importProc = Process(target=backgroundAnonymizeTrans, args =[modelDir, omtPath])
+	importProc.start()
+	pid = str(importProc.pid)
+	with open(modelDir + '/PPID.txt', 'w+') as outFile:
+		outFile.write(pid)
+	return ('Success',204)
+
+def backgroundAnonymizeTrans(modelDir, omtPath):
+	with open(omtPath, 'r') as inFile:
+		inNetwork = json.load(inFile)
+		nameOption = request.form.get('anonymizeNameOption')
+		if nameOption == 'pseudonymize':
+			anonymization.tranPseudomizeNames(inNetwork)
+		elif nameOption == 'randomize':
+			anonymization.tranRandomizeNames(inNetwork)
+		locOption = request.form.get('anonymizeLocationOption')
+		if locOption == 'translation':
+			translation = request.form.get('translate')
+			rotation = request.form.get('rotate')
+			anonymization.tranTranslateLocations(inNetwork, translation, rotation)
+		elif locOption == 'randomize':
+			anonymization.tranRandomizeLocations(inNetwork)
+		elecProp = request.form.get('electricProperty')
+		if elecProp == 'modifyLengthSize':
+			anonymization.tranModifyTriplexLengths(inNetwork)
+			anonymization.tranModifyConductorLengths(inNetwork)
+		elif elecProp == 'smoothLoadGen':
+			anonymization.tranSmoothLoads(inNetwork)
+		elif elecProp == 'shuffleLoadGen':
+			shufPerc = request.form.get('shufflePerc')
+			anonymization.tranShuffleLoads(inNetwork, shufPerc)
+		elif elecProp == 'addNoise':
+			noisePerc = request.form.get('noisePerc')
+			anonymization.tranAddNoise(inNetwork, noisePerc)
+	with open(omtPath, 'w') as outFile:
+		json.dump(inNetwork, outFile, indent=4)
+	os.remove(modelDir + '/PPID.txt')
+
+@app.route("/checkAnonymizeTrans/<owner>/<modelName>", methods=["POST","GET"])
+def checkAnonymizeTrans(owner, modelName):
+	pidPath = ('data/Model/' + owner + '/' + modelName + '/PPID.txt')
+	# print 'Check conversion status:', os.path.exists(pidPath), 'for path', pidPath
+	# checks to see if PID file exists, if theres no PID file process is done.
+	return jsonify(exists=os.path.exists(pidPath))
+
 ###################################################
 # OTHER FUNCTIONS
 ###################################################
