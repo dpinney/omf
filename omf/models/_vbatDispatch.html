@@ -1355,7 +1355,6 @@
 					insertMetric("monthlySummaryTable","Savings ($)", allOutputData.savings)
 				</script>
 				<script>
-
 					//table = gebi("monthlySummaryTable")
 					//newRow = table.insertRow()
 					//newRow.insertCell().innerHTML = ""
@@ -1365,15 +1364,11 @@
 					cell = newRow.insertCell()
 					cell.innerHTML = "$" + delimitNumbers(allOutputData.NPV.toFixed(0))
 					newRow = table.insertRow()
-					//newRow.insertCell().innerHTML = "<div id=\"SPP\">Financial Calculations:</div>"
 					newRow.insertCell().innerHTML = "<div id=\"SPP\">SPP:</div>"
 					cell = newRow.insertCell()
 					cell.innerHTML = delimitNumbers(allOutputData.SPP.toFixed(3))
 					//cell = newRow.insertCell()
 					//cell.innerHTML + ""
-					//newRow.insertCell().innerHTML = "<div id=\"SPP\">SPP:</div>"
-					//cell = newRow.insertCell()
-					//cell.innerHTML = delimitNumbers(allOutputData.SPP.toFixed(3))
 				</script>
 			</div>
 		</div>
