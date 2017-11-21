@@ -96,6 +96,7 @@ def work(modelDir, inputDict):
 		energyMonthly[int(dates[x][:2])-1] += demandList[x]
 	try:
 		myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
+		print myOut
 		P_lower = myOut.partition("P_lower =\n\n")[2]
 		P_lower = P_lower.partition("\n\nn")[0]
 		P_lower = map(float,P_lower.split('\n'))
@@ -132,7 +133,10 @@ def work(modelDir, inputDict):
 			savings[x] = totalCost[x] - totalCostAdjusted[x]
 			cashFlow += savings[x]
 		cashFlowList[0] = cashFlow
-		SPP = float(inputDict["unitDeviceCost"])*float(inputDict["number_devices"])/cashFlow
+		if cashFlow ==0:
+			SPP = 0
+		else:
+			SPP = float(inputDict["unitDeviceCost"])*float(inputDict["number_devices"])/cashFlow
 		for x in range(int(inputDict["projectionLength"])):
 			if x >0:
 				cashFlowList[x] = cashFlowList[x-1]/(1+float(inputDict["discountRate"])/100)
@@ -160,7 +164,8 @@ def new(modelDir):
 	defaultInputs = {
 		"user": "admin",
 		"load_type": "1",
-		"zipcode": "'default'",
+		"zipcode": "'ADAK NAS'", 
+		#"zipcode": "'default'",
 		"number_devices": "100",
 		"power": "5.6",
 		"capacitance": "2",
