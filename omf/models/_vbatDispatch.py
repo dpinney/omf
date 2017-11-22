@@ -89,14 +89,15 @@ def work(modelDir, inputDict):
 	savings = [0]*12
 	cashFlow = 0
 	cashFlowList = [0]*int(inputDict["projectionLength"])
+	cumulativeCashflow = [0]*int(inputDict["projectionLength"])
 	NPV = 0
+	#netCashflow = [0]*(int(inputDict["projectionLength"])+1)
 	for x in range(8760):
 		if demandList[x] > peakDemand[int(dates[x][:2])-1]: #month number, -1 gives the index of peakDemand
 			peakDemand[int(dates[x][:2])-1] = demandList[x]
 		energyMonthly[int(dates[x][:2])-1] += demandList[x]
 	try:
 		myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
-		print myOut
 		P_lower = myOut.partition("P_lower =\n\n")[2]
 		P_lower = P_lower.partition("\n\nn")[0]
 		P_lower = map(float,P_lower.split('\n'))
@@ -136,13 +137,19 @@ def work(modelDir, inputDict):
 		if cashFlow ==0:
 			SPP = 0
 		else:
-			SPP = float(inputDict["unitDeviceCost"])*float(inputDict["number_devices"])/cashFlow
+			SPP = (float(inputDict["unitDeviceCost"])+float(inputDict["unitUpkeepCost"]))*float(inputDict["number_devices"])/cashFlow
 		for x in range(int(inputDict["projectionLength"])):
 			if x >0:
-				cashFlowList[x] = cashFlowList[x-1]/(1+float(inputDict["discountRate"])/100)
+				cashFlowList[x] = (cashFlowList[x-1]-float(inputDict["unitUpkeepCost"]))/(1+float(inputDict["discountRate"])/100)
 		for x in cashFlowList:
 			NPV +=x
 		NPV -= float(inputDict["unitDeviceCost"])*float(inputDict["number_devices"])
+		cashFlowList[0] -= float(inputDict["unitDeviceCost"])*float(inputDict["number_devices"])
+		for x in range(int(inputDict["projectionLength"])):
+			if x == 0:
+				cumulativeCashflow[x] = cashFlowList[x]
+			else:
+				cumulativeCashflow[x] = cumulativeCashflow[x-1] + cashFlowList[x]
 		outData["energyCost"] = energyCost
 		outData["energyCostAdjusted"] = energyCostAdjusted
 		outData["demandCharge"] = demandCharge
@@ -151,7 +158,9 @@ def work(modelDir, inputDict):
 		outData["totalCostAdjusted"] = totalCostAdjusted
 		outData["savings"] = savings
 		outData["NPV"] = NPV
-		outData["SPP"] = SPP#int(format(SPP,'.2f'))
+		outData["SPP"] = SPP
+		outData["netCashflow"] = cashFlowList	#netCashflow
+		outData["cumulativeCashflow"] = cumulativeCashflow
 		# Stdout/stderr.
 		outData["stdout"] = "Success"
 		#inputDict["stderr"] = ""
@@ -164,8 +173,8 @@ def new(modelDir):
 	defaultInputs = {
 		"user": "admin",
 		"load_type": "1",
-		"zipcode": "'ADAK NAS'", 
-		#"zipcode": "'default'",
+		#"zipcode": "'ADAK NAS'", 
+		"zipcode": "'default'",
 		"number_devices": "100",
 		"power": "5.6",
 		"capacitance": "2",
@@ -178,6 +187,7 @@ def new(modelDir):
 		"projectionLength":"15",
 		"discountRate":"2",
 		"unitDeviceCost":"100",
+		"unitUpkeepCost":"5",
 		"modelType":modelName}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	return creationCode
