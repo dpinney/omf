@@ -140,7 +140,7 @@ def work(modelDir, inputDict):
 			SPP = (float(inputDict["unitDeviceCost"])+float(inputDict["unitUpkeepCost"]))*float(inputDict["number_devices"])/cashFlow
 		for x in range(int(inputDict["projectionLength"])):
 			if x >0:
-				cashFlowList[x] = (cashFlowList[x-1]-float(inputDict["unitUpkeepCost"]))/(1+float(inputDict["discountRate"])/100)
+				cashFlowList[x] = (cashFlowList[x-1])/(1+float(inputDict["discountRate"])/100)
 		for x in cashFlowList:
 			NPV +=x
 		NPV -= float(inputDict["unitDeviceCost"])*float(inputDict["number_devices"])
@@ -150,6 +150,10 @@ def work(modelDir, inputDict):
 				cumulativeCashflow[x] = cashFlowList[x]
 			else:
 				cumulativeCashflow[x] = cumulativeCashflow[x-1] + cashFlowList[x]
+		for x in cumulativeCashflow:
+			x -= float(inputDict["unitUpkeepCost"])
+		for x in cashFlowList:
+			x -= float(inputDict["unitUpkeepCost"])
 		outData["energyCost"] = energyCost
 		outData["energyCostAdjusted"] = energyCostAdjusted
 		outData["demandCharge"] = demandCharge
@@ -173,7 +177,6 @@ def new(modelDir):
 	defaultInputs = {
 		"user": "admin",
 		"load_type": "1",
-		#"zipcode": "'ADAK NAS'", 
 		"zipcode": "'default'",
 		"number_devices": "100",
 		"power": "5.6",

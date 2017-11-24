@@ -1131,55 +1131,55 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Number of devices<span class="classic">The termination tolerance for powerflow, in units P and Q dispatch per unit. Devices must be less than 100 million for all devices. For Water Heater expect 10 minutes per 50 device</span></label>
-				<input type="text" id="number_devices" name="number_devices" pattern="[1-9][0-9]{0,8}" required="required">
+				<input type="text" id="number_devices" name="number_devices" pattern="[1-9][0-9]{0,8}" required="required" title="Positive number with less than 8 digits">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Rated Power(kW)<span class="classic">power</span></label>
-				<input type="text" id="power" name="power" pattern="^\d+\.?\d*?$" required="required">
+				<input type="text" id="power" name="power" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Thermal Capacitance(kWh/&degC)<span class="classic">capacitance</span></label>
-				<input type="text" id="capacitance" name="capacitance" pattern="^\d+\.?\d*?$" required="required">
+				<input type="text" id="capacitance" name="capacitance" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Thermal Resistance(&degC/kW)<span class="classic">resistance</span></label>
-				<input type="text" id="resistance" name="resistance" pattern="^\d+\.?\d*?$" required="required">
+				<input type="text" id="resistance" name="resistance" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number">
 			</div>			
 			<div class="shortInput">
 				<label class="tooltip">COP<span class="classic">Coefficient of Power</span></label>
-				<input type="text" id="cop" name="cop" pattern="^\d+\.?\d*?$" required="required">
+				<input type="text" id="cop" name="cop" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Temperature Setpoint(&degC)<span class="classic">setpoint</span></label>
-				<input type="text" id="setpoint" name="setpoint" pattern="^\d+\.?\d*?$" required="required">
+				<input type="text" id="setpoint" name="setpoint" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Temperature Deadband(&degC)<span class="classic">deadband</span></label>
-				<input type="text" id="deadband" name="deadband" pattern="^\d+\.?\d*?$" required="required">
+				<input type="text" id="deadband" name="deadband" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Unit Cost ($/unit)<span class="classic">unitDeviceCost</span></label>
-				<input type="text" id="unitDeviceCost" name="unitDeviceCost" pattern="^\d+\.?\d*?$" required="required">
+				<input type="text" id="unitDeviceCost" name="unitDeviceCost" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Upkeep Cost ($/unit/year)<span class="classic">unitUpkeepCost</span></label>
-				<input type="text" id="unitUpkeepCost" name="unitUpkeepCost" pattern="^\d+\.?\d*?$" required="required">
+				<input type="text" id="unitUpkeepCost" name="unitUpkeepCost" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Demand Charge Cost($/kW)<span class="classic">demandChargeCost</span></label>
-				<input type="text" id="demandChargeCost" name="demandChargeCost" pattern="^\d+\.?\d*?$" required="required">
+				<input type="text" id="demandChargeCost" name="demandChargeCost" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Energy Cost($/kWh)<span class="classic">electricityCost</span></label>
-				<input type="text" id="electricityCost" name="electricityCost" pattern="^\d+\.?\d*?$" required="required">
+				<input type="text" id="electricityCost" name="electricityCost" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Financial Projection Length(years)<span class="classic">projectionLength</span></label>
-				<input type="text" id="projectionLength" name="projectionLength" pattern="^\d+\.?\d*?$" required="required">
+				<input type="text" id="projectionLength" name="projectionLength" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Discount Rate(%)<span class="classic">discountRate</span></label>
-				<input type="text" id="discountRate" name="discountRate" pattern="^\d+\.?\d*?$" required="required">
+				<input type="text" id="discountRate" name="discountRate" pattern="[1-9][0-9]{0,2}" required="required" title="Positive rational number between 0 and 100">
 			</div>
 			<!-- Required Buttons -->
 			<div class="wideInput" style="text-align:right">
