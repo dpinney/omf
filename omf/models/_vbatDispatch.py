@@ -74,10 +74,11 @@ def work(modelDir, inputDict):
 			try:
 				demand = float(demand)
 				demandList.append(demand)
-			except:
-				print 'found power'
-			if line != 'timestamp,power\n':
 				dates.append(line.partition(' ')[0])
+			except:
+				print 'Skipped header'
+			'''if line != 'timestamp,power\n':
+				dates.append(line.partition(' ')[0])'''
 	peakDemand = [0]*12
 	peakAdjustedDemand = [0]*12
 	energyMonthly = [0]*12
