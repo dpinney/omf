@@ -456,14 +456,13 @@ def tranAddNoise(inNetwork, noisePerc):
 						for prop in inNetwork[array][i][key]:
 							if ('bus' not in prop) and ('status' not in prop):
 								val = inNetwork[array][i][key][prop]
-								print key, prop, val
+								# print prop, val
 								try:
 									parseVal = float(val)
-									# print parseVal
 									randNoise = random.randint(parseVal - noisePerc*parseVal, parseVal + noisePerc*parseVal)
-									# print parseVal, randNoise
+									# print prop, parseVal, randNoise
 									inNetwork[array][i][key][prop] = str(randNoise)
-									# print prop, val, randNoise
+									print prop, val, randNoise, inNetwork[array][i][key][prop]
 								except ValueError:
 									continue
 	return
@@ -478,8 +477,9 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 			i = int(each) - 1
 			for key in inNetwork['bus'][i]:
 				for prop in inNetwork['bus'][i][key]:
-					if ('Qd' in prop) and ('Pd' in prop):
+					if 'Qd' in prop:
 						qParents.append(inNetwork['bus'][i][key]['Qd'])
+					if 'Pd' in prop:
 						pParents.append(inNetwork['bus'][i][key]['Pd'])
 	for dic in inNetwork['gen']:
 		for each in dic:
@@ -499,12 +499,13 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 			i = int(each) - 1
 			for key in inNetwork['bus'][i]:
 				for prop in inNetwork['bus'][i][key]:
-					if ('Qd' in prop) and ('Pd' in prop):
-						if random.randint(0,100) <= shufPerc:
-							inNetwork['bus'][i][key]['Qd'] = pParents[pIdx]
-							inNetwork['bus'][i][key]['Pd'] = qParents[qIdx]
-							pIdx += 1
+					if random.randint(0,100) <= shufPerc:
+						if 'Qd' in prop:
+							inNetwork['bus'][i][key]['Qd'] = qParents[qIdx]
 							qIdx += 1
+						if 'Pd' in prop:
+							inNetwork['bus'][i][key]['Pd'] = pParents[pIdx]
+							pIdx += 1
 	for dic in inNetwork['gen']:
 		for each in dic:
 			i = int(each) - 1
@@ -516,7 +517,7 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 							genIdx += 1
 	return
 
-def _tests():
+# def _tests():
 # 	# DISTRIBUTION FEEDER TESTS
 # 	# Test distPseudomizeNames
 # 	FNAME = "Simple Market System AnonTest.omd"
@@ -645,25 +646,25 @@ def _tests():
 # 	with open(FNAMEOUT, "w") as outFile:
 # 		json.dump(inNetwork, outFile, indent=4)
 
-	# Testing tranAddNoise
-	FNAME = "case118.omt"
-	with open(FNAME, "r") as inFile:
-		inNetwork = json.load(inFile)
-		noisePerc = 50
-		tranAddNoise(inNetwork, noisePerc)
-	FNAMEOUT = "118_tranAddNoise.omt"
-	with open(FNAMEOUT, "w") as outFile:
-		json.dump(inNetwork, outFile, indent=4)
+# 	# Testing tranAddNoise
+# 	FNAME = "case118.omt"
+# 	with open(FNAME, "r") as inFile:
+# 		inNetwork = json.load(inFile)
+# 		noisePerc = 50
+# 		tranAddNoise(inNetwork, noisePerc)
+# 	FNAMEOUT = "118_tranAddNoise.omt"
+# 	with open(FNAMEOUT, "w") as outFile:
+# 		json.dump(inNetwork, outFile, indent=4)
 
-	# Testing tranShuffleLoadsAndGens
-	FNAME = "case118.omt"
-	with open(FNAME, "r") as inFile:
-		inNetwork = json.load(inFile)
-		shufPerc = 100
-		tranShuffleLoadsAndGens(inNetwork, shufPerc)
-	FNAMEOUT = "118_tranShuffleLoadsAndGens.omt"
-	with open(FNAMEOUT, "w") as outFile:
-		json.dump(inNetwork, outFile, indent=4)
+# 	# Testing tranShuffleLoadsAndGens
+# 	FNAME = "case118.omt"
+# 	with open(FNAME, "r") as inFile:
+# 		inNetwork = json.load(inFile)
+# 		shufPerc = 100
+# 		tranShuffleLoadsAndGens(inNetwork, shufPerc)
+# 	FNAMEOUT = "118_tranShuffleLoadsAndGens.omt"
+# 	with open(FNAMEOUT, "w") as outFile:
+# 		json.dump(inNetwork, outFile, indent=4)
 
-if __name__ == '__main__':
-	_tests()
+# if __name__ == '__main__':
+# 	_tests()
