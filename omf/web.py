@@ -1118,12 +1118,7 @@ def backgroundAnonymizeTran(modelDir, omtPath):
 		elif locOption == 'randomize':
 			anonymization.tranRandomizeLocations(inNetwork)
 		elecProp = request.form.get('electricProperty')
-		if elecProp == 'modifyLengthSize':
-			anonymization.tranModifyTriplexLengths(inNetwork)
-			anonymization.tranModifyConductorLengths(inNetwork)
-		elif elecProp == 'smoothLoadGen':
-			anonymization.tranSmoothLoads(inNetwork)
-		elif elecProp == 'shuffleLoadGen':
+		if elecProp == 'shuffleLoadGen':
 			shufPerc = request.form.get('shufflePerc')
 			anonymization.tranShuffleLoadsAndGens(inNetwork, shufPerc)
 		elif elecProp == 'addNoise':
