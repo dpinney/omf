@@ -65,17 +65,12 @@ def work(modelDir, inputDict):
 		for line in f.readlines():
 			demand = line.partition(',')[2]
 			demand = demand.partition('\n')[0]
-			'''if demand != 'power':
-				demand = float(demand)
-				demandList.append(demand)'''
 			try:
 				demand = float(demand)
 				demandList.append(demand)
 				dates.append(line.partition(' ')[0])
 			except:
 				print 'Skipped header'
-			'''if line != 'timestamp,power\n':
-				dates.append(line.partition(' ')[0])'''
 	peakDemand = [0]*12
 	peakAdjustedDemand = [0]*12
 	energyMonthly = [0]*12
