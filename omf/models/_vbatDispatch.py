@@ -59,7 +59,7 @@ def work(modelDir, inputDict):
 			inputDict['number_devices'] + ']')
 
 	script_dir = os.path.dirname(os.path.dirname(__file__))
-	rel_path = 'static\\testFiles\\FrankScadaValidCSV.csv'
+	rel_path = 'static/testFiles/FrankScadaValidCSV.csv'
 	abs_file_path = os.path.join(script_dir, rel_path)
 	demandList = []
 	demandAdjustedList = []
