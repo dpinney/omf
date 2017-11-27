@@ -105,6 +105,7 @@ def distTranslateLocations(inFeeder, translation, rotation):
 
 def distAddNoise(inFeeder, noisePerc):
 	''' Add random noise to properties with numeric values for all objects in the inFeeder distribution system based on a noisePerc magnitude. '''
+	noisePerc = float(noisePerc)
 	for key in inFeeder['tree']:
 		for prop in inFeeder['tree'][key]:
 			val = inFeeder['tree'][key][prop]
@@ -130,6 +131,7 @@ def distAddNoise(inFeeder, noisePerc):
 
 def distShuffleLoads(inFeeder, shufPerc):
 	''' Shuffle the parent properties between all load objects in the inFeeder distribution system. '''
+	shufPerc = float(shufPerc)
 	houseParents = []
 	zipParents = []
 	tlParents = []
@@ -442,6 +444,7 @@ def tranTranslateLocations(inNetwork, translation, rotation):
 
 def tranAddNoise(inNetwork, noisePerc):
 	''' Add random noise to properties with numeric values for all objects in the inNetwork transmission system based on a noisePerc magnitude. '''
+	noisePerc = float(noisePerc)
 	for array in inNetwork:
 		if (array == 'bus') or (array == 'gen') or (array == 'branch'):
 			for dic in inNetwork[array]:
@@ -463,6 +466,7 @@ def tranAddNoise(inNetwork, noisePerc):
 
 def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 	''' Shuffle the parent properties between all load and gen objects in the inNetwork transmission system. '''
+	shufPerc = float(shufPerc)
 	qParents = []
 	pParents = []
 	genParents = []
