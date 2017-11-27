@@ -10,9 +10,6 @@ import __neoMetaModel__
 from __neoMetaModel__ import *
 import random
 import csv
-#trying something
-import ctypes  # An included library with Python install.   
-
 	
 # Model metadata:
 fileName = os.path.basename(__file__)
@@ -175,6 +172,7 @@ def work(modelDir, inputDict):
 		outData["stdout"] = "Failure"
 		inputDict["stderr"] = myOut
 	return outData
+
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
@@ -197,6 +195,7 @@ def new(modelDir):
 		"modelType":modelName}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	return creationCode
+
 def _simpleTest():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
