@@ -105,28 +105,24 @@ def distTranslateLocations(inFeeder, translation, rotation):
 
 def distAddNoise(inFeeder, noisePerc):
 	''' Add random noise to properties with numeric values for all objects in the inFeeder distribution system based on a noisePerc magnitude. '''
-	noisePerc = float(noisePerc)/100
 	for key in inFeeder['tree']:
 		for prop in inFeeder['tree'][key]:
 			val = inFeeder['tree'][key][prop]
-			# print key, prop, val
 			try:
 				parseVal = float(val)
-				# print parseVal
-				randNoise = random.randint(parseVal - noisePerc*parseVal, parseVal + noisePerc*parseVal)
-				# print parseVal, randNoise
-				inFeeder['tree'][key][prop] = str(randNoise)
-				# print prop, val, randNoise
+				randNoise = random.randint(-noisePerc, noisePerc)/100
+				randVal = parseVal + randNoise*parseVal
+				inFeeder['tree'][key][prop] = str(randVal)
 			except ValueError:
 				try:
 					compVal = complex(val)
 					realVal = float(compVal.real)
 					imagVal = float(compVal.imag)
-					randReal = random.randint(realVal - noisePerc*realVal, realVal + noisePerc*realVal)
-					randImag = random.randint(imagVal - noisePerc*imagVal, imagVal + noisePerc*imagVal)
-					randNoise = complex(randReal, randImag)
-					inFeeder['tree'][key][prop] = str(randNoise)
-					# print prop, val, randNoise
+					randNoise = random.randint(-noisePerc, noisePerc)/100
+					randReal = realVal + randNoise*realVal
+					randImag = imagVal + randNoise*imagVal
+					randVal = complex(randReal, randImag)
+					inFeeder['tree'][key][prop] = str(randVal)
 				except ValueError:
 					continue
 				continue
@@ -446,7 +442,6 @@ def tranTranslateLocations(inNetwork, translation, rotation):
 
 def tranAddNoise(inNetwork, noisePerc):
 	''' Add random noise to properties with numeric values for all objects in the inNetwork transmission system based on a noisePerc magnitude. '''
-	noisePerc = float(noisePerc)/100
 	for array in inNetwork:
 		if (array == 'bus') or (array == 'gen') or (array == 'branch'):
 			for dic in inNetwork[array]:
@@ -456,14 +451,13 @@ def tranAddNoise(inNetwork, noisePerc):
 						for prop in inNetwork[array][i][key]:
 							if ('bus' not in prop) and ('status' not in prop):
 								val = inNetwork[array][i][key][prop]
-								# print prop, val
 								try:
 									parseVal = float(val)
-									randNoise = random.randint(parseVal - noisePerc*parseVal, parseVal + noisePerc*parseVal)
-									# print prop, parseVal, randNoise
-									inNetwork[array][i][key][prop] = str(randNoise)
-									print prop, val, randNoise, inNetwork[array][i][key][prop]
+									randNoise = random.randint(-noisePerc, noisePerc)/100
+									randVal = parseVal + randNoise*parseVal
+									inNetwork[array][i][key][prop] = str(randVal)
 								except ValueError:
+									print 'error'
 									continue
 	return
 
@@ -517,154 +511,154 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 							genIdx += 1
 	return
 
-# def _tests():
-# 	# DISTRIBUTION FEEDER TESTS
-# 	# Test distPseudomizeNames
-# 	FNAME = "Simple Market System AnonTest.omd"
-# 	with open(FNAME, "r") as inFile:
-# 		inFeeder = json.load(inFile)
-# 		nameKey = distPseudomizeNames(inFeeder)
-# 		print nameKey
-# 	FNAMEOUT = "simpleMarket_distPseudomizeNames.omd"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inFeeder, outFile, indent=4)
+def _tests():
+	# DISTRIBUTION FEEDER TESTS
+	# Test distPseudomizeNames
+	FNAME = "Simple Market System AnonTest.omd"
+	with open(FNAME, "r") as inFile:
+		inFeeder = json.load(inFile)
+		nameKey = distPseudomizeNames(inFeeder)
+		print nameKey
+	FNAMEOUT = "simpleMarket_distPseudomizeNames.omd"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inFeeder, outFile, indent=4)
 
-# 	# Test distRandomizeNames
-# 	FNAME = "Simple Market System AnonTest.omd"
-# 	with open(FNAME, "r") as inFile:
-# 		inFeeder = json.load(inFile)
-# 		distRandomizeNames(inFeeder)
-# 	FNAMEOUT = "simpleMarket_distRandomizeNames.omd"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inFeeder, outFile, indent=4)
+	# Test distRandomizeNames
+	FNAME = "Simple Market System AnonTest.omd"
+	with open(FNAME, "r") as inFile:
+		inFeeder = json.load(inFile)
+		distRandomizeNames(inFeeder)
+	FNAMEOUT = "simpleMarket_distRandomizeNames.omd"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inFeeder, outFile, indent=4)
 
-# 	# Test distRandomizeLocations
-# 	FNAME = "Simple Market System AnonTest.omd"
-# 	with open(FNAME, "r") as inFile:
-# 		inFeeder = json.load(inFile)
-# 		distRandomizeLocations(inFeeder)
-# 	FNAMEOUT = "simpleMarket_distRandomizeLocations.omd"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inFeeder, outFile, indent=4)
+	# Test distRandomizeLocations
+	FNAME = "Simple Market System AnonTest.omd"
+	with open(FNAME, "r") as inFile:
+		inFeeder = json.load(inFile)
+		distRandomizeLocations(inFeeder)
+	FNAMEOUT = "simpleMarket_distRandomizeLocations.omd"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inFeeder, outFile, indent=4)
 
-# 	# Test distTranslateLocations
-# 	FNAME = "Simple Market System AnonTest.omd"
-# 	with open(FNAME, "r") as inFile:
-# 		inFeeder = json.load(inFile)
-# 		translation = 20
-# 		rotation = 20
-# 		distTranslateLocations(inFeeder, translation, rotation)
-# 	FNAMEOUT = "simpleMarket_distTranslateLocations.omd"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inFeeder, outFile, indent=4)
+	# Test distTranslateLocations
+	FNAME = "Simple Market System AnonTest.omd"
+	with open(FNAME, "r") as inFile:
+		inFeeder = json.load(inFile)
+		translation = 20
+		rotation = 20
+		distTranslateLocations(inFeeder, translation, rotation)
+	FNAMEOUT = "simpleMarket_distTranslateLocations.omd"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inFeeder, outFile, indent=4)
 
-# 	# Test distAddNoise
-# 	FNAME = "Simple Market System AnonTest.omd"
-# 	with open(FNAME, "r") as inFile:
-# 		inFeeder = json.load(inFile)
-# 		noisePerc = 50
-# 		distAddNoise(inFeeder, noisePerc)
-# 	FNAMEOUT = "simpleMarket_distAddNoise.omd"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inFeeder, outFile, indent=4)
+	# Test distAddNoise
+	FNAME = "Simple Market System AnonTest.omd"
+	with open(FNAME, "r") as inFile:
+		inFeeder = json.load(inFile)
+		noisePerc = 50
+		distAddNoise(inFeeder, noisePerc)
+	FNAMEOUT = "simpleMarket_distAddNoise.omd"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inFeeder, outFile, indent=4)
 
-# 	# Test distShuffleLoads
-# 	FNAME = "Simple Market System AnonTest.omd"
-# 	with open(FNAME, "r") as inFile:
-# 		inFeeder = json.load(inFile)
-# 		shufPerc = 100
-# 		distShuffleLoads(inFeeder, shufPerc)
-# 	FNAMEOUT = "simpleMarket_distShuffleLoads.omd"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inFeeder, outFile, indent=4)
+	# Test distShuffleLoads
+	FNAME = "Simple Market System AnonTest.omd"
+	with open(FNAME, "r") as inFile:
+		inFeeder = json.load(inFile)
+		shufPerc = 100
+		distShuffleLoads(inFeeder, shufPerc)
+	FNAMEOUT = "simpleMarket_distShuffleLoads.omd"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inFeeder, outFile, indent=4)
 
-# 	# Test distModifyTriplexLengths
-# 	FNAME = "Simple Market System AnonTest.omd"
-# 	with open(FNAME, "r") as inFile:
-# 		inFeeder = json.load(inFile)
-# 		distModifyTriplexLengths(inFeeder)
-# 	FNAMEOUT = "simpleMarket_distModifyTriplexLengths.omd"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inFeeder, outFile, indent=4)
+	# Test distModifyTriplexLengths
+	FNAME = "Simple Market System AnonTest.omd"
+	with open(FNAME, "r") as inFile:
+		inFeeder = json.load(inFile)
+		distModifyTriplexLengths(inFeeder)
+	FNAMEOUT = "simpleMarket_distModifyTriplexLengths.omd"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inFeeder, outFile, indent=4)
 
-# 	# Test distModifyConductorLengths
-# 	FNAME = "Olin Barre GH.omd"
-# 	with open(FNAME, "r") as inFile:
-# 		inFeeder = json.load(inFile)
-# 		distModifyConductorLengths(inFeeder)
-# 	FNAMEOUT = "olinBarreGH_distModifyConductorLengths.omd"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inFeeder, outFile, indent=4)
+	# Test distModifyConductorLengths
+	FNAME = "Olin Barre GH.omd"
+	with open(FNAME, "r") as inFile:
+		inFeeder = json.load(inFile)
+		distModifyConductorLengths(inFeeder)
+	FNAMEOUT = "olinBarreGH_distModifyConductorLengths.omd"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inFeeder, outFile, indent=4)
 
-# 	# Test distSmoothLoads
-# 	FNAME = "Calibrated Feeder1.omd"
-# 	with open(FNAME, "r") as inFile:
-# 		inFeeder = json.load(inFile)
-# 		distSmoothLoads(inFeeder)
-# 	FNAMEOUT = "calibrated_distSmoothLoads.omd"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inFeeder, outFile, indent=4)
+	# Test distSmoothLoads
+	FNAME = "Calibrated Feeder1.omd"
+	with open(FNAME, "r") as inFile:
+		inFeeder = json.load(inFile)
+		distSmoothLoads(inFeeder)
+	FNAMEOUT = "calibrated_distSmoothLoads.omd"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inFeeder, outFile, indent=4)
 
 
-# 	TRANSMISSION NETWORK TESTS
-# 	Test tranPseudomizeNames
-# 	FNAME = "case118.omt"
-# 	with open(FNAME, "r") as inFile:
-# 		inNetwork = json.load(inFile)
-# 		busKey = tranPseudomizeNames(inNetwork)
-# 		print busKey
-# 	FNAMEOUT = "118_tranPseudomizeNames.omt"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inNetwork, outFile, indent=4)
+	TRANSMISSION NETWORK TESTS
+	Test tranPseudomizeNames
+	FNAME = "case118.omt"
+	with open(FNAME, "r") as inFile:
+		inNetwork = json.load(inFile)
+		busKey = tranPseudomizeNames(inNetwork)
+		print busKey
+	FNAMEOUT = "118_tranPseudomizeNames.omt"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inNetwork, outFile, indent=4)
 
-# 	# Test tranRandomizeNames
-# 	FNAME = "case118.omt"
-# 	with open(FNAME, "r") as inFile:
-# 		inNetwork = json.load(inFile)
-# 		tranRandomizeNames(inNetwork)
-# 	FNAMEOUT = "118_tranRandomizeNames.omt"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inNetwork, outFile, indent=4)
+	# Test tranRandomizeNames
+	FNAME = "case118.omt"
+	with open(FNAME, "r") as inFile:
+		inNetwork = json.load(inFile)
+		tranRandomizeNames(inNetwork)
+	FNAMEOUT = "118_tranRandomizeNames.omt"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inNetwork, outFile, indent=4)
 
-# 	# Test tranRandomizeLocations
-# 	FNAME = "case118.omt"
-# 	with open(FNAME, "r") as inFile:
-# 		inNetwork = json.load(inFile)
-# 		tranRandomizeLocations(inNetwork)
-# 	FNAMEOUT = "118_tranRandomizeLocations.omt"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inNetwork, outFile, indent=4)
+	# Test tranRandomizeLocations
+	FNAME = "case118.omt"
+	with open(FNAME, "r") as inFile:
+		inNetwork = json.load(inFile)
+		tranRandomizeLocations(inNetwork)
+	FNAMEOUT = "118_tranRandomizeLocations.omt"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inNetwork, outFile, indent=4)
 
-# 	# Test tranTranslateLocation
-# 	FNAME = "case118.omt"
-# 	with open(FNAME, "r") as inFile:
-# 		inNetwork = json.load(inFile)
-# 		translation = 20
-# 		rotation = 20
-# 		tranTranslateLocations(inNetwork, translation, rotation)
-# 	FNAMEOUT = "118_tranTranslateLocations.omt"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inNetwork, outFile, indent=4)
+	# Test tranTranslateLocation
+	FNAME = "case118.omt"
+	with open(FNAME, "r") as inFile:
+		inNetwork = json.load(inFile)
+		translation = 20
+		rotation = 20
+		tranTranslateLocations(inNetwork, translation, rotation)
+	FNAMEOUT = "118_tranTranslateLocations.omt"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inNetwork, outFile, indent=4)
 
-# 	# Testing tranAddNoise
-# 	FNAME = "case118.omt"
-# 	with open(FNAME, "r") as inFile:
-# 		inNetwork = json.load(inFile)
-# 		noisePerc = 50
-# 		tranAddNoise(inNetwork, noisePerc)
-# 	FNAMEOUT = "118_tranAddNoise.omt"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inNetwork, outFile, indent=4)
+	# Testing tranAddNoise
+	FNAME = "case118.omt"
+	with open(FNAME, "r") as inFile:
+		inNetwork = json.load(inFile)
+		noisePerc = 100
+		tranAddNoise(inNetwork, noisePerc)
+	FNAMEOUT = "118_tranAddNoise.omt"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inNetwork, outFile, indent=4)
 
-# 	# Testing tranShuffleLoadsAndGens
-# 	FNAME = "case118.omt"
-# 	with open(FNAME, "r") as inFile:
-# 		inNetwork = json.load(inFile)
-# 		shufPerc = 100
-# 		tranShuffleLoadsAndGens(inNetwork, shufPerc)
-# 	FNAMEOUT = "118_tranShuffleLoadsAndGens.omt"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inNetwork, outFile, indent=4)
+	# Testing tranShuffleLoadsAndGens
+	FNAME = "case118.omt"
+	with open(FNAME, "r") as inFile:
+		inNetwork = json.load(inFile)
+		shufPerc = 100
+		tranShuffleLoadsAndGens(inNetwork, shufPerc)
+	FNAMEOUT = "118_tranShuffleLoadsAndGens.omt"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inNetwork, outFile, indent=4)
 
-# if __name__ == '__main__':
-# 	_tests()
+if __name__ == '__main__':
+	_tests()

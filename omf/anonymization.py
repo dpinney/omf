@@ -105,28 +105,24 @@ def distTranslateLocations(inFeeder, translation, rotation):
 
 def distAddNoise(inFeeder, noisePerc):
 	''' Add random noise to properties with numeric values for all objects in the inFeeder distribution system based on a noisePerc magnitude. '''
-	noisePerc = float(noisePerc)/100
 	for key in inFeeder['tree']:
 		for prop in inFeeder['tree'][key]:
 			val = inFeeder['tree'][key][prop]
-			# print key, prop, val
 			try:
 				parseVal = float(val)
-				# print parseVal
-				randNoise = random.randint(parseVal - noisePerc*parseVal, parseVal + noisePerc*parseVal)
-				# print parseVal, randNoise
-				inFeeder['tree'][key][prop] = str(randNoise)
-				# print prop, val, randNoise
+				randNoise = random.randint(-noisePerc, noisePerc)/100
+				randVal = parseVal + randNoise*parseVal
+				inFeeder['tree'][key][prop] = str(randVal)
 			except ValueError:
 				try:
 					compVal = complex(val)
 					realVal = float(compVal.real)
 					imagVal = float(compVal.imag)
-					randReal = random.randint(realVal - noisePerc*realVal, realVal + noisePerc*realVal)
-					randImag = random.randint(imagVal - noisePerc*imagVal, imagVal + noisePerc*imagVal)
-					randNoise = complex(randReal, randImag)
-					inFeeder['tree'][key][prop] = str(randNoise)
-					# print prop, val, randNoise
+					randNoise = random.randint(-noisePerc, noisePerc)/100
+					randReal = realVal + randNoise*realVal
+					randImag = imagVal + randNoise*imagVal
+					randVal = complex(randReal, randImag)
+					inFeeder['tree'][key][prop] = str(randVal)
 				except ValueError:
 					continue
 				continue
@@ -446,7 +442,6 @@ def tranTranslateLocations(inNetwork, translation, rotation):
 
 def tranAddNoise(inNetwork, noisePerc):
 	''' Add random noise to properties with numeric values for all objects in the inNetwork transmission system based on a noisePerc magnitude. '''
-	noisePerc = float(noisePerc)/100
 	for array in inNetwork:
 		if (array == 'bus') or (array == 'gen') or (array == 'branch'):
 			for dic in inNetwork[array]:
@@ -458,9 +453,11 @@ def tranAddNoise(inNetwork, noisePerc):
 								val = inNetwork[array][i][key][prop]
 								try:
 									parseVal = float(val)
-									randNoise = random.randint(parseVal - noisePerc*parseVal, parseVal + noisePerc*parseVal)
-									inNetwork[array][i][key][prop] = str(randNoise)
+									randNoise = random.randint(-noisePerc, noisePerc)/100
+									randVal = parseVal + randNoise*parseVal
+									inNetwork[array][i][key][prop] = str(randVal)
 								except ValueError:
+									print 'error'
 									continue
 	return
 
@@ -647,7 +644,7 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 # 	FNAME = "case118.omt"
 # 	with open(FNAME, "r") as inFile:
 # 		inNetwork = json.load(inFile)
-# 		noisePerc = 50
+# 		noisePerc = 100
 # 		tranAddNoise(inNetwork, noisePerc)
 # 	FNAMEOUT = "118_tranAddNoise.omt"
 # 	with open(FNAMEOUT, "w") as outFile:
