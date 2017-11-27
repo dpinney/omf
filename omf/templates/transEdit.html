@@ -143,6 +143,14 @@
                         &nbsp;from&#8220;<span id = 'modelNameHeader'>{{ modelName }}</span>&#8221;
                 </div>
                 <div id="menuRight">
+                        <div id="editDiv" style="display:inline-block">
+                                <div class="buttonGroup">
+                                        <button id="editOps" class='pill' onclick='dropPill(this, "Edit");'>Edit ▾</button>
+                                        <ul class='menu right'>
+                                                <li><a href='javascript:showModal("anonymizeModal");'>Anonymization...</a></li>
+                                        </ul>
+                                </div>
+                        </div>
                         <div id="addDiv" style="display:inline-block">
                                 <div class="buttonGroup">
                                         <button id="addOps" class='pill' onclick='dropPill(this, "Add");'>Add ▾</button>
@@ -211,6 +219,50 @@
                                 </table>
                         </form>
                         <iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
+                </div>
+        </div>
+        <div id='anonymizeModal' class='modal'>
+                <div class='modalContent' id='anonymizeModalContent' style='width:475px'>
+                        <div style='font-weight:bold; font-size:14pt'>Anonymization</div>
+                        <br>
+                        <form onsubmit='anonymize();' action='/anonymizeTran/{{owner}}/{{networkName}}' id='anonymize' enctype='multipart form-data' method='post'>
+                                <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
+                                <input type='hidden' id='modelName' name='modelName' value='{{modelName}}'/>
+                                <div id='anonymizeInputs' align='left'>
+                                        <div style='font-weight:bold; font-size:12pt'>Names and Labels:</div>
+                                        <input type='radio' id='noChange' name='anonymizeNameOption' value='noChange' checked>
+                                        <label for='noChange'>No Change</label>
+                                        <br>
+                                        <input type='radio' id='pseudonymize' name='anonymizeNameOption' value='pseudonymize'>
+                                        <label for='pseudonymize'>Pseudonymize</label>
+                                        <br>
+                                        <input type='radio' id='randomize' name='anonymizeNameOption' value='randomize'>
+                                        <label for='randomize'>Randomize</label>
+                                        <br>
+                                        <br>
+                                        <div style='font-weight:bold; font-size:12pt'>Locations:</div>
+                                        <input type='radio' id='noChange' name='anonymizeLocationOption' value='noChange' checked>
+                                        <label for='noChange'>No Change</label>
+                                        <br>
+                                        <input type='radio' id='translation' name='anonymizeLocationOption' value='translation'>
+                                        <label for='translation'>Translate <input style='width:40px' type='text' id='translate' name='translate'>[ft] and Rotate <input style='width:30px' type='text' id='rotate' name='rotate'>[degrees]</label>
+                                        <br>
+                                        <input type='radio' id='randomize' name='anonymizeLocationOption' value='randomize'>
+                                        <label for='randomize'>Random (Force Layout)</label>
+                                        <br>
+                                        <br>
+                                        <div style='font-weight:bold; font-size:12pt'>Electrical Properties:</div>
+                                        <input type='checkbox' id='shuffleLoadGen' name='electricProperty' value='shuffleLoadGen'>
+                                        <label for='shuffleLoadGen'>Shuffle loads and generators <input style='width:30px' type='text' id='shufflePerc' name='shufflePerc'>[%]</label>
+                                        <br>
+                                        <input type='checkbox' id='addNoise' name='electricProperty' value='addNoise'>
+                                        <label for='addNoise'>Add Noise <input style='width:30px' type='text' id='noisePerc' name='noisePerc'>[%]</label>
+                                        <br>
+                                        <br>
+                                        <button onclick='event.preventDefault();closeModal("anonymizeModal")'>Cancel</button>
+                                        <input type='submit' value='Apply' style='min-width:45px'>
+                                </div>
+                        </form>
                 </div>
         </div>
         <div id='tableScroller'></div>
@@ -990,6 +1042,41 @@ function checkNetworkName(newName) {
                 })
         }
 }
+function startProcess(startUrl) {
+        // Start a long running process using startUrl.
+        $.ajax({
+                url: startUrl
+        }).done(function (data) {
+                console.log(data)
+        })
+}
+function startCheck(checkUrl) {
+        // Do get requests to checkUrl for long running process monitoring.
+        window.setInterval(function checkAPI() {
+                $.ajax({
+                        url: checkUrl
+                }).done(function (data) {
+                        console.log(data)
+                        if (data.exists == true) {
+                                // Still processing.
+                        } else if (data.exists == false) {
+                                // Success processing.
+                                removeProgressDialog()
+                                window.location.reload();
+                        } else {
+                                // Error processing.
+                                alert(data)
+                                removeProgressDialog()
+                                window.location.reload();
+                        }
+                })
+        }, 5000)
+}
+function anonymize() {
+        showProgressDialog('spinner', 'Anonymizing Network')
+        startProcess('/anonymizeTrans/{{owner}}/{{networkName}}')
+        startCheck('/checkAnonymizeTran/{{owner}}/{{modelName}}')
+}
 //ADD PROMPT TO SAVE CHANGES BEFORE EXIT
 {% if is_admin or not public %}
         window.onbeforeunload = function(e) {
@@ -1001,3 +1088,4 @@ function checkNetworkName(newName) {
 </script>
 <script type='text/javascript'>clickCloseEvent("File","fileOps")</script>
 <script type='text/javascript'>clickCloseEvent("Add","addOps")</script>
+<script type='text/javascript'>clickCloseEvent('Edit','editOps')</script>
