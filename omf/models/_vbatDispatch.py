@@ -64,18 +64,20 @@ def work(modelDir, inputDict):
 	demandList = []
 	demandAdjustedList = []
 	dates = []
-	hours = []
 	with open(abs_file_path, 'r') as f:
 		for line in f.readlines():
 			demand = line.partition(',')[2]
 			demand = demand.partition('\n')[0]
-			if demand != 'power':
+			'''if demand != 'power':
+				demand = float(demand)
+				demandList.append(demand)'''
+			try:
 				demand = float(demand)
 				demandList.append(demand)
+			except:
+				print 'found power'
 			if line != 'timestamp,power\n':
 				dates.append(line.partition(' ')[0])
-				hour = line.partition(' ')[2]
-				hours.append(hour.partition(',')[0])
 	peakDemand = [0]*12
 	peakAdjustedDemand = [0]*12
 	energyMonthly = [0]*12
