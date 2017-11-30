@@ -54,7 +54,6 @@ def work(modelDir, inputDict):
 		.replace('ARGS', inputDict['zipcode'] + ',' + inputDict['load_type'] +',[' + inputDict['capacitance'] + ','+ inputDict['resistance'] + 
 			',' + inputDict['power'] + ',' + inputDict['cop'] + ',' + inputDict['deadband'] + ',' + inputDict['setpoint'] + ',' +
 			inputDict['number_devices'] + ']')
-
 	script_dir = os.path.dirname(os.path.dirname(__file__))
 	rel_path = 'static/testFiles/FrankScadaValidCSV.csv'
 	abs_file_path = os.path.join(script_dir, rel_path)
