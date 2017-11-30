@@ -606,8 +606,9 @@
     // Find Function
     var searchCursor
     function findNext() {
-      term = document.getElementById('searchTerm').value
-      hits = findElementsViaString(term)
+      var selected
+      var term = document.getElementById('searchTerm').value
+      var hits = findElementsViaString(term)
       document.getElementById('searchHitCount').innerHTML = hits.length + ' Hits'
       for (i in hits) {
         document.getElementById(hits[i].toString()).classList.remove('selected')
@@ -633,10 +634,15 @@
         }
         tableDestroy()
         tableCreate(testFeeder.tree[selected])
-        x = document.getElementById(selected.toString()).getAttribute('cx')
-        y = document.getElementById(selected.toString()).getAttribute('cy')
-        svgPanZoom('#svgContainer').pan({x: x, y: y})
-        svgPanZoom('#svgContainer').zoom(2)
+        var x = document.getElementById(selected.toString()).getAttribute('cx')
+        var y = document.getElementById(selected.toString()).getAttribute('cy')
+        var panZoom = svgPanZoom('#svgContainer')
+        panZoom.pan({x: 0, y: 0})
+        var realZoom = panZoom.getSizes().realZoom
+        var width = panZoom.getSizes().width/2
+        var height = panZoom.getSizes().height/2
+        panZoom.pan({ x: width-(x*realZoom), y: height-(y*realZoom) })
+        panZoom.zoom(3)
         document.getElementById(selected.toString()).classList.add('selected')
       } 
       catch (err) {

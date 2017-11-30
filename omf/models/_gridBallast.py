@@ -363,8 +363,8 @@ def work(modelDir, inputDict):
 	outData['gridBallast']['rmvt'] = np.std(eventRM)
 	# Availability
 	rmt = 7
-	available = [x[1] > rmt for x in zip(dateTimeStamps, availPerc) if (x[0] <= eventStart) or (x[0] > eventEnd)]
-	outData['gridBallast']['availability'] = 100.0 * sum(available) / (int(inputDict['simLength']) - int(eventLength[1]))
+	available = [x[1] > rmt for x in zip(dateTimeStamps, availPerc) if (x[0] < eventStart) or (x[0] > eventEnd)]
+	outData['gridBallast']['availability'] = 100.0 * sum(available) / (int(inputDict['simLength']) - int(eventLength[1]) - 1)
 	# Waterheater Temperature Drop calculations
 	whTemp = outData['gridBallast']['waterheaterTemp']
 	whTempList = whTemp.values()
@@ -569,8 +569,8 @@ def new(modelDir):
 	defaultInputs = {
 		"modelType": modelName,
 		"zipCode": "59001",
-		"feederName1": "Olin Barre GH EOL Solar GridBallast",
-		# "feederName1": "UCS Egan Housed Solar",
+		# "feederName1": "Olin Barre GH EOL Solar GridBallast",
+		"feederName1": "UCS Egan Housed Solar",
 		# "feederName1": "Connexus West End Final Fixed Solar",
 		"simStartDate": "2012-01-01 12:00:00",
 		"simLength": "180",
