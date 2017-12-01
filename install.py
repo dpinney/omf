@@ -4,14 +4,12 @@ if platform.system() == 'Linux':
 	# if Ubuntu run these commands:
 	if platform.linux_distribution()[0]=="Ubuntu":
 		# git clone https://github.com/dpinney/omf.git
-'''
 		os.system("sudo apt-get install python-pip git unixodbc-dev libfreetype6-dev \
 		pkg-config python-dev python-numpy alien python-pygraphviz \
 		python-pydot ffmpeg mdbtools python-cairocffi python-tk")
 		os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2.0-1.x86_64.rpm")
 		os.system("sudo alien gridlabd-3.2.0-1.x86_64.rpm")
                 os.system("sudo apt-get install libgraphviz-dev")
-'''
 		workDir = os.getcwd()
 		for file in os.listdir(workDir):
 			if file.endswith('.deb'):
@@ -24,7 +22,6 @@ if platform.system() == 'Linux':
 	# if CentOS 7 run these commands:
 	elif platform.linux_distribution()[0]=="CentOS Linux":
 		# git clone https://github.com/dpinney/omf.git
-'''
 		os.system("sudo yum -y install wget git graphviz gcc xerces-c python-devel tkinter 'graphviz-devel.x86_64'")
 		os.system("yum --enablerepo=extras install epel-release")
 		os.system("sudo yum -y install mdbtools")
@@ -34,7 +31,6 @@ if platform.system() == 'Linux':
 		os.system("sudo yum -y install python-pip")
 		os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2.0-1.x86_64.rpm")
 		os.system("rpm -Uvh gridlabd-3.2.0-1.x86_64.rpm")
-'''
 		os.system("cd omf")
 		os.system("pip install -r requirements.txt")
 		os.system("pip install --ignore-installed six")
@@ -48,7 +44,6 @@ elif platform.system()=='Windows':
 	workDir = os.getcwd()
 	# chocoString = "@'%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe' -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command 'iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))' && SET 'PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin'"
 	# os.system(chocoString)
-'''
 	os.system("choco install -y git")
 	os.system("choco install -y wget")
 	os.system("choco install -y python2")
@@ -57,7 +52,6 @@ elif platform.system()=='Windows':
 	os.system("choco install -y ffmpeg")
 	os.system("choco install -y graphviz")
 	os.system("choco install -y pip")
-'''
 	# Sometimes refreshenv doesnt properly update the path variables and pip doesnt work. 
 	# Testing timeout and using refresh multiple times
 	os.system("timeout 5")
@@ -95,7 +89,6 @@ elif platform.system()=='Windows':
 	os.system("python setup.py develop")
 # if Mac run these commands:
 elif platform.system()=="Darwin":
-'''
 	print 'Mac'
 	# Install homebrew
 	os.system('/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
@@ -106,7 +99,6 @@ elif platform.system()=="Darwin":
 	os.system('sudo hdiutil attach gridlabd.dmg')
 	os.system('sudo installer -package /Volumes/GridLAB-D\ 3.2.0/gridlabd.mpkg -target /')
 	os.system('sudo hdiutil detach /Volumes/GridLAB-D\ 3.2.0')
-'''
 	os.system('cd omf')
 	os.system('pip install -r requirements.txt')
 	os.system('python setup.py develop')
