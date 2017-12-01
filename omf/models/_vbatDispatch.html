@@ -1181,6 +1181,40 @@
 				<label class="tooltip">Discount Rate(%)<span class="classic">discountRate</span></label>
 				<input type="text" id="discountRate" name="discountRate" pattern="[1-9][0-9]{0,2}" required="required" title="Positive rational number between 0 and 100">
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Demand Curve (.csv file)<span class="classic">Please see the documentation at the help link for the required format and an example demand file. If this field is blank the OMF will re-use the file from the previous run.</span></label>
+				<script>var fileName=true;</script>
+				<input type="file" id="demandCurveFile" name="demandCurveFile" accept=".csv" onchange="handle_files(this.files)">
+				<input id="demandCurve" name="demandCurve" type="hidden">
+				<!-- Format the file input and populate it with a saved file. -->				
+				<input type="hidden" id="fileName" name="fileName" readonly="readonly">
+				<div id="fileBackground"></div>
+				<div id="fileExists"><label for="demandCurveFile" id="demandCurveFileName"></label></div>
+				<script>
+					if (typeof allInputData.fileName !== 'undefined') {				
+						var FileName = allInputData.fileName;
+						document.getElementById('demandCurveFileName').innerHTML = FileName;
+					}
+					else {
+						document.getElementById('demandCurveFileName').innerHTML = 'Please select a file'
+						gebi('demandCurveFile').setAttribute('required', 'required')}
+					// File handler function.
+					function handle_files(files) {
+						// read file to a hidden input field
+						reader = new FileReader()
+						reader.readAsText(files[0])
+						reader.onload = loaded
+						function loaded(evt) {
+							evt.target.result
+							gebi("demandCurve").value = reader.result
+							var FileName = gebi("demandCurveFile").value.split("\\");
+							var FileName = FileName[FileName.length-1];
+							document.getElementById('demandCurveFileName').innerHTML = FileName;
+							gebi("fileName").value = FileName;
+						}
+					}
+				</script>
+			</div>
 			<!-- Required Buttons -->
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
