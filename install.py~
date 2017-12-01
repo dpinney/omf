@@ -24,7 +24,6 @@ if platform.system() == 'Linux':
 	# if CentOS 7 run these commands:
 	elif platform.linux_distribution()[0]=="CentOS Linux":
 		# git clone https://github.com/dpinney/omf.git
-'''
 		os.system("sudo yum -y install wget git graphviz gcc xerces-c python-devel tkinter 'graphviz-devel.x86_64'")
 		os.system("yum --enablerepo=extras install epel-release")
 		os.system("sudo yum -y install mdbtools")
@@ -34,7 +33,6 @@ if platform.system() == 'Linux':
 		os.system("sudo yum -y install python-pip")
 		os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2.0-1.x86_64.rpm")
 		os.system("rpm -Uvh gridlabd-3.2.0-1.x86_64.rpm")
-'''
 		os.system("cd omf")
 		os.system("pip install -r requirements.txt")
 		os.system("pip install --ignore-installed six")
