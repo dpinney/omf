@@ -349,8 +349,10 @@ function buildNetwork() {
         // Find the size we need for the full chart.
         maxLon = 100, maxLat = 100
         for (num in networkData.bus) {
-                if (networkData.bus[num][String(parseInt(num)+1)]['longitude'] > maxLon) {maxLon = networkData.bus[num][String(parseInt(num)+1)]['longitude']}
-                if (networkData.bus[num][String(parseInt(num)+1)]['latitude'] > maxLat) {maxLat = networkData.bus[num][String(parseInt(num)+1)]['latitude']}
+                key = Object.keys(networkData.bus[num])[0]
+                console.log(key)
+                if (networkData.bus[num][key]['longitude'] > maxLon) {maxLon = networkData.bus[num][key]['longitude']}
+                if (networkData.bus[num][key]['latitude'] > maxLat) {maxLat = networkData.bus[num][key]['latitude']}
         }
         //console.log("maxLon:", maxLon, " maxLat:", maxLat)
         maxLon = Math.round(maxLon + 20.0)

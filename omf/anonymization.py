@@ -491,7 +491,7 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 	for i in inNetwork['bus']:
 		key = inNetwork['bus'][busId].keys()[0]
 		for prop in inNetwork['bus'][busId][key]:
-			if random.randint(0,100) <= shufPerc:
+			if random.randint(0,100) < shufPerc:
 				if 'Qd' in prop:
 					inNetwork['bus'][busId][key]['Qd'] = qParents[qIdx]
 					qIdx += 1
@@ -515,7 +515,7 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 		key = inNetwork['gen'][genId].keys()[0]
 		for prop in inNetwork['gen'][genId][key]:
 			if 'bus' in prop:
-				if random.randint(0,100) <= shufPerc:
+				if random.randint(0,100) < shufPerc:
 					inNetwork['gen'][genId][key]['bus'] = genParents[genIdx]
 					genIdx += 1
 		genId += 1
