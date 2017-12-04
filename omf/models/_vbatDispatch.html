@@ -1181,6 +1181,40 @@
 				<label class="tooltip">Discount Rate(%)<span class="classic">discountRate</span></label>
 				<input type="text" id="discountRate" name="discountRate" pattern="[1-9][0-9]{0,2}" required="required" title="Positive rational number between 0 and 100">
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Demand Curve (.csv file)<span class="classic">Please see the documentation at the help link for the required format and an example demand file. If this field is blank the OMF will re-use the file from the previous run.</span></label>
+				<script>var fileName=true;</script>
+				<input type="file" id="demandCurveFile" name="demandCurveFile" accept=".csv" onchange="handle_files(this.files)">
+				<input id="demandCurve" name="demandCurve" type="hidden">
+				<!-- Format the file input and populate it with a saved file. -->				
+				<input type="hidden" id="fileName" name="fileName" readonly="readonly">
+				<div id="fileBackground"></div>
+				<div id="fileExists"><label for="demandCurveFile" id="demandCurveFileName"></label></div>
+				<script>
+					if (typeof allInputData.fileName !== 'undefined') {				
+						var FileName = allInputData.fileName;
+						document.getElementById('demandCurveFileName').innerHTML = FileName;
+					}
+					else {
+						document.getElementById('demandCurveFileName').innerHTML = 'Please select a file'
+						gebi('demandCurveFile').setAttribute('required', 'required')}
+					// File handler function.
+					function handle_files(files) {
+						// read file to a hidden input field
+						reader = new FileReader()
+						reader.readAsText(files[0])
+						reader.onload = loaded
+						function loaded(evt) {
+							evt.target.result
+							gebi("demandCurve").value = reader.result
+							var FileName = gebi("demandCurveFile").value.split("\\");
+							var FileName = FileName[FileName.length-1];
+							document.getElementById('demandCurveFileName').innerHTML = FileName;
+							gebi("fileName").value = FileName;
+						}
+					}
+				</script>
+			</div>
 			<!-- Required Buttons -->
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
@@ -1205,7 +1239,7 @@
 	</div>
 	<!-- Output tables, graphs, etc. -->
 	<div id="output" class="postRun">
-		<p class="reportTitle postRun" style="page-break-before:always">Power Available</p>
+		<p class="reportTitle postRun" style="page-break-before:always">VBAT Power Available</p>
 		<div id="powerReport" class="tightContent postRun">
 			<div id="powerChart"></div>
 			<script>
@@ -1235,47 +1269,12 @@
 						{"name":"Min Power","marker":{"enabled":false},"color":"red","data":allOutputData.minPowerSeries,"pointPlacement": +0.1},
 						{"name":"Max Power","marker":{"enabled":false},"color":"purple","data":allOutputData.maxPowerSeries,"pointPlacement": -0.2},
 					],
-					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"powerChart","type":"column","marginRight":20, "height":750,"width":1000},
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"powerChart","type":"column","marginRight":20, "height":500,"width":1000},
 					"tooltip":false,
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Energy Available</p>
-		<div id="energyReport" class="tightContent postRun">
-			<div id="energyChart"></div>
-			<script>
-				new Highcharts.Chart({"credits":{"enabled":false},
-					"plotOptions":{
-						"series":{
-							"animation":false,
-							//"pointStart":Date.parse(allOutputData.startDate),
-							"shadow":false,
-							"pointInterval":3600000},
-						"line":{"marker":{"enabled":false}}},
-					"xAxis":{
-						"maxZoom":108000000,
-						"tickColor":"gray",
-						"dateTimeLabelFormats":{
-							"month": '%b %e'
-						},
-						"type":"datetime",
-						"lineColor":"gray"
-					},
-					"yAxis":{
-						"title":{"text":"Energy (kWh)","style":{"color":"gray"}},
-						//"min":allOutputData.differenceMin
-					},
-					"title":{"text":null},
-					"series":[
-						{"name":"Min Energy","marker":{"enabled":false},"color":"red","data":allOutputData.minEnergySeries,"pointPlacement": +0.1},
-						{"name":"Max Energy","marker":{"enabled":false},"color":"purple","data":allOutputData.maxEnergySeries,"pointPlacement": -0.2},
-					],
-					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"energyChart","type":"column","marginRight":20, "height":750,"width":1000},
-					"tooltip":false,
-					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
-			</script>
-		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Power Demand</p>
+		<p class="reportTitle postRun" style="page-break-before:always">VBAT Demand Impact</p>
 		<div id="demandReport" class="tightContent postRun">
 			<div id="demandChart"></div>
 			<script>
@@ -1303,11 +1302,11 @@
 					"title":{"text":null},
 					"series":[
 						{"name":"Demand","marker":{"enabled":false},"color":"red","data":allOutputData.demand},
-						{"name":"Demand after VBAT reduction","marker":{"enabled":false},"color":"purple","data":allOutputData.demandAdjusted},
+						{"name":"Demand after VBAT","marker":{"enabled":false},"color":"purple","data":allOutputData.demandAdjusted},
 					],
-					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"demandChart","type":"column","marginRight":20, "height":750,"width":1000},
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"demandChart","type":"line","marginRight":20, "height":750,"width":1000},
 					"tooltip":false,
-					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":0,"y":0,"layout":"horizontal"}})
 			</script>
 		</div>
 		<p class="reportTitle postRun">Monthly Cost Comparison</p>
@@ -1358,7 +1357,7 @@
 					insertMetric("monthlySummaryTable","Total Cost using VBAT ($)", allOutputData.totalCostAdjusted)
 					insertMetric("monthlySummaryTable","Savings ($)", allOutputData.savings)
 				</script>
-				<script>
+				<!--<script>
 					//table = gebi("monthlySummaryTable")
 					//newRow = table.insertRow()
 					//newRow.insertCell().innerHTML = ""
@@ -1373,18 +1372,18 @@
 					cell.innerHTML = delimitNumbers(allOutputData.SPP.toFixed(3))
 					//cell = newRow.insertCell()
 					//cell.innerHTML + ""
-				</script>
+				</script>-->
 			</div>
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Cash Flow</p>
+		<p class="reportTitle postRun" style="page-break-before:always">Cash Flow Projection</p>
 		<div id="cashFlowReport" class="tightContent postRun">
 			<div id="cashFlowChartDiv"></div>
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
 					"plotOptions":{"column":{"stacking":'normal'},"series":{"animation":false,"shadow":false},"spline":{"animation":false,"shadow":false}},
 					"xAxis":{"title":{"text":"Year After Installation","style":{"color":"gray"}},"type":"linear","tickColor":"gray","tickInterval":1,"lineColor":"gray","minorTickColor":"gray", "minorTickInterval":5},
-					//"title":{"text":"NPV:$" + delimitNumbers(allOutputData.NPV.toFixed(0)) + "; SPP:" + allOutputData.SPP.toFixed(3) + ": LCOE: " + allOutputData.LCOE.toFixed(2) +"$/kWh", "verticalAlign":"bottom", "align":"right", "y":-50, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
-					"title":{"text":""},
+					"title":{"text":"NPV:$" + allOutputData.NPV.toFixed(0) + " ;	SPP:" + allOutputData.SPP.toFixed(3), "verticalAlign":"bottom", "align":"right", "y":-50, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
+					//"title":{"text":""},
 					"series":[{"name":"Net Benefits", "data":allOutputData.netCashflow},
 						{"name":"Cumulative Return", "type":"spline", "data":allOutputData.cumulativeCashflow}
 					],

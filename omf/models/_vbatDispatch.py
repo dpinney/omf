@@ -10,9 +10,6 @@ import __neoMetaModel__
 from __neoMetaModel__ import *
 import random
 import csv
-#trying something
-import ctypes  # An included library with Python install.   
-
 	
 # Model metadata:
 fileName = os.path.basename(__file__)
@@ -57,25 +54,40 @@ def work(modelDir, inputDict):
 		.replace('ARGS', inputDict['zipcode'] + ',' + inputDict['load_type'] +',[' + inputDict['capacitance'] + ','+ inputDict['resistance'] + 
 			',' + inputDict['power'] + ',' + inputDict['cop'] + ',' + inputDict['deadband'] + ',' + inputDict['setpoint'] + ',' +
 			inputDict['number_devices'] + ']')
-
 	script_dir = os.path.dirname(os.path.dirname(__file__))
-	rel_path = 'static\\testFiles\\FrankScadaValidCSV.csv'
+	rel_path = 'static/testFiles/FrankScadaValidCSV.csv'
 	abs_file_path = os.path.join(script_dir, rel_path)
 	demandList = []
 	demandAdjustedList = []
 	dates = []
-	hours = []
-	with open(abs_file_path, 'r') as f:
+	with open(pJoin(modelDir,"demand.csv"),"w") as demandFile:
+		demandFile.write(inputDict['demandCurve'])
+	'''with open(abs_file_path, 'r') as f:
 		for line in f.readlines():
 			demand = line.partition(',')[2]
 			demand = demand.partition('\n')[0]
-			if demand != 'power':
+			try:
 				demand = float(demand)
 				demandList.append(demand)
-			if line != 'timestamp,power\n':
 				dates.append(line.partition(' ')[0])
-				hour = line.partition(' ')[2]
-				hours.append(hour.partition(',')[0])
+			except:
+				print 'Skipped header' '''
+	try:
+		#dc = []
+		with open(pJoin(modelDir,"demand.csv")) as inFile:
+			reader = csv.DictReader(inFile)
+			for row in reader:
+				#dc.append({'datetime': parse(row['timestamp']), 'power': float(row['power'])})
+				demandList.append(float(row['power']))
+				dates.append(row['timestamp'])
+			if len(demandList)!=8760: raise Exception
+	except:
+		e = sys.exc_info()[0]
+		if str(e) == "<type 'exceptions.SystemExit'>":
+			pass
+		'''else:
+			errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href = 'https://github.com/dpinney/omf/wiki/Models-~-storagePeakShave#demand-file-csv-format'>\nOMF Wiki storagePeakShave - Demand File CSV Format</a>"
+			raise Exception(errorMessage)'''
 	peakDemand = [0]*12
 	peakAdjustedDemand = [0]*12
 	energyMonthly = [0]*12
@@ -172,6 +184,7 @@ def work(modelDir, inputDict):
 		outData["stdout"] = "Failure"
 		inputDict["stderr"] = myOut
 	return outData
+
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
@@ -191,9 +204,12 @@ def new(modelDir):
 		"discountRate":"2",
 		"unitDeviceCost":"100",
 		"unitUpkeepCost":"5",
+		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidCSV.csv")).read(),
+		"fileName": "FrankScadaValidCSV.csv",
 		"modelType":modelName}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	return creationCode
+
 def _simpleTest():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)

@@ -9,6 +9,7 @@ if platform.system() == 'Linux':
 		python-pydot ffmpeg mdbtools python-cairocffi python-tk")
 		os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2.0-1.x86_64.rpm")
 		os.system("sudo alien gridlabd-3.2.0-1.x86_64.rpm")
+                os.system("sudo apt-get install libgraphviz-dev")
 		workDir = os.getcwd()
 		for file in os.listdir(workDir):
 			if file.endswith('.deb'):
