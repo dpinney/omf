@@ -1054,11 +1054,13 @@ def anonymize(owner, feederName):
 def backgroundAnonymize(modelDir, omdPath):
 	with open(omdPath, 'r') as inFile:
 		inFeeder = json.load(inFile)
+		# Name Option
 		nameOption = request.form.get('anonymizeNameOption')
 		if nameOption == 'pseudonymize':
 			anonymization.distPseudomizeNames(inFeeder)
 		elif nameOption == 'randomize':
 			anonymization.distRandomizeNames(inFeeder)
+		# Location Option
 		locOption = request.form.get('anonymizeLocationOption')
 		if locOption == 'translation':
 			translation = request.form.get('translate')
@@ -1066,16 +1068,16 @@ def backgroundAnonymize(modelDir, omdPath):
 			anonymization.distTranslateLocations(inFeeder, translation, rotation)
 		elif locOption == 'randomize':
 			anonymization.distRandomizeLocations(inFeeder)
-		elecProp = request.form.get('electricProperty')
-		if elecProp == 'modifyLengthSize':
+		# Electrical Properties
+		if request.form.get('modifyLengthSize'):
 			anonymization.distModifyTriplexLengths(inFeeder)
 			anonymization.distModifyConductorLengths(inFeeder)
-		elif elecProp == 'smoothLoadGen':
+		if request.form.get('smoothLoadGen'):
 			anonymization.distSmoothLoads(inFeeder)
-		elif elecProp == 'shuffleLoadGen':
+		if request.form.get('shuffleLoadGen'):
 			shufPerc = request.form.get('shufflePerc')
 			anonymization.distShuffleLoads(inFeeder, shufPerc)
-		elif elecProp == 'addNoise':
+		if request.form.get('addNoise'):
 			noisePerc = request.form.get('noisePerc')
 			anonymization.distAddNoise(inFeeder, noisePerc)
 	with open(omdPath, 'w') as outFile:
@@ -1105,11 +1107,13 @@ def anonymizeTran(owner, networkName):
 def backgroundAnonymizeTran(modelDir, omtPath):
 	with open(omtPath, 'r') as inFile:
 		inNetwork = json.load(inFile)
+		# Name Options
 		nameOption = request.form.get('anonymizeNameOption')
 		if nameOption == 'pseudonymize':
 			anonymization.tranPseudomizeNames(inNetwork)
 		elif nameOption == 'randomize':
 			anonymization.tranRandomizeNames(inNetwork)
+		# Location Options
 		locOption = request.form.get('anonymizeLocationOption')
 		if locOption == 'translation':
 			translation = request.form.get('translate')
@@ -1117,11 +1121,11 @@ def backgroundAnonymizeTran(modelDir, omtPath):
 			anonymization.tranTranslateLocations(inNetwork, translation, rotation)
 		elif locOption == 'randomize':
 			anonymization.tranRandomizeLocations(inNetwork)
-		elecProp = request.form.get('electricProperty')
-		if elecProp == 'shuffleLoadGen':
+		# Electrical Properties
+		if request.form.get('shuffleLoadGen'):
 			shufPerc = request.form.get('shufflePerc')
 			anonymization.tranShuffleLoadsAndGens(inNetwork, shufPerc)
-		elif elecProp == 'addNoise':
+		if request.form.get('addNoise'):
 			noisePerc = request.form.get('noisePerc')
 			anonymization.tranAddNoise(inNetwork, noisePerc)
 	with open(omtPath, 'w') as outFile:
