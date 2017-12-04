@@ -108,81 +108,77 @@ def work(modelDir, inputDict):
 		if demandList[x] > peakDemand[int(dates[x][:2])-1]: #month number, -1 gives the index of peakDemand
 			peakDemand[int(dates[x][:2])-1] = demandList[x]
 		energyMonthly[int(dates[x][:2])-1] += demandList[x]
-	try:
-		myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
-		P_lower = myOut.partition("P_lower =\n\n")[2]
-		P_lower = P_lower.partition("\n\nn")[0]
-		P_lower = map(float,P_lower.split('\n'))
-		P_upper = myOut.partition("P_upper =\n\n")[2]
-		P_upper = P_upper.partition("\n\nn")[0]
-		P_upper = map(float,P_upper.split('\n'))
-		E_UL = myOut.partition("E_UL =\n\n")[2]
-		E_UL = E_UL.partition("\n\n")[0]
-		E_UL = map(float,E_UL.split('\n'))
-		for x,y in zip(P_upper,demandList):
-			demandAdjustedList.append(y-x)
-		for x in range(8760):
-			if demandAdjustedList[x] > peakAdjustedDemand[int(dates[x][:2])-1]:
-				peakAdjustedDemand[int(dates[x][:2])-1] = demandAdjustedList[x]
-			energyAdjustedMonthly[int(dates[x][:2])-1] += demandAdjustedList[x]
-		# Format results to go in chart.
-		outData["minPowerSeries"] = [-1*x for x in P_lower]
-		outData["maxPowerSeries"] = P_upper
-		outData["minEnergySeries"] = [-1*x for x in E_UL]
-		outData["maxEnergySeries"] = E_UL
-		outData["demand"] = demandList
-		outData["demandAdjusted"] = demandAdjustedList
-		outData["peakDemand"] = peakDemand
-		outData["peakAdjustedDemand"] = peakAdjustedDemand
-		outData["energyMonthly"] = energyMonthly
-		outData["energyAdjustedMonthly"] = energyAdjustedMonthly
-		for x in range(12):
-			energyCost[x] = energyMonthly[x]*float(inputDict["electricityCost"])
-			energyCostAdjusted[x] = energyAdjustedMonthly[x]*float(inputDict["electricityCost"])
-			demandCharge[x] = peakDemand[x]*float(inputDict["demandChargeCost"])
-			demandChargeAdjusted[x] = peakAdjustedDemand[x]*float(inputDict["demandChargeCost"])
-			totalCost[x] = energyCost[x] + demandCharge[x]
-			totalCostAdjusted[x] = energyCostAdjusted[x] + demandChargeAdjusted[x]
-			savings[x] = totalCost[x] - totalCostAdjusted[x]
-			cashFlow += savings[x]
-		cashFlowList[0] = cashFlow
-		if cashFlow ==0:
-			SPP = 0
+	myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
+	P_lower = myOut.partition("P_lower =\n\n")[2]
+	P_lower = P_lower.partition("\n\nn")[0]
+	P_lower = map(float,P_lower.split('\n'))
+	P_upper = myOut.partition("P_upper =\n\n")[2]
+	P_upper = P_upper.partition("\n\nn")[0]
+	P_upper = map(float,P_upper.split('\n'))
+	E_UL = myOut.partition("E_UL =\n\n")[2]
+	E_UL = E_UL.partition("\n\n")[0]
+	E_UL = map(float,E_UL.split('\n'))
+	for x,y in zip(P_upper,demandList):
+		demandAdjustedList.append(y-x)
+	for x in range(8760):
+		if demandAdjustedList[x] > peakAdjustedDemand[int(dates[x][:2])-1]:
+			peakAdjustedDemand[int(dates[x][:2])-1] = demandAdjustedList[x]
+		energyAdjustedMonthly[int(dates[x][:2])-1] += demandAdjustedList[x]
+	# Format results to go in chart.
+	outData["minPowerSeries"] = [-1*x for x in P_lower]
+	outData["maxPowerSeries"] = P_upper
+	outData["minEnergySeries"] = [-1*x for x in E_UL]
+	outData["maxEnergySeries"] = E_UL
+	outData["demand"] = demandList
+	outData["demandAdjusted"] = demandAdjustedList
+	outData["peakDemand"] = peakDemand
+	outData["peakAdjustedDemand"] = peakAdjustedDemand
+	outData["energyMonthly"] = energyMonthly
+	outData["energyAdjustedMonthly"] = energyAdjustedMonthly
+	for x in range(12):
+		energyCost[x] = energyMonthly[x]*float(inputDict["electricityCost"])
+		energyCostAdjusted[x] = energyAdjustedMonthly[x]*float(inputDict["electricityCost"])
+		demandCharge[x] = peakDemand[x]*float(inputDict["demandChargeCost"])
+		demandChargeAdjusted[x] = peakAdjustedDemand[x]*float(inputDict["demandChargeCost"])
+		totalCost[x] = energyCost[x] + demandCharge[x]
+		totalCostAdjusted[x] = energyCostAdjusted[x] + demandChargeAdjusted[x]
+		savings[x] = totalCost[x] - totalCostAdjusted[x]
+		cashFlow += savings[x]
+	cashFlowList[0] = cashFlow
+	if cashFlow ==0:
+		SPP = 0
+	else:
+		SPP = (float(inputDict["unitDeviceCost"])+float(inputDict["unitUpkeepCost"]))*float(inputDict["number_devices"])/cashFlow
+	for x in range(int(inputDict["projectionLength"])):
+		if x >0:
+			cashFlowList[x] = (cashFlowList[x-1])/(1+float(inputDict["discountRate"])/100)
+	for x in cashFlowList:
+		NPV +=x
+	NPV -= float(inputDict["unitDeviceCost"])*float(inputDict["number_devices"])
+	cashFlowList[0] -= float(inputDict["unitDeviceCost"])*float(inputDict["number_devices"])
+	for x in range(int(inputDict["projectionLength"])):
+		if x == 0:
+			cumulativeCashflow[x] = cashFlowList[x]
 		else:
-			SPP = (float(inputDict["unitDeviceCost"])+float(inputDict["unitUpkeepCost"]))*float(inputDict["number_devices"])/cashFlow
-		for x in range(int(inputDict["projectionLength"])):
-			if x >0:
-				cashFlowList[x] = (cashFlowList[x-1])/(1+float(inputDict["discountRate"])/100)
-		for x in cashFlowList:
-			NPV +=x
-		NPV -= float(inputDict["unitDeviceCost"])*float(inputDict["number_devices"])
-		cashFlowList[0] -= float(inputDict["unitDeviceCost"])*float(inputDict["number_devices"])
-		for x in range(int(inputDict["projectionLength"])):
-			if x == 0:
-				cumulativeCashflow[x] = cashFlowList[x]
-			else:
-				cumulativeCashflow[x] = cumulativeCashflow[x-1] + cashFlowList[x]
-		for x in cumulativeCashflow:
-			x -= float(inputDict["unitUpkeepCost"])
-		for x in cashFlowList:
-			x -= float(inputDict["unitUpkeepCost"])
-		outData["energyCost"] = energyCost
-		outData["energyCostAdjusted"] = energyCostAdjusted
-		outData["demandCharge"] = demandCharge
-		outData["demandChargeAdjusted"] = demandChargeAdjusted
-		outData["totalCost"] = totalCost
-		outData["totalCostAdjusted"] = totalCostAdjusted
-		outData["savings"] = savings
-		outData["NPV"] = NPV
-		outData["SPP"] = SPP
-		outData["netCashflow"] = cashFlowList	#netCashflow
-		outData["cumulativeCashflow"] = cumulativeCashflow
-		# Stdout/stderr.
-		outData["stdout"] = "Success"
-		#inputDict["stderr"] = ""
-	except:
-		outData["stdout"] = "Failure"
-		inputDict["stderr"] = myOut
+			cumulativeCashflow[x] = cumulativeCashflow[x-1] + cashFlowList[x]
+	for x in cumulativeCashflow:
+		x -= float(inputDict["unitUpkeepCost"])
+	for x in cashFlowList:
+		x -= float(inputDict["unitUpkeepCost"])
+	outData["energyCost"] = energyCost
+	outData["energyCostAdjusted"] = energyCostAdjusted
+	outData["demandCharge"] = demandCharge
+	outData["demandChargeAdjusted"] = demandChargeAdjusted
+	outData["totalCost"] = totalCost
+	outData["totalCostAdjusted"] = totalCostAdjusted
+	outData["savings"] = savings
+	outData["NPV"] = NPV
+	outData["SPP"] = SPP
+	outData["netCashflow"] = cashFlowList	#netCashflow
+	outData["cumulativeCashflow"] = cumulativeCashflow
+	# Stdout/stderr.
+	outData["stdout"] = "Success"
+	#inputDict["stderr"] = ""
 	return outData
 
 def new(modelDir):
