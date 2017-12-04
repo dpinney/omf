@@ -350,7 +350,7 @@ def tranPseudomizeNames(inNetwork):
 				for prop in inNetwork['bus'][i][key]:
 					if 'bus_i' in prop:
 						oldBus = inNetwork['bus'][i][key]['bus_i']
-						newBus = busKey[busIdx]
+						newBus = busKeys[busIdx]
 						busIdx += 1
 						newBusKey.update({oldBus:newBus})
 						inNetwork['bus'][i][key]['bus_i'] = newBus
@@ -399,7 +399,7 @@ def tranRandomizeNames(inNetwork):
 				for prop in inNetwork['bus'][i][key]:
 					if 'bus_i' in prop:
 						oldBus = inNetwork['bus'][i][key]['bus_i']
-						newBus = busKey[busIdx]
+						newBus = busKeys[busIdx]
 						busIdx += 1
 						newBusKey.update({oldBus:newBus})
 						inNetwork['bus'][i][key]['bus_i'] = newBus
