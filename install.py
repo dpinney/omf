@@ -6,7 +6,7 @@ if platform.system() == 'Linux':
 		# git clone https://github.com/dpinney/omf.git
 		os.system("sudo apt-get install python-pip git unixodbc-dev libfreetype6-dev \
 		pkg-config python-dev python-numpy alien python-pygraphviz \
-		python-pydot ffmpeg mdbtools python-cairocffi python-tk")
+		python-pydot ffmpeg mdbtools python-cairocffi python-tk octave")
 		os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2.0-1.x86_64.rpm")
 		os.system("sudo alien gridlabd-3.2.0-1.x86_64.rpm")
                 os.system("sudo apt-get install libgraphviz-dev")
@@ -22,7 +22,7 @@ if platform.system() == 'Linux':
 	# if CentOS 7 run these commands:
 	elif platform.linux_distribution()[0]=="CentOS Linux":
 		# git clone https://github.com/dpinney/omf.git
-		os.system("sudo yum -y install wget git graphviz gcc xerces-c python-devel tkinter 'graphviz-devel.x86_64'")
+		os.system("sudo yum -y install wget git graphviz gcc xerces-c python-devel tkinter octave 'graphviz-devel.x86_64'")
 		os.system("yum --enablerepo=extras install epel-release")
 		os.system("sudo yum -y install mdbtools")
 		os.system("sudo rpm --import http://li.nux.ro/download/nux/RPM-GPG-KEY-nux.ro")
@@ -52,6 +52,7 @@ elif platform.system()=='Windows':
 	os.system("choco install -y ffmpeg")
 	os.system("choco install -y graphviz")
 	os.system("choco install -y pip")
+	os.system("choco install -y octave")
 	# Sometimes refreshenv doesnt properly update the path variables and pip doesnt work. 
 	# Testing timeout and using refresh multiple times
 	os.system("timeout 5")
@@ -92,7 +93,7 @@ elif platform.system()=="Darwin":
 	print 'Mac'
 	# Install homebrew
 	os.system('/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
-	os.system('brew install wget python ffmpeg git graphviz')
+	os.system('brew install wget python ffmpeg git graphviz octave')
 	os.system('brew link --overwrite python')
 	# Works for gridlab version 3.2, will need to update when we use gridlabd v4
 	os.system('wget -O gridlabd.dmg --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd_3.2.0.dmg')
