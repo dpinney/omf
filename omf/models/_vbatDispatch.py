@@ -62,32 +62,18 @@ def work(modelDir, inputDict):
 	dates = []
 	with open(pJoin(modelDir,"demand.csv"),"w") as demandFile:
 		demandFile.write(inputDict['demandCurve'])
-	'''with open(abs_file_path, 'r') as f:
-		for line in f.readlines():
-			demand = line.partition(',')[2]
-			demand = demand.partition('\n')[0]
-			try:
-				demand = float(demand)
-				demandList.append(demand)
-				dates.append(line.partition(' ')[0])
-			except:
-				print 'Skipped header' '''
 	try:
-		#dc = []
 		with open(pJoin(modelDir,"demand.csv")) as inFile:
 			reader = csv.DictReader(inFile)
 			for row in reader:
-				#dc.append({'datetime': parse(row['timestamp']), 'power': float(row['power'])})
 				demandList.append(float(row['power']))
+				#TODO: catch date issues. datetime.datetime.strptime('%Y-%M-%D %H:%M:%S')
 				dates.append(row['timestamp'])
-			if len(demandList)!=8760: raise Exception
+			if len(demandList) != 8760:
+				raise Exception
 	except:
-		e = sys.exc_info()[0]
-		if str(e) == "<type 'exceptions.SystemExit'>":
-			pass
-		'''else:
-			errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href = 'https://github.com/dpinney/omf/wiki/Models-~-storagePeakShave#demand-file-csv-format'>\nOMF Wiki storagePeakShave - Demand File CSV Format</a>"
-			raise Exception(errorMessage)'''
+		errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href = 'https://github.com/dpinney/omf/wiki/Models-~-storagePeakShave#demand-file-csv-format'>\nOMF Wiki storagePeakShave - Demand File CSV Format</a>"
+		raise Exception(errorMessage)
 	peakDemand = [0]*12
 	peakAdjustedDemand = [0]*12
 	energyMonthly = [0]*12
