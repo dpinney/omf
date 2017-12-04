@@ -331,7 +331,8 @@ def distSmoothLoads(inFeeder):
 def tranPseudomizeNames(inNetwork):
 	''' Replace all names in the inNetwork transmission system with pseudonames composed of the object type and a random ID. Return a key with name and ID pairs. '''
 	newBusKey = {}
-	randomID = random.randint(0,100)
+	busKeys = []
+	busIdx = 0
 	# Create busKey dictionary
 	for dic in inNetwork['bus']:
 		for each in dic:
@@ -340,10 +341,19 @@ def tranPseudomizeNames(inNetwork):
 				for prop in inNetwork['bus'][i][key]:
 					if 'bus_i' in prop:
 						oldBus = inNetwork['bus'][i][key]['bus_i']
-						newBus = 'bus' + str(randomID)
+						busKeys.append(oldBus)
+	random.shuffle(busKeys)
+	for dic in inNetwork['bus']:
+		for each in dic:
+			i = int(each) - 1
+			for key in inNetwork['bus'][i]:
+				for prop in inNetwork['bus'][i][key]:
+					if 'bus_i' in prop:
+						oldBus = inNetwork['bus'][i][key]['bus_i']
+						newBus = busKey[busIdx]
+						busIdx += 1
 						newBusKey.update({oldBus:newBus})
 						inNetwork['bus'][i][key]['bus_i'] = newBus
-						randomID += 1
 	# Replace busNames in generators
 	for dic in inNetwork['gen']:
 		for each in dic:
@@ -370,7 +380,8 @@ def tranPseudomizeNames(inNetwork):
 def tranRandomizeNames(inNetwork):
 	''' Replace all names in the inNetwork transmission system with pseudonames composed of the object type and a random ID. '''
 	newBusKey = {}
-	randomID = random.randint(0,100)
+	busKeys = []
+	busIdx = 0
 	# Create busKey dictionary
 	for dic in inNetwork['bus']:
 		for each in dic:
@@ -379,10 +390,19 @@ def tranRandomizeNames(inNetwork):
 				for prop in inNetwork['bus'][i][key]:
 					if 'bus_i' in prop:
 						oldBus = inNetwork['bus'][i][key]['bus_i']
-						newBus = 'bus' + str(randomID)
+						busKeys.append(oldBus)
+	random.shuffle(busKeys)
+	for dic in inNetwork['bus']:
+		for each in dic:
+			i = int(each) - 1
+			for key in inNetwork['bus'][i]:
+				for prop in inNetwork['bus'][i][key]:
+					if 'bus_i' in prop:
+						oldBus = inNetwork['bus'][i][key]['bus_i']
+						newBus = busKey[busIdx]
+						busIdx += 1
 						newBusKey.update({oldBus:newBus})
 						inNetwork['bus'][i][key]['bus_i'] = newBus
-						randomID += 1
 	# Replace busNames in generators
 	for dic in inNetwork['gen']:
 		for each in dic:
