@@ -61,14 +61,17 @@ def work(modelDir, inputDict):
 	demandAdjustedList = []
 	dates = []
 	with open(pJoin(modelDir,"demand.csv"),"w") as demandFile:
-		demandFile.write(inputDict['demandCurve'])
+		print inputDict['demandCurve'].replace('\r','')
+		#demandFile.write(inputDict['demandCurve'])
+		demandFile.write(inputDict['demandCurve'].replace('\r',''))
 	try:
 		with open(pJoin(modelDir,"demand.csv")) as inFile:
 			reader = csv.DictReader(inFile)
 			for row in reader:
 				demandList.append(float(row['power']))
 				#TODO: catch date issues. datetime.datetime.strptime('%Y-%M-%D %H:%M:%S')
-				dates.append(row['timestamp'])
+				#dates.append(row['timestamp'])
+				dates.append(row['timestamp'].partition('/')[0])
 			if len(demandList) != 8760:
 				raise Exception
 	except:
@@ -91,9 +94,9 @@ def work(modelDir, inputDict):
 	NPV = 0
 	#netCashflow = [0]*(int(inputDict["projectionLength"])+1)
 	for x in range(8760):
-		if demandList[x] > peakDemand[int(dates[x][:2])-1]: #month number, -1 gives the index of peakDemand
-			peakDemand[int(dates[x][:2])-1] = demandList[x]
-		energyMonthly[int(dates[x][:2])-1] += demandList[x]
+		if demandList[x] > peakDemand[int(dates[x])-1]: #month number, -1 gives the index of peakDemand
+			peakDemand[int(dates[x])-1] = demandList[x]
+		energyMonthly[int(dates[x])-1] += demandList[x]
 	myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
 	P_lower = myOut.partition("P_lower =\n\n")[2]
 	P_lower = P_lower.partition("\n\nn")[0]
@@ -107,9 +110,9 @@ def work(modelDir, inputDict):
 	for x,y in zip(P_upper,demandList):
 		demandAdjustedList.append(y-x)
 	for x in range(8760):
-		if demandAdjustedList[x] > peakAdjustedDemand[int(dates[x][:2])-1]:
-			peakAdjustedDemand[int(dates[x][:2])-1] = demandAdjustedList[x]
-		energyAdjustedMonthly[int(dates[x][:2])-1] += demandAdjustedList[x]
+		if demandAdjustedList[x] > peakAdjustedDemand[int(dates[x])-1]:
+			peakAdjustedDemand[int(dates[x])-1] = demandAdjustedList[x]
+		energyAdjustedMonthly[int(dates[x])-1] += demandAdjustedList[x]
 	# Format results to go in chart.
 	outData["minPowerSeries"] = [-1*x for x in P_lower]
 	outData["maxPowerSeries"] = P_upper
