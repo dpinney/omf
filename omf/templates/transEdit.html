@@ -348,11 +348,13 @@ function addLine(x1,y1,x2,y2,id,myClass) {
 function buildNetwork() {
         // Find the size we need for the full chart.
         maxLon = 100, maxLat = 100
+        busNumMap = {}
         for (num in networkData.bus) {
-                key = Object.keys(networkData.bus[num])[0]
-                console.log(key)
-                if (networkData.bus[num][key]['longitude'] > maxLon) {maxLon = networkData.bus[num][key]['longitude']}
-                if (networkData.bus[num][key]['latitude'] > maxLat) {maxLat = networkData.bus[num][key]['latitude']}
+                busKey = Object.keys(networkData.bus[num])[0]
+                busNum = networkData.bus[num][busKey]['bus_i']
+                busNumMap[busNum] = num
+                if (networkData.bus[num][busKey]['longitude'] > maxLon) {maxLon = networkData.bus[num][busKey]['longitude']}
+                if (networkData.bus[num][busKey]['latitude'] > maxLat) {maxLat = networkData.bus[num][busKey]['latitude']}
         }
         //console.log("maxLon:", maxLon, " maxLat:", maxLat)
         maxLon = Math.round(maxLon + 20.0)
@@ -370,30 +372,38 @@ function buildNetwork() {
         })
         // Go through and add all lines first
         for (num in networkData.branch) {
+                branchKey = Object.keys(networkData.branch[num])[0]
                 try {
-                        anOb = networkData.branch[num][String(parseInt(num)+1)]
-                        fNum = networkData.branch[num][String(parseInt(num)+1)]['fbus']
-                        tNum = networkData.branch[num][String(parseInt(num)+1)]['tbus']
-                        fromOb = networkData.bus[parseInt(fNum)-1][fNum]
-                        toOb = networkData.bus[parseInt(tNum)-1][tNum]
-                        addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],"branch_"+String(parseInt(num)+1),"branch" + ' p' + phaseCount(anOb))
+                        anOb = networkData.branch[num][branchKey]
+                        fNum = networkData.branch[num][branchKey]['fbus']
+                        tNum = networkData.branch[num][branchKey]['tbus']
+                        // fromOb = networkData.bus[parseInt(fNum)-1][fNum]
+                        // toOb = networkData.bus[parseInt(tNum)-1][tNum]
+                        fBusNum = busNumMap[fNum]
+                        tBusNum = busNumMap[tNum]
+                        fromOb = networkData.bus[fBusNum][fNum]
+                        toOb = networkData.bus[tBusNum][tNum]
+                        addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],"branch_"+branchKey,"branch" + ' p' + phaseCount(anOb))
                 } catch(e) {}
         }
         // Add buses after all lines
         for (num in networkData.bus) {
+                busKey = Object.keys(networkData.bus[num])[0]
                 try {
-                        anOb = networkData.bus[num][String(parseInt(num)+1)]
-                        addCircle(anOb['longitude'], anOb['latitude'],5,"bus_"+String(parseInt(num)+1),"bus")
+                        anOb = networkData.bus[num][busKey]
+                        addCircle(anOb['longitude'], anOb['latitude'],5,"bus_"+busKey,"bus")
                 } catch(e) {}
         }
         // Draw generators over busses
         for (num in networkData.gen) {
+                genKey = Object.keys(networkData.gen[num])[0]
                 try {
-                        anOb = networkData.gen[num][String(parseInt(num)+1)]
-                        var longitude = networkData.bus[String(parseInt(anOb['bus'])-1)][anOb['bus']]['longitude']
-                        var latitude = networkData.bus[String(parseInt(anOb['bus'])-1)][anOb['bus']]['latitude']
+                        anOb = networkData.gen[num][genKey]
+                        busNum = busNumMap[anOb['bus']]
+                        var longitude = networkData.bus[busNum][anOb['bus']]['longitude']
+                        var latitude = networkData.bus[busNum][anOb['bus']]['latitude']
                         var width = 4
-                        addRectangle(longitude-width/2,latitude-width/2,width,width,"gen_"+String(parseInt(num)+1),"gen")
+                        addRectangle(longitude-width/2,latitude-width/2,width,width,"gen_"+genKey,"gen")
                 } catch(e) {}
         }
 }
