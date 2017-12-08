@@ -1057,7 +1057,7 @@ def backgroundAnonymize(modelDir, omdPath):
 		# Name Option
 		nameOption = request.form.get('anonymizeNameOption')
 		if nameOption == 'pseudonymize':
-			anonymization.distPseudomizeNames(inFeeder)
+			newNameKey = anonymization.distPseudomizeNames(inFeeder)
 		elif nameOption == 'randomize':
 			anonymization.distRandomizeNames(inFeeder)
 		# Location Option
@@ -1083,6 +1083,8 @@ def backgroundAnonymize(modelDir, omdPath):
 	with open(omdPath, 'w') as outFile:
 		json.dump(inFeeder, outFile, indent=4)
 	os.remove(modelDir + '/PPID.txt')
+	if newNameKey:
+		return newNameKey
 
 @app.route("/checkAnonymize/<owner>/<modelName>", methods=["POST","GET"])
 def checkAnonymize(owner, modelName):
@@ -1110,7 +1112,7 @@ def backgroundAnonymizeTran(modelDir, omtPath):
 		# Name Options
 		nameOption = request.form.get('anonymizeNameOption')
 		if nameOption == 'pseudonymize':
-			anonymization.tranPseudomizeNames(inNetwork)
+			newBusKey = anonymization.tranPseudomizeNames(inNetwork)
 		elif nameOption == 'randomize':
 			anonymization.tranRandomizeNames(inNetwork)
 		# Location Options
@@ -1131,6 +1133,8 @@ def backgroundAnonymizeTran(modelDir, omtPath):
 	with open(omtPath, 'w') as outFile:
 		json.dump(inNetwork, outFile, indent=4)
 	os.remove(modelDir + '/TPPID.txt')
+	if newBusKey:
+		return newBusKey
 
 @app.route("/checkAnonymizeTran/<owner>/<modelName>", methods=["POST","GET"])
 def checkAnonymizeTran(owner, modelName):
