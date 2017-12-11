@@ -338,6 +338,8 @@ def work(modelDir, inputDict):
 		'lineUnitCost' : inputDict['lineUnitCost']
 
 	}
+	if inputDict['scenarios'] != "":
+		print "kjojojuijojoj"
 	gfmJson = convertToGFM(gfmInputTemplate, feederModel)
 	gfmInputFilename = 'gfmInput.json'
 	with open(pJoin(modelDir, gfmInputFilename), "w") as outFile:
@@ -348,7 +350,12 @@ def work(modelDir, inputDict):
 	proc.wait()
 	# HACK: rename the hardcoded gfm output
 	rdtInputFilePath = pJoin(modelDir,'rdtInput.json')
+	print 'Before weird RENAMING STUFF!!!!'
 	os.rename(pJoin(modelDir,'rdt_OUTPUT.json'),rdtInputFilePath)
+	# print 'RENAME FROM', pJoin(modelDir,'rdt_OUTPUT.json')
+	# print 'RENAME TO', rdtInputFilePath
+	# print 'After weird RENAMING STUFF!!!!'
+	#raise Exception('Go no further')
 	# Pull GFM input data on lines and generators for HTML presentation.
 	with open(rdtInputFilePath, 'r') as rdtInputFile:
 		# HACK: we use rdtInput as a string in the frontend.
@@ -361,6 +368,10 @@ def work(modelDir, inputDict):
 	outData["lineData"] = lineData
 	outData["generatorData"] = '{:,.2f}'.format(float(inputDict["dgUnitCost"]) * float(inputDict["maxDGPerGenerator"]))
 	outData['gfmRawOut'] = rdtJsonAsString
+	#if inputDict['scenarios'] == "":
+	#	rdtJson['scenarios'] = inputDict['scenarios']
+	#	with open(pJoin(rdtInputFilePath), "w") as rdtInputFile:
+	#		json.dump(rdtJson, rdtInputFile, indent=4)
 	# Run GridLAB-D first time to generate xrMatrices.
 	if platform.system() == "Windows":
 		omdPath = pJoin(modelDir, feederName + ".omd")
@@ -375,12 +386,12 @@ def work(modelDir, inputDict):
 					if (newLine == omd["tree"][omdObj]["name"]):
 						deleteList.append(omdObj)
 		for delItem in deleteList:
-			print delItem
 			del omd["tree"][delItem]
 		#Load a blank glm file and use it to write to it
 		feederPath = pJoin(modelDir, 'feeder.glm')
 		with open(feederPath, 'w') as glmFile:
-			toWrite =  omf.feeder.sortedWrite(omd['tree']) + "object jsondump {\n\tfilename_dump_reliability test_JSON_dump1.json;\n\twrite_reliability true;\n\tfilename_dump_line test_JSON_dump2.json;\n\twrite_line true;\n};\n"# + "object jsonreader {\n\tfilename " + insertRealRdtOutputNameHere + ";\n};"
+			#toWrite =  omf.feeder.sortedWrite(omd['tree']) + "object jsondump {\n\tfilename_dump_reliability test_JSON_dump1.json;\n\twrite_reliability true;\n\tfilename_dump_line test_JSON_dump2.json;\n\twrite_line true;\n};\n"# + "object jsonreader {\n\tfilename " + insertRealRdtOutputNameHere + ";\n};"
+			toWrite =  omf.feeder.sortedWrite(omd['tree']) + "object jsondump {\n\tfilename_dump_reliability test_JSON_dump.json;\n\twrite_system_info true;\n\twrite_per_unit true;\n\tsystem_base 100.0 MVA;\n};\n"# + "object jsonreader {\n\tfilename " + insertRealRdtOutputNameHere + ";\n};"
 			glmFile.write(toWrite)		
 		#Write attachments from omd, if no file, one will be created
 		for fileName in omd['attachments']:
@@ -392,11 +403,10 @@ def work(modelDir, inputDict):
 		proc = subprocess.Popen(['gridlabd', 'feeder.glm'], stdout=subprocess.PIPE, shell=True, cwd=modelDir)
 		(out, err) = proc.communicate()
 		accumulator = ""
-		#with open(pJoin(modelDir, "test_JSON_dump1.json"), "r") as gldOut:
-		#	accumulator = json.load(gldOut)
-		with open(pJoin(modelDir, "test_JSON_dump2.json"), "r") as gldOut:
+		with open(pJoin(modelDir, "JSON_dump_line.json"), "r") as gldOut:
 			accumulator = json.load(gldOut)
 		outData['gridlabdRawOut'] = accumulator
+		#THIS IS THE CODE THAT ONCE FRANK GETS DONE WITH GRIDLAB-D NEEDS TO BE UNCOMMENTED
 		'''rdtJson["line_codes"] = accumulator["properties"]["line_codes"]
 		rdtJson["lines"] = accumulator["properties"]["lines"]
 		with open(pJoin(modelDir, rdtInputFilePath), "w") as outFile:
@@ -459,6 +469,8 @@ def new(modelDir):
 		"weatherImpactsFileName": "wf_clip.asc",
 		"xrMatrices":open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","lineCodesTrip37.json")).read(),
 		"xrMatricesFileName":"lineCodesTrip37.json",
+		"scenarios": "",
+		"scenariosFileName": "",
 		"simulationDate": "2012-01-01",
 		"simulationZipCode": "64735"
 	}

@@ -63,15 +63,45 @@
 			//gebi(connectedElementName).value = '-';
 		}
 
-		function swapScenarios(scenarioDict, critLoadMetDict, nonCritLoadMetDict, gebiScenarioID) {
+		function swapScenarios(scenarioDict, critLoadMetDict, nonCritLoadMetDict, designHTML, gebiScenarioID) {
 			var scenarioID = gebi("scenarioSelect").value;
-			gebi(gebiScenarioID).innerHTML = scenarioDict[scenarioID];
-			gebi("nonCriticalLoadMetDisplay").innerHTML = "Non-critical Load lost: " + nonCritLoadMetDict[scenarioID];
-			gebi("criticalLoadMetDisplay").innerHTML = "Critical Load lost: " + critLoadMetDict[scenarioID];
+			if(scenarioID == 'designSolution') {
+				//gebi('contentHeader').innerHTML = 'One Line Diagram';
+				gebi('outputDisplay').innerHTML = designHTML;
+			}
+			else {
+				//gebi('contentHeader').innerHTML = 'Weather Type: Wind';
+				gebi(gebiScenarioID).innerHTML = critLoadMetDict[scenarioID] + scenarioDict[scenarioID];
+			}
 		}
 
 		function storeScenario(scenarioDict, id, table){
 			scenarioDict[id] = table;
+		}
+
+		function checkDamageScenarioUsage() {
+			console.log("afuwheaiufhwiauefhilawhefui")
+			var useUploadedScenario = gebi("useUploadedScenario").checked;
+			console.log("scenarios: " + gebi('scenarios').value)
+			if(useUploadedScenario == false) {
+				gebi('scenarios').value = "";
+				gebi('scenariosFileName').value = "";
+				console.log("scenarios: " + gebi('scenarios').value)
+			}
+		}
+
+		function downloadTextFile(fileName, text) {
+			console.log(text)
+			var element = document.createElement('a');
+		    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+		    element.setAttribute('download', fileName);
+
+		    element.style.display = 'none';
+		    document.body.appendChild(element);
+
+		    element.click();
+
+		    document.body.removeChild(element);
 		}
 	</script>
 </head>
@@ -260,6 +290,37 @@
 				</script>
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Damage Scenarios (.json file)<span class="classic">Please see the documentation at the help link for the required format. If this field is blank the OMF will re-use the file from the previous run.</span></label>
+				<script>var fileName=true;</script>
+				<input type="file" id="scenariosDataFile" name="scenariosDataFile" accept=".json" onchange="handle_scenario_files(this.files)">
+				<input id="scenarios" name="scenarios" type="hidden">
+				<!-- Format the file input and populate it with a saved file. -->
+				<input type="hidden" id="scenariosFileName" name="scenariosFileName" readonly="readonly">
+				<div id="fileBackground"></div>
+				<div id="fileExists"><label class="fileName" for="scenariosDataFile" id="scenariosFileNameLabel" name="scenariosFileName"></label></div>
+				<input type="checkbox" id="useUploadedScenario" name="useUploadedScenario"> Use uploaded JSON file<br>
+				<script>
+					if (typeof allInputData.scenariosFileName !== 'undefined') {					
+						document.getElementById('scenariosFileNameLabel').innerHTML = allInputData.scenariosFileName;
+					}
+					// File handler function.
+					function handle_scenario_files(files) {
+						// read file to a hidden input field
+						var reader = new FileReader()
+						reader.readAsText(files[0])
+						reader.onload = loaded
+						function loaded(evt) {
+							evt.target.result
+							gebi("scenarios").value = reader.result
+							var FileName = gebi("scenariosDataFile").value.split("\\");
+							var FileName = FileName[FileName.length-1];
+							document.getElementById('scenariosFileNameLabel').innerHTML = FileName;
+							gebi("scenariosFileName").value = FileName;
+						}
+					}
+				</script>
+			</div>
+			<div class="shortInput">
 				<label>Simulation Date (YYYY-MM-DD)</label>
 				<input type="text" id="simulationDate" name="simulationDate" pattern="^\d\d\d\d-\d\d-\d\d$">
 			</div>
@@ -273,7 +334,7 @@
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
 				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
 				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" type="submit" class="stoppedInline postRunInline">Run Model</button>
+				<button id="runButton" type="submit" onmousedown="checkDamageScenarioUsage();" class="stoppedInline postRunInline">Run Model</button>
 			</div>
 		</form>
 	</div>
@@ -289,43 +350,63 @@
 		</script>
 	</div>
 	<div id="output" class="postRun">
-		<p class="reportTitle" style="page-break-before:always">Resilience Solution</p>
-		<div class="content" style="overflow: scroll; height: 600px">
-			<div id="diagram" style="width: 40%; float: left;">	
-				<h4 style="text-align: center;">One Line Diagram</h4>
-				<img id="oneLineDiagram" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%; max-height: 100%;"/>
-				<script>gebi("oneLineDiagram").src = "data:image/png;base64," + allOutputData.oneLineDiagram</script>
+		<div class="content">
+			<select id="scenarioSelect" style="width: 40%;float: right;" onchange="swapScenarios(scenarioDict, critLoadMetDict, nonCritLoadMetDict, htmlDisplayCollector, 'outputDisplay')">
+			</select>
+			<br>
+			<br>
+
+			<table>
+				<tr><th><div style="float: left;">One Line Diagram (scroll to zoom, drag to pan)</div><div style="float: right;" id="powerflowValid"></div></th></tr>
+				<tr><td>
+					<div id="diagram">	
+						<img id="oneLineDiagram" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%; max-height: 100%;"/>
+						<script>gebi("oneLineDiagram").src = "data:image/png;base64," + allOutputData.oneLineDiagram</script>
+						<script src="{{pathPrefix}}/static/wheelzoom.js"></script>
+						<script type="text/javascript">
+								images = wheelzoom(document.querySelectorAll('img'), {zoom: 0.1, maxZoom: 10});
+						</script>
+					</div>
+				</td></tr>
+			</table>
+			<br><br>
+			<div id="outputDisplay">
 			</div>
-			<div id="tables" style="width: 60%; float: right;">
-				<h4 style="float: left">Hardware Changes</h4>
-				<h4 style="float: right; color: #54c465;" id="validation"></h4>
-				<br><br>
-				<table id="totalCostTable">
-				</table>
+
+			<div id="tables">
 				<br>
-				<table id="solutionComponents">
-				</table>
+				<br>
 				<script>
-					//Displays RDT outputs into HTML tables
 					var rdtOutput = allOutputData.rdtRawOut;
 					var gfmOutput = allOutputData.gfmRawOut;
 					rdtOutput = JSON.parse(rdtOutput);
 					gfmOutput = JSON.parse(gfmOutput);
 					var scenarioDict = [];
 					var lineData = allOutputData.lineData;
-					var htmlCollector = "<tr><th>Device ID</th><th>Type</th><th>Action</th><th>Cost</th></tr>";
 					var totalCost = 0.0;
 					var critLoadMetDict = [];
 					var nonCritLoadMetDict = [];
+					var dataDict = [];
+					var htmlDisplayCollector = "";
 
+					if(rdtOutput.design_solution.is_feasible == true) {
+						console.log("SUPLOL")
+						gebi("powerflowValid").style =  "float: right; color: #54c465;" 
+						gebi("powerflowValid").innerHTML = "Powerflow Validated";
+					}
+					else {
+						gebi("powerflowValid").style =  "float: right; color: red;" 
+						gebi("powerflowValid").innerHTML = "Powerflow Not Validated";
+					}
 
+					//Displays RDT outputs into HTML tables
+					var htmlCollector = "<tr><th>Device ID</th><th>Type</th><th>Action</th><th>Cost</th></tr>";
 					for(var i = 0; i < rdtOutput.design_solution.generators.length; i++) {
 						generator = rdtOutput.design_solution.generators[i];
 						genCost = parseFloat(allOutputData["generatorData"].replace(/\,/g,''));
 						htmlCollector = htmlCollector + "<tr><td>" + generator.id + "</td><td>Generator</td><td>Built with 5 MW of capacity</td><td>$" + genCost + "</td></tr>";
 						totalCost = totalCost + genCost;
 					}
-
 					for(var j = 0; j < rdtOutput.design_solution.lines.length; j++) {
 						line = rdtOutput.design_solution.lines[j];
 						var hardened = "Hardened";
@@ -345,25 +426,18 @@
 						htmlCollector = htmlCollector + "<tr><td>" + lineID + "</td><td>Line</td><td>" + hardened + switchBuilt + "</td><td>$" +  lineCost + "</td></tr>";
 						totalCost = parseFloat(lineCost.replace(/\,/g,'')) + totalCost;
 					}
-					if(rdtOutput.design_solution.is_feasible == true) {
-						gebi("validation").innerHTML = "Powerflow Validated";
-					}
-					else {
-						gebi("validation").innerHTML = "Powerflow Not Validated";
-						gebi("validation").style.color = "red";
-					}
-					//Total cost is currently being determined by summing all component costs of the design solution.  However, there is a section in RDTOUTPUT that gives total cost, though it is not implemented
-					//gebi("totalCostTable").innerHTML = '<tr><th>Total Cost</th></tr><tr><td>$' + rdtOutput.design_solution.design_cost + '</td></tr>';
-					gebi("totalCostTable").innerHTML = '<tr><th>Total Cost</th></tr><tr><td>$' + totalCost.toFixed(2) + '</td></tr>';
-					gebi("solutionComponents").innerHTML = htmlCollector;
+
+					htmlDisplayCollector = htmlDisplayCollector + '<h4 style="text-align: center">Hardware Changes</h4>';
+				
+					htmlDisplayCollector = htmlDisplayCollector + '<br><br><table id="totalCostTable"><tr><th>Total Cost</th></tr><tr><td>$' + totalCost.toFixed(2) + '</td></tr></table><br>';
+					htmlDisplayCollector = htmlDisplayCollector + '<table id="solutionComponents">' + htmlCollector + '</table>';
 
 					for(var j = 0; j < rdtOutput.scenario_solution.length; j++) {
 						scenario = rdtOutput.scenario_solution[j]; 
-						critLoadMetDict[scenario.id] = scenario.critical_load_met.toFixed(2);
-						nonCritLoadMetDict[scenario.id] = scenario.non_critical_load_met.toFixed(2);
+						critLoadMetDict[scenario.id] = '<div><h5 style="padding: 3px; float: left; border: 1px solid black; background-color: #AAD0FF" id="nonCriticalLoadMetDisplay">Non-critical Load lost: ' + scenario.non_critical_load_met.toFixed(2) + '</h5><h5 style="padding: 3px; float: right; border: 1px solid black; background-color: #AAD0FF" id="criticalLoadMetDisplay">Critical Load lost: '+ scenario.critical_load_met.toFixed(2) + '</h5></div><br><br>';
 					}
 					for(var j = 0; j < gfmOutput.scenarios.length; j++) {
-						htmlCollector = "<tr><th>Device ID</th><th>Type</th><th>Result</th></tr>";
+						htmlCollector = "<table><tr><th>Device ID</th><th>Type</th><th>Result</th></tr>";
 						scenario = gfmOutput.scenarios[j]; 
 						
 						for(var k = 0; k < scenario.hardened_disabled_lines.length; k++) {
@@ -377,54 +451,29 @@
 						if (scenario.hardened_disabled_lines.length == 0 && scenario.disable_lines.length == 0) {
 							htmlCollector = htmlCollector + "<tr><td colspan='3'>No components affected.</td></tr>";
 						}
-						scenarioDict[parseFloat(scenario.id) + 1] = htmlCollector;
+						scenarioDict[parseFloat(scenario.id) + 1] = htmlCollector + "</table>";
 					}
 
+					htmlCollector = "<option value='designSolution'>Design Solution</option>"
+					for (var scenarioID in scenarioDict) {
+						htmlCollector = htmlCollector + "<option value='" + scenarioID + "'>Scenario " + scenarioID  + "</option>";
+					}
+					gebi("scenarioSelect").innerHTML = htmlCollector;
 				</script>
-			</div>
-		</div>
-		<p class="reportTitle" style="page-break-before:always">Damage Scenario Result</p>
-		<div class="content" style="overflow: scroll; height: 600px">
-			<div id="diagram" style="width: 40%; float: left;">	
-				<h4 style="text-align: center;">Weather Type: Wind</h4>
-				<img id="oneLineDiagram2" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%; max-height: 100%;"/>
-				<script>gebi("oneLineDiagram2").src = "data:image/png;base64," + allOutputData.oneLineDiagram</script>
-			</div>
-			<div id="tables" style="width: 60%; float: right;">
-				<div style="float: left">
-					<h5 style="padding: 3px; float: left; border: 1px solid black; background-color: #AAD0FF" id="nonCriticalLoadMetDisplay"></h5>
-					<h5 style="padding: 3px; float: right; border: 1px solid black; background-color: #AAD0FF" id="criticalLoadMetDisplay"></h5>
-				</div>
-				<select id="scenarioSelect" style="width: 40%;float: right;" onchange="swapScenarios(scenarioDict, critLoadMetDict, nonCritLoadMetDict, 'scenarioTable')"">
-					<script>
-						htmlCollector = ""
-						for (var scenarioID in scenarioDict) {
-							htmlCollector = htmlCollector + "<option value='" + scenarioID + "'>Scenario " + scenarioID  + "</option>";
-						}
-						gebi("scenarioSelect").innerHTML = htmlCollector;
-					</script>
-				</select>
-				<br>
-				<br>
+
 				<table id="scenarioTable">
-				<script>swapScenarios(scenarioDict, critLoadMetDict, nonCritLoadMetDict, "scenarioTable")</script>
+				<script>swapScenarios(scenarioDict, critLoadMetDict, nonCritLoadMetDict, htmlDisplayCollector, "outputDisplay")</script>
 				</table>
 			</div>
 		</div>
-		<p class="reportTitle">GFM Output</p>
-		<div class="content" style="overflow: scroll; height: 600px">
-			<pre id="gfmOutputFrame"></pre>
-			<script>gebi("gfmOutputFrame").innerHTML = allOutputData.gfmRawOut</script>
+	
+		<div style="text-align: center" class="content">
+			<h4>Downloads:</h4><br>
+			<a onclick="downloadTextFile('gfmOutput.txt', allOutputData['gfmRawOut'])">GFM Output</a><br>
+			<a onclick="downloadTextFile('rdtOutput.txt', allOutputData['rdtRawOut'])">RDT Output</a><br>
+			<a onclick="downloadTextFile('gridlabdOutput.txt', allOutputData['gridlabdRawOut'])">GridlabD Output</a>
 		</div>
-		<p class="reportTitle">RDT Output</p>
-		<div class="content" style="overflow: scroll; height: 600px">
-			<pre id="rdtOutputFrame"></pre>
-			<script>gebi("rdtOutputFrame").innerHTML = allOutputData.rdtRawOut</script>
-		</div>
-		<p class="reportTitle">GridLAB-D Output</p>
-		<div class="content" style="overflow: auto">
-			<pre id="gridlabOutputFrame"></pre>
-			<script>gebi("gridlabOutputFrame").innerHTML = JSON.stringify(allOutputData.gridlabdRawOut, null, '\t')</script>
-		</div>
+		<br>
+		<br>	
 	</div>
 </body>
