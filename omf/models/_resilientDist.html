@@ -79,17 +79,6 @@
 			scenarioDict[id] = table;
 		}
 
-		function checkDamageScenarioUsage() {
-			console.log("afuwheaiufhwiauefhilawhefui")
-			var useUploadedScenario = gebi("useUploadedScenario").checked;
-			console.log("scenarios: " + gebi('scenarios').value)
-			if(useUploadedScenario == false) {
-				gebi('scenarios').value = "";
-				gebi('scenariosFileName').value = "";
-				console.log("scenarios: " + gebi('scenarios').value)
-			}
-		}
-
 		function downloadTextFile(fileName, text) {
 			console.log(text)
 			var element = document.createElement('a');
@@ -320,10 +309,6 @@
 				</script>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Override Simulated Damage<span class="classic">Used uploaded JSON file instead of GFM-generated damage scenarios.</span></label>
-				<br><input style="display:inline; width:15px" type="checkbox" id="useUploadedScenario" name="useUploadedScenario">Use Damage Scenarios File
-			</div>
-			<div class="shortInput">
 				<label>Simulation Date (YYYY-MM-DD)</label>
 				<input type="text" id="simulationDate" name="simulationDate" pattern="^\d\d\d\d-\d\d-\d\d$">
 			</div>
@@ -467,10 +452,10 @@
 			</div>
 		</div>
 		<p class="reportTitle postRun" style="page-break-before:always">Download Output Data</p>	
-		<div style="text-align:left; padding:10px" class="tightContent">
-			<a onclick="downloadTextFile('gfmOutput.txt', allOutputData['gfmRawOut'])">General Fragility Model (GFM) Output</a><br>
-			<a onclick="downloadTextFile('rdtOutput.txt', allOutputData['rdtRawOut'])">Resilient Design Tool (RDT) Output</a><br>
-			<a onclick="downloadTextFile('gridlabdOutput.txt', allOutputData['gridlabdRawOut'])">GridLAB-D (GLD) Output</a>
+		<div style="text-align:left" class="tightContent">
+			<a style="padding:10px" onclick="downloadTextFile('gfmOutput.txt', allOutputData['gfmRawOut'])">General Fragility Model (GFM) Output</a><br>
+			<a style="padding:10px" onclick="downloadTextFile('rdtOutput.txt', allOutputData['rdtRawOut'])">Resilient Design Tool (RDT) Output</a><br>
+			<a style="padding:10px" onclick="downloadTextFile('gridlabdOutput.txt', allOutputData['gridlabdRawOut'])">GridLAB-D (GLD) Output</a>
 		</div>
 		<br>
 		<br>	

@@ -338,8 +338,6 @@ def work(modelDir, inputDict):
 		'lineUnitCost' : inputDict['lineUnitCost']
 
 	}
-	if inputDict['scenarios'] != "":
-		print "kjojojuijojoj"
 	gfmJson = convertToGFM(gfmInputTemplate, feederModel)
 	gfmInputFilename = 'gfmInput.json'
 	with open(pJoin(modelDir, gfmInputFilename), "w") as outFile:
@@ -369,7 +367,7 @@ def work(modelDir, inputDict):
 	outData["generatorData"] = '{:,.2f}'.format(float(inputDict["dgUnitCost"]) * float(inputDict["maxDGPerGenerator"]))
 	outData['gfmRawOut'] = rdtJsonAsString
 	if inputDict['scenarios'] != "":
-		rdtJson['scenarios'] = inputDict['scenarios']
+		rdtJson['scenarios'] = json.loads(inputDict['scenarios'])
 		with open(pJoin(rdtInputFilePath), "w") as rdtInputFile:
 			json.dump(rdtJson, rdtInputFile, indent=4)
 	# Run GridLAB-D first time to generate xrMatrices.
