@@ -1,0 +1,13 @@
+[ {
+    "id" : "0",
+    "hardened_disabled_lines" : [ ],
+    "disable_lines" : [ "C_node734-710", "B_node708-733" ]
+  }, {
+    "id" : "1",
+    "hardened_disabled_lines" : [ ],
+    "disable_lines" : [ "C_node702-705", "A_node737-738", "B_node734-737" ]
+  }, {
+    "id" : "2",
+    "hardened_disabled_lines" : [ ],
+    "disable_lines" : [ "B_node702-703", "A_node702-705", "B_node704-714" ]
+  } ]
