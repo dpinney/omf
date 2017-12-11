@@ -569,8 +569,8 @@ def new(modelDir):
 	defaultInputs = {
 		"modelType": modelName,
 		"zipCode": "59001",
-		# "feederName1": "Olin Barre GH EOL Solar GridBallast",
-		"feederName1": "UCS Egan Housed Solar",
+		"feederName1": "Olin Barre GH EOL Solar GridBallast",
+		# "feederName1": "UCS Egan Housed Solar",
 		# "feederName1": "Connexus West End Final Fixed Solar",
 		"simStartDate": "2012-01-01 12:00:00",
 		"simLength": "180",
