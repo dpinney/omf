@@ -368,10 +368,10 @@ def work(modelDir, inputDict):
 	outData["lineData"] = lineData
 	outData["generatorData"] = '{:,.2f}'.format(float(inputDict["dgUnitCost"]) * float(inputDict["maxDGPerGenerator"]))
 	outData['gfmRawOut'] = rdtJsonAsString
-	#if inputDict['scenarios'] == "":
-	#	rdtJson['scenarios'] = inputDict['scenarios']
-	#	with open(pJoin(rdtInputFilePath), "w") as rdtInputFile:
-	#		json.dump(rdtJson, rdtInputFile, indent=4)
+	if inputDict['scenarios'] != "":
+		rdtJson['scenarios'] = inputDict['scenarios']
+		with open(pJoin(rdtInputFilePath), "w") as rdtInputFile:
+			json.dump(rdtJson, rdtInputFile, indent=4)
 	# Run GridLAB-D first time to generate xrMatrices.
 	if platform.system() == "Windows":
 		omdPath = pJoin(modelDir, feederName + ".omd")
