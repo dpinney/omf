@@ -298,7 +298,6 @@
 				<input type="hidden" id="scenariosFileName" name="scenariosFileName" readonly="readonly">
 				<div id="fileBackground"></div>
 				<div id="fileExists"><label class="fileName" for="scenariosDataFile" id="scenariosFileNameLabel" name="scenariosFileName"></label></div>
-				<input type="checkbox" id="useUploadedScenario" name="useUploadedScenario"> Use uploaded JSON file<br>
 				<script>
 					if (typeof allInputData.scenariosFileName !== 'undefined') {					
 						document.getElementById('scenariosFileNameLabel').innerHTML = allInputData.scenariosFileName;
@@ -319,6 +318,10 @@
 						}
 					}
 				</script>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Override Simulated Damage<span class="classic">Used uploaded JSON file instead of GFM-generated damage scenarios.</span></label>
+				<br><input style="display:inline; width:15px" type="checkbox" id="useUploadedScenario" name="useUploadedScenario">Use Damage Scenarios File
 			</div>
 			<div class="shortInput">
 				<label>Simulation Date (YYYY-MM-DD)</label>
@@ -372,7 +375,6 @@
 			<br><br>
 			<div id="outputDisplay">
 			</div>
-
 			<div id="tables">
 				<br>
 				<br>
@@ -423,13 +425,12 @@
 							switchBuilt = ", Switch not built";
 						}
 						lineID = lineData[j][0];
-						htmlCollector = htmlCollector + "<tr><td>" + lineID + "</td><td>Line</td><td>" + hardened + switchBuilt + "</td><td>$" +  lineCost + "</td></tr>";
+						if (lineCost != 0.0) {
+							htmlCollector = htmlCollector + "<tr><td>" + lineID + "</td><td>Line</td><td>" + hardened + switchBuilt + "</td><td>$" +  lineCost + "</td></tr>";							
+						}
 						totalCost = parseFloat(lineCost.replace(/\,/g,'')) + totalCost;
 					}
-
-					htmlDisplayCollector = htmlDisplayCollector + '<h4 style="text-align: center">Hardware Changes</h4>';
-				
-					htmlDisplayCollector = htmlDisplayCollector + '<br><br><table id="totalCostTable"><tr><th>Total Cost</th></tr><tr><td>$' + totalCost.toFixed(2) + '</td></tr></table><br>';
+					htmlDisplayCollector = htmlDisplayCollector + '<table id="totalCostTable"><tr><th>Total Cost</th></tr><tr><td>$' + totalCost.toFixed(2) + '</td></tr></table><br>';
 					htmlDisplayCollector = htmlDisplayCollector + '<table id="solutionComponents">' + htmlCollector + '</table>';
 
 					for(var j = 0; j < rdtOutput.scenario_solution.length; j++) {
@@ -460,18 +461,16 @@
 					}
 					gebi("scenarioSelect").innerHTML = htmlCollector;
 				</script>
-
 				<table id="scenarioTable">
 				<script>swapScenarios(scenarioDict, critLoadMetDict, nonCritLoadMetDict, htmlDisplayCollector, "outputDisplay")</script>
 				</table>
 			</div>
 		</div>
-	
-		<div style="text-align: center" class="content">
-			<h4>Downloads:</h4><br>
-			<a onclick="downloadTextFile('gfmOutput.txt', allOutputData['gfmRawOut'])">GFM Output</a><br>
-			<a onclick="downloadTextFile('rdtOutput.txt', allOutputData['rdtRawOut'])">RDT Output</a><br>
-			<a onclick="downloadTextFile('gridlabdOutput.txt', allOutputData['gridlabdRawOut'])">GridlabD Output</a>
+		<p class="reportTitle postRun" style="page-break-before:always">Download Output Data</p>	
+		<div style="text-align: left" class="tightContent">
+			<a onclick="downloadTextFile('gfmOutput.txt', allOutputData['gfmRawOut'])">General Fragility Model (GFM) Output</a><br>
+			<a onclick="downloadTextFile('rdtOutput.txt', allOutputData['rdtRawOut'])">Resilient Design Tool (RDT) Output</a><br>
+			<a onclick="downloadTextFile('gridlabdOutput.txt', allOutputData['gridlabdRawOut'])">GridLAB-D (GLD) Output</a>
 		</div>
 		<br>
 		<br>	

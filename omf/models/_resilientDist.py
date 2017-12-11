@@ -310,7 +310,7 @@ def genDiagram(outputDir, feederJson):
 	# Create and save the graphic.
 	nxG = feeder.treeToNxGraph(tree)
 	feeder.latLonNxGraph(nxG) # This function creates a .plt reference which can be saved here.
-	plt.savefig(pJoin(outputDir,"feederChart.png"))	
+	plt.savefig(pJoin(outputDir,"feederChart.png"), dpi=800, pad_inches=0.0)	
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
