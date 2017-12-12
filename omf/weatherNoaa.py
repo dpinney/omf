@@ -2,90 +2,29 @@ import os, urllib, json, csv, math, re, tempfile, shutil, urllib2, sys
 from os.path import join as pJoin
 from datetime import timedelta, datetime
 from math import modf
-from bs4 import BeautifulSoup
 import requests
 import time
 import collections
 
-#url = 'https://www.ncdc.noaa.gov/cdo-web/api/v2/'
-#url = 'https://www.ncdc.noaa.gov/cdo-web/api/v2/locations?locationcategoryid=CITY&sortfield=name&sortorder=desc'
-#url = 'https://www.ncdc.noaa.gov/cdo-web/api/v2/locations?locationcategoryid=zip&sortfield=name&sortorder=desc'
-
-#https://www.ncdc.noaa.gov/cdo-web/api/v2/data?datasetid=GHCND&locationid=ZIP:28801&startdate=2010-05-01&enddate=2010-05-01
-#zipcode = '94501'#'28801'
-#startdate = '1945-04-01'#'2010-05-01'
-#enddate = '1945-05-01'#'2010-05-01'
-#url = ('https://www.ncdc.noaa.gov/cdo-web/api/v2/data?datasetid=GHCND&locationid=ZIP:' + zipcode + 
-#	'&units=metric&startdate=' + startdate + '&enddate=' + enddate)
-
-#url = 'https://www.ncdc.noaa.gov/cdo-web/api/v2/data?datasetid=GHCND&stationid=WBAN:23239&startdate=1946-01-01&enddate=1946-12-31&limit=1000'
-#url = 'https://www.ncdc.noaa.gov/cdo-web/api/v2/data?datasetid=LCD&locationid=ZIP:94501'
-#url = 'https://www.ncdc.noaa.gov/cdo-web/api/v2/data?datasetid=LCD&locationid=WBAN:23239&startdate=1946-01-01&enddate=1946-02-02'
-
 headers = {'token':'JkyCcxgvGhNUdDCvHCeBeaZQdDNQEJtw'} #token I requested from NOAA
 
-###### This search works by taking WBAN inputs and checks if data is available
-#url = 'https://www.ncdc.noaa.gov/access-data-service/api/v1/data?dataset=daily-summaries&dataTypes=WT03&stations=WBAN23239&startDate=1952-01-01&endDate=1970-12-31&includeAttributes=true&format=json&limit=1000'
-#url = 'https://www.ncdc.noaa.gov/access-data-service/api/v1/data?dataset=global-marine&dataTypes=WIND_DIR,WIND_SPEED&stations=AUCE&startDate=2016-01-01&endDate=2016-01-02'
-#url = 'https://www.ncdc.noaa.gov/access-data-service/api/v1/data?dataset=normal-hly&locationid=ZIP:22202'
-#url = 'https://www.ncdc.noaa.gov/cdo-web/api/v2/data?datasetid=NORMAL_HLY&locationid=ZIP:22202&startdate=1900-01-01&enddate=2016-01-02'
-#url = 'https://www.ncdc.noaa.gov/cdo-web/api/v2/datasets?NORMAL_HLY/locations/ZIP:22202'
-
-#url = 'https://www.ncdc.noaa.gov/cdo-web/api/v2/data?datasetid=NORMAL_HLY&datatype=HLY-TEMP-NORMAL&locationid=ZIP:22202&units=metric&startdate=2010-01-01T00:00:00&enddate=2010-12-31T23:00:00&limit=1000'
-#HLY-TEMP-NORMAL
-
-'''
-zipCode = '22202'
-year = '2010'
-day = '01'
-month = '02'
-	#writer.writerows([weather])
-#print weather
-#weather = []
-for hour in range(1):
-	if len(str(hour)) == 1:
-		hour = '0' + str(hour)
-	else:
-		hour = str(hour)
-	url = ('https://www.ncdc.noaa.gov/cdo-web/api/v2/data?datasetid=NORMAL_HLY&datatype=HLY-TEMP-NORMAL&locationid=ZIP:' + zipCode + 
-		'&units=metric&startdate=' + year + '-01-01T' + hour + ':00:00&enddate=' + year + '-01-01T' + hour + ':00:00&limit=1000')
-	time.sleep(0.075) #it says that no more than 5 requests per second can be done but a 0.1 delay is enough
-	r = requests.get(url, headers=headers)
-	x = r.text
-	print x
-	#weather.append(x)
-	#print x
-'''
-
-'''for x in weather:
-	x = int(x)#x.encode('utf-8')'''
-
-
-#print weather
-#x = r.json()
-
-
-'''x = r.text
-x = x.partition('HLY-TEMP-NORMAL')[2]
-x = x.partition('}')[0]
-x = x.partition('value":')[2]
-print x'''
+def noaaWeather(token, zipCode, year, month, day):
+	pass
 
 ############### Trying to pull only u'datatype': u'HLY-TEMP-NORMAL'
+# Query Parameters
 zipCode = '11430'#'22202'
-
-######################### this returns the databases that contain data for a given zip code
-url = ('https://www.ncdc.noaa.gov/cdo-web/api/v2/datasets?locationid=ZIP:' + zipCode + '&limit=1000')
 year = '2010'
 month = '01'
 day = '01'
 
+# Build the URL
 url = ('https://www.ncdc.noaa.gov/cdo-web/api/v2/data?datasetid=NORMAL_HLY&datatype=HLY-TEMP-NORMAL&locationid=ZIP:' + zipCode + 
 		'&units=metric&startdate=' + year + '-' + month + '-' + day + 'T00:00:00&enddate=' + year + '-' + month + '-' + day + 'T23:00:00&limit=1000')
 r = requests.get(url, headers=headers)
 print r.json()
-########## This checks if data is available for the Zip entered and returns the dates it is available
 
+########## This checks if data is available for the Zip entered and returns the dates it is available
 r = requests.get(url, headers=headers)
 x = str(r.text)
 txt = 'empty'
@@ -124,7 +63,6 @@ year = startDate.partition('-')[0]
 if dataAvailable == 1:
 	with open('weatherNoaaTemp.csv','w') as file:
 		writer = csv.writer(file)
-
 		for month in calendar:
 			for day in range(calendar[month]):
 				day = day+1
