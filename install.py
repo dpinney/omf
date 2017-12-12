@@ -1,40 +1,37 @@
 import platform, os
 # All installations require git to clone the omf
-if platform.system() == 'Linux':
-	# if Ubuntu run these commands:
-	if platform.linux_distribution()[0]=="Ubuntu":
-		# git clone https://github.com/dpinney/omf.git
-		os.system("sudo apt-get install python-pip git unixodbc-dev libfreetype6-dev \
-		pkg-config python-dev python-numpy alien python-pygraphviz \
-		python-pydot ffmpeg mdbtools python-cairocffi python-tk octave")
-		os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2.0-1.x86_64.rpm")
-		os.system("sudo alien gridlabd-3.2.0-1.x86_64.rpm")
-                os.system("sudo apt-get install libgraphviz-dev")
-		workDir = os.getcwd()
-		for file in os.listdir(workDir):
-			if file.endswith('.deb'):
-				debFile = file		
-		os.system("sudo dpkg -i " + debFile)
-		os.system("sudo apt-get install -f")
-		os.system("cd omf")
-		os.system("pip install -r requirements.txt")
-		os.system("sudo python setup.py develop")
+if platform.system() == 'Linux' and platform.linux_distribution()[0]=="Ubuntu":
+	os.system("sudo apt-get install python-pip git unixodbc-dev libfreetype6-dev \
+	pkg-config python-dev python-numpy alien python-pygraphviz \
+	python-pydot ffmpeg mdbtools python-cairocffi python-tk octave")
+	os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2.0-1.x86_64.rpm")
+	os.system("sudo alien gridlabd-3.2.0-1.x86_64.rpm")
+	os.system("sudo apt-get install libgraphviz-dev")
+	workDir = os.getcwd()
+	for file in os.listdir(workDir):
+		if file.endswith('.deb'):
+			debFile = file		
+	os.system("sudo dpkg -i " + debFile)
+	os.system("sudo apt-get install -f")
+	os.system("cd omf")
+	os.system("pip install -r requirements.txt")
+	os.system("sudo python setup.py develop")
 	# if CentOS 7 run these commands:
-	elif platform.linux_distribution()[0]=="CentOS Linux":
-		# git clone https://github.com/dpinney/omf.git
-		os.system("sudo yum -y install wget git graphviz gcc xerces-c python-devel tkinter octave 'graphviz-devel.x86_64'")
-		os.system("yum --enablerepo=extras install epel-release")
-		os.system("sudo yum -y install mdbtools")
-		os.system("sudo rpm --import http://li.nux.ro/download/nux/RPM-GPG-KEY-nux.ro")
-		os.system("sudo rpm -Uvh http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-1.el7.nux.noarch.rpm")
-		os.system("sudo yum -y install ffmpeg ffmpeg-devel -y")
-		os.system("sudo yum -y install python-pip")
-		os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2.0-1.x86_64.rpm")
-		os.system("rpm -Uvh gridlabd-3.2.0-1.x86_64.rpm")
-		os.system("cd omf")
-		os.system("pip install -r requirements.txt")
-		os.system("pip install --ignore-installed six")
-		os.system("python setup.py develop")
+elif platform.system() == 'Linux' and platform.linux_distribution()[0]=="CentOS Linux":
+	# git clone https://github.com/dpinney/omf.git
+	os.system("sudo yum -y install wget git graphviz gcc xerces-c python-devel tkinter octave 'graphviz-devel.x86_64'")
+	os.system("yum --enablerepo=extras install epel-release")
+	os.system("sudo yum -y install mdbtools")
+	os.system("sudo rpm --import http://li.nux.ro/download/nux/RPM-GPG-KEY-nux.ro")
+	os.system("sudo rpm -Uvh http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-1.el7.nux.noarch.rpm")
+	os.system("sudo yum -y install ffmpeg ffmpeg-devel -y")
+	os.system("sudo yum -y install python-pip")
+	os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2.0-1.x86_64.rpm")
+	os.system("rpm -Uvh gridlabd-3.2.0-1.x86_64.rpm")
+	os.system("cd omf")
+	os.system("pip install -r requirements.txt")
+	os.system("pip install --ignore-installed six")
+	os.system("python setup.py develop")
 # if Windows run these commands:
 elif platform.system()=='Windows':
 	# Need to manually download and install Python 2.7 and set python as a path variable, Git, Chocolatey 
@@ -64,6 +61,7 @@ elif platform.system()=='Windows':
 	# env variables in python
 	# Manually setting path for pip and other scripts
 	os.system('setx PATH "%PATH%;C:\Python27\Scripts')
+	os.system('setx PATH "%PATH%;C:\Program Files (x86)\Graphviz2.38\bin')
 	os.system("cd " + workDir)
 	# Sometimes wget has a hard time downloading gridlabD
 	if platform.architecture()[0] == '32bit':
@@ -103,3 +101,5 @@ elif platform.system()=="Darwin":
 	os.system('cd omf')
 	os.system('pip install -r requirements.txt')
 	os.system('python setup.py develop')
+else:
+	print 'Your operating system is not currently supported.'
