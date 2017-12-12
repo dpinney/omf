@@ -14,7 +14,7 @@ def noaaWeather(token, zipCode, year, month, day):
 
 ############### Trying to pull only u'datatype': u'HLY-TEMP-NORMAL'
 # Query Parameters
-zipCode = '22202'
+'''zipCode = '11430'#'22202'
 year = '2010'
 month = '01'
 day = '01'
@@ -25,8 +25,10 @@ url = ('https://www.ncdc.noaa.gov/cdo-web/api/v2/data?datasetid=NORMAL_HLY&datat
 
 # Test the query
 r = requests.get(url, headers=headers)
-print r.json()
+print r.json()'''
 
+zipCode = '11430'#'22202'
+url = ('https://www.ncdc.noaa.gov/cdo-web/api/v2/datasets?locationid=ZIP:' + zipCode + '&limit=1000')
 ########## This checks if data is available for the Zip entered and returns the dates it is available
 r = requests.get(url, headers=headers)
 x = str(r.text)
