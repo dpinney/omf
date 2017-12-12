@@ -57,7 +57,7 @@ def annualDataHourlyToCsv(token, zipCode, dataTypeList, csvPath):
 	# Pull the full dataset and write it.
 	if dataAvailable == 1:
 		with open(csvPath,'w') as file:
-			writer = csv.writer(file)
+			writer = csv.writer(file,lineterminator = '\n')
 			for month in calendar:
 				for day in range(calendar[month]):
 					day = day+1
@@ -82,6 +82,8 @@ def annualDataHourlyToCsv(token, zipCode, dataTypeList, csvPath):
 						writer.writerow([str(x)])
 
 def _tests():
-	checkDatasets(DEFAULT_TOKEN, '22202')
-	pullOneDayHourly(DEFAULT_TOKEN, '22202', '2010','01','01')
+	#checkDatasets(DEFAULT_TOKEN, '22202')
+	#pullOneDayHourly(DEFAULT_TOKEN, '22202', '2010','01','01')
 	annualDataHourlyToCsv(DEFAULT_TOKEN, '11430', [], 'weatherNoaaTemp.csv')
+
+_tests()
