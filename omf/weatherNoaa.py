@@ -11,9 +11,10 @@ headers = {'token':'JkyCcxgvGhNUdDCvHCeBeaZQdDNQEJtw'} #token I requested from N
 def noaaWeather(token, zipCode, year, month, day):
 	pass
 
+
 ############### Trying to pull only u'datatype': u'HLY-TEMP-NORMAL'
 # Query Parameters
-zipCode = '11430'#'22202'
+zipCode = '22202'
 year = '2010'
 month = '01'
 day = '01'
@@ -21,6 +22,8 @@ day = '01'
 # Build the URL
 url = ('https://www.ncdc.noaa.gov/cdo-web/api/v2/data?datasetid=NORMAL_HLY&datatype=HLY-TEMP-NORMAL&locationid=ZIP:' + zipCode + 
 		'&units=metric&startdate=' + year + '-' + month + '-' + day + 'T00:00:00&enddate=' + year + '-' + month + '-' + day + 'T23:00:00&limit=1000')
+
+# Test the query
 r = requests.get(url, headers=headers)
 print r.json()
 
