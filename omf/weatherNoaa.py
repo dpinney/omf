@@ -79,7 +79,9 @@ def annualDataHourlyToCsv(token, zipCode, dataTypeList, csvPath):
 						text = x.partition('}')[2]
 						x = x.partition('}')[0]
 						x = x.partition('value":')[2]
-						writer.writerow([str(x)])
+						timeStamp = month + '/' + day + '/' + year + ' ' + str(hour) + ':00:00'
+						writer.writerow([timeStamp,str(x)])
+						#writer.writerow([str(x)])
 
 def _tests():
 	#checkDatasets(DEFAULT_TOKEN, '22202')
