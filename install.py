@@ -1,11 +1,11 @@
 import platform, os
-# All installations require git to clone the omf
+# All installations require git to clone the omf.
 if platform.system() == 'Linux' and platform.linux_distribution()[0]=="Ubuntu":
 	os.system("sudo apt-get install python-pip git unixodbc-dev libfreetype6-dev \
 	pkg-config python-dev python-numpy alien python-pygraphviz \
 	python-pydot ffmpeg mdbtools python-cairocffi python-tk octave")
-	os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2.0-1.x86_64.rpm")
-	os.system("sudo alien gridlabd-3.2.0-1.x86_64.rpm")
+	os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0.0-1.el6.x86_64.rpm")
+	os.system("sudo alien gridlabd-4.0.0-1.el6.x86_64.rpm")
 	os.system("sudo apt-get install libgraphviz-dev")
 	workDir = os.getcwd()
 	for file in os.listdir(workDir):
@@ -26,7 +26,7 @@ elif platform.system() == 'Linux' and platform.linux_distribution()[0]=="CentOS 
 	os.system("sudo rpm -Uvh http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-1.el7.nux.noarch.rpm")
 	os.system("sudo yum -y install ffmpeg ffmpeg-devel -y")
 	os.system("sudo yum -y install python-pip")
-	os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2.0-1.x86_64.rpm")
+	os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0.0-1.el6.x86_64.rpm")
 	os.system("rpm -Uvh gridlabd-3.2.0-1.x86_64.rpm")
 	os.system("cd omf")
 	os.system("pip install -r requirements.txt")
@@ -66,15 +66,15 @@ elif platform.system()=='Windows':
 	# Sometimes wget has a hard time downloading gridlabD
 	if platform.architecture()[0] == '32bit':
 		if 'gridlabd-3.2-win32.exe' not in os.listdir(workDir):	
-			os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2-win32.exe")
-			os.system("gridlabd-3.2-win32.exe/silent")
+			os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0_RC1.exe")
+			os.system("gridlabd-4.0_RC1.exe/silent")
 		if 'pygraphviz-1.3.1-cp27-none-win32.whl' not in os.listdir(workDir):
 			os.system("wget --no-check-certificate https://github.com/dpinney/omf/raw/master/omf/static/pygraphviz-1.3.1-cp27-none-win32.whl")
 	elif platform.architecture()[1] == '64bit':
-		# Note: has not been tested yet, only 32bit has
+		# Note: has not been tested yet, only 32bit has.
 		if 'gridlabd-3.2-x64.exe' not in os.listdir(workDir):	
-			os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2-x64.exe")
-			os.system("gridlabd-3.2-x64.exe/silent")
+			os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0_RC1.exe")
+			os.system("gridlabd-4.0_RC1.exe/silent")
 		if 'pygraphviz-1.3.1-cp27-none-win_amd64.whl' not in os.listdir(workDir):
 			os.system("wget --no-check-certificate https://github.com/dpinney/omf/raw/master/omf/static/pygraphviz-1.3.1-cp27-none-win_amd64.whl")
 	for file in os.listdir(workDir):
@@ -86,18 +86,15 @@ elif platform.system()=='Windows':
 	os.system("pip install -r requirements.txt")
 	os.system("pip install setuptools==33.1.1")
 	os.system("python setup.py develop")
-# if Mac run these commands:
-elif platform.system()=="Darwin":
-	print 'Mac'
+elif platform.system()=="Darwin": # MacOS
 	# Install homebrew
 	os.system('/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
 	os.system('brew install wget python ffmpeg git graphviz octave')
 	os.system('brew link --overwrite python')
-	# Works for gridlab version 3.2, will need to update when we use gridlabd v4
-	os.system('wget -O gridlabd.dmg --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd_3.2.0.dmg')
+	os.system('wget -O gridlabd.dmg --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd_4.0.0.dmg')
 	os.system('sudo hdiutil attach gridlabd.dmg')
-	os.system('sudo installer -package /Volumes/GridLAB-D\ 3.2.0/gridlabd.mpkg -target /')
-	os.system('sudo hdiutil detach /Volumes/GridLAB-D\ 3.2.0')
+	os.system('sudo installer -package /Volumes/GridLAB-D\ 4.0.0/gridlabd.mpkg -target /')
+	os.system('sudo hdiutil detach /Volumes/GridLAB-D\ 4.0.0')
 	os.system('cd omf')
 	os.system('pip install -r requirements.txt')
 	os.system('python setup.py develop')
