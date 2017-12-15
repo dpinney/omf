@@ -23,7 +23,7 @@ def annualDataHourlyToCsv(token, zipCode, dataTypeList, csvPath):
 	# This checks if data is available for the Zip entered and returns the dates it is available
 	r = requests.get(url, headers={'token':DEFAULT_TOKEN})
 	x = str(r.text)
-	print x
+	#print x
 	txt = 'empty'
 	dataAvailable = 0
 	#TODO: use json.loads(x) to parse JSON from a string.
@@ -31,7 +31,8 @@ def annualDataHourlyToCsv(token, zipCode, dataTypeList, csvPath):
 		txt = x.partition('{')[2]
 		x = txt.partition('}')[2]
 		txt = txt.partition('}')[0]
-		if len((txt.partition('NORMAL_HLY')[0]).partition('Normals Hourly')[2]) > 0:
+		#print len(txt.partition('NORMAL_HLY')[2])#.partition('Normals Hourly')[2]
+		if len(txt.partition(dataTypeList)[2]) > 0:
 			dataAvailable = 1
 			startDate = (txt.partition('mindate":"')[2]).partition('",')[0]
 			endDate = (txt.partition('maxdate":"')[2]).partition('",')[0]
@@ -84,8 +85,9 @@ def annualDataHourlyToCsv(token, zipCode, dataTypeList, csvPath):
 						writer.writerow([str(x)])
 
 def _tests():
-	#checkDatasets(DEFAULT_TOKEN, '22202')
+	checkDatasets(DEFAULT_TOKEN, '22202')
 	#pullOneDayHourly(DEFAULT_TOKEN, '22202', '2010','01','01')
-	annualDataHourlyToCsv(DEFAULT_TOKEN, '11430', [], 'weatherNoaaTemp.csv')
+	#annualDataHourlyToCsv(DEFAULT_TOKEN, '11430', [], 'weatherNoaaTemp.csv')
+	#annualDataHourlyToCsv(DEFAULT_TOKEN, '11430', 'NORMAL_HLY', 'weatherNoaaTemp.csv')
 
 _tests()
