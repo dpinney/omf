@@ -27,7 +27,12 @@
 % VB_func(94128,1,[5.6,100,2,2.5,22.5,.625,50])
 
 % VB_func(94128,4,[2,2,5.6,2.5,0.625,22.5,1])
+%VB_func('C:\\Users\\simon\\Documents\\GitHub\\omf\\omf\\weatherNoaaTemp.csv'...
+%    ,1,[2,2,5.6,2.5,0.625,22.5,1])
 
-VB_func('ADAK NAS',1,[2,2,5.6,2.5,0.625,22.5,1])
+VB_func('C:\Users\simon\Documents\GitHub\omf\omf\models\weatherNoaaTemp.csv'...
+    ,1,[2,2,5.6,2.5,0.625,22.5,1])
+
+%VB_func('weatherNoaaTemp.csv',1,[2,2,5.6,2.5,0.625,22.5,1])
 
 % VB_func(94128,2,0)
