@@ -6,6 +6,10 @@ def checkDatasets(token, zipCode):
 	# Returns the list of datasets and dates available for a given zipcode.
 	url = ('https://www.ncdc.noaa.gov/cdo-web/api/v2/datasets?locationid=ZIP:' + zipCode + '&limit=1000')
 	r = requests.get(url, headers={'token':DEFAULT_TOKEN})
+	#jsonData = json.loads(str(r.text))
+	#size =jsonData['metadata']['resultset']['count']
+	#for x in range(size):
+	#	print jsonData['results'][x]['id']
 	return r.json()
 
 def pullOneDayHourly(token, zipCode, year, month, day):
@@ -14,32 +18,23 @@ def pullOneDayHourly(token, zipCode, year, month, day):
 		'&units=metric&startdate=' + year + '-' + month + '-' + day + 'T00:00:00&enddate=' + \
 		year + '-' + month + '-' + day + 'T23:00:00&limit=1000')
 	r = requests.get(url, headers={'token':token})
+	print r.text
 	return r.json()
 
-def annualDataHourlyToCsv(token, zipCode, dataTypeList, csvPath):
+def annualDataHourlyToCsv(token, zipCode, dataSet, dataTypeList, csvPath):
 	'''Write a CSV at csvPath with a year of hourly data with columns of each datatype in the dataTypeList.'''
 	#TODO: implement dataTypeList
 	url = ('https://www.ncdc.noaa.gov/cdo-web/api/v2/datasets?locationid=ZIP:' + zipCode + '&limit=1000')
 	# This checks if data is available for the Zip entered and returns the dates it is available
 	r = requests.get(url, headers={'token':DEFAULT_TOKEN})
 	x = str(r.text)
-	#print x
-	txt = 'empty'
-	dataAvailable = 0
-	#TODO: use json.loads(x) to parse JSON from a string.
-	while txt != '':
-		txt = x.partition('{')[2]
-		x = txt.partition('}')[2]
-		txt = txt.partition('}')[0]
-		#print len(txt.partition('NORMAL_HLY')[2])#.partition('Normals Hourly')[2]
-		if len(txt.partition(dataTypeList)[2]) > 0:
+	jsonData = json.loads(str(r.text))
+	size =jsonData['metadata']['resultset']['count']
+	for x in range(size):
+		if jsonData['results'][x]['id'] == dataSet:
+			startDate = jsonData['results'][x]['mindate']
+			endDate = jsonData['results'][x]['maxdate']
 			dataAvailable = 1
-			startDate = (txt.partition('mindate":"')[2]).partition('",')[0]
-			endDate = (txt.partition('maxdate":"')[2]).partition('",')[0]
-	if dataAvailable == 0:
-		print 'No temperature data is available for this zip code'
-	else:
-		print 'We have found temperature data for the zip code: ' + str(zipCode) + '\nWith start date: ' + str(startDate) + '\nAnd end date: ' + str(endDate)
 	# Stores the number of days in each month
 	calendar = collections.OrderedDict()
 	calendar['01'] = 31
@@ -68,26 +63,19 @@ def annualDataHourlyToCsv(token, zipCode, dataTypeList, csvPath):
 						day = str(day)
 					url = ('https://www.ncdc.noaa.gov/cdo-web/api/v2/data?datasetid=NORMAL_HLY&datatype=HLY-TEMP-NORMAL&locationid=ZIP:' + zipCode + 
 						'&units=metric&startdate=' + year + '-' + month + '-' + day + 'T00:00:00&enddate=' + year + '-' + month + '-' + day + 'T23:00:00&limit=1000')
-					#time.sleep(0.1) #SET TO 0.2 WHEN NOT TESTING
+					#time.sleep(0.2) #SET TO 0.2 WHEN NOT TESTING
 					r = requests.get(url, headers={'token':DEFAULT_TOKEN})
 					text = r.text
-					for hour in range(24):
-						if len(str(hour)) == 1:
-							hour = '0' + str(hour)
-						else:
-							hour = str(hour)
-						x = text.partition('HLY-TEMP-NORMAL')[2]
-						text = x.partition('}')[2]
-						x = x.partition('}')[0]
-						x = x.partition('value":')[2]
-						#timeStamp = month + '/' + day + '/' + year + ' ' + str(hour) + ':00:00'
-						#writer.writerow([timeStamp,str(x)])
-						writer.writerow([str(x)])
-
+					jsonData = json.loads(str(r.text))
+					size =jsonData['metadata']['resultset']['count']
+					for x in range(size):
+						if jsonData['results'][x]['datatype'] == dataTypeList:
+							writer.writerow([str(jsonData['results'][x]['value'])])
+							
 def _tests():
-	checkDatasets(DEFAULT_TOKEN, '22202')
+	#checkDatasets(DEFAULT_TOKEN, '22202')
 	#pullOneDayHourly(DEFAULT_TOKEN, '22202', '2010','01','01')
 	#annualDataHourlyToCsv(DEFAULT_TOKEN, '11430', [], 'weatherNoaaTemp.csv')
-	#annualDataHourlyToCsv(DEFAULT_TOKEN, '11430', 'NORMAL_HLY', 'weatherNoaaTemp.csv')
+	annualDataHourlyToCsv(DEFAULT_TOKEN, '11430', 'NORMAL_HLY', 'HLY-TEMP-NORMAL', 'weatherNoaaTemp.csv')
 
 _tests()
