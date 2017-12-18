@@ -36,6 +36,9 @@ elseif strcmp(out_temp,'default')
     out_temp = 'outdoor_temperature.csv';
     tempData = csvread(out_temp);
     temperature_a=tempData(:,2);
+elseif strcmp(out_temp(end-2:end),'csv') %strcmp(out_temp,'Loaded File')
+    tempData = csvread(out_temp);
+    temperature_a=tempData(:,1);
 else
     temperature_a = VB_TMY3(out_temp)';
 end

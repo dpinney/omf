@@ -24,6 +24,10 @@
 		input[type='file'] {
 		  color: transparent;
 		}
+		#tempCurveFileName {line-height:35px;}
+		input[type='file'] {
+		  color: transparent;
+		}		
 		/*IE Hacks*/
 		@media screen\0 {
 			#fileBackground{margin-left:0px;width:222px;max-width:222px;height:29px;}
@@ -1239,6 +1243,40 @@
 							var FileName = FileName[FileName.length-1];
 							document.getElementById('demandCurveFileName').innerHTML = FileName;
 							gebi("fileName").value = FileName;
+						}
+					}
+				</script>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Temperature Curve (.csv file)<span class="classic">Please see the documentation at the help link for the required format and an example temperature file. If this field is blank the OMF will re-use the file from the previous run.</span></label>
+				<script>var tempFileName=true;</script>
+				<input type="file" id="tempCurveFile" name="tempCurveFile" accept=".csv" onchange="handle_files(this.files)">
+				<input id="tempCurve" name="tempCurve" type="hidden">
+				<!-- Format the file input and populate it with a saved file. -->				
+				<input type="hidden" id="tempFileName" name="tempFileName" readonly="readonly">
+				<div id="fileBackground"></div>
+				<div id="fileExists"><label for="tempCurveFile" id="tempCurveFileName"></label></div>
+				<script>
+					if (typeof allInputData.tempFileName !== 'undefined') {				
+						var tempFileName = allInputData.tempFileName;
+						document.getElementById('tempCurveFileName').innerHTML = tempFileName;
+					}
+					else {
+						document.getElementById('tempCurveFileName').innerHTML = 'Please select a file'
+						gebi('tempCurveFile').setAttribute('required', 'required')}
+					// File handler function.
+					function handle_files(files) {
+						// read file to a hidden input field
+						reader = new FileReader()
+						reader.readAsText(files[0])
+						reader.onload = loaded
+						function loaded(evt) {
+							evt.target.result
+							gebi("tempCurve").value = reader.result
+							var tempFileName = gebi("tempCurveFile").value.split("\\");
+							var tempFileName = tempFileName[tempFileName.length-1];
+							document.getElementById('tempCurveFileName').innerHTML = tempFileName;
+							gebi("tempFileName").value = tempFileName;
 						}
 					}
 				</script>

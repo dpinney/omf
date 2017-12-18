@@ -48,12 +48,14 @@ def work(modelDir, inputDict):
 		octBin = 'octave --no-gui'
 	else:
 		octBin = 'octave --no-window-system'
+	inputDict['zipcode'] = "'" + str(os.path.abspath("weatherNoaaTemp.csv")) + "'"
 	command = 'OCTBIN --eval "addpath(genpath(\'FULLPATH\'));VB_func(ARGS)"'\
 	 	.replace('FULLPATH', vbatPath)\
 	 	.replace('OCTBIN',octBin)\
 		.replace('ARGS', inputDict['zipcode'] + ',' + inputDict['load_type'] +',[' + inputDict['capacitance'] + ','+ inputDict['resistance'] + 
 			',' + inputDict['power'] + ',' + inputDict['cop'] + ',' + inputDict['deadband'] + ',' + inputDict['setpoint'] + ',' +
 			inputDict['number_devices'] + ']')
+	#print os.path.abspath("weatherNoaaTemp.csv")
 	script_dir = os.path.dirname(os.path.dirname(__file__))
 	rel_path = 'static/testFiles/FrankScadaValidCSV.csv'
 	abs_file_path = os.path.join(script_dir, rel_path)
@@ -61,7 +63,7 @@ def work(modelDir, inputDict):
 	demandAdjustedList = []
 	dates = []
 	with open(pJoin(modelDir,"demand.csv"),"w") as demandFile:
-		print inputDict['demandCurve'].replace('\r','')
+		#print inputDict['demandCurve'].replace('\r','')
 		#demandFile.write(inputDict['demandCurve'])
 		demandFile.write(inputDict['demandCurve'].replace('\r',''))
 	try:
@@ -98,15 +100,18 @@ def work(modelDir, inputDict):
 			peakDemand[int(dates[x])-1] = demandList[x]
 		energyMonthly[int(dates[x])-1] += demandList[x]
 	myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
-	P_lower = myOut.partition("P_lower =\n\n")[2]
-	P_lower = P_lower.partition("\n\nn")[0]
-	P_lower = map(float,P_lower.split('\n'))
-	P_upper = myOut.partition("P_upper =\n\n")[2]
-	P_upper = P_upper.partition("\n\nn")[0]
-	P_upper = map(float,P_upper.split('\n'))
-	E_UL = myOut.partition("E_UL =\n\n")[2]
-	E_UL = E_UL.partition("\n\n")[0]
-	E_UL = map(float,E_UL.split('\n'))
+	try:
+		P_lower = myOut.partition("P_lower =\n\n")[2]
+		P_lower = P_lower.partition("\n\nn")[0]
+		P_lower = map(float,P_lower.split('\n'))
+		P_upper = myOut.partition("P_upper =\n\n")[2]
+		P_upper = P_upper.partition("\n\nn")[0]
+		P_upper = map(float,P_upper.split('\n'))
+		E_UL = myOut.partition("E_UL =\n\n")[2]
+		E_UL = E_UL.partition("\n\n")[0]
+		E_UL = map(float,E_UL.split('\n'))
+	except:
+		raise Exception('Parsing error, check power data')
 	for x,y in zip(P_upper,demandList):
 		demandAdjustedList.append(y-x)
 	for x in range(8760):
@@ -190,7 +195,9 @@ def new(modelDir):
 		"unitDeviceCost":"100",
 		"unitUpkeepCost":"5",
 		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidCSV.csv")).read(),
+		"tempCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","weatherNoaaTemp.csv")).read(),
 		"fileName": "FrankScadaValidCSV.csv",
+		"tempFileName": "weatherNoaaTemp.csv",
 		"modelType":modelName}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	return creationCode
