@@ -163,7 +163,7 @@ def netToMat(inNet, networkName):
 		matStr.append('\n')
 	return matStr
 
-def _secretTests():
+def tests():
 	# Parse mat to dictionary.
 	networkName = 'case9'
 	networkJson = parse(pJoin(omf.omfDir,'solvers','matpower5.1',networkName+'.m'), filePath=True)

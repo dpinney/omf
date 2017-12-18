@@ -199,7 +199,7 @@ def new(modelDir):
 		return False
 	return creationCode
 
-def _simpleTest():
+def _tests():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
@@ -218,4 +218,4 @@ def _simpleTest():
 	renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	_simpleTest ()
+	_tests()
