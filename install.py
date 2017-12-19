@@ -99,4 +99,4 @@ elif platform.system()=="Darwin": # MacOS
 	os.system('pip install -r requirements.txt')
 	os.system('python setup.py develop')
 else:
-	print 'Your operating system is not currently supported.'
+	print 'Your operating system, ' + platform.system() + ', is not currently supported.'
