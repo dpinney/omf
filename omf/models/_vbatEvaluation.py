@@ -57,7 +57,10 @@ def work(modelDir, inputDict):
 			',' + inputDict['power'] + ',' + inputDict['cop'] + ',' + inputDict['deadband'] + ',' + inputDict['setpoint'] + ',' +
 			inputDict['number_devices'] + ']')
 	try:
-		myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
+		proc = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
+		with open(pJoin(modelDir, "PID.txt"),"w") as pidFile:
+			pidFile.write(str(proc.pid))
+		(myOut, err) = proc.communicate()
 		P_lower = myOut.partition("P_lower =\n\n")[2]
 		P_lower = P_lower.partition("\n\nn")[0]
 		P_lower = map(float,P_lower.split('\n'))
