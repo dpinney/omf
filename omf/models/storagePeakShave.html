@@ -279,8 +279,8 @@
 		</script>
 		<p class="reportTitle postRun">Monthly Cost Comparison</p>
 		<div id="levelizedCostReport" class="tightContent postRun">
-			<div id="levelizedCostTableDiv" style="display:inline-block; width:1000px; height:280px; overflow-y:hidden; overflow-x:auto;">
-				<table id="monthlySummaryTable" style="margin:5px;">
+			<div id="levelizedCostTableDiv" style="display:inline-block; width:1000px; height:255px; overflow-y:hidden; overflow-x:auto;">
+				<table id="monthlySummaryTable" style="margin:5px;margin: 5px;width: 990px;font-size: 14pt">
 					<style>td, th {padding:7 0 5 20;text-align: left;font-size:0.7em;}</style>
 					<div id="tableHead">
 						<thead>
@@ -308,21 +308,6 @@
 					insertDollarMetric("monthlySummaryTable","Value of Reduction ($)", allOutputData.benefitMonthly)
 					insertDollarMetric("monthlySummaryTable","Cost to Recharge Battery ($)", allOutputData.costtoRecharge)
 					insertDollarMetric("monthlySummaryTable","Net Benefit ($)", allOutputData.benefitNet)
-				</script>
-				<script>
-					table = gebi("monthlySummaryTable")
-					newRow = table.insertRow()
-					newRow.insertCell().innerHTML = ""
-					newRow = table.insertRow()
-					newRow.insertCell().innerHTML = "<div id=\"SPP\">Financial Calculations:</div>"
-					newRow.insertCell().innerHTML = "<div id=\"SPP\">NPV:</div>"
-					cell = newRow.insertCell()
-					cell.innerHTML = "$" + delimitNumbers(allOutputData.NPV.toFixed(0))
-					cell = newRow.insertCell()
-					cell.innerHTML + ""
-					newRow.insertCell().innerHTML = "<div id=\"SPP\">SPP:</div>"
-					cell = newRow.insertCell()
-					cell.innerHTML = delimitNumbers(allOutputData.SPP.toFixed(3))
 				</script>
 			</div>
 		</div>
