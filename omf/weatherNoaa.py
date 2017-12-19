@@ -18,13 +18,14 @@ def pullOneDayHourly(token, zipCode, year, month, day):
 		'&units=metric&startdate=' + year + '-' + month + '-' + day + 'T00:00:00&enddate=' + \
 		year + '-' + month + '-' + day + 'T23:00:00&limit=1000')
 	r = requests.get(url, headers={'token':token})
-	print r.text
+	#print r.text
 	return r.json()
 
 def annualDataHourlyToCsv(token, zipCode, dataSet, dataTypeList, csvPath):
 	'''Write a CSV at csvPath with a year of hourly data with columns of each datatype in the dataTypeList.'''
 	#TODO: implement dataTypeList
 	url = ('https://www.ncdc.noaa.gov/cdo-web/api/v2/datasets?locationid=ZIP:' + zipCode + '&limit=1000')
+	#len(dataTypeList)
 	# This checks if data is available for the Zip entered and returns the dates it is available
 	r = requests.get(url, headers={'token':DEFAULT_TOKEN})
 	x = str(r.text)
@@ -71,7 +72,7 @@ def annualDataHourlyToCsv(token, zipCode, dataSet, dataTypeList, csvPath):
 					for x in range(size):
 						if jsonData['results'][x]['datatype'] == dataTypeList:
 							writer.writerow([str(jsonData['results'][x]['value'])])
-							
+
 def _tests():
 	#checkDatasets(DEFAULT_TOKEN, '22202')
 	#pullOneDayHourly(DEFAULT_TOKEN, '22202', '2010','01','01')
