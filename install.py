@@ -1,23 +1,6 @@
 import platform, os
 # All installations require git to clone the omf.
-if platform.system() == 'Linux' and platform.linux_distribution()[0]=="Ubuntu":
-	os.system("sudo apt-get install python-pip git unixodbc-dev libfreetype6-dev \
-	pkg-config python-dev python-numpy alien python-pygraphviz \
-	python-pydot ffmpeg mdbtools python-cairocffi python-tk octave")
-	os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0.0-1.el6.x86_64.rpm")
-	os.system("sudo alien gridlabd-4.0.0-1.el6.x86_64.rpm")
-	os.system("sudo apt-get install libgraphviz-dev")
-	workDir = os.getcwd()
-	for file in os.listdir(workDir):
-		if file.endswith('.deb'):
-			debFile = file		
-	os.system("sudo dpkg -i " + debFile)
-	os.system("sudo apt-get install -f")
-	os.system("cd omf")
-	os.system("pip install -r requirements.txt")
-	os.system("sudo python setup.py develop")
-	# if CentOS 7 run these commands:
-elif platform.system() == 'Linux' and platform.linux_distribution()[0]=="CentOS Linux":
+if platform.system() == 'Linux' and platform.linux_distribution()[0]=="CentOS Linux":
 	# git clone https://github.com/dpinney/omf.git
 	os.system("sudo yum -y install wget git graphviz gcc xerces-c python-devel tkinter octave 'graphviz-devel.x86_64'")
 	os.system("yum --enablerepo=extras install epel-release")
@@ -32,7 +15,21 @@ elif platform.system() == 'Linux' and platform.linux_distribution()[0]=="CentOS 
 	os.system("pip install -r requirements.txt")
 	os.system("pip install --ignore-installed six")
 	os.system("python setup.py develop")
-# if Windows run these commands:
+elif platform.system() == 'Linux' and platform.linux_distribution()[0]!="CentOS Linux":
+	# Assume non-CentOS systems are Debian-based.
+	os.system("sudo apt-get install python-pip git unixodbc-dev libfreetype6-dev \
+	pkg-config python-dev python-numpy alien python-pygraphviz \
+	python-pydot ffmpeg mdbtools python-cairocffi python-tk octave libgraphviz-dev")
+	os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0.0-1.el6.x86_64.rpm")
+	os.system("sudo alien gridlabd-4.0.0-1.el6.x86_64.rpm")
+	workDir = os.getcwd()
+	for file in os.listdir(workDir):
+		if file.endswith('.deb'):
+			os.system("sudo dpkg -i " + debFile)
+	os.system("sudo apt-get install -f")
+	os.system("cd omf")
+	os.system("pip install -r requirements.txt")
+	os.system("sudo python setup.py develop")
 elif platform.system()=='Windows':
 	# Need to manually download and install Python 2.7 and set python as a path variable, Git, Chocolatey 
 	# Download Pygraphviz whl and place it in the omf directory
@@ -99,4 +96,4 @@ elif platform.system()=="Darwin": # MacOS
 	os.system('pip install -r requirements.txt')
 	os.system('python setup.py develop')
 else:
-	print 'Your operating system, ' + platform.system() + ', is not currently supported.'
+	print 'Your operating system is not currently supported.'
