@@ -12,10 +12,18 @@ If you'd like to host your own copy of the OMF, please follow the [developer ins
 
 ### Example Screenshots
 
-WYSIWYG circuit editor:
+Graphical circuit editor:
 
-![Screenshot 1](https://raw.githubusercontent.com/wiki/dpinney/omf/images/readme_DistributionFeeder.png)
+![Screenshot 1](https://raw.githubusercontent.com/wiki/dpinney/omf/images/readme_circuitEditor.png)
 
-Output example From a solar distributed generation model:
+Power quality metrics calculation from a solar distributed generation model:
 
-![Screenshot 2](https://raw.githubusercontent.com/wiki/dpinney/omf/images/readme_energyBalance.png)
+![Screenshot 2](https://raw.githubusercontent.com/wiki/dpinney/omf/images/readme_distributionPower.png)
+
+Transmission powerflow results:
+
+![Screenshot 3](https://raw.githubusercontent.com/wiki/dpinney/omf/images/readme_transmissionPowerflow.png)
+
+Financial analysis of the impact of distributed generation:
+
+![Screenshot 4](https://raw.githubusercontent.com/wiki/dpinney/omf/images/readme_financialModeling.png)
