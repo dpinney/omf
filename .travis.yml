@@ -7,12 +7,6 @@ env:
 before_install:
     - sh -e /etc/init.d/xvfb start
     - sudo apt-get update -qq
-    - sudo apt-get install -y python-pip git unixodbc-dev libfreetype6-dev pkg-config python-dev python-numpy alien octave ffmpeg
-    - cd omf/solvers/gridlabd
-    - sudo alien gridlabd-3.1.0-1.x86_64.rpm
-    - sudo dpkg -i gridlabd_3.1.0-2_amd64.deb
-    - sudo apt-get install -f  
-    - cd ../../../
-install: "python setup.py develop"
+install: "python install.py"
 script:
     - python ./omf/runAllTests.py omf
