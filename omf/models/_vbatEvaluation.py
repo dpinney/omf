@@ -56,11 +56,17 @@ def work(modelDir, inputDict):
 		.replace('ARGS', inputDict['zipcode'] + ',' + inputDict['load_type'] +',[' + inputDict['capacitance'] + ','+ inputDict['resistance'] + 
 			',' + inputDict['power'] + ',' + inputDict['cop'] + ',' + inputDict['deadband'] + ',' + inputDict['setpoint'] + ',' +
 			inputDict['number_devices'] + ']')
+	octCommand = '"addpath(genpath(\'FULLPATH\'));VB_func(ARGS)"'.replace('FULLPATH', vbatPath.replace('\\','\\\\'))\
+		.replace('ARGS', inputDict['zipcode'] + ',' + inputDict['load_type'] +',[' + inputDict['capacitance'] + ','+ inputDict['resistance'] + 
+			',' + inputDict['power'] + ',' + inputDict['cop'] + ',' + inputDict['deadband'] + ',' + inputDict['setpoint'] + ',' +
+			inputDict['number_devices'] + ']')
 	try:
-		proc = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
+		print command
+		proc = subprocess.Popen([octBin,'--eval',octCommand], stdout=subprocess.PIPE, shell=True)
 		with open(pJoin(modelDir, "PID.txt"),"w") as pidFile:
 			pidFile.write(str(proc.pid))
 		(myOut, err) = proc.communicate()
+		print myOut
 		P_lower = myOut.partition("P_lower =\n\n")[2]
 		P_lower = P_lower.partition("\n\nn")[0]
 		P_lower = map(float,P_lower.split('\n'))
