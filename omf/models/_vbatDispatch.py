@@ -48,7 +48,9 @@ def work(modelDir, inputDict):
 		octBin = 'octave --no-gui'
 	else:
 		octBin = 'octave --no-window-system'
-	inputDict['zipcode'] = "'" + str(os.path.abspath("weatherNoaaTemp.csv")) + "'"
+
+	#inputDict['zipcode'] = "'" + str(os.path.abspath("weatherNoaaTemp.csv")) + "'"
+	inputDict['zipcode'] = "'" + str(os.path.abspath(inputDict['tempFileName'])) + "'"
 	command = 'OCTBIN --eval "addpath(genpath(\'FULLPATH\'));VB_func(ARGS)"'\
 	 	.replace('FULLPATH', vbatPath)\
 	 	.replace('OCTBIN',octBin)\
@@ -180,7 +182,7 @@ def new(modelDir):
 	defaultInputs = {
 		"user": "admin",
 		"load_type": "1",
-		"zipcode": "'default'",
+		"zipcode": "40355",
 		"number_devices": "100",
 		"power": "5.6",
 		"capacitance": "2",
@@ -192,7 +194,7 @@ def new(modelDir):
 		"electricityCost":"0.06",
 		"projectionLength":"15",
 		"discountRate":"2",
-		"unitDeviceCost":"100",
+		"unitDeviceCost":"200",
 		"unitUpkeepCost":"5",
 		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidCSV.csv")).read(),
 		"tempCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","weatherNoaaTemp.csv")).read(),
