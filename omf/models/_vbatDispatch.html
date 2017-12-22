@@ -299,9 +299,8 @@
 					},
 					"yAxis":{
 						"title":{"text":"Power (kW)","style":{"color":"gray"}},
-						// "min":allOutputData.differenceMin
 					},
-					"title":{"text":null},
+					"title":{"text": allOutputData.dataCheck, "verticalAlign":"bottom", "align":"right", "y":-400, "x":-150, "style":{"color":"gray", "fontSize":"36px"}},
 					"series":[
 						{"name":"Min Power","marker":{"enabled":false},"color":"red","data":allOutputData.minPowerSeries,"pointPlacement": +0.1},
 						{"name":"Max Power","marker":{"enabled":false},"color":"purple","data":allOutputData.maxPowerSeries,"pointPlacement": -0.2},
@@ -319,7 +318,6 @@
 					"plotOptions":{
 						"series":{
 							"animation":false,
-							//"pointStart":Date.parse(allOutputData.startDate),
 							"shadow":false,
 							"pointInterval":3600000},
 						"line":{"marker":{"enabled":false}}},
@@ -334,7 +332,6 @@
 					},
 					"yAxis":{
 						"title":{"text":"Demand (kWh)","style":{"color":"gray"}},
-						//"min":allOutputData.differenceMin
 					},
 					"title":{"text":null},
 					"series":[

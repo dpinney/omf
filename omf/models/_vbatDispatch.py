@@ -121,9 +121,18 @@ def work(modelDir, inputDict):
 			peakAdjustedDemand[int(dates[x])-1] = demandAdjustedList[x]
 		energyAdjustedMonthly[int(dates[x])-1] += demandAdjustedList[x]
 	# Format results to go in chart.
+	rms = 0
+	for each in P_lower:
+		rms = rms + (each**2)**0.5
+	for each in P_upper:
+		rms = rms + (each**2)**0.5
+	if rms == 0:
+		outData["dataCheck"] = 'VBAT returns no values for your inputs'
+	else:
+		outData["dataCheck"] = ''
 	outData["minPowerSeries"] = [-1*x for x in P_lower]
 	outData["maxPowerSeries"] = P_upper
-	outData["minEnergySeries"] = [-1*x for x in E_UL]
+	outData["minEnergySeries"] = [-1*x for x in E_UL]############## Remove energy? it's no longer displayed on the front end
 	outData["maxEnergySeries"] = E_UL
 	outData["demand"] = demandList
 	outData["demandAdjusted"] = demandAdjustedList

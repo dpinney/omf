@@ -72,6 +72,16 @@ def work(modelDir, inputDict):
 	E_UL = myOut.partition("E_UL =\n\n")[2]
 	E_UL = E_UL.partition("\n\n")[0]
 	E_UL = map(float,E_UL.split('\n'))
+
+	rms = 0
+	for each in P_lower:
+		rms = rms + (each**2)**0.5
+	for each in P_upper:
+		rms = rms + (each**2)**0.5
+	if rms == 0:
+		outData["dataCheck"] = 'VBAT returns no values for your inputs'
+	else:
+		outData["dataCheck"] = ''
 	# Format results to go in chart.
 	outData["minPowerSeries"] = [-1*x for x in P_lower]
 	outData["maxPowerSeries"] = P_upper
