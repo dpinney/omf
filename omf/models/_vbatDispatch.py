@@ -48,7 +48,9 @@ def work(modelDir, inputDict):
 		octBin = 'octave --no-gui'
 	else:
 		octBin = 'octave --no-window-system'
-	inputDict['zipcode'] = "'" + str(os.path.abspath("weatherNoaaTemp.csv")) + "'"
+
+	#inputDict['zipcode'] = "'" + str(os.path.abspath("weatherNoaaTemp.csv")) + "'"
+	inputDict['zipcode'] = "'" + str(os.path.abspath(inputDict['tempFileName'])) + "'"
 	command = 'OCTBIN --eval "addpath(genpath(\'FULLPATH\'));VB_func(ARGS)"'\
 	 	.replace('FULLPATH', vbatPath)\
 	 	.replace('OCTBIN',octBin)\
@@ -119,9 +121,18 @@ def work(modelDir, inputDict):
 			peakAdjustedDemand[int(dates[x])-1] = demandAdjustedList[x]
 		energyAdjustedMonthly[int(dates[x])-1] += demandAdjustedList[x]
 	# Format results to go in chart.
+	rms = 0
+	for each in P_lower:
+		rms = rms + (each**2)**0.5
+	for each in P_upper:
+		rms = rms + (each**2)**0.5
+	if rms == 0:
+		outData["dataCheck"] = 'VBAT returns no values for your inputs'
+	else:
+		outData["dataCheck"] = ''
 	outData["minPowerSeries"] = [-1*x for x in P_lower]
 	outData["maxPowerSeries"] = P_upper
-	outData["minEnergySeries"] = [-1*x for x in E_UL]
+	outData["minEnergySeries"] = [-1*x for x in E_UL]############## Remove energy? it's no longer displayed on the front end
 	outData["maxEnergySeries"] = E_UL
 	outData["demand"] = demandList
 	outData["demandAdjusted"] = demandAdjustedList
@@ -180,7 +191,7 @@ def new(modelDir):
 	defaultInputs = {
 		"user": "admin",
 		"load_type": "1",
-		"zipcode": "'default'",
+		"zipcode": "40355",
 		"number_devices": "100",
 		"power": "5.6",
 		"capacitance": "2",
@@ -192,7 +203,7 @@ def new(modelDir):
 		"electricityCost":"0.06",
 		"projectionLength":"15",
 		"discountRate":"2",
-		"unitDeviceCost":"100",
+		"unitDeviceCost":"200",
 		"unitUpkeepCost":"5",
 		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidCSV.csv")).read(),
 		"tempCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","weatherNoaaTemp.csv")).read(),
