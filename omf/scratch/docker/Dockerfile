@@ -3,7 +3,7 @@ FROM ubuntu:16.04
 MAINTAINER <david.pinney@nreca.coop>
 
 # Install and setup OMF reqs
-RUN apt-get -y update && apt-get install -y python-pip git unixodbc-dev libfreetype6-dev pkg-config python-dev python-numpy alien python-pygraphviz python-pydot ffmpeg mdbtools python-cairocffi
+RUN apt-get -y update && apt-get install -y python-pip git unixodbc-dev libfreetype6-dev pkg-config python-dev python-numpy alien python-pygraphviz python-pydot ffmpeg mdbtools python-cairocffi octave
 RUN cd home; git clone https://github.com/dpinney/omf
 RUN cd home/omf; python setup.py develop
 # Make sure the docker instance listens externally:
