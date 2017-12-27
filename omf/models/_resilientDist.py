@@ -184,12 +184,15 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			newBus['id'] = bus.get('name','')+'_bus'
 			numPhases, newBus['has_phase'], max_real_phase, max_reactive_phase = getNodePhases(bus, 0.0)
 			gfmJson['buses'].append(newBus)
-			for busNode in jsonNodes:
-				# HACK: sometimes keys are strings. Sometimes not.
-				if int(key) == busNode.get('treeIndex',0):
-					# HACK: nice coords for GFM which wants lat/lon.
-					newBus['y'] = busNode.get('y')/5000.0
-					newBus['x'] = busNode.get('x')/5000.0
+			if len(jsonNodes) == 0:
+				pass #TODO: implement lat/lon tree usage for newBus stuff.
+			else:
+				for busNode in jsonNodes:
+					# HACK: sometimes keys are strings. Sometimes not.
+					if int(key) == busNode.get('treeIndex',0):
+						# HACK: nice coords for GFM which wants lat/lon.
+						newBus['y'] = busNode.get('y')/5000.0
+						newBus['x'] = busNode.get('x')/5000.0
 	# Load creation:
 	objToFind = ['load']
 	phaseNames = {'A':0, 'B':1, 'C':2}
