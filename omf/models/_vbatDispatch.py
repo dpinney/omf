@@ -3,13 +3,15 @@ Requirements: GNU octave
 '''
 
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime, traceback, math
-import multiprocessing, platform
+import multiprocessing, platform,collections
 from os.path import join as pJoin
 from jinja2 import Template
 import __neoMetaModel__
 from __neoMetaModel__ import *
 import random
 import csv
+import matplotlib.pyplot as plt
+import numpy as np
 	
 # Model metadata:
 fileName = os.path.basename(__file__)
@@ -73,7 +75,6 @@ def work(modelDir, inputDict):
 			reader = csv.DictReader(inFile)
 			for row in reader:
 				demandList.append(float(row['power']))
-				#TODO: catch date issues. datetime.datetime.strptime('%Y-%M-%D %H:%M:%S')
 				#dates.append(row['timestamp'])
 				dates.append(row['timestamp'].partition('/')[0])
 			if len(demandList) != 8760:
@@ -179,12 +180,67 @@ def work(modelDir, inputDict):
 	outData["savings"] = savings
 	outData["NPV"] = NPV
 	outData["SPP"] = SPP
-	outData["netCashflow"] = cashFlowList	#netCashflow
+	outData["netCashflow"] = cashFlowList
 	outData["cumulativeCashflow"] = cumulativeCashflow
 	# Stdout/stderr.
 	outData["stdout"] = "Success"
-	#inputDict["stderr"] = ""
 	return outData
+
+def carpetPlot(tempData): #tempData is a 8760 list that contains the temperature data to be displayed in a carpet plot
+#takes about one minute to run
+	calendar = collections.OrderedDict()
+	calendar['0'] = 31
+	calendar['1'] = 28
+	calendar['2'] = 31
+	calendar['3'] = 30
+	calendar['4'] = 31
+	calendar['5'] = 30
+	calendar['6'] = 31
+	calendar['7'] = 31
+	calendar['8'] = 30
+	calendar['9'] = 31
+	calendar['10'] = 30
+	calendar['11'] = 31
+	f, axarr = plt.subplots(12, 31, sharex=True, sharey=True)
+	f.suptitle('Carpet Plot of VBAT energy potential')
+	f.text(0.5, 0.05, 'Days', ha='center', va='center')
+	f.text(0.04, 0.5, 'Months', ha='center', va='center', rotation='vertical')
+	f.text(0.095,0.86, 'Jan', ha='center', va='center')
+	f.text(0.095,0.79, 'Feb', ha='center', va='center')
+	f.text(0.095,0.72, 'Mar', ha='center', va='center')
+	f.text(0.095,0.66, 'Apr', ha='center', va='center')
+	f.text(0.095,0.59, 'May', ha='center', va='center')
+	f.text(0.095,0.525, 'Jun', ha='center', va='center')
+	f.text(0.095,0.47, 'Jul', ha='center', va='center')
+	f.text(0.095,0.40, 'Aug', ha='center', va='center')
+	f.text(0.095,0.335, 'Sep', ha='center', va='center')
+	f.text(0.095,0.265, 'Oct', ha='center', va='center')
+	f.text(0.095,0.195, 'Nov', ha='center', va='center')
+	f.text(0.095,0.135, 'Dec', ha='center', va='center')
+	dayNum = -24
+	for month in calendar:
+		for day in range(calendar[month]):
+			dayNum += 24
+			dayValues = []
+			for z in range(24):
+				dayValues.append(tempData[dayNum + z])
+			axarr[int(month),day].plot(dayValues)
+			axarr[int(month),day].axis('off')
+	axarr[1,28].plot(0,0)
+	axarr[1,29].plot(0,0)
+	axarr[1,30].plot(0,0)
+	axarr[3,30].plot(0,0)
+	axarr[5,30].plot(0,0)
+	axarr[8,30].plot(0,0)
+	axarr[10,30].plot(0,0)
+	axarr[1,28].axis('off')
+	axarr[1,29].axis('off')
+	axarr[1,30].axis('off')
+	axarr[3,30].axis('off')
+	axarr[5,30].axis('off')
+	axarr[8,30].axis('off')
+	axarr[10,30].axis('off')
+	plt.savefig('vbatDispatchCarpetPlot.png')
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
