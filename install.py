@@ -60,8 +60,8 @@ elif platform.system()=='Windows':
 	# Possible start a new process after refreshenv, maybe look for anothey way to refresh 
 	# env variables in python
 	# Manually setting path for pip and other scripts
-	os.system('setx PATH "%PATH%;C:\Python27\Scripts')
-	os.system('setx PATH "%PATH%;C:\Program Files (x86)\Graphviz2.38\bin')
+	os.system('setx /M PATH "%PATH%;C:\Python27\Scripts"')
+	os.system('setx /M PATH "%PATH%;C:\Program Files (x86)\Graphviz2.38\bin"')
 	os.system("cd " + workDir)
 	# Sometimes wget has a hard time downloading gridlabD
 	if platform.architecture()[0] == '32bit':
