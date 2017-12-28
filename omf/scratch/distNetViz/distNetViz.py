@@ -5,14 +5,11 @@ Load an OMF feeder in to the new viewer.
 import tempfile, shutil, os, fileinput, json, networkx as nx, platform, omf.feeder as feeder, webbrowser, sys
 
 def main():
-	SOURCE_DIR = './'
-	# HACK: make sure we have our homebrew binaries available.
-	os.environ['PATH'] += os.pathsep + '/usr/local/bin'
-	# Handle the command line arguments.
+	''' Handle the command line arguments for distNetViz.'''
 	argCount = len(sys.argv)
 	errorMessage = 'Incorrect inputs. Usage: distNetViz -f <Path_to_feeder.glm or .omd>'
 	if argCount == 1:
-		# print 'Running tests. Normal usage: distNetViz -f <Path_to_feeder.glm or .omd>'
+		print 'Running tests. Normal usage: distNetViz -f <Path_to_feeder.glm or .omd>'
 		# FEEDER_PATH = 'DEC Robinsonville Debugged.omd'
 		FEEDER_PATH = '../../static/publicFeeders/Simple Market System.omd'
 		DO_FORCE_LAYOUT = True
@@ -27,12 +24,16 @@ def main():
 		FEEDER_PATH = sys.argv[2]
 	elif argCount > 3:
 		print errorMessage
+	viz(FEEDER_PATH, forceLayout=DO_FORCE_LAYOUT, outputPath=None)
+
+def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None):
+	''' Vizualize a distribution system.'''
 	# Load in the feeder.
-	with open(FEEDER_PATH,'r') as feedFile:
-		if FEEDER_PATH.endswith('.omd'):
+	with open(pathToOmdOrGlm,'r') as feedFile:
+		if pathToOmdOrGlm.endswith('.omd'):
 			thisFeed = json.load(feedFile)
-		elif FEEDER_PATH.endswith('.glm'):
-			thisFeed = {'tree':feeder.parse(FEEDER_PATH, filePath=True)}
+		elif pathToOmdOrGlm.endswith('.glm'):
+			thisFeed = {'tree':feeder.parse(pathToOmdOrGlm, filePath=True)}
 		tree = thisFeed['tree']
 	# If there is zero lat/lon info, do force layout by default.
 	latLonCount = 0
@@ -41,9 +42,9 @@ def main():
 			if subKey in tree[key]:
 				latLonCount += 1
 	if latLonCount == 0:
-		DO_FORCE_LAYOUT = True
+		forceLayout = True
 	# Force layout of feeders with no lat/lon information so we can actually see what's there.
-	if DO_FORCE_LAYOUT:
+	if forceLayout:
 		print "Force laying out the graph..."
 		# Use graphviz to lay out the graph.
 		inGraph = feeder.treeToNxGraph(tree)
@@ -62,7 +63,14 @@ def main():
 				tree[key]['longitude'] = thisPos[0]
 				tree[key]['latitude'] = thisPos[1]
 	# Set up temp directory and copy the feeder and viewer in to it.
-	tempDir = tempfile.mkdtemp()
+	if outputPath == None:
+		tempDir = tempfile.mkdtemp()
+	else:
+		tempDir = outputPath
+	#HACK: make sure we get the required files from the right place.
+	SOURCE_DIR = os.path.dirname(__file__) + '/'
+	# HACK: make sure we have our homebrew binaries available.
+	os.environ['PATH'] += os.pathsep + '/usr/local/bin'
 	shutil.copy(SOURCE_DIR + '/distNetViz.html', tempDir + '/viewer.html')
 	shutil.copy(SOURCE_DIR + '/svg-pan-zoom.js', tempDir + '/svg-pan-zoom.js')
 	# Grab the library we need.
