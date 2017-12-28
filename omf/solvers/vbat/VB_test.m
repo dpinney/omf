@@ -30,8 +30,8 @@
 %VB_func('C:\\Users\\simon\\Documents\\GitHub\\omf\\omf\\weatherNoaaTemp.csv'...
 %    ,1,[2,2,5.6,2.5,0.625,22.5,1])
 
-%VB_func('C:\Users\simon\Documents\GitHub\omf\omf\models\weatherNoaaTemp.csv'...
-%    ,1,[2,2,5.6,2.5,0.625,22.5,1])
+VB_func('C:\Users\simon\Documents\GitHub\omf\omf\models\weatherNoaaTemp.csv'...
+   ,1,[2,2,5.6,2.5,0.625,22.5,1])
 
 %VB_func('weatherNoaaTemp.csv',1,[2,2,5.6,2.5,0.625,22.5,1])
 
