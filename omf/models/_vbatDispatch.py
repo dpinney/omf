@@ -102,7 +102,14 @@ def work(modelDir, inputDict):
 		if demandList[x] > peakDemand[int(dates[x])-1]: #month number, -1 gives the index of peakDemand
 			peakDemand[int(dates[x])-1] = demandList[x]
 		energyMonthly[int(dates[x])-1] += demandList[x]
-	myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
+	#myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
+	if plat == 'Windows':
+		myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
+	else:
+		proc = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
+		with open(pJoin(modelDir, "PID.txt"),"w") as pidFile:
+			pidFile.write(str(proc.pid))
+		(myOut, err) = proc.communicate()
 	try:
 		P_lower = myOut.partition("P_lower =\n\n")[2]
 		P_lower = P_lower.partition("\n\nn")[0]
