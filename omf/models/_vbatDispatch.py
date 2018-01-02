@@ -59,11 +59,10 @@ def work(modelDir, inputDict):
 	except:
 		errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href = 'https://github.com/dpinney/omf/wiki/Models-~-storagePeakShave#demand-file-csv-format'>\nOMF Wiki storagePeakShave - Demand File CSV Format</a>"
 		raise Exception(errorMessage)
-	inputDict['tempFilePath'] = "'" + str(tempFilePath) + "\\temp.csv'"
 	command = 'OCTBIN --eval "addpath(genpath(\'FULLPATH\'));VB_func(ARGS)"'\
 	 	.replace('FULLPATH', vbatPath)\
 	 	.replace('OCTBIN',octBin)\
-		.replace('ARGS', inputDict['tempFilePath'] + ',' + inputDict['load_type'] +',[' + inputDict['capacitance'] + ','+ inputDict['resistance'] + 
+		.replace('ARGS', "'" + str(tempFilePath) + "\\temp.csv'," + inputDict['load_type'] +',[' + inputDict['capacitance'] + ','+ inputDict['resistance'] + 
 			',' + inputDict['power'] + ',' + inputDict['cop'] + ',' + inputDict['deadband'] + ',' + inputDict['setpoint'] + ',' +
 			inputDict['number_devices'] + ']')
 	script_dir = os.path.dirname(os.path.dirname(__file__))
@@ -256,8 +255,6 @@ def new(modelDir):
 	defaultInputs = {
 		"user": "admin",
 		"load_type": "1",
-		"tempFilePath": "",
-		"demandFilePath": "",
 		"number_devices": "100",
 		"power": "5.6",
 		"capacitance": "2",
