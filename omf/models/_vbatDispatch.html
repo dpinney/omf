@@ -228,8 +228,8 @@
 				<div id="fileExists"><label for="tempCurveFile" id="tempCurveFileName"></label></div>
 				<script>
 					if (typeof allInputData.tempFileName !== 'undefined') {				
-						var tempFileName = allInputData.tempFileName;
-						document.getElementById('tempCurveFileName').innerHTML = tempFileName;
+						var FileName = allInputData.tempFileName;
+						document.getElementById('tempCurveFileName').innerHTML = FileName;
 					}
 					else {
 						document.getElementById('tempCurveFileName').innerHTML = 'Please select a file'
@@ -243,10 +243,10 @@
 						function loaded(evt) {
 							evt.target.result
 							gebi("tempCurve").value = reader.result
-							var tempFileName = gebi("tempCurveFile").value.split("\\");
-							var tempFileName = tempFileName[tempFileName.length-1];
-							document.getElementById('tempCurveFileName').innerHTML = tempFileName;
-							gebi("tempFileName").value = tempFileName;
+							var FileName = gebi("tempCurveFile").value.split("\\");
+							var FileName = FileName[FileName.length-1];
+							document.getElementById('tempCurveFileName').innerHTML = FileName;
+							gebi("tempFileName").value = FileName;
 						}
 					}
 				</script>
