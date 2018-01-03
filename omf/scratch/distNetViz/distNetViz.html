@@ -301,6 +301,8 @@
     var previousTarget = {} // Global to keep track of previous selection target
     var selection = [] // Global to keep track of multiple alt-selections
     var downX, downY, upX, upY // Globals to keep track of mouse coordinates
+    var newNodeGenObj = {};
+    var lastElementSelected = {}// Global to keep track of last element, for use in movebus function
     function mouseDown(event) {
       downX = event.pageX
       downY = event.pageY
@@ -309,7 +311,29 @@
       upX = event.pageX
       upY = event.pageY
     }
+
+    //Returns real Lat/Long of a click event, used in the moveBus function
+    function clickLatLon(event) {
+      // Return real lat/lon location of current click.
+      var pan = window.panZoom.getPan();
+      //var zoom = panZoom.getZoom();
+      var sizes = window.panZoom.getSizes();
+      var zoom = sizes.realZoom;
+      var x, y, pt;
+      var svg = document.getElementById('svgContainer');
+      var pt = svg.createSVGPoint();
+      pt.x = event.clientX;
+      pt.y = event.clientY;
+      pt = pt.matrixTransform(svg.getScreenCTM().inverse());
+      x = pt.x;
+      y = pt.y;
+      x = (x - pan.x) / zoom;
+      y = (y - pan.y) / zoom;
+      return [x,y];
+      }  
+
     function svgClick(event) {
+      latLon=clickLatLon(event);
       if ( (downX!==upX) || (downY!==upY) ) {
         return
       }
@@ -320,8 +344,12 @@
         selection = []
       }
       event.target.classList.add('selected')
-      if ( (event.target.id != 'svgContainer') 
+      if ( (event.target.id != 'svgContainer')
+
         && (selection.indexOf(testFeeder.tree[event.target.id]) === -1) ) {
+
+        lastElementSelected= (event.target)
+        
         tableDestroy()
         tableCreate(testFeeder.tree[event.target.id])
         selection.push(event.target)
@@ -336,6 +364,7 @@
       }
       previousTarget = event.target
     }
+
     function phaseCount(p) {
       total = 0
       if (p.search('A') > -1) {total++}
@@ -505,6 +534,7 @@
       }
       document.body.addEventListener('click', clickCloseEvent, true)
     }
+    //what does the following do?
     function clickCloseEvent(labelName, buttonName) {
       var thisButton = document.getElementById(buttonName);
       thisButton.nextSibling.nextSibling.style.display = 'none'
@@ -527,6 +557,7 @@
       }
       tabScroll.appendChild(tbl)
     }
+    //what is going on in newNode????
     function newNode() {
       var newTreeId = Object.keys(testFeeder.tree).length
       var newNode = {
@@ -541,12 +572,21 @@
       testFeeder.tree[newTreeId] = newNode
       console.log('newNode:', newTreeId, testFeeder.tree[newTreeId])
       // Click location to add
-      var clickTarget = document.getElementById('svgContainer')
+      clickTarget = document.getElementById('svgContainer')
       clickTarget.addEventListener('click', clickLocate, false)
     }
+ 
+
+    //meant to draw on svg, save for the new node thing
     function clickLocate() {
       var xloc = event.pageX
       var yloc = event.pageY
+      //var newTreeId = Object.keys(testFeeder.tree).length
+      coords=clickLatLon(event)
+      xloc = coords[0]
+      yloc = coords[1]
+      newType = "node"
+      //console.log(xloc, yloc)
       testFeeder.tree[newTreeId].longitude = xloc
       testFeeder.tree[newTreeId].latitude = yloc
       // Draw on svg
@@ -557,8 +597,9 @@
       myClass = testFeeder.tree[newTreeId].object
       addCircle(x,y,r,id,myClass)
       clickTarget.removeEventListener('click', clickLocate, false)
-      console.log('clicked')
+      //console.log('clicked')
     }
+
     function newLink() {
       if (selection.length === 2) {      
         var newTreeId = Object.keys(testFeeder.tree).length
@@ -583,19 +624,78 @@
         addLine(x1,y1,x2,y2,id,myClass)
       }
     }
+
     function dragMode() {
-      var clickTarget = document.getElementById('svgContainer')
-      clickTarget.addEventListener('click', dragLocate, false)
-      clickTarget.removeEventListener('click', dragLocate, false)
+      clickTarget = document.getElementById('svgContainer')
+      clickTarget.addEventListener('click', moveBusListener, false)
     }
-    function dragLocate() {
-      var xloc = event.pageX
-      var yloc = event.pageY
-      testFeeder.tree[previousTarget.id].longitude = xloc
-      testFeeder.tree[previousTarget.id].latitude = yloc
-      previousTarget.setAttribute('cx', xloc)
-      previousTarget.setAttribute('cy', yloc)
-    }
+
+    function moveBusListener(){
+      currSelsvg=lastElementSelected 
+      currSelId=currSelsvg.id
+      currSel=testFeeder.tree[currSelId]
+    
+      coords=clickLatLon(event) 
+      currSel["longitude"] = coords[0]
+      currSel["latitude"] = coords[1]
+
+      //Runs through testFeeder lines (links) determines if clicked node is an end or target for any line in feeder
+      for (num in testFeeder.links) {
+            
+            selBusId=currSel.name
+            selBranch = testFeeder.links[num]
+            fbus=selBranch.source
+            tbus=selBranch.target
+            fBusID = selBranch.source.name
+            tBusID= selBranch.target.name
+            
+            //If any lines are an end or target for clicked node, the lines are deleted, and redrawn to new clicked location
+            if(fBusID == selBusId || tBusID == selBusId) {
+              document.getElementById(testFeeder.links[num].treeIndex).remove()
+              fromBus = testFeeder.tree[testFeeder.nodes[fbus.index].treeIndex]
+              toBus = testFeeder.tree[testFeeder.nodes[tbus.index].treeIndex]
+                        x1 = fromBus['longitude']
+                        y1 = fromBus['latitude']
+                        x2 = toBus['longitude']
+                        y2 = toBus['latitude']
+                        key=testFeeder.links[num].treeIndex
+                        addLine(x1,y1,x2,y2, key, testFeeder.tree[key]['object'] + ' p' + phaseCount(testFeeder.tree[key]['phases']))
+              //redraw buses
+              //then the three buses on the lines, the two origin buses along with the new moved bus, are redrawn,
+              //checks to make sure that if a bus value is null, the next bus is searched for to avoid error. avoids double removal
+                       
+                      if(fBusID == selBusId) {
+                          id=testFeeder.nodes[tbus.index].treeIndex
+                          myClass = testFeeder.tree[id].objectType
+                          addCircle(x2,y2,2,id,myClass)
+                           if (document.getElementById(testFeeder.nodes[tbus.index].treeIndex) !== null){
+                              document.getElementById(testFeeder.nodes[tbus.index].treeIndex).remove()
+                                
+                              }
+                          }
+                          
+                          
+                      if(tBusID == selBusId) {
+                        id=testFeeder.nodes[fbus.index].treeIndex
+                          myClass = testFeeder.tree[id].objectType
+                        addCircle(x1,y1,2,id,"myClass")
+                        if(document.getElementById(testFeeder.nodes[fbus.index].treeIndex) !== null){
+                          document.getElementById(testFeeder.nodes[fbus.index].treeIndex).remove()
+                                 
+                          }
+                      }
+        //Adds in final target bus, aka the bus which was moved              
+        console.log(currSelsvg)
+        document.getElementById(currSelsvg.id).remove()
+        addCircle(coords[0],coords[1],2,currSelId,testFeeder.tree[currSelId].objectType)
+
+            }}
+       
+      clickTarget.removeEventListener('click', moveBusListener, false)
+
+      }
+       
+
     // Modal functions
     function showModal(element){
       document.getElementById(element).style.display = 'block'
