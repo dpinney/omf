@@ -1,893 +1,897 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <style>
-    * { font-family: Helvetica, Arial, Sans-Serif;}
-    div.divButton {
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      -khtml-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-      cursor: pointer;
-      cursor: hand; 
-      position:fixed;
-      width:30px;
-      height:30px;
-      text-align:center;
-      font-size:30px;
-      line-height:30px;
-      color:white;
-    }
-    div#tableScroller {
-      overflow-y: auto;
-      overflow-x: hidden;
-      position: fixed;
-      width: 315px;
-      top: 55px;
-      right: 5px;
-      max-height:90%;
-    }
-    table {
-      width: 300px;
-      border:1px solid black;
-      border-collapse: collapse;
-      text-align: left;
-      table-layout:fixed;
-    }
-    body {margin:0px;}
-    td {
-      background:white;
-      color:black;
-      word-wrap:break-word;
-    }
-    th {
-      background:black;
-      color:white;
-    }
-    svg {
-      position: absolute;
-      left: 0%;
-      top: 0%;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-    }
-    #saveButton {
-      float:right;
-    }
-    input {
-      width:140px;
-    }
-    /* Load Spinner */
-    .loader {
-      margin: 60px auto;
-      font-size: 10px;
-      position: relative;
-      text-indent: -9999em;
-      border-top: 1.1em solid rgba(255, 255, 255, 0.2);
-      border-right: 1.1em solid rgba(255, 255, 255, 0.2);
-      border-bottom: 1.1em solid rgba(255, 255, 255, 0.2);
-      border-left: 1.1em solid #ffffff;
-      -webkit-transform: translateZ(0);
-      -ms-transform: translateZ(0);
-      transform: translateZ(0);
-      -webkit-animation: load8 1.1s infinite linear;
-      animation: load8 1.1s infinite linear;
-    }
-    .loader,
-    .loader:after {
-      border-radius: 50%;
-      width: 10em;
-      height: 10em;
-    }
-    @-webkit-keyframes load8 {
-      0% {
-      -webkit-transform: rotate(0deg);
-      transform: rotate(0deg);
-      }
-      100% {
-      -webkit-transform: rotate(360deg);
-      transform: rotate(360deg);
-      }
-    }
-    @keyframes load8 {
-      0% {
-      -webkit-transform: rotate(0deg);
-      transform: rotate(0deg);
-      }
-      100% {
-      -webkit-transform: rotate(360deg);
-      transform: rotate(360deg);
-      }
-    }
-    /* HEADER and MENU LINKS */
-    div#header{ width:100%; min-width:1000px; height:25px; background:black; padding:0.6em 0 0.6em 0; }
-    div#headInnerBlock{ width:1000px; height:40px; font-size:medium; color:white; margin:4px auto 0 auto; }
-    div#menuLeft{ height:40px; float:left; font-size:medium; color:white; margin-left:5px;}
-    div#menuRight{ height:40px; font-size:medium; color:white; float:right; display:flex; }
-    div#arrow { font-size:8pt; position:absolute; margin-top:2px; margin-left:4px; display:inline; }
-    ul.menu {
-      position:absolute;
-      top: 100%;
-      left: 0;
-      z-index: 1000;
-      min-width: 100px;
-      padding: 5px 0px 5px 0px;
-      margin: 1px 0 0;
-      list-style: none;
-      display: none;
-      text-align:left;
-      background-color:#F8F8F8;
-      padding:0;
-      border: 1px solid #CCC;
-      -webkit-border-radius: 5px;
-      -moz-border-radius: 5px;
-      border-radius: 5px;
-      -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-      -moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-      -webkit-background-clip: padding-box; }
-    ul.menu.right { right:0; left:auto; padding:0 0 0 0; overflow-y:auto; overflow-x:hidden; max-height:550px; }
-    ul.menu.left { right:auto; left:auto; padding:0 0 0 0; }
-    ul.menu.center { right:auto; left:-45%; }
-    ul.menu li { padding:0px; }
-    ul.menu li:hover { background:green; color:white; }
-    ul.menu li:hover a { color:white; }
-    ul.menu a { display:block; color:black; padding:4px; }
-    ul.menu a:hover {color:white;}
-    ul.menu { display:block; color:black; padding:4px; }
-    ul.menu ul.menu:hover, ul.menu:visited:hover { color:white; }
-    div.buttonGroup { display:inline-block; position:relative; }   
-    button.pill{
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      -khtml-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-      color:white;
-      font-size:medium;     
-      width: auto;
-      height:35px;
-      margin: 0px;
-      margin-top:-5px;
-      padding:0.3em;
-      background-color:#E0E0E0;
-      display:inline-block;
-      border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;
-      white-space: nowrap;
-      display:inline-block;}
-    button.pill:hover{background:transparent;}
-    /* MODAL DIALOGS */
-    .modal{
-      display: none; /* Hidden by default */
-      position: fixed; /* Stay in place */
-      z-index: 1; /* Sit on top */
-      left: 0;
-      top: 0;
-      width: 100%; /* Full width */
-      height: 100%; /* Full height */
-      overflow: hidden; /* If scroll is needed change to auto */
-      background-color: rgb(0,0,0); /* Fallback color */
-      background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-    }
-    .modalContent{
-        background-color: #fefefe;
-        margin: 15% auto; /* 15% from the top and centered */
-        padding: 20px;
-        border: 1px solid #888;
-        width: 50%; /* Could be more or less, depending on screen size */
-        border-radius: 5px;
-        text-align: center;
-    }
-    #modalCancel{
-      width:45px;
-      font-size:small;
-      background:seagreen;
-      -webkit-border-radius: 5px;
-      -moz-border-radius: 5px;
-      border-radius: 5px;
-      border: none;
-      color: white;
-      cursor:pointer; 
-      padding:4px 6px 4px;
-    }
-    #blankModal{
-      width: 300px;
-    }
-  </style>
-  <script type='text/javascript' src='svg-pan-zoom.js'></script>
-  <!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder.js'></script> -->
-  <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder Largest.js'></script>
-  <!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder Norfork.js'></script> -->
-  <script type='text/javascript'>
-    function saveSvg() {
-      // Add some critical information
-      alert('We are redirecting you to a static version of the SVG that you can save as a .svg file.')
-      svg = document.getElementById('svgContainer').outerHTML
-      b64 = btoa(svg)
-      window.location = 'data:image/svg+xml;base64,\n' + b64
-    }
-    function saveJson() {
-      // WARNING! Performance is very bad because the JSON is enormous! This can hang your browser!
-      alert('We are redirecting you to a static version of the JSON that you can save as a .json file.')
-      modJson = JSON.stringify(testFeeder)
-      b64 = btoa(modJson)
-      window.location = 'data:text/json;base64,\n' + b64
-    }
-    function addCircle(x,y,r,id,myClass) {
-      svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0]
-      aCirc = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
-      aCirc.setAttribute('cx', x)
-      aCirc.setAttribute('cy', y)
-      aCirc.setAttribute('r', r)
-      aCirc.setAttribute('id', id)
-      aCirc.setAttribute('class', myClass)
-      aCirc.setAttribute('stroke-width', 0.5)
-      svgOb.appendChild(aCirc)
-    }
-    function addLine(x1,y1,x2,y2,id,myClass) {
-      svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0]
-      aLine = document.createElementNS('http://www.w3.org/2000/svg', 'line')
-      aLine.setAttribute('x1', x1)
-      aLine.setAttribute('y1', y1)
-      aLine.setAttribute('x2', x2)
-      aLine.setAttribute('y2', y2)
-      aLine.setAttribute('id', id)
-      aLine.setAttribute('class', myClass)
-      if (myClass.indexOf('p2') !== -1) {
-        w = 2
-      } 
-      else if (myClass.indexOf('p3') !== -1) {
-        w = 3
-      }
-      else if (myClass.indexOf('parentChild') !== -1) {
-        w = 0.5
-      }
-      else {
-        w = 1
-      }
-      aLine.setAttribute('stroke-width', w)
-      svgOb.appendChild(aLine)
-    }
-    function buildFeeder() {
-      // Make a map objectName -> key. And while we're at it, find the size we need for the full chart.
-      nameToKey = {}, maxLon = 100, maxLat = 100
-      for (key in testFeeder.tree) {
-        nameToKey[testFeeder.tree[key]['name']] = key
-        if (testFeeder.tree[key]['longitude'] > maxLon) {maxLon = testFeeder.tree[key]['longitude']}
-        if (testFeeder.tree[key]['latitude'] > maxLat) {maxLat = testFeeder.tree[key]['latitude']}
-      }
-      maxLon = Math.round(maxLon + 20.0)
-      maxLat = Math.round(maxLat + 20.0)
-      svgOb = document.getElementById('svgContainer')
-      svgOb.setAttribute('width', maxLon)
-      svgOb.setAttribute('height', maxLat)
-      svgOb.setAttribute('viewBox','-10.0 -10.0 ' + maxLon + ' ' + maxLat)
-      // Attach the pan/zoom behavior.
-      window.panZoom = svgPanZoom('#svgContainer', {
-        zoomEnabled: true,
-        controlIconsEnabled: false,
-        fit: true,
-        center: true,
-        minZoom: 0.5,
-        maxZoom: 100
-      })
-      // Go through and add all lines first
-      for (key in testFeeder.tree) {
-        anOb = testFeeder.tree[key]
-        if (['transformer','overhead_line','underground_line','triplex_line','regulator','fuse','switch'].indexOf(anOb['object']) != -1) {
-          fromOb = testFeeder.tree[nameToKey[anOb['from']]]
-          toOb = testFeeder.tree[nameToKey[anOb['to']]]
-          addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],key,anOb['object'] + ' p' + phaseCount(anOb['phases']))
-        }
-        else if ( (['node','load','house','meter','triplex_meter','triplex_node','triplex_load','waterheater','ZIPload'].indexOf(anOb['object']) != -1) 
-          && ('parent' in anOb) ) {
-          pOb = testFeeder.tree[nameToKey[anOb['parent']]]
-          addLine(pOb['longitude'],pOb['latitude'],anOb['longitude'],anOb['latitude'],'','parentChild')
-        }
-      }
-      // Add circles after all lines
-      for (key in testFeeder.tree) {
-        anOb = testFeeder.tree[key]
-        if (['node','load','house','meter','triplex_meter','triplex_node','triplex_load','waterheater','ZIPload'].indexOf(anOb['object']) != -1) {
-          addCircle(anOb['longitude'],anOb['latitude'],2,key,anOb['object'])
-        }
-      }
-    }
-    var previousTarget = {} // Global to keep track of previous selection target
-    var selection = [] // Global to keep track of multiple alt-selections
-    var downX, downY, upX, upY // Globals to keep track of mouse coordinates
-    var newNodeGenObj = {};
-    var lastElementSelected = {}// Global to keep track of last element, for use in movebus function
-    function mouseDown(event) {
-      downX = event.pageX
-      downY = event.pageY
-    }
-    function mouseUp(event) { 
-      upX = event.pageX
-      upY = event.pageY
-    }
-
-    //Returns real Lat/Long of a click event, used in the moveBus function
-    function clickLatLon(event) {
-      // Return real lat/lon location of current click.
-      var pan = window.panZoom.getPan();
-      //var zoom = panZoom.getZoom();
-      var sizes = window.panZoom.getSizes();
-      var zoom = sizes.realZoom;
-      var x, y, pt;
-      var svg = document.getElementById('svgContainer');
-      var pt = svg.createSVGPoint();
-      pt.x = event.clientX;
-      pt.y = event.clientY;
-      pt = pt.matrixTransform(svg.getScreenCTM().inverse());
-      x = pt.x;
-      y = pt.y;
-      x = (x - pan.x) / zoom;
-      y = (y - pan.y) / zoom;
-      return [x,y];
-      }  
-
-    function svgClick(event) {
-      latLon=clickLatLon(event);
-      if ( (downX!==upX) || (downY!==upY) ) {
-        return
-      }
-      if (!event.altKey) {
-        for (i=0; i<selection.length; i++) {
-          selection[i].classList.remove('selected')
-        }
-        selection = []
-      }
-      event.target.classList.add('selected')
-      if ( (event.target.id != 'svgContainer')
-
-        && (selection.indexOf(testFeeder.tree[event.target.id]) === -1) ) {
-
-        lastElementSelected= (event.target)
-        
-        tableDestroy()
-        tableCreate(testFeeder.tree[event.target.id])
-        selection.push(event.target)
-      }
-      else {
-        tableDestroy()
-      }
-      // ALT-SELECTION
-      if (selection.length >= 2) {
-        tableDestroy()
-        selectionTable()
-      }
-      previousTarget = event.target
-    }
-
-    function phaseCount(p) {
-      total = 0
-      if (p.search('A') > -1) {total++}
-      if (p.search('B') > -1) {total++}
-      if (p.search('C') > -1) {total++}
-      return total
-    }
-    function hotkeys() {
-      // IE8 and earlier
-      if (window.event) {
-        x = event.keyCode
-      }
-      // IE9/Firefox/Chrome/Opera/Safari
-      else if (event.which) {
-        x = event.which
-      }
-      keychar = String.fromCharCode(x);
-      if (event.target.type != 'text') {
-        // Dispatch the key:
-        if (keychar == '-') {
-          zoomOut()
-        } 
-        else if (keychar == '=') {
-          zoomIn()
-        }
-      }
-    }
-    function tableCreate(inputObject) {
-      tabScroll = document.getElementById('tableScroller')
-      tbl = document.createElement('table')
-      // Put in the header.
-      headRow = document.createElement('tr')
-      headRow.innerHTML = '<th><button onclick="tablePlus(this)">+</button><button onclick="dragMode()">Drag</button></th>'
-      headRow.innerHTML += '<th><button id="saveButton" onclick="tableSave(this)">Save</button><button onclick="deleteOb()">Delete Object</button></th>'
-      tbl.appendChild(headRow)
-      // Put the object in.
-      for (key in inputObject) {
-        row = document.createElement('tr')
-        row.innerHTML = '<td><button onclick="tableDel(this)">&#215;</button><input style="width:112px" value=' + key + '></input></td>'
-        row.innerHTML += '<td><input value="' + inputObject[key] + '"></input></td>'
-        tbl.appendChild(row)
-      }
-      tabScroll.appendChild(tbl)
-    }
-    function tableDel(me) {
-      myRow = me.parentElement.parentElement
-      myTable = myRow.parentElement
-      myTable.removeChild(myRow)
-    }
-    function tablePlus(me) {
-      myTable = me.parentElement.parentElement.parentElement
-      newRow = myTable.insertRow(1)
-      newRow.innerHTML = '<td><button onclick="tableDel(this)">&#215;</button><input style="width:112px"></input></td>'
-      newRow.innerHTML += '<td><input></input></td>'
-    }
-    function tableSave(me) {
-      tbl = me.parentElement.parentElement.parentElement
-      var toJson = {}
-      // convert HTML table to JSON
-      for (i = 1; i < tbl.rows.length; i++) {
-        key = tbl.rows[i].cells[0].lastElementChild.value
-        if (key !== '') {
-          toJson[key] = tbl.rows[i].cells[1].lastElementChild.value
-        }
-      }
-      // Update tree with new values
-      for (key in toJson) {
-        testFeeder.tree[previousTarget.id][key] = toJson[key]
-      }
-      // Delete properties from tree
-      for (key in testFeeder.tree[previousTarget.id]) {
-        if (!toJson.hasOwnProperty(key)) {
-          delete testFeeder.tree[previousTarget.id][key]
-        }
-      }
-      // Update Feeder
-      if (previousTarget.tagName === 'circle') {
-        // Update Circle
-        previousTarget.setAttribute('cx', toJson['longitude'])
-        previousTarget.setAttribute('cy', toJson['latitude'])
-        // Update Line
-        for (i = 0, limit = Object.keys(testFeeder.tree).length; i < limit; i++) {
-          if (testFeeder.tree[i]['from'] === testFeeder.tree[previousTarget.id]['name']) {
-            document.getElementById(i).setAttribute('x1', toJson['longitude'])
-            document.getElementById(i).setAttribute('y1', toJson['latitude'])
-          }
-          else if (testFeeder.tree[i]['to'] === testFeeder.tree[previousTarget.id]['name']) {
-            document.getElementById(i).setAttribute('x2', toJson['longitude'])
-            document.getElementById(i).setAttribute('y2', toJson['latitude'])
-          }
-        }
-      }
-      tableDestroy()
-      tableCreate(toJson)
-      alert('Updated object: ' + testFeeder.tree[previousTarget.id].name)
-    }
-    function tableDestroy() {
-      tabScroll = document.getElementById('tableScroller')
-      kid = tabScroll.children[0]
-      if (!(kid === undefined)) {tabScroll.removeChild(kid)}
-    }
-    function deleteOb() {
-      // Delete Lines
-      if (previousTarget.tagName === 'line') {
-        previousTarget.remove()
-        testFeeder.tree[previousTarget.id] = {}
-      }
-      // Delete Circles
-      if (previousTarget.tagName === 'circle') {
-        // Check for connected lines
-        lines = 0
-        for (i = 0, limit = Object.keys(testFeeder.tree).length; i < limit; i++) {
-          if ( (testFeeder.tree[i]['from'] === testFeeder.tree[previousTarget.id]['name'])
-            || (testFeeder.tree[i]['to'] === testFeeder.tree[previousTarget.id]['name']) ) {
-            lines++
-          }
-        }
-        if (lines > 0) {
-          alert('Cannot delete circles with lines still connected')
-        } 
-        else {
-          previousTarget.remove()
-        }
-      }
-      tableDestroy()
-    }
-    function scaleTo(x) {
-      if (!x) {
-        return
-      }
-      circles = document.getElementsByTagName('circle')
-      lines = document.getElementsByTagName('line')
-      // Scale Circles
-      for (i = 0; i < circles.length; i++) {
-        circles[i].setAttribute('r', 2*x)
-        circles[i].setAttribute('stroke-width', 0.5*x)
-      }
-      // Scale Lines
-      for (i = 0; i < lines.length; i++) {
-        if (lines[i].getAttribute('class').indexOf('p2') !== -1) {
-          lines[i].setAttribute('stroke-width', 2*x)
-        }
-        else if (lines[i].getAttribute('class').indexOf('p3') !== -1) {
-          lines[i].setAttribute('stroke-width', 3*x)
-        }
-        else if (lines[i].getAttribute('class').indexOf('parentChild') !== -1) {
-          lines[i].setAttribute('stroke-width', 0.5*x)
-        }
-        else {
-          lines[i].setAttribute('stroke-width', x)
-        }
-      }
-    }
-    function dropPill(thisButton, name) {
-      thisButton.style.color= 'black'
-      thisButton.style.background= '#F8F8F8'
-      thisButton.style.textAlign = 'left'
-      thisButton.nextSibling.nextSibling.style.display = 'inline-block'
-      thisButton.innerHTML = name + ' ▴'
-      function clickCloseEvent() {
-        thisButton.nextSibling.nextSibling.style.display = 'none'
-        thisButton.innerHTML = name + ' ▾'
-        this.removeEventListener('click', arguments.callee, true)
-        thisButton.style.color= 'white'
-        thisButton.style.background= 'transparent'
-        if (window.event.toElement==thisButton) {event.stopPropagation()}
-      }
-      document.body.addEventListener('click', clickCloseEvent, true)
-    }
-    //what does the following do?
-    function clickCloseEvent(labelName, buttonName) {
-      var thisButton = document.getElementById(buttonName);
-      thisButton.nextSibling.nextSibling.style.display = 'none'
-      thisButton.innerHTML = labelName + ' ▾'
-      this.removeEventListener('click', arguments.callee, true)
-      if (window.event.toElement==thisButton) {event.stopPropagation()}
-    }
-    function selectionTable() {
-      tabScroll = document.getElementById('tableScroller')
-      tbl = document.createElement('table')
-      // Put in the header.
-      headRow = document.createElement('tr')
-      headRow.innerHTML = '<th>Selected Elements</th>'
-      tbl.appendChild(headRow)
-      // Put the object in.
-      for (i = 0; i < selection.length; i++) {
-        row = document.createElement('tr')
-        row.innerHTML = '<td>' + testFeeder.tree[selection[i].id].name + '</td>'
-        tbl.appendChild(row)
-      }
-      tabScroll.appendChild(tbl)
-    }
-    //what is going on in newNode????
-    function newNode() {
-      var newTreeId = Object.keys(testFeeder.tree).length
-      var newNode = {
-        longitude: 0,
-        latitude: 0,
-        name: 'newNode' + String(newTreeId),
-        nominal_voltage: 1000,
-        object: 'node',
-        phases: 'A'
-      }
-      // Save to tree
-      testFeeder.tree[newTreeId] = newNode
-      console.log('newNode:', newTreeId, testFeeder.tree[newTreeId])
-      // Click location to add
-      clickTarget = document.getElementById('svgContainer')
-      clickTarget.addEventListener('click', clickLocate, false)
-    }
- 
-
-    //meant to draw on svg, save for the new node thing
-    function clickLocate() {
-      var xloc = event.pageX
-      var yloc = event.pageY
-      //var newTreeId = Object.keys(testFeeder.tree).length
-      coords=clickLatLon(event)
-      xloc = coords[0]
-      yloc = coords[1]
-      newType = "node"
-      //console.log(xloc, yloc)
-      testFeeder.tree[newTreeId].longitude = xloc
-      testFeeder.tree[newTreeId].latitude = yloc
-      // Draw on svg
-      x = testFeeder.tree[newTreeId].longitude
-      y = testFeeder.tree[newTreeId].latitude
-      r = 2
-      id = newTreeId
-      myClass = testFeeder.tree[newTreeId].object
-      addCircle(x,y,r,id,myClass)
-      clickTarget.removeEventListener('click', clickLocate, false)
-      //console.log('clicked')
-    }
-
-    function newLink() {
-      if (selection.length === 2) {      
-        var newTreeId = Object.keys(testFeeder.tree).length
-        var newLink = {
-          name: 'newLink' + String(newTreeId),
-          object: 'overhead_line',
-          phases: 'A',
-          configuration: 'configuration',
-          from: testFeeder.tree[selection[0].id].name,
-          to: testFeeder.tree[selection[1].id].name
-        }
-        // Save to tree
-        testFeeder.tree[newTreeId] = newLink
-        console.log('newLink:', newTreeId, testFeeder.tree[newTreeId])
-        // Draw on svg
-        x1 = testFeeder.tree[selection[0].id].longitude
-        y1 = testFeeder.tree[selection[0].id].latitude
-        x2 = testFeeder.tree[selection[1].id].longitude
-        y2 = testFeeder.tree[selection[1].id].latitude
-        id = newTreeId
-        myClass = testFeeder.tree[newTreeId].object
-        addLine(x1,y1,x2,y2,id,myClass)
-      }
-    }
-
-    function dragMode() {
-      clickTarget = document.getElementById('svgContainer')
-      clickTarget.addEventListener('click', moveBusListener, false)
-    }
-
-    function moveBusListener(){
-      currSelsvg=lastElementSelected 
-      currSelId=currSelsvg.id
-      currSel=testFeeder.tree[currSelId]
-    
-      coords=clickLatLon(event) 
-      currSel["longitude"] = coords[0]
-      currSel["latitude"] = coords[1]
-
-      //Runs through testFeeder lines (links) determines if clicked node is an end or target for any line in feeder
-      for (num in testFeeder.links) {
-            
-            selBusId=currSel.name
-            selBranch = testFeeder.links[num]
-            fbus=selBranch.source
-            tbus=selBranch.target
-            fBusID = selBranch.source.name
-            tBusID= selBranch.target.name
-            
-            //If any lines are an end or target for clicked node, the lines are deleted, and redrawn to new clicked location
-            if(fBusID == selBusId || tBusID == selBusId) {
-              document.getElementById(testFeeder.links[num].treeIndex).remove()
-              fromBus = testFeeder.tree[testFeeder.nodes[fbus.index].treeIndex]
-              toBus = testFeeder.tree[testFeeder.nodes[tbus.index].treeIndex]
-                        x1 = fromBus['longitude']
-                        y1 = fromBus['latitude']
-                        x2 = toBus['longitude']
-                        y2 = toBus['latitude']
-                        key=testFeeder.links[num].treeIndex
-                        addLine(x1,y1,x2,y2, key, testFeeder.tree[key]['object'] + ' p' + phaseCount(testFeeder.tree[key]['phases']))
-              //redraw buses
-              //then the three buses on the lines, the two origin buses along with the new moved bus, are redrawn,
-              //checks to make sure that if a bus value is null, the next bus is searched for to avoid error. avoids double removal
-                       
-                      if(fBusID == selBusId) {
-                          id=testFeeder.nodes[tbus.index].treeIndex
-                          myClass = testFeeder.tree[id].objectType
-                          addCircle(x2,y2,2,id,myClass)
-                           if (document.getElementById(testFeeder.nodes[tbus.index].treeIndex) !== null){
-                              document.getElementById(testFeeder.nodes[tbus.index].treeIndex).remove()
-                                
-                              }
-                          }
-                          
-                          
-                      if(tBusID == selBusId) {
-                        id=testFeeder.nodes[fbus.index].treeIndex
-                          myClass = testFeeder.tree[id].objectType
-                        addCircle(x1,y1,2,id,"myClass")
-                        if(document.getElementById(testFeeder.nodes[fbus.index].treeIndex) !== null){
-                          document.getElementById(testFeeder.nodes[fbus.index].treeIndex).remove()
-                                 
-                          }
-                      }
-        //Adds in final target bus, aka the bus which was moved              
-        console.log(currSelsvg)
-        document.getElementById(currSelsvg.id).remove()
-        addCircle(coords[0],coords[1],2,currSelId,testFeeder.tree[currSelId].objectType)
-
-            }}
-       
-      clickTarget.removeEventListener('click', moveBusListener, false)
-
-      }
-       
-
-    // Modal functions
-    function showModal(element){
-      document.getElementById(element).style.display = 'block'
-    }
-    function closeModal(element){
-      document.getElementById(element).style.display = 'none'
-    }
-    // Find Function
-    var searchCursor
-    function findNext() {
-      var selected
-      var term = document.getElementById('searchTerm').value
-      var hits = findElementsViaString(term)
-      document.getElementById('searchHitCount').innerHTML = hits.length + ' Hits'
-      for (i in hits) {
-        document.getElementById(hits[i].toString()).classList.remove('selected')
-      }
-      try {
-        if (hits.length == 0) {
-          alert('No objects found containing term.')
-          return false
-        }
-        if (searchCursor == undefined) {
-          selected = hits[0]
-          searchCursor = 0
-        } 
-        else {
-          searchCursor++
-          if (searchCursor == hits.length) {
-            searchCursor = 0
-          }
-          if (searchCursor == -1) {
-            searchCursor = hits.length - 2
-          }
-          selected = hits[searchCursor]
-        }
-        tableDestroy()
-        tableCreate(testFeeder.tree[selected])
-        var x = document.getElementById(selected.toString()).getAttribute('cx')
-        var y = document.getElementById(selected.toString()).getAttribute('cy')
-        var panZoom = svgPanZoom('#svgContainer')
-        panZoom.pan({x: 0, y: 0})
-        var realZoom = panZoom.getSizes().realZoom
-        var width = panZoom.getSizes().width/2
-        var height = panZoom.getSizes().height/2
-        panZoom.pan({ x: width-(x*realZoom), y: height-(y*realZoom) })
-        panZoom.zoom(3)
-        document.getElementById(selected.toString()).classList.add('selected')
-      } 
-      catch (err) {
-        alert('Objects have been hidden in the layout, please unfold them first.\n' + err.message)
-      }
-    }
-    function findPrevious() {
-      if (searchCursor == undefined) {
-        findNext()
-      } 
-      else {
-        searchCursor -= 2
-        findNext()
-      }
-    }
-    function findElementsViaString(inString) {
-      var results = []
-      for (key in testFeeder.tree) {
-        subIndex = JSON.stringify(testFeeder.tree[key]).indexOf(inString)
-        if (subIndex != -1 && testFeeder.tree[key]['object'] != 'player' && (testFeeder.tree[key].hasOwnProperty('object') || testFeeder.tree[key].hasOwnProperty('module'))) {
-          results.push(key)
-        }
-      }
-      return results
-    }
-  </script>
-</head>
-<body onkeypress='hotkeys()' style='width:100%;height:100%'>
-  <!-- Start Controls -->
-  <div style='background:orange; top:55px; left:5px' class='divButton' onclick='window.panZoom.zoomIn()' title='Zoom In'>+</div>
-  <div style='background:green; top:95px; left:5px' class='divButton' onclick='window.panZoom.zoomOut()' title='Zoom Out'>-</div>
-  <div style='background:plum; top:135px; left:5px' class='divButton' onclick='window.panZoom.reset()' title='Reset Zoom'>R</div>
-  <!-- <div style='background:navy; top:175px; left:5px' id='saveLink' class='divButton' onclick='saveSvg()' title='Save File' download>S</div> -->
-  <div style='background:tomato; top:215px; left:5px;' class='divButton' onclick='scaleTo(parseFloat(prompt("Zoom level as a float?","1.0")))' title='Zoom To'>Z</div>
-  <!-- End Controls -->
-  <svg id='svgContainer' xmlns='http://www.w3.org/2000/svg' style='width:100%;height:100%' onclick='svgClick(event)' onmousedown='mouseDown(event)' onmouseup='mouseUp(event)'>
-    <style type="text/css">
-      <![CDATA[
-      .house {fill:blue;}
-      .triplex_meter {fill:orange;}
-      .underground_line {stroke:gray;}
-      line {stroke:black;}
-      line.parentChild {stroke:LightGrey;}
-      circle {stroke:white; fill:gray;}
-      line.selected, circle.selected {stroke:lime;}
-      ]]>
-    </style>
-  </svg>
-  <!-- Menu Bar -->
-  <div id='header'>
-    <div id='menuRight'>
-      <div id='EditDiv'>
-        <div class='buttonGroup'>
-          <button id='editOps' class='pill' onclick='dropPill(this, "Edit")'>Edit ▾</button> 
-          <ul id='editMenu' class='menu right'>
-            <li><a href='javascript:showModal("findModal")'>Find...</a></li>
-          </ul>  
-        </div>
-      </div>
-      <div id='addDiv'>
-        <div class='buttonGroup'>
-          <button id='addOps' class='pill' onclick='dropPill(this, "Add")'>Add ▾</button>
-          <ul id='newObjectMenu' class='menu right'>
-            <li><a href='javascript:newNode()'>node</a></li>
-            <li><a href='javascript:newLink()'>link</a></li>
-            <li><a>load</a></li>
-            <li><a>overhead_line</a></li>
-            <li><a>volt_var_control</a></li>
-            <li><a>battery</a></li>
-            <li><a>house</a></li>
-            <li><a>transformer_configuration</a></li>
-            <li><a>evcharger_det</a></li>
-            <li><a>inverter</a></li>
-            <li><a>triplex_line_conductor</a></li>
-            <li><a>transformer</a></li>
-            <li><a>regulator_configuration</a></li>
-            <li><a>windturb_dg</a></li>
-            <li><a>node</a></li>
-            <li><a>meter_recorder</a></li>
-            <li><a>triplex_line</a></li>
-            <li><a>triplex_node</a></li>
-            <li><a>triplex_line_configuration</a></li>
-            <li><a>capacitor</a></li>
-            <li><a>solar</a></li>
-            <li><a>ZIPload</a></li>
-            <li><a>triplex_meter</a></li>
-            <li><a>regulator</a></li>
-            <li><a>load</a></li>
-            <li><a>overhead_line</a></li>
-            <li><a>volt_var_control</a></li>
-            <li><a>battery</a></li>
-            <li><a>house</a></li>
-            <li><a>transformer_configuration</a></li>
-            <li><a>evcharger_det</a></li>
-            <li><a>inverter</a></li>
-            <li><a>triplex_line_conductor</a></li>
-            <li><a>transformer</a></li>
-            <li><a>regulator_configuration</a></li>
-            <li><a>windturb_dg</a></li>
-            <li><a>node</a></li>
-            <li><a>meter_recorder</a></li>
-            <li><a>triplex_line</a></li>
-            <li><a>triplex_node</a></li>
-            <li><a>triplex_line_configuration</a></li>
-            <li><a>capacitor</a></li>
-            <li><a>solar</a></li>
-            <li><a>ZIPload</a></li>
-            <li><a>triplex_meter</a></li>
-            <li><a>regulator</a></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- Modals: findModal -->
-  <div id='findModal' class='modal'>
-    <div class='modalContent' id='findModalContent' style='width:200px'>
-      <table class='importOptions' style='padding:4px; word-wrap:break-word'>
-        <tr>
-          <td>Term</td>
-          <td><input id='searchTerm' type='text'></td>
-          <td id='searchHitCount' style='font-size:8pt; text-align:center'></td>
-        </tr>
-        <tr>
-          <td><button style='width:75px' onclick='findPrevious()'>Previous</button></td>
-          <td><button style='width:75px' onclick='findNext()'>Next</button></td>
-          <td><button style='width:75px' onclick='closeModal("findModal")'>Cancel</button></td>
-        </tr>
-      </table>
-    </div>
-  </div>
-  <div id='tableScroller'></div>
-  <p id="loadingMessage" style="font-size:60pt; text-align:center; width:100%; display:inline-block">Feeder Loading...</p>
-  </body>
-  <script type='text/javascript'>
-    function loadingStuff() {
-      buildFeeder();
-      document.getElementById('loadingMessage').style.display = 'none'
-    }
-    setTimeout(loadingStuff,100)
-  </script>
-  <script type='text/javascript'>clickCloseEvent('Edit', 'editOps')</script>
-  <script type="text/javascript">clickCloseEvent('Add', 'addOps')</script>
+	<meta charset="UTF-8">
+	<style>
+	* { font-family: Helvetica, Arial, Sans-Serif;}
+	div.divButton {
+		-webkit-touch-callout: none;
+		-webkit-user-select: none;
+		-khtml-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
+		cursor: pointer;
+		cursor: hand; 
+		position:fixed;
+		width:30px;
+		height:30px;
+		text-align:center;
+		font-size:30px;
+		line-height:30px;
+		color:white;
+	}
+	div#tableScroller {
+		overflow-y: auto;
+		overflow-x: hidden;
+		position: fixed;
+		width: 315px;
+		top: 55px;
+		right: 5px;
+		max-height:90%;
+	}
+	table {
+		width: 300px;
+		border:1px solid black;
+		border-collapse: collapse;
+		text-align: left;
+		table-layout:fixed;
+	}
+	body {margin:0px;}
+	td {
+		background:white;
+		color:black;
+		word-wrap:break-word;
+	}
+	th {
+		background:black;
+		color:white;
+	}
+	svg {
+		position: absolute;
+		left: 0%;
+		top: 0%;
+		width: 100%;
+		height: 100%;
+		z-index: -1;
+	}
+	#saveButton {
+		float:right;
+	}
+	input {
+		width:140px;
+	}
+	/* Load Spinner */
+	.loader {
+		margin: 60px auto;
+		font-size: 10px;
+		position: relative;
+		text-indent: -9999em;
+		border-top: 1.1em solid rgba(255, 255, 255, 0.2);
+		border-right: 1.1em solid rgba(255, 255, 255, 0.2);
+		border-bottom: 1.1em solid rgba(255, 255, 255, 0.2);
+		border-left: 1.1em solid #ffffff;
+		-webkit-transform: translateZ(0);
+		-ms-transform: translateZ(0);
+		transform: translateZ(0);
+		-webkit-animation: load8 1.1s infinite linear;
+		animation: load8 1.1s infinite linear;
+	}
+	.loader,
+	.loader:after {
+		border-radius: 50%;
+		width: 10em;
+		height: 10em;
+	}
+	@-webkit-keyframes load8 {
+		0% {
+			-webkit-transform: rotate(0deg);
+			transform: rotate(0deg);
+		}
+		100% {
+			-webkit-transform: rotate(360deg);
+			transform: rotate(360deg);
+		}
+	}
+	@keyframes load8 {
+		0% {
+			-webkit-transform: rotate(0deg);
+			transform: rotate(0deg);
+		}
+		100% {
+			-webkit-transform: rotate(360deg);
+			transform: rotate(360deg);
+		}
+	}
+	/* HEADER and MENU LINKS */
+	div#header{ width:100%; min-width:1000px; height:25px; background:black; padding:0.6em 0 0.6em 0; }
+	div#headInnerBlock{ width:1000px; height:40px; font-size:medium; color:white; margin:4px auto 0 auto; }
+	div#menuLeft{ height:40px; float:left; font-size:medium; color:white; margin-left:5px;}
+	div#menuRight{ height:40px; font-size:medium; color:white; float:right; display:flex; }
+	div#arrow { font-size:8pt; position:absolute; margin-top:2px; margin-left:4px; display:inline; }
+	ul.menu {
+		position:absolute;
+		top: 100%;
+		left: 0;
+		z-index: 1000;
+		min-width: 100px;
+		padding: 5px 0px 5px 0px;
+		margin: 1px 0 0;
+		list-style: none;
+		display: none;
+		text-align:left;
+		background-color:#F8F8F8;
+		padding:0;
+		border: 1px solid #CCC;
+		-webkit-border-radius: 5px;
+		-moz-border-radius: 5px;
+		border-radius: 5px;
+		-webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+		-moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+		box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+		-webkit-background-clip: padding-box; }
+		ul.menu.right { right:0; left:auto; padding:0 0 0 0; overflow-y:auto; overflow-x:hidden; max-height:550px; }
+		ul.menu.left { right:auto; left:auto; padding:0 0 0 0; }
+		ul.menu.center { right:auto; left:-45%; }
+		ul.menu li { padding:0px; }
+		ul.menu li:hover { background:green; color:white; }
+		ul.menu li:hover a { color:white; }
+		ul.menu a { display:block; color:black; padding:4px; }
+		ul.menu a:hover {color:white;}
+		ul.menu { display:block; color:black; padding:4px; }
+		ul.menu ul.menu:hover, ul.menu:visited:hover { color:white; }
+		div.buttonGroup { display:inline-block; position:relative; }   
+		button.pill{
+			-webkit-touch-callout: none;
+			-webkit-user-select: none;
+			-khtml-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
+			color:white;
+			font-size:medium;     
+			width: auto;
+			height:35px;
+			margin: 0px;
+			margin-top:-5px;
+			padding:0.3em;
+			background-color:#E0E0E0;
+			display:inline-block;
+			border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;
+			white-space: nowrap;
+			display:inline-block;}
+			button.pill:hover{background:transparent;}
+			/* MODAL DIALOGS */
+			.modal{
+				display: none; /* Hidden by default */
+				position: fixed; /* Stay in place */
+				z-index: 1; /* Sit on top */
+				left: 0;
+				top: 0;
+				width: 100%; /* Full width */
+				height: 100%; /* Full height */
+				overflow: hidden; /* If scroll is needed change to auto */
+				background-color: rgb(0,0,0); /* Fallback color */
+				background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+			}
+			.modalContent{
+				background-color: #fefefe;
+				margin: 15% auto; /* 15% from the top and centered */
+				padding: 20px;
+				border: 1px solid #888;
+				width: 50%; /* Could be more or less, depending on screen size */
+				border-radius: 5px;
+				text-align: center;
+			}
+			#modalCancel{
+				width:45px;
+				font-size:small;
+				background:seagreen;
+				-webkit-border-radius: 5px;
+				-moz-border-radius: 5px;
+				border-radius: 5px;
+				border: none;
+				color: white;
+				cursor:pointer; 
+				padding:4px 6px 4px;
+			}
+			#blankModal{
+				width: 300px;
+			}
+		</style>
+		<script type='text/javascript' src='svg-pan-zoom.js'></script>
+		<!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder.js'></script> -->
+		<script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder Largest.js'></script>
+		<!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder Norfork.js'></script> -->
+	</head>
+	<body onkeypress='hotkeys()' style='width:100%;height:100%'>
+		<!-- Start Controls -->
+		<div style='background:orange; top:55px; left:5px' class='divButton' onclick='window.panZoom.zoomIn()' title='Zoom In'>+</div>
+		<div style='background:green; top:95px; left:5px' class='divButton' onclick='window.panZoom.zoomOut()' title='Zoom Out'>-</div>
+		<div style='background:plum; top:135px; left:5px' class='divButton' onclick='window.panZoom.reset()' title='Reset Zoom'>R</div>
+		<!-- <div style='background:navy; top:175px; left:5px' id='saveLink' class='divButton' onclick='saveSvg()' title='Save File' download>S</div> -->
+		<div style='background:tomato; top:215px; left:5px;' class='divButton' onclick='scaleTo(parseFloat(prompt("Zoom level as a float?","1.0")))' title='Zoom To'>Z</div>
+		<!-- End Controls -->
+		<svg id='svgContainer' xmlns='http://www.w3.org/2000/svg' style='width:100%;height:100%' onclick='svgClick(event)' onmousedown='mouseDown(event)' onmouseup='mouseUp(event)'>
+			<style type="text/css">
+			<![CDATA[
+			.house {fill:blue;}
+			.triplex_meter {fill:orange;}
+			.underground_line {stroke:gray;}
+			line {stroke:black;}
+			line.parentChild {stroke:LightGrey;}
+			circle {stroke:white; fill:gray;}
+			line.selected, circle.selected {stroke:lime;}
+			]]>
+		</style>
+	</svg>
+	<!-- Menu Bar -->
+	<div id='header'>
+		<div id='menuRight'>
+			<div id='EditDiv'>
+				<div class='buttonGroup'>
+					<button id='editOps' class='pill' onclick='dropPill(this, "Edit")'>Edit ▾</button> 
+					<ul id='editMenu' class='menu right' style="display:none">
+						<li><a href='javascript:showModal("findModal")'>Find...</a></li>
+					</ul>  
+				</div>
+			</div>
+			<div id='addDiv'>
+				<div class='buttonGroup'>
+					<button id='addOps' class='pill' onclick='dropPill(this, "Add")'>Add ▾</button>
+					<ul id='newObjectMenu' class='menu right' style="display:none">
+						<li><a href='javascript:newNode()'>node</a></li>
+						<li><a href='javascript:newLink()'>link</a></li>
+						<li><a>load</a></li>
+						<li><a>overhead_line</a></li>
+						<li><a>volt_var_control</a></li>
+						<li><a>battery</a></li>
+						<li><a>house</a></li>
+						<li><a>transformer_configuration</a></li>
+						<li><a>evcharger_det</a></li>
+						<li><a>inverter</a></li>
+						<li><a>triplex_line_conductor</a></li>
+						<li><a>transformer</a></li>
+						<li><a>regulator_configuration</a></li>
+						<li><a>windturb_dg</a></li>
+						<li><a>node</a></li>
+						<li><a>meter_recorder</a></li>
+						<li><a>triplex_line</a></li>
+						<li><a>triplex_node</a></li>
+						<li><a>triplex_line_configuration</a></li>
+						<li><a>capacitor</a></li>
+						<li><a>solar</a></li>
+						<li><a>ZIPload</a></li>
+						<li><a>triplex_meter</a></li>
+						<li><a>regulator</a></li>
+						<li><a>load</a></li>
+						<li><a>overhead_line</a></li>
+						<li><a>volt_var_control</a></li>
+						<li><a>battery</a></li>
+						<li><a>house</a></li>
+						<li><a>transformer_configuration</a></li>
+						<li><a>evcharger_det</a></li>
+						<li><a>inverter</a></li>
+						<li><a>triplex_line_conductor</a></li>
+						<li><a>transformer</a></li>
+						<li><a>regulator_configuration</a></li>
+						<li><a>windturb_dg</a></li>
+						<li><a>node</a></li>
+						<li><a>meter_recorder</a></li>
+						<li><a>triplex_line</a></li>
+						<li><a>triplex_node</a></li>
+						<li><a>triplex_line_configuration</a></li>
+						<li><a>capacitor</a></li>
+						<li><a>solar</a></li>
+						<li><a>ZIPload</a></li>
+						<li><a>triplex_meter</a></li>
+						<li><a>regulator</a></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Modals: findModal -->
+	<div id='findModal' class='modal'>
+		<div class='modalContent' id='findModalContent' style='width:200px'>
+			<table class='importOptions' style='padding:4px; word-wrap:break-word'>
+				<tr>
+					<td>Term</td>
+					<td><input id='searchTerm' type='text'></td>
+					<td id='searchHitCount' style='font-size:8pt; text-align:center'></td>
+				</tr>
+				<tr>
+					<td><button style='width:75px' onclick='findPrevious()'>Previous</button></td>
+					<td><button style='width:75px' onclick='findNext()'>Next</button></td>
+					<td><button style='width:75px' onclick='closeModal("findModal")'>Cancel</button></td>
+				</tr>
+			</table>
+		</div>
+	</div>
+	<div id='tableScroller'></div>
+	<p id="loadingMessage" style="font-size:60pt; text-align:center; width:100%; display:inline-block">Feeder Loading...</p>
+</body>
+<script type='text/javascript'>
+	function loadingStuff() {
+		buildFeeder();
+		document.getElementById('loadingMessage').style.display = 'none'
+	}
+	setTimeout(loadingStuff,100)
+</script>
 </html>
 <script id='feederInsert'>
 </script>
 <script id='panZoomInsert'>
+</script>
+<script type='text/javascript'>
+var previousTarget = {} // Global to keep track of previous selection target
+var selection = [] // Global to keep track of multiple alt-selections
+var downX, downY, upX, upY // Globals to keep track of mouse coordinates
+var newNodeGenObj = {};
+var lastElementSelected = {}// Global to keep track of last element, for use in movebus function
+var searchCursor
+
+function saveSvg() {
+	// Add some critical information
+	alert('We are redirecting you to a static version of the SVG that you can save as a .svg file.')
+	svg = document.getElementById('svgContainer').outerHTML
+	b64 = btoa(svg)
+	window.location = 'data:image/svg+xml;base64,\n' + b64
+}
+
+function saveJson() {
+  // WARNING! Performance is very bad because the JSON is enormous! This can hang your browser!
+  alert('We are redirecting you to a static version of the JSON that you can save as a .json file.')
+  modJson = JSON.stringify(testFeeder)
+  b64 = btoa(modJson)
+  window.location = 'data:text/json;base64,\n' + b64
+}
+
+function addCircle(x,y,r,id,myClass) {
+	svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0]
+	aCirc = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+	aCirc.setAttribute('cx', x)
+	aCirc.setAttribute('cy', y)
+	aCirc.setAttribute('r', r)
+	aCirc.setAttribute('id', id)
+	aCirc.setAttribute('class', myClass)
+	aCirc.setAttribute('stroke-width', 0.5)
+	svgOb.appendChild(aCirc)
+}
+
+function addLine(x1,y1,x2,y2,id,myClass) {
+	svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0]
+	aLine = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+	aLine.setAttribute('x1', x1)
+	aLine.setAttribute('y1', y1)
+	aLine.setAttribute('x2', x2)
+	aLine.setAttribute('y2', y2)
+	aLine.setAttribute('id', id)
+	aLine.setAttribute('class', myClass)
+	if (myClass.indexOf('p2') !== -1) {
+		w = 2
+	} 
+	else if (myClass.indexOf('p3') !== -1) {
+		w = 3
+	}
+	else if (myClass.indexOf('parentChild') !== -1) {
+		w = 0.5
+	}
+	else {
+		w = 1
+	}
+	aLine.setAttribute('stroke-width', w)
+	svgOb.appendChild(aLine)
+}
+function buildFeeder() {
+	// Make a map objectName -> key. And while we're at it, find the size we need for the full chart.
+	nameToKey = {}, maxLon = 100, maxLat = 100
+	for (key in testFeeder.tree) {
+		nameToKey[testFeeder.tree[key]['name']] = key
+		if (testFeeder.tree[key]['longitude'] > maxLon) {maxLon = testFeeder.tree[key]['longitude']}
+			if (testFeeder.tree[key]['latitude'] > maxLat) {maxLat = testFeeder.tree[key]['latitude']}
+		}
+	maxLon = Math.round(maxLon + 20.0)
+	maxLat = Math.round(maxLat + 20.0)
+	svgOb = document.getElementById('svgContainer')
+	svgOb.setAttribute('width', maxLon)
+	svgOb.setAttribute('height', maxLat)
+	svgOb.setAttribute('viewBox','-10.0 -10.0 ' + maxLon + ' ' + maxLat)
+	// Attach the pan/zoom behavior.
+	window.panZoom = svgPanZoom('#svgContainer', {
+		zoomEnabled: true,
+		controlIconsEnabled: false,
+		fit: true,
+		center: true,
+		minZoom: 0.5,
+		maxZoom: 100
+	})
+	// Go through and add all lines first
+	for (key in testFeeder.tree) {
+		anOb = testFeeder.tree[key]
+		if (['transformer','overhead_line','underground_line','triplex_line','regulator','fuse','switch'].indexOf(anOb['object']) != -1) {
+			fromOb = testFeeder.tree[nameToKey[anOb['from']]]
+			toOb = testFeeder.tree[nameToKey[anOb['to']]]
+			addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],key,anOb['object'] + ' p' + phaseCount(anOb['phases']))
+		}
+		else if ( (['node','load','house','meter','triplex_meter','triplex_node','triplex_load','waterheater','ZIPload'].indexOf(anOb['object']) != -1) 
+			&& ('parent' in anOb) ) {
+			pOb = testFeeder.tree[nameToKey[anOb['parent']]]
+		addLine(pOb['longitude'],pOb['latitude'],anOb['longitude'],anOb['latitude'],'','parentChild')
+	}
+	}
+	// Add circles after all lines
+	for (key in testFeeder.tree) {
+		anOb = testFeeder.tree[key]
+		if (['node','load','house','meter','triplex_meter','triplex_node','triplex_load','waterheater','ZIPload'].indexOf(anOb['object']) != -1) {
+			addCircle(anOb['longitude'],anOb['latitude'],2,key,anOb['object'])
+		}
+	}
+}
+
+function mouseDown(event) {
+	downX = event.pageX
+	downY = event.pageY
+}
+function mouseUp(event) { 
+	upX = event.pageX
+	upY = event.pageY
+}
+
+//Returns real Lat/Long of a click event, used in the moveBus function
+function clickLatLon(event) {
+	// Return real lat/lon location of current click.
+	var pan = window.panZoom.getPan();
+	//var zoom = panZoom.getZoom();
+	var sizes = window.panZoom.getSizes();
+	var zoom = sizes.realZoom;
+	var x, y, pt;
+	var svg = document.getElementById('svgContainer');
+	var pt = svg.createSVGPoint();
+	pt.x = event.clientX;
+	pt.y = event.clientY;
+	pt = pt.matrixTransform(svg.getScreenCTM().inverse());
+	x = pt.x;
+	y = pt.y;
+	x = (x - pan.x) / zoom;
+	y = (y - pan.y) / zoom;
+	return [x,y];
+}  
+
+function svgClick(event) {
+	latLon=clickLatLon(event);
+	if ( (downX!==upX) || (downY!==upY) ) {
+		return
+	}
+	if (!event.altKey) {
+		for (i=0; i<selection.length; i++) {
+			selection[i].classList.remove('selected')
+		}
+		selection = []
+	}
+	event.target.classList.add('selected')
+	if ( (event.target.id != 'svgContainer')
+
+		&& (selection.indexOf(testFeeder.tree[event.target.id]) === -1) ) {
+
+		lastElementSelected= (event.target)
+
+	tableDestroy()
+	tableCreate(testFeeder.tree[event.target.id])
+	selection.push(event.target)
+}
+else {
+	tableDestroy()
+}
+	// ALT-SELECTION
+	if (selection.length >= 2) {
+		tableDestroy()
+		selectionTable()
+	}
+	previousTarget = event.target
+}
+
+function phaseCount(p) {
+		total = 0
+		if (p.search('A') > -1) {total++}
+			if (p.search('B') > -1) {total++}
+				if (p.search('C') > -1) {total++}
+					return total
+			}
+			function hotkeys() {
+	// IE8 and earlier
+	if (window.event) {
+		x = event.keyCode
+	}
+	// IE9/Firefox/Chrome/Opera/Safari
+	else if (event.which) {
+		x = event.which
+	}
+	keychar = String.fromCharCode(x);
+	if (event.target.type != 'text') {
+	// Dispatch the key:
+	if (keychar == '-') {
+		zoomOut()
+	} 
+	else if (keychar == '=') {
+		zoomIn()
+	}
+	}
+}
+
+function tableCreate(inputObject) {
+	tabScroll = document.getElementById('tableScroller')
+	tbl = document.createElement('table')
+  // Put in the header.
+  headRow = document.createElement('tr')
+  headRow.innerHTML = '<th><button onclick="tablePlus(this)">+</button><button onclick="dragMode()">Drag</button></th>'
+  headRow.innerHTML += '<th><button id="saveButton" onclick="tableSave(this)">Save</button><button onclick="deleteOb()">Delete Object</button></th>'
+  tbl.appendChild(headRow)
+  // Put the object in.
+  for (key in inputObject) {
+  	row = document.createElement('tr')
+  	row.innerHTML = '<td><button onclick="tableDel(this)">&#215;</button><input style="width:112px" value=' + key + '></input></td>'
+  	row.innerHTML += '<td><input value="' + inputObject[key] + '"></input></td>'
+  	tbl.appendChild(row)
+  }
+  tabScroll.appendChild(tbl)
+}
+
+function tableDel(me) {
+	myRow = me.parentElement.parentElement
+	myTable = myRow.parentElement
+	myTable.removeChild(myRow)
+}
+
+function tablePlus(me) {
+	myTable = me.parentElement.parentElement.parentElement
+	newRow = myTable.insertRow(1)
+	newRow.innerHTML = '<td><button onclick="tableDel(this)">&#215;</button><input style="width:112px"></input></td>'
+	newRow.innerHTML += '<td><input></input></td>'
+}
+
+function tableSave(me) {
+	tbl = me.parentElement.parentElement.parentElement
+	var toJson = {}
+	// convert HTML table to JSON
+	for (i = 1; i < tbl.rows.length; i++) {
+		key = tbl.rows[i].cells[0].lastElementChild.value
+		if (key !== '') {
+			toJson[key] = tbl.rows[i].cells[1].lastElementChild.value
+		}
+	}
+	// Update tree with new values
+	for (key in toJson) {
+		testFeeder.tree[previousTarget.id][key] = toJson[key]
+	}
+	// Delete properties from tree
+	for (key in testFeeder.tree[previousTarget.id]) {
+		if (!toJson.hasOwnProperty(key)) {
+			delete testFeeder.tree[previousTarget.id][key]
+		}
+	}
+	// Update Feeder
+	if (previousTarget.tagName === 'circle') {
+	// Update Circle
+	previousTarget.setAttribute('cx', toJson['longitude'])
+	previousTarget.setAttribute('cy', toJson['latitude'])
+	// Update Line
+	for (i = 0, limit = Object.keys(testFeeder.tree).length; i < limit; i++) {
+		if (testFeeder.tree[i]['from'] === testFeeder.tree[previousTarget.id]['name']) {
+			document.getElementById(i).setAttribute('x1', toJson['longitude'])
+			document.getElementById(i).setAttribute('y1', toJson['latitude'])
+		}
+		else if (testFeeder.tree[i]['to'] === testFeeder.tree[previousTarget.id]['name']) {
+			document.getElementById(i).setAttribute('x2', toJson['longitude'])
+			document.getElementById(i).setAttribute('y2', toJson['latitude'])
+		}
+	}
+	}
+	tableDestroy()
+	tableCreate(toJson)
+	alert('Updated object: ' + testFeeder.tree[previousTarget.id].name)
+}
+
+function tableDestroy() {
+	tabScroll = document.getElementById('tableScroller')
+	kid = tabScroll.children[0]
+	if (!(kid === undefined)) {tabScroll.removeChild(kid)}
+}
+
+function deleteOb() {
+	// Delete Lines
+	if (previousTarget.tagName === 'line') {
+		previousTarget.remove()
+		testFeeder.tree[previousTarget.id] = {}
+	}
+	// Delete Circles
+	if (previousTarget.tagName === 'circle') {
+		// Check for connected lines
+		lines = 0
+		for (i = 0, limit = Object.keys(testFeeder.tree).length; i < limit; i++) {
+			if ( (testFeeder.tree[i]['from'] === testFeeder.tree[previousTarget.id]['name'])
+				|| (testFeeder.tree[i]['to'] === testFeeder.tree[previousTarget.id]['name']) ) {
+				lines++
+		}
+	}
+	if (lines > 0) {
+		alert('Cannot delete circles with lines still connected')
+	} 
+	else {
+		previousTarget.remove()
+	}
+}
+tableDestroy()
+}
+
+function scaleTo(x) {
+	if (!x) {
+		return
+	}
+	circles = document.getElementsByTagName('circle')
+	lines = document.getElementsByTagName('line')
+  // Scale Circles
+  for (i = 0; i < circles.length; i++) {
+  	circles[i].setAttribute('r', 2*x)
+  	circles[i].setAttribute('stroke-width', 0.5*x)
+  }
+  // Scale Lines
+  for (i = 0; i < lines.length; i++) {
+  	if (lines[i].getAttribute('class').indexOf('p2') !== -1) {
+  		lines[i].setAttribute('stroke-width', 2*x)
+  	}
+  	else if (lines[i].getAttribute('class').indexOf('p3') !== -1) {
+  		lines[i].setAttribute('stroke-width', 3*x)
+  	}
+  	else if (lines[i].getAttribute('class').indexOf('parentChild') !== -1) {
+  		lines[i].setAttribute('stroke-width', 0.5*x)
+  	}
+  	else {
+  		lines[i].setAttribute('stroke-width', x)
+  	}
+  }
+}
+
+function dropPill(thisButton, name) {
+	// This function is used to make the dropdown menus work.
+	thisButton.style.color= 'black'
+	thisButton.style.background= '#F8F8F8'
+	thisButton.style.textAlign = 'left'
+	thisButton.nextSibling.nextSibling.style.display = 'inline-block'
+	thisButton.innerHTML = name + ' ▴'
+	function clickCloseEvent() {
+		thisButton.nextSibling.nextSibling.style.display = 'none'
+		thisButton.innerHTML = name + ' ▾'
+		this.removeEventListener('click', arguments.callee, true)
+		thisButton.style.color= 'white'
+		thisButton.style.background= 'transparent'
+		if (window.event.toElement==thisButton) {event.stopPropagation()}
+	}
+	document.body.addEventListener('click', clickCloseEvent, true)
+}
+
+function clickCloseEvent(labelName, buttonName) {
+	// This event allows users to close the dropdown menus.
+	var thisButton = document.getElementById(buttonName);
+	thisButton.nextSibling.nextSibling.style.display = 'none'
+	thisButton.innerHTML = labelName + ' ▾'
+	this.removeEventListener('click', arguments.callee, true)
+	if (window.event.toElement==thisButton) {event.stopPropagation()}
+}
+
+function selectionTable() {
+	tabScroll = document.getElementById('tableScroller')
+	tbl = document.createElement('table')
+  // Put in the header.
+  headRow = document.createElement('tr')
+  headRow.innerHTML = '<th>Selected Elements</th>'
+  tbl.appendChild(headRow)
+  // Put the object in.
+  for (i = 0; i < selection.length; i++) {
+  	row = document.createElement('tr')
+  	row.innerHTML = '<td>' + testFeeder.tree[selection[i].id].name + '</td>'
+  	tbl.appendChild(row)
+  }
+  tabScroll.appendChild(tbl)
+}
+
+//what is going on in newNode????
+function newNode() {
+	var newTreeId = Object.keys(testFeeder.tree).length
+	var newNode = {
+		longitude: 0,
+		latitude: 0,
+		name: 'newNode' + String(newTreeId),
+		nominal_voltage: 1000,
+		object: 'node',
+		phases: 'A'
+	}
+  // Save to tree
+  testFeeder.tree[newTreeId] = newNode
+  console.log('newNode:', newTreeId, testFeeder.tree[newTreeId])
+  // Click location to add
+  clickTarget = document.getElementById('svgContainer')
+  clickTarget.addEventListener('click', clickLocate, false)
+}
+
+//meant to draw on svg, save for the new node thing
+function clickLocate() {
+	var xloc = event.pageX
+	var yloc = event.pageY
+  //var newTreeId = Object.keys(testFeeder.tree).length
+  coords=clickLatLon(event)
+  xloc = coords[0]
+  yloc = coords[1]
+  newType = "node"
+  //console.log(xloc, yloc)
+  testFeeder.tree[newTreeId].longitude = xloc
+  testFeeder.tree[newTreeId].latitude = yloc
+  // Draw on svg
+  x = testFeeder.tree[newTreeId].longitude
+  y = testFeeder.tree[newTreeId].latitude
+  r = 2
+  id = newTreeId
+  myClass = testFeeder.tree[newTreeId].object
+  addCircle(x,y,r,id,myClass)
+  clickTarget.removeEventListener('click', clickLocate, false)
+  //console.log('clicked')
+}
+
+function newLink() {
+	if (selection.length === 2) {      
+		var newTreeId = Object.keys(testFeeder.tree).length
+		var newLink = {
+			name: 'newLink' + String(newTreeId),
+			object: 'overhead_line',
+			phases: 'A',
+			configuration: 'configuration',
+			from: testFeeder.tree[selection[0].id].name,
+			to: testFeeder.tree[selection[1].id].name
+		}
+    // Save to tree
+    testFeeder.tree[newTreeId] = newLink
+    console.log('newLink:', newTreeId, testFeeder.tree[newTreeId])
+    // Draw on svg
+    x1 = testFeeder.tree[selection[0].id].longitude
+    y1 = testFeeder.tree[selection[0].id].latitude
+    x2 = testFeeder.tree[selection[1].id].longitude
+    y2 = testFeeder.tree[selection[1].id].latitude
+    id = newTreeId
+    myClass = testFeeder.tree[newTreeId].object
+    addLine(x1,y1,x2,y2,id,myClass)
+}
+}
+
+function dragMode() {
+	clickTarget = document.getElementById('svgContainer')
+	clickTarget.addEventListener('click', moveBusListener, false)
+}
+
+function moveBusListener() {
+	currSelsvg=lastElementSelected 
+	currSelId=currSelsvg.id
+	currSel=testFeeder.tree[currSelId]
+	coords=clickLatLon(event) 
+	currSel["longitude"] = coords[0]
+	currSel["latitude"] = coords[1]
+	//Runs through testFeeder lines (links) determines if clicked node is an end or target for any line in feeder
+	for (num in testFeeder.links) {
+		selBusId=currSel.name
+		selBranch = testFeeder.links[num]
+		fbus=selBranch.source
+		tbus=selBranch.target
+		fBusID = selBranch.source.name
+		tBusID= selBranch.target.name
+		//If any lines are an end or target for clicked node, the lines are deleted, and redrawn to new clicked location
+		if(fBusID == selBusId || tBusID == selBusId) {
+			document.getElementById(testFeeder.links[num].treeIndex).remove()
+			fromBus = testFeeder.tree[testFeeder.nodes[fbus.index].treeIndex]
+			toBus = testFeeder.tree[testFeeder.nodes[tbus.index].treeIndex]
+			x1 = fromBus['longitude']
+			y1 = fromBus['latitude']
+			x2 = toBus['longitude']
+			y2 = toBus['latitude']
+			key=testFeeder.links[num].treeIndex
+			addLine(x1,y1,x2,y2, key, testFeeder.tree[key]['object'] + ' p' + phaseCount(testFeeder.tree[key]['phases']))
+			//redraw buses
+			//then the three buses on the lines, the two origin buses along with the new moved bus, are redrawn,
+			//checks to make sure that if a bus value is null, the next bus is searched for to avoid error. avoids double removal
+			if(fBusID == selBusId) {
+				id=testFeeder.nodes[tbus.index].treeIndex
+				myClass = testFeeder.tree[id].objectType
+				addCircle(x2,y2,2,id,myClass)
+				if (document.getElementById(testFeeder.nodes[tbus.index].treeIndex) !== null) {
+					document.getElementById(testFeeder.nodes[tbus.index].treeIndex).remove()
+				}
+			}
+			if(tBusID == selBusId) {
+				id=testFeeder.nodes[fbus.index].treeIndex
+				myClass = testFeeder.tree[id].objectType
+				addCircle(x1,y1,2,id,"myClass")
+				if(document.getElementById(testFeeder.nodes[fbus.index].treeIndex) !== null) {
+					document.getElementById(testFeeder.nodes[fbus.index].treeIndex).remove()
+				}
+			}
+			//Adds in final target bus, aka the bus which was moved              
+			console.log(currSelsvg)
+			document.getElementById(currSelsvg.id).remove()
+			addCircle(coords[0],coords[1],2,currSelId,testFeeder.tree[currSelId].objectType)
+		}
+	}
+	clickTarget.removeEventListener('click', moveBusListener, false)
+}
+
+// Modal functions
+function showModal(element){
+	document.getElementById(element).style.display = 'block'
+}
+
+function closeModal(element){
+	document.getElementById(element).style.display = 'none'
+}
+
+// Find Function
+function findNext() {
+	var selected
+	var term = document.getElementById('searchTerm').value
+	var hits = findElementsViaString(term)
+	document.getElementById('searchHitCount').innerHTML = hits.length + ' Hits'
+	for (i in hits) {
+		document.getElementById(hits[i].toString()).classList.remove('selected')
+	}
+	try {
+		if (hits.length == 0) {
+			alert('No objects found containing term.')
+			return false
+		}
+		if (searchCursor == undefined) {
+			selected = hits[0]
+			searchCursor = 0
+		} 
+		else {
+			searchCursor++
+			if (searchCursor == hits.length) {
+				searchCursor = 0
+			}
+			if (searchCursor == -1) {
+				searchCursor = hits.length - 2
+			}
+			selected = hits[searchCursor]
+		}
+		tableDestroy()
+		tableCreate(testFeeder.tree[selected])
+		var x = document.getElementById(selected.toString()).getAttribute('cx')
+		var y = document.getElementById(selected.toString()).getAttribute('cy')
+		var panZoom = svgPanZoom('#svgContainer')
+		panZoom.pan({x: 0, y: 0})
+		var realZoom = panZoom.getSizes().realZoom
+		var width = panZoom.getSizes().width/2
+		var height = panZoom.getSizes().height/2
+		panZoom.pan({ x: width-(x*realZoom), y: height-(y*realZoom) })
+		panZoom.zoom(3)
+		document.getElementById(selected.toString()).classList.add('selected')
+	} 
+	catch (err) {
+		alert('Objects have been hidden in the layout, please unfold them first.\n' + err.message)
+	}
+}
+function findPrevious() {
+	if (searchCursor == undefined) {
+		findNext()
+	} 
+	else {
+		searchCursor -= 2
+		findNext()
+	}
+}
+function findElementsViaString(inString) {
+	var results = []
+	for (key in testFeeder.tree) {
+		subIndex = JSON.stringify(testFeeder.tree[key]).indexOf(inString)
+		if (subIndex != -1 && testFeeder.tree[key]['object'] != 'player' && (testFeeder.tree[key].hasOwnProperty('object') || testFeeder.tree[key].hasOwnProperty('module'))) {
+			results.push(key)
+		}
+	}
+	return results
+}
 </script>
