@@ -157,22 +157,20 @@ def work(modelDir, inputDict):
 	plt.gca().set_aspect('equal')
 	busLocations = {}
 	i = 0
-	for bus in networkJson["bus"]:
-		for busName, busInfo in bus.items():
-			y = float(busInfo["latitude"])
-			x = float(busInfo["longitude"])
-			plt.plot([x], [y], marker='o', markersize=12.0, color=mapper.to_rgba(nodeVolts[i]), zorder=5)  
-			busLocations[busName] = [x, y]
+	print networkJson["bus"]
+	for busName, busInfo in networkJson["bus"].items():
+		y = float(busInfo["latitude"])
+		x = float(busInfo["longitude"])
+		plt.plot([x], [y], marker='o', markersize=12.0, color=mapper.to_rgba(nodeVolts[i]), zorder=5)  
+		busLocations[busName] = [x, y]
 		i = i + 1
-	for gen in networkJson["gen"]:
-		for genName, genInfo in gen.items():
-			x,y =  busLocations[genInfo["bus"]]
-			plt.plot([x], [y], 's', color='gray', zorder=10)
-	for branch in networkJson["branch"]:
-		for branchName, branchInfo in branch.items():
-			x1, y1 = busLocations[branchInfo["fbus"]]
-			x2, y2 = busLocations[branchInfo["tbus"]]
-			plt.plot([x1, x2], [y1,y2], color='black', marker = '', zorder=0)
+	for genName, genInfo in networkJson["gen"].items():
+		x,y =  busLocations[genInfo["bus"]]
+		plt.plot([x], [y], 's', color='gray', zorder=10)
+	for branchName, branchInfo in networkJson["branch"].items():
+		x1, y1 = busLocations[branchInfo["fbus"]]
+		x2, y2 = busLocations[branchInfo["tbus"]]
+		plt.plot([x1, x2], [y1,y2], color='black', marker = '', zorder=0)
 	plt.savefig(modelDir + '/output.png')
 	with open(pJoin(modelDir,"output.png"),"rb") as inFile:
 		outData["chart"] = inFile.read().encode("base64")

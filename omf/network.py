@@ -7,8 +7,8 @@ import omf
 # import matpower
 
 # Wireframe for new netork objects:
-newNetworkWireframe = {"baseMVA":"100.0","mpcVersion":"2.0","bus":[],"gen":[],
-	"branch":[]}
+newNetworkWireframe = {"baseMVA":"100.0","mpcVersion":"2.0","bus":{},"gen":{},
+	"branch":{}}
 
 def parse(inputStr, filePath=True):
 	''' Parse a MAT into an omf.network json. This is so we can walk the json, change things in bulk, etc.
@@ -68,15 +68,15 @@ def _dictConversion(inputStr, filePath=True):
 			elif todo=="bus":
 				maxKey = str(len(newNetworkWireframe['bus'])+1)
 				bus = {"bus_i":line[0],"type":line[1],"Pd": line[2],"Qd": line[3],"Gs": line[4],"Bs": line[5],"area": line[6],"Vm": line[7],"Va": line[8],"baseKV": line[9],"zone": line[10],"Vmax": line[11],"Vmin": line[12]}
-				newNetworkWireframe['bus'].append({maxKey : bus})
+				newNetworkWireframe['bus'][maxKey] = bus
 			elif todo=="gen":
 				maxKey = str(len(newNetworkWireframe['gen'])+1)
 				gen = {"bus": line[0],"Pg": line[1],"Qg": line[2],"Qmax": line[3],"Qmin": line[4],"Vg": line[5],"mBase": line[6],"status": line[7],"Pmax": line[8],"Pmin": line[9],"Pc1": line[10],"Pc2": line[11],"Qc1min": line[12],"Qc1max": line[13],"Qc2min": line[14],"Qc2max": line[15],"ramp_agc": line[16],"ramp_10": line[17],"ramp_30": line[18],"ramp_q": line[19],"apf": line[20]}
-				newNetworkWireframe['gen'].append({maxKey : gen})
+				newNetworkWireframe['gen'][maxKey] = gen
 			elif todo=='branch':
 				maxKey = str(len(newNetworkWireframe['branch'])+1)
 				branch =  {"fbus":line[0],"tbus":line[1],"r": line[2],"x": line[3],"b": line[4],"rateA": line[5],"rateB": line[6],"rateC": line[7],"ratio": line[8],"angle": line[9],"status": line[10],"angmin": line[11],"angmax": line[12]}
-				newNetworkWireframe['branch'].append({maxKey : branch})
+				newNetworkWireframe['branch'][maxKey] = branch
 		else:
 			# Determine what type of data is coming up.
 			if "matpower case format" in line.lower():
@@ -157,7 +157,8 @@ def netToMat(inNet, networkName):
 		matStr.append('%\t'+'\t'.join(str(x) for x in electricalKey[i])+'\n')
 		matStr.append('mpc.'+electrical+' = [\n')
 		for j,electricalDict in enumerate(inNet[electrical]):
-			electricalValues = '\t'.join(electricalDict[str(j+1)][val] for val in electricalKey[i])
+			valueDict = inNet[electrical][str(electricalDict)]
+			electricalValues = '\t'.join(valueDict[val] for val in electricalKey[i])
 			matStr.append('\t'+electricalValues+';\n')
 		matStr.append('];\n')
 		matStr.append('\n')
