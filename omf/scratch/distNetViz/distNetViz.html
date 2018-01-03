@@ -698,6 +698,7 @@ function selectionTable() {
 //what is going on in newNode????
 function newNode() {
 	var newTreeId = Object.keys(testFeeder.tree).length
+	var nodesID = Object.keys(testFeeder.nodes).length
 	var newNode = {
 		longitude: 0,
 		latitude: 0,
@@ -708,25 +709,25 @@ function newNode() {
 	}
   // Save to tree
   testFeeder.tree[newTreeId] = newNode
+  //Save to nodes
+  testFeeder.nodes[nodesID] = newNode
   console.log('newNode:', newTreeId, testFeeder.tree[newTreeId])
   // Click location to add
   clickTarget = document.getElementById('svgContainer')
   clickTarget.addEventListener('click', clickLocate, false)
 }
 
-//meant to draw on svg, save for the new node thing
+
 function clickLocate() {
 	var xloc = event.pageX
 	var yloc = event.pageY
-  //var newTreeId = Object.keys(testFeeder.tree).length
+	var newTreeId = (Object.keys(testFeeder.tree).length)-1
   coords=clickLatLon(event)
   xloc = coords[0]
   yloc = coords[1]
-  newType = "node"
-  //console.log(xloc, yloc)
   testFeeder.tree[newTreeId].longitude = xloc
   testFeeder.tree[newTreeId].latitude = yloc
-  // Draw on svg
+  // Draw new node on svg
   x = testFeeder.tree[newTreeId].longitude
   y = testFeeder.tree[newTreeId].latitude
   r = 2
@@ -734,7 +735,7 @@ function clickLocate() {
   myClass = testFeeder.tree[newTreeId].object
   addCircle(x,y,r,id,myClass)
   clickTarget.removeEventListener('click', clickLocate, false)
-  //console.log('clicked')
+  
 }
 
 function newLink() {
