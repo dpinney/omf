@@ -98,21 +98,18 @@ def _dictToString(inDict):
 def netToNxGraph(inNet):
 	''' Convert network.omt to networkx graph. '''
 	outGraph = nx.Graph()
-	for compType in inNet:
-		if compType in ['bus','gen','branch']:
-			comp = inNet[compType]
-			for compVal in comp:
-				for idnum,item in compVal.iteritems():
-					if 'fbus' in item.keys():
-						outGraph.add_edge(item['fbus'],item['tbus'],attr_dict={'type':'branch'})
-					elif compType=='bus':
-						if item.get('bus_i',0) in outGraph:
-							# Edge already led to node's addition, so just set the attributes:
-							outGraph.node[item['bus_i']]['type']='bus'
-						else:
-							outGraph.add_node(item['bus_i'])
-					elif compType=='gen':
-						pass
+	for compType in ['bus','gen','branch']:
+		for idNum, item in inNet[compType].iteritems():
+			if 'fbus' in item.keys():
+				outGraph.add_edge(item['fbus'],item['tbus'],attr_dict={'type':'branch'})
+			elif compType=='bus':
+				if item.get('bus_i',0) in outGraph:
+					# Edge already led to node's addition, so just set the attributes:
+					outGraph.node[item['bus_i']]['type']='bus'
+				else:
+					outGraph.add_node(item['bus_i'])
+			elif compType=='gen':
+				pass
 	return outGraph
 
 def latlonToNet(inGraph, inNet):
@@ -120,16 +117,12 @@ def latlonToNet(inGraph, inNet):
 	cleanG = nx.Graph(inGraph.edges())
 	cleanG.add_nodes_from(inGraph)
 	pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
-	for compType in inNet:
-		if compType in ['bus']:
-			comp = inNet[compType]
-			for compVal in comp:
-				for idnum,item in compVal.iteritems():
-					obName = item.get('bus_i')
-					thisPos = pos.get(obName, None)
-					if thisPos != None:
-						inNet[compType][int(float(idnum))-1][idnum]['longitude'] = thisPos[0]
-						inNet[compType][int(float(idnum))-1][idnum]['latitude'] = thisPos[1]
+	for idnum, item in inNet['bus'].iteritems():
+		obName = item.get('bus_i')
+		thisPos = pos.get(obName, None)
+		if thisPos != None:
+			inNet['bus'][idnum]['longitude'] = thisPos[0]
+			inNet['bus'][idnum]['latitude'] = thisPos[1]
 	return inNet
 
 def netToMat(inNet, networkName):
@@ -164,7 +157,7 @@ def netToMat(inNet, networkName):
 		matStr.append('\n')
 	return matStr
 
-def tests():
+def _tests():
 	# Parse mat to dictionary.
 	networkName = 'case9'
 	networkJson = parse(pJoin(omf.omfDir,'solvers','matpower5.1',networkName+'.m'), filePath=True)
@@ -191,4 +184,4 @@ def tests():
 	# matpower.runSim(pJoin(os.getcwd(),'scratch','transmission',"outData",networkName), inputDict, debug=False)
 
 if __name__ == '__main__':
-	_secretTests()
+	_tests()
