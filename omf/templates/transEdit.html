@@ -350,11 +350,11 @@ function buildNetwork() {
         maxLon = 100, maxLat = 100
         busNumMap = {}
         for (num in networkData.bus) {
-                busKey = Object.keys(networkData.bus[num])[0]
-                busNum = networkData.bus[num][busKey]['bus_i']
+                //busKey = Object.keys(networkData.bus[num])[0]
+                busNum = networkData.bus[num]['bus_i']
                 busNumMap[busNum] = num
-                if (networkData.bus[num][busKey]['longitude'] > maxLon) {maxLon = networkData.bus[num][busKey]['longitude']}
-                if (networkData.bus[num][busKey]['latitude'] > maxLat) {maxLat = networkData.bus[num][busKey]['latitude']}
+                if (networkData.bus[num]['longitude'] > maxLon) {maxLon = networkData.bus[num]['longitude']}
+                if (networkData.bus[num]['latitude'] > maxLat) {maxLat = networkData.bus[num]['latitude']}
         }
         //console.log("maxLon:", maxLon, " maxLat:", maxLat)
         maxLon = Math.round(maxLon + 20.0)
@@ -372,38 +372,38 @@ function buildNetwork() {
         })
         // Go through and add all lines first
         for (num in networkData.branch) {
-                branchKey = Object.keys(networkData.branch[num])[0]
+                //branchKey = Object.keys(networkData.branch[num])[0]
                 try {
-                        anOb = networkData.branch[num][branchKey]
-                        fNum = networkData.branch[num][branchKey]['fbus']
-                        tNum = networkData.branch[num][branchKey]['tbus']
+                        anOb = networkData.branch[num]
+                        fNum = networkData.branch[num]['fbus']
+                        tNum = networkData.branch[num]['tbus']
                         // fromOb = networkData.bus[parseInt(fNum)-1][fNum]
                         // toOb = networkData.bus[parseInt(tNum)-1][tNum]
                         fBusNum = busNumMap[fNum]
                         tBusNum = busNumMap[tNum]
-                        fromOb = networkData.bus[fBusNum][fNum]
-                        toOb = networkData.bus[tBusNum][tNum]
-                        addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],"branch_"+branchKey,"branch" + ' p' + phaseCount(anOb))
+                        fromOb = networkData.bus[fBusNum]
+                        toOb = networkData.bus[tBusNum]
+                        addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],"branch_"+num,"branch" + ' p' + phaseCount(anOb))
                 } catch(e) {}
         }
         // Add buses after all lines
         for (num in networkData.bus) {
-                busKey = Object.keys(networkData.bus[num])[0]
+                //busKey = Object.keys(networkData.bus[num])[0]
                 try {
-                        anOb = networkData.bus[num][busKey]
-                        addCircle(anOb['longitude'], anOb['latitude'],5,"bus_"+busKey,"bus")
+                        anOb = networkData.bus[num]
+                        addCircle(anOb['longitude'], anOb['latitude'],5,"bus_"+num,"bus")
                 } catch(e) {}
         }
         // Draw generators over busses
         for (num in networkData.gen) {
-                genKey = Object.keys(networkData.gen[num])[0]
+                //genKey = Object.keys(networkData.gen[num])[0]
                 try {
-                        anOb = networkData.gen[num][genKey]
+                        anOb = networkData.gen[num]
                         busNum = busNumMap[anOb['bus']]
-                        var longitude = networkData.bus[busNum][anOb['bus']]['longitude']
-                        var latitude = networkData.bus[busNum][anOb['bus']]['latitude']
+                        var longitude = networkData.bus[busNum]['longitude']
+                        var latitude = networkData.bus[busNum]['latitude']
                         var width = 4
-                        addRectangle(longitude-width/2,latitude-width/2,width,width,"gen_"+genKey,"gen")
+                        addRectangle(longitude-width/2,latitude-width/2,width,width,"gen_"+num,"gen")
                 } catch(e) {}
         }
 }
@@ -454,9 +454,9 @@ function svgClick(event) {
          var clickID = event.target.id.split("_")[1]
          lastElementSelected = event.target
          //console.log('clicked ', clickType, ' with id', clickID)
-                if (selection.indexOf(networkData[clickType][parseInt(clickID)-1]) === -1){
+                if (selection.indexOf(networkData[clickType]) === -1){
                         tableDestroy()
-                        tableCreate(networkData[clickType][parseInt(clickID)-1][clickID])
+                        tableCreate(networkData[clickType][clickID])
                         selection.push(event.target)
                 }
         }
@@ -561,13 +561,13 @@ function tableSave(me) {
         var clickType = previousTarget.id.split("_")[0]
         var clickID = previousTarget.id.split("_")[1]
         for (key in toJson) {
-                networkData[clickType][parseInt(clickID)-1][clickID][key] = toJson[key]
+                networkData[clickType][clickID][key] = toJson[key]
         }
         // Delete properties from tree
-        for (key in networkData[clickType][parseInt(clickID)-1][clickID]) {
+        for (key in networkData[clickType][clickID]) {
                 // HACK: DON'T DELETE DATA THAT OBJECTS MUST CONTAIN VIA CHECKING THE NAMES.
                 if (!toJson.hasOwnProperty(key) && key!='latitude' && key!='longitude' && key!='bus_i' && key!='fbus' && key!='tbus' && key!='bus') {
-                        delete networkData[clickType][parseInt(clickID)-1][clickID][key]
+                        delete networkData[clickType][clickID][key]
                 }
         }
         unsavedChanges = true;
@@ -585,26 +585,26 @@ function deleteOb() {
         // Delete Lines
         if (clickType === 'branch') {
                 previousTarget.remove()
-                networkData[clickType][parseInt(clickID)-1][clickID] = {}
+                networkData[clickType][clickID] = {}
         }
         //Delete Squares
         if (clickType === 'gen') {
                 previousTarget.remove()
-                networkData[clickType][parseInt(clickID)-1][clickID] = {}
+                networkData[clickType][clickID] = {}
         }
         // Delete Circles
         if (clickType === 'bus') {
                 gens = 0
-                for (i = 0, limit = (networkData.gen).length; i < limit; i++) {
-                        if (parseInt(networkData.gen[i][String(i+1)]['bus']) === parseInt(clickID)) {
+                for (i = 0, limit = Object.keys(networkData.gen).length; i < limit; i++) {
+                        if (parseInt(networkData.gen[String(i+1)]['bus']) === parseInt(clickID)) {
                                 gens++
                         }
                 }
                 // Check for connected lines
                 lines = 0
-                for (i = 0, limit = (networkData.branch).length; i < limit; i++) {
-                        if ( (parseInt(networkData.branch[i][String(i+1)]['fbus']) === parseInt(clickID))
-                                || (parseInt(networkData.branch[i][String(i+1)]['tbus']) === parseInt(clickID)) ) {
+                for (i = 0, limit = Object.keys(networkData.branch).length; i < limit; i++) {
+                        if ( (parseInt(networkData.branch[String(i+1)]['fbus']) === parseInt(clickID))
+                                || (parseInt(networkData.branch[String(i+1)]['tbus']) === parseInt(clickID)) ) {
                                 lines++
                         }
                 }
@@ -676,10 +676,10 @@ function selectionTable() {
 }
 function newNode(typeOfNode) {
         //console.log('new bus length',(networkData.bus).length+1)
-        newID = (networkData[typeOfNode].length)+1
+        newID = (Object.keys(networkData[typeOfNode]).length)+1
         newBusGenObj = {}
         //console.log('new bus length',(networkData.bus).length+1)
-        newBusGenObj[String(newID)] = {
+        newBusGenObj = {
                 longitude: "0",
                 latitude: "0",
                 bus_i: String(newID),
@@ -708,12 +708,12 @@ function clickLocate() {
         yloc = coords[1]
         newType = "bus"
         // Save to tree
-        networkData[newType][newID-1] = newBusGenObj
-        networkData[newType][newID-1][String(newID)].longitude = xloc
-        networkData[newType][newID-1][String(newID)].latitude = yloc
+        networkData[newType][String(newID)] = newBusGenObj
+        networkData[newType][String(newID)].longitude = xloc
+        networkData[newType][String(newID)].latitude = yloc
         // Draw on svg
-        x = networkData[newType][newID-1][String(newID)].longitude
-        y = networkData[newType][newID-1][String(newID)].latitude
+        x = networkData[newType][String(newID)].longitude
+        y = networkData[newType][String(newID)].latitude
         r = 5
         addCircle(x,y,r,newType+"_"+String(newID),newType)
         clickTarget.removeEventListener('click', clickLocate, false)
@@ -728,24 +728,23 @@ function moveBusListener() {
         currSel = lastElementSelected
         selectionIDSplit = currSel.id.split("_")
         selBusID = parseInt(selectionIDSplit[1])
-        selBus = networkData["bus"][selBusID - 1][String(selBusID)]
+        selBus = networkData["bus"][String(selBusID)]
         coords = clickLatLon(event)
-        networkData["bus"][selBusID - 1][String(selBusID)].longitude = coords[0]
-        networkData["bus"][selBusID - 1][String(selBusID)].latitude = coords[1]
-
+        networkData["bus"][String(selBusID)].longitude = coords[0]
+        networkData["bus"][String(selBusID)].latitude = coords[1]
         for (num in networkData.branch) {
-                selBranch = networkData.branch[num][String(parseInt(num)+1)]
+                selBranch = networkData.branch[String(parseInt(num))]
                 fBusID = selBranch['fbus']
                 tBusID= selBranch['tbus']
                 if(fBusID == selBusID || tBusID == selBusID) {
-                        document.getElementById("branch_" + String(parseInt(num)+1)).remove()
-                        fromBus = networkData.bus[parseInt(fBusID)-1][fBusID]
-                        toBus = networkData.bus[parseInt(tBusID)-1][tBusID]
+                        document.getElementById("branch_" + String(parseInt(num))).remove()
+                        fromBus = networkData.bus[fBusID]
+                        toBus = networkData.bus[tBusID]
                         x1 = fromBus['longitude']
                         y1 = fromBus['latitude']
                         x2 = toBus['longitude']
                         y2 = toBus['latitude']
-                        addLine(x1,y1,x2,y2,"branch_"+String(parseInt(num)+1),"branch" + ' p' + phaseCount(selBranch))
+                        addLine(x1,y1,x2,y2,"branch_"+String(parseInt(num)),"branch" + ' p' + phaseCount(selBranch))
                         // Redraw buses
                         r = 5
                         if(fBusID == selBusID) {
@@ -757,14 +756,14 @@ function moveBusListener() {
                                 addCircle(x1,y1,r,"bus_"+String(fBusID),"bus")       
                         }
                         for(gen in networkData.gen) {
-                                busGenID = networkData.gen[gen][String(parseInt(gen)+1)]['bus']
+                                busGenID = networkData.gen[String(parseInt(gen))]['bus']
                                 if(busGenID == fBusID) {
-                                        document.getElementById("gen_" + String(parseInt(gen)+1)).remove() 
-                                        addRectangle(x1 - 4/2, y1 - 4/2, 4, 4, "gen_" + String(parseInt(gen)+1), "gen")
+                                        document.getElementById("gen_" + String(parseInt(gen))).remove() 
+                                        addRectangle(x1 - 4/2, y1 - 4/2, 4, 4, "gen_" + String(parseInt(gen)), "gen")
                                 }
                                 if(busGenID == tBusID) {
-                                        document.getElementById("gen_" + String(parseInt(gen)+1)).remove() 
-                                        addRectangle(x2- 4/2, y2 - 4/2, 4, 4, "gen_" + String(parseInt(gen)+1), "gen")
+                                        document.getElementById("gen_" + String(parseInt(gen))).remove() 
+                                        addRectangle(x2- 4/2, y2 - 4/2, 4, 4, "gen_" + String(parseInt(gen)), "gen")
                                 }
                         }
                 }
@@ -773,25 +772,26 @@ function moveBusListener() {
         document.getElementById('bus_' + selBusID).remove()
         addCircle(coords[0],coords[1],r,"bus_"+String(selBusID),"bus")
         for(gen in networkData.gen) {
-                busGenID = networkData.gen[gen][String(parseInt(gen)+1)]['bus']
+                busGenID = networkData.gen[String(parseInt(gen))]['bus']
                 if(busGenID == selBusID) {
-                        document.getElementById("gen_" + String(parseInt(gen)+1)).remove() 
-                        addRectangle(coords[0] - 4/2, coords[1] - 4/2, 4, 4, "gen_" + String(parseInt(gen)+1), "gen")
+                        document.getElementById("gen_" + String(parseInt(gen))).remove() 
+                        addRectangle(coords[0] - 4/2, coords[1] - 4/2, 4, 4, "gen_" + String(parseInt(gen)), "gen")
                 }
         }
        
         clickTarget.removeEventListener('click', moveBusListener, false)
+        console.log(networkData)
 }
 
 function newGen() {
         currSel = selection[0]
         selectionIDSplit = currSel.id.split("_")
         if(selection.length === 1 && String(selectionIDSplit[0]) == "bus") {
-                newID = (networkData["gen"].length)+1
+                newID = (Object.keys(networkData["gen"]).length)+1
                 newGenObj = {}
                 selBusID = parseInt(selectionIDSplit[1])
-                selBus = networkData["bus"][selBusID - 1][String(selBusID)]
-                newGenObj[String(newID)] = {
+                selBus = networkData["bus"][String(selBusID)]
+                newGenObj = {
                         longitude: selBus.longitude,
                         latitude: selBus.latitude,
                         bus: String(selBusID),
@@ -817,7 +817,7 @@ function newGen() {
                         apf: "0"
                 }
                 addRectangle(selBus.longitude - 4/2, selBus.latitude - 4/2, 4, 4, "gen_" + newID, "gen")
-                networkData["gen"][newID - 1] = newGenObj
+                networkData["gen"][String(newID)] = newGenObj
                 
         }
 }
@@ -826,11 +826,11 @@ function newLink() {
         busOne = selection[0].id.split("_")
         busTwo = selection[1].id.split("_")
         if (selection.length === 2 && String(busOne[0]) == "bus" && String(busTwo[0]) == "bus") {
-                var newCompID = (networkData.branch).length + 1
+                var newCompID = (Object.keys(networkData.branch)).length + 1
                 var fBusID = parseInt(busOne[1])
                 var tBusID = parseInt(busTwo[1])
                 var newLink = {}
-                newLink[String(newCompID)] = {
+                newLink = {
                         r: "0.02",
                         x: "0.06",
                         b: "0.03",
@@ -846,13 +846,13 @@ function newLink() {
                         tbus: String(tBusID)
                 }
                 // Save to tree
-                networkData.branch[newCompID-1] = newLink
+                networkData.branch[String(newCompID)] = newLink
                 // Draw on svg
-                x1 = networkData.bus[fBusID-1][String(fBusID)].longitude
-                y1 = networkData.bus[fBusID-1][String(fBusID)].latitude
-                x2 = networkData.bus[tBusID-1][String(tBusID)].longitude
-                y2 = networkData.bus[tBusID-1][String(tBusID)].latitude
-                addLine(x1,y1,x2,y2,"branch_" + String(newCompID),"branch" + ' p' + phaseCount(newLink[newCompID]))
+                x1 = networkData.bus[String(fBusID)].longitude
+                y1 = networkData.bus[String(fBusID)].latitude
+                x2 = networkData.bus[String(tBusID)].longitude
+                y2 = networkData.bus[String(tBusID)].latitude
+                addLine(x1,y1,x2,y2,"branch_" + String(newCompID),"branch" + ' p' + phaseCount(newLink))
                 //Redraw connected components
                 r = 5
                 document.getElementById('bus_' + fBusID).remove()
@@ -861,14 +861,14 @@ function newLink() {
                 addCircle(x2,y2,r,"bus_"+String(tBusID),"bus")
 
                 for(gen in networkData.gen) {
-                        busGenID = networkData.gen[gen][String(parseInt(gen)+1)]['bus']
+                        busGenID = networkData.gen[String(parseInt(gen))]['bus']
                         if(busGenID == fBusID) {
-                                document.getElementById("gen_" + String(parseInt(gen)+1)).remove() 
-                                addRectangle(x1 - 4/2, y1 - 4/2, 4, 4, "gen_" + String(parseInt(gen)+1), "gen")
+                                document.getElementById("gen_" + String(parseInt(gen))).remove() 
+                                addRectangle(x1 - 4/2, y1 - 4/2, 4, 4, "gen_" + String(parseInt(gen)), "gen")
                         }
                         if(busGenID == tBusID) {
-                                document.getElementById("gen_" + String(parseInt(gen)+1)).remove() 
-                                addRectangle(x2- 4/2, y2 - 4/2, 4, 4, "gen_" + String(parseInt(gen)+1), "gen")
+                                document.getElementById("gen_" + String(parseInt(gen))).remove() 
+                                addRectangle(x2- 4/2, y2 - 4/2, 4, 4, "gen_" + String(parseInt(gen)), "gen")
                         }
                 }
         }

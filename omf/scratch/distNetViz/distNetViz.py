@@ -28,6 +28,8 @@ def main():
 
 def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None):
 	''' Vizualize a distribution system.'''
+	# HACK: make sure we have our homebrew binaries available.
+	os.environ['PATH'] += os.pathsep + '/usr/local/bin'
 	# Load in the feeder.
 	with open(pathToOmdOrGlm,'r') as feedFile:
 		if pathToOmdOrGlm.endswith('.omd'):
@@ -69,8 +71,6 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None):
 		tempDir = outputPath
 	#HACK: make sure we get the required files from the right place.
 	SOURCE_DIR = os.path.dirname(__file__) + '/'
-	# HACK: make sure we have our homebrew binaries available.
-	os.environ['PATH'] += os.pathsep + '/usr/local/bin'
 	shutil.copy(SOURCE_DIR + '/distNetViz.html', tempDir + '/viewer.html')
 	shutil.copy(SOURCE_DIR + '/svg-pan-zoom.js', tempDir + '/svg-pan-zoom.js')
 	# Grab the library we need.
