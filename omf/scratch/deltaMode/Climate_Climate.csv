@@ -1,9 +1,0 @@
-# file...... Climate_Climate.csv
-# date...... Tue Mar 14 08:51:13 2017
-# user...... mhx
-# host...... (null)
-# target.... climate 2273
-# trigger... (none)
-# interval.. 3600
-# limit..... 0
-# timestamp,temperature,solar_direct,wind_speed,rainfall,snowdepth,solar_global

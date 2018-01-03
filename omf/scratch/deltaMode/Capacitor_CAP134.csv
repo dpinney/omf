@@ -1,9 +1,0 @@
-# file...... Capacitor_CAP134.csv
-# date...... Tue Mar 14 08:51:13 2017
-# user...... mhx
-# host...... (null)
-# target.... capacitor 433
-# trigger... (none)
-# interval.. 3600
-# limit..... 0
-# timestamp,switchA,switchB,switchC,phases

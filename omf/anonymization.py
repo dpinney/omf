@@ -333,40 +333,34 @@ def tranPseudomizeNames(inNetwork):
 	newBusKey = {}
 	randomID = random.randint(0,100)
 	# Create busKey dictionary
-	busId = 0
 	for i in inNetwork['bus']:
-		key = inNetwork['bus'][busId].keys()[0]
-		for prop in inNetwork['bus'][busId][key]:
+		key = str(i.keys()[0])
+		for prop in i[key]:
 			if 'bus_i' in prop:
-				oldBus = inNetwork['bus'][busId][key]['bus_i']
+				oldBus = i[key]['bus_i']
 				# convert newBus to unicode
 				newBus = str(randomID).encode("utf-8").decode("utf-8")
 				newBusKey.update({oldBus:newBus})
-				inNetwork['bus'][busId][key]['bus_i'] = newBus
-				inNetwork['bus'][busId][newBus] = inNetwork['bus'][busId].pop(oldBus)
+				i[key]['bus_i'] = newBus
+				i[newBus] = i.pop(oldBus)
 				randomID += 1
-		busId += 1
 	# Replace busNames in generators
-	genId = 0
 	for i in inNetwork['gen']:
-		key = inNetwork['gen'][genId].keys()[0]
-		for prop in inNetwork['gen'][genId][key]:
+		key = str(i.keys()[0])
+		for prop in i[key]:
 			if 'bus' in prop:
-				oldBus = inNetwork['gen'][genId][key]['bus']
-				inNetwork['gen'][genId][key]['bus'] = newBusKey[oldBus]
-		genId += 1
+				oldBus = i[key]['bus']
+				i[key]['bus'] = newBusKey[oldBus]
 	# Replace busNames in branches
-	branchId = 0
 	for i in inNetwork['branch']:
-		key = inNetwork['branch'][branchId].keys()[0]
-		for prop in inNetwork['branch'][branchId][key]:
+		key = str(i.keys()[0])
+		for prop in i[key]:
 			if 'fbus' in prop:
-				oldFrom = inNetwork['branch'][branchId][key]['fbus']
-				inNetwork['branch'][branchId][key]['fbus'] = newBusKey[oldFrom]
+				oldFrom = i[key]['fbus']
+				i[key]['fbus'] = newBusKey[oldFrom]
 			if 'tbus' in prop:
-				oldTo = inNetwork['branch'][branchId][key]['tbus']
-				inNetwork['branch'][branchId][key]['tbus'] = newBusKey[oldTo]
-		branchId += 1
+				oldTo = i[key]['tbus']
+				i[key]['tbus'] = newBusKey[oldTo]
 	return newBusKey
 
 def tranRandomizeNames(inNetwork):
@@ -374,40 +368,34 @@ def tranRandomizeNames(inNetwork):
 	newBusKey = {}
 	randomID = random.randint(0,100)
 	# Create busKey dictionary
-	busId = 0
 	for i in inNetwork['bus']:
-		key = inNetwork['bus'][busId].keys()[0]
-		for prop in inNetwork['bus'][busId][key]:
+		key = str(i.keys()[0])
+		for prop in i[key]:
 			if 'bus_i' in prop:
-				oldBus = inNetwork['bus'][busId][key]['bus_i']
+				oldBus = i[key]['bus_i']
 				# convert newBus to unicode
 				newBus = str(randomID).encode("utf-8").decode("utf-8")
 				newBusKey.update({oldBus:newBus})
-				inNetwork['bus'][busId][key]['bus_i'] = newBus
-				inNetwork['bus'][busId][newBus] = inNetwork['bus'][busId].pop(oldBus)
+				i[key]['bus_i'] = newBus
+				i[newBus] = i.pop(oldBus)
 				randomID += 1
-		busId += 1
 	# Replace busNames in generators
-	genId = 0
 	for i in inNetwork['gen']:
-		key = inNetwork['gen'][genId].keys()[0]
-		for prop in inNetwork['gen'][genId][key]:
+		key = str(i.keys()[0])
+		for prop in i[key]:
 			if 'bus' in prop:
-				oldBus = inNetwork['gen'][genId][key]['bus']
-				inNetwork['gen'][genId][key]['bus'] = newBusKey[oldBus]
-		genId += 1
+				oldBus = i[key]['bus']
+				i[key]['bus'] = newBusKey[oldBus]
 	# Replace busNames in branches
-	branchId = 0
 	for i in inNetwork['branch']:
-		key = inNetwork['branch'][branchId].keys()[0]
-		for prop in inNetwork['branch'][branchId][key]:
+		key = str(i.keys()[0])
+		for prop in i[key]:
 			if 'fbus' in prop:
-				oldFrom = inNetwork['branch'][branchId][key]['fbus']
-				inNetwork['branch'][branchId][key]['fbus'] = newBusKey[oldFrom]
+				oldFrom = i[key]['fbus']
+				i[key]['fbus'] = newBusKey[oldFrom]
 			if 'tbus' in prop:
-				oldTo = inNetwork['branch'][branchId][key]['tbus']
-				inNetwork['branch'][branchId][key]['tbus'] = newBusKey[oldTo]
-		branchId += 1
+				oldTo = i[key]['tbus']
+				i[key]['tbus'] = newBusKey[oldTo]
 	return
 
 def tranRandomizeLocations(inNetwork):
@@ -415,15 +403,13 @@ def tranRandomizeLocations(inNetwork):
 	# inNetwork['bus'] = []
 	# inNetwork['gen'] = []
 	# inNetwork['branch'] = []
-	busId = 0
 	for i in inNetwork['bus']:
-		key = inNetwork['bus'][busId].keys()[0]
-		for prop in inNetwork['bus'][busId][key]:
+		key = str(i.keys()[0])
+		for prop in i[key]:
 			if 'longitude' in prop:
-				inNetwork['bus'][busId][key]['longitude'] = random.randint(0,1000)
+				i[key]['longitude'] = random.randint(0,1000)
 			if 'latitude' in prop:
-				inNetwork['bus'][busId][key]['latitude'] = random.randint(0,1000)
-		busId += 1
+				i[key]['latitude'] = random.randint(0,1000)
 	return
 
 def tranTranslateLocations(inNetwork, translation, rotation):
@@ -433,17 +419,15 @@ def tranTranslateLocations(inNetwork, translation, rotation):
 	# inNetwork['branch'] = []
 	translation = float(translation)
 	rotation = float(rotation)
-	busId = 0
 	for i in inNetwork['bus']:
-		key = inNetwork['bus'][busId].keys()[0]
-		for prop in inNetwork['bus'][busId][key]:
+		key = str(i.keys()[0])
+		for prop in i[key]:
 			if 'longitude' in prop:
-				longitude = float(inNetwork['bus'][busId][key]['longitude'])
-				inNetwork['bus'][busId][key]['longitude'] = longitude + translation*math.cos(rotation)
+				longitude = float(i[key]['longitude'])
+				i[key]['longitude'] = longitude + translation*math.cos(rotation)
 			if 'latitude' in prop:
-				latitude = float(inNetwork['bus'][busId][key]['latitude'])
-				inNetwork['bus'][busId][key]['latitude'] = latitude + translation*math.sin(rotation)
-		busId += 1
+				latitude = float(i[key]['latitude'])
+				i[key]['latitude'] = latitude + translation*math.sin(rotation)
 	return
 
 def tranAddNoise(inNetwork, noisePerc):
@@ -453,15 +437,15 @@ def tranAddNoise(inNetwork, noisePerc):
 		if (array == 'bus') or (array == 'gen') or (array == 'branch'):
 			arrayId = 0
 			for i in inNetwork[array]:
-				key = inNetwork[array][arrayId].keys()[0]
-				for prop in inNetwork[array][arrayId][key]:
+				key = str(i.keys()[0])
+				for prop in i[key]:
 					if ('bus' not in prop) and ('status' not in prop):
-						val = inNetwork[array][arrayId][key][prop]
+						val = i[key][prop]
 						try:
 							parseVal = float(val)
 							randNoise = random.randint(-noisePerc, noisePerc)/100
 							randVal = parseVal + randNoise*parseVal
-							inNetwork[array][arrayId][key][prop] = str(randVal)
+							i[key][prop] = str(randVal)
 						except ValueError:
 							print 'error'
 							continue
@@ -476,12 +460,12 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 	pParents = []
 	busId = 0
 	for i in inNetwork['bus']:
-		key = inNetwork['bus'][busId].keys()[0]
-		for prop in inNetwork['bus'][busId][key]:
+		key = str(i.keys()[0])
+		for prop in i[key]:
 			if 'Qd' in prop:
-				qParents.append(inNetwork['bus'][busId][key]['Qd'])
+				qParents.append(i[key]['Qd'])
 			if 'Pd' in prop:
-				pParents.append(inNetwork['bus'][busId][key]['Pd'])
+				pParents.append(i[key]['Pd'])
 		busId += 1
 	random.shuffle(qParents)
 	random.shuffle(pParents)
@@ -489,39 +473,39 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 	pIdx = 0
 	busId = 0
 	for i in inNetwork['bus']:
-		key = inNetwork['bus'][busId].keys()[0]
-		for prop in inNetwork['bus'][busId][key]:
+		key = str(i.keys()[0])
+		for prop in i[key]:
 			if random.randint(0,100) < shufPerc:
 				if 'Qd' in prop:
-					inNetwork['bus'][busId][key]['Qd'] = qParents[qIdx]
+					i[key]['Qd'] = qParents[qIdx]
 					qIdx += 1
 				if 'Pd' in prop:
-					inNetwork['bus'][busId][key]['Pd'] = pParents[pIdx]
+					i[key]['Pd'] = pParents[pIdx]
 					pIdx += 1
 		busId += 1
 	# Shuffle Generators
 	genParents = []
 	genId = 0
 	for i in inNetwork['gen']:
-		key = inNetwork['gen'][genId].keys()[0]
-		for prop in inNetwork['gen'][genId][key]:
+		key = str(i.keys()[0])
+		for prop in i[key]:
 			if 'bus' in prop:
-				genParents.append(inNetwork['gen'][genId][key]['bus'])
+				genParents.append(i[key]['bus'])
 		genId += 1
 	random.shuffle(genParents)
 	genId = 0
 	genIdx = 0
 	for i in inNetwork['gen']:
-		key = inNetwork['gen'][genId].keys()[0]
-		for prop in inNetwork['gen'][genId][key]:
+		key = str(i.keys()[0])
+		for prop in i[key]:
 			if 'bus' in prop:
 				if random.randint(0,100) < shufPerc:
-					inNetwork['gen'][genId][key]['bus'] = genParents[genIdx]
+					i[key]['bus'] = genParents[genIdx]
 					genIdx += 1
 		genId += 1
 	return
 
-# def _tests():
+#def _tests():
 # 	# DISTRIBUTION FEEDER TESTS
 # 	# Test distPseudomizeNames
 # 	FNAME = "Simple Market System AnonTest.omd"
@@ -611,19 +595,18 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 
 
 # 	TRANSMISSION NETWORK TESTS
-# 	Test tranPseudomizeNames
-# 	FNAME = "case118.omt"
-# 	with open(FNAME, "r") as inFile:
-# 		inNetwork = json.load(inFile)
-# 		busKey = tranPseudomizeNames(inNetwork)
-# 		print busKey
-# 	FNAMEOUT = "118_tranPseudomizeNames.omt"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inNetwork, outFile, indent=4)
+# 	Test tranPseudomizeNames	
+#	FNAME = "case118.omt"
+#	with open(FNAME, "r") as inFile:
+#		inNetwork = json.load(inFile)
+#		busKey = tranPseudomizeNames(inNetwork)
+#	FNAMEOUT = "118_tranPseudomizeNames.omt"
+#	with open(FNAMEOUT, "w") as outFile:
+#		json.dump(inNetwork, outFile, indent=4)
 
 # 	# Test tranRandomizeNames
 # 	FNAME = "case118.omt"
-# 	with open(FNAME, "r") as inFile:
+#	with open(FNAME, "r") as inFile:
 # 		inNetwork = json.load(inFile)
 # 		tranRandomizeNames(inNetwork)
 # 	FNAMEOUT = "118_tranRandomizeNames.omt"
@@ -655,13 +638,13 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 # 	with open(FNAME, "r") as inFile:
 # 		inNetwork = json.load(inFile)
 # 		noisePerc = 100
-# 		tranAddNoise(inNetwork, noisePerc)
+#		tranAddNoise(inNetwork, noisePerc)
 # 	FNAMEOUT = "118_tranAddNoise.omt"
 # 	with open(FNAMEOUT, "w") as outFile:
 # 		json.dump(inNetwork, outFile, indent=4)
 
 # 	# Testing tranShuffleLoadsAndGens
-# 	FNAME = "case118.omt"
+#	FNAME = "case118.omt"
 # 	with open(FNAME, "r") as inFile:
 # 		inNetwork = json.load(inFile)
 # 		shufPerc = 100
@@ -670,5 +653,5 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 # 	with open(FNAMEOUT, "w") as outFile:
 # 		json.dump(inNetwork, outFile, indent=4)
 
-# if __name__ == '__main__':
-# 	_tests()
+#if __name__ == '__main__':
+#	_tests()

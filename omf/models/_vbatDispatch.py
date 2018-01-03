@@ -50,16 +50,21 @@ def work(modelDir, inputDict):
 		octBin = 'octave --no-gui'
 	else:
 		octBin = 'octave --no-window-system'
-
-	#inputDict['zipcode'] = "'" + str(os.path.abspath("weatherNoaaTemp.csv")) + "'"
-	inputDict['zipcode'] = "'" + str(os.path.abspath(inputDict['tempFileName'])) + "'"
+	with open(pJoin(modelDir,"temp.csv"),"w") as tempFile:
+		tempFile.write(inputDict['tempCurve'])
+	try:
+		with open(pJoin(modelDir,"temp.csv")) as inFile:
+			reader = csv.DictReader(inFile)
+			tempFilePath = modelDir
+	except:
+		errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href = 'https://github.com/dpinney/omf/wiki/Models-~-storagePeakShave#demand-file-csv-format'>\nOMF Wiki storagePeakShave - Demand File CSV Format</a>"
+		raise Exception(errorMessage)
 	command = 'OCTBIN --eval "addpath(genpath(\'FULLPATH\'));VB_func(ARGS)"'\
 	 	.replace('FULLPATH', vbatPath)\
 	 	.replace('OCTBIN',octBin)\
-		.replace('ARGS', inputDict['zipcode'] + ',' + inputDict['load_type'] +',[' + inputDict['capacitance'] + ','+ inputDict['resistance'] + 
+		.replace('ARGS', "'" + str(tempFilePath) + "\\temp.csv'," + inputDict['load_type'] +',[' + inputDict['capacitance'] + ','+ inputDict['resistance'] + 
 			',' + inputDict['power'] + ',' + inputDict['cop'] + ',' + inputDict['deadband'] + ',' + inputDict['setpoint'] + ',' +
 			inputDict['number_devices'] + ']')
-	#print os.path.abspath("weatherNoaaTemp.csv")
 	script_dir = os.path.dirname(os.path.dirname(__file__))
 	rel_path = 'static/testFiles/FrankScadaValidCSV.csv'
 	abs_file_path = os.path.join(script_dir, rel_path)
@@ -67,15 +72,12 @@ def work(modelDir, inputDict):
 	demandAdjustedList = []
 	dates = []
 	with open(pJoin(modelDir,"demand.csv"),"w") as demandFile:
-		#print inputDict['demandCurve'].replace('\r','')
-		#demandFile.write(inputDict['demandCurve'])
 		demandFile.write(inputDict['demandCurve'].replace('\r',''))
 	try:
 		with open(pJoin(modelDir,"demand.csv")) as inFile:
 			reader = csv.DictReader(inFile)
 			for row in reader:
 				demandList.append(float(row['power']))
-				#dates.append(row['timestamp'])
 				dates.append(row['timestamp'].partition('/')[0])
 			if len(demandList) != 8760:
 				raise Exception
@@ -102,7 +104,13 @@ def work(modelDir, inputDict):
 		if demandList[x] > peakDemand[int(dates[x])-1]: #month number, -1 gives the index of peakDemand
 			peakDemand[int(dates[x])-1] = demandList[x]
 		energyMonthly[int(dates[x])-1] += demandList[x]
-	myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
+	if plat == 'Windows':
+		myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
+	else:
+		proc = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
+		with open(pJoin(modelDir, "PID.txt"),"w") as pidFile:
+			pidFile.write(str(proc.pid))
+		(myOut, err) = proc.communicate()
 	try:
 		P_lower = myOut.partition("P_lower =\n\n")[2]
 		P_lower = P_lower.partition("\n\nn")[0]
@@ -247,7 +255,6 @@ def new(modelDir):
 	defaultInputs = {
 		"user": "admin",
 		"load_type": "1",
-		"zipcode": "40355",
 		"number_devices": "100",
 		"power": "5.6",
 		"capacitance": "2",
