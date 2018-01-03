@@ -66,7 +66,8 @@ def work(modelDir, inputDict):
 			',' + inputDict['power'] + ',' + inputDict['cop'] + ',' + inputDict['deadband'] + ',' + inputDict['setpoint'] + ',' +
 			inputDict['number_devices'] + ']')
 	script_dir = os.path.dirname(os.path.dirname(__file__))
-	rel_path = 'static/testFiles/FrankScadaValidCSV.csv'
+	#rel_path = 'static/testFiles/FrankScadaValidCSV.csv'
+	rel_path = 'static/testFiles/FrankScadaValidVBAT.csv'
 	abs_file_path = os.path.join(script_dir, rel_path)
 	demandList = []
 	demandAdjustedList = []
@@ -75,15 +76,16 @@ def work(modelDir, inputDict):
 		demandFile.write(inputDict['demandCurve'].replace('\r',''))
 	try:
 		with open(pJoin(modelDir,"demand.csv")) as inFile:
-			reader = csv.DictReader(inFile)
+			reader = csv.reader(inFile)
 			for row in reader:
-				demandList.append(float(row['power']))
-				dates.append(row['timestamp'].partition('/')[0])
-			if len(demandList) != 8760:
-				raise Exception
+				demandList.append(float(row[0]))
+				print len(demandList)
+		 		# if len(demandList) != 8760:
+		 		# 	raise Exception
 	except:
 		errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href = 'https://github.com/dpinney/omf/wiki/Models-~-storagePeakShave#demand-file-csv-format'>\nOMF Wiki storagePeakShave - Demand File CSV Format</a>"
 		raise Exception(errorMessage)
+	print len(demandList)
 	peakDemand = [0]*12
 	peakAdjustedDemand = [0]*12
 	energyMonthly = [0]*12
@@ -100,10 +102,27 @@ def work(modelDir, inputDict):
 	cumulativeCashflow = [0]*int(inputDict["projectionLength"])
 	NPV = 0
 	#netCashflow = [0]*(int(inputDict["projectionLength"])+1)
-	for x in range(8760):
-		if demandList[x] > peakDemand[int(dates[x])-1]: #month number, -1 gives the index of peakDemand
-			peakDemand[int(dates[x])-1] = demandList[x]
-		energyMonthly[int(dates[x])-1] += demandList[x]
+	calendar = collections.OrderedDict()
+	calendar['1'] = 31
+	calendar['2'] = 28
+	calendar['3'] = 31
+	calendar['4'] = 30
+	calendar['5'] = 31
+	calendar['6'] = 30
+	calendar['7'] = 31
+	calendar['8'] = 31
+	calendar['9'] = 30
+	calendar['10'] = 31
+	calendar['11'] = 30
+	calendar['12'] = 31
+	dayCount = -1
+	for monthNum in calendar:					#month number in year
+		for x in range(calendar[monthNum]):		#day number-1 in number of days in month
+			for y in range(24):					#hour of the day-1 out of 24
+				dayCount += 1					#hour out of the year-1 
+				if demandList[dayCount] > peakDemand[int(monthNum)-1]:
+					peakDemand[int(monthNum)-1] = demandList[dayCount]
+				energyMonthly[int(monthNum)-1] += demandList[dayCount]
 	if plat == 'Windows':
 		myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
 	else:
@@ -125,11 +144,14 @@ def work(modelDir, inputDict):
 		raise Exception('Parsing error, check power data')
 	for x,y in zip(P_upper,demandList):
 		demandAdjustedList.append(y-x)
-	for x in range(8760):
-		if demandAdjustedList[x] > peakAdjustedDemand[int(dates[x])-1]:
-			peakAdjustedDemand[int(dates[x])-1] = demandAdjustedList[x]
-		energyAdjustedMonthly[int(dates[x])-1] += demandAdjustedList[x]
-	# Format results to go in chart.
+	dayCount = -1
+	for monthNum in calendar:					#month number in year
+		for x in range(calendar[monthNum]):		#day number-1 in number of days in month
+			for y in range(24):					#hour of the day-1 out of 24
+				dayCount += 1					#hour out of the year-1 
+				if demandAdjustedList[dayCount] > peakAdjustedDemand[int(monthNum)-1]:
+					peakAdjustedDemand[int(monthNum)-1] = demandAdjustedList[dayCount]
+				energyAdjustedMonthly[int(monthNum)-1] += demandAdjustedList[dayCount]
 	rms = 0
 	for each in P_lower:
 		rms = rms + (each**2)**0.5
@@ -268,9 +290,11 @@ def new(modelDir):
 		"discountRate":"2",
 		"unitDeviceCost":"200",
 		"unitUpkeepCost":"5",
-		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidCSV.csv")).read(),
+		#"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidCSV.csv")).read(),
+		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidVBAT.csv")).read(),
 		"tempCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","weatherNoaaTemp.csv")).read(),
-		"fileName": "FrankScadaValidCSV.csv",
+		"fileName": "FrankScadaValidVBAT.csv",
+		#"fileName": "FrankScadaValidCSV.csv",
 		"tempFileName": "weatherNoaaTemp.csv",
 		"modelType":modelName}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
