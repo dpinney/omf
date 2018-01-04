@@ -79,13 +79,11 @@ def work(modelDir, inputDict):
 			reader = csv.reader(inFile)
 			for row in reader:
 				demandList.append(float(row[0]))
-				print len(demandList)
-		 		# if len(demandList) != 8760:
-		 		# 	raise Exception
+	 		if len(demandList) != 8760:
+	 			raise Exception
 	except:
 		errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href = 'https://github.com/dpinney/omf/wiki/Models-~-storagePeakShave#demand-file-csv-format'>\nOMF Wiki storagePeakShave - Demand File CSV Format</a>"
 		raise Exception(errorMessage)
-	print len(demandList)
 	peakDemand = [0]*12
 	peakAdjustedDemand = [0]*12
 	energyMonthly = [0]*12
@@ -290,11 +288,9 @@ def new(modelDir):
 		"discountRate":"2",
 		"unitDeviceCost":"200",
 		"unitUpkeepCost":"5",
-		#"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidCSV.csv")).read(),
 		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidVBAT.csv")).read(),
 		"tempCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","weatherNoaaTemp.csv")).read(),
 		"fileName": "FrankScadaValidVBAT.csv",
-		#"fileName": "FrankScadaValidCSV.csv",
 		"tempFileName": "weatherNoaaTemp.csv",
 		"modelType":modelName}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
