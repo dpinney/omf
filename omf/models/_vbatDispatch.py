@@ -79,7 +79,6 @@ def work(modelDir, inputDict):
 			reader = csv.reader(inFile)
 			for row in reader:
 				demandList.append(float(row[0]))
-				print len(demandList)
 	 		if len(demandList) != 8760:
 	 			raise Exception
 	except:
