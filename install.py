@@ -4,7 +4,7 @@ import platform, os
 if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu","debian"]:
 	os.system("sudo apt-get install python-pip git unixodbc-dev libfreetype6-dev \
 	pkg-config python-dev python-numpy alien python-pygraphviz libgraphviz-dev \
-	python-pydot mdbtools python-tk octave")
+	python-pydot mdbtools python-tk octave python-boto")
 	try:
 		os.system("sudo apt-get install ffmpeg python-cairocffi")
 	except:
