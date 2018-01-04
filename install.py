@@ -1,24 +1,22 @@
 import platform, os
 
-# All installations require git to clone the omf.
-if platform.system() == 'Linux' and platform.linux_distribution()[0]=="Ubuntu":
+# All installations require git to clone the omf first.
+if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu","Debian"]:
 	os.system("sudo apt-get install python-pip git unixodbc-dev libfreetype6-dev \
-	pkg-config python-dev python-numpy alien python-pygraphviz \
+	pkg-config python-dev python-numpy alien python-pygraphviz libgraphviz-dev \
 	python-pydot ffmpeg mdbtools python-cairocffi python-tk octave")
 	os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0.0-1.el6.x86_64.rpm")
 	os.system("sudo alien gridlabd-4.0.0-1.el6.x86_64.rpm")
-	os.system("sudo apt-get install libgraphviz-dev")
 	workDir = os.getcwd()
 	for file in os.listdir(workDir):
-		if file.endswith('.deb'):
+		if file.endswith(".deb"):
 			debFile = file		
 	os.system("sudo dpkg -i " + debFile)
 	os.system("sudo apt-get install -f")
 	os.system("cd omf")
 	os.system("pip install -r requirements.txt")
 	os.system("sudo python setup.py develop")
-elif platform.system() == 'Linux' and platform.linux_distribution()[0]=="CentOS Linux":
-	# git clone https://github.com/dpinney/omf.git
+elif platform.system() == "Linux" and platform.linux_distribution()[0]=="CentOS Linux":
 	os.system("sudo yum -y install wget git graphviz gcc xerces-c python-devel tkinter octave 'graphviz-devel.x86_64'")
 	os.system("yum --enablerepo=extras install epel-release")
 	os.system("sudo yum -y install mdbtools")
@@ -88,14 +86,14 @@ elif platform.system()=='Windows':
 elif platform.system()=="Darwin": # MacOS
 	# Install homebrew
 	os.system('/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
-	os.system('brew install wget python ffmpeg git graphviz octave')
-	os.system('brew link --overwrite python')
-	os.system('wget -O gridlabd.dmg --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd_4.0.0.dmg')
-	os.system('sudo hdiutil attach gridlabd.dmg')
-	os.system('sudo installer -package /Volumes/GridLAB-D\ 4.0.0/gridlabd.mpkg -target /')
-	os.system('sudo hdiutil detach /Volumes/GridLAB-D\ 4.0.0')
-	os.system('cd omf')
-	os.system('pip install -r requirements.txt')
-	os.system('python setup.py develop')
+	os.system("brew install wget python ffmpeg git graphviz octave")
+	os.system("brew link --overwrite python")
+	os.system("wget -O gridlabd.dmg --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd_4.0.0.dmg")
+	os.system("sudo hdiutil attach gridlabd.dmg")
+	os.system("sudo installer -package /Volumes/GridLAB-D\ 4.0.0/gridlabd.mpkg -target /")
+	os.system("sudo hdiutil detach /Volumes/GridLAB-D\ 4.0.0")
+	os.system("cd omf")
+	os.system("pip install -r requirements.txt")
+	os.system("python setup.py develop")
 else:
-	print 'Your operating system is not currently supported. Platform detected: ' + str(platform.system()) + str(platform.linux_distribution())
+	print "Your operating system is not currently supported. Platform detected: " + str(platform.system()) + str(platform.linux_distribution())
