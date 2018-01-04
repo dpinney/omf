@@ -146,11 +146,12 @@ def annualDataHourlyToCsv(token, zipCode, dataSet, dataTypeList, csvPath):
 
 
 def _tests():
-	#checkDatasets(DEFAULT_TOKEN, '40510') #Lexington, KY (LEX airport)
-	#pullOneDayHourly(DEFAULT_TOKEN, '22202', '2010','01','01')
+	checkDatasets(DEFAULT_TOKEN, '40510') #Lexington, KY (LEX airport)
+	pullOneDayHourly(DEFAULT_TOKEN, '22202', '2010','01','01')
 	#annualDataHourlyToCsv(DEFAULT_TOKEN, '11430', [], 'weatherNoaaTemp.csv')
 	#annualDataHourlyToCsv(DEFAULT_TOKEN, '40510', 'NORMAL_HLY', 'HLY-TEMP-NORMAL', 'weatherNoaaTemp.csv')
-	annualDataHourlyToCsv(DEFAULT_TOKEN, '40510', 'NORMAL_HLY', ['HLY-TEMP-NORMAL','HLY-WIND-1STPCT'], 'weatherNoaaTemp.csv')
+	#annualDataHourlyToCsv(DEFAULT_TOKEN, '40510', 'NORMAL_HLY', ['HLY-TEMP-NORMAL','HLY-WIND-1STPCT'], 'weatherNoaaTemp.csv')
 
-
+if __name__ == '__main__':
+	_tests()
 _tests()
