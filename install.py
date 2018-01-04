@@ -1,4 +1,5 @@
 import platform, os
+
 # All installations require git to clone the omf.
 if platform.system() == 'Linux' and platform.linux_distribution()[0]=="Ubuntu":
 	os.system("sudo apt-get install python-pip git unixodbc-dev libfreetype6-dev \
@@ -16,7 +17,6 @@ if platform.system() == 'Linux' and platform.linux_distribution()[0]=="Ubuntu":
 	os.system("cd omf")
 	os.system("pip install -r requirements.txt")
 	os.system("sudo python setup.py develop")
-	# if CentOS 7 run these commands:
 elif platform.system() == 'Linux' and platform.linux_distribution()[0]=="CentOS Linux":
 	# git clone https://github.com/dpinney/omf.git
 	os.system("sudo yum -y install wget git graphviz gcc xerces-c python-devel tkinter octave 'graphviz-devel.x86_64'")
@@ -32,7 +32,6 @@ elif platform.system() == 'Linux' and platform.linux_distribution()[0]=="CentOS 
 	os.system("pip install -r requirements.txt")
 	os.system("pip install --ignore-installed six")
 	os.system("python setup.py develop")
-# if Windows run these commands:
 elif platform.system()=='Windows':
 	# Need to manually download and install Python 2.7 and set python as a path variable, Git, Chocolatey 
 	# Download Pygraphviz whl and place it in the omf directory
@@ -99,4 +98,4 @@ elif platform.system()=="Darwin": # MacOS
 	os.system('pip install -r requirements.txt')
 	os.system('python setup.py develop')
 else:
-	print 'Your operating system is not currently supported.'
+	print 'Your operating system is not currently supported. Platform detected: ' + str(platform.system()) + str(platform.linux_distribution())
