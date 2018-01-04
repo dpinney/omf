@@ -19,7 +19,7 @@ if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu
 	os.system("sudo apt-get install -f")
 	os.system("cd omf")
 	os.system("pip install -r requirements.txt")
-	os.system("sudo python setup.py develop")
+	os.system("python setup.py develop")
 elif platform.system() == "Linux" and platform.linux_distribution()[0]=="CentOS Linux":
 	os.system("sudo yum -y install wget git graphviz gcc xerces-c python-devel tkinter octave 'graphviz-devel.x86_64'")
 	os.system("yum --enablerepo=extras install epel-release")
