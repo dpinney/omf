@@ -325,6 +325,7 @@ def _tests():
 	voltVectorB = [-random.uniform(3699,3795) for x in range(0, 8760)]
 	print "Running gridlabD with voltage players."
 	voltFeederPath, outcome = attachVolts(workDir, feederPath, voltVectorA, voltVectorB, voltVectorC, simStartDate, simLength, simLengthUnits)
+	print os.system("gridlabd --version")
 	# try: 
 	# 	assert None == omfCalibrate(workDir, voltFeederPath, scadaPath, simStartDate, simLength, simLengthUnits, "FBS", error, trim), "feeder calibration failed"
 	# 	print "\n  Success! Ran calibrate with voltage players!"
