@@ -1,6 +1,6 @@
 import platform, os
 
-# All installations require git to clone the omf first.
+# Note: all installations require git to clone the omf first.
 if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu","debian"]:
 	os.system("sudo apt-get install python-pip git unixodbc-dev libfreetype6-dev \
 	pkg-config python-dev python-numpy alien python-pygraphviz libgraphviz-dev \

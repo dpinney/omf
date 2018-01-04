@@ -6,6 +6,8 @@ env:
   - DISPLAY=:99.0
 before_install:
   - sh -e /etc/init.d/xvfb start
-install: "python install.py"
+  - sudo apt-get update -qq
+  - python install.py
+install: "python setup.py develop"
 script:
   - python ./omf/runAllTests.py omf
