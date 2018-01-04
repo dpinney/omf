@@ -4,17 +4,17 @@ import platform, os
 if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu","debian"]:
 	os.system("sudo apt-get install python-pip git unixodbc-dev libfreetype6-dev \
 	pkg-config python-dev python-numpy alien python-pygraphviz libgraphviz-dev \
-	python-pydot mdbtools python-cairocffi python-tk octave")
+	python-pydot mdbtools python-tk octave")
 	try:
-		os.system("sudo apt-get install ffmpeg")
+		os.system("sudo apt-get install ffmpeg python-cairocffi")
 	except:
-		pass # Debian won't bundle ffmpeg.
+		pass # Debian won't bundle a couple packages.
 	os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0.0-1.el6.x86_64.rpm")
 	os.system("sudo alien gridlabd-4.0.0-1.el6.x86_64.rpm")
 	workDir = os.getcwd()
 	for file in os.listdir(workDir):
 		if file.endswith(".deb"):
-			debFile = file		
+			debFile = file
 	os.system("sudo dpkg -i " + debFile)
 	os.system("sudo apt-get install -f")
 	os.system("cd omf")
@@ -66,14 +66,14 @@ elif platform.system()=='Windows':
 	os.system("cd " + workDir)
 	# Sometimes wget has a hard time downloading gridlabD
 	if platform.architecture()[0] == '32bit':
-		if 'gridlabd-3.2-win32.exe' not in os.listdir(workDir):	
+		if 'gridlabd-3.2-win32.exe' not in os.listdir(workDir):
 			os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0_RC1.exe")
 			os.system("gridlabd-4.0_RC1.exe/silent")
 		if 'pygraphviz-1.3.1-cp27-none-win32.whl' not in os.listdir(workDir):
 			os.system("wget --no-check-certificate https://github.com/dpinney/omf/raw/master/omf/static/pygraphviz-1.3.1-cp27-none-win32.whl")
 	elif platform.architecture()[1] == '64bit':
 		# Note: has not been tested yet, only 32bit has.
-		if 'gridlabd-3.2-x64.exe' not in os.listdir(workDir):	
+		if 'gridlabd-3.2-x64.exe' not in os.listdir(workDir):
 			os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0_RC1.exe")
 			os.system("gridlabd-4.0_RC1.exe/silent")
 		if 'pygraphviz-1.3.1-cp27-none-win_amd64.whl' not in os.listdir(workDir):
