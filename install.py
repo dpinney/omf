@@ -4,7 +4,11 @@ import platform, os
 if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu","debian"]:
 	os.system("sudo apt-get install python-pip git unixodbc-dev libfreetype6-dev \
 	pkg-config python-dev python-numpy alien python-pygraphviz libgraphviz-dev \
-	python-pydot ffmpeg mdbtools python-cairocffi python-tk octave")
+	python-pydot mdbtools python-cairocffi python-tk octave")
+	try:
+		os.system("sudo apt-get install ffmpeg")
+	except:
+		pass # Debian won't bundle ffmpeg.
 	os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0.0-1.el6.x86_64.rpm")
 	os.system("sudo alien gridlabd-4.0.0-1.el6.x86_64.rpm")
 	workDir = os.getcwd()
