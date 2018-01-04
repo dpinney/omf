@@ -85,7 +85,7 @@ elif platform.system()=='Windows':
 	os.system("python setup.py develop")
 elif platform.system()=="Darwin": # MacOS
 	# Install homebrew
-	os.system('/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
+	os.system("/usr/bin/ruby -e '$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)'")
 	os.system("brew install wget python ffmpeg git graphviz octave")
 	os.system("brew link --overwrite python")
 	os.system("wget -O gridlabd.dmg --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd_4.0.0.dmg")
