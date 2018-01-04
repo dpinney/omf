@@ -376,8 +376,8 @@ def runForeground(modelDir, inputDict):
 		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 			json.dump(inputDict, inFile, indent=4)
 		# Send email to user on model failure.
-		email = session['user_id']
 		try:
+			email = session['user_id']
 			user = json.load(open("data/User/" + email + ".json"))
 			modelPath, modelName = pSplit(modelDir)
 			message = "The model " + "<i>" + str(modelName) + "</i>" + " has failed to complete running. It ran for a total of " + str(inputDict["runTime"]) + " seconds from " + str(beginTime) + ", to " + str(finishTime) + "."
