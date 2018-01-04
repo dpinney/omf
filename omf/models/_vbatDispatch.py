@@ -80,12 +80,11 @@ def work(modelDir, inputDict):
 			for row in reader:
 				demandList.append(float(row[0]))
 				print len(demandList)
-		 		# if len(demandList) != 8760:
-		 		# 	raise Exception
+	 		if len(demandList) != 8760:
+	 			raise Exception
 	except:
 		errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href = 'https://github.com/dpinney/omf/wiki/Models-~-storagePeakShave#demand-file-csv-format'>\nOMF Wiki storagePeakShave - Demand File CSV Format</a>"
 		raise Exception(errorMessage)
-	print len(demandList)
 	peakDemand = [0]*12
 	peakAdjustedDemand = [0]*12
 	energyMonthly = [0]*12
