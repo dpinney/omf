@@ -8,7 +8,6 @@ if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu
 	try:
 		os.system("sudo apt-get install ffmpeg python-cairocffi")
 	except:
-		os.system("export BOTO_CONFIG=/dev/null") # Debian breaks boto for some reason.
 		pass # Debian won't bundle a couple packages.
 	os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0.0-1.el6.x86_64.rpm")
 	os.system("sudo alien gridlabd-4.0.0-1.el6.x86_64.rpm")
