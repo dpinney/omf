@@ -3,7 +3,7 @@ import platform, os
 # Note: all installations require git to clone the omf first.
 if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu","debian"]:
 	os.system("sudo apt-get install python-pip git unixodbc-dev libfreetype6-dev \
-	pkg-config python-dev python-numpy alien python-pygraphviz libgraphviz-dev \
+	pkg-config python-dev python-numpy alien graphviz python-pygraphviz libgraphviz-dev \
 	python-pydot mdbtools python-tk octave")
 	try:
 		os.system("sudo apt-get install ffmpeg python-cairocffi")
