@@ -695,11 +695,11 @@ function selectionTable() {
   tabScroll.appendChild(tbl)
 }
 
-//what is going on in newNode????
+
 function newNode() {
 	var newTreeId = Object.keys(testFeeder.tree).length
 	var nodesID = Object.keys(testFeeder.nodes).length
-	var newNode = {
+	var newTreeNode = {
 		longitude: 0,
 		latitude: 0,
 		name: 'newNode' + String(newTreeId),
@@ -707,8 +707,18 @@ function newNode() {
 		object: 'node',
 		phases: 'A'
 	}
+	//Adds to testFeeder.nodes
+	var newNode = {
+		index: nodesID,
+		chargeMultiple: 1,
+		fixed: true,
+		name: 'newNode' + String(newTreeId),
+		objectType: 'node',
+		treeIndex: newTreeId,
+		weight: 0
+	}
   // Save to tree
-  testFeeder.tree[newTreeId] = newNode
+  testFeeder.tree[newTreeId] = newTreeNode
   //Save to nodes
   testFeeder.nodes[nodesID] = newNode
   console.log('newNode:', newTreeId, testFeeder.tree[newTreeId])
@@ -741,7 +751,9 @@ function clickLocate() {
 function newLink() {
 	if (selection.length === 2) {      
 		var newTreeId = Object.keys(testFeeder.tree).length
+		var linksID = Object.keys(testFeeder.links).length
 		var newLink = {
+			//creates newlink variable in testFeeder.tree
 			name: 'newLink' + String(newTreeId),
 			object: 'overhead_line',
 			phases: 'A',
@@ -749,8 +761,27 @@ function newLink() {
 			from: testFeeder.tree[selection[0].id].name,
 			to: testFeeder.tree[selection[1].id].name
 		}
+
+		for (num in testFeeder.nodes){
+			//For loop to build variable in testFeeder.links
+			if(testFeeder.tree[selection[0].id].name == testFeeder.nodes[num].name)
+				linksource=testFeeder.nodes[num]
+			if(testFeeder.tree[selection[1].id].name == testFeeder.nodes[num].name)
+				linktarget=testFeeder.nodes[num]
+		}
+
+		var newLinkLinks = {
+			//creates variable in testFeeder.links, is crucial
+			//for moveBus and Dragmode functions to work
+			objectType: 'fromTo',
+			source: linksource,
+			target: linktarget,
+			treeIndex: newTreeId
+		}
     // Save to tree
     testFeeder.tree[newTreeId] = newLink
+    // Save to links node
+    testFeeder.links[linksID] = newLinkLinks
     console.log('newLink:', newTreeId, testFeeder.tree[newTreeId])
     // Draw on svg
     x1 = testFeeder.tree[selection[0].id].longitude
@@ -781,10 +812,12 @@ function moveBusListener() {
 		selBranch = testFeeder.links[num]
 		fbus=selBranch.source
 		tbus=selBranch.target
+		console.log(selBranch)
 		fBusID = selBranch.source.name
 		tBusID= selBranch.target.name
 		//If any lines are an end or target for clicked node, the lines are deleted, and redrawn to new clicked location
 		if(fBusID == selBusId || tBusID == selBusId) {
+			console.log(testFeeder.links[num].treeIndex)
 			document.getElementById(testFeeder.links[num].treeIndex).remove()
 			fromBus = testFeeder.tree[testFeeder.nodes[fbus.index].treeIndex]
 			toBus = testFeeder.tree[testFeeder.nodes[tbus.index].treeIndex]
@@ -814,7 +847,7 @@ function moveBusListener() {
 				}
 			}
 			//Adds in final target bus, aka the bus which was moved              
-			console.log(currSelsvg)
+		
 			document.getElementById(currSelsvg.id).remove()
 			addCircle(coords[0],coords[1],2,currSelId,testFeeder.tree[currSelId].objectType)
 		}
