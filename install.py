@@ -4,10 +4,11 @@ import platform, os
 if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu","debian"]:
 	os.system("sudo apt-get install python-pip git unixodbc-dev libfreetype6-dev \
 	pkg-config python-dev python-numpy alien python-pygraphviz libgraphviz-dev \
-	python-pydot mdbtools python-tk octave python-boto")
+	python-pydot mdbtools python-tk octave")
 	try:
 		os.system("sudo apt-get install ffmpeg python-cairocffi")
 	except:
+		os.system("sudo pip install google-compute-engine") # Debian breaks boto for some reason.
 		pass # Debian won't bundle a couple packages.
 	os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0.0-1.el6.x86_64.rpm")
 	os.system("sudo alien gridlabd-4.0.0-1.el6.x86_64.rpm")
