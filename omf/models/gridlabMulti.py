@@ -376,6 +376,7 @@ def runForeground(modelDir, inputDict):
 		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 			json.dump(inputDict, inFile, indent=4)
 		# Send email to user on model failure.
+		email = 'NoEmail'
 		try:
 			email = session['user_id']
 			user = json.load(open("data/User/" + email + ".json"))
