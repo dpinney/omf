@@ -791,7 +791,12 @@ function newLink() {
     id = newTreeId
     myClass = testFeeder.tree[newTreeId].object
     addLine(x1,y1,x2,y2,id,myClass)
-}
+    //then below fixes the build order so cirlces come in last
+    selection[0].remove()
+    selection[1].remove()
+    addCircle(x1,y1,2,selection[0].id,testFeeder.tree[selection[0].id].objectType)
+    addCircle(x2,y2,2,selection[1].id,testFeeder.tree[selection[1].id].objectType)
+	}
 }
 
 function dragMode() {
