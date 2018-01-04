@@ -288,11 +288,9 @@ def new(modelDir):
 		"discountRate":"2",
 		"unitDeviceCost":"200",
 		"unitUpkeepCost":"5",
-		#"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidCSV.csv")).read(),
 		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidVBAT.csv")).read(),
 		"tempCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","weatherNoaaTemp.csv")).read(),
 		"fileName": "FrankScadaValidVBAT.csv",
-		#"fileName": "FrankScadaValidCSV.csv",
 		"tempFileName": "weatherNoaaTemp.csv",
 		"modelType":modelName}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
