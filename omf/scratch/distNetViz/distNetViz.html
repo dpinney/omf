@@ -721,7 +721,6 @@ function newNode() {
   testFeeder.tree[newTreeId] = newTreeNode
   //Save to nodes
   testFeeder.nodes[nodesID] = newNode
-  console.log('newNode:', newTreeId, testFeeder.tree[newTreeId])
   // Click location to add
   clickTarget = document.getElementById('svgContainer')
   clickTarget.addEventListener('click', clickLocate, false)
@@ -782,7 +781,6 @@ function newLink() {
     testFeeder.tree[newTreeId] = newLink
     // Save to links node
     testFeeder.links[linksID] = newLinkLinks
-    console.log('newLink:', newTreeId, testFeeder.tree[newTreeId])
     // Draw on svg
     x1 = testFeeder.tree[selection[0].id].longitude
     y1 = testFeeder.tree[selection[0].id].latitude
@@ -813,51 +811,51 @@ function moveBusListener() {
 	currSel["latitude"] = coords[1]
 	//Runs through testFeeder lines (links) determines if clicked node is an end or target for any line in feeder
 	for (num in testFeeder.links) {
-		selBusId=currSel.name
-		selBranch = testFeeder.links[num]
-		fbus=selBranch.source
-		tbus=selBranch.target
-		console.log(selBranch)
-		fBusID = selBranch.source.name
-		tBusID= selBranch.target.name
-		//If any lines are an end or target for clicked node, the lines are deleted, and redrawn to new clicked location
-		if(fBusID == selBusId || tBusID == selBusId) {
-			console.log(testFeeder.links[num].treeIndex)
-			document.getElementById(testFeeder.links[num].treeIndex).remove()
-			fromBus = testFeeder.tree[testFeeder.nodes[fbus.index].treeIndex]
-			toBus = testFeeder.tree[testFeeder.nodes[tbus.index].treeIndex]
-			x1 = fromBus['longitude']
-			y1 = fromBus['latitude']
-			x2 = toBus['longitude']
-			y2 = toBus['latitude']
-			key=testFeeder.links[num].treeIndex
-			addLine(x1,y1,x2,y2, key, testFeeder.tree[key]['object'] + ' p' + phaseCount(testFeeder.tree[key]['phases']))
-			//redraw buses
-			//then the three buses on the lines, the two origin buses along with the new moved bus, are redrawn,
-			//checks to make sure that if a bus value is null, the next bus is searched for to avoid error. avoids double removal
-			if(fBusID == selBusId) {
-				id=testFeeder.nodes[tbus.index].treeIndex
-				myClass = testFeeder.tree[id].objectType
-				addCircle(x2,y2,2,id,myClass)
-				if (document.getElementById(testFeeder.nodes[tbus.index].treeIndex) !== null) {
-					document.getElementById(testFeeder.nodes[tbus.index].treeIndex).remove()
+		if(testFeeder.links[num].objectType !== 'parentChild'){
+			selBusId=currSel.name
+			selBranch = testFeeder.links[num]
+			fbus=selBranch.source
+			tbus=selBranch.target
+			fBusID = selBranch.source.name
+			tBusID= selBranch.target.name
+			//If any lines are an end or target for clicked node, the lines are deleted, and redrawn to new clicked location
+			if(fBusID == selBusId || tBusID == selBusId) {
+				document.getElementById(testFeeder.links[num].treeIndex).remove()
+				fromBus = testFeeder.tree[testFeeder.nodes[fbus.index].treeIndex]
+				toBus = testFeeder.tree[testFeeder.nodes[tbus.index].treeIndex]
+				x1 = fromBus['longitude']
+				y1 = fromBus['latitude']
+				x2 = toBus['longitude']
+				y2 = toBus['latitude']
+				key=testFeeder.links[num].treeIndex
+				addLine(x1,y1,x2,y2, key, testFeeder.tree[key]['object'] + ' p' + phaseCount(testFeeder.tree[key]['phases']))
+				//redraw buses
+				//then the three buses on the lines, the two origin buses along with the new moved bus, are redrawn,
+				//checks to make sure that if a bus value is null, the next bus is searched for to avoid error. avoids double removal
+				if(fBusID == selBusId) {
+					id=testFeeder.nodes[tbus.index].treeIndex
+					myClass = testFeeder.tree[id].objectType
+					addCircle(x2,y2,2,id,myClass)
+					if (document.getElementById(testFeeder.nodes[tbus.index].treeIndex) !== null) {
+						document.getElementById(testFeeder.nodes[tbus.index].treeIndex).remove()
+					}
 				}
-			}
-			if(tBusID == selBusId) {
-				id=testFeeder.nodes[fbus.index].treeIndex
-				myClass = testFeeder.tree[id].objectType
-				addCircle(x1,y1,2,id,"myClass")
-				if(document.getElementById(testFeeder.nodes[fbus.index].treeIndex) !== null) {
-					document.getElementById(testFeeder.nodes[fbus.index].treeIndex).remove()
+				if(tBusID == selBusId) {
+					id=testFeeder.nodes[fbus.index].treeIndex
+					myClass = testFeeder.tree[id].objectType
+					addCircle(x1,y1,2,id,"myClass")
+					if(document.getElementById(testFeeder.nodes[fbus.index].treeIndex) !== null) {
+						document.getElementById(testFeeder.nodes[fbus.index].treeIndex).remove()
+					}
 				}
+				//Adds in final target bus, aka the bus which was moved              
+			
+				document.getElementById(currSelsvg.id).remove()
+				addCircle(coords[0],coords[1],2,currSelId,testFeeder.tree[currSelId].objectType)
 			}
-			//Adds in final target bus, aka the bus which was moved              
-		
-			document.getElementById(currSelsvg.id).remove()
-			addCircle(coords[0],coords[1],2,currSelId,testFeeder.tree[currSelId].objectType)
 		}
+		clickTarget.removeEventListener('click', moveBusListener, false)
 	}
-	clickTarget.removeEventListener('click', moveBusListener, false)
 }
 
 // Modal functions
