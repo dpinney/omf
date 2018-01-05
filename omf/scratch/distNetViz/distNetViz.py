@@ -33,7 +33,7 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None):
 	# Load in the feeder.
 	with open(pathToOmdOrGlm,'r') as feedFile:
 		if pathToOmdOrGlm.endswith('.omd'):
-			thisFeed = json.load(feedFile)
+			thisFeed = {'tree':json.load(feedFile)['tree']} # TODO: later bring back attachments.
 		elif pathToOmdOrGlm.endswith('.glm'):
 			thisFeed = {'tree':feeder.parse(pathToOmdOrGlm, filePath=True)}
 		tree = thisFeed['tree']
