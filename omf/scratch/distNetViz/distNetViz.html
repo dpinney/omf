@@ -799,6 +799,9 @@ function newLink() {
 		addCircle(x1,y1,2,selection[0].id,testFeeder.tree[selection[0].id].objectType)
 		addCircle(x2,y2,2,selection[1].id,testFeeder.tree[selection[1].id].objectType)
 	}
+	if(selection.length < 2){
+		alert("Please hold down the 'alt' key and select two nodes to connect")
+	}
 }
 
 function dragMode() {
@@ -836,6 +839,7 @@ function moveBusListener() {
 				//redraw buses
 				//then the three buses on the lines, the two origin buses along with the new moved bus, are redrawn,
 				//checks to make sure that if a bus value is null, the next bus is searched for to avoid error. avoids double removal
+				//maybe make below its own "circle creation" function for node ends, which gets called
 				if(fBusID == selBusId) {
 					id=testFeeder.nodes[tbus.index].treeIndex
 					myClass = testFeeder.tree[id].objectType
