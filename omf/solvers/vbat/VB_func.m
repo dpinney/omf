@@ -20,33 +20,36 @@ try
 %         out_temp = 'outdoor_temperature.csv';
 % end
 
-% if out_temp == 94128 
-%     out_temp = 'outdoor_temperature_zipCode_94128.csv';
-%     tempData = csvread(out_temp);
-%     temperature_a=tempData(:,2);
-% elseif out_temp == 97218
-%     out_temp = 'outdoor_temperature_zipCode_97218.csv';
-%     tempData = csvread(out_temp);
-%     temperature_a=tempData(:,2);
-% elseif out_temp == 98158
-%     out_temp = 'outdoor_temperature_zipCode_98158.csv';
-%     tempData = csvread(out_temp);
-%     temperature_a=tempData(:,2);
-% elseif strcmp(out_temp,'default')
-%     out_temp = 'outdoor_temperature.csv';
-%     tempData = csvread(out_temp);
-%     temperature_a=tempData(:,2);
-% elseif strcmp(out_temp(end-2:end),'csv')
-%     tempData = csvread(out_temp);
-%     temperature_a=tempData(:,1);
-% else
-%     temperature_a = VB_TMY3(out_temp)';
-% end
-
 if strcmp(out_temp(end-2:end),'csv')
     tempData = csvread(out_temp);
     temperature_a=tempData(:,1);
+elseif out_temp == 94128 
+    out_temp = 'outdoor_temperature_zipCode_94128.csv';
+    tempData = csvread(out_temp);
+    temperature_a=tempData(:,2);
+elseif out_temp == 97218
+    out_temp = 'outdoor_temperature_zipCode_97218.csv';
+    tempData = csvread(out_temp);
+    temperature_a=tempData(:,2);
+elseif out_temp == 98158
+    out_temp = 'outdoor_temperature_zipCode_98158.csv';
+    tempData = csvread(out_temp);
+    temperature_a=tempData(:,2);
+elseif strcmp(out_temp,'default')
+    out_temp = 'outdoor_temperature.csv';
+    tempData = csvread(out_temp);
+    temperature_a=tempData(:,2);
+elseif strcmp(out_temp(end-2:end),'csv')
+    tempData = csvread(out_temp);
+    temperature_a=tempData(:,1);
+else
+    temperature_a = VB_TMY3(out_temp)';
 end
+
+% if strcmp(out_temp(end-2:end),'csv')
+%     tempData = csvread(out_temp);
+%     temperature_a=tempData(:,1);
+% end
 
 if device_type == 3
     temperature_a = 20*ones(8760,1);
