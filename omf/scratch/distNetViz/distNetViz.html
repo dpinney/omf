@@ -209,7 +209,7 @@
 		<div style='background:orange; top:55px; left:5px' class='divButton' onclick='window.panZoom.zoomIn()' title='Zoom In'>+</div>
 		<div style='background:green; top:95px; left:5px' class='divButton' onclick='window.panZoom.zoomOut()' title='Zoom Out'>-</div>
 		<div style='background:plum; top:135px; left:5px' class='divButton' onclick='window.panZoom.reset()' title='Reset Zoom'>R</div>
-		<div style='background:tomato; top:175px; left:5px;' class='divButton' onclick='scaleTo(parseFloat(prompt("Scale level as a float?",scaleLevel)))' title='Scale To'>S</div>
+		<div style='background:tomato; top:175px; left:5px;' class='divButton' onclick='scaleTo(parseFloat(prompt("Scale level as a float?", scaleLevel)))' title='Scale To'>S</div>
 		<!-- <div style='background:navy; top:215px; left:5px' id='saveLink' class='divButton' onclick='saveSvg()' title='Save File' download>S</div> -->
 		<!-- End Controls -->
 		<svg id='svgContainer' xmlns='http://www.w3.org/2000/svg' style='width:100%;height:100%' onclick='svgClick(event)' onmousedown='mouseDown(event)' onmouseup='mouseUp(event)'>
@@ -340,11 +340,11 @@ function saveSvg() {
 }
 
 function saveJson() {
-  // WARNING! Performance is very bad because the JSON is enormous! This can hang your browser!
-  alert('We are redirecting you to a static version of the JSON that you can save as a .json file.')
-  modJson = JSON.stringify(testFeeder)
-  b64 = btoa(modJson)
-  window.location = 'data:text/json;base64,\n' + b64
+	// WARNING! Performance is very bad because the JSON is enormous! This can hang your browser!
+	alert('We are redirecting you to a static version of the JSON that you can save as a .json file.')
+	modJson = JSON.stringify(testFeeder)
+	b64 = btoa(modJson)
+	window.location = 'data:text/json;base64,\n' + b64
 }
 
 function addCircle(x,y,r,id,myClass) {
@@ -522,19 +522,19 @@ function phaseCount(p) {
 function tableCreate(inputObject) {
 	tabScroll = document.getElementById('tableScroller')
 	tbl = document.createElement('table')
-  // Put in the header.
-  headRow = document.createElement('tr')
-  headRow.innerHTML = '<th><button onclick="tablePlus(this)">+</button><button onclick="dragMode()">Drag</button></th>'
-  headRow.innerHTML += '<th><button id="saveButton" onclick="tableSave(this)">Save</button><button onclick="deleteOb()">Delete Object</button></th>'
-  tbl.appendChild(headRow)
-  // Put the object in.
-  for (key in inputObject) {
-  	row = document.createElement('tr')
-  	row.innerHTML = '<td><button onclick="tableDel(this)">&#215;</button><input style="width:112px" value=' + key + '></input></td>'
-  	row.innerHTML += '<td><input value="' + inputObject[key] + '"></input></td>'
-  	tbl.appendChild(row)
-  }
-  tabScroll.appendChild(tbl)
+	// Put in the header.
+	headRow = document.createElement('tr')
+	headRow.innerHTML = '<th><button onclick="tablePlus(this)">+</button><button onclick="dragMode()">Drag</button></th>'
+	headRow.innerHTML += '<th><button id="saveButton" onclick="tableSave(this)">Save</button><button onclick="deleteOb()">Delete Object</button></th>'
+	tbl.appendChild(headRow)
+	// Put the object in.
+	for (key in inputObject) {
+		row = document.createElement('tr')
+		row.innerHTML = '<td><button onclick="tableDel(this)">&#215;</button><input style="width:112px" value=' + key + '></input></td>'
+		row.innerHTML += '<td><input value="' + inputObject[key] + '"></input></td>'
+		tbl.appendChild(row)
+	}
+	tabScroll.appendChild(tbl)
 }
 
 function tableDel(me) {
@@ -634,26 +634,26 @@ function scaleTo(x) {
 	}
 	circles = document.getElementsByTagName('circle')
 	lines = document.getElementsByTagName('line')
-  // Scale Circles
-  for (i = 0; i < circles.length; i++) {
-  	circles[i].setAttribute('r', 2*x)
-  	circles[i].setAttribute('stroke-width', 0.5*x)
-  }
-  // Scale Lines
-  for (i = 0; i < lines.length; i++) {
-  	if (lines[i].getAttribute('class').indexOf('p2') !== -1) {
-  		lines[i].setAttribute('stroke-width', 2*x)
-  	}
-  	else if (lines[i].getAttribute('class').indexOf('p3') !== -1) {
-  		lines[i].setAttribute('stroke-width', 3*x)
-  	}
-  	else if (lines[i].getAttribute('class').indexOf('parentChild') !== -1) {
-  		lines[i].setAttribute('stroke-width', 0.5*x)
-  	}
-  	else {
-  		lines[i].setAttribute('stroke-width', x)
-  	}
-  }
+	// Scale Circles
+	for (i = 0; i < circles.length; i++) {
+		circles[i].setAttribute('r', 2*x)
+		circles[i].setAttribute('stroke-width', 0.5*x)
+	}
+	// Scale Lines
+	for (i = 0; i < lines.length; i++) {
+		if (lines[i].getAttribute('class').indexOf('p2') !== -1) {
+			lines[i].setAttribute('stroke-width', 2*x)
+		}
+		else if (lines[i].getAttribute('class').indexOf('p3') !== -1) {
+			lines[i].setAttribute('stroke-width', 3*x)
+		}
+		else if (lines[i].getAttribute('class').indexOf('parentChild') !== -1) {
+			lines[i].setAttribute('stroke-width', 0.5*x)
+		}
+		else {
+			lines[i].setAttribute('stroke-width', x)
+		}
+	}
 }
 
 function dropPill(thisButton, name) {
@@ -686,17 +686,17 @@ function clickCloseEvent(labelName, buttonName) {
 function selectionTable() {
 	tabScroll = document.getElementById('tableScroller')
 	tbl = document.createElement('table')
-  // Put in the header.
-  headRow = document.createElement('tr')
-  headRow.innerHTML = '<th>Selected Elements</th>'
-  tbl.appendChild(headRow)
-  // Put the object in.
-  for (i = 0; i < selection.length; i++) {
-  	row = document.createElement('tr')
-  	row.innerHTML = '<td>' + testFeeder.tree[selection[i].id].name + '</td>'
-  	tbl.appendChild(row)
-  }
-  tabScroll.appendChild(tbl)
+	// Put in the header.
+	headRow = document.createElement('tr')
+	headRow.innerHTML = '<th>Selected Elements</th>'
+	tbl.appendChild(headRow)
+	// Put the object in.
+	for (i = 0; i < selection.length; i++) {
+		row = document.createElement('tr')
+		row.innerHTML = '<td>' + testFeeder.tree[selection[i].id].name + '</td>'
+		tbl.appendChild(row)
+	}
+	tabScroll.appendChild(tbl)
 }
 
 
@@ -721,13 +721,13 @@ function newNode() {
 		treeIndex: newTreeId,
 		weight: 0
 	}
-  // Save to tree
-  testFeeder.tree[newTreeId] = newTreeNode
-  //Save to nodes
-  testFeeder.nodes[nodesID] = newNode
-  // Click location to add
-  clickTarget = document.getElementById('svgContainer')
-  clickTarget.addEventListener('click', clickLocate, false)
+	// Save to tree
+	testFeeder.tree[newTreeId] = newTreeNode
+	//Save to nodes
+	testFeeder.nodes[nodesID] = newNode
+	// Click location to add
+	clickTarget = document.getElementById('svgContainer')
+	clickTarget.addEventListener('click', clickLocate, false)
 }
 
 
@@ -735,20 +735,20 @@ function clickLocate() {
 	var xloc = event.pageX
 	var yloc = event.pageY
 	var newTreeId = (Object.keys(testFeeder.tree).length)-1
-  coords=clickLatLon(event)
-  xloc = coords[0]
-  yloc = coords[1]
-  testFeeder.tree[newTreeId].longitude = xloc
-  testFeeder.tree[newTreeId].latitude = yloc
-  // Draw new node on svg
-  x = testFeeder.tree[newTreeId].longitude
-  y = testFeeder.tree[newTreeId].latitude
-  r = 2
-  id = newTreeId
-  myClass = testFeeder.tree[newTreeId].object
-  addCircle(x,y,r,id,myClass)
-  clickTarget.removeEventListener('click', clickLocate, false)
-  
+	coords=clickLatLon(event)
+	xloc = coords[0]
+	yloc = coords[1]
+	testFeeder.tree[newTreeId].longitude = xloc
+	testFeeder.tree[newTreeId].latitude = yloc
+	// Draw new node on svg
+	x = testFeeder.tree[newTreeId].longitude
+	y = testFeeder.tree[newTreeId].latitude
+	r = 2
+	id = newTreeId
+	myClass = testFeeder.tree[newTreeId].object
+	addCircle(x,y,r,id,myClass)
+	clickTarget.removeEventListener('click', clickLocate, false)
+	
 }
 
 function newLink() {
@@ -781,23 +781,23 @@ function newLink() {
 			target: linktarget,
 			treeIndex: newTreeId
 		}
-    // Save to tree
-    testFeeder.tree[newTreeId] = newLink
-    // Save to links node
-    testFeeder.links[linksID] = newLinkLinks
-    // Draw on svg
-    x1 = testFeeder.tree[selection[0].id].longitude
-    y1 = testFeeder.tree[selection[0].id].latitude
-    x2 = testFeeder.tree[selection[1].id].longitude
-    y2 = testFeeder.tree[selection[1].id].latitude
-    id = newTreeId
-    myClass = testFeeder.tree[newTreeId].object
-    addLine(x1,y1,x2,y2,id,myClass)
-    //then below fixes the build order so cirlces come in last
-    selection[0].remove()
-    selection[1].remove()
-    addCircle(x1,y1,2,selection[0].id,testFeeder.tree[selection[0].id].objectType)
-    addCircle(x2,y2,2,selection[1].id,testFeeder.tree[selection[1].id].objectType)
+	  // Save to tree
+	  testFeeder.tree[newTreeId] = newLink
+	  // Save to links node
+	  testFeeder.links[linksID] = newLinkLinks
+	  // Draw on svg
+	  x1 = testFeeder.tree[selection[0].id].longitude
+	  y1 = testFeeder.tree[selection[0].id].latitude
+	  x2 = testFeeder.tree[selection[1].id].longitude
+	  y2 = testFeeder.tree[selection[1].id].latitude
+	  id = newTreeId
+	  myClass = testFeeder.tree[newTreeId].object
+	  addLine(x1,y1,x2,y2,id,myClass)
+	  //then below fixes the build order so cirlces come in last
+	  selection[0].remove()
+	  selection[1].remove()
+	  addCircle(x1,y1,2,selection[0].id,testFeeder.tree[selection[0].id].objectType)
+	  addCircle(x2,y2,2,selection[1].id,testFeeder.tree[selection[1].id].objectType)
 	}
 }
 
