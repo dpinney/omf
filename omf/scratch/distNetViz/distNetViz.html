@@ -209,7 +209,7 @@
 		<div style='background:orange; top:55px; left:5px' class='divButton' onclick='window.panZoom.zoomIn()' title='Zoom In'>+</div>
 		<div style='background:green; top:95px; left:5px' class='divButton' onclick='window.panZoom.zoomOut()' title='Zoom Out'>-</div>
 		<div style='background:plum; top:135px; left:5px' class='divButton' onclick='window.panZoom.reset()' title='Reset Zoom'>R</div>
-		<div style='background:tomato; top:175px; left:5px;' class='divButton' onclick='scaleTo(parseFloat(prompt("Zoom level as a float?","1.0")))' title='Zoom To'>Z</div>
+		<div style='background:tomato; top:175px; left:5px;' class='divButton' onclick='scaleTo(parseFloat(prompt("Scale level as a float?",scaleLevel)))' title='Scale To'>S</div>
 		<!-- <div style='background:navy; top:215px; left:5px' id='saveLink' class='divButton' onclick='saveSvg()' title='Save File' download>S</div> -->
 		<!-- End Controls -->
 		<svg id='svgContainer' xmlns='http://www.w3.org/2000/svg' style='width:100%;height:100%' onclick='svgClick(event)' onmousedown='mouseDown(event)' onmouseup='mouseUp(event)'>
@@ -624,7 +624,11 @@ function deleteOb() {
 tableDestroy()
 }
 
+scaleLevel = 1.0
+
 function scaleTo(x) {
+	// Scale the thickness of all lines and size of all circles. This helps user see details.
+	scaleLevel = x
 	if (!x) {
 		return
 	}
