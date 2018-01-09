@@ -816,54 +816,61 @@ function moveBusListener() {
 	coords=clickLatLon(event) 
 	currSel["longitude"] = coords[0]
 	currSel["latitude"] = coords[1]
+	//console.log(currSel, coords)
 	//Runs through testFeeder lines (links) determines if clicked node is an end or target for any line in feeder
-	for (num in testFeeder.links) {
-		if(testFeeder.links[num].objectType !== 'parentChild'){
+	for (num in testFeeder.tree) {
+		if((testFeeder.tree[num].from) && (testFeeder.tree[num].to)!== undefined){
 			selBusId=currSel.name
-			selBranch = testFeeder.links[num]
-			fbus=selBranch.source
-			tbus=selBranch.target
-			fBusID = selBranch.source.name
-			tBusID= selBranch.target.name
+			selBranch = testFeeder.tree[num]
+			id=num
+			fbus=selBranch.from
+			tbus=selBranch.to
+			console.log(selBranch, fbus, tbus, selBusId)
 			//If any lines are an end or target for clicked node, the lines are deleted, and redrawn to new clicked location
-			if(fBusID == selBusId || tBusID == selBusId) {
-				document.getElementById(testFeeder.links[num].treeIndex).remove()
-				fromBus = testFeeder.tree[testFeeder.nodes[fbus.index].treeIndex]
-				toBus = testFeeder.tree[testFeeder.nodes[tbus.index].treeIndex]
-				x1 = fromBus['longitude']
-				y1 = fromBus['latitude']
-				x2 = toBus['longitude']
-				y2 = toBus['latitude']
-				key=testFeeder.links[num].treeIndex
-				addLine(x1,y1,x2,y2, key, testFeeder.tree[key]['object'] + ' p' + phaseCount(testFeeder.tree[key]['phases']))
+			if(fbus == selBusId || tbus == selBusId) {
+				console.log(fbus, tbus, selBusId)
+				document.getElementById(num).remove()
+				for (num in testFeeder.tree){
+					if(fbus == testFeeder.tree[num].name){
+						x1 = testFeeder.tree[num]['longitude']
+						y1 = testFeeder.tree[num]['latitude']
+						numf=num
+						myClassf=testFeeder.tree[num].object	
+					}
+					else if(tbus == testFeeder.tree[num].name){
+						x2 = testFeeder.tree[num]['longitude']
+						y2 = testFeeder.tree[num]['latitude']
+						numt=num
+						myClasst=testFeeder.tree[num].object
+					}
+				}
+
+				addLine(x1,y1,x2,y2,id,selBranch['object'] + ' p' + phaseCount(selBranch['phases']))
 				//redraw buses
 				//then the three buses on the lines, the two origin buses along with the new moved bus, are redrawn,
 				//checks to make sure that if a bus value is null, the next bus is searched for to avoid error. avoids double removal
 				//maybe make below its own "circle creation" function for node ends, which gets called
-				if(fBusID == selBusId) {
-					id=testFeeder.nodes[tbus.index].treeIndex
-					myClass = testFeeder.tree[id].objectType
-					addCircle(x2,y2,2,id,myClass)
-					if (document.getElementById(testFeeder.nodes[tbus.index].treeIndex) !== null) {
-						document.getElementById(testFeeder.nodes[tbus.index].treeIndex).remove()
+				if(fbus == selBusId) {
+					addCircle(x2,y2,2,numt,myClasst)
+					if (document.getElementById(numt) !== null) {
+						document.getElementById(numt).remove()
 					}
 				}
-				if(tBusID == selBusId) {
-					id=testFeeder.nodes[fbus.index].treeIndex
-					myClass = testFeeder.tree[id].objectType
-					addCircle(x1,y1,2,id,"myClass")
-					if(document.getElementById(testFeeder.nodes[fbus.index].treeIndex) !== null) {
-						document.getElementById(testFeeder.nodes[fbus.index].treeIndex).remove()
+				if(tbus == selBusId) {
+					addCircle(x1,y1,2,numf,myClassf)
+					if(document.getElementById(numf) !== null) {
+						document.getElementById(numf).remove()
 					}
 				}
 				//Adds in final target bus, aka the bus which was moved              
 			
-				document.getElementById(currSelsvg.id).remove()
+				document.getElementById(currSelId).remove()
 				addCircle(coords[0],coords[1],2,currSelId,testFeeder.tree[currSelId].objectType)
 			}
+
 		}
-		clickTarget.removeEventListener('click', moveBusListener, false)
 	}
+	clickTarget.removeEventListener('click', moveBusListener, false)
 }
 
 // Modal functions
