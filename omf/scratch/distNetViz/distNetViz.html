@@ -767,8 +767,8 @@ function newLink() {
 		//then below fixes the build order so cirlces come in last
 		selection[0].remove()
 		selection[1].remove()
-		addCircle(x1,y1,2,selection[0].id,testFeeder.tree[selection[0].id].objectType)
-		addCircle(x2,y2,2,selection[1].id,testFeeder.tree[selection[1].id].objectType)
+		addCircle(x1,y1,2,selection[0].id,testFeeder.tree[selection[0].id].object)
+		addCircle(x2,y2,2,selection[1].id,testFeeder.tree[selection[1].id].object)
 	} else if (selection.length < 2){
 		alert("Please hold down the 'alt' key and select two nodes to connect.")
 	} else { //selection.length > 2
@@ -836,7 +836,7 @@ function moveNodeListener() {
 				}
 				//Adds in final target bus, aka the bus which was moved
 				document.getElementById(currSelId).remove()
-				addCircle(coords[0],coords[1],2,currSelId,testFeeder.tree[currSelId].objectType)
+				addCircle(coords[0],coords[1],2,currSelId,testFeeder.tree[currSelId].object)
 			}
 
 		}
