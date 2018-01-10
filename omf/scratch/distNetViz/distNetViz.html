@@ -451,14 +451,20 @@ function svgClick(event) {
 		}
 		selection = []
 	}
+	if((testFeeder.tree[event.target.id]) !== undefined){
 	event.target.classList.add('selected')
+	}
 	if ( (event.target.id != 'svgContainer')
-		&& (selection.indexOf(testFeeder.tree[event.target.id]) === -1) ) {
-		lastElementSelected = (event.target)
-		tableDestroy()
-		tableCreate(testFeeder.tree[event.target.id])
-		selection.push(event.target)
-	} else {
+		&& (selection.indexOf(testFeeder.tree[event.target.id]) === -1)) {
+		if((testFeeder.tree[event.target.id]) !== undefined){
+			lastElementSelected = (event.target)
+			tableDestroy()
+			tableCreate(testFeeder.tree[event.target.id])
+			selection.push(event.target)
+			console.log(selection)
+			console.log(event.target)
+			console.log(event.target.id)
+	} }else {
 		tableDestroy()
 	}
 	// ALT-SELECTION
@@ -520,7 +526,6 @@ function tableCreate(inputObject) {
 	}
 	// Put the object in.
 	for (key in inputObject) {
-		console.log(inputObject)
 		row = document.createElement('tr')
 		row.innerHTML = '<td><button onclick="tableDel(this)">&#215;</button><input style="width:112px" value=' + key + '></input></td>'
 		row.innerHTML += '<td><input value="' + inputObject[key] + '"></input></td>'
