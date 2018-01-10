@@ -329,10 +329,11 @@ var selection = [] // Global to keep track of multiple alt-selections
 var downX, downY, upX, upY // Globals to keep track of mouse coordinates
 var newNodeGenObj = {};
 var lastElementSelected = {}// Global to keep track of last element, for use in movebus function
-var searchCursor
+var searchCursor // Keeping track of search location
+var scaleLevel = 1.0 // Scale that all SVG objects are drawn at
 
 function saveSvg() {
-	// Add some critical information
+	// Create an SVG that can be saved.
 	alert('We are redirecting you to a static version of the SVG that you can save as a .svg file.')
 	svg = document.getElementById('svgContainer').outerHTML
 	b64 = btoa(svg)
@@ -438,29 +439,10 @@ function mouseUp(event) {
 	upY = event.pageY
 }
 
-//Returns real Lat/Long of a click event, used in the moveBus function
-function clickLatLon(event) {
-	// Return real lat/lon location of current click.
-	var pan = window.panZoom.getPan();
-	//var zoom = panZoom.getZoom();
-	var sizes = window.panZoom.getSizes();
-	var zoom = sizes.realZoom;
-	var x, y, pt;
-	var svg = document.getElementById('svgContainer');
-	var pt = svg.createSVGPoint();
-	pt.x = event.clientX;
-	pt.y = event.clientY;
-	pt = pt.matrixTransform(svg.getScreenCTM().inverse());
-	x = pt.x;
-	y = pt.y;
-	x = (x - pan.x) / zoom;
-	y = (y - pan.y) / zoom;
-	return [x,y];
-}  
-
 function svgClick(event) {
-	latLon=clickLatLon(event);
+	// Listener on the SVG object that handles user clicks.
 	if ( (downX!==upX) || (downY!==upY) ) {
+		// Ignore drags.
 		return
 	}
 	if (!event.altKey) {
@@ -471,34 +453,33 @@ function svgClick(event) {
 	}
 	event.target.classList.add('selected')
 	if ( (event.target.id != 'svgContainer')
-
 		&& (selection.indexOf(testFeeder.tree[event.target.id]) === -1) ) {
-
-		lastElementSelected= (event.target)
-
-	tableDestroy()
-	tableCreate(testFeeder.tree[event.target.id])
-	selection.push(event.target)
-}
-else {
-	tableDestroy()
-}
+		lastElementSelected = (event.target)
+		tableDestroy()
+		tableCreate(testFeeder.tree[event.target.id])
+		selection.push(event.target)
+	} else {
+		tableDestroy()
+	}
 	// ALT-SELECTION
 	if (selection.length >= 2) {
 		tableDestroy()
-		selectionTable()
+		multiSelectionTable()
 	}
 	previousTarget = event.target
 }
 
 function phaseCount(p) {
-		total = 0
-		if (p.search('A') > -1) {total++}
-			if (p.search('B') > -1) {total++}
-				if (p.search('C') > -1) {total++}
-					return total
-			}
-			function hotkeys() {
+	// Return the number of phases a line has.
+	total = 0
+	if (p.search('A') > -1) {total++}
+	if (p.search('B') > -1) {total++}
+	if (p.search('C') > -1) {total++}
+	return total
+}
+
+function hotkeys() {
+	// Handle hotkey presses.
 	// IE8 and earlier
 	if (window.event) {
 		x = event.keyCode
@@ -509,22 +490,23 @@ function phaseCount(p) {
 	}
 	keychar = String.fromCharCode(x);
 	if (event.target.type != 'text') {
-	// Dispatch the key:
-	if (keychar == '-') {
-		zoomOut()
-	} 
-	else if (keychar == '=') {
-		zoomIn()
-	}
+		// Dispatch the key:
+		if (keychar == '-') {
+			zoomOut()
+		} 
+		else if (keychar == '=') {
+			zoomIn()
+		}
 	}
 }
 
 function tableCreate(inputObject) {
+	// Show the object table that a user has selected.
 	tabScroll = document.getElementById('tableScroller')
 	tbl = document.createElement('table')
 	// Put in the header.
 	headRow = document.createElement('tr')
-	headRow.innerHTML = '<th><button onclick="tablePlus(this)">+</button><button onclick="dragMode()">Drag</button></th>'
+	headRow.innerHTML = '<th><button onclick="tablePlus(this)">+</button><button onclick="moveNode()">Drag</button></th>'
 	headRow.innerHTML += '<th><button id="saveButton" onclick="tableSave(this)">Save</button><button onclick="deleteOb()">Delete Object</button></th>'
 	tbl.appendChild(headRow)
 	// Put the object in.
@@ -538,12 +520,14 @@ function tableCreate(inputObject) {
 }
 
 function tableDel(me) {
+	// Delete button functionality in object table.
 	myRow = me.parentElement.parentElement
 	myTable = myRow.parentElement
 	myTable.removeChild(myRow)
 }
 
 function tablePlus(me) {
+	// Add attribute button functionality in object table.
 	myTable = me.parentElement.parentElement.parentElement
 	newRow = myTable.insertRow(1)
 	newRow.innerHTML = '<td><button onclick="tableDel(this)">&#215;</button><input style="width:112px"></input></td>'
@@ -551,6 +535,7 @@ function tablePlus(me) {
 }
 
 function tableSave(me) {
+	// Update tree data structure with changes made in object table.
 	tbl = me.parentElement.parentElement.parentElement
 	var toJson = {}
 	// convert HTML table to JSON
@@ -572,20 +557,20 @@ function tableSave(me) {
 	}
 	// Update Feeder
 	if (previousTarget.tagName === 'circle') {
-	// Update Circle
-	previousTarget.setAttribute('cx', toJson['longitude'])
-	previousTarget.setAttribute('cy', toJson['latitude'])
-	// Update Line
-	for (i = 0, limit = Object.keys(testFeeder.tree).length; i < limit; i++) {
-		if (testFeeder.tree[i]['from'] === testFeeder.tree[previousTarget.id]['name']) {
-			document.getElementById(i).setAttribute('x1', toJson['longitude'])
-			document.getElementById(i).setAttribute('y1', toJson['latitude'])
+		// Update Circle
+		previousTarget.setAttribute('cx', toJson['longitude'])
+		previousTarget.setAttribute('cy', toJson['latitude'])
+		// Update Line
+		for (i = 0, limit = Object.keys(testFeeder.tree).length; i < limit; i++) {
+			if (testFeeder.tree[i]['from'] === testFeeder.tree[previousTarget.id]['name']) {
+				document.getElementById(i).setAttribute('x1', toJson['longitude'])
+				document.getElementById(i).setAttribute('y1', toJson['latitude'])
+			}
+			else if (testFeeder.tree[i]['to'] === testFeeder.tree[previousTarget.id]['name']) {
+				document.getElementById(i).setAttribute('x2', toJson['longitude'])
+				document.getElementById(i).setAttribute('y2', toJson['latitude'])
+			}
 		}
-		else if (testFeeder.tree[i]['to'] === testFeeder.tree[previousTarget.id]['name']) {
-			document.getElementById(i).setAttribute('x2', toJson['longitude'])
-			document.getElementById(i).setAttribute('y2', toJson['latitude'])
-		}
-	}
 	}
 	tableDestroy()
 	tableCreate(toJson)
@@ -593,6 +578,7 @@ function tableSave(me) {
 }
 
 function tableDestroy() {
+	// Hide the object table.
 	tabScroll = document.getElementById('tableScroller')
 	kid = tabScroll.children[0]
 	if (!(kid === undefined)) {tabScroll.removeChild(kid)}
@@ -612,19 +598,18 @@ function deleteOb() {
 			if ( (testFeeder.tree[i]['from'] === testFeeder.tree[previousTarget.id]['name'])
 				|| (testFeeder.tree[i]['to'] === testFeeder.tree[previousTarget.id]['name']) ) {
 				lines++
+			}
+		}
+		if (lines > 0) {
+			alert('Cannot delete circles with lines still connected')
+		} 
+		else {
+			previousTarget.remove()
 		}
 	}
-	if (lines > 0) {
-		alert('Cannot delete circles with lines still connected')
-	} 
-	else {
-		previousTarget.remove()
-	}
+	// Hide the object table.
+	tableDestroy()
 }
-tableDestroy()
-}
-
-scaleLevel = 1.0
 
 function scaleTo(x) {
 	// Scale the thickness of all lines and size of all circles. This helps user see details.
@@ -683,7 +668,8 @@ function clickCloseEvent(labelName, buttonName) {
 	if (window.event.toElement==thisButton) {event.stopPropagation()}
 }
 
-function selectionTable() {
+function multiSelectionTable() {
+	// Display the table when a user has selected multiple objects.
 	tabScroll = document.getElementById('tableScroller')
 	tbl = document.createElement('table')
 	// Put in the header.
@@ -699,6 +685,23 @@ function selectionTable() {
 	tabScroll.appendChild(tbl)
 }
 
+function clickLatLon(event) {
+	//Returns real Lat/Long of a click event, used in the moveBus function
+	var pan = window.panZoom.getPan();
+	var sizes = window.panZoom.getSizes();
+	var zoom = sizes.realZoom;
+	var x, y, pt;
+	var svg = document.getElementById('svgContainer');
+	var pt = svg.createSVGPoint();
+	pt.x = event.clientX;
+	pt.y = event.clientY;
+	pt = pt.matrixTransform(svg.getScreenCTM().inverse());
+	x = pt.x;
+	y = pt.y;
+	x = (x - pan.x) / zoom;
+	y = (y - pan.y) / zoom;
+	return [x,y];
+}
 
 function newNode() {
 	var newTreeId = Object.keys(testFeeder.tree).length
@@ -710,20 +713,19 @@ function newNode() {
 		object: 'node',
 		phases: 'A'
 	}
-
 	// Save to tree
 	testFeeder.tree[newTreeId] = newTreeNode
 	// Click location to add
 	clickTarget = document.getElementById('svgContainer')
-	clickTarget.addEventListener('click', clickLocate, false)
+	clickTarget.addEventListener('click', newNodeListener, false)
+	document.body.style.cursor = 'crosshair'
 }
 
-
-function clickLocate() {
+function newNodeListener() {
 	var xloc = event.pageX
 	var yloc = event.pageY
 	var newTreeId = (Object.keys(testFeeder.tree).length)-1
-	coords=clickLatLon(event)
+	coords = clickLatLon(event)
 	xloc = coords[0]
 	yloc = coords[1]
 	testFeeder.tree[newTreeId].longitude = xloc
@@ -735,12 +737,13 @@ function clickLocate() {
 	id = newTreeId
 	myClass = testFeeder.tree[newTreeId].object
 	addCircle(x,y,r,id,myClass)
-	clickTarget.removeEventListener('click', clickLocate, false)
-	
+	clickTarget.removeEventListener('click', newNodeListener, false)
+	document.body.style.cursor = 'auto'
 }
 
 function newLink() {
 	if (selection.length === 2) {      
+		// Connect the 2 selected nodes.
 		var newTreeId = Object.keys(testFeeder.tree).length
 		var newLink = {
 			//creates newlink variable in testFeeder.tree
@@ -751,7 +754,6 @@ function newLink() {
 			from: testFeeder.tree[selection[0].id].name,
 			to: testFeeder.tree[selection[1].id].name
 		}
-
 		// Save to tree
 		testFeeder.tree[newTreeId] = newLink
 		// Draw on svg
@@ -767,18 +769,22 @@ function newLink() {
 		selection[1].remove()
 		addCircle(x1,y1,2,selection[0].id,testFeeder.tree[selection[0].id].objectType)
 		addCircle(x2,y2,2,selection[1].id,testFeeder.tree[selection[1].id].objectType)
-	}
-	if(selection.length < 2){
-		alert("Please hold down the 'alt' key and select two nodes to connect")
+	} else if (selection.length < 2){
+		alert("Please hold down the 'alt' key and select two nodes to connect.")
+	} else { //selection.length > 2
+		alert("Please select no more than two nodes to connect.")
 	}
 }
 
-function dragMode() {
+function moveNode() {
+	// When user clicks drag, add a listener to effect the movement on next click.
+	document.body.style.cursor = 'crosshair'
 	clickTarget = document.getElementById('svgContainer')
-	clickTarget.addEventListener('click', moveBusListener, false)
+	clickTarget.addEventListener('click', moveNodeListener, false)
 }
 
-function moveBusListener() {
+function moveNodeListener() {
+	// Listener to allow a node to move once the user clicks the target location.
 	currSelsvg=lastElementSelected 
 	currSelId=currSelsvg.id
 	currSel=testFeeder.tree[currSelId]
@@ -828,28 +834,29 @@ function moveBusListener() {
 						document.getElementById(numf).remove()
 					}
 				}
-				//Adds in final target bus, aka the bus which was moved              
-			
+				//Adds in final target bus, aka the bus which was moved
 				document.getElementById(currSelId).remove()
 				addCircle(coords[0],coords[1],2,currSelId,testFeeder.tree[currSelId].objectType)
 			}
 
 		}
 	}
-	clickTarget.removeEventListener('click', moveBusListener, false)
+	document.body.style.cursor = 'auto'
+	clickTarget.removeEventListener('click', moveNodeListener, false)
 }
 
-// Modal functions
 function showModal(element){
+	// Make a modal dialog visible.
 	document.getElementById(element).style.display = 'block'
 }
 
 function closeModal(element){
+	// Hide a modal dialog.
 	document.getElementById(element).style.display = 'none'
 }
 
-// Find Function
 function findNext() {
+	// Find the next object matching the user input.
 	var selected
 	var term = document.getElementById('searchTerm').value
 	var hits = findElementsViaString(term)
@@ -893,6 +900,7 @@ function findNext() {
 		alert('Objects have been hidden in the layout, please unfold them first.\n' + err.message)
 	}
 }
+
 function findPrevious() {
 	if (searchCursor == undefined) {
 		findNext()
@@ -902,6 +910,7 @@ function findPrevious() {
 		findNext()
 	}
 }
+
 function findElementsViaString(inString) {
 	var results = []
 	for (key in testFeeder.tree) {
