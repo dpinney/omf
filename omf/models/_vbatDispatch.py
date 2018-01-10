@@ -62,7 +62,7 @@ def work(modelDir, inputDict):
 	command = 'OCTBIN --eval "addpath(genpath(\'FULLPATH\'));VB_func(ARGS)"'\
 	 	.replace('FULLPATH', vbatPath)\
 	 	.replace('OCTBIN',octBin)\
-		.replace('ARGS', "'" + str(tempFilePath) + "\\temp.csv'," + inputDict['load_type'] +',[' + inputDict['capacitance'] + ','+ inputDict['resistance'] + 
+		.replace('ARGS', "'" + str(tempFilePath) + "/temp.csv'," + inputDict['load_type'] +',[' + inputDict['capacitance'] + ','+ inputDict['resistance'] + 
 			',' + inputDict['power'] + ',' + inputDict['cop'] + ',' + inputDict['deadband'] + ',' + inputDict['setpoint'] + ',' +
 			inputDict['number_devices'] + ']')
 	script_dir = os.path.dirname(os.path.dirname(__file__))
