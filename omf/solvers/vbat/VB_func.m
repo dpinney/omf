@@ -1,29 +1,9 @@
-%This function takes the inputs:
+%This function takes handles the inputs sent to the function to use device
+%specific inputs and out_temp types
 %out_temp : a csv file containing outdoor temperature
-%
-%device_type : a number from 1 to 4 for which
-% 1 is AC
-% 2 is HP
-% 3 is RG
-% 4 is WH
-
 function VB_func(out_temp,device_type, device_parameters)
 try
-% switch out_temp
-%     case 94128
-%         out_temp = 'outdoor_temperature_zipCode_94128.csv';
-%     case 97218
-%         out_temp = 'outdoor_temperature_zipCode_97218.csv';
-%     case 98158
-%         out_temp = 'outdoor_temperature_zipCode_98158.csv';
-%     case 'default'
-%         out_temp = 'outdoor_temperature.csv';
-% end
-
-if strcmp(out_temp(end-2:end),'csv')
-    tempData = csvread(out_temp);
-    temperature_a=tempData(:,1);
-elseif out_temp == 94128 
+if out_temp == 94128 
     out_temp = 'outdoor_temperature_zipCode_94128.csv';
     tempData = csvread(out_temp);
     temperature_a=tempData(:,2);
@@ -46,32 +26,11 @@ else
     temperature_a = VB_TMY3(out_temp)';
 end
 
-% if strcmp(out_temp(end-2:end),'csv')
-%     tempData = csvread(out_temp);
-%     temperature_a=tempData(:,1);
-% end
-
 if device_type == 3
     temperature_a = 20*ones(8760,1);
-% else
-%     tempData = csvread(out_temp);
-%     temperature_a=tempData(:,2);
 end
 
-%switch device_type
-%    case 1
-%        paraFile = 'para_AC.csv';
-%    case 2
-%        paraFile = 'para_HP.csv';
-%    case 3
-%        paraFile = 'para_RG.csv';
-%    case 4
-%        paraFile = 'para_WH.csv';
-%end
-
-% if device_parameters ~= 0
-	paraFile = device_parameters;
-% end
+paraFile = device_parameters;
 
 switch device_type
     case 1
@@ -96,8 +55,6 @@ disp('n')
 E_UL
 disp('')
 catch error
-%     disp('Got the error:')
-%     x = rethrow(error);
     disp(error)
 end
     
