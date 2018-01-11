@@ -418,7 +418,7 @@ function buildFeeder() {
 		else if ( (['node','load','house','meter','triplex_meter','triplex_node','triplex_load','waterheater','ZIPload'].indexOf(anOb['object']) != -1) 
 			&& ('parent' in anOb) ) {
 			pOb = testFeeder.tree[nameToKey[anOb['parent']]]
-		addLine(pOb['longitude'],pOb['latitude'],anOb['longitude'],anOb['latitude'],'','parentChild')
+		addLine(pOb['longitude'],pOb['latitude'],anOb['longitude'],anOb['latitude'],pOb.name + '_' + anOb.name,'parentChild')
 	}
 	}
 	// Add circles after all lines
@@ -461,9 +461,6 @@ function svgClick(event) {
 			tableDestroy()
 			tableCreate(testFeeder.tree[event.target.id])
 			selection.push(event.target)
-			console.log(selection)
-			console.log(event.target)
-			console.log(event.target.id)
 	} }else {
 		tableDestroy()
 	}
@@ -808,6 +805,17 @@ function moveNodeListener() {
 	currSel["latitude"] = coords[1]
 	//Runs through testFeeder lines (links) determines if clicked node is an end or target for any line in feeder
 	for (num in testFeeder.tree) {
+		if('parent' in testFeeder.tree[num]){
+			if(currSel.name == testFeeder.tree[num].parent){
+				console.log(document.getElementById(currSel.name + "_" + testFeeder.tree[num].name))
+				document.getElementById(currSel.name + "_" + testFeeder.tree[num].name).remove()
+				x3 = currSel.longitude
+				y3 = currSel.latitude
+				x4 = testFeeder.tree[num]['longitude']
+				y4 = testFeeder.tree[num]['latitude']
+				addLine(x3,y3,x4,y4,currSel.name + "_" + testFeeder.tree[num].name,'parentChild')
+			}
+		}
 		if((testFeeder.tree[num].from) && (testFeeder.tree[num].to)!== undefined){
 			selBusId=currSel.name
 			selBranch = testFeeder.tree[num]
@@ -822,7 +830,8 @@ function moveNodeListener() {
 						x1 = testFeeder.tree[num]['longitude']
 						y1 = testFeeder.tree[num]['latitude']
 						numf=num
-						myClassf=testFeeder.tree[num].object	
+						myClassf=testFeeder.tree[num].object
+	
 					}
 					else if(tbus == testFeeder.tree[num].name){
 						x2 = testFeeder.tree[num]['longitude']
@@ -830,8 +839,8 @@ function moveNodeListener() {
 						numt=num
 						myClasst=testFeeder.tree[num].object
 					}
+				
 				}
-
 				addLine(x1,y1,x2,y2,id,selBranch['object'] + ' p' + phaseCount(selBranch['phases']))
 				//redraw buses
 				//then the three buses on the lines, the two origin buses along with the new moved bus, are redrawn,
