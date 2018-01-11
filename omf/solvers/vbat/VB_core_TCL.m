@@ -1,18 +1,11 @@
+%This function takes the data as an input and returns power and energy potential 
+%using VBAT for fridges, AC, and heat pumps
 function [P_lower, P_upper, E_UL] = VB_core_TCL(paraFile, theta_a,TCL_idx)
 % Author: Di Wu and He Hao (PNNL)
 % Last update time: September 19, 2017
 % This function is used to characterize VB capacity from a population of AC, HP, or RG
 
-% if ischar(paraFile) == 1
-%     if isempty(version('-release')) == 1
-%         para = csvread(paraFile);
-%         para(1,:)=[];
-%     else
-%         para = xlsread(paraFile);
-%     end
-% else
     para = repmat(paraFile(1:6),paraFile(7),1);
-% end
 
 N = size(para,1); % number of TCL
 C = para(:,1); % thermal capacitance
