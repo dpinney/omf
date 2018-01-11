@@ -814,6 +814,14 @@ function moveNodeListener() {
 				x4 = testFeeder.tree[num]['longitude']
 				y4 = testFeeder.tree[num]['latitude']
 				addLine(x3,y3,x4,y4,currSel.name + "_" + testFeeder.tree[num].name,'parentChild')
+				addCircle(x4,y4,2,num,testFeeder.tree[num].object)
+				if (document.getElementById(num) !== null) {
+						document.getElementById(num).remove()
+					}
+				addCircle(x3,y3,2,currSelId,currSel.object)
+				if (document.getElementById(currSelId) !== null) {
+						document.getElementById(currSelId).remove()
+					}
 			}
 		}
 		if((testFeeder.tree[num].from) && (testFeeder.tree[num].to)!== undefined){
