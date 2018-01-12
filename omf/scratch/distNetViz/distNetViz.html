@@ -803,27 +803,44 @@ function moveNodeListener() {
 	coords=clickLatLon(event) 
 	currSel["longitude"] = coords[0]
 	currSel["latitude"] = coords[1]
+	currSelP=currSel.parent
 	//Runs through testFeeder lines (links) determines if clicked node is an end or target for any line in feeder
 	for (num in testFeeder.tree) {
-		if('parent' in testFeeder.tree[num]){
-			if(currSel.name == testFeeder.tree[num].parent){
-				console.log(document.getElementById(currSel.name + "_" + testFeeder.tree[num].name))
-				document.getElementById(currSel.name + "_" + testFeeder.tree[num].name).remove()
-				x3 = currSel.longitude
-				y3 = currSel.latitude
-				x4 = testFeeder.tree[num]['longitude']
-				y4 = testFeeder.tree[num]['latitude']
-				addLine(x3,y3,x4,y4,currSel.name + "_" + testFeeder.tree[num].name,'parentChild')
-				addCircle(x4,y4,2,num,testFeeder.tree[num].object)
-				if (document.getElementById(num) !== null) {
-						document.getElementById(num).remove()
-					}
-				addCircle(x3,y3,2,currSelId,currSel.object)
-				if (document.getElementById(currSelId) !== null) {
-						document.getElementById(currSelId).remove()
-					}
-			}
+		if(currSel.name == testFeeder.tree[num].parent){
+			document.getElementById(currSel.name + "_" + testFeeder.tree[num].name).remove()
+			x3 = currSel.longitude
+			y3 = currSel.latitude
+			x4 = testFeeder.tree[num]['longitude']
+			y4 = testFeeder.tree[num]['latitude']
+			addLine(x3,y3,x4,y4,currSel.name + "_" + testFeeder.tree[num].name,'parentChild')
+			addCircle(x4,y4,2,num,testFeeder.tree[num].object)
+			if (document.getElementById(num) !== null) {
+					document.getElementById(num).remove()
+				}
+			addCircle(x3,y3,2,currSelId,currSel.object)
+			if (document.getElementById(currSelId) !== null) {
+					document.getElementById(currSelId).remove()
+				}
 		}
+		if ((['node','load','house','meter','triplex_meter','triplex_node','triplex_load','waterheater','ZIPload'].indexOf(testFeeder.tree[num]['object']) != -1) 
+			&& ('parent' in currSel)){
+				if(currSelP == testFeeder.tree[num].name){
+			document.getElementById(testFeeder.tree[num].name + "_" + currSel.name).remove()
+			x3 = currSel.longitude
+			y3 = currSel.latitude
+			x4 = testFeeder.tree[num]['longitude']
+			y4 = testFeeder.tree[num]['latitude']
+			addLine(x3,y3,x4,y4,testFeeder.tree[num].name + "_" + currSel.name,'parentChild')
+			addCircle(x4,y4,2,num,testFeeder.tree[num].object)
+			if (document.getElementById(num) !== null){
+				document.getElementById(num).remove()
+				}
+			addCircle(x3,y3,2,currSelId,currSel.object)
+			if (document.getElementById(currSelId) !== null){
+				document.getElementById(currSelId).remove()
+				}	
+			}
+		}	
 		if((testFeeder.tree[num].from) && (testFeeder.tree[num].to)!== undefined){
 			selBusId=currSel.name
 			selBranch = testFeeder.tree[num]
@@ -847,7 +864,6 @@ function moveNodeListener() {
 						numt=num
 						myClasst=testFeeder.tree[num].object
 					}
-				
 				}
 				addLine(x1,y1,x2,y2,id,selBranch['object'] + ' p' + phaseCount(selBranch['phases']))
 				//redraw buses
