@@ -1,19 +1,10 @@
-function [P_upper_wh, P_lower_wh, E_UL_wh] = VB_core_WH(paraFile)
+%This function takes the data as an input and returns power and energy potential 
+%using VBAT for water heaters
 % Author: He Hao (PNNL)
 % Last update time: September 19, 2017
 % This function is used to characterize VB capacity from a population of WH considering water draw
-
-% if ischar(paraFile) == 1
-%     if isempty(version('-release')) == 1
-%         para = csvread(paraFile);
-%         para(1,:)=[];
-%     else
-%         para = xlsread(paraFile);
-%     end
-% else
+function [P_upper_wh, P_lower_wh, E_UL_wh] = VB_core_WH(paraFile)
     para = repmat(paraFile(1:6),paraFile(7),1);
-% end
-
 N_wh = size(para,1); % number of TCL
 C_wh = para(:,1); % thermal capacitance
 R_wh = para(:,2); % thermal resistance
