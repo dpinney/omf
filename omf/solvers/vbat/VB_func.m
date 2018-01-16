@@ -5,19 +5,19 @@ function VB_func(out_temp,device_type, device_parameters)
 try
 if out_temp == 94128 
     out_temp = 'outdoor_temperature_zipCode_94128.csv';
-    tempData = csvread(out_temp);
+    tempData = csvread(which(out_temp));
     temperature_a=tempData(:,2);
 elseif out_temp == 97218
     out_temp = 'outdoor_temperature_zipCode_97218.csv';
-    tempData = csvread(out_temp);
+    tempData = csvread(which(out_temp));
     temperature_a=tempData(:,2);
 elseif out_temp == 98158
     out_temp = 'outdoor_temperature_zipCode_98158.csv';
-    tempData = csvread(out_temp);
+    tempData = csvread(which(out_temp));
     temperature_a=tempData(:,2);
 elseif strcmp(out_temp,'default')
     out_temp = 'outdoor_temperature.csv';
-    tempData = csvread(out_temp);
+    tempData = csvread(which(out_temp));
     temperature_a=tempData(:,2);
 elseif strcmp(out_temp(end-2:end),'csv')
     tempData = csvread(out_temp);
