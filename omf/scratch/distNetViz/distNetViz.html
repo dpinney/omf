@@ -407,6 +407,8 @@ function buildFeeder() {
 		minZoom: 0.5,
 		maxZoom: 100
 	})
+	// All objects that are of type node.
+	nodeTypes = ['node','load','house','meter','triplex_meter','triplex_node','triplex_load','waterheater','ZIPload']
 	// Go through and add all lines first
 	for (key in testFeeder.tree) {
 		anOb = testFeeder.tree[key]
@@ -415,16 +417,15 @@ function buildFeeder() {
 			toOb = testFeeder.tree[nameToKey[anOb['to']]]
 			addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],key,anOb['object'] + ' p' + phaseCount(anOb['phases']))
 		}
-		else if ( (['node','load','house','meter','triplex_meter','triplex_node','triplex_load','waterheater','ZIPload'].indexOf(anOb['object']) != -1) 
-			&& ('parent' in anOb) ) {
+		else if ((nodeTypes.indexOf(anOb['object']) != -1) && ('parent' in anOb)) {
 			pOb = testFeeder.tree[nameToKey[anOb['parent']]]
-		addLine(pOb['longitude'],pOb['latitude'],anOb['longitude'],anOb['latitude'],pOb.name + '_' + anOb.name,'parentChild')
-	}
+			addLine(pOb['longitude'],pOb['latitude'],anOb['longitude'],anOb['latitude'],pOb.name + '_' + anOb.name,'parentChild')
+		}
 	}
 	// Add circles after all lines
 	for (key in testFeeder.tree) {
 		anOb = testFeeder.tree[key]
-		if (['node','load','house','meter','triplex_meter','triplex_node','triplex_load','waterheater','ZIPload'].indexOf(anOb['object']) != -1) {
+		if (nodeTypes.indexOf(anOb['object']) != -1) {
 			addCircle(anOb['longitude'],anOb['latitude'],2,key,anOb['object'])
 		}
 	}
