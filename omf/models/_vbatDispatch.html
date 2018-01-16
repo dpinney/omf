@@ -208,7 +208,6 @@
 						reader.onload = loaded
 						function loaded(evt) {
 							evt.target.result
-							gebi("demandCurve").value = reader.result
 							gebi("demandCurve").value = reader.result.replace("\r\n","\n");
 							var FileName = gebi("demandCurveFile").value.split("\\");
 							var FileName = FileName[FileName.length-1];
