@@ -923,6 +923,7 @@ function findNext() {
 			searchCursor = 0
 		} 
 		else {
+			console.log(searchCursor)
 			searchCursor++
 			if (searchCursor == hits.length) {
 				searchCursor = 0
@@ -951,10 +952,18 @@ function findNext() {
 }
 
 function findPrevious() {
+	var selected
+	var term = document.getElementById('searchTerm').value
+	var hits = findElementsViaString(term)
 	if (searchCursor == undefined) {
 		findNext()
 	} 
-	else {
+	else if (searchCursor == 0){
+		searchCursor = (hits.length) -2
+		findNext()
+	}
+	else{
+		console.log(searchCursor)
 		searchCursor -= 2
 		findNext()
 	}
