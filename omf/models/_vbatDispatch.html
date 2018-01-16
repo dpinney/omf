@@ -209,6 +209,7 @@
 						function loaded(evt) {
 							evt.target.result
 							gebi("demandCurve").value = reader.result
+							gebi("demandCurve").value = reader.result.replace("\r\n","\n");
 							var FileName = gebi("demandCurveFile").value.split("\\");
 							var FileName = FileName[FileName.length-1];
 							document.getElementById('demandCurveFileName').innerHTML = FileName;
@@ -242,7 +243,7 @@
 						reader.onload = loaded
 						function loaded(evt) {
 							evt.target.result
-							gebi("tempCurve").value = reader.result
+							gebi("tempCurve").value = reader.result.replace("\r\n","\n");
 							var FileName = gebi("tempCurveFile").value.split("\\");
 							var FileName = FileName[FileName.length-1];
 							document.getElementById('tempCurveFileName').innerHTML = FileName;
