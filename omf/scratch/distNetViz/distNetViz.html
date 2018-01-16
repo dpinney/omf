@@ -923,7 +923,6 @@ function findNext() {
 			searchCursor = 0
 		} 
 		else {
-			console.log(searchCursor)
 			searchCursor++
 			if (searchCursor == hits.length) {
 				searchCursor = 0
@@ -935,8 +934,30 @@ function findNext() {
 		}
 		tableDestroy()
 		tableCreate(testFeeder.tree[selected])
+		//Test to see if tree element has a cx and cy
+		if (document.getElementById(selected.toString()).getAttribute('cx') 
+			&&  document.getElementById(selected.toString()).getAttribute('cy')
+			!== null){
 		var x = document.getElementById(selected.toString()).getAttribute('cx')
 		var y = document.getElementById(selected.toString()).getAttribute('cy')
+		}
+		//If not, find cx and cy of attatched nodes, find midpoint
+		else{
+			sourceName=testFeeder.tree[selected].from
+			targetName=testFeeder.tree[selected].to
+			for (num in testFeeder.tree){
+				if(testFeeder.tree[num].name == sourceName){
+					x2=testFeeder.tree[num].longitude
+					y2=testFeeder.tree[num].latitude
+				}
+				if(testFeeder.tree[num].name == targetName){
+					x1=testFeeder.tree[num].longitude
+					y1=testFeeder.tree[num].latitude
+				}
+			}
+			var x = (x1+x2)/2
+			var y = (y1+y2)/2
+		}
 		var panZoom = svgPanZoom('#svgContainer')
 		panZoom.pan({x: 0, y: 0})
 		var realZoom = panZoom.getSizes().realZoom
@@ -963,7 +984,6 @@ function findPrevious() {
 		findNext()
 	}
 	else{
-		console.log(searchCursor)
 		searchCursor -= 2
 		findNext()
 	}
