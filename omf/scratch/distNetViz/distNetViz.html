@@ -755,36 +755,43 @@ function newNodeListener() {
 }
 
 function newLink() {
-	if (selection.length === 2) {      
-		// Connect the 2 selected nodes.
-		var newTreeId = Object.keys(testFeeder.tree).length
-		var newLink = {
-			//creates newlink variable in testFeeder.tree
-			name: 'newLink' + String(newTreeId),
-			object: 'overhead_line',
-			phases: 'A',
-			configuration: 'configuration',
-			from: testFeeder.tree[selection[0].id].name,
-			to: testFeeder.tree[selection[1].id].name
+	nodeTypes = ['node','load','house','meter','triplex_meter','triplex_node','triplex_load','waterheater','ZIPload']
+	if (selection.length === 2){
+		if ((nodeTypes.indexOf(testFeeder.tree[selection[0].id].object)) && (nodeTypes.indexOf(testFeeder.tree[selection[1].id].object))
+				 !== -1)    {   
+			console.log((testFeeder.tree[selection[0].id].object), (testFeeder.tree[selection[1].id].object))   
+			// Connect the 2 selected nodes.
+			var newTreeId = Object.keys(testFeeder.tree).length
+			var newLink = {
+				//creates newlink variable in testFeeder.tree
+				name: 'newLink' + String(newTreeId),
+				object: 'overhead_line',
+				phases: 'A',
+				configuration: 'configuration',
+				from: testFeeder.tree[selection[0].id].name,
+				to: testFeeder.tree[selection[1].id].name
+			}
+			// Save to tree
+			testFeeder.tree[newTreeId] = newLink
+			// Draw on svg
+			x1 = testFeeder.tree[selection[0].id].longitude
+			y1 = testFeeder.tree[selection[0].id].latitude
+			x2 = testFeeder.tree[selection[1].id].longitude
+			y2 = testFeeder.tree[selection[1].id].latitude
+			id = newTreeId
+			myClass = testFeeder.tree[newTreeId].object
+			addLine(x1,y1,x2,y2,id,myClass)
+			//then below fixes the build order so cirlces come in last
+			selection[0].remove()
+			selection[1].remove()
+			addCircle(x1,y1,2,selection[0].id,testFeeder.tree[selection[0].id].object)
+			addCircle(x2,y2,2,selection[1].id,testFeeder.tree[selection[1].id].object)
 		}
-		// Save to tree
-		testFeeder.tree[newTreeId] = newLink
-		// Draw on svg
-		x1 = testFeeder.tree[selection[0].id].longitude
-		y1 = testFeeder.tree[selection[0].id].latitude
-		x2 = testFeeder.tree[selection[1].id].longitude
-		y2 = testFeeder.tree[selection[1].id].latitude
-		id = newTreeId
-		myClass = testFeeder.tree[newTreeId].object
-		addLine(x1,y1,x2,y2,id,myClass)
-		//then below fixes the build order so cirlces come in last
-		selection[0].remove()
-		selection[1].remove()
-		addCircle(x1,y1,2,selection[0].id,testFeeder.tree[selection[0].id].object)
-		addCircle(x2,y2,2,selection[1].id,testFeeder.tree[selection[1].id].object)
-	} else if (selection.length < 2){
+	}
+	else if (selection.length < 2){
 		alert("Please hold down the 'alt' key and select two nodes to connect.")
-	} else { //selection.length > 2
+	} 
+	else { //selection.length > 2
 		alert("Please select no more than two nodes to connect.")
 	}
 }
