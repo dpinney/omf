@@ -787,7 +787,7 @@ function newLink() {
 			addCircle(x1,y1,2,selection[0].id,testFeeder.tree[selection[0].id].object)
 			addCircle(x2,y2,2,selection[1].id,testFeeder.tree[selection[1].id].object)
 		}
-		else {
+		else if (((nodeTypes.indexOf(testFeeder.tree[selection[0].id].object)) && (nodeTypes.indexOf(testFeeder.tree[selection[1].id].object))== -1)) {
 			alert("Please only select nodes")
 			for (i=0; i<selection.length; i++) {
 			selection[i].classList.remove('selected')
