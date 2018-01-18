@@ -760,9 +760,12 @@ function newLink() {
 	if (selection.length === 2){
 		console.log((testFeeder.tree[selection[0].id].object), (testFeeder.tree[selection[1].id].object)) 
 		console.log((nodeTypes.indexOf(testFeeder.tree[selection[0].id].object)), (nodeTypes.indexOf(testFeeder.tree[selection[1].id].object)))
-		if ((nodeTypes.indexOf(testFeeder.tree[selection[0].id].object)) && (nodeTypes.indexOf(testFeeder.tree[selection[1].id].object))
-				 !== -1)    {   
-			console.log((testFeeder.tree[selection[0].id].object), (testFeeder.tree[selection[1].id].object))   
+		console.log("pass")
+		if ((nodeTypes.indexOf(testFeeder.tree[selection[0].id].object)), (nodeTypes.indexOf(testFeeder.tree[selection[1].id].object))
+				 !== -1)    {
+			console.log((testFeeder.tree[selection[0].id].object), (testFeeder.tree[selection[1].id].object)) 
+			console.log((nodeTypes.indexOf(testFeeder.tree[selection[0].id].object)), (nodeTypes.indexOf(testFeeder.tree[selection[1].id].object)))
+			console.log("Pass")   
 			// Connect the 2 selected nodes.
 			var newTreeId = Object.keys(testFeeder.tree).length
 			var newLink = {
@@ -789,6 +792,7 @@ function newLink() {
 			selection[1].remove()
 			addCircle(x1,y1,2,selection[0].id,testFeeder.tree[selection[0].id].object)
 			addCircle(x2,y2,2,selection[1].id,testFeeder.tree[selection[1].id].object)
+			selection = []
 		}
 		else if (((nodeTypes.indexOf(testFeeder.tree[selection[0].id].object)) && (nodeTypes.indexOf(testFeeder.tree[selection[1].id].object))== -1)) {
 			alert("Please only select nodes")
