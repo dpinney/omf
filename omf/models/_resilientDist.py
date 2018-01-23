@@ -174,8 +174,8 @@ def convertToGFM(gfmInputTemplate, feederModel):
 				'id': '', #*
 				# 'min_voltage': 0.8, # in p.u.
 				# 'max_voltage': 1.2, # in p.u.
-				'y': '', # not in schema.
-				'x': '', # not in schema.
+				'y': float(bus.get('latitude',0.0))/5000.0,
+				'x': float(bus.get('longitude',0.0))/5000.0,
 				# 'has_generator': False,
 				# 'has_phase': [True, True, True],
 				# 'ref_voltage': [1.0, 1.0, 1.0]
@@ -184,9 +184,8 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			newBus['id'] = bus.get('name','')+'_bus'
 			numPhases, newBus['has_phase'], max_real_phase, max_reactive_phase = getNodePhases(bus, 0.0)
 			gfmJson['buses'].append(newBus)
-			if len(jsonNodes) == 0:
-				pass #TODO: implement lat/lon tree usage for newBus stuff.
-			else:
+			if len(jsonNodes) != 0:
+				# HACK: no lat/lon data in tree, so use data from jsonNodes instead.
 				for busNode in jsonNodes:
 					# HACK: sometimes keys are strings. Sometimes not.
 					if int(key) == busNode.get('treeIndex',0):
@@ -318,7 +317,8 @@ def genDiagram(outputDir, feederJson):
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	outData = {}
-	feederName = inputDict["feederName1"]
+	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
+	inputDict["feederName1"] = feederName
 	with open(pJoin(modelDir,inputDict['weatherImpactsFileName']),'w') as hazardFile:
 		hazardFile.write(inputDict['weatherImpacts'])
 	with open(pJoin(modelDir, feederName + '.omd'), "r") as jsonIn:
