@@ -453,16 +453,17 @@ function svgClick(event) {
 		selection = []
 	}
 	if((testFeeder.tree[event.target.id]) !== undefined){
-	event.target.classList.add('selected')
+		event.target.classList.add('selected')
 	}
-	if ( (event.target.id != 'svgContainer')
-		&& (selection.indexOf(testFeeder.tree[event.target.id]) === -1)) {
+	if ( (event.target.id != 'svgContainer') && (selection.indexOf(testFeeder.tree[event.target.id]) === -1)) {
 		if((testFeeder.tree[event.target.id]) !== undefined){
 			lastElementSelected = (event.target)
 			tableDestroy()
 			tableCreate(testFeeder.tree[event.target.id])
 			selection.push(event.target)
-	} }else {
+		}
+	}
+	else {
 		tableDestroy()
 	}
 	// ALT-SELECTION
@@ -755,38 +756,62 @@ function newNodeListener() {
 }
 
 function newLink() {
-	if (selection.length === 2) {      
-		// Connect the 2 selected nodes.
-		var newTreeId = Object.keys(testFeeder.tree).length
-		var newLink = {
-			//creates newlink variable in testFeeder.tree
-			name: 'newLink' + String(newTreeId),
-			object: 'overhead_line',
-			phases: 'A',
-			configuration: 'configuration',
-			from: testFeeder.tree[selection[0].id].name,
-			to: testFeeder.tree[selection[1].id].name
+	nodeTypes = ['node','load','house','meter','triplex_meter','triplex_node','triplex_load','waterheater','ZIPload']
+	if (selection.length === 2){
+		console.log((testFeeder.tree[selection[0].id].object), (testFeeder.tree[selection[1].id].object)) 
+		console.log((nodeTypes.indexOf(testFeeder.tree[selection[0].id].object)), (nodeTypes.indexOf(testFeeder.tree[selection[1].id].object)))
+		console.log("pass")
+		if ((nodeTypes.indexOf(testFeeder.tree[selection[0].id].object)), (nodeTypes.indexOf(testFeeder.tree[selection[1].id].object))
+				 !== -1)    {
+			console.log((testFeeder.tree[selection[0].id].object), (testFeeder.tree[selection[1].id].object)) 
+			console.log((nodeTypes.indexOf(testFeeder.tree[selection[0].id].object)), (nodeTypes.indexOf(testFeeder.tree[selection[1].id].object)))
+			console.log("Pass")   
+			// Connect the 2 selected nodes.
+			var newTreeId = Object.keys(testFeeder.tree).length
+			var newLink = {
+				//creates newlink variable in testFeeder.tree
+				name: 'newLink' + String(newTreeId),
+				object: 'overhead_line',
+				phases: 'A',
+				configuration: 'configuration',
+				from: testFeeder.tree[selection[0].id].name,
+				to: testFeeder.tree[selection[1].id].name
+			}
+			// Save to tree
+			testFeeder.tree[newTreeId] = newLink
+			// Draw on svg
+			x1 = testFeeder.tree[selection[0].id].longitude
+			y1 = testFeeder.tree[selection[0].id].latitude
+			x2 = testFeeder.tree[selection[1].id].longitude
+			y2 = testFeeder.tree[selection[1].id].latitude
+			id = newTreeId
+			myClass = testFeeder.tree[newTreeId].object
+			addLine(x1,y1,x2,y2,id,myClass)
+			//then below fixes the build order so cirlces come in last
+			selection[0].remove()
+			selection[1].remove()
+			addCircle(x1,y1,2,selection[0].id,testFeeder.tree[selection[0].id].object)
+			addCircle(x2,y2,2,selection[1].id,testFeeder.tree[selection[1].id].object)
+			selection = []
 		}
-		// Save to tree
-		testFeeder.tree[newTreeId] = newLink
-		// Draw on svg
-		x1 = testFeeder.tree[selection[0].id].longitude
-		y1 = testFeeder.tree[selection[0].id].latitude
-		x2 = testFeeder.tree[selection[1].id].longitude
-		y2 = testFeeder.tree[selection[1].id].latitude
-		id = newTreeId
-		myClass = testFeeder.tree[newTreeId].object
-		addLine(x1,y1,x2,y2,id,myClass)
-		//then below fixes the build order so cirlces come in last
-		selection[0].remove()
-		selection[1].remove()
-		addCircle(x1,y1,2,selection[0].id,testFeeder.tree[selection[0].id].object)
-		addCircle(x2,y2,2,selection[1].id,testFeeder.tree[selection[1].id].object)
-	} else if (selection.length < 2){
-		alert("Please hold down the 'alt' key and select two nodes to connect.")
-	} else { //selection.length > 2
-		alert("Please select no more than two nodes to connect.")
+		else if (((nodeTypes.indexOf(testFeeder.tree[selection[0].id].object)) && (nodeTypes.indexOf(testFeeder.tree[selection[1].id].object))== -1)) {
+			alert("Please only select nodes")
+			for (i=0; i<selection.length; i++) {
+			selection[i].classList.remove('selected')
+			}
+			selection = []
+			tableDestroy()
+		}
 	}
+	else{
+		alert("Please hold down the 'alt' key and select two nodes to connect.")
+		for (i=0; i<selection.length; i++) {
+			selection[i].classList.remove('selected')
+			}
+			selection = []
+			tableDestroy()
+	} 
+	
 }
 
 function moveNode() {
@@ -912,6 +937,7 @@ function findNext() {
 	document.getElementById('searchHitCount').innerHTML = hits.length + ' Hits'
 	for (i in hits) {
 		document.getElementById(hits[i].toString()).classList.remove('selected')
+		selection = []
 	}
 	try {
 		if (hits.length == 0) {
@@ -923,7 +949,6 @@ function findNext() {
 			searchCursor = 0
 		} 
 		else {
-			console.log(searchCursor)
 			searchCursor++
 			if (searchCursor == hits.length) {
 				searchCursor = 0
@@ -935,8 +960,30 @@ function findNext() {
 		}
 		tableDestroy()
 		tableCreate(testFeeder.tree[selected])
+		//Test to see if tree element has a cx and cy
+		if (document.getElementById(selected.toString()).getAttribute('cx') 
+			&&  document.getElementById(selected.toString()).getAttribute('cy')
+			!== null){
 		var x = document.getElementById(selected.toString()).getAttribute('cx')
 		var y = document.getElementById(selected.toString()).getAttribute('cy')
+		}
+		//If not, find cx and cy of attatched nodes, find midpoint
+		else{
+			sourceName=testFeeder.tree[selected].from
+			targetName=testFeeder.tree[selected].to
+			for (num in testFeeder.tree){
+				if(testFeeder.tree[num].name == sourceName){
+					x2=testFeeder.tree[num].longitude
+					y2=testFeeder.tree[num].latitude
+				}
+				if(testFeeder.tree[num].name == targetName){
+					x1=testFeeder.tree[num].longitude
+					y1=testFeeder.tree[num].latitude
+				}
+			}
+			var x = (x1+x2)/2
+			var y = (y1+y2)/2
+		}
 		var panZoom = svgPanZoom('#svgContainer')
 		panZoom.pan({x: 0, y: 0})
 		var realZoom = panZoom.getSizes().realZoom
@@ -945,6 +992,7 @@ function findNext() {
 		panZoom.pan({ x: width-(x*realZoom), y: height-(y*realZoom) })
 		panZoom.zoom(3)
 		document.getElementById(selected.toString()).classList.add('selected')
+		selection.push(document.getElementById(selected))
 	} 
 	catch (err) {
 		alert('Objects have been hidden in the layout, please unfold them first.\n' + err.message)
@@ -963,7 +1011,6 @@ function findPrevious() {
 		findNext()
 	}
 	else{
-		console.log(searchCursor)
 		searchCursor -= 2
 		findNext()
 	}
