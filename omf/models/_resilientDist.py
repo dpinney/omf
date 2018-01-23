@@ -1,7 +1,7 @@
 ''' Run micot-GFM, micot-RDT, and GridLAB-D to determine an optimal distribution resiliency investment. '''
-
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math
-import traceback, copy, platform, re
+import traceback
+import platform, re
 from os.path import join as pJoin
 from jinja2 import Template
 from matplotlib import pyplot as plt
@@ -10,6 +10,7 @@ from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
 import subprocess, random, webbrowser, multiprocessing
 import pprint as pprint
+import copy
 
 # OMF imports
 import omf.feeder as feeder
@@ -174,8 +175,8 @@ def convertToGFM(gfmInputTemplate, feederModel):
 				'id': '', #*
 				# 'min_voltage': 0.8, # in p.u.
 				# 'max_voltage': 1.2, # in p.u.
-				'y': '', # not in schema.
-				'x': '', # not in schema.
+				'y': float(bus.get('latitude',0.0))/5000.0,
+				'x': float(bus.get('longitude',0.0))/5000.0,
 				# 'has_generator': False,
 				# 'has_phase': [True, True, True],
 				# 'ref_voltage': [1.0, 1.0, 1.0]
@@ -184,9 +185,8 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			newBus['id'] = bus.get('name','')+'_bus'
 			numPhases, newBus['has_phase'], max_real_phase, max_reactive_phase = getNodePhases(bus, 0.0)
 			gfmJson['buses'].append(newBus)
-			if len(jsonNodes) == 0:
-				pass #TODO: implement lat/lon tree usage for newBus stuff.
-			else:
+			if len(jsonNodes) != 0:
+				# HACK: no lat/lon data in tree, so use data from jsonNodes instead.
 				for busNode in jsonNodes:
 					# HACK: sometimes keys are strings. Sometimes not.
 					if int(key) == busNode.get('treeIndex',0):
@@ -318,7 +318,8 @@ def genDiagram(outputDir, feederJson):
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	outData = {}
-	feederName = inputDict["feederName1"]
+	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
+	inputDict["feederName1"] = feederName
 	with open(pJoin(modelDir,inputDict['weatherImpactsFileName']),'w') as hazardFile:
 		hazardFile.write(inputDict['weatherImpacts'])
 	with open(pJoin(modelDir, feederName + '.omd'), "r") as jsonIn:
@@ -351,12 +352,7 @@ def work(modelDir, inputDict):
 	proc.wait()
 	# HACK: rename the hardcoded gfm output
 	rdtInputFilePath = pJoin(modelDir,'rdtInput.json')
-	print 'Before weird RENAMING STUFF!!!!'
 	os.rename(pJoin(modelDir,'rdt_OUTPUT.json'),rdtInputFilePath)
-	# print 'RENAME FROM', pJoin(modelDir,'rdt_OUTPUT.json')
-	# print 'RENAME TO', rdtInputFilePath
-	# print 'After weird RENAMING STUFF!!!!'
-	#raise Exception('Go no further')
 	# Pull GFM input data on lines and generators for HTML presentation.
 	with open(rdtInputFilePath, 'r') as rdtInputFile:
 		# HACK: we use rdtInput as a string in the frontend.
@@ -408,8 +404,24 @@ def work(modelDir, inputDict):
 			accumulator = json.load(gldOut)
 		outData['gridlabdRawOut'] = accumulator
 		#THIS IS THE CODE THAT ONCE FRANK GETS DONE WITH GRIDLAB-D NEEDS TO BE UNCOMMENTED
-		'''rdtJson["line_codes"] = accumulator["properties"]["line_codes"]
+		rdtJson["line_codes"] = accumulator["properties"]["line_codes"]
 		rdtJson["lines"] = accumulator["properties"]["lines"]
+		for item in rdtJson["lines"]:
+			item['node1_id'] = item['node1_id'] + "_bus"
+			item['node2_id'] = item['node2_id'] + "_bus"
+		with open(pJoin(modelDir, rdtInputFilePath), "w") as outFile:
+			json.dump(rdtJson, outFile, indent=4)
+		'''rdtJson["line_codes"] = accumulator["properties"]["line_codes"]
+		counter = 1
+		lineCodeTracker = {}
+		for item in rdtJson["line_codes"]:
+			lineCodeTracker[item['line_code']] = counter
+			item['line_code'] = counter
+			counter = counter + 1
+		rdtJson["lines"] = accumulator["properties"]["lines"]
+		print lineCodeTracker
+		for line in rdtJson["lines"]:
+			line["line_code"] = lineCodeTracker[line["line_code"]]
 		with open(pJoin(modelDir, rdtInputFilePath), "w") as outFile:
 			json.dump(rdtJson, outFile, indent=4)'''
 	else:

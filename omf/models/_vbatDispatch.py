@@ -118,7 +118,11 @@ def work(modelDir, inputDict):
 					peakDemand[int(monthNum)-1] = demandList[dayCount]
 				energyMonthly[int(monthNum)-1] += demandList[dayCount]
 	if plat == 'Windows':
-		myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
+		# myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
+		proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+		with open(pJoin(modelDir, "PID.txt"),"w") as pidFile:
+			pidFile.write(str(proc.pid))
+		(myOut, err) = proc.communicate()
 	else:
 		proc = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
 		with open(pJoin(modelDir, "PID.txt"),"w") as pidFile:
