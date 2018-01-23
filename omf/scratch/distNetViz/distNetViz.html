@@ -228,6 +228,11 @@
 	<!-- Menu Bar -->
 	<div id='header'>
 		<div id='menuRight'>
+			<div id='saveButton'> 
+				<div class='buttonGroup'>
+				 	<button id='save' class='pill' onclick="downloadTextFile('testFeederOutput.txt', JSON.stringify(testFeeder))">Save </button>
+				 </div>
+			</div>	 	
 			<div id='EditDiv'>
 				<div class='buttonGroup'>
 					<button id='editOps' class='pill' onclick='dropPill(this, "Edit")'>Edit ▾</button> 
@@ -347,6 +352,20 @@ function saveJson() {
 	b64 = btoa(modJson)
 	window.location = 'data:text/json;base64,\n' + b64
 }
+
+function downloadTextFile(fileName, text) {
+			console.log(text)
+			var element = document.createElement('a');
+		    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+		    element.setAttribute('download', fileName);
+
+		    element.style.display = 'none';
+		    document.body.appendChild(element);
+
+		    element.click();
+
+		    document.body.removeChild(element);
+		}
 
 function addCircle(x,y,r,id,myClass) {
 	svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0]
@@ -758,14 +777,8 @@ function newNodeListener() {
 function newLink() {
 	nodeTypes = ['node','load','house','meter','triplex_meter','triplex_node','triplex_load','waterheater','ZIPload']
 	if (selection.length === 2){
-		console.log((testFeeder.tree[selection[0].id].object), (testFeeder.tree[selection[1].id].object)) 
-		console.log((nodeTypes.indexOf(testFeeder.tree[selection[0].id].object)), (nodeTypes.indexOf(testFeeder.tree[selection[1].id].object)))
-		console.log("pass")
 		if ((nodeTypes.indexOf(testFeeder.tree[selection[0].id].object)), (nodeTypes.indexOf(testFeeder.tree[selection[1].id].object))
-				 !== -1)    {
-			console.log((testFeeder.tree[selection[0].id].object), (testFeeder.tree[selection[1].id].object)) 
-			console.log((nodeTypes.indexOf(testFeeder.tree[selection[0].id].object)), (nodeTypes.indexOf(testFeeder.tree[selection[1].id].object)))
-			console.log("Pass")   
+				 !== -1)    { 
 			// Connect the 2 selected nodes.
 			var newTreeId = Object.keys(testFeeder.tree).length
 			var newLink = {
@@ -794,7 +807,7 @@ function newLink() {
 			addCircle(x2,y2,2,selection[1].id,testFeeder.tree[selection[1].id].object)
 			selection = []
 		}
-		else if (((nodeTypes.indexOf(testFeeder.tree[selection[0].id].object)) && (nodeTypes.indexOf(testFeeder.tree[selection[1].id].object))== -1)) {
+		else if (((nodeTypes.indexOf(testFeeder.tree[selection[0].id].object)) || (nodeTypes.indexOf(testFeeder.tree[selection[1].id].object))== -1)) {
 			alert("Please only select nodes")
 			for (i=0; i<selection.length; i++) {
 			selection[i].classList.remove('selected')
