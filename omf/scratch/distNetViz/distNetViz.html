@@ -453,16 +453,17 @@ function svgClick(event) {
 		selection = []
 	}
 	if((testFeeder.tree[event.target.id]) !== undefined){
-	event.target.classList.add('selected')
+		event.target.classList.add('selected')
 	}
-	if ( (event.target.id != 'svgContainer')
-		&& (selection.indexOf(testFeeder.tree[event.target.id]) === -1)) {
+	if ( (event.target.id != 'svgContainer') && (selection.indexOf(testFeeder.tree[event.target.id]) === -1)) {
 		if((testFeeder.tree[event.target.id]) !== undefined){
 			lastElementSelected = (event.target)
 			tableDestroy()
 			tableCreate(testFeeder.tree[event.target.id])
 			selection.push(event.target)
-	} }else {
+		}
+	}
+	else {
 		tableDestroy()
 	}
 	// ALT-SELECTION
@@ -757,9 +758,14 @@ function newNodeListener() {
 function newLink() {
 	nodeTypes = ['node','load','house','meter','triplex_meter','triplex_node','triplex_load','waterheater','ZIPload']
 	if (selection.length === 2){
-		if ((nodeTypes.indexOf(testFeeder.tree[selection[0].id].object)) && (nodeTypes.indexOf(testFeeder.tree[selection[1].id].object))
-				 !== -1)    {   
-			console.log((testFeeder.tree[selection[0].id].object), (testFeeder.tree[selection[1].id].object))   
+		console.log((testFeeder.tree[selection[0].id].object), (testFeeder.tree[selection[1].id].object)) 
+		console.log((nodeTypes.indexOf(testFeeder.tree[selection[0].id].object)), (nodeTypes.indexOf(testFeeder.tree[selection[1].id].object)))
+		console.log("pass")
+		if ((nodeTypes.indexOf(testFeeder.tree[selection[0].id].object)), (nodeTypes.indexOf(testFeeder.tree[selection[1].id].object))
+				 !== -1)    {
+			console.log((testFeeder.tree[selection[0].id].object), (testFeeder.tree[selection[1].id].object)) 
+			console.log((nodeTypes.indexOf(testFeeder.tree[selection[0].id].object)), (nodeTypes.indexOf(testFeeder.tree[selection[1].id].object)))
+			console.log("Pass")   
 			// Connect the 2 selected nodes.
 			var newTreeId = Object.keys(testFeeder.tree).length
 			var newLink = {
@@ -786,6 +792,7 @@ function newLink() {
 			selection[1].remove()
 			addCircle(x1,y1,2,selection[0].id,testFeeder.tree[selection[0].id].object)
 			addCircle(x2,y2,2,selection[1].id,testFeeder.tree[selection[1].id].object)
+			selection = []
 		}
 		else if (((nodeTypes.indexOf(testFeeder.tree[selection[0].id].object)) && (nodeTypes.indexOf(testFeeder.tree[selection[1].id].object))== -1)) {
 			alert("Please only select nodes")
@@ -930,6 +937,7 @@ function findNext() {
 	document.getElementById('searchHitCount').innerHTML = hits.length + ' Hits'
 	for (i in hits) {
 		document.getElementById(hits[i].toString()).classList.remove('selected')
+		selection = []
 	}
 	try {
 		if (hits.length == 0) {
@@ -984,6 +992,7 @@ function findNext() {
 		panZoom.pan({ x: width-(x*realZoom), y: height-(y*realZoom) })
 		panZoom.zoom(3)
 		document.getElementById(selected.toString()).classList.add('selected')
+		selection.push(document.getElementById(selected))
 	} 
 	catch (err) {
 		alert('Objects have been hidden in the layout, please unfold them first.\n' + err.message)

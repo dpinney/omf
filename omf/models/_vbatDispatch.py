@@ -65,10 +65,6 @@ def work(modelDir, inputDict):
 		.replace('ARGS', "'" + str(tempFilePath) + "/temp.csv'," + inputDict['load_type'] +',[' + inputDict['capacitance'] + ','+ inputDict['resistance'] + 
 			',' + inputDict['power'] + ',' + inputDict['cop'] + ',' + inputDict['deadband'] + ',' + inputDict['setpoint'] + ',' +
 			inputDict['number_devices'] + ']')
-	script_dir = os.path.dirname(os.path.dirname(__file__))
-	#rel_path = 'static/testFiles/FrankScadaValidCSV.csv'
-	rel_path = 'static/testFiles/FrankScadaValidVBAT.csv'
-	abs_file_path = os.path.join(script_dir, rel_path)
 	demandList = []
 	demandAdjustedList = []
 	dates = []
@@ -122,7 +118,11 @@ def work(modelDir, inputDict):
 					peakDemand[int(monthNum)-1] = demandList[dayCount]
 				energyMonthly[int(monthNum)-1] += demandList[dayCount]
 	if plat == 'Windows':
-		myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
+		# myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
+		proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+		with open(pJoin(modelDir, "PID.txt"),"w") as pidFile:
+			pidFile.write(str(proc.pid))
+		(myOut, err) = proc.communicate()
 	else:
 		proc = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
 		with open(pJoin(modelDir, "PID.txt"),"w") as pidFile:
