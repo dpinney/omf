@@ -136,28 +136,106 @@
 				<input type="text" id="number_devices" name="number_devices" pattern="[1-9][0-9]{0,8}" required="required" title="Positive number with less than 8 digits">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Rated Power(kW)<span class="classic">power</span></label>
-				<input type="text" id="power" name="power" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number">
+				<label class="tooltip">Rated Power(kW)<span class="classic">Power, must be a positive rational number between 0.1 and 7.2 with exactly one decimal digits</span></label>
+				<input type="text" id="power" name="power" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number between 0.1 and 7.2 with exactly one decimal digit" onchange="handle_power_value()">
+				<script>
+					function handle_power_value(){
+						var x = gebi("power").value;
+						if (x >7.2){
+							x = 7.2;
+						} else if (x < 0.1){
+							x = 0.1;
+						}
+						allInputData.power = x;
+						gebi("power").value = x;
+						gebi("power").innerHTML = x;
+					}
+				</script>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Thermal Capacitance(kWh/&degC)<span class="classic">capacitance</span></label>
-				<input type="text" id="capacitance" name="capacitance" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number">
+				<label class="tooltip">Thermal Capacitance(kWh/&degC)<span class="classic">Capacitance, must be between 0.2 and 2.5 with exactly one decimal digit</span></label>
+				<input type="text" id="capacitance" name="capacitance" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number between 0.2 and 2.5 with exactly one decimal digit" onchange="handle_capacitance_value()">
+				<script>
+					function handle_capacitance_value(){
+						var x = gebi("capacitance").value;
+						if (x >2.5){
+							x = 2.5;
+						} else if (x < 0.2){
+							x = 0.2;
+						}
+						allInputData.capacitance = x;
+						gebi("capacitance").value = x;
+						gebi("capacitance").innerHTML = x;
+					}
+				</script>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Thermal Resistance(&degC/kW)<span class="classic">resistance</span></label>
-				<input type="text" id="resistance" name="resistance" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number">
+				<label class="tooltip">Thermal Resistance(&degC/kW)<span class="classic">Resistance, must be between 1.5 and 140</span></label>
+				<input type="text" id="resistance" name="resistance" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number between 1.5 and 140" onchange="handle_resistance_value()">
+				<script>
+					function handle_resistance_value(){
+						var x = gebi("resistance").value;
+						if (x >140){
+							x = 140;
+						} else if (x < 1.5){
+							x = 1.5;
+						}
+						allInputData.resistance = x;
+						gebi("resistance").value = x;
+						gebi("resistance").innerHTML = x;
+					}
+				</script>
 			</div>			
 			<div class="shortInput">
-				<label class="tooltip">COP<span class="classic">Coefficient of Power</span></label>
-				<input type="text" id="cop" name="cop" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number">
+				<label class="tooltip">COP<span class="classic">Coefficient of Power, must be between 1 and 3.5</span></label>
+				<input type="text" id="cop" name="cop" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number between 1 and 3.5" onchange="handle_cop_value()">
+				<script>
+					function handle_cop_value(){
+						var x = gebi("cop").value;
+						if (x >3.5){
+							x = 3.5;
+						} else if (x < 1){
+							x = 1;
+						}
+						allInputData.cop = x;
+						gebi("cop").value = x;
+						gebi("cop").innerHTML = x;
+					}
+				</script>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Temperature Setpoint(&degC)<span class="classic">setpoint</span></label>
-				<input type="text" id="setpoint" name="setpoint" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number">
+				<label class="tooltip">Temperature Setpoint(&degC)<span class="classic">Setpoint, must be between 1.7 and 54</span></label>
+				<input type="text" id="setpoint" name="setpoint" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number 1.7 to 54" onchange="handle_setpoint_value()">
+				<script>
+					function handle_setpoint_value(){
+						var x = gebi("setpoint").value;
+						if (x >54){
+							x = 54;
+						} else if (x < 1.7){
+							x = 1.7;
+						}
+						allInputData.setpoint = x;
+						gebi("setpoint").value = x;
+						gebi("setpoint").innerHTML = x;
+					}
+				</script>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Temperature Deadband(&degC)<span class="classic">deadband</span></label>
-				<input type="text" id="deadband" name="deadband" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number">
+				<label class="tooltip">Temperature Deadband(&degC)<span class="classic">Deadband, must be between 0.125 and 2</span></label>
+				<input type="text" id="deadband" name="deadband" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number 0.125 to 2" onchange="handle_deadband_value()">
+				<script>
+					function handle_deadband_value(){
+						var x = gebi("deadband").value;
+						if (x >2){
+							x = 2;
+						} else if (x < 0.125){
+							x = 0.125;
+						}
+						allInputData.deadband = x;
+						gebi("deadband").value = x;
+						gebi("deadband").innerHTML = x;
+					}
+				</script>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Unit Cost ($/unit)<span class="classic">unitDeviceCost</span></label>
