@@ -770,6 +770,7 @@ function newNodeListener() {
 	id = newTreeId
 	myClass = testFeeder.tree[newTreeId].object
 	addCircle(x,y,r,id,myClass)
+	scaleTo(scaleLevel)
 	clickTarget.removeEventListener('click', newNodeListener, false)
 	document.body.style.cursor = 'auto'
 }
@@ -805,6 +806,7 @@ function newLink() {
 			selection[1].remove()
 			addCircle(x1,y1,2,selection[0].id,testFeeder.tree[selection[0].id].object)
 			addCircle(x2,y2,2,selection[1].id,testFeeder.tree[selection[1].id].object)
+			scaleTo(scaleLevel)
 			selection = []
 		}
 		else if (((nodeTypes.indexOf(testFeeder.tree[selection[0].id].object)) || (nodeTypes.indexOf(testFeeder.tree[selection[1].id].object))== -1)) {
@@ -860,6 +862,7 @@ function moveNodeListener() {
 			if (document.getElementById(currSelId) !== null) {
 					document.getElementById(currSelId).remove()
 				}
+				scaleTo(scaleLevel)
 		}
 		if ((['node','load','house','meter','triplex_meter','triplex_node','triplex_load','waterheater','ZIPload'].indexOf(testFeeder.tree[num]['object']) != -1) 
 			&& ('parent' in currSel)){
@@ -879,6 +882,7 @@ function moveNodeListener() {
 				document.getElementById(currSelId).remove()
 				}	
 			}
+			scaleTo(scaleLevel)
 		}	
 		if((testFeeder.tree[num].from) && (testFeeder.tree[num].to)!== undefined){
 			selBusId=currSel.name
@@ -924,6 +928,7 @@ function moveNodeListener() {
 				//Adds in final target bus, aka the bus which was moved
 				document.getElementById(currSelId).remove()
 				addCircle(coords[0],coords[1],2,currSelId,testFeeder.tree[currSelId].object)
+				scaleTo(scaleLevel)
 			}
 
 		}
