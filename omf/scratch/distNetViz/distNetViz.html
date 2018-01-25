@@ -953,6 +953,9 @@ function findNext() {
 	var term = document.getElementById('searchTerm').value
 	var hits = findElementsViaString(term)
 	document.getElementById('searchHitCount').innerHTML = hits.length + ' Hits'
+	for (i=0; i<selection.length; i++) {
+	selection[i].classList.remove('selected')
+	}
 	for (i in hits) {
 		document.getElementById(hits[i].toString()).classList.remove('selected')
 		selection = []
