@@ -143,8 +143,10 @@
 						var x = gebi("power").value;
 						if (x >7.2){
 							x = 7.2;
+							window.alert("Bad input, will be adjusted to the nearest acceptable value");
 						} else if (x < 0.1){
 							x = 0.1;
+							window.alert("Bad inputs, values will be adjusted to the nearest acceptable value");
 						}
 						allInputData.power = x;
 						gebi("power").value = x;
@@ -160,8 +162,10 @@
 						var x = gebi("capacitance").value;
 						if (x >2.5){
 							x = 2.5;
+							window.alert("Bad inputs, values will be adjusted to the nearest acceptable value");
 						} else if (x < 0.2){
 							x = 0.2;
+							window.alert("Bad inputs, values will be adjusted to the nearest acceptable value");
 						}
 						allInputData.capacitance = x;
 						gebi("capacitance").value = x;
@@ -177,8 +181,10 @@
 						var x = gebi("resistance").value;
 						if (x >140){
 							x = 140;
+							window.alert("Bad inputs, values will be adjusted to the nearest acceptable value");
 						} else if (x < 1.5){
 							x = 1.5;
+							window.alert("Bad inputs, values will be adjusted to the nearest acceptable value");
 						}
 						allInputData.resistance = x;
 						gebi("resistance").value = x;
@@ -194,8 +200,10 @@
 						var x = gebi("cop").value;
 						if (x >3.5){
 							x = 3.5;
+							window.alert("Bad inputs, values will be adjusted to the nearest acceptable value");
 						} else if (x < 1){
 							x = 1;
+							window.alert("Bad inputs, values will be adjusted to the nearest acceptable value");
 						}
 						allInputData.cop = x;
 						gebi("cop").value = x;
@@ -211,8 +219,10 @@
 						var x = gebi("setpoint").value;
 						if (x >54){
 							x = 54;
+							window.alert("Bad inputs, values will be adjusted to the nearest acceptable value");
 						} else if (x < 1.7){
 							x = 1.7;
+							window.alert("Bad inputs, values will be adjusted to the nearest acceptable value");
 						}
 						allInputData.setpoint = x;
 						gebi("setpoint").value = x;
@@ -228,8 +238,10 @@
 						var x = gebi("deadband").value;
 						if (x >2){
 							x = 2;
+							window.alert("Bad inputs, values will be adjusted to the nearest acceptable value");
 						} else if (x < 0.125){
 							x = 0.125;
+							window.alert("Bad inputs, values will be adjusted to the nearest acceptable value");
 						}
 						allInputData.deadband = x;
 						gebi("deadband").value = x;
