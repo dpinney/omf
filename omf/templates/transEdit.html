@@ -122,7 +122,7 @@
 	<div style='background:dimgray; top:55px; left:5px' class='divButton' onclick='window.panZoom.zoomIn()' title='Zoom In'>+</div>
 	<div style='background:dimgray; top:95px; left:5px' class='divButton' onclick='window.panZoom.zoomOut()' title='Zoom Out'>-</div>
 	<div style='background:dimgray; top:135px; left:5px' class='divButton' onclick='window.panZoom.reset()' title='Reset Zoom'>R</div>
-	<div style='background:dimgray; top:175px; left:5px;' class='divButton' onclick='scaleTo(parseFloat(prompt("Scale line thickness by this multiple:","1.0")))' title='Zoom To'>S</div>
+	<div style='background:dimgray; top:175px; left:5px;' class='divButton' onclick='scaleTo()' title='Zoom To'>S</div>
 	<!-- End Controls -->
 	<svg id='svgContainer' xmlns='http://www.w3.org/2000/svg' style='width:100%;height:100%;min-width:1000px;background-color:white;' onclick='svgClick(event)' onmousedown='mouseDown(event)' onmouseup='mouseUp(event)'>
 		<style type="text/css">
@@ -620,18 +620,21 @@ function deleteOb() {
 	unsavedChanges=true
 	tableDestroy()
 }
-function scaleTo(x) {
-	if (!x) {
-		return
-	}
-	if(scaleTracker != 1) {
-		reset = confirm("Would you like to reset scaling?")
-		if (reset) {
-			scaleTracker = (1/scaleTracker)*(1/scaleTracker)
-			console.log(scaleTracker)
+function scaleTo() {
+	if(scaleTracker == 1)  {
+		x = parseFloat(prompt("Scale line thickness by this multiple:","1.0"))
+		if (!x) {
+			return
 		}
-	} 
+		scaleTracker = x;
+	}
 	else {
+		scaleTracker = 1
+		x = scaleTracker
+		x = parseFloat(prompt("Scale line thickness by this multiple:","1.0"))
+		if (!x) {
+			return
+		}
 		scaleTracker = x;
 	}
 	circles = document.getElementsByTagName('circle')
@@ -639,7 +642,7 @@ function scaleTo(x) {
 	rects = document.getElementsByTagName('rect')
 	// Scale Circles
 	for (i = 0; i < circles.length; i++) {
-		circles[i].setAttribute('r', 2*x)
+		circles[i].setAttribute('r', 5*x)
 		circles[i].setAttribute('stroke-width', 0.5*x)
 	}
 	// Scale Lines
@@ -666,11 +669,11 @@ function scaleTo(x) {
 		strokeW = parseFloat(rects[i].getAttribute('stroke-width'))
 		longitude = xPos + width/2
 		latitude = yPos + height/2
-		rects[i].setAttribute('width', width*x/2)
-		rects[i].setAttribute('height', height*x/2)
-		rects[i].setAttribute('stroke-width', strokeW*x*0.5)
-		rects[i].setAttribute('x', longitude - (width*x/4))
-		rects[i].setAttribute('y', latitude - (height*x/4))
+		rects[i].setAttribute('width', 4*x)
+		rects[i].setAttribute('height', 4*x)
+		rects[i].setAttribute('stroke-width', x*0.5)
+		rects[i].setAttribute('x', longitude - (2*x))
+		rects[i].setAttribute('y', latitude - (2*x))
 	}   
 }
 function selectionTable() {
@@ -747,7 +750,7 @@ function clickLocate() {
 	if(scaleTracker != 1.0) {
 		console.log(scaleTracker)
 		newCir = document.getElementById(newType+"_"+String(newID))
-		newCir.setAttribute('r', 2*scaleTracker)
+		newCir.setAttribute('r', 5*scaleTracker)
 		newCir.setAttribute('stroke-width', 0.5*scaleTracker)
 	}
 
@@ -792,7 +795,7 @@ function moveBusListener() {
 				addCircle(x2,y2,r,"bus_"+String(tBusID),"bus")
 				if(scaleTracker != 1.0) {
 					newCir = document.getElementById("bus_"+String(tBusID))
-					newCir.setAttribute('r', 2*scaleTracker)
+					newCir.setAttribute('r', 5*scaleTracker)
 					newCir.setAttribute('stroke-width', 0.5*scaleTracker)
 				}
 			}
@@ -801,7 +804,7 @@ function moveBusListener() {
 				addCircle(x1,y1,r,"bus_"+String(fBusID),"bus")
 				if(scaleTracker != 1.0) {
 					newCir = document.getElementById("bus_"+String(fBusID))
-					newCir.setAttribute('r', 2*scaleTracker)
+					newCir.setAttribute('r', 5*scaleTracker)
 					newCir.setAttribute('stroke-width', 0.5*scaleTracker)  
 				}     
 			}
@@ -813,9 +816,18 @@ function moveBusListener() {
 					addRectangle(x1 - 4/2, y1 - 4/2, 4, 4, "gen_" + String(parseInt(gen)), "gen")
 					if(scaleTracker != 1.0) {
 						newRect = document.getElementById("gen_"+String(parseInt(gen)))
-						newRect.setAttribute('stroke-width', 0.5*scaleTracker)  
-						newRect.setAttribute('width', 2*scaleTracker)
-						newRect.setAttribute('height', 2*scaleTracker) 
+						xPos = parseFloat(newRect.getAttribute('x'))
+						yPos = parseFloat(newRect.getAttribute('y'))
+						width = parseFloat(newRect.getAttribute('width'))
+						height = parseFloat(newRect.getAttribute('height'))
+						strokeW = parseFloat(newRect.getAttribute('stroke-width'))
+						longitude = xPos + width/2
+						latitude = yPos + height/2
+						newRect.setAttribute('width', 4*scaleTracker)
+						newRect.setAttribute('height', 4*scaleTracker)
+						newRect.setAttribute('stroke-width', scaleTracker*0.5)
+						newRect.setAttribute('x', longitude - (2*scaleTracker))
+						newRect.setAttribute('y', latitude - (2*scaleTracker))
 					}
 				}
 				if(busGenID == tBusID) {
@@ -823,9 +835,18 @@ function moveBusListener() {
 					addRectangle(x2- 4/2, y2 - 4/2, 4, 4, "gen_" + String(parseInt(gen)), "gen")
 					if(scaleTracker != 1.0) {
 						newRect = document.getElementById("gen_"+String(parseInt(gen)))
-						newRect.setAttribute('stroke-width', 0.5*scaleTracker)  
-						newRect.setAttribute('width', 2*scaleTracker)
-						newRect.setAttribute('height', 2*scaleTracker)
+						xPos = parseFloat(newRect.getAttribute('x'))
+						yPos = parseFloat(newRect.getAttribute('y'))
+						width = parseFloat(newRect.getAttribute('width'))
+						height = parseFloat(newRect.getAttribute('height'))
+						strokeW = parseFloat(newRect.getAttribute('stroke-width'))
+						longitude = xPos + width/2
+						latitude = yPos + height/2
+						newRect.setAttribute('width', 4*scaleTracker)
+						newRect.setAttribute('height', 4*scaleTracker)
+						newRect.setAttribute('stroke-width', scaleTracker*0.5)
+						newRect.setAttribute('x', longitude - (2*scaleTracker))
+						newRect.setAttribute('y', latitude - (2*scaleTracker))
 					}
 				}
 			}
@@ -836,7 +857,7 @@ function moveBusListener() {
 	addCircle(coords[0],coords[1],r,"bus_"+String(selBusID),"bus")
 	if(scaleTracker != 1.0) {
 		newCir = document.getElementById("bus_"+String(selBusID))
-		newCir.setAttribute('r', 2*scaleTracker)
+		newCir.setAttribute('r', 5*scaleTracker)
 		newCir.setAttribute('stroke-width', 0.5*scaleTracker)
 	}
 	//Redraw generator on selected bus
@@ -854,11 +875,11 @@ function moveBusListener() {
 				strokeW = parseFloat(newRect.getAttribute('stroke-width'))
 				longitude = xPos + width/2
 				latitude = yPos + height/2
-				newRect.setAttribute('width', width*scaleTracker/2)
-				newRect.setAttribute('height', height*scaleTracker/2)
-				newRect.setAttribute('stroke-width', strokeW*scaleTracker)
-				newRect.setAttribute('x', longitude - (width*scaleTracker/4))
-				newRect.setAttribute('y', latitude - (height*scaleTracker/4))
+				newRect.setAttribute('width', 4*scaleTracker)
+				newRect.setAttribute('height', 4*scaleTracker)
+				newRect.setAttribute('stroke-width', scaleTracker*0.5)
+				newRect.setAttribute('x', longitude - (2*scaleTracker))
+				newRect.setAttribute('y', latitude - (2*scaleTracker))
 			}
 		}
 	}
@@ -964,10 +985,10 @@ function newLink() {
 		addCircle(x2,y2,r,"bus_"+String(tBusID),"bus")
 		if(scaleTracker != 1.0) {
 			newCir1 = document.getElementById("bus_"+String(fBusID))
-			newCir1.setAttribute('r', 2*scaleTracker)
+			newCir1.setAttribute('r', 5*scaleTracker)
 			newCir1.setAttribute('stroke-width', 0.5*scaleTracker)
 			newCir2 = document.getElementById("bus_"+String(tBusID))
-			newCir2.setAttribute('r', 2*scaleTracker)
+			newCir2.setAttribute('r', 5*scaleTracker)
 			newCir2.setAttribute('stroke-width', 0.5*scaleTracker)
 		}
 
@@ -985,11 +1006,11 @@ function newLink() {
 					strokeW = parseFloat(newRect.getAttribute('stroke-width'))
 					longitude = xPos + width/2
 					latitude = yPos + height/2
-					newRect.setAttribute('width', width*scaleTracker/2)
-					newRect.setAttribute('height', height*scaleTracker/2)
-					newRect.setAttribute('stroke-width', strokeW*scaleTracker*0.5)
-					newRect.setAttribute('x', longitude - (width*scaleTracker/4))
-					newRect.setAttribute('y', latitude - (height*scaleTracker/4))
+					newRect.setAttribute('width', 4*scaleTracker)
+					newRect.setAttribute('height', 4*scaleTracker)
+					newRect.setAttribute('stroke-width', scaleTracker*0.5)
+					newRect.setAttribute('x', longitude - (2*scaleTracker))
+					newRect.setAttribute('y', latitude - (2*scaleTracker))
 				}
 			}
 			if(busGenID == tBusID) {
@@ -1004,11 +1025,11 @@ function newLink() {
 					strokeW = parseFloat(newRect.getAttribute('stroke-width'))
 					longitude = xPos + width/2
 					latitude = yPos + height/2
-					newRect.setAttribute('width', width*scaleTracker/2)
-					newRect.setAttribute('height', height*scaleTracker/2)
-					newRect.setAttribute('stroke-width', strokeW*scaleTracker*0.5)
-					newRect.setAttribute('x', longitude - (width*scaleTracker/4))
-					newRect.setAttribute('y', latitude - (height*scaleTracker/4))
+					newRect.setAttribute('width', 4*scaleTracker)
+					newRect.setAttribute('height', 4*scaleTracker)
+					newRect.setAttribute('stroke-width', scaleTracker*0.5)
+					newRect.setAttribute('x', longitude - (2*scaleTracker))
+					newRect.setAttribute('y', latitude - (2*scaleTracker))
 				}
 			}
 		}
