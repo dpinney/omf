@@ -136,8 +136,8 @@
 				<input type="text" id="number_devices" name="number_devices" pattern="[1-9][0-9]{0,8}" required="required" title="Positive number with less than 8 digits">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Rated Power(kW)<span class="classic">Power, must be a positive rational number between 0.1 and 7.2 with exactly one decimal digits</span></label>
-				<input type="text" id="power" name="power" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number between 0.1 and 7.2 with exactly one decimal digit" onchange="handle_power_value()">
+				<label class="tooltip">Rated Power(kW)<span class="classic">Power, must be a positive rational number between 0.1 and 7.2</span></label>
+				<input type="text" id="power" name="power" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number between 0.1 and 7.2" onchange="handle_power_value()">
 				<script>
 					function handle_power_value(){
 						var x = gebi("power").value;
