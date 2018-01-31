@@ -472,7 +472,7 @@ function svgClick(event) {
 		selection = []
 	}
 	if((testFeeder.tree[event.target.id]) !== undefined){
-		event.target.classList.add('selected')
+		event.target.classList.add('selected') 
 	}
 	if ( (event.target.id != 'svgContainer') && (selection.indexOf(testFeeder.tree[event.target.id]) === -1)) {
 		if((testFeeder.tree[event.target.id]) !== undefined){
@@ -845,6 +845,7 @@ function moveNodeListener() {
 	currSel["longitude"] = coords[0]
 	currSel["latitude"] = coords[1]
 	currSelP=currSel.parent
+	nodeTypes = ['node','load','house','meter','triplex_meter','triplex_node','triplex_load','waterheater','ZIPload']
 	//Runs through testFeeder lines (links) determines if clicked node is an end or target for any line in feeder
 	for (num in testFeeder.tree) {
 		if(currSel.name == testFeeder.tree[num].parent){
@@ -864,24 +865,24 @@ function moveNodeListener() {
 				}
 				scaleTo(scaleLevel)
 		}
-		if ((['node','load','house','meter','triplex_meter','triplex_node','triplex_load','waterheater','ZIPload'].indexOf(testFeeder.tree[num]['object']) != -1) 
-			&& ('parent' in currSel)){
+		if ((nodeTypes.indexOf(testFeeder.tree[num]['object']) != -1) 
+			&& (currSelP != undefined)){
 				if(currSelP == testFeeder.tree[num].name){
-			document.getElementById(testFeeder.tree[num].name + "_" + currSel.name).remove()
-			x3 = currSel.longitude
-			y3 = currSel.latitude
-			x4 = testFeeder.tree[num]['longitude']
-			y4 = testFeeder.tree[num]['latitude']
-			addLine(x3,y3,x4,y4,testFeeder.tree[num].name + "_" + currSel.name,'parentChild')
-			addCircle(x4,y4,2,num,testFeeder.tree[num].object)
-			if (document.getElementById(num) !== null){
-				document.getElementById(num).remove()
+					document.getElementById(testFeeder.tree[num].name + "_" + currSel.name).remove()
+					x3 = currSel.longitude
+					y3 = currSel.latitude
+					x4 = testFeeder.tree[num]['longitude']
+					y4 = testFeeder.tree[num]['latitude']
+					addLine(x3,y3,x4,y4,testFeeder.tree[num].name + "_" + currSel.name,'parentChild')
+					addCircle(x4,y4,2,num,testFeeder.tree[num].object)
+					if (document.getElementById(num) !== null){
+						document.getElementById(num).remove()
+						}
+					addCircle(x3,y3,2,currSelId,currSel.object)
+					if (document.getElementById(currSelId) !== null){
+						document.getElementById(currSelId).remove()
+						}	
 				}
-			addCircle(x3,y3,2,currSelId,currSel.object)
-			if (document.getElementById(currSelId) !== null){
-				document.getElementById(currSelId).remove()
-				}	
-			}
 			scaleTo(scaleLevel)
 		}	
 		if((testFeeder.tree[num].from) && (testFeeder.tree[num].to)!== undefined){
@@ -955,12 +956,14 @@ function findNext() {
 	document.getElementById('searchHitCount').innerHTML = hits.length + ' Hits'
 	for (i=0; i<selection.length; i++) {
 	selection[i].classList.remove('selected')
+	selection = []
 	}
-	for (i in hits) {
+	//Below commented out, should be unnecessary. Further testing required until removal, 1/31/2018
+	/*for (i in hits) {
 		document.getElementById(hits[i].toString()).classList.remove('selected')
 		selection = []
-	}
-	try {
+	}*/
+	//try {
 		if (hits.length == 0) {
 			alert('No objects found containing term.')
 			return false
@@ -994,16 +997,17 @@ function findNext() {
 			targetName=testFeeder.tree[selected].to
 			for (num in testFeeder.tree){
 				if(testFeeder.tree[num].name == sourceName){
-					x2=testFeeder.tree[num].longitude
-					y2=testFeeder.tree[num].latitude
+					x2=parseFloat(testFeeder.tree[num].longitude)
+					y2=parseFloat(testFeeder.tree[num].latitude)
 				}
 				if(testFeeder.tree[num].name == targetName){
-					x1=testFeeder.tree[num].longitude
-					y1=testFeeder.tree[num].latitude
+					x1=parseFloat(testFeeder.tree[num].longitude)
+					y1=parseFloat(testFeeder.tree[num].latitude)
 				}
+
 			}
-			var x = (x1+x2)/2
-			var y = (y1+y2)/2
+			var x = ((x1+x2)/2)
+			var y = ((y1+y2)/2)			
 		}
 		var panZoom = svgPanZoom('#svgContainer')
 		panZoom.pan({x: 0, y: 0})
@@ -1014,10 +1018,10 @@ function findNext() {
 		panZoom.zoom(3)
 		document.getElementById(selected.toString()).classList.add('selected')
 		selection.push(document.getElementById(selected))
-	} 
-	catch (err) {
+	//} 
+	/*catch (err) {
 		alert('Objects have been hidden in the layout, please unfold them first.\n' + err.message)
-	}
+	}*/
 }
 
 function findPrevious() {
@@ -1046,5 +1050,27 @@ function findElementsViaString(inString) {
 		}
 	}
 	return results
+}
+function fixPhases () {
+	for (i in testFeeder.tree){
+		if (testFeeder.tree[i].name != undefined) {
+		nodeName = testFeeder.tree[i].name
+		for (j in testFeeder.tree){
+			if (testFeeder.tree[j].from != undefined){
+			linkFrom = testFeeder.tree[j].from
+			if (nodeName == linkFrom){
+				node = testFeeder.tree[i]
+				link = testFeeder.tree[j]
+				nodePhase = node.phases.split('').sort().join('').trim()
+				linkPhase = link.phases.split('').sort().join('').trim()
+
+				if (linkPhase.length > nodePhase.length){
+					linkPhase==nodePhase
+				}
+			}
+			}
+		}
+		}
+	}
 }
 </script>
