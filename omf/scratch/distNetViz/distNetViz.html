@@ -957,6 +957,8 @@ function findNext() {
 		selection[i].classList.remove('selected')
 	}
 	selection = []
+	tableDestroy()
+	// Set the selection variable.
 	if (hits.length == 0) {
 		alert('No objects found containing term.')
 		return false
@@ -975,42 +977,39 @@ function findNext() {
 		}
 		selected = hits[searchCursor]
 	}
-	tableDestroy()
-	tableCreate(testFeeder.tree[selected])
-	//Test to see if tree element has a cx and cy
-	if (document.getElementById(selected.toString()).getAttribute('cx') 
-		&&  document.getElementById(selected.toString()).getAttribute('cy')
-		!== null){
-	var x = document.getElementById(selected.toString()).getAttribute('cx')
-	var y = document.getElementById(selected.toString()).getAttribute('cy')
-	}
-	//If not, find cx and cy of attatched nodes, find midpoint
-	else{
-		sourceName=testFeeder.tree[selected].from
-		targetName=testFeeder.tree[selected].to
+	// Find the location to zoom to.
+	if (document.getElementById(selected.toString()).getAttribute('cx') !== null
+			&& document.getElementById(selected.toString()).getAttribute('cy') !== null) {
+		// If the SVG object has cx and cy, then we can zoom to those x,y coordinates.
+		var x = document.getElementById(selected.toString()).getAttribute('cx')
+		var y = document.getElementById(selected.toString()).getAttribute('cy')
+	} else { 
+		// If no cx, cy, then we have a line, so set zoom location to midpoint.
+		sourceName = testFeeder.tree[selected].from
+		targetName = testFeeder.tree[selected].to
 		for (num in testFeeder.tree){
-			if(testFeeder.tree[num].name == sourceName){
-				x2=parseFloat(testFeeder.tree[num].longitude)
-				y2=parseFloat(testFeeder.tree[num].latitude)
+			if (testFeeder.tree[num].name == sourceName) {
+				x2 = parseFloat(testFeeder.tree[num].longitude)
+				y2 = parseFloat(testFeeder.tree[num].latitude)
 			}
-			if(testFeeder.tree[num].name == targetName){
-				x1=parseFloat(testFeeder.tree[num].longitude)
-				y1=parseFloat(testFeeder.tree[num].latitude)
+			if (testFeeder.tree[num].name == targetName) {
+				x1 = parseFloat(testFeeder.tree[num].longitude)
+				y1 = parseFloat(testFeeder.tree[num].latitude)
 			}
-
 		}
 		var x = ((x1+x2)/2)
-		var y = ((y1+y2)/2)			
+		var y = ((y1+y2)/2)
 	}
-	var panZoom = svgPanZoom('#svgContainer')
-	panZoom.pan({x: 0, y: 0})
-	var realZoom = panZoom.getSizes().realZoom
-	var width = panZoom.getSizes().width/2
-	var height = panZoom.getSizes().height/2
-	panZoom.pan({ x: width-(x*realZoom), y: height-(y*realZoom) })
-	panZoom.zoom(3)
+	// Update display of new selection.
+	window.panZoom.pan({x: 0, y: 0})
+	var realZoom = window.panZoom.getSizes().realZoom
+	var width = window.panZoom.getSizes().width/2
+	var height = window.panZoom.getSizes().height/2
+	window.panZoom.pan({ x: width-(x*realZoom), y: height-(y*realZoom) })
+	window.panZoom.zoom(3)
 	document.getElementById(selected.toString()).classList.add('selected')
 	selection.push(document.getElementById(selected))
+	tableCreate(testFeeder.tree[selected])
 }
 
 function findPrevious() {
