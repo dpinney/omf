@@ -201,7 +201,7 @@
 		</style>
 		<script type='text/javascript' src='svg-pan-zoom.js'></script>
 		<!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder.js'></script> -->
-		<script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder Largest.js'></script>
+		<!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder Largest.js'></script> -->
 		<!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder Norfork.js'></script> -->
 	</head>
 	<body onkeypress='hotkeys()' style='width:100%;height:100%'>
@@ -426,9 +426,6 @@ function buildFeeder() {
 		minZoom: 0.5,
 		maxZoom: 100
 	})
-	// All objects that are of type node.
-	nodeTypes = ['node','load','house','meter','triplex_meter','triplex_node','triplex_load','waterheater','ZIPload']
-	linkTypes = ['transformer','overhead_line','underground_line','triplex_line','regulator','fuse','switch']
 	// Go through and add all lines first
 	for (key in testFeeder.tree) {
 		anOb = testFeeder.tree[key]
@@ -955,74 +952,65 @@ function findNext() {
 	var term = document.getElementById('searchTerm').value
 	var hits = findElementsViaString(term)
 	document.getElementById('searchHitCount').innerHTML = hits.length + ' Hits'
+	// Clear the current selection.
 	for (i=0; i<selection.length; i++) {
-	selection[i].classList.remove('selected')
-	selection = []
+		selection[i].classList.remove('selected')
 	}
-	//Below commented out, should be unnecessary. Further testing required until removal, 1/31/2018
-	/*for (i in hits) {
-		document.getElementById(hits[i].toString()).classList.remove('selected')
-		selection = []
-	}*/
-	//try {
-		if (hits.length == 0) {
-			alert('No objects found containing term.')
-			return false
-		}
-		if (searchCursor == undefined) {
-			selected = hits[0]
+	selection = []
+	if (hits.length == 0) {
+		alert('No objects found containing term.')
+		return false
+	}
+	if (searchCursor == undefined) {
+		selected = hits[0]
+		searchCursor = 0
+	} 
+	else {
+		searchCursor++
+		if (searchCursor == hits.length) {
 			searchCursor = 0
-		} 
-		else {
-			searchCursor++
-			if (searchCursor == hits.length) {
-				searchCursor = 0
-			}
-			if (searchCursor == -1) {
-				searchCursor = hits.length - 2
-			}
-			selected = hits[searchCursor]
 		}
-		tableDestroy()
-		tableCreate(testFeeder.tree[selected])
-		//Test to see if tree element has a cx and cy
-		if (document.getElementById(selected.toString()).getAttribute('cx') 
-			&&  document.getElementById(selected.toString()).getAttribute('cy')
-			!== null){
-		var x = document.getElementById(selected.toString()).getAttribute('cx')
-		var y = document.getElementById(selected.toString()).getAttribute('cy')
+		if (searchCursor == -1) {
+			searchCursor = hits.length - 2
 		}
-		//If not, find cx and cy of attatched nodes, find midpoint
-		else{
-			sourceName=testFeeder.tree[selected].from
-			targetName=testFeeder.tree[selected].to
-			for (num in testFeeder.tree){
-				if(testFeeder.tree[num].name == sourceName){
-					x2=parseFloat(testFeeder.tree[num].longitude)
-					y2=parseFloat(testFeeder.tree[num].latitude)
-				}
-				if(testFeeder.tree[num].name == targetName){
-					x1=parseFloat(testFeeder.tree[num].longitude)
-					y1=parseFloat(testFeeder.tree[num].latitude)
-				}
+		selected = hits[searchCursor]
+	}
+	tableDestroy()
+	tableCreate(testFeeder.tree[selected])
+	//Test to see if tree element has a cx and cy
+	if (document.getElementById(selected.toString()).getAttribute('cx') 
+		&&  document.getElementById(selected.toString()).getAttribute('cy')
+		!== null){
+	var x = document.getElementById(selected.toString()).getAttribute('cx')
+	var y = document.getElementById(selected.toString()).getAttribute('cy')
+	}
+	//If not, find cx and cy of attatched nodes, find midpoint
+	else{
+		sourceName=testFeeder.tree[selected].from
+		targetName=testFeeder.tree[selected].to
+		for (num in testFeeder.tree){
+			if(testFeeder.tree[num].name == sourceName){
+				x2=parseFloat(testFeeder.tree[num].longitude)
+				y2=parseFloat(testFeeder.tree[num].latitude)
+			}
+			if(testFeeder.tree[num].name == targetName){
+				x1=parseFloat(testFeeder.tree[num].longitude)
+				y1=parseFloat(testFeeder.tree[num].latitude)
+			}
 
-			}
-			var x = ((x1+x2)/2)
-			var y = ((y1+y2)/2)			
 		}
-		var panZoom = svgPanZoom('#svgContainer')
-		panZoom.pan({x: 0, y: 0})
-		var realZoom = panZoom.getSizes().realZoom
-		var width = panZoom.getSizes().width/2
-		var height = panZoom.getSizes().height/2
-		panZoom.pan({ x: width-(x*realZoom), y: height-(y*realZoom) })
-		panZoom.zoom(3)
-		document.getElementById(selected.toString()).classList.add('selected')
-		selection.push(document.getElementById(selected))
-	//} 
-	/*catch (err) {
-		alert('Objects have been hidden in the layout, please unfold them first.\n' + err.message)
-	}*/
+		var x = ((x1+x2)/2)
+		var y = ((y1+y2)/2)			
+	}
+	var panZoom = svgPanZoom('#svgContainer')
+	panZoom.pan({x: 0, y: 0})
+	var realZoom = panZoom.getSizes().realZoom
+	var width = panZoom.getSizes().width/2
+	var height = panZoom.getSizes().height/2
+	panZoom.pan({ x: width-(x*realZoom), y: height-(y*realZoom) })
+	panZoom.zoom(3)
+	document.getElementById(selected.toString()).classList.add('selected')
+	selection.push(document.getElementById(selected))
 }
 
 function findPrevious() {
