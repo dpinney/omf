@@ -948,33 +948,27 @@ function closeModal(element){
 
 function findNext() {
 	// Find the next object matching the user input.
-	var selected
 	var term = document.getElementById('searchTerm').value
 	var hits = findElementsViaString(term)
 	document.getElementById('searchHitCount').innerHTML = hits.length + ' Hits'
+	// If we can't find anything, stop.
+	if (hits.length == 0) {
+		alert('No objects found containing term.')
+		return false
+	}
 	// Clear the current selection.
 	for (i=0; i<selection.length; i++) {
 		selection[i].classList.remove('selected')
 	}
 	selection = []
 	tableDestroy()
-	// Set the selection variable.
-	if (hits.length == 0) {
-		alert('No objects found containing term.')
-		return false
-	}
+	// Find the tree index of the next item.
+	var selected
 	if (searchCursor == undefined) {
 		selected = hits[0]
 		searchCursor = 0
-	} 
-	else {
-		searchCursor++
-		if (searchCursor == hits.length) {
-			searchCursor = 0
-		}
-		if (searchCursor == -1) {
-			searchCursor = hits.length - 2
-		}
+	}  else {
+		searchCursor = (searchCursor + 1) % hits.length
 		selected = hits[searchCursor]
 	}
 	// Find the location to zoom to.
@@ -999,22 +993,20 @@ function findNext() {
 	window.panZoom.zoom(3)
 	// Udpate the selection.
 	svgOb.classList.add('selected')
-	selection.push(document.getElementById(selected))
+	selection.push(svgOb)
 	tableCreate(testFeeder.tree[selected])
 }
 
 function findPrevious() {
-	var selected
 	var term = document.getElementById('searchTerm').value
 	var hits = findElementsViaString(term)
 	if (searchCursor == undefined) {
 		findNext()
-	} 
-	else if (searchCursor == 0){
-		searchCursor = (hits.length) -2
+	}  else if (searchCursor == 0) {
+		// Wrapped around.
+		searchCursor = (hits.length) - 2
 		findNext()
-	}
-	else{
+	} else {
 		searchCursor -= 2
 		findNext()
 	}
