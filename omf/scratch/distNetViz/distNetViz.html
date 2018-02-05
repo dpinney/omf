@@ -201,7 +201,7 @@
 		</style>
 		<script type='text/javascript' src='svg-pan-zoom.js'></script>
 		<!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder.js'></script> -->
-		<script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder Largest.js'></script>
+		<!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder Largest.js'></script> -->
 		<!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder Norfork.js'></script> -->
 	</head>
 	<body onkeypress='hotkeys()' style='width:100%;height:100%'>
@@ -426,17 +426,15 @@ function buildFeeder() {
 		minZoom: 0.5,
 		maxZoom: 100
 	})
-	// All objects that are of type node.
-	nodeTypes = ['node','load','house','meter','triplex_meter','triplex_node','triplex_load','waterheater','ZIPload']
 	// Go through and add all lines first
 	for (key in testFeeder.tree) {
 		anOb = testFeeder.tree[key]
-		if (['transformer','overhead_line','underground_line','triplex_line','regulator','fuse','switch'].indexOf(anOb['object']) != -1) {
+		if ('from' in anOb && 'to' in anOb) {
 			fromOb = testFeeder.tree[nameToKey[anOb['from']]]
 			toOb = testFeeder.tree[nameToKey[anOb['to']]]
 			addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],key,anOb['object'] + ' p' + phaseCount(anOb['phases']))
 		}
-		else if ((nodeTypes.indexOf(anOb['object']) != -1) && ('parent' in anOb)) {
+		else if ('parent' in anOb) {
 			pOb = testFeeder.tree[nameToKey[anOb['parent']]]
 			addLine(pOb['longitude'],pOb['latitude'],anOb['longitude'],anOb['latitude'],pOb.name + '_' + anOb.name,'parentChild')
 		}
@@ -444,7 +442,7 @@ function buildFeeder() {
 	// Add circles after all lines
 	for (key in testFeeder.tree) {
 		anOb = testFeeder.tree[key]
-		if (nodeTypes.indexOf(anOb['object']) != -1) {
+		if ('latitude' in anOb && 'longitude' in anOb && 'object' in anOb) {
 			addCircle(anOb['longitude'],anOb['latitude'],2,key,anOb['object'])
 		}
 	}
@@ -472,7 +470,7 @@ function svgClick(event) {
 		selection = []
 	}
 	if((testFeeder.tree[event.target.id]) !== undefined){
-		event.target.classList.add('selected')
+		event.target.classList.add('selected') 
 	}
 	if ( (event.target.id != 'svgContainer') && (selection.indexOf(testFeeder.tree[event.target.id]) === -1)) {
 		if((testFeeder.tree[event.target.id]) !== undefined){
@@ -845,6 +843,7 @@ function moveNodeListener() {
 	currSel["longitude"] = coords[0]
 	currSel["latitude"] = coords[1]
 	currSelP=currSel.parent
+	nodeTypes = ['node','load','house','meter','triplex_meter','triplex_node','triplex_load','waterheater','ZIPload']
 	//Runs through testFeeder lines (links) determines if clicked node is an end or target for any line in feeder
 	for (num in testFeeder.tree) {
 		if(currSel.name == testFeeder.tree[num].parent){
@@ -864,24 +863,24 @@ function moveNodeListener() {
 				}
 				scaleTo(scaleLevel)
 		}
-		if ((['node','load','house','meter','triplex_meter','triplex_node','triplex_load','waterheater','ZIPload'].indexOf(testFeeder.tree[num]['object']) != -1) 
-			&& ('parent' in currSel)){
+		if ((nodeTypes.indexOf(testFeeder.tree[num]['object']) != -1) 
+			&& (currSelP != undefined)){
 				if(currSelP == testFeeder.tree[num].name){
-			document.getElementById(testFeeder.tree[num].name + "_" + currSel.name).remove()
-			x3 = currSel.longitude
-			y3 = currSel.latitude
-			x4 = testFeeder.tree[num]['longitude']
-			y4 = testFeeder.tree[num]['latitude']
-			addLine(x3,y3,x4,y4,testFeeder.tree[num].name + "_" + currSel.name,'parentChild')
-			addCircle(x4,y4,2,num,testFeeder.tree[num].object)
-			if (document.getElementById(num) !== null){
-				document.getElementById(num).remove()
+					document.getElementById(testFeeder.tree[num].name + "_" + currSel.name).remove()
+					x3 = currSel.longitude
+					y3 = currSel.latitude
+					x4 = testFeeder.tree[num]['longitude']
+					y4 = testFeeder.tree[num]['latitude']
+					addLine(x3,y3,x4,y4,testFeeder.tree[num].name + "_" + currSel.name,'parentChild')
+					addCircle(x4,y4,2,num,testFeeder.tree[num].object)
+					if (document.getElementById(num) !== null){
+						document.getElementById(num).remove()
+						}
+					addCircle(x3,y3,2,currSelId,currSel.object)
+					if (document.getElementById(currSelId) !== null){
+						document.getElementById(currSelId).remove()
+						}	
 				}
-			addCircle(x3,y3,2,currSelId,currSel.object)
-			if (document.getElementById(currSelId) !== null){
-				document.getElementById(currSelId).remove()
-				}	
-			}
 			scaleTo(scaleLevel)
 		}	
 		if((testFeeder.tree[num].from) && (testFeeder.tree[num].to)!== undefined){
@@ -949,89 +948,63 @@ function closeModal(element){
 
 function findNext() {
 	// Find the next object matching the user input.
-	var selected
 	var term = document.getElementById('searchTerm').value
 	var hits = findElementsViaString(term)
 	document.getElementById('searchHitCount').innerHTML = hits.length + ' Hits'
+	// If we can't find anything, stop.
+	if (hits.length == 0) {
+		alert('No objects found containing term.')
+		return false
+	}
+	// Clear the current selection.
 	for (i=0; i<selection.length; i++) {
-	selection[i].classList.remove('selected')
+		selection[i].classList.remove('selected')
 	}
-	for (i in hits) {
-		document.getElementById(hits[i].toString()).classList.remove('selected')
-		selection = []
+	selection = []
+	tableDestroy()
+	// Find the tree index of the next item.
+	if (searchCursor == undefined) {
+		searchCursor = 0
+	}  else {
+		searchCursor = (searchCursor + 1) % hits.length
 	}
-	try {
-		if (hits.length == 0) {
-			alert('No objects found containing term.')
-			return false
-		}
-		if (searchCursor == undefined) {
-			selected = hits[0]
-			searchCursor = 0
-		} 
-		else {
-			searchCursor++
-			if (searchCursor == hits.length) {
-				searchCursor = 0
-			}
-			if (searchCursor == -1) {
-				searchCursor = hits.length - 2
-			}
-			selected = hits[searchCursor]
-		}
-		tableDestroy()
-		tableCreate(testFeeder.tree[selected])
-		//Test to see if tree element has a cx and cy
-		if (document.getElementById(selected.toString()).getAttribute('cx') 
-			&&  document.getElementById(selected.toString()).getAttribute('cy')
-			!== null){
-		var x = document.getElementById(selected.toString()).getAttribute('cx')
-		var y = document.getElementById(selected.toString()).getAttribute('cy')
-		}
-		//If not, find cx and cy of attatched nodes, find midpoint
-		else{
-			sourceName=testFeeder.tree[selected].from
-			targetName=testFeeder.tree[selected].to
-			for (num in testFeeder.tree){
-				if(testFeeder.tree[num].name == sourceName){
-					x2=testFeeder.tree[num].longitude
-					y2=testFeeder.tree[num].latitude
-				}
-				if(testFeeder.tree[num].name == targetName){
-					x1=testFeeder.tree[num].longitude
-					y1=testFeeder.tree[num].latitude
-				}
-			}
-			var x = (x1+x2)/2
-			var y = (y1+y2)/2
-		}
-		var panZoom = svgPanZoom('#svgContainer')
-		panZoom.pan({x: 0, y: 0})
-		var realZoom = panZoom.getSizes().realZoom
-		var width = panZoom.getSizes().width/2
-		var height = panZoom.getSizes().height/2
-		panZoom.pan({ x: width-(x*realZoom), y: height-(y*realZoom) })
-		panZoom.zoom(3)
-		document.getElementById(selected.toString()).classList.add('selected')
-		selection.push(document.getElementById(selected))
-	} 
-	catch (err) {
-		alert('Objects have been hidden in the layout, please unfold them first.\n' + err.message)
+	var hitId = hits[searchCursor]
+	// Find the location to zoom to.
+	var svgOb = document.getElementById(hitId.toString())
+	var cx = svgOb.getAttribute('cx')
+	var cy = svgOb.getAttribute('cy')
+	if (cx !== null && cy !== null) {
+		// Circle object, just get cx and cy
+		var x = cx
+		var y = cy
+	} else {
+		// Line object, get midpoint to zoom to
+		var x = (parseFloat(svgOb.getAttribute('x1')) + parseFloat(svgOb.getAttribute('x2'))) / 2
+		var y = (parseFloat(svgOb.getAttribute('y1')) + parseFloat(svgOb.getAttribute('y2'))) / 2
 	}
+	// Zoom to the next hit.
+	window.panZoom.pan({x:0, y:0})
+	var realZoom = window.panZoom.getSizes().realZoom
+	var width = window.panZoom.getSizes().width/2
+	var height = window.panZoom.getSizes().height/2
+	window.panZoom.pan({x:width - (x * realZoom), y:height - (y * realZoom)})
+	window.panZoom.zoom(3 / scaleLevel)
+	// Udpate the selection.
+	svgOb.classList.add('selected')
+	selection.push(svgOb)
+	tableCreate(testFeeder.tree[hitId])
 }
 
 function findPrevious() {
-	var selected
 	var term = document.getElementById('searchTerm').value
 	var hits = findElementsViaString(term)
 	if (searchCursor == undefined) {
 		findNext()
-	} 
-	else if (searchCursor == 0){
-		searchCursor = (hits.length) -2
+	}  else if (searchCursor == 0) {
+		// Wrapped around.
+		searchCursor = (hits.length) - 2
 		findNext()
-	}
-	else{
+	} else {
 		searchCursor -= 2
 		findNext()
 	}
@@ -1046,5 +1019,27 @@ function findElementsViaString(inString) {
 		}
 	}
 	return results
+}
+function fixPhases () {
+	for (i in testFeeder.tree){
+		if (testFeeder.tree[i].name != undefined) {
+		nodeName = testFeeder.tree[i].name
+		for (j in testFeeder.tree){
+			if (testFeeder.tree[j].from != undefined){
+			linkFrom = testFeeder.tree[j].from
+			if (nodeName == linkFrom){
+				node = testFeeder.tree[i]
+				link = testFeeder.tree[j]
+				nodePhase = node.phases.split('').sort().join('').trim()
+				linkPhase = link.phases.split('').sort().join('').trim()
+
+				if (linkPhase.length > nodePhase.length){
+					linkPhase==nodePhase
+				}
+			}
+			}
+		}
+		}
+	}
 }
 </script>
