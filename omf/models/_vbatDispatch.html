@@ -275,7 +275,7 @@
 	</div>
 	<!-- Output tables, graphs, etc. -->
 	<div id="output" class="postRun">
-		<p class="reportTitle postRun" style="page-break-before:always">VBAT Power Available</p>
+		<p class="reportTitle postRun" style="page-break-before:always">VBAT Energy Available</p>
 		<div id="powerReport" class="tightContent postRun">
 			<div id="powerChart"></div>
 			<script>
@@ -297,12 +297,12 @@
 						"lineColor":"gray"
 					},
 					"yAxis":{
-						"title":{"text":"Power (kW)","style":{"color":"gray"}},
+						"title":{"text":"Energy (kWh)","style":{"color":"gray"}},
 					},
 					"title":{"text": allOutputData.dataCheck, "verticalAlign":"bottom", "align":"right", "y":-400, "x":-150, "style":{"color":"gray", "fontSize":"36px"}},
 					"series":[
-						{"name":"Min Power","marker":{"enabled":false},"color":"red","data":allOutputData.minPowerSeries,"pointPlacement": +0.1},
-						{"name":"Max Power","marker":{"enabled":false},"color":"purple","data":allOutputData.maxPowerSeries,"pointPlacement": -0.2},
+						{"name":"Min Energy","marker":{"enabled":false},"color":"red","data":allOutputData.minEnergySeries,"pointPlacement": +0.1},
+						{"name":"Max energy","marker":{"enabled":false},"color":"purple","data":allOutputData.maxEnergySeries,"pointPlacement": -0.2},
 					],
 					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"powerChart","type":"column","marginRight":20, "height":500,"width":1000},
 					"tooltip":false,
