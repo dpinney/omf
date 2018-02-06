@@ -529,7 +529,7 @@ function tableCreate(inputObject) {
 	// Put in the header.
 	if((inputObject.from || inputObject.to) == undefined){
 		headRow = document.createElement('tr')
-		headRow.innerHTML = '<th><button onclick="tablePlus(this)">+</button><button onclick="moveNode()">Drag</button></th>'
+		headRow.innerHTML = '<th><button onclick="tablePlus(this)">+</button><button onclick="moveNode()">Move</button></th>'
 		headRow.innerHTML += '<th><button id="saveButton" onclick="tableSave(this)">Save</button><button onclick="deleteOb()">Delete Object</button></th>'
 		tbl.appendChild(headRow)
 		}
