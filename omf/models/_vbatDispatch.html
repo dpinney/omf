@@ -137,117 +137,27 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Rated Power(kW)<span class="classic">Power, must be a positive rational number between 0.1 and 7.2</span></label>
-				<input type="text" id="power" name="power" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number between 0.1 and 7.2" onchange="handle_power_value()">
-				<script>
-					function handle_power_value(){
-						var x = gebi("power").value;
-						if (x >7.2){
-							x = 7.2;
-							window.alert("Bad input, will be adjusted to the nearest acceptable value");
-						} else if (x < 0.1){
-							x = 0.1;
-							window.alert("Bad inputs, values will be adjusted to the nearest acceptable value");
-						}
-						allInputData.power = x;
-						gebi("power").value = x;
-						gebi("power").innerHTML = x;
-					}
-				</script>
+				<input type="text" id="power" name="power" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number that should be between 0.1 and 7.2">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Thermal Capacitance(kWh/&degC)<span class="classic">Capacitance, must be between 0.2 and 2.5 with exactly one decimal digit</span></label>
-				<input type="text" id="capacitance" name="capacitance" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number between 0.2 and 2.5 with exactly one decimal digit" onchange="handle_capacitance_value()">
-				<script>
-					function handle_capacitance_value(){
-						var x = gebi("capacitance").value;
-						if (x >2.5){
-							x = 2.5;
-							window.alert("Bad inputs, values will be adjusted to the nearest acceptable value");
-						} else if (x < 0.2){
-							x = 0.2;
-							window.alert("Bad inputs, values will be adjusted to the nearest acceptable value");
-						}
-						allInputData.capacitance = x;
-						gebi("capacitance").value = x;
-						gebi("capacitance").innerHTML = x;
-					}
-				</script>
+				<input type="text" id="capacitance" name="capacitance" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number that should be between 0.2 and 2.5">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Thermal Resistance(&degC/kW)<span class="classic">Resistance, must be between 1.5 and 140</span></label>
-				<input type="text" id="resistance" name="resistance" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number between 1.5 and 140" onchange="handle_resistance_value()">
-				<script>
-					function handle_resistance_value(){
-						var x = gebi("resistance").value;
-						if (x >140){
-							x = 140;
-							window.alert("Bad inputs, values will be adjusted to the nearest acceptable value");
-						} else if (x < 1.5){
-							x = 1.5;
-							window.alert("Bad inputs, values will be adjusted to the nearest acceptable value");
-						}
-						allInputData.resistance = x;
-						gebi("resistance").value = x;
-						gebi("resistance").innerHTML = x;
-					}
-				</script>
+				<input type="text" id="resistance" name="resistance" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number that should be between 1.5 and 140">
 			</div>			
 			<div class="shortInput">
 				<label class="tooltip">COP<span class="classic">Coefficient of Power, must be between 1 and 3.5</span></label>
-				<input type="text" id="cop" name="cop" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number between 1 and 3.5" onchange="handle_cop_value()">
-				<script>
-					function handle_cop_value(){
-						var x = gebi("cop").value;
-						if (x >3.5){
-							x = 3.5;
-							window.alert("Bad inputs, values will be adjusted to the nearest acceptable value");
-						} else if (x < 1){
-							x = 1;
-							window.alert("Bad inputs, values will be adjusted to the nearest acceptable value");
-						}
-						allInputData.cop = x;
-						gebi("cop").value = x;
-						gebi("cop").innerHTML = x;
-					}
-				</script>
+				<input type="text" id="cop" name="cop" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number that should be between 1 and 3.5">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Temperature Setpoint(&degC)<span class="classic">Setpoint, must be between 1.7 and 54</span></label>
-				<input type="text" id="setpoint" name="setpoint" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number 1.7 to 54" onchange="handle_setpoint_value()">
-				<script>
-					function handle_setpoint_value(){
-						var x = gebi("setpoint").value;
-						if (x >54){
-							x = 54;
-							window.alert("Bad inputs, values will be adjusted to the nearest acceptable value");
-						} else if (x < 1.7){
-							x = 1.7;
-							window.alert("Bad inputs, values will be adjusted to the nearest acceptable value");
-						}
-						allInputData.setpoint = x;
-						gebi("setpoint").value = x;
-						gebi("setpoint").innerHTML = x;
-					}
-				</script>
+				<input type="text" id="setpoint" name="setpoint" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number that should be between 1.7 to 54">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Temperature Deadband(&degC)<span class="classic">Deadband, must be between 0.125 and 2</span></label>
-				<input type="text" id="deadband" name="deadband" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number 0.125 to 2" onchange="handle_deadband_value()">
-				<script>
-					function handle_deadband_value(){
-						var x = gebi("deadband").value;
-						if (x >2){
-							x = 2;
-							window.alert("Bad inputs, values will be adjusted to the nearest acceptable value");
-						} else if (x < 0.125){
-							x = 0.125;
-							window.alert("Bad inputs, values will be adjusted to the nearest acceptable value");
-						}
-						allInputData.deadband = x;
-						gebi("deadband").value = x;
-						gebi("deadband").innerHTML = x;
-					}
-				</script>
+				<input type="text" id="deadband" name="deadband" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number that should be between 0.125 to 2">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Unit Cost ($/unit)<span class="classic">unitDeviceCost</span></label>
@@ -365,7 +275,7 @@
 	</div>
 	<!-- Output tables, graphs, etc. -->
 	<div id="output" class="postRun">
-		<p class="reportTitle postRun" style="page-break-before:always">VBAT Power Available</p>
+		<p class="reportTitle postRun" style="page-break-before:always">VBAT Energy Available</p>
 		<div id="powerReport" class="tightContent postRun">
 			<div id="powerChart"></div>
 			<script>
@@ -387,12 +297,12 @@
 						"lineColor":"gray"
 					},
 					"yAxis":{
-						"title":{"text":"Power (kW)","style":{"color":"gray"}},
+						"title":{"text":"Energy (kWh)","style":{"color":"gray"}},
 					},
 					"title":{"text": allOutputData.dataCheck, "verticalAlign":"bottom", "align":"right", "y":-400, "x":-150, "style":{"color":"gray", "fontSize":"36px"}},
 					"series":[
-						{"name":"Min Power","marker":{"enabled":false},"color":"red","data":allOutputData.minPowerSeries,"pointPlacement": +0.1},
-						{"name":"Max Power","marker":{"enabled":false},"color":"purple","data":allOutputData.maxPowerSeries,"pointPlacement": -0.2},
+						{"name":"Min Energy","marker":{"enabled":false},"color":"red","data":allOutputData.minEnergySeries,"pointPlacement": +0.1},
+						{"name":"Max energy","marker":{"enabled":false},"color":"purple","data":allOutputData.maxEnergySeries,"pointPlacement": -0.2},
 					],
 					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"powerChart","type":"column","marginRight":20, "height":500,"width":1000},
 					"tooltip":false,
