@@ -140,7 +140,11 @@ def work(modelDir, inputDict):
 		E_UL = map(float,E_UL.split('\n'))
 	except:
 		raise Exception('Parsing error, check power data')
-	for x,y in zip(P_upper,demandList):
+	outData["minPowerSeries"] = [-1*x for x in P_lower]
+	outData["maxPowerSeries"] = P_upper
+	outData["minEnergySeries"] = [-1*x for x in E_UL]
+	outData["maxEnergySeries"] = E_UL
+	for x,y in zip(E_UL,demandList):
 		demandAdjustedList.append(y-x)
 	dayCount = -1
 	for monthNum in calendar:					#month number in year
@@ -159,15 +163,11 @@ def work(modelDir, inputDict):
 		outData["dataCheck"] = 'VBAT returns no values for your inputs'
 	else:
 		outData["dataCheck"] = ''
-	outData["minPowerSeries"] = [-1*x for x in P_lower]
-	outData["maxPowerSeries"] = P_upper
-	outData["minEnergySeries"] = [-1*x for x in E_UL]############## Remove energy? it's no longer displayed on the front end
-	outData["maxEnergySeries"] = E_UL
 	outData["demand"] = demandList
-	outData["demandAdjusted"] = demandAdjustedList
 	outData["peakDemand"] = peakDemand
-	outData["peakAdjustedDemand"] = peakAdjustedDemand
 	outData["energyMonthly"] = energyMonthly
+	outData["demandAdjusted"] = demandAdjustedList
+	outData["peakAdjustedDemand"] = peakAdjustedDemand
 	outData["energyAdjustedMonthly"] = energyAdjustedMonthly
 	for x in range(12):
 		energyCost[x] = energyMonthly[x]*float(inputDict["electricityCost"])
