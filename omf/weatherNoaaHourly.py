@@ -1,8 +1,10 @@
-import requests, csv, json, collections
-#for list of available stations go to:
-#ftp://ftp.ncdc.noaa.gov/pub/data/uscrn/products/hourly02 
+import requests, csv, tempfile, os
 
 def pullWeather(year, station, outputPath):
+	'''
+	For a given year and weather station, write 8760 hourly weather data (temp, humidity, etc.) to outputPath.
+	for list of available stations go to: ftp://ftp.ncdc.noaa.gov/pub/data/uscrn/products/hourly02
+	'''
 	url = 'https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02/' + year + '/CRNH0203-' + year + '-' + station + '.txt'
 	r = requests.get(url)
 	data = r.text
@@ -17,9 +19,9 @@ def pullWeather(year, station, outputPath):
 		for x in range(0,8760): 
 			wr.writerow([tempData[x]])
 
-#TODO: create a tests function.
 def _tests():
-	pullWeather('2017','KY_Versailles_3_NNW','weatherNoaaTemp.csv')
+	tmpdir = tempfile.mkdtemp()
+	pullWeather('2017', 'KY_Versailles_3_NNW', os.path.join(tmpdir, 'weatherNoaaTemp.csv'))
 
 if __name__ == '__main__':
 	_tests()
