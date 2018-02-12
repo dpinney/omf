@@ -13,6 +13,12 @@ for x in range(0,8760):
 		temp+=data[y]
 	tempData.append(float(temp))
 with open('weatherNoaaTemp.csv', 'wb') as myfile:
-    wr = csv.writer(myfile,lineterminator = '\n')
-    for x in range(0,8760): 
-    	wr.writerow([tempData[x]])
+	wr = csv.writer(myfile,lineterminator = '\n')
+	for x in range(0,8760): 
+		wr.writerow([tempData[x]])
+
+def pullWeather(year, station, outputPath):
+	# TODO: implement to return the 8760 .csv file to outputPath.
+	pass
+
+#TODO: create a tests function.
