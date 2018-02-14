@@ -17,7 +17,7 @@ from omf.solvers import gridlabd
 # Model metadata:
 fileName = os.path.basename(__file__)
 modelName = fileName[0:fileName.rfind('.')]
-tooltip = "TOOLTIP TBD"
+tooltip = "Generate timeseries powerflow scenarios from a distribution feeder."
 
 # Our HTML template for the interface:
 with open(pJoin(__neoMetaModel__._myDir,modelName+".html"),"r") as tempFile:
@@ -31,10 +31,12 @@ def work(modelDir, inputDict):
 	inputDict["feederName1"] = feederName
 	# Make an output.
 	outData["test"] = 1
+	# TODO: actually run the scenario generator.
 	return outData
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	# TODO: add inputs needed based on spec.
 	defaultInputs = {
 		"feederName1": "Olin Barre Geo",
 		"modelType": modelName,
@@ -42,7 +44,7 @@ def new(modelDir):
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
-		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
+		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName1"]+".omd"), pJoin(modelDir, defaultInputs["feederName1"]+".omd"))
 	except:
 		return False
 	return creationCode
