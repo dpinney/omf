@@ -6,7 +6,7 @@ Full documentation is available on our [OMF wiki](https://github.com/dpinney/omf
 
 ### Installation
 
-Anyone can sign up for a free account on our hosted production site http://www.omf.coop/.
+Anyone can sign up for a free account on our hosted production site https://www.omf.coop/.
 
 If you'd like to host your own copy of the OMF, please follow the [developer installation instructions](https://github.com/dpinney/omf/wiki/Dev-~-Installation-Instructions).
 
