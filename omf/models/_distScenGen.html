@@ -60,13 +60,6 @@
 				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
 				<input type="text" id="feederName1" name="feederName1" style="display:none">
 			</div>
-			<div class="shortInput">
-				<label class="tooltip">Layout Algorithm<span class="classic">Geospatial shows the circuit the same way it was defined in the feeder editor. Force Directed uses an algorithm to show the circuit elements evenly spaced (useful for circuits without location data).</span></label>
-				<select id="layoutAlgorithm" name="layoutAlgorithm">
-					<option value="geospatial">Geospatial</option>
-					<option value="forceDirected">Force Directed</option>
-				</select>
-			</div>
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
@@ -88,10 +81,12 @@
 		</script>
 	</div>
 	<div id="output">
-		<p class="reportTitle postRun" style="page-break-before:always">Voltage Drop Diagram</p>
+		<p class="reportTitle postRun" style="page-break-before:always">Timeseries Powerflow Results</p>
 		<div id="voltageDropDiagram" class="tightContent postRun">
-			<img id="voltageDropChart" style="width:1000px;height:1000px;" />
-			<script type="text/javascript">gebi("voltageDropChart").src = "data:image/png;base64," + allOutputData.voltageDrop</script>
+			<p id="fakeOutput"></p>
 		</div>
+		<script type="text/javascript">
+			gebi("fakeOutput").innerHTML = allOutputData["test"]
+		</script>
 	</div>
 </body>
