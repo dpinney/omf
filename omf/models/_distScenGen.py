@@ -27,11 +27,16 @@ def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	outData = {}
 	# Get feeder name.
-	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
+	feederName = [x for x in os.listdir(modelDir) if x.endswith(".omd")][0][:-4]
 	inputDict["feederName1"] = feederName
+	# Get the feeder data and write to .glm.
+	with open(pJoin(modelDir,feederName + ".omd"),"r") as inFile:
+		feederData = json.load(inFile)
+	with open(pJoin(modelDir,"scenarioSeed.glm"), "w") as outFile:
+		outFile.write(omf.feeder.sortedWrite(feederData["tree"]))
+	# TODO: actually run the scenario generator.
 	# Make an output.
 	outData["test"] = 1
-	# TODO: actually run the scenario generator.
 	return outData
 
 def new(modelDir):
