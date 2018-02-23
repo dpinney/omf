@@ -377,7 +377,6 @@
 					var htmlDisplayCollector = "";
 
 					if(rdtOutput.design_solution.is_feasible == true) {
-						console.log("SUPLOL")
 						gebi("powerflowValid").style =  "float: right; color: #54c465;" 
 						gebi("powerflowValid").innerHTML = "Powerflow Validated";
 					}
@@ -415,7 +414,17 @@
 						}
 						totalCost = parseFloat(lineCost.replace(/\,/g,'')) + totalCost;
 					}
-					htmlDisplayCollector = htmlDisplayCollector + '<table id="totalCostTable"><tr><th>Total Cost</th></tr><tr><td>$' + totalCost.toFixed(2) + '</td></tr></table><br>';
+					secondRunValid = ""
+					secondRunValidStyle = ""
+					if(allOutputData.secondGLD == "True") {
+						secondRunValidStyle =  "color: #54c465;" 
+						secondRunValid = "Powerflow Validated";
+					}
+					else {
+						secondRunValidStyle =  "color: red;" 
+						secondRunValid = "Powerflow Not Validated";
+					}
+					htmlDisplayCollector = htmlDisplayCollector + '<table id="totalCostTable"><tr><th><div style="float: left;">Total Cost</div><div style="' + secondRunValidStyle + 'float: right;">' + secondRunValid + '</div></th></tr><tr><td>$' + totalCost.toFixed(2) + '</td></tr></table><br>';
 					htmlDisplayCollector = htmlDisplayCollector + '<table id="solutionComponents">' + htmlCollector + '</table>';
 
 					for(var j = 0; j < rdtOutput.scenario_solution.length; j++) {
@@ -455,7 +464,7 @@
 		<div style="text-align:left" class="tightContent">
 			<a style="padding:10px" onclick="downloadTextFile('gfmOutput.txt', allOutputData['gfmRawOut'])">General Fragility Model (GFM) Output</a><br>
 			<a style="padding:10px" onclick="downloadTextFile('rdtOutput.txt', allOutputData['rdtRawOut'])">Resilient Design Tool (RDT) Output</a><br>
-			<a style="padding:10px" onclick="downloadTextFile('gridlabdOutput.txt', allOutputData['gridlabdRawOut'])">GridLAB-D (GLD) Output</a>
+			<a style="padding:10px" onclick="downloadTextFile('gridlabdOutput.txt', JSON.stringify(allOutputData['gridlabdRawOut'], null, 2))">GridLAB-D (GLD) Output</a>
 		</div>
 		<br>
 		<br>	
