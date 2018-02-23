@@ -11,6 +11,7 @@ from __neoMetaModel__ import *
 import subprocess, random, webbrowser, multiprocessing
 import pprint as pprint
 import copy
+import os.path
 
 # OMF imports
 import omf.feeder as feeder
@@ -387,7 +388,6 @@ def work(modelDir, inputDict):
 		#Load a blank glm file and use it to write to it
 		feederPath = pJoin(modelDir, 'feeder.glm')
 		with open(feederPath, 'w') as glmFile:
-			#toWrite =  omf.feeder.sortedWrite(omd['tree']) + "object jsondump {\n\tfilename_dump_reliability test_JSON_dump1.json;\n\twrite_reliability true;\n\tfilename_dump_line test_JSON_dump2.json;\n\twrite_line true;\n};\n"# + "object jsonreader {\n\tfilename " + insertRealRdtOutputNameHere + ";\n};"
 			toWrite =  omf.feeder.sortedWrite(omd['tree']) + "object jsondump {\n\tfilename_dump_reliability test_JSON_dump.json;\n\twrite_system_info true;\n\twrite_per_unit true;\n\tsystem_base 100.0 MVA;\n};\n"# + "object jsonreader {\n\tfilename " + insertRealRdtOutputNameHere + ";\n};"
 			glmFile.write(toWrite)		
 		#Write attachments from omd, if no file, one will be created
@@ -403,7 +403,7 @@ def work(modelDir, inputDict):
 		with open(pJoin(modelDir, "JSON_dump_line.json"), "r") as gldOut:
 			accumulator = json.load(gldOut)
 		outData['gridlabdRawOut'] = accumulator
-		#THIS IS THE CODE THAT ONCE FRANK GETS DONE WITH GRIDLAB-D NEEDS TO BE UNCOMMENTED
+		#Data trabsformation for GLD
 		rdtJson["line_codes"] = accumulator["properties"]["line_codes"]
 		rdtJson["lines"] = accumulator["properties"]["lines"]
 		for item in rdtJson["lines"]:
@@ -436,15 +436,55 @@ def work(modelDir, inputDict):
 	rdtOutFile = modelDir + '/rdtOutput.json'
 	rdtSolverFolder = pJoin(__neoMetaModel__._omfDir,'solvers','rdt')
 	rdtJarPath = pJoin(rdtSolverFolder,'micot-rdt.jar')
-	proc = subprocess.Popen(['java', "-Djna.library.path=" + rdtSolverFolder, '-jar', rdtJarPath, '-c', rdtInputFilePath, '-e', rdtOutFile])
-	proc.wait()
+	proc = subprocess.Popen(['java', "-Djna.library.path=" + rdtSolverFolder, '-jar', rdtJarPath, '-c', rdtInputFilePath, '-e', rdtOutFile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	(stdout,stderr) = proc.communicate()
+	with open(pJoin(modelDir, "rdtConsoleOut.txt"), "w") as rdtConsoleOut:
+		rdtConsoleOut.write(stdout)
 	rdtRawOut = open(rdtOutFile).read()
 	outData['rdtRawOut'] = rdtRawOut
 	# Indent the RDT output nicely.
 	with open(pJoin(rdtOutFile),"w") as outFile:
 		rdtOut = json.loads(rdtRawOut)
 		json.dump(rdtOut, outFile, indent = 4)
+
 	# TODO: run GridLAB-D second time to validate RDT results with new control schemes.
+	feederCopy = copy.deepcopy(feederModel)
+	lineSwitchList = []
+	for line in rdtOut['design_solution']['lines']:
+		if('switch_built' in line):
+			lineSwitchList.append(line['id'])
+	#Remove nonessential lines as indicated by RDT output
+	for key in feederCopy['tree'].keys():
+		value = feederCopy['tree'][key]
+		if('object' in value):
+			if (value['object'] == 'underground_line') or (value['object'] == 'overhead_line'):
+				if value['name'] not in lineSwitchList:
+					del feederCopy['tree'][key]
+	#Add generators to 
+	maxTreeKey = int(max(feederCopy['tree'], key=int)) + 1
+	for gen in rdtOut['design_solution']['generators']:
+		newGen = {}
+		newGen["object"] = "diesel_dg"
+		newGen["name"] = gen['id']
+		newGen["parent"] = gen['id'][:-4]
+		newGen["phases"] = "ABC"
+		newGen["Gen_type"] = "CONSTANT_PQ"
+		newGen["Rated_VA"] = "5.0 kVA"
+		newGen["power_out_A"] = "250.0+120.0j"
+		newGen["power_out_B"] = "230.0+130.0j"
+		newGen["power_out_C"] = "220.0+150.0j"
+		feederCopy['tree'][str(maxTreeKey)] = newGen
+		maxTreeKey = maxTreeKey + 1
+	maxTreeKey = max(feederCopy['tree'], key=int)
+	#Load a blank glm file and use it to write to it
+	feederPath = pJoin(modelDir, 'feederSecond.glm')
+	with open(feederPath, 'w') as glmFile:
+		toWrite =  "module generators;\n\n" + omf.feeder.sortedWrite(feederCopy['tree']) + "object voltdump {\n\tfilename voltDump2ndRun.csv;\n};\nobject jsondump {\n\tfilename_dump_reliability test_JSON_dump.json;\n\twrite_system_info true;\n\twrite_per_unit true;\n\tsystem_base 100.0 MVA;\n};\n"# + "object jsonreader {\n\tfilename " + insertRealRdtOutputNameHere + ";\n};"
+		glmFile.write(toWrite)
+	#Wire in the file the user specifies via zipcode.
+	proc = subprocess.Popen(['gridlabd', 'feederSecond.glm'], stdout=subprocess.PIPE, shell=True, cwd=modelDir)
+	(out, err) = proc.communicate()
+	outData["secondGLD"] = str(os.path.isfile(pJoin(modelDir,"voltDump2ndRun.csv")))
 	# Draw the feeder.
 	genDiagram(modelDir, feederModel)
 	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
