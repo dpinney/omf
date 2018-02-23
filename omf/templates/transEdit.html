@@ -454,7 +454,7 @@ function svgClick(event) {
 	 var clickType = event.target.id.split("_")[0]
 	 var clickID = event.target.id.split("_")[1]
 	 lastElementSelected = event.target
-	 console.log(lastElementSelected)
+	 // console.log(lastElementSelected)
 	 //console.log('clicked ', clickType, ' with id', clickID)
 		if (selection.indexOf(networkData[clickType]) === -1){
 			tableDestroy()
@@ -748,7 +748,7 @@ function clickLocate() {
 	r = 5
 	addCircle(x,y,r,newType+"_"+String(newID),newType)
 	if(scaleTracker != 1.0) {
-		console.log(scaleTracker)
+		// console.log(scaleTracker)
 		newCir = document.getElementById(newType+"_"+String(newID))
 		newCir.setAttribute('r', 5*scaleTracker)
 		newCir.setAttribute('stroke-width', 0.5*scaleTracker)
@@ -885,7 +885,7 @@ function moveBusListener() {
 	}
        
 	clickTarget.removeEventListener('click', moveBusListener, false)
-	console.log(networkData)
+	// console.log(networkData)
 }
 
 function newGen() {
@@ -1221,7 +1221,7 @@ function startProcess(startUrl) {
 	$.ajax({
 		url: startUrl
 	}).done(function (data) {
-		console.log(data)
+		// console.log(data)
 	})
 }
 function startCheck(checkUrl) {
@@ -1230,7 +1230,7 @@ function startCheck(checkUrl) {
 		$.ajax({
 			url: checkUrl
 		}).done(function (data) {
-			console.log(data)
+			// console.log(data)
 			if (data.exists == true) {
 				// Still processing.
 			} else if (data.exists == false) {
