@@ -126,16 +126,16 @@ def work(modelDir, inputDict):
 	calendar['10'] = 31
 	calendar['11'] = 30
 	calendar['12'] = 31
-	dayCount = -1
+	hourCounter = -1
 	peakHourOfMonth = [0]*12
 	for monthNum in calendar:					#month number in year
 		for x in range(calendar[monthNum]):		#day number-1 in number of days in month
 			for y in range(24):					#hour of the day-1 out of 24
-				dayCount += 1					#hour out of the year-1 
-				if demandList[dayCount] > peakDemand[int(monthNum)-1]:
-					peakDemand[int(monthNum)-1] = demandList[dayCount]
-					peakHourOfMonth[int(monthNum)-1] = dayCount
-				energyMonthly[int(monthNum)-1] += demandList[dayCount]
+				hourCounter += 1					#hour out of the year-1 
+				if demandList[hourCounter] > peakDemand[int(monthNum)-1]:
+					peakDemand[int(monthNum)-1] = demandList[hourCounter]
+					peakHourOfMonth[int(monthNum)-1] = hourCounter
+				energyMonthly[int(monthNum)-1] += demandList[hourCounter]
 	if plat == 'Windows':
 		# myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
 		proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
@@ -189,12 +189,12 @@ def work(modelDir, inputDict):
 			model += VBenergy[i] == alpha * e0 + VBpower[i] * deltaT
 		else:
 		    model += VBenergy[i] == alpha * VBenergy[i-1] + VBpower[i] * deltaT
-	dayCount = 0
+	hourCounter = 0
 	for monthNum in calendar:					#month number in year
 		for x in range(calendar[monthNum]):		#day number-1 in number of days in month
 			for y in range(24):					#hour of the day-1 out of 24
-				model += (Demand[int(monthNum)] >= demandList[dayCount] + VBpower[dayCount+1])
-				dayCount += 1
+				model += (Demand[int(monthNum)] >= demandList[hourCounter] + VBpower[hourCounter+1])
+				hourCounter += 1
 	model.solve()
 	powerReduc = []
 	energyReduc = []
@@ -210,29 +210,29 @@ def work(modelDir, inputDict):
 		y = x - x%24
 		for z in range(y,y+24):
 			demandAdjustedList[z] = (powerReduc[z]+demandList[z])
-	dayCount = -1
+	hourCounter = -1
 	peakHourOfMonth = [0]*12
 	for monthNum in calendar:					#month number in year
 		peakValMonth = 0
 		for x in range(calendar[monthNum]):		#day number-1 in number of days in month
 			for y in range(24):					#hour of the day-1 out of 24
-				dayCount += 1					#hour out of the year-1 
-				if demandAdjustedList[dayCount] > peakValMonth:
-					peakValMonth = demandAdjustedList[dayCount]
-					peakHourOfMonth[int(monthNum)-1] = dayCount				
+				hourCounter += 1					#hour out of the year-1 
+				if demandAdjustedList[hourCounter] > peakValMonth:
+					peakValMonth = demandAdjustedList[hourCounter]
+					peakHourOfMonth[int(monthNum)-1] = hourCounter				
 	for x in peakHourOfMonth:
 		y = x - x%24
 		for z in range(y,y+24):
 			demandAdjustedList[z] = (powerReduc[z]+demandList[z])
 
-	dayCount = 0
+	for i in range(12):
+		peakAdjustedDemand[i] = demandAdjustedList[peakHourOfMonth[i]]
+	hourCounter = 0
 	for monthNum in calendar:					#month number in year
 		for x in range(calendar[monthNum]):		#day number-1 in number of days in month
 			for y in range(24):					#hour of the day-1 out of 24
-				if demandAdjustedList[dayCount] > peakAdjustedDemand[int(monthNum)-1]:
-					peakAdjustedDemand[int(monthNum)-1] = demandAdjustedList[dayCount]
-				energyAdjustedMonthly[int(monthNum)-1] += demandAdjustedList[dayCount]
-				dayCount += 1
+				energyAdjustedMonthly[int(monthNum)-1] += demandAdjustedList[hourCounter]
+				hourCounter += 1
 	rms = 0
 	for each in P_lower:
 		rms = rms + (each**2)**0.5
