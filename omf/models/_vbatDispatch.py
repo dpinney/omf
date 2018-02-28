@@ -112,7 +112,6 @@ def work(modelDir, inputDict):
 	cashFlowList = [0]*int(inputDict["projectionLength"])
 	cumulativeCashflow = [0]*int(inputDict["projectionLength"])
 	NPV = 0
-	#netCashflow = [0]*(int(inputDict["projectionLength"])+1)
 	calendar = collections.OrderedDict()
 	calendar['1'] = 31
 	calendar['2'] = 28
