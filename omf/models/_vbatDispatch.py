@@ -62,20 +62,16 @@ def work(modelDir, inputDict):
 	except:
 		errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href = 'https://github.com/dpinney/omf/wiki/Models-~-storagePeakShave#demand-file-csv-format'>\nOMF Wiki storagePeakShave - Demand File CSV Format</a>"
 		raise Exception(errorMessage)
-	with open(pJoin(modelDir,"temp.csv"),"a+") as tempFile:
+	with open(pJoin(modelDir,"temp.csv"),"r") as tempFile:
 		reader = csv.reader(tempFile)
 		temp = list(reader)
-		newTemp = ""
-		for i in range(8760):
-			if temp[i][0] == '999.0':
-				temp[i][0] = inputDict['setpoint']
-			newTemp += (str(temp[i][0])+'\n')
-	with open(pJoin(modelDir,"temp.csv"),"w") as tempFile:
-		tempFile.truncate()
-		tempFile.close()
+	newTemp = ""
+	for i in range(8760):
+		if temp[i][0] == '999.0':
+			temp[i][0] = inputDict['setpoint']
+		newTemp += (str(temp[i][0])+'\n')
 	with open(pJoin(modelDir,"temp.csv"),"w") as tempFile:
 		tempFile.write(newTemp)
-
 	command = 'OCTBIN --eval "addpath(genpath(\'FULLPATH\'));VB_func(ARGS)"'\
 	 	.replace('FULLPATH', vbatPath)\
 	 	.replace('OCTBIN',octBin)\
@@ -386,10 +382,11 @@ def _simpleTest():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	renderAndShow(modelLoc)
+	# renderAndShow(modelLoc)
 	# Run the model.
 	runForeground(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
 	renderAndShow(modelLoc)
+
 if __name__ == '__main__':
 	_simpleTest ()
