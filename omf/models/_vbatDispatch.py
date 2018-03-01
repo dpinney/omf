@@ -12,6 +12,9 @@ import random
 import csv
 import matplotlib.pyplot as plt
 import numpy as np
+
+import pandas as pd
+import pulp
 	
 # Model metadata:
 fileName = os.path.basename(__file__)
@@ -109,7 +112,6 @@ def work(modelDir, inputDict):
 	cashFlowList = [0]*int(inputDict["projectionLength"])
 	cumulativeCashflow = [0]*int(inputDict["projectionLength"])
 	NPV = 0
-	#netCashflow = [0]*(int(inputDict["projectionLength"])+1)
 	calendar = collections.OrderedDict()
 	calendar['1'] = 31
 	calendar['2'] = 28
@@ -123,14 +125,16 @@ def work(modelDir, inputDict):
 	calendar['10'] = 31
 	calendar['11'] = 30
 	calendar['12'] = 31
-	dayCount = -1
+	hourCounter = -1
+	peakHourOfMonth = [0]*12
 	for monthNum in calendar:					#month number in year
 		for x in range(calendar[monthNum]):		#day number-1 in number of days in month
 			for y in range(24):					#hour of the day-1 out of 24
-				dayCount += 1					#hour out of the year-1 
-				if demandList[dayCount] > peakDemand[int(monthNum)-1]:
-					peakDemand[int(monthNum)-1] = demandList[dayCount]
-				energyMonthly[int(monthNum)-1] += demandList[dayCount]
+				hourCounter += 1					#hour out of the year-1 
+				if demandList[hourCounter] > peakDemand[int(monthNum)-1]:
+					peakDemand[int(monthNum)-1] = demandList[hourCounter]
+					peakHourOfMonth[int(monthNum)-1] = hourCounter
+				energyMonthly[int(monthNum)-1] += demandList[hourCounter]
 	if plat == 'Windows':
 		# myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
 		proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
@@ -158,16 +162,76 @@ def work(modelDir, inputDict):
 	outData["maxPowerSeries"] = P_upper
 	outData["minEnergySeries"] = [-1*x for x in E_UL]
 	outData["maxEnergySeries"] = E_UL
-	for x,y in zip(E_UL,demandList):
-		demandAdjustedList.append(y-x)
-	dayCount = -1
+	### Di's Modified dispatch code begings
+	month_index=range(1,13)
+	beta=float(inputDict["demandChargeCost"])
+	C=float(inputDict["capacitance"])
+	R=float(inputDict["resistance"])
+	deltaT=1
+	alpha=1- deltaT/(C*R) # hourly self discharge rate
+	e0=0 # VB initial energy state
+
+	model = pulp.LpProblem("Demand charge minimization problem", pulp.LpMinimize) 	# start demand charge reduction LP problem
+	VBpower = pulp.LpVariable.dicts("ChargingPower",((i+1) for i in range(8760)))	# decision variable of VB charging power; dim: 8760 by 1
+	for i in range(8760):
+		VBpower[i+1].lowBound = -P_lower[i]
+		VBpower[i+1].upBound = P_upper[i]
+	VBenergy = pulp.LpVariable.dicts("EnergyState",((i+1) for i in range(8760)))	# decision variable of VB energy state; dim: 8760 by 1
+	for i in range(8760):
+	    VBenergy[i+1].lowBound = -E_UL[i]
+	    VBenergy[i+1].upBound = E_UL[i]
+	Demand = pulp.LpVariable.dicts("MonthlyDemand",((month) for month in month_index),lowBound=0)
+	model += pulp.lpSum([Demand[month] * beta] for month in month_index)# objective function: sum of monthly demand charge
+	for i in range(8760):	# VB energy state as a function of VB power
+		i += 1
+		if i==1:
+			model += VBenergy[i] == alpha * e0 + VBpower[i] * deltaT
+		else:
+		    model += VBenergy[i] == alpha * VBenergy[i-1] + VBpower[i] * deltaT
+	hourCounter = 0
 	for monthNum in calendar:					#month number in year
 		for x in range(calendar[monthNum]):		#day number-1 in number of days in month
 			for y in range(24):					#hour of the day-1 out of 24
-				dayCount += 1					#hour out of the year-1 
-				if demandAdjustedList[dayCount] > peakAdjustedDemand[int(monthNum)-1]:
-					peakAdjustedDemand[int(monthNum)-1] = demandAdjustedList[dayCount]
-				energyAdjustedMonthly[int(monthNum)-1] += demandAdjustedList[dayCount]
+				model += (Demand[int(monthNum)] >= demandList[hourCounter] + VBpower[hourCounter+1])
+				hourCounter += 1
+	model.solve()
+	powerReduc = []
+	energyReduc = []
+	for i in range(1,8761):
+	    powerReduc.append(VBpower[i].varValue)
+	    energyReduc.append(VBenergy[i].varValue)
+	outData["VBpower"] = powerReduc
+	outData["VBenergy"] = energyReduc
+	### Di's Modified dispatch code ends
+	for each in demandList:
+		demandAdjustedList.append(each)
+	for x in peakHourOfMonth:
+		y = x - x%24
+		for z in range(y,y+24):
+			demandAdjustedList[z] = (powerReduc[z]+demandList[z])
+	hourCounter = -1
+	peakHourOfMonth = [0]*12
+	for monthNum in calendar:					#month number in year
+		peakValMonth = 0
+		for x in range(calendar[monthNum]):		#day number-1 in number of days in month
+			for y in range(24):					#hour of the day-1 out of 24
+				hourCounter += 1					#hour out of the year-1 
+				if demandAdjustedList[hourCounter] > peakValMonth:
+					peakValMonth = demandAdjustedList[hourCounter]
+					peakHourOfMonth[int(monthNum)-1] = hourCounter				
+	for x in peakHourOfMonth:
+		y = x - x%24
+		for z in range(y,y+24):
+			demandAdjustedList[z] = (powerReduc[z]+demandList[z])
+
+	for i in range(12):
+		peakAdjustedDemand[i] = demandAdjustedList[peakHourOfMonth[i]]
+	hourCounter = 0
+	for monthNum in calendar:					#month number in year
+		for x in range(calendar[monthNum]):		#day number-1 in number of days in month
+			for y in range(24):					#hour of the day-1 out of 24
+				energyAdjustedMonthly[int(monthNum)-1] += demandAdjustedList[hourCounter]
+				hourCounter += 1
 	rms = 0
 	for each in P_lower:
 		rms = rms + (each**2)**0.5
