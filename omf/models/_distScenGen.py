@@ -47,7 +47,7 @@ def work(modelDir, inputDict):
 	paraInput = {
 		"rootpath": None,
 		"experimentFilePath": modelDir,
-		"numoffeeders": 10,
+		"numoffeeders": None,
 		"testfolder": "testjson_folder",
 		"startdate": "2013-08-01 0:00:00",
 		"enddate": "2013-08-02 0:00:00",
@@ -66,7 +66,7 @@ def work(modelDir, inputDict):
 		}
 	}
 	paraInput['rootpath'] = omfDir + '/scratch/parapopulation_tool'
-	paraInput['numoffeeders'] = inputDict['Feeder Number']
+	paraInput['numoffeeders'] = len(paraInput['inputGLM'].keys())
 	# Get the feeder data and write to .glm.
 	with open(pJoin(modelDir,feederName + ".omd"),"r") as inFile:
 		feederData = json.load(inFile)
