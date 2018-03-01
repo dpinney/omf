@@ -1,24 +1,16 @@
-''' Description TBD '''
+''' TODO: Description TBD '''
 
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math
 import traceback
 from os.path import join as pJoin
 from jinja2 import Template
 from matplotlib import pyplot as plt
-from networkx.drawing.nx_agraph import graphviz_layout
-import networkx as nx
 from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
 
 # OMF imports 
 import omf.feeder as feeder
 from omf.solvers import gridlabd
-
-#Import json package
-import json
-import csv
-#Import gridlabd to run simulations
-import subprocess
 
 # Model metadata:
 fileName = os.path.basename(__file__)
@@ -48,11 +40,11 @@ def work(modelDir, inputDict):
 		"rootpath": None,
 		"experimentFilePath": modelDir,
 		"numoffeeders": None,
-		"testfolder": "testjson_folder",
-		"startdate": "2013-08-01 0:00:00",
-		"enddate": "2013-08-02 0:00:00",
-		"recordstart": "2013-08-01 0:00:00",
-		"recordend": "2013-08-02 0:00:00",
+		"testfolder": "parapopulation_feeders",
+		"startdate": "2013-08-01 0:00:00", # TODO: use datetime to set this to 1 day before inputDict['startTime']
+		"enddate": inputDict['endTime'],
+		"recordstart": inputDict['startTime'],
+		"recordend": inputDict['endTime'],
 		"inputGLM": {
 			"R1-12.47-1.glm": [0.12, 6.5, 1, 1],
 			# "R1-12.47-2.glm": [0.11, 6.5, 1, 1],
@@ -74,7 +66,7 @@ def work(modelDir, inputDict):
 		outFile.write(omf.feeder.sortedWrite(feederData["tree"]))
 	# Put the data in to the PNNL parapulation tool.
 	scenGen.main(paraInput)
-	direc = pJoin(modelDir, 'testjson_folder') #somehow make testjson_folder a user input
+	direc = pJoin(modelDir, paraInput['testfolder'])
 	# Run gridlabd simulations.
 	print(direc)
 	for filename in os.listdir(direc):
@@ -91,12 +83,12 @@ def work(modelDir, inputDict):
 					for file in os.listdir(pJoin(direc, filename, name)):
 						if 'swing_node' in file:
 							#Make an output.
-							outputFile=pJoin(direc, filename, name, file)
+							outputFile = pJoin(direc, filename, name, file)
 							outData[file] = graphify(outputFile)  #charts of some sort
 	return outData
 	
 def graphify(outputFile):
-	#parses through a gridlabd csv file and pulls out relevant information, writes to python dictionary
+	''' parses through a gridlabd csv file and pulls out relevant information, writes to python dictionary. '''
 	names=('#timestamp', 'measured_current_A.real','measured_current_A.imag'	,'measured_current_B.real'	,'measured_current_B.imag'	,'measured_current_C.real',	'measured_current_C.imag',	'measured_voltage_A.real',	'measured_voltage_A.imag',	'measured_voltage_B.real',	'measured_voltage_B.imag','measured_voltage_C.real','measured_voltage_C.imag,','measured_real_power','measured_reactive_power')
 	new_dict = {}
 	with open(outputFile, 'r') as csvfile:
@@ -106,18 +98,15 @@ def graphify(outputFile):
 		for row in swingnode:
 			new_dict[row['#timestamp']] = (row['measured_real_power'], row['measured_reactive_power'])
 		return new_dict
+
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	# TODO: add inputs needed based on spec.
 	defaultInputs = {
 		"feederName1": "Olin Barre Geo",
 		"modelType": modelName,
 		"runTime": "",
-		"Start Time": "2013-08-01 0:00:00",
-		"End Time": "2013-08-02 0:00:00",
-		"Feeder Number": "1",
-		"Folder Name": "test_Folder",
-
+		"startTime": "2013-08-01 0:00:00",
+		"endTime": "2013-08-02 0:00:00",
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
