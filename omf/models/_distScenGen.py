@@ -39,7 +39,7 @@ def work(modelDir, inputDict):
 	paraInput = {
 		"rootpath": None,
 		"experimentFilePath": modelDir,
-		"numoffeeders": None,
+		"numoffeeders": int(inputDict['numoffeeders']),
 		"testfolder": "parapopulation_feeders",
 		"startdate": "2013-08-01 0:00:00", # TODO: use datetime to set this to 1 day before inputDict['startTime']
 		"enddate": inputDict['endTime'],
@@ -58,7 +58,6 @@ def work(modelDir, inputDict):
 		}
 	}
 	paraInput['rootpath'] = omfDir + '/scratch/parapopulation_tool'
-	paraInput['numoffeeders'] = len(paraInput['inputGLM'].keys())
 	# Get the feeder data and write to .glm.
 	with open(pJoin(modelDir,feederName + ".omd"),"r") as inFile:
 		feederData = json.load(inFile)
@@ -105,6 +104,7 @@ def new(modelDir):
 		"feederName1": "Olin Barre Geo",
 		"modelType": modelName,
 		"runTime": "",
+		"numoffeeders":"1",
 		"startTime": "2013-08-01 0:00:00",
 		"endTime": "2013-08-02 0:00:00",
 	}
