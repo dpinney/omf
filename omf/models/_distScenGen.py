@@ -46,6 +46,7 @@ def work(modelDir, inputDict):
 	# Modify parapulation tool inputs.
 	paraInput = {
 		"rootpath": None,
+		"experimentFilePath": modelDir,
 		"numoffeeders": 10,
 		"testfolder": "testjson_folder",
 		"startdate": "2013-08-01 0:00:00",
@@ -54,14 +55,14 @@ def work(modelDir, inputDict):
 		"recordend": "2013-08-02 0:00:00",
 		"inputGLM": {
 			"R1-12.47-1.glm": [0.12, 6.5, 1, 1],
-			"R1-12.47-2.glm": [0.11, 6.5, 1, 1],
-			"R1-12.47-3.glm": [0.11, 6.5, 1, 1],
-			"R2-12.47-1.glm": [0.11, 6.5, 2, 1],
-			"R2-12.47-2.glm": [0.11, 6.5, 2, 1],
-			"R2-12.47-3.glm": [0.11, 6.5, 2, 1],
-			"R3-12.47-1.glm": [0.11, 6.5, 3, 1],
-			"R3-12.47-2.glm": [0.11, 6.5, 3, 1],
-			"R3-12.47-3.glm": [0.11, 6.5, 3, 1]
+			# "R1-12.47-2.glm": [0.11, 6.5, 1, 1],
+			# "R1-12.47-3.glm": [0.11, 6.5, 1, 1],
+			# "R2-12.47-1.glm": [0.11, 6.5, 2, 1],
+			# "R2-12.47-2.glm": [0.11, 6.5, 2, 1],
+			# "R2-12.47-3.glm": [0.11, 6.5, 2, 1],
+			# "R3-12.47-1.glm": [0.11, 6.5, 3, 1],
+			# "R3-12.47-2.glm": [0.11, 6.5, 3, 1],
+			# "R3-12.47-3.glm": [0.11, 6.5, 3, 1]
 		}
 	}
 	paraInput['rootpath'] = omfDir + '/scratch/parapopulation_tool'

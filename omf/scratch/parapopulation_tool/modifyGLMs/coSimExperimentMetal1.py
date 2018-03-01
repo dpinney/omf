@@ -107,6 +107,7 @@ if __name__ == '__main__':
 	# ---------------------------------------------------------------
 	# ----------------------- Settings ------------------------------
 	# ---------------------------------------------------------------
+# NRECA EDIT: Main function added so it can be called later
 def main(input_data_dict):
 	start = time.time()
 	
@@ -153,7 +154,8 @@ def main(input_data_dict):
 	includeFilePath = '/modelDependency'
 
 	# relative path to where you want the experiment outputs
-	experimentFilePath = 'C:/Users/Tuomas/SkyDrive/omf/omf/data/Model/admin/Automated Testing of _distScenGen'
+	# NRECA EDIT experimentFilePath now pulled from json dictionary input
+	experimentFilePath = input_data_dict['experimentFilePath']
 
 	# relative path to MATPOWER wrapper related files
 	matpowerFilePath = '/modelDependency/matpower'
@@ -252,6 +254,7 @@ def main(input_data_dict):
 	# combine path so they are not relative anymore
 	feederFilePath = rootPath + feederFilePath
 	includeFilePath = rootPath + includeFilePath
+	#NRECA EDIT: experimentFilePath now just experimentFilePath pulled directly from json dictionary
 	experimentFilePath = experimentFilePath
 	matpowerFilePath = rootPath + matpowerFilePath
 	aggregatorFilePath = rootPath + aggregatorFilePath
