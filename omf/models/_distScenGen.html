@@ -10,6 +10,7 @@
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<!-- Data  Imports -->
 	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
 	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
@@ -83,28 +84,45 @@
 	<div id="output">
 		<p class="reportTitle postRun" style="page-break-before:always">Timeseries Powerflow Results</p>
 		<div id="voltageDropDiagram" class="tightContent postRun">
-			<p id="fakeOutput"></p>
+			<div id="chartContainer">
 		</div>
 		<script type="text/javascript">
-/*			gebi("fakeOutput").innerHTML = allOutputData["test"]
-			key_list=Object.keys(allOutputData["R1-12.47-1_swing_node.csv"])
-			category_list=for (var key in key_list){console.log(key_list[key])}])
-
-
-
-			
-			new Highcharts.chart('container', {
-			    xAxis: {
-			        categories: []
-			    },
-
-			    series: [{
-			        data: []
-			    }, {
-			        data: [216.4, 194.1, 95.6, 54.4, 29.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5],
-			        lineWidth: 5
-			    }]
-			});*/
+			h_c_options = {
+				"credits": {"enabled":false},
+				"plotOptions": {
+					"series": {"shadow":false,"animation": false},
+					"line": {"marker":{"enabled":false}}
+				},
+				"xAxis": {
+					"tickColor":"gray",
+					"lineColor":"gray"},
+				"title": {"text":null},
+				"series": [
+					{ "marker":{"enabled":false},
+					 "dataLabels":{"enabled":false},
+					 "color":"red",
+					 "data":[10,40,30,60,30,60,20,50],
+					 "name":"Power Generated" }
+				],
+				"tooltip": false,
+				"yAxis": {
+					"title": {
+						"text":"Power (W-AC)",
+						"style":{"color":"gray"}
+					},
+					"min":0},
+				"chart": {
+					"zoomType":"x",
+					"marginBottom":35,
+					"width":1000,
+					"height":300,
+					"marginRight":20,
+					"renderTo":"chartContainer",
+					"type":"line"
+				},
+				"legend":false
+			}
+			new Highcharts.Chart(h_c_options)
 		</script>
 	</div>
 </body>
