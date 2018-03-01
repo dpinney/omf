@@ -23,3 +23,4 @@ requests>=2.13
 pandas>=0.3.1
 pulp>=1.6.8
 tqdm>=4.19.6
+scipy>=0.18.1
