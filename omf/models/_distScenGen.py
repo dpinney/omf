@@ -43,22 +43,38 @@ def work(modelDir, inputDict):
 	# Get feeder name.
 	feederName = [x for x in os.listdir(modelDir) if x.endswith(".omd")][0][:-4]
 	inputDict["feederName1"] = feederName
+	# Modify parapulation tool inputs.
+	paraInput = {
+		"rootpath": None,
+		"numoffeeders": 10,
+		"testfolder": "testjson_folder",
+		"startdate": "2013-08-01 0:00:00",
+		"enddate": "2013-08-02 0:00:00",
+		"recordstart": "2013-08-01 0:00:00",
+		"recordend": "2013-08-02 0:00:00",
+		"inputGLM": {
+			"R1-12.47-1.glm": [0.12, 6.5, 1, 1],
+			"R1-12.47-2.glm": [0.11, 6.5, 1, 1],
+			"R1-12.47-3.glm": [0.11, 6.5, 1, 1],
+			"R2-12.47-1.glm": [0.11, 6.5, 2, 1],
+			"R2-12.47-2.glm": [0.11, 6.5, 2, 1],
+			"R2-12.47-3.glm": [0.11, 6.5, 2, 1],
+			"R3-12.47-1.glm": [0.11, 6.5, 3, 1],
+			"R3-12.47-2.glm": [0.11, 6.5, 3, 1],
+			"R3-12.47-3.glm": [0.11, 6.5, 3, 1]
+		}
+	}
+	paraInput['rootpath'] = omfDir + '/scratch/parapopulation_tool'
+	paraInput['numoffeeders'] = inputDict['Feeder Number']
 	# Get the feeder data and write to .glm.
 	with open(pJoin(modelDir,feederName + ".omd"),"r") as inFile:
 		feederData = json.load(inFile)
 	with open(pJoin(modelDir,"scenarioSeed.glm"), "w") as outFile:
 		outFile.write(omf.feeder.sortedWrite(feederData["tree"]))
-
-	#Write inputted data (input dict) to a json file for scenGen (input_data_dict)
-
-	#Below should work, assuming files are always written exactly the same in model
-	input_data_dict_Path=os.path.dirname(os.path.dirname(scenGen.__file__))
-	#somehow pull variable from html so that inputdatadict is name of what is inputted
-	with open(pJoin(input_data_dict_Path, 'input_data_dict.json'), 'r') as d:
-		data=json.load(d)
-	scenGen.main(data)
-	direc=pJoin(modelDir, 'testjson_folder') #somehow make testjson_folder a user input
-	#run gridlabd simulations
+	# Put the data in to the PNNL parapulation tool.
+	scenGen.main(paraInput)
+	direc = pJoin(modelDir, 'testjson_folder') #somehow make testjson_folder a user input
+	# Run gridlabd simulations.
 	print(direc)
 	for filename in os.listdir(direc):
 		if filename != 'include':
