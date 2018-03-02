@@ -349,8 +349,10 @@ def work(modelDir, inputDict):
 		json.dump(gfmJson, outFile, indent=4)
 	# Run GFM
 	gfmBinaryPath = pJoin(__neoMetaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
-	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],'-num','3'], cwd=modelDir)
-	proc.wait()
+	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],'-num','3'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=modelDir)
+	(stdout,stderr) = proc.communicate()
+	with open(pJoin(modelDir, "gfmConsoleOut.txt"), "w") as gfmConsoleOut:
+		gfmConsoleOut.write(stdout)
 	# HACK: rename the hardcoded gfm output
 	rdtInputFilePath = pJoin(modelDir,'rdtInput.json')
 	os.rename(pJoin(modelDir,'rdt_OUTPUT.json'),rdtInputFilePath)
