@@ -326,7 +326,7 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir, feederName + '.omd'), "r") as jsonIn:
 		feederModel = json.load(jsonIn)
 	# Create GFM input file.
-	print "Running GFM ************************************"
+	print "RUNNING GFM FOR", modelDir
 	gfmInputTemplate = {
 		'phase_variation' : float(inputDict['phaseVariation']),
 		'chance_constraint' : float(inputDict['chanceConstraint']),
@@ -341,7 +341,6 @@ def work(modelDir, inputDict):
 		'switchCost' : inputDict['switchCost'],
 		'generatorCandidates' : inputDict['generatorCandidates'],
 		'lineUnitCost' : inputDict['lineUnitCost']
-
 	}
 	gfmJson = convertToGFM(gfmInputTemplate, feederModel)
 	gfmInputFilename = 'gfmInput.json'
@@ -434,7 +433,7 @@ def work(modelDir, inputDict):
 		gridlabdRawOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=modelDir)
 		outData['gridlabdRawOut'] = gridlabdRawOut
 	# Run RDT.
-	print "Running RDT ************************************"
+	print "RUNNING RDT FOR", modelDir
 	rdtOutFile = modelDir + '/rdtOutput.json'
 	rdtSolverFolder = pJoin(__neoMetaModel__._omfDir,'solvers','rdt')
 	rdtJarPath = pJoin(rdtSolverFolder,'micot-rdt.jar')
@@ -448,21 +447,21 @@ def work(modelDir, inputDict):
 	with open(pJoin(rdtOutFile),"w") as outFile:
 		rdtOut = json.loads(rdtRawOut)
 		json.dump(rdtOut, outFile, indent = 4)
-
-	# TODO: run GridLAB-D second time to validate RDT results with new control schemes.
+	# Generate and run 2nd copy of GridLAB-D model with changes specified by RDT.
+	print "RUNNING GLD FOR", modelDir
 	feederCopy = copy.deepcopy(feederModel)
 	lineSwitchList = []
 	for line in rdtOut['design_solution']['lines']:
 		if('switch_built' in line):
 			lineSwitchList.append(line['id'])
-	#Remove nonessential lines as indicated by RDT output
+	# Remove nonessential lines in second model as indicated by RDT output.
 	for key in feederCopy['tree'].keys():
 		value = feederCopy['tree'][key]
 		if('object' in value):
 			if (value['object'] == 'underground_line') or (value['object'] == 'overhead_line'):
 				if value['name'] not in lineSwitchList:
 					del feederCopy['tree'][key]
-	#Add generators to 
+	#Add generators to second model.
 	maxTreeKey = int(max(feederCopy['tree'], key=int)) + 1
 	for gen in rdtOut['design_solution']['generators']:
 		newGen = {}
@@ -478,19 +477,24 @@ def work(modelDir, inputDict):
 		feederCopy['tree'][str(maxTreeKey)] = newGen
 		maxTreeKey = maxTreeKey + 1
 	maxTreeKey = max(feederCopy['tree'], key=int)
-	#Load a blank glm file and use it to write to it
+	# Load a blank glm file and use it to write to it
 	feederPath = pJoin(modelDir, 'feederSecond.glm')
 	with open(feederPath, 'w') as glmFile:
 		toWrite =  "module generators;\n\n" + omf.feeder.sortedWrite(feederCopy['tree']) + "object voltdump {\n\tfilename voltDump2ndRun.csv;\n};\nobject jsondump {\n\tfilename_dump_reliability test_JSON_dump.json;\n\twrite_system_info true;\n\twrite_per_unit true;\n\tsystem_base 100.0 MVA;\n};\n"# + "object jsonreader {\n\tfilename " + insertRealRdtOutputNameHere + ";\n};"
 		glmFile.write(toWrite)
-	#Wire in the file the user specifies via zipcode.
-	proc = subprocess.Popen(['gridlabd', 'feederSecond.glm'], stdout=subprocess.PIPE, shell=True, cwd=modelDir)
-	(out, err) = proc.communicate()
-	outData["secondGLD"] = str(os.path.isfile(pJoin(modelDir,"voltDump2ndRun.csv")))
+	# Run GridLAB-D second time.
+	if platform.system() == "Windows":
+		proc = subprocess.Popen(['gridlabd', 'feederSecond.glm'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=modelDir)
+		(out, err) = proc.communicate()
+		outData["secondGLD"] = str(os.path.isfile(pJoin(modelDir,"voltDump2ndRun.csv")))
+	else:
+		# TODO: make 2nd run of GridLAB-D work on Unixes.
+		outData["secondGLD"] = str(False)
 	# Draw the feeder.
 	genDiagram(modelDir, feederModel)
 	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
 		outData["oneLineDiagram"] = inFile.read().encode("base64")
+	# And we're done.
 	return outData
 
 def cancel(modelDir):
