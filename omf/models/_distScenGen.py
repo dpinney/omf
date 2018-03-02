@@ -75,6 +75,7 @@ def work(modelDir, inputDict):
 					proc = subprocess.Popen(['gridlabd', name], stdout=subprocess.PIPE, shell=True, cwd=pJoin(direc, filename))
 					(out, err) = proc.communicate()
 	#parse through gridlabd csv files
+	i=0 # counter to create dictionary
 	for filename in os.listdir(direc):
 		if filename != 'include':
 			for name in os.listdir(pJoin(direc, filename)):
@@ -83,19 +84,29 @@ def work(modelDir, inputDict):
 						if 'swing_node' in file:
 							#Make an output.
 							outputFile = pJoin(direc, filename, name, file)
-							outData[file] = graphify(outputFile)  #charts of some sort
+							# feederid = ("Feeder"+i)
+							outData[i] = [file, graphify(outputFile) ]
+							i=i+1
+
 	return outData
 	
 def graphify(outputFile):
 	''' parses through a gridlabd csv file and pulls out relevant information, writes to python dictionary. '''
-	names=('#timestamp', 'measured_current_A.real','measured_current_A.imag'	,'measured_current_B.real'	,'measured_current_B.imag'	,'measured_current_C.real',	'measured_current_C.imag',	'measured_voltage_A.real',	'measured_voltage_A.imag',	'measured_voltage_B.real',	'measured_voltage_B.imag','measured_voltage_C.real','measured_voltage_C.imag,','measured_real_power','measured_reactive_power')
 	new_dict = {}
+	dates=[]
+	measured_real_power=[]
+	measured_reactive_power=[]
 	with open(outputFile, 'r') as csvfile:
-		swingnode = csv.DictReader(csvfile, dialect='excel', fieldnames= names, delimiter=',')
+		swingnode = csv.reader(csvfile, dialect='excel', delimiter=',')
 		for i in range(9):
 			swingnode.next()
-		for row in swingnode:
-			new_dict[row['#timestamp']] = (row['measured_real_power'], row['measured_reactive_power'])
+		for row in (swingnode):
+			dates.append(row[0])
+			measured_real_power.append(float(row[13]))
+			measured_reactive_power.append(float(row[14]))
+			new_dict["dates"]=dates
+			new_dict["measured_real_power"]=measured_real_power
+			new_dict["measured_reactive_power"]=measured_reactive_power
 		return new_dict
 
 def new(modelDir):
