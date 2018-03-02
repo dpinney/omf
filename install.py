@@ -9,7 +9,7 @@ if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu
 		os.system("sudo apt-get install ffmpeg python-cairocffi")
 	except:
 		pass # Debian won't bundle a couple packages.
-	os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0.0-1.el6.x86_64.rpm")
+	os.system("wget https://ufpr.dl.sourceforge.net/project/gridlab-d/gridlab-d/Candidate%20release/gridlabd-4.0.0-1.el6.x86_64.rpm")
 	os.system("sudo alien gridlabd-4.0.0-1.el6.x86_64.rpm")
 	workDir = os.getcwd()
 	for file in os.listdir(workDir):
@@ -28,7 +28,7 @@ elif platform.system() == "Linux" and platform.linux_distribution()[0]=="CentOS 
 	os.system("sudo rpm -Uvh http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-1.el7.nux.noarch.rpm")
 	os.system("sudo yum -y install ffmpeg ffmpeg-devel -y")
 	os.system("sudo yum -y install python-pip")
-	os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0.0-1.el6.x86_64.rpm")
+	os.system("wget --no-check-certificate https://ufpr.dl.sourceforge.net/project/gridlab-d/gridlab-d/Candidate%20release/gridlabd-4.0.0-1.el6.x86_64.rpm")
 	os.system("rpm -Uvh gridlabd-3.2.0-1.x86_64.rpm")
 	os.system("cd omf")
 	os.system("pip install -r requirements.txt")
@@ -68,14 +68,14 @@ elif platform.system()=='Windows':
 	# Sometimes wget has a hard time downloading gridlabD
 	if platform.architecture()[0] == '32bit':
 		if 'gridlabd-3.2-win32.exe' not in os.listdir(workDir):
-			os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0_RC1.exe")
+			os.system("wget --no-check-certificate https://ufpr.dl.sourceforge.net/project/gridlab-d/gridlab-d/Candidate%20release/gridlabd-4.0_RC1.exe")
 			os.system("gridlabd-4.0_RC1.exe/silent")
 		if 'pygraphviz-1.3.1-cp27-none-win32.whl' not in os.listdir(workDir):
 			os.system("wget --no-check-certificate https://github.com/dpinney/omf/raw/master/omf/static/pygraphviz-1.3.1-cp27-none-win32.whl")
 	elif platform.architecture()[1] == '64bit':
 		# Note: has not been tested yet, only 32bit has.
 		if 'gridlabd-3.2-x64.exe' not in os.listdir(workDir):
-			os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0_RC1.exe")
+			os.system("wget --no-check-certificate https://ufpr.dl.sourceforge.net/project/gridlab-d/gridlab-d/Candidate%20release/gridlabd-4.0_RC1.exe")
 			os.system("gridlabd-4.0_RC1.exe/silent")
 		if 'pygraphviz-1.3.1-cp27-none-win_amd64.whl' not in os.listdir(workDir):
 			os.system("wget --no-check-certificate https://github.com/dpinney/omf/raw/master/omf/static/pygraphviz-1.3.1-cp27-none-win_amd64.whl")
@@ -93,7 +93,7 @@ elif platform.system()=="Darwin": # MacOS
 	os.system("/usr/bin/ruby -e '$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)'")
 	os.system("brew install wget python ffmpeg git graphviz octave")
 	os.system("brew link --overwrite python")
-	os.system("wget -O gridlabd.dmg --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd_4.0.0.dmg")
+	os.system("wget -O gridlabd.dmg --no-check-certificate https://ufpr.dl.sourceforge.net/project/gridlab-d/gridlab-d/Candidate%20release/gridlabd_4.0.0.dmg")
 	os.system("sudo hdiutil attach gridlabd.dmg")
 	os.system("sudo installer -package /Volumes/GridLAB-D\ 4.0.0/gridlabd.mpkg -target /")
 	os.system("sudo hdiutil detach /Volumes/GridLAB-D\ 4.0.0")
