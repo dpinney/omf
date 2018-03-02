@@ -205,21 +205,21 @@ def work(modelDir, inputDict):
 		y = x - x%24
 		for z in range(y,y+24):
 			demandAdjustedList[z] = (powerReduc[z]+demandList[z])
-	hourCounter = -1
-	peakHourOfMonth = [0]*12
-	for monthNum in calendar:					#month number in year
-		peakValMonth = 0
-		for x in range(calendar[monthNum]):		#day number-1 in number of days in month
-			for y in range(24):					#hour of the day-1 out of 24
-				hourCounter += 1					#hour out of the year-1 
-				if demandAdjustedList[hourCounter] > peakValMonth:
-					peakValMonth = demandAdjustedList[hourCounter]
-					peakHourOfMonth[int(monthNum)-1] = hourCounter				
-	for x in peakHourOfMonth:
-		y = x - x%24
-		for z in range(y,y+24):
-			demandAdjustedList[z] = (powerReduc[z]+demandList[z])
-
+	for i in range(10):
+		hourCounter = -1
+		peakHourOfMonth = [0]*12
+		for monthNum in calendar:					#month number in year
+			peakValMonth = 0
+			for x in range(calendar[monthNum]):		#day number-1 in number of days in month
+				for y in range(24):					#hour of the day-1 out of 24
+					hourCounter += 1					#hour out of the year-1 
+					if demandAdjustedList[hourCounter] > peakValMonth:
+						peakValMonth = demandAdjustedList[hourCounter]
+						peakHourOfMonth[int(monthNum)-1] = hourCounter				
+		for x in peakHourOfMonth:
+			y = x - x%24
+			for z in range(y,y+24):
+				demandAdjustedList[z] = (powerReduc[z]+demandList[z])
 	for i in range(12):
 		peakAdjustedDemand[i] = demandAdjustedList[peakHourOfMonth[i]]
 	hourCounter = 0
