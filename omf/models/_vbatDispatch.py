@@ -273,6 +273,10 @@ def work(modelDir, inputDict):
 		x -= float(inputDict["unitUpkeepCost"])
 	for x in cashFlowList:
 		x -= float(inputDict["unitUpkeepCost"])
+	dispatchedPower = []
+	for x,y in zip(demandAdjustedList,demandList):
+		dispatchedPower.append(x-y)
+	outData["VBdispatch"] = dispatchedPower
 	outData["energyCost"] = energyCost
 	outData["energyCostAdjusted"] = energyCostAdjusted
 	outData["demandCharge"] = demandCharge
