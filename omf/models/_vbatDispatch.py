@@ -166,7 +166,6 @@ def work(modelDir, inputDict):
 	deltaT=1
 	alpha=1- deltaT/(C*R) # hourly self discharge rate
 	e0=0 # VB initial energy state
-
 	model = pulp.LpProblem("Demand charge minimization problem", pulp.LpMinimize) 	# start demand charge reduction LP problem
 	VBpower = pulp.LpVariable.dicts("ChargingPower",((i+1) for i in range(8760)))	# decision variable of VB charging power; dim: 8760 by 1
 	for i in range(8760):
@@ -273,6 +272,10 @@ def work(modelDir, inputDict):
 		x -= float(inputDict["unitUpkeepCost"])
 	for x in cashFlowList:
 		x -= float(inputDict["unitUpkeepCost"])
+	dispatchedPower = []
+	for x,y in zip(demandAdjustedList,demandList):
+		dispatchedPower.append(x-y)
+	outData["VBdispatch"] = dispatchedPower
 	outData["energyCost"] = energyCost
 	outData["energyCostAdjusted"] = energyCostAdjusted
 	outData["demandCharge"] = demandCharge
@@ -349,7 +352,7 @@ def new(modelDir):
 	defaultInputs = {
 		"user": "admin",
 		"load_type": "1",
-		"number_devices": "100",
+		"number_devices": "2000",
 		"power": "5.6",
 		"capacitance": "2",
 		"resistance": "2",
