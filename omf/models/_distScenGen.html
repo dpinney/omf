@@ -106,15 +106,33 @@
 					"line": {"marker":{"enabled":false}}
 				},
 				"xAxis": {
+					"type": 'datetime',
+					"dateTimeLabelFormats":{
+						"time": '%e of %b'
+					},
 					"tickColor":"gray",
 					"lineColor":"gray"},
+
+
 				"title": {"text":null},
+
+
 				"series": [
 					{ "marker":{"enabled":false},
 					 "dataLabels":{"enabled":false},
 					 "color":"red",
 					 "data":allOutputData[0][1].measured_reactive_power,
-					 "name":"Power Generated" }
+					 "name":"Power Generated", 
+					"pointStart": Date.parse(allOutputData[0][1].dates[0]),
+					"pointInterval":Date.parse(allOutputData[0][1].dates[1])-Date.parse(allOutputData[0][1].dates[0])},
+		
+					{ "marker":{"enabled":false},
+					 "dataLabels":{"enabled":false},
+					 "color":"blue",
+					 "data":allOutputData[0][1].measured_real_power,
+					 "name":"Power Generated?", 
+						"pointStart":Date.parse(allOutputData[0][1].dates[0]),
+						"pointInterval":Date.parse(allOutputData[0][1].dates[1])-Date.parse(allOutputData[0][1].dates[0])}
 				],
 				"tooltip": false,
 				"yAxis": {

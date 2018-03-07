@@ -47,14 +47,14 @@ def work(modelDir, inputDict):
 		"recordend": inputDict['endTime'],
 		"inputGLM": {
 			"R1-12.47-1.glm": [0.12, 6.5, 1, 1],
-			# "R1-12.47-2.glm": [0.11, 6.5, 1, 1],
-			# "R1-12.47-3.glm": [0.11, 6.5, 1, 1],
-			# "R2-12.47-1.glm": [0.11, 6.5, 2, 1],
-			# "R2-12.47-2.glm": [0.11, 6.5, 2, 1],
-			# "R2-12.47-3.glm": [0.11, 6.5, 2, 1],
-			# "R3-12.47-1.glm": [0.11, 6.5, 3, 1],
-			# "R3-12.47-2.glm": [0.11, 6.5, 3, 1],
-			# "R3-12.47-3.glm": [0.11, 6.5, 3, 1]
+			"R1-12.47-2.glm": [0.11, 6.5, 1, 1],
+			"R1-12.47-3.glm": [0.11, 6.5, 1, 1],
+			"R2-12.47-1.glm": [0.11, 6.5, 2, 1],
+			"R2-12.47-2.glm": [0.11, 6.5, 2, 1],
+			"R2-12.47-3.glm": [0.11, 6.5, 2, 1],
+			"R3-12.47-1.glm": [0.11, 6.5, 3, 1],
+			"R3-12.47-2.glm": [0.11, 6.5, 3, 1],
+			"R3-12.47-3.glm": [0.11, 6.5, 3, 1],
 		}
 	}
 	paraInput['rootpath'] = omfDir + '/scratch/parapopulation_tool'
@@ -101,7 +101,7 @@ def graphify(outputFile):
 		for i in range(9):
 			swingnode.next()
 		for row in (swingnode):
-			dates.append(row[0])
+			dates.append(row[0][0:19])
 			measured_real_power.append(float(row[13]))
 			measured_reactive_power.append(float(row[14]))
 			new_dict["dates"]=dates
