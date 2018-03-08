@@ -99,6 +99,8 @@
 			<div id="chartContainer">
 		</div>
 		<script type="text/javascript">
+			startDate = Date.parse(allOutputData[0][1].dates[0])
+			dateInterval = Date.parse(allOutputData[0][1].dates[1])-Date.parse(allOutputData[0][1].dates[0])
 			h_c_options = {
 				"credits": {"enabled":false},
 				"plotOptions": {
@@ -112,27 +114,22 @@
 					},
 					"tickColor":"gray",
 					"lineColor":"gray"},
-
-
 				"title": {"text":null},
-
-
 				"series": [
 					{ "marker":{"enabled":false},
 					 "dataLabels":{"enabled":false},
 					 "color":"red",
-					 "data":allOutputData[0][1].measured_reactive_power,
-					 "name":"Power Generated", 
-					"pointStart": Date.parse(allOutputData[0][1].dates[0]),
-					"pointInterval":Date.parse(allOutputData[0][1].dates[1])-Date.parse(allOutputData[0][1].dates[0])},
-		
-					{ "marker":{"enabled":false},
-					 "dataLabels":{"enabled":false},
-					 "color":"blue",
 					 "data":allOutputData[0][1].measured_real_power,
 					 "name":"Power Generated?", 
-						"pointStart":Date.parse(allOutputData[0][1].dates[0]),
-						"pointInterval":Date.parse(allOutputData[0][1].dates[1])-Date.parse(allOutputData[0][1].dates[0])}
+						"pointStart":starDate,
+						"pointInterval":dateInterval}
+					{ "marker":{"enabled":false},
+					 "dataLabels":{"enabled":false},
+					 "color":"orange",
+					 "data":allOutputData[0][1].measured_reactive_power,
+					 "name":"Power Generated", 
+					"pointStart":startDate,
+					"pointInterval":dateInterval},
 				],
 				"tooltip": false,
 				"yAxis": {
