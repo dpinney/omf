@@ -36,12 +36,14 @@ def work(modelDir, inputDict):
 	feederName = [x for x in os.listdir(modelDir) if x.endswith(".omd")][0][:-4]
 	inputDict["feederName1"] = feederName
 	# Modify parapulation tool inputs.
+	recStart = dt.datetime.strptime(inputDict['startTime'], '%Y-%m-%d %H:%M:%S')
+	startdate = recStart - dt.timedelta(days=1)
 	paraInput = {
 		"rootpath": None,
 		"experimentFilePath": modelDir,
 		"numoffeeders": int(inputDict['numoffeeders']),
 		"testfolder": "parapopulation_feeders",
-		"startdate": "2013-08-01 0:00:00", # TODO: use datetime to set this to 1 day before inputDict['startTime']
+		"startdate": str(startdate),
 		"enddate": inputDict['endTime'],
 		"recordstart": inputDict['startTime'],
 		"recordend": inputDict['endTime'],
