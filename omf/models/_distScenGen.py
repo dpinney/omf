@@ -89,7 +89,6 @@ def work(modelDir, inputDict):
 							# feederid = ("Feeder"+i)
 							outData[i] = [file, graphify(outputFile) ]
 							i=i+1
-
 	return outData
 	
 def graphify(outputFile):

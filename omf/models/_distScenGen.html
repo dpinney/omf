@@ -56,11 +56,11 @@
 				<label>Run Time</label>
 				<input type="text" id="runTime" name="runTime" readonly/>
 			</div>
-			<div class="shortInput">
+			<!-- <div class="shortInput">
 				<label>Feeder</label>
 				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
 				<input type="text" id="feederName1" name="feederName1" style="display:none">
-			</div>
+			</div> -->
 			<div class="shortInput">
 				<label>Start Time</label>
 				<input type="text" id="startTime" name="startTime" pattern="^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$" required="required">
@@ -121,7 +121,7 @@
 					 "color":"red",
 					 "data":allOutputData[0][1].measured_real_power,
 					 "name":"Power Generated?", 
-						"pointStart":starDate,
+						"pointStart":startDate,
 						"pointInterval":dateInterval},
 					{ "marker":{"enabled":false},
 					 "dataLabels":{"enabled":false},
