@@ -116,8 +116,8 @@ def new(modelDir):
 		"modelType": modelName,
 		"runTime": "",
 		"numoffeeders":"1",
-		"startTime": "2013-08-01 0:00:00",
-		"endTime": "2013-08-02 0:00:00",
+		"startTime": "2013-08-01 00:00:00",
+		"endTime": "2013-08-02 00:00:00",
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
