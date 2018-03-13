@@ -75,8 +75,8 @@ def work(modelDir, inputDict):
 			for name in os.listdir(pJoin(direc, filename)):
 				if name.endswith('.glm'):
 					proc = subprocess.Popen('gridlabd ' + name, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, cwd=pJoin(direc, filename))
-					# (out, err) = proc.communicate()
-					code = proc.wait()
+					(out, err) = proc.communicate()
+					#code = proc.wait()
 	#parse through gridlabd csv files
 	i=0 # counter to create dictionary
 	for filename in os.listdir(direc):

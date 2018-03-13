@@ -145,14 +145,19 @@
 					"min":0},
 				"chart": {
 					"zoomType":"x",
-					"marginBottom":35,
+					"marginBottom":200,
 					"width":1000,
-					"height":300,
+					"height":700,
 					"marginRight":20,
 					"renderTo":"chartContainer",
 					"type":"line"
 				},
-				"legend":false
+				"legend": {
+					"enabled": true,
+					"align": "center",
+					"verticalAlign": "bottom",
+
+				}
 			}
 			new Highcharts.Chart(h_c_options)
 		</script>
