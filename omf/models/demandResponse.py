@@ -422,10 +422,6 @@ def _prismTests():
 		'numCPPDays': 10, # Number of CPP days in a cooling season. Only required for 2tierCPP
 		'origLoad': [float(x) for x in open('./test_load.csv').readlines()] }) # 8760 load values
 
-def cancel(modelDir):
-	''' This model runs so fast it's pointless to cancel a run. '''
-	pass
-
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {

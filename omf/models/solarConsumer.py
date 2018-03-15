@@ -79,10 +79,6 @@ def work(modelDir, inputDict):
 	outData["stderr"] = ""
 	return outData
 
-def cancel(modelDir):
-	''' solarConsumer runs so fast it's pointless to cancel a run. '''
-	pass
-
 def tjCode(inputs, outData):
 	# Make inputs the right types.
 	for k in inputs.keys():
