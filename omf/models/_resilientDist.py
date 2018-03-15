@@ -497,10 +497,6 @@ def work(modelDir, inputDict):
 	# And we're done.
 	return outData
 
-def cancel(modelDir):
-	''' The model runs so fast it's pointless to cancel a run. '''
-	pass
-
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {

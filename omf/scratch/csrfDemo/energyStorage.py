@@ -218,10 +218,6 @@ def runForeground(modelDir, inputDict):
 		except Exception, e:
 			pass
 
-def cancel(modelDir):
-	''' This model runs so fast it's pointless to cancel a run. '''
-	pass
-
 def _tests():
 	# Variables
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")

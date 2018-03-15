@@ -121,10 +121,6 @@ def _aggData(key, aggFun, simStartDate, simLength, simLengthUnits, ssc, dat):
 		split = [hourData[x:x+24] for x in xrange(simLength)]
 		return map(aggFun, split)
 
-def cancel(modelDir):
-	''' PV Watts runs so fast it's pointless to cancel a run. '''
-	pass
-
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {

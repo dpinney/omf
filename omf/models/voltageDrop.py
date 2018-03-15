@@ -124,10 +124,6 @@ def voltPlot(omd, workDir=None, neatoLayout=False):
 	plt.colorbar()
 	return voltChart
 
-def cancel(modelDir):
-	''' Voltage drop runs so fast it's pointless to cancel a run. '''
-	pass
-
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {

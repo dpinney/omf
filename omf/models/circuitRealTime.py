@@ -24,10 +24,6 @@ def work(modelDir, inputDict):
 	outData["stdout"] = "Success"
 	outData["stderr"] = ""
 
-def cancel(modelDir):
-	''' PV Watts runs so fast it's pointless to cancel a run. '''
-	pass
-
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {

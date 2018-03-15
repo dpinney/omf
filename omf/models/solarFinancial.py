@@ -224,10 +224,6 @@ def _runningSum(inList):
 	''' Give a list of running sums of inList. '''
 	return [sum(inList[:i+1]) for (i,val) in enumerate(inList)]
 
-def cancel(modelDir):
-	''' solarFinancial runs so fast it's pointless to cancel a run. '''
-	pass
-
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
