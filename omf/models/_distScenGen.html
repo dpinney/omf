@@ -63,11 +63,12 @@
 			</div> -->
 			<div class="shortInput">
 				<label>Start Time</label>
-				<input type="text" id="startTime" name="startTime" pattern="^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$" required="required">
+				<input type="text" id="startTime" name="startTime" pattern="^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$" required="required"
+				oninvalid="setCustomValidity('Enter Date in format YYYY-MM-DD HH:MM:SS')">
 			</div>
 			<div class="shortInput">
 				<label>End Time</label>
-				<input type="text" id="endTime" name="endTime" pattern="^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$" required="required">
+				<input type="text" id="endTime" name="endTime" pattern="^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$" required="required" oninvalid="setCustomValidity('Enter Date in format YYYY-MM-DD HH:MM:SS')">
 			</div>
 			<div class="shortInput">
 				<label>Number of Feeders</label>
