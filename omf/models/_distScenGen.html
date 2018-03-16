@@ -74,6 +74,13 @@
 				<input type="text" id="numoffeeders" name="numoffeeders" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
 			<div class="wideInput" style="text-align:right">
+				<script>
+				function openInNewTab(url) {
+					var win = window.open(url, '_blank');
+					win.focus();
+				}
+				</script>
+				<button id="feederInfoURL" type="button" onclick="openInNewTab('http://gridlab-d.shoutwiki.com/wiki/Feeder_Taxonomy');">Feeder Info</button>
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
 				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
