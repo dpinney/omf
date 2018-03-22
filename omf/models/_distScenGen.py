@@ -78,18 +78,21 @@ def work(modelDir, inputDict):
 					(out, err) = proc.communicate()
 					#code = proc.wait()
 	#parse through gridlabd csv files
-	i=0 # counter to create dictionary
+	 # counter to create dictionary
 	for filename in os.listdir(direc):
 		if filename != 'include':
 			for name in os.listdir(pJoin(direc, filename)):
 				if name == 'output':
 					for file in os.listdir(pJoin(direc, filename, name)):
 						if 'swing_node' in file:
+							feeder_name = str(file)
 							#Make an output.
 							outputFile = pJoin(direc, filename, name, file)
-							# feederid = ("Feeder"+i)
-							outData[i] = [file, graphify(outputFile) ]
-							i=i+1
+							outData[file] = {}
+							outData[file]["dates"] =  graphify(outputFile)["dates"]
+							outData[file]["measured_real_power"] = graphify(outputFile)["measured_real_power"]
+							outData[file]["measured_reactive_power"] = graphify(outputFile)["measured_reactive_power"]
+						
 	return outData
 	
 def graphify(outputFile):
