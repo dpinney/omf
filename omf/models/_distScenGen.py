@@ -35,6 +35,7 @@ def work(modelDir, inputDict):
 	# Get feeder name.
 	feederName = [x for x in os.listdir(modelDir) if x.endswith(".omd")][0][:-4]
 	inputDict["feederName1"] = feederName
+	#Right here enter code to search the 
 	# Modify parapulation tool inputs.
 	recStart = dt.datetime.strptime(inputDict['startTime'], '%Y-%m-%d %H:%M:%S')
 	startdate = recStart - dt.timedelta(days=1)
@@ -123,6 +124,17 @@ def new(modelDir):
 		"numoffeeders":"1",
 		"startTime": "2013-08-01 00:00:00",
 		"endTime": "2013-08-02 00:00:00",
+		"inputGLM": {
+			"R1-12.47-1.glm": [0.12, 6.5, 1, 1],
+			"R1-12.47-2.glm": [0.11, 6.5, 1, 1],
+			"R1-12.47-3.glm": [0.11, 6.5, 1, 1],
+			"R2-12.47-1.glm": [0.11, 6.5, 2, 1],
+			"R2-12.47-2.glm": [0.11, 6.5, 2, 1],
+			"R2-12.47-3.glm": [0.11, 6.5, 2, 1],
+			"R3-12.47-1.glm": [0.11, 6.5, 3, 1],
+			"R3-12.47-2.glm": [0.11, 6.5, 3, 1],
+			"R3-12.47-3.glm": [0.11, 6.5, 3, 1],
+		}
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:

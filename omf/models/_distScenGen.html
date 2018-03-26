@@ -86,18 +86,16 @@
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
 				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
 				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
+				<button id="runButton" class="stoppedInline postRunInline" onclick="showChoices()" type="submit">Run Model</button>
 			</div>
-		</form>
-		<body>
+			<body>
 				<h1>Multiple Selections</h1>
-				<form action = "">
 				<fieldset>
 				<label>
 				   Select the feeders to be used.
 				   (ctrl-click to select multiple lines)
 				</label>
-				<select id = "selLanguage"
+				<select id = "selFeeders"
 				    multiple = "multiple"
 				    size = "9">
 				   <option value = "R1-12.47-1.glm">R1-12.47-1.glm</option>
@@ -111,31 +109,34 @@
 				   <option value = "R3-12.47-3.glm">R3-12.47-3.glm</option>
 				  </select>
 				  </fieldset>
-				</form>
 				<div id = "output">
 				</div>
-		</body>
+		</body>		
 		<script type = "text/javascript">
 			//from multi-select.html
 			function showChoices(){
 			  //retrieve data
-			var selLanguage = document.getElementById("selLanguage");
+			var selFeeder = document.getElementById("selFeeders");
 			  //set up output string
-			var result = "<h2>Your Languages</h2>";
-			result += "<ul> n";
+			var result = [];
 			  //step through options
-			for (i = 0; i < selLanguage.length; i++){
+			for (i = 0; i < selFeeder.length; i++){
 			   //examine current option
-				currentOption = selLanguage[i];
+				currentOption = selFeeder[i];
 			   //print it if it has been selected
 				if (currentOption.selected == true){
-				result +=  currentOption.value;
+				result.push(currentOption.value);
 				} // end if
 			} // end for loop
 			  //finish off the list and print it out
+			  console.log(result)
 			} // end showChoices
 		</script>
+	</form>
 	</div>
+	
+		
+	</form>
 	<div id ="runIndicator" class="content running">
 		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
 	</div>
@@ -164,14 +165,14 @@
 					"dataLabels":{"enabled":false},
 					"color":"red",
 					"data":allOutputData[key].measured_real_power,
-					"name":allOutputData[key], 
+					"name":key, 
 					"pointStart":startDate,
 					"pointInterval":dateInterval},
 					{ "marker":{"enabled":false},
 					"dataLabels":{"enabled":false},
 					"color":"orange",
 					"data":allOutputData[key].measured_reactive_power,
-					"name":allOutputData[key], 
+					"name":key, 
 					"pointStart":startDate,
 					"pointInterval":dateInterval},
 				)
