@@ -156,10 +156,11 @@
 		<script type="text/javascript">
 			
 			var seriesoptions=[]
+			function dateOb(inStr) {return Date.parse(inStr.replace(/-/g,"/"))}
 			for (var index in Object.keys(allOutputData)){
 				var key = Object.keys(allOutputData)[index]
-				startDate = Date.parse(allOutputData[key].dates[0])
-				dateInterval = Date.parse(allOutputData[key].dates[1])-Date.parse(allOutputData[key].dates[0])
+				startDate = dateOb(allOutputData[key].dates[0])
+				dateInterval = dateOb(allOutputData[key].dates[1])-startDate
 				seriesoptions.push(
 					{ "marker":{"enabled":false},
 					"dataLabels":{"enabled":false},
