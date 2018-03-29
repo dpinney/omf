@@ -116,7 +116,10 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			lineCount+=1
 	# Line Code Creation
 	xMatrices, rMatrices = {1: [], 2: [], 3: []}, {1: [], 2: [], 3: []}
-	lineCodes = json.loads(gfmInputTemplate['xrMatrices'])['line_codes']
+	try: 
+		lineCodes = json.loads(gfmInputTemplate['xrMatrices'])['line_codes']
+	except:
+		raise Exception('ERROR: Unable to process user uploaded XR Matrices')
 	for i,code in enumerate(lineCodes):
 		if i > 100: break
 		xMatrices[int(code['num_phases'])].append(code['xmatrix'])
@@ -354,7 +357,9 @@ def work(modelDir, inputDict):
 		gfmConsoleOut.write(stdout)
 	# HACK: rename the hardcoded gfm output
 	rdtInputFilePath = pJoin(modelDir,'rdtInput.json')
-	os.rename(pJoin(modelDir,'rdt_OUTPUT.json'),rdtInputFilePath)
+	#fix for windows web server hangup
+	rdtInputFilePath = pJoin(modelDir,'rdt_OUTPUT.json')
+	#os.rename(pJoin(modelDir,'rdt_OUTPUT.json'),rdtInputFilePath)
 	# Pull GFM input data on lines and generators for HTML presentation.
 	with open(rdtInputFilePath, 'r') as rdtInputFile:
 		# HACK: we use rdtInput as a string in the frontend.
