@@ -86,57 +86,11 @@
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
 				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
 				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" class="stoppedInline postRunInline" onclick="showChoices()" type="submit">Run Model</button>
+				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
 			</div>
-			<body>
-				<h1>Multiple Selections</h1>
-				<fieldset>
-				<label>
-				   Select the feeders to be used.
-				   (ctrl-click to select multiple lines)
-				</label>
-				<select id = "selFeeders"
-				    multiple = "multiple"
-				    size = "9">
-				   <option value = "R1-12.47-1.glm">R1-12.47-1.glm</option>
-				   <option value = "R1-12.47-2.glm">R1-12.47-2.glm</option>
-				   <option value = "R1-12.47-3.glm">R1-12.47-3.glm</option>
-				   <option value = "R2-12.47-1.glm">R2-12.47-1.glm</option>
-				   <option value = "R2-12.47-2.glm">R2-12.47-2.glm</option>
-				   <option value = "R2-12.47-3.glm">R2-12.47-3.glm</option>
-				   <option value = "R3-12.47-1.glm">R3-12.47-1.glm</option>
-				   <option value = "R3-12.47-2.glm">R3-12.47-2.glm</option>
-				   <option value = "R3-12.47-3.glm">R3-12.47-3.glm</option>
-				  </select>
-				  </fieldset>
-				<div id = "output">
-				</div>
-		</body>		
-		<script type = "text/javascript">
-			//from multi-select.html
-			function showChoices(){
-			  //retrieve data
-			var selFeeder = document.getElementById("selFeeders");
-			  //set up output string
-			var result = [];
-			  //step through options
-			for (i = 0; i < selFeeder.length; i++){
-			   //examine current option
-				currentOption = selFeeder[i];
-			   //print it if it has been selected
-				if (currentOption.selected == true){
-				result.push(currentOption.value);
-				} // end if
-			} // end for loop
-			  //finish off the list and print it out
-			  console.log(result)
-			} // end showChoices
-		</script>
 	</form>
 	</div>
 	
-		
-	</form>
 	<div id ="runIndicator" class="content running">
 		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
 	</div>
@@ -221,4 +175,5 @@
 			new Highcharts.Chart(h_c_options)
 		</script>
 	</div>
+</div>
 </body>

@@ -35,16 +35,6 @@ def work(modelDir, inputDict):
 	# Get feeder name.
 	feederName = [x for x in os.listdir(modelDir) if x.endswith(".omd")][0][:-4]
 	inputDict["feederName1"] = feederName
-	#Right here enter code to search the results list from html if it matches an entry
-	#in the original allinputdict, if so append to parainputs
-	# selected_Feeders =  allInputData["results"]
-	# for key in inputDict["inputGLM"].iterkeys():
-	# 	for feed in selected_Feeders:
-	# 		if key = feed:
-	# 			paraInput["inputGLM"][key] = inputDict["inputGLM"][key]
-				#remember to remove stuff in parainput
-
-
 	# Modify parapulation tool inputs.
 	recStart = dt.datetime.strptime(inputDict['startTime'], '%Y-%m-%d %H:%M:%S')
 	startdate = recStart - dt.timedelta(days=1)
@@ -133,7 +123,6 @@ def new(modelDir):
 		"numoffeeders":"1",
 		"startTime": "2013-08-01 00:00:00",
 		"endTime": "2013-08-02 00:00:00",
-		"results": {},
 		"inputGLM": {
 			"R1-12.47-1.glm": [0.12, 6.5, 1, 1],
 			"R1-12.47-2.glm": [0.11, 6.5, 1, 1],
