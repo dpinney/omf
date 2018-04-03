@@ -1,6 +1,10 @@
 ''' Functions for anonymizing data in OMF distribution and transmission systems.'''
 
-import json, math, random, datetime
+import json, math, random, datetime, os
+from os.path import join as pJoin
+
+omfDir=os.path.dirname(os.path.dirname(__file__))
+
 
 # DISTRIBUTION FEEDER FUNCTIONS
 def distPseudomizeNames(inFeeder):
@@ -505,38 +509,43 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 		genId += 1
 	return
 
-#def _tests():
+def _tests():
+	pass
 # 	# DISTRIBUTION FEEDER TESTS
 # 	# Test distPseudomizeNames
-# 	FNAME = "Simple Market System AnonTest.omd"
-# 	with open(FNAME, "r") as inFile:
-# 		inFeeder = json.load(inFile)
-# 		nameKey = distPseudomizeNames(inFeeder)
-# 		print nameKey
-# 	FNAMEOUT = "simpleMarket_distPseudomizeNames.omd"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inFeeder, outFile, indent=4)
+	# FNAME = "Simple Market System AnonTest.omd"
+	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
+	# with open(FNAME, "r") as inFile:
+	# 	inFeeder = json.load(inFile)
+	# 	nameKey = distPseudomizeNames(inFeeder)
+	# 	print nameKey
+	# FNAMEOUT = "simpleMarket_distPseudomizeNames.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inFeeder, outFile, indent=4)
 
 # 	# Test distRandomizeNames
-# 	FNAME = "Simple Market System AnonTest.omd"
-# 	with open(FNAME, "r") as inFile:
-# 		inFeeder = json.load(inFile)
-# 		distRandomizeNames(inFeeder)
-# 	FNAMEOUT = "simpleMarket_distRandomizeNames.omd"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inFeeder, outFile, indent=4)
+	# FNAME = "Simple Market System AnonTest.omd"
+	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
+	# with open(FNAME, "r") as inFile:
+	# 	inFeeder = json.load(inFile)
+	# 	distRandomizeNames(inFeeder)
+	# FNAMEOUT = "simpleMarket_distRandomizeNames.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inFeeder, outFile, indent=4)
 
 # 	# Test distRandomizeLocations
-# 	FNAME = "Simple Market System AnonTest.omd"
-# 	with open(FNAME, "r") as inFile:
-# 		inFeeder = json.load(inFile)
-# 		distRandomizeLocations(inFeeder)
-# 	FNAMEOUT = "simpleMarket_distRandomizeLocations.omd"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inFeeder, outFile, indent=4)
+	# FNAME = "Simple Market System AnonTest.omd"
+	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
+	# with open(FNAME, "r") as inFile:
+	# 	inFeeder = json.load(inFile)
+	# 	distRandomizeLocations(inFeeder)
+	# FNAMEOUT = "simpleMarket_distRandomizeLocations.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inFeeder, outFile, indent=4)
 
-# 	# Test distTranslateLocations
+# # 	# Test distTranslateLocations
 # 	FNAME = "Simple Market System AnonTest.omd"
+# 	FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
 # 	with open(FNAME, "r") as inFile:
 # 		inFeeder = json.load(inFile)
 # 		translation = 20
@@ -546,72 +555,79 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 # 	with open(FNAMEOUT, "w") as outFile:
 # 		json.dump(inFeeder, outFile, indent=4)
 
-# 	# Test distAddNoise
-# 	FNAME = "Simple Market System AnonTest.omd"
-# 	with open(FNAME, "r") as inFile:
-# 		inFeeder = json.load(inFile)
-# 		noisePerc = 50
-# 		distAddNoise(inFeeder, noisePerc)
-# 	FNAMEOUT = "simpleMarket_distAddNoise.omd"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inFeeder, outFile, indent=4)
+	# Test distAddNoise
+	# FNAME = "Simple Market System AnonTest.omd"
+	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
+	# with open(FNAME, "r") as inFile:
+	# 	inFeeder = json.load(inFile)
+	# 	noisePerc = 50
+	# 	distAddNoise(inFeeder, noisePerc)
+	# FNAMEOUT = "simpleMarket_distAddNoise.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inFeeder, outFile, indent=4)
 
 # 	# Test distShuffleLoads
-# 	FNAME = "Simple Market System AnonTest.omd"
-# 	with open(FNAME, "r") as inFile:
-# 		inFeeder = json.load(inFile)
-# 		shufPerc = 100
-# 		distShuffleLoads(inFeeder, shufPerc)
-# 	FNAMEOUT = "simpleMarket_distShuffleLoads.omd"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inFeeder, outFile, indent=4)
+	# FNAME = "Simple Market System AnonTest.omd"
+	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
+	# with open(FNAME, "r") as inFile:
+	# 	inFeeder = json.load(inFile)
+	# 	shufPerc = 100
+	# 	distShuffleLoads(inFeeder, shufPerc)
+	# FNAMEOUT = "simpleMarket_distShuffleLoads.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inFeeder, outFile, indent=4)
 
 # 	# Test distModifyTriplexLengths
-# 	FNAME = "Simple Market System AnonTest.omd"
-# 	with open(FNAME, "r") as inFile:
-# 		inFeeder = json.load(inFile)
-# 		distModifyTriplexLengths(inFeeder)
-# 	FNAMEOUT = "simpleMarket_distModifyTriplexLengths.omd"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inFeeder, outFile, indent=4)
+	# FNAME = "Simple Market System AnonTest.omd"
+	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
+	# with open(FNAME, "r") as inFile:
+	# 	inFeeder = json.load(inFile)
+	# 	distModifyTriplexLengths(inFeeder)
+	# FNAMEOUT = "simpleMarket_distModifyTriplexLengths.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inFeeder, outFile, indent=4)
 
 # 	# Test distModifyConductorLengths
-# 	FNAME = "Olin Barre GH.omd"
-# 	with open(FNAME, "r") as inFile:
-# 		inFeeder = json.load(inFile)
-# 		distModifyConductorLengths(inFeeder)
-# 	FNAMEOUT = "olinBarreGH_distModifyConductorLengths.omd"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inFeeder, outFile, indent=4)
+	# FNAME = "Olin Barre GH.omd"
+	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
+	# with open(FNAME, "r") as inFile:
+	# 	inFeeder = json.load(inFile)
+	# 	distModifyConductorLengths(inFeeder)
+	# FNAMEOUT = "olinBarreGH_distModifyConductorLengths.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inFeeder, outFile, indent=4)
 
-# 	# Test distSmoothLoads
-# 	FNAME = "Calibrated Feeder1.omd"
-# 	with open(FNAME, "r") as inFile:
-# 		inFeeder = json.load(inFile)
-# 		distSmoothLoads(inFeeder)
-# 	FNAMEOUT = "calibrated_distSmoothLoads.omd"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inFeeder, outFile, indent=4)
+	# Test distSmoothLoads
+	# FNAME = "Calibrated Feeder1.omd"
+	# FNAME=pJoin(omfDir,'data','model','public', FNAME)
+	# with open(FNAME, "r") as inFile:
+	# 	inFeeder = json.load(inFile)
+	# 	distSmoothLoads(inFeeder)
+	# FNAMEOUT = "calibrated_distSmoothLoads.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inFeeder, outFile, indent=4)
 
 
 # 	TRANSMISSION NETWORK TESTS
 # 	Test tranPseudomizeNames	
-#	FNAME = "case118.omt"
-#	with open(FNAME, "r") as inFile:
-#		inNetwork = json.load(inFile)
-#		busKey = tranPseudomizeNames(inNetwork)
-#	FNAMEOUT = "118_tranPseudomizeNames.omt"
-#	with open(FNAMEOUT, "w") as outFile:
-#		json.dump(inNetwork, outFile, indent=4)
+	# FNAME = "case9.omt"
+	# FNAME=pJoin(omfDir,'omf','data','model','admin','Automated Testing of transmission', FNAME)
+	# with open(FNAME, "r") as inFile:
+	# 	inNetwork = json.load(inFile)
+	# 	busKey = tranPseudomizeNames(inNetwork)
+	# FNAMEOUT = "118_tranPseudomizeNames.omt"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inNetwork, outFile, indent=4)
 
 # 	# Test tranRandomizeNames
-# 	FNAME = "case118.omt"
-#	with open(FNAME, "r") as inFile:
-# 		inNetwork = json.load(inFile)
-# 		tranRandomizeNames(inNetwork)
-# 	FNAMEOUT = "118_tranRandomizeNames.omt"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inNetwork, outFile, indent=4)
+	# FNAME = "case9.omt"
+	# FNAME=pJoin(omfDir,'omf','data','model','admin','Automated Testing of transmission', FNAME)
+	# with open(FNAME, "r") as inFile:
+	# 	inNetwork = json.load(inFile)
+	# 	tranRandomizeNames(inNetwork)
+	# FNAMEOUT = "118_tranRandomizeNames.omt"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inNetwork, outFile, indent=4)
 
 # 	# Test tranRandomizeLocations
 # 	FNAME = "case118.omt"
@@ -653,5 +669,5 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 # 	with open(FNAMEOUT, "w") as outFile:
 # 		json.dump(inNetwork, outFile, indent=4)
 
-#if __name__ == '__main__':
-#	_tests()
+if __name__ == '__main__':
+	_tests()
