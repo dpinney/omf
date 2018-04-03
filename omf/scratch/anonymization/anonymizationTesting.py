@@ -20,4 +20,4 @@ filePath = '/blah/blah/olin barre.omd'
 # Run voltage drop on anonymized olin barre.
 # omf.models.voltageDrop.new(thisWorkDir, inputData)
 
-# Delete confidential data in here: .omd and .glm files in original voltage drop folder, .omd in anonyized voltage drop folder
+# Delete confidential data in here: .omd and .glm files in original voltage drop folder, .omd in anonyized voltage drop folder.
