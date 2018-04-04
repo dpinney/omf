@@ -11,7 +11,7 @@ from __neoMetaModel__ import *
 import random
 import csv
 import matplotlib.pyplot as plt
-import numpy as np
+# import numpy as np
 
 import pandas as pd
 import pulp
@@ -19,7 +19,7 @@ import pulp
 # Model metadata:
 fileName = os.path.basename(__file__)
 modelName = fileName[0:fileName.rfind('.')]
-tooltip = "Calculate the virtual battery capacity for a collection of thermostically controlled loads."
+tooltip = "Calculate the virtual battery capacity for a collection of thermostatically controlled loads."
 
 # Our HTML template for the interface:
 with open(pJoin(__neoMetaModel__._myDir,modelName + ".html"),"r") as tempFile:
