@@ -63,8 +63,8 @@
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<!-- Required Inputs -->
-			<div class="shortInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-vbatDispatch" target="blank">Help?</a></label>
+			<div class="shortInput">b
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-vbatDispatch" target="blank" style="font-weight:bold">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
@@ -132,59 +132,59 @@
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Number of devices<span class="classic">The termination tolerance for powerflow, in units P and Q dispatch per unit. Devices must be less than 100 million for all devices. For Water Heater expect 60 minutes per 50 device</span></label>
-				<input type="text" id="number_devices" name="number_devices" pattern="[1-9][0-9]{0,8}" required="required" title="Positive number with less than 8 digits">
+				<label class="tooltip">Number of devices<span class="classic">Total number of devices to simulate.</span></label>
+				<input type="text" id="number_devices" name="number_devices" pattern="[1-9][0-9]{0,8}" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Rated Power(kW)<span class="classic">Power, must be a positive rational number between 0.1 and 7.2</span></label>
-				<input type="text" id="power" name="power" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number that should be between 0.1 and 7.2">
+				<label class="tooltip">Rated Power (kW)<span class="classic">Max power per device. Must be a positive rational number between 0.1 and 7.2.</span></label>
+				<input type="text" id="power" name="power" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Thermal Capacitance(kWh/&degC)<span class="classic">Capacitance, must be between 0.2 and 2.5 with exactly one decimal digit</span></label>
-				<input type="text" id="capacitance" name="capacitance" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number that should be between 0.2 and 2.5">
+				<label class="tooltip">Thermal Capacitance (kWh/&degC)<span class="classic">Capacitance of each device. Must be between 0.2 and 2.5 with exactly one decimal digit.</span></label>
+				<input type="text" id="capacitance" name="capacitance" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Thermal Resistance(&degC/kW)<span class="classic">Resistance, must be between 1.5 and 140</span></label>
-				<input type="text" id="resistance" name="resistance" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number that should be between 1.5 and 140">
+				<label class="tooltip">Thermal Resistance (&degC/kW)<span class="classic">Resistance of each device. Must be between 1.5 and 140.</span></label>
+				<input type="text" id="resistance" name="resistance" pattern="^\d+\.?\d*?$" required="required">
 			</div>			
 			<div class="shortInput">
-				<label class="tooltip">COP<span class="classic">Coefficient of Power, must be between 1 and 3.5</span></label>
-				<input type="text" id="cop" name="cop" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number that should be between 1 and 3.5">
+				<label class="tooltip">COP<span class="classic">Coefficient of power of each device. Must be between 1 and 3.5</span></label>
+				<input type="text" id="cop" name="cop" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Temperature Setpoint(&degC)<span class="classic">Setpoint, must be between 1.7 and 54</span></label>
-				<input type="text" id="setpoint" name="setpoint" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number that should be between 1.7 to 54">
+				<label class="tooltip">Temperature Setpoint (&degC)<span class="classic">Setpoint for each device. Must be between 1.7 and 54.</span></label>
+				<input type="text" id="setpoint" name="setpoint" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Temperature Deadband(&degC)<span class="classic">Deadband, must be between 0.125 and 2</span></label>
-				<input type="text" id="deadband" name="deadband" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number that should be between 0.125 to 2">
+				<label class="tooltip">Temperature Deadband (&degC)<span class="classic">Deadband for each device. Must be between 0.125 and 2.</span></label>
+				<input type="text" id="deadband" name="deadband" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Unit Cost ($/unit)<span class="classic">unitDeviceCost</span></label>
-				<input type="text" id="unitDeviceCost" name="unitDeviceCost" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number">
+				<label class="tooltip">Unit Cost ($/unit)<span class="classic">Cost per device for equipping it to respond to load control signals. E.g. for a direct load control program, this would be the cost of a load control switch, typically about $100.</span></label>
+				<input type="text" id="unitDeviceCost" name="unitDeviceCost" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Upkeep Cost ($/unit/year)<span class="classic">unitUpkeepCost</span></label>
-				<input type="text" id="unitUpkeepCost" name="unitUpkeepCost" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number">
+				<label class="tooltip">Upkeep Cost ($/unit/year)<span class="classic">Maintenance cost each year per device for replacing or repairing defective load control equipment.</span></label>
+				<input type="text" id="unitUpkeepCost" name="unitUpkeepCost" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Demand Charge Cost($/kW)<span class="classic">demandChargeCost</span></label>
-				<input type="text" id="demandChargeCost" name="demandChargeCost" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number">
+				<label class="tooltip">Demand Charge Cost ($/kW)<span class="classic">Demand charge utility pays for peak demand events. Assumed to be calculated based on monthly single highest peak.</span></label>
+				<input type="text" id="demandChargeCost" name="demandChargeCost" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Energy Cost($/kWh)<span class="classic">electricityCost</span></label>
-				<input type="text" id="electricityCost" name="electricityCost" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number">
+				<label class="tooltip">Energy Cost($/kWh)<span class="classic">Cost of energy bought by the utility. I.e. wholesale (not retail) cost.</span></label>
+				<input type="text" id="electricityCost" name="electricityCost" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Financial Projection Length(years)<span class="classic">projectionLength</span></label>
-				<input type="text" id="projectionLength" name="projectionLength" pattern="^\d+\.?\d*?$" required="required" title="Positive rational number">
+				<label class="tooltip">Financial Projection Length(years)<span class="classic">Number of years to project out estimated savings.</span></label>
+				<input type="text" id="projectionLength" name="projectionLength" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Discount Rate(%)<span class="classic">discountRate</span></label>
-				<input type="text" id="discountRate" name="discountRate" pattern="[1-9][0-9]{0,2}" required="required" title="Positive rational number between 0 and 100">
+				<label class="tooltip">Discount Rate(%)<span class="classic">Discount rate used in financial analysis.</span></label>
+				<input type="text" id="discountRate" name="discountRate" pattern="[1-9][0-9]{0,2}" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Demand Curve (.csv file)<span class="classic">Please see the documentation at the help link for the required format and an example demand file. If this field is blank the OMF will re-use the file from the previous run.</span></label>
+				<label class="tooltip">Demand Curve (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
 				<script>var fileName=true;</script>
 				<input type="file" id="demandCurveFile" name="demandCurveFile" accept=".csv" onchange="handle_files_demand(this.files)">
 				<input id="demandCurve" name="demandCurve" type="hidden">
@@ -218,7 +218,7 @@
 				</script>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Temperature Curve in &degC (.csv file)<span class="classic">Please see the documentation at the help link for the required format and an example temperature file. If this field is blank the OMF will re-use the file from the previous run.</span></label>
+				<label class="tooltip">Temperature Curve in &degC (.csv file)<span class="classic">Please see the documentation at the help link for the required format and an example temperature file.</span></label>
 				<script>var tempFileName=true;</script>
 				<input type="file" id="tempCurveFile" name="tempCurveFile" accept=".csv" onchange="handle_files_weather(this.files)">
 				<input id="tempCurve" name="tempCurve" type="hidden">
