@@ -1,21 +1,13 @@
-''' VBAT Evaluation
-Requirements: GNU octave
-'''
+''' Evaluate demand response energy and economic savings available using PNNL VirtualBatteries (VBAT) model. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime, traceback, math
-import multiprocessing, platform,collections
+import json, os, shutil, subprocess, platform, collections, csv, pulp
 from os.path import join as pJoin
 from jinja2 import Template
 import __neoMetaModel__
 from __neoMetaModel__ import *
-import random
-import csv
 import matplotlib.pyplot as plt
-# import numpy as np
-
 import pandas as pd
-import pulp
-	
+
 # Model metadata:
 fileName = os.path.basename(__file__)
 modelName = fileName[0:fileName.rfind('.')]
@@ -291,8 +283,9 @@ def work(modelDir, inputDict):
 	outData["stdout"] = "Success"
 	return outData
 
-def carpetPlot(tempData): #tempData is a 8760 list that contains the temperature data to be displayed in a carpet plot
-#takes about one minute to run
+def carpetPlot(tempData):
+	#tempData is a 8760 list that contains the temperature data to be displayed in a carpet plot
+	#takes about one minute to run
 	calendar = collections.OrderedDict()
 	calendar['0'] = 31
 	calendar['1'] = 28
