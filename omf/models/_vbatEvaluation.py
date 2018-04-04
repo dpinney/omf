@@ -1,18 +1,11 @@
-''' VBAT Evaluation
-Requirements: GNU octave
-'''
+''' Get power and energy limits from PNNL VirtualBatteries (VBAT) load model.'''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime, traceback, math
-import multiprocessing, platform
+import json, os, shutil, subprocess, platform
 from os.path import join as pJoin
 from jinja2 import Template
 import __neoMetaModel__
 from __neoMetaModel__ import *
-import random
-#trying something
-import ctypes  # An included library with Python install.   
 
-	
 # Model metadata:
 fileName = os.path.basename(__file__)
 modelName = fileName[0:fileName.rfind('.')]
