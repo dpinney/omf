@@ -1,4 +1,5 @@
 import omf, os, web, logging
+from multiprocessing import Process
 
 reApp = web.Flask('OMFR')
 
@@ -14,15 +15,22 @@ def before_request():
 		return web.redirect(url, code=code)
 
 if __name__ == "__main__":
-	logging.basicConfig(filename='omf.log',level=logging.DEBUG)
+	logging.basicConfig(filename='omf.log', level=logging.DEBUG)
 	template_files = ["templates/"+ x  for x in web.safeListdir("templates")]
 	model_files = ["models/" + x for x in web.safeListdir("models")]
-	web.Process(target=reApp.run, kwargs=dict(host='0.0.0.0', port=80, threaded=True)).start()
-	web.app.run(
-		port=443,
-		debug=False, 
-		host="0.0.0.0", 
-		extra_files=template_files + model_files, 
-		threaded=True,
-		ssl_context=('omfDevCert.pem','omfDevKey.pem'),
-	)
+	# HTTP redirector:
+	reAppKwargs = {
+		'host':'0.0.0.0',
+		'port':80,
+		'threaded':True
+	}
+	Process(target=reApp.run, kwargs=reAppKwargs).start()
+	# HTTPS (main app):
+	sslAppKwargs = {
+		'host':'0.0.0.0',
+		'port':443,
+		'threaded':True,
+		'extra_files':template_files + model_files,
+		'ssl_context':('omfDevCert.pem','omfDevKey.pem')
+	}
+	Process(target=web.app.run, kwargs=sslAppKwargs).start()
