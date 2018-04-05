@@ -11,6 +11,7 @@ build
 omf.egg-info
 omf/emailCredentials.key
 **/.DS_Store
+omf/octave-workspace
 # But include a few things:
 !omf/data/Model/public/*
 !omf/data/Feeder/public/*
