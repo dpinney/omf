@@ -405,7 +405,7 @@ def networkGet(owner, modelName, networkNum):
 	networkName = json.load(open(modelDir + "/allInputData.json")).get('networkName1')
 	networkPath = modelDir + "/" + networkName + ".omt"
 	with open(modelDir + "/" + networkName + ".omt", "r") as netFile:
-		networkData = json.dumps(json.load(netFile), indent=4)
+		networkData = json.dumps(json.load(netFile))
 	return render_template("transEdit.html", networks=yourNetworks, publicNetworks=publicNetworks, modelName=modelName, networkData=networkData, networkName=networkName, networkNum=networkNum, ref=request.referrer, is_admin=User.cu()=="admin", public=owner=="public",
 		currUser = User.cu(), owner = owner)
 
@@ -827,7 +827,7 @@ def networkData(owner, modelName, networkName):
 	if User.cu()=="admin" or owner==User.cu() or owner=="public":
 		with open("data/Model/" + owner + "/" + modelName + "/" + networkName + ".omt", "r") as netFile:
 			thisNet = json.load(netFile)
-		return json.dumps(thisNet, indent=4)
+		return json.dumps(thisNet)
 		# return jsonify(netFile.read())
 
 @app.route("/saveFeeder/<owner>/<modelName>/<feederName>", methods=["POST"])

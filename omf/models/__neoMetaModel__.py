@@ -1,12 +1,21 @@
 """ Common functions for all models """
 
 import json, os, sys, tempfile, webbrowser, math, shutil, datetime, omf, multiprocessing, traceback
+from jinja2 import Template
 from os.path import join as pJoin
 from os.path import split as pSplit
 
 # Locational variables so we don't have to rely on OMF being in the system path.
 _myDir = os.path.dirname(os.path.abspath(__file__))
 _omfDir = os.path.dirname(_myDir)
+
+def metadata(fileUnderObject):
+	''' Get the model name and template for a given model from its filename and associated .html file.
+	The argument fileUnderObject should always be __file__.'''
+	fileName = os.path.basename(fileUnderObject)
+	modelName = fileName[0:fileName.rfind('.')]
+	template = Template(open(pJoin(_myDir, modelName+".html"),"r").read()) #HTML Template for showing output.
+	return modelName, template
 
 def heavyProcessing(modelDir, inputDict):
 	''' Wrapper to handle model running safely and uniformly. '''

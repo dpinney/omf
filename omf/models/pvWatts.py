@@ -2,7 +2,6 @@
 
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime, traceback
 from os.path import join as pJoin
-from jinja2 import Template
 from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
 
@@ -12,10 +11,8 @@ from omf.solvers import nrelsam2013
 from omf.weather import zipCodeToClimateName
 
 # Model metadata:
-fileName = os.path.basename(__file__)
-modelName = fileName[0:fileName.rfind('.')]
 tooltip = "The pvWatts model runs the NREL pvWatts tool for quick estimation of solar panel output."
-template = Template(open(pJoin(__neoMetaModel__._myDir,modelName+".html"),"r").read()) #HTML Template for showing output.
+modelName, template = metadata(__file__)
 
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
