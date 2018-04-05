@@ -59,16 +59,16 @@ def work(modelDir, inputDict):
 	try:
 		demandList = []
 		with open(pJoin(modelDir,"demand.csv")) as inFile:
-			reader = csv.DictReader(inFile)
+			reader = csv.reader(inFile)
 			for row in reader:
-				demandList.append({'datetime': parse(row['timestamp']), 'power': float(row['power'])})
+				demandList.append(row) #######demandList.append({'datetime': parse(row['timestamp']), 'power': float(row['power'])})
 			if len(demandList)!=8760: raise Exception
 	except:
 		errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>"
 		raise Exception(errorMessage)
 
-	demandCurve = [x['power'] for x in demandList]
-	outData['startDate'] = demandList[0]['datetime'].isoformat()
+	demandCurve = [float(x[0]) for x in demandList]
+	outData['startDate'] = '2011-01-01'######demandList[0]['datetime'].isoformat()
 	# Run the PRISM model.
 	allPrismOutput = prism({
 		'rateStructure': rateStruct, # options: 2tier, 2tierCPP, PTR, 3tier, 24hourly
@@ -428,8 +428,8 @@ def new(modelDir):
 		"modelType": modelName,
 		"retailCost": "0.1",
 		"WholesaleEnergyCost": "0.07",
-		"fileName":"FrankScadaValidCSV.csv",
-		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidCSV.csv")).read(),
+		"fileName":"FrankScadaValidCSV_Copy.csv",
+		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidCSV_Copy.csv")).read(),
 		"DrPurchInstallCost": "100000",
 		"runTime": "0:00:03",
 		"SubstitutionPriceElasticity": "-0.09522",
