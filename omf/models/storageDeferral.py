@@ -53,9 +53,9 @@ def work(modelDir, inputDict):
 	try:
 		dc = []
 		with open(pJoin(modelDir,"demand.csv")) as inFile:
-			reader = csv.DictReader(inFile)
+			reader = csv.reader(inFile)
 			for row in reader:
-				dc.append({'datetime': parse(row['timestamp']), 'power': float(row['power'])})
+				dc.append({'power': float(row[0])})
 			if len(dc)!=8760: raise Exception
 	except:
 			e = sys.exc_info()[0]
@@ -63,6 +63,7 @@ def work(modelDir, inputDict):
 				pass
 			else:
 				errorMessage = "Demand CSV file is incorrect format."
+				print dc
 				raise Exception(errorMessage)
 	if deferralType == 'subTransformer':
 		for row in dc:
@@ -100,7 +101,7 @@ def work(modelDir, inputDict):
 			newBattCapacity = numOfUnits *cellCapacity * dodFactor
 			battSoC = newBattCapacity
 			for row in dc:
-				month = int(row['datetime'].month)-1
+				# month = int(row['datetime'].month)-1
 				discharge = min(numOfUnits * dischargeRate,battSoC, row['power'] - transformerThreshold)
 				charge = min(numOfUnits * chargeRate, newBattCapacity-battSoC, (transformerThreshold - row['power'])*battEff)
 				if counter == 8760:
@@ -125,7 +126,7 @@ def work(modelDir, inputDict):
 		#Battery dispatch loop, determine net power, battery state of charge.
 		for row in finalDC:
 			outData['startDate'] = finalDC[0]['datetime'].isoformat()
-			month = int(row['datetime'].month)-1
+			# month = int(row['datetime'].month)-1
 			discharge = min(afterBattDischarge,battSoC, row['power'] - transformerThreshold)
 			charge = min(afterBattCharge, afterBattCapacity-battSoC, (transformerThreshold - row['power'])*battEff)
 			if row['power'] > transformerThreshold and battSoC > 0:
@@ -177,7 +178,7 @@ def work(modelDir, inputDict):
 			newBattCapacity = numOfUnits *cellCapacity * dodFactor
 			battSoC = newBattCapacity
 			for row in dc:
-				month = int(row['datetime'].month)-1
+				# month = int(row['datetime'].month)-1
 				if row['sign'] == 'positive':
 					discharge = min(numOfUnits * dischargeRate,battSoC, row['power'] - transformerThreshold)
 					charge = min(numOfUnits * chargeRate, newBattCapacity-battSoC, (transformerThreshold - row['power'])*battEff)
@@ -205,8 +206,8 @@ def work(modelDir, inputDict):
 		battSoC = afterBattCapacity
 		finalDC = copy.deepcopy(dc)
 		for row in finalDC:
-			outData['startDate'] = finalDC[0]['datetime'].isoformat()
-			month = int(row['datetime'].month)-1
+			outData['startDate'] = '2011-01-01'#finalDC[0]['datetime'].isoformat()
+			# month = int(row['datetime'].month)-1
 			discharge = abs(row['power']) - transformerThreshold
 			charge = min(afterBattCharge, afterBattCapacity-battSoC, battEff*(transformerThreshold - abs(row['power'])))
 			if (row['sign'] == 'positive' and row['excessDemand'] > 0) and battSoC > 0:
@@ -264,8 +265,8 @@ def new(modelDir):
 		"dischargeRate": "5",
 		"modelType": modelName,
 		"chargeRate": "5",
-		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidCSV.csv")).read(),
-		"fileName": "FrankScadaValidCSV.csv",
+		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidCSV_Copy.csv")).read(),
+		"fileName": "FrankScadaValidCSV_Copy.csv",
 		"cellCost": "7140",
 		"cellQuantity": "10",
 		"dodFactor":"100",
