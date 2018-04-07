@@ -1,23 +1,131 @@
 import omf
+import os
+from os.path import join as pJoin
 import json
+import json, math, random, datetime, os
+import shutil
+from omf.models import voltageDrop
+
+_myDir = os.path.dirname(os.path.abspath(__file__))
+omfDirec =  os.path.dirname(os.path.dirname(_myDir))
 
 thisWorkDir = omf.omfDir + '/scratch/anonymization/'
+print(thisWorkDir)
+filePath = pJoin(omfDirec, 'static', 'publicFeeders')
 
-filePath = '/blah/blah/olin barre.omd'
+# filePath = 'Users/tuomastalvitie/omf/omf/static/public feeders/Olin Barre Geo.omd'
+# filePath = omfpJoin(omfDir, 'static', 'publicFeeders', 'Olin Barre Geo.omd')
+
+
+#Delete Everything in Directory
+for i in os.listdir(thisWorkDir):
+	files = {'randomLoc', 'randomNames', 'original'}
+	if i in (files):
+		shutil.rmtree(i)
+
+#Functions
+def distRandomizeLocations(inFeeder):
+	inFeeder['nodes'] = []
+	inFeeder['links'] = []
+	inFeeder['hiddenNodes'] = []
+	inFeeder['hiddenLinks'] = []
+	for key in inFeeder['tree']:
+		if ('longitude' in inFeeder['tree'][key]) or ('latitude' in inFeeder['tree'][key]):
+			inFeeder['tree'][key]['longitude'] = random.randint(0,1000)
+			inFeeder['tree'][key]['latitude'] = random.randint(0,1000)
+	return
+
+def distRandomizeNames(inFeeder):
+	''' Replace all names in the inFeeder distribution system with a random ID number. '''
+	newNameKey = {}
+	randomID = random.randint(0,100)
+	# Create nameKey dictionary
+	for key in inFeeder['tree']:
+		if 'name' in inFeeder['tree'][key]:
+			oldName = inFeeder['tree'][key]['name']
+			newName = str(randomID)
+			newNameKey.update({oldName:newName})
+			inFeeder['tree'][key]['name'] = newName
+			randomID += 1
+	# Replace names in tree
+	for key in inFeeder['tree']:
+		if 'parent' in inFeeder['tree'][key]:
+			oldParent = inFeeder['tree'][key]['parent']  
+			inFeeder['tree'][key]['parent'] = newNameKey[oldParent]
+		if ('from' in inFeeder['tree'][key]) and ('to' in inFeeder['tree'][key]):
+			oldFrom = inFeeder['tree'][key]['from']
+			oldTo = inFeeder['tree'][key]['to']
+			inFeeder['tree'][key]['from'] = newNameKey[oldFrom]
+			inFeeder['tree'][key]['to'] = newNameKey[oldTo]
+	# Replace names in links
+	for i in range(len(inFeeder['links'])):
+		for key in inFeeder['links'][i]:
+			if (key == 'source') or (key == 'target'):
+				oldLink = inFeeder['links'][i][key]['name']
+				inFeeder['links'][i][key]['name'] = newNameKey[oldLink]
+	# Replace names in 'nodes'
+	for i in range(len(inFeeder['nodes'])):
+		for key in inFeeder['nodes'][i]:
+			if key == 'name':
+				oldNode = inFeeder['nodes'][i][key]
+				inFeeder['nodes'][i][key] = newNameKey[oldNode]
+	return
 
 # Get the circuit in to memory.
-
+with open(pJoin(filePath, 'Olin Barre Geo.omd'), "r") as inFile:
+	inNetwork = json.load(inFile)
 # Randomize names.
-
+	distRandomizeNames(inNetwork)
+	FNAMEOUT = "simpleMarket_distRandomizeNames.omd"
+with open(FNAMEOUT, "w") as outFile:
+	json.dump(inNetwork, outFile, indent=4)
 # Randomize locations.
-
+with open(pJoin(filePath, 'Olin Barre Geo.omd'), "r") as inFile:
+	inNetwork = json.load(inFile)
 # Write resulting .omd to disk.
-
+	distRandomizeLocations(inNetwork)
+	FNAMEOUT = "simpleMarket_distRandomizeLocations.omd"
+with open(FNAMEOUT, "w") as outFile:
+	json.dump(inNetwork, outFile, indent=4)
 # Create 2 voltage drop models, copy correct .omd in to those directories.
 
+#I created 3, one for randNames, one for randLoc, one for the original
+
+randomNames = thisWorkDir  + 'randomNames'
+randomLoc = thisWorkDir + 'randomLoc'
+original_Loc = thisWorkDir + 'original'
+
+#Create three voltageDrop models
+voltageDrop.new(randomNames)
+voltageDrop.new(randomLoc)
+voltageDrop.new(original_Loc)
+
+#Remove extra original .omd files in anonymized subdirectories
+os.remove(pJoin(thisWorkDir, "randomLoc", "Olin Barre Geo.omd"))
+os.remove(pJoin(thisWorkDir, "randomNames", "Olin Barre Geo.omd"))
+
+#Put randomized voltage drops in correct folders, only 1 omd per folder. Maybe fix this later. 
+shutil.move("simpleMarket_distRandomizeLocations.omd", pJoin(randomLoc, "simpleMarket_distRandomizeLocations.omd"))
+shutil.move("simpleMarket_distRandomizeNames.omd", pJoin(randomNames, "simpleMarket_distRandomizeNames.omd"))
+
 # Run voltage drop on original olin barre.
+voltageDrop.work(original_Loc, json.load(open(original_Loc + "/allInputData.json")))
 
-# Run voltage drop on anonymized olin barre.
+#Run voltage drop on anonymized names
+# voltageDrop.work(randomNames, json.load(open(randomNames + "/allInputData.json")))
+
+# #Run voltage drop on anonymized locations
+voltageDrop.work(randomLoc, json.load(open(randomLoc + "/allInputData.json")))
+
+# voltageDrop.work(thisWorkDir, )
+# voltageDrop.work(thisWorkDir)
+# omf.models.voltageDrop.work("original olin barre", inputDict) #
+# # Run voltage drop on anonymized olin barre.
+# omf.models.voltageDrop.work("anonymized version olin barre", inputDict)
 # omf.models.voltageDrop.new(thisWorkDir, inputData)
-
 # Delete confidential data in here: .omd and .glm files in original voltage drop folder, .omd in anonyized voltage drop folder.
+for i in os.listdir(pJoin(thisWorkDir, "original")):
+	if i.endswith((".omd", ".glm")):
+		os.remove(pJoin(thisWorkDir, "original", i))
+#Last Line		
+#os.remove(pJoin(thisWorkDir, "Olin Barre Geo.omd"))

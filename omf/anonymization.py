@@ -523,25 +523,25 @@ def _tests():
 	# with open(FNAMEOUT, "w") as outFile:
 	# 	json.dump(inFeeder, outFile, indent=4)
 
-# 	# Test distRandomizeNames
-	# FNAME = "Simple Market System AnonTest.omd"
-	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
-	# with open(FNAME, "r") as inFile:
-	# 	inFeeder = json.load(inFile)
-	# 	distRandomizeNames(inFeeder)
-	# FNAMEOUT = "simpleMarket_distRandomizeNames.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inFeeder, outFile, indent=4)
+# # 	# Test distRandomizeNames
+# 	FNAME = "Simple Market System AnonTest.omd"
+# 	FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
+# 	with open(FNAME, "r") as inFile:
+# 		inFeeder = json.load(inFile)
+# 		distRandomizeNames(inFeeder)
+# 	FNAMEOUT = "simpleMarket_distRandomizeNames.omd"
+# 	with open(FNAMEOUT, "w") as outFile:
+# 		json.dump(inFeeder, outFile, indent=4)
 
 # 	# Test distRandomizeLocations
-	# FNAME = "Simple Market System AnonTest.omd"
-	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
-	# with open(FNAME, "r") as inFile:
-	# 	inFeeder = json.load(inFile)
-	# 	distRandomizeLocations(inFeeder)
-	# FNAMEOUT = "simpleMarket_distRandomizeLocations.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inFeeder, outFile, indent=4)
+	FNAME = "Simple Market System AnonTest.omd"
+	FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
+	with open(FNAME, "r") as inFile:
+		inFeeder = json.load(inFile)
+		distRandomizeLocations(inFeeder)
+	FNAMEOUT = "simpleMarket_distRandomizeLocations.omd"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inFeeder, outFile, indent=4)
 
 # # 	# Test distTranslateLocations
 # 	FNAME = "Simple Market System AnonTest.omd"
