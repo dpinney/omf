@@ -509,8 +509,8 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 		genId += 1
 	return
 
-def _tests():
-	pass
+# def _tests():
+# 	pass
 # 	# DISTRIBUTION FEEDER TESTS
 # 	# Test distPseudomizeNames
 	# FNAME = "Simple Market System AnonTest.omd"
@@ -534,14 +534,14 @@ def _tests():
 # 		json.dump(inFeeder, outFile, indent=4)
 
 # 	# Test distRandomizeLocations
-	FNAME = "Simple Market System AnonTest.omd"
-	FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
-	with open(FNAME, "r") as inFile:
-		inFeeder = json.load(inFile)
-		distRandomizeLocations(inFeeder)
-	FNAMEOUT = "simpleMarket_distRandomizeLocations.omd"
-	with open(FNAMEOUT, "w") as outFile:
-		json.dump(inFeeder, outFile, indent=4)
+	# FNAME = "Simple Market System AnonTest.omd"
+	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
+	# with open(FNAME, "r") as inFile:
+	# 	inFeeder = json.load(inFile)
+	# 	distRandomizeLocations(inFeeder)
+	# FNAMEOUT = "simpleMarket_distRandomizeLocations.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inFeeder, outFile, indent=4)
 
 # # 	# Test distTranslateLocations
 # 	FNAME = "Simple Market System AnonTest.omd"
@@ -669,5 +669,5 @@ def _tests():
 # 	with open(FNAMEOUT, "w") as outFile:
 # 		json.dump(inNetwork, outFile, indent=4)
 
-if __name__ == '__main__':
-	_tests()
+# if __name__ == '__main__':
+	# _tests()
