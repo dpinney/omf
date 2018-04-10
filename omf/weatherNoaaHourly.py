@@ -1,3 +1,5 @@
+''' Pulls hourly weather data from NOAA's quality controlled USCRN dataset. '''
+
 import requests, csv, tempfile, os
 
 def pullWeather(year, station, outputPath):
