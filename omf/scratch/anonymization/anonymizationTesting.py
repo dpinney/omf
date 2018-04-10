@@ -33,12 +33,17 @@ def distRandomizeLocations(inFeeder):
 		if ('longitude' in inFeeder['tree'][key]) or ('latitude' in inFeeder['tree'][key]):
 			inFeeder['tree'][key]['longitude'] = random.randint(0,1000)
 			inFeeder['tree'][key]['latitude'] = random.randint(0,1000)
-	return
 
 def distRandomizeNames(inFeeder):
 	''' Replace all names in the inFeeder distribution system with a random ID number. '''
 	newNameKey = {}
 	randomID = random.randint(0,100)
+	'''
+	# Alternate approach, maybe use later.
+	allKeys = range(len(inFeeder['tree'].keys()))
+	random.shuffle(allKeys) # results in [83, 7204, 13, 57, ...]
+	allKeys[i]; i+=1# instead of id += 1
+	'''
 	# Create nameKey dictionary
 	for key in inFeeder['tree']:
 		if 'name' in inFeeder['tree'][key]:
@@ -50,13 +55,16 @@ def distRandomizeNames(inFeeder):
 	# Replace names in tree
 	for key in inFeeder['tree']:
 		if 'parent' in inFeeder['tree'][key]:
-			oldParent = inFeeder['tree'][key]['parent']  
+			oldParent = inFeeder['tree'][key]['parent']
 			inFeeder['tree'][key]['parent'] = newNameKey[oldParent]
 		if ('from' in inFeeder['tree'][key]) and ('to' in inFeeder['tree'][key]):
 			oldFrom = inFeeder['tree'][key]['from']
 			oldTo = inFeeder['tree'][key]['to']
 			inFeeder['tree'][key]['from'] = newNameKey[oldFrom]
 			inFeeder['tree'][key]['to'] = newNameKey[oldTo]
+		if inFeeder['tree'][key].get('object','') == 'transformer':
+			oldConfig = inFeeder['tree'][key]['transformer_configuration']
+			inFeeder['tree'][key]['transformer_configuration'] = newNameKey[oldConfig]
 	# Replace names in links
 	for i in range(len(inFeeder['links'])):
 		for key in inFeeder['links'][i]:
@@ -69,7 +77,17 @@ def distRandomizeNames(inFeeder):
 			if key == 'name':
 				oldNode = inFeeder['nodes'][i][key]
 				inFeeder['nodes'][i][key] = newNameKey[oldNode]
-	return
+	''' Additional types to replace:
+	XXX transformer_configuration (transformer)
+	OOO triplex_line_configuration (triplex_line)
+	OOO triplex_line_conductor (triplex_line_configuration)
+	OOO overhead_line_conductor (overhead_line_configuration)
+	OOO underground_line_conductor (underground_line_configuration)
+	OOO overhead_line_configuration (overhead_line)
+	OOO underground_line_configuration (underground_line)
+	OOO line_spacing (underground_line_configuration AND overhead_line_configuration)
+	OOO regulator_configuration (regulator)
+	'''
 
 # Get the circuit in to memory.
 with open(pJoin(filePath, 'Olin Barre Geo.omd'), "r") as inFile:
