@@ -5,7 +5,7 @@ import requests, csv, tempfile, os
 def pullWeather(year, station, outputPath):
 	'''
 	For a given year and weather station, write 8760 hourly weather data (temp, humidity, etc.) to outputPath.
-	for list of available stations go to: ftp://ftp.ncdc.noaa.gov/pub/data/uscrn/products/hourly02
+	for list of available stations go to: https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02
 	'''
 	url = 'https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02/' + year + '/CRNH0203-' + year + '-' + station + '.txt'
 	r = requests.get(url)
