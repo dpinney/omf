@@ -49,6 +49,8 @@ def work(modelDir, inputDict):
 	battCapacity = cellQuantity * cellCapacity * dodFactor
 	battDischarge = cellQuantity * dischargeRate
 	battCharge = cellQuantity * chargeRate
+	# David's maybe idea about how to build this:
+	# data = [startTime + datetime.timedelta(hours=1)*x for x in range(8760)]
 	# Most of our data goes inside the dc "table"
 	try:
 		dc = []
