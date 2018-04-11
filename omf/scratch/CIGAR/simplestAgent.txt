@@ -25,7 +25,3 @@ http://gridlab-d.shoutwiki.com/wiki/Realtime_server
 http://gridlab-d.shoutwiki.com/wiki/Pauseat
 https://docs.python.org/2/howto/urllib2.html
 https://github.com/NREL/buspy/blob/develop/buspy/comm/gridlabcomm.py
-
-
-
-

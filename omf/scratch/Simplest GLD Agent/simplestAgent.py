@@ -7,20 +7,20 @@ time.sleep(2)
 
 try:
 	# Read the clock and a water heater temp.
-	print urllib2.urlopen('http://localhost:6267/clock').read()
-	print urllib2.urlopen('http://localhost:6267/waterheater1/temperature').read()
+	print urllib2.urlopen('http://localhost:6267/raw/clock').read()
+	print urllib2.urlopen('http://localhost:6267/raw/waterheater1/temperature').read()
 	# Step the simulation.
 	urllib2.urlopen('http://localhost:6267/control/pauseat=2000-01-02%2012:00:00').read()
 	print 'Stepped ahead 12 hours.'
 	time.sleep(2) # Hack: give the simulation some time to run.
 	# Get the value and clock again.
-	print urllib2.urlopen('http://localhost:6267/waterheater1/temperature').read()
-	print urllib2.urlopen('http://localhost:6267/clock').read()
+	print urllib2.urlopen('http://localhost:6267/raw/waterheater1/temperature').read()
+	print urllib2.urlopen('http://localhost:6267/raw/clock').read()
 	# Set a value.
-	urllib2.urlopen('http://localhost:6267/waterheater1/temperature=110.0').read()
+	urllib2.urlopen('http://localhost:6267/raw/waterheater1/temperature=110.0').read()
 	# Finish the simulation and see final temperature.
 	urllib2.urlopen('http://localhost:6267/control/resume').read()
-	print urllib2.urlopen('http://localhost:6267/waterheater1/temperature').read()
+	print urllib2.urlopen('http://localhost:6267/raw/waterheater1/temperature').read()
 except:
 	pass # server being weird.
 
