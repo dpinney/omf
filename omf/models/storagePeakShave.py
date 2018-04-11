@@ -49,7 +49,6 @@ def work(modelDir, inputDict):
 	battCapacity = cellQuantity * cellCapacity * dodFactor
 	battDischarge = cellQuantity * dischargeRate
 	battCharge = cellQuantity * chargeRate
-	# David's maybe idea about how to build this:
 	dates = [(datetime.datetime(2011,1,1,0,0) + datetime.timedelta(hours=1)*x).strftime("%m/%d/%Y %H:%M:%S") for x in range(8760)]
 	# Most of our data goes inside the dc "table"
 	try:
