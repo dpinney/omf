@@ -48,12 +48,15 @@ def work(modelDir, inputDict):
 	battDischarge = cellQuantity * dischargeRate
 	battCharge = cellQuantity * chargeRate
 	# Most of our data goes inside the dc "table"
+	dates = [(datetime.datetime(2011,1,1,0,0) + datetime.timedelta(hours=1)*x).strftime("%m/%d/%Y %H:%M:%S") for x in range(8760)]
 	try:
 		dc = []
 		with open(pJoin(modelDir,"demand.csv")) as inFile:
-			reader = csv.DictReader(inFile)
+			reader = csv.reader(inFile)
+			x = 0
 			for row in reader:
-				dc.append({'datetime': parse(row['timestamp']), 'power': float(row['power'])})
+				dc.append({'datetime': parse(dates[x]), 'power': float(row[0])})
+				x += 1
 			if len(dc)!=8760: raise Exception
 	except:
 			e = sys.exc_info()[0]
@@ -65,12 +68,13 @@ def work(modelDir, inputDict):
 	#Add price to dc table
 	try:
 		with open(pJoin(modelDir,'priceCurve.csv')) as priceFile:
-			reader = csv.DictReader(priceFile)
+			reader = csv.reader(priceFile)
 			rowCount = 0
-	 		for i, row in enumerate(reader):
-	 			dc[i]['price'] = float(row['price'])
-	 			rowCount+=1
-	 		if rowCount!= 8760: raise Exception
+			i = 0
+	 		for row in reader:
+	 			dc[i]['price'] = float(row[0])
+	 			i += 1
+	 		if i!= 8760: raise Exception
 	except:
 	 	e = sys.exc_info()[0]
 		if str(e) == "<type 'exceptions.SystemExit'>":
@@ -175,10 +179,10 @@ def new(modelDir):
 		"dischargeRate": "5",
 		"modelType": modelName,
 		"chargeRate": "5",
-		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidCSV.csv")).read(),
-		"fileName": "FrankScadaValidCSV.csv",
-		"priceCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","priceCurve.csv")).read(),
-		"fileNamed":"priceCurve.csv",
+		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidCSV_Copy.csv")).read(),
+		"fileName": "FrankScadaValidCSV_Copy.csv",
+		"priceCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","priceCurve_Copy.csv")).read(),
+		"fileNamed":"priceCurve_Copy.csv",
 		"cellCost": "7140",
 		"cellQuantity": "10",
 		"runTime": "0:00:03",
