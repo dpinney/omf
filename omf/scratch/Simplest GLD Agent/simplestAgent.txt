@@ -18,6 +18,12 @@ XXX Doesn't work with GridLAB-D v4.0.
 	XXX What about a browser? Can't even hit the root at http://localhost:6267.
 	XXX Check the docs? Tried the wget command the docs said would work. It didn't work.
 	XXX Read the docs more carefully? need to add /raw/ in the get statements. There was a bug in the docs.
+XXX Make warnings go away by fixing waterheater and using -q argument.
+XXX Better documentation of print statements.
+XXX Factored out base URL.
+OOO Requiring pauseat in glm... We could create a copy of the GLM?
+OOO What could still be better? Need a wait until function. Needs testing. Do we need a maxWait argument?
+OOO Port in faster URL library from abc4pvcosim?
 
 REFERENCES
 https://docs.python.org/2/library/subprocess.html
