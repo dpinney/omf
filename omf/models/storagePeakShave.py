@@ -50,14 +50,17 @@ def work(modelDir, inputDict):
 	battDischarge = cellQuantity * dischargeRate
 	battCharge = cellQuantity * chargeRate
 	# David's maybe idea about how to build this:
-	# data = [startTime + datetime.timedelta(hours=1)*x for x in range(8760)]
+	dates = [(datetime.datetime(2011,1,1,0,0) + datetime.timedelta(hours=1)*x).strftime("%m/%d/%Y %H:%M:%S") for x in range(8760)]
 	# Most of our data goes inside the dc "table"
 	try:
 		dc = []
 		with open(pJoin(modelDir,"demand.csv")) as inFile:
-			reader = csv.DictReader(inFile)
+			reader = csv.reader(inFile)
+			x = 0
 			for row in reader:
-				dc.append({'datetime': parse(row['timestamp']), 'power': float(row['power'])})
+				dc.append({'datetime': parse(dates[x]), 'power': float(row[0])})
+				x += 1
+			print dc
 			if len(dc)!=8760: raise Exception
 	except:
 			e = sys.exc_info()[0]
@@ -271,8 +274,8 @@ def new(modelDir):
 		"dischargeRate": "5",
 		"modelType": modelName,
 		"chargeRate": "5",
-		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidCSV.csv")).read(),
-		"fileName": "FrankScadaValidCSV.csv",
+		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidCSV_Copy.csv")).read(),
+		"fileName": "FrankScadaValidCSV_Copy.csv",
 		"dispatchStrategy": "optimal",
 		"cellCost": "7140",
 		"cellQuantity": "10",
