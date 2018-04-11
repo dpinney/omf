@@ -26,13 +26,13 @@ def work(modelDir, inputDict):
 	if inputDict['load_type'] == '4':
 		numDevices = int(inputDict['number_devices'])
 		if numDevices == 1:
-			runTimeDuration = 2
+			runTimeDuration = 5
 		elif numDevices > 1 and numDevices < 10:
-			runTimeDuration = 3.5
+			runTimeDuration = 10
 		elif numDevices >= 10 and numDevices < 50:
-			runTimeDuration = 6
+			runTimeDuration = 15
 		else :
-			runTimeDuration = (numDevices-numDevices%50)*.2
+			runTimeDuration = (numDevices-numDevices%50)*.5
 		inputDict['runTimeEstimate'] = 'This configuration will take an approximate run time of: ' + str(runTimeDuration) +' minutes.'
 		#HACK: dump input immediately to show runtime estimate.
 	else:
