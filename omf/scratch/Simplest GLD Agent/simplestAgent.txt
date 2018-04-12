@@ -22,7 +22,7 @@ XXX Make warnings go away by fixing waterheater and using -q argument.
 XXX Better documentation of print statements.
 XXX Factored out base URL.
 OOO Requiring pauseat in glm... We could create a copy of the GLM?
-OOO What could still be better? Need a wait until function. Needs testing. Do we need a maxWait argument?
+OOO Need a wait until function? Needs testing. Do we need a maxWait argument?
 OOO Port in faster URL library from abc4pvcosim?
 
 REFERENCES
