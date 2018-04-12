@@ -9,10 +9,17 @@ OUTPUT: y.glm
 
 '''
 
+from os.path import splitext
 import sys, omf
 
 def main():
 	pass
 
 if __name__ == '__main__':
-	main()
+  file_name, extension = splitext(sys.argv[1])
+  if (extension == '.std' or extension == '.seq'):
+    
+  elif (extension == '.mdb'):
+    pass
+  else:
+    raise Exception("FILE DOES NOT SUPPORT CONVERSION FOR EXTENSION: ", extension)
