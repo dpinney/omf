@@ -29,6 +29,9 @@ def handleMilFile(std, seq, failure = False):
     print 'FAILED TO CONVERT STD AND SEQ FILES FOR %s AND %s' % std, seq
   return failure
 
+def handleMdbFile(mdb, failure = False):
+  pass
+
 def is_valid_file(parser, file_name):
   ''' Check validity of user input '''
   valid_names = ["mdb", "seq", "std"]
