@@ -30,7 +30,20 @@ def handleMilFile(std, seq, failure = False):
   return failure
 
 def handleMdbFile(mdb, failure = False):
-  pass
+  ''' Convert mdb database to glm file. '''
+  try:
+
+  # Convert to string for conversion.
+  
+    if isinstance(mdb, list):
+      mdb = ' '.join(mdb)
+    glm, x_scale, y_scale = convertCymeModel(mdb)
+    with open(mdb.replace('.mdb', '.glm'), 'w') as output_file:
+      output_file.write(feeder.sortedWrite(glm))
+  except: 
+    failure = True
+    print 'FAILED TO CONVERT MDB FILE FOR %s' % mdb
+  return failure
 
 def is_valid_file(parser, file_name):
   ''' Check validity of user input '''
