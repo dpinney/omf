@@ -8,17 +8,35 @@ OUTPUT: y.glm
 (Uses cymeToGridlab.py)
 
 '''
+from os.path import exists, splitext
 
-import os.path
 import sys
+import milToGridlab as mil
+
+def handleMilFile(std, seq, failure = False):
+  ''' Conversion routine for the std and seq files. '''
+    # Attempt to open std and seq files and conver to glm.
+  try:
+    with open(std) as std_file, open(seq) as seq_file:
+      glm, x_scale, y_scale = mil.covert(std_file.read(), seq_file.read())
+  
+  # Write to new glm file.
+    with open(std.replace('.std', '.glm'), 'w') as output_file:
+      output_file.write(feeder.sortedWrite(glm))
+      print 'GLM FILE WRITTEN FOR %s AND %s' % std, seq
+  except:
+    failure = True
+    print 'FAILED TO CONVERT STD AND SEQ FILES FOR %s AND %s' % std, seq
+  return failure
 
 def is_valid_file(parser, file_name):
+  ''' Check validity of user input '''
   valid_names = ["mdb", "seq", "std"]
 
   # Check to see that file exists. 
-  if not os.path.exists(file_name):
+  if not exists(file_name):
     parser.error("FILE %s DOES NOT EXIST." % file_name)
-  suffix = os.path.splitext(file_name)[1][1:]
+  suffix = splitext(file_name)[1][1:]
 
   # Check to ensure that no invalid name is being passed.
   if suffix not in valid_names:
