@@ -9,9 +9,13 @@ OUTPUT: y.glm
 
 '''
 from os.path import exists, splitext
-
+from os import getcwd
 import sys
-import milToGridlab as mil
+
+sys.path.insert(0, '../milToGridLab.py')
+import milToGridLab as mil
+sys.path.insert(0, '../cymeToGridLab.py')
+import cymeToGridlab as cyme
 
 def handleMilFile(std, seq, failure = False):
   ''' Conversion routine for the std and seq files. '''
@@ -29,7 +33,7 @@ def handleMilFile(std, seq, failure = False):
     print 'FAILED TO CONVERT STD AND SEQ FILES FOR %s AND %s' % std, seq
   return failure
 
-def handleMdbFile(mdb, failure = False):
+def handleMdbFile(mdb, modelDir, failure = False):
   ''' Convert mdb database to glm file. '''
   try:
 
@@ -37,7 +41,7 @@ def handleMdbFile(mdb, failure = False):
   
     if isinstance(mdb, list):
       mdb = ' '.join(mdb)
-    glm, x_scale, y_scale = convertCymeModel(mdb)
+    glm, x_scale, y_scale = convertCymeModel(mdb, modelDir)
     with open(mdb.replace('.mdb', '.glm'), 'w') as output_file:
       output_file.write(feeder.sortedWrite(glm))
   except: 
@@ -65,20 +69,23 @@ def is_valid_file(parser, file_name):
 def main():
 
   parser = argparse.ArgumentParser()
-  parser.add_argument("--std", help="Single std file. Must go with seq file.", type=lambda f: is_valid_file(parser, f))
-  parser.add_argument("--seq", help="Single seq file. Must go with std file.", type=lambda f: is_valid_file(parser, f))
-  parser.add_argument("--mdb", help="Single mdb file, with both network and database exported to the same file.", type=lambda f: is_valid_file(parser, f))
-
-  # parser.add_argument("-of", "output_file", action="store_true")  For later-store in new folder.
+  parser.add_argument("-std", help="Single std file. Must go with seq file.", type=lambda f: is_valid_file(parser, f))
+  parser.add_argument("-seq", help="Single seq file. Must go with std file.", type=lambda f: is_valid_file(parser, f))
+  parser.add_argument("-mdb", help="Single mdb file, with both network and database exported to the same file.", type=lambda f: is_valid_file(parser, f))
+  # parser.add_argument("-if", "-inputfolder", action="store_true
+  # parser.add_argument("-of", "-outputfolder", action="store_true")  For later-store in new folder.
   
   args = parser.parse_args()
 
+'''
   if (args.std and args.seq):
     pass
   elif (args.mdb):
+    if (args.inputfolder): # Ternary operator here.
     pass
   else:
     # Raise exception.
+'''
 
 if __name__ == "__main__"
   main()

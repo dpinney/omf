@@ -10,8 +10,8 @@ if __name__ == "__main__":
 	web.app.add_url_rule('/sigh', 'sigh', view_func=web.app.sigh)
 	# Start the server.
 	web.app.run(
-		host='0.0.0.0',
-		port=6000,
+		host='127.0.0.1',
+		port=5001,
 		threaded=True,
 		extra_files=template_files + model_files
 	)
