@@ -11,8 +11,11 @@ OUTPUT: y.glm
 from os.path import exists, splitext
 from os import getcwd
 import sys
-import '../milToGridlab' as mil
-import '../cymeToGridlab' as cyme
+
+sys.path.insert(0, '../milToGridLab.py')
+import milToGridLab as mil
+sys.path.insert(0, '../cymeToGridLab.py')
+import cymeToGridlab as cyme
 
 def handleMilFile(std, seq, failure = False):
   ''' Conversion routine for the std and seq files. '''
@@ -74,6 +77,7 @@ def main():
   
   args = parser.parse_args()
 
+'''
   if (args.std and args.seq):
     pass
   elif (args.mdb):
@@ -81,6 +85,7 @@ def main():
     pass
   else:
     # Raise exception.
+'''
 
 if __name__ == "__main__"
   main()
