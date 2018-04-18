@@ -5053,12 +5053,12 @@ object capacitor {
 	time_delay 300.0;
 	switchC CLOSED;
 	nominal_voltage 2401.7771;
+	voltage_set_high 2350.0;
 	voltage_set_low 2340.0;
 	control_level INDIVIDUAL;
 	switchA CLOSED;
 	switchB CLOSED;
 	phases_connected ABCN;
-	voltage_set_high 2350.0;
 	pt_phase ABCN;
 };
 
