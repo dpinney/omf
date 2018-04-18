@@ -170,6 +170,7 @@
 						<li><a href='javascript:renameNetwork();'>Rename</a></li>
 						<li><a href='javascript:showModal("blankNetworkModal");'>New Blank Network...</a></li>
 						<li><a href='javascript:showModal("matpowerModal");'>MATPOWER Import...</a></li>
+						<li><a href='javascript:downloadTextFile("networkData.omt", JSON.stringify(networkData, null, 2));'>Download .omt File</a></li>
 					</ul>
 					{% endif %}
 				</div>
@@ -348,6 +349,7 @@ function addLine(x1,y1,x2,y2,id,myClass) {
 }
 function buildNetwork() {
 	// Find the size we need for the full chart.
+	console.log(networkData)
 	maxLon = 100, maxLat = 100
 	busNumMap = {}
 	for (num in networkData.bus) {
@@ -1250,6 +1252,19 @@ function anonymize() {
 	showProgressDialog('spinner', 'Anonymizing Network')
 	startProcess('/anonymizeTrans/{{owner}}/{{networkName}}')
 	startCheck('/checkAnonymizeTran/{{owner}}/{{modelName}}')
+}
+function downloadTextFile(fileName, text) {
+	console.log(text)
+	var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', fileName);
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
 }
 //ADD PROMPT TO SAVE CHANGES BEFORE EXIT
 {% if is_admin or not public %}
