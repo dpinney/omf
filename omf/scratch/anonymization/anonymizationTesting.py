@@ -176,3 +176,10 @@ for i in os.listdir(pJoin(thisWorkDir, "original")):
 		os.remove(pJoin(thisWorkDir, "original", i))
 #Last Line		
 #os.remove(pJoin(thisWorkDir, "Olin Barre Geo.omd"))
+
+#Compare Voltdumps
+#Option 1, create two volt dumps in the random names file, one anonymized, one not. 
+	'''Compare rows, ensure all rows match. Ignore names '''
+
+#Option 2, compare voltdump.csv to newNameKey in the anon function
+
