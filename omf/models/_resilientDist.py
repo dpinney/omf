@@ -171,7 +171,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 		#SET THE newLineCode to the output of GRIDLABD
 		gfmJson['line_codes'].append(newLineCode)
 	# Bus creation:
-	objToFind = ['node', 'load']
+	objToFind = ['node', 'load', 'triplex_meter', 'triplex_node']
 	for key, bus in jsonTree.iteritems():
 		# if bus.get('object','') in objToFind and bus.get('bustype','').lower() != 'swing':
 		if bus.get('object','').lower() in objToFind:
@@ -377,6 +377,7 @@ def work(modelDir, inputDict):
 		with open(pJoin(rdtInputFilePath), "w") as rdtInputFile:
 			json.dump(rdtJson, rdtInputFile, indent=4)
 	# Run GridLAB-D first time to generate xrMatrices.
+	print "RUNNING GLD FOR", modelDir
 	if platform.system() == "Windows":
 		omdPath = pJoin(modelDir, feederName + ".omd")
 		with open(omdPath, "r") as omd:
@@ -405,6 +406,8 @@ def work(modelDir, inputDict):
 		shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
 		proc = subprocess.Popen(['gridlabd', 'feeder.glm'], stdout=subprocess.PIPE, shell=True, cwd=modelDir)
 		(out, err) = proc.communicate()
+		with open(pJoin(modelDir, "gldConsoleOut.txt"), "w") as gldConsoleOut:
+			gldConsoleOut.write(out)
 		accumulator = ""
 		with open(pJoin(modelDir, "JSON_dump_line.json"), "r") as gldOut:
 			accumulator = json.load(gldOut)
@@ -442,6 +445,9 @@ def work(modelDir, inputDict):
 	rdtOutFile = modelDir + '/rdtOutput.json'
 	rdtSolverFolder = pJoin(__neoMetaModel__._omfDir,'solvers','rdt')
 	rdtJarPath = pJoin(rdtSolverFolder,'micot-rdt.jar')
+	#TEST RUSSELL THING, DELETE WHEN DONE
+	#shutil.copy(pJoin(__neoMetaModel__._omfDir, "scratch", "rdt_OUTPUTTEST.json"), pJoin(modelDir, 'rdt_OUTPUT.json'))
+	#############
 	proc = subprocess.Popen(['java', "-Djna.library.path=" + rdtSolverFolder, '-jar', rdtJarPath, '-c', rdtInputFilePath, '-e', rdtOutFile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	(stdout,stderr) = proc.communicate()
 	with open(pJoin(modelDir, "rdtConsoleOut.txt"), "w") as rdtConsoleOut:
@@ -468,7 +474,7 @@ def work(modelDir, inputDict):
 					del feederCopy['tree'][key]
 	#Add generators to second model.
 	maxTreeKey = int(max(feederCopy['tree'], key=int)) + 1
-	for gen in rdtOut['design_solution']['generators']:
+	'''for gen in rdtOut['design_solution']['generators']:
 		newGen = {}
 		newGen["object"] = "diesel_dg"
 		newGen["name"] = gen['id']
@@ -481,6 +487,7 @@ def work(modelDir, inputDict):
 		newGen["power_out_C"] = "220.0+150.0j"
 		feederCopy['tree'][str(maxTreeKey)] = newGen
 		maxTreeKey = maxTreeKey + 1
+	'''
 	maxTreeKey = max(feederCopy['tree'], key=int)
 	# Load a blank glm file and use it to write to it
 	feederPath = pJoin(modelDir, 'feederSecond.glm')
@@ -505,7 +512,7 @@ def work(modelDir, inputDict):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"feederName1": "trip37",
+		"feederName1": "Winter 2017 Fixed",
 		"modelType": modelName,
 		"runTime": "0:00:30",
 		"layoutAlgorithm": "geospatial",
