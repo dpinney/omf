@@ -1,3 +1,5 @@
+#set pauseat=2000-01-02 00:00:00 PST;
+
 clock {
 	timezone PST+8PDT;
 	starttime '2000-01-01 00:00:00';
@@ -7,7 +9,6 @@ clock {
 #set minimum_timestep=60;
 #set profiler=1;
 #set relax_naming_rules=1;
-#set pauseat=2000-01-02 00:00:00 PST;
 module generators;
 module tape;
 module climate;
@@ -566,6 +567,7 @@ object waterheater {
 	schedule_skew -810;
 	water_demand water14*1;
 	name waterheater1;
+	tank_diameter 3.78;
 	parent house1;
 	heating_element_capacity 4.8 kW;
 	thermostat_deadband 2.9;
@@ -652,6 +654,7 @@ object waterheater {
 	schedule_skew -810;
 	water_demand water14*1;
 	name waterheater2;
+	tank_diameter 3.78;
 	parent house2;
 	heating_element_capacity 4.8 kW;
 	thermostat_deadband 2.9;
