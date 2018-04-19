@@ -77,15 +77,13 @@ def main():
   
   args = parser.parse_args()
 
-'''
   if (args.std and args.seq):
-    pass
+    handleMilFile()
   elif (args.mdb):
     if (args.inputfolder): # Ternary operator here.
     pass
   else:
-    # Raise exception.
-'''
+    raise("INVALID FILE INPUT.")
 
-if __name__ == "__main__"
+if __name__ == "__main__":
   main()
