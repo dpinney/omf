@@ -10,11 +10,11 @@ OUTPUT: y.glm
 '''
 from os.path import exists, splitext
 from os import getcwd
+import argparse
 import sys
 
-sys.path.insert(0, '../milToGridLab.py')
-import milToGridLab as mil
-sys.path.insert(0, '../cymeToGridLab.py')
+sys.path.append('../')
+import milToGridlab as mil
 import cymeToGridlab as cyme
 
 def handleMilFile(std, seq, failure = False):
