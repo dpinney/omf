@@ -83,7 +83,7 @@ def main():
     home_folder = os.getcwd()
     handleMdb(args.mdb, home_folder)
   else:
-    raise("INVALID FILE INPUT.")
+    raise Exception("INVALID FILE INPUT.")
 
 if __name__ == "__main__":
   main()
