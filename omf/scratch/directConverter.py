@@ -31,7 +31,7 @@ def handleMilFile(std, seq, failure = False):
   except:
     failure = True
     print 'FAILED TO CONVERT STD AND SEQ FILES FOR %s AND %s' % std, seq
-  return failure
+  return failure  
 
 def handleMdbFile(mdb, modelDir, failure = False):
   ''' Convert mdb database to glm file. '''
@@ -78,10 +78,10 @@ def main():
   args = parser.parse_args()
 
   if (args.std and args.seq):
-    handleMilFile()
+    handleMilFile(args.std, args.seq)
   elif (args.mdb):
-    if (args.inputfolder): # Ternary operator here.
-    pass
+   home_folder = os.getcwd()
+    handleMdb(args.mdb, home_folder)
   else:
     raise("INVALID FILE INPUT.")
 
