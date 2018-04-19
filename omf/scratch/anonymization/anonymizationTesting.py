@@ -5,6 +5,7 @@ import json
 import json, math, random, datetime, os
 import shutil
 from omf.models import voltageDrop
+import random
 
 _myDir = os.path.dirname(os.path.abspath(__file__))
 omfDirec =  os.path.dirname(os.path.dirname(_myDir))
@@ -37,7 +38,9 @@ def distRandomizeLocations(inFeeder):
 def distRandomizeNames(inFeeder):
 	''' Replace all names in the inFeeder distribution system with a random ID number. '''
 	newNameKey = {}
-	randomID = random.randint(0,100)
+	allKeys = range(len(inFeeder['tree'].keys()))
+	random.shuffle(allKeys)
+	#randomID = random.randint(0,100)
 	'''
 	# Alternate approach, maybe use later.
 	allKeys = range(len(inFeeder['tree'].keys()))
@@ -45,13 +48,12 @@ def distRandomizeNames(inFeeder):
 	allKeys[i]; i+=1# instead of id += 1
 	'''
 	# Create nameKey dictionary
-	for key in inFeeder['tree']:
+	for count, key in enumerate(inFeeder['tree']):
 		if 'name' in inFeeder['tree'][key]:
 			oldName = inFeeder['tree'][key]['name']
-			newName = str(randomID)
+			newName = str(allKeys[count])
 			newNameKey.update({oldName:newName})
 			inFeeder['tree'][key]['name'] = newName
-			randomID += 1
 	# Replace names in tree
 	for key in inFeeder['tree']:
 		if 'parent' in inFeeder['tree'][key]:
@@ -62,9 +64,36 @@ def distRandomizeNames(inFeeder):
 			oldTo = inFeeder['tree'][key]['to']
 			inFeeder['tree'][key]['from'] = newNameKey[oldFrom]
 			inFeeder['tree'][key]['to'] = newNameKey[oldTo]
-		if inFeeder['tree'][key].get('object','') == 'transformer':
-			oldConfig = inFeeder['tree'][key]['transformer_configuration']
-			inFeeder['tree'][key]['transformer_configuration'] = newNameKey[oldConfig]
+		# if inFeeder['tree'][key].get('object','') == 'transformer':
+		# 	oldConfig = inFeeder['tree'][key]['configuration']
+		# 	inFeeder['tree'][key]['configuration'] = newNameKey[oldConfig]
+	#Replace triplex line Configs - these dont exsist
+		# if inFeeder['tree'][key].get('object','') == 'triplex_line':
+		# 	oldConfig = inFeeder['tree'][key]['configuration']
+		# 	inFeeder['tree'][key]['configuration'] = newNameKey[oldConfig]
+
+	#Replace triplex line conductors - neither do these
+		# if inFeeder['tree'][key].get('object','') == 'triplex_line':
+		# 	oldConfig = inFeeder['tree'][key]['configuration']
+		# 	inFeeder['tree'][key]['configuration'] = newNameKey[oldConfig]
+
+	#this does, works for line_config objects
+		if inFeeder['tree'][key].get('object', '') == 'line_configuration':
+			print("activated")
+			for prop in inFeeder['tree'][key]:
+				slist = {'conductor_N', 'conductor_A', 'conductor_B', 'conductor_C'}
+				if prop in slist:
+					print("has detected a conductor")
+					oldCon = inFeeder['tree'][key][prop]
+					inFeeder['tree'][key][prop] = newNameKey[oldCon]
+	#Replace Spacing
+		if 'spacing' in inFeeder['tree'][key]:
+			oldspace = inFeeder['tree'][key]['spacing']
+			inFeeder['tree'][key]['spacing'] = newNameKey[oldspace]
+	#Replace configs general form
+		if 'configuration' in inFeeder['tree'][key]:
+			oldConfig = inFeeder['tree'][key]['configuration']
+			inFeeder['tree'][key]['configuration'] = newNameKey[oldConfig]
 	# Replace names in links
 	for i in range(len(inFeeder['links'])):
 		for key in inFeeder['links'][i]:
@@ -76,11 +105,11 @@ def distRandomizeNames(inFeeder):
 		for key in inFeeder['nodes'][i]:
 			if key == 'name':
 				oldNode = inFeeder['nodes'][i][key]
-				inFeeder['nodes'][i][key] = newNameKey[oldNode]
+				inFeeder['nodes'][i][key] = newNameKey[oldNode]	
 	''' Additional types to replace:
 	XXX transformer_configuration (transformer)
-	OOO triplex_line_configuration (triplex_line)
-	OOO triplex_line_conductor (triplex_line_configuration)
+	OOO triplex_line_configuration (triplex_line) doesnt exsist
+	OOO triplex_line_conductor (triplex_line_configuration) doesnt exsist
 	OOO overhead_line_conductor (overhead_line_configuration)
 	OOO underground_line_conductor (underground_line_configuration)
 	OOO overhead_line_configuration (overhead_line)
@@ -94,7 +123,7 @@ with open(pJoin(filePath, 'Olin Barre Geo.omd'), "r") as inFile:
 	inNetwork = json.load(inFile)
 # Randomize names.
 	distRandomizeNames(inNetwork)
-	FNAMEOUT = "simpleMarket_distRandomizeNames.omd"
+	FNAMEOUT = "Olin Barre Geo RandomNames.omd"
 with open(FNAMEOUT, "w") as outFile:
 	json.dump(inNetwork, outFile, indent=4)
 # Randomize locations.
@@ -102,7 +131,7 @@ with open(pJoin(filePath, 'Olin Barre Geo.omd'), "r") as inFile:
 	inNetwork = json.load(inFile)
 # Write resulting .omd to disk.
 	distRandomizeLocations(inNetwork)
-	FNAMEOUT = "simpleMarket_distRandomizeLocations.omd"
+	FNAMEOUT = "Olin Barre Geo randomLoc.omd"
 with open(FNAMEOUT, "w") as outFile:
 	json.dump(inNetwork, outFile, indent=4)
 # Create 2 voltage drop models, copy correct .omd in to those directories.
@@ -123,14 +152,14 @@ os.remove(pJoin(thisWorkDir, "randomLoc", "Olin Barre Geo.omd"))
 os.remove(pJoin(thisWorkDir, "randomNames", "Olin Barre Geo.omd"))
 
 #Put randomized voltage drops in correct folders, only 1 omd per folder. Maybe fix this later. 
-shutil.move("simpleMarket_distRandomizeLocations.omd", pJoin(randomLoc, "simpleMarket_distRandomizeLocations.omd"))
-shutil.move("simpleMarket_distRandomizeNames.omd", pJoin(randomNames, "simpleMarket_distRandomizeNames.omd"))
+shutil.move("Olin Barre Geo randomLoc.omd", pJoin(randomLoc, "Olin Barre Geo randomLoc.omd"))
+shutil.move("Olin Barre Geo RandomNames.omd", pJoin(randomNames, "Olin Barre Geo RandomNames.omd"))
 
 # Run voltage drop on original olin barre.
 voltageDrop.work(original_Loc, json.load(open(original_Loc + "/allInputData.json")))
 
 #Run voltage drop on anonymized names
-# voltageDrop.work(randomNames, json.load(open(randomNames + "/allInputData.json")))
+voltageDrop.work(randomNames, json.load(open(randomNames + "/allInputData.json")))
 
 # #Run voltage drop on anonymized locations
 voltageDrop.work(randomLoc, json.load(open(randomLoc + "/allInputData.json")))

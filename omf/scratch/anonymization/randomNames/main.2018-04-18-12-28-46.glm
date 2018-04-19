@@ -1,0 +1,12754 @@
+clock {
+	timezone PST+8PDT;
+	starttime '2000-01-01 00:00:00';
+	stoptime '2000-01-02 00:00:00';
+};
+
+#set minimum_timestep=60;
+#set profiler=1;
+#set relax_naming_rules=1;
+module generators;
+module tape;
+module climate;
+module residential {
+	implicit_enduses NONE;
+};
+
+module powerflow {
+	solver_method NR;
+	NR_iteration_limit 50;
+};
+
+object node {
+	phases ABCN;
+	name 83;
+	bustype SWING;
+	nominal_voltage 7200.0;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 83;
+	name 295;
+	to 608;
+	length 20.6237;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 608;
+	name 977;
+	to 1310;
+	length 13.0755;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1310;
+	name 863;
+	to 631;
+	length 14.8233;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1310;
+	name 88;
+	to 344;
+	length 10;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1310;
+	name 1385;
+	to 1136;
+	length 10;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1310;
+	name 56;
+	to 1002;
+	length 19.0913;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1002;
+	name 1495;
+	to 526;
+	length 24.3563;
+	configuration 528;
+};
+
+object fuse {
+	phases ACBN;
+	from 526;
+	name 872;
+	current_limit 9999.0 A;
+	to 1360;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1360;
+	name 9;
+	to 426;
+	length 82.2659;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 426;
+	name 982;
+	to 540;
+	length 87.5465;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 540;
+	name 1642;
+	to 1508;
+	length 281.156;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1508;
+	name 700;
+	to 1704;
+	length 465.786;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1704;
+	name 262;
+	to 1044;
+	length 212.612;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1044;
+	name 563;
+	to 140;
+	length 302.735;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 140;
+	name 406;
+	to 745;
+	length 178.526;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 745;
+	name 975;
+	to 1598;
+	length 144.103;
+	configuration 528;
+};
+
+object transformer {
+	phases BS;
+	from 1598;
+	name 1152;
+	to 100;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 358;
+	parent 100;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1598;
+	name 1520;
+	to 830;
+	length 266.66;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 830;
+	name 542;
+	to 581;
+	length 153.517;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 581;
+	name 637;
+	to 866;
+	length 357.003;
+	configuration 528;
+};
+
+object overhead_line {
+	phases AN;
+	from 866;
+	name 1032;
+	to 585;
+	length 27.7071;
+	configuration 1270;
+};
+
+object fuse {
+	phases AN;
+	from 585;
+	name 67;
+	current_limit 9999.0 A;
+	to 687;
+};
+
+object overhead_line {
+	phases AN;
+	from 687;
+	name 601;
+	to 875;
+	length 103.665;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 875;
+	name 158;
+	to 1601;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1425;
+	parent 1601;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1314;
+	parent 1601;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 866;
+	name 1229;
+	to 1444;
+	length 287.2;
+	configuration 528;
+};
+
+object transformer {
+	phases BS;
+	from 1444;
+	name 1542;
+	to 1635;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 1618;
+	parent 1635;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1444;
+	name 1612;
+	to 508;
+	length 211.226;
+	configuration 528;
+};
+
+object transformer {
+	phases CS;
+	from 508;
+	name 973;
+	to 1154;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 100;
+	name 319;
+	parent 1154;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 508;
+	name 243;
+	to 1469;
+	length 194.654;
+	configuration 528;
+};
+
+object transformer {
+	phases BS;
+	from 1469;
+	name 990;
+	to 551;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 1712;
+	parent 551;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1469;
+	name 944;
+	to 1345;
+	length 222.044;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1345;
+	name 1364;
+	to 1695;
+	length 273.49;
+	configuration 528;
+};
+
+object transformer {
+	phases AS;
+	from 1695;
+	name 314;
+	to 853;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1252;
+	parent 853;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 1695;
+	name 636;
+	to 185;
+	length 26.5061;
+	configuration 1699;
+};
+
+object fuse {
+	phases CN;
+	from 185;
+	name 1472;
+	current_limit 9999.0 A;
+	to 1208;
+};
+
+object overhead_line {
+	phases CN;
+	from 1208;
+	name 630;
+	to 1278;
+	length 80.8867;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 1278;
+	name 76;
+	to 1534;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 1519.04;
+	name 1085;
+	parent 1534;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 1695;
+	name 706;
+	to 1241;
+	length 28.1181;
+	configuration 1699;
+};
+
+object fuse {
+	phases CN;
+	from 1241;
+	name 336;
+	current_limit 9999.0 A;
+	to 1020;
+};
+
+object overhead_line {
+	phases CN;
+	from 1020;
+	name 457;
+	to 900;
+	length 241.85;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 900;
+	name 1003;
+	to 966;
+	length 320.096;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 966;
+	name 467;
+	to 1553;
+	length 319.967;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 1553;
+	name 622;
+	to 1660;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 1655.3;
+	name 300;
+	parent 1660;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 1553;
+	name 211;
+	to 616;
+	length 203.088;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 616;
+	name 780;
+	to 51;
+	length 158.947;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 51;
+	name 971;
+	to 1237;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 10133.7;
+	name 1267;
+	parent 1237;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 1695;
+	name 459;
+	to 768;
+	length 24.9997;
+	configuration 1270;
+};
+
+object fuse {
+	phases AN;
+	from 768;
+	name 490;
+	current_limit 9999.0 A;
+	to 107;
+};
+
+object overhead_line {
+	phases AN;
+	from 107;
+	name 561;
+	to 1160;
+	length 260.872;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 1160;
+	name 1089;
+	to 117;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1438;
+	parent 117;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 1160;
+	name 809;
+	to 171;
+	length 174.815;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 171;
+	name 310;
+	to 1702;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 753;
+	parent 1702;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1292;
+	parent 1702;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 1160;
+	name 77;
+	to 1080;
+	length 467.84;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 1080;
+	name 1362;
+	to 1685;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 887;
+	parent 1685;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1703;
+	parent 1685;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 1080;
+	name 388;
+	to 1075;
+	length 372.94;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 1075;
+	name 281;
+	to 1500;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1588;
+	parent 1500;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 1075;
+	name 430;
+	to 825;
+	length 288.845;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 825;
+	name 614;
+	to 567;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1410;
+	parent 567;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 1080;
+	name 1269;
+	to 1624;
+	length 235.1;
+	configuration 1270;
+};
+
+object overhead_line {
+	phases AN;
+	from 1624;
+	name 1527;
+	to 937;
+	length 316.703;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 937;
+	name 46;
+	to 1582;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 537;
+	parent 1582;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1260;
+	parent 1582;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 937;
+	name 930;
+	to 1311;
+	length 201.012;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 1311;
+	name 1613;
+	to 273;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 732;
+	parent 273;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 1624;
+	name 839;
+	to 85;
+	length 383.447;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 85;
+	name 889;
+	to 595;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 565;
+	parent 595;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 85;
+	name 166;
+	to 1224;
+	length 321.462;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 1224;
+	name 892;
+	to 473;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 893;
+	parent 473;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 683;
+	parent 473;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 1224;
+	name 389;
+	to 1693;
+	length 211.036;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 1693;
+	name 1043;
+	to 285;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 785;
+	parent 285;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 1693;
+	name 1324;
+	to 882;
+	length 202.261;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 882;
+	name 1456;
+	to 1268;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1030;
+	parent 1268;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1568;
+	parent 1268;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 882;
+	name 1153;
+	to 1259;
+	length 217.697;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 1259;
+	name 1630;
+	to 725;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 205;
+	parent 725;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1201;
+	parent 725;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 882;
+	name 580;
+	to 465;
+	length 198.705;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 465;
+	name 605;
+	to 277;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 261;
+	parent 277;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 1693;
+	name 1603;
+	to 66;
+	length 202.235;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 66;
+	name 715;
+	to 849;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1423;
+	parent 849;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 1624;
+	name 828;
+	to 1641;
+	length 141.214;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 1641;
+	name 47;
+	to 80;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 257;
+	parent 80;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1695;
+	name 861;
+	to 909;
+	length 335.444;
+	configuration 528;
+};
+
+object transformer {
+	phases BS;
+	from 909;
+	name 681;
+	to 868;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 1667;
+	parent 868;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 909;
+	name 570;
+	to 1293;
+	length 26.6007;
+	configuration 1699;
+};
+
+object fuse {
+	phases CN;
+	from 1293;
+	name 888;
+	current_limit 9999.0 A;
+	to 1264;
+};
+
+object overhead_line {
+	phases CN;
+	from 1264;
+	name 1066;
+	to 30;
+	length 243.066;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 30;
+	name 1175;
+	to 1633;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 4534.42;
+	name 1589;
+	parent 1633;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 30;
+	name 1453;
+	to 371;
+	length 305.297;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 371;
+	name 1359;
+	to 242;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 3757.23;
+	name 1502;
+	parent 242;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 909;
+	name 1271;
+	to 1257;
+	length 386.822;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1257;
+	name 128;
+	to 201;
+	length 137.975;
+	configuration 528;
+};
+
+object transformer {
+	phases BS;
+	from 201;
+	name 1296;
+	to 548;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 1195;
+	parent 548;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 201;
+	name 648;
+	to 1628;
+	length 25.0001;
+	configuration 1270;
+};
+
+object fuse {
+	phases AN;
+	from 1628;
+	name 1576;
+	current_limit 9999.0 A;
+	to 754;
+};
+
+object overhead_line {
+	phases AN;
+	from 754;
+	name 35;
+	to 97;
+	length 118.283;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 97;
+	name 1442;
+	to 992;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 309;
+	parent 992;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 97;
+	name 1707;
+	to 617;
+	length 218.301;
+	configuration 1270;
+};
+
+object overhead_line {
+	phases AN;
+	from 617;
+	name 1146;
+	to 1053;
+	length 286.217;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 1053;
+	name 1478;
+	to 466;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 160;
+	parent 466;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 201;
+	name 800;
+	to 1287;
+	length 428.982;
+	configuration 834;
+};
+
+object transformer {
+	phases AS;
+	from 1287;
+	name 713;
+	to 1379;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 743;
+	parent 1379;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 795;
+	parent 1379;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 201;
+	name 755;
+	to 1119;
+	length 155.789;
+	configuration 528;
+};
+
+object underground_line {
+	phases ACBN;
+	from 1119;
+	name 578;
+	to 545;
+	length 24.9999;
+	configuration 1118;
+};
+
+object fuse {
+	phases ACB;
+	from 545;
+	name 93;
+	current_limit 9999.0 A;
+	to 640;
+};
+
+object underground_line {
+	phases ACB;
+	from 640;
+	name 707;
+	to 968;
+	length 201.626;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 968;
+	name 442;
+	to 1306;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 3072.58;
+	name 137;
+	parent 1306;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1119;
+	name 1404;
+	to 10;
+	length 172.639;
+	configuration 528;
+};
+
+object transformer {
+	phases BS;
+	from 10;
+	name 642;
+	to 239;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 1679;
+	parent 239;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 1697;
+	parent 239;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 899;
+	parent 239;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 10;
+	name 1386;
+	to 1354;
+	length 561.815;
+	configuration 528;
+};
+
+object overhead_line {
+	phases AN;
+	from 1354;
+	name 1250;
+	to 802;
+	length 22.8798;
+	configuration 834;
+};
+
+object fuse {
+	phases AN;
+	from 802;
+	name 1042;
+	current_limit 9999.0 A;
+	to 659;
+};
+
+object overhead_line {
+	phases AN;
+	from 659;
+	name 1418;
+	to 170;
+	length 64.7094;
+	configuration 834;
+};
+
+object line_configuration {
+	name 834;
+	spacing 116;
+	conductor_N 43;
+	conductor_A 43;
+	conductor_C 791;
+	conductor_B 791;
+};
+
+object overhead_line {
+	phases AN;
+	from 170;
+	name 431;
+	to 307;
+	length 186.866;
+	configuration 834;
+};
+
+object transformer {
+	phases AS;
+	from 307;
+	name 1059;
+	to 1079;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 538;
+	parent 1079;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 674;
+	parent 1079;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1354;
+	name 592;
+	to 209;
+	length 169.689;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 209;
+	name 199;
+	to 1083;
+	length 293.041;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1083;
+	name 767;
+	to 420;
+	length 421.542;
+	configuration 528;
+};
+
+object overhead_line {
+	phases CN;
+	from 420;
+	name 1518;
+	to 1172;
+	length 25;
+	configuration 1699;
+};
+
+object fuse {
+	phases CN;
+	from 1172;
+	name 446;
+	current_limit 9999.0 A;
+	to 835;
+};
+
+object overhead_line {
+	phases CN;
+	from 835;
+	name 619;
+	to 699;
+	length 235.932;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 699;
+	name 711;
+	to 812;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 2697.44;
+	name 981;
+	parent 812;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 699;
+	name 1180;
+	to 790;
+	length 78.2066;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 790;
+	name 1300;
+	to 1432;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 2172.58;
+	name 363;
+	parent 1432;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 787.278;
+	name 855;
+	parent 1432;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 790;
+	name 1068;
+	to 215;
+	length 187.008;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 215;
+	name 1014;
+	to 372;
+	length 268.521;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 372;
+	name 1675;
+	to 356;
+	length 144.519;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 356;
+	name 1099;
+	to 387;
+	length 159.822;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 387;
+	name 1024;
+	to 58;
+	length 192.016;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 58;
+	name 123;
+	to 1550;
+	length 242.98;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 1550;
+	name 62;
+	to 1193;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 2914.44;
+	name 1299;
+	parent 1193;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 387;
+	name 49;
+	to 1462;
+	length 336;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 1462;
+	name 917;
+	to 55;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 2540.99;
+	name 1206;
+	parent 55;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 215;
+	name 1562;
+	to 429;
+	length 115.812;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 429;
+	name 841;
+	to 1434;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 4567.22;
+	name 822;
+	parent 1434;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 420;
+	name 103;
+	to 375;
+	length 546.446;
+	configuration 528;
+};
+
+object transformer {
+	phases BS;
+	from 375;
+	name 423;
+	to 1408;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 1115;
+	parent 1408;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 375;
+	name 256;
+	to 1337;
+	length 131.068;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1337;
+	name 718;
+	to 1174;
+	length 222.516;
+	configuration 528;
+};
+
+object switch {
+	status CLOSED;
+	phases ACBN;
+	from 1174;
+	name 1104;
+	to 1678;
+};
+
+object switch {
+	status CLOSED;
+	phases ACBN;
+	from 1678;
+	name 513;
+	to 690;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 690;
+	name 837;
+	to 312;
+	length 25.0002;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 312;
+	name 1436;
+	to 1234;
+	length 226.378;
+	configuration 528;
+};
+
+object transformer {
+	phases AS;
+	from 1234;
+	name 102;
+	to 860;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1514;
+	parent 860;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1234;
+	name 1165;
+	to 65;
+	length 222.764;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 65;
+	name 1273;
+	to 38;
+	length 489.892;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 38;
+	name 879;
+	to 407;
+	length 558.193;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 407;
+	name 1507;
+	to 908;
+	length 76.3128;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 908;
+	name 1297;
+	to 574;
+	length 329.719;
+	configuration 528;
+};
+
+object transformer {
+	phases BS;
+	from 574;
+	name 474;
+	to 294;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 404;
+	parent 294;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 1394;
+	parent 294;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 303;
+	parent 294;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 574;
+	name 1532;
+	to 1159;
+	length 311.671;
+	configuration 528;
+};
+
+object overhead_line {
+	phases AN;
+	from 1159;
+	name 652;
+	to 777;
+	length 29.6986;
+	configuration 1270;
+};
+
+object fuse {
+	phases AN;
+	from 777;
+	name 1413;
+	current_limit 9999.0 A;
+	to 950;
+};
+
+object overhead_line {
+	phases AN;
+	from 950;
+	name 846;
+	to 1645;
+	length 99.3975;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 1645;
+	name 246;
+	to 89;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 156;
+	parent 89;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 1645;
+	name 1320;
+	to 1133;
+	length 278.816;
+	configuration 1270;
+};
+
+object overhead_line {
+	phases AN;
+	from 1133;
+	name 154;
+	to 1041;
+	length 354.071;
+	configuration 1270;
+};
+
+object overhead_line {
+	phases AN;
+	from 1041;
+	name 94;
+	to 396;
+	length 348.862;
+	configuration 1270;
+};
+
+object overhead_line {
+	phases AN;
+	from 396;
+	name 881;
+	to 999;
+	length 238.633;
+	configuration 1270;
+};
+
+object overhead_line {
+	phases AN;
+	from 999;
+	name 527;
+	to 104;
+	length 333.034;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 104;
+	name 1170;
+	to 1393;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1511;
+	parent 1393;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 104;
+	name 81;
+	to 530;
+	length 285.607;
+	configuration 1270;
+};
+
+object overhead_line {
+	phases AN;
+	from 530;
+	name 1494;
+	to 1521;
+	length 108.49;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 1521;
+	name 907;
+	to 1370;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1353;
+	parent 1370;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 993;
+	parent 1370;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases A;
+	from 530;
+	name 1650;
+	to 255;
+	length 159.789;
+	configuration 1270;
+};
+
+object underground_line {
+	phases A;
+	from 255;
+	name 845;
+	to 877;
+	length 215.958;
+	configuration 1118;
+};
+
+object overhead_line {
+	phases AN;
+	from 999;
+	name 1343;
+	to 557;
+	length 222.075;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 557;
+	name 435;
+	to 296;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 63;
+	parent 296;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 1041;
+	name 1396;
+	to 1637;
+	length 252;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 1637;
+	name 1446;
+	to 253;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1021;
+	parent 253;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1159;
+	name 397;
+	to 447;
+	length 351.049;
+	configuration 528;
+};
+
+object transformer {
+	phases AS;
+	from 447;
+	name 350;
+	to 1526;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 736;
+	parent 1526;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 447;
+	name 1048;
+	to 1564;
+	length 78.1503;
+	configuration 528;
+};
+
+object overhead_line {
+	phases AN;
+	from 1159;
+	name 1517;
+	to 480;
+	length 29.7713;
+	configuration 1270;
+};
+
+object fuse {
+	phases AN;
+	from 480;
+	name 478;
+	current_limit 9999.0 A;
+	to 482;
+};
+
+object overhead_line {
+	phases AN;
+	from 482;
+	name 666;
+	to 1196;
+	length 486.611;
+	configuration 1270;
+};
+
+object line_configuration {
+	name 1270;
+	spacing 116;
+	conductor_N 680;
+	conductor_A 680;
+	conductor_C 791;
+	conductor_B 791;
+};
+
+object overhead_line {
+	phases AN;
+	from 1196;
+	name 792;
+	to 24;
+	length 346.911;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 24;
+	name 813;
+	to 106;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1578;
+	parent 106;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 125;
+	parent 106;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 24;
+	name 805;
+	to 694;
+	length 375.825;
+	configuration 834;
+};
+
+object transformer {
+	phases AS;
+	from 694;
+	name 1061;
+	to 224;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1457;
+	parent 224;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 694;
+	name 398;
+	to 1651;
+	length 341.47;
+	configuration 834;
+};
+
+object transformer {
+	phases AS;
+	from 1651;
+	name 469;
+	to 1510;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 286;
+	parent 1510;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 1651;
+	name 984;
+	to 61;
+	length 343.023;
+	configuration 834;
+};
+
+object overhead_line {
+	phases AN;
+	from 61;
+	name 392;
+	to 976;
+	length 226.764;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 976;
+	name 1467;
+	to 241;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 850;
+	parent 241;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 24;
+	name 181;
+	to 186;
+	length 157.693;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 186;
+	name 1023;
+	to 927;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 163;
+	parent 927;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 24;
+	name 621;
+	to 952;
+	length 196.101;
+	configuration 834;
+};
+
+object overhead_line {
+	phases AN;
+	from 952;
+	name 1056;
+	to 378;
+	length 243.492;
+	configuration 834;
+};
+
+object transformer {
+	phases AS;
+	from 378;
+	name 274;
+	to 1261;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 723;
+	parent 1261;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1280;
+	parent 1261;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 378;
+	name 268;
+	to 1713;
+	length 198.508;
+	configuration 834;
+};
+
+object overhead_line {
+	phases AN;
+	from 1713;
+	name 735;
+	to 635;
+	length 293.785;
+	configuration 1270;
+};
+
+object overhead_line {
+	phases AN;
+	from 635;
+	name 867;
+	to 190;
+	length 215.575;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 190;
+	name 934;
+	to 1202;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1435;
+	parent 1202;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 72;
+	parent 1202;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 190;
+	name 13;
+	to 144;
+	length 216.201;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 144;
+	name 1173;
+	to 130;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 338;
+	parent 130;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 1713;
+	name 333;
+	to 1332;
+	length 177.49;
+	configuration 834;
+};
+
+object transformer {
+	phases AS;
+	from 1332;
+	name 1387;
+	to 219;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 443;
+	parent 219;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 378;
+	name 1475;
+	to 1113;
+	length 116.619;
+	configuration 1270;
+};
+
+object overhead_line {
+	phases AN;
+	from 1113;
+	name 661;
+	to 244;
+	length 245.206;
+	configuration 1270;
+};
+
+object overhead_line {
+	phases AN;
+	from 244;
+	name 1643;
+	to 1351;
+	length 361.047;
+	configuration 1270;
+};
+
+object overhead_line {
+	phases AN;
+	from 1351;
+	name 1331;
+	to 1236;
+	length 204.81;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 1236;
+	name 439;
+	to 1185;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 602;
+	parent 1185;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 1196;
+	name 1071;
+	to 1034;
+	length 150.83;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 1034;
+	name 970;
+	to 6;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1584;
+	parent 6;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 908;
+	name 331;
+	to 1636;
+	length 361.26;
+	configuration 528;
+};
+
+object overhead_line {
+	phases AN;
+	from 1636;
+	name 3;
+	to 874;
+	length 25.0002;
+	configuration 1270;
+};
+
+object fuse {
+	phases AN;
+	from 874;
+	name 1350;
+	current_limit 9999.0 A;
+	to 1225;
+};
+
+object overhead_line {
+	phases AN;
+	from 1225;
+	name 1652;
+	to 703;
+	length 81.4961;
+	configuration 1270;
+};
+
+object overhead_line {
+	phases AN;
+	from 703;
+	name 347;
+	to 921;
+	length 177.052;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 921;
+	name 1595;
+	to 493;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 324;
+	parent 493;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1636;
+	name 1515;
+	to 633;
+	length 303.262;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 633;
+	name 359;
+	to 1074;
+	length 240.007;
+	configuration 528;
+};
+
+object transformer {
+	phases BS;
+	from 1074;
+	name 50;
+	to 110;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 354;
+	parent 110;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 1384;
+	parent 110;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1074;
+	name 196;
+	to 40;
+	length 258.716;
+	configuration 528;
+};
+
+object transformer {
+	phases CS;
+	from 40;
+	name 1559;
+	to 1673;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 3504.9;
+	name 165;
+	parent 1673;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 40;
+	name 1031;
+	to 1565;
+	length 311.169;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1565;
+	name 60;
+	to 26;
+	length 393.013;
+	configuration 528;
+};
+
+object overhead_line {
+	phases AN;
+	from 26;
+	name 1348;
+	to 717;
+	length 219.619;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 717;
+	name 639;
+	to 232;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 57;
+	parent 232;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 26;
+	name 425;
+	to 1219;
+	length 25;
+	configuration 1699;
+};
+
+object fuse {
+	phases CN;
+	from 1219;
+	name 826;
+	current_limit 9999.0 A;
+	to 814;
+};
+
+object overhead_line {
+	phases CN;
+	from 814;
+	name 1484;
+	to 37;
+	length 467.549;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 37;
+	name 940;
+	to 1313;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 3111.26;
+	name 448;
+	parent 1313;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 507.189;
+	name 1216;
+	parent 1313;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 37;
+	name 250;
+	to 914;
+	length 76.1979;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 914;
+	name 746;
+	to 1487;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 100;
+	name 1329;
+	parent 1487;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 914;
+	name 194;
+	to 1223;
+	length 158.17;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 1223;
+	name 1674;
+	to 349;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 3053.22;
+	name 1477;
+	parent 349;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 26;
+	name 1622;
+	to 1294;
+	length 370.349;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1294;
+	name 1481;
+	to 1307;
+	length 436.493;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1307;
+	name 297;
+	to 92;
+	length 231.048;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 92;
+	name 675;
+	to 597;
+	length 16.7208;
+	configuration 127;
+};
+
+object fuse {
+	phases ACBN;
+	from 597;
+	name 543;
+	current_limit 9999.0 A;
+	to 1340;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1340;
+	name 610;
+	to 449;
+	length 13.0467;
+	configuration 127;
+};
+
+object line_configuration {
+	name 127;
+	spacing 116;
+	conductor_N 43;
+	conductor_A 43;
+	conductor_C 43;
+	conductor_B 43;
+};
+
+object overhead_line_conductor {
+	resistance 2.44;
+	name 43;
+	geometric_mean_radius 0.00479;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 449;
+	name 1626;
+	to 346;
+	length 198.672;
+	configuration 127;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 346;
+	name 1000;
+	to 656;
+	length 333.666;
+	configuration 127;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 656;
+	name 343;
+	to 609;
+	length 425.544;
+	configuration 127;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 609;
+	name 628;
+	to 935;
+	length 380.42;
+	configuration 127;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 935;
+	name 496;
+	to 536;
+	length 366.98;
+	configuration 127;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 536;
+	name 913;
+	to 1281;
+	length 397.887;
+	configuration 127;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1281;
+	name 720;
+	to 1026;
+	length 514.255;
+	configuration 127;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1026;
+	name 1499;
+	to 1401;
+	length 338.245;
+	configuration 127;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1401;
+	name 781;
+	to 437;
+	length 479.758;
+	configuration 127;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 437;
+	name 604;
+	to 587;
+	length 428.894;
+	configuration 127;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 587;
+	name 731;
+	to 1417;
+	length 501.183;
+	configuration 127;
+};
+
+object overhead_line {
+	phases ACB;
+	from 1417;
+	name 1069;
+	to 1706;
+	length 201.729;
+	configuration 162;
+};
+
+object underground_line {
+	phases ACB;
+	from 1706;
+	name 95;
+	to 159;
+	length 28.5185;
+	configuration 1118;
+};
+
+object fuse {
+	phases ACB;
+	from 159;
+	name 254;
+	current_limit 9999.0 A;
+	to 554;
+};
+
+object underground_line {
+	phases ACB;
+	from 554;
+	name 954;
+	to 986;
+	length 110.07;
+	configuration 1118;
+};
+
+object underground_line {
+	phases ACB;
+	from 986;
+	name 525;
+	to 1007;
+	length 158.171;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 1007;
+	name 1106;
+	to 96;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1318;
+	parent 96;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 464;
+	parent 96;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases AN;
+	from 1007;
+	name 729;
+	to 705;
+	length 212.725;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 705;
+	name 1330;
+	to 1309;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1312;
+	parent 1309;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases AN;
+	from 705;
+	name 178;
+	to 318;
+	length 205.18;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 318;
+	name 949;
+	to 291;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1100;
+	parent 291;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 157;
+	parent 291;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1091;
+	parent 291;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases AN;
+	from 318;
+	name 762;
+	to 151;
+	length 214.739;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 151;
+	name 844;
+	to 1519;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 453;
+	parent 1519;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases AN;
+	from 151;
+	name 1412;
+	to 1285;
+	length 305.264;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 1285;
+	name 21;
+	to 783;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 741;
+	parent 783;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases ACBN;
+	from 1007;
+	name 1483;
+	to 603;
+	length 217.404;
+	configuration 1118;
+};
+
+object transformer {
+	phases BS;
+	from 603;
+	name 926;
+	to 1496;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 1107;
+	parent 1496;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases ACB;
+	from 603;
+	name 1482;
+	to 829;
+	length 265.389;
+	configuration 1118;
+};
+
+object underground_line {
+	phases B;
+	from 829;
+	name 1577;
+	to 1672;
+	length 83.1156;
+	configuration 1118;
+};
+
+object underground_line {
+	phases ACB;
+	from 986;
+	name 1184;
+	to 486;
+	length 652.912;
+	configuration 1118;
+};
+
+object fuse {
+	phases ACB;
+	from 486;
+	name 662;
+	current_limit 9999.0 A;
+	to 1399;
+};
+
+object underground_line {
+	phases ACB;
+	from 1399;
+	name 733;
+	to 859;
+	length 29.5374;
+	configuration 1118;
+};
+
+object underground_line {
+	phases ACB;
+	from 859;
+	name 765;
+	to 483;
+	length 29.9672;
+	configuration 1118;
+};
+
+object switch {
+	status CLOSED;
+	phases ACBN;
+	from 483;
+	name 751;
+	to 864;
+};
+
+object switch {
+	status CLOSED;
+	phases ACB;
+	from 864;
+	name 1563;
+	to 1209;
+};
+
+object underground_line {
+	phases ACB;
+	from 859;
+	name 109;
+	to 758;
+	length 28.999;
+	configuration 1118;
+};
+
+object fuse {
+	phases ACB;
+	from 758;
+	name 1365;
+	current_limit 9999.0 A;
+	to 489;
+};
+
+object underground_line {
+	phases ACB;
+	from 489;
+	name 842;
+	to 202;
+	length 486.139;
+	configuration 1118;
+};
+
+object underground_line {
+	phases ACB;
+	from 202;
+	name 1447;
+	to 816;
+	length 91.9686;
+	configuration 1118;
+};
+
+object underground_line {
+	phases ACBN;
+	from 816;
+	name 1402;
+	to 704;
+	length 140;
+	configuration 1118;
+};
+
+object transformer {
+	phases BS;
+	from 704;
+	name 1212;
+	to 1683;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 463;
+	parent 1683;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 552;
+	parent 1683;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 693;
+	parent 1683;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases ACBN;
+	from 704;
+	name 727;
+	to 1441;
+	length 280.001;
+	configuration 1118;
+};
+
+object transformer {
+	phases CS;
+	from 1441;
+	name 1452;
+	to 677;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 2710.05;
+	name 1687;
+	parent 677;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 1763.8;
+	name 509;
+	parent 677;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 3545.27;
+	name 1400;
+	parent 677;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases CN;
+	from 1441;
+	name 1397;
+	to 1609;
+	length 189.809;
+	configuration 1118;
+};
+
+object underground_line {
+	phases CN;
+	from 1609;
+	name 207;
+	to 848;
+	length 236.79;
+	configuration 1118;
+};
+
+object transformer {
+	phases CS;
+	from 848;
+	name 586;
+	to 454;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 100;
+	name 1148;
+	parent 454;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases C;
+	from 848;
+	name 1611;
+	to 948;
+	length 75.43;
+	configuration 1118;
+};
+
+object underground_line {
+	phases C;
+	from 948;
+	name 0;
+	to 200;
+	length 137.48;
+	configuration 1118;
+};
+
+object transformer {
+	phases CS;
+	from 200;
+	name 1407;
+	to 1657;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 100;
+	name 424;
+	parent 1657;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 1942.96;
+	name 519;
+	parent 1657;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 3005.28;
+	name 155;
+	parent 1657;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 2369.4;
+	name 576;
+	parent 1657;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases CN;
+	from 200;
+	name 512;
+	to 730;
+	length 133.57;
+	configuration 1118;
+};
+
+object transformer {
+	phases CS;
+	from 730;
+	name 1629;
+	to 1045;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 1768.85;
+	name 1543;
+	parent 1045;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 1836.98;
+	name 1049;
+	parent 1045;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases ACBN;
+	from 1441;
+	name 920;
+	to 436;
+	length 258.114;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 436;
+	name 854;
+	to 1284;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1210;
+	parent 1284;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1427;
+	parent 1284;
+	nominal_voltage 120;
+};
+
+object line_configuration {
+	name 1118;
+	spacing 1001;
+	conductor_N 671;
+	conductor_A 671;
+	conductor_C 671;
+	conductor_B 671;
+};
+
+object line_spacing {
+	distance_AN 0.000000;
+	name 1001;
+	distance_CN 0.000000;
+	distance_BC 0.500000;
+	distance_AB 0.500000;
+	distance_BN 0.000000;
+	distance_AC 1.000000;
+};
+
+object underground_line_conductor {
+	conductor_gmr 0.008830;
+	conductor_resistance 1.540000;
+	shield_resistance 0.000000;
+	neutral_gmr 0.002080;
+	outer_diameter 0.980000;
+	neutral_strands 6.000000;
+	neutral_resistance 14.872000;
+	neutral_diameter 0.064000;
+	conductor_diameter 0.292000;
+	shield_gmr 0.000000;
+	name 671;
+};
+
+object underground_line {
+	phases ACBN;
+	from 436;
+	name 1569;
+	to 623;
+	length 126.182;
+	configuration 1118;
+};
+
+object underground_line {
+	phases ACBN;
+	from 623;
+	name 740;
+	to 559;
+	length 230.013;
+	configuration 1118;
+};
+
+object transformer {
+	phases BS;
+	from 559;
+	name 1017;
+	to 836;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 807;
+	parent 836;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 833;
+	parent 836;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases BN;
+	from 559;
+	name 1647;
+	to 495;
+	length 353.102;
+	configuration 1118;
+};
+
+object transformer {
+	phases BS;
+	from 495;
+	name 1488;
+	to 520;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 672;
+	parent 520;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases B;
+	from 495;
+	name 1258;
+	to 1460;
+	length 98.1972;
+	configuration 1118;
+};
+
+object underground_line {
+	phases B;
+	from 1460;
+	name 716;
+	to 607;
+	length 143.061;
+	configuration 1118;
+};
+
+object transformer {
+	phases BS;
+	from 607;
+	name 1214;
+	to 282;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 329;
+	parent 282;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases ACBN;
+	from 559;
+	name 500;
+	to 1102;
+	length 244.614;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 1102;
+	name 894;
+	to 25;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 82;
+	parent 25;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases ACBN;
+	from 1102;
+	name 941;
+	to 787;
+	length 174.374;
+	configuration 1118;
+};
+
+object underground_line {
+	phases ACBN;
+	from 787;
+	name 1040;
+	to 1371;
+	length 186.186;
+	configuration 1118;
+};
+
+object transformer {
+	phases BS;
+	from 1371;
+	name 632;
+	to 270;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 1658;
+	parent 270;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 1516;
+	parent 270;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases ACBN;
+	from 1371;
+	name 1375;
+	to 983;
+	length 218.151;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 983;
+	name 773;
+	to 1116;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1450;
+	parent 1116;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases ACBN;
+	from 983;
+	name 956;
+	to 1166;
+	length 199.729;
+	configuration 1118;
+};
+
+object transformer {
+	phases CS;
+	from 1166;
+	name 1022;
+	to 1029;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 3290.42;
+	name 549;
+	parent 1029;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 2374.45;
+	name 305;
+	parent 1029;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases ACBN;
+	from 1166;
+	name 1349;
+	to 1684;
+	length 140.001;
+	configuration 1118;
+};
+
+object transformer {
+	phases BS;
+	from 1684;
+	name 27;
+	to 322;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 484;
+	parent 322;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 1676;
+	parent 322;
+	nominal_voltage 120;
+};
+
+object transformer {
+	phases CS;
+	from 787;
+	name 1275;
+	to 721;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 1988.38;
+	name 1078;
+	parent 721;
+	nominal_voltage 120;
+};
+
+object transformer {
+	phases CS;
+	from 623;
+	name 1416;
+	to 68;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 4282.08;
+	name 514;
+	parent 68;
+	nominal_voltage 120;
+};
+
+object transformer {
+	phases AS;
+	from 816;
+	name 1455;
+	to 738;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 763;
+	parent 738;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 505;
+	parent 738;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1530;
+	parent 738;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases ACB;
+	from 859;
+	name 911;
+	to 1471;
+	length 29.715;
+	configuration 1118;
+};
+
+object switch {
+	status CLOSED;
+	phases ACBN;
+	from 1471;
+	name 1179;
+	to 348;
+};
+
+object switch {
+	status CLOSED;
+	phases ACB;
+	from 348;
+	name 1027;
+	to 73;
+};
+
+object underground_line {
+	phases ACB;
+	from 73;
+	name 573;
+	to 1095;
+	length 520.593;
+	configuration 1118;
+};
+
+object underground_line {
+	phases ACB;
+	from 1095;
+	name 298;
+	to 1122;
+	length 524.298;
+	configuration 1118;
+};
+
+object underground_line {
+	phases ACB;
+	from 1122;
+	name 317;
+	to 1087;
+	length 499.641;
+	configuration 1118;
+};
+
+object underground_line {
+	phases ACB;
+	from 1087;
+	name 541;
+	to 1391;
+	length 311.538;
+	configuration 1118;
+};
+
+object switch {
+	status CLOSED;
+	phases ACBN;
+	from 1391;
+	name 553;
+	to 1546;
+};
+
+object switch {
+	status CLOSED;
+	phases ACB;
+	from 1546;
+	name 1149;
+	to 1168;
+};
+
+object underground_line {
+	phases ACB;
+	from 1168;
+	name 1046;
+	to 1101;
+	length 21.6692;
+	configuration 1118;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1101;
+	name 824;
+	to 1057;
+	length 26.3767;
+	configuration 528;
+};
+
+object underground_line {
+	phases AN;
+	from 1057;
+	name 1419;
+	to 1378;
+	length 30.0841;
+	configuration 1118;
+};
+
+object fuse {
+	phases A;
+	from 1378;
+	name 119;
+	current_limit 9999.0 A;
+	to 1016;
+};
+
+object underground_line {
+	phases A;
+	from 1016;
+	name 247;
+	to 522;
+	length 248.664;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 522;
+	name 1233;
+	to 1666;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 341;
+	parent 1666;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 167;
+	parent 1666;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 958;
+	parent 1666;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases AN;
+	from 522;
+	name 218;
+	to 684;
+	length 120.109;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 684;
+	name 487;
+	to 240;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 411;
+	parent 240;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases AN;
+	from 684;
+	name 1138;
+	to 1656;
+	length 139.46;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 1656;
+	name 951;
+	to 1639;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 670;
+	parent 1639;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 264;
+	parent 1639;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 390;
+	parent 1639;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 658;
+	parent 1639;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases AN;
+	from 1656;
+	name 452;
+	to 1454;
+	length 140.033;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 1454;
+	name 1597;
+	to 339;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1163;
+	parent 339;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1189;
+	parent 339;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1523;
+	parent 339;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases AN;
+	from 1454;
+	name 799;
+	to 1445;
+	length 108.756;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 1445;
+	name 142;
+	to 451;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1465;
+	parent 451;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1057;
+	name 638;
+	to 362;
+	length 191.748;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 362;
+	name 1156;
+	to 213;
+	length 80.5873;
+	configuration 528;
+};
+
+object transformer {
+	phases BS;
+	from 213;
+	name 1204;
+	to 316;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 191;
+	parent 316;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 213;
+	name 402;
+	to 1421;
+	length 240.081;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1421;
+	name 1474;
+	to 52;
+	length 317.835;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 52;
+	name 340;
+	to 962;
+	length 201.027;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 962;
+	name 290;
+	to 1688;
+	length 201.443;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1688;
+	name 1696;
+	to 1592;
+	length 224.687;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1592;
+	name 1590;
+	to 1549;
+	length 216.095;
+	configuration 528;
+};
+
+object overhead_line {
+	phases AN;
+	from 1549;
+	name 1594;
+	to 817;
+	length 474.794;
+	configuration 528;
+};
+
+object overhead_line {
+	phases AN;
+	from 817;
+	name 865;
+	to 904;
+	length 25.0001;
+	configuration 834;
+};
+
+object fuse {
+	phases AN;
+	from 904;
+	name 1194;
+	current_limit 9999.0 A;
+	to 488;
+};
+
+object overhead_line {
+	phases AN;
+	from 488;
+	name 269;
+	to 153;
+	length 325.822;
+	configuration 834;
+};
+
+object transformer {
+	phases AS;
+	from 153;
+	name 1668;
+	to 756;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 994;
+	parent 756;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1592;
+	name 1178;
+	to 897;
+	length 90.9393;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 897;
+	name 939;
+	to 784;
+	length 24.9999;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 346;
+	name 1617;
+	to 1263;
+	length 191.256;
+	configuration 162;
+};
+
+object transformer {
+	phases AS;
+	from 1263;
+	name 870;
+	to 593;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 820;
+	parent 593;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases BN;
+	from 1263;
+	name 1005;
+	to 600;
+	length 40.0012;
+	configuration 162;
+};
+
+object transformer {
+	phases BS;
+	from 600;
+	name 304;
+	to 1150;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 575;
+	parent 1150;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 449;
+	name 69;
+	to 998;
+	length 29.1022;
+	configuration 127;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 92;
+	name 361;
+	to 7;
+	length 32.2093;
+	configuration 127;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 7;
+	name 23;
+	to 1596;
+	length 19.976;
+	configuration 127;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 92;
+	name 924;
+	to 535;
+	length 158.967;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 535;
+	name 770;
+	to 789;
+	length 15.1854;
+	configuration 528;
+};
+
+object fuse {
+	phases ACBN;
+	from 789;
+	name 915;
+	current_limit 9999.0 A;
+	to 183;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 183;
+	name 1583;
+	to 788;
+	length 14.881;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 788;
+	name 660;
+	to 342;
+	length 401.908;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 342;
+	name 1006;
+	to 724;
+	length 30;
+	configuration 528;
+};
+
+object overhead_line {
+	phases AN;
+	from 724;
+	name 823;
+	to 692;
+	length 25.2353;
+	configuration 1270;
+};
+
+object fuse {
+	phases AN;
+	from 692;
+	name 1604;
+	current_limit 9999.0 A;
+	to 39;
+};
+
+object overhead_line {
+	phases AN;
+	from 39;
+	name 507;
+	to 696;
+	length 185.337;
+	configuration 1270;
+};
+
+object overhead_line {
+	phases AN;
+	from 696;
+	name 1448;
+	to 1377;
+	length 210.084;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 1377;
+	name 961;
+	to 195;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 936;
+	parent 195;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 724;
+	name 1181;
+	to 857;
+	length 212.564;
+	configuration 528;
+};
+
+object transformer {
+	phases CS;
+	from 857;
+	name 895;
+	to 380;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 4748.9;
+	name 133;
+	parent 380;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 857;
+	name 279;
+	to 1290;
+	length 747.809;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1290;
+	name 313;
+	to 1094;
+	length 265.618;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1094;
+	name 418;
+	to 1686;
+	length 507.61;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1686;
+	name 1411;
+	to 510;
+	length 269.729;
+	configuration 528;
+};
+
+object transformer {
+	phases BS;
+	from 510;
+	name 1035;
+	to 134;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 1420;
+	parent 134;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 79;
+	parent 134;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 510;
+	name 529;
+	to 1709;
+	length 362.275;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1709;
+	name 5;
+	to 485;
+	length 403.339;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 485;
+	name 135;
+	to 1539;
+	length 292.192;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1539;
+	name 1143;
+	to 929;
+	length 375.845;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 929;
+	name 1463;
+	to 880;
+	length 306.614;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 880;
+	name 985;
+	to 1531;
+	length 317.537;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1531;
+	name 1228;
+	to 810;
+	length 286.057;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 810;
+	name 472;
+	to 1355;
+	length 13.0603;
+	configuration 162;
+};
+
+object fuse {
+	phases ACBN;
+	from 1355;
+	name 325;
+	current_limit 9999.0 A;
+	to 1433;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1433;
+	name 598;
+	to 533;
+	length 106.95;
+	configuration 162;
+};
+
+object transformer {
+	phases AS;
+	from 533;
+	name 1262;
+	to 796;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 32759.0;
+	name 967;
+	parent 796;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 533;
+	name 577;
+	to 884;
+	length 29.3356;
+	configuration 162;
+};
+
+object switch {
+	status CLOSED;
+	phases ACBN;
+	from 884;
+	name 1304;
+	to 938;
+};
+
+object switch {
+	status CLOSED;
+	phases ACBN;
+	from 938;
+	name 337;
+	to 1524;
+};
+
+object overhead_line {
+	phases ACB;
+	from 1524;
+	name 1403;
+	to 468;
+	length 15.0633;
+	configuration 162;
+};
+
+object underground_line {
+	phases ACB;
+	from 468;
+	name 1302;
+	to 1334;
+	length 28.9999;
+	configuration 1118;
+};
+
+object fuse {
+	phases ACB;
+	from 1334;
+	name 272;
+	current_limit 9999.0 A;
+	to 905;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 810;
+	name 1579;
+	to 811;
+	length 470.042;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 811;
+	name 1575;
+	to 599;
+	length 436.471;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 599;
+	name 245;
+	to 1380;
+	length 368.458;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1380;
+	name 1600;
+	to 1689;
+	length 341.358;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1689;
+	name 1319;
+	to 4;
+	length 359.974;
+	configuration 528;
+};
+
+object overhead_line {
+	phases BN;
+	from 510;
+	name 184;
+	to 1414;
+	length 25;
+	configuration 34;
+};
+
+object fuse {
+	phases BN;
+	from 1414;
+	name 458;
+	current_limit 9999.0 A;
+	to 1451;
+};
+
+object overhead_line {
+	phases BN;
+	from 1451;
+	name 757;
+	to 739;
+	length 121.877;
+	configuration 34;
+};
+
+object overhead_line {
+	phases BN;
+	from 739;
+	name 59;
+	to 1661;
+	length 197.367;
+	configuration 34;
+};
+
+object overhead_line {
+	phases BN;
+	from 1661;
+	name 501;
+	to 345;
+	length 255;
+	configuration 34;
+};
+
+object overhead_line {
+	phases BN;
+	from 345;
+	name 1640;
+	to 400;
+	length 255;
+	configuration 34;
+};
+
+object overhead_line {
+	phases BN;
+	from 400;
+	name 1498;
+	to 932;
+	length 360;
+	configuration 34;
+};
+
+object line_configuration {
+	name 34;
+	spacing 116;
+	conductor_N 680;
+	conductor_A 791;
+	conductor_C 791;
+	conductor_B 680;
+};
+
+object overhead_line {
+	phases BN;
+	from 1661;
+	name 562;
+	to 766;
+	length 268.71;
+	configuration 34;
+};
+
+object transformer {
+	phases BS;
+	from 766;
+	name 1274;
+	to 980;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 682;
+	parent 980;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases BN;
+	from 766;
+	name 90;
+	to 1363;
+	length 304.822;
+	configuration 34;
+};
+
+object transformer {
+	phases BS;
+	from 1363;
+	name 776;
+	to 1198;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 664;
+	parent 1198;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases BN;
+	from 766;
+	name 132;
+	to 1431;
+	length 220.523;
+	configuration 34;
+};
+
+object transformer {
+	phases BS;
+	from 1431;
+	name 42;
+	to 1366;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 481;
+	parent 1366;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases B;
+	from 1290;
+	name 1097;
+	to 315;
+	length 264.012;
+	configuration 34;
+};
+
+object underground_line {
+	phases B;
+	from 315;
+	name 210;
+	to 492;
+	length 25.0002;
+	configuration 1118;
+};
+
+object fuse {
+	phases B;
+	from 492;
+	name 987;
+	current_limit 9999.0 A;
+	to 1525;
+};
+
+object underground_line {
+	phases B;
+	from 1525;
+	name 702;
+	to 689;
+	length 110.041;
+	configuration 1118;
+};
+
+object transformer {
+	phases BS;
+	from 689;
+	name 821;
+	to 1279;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 1580;
+	parent 1279;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 857;
+	name 22;
+	to 1120;
+	length 25.0001;
+	configuration 1699;
+};
+
+object fuse {
+	phases CN;
+	from 1120;
+	name 393;
+	current_limit 9999.0 A;
+	to 858;
+};
+
+object overhead_line {
+	phases CN;
+	from 858;
+	name 643;
+	to 1336;
+	length 131.009;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 1336;
+	name 1244;
+	to 252;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 4264.42;
+	name 1587;
+	parent 252;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 158.97;
+	name 1646;
+	parent 252;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 1336;
+	name 1018;
+	to 1486;
+	length 240.841;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 1486;
+	name 1708;
+	to 710;
+	length 269.281;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 710;
+	name 422;
+	to 1246;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 4385.54;
+	name 1504;
+	parent 1246;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 710;
+	name 1489;
+	to 1232;
+	length 152.053;
+	configuration 1699;
+};
+
+object underground_line {
+	phases CN;
+	from 1232;
+	name 708;
+	to 306;
+	length 24.9998;
+	configuration 1118;
+};
+
+object fuse {
+	phases C;
+	from 306;
+	name 1187;
+	current_limit 9999.0 A;
+	to 1459;
+};
+
+object underground_line {
+	phases C;
+	from 1459;
+	name 1509;
+	to 1038;
+	length 373.741;
+	configuration 1118;
+};
+
+object transformer {
+	phases CS;
+	from 1038;
+	name 1088;
+	to 963;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 3416.58;
+	name 728;
+	parent 963;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 5445.34;
+	name 808;
+	parent 963;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 1232;
+	name 779;
+	to 651;
+	length 384.201;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 651;
+	name 86;
+	to 1342;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 3578.08;
+	name 742;
+	parent 1342;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 100;
+	name 499;
+	parent 1342;
+	nominal_voltage 120;
+};
+
+object capacitor {
+	control VOLT;
+	dwell_time 0.0;
+	name 764;
+	parent 342;
+	capacitor_B 0.10 MVAr;
+	capacitor_C 0.10 MVAr;
+	capacitor_A 0.10 MVAr;
+	phases ABCN;
+	time_delay 300.0;
+	switchC CLOSED;
+	nominal_voltage 2401.7771;
+	voltage_set_high 2350.0;
+	voltage_set_low 2340.0;
+	control_level INDIVIDUAL;
+	switchA CLOSED;
+	switchB CLOSED;
+	phases_connected ABCN;
+	pt_phase ABCN;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 788;
+	name 386;
+	to 299;
+	length 24.2364;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 535;
+	name 1692;
+	to 1406;
+	length 24.3991;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1406;
+	name 1218;
+	to 955;
+	length 19.975;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1307;
+	name 1430;
+	to 1710;
+	length 185.436;
+	configuration 162;
+};
+
+object transformer {
+	phases AS;
+	from 1710;
+	name 556;
+	to 1058;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 14804.3;
+	name 289;
+	parent 1058;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1710;
+	name 1485;
+	to 265;
+	length 26.7337;
+	configuration 162;
+};
+
+object switch {
+	status CLOSED;
+	phases ACBN;
+	from 265;
+	name 440;
+	to 1607;
+};
+
+object switch {
+	status CLOSED;
+	phases ACBN;
+	from 1607;
+	name 771;
+	to 70;
+};
+
+object overhead_line {
+	phases ACB;
+	from 70;
+	name 1019;
+	to 1428;
+	length 10;
+	configuration 162;
+};
+
+object underground_line {
+	phases ACB;
+	from 1428;
+	name 192;
+	to 922;
+	length 29.1536;
+	configuration 1118;
+};
+
+object fuse {
+	phases ACB;
+	from 922;
+	name 335;
+	current_limit 9999.0 A;
+	to 1109;
+};
+
+object overhead_line {
+	phases CN;
+	from 1710;
+	name 569;
+	to 1468;
+	length 23.1075;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 1468;
+	name 856;
+	to 1528;
+	length 20;
+	configuration 1699;
+};
+
+object fuse {
+	phases CN;
+	from 1528;
+	name 1369;
+	current_limit 9999.0 A;
+	to 1277;
+};
+
+object overhead_line {
+	phases CN;
+	from 1277;
+	name 697;
+	to 947;
+	length 10;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 947;
+	name 108;
+	to 197;
+	length 86.7997;
+	configuration 1699;
+};
+
+object overhead_line_conductor {
+	resistance 0.185900;
+	name 791;
+	geometric_mean_radius 0.031300;
+};
+
+object overhead_line {
+	phases CN;
+	from 197;
+	name 1121;
+	to 625;
+	length 145.002;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 625;
+	name 1323;
+	to 234;
+	length 54.57;
+	configuration 1129;
+};
+
+object overhead_line {
+	phases CN;
+	from 234;
+	name 497;
+	to 1139;
+	length 294.564;
+	configuration 1129;
+};
+
+object overhead_line {
+	phases CN;
+	from 1139;
+	name 988;
+	to 1073;
+	length 321.163;
+	configuration 1129;
+};
+
+object overhead_line {
+	phases CN;
+	from 1073;
+	name 989;
+	to 515;
+	length 557.377;
+	configuration 1129;
+};
+
+object overhead_line {
+	phases CN;
+	from 515;
+	name 891;
+	to 1183;
+	length 378.344;
+	configuration 1129;
+};
+
+object overhead_line {
+	phases CN;
+	from 1183;
+	name 772;
+	to 1144;
+	length 87.8082;
+	configuration 1129;
+};
+
+object overhead_line {
+	phases CN;
+	from 1144;
+	name 591;
+	to 1497;
+	length 455.006;
+	configuration 1129;
+};
+
+object transformer {
+	phases CS;
+	from 1497;
+	name 1317;
+	to 1054;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 103.456;
+	name 1655;
+	parent 1054;
+	nominal_voltage 120;
+};
+
+object line_configuration {
+	name 1129;
+	spacing 116;
+	conductor_N 43;
+	conductor_A 791;
+	conductor_C 43;
+	conductor_B 791;
+};
+
+object overhead_line {
+	phases CN;
+	from 1497;
+	name 1051;
+	to 910;
+	length 271.745;
+	configuration 1129;
+};
+
+object transformer {
+	phases CS;
+	from 910;
+	name 945;
+	to 1621;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 116.073;
+	name 862;
+	parent 1621;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 910;
+	name 712;
+	to 504;
+	length 28.1392;
+	configuration 1699;
+};
+
+object fuse {
+	phases CN;
+	from 504;
+	name 1522;
+	current_limit 9999.0 A;
+	to 974;
+};
+
+object overhead_line {
+	phases CN;
+	from 974;
+	name 1333;
+	to 415;
+	length 419.578;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 415;
+	name 584;
+	to 709;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 100;
+	name 1593;
+	parent 709;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 111.026;
+	name 851;
+	parent 709;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 234.669;
+	name 1077;
+	parent 709;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 1370.17;
+	name 1614;
+	parent 709;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 113.55;
+	name 258;
+	parent 709;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 227.099;
+	name 885;
+	parent 709;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 100;
+	name 121;
+	parent 709;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 415;
+	name 831;
+	to 8;
+	length 164.993;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 8;
+	name 589;
+	to 146;
+	length 222.922;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 146;
+	name 906;
+	to 1608;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 100;
+	name 1171;
+	parent 1608;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 100;
+	name 701;
+	parent 1608;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 100;
+	name 14;
+	parent 1608;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 100;
+	name 749;
+	parent 1608;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 100;
+	name 471;
+	parent 1608;
+	nominal_voltage 120;
+};
+
+object transformer {
+	phases CS;
+	from 8;
+	name 719;
+	to 1701;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 100;
+	name 1429;
+	parent 1701;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 910;
+	name 931;
+	to 579;
+	length 473.935;
+	configuration 1129;
+};
+
+object transformer {
+	phases CS;
+	from 579;
+	name 301;
+	to 498;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 3979.29;
+	name 12;
+	parent 498;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 7469.05;
+	name 1533;
+	parent 498;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 100;
+	name 1409;
+	parent 498;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 100;
+	name 276;
+	parent 498;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 910;
+	name 1140;
+	to 1570;
+	length 185.953;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 1570;
+	name 1134;
+	to 928;
+	length 335.111;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 928;
+	name 302;
+	to 1599;
+	length 270.724;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 1599;
+	name 321;
+	to 1124;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 100;
+	name 41;
+	parent 1124;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 100;
+	name 1466;
+	parent 1124;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 244.763;
+	name 925;
+	parent 1124;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 100;
+	name 450;
+	parent 1124;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 100;
+	name 1242;
+	parent 1124;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 1599;
+	name 1664;
+	to 1347;
+	length 301.445;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 1347;
+	name 1638;
+	to 667;
+	length 337.061;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 667;
+	name 84;
+	to 126;
+	length 317.851;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 126;
+	name 1571;
+	to 1449;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 100;
+	name 1131;
+	parent 1449;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 100.933;
+	name 1316;
+	parent 1449;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 136.26;
+	name 1341;
+	parent 1449;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 196.819;
+	name 417;
+	parent 1449;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 100.933;
+	name 1566;
+	parent 1449;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 100;
+	name 901;
+	parent 1449;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 1529.14;
+	name 421;
+	parent 1449;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 100;
+	name 1308;
+	parent 1449;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 1183;
+	name 409;
+	to 369;
+	length 197.805;
+	configuration 1129;
+};
+
+object overhead_line {
+	phases CN;
+	from 369;
+	name 1634;
+	to 227;
+	length 161.838;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 227;
+	name 1191;
+	to 778;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 5440.29;
+	name 912;
+	parent 778;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 197;
+	name 470;
+	to 1325;
+	length 60.3968;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 1325;
+	name 1141;
+	to 477;
+	length 207.359;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 477;
+	name 606;
+	to 330;
+	length 179.863;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 330;
+	name 267;
+	to 655;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 1143.07;
+	name 112;
+	parent 655;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 2407.25;
+	name 91;
+	parent 655;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 477;
+	name 815;
+	to 612;
+	length 260.268;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 612;
+	name 1648;
+	to 516;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 2498.09;
+	name 698;
+	parent 516;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 1380.26;
+	name 476;
+	parent 516;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 612;
+	name 1176;
+	to 1619;
+	length 93.7711;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 1619;
+	name 1541;
+	to 149;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 905.874;
+	name 115;
+	parent 149;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 612;
+	name 517;
+	to 271;
+	length 278.181;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 271;
+	name 1424;
+	to 1328;
+	length 175.369;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 1328;
+	name 1255;
+	to 29;
+	length 184.174;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 29;
+	name 594;
+	to 413;
+	length 152.018;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 413;
+	name 385;
+	to 1691;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 116.073;
+	name 48;
+	parent 1691;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 2096.88;
+	name 364;
+	parent 1691;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 29;
+	name 1395;
+	to 419;
+	length 194.763;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 419;
+	name 691;
+	to 1098;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 5854.12;
+	name 627;
+	parent 1098;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 419;
+	name 365;
+	to 382;
+	length 146.804;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 382;
+	name 969;
+	to 410;
+	length 61.5997;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 410;
+	name 177;
+	to 726;
+	length 191.621;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 726;
+	name 1084;
+	to 957;
+	length 220.748;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 957;
+	name 1581;
+	to 1161;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 3219.76;
+	name 351;
+	parent 1161;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 410;
+	name 1538;
+	to 1199;
+	length 163.463;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 1199;
+	name 1256;
+	to 1177;
+	length 148.042;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 1177;
+	name 1372;
+	to 1458;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 1622.5;
+	name 737;
+	parent 1458;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 1177;
+	name 53;
+	to 308;
+	length 141.308;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 308;
+	name 769;
+	to 36;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 5662.34;
+	name 688;
+	parent 36;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 308;
+	name 427;
+	to 143;
+	length 221.91;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 143;
+	name 1235;
+	to 1398;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 4900.3;
+	name 1659;
+	parent 1398;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 143;
+	name 744;
+	to 1512;
+	length 315.855;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 1512;
+	name 1050;
+	to 1295;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 7857.64;
+	name 714;
+	parent 1295;
+	nominal_voltage 120;
+};
+
+object line_configuration {
+	name 1699;
+	spacing 116;
+	conductor_N 680;
+	conductor_A 791;
+	conductor_C 680;
+	conductor_B 791;
+};
+
+object overhead_line_conductor {
+	resistance 1.69;
+	name 680;
+	geometric_mean_radius 0.00418;
+};
+
+object overhead_line {
+	phases CN;
+	from 1512;
+	name 1135;
+	to 45;
+	length 26.8967;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 45;
+	name 511;
+	to 1464;
+	length 323.346;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 1464;
+	name 1190;
+	to 1010;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 8612.11;
+	name 1700;
+	parent 1010;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 143;
+	name 1555;
+	to 1117;
+	length 156.676;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 1117;
+	name 164;
+	to 288;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 6906.34;
+	name 531;
+	parent 288;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 382;
+	name 214;
+	to 1383;
+	length 214.091;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 1383;
+	name 1388;
+	to 139;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 5319.17;
+	name 226;
+	parent 139;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 29;
+	name 71;
+	to 1610;
+	length 196.629;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 1610;
+	name 1547;
+	to 1344;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 2467.81;
+	name 114;
+	parent 1344;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 1610;
+	name 394;
+	to 804;
+	length 201.087;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 804;
+	name 355;
+	to 208;
+	length 422.629;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 208;
+	name 903;
+	to 686;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 8102.4;
+	name 259;
+	parent 686;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 1565;
+	name 461;
+	to 991;
+	length 25;
+	configuration 1270;
+};
+
+object fuse {
+	phases AN;
+	from 991;
+	name 1662;
+	current_limit 9999.0 A;
+	to 1182;
+};
+
+object overhead_line {
+	phases AN;
+	from 1182;
+	name 1415;
+	to 475;
+	length 308.628;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 475;
+	name 1352;
+	to 722;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 747;
+	parent 722;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 1234;
+	name 98;
+	to 1298;
+	length 24.9998;
+	configuration 834;
+};
+
+object fuse {
+	phases AN;
+	from 1298;
+	name 367;
+	current_limit 9999.0 A;
+	to 1470;
+};
+
+object overhead_line {
+	phases AN;
+	from 1470;
+	name 1291;
+	to 366;
+	length 346.642;
+	configuration 834;
+};
+
+object overhead_line {
+	phases AN;
+	from 420;
+	name 280;
+	to 1644;
+	length 25.0003;
+	configuration 1270;
+};
+
+object fuse {
+	phases AN;
+	from 1644;
+	name 1682;
+	current_limit 9999.0 A;
+	to 403;
+};
+
+object overhead_line {
+	phases AN;
+	from 403;
+	name 618;
+	to 1356;
+	length 262.794;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 1356;
+	name 1111;
+	to 1217;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 18;
+	parent 1217;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 1083;
+	name 2;
+	to 572;
+	length 27.5663;
+	configuration 1699;
+};
+
+object fuse {
+	phases CN;
+	from 572;
+	name 588;
+	current_limit 9999.0 A;
+	to 438;
+};
+
+object overhead_line {
+	phases CN;
+	from 438;
+	name 761;
+	to 1681;
+	length 224.554;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 1681;
+	name 353;
+	to 1572;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 4592.45;
+	name 1076;
+	parent 1572;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 1257;
+	name 933;
+	to 455;
+	length 25.0001;
+	configuration 1699;
+};
+
+object fuse {
+	phases CN;
+	from 455;
+	name 1207;
+	current_limit 9999.0 A;
+	to 395;
+};
+
+object overhead_line {
+	phases CN;
+	from 395;
+	name 546;
+	to 1654;
+	length 336.596;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 1654;
+	name 1282;
+	to 1092;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 10698.9;
+	name 193;
+	parent 1092;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 2455.2;
+	name 760;
+	parent 1092;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases BN;
+	from 1345;
+	name 942;
+	to 152;
+	length 25.0001;
+	configuration 1567;
+};
+
+object fuse {
+	phases BN;
+	from 152;
+	name 33;
+	current_limit 9999.0 A;
+	to 1605;
+};
+
+object line_configuration {
+	name 1567;
+	spacing 116;
+	conductor_N 43;
+	conductor_A 791;
+	conductor_C 791;
+	conductor_B 43;
+};
+
+object overhead_line {
+	phases BN;
+	from 1605;
+	name 136;
+	to 550;
+	length 473.406;
+	configuration 1567;
+};
+
+object overhead_line {
+	phases BN;
+	from 550;
+	name 524;
+	to 1663;
+	length 163.187;
+	configuration 34;
+};
+
+object transformer {
+	phases BS;
+	from 1663;
+	name 141;
+	to 235;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 266;
+	parent 235;
+	nominal_voltage 120;
+};
+
+object transformer {
+	phases BS;
+	from 550;
+	name 1461;
+	to 368;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 148;
+	parent 368;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 503;
+	parent 368;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 332;
+	parent 368;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases BN;
+	from 550;
+	name 1392;
+	to 840;
+	length 82.1566;
+	configuration 34;
+};
+
+object overhead_line {
+	phases BN;
+	from 840;
+	name 566;
+	to 1671;
+	length 406.315;
+	configuration 34;
+};
+
+object transformer {
+	phases BS;
+	from 1671;
+	name 1086;
+	to 827;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 460;
+	parent 827;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 508;
+	name 75;
+	to 1368;
+	length 25;
+	configuration 1699;
+};
+
+object fuse {
+	phases CN;
+	from 1368;
+	name 1389;
+	current_limit 9999.0 A;
+	to 1239;
+};
+
+object overhead_line {
+	phases CN;
+	from 1239;
+	name 231;
+	to 997;
+	length 228.973;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 997;
+	name 87;
+	to 943;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 2916.97;
+	name 383;
+	parent 943;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 3878.35;
+	name 1690;
+	parent 943;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 2624.26;
+	name 568;
+	parent 943;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 830;
+	name 491;
+	to 1585;
+	length 393.554;
+	configuration 162;
+};
+
+object transformer {
+	phases BS;
+	from 1585;
+	name 479;
+	to 676;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 198;
+	parent 676;
+	nominal_voltage 120;
+};
+
+object line_configuration {
+	name 162;
+	spacing 116;
+	conductor_N 680;
+	conductor_A 680;
+	conductor_C 680;
+	conductor_B 680;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1585;
+	name 873;
+	to 1222;
+	length 208.153;
+	configuration 162;
+};
+
+object underground_line {
+	phases ACBN;
+	from 1222;
+	name 494;
+	to 230;
+	length 24.9999;
+	configuration 1118;
+};
+
+object fuse {
+	phases ACB;
+	from 230;
+	name 138;
+	current_limit 9999.0 A;
+	to 1422;
+};
+
+object underground_line {
+	phases ACB;
+	from 1422;
+	name 161;
+	to 555;
+	length 179.161;
+	configuration 1118;
+};
+
+object transformer {
+	phases BS;
+	from 555;
+	name 678;
+	to 1439;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 120;
+	parent 1439;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 147;
+	parent 1439;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 650;
+	parent 1439;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases BN;
+	from 555;
+	name 168;
+	to 1215;
+	length 179.452;
+	configuration 1118;
+};
+
+object transformer {
+	phases BS;
+	from 1215;
+	name 113;
+	to 1616;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 1011;
+	parent 1616;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 376;
+	parent 1616;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 416;
+	parent 1616;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases BN;
+	from 1215;
+	name 1247;
+	to 1493;
+	length 131.437;
+	configuration 1118;
+};
+
+object transformer {
+	phases BS;
+	from 1493;
+	name 1;
+	to 1367;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 1591;
+	parent 1367;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 663;
+	parent 1367;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases ACBN;
+	from 555;
+	name 122;
+	to 1188;
+	length 387.426;
+	configuration 1118;
+};
+
+object transformer {
+	phases CS;
+	from 1188;
+	name 275;
+	to 1192;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 3270.23;
+	name 399;
+	parent 1192;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 2190.25;
+	name 176;
+	parent 1192;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases ACBN;
+	from 1188;
+	name 189;
+	to 1012;
+	length 276.423;
+	configuration 1118;
+};
+
+object transformer {
+	phases BS;
+	from 1012;
+	name 32;
+	to 1126;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 1698;
+	parent 1126;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases ACBN;
+	from 1012;
+	name 1536;
+	to 654;
+	length 20.6168;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 654;
+	name 20;
+	to 182;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 99;
+	parent 182;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases ACB;
+	from 654;
+	name 965;
+	to 1125;
+	length 90.0433;
+	configuration 1118;
+};
+
+object underground_line {
+	phases ACB;
+	from 1125;
+	name 1506;
+	to 19;
+	length 25.0002;
+	configuration 1118;
+};
+
+object underground_line {
+	phases ACB;
+	from 19;
+	name 1586;
+	to 896;
+	length 75.008;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 896;
+	name 995;
+	to 798;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1013;
+	parent 798;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1473;
+	parent 798;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases ACBN;
+	from 896;
+	name 175;
+	to 1147;
+	length 200.306;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 1147;
+	name 260;
+	to 1711;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1108;
+	parent 1711;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 502;
+	parent 1711;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases ACB;
+	from 1147;
+	name 1561;
+	to 1606;
+	length 100.914;
+	configuration 1118;
+};
+
+object underground_line {
+	phases ACB;
+	from 1606;
+	name 283;
+	to 1677;
+	length 99.7906;
+	configuration 1118;
+};
+
+object transformer {
+	phases BS;
+	from 1677;
+	name 544;
+	to 1503;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 1128;
+	parent 1503;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 669;
+	parent 1503;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 1253;
+	parent 1503;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases ACBN;
+	from 1677;
+	name 615;
+	to 1072;
+	length 199.716;
+	configuration 1118;
+};
+
+object transformer {
+	phases CS;
+	from 1072;
+	name 1137;
+	to 1492;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 3918.73;
+	name 129;
+	parent 1492;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases ACBN;
+	from 1072;
+	name 434;
+	to 44;
+	length 239.853;
+	configuration 1118;
+};
+
+object underground_line {
+	phases CBN;
+	from 44;
+	name 1620;
+	to 249;
+	length 170.776;
+	configuration 1118;
+};
+
+object transformer {
+	phases BS;
+	from 249;
+	name 1093;
+	to 1288;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 327;
+	parent 1288;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 352;
+	parent 1288;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 263;
+	parent 1288;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 1070;
+	parent 1288;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases CBN;
+	from 249;
+	name 1081;
+	to 590;
+	length 199.991;
+	configuration 1118;
+};
+
+object transformer {
+	phases CS;
+	from 590;
+	name 1545;
+	to 1358;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 2424.92;
+	name 641;
+	parent 1358;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 7363.07;
+	name 462;
+	parent 1358;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases CBN;
+	from 590;
+	name 564;
+	to 665;
+	length 199.985;
+	configuration 1118;
+};
+
+object transformer {
+	phases BS;
+	from 665;
+	name 1623;
+	to 560;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 78;
+	parent 560;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 774;
+	parent 560;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases BN;
+	from 665;
+	name 54;
+	to 1254;
+	length 186.29;
+	configuration 1118;
+};
+
+object transformer {
+	phases BS;
+	from 1254;
+	name 334;
+	to 1226;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 1200;
+	parent 1226;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 1221;
+	parent 1226;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 1476;
+	parent 1226;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 1082;
+	parent 1226;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases BN;
+	from 1254;
+	name 16;
+	to 236;
+	length 207.458;
+	configuration 1118;
+};
+
+object transformer {
+	phases BS;
+	from 236;
+	name 1501;
+	to 323;
+	configuration 752;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 28;
+	parent 323;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 916;
+	parent 323;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 964;
+	parent 323;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 100;
+	name 571;
+	parent 323;
+	nominal_voltage 120;
+};
+
+object transformer {
+	phases AS;
+	from 44;
+	name 794;
+	to 31;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1554;
+	parent 31;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1335;
+	parent 31;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 405;
+	parent 31;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 919;
+	parent 31;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases A;
+	from 1606;
+	name 1062;
+	to 1625;
+	length 167.617;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 1625;
+	name 532;
+	to 1680;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 902;
+	parent 1680;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1276;
+	parent 1680;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1112;
+	parent 1680;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 644;
+	parent 1680;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases AN;
+	from 1625;
+	name 278;
+	to 1151;
+	length 212.671;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 1151;
+	name 237;
+	to 1145;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 328;
+	parent 1145;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1327;
+	parent 1145;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1142;
+	parent 1145;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 287;
+	parent 1145;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases AN;
+	from 1151;
+	name 759;
+	to 1105;
+	length 270.722;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 1105;
+	name 204;
+	to 169;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 212;
+	parent 169;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 180;
+	parent 169;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases AN;
+	from 1105;
+	name 547;
+	to 1065;
+	length 199.88;
+	configuration 1118;
+};
+
+object transformer_configuration {
+	powerC_rating 50 kVA;
+	name 752;
+	shunt_impedance 10000+10000j;
+	secondary_voltage 120.0;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	impedance 0.00033+0.0022j;
+	primary_voltage 7200.0;
+	powerB_rating 50 kVA;
+	powerA_rating 50 kVA;
+};
+
+object transformer {
+	phases AS;
+	from 1065;
+	name 685;
+	to 187;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 673;
+	parent 187;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases AN;
+	from 1065;
+	name 818;
+	to 293;
+	length 200.19;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 293;
+	name 11;
+	to 1203;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 797;
+	parent 1203;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 886;
+	parent 1203;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases AN;
+	from 293;
+	name 1631;
+	to 1245;
+	length 198.968;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 1245;
+	name 1479;
+	to 401;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 284;
+	parent 401;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 978;
+	parent 401;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases AN;
+	from 1245;
+	name 381;
+	to 1602;
+	length 269.856;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 1602;
+	name 1230;
+	to 1243;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 384;
+	parent 1243;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1556;
+	parent 1243;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 131;
+	parent 1243;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases AN;
+	from 1602;
+	name 996;
+	to 679;
+	length 183.026;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 679;
+	name 1055;
+	to 649;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1627;
+	parent 649;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 370;
+	parent 649;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 624;
+	parent 649;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1537;
+	parent 649;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases AN;
+	from 679;
+	name 456;
+	to 223;
+	length 186.848;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 223;
+	name 228;
+	to 878;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 876;
+	parent 878;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1127;
+	parent 878;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases AN;
+	from 1245;
+	name 838;
+	to 1373;
+	length 297.293;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 1373;
+	name 583;
+	to 1321;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1283;
+	parent 1321;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 959;
+	parent 1321;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1338;
+	parent 1321;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases AN;
+	from 1065;
+	name 145;
+	to 1265;
+	length 190.022;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 1265;
+	name 782;
+	to 1167;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 374;
+	parent 1167;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1346;
+	parent 1167;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1376;
+	parent 1167;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 657;
+	parent 1167;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1339;
+	parent 1167;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases AN;
+	from 1265;
+	name 946;
+	to 582;
+	length 319.945;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 582;
+	name 1548;
+	to 1426;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1315;
+	parent 1426;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases C;
+	from 1125;
+	name 225;
+	to 521;
+	length 24.9998;
+	configuration 1118;
+};
+
+object underground_line {
+	phases C;
+	from 521;
+	name 1039;
+	to 653;
+	length 143.116;
+	configuration 1118;
+};
+
+object transformer {
+	phases CS;
+	from 653;
+	name 1653;
+	to 1305;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 4996.19;
+	name 233;
+	parent 1305;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 3550.32;
+	name 1238;
+	parent 1305;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 5644.68;
+	name 558;
+	parent 1305;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 2914.44;
+	name 1004;
+	parent 1305;
+	nominal_voltage 120;
+};
+
+object underground_line {
+	phases CN;
+	from 653;
+	name 217;
+	to 1272;
+	length 204.811;
+	configuration 1118;
+};
+
+object transformer {
+	phases CS;
+	from 1272;
+	name 414;
+	to 1544;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 3451.91;
+	name 15;
+	parent 1544;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 4433.48;
+	name 819;
+	parent 1544;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 5730.47;
+	name 428;
+	parent 1544;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 3744.62;
+	name 1535;
+	parent 1544;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 2957.34;
+	name 1047;
+	parent 1544;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 1222;
+	name 360;
+	to 890;
+	length 197.817;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 890;
+	name 1063;
+	to 1103;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1186;
+	parent 1103;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1197;
+	parent 1103;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 830;
+	name 172;
+	to 883;
+	length 27.5374;
+	configuration 1270;
+};
+
+object fuse {
+	phases AN;
+	from 883;
+	name 1490;
+	current_limit 9999.0 A;
+	to 1573;
+};
+
+object overhead_line {
+	phases AN;
+	from 1573;
+	name 292;
+	to 1248;
+	length 338.423;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 1248;
+	name 17;
+	to 320;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1326;
+	parent 320;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1705;
+	parent 320;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 745;
+	name 1211;
+	to 1560;
+	length 168.466;
+	configuration 528;
+};
+
+object overhead_line {
+	phases AN;
+	from 1560;
+	name 105;
+	to 1123;
+	length 233.407;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 1123;
+	name 518;
+	to 1220;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1158;
+	parent 1220;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 1123;
+	name 775;
+	to 445;
+	length 278.056;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 445;
+	name 1374;
+	to 634;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 646;
+	parent 634;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 445;
+	name 1382;
+	to 1251;
+	length 257.596;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 1251;
+	name 1694;
+	to 1491;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 734;
+	parent 1491;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1090;
+	parent 1491;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 1251;
+	name 801;
+	to 923;
+	length 205.673;
+	configuration 1270;
+};
+
+object overhead_line {
+	phases A;
+	from 923;
+	name 1361;
+	to 373;
+	length 83.3179;
+	configuration 1270;
+};
+
+object underground_line {
+	phases A;
+	from 373;
+	name 1440;
+	to 1540;
+	length 25;
+	configuration 1118;
+};
+
+object fuse {
+	phases A;
+	from 1540;
+	name 1480;
+	current_limit 9999.0 A;
+	to 953;
+};
+
+object underground_line {
+	phases A;
+	from 953;
+	name 221;
+	to 1155;
+	length 100.748;
+	configuration 1118;
+};
+
+object transformer {
+	phases AS;
+	from 1155;
+	name 1632;
+	to 972;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1615;
+	parent 972;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1227;
+	parent 972;
+	nominal_voltage 120;
+};
+
+object line_configuration {
+	name 528;
+	spacing 116;
+	conductor_N 203;
+	conductor_A 203;
+	conductor_C 203;
+	conductor_B 203;
+};
+
+object line_spacing {
+	distance_BC 7.0;
+	name 116;
+	distance_CN 5.0;
+	distance_AN 4.272002;
+	distance_AB 2.5;
+	distance_AC 4.5;
+	distance_BN 5.656854;
+};
+
+object overhead_line_conductor {
+	resistance 0.303;
+	name 203;
+	geometric_mean_radius 0.0221;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1560;
+	name 898;
+	to 1529;
+	length 427.282;
+	configuration 528;
+};
+
+object transformer {
+	phases CS;
+	from 1529;
+	name 101;
+	to 803;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 936.154;
+	name 124;
+	parent 803;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 1286.9;
+	name 1286;
+	parent 803;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 1529;
+	name 871;
+	to 918;
+	length 247.043;
+	configuration 528;
+};
+
+object overhead_line {
+	phases ACBN;
+	from 918;
+	name 1231;
+	to 1162;
+	length 232.862;
+	configuration 528;
+};
+
+object overhead_line {
+	phases AN;
+	from 1162;
+	name 852;
+	to 1670;
+	length 267.903;
+	configuration 528;
+};
+
+object transformer {
+	phases AS;
+	from 1670;
+	name 645;
+	to 506;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 629;
+	parent 506;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 1670;
+	name 596;
+	to 1067;
+	length 29.7028;
+	configuration 1270;
+};
+
+object fuse {
+	phases AN;
+	from 1067;
+	name 1322;
+	current_limit 9999.0 A;
+	to 357;
+};
+
+object overhead_line {
+	phases AN;
+	from 357;
+	name 1169;
+	to 869;
+	length 96.8605;
+	configuration 1270;
+};
+
+object overhead_line {
+	phases AN;
+	from 1162;
+	name 1110;
+	to 432;
+	length 25.0002;
+	configuration 1270;
+};
+
+object fuse {
+	phases AN;
+	from 432;
+	name 1130;
+	current_limit 9999.0 A;
+	to 806;
+};
+
+object overhead_line {
+	phases AN;
+	from 806;
+	name 1114;
+	to 1303;
+	length 409.942;
+	configuration 1270;
+};
+
+object overhead_line {
+	phases AN;
+	from 1303;
+	name 408;
+	to 311;
+	length 248.917;
+	configuration 1270;
+};
+
+object overhead_line {
+	phases AN;
+	from 311;
+	name 647;
+	to 1357;
+	length 216.307;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 1357;
+	name 1164;
+	to 1574;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1558;
+	parent 1574;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 1303;
+	name 1437;
+	to 1381;
+	length 467.07;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 1381;
+	name 1240;
+	to 1669;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1289;
+	parent 1669;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 748;
+	parent 1669;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 1303;
+	name 188;
+	to 750;
+	length 204.616;
+	configuration 1270;
+};
+
+object overhead_line {
+	phases AN;
+	from 750;
+	name 1060;
+	to 118;
+	length 57.4479;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 118;
+	name 238;
+	to 793;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 843;
+	parent 793;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 118;
+	name 251;
+	to 534;
+	length 236.478;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 534;
+	name 620;
+	to 695;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 523;
+	parent 695;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 750;
+	name 1649;
+	to 1052;
+	length 226.662;
+	configuration 1270;
+};
+
+object overhead_line {
+	phases AN;
+	from 1052;
+	name 847;
+	to 111;
+	length 29.3057;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 111;
+	name 64;
+	to 1033;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 786;
+	parent 1033;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 111;
+	name 150;
+	to 960;
+	length 94.3617;
+	configuration 1270;
+};
+
+object overhead_line {
+	phases AN;
+	from 960;
+	name 613;
+	to 173;
+	length 269.024;
+	configuration 1270;
+};
+
+object overhead_line {
+	phases AN;
+	from 173;
+	name 1009;
+	to 248;
+	length 229.972;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 248;
+	name 1037;
+	to 1008;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 1301;
+	parent 1008;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases AN;
+	from 960;
+	name 1025;
+	to 1015;
+	length 162.808;
+	configuration 1270;
+};
+
+object overhead_line {
+	phases AN;
+	from 1015;
+	name 216;
+	to 1665;
+	length 218.5;
+	configuration 1270;
+};
+
+object transformer {
+	phases AS;
+	from 1665;
+	name 626;
+	to 1390;
+	configuration 752;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 379;
+	parent 1390;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	power_12 100;
+	name 222;
+	parent 1390;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 918;
+	name 1096;
+	to 611;
+	length 82.4549;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 611;
+	name 326;
+	to 229;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 4842.26;
+	name 74;
+	parent 229;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 6336.07;
+	name 174;
+	parent 229;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 745;
+	name 444;
+	to 1036;
+	length 25.1837;
+	configuration 1699;
+};
+
+object fuse {
+	phases CN;
+	from 1036;
+	name 1249;
+	current_limit 9999.0 A;
+	to 1205;
+};
+
+object overhead_line {
+	phases CN;
+	from 1205;
+	name 1405;
+	to 1551;
+	length 206.813;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 1551;
+	name 1552;
+	to 179;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 1261.66;
+	name 979;
+	parent 179;
+	nominal_voltage 120;
+};
+
+object overhead_line {
+	phases CN;
+	from 1551;
+	name 668;
+	to 1443;
+	length 93.3471;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 1443;
+	name 391;
+	to 1557;
+	length 318.945;
+	configuration 1699;
+};
+
+object overhead_line {
+	phases CN;
+	from 1557;
+	name 377;
+	to 539;
+	length 209.243;
+	configuration 1699;
+};
+
+object transformer {
+	phases CS;
+	from 539;
+	name 832;
+	to 1132;
+	configuration 752;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 2293.7;
+	name 220;
+	parent 1132;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 608;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1310;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 631;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 344;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1136;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1002;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 526;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1360;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 426;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 540;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1508;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1704;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1044;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 140;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 745;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1598;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 100;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 830;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 581;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 866;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 585;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 687;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 875;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1601;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 1444;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 1635;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 508;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1154;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 1469;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 551;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 1345;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1695;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 853;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 185;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 1208;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 1278;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1534;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 1241;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 1020;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 900;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 966;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 1553;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1660;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 616;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 51;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1237;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 768;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 107;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 1160;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 117;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 171;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1702;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1080;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1685;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1075;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1500;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 825;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 567;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1624;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 937;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1582;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1311;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 273;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 85;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 595;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1224;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 473;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1693;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 285;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 882;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1268;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1259;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 725;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 465;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 277;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 66;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 849;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1641;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 80;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 909;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 868;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 1293;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 1264;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 30;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1633;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 371;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 242;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 1257;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 201;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 548;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1628;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 754;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 97;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 992;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 617;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 1053;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 466;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1287;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1379;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 1119;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 545;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABC;
+	name 640;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 968;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1306;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 10;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 239;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 1354;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 802;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 659;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 170;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 307;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1079;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 209;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1083;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 420;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 1172;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 835;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 699;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 812;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 790;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1432;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 215;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 372;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 356;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 387;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 58;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 1550;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1193;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 1462;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 55;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 429;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1434;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 375;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 1408;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 1337;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1174;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1678;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 690;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 312;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1234;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 860;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 65;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 38;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 407;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 908;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 574;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 294;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 1159;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 777;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 950;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 1645;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 89;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1133;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 1041;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 396;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 999;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 104;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1393;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 530;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 1521;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1370;
+	nominal_voltage 120;
+};
+
+object node {
+	phases A;
+	name 255;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 877;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 557;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 296;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1637;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 253;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 447;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1526;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 1564;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 480;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 482;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 1196;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 24;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 106;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 694;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 224;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1651;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1510;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 61;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 976;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 241;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 186;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 927;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 952;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 378;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1261;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1713;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 635;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 190;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1202;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 144;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 130;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1332;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 219;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1113;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 244;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 1351;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 1236;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1185;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1034;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 6;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 1636;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 874;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 1225;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 703;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 921;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 493;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 633;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1074;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 110;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 40;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1673;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 1565;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 26;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 717;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 232;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 1219;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 814;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 37;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1313;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 914;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1487;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 1223;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 349;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 1294;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1307;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 92;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 597;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1340;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 449;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 346;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 656;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 609;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 935;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 536;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1281;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1026;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1401;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 437;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 587;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1417;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABC;
+	name 1706;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 159;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABC;
+	name 554;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABC;
+	name 986;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1007;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 96;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 705;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1309;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 318;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 291;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 151;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1519;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1285;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 783;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 603;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 1496;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABC;
+	name 829;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases BN;
+	name 1672;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 486;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABC;
+	name 1399;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABC;
+	name 859;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 483;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 864;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABC;
+	name 1209;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 758;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABC;
+	name 489;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABC;
+	name 202;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 816;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 704;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 1683;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 1441;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 677;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 1609;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 848;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 454;
+	nominal_voltage 120;
+};
+
+object node {
+	phases C;
+	name 948;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 200;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1657;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 730;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1045;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 436;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1284;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 623;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 559;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 836;
+	nominal_voltage 120;
+};
+
+object node {
+	phases BN;
+	name 495;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 520;
+	nominal_voltage 120;
+};
+
+object node {
+	phases B;
+	name 1460;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases BN;
+	name 607;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 282;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 1102;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 25;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 787;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1371;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 270;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 983;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1116;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 1166;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1029;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 1684;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 322;
+	nominal_voltage 120;
+};
+
+object triplex_meter {
+	phases CS;
+	name 721;
+	nominal_voltage 120;
+};
+
+object triplex_meter {
+	phases CS;
+	name 68;
+	nominal_voltage 120;
+};
+
+object triplex_meter {
+	phases AS;
+	name 738;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 1471;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 348;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABC;
+	name 73;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABC;
+	name 1095;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABC;
+	name 1122;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABC;
+	name 1087;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1391;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1546;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABC;
+	name 1168;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1101;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1057;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 1378;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases A;
+	name 1016;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 522;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1666;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 684;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 240;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1656;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1639;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1454;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 339;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1445;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 451;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 362;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 213;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 316;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 1421;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 52;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 962;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1688;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1592;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1549;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 817;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 904;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 488;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 153;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 756;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 897;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 784;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1263;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 593;
+	nominal_voltage 120;
+};
+
+object node {
+	phases BN;
+	name 600;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 1150;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 998;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 7;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1596;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 535;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 789;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 183;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 788;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 342;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 724;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 692;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 39;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 696;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 1377;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 195;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 857;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 380;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 1290;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1094;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1686;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 510;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 134;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 1709;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 485;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1539;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 929;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 880;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1531;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 810;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1355;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1433;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 533;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 796;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 884;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 938;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1524;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABC;
+	name 468;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1334;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABC;
+	name 905;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 811;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 599;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1380;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1689;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 4;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases BN;
+	name 1414;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases BN;
+	name 1451;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases BN;
+	name 739;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases BN;
+	name 1661;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases BN;
+	name 345;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases BN;
+	name 400;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases BN;
+	name 932;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases BN;
+	name 766;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 980;
+	nominal_voltage 120;
+};
+
+object node {
+	phases BN;
+	name 1363;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 1198;
+	nominal_voltage 120;
+};
+
+object node {
+	phases BN;
+	name 1431;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 1366;
+	nominal_voltage 120;
+};
+
+object node {
+	phases B;
+	name 315;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases BN;
+	name 492;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases B;
+	name 1525;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases BN;
+	name 689;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 1279;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 1120;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 858;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 1336;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 252;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 1486;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 710;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1246;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 1232;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 306;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases C;
+	name 1459;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 1038;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 963;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 651;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1342;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 299;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1406;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 955;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1710;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1058;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 265;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1607;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 70;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABC;
+	name 1428;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 922;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABC;
+	name 1109;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 1468;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 1528;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 1277;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 947;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 197;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 625;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 234;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 1139;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 1073;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 515;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 1183;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 1144;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 1497;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1054;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 910;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1621;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 504;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 974;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 415;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 709;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 8;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 146;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1608;
+	nominal_voltage 120;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1701;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 579;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 498;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 1570;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 928;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 1599;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1124;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 1347;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 667;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 126;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1449;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 369;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 227;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 778;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 1325;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 477;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 330;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 655;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 612;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 516;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 1619;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 149;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 271;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 1328;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 29;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 413;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1691;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 419;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1098;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 382;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 410;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 726;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 957;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1161;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 1199;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 1177;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1458;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 308;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 36;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 143;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1398;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 1512;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1295;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 45;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 1464;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1010;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 1117;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 288;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 1383;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 139;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 1610;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1344;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 804;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 208;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 686;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 991;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 1182;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 475;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 722;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1298;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 1470;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 366;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 1644;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 403;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 1356;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1217;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 572;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 438;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 1681;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1572;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 455;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 395;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 1654;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1092;
+	nominal_voltage 120;
+};
+
+object node {
+	phases BN;
+	name 152;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases BN;
+	name 1605;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases BN;
+	name 550;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases BN;
+	name 1663;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 235;
+	nominal_voltage 120;
+};
+
+object triplex_meter {
+	phases BS;
+	name 368;
+	nominal_voltage 120;
+};
+
+object node {
+	phases BN;
+	name 840;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases BN;
+	name 1671;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 827;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 1368;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 1239;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 997;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 943;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 1585;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 676;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 1222;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 230;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABC;
+	name 1422;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 555;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 1439;
+	nominal_voltage 120;
+};
+
+object node {
+	phases BN;
+	name 1215;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 1616;
+	nominal_voltage 120;
+};
+
+object node {
+	phases BN;
+	name 1493;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 1367;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 1188;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1192;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 1012;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 1126;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 654;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 182;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABC;
+	name 1125;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABC;
+	name 19;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 896;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 798;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 1147;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1711;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABC;
+	name 1606;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1677;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 1503;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 1072;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1492;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 44;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases BCN;
+	name 249;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 1288;
+	nominal_voltage 120;
+};
+
+object node {
+	phases BCN;
+	name 590;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1358;
+	nominal_voltage 120;
+};
+
+object node {
+	phases BCN;
+	name 665;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 560;
+	nominal_voltage 120;
+};
+
+object node {
+	phases BN;
+	name 1254;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 1226;
+	nominal_voltage 120;
+};
+
+object node {
+	phases BN;
+	name 236;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases BS;
+	name 323;
+	nominal_voltage 120;
+};
+
+object triplex_meter {
+	phases AS;
+	name 31;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1625;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1680;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1151;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1145;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1105;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 169;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1065;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 187;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 293;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1203;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1245;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 401;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1602;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1243;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 679;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 649;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 223;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 878;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1373;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1321;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1265;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1167;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 582;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1426;
+	nominal_voltage 120;
+};
+
+object node {
+	phases C;
+	name 521;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 653;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1305;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 1272;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1544;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 890;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1103;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 883;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 1573;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 1248;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 320;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 1560;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 1123;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1220;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 445;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 634;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1251;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1491;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 923;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases A;
+	name 373;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 1540;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases A;
+	name 953;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 1155;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 972;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 1529;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 803;
+	nominal_voltage 120;
+};
+
+object node {
+	phases ABCN;
+	name 918;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases ABCN;
+	name 1162;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 1670;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 506;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1067;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 357;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 869;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 432;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 806;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 1303;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 311;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 1357;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1574;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1381;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1669;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 750;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 118;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 793;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 534;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 695;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1052;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 111;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1033;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 960;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 173;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 248;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1008;
+	nominal_voltage 120;
+};
+
+object node {
+	phases AN;
+	name 1015;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases AN;
+	name 1665;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases AS;
+	name 1390;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 611;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 229;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 1036;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 1205;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 1551;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 179;
+	nominal_voltage 120;
+};
+
+object node {
+	phases CN;
+	name 1443;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 1557;
+	nominal_voltage 7200.0;
+};
+
+object node {
+	phases CN;
+	name 539;
+	nominal_voltage 7200.0;
+};
+
+object triplex_meter {
+	phases CS;
+	name 1132;
+	nominal_voltage 120;
+};
+
+object voltdump {
+	filename voltDump.csv;
+};
+
