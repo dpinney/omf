@@ -5,6 +5,7 @@ import json
 import json, math, random, datetime, os
 import shutil
 from omf.models import voltageDrop
+import random
 
 _myDir = os.path.dirname(os.path.abspath(__file__))
 omfDirec =  os.path.dirname(os.path.dirname(_myDir))
@@ -37,7 +38,9 @@ def distRandomizeLocations(inFeeder):
 def distRandomizeNames(inFeeder):
 	''' Replace all names in the inFeeder distribution system with a random ID number. '''
 	newNameKey = {}
-	randomID = random.randint(0,100)
+	allKeys = range(len(inFeeder['tree'].keys()))
+	random.shuffle(allKeys)
+	#randomID = random.randint(0,100)
 	'''
 	# Alternate approach, maybe use later.
 	allKeys = range(len(inFeeder['tree'].keys()))
@@ -45,13 +48,12 @@ def distRandomizeNames(inFeeder):
 	allKeys[i]; i+=1# instead of id += 1
 	'''
 	# Create nameKey dictionary
-	for key in inFeeder['tree']:
+	for count, key in enumerate(inFeeder['tree']):
 		if 'name' in inFeeder['tree'][key]:
 			oldName = inFeeder['tree'][key]['name']
-			newName = str(randomID)
+			newName = str(allKeys[count])
 			newNameKey.update({oldName:newName})
 			inFeeder['tree'][key]['name'] = newName
-			randomID += 1
 	# Replace names in tree
 	for key in inFeeder['tree']:
 		if 'parent' in inFeeder['tree'][key]:
