@@ -96,7 +96,8 @@ def distRandomizeNames(inFeeder):
 				oldNode = inFeeder['nodes'][i][key]
 				inFeeder['nodes'][i][key] = newNameKey[oldNode]	
 
-
+	return
+	
 def distRandomizeLocations(inFeeder):
 	''' Replace all objects' longitude and latitude positions in the inFeeder distribution system with random values. '''
 	inFeeder['nodes'] = []
@@ -527,7 +528,7 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 		genId += 1
 	return
 
-def _tests():
+# def _tests():
 # 	pass
 # 	# DISTRIBUTION FEEDER TESTS
 # 	# Test distPseudomizeNames
@@ -541,15 +542,15 @@ def _tests():
 	# with open(FNAMEOUT, "w") as outFile:
 	# 	json.dump(inFeeder, outFile, indent=4)
 
-# 	# Test distRandomizeNames
-	FNAME = "Simple Market System AnonTest.omd"
-	FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
-	with open(FNAME, "r") as inFile:
-		inFeeder = json.load(inFile)
-		distRandomizeNames(inFeeder)
-	FNAMEOUT = "simpleMarket_distRandomizeNames.omd"
-	with open(FNAMEOUT, "w") as outFile:
-		json.dump(inFeeder, outFile, indent=4)
+# # 	# Test distRandomizeNames
+# 	FNAME = "Simple Market System AnonTest.omd"
+# 	FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
+# 	with open(FNAME, "r") as inFile:
+# 		inFeeder = json.load(inFile)
+# 		distRandomizeNames(inFeeder)
+# 	FNAMEOUT = "simpleMarket_distRandomizeNames.omd"
+# 	with open(FNAMEOUT, "w") as outFile:
+# 		json.dump(inFeeder, outFile, indent=4)
 
 # 	# Test distRandomizeLocations
 	# FNAME = "Simple Market System AnonTest.omd"
@@ -687,5 +688,5 @@ def _tests():
 # 	with open(FNAMEOUT, "w") as outFile:
 # 		json.dump(inNetwork, outFile, indent=4)
 
-if __name__ == '__main__':
-	_tests()
+# if __name__ == '__main__':
+# 	_tests()
