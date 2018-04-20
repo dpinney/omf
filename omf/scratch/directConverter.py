@@ -80,8 +80,8 @@ def main():
   if (args.std and args.seq):
     handleMilFile(args.std, args.seq)
   elif (args.mdb):
-    home_folder = os.getcwd()
-    handleMdb(args.mdb, home_folder)
+    home_folder = getcwd()
+    handleMdbFile(args.mdb, home_folder)
   else:
     raise Exception("INVALID FILE INPUT.")
 
