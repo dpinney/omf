@@ -184,17 +184,15 @@ def treeToNxGraph(inTree):
 	return outGraph
 
 def treeToDiNxGraph(inTree):
-	''' Convert feeder tree to networkx graph. '''
+	''' Convert feeder tree to a DIRECTED networkx graph. '''
 	outGraph = nx.DiGraph()
 	network_objects = ['regulator', 'overhead_line', 'underground_line', 'transformer', 'fuse', 'switch', 'triplex_line', 'node', 'triplex_node', 'meter', 'triplex_meter', 'load', 'triplex_load', 'series_reactor']
-
 	for key in inTree:
 		item = inTree[key]
 		if 'object' in item:
 			if item['object'] == 'switch':
 				if 'OPEN' in item.values(): #super hacky
 					continue
-
 		if 'name' in item.keys():#sometimes network objects aren't named!
 			if 'parent' in item.keys():
 				outGraph.add_edge(item['parent'], item['name'], attr_dict={'type':'parentChild','phases':1, 'length': 0})#jfk. swapped from,to
@@ -214,10 +212,8 @@ def treeToDiNxGraph(inTree):
 			if 'from' in item.keys():
 				myPhase = _phaseCount(item.get('phases','AN'))
 				outGraph.add_edge(item['from'],item['to'],attr_dict={'type':item['object'],'phases':myPhase, 'length': float(item.get('length',0))})
-
 			if 'latitude' in item.keys() and 'longitude' in item.keys():
 				outGraph.node.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
-
 	return outGraph
 
 def latLonNxGraph(inGraph, labels=False, neatoLayout=False, showPlot=False):

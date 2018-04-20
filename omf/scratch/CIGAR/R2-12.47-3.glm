@@ -37733,18 +37733,18 @@ object underground_line_conductor:10 {
 
 // Recorders
 
-object recorder { 
-    parent R2-12-47-3_reg_1;
-    property tap_A,tap_B,tap_C,power_in_A.real,power_in_A.imag,power_in_B.real,power_in_B.imag,power_in_C.real,power_in_C.imag,power_in.real,power_in.imag; 
-    limit 1440; 
-    interval 60; 
-    file "R2-12.47-3_reg1_output.csv"; 
-}; 
-
-object recorder { 
-	parent R2-12-47-3_cap_1;
-    property "switchA,switchB,switchC,voltage_A.real,voltage_A.imag,voltage_B.real,voltage_B.imag,voltage_C.real,voltage_C.imag"; 
-    file R2-12.47-3_capacitor1.csv; 
-    interval 60; 
-    limit 1440; 
+//object recorder { 
+//    parent R2-12-47-3_reg_1;
+//    property tap_A,tap_B,tap_C,power_in_A.real,power_in_A.imag,power_in_B.real,power_in_B.imag,power_in_C.real,power_in_C.imag,power_in.real,power_in.imag; 
+//    limit 1440; 
+//    interval 60; 
+//    file "R2-12.47-3_reg1_output.csv"; 
+//}; 
+//
+//object recorder { 
+//	parent R2-12-47-3_cap_1;
+//    property "switchA,switchB,switchC,voltage_A.real,voltage_A.imag,voltage_B.real,voltage_B.imag,voltage_C.real,voltage_C.imag"; 
+//    file R2-12.47-3_capacitor1.csv; 
+//    interval 60; 
+//    limit 1440; 
 };
