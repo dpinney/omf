@@ -33,21 +33,21 @@ def handleMilFile(std, seq, failure = False):
     print 'FAILED TO CONVERT STD AND SEQ FILES FOR %s AND %s' % std, seq
   return failure  
 
-def handleMdbFile(mdb, modelDir, failure = False):
+def handleMdbFile(mdb_path, modelDir, failure = False):
   ''' Convert mdb database to glm file. '''
-  try:
+  pass
+#  try:
 
   # Convert to string for conversion.
-  
-    if isinstance(mdb, list):
-      mdb = ' '.join(mdb)
-    glm, x_scale, y_scale = convertCymeModel(mdb, modelDir)
-    with open(mdb.replace('.mdb', '.glm'), 'w') as output_file:
-      output_file.write(feeder.sortedWrite(glm))
-  except: 
-    failure = True
-    print 'FAILED TO CONVERT MDB FILE FOR %s' % mdb
-  return failure
+#    mdb = open(mdb_path, 'r')
+#    glm, x_scale, y_scale = convertCymeModel(mdb, modelDir)
+#    with open(mdb_path.replace('.mdb', '.glm'), 'w') as output_file:
+#      output_file.write(feeder.sortedWrite(glm))
+#  except: 
+#    failure = True
+#    print 'FAILED TO CONVERT MDB FILE FOR %s' % mdb
+#  mdb.close()
+#  return failure
 
 def is_valid_file(parser, file_name):
   ''' Check validity of user input '''
@@ -74,7 +74,7 @@ def main():
   parser.add_argument("-mdb", help="Single mdb file, with both network and database exported to the same file.", type=lambda f: is_valid_file(parser, f))
   # parser.add_argument("-if", "-inputfolder", action="store_true
   # parser.add_argument("-of", "-outputfolder", action="store_true")  For later-store in new folder.
-  
+  print getcwd()  
   args = parser.parse_args()
 
   if (args.std and args.seq):
