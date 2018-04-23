@@ -1,0 +1,27 @@
+GOAL
+Hacking on the CIGAR cosim.py
+
+PREREQUISITES
+This code only works with GridLAB-D v4.0.
+
+TECHNICAL GLD WARMUP
+XXX Downloaded taxonomic feeder glm file R2-12.47-3.glm (Light Suburban) to use as an example
+XXX Changed the output to dump Voltages A, B, and C on load 1 (are these the right variables to use? will they change? should I be using a different object?)
+XXX Does the glm run? Yes, but the values don't change (should voltage change?)
+OOO Add Inverter 
+OOO Add Solar
+OOO Add Battery
+OOO Create a picture of the glm using the drawing code in feeder.py
+OOO Implement waitUntil() function
+
+LATERBASE
+OOO Requiring pauseat in glm... We could create a copy of the GLM?
+OOO Need a wait until function? Needs testing. Do we need a maxWait argument?
+OOO Port in faster URL library from abc4pvcosim?
+
+REFERENCES
+https://docs.python.org/2/library/subprocess.html
+http://gridlab-d.shoutwiki.com/wiki/Realtime_server
+http://gridlab-d.shoutwiki.com/wiki/Pauseat
+https://docs.python.org/2/howto/urllib2.html
+https://github.com/NREL/buspy/blob/develop/buspy/comm/gridlabcomm.py

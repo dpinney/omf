@@ -46,25 +46,43 @@ def distPseudomizeNames(inFeeder):
 def distRandomizeNames(inFeeder):
 	''' Replace all names in the inFeeder distribution system with a random ID number. '''
 	newNameKey = {}
-	randomID = random.randint(0,100)
+	allKeys = range(len(inFeeder['tree'].keys()))
+	random.shuffle(allKeys)
+
 	# Create nameKey dictionary
-	for key in inFeeder['tree']:
+	for count, key in enumerate(inFeeder['tree']):
 		if 'name' in inFeeder['tree'][key]:
 			oldName = inFeeder['tree'][key]['name']
-			newName = str(randomID)
+			newName = str(allKeys[count])
 			newNameKey.update({oldName:newName})
 			inFeeder['tree'][key]['name'] = newName
-			randomID += 1
 	# Replace names in tree
 	for key in inFeeder['tree']:
 		if 'parent' in inFeeder['tree'][key]:
-			oldParent = inFeeder['tree'][key]['parent']  
+			oldParent = inFeeder['tree'][key]['parent']
 			inFeeder['tree'][key]['parent'] = newNameKey[oldParent]
 		if ('from' in inFeeder['tree'][key]) and ('to' in inFeeder['tree'][key]):
 			oldFrom = inFeeder['tree'][key]['from']
 			oldTo = inFeeder['tree'][key]['to']
 			inFeeder['tree'][key]['from'] = newNameKey[oldFrom]
 			inFeeder['tree'][key]['to'] = newNameKey[oldTo]
+		#Line configs
+		if inFeeder['tree'][key].get('object', '') == 'line_configuration':
+			print("activated")
+			for prop in inFeeder['tree'][key]:
+				slist = {'conductor_N', 'conductor_A', 'conductor_B', 'conductor_C'}
+				if prop in slist:
+					print("has detected a conductor")
+					oldCon = inFeeder['tree'][key][prop]
+					inFeeder['tree'][key][prop] = newNameKey[oldCon]
+	#Replace Spacing
+		if 'spacing' in inFeeder['tree'][key]:
+			oldspace = inFeeder['tree'][key]['spacing']
+			inFeeder['tree'][key]['spacing'] = newNameKey[oldspace]
+	#Replace configs general form
+		if 'configuration' in inFeeder['tree'][key]:
+			oldConfig = inFeeder['tree'][key]['configuration']
+			inFeeder['tree'][key]['configuration'] = newNameKey[oldConfig]
 	# Replace names in links
 	for i in range(len(inFeeder['links'])):
 		for key in inFeeder['links'][i]:
@@ -76,9 +94,10 @@ def distRandomizeNames(inFeeder):
 		for key in inFeeder['nodes'][i]:
 			if key == 'name':
 				oldNode = inFeeder['nodes'][i][key]
-				inFeeder['nodes'][i][key] = newNameKey[oldNode]
-	return
+				inFeeder['nodes'][i][key] = newNameKey[oldNode]	
 
+	return newNameKey
+	
 def distRandomizeLocations(inFeeder):
 	''' Replace all objects' longitude and latitude positions in the inFeeder distribution system with random values. '''
 	inFeeder['nodes'] = []
@@ -670,4 +689,4 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 # 		json.dump(inNetwork, outFile, indent=4)
 
 # if __name__ == '__main__':
-	# _tests()
+# 	_tests()
