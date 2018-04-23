@@ -35,9 +35,11 @@ def handleMilFile(std, seq, failure = False):
 
 def handleMdbFile(mdb_path, modelDir, failure = False):
   ''' Convert mdb database to glm file. '''
-  pass
-#  try:
+  with open(mdb_path, 'r') as infile, open(mdb_path.replace('.mdb', '.glm'), 'w') as outfile:
+    glm, x_scale, y_scale = cyme.convertCymeModel(infile, modelDir)
 
+#  try:
+  
   # Convert to string for conversion.
 #    mdb = open(mdb_path, 'r')
 #    glm, x_scale, y_scale = convertCymeModel(mdb, modelDir)
@@ -72,9 +74,6 @@ def main():
   parser.add_argument("-std", help="Single std file. Must go with seq file.", type=lambda f: is_valid_file(parser, f))
   parser.add_argument("-seq", help="Single seq file. Must go with std file.", type=lambda f: is_valid_file(parser, f))
   parser.add_argument("-mdb", help="Single mdb file, with both network and database exported to the same file.", type=lambda f: is_valid_file(parser, f))
-  # parser.add_argument("-if", "-inputfolder", action="store_true
-  # parser.add_argument("-of", "-outputfolder", action="store_true")  For later-store in new folder.
-  print getcwd()  
   args = parser.parse_args()
 
   if (args.std and args.seq):
