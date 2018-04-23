@@ -96,7 +96,7 @@ def distRandomizeNames(inFeeder):
 				oldNode = inFeeder['nodes'][i][key]
 				inFeeder['nodes'][i][key] = newNameKey[oldNode]	
 
-	return
+	return newNameKey
 	
 def distRandomizeLocations(inFeeder):
 	''' Replace all objects' longitude and latitude positions in the inFeeder distribution system with random values. '''
