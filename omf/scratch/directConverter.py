@@ -21,11 +21,13 @@ def handleMilFile(std_path, seq_path, failure = False):
   ''' Conversion routine for the std and seq files. '''
     # Attempt to open std and seq files and convert to glm.
   try:
-    with open(std_path, 'r') as std_file, open(seq_path, 'r') as seq_file, open(std_path.replace('.std', '.glm'), 'w') as output_file:
+    with open(std_path, 'r') as std_file, open(seq_path, 'r') as seq_file:
+      output_file = open('output.glm', 'w')
       glm, x_scale, y_scale = mil.convert(std_file, seq_file)
       output_file.write(feeder.sortedWrite(glm))
       print 'GLM FILE WRITTEN FOR STD/SEQ COMBO.'
-  except err:
+  except IOError:
+    print 'UNABLE TO WRITE GLM FILE.'
     failure = True
   finally:
     output_file.close()
