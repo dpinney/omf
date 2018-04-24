@@ -10,16 +10,22 @@ OUTPUT: y.glm
 '''
 from os.path import exists, splitext
 from os import getcwd
-import argparse
-import sys
+import argparse, sys
 
 sys.path.append('../')
 import milToGridlab as mil
 import cymeToGridlab as cyme
+import feeder
 
-def handleMilFile(std, seq, failure = False):
+def handleMilFile(std_path, seq_path, failure = False):
   ''' Conversion routine for the std and seq files. '''
-    # Attempt to open std and seq files and conver to glm.
+    # Attempt to open std and seq files and convert to glm.
+  with open(std_path, 'r') as std_file, open(seq_path, 'r') as seq_file, open(std_path.replace('.std', '.glm'), 'w') as output_file:
+    glm, x_scale, y_scale = mil.convert(std_file, seq_file)
+    output_file.write(feeder.sortedWrite(glm))
+    print 'GLM FILE WRITTEN.'
+
+'''
   try:
     with open(std) as std_file, open(seq) as seq_file:
       glm, x_scale, y_scale = mil.covert(std_file.read(), seq_file.read())
@@ -32,11 +38,12 @@ def handleMilFile(std, seq, failure = False):
     failure = True
     print 'FAILED TO CONVERT STD AND SEQ FILES FOR %s AND %s' % std, seq
   return failure  
+'''
 
 def handleMdbFile(mdb_path, modelDir, failure = False):
   ''' Convert mdb database to glm file. '''
   with open(mdb_path, 'r') as infile, open(mdb_path.replace('.mdb', '.glm'), 'w') as outfile:
-    glm, x_scale, y_scale = cyme.convertCymeModel(infile, modelDir)
+    glm, x_scale, y_scale = cyme.convertCymeModel(mdb_path, modelDir)
 
 #  try:
   
@@ -79,7 +86,7 @@ def main():
   if (args.std and args.seq):
     handleMilFile(args.std, args.seq)
   elif (args.mdb):
-    home_folder = getcwd()
+    home_folder = '../' + getcwd()
     handleMdbFile(args.mdb, home_folder)
   else:
     raise Exception("INVALID FILE INPUT.")
