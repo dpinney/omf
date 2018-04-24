@@ -9,7 +9,6 @@ OUTPUT: y.glm
 
 '''
 from os.path import exists, splitext
-from os import getcwd
 import argparse, sys
 
 sys.path.append('../')
@@ -22,7 +21,8 @@ def handleMilFile(std_path, seq_path, failure = False):
     # Attempt to open std and seq files and convert to glm.
   try:
     with open(std_path, 'r') as std_file, open(seq_path, 'r') as seq_file:
-      output_file = open('output.glm', 'w')
+      output_path = std_path.split('/')[-1].replace('.std', '.glm') # We wish to put the file in the current running directory.
+      output_file = open(output_path, 'w')
       glm, x_scale, y_scale = mil.convert(std_file, seq_file)
       output_file.write(feeder.sortedWrite(glm))
       print 'GLM FILE WRITTEN FOR STD/SEQ COMBO.'
