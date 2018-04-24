@@ -20,30 +20,23 @@ import feeder
 def handleMilFile(std_path, seq_path, failure = False):
   ''' Conversion routine for the std and seq files. '''
     # Attempt to open std and seq files and convert to glm.
-  with open(std_path, 'r') as std_file, open(seq_path, 'r') as seq_file, open(std_path.replace('.std', '.glm'), 'w') as output_file:
-    glm, x_scale, y_scale = mil.convert(std_file, seq_file)
-    output_file.write(feeder.sortedWrite(glm))
-    print 'GLM FILE WRITTEN.'
-
-'''
   try:
-    with open(std) as std_file, open(seq) as seq_file:
-      glm, x_scale, y_scale = mil.covert(std_file.read(), seq_file.read())
-  
-  # Write to new glm file.
-    with open(std.replace('.std', '.glm'), 'w') as output_file:
+    with open(std_path, 'r') as std_file, open(seq_path, 'r') as seq_file, open(std_path.replace('.std', '.glm'), 'w') as output_file:
+      glm, x_scale, y_scale = mil.convert(std_file, seq_file)
       output_file.write(feeder.sortedWrite(glm))
-      print 'GLM FILE WRITTEN FOR %s AND %s' % std, seq
-  except:
+      print 'GLM FILE WRITTEN FOR STD/SEQ COMBO.'
+  except err:
     failure = True
-    print 'FAILED TO CONVERT STD AND SEQ FILES FOR %s AND %s' % std, seq
-  return failure  
-'''
+  finally:
+    output_file.close()
+  return failure
+  
 
 def handleMdbFile(mdb_path, modelDir, failure = False):
   ''' Convert mdb database to glm file. '''
-  with open(mdb_path, 'r') as infile, open(mdb_path.replace('.mdb', '.glm'), 'w') as outfile:
-    glm, x_scale, y_scale = cyme.convertCymeModel(mdb_path, modelDir)
+  pass
+#  with open(mdb_path, 'r') as infile, open(mdb_path.replace('.mdb', '.glm'), 'w') as outfile:
+#    glm, x_scale, y_scale = cyme.convertCymeModel(mdb_path, modelDir)
 
 #  try:
   
