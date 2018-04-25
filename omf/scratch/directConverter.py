@@ -9,6 +9,7 @@ OUTPUT: y.glm
 
 '''
 from os.path import exists, splitext
+from os import getcwd
 import argparse, sys
 
 sys.path.append('../')
@@ -36,23 +37,22 @@ def handleMilFile(std_path, seq_path, failure = False):
 
 def handleMdbFile(mdb_path, modelDir, failure = False):
   ''' Convert mdb database to glm file. '''
-  pass
-#  with open(mdb_path, 'r') as infile, open(mdb_path.replace('.mdb', '.glm'), 'w') as outfile:
-#    glm, x_scale, y_scale = cyme.convertCymeModel(mdb_path, modelDir)
-
-#  try:
+  try:
+    with open(mdb_path, 'r') as infile:
+      output_path = mdb_path.split('/')[-1].replace('.mdb', '.glm')
+      output_file = open(output_path, 'w')
+      glm, x_scale, y_scale = cyme.convertCymeModel(mdb_path, modelDir)
+      output_file.write(feeder.sortedWrite(glm))
+  except IOError:
+    print 'UNABLE TO WRITE GLM FILE.'
+    failure = True
+  except:
+    print 'ERROR IN CYME MODEL FUNCTION.', sys.exc_info()[0]
+    failure = True
+  finally:
+    output_file.close()
+  return failure
   
-  # Convert to string for conversion.
-#    mdb = open(mdb_path, 'r')
-#    glm, x_scale, y_scale = convertCymeModel(mdb, modelDir)
-#    with open(mdb_path.replace('.mdb', '.glm'), 'w') as output_file:
-#      output_file.write(feeder.sortedWrite(glm))
-#  except: 
-#    failure = True
-#    print 'FAILED TO CONVERT MDB FILE FOR %s' % mdb
-#  mdb.close()
-#  return failure
-
 def is_valid_file(parser, file_name):
   ''' Check validity of user input '''
   valid_names = ["mdb", "seq", "std"]
