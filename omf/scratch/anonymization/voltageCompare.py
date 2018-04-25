@@ -1,4 +1,3 @@
-
 import json, math, random, datetime, os
 from os.path import join as pJoin
 import csv
@@ -15,7 +14,6 @@ with open(FNAME, "r") as inFile:
 	voltDump.next()
 	for row in voltDump:
 		randomNamesList.append(row[1:])
-
 
 omfDir='C:/Users/Tuomas/SkyDrive/omf'
 FNAME=pJoin(omfDir,'omf','scratch','anonymization','original', 'voltDump.csv')
