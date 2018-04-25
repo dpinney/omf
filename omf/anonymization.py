@@ -191,8 +191,17 @@ def distShuffleLoads(inFeeder, shufPerc):
 				zipIdx += 1
 		if ('from' in inFeeder['tree'][key]) and (inFeeder['tree'][key].get('object') == 'triplex_line'):
 			if random.randint(0,100) <= shufPerc:
-				inFeeder['tree'][key]['from'] = tlParents[tlIdx]
-				tlIdx += 1
+				if (inFeeder['tree'][key]['from']) != (tlParents[tlIdx]):
+					tlIdx = 0
+					print(inFeeder['tree'][key])
+					inFeeder['tree'][key]['from'] = tlParents[tlIdx]
+					print(inFeeder['tree'][key])
+					print(tlParents)
+					tlParents.pop(tlIdx)
+				elif (inFeeder['tree'][key]['from']) == (tlParents[tlIdx]):
+					tlIdx = tlIdx + 1
+					inFeeder['tree'][key]['from'] = tlParents[tlIdx]
+					tlParents.pop(tlIdx)
 		# if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key].get('object') == 'triplex_node'):
 		# 	if random.randint(0,100) < shufPerc:
 		# 		inFeeder['tree'][key]['parent'] = tnParents[tnIdx]
