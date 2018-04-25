@@ -124,6 +124,7 @@ def distTranslateLocations(inFeeder, translation, rotation):
 			latitude = float(inFeeder['tree'][key]['latitude'])
 			inFeeder['tree'][key]['longitude'] = longitude + translation*math.cos(rotation)
 			inFeeder['tree'][key]['latitude'] = latitude + translation*math.sin(rotation)
+		
 	return
 
 def distAddNoise(inFeeder, noisePerc):
@@ -134,15 +135,18 @@ def distAddNoise(inFeeder, noisePerc):
 			val = inFeeder['tree'][key][prop]
 			try:
 				parseVal = float(val)
-				randNoise = random.randint(-noisePerc, noisePerc)/100
+				print(parseVal)
+				randNoise = random.uniform(-noisePerc, noisePerc)/100
+				print(randNoise)
 				randVal = parseVal + randNoise*parseVal
+				print(randVal)
 				inFeeder['tree'][key][prop] = str(randVal)
 			except ValueError:
 				try:
 					compVal = complex(val)
 					realVal = float(compVal.real)
 					imagVal = float(compVal.imag)
-					randNoise = random.randint(-noisePerc, noisePerc)/100
+					randNoise = random.uniform(-noisePerc, noisePerc)/100
 					randReal = realVal + randNoise*realVal
 					randImag = imagVal + randNoise*imagVal
 					randVal = complex(randReal, randImag)
@@ -528,7 +532,7 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 		genId += 1
 	return
 
-# def _tests():
+def _tests():
 # 	pass
 # 	# DISTRIBUTION FEEDER TESTS
 # 	# Test distPseudomizeNames
@@ -563,16 +567,16 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 	# 	json.dump(inFeeder, outFile, indent=4)
 
 # # 	# Test distTranslateLocations
-# 	FNAME = "Simple Market System AnonTest.omd"
-# 	FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
-# 	with open(FNAME, "r") as inFile:
-# 		inFeeder = json.load(inFile)
-# 		translation = 20
-# 		rotation = 20
-# 		distTranslateLocations(inFeeder, translation, rotation)
-# 	FNAMEOUT = "simpleMarket_distTranslateLocations.omd"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inFeeder, outFile, indent=4)
+	# FNAME = "Simple Market System AnonTest.omd"
+	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
+	# with open(FNAME, "r") as inFile:
+	# 	inFeeder = json.load(inFile)
+	# 	translation = 20
+	# 	rotation = 20
+	# 	distTranslateLocations(inFeeder, translation, rotation)
+	# FNAMEOUT = "simpleMarket_distTranslateLocations.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inFeeder, outFile, indent=4)
 
 	# Test distAddNoise
 	# FNAME = "Simple Market System AnonTest.omd"
@@ -688,5 +692,5 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 # 	with open(FNAMEOUT, "w") as outFile:
 # 		json.dump(inNetwork, outFile, indent=4)
 
-# if __name__ == '__main__':
-# 	_tests()
+if __name__ == '__main__':
+	_tests()
