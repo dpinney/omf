@@ -135,11 +135,8 @@ def distAddNoise(inFeeder, noisePerc):
 			val = inFeeder['tree'][key][prop]
 			try:
 				parseVal = float(val)
-				print(parseVal)
 				randNoise = random.uniform(-noisePerc, noisePerc)/100
-				print(randNoise)
 				randVal = parseVal + randNoise*parseVal
-				print(randVal)
 				inFeeder['tree'][key][prop] = str(randVal)
 			except ValueError:
 				try:
@@ -191,17 +188,8 @@ def distShuffleLoads(inFeeder, shufPerc):
 				zipIdx += 1
 		if ('from' in inFeeder['tree'][key]) and (inFeeder['tree'][key].get('object') == 'triplex_line'):
 			if random.randint(0,100) <= shufPerc:
-				if (inFeeder['tree'][key]['from']) != (tlParents[tlIdx]):
-					tlIdx = 0
-					print(inFeeder['tree'][key])
-					inFeeder['tree'][key]['from'] = tlParents[tlIdx]
-					print(inFeeder['tree'][key])
-					print(tlParents)
-					tlParents.pop(tlIdx)
-				elif (inFeeder['tree'][key]['from']) == (tlParents[tlIdx]):
-					tlIdx = tlIdx + 1
-					inFeeder['tree'][key]['from'] = tlParents[tlIdx]
-					tlParents.pop(tlIdx)
+				inFeeder['tree'][key]['from'] = tlParents[tlIdx]
+				tlIdx += 1
 		# if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key].get('object') == 'triplex_node'):
 		# 	if random.randint(0,100) < shufPerc:
 		# 		inFeeder['tree'][key]['parent'] = tnParents[tnIdx]
@@ -541,7 +529,7 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 		genId += 1
 	return
 
-def _tests():
+# def _tests():
 # 	pass
 # 	# DISTRIBUTION FEEDER TESTS
 # 	# Test distPseudomizeNames
@@ -701,5 +689,5 @@ def _tests():
 # 	with open(FNAMEOUT, "w") as outFile:
 # 		json.dump(inNetwork, outFile, indent=4)
 
-if __name__ == '__main__':
-	_tests()
+# if __name__ == '__main__':
+# 	_tests()
