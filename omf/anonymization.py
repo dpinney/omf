@@ -180,16 +180,52 @@ def distShuffleLoads(inFeeder, shufPerc):
 	for key in inFeeder['tree']:
 		if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key].get('object') == 'house'):
 			if random.randint(0,100) <= shufPerc:
-				inFeeder['tree'][key]['parent'] = houseParents[houseIdx]
-				houseIdx += 1
+				houseIdx = 0
+				if inFeeder['tree'][key]['parent'] != houseParents[houseIdx]:
+					houseIdx = 0
+					inFeeder['tree'][key]['parent'] = houseParents[houseIdx]
+					houseParents.pop(houseIdx)
+				elif inFeeder['tree'][key]['parent'] == houseParents[houseIdx]:
+					houseIdx = houseIdx + 1
+					inFeeder['tree'][key]['parent'] = houseParents[houseIdx]
+					houseParents.pop(houseIdx)
 		if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key].get('object') == 'ZIPload'):
+			zipIdx = 0
 			if random.randint(0,100) <= shufPerc:
-				inFeeder['tree'][key]['parent'] = zipParents[zipIdx]
-				zipIdx += 1
+				zipIdx = 0
+				if inFeeder['tree'][key]['parent'] != zipParents[zipIdx]:
+					print(inFeeder['tree'][key]['parent'])
+					try:
+						zipIdx = 0
+						inFeeder['tree'][key]['parent'] = zipParents[zipIdx]
+						#print(zipParents)
+						zipParents.pop(zipIdx)
+						print(inFeeder['tree'][key]['parent'])
+					except IndexError:
+						continue
+				elif (inFeeder['tree'][key]['parent']) == zipParents[zipIdx]:
+					print(inFeeder['tree'][key]['parent'])
+					try:
+						zipIdx = zipIdx + 1
+						#print(zipParents)
+						inFeeder['tree'][key]['parent'] = zipParents[zipIdx]
+						zipParents.pop(zipIdx)
+						print(inFeeder['tree'][key]['parent'])
+					except IndexError:
+						continue
 		if ('from' in inFeeder['tree'][key]) and (inFeeder['tree'][key].get('object') == 'triplex_line'):
 			if random.randint(0,100) <= shufPerc:
-				inFeeder['tree'][key]['from'] = tlParents[tlIdx]
-				tlIdx += 1
+				tlIdx = 0
+				if (inFeeder['tree'][key]['from']) != (tlParents[tlIdx]):
+					tlIdx = 0
+
+					inFeeder['tree'][key]['from'] = tlParents[tlIdx]
+					
+					tlParents.pop(tlIdx)
+				elif (inFeeder['tree'][key]['from']) == (tlParents[tlIdx]):
+					tlIdx = tlIdx + 1
+					inFeeder['tree'][key]['from'] = tlParents[tlIdx]
+					tlParents.pop(tlIdx)
 		# if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key].get('object') == 'triplex_node'):
 		# 	if random.randint(0,100) < shufPerc:
 		# 		inFeeder['tree'][key]['parent'] = tnParents[tnIdx]
