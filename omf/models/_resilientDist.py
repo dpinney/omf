@@ -249,46 +249,32 @@ def convertToGFM(gfmInputTemplate, feederModel):
 	# Generator creation:
 	genCands = gfmInputTemplate['generatorCandidates'].strip().replace(' ', '').split(',')
 	for key, gens in jsonTree.iteritems():
-		if gens.get('name','') in genCands:
+		# Check for a swing node:
+		isSwing = gens.get('bustype','') == 'SWING'
+		if gens.get('name','') in genCands or isSwing:
 			genID = gens.get('name','')+'_gen'
 			for elem in gfmJson['buses']:
 				if elem['id'][0:-4] == genID[0:-4]:
 					busID = elem['id']
 			numPhases, has_phase, max_real_phase, max_reactive_phase = getNodePhases(gens, gfmInputTemplate['maxDGPerGenerator'])
+			if isSwing:
+				# HACK: swing buses get "infinitely large", i.e. 5 GW, generator capacity.
+				genSize = 5.0 * 1000.0 * 1000.0 * 1000.0
+			else:
+				# Non swing buses get 5 kW generators.
+				genSize = 5000.0
 			genObj = dict({
 	 			'id': gens.get('name','')+'_gen', #*
 				'node_id': busID, #*
 				'is_new': True, # Whether or not new generation can be built.
 				'microgrid_cost': 1.5, # Per MW capacity of building DG.
-				'max_microgrid': 5000.0, # Max additional capacity for this gen.
+				'max_microgrid': genSize, # Max additional capacity for this gen.
 				'microgrid_fixed_cost': 0, # One-time fixed cost for building DG.
 				'has_phase': has_phase, #*
 				'max_reactive_phase': [0.0,0.0,0.0], #*
 				'max_real_phase': [0.0,0.0,0.0] #*
 			})
 			gfmJson['generators'].append(genObj)
-			# BUG: GENERATORS ADDED TO ALL SWING BUSES: gfmJson['generators'].append(genObj)
-	#find swing nodes from .OMD
-	for node in jsonNodes:
-		if(node.get('objectType') == "gridNode swingNode"):
-			genID = node.get('name','')+'_gen'
-			for elem in gfmJson['buses']:
-				if elem['id'][0:-4] == genID[0:-4]:
-					busID = elem['id']
-			numPhases, has_phase, max_real_phase, max_reactive_phase = getNodePhases(gens, gfmInputTemplate['maxDGPerGenerator'])
-			genObj = dict({
-	 			'id': node.get('name','')+'_gen', #*
-				'node_id': busID, #*
-				'is_new': True, # Whether or not new generation can be built.
-				'microgrid_cost': 1.5, # Per MW capacity of building DG.
-				'max_microgrid': 5000.0, # Max additional capacity for this gen.
-				'microgrid_fixed_cost': 0, # One-time fixed cost for building DG.
-				'has_phase': has_phase, #*
-				'max_reactive_phase': [1e30,1e30,1e30], #*
-				'max_real_phase': [1e30,1e30,1e30] #*
-			})
-			gfmJson['generators'].append(genObj)
-	# Return 
 	return gfmJson
 
 def genDiagram(outputDir, feederJson):
@@ -512,7 +498,7 @@ def work(modelDir, inputDict):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"feederName1": "Winter 2017 Fixed",
+		"feederName1": "trip37",
 		"modelType": modelName,
 		"runTime": "0:00:30",
 		"layoutAlgorithm": "geospatial",
