@@ -20,7 +20,7 @@
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 	<script type="text/javascript">
 		function downloadTextFile(fileName, text) {
-			//console.log(text)
+			console.log(text);
 			var element = document.createElement('a');
 		    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
 		    element.setAttribute('download', fileName);
