@@ -1,0 +1,28 @@
+clock {
+	timezone PST+8PDT;
+	starttime '2000-01-01 00:00:00';
+	stoptime '2000-01-01 00:00:00';
+};
+
+#set minimum_timestep=60;
+#set profiler=1;
+#set relax_naming_rules=1;
+#include "schedules.glm";
+module generators;
+module tape;
+module residential {
+	implicit_enduses NONE;
+};
+
+module powerflow {
+	solver_method NR;
+	NR_iteration_limit 50;
+};
+
+module climate;
+object climate {
+	name Climate;
+	interpolate QUADRATIC;
+	tmyfile climate.tmy2;
+};
+

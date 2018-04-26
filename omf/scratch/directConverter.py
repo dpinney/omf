@@ -10,47 +10,49 @@ OUTPUT: y.glm
 '''
 from os.path import exists, splitext
 from os import getcwd
-import argparse
-import sys
+import argparse, sys
 
 sys.path.append('../')
 import milToGridlab as mil
 import cymeToGridlab as cyme
+import feeder
 
-def handleMilFile(std, seq, failure = False):
+def handleMilFile(std_path, seq_path, failure = False):
   ''' Conversion routine for the std and seq files. '''
-    # Attempt to open std and seq files and conver to glm.
+    # Attempt to open std and seq files and convert to glm.
   try:
-    with open(std) as std_file, open(seq) as seq_file:
-      glm, x_scale, y_scale = mil.covert(std_file.read(), seq_file.read())
-  
-  # Write to new glm file.
-    with open(std.replace('.std', '.glm'), 'w') as output_file:
+    with open(std_path, 'r') as std_file, open(seq_path, 'r') as seq_file:
+      output_path = std_path.split('/')[-1].replace('.std', '.glm') # We wish to put the file in the current running directory.
+      output_file = open(output_path, 'w')
+      glm, x_scale, y_scale = mil.convert(std_file, seq_file)
       output_file.write(feeder.sortedWrite(glm))
-      print 'GLM FILE WRITTEN FOR %s AND %s' % std, seq
-  except:
+      print 'GLM FILE WRITTEN FOR STD/SEQ COMBO.'
+  except IOError:
+    print 'UNABLE TO WRITE GLM FILE.'
     failure = True
-    print 'FAILED TO CONVERT STD AND SEQ FILES FOR %s AND %s' % std, seq
-  return failure  
+  finally:
+    output_file.close()
+  return failure
+  
 
 def handleMdbFile(mdb_path, modelDir, failure = False):
   ''' Convert mdb database to glm file. '''
-  with open(mdb_path, 'r') as infile, open(mdb_path.replace('.mdb', '.glm'), 'w') as outfile:
-    glm, x_scale, y_scale = cyme.convertCymeModel(infile, modelDir)
-
-#  try:
+  try:
+    with open(mdb_path, 'r') as infile:
+      output_path = mdb_path.split('/')[-1].replace('.mdb', '.glm')
+      output_file = open(output_path, 'w')
+      glm, x_scale, y_scale = cyme.convertCymeModel(mdb_path, modelDir)
+      output_file.write(feeder.sortedWrite(glm))
+  except IOError:
+    print 'UNABLE TO WRITE GLM FILE.'
+    failure = True
+  except:
+    print 'ERROR IN CYME MODEL FUNCTION.', sys.exc_info()[0]
+    failure = True
+  finally:
+    output_file.close()
+  return failure
   
-  # Convert to string for conversion.
-#    mdb = open(mdb_path, 'r')
-#    glm, x_scale, y_scale = convertCymeModel(mdb, modelDir)
-#    with open(mdb_path.replace('.mdb', '.glm'), 'w') as output_file:
-#      output_file.write(feeder.sortedWrite(glm))
-#  except: 
-#    failure = True
-#    print 'FAILED TO CONVERT MDB FILE FOR %s' % mdb
-#  mdb.close()
-#  return failure
-
 def is_valid_file(parser, file_name):
   ''' Check validity of user input '''
   valid_names = ["mdb", "seq", "std"]
@@ -79,7 +81,7 @@ def main():
   if (args.std and args.seq):
     handleMilFile(args.std, args.seq)
   elif (args.mdb):
-    home_folder = getcwd()
+    home_folder = '../' + getcwd()
     handleMdbFile(args.mdb, home_folder)
   else:
     raise Exception("INVALID FILE INPUT.")

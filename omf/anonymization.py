@@ -124,6 +124,7 @@ def distTranslateLocations(inFeeder, translation, rotation):
 			latitude = float(inFeeder['tree'][key]['latitude'])
 			inFeeder['tree'][key]['longitude'] = longitude + translation*math.cos(rotation)
 			inFeeder['tree'][key]['latitude'] = latitude + translation*math.sin(rotation)
+		
 	return
 
 def distAddNoise(inFeeder, noisePerc):
@@ -134,7 +135,7 @@ def distAddNoise(inFeeder, noisePerc):
 			val = inFeeder['tree'][key][prop]
 			try:
 				parseVal = float(val)
-				randNoise = random.randint(-noisePerc, noisePerc)/100
+				randNoise = random.uniform(-noisePerc, noisePerc)/100
 				randVal = parseVal + randNoise*parseVal
 				inFeeder['tree'][key][prop] = str(randVal)
 			except ValueError:
@@ -142,7 +143,7 @@ def distAddNoise(inFeeder, noisePerc):
 					compVal = complex(val)
 					realVal = float(compVal.real)
 					imagVal = float(compVal.imag)
-					randNoise = random.randint(-noisePerc, noisePerc)/100
+					randNoise = random.uniform(-noisePerc, noisePerc)/100
 					randReal = realVal + randNoise*realVal
 					randImag = imagVal + randNoise*imagVal
 					randVal = complex(randReal, randImag)
@@ -179,16 +180,58 @@ def distShuffleLoads(inFeeder, shufPerc):
 	for key in inFeeder['tree']:
 		if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key].get('object') == 'house'):
 			if random.randint(0,100) <= shufPerc:
-				inFeeder['tree'][key]['parent'] = houseParents[houseIdx]
-				houseIdx += 1
+				houseIdx = 0
+				if inFeeder['tree'][key]['parent'] != houseParents[houseIdx]:
+					try:
+						houseIdx = 0
+						inFeeder['tree'][key]['parent'] = houseParents[houseIdx]
+						houseParents.pop(houseIdx)
+					except IndexError:
+						continue
+				elif inFeeder['tree'][key]['parent'] == houseParents[houseIdx]:
+					try:
+						houseIdx = houseIdx + 1
+						inFeeder['tree'][key]['parent'] = houseParents[houseIdx]
+						houseParents.pop(houseIdx)
+					except IndexError:
+						continue
 		if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key].get('object') == 'ZIPload'):
+			zipIdx = 0
 			if random.randint(0,100) <= shufPerc:
-				inFeeder['tree'][key]['parent'] = zipParents[zipIdx]
-				zipIdx += 1
+				zipIdx = 0
+				if inFeeder['tree'][key]['parent'] != zipParents[zipIdx]:
+					print(inFeeder['tree'][key]['parent'])
+					try:
+						zipIdx = 0
+						inFeeder['tree'][key]['parent'] = zipParents[zipIdx]
+						#print(zipParents)
+						zipParents.pop(zipIdx)
+						print(inFeeder['tree'][key]['parent'])
+					except IndexError:
+						continue
+				elif (inFeeder['tree'][key]['parent']) == zipParents[zipIdx]:
+					print(inFeeder['tree'][key]['parent'])
+					try:
+						zipIdx = zipIdx + 1
+						#print(zipParents)
+						inFeeder['tree'][key]['parent'] = zipParents[zipIdx]
+						zipParents.pop(zipIdx)
+						print(inFeeder['tree'][key]['parent'])
+					except IndexError:
+						continue
 		if ('from' in inFeeder['tree'][key]) and (inFeeder['tree'][key].get('object') == 'triplex_line'):
 			if random.randint(0,100) <= shufPerc:
-				inFeeder['tree'][key]['from'] = tlParents[tlIdx]
-				tlIdx += 1
+				tlIdx = 0
+				if (inFeeder['tree'][key]['from']) != (tlParents[tlIdx]):
+					tlIdx = 0
+
+					inFeeder['tree'][key]['from'] = tlParents[tlIdx]
+					
+					tlParents.pop(tlIdx)
+				elif (inFeeder['tree'][key]['from']) == (tlParents[tlIdx]):
+					tlIdx = tlIdx + 1
+					inFeeder['tree'][key]['from'] = tlParents[tlIdx]
+					tlParents.pop(tlIdx)
 		# if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key].get('object') == 'triplex_node'):
 		# 	if random.randint(0,100) < shufPerc:
 		# 		inFeeder['tree'][key]['parent'] = tnParents[tnIdx]
@@ -563,16 +606,16 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 	# 	json.dump(inFeeder, outFile, indent=4)
 
 # # 	# Test distTranslateLocations
-# 	FNAME = "Simple Market System AnonTest.omd"
-# 	FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
-# 	with open(FNAME, "r") as inFile:
-# 		inFeeder = json.load(inFile)
-# 		translation = 20
-# 		rotation = 20
-# 		distTranslateLocations(inFeeder, translation, rotation)
-# 	FNAMEOUT = "simpleMarket_distTranslateLocations.omd"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inFeeder, outFile, indent=4)
+	# FNAME = "Simple Market System AnonTest.omd"
+	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
+	# with open(FNAME, "r") as inFile:
+	# 	inFeeder = json.load(inFile)
+	# 	translation = 20
+	# 	rotation = 20
+	# 	distTranslateLocations(inFeeder, translation, rotation)
+	# FNAMEOUT = "simpleMarket_distTranslateLocations.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inFeeder, outFile, indent=4)
 
 	# Test distAddNoise
 	# FNAME = "Simple Market System AnonTest.omd"
