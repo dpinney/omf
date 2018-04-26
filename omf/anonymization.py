@@ -182,13 +182,19 @@ def distShuffleLoads(inFeeder, shufPerc):
 			if random.randint(0,100) <= shufPerc:
 				houseIdx = 0
 				if inFeeder['tree'][key]['parent'] != houseParents[houseIdx]:
-					houseIdx = 0
-					inFeeder['tree'][key]['parent'] = houseParents[houseIdx]
-					houseParents.pop(houseIdx)
+					try:
+						houseIdx = 0
+						inFeeder['tree'][key]['parent'] = houseParents[houseIdx]
+						houseParents.pop(houseIdx)
+					except IndexError:
+						continue
 				elif inFeeder['tree'][key]['parent'] == houseParents[houseIdx]:
-					houseIdx = houseIdx + 1
-					inFeeder['tree'][key]['parent'] = houseParents[houseIdx]
-					houseParents.pop(houseIdx)
+					try:
+						houseIdx = houseIdx + 1
+						inFeeder['tree'][key]['parent'] = houseParents[houseIdx]
+						houseParents.pop(houseIdx)
+					except IndexError:
+						continue
 		if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key].get('object') == 'ZIPload'):
 			zipIdx = 0
 			if random.randint(0,100) <= shufPerc:
