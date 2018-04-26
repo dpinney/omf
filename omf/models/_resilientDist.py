@@ -73,7 +73,6 @@ def convertToGFM(gfmInputTemplate, feederModel):
 	hardCands = gfmInputTemplate['hardeningCandidates'].strip().replace(' ', '').split(',')
 	newLineCands = gfmInputTemplate["newLineCandidates"].strip().replace(' ', '').split(',')
 	switchCands = gfmInputTemplate["switchCandidates"].strip().replace(' ', '').split(',')
-
 	objToFind = ['transformer', 'regulator', 'underground_line', 'overhead_line']
 	lineCount = 0
 	for key, line in jsonTree.iteritems():
@@ -258,21 +257,24 @@ def convertToGFM(gfmInputTemplate, feederModel):
 					busID = elem['id']
 			numPhases, has_phase, max_real_phase, max_reactive_phase = getNodePhases(gens, gfmInputTemplate['maxDGPerGenerator'])
 			if isSwing:
-				# HACK: swing buses get "infinitely large", i.e. 5 GW, generator capacity.
-				genSize = 5.0 * 1000.0 * 1000.0 * 1000.0
+				# HACK: swing buses get "infinitely large", i.e. 5 TW, generator capacity.
+				genSize = 5.0 * 1000.0 * 1000.0
+				isNew = False
+				has_phase = [True, True, True]
 			else:
-				# Non swing buses get 5 kW generators.
-				genSize = 5000.0
+				# Non swing buses get 1 MW generators.
+				genSize = gfmInputTemplate['maxDGPerGenerator']
+				isNew = True
 			genObj = dict({
 	 			'id': gens.get('name','')+'_gen', #*
 				'node_id': busID, #*
-				'is_new': True, # Whether or not new generation can be built.
-				'microgrid_cost': 1.5, # Per MW capacity of building DG.
+				'is_new': isNew, # Whether or not new generation can be built.
+				'microgrid_cost': gfmInputTemplate['dgUnitCost'], # Per MW capacity of building DG.
 				'max_microgrid': genSize, # Max additional capacity for this gen.
 				'microgrid_fixed_cost': 0, # One-time fixed cost for building DG.
 				'has_phase': has_phase, #*
-				'max_reactive_phase': [0.0,0.0,0.0], #*
-				'max_real_phase': [0.0,0.0,0.0] #*
+				'max_reactive_phase': [genSize,genSize,genSize], #*
+				'max_real_phase': [genSize,genSize,genSize] #*
 			})
 			gfmJson['generators'].append(genObj)
 	return gfmJson
@@ -323,6 +325,7 @@ def work(modelDir, inputDict):
 		'total_load_met' : 1.0,#(float(inputDict['criticalLoadMet']) + float(inputDict['nonCriticalLoadMet'])),
 		'xrMatrices' : inputDict["xrMatrices"],
 		'maxDGPerGenerator' : float(inputDict["maxDGPerGenerator"]),
+		'dgUnitCost' : float(inputDict["dgUnitCost"]),
 		'newLineCandidates' : inputDict['newLineCandidates'],
 		'hardeningCandidates' : inputDict['hardeningCandidates'],
 		'switchCandidates'	: inputDict['switchCandidates'],
