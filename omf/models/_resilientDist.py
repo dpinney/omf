@@ -108,7 +108,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			if line.get('name','') in switchCands:
 				newLine['has_switch'] = True
 			if line.get('name','') in newLineCands:
-				newLine["is_new"] = True
+				newLine['is_new'] = True
 			if line.get('object','') in ['transformer','regulator']: 
 				newLine['is_transformer'] = True
  			gfmJson['lines'].append(newLine)
@@ -170,17 +170,18 @@ def convertToGFM(gfmInputTemplate, feederModel):
 		#SET THE newLineCode to the output of GRIDLABD
 		gfmJson['line_codes'].append(newLineCode)
 	# Bus creation:
-	objToFind = ['node', 'load', 'triplex_meter', 'triplex_node']
+	objToFind = ['node', 'load']
 	for key, bus in jsonTree.iteritems():
-		# if bus.get('object','') in objToFind and bus.get('bustype','').lower() != 'swing':
-		if bus.get('object','').lower() in objToFind:
+		objType = bus.get('object','')
+		# HACK: some loads can be parented to other things. Don't make buses for them.
+		hasParent = 'parent' in bus
+		if objType in objToFind and not hasParent:
 			newBus = dict({
 				'id': '', #*
 				# 'min_voltage': 0.8, # in p.u.
 				# 'max_voltage': 1.2, # in p.u.
 				'y': float(bus.get('latitude',0.0))/5000.0,
 				'x': float(bus.get('longitude',0.0))/5000.0,
-				# 'has_generator': False,
 				# 'has_phase': [True, True, True],
 				# 'ref_voltage': [1.0, 1.0, 1.0]
 				# 'ref_voltage': 1.0 # From github.
@@ -199,8 +200,10 @@ def convertToGFM(gfmInputTemplate, feederModel):
 	# Load creation:
 	objToFind = ['load']
 	phaseNames = {'A':0, 'B':1, 'C':2}
-	for key, loads in jsonTree.iteritems():
-		if loads.get('object','') in objToFind:
+	for key, load in jsonTree.iteritems():
+		objType = load.get('object','')
+		hasParent = 'parent' in load
+		if objType in objToFind:
 			newLoad = dict({
 				'id': '', #*
 				'node_id': '', #*
@@ -209,35 +212,35 @@ def convertToGFM(gfmInputTemplate, feederModel):
 				'max_reactive_phase': [0,0,0], #*
 				'has_phase': [False, False, False] #*
 			})
-			newLoad['id'] = loads.get('name','')+'_lod'
-			for elem in gfmJson['buses']:
-				if elem['id'][0:-4] == newLoad['id'][0:-4]:
-					busID = elem['id']
-			newLoad['node_id'] = busID
-			#numPhases, newLoad['has_phase'], newLoad['max_real_phase'], newLoad['max_reactive_phase'] = getNodePhases(loads, 10)
-			voltage = float(loads.get('nominal_voltage','4800'))
+			newLoad['id'] = load.get('name','')+'_lod'
+			# Associate the new load with the bus it is attached to.
+			if hasParent:
+				newLoad['node_id'] = load['parent'] + '_bus'
+			else: #no parent, i.e. we created a bus for the load.
+				newLoad['node_id'] = load['name'] + '_bus'
+			voltage = float(load.get('nominal_voltage','4800'))
 			for phaseName, index in phaseNames.iteritems():
 				impedance = 'constant_impedance_' + phaseName
 				power = 'constant_power_' + phaseName
 				current = 'constant_current_' + phaseName
-				if impedance in loads:
-					constImpedRaw = loads.get(impedance,'').replace(' ','')
+				if impedance in load:
+					constImpedRaw = load.get(impedance,'').replace(' ','')
 					constImped = complex(constImpedRaw)
 					realImpedance = constImped.real
 					reactiveImpedance = constImped.imag
 					newLoad['max_real_phase'][index] = abs((voltage*voltage)/realImpedance)/1000000
 					newLoad['max_reactive_phase'][index] = abs((voltage*voltage)/reactiveImpedance)/1000000
 					newLoad['has_phase'][index] = True
-				if current in loads:
-					constCurrRaw = loads.get(current,'').replace(' ','')
+				if current in load:
+					constCurrRaw = load.get(current,'').replace(' ','')
 					constCurr = complex(constCurrRaw)
 					realCurr = constCurr.real
 					reactiveCurr = constCurr.imag
 					newLoad['max_real_phase'][index] = abs(voltage*realCurr)/1000000
 					newLoad['max_reactive_phase'][index] = abs(voltage*reactiveCurr)/1000000
 					newLoad['has_phase'][index] = True
-				if power in loads:
-					constPowerRaw = loads.get(power,'').replace(' ','')
+				if power in load:
+					constPowerRaw = load.get(power,'').replace(' ','')
 					constPower = complex(constPowerRaw)
 					realPower = constPower.real
 					reactivePower = constPower.imag
