@@ -138,6 +138,8 @@
 	<p class="reportTitle postRun" style="page-break-before:always">Download Output Data</p>	
 		<div style="text-align:left" class="tightContent">
 			<a style="padding:10px" onclick="downloadTextFile('weatherDataPulled.txt',allOutputData['data'])">Weather Data</a>
+			<a id="dTest" download>David Test</a>
+			<script>gebi('dTest').href = "/downloadModelData/" + allInputData.user + "/" + allInputData.modelName + "/allInputData.json"</script>
 		</div>
 	<!--<div>
 		<input id="results" name="results" type="hidden" onload="loadOutputData()">
