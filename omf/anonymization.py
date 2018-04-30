@@ -169,6 +169,7 @@ def distShuffleLoads(inFeeder, shufPerc):
 			tlParents.append(inFeeder['tree'][key].get('from'))
 		# if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key].get('object') == 'triplex_node'):
 		# 	tnParents.append(inFeeder['tree'][key]['parent'])
+		#shouldnt work for triplex lines, only work on triplex nodes, house, ziploads, triplex loads, and loads
 	random.shuffle(houseParents)
 	random.shuffle(zipParents)
 	random.shuffle(tlParents)
@@ -571,7 +572,7 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 		genId += 1
 	return
 
-# def _tests():
+def _tests():
 # 	pass
 # 	# DISTRIBUTION FEEDER TESTS
 # 	# Test distPseudomizeNames
@@ -629,15 +630,15 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 	# 	json.dump(inFeeder, outFile, indent=4)
 
 # 	# Test distShuffleLoads
-	# FNAME = "Simple Market System AnonTest.omd"
-	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
-	# with open(FNAME, "r") as inFile:
-	# 	inFeeder = json.load(inFile)
-	# 	shufPerc = 100
-	# 	distShuffleLoads(inFeeder, shufPerc)
-	# FNAMEOUT = "simpleMarket_distShuffleLoads.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inFeeder, outFile, indent=4)
+	FNAME = "Simple Market System AnonTest.omd"
+	FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
+	with open(FNAME, "r") as inFile:
+		inFeeder = json.load(inFile)
+		shufPerc = 100
+		distShuffleLoads(inFeeder, shufPerc)
+	FNAMEOUT = "simpleMarket_distShuffleLoads.omd"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inFeeder, outFile, indent=4)
 
 # 	# Test distModifyTriplexLengths
 	# FNAME = "Simple Market System AnonTest.omd"
@@ -731,5 +732,5 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 # 	with open(FNAMEOUT, "w") as outFile:
 # 		json.dump(inNetwork, outFile, indent=4)
 
-# if __name__ == '__main__':
-# 	_tests()
+if __name__ == '__main__':
+	_tests()
