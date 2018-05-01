@@ -1,7 +1,9 @@
 ''' Convert a Milsoft Windmil feeder model into an OMF-compatible version. '''
-import feeder, csv, random, math, copy, locale
+import os, feeder, csv, random, math, copy, locale, json, traceback, shutil
 from StringIO import StringIO
 from os.path import join as pJoin
+from solvers import gridlabd
+from matplotlib import pyplot as plt
 
 def convert(stdString,seqString):
     ''' Take in a .std and .seq strings from Milsoft and spit out a (json dict, int, int).'''
@@ -656,7 +658,6 @@ def convert(stdString,seqString):
                 percent_z = safeGet(trans_config, 6, 3)
                 x_r_ratio = safeGet(trans_config, 9, 5)
             # Set the shunt impedance
-            print no_load_loss
             try: 
                 f_no_load_loss = float(no_load_loss)
             except:
@@ -1274,22 +1275,27 @@ def _latCount(name):
                 myLatCount += 1
     print name, 'COUNT', nameCount, 'LAT COUNT', latCount, 'SUCCESS RATE', 1.0*latCount/nameCount
 
-def _tests(testFiles, openPrefix, outPrefix, testAttachments, keepFiles=True):
+def _tests(keepFiles=True):
     ''' Test convert every windmil feeder we have (in static/testFiles). Return number of exceptions we hit. '''
-    import os, json, traceback, shutil
-    from solvers import gridlabd
-    from matplotlib import pyplot as plt
     # setlocale lives here to avoid changing it globally 
-    locale.setlocale(locale.LC_ALL, 'en_US')
-    try:
-        os.mkdir(outPrefix)
-    except:
-        pass # Directory already there.
+    # locale.setlocale(locale.LC_ALL, 'en_US')
+    # Variables for the testing.
     exceptionCount = 0
+    openPrefix = './static/testFiles/'
+    outPrefix = './scratch/milToGridlabTests/'
+    testFiles = [('Olin-Barre.std','Olin.seq')]
     # testFiles = [('INEC-RENOIR.std','INEC.seq'), ('INEC-GRAHAM.std','INEC.seq'),
     #   ('Olin-Barre.std','Olin.seq'), ('Olin-Brown.std','Olin.seq'),
-    #   ('ABEC-FRANK.std','ABEC.seq'), ('ABEC-COLUMBIA.std','ABEC.seq'),('OMF_Norfork1.std', 'OMF_Norfork1.seq')]
-    # testAttachments = {'schedules.glm':''}
+    #   ('ABEC-FRANK.std','ABEC.seq'), ('ABEC-COLUMBIA.std','ABEC.seq'),('OMF_Norfork1.std', 'OMF_Norfork1.seq'),('UE yadkin tabernacle.std','UE yadkin tabernacle.seq')]
+    testAttachments = {'schedules.glm':'', 'climate.tmy2':open('./data/Climate/KY-LEXINGTON.tmy2','r').read()}
+    # Create the work directory.
+    try:
+        shutil.rmtree(outPrefix)
+    except:
+        pass # no test directory yet.
+    finally:
+        os.mkdir(outPrefix)
+    # Run all the tests.
     for stdString, seqString in testFiles:
         try:
             # Convert the std+seq.
@@ -1348,8 +1354,4 @@ def _tests(testFiles, openPrefix, outPrefix, testAttachments, keepFiles=True):
     return exceptionCount
 
 if __name__ == "__main__":
-    openPrefix = './static/testFiles/'
-    outPrefix = './scratch/milToGridlabTests/'
-    testAttachments = {'schedules.glm':'', 'climate.tmy2':open('./data/Climate/KY-LEXINGTON.tmy2','r').read()}
-    testFiles = [('UE yadkin tabernacle.std','UE yadkin tabernacle.seq')]
-    _tests(testFiles, openPrefix, outPrefix, testAttachments)
+    _tests()
