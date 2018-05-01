@@ -4,7 +4,6 @@
 #set threadcount=1;
 #set randomseed=1;
 #set relax_naming_rules=1;
-#define stylesheet=http://gridlab-d.svn.sourceforge.net/viewvc/gridlab-d/trunk/core/gridlabd-2_0
 #set minimum_timestep=60
 
 clock {
@@ -303,7 +302,8 @@ object line_spacing:510 {
 	distance_BC 0.0;
 	distance_AN 0.0;
 	distance_CN 5.0;
-	distance_BN 0.0;}
+	distance_BN 0.0;
+}
 
 object line_configuration:601 {
 	conductor_A overhead_line_conductor:6010;

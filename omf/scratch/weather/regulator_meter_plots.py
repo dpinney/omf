@@ -1,23 +1,19 @@
-
 # coding: utf-8
-
-# In[2]:
 
 #Basic module calls and function set-up to pop-out fig to zoom and etc.
 import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.dates as mdates
-get_ipython().magic(u'matplotlib inline')
-
-
-# In[26]:
 
 #This plots weather_climate data
 jal=[x*0 for x in range(30)]
-date5,jal[1],jal[2],jal[3],jal[4],jal[5],jal[6]= np.loadtxt('C:\Users\gour967\Documents\GitHub\omf\omf\weather_climate_data.csv',
-                                      comments='#',delimiter=',',
-                                      unpack=True,
-                                      converters={0: lambda d5: mdates.strpdate2num('%Y-%m-%d %H:%M:%S')(d5[:-4])})
+date5,jal[1],jal[2],jal[3],jal[4],jal[5],jal[6]= np.loadtxt(
+    './weather_climate_data.csv',
+    comments='#',
+    delimiter=',',
+    unpack=True,
+    converters={0: lambda d5: mdates.strpdate2num('%Y-%m-%d %H:%M:%S')(d5[:-4])}
+)
 plt.subplot(6,1,1)
 [plt.plot_date(date5,jal[1],fmt='-',color='green',label='Temperature')]
 plt.legend(loc='best', numpoints=1)
@@ -64,18 +60,16 @@ plt.gcf().set_size_inches(18, 36)
 plt.savefig('weather_climate_data.png')#,dpi=300
 #plt.clf()
 
-
-# In[25]:
-
 #This plots weather_tripmeter_energy_consumed, max min avg voltage data
 val=[x*0 for x in range(50)]
 #file_name=raw_input('Enter the .csv file name:')
-date,val[1],val[2],val[3],val[4],val[5],val[6],val[7],val[8]= np.loadtxt('C:\Users\gour967\Documents\GitHub\omf\omf\weather_triplex_meter_all.csv',
-                                                                                        comments='#',
-                                                                                        delimiter=',',
-                                                                                        unpack=True,
-                                                                                        converters={0:lambda d: mdates.strpdate2num('%Y-%m-%d %H:%M:%S')(d[:-4])})
-
+date,val[1],val[2],val[3],val[4],val[5],val[6],val[7],val[8]= np.loadtxt(
+    './weather_triplex_meter_all.csv',
+    comments='#',
+    delimiter=',',
+    unpack=True,
+    converters={0:lambda d: mdates.strpdate2num('%Y-%m-%d %H:%M:%S')(d[:-4])}
+)
 
 plt.subplot(4,1,1)
 [plt.plot_date(date,val[x],fmt='-',label='Voltage_'+str(x)) for x in range(1,3)]
@@ -110,17 +104,16 @@ plt.gcf().set_size_inches(18, 24)
 plt.savefig('weather_max_min_avg_volt.png')#,dpi=300
 #plt.clf()
 
-
-# In[27]:
-
 #This plots regulator power related data-power into feeder, powerfactor, power losses
 bal=[x*0 for x in range(50)]
 #file_name=raw_input('Enter the .csv file name:')
-date1,bal[1],bal[2],bal[3],bal[4]= np.loadtxt('C:\Users\gour967\Documents\GitHub\omf\omf\weather_regulator_power_data.csv',
-                                                                                        comments='#',
-                                                                                        delimiter=',',
-                                                                                        unpack=True,
-                                                                                        converters={0:lambda d1: mdates.strpdate2num('%Y-%m-%d %H:%M:%S')(d1[:-4])})
+date1,bal[1],bal[2],bal[3],bal[4]= np.loadtxt(
+    './weather_regulator_power_data.csv',
+    comments='#',
+    delimiter=',',
+    unpack=True,
+    converters={0:lambda d1: mdates.strpdate2num('%Y-%m-%d %H:%M:%S')(d1[:-4])}
+)
  
 plt.subplot(2,1,1)
 [plt.plot_date(date1,bal[1]/1000,fmt='-',color='brown',label='Power Flow into Feeder')]
@@ -140,17 +133,16 @@ plt.gcf().set_size_inches(18, 12)
 plt.savefig('weather_@regulator_power_data.png')#,dpi=300
 #plt.clf()
 
-
-# In[22]:
-
 #This plots focuses on net energy losses
 hal=[x*0 for x in range(20)]
 #file_name=raw_input('Enter the .csv file name:')
-date2,hal[1],hal[2],hal[3]= np.loadtxt('C:\Users\gour967\Documents\GitHub\omf\omf\weather_regulator_meter_energy.csv',
-                                                                                        comments='#',
-                                                                                        delimiter=',',
-                                                                                        unpack=True,
-                                                                                        converters={0:lambda d2: mdates.strpdate2num('%Y-%m-%d %H:%M:%S')(d2[:-4])})
+date2,hal[1],hal[2],hal[3]= np.loadtxt(
+    './weather_regulator_meter_energy.csv',
+    comments='#',
+    delimiter=',',
+    unpack=True,
+    converters={0:lambda d2: mdates.strpdate2num('%Y-%m-%d %H:%M:%S')(d2[:-4])}
+)
 plt.subplot(3,1,1)
 [plt.plot_date(date2,hal[1]/1000,fmt='-',color='red',label='Energy at Substation')]
 plt.legend(loc='best', numpoints=1)
@@ -176,9 +168,3 @@ plt.ylabel('Energy (kWh)')#,fontsize=16
 plt.gcf().set_size_inches(18, 18)
 plt.savefig('weather_energy_losses_net.png')#,dpi=300
 #plt.clf()
-
-
-# In[ ]:
-
-
-
