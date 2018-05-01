@@ -20,22 +20,23 @@ conductors is the full path to a .csv file containing conductor information for 
 
 Note that db_network and db_equipment can be the same file is both network and equipment databases were exported to one .mdb file from CYME.
 '''
+
 import feeder, csv, random, math, copy, subprocess, locale
 from os.path import join as pJoin
 import warnings
 from StringIO import StringIO
 import sys, os, json, traceback, shutil
 from solvers import gridlabd
-from matplotlib import pyplot as plt
 from pathlib import Path
 import matplotlib
 matplotlib.pyplot.switch_backend('Agg')
+from matplotlib import pyplot as plt
 import numpy as np
 from numpy.linalg import inv
 import platform
 
+m2ft = 1.0/0.3048 # Conversion factor for meters to feet
 
-m2ft = 1.0/0.3048             # Conversion factor for meters to feet
 class Map(dict):
 	"""
 	Example:
@@ -70,11 +71,9 @@ class Map(dict):
 
 def _csvDump(database_file, modelDir):
 	# Get the list of table names with "mdb-tables"
-	print "database", database_file
-
-	if platform.system() == 'Linux':
+	if platform.system() == 'Linux' or platform.system() == 'Darwin':
 		table_names = subprocess.Popen(["mdb-tables", "-1", database_file],
-									   stdout=subprocess.PIPE).communicate()[0]
+			stdout=subprocess.PIPE).communicate()[0]
 		tables = table_names.split('\n')
 		if not os.path.isdir((pJoin(modelDir,'cymeCsvDump'))):
 			os.makedirs((pJoin(modelDir,'cymeCsvDump')))
@@ -85,7 +84,7 @@ def _csvDump(database_file, modelDir):
 				filename = table.replace(" ","_") + ".csv"
 				file = open(pJoin(modelDir,'cymeCsvDump',filename), 'w+')
 				contents = subprocess.Popen(["mdb-export", database_file, table],
-											stdout=subprocess.PIPE).communicate()[0]
+					stdout=subprocess.PIPE).communicate()[0]
 				file.write(contents)
 				file.close()
 	elif platform.system() == 'Windows':
@@ -96,7 +95,6 @@ def _csvDump(database_file, modelDir):
 		database_file = database_file.split('\\')[-1]
 		table_names = subprocess.Popen(["bash", "-c", "mdb-tables -1 " + database_file], stdout=subprocess.PIPE).communicate()[0]
 		tables = table_names.split('\n')
-
 		if not os.path.isdir((pJoin(modelDir,'cymeCsvDump'))):
 			os.makedirs((pJoin(modelDir,'cymeCsvDump')))
 		# Dump each table as a CSV file using "mdb-export",
@@ -105,9 +103,8 @@ def _csvDump(database_file, modelDir):
 			if table != '':
 				filename = table.replace(" ","_") + ".csv"
 				file = open(pJoin(modelDir,'cymeCsvDump',filename), 'w+')
-
 				contents = subprocess.Popen(["bash", "-c", "mdb-export " + database_file + " " +table],
-											stdout=subprocess.PIPE).communicate()[0]
+					stdout=subprocess.PIPE).communicate()[0]
 				file.write(contents)
 				file.close()
 		os.chdir(originaldir)
@@ -125,17 +122,16 @@ def _findNetworkId(csvFile):
 	# If single source network, select the only source
 		return networks[0]
 
-#jfk. helper function for _fixName
 def _isfloat(value):
+  'Helper function for _fixName.'
   try:
     float(value)
     return True
   except:
     return False
 
-#jfk.  Ensure that all names start with a letter.  Not critical, but reduces gridlabd warnings.
 def _fixName(name):
-	'''Function that replaces characters not allowed in name with _'''
+	'Function that replaces characters not allowed in name with _'
 	badChar = [' ', '-', '\\', '//', '/', ':', '.', "'\'", '&']
 	for char in badChar:
 		name = name.replace(char, '_')
@@ -145,7 +141,7 @@ def _fixName(name):
 	return name
 
 def _convertPhase(int_phase):
-	'''Function that converts a number to a phase'''
+	'Function that converts a number to a phase'
 	if int_phase == 1:
 		phase = 'AN'
 	elif int_phase == 2:
@@ -392,7 +388,6 @@ def _readCymeSource(feederId, type, modelDir):
 					cymsource[_fixName(row.NodeId)]['nominal_voltage'] = str(float(row.KVLL)*1000.0/math.sqrt(3)) #jfk.
 					cymsource[_fixName(row.NodeId)]['source_voltage'] = str(float(row.OperatingVoltage1)*1000.0) #jfk
 					swingBus = _fixName(row.NodeId)
-	print 'swingbus',swingBus
 	return cymsource, feeder_id, swingBus
 
 def _readCymeNode(feederId, modelDir):
@@ -583,12 +578,10 @@ def _readCymeQOverheadLine(feederId, modelDir):
 				cymeqoverheadline[row.EquipmentId]['conductor_N'] = _fixName(row.NeutralConductorId)
 	return cymeqoverheadline, spacingIds
 
-#jfk.  PECO has several reactors in their networks.
 def _readCymeReactors(feederId, modelDir):
 	cymseriesreactor = {}
 	CYMSERIESREACTOR = { 'name' : None,
 						 'configuration': None}
-
 	reactorIds = []
 	seriesreactor_db = _csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMSERIESREACTOR.csv"),feederId)
 	if len(seriesreactor_db) == 0:
@@ -605,14 +598,11 @@ def _readCymeReactors(feederId, modelDir):
 
 	return cymseriesreactor, reactorIds
 
-#jfk
 def _readEqReactors(feederId, modelDir):
 	cymeqreactor = {}
 	CYMEQREACTOR = { 'name' : None,
 					 'reactance': None}
-
 	cymeqreactor_db = _csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMEQSERIESREACTOR.csv"),feederId)
-
 	if len(cymeqreactor_db) == 0:
 		warnings.warn("No reactor equipment was found in CYMEQREACTOR for feeder_id: {:s}.".format(feederId), RuntimeWarning)
 	else:
@@ -1481,12 +1471,14 @@ def _readEqPhotovoltaic(feederId, modelDir):
 
 def _readEqBattery(feederId, modelDir):
 	cymEqBattery = {}
-	CYMEQBATTERY = {'name': None,
-					'rated_storage_energy': None,
-					'max_charging_power': None,
-					'max_discharging_power': None,
-					'charge_efficiency':None,
-					'discharge_efficiency':None}
+	CYMEQBATTERY = {
+		'name': None,
+		'rated_storage_energy': None,
+		'max_charging_power': None,
+		'max_discharging_power': None,
+		'charge_efficiency':None,
+		'discharge_efficiency':None
+	}
 	cymeqbattery_db = _csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMEQBESS.csv"),feederId)
 	if len(cymeqbattery_db) == 0:
 		warnings.warn("No battery information was found in CYMEQBATTERY for feeder id: {:s}.".format(feederId), RuntimeWarning)
@@ -1504,9 +1496,11 @@ def _readEqBattery(feederId, modelDir):
 
 def _readCymeBattery(feederId, modelDir):
 	cymeBattery = {}
-	CYMEBATTERY = {'name': None,
-						'configuration': None,
-						'phase': None}
+	CYMEBATTERY = {
+		'name': None,
+		'configuration': None,
+		'phase': None
+	}
 	cymbattery_db = _csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMBESS.csv"),feederId)
 	if len(cymbattery_db) == 0:
 		warnings.warn("No battery information was found in CYMBESS for feeder id: {:s}.".format(feederId), RuntimeWarning)
@@ -1522,9 +1516,11 @@ def _readCymeBattery(feederId, modelDir):
 
 def _readCymeGenerator(feederId, modelDir):
 	cymeGenerator = {}
-	CYMEGENERATOR = {'name':None,
-					'generation':None,
-					'power_factor':None}
+	CYMEGENERATOR = {
+		'name': None,
+		'generation': None,
+		'power_factor': None
+	}
 	cymgenerator_db = _csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMDGGENERATIONMODEL.csv"),feederId)
 	if len(cymgenerator_db) == 0:
 		warnings.warn("No generator information was found in CYMDGGENERATIONMODEL for feeder id: {:s}.".format(feederId), RuntimeWarning)
@@ -1552,7 +1548,6 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	if (test==False):
 		network_db_path = modelDir + network_db 
 		network_db = network_db_path 
-		print 'network_db',network_db
 	else:
 		network_db = Path(network_db).resolve()     
 	conductor_data_csv = None
@@ -1583,7 +1578,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	# Open the network database file
 	# net_db = _openDatabase(network_db)
 	# Dumping csv's to folder
-	# _csvDump(str(network_db), modelDir)
+	_csvDump(str(network_db), modelDir)
 	# import pdb
 	# pdb.set_trace()
 	# feeder_id =_csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMNETWORK.csv"),columns=['NetworkId'])
@@ -1639,14 +1634,19 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	cymphotovoltaic = _readCymePhotovoltaic(feeder_id,modelDir)
 	# PV CONFIGS
 	cymeqphotovoltaic = _readEqPhotovoltaic(feeder_id,modelDir)
-	# BATTERY
-	#jfk.  todo: these lines throw an error.  I comment them out because I don't have batteries.
-	cymbattery = _readCymeBattery(feeder_id, modelDir)
-	# BATTERY CONFIGS
-	cymeqbattery = _readEqBattery(feeder_id,modelDir)
-	# GENERATOR 
-	cymgenerator = _readCymeGenerator(feeder_id, modelDir)
-	# Check that the section actually is a device
+	try:
+		# BATTERY
+		cymbattery = _readCymeBattery(feeder_id, modelDir)
+		# BATTERY CONFIGS
+		cymeqbattery = _readEqBattery(feeder_id,modelDir)
+	except:
+		pass #HACK: generator failure.
+	try:
+		# GENERATOR
+		cymgenerator = _readCymeGenerator(feeder_id, modelDir)
+	except:
+		pass #HACK: generator failure.
+	# Check that the section actually is a device.
 	for link in cymsection.keys():
 		link_exists = 0
 		for device in cymsectiondevice.keys():
@@ -1773,13 +1773,11 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	# -21-CYME CYMEQAUTOTRANSFORMER**********************************************************************************************************************************************************************
 	cymeqautoxfmr = _readEqAutoXfmr(feeder_id, modelDir)
 	# -22-CYME CYME REACTORS********************************************************************************************
-	cymreactor, reactorIds =_readCymeReactors(feeder_id, modelDir) #jfk
+	cymreactor, reactorIds =_readCymeReactors(feeder_id, modelDir)
 	# -23-CYME CYMEQREACTORS********************************************************************************************
 	cymeqreactor =_readEqReactors(feeder_id, modelDir)
 	# -24-CYME CYMEQTRANSFORMER********************************************************************************************
 	cymeqxfmr =_readEqXfmr(feeder_id, modelDir)
-
-
 	# Check number of sources
 	meters = {}
 	if len(cymsource) > 1:
@@ -1830,18 +1828,18 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 		# Create all the node dictionaries
 			if cymsectiondevice[device]['from'] not in nodes.keys() and cymsectiondevice[device]['from'] != swingBus:
 				nodes[cymsectiondevice[device]['from']] = {'object' : 'node',
-																							'name' : cymsectiondevice[device]['from'],
-																							'phases' : cymsectiondevice[device]['phases'],
-																							'nominal_voltage' : str(feeder_VLN),
-																							'latitude' : cymsectiondevice[device]['fromLatitude'],
-																							'longitude' : cymsectiondevice[device]['fromLongitude']}
+				'name' : cymsectiondevice[device]['from'],
+				'phases' : cymsectiondevice[device]['phases'],
+				'nominal_voltage' : str(feeder_VLN),
+				'latitude' : cymsectiondevice[device]['fromLatitude'],
+				'longitude' : cymsectiondevice[device]['fromLongitude']}
 			if cymsectiondevice[device]['to'] not in nodes.keys() and cymsectiondevice[device]['to'] != swingBus:
 				nodes[cymsectiondevice[device]['to']] = {'object' : 'node',
-																							'name' : cymsectiondevice[device]['to'],
-																							'phases' : cymsectiondevice[device]['phases'],
-																							'nominal_voltage' : str(feeder_VLN),
-																							'latitude' : cymsectiondevice[device]['toLatitude'],
-																							'longitude' : cymsectiondevice[device]['toLongitude']}
+				'name' : cymsectiondevice[device]['to'],
+				'phases' : cymsectiondevice[device]['phases'],
+				'nominal_voltage' : str(feeder_VLN),
+				'latitude' : cymsectiondevice[device]['toLatitude'],
+				'longitude' : cymsectiondevice[device]['toLongitude']}
 		else:
 			cymsectiondevice[device]['fromLatitude'] = cymsection[cymsectiondevice[device]['section_name']]['fromX']
 			cymsectiondevice[device]['fromLongitude'] = cymsection[cymsectiondevice[device]['section_name']]['fromY']
@@ -1849,9 +1847,9 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 			cymsectiondevice[device]['toLongitude'] = cymsection[cymsectiondevice[device]['section_name']]['toY']
 			if cymsectiondevice[device]['parent'] not in nodes.keys() and cymsectiondevice[device]['parent'] != swingBus:
 				nodes[cymsectiondevice[device]['parent']] = {'object' : 'node',
-																							'name' : cymsectiondevice[device]['parent'],
-																							'phases' : cymsectiondevice[device]['phases'],
-																							'nominal_voltage' : str(feeder_VLN)}
+					'name' : cymsectiondevice[device]['parent'],
+					'phases' : cymsectiondevice[device]['phases'],
+					'nominal_voltage' : str(feeder_VLN)}
 				if cymsectiondevice[device]['location'] == 2:
 					nodes[cymsectiondevice[device]['parent']]['latitude'] = cymsectiondevice[device]['toLatitude']
 					nodes[cymsectiondevice[device]['parent']]['longitude'] = cymsectiondevice[device]['toLongitude']
@@ -1864,46 +1862,44 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 		if olc in cymeqconductor.keys():
 			if olc not in ohl_conds.keys():
 				ohl_conds[olc] = {'object' : 'overhead_line_conductor',
-												'name' : olc,
-												'resistance' : '{:0.6f}'.format(cymeqconductor[olc]['resistance']),
-												'geometric_mean_radius' : '{:0.6f}'.format(cymeqconductor[olc]['geometric_mean_radius'])}
+					'name' : olc,
+					'resistance' : '{:0.6f}'.format(cymeqconductor[olc]['resistance']),
+					'geometric_mean_radius' : '{:0.6f}'.format(cymeqconductor[olc]['geometric_mean_radius'])}
 		else:
 			print "There is no conductor spec for ", olc, " in the equipment database provided.\n" 
-
 	for olc in cymeqconductor:
 		if olc in cymeqconductor.keys():
 			if olc not in ohl_conds.keys():
 				ohl_conds[olc] = {'object' : 'overhead_line_conductor',
-												'name' : olc,
-												'resistance' : '{:0.6f}'.format(cymeqconductor[olc]['resistance']),
-												'geometric_mean_radius' : '{:0.6f}'.format(cymeqconductor[olc]['geometric_mean_radius'])}
+					'name' : olc,
+					'resistance' : '{:0.6f}'.format(cymeqconductor[olc]['resistance']),
+					'geometric_mean_radius' : '{:0.6f}'.format(cymeqconductor[olc]['geometric_mean_radius'])}
 		else:
 			print "There is no conductor spec for ", olc, " in the equipment database provided.\n" 
-
 	ohl_configs = {}
 	for ohlc in cymeqoverheadline:
 		if ohlc in lineIds:
 			if ohlc not in ohl_configs.keys():
 				ohl_configs[ohlc] = {'object' : 'line_configuration',
-									'name': ohlc+'conf',
-									'spacing': cymeqoverheadline[ohlc]['spacing']+'ohsps',
-									'conductor_A': cymeqoverheadline[ohlc]['configuration'],
-									'conductor_B': cymeqoverheadline[ohlc]['configuration'],
-									'conductor_C': cymeqoverheadline[ohlc]['configuration'],
-									'conductor_N': cymeqoverheadline[ohlc]['conductor_N']}
+					'name': ohlc+'conf',
+					'spacing': cymeqoverheadline[ohlc]['spacing']+'ohsps',
+					'conductor_A': cymeqoverheadline[ohlc]['configuration'],
+					'conductor_B': cymeqoverheadline[ohlc]['configuration'],
+					'conductor_C': cymeqoverheadline[ohlc]['configuration'],
+					'conductor_N': cymeqoverheadline[ohlc]['conductor_N']}
 	ohl_spcs = {}
 	# Create overhead line spacing dictionaries
 	for ols in uniqueOhSpacing:
 		if ols in cymeqgeometricalarrangement.keys():
 			if ols not in ohl_spcs.keys():
 				ohl_spcs[ols] = {'object' : 'line_spacing',
-												'name' : ols,
-												'distance_AB' : '{:0.6f}'.format(cymeqgeometricalarrangement[ols]['distance_AB']),
-												'distance_AC' : '{:0.6f}'.format(cymeqgeometricalarrangement[ols]['distance_AC']),
-												'distance_AN' : '{:0.6f}'.format(cymeqgeometricalarrangement[ols]['distance_AN']),
-												'distance_BC' : '{:0.6f}'.format(cymeqgeometricalarrangement[ols]['distance_BC']),
-												'distance_BN' : '{:0.6f}'.format(cymeqgeometricalarrangement[ols]['distance_BN']),
-												'distance_CN' : '{:0.6f}'.format(cymeqgeometricalarrangement[ols]['distance_CN'])}
+					'name' : ols,
+					'distance_AB' : '{:0.6f}'.format(cymeqgeometricalarrangement[ols]['distance_AB']),
+					'distance_AC' : '{:0.6f}'.format(cymeqgeometricalarrangement[ols]['distance_AC']),
+					'distance_AN' : '{:0.6f}'.format(cymeqgeometricalarrangement[ols]['distance_AN']),
+					'distance_BC' : '{:0.6f}'.format(cymeqgeometricalarrangement[ols]['distance_BC']),
+					'distance_BN' : '{:0.6f}'.format(cymeqgeometricalarrangement[ols]['distance_BN']),
+					'distance_CN' : '{:0.6f}'.format(cymeqgeometricalarrangement[ols]['distance_CN'])}
 		else:
 			print "There is no line spacing spec for ", ols, "in the equipment database provided.\n" 
 	
@@ -2289,34 +2285,34 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 								spctRating = _find_SPCT_rating(str(cymcustomerload[load]['constant_power_A']))
 								cymcustomerload[load]['constant_power_{:s}'.format(phase)] = cymcustomerload[load]['constant_power_A']
 							spct_cfgs['SPCTconfig{:s}{:s}'.format(load, phase)] = { 'object' : 'transformer_configuration',
-																															'name' : 'SPCTconfig{:s}{:s}'.format(load, phase),
-																															'connect_type' : 'SINGLE_PHASE_CENTER_TAPPED',
-																															'install_type' : 'POLETOP',
-																															'primary_voltage' : str(feeder_VLN),
-																															'secondary_voltage' : '120',
-																															'power_rating' : spctRating,
-																															'power{:s}_rating'.format(phase) : spctRating,
-																															'impedance' : '0.00033+0.0022j'}
+								'name' : 'SPCTconfig{:s}{:s}'.format(load, phase),
+								'connect_type' : 'SINGLE_PHASE_CENTER_TAPPED',
+								'install_type' : 'POLETOP',
+								'primary_voltage' : str(feeder_VLN),
+								'secondary_voltage' : '120',
+								'power_rating' : spctRating,
+								'power{:s}_rating'.format(phase) : spctRating,
+								'impedance' : '0.00033+0.0022j'}
 							spcts['SPCT{:s}{:s}'.format(load, phase)] = { 'object' : 'transformer',
-																											'name' : 'SPCT{:s}{:s}'.format(load, phase),
-																											'phases' : '{:s}S'.format(phase),
-																											'from' : cymsectiondevice[load]['parent'],
-																											'to' : 'tpm{:s}{:s}'.format(load, phase),
-																											'configuration' : 'SPCTconfig{:s}{:s}'.format(load, phase)}
+								'name' : 'SPCT{:s}{:s}'.format(load, phase),
+								'phases' : '{:s}S'.format(phase),
+								'from' : cymsectiondevice[load]['parent'],
+								'to' : 'tpm{:s}{:s}'.format(load, phase),
+								'configuration' : 'SPCTconfig{:s}{:s}'.format(load, phase)}
 							tpms['tpm{:s}{:s}'.format(load, phase)] = {'object' : 'triplex_meter',
-																										'name' : 'tpm{:s}{:s}'.format(load, phase),
-																										'phases' : '{:s}S'.format(phase),
-																										'nominal_voltage' : '120',
-																										'latitude' : str(float(nodes[cymsectiondevice[load]['parent']]['latitude']) + random.uniform(-5, 5)),
-																										'longitude' : str(float(nodes[cymsectiondevice[load]['parent']]['longitude']) + random.uniform(-5, 5))}
+								'name' : 'tpm{:s}{:s}'.format(load, phase),
+								'phases' : '{:s}S'.format(phase),
+								'nominal_voltage' : '120',
+								'latitude' : str(float(nodes[cymsectiondevice[load]['parent']]['latitude']) + random.uniform(-5, 5)),
+								'longitude' : str(float(nodes[cymsectiondevice[load]['parent']]['longitude']) + random.uniform(-5, 5))}
 							tpns['tpn{:s}{:s}'.format(load, phase)] = {'object' : 'triplex_node',
-																										'name' : 'tpn{:s}{:s}'.format(load, phase),
-																										'phases' : '{:s}S'.format(phase),
-																										'nominal_voltage' : '120',
-																										'parent' : 'tpm{:s}{:s}'.format(load, phase),
-																										'power_12' : cymcustomerload[load]['constant_power_{:s}'.format(phase)],
-																										'latitude' : str(float(tpms['tpm{:s}{:s}'.format(load, phase)]['latitude']) + random.uniform(-5, 5)),
-																										'longitude' : str(float(tpms['tpm{:s}{:s}'.format(load, phase)]['longitude']) + random.uniform(-5, 5))}
+								'name' : 'tpn{:s}{:s}'.format(load, phase),
+								'phases' : '{:s}S'.format(phase),
+								'nominal_voltage' : '120',
+								'parent' : 'tpm{:s}{:s}'.format(load, phase),
+								'power_12' : cymcustomerload[load]['constant_power_{:s}'.format(phase)],
+								'latitude' : str(float(tpms['tpm{:s}{:s}'.format(load, phase)]['latitude']) + random.uniform(-5, 5)),
+								'longitude' : str(float(tpms['tpm{:s}{:s}'.format(load, phase)]['longitude']) + random.uniform(-5, 5))}
 	#jfk.  I can't find the band_center anywhere in the cyme databaes files.
 	#Unfortunately, the only way to deal with this is by looking at the cyme user interfrace.
 	# Create regulator and regulator configuration dictionaries
@@ -2353,47 +2349,39 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 				else:
 					raiseTaps = cymeqregulator[regEq]['raise_taps']
 					lowerTaps = cymeqregulator[regEq]['lower_taps']
-
-				reg_nominalvoltage = float(cymeqregulator[regEq]['nominal_voltage'])*1000
-				reg_bandwidth = str(float(cymeqregulator[regEq]['bandwidth'])*float(reg_nominalvoltage)/120.0)
-
-
-				#jfk.  deprecated with new naming.
-				# if regEq == reg:
-				# 	suffix = 'cfg'
-				# else:
-				# 	suffix = ''
-
-				#jfk.  Need to have separate regulator configurations for each regulator
+				reg_nominalvoltage = float(cymeqregulator[regEq]['nominal_voltage'])*1000.0
+				#HACK: bandwidth sometimes set to none.
+				if not cymeqregulator[regEq]['bandwidth']:
+					#HACK: just choose 10% of nominal. Good idea? TBD.
+					safeRegBand = 0.10 * reg_nominalvoltage
+				else:
+					safeRegBand = float(cymeqregulator[regEq]['bandwidth'])
+				reg_bandwidth = str(safeRegBand*reg_nominalvoltage/120.0)
+				#jfk. Need to have separate regulator configurations for each regulator
 				# Cyme holds tap position in regulator, but Gridlabd holds tap position in configuration
 				regEq = regEq +'_' + reg
 				if reg in regulator_bandcenters.keys():
 					band_center120 = regulator_bandcenters[reg]
 				else:
-					print 'Warning: Bandcenter info not provided.  Setting bandcenter to 1.05'
+					warnings.warn('Bandcenter info not provided. Setting bandcenter to 1.05.')
 					band_center120 = 126.0
-
-				print 'Regulators hardcoded to OUTPUT_VOLTAGE!!'
+				warnings.warn('Regulators hardcoded to OUTPUT_VOLTAGE.')
 				ph = cymsectiondevice[reg]['phases'].replace('N', '')
 				if regEq not in reg_cfgs.keys():
 					reg_cfgs[regEq] = {'object' : 'regulator_configuration',
-													'name' : regEq, #jfk
-													'connect_type' : 'WYE_WYE',
-													'band_center' : str(float(reg_nominalvoltage)*(band_center120/120.0)),
-													'band_width' : reg_bandwidth,
-													'regulation' : str(cymregulator[reg]['regulation']),
-													'time_delay' : '30.0',
-													'dwell_time' : '5',
-													'Control' : 'OUTPUT_VOLTAGE', #'MANUAL' #
-													'control_level' : 'INDIVIDUAL',
-													'raise_taps' : raiseTaps,
-													'lower_taps' : lowerTaps}
-
+						'name' : regEq, #jfk
+						'connect_type' : 'WYE_WYE',
+						'band_center' : str(float(reg_nominalvoltage)*(band_center120/120.0)),
+						'band_width' : reg_bandwidth,
+						'regulation' : str(cymregulator[reg]['regulation']),
+						'time_delay' : '30.0',
+						'dwell_time' : '5',
+						'Control' : 'OUTPUT_VOLTAGE', #'MANUAL' #
+						'control_level' : 'INDIVIDUAL',
+						'raise_taps' : raiseTaps,
+						'lower_taps' : lowerTaps}
 					for phase in ph:
 						reg_cfgs[regEq]['tap_pos_{:s}'.format(phase)] = str(cymregulator[reg]['tap_pos_{:s}'.format(phase)])
-
-
-
 				if reg not in reg_cfgs.keys():
 					regs[reg] = {'object' : 'regulator',
 										'name' : reg,
@@ -2777,67 +2765,60 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 					glmTree[x]['phases'] = glmTree[x]['phases'] + 'N'
 			except:
 				pass
-	print modelDir
 	checkMissingNodes(nodes, cymsectiondevice, objectList, feeder_id, modelDir, cymsection)
-
-
 	#jfk.  add regulator to source
 	biggestkey = max(glmTree.keys())
-	glmTree[biggestkey+1] = {'object': 'node',
-				   'name': 'sourcenode',
-				   'phases': 'ABC',
-					'nominal_voltage': cymsource[_fixName(swingBus)]['nominal_voltage'],
-					'bustype': 'SWING'}
-
-	glmTree[biggestkey+2] = {'object': 'regulator',
-					   'name': 'sourceregulator',
-					   'phases': 'ABC',
-					   'from': 'sourcenode',
-					   'to': 'n' + swingBus,
-					   'configuration': 'ss_regconfiguration'}
-
-	glmTree[biggestkey+3] = {'object': 'regulator_configuration',
-						'name': 'ss_regconfiguration',
-						'band_center': cymsource[_fixName(swingBus)]['source_voltage'],
-						'Control': 'OUTPUT_VOLTAGE',
-						'connect_type': 'WYE_WYE',
-						'raise_taps': '50', #want to be very close to desired voltage for agreement with cyme
-						'lower_taps': '50',
-						'band_width': '2.0', #bandwidth should be very small for all voltage levels
-						'regulation': '0.1',
-						'dwell_time': '5',
-						'tap_pos_A': '0',
-						'tap_pos_B': '0',
-						'tap_pos_C': '0',
-						'time_delay': '30.0',
-						'control_level': 'INDIVIDUAL'}
-
-
+	glmTree[biggestkey+1] = {
+		'object': 'node',
+		'name': 'sourcenode',
+		'phases': 'ABC',
+		'nominal_voltage': cymsource[_fixName(swingBus)]['nominal_voltage'],
+		'bustype': 'SWING'
+	}
+	glmTree[biggestkey+2] = {
+		'object': 'regulator',
+		'name': 'sourceregulator',
+		'phases': 'ABC',
+		'from': 'sourcenode',
+		'to': 'n' + swingBus,
+		'configuration': 'ss_regconfiguration'
+	}
+	glmTree[biggestkey+3] = {
+		'object': 'regulator_configuration',
+		'name': 'ss_regconfiguration',
+		'band_center': cymsource[_fixName(swingBus)]['nominal_voltage'], #HACK: source_voltage set to nominal.
+		'Control': 'OUTPUT_VOLTAGE',
+		'connect_type': 'WYE_WYE',
+		'raise_taps': '50', #want to be very close to desired voltage for agreement with cyme
+		'lower_taps': '50',
+		'band_width': '2.0', #bandwidth should be very small for all voltage levels
+		'regulation': '0.1',
+		'dwell_time': '5',
+		'tap_pos_A': '0',
+		'tap_pos_B': '0',
+		'tap_pos_C': '0',
+		'time_delay': '30.0',
+		'control_level': 'INDIVIDUAL'
+	}
 	return glmTree, x_scale, y_scale
 	
-def _tests(testFile, modelDir, outPrefix, keepFiles=True ):
-	import os, json, traceback, shutil
-	from solvers import gridlabd
-	from matplotlib import pyplot as plt
-	import feeder
+def _tests(keepFiles=True):
+	testFile = ['IEEE13.mdb']
+	modelDir = './static/testFiles/'
+	outPrefix = './scratch/cymeToGridlabTests/'
 	exceptionCount = 0
-	locale.setlocale(locale.LC_ALL, 'en_US')
 	try:
-		os.mkdir(outPrefix)
+		shutil.rmtree(outPrefix)
 	except:
-		pass # Directory already there.
-	try:
-		print testFile
-		for file in testFile:
-			db_network = file
-			# HACK: converting the 1 length .mdb file array to a string to force it into the conversion
-			# function. Will need a loop when more .mdb files are added.
-			if isinstance(db_network,list) == True:
-				db_network = ' '.join(db_network)
+		pass # no test directory yet.
+	finally:
+		os.mkdir(outPrefix)
+	locale.setlocale(locale.LC_ALL, 'en_US')
+	for db_network in testFile:
+		try:
+			# Main conversion of CYME model.
 			cyme_base, x, y = convertCymeModel(db_network, modelDir)    
 			glmString = feeder.sortedWrite(cyme_base)
-			if isinstance(db_network, list):
-				db_network = " ".join(db_network)
 			testFilename = db_network[:-4]
 			gfile = open(modelDir+testFilename+".glm", 'w')
 			gfile.write(glmString)
@@ -2847,59 +2828,53 @@ def _tests(testFile, modelDir, outPrefix, keepFiles=True ):
 			inFileSize = inFileStats.st_size
 			outFileSize = outFileStats.st_size
 			treeObj = feeder.parse(modelDir+testFilename+".glm")
-			print 'WROTE GLM FOR'
+			print 'WROTE GLM FOR ' + db_network
 			with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
-					resultsFile.write('WROTE GLM FOR ' + testFilename + "\n")
-					resultsFile.write('Input .mdb File Size: ' + str(locale.format("%d", inFileSize, grouping=True))+'\n')
-					resultsFile.write('Output .glm File Size: '+ str(locale.format("%d", outFileSize, grouping=True))+'\n')
-			try:
-				os.mkdir(outPrefix)
-			except:
-				pass # Directory already there.     
-			'''Attempt to graph'''
-			try:
-				# Draw the GLM.
-				myGraph = feeder.treeToNxGraph(cyme_base)
-				feeder.latLonNxGraph(myGraph, neatoLayout=False)
-				plt.savefig(outPrefix + testFilename+".png")
-				with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
-					resultsFile.write('DREW GLM FOR ' + testFilename + "\n")
-				print 'DREW GLM OF'
-			except:
-				exceptionCount += 1
-				with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
-					resultsFile.write('FAILED DRAWING' + testFilename + "\n")
-				print 'FAILED DRAWING'
-			try:
-				# Run powerflow on the GLM.
-				output = gridlabd.runInFilesystem(treeObj, keepFiles=True, workDir=outPrefix)
-				if output['stderr'] == "":
-					gridlabdStderr = "GridLabD ran successfully without error."
-				else:
-					gridlabdStderr =  output['stderr']
-				with open(outPrefix + testFilename +".JSON",'w') as outFile:
-					json.dump(output, outFile, indent=4)
-				with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
-					resultsFile.write('RAN GRIDLAB ON ' + testFilename + "\n")
-					resultsFile.write('STDERR: ' + gridlabdStderr + "\n\n")
-				print 'RAN GRIDLAB ON\n'                 
-			except:
-				exceptionCount += 1
-				with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
-					resultsFile.write('POWERFLOW FAILED FOR ' + testFilename + "\n")
-				print 'POWERFLOW FAILED'
-	except:
-		print 'FAILED CONVERTING'
-		testFilename = 'failed'
-		with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
-			resultsFile.write('FAILED CONVERTING ' + testFilename + "\n")
-		exceptionCount += 1
-		traceback.print_exc()
+				resultsFile.write('WROTE GLM FOR ' + testFilename + "\n")
+				resultsFile.write('Input .mdb File Size: ' + str(locale.format("%d", inFileSize, grouping=True))+'\n')
+				resultsFile.write('Output .glm File Size: '+ str(locale.format("%d", outFileSize, grouping=True))+'\n')
+		except:
+			print 'FAILED CONVERTING'
+			testFilename = 'failed'
+			with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
+				resultsFile.write('FAILED CONVERTING ' + testFilename + "\n")
+			traceback.print_exc()
+			exceptionCount += 3
+			continue # No use trying to draw or run if conversion fails.
+		try:
+			# Draw the GLM.
+			myGraph = feeder.treeToNxGraph(cyme_base)
+			feeder.latLonNxGraph(myGraph, neatoLayout=False)
+			plt.savefig(outPrefix + testFilename+".png")
+			with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
+				resultsFile.write('DREW GLM FOR ' + testFilename + "\n")
+			print 'DREW GLM OF ' + db_network
+		except:
+			exceptionCount += 1
+			with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
+				resultsFile.write('FAILED DRAWING' + testFilename + "\n")
+			print 'FAILED DRAWING ' + db_network
+		try:
+			# Run powerflow on the GLM.
+			output = gridlabd.runInFilesystem(treeObj, keepFiles=True, workDir=outPrefix)
+			if output['stderr'] == "":
+				gridlabdStderr = "GridLabD ran successfully without error."
+			else:
+				gridlabdStderr =  output['stderr']
+			with open(outPrefix + testFilename +".JSON",'w') as outFile:
+				json.dump(output, outFile, indent=4)
+			with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
+				resultsFile.write('RAN GRIDLAB ON ' + testFilename + "\n")
+				resultsFile.write('STDERR: ' + gridlabdStderr + "\n\n")
+			print 'RAN GRIDLAB ON ' + db_network
+		except:
+			exceptionCount += 1
+			with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
+				resultsFile.write('POWERFLOW FAILED FOR ' + testFilename + "\n")
+			print 'POWERFLOW FAILED'
 	if not keepFiles:
 		shutil.rmtree(outPrefix)
 	return exceptionCount    
+
 if __name__ == '__main__':
-	testFile = ["Titanium.mdb"]
-	modelDir = './static/testFiles/'
-	outPrefix = './static/testFiles/cymeToGridlabTests/' 
-	_tests(testFile, modelDir, outPrefix)
+	_tests()
