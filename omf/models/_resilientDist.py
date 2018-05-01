@@ -77,6 +77,9 @@ def convertToGFM(gfmInputTemplate, feederModel):
 	lineCount = 0
 	for key, line in jsonTree.iteritems():
 		if line.get('object','') in objToFind:
+			phases = line.get('phases')
+			if 'S' in phases:
+				continue # We don't support secondary system transformers.
 			newLine = dict({
 				'id' : '', #*
 				'node1_id' : '', #*
@@ -504,7 +507,7 @@ def work(modelDir, inputDict):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"feederName1": "Winter 2017 Fixed",
+		"feederName1": "trip37",
 		"modelType": modelName,
 		"runTime": "0:00:30",
 		"layoutAlgorithm": "geospatial",
