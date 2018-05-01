@@ -4,9 +4,9 @@ def sigh():
 	return 'SIGH'
 
 def transmissionConvert(owner, modelName):
-	'Assume that PNNL creates a new transmission model folder.' + \
-	'Also they need to place a .m file in that folder called convertMe.m' + \
-	'Then they send a get request to this route.'
+	'First, DRPOWER creates a new transmission model folder.' + \
+	'Then it places an .m file in that folder named convertMe.m' + \
+	'Then send a request to this route and redirect the user accordingly'
 	# Model folder full path.
 	modelDir = os.path.join(omf.omfDir, 'data', 'Model', owner, modelName)
 	# Remove the existing file.
@@ -32,7 +32,16 @@ def transmissionConvert(owner, modelName):
 	return 'CONVERTED'
 
 def powerPublish(owner, modelName):
+	'Hook to pull data back to DRPOWER main repository.'
 	return 'PNNL PUBLICATION URL GOES HERE'
+
+def injectUser(email, password):
+	'Create a new user and log that user in.'
+	user = {"username":email, "password_digest":web.pbkdf2_sha512.encrypt(password)}
+	web.flask_login.login_user(web.User(user))
+	with open("./data/User/"+user["username"]+".json","w") as outFile:
+		json.dump(user, outFile, indent=4)
+	return web.redirect('/')
 
 if __name__ == '__main__':
 	template_files = ['templates/'+ x  for x in web.safeListdir('templates')]
@@ -41,6 +50,7 @@ if __name__ == '__main__':
 	web.app.add_url_rule('/sigh', 'sigh', view_func=sigh)
 	web.app.add_url_rule('/transmissionConvert/<owner>/<modelName>/', 'transmissionConvert', view_func=transmissionConvert)
 	web.app.add_url_rule('/publishModel/<owner>/<modelName>/', 'powerPublish', methods=["POST"], view_func=powerPublish)
+	web.app.add_url_rule('/injectUser/<email>/<password>/', 'injectUser', view_func=injectUser)
 	# def crash(): raise Exception
 	# web.app.add_url_rule('/crash','crash',view_func=crash)
 	# Remove the bogus old publishModel route.
