@@ -5,25 +5,19 @@ from os.path import join as pJoin
 from jinja2 import Template
 import __neoMetaModel__
 from __neoMetaModel__ import *
-
-
 import requests, csv, tempfile
-
-
 
 # Model metadata:
 fileName = os.path.basename(__file__)
 modelName = fileName[0:fileName.rfind('.')]
-tooltip = "Calculate the virtual battery capacity for a collection of thermostically controlled loads."
+tooltip = "Download historical weather data for a given location for use in other models."
 
 # Our HTML template for the interface:
 with open(pJoin(__neoMetaModel__._myDir,modelName + ".html"),"r") as file:
 	template = Template(file.read())
 
-
-#check to see if user is getting raw METAR
-#filter duplicate values in the hour
-
+#TODO: check to see if user is getting raw METAR
+#TODO: filter duplicate values in the hour
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory.'''
@@ -39,13 +33,14 @@ def work(modelDir, inputDict):
 	valuesMissing = 0
 	if source == "METAR":
 		data = pullMETAR(year,station,parameter)
-
+	# Writing the raw output.
 	with open(pJoin(modelDir,"weather.csv"),"w") as file:
 		file.write(data)
-	
+	# Trying to clean up the output and writing a cleaner copy.
 	with open(pJoin(modelDir,"weather.csv"),"r") as file:
 		reader = csv.reader(file)
 		for row in reader:
+			print row
 			hour = (row[1].partition(" ")[2]).partition(":")[0]
 			if hour != '':
 				# print int(hour)
@@ -55,24 +50,18 @@ def work(modelDir, inputDict):
 					verifiedData.append("999.9")
 					lastValidHour = hour
 					valuesMissing += 1
-					print "hour: " + str(hour) + " and value: " + str(row[2])
+					# print "hour: " + str(hour) + " and value: " + str(row[2])
 				elif row[2] != "M" and hour != lastValidHour:
 					lastValidHour = hour
-					print "hour: " + str(hour) + " and value: " + str(row[2])
+					# print "hour: " + str(hour) + " and value: " + str(row[2])
 					verifiedData.append(row[2])
 					validCount += 1
-
 	print "missing values: " + str(valuesMissing)
 	print "valid count is: " + str(validCount)
-
 	outData["data"] = verifiedData
 	with open(pJoin(modelDir,"weather.csv"),"w") as file:
-		# file.write(str(verifiedData))
 		writer = csv.writer(file)
-		# writer.writerow(verifiedData)
-		for i in range(len(verifiedData)):
-			writer.writerow([verifiedData[i].replace("\n","")])
-	# Stdout/stderr.
+		writer.writerows([[x] for x in verifiedData])
 	outData["stdout"] = "Success"
 	return outData
 
@@ -113,6 +102,16 @@ def new(modelDir):
 #	deadband = "0.625",
 #	return power,capacitance,resistance,cop,setpoint,deadband
 
+# from dateutil.parser import parse as parseDt
+# from calendar import isleap
+# inData = ['2017-01-05 11:00','2017-11-20 12:00']
+# dataYear = parseDt(inData[0]).year
+# hours = 8760 + 24 * isleap(dataYear) # Handles leap years.
+# outData = ['999.9' for x in range(hours) ]
+# for read in inData:
+# 	d = parseDt(read)
+# 	(year, week, day) = d.isocalendar()
+# 	outData[week*24*7 + day*24 + d.hour] = 'VALUEGoesHere'
 
 def _simpleTest():
 	# Location
@@ -126,11 +125,11 @@ def _simpleTest():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	renderAndShow(modelLoc)
+	# renderAndShow(modelLoc)
 	# Run the model.
 	runForeground(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
-	renderAndShow(modelLoc)
+	# renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_simpleTest ()
