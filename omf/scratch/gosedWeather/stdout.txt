@@ -1,48 +1,0 @@
-                                                                                                                                                                                              
-Core profiler results
-======================
-
-Total objects               2026 objects
-Parallelism                    1 thread
-Total time                   7.0 seconds
-  Core time                  1.9 seconds (27.4%)
-    Compiler                 0.2 seconds (2.4%)
-    Instances                0.0 seconds (0.0%)
-    Random variables         0.0 seconds (0.0%)
-    Schedules                0.0 seconds (0.0%)
-    Loadshapes               0.0 seconds (0.0%)
-    Enduses                  0.0 seconds (0.0%)
-    Transforms               0.0 seconds (0.7%)
-  Model time                 5.1 seconds/thread (72.6%)
-Simulation time               10 days
-Simulation speed              69k object.hours/second
-Passes completed             759 passes
-Time steps completed         241 timesteps
-Convergence efficiency      3.15 passes/timestep
-Read lock contention        0.0%
-Write lock contention       0.0%
-Average timestep           3585 seconds/timestep
-Simulation rate          123429 x realtime
-
-
-Model profiler results
-======================
-
-Class            Time (s) Time (%) msec/obj
----------------- -------- -------- --------
-triplex_load       1.955     38.5%      2.7
-node               1.072     21.1%      2.4
-underground_line   0.717     14.1%      2.6
-triplex_meter      0.437      8.6%      2.7
-transformer        0.398      7.8%      2.5
-switch             0.317      6.2%      2.6
-fuse               0.125      2.5%      3.4
-overhead_line      0.030      0.6%      2.5
-climate            0.017      0.3%     17.0
-recorder           0.007      0.1%      7.0
-inverter           0.003      0.1%      3.0
-solar              0.003      0.1%      3.0
-player             0.002      0.0%      2.0
-================ ======== ======== ========
-Total              5.083    100.0%      2.5
-
