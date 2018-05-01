@@ -1,4 +1,6 @@
-''' Pulls hourly weather data from NOAA's quality controlled USCRN dataset. '''
+''' Pulls hourly weather data from NOAA's quality controlled USCRN dataset.
+Documentation is at https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02/README.txt
+'''
 
 import requests, csv, tempfile, os
 
@@ -10,6 +12,8 @@ def pullWeather(year, station, outputPath):
 	url = 'https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02/' + year + '/CRNH0203-' + year + '-' + station + '.txt'
 	r = requests.get(url)
 	data = r.text
+	matrix = [x.split() for x in data.split('\n')]
+	#TODO: use matrix to pull out an arbitrary attribute.
 	tempData = []
 	for x in range(0,8760):
 		temp = ''
@@ -24,6 +28,7 @@ def pullWeather(year, station, outputPath):
 def _tests():
 	tmpdir = tempfile.mkdtemp()
 	pullWeather('2017', 'KY_Versailles_3_NNW', os.path.join(tmpdir, 'weatherNoaaTemp.csv'))
+	print 'Weather testing complete in ' + tmpdir
 
 if __name__ == '__main__':
 	_tests()
