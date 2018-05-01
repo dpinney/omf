@@ -71,7 +71,6 @@ class Map(dict):
 
 def _csvDump(database_file, modelDir):
 	# Get the list of table names with "mdb-tables"
-	print "database", database_file
 	if platform.system() == 'Linux' or platform.system() == 'Darwin':
 		table_names = subprocess.Popen(["mdb-tables", "-1", database_file],
 			stdout=subprocess.PIPE).communicate()[0]
@@ -389,7 +388,6 @@ def _readCymeSource(feederId, type, modelDir):
 					cymsource[_fixName(row.NodeId)]['nominal_voltage'] = str(float(row.KVLL)*1000.0/math.sqrt(3)) #jfk.
 					cymsource[_fixName(row.NodeId)]['source_voltage'] = str(float(row.OperatingVoltage1)*1000.0) #jfk
 					swingBus = _fixName(row.NodeId)
-	print 'swingbus',swingBus
 	return cymsource, feeder_id, swingBus
 
 def _readCymeNode(feederId, modelDir):
@@ -1518,9 +1516,11 @@ def _readCymeBattery(feederId, modelDir):
 
 def _readCymeGenerator(feederId, modelDir):
 	cymeGenerator = {}
-	CYMEGENERATOR = {'name':None,
-					'generation':None,
-					'power_factor':None}
+	CYMEGENERATOR = {
+		'name': None,
+		'generation': None,
+		'power_factor': None
+	}
 	cymgenerator_db = _csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMDGGENERATIONMODEL.csv"),feederId)
 	if len(cymgenerator_db) == 0:
 		warnings.warn("No generator information was found in CYMDGGENERATIONMODEL for feeder id: {:s}.".format(feederId), RuntimeWarning)
@@ -1548,7 +1548,6 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	if (test==False):
 		network_db_path = modelDir + network_db 
 		network_db = network_db_path 
-		print 'network_db',network_db
 	else:
 		network_db = Path(network_db).resolve()     
 	conductor_data_csv = None
@@ -1635,13 +1634,18 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	cymphotovoltaic = _readCymePhotovoltaic(feeder_id,modelDir)
 	# PV CONFIGS
 	cymeqphotovoltaic = _readEqPhotovoltaic(feeder_id,modelDir)
-	print cymeqphotovoltaic
-	# BATTERY
-	cymbattery = _readCymeBattery(feeder_id, modelDir)
-	# BATTERY CONFIGS
-	cymeqbattery = _readEqBattery(feeder_id,modelDir)
-	# GENERATOR
-	cymgenerator = _readCymeGenerator(feeder_id, modelDir)
+	try:
+		# BATTERY
+		cymbattery = _readCymeBattery(feeder_id, modelDir)
+		# BATTERY CONFIGS
+		cymeqbattery = _readEqBattery(feeder_id,modelDir)
+	except:
+		pass #HACK: generator failure.
+	try:
+		# GENERATOR
+		cymgenerator = _readCymeGenerator(feeder_id, modelDir)
+	except:
+		pass #HACK: generator failure.
 	# Check that the section actually is a device.
 	for link in cymsection.keys():
 		link_exists = 0
@@ -1769,7 +1773,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	# -21-CYME CYMEQAUTOTRANSFORMER**********************************************************************************************************************************************************************
 	cymeqautoxfmr = _readEqAutoXfmr(feeder_id, modelDir)
 	# -22-CYME CYME REACTORS********************************************************************************************
-	cymreactor, reactorIds =_readCymeReactors(feeder_id, modelDir) #jfk
+	cymreactor, reactorIds =_readCymeReactors(feeder_id, modelDir)
 	# -23-CYME CYMEQREACTORS********************************************************************************************
 	cymeqreactor =_readEqReactors(feeder_id, modelDir)
 	# -24-CYME CYMEQTRANSFORMER********************************************************************************************
@@ -2345,44 +2349,39 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 				else:
 					raiseTaps = cymeqregulator[regEq]['raise_taps']
 					lowerTaps = cymeqregulator[regEq]['lower_taps']
-				reg_nominalvoltage = float(cymeqregulator[regEq]['nominal_voltage'])*1000
-				reg_bandwidth = str(float(cymeqregulator[regEq]['bandwidth'])*float(reg_nominalvoltage)/120.0)
-				#jfk.  deprecated with new naming.
-				# if regEq == reg:
-				# 	suffix = 'cfg'
-				# else:
-				# 	suffix = ''
-
-				#jfk.  Need to have separate regulator configurations for each regulator
+				reg_nominalvoltage = float(cymeqregulator[regEq]['nominal_voltage'])*1000.0
+				#HACK: bandwidth sometimes set to none.
+				if not cymeqregulator[regEq]['bandwidth']:
+					#HACK: just choose 10% of nominal. Good idea? TBD.
+					safeRegBand = 0.10 * reg_nominalvoltage
+				else:
+					safeRegBand = float(cymeqregulator[regEq]['bandwidth'])
+				reg_bandwidth = str(safeRegBand*reg_nominalvoltage/120.0)
+				#jfk. Need to have separate regulator configurations for each regulator
 				# Cyme holds tap position in regulator, but Gridlabd holds tap position in configuration
 				regEq = regEq +'_' + reg
 				if reg in regulator_bandcenters.keys():
 					band_center120 = regulator_bandcenters[reg]
 				else:
-					print 'Warning: Bandcenter info not provided.  Setting bandcenter to 1.05'
+					warnings.warn('Bandcenter info not provided. Setting bandcenter to 1.05.')
 					band_center120 = 126.0
-
-				print 'Regulators hardcoded to OUTPUT_VOLTAGE!!'
+				warnings.warn('Regulators hardcoded to OUTPUT_VOLTAGE.')
 				ph = cymsectiondevice[reg]['phases'].replace('N', '')
 				if regEq not in reg_cfgs.keys():
 					reg_cfgs[regEq] = {'object' : 'regulator_configuration',
-													'name' : regEq, #jfk
-													'connect_type' : 'WYE_WYE',
-													'band_center' : str(float(reg_nominalvoltage)*(band_center120/120.0)),
-													'band_width' : reg_bandwidth,
-													'regulation' : str(cymregulator[reg]['regulation']),
-													'time_delay' : '30.0',
-													'dwell_time' : '5',
-													'Control' : 'OUTPUT_VOLTAGE', #'MANUAL' #
-													'control_level' : 'INDIVIDUAL',
-													'raise_taps' : raiseTaps,
-													'lower_taps' : lowerTaps}
-
+						'name' : regEq, #jfk
+						'connect_type' : 'WYE_WYE',
+						'band_center' : str(float(reg_nominalvoltage)*(band_center120/120.0)),
+						'band_width' : reg_bandwidth,
+						'regulation' : str(cymregulator[reg]['regulation']),
+						'time_delay' : '30.0',
+						'dwell_time' : '5',
+						'Control' : 'OUTPUT_VOLTAGE', #'MANUAL' #
+						'control_level' : 'INDIVIDUAL',
+						'raise_taps' : raiseTaps,
+						'lower_taps' : lowerTaps}
 					for phase in ph:
 						reg_cfgs[regEq]['tap_pos_{:s}'.format(phase)] = str(cymregulator[reg]['tap_pos_{:s}'.format(phase)])
-
-
-
 				if reg not in reg_cfgs.keys():
 					regs[reg] = {'object' : 'regulator',
 										'name' : reg,
@@ -2766,45 +2765,47 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 					glmTree[x]['phases'] = glmTree[x]['phases'] + 'N'
 			except:
 				pass
-	print modelDir
 	checkMissingNodes(nodes, cymsectiondevice, objectList, feeder_id, modelDir, cymsection)
-
-
 	#jfk.  add regulator to source
 	biggestkey = max(glmTree.keys())
-	glmTree[biggestkey+1] = {'object': 'node',
-				   'name': 'sourcenode',
-				   'phases': 'ABC',
-					'nominal_voltage': cymsource[_fixName(swingBus)]['nominal_voltage'],
-					'bustype': 'SWING'}
-
-	glmTree[biggestkey+2] = {'object': 'regulator',
-					   'name': 'sourceregulator',
-					   'phases': 'ABC',
-					   'from': 'sourcenode',
-					   'to': 'n' + swingBus,
-					   'configuration': 'ss_regconfiguration'}
-
-	glmTree[biggestkey+3] = {'object': 'regulator_configuration',
-						'name': 'ss_regconfiguration',
-						'band_center': cymsource[_fixName(swingBus)]['source_voltage'],
-						'Control': 'OUTPUT_VOLTAGE',
-						'connect_type': 'WYE_WYE',
-						'raise_taps': '50', #want to be very close to desired voltage for agreement with cyme
-						'lower_taps': '50',
-						'band_width': '2.0', #bandwidth should be very small for all voltage levels
-						'regulation': '0.1',
-						'dwell_time': '5',
-						'tap_pos_A': '0',
-						'tap_pos_B': '0',
-						'tap_pos_C': '0',
-						'time_delay': '30.0',
-						'control_level': 'INDIVIDUAL'}
-
-
+	glmTree[biggestkey+1] = {
+		'object': 'node',
+		'name': 'sourcenode',
+		'phases': 'ABC',
+		'nominal_voltage': cymsource[_fixName(swingBus)]['nominal_voltage'],
+		'bustype': 'SWING'
+	}
+	glmTree[biggestkey+2] = {
+		'object': 'regulator',
+		'name': 'sourceregulator',
+		'phases': 'ABC',
+		'from': 'sourcenode',
+		'to': 'n' + swingBus,
+		'configuration': 'ss_regconfiguration'
+	}
+	glmTree[biggestkey+3] = {
+		'object': 'regulator_configuration',
+		'name': 'ss_regconfiguration',
+		'band_center': cymsource[_fixName(swingBus)]['nominal_voltage'], #HACK: source_voltage set to nominal.
+		'Control': 'OUTPUT_VOLTAGE',
+		'connect_type': 'WYE_WYE',
+		'raise_taps': '50', #want to be very close to desired voltage for agreement with cyme
+		'lower_taps': '50',
+		'band_width': '2.0', #bandwidth should be very small for all voltage levels
+		'regulation': '0.1',
+		'dwell_time': '5',
+		'tap_pos_A': '0',
+		'tap_pos_B': '0',
+		'tap_pos_C': '0',
+		'time_delay': '30.0',
+		'control_level': 'INDIVIDUAL'
+	}
 	return glmTree, x_scale, y_scale
 	
-def _tests(testFile, modelDir, outPrefix, keepFiles=True ):
+def _tests(keepFiles=True):
+	testFile = ['IEEE13.mdb']
+	modelDir = './static/testFiles/'
+	outPrefix = './scratch/cymeToGridlabTests/'
 	exceptionCount = 0
 	try:
 		shutil.rmtree(outPrefix)
@@ -2813,30 +2814,33 @@ def _tests(testFile, modelDir, outPrefix, keepFiles=True ):
 	finally:
 		os.mkdir(outPrefix)
 	locale.setlocale(locale.LC_ALL, 'en_US')
-	for file in testFile:
-		db_network = file
-		# HACK: converting the 1 length .mdb file array to a string to force it into the conversion
-		# function. Will need a loop when more .mdb files are added.
-		if isinstance(db_network,list) == True:
-			db_network = ' '.join(db_network)
-		cyme_base, x, y = convertCymeModel(db_network, modelDir)    
-		glmString = feeder.sortedWrite(cyme_base)
-		if isinstance(db_network, list):
-			db_network = " ".join(db_network)
-		testFilename = db_network[:-4]
-		gfile = open(modelDir+testFilename+".glm", 'w')
-		gfile.write(glmString)
-		gfile.close()
-		inFileStats = os.stat(pJoin(modelDir,db_network))
-		outFileStats = os.stat(pJoin(modelDir,testFilename+".glm"))
-		inFileSize = inFileStats.st_size
-		outFileSize = outFileStats.st_size
-		treeObj = feeder.parse(modelDir+testFilename+".glm")
-		print 'WROTE GLM FOR '
-		with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
+	for db_network in testFile:
+		try:
+			# Main conversion of CYME model.
+			cyme_base, x, y = convertCymeModel(db_network, modelDir)    
+			glmString = feeder.sortedWrite(cyme_base)
+			testFilename = db_network[:-4]
+			gfile = open(modelDir+testFilename+".glm", 'w')
+			gfile.write(glmString)
+			gfile.close()
+			inFileStats = os.stat(pJoin(modelDir,db_network))
+			outFileStats = os.stat(pJoin(modelDir,testFilename+".glm"))
+			inFileSize = inFileStats.st_size
+			outFileSize = outFileStats.st_size
+			treeObj = feeder.parse(modelDir+testFilename+".glm")
+			print 'WROTE GLM FOR ' + db_network
+			with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
 				resultsFile.write('WROTE GLM FOR ' + testFilename + "\n")
 				resultsFile.write('Input .mdb File Size: ' + str(locale.format("%d", inFileSize, grouping=True))+'\n')
 				resultsFile.write('Output .glm File Size: '+ str(locale.format("%d", outFileSize, grouping=True))+'\n')
+		except:
+			print 'FAILED CONVERTING'
+			testFilename = 'failed'
+			with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
+				resultsFile.write('FAILED CONVERTING ' + testFilename + "\n")
+			traceback.print_exc()
+			exceptionCount += 3
+			continue # No use trying to draw or run if conversion fails.
 		try:
 			# Draw the GLM.
 			myGraph = feeder.treeToNxGraph(cyme_base)
@@ -2844,12 +2848,12 @@ def _tests(testFile, modelDir, outPrefix, keepFiles=True ):
 			plt.savefig(outPrefix + testFilename+".png")
 			with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
 				resultsFile.write('DREW GLM FOR ' + testFilename + "\n")
-			print 'DREW GLM OF'
+			print 'DREW GLM OF ' + db_network
 		except:
 			exceptionCount += 1
 			with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
 				resultsFile.write('FAILED DRAWING' + testFilename + "\n")
-			print 'FAILED DRAWING'
+			print 'FAILED DRAWING ' + db_network
 		try:
 			# Run powerflow on the GLM.
 			output = gridlabd.runInFilesystem(treeObj, keepFiles=True, workDir=outPrefix)
@@ -2862,25 +2866,15 @@ def _tests(testFile, modelDir, outPrefix, keepFiles=True ):
 			with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
 				resultsFile.write('RAN GRIDLAB ON ' + testFilename + "\n")
 				resultsFile.write('STDERR: ' + gridlabdStderr + "\n\n")
-			print 'RAN GRIDLAB ON\n'                 
+			print 'RAN GRIDLAB ON ' + db_network
 		except:
 			exceptionCount += 1
 			with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
 				resultsFile.write('POWERFLOW FAILED FOR ' + testFilename + "\n")
 			print 'POWERFLOW FAILED'
-	# except:
-	# 	print 'FAILED CONVERTING'
-	# 	testFilename = 'failed'
-	# 	with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
-	# 		resultsFile.write('FAILED CONVERTING ' + testFilename + "\n")
-	# 	exceptionCount += 1
-	# 	traceback.print_exc()
 	if not keepFiles:
 		shutil.rmtree(outPrefix)
 	return exceptionCount    
 
 if __name__ == '__main__':
-	testFile = ['IEEE13.mdb']
-	modelDir = './static/testFiles/'
-	outPrefix = './static/testFiles/cymeToGridlabTests/' 
-	_tests(testFile, modelDir, outPrefix)
+	_tests()
