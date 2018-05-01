@@ -170,7 +170,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 		#SET THE newLineCode to the output of GRIDLABD
 		gfmJson['line_codes'].append(newLineCode)
 	# Bus creation:
-	objToFind = ['node', 'load']
+	objToFind = ['node', 'load', 'triplex_meter']
 	for key, bus in jsonTree.iteritems():
 		objType = bus.get('object','')
 		# HACK: some loads can be parented to other things. Don't make buses for them.
@@ -358,9 +358,9 @@ def work(modelDir, inputDict):
 		rdtJsonAsString = rdtInputFile.read()
 		rdtJson = json.loads(rdtJsonAsString)
 	# Calculate line costs.
-	lineData = []
+	lineData = {}
 	for line in rdtJson["lines"]:
-		lineData.append((line["id"], '{:,.2f}'.format(float(line["length"]) * float(inputDict["lineUnitCost"]))))
+		lineData[line["id"]] = '{:,.2f}'.format(float(line["length"]) * float(inputDict["lineUnitCost"]))
 	outData["lineData"] = lineData
 	outData["generatorData"] = '{:,.2f}'.format(float(inputDict["dgUnitCost"]) * float(inputDict["maxDGPerGenerator"]))
 	outData['gfmRawOut'] = rdtJsonAsString
@@ -504,7 +504,7 @@ def work(modelDir, inputDict):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"feederName1": "trip37",
+		"feederName1": "Winter 2017 Fixed",
 		"modelType": modelName,
 		"runTime": "0:00:30",
 		"layoutAlgorithm": "geospatial",

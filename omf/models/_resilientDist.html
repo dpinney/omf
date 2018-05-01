@@ -393,26 +393,32 @@
 						htmlCollector = htmlCollector + "<tr><td>" + generator.id + "</td><td>Generator</td><td>Built with 5 MW of capacity</td><td>$" + genCost + "</td></tr>";
 						totalCost = totalCost + genCost;
 					}
+					console.log(rdtOutput.design_solution.lines.length);
+					console.log(lineData.length);
+
 					for(var j = 0; j < rdtOutput.design_solution.lines.length; j++) {
 						line = rdtOutput.design_solution.lines[j];
-						var hardened = "Hardened";
-						var switchBuilt = ", Switch built";
-						lineCost = lineData[j][1];
-						if(line.hardened == false) {
-							hardened = "Unhardened";
-							lineCost = "0";
-						} else if (line.hardened == undefined) {
-							hardened = "Not a Hardening Candidate";
-							lineCost = "0";
+						if(line.id in lineData) {
+							var hardened = "Hardened";
+							var switchBuilt = ", Switch built";
+							lineCost = lineData[line.id];
+							if(line.hardened == false) {
+								hardened = "Unhardened";
+								lineCost = "0";
+							} else if (line.hardened == undefined) {
+								hardened = "Not a Hardening Candidate";
+								lineCost = "0";
+							}
+							if(line.switch_built == false) {
+								switchBuilt = ", Switch not built";
+							}
+							lineID = line.id;
+							if (lineCost != 0.0) {
+								htmlCollector = htmlCollector + "<tr><td>" + lineID + "</td><td>Line</td><td>" + hardened + switchBuilt + "</td><td>$" +  lineCost + "</td></tr>";							
+							}
+							totalCost = parseFloat(lineCost.replace(/\,/g,'')) + totalCost;
 						}
-						if(line.switch_built == false) {
-							switchBuilt = ", Switch not built";
-						}
-						lineID = lineData[j][0];
-						if (lineCost != 0.0) {
-							htmlCollector = htmlCollector + "<tr><td>" + lineID + "</td><td>Line</td><td>" + hardened + switchBuilt + "</td><td>$" +  lineCost + "</td></tr>";							
-						}
-						totalCost = parseFloat(lineCost.replace(/\,/g,'')) + totalCost;
+						
 					}
 					secondRunValid = ""
 					secondRunValidStyle = ""
