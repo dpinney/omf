@@ -169,6 +169,8 @@ def distShuffleLoads(inFeeder, shufPerc):
 			tlParents.append(inFeeder['tree'][key].get('from'))
 		# if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key].get('object') == 'triplex_node'):
 		# 	tnParents.append(inFeeder['tree'][key]['parent'])
+		#shouldnt work for triplex lines, only work on triplex nodes, house, ziploads, triplex loads, and loads
+		#EDIT works on triplex lines because it looks for the froms and tos, which in fact are triplex_nodes
 	random.shuffle(houseParents)
 	random.shuffle(zipParents)
 	random.shuffle(tlParents)
@@ -177,6 +179,10 @@ def distShuffleLoads(inFeeder, shufPerc):
 	zipIdx = 0
 	tlIdx = 0
 	# tnIdx = 0
+	#Switch out parents in feeder with the first parent from the list. If same parent as before, go to second
+	#Then pop out parent from list. List is shuffled to begin with so no need to randomly select from list
+	#If an index error (because all selections in list removed), ignore and continue
+	#Works same way for each type of object
 	for key in inFeeder['tree']:
 		if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key].get('object') == 'house'):
 			if random.randint(0,100) <= shufPerc:
@@ -200,23 +206,22 @@ def distShuffleLoads(inFeeder, shufPerc):
 			if random.randint(0,100) <= shufPerc:
 				zipIdx = 0
 				if inFeeder['tree'][key]['parent'] != zipParents[zipIdx]:
-					print(inFeeder['tree'][key]['parent'])
+			
 					try:
 						zipIdx = 0
 						inFeeder['tree'][key]['parent'] = zipParents[zipIdx]
 						#print(zipParents)
 						zipParents.pop(zipIdx)
-						print(inFeeder['tree'][key]['parent'])
+
 					except IndexError:
 						continue
 				elif (inFeeder['tree'][key]['parent']) == zipParents[zipIdx]:
-					print(inFeeder['tree'][key]['parent'])
+				
 					try:
 						zipIdx = zipIdx + 1
-						#print(zipParents)
 						inFeeder['tree'][key]['parent'] = zipParents[zipIdx]
 						zipParents.pop(zipIdx)
-						print(inFeeder['tree'][key]['parent'])
+						
 					except IndexError:
 						continue
 		if ('from' in inFeeder['tree'][key]) and (inFeeder['tree'][key].get('object') == 'triplex_line'):
@@ -628,16 +633,16 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 	# with open(FNAMEOUT, "w") as outFile:
 	# 	json.dump(inFeeder, outFile, indent=4)
 
-# 	# Test distShuffleLoads
-	# FNAME = "Simple Market System AnonTest.omd"
-	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
-	# with open(FNAME, "r") as inFile:
-	# 	inFeeder = json.load(inFile)
-	# 	shufPerc = 100
-	# 	distShuffleLoads(inFeeder, shufPerc)
-	# FNAMEOUT = "simpleMarket_distShuffleLoads.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inFeeder, outFile, indent=4)
+# # 	# Test distShuffleLoads
+# 	FNAME = "Simple Market System AnonTest.omd"
+# 	FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
+# 	with open(FNAME, "r") as inFile:
+# 		inFeeder = json.load(inFile)
+# 		shufPerc = 100
+# 		distShuffleLoads(inFeeder, shufPerc)
+# 	FNAMEOUT = "simpleMarket_distShuffleLoads.omd"
+# 	with open(FNAMEOUT, "w") as outFile:
+# 		json.dump(inFeeder, outFile, indent=4)
 
 # 	# Test distModifyTriplexLengths
 	# FNAME = "Simple Market System AnonTest.omd"
