@@ -17,8 +17,13 @@ modelName = fileName[0:fileName.rfind('.')]
 tooltip = "Calculate the virtual battery capacity for a collection of thermostically controlled loads."
 
 # Our HTML template for the interface:
-with open(pJoin(__neoMetaModel__._myDir,modelName + ".html"),"r") as tempFile:
-	template = Template(tempFile.read())
+with open(pJoin(__neoMetaModel__._myDir,modelName + ".html"),"r") as file:
+	template = Template(file.read())
+
+
+#check to see if user is getting raw METAR
+#filter duplicate values in the hour
+
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory.'''
@@ -28,9 +33,45 @@ def work(modelDir, inputDict):
 	year = inputDict["year"]
 	station = inputDict["station"]
 	parameter = inputDict["weatherParameter"]
+	verifiedData = []
+	validCount = 0
+	lastValidHour = 0
+	valuesMissing = 0
 	if source == "METAR":
-		outData["data"] = pullMETAR(year,station,parameter)
+		data = pullMETAR(year,station,parameter)
+
+	with open(pJoin(modelDir,"weather.csv"),"w") as file:
+		file.write(data)
 	
+	with open(pJoin(modelDir,"weather.csv"),"r") as file:
+		reader = csv.reader(file)
+		for row in reader:
+			hour = (row[1].partition(" ")[2]).partition(":")[0]
+			if hour != '':
+				# print int(hour)
+				hour = int(hour)
+				# print hour + " and value " + row[2]
+				if ((hour > lastValidHour) and (hour - lastValidHour > 1)) or ((hour < lastValidHour) and (hour+24 - lastValidHour) > 1):
+					verifiedData.append("999.9")
+					lastValidHour = hour
+					valuesMissing += 1
+					print "hour: " + str(hour) + " and value: " + str(row[2])
+				elif row[2] != "M" and hour != lastValidHour:
+					lastValidHour = hour
+					print "hour: " + str(hour) + " and value: " + str(row[2])
+					verifiedData.append(row[2])
+					validCount += 1
+
+	print "missing values: " + str(valuesMissing)
+	print "valid count is: " + str(validCount)
+
+	outData["data"] = verifiedData
+	with open(pJoin(modelDir,"weather.csv"),"w") as file:
+		# file.write(str(verifiedData))
+		writer = csv.writer(file)
+		# writer.writerow(verifiedData)
+		for i in range(len(verifiedData)):
+			writer.writerow([verifiedData[i].replace("\n","")])
 	# Stdout/stderr.
 	outData["stdout"] = "Success"
 	return outData
@@ -38,6 +79,7 @@ def work(modelDir, inputDict):
 def pullMETAR(year, station, datatype): #def pullMETAR(year, station, datatype, outputDir):
 	url = ('https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?station=' + station + '&data=' + datatype + '&year1=' + year + 
 		'&month1=1&day1=1&year2=' + year + '&month2=12&day2=31&tz=Etc%2FUTC&format=onlycomma&latlon=no&direct=no&report_type=1&report_type=2')
+	print url
 	r = requests.get(url)
 	data = r.text
 	# tempData = []

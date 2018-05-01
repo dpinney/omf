@@ -18,7 +18,7 @@
 	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
-	<script type="text/javascript">
+	<!--<script type="text/javascript">
 		function downloadTextFile(fileName, text) {
 			console.log(text);
 			var element = document.createElement('a');
@@ -29,7 +29,7 @@
 		    element.click();
 		    document.body.removeChild(element);
 		}
-	</script>
+	</script>-->
 	</script>
 </head>
 <body onload="init()">
@@ -79,11 +79,11 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Year<span class="classic">year</span></label>
-				<input type="text" id="year" name="year" pattern="[1-2][0-9][0-9][0-9]" required="required">
+				<input type="text" id="year" name="year" pattern="[1-2][0-9][0-9][0-9]" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Station<span class="classic">ASOS Code, for USA codes (starting with K) exclude the first letter</span></label>
-				<input type="text" id="station" name="station" pattern="[A-Z]{3,4}" required="required">
+				<input type="text" id="station" name="station" pattern="[A-Z]{3,4}" required="required"/>
 			</div>			
 			<div class="shortInput">
 				<label class="tooltip">Weather Parameter<span class="classic">Data that should be pulled</span></label>
@@ -137,9 +137,10 @@
 	</div>
 	<p class="reportTitle postRun" style="page-break-before:always">Download Output Data</p>	
 		<div style="text-align:left" class="tightContent">
-			<a style="padding:10px" onclick="downloadTextFile('weatherDataPulled.txt',allOutputData['data'])">Weather Data</a>
-			<a id="dTest" download>David Test</a>
-			<script>gebi('dTest').href = "/downloadModelData/" + allInputData.user + "/" + allInputData.modelName + "/allInputData.json"</script>
+			<!--<a style="padding:10px" onclick="downloadTextFile('weatherDataPulled.txt',allOutputData.data)">Weather Data</a>-->
+			<!--<a style="padding:10px" onclick="(downloadTextFile('weatherData.txt', allOutputData.data))">Weather Output</a>-->
+			<a id="dTest" download>Output Download</a>
+			<script>gebi('dTest').href = "/downloadModelData/" + allInputData.user + "/" + allInputData.modelName + "/weather.csv"</script>
 		</div>
 	<!--<div>
 		<input id="results" name="results" type="hidden" onload="loadOutputData()">
