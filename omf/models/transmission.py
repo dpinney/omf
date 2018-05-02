@@ -9,7 +9,6 @@ from os.path import join as pJoin
 from jinja2 import Template
 import __neoMetaModel__
 from __neoMetaModel__ import *
-import pprint as pprint
 import matplotlib
 import matplotlib.cm as cm
 from matplotlib import pyplot as plt
@@ -157,7 +156,6 @@ def work(modelDir, inputDict):
 	plt.gca().set_aspect('equal')
 	busLocations = {}
 	i = 0
-	print networkJson["bus"]
 	for busName, busInfo in networkJson["bus"].items():
 		y = float(busInfo["latitude"])
 		x = float(busInfo["longitude"])
