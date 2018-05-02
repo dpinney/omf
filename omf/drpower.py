@@ -18,10 +18,9 @@ def transmissionConvert(owner, modelName):
 			pass # Ignore deletion failure.
 	# Convert and lay out the new file.
 	netJson = omf.network.parse(os.path.join(modelDir, 'convertMe.m'), filePath=True)
-	nxG = omf.network.netToNxGraph(netJson)
-	newNetwork = omf.network.latlonToNet(nxG, netJson)
+	omf.network.layout(netJson)
 	with open(os.path.join(modelDir,'case.omt'),'w') as outFile:
-		json.dump(newNetwork, outFile)
+		json.dump(netJson, outFile)
 	# Rewrite allInputData.json
 	with open(os.path.join(modelDir, 'allInputData.json'),'r+') as inFile:
 		inData = json.load(inFile)
