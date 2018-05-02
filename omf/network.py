@@ -177,7 +177,6 @@ def viz(pathToOmt, outputPath=None):
 	#HACK: make sure we get the required files from the right place.
 	SOURCE_DIR = os.path.dirname(__file__) + '/'
 	shutil.copy(SOURCE_DIR + 'templates/transEdit.html', tempDir + '/viewer.html')
-	# shutil.copy(SOURCE_DIR + 'static/svg-pan-zoom.js', tempDir + '/svg-pan-zoom.js')
 	# Rewrite the load lines in viewer.html
 	# Note: you can't juse open the file in r+ mode because, based on the way the file is mapped to memory, you can only overwrite a line with another of exactly the same length.
 	for line in fileinput.input(tempDir + '/viewer.html', inplace=1):
@@ -192,8 +191,7 @@ def viz(pathToOmt, outputPath=None):
 		elif line.lstrip().startswith('<link rel="stylesheet" href="/static/omf.css"/>'):
 			print '<link rel="stylesheet" href="' + SOURCE_DIR + 'static/omf.css"/>'
 		elif line.lstrip().startswith('<link rel="shortcut icon" href="/static/favicon.ico"/>'):
-			# print '<link rel="shortcut icon" href="' + SOURCE_DIR + '/static/favicon.ico"/>'
-			print '' # Favicon having trouble loading.
+			print '<link rel="shortcut icon" href="' + SOURCE_DIR + '/static/favicon.ico"/>'
 		elif line.lstrip().startswith('{%'):
 			print '' # Remove the is_admin check for saving changes.
 		else:
@@ -226,7 +224,8 @@ def _tests():
 	# 	"genLimits" : 0,
 	# 	}
 	# matpower.runSim(pJoin(os.getcwd(),'scratch','transmission',"outData",networkName), inputDict, debug=False)
+	# viz('./static/SimpleNetwork.json')
 
 if __name__ == '__main__':
-	viz('./static/SimpleNetwork.json')
-	# _tests()
+	# viz('./static/SimpleNetwork.json')
+	_tests()
