@@ -442,7 +442,7 @@ function buildFeeder() {
 	// Add circles after all lines
 	for (key in testFeeder.tree) {
 		anOb = testFeeder.tree[key]
-		if ('latitude' in anOb && 'longitude' in anOb && 'object' in anOb) {
+		if ('latitude' in anOb && 'longitude' in anOb && 'object' in anOb && !('from' in anOb) && !('to' in anOb)) {
 			addCircle(anOb['longitude'],anOb['latitude'],2,key,anOb['object'])
 		}
 	}
