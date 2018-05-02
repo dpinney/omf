@@ -24,6 +24,11 @@ def write(inNet):
 		output += _dictToString(inNet[key]) + '\n'
 	return output
 
+def layout(inNet):
+	''' Add synthetic lat/lon data to a graph to give it a nice human-readable shape. '''
+	nxG = netToNxGraph(inNet)
+	inNet = latlonToNet(nxG, inNet)
+
 def _dictConversion(inputStr, filePath=True):
 	''' Turn a MAT file/string into a dictionary.
 
