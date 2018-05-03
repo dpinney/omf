@@ -2,7 +2,7 @@ import omf
 import sys
 from matplotlib import pyplot as plt
 
-FNAME = 'R2-12.47-3.glm'
+FNAME = 'smsSingle.glm'
 
 # help(omf.feeder.parse)
 

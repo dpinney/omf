@@ -717,3 +717,29 @@ object ZIPload {
 	groupid fan;
 };
 
+object inverter {
+	parent tm_2;
+	name inverter_1;
+	generator_mode CONSTANT_PF;
+	generator_status ONLINE;
+	inverter_type PWM;
+	power_factor 1.0;
+//	<< implied child that provides a DC power input >>
+};
+
+object solar {
+	name solar_1;
+	parent inverter_1;
+	generator_mode SUPPLY_DRIVEN;
+	generator_status ONLINE;
+	panel_type SINGLE_CRYSTAL_SILICON;
+	efficiency 0.2;
+	area 2500;
+};
+
+//object battery {
+//	name battery_1;
+//	parent inverter_1;
+//	generator_mode SUPPLY_DRIVEN;
+//	generator_status ONLINE;
+//}

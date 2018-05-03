@@ -8,10 +8,27 @@ TECHNICAL GLD WARMUP
 XXX Downloaded taxonomic feeder glm file R2-12.47-3.glm (Light Suburban) to use as an example
 XXX Changed the output to dump Voltages A, B, and C on load 1 (are these the right variables to use? will they change? should I be using a different object?)
 XXX Does the glm run? Yes, but the values don't change (should voltage change?)
-OOO Add Inverter 
-OOO Add Solar
+XXX Add Inverter 
+	XXX Added example code from http://gridlab-d.shoutwiki.com/wiki/Inverter, named inverter_1
+XXX Add Solar
+	XXX Added example code from http://gridlab-d.shoutwiki.com/wiki/Solar
+	XXX set parent to inverter_1
+	XXX drawFeeder.py works
+XXX Modify cosim.py to read info on feeders
+OOO Run cosim.py and troubleshoot
+	XXX ERROR    [INIT] : init_solar(obj=32;solar_1): Solar panel can only have an inverter as its parent.
+		XXX removing battery so solar has inverter as parent
+	XXX Simulation works without battery
 OOO Add Battery
-OOO Create a picture of the glm using the drawing code in feeder.py
+	OOO How does the diagram look? How do you represent in gridlab-d, what connects to what? 
+	OOO What necessary variables need to go in battery?	
+XXX Run drawFeeder.py and troubleshoot
+	XXX drawFeeder.py works and shows correct layout
+
+OOO Test protective devices. What are they? do they work?
+	OOO Fuse? Breaker? Transformer?
+
+XXX Create a picture of the glm using the drawing code in feeder.py
 OOO Implement waitUntil() function
 
 LATERBASE

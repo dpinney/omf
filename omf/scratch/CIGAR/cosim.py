@@ -1,7 +1,7 @@
 import os, urllib2, subprocess, time
 
 # Start servert in server mode, note that the .glm has pauseat set for 1 day in to the simulation.
-proc = subprocess.Popen(['gridlabd','R2-12.47-3.glm','--server','-P','6267','-q'],stderr=None, stdout=None)
+proc = subprocess.Popen(['gridlabd','smsSingle.glm','--server','-P','6267','-q'],stderr=None, stdout=None)
 # Hack: wait for the dang server to start up and simulate.
 time.sleep(2)
 
@@ -35,29 +35,29 @@ try:
 	# urllib2.urlopen(BASE_URL + 'control/resume').read()
 	# print '* Reading final temp:', urllib2.urlopen(BASE_URL + 'raw/waterheater1/temperature').read()
 
-	# Read the clock and load1 voltages.
+	# Read the clock, solar output voltage, battery state of charge, and inverter voltage input.
 	print '* Reading clock:', urllib2.urlopen(BASE_URL + 'raw/clock').read()
-	print '* Reading load voltage A:', urllib2.urlopen(BASE_URL + 'raw/R2-12-47-3_meter_1/voltage_A').read()
-	print '* Reading load voltage B:', urllib2.urlopen(BASE_URL + 'raw/R2-12-47-3_meter_1/voltage_B').read()
-	print '* Reading load voltage C:', urllib2.urlopen(BASE_URL + 'raw/R2-12-47-3_meter_1/voltage_C').read()
+	print '* Reading solar_1 output volatage (V_Out):', urllib2.urlopen(BASE_URL + 'raw/solar_1/V_Out').read()
+#	print '* Reading battery_1 state of charge:', urllib2.urlopen(BASE_URL + 'raw/battery_1/battery_state').read()
+	print '* Reading inverter_1 input voltage (V_In):', urllib2.urlopen(BASE_URL + 'raw/inverter_1/V_In').read()
 	# Step the simulation.
 	urllib2.urlopen(BASE_URL + 'control/pauseat=2000-01-02%2012:00:00').read()
 	print '* Stepped ahead 12 hours.'
 	time.sleep(2) # Hack: give the simulation some time to run.
 	# Get the value and clock again.
-	print '* Reading load voltage A again:', urllib2.urlopen(BASE_URL + 'raw/R2-12-47-3_meter_1/voltage_A').read()
-	print '* Reading load voltage B again:', urllib2.urlopen(BASE_URL + 'raw/R2-12-47-3_meter_1/voltage_B').read()
-	print '* Reading load voltage C again:', urllib2.urlopen(BASE_URL + 'raw/R2-12-47-3_meter_1/voltage_C').read()
+	print '* Reading solar_1 output volatage (V_Out):', urllib2.urlopen(BASE_URL + 'raw/solar_1/V_Out').read()
+#	print '* Reading battery_1 state of charge:', urllib2.urlopen(BASE_URL + 'raw/battery_1/battery_state').read()
+	print '* Reading inverter_1 input voltage (V_In):', urllib2.urlopen(BASE_URL + 'raw/inverter_1/V_In').read()
 	print '* Reading clock again:', urllib2.urlopen(BASE_URL + 'raw/clock').read()
 	# # Set a value.
 	# urllib2.urlopen(BASE_URL + 'raw/waterheater1/temperature=110.0').read()
 	# print '* Setting temp to 110.'
-	# Finish the simulation and see final voltages.
+	# Finish the simulation and see final values.
 	print '* Resuming simulation.'
 	urllib2.urlopen(BASE_URL + 'control/resume').read()
-	print '* Reading final load voltage A:', urllib2.urlopen(BASE_URL + 'raw/R2-12-47-3_meter_1/voltage_A').read()
-	print '* Reading final load voltage B:', urllib2.urlopen(BASE_URL + 'raw/R2-12-47-3_meter_1/voltage_B').read()
-	print '* Reading final load voltage C:', urllib2.urlopen(BASE_URL + 'raw/R2-12-47-3_meter_1/voltage_C').read()
+	print '* Reading solar_1 output volatage (V_Out):', urllib2.urlopen(BASE_URL + 'raw/solar_1/V_Out').read()
+#	print '* Reading battery_1 state of charge:', urllib2.urlopen(BASE_URL + 'raw/battery_1/battery_state').read()
+	print '* Reading inverter_1 input voltage (V_In):', urllib2.urlopen(BASE_URL + 'raw/inverter_1/V_In').read()
 except:
 	pass # server being weird.
 
