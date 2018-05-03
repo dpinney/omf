@@ -230,7 +230,7 @@
 		<div id='menuRight'>
 			<div id='saveButton'> 
 				<div class='buttonGroup'>
-				 	<button id='save' class='pill' onclick="downloadTextFile('testFeederOutput.txt', JSON.stringify(testFeeder))">Save </button>
+				 	<button id='save' class='pill' onclick="downloadTextFile()">Save </button>
 				 </div>
 			</div>	 	
 			<div id='EditDiv'>
@@ -333,28 +333,38 @@ var scaleLevel = 1.0 // Scale that all SVG objects are drawn at
 function saveSvg() {
 	// Create an SVG that can be saved.
 	alert('We are redirecting you to a static version of the SVG that you can save as a .svg file.')
-	svg = document.getElementById('svgContainer').outerHTML
-	b64 = btoa(svg)
-	window.location = 'data:image/svg+xml;base64,\n' + b64
+	var svg = document.getElementById('svgContainer').outerHTML
+	var win = window.open()
+	win.document.write(svg)
 }
 
-function saveJson() {
+function downloadTextFile() {
 	// WARNING! Performance is very bad because the JSON is enormous! This can hang your browser!
-	alert('We are redirecting you to a static version of the JSON that you can save as a .json file.')
-	modJson = JSON.stringify(testFeeder)
-	b64 = btoa(modJson)
-	window.location = 'data:text/json;base64,\n' + b64
+	alert('We are opening a window with JSON in it that you can save as a .json file.')
+	var modJson = JSON.stringify(testFeeder)
+	var win = window.open()
+	win.document.write(modJson)
 }
 
-function downloadTextFile(fileName, text) {
-	console.log(text)
-	var element = document.createElement('a');
-	element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-	element.setAttribute('download', fileName);
-	element.style.display = 'none';
-	document.body.appendChild(element);
-	element.click();
-	document.body.removeChild(element);
+function NOdownloadTextFile() {
+	// var fName = 'testFeederOutput.txt'
+	// var feedData = JSON.stringify(testFeeder)
+	// var string = document.output(feedData)
+	// var iframe = "<iframe width='100%' height='100%' src='" + string + "'></iframe>"
+	// var x = window.open();
+	// x.document.open();
+	// x.document.write(iframe);
+	// x.document.close();
+	var fileName = 'testFeederOutput.txt'
+	var text = JSON.stringify(testFeeder)
+	// console.log(text)
+	var element = document.createElement('a')
+	element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text))
+	element.setAttribute('download', fileName)
+	element.style.display = 'none'
+	document.body.appendChild(element)
+	element.click()
+	document.body.removeChild(element)
 }
 
 function addCircle(x,y,r,id,myClass) {
