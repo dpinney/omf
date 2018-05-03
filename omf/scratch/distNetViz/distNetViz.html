@@ -346,27 +346,6 @@ function downloadTextFile() {
 	win.document.write(modJson)
 }
 
-function NOdownloadTextFile() {
-	// var fName = 'testFeederOutput.txt'
-	// var feedData = JSON.stringify(testFeeder)
-	// var string = document.output(feedData)
-	// var iframe = "<iframe width='100%' height='100%' src='" + string + "'></iframe>"
-	// var x = window.open();
-	// x.document.open();
-	// x.document.write(iframe);
-	// x.document.close();
-	var fileName = 'testFeederOutput.txt'
-	var text = JSON.stringify(testFeeder)
-	// console.log(text)
-	var element = document.createElement('a')
-	element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text))
-	element.setAttribute('download', fileName)
-	element.style.display = 'none'
-	document.body.appendChild(element)
-	element.click()
-	document.body.removeChild(element)
-}
-
 function addCircle(x,y,r,id,myClass) {
 	svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0]
 	aCirc = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
