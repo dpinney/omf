@@ -112,6 +112,7 @@ def distRandomizeLocations(inFeeder):
 
 def distTranslateLocations(inFeeder, translation, rotation):
 	''' Move the position of all objects in the inFeeder distribution system by a horizontal translation and counter-clockwise rotation. '''
+	#Horribly designed, if translation is 0 but rotation is large, system will not move
 	translation = float(translation)
 	rotation = float(rotation)
 	inFeeder['nodes'] = []
