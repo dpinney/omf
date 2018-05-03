@@ -230,7 +230,7 @@
 		<div id='menuRight'>
 			<div id='saveButton'> 
 				<div class='buttonGroup'>
-				 	<button id='save' class='pill' onclick="downloadTextFile('testFeederOutput.txt', JSON.stringify(testFeeder))">Save </button>
+				 	<button id='save' class='pill' onclick="downloadTextFile()">Save </button>
 				 </div>
 			</div>	 	
 			<div id='EditDiv'>
@@ -316,13 +316,6 @@
 	<div id='tableScroller'></div>
 	<p id="loadingMessage" style="font-size:60pt; text-align:center; width:100%; display:inline-block">Feeder Loading...</p>
 </body>
-<script type='text/javascript'>
-	function loadingStuff() {
-		buildFeeder();
-		document.getElementById('loadingMessage').style.display = 'none'
-	}
-	setTimeout(loadingStuff,100)
-</script>
 </html>
 <script id='feederInsert'>
 </script>
@@ -340,32 +333,18 @@ var scaleLevel = 1.0 // Scale that all SVG objects are drawn at
 function saveSvg() {
 	// Create an SVG that can be saved.
 	alert('We are redirecting you to a static version of the SVG that you can save as a .svg file.')
-	svg = document.getElementById('svgContainer').outerHTML
-	b64 = btoa(svg)
-	window.location = 'data:image/svg+xml;base64,\n' + b64
+	var svg = document.getElementById('svgContainer').outerHTML
+	var win = window.open()
+	win.document.write(svg)
 }
 
-function saveJson() {
+function downloadTextFile() {
 	// WARNING! Performance is very bad because the JSON is enormous! This can hang your browser!
-	alert('We are redirecting you to a static version of the JSON that you can save as a .json file.')
-	modJson = JSON.stringify(testFeeder)
-	b64 = btoa(modJson)
-	window.location = 'data:text/json;base64,\n' + b64
+	alert('We are opening a window with JSON in it that you can save as a .json file.')
+	var modJson = JSON.stringify(testFeeder)
+	var win = window.open()
+	win.document.write(modJson)
 }
-
-function downloadTextFile(fileName, text) {
-			console.log(text)
-			var element = document.createElement('a');
-		    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-		    element.setAttribute('download', fileName);
-
-		    element.style.display = 'none';
-		    document.body.appendChild(element);
-
-		    element.click();
-
-		    document.body.removeChild(element);
-		}
 
 function addCircle(x,y,r,id,myClass) {
 	svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0]
@@ -442,7 +421,7 @@ function buildFeeder() {
 	// Add circles after all lines
 	for (key in testFeeder.tree) {
 		anOb = testFeeder.tree[key]
-		if ('latitude' in anOb && 'longitude' in anOb && 'object' in anOb) {
+		if ('latitude' in anOb && 'longitude' in anOb && 'object' in anOb && !('from' in anOb) && !('to' in anOb)) {
 			addCircle(anOb['longitude'],anOb['latitude'],2,key,anOb['object'])
 		}
 	}
@@ -965,7 +944,7 @@ function findNext() {
 	// Find the tree index of the next item.
 	if (searchCursor == undefined) {
 		searchCursor = 0
-	}  else {
+	} else {
 		searchCursor = (searchCursor + 1) % hits.length
 	}
 	var hitId = hits[searchCursor]
@@ -1000,7 +979,7 @@ function findPrevious() {
 	var hits = findElementsViaString(term)
 	if (searchCursor == undefined) {
 		findNext()
-	}  else if (searchCursor == 0) {
+	} else if (searchCursor == 0) {
 		// Wrapped around.
 		searchCursor = (hits.length) - 2
 		findNext()
@@ -1020,26 +999,36 @@ function findElementsViaString(inString) {
 	}
 	return results
 }
+
 function fixPhases () {
+	// Todo: complete this to walk the tree and fix phasing.
 	for (i in testFeeder.tree){
 		if (testFeeder.tree[i].name != undefined) {
-		nodeName = testFeeder.tree[i].name
-		for (j in testFeeder.tree){
-			if (testFeeder.tree[j].from != undefined){
-			linkFrom = testFeeder.tree[j].from
-			if (nodeName == linkFrom){
-				node = testFeeder.tree[i]
-				link = testFeeder.tree[j]
-				nodePhase = node.phases.split('').sort().join('').trim()
-				linkPhase = link.phases.split('').sort().join('').trim()
-
-				if (linkPhase.length > nodePhase.length){
-					linkPhase==nodePhase
+			nodeName = testFeeder.tree[i].name
+			for (j in testFeeder.tree) {
+				if (testFeeder.tree[j].from != undefined) {
+					linkFrom = testFeeder.tree[j].from
+					if (nodeName == linkFrom) {
+						node = testFeeder.tree[i]
+						link = testFeeder.tree[j]
+						nodePhase = node.phases.split('').sort().join('').trim()
+						linkPhase = link.phases.split('').sort().join('').trim()
+						if (linkPhase.length > nodePhase.length) {
+							linkPhase==nodePhase
+						}
+					}
 				}
 			}
-			}
-		}
 		}
 	}
 }
+
+function loadingStuff() {
+	// Start the feeder building and when it's done, remove the loading message.
+	buildFeeder();
+	document.getElementById('loadingMessage').style.display = 'none'
+}
+
+// Run loading stuff.
+setTimeout(loadingStuff,100)
 </script>

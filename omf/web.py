@@ -487,11 +487,11 @@ def milImportBackground(owner, modelName, feederName, feederNum, stdString, seqS
 @app.route("/matpowerImport/<owner>", methods=["POST"])
 @flask_login.login_required
 def matpowerImport(owner):
-	''' API for importing a milsoft feeder. '''
+	''' API for importing a MATPOWER network. '''
 	modelName = request.form.get("modelName","")
 	networkName = str(request.form.get("networkNameM","network1"))
 	networkNum = request.form.get("networkNum",1)
-	# Delete existing .m files to not clutter model
+	# Delete existing .m files to not clutter model.
 	path = "data/Model/"+owner+"/"+modelName
 	fileList = safeListdir(path)
 	for file in fileList:
@@ -507,16 +507,14 @@ def matpowerImport(owner):
 
 def matImportBackground(owner, modelName, networkName, networkNum):
 	''' Function to run in the background for Milsoft import. '''
-	# TODO: Layout vars x/y scale left over from d3?
 	modelDir = "data/Model/"+owner+"/"+modelName
 	networkDir = modelDir+"/"+networkName+".m"
-	newFeeder = network.parse(networkDir, filePath=True)
-	nxG = network.netToNxGraph(newFeeder)
-	newFeeder = network.latlonToNet(nxG, newFeeder)
+	newNet = network.parse(networkDir, filePath=True)
+	network.layout(newNet)
 	try: os.remove(networkDir)
 	except: pass
 	with open(networkDir.replace('.m','.omt'), "w") as outFile:
-		json.dump(newFeeder, outFile, indent=4)
+		json.dump(newNet, outFile, indent=4)
 	os.remove("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
 	removeNetwork(owner, modelName, networkNum)
 	writeToInput(modelDir, networkName, 'networkName'+str(networkNum))
