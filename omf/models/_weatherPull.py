@@ -1,11 +1,13 @@
 ''' Get power and energy limits from PNNL VirtualBatteries (VBAT) load model.'''
 
-import json, os, shutil, subprocess, platform
+import json, os, shutil, subprocess, platform, math
 from os.path import join as pJoin
 from jinja2 import Template
 import __neoMetaModel__
 from __neoMetaModel__ import *
 import requests, csv, tempfile
+from dateutil.parser import parse as parseDt
+import datetime as dt
 
 # Model metadata:
 fileName = os.path.basename(__file__)
@@ -28,46 +30,41 @@ def work(modelDir, inputDict):
 	station = inputDict["station"]
 	parameter = inputDict["weatherParameter"]
 	verifiedData = []
-	validCount = 0
-	lastValidHour = 0
-	valuesMissing = 0
+	errorCount = 0
 	if source == "METAR":
 		data = pullMETAR(year,station,parameter)
 	# Writing the raw output.
 	with open(pJoin(modelDir,"weather.csv"),"w") as file:
 		file.write(data)
-	# Trying to clean up the output and writing a cleaner copy.
+
+	verifiedData = [999.9]*8760
+	firstDT = dt.datetime(int(year),1,1,0)
 	with open(pJoin(modelDir,"weather.csv"),"r") as file:
 		reader = csv.reader(file)
 		for row in reader:
-			print row
-			hour = (row[1].partition(" ")[2]).partition(":")[0]
-			if hour != '':
-				# print int(hour)
-				hour = int(hour)
-				# print hour + " and value " + row[2]
-				if ((hour > lastValidHour) and (hour - lastValidHour > 1)) or ((hour < lastValidHour) and (hour+24 - lastValidHour) > 1):
-					verifiedData.append("999.9")
-					lastValidHour = hour
-					valuesMissing += 1
-					# print "hour: " + str(hour) + " and value: " + str(row[2])
-				elif row[2] != "M" and hour != lastValidHour:
-					lastValidHour = hour
-					# print "hour: " + str(hour) + " and value: " + str(row[2])
-					verifiedData.append(row[2])
-					validCount += 1
-	print "missing values: " + str(valuesMissing)
-	print "valid count is: " + str(validCount)
+			if row[1] != "valid" and row[2] != "M":
+				d = parseDt(row[1])
+				deltatime = d - firstDT
+				verifiedData[int(math.floor((deltatime.total_seconds())/(60*60)))] = row[2]
+
 	outData["data"] = verifiedData
-	with open(pJoin(modelDir,"weather.csv"),"w") as file:
+	with open(pJoin(modelDir,"weather.csv"),"wb") as file:
 		writer = csv.writer(file)
 		writer.writerows([[x] for x in verifiedData])
+
+
+	for each in verifiedData:
+		if each == 999.9:
+			errorCount += 1
+
+	outData["errorCount"] = errorCount
+
 	outData["stdout"] = "Success"
 	return outData
 
 def pullMETAR(year, station, datatype): #def pullMETAR(year, station, datatype, outputDir):
 	url = ('https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?station=' + station + '&data=' + datatype + '&year1=' + year + 
-		'&month1=1&day1=1&year2=' + year + '&month2=12&day2=31&tz=Etc%2FUTC&format=onlycomma&latlon=no&direct=no&report_type=1&report_type=2')
+		'&month1=1&day1=1&year2=' + str(int(year)+1) + '&month2=1&day2=1&tz=Etc%2FUTC&format=onlycomma&latlon=no&direct=no&report_type=1&report_type=2')
 	print url
 	r = requests.get(url)
 	data = r.text
@@ -102,16 +99,6 @@ def new(modelDir):
 #	deadband = "0.625",
 #	return power,capacitance,resistance,cop,setpoint,deadband
 
-# from dateutil.parser import parse as parseDt
-# from calendar import isleap
-# inData = ['2017-01-05 11:00','2017-11-20 12:00']
-# dataYear = parseDt(inData[0]).year
-# hours = 8760 + 24 * isleap(dataYear) # Handles leap years.
-# outData = ['999.9' for x in range(hours) ]
-# for read in inData:
-# 	d = parseDt(read)
-# 	(year, week, day) = d.isocalendar()
-# 	outData[week*24*7 + day*24 + d.hour] = 'VALUEGoesHere'
 
 def _simpleTest():
 	# Location
@@ -129,7 +116,7 @@ def _simpleTest():
 	# Run the model.
 	runForeground(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
-	# renderAndShow(modelLoc)
+	renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_simpleTest ()
