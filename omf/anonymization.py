@@ -110,6 +110,8 @@ def distRandomizeLocations(inFeeder):
 def distTranslateLocations(inFeeder, translation, rotation):
 	''' Move the position of all objects in the inFeeder distribution system by a horizontal translation and counter-clockwise rotation. '''
 	#Horribly designed, if translation is 0 but rotation is large, system will not move
+	#Have to fix how translation is inputted on the front end, to allow for both horizontal and vertical
+		'''transformations, not just diagonal'''
 	#x' = x*cos(degrees) - y*cos(degrees)
 	# y' = y*cos(degrees - x* sin(degrees)
 	translation = float(translation)
@@ -122,8 +124,16 @@ def distTranslateLocations(inFeeder, translation, rotation):
 		if ('longitude' in inFeeder['tree'][key]) or ('latitude' in inFeeder['tree'][key]):
 			longitude = float(inFeeder['tree'][key]['longitude'])
 			latitude = float(inFeeder['tree'][key]['latitude'])
-			inFeeder['tree'][key]['longitude'] = longitude + translation*math.cos(rotation)
-			inFeeder['tree'][key]['latitude'] = latitude + translation*math.sin(rotation)
+			inFeeder['tree'][key]['longitude']=longitude+translation
+			inFeeder['tree'][key]['latitude']=latitude+translation
+
+			x = float(inFeeder['tree'][key]['longitude'])
+			y = float(inFeeder['tree'][key]['latitude'])
+
+			inFeeder['tree'][key]['longitude'] = x*math.cos(rotation) - y*math.cos(rotation)
+			inFeeder['tree'][key]['latitude'] = y*cos(rotation) - x* sin(rotation)
+
+			
 
 def distAddNoise(inFeeder, noisePerc):
 	''' Add random noise to properties with numeric values for all objects in the inFeeder distribution system based on a noisePerc magnitude. '''
