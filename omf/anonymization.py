@@ -128,7 +128,7 @@ def distTranslateLocations(inFeeder, translation, rotation):
 			x = float(inFeeder['tree'][key]['longitude'])
 			y = float(inFeeder['tree'][key]['latitude'])
 			inFeeder['tree'][key]['longitude'] = x*math.cos(rotation) - y*math.cos(rotation)
-			inFeeder['tree'][key]['latitude'] = y*cos(rotation) - x* sin(rotation)
+			inFeeder['tree'][key]['latitude'] = y*math.cos(rotation) - x* math.sin(rotation)
 
 			
 
