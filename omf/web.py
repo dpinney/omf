@@ -510,13 +510,12 @@ def matImportBackground(owner, modelName, networkName, networkNum):
 	# TODO: Layout vars x/y scale left over from d3?
 	modelDir = "data/Model/"+owner+"/"+modelName
 	networkDir = modelDir+"/"+networkName+".m"
-	newFeeder = network.parse(networkDir, filePath=True)
-	nxG = network.netToNxGraph(newFeeder)
-	newFeeder = network.latlonToNet(nxG, newFeeder)
+	newNet = network.parse(networkDir, filePath=True)
+	network.layout(newNet)
 	try: os.remove(networkDir)
 	except: pass
 	with open(networkDir.replace('.m','.omt'), "w") as outFile:
-		json.dump(newFeeder, outFile, indent=4)
+		json.dump(newNet, outFile, indent=4)
 	os.remove("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
 	removeNetwork(owner, modelName, networkNum)
 	writeToInput(modelDir, networkName, 'networkName'+str(networkNum))
