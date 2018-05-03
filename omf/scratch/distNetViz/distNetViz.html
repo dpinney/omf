@@ -316,13 +316,6 @@
 	<div id='tableScroller'></div>
 	<p id="loadingMessage" style="font-size:60pt; text-align:center; width:100%; display:inline-block">Feeder Loading...</p>
 </body>
-<script type='text/javascript'>
-	function loadingStuff() {
-		buildFeeder();
-		document.getElementById('loadingMessage').style.display = 'none'
-	}
-	setTimeout(loadingStuff,100)
-</script>
 </html>
 <script id='feederInsert'>
 </script>
@@ -354,18 +347,15 @@ function saveJson() {
 }
 
 function downloadTextFile(fileName, text) {
-			console.log(text)
-			var element = document.createElement('a');
-		    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-		    element.setAttribute('download', fileName);
-
-		    element.style.display = 'none';
-		    document.body.appendChild(element);
-
-		    element.click();
-
-		    document.body.removeChild(element);
-		}
+	console.log(text)
+	var element = document.createElement('a');
+	element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+	element.setAttribute('download', fileName);
+	element.style.display = 'none';
+	document.body.appendChild(element);
+	element.click();
+	document.body.removeChild(element);
+}
 
 function addCircle(x,y,r,id,myClass) {
 	svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0]
@@ -965,7 +955,7 @@ function findNext() {
 	// Find the tree index of the next item.
 	if (searchCursor == undefined) {
 		searchCursor = 0
-	}  else {
+	} else {
 		searchCursor = (searchCursor + 1) % hits.length
 	}
 	var hitId = hits[searchCursor]
@@ -1000,7 +990,7 @@ function findPrevious() {
 	var hits = findElementsViaString(term)
 	if (searchCursor == undefined) {
 		findNext()
-	}  else if (searchCursor == 0) {
+	} else if (searchCursor == 0) {
 		// Wrapped around.
 		searchCursor = (hits.length) - 2
 		findNext()
@@ -1020,26 +1010,36 @@ function findElementsViaString(inString) {
 	}
 	return results
 }
+
 function fixPhases () {
+	// Todo: complete this to walk the tree and fix phasing.
 	for (i in testFeeder.tree){
 		if (testFeeder.tree[i].name != undefined) {
-		nodeName = testFeeder.tree[i].name
-		for (j in testFeeder.tree){
-			if (testFeeder.tree[j].from != undefined){
-			linkFrom = testFeeder.tree[j].from
-			if (nodeName == linkFrom){
-				node = testFeeder.tree[i]
-				link = testFeeder.tree[j]
-				nodePhase = node.phases.split('').sort().join('').trim()
-				linkPhase = link.phases.split('').sort().join('').trim()
-
-				if (linkPhase.length > nodePhase.length){
-					linkPhase==nodePhase
+			nodeName = testFeeder.tree[i].name
+			for (j in testFeeder.tree) {
+				if (testFeeder.tree[j].from != undefined) {
+					linkFrom = testFeeder.tree[j].from
+					if (nodeName == linkFrom) {
+						node = testFeeder.tree[i]
+						link = testFeeder.tree[j]
+						nodePhase = node.phases.split('').sort().join('').trim()
+						linkPhase = link.phases.split('').sort().join('').trim()
+						if (linkPhase.length > nodePhase.length) {
+							linkPhase==nodePhase
+						}
+					}
 				}
 			}
-			}
-		}
 		}
 	}
 }
+
+function loadingStuff() {
+	// Start the feeder building and when it's done, remove the loading message.
+	buildFeeder();
+	document.getElementById('loadingMessage').style.display = 'none'
+}
+
+// Run loading stuff.
+setTimeout(loadingStuff,100)
 </script>
