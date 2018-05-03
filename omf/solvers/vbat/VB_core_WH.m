@@ -102,8 +102,8 @@ P_lower_wh = mean(P_lower_wh1);
 % extract hourly data from minute output for energy
 E_UL_wh = E_UL_wh1(60:60:length(E_UL_wh1));
 
-if paraFile(7) ==1
-    E_UL_wh = zeros(8760,1);
+if paraFile(7) ==1 %vbat doesn't work with 1 device or less, this avoids an error and instead returns 0's
+   E_UL_wh = zeros(8760,1);
 end
 
 end
