@@ -1,5 +1,3 @@
-#set pauseat=2000-01-02 00:00:00 PST;
-
 clock {
 	timezone PST+8PDT;
 	starttime '2000-01-01 00:00:00';
@@ -724,7 +722,9 @@ object inverter {
 	generator_status ONLINE;
 	inverter_type PWM;
 	power_factor 1.0;
-//	<< implied child that provides a DC power input >>
+	inverter_efficiency 0.95;
+	rated_power 100 kW;
+	//	<< implied child that provides a DC power input >>
 };
 
 object solar {
