@@ -48,7 +48,6 @@ def distRandomizeNames(inFeeder):
 	newNameKey = {}
 	allKeys = range(len(inFeeder['tree'].keys()))
 	random.shuffle(allKeys)
-
 	# Create nameKey dictionary
 	for count, key in enumerate(inFeeder['tree']):
 		if 'name' in inFeeder['tree'][key]:
@@ -95,7 +94,6 @@ def distRandomizeNames(inFeeder):
 			if key == 'name':
 				oldNode = inFeeder['nodes'][i][key]
 				inFeeder['nodes'][i][key] = newNameKey[oldNode]	
-
 	return newNameKey
 	
 def distRandomizeLocations(inFeeder):
@@ -108,7 +106,6 @@ def distRandomizeLocations(inFeeder):
 		if ('longitude' in inFeeder['tree'][key]) or ('latitude' in inFeeder['tree'][key]):
 			inFeeder['tree'][key]['longitude'] = random.randint(0,1000)
 			inFeeder['tree'][key]['latitude'] = random.randint(0,1000)
-	return
 
 def distTranslateLocations(inFeeder, translation, rotation):
 	''' Move the position of all objects in the inFeeder distribution system by a horizontal translation and counter-clockwise rotation. '''
@@ -124,8 +121,6 @@ def distTranslateLocations(inFeeder, translation, rotation):
 			latitude = float(inFeeder['tree'][key]['latitude'])
 			inFeeder['tree'][key]['longitude'] = longitude + translation*math.cos(rotation)
 			inFeeder['tree'][key]['latitude'] = latitude + translation*math.sin(rotation)
-		
-	return
 
 def distAddNoise(inFeeder, noisePerc):
 	''' Add random noise to properties with numeric values for all objects in the inFeeder distribution system based on a noisePerc magnitude. '''
@@ -151,7 +146,6 @@ def distAddNoise(inFeeder, noisePerc):
 				except ValueError:
 					continue
 				continue
-	return
 
 def distShuffleLoads(inFeeder, shufPerc):
 	''' Shuffle the parent properties between all load objects in the inFeeder distribution system. '''
@@ -241,7 +235,6 @@ def distShuffleLoads(inFeeder, shufPerc):
 		# 	if random.randint(0,100) < shufPerc:
 		# 		inFeeder['tree'][key]['parent'] = tnParents[tnIdx]
 		# 		tnIdx += 1
-	return
 
 def distModifyTriplexLengths(inFeeder):
 	''' Modifies triplex line length and diameter properties while preserving original impedance in the inFeeder distribution system. '''
@@ -264,7 +257,7 @@ def distModifyTriplexLengths(inFeeder):
 					tLookup[tLine].update(conductor_1=inFeeder['tree'][key].get('conductor_1'))
 					tLookup[tLine].update(conductor_2=inFeeder['tree'][key].get('conductor_2'))
 					tLookup[tLine].update(conductor_N=inFeeder['tree'][key].get('conductor_N'))
-	for key in inFeeder['tree']:	
+	for key in inFeeder['tree']:
 		if inFeeder['tree'][key].get('object') == 'triplex_line_conductor':
 			for tLine in tLookup:
 				if (tLookup[tLine].get('conductor_1') == inFeeder['tree'][key].get('name')) or (tLookup[tLine].get('conductor_2') == inFeeder['tree'][key].get('name')) or (tLookup[tLine].get('conductor_N') == inFeeder['tree'][key].get('name')):
@@ -281,7 +274,6 @@ def distModifyTriplexLengths(inFeeder):
 				inFeeder['tree'][key]['diameter'] = tLookup[tLine].get('diameter')
 			if (inFeeder['tree'][key].get('name') == tLookup[tLine].get('conductor_1')) or (inFeeder['tree'][key].get('name') == tLookup[tLine].get('conductor_2')) or (inFeeder['tree'][key].get('name') == tLookup[tLine].get('conductor_N')):
 				inFeeder['tree'][key]['resistance'] = tLookup[tLine].get('resistance')
-	return
 
 def distModifyConductorLengths(inFeeder):
 	''' Modifies conductor length and diameter properties while preserving original impedance in the inFeeder distribution system. '''
@@ -353,7 +345,6 @@ def distModifyConductorLengths(inFeeder):
 			if (inFeeder['tree'][key].get('name') == oLookup[oLine].get('conductor_N')) or (inFeeder['tree'][key].get('name') == oLookup[oLine].get('conductor_A')) or (inFeeder['tree'][key].get('name') == oLookup[oLine].get('conductor_B')) or (inFeeder['tree'][key].get('name') == oLookup[oLine].get('conductor_C')):
 				inFeeder['tree'][key]['resistance'] = oLookup[oLine].get('resistance')
 				inFeeder['tree'][key]['geometric_mean_radius'] = oLookup[oLine].get('geometric_mean_radius')
-	return
 
 def distSmoothLoads(inFeeder):
 	''' Reduce the resolution of load shapes by taking all sub-hourly load dispatch data in the inFeeder distribution system and aggregating to the hour level. ''' 
@@ -396,7 +387,6 @@ def distSmoothLoads(inFeeder):
 		outList.append(scadaPoint)
 	scadaAttach = '\n'.join(outList)
 	inFeeder['attachments']['subScadaCalibrated1.player'] = scadaAttach
-	return
 
 # TRANSMISSION NETWORK FUNCTIONS
 def tranPseudomizeNames(inNetwork):
@@ -467,7 +457,6 @@ def tranRandomizeNames(inNetwork):
 			if 'tbus' in prop:
 				oldTo = i[key]['tbus']
 				i[key]['tbus'] = newBusKey[oldTo]
-	return
 
 def tranRandomizeLocations(inNetwork):
 	''' Replace all objects' longitude and latitude positions in the inNetwork transmission system with random values. '''
@@ -481,7 +470,6 @@ def tranRandomizeLocations(inNetwork):
 				i[key]['longitude'] = random.randint(0,1000)
 			if 'latitude' in prop:
 				i[key]['latitude'] = random.randint(0,1000)
-	return
 
 def tranTranslateLocations(inNetwork, translation, rotation):
 	''' Move the position of all objects in the inNetwork transmission system by a horizontal translation and counter-clockwise rotation. '''
@@ -499,7 +487,6 @@ def tranTranslateLocations(inNetwork, translation, rotation):
 			if 'latitude' in prop:
 				latitude = float(i[key]['latitude'])
 				i[key]['latitude'] = latitude + translation*math.sin(rotation)
-	return
 
 def tranAddNoise(inNetwork, noisePerc):
 	''' Add random noise to properties with numeric values for all objects in the inNetwork transmission system based on a noisePerc magnitude. '''
@@ -521,7 +508,6 @@ def tranAddNoise(inNetwork, noisePerc):
 							print 'error'
 							continue
 				arrayId += 1
-	return
 
 def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 	''' Shuffle the parent properties between all load and gen objects in the inNetwork transmission system. '''
@@ -574,7 +560,6 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 					i[key]['bus'] = genParents[genIdx]
 					genIdx += 1
 		genId += 1
-	return
 
 # def _tests():
 # 	pass
