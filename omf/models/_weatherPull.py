@@ -34,8 +34,8 @@ def work(modelDir, inputDict):
 	#check the source using and use the appropriate function
 	if source == "METAR":
 		data = pullMETAR(year,station,parameter)
-	elif source == "USCRN":
-		data = pullUSCRN(year,station,parameter)
+	# elif source == "USCRN":
+	# 	data = pullUSCRN(year,station,parameter)
 	# Writing the raw output.
 	with open(pJoin(modelDir,"weather.csv"),"w") as file:
 		file.write(data)
@@ -82,7 +82,7 @@ def pullMETAR(year, station, datatype): #def pullMETAR(year, station, datatype, 
 	# 	for x in range(0,8760): 
 	# 		wr.writerow([tempData[x]])
 
-def pullUSCRN(year, station, datatype):
+# def pullUSCRN(year, station, datatype):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
