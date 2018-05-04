@@ -31,34 +31,38 @@ def work(modelDir, inputDict):
 	parameter = inputDict["weatherParameter"]
 	verifiedData = []
 	errorCount = 0
+	#check the source using and use the appropriate function
 	if source == "METAR":
 		data = pullMETAR(year,station,parameter)
+	elif source == "USCRN":
+		data = pullUSCRN(year,station,parameter)
 	# Writing the raw output.
 	with open(pJoin(modelDir,"weather.csv"),"w") as file:
 		file.write(data)
 
-	verifiedData = [999.9]*8760
-	firstDT = dt.datetime(int(year),1,1,0)
-	with open(pJoin(modelDir,"weather.csv"),"r") as file:
-		reader = csv.reader(file)
-		for row in reader:
-			if row[1] != "valid" and row[2] != "M":
-				d = parseDt(row[1])
-				deltatime = d - firstDT
-				verifiedData[int(math.floor((deltatime.total_seconds())/(60*60)))] = row[2]
+	if parameter != "metar":#raw metar should not be formated as it is already in its own format and difficult to handle
+		verifiedData = [999.9]*8760
+		firstDT = dt.datetime(int(year),1,1,0)
+		with open(pJoin(modelDir,"weather.csv"),"r") as file:
+			reader = csv.reader(file)
+			for row in reader:
+				if row[1] != "valid" and row[2] != "M":
+					d = parseDt(row[1])
+					deltatime = d - firstDT
+					verifiedData[int(math.floor((deltatime.total_seconds())/(60*60)))] = row[2]
 
-	outData["data"] = verifiedData
-	with open(pJoin(modelDir,"weather.csv"),"wb") as file:
-		writer = csv.writer(file)
-		writer.writerows([[x] for x in verifiedData])
+		#storing good data to allOutputData.json and weather.csv
+		outData["data"] = verifiedData
+		with open(pJoin(modelDir,"weather.csv"),"wb") as file:
+			writer = csv.writer(file)
+			writer.writerows([[x] for x in verifiedData])
 
-
+	#checking how many wrong values there are
 	for each in verifiedData:
 		if each == 999.9:
 			errorCount += 1
 
 	outData["errorCount"] = errorCount
-
 	outData["stdout"] = "Success"
 	return outData
 
@@ -77,6 +81,8 @@ def pullMETAR(year, station, datatype): #def pullMETAR(year, station, datatype, 
 	# 	wr = csv.writer(myfile,lineterminator = '\n')
 	# 	for x in range(0,8760): 
 	# 		wr.writerow([tempData[x]])
+
+def pullUSCRN(year, station, datatype):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
