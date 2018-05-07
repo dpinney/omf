@@ -121,7 +121,7 @@ object line_configuration:7241 {
 //create lineobjects:
 object underground_line:701702 {
 	 phases "ABC";
-	 name _701-702;
+	 name "_701-702";
 	 from load:801;
 	 to node:702;
 	 length 960;
@@ -130,7 +130,7 @@ object underground_line:701702 {
 
 object underground_line:702705 {
 	 phases "ABC";
-	 name 702-705;
+	 name "_702-705";
 	 from node:702;
 	 to node:705;
 	 length 400;
@@ -139,7 +139,7 @@ object underground_line:702705 {
 
 object underground_line:702713 {
 	 phases "ABC";
-	 name 702-713;
+	 name "_702-713";
 	 from node:702;
 	 to load:813;
 	 length 360;
@@ -148,7 +148,7 @@ object underground_line:702713 {
 
 object underground_line:702703 {
 	 phases "ABC";
-	 name 702-703;
+	 name "_702-703";
 	 from node:702;
 	 to node:703;
 	 length 1320;
@@ -157,7 +157,7 @@ object underground_line:702703 {
 
 object underground_line:703727 {
 	 phases "ABC";
-	 name 703-727;
+	 name "_703-727";
 	 from node:703;
 	 to load:827;
 	 length 240;
@@ -166,7 +166,7 @@ object underground_line:703727 {
 
 object underground_line:703730 {
 	 phases "ABC";
-	 name 703-730;
+	 name "_703-730";
 	 from node:703;
 	 to load:830;
 	 length 600;
@@ -175,7 +175,7 @@ object underground_line:703730 {
 
 object underground_line:704714 {
 	 phases "ABC";
-	 name 704-714;
+	 name "_704-714";
 	 from node:704;
 	 to load:814;
 	 length 80;
@@ -184,7 +184,7 @@ object underground_line:704714 {
 
 object underground_line:704720 {
 	 phases "ABC";
-	 name 704-720;
+	 name "_704-720";
 	 from node:704;
 	 to load:820;
 	 length 800;
@@ -193,7 +193,7 @@ object underground_line:704720 {
 
 object underground_line:705742 {
 	 phases "ABC";
-	 name 705-742;
+	 name "_705-742";
 	 from node:705;
 	 to load:842;
 	 length 320;
@@ -202,7 +202,7 @@ object underground_line:705742 {
 
 object underground_line:705712 {
 	 phases "ABC";
-	 name 705-712;
+	 name "_705-712";
 	 from node:705;
 	 to load:812;
 	 length 240;
@@ -211,7 +211,7 @@ object underground_line:705712 {
 
 object underground_line:706725 {
 	 phases "ABC";
-	 name 706-725;
+	 name "_706-725";
 	 from node:706;
 	 to load:825;
 	 length 280;
@@ -220,7 +220,7 @@ object underground_line:706725 {
 
 object underground_line:707724 {
 	 phases "ABC";
-	 name 707-724;
+	 name "_707-724";
 	 from node:707;
 	 to load:824;
 	 length 760;
@@ -229,7 +229,7 @@ object underground_line:707724 {
 
 object underground_line:707722 {
 	 phases "ABC";
-	 name 707-722;
+	 name "_707-722";
 	 from node:707;
 	 to load:822;
 	 length 120;
@@ -238,7 +238,7 @@ object underground_line:707722 {
 
 object underground_line:708733 {
 	 phases "ABC";
-	 name 708-733;
+	 name "_708-733";
 	 from node:708;
 	 to load:833;
 	 length 320;
@@ -247,7 +247,7 @@ object underground_line:708733 {
 
 object underground_line:708732 {
 	 phases "ABC";
-	 name 708-732;
+	 name "_708-732";
 	 from node:708;
 	 to load:832;
 	 length 320;
@@ -256,7 +256,7 @@ object underground_line:708732 {
 
 object underground_line:709731 {
 	 phases "ABC";
-	 name 709-731;
+	 name "_709-731";
 	 from node:709;
 	 to load:831;
 	 length 600;
@@ -265,7 +265,7 @@ object underground_line:709731 {
 
 object underground_line:709708 {
 	 phases "ABC";
-	 name 709-708;
+	 name "_709-708";
 	 from node:709;
 	 to node:708;
 	 length 320;
@@ -274,7 +274,7 @@ object underground_line:709708 {
 
 object underground_line:710735 {
 	 phases "ABC";
-	 name 710-735;
+	 name "_710-735";
 	 from node:710;
 	 to load:835;
 	 length 200;
@@ -283,7 +283,7 @@ object underground_line:710735 {
 
 object underground_line:710736 {
 	 phases "ABC";
-	 name 710-736;
+	 name "_710-736";
 	 from node:710;
 	 to load:836;
 	 length 1280;
@@ -292,7 +292,7 @@ object underground_line:710736 {
 
 object underground_line:711741 {
 	 phases "ABC";
-	 name 711-741;
+	 name "_711-741";
 	 from node:711;
 	 to load:841;
 	 length 400;
@@ -301,7 +301,7 @@ object underground_line:711741 {
 
 object underground_line:711740 {
 	 phases "ABC";
-	 name 711-740;
+	 name "_711-740";
 	 from node:711;
 	 to load:840;
 	 length 200;
@@ -310,7 +310,7 @@ object underground_line:711740 {
 
 object underground_line:713704 {
 	 phases "ABC";
-	 name 713-704;
+	 name "_713-704";
 	 from load:813;
 	 to node:704;
 	 length 520;
@@ -319,7 +319,7 @@ object underground_line:713704 {
 
 object underground_line:714718 {
 	 phases "ABC";
-	 name 714-718;
+	 name "_714-718";
 	 from load:814;
 	 to load:818;
 	 length 520;
@@ -328,7 +328,7 @@ object underground_line:714718 {
 
 object underground_line:720707 {
 	 phases "ABC";
-	 name 720-707;
+	 name "_720-707";
 	 from load:820;
 	 to node:707;
 	 length 920;
@@ -337,7 +337,7 @@ object underground_line:720707 {
 
 object underground_line:720706 {
 	 phases "ABC";
-	 name 720-706;
+	 name "_720-706";
 	 from load:820;
 	 to node:706;
 	 length 600;
@@ -346,7 +346,7 @@ object underground_line:720706 {
 
 object underground_line:727744 {
 	 phases "ABC";
-	 name 727-744;
+	 name "_727-744";
 	 from load:827;
 	 to load:844;
 	 length 280;
@@ -355,7 +355,7 @@ object underground_line:727744 {
 
 object underground_line:730709 {
 	 phases "ABC";
-	 name 730-709;
+	 name "_730-709";
 	 from load:830;
 	 to node:709;
 	 length 200;
@@ -364,7 +364,7 @@ object underground_line:730709 {
 
 object underground_line:733734 {
 	 phases "ABC";
-	 name 733-734;
+	 name "_733-734";
 	 from load:833;
 	 to load:834;
 	 length 560;
@@ -373,7 +373,7 @@ object underground_line:733734 {
 
 object underground_line:734737 {
 	 phases "ABC";
-	 name 734-737;
+	 name "_734-737";
 	 from load:834;
 	 to load:837;
 	 length 640;
@@ -382,7 +382,7 @@ object underground_line:734737 {
 
 object underground_line:734710 {
 	 phases "ABC";
-	 name 734-710;
+	 name "_734-710";
 	 from load:834;
 	 to node:710;
 	 length 520;
@@ -391,7 +391,7 @@ object underground_line:734710 {
 
 object underground_line:737738 {
 	 phases "ABC";
-	 name 737-738;
+	 name "_737-738";
 	 from load:837;
 	 to load:838;
 	 length 400;
@@ -400,7 +400,7 @@ object underground_line:737738 {
 
 object underground_line:738711 {
 	 phases "ABC";
-	 name 738-711;
+	 name "_738-711";
 	 from load:838;
 	 to node:711;
 	 length 400;
@@ -409,7 +409,7 @@ object underground_line:738711 {
 
 object underground_line:744728 {
 	 phases "ABC";
-	 name 744-728;
+	 name "_744-728";
 	 from load:844;
 	 to load:828;
 	 length 200;
@@ -418,7 +418,7 @@ object underground_line:744728 {
 
 object underground_line:744729 {
 	 phases "ABC";
-	 name 744-729;
+	 name "_744-729";
 	 from load:844;
 	 to load:829;
 	 length 280;
@@ -427,7 +427,7 @@ object underground_line:744729 {
 
 object underground_line:781701 {
 	 phases "ABC";
-	 name 781-701;
+	 name "_781-701";
 	 from node:781;
 	 to load:801;
 	 length 1850;
@@ -439,7 +439,7 @@ object underground_line:781701 {
 
 object node:799 {
 	phases "ABC";
-	name 799;
+	name "_799";
 	bustype SWING;
 	voltage_A 2400.000000-1385.640646j;
 	voltage_B -2400.000000-1385.640646j;
@@ -450,7 +450,7 @@ object node:799 {
 //Create extra node for other side of regulator
 object node:781 {
 	 phases "ABC";
-	 name 781;
+	 name "_781";
 	 //bustype SWING;
 	 voltage_A 2400.0000-1385.640646j;
 	 voltage_B -2400.0000-1385.640646j;
@@ -460,7 +460,7 @@ object node:781 {
 
 object node:702 {
 	 phases "ABC";
-	 name 702;
+	 name "_702";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -469,7 +469,7 @@ object node:702 {
 
 object node:703 {
 	 phases "ABC";
-	 name 703;
+	 name "_703";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -478,7 +478,7 @@ object node:703 {
 
 object node:704 {
 	 phases "ABC";
-	 name 704;
+	 name "_704";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -487,7 +487,7 @@ object node:704 {
 
 object node:705 {
 	 phases "ABC";
-	 name 705;
+	 name "_705";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -496,7 +496,7 @@ object node:705 {
 
 object node:706 {
 	 phases "ABC";
-	 name 706;
+	 name "_706";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -505,7 +505,7 @@ object node:706 {
 
 object node:707 {
 	 phases "ABC";
-	 name 707;
+	 name "_707";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -514,7 +514,7 @@ object node:707 {
 
 object node:708 {
 	 phases "ABC";
-	 name 708;
+	 name "_708";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -523,7 +523,7 @@ object node:708 {
 
 object node:709 {
 	 phases "ABC";
-	 name 709;
+	 name "_709";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -532,7 +532,7 @@ object node:709 {
 
 object node:710 {
 	 phases "ABC";
-	 name 710;
+	 name "_710";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -541,7 +541,7 @@ object node:710 {
 
 object node:711 {
 	 phases "ABC";
-	 name 711;
+	 name "_711";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -551,7 +551,7 @@ object node:711 {
 //Create loads
 object load:801 {
 	 phases "ABCD";
-	 name 801;
+	 name "_801";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -563,7 +563,7 @@ object load:801 {
 
 object load:812 {
 	 phases "ABCD";
-	 name 812;
+	 name "_812";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -573,7 +573,7 @@ object load:812 {
 
 object load:813 {
 	 phases "ABCD";
-	 name 813;
+	 name "_813";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -583,7 +583,7 @@ object load:813 {
 
 object load:814 {
 	 phases "ABCD";
-	 name 814;
+	 name "_814";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -594,7 +594,7 @@ object load:814 {
 
 object load:818 {
 	 phases "ABCD";
-	 name 818;
+	 name "_818";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -604,7 +604,7 @@ object load:818 {
 
 object load:820 {
 	 phases "ABCD";
-	 name 820;
+	 name "_820";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -614,7 +614,7 @@ object load:820 {
 
 object load:822 {
 	 phases "ABCD";
-	 name 822;
+	 name "_822";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -625,7 +625,7 @@ object load:822 {
 
 object load:824 {
 	 phases "ABCD";
-	 name 824;
+	 name "_824";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -635,7 +635,7 @@ object load:824 {
 
 object load:825 {
 	 phases "ABCD";
-	 name 825;
+	 name "_825";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -645,7 +645,7 @@ object load:825 {
 
 object load:827 {
 	 phases "ABCD";
-	 name 827;
+	 name "_827";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -655,7 +655,7 @@ object load:827 {
 
 object load:828 {
 	 phases "ABCD";
-	 name 828;
+	 name "_828";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -667,7 +667,7 @@ object load:828 {
 
 object load:829 {
 	 phases "ABCD";
-	 name 829;
+	 name "_829";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -677,7 +677,7 @@ object load:829 {
 
 object load:830 {
 	 phases "ABCD";
-	 name 830;
+	 name "_830";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -687,7 +687,7 @@ object load:830 {
 
 object load:831 {
 	 phases "ABCD";
-	 name 831;
+	 name "_831";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -697,7 +697,7 @@ object load:831 {
 
 object load:832 {
 	 phases "ABCD";
-	 name 832;
+	 name "_832";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -707,7 +707,7 @@ object load:832 {
 
 object load:833 {
 	 phases "ABCD";
-	 name 833;
+	 name "_833";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -717,7 +717,7 @@ object load:833 {
 
 object load:834 {
 	 phases "ABCD";
-	 name 834;
+	 name "_834";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -727,7 +727,7 @@ object load:834 {
 
 object load:835 {
 	 phases "ABCD";
-	 name 835;
+	 name "_835";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -737,7 +737,7 @@ object load:835 {
 
 object load:836 {
 	 phases "ABCD";
-	 name 836;
+	 name "_836";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -747,7 +747,7 @@ object load:836 {
 
 object load:837 {
 	 phases "ABCD";
-	 name 837;
+	 name "_837";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -757,7 +757,7 @@ object load:837 {
 
 object load:838 {
 	 phases "ABCD";
-	 name 838;
+	 name "_838";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -767,7 +767,7 @@ object load:838 {
 
 object load:840 {
 	 phases "ABCD";
-	 name 840;
+	 name "_840";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -777,7 +777,7 @@ object load:840 {
 
 object load:841 {
 	 phases "ABCD";
-	 name 841;
+	 name "_841";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -787,7 +787,7 @@ object load:841 {
 
 object load:842 {
 	 phases "ABCD";
-	 name 842;
+	 name "_842";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -798,7 +798,7 @@ object load:842 {
 
 object load:844 {
 	 phases "ABCD";
-	 name 844;
+	 name "_844";
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
@@ -824,7 +824,7 @@ object transformer:23 {
 }
 object node:775 {
 	 phases "ABC";
-	 name 775;
+	 name "_775";
 	 voltage_A 240.000000 -138.564065j;
 	 voltage_B -240.000000 -138.564065j;
 	 voltage_C -0.000000+277.128129j;
