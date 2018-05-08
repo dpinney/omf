@@ -72,7 +72,24 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Source<span class="classic">Source of data</span></label>
-				<select id="source" name="source">
+				<select id="source" name="source" onchange="loadWeatherParameters()">
+					<script type="text/javascript">
+						function loadWeatherParameters(){
+							var x = gebi("source").value;
+							if (x == "METAR"){
+								gebi("weatherParameterMETAR").style.display = "block"
+								gebi("weatherParameterUSCRN").style.display = "none"
+								gebi("stationMETAR").style.display = "block"
+								gebi("stationUSCRN").style.display = "none"
+
+							} else if (x == "USCRN"){
+								gebi("weatherParameterMETAR").style.display = "none"
+								gebi("weatherParameterUSCRN").style.display = "block"
+								gebi("stationMETAR").style.display = "none"
+								gebi("stationUSCRN").style.display = "block"
+							}
+						}
+					</script>
 					<option value="METAR">METAR</option>
 					<option value="USCRN">USCRN</option>
 				</select>
@@ -83,11 +100,169 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Station<span class="classic">ASOS Code, for USA codes (starting with K) exclude the first letter</span></label>
-				<input type="text" id="station" name="station" pattern="[A-Z]{3,4}" required="required"/>
+				<input type="text" id="stationMETAR" name="stationMETAR" pattern="[A-Z]{3,4}" required="required"/>
+				<select id="stationUSCRN" name="stationUSCRN" required="required" style="display:none;">
+					<option value="AK_Barrow_4_ENE">AK_Barrow</option>
+					<option value="AK_Cordova_14_ESE">AK_Cordova</option>
+					<option value="AK_Deadhorse_3_S">AK_Deadhorse</option>
+					<option value="AK_Denali_27_N">AK_Denali</option>
+					<option value="AK_Fairbanks_11_NE">AK_Fairbanks</option>
+					<option value="AK_Glennallen_64_N">AK_Glennallen</option>
+					<option value="AK_Gustavus_2_NE">AK_Gustavus</option>
+					<option value="AK_Ivotuk_1_NNE">AK_Ivotuk</option>
+					<option value="AK_Kenai_29_ENE">AK_Kenai</option>
+					<option value="AK_King_Salmon_42_SE">AK_King_Salmon</option>
+					<option value="AK_Metlakatla_6_S">AK_Metlakatla</option>
+					<option value="AK_Port_Alsworth_1_SW">AK_Port_Alsworth</option>
+					<option value="AK_Red_Dog_Mine_3_SSW">AK_Red_Dog_Mine</option>
+					<option value="AK_Ruby_44_ESE">AK_Ruby</option>
+					<option value="AK_Sand_Point_1_ENE">AK_Sand_Point</option>
+					<option value="AK_Selawik_28_E">AK_Selawik</option>
+					<option value="AK_Sitka_1_NE">AK_Sitka</option>
+					<option value="AK_St._Paul_4_NE">AK_St._Paul</option>
+					<option value="AK_Tok_70_SE">AK_Tok</option>
+					<option value="AK_Toolik_Lake_5_ENE">AK_Toolik_Lake</option>
+					<option value="AK_Yakutat_3_SSE">AK_Yakutat</option>
+					<option value="AL_Brewton_3_NNE">AL_Brewton</option>
+					<option value="AL_Clanton_2_NE">AL_Clanton</option>
+					<option value="AL_Courtland_2_WSW">AL_Courtland</option>
+					<option value="AL_Cullman_3_ENE">AL_Cullman</option>
+					<option value="AL_Fairhope_3_NE">AL_Fairhope</option>
+					<option value="AL_Gadsden_19_N">AL_Gadsden</option>
+					<option value="AL_Gainesville_2_NE">AL_Gainesville</option>
+					<option value="AL_Greensboro_2_WNW">AL_Greensboro</option>
+					<option value="AL_Highland_Home_2_S">AL_Highland_Home</option>
+					<option value="AL_Muscle_Shoals_2_N">AL_Muscle_Shoals</option>
+					<option value="AL_Northport_2_S">AL_Northport</option>
+					<option value="AL_Russellville_4_SSE">AL_Russellville</option>
+					<option value="AL_Scottsboro_2_NE">AL_Scottsboro</option>
+					<option value="AL_Selma_6_SSE">AL_Selma</option>
+					<option value="AL_Selma_13_WNW">AL_Selma</option>
+					<option value="AL_Talladega_10_NNE">AL_Talladega</option>
+					<option value="AL_Thomasville_2_S">AL_Thomasville</option>
+					<option value="AL_Troy_2_W">AL_Troy</option>
+					<option value="AL_Valley_Head_1_SSW">AL_Valley_Head</option>
+					<option value="AR_Batesville_8_WNW">AR_Batesville</option>
+					<option value="AZ_Elgin_5_S">AZ_Elgin</option>
+					<option value="AZ_Tucson_11_W">AZ_Tucson</option>
+					<option value="AZ_Williams_35_NNW">AZ_Williams</option>
+					<option value="AZ_Yuma_27_ENE">AZ_Yuma</option>
+					<option value="CA_Bodega_6_WSW">CA_Bodega</option>
+					<option value="CA_Fallbrook_5_NE">CA_Fallbrook</option>
+					<option value="CA_Merced_23_WSW">CA_Merced</option>
+					<option value="CA_Redding_12_WNW">CA_Redding</option>
+					<option value="CA_Santa_Barbara_11_W">CA_Santa_Barbara</option>
+					<option value="CA_Stovepipe_Wells_1_SW">CA_Stovepipe_Wells</option>
+					<option value="CA_Yosemite_Village_12_W">CA_Yosemite_Village</option>
+					<option value="CO_Boulder_14_W">CO_Boulder</option>
+					<option value="CO_Cortez_8_SE">CO_Cortez</option>
+					<option value="CO_Dinosaur_2_E">CO_Dinosaur</option>
+					<option value="CO_La_Junta_17_WSW">CO_La_Junta</option>
+					<option value="CO_Montrose_11_ENE">CO_Montrose</option>
+					<option value="CO_Nunn_7_NNE">CO_Nunn</option>
+					<option value="FL_Everglades_City_5_NE">FL_Everglades_City</option>
+					<option value="FL_Sebring_23_SSE">FL_Sebring</option>
+					<option value="FL_Titusville_7_E">FL_Titusville</option>
+					<option value="GA_Brunswick_23_S">GA_Brunswick</option>
+					<option value="GA_Newton_8_W">GA_Newton</option>
+					<option value="GA_Newton_11_SW">GA_Newton</option>
+					<option value="GA_Watkinsville_5_SSE">GA_Watkinsville</option>
+					<option value="HI_Hilo_5_S">HI_Hilo</option>
+					<option value="HI_Mauna_Loa_5_NNE">HI_Mauna_Loa</option>
+					<option value="IA_Des_Moines_17_E">IA_Des_Moines</option>
+					<option value="ID_Arco_17_SW">ID_Arco</option>
+					<option value="ID_Murphy_10_W">ID_Murphy</option>
+					<option value="IL_Champaign_9_SW">IL_Champaign</option>
+					<option value="IL_Shabbona_5_NNE">IL_Shabbona</option>
+					<option value="IN_Bedford_5_WNW">IN_Bedford</option>
+					<option value="KS_Manhattan_6_SSW">KS_Manhattan</option>
+					<option value="KS_Oakley_19_SSW">KS_Oakley</option>
+					<option value="KY_Bowling_Green_21_NNE">KY_Bowling_Green</option>
+					<option value="KY_Versailles_3_NNW">KY_Versailles</option>
+					<option value="LA_Lafayette_13_SE">LA_Lafayette</option>
+					<option value="LA_Monroe_26_N">LA_Monroe</option>
+					<option value="ME_Limestone_4_NNW">ME_Limestone</option>
+					<option value="ME_Old_Town_2_W">ME_Old_Town</option>
+					<option value="MI_Chatham_1_SE">MI_Chatham</option>
+					<option value="MI_Gaylord_9_SSW">MI_Gaylord</option>
+					<option value="MN_Goodridge_12_NNW">MN_Goodridge</option>
+					<option value="MN_Sandstone_6_W">MN_Sandstone</option>
+					<option value="MO_Chillicothe_22_ENE">MO_Chillicothe</option>
+					<option value="MO_Joplin_24_N">MO_Joplin</option>
+					<option value="MO_Salem_10_W">MO_Salem</option>
+					<option value="MS_Holly_Springs_4_N">MS_Holly_Springs</option>
+					<option value="MS_Newton_5_ENE">MS_Newton</option>
+					<option value="MT_Dillon_18_WSW">MT_Dillon</option>
+					<option value="MT_Lewistown_42_WSW">MT_Lewistown</option>
+					<option value="MT_St._Mary_1_SSW">MT_St._Mary</option>
+					<option value="MT_Wolf_Point_29_ENE">MT_Wolf_Point</option>
+					<option value="MT_Wolf_Point_34_NE">MT_Wolf_Point</option>
+					<option value="NC_Asheville_8_SSW">NC_Asheville</option>
+					<option value="NC_Asheville_13_S">NC_Asheville</option>
+					<option value="NC_Durham_11_W">NC_Durham</option>
+					<option value="ND_Jamestown_38_WSW">ND_Jamestown</option>
+					<option value="ND_Medora_7_E">ND_Medora</option>
+					<option value="ND_Northgate_5_ESE">ND_Northgate</option>
+					<option value="NE_Harrison_20_SSE">NE_Harrison</option>
+					<option value="NE_Lincoln_8_ENE">NE_Lincoln</option>
+					<option value="NE_Lincoln_11_SW">NE_Lincoln</option>
+					<option value="NE_Whitman_5_ENE">NE_Whitman</option>
+					<option value="NH_Durham_2_N">NH_Durham</option>
+					<option value="NH_Durham_2_SSW">NH_Durham</option>
+					<option value="NM_Las_Cruces_20_N">NM_Las_Cruces</option>
+					<option value="NM_Los_Alamos_13_W">NM_Los_Alamos</option>
+					<option value="NM_Socorro_20_N">NM_Socorro</option>
+					<option value="NV_Baker_5_W">NV_Baker</option>
+					<option value="NV_Denio_52_WSW">NV_Denio</option>
+					<option value="NV_Mercury_3_SSW">NV_Mercury</option>
+					<option value="NY_Ithaca_13_E">NY_Ithaca</option>
+					<option value="NY_Millbrook_3_W">NY_Millbrook</option>
+					<option value="OH_Wooster_3_SSE">OH_Wooster</option>
+					<option value="OK_Goodwell_2_E">OK_Goodwell</option>
+					<option value="OK_Goodwell_2_SE">OK_Goodwell</option>
+					<option value="OK_Stillwater_2_W">OK_Stillwater</option>
+					<option value="OK_Stillwater_5_WNW">OK_Stillwater</option>
+					<option value="ON_Egbert_1_W">ON_Egbert</option>
+					<option value="OR_Coos_Bay_8_SW">OR_Coos_Bay</option>
+					<option value="OR_Corvallis_10_SSW">OR_Corvallis</option>
+					<option value="OR_John_Day_35_WNW">OR_John_Day</option>
+					<option value="OR_Riley_10_WSW">OR_Riley</option>
+					<option value="PA_Avondale_2_N">PA_Avondale</option>
+					<option value="RI_Kingston_1_NW">RI_Kingston</option>
+					<option value="RI_Kingston_1_W">RI_Kingston</option>
+					<option value="SA_Tiksi_4_SSE">SA_Tiksi</option>
+					<option value="SC_Blackville_3_W">SC_Blackville</option>
+					<option value="SC_McClellanville_7_NE">SC_McClellanville</option>
+					<option value="SD_Aberdeen_35_WNW">SD_Aberdeen</option>
+					<option value="SD_Buffalo_13_ESE">SD_Buffalo</option>
+					<option value="SD_Pierre_24_S">SD_Pierre</option>
+					<option value="SD_Sioux_Falls_14_NNE">SD_Sioux_Falls</option>
+					<option value="TN_Crossville_7_NW">TN_Crossville</option>
+					<option value="TX_Austin_33_NW">TX_Austin</option>
+					<option value="TX_Bronte_11_NNE">TX_Bronte</option>
+					<option value="TX_Edinburg_17_NNE">TX_Edinburg</option>
+					<option value="TX_Monahans_6_ENE">TX_Monahans</option>
+					<option value="TX_Muleshoe_19_S">TX_Muleshoe</option>
+					<option value="TX_Palestine_6_WNW">TX_Palestine</option>
+					<option value="TX_Panther_Junction_2_N">TX_Panther_Junction</option>
+					<option value="TX_Port_Aransas_32_NNE">TX_Port_Aransas</option>
+					<option value="UT_Brigham_City_28_WNW">UT_Brigham_City</option>
+					<option value="UT_Torrey_7_E">UT_Torrey</option>
+					<option value="VA_Cape_Charles_5_ENE">VA_Cape_Charles</option>
+					<option value="VA_Charlottesville_2_SSE">VA_Charlottesville</option>
+					<option value="WA_Darrington_21_NNE">WA_Darrington</option>
+					<option value="WA_Quinault_4_NE">WA_Quinault</option>
+					<option value="WA_Spokane_17_SSW">WA_Spokane</option>
+					<option value="WI_Necedah_5_WNW">WI_Necedah</option>
+					<option value="WV_Elkins_21_ENE">WV_Elkins</option>
+					<option value="WY_Lander_11_SSE">WY_Lander</option>
+					<option value="WY_Moose_1_NNE">WY_Moose</option>
+					<option value="WY_Sundance_8_NNW">WY_Sundance</option>
+				</select>
 			</div>			
 			<div class="shortInput">
 				<label class="tooltip">Weather Parameter<span class="classic">Data that should be pulled</span></label>
-				<select id="weatherParameter" name="weatherParameter">
+				<select id="weatherParameterMETAR" name="weatherParameterMETAR" required="required">
 					<option value="tmpc">Temperature (Celsius)</option>
 					<option value="tmpf">Temperature (Fahrenheit)</option>
 					<option value="dwpc">Dew Point (Celsius)</option>
@@ -111,6 +286,30 @@
 					<option value="skyl3">Cloud Height Level 3 (ft)</option>
 					<option value="presentwx">Weather Codes</option>
 					<option value="metar">Raw METAR</option>
+				</select>
+				<select id="weatherParameterUSCRN" name="weatherParameterUSCRN" required="required" style="display:none">
+					<option value="T_CALC">Air temperature (Celsius)</option>
+					<option value="T_HR_AVG">Average air temperature (Celsius)</option>
+					<option value="T_MAX">Maximum air temperature (Celsius)</option>
+					<option value="T_MIN">Minimum air temperature (Celsius)</option>
+					<option value="P_CALC">Precipitation (mm)</option>
+					<option value="SOLARAD">Average global solar radiation (watts/meter^2)</option>
+					<option value="SOLARAD_MAX">Maximum global solar radiation (watts/meter^2)</option>
+					<option value="SOLARAD_MIN">Minimum global solar radiation (watts/meter^2)</option>
+					<option value="SUR_TEMP">Average infrared surface temperature (Celsius)</option>
+					<option value="SUR_TEMP_MAX">Maximum infrared surface temperature (Celsius)</option>
+					<option value="SUR_TEMP_MIN">Minimum infrared surface temperature (Celsius)</option>
+					<option value="RH_HR_AVG">RH average for hour (%)</option>
+					<option value="SOIL_MOISTURE_5">Average soil moisture at 5 cm below the surface (m^3/m^3)</option>
+					<option value="SOIL_MOISTURE_10">Average soil moisture at 10 cm below the surface (m^3/m^3)</option>
+					<option value="SOIL_MOISTURE_20">Average soil moisture at 20 cm below the surface (m^3/m^3)</option>
+					<option value="SOIL_MOISTURE_50">Average soil moisture at 50 cm below the surface (m^3/m^3)</option>
+					<option value="SOIL_MOISTURE_100">Average soil moisture at 100 cm below the surface (m^3/m^3)</option>
+					<option value="SOIL_TEMP_5">Average soil temperature at 5 cm below the surface (Celsius)</option>
+					<option value="SOIL_TEMP_10">Average soil temperature at 10 cm below the surface (Celsius)</option>
+					<option value="SOIL_TEMP_20">Average soil temperature at 20 cm below the surface (Celsius)</option>
+					<option value="SOIL_TEMP_50">Average soil temperature at 50 cm below the surface (Celsius)</option>
+					<option value="SOIL_TEMP_100">Average soil temperature at 100 cm below the surface (Celsius)</option>					
 				</select>
 			</div>
 			<!-- Required Buttons -->

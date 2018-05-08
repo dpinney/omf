@@ -34,13 +34,14 @@ def work(modelDir, inputDict):
 	#check the source using and use the appropriate function
 	if source == "METAR":
 		data = pullMETAR(year,station,parameter)
-	# elif source == "USCRN":
-	# 	data = pullUSCRN(year,station,parameter)
-	# Writing the raw output.
+	elif source == "USCRN":
+		data = pullUSCRN(year,station,parameter)
+
+	#writing raw data
 	with open(pJoin(modelDir,"weather.csv"),"w") as file:
 		file.write(data)
 
-	if parameter != "metar":#raw metar should not be formated as it is already in its own format and difficult to handle
+	if parameter != "metar" and source == "METAR":#raw metar should not be formated as it is already in its own format and difficult to handle
 		verifiedData = [999.9]*8760
 		firstDT = dt.datetime(int(year),1,1,0)
 		with open(pJoin(modelDir,"weather.csv"),"r") as file:
@@ -56,7 +57,10 @@ def work(modelDir, inputDict):
 		with open(pJoin(modelDir,"weather.csv"),"wb") as file:
 			writer = csv.writer(file)
 			writer.writerows([[x] for x in verifiedData])
-
+	elif source == "USCRN":
+		verifiedData = [999.9]*8760
+		for x in verifiedData:
+			print x[0:3] #if x[0:3] == -99
 	#checking how many wrong values there are
 	for each in verifiedData:
 		if each == 999.9:
@@ -69,7 +73,7 @@ def work(modelDir, inputDict):
 def pullMETAR(year, station, datatype): #def pullMETAR(year, station, datatype, outputDir):
 	url = ('https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?station=' + station + '&data=' + datatype + '&year1=' + year + 
 		'&month1=1&day1=1&year2=' + str(int(year)+1) + '&month2=1&day2=1&tz=Etc%2FUTC&format=onlycomma&latlon=no&direct=no&report_type=1&report_type=2')
-	print url
+	# print url
 	r = requests.get(url)
 	data = r.text
 	# tempData = []
@@ -82,7 +86,65 @@ def pullMETAR(year, station, datatype): #def pullMETAR(year, station, datatype, 
 	# 	for x in range(0,8760): 
 	# 		wr.writerow([tempData[x]])
 
-# def pullUSCRN(year, station, datatype):
+def pullUSCRN(year, state_city, datatype):
+	'''	For a given year and weather station, write 8760 hourly weather data (temp, humidity, etc.) to outputPath.
+	for list of available stations go to: https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02'''
+	if datatype == "T_CALC":
+		datatype = 9
+	elif datatype == "T_HR_AVG":
+		datatype = 10
+	elif datatype == "T_MAX":
+		datatype = 11
+	elif datatype == "T_MIN":
+		datatype = 12
+	elif datatype == "P_CALC":
+		datatype = 13
+	elif datatype == "SOLARAD":
+		datatype = 14
+	elif datatype == "SOLARAD_MAX":
+		datatype = 16
+	elif datatype == "SOLARAD_MIN":
+		datatype = 18
+	elif datatype == "SUR_TEMP":
+		datatype = 21
+	elif datatype == "SUR_TEMP_MAX":
+		datatype = 23
+	elif datatype == "SUR_TEMP_MIN":
+		datatype = 25
+	elif datatype == "RH_HR_AVG":
+		datatype = 27
+	elif datatype == "SOIL_MOISTURE_5":
+		datatype = 29
+	elif datatype == "SOIL_MOISTURE_10":
+		datatype = 30
+	elif datatype == "SOIL_MOISTURE_20":
+		datatype = 31
+	elif datatype == "SOIL_MOISTURE_50":
+		datatype = 32
+	elif datatype == "SOIL_MOISTURE_100":
+		datatype = 33
+	elif datatype == "SOIL_TEMP_5":
+		datatype = 34
+	elif datatype == "SOIL_TEMP_10":
+		datatype = 35
+	elif datatype == "SOIL_TEMP_20":
+		datatype = 36
+	elif datatype == "SOIL_TEMP_50":
+		datatype = 37
+	elif datatype == "SOIL_TEMP_100":
+		datatype = 38
+	#need to have handling for stupid inputs #REPLACE WITH A DICTIONARY
+	url = 'https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02/' + year + '/CRNH0203-' + year + '-' + state_city + '.txt'
+	r = requests.get(url)
+	data = r.text
+	matrix = [x.split() for x in data.split('\n')]
+	tempData = []
+	for i in range(8760):
+		tempData.append(matrix[i][datatype])
+	return tempData
+	# with open(outputPath, 'wb') as file:
+	# 	writer = csv.writer(file)
+	# 	writer.writerows([[x] for x in tempData])
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
@@ -92,6 +154,7 @@ def new(modelDir):
 		"year":"2017",
 		"station":"IAD",
 		"weatherParameter":"tmpc",
+		"state_city":"KY_Versailles_3_NNW",
 		"modelType":modelName}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	return creationCode
