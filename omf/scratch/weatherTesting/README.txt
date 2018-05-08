@@ -6,4 +6,7 @@ USAGE
 4. Seperate plots are saved a .png
 
 TODO
-0. Pull the weather data from weatherNoaaHourly.py
+OOO Get aGosedWeather.py running its tests.
+OOO Pull the weather data from weatherNoaaHourly.py instead of weather.py.
+OOO Update climateChange function in web.py
+OOO Factor weather.py out of all other models.
