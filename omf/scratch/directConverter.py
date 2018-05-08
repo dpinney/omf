@@ -5,7 +5,7 @@ Usage2: python directorConverter -mdb PATH_TO_F1.mdb
 Output is written to the current working directory.
 '''
 
-from os.path import exists, splitext
+from os.path import exists, splitext, abspath
 from os import getcwd
 import argparse, sys
 sys.path.append('../')
@@ -33,10 +33,10 @@ def handleMilFile(std_path, seq_path, failure = False):
 def handleMdbFile(mdb_path, modelDir, failure = False):
   ''' Convert mdb database to glm file. '''
   try:
-    with open(mdb_path, 'r') as infile:
-      output_path = mdb_path.split('/')[-1].replace('.mdb', '.glm')
-      output_file = open(output_path, 'w')
-      cyme._csvDump(mdb_path, modelDir)
+    outputFname = mdb_path.split('/')[-1].replace('.mdb', '.glm')
+    with open(outputFname, 'w') as output_file:
+      print '!!!!!!!MDB_PATH', mdb_path
+      print '!!!!!!!MODELDIR', modelDir
       glm, x_scale, y_scale = cyme.convertCymeModel(mdb_path, modelDir)
       output_file.write(feeder.sortedWrite(glm))
   except IOError:
@@ -71,7 +71,7 @@ def main():
   if (args.std and args.seq):
     handleMilFile(args.std, args.seq)
   elif (args.mdb):
-    home_folder = '../' + getcwd()
+    home_folder = getcwd()
     handleMdbFile(args.mdb, home_folder)
   else:
     raise Exception("INVALID FILE INPUT.")

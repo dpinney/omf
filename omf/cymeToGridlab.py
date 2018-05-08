@@ -1545,11 +1545,8 @@ def _find_SPCT_rating(load_str):
 		return str(past_rating)
 	
 def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
-	if (test==False):
-		network_db_path = modelDir + network_db 
-		network_db = network_db_path 
-	else:
-		network_db = Path(network_db).resolve()     
+	print 'DEFAULT TEST PATH', modelDir + network_db 
+	print 'NEW PATH', network_db
 	conductor_data_csv = None
 	dbflag = 0 
 	#HACK: manual network ID detection.
@@ -2802,42 +2799,43 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 		'control_level': 'INDIVIDUAL'
 	}
 	return glmTree, x_scale, y_scale
-	
+
 def _tests(keepFiles=True):
 	testFile = ['IEEE13.mdb']
-	modelDir = './static/testFiles/'
-	outPrefix = './scratch/cymeToGridlabTests/'
+	inputDir = './static/testFiles/'
+	# outputDir = tempfile.mkdtemp()
+	outputDir = './scratch/cymeToGridlabTests/'
 	exceptionCount = 0
 	try:
-		shutil.rmtree(outPrefix)
+		shutil.rmtree(outputDir)
 	except:
 		pass # no test directory yet.
 	finally:
-		os.mkdir(outPrefix)
+		os.mkdir(outputDir)
 	locale.setlocale(locale.LC_ALL, 'en_US')
 	for db_network in testFile:
 		try:
 			# Main conversion of CYME model.
-			cyme_base, x, y = convertCymeModel(db_network, modelDir)    
+			cyme_base, x, y = convertCymeModel(inputDir + db_network, inputDir)    
 			glmString = feeder.sortedWrite(cyme_base)
 			testFilename = db_network[:-4]
-			gfile = open(modelDir+testFilename+".glm", 'w')
+			gfile = open(inputDir+testFilename+".glm", 'w')
 			gfile.write(glmString)
 			gfile.close()
-			inFileStats = os.stat(pJoin(modelDir,db_network))
-			outFileStats = os.stat(pJoin(modelDir,testFilename+".glm"))
+			inFileStats = os.stat(pJoin(inputDir,db_network))
+			outFileStats = os.stat(pJoin(inputDir,testFilename+".glm"))
 			inFileSize = inFileStats.st_size
 			outFileSize = outFileStats.st_size
-			treeObj = feeder.parse(modelDir+testFilename+".glm")
+			treeObj = feeder.parse(inputDir+testFilename+".glm")
 			print 'WROTE GLM FOR ' + db_network
-			with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
+			with open(pJoin(outputDir,'convResults.txt'),'a') as resultsFile:
 				resultsFile.write('WROTE GLM FOR ' + testFilename + "\n")
 				resultsFile.write('Input .mdb File Size: ' + str(locale.format("%d", inFileSize, grouping=True))+'\n')
 				resultsFile.write('Output .glm File Size: '+ str(locale.format("%d", outFileSize, grouping=True))+'\n')
 		except:
 			print 'FAILED CONVERTING'
 			testFilename = 'failed'
-			with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
+			with open(pJoin(outputDir,'convResults.txt'),'a') as resultsFile:
 				resultsFile.write('FAILED CONVERTING ' + testFilename + "\n")
 			traceback.print_exc()
 			exceptionCount += 3
@@ -2846,35 +2844,35 @@ def _tests(keepFiles=True):
 			# Draw the GLM.
 			myGraph = feeder.treeToNxGraph(cyme_base)
 			feeder.latLonNxGraph(myGraph, neatoLayout=False)
-			plt.savefig(outPrefix + testFilename+".png")
-			with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
+			plt.savefig(outputDir + testFilename+".png")
+			with open(pJoin(outputDir,'convResults.txt'),'a') as resultsFile:
 				resultsFile.write('DREW GLM FOR ' + testFilename + "\n")
 			print 'DREW GLM OF ' + db_network
 		except:
 			exceptionCount += 1
-			with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
+			with open(pJoin(outputDir,'convResults.txt'),'a') as resultsFile:
 				resultsFile.write('FAILED DRAWING' + testFilename + "\n")
 			print 'FAILED DRAWING ' + db_network
 		try:
 			# Run powerflow on the GLM.
-			output = gridlabd.runInFilesystem(treeObj, keepFiles=True, workDir=outPrefix)
+			output = gridlabd.runInFilesystem(treeObj, keepFiles=True, workDir=outputDir)
 			if output['stderr'] == "":
 				gridlabdStderr = "GridLabD ran successfully without error."
 			else:
 				gridlabdStderr =  output['stderr']
-			with open(outPrefix + testFilename +".JSON",'w') as outFile:
+			with open(outputDir + testFilename +".JSON",'w') as outFile:
 				json.dump(output, outFile, indent=4)
-			with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
+			with open(pJoin(outputDir,'convResults.txt'),'a') as resultsFile:
 				resultsFile.write('RAN GRIDLAB ON ' + testFilename + "\n")
 				resultsFile.write('STDERR: ' + gridlabdStderr + "\n\n")
 			print 'RAN GRIDLAB ON ' + db_network
 		except:
 			exceptionCount += 1
-			with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
+			with open(pJoin(outputDir,'convResults.txt'),'a') as resultsFile:
 				resultsFile.write('POWERFLOW FAILED FOR ' + testFilename + "\n")
 			print 'POWERFLOW FAILED'
 	if not keepFiles:
-		shutil.rmtree(outPrefix)
+		shutil.rmtree(outputDir)
 	return exceptionCount    
 
 if __name__ == '__main__':
