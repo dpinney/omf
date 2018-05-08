@@ -1,17 +1,13 @@
 '''
-USAGE 1: python directConverter.py x.std y.seq
-OUTPUT: z.glm
-(Uses milToGridlab.py)
-
-USAGE 2: python directConverter.py x.mdb
-OUTPUT: y.glm
-(Uses cymeToGridlab.py)
-
+Convert CYMDIST .mdb or Windmil .std/.seq to GridLAB-D .glm.
+Usage1: python directorConverter -std PATH_TO_F1.std -seq PATH_TO_F1.seq
+Usage2: python directorConverter -mdb PATH_TO_F1.mdb
+Output is written to the current working directory.
 '''
+
 from os.path import exists, splitext
 from os import getcwd
 import argparse, sys
-
 sys.path.append('../')
 import milToGridlab as mil
 import cymeToGridlab as cyme
@@ -24,7 +20,7 @@ def handleMilFile(std_path, seq_path, failure = False):
     with open(std_path, 'r') as std_file, open(seq_path, 'r') as seq_file:
       output_path = std_path.split('/')[-1].replace('.std', '.glm') # We wish to put the file in the current running directory.
       output_file = open(output_path, 'w')
-      glm, x_scale, y_scale = mil.convert(std_file, seq_file)
+      glm, x_scale, y_scale = mil.convert(std_file.read(), seq_file.read())
       output_file.write(feeder.sortedWrite(glm))
       print 'GLM FILE WRITTEN FOR STD/SEQ COMBO.'
   except IOError:
@@ -33,7 +29,6 @@ def handleMilFile(std_path, seq_path, failure = False):
   finally:
     output_file.close()
   return failure
-  
 
 def handleMdbFile(mdb_path, modelDir, failure = False):
   ''' Convert mdb database to glm file. '''
@@ -53,32 +48,26 @@ def handleMdbFile(mdb_path, modelDir, failure = False):
   finally:
     output_file.close()
   return failure
-  
+
 def is_valid_file(parser, file_name):
   ''' Check validity of user input '''
   valid_names = ["mdb", "seq", "std"]
-
   # Check to see that file exists. 
   if not exists(file_name):
     parser.error("FILE %s DOES NOT EXIST." % file_name)
   suffix = splitext(file_name)[1][1:]
-
   # Check to ensure that no invalid name is being passed.
   if suffix not in valid_names:
     parser.error("FILE SUFFIX FOR %s INVALID." % file_name)
-
   print "VALID MATCH CONFIRMED FOR FILE %s." % file_name
   return file_name
 
-
 def main():
-
   parser = argparse.ArgumentParser()
   parser.add_argument("-std", help="Single std file. Must go with seq file.", type=lambda f: is_valid_file(parser, f))
   parser.add_argument("-seq", help="Single seq file. Must go with std file.", type=lambda f: is_valid_file(parser, f))
   parser.add_argument("-mdb", help="Single mdb file, with both network and database exported to the same file.", type=lambda f: is_valid_file(parser, f))
   args = parser.parse_args()
-
   if (args.std and args.seq):
     handleMilFile(args.std, args.seq)
   elif (args.mdb):

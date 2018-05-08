@@ -21,7 +21,7 @@ conductors is the full path to a .csv file containing conductor information for 
 Note that db_network and db_equipment can be the same file is both network and equipment databases were exported to one .mdb file from CYME.
 '''
 
-import feeder, csv, random, math, copy, subprocess, locale
+import feeder, csv, random, math, copy, subprocess, locale, tempfile
 from os.path import join as pJoin
 import warnings
 from StringIO import StringIO
@@ -1552,11 +1552,12 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 		network_db = Path(network_db).resolve()     
 	conductor_data_csv = None
 	dbflag = 0 
+	#HACK: manual network ID detection.
 	if 'Duke' in str(network_db):
 		dbflag = 0
 	elif 'OakPass' in str(network_db):
 		dbflag= 1
-	glmTree = {}    # Dictionary that will hold the feeder model for conversion to .glm format 
+	glmTree = {}  # Dictionary that will hold the feeder model for conversion to .glm format 
 	regulator_sections = {}
 	recloser_sections = {}
 	sectionalizer_sections = {}
