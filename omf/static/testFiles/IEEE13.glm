@@ -614,193 +614,193 @@ object node {
 object triplex_meter {
 	phases CS;
 	name ntpmLOAD634C;
-	longitude 744.240353108;
+	longitude 750.949617776;
 	nominal_voltage 120;
-	latitude 2403.47925616;
+	latitude 2401.8148391;
 };
 
 object triplex_meter {
 	phases BS;
 	name ntpmLOAD634B;
-	longitude 743.414045011;
+	longitude 750.882974363;
 	nominal_voltage 120;
-	latitude 2406.35359748;
+	latitude 2407.33784173;
 };
 
 object triplex_meter {
 	phases AS;
 	name ntpmLOAD634A;
-	longitude 748.106468496;
+	longitude 743.236237;
 	nominal_voltage 120;
-	latitude 2408.56644183;
+	latitude 2405.86047045;
 };
 
 object triplex_meter {
 	phases AS;
 	name ntpmLOAD611A;
-	longitude 1312.12950827;
+	longitude 1306.47799647;
 	nominal_voltage 120;
-	latitude -2392.55936121;
+	latitude -2384.75068584;
 };
 
 object triplex_meter {
 	phases CS;
 	name ntpmLOAD611C;
-	longitude 1304.70218262;
+	longitude 1303.5735531;
 	nominal_voltage 120;
-	latitude -2389.2364182;
+	latitude -2387.41355378;
 };
 
 object triplex_meter {
 	phases BS;
 	name ntpmLOAD646B;
-	longitude 749.581590818;
+	longitude 745.763318864;
 	nominal_voltage 120;
-	latitude -2420.01339255;
+	latitude -2420.97737122;
 };
 
 object triplex_meter {
 	phases CS;
 	name ntpmLOAD646C;
-	longitude 748.452512687;
+	longitude 748.14222796;
 	nominal_voltage 120;
-	latitude -2426.57662176;
+	latitude -2423.05985454;
 };
 
 object triplex_meter {
 	phases AS;
 	name ntpmLOAD646A;
-	longitude 745.629510645;
+	longitude 745.317235666;
 	nominal_voltage 120;
-	latitude -2417.69340853;
+	latitude -2423.95320397;
 };
 
 object triplex_meter {
 	phases CS;
 	name ntpmLOAD692C;
-	longitude 1303.61188738;
+	longitude 1302.69319403;
 	nominal_voltage 120;
-	latitude 1195.82785516;
+	latitude 1194.22154136;
 };
 
 object triplex_meter {
 	phases BS;
 	name ntpmLOAD692B;
-	longitude 1301.7837346;
+	longitude 1308.65305178;
 	nominal_voltage 120;
-	latitude 1194.03675591;
+	latitude 1186.61444897;
 };
 
 object triplex_meter {
 	phases AS;
 	name ntpmLOAD692A;
-	longitude 1300.95818761;
+	longitude 1307.81812475;
 	nominal_voltage 120;
-	latitude 1190.37633823;
+	latitude 1187.4481698;
 };
 
 object triplex_meter {
 	phases AS;
 	name ntpmLOAD675A;
-	longitude 1308.60196564;
+	longitude 1304.61873846;
 	nominal_voltage 120;
-	latitude 1691.89614691;
+	latitude 1686.56053703;
 };
 
 object triplex_meter {
 	phases BS;
 	name ntpmLOAD675B;
-	longitude 1303.76122357;
+	longitude 1307.39748597;
 	nominal_voltage 120;
-	latitude 1687.52855888;
+	latitude 1687.90147398;
 };
 
 object triplex_meter {
 	phases CS;
 	name ntpmLOAD675C;
-	longitude 1307.41111462;
+	longitude 1306.83778202;
 	nominal_voltage 120;
-	latitude 1686.3771973;
+	latitude 1689.64528748;
 };
 
 object triplex_meter {
 	phases AS;
 	name ntpmLOAD671A;
-	longitude 1301.10738903;
+	longitude 1310.13585169;
 	nominal_voltage 120;
-	latitude -8.87446599205;
+	latitude -5.65888157808;
 };
 
 object triplex_meter {
 	phases BS;
 	name ntpmLOAD671B;
-	longitude 1306.45199063;
+	longitude 1301.56995616;
 	nominal_voltage 120;
-	latitude -3.85002758452;
+	latitude -5.37257211684;
 };
 
 object triplex_meter {
 	phases CS;
 	name ntpmLOAD671C;
-	longitude 1301.53369467;
+	longitude 1301.07834753;
 	nominal_voltage 120;
-	latitude -0.329177972213;
+	latitude -8.85981211977;
 };
 
 object triplex_meter {
 	phases BS;
 	name ntpmLOAD611B;
-	longitude 1306.16701256;
+	longitude 1307.82475048;
 	nominal_voltage 120;
-	latitude -2388.2794208;
+	latitude -2389.23038884;
 };
 
 object triplex_meter {
 	phases CS;
 	name ntpmLOAD645C;
-	longitude 744.425839506;
+	longitude 751.29253691;
 	nominal_voltage 120;
-	latitude -1222.3333532;
+	latitude -1212.84445664;
 };
 
 object triplex_meter {
 	phases BS;
 	name ntpmLOAD645B;
-	longitude 743.74070555;
+	longitude 749.355617449;
 	nominal_voltage 120;
-	latitude -1215.59557052;
+	latitude -1218.48863991;
 };
 
 object triplex_meter {
 	phases AS;
 	name ntpmLOAD645A;
-	longitude 743.969121973;
+	longitude 746.902524923;
 	nominal_voltage 120;
-	latitude -1216.53635352;
+	latitude -1215.22280424;
 };
 
 object triplex_meter {
 	phases CS;
 	name ntpmLOAD652C;
-	longitude 1548.48103444;
+	longitude 1545.37891724;
 	nominal_voltage 120;
-	latitude -1225.98162406;
+	latitude -1228.3432346;
 };
 
 object triplex_meter {
 	phases BS;
 	name ntpmLOAD652B;
-	longitude 1549.00716954;
+	longitude 1548.82957838;
 	nominal_voltage 120;
-	latitude -1227.59552928;
+	latitude -1227.6475426;
 };
 
 object triplex_meter {
 	phases AS;
 	name ntpmLOAD652A;
-	longitude 1543.31856408;
+	longitude 1547.83528281;
 	nominal_voltage 120;
-	latitude -1227.44967231;
+	latitude -1226.29723905;
 };
 
 object triplex_node {
@@ -808,9 +808,9 @@ object triplex_node {
 	power_12 0.000+0.000j;
 	name ntpnLOAD692A;
 	parent ntpmLOAD692A;
-	longitude 1300.54165422;
+	longitude 1309.43853531;
 	nominal_voltage 120;
-	latitude 1188.31634555;
+	latitude 1187.60344453;
 };
 
 object triplex_node {
@@ -818,9 +818,9 @@ object triplex_node {
 	power_12 0.000+0.000j;
 	name ntpnLOAD692B;
 	parent ntpmLOAD692B;
-	longitude 1297.32101117;
+	longitude 1306.34270842;
 	nominal_voltage 120;
-	latitude 1191.51772863;
+	latitude 1185.99658036;
 };
 
 object triplex_node {
@@ -828,9 +828,9 @@ object triplex_node {
 	power_12 170000.000+151000.000j;
 	name ntpnLOAD692C;
 	parent ntpmLOAD692C;
-	longitude 1300.14755947;
+	longitude 1305.32225738;
 	nominal_voltage 120;
-	latitude 1191.98670527;
+	latitude 1189.5340769;
 };
 
 object triplex_node {
@@ -838,9 +838,9 @@ object triplex_node {
 	power_12 385000.000+220000.000j;
 	name ntpnLOAD671C;
 	parent ntpmLOAD671C;
-	longitude 1305.42495673;
+	longitude 1300.93706951;
 	nominal_voltage 120;
-	latitude -3.35304650549;
+	latitude -4.01994017837;
 };
 
 object triplex_node {
@@ -848,9 +848,9 @@ object triplex_node {
 	power_12 385000.000+220000.000j;
 	name ntpnLOAD671B;
 	parent ntpmLOAD671B;
-	longitude 1304.03800823;
+	longitude 1305.19792868;
 	nominal_voltage 120;
-	latitude -5.50540423187;
+	latitude -2.99081785836;
 };
 
 object triplex_node {
@@ -858,9 +858,9 @@ object triplex_node {
 	power_12 385000.000+220000.000j;
 	name ntpnLOAD671A;
 	parent ntpmLOAD671A;
-	longitude 1298.52943936;
+	longitude 1308.48351043;
 	nominal_voltage 120;
-	latitude -7.7880102505;
+	latitude -8.59350839171;
 };
 
 object triplex_node {
@@ -868,9 +868,9 @@ object triplex_node {
 	power_12 0.000+0.000j;
 	name ntpnLOAD611A;
 	parent ntpmLOAD611A;
-	longitude 1313.20499167;
+	longitude 1309.03366451;
 	nominal_voltage 120;
-	latitude -2397.40893005;
+	latitude -2383.95567176;
 };
 
 object triplex_node {
@@ -878,9 +878,9 @@ object triplex_node {
 	power_12 128000.000+86000.000j;
 	name ntpnLOAD652A;
 	parent ntpmLOAD652A;
-	longitude 1543.7697925;
+	longitude 1547.62595901;
 	nominal_voltage 120;
-	latitude -1222.90651841;
+	latitude -1229.88566356;
 };
 
 object triplex_node {
@@ -888,9 +888,9 @@ object triplex_node {
 	power_12 0.000+0.000j;
 	name ntpnLOAD652B;
 	parent ntpmLOAD652B;
-	longitude 1553.06250517;
+	longitude 1549.02542833;
 	nominal_voltage 120;
-	latitude -1227.0712908;
+	latitude -1232.40327548;
 };
 
 object triplex_node {
@@ -898,9 +898,9 @@ object triplex_node {
 	power_12 0.000+0.000j;
 	name ntpnLOAD611B;
 	parent ntpmLOAD611B;
-	longitude 1305.21915967;
+	longitude 1312.33618459;
 	nominal_voltage 120;
-	latitude -2388.16369151;
+	latitude -2392.13998979;
 };
 
 object triplex_node {
@@ -908,9 +908,9 @@ object triplex_node {
 	power_12 0.000+0.000j;
 	name ntpnLOAD646A;
 	parent ntpmLOAD646A;
-	longitude 748.332661808;
+	longitude 743.803750464;
 	nominal_voltage 120;
-	latitude -2417.56672516;
+	latitude -2421.82354037;
 };
 
 object triplex_node {
@@ -918,9 +918,9 @@ object triplex_node {
 	power_12 0.000+0.000j;
 	name ntpnLOAD646C;
 	parent ntpmLOAD646C;
-	longitude 744.208137603;
+	longitude 744.189110549;
 	nominal_voltage 120;
-	latitude -2428.57382982;
+	latitude -2418.22720915;
 };
 
 object triplex_node {
@@ -928,9 +928,9 @@ object triplex_node {
 	power_12 230000.000+132000.000j;
 	name ntpnLOAD646B;
 	parent ntpmLOAD646B;
-	longitude 747.140846547;
+	longitude 747.000806542;
 	nominal_voltage 120;
-	latitude -2416.25758473;
+	latitude -2418.91265536;
 };
 
 object triplex_node {
@@ -938,9 +938,9 @@ object triplex_node {
 	power_12 68000.000+60000.000j;
 	name ntpnLOAD675B;
 	parent ntpmLOAD675B;
-	longitude 1305.022107;
+	longitude 1310.44510769;
 	nominal_voltage 120;
-	latitude 1691.17875221;
+	latitude 1684.55444431;
 };
 
 object triplex_node {
@@ -948,9 +948,9 @@ object triplex_node {
 	power_12 0.000+0.000j;
 	name ntpnLOAD652C;
 	parent ntpmLOAD652C;
-	longitude 1550.14659147;
+	longitude 1542.76806258;
 	nominal_voltage 120;
-	latitude -1224.22209174;
+	latitude -1225.16477326;
 };
 
 object triplex_node {
@@ -958,9 +958,9 @@ object triplex_node {
 	power_12 160000.000+110000.000j;
 	name ntpnLOAD634A;
 	parent ntpmLOAD634A;
-	longitude 752.019226533;
+	longitude 743.130061783;
 	nominal_voltage 120;
-	latitude 2403.77799638;
+	latitude 2401.23428424;
 };
 
 object triplex_node {
@@ -968,9 +968,9 @@ object triplex_node {
 	power_12 170000.000+80000.000j;
 	name ntpnLOAD611C;
 	parent ntpmLOAD611C;
-	longitude 1300.61082415;
+	longitude 1300.93492708;
 	nominal_voltage 120;
-	latitude -2388.46838293;
+	latitude -2386.26732868;
 };
 
 object triplex_node {
@@ -978,9 +978,9 @@ object triplex_node {
 	power_12 120000.000+90000.000j;
 	name ntpnLOAD634B;
 	parent ntpmLOAD634B;
-	longitude 745.411275793;
+	longitude 746.660694216;
 	nominal_voltage 120;
-	latitude 2404.67967652;
+	latitude 2406.55035631;
 };
 
 object triplex_node {
@@ -988,9 +988,9 @@ object triplex_node {
 	power_12 0.000+0.000j;
 	name ntpnLOAD645A;
 	parent ntpmLOAD645A;
-	longitude 743.478934166;
+	longitude 749.046432148;
 	nominal_voltage 120;
-	latitude -1214.97863412;
+	latitude -1213.63671103;
 };
 
 object triplex_node {
@@ -998,9 +998,9 @@ object triplex_node {
 	power_12 170000.000+125000.000j;
 	name ntpnLOAD645B;
 	parent ntpmLOAD645B;
-	longitude 744.866807158;
+	longitude 746.714159976;
 	nominal_voltage 120;
-	latitude -1218.27700951;
+	latitude -1217.12287292;
 };
 
 object triplex_node {
@@ -1008,9 +1008,9 @@ object triplex_node {
 	power_12 0.000+0.000j;
 	name ntpnLOAD645C;
 	parent ntpmLOAD645C;
-	longitude 748.241685358;
+	longitude 752.993578434;
 	nominal_voltage 120;
-	latitude -1223.5535294;
+	latitude -1207.89046533;
 };
 
 object triplex_node {
@@ -1018,9 +1018,9 @@ object triplex_node {
 	power_12 290000.000+212000.000j;
 	name ntpnLOAD675C;
 	parent ntpmLOAD675C;
-	longitude 1312.19760912;
+	longitude 1304.74751782;
 	nominal_voltage 120;
-	latitude 1685.56825426;
+	latitude 1692.44224838;
 };
 
 object triplex_node {
@@ -1028,9 +1028,9 @@ object triplex_node {
 	power_12 120000.000+90000.000j;
 	name ntpnLOAD634C;
 	parent ntpmLOAD634C;
-	longitude 744.563908597;
+	longitude 752.123960679;
 	nominal_voltage 120;
-	latitude 2400.29696614;
+	latitude 2399.47998574;
 };
 
 object triplex_node {
@@ -1038,9 +1038,9 @@ object triplex_node {
 	power_12 485000.000+190000.000j;
 	name ntpnLOAD675A;
 	parent ntpmLOAD675A;
-	longitude 1305.24412722;
+	longitude 1300.57751109;
 	nominal_voltage 120;
-	latitude 1687.69146309;
+	latitude 1690.21446439;
 };
 
 object overhead_line {
@@ -1372,9 +1372,9 @@ object capacitor {
 	capacitor_B 200000.0;
 	capacitor_C 200000.0;
 	phases ABC;
-	longitude 1302.04557457;
+	longitude 1303.9047356;
 	time_delay 2;
-	latitude 1690.67305345;
+	latitude 1683.83131207;
 	nominal_voltage 2401.78;
 	switchC CLOSED;
 	switchB CLOSED;
@@ -1389,9 +1389,9 @@ object capacitor {
 	parent nx611;
 	capacitor_C 100000.0;
 	phases C;
-	longitude 1304.11545076;
+	longitude 1310.60797625;
 	time_delay 2;
-	latitude -2386.81867721;
+	latitude -2390.39197555;
 	nominal_voltage 2401.78;
 	switchC CLOSED;
 	phases_connected CN;

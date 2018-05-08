@@ -1545,8 +1545,6 @@ def _find_SPCT_rating(load_str):
 		return str(past_rating)
 	
 def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
-	print 'DEFAULT TEST PATH', modelDir + network_db 
-	print 'NEW PATH', network_db
 	conductor_data_csv = None
 	dbflag = 0 
 	#HACK: manual network ID detection.
@@ -2763,7 +2761,8 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 					glmTree[x]['phases'] = glmTree[x]['phases'] + 'N'
 			except:
 				pass
-	checkMissingNodes(nodes, cymsectiondevice, objectList, feeder_id, modelDir, cymsection)
+	#TODO: have this missing nodes report not put files all over the place.
+	# checkMissingNodes(nodes, cymsectiondevice, objectList, feeder_id, modelDir, cymsection)
 	#jfk.  add regulator to source
 	biggestkey = max(glmTree.keys())
 	glmTree[biggestkey+1] = {
@@ -2798,9 +2797,11 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 		'time_delay': '30.0',
 		'control_level': 'INDIVIDUAL'
 	}
+	# Clean up the csvDump.
+	shutil.rmtree(pJoin(modelDir,'cymeCsvDump'))
 	return glmTree, x_scale, y_scale
 
-def _tests(keepFiles=True):
+def _tests(keepFiles=False):
 	testFile = ['IEEE13.mdb']
 	inputDir = './static/testFiles/'
 	# outputDir = tempfile.mkdtemp()

@@ -35,8 +35,6 @@ def handleMdbFile(mdb_path, modelDir, failure = False):
   try:
     outputFname = mdb_path.split('/')[-1].replace('.mdb', '.glm')
     with open(outputFname, 'w') as output_file:
-      print '!!!!!!!MDB_PATH', mdb_path
-      print '!!!!!!!MODELDIR', modelDir
       glm, x_scale, y_scale = cyme.convertCymeModel(mdb_path, modelDir)
       output_file.write(feeder.sortedWrite(glm))
   except IOError:
