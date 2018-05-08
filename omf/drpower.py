@@ -42,7 +42,7 @@ def injectUser():
 	web.flask_login.login_user(web.User(user))
 	with open('./data/User/'+user['username']+'.json','w') as outFile:
 		json.dump(user, outFile, indent=4)
-	return web.redirect('/newtwork/' + pData['email'] + '/' + pData['modelName'] + '/1')
+	return web.redirect('/network/' + pData['email'] + '/' + pData['modelName'] + '/1')
 
 if __name__ == '__main__':
 	template_files = ['templates/'+ x  for x in web.safeListdir('templates')]

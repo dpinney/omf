@@ -1133,7 +1133,11 @@ function finishPastActions(){
 		}
 	})
 	// Send network name to model and remove loading dialog.
-	window.opener.$(window.opener.document).trigger('mainWindow', "{{ modelName }};"+"networkName{{networkNum}};"+lastNetworkName);
+	try {
+		window.opener.$(window.opener.document).trigger('mainWindow', "{{ modelName }};"+"networkName{{networkNum}};"+lastNetworkName);
+	} catch (err) {
+		// Opened directly with no previous window.
+	}
 	setTimeout(removeProgressDialog,500) // hard cap.
 }
 
