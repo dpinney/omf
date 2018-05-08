@@ -32,15 +32,17 @@ def transmissionConvert(owner, modelName):
 
 def powerPublish(owner, modelName):
 	'Hook to pull data back to DRPOWER main repository.'
+	#TODO: return web.redirect('drpowerHost.com/publishCallback/userName/directoryName/')
 	return 'PNNL PUBLICATION URL GOES HERE'
 
-def injectUser(email, password):
+def injectUser(email, passwordHash, modelName):
 	'Create a new user and log that user in.'
-	user = {"username":email, "password_digest":web.pbkdf2_sha512.encrypt(password)}
+	#TODO: make this a post request.
+	user = {'username':email, 'password_digest':passwordHash}
 	web.flask_login.login_user(web.User(user))
-	with open("./data/User/"+user["username"]+".json","w") as outFile:
+	with open('./data/User/'+user['username']+'.json','w') as outFile:
 		json.dump(user, outFile, indent=4)
-	return web.redirect('/')
+	return web.redirect('/') #TODO: redirect appropriately to modelName.
 
 if __name__ == '__main__':
 	template_files = ['templates/'+ x  for x in web.safeListdir('templates')]
@@ -48,8 +50,8 @@ if __name__ == '__main__':
 	# Add routes.
 	web.app.add_url_rule('/sigh', 'sigh', view_func=sigh)
 	web.app.add_url_rule('/transmissionConvert/<owner>/<modelName>/', 'transmissionConvert', view_func=transmissionConvert)
-	web.app.add_url_rule('/publishModel/<owner>/<modelName>/', 'powerPublish', methods=["POST"], view_func=powerPublish)
-	web.app.add_url_rule('/injectUser/<email>/<password>/', 'injectUser', view_func=injectUser)
+	web.app.add_url_rule('/publishModel/<owner>/<modelName>/', 'powerPublish', methods=['POST'], view_func=powerPublish)
+	web.app.add_url_rule('/injectUser/<email>/<passwordHash>/<modelName>/', 'injectUser', view_func=injectUser)
 	# def crash(): raise Exception
 	# web.app.add_url_rule('/crash','crash',view_func=crash)
 	# Remove the bogus old publishModel route.
