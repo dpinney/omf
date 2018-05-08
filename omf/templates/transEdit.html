@@ -144,7 +144,7 @@
 			<div id="editDiv" style="display:inline-block">
 				<div class="buttonGroup">
 					<button id="editOps" class='pill' onclick='dropPill(this, "Edit");'>Edit ▾</button>
-					<ul class='menu right'>
+					<ul class='menu right' style="display:none">
 						<li><a href='javascript:showModal("anonymizeModal");'>Anonymization...</a></li>
 					</ul>
 				</div>
@@ -152,7 +152,7 @@
 			<div id="addDiv" style="display:inline-block">
 				<div class="buttonGroup">
 					<button id="addOps" class='pill' onclick='dropPill(this, "Add");'>Add ▾</button>
-					<ul id='newObjectMenu' class='menu right' style="">
+					<ul id='newObjectMenu' class='menu right' style="display:none">
 						<li><a href='javascript:newNode("bus");'>Bus</a></li>
 						<li><a href='javascript:newLink();'>Line</a></li>
 						<li><a href='javascript:newGen();'>Generator</a></li>
@@ -163,7 +163,7 @@
 				<div class='buttonGroup'>
 					{% if is_admin or not public %}
 					<button id="fileOps" class='pill' onclick='dropPill(this, "File")'>File ▾</button>
-					<ul class='menu right'>
+					<ul class='menu right' style="display:none">
 						<li><a href='javascript:saveNetwork();'>Save</a></li>
 						<li><a href='javascript:renameNetwork();'>Rename</a></li>
 						<li><a href='javascript:showModal("blankNetworkModal");'>New Blank Network...</a></li>
@@ -346,7 +346,6 @@ function addLine(x1,y1,x2,y2,id,myClass) {
 }
 function buildNetwork() {
 	// Find the size we need for the full chart.
-	console.log(networkData)
 	maxLon = 100, maxLat = 100
 	busNumMap = {}
 	for (num in networkData.bus) {
@@ -1112,12 +1111,15 @@ function showProgressDialog(progressType, dialogMessage, cancelType) {
 			}
 		};
 	}
-}function removeProgressDialog() {
+}
+
+function removeProgressDialog() {
 	if (gebi('progressBackground')!=null)
 		document.body.removeChild(gebi('progressBackground'))
 	if (gebi('progressContent')!=null)
 		document.body.removeChild(gebi('progressContent'))
 }
+
 function finishPastActions(){
 	showProgressDialog('spinner','Loading Network', 'loading');
 	var modelName = '{{modelName}}'
@@ -1134,6 +1136,7 @@ function finishPastActions(){
 	window.opener.$(window.opener.document).trigger('mainWindow', "{{ modelName }};"+"networkName{{networkNum}};"+lastNetworkName);
 	setTimeout(removeProgressDialog,500) // hard cap.
 }
+
 function checkConversion() {
 	var conversionStatus = 'converting';
 		// Check every 5 seconds for a feeder & refresh.
@@ -1274,6 +1277,3 @@ function downloadTextFile(fileName, text) {
 	};
 {% endif %}
 </script>
-<script type='text/javascript'>clickCloseEvent("File","fileOps")</script>
-<script type='text/javascript'>clickCloseEvent("Add","addOps")</script>
-<script type='text/javascript'>clickCloseEvent('Edit','editOps')</script>
