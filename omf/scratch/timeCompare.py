@@ -1,14 +1,16 @@
-import timeit
+import time
 import os
 import opendssdirect as dss
 
 glm_input = 'powerflow_IEEE_37node.glm'
 gridlab_sims = dict()
 
+t = time.time()
 for i in range(1, 21):
-  xlm_file = glm_input.replace('.glm', '.xml')
-  os.system('gridlabd %s --output %s' % (glm_input, xlm_file))
-  gridlab_sims[i] = xlm_file
+  os.system('gridlabd %s --verbose' % (glm_input))
+  print "PROCESSED"
+print 'TOTAL TIME: %f' % (float((time.time()-t)))
+print 'AVG TIME: %f' % (float((time.time()-t)/21.0))
 
 '''
 dss_sims = dict()

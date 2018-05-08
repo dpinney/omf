@@ -9,8 +9,6 @@
 // no loadobjects attached to cause time to advance and there are no
 // recorders attached to gather the output.  See residential_loads.glm
 // for an example model that produces output.
-#set profiler=1
-#set pauseatexit=1
 #set iteration_limit=20000;
 
 clock {
