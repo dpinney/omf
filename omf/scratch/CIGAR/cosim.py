@@ -18,8 +18,24 @@ def waitUntil(targetTime):
 		# print 'CURRENT VS TARGET', currentTime, targetTime
 		#TODO: need a maxWait argument and accumulator so we don't wait forever.
 
-#TODO: def read(obName, propName). If urlopen fails, do warnings.warn() instead of raise exception.
-#TODO: def write(obName, propName, value) = read(obName, propName += '=value')
+#read(obName, propName). If urlopen fails, do warnings.warn() instead of raise exception.
+def read(obName, propName):
+	try:
+		if(obName == 'raw'):
+			return urllib2.urlopen(BASE_URL + 'raw/' + propName).read()
+		else:
+			return urllib2.urlopen(BASE_URL + 'raw/' + obName + '/' + propName).read()
+	except:
+		warnings.warn("Failed to read " + propName + " of " + obName)
+#write(obName, propName, value) = read(obName, propName += '=value')
+def write(obName, propName, value):
+	try:
+		if(obName == 'raw'):
+			return urllib2.urlopen(BASE_URL + 'raw/' + propName + '+=' + value).read()
+		else:
+			return urllib2.urlopen(BASE_URL + 'raw/' + obName + '/' + propName + '+=' + value).read()
+	except:
+		warnings.warn("Failed to write " + value + " to " + propName + " of " + obName)
 
 # Start servert in server mode, note that the .glm has pauseat set for 1 day in to the simulation.
 proc = subprocess.Popen(['gridlabd', GLM_PATH, '--server', '-P', PORT, '-q','--define','pauseat="' + START_PAUSE + '"'], stderr=None, stdout=None)
@@ -28,8 +44,8 @@ time.sleep(2)
 #TODO: instead of sleeping, wait 1 second, try to read clock, if it fails then wait 1 more second, loop, etc.
 
 # Read the clock, solar output voltage, battery state of charge, and inverter voltage input.
-print '* Reading clock:', urllib2.urlopen(BASE_URL + 'raw/clock').read()
-print '* Reading solar_1 output volatage (V_Out):', urllib2.urlopen(BASE_URL + 'raw/solar_1/V_Out').read()
+print '* Reading clock:', read('raw', 'clock')
+print '* Reading solar_1 output volatage (V_Out):', read('solar_1', 'V_Out')
 # print '* Reading battery_1 state of charge:', urllib2.urlopen(BASE_URL + 'raw/battery_1/battery_state').read()
 print '* Reading inverter_1 input voltage (V_In):', urllib2.urlopen(BASE_URL + 'raw/inverter_1/V_In').read()
 # Step the simulation.

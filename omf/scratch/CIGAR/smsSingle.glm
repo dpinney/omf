@@ -721,7 +721,7 @@ object inverter {
 	generator_mode CONSTANT_PF;
 	generator_status ONLINE;
 	inverter_type PWM;
-	power_factor 1.0;
+	power_factor -0.1;
 	inverter_efficiency 0.95;
 	rated_power 100 kW;
 	//	<< implied child that provides a DC power input >>
@@ -742,4 +742,51 @@ object solar {
 //	parent inverter_1;
 //	generator_mode SUPPLY_DRIVEN;
 //	generator_status ONLINE;
+//}
+
+object battery {
+	battery_state FULL;
+	name battery_1;
+	parent inverter_1;
+	round_trip_efficiency 0.85;
+	generator_status ONLINE;
+	state_of_charge 1.0;
+	battery_type LI_ION;
+	generator_mode SUPPLY_DRIVEN;
+	battery_capacity 7 kWh;
+	use_internal_battery_model TRUE;
+};
+
+object node {
+	phases ABCN;
+	name n640;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	voltage_A 2401.7771;
+	nominal_voltage 2401.7771;
+};
+
+object recloser {
+	name recloser_1;
+	phases ABCN;
+	from n640;
+	to n630;
+	retry_time 1s;
+	max_number_of_tries 3;
+};
+
+//object metrics {
+//	name test_metrics;
+//	module_metrics_object powermetrics;
+//	metrics_of_interest "SAIFI,SAIDI";
+//	customer_group "groupid=METEROBJS";
+//	metric_interval 0 s;
+//	report_interval 1 yr;
+//	}
+//
+//object eventgen {
+//	name RandEvent;
+//	parent test_metrics;
+//	target_group "class=line AND groupid=FAULTY";
+//	fault_type "DLG-X";
 //}
