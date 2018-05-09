@@ -13,9 +13,11 @@ def main():
 		FEEDER_PATH = '../../static/publicFeeders/Simple Market System.omd'
 		DO_FORCE_LAYOUT = True
 	elif argCount == 2:
+		print 'Beginning display of ' + sys.argv[1]
 		DO_FORCE_LAYOUT = False
 		FEEDER_PATH = sys.argv[1]
 	elif argCount == 3:
+		print 'Force laying out and displaying ' + sys.argv[2]
 		if sys.argv[1] == '-f':
 			DO_FORCE_LAYOUT = True
 		else:
