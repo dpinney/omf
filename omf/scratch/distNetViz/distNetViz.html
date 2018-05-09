@@ -247,50 +247,6 @@
 					<ul id='newObjectMenu' class='menu right' style="display:none">
 						<li><a href='javascript:newNode()'>node</a></li>
 						<li><a href='javascript:newLink()'>link</a></li>
-						<li><a>load</a></li>
-						<li><a>overhead_line</a></li>
-						<li><a>volt_var_control</a></li>
-						<li><a>battery</a></li>
-						<li><a>house</a></li>
-						<li><a>transformer_configuration</a></li>
-						<li><a>evcharger_det</a></li>
-						<li><a>inverter</a></li>
-						<li><a>triplex_line_conductor</a></li>
-						<li><a>transformer</a></li>
-						<li><a>regulator_configuration</a></li>
-						<li><a>windturb_dg</a></li>
-						<li><a>node</a></li>
-						<li><a>meter_recorder</a></li>
-						<li><a>triplex_line</a></li>
-						<li><a>triplex_node</a></li>
-						<li><a>triplex_line_configuration</a></li>
-						<li><a>capacitor</a></li>
-						<li><a>solar</a></li>
-						<li><a>ZIPload</a></li>
-						<li><a>triplex_meter</a></li>
-						<li><a>regulator</a></li>
-						<li><a>load</a></li>
-						<li><a>overhead_line</a></li>
-						<li><a>volt_var_control</a></li>
-						<li><a>battery</a></li>
-						<li><a>house</a></li>
-						<li><a>transformer_configuration</a></li>
-						<li><a>evcharger_det</a></li>
-						<li><a>inverter</a></li>
-						<li><a>triplex_line_conductor</a></li>
-						<li><a>transformer</a></li>
-						<li><a>regulator_configuration</a></li>
-						<li><a>windturb_dg</a></li>
-						<li><a>node</a></li>
-						<li><a>meter_recorder</a></li>
-						<li><a>triplex_line</a></li>
-						<li><a>triplex_node</a></li>
-						<li><a>triplex_line_configuration</a></li>
-						<li><a>capacitor</a></li>
-						<li><a>solar</a></li>
-						<li><a>ZIPload</a></li>
-						<li><a>triplex_meter</a></li>
-						<li><a>regulator</a></li>
 					</ul>
 				</div>
 			</div>
@@ -961,13 +917,13 @@ function findNext() {
 		var x = (parseFloat(svgOb.getAttribute('x1')) + parseFloat(svgOb.getAttribute('x2'))) / 2
 		var y = (parseFloat(svgOb.getAttribute('y1')) + parseFloat(svgOb.getAttribute('y2'))) / 2
 	}
-	// Zoom to the next hit.
+	// Pan to the next hit.
 	window.panZoom.pan({x:0, y:0})
 	var realZoom = window.panZoom.getSizes().realZoom
-	var width = window.panZoom.getSizes().width/2
-	var height = window.panZoom.getSizes().height/2
+	var width = window.panZoom.getSizes().width / 2
+	var height = window.panZoom.getSizes().height / 2
 	window.panZoom.pan({x:width - (x * realZoom), y:height - (y * realZoom)})
-	window.panZoom.zoom(3 / scaleLevel)
+	// TODO: Zoom in close
 	// Udpate the selection.
 	svgOb.classList.add('selected')
 	selection.push(svgOb)
