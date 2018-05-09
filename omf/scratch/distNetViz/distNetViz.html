@@ -803,38 +803,36 @@ function moveNodeListener() {
 			addCircle(newLon,newLat,2,currSelId,currSel.object)
 		}
 		// Move all lines from or to the clicked node.
-		if((testFeeder.tree[num].from) && (testFeeder.tree[num].to)!== undefined){
-			selBranch = testFeeder.tree[num]
+		if((treeOb.from) && (treeOb.to)!== undefined){
+			//below ID is from original for loop to give to
 			id=num
-			fbus=selBranch.from
-			tbus=selBranch.to
 			//If any lines are an end or target for clicked node, the lines are deleted, and redrawn to new clicked location
-			if(fbus == currSel.name || tbus == currSel.name) {
+			if(treeOb.from == currSel.name || treeOb.to == currSel.name) {
 				document.getElementById(num).remove()
 				for (num in testFeeder.tree){
-					if(fbus == testFeeder.tree[num].name){
+					if(treeOb.from == testFeeder.tree[num].name){
 						x1 = testFeeder.tree[num]['longitude']
 						y1 = testFeeder.tree[num]['latitude']
 						numf=num
 						myClassf=testFeeder.tree[num].object
 	
 					}
-					else if(tbus == testFeeder.tree[num].name){
+					else if(treeOb.to == testFeeder.tree[num].name){
 						x2 = testFeeder.tree[num]['longitude']
 						y2 = testFeeder.tree[num]['latitude']
 						numt=num
 						myClasst=testFeeder.tree[num].object
 					}
 				}
-				addLine(x1,y1,x2,y2,id,selBranch['object'] + ' p' + phaseCount(selBranch['phases']))
+				addLine(x1,y1,x2,y2,id,treeOb['object'] + ' p' + phaseCount(treeOb['phases']))
 				// Redraw nodes at other end of line so they aren't below the newly drawn lines.
-				if(fbus == currSel.name) {
+				if(treeOb.from == currSel.name) {
 					addCircle(x2,y2,2,numt,myClasst)
 					if (document.getElementById(numt) !== null) {
 						document.getElementById(numt).remove()
 					}
 				}
-				if(tbus == currSel.name) {
+				if(treeOb.to == currSel.name) {
 					addCircle(x1,y1,2,numf,myClassf)
 					if(document.getElementById(numf) !== null) {
 						document.getElementById(numf).remove()
