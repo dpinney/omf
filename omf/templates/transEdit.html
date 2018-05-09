@@ -115,7 +115,7 @@
 	</style>
 	<script>networkData={% if networkData %}{{networkData | safe}}{% else %}null{% endif %}</script>
 </head>
-<body onkeypress='hotkeys()' onload="finishPastActions();" style='width:100%;height:100%'>
+<body onkeypress='hotkeys()' onload="loading();" style='width:100%;height:100%'>
 	<!-- Start Controls -->
 	<div style='background:dimgray; top:55px; left:5px' class='divButton' onclick='window.panZoom.zoomIn()' title='Zoom In'>+</div>
 	<div style='background:dimgray; top:95px; left:5px' class='divButton' onclick='window.panZoom.zoomOut()' title='Zoom Out'>-</div>
@@ -265,13 +265,6 @@
 	</div>
 	<div id='tableScroller'></div>
 	</body>
-	<script type='text/javascript'>
-		function loadingStuff() {
-			buildNetwork();
-			document.getElementById('loadingMessage').style.display = 'none'
-		}
-		setTimeout(loadingStuff,100)
-	</script>
 </html>
 
 <!-- ******** Javascript ******** -->
@@ -1120,25 +1113,30 @@ function removeProgressDialog() {
 		document.body.removeChild(gebi('progressContent'))
 }
 
-function finishPastActions(){
+function loading() {
+	// Put up progress dialog.
 	showProgressDialog('spinner','Loading Network', 'loading');
-	var modelName = '{{modelName}}'
-	// Check conversion.
-	$.ajax({
-		url: "/checkConversion/" + modelName
-	}).done(function (data) {
-		if (data.exists == true) {
-			showProgressDialog('spinner','Converting network','conversion');
-			checkConversion()
-		}
-	})
-	// Send network name to model and remove loading dialog.
-	try {
-		window.opener.$(window.opener.document).trigger('mainWindow', "{{ modelName }};"+"networkName{{networkNum}};"+lastNetworkName);
-	} catch (err) {
-		// Opened directly with no previous window.
+	// Helper function to do the stuff that takes a long time:
+	function longLoadingProcess() {
+		var modelName = '{{modelName}}'
+		// Check conversion.
+		$.ajax({
+			url: "/checkConversion/" + modelName
+		}).done(function (data) {
+			if (data.exists == true) {
+				showProgressDialog('spinner','Converting network','conversion');
+				checkConversion()
+			}
+		})
+		// Send network name to model and remove loading dialog.
+		try {
+			window.opener.$(window.opener.document).trigger('mainWindow', "{{ modelName }};"+"networkName{{networkNum}};"+lastNetworkName);
+		} catch (err) {} // Opened directly with no previous window.
+		// Finally, draw the network:
+		buildNetwork();
+		removeProgressDialog();
 	}
-	setTimeout(removeProgressDialog,500) // hard cap.
+	setTimeout(longLoadingProcess, 100)
 }
 
 function checkConversion() {
