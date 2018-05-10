@@ -814,7 +814,6 @@ function moveNodeListener() {
 						y1 = testFeeder.tree[subEl]['latitude']
 						numf=subEl
 						myClassf=testFeeder.tree[subEl].object
-	
 					}
 					else if(treeOb.to == testFeeder.tree[subEl].name){
 						x2 = testFeeder.tree[subEl]['longitude']
@@ -822,23 +821,20 @@ function moveNodeListener() {
 						numt=subEl
 						myClasst=testFeeder.tree[subEl].object
 					}
-				
-				}
-				console.log(num)
-			
+				}	
 				addLine(x1,y1,x2,y2,num,treeOb['object'] + ' p' + phaseCount(treeOb['phases']))
 				// Redraw nodes at other end of line so they aren't below the newly drawn lines.
 				if(treeOb.from == currSel.name) {
 					addCircle(x2,y2,2,numt,myClasst)
-					if (document.getElementById(numt) !== null) {
+					
 						document.getElementById(numt).remove()
-					}
+					
 				}
 				if(treeOb.to == currSel.name) {
 					addCircle(x1,y1,2,numf,myClassf)
-					if(document.getElementById(numf) !== null) {
+					
 						document.getElementById(numf).remove()
-					}
+					
 				}
 				// Finally, draw the clicked node in its new location.
 				document.getElementById(currSelId).remove()
