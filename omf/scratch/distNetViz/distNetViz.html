@@ -805,7 +805,6 @@ function moveNodeListener() {
 		// Move all lines from or to the clicked node.
 		if((treeOb.from) && (treeOb.to)!== undefined){
 			//below ID is from original for loop to give to
-			id=num
 			//If any lines are an end or target for clicked node, the lines are deleted, and redrawn to new clicked location
 			if(treeOb.from == currSel.name || treeOb.to == currSel.name) {
 				document.getElementById(num).remove()
@@ -823,11 +822,11 @@ function moveNodeListener() {
 						numt=subEl
 						myClasst=testFeeder.tree[subEl].object
 					}
-				console.log(num)
+				
 				}
 				console.log(num)
-				console.log(id)
-				addLine(x1,y1,x2,y2,id,treeOb['object'] + ' p' + phaseCount(treeOb['phases']))
+			
+				addLine(x1,y1,x2,y2,num,treeOb['object'] + ' p' + phaseCount(treeOb['phases']))
 				// Redraw nodes at other end of line so they aren't below the newly drawn lines.
 				if(treeOb.from == currSel.name) {
 					addCircle(x2,y2,2,numt,myClasst)
