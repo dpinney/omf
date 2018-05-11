@@ -13,9 +13,11 @@ def main():
 		FEEDER_PATH = '../../static/publicFeeders/Simple Market System.omd'
 		DO_FORCE_LAYOUT = True
 	elif argCount == 2:
+		print 'Beginning display of ' + sys.argv[1]
 		DO_FORCE_LAYOUT = False
 		FEEDER_PATH = sys.argv[1]
 	elif argCount == 3:
+		print 'Force laying out and displaying ' + sys.argv[2]
 		if sys.argv[1] == '-f':
 			DO_FORCE_LAYOUT = True
 		else:
@@ -91,4 +93,6 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None):
 
 if __name__ == '__main__':
 	main()
+	#viz('/Users/tuomastalvitie/OneDrive/NRECA Code/DEC Robinsonville Original.omd', forceLayout=False, outputPath=None)
+	#viz('C:\Users\Tuomas\SkyDrive\NRECA Code\Utility Data\DEC Robinsonville Substation\DEC Robinsonville Original.omd', forceLayout=False, outputPath=None)
 	# viz('/Users/dpinney/Desktop/LATERBASE/NRECA/GridBallast/DM1.3.1 Go-No-Go - Demonstration of GridBallast Performance in Simulation - FINISHED/Utility Data/DEC Robinsonville Substation/DEC Robinsonville Original.omd', forceLayout=False, outputPath=None)

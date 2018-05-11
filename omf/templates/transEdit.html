@@ -115,7 +115,7 @@
 	</style>
 	<script>networkData={% if networkData %}{{networkData | safe}}{% else %}null{% endif %}</script>
 </head>
-<body onkeypress='hotkeys()' onload="finishPastActions();" style='width:100%;height:100%'>
+<body onkeypress='hotkeys()' onload="loading();" style='width:100%;height:100%'>
 	<!-- Start Controls -->
 	<div style='background:dimgray; top:55px; left:5px' class='divButton' onclick='window.panZoom.zoomIn()' title='Zoom In'>+</div>
 	<div style='background:dimgray; top:95px; left:5px' class='divButton' onclick='window.panZoom.zoomOut()' title='Zoom Out'>-</div>
@@ -144,7 +144,7 @@
 			<div id="editDiv" style="display:inline-block">
 				<div class="buttonGroup">
 					<button id="editOps" class='pill' onclick='dropPill(this, "Edit");'>Edit ▾</button>
-					<ul class='menu right'>
+					<ul class='menu right' style="display:none">
 						<li><a href='javascript:showModal("anonymizeModal");'>Anonymization...</a></li>
 					</ul>
 				</div>
@@ -152,7 +152,7 @@
 			<div id="addDiv" style="display:inline-block">
 				<div class="buttonGroup">
 					<button id="addOps" class='pill' onclick='dropPill(this, "Add");'>Add ▾</button>
-					<ul id='newObjectMenu' class='menu right' style="">
+					<ul id='newObjectMenu' class='menu right' style="display:none">
 						<li><a href='javascript:newNode("bus");'>Bus</a></li>
 						<li><a href='javascript:newLink();'>Line</a></li>
 						<li><a href='javascript:newGen();'>Generator</a></li>
@@ -163,7 +163,7 @@
 				<div class='buttonGroup'>
 					{% if is_admin or not public %}
 					<button id="fileOps" class='pill' onclick='dropPill(this, "File")'>File ▾</button>
-					<ul class='menu right'>
+					<ul class='menu right' style="display:none">
 						<li><a href='javascript:saveNetwork();'>Save</a></li>
 						<li><a href='javascript:renameNetwork();'>Rename</a></li>
 						<li><a href='javascript:showModal("blankNetworkModal");'>New Blank Network...</a></li>
@@ -265,13 +265,6 @@
 	</div>
 	<div id='tableScroller'></div>
 	</body>
-	<script type='text/javascript'>
-		function loadingStuff() {
-			buildNetwork();
-			document.getElementById('loadingMessage').style.display = 'none'
-		}
-		setTimeout(loadingStuff,100)
-	</script>
 </html>
 
 <!-- ******** Javascript ******** -->
@@ -346,7 +339,6 @@ function addLine(x1,y1,x2,y2,id,myClass) {
 }
 function buildNetwork() {
 	// Find the size we need for the full chart.
-	console.log(networkData)
 	maxLon = 100, maxLat = 100
 	busNumMap = {}
 	for (num in networkData.bus) {
@@ -1112,28 +1104,41 @@ function showProgressDialog(progressType, dialogMessage, cancelType) {
 			}
 		};
 	}
-}function removeProgressDialog() {
+}
+
+function removeProgressDialog() {
 	if (gebi('progressBackground')!=null)
 		document.body.removeChild(gebi('progressBackground'))
 	if (gebi('progressContent')!=null)
 		document.body.removeChild(gebi('progressContent'))
 }
-function finishPastActions(){
+
+function loading() {
+	// Put up progress dialog.
 	showProgressDialog('spinner','Loading Network', 'loading');
-	var modelName = '{{modelName}}'
-	// Check conversion.
-	$.ajax({
-		url: "/checkConversion/" + modelName
-	}).done(function (data) {
-		if (data.exists == true) {
-			showProgressDialog('spinner','Converting network','conversion');
-			checkConversion()
-		}
-	})
-	// Send network name to model and remove loading dialog.
-	window.opener.$(window.opener.document).trigger('mainWindow', "{{ modelName }};"+"networkName{{networkNum}};"+lastNetworkName);
-	setTimeout(removeProgressDialog,500) // hard cap.
+	// Helper function to do the stuff that takes a long time:
+	function longLoadingProcess() {
+		var modelName = '{{modelName}}'
+		// Check conversion.
+		$.ajax({
+			url: "/checkConversion/" + modelName
+		}).done(function (data) {
+			if (data.exists == true) {
+				showProgressDialog('spinner','Converting network','conversion');
+				checkConversion()
+			}
+		})
+		// Send network name to model and remove loading dialog.
+		try {
+			window.opener.$(window.opener.document).trigger('mainWindow', "{{ modelName }};"+"networkName{{networkNum}};"+lastNetworkName);
+		} catch (err) {} // Opened directly with no previous window.
+		// Finally, draw the network:
+		buildNetwork();
+		removeProgressDialog();
+	}
+	setTimeout(longLoadingProcess, 100)
 }
+
 function checkConversion() {
 	var conversionStatus = 'converting';
 		// Check every 5 seconds for a feeder & refresh.
@@ -1274,6 +1279,3 @@ function downloadTextFile(fileName, text) {
 	};
 {% endif %}
 </script>
-<script type='text/javascript'>clickCloseEvent("File","fileOps")</script>
-<script type='text/javascript'>clickCloseEvent("Add","addOps")</script>
-<script type='text/javascript'>clickCloseEvent('Edit','editOps')</script>
