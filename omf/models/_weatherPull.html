@@ -72,7 +72,7 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Source<span class="classic">Source of data</span></label>
-				<select id="source" name="source" onchange="loadWeatherParameters()">
+				<select id="source" name="source" onchange="loadWeatherParameters()" onload="loadWeatherParameters()">
 					<script type="text/javascript">
 						function loadWeatherParameters(){
 							var x = gebi("source").value;
