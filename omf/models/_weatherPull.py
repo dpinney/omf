@@ -29,17 +29,22 @@ def work(modelDir, inputDict):
 	year = inputDict["year"]
 	station = inputDict["station"]
 	parameter = inputDict["weatherParameter"]
+	state_city = inputDict["state_city"]
 	verifiedData = []
 	errorCount = 0
 	#check the source using and use the appropriate function
 	if source == "METAR":
 		data = pullMETAR(year,station,parameter)
+		with open(pJoin(modelDir,"weather.csv"),"w") as file:
+			file.write(data)
 	elif source == "USCRN":
-		data = pullUSCRN(year,station,parameter)
+		data = pullUSCRN(year,state_city,parameter)
+		with open(pJoin(modelDir,"weather.csv"),"w") as file:
+			writer = csv.writer(file)
+			writer.writerows([[x] for x in data])
 
 	#writing raw data
-	with open(pJoin(modelDir,"weather.csv"),"w") as file:
-		file.write(data)
+
 
 	if parameter != "metar" and source == "METAR":#raw metar should not be formated as it is already in its own format and difficult to handle
 		verifiedData = [999.9]*8760
@@ -58,9 +63,16 @@ def work(modelDir, inputDict):
 			writer = csv.writer(file)
 			writer.writerows([[x] for x in verifiedData])
 	elif source == "USCRN":
-		verifiedData = [999.9]*8760
-		for x in verifiedData:
-			print x[0:3] #if x[0:3] == -99
+		verifiedData = []#[999.9]*8760
+		with open(pJoin(modelDir,"weather.csv"),"r") as file:
+			reader = csv.reader(file)
+			for row in reader:
+				verifiedData.append(row[0])
+				print row[0]
+		with open(pJoin(modelDir,"weather.csv"),"wb") as file:
+			writer = csv.writer(file)
+			writer.writerows([[x] for x in verifiedData])
+
 	#checking how many wrong values there are
 	for each in verifiedData:
 		if each == 999.9:
@@ -90,49 +102,51 @@ def pullUSCRN(year, state_city, datatype):
 	'''	For a given year and weather station, write 8760 hourly weather data (temp, humidity, etc.) to outputPath.
 	for list of available stations go to: https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02'''
 	if datatype == "T_CALC":
-		datatype = 9
+		datatypeID = 9
 	elif datatype == "T_HR_AVG":
-		datatype = 10
+		datatypeID = 10
 	elif datatype == "T_MAX":
-		datatype = 11
+		datatypeID = 11
 	elif datatype == "T_MIN":
-		datatype = 12
+		datatypeID = 12
 	elif datatype == "P_CALC":
-		datatype = 13
+		datatypeID = 13
 	elif datatype == "SOLARAD":
-		datatype = 14
+		datatypeID = 14
 	elif datatype == "SOLARAD_MAX":
-		datatype = 16
+		datatypeID = 16
 	elif datatype == "SOLARAD_MIN":
-		datatype = 18
+		datatypeID = 18
 	elif datatype == "SUR_TEMP":
-		datatype = 21
+		datatypeID = 21
 	elif datatype == "SUR_TEMP_MAX":
-		datatype = 23
+		datatypeID = 23
 	elif datatype == "SUR_TEMP_MIN":
-		datatype = 25
+		datatypeID = 25
 	elif datatype == "RH_HR_AVG":
-		datatype = 27
+		datatypeID = 27
 	elif datatype == "SOIL_MOISTURE_5":
-		datatype = 29
+		datatypeID = 29
 	elif datatype == "SOIL_MOISTURE_10":
-		datatype = 30
+		datatypeID = 30
 	elif datatype == "SOIL_MOISTURE_20":
-		datatype = 31
+		datatypeID = 31
 	elif datatype == "SOIL_MOISTURE_50":
-		datatype = 32
+		datatypeID = 32
 	elif datatype == "SOIL_MOISTURE_100":
-		datatype = 33
+		datatypeID = 33
 	elif datatype == "SOIL_TEMP_5":
-		datatype = 34
+		datatypeID = 34
 	elif datatype == "SOIL_TEMP_10":
-		datatype = 35
+		datatypeID = 35
 	elif datatype == "SOIL_TEMP_20":
-		datatype = 36
+		datatypeID = 36
 	elif datatype == "SOIL_TEMP_50":
-		datatype = 37
+		datatypeID = 37
 	elif datatype == "SOIL_TEMP_100":
-		datatype = 38
+		datatypeID = 38
+	else:
+		datatypeID = 1
 	#need to have handling for stupid inputs #REPLACE WITH A DICTIONARY
 	url = 'https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02/' + year + '/CRNH0203-' + year + '-' + state_city + '.txt'
 	r = requests.get(url)
@@ -140,7 +154,7 @@ def pullUSCRN(year, state_city, datatype):
 	matrix = [x.split() for x in data.split('\n')]
 	tempData = []
 	for i in range(8760):
-		tempData.append(matrix[i][datatype])
+		tempData.append(matrix[i][datatypeID])
 	return tempData
 	# with open(outputPath, 'wb') as file:
 	# 	writer = csv.writer(file)
@@ -150,10 +164,10 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		"user": "admin",
-		"source":"METAR",
+		"source":"USCRN",#"source":"METAR",
 		"year":"2017",
 		"station":"IAD",
-		"weatherParameter":"tmpc",
+		"weatherParameter":"T_CALC",#"weatherParameter":"tmpc",
 		"state_city":"KY_Versailles_3_NNW",
 		"modelType":modelName}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
