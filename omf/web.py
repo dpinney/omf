@@ -1061,9 +1061,10 @@ def backgroundAnonymize(modelDir, omdPath):
 		# Location Option
 		locOption = request.form.get('anonymizeLocationOption')
 		if locOption == 'translation':
-			translation = request.form.get('translate')
+			translationRight = request.form.get('translateRight')
+			translationUp = request.form.get('translateUp')
 			rotation = request.form.get('rotate')
-			anonymization.distTranslateLocations(inFeeder, translation, rotation)
+			anonymization.distTranslateLocations(inFeeder, translationRight, translationUp, rotation)
 		elif locOption == 'randomize':
 			anonymization.distRandomizeLocations(inFeeder)
 		# Electrical Properties

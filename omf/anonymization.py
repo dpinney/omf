@@ -107,28 +107,53 @@ def distRandomizeLocations(inFeeder):
 			inFeeder['tree'][key]['longitude'] = random.randint(0,1000)
 			inFeeder['tree'][key]['latitude'] = random.randint(0,1000)
 
-def distTranslateLocations(inFeeder, translation, rotation):
+def distTranslateLocations(inFeeder, translationRight, translationUp, rotation):
 	''' Move the position of all objects in the inFeeder distribution system by a horizontal translation and counter-clockwise rotation. '''
 	#Horribly designed, if translation is 0 but rotation is large, system will not move
 	#Have to fix how translation is inputted on the front end, to allow for both horizontal and vertical
 	#x' = x*cos(degrees) - y*cos(degrees)
 	# y' = y*cos(degrees - x* sin(degrees)
-	translation = float(translation)
-	rotation = float(rotation)
+	translationRight = float(translationRight)
+	translationUp = float(translationUp)
+	rotation = math.radians(float(rotation))
+	biggestLat, biggestLon, smallestLat, smallestLon = 0, 0, 0, 0
 	inFeeder['nodes'] = []
 	inFeeder['links'] = []
 	inFeeder['hiddenNodes'] = []
 	inFeeder['hiddenLinks'] = []
+	
 	for key in inFeeder['tree']:
 		if ('longitude' in inFeeder['tree'][key]) or ('latitude' in inFeeder['tree'][key]):
 			longitude = float(inFeeder['tree'][key]['longitude'])
 			latitude = float(inFeeder['tree'][key]['latitude'])
-			inFeeder['tree'][key]['longitude']=longitude+translation
-			inFeeder['tree'][key]['latitude']=latitude+translation
+			#Translate Feeder
+			inFeeder['tree'][key]['longitude']=longitude+translationRight
+			inFeeder['tree'][key]['latitude']=latitude+translationUp
+		#Find midpoint
+		#Find greatest Lat, least lat, great lon, least lon, then midpoint
+	for key, value1 in inFeeder['tree'].iteritems():
+		if 'latitude' in value1:
+			if value1['latitude']>biggestLat:
+				biggestLat = value1['latitude']
+			if value1['latitude'] < smallestLat:
+				smallestLat = value1['latitude']
+		if 'longitude' in value1:
+			if value1['longitude']>biggestLon:
+				biggestLon = value1['longitude']
+			if value1['longitude'] < smallestLon:
+				smallestLat = value1['longitude']
+	midLon = float((biggestLon + smallestLon))/2
+	midLat = float((biggestLat +smallestLat))/2
+	#rotation
+	for key in inFeeder['tree']:
+		if ('longitude' in inFeeder['tree'][key]) or ('latitude' in inFeeder['tree'][key]):
+			#Rotate about composite origin (midpoint)
+			#qx = ox + math.cos(angle) * (px - ox) - math.sin(angle) * (py - oy)
+    		#qy = oy + math.sin(angle) * (px - ox) + math.cos(angle) * (py - oy)
 			x = float(inFeeder['tree'][key]['longitude'])
 			y = float(inFeeder['tree'][key]['latitude'])
-			inFeeder['tree'][key]['longitude'] = x*math.cos(rotation) - y*math.cos(rotation)
-			inFeeder['tree'][key]['latitude'] = y*math.cos(rotation) - x* math.sin(rotation)
+			inFeeder['tree'][key]['longitude'] = (midLon) + (math.cos(rotation)*(x-midLon)) - ((y-midLat)*math.sin(rotation))
+			inFeeder['tree'][key]['latitude'] = (midLat) + (math.sin(rotation)*(x-midLon)) + ((y-midLat)* math.cos(rotation))
 
 			
 
@@ -612,9 +637,10 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
 	# with open(FNAME, "r") as inFile:
 	# 	inFeeder = json.load(inFile)
-	# 	translation = 20
+	# 	translationRight = 20
+	# 	translationUp = 20
 	# 	rotation = 20
-	# 	distTranslateLocations(inFeeder, translation, rotation)
+	# 	distTranslateLocations(inFeeder, translationRight, translationUp, rotation)
 	# FNAMEOUT = "simpleMarket_distTranslateLocations.omd"
 	# with open(FNAMEOUT, "w") as outFile:
 	# 	json.dump(inFeeder, outFile, indent=4)
