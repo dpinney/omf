@@ -419,10 +419,6 @@ function svgClick(event) {
 		tableDestroy()
 		multiSelectionTable()
 	}
-	// Shift for starting movement.
-	if (event.shiftKey){
-		moveNode()
-	}
 	previousTarget = event.target
 }
 
@@ -437,22 +433,22 @@ function phaseCount(p) {
 
 function hotkeys() {
 	// Handle hotkey presses.
-	// IE8 and earlier
 	if (window.event) {
-		x = event.keyCode
+		// IE8 and earlier
+		var x = event.keyCode
+	} else if (event.which) {
+		// IE9/Firefox/Chrome/Opera/Safari
+		var x = event.which
 	}
-	// IE9/Firefox/Chrome/Opera/Safari
-	else if (event.which) {
-		x = event.which
-	}
-	keychar = String.fromCharCode(x);
+	var keychar = String.fromCharCode(x);
 	if (event.target.type != 'text') {
 		// Dispatch the key:
 		if (keychar == '-') {
-			zoomOut()
-		} 
-		else if (keychar == '=') {
-			zoomIn()
+			window.panZoom.zoomOut()
+		} else if (keychar == '=') {
+			window.panZoom.zoomIn()
+		} else if (keychar =='m') {
+			moveNode()
 		}
 	}
 }
