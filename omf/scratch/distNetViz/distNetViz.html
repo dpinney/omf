@@ -394,38 +394,33 @@ function mouseUp(event) {
 
 function svgClick(event) {
 	// Listener on the SVG object that handles user clicks.
-	if ( (downX!==upX) || (downY!==upY) ) {
-		// Ignore drags.
+	if (downX !== upX || downY !== upY) {
+		// Ignore drags, those should be handled by svz-panzoom.
 		return
 	}
 	if (!event.altKey) {
+		// Not holding alt, so clear selection.
 		for (i=0; i<selection.length; i++) {
 			selection[i].classList.remove('selected')
 		}
 		selection = []
-	}
-	if((testFeeder.tree[event.target.id]) !== undefined){
-		event.target.classList.add('selected') 
-	}
-	if ( (event.target.id != 'svgContainer') && (selection.indexOf(testFeeder.tree[event.target.id]) === -1)) {
-		if((testFeeder.tree[event.target.id]) !== undefined){
-			lastElementSelected = (event.target)
-			tableDestroy()
-			tableCreate(testFeeder.tree[event.target.id])
-			selection.push(event.target)
-		}
-	}
-	else {
 		tableDestroy()
 	}
-	// ALT-SELECTION
+	if (event.target.id != 'svgContainer' && selection.indexOf(testFeeder.tree[event.target.id]) === -1 && testFeeder.tree[event.target.id] !== undefined) {
+		// Clicking on an item selects it.
+		lastElementSelected = (event.target)
+		event.target.classList.add('selected')
+		tableDestroy()
+		tableCreate(testFeeder.tree[event.target.id])
+		selection.push(event.target)
+	}
+	// Alt for multiple selection.
 	if (selection.length >= 2) {
 		tableDestroy()
 		multiSelectionTable()
 	}
-	//Alt + m
-	console.log(event.ctrlKey)
-	if (event.ctrlKey){
+	// Shift for starting movement.
+	if (event.shiftKey){
 		moveNode()
 	}
 	previousTarget = event.target
@@ -831,15 +826,11 @@ function moveNodeListener() {
 				// Redraw nodes at other end of line so they aren't below the newly drawn lines.
 				if(treeOb.from == currSel.name) {
 					addCircle(x2,y2,2,numt,myClasst)
-					
-						document.getElementById(numt).remove()
-					
+					document.getElementById(numt).remove()
 				}
 				if(treeOb.to == currSel.name) {
 					addCircle(x1,y1,2,numf,myClassf)
-					
-						document.getElementById(numf).remove()
-					
+					document.getElementById(numf).remove()
 				}
 				// Finally, draw the clicked node in its new location.
 				document.getElementById(currSelId).remove()
