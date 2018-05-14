@@ -42,10 +42,7 @@ def work(modelDir, inputDict):
 		with open(pJoin(modelDir,"weather.csv"),"w") as file:
 			writer = csv.writer(file)
 			writer.writerows([[x] for x in data])
-
 	#writing raw data
-
-
 	if parameter != "metar" and source == "METAR":#raw metar should not be formated as it is already in its own format and difficult to handle
 		verifiedData = [999.9]*8760
 		firstDT = dt.datetime(int(year),1,1,0)
@@ -74,9 +71,14 @@ def work(modelDir, inputDict):
 			writer.writerows([[x] for x in verifiedData])
 
 	#checking how many wrong values there are
-	for each in verifiedData:
-		if each == 999.9:
-			errorCount += 1
+	if source == "METAR":
+		for each in verifiedData:
+			if each == 999.9:
+				errorCount += 1
+	elif source == "USCRN":
+		for each in verifiedData:
+			if str(each) == str(-9999.0):
+				errorCount += 1
 
 	outData["errorCount"] = errorCount
 	outData["stdout"] = "Success"
@@ -164,10 +166,10 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		"user": "admin",
-		"source":"USCRN",#"source":"METAR",
+		"source":"METAR", #"source":"USCRN",
 		"year":"2017",
 		"station":"IAD",
-		"weatherParameter":"T_CALC",#"weatherParameter":"tmpc",
+		"weatherParameter":"tmpc",#"weatherParameter":"T_CALC",
 		"state_city":"KY_Versailles_3_NNW",
 		"modelType":modelName}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
