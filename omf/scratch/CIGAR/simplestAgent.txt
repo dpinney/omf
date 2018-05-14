@@ -19,14 +19,19 @@ OOO Run cosim.py and troubleshoot
 	XXX ERROR    [INIT] : init_solar(obj=32;solar_1): Solar panel can only have an inverter as its parent.
 		XXX removing battery so solar has inverter as parent
 	XXX Simulation works without battery
-OOO Add Battery
+XXX Add Battery
 	OOO How does the diagram look? How do you represent in gridlab-d, what connects to what? 
 	OOO What necessary variables need to go in battery?	
 XXX Run drawFeeder.py and troubleshoot
 	XXX drawFeeder.py works and shows correct layout
 
-OOO Test protective devices. What are they? do they work?
-	OOO Fuse? Breaker? Transformer?
+OOO Do a short circuit study in GridLAB-D. Create a fault. Overview of reliability module should help. Also write the fault current at the line that is faulted to file with a recorder.
+	XXX Added eventgen object and metrics object and used example parameters. Received error fo init of test_metrics. What is the module_metrics_obj supposed to be?
+	XXX Included the power_metrics object - used in example in documentation. Error msg says power_metrics failed to map fault_check object! Need a fault_check object, perhaps?
+	OOO 
+
+
+
 
 XXX Create a picture of the glm using the drawing code in feeder.py
 OOO Implement waitUntil() function

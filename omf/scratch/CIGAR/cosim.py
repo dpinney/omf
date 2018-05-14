@@ -1,4 +1,4 @@
-import os, urllib, urllib2, subprocess, time, warnings
+import os, urllib, urllib2, subprocess, time, warnings, HTML
 
 
 class Coordinator(object):
@@ -21,6 +21,9 @@ class Coordinator(object):
 			cosim.waitUntil(s + 1)
 
 	def drawResults(self):
+		t_res = HTML.Table(h_row=["Agent", "some_category", "some_category", "some_category"])
+		for agent_x in agents:
+			#HTML.
 		pass #TODO: need an HTML table.
 
 

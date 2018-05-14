@@ -14,6 +14,11 @@ module residential {
 	implicit_enduses NONE;
 };
 
+module reliability {
+	maximum_event_length 300 s;
+	report_event_log TRUE;
+};
+
 schedule water14 {
 	0-9 0 * * * 0.00;
 	10-19 0 * * * 0.00;
@@ -775,18 +780,29 @@ object recloser {
 	max_number_of_tries 3;
 };
 
-//object metrics {
-//	name test_metrics;
-//	module_metrics_object powermetrics;
-//	metrics_of_interest "SAIFI,SAIDI";
-//	customer_group "groupid=METEROBJS";
-//	metric_interval 0 s;
-//	report_interval 1 yr;
-//	}
-//
-//object eventgen {
-//	name RandEvent;
-//	parent test_metrics;
-//	target_group "class=line AND groupid=FAULTY";
-//	fault_type "DLG-X";
-//}
+object power_metrics {
+	name pm_1;
+};
+
+object metrics {
+	name test_metrics;
+	module_metrics_object pm_1;
+	metrics_of_interest "SAIFI,SAIDI";
+	customer_group "groupid=METEROBJS";
+	metric_interval 0 s;
+	report_interval 1 yr;
+};
+
+object fault_check {
+	name test_fault;
+	check_mode ONCHANGE;
+	eventgen_object RandEvent;
+	output_filename testout.txt;
+};
+
+object eventgen {
+	name RandEvent;
+	parent test_metrics;
+	target_group "class=line AND groupid=FAULTY";
+	fault_type "DLG-X";
+};
