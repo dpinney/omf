@@ -423,6 +423,11 @@ function svgClick(event) {
 		tableDestroy()
 		multiSelectionTable()
 	}
+	//Alt + m
+	console.log(event.ctrlKey)
+	if (event.ctrlKey){
+		moveNode()
+	}
 	previousTarget = event.target
 }
 
