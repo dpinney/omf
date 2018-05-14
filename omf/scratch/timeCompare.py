@@ -7,7 +7,7 @@ def getMemory():
   process = psutil.Process(os.getpid())
   return process.memory_percent()
 
-glm_input = 'powerflow_IEEE_37node.glm'
+glm_input = '../../../gridlab-d-master/Test_37.glm'
 gridlab_sims = dict()
 
 t1 = time.time()
