@@ -1,7 +1,7 @@
 clock {
 	timezone PST+8PDT;
 	starttime '2000-01-01 00:00:00';
-	stoptime '2000-01-10 00:00:00';
+	stoptime '2000-01-05 00:00:00';
 };
 
 #set minimum_timestep=60;
@@ -778,31 +778,4 @@ object recloser {
 	to n630;
 	retry_time 1s;
 	max_number_of_tries 3;
-};
-
-object power_metrics {
-	name pm_1;
-};
-
-object metrics {
-	name test_metrics;
-	module_metrics_object pm_1;
-	metrics_of_interest "SAIFI,SAIDI";
-	customer_group "groupid=METEROBJS";
-	metric_interval 0 s;
-	report_interval 1 yr;
-};
-
-object fault_check {
-	name test_fault;
-	check_mode ONCHANGE;
-	eventgen_object RandEvent;
-	output_filename testout.txt;
-};
-
-object eventgen {
-	name RandEvent;
-	parent test_metrics;
-	target_group "class=line AND groupid=FAULTY";
-	fault_type "DLG-X";
 };
