@@ -344,8 +344,8 @@ function buildFeeder() {
 	for (key in testFeeder.tree) {
 		nameToKey[testFeeder.tree[key]['name']] = key
 		if (testFeeder.tree[key]['longitude'] > maxLon) {maxLon = testFeeder.tree[key]['longitude']}
-			if (testFeeder.tree[key]['latitude'] > maxLat) {maxLat = testFeeder.tree[key]['latitude']}
-		}
+		if (testFeeder.tree[key]['latitude'] > maxLat) {maxLat = testFeeder.tree[key]['latitude']}
+	}
 	maxLon = Math.round(maxLon + 20.0)
 	maxLat = Math.round(maxLat + 20.0)
 	svgOb = document.getElementById('svgContainer')
@@ -458,18 +458,16 @@ function tableCreate(inputObject) {
 	tabScroll = document.getElementById('tableScroller')
 	tbl = document.createElement('table')
 	// Put in the header.
-	if((inputObject.from || inputObject.to) == undefined){
+	if ((inputObject.from || inputObject.to) == undefined) {
 		headRow = document.createElement('tr')
 		headRow.innerHTML = '<th><button onclick="tablePlus(this)">+</button><button onclick="moveNode()">Move</button></th>'
 		headRow.innerHTML += '<th><button id="saveButton" onclick="tableSave(this)">Save</button><button onclick="deleteOb()">Delete Object</button></th>'
 		tbl.appendChild(headRow)
-		}
-	else if((inputObject.from || inputObject.to) !== undefined){
+	} else if((inputObject.from || inputObject.to) !== undefined) {
 		headRow = document.createElement('tr')
 		headRow.innerHTML = '<th><button onclick="tablePlus(this)">+</button>'
 		headRow.innerHTML += '<th><button id="saveButton" onclick="tableSave(this)">Save</button><button onclick="deleteOb()">Delete Object</button></th>'
 		tbl.appendChild(headRow)
-
 	}
 	// Put the object in.
 	for (key in inputObject) {
@@ -517,7 +515,7 @@ function tableSave(me) {
 			delete testFeeder.tree[previousTarget.id][key]
 		}
 	}
-	// Update Feeder
+	// Update SVG
 	if (previousTarget.tagName === 'circle') {
 		// Update Circle
 		previousTarget.setAttribute('cx', toJson['longitude'])
@@ -666,6 +664,7 @@ function clickLatLon(event) {
 }
 
 function newNode() {
+	// Start creation of new node.
 	var newTreeId = Object.keys(testFeeder.tree).length
 	var newTreeNode = {
 		longitude: 0,
@@ -684,6 +683,7 @@ function newNode() {
 }
 
 function newNodeListener() {
+	// Click handler for location of new node.
 	var xloc = event.pageX
 	var yloc = event.pageY
 	var newTreeId = (Object.keys(testFeeder.tree).length)-1
@@ -705,6 +705,7 @@ function newNodeListener() {
 }
 
 function newLink() {
+	// Create new link object.
 	nodeTypes = ['node','load','house','meter','triplex_meter','triplex_node','triplex_load','waterheater','ZIPload']
 	if (selection.length === 2){
 		if ((nodeTypes.indexOf(testFeeder.tree[selection[0].id].object)), (nodeTypes.indexOf(testFeeder.tree[selection[1].id].object))
@@ -747,15 +748,14 @@ function newLink() {
 			tableDestroy()
 		}
 	}
-	else{
+	else {
 		alert("Please hold down the 'alt' key and select two nodes to connect.")
 		for (i=0; i<selection.length; i++) {
 			selection[i].classList.remove('selected')
 			}
 			selection = []
 			tableDestroy()
-	} 
-	
+	}	
 }
 
 function moveNode() {
