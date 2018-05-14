@@ -109,12 +109,17 @@ def distRandomizeLocations(inFeeder):
 
 def distTranslateLocations(inFeeder, translationRight, translationUp, rotation):
 	''' Move the position of all objects in the inFeeder distribution system by a horizontal translation and counter-clockwise rotation. '''
-	#Horribly designed, if translation is 0 but rotation is large, system will not move
-	#Have to fix how translation is inputted on the front end, to allow for both horizontal and vertical
-	#x' = x*cos(degrees) - y*cos(degrees)
-	# y' = y*cos(degrees - x* sin(degrees)
+	''' Also rotate feeder around the average point of a feeder '''
+	#Handle empty values
+	if translationRight == '':
+		translationRight = 0
+	if translationUp == '':
+		translationUp = 0
+	if rotation == '':
+		rotation = 0
 	translationRight = float(translationRight)
 	translationUp = float(translationUp)
+	#convert from degreeas to radians
 	rotation = math.radians(float(rotation))
 	biggestLat, biggestLon, smallestLat, smallestLon = 0, 0, 0, 0
 	inFeeder['nodes'] = []
@@ -129,8 +134,8 @@ def distTranslateLocations(inFeeder, translationRight, translationUp, rotation):
 			#Translate Feeder
 			inFeeder['tree'][key]['longitude']=longitude+translationRight
 			inFeeder['tree'][key]['latitude']=latitude+translationUp
-		#Find midpoint
-		#Find greatest Lat, least lat, great lon, least lon, then midpoint
+	#Find composite midpoint to rotate around. It is the average point of the feeder's extrema
+	#Find greatest Lat, least lat, great lon, least lon, then midpoint
 	for key, value1 in inFeeder['tree'].iteritems():
 		if 'latitude' in value1:
 			if value1['latitude']>biggestLat:
@@ -144,7 +149,7 @@ def distTranslateLocations(inFeeder, translationRight, translationUp, rotation):
 				smallestLat = value1['longitude']
 	midLon = float((biggestLon + smallestLon))/2
 	midLat = float((biggestLat +smallestLat))/2
-	#rotation
+	#Rotate
 	for key in inFeeder['tree']:
 		if ('longitude' in inFeeder['tree'][key]) or ('latitude' in inFeeder['tree'][key]):
 			#Rotate about composite origin (midpoint)
