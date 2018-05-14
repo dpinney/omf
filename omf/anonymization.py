@@ -164,6 +164,7 @@ def distTranslateLocations(inFeeder, translationRight, translationUp, rotation):
 
 def distAddNoise(inFeeder, noisePerc):
 	''' Add random noise to properties with numeric values for all objects in the inFeeder distribution system based on a noisePerc magnitude. '''
+	#Problem? Adding noise to names causes duplicates which breaks feeder
 	noisePerc = float(noisePerc)
 	for key in inFeeder['tree']:
 		for prop in inFeeder['tree'][key]:
