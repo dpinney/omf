@@ -399,7 +399,7 @@ function svgClick(event) {
 		return
 	}
 	if (!event.altKey) {
-		// Not holding alt, so clear selection.
+		// Not holding alt and clicking the canvas, so clear the selection.
 		for (i=0; i<selection.length; i++) {
 			selection[i].classList.remove('selected')
 		}
@@ -773,7 +773,6 @@ function moveNodeListener() {
 	var newLat = clickLatLon(event)[1]
 	var newLon = clickLatLon(event)[0]
 	var currSelP = currSel.parent
-	var nodeTypes = ['node','load','house','meter','triplex_meter','triplex_node','triplex_load','waterheater','ZIPload']
 	// Update the coordinate values on the object.
 	currSel["longitude"] = newLon
 	currSel["latitude"] = newLat
@@ -790,7 +789,7 @@ function moveNodeListener() {
 			addCircle(newLon,newLat,2,currSelId,currSel.object)
 		}
 		// Move line between clicked node and its treeOb parent (if it is a child).
-		if (currSelP != undefined && currSelP == treeOb.name && nodeTypes.indexOf(treeOb['object']) != -1 ) {
+		if (currSelP != undefined && currSelP == treeOb.name && treeOb.from == undefined && treeOb.to == undefined) {
 			document.getElementById(treeOb.name + "_" + currSel.name).remove()
 			addLine(newLon,newLat,treeOb.longitude,treeOb.latitude,treeOb.name + "_" + currSel.name,'parentChild')
 			document.getElementById(num).remove()
@@ -798,33 +797,33 @@ function moveNodeListener() {
 			document.getElementById(currSelId).remove()
 			addCircle(newLon,newLat,2,currSelId,currSel.object)
 		}
-		// Move all lines from or to the clicked node.
-		if((treeOb.from) && (treeOb.to)!== undefined){
-			//below ID is from original for loop to give to
-			//If any lines are an end or target for clicked node, the lines are deleted, and redrawn to new clicked location
-			if(treeOb.from == currSel.name || treeOb.to == currSel.name) {
+		if (treeOb.from !== undefined && treeOb.to !== undefined){
+			// Move all lines from or to the clicked node.
+			if (treeOb.from == currSel.name || treeOb.to == currSel.name) {
+				// If the current object is a line connected to the current node, move it.
 				document.getElementById(num).remove()
-				for (subEl in testFeeder.tree){
-					if(treeOb.from == testFeeder.tree[subEl].name){
+				for (subEl in testFeeder.tree) {
+					// Find the coordinates on the other end of the moving line.
+					if (treeOb.from == testFeeder.tree[subEl].name) {
 						x1 = testFeeder.tree[subEl]['longitude']
 						y1 = testFeeder.tree[subEl]['latitude']
-						numf=subEl
-						myClassf=testFeeder.tree[subEl].object
-					}
-					else if(treeOb.to == testFeeder.tree[subEl].name){
+						numf = subEl
+						myClassf = testFeeder.tree[subEl].object
+					} else if (treeOb.to == testFeeder.tree[subEl].name) {
 						x2 = testFeeder.tree[subEl]['longitude']
 						y2 = testFeeder.tree[subEl]['latitude']
-						numt=subEl
-						myClasst=testFeeder.tree[subEl].object
+						numt = subEl
+						myClasst = testFeeder.tree[subEl].object
 					}
-				}	
+				}
+				// Draw the line.
 				addLine(x1,y1,x2,y2,num,treeOb['object'] + ' p' + phaseCount(treeOb['phases']))
-				// Redraw nodes at other end of line so they aren't below the newly drawn lines.
-				if(treeOb.from == currSel.name) {
+				// Redraw nodes after line so they aren't below the newly drawn lines. Up to 3 nodes for case where we are moving node between 2 from-to lines.
+				if (treeOb.from == currSel.name) {
 					addCircle(x2,y2,2,numt,myClasst)
 					document.getElementById(numt).remove()
 				}
-				if(treeOb.to == currSel.name) {
+				if (treeOb.to == currSel.name) {
 					addCircle(x1,y1,2,numf,myClassf)
 					document.getElementById(numf).remove()
 				}
@@ -836,7 +835,7 @@ function moveNodeListener() {
 	}
 	// Fix scaling of new objects.
 	scaleTo(scaleLevel)
-	// Return the cursor to its default 
+	// Return the cursor to its default.
 	document.body.style.cursor = 'auto'
 	clickTarget.removeEventListener('click', moveNodeListener, false)
 }
