@@ -1,7 +1,14 @@
 import time
 import psutil
 import os
+import ctypes
 import opendssdirect as dss
+
+'''
+import sys
+sys.path.insert(0, '../../../linux-dss/')
+import PyDSS 
+'''
 
 def getMemory():
   process = psutil.Process(os.getpid())
@@ -9,7 +16,7 @@ def getMemory():
 
 glm_input = '../../../gridlab-d-master/Test_37.glm'
 gridlab_sims = dict()
-
+#dsslib_path = os.pats
 t1 = time.time()
 for i in range(1, 21):
   os.system('gridlabd %s --quiet' % (glm_input))
@@ -25,6 +32,7 @@ t2 = time.time()
 
 
 file_path = '../../../OpenDSS/Distrib/IEEETestCases/37Bus/ieee37.dss'
+
 for j in range(1, 21):
   dss.run_command('Redirect ' + file_path)
   dss.run_command('Compile ' + file_path)
