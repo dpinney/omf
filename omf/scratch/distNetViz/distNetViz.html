@@ -455,10 +455,10 @@ function hotkeys() {
 
 function tableCreate(inputObject) {
 	// Show the object table that a user has selected.
-	tabScroll = document.getElementById('tableScroller')
-	tbl = document.createElement('table')
+	var tabScroll = document.getElementById('tableScroller')
+	var tbl = document.createElement('table')
 	// Put in the header.
-	headRow = document.createElement('tr')
+	var headRow = document.createElement('tr')
 	if ((inputObject.from || inputObject.to) == undefined){
 		headRow.innerHTML = '<th><button onclick="tablePlus(this)">+</button><button onclick="moveNode()">Move</button></th>'
 	}
