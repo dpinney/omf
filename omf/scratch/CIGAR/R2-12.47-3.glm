@@ -4,7 +4,7 @@
 clock{ 
      timezone EST+8EDT; 
      timestamp '2000-01-01 0:00:00'; 
-     stoptime '2000-01-01 1:00:00'; 
+     stoptime '2000-01-10 0:00:00'; 
 
 } 
 
@@ -12,6 +12,7 @@ clock{
 //********************************************* 
 // modules 
 module tape; 
+module reliability;
 module powerflow{ 
      solver_method NR; 
       default_maximum_voltage_error 1e-6;
@@ -37747,4 +37748,4 @@ object underground_line_conductor:10 {
 //    file R2-12.47-3_capacitor1.csv; 
 //    interval 60; 
 //    limit 1440; 
-};
+//};

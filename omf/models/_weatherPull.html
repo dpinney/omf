@@ -99,7 +99,7 @@
 				<input type="text" id="year" name="year" pattern="[1-2][0-9][0-9][0-9]" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Station<span class="classic">ASOS Code, for USA codes (starting with K) exclude the first letter</span></label>
+				<label class="tooltip">Station<span class="classic">For METAR source: ASOS Code, for USA codes (starting with K) exclude the first letter. For USCRN: Dropdown menu of stations</span></label>
 				<input type="text" id="stationMETAR" name="stationMETAR" pattern="[A-Z]{3,4}" required="required"/>
 				<select id="stationUSCRN" name="stationUSCRN" required="required" style="display:none;">
 					<option value="AK_Barrow_4_ENE">AK_Barrow</option>
@@ -340,6 +340,8 @@
 			<!--<a style="padding:10px" onclick="(downloadTextFile('weatherData.txt', allOutputData.data))">Weather Output</a>-->
 			<a id="dTest" download>Output Download</a>
 			<script>gebi('dTest').href = "/downloadModelData/" + allInputData.user + "/" + allInputData.modelName + "/weather.csv"</script>
+			<!--<a id="errorCount" onload="loadErrorCount()"></a>
+			<script>function loadErrorCount(){gebi('errorCount').value = allOutputData.errorCount}</script>-->
 		</div>
 	<!--<div>
 		<input id="results" name="results" type="hidden" onload="loadOutputData()">
