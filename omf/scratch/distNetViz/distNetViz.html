@@ -458,17 +458,15 @@ function tableCreate(inputObject) {
 	tabScroll = document.getElementById('tableScroller')
 	tbl = document.createElement('table')
 	// Put in the header.
-	if ((inputObject.from || inputObject.to) == undefined) {
-		headRow = document.createElement('tr')
+	headRow = document.createElement('tr')
+	if ((inputObject.from || inputObject.to) == undefined){
 		headRow.innerHTML = '<th><button onclick="tablePlus(this)">+</button><button onclick="moveNode()">Move</button></th>'
-		headRow.innerHTML += '<th><button id="saveButton" onclick="tableSave(this)">Save</button><button onclick="deleteOb()">Delete Object</button></th>'
-		tbl.appendChild(headRow)
-	} else if((inputObject.from || inputObject.to) !== undefined) {
-		headRow = document.createElement('tr')
-		headRow.innerHTML = '<th><button onclick="tablePlus(this)">+</button>'
-		headRow.innerHTML += '<th><button id="saveButton" onclick="tableSave(this)">Save</button><button onclick="deleteOb()">Delete Object</button></th>'
-		tbl.appendChild(headRow)
 	}
+	else if((inputObject.from || inputObject.to) !== undefined){
+		headRow.innerHTML = '<th><button onclick="tablePlus(this)">+</button>'
+	}
+	headRow.innerHTML += '<th><button id="saveButton" onclick="tableSave(this)">Save</button><button onclick="deleteOb()">Delete Object</button></th>'
+	tbl.appendChild(headRow)
 	// Put the object in.
 	for (key in inputObject) {
 		row = document.createElement('tr')
