@@ -266,9 +266,6 @@
 	<div id='tableScroller'></div>
 	</body>
 </html>
-
-<!-- ******** Javascript ******** -->
-
 <script type='text/javascript'>
 // Globals
 var unsavedChanges = false;
@@ -282,7 +279,7 @@ var newID = '';
 var newType = '';
 var newBusGenObj = {};
 var scaleTracker = 1
-// Functions
+
 function saveSvg() {
 	// Redirect to an .svg file that the user can save.
 	alert('We are redirecting you to a static version of the SVG that you can save as a .svg file.')
@@ -290,7 +287,9 @@ function saveSvg() {
 	b64 = btoa(svg)
 	window.location = 'data:image/svg+xml;base64,\n' + b64
 }
+
 function addRectangle(x,y,width, height, id,myClass) {
+	// Draw a rectangle in the SVG.
 	svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0]
 	aRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
 	aRect.setAttribute('x',x)
@@ -302,7 +301,9 @@ function addRectangle(x,y,width, height, id,myClass) {
 	aRect.setAttribute('stroke-width', 0.5)
 	svgOb.appendChild(aRect)
 }
+
 function addCircle(x,y,r,id,myClass) {
+	// Draw a circle in the SVG.
 	svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0]
 	aCirc = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
 	aCirc.setAttribute('cx',x)
@@ -313,7 +314,9 @@ function addCircle(x,y,r,id,myClass) {
 	aCirc.setAttribute('stroke-width', 0.5)
 	svgOb.appendChild(aCirc)
 }
+
 function addLine(x1,y1,x2,y2,id,myClass) {
+	// Draw a line in the SVG.
 	svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0]
 	aLine = document.createElementNS('http://www.w3.org/2000/svg', 'line')
 	aLine.setAttribute('x1',x1)
@@ -322,36 +325,24 @@ function addLine(x1,y1,x2,y2,id,myClass) {
 	aLine.setAttribute('y2',y2)
 	aLine.setAttribute('id',id)
 	aLine.setAttribute('class',myClass)
-	if (myClass.indexOf('p2') !== -1) {
-		w = 2
-	}
-	else if (myClass.indexOf('p3') !== -1) {
-		w = 3
-	}
-	else if (myClass.indexOf('parentChild') !== -1) {
-		w = 0.5
-	}
-	else {
-		w = 1
-	}
-	aLine.setAttribute('stroke-width', w)
+	aLine.setAttribute('stroke-width', 2)
 	svgOb.appendChild(aLine)
 }
+
 function buildNetwork() {
 	// Find the size we need for the full chart.
-	maxLon = 100, maxLat = 100
-	busNumMap = {}
-	for (num in networkData.bus) {
-		//busKey = Object.keys(networkData.bus[num])[0]
-		busNum = networkData.bus[num]['bus_i']
+	var maxLon = 100
+	var maxLat = 100
+	var busNumMap = {}
+	for (var num in networkData.bus) {
+		var busNum = networkData.bus[num]['bus_i']
 		busNumMap[busNum] = num
 		if (networkData.bus[num]['longitude'] > maxLon) {maxLon = networkData.bus[num]['longitude']}
 		if (networkData.bus[num]['latitude'] > maxLat) {maxLat = networkData.bus[num]['latitude']}
 	}
-	//console.log("maxLon:", maxLon, " maxLat:", maxLat)
 	maxLon = Math.round(maxLon + 20.0)
 	maxLat = Math.round(maxLat + 20.0)
-	svgOb = document.getElementById('svgContainer')
+	var svgOb = document.getElementById('svgContainer')
 	svgOb.setAttribute('width', maxLon)
 	svgOb.setAttribute('height', maxLat)
 	svgOb.setAttribute('viewBox','-10.0 -10.0 ' + maxLon + ' ' + maxLat)
@@ -364,13 +355,10 @@ function buildNetwork() {
 	})
 	// Go through and add all lines first
 	for (num in networkData.branch) {
-		//branchKey = Object.keys(networkData.branch[num])[0]
 		try {
 			anOb = networkData.branch[num]
 			fNum = networkData.branch[num]['fbus']
 			tNum = networkData.branch[num]['tbus']
-			// fromOb = networkData.bus[parseInt(fNum)-1][fNum]
-			// toOb = networkData.bus[parseInt(tNum)-1][tNum]
 			fBusNum = busNumMap[fNum]
 			tBusNum = busNumMap[tNum]
 			fromOb = networkData.bus[fBusNum]
@@ -380,7 +368,6 @@ function buildNetwork() {
 	}
 	// Add buses after all lines
 	for (num in networkData.bus) {
-		//busKey = Object.keys(networkData.bus[num])[0]
 		try {
 			anOb = networkData.bus[num]
 			addCircle(anOb['longitude'], anOb['latitude'],5,"bus_"+num,"bus")
@@ -388,7 +375,6 @@ function buildNetwork() {
 	}
 	// Draw generators over busses
 	for (num in networkData.gen) {
-		//genKey = Object.keys(networkData.gen[num])[0]
 		try {
 			anOb = networkData.gen[num]
 			busNum = busNumMap[anOb['bus']]
@@ -399,10 +385,12 @@ function buildNetwork() {
 		} catch(e) {}
 	}
 }
+
 function mouseDown(event) {
 	downX = event.pageX
 	downY = event.pageY
 }
+
 function mouseUp(event) {
 	upX = event.pageX
 	upY = event.pageY
@@ -428,42 +416,41 @@ function clickLatLon(event) {
 }
 
 function svgClick(event) {
+	// Event handler for all clicks on the SVG.
 	latLon = clickLatLon(event);
-	// console.log('CLICKLOC',latLon[0],latLon[1]);
-	//console.log("debug: screen ", event.screenX, event.screenY, "page ", event.pageX, event.pageY)
 	if ( (downX!==upX) || (downY!==upY) ) {
+		// Immediately exit if drag is selected. SVG pan zoom handles those.
 		return
 	}
 	if (!event.altKey) {
+		// Clicking blank canvas without alt held deselcts.
 		for (i=0; i<selection.length; i++) {
 			selection[i].classList.remove('selected')
 		}
 		selection = []
 	}
 	event.target.classList.add('selected')
-	if ( event.target.id != 'svgContainer') {
-	 var clickType = event.target.id.split("_")[0]
-	 var clickID = event.target.id.split("_")[1]
-	 lastElementSelected = event.target
-	 // console.log(lastElementSelected)
-	 //console.log('clicked ', clickType, ' with id', clickID)
+	if (event.target.id != 'svgContainer') {
+		// Selecting a new object.
+		var clickType = event.target.id.split("_")[0]
+		var clickID = event.target.id.split("_")[1]
+		lastElementSelected = event.target
 		if (selection.indexOf(networkData[clickType]) === -1){
 			tableDestroy()
 			tableCreate(networkData[clickType][clickID])
 			selection.push(event.target)
 		}
-	}
-	else {
+	} else {
 		tableDestroy()
 	}
-	// ALT-SELECTION
 	if (selection.length >= 2) {
-		//console.log('selected more than one element')
+		// Beginning alt-selection.
 		tableDestroy()
-		selectionTable()
+		multiSelectionTable()
 	}
 	previousTarget = event.target
 }
+
 function phaseCount(p) {
 	total = 0
 	if ("rateA" in p){
@@ -477,6 +464,7 @@ function phaseCount(p) {
 	}
 	return total
 }
+
 function hotkeys() {
 	// IE8 and earlier
 	if (window.event) {
@@ -490,17 +478,19 @@ function hotkeys() {
 	if (event.target.type != 'text') {
 		// Dispatch the key:
 		if (keychar == '-') {
-			zoomOut()
+			window.panZoom.zoomOut()
 		}
 		else if (keychar == '=') {
-			zoomIn()
+			window.panZoom.zoomIn()
 		}
 	}
 }
+
 function tableCreate(inputObject) {
+	// Draw the table for the selected object (i.e. inputObject).
 	tabScroll = document.getElementById('tableScroller')
 	tbl = document.createElement('table')
-	// Show what type of thing you clicked/
+	// Show what type of thing you clicked
 	whatClicked = document.createElement('tr')
 	var clickType = event.target.id.split("_")[0]
 	var clickID = event.target.id.split("_")[1]
@@ -517,7 +507,7 @@ function tableCreate(inputObject) {
 		headRow.innerHTML += '<th><button id="deleteButton" onclick="deleteOb()">Delete</button><button id="saveButton" onclick="tableSave(this)">Save</button></th>'
 	}
 	tbl.appendChild(headRow)
-	// Put the object in.
+	// Put the object attributes in.
 	var notAllowed = ['bus_i', 'bus', 'fbus', 'tbus', 'latitude', 'longitude'] //disabled because doesn't render in real time, and on-change causes lines to sometimes render improperly.
 	for (key in inputObject) {
 		if (!(notAllowed.indexOf(key) > -1)) {
@@ -529,18 +519,24 @@ function tableCreate(inputObject) {
 	}
 	tabScroll.appendChild(tbl)
 }
+
 function tableDel(me) {
+	// Button in selection table that deletes attribute rows.
 	myRow = me.parentElement.parentElement
 	myTable = myRow.parentElement
 	myTable.removeChild(myRow)
 }
+
 function tablePlus(me) {
+	// Button in selection table that adds attribute rows.
 	myTable = me.parentElement.parentElement.parentElement
 	newRow = myTable.insertRow(2)
 	newRow.innerHTML = '<td><button onclick="tableDel(this)">&#215;</button><input style="width:112px"></input></td>'
 	newRow.innerHTML += '<td><input></input></td>'
 }
+
 function tableSave(me) {
+	// Button that saves changes made in selection table.
 	var tbl = me.parentElement.parentElement.parentElement
 	var toJson = {}
 	// convert HTML table to JSON
@@ -567,12 +563,16 @@ function tableSave(me) {
 	alert('Updated object: ' + previousTarget.id)
 	tableDestroy()
 }
+
 function tableDestroy() {
+	// Remove the selection table.
 	tabScroll = document.getElementById('tableScroller')
 	kid = tabScroll.children[0]
 	if (!(kid === undefined)) {tabScroll.removeChild(kid)}
 }
+
 function deleteOb() {
+	// Delete button in selection table.
 	var clickType = previousTarget.id.split("_")[0]
 	var clickID = previousTarget.id.split("_")[1]
 	// Delete Lines
@@ -611,7 +611,9 @@ function deleteOb() {
 	unsavedChanges=true
 	tableDestroy()
 }
+
 function scaleTo() {
+	// Change the relative thickness of all lines and circles. Helps users see detail in big models.
 	if(scaleTracker == 1)  {
 		x = parseFloat(prompt("Scale line thickness by this multiple:","1.0"))
 		if (!x) {
@@ -667,7 +669,9 @@ function scaleTo() {
 		rects[i].setAttribute('y', latitude - (2*x))
 	}   
 }
-function selectionTable() {
+
+function multiSelectionTable() {
+	// Build the table for multiple selections.
 	tabScroll = document.getElementById('tableScroller')
 	tbl = document.createElement('table')
 	// Put in the header.
@@ -696,11 +700,11 @@ function selectionTable() {
 		tableDestroy()
 	}
 }
+
 function newNode(typeOfNode) {
-	//console.log('new bus length',(networkData.bus).length+1)
+	// Create a new node object.
 	newID = (Object.keys(networkData[typeOfNode]).length)+1
 	newBusGenObj = {}
-	//console.log('new bus length',(networkData.bus).length+1)
 	newBusGenObj = {
 		longitude: "0",
 		latitude: "0",
@@ -718,13 +722,14 @@ function newNode(typeOfNode) {
 		Vmax: "1.05",
 		Vmin: "0.95"
 	}
-	// Click location to add
+	// Add handler to get user's click location for adding.
 	clickTarget = document.getElementById('svgContainer')
 	clickTarget.addEventListener('click', clickLocate, false)
 	document.body.style.cursor = 'crosshair'
 }
 
 function clickLocate() {
+	// Helper function that finishes node creation after user clicks on a location.
 	var xloc = event.pageX
 	var yloc = event.pageY
 	coords = clickLatLon(event)
@@ -741,7 +746,6 @@ function clickLocate() {
 	r = 5
 	addCircle(x,y,r,newType+"_"+String(newID),newType)
 	if(scaleTracker != 1.0) {
-		// console.log(scaleTracker)
 		newCir = document.getElementById(newType+"_"+String(newID))
 		newCir.setAttribute('r', 5*scaleTracker)
 		newCir.setAttribute('stroke-width', 0.5*scaleTracker)
@@ -751,11 +755,14 @@ function clickLocate() {
 }
 
 function moveBus() {
+	// Start the bus moving process by adding a listener
 	clickTarget = document.getElementById('svgContainer')
 	clickTarget.addEventListener('click', moveBusListener, false)
+	document.body.style.cursor = 'crosshair'
 }
 
 function moveBusListener() {
+	// Helper to complete bus movement after user clicks new location.
 	currSel = lastElementSelected
 	selectionIDSplit = currSel.id.split("_")
 	selBusID = parseInt(selectionIDSplit[1])
@@ -768,7 +775,7 @@ function moveBusListener() {
 		fBusID = selBranch['fbus']
 		tBusID= selBranch['tbus']
 		if(fBusID == selBusID || tBusID == selBusID) {
-			//Redraw connected lines containing selected bus
+			// Redraw connected lines containing selected bus
 			document.getElementById("branch_" + String(parseInt(num))).remove()
 			fromBus = networkData.bus[fBusID]
 			toBus = networkData.bus[tBusID]
@@ -876,12 +883,12 @@ function moveBusListener() {
 			}
 		}
 	}
-       
 	clickTarget.removeEventListener('click', moveBusListener, false)
-	// console.log(networkData)
+	document.body.style.cursor = 'auto'
 }
 
 function newGen() {
+	// Create new generator.
 	currSel = selection[0]
 	selectionIDSplit = currSel.id.split("_")
 	if(selection.length === 1 && String(selectionIDSplit[0]) == "bus") {
@@ -931,11 +938,11 @@ function newGen() {
 			newRect.setAttribute('y', latitude - (height*scaleTracker/4))
 		}
 		networkData["gen"][String(newID)] = newGenObj
-		
 	}
 }
 
 function newLink() {
+	// Add a branch.
 	busOne = selection[0].id.split("_")
 	busTwo = selection[1].id.split("_")
 	if (selection.length === 2 && String(busOne[0]) == "bus" && String(busTwo[0]) == "bus") {
@@ -984,8 +991,8 @@ function newLink() {
 			newCir2.setAttribute('r', 5*scaleTracker)
 			newCir2.setAttribute('stroke-width', 0.5*scaleTracker)
 		}
-
 		for(gen in networkData.gen) {
+			// Check for connected buses and generators, redraw them to make sure they stay on top.
 			busGenID = networkData.gen[String(parseInt(gen))]['bus']
 			if(busGenID == fBusID) {
 				document.getElementById("gen_" + String(parseInt(gen))).remove() 
@@ -1028,39 +1035,20 @@ function newLink() {
 		}
 	}
 }
-// Modal and conversion functions.
+
+
 function showModal(element){
+	// Show a modal dialog.
 	gebi(element).style.display = 'block'
 }
+
 function closeModal(element){
+	// Hide a modal dialog.
 	gebi(element).style.display = 'none'
 }
-function startConversion(elementName, nextAction) {
-	// Additional check, required for Safari browsers
-	var newName = document.getElementById(elementName).value;
-	if (true) {
-		var modelName = "{{ modelName }}"
-		$.ajax({
-			url: "/uniqObjName/Network/" + "{{ owner }}" + "/" + newName + "/" + modelName
-		}).done(function (data) {
-			if (data.exists) {
-				alert("You already have a Network named '" + newName + "', please choose a different name.")
-			}
-			else{
-				if (nextAction == 1){
-					newnetwork.submit()
-				}
-				else{
-					gebi('matpower').submit();
-					showProgressDialog('spinner','Converting network','conversion');
-					setTimeout(checkConversion,5000); // Set an initial delay because it takes time to create conversion files.
-				}
-			}
-		})
-	}
-}
+
 function showProgressDialog(progressType, dialogMessage, cancelType) {
-	// Make the elements.
+	// Show a progress dialog for loading, converting, etc.
 	background = document.createElement('div')
 	background.id = 'progressBackground'
 	background.style.zIndex = '9998'
@@ -1107,6 +1095,7 @@ function showProgressDialog(progressType, dialogMessage, cancelType) {
 }
 
 function removeProgressDialog() {
+	// Remove the progress dialog.
 	if (gebi('progressBackground')!=null)
 		document.body.removeChild(gebi('progressBackground'))
 	if (gebi('progressContent')!=null)
@@ -1114,7 +1103,7 @@ function removeProgressDialog() {
 }
 
 function loading() {
-	// Put up progress dialog.
+	// Load everything in when the page is loaded.
 	showProgressDialog('spinner','Loading Network', 'loading');
 	// Helper function to do the stuff that takes a long time:
 	function longLoadingProcess() {
@@ -1139,7 +1128,33 @@ function loading() {
 	setTimeout(longLoadingProcess, 100)
 }
 
+function startConversion(elementName, nextAction) {
+	// Additional check, required for Safari browsers
+	var newName = document.getElementById(elementName).value;
+	if (true) {
+		var modelName = "{{ modelName }}"
+		$.ajax({
+			url: "/uniqObjName/Network/" + "{{ owner }}" + "/" + newName + "/" + modelName
+		}).done(function (data) {
+			if (data.exists) {
+				alert("You already have a Network named '" + newName + "', please choose a different name.")
+			}
+			else{
+				if (nextAction == 1){
+					newnetwork.submit()
+				}
+				else{
+					gebi('matpower').submit();
+					showProgressDialog('spinner','Converting network','conversion');
+					setTimeout(checkConversion,5000); // Set an initial delay because it takes time to create conversion files.
+				}
+			}
+		})
+	}
+}
+
 function checkConversion() {
+	// Periodically check to see if any conversion is happening. And if it's done, load the converted model.
 	var conversionStatus = 'converting';
 		// Check every 5 seconds for a feeder & refresh.
 		var setInterval = window.setInterval(function pingAPI(){
@@ -1159,16 +1174,19 @@ function checkConversion() {
 				alert("Conversion complete.")
 				window.location.reload();
 			}
-			//console.log("Converting...")
 			return pingAPI;
 		}(), 5000);
 }
+
 function saveNetwork() {
+	// Start save process on user command.
 	gebi("fileOps").click();
 	savePoster("{{ networkName }}", "{{ modelName }}", "{{ owner }}")
 	alert("Network saved to disk.")
 }
+
 function savePoster(name, modelName, user) {
+	// Do activity to save network over the web.
 	networkObject = {
 		mpcVersion: networkData.mpcVersion,
 		baseMVA: networkData.baseMVA,
@@ -1185,7 +1203,9 @@ function savePoster(name, modelName, user) {
 	unsavedChanges=false
 	post_to_url("/saveNetwork/" + user + "/" + modelName + "/" + name, payload)
 }
+
 function renameNetwork() {
+	// Rename the network with web server.
 	if (unsavedChanges){
 		alert('You have unsaved changes. Please save the network before proceeding.')
 	}
@@ -1199,8 +1219,9 @@ function renameNetwork() {
 		}
 	}
 }
+
 function checkNetworkName(newName) {
-	// Additional check, required for Safari browsers
+	// Check to make sure network name is unique.
 	if (true) {
 		var modelName = "{{ modelName }}"
 		$.ajax({
@@ -1222,21 +1243,20 @@ function checkNetworkName(newName) {
 		})
 	}
 }
+
 function startProcess(startUrl) {
 	// Start a long running process using startUrl.
 	$.ajax({
 		url: startUrl
-	}).done(function (data) {
-		// console.log(data)
-	})
+	}).done(function (data) {})
 }
+
 function startCheck(checkUrl) {
 	// Do get requests to checkUrl for long running process monitoring.
 	window.setInterval(function checkAPI() {
 		$.ajax({
 			url: checkUrl
 		}).done(function (data) {
-			// console.log(data)
 			if (data.exists == true) {
 				// Still processing.
 			} else if (data.exists == false) {
@@ -1252,30 +1272,32 @@ function startCheck(checkUrl) {
 		})
 	}, 5000)
 }
+
 function anonymize() {
+	// Start anonymization function.
 	showProgressDialog('spinner', 'Anonymizing Network')
 	startProcess('/anonymizeTrans/{{owner}}/{{networkName}}')
 	startCheck('/checkAnonymizeTran/{{owner}}/{{modelName}}')
 }
+
 function downloadTextFile(fileName, text) {
+	// Insert the model as text and push it as a download.
 	console.log(text)
 	var element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
     element.setAttribute('download', fileName);
-
     element.style.display = 'none';
     document.body.appendChild(element);
-
     element.click();
-
     document.body.removeChild(element);
 }
-//ADD PROMPT TO SAVE CHANGES BEFORE EXIT
+
 {% if is_admin or not public %}
-	window.onbeforeunload = function(e) {
-		var confirmationMessage = 'It looks like you have been editing something. ';
-		confirmationMessage += 'If you leave before saving, your changes will be lost.';
-		if (unsavedChanges) return confirmationMessage;
-	};
+// Add prompt to save changes before exit.
+window.onbeforeunload = function(e) {
+	var confirmationMessage = 'It looks like you have been editing something. ';
+	confirmationMessage += 'If you leave before saving, your changes will be lost.';
+	if (unsavedChanges) return confirmationMessage;
+};
 {% endif %}
 </script>
