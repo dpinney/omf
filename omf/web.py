@@ -507,17 +507,20 @@ def matpowerImport(owner):
 
 def matImportBackground(owner, modelName, networkName, networkNum):
 	''' Function to run in the background for Milsoft import. '''
-	modelDir = "data/Model/"+owner+"/"+modelName
-	networkDir = modelDir+"/"+networkName+".m"
-	newNet = network.parse(networkDir, filePath=True)
-	network.layout(newNet)
-	try: os.remove(networkDir)
-	except: pass
-	with open(networkDir.replace('.m','.omt'), "w") as outFile:
-		json.dump(newNet, outFile, indent=4)
-	os.remove("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
-	removeNetwork(owner, modelName, networkNum)
-	writeToInput(modelDir, networkName, 'networkName'+str(networkNum))
+	try:
+		modelDir = "data/Model/"+owner+"/"+modelName
+		networkDir = modelDir+"/"+networkName+".m"
+		newNet = network.parse(networkDir, filePath=True)
+		network.layout(newNet)
+		try: os.remove(networkDir)
+		except: pass
+		with open(networkDir.replace('.m','.omt'), "w") as outFile:
+			json.dump(newNet, outFile, indent=4)
+		os.remove("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
+		removeNetwork(owner, modelName, networkNum)
+		writeToInput(modelDir, networkName, 'networkName'+str(networkNum))
+	except:
+		os.remove("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
 
 @app.route("/gridlabdImport/<owner>", methods=["POST"])
 @flask_login.login_required
