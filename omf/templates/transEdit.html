@@ -724,11 +724,11 @@ function newNode(typeOfNode) {
 	}
 	// Add handler to get user's click location for adding.
 	clickTarget = document.getElementById('svgContainer')
-	clickTarget.addEventListener('click', clickLocate, false)
+	clickTarget.addEventListener('click', newNodeListener, false)
 	document.body.style.cursor = 'crosshair'
 }
 
-function clickLocate() {
+function newNodeListener() {
 	// Helper function that finishes node creation after user clicks on a location.
 	var xloc = event.pageX
 	var yloc = event.pageY
@@ -750,7 +750,7 @@ function clickLocate() {
 		newCir.setAttribute('r', 5*scaleTracker)
 		newCir.setAttribute('stroke-width', 0.5*scaleTracker)
 	}
-	clickTarget.removeEventListener('click', clickLocate, false)
+	clickTarget.removeEventListener('click', newNodeListener, false)
 	document.body.style.cursor = 'auto'
 }
 
