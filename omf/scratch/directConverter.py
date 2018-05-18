@@ -28,6 +28,7 @@ def handleMilFile(std_path, seq_path, failure = False):
     print 'UNABLE TO WRITE GLM FILE.'
     failure = True
   except err:
+    print traceback.format_exc()
   finally:
     output_file.close()
   return failure
