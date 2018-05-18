@@ -168,25 +168,26 @@ def distAddNoise(inFeeder, noisePerc):
 	noisePerc = float(noisePerc)
 	for key in inFeeder['tree']:
 		for prop in inFeeder['tree'][key]:
-			val = inFeeder['tree'][key][prop]
-			try:
-				parseVal = float(val)
-				randNoise = random.uniform(-noisePerc, noisePerc)/100
-				randVal = parseVal + randNoise*parseVal
-				inFeeder['tree'][key][prop] = str(randVal)
-			except ValueError:
+			if prop not in ['name', 'from', 'to', 'configuration', 'line_configuration', 'spacing']:
+				val = inFeeder['tree'][key][prop]
 				try:
-					compVal = complex(val)
-					realVal = float(compVal.real)
-					imagVal = float(compVal.imag)
+					parseVal = float(val)
 					randNoise = random.uniform(-noisePerc, noisePerc)/100
-					randReal = realVal + randNoise*realVal
-					randImag = imagVal + randNoise*imagVal
-					randVal = complex(randReal, randImag)
+					randVal = parseVal + randNoise*parseVal
 					inFeeder['tree'][key][prop] = str(randVal)
 				except ValueError:
+					try:
+						compVal = complex(val)
+						realVal = float(compVal.real)
+						imagVal = float(compVal.imag)
+						randNoise = random.uniform(-noisePerc, noisePerc)/100
+						randReal = realVal + randNoise*realVal
+						randImag = imagVal + randNoise*imagVal
+						randVal = complex(randReal, randImag)
+						inFeeder['tree'][key][prop] = str(randVal)
+					except ValueError:
+						continue
 					continue
-				continue
 
 def distShuffleLoads(inFeeder, shufPerc):
 	''' Shuffle the parent properties between all load objects in the inFeeder distribution system. '''
@@ -618,15 +619,15 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 	# with open(FNAMEOUT, "w") as outFile:
 	# 	json.dump(inFeeder, outFile, indent=4)
 
-# # 	# Test distRandomizeNames
-# 	FNAME = "Simple Market System AnonTest.omd"
-# 	FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
-# 	with open(FNAME, "r") as inFile:
-# 		inFeeder = json.load(inFile)
-# 		distRandomizeNames(inFeeder)
-# 	FNAMEOUT = "simpleMarket_distRandomizeNames.omd"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inFeeder, outFile, indent=4)
+# # # 	# Test distRandomizeNames
+	# FNAME = "Simple Market System AnonTest.omd"
+	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
+	# with open(FNAME, "r") as inFile:
+	# 	inFeeder = json.load(inFile)
+	# 	distRandomizeNames(inFeeder)
+	# FNAMEOUT = "simpleMarket_distRandomizeNames.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inFeeder, outFile, indent=4)
 
 # 	# Test distRandomizeLocations
 	# FNAME = "Simple Market System AnonTest.omd"

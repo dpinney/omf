@@ -73,7 +73,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 	hardCands = gfmInputTemplate['hardeningCandidates'].strip().replace(' ', '').split(',')
 	newLineCands = gfmInputTemplate["newLineCandidates"].strip().replace(' ', '').split(',')
 	switchCands = gfmInputTemplate["switchCandidates"].strip().replace(' ', '').split(',')
-	objToFind = ['transformer', 'regulator', 'underground_line', 'overhead_line']
+	objToFind = ['transformer', 'regulator', 'underground_line', 'overhead_line', 'fuse', 'switch']
 	lineCount = 0
 	for key, line in jsonTree.iteritems():
 		if line.get('object','') in objToFind:
@@ -346,7 +346,10 @@ def work(modelDir, inputDict):
 		json.dump(gfmJson, outFile, indent=4)
 	# Run GFM
 	gfmBinaryPath = pJoin(__neoMetaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
-	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],'-num','3'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=modelDir)
+	print gfmBinaryPath
+	print gfmInputFilename
+	print ' '.join(['java','-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],'-num','3'])
+	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],'-num','-3'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=modelDir)
 	(stdout,stderr) = proc.communicate()
 	with open(pJoin(modelDir, "gfmConsoleOut.txt"), "w") as gfmConsoleOut:
 		gfmConsoleOut.write(stdout)
@@ -367,6 +370,7 @@ def work(modelDir, inputDict):
 	outData["lineData"] = lineData
 	outData["generatorData"] = '{:,.2f}'.format(float(inputDict["dgUnitCost"]) * float(inputDict["maxDGPerGenerator"]))
 	outData['gfmRawOut'] = rdtJsonAsString
+	#Inserts scenarios block into RDT input if does not exist
 	if inputDict['scenarios'] != "":
 		rdtJson['scenarios'] = json.loads(inputDict['scenarios'])
 		with open(pJoin(rdtInputFilePath), "w") as rdtInputFile:
@@ -407,7 +411,7 @@ def work(modelDir, inputDict):
 		with open(pJoin(modelDir, "JSON_dump_line.json"), "r") as gldOut:
 			accumulator = json.load(gldOut)
 		outData['gridlabdRawOut'] = accumulator
-		#Data trabsformation for GLD
+		#Data transformation for GLD
 		rdtJson["line_codes"] = accumulator["properties"]["line_codes"]
 		rdtJson["lines"] = accumulator["properties"]["lines"]
 		for item in rdtJson["lines"]:
@@ -440,9 +444,6 @@ def work(modelDir, inputDict):
 	rdtOutFile = modelDir + '/rdtOutput.json'
 	rdtSolverFolder = pJoin(__neoMetaModel__._omfDir,'solvers','rdt')
 	rdtJarPath = pJoin(rdtSolverFolder,'micot-rdt.jar')
-	#TEST RUSSELL THING, DELETE WHEN DONE
-	#shutil.copy(pJoin(__neoMetaModel__._omfDir, "scratch", "rdt_OUTPUTTEST.json"), pJoin(modelDir, 'rdt_OUTPUT.json'))
-	#############
 	proc = subprocess.Popen(['java', "-Djna.library.path=" + rdtSolverFolder, '-jar', rdtJarPath, '-c', rdtInputFilePath, '-e', rdtOutFile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	(stdout,stderr) = proc.communicate()
 	with open(pJoin(modelDir, "rdtConsoleOut.txt"), "w") as rdtConsoleOut:
@@ -507,7 +508,7 @@ def work(modelDir, inputDict):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"feederName1": "trip37",
+		"feederName1": "Winter 2017 Fixed",
 		"modelType": modelName,
 		"runTime": "0:00:30",
 		"layoutAlgorithm": "geospatial",
