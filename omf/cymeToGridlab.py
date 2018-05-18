@@ -930,21 +930,29 @@ def _readCymeShuntCapacitor(feederId, modelDir):
 						cymshuntcapacitor[row.DeviceNumber]['kV_line_neutral'] = float(row.KVLN)*1000
 					if int(row.CapacitorControlType) == 2:
 						cymshuntcapacitor[row.DeviceNumber]['control'] = 'VAR'
-						cymshuntcapacitor[row.DeviceNumber]['VAr_set_high'] = float(row.OnValueA)*1000
+						cymshuntcapacitor[row.DeviceNumber]['VAr_set_high'] = float(row.OnValue)*1000
 						cymshuntcapacitor[row.DeviceNumber]['VAr_set_low'] = float(row.OffValueA)*1000
 						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = "ABCN"
 					elif int(row.CapacitorControlType) == 3:
 						cymshuntcapacitor[row.DeviceNumber]['control'] = 'CURRENT'
-						cymshuntcapacitor[row.DeviceNumber]['current_set_high'] = row.OnValueA
+						cymshuntcapacitor[row.DeviceNumber]['current_set_high'] = row.OnValue
 						cymshuntcapacitor[row.DeviceNumber]['current_set_low'] = row.OffValueA
 						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = "ABCN"
 					elif int(row.CapacitorControlType) == 7:
 						cymshuntcapacitor[row.DeviceNumber]['control'] = 'VOLT'
+                                                #print cymshuntcapacitor[row.DeviceNumber]['voltage_set_low']
 						controlledphase = _convertPhase(int(row.ControlledPhase)).replace('N','')
+                                                if row.get('OnValue' + controlledphase) is None:
+                                                  row['OnValue' + controlledphase] = 0
+                                                if row.get('OffValue' + controlledphase) is None:
+                                                  row['OffValue' + controlledphase] = 0
 						cymshuntcapacitor[row.DeviceNumber]['voltage_set_low'] = float(row['OnValue'+controlledphase])
 						cymshuntcapacitor[row.DeviceNumber]['voltage_set_high'] = float(row['OffValue'+controlledphase])
 						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = controlledphase#row.Phase doesn't exist
-						cymshuntcapacitor[row.DeviceNumber]['remote_sense'] = _fixName(row.ControlledNodeId)
+                                                if row.ControlledNodeId:
+						  cymshuntcapacitor[row.DeviceNumber]['remote_sense'] = _fixName(row.ControlledNodeId)
+                                                
+                                                
 					else:
 						cymshuntcapacitor[row.DeviceNumber]['control'] = 'MANUAL'
 						cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = "ABCN"
@@ -1599,6 +1607,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	cymrecloser = _readCymeRecloser(feeder_id, modelDir)
 	# -9-CYME CYMREGULATOR**********************************************************************************************************************************************************************
 	cymregulator = _readCymeRegulator(feeder_id, modelDir)
+      
 	# -10-CYME CYMSHUNTCAPACITOR**********************************************************************************************************************************************************************
 	cymshuntcapacitor = _readCymeShuntCapacitor(feeder_id, modelDir)
 	# -11-CYME CYMCUSTOMERLOAD**********************************************************************************************************************************************************************
@@ -1854,6 +1863,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 					nodes[cymsectiondevice[device]['parent']]['longitude'] = cymsectiondevice[device]['fromLongitude']
 	# Create overhead line conductor dictionaries
 	ohl_conds = {}
+        print "REACHED"
 	for olc in OH_conductors:
 		if olc in cymeqconductor.keys():
 			if olc not in ohl_conds.keys():
@@ -2230,7 +2240,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 
 				#This needs to be expanded for other control types too.
 				if caps[cap]['control'] == 'VOLT':
-					caps[cap]['remote_sense'] = 'n' + cymshuntcapacitor[cap]['remote_sense']#jfk.  hacky.  have to add 'n' because it's added later to nodes.
+					caps[cap]['remote_sense'] = 'n' + str(cymshuntcapacitor[cap]['remote_sense'])#jfk.  hacky.  have to add 'n' because it's added later to nodes.
 					caps[cap]['voltage_set_high'] =str(cymshuntcapacitor[cap]['voltage_set_high']*(1/120.0)*float(feeder_VLN))
 					caps[cap]['voltage_set_low'] = str(cymshuntcapacitor[cap]['voltage_set_low']*(1/120.0)*float(feeder_VLN))
 					caps[cap]['pt_phase'] = cymshuntcapacitor[cap]['pt_phase']

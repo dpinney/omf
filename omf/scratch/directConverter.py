@@ -12,6 +12,7 @@ sys.path.append('../')
 import milToGridlab as mil
 import cymeToGridlab as cyme
 import feeder
+import traceback
 
 def handleMilFile(std_path, seq_path, failure = False):
   ''' Conversion routine for the std and seq files. '''
@@ -26,6 +27,7 @@ def handleMilFile(std_path, seq_path, failure = False):
   except IOError:
     print 'UNABLE TO WRITE GLM FILE.'
     failure = True
+  except err:
   finally:
     output_file.close()
   return failure
@@ -40,8 +42,14 @@ def handleMdbFile(mdb_path, modelDir, failure = False):
   except IOError:
     print 'UNABLE TO WRITE GLM FILE.'
     failure = True
-  except:
-    print 'ERROR IN CYME MODEL FUNCTION.', sys.exc_info()[0]
+  except IndexError:
+    print 'INDEX ACCESSING ERROR IN CYME MODEL FUNCTION AT: ' + str(sys.exc_info()[2])
+    print traceback.format_exc()
+  except KeyError:
+    print 'DICTIONARY ERROR IN CYME MODEL FUNCTION AT: ' + str(sys.exc_info()[2])
+  except Exception, err:
+    print str(e)
+    print traceback.format_exc()
     failure = True
   finally:
     output_file.close()
