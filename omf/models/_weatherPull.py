@@ -27,13 +27,9 @@ def work(modelDir, inputDict):
 	# Run VBAT code.
 	source = inputDict["source"]
 	year = inputDict["year"]
-	
-	if source == "METAR":
-		station = inputDict["stationMETAR"]
-		parameter = inputDict["weatherParameterMETAR"]
-	elif source == "USCRN":
-		station = inputDict["stationUSCRN"]
-		parameter = inputDict["weatherParameterUSCRN"]
+	station = inputDict["station"]
+	parameter = inputDict["weatherParameter"]
+	state_city = inputDict["state_city"]
 	verifiedData = []
 	errorCount = 0
 	#check the source using and use the appropriate function
@@ -42,7 +38,7 @@ def work(modelDir, inputDict):
 		with open(pJoin(modelDir,"weather.csv"),"w") as file:
 			file.write(data)
 	elif source == "USCRN":
-		data = pullUSCRN(year,station,parameter)
+		data = pullUSCRN(year,state_city,parameter)
 		with open(pJoin(modelDir,"weather.csv"),"w") as file:
 			writer = csv.writer(file)
 			writer.writerows([[x] for x in data])
@@ -57,19 +53,20 @@ def work(modelDir, inputDict):
 					d = parseDt(row[1])
 					deltatime = d - firstDT
 					verifiedData[int(math.floor((deltatime.total_seconds())/(60*60)))] = row[2]
+
 		#storing good data to allOutputData.json and weather.csv
 		outData["data"] = verifiedData
 		with open(pJoin(modelDir,"weather.csv"),"wb") as file:
 			writer = csv.writer(file)
 			writer.writerows([[x] for x in verifiedData])
 	elif source == "USCRN":
-		verifiedData = []
+		verifiedData = []#[999.9]*8760
 		with open(pJoin(modelDir,"weather.csv"),"r") as file:
 			reader = csv.reader(file)
 			for row in reader:
-				verifiedData.append(row[0])	
-			outData["data"] = verifiedData
-	with open(pJoin(modelDir,"weather.csv"),"wb") as file:
+				verifiedData.append(row[0])
+				print row[0]
+		with open(pJoin(modelDir,"weather.csv"),"wb") as file:
 			writer = csv.writer(file)
 			writer.writerows([[x] for x in verifiedData])
 
@@ -103,7 +100,7 @@ def pullMETAR(year, station, datatype): #def pullMETAR(year, station, datatype, 
 	# 	for x in range(0,8760): 
 	# 		wr.writerow([tempData[x]])
 
-def pullUSCRN(year, station, datatype):
+def pullUSCRN(year, state_city, datatype):
 	'''	For a given year and weather station, write 8760 hourly weather data (temp, humidity, etc.) to outputPath.
 	for list of available stations go to: https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02'''
 	if datatype == "T_CALC":
@@ -153,7 +150,7 @@ def pullUSCRN(year, station, datatype):
 	else:
 		datatypeID = 1
 	#need to have handling for stupid inputs #REPLACE WITH A DICTIONARY
-	url = 'https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02/' + year + '/CRNH0203-' + year + '-' + station + '.txt'
+	url = 'https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02/' + year + '/CRNH0203-' + year + '-' + state_city + '.txt'
 	r = requests.get(url)
 	data = r.text
 	matrix = [x.split() for x in data.split('\n')]
@@ -169,12 +166,11 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		"user": "admin",
-		"source":"METAR", #"source":"USCRN",#
+		"source":"METAR", #"source":"USCRN",
 		"year":"2017",
-		"stationMETAR":"CHO",
-		"stationUSCRN":"AK_Barrow_4_ENE",
-		"weatherParameterUSCRN":"T_CALC",#"weatherParameter":"",#
-		"weatherParameterMETAR":"tmpc",
+		"station":"IAD",
+		"weatherParameter":"tmpc",#"weatherParameter":"T_CALC",
+		"state_city":"KY_Versailles_3_NNW",
 		"modelType":modelName}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	return creationCode

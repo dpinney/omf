@@ -72,7 +72,7 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Source<span class="classic">Source of data</span></label>
-				<select id="source" name="source" onchange="loadWeatherParameters()" >
+				<select id="source" name="source" onchange="loadWeatherParameters()" onload="loadWeatherParameters()">
 					<script type="text/javascript">
 						function loadWeatherParameters(){
 							var x = gebi("source").value;
@@ -81,8 +81,8 @@
 								gebi("weatherParameterUSCRN").style.display = "none"
 								gebi("stationMETAR").style.display = "block"
 								gebi("stationUSCRN").style.display = "none"
-							}
-							else if (x == "USCRN"){
+
+							} else if (x == "USCRN"){
 								gebi("weatherParameterMETAR").style.display = "none"
 								gebi("weatherParameterUSCRN").style.display = "block"
 								gebi("stationMETAR").style.display = "none"
@@ -100,7 +100,7 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Station<span class="classic">For METAR source: ASOS Code, for USA codes (starting with K) exclude the first letter. For USCRN: Dropdown menu of stations</span></label>
-				<input type="text" id="stationMETAR" name="stationMETAR" pattern="[a-zA-Z]{3,4}" required="required"/>
+				<input type="text" id="stationMETAR" name="stationMETAR" pattern="[A-Z]{3,4}" required="required"/>
 				<select id="stationUSCRN" name="stationUSCRN" required="required" style="display:none;">
 					<option value="AK_Barrow_4_ENE">AK_Barrow</option>
 					<option value="AK_Cordova_14_ESE">AK_Cordova</option>
@@ -335,12 +335,13 @@
 		</script>
 	</div>
 	<p class="reportTitle postRun" style="page-break-before:always">Download Output Data</p>	
-		<div style="text-align:left" class="tightContent postRun">
+		<div style="text-align:left" class="tightContent">
 			<!--<a style="padding:10px" onclick="downloadTextFile('weatherDataPulled.txt',allOutputData.data)">Weather Data</a>-->
 			<!--<a style="padding:10px" onclick="(downloadTextFile('weatherData.txt', allOutputData.data))">Weather Output</a>-->
 			<a id="dTest" download>Output Download</a>
 			<script>gebi('dTest').href = "/downloadModelData/" + allInputData.user + "/" + allInputData.modelName + "/weather.csv"</script>
-			<p id="errorCount" class="tightContent">{{allOutputData.errorCount}}</p>		
+			<!--<a id="errorCount" onload="loadErrorCount()"></a>
+			<script>function loadErrorCount(){gebi('errorCount').value = allOutputData.errorCount}</script>-->
 		</div>
 	<!--<div>
 		<input id="results" name="results" type="hidden" onload="loadOutputData()">
