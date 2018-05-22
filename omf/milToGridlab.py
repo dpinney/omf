@@ -1279,7 +1279,7 @@ def _latCount(name):
                 myLatCount += 1
     print name, 'COUNT', nameCount, 'LAT COUNT', latCount, 'SUCCESS RATE', 1.0*latCount/nameCount
 
-def _tests(keepFiles=True):
+def _tests(keepFiles=False):
     ''' Test convert every windmil feeder we have (in static/testFiles). Return number of exceptions we hit. '''
     # setlocale lives here to avoid changing it globally 
     # locale.setlocale(locale.LC_ALL, 'en_US')

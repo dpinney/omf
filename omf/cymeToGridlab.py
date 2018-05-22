@@ -2811,7 +2811,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	shutil.rmtree(pJoin(modelDir,'cymeCsvDump'))
 	return glmTree, x_scale, y_scale
 
-def _tests(keepFiles=False):
+def _tests(keepFiles=True):
 	testFile = ['IEEE13.mdb']
 	inputDir = './static/testFiles/'
 	# outputDir = tempfile.mkdtemp()
