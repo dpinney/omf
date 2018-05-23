@@ -27,7 +27,6 @@ def work(modelDir, inputDict):
 	# Run VBAT code.
 	source = inputDict["source"]
 	year = inputDict["year"]
-	
 	if source == "METAR":
 		station = inputDict["stationMETAR"]
 		parameter = inputDict["weatherParameterMETAR"]
@@ -70,9 +69,8 @@ def work(modelDir, inputDict):
 				verifiedData.append(row[0])	
 			outData["data"] = verifiedData
 	with open(pJoin(modelDir,"weather.csv"),"wb") as file:
-			writer = csv.writer(file)
-			writer.writerows([[x] for x in verifiedData])
-
+		writer = csv.writer(file)
+		writer.writerows([[x] for x in verifiedData])
 	#checking how many wrong values there are
 	if source == "METAR":
 		for each in verifiedData:
@@ -82,7 +80,6 @@ def work(modelDir, inputDict):
 		for each in verifiedData:
 			if str(each) == str(-9999.0):
 				errorCount += 1
-
 	outData["errorCount"] = errorCount
 	outData["stdout"] = "Success"
 	return outData
@@ -173,7 +170,7 @@ def new(modelDir):
 		"year":"2017",
 		"stationMETAR":"CHO",
 		"stationUSCRN":"AK_Barrow_4_ENE",
-		"weatherParameterUSCRN":"T_CALC",#"weatherParameter":"",#
+		"weatherParameterUSCRN":"T_CALC",
 		"weatherParameterMETAR":"tmpc",
 		"modelType":modelName}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
