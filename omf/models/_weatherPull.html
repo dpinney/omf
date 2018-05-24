@@ -338,17 +338,11 @@
 		<div style="text-align:left" class="tightContent postRun">
 			<!--<a style="padding:10px" onclick="downloadTextFile('weatherDataPulled.txt',allOutputData.data)">Weather Data</a>-->
 			<!--<a style="padding:10px" onclick="(downloadTextFile('weatherData.txt', allOutputData.data))">Weather Output</a>-->
-			<a id="dTest" download>Output Download</a>
+			<a id="dTest" download>Output Download</a><br>
 			<script>gebi('dTest').href = "/downloadModelData/" + allInputData.user + "/" + allInputData.modelName + "/weather.csv"</script>
-			<p id="errorCount"><script>allOutputData.errorCount</script></p>
-			<!-- <script>gebi('errorCount').value = allInputData.errorCount;</script>-->
+			<p id="errorDisplay" class="postRun"></p>
+			<script type="text/javascript">
+			if(allOutputData.errorCount !== 0){gebi('errorDisplay').innerHTML = "There were " + allOutputData.errorCount + " out of 8760, missing or corrupt values found in this set"}
+			</script>
 		</div>
-	<!--<div>
-		<input id="results" name="results" type="hidden" onload="loadOutputData()">
-		<script>
-			function loadOutputData(){
-			gebi('results').value = allOutputData.data;
-			}
-		</script>
-	</div>-->
 </body>
