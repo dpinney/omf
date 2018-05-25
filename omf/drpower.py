@@ -50,7 +50,7 @@ if __name__ == '__main__':
 	web.app.add_url_rule('/sigh', 'sigh', view_func=sigh)
 	web.app.add_url_rule('/transmissionConvert/<owner>/<modelName>/', 'transmissionConvert', view_func=transmissionConvert)
 	web.app.add_url_rule('/publishModel/<owner>/<modelName>/', 'powerPublish', methods=['POST'], view_func=powerPublish)
-	web.app.add_url_rule('/injectUser/', 'injectUser', methods=['POST'], view_func=injectUser)
+	web.app.add_url_rule('/injectUser/<email>/<passwordHash>/<modelName>/', 'injectUser', view_func=injectUser)
 	# def crash(): raise Exception
 	# web.app.add_url_rule('/crash','crash',view_func=crash)
 	# Remove the bogus old publishModel route.
