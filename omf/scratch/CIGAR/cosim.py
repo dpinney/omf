@@ -1,4 +1,4 @@
-import os, urllib, urllib2, subprocess, time, warnings
+import os, urllib, urllib2, subprocess, time, warnings, webbrowser
 from datetime import datetime, timedelta
 
 def parseDt(dtString):
@@ -43,7 +43,39 @@ class Coordinator(object):
 			self.glw.waitUntil(writeDt(now + stepDelta))
 
 	def drawResults(self):
-		return self.log
+		#return self.log
+		html_str = """
+		<!DOCTYPE html>
+		<html>
+			<head>
+				<style>
+					table, th, td { border: 1px solid black; 
+					text-align: center;}
+				</style>
+			</head>
+			<body>
+				<table>
+					<tr>
+						<th>Time</th>"""
+						
+		for x in range(len(self.agents)):
+			temp_str = "<th>Agent"+str(x)+"_Read</th><th>Agent"+str(x)+"_ReadRes</th><th>Agent"+str(x)+"_Write</th><th>Agent"+str(x)+"_WriteRes</th>"
+			html_str += temp_str
+		html_str += """
+					</tr>"""
+		for row in self.log:
+			row_str = "<tr><td>"+row.pop(0).strftime("%Y-%m-%d %H:%M:%S")+"</td>"
+			for col in row:
+				row_str += "<td>"+str(col[0])+"</td><td>"+str(col[1])+"</td>"
+			row_str += "</tr>"
+			html_str += row_str
+		html_str += """
+				</table>
+			</body>
+		</html>"""
+		Html_file = open("output.html", "w")
+		Html_file.write(html_str)
+		Html_file.close()
 		# t_res = HTML.Table(h_row=["Agent", "some_category", "some_category", "some_category"])
 		# for agent_x in agents:
 		# 	pass #TODO: need an HTML table.
