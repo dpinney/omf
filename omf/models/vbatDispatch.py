@@ -11,7 +11,7 @@ import pandas as pd
 # Model metadata:
 fileName = os.path.basename(__file__)
 modelName = fileName[0:fileName.rfind('.')]
-tooltip = "Calculate the virtual battery capacity for a collection of thermostatically controlled loads."
+tooltip = "Calculate the energy storage capacity for a collection of thermostatically controlled loads."
 
 # Our HTML template for the interface:
 with open(pJoin(__neoMetaModel__._myDir,modelName + ".html"),"r") as tempFile:
