@@ -73,7 +73,7 @@ class WriteIntervalAttackAgent(object):
 	__slots__ = 'attackStartTime', 'attackEndTime', 'obNameToAttack', 'obPropToAttack', 'propTarget'
 	# e.g. e.g. "2000-01-02 16:00:00", "tm_1", "measured_real_energy", "0.0"
 
-	def __init__(self, attackTime, obNameToAttack, obPropToAttack, propTarget):
+	def __init__(self, attackStartTime, attackEndTime, obNameToAttack, obPropToAttack, propTarget):
 		self.attackStartTime = attackStartTime
 		self.attackEndTime = attackEndTime
 		self.obNameToAttack = obNameToAttack
