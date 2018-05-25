@@ -342,7 +342,15 @@
 			<script>gebi('dTest').href = "/downloadModelData/" + allInputData.user + "/" + allInputData.modelName + "/weather.csv"</script>
 			<p id="errorDisplay" class="postRun"></p>
 			<script type="text/javascript">
-			if(allOutputData.errorCount !== 0){gebi('errorDisplay').innerHTML = "There were " + allOutputData.errorCount + " out of 8760, missing or corrupt values found in this set"}
+			if(allInputData.source == "METAR"){
+				station = allInputData.stationMETAR
+			}else if (allInputData.source == "USCRN"){
+				station = allInputData.stationUSCRN
+			}
+			if(allOutputData.errorCount !== 0){gebi('errorDisplay').innerHTML = "Your search for " + allInputData.year + " " + station + 
+				" is completed. There were " + allOutputData.errorCount + " out of 8760, missing or corrupt values found in this set"}
+			else{gebi('errorDisplay').innerHTML = "Your search for " + allInputData.year + " " + station + 
+				" is completed. There were no errors found in this data pull"}
 			</script>
 		</div>
 </body>

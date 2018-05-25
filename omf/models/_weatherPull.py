@@ -166,7 +166,7 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		"user": "admin",
-		"source":"METAR", #"source":"USCRN",#
+		"source":"USCRN",#"source":"METAR", #
 		"year":"2017",
 		"stationMETAR":"CHO",
 		"stationUSCRN":"AK_Barrow_4_ENE",
