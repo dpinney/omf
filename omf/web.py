@@ -145,6 +145,7 @@ def login_page():
 		thisModel = getattr(models, modelName)
 		if not modelName.startswith('_'):
 			modelNames.append(modelName)
+	modelNames.sort()
 	return render_template("clusterLogin.html", next=nextUrl, modelNames=modelNames)
 
 @app.route("/logout")
