@@ -35,14 +35,13 @@ def powerPublish(owner, modelName):
 	#TODO: return web.redirect('drpowerHost.com/publishCallback/userName/directoryName/')
 	return 'PNNL PUBLICATION URL GOES HERE'
 
-def injectUser():
+def injectUser(email, passwordHash, modelName):
 	'Create a new user and log that user in. Note that hash should be pbkdf2_sha512'
-	pData = request.form.to_dict()
-	user = {'username':pData['email'], 'password_digest':pData['passwordHash']}
+	user = {'username':email, 'password_digest':passwordHash}
 	web.flask_login.login_user(web.User(user))
-	with open('./data/User/'+user['username']+'.json','w') as outFile:
+	with open('./data/User/'+ email + '.json','w') as outFile:
 		json.dump(user, outFile, indent=4)
-	return web.redirect('/network/' + pData['email'] + '/' + pData['modelName'] + '/1')
+	return web.redirect('/network/' + email + '/' + modelName + '/1')
 
 if __name__ == '__main__':
 	template_files = ['templates/'+ x  for x in web.safeListdir('templates')]
