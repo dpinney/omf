@@ -2,15 +2,10 @@ import opendssdirect as dss
 import types
 import inspect
 
+print 'All of the object types that OpenDSS supports:'
 for name, module in inspect.getmembers(dss):
     if isinstance(module, types.ModuleType) and not name.startswith('_'):
         print 'dss.{%s}' % name
-
-
-# All buses.
-
-for bus in dss.Circuit.AllBusNames():
-  print bus
 
 # Pandas interface.
 '''
@@ -46,7 +41,6 @@ dss.run_command(
     initial_state=20
     ))
 
-
 dss.run_command(
     "New Storage.{bus_name} Bus1={bus_name} phases=1 kV=2.2 kWRated={rating} kWhRated={kwh_rating} kWhStored={initial_state} %IdlingkW=0 %reserve=0 %EffCharge=100 %EffDischarge=100 State=CHARGING".format(
     bus_name='611',
@@ -55,6 +49,11 @@ dss.run_command(
     initial_state=20
     ))
 
-dss.run_command('Solve');
+dss.run_command('Solve')
 
+print '\nAll buses in the model:'
+for bus in dss.Circuit.AllBusNames():
+    print bus
+
+print '\nDetails on the storage added to the model:'
 print dss.utils.class_to_dataframe('Storage')
