@@ -50,6 +50,9 @@ elif platform.system()=='Windows':
 	os.system("choco install -y ffmpeg")
 	os.system("choco install -y graphviz")
 	os.system("choco install -y pip")
+
+  os.system("python -m pip install scipy")
+  #os.system("python -m pip install pygraphviz")
 	#os.system("choco install -y octave")
 	os.system("choco install -y octave.portable")
 	# Sometimes refreshenv doesnt properly update the path variables and pip doesnt work. 
