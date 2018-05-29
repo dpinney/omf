@@ -139,13 +139,7 @@ def login_page():
 	nextUrl = str(request.args.get("next","/"))
 	if flask_login.current_user.is_authenticated():
 		return redirect(urlTarget)
-	# Generate list of models:
-	modelNames = []
-	for modelName in models.__all__:
-		thisModel = getattr(models, modelName)
-		if not modelName.startswith('_'):
-			modelNames.append(modelName)
-	return render_template("clusterLogin.html", next=nextUrl, modelNames=modelNames)
+	return render_template("clusterLogin.html", next=nextUrl)
 
 @app.route("/logout")
 def logout():
@@ -1180,12 +1174,22 @@ def root():
 		except:
 			continue
 	modelTips = {}
- 	for name in models.__all__:
- 		try:
- 			modelTips[name] = getattr(omf.models,name).tooltip
- 		except:
- 			pass
-  	return render_template("home.html", models=allModels, current_user=User.cu(), is_admin=isAdmin, modelNames=models.__all__, modelTips=modelTips)
+	for name in models.__all__:
+		try:
+			modelTips[name] = getattr(omf.models,name).tooltip
+		except:
+			pass
+	# Generate list of models:
+	modelNames = []
+	for modelName in models.__all__:
+		thisModel = getattr(models, modelName)
+		hideFlag = thisModel.__dict__.get('hidden', False)
+		#HACK: support for old underscore hiding.
+		hideChar = modelName.startswith('_')
+		if not(hideFlag or hideChar):
+			modelNames.append(modelName)
+	modelNames.sort()
+	return render_template("home.html", models=allModels, current_user=User.cu(), is_admin=isAdmin, modelNames=modelNames, modelTips=modelTips)
 
 @app.route("/delete/<objectType>/<owner>/<objectName>", methods=["POST"])
 @flask_login.login_required

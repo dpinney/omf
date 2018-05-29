@@ -1,4 +1,4 @@
-import os, urllib, urllib2, subprocess, time, warnings
+import os, urllib, urllib2, subprocess, time, warnings, webbrowser
 from datetime import datetime, timedelta
 
 def parseDt(dtString):
@@ -43,7 +43,39 @@ class Coordinator(object):
 			self.glw.waitUntil(writeDt(now + stepDelta))
 
 	def drawResults(self):
-		return self.log
+		#return self.log
+		html_str = """
+		<!DOCTYPE html>
+		<html>
+			<head>
+				<style>
+					table, th, td { border: 1px solid black; 
+					text-align: center;}
+				</style>
+			</head>
+			<body>
+				<table>
+					<tr>
+						<th>Time</th>"""
+						
+		for x in range(len(self.agents)):
+			temp_str = "<th>Agent"+str(x)+"_Read</th><th>Agent"+str(x)+"_ReadRes</th><th>Agent"+str(x)+"_Write</th><th>Agent"+str(x)+"_WriteRes</th>"
+			html_str += temp_str
+		html_str += """
+					</tr>"""
+		for row in self.log:
+			row_str = "<tr><td>"+row.pop(0).strftime("%Y-%m-%d %H:%M:%S")+"</td>"
+			for col in row:
+				row_str += "<td>"+str(col[0])+"</td><td>"+str(col[1])+"</td>"
+			row_str += "</tr>"
+			html_str += row_str
+		html_str += """
+				</table>
+			</body>
+		</html>"""
+		Html_file = open("output.html", "w")
+		Html_file.write(html_str)
+		Html_file.close()
 		# t_res = HTML.Table(h_row=["Agent", "some_category", "some_category", "some_category"])
 		# for agent_x in agents:
 		# 	pass #TODO: need an HTML table.
@@ -160,12 +192,47 @@ def _test():
 	# proc.kill() # For those hard-to-stop servers.
 
 def _test2():
+	# test with AlertAgent, ReadAttackAgent
 	import cyberAttack
-	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
-	agents = [cyberAttack.AlertAgent('2000-01-03 12:00:00')]
+	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 12:00:00', 'stepSizeSeconds':3600} #error with having 
+	agents = [cyberAttack.AlertAgent('2000-01-03 12:00:00')] 
 	print 'Starting co-sim with 1 agent.'
 	coord = Coordinator(agents, cosimProps)
 	# print coord.drawResults()
 
+def _test3():
+	# test with AlertAgent, ReadAttackAgent
+	import cyberAttack
+	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
+	agents = [cyberAttack.AlertAgent('2000-01-03 12:00:00'), cyberAttack.ReadAttackAgent('2000-01-02 10:00:00', 'tm_1', 'measured_power')]
+	print 'Starting co-sim with 2 agents.'
+	coord = Coordinator(agents, cosimProps)
+	print coord.drawResults()
+
+def _test4():
+	# test with AlertAgent, ReadAttackAgent, and ReadAttackIntervalAgent
+	import cyberAttack
+	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
+	agents = [cyberAttack.AlertAgent('2000-01-03 04:00:00'), cyberAttack.ReadAttackAgent('2000-01-02 10:00:00', 'tm_1', 'measured_power'), cyberAttack.ReadIntervalAttackAgent('2000-01-02 08:00:00', '2000-01-03 08:00:00', 'tm_1', 'measured_real_energy')]
+	print 'Starting co-sim with 3 agents.'
+	coord = Coordinator(agents, cosimProps)
+	print coord.drawResults()
+
+def _test5():
+	# test with AlertAgent, ReadAttackAgent, ReadIntervalAttackAgent, and WriteAttackAgent
+	#shows how WriteAttackAgent and WriteIntervalAttackAgent interact with ReadAttackAgent and ReadIntervalAttackAgent
+	import cyberAttack
+	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
+	agents = []
+	agents.append(cyberAttack.AlertAgent('2000-01-03 04:00:00'))
+	agents.append(cyberAttack.ReadAttackAgent('2000-01-02 10:00:00', 'tm_1', 'measured_power'))
+	agents.append(cyberAttack.ReadIntervalAttackAgent('2000-01-02 08:00:00', '2000-01-03 08:00:00', 'tm_1', 'measured_real_energy'))
+	agents.append(cyberAttack.WriteAttackAgent('2000-01-02 16:00:00', 'tm_1', 'measured_real_energy', '0.0'))
+	agents.append(cyberAttack.WriteIntervalAttackAgent('2000-01-03 20:00:00', '2000-01-04 08:00:00', 'inverter_1', 'power_factor', '0.4'))
+	agents.append(cyberAttack.ReadIntervalAttackAgent('2000-01-03 12:00:00', '2000-01-04 12:00:00', 'tm_2', 'measured_reactive_power'))
+	print 'Starting co-sim with 6 agents.'
+	coord = Coordinator(agents, cosimProps)
+	print coord.drawResults()
+
 if __name__ == '__main__':
-	_test2()
+	_test5()
