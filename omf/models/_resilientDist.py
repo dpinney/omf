@@ -61,7 +61,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 		'line_codes' : [],
 		'lines' : [],
 		'critical_load_met' : gfmInputTemplate.get('critical_load_met',0.98),
-		'total_load_met' : gfmInputTemplate.get('total_load_met',0.5),
+		'total_load_met' : gfmInputTemplate.get('total_load_met',0.9),
 		'chance_constraint' : gfmInputTemplate.get('chance_constraint', 1.0),
 		'phase_variation' : gfmInputTemplate.get('phase_variation', 0.15),
 		'scenarios' : [] # Made up fragility damage scenario.
@@ -328,7 +328,7 @@ def work(modelDir, inputDict):
 		'phase_variation' : float(inputDict['phaseVariation']),
 		'chance_constraint' : float(inputDict['chanceConstraint']),
 		'critical_load_met' : float(inputDict['criticalLoadMet']),
-		'total_load_met' : 1.0,#(float(inputDict['criticalLoadMet']) + float(inputDict['nonCriticalLoadMet'])),
+		'total_load_met' : 0.9,#(float(inputDict['criticalLoadMet']) + float(inputDict['nonCriticalLoadMet'])),
 		'xrMatrices' : inputDict["xrMatrices"],
 		'maxDGPerGenerator' : float(inputDict["maxDGPerGenerator"]),
 		'dgUnitCost' : float(inputDict["dgUnitCost"]),
@@ -363,6 +363,8 @@ def work(modelDir, inputDict):
 		# HACK: we use rdtInput as a string in the frontend.
 		rdtJsonAsString = rdtInputFile.read()
 		rdtJson = json.loads(rdtJsonAsString)
+	if (inputDict["feederName1"] == "debuggedSVEC"):
+		rdtJson["power_flow"] = "network_flow"
 	# Calculate line costs.
 	lineData = {}
 	for line in rdtJson["lines"]:
@@ -508,7 +510,7 @@ def work(modelDir, inputDict):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"feederName1": "Winter 2017 Fixed",
+		"feederName1": "trip37",#debuggedSVEC
 		"modelType": modelName,
 		"runTime": "0:00:30",
 		"layoutAlgorithm": "geospatial",
@@ -520,7 +522,7 @@ def new(modelDir):
 		"dgUnitCost": "1000000.0",
 		"hardeningUnitCost": "1000.0",
 		"maxDGPerGenerator": "0.5",
-		"hardeningCandidates": "A_node705-742,A_node705-712,A_node706-725",
+		"hardeningCandidates": "A_node705-742,A_node705-712,A_node706-725, SCL33937",
 		"newLineCandidates": "TIE_A_to_C,TIE_C_to_B,TIE_B_to_A",
 		"generatorCandidates": "A_node706,A_node707,A_node708,B_node704,B_node705,B_node703",
 		"switchCandidates" : "A_node705-742,A_node705-712",
@@ -529,7 +531,7 @@ def new(modelDir):
 		"chanceConstraint": "1.0",
 		"phaseVariation": "0.15",
 		"weatherImpacts": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","wf_clip.asc")).read(),
-		"weatherImpactsFileName": "wf_clip.asc",
+		"weatherImpactsFileName": "wf_clip.asc", #wf_clipSVEC.asc
 		"xrMatrices":open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","lineCodesTrip37.json")).read(),
 		"xrMatricesFileName":"lineCodesTrip37.json",
 		"scenarios": "",
