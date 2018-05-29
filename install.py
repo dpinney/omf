@@ -36,18 +36,9 @@ elif platform.system() == "Linux" and platform.linux_distribution()[0]=="CentOS 
 	os.system("pip install --ignore-installed six")
 	os.system("python setup.py develop")
 elif platform.system()=='Windows':
-	# Need to manually download and install Python 2.7 and set python as a path variable, Git, Chocolatey 
-	# Download Pygraphviz whl and place it in the omf directory
-	# Use wget to download omf from github
-	# git clone https://github.com/dpinney/omf.git
+	# Need to manually download and install Chocolatey 
 	workDir = os.getcwd()
 	# chocoString = "@'%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe' -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command 'iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))' && SET 'PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin'"
-	# os.system(chocoString)
-  try:
-    subprocess.call(['python'])
-  except OSError:
-    print "WINDOWS USERS MUST MANUALLY INSTALL PYTHON."
-
 	os.system("choco install -y git")
 	os.system("choco install -y wget")
 	os.system("choco install -y python2")
