@@ -1,5 +1,5 @@
-import platform, os
-import subprocess
+import platform, os, sys
+
 
 # Note: all installations require git to clone the omf first.
 if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu","debian"]:
@@ -36,12 +36,16 @@ elif platform.system() == "Linux" and platform.linux_distribution()[0]=="CentOS 
 	os.system("pip install --ignore-installed six")
 	os.system("python setup.py develop")
 elif platform.system()=='Windows':
-	# Need to manually download and install Chocolatey 
+	# Need to manually download and install Chocolatey, python. 
 	workDir = os.getcwd()
 	# chocoString = "@'%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe' -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command 'iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))' && SET 'PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin'"
 	os.system("choco install -y git")
 	os.system("choco install -y wget")
-	os.system("choco install -y python2")
+
+  version = sys.version.split('\n')[0] # Check for right Python version. This script shouldn't run at all if python isn't installed, right?
+  if not version.startswith('2.'):
+    os.system("choco install -y python2")
+
 	os.system("choco install -y vcredist2008")
 	os.system("choco install -y vcpython27")
 	os.system("choco install -y ffmpeg")
