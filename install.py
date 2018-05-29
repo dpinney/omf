@@ -1,4 +1,5 @@
 import platform, os
+import subprocess
 
 # Note: all installations require git to clone the omf first.
 if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu","debian"]:
@@ -42,6 +43,11 @@ elif platform.system()=='Windows':
 	workDir = os.getcwd()
 	# chocoString = "@'%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe' -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command 'iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))' && SET 'PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin'"
 	# os.system(chocoString)
+  try:
+    subprocess.call(['python'])
+  except OSError:
+    print "WINDOWS USERS MUST MANUALLY INSTALL PYTHON."
+
 	os.system("choco install -y git")
 	os.system("choco install -y wget")
 	os.system("choco install -y python2")
@@ -50,10 +56,10 @@ elif platform.system()=='Windows':
 	os.system("choco install -y ffmpeg")
 	os.system("choco install -y graphviz")
 	os.system("choco install -y pip")
-
   os.system("python -m pip install scipy")
-  #os.system("python -m pip install pygraphviz")
-	#os.system("choco install -y octave")
+  os.system("python -m pip install pygraphviz")
+  # There is no PyGraphviz binary package for Windows, but you can built it from source.
+
 	os.system("choco install -y octave.portable")
 	# Sometimes refreshenv doesnt properly update the path variables and pip doesnt work. 
 	# Testing timeout and using refresh multiple times
