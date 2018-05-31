@@ -43,16 +43,16 @@ elif platform.system()=='Windows':
 		os.system("choco install -y python2")
 
 	chocoString = @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
-    os.system(chocoString)
+    	os.system(chocoString)
 	
 
-    os.system("choco install -y wget")
+    	os.system("choco install -y wget")
 	os.system("choco install -y vcredist2008")
 	os.system("choco install -y vcpython27")
 	os.system("choco install -y ffmpeg")
 	os.system("choco install -y graphviz")
 	os.system("choco install -y pip")
-    os.system("choco install -y octave.portable")
+    	os.system("choco install -y octave.portable")
         
 
 	os.system("python -m pip install scipy")
