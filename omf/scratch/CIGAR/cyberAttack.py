@@ -89,6 +89,23 @@ class WriteIntervalAttackAgent(object):
 			return [{'cmd':'write','obName':self.obNameToAttack,'propName':self.obPropToAttack,'value':self.propTarget}]	
 		return []
 
+class DefendByValueAgent(object):
+	__slots__ = 'obNameToDefend', 'obPropToDefend', 'propTarget'
+	# e.g. "Test_inverter_1", "V_Out", "3.0"
+
+	def __init__(self, obNameToDefend, obPropToDefend, propTarget):
+		self.obNameToDefend = obNameToDefend
+		self.obPropToDefend = obPropToDefend
+		self.propTarget = propTarget
+
+	def readStep(self, time):
+		return [{'cmd':'read','obName':self.obNameToDefend,'propName':self.obPropToDefend}] # Doesn't need to read.
+
+	def writeStep(self, time, rezList):
+		if rezList != self.propTarget:
+			return [{'cmd':'write','obName':self.obNameToDefend,'propName':self.obPropToDefend,'value':self.propTarget}]
+		return []
+
 # class DefendOutput(object):
 # 	__slots__ = 'obNameToDefend', 'obPropToDefend', 'propTarget'
 # 	# e.g. "Test_inverter_1", "V_Out", "3.0"

@@ -76,9 +76,6 @@ class Coordinator(object):
 		Html_file = open("output.html", "w")
 		Html_file.write(html_str)
 		Html_file.close()
-		# t_res = HTML.Table(h_row=["Agent", "some_category", "some_category", "some_category"])
-		# for agent_x in agents:
-		# 	pass #TODO: need an HTML table.
 
 class GridLabWorld(object):
 	__slots__ = 'PORT', 'HOST', 'GLM_PATH', 'START_PAUSE', 'baseUrl'
@@ -230,7 +227,9 @@ def _test5():
 	agents.append(cyberAttack.WriteAttackAgent('2000-01-02 16:00:00', 'tm_1', 'measured_real_energy', '0.0'))
 	agents.append(cyberAttack.WriteIntervalAttackAgent('2000-01-03 20:00:00', '2000-01-04 08:00:00', 'inverter_1', 'power_factor', '0.4'))
 	agents.append(cyberAttack.ReadIntervalAttackAgent('2000-01-03 12:00:00', '2000-01-04 12:00:00', 'tm_2', 'measured_reactive_power'))
-	print 'Starting co-sim with 6 agents.'
+	agents.append(cyberAttack.DefendByValueAgent('battery_1', 'generator_status', 'ONLINE'))
+	agents.append(cyberAttack.WriteAttackAgent('2000-01-01 04:00:00', 'battery_1', 'generator_status', 'OFFLINE'))
+	print 'Starting co-sim with 8 agents.'
 	coord = Coordinator(agents, cosimProps)
 	print coord.drawResults()
 
