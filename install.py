@@ -55,8 +55,8 @@ elif platform.system()=='Windows':
     	os.system("choco install -y octave.portable")
         
 
-	os.system("python -m pip install scipy")
-	os.system("python -m pip install pygraphviz")
+	os.system("C:\Python27\python.exe -m pip install scipy")
+	#os.system("C:\Python27\python.exe -m pip install pygraphviz --install-option="--include-path=C:\Programs\Graphviz2.38\include" --install-option="--library-path=C:\Programs\Graphviz2.38\lib\release\lib"")
 
 	# Sometimes refreshenv doesnt properly update the path variables and pip doesnt work. 
 	# Testing timeout and using refresh multiple times
