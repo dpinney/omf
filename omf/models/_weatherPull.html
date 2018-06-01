@@ -336,8 +336,6 @@
 	</div>
 	<p class="reportTitle postRun" style="page-break-before:always">Download Output Data</p>	
 		<div style="text-align:left" class="tightContent postRun">
-			<!--<a style="padding:10px" onclick="downloadTextFile('weatherDataPulled.txt',allOutputData.data)">Weather Data</a>-->
-			<!--<a style="padding:10px" onclick="(downloadTextFile('weatherData.txt', allOutputData.data))">Weather Output</a>-->
 			<a id="dTest" download>Output Download</a><br>
 			<script>gebi('dTest').href = "/downloadModelData/" + allInputData.user + "/" + allInputData.modelName + "/weather.csv"</script>
 			<p id="errorDisplay" class="postRun"></p>

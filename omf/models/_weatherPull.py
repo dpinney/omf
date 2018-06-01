@@ -84,21 +84,13 @@ def work(modelDir, inputDict):
 	outData["stdout"] = "Success"
 	return outData
 
-def pullMETAR(year, station, datatype): #def pullMETAR(year, station, datatype, outputDir):
+def pullMETAR(year, station, datatype):
 	url = ('https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?station=' + station + '&data=' + datatype + '&year1=' + year + 
 		'&month1=1&day1=1&year2=' + str(int(year)+1) + '&month2=1&day2=1&tz=Etc%2FUTC&format=onlycomma&latlon=no&direct=no&report_type=1&report_type=2')
-	# print url
 	r = requests.get(url)
 	data = r.text
-	# tempData = []
-	# for x in range(8760):
-	# 	tempData.append(((data.partition(station + ',')[2]).partition('\n')[0]).partition(',')[2])
-	# 	data = data.partition(tempData[x])[2]
 	return data
-	# with open(outputDir, 'wb') as myfile:
-	# 	wr = csv.writer(myfile,lineterminator = '\n')
-	# 	for x in range(0,8760): 
-	# 		wr.writerow([tempData[x]])
+
 
 def pullUSCRN(year, station, datatype):
 	'''	For a given year and weather station, write 8760 hourly weather data (temp, humidity, etc.) to outputPath.
@@ -158,9 +150,6 @@ def pullUSCRN(year, station, datatype):
 	for i in range(8760):
 		tempData.append(matrix[i][datatypeID])
 	return tempData
-	# with open(outputPath, 'wb') as file:
-	# 	writer = csv.writer(file)
-	# 	writer.writerows([[x] for x in tempData])
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
