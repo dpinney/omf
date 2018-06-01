@@ -258,6 +258,8 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		"batteryEfficiency": "92",
+		"retailCost": "0.06",
+	    "deferralType": "line",
 		"inverterEfficiency": "97.5",
 		"cellCapacity": "7",
 		"created": "2015-06-12 17:20:39.308239",
