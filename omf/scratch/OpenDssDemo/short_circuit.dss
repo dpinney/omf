@@ -1,0 +1,41 @@
+clear
+
+new circuit.MVLV_case_MV   basekV=10 phases=3 
+~ mvasc3=200000 200000
+
+new vsource.VS1 bus1=M1  basekV=10 phases=3 
+~ mvasc3=200000 200000
+
+new  linecode.YJV_240 nphases=3   r1=0.069   x1=0.0991 r0=0.1104   x0=0.15856  units=Kmi
+new  linecode.YJV_120 nphases=3   r1=0.1056  x1=0.153  r0=0.16896  x0=0.2448   units=Kmi
+new  linecode.YJV_70  nphases=3   r1=0.1903  x1=0.268  r0=0.30448  x0=0.4288   units=Kmi
+
+!****10KV LINE
+new line.line1 bus1=M1 bus2=M2   Linecode=YJV_240  length=1  units=Kmi
+new line.line2 bus1=M2 bus2=M3   Linecode=YJV_240  length=1  units=Kmi
+new line.line3 bus1=M3 bus2=M4   Linecode=YJV_240  length=1  units=Kmi
+new line.line4 bus1=M4 bus2=M5   Linecode=YJV_240  length=1  units=Kmi
+
+! PV system
+New XYCurve.MyPvsT npts=4  xarray=  yarray=
+New XYCurve.MyEff npts=4  xarray=  yarray=
+New PVSystem.PV phases=3 bus1=M4 kV=10  kVA=4000  irrad=1.0  Pmpp=4000
+~ temperature=25 PF=1  effcurve=Myeff  P-TCurve=MyPvsT  model=2
+~  %Cutin=10  %Cutout=10
+
+New Fault.F1  bus1=M3.1.2.3   phases=3 r=0  ontime=0.3
+
+! monitor
+new monitor.PVPQ  PVSystem.PV  1 mode=1   ppolar=no
+new monitor.PVstate  PVSystem.PV  1 mode=3
+new monitor.PVvi  PVSystem.PV  1 mode=0
+New Monitor.monline1  element=line.line1 1    mode=0 
+New Monitor.monline2  element=line.line2 1    mode=0
+New Monitor.monline3  element=line.line3 1    mode=0
+New Monitor.monline4  element=line.line4 1    mode=0 
+
+set voltagebases=
+calcvoltagebases  
+
+set  controlmode=off loadmodel=admittanc
+solve mode=dynamics number=5  hour=0  h=.1 sec=0 
