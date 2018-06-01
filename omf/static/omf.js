@@ -16,6 +16,18 @@ function post_to_url(path, params, method) {
 	form.submit()
 }
 
+function handle_files(files, contentsId, nameId) {
+	// Helper function to pull file contents in to an allInputData data structure.
+	// Read the file
+	reader = new FileReader()
+	reader.readAsText(files[0])
+	// After loading, put the name and content in the right hidden inputs:
+	reader.onload = function loaded(evt) {
+		document.getElementById(nameId).value = files[0].name
+		document.getElementById(contentsId).value = reader.result
+	}
+}
+
 function ajaxReq(requestType, URL, asynch) {
 	var xmlhttp
 	if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari

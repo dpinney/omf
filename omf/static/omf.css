@@ -117,8 +117,9 @@ select, input[type='text'], input[type='email'], input[type='file'], button {
 	border-width:1px;
 	border-color:white;
 	border-style:solid; }
-button, input[type='submit'] {
+button, input[type='submit'], label.fileButton {
 	width:auto;
+	padding: 4px;
 	margin-right:3px;
 	font-size:small;
 	background:seagreen;
@@ -157,6 +158,13 @@ p.inputSectionHeader {
 	font-style: italic;
 	margin-bottom: -3px;}
 .add-feeder, .edit-feeder {display: inline;}
+input.uploadFileName {
+	display: inline !important;
+	font-size: 12pt !important;
+	overflow-x: auto !important;
+	border-bottom: none !important;
+	text-align: left !important;
+}
 
 /**********************************************
 MODEL OUTPUT
