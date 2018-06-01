@@ -1,4 +1,5 @@
-import platform, os
+import platform, os, sys
+
 
 # Note: all installations require git to clone the omf first.
 if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu","debian"]:
@@ -35,23 +36,27 @@ elif platform.system() == "Linux" and platform.linux_distribution()[0]=="CentOS 
 	os.system("pip install --ignore-installed six")
 	os.system("python setup.py develop")
 elif platform.system()=='Windows':
-	# Need to manually download and install Python 2.7 and set python as a path variable, Git, Chocolatey 
-	# Download Pygraphviz whl and place it in the omf directory
-	# Use wget to download omf from github
-	# git clone https://github.com/dpinney/omf.git
+	# Need to manually download and install Chocolatey, python. 
 	workDir = os.getcwd()
-	# chocoString = "@'%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe' -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command 'iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))' && SET 'PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin'"
-	# os.system(chocoString)
-	os.system("choco install -y git")
-	os.system("choco install -y wget")
-	os.system("choco install -y python2")
+        version = sys.version.split('\n')[0] # Check for right Python version. This script shouldn't run at all if python isn't installed, right?
+	if not version.startswith('2.'):
+		os.system("choco install -y python2")
+
+#	chocoString = @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
+ #   	os.system(chocoString)
+	
+
+    	os.system("choco install -y wget")
 	os.system("choco install -y vcredist2008")
 	os.system("choco install -y vcpython27")
 	os.system("choco install -y ffmpeg")
 	os.system("choco install -y graphviz")
 	os.system("choco install -y pip")
-	#os.system("choco install -y octave")
-	os.system("choco install -y octave.portable")
+    	os.system("choco install -y octave.portable")
+        
+
+	os.system("C:\Python27\python.exe -m pip install scipy")
+
 	# Sometimes refreshenv doesnt properly update the path variables and pip doesnt work. 
 	# Testing timeout and using refresh multiple times
 	os.system("timeout 5")
@@ -88,6 +93,7 @@ elif platform.system()=='Windows':
 	os.system("pip install -r requirements.txt")
 	os.system("pip install setuptools==33.1.1")
 	os.system("python setup.py develop")
+        
 elif platform.system()=="Darwin": # MacOS
 	# Install homebrew
 	os.system("/usr/bin/ruby -e '$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)'")

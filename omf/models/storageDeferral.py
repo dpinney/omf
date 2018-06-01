@@ -63,7 +63,6 @@ def work(modelDir, inputDict):
 				pass
 			else:
 				errorMessage = "Demand CSV file is incorrect format."
-				print dc
 				raise Exception(errorMessage)
 	if deferralType == 'subTransformer':
 		for row in dc:
@@ -125,7 +124,7 @@ def work(modelDir, inputDict):
 		battSoC = afterBattCapacity
 		#Battery dispatch loop, determine net power, battery state of charge.
 		for row in finalDC:
-			outData['startDate'] = finalDC[0]['datetime'].isoformat()
+			outData['startDate'] = '2011-01-01' #finalDC[0]['datetime'].isoformat()
 			# month = int(row['datetime'].month)-1
 			discharge = min(afterBattDischarge,battSoC, row['power'] - transformerThreshold)
 			charge = min(afterBattCharge, afterBattCapacity-battSoC, (transformerThreshold - row['power'])*battEff)
@@ -138,7 +137,7 @@ def work(modelDir, inputDict):
 			else:
 				row['netpower'] = row['power']
 			row['battSoC'] = battSoC
-	else:
+	else: # Line deferral option.
 		for row in dc:
 			if row['power']>0:
 				row['excessDemand'] = row['power'] - transformerThreshold
@@ -258,9 +257,10 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		"batteryEfficiency": "92",
+		"retailCost": "0.06",
+		"deferralType": "subTransformer",
 		"inverterEfficiency": "97.5",
 		"cellCapacity": "7",
-		"discountRate": "2.5",
 		"created": "2015-06-12 17:20:39.308239",
 		"dischargeRate": "5",
 		"modelType": modelName,
@@ -268,14 +268,12 @@ def new(modelDir):
 		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidCSV_Copy.csv")).read(),
 		"fileName": "FrankScadaValidCSV_Copy.csv",
 		"cellCost": "7140",
-		"cellQuantity": "10",
 		"dodFactor":"100",
 		"avoidedCost":"2000000",
 		"transformerThreshold":"6.6",
 		"batteryCycleLife": "5000",
 		"carryingCost":"7",
 		"yearsToReplace":"2"
-
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 

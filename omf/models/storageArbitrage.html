@@ -210,11 +210,12 @@
 				</script>
 			</div>
 			<div class="shortInput">
-				<label>Price Threshold for Discharge($)</label>
+				<label></label>
+				<label class="tooltip">Price Threshold for Discharge ($)<span class="classic">The model discharges the battery when the current price is greater than this value.</span></label>
 				<input type="text" id="dischargePriceThreshold" name="dischargePriceThreshold" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
-				<label>Price Threshold for Charge($)</label>
+				<label class="tooltip">Price Threshold for Charge ($)<span class="classic">The model charges the battery when the current price is less than this value.</span></label>
 				<input type="text" id="chargePriceThreshold" name="chargePriceThreshold" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="wideInput" style="text-align:right">
@@ -264,8 +265,8 @@
 		</script>
 		<p class="reportTitle postRun">Monthly Cost Comparison</p>
 		<div id="levelizedCostReport" class="tightContent postRun">
-			<div id="levelizedCostTableDiv" style="display:inline-block; width:1000px; height:280px; overflow-y:hidden; overflow-x:auto;">
-				<table id="monthlySummaryTable" style="margin:5px;">
+			<div id="levelizedCostTableDiv" style="display:inline-block; width:1000px">
+				<table id="monthlySummaryTable" style="margin:5px;width:990px">
 					<style>td, th {padding:7 0 5 20;text-align: left;font-size:0.7em;}</style>
 					<div id="tableHead">
 						<thead>
@@ -288,7 +289,7 @@
 				<script>
 					// insertMetric("monthlySummaryTable","Existing Demand (kW)", allOutputData.monthlyDemand)
 					insertMetric("monthlySummaryTable","Energy Offset(kW)", allOutputData.energyOffset)
-					insertMetric("monthlySummaryTable","kWh to Recharge (kW)", allOutputData.kWhtoRecharge)
+					insertMetric("monthlySummaryTable","Energy to Recharge (kWh)", allOutputData.kWhtoRecharge)
 					insertDollarMetric("monthlySummaryTable","Energy Offset Savings ($)", allOutputData.dischargeSavings)
 					insertDollarMetric("monthlySummaryTable","Cost to Recharge Battery ($)", allOutputData.costToRecharge)
 					insertDollarMetric("monthlySummaryTable","Net Benefit ($)", allOutputData.benefitNet)

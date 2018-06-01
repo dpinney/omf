@@ -13,6 +13,7 @@ import datetime as dt
 fileName = os.path.basename(__file__)
 modelName = fileName[0:fileName.rfind('.')]
 tooltip = "Download historical weather data for a given location for use in other models."
+hidden = True
 
 # Our HTML template for the interface:
 with open(pJoin(__neoMetaModel__._myDir,modelName + ".html"),"r") as file:

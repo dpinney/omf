@@ -127,7 +127,7 @@
 			</div>
 			<div class="shortInput">
 				<label>Demand Charge Cost ($/kW)</label>
-				<input type="text" id="demandCharge" name="demandCharge" required="required" pattern="^\d+$"/>
+				<input type="text" id="demandCharge" name="demandCharge" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Electricity Cost ($/kWh)<span class="classic">The cost of the electricity used to recharge the battery system.</span></label>
@@ -304,7 +304,7 @@
 					insertMetric("monthlySummaryTable","Existing Demand (kW)", allOutputData.monthlyDemand)
 					insertMetric("monthlySummaryTable","Demand with Battery (kW)", allOutputData.monthlyDemandRed)
 					insertMetric("monthlySummaryTable","Reduction Amount (kW)", allOutputData.ps)
-					insertMetric("monthlySummaryTable","kWh to Full-Battery (kW)", allOutputData.kWhtoRecharge)
+					insertMetric("monthlySummaryTable","Energy to Full-Battery (kWh)", allOutputData.kWhtoRecharge)
 					insertDollarMetric("monthlySummaryTable","Value of Reduction ($)", allOutputData.benefitMonthly)
 					insertDollarMetric("monthlySummaryTable","Cost to Recharge Battery ($)", allOutputData.costtoRecharge)
 					insertDollarMetric("monthlySummaryTable","Net Benefit ($)", allOutputData.benefitNet)
