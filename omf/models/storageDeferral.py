@@ -260,7 +260,6 @@ def new(modelDir):
 		"batteryEfficiency": "92",
 		"inverterEfficiency": "97.5",
 		"cellCapacity": "7",
-		"discountRate": "2.5",
 		"created": "2015-06-12 17:20:39.308239",
 		"dischargeRate": "5",
 		"modelType": modelName,
@@ -268,14 +267,12 @@ def new(modelDir):
 		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidCSV_Copy.csv")).read(),
 		"fileName": "FrankScadaValidCSV_Copy.csv",
 		"cellCost": "7140",
-		"cellQuantity": "10",
 		"dodFactor":"100",
 		"avoidedCost":"2000000",
 		"transformerThreshold":"6.6",
 		"batteryCycleLife": "5000",
 		"carryingCost":"7",
 		"yearsToReplace":"2"
-
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
