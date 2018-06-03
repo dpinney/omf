@@ -90,9 +90,9 @@ elif platform.system()=='Windows':
 			os.system("pip install " + whlFile)
 	os.system("cd omf")
 	os.system("refreshenv")
-	os.system("pip install -r requirements.txt")
-	os.system("pip install setuptools==33.1.1")
-	os.system("python setup.py develop")
+	os.system("C:\Python27\python.exe pip install -r requirements.txt")
+	os.system("C:\Python27\python.exe pip install setuptools==33.1.1")
+	os.system("C:\Python27\python.exe setup.py develop")
         
 elif platform.system()=="Darwin": # MacOS
 	# Install homebrew
