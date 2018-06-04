@@ -56,6 +56,7 @@ elif platform.system()=='Windows':
         
 
 	os.system("C:\Python27\python.exe -m pip install scipy")
+        os.system('C:\Python27\python.exe -m pip install --global-option=build_ext --global-option="-IC:\Program Files\Graphviz2.38\include" --global-option="-LC:\Program Files\Graphviz2.38\lib\release\lib" pygraphviz')
 
 	# Sometimes refreshenv doesnt properly update the path variables and pip doesnt work. 
 	# Testing timeout and using refresh multiple times
@@ -75,15 +76,15 @@ elif platform.system()=='Windows':
 		if 'gridlabd-3.2-win32.exe' not in os.listdir(workDir):
 			os.system("wget --no-check-certificate https://ufpr.dl.sourceforge.net/project/gridlab-d/gridlab-d/Candidate%20release/gridlabd-4.0_RC1.exe")
 			os.system("gridlabd-4.0_RC1.exe/silent")
-		if 'pygraphviz-1.3.1-cp27-none-win32.whl' not in os.listdir(workDir):
-			os.system("wget --no-check-certificate https://github.com/dpinney/omf/raw/master/omf/static/pygraphviz-1.3.1-cp27-none-win32.whl")
+		#if 'pygraphviz-1.3.1-cp27-none-win32.whl' not in os.listdir(workDir):
+			#os.system("wget --no-check-certificate https://github.com/dpinney/omf/raw/master/omf/static/pygraphviz-1.3.1-cp27-none-win32.whl")
 	elif platform.architecture()[1] == '64bit':
 		# Note: has not been tested yet, only 32bit has.
 		if 'gridlabd-3.2-x64.exe' not in os.listdir(workDir):
 			os.system("wget --no-check-certificate https://ufpr.dl.sourceforge.net/project/gridlab-d/gridlab-d/Candidate%20release/gridlabd-4.0_RC1.exe")
 			os.system("gridlabd-4.0_RC1.exe/silent")
-		if 'pygraphviz-1.3.1-cp27-none-win_amd64.whl' not in os.listdir(workDir):
-			os.system("wget --no-check-certificate https://github.com/dpinney/omf/raw/master/omf/static/pygraphviz-1.3.1-cp27-none-win_amd64.whl")
+		#if 'pygraphviz-1.3.1-cp27-none-win_amd64.whl' not in os.listdir(workDir):
+			#os.system("wget --no-check-certificate https://github.com/dpinney/omf/raw/master/omf/static/pygraphviz-1.3.1-cp27-none-win_amd64.whl")
 	for file in os.listdir(workDir):
 		if file.endswith('.whl'):
 			whlFile = file
