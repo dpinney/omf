@@ -59,7 +59,7 @@ def work(modelDir, inputDict):
 			for row in reader:
 				dc.append({'datetime': parse(dates[x]), 'power': float(row[0])})
 				x += 1
-			print dc
+			# print dc
 			if len(dc)!=8760: raise Exception
 	except:
 			e = sys.exc_info()[0]
