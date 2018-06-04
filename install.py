@@ -56,7 +56,7 @@ elif platform.system()=='Windows':
         
 
 	os.system("C:\Python27\python.exe -m pip install scipy")
-        os.system('C:\Python27\python.exe -m pip install --global-option=build_ext --global-option="-IC:\Program Files\Graphviz2.38\include" --global-option="-LC:\Program Files\Graphviz2.38\lib\release\lib" pygraphviz')
+        os.system("C:\Python27\python.exe -m pip install ../pygraphviz-1.3.1-cp27-none-win_amd64.whl")
 
 	# Sometimes refreshenv doesnt properly update the path variables and pip doesnt work. 
 	# Testing timeout and using refresh multiple times
@@ -93,7 +93,7 @@ elif platform.system()=='Windows':
 	os.system("refreshenv")
 	os.system("C:\Python27\python.exe -m pip install -r requirements.txt")
 	os.system("C:\Python27\python.exe -m pip install setuptools==33.1.1")
-	os.system("C:\Python27\python.exe setup.py develop")
+	os.system("C:\Python27\python.exe -m setup.py develop")
         
 elif platform.system()=="Darwin": # MacOS
 	# Install homebrew
