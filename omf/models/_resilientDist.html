@@ -189,6 +189,10 @@
 				<label class="tooltip">Generator Candidates<span class="classic">The IDs of nodes on the system where the user wants to consider adding distributed generation. At least one node is required.</span></label>
 				<input type="text" id="generatorCandidates" name="generatorCandidates" pattern="^(|([\w\d_-]+)(,[\w\d_-]+)*)$">
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Powerflow<span class="classic">Choice of powerflow to use.</span></label>
+				<input type="text" id="power_flow" name="power_flow" pattern="^(|([\w\d_-]+)$">
+			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Simulation Specs</p>
 			</div>
@@ -210,6 +214,7 @@
 				<label class="tooltip">Phase Variation<span class="classic">Controls the amount of phase imbalancer allowed in the system's transformers.</span></label>
 				<input type="text" id="phaseVariation" name="phaseVariation" pattern="^\d+\.?\d*?$">
 			</div>
+
 			<div class="shortInput">
 				<label class="tooltip">Weather Impacts (.asc file)<span class="classic">Please see the documentation at the help link for the required format. If this field is blank the OMF will re-use the file from the previous run.</span></label>
 				<script>var fileName=true;</script>
