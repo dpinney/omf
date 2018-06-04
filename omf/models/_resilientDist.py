@@ -420,19 +420,6 @@ def work(modelDir, inputDict):
 			item['node2_id'] = item['node2_id'] + "_bus"
 		with open(pJoin(modelDir, rdtInputFilePath), "w") as outFile:
 			json.dump(rdtJson, outFile, indent=4)
-		'''rdtJson["line_codes"] = accumulator["properties"]["line_codes"]
-		counter = 1
-		lineCodeTracker = {}
-		for item in rdtJson["line_codes"]:
-			lineCodeTracker[item['line_code']] = counter
-			item['line_code'] = counter
-			counter = counter + 1
-		rdtJson["lines"] = accumulator["properties"]["lines"]
-		print lineCodeTracker
-		for line in rdtJson["lines"]:
-			line["line_code"] = lineCodeTracker[line["line_code"]]
-		with open(pJoin(modelDir, rdtInputFilePath), "w") as outFile:
-			json.dump(rdtJson, outFile, indent=4)'''
 	else:
 		tree = feederModel.get("tree",{})
 		attachments = feederModel.get("attachments",{})
@@ -471,20 +458,6 @@ def work(modelDir, inputDict):
 					del feederCopy['tree'][key]
 	#Add generators to second model.
 	maxTreeKey = int(max(feederCopy['tree'], key=int)) + 1
-	'''for gen in rdtOut['design_solution']['generators']:
-		newGen = {}
-		newGen["object"] = "diesel_dg"
-		newGen["name"] = gen['id']
-		newGen["parent"] = gen['id'][:-4]
-		newGen["phases"] = "ABC"
-		newGen["Gen_type"] = "CONSTANT_PQ"
-		newGen["Rated_VA"] = "5.0 kVA"
-		newGen["power_out_A"] = "250.0+120.0j"
-		newGen["power_out_B"] = "230.0+130.0j"
-		newGen["power_out_C"] = "220.0+150.0j"
-		feederCopy['tree'][str(maxTreeKey)] = newGen
-		maxTreeKey = maxTreeKey + 1
-	'''
 	maxTreeKey = max(feederCopy['tree'], key=int)
 	# Load a blank glm file and use it to write to it
 	feederPath = pJoin(modelDir, 'feederSecond.glm')
