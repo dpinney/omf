@@ -87,11 +87,11 @@ elif platform.system()=='Windows':
 	for file in os.listdir(workDir):
 		if file.endswith('.whl'):
 			whlFile = file
-			os.system("pip install " + whlFile)
+			os.system("C:\Python27\python.exe -m pip install " + whlFile)
 	os.system("cd omf")
 	os.system("refreshenv")
-	os.system("C:\Python27\python.exe pip install -r requirements.txt")
-	os.system("C:\Python27\python.exe pip install setuptools==33.1.1")
+	os.system("C:\Python27\python.exe -m pip install -r requirements.txt")
+	os.system("C:\Python27\python.exe -m pip install setuptools==33.1.1")
 	os.system("C:\Python27\python.exe setup.py develop")
         
 elif platform.system()=="Darwin": # MacOS
