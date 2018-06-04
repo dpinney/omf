@@ -85,10 +85,10 @@ elif platform.system()=='Windows':
 			os.system("gridlabd-4.0_RC1.exe/silent")
 		#if 'pygraphviz-1.3.1-cp27-none-win_amd64.whl' not in os.listdir(workDir):
 			#os.system("wget --no-check-certificate https://github.com/dpinney/omf/raw/master/omf/static/pygraphviz-1.3.1-cp27-none-win_amd64.whl")
-	for file in os.listdir(workDir):
-		if file.endswith('.whl'):
-			whlFile = file
-			os.system("C:\Python27\python.exe -m pip install " + whlFile)
+	#for file in os.listdir(workDir):
+		#if file.endswith('.whl'):
+			#whlFile = file
+			#os.system("C:\Python27\python.exe -m pip install " + whlFile)
 	os.system("cd omf")
 	os.system("refreshenv")
 	os.system("C:\Python27\python.exe -m pip install -r requirements.txt")
