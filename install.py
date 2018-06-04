@@ -36,13 +36,14 @@ elif platform.system() == "Linux" and platform.linux_distribution()[0]=="CentOS 
 	os.system("pip install --ignore-installed six")
 	os.system("python setup.py develop")
 elif platform.system()=='Windows':
-	# Need to manually download and install Chocolatey, python. 
-	workDir = os.getcwd()
-		version = sys.version.split('\n')[0] # Check for right Python version. This script shouldn't run at all if python isn't installed, right?
-	if not version.startswith('2.'):
-		os.system("choco install -y python2")
+	# Choco install.
 	# chocoString = @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
 	# os.system(chocoString)
+	# Check for right Python version.
+	version = sys.version.split('\n')[0] 
+	if not version.startswith('2.'):
+		os.system("choco install -y python2")
+	# Install choco packages.
 	os.system("choco install -y wget")
 	os.system("choco install -y vcredist2008")
 	os.system("choco install -y vcpython27")
@@ -50,35 +51,28 @@ elif platform.system()=='Windows':
 	os.system("choco install -y graphviz")
 	os.system("choco install -y pip")
 	os.system("choco install -y octave.portable")
-	os.system("C:\\Python27\\python.exe -m pip install scipy")
-	os.system("C:\\Python27\\python.exe -m pip install ../pygraphviz-1.3.1-cp27-none-win_amd64.whl")
-	# Sometimes refreshenv doesnt properly update the path variables and pip doesnt work. 
-	# Testing timeout and using refresh multiple times
+	# HACK: timeout and refreshenv should get all the choco binaries on to the path.
 	os.system("timeout 5")
 	os.system("refreshenv")
-	os.system("timeout 5")
-	os.system("refreshenv")
-	os.system("timeout 5")
-	# Possible start a new process after refreshenv, maybe look for anothey way to refresh 
-	# env variables in python
-	# Manually setting path for pip and other scripts
+	# Manually setting path for pip and other scripts.
 	os.system('setx /M PATH "%PATH%;C:\\Python27\\Scripts"')
 	os.system('setx /M PATH "%PATH%;C:\\Program Files (x86)\\Graphviz2.38\\bin"')
-	os.system("cd " + workDir)
-	# Sometimes wget has a hard time downloading gridlabD
+	# Install GridLAB-D.
+	os.system("wget --no-check-certificate https://ufpr.dl.sourceforge.net/project/gridlab-d/gridlab-d/Candidate%20release/gridlabd-4.0_RC1.exe")
+	os.system("gridlabd-4.0_RC1.exe/silent")
+	# Install pygraphviz.
 	if platform.architecture()[0] == '32bit':
-		if 'gridlabd-3.2-win32.exe' not in os.listdir(workDir):
-			os.system("wget --no-check-certificate https://ufpr.dl.sourceforge.net/project/gridlab-d/gridlab-d/Candidate%20release/gridlabd-4.0_RC1.exe")
-			os.system("gridlabd-4.0_RC1.exe/silent")
+		os.system("C:\\Python27\\python.exe -m pip install omf\\omf\\static\\pygraphviz-1.3.1-cp27-none-win32.whl")
 	elif platform.architecture()[1] == '64bit':
-		# Note: has not been tested yet, only 32bit has.
-		if 'gridlabd-3.2-x64.exe' not in os.listdir(workDir):
-			os.system("wget --no-check-certificate https://ufpr.dl.sourceforge.net/project/gridlab-d/gridlab-d/Candidate%20release/gridlabd-4.0_RC1.exe")
-			os.system("gridlabd-4.0_RC1.exe/silent")
+		os.system("C:\\Python27\\python.exe -m pip install omf\\omf\\static\\pygraphviz-1.3.1-cp27-none-win_amd64.whl")
+	# Finish up installation with pip.
 	os.system("cd omf")
+	# HACK: more refreshes of the environment.
+	os.system("timeout 5")
 	os.system("refreshenv")
+	os.system("C:\\Python27\\python.exe -m pip install setuptools>=33.1.1")
+	# os.system("C:\\Python27\\python.exe -m pip install scipy")
 	os.system("C:\\Python27\\python.exe -m pip install -r requirements.txt")
-	os.system("C:\\Python27\\python.exe -m pip install setuptools==33.1.1")
 	os.system("C:\\Python27\\python.exe -m setup.py develop")
 elif platform.system()=="Darwin": # MacOS
 	# Install homebrew
@@ -87,8 +81,8 @@ elif platform.system()=="Darwin": # MacOS
 	os.system("brew link --overwrite python")
 	os.system("wget -O gridlabd.dmg --no-check-certificate https://ufpr.dl.sourceforge.net/project/gridlab-d/gridlab-d/Candidate%20release/gridlabd_4.0.0.dmg")
 	os.system("sudo hdiutil attach gridlabd.dmg")
-	os.system("sudo installer -package /Volumes/GridLAB-D\ 4.0.0/gridlabd.mpkg -target /")
-	os.system("sudo hdiutil detach /Volumes/GridLAB-D\ 4.0.0")
+	os.system("sudo installer -package /Volumes/GridLAB-D\\ 4.0.0/gridlabd.mpkg -target /")
+	os.system("sudo hdiutil detach /Volumes/GridLAB-D\\ 4.0.0")
 	os.system("cd omf")
 	os.system("pip install -r requirements.txt")
 	os.system("python setup.py develop")
