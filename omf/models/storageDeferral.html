@@ -126,40 +126,13 @@
 				<input type="text" id="retailCost" name="retailCost" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Demand Curve (.csv file)<span class="classic">Please see the documentation at the help link for the required format and an example demand file. If this field is blank the OMF will re-use the file from the previous run.</span></label>
-				<script>var fileName=true;</script>
-				<input type="file" id="demandCurveFile" name="demandCurveFile" accept=".csv" onchange="handle_files(this.files)">
+				<label class="tooltip">Demand Curve (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
+				<input id="demandCurveFile" type="file" style="display:none" onchange="handle_files(this.files,'demandCurve','fileName')">
 				<input id="demandCurve" name="demandCurve" type="hidden">
-				{% if allInputData.fileName|string() is defined %}
-					<input type="hidden" id="fileName" name="fileName" readonly="readonly">
-					<div id="fileBackground"></div>
-					<div id="fileExists"><label for="demandCurveFile" id="demandCurveFileName"></label></div>
-					<script>
-						var FileName = allInputData.fileName;
-						document.getElementById('demandCurveFileName').innerHTML = FileName;
-					</script>
-				{% endif %}
-				<script>
-					// Make sure the file is required on prerun.
-					if (modelStatus == "preRun") {gebi('demandCurveFile').setAttribute('required', 'required')}
-					else {}
-					// File handler function.
-					function handle_files(files) {
-						// read file to a hidden input field
-						reader = new FileReader()
-						reader.readAsText(files[0])
-						reader.onload = loaded
-						function loaded(evt) {
-							evt.target.result
-							gebi("demandCurve").value = reader.result
-							var FileName = gebi("demandCurveFile").value.split("\\");
-							var FileName = FileName[FileName.length-1];
-							document.getElementById('demandCurveFileName').innerHTML = FileName;
-							gebi("fileName").value = FileName;
-						}
-					}
-
-				</script>
+				<div>
+					<label for="demandCurveFile" class="fileButton">Choose File</label>
+					<input id="fileName" name="fileName" value='' readonly class="uploadFileName">
+				</div>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Transformer Deferral</p>
