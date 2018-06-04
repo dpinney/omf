@@ -190,8 +190,11 @@
 				<input type="text" id="generatorCandidates" name="generatorCandidates" pattern="^(|([\w\d_-]+)(,[\w\d_-]+)*)$">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Powerflow<span class="classic">Choice of powerflow to use.</span></label>
-				<input type="text" id="power_flow" name="power_flow" pattern="^(|([\w\d_-]+)$">
+				<label class="tooltip">Powerflow<span class="classic">Choice of powerflow to use. The default, Network Flow, is a faster and simpler version of the Full Powerflow.</span></label>
+				<select id="power_flow" name="power_flow" />
+					<option value="network_flow">Network Flow</option>
+					<option value="lindist_flow">Full Powerflow</option>
+				</select>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Simulation Specs</p>

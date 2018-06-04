@@ -509,7 +509,7 @@ def work(modelDir, inputDict):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"feederName1": "Winter 2017 Fixed",#debuggedSVEC
+		"feederName1": "trip37", # "Winter 2017 Fixed" "debuggedSVEC"
 		"modelType": modelName,
 		"runTime": "0:00:30",
 		"layoutAlgorithm": "geospatial",
@@ -530,7 +530,7 @@ def new(modelDir):
 		"chanceConstraint": "1.0",
 		"phaseVariation": "0.15",
 		"weatherImpacts": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","wf_clip.asc")).read(),
-		"weatherImpactsFileName": "wind_grid_1UCS.asc", #wf_clipSVEC.asc
+		"weatherImpactsFileName": "wf_clip.asc", # "wind_grid_1UCS.asc" "wf_clipSVEC.asc"
 		"xrMatrices":open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","lineCodesTrip37.json")).read(),
 		"xrMatricesFileName":"lineCodesTrip37.json",
 		"scenarios": "",
