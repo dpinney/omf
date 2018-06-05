@@ -3,10 +3,9 @@
 
 '''
 
-import os, urllib, json, csv, math, re, tempfile, shutil, urllib2, sys
+import os, urllib, urllib2, csv, math, re, tempfile
 from os.path import join as pJoin
 from datetime import timedelta, datetime
-from math import modf
 from bs4 import BeautifulSoup
 
 def _downloadWeatherWunderground(start, end, airport, workDir):
