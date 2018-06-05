@@ -7,6 +7,7 @@ import __neoMetaModel__
 from __neoMetaModel__ import *
 from dateutil.parser import parse as parseDt
 import datetime as dt
+from omf import weather
 
 # Model metadata:
 fileName = os.path.basename(__file__)
@@ -33,11 +34,11 @@ def work(modelDir, inputDict):
 	errorCount = 0
 	#check the source using and use the appropriate function
 	if source == "ASOS":
-		data = pullASOS(year,station,parameter)
+		data = weather.pullAsos(year,station,parameter)
 		with open(pJoin(modelDir,"weather.csv"),"w") as file:
 			file.write(data)
 	elif source == "USCRN":
-		data = pullUSCRN(year,station,parameter)
+		data = weather.pullUscrn(year,station,parameter)
 		with open(pJoin(modelDir,"weather.csv"),"w") as file:
 			writer = csv.writer(file)
 			writer.writerows([[x] for x in data])
@@ -79,72 +80,6 @@ def work(modelDir, inputDict):
 	outData["errorCount"] = errorCount
 	outData["stdout"] = "Success"
 	return outData
-
-def pullASOS(year, station, datatype):
-	url = ('https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?station=' + station + '&data=' + datatype + '&year1=' + year + 
-		'&month1=1&day1=1&year2=' + str(int(year)+1) + '&month2=1&day2=1&tz=Etc%2FUTC&format=onlycomma&latlon=no&direct=no&report_type=1&report_type=2')
-	r = requests.get(url)
-	data = r.text
-	return data
-
-def pullUSCRN(year, station, datatype):
-	'''	For a given year and weather station, write 8760 hourly weather data (temp, humidity, etc.) to outputPath.
-	for list of available stations go to: https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02'''
-	if datatype == "T_CALC":
-		datatypeID = 9
-	elif datatype == "T_HR_AVG":
-		datatypeID = 10
-	elif datatype == "T_MAX":
-		datatypeID = 11
-	elif datatype == "T_MIN":
-		datatypeID = 12
-	elif datatype == "P_CALC":
-		datatypeID = 13
-	elif datatype == "SOLARAD":
-		datatypeID = 14
-	elif datatype == "SOLARAD_MAX":
-		datatypeID = 16
-	elif datatype == "SOLARAD_MIN":
-		datatypeID = 18
-	elif datatype == "SUR_TEMP":
-		datatypeID = 21
-	elif datatype == "SUR_TEMP_MAX":
-		datatypeID = 23
-	elif datatype == "SUR_TEMP_MIN":
-		datatypeID = 25
-	elif datatype == "RH_HR_AVG":
-		datatypeID = 27
-	elif datatype == "SOIL_MOISTURE_5":
-		datatypeID = 29
-	elif datatype == "SOIL_MOISTURE_10":
-		datatypeID = 30
-	elif datatype == "SOIL_MOISTURE_20":
-		datatypeID = 31
-	elif datatype == "SOIL_MOISTURE_50":
-		datatypeID = 32
-	elif datatype == "SOIL_MOISTURE_100":
-		datatypeID = 33
-	elif datatype == "SOIL_TEMP_5":
-		datatypeID = 34
-	elif datatype == "SOIL_TEMP_10":
-		datatypeID = 35
-	elif datatype == "SOIL_TEMP_20":
-		datatypeID = 36
-	elif datatype == "SOIL_TEMP_50":
-		datatypeID = 37
-	elif datatype == "SOIL_TEMP_100":
-		datatypeID = 38
-	else:
-		datatypeID = 1
-	#need to have handling for stupid inputs #REPLACE WITH A DICTIONARY
-	url = 'https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02/' + year + '/CRNH0203-' + year + '-' + station + '.txt'
-	r = requests.get(url)
-	data = r.text
-	matrix = [x.split() for x in data.split('\n')]
-	tempData = []
-	for i in range(8760):
-		tempData.append(matrix[i][datatypeID])
-	return tempData
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
