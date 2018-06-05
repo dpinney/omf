@@ -12,7 +12,6 @@ from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
 # import matplotlib.pyplot as plt #NOTE: used for debugging don't delete.
 # OMF imports
-from omf.weather import _downloadWeather
 
 # Model metadata:
 fileName = os.path.basename(__file__)
