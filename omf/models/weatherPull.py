@@ -22,7 +22,6 @@ with open(pJoin(__neoMetaModel__._myDir,modelName + ".html"),"r") as file:
 def work(modelDir, inputDict):
 	''' Run the model in its directory.'''
 	outData = {}
-	# Run VBAT code.
 	source = inputDict["source"]
 	year = inputDict["year"]
 	if source == "METAR":
