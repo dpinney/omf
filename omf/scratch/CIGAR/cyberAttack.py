@@ -102,7 +102,9 @@ class DefendByValueAgent(object):
 		return [{'cmd':'read','obName':self.obNameToDefend,'propName':self.obPropToDefend}] # Doesn't need to read.
 
 	def writeStep(self, time, rezList):
-		if rezList != self.propTarget:
+		temp = rezList.pop()
+		rezList.append(temp)
+		if temp != self.propTarget:
 			return [{'cmd':'write','obName':self.obNameToDefend,'propName':self.obPropToDefend,'value':self.propTarget}]
 		return []
 
