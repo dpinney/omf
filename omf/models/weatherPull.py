@@ -19,13 +19,9 @@ hidden = True
 with open(pJoin(__neoMetaModel__._myDir,modelName + ".html"),"r") as file:
 	template = Template(file.read())
 
-#TODO: check to see if user is getting raw METAR
-#TODO: filter duplicate values in the hour
-
 def work(modelDir, inputDict):
 	''' Run the model in its directory.'''
 	outData = {}
-	# Run VBAT code.
 	source = inputDict["source"]
 	year = inputDict["year"]
 	if source == "METAR":
@@ -91,7 +87,6 @@ def pullMETAR(year, station, datatype):
 	r = requests.get(url)
 	data = r.text
 	return data
-
 
 def pullUSCRN(year, station, datatype):
 	'''	For a given year and weather station, write 8760 hourly weather data (temp, humidity, etc.) to outputPath.
@@ -165,16 +160,6 @@ def new(modelDir):
 		"modelType":modelName}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	return creationCode
-
-#def defaultValuesAC():
-#	power = "1000",
-#	capacitance = "2",
-#	resistance = "2",
-#	cop = "2.5",
-#	setpoint = "22.5",
-#	deadband = "0.625",
-#	return power,capacitance,resistance,cop,setpoint,deadband
-
 
 def _simpleTest():
 	# Location
