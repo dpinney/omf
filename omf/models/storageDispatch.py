@@ -18,6 +18,7 @@ from omf.weather import _downloadWeather
 fileName = os.path.basename(__file__)
 modelName = fileName[0:fileName.rfind('.')]
 tooltip = 'storageDispatch helps figure out how to dispatch energy storage.'
+hidden = True
 
 # Our HTML template for the interface:
 with open(pJoin(__neoMetaModel__._myDir, modelName + ".html"),"r") as tempFile:

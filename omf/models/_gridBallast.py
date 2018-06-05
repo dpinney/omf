@@ -28,6 +28,7 @@ fileName = os.path.basename(__file__)
 modelName = fileName[0:fileName.rfind('.')]
 tooltip = 'gridBallast simulator'
 template = Template(open(pJoin(__neoMetaModel__._myDir,modelName+".html"),"r").read()) #HTML Template for showing output.
+hidden = True
 
 # with open(pJoin(__neoMetaModel__._myDir,modelName+".html"),"r") as tempFile:
 # 	template = Template(tempFile.read())

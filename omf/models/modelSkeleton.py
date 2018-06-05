@@ -15,6 +15,7 @@ from weather import zipCodeToClimateName
 # Model metadata:
 fileName = os.path.basename(__file__)
 modelName = fileName[0:fileName.rfind('.')]
+hidden = True
 
 # Our HTML template for the interface:
 with open(pJoin(__neoMetaModel__._myDir,modelName+".html"),"r") as tempFile:
