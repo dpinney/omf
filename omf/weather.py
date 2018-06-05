@@ -1,14 +1,64 @@
-''' weather.py pulls weather data from various sources.
-
-
+'''
+Pull weather data from various sources.
+Source options include NOAA's USCRN, Iowa State University's METAR, and Weather Underground (currently deprecated).
 '''
 
-import os, urllib, urllib2, csv, math, re, tempfile
+import os, urllib, urllib2, requests, csv, math, re, tempfile
 from os.path import join as pJoin
 from datetime import timedelta, datetime
 from bs4 import BeautifulSoup
 
-def _downloadWeatherWunderground(start, end, airport, workDir):
+def pullWeatherAsos(year, station, datatype, outputDir):
+	'''
+	This model pulls the hourly temperature for the specified year and ASOS station
+	ASOS is the Automated Surface Observing System, a network of about 900 weater stations, they collect data at hourly intervals, they're run by NWS + FAA + DOD, and there is data going back to 1901 for at least some sites.
+	This data is also known as METAR data, which is the name of the format its stored in.
+	The year cannot be the current year.
+	For ASOS station code: https://www.faa.gov/air_traffic/weather/asos/
+	This model will output a folder path, open that path and you will find a csv file containing your data
+	For years before 1998 there may or may not be any data, as such the datapull can fail for some years
+
+	datatype options: 
+	'relh' for relative humidity
+	'tmpc' for temperature in celsius
+	'''
+	url = ('https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?station=' + station + '&data=' + datatype + '&year1=' + year + 
+		'&month1=1&day1=1&year2=' + year + '&month2=12&day2=31&tz=Etc%2FUTC&format=onlycomma&latlon=no&direct=no&report_type=1&report_type=2')
+	r = requests.get(url)
+	data = r.text
+	tempData = []
+	for x in range(8760):
+		tempData.append(((data.partition(station + ',')[2]).partition('\n')[0]).partition(',')[2])
+		data = data.partition(tempData[x])[2]
+	with open(outputDir, 'wb') as myfile:
+		wr = csv.writer(myfile,lineterminator = '\n')
+		for x in range(0,8760): 
+			wr.writerow([tempData[x]])
+
+def pullWeatherUscrn(year, station, outputPath):
+	'''
+	Pulls hourly weather data from NOAA's quality controlled USCRN dataset.
+	Documentation is at https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02/README.txt
+	For a given year and weather station, write 8760 hourly weather data (temp, humidity, etc.) to outputPath.
+	for list of available stations go to: https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02
+	'''
+	url = 'https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02/' + year + '/CRNH0203-' + year + '-' + station + '.txt'
+	r = requests.get(url)
+	data = r.text
+	matrix = [x.split() for x in data.split('\n')]
+	#TODO: use matrix to pull out an arbitrary attribute.
+	tempData = []
+	for x in range(0,8760):
+		temp = ''
+		for y in range(x*244+59,x*244+64):
+			temp+=data[y]
+		tempData.append(float(temp))
+	with open(outputPath, 'wb') as myfile:
+		wr = csv.writer(myfile,lineterminator = '\n')
+		for x in range(0,8760): 
+			wr.writerow([tempData[x]])
+
+def _pullWeatherWunderground(start, end, airport, workDir):
 	''' Download weather CSV data to workDir. 1 file for each day between start and 
 	end (YYYY-MM-DD format). Location is set by airport (three letter airport code, e.g. DCA). '''
 	# Parse start and end dates.
@@ -35,7 +85,7 @@ def _downloadWeatherWunderground(start, end, airport, workDir):
 			continue # Just try to grab the next one.
 		work_day = work_day + timedelta(days = 1) # Advance one day
 
-def _airportCodeToLatLon(airport):
+def airportCodeToLatLon(airport):
 	''' Airport three letter code -> lat/lon of that location. '''
 	try:
 		url2 = urllib2.urlopen('http://www.airport-data.com/airport/'+airport+'/#location')
@@ -112,21 +162,16 @@ def zipCodeToClimateName(zipCode):
 	return climateName, latforpvwatts
 
 def _tests():
-	print "weather.py tests disabled to stop sending too many API requests to airport-data.com, nrel.gov, etc."
-	# print "Beginning to test weather.py"
-	# workDir = tempfile.mkdtemp()
-	# print "IAD lat/lon =", _airportCodeToLatLon("IAD")
-	# assert (38.947444, -77.459944)==_airportCodeToLatLon("IAD"), "airportCode lookup failed."
-	# print "Weather downloading to", workDir
-	# assert None==_downloadWeather("2010-03-01", "2010-04-01", "PDX", workDir)
-	# print "Peak solar extraction in", workDir
-	# assert None==_getPeakSolar("PDX", workDir, dniScale=1.0, dhiScale=1.0, ghiScale=1.0)
-	# print "Pull weather and solar data together in", workDir
-	# assert None==_processWeather("2010-03-01", "2010-04-01", "PDX", workDir)
-	# print "Testing the full process together."
-	# assert None==makeClimateCsv("2010-07-01", "2010-08-01", "IAD", pJoin(tempfile.mkdtemp(),"weatherDCA.csv"), cleanup=True)
-	# print "Testing the zip code to climate name conversion"
-	# assert ('MO-KANSAS_CITY',30)==zipCodeToClimateName(64735)
+	tmpdir = tempfile.mkdtemp()
+	print "Beginning to test weather.py in", tmpdir
+	assert ('MO-KANSAS_CITY',30) == zipCodeToClimateName(64735)
+	assert (38.947444, -77.459944) == airportCodeToLatLon("IAD"), "airportCode lookup failed."
+	# Testing USCRN
+	pullWeatherUscrn('2017', 'KY_Versailles_3_NNW', os.path.join(tmpdir, 'weatherUscrn.csv'))
+	print 'USCRN (NOAA) data pulled to ' + tmpdir
+	# Testing ASOS
+	pullWeatherAsos('2017','CGS', 'relh', os.path.join(tmpdir, 'weatherAsos.csv'))
+	print 'ASOS (Iowa) data pulled to ' + tmpdir
 
 if __name__ == "__main__":
 	_tests()
