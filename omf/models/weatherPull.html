@@ -76,21 +76,21 @@
 					<script type="text/javascript">
 						function loadWeatherParameters(){
 							var x = gebi("source").value;
-							if (x == "METAR"){
-								gebi("weatherParameterMETAR").style.display = "block"
+							if (x == "ASOS"){
+								gebi("weatherParameterASOS").style.display = "block"
 								gebi("weatherParameterUSCRN").style.display = "none"
-								gebi("stationMETAR").style.display = "block"
+								gebi("stationASOS").style.display = "block"
 								gebi("stationUSCRN").style.display = "none"
 							}
 							else if (x == "USCRN"){
-								gebi("weatherParameterMETAR").style.display = "none"
+								gebi("weatherParameterASOS").style.display = "none"
 								gebi("weatherParameterUSCRN").style.display = "block"
-								gebi("stationMETAR").style.display = "none"
+								gebi("stationASOS").style.display = "none"
 								gebi("stationUSCRN").style.display = "block"
 							}
 						}
 					</script>
-					<option value="METAR">METAR</option>
+					<option value="ASOS">ASOS</option>
 					<option value="USCRN">USCRN</option>
 				</select>
 			</div>
@@ -99,8 +99,8 @@
 				<input type="text" id="year" name="year" pattern="[1-2][0-9][0-9][0-9]" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Station<span class="classic">For METAR source: ASOS Code, for USA codes (starting with K) exclude the first letter. For USCRN: Dropdown menu of stations</span></label>
-				<input type="text" id="stationMETAR" name="stationMETAR" pattern="[a-zA-Z]{3,4}" required="required"/>
+				<label class="tooltip">Station<span class="classic">For ASOS source: ASOS Code, for USA codes (starting with K) exclude the first letter. For USCRN: Dropdown menu of stations</span></label>
+				<input type="text" id="stationASOS" name="stationASOS" pattern="[a-zA-Z]{3,4}" required="required"/>
 				<select id="stationUSCRN" name="stationUSCRN" required="required" style="display:none;">
 					<option value="AK_Barrow_4_ENE">AK_Barrow</option>
 					<option value="AK_Cordova_14_ESE">AK_Cordova</option>
@@ -262,7 +262,7 @@
 			</div>			
 			<div class="shortInput">
 				<label class="tooltip">Weather Parameter<span class="classic">Data that should be pulled</span></label>
-				<select id="weatherParameterMETAR" name="weatherParameterMETAR" required="required">
+				<select id="weatherParameterASOS" name="weatherParameterASOS" required="required">
 					<option value="tmpc">Temperature (Celsius)</option>
 					<option value="tmpf">Temperature (Fahrenheit)</option>
 					<option value="dwpc">Dew Point (Celsius)</option>
@@ -285,7 +285,7 @@
 					<option value="skyl2">Cloud Height Level 2 (ft)</option>
 					<option value="skyl3">Cloud Height Level 3 (ft)</option>
 					<option value="presentwx">Weather Codes</option>
-					<option value="metar">Raw METAR</option>
+					<option value="asos">Raw ASOS</option>
 				</select>
 				<select id="weatherParameterUSCRN" name="weatherParameterUSCRN" required="required" style="display:none">
 					<option value="T_CALC">Air temperature (Celsius)</option>
@@ -340,8 +340,8 @@
 			<script>gebi('dTest').href = "/downloadModelData/" + allInputData.user + "/" + allInputData.modelName + "/weather.csv"</script>
 			<p id="errorDisplay" class="postRun"></p>
 			<script type="text/javascript">
-			if(allInputData.source == "METAR"){
-				station = allInputData.stationMETAR
+			if(allInputData.source == "ASOS"){
+				station = allInputData.stationASOS
 			}else if (allInputData.source == "USCRN"){
 				station = allInputData.stationUSCRN
 			}
