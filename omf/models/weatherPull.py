@@ -1,11 +1,10 @@
 ''' Get power and energy limits from PNNL VirtualBatteries (VBAT) load model.'''
 
-import json, os, shutil, subprocess, platform, math
+import json, os, shutil, math, requests, csv
 from os.path import join as pJoin
 from jinja2 import Template
 import __neoMetaModel__
 from __neoMetaModel__ import *
-import requests, csv, tempfile
 from dateutil.parser import parse as parseDt
 import datetime as dt
 
@@ -24,17 +23,17 @@ def work(modelDir, inputDict):
 	outData = {}
 	source = inputDict["source"]
 	year = inputDict["year"]
-	if source == "METAR":
-		station = inputDict["stationMETAR"]
-		parameter = inputDict["weatherParameterMETAR"]
+	if source == "ASOS":
+		station = inputDict["stationASOS"]
+		parameter = inputDict["weatherParameterASOS"]
 	elif source == "USCRN":
 		station = inputDict["stationUSCRN"]
 		parameter = inputDict["weatherParameterUSCRN"]
 	verifiedData = []
 	errorCount = 0
 	#check the source using and use the appropriate function
-	if source == "METAR":
-		data = pullMETAR(year,station,parameter)
+	if source == "ASOS":
+		data = pullASOS(year,station,parameter)
 		with open(pJoin(modelDir,"weather.csv"),"w") as file:
 			file.write(data)
 	elif source == "USCRN":
@@ -43,7 +42,7 @@ def work(modelDir, inputDict):
 			writer = csv.writer(file)
 			writer.writerows([[x] for x in data])
 	#writing raw data
-	if parameter != "metar" and source == "METAR":#raw metar should not be formated as it is already in its own format and difficult to handle
+	if parameter != "asos" and source == "ASOS":#raw ASOS should not be formated as it is already in its own format and difficult to handle
 		verifiedData = [999.9]*8760
 		firstDT = dt.datetime(int(year),1,1,0)
 		with open(pJoin(modelDir,"weather.csv"),"r") as file:
@@ -69,7 +68,7 @@ def work(modelDir, inputDict):
 		writer = csv.writer(file)
 		writer.writerows([[x] for x in verifiedData])
 	#checking how many wrong values there are
-	if source == "METAR":
+	if source == "ASOS":
 		for each in verifiedData:
 			if each == 999.9:
 				errorCount += 1
@@ -81,7 +80,7 @@ def work(modelDir, inputDict):
 	outData["stdout"] = "Success"
 	return outData
 
-def pullMETAR(year, station, datatype):
+def pullASOS(year, station, datatype):
 	url = ('https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?station=' + station + '&data=' + datatype + '&year1=' + year + 
 		'&month1=1&day1=1&year2=' + str(int(year)+1) + '&month2=1&day2=1&tz=Etc%2FUTC&format=onlycomma&latlon=no&direct=no&report_type=1&report_type=2')
 	r = requests.get(url)
@@ -151,12 +150,12 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		"user": "admin",
-		"source":"USCRN",#"source":"METAR", #
+		"source":"USCRN",#"source":"ASOS", #
 		"year":"2017",
-		"stationMETAR":"CHO",
+		"stationASOS":"CHO",
 		"stationUSCRN":"AK_Barrow_4_ENE",
 		"weatherParameterUSCRN":"T_CALC",
-		"weatherParameterMETAR":"tmpc",
+		"weatherParameterASOS":"tmpc",
 		"modelType":modelName}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	return creationCode
