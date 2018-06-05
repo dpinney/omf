@@ -75,41 +75,12 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Demand Curve (.csv file)<span class="classic">Please see the documentation at the help link for the required format. If this field is blank the OMF will re-use the file from the previous run.</span></label>
-				<!--<script>var fileName=true;</script>-->
 				<input id="demandCurveFile" type="file" style="display:none" onchange="handle_files(this.files,'demandCurve','fileName')">
 				<input id="demandCurve" name="demandCurve" type="hidden">
-				<!-- Format the file input and populate it with a saved file. -->
 				<div>
 					<label for="demandCurveFile" class="fileButton">Choose File</label>
 					<input id="fileName" name="fileName" value='' readonly class="uploadFileName">	
 				</div>
-				<!--<input type="hidden" id="fileName" name="fileName" readonly="readonly">
-				<div id="fileBackground"></div>
-				<div id="fileExists"><label for="demandCurveFile" id="demandCurveFileName" name="demandCurveFileName"></label></div>-->
-				<!--<script>
-					if (typeof allInputData.fileName !== 'undefined') {					
-						document.getElementById('demandCurveFileName').innerHTML = allInputData.fileName;
-					}
-					else {
-						document.getElementById('demandCurveFileName').innerHTML = 'Please select a file'
-						gebi('demandCurveFile').setAttribute('required', 'required')
-					}
-					// File handler function.
-					function handle_files(files) {
-						// read file to a hidden input field
-						reader = new FileReader()
-						reader.readAsText(files[0])
-						reader.onload = loaded
-						function loaded(evt) {
-							evt.target.result
-							gebi("demandCurve").value = reader.result
-							var FileName = gebi("demandCurveFile").value.split("\\");
-							var FileName = FileName[FileName.length-1];
-							document.getElementById('demandCurveFileName').innerHTML = FileName;
-							gebi("fileName").value = FileName;
-						}
-					}
-				</script>-->
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Demand Response Program Variables</p>
