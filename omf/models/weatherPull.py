@@ -1,9 +1,7 @@
 ''' Get power and energy limits from PNNL VirtualBatteries (VBAT) load model.'''
-
-import json, os, shutil, math, requests, csv
+import json, os, shutil, math, requests, csv, __neoMetaModel__
 from os.path import join as pJoin
 from jinja2 import Template
-import __neoMetaModel__
 from __neoMetaModel__ import *
 from dateutil.parser import parse as parseDt
 import datetime as dt
