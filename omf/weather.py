@@ -29,51 +29,32 @@ def pullUscrn(year, station, datatype):
 	Documentation is at https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02/README.txt
 	For a given year, weather station, and datatype, write 8760 hourly weather data (temp, humidity, etc.) to outputPath.
 	for list of available stations go to: https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02'''
-	if datatype == "T_CALC":
-		datatypeID = 9
-	elif datatype == "T_HR_AVG":
-		datatypeID = 10
-	elif datatype == "T_MAX":
-		datatypeID = 11
-	elif datatype == "T_MIN":
-		datatypeID = 12
-	elif datatype == "P_CALC":
-		datatypeID = 13
-	elif datatype == "SOLARAD":
-		datatypeID = 14
-	elif datatype == "SOLARAD_MAX":
-		datatypeID = 16
-	elif datatype == "SOLARAD_MIN":
-		datatypeID = 18
-	elif datatype == "SUR_TEMP":
-		datatypeID = 21
-	elif datatype == "SUR_TEMP_MAX":
-		datatypeID = 23
-	elif datatype == "SUR_TEMP_MIN":
-		datatypeID = 25
-	elif datatype == "RH_HR_AVG":
-		datatypeID = 27
-	elif datatype == "SOIL_MOISTURE_5":
-		datatypeID = 29
-	elif datatype == "SOIL_MOISTURE_10":
-		datatypeID = 30
-	elif datatype == "SOIL_MOISTURE_20":
-		datatypeID = 31
-	elif datatype == "SOIL_MOISTURE_50":
-		datatypeID = 32
-	elif datatype == "SOIL_MOISTURE_100":
-		datatypeID = 33
-	elif datatype == "SOIL_TEMP_5":
-		datatypeID = 34
-	elif datatype == "SOIL_TEMP_10":
-		datatypeID = 35
-	elif datatype == "SOIL_TEMP_20":
-		datatypeID = 36
-	elif datatype == "SOIL_TEMP_50":
-		datatypeID = 37
-	elif datatype == "SOIL_TEMP_100":
-		datatypeID = 38
-	else:
+	datatypeDict = {
+		"T_CALC":9,
+		"T_HR_AVG":10,
+		"T_MAX":11,
+		"T_MIN":12,
+		"P_CALC":13,
+		"SOLARAD":14,
+		"SOLARAD_MAX":16,
+		"SOLARAD_MIN":18,
+		"SUR_TEMP":21,
+		"SUR_TEMP_MAX":23,
+		"SUR_TEMP_MIN":25,
+		"RH_HR_AVG":27,
+		"SOIL_MOISTURE_5":29,
+		"SOIL_MOISTURE_10":30,
+		"SOIL_MOISTURE_20":31,
+		"SOIL_MOISTURE_50":32,
+		"SOIL_MOISTURE_100":33,
+		"SOIL_TEMP_5":34,
+		"SOIL_TEMP_10":35,
+		"SOIL_TEMP_20":36,
+		"SOIL_TEMP_50":37,
+		"SOIL_TEMP_100":38}
+	try:
+		datatypeID = datatypeDict[datatype]
+	except:
 		datatypeID = 1
 	#need to have handling for stupid inputs #REPLACE WITH A DICTIONARY
 	url = 'https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02/' + year + '/CRNH0203-' + year + '-' + station + '.txt'
