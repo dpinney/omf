@@ -18,6 +18,7 @@ from omf.solvers import gridlabd
 fileName = os.path.basename(__file__)
 modelName = fileName[0:fileName.rfind('.')]
 tooltip = "The dsoSimStudio model runs..."
+hidden = True
 
 # Our HTML template for the interface:
 with open(pJoin(__neoMetaModel__._myDir,modelName+".html"),"r") as tempFile:

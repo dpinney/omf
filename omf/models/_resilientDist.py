@@ -22,6 +22,7 @@ from omf.weather import zipCodeToClimateName
 fileName = os.path.basename(__file__)
 modelName = fileName[0:fileName.rfind('.')]
 tooltip = "Model extreme weather and determine optimal investment for distribution resiliency."
+hidden = True
 # Our HTML template for the interface:
 with open(pJoin(__neoMetaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
