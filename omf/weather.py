@@ -8,55 +8,63 @@ from os.path import join as pJoin
 from datetime import timedelta, datetime
 from bs4 import BeautifulSoup
 
-def pullWeatherAsos(year, station, datatype, outputDir):
-	'''
-	This model pulls the hourly temperature for the specified year and ASOS station
+
+def pullAsos(year, station, datatype):
+	'''This model pulls the hourly temperature for the specified year and ASOS station
 	ASOS is the Automated Surface Observing System, a network of about 900 weater stations, they collect data at hourly intervals, they're run by NWS + FAA + DOD, and there is data going back to 1901 for at least some sites.
 	This data is also known as METAR data, which is the name of the format its stored in.
 	The year cannot be the current year.
 	For ASOS station code: https://www.faa.gov/air_traffic/weather/asos/
+	Note for USA stations (beginning with a K) you must NOT include the 'K'
 	This model will output a folder path, open that path and you will find a csv file containing your data
-	For years before 1998 there may or may not be any data, as such the datapull can fail for some years
-
-	datatype options: 
-	'relh' for relative humidity
-	'tmpc' for temperature in celsius
-	'''
+	For years before 1998 there may or may not be any data, as such the datapull can fail for some years'''
 	url = ('https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?station=' + station + '&data=' + datatype + '&year1=' + year + 
-		'&month1=1&day1=1&year2=' + year + '&month2=12&day2=31&tz=Etc%2FUTC&format=onlycomma&latlon=no&direct=no&report_type=1&report_type=2')
+		'&month1=1&day1=1&year2=' + str(int(year)+1) + '&month2=1&day2=1&tz=Etc%2FUTC&format=onlycomma&latlon=no&direct=no&report_type=1&report_type=2')
 	r = requests.get(url)
 	data = r.text
-	tempData = []
-	for x in range(8760):
-		tempData.append(((data.partition(station + ',')[2]).partition('\n')[0]).partition(',')[2])
-		data = data.partition(tempData[x])[2]
-	with open(outputDir, 'wb') as myfile:
-		wr = csv.writer(myfile,lineterminator = '\n')
-		for x in range(0,8760): 
-			wr.writerow([tempData[x]])
+	return data
 
-def pullWeatherUscrn(year, station, outputPath):
-	'''
-	Pulls hourly weather data from NOAA's quality controlled USCRN dataset.
+def pullUscrn(year, station, datatype):
+	'''Pulls hourly weather data from NOAA's quality controlled USCRN dataset.
 	Documentation is at https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02/README.txt
-	For a given year and weather station, write 8760 hourly weather data (temp, humidity, etc.) to outputPath.
-	for list of available stations go to: https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02
-	'''
+	For a given year, weather station, and datatype, write 8760 hourly weather data (temp, humidity, etc.) to outputPath.
+	for list of available stations go to: https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02'''
+	datatypeDict = {
+		"T_CALC":9,
+		"T_HR_AVG":10,
+		"T_MAX":11,
+		"T_MIN":12,
+		"P_CALC":13,
+		"SOLARAD":14,
+		"SOLARAD_MAX":16,
+		"SOLARAD_MIN":18,
+		"SUR_TEMP":21,
+		"SUR_TEMP_MAX":23,
+		"SUR_TEMP_MIN":25,
+		"RH_HR_AVG":27,
+		"SOIL_MOISTURE_5":29,
+		"SOIL_MOISTURE_10":30,
+		"SOIL_MOISTURE_20":31,
+		"SOIL_MOISTURE_50":32,
+		"SOIL_MOISTURE_100":33,
+		"SOIL_TEMP_5":34,
+		"SOIL_TEMP_10":35,
+		"SOIL_TEMP_20":36,
+		"SOIL_TEMP_50":37,
+		"SOIL_TEMP_100":38}
+	try:
+		datatypeID = datatypeDict[datatype]
+	except:
+		datatypeID = 1
+	#need to have handling for stupid inputs #REPLACE WITH A DICTIONARY
 	url = 'https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02/' + year + '/CRNH0203-' + year + '-' + station + '.txt'
 	r = requests.get(url)
 	data = r.text
 	matrix = [x.split() for x in data.split('\n')]
-	#TODO: use matrix to pull out an arbitrary attribute.
 	tempData = []
-	for x in range(0,8760):
-		temp = ''
-		for y in range(x*244+59,x*244+64):
-			temp+=data[y]
-		tempData.append(float(temp))
-	with open(outputPath, 'wb') as myfile:
-		wr = csv.writer(myfile,lineterminator = '\n')
-		for x in range(0,8760): 
-			wr.writerow([tempData[x]])
+	for i in range(8760):
+		tempData.append(matrix[i][datatypeID])
+	return tempData
 
 def _pullWeatherWunderground(start, end, airport, workDir):
 	''' Download weather CSV data to workDir. 1 file for each day between start and 
@@ -162,16 +170,17 @@ def zipCodeToClimateName(zipCode):
 	return climateName, latforpvwatts
 
 def _tests():
-	tmpdir = tempfile.mkdtemp()
-	print "Beginning to test weather.py in", tmpdir
-	assert ('MO-KANSAS_CITY',30) == zipCodeToClimateName(64735)
-	assert (38.947444, -77.459944) == airportCodeToLatLon("IAD"), "airportCode lookup failed."
-	# Testing USCRN
-	pullWeatherUscrn('2017', 'KY_Versailles_3_NNW', os.path.join(tmpdir, 'weatherUscrn.csv'))
-	print 'USCRN (NOAA) data pulled to ' + tmpdir
-	# Testing ASOS
-	pullWeatherAsos('2017','CGS', 'relh', os.path.join(tmpdir, 'weatherAsos.csv'))
-	print 'ASOS (Iowa) data pulled to ' + tmpdir
+	print 'weather.py tests currently disabled to keep them from sending too many HTTP requests.'
+	# tmpdir = tempfile.mkdtemp()
+	# print "Beginning to test weather.py in", tmpdir
+	# assert ('MO-KANSAS_CITY',30) == zipCodeToClimateName(64735)
+	# assert (38.947444, -77.459944) == airportCodeToLatLon("IAD"), "airportCode lookup failed."
+	# # Testing USCRN
+	# pullUscrn('2017', 'KY_Versailles_3_NNW', 'T_CALC')
+	# print 'USCRN (NOAA) data pulled to ' + tmpdir
+	# # Testing ASOS
+	# pullAsos('2017','CHO', 'tmpc')
+	# print 'ASOS (Iowa) data pulled to ' + tmpdir
 
 if __name__ == "__main__":
 	_tests()

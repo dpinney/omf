@@ -10,6 +10,7 @@ Anyone can sign up for a free account on our hosted production site https://www.
 
 If you'd like to host your own copy of the OMF, please follow the [developer installation instructions](https://github.com/dpinney/omf/wiki/Dev-~-Installation-Instructions).
 
+Windows users must install Python2.7, Chocolatey, and the VCPython27 compiler manually before running the installation script.
 ### Example Screenshots
 
 Graphical circuit editor:
