@@ -46,7 +46,6 @@ elif platform.system()=='Windows':
 	# Install choco packages.
 	os.system("choco install -y wget")
 	os.system("choco install -y vcredist2008")
-	os.system("choco install -y vcpython27")
 	os.system("choco install -y ffmpeg")
 	os.system("choco install -y graphviz")
 	os.system("choco install -y pip")
@@ -54,26 +53,24 @@ elif platform.system()=='Windows':
 	# HACK: timeout and refreshenv should get all the choco binaries on to the path.
 	os.system("timeout 5")
 	os.system("refreshenv")
-	# Manually setting path for pip and other scripts.
-	os.system('setx /M PATH "%PATH%;C:\\Python27\\Scripts"')
-	os.system('setx /M PATH "%PATH%;C:\\Program Files (x86)\\Graphviz2.38\\bin"')
 	# Install GridLAB-D.
 	os.system("wget --no-check-certificate https://ufpr.dl.sourceforge.net/project/gridlab-d/gridlab-d/Candidate%20release/gridlabd-4.0_RC1.exe")
 	os.system("gridlabd-4.0_RC1.exe/silent")
 	# Install pygraphviz.
 	if platform.architecture()[0] == '32bit':
-		os.system("C:\\Python27\\python.exe -m pip install omf\\omf\\static\\pygraphviz-1.3.1-cp27-none-win32.whl")
-	elif platform.architecture()[1] == '64bit':
-		os.system("C:\\Python27\\python.exe -m pip install omf\\omf\\static\\pygraphviz-1.3.1-cp27-none-win_amd64.whl")
+		os.system("C:\\Python27\\python.exe -m pip install omf\\static\\pygraphviz-1.3.1-cp27-none-win32.whl")
+	elif platform.architecture()[0] == '64bit':
+		os.system("C:\\Python27\\python.exe -m pip install omf\\static\\pygraphviz-1.3.1-cp27-none-win_amd64.whl")
 	# Finish up installation with pip.
 	os.system("cd omf")
 	# HACK: more refreshes of the environment.
 	os.system("timeout 5")
 	os.system("refreshenv")
+        os.system("C:\\Python27\\python.exe -m pip install scipy")
 	os.system("C:\\Python27\\python.exe -m pip install setuptools>=33.1.1")
-	# os.system("C:\\Python27\\python.exe -m pip install scipy")
 	os.system("C:\\Python27\\python.exe -m pip install -r requirements.txt")
 	os.system("C:\\Python27\\python.exe -m setup.py develop")
+
 elif platform.system()=="Darwin": # MacOS
 	# Install homebrew
 	os.system("/usr/bin/ruby -e '$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)'")
