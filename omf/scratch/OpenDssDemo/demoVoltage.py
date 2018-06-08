@@ -1,19 +1,59 @@
+# -*- coding: future_fstrings -*-
+
 import opendssdirect as dss
 import networkx as nx
 import matplotlib.pyplot as plt
+import pip
 
-def calculateGraph():
+def checkFutureStrings():
+  futureStringsFlag = False
+  installed_packages = pip.get_installed_distributions()
+  installed_packages_list = sorted(["%s" % (i.key) for i in installed_packages])
+  if 'future_fstrings' not in installed_packages_list:
+    pip.main(['install', 'future-fstrings'])
+    futureStringsFlag = True
+  return futureStringsFlag
+
+def calculateGraph(df):
+  graph = nx.Graph()
+  data = df[['Bus1', 'Bus2']].to_dict(orient="index")
+  for key in data:
+    voltage_line = data[key]
+    if f".{1}" in key["Bus1"] and f".{1}" in key["Bus2"]:
+      G.add_edge(key["Bus1"].split(".")[0], key["Bus2"].split(".")[0])
+  positions = {}
+  for name in dss.Circuit.AllBusNames():
+    dss.Circuit.SetActiveBus(f"{name}")
+    if phase in dss.Bus.Nodes():
+      index = dss.Bus.Nodes().index(1) # Default to first phase.
+      re, im = dss.Bus.PuVoltage()[index:index+2]
+      voltage = abs(complex(re, im))
+      distance = dss.Bus.Distance()
+      positions[dss.Bus.Name()] = (distance, voltage)
+  return graph, positions
 
 def plotGraph():
+  lines = dss.utils.lines_to_dataframe()
+  graph, position = calculateGraph(lines)
+  fig, axis = plt.subplots(1, 1, figsize=(16, 10)) 
+  nx.draw_networkx_nodes(graph, position, axis, labels={x: x for x in graph.nodes()})
+  nx.draw_networkx_labels(graph, position, axis, labels={x: x for x in graph.nodes()})
+  nx.draw_networkx_edges(graph, position, axis, labels={x: x for x in graph.nodes()})
+
+  axis.grid()
+  axis.set_xlabel('DISTANCE [KM]')
+  axis.set_ylabel('VOLTAGE [PER UNIT]')
+  axis.set_title('VOLTAGE PROFILE')
 
 
 if __name__ == "__main__":
-  get_ipython().magic('matplotlib inline')
-
+  uninstallTempPackage = checkFutureStrings()
   dss.run_command('Redirect ./short_circuit.dss')
   dss.run_command("New EnergyMeter.Main Line.650632 1")
   dss.run_command('Solve ./short_circuit.dss')
+  plotGraph()
 
-  lines = dss.utils.lines_to_dataframe()
+  if uninstallTempPackage:
+    pip.main(['uninstall', 'future-fstrings'])
 
 
