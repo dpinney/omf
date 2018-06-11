@@ -28,6 +28,7 @@ def calculateGraph(df, phase=1):
 			index = dss.Bus.Nodes().index(phase)
 			re, im = dss.Bus.PuVoltage()[index:index+2]
 			voltage = abs(complex(re, im))
+			distance = dss.Bus.Distance()
 			positions[dss.Bus.Name()] = (distance, voltage)
 	return graph, positions
 
@@ -37,9 +38,9 @@ def plotGraph():
 	fig, ax = plt.subplots(1, 1, figsize(16, 10))
 	nx.draw_networkx_nodes(graph, position, labels={x: x for x in graph.nodes()})
 	nx.draw_networkx_nodes(graph, position, labels={x: x for x in graph.nodes()})
-    nx.draw_networkx_nodes(graph, position, labels={x: x for x in graph.nodes()})
+	nx.draw_networkx_nodes(graph, position, labels={x: x for x in graph.nodes()})
 
-    ax.set_title('VOLTAGE PROFILE')
+	ax.set_title('VOLTAGE PROFILE')
 
 if __name__ == "__main__":
 	uninstallFlag = checkFutureStrings()
@@ -48,5 +49,5 @@ if __name__ == "__main__":
 	dss.run_command('Solv ./short_circuit.dss')
 	plotGraph()
 
-    if uninstallFlag:
-    	pip.main(['uninstall', 'future-fstrings'])
+	if uninstallFlag:
+		pip.main(['uninstall', 'future-fstrings'])
