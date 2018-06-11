@@ -35,15 +35,15 @@ def calculateGraph(df, phase=1):
 def plotGraph():
   lines = dss.utils.lines_to_dataframe()
   graph, position = calculateGraph(lines)
-  fig, axis = plt.subplots(1, 1, figsize=(16, 10)) 
-  nx.draw_networkx_nodes(graph, position, axis, labels={x: x for x in graph.nodes()})
-  nx.draw_networkx_labels(graph, position, axis, labels={x: x for x in graph.nodes()})
-  nx.draw_networkx_edges(graph, position, axis, labels={x: x for x in graph.nodes()})
+  fig, axes = plt.subplots(1, 1, figsize=(16, 10)) 
+  nx.draw_networkx_nodes(graph, position, labels={x: x for x in graph.nodes()})
+  nx.draw_networkx_labels(graph, position, labels={x: x for x in graph.nodes()})
+  nx.draw_networkx_edges(graph, position, labels={x: x for x in graph.nodes()})
 
-  axis.grid()
-  axis.set_xlabel('DISTANCE [KM]')
-  axis.set_ylabel('VOLTAGE [PER UNIT]')
-  axis.set_title('VOLTAGE PROFILE')
+ # axis.grid()
+ # axis.set_xlabel('DISTANCE [KM]')
+ # axis.set_ylabel('VOLTAGE [PER UNIT]')
+ # axis.set_title('VOLTAGE PROFILE')
 
 
 if __name__ == "__main__":
