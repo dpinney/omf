@@ -35,7 +35,7 @@ def calculateGraph(df, phase=1):
 def plotGraph():
 	lines = dss.utils.lines_to_dataframe()
 	graph, position = calculateGraph(lines)
-	fig, ax = plt.subplots(1, 1, figsize(16, 10))
+	fig, ax = plt.subplots(1, 1, figsize=(16, 10))
 	nx.draw_networkx_nodes(graph, position, labels={x: x for x in graph.nodes()})
 	nx.draw_networkx_nodes(graph, position, labels={x: x for x in graph.nodes()})
 	nx.draw_networkx_nodes(graph, position, labels={x: x for x in graph.nodes()})
