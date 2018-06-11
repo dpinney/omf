@@ -14,18 +14,18 @@ def checkFutureStrings():
     futureStringsFlag = True
   return futureStringsFlag
 
-def calculateGraph(df):
+def calculateGraph(df, phase=1):
   graph = nx.Graph()
   data = df[['Bus1', 'Bus2']].to_dict(orient="index")
   for key in data:
     voltage_line = data[key]
-    if f".{1}" in key["Bus1"] and f".{1}" in key["Bus2"]:
+    if f".{phase}" in voltage_line["Bus1"] and f".{phase}" in voltage_line["Bus2"]:
       G.add_edge(key["Bus1"].split(".")[0], key["Bus2"].split(".")[0])
   positions = {}
   for name in dss.Circuit.AllBusNames():
     dss.Circuit.SetActiveBus(f"{name}")
     if phase in dss.Bus.Nodes():
-      index = dss.Bus.Nodes().index(1) # Default to first phase.
+      index = dss.Bus.Nodes().index(phase) # Default to first phase.
       re, im = dss.Bus.PuVoltage()[index:index+2]
       voltage = abs(complex(re, im))
       distance = dss.Bus.Distance()
