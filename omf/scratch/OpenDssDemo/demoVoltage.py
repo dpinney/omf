@@ -39,7 +39,8 @@ def plotGraph():
 	nx.draw_networkx_nodes(graph, position, labels={x: x for x in graph.nodes()})
 	nx.draw_networkx_nodes(graph, position, labels={x: x for x in graph.nodes()})
 	nx.draw_networkx_nodes(graph, position, labels={x: x for x in graph.nodes()})
-
+	ax.set_xlabel('Distances [km]')
+	ax.set_ylabel('Voltage [P.u]')
 	ax.set_title('VOLTAGE PROFILE')
 
 if __name__ == "__main__":
