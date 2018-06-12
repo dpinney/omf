@@ -95,12 +95,10 @@
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Year<span class="classic">year</span></label>
-				<input type="text" id="year" name="year" pattern="[1-2][0-9][0-9][0-9]" required="required"/>
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">Station - ASOS<span class="classic">ASOS Code, for USA codes (starting with K) exclude the first letter.</span></label>
 				<input type="text" id="stationASOS" name="stationASOS" pattern="[a-zA-Z]{3,4}" required="required"/>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Station - USCRN<span class="classic">USCRN: Dropdown menu of stations</span></label>
 				<select id="stationUSCRN" name="stationUSCRN" required="required">
 					<option value="AK_Barrow_4_ENE">AK_Barrow</option>
@@ -260,7 +258,11 @@
 					<option value="WY_Moose_1_NNE">WY_Moose</option>
 					<option value="WY_Sundance_8_NNW">WY_Sundance</option>
 				</select>
-			</div>			
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Year<span class="classic">year</span></label>
+				<input type="text" id="year" name="year" pattern="[1-2][0-9][0-9][0-9]" required="required"/>
+			</div>	
 			<div class="shortInput">
 				<label class="tooltip">Weather Parameter - ASOS<span class="classic">Data that should be pulled</span></label>
 				<select id="weatherParameterASOS" name="weatherParameterASOS" required="required">
@@ -288,6 +290,8 @@
 					<option value="presentwx">Weather Codes</option>
 					<option value="asos">Raw ASOS</option>
 				</select>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Weather Parameter - USCRN<span class="classic">Data that should be pulled</span></label>
 				<select id="weatherParameterUSCRN" name="weatherParameterUSCRN" required="required">
 					<option value="T_CALC">Air temperature (Celsius)</option>
