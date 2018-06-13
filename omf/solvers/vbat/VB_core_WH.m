@@ -5,12 +5,13 @@
 % This function is used to characterize VB capacity from a population of WH considering water draw
 function [P_upper_wh, P_lower_wh, E_UL_wh] = VB_core_WH(paraFile)
     para = repmat(paraFile(1:6),paraFile(7),1);
-N_wh = size(para,1); % number of TCL
-C_wh = para(:,1); % thermal capacitance
-R_wh = para(:,2); % thermal resistance
-P_wh = para(:,3); % rated power (kW) of each TCL
-delta_wh = para(:,5); % temperature deadband
-theta_s_wh = para(:,6); % temperature setpoint
+N_wh = 20; % device constant
+n = size(para,1); % number of TCL
+C_wh = para(1:N_wh,1); % thermal capacitance
+R_wh = para(1:N_wh,2); % thermal resistance
+P_wh = para(1:N_wh,3); % rated power (kW) of each TCL
+delta_wh = para(1:N_wh,5); % temperature deadband
+theta_s_wh = para(1:N_wh,6); % temperature setpoint
 
 % theta_a is the ambient temperature
 theta_a = (72-32)*5/9*ones(365,24*60);
@@ -82,7 +83,7 @@ for t=1:1:T-1
       m(theta(:,t+1) >= theta_lower_wh & theta(:,t+1) <= theta_upper_wh,t+1)=m(theta(:,t+1) >= theta_lower_wh & theta(:,t+1) <= theta_upper_wh,t);
     Po_total_sim(t+1) = sum(m(:,t+1).*P_wh);
 end
-%
+
 index_available = ones(N_wh, T);
 
 for t=1:1:T-1
@@ -101,6 +102,10 @@ P_lower_wh1 = reshape(P_lower_wh1, [60,8760]);
 P_lower_wh = mean(P_lower_wh1);
 % extract hourly data from minute output for energy
 E_UL_wh = E_UL_wh1(60:60:length(E_UL_wh1));
+
+P_upper_wh = P_upper_wh*n/N_wh;
+P_lower_wh = P_lower_wh*n/N_wh;
+E_UL_wh = E_UL_wh*n/N_wh;
 
 if paraFile(7) ==1 %vbat doesn't work with 1 device or less, this avoids an error and instead returns 0's
    E_UL_wh = zeros(8760,1);
