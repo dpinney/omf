@@ -140,7 +140,7 @@ def _tests():
 		outFile.write(omf.feeder.sortedWrite(testFeed))
 	print 'Brooklyn test:', houseSpecs(40.71418, -73.96125), '\n'
 	print 'Arlington test:', houseSpecs(38.88358, -77.10193), '\n'
-	print 'Override apartment test:', houseSpecs(38.883557,-77.102175), '\n' #print 'Override apartment test:', houseSpecs(0,0,addressOverride='3444 N Fairfax Dr, Arlington, VA 22201, USA'), '\n'
+	print 'Override apartment test:', houseSpecs(38.883557,-77.102175), '\n'
 	print 'Override house test:', houseSpecs(0,0,addressOverride='1629 North Stafford Street, Arlington, VA 22207, USA'), '\n'
 	print 'Full gldHouse test:', gldHouse(0,0,addressOverride='1629 North Stafford Street, Arlington, VA 22207, USA'), '\n'
 	# print 'Apt test:', gldHouse(0,0,addressOverride='3444 N Fairfax Dr, Arlington, VA 22201, USA')
