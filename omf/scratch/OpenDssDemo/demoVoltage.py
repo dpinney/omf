@@ -57,6 +57,15 @@ if __name__ == "__main__":
     ))
     '''
 	dss.run_command('Solve')
+	'''
+    dss.run_command('Clear')
+	dss.run_command('New Circuit.MyCircuit  BasekV=0.6')
+	dss.run_command('New line.MyLine Bus1=SourceBus  Bus2=LoadBus R1=1 X1=0.5 R0=1 X0=0.5 Length=1')
+	dss.run_command('New Load.MyLoad Bus1=LoadBus kV=0.6 kW=3 PF=0.6')
 	dss.run_command('Show voltages')
+	dss.run_command('Show curr')
+	dss.run_command('Show powers')
+	dss.run_command('Show losses')
+	'''
 	plotGraph()
 	print dss.Vsources.PU()
