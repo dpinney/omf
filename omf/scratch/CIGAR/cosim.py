@@ -43,7 +43,7 @@ class Coordinator(object):
 			self.glw.waitUntil(writeDt(now + stepDelta))
 		self.glw.shutdown()
 
-	def drawResults(self):
+	def drawResults(self, outputPath=None):
 		#return self.log
 		html_str = """
 		<!DOCTYPE html>
@@ -74,11 +74,14 @@ class Coordinator(object):
 				</table>
 			</body>
 		</html>"""
-		Html_file = open("output.html", "w")
+		if outputPath is None:
+			Html_file = open("output.html", "w")
+		else:
+			Html_file = open(outputPath, "w")
 		Html_file.write(html_str)
 		Html_file.close()
 
-	def drawPrettyResults(self):
+	def drawPrettyResults(self, outputPath=None):
 		#return self.log
 		html_str = """
 		<!DOCTYPE html>
@@ -125,7 +128,10 @@ class Coordinator(object):
 				</div>
 			</body>
 		</html>"""
-		Html_file = open("AgentLog/output.html", "w")
+		if outputPath is None:
+			Html_file = open("AgentLog/output.html", "w")
+		else:
+			Html_file = open(outputPath, "w")
 		Html_file.write(html_str)
 		Html_file.close()
 
@@ -311,6 +317,7 @@ def _testfault():
 	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./Exercise_4_2_1.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-01 15:00:00', 'stepSizeSeconds':3600}
 	agents = []
 
-
 if __name__ == '__main__':
-	_test6()
+	# _test6()
+	thisDir = os.path.dirname(__file__)
+	webbrowser.open_new("file://" + thisDir + "/AgentLog/output.html")
