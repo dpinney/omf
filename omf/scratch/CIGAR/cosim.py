@@ -176,6 +176,7 @@ class GridLabWorld(object):
 			return urllib2.urlopen(self.baseUrl + 'raw/' + obName + '/' + propName).read()
 		except:
 			warnings.warn("Failed to read " + propName + " of " + obName)
+			return "ERROR"
 
 	def readClock(self):
 		'Read the clock'
@@ -183,6 +184,7 @@ class GridLabWorld(object):
 			return urllib2.urlopen(self.baseUrl + 'raw/clock').read()
 		except:
 			warnings.warn("Failed to read the clock.")
+			return "ERROR"
 
 	def shutdown(self):
 		'Stop simulation.'
