@@ -285,5 +285,18 @@ def _test5():
 	# print coord.drawResults()
 	print coord.drawPrettyResults()
 
+def _test6():
+	import cyberAttack
+	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
+	agents = []
+	#agents.append(cyberAttack.ReadIntervalAttackAgent('2000-01-02 06:00:00', '2000-01-02 18:00:00', 'solar_2', 'area'))
+	agents.append(cyberAttack.DefendByValueAgent('solar_2', 'area', '+323 sf'))
+	agents.append(cyberAttack.CopycatAgent('2000-01-02 12:00:00', 'solar_1', 'area', 'solar_2', 'area'))
+	# agents.append(cyberAttack.ReadIntervalAttackAgent('2000-01-02 06:00:00', '2000-01-02 18:00:00', 'inverter_2', 'V_In'))
+	print 'Starting co-sim with a DefendByValueAgent and a CopycatAgent.'
+	coord = Coordinator(agents, cosimProps)
+	print coord.drawPrettyResults()
+
+
 if __name__ == '__main__':
-	_test5()
+	_test6()

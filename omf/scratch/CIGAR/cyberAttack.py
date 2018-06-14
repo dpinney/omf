@@ -99,13 +99,36 @@ class DefendByValueAgent(object):
 		self.propTarget = propTarget
 
 	def readStep(self, time):
-		return [{'cmd':'read','obName':self.obNameToDefend,'propName':self.obPropToDefend}] # Doesn't need to read.
+		return [{'cmd':'read','obName':self.obNameToDefend,'propName':self.obPropToDefend}]
 
 	def writeStep(self, time, rezList):
 		temp = rezList.pop()
 		rezList.append(temp)
 		if temp != self.propTarget:
 			return [{'cmd':'write','obName':self.obNameToDefend,'propName':self.obPropToDefend,'value':self.propTarget}]
+		return []
+
+class CopycatAgent(object):
+	__slots__ = 'attackTime', 'obNameToCopy', 'obPropToCopy', 'obNameToPaste', 'obPropToPaste'
+	# e.g. "solar_1", "V_Out", "solar_2", "V_Out"
+
+	def __init__(self, attackTime, obNameToCopy, obPropToCopy, obNameToPaste, obPropToPaste):
+		self.attackTime = attackTime
+		self.obNameToCopy = obNameToCopy
+		self.obPropToCopy = obPropToCopy
+		self.obNameToPaste = obNameToPaste
+		self.obPropToPaste = obPropToPaste
+
+	def readStep(self, time):
+		if time == self.attackTime:
+			return [{'cmd':'read','obName':self.obNameToCopy,'propName':self.obPropToCopy}]
+		return []
+
+	def writeStep(self, time, rezList):
+		if time == self.attackTime:
+			temp = rezList.pop()
+			rezList.append(temp)
+			return [{'cmd':'write','obName':self.obNameToPaste,'propName':self.obPropToPaste,'value':temp}]
 		return []
 
 # class DefendOutput(object):

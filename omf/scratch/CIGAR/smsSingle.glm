@@ -721,12 +721,12 @@ object ZIPload {
 };
 
 object inverter {
-	parent tm_2;
+	parent tm_1;
 	name inverter_1;
 	generator_mode CONSTANT_PF;
 	generator_status ONLINE;
 	inverter_type PWM;
-	power_factor -0.1;
+	power_factor 1.0;
 	inverter_efficiency 0.95;
 	rated_power 100 kW;
 	//	<< implied child that provides a DC power input >>
@@ -753,6 +753,41 @@ object battery {
 	battery_state FULL;
 	name battery_1;
 	parent inverter_1;
+	round_trip_efficiency 0.85;
+	generator_status ONLINE;
+	state_of_charge 1.0;
+	battery_type LI_ION;
+	generator_mode SUPPLY_DRIVEN;
+	battery_capacity 7 kWh;
+	use_internal_battery_model TRUE;
+};
+
+object inverter {
+	parent tm_2;
+	name inverter_2;
+	generator_mode CONSTANT_PF;
+	generator_status ONLINE;
+	inverter_type PWM;
+	power_factor 1.0;
+	inverter_efficiency 0.95;
+	rated_power 100 kW;
+	//	<< implied child that provides a DC power input >>
+};
+
+object solar {
+	name solar_2;
+	parent inverter_2;
+	generator_mode SUPPLY_DRIVEN;
+	generator_status ONLINE;
+	panel_type SINGLE_CRYSTAL_SILICON;
+	efficiency 0.2;
+	area 323;
+};
+
+object battery {
+	battery_state FULL;
+	name battery_2;
+	parent inverter_2;
 	round_trip_efficiency 0.85;
 	generator_status ONLINE;
 	state_of_charge 1.0;
