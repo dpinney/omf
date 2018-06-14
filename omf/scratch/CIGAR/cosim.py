@@ -41,6 +41,7 @@ class Coordinator(object):
 				logEntry.append([writeCommands,writeResults])
 			self.log.append(logEntry)
 			self.glw.waitUntil(writeDt(now + stepDelta))
+		self.glw.shutdown()
 
 	def drawResults(self):
 		#return self.log
@@ -189,9 +190,10 @@ class GridLabWorld(object):
 	def shutdown(self):
 		'Stop simulation.'
 		try:
+			# TODO: Use Kill -9 to make sure this process is super dead
 			return urllib2.urlopen(self.baseUrl + 'control/shutdown').read()
 		except:
-			warnings.warn("Shutdown failed!")
+			warnings.warn("Server manually stopped!")
 
 	def resume(self):
 		try:
@@ -201,8 +203,12 @@ class GridLabWorld(object):
 
 	def write(self, obName, propName, value):
 		'Write a value back to the simulation'
-		#HACK: writing is just reading a value plus a little bit more.
-		self.read(obName, propName + '=' + value)
+		try:
+			urllib2.urlopen(self.baseUrl + 'raw/' + obName + '/' + propName + '=' + value).read()
+			return "WRITE_SUCCESS"
+		except:
+			warnings.warn("Failed to read " + propName + " of " + obName)
+			return "ERROR"
 
 	def start(self):
 		#TODO: watch out for in-use port.
@@ -294,11 +300,16 @@ def _test6():
 	#agents.append(cyberAttack.ReadIntervalAttackAgent('2000-01-02 06:00:00', '2000-01-02 18:00:00', 'solar_2', 'area'))
 	agents.append(cyberAttack.DefendByValueAgent('solar_2', 'area', '+323 sf'))
 	agents.append(cyberAttack.CopycatAgent('2000-01-02 12:00:00', 'solar_1', 'area', 'solar_2', 'area'))
-	# agents.append(cyberAttack.ReadIntervalAttackAgent('2000-01-02 06:00:00', '2000-01-02 18:00:00', 'inverter_2', 'V_In'))
+	#agents.append(cyberAttack.ReadIntervalAttackAgent('2000-01-02 06:00:00', '2000-01-02 18:00:00', 'inverter_2', 'V_In'))
 	print 'Starting co-sim with a DefendByValueAgent and a CopycatAgent.'
 	coord = Coordinator(agents, cosimProps)
 	print coord.drawPrettyResults()
 
+def _testfault():
+	import cyberAttack
+	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./Exercise_4_2_1.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-01 15:00:00', 'stepSizeSeconds':3600}
+	agents = []
+
 
 if __name__ == '__main__':
-	_test6()
+	_test5()
