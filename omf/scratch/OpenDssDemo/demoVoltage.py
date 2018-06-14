@@ -18,6 +18,7 @@ def calculateGraph(df, phase=1):
 			re, im = dss.Bus.PuVoltage()[index:index+2]
 			voltage = abs(complex(re, im))
 			distance = dss.Bus.Distance()
+			print distance
 			positions[dss.Bus.Name()] = (distance, voltage)
 	return graph, positions
 
@@ -36,5 +37,26 @@ def plotGraph():
 if __name__ == "__main__":
 	dss.run_command('Redirect ./short_circuit.dss')
 	dss.run_command('New EnergyMeter.Main Line.650632 1')
-	dss.run_command('Solv ./short_circuit.dss')
+	'''
+    dss.run_command(
+        "New Storage.{bus_name} Bus1={bus_name} phases=1 kV=2.2 kWRated={rating} kWhRated={kwh_rating} kWhStored={initial_state} %IdlingkW=0 %reserve=0 %EffCharge=100 %EffDischarge=100 State=CHARGING".format(
+        bus_name='675',
+        rating=20,
+        kwh_rating=20,
+        initial_state=20
+    ))
+    '''
+
+	'''
+    dss.run_command(
+        "New Storage.{bus_name} Bus1={bus_name} phases=1 kV=2.2 kWRated={rating} kWhRated={kwh_rating} kWhStored={initial_state} %IdlingkW=0 %reserve=0 %EffCharge=100 %EffDischarge=100 State=CHARGING".format(
+        bus_name='611',
+        rating=20,
+        kwh_rating=20,
+        initial_state=20
+    ))
+    '''
+	dss.run_command('Solve')
+	dss.run_command('Show voltages')
 	plotGraph()
+	print dss.Vsources.PU()
