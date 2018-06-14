@@ -77,6 +77,57 @@ class Coordinator(object):
 		Html_file.write(html_str)
 		Html_file.close()
 
+	def drawPrettyResults(self):
+		#return self.log
+		html_str = """
+		<!DOCTYPE html>
+		<html>
+			<head>
+				<title>Pretty Results</title>
+				<style>
+					table, th, td { border: 1px solid black; 
+					text-align: center;}
+				</style>
+				<link href="css/960.css" rel="stylesheet" media="screen" />
+				<link href="css/defaultTheme.css" rel="stylesheet" media="screen" />
+				<link href="css/myTheme.css" rel="stylesheet" media="screen" />
+				<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
+
+				<script src="jquery.fixedheadertable.js"></script>
+				<script src="prettyResults.js"></script>
+			</head>
+			<body>
+				<div class="container_whole">
+					<div class="grid_whole height_whole">
+						<table class="fancyTable" id="myTable" cellpadding="0" cellspacing="0">
+							<thead>
+								<tr>
+									<th>Time</th>"""
+						
+		for x in range(len(self.agents)):
+			temp_str = "<th>Agent"+str(x)+"_Read</th><th>Agent"+str(x)+"_ReadRes</th><th>Agent"+str(x)+"_Write</th><th>Agent"+str(x)+"_WriteRes</th>"
+			html_str += temp_str
+		html_str += """
+								</tr>
+							</thead>
+							<tbody>"""
+		for row in self.log:
+			row_str = "<tr><td>"+row.pop(0).strftime("%Y-%m-%d %H:%M:%S")+"</td>"
+			for col in row:
+				row_str += "<td>"+str(col[0])+"</td><td>"+str(col[1])+"</td>"
+			row_str += "</tr>"
+			html_str += row_str
+		html_str += """
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</body>
+		</html>"""
+		Html_file = open("AgentLog/output.html", "w")
+		Html_file.write(html_str)
+		Html_file.close()
+
 class GridLabWorld(object):
 	__slots__ = 'PORT', 'HOST', 'GLM_PATH', 'START_PAUSE', 'baseUrl'
 
@@ -231,7 +282,8 @@ def _test5():
 	agents.append(cyberAttack.WriteAttackAgent('2000-01-01 04:00:00', 'battery_1', 'generator_status', 'OFFLINE'))
 	print 'Starting co-sim with 8 agents.'
 	coord = Coordinator(agents, cosimProps)
-	print coord.drawResults()
+	# print coord.drawResults()
+	print coord.drawPrettyResults()
 
 if __name__ == '__main__':
 	_test5()
