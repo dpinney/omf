@@ -130,7 +130,7 @@ class Coordinator(object):
 		Html_file.close()
 
 class GridLabWorld(object):
-	__slots__ = 'PORT', 'HOST', 'GLM_PATH', 'START_PAUSE', 'baseUrl'
+	__slots__ = 'PORT', 'HOST', 'GLM_PATH', 'START_PAUSE', 'baseUrl', 'procObject'
 
 	def __init__(self, PORT, HOST, GLM_PATH, START_PAUSE):
 		self.PORT = PORT
@@ -190,9 +190,10 @@ class GridLabWorld(object):
 	def shutdown(self):
 		'Stop simulation.'
 		try:
-			# TODO: Use Kill -9 to make sure this process is super dead
 			return urllib2.urlopen(self.baseUrl + 'control/shutdown').read()
 		except:
+			# TODO: Use Kill -9 to make sure this process is super dead
+			print 'MY PID!', self.procObject.pid
 			warnings.warn("Server manually stopped!")
 
 	def resume(self):
@@ -212,7 +213,7 @@ class GridLabWorld(object):
 
 	def start(self):
 		#TODO: watch out for in-use port.
-		proc = subprocess.Popen(['gridlabd', self.GLM_PATH, '--server', '-P', self.PORT, '-q','--define','pauseat="' + self.START_PAUSE + '"'], stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+		self.procObject = subprocess.Popen(['gridlabd', self.GLM_PATH, '--server', '-P', self.PORT, '-q','--define','pauseat="' + self.START_PAUSE + '"'], stderr=subprocess.PIPE, stdout=subprocess.PIPE)
 		# HACK: wait for the dang server to start up and simulate.
 		time.sleep(2) #TODO: instead of sleeping, wait 1 second, try to read clock, if it fails then wait 1 more second, loop, etc.
 
@@ -312,4 +313,4 @@ def _testfault():
 
 
 if __name__ == '__main__':
-	_test5()
+	_test6()
