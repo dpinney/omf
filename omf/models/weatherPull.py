@@ -52,7 +52,7 @@ def work(modelDir, inputDict):
 					deltatime = d - firstDT
 					verifiedData[int(math.floor((deltatime.total_seconds())/(60*60)))] = row[2]
 		#storing good data to allOutputData.json and weather.csv
-		outData["data"] = verifiedData
+		outData["rawData"] = [float(x) for x in verifiedData]
 		with open(pJoin(modelDir,"weather.csv"),"wb") as file:
 			writer = csv.writer(file)
 			writer.writerows([[x] for x in verifiedData])
@@ -62,7 +62,7 @@ def work(modelDir, inputDict):
 			reader = csv.reader(file)
 			for row in reader:
 				verifiedData.append(row[0])	
-			outData["data"] = verifiedData
+			outData["rawData"] = [float(x) for x in verifiedData]
 	with open(pJoin(modelDir,"weather.csv"),"wb") as file:
 		writer = csv.writer(file)
 		writer.writerows([[x] for x in verifiedData])
@@ -83,7 +83,7 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		"user": "admin",
-		"source":"USCRN",#"source":"ASOS", #
+		"source":"ASOS", #"source":"USCRN",#
 		"year":"2017",
 		"stationASOS":"CHO",
 		"stationUSCRN":"AK_Barrow_4_ENE",

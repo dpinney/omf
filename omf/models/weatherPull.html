@@ -18,18 +18,6 @@
 	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
-	<!--<script type="text/javascript">
-		function downloadTextFile(fileName, text) {
-			console.log(text);
-			var element = document.createElement('a');
-		    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-		    element.setAttribute('download', fileName);
-		    element.style.display = 'none';
-		    document.body.appendChild(element);
-		    element.click();
-		    document.body.removeChild(element);
-		}
-	</script>-->
 	</script>
 </head>
 <body onload="init()">
@@ -73,23 +61,6 @@
 			<div class="shortInput">
 				<label class="tooltip">Source<span class="classic">Source of data</span></label>
 				<select id="source" name="source" onchange="loadWeatherParameters()" >
-					<!--<script type="text/javascript">
-						function loadWeatherParameters(){
-							var x = gebi("source").value;
-							if (x == "ASOS"){
-								gebi("weatherParameterASOS").style.display = "block"
-								gebi("weatherParameterUSCRN").style.display = "none"
-								gebi("stationASOS").style.display = "block"
-								gebi("stationUSCRN").style.display = "none"
-							}
-							else if (x == "USCRN"){
-								gebi("weatherParameterASOS").style.display = "none"
-								gebi("weatherParameterUSCRN").style.display = "block"
-								gebi("stationASOS").style.display = "none"
-								gebi("stationUSCRN").style.display = "block"
-							}
-						}
-					</script>-->
 					<option value="ASOS">ASOS</option>
 					<option value="USCRN">USCRN</option>
 				</select>
@@ -341,20 +312,53 @@
 		</script>
 	</div>
 	<p class="reportTitle postRun" style="page-break-before:always">Download Output Data</p>	
-		<div style="text-align:left" class="tightContent postRun">
-			<a id="dTest" download>Output Download</a><br>
-			<script>gebi('dTest').href = "/downloadModelData/" + allInputData.user + "/" + allInputData.modelName + "/weather.csv"</script>
-			<p id="errorDisplay" class="postRun"></p>
-			<script type="text/javascript">
-			if(allInputData.source == "ASOS"){
-				station = allInputData.stationASOS
-			}else if (allInputData.source == "USCRN"){
-				station = allInputData.stationUSCRN
-			}
-			if(allOutputData.errorCount !== 0){gebi('errorDisplay').innerHTML = "Your search for " + allInputData.year + " " + station + 
-				" is completed. There were " + allOutputData.errorCount + " out of 8760, missing or corrupt values found in this set"}
-			else{gebi('errorDisplay').innerHTML = "Your search for " + allInputData.year + " " + station + 
-				" is completed. There were no errors found in this data pull"}
-			</script>
-		</div>
+	<div style="text-align:left" class="tightContent postRun">
+		<a id="dTest" download>Output Download</a><br>
+		<script>gebi('dTest').href = "/downloadModelData/" + allInputData.user + "/" + allInputData.modelName + "/weather.csv"</script>
+		<p id="errorDisplay" class="postRun"></p>
+		<script type="text/javascript">
+		if(allInputData.source == "ASOS"){
+			station = allInputData.stationASOS
+		}else if (allInputData.source == "USCRN"){
+			station = allInputData.stationUSCRN
+		}
+		if(allOutputData.errorCount !== 0){gebi('errorDisplay').innerHTML = "Your search for " + allInputData.year + " " + station + 
+			" is completed. There were " + allOutputData.errorCount + " out of 8760, missing or corrupt values found in this set"}
+		else{gebi('errorDisplay').innerHTML = "Your search for " + allInputData.year + " " + station + 
+			" is completed. There were no errors found in this data pull"}
+		</script>
+	</div>
+	<p class="reportTitle postRun" style="page-break-before:always">Data Pulled Plot</p>	
+	<div id="dataPlot" class="tightContent postRun">
+		<div id="dataChart"></div>
+		<script>
+			new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{
+						"series":{
+							"animation":false,
+							// "pointStart":Date.parse(allOutputData.startDate),
+							"shadow":false,
+							"pointInterval":3600000},
+						"line":{"marker":{"enabled":false}}},
+					"xAxis":{
+						"maxZoom":108000000,
+						"tickColor":"gray",
+						"dateTimeLabelFormats":{
+							"month": '%b %e'
+						},
+						"type":"datetime",
+						"lineColor":"gray"
+					},
+					"yAxis":{
+						"title":{"text":"Unit","style":{"color":"gray"}},
+					},
+					"title":{"text": allOutputData.dataCheck, "verticalAlign":"bottom", "align":"right", "y":-400, "x":-150, "style":{"color":"gray", "fontSize":"36px"}},
+					"series":[
+						{"name":"Data resquested","marker":{"enabled":false},"color":"blue","data":allOutputData.rawData}
+					],
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"dataChart","type":"line","marginRight":20, "height":500,"width":1000},
+					"tooltip":false,
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+		</script>
+	</div>
 </body>
