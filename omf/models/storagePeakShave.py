@@ -60,7 +60,7 @@ def work(modelDir, inputDict):
 				dc.append({'datetime': parse(dates[x]), 'power': float(row[0])})
 				x += 1
 			# print dc
-			if len(dc)!=8760: raise Exception
+			if len(dc) != 8760: raise Exception
 	except:
 			e = sys.exc_info()[0]
 			if str(e) == "<type 'exceptions.SystemExit'>":
@@ -132,7 +132,7 @@ def work(modelDir, inputDict):
 		for row in monthlyPeakDemand:
 			ps.append(row['power']-row['netpower'])
 		peakShaveSum = sum(ps)
-	else:
+	else: # Custom dispatch.
 		try:
 			with open(pJoin(modelDir,'dispatchStrategy.csv')) as strategyFile:
 				reader = csv.DictReader(strategyFile)
@@ -151,14 +151,15 @@ def work(modelDir, inputDict):
 	 	outData['startDate'] = dc[0]['datetime'].isoformat()
 		battSoC = battCapacity
 		for row in dc:
-			month = int(row['datetime'].month)-1
-			discharge = min(battDischarge,battSoC)
-			charge = min(battCharge, battCapacity-battSoC)
-			#If there is a 1 in the dispatch strategy csv, the battery discharges
-			if row['dispatch']==1:
+			month = int(row['datetime'].month) - 1
+			discharge = min(battDischarge, battSoC)
+			charge = min(battCharge, battCapacity - battSoC)
+			# If there is a 1 in the dispatch strategy csv, the battery discharges
+			if row['dispatch'] == 1:
 				row['netpower'] = row['power'] - discharge
 				battSoC -= discharge
 			else:
+				# Otherwise charge the battery.
 				if battSoC < battCapacity:
 					battSoC += charge
 					row['netpower'] = row['power'] + charge/battEff
@@ -166,7 +167,7 @@ def work(modelDir, inputDict):
 					row['netpower'] = row['power']
 			row['battSoC'] = battSoC
 		dcGroupByMonth = [[t['power'] for t in dc if t['datetime'].month-1==x] for x in range(12)]
-		#Calculating how much the battery discharges each month
+		# Calculating how much the battery discharges each month
 		dischargeGroupByMonth = [[t['netpower']-t['power'] for t in dc if t['datetime'].month-1==x] for x in range(12)]
 		simpleDCGroupByMonth = [[t for t in dc if t['datetime'].month-1==x] for x in range(12)]
 		monthlyPeakDemand =  [max(dVals, key=lambda x: x['power']) for dVals in simpleDCGroupByMonth]
@@ -175,7 +176,7 @@ def work(modelDir, inputDict):
 			ps.append(row['power']-row['netpower'])
 		peakShaveSum = sum(ps)
 		chargePerMonth = []
-		#Calculate how much the battery charges per year for cashFlowCurve, SPP calculation, kWhToRecharge
+		# Calculate how much the battery charges per year for cashFlowCurve, SPP calculation, kWhToRecharge
 		for row in dischargeGroupByMonth:
 			total = 0
 			for num in row:
@@ -183,7 +184,7 @@ def work(modelDir, inputDict):
 					total += num
 			chargePerMonth.append(total)
 		totalYearlyCharge = sum(chargePerMonth)
-	#Calculations
+	# Calculations
 	dcThroughTheMonth = [[t for t in iter(dc) if t['datetime'].month-1<=x] for x in range(12)]
 	hoursThroughTheMonth = [len(dcThroughTheMonth[month]) for month in range(12)]
 	if peakShaveSum == 0:
