@@ -164,6 +164,7 @@ input.uploadFileName {
 	overflow-x: auto !important;
 	border-bottom: none !important;
 	text-align: left !important;
+	width: 238px;
 }
 
 /**********************************************

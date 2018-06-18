@@ -60,7 +60,7 @@ def work(modelDir, inputDict):
 				dc.append({'datetime': parse(dates[x]), 'power': float(row[0])})
 				x += 1
 			# print dc
-			if len(dc)!=8760: raise Exception
+			if len(dc) != 8760: raise Exception
 	except:
 			e = sys.exc_info()[0]
 			if str(e) == "<type 'exceptions.SystemExit'>":
@@ -126,39 +126,41 @@ def work(modelDir, inputDict):
 		dcGroupByMonth = [[t['power'] for t in dc if t['datetime'].month-1==x] for x in range(12)]
 		simpleDCGroupByMonth = [[t for t in dc if t['datetime'].month-1==x] for x in range(12)]
 		#Finding rows with max power
-		monthlyPeakDemand =  [max(dVals, key=lambda x: x['power']) for dVals in simpleDCGroupByMonth]
+		monthlyPeakDemandHist =  [max(dVals, key=lambda x: x['power']) for dVals in simpleDCGroupByMonth]
+		monthlyPeakDemandShav = [max(dVals, key=lambda x: x['netpower']) for dVals in simpleDCGroupByMonth]
 		ps = []
 		#Determining monthly peak shave
-		for row in monthlyPeakDemand:
-			ps.append(row['power']-row['netpower'])
+		for hist, shav in zip(monthlyPeakDemandHist, monthlyPeakDemandShav):
+			ps.append(hist['power']-shav['netpower'])
 		peakShaveSum = sum(ps)
-	else:
+	else: # Custom dispatch.
 		try:
 			with open(pJoin(modelDir,'dispatchStrategy.csv')) as strategyFile:
 				reader = csv.DictReader(strategyFile)
 				rowCount = 0
-	 			for i, row in enumerate(reader):
-	 				dc[i]['dispatch'] = int(row['dispatch'])
-	 				rowCount+=1
-	 			if rowCount!= 8760: raise Exception
-	 	except:
+				for i, row in enumerate(reader):
+					dc[i]['dispatch'] = int(row['dispatch'])
+					rowCount+=1
+				if rowCount!= 8760: raise Exception
+		except:
 			e = sys.exc_info()[0]
 			if str(e) == "<type 'exceptions.SystemExit'>":
 				pass
 			else:
 				errorMessage = "Dispatch Strategy file is in an incorrect format. Please see valid format definition at <a target = '_blank' href = 'https://github.com/dpinney/omf/wiki/Models-~-storagePeakShave#custom-dispatch-strategy-file-csv-format'>\nOMF Wiki storagePeakShave - Custom Dispatch Strategy File Format</a>"
-				raise Exception(errorMessage)	 		
-	 	outData['startDate'] = dc[0]['datetime'].isoformat()
+				raise Exception(errorMessage)
+		outData['startDate'] = dc[0]['datetime'].isoformat()
 		battSoC = battCapacity
 		for row in dc:
-			month = int(row['datetime'].month)-1
-			discharge = min(battDischarge,battSoC)
-			charge = min(battCharge, battCapacity-battSoC)
-			#If there is a 1 in the dispatch strategy csv, the battery discharges
-			if row['dispatch']==1:
+			month = int(row['datetime'].month) - 1
+			discharge = min(battDischarge, battSoC)
+			charge = min(battCharge, battCapacity - battSoC)
+			# If there is a 1 in the dispatch strategy csv, the battery discharges
+			if row['dispatch'] == 1:
 				row['netpower'] = row['power'] - discharge
 				battSoC -= discharge
 			else:
+				# Otherwise charge the battery.
 				if battSoC < battCapacity:
 					battSoC += charge
 					row['netpower'] = row['power'] + charge/battEff
@@ -166,16 +168,17 @@ def work(modelDir, inputDict):
 					row['netpower'] = row['power']
 			row['battSoC'] = battSoC
 		dcGroupByMonth = [[t['power'] for t in dc if t['datetime'].month-1==x] for x in range(12)]
-		#Calculating how much the battery discharges each month
+		# Calculating how much the battery discharges each month
 		dischargeGroupByMonth = [[t['netpower']-t['power'] for t in dc if t['datetime'].month-1==x] for x in range(12)]
 		simpleDCGroupByMonth = [[t for t in dc if t['datetime'].month-1==x] for x in range(12)]
-		monthlyPeakDemand =  [max(dVals, key=lambda x: x['power']) for dVals in simpleDCGroupByMonth]
+		monthlyPeakDemandHist =  [max(dVals, key=lambda x: x['power']) for dVals in simpleDCGroupByMonth]
+		monthlyPeakDemandShav = [max(dVals, key=lambda x: x['netpower']) for dVals in simpleDCGroupByMonth]
 		ps = []
-		for row in monthlyPeakDemand:
-			ps.append(row['power']-row['netpower'])
+		for hist, shav in zip(monthlyPeakDemandHist, monthlyPeakDemandShav):
+			ps.append(hist['power']-shav['netpower'])
 		peakShaveSum = sum(ps)
 		chargePerMonth = []
-		#Calculate how much the battery charges per year for cashFlowCurve, SPP calculation, kWhToRecharge
+		# Calculate how much the battery charges per year for cashFlowCurve, SPP calculation, kWhToRecharge
 		for row in dischargeGroupByMonth:
 			total = 0
 			for num in row:
@@ -183,12 +186,12 @@ def work(modelDir, inputDict):
 					total += num
 			chargePerMonth.append(total)
 		totalYearlyCharge = sum(chargePerMonth)
-	#Calculations
+	# Calculations
 	dcThroughTheMonth = [[t for t in iter(dc) if t['datetime'].month-1<=x] for x in range(12)]
 	hoursThroughTheMonth = [len(dcThroughTheMonth[month]) for month in range(12)]
 	if peakShaveSum == 0:
-			peakShaveSum = -1
-			#peakShave of 0 means no benefits, so make it -1
+		peakShaveSum = -1
+		#peakShave of 0 means no benefits, so make it -1
 	if dispatchStrategy == 'optimal':
 		cashFlowCurve = [peakShaveSum * demandCharge for year in range(projYears)]
 		outData['SPP'] = (cellCost*cellQuantity)/(peakShaveSum*demandCharge)
@@ -257,41 +260,41 @@ def work(modelDir, inputDict):
 	LCOE = lcoeTotCost / loceTotEnergy
 	outData['LCOE'] = LCOE
 	# Stdout/stderr.
-	outData["stdout"] = "Success"
-	outData["stderr"] = ""
+	outData['stdout'] = 'Success'
+	outData['stderr'] = ''
 	# Return the output.
 	return outData
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"batteryEfficiency": "92",
-		"inverterEfficiency": "97.5",
-		"cellCapacity": "7",
-		"discountRate": "2.5",
-		"created": "2015-06-12 17:20:39.308239",
-		"dischargeRate": "5",
-		"modelType": modelName,
-		"chargeRate": "5",
-		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidCSV_Copy.csv")).read(),
-		"fileName": "FrankScadaValidCSV_Copy.csv",
-		"dispatchStrategy": "optimal",
-		"cellCost": "7140",
-		"cellQuantity": "10",
-		"runTime": "0:00:03",
-		"projYears": "15",
-		"demandCharge": "20",
-		"dodFactor":"100",
-		"retailCost": "0.06",
-		"startPeakHour": "18",
-		"endPeakHour": "22",
-		"batteryCycleLife": "5000"
+		'batteryEfficiency': '92',
+		'inverterEfficiency': '97.5',
+		'cellCapacity': '7',
+		'discountRate': '2.5',
+		'created': '2015-06-12 17:20:39.308239',
+		'dischargeRate': '5',
+		'modelType': modelName,
+		'chargeRate': '5000',
+		'demandCurve': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','FrankScadaValidCSV_Copy.csv')).read(),
+		'fileName': 'FrankScadaValidCSV_Copy.csv',
+		'dispatchStrategy': 'optimal',
+		'cellCost': '7140',
+		'cellQuantity': '10',
+		'runTime': '0:00:03',
+		'projYears': '15',
+		'demandCharge': '20',
+		'dodFactor':'100',
+		'retailCost': '0.06',
+		'startPeakHour': '18',
+		'endPeakHour': '22',
+		'batteryCycleLife': '5000'
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
 def _tests():
 	# Location
-	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
+	modelLoc = pJoin(__neoMetaModel__._omfDir,'data','Model','admin','Automated Testing of ' + modelName)
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
@@ -303,7 +306,7 @@ def _tests():
 	# Pre-run.
 	renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
+	runForeground(modelLoc, json.load(open(modelLoc + '/allInputData.json')))
 	# Show the output.
 	renderAndShow(modelLoc)
 

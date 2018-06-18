@@ -11,36 +11,6 @@
 		#SPP {
 			font-weight:bold;
 		}
-		#tableHead {
-			margin-top:20px;
-		}
-		/*File Styles*/
-		#fileBackground{position:absolute;width:205px;max-width:205px;height:29px;margin: -30px 0 0 116px;background-color:gainsboro;}
-		#fileExists {
-			background-color:transparent;
-			max-width:185px;
-			overflow-x:auto;
-			overflow-y:hidden;
-			height:35px;
-			margin:-32px 0 0 116px;
-			position:absolute;
-			font-size:0.8em;
-			z-index:1;
-		}
-		#demandCurveFileName {line-height:35px;}
-		input[type='file'] {
-		  color: transparent;
-		}
-		/*IE Hacks*/
-		@media screen\0 {
-			#fileBackground{margin-left:0px;width:222px;max-width:222px;height:29px;}
-			#fileExists{margin: -27px 0 0 10px;height:42px;}
-		}
-		/*Firefox Hacks*/
-		@-moz-document url-prefix() {
-			#fileBackground{margin-left:125px;width:195px;max-width:195px;}
-			#fileExists{max-width:175px;margin:-32px 0 0 135px;height:47px;}
-		 }
 	</style>
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->
@@ -194,7 +164,7 @@
 	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
 		<pre id='errorText' style='overflow-x:scroll'></pre>
 		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {	
+		if (typeof(allInputData.stderr) !== 'undefined') {
 			gebi('stopIndicator').style.visibility = 'visible'
 			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
 		</script>
@@ -270,7 +240,7 @@
 					"plotOptions":{
 						"series":{
 							"animation":false,
-							"pointStart":Date.parse(allOutputData.startDate),
+							"pointStart":Date.UTC(2017, 0, 1),
 							"shadow":false,
 							"pointInterval":3600000},
 						"line":{"marker":{"enabled":false}}},
@@ -307,7 +277,7 @@
 					"plotOptions":{
 						"series":{
 							"animation":false,
-							"pointStart":Date.parse(allOutputData.startDate),
+							"pointStart":Date.UTC(2017, 0, 1),
 							"shadow":false,
 							"pointInterval":3600000},
 						"line":{"marker":{"enabled":false}}},
