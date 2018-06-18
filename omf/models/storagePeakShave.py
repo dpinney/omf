@@ -126,11 +126,12 @@ def work(modelDir, inputDict):
 		dcGroupByMonth = [[t['power'] for t in dc if t['datetime'].month-1==x] for x in range(12)]
 		simpleDCGroupByMonth = [[t for t in dc if t['datetime'].month-1==x] for x in range(12)]
 		#Finding rows with max power
-		monthlyPeakDemand =  [max(dVals, key=lambda x: x['power']) for dVals in simpleDCGroupByMonth]
+		monthlyPeakDemandHist =  [max(dVals, key=lambda x: x['power']) for dVals in simpleDCGroupByMonth]
+		monthlyPeakDemandShav = [max(dVals, key=lambda x: x['netpower']) for dVals in simpleDCGroupByMonth]
 		ps = []
 		#Determining monthly peak shave
-		for row in monthlyPeakDemand:
-			ps.append(row['power']-row['netpower'])
+		for hist, shav in zip(monthlyPeakDemandHist, monthlyPeakDemandShav):
+			ps.append(hist['power']-shav['netpower'])
 		peakShaveSum = sum(ps)
 	else: # Custom dispatch.
 		try:
@@ -170,10 +171,11 @@ def work(modelDir, inputDict):
 		# Calculating how much the battery discharges each month
 		dischargeGroupByMonth = [[t['netpower']-t['power'] for t in dc if t['datetime'].month-1==x] for x in range(12)]
 		simpleDCGroupByMonth = [[t for t in dc if t['datetime'].month-1==x] for x in range(12)]
-		monthlyPeakDemand =  [max(dVals, key=lambda x: x['power']) for dVals in simpleDCGroupByMonth]
+		monthlyPeakDemandHist =  [max(dVals, key=lambda x: x['power']) for dVals in simpleDCGroupByMonth]
+		monthlyPeakDemandShav = [max(dVals, key=lambda x: x['netpower']) for dVals in simpleDCGroupByMonth]
 		ps = []
-		for row in monthlyPeakDemand:
-			ps.append(row['power']-row['netpower'])
+		for hist, shav in zip(monthlyPeakDemandHist, monthlyPeakDemandShav):
+			ps.append(hist['power']-shav['netpower'])
 		peakShaveSum = sum(ps)
 		chargePerMonth = []
 		# Calculate how much the battery charges per year for cashFlowCurve, SPP calculation, kWhToRecharge
