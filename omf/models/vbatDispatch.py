@@ -24,16 +24,7 @@ def work(modelDir, inputDict):
 	vbatPath = os.path.join(omf.omfDir,'solvers','vbat')
 	plat = platform.system()
 	if inputDict['load_type'] == '4':
-		numDevices = int(inputDict['number_devices'])
-		if numDevices == 1:
-			runTimeDuration = 5
-		elif numDevices > 1 and numDevices < 10:
-			runTimeDuration = 10
-		elif numDevices >= 10 and numDevices < 50:
-			runTimeDuration = 15
-		else :
-			runTimeDuration = (numDevices-numDevices%50)*.5
-		inputDict['runTimeEstimate'] = 'This configuration will take an approximate run time of: ' + str(runTimeDuration) +' minutes.'
+		inputDict['runTimeEstimate'] = 'This configuration will take an approximate run time of: ' + str(4) +' minutes.'
 		#HACK: dump input immediately to show runtime estimate.
 	else:
 		inputDict['runTimeEstimate'] = 'This configuration will take an approximate run time of: 0.5 minutes.'
