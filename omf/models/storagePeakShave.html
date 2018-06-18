@@ -164,7 +164,7 @@
 	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
 		<pre id='errorText' style='overflow-x:scroll'></pre>
 		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {	
+		if (typeof(allInputData.stderr) !== 'undefined') {
 			gebi('stopIndicator').style.visibility = 'visible'
 			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
 		</script>
@@ -240,7 +240,7 @@
 					"plotOptions":{
 						"series":{
 							"animation":false,
-							"pointStart":Date.parse(allOutputData.startDate),
+							"pointStart":Date.UTC(2017, 0, 1),
 							"shadow":false,
 							"pointInterval":3600000},
 						"line":{"marker":{"enabled":false}}},
@@ -277,7 +277,7 @@
 					"plotOptions":{
 						"series":{
 							"animation":false,
-							"pointStart":Date.parse(allOutputData.startDate),
+							"pointStart":Date.UTC(2017, 0, 1),
 							"shadow":false,
 							"pointInterval":3600000},
 						"line":{"marker":{"enabled":false}}},
