@@ -182,8 +182,7 @@ def work(modelDir, inputDict):
 		for row in dischargeGroupByMonth:
 			total = 0
 			for num in row:
-				if num > 0:
-					total += num
+				total += num
 			chargePerMonth.append(total)
 		totalYearlyCharge = sum(chargePerMonth)
 	# Calculations
