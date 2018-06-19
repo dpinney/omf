@@ -88,7 +88,7 @@ def work(modelDir, inputDict):
 		# row['weekday'] = row['datetime'].weekday() # TODO: figure out why we care about this.
 	battSoC = battCapacity
 	for row in dc:
-		outData['startDate'] = dc[0]['datetime'].isoformat()
+		outData['startDate'] = '2011-01-01'#dc[0]['datetime'].isoformat()
 		month = int(row['datetime'].month)-1
 		discharge = min(battDischarge,battSoC)
 		charge = min(battCharge, battCapacity-battSoC)
@@ -109,7 +109,7 @@ def work(modelDir, inputDict):
 	dcGroupByMonth = [[t for t in dc if t['datetime'].month-1==x] for x in range(12)]
 	monthlyCharge = []
 	monthlyDischarge = []
-	#Calculate the monthly energy discharged/charged 
+	#Calculate the monthly energy discharged/charged
 	for row in dischargeGroupByMonth:
 		chargePower = 0
 		dischargePower = 0
@@ -122,7 +122,7 @@ def work(modelDir, inputDict):
 		monthlyDischarge.append(dischargePower)
 	monthlyDischargeSavings = []
 	monthlyChargeCost = []
-	#Calculate the monthly cost to charge and savings by discharging 
+	#Calculate the monthly cost to charge and savings by discharging
 	for row in dcGroupByMonth:
 		chargeCost = 0
 		dischargeSavings = 0

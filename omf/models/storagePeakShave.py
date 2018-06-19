@@ -73,7 +73,7 @@ def work(modelDir, inputDict):
 		row['hour'] = row['datetime'].hour
 		# row['weekday'] = row['datetime'].weekday() # TODO: figure out why we care about this.
 	if dispatchStrategy == "optimal":
-		outData['startDate'] = dc[0]['datetime'].isoformat()
+		outData['startDate'] = '2011-01-01'#dc[0]['datetime'].isoformat()
 		ps = [battDischarge for x in range(12)]
 		dcGroupByMonth = [[t['power'] for t in dc if t['datetime'].month-1==x] for x in range(12)]
 		monthlyPeakDemand = [max(dcGroupByMonth[x]) for x in range(12)]
@@ -105,7 +105,7 @@ def work(modelDir, inputDict):
 			ps = [ps[month]-(battDoD[month] < 0) for month in range(12)]
 		peakShaveSum = sum(ps)
 	elif dispatchStrategy == "daily":
-		outData['startDate'] = dc[0]['datetime'].isoformat()
+		outData['startDate'] = '2011-01-01'#dc[0]['datetime'].isoformat()
 		battSoC = battCapacity
 		for row in dc:
 			month = int(row['datetime'].month)-1
@@ -149,7 +149,7 @@ def work(modelDir, inputDict):
 			else:
 				errorMessage = "Dispatch Strategy file is in an incorrect format. Please see valid format definition at <a target = '_blank' href = 'https://github.com/dpinney/omf/wiki/Models-~-storagePeakShave#custom-dispatch-strategy-file-csv-format'>\nOMF Wiki storagePeakShave - Custom Dispatch Strategy File Format</a>"
 				raise Exception(errorMessage)
-		outData['startDate'] = dc[0]['datetime'].isoformat()
+		outData['startDate'] = '2011-01-01'#dc[0]['datetime'].isoformat()
 		battSoC = battCapacity
 		for row in dc:
 			month = int(row['datetime'].month) - 1
@@ -202,7 +202,7 @@ def work(modelDir, inputDict):
 		outData['SPP'] = (cellCost*cellQuantity)/((peakShaveSum*demandCharge)-(battCapacity*365*retailCost))
 	else:
 		cashFlowCurve = [(peakShaveSum * demandCharge)-(totalYearlyCharge*retailCost) for year in range(projYears)]
-		outData['SPP'] = (cellCost*cellQuantity)/((peakShaveSum*demandCharge)-(totalYearlyCharge*retailCost))		
+		outData['SPP'] = (cellCost*cellQuantity)/((peakShaveSum*demandCharge)-(totalYearlyCharge*retailCost))
 	cashFlowCurve[0]-= (cellCost * cellQuantity)
 	outData['netCashflow'] = cashFlowCurve
 	outData['cumulativeCashflow'] = [sum(cashFlowCurve[0:i+1]) for i,d in enumerate(cashFlowCurve)]
