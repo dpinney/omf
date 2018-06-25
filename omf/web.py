@@ -9,8 +9,10 @@ import models, feeder, network, milToGridlab, cymeToGridlab, signal, weather, an
 import omf
 from omf.calibrate import omfCalibrate
 from omf.loadModelingAmi import writeNewGlmAndPlayers
+from flask_compress import Compress
 
 app = Flask("web")
+Compress(app)
 URL = "http://www.omf.coop"
 _omfDir = os.path.dirname(os.path.abspath(__file__))
 
