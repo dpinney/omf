@@ -37,5 +37,12 @@ New Monitor.monline4  element=line.line4 1    mode=0
 set voltagebases=
 calcvoltagebases  
 
+buscoords file=short_circuit_coords.csv
+
 set  controlmode=off loadmodel=admittanc
 solve mode=dynamics number=5  hour=0  h=.1 sec=0 
+
+set normvminpu=0.90
+set normvmaxpu=1.10
+
+export profile short_circuit_profile.csv

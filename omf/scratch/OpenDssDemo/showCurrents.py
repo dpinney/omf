@@ -38,7 +38,6 @@ def plotGraph():
 	plt.show()
 
 if __name__ == "__main__":
-	dss.run_command("Redirect ./short_circuit.dss")
-	dss.run_command('Solve')
+	dss.run_command('Redirect ./short_circuit.dss')
 	plotGraph()
-	#dss.run_command('Show curr')
+	# dss.run_command('Show curr')
