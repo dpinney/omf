@@ -43,6 +43,7 @@ class DSS:
 # method gets the bus and branch names of the DSS 'circuit' instance
 # also populates the branch currents and bus voltages
     def populate_results(self):
+    	print dss.Bus.NumNodes()
         self.bus = dss.Bus.Name(self.circuit)
         self.branch = Branch(self.circuit)
 
@@ -209,7 +210,7 @@ class Bus:
             y - array (n) - from-bus y location
         """
 # n is set to the number of buses in the circuit
-        n = circuit.NumBuses
+        n = circuit.NumBuses()
 
 # make the x,y, distance, and voltage numpy arrays of length n and set
 # the vslues to all zeros
