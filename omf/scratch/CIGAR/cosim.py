@@ -1,4 +1,4 @@
-import os, urllib, urllib2, subprocess, time, warnings, webbrowser
+import os, signal, urllib, urllib2, subprocess, time, warnings, webbrowser
 from datetime import datetime, timedelta
 
 def parseDt(dtString):
@@ -27,21 +27,25 @@ class Coordinator(object):
 		self.log = []
 		# Step through each time step.
 		for now in stepDts:
-			logEntry = [now]
+			logEntry = {'time':now, 'entries':[]}
 			# At each time step each agent acts.
 			for a in agents:
 				# Send agent's request to GridLAB-D
 				nowStr = writeDt(now)
 				readRequests = a.readStep(nowStr)
 				readResults = self.glw.doRequests(readRequests)
-				logEntry.append([readRequests, readResults])
+				#logEntry.append([readRequests, readResults])
 				# Send results from GridLAB-D back to agent for write step.
-				writeCommands = a.writeStep(nowStr, readResults)
-				writeResults = self.glw.doRequests(writeCommands)
-				logEntry.append([writeCommands,writeResults])
+				writeRequests = a.writeStep(nowStr, readResults)
+				writeResults = self.glw.doRequests(writeRequests)
+				logEntry['entries'].append({'agent': a.agentName, 'requests': readRequests + writeRequests, 'results': readResults + writeResults})
 			self.log.append(logEntry)
 			self.glw.waitUntil(writeDt(now + stepDelta))
 		self.glw.shutdown()
+
+	def returnLog(self):
+		# for testing purposes
+		return self.log
 
 	def drawResults(self, outputPath=None):
 		#return self.log
@@ -108,17 +112,45 @@ class Coordinator(object):
 								<tr>
 									<th>Time</th>"""
 						
-		for x in range(len(self.agents)):
-			temp_str = "<th>Agent"+str(x)+"_Read</th><th>Agent"+str(x)+"_ReadRes</th><th>Agent"+str(x)+"_Write</th><th>Agent"+str(x)+"_WriteRes</th>"
+		for agent in self.agents:
+			temp_str = "<th>"+agent.agentName+" Requests</th><th>"+agent.agentName+" Results</th>"
 			html_str += temp_str
 		html_str += """
 								</tr>
 							</thead>
 							<tbody>"""
 		for row in self.log:
-			row_str = "<tr><td>"+row.pop(0).strftime("%Y-%m-%d %H:%M:%S")+"</td>"
-			for col in row:
-				row_str += "<td>"+str(col[0])+"</td><td>"+str(col[1])+"</td>"
+			row_str = "<tr><td>"+row.get('time').strftime("%Y-%m-%d %H:%M:%S")+"</td>"
+			for agentEntry in row.get('entries'):
+				reqs_str = "<td><p>"
+				agent_reqs = agentEntry.get('requests')
+				if not agent_reqs: #if it's empty (no requests made at the given time)
+					reqs_str += "None"
+				else:
+					for req in agent_reqs:
+						cmd = req.get('cmd')
+						if cmd == 'readClock':
+							reqs_str += "<b>READCLOCK</b><br/>"
+						elif cmd == 'read':
+							temp_str = "<b>READ</b> " + req.get('obName') + " &rarr; " + req.get('propName') + "<br/>"
+							reqs_str += temp_str
+						elif cmd == 'write':
+							temp_str = "<b>WRITE</b> " + req.get('obName') + " &rarr; " + req.get('propName') + " = " + req.get('value') + "<br/>"
+							reqs_str += temp_str
+				reqs_str += "</p></td>"
+				res_str = "<td><p>"
+				agent_res = agentEntry.get('results')
+				if not agent_res: #if it's empty (no results at the given time)
+					res_str += "None"
+				else:
+					for res in agent_res:
+						if 'status' in res:
+							temp_str = "<b>" + res.get('status') + "</b> : " + res.get('obName') + " &rarr; " + res.get('propName') + " = " + res.get('value') + "<br/>"
+						else:
+							temp_str = res.get('obName') + " &rarr; " + res.get('propName') + " = " + res.get('value') + "<br/>"
+						res_str += temp_str 
+				res_str += "</p></td>"
+				row_str += reqs_str + res_str
 			row_str += "</tr>"
 			html_str += row_str
 		html_str += """
@@ -158,9 +190,9 @@ class GridLabWorld(object):
 			if reqType == 'readClock':
 				results.append(self.readClock())
 			elif reqType == 'read':
-				results.append(self.read(obName, propName))
+				results.append({'obName':obName, 'propName':propName, 'value':self.read(obName, propName)})
 			elif reqType == 'write':
-				results.append(self.write(obName, propName, value))
+				results.append({'obName':obName, 'propName':propName, 'value':value, 'status':self.write(obName, propName, value)})
 		return results
 
 	def waitUntil(self, targetTime):
@@ -180,6 +212,7 @@ class GridLabWorld(object):
 	def read(self, obName, propName):
 		'Read a value from the GLD simulation.'
 		try:
+			# print obName + "  " + propName
 			return urllib2.urlopen(self.baseUrl + 'raw/' + obName + '/' + propName).read()
 		except:
 			warnings.warn("Failed to read " + propName + " of " + obName)
@@ -200,6 +233,10 @@ class GridLabWorld(object):
 		except:
 			# TODO: Use Kill -9 to make sure this process is super dead
 			print 'MY PID!', self.procObject.pid
+			# print 'MY GRIDLABD PID!', int(check_output(["pidof", "-s", "gridlabd.bin"]))
+			# HACK: Noticed the value of pid for gridlabd.bin was always 13 greater than the sh pid. Obviously needs to be changed
+			#os.kill(int(self.procObject.pid) + 13, signal.SIGKILL)
+			os.kill(self.procObject.pid, signal.SIGKILL)
 			warnings.warn("Server manually stopped!")
 
 	def resume(self):
@@ -214,12 +251,13 @@ class GridLabWorld(object):
 			urllib2.urlopen(self.baseUrl + 'raw/' + obName + '/' + propName + '=' + value).read()
 			return "WRITE_SUCCESS"
 		except:
-			warnings.warn("Failed to read " + propName + " of " + obName)
-			return "ERROR"
+			warnings.warn("Failed to write " + value + " to " + propName + " of " + obName)
+			return "WRITE_FAILURE"
 
 	def start(self):
 		#TODO: watch out for in-use port.
 		self.procObject = subprocess.Popen(['gridlabd', self.GLM_PATH, '--server', '-P', self.PORT, '-q','--define','pauseat="' + self.START_PAUSE + '"'], stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+		# print 'MY START PID!', self.procObject.pid
 		# HACK: wait for the dang server to start up and simulate.
 		time.sleep(2) #TODO: instead of sleeping, wait 1 second, try to read clock, if it fails then wait 1 more second, loop, etc.
 
@@ -310,6 +348,28 @@ def _test6():
 	#agents.append(cyberAttack.ReadIntervalAttackAgent('2000-01-02 06:00:00', '2000-01-02 18:00:00', 'inverter_2', 'V_In'))
 	print 'Starting co-sim with a DefendByValueAgent and a CopycatAgent.'
 	coord = Coordinator(agents, cosimProps)
+	print coord.returnLog()
+	# print coord.drawPrettyResults()
+
+def _test7():
+	# test with ReadMultAttackAgent
+	import cyberAttack
+	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
+	agents = [cyberAttack.ReadMultAttackAgent('2000-01-01 01:00:00', 'tm_1', ['measured_power','measured_real_energy'])]
+	print 'Starting co-sim with 1 ReadMultAttackAgent.'
+	coord = Coordinator(agents, cosimProps)
+	print coord.drawPrettyResults()
+
+def _test8():
+	# test with ReadMultAttackAgent and WriteMultAttackAgent
+	import cyberAttack
+	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
+	agents = []
+	agents.append(cyberAttack.ReadMultAttackAgent('ReadMultAttackAgent_1', '2000-01-01 01:00:00', 'tm_1', ['measured_power','measured_real_energy']))
+	agents.append(cyberAttack.WriteMultAttackAgent('WriteMultAttackAgent_1', '2000-01-01 02:00:00', 'tm_1', [{'obPropToAttack':'measured_power', 'value':'0.0'}, {'obPropToAttack':'measured_real_energy', 'value':'0.0'}]))
+	print 'Starting co-sim with 1 ReadMultAttackAgent and 1 WriteMultAttackAgent.'
+	coord = Coordinator(agents, cosimProps)
+	#print coord.returnLog()
 	print coord.drawPrettyResults()
 
 def _testfault():
@@ -318,6 +378,6 @@ def _testfault():
 	agents = []
 
 if __name__ == '__main__':
-	# _test6()
+	_test8()
 	thisDir = os.path.dirname(__file__)
 	webbrowser.open_new("file://" + thisDir + "/AgentLog/output.html")
