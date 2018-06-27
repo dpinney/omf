@@ -6,15 +6,15 @@ import pip
 
 def calculateGraph(df, phase=1):
 	graph = nx.Graph()
+	print df
 	positions = None
 	data = df[['Bus1', 'Bus2']].to_dict(orient="index")
 	for key in data:
 		voltage_line = data[key]
 		graph.add_edge(voltage_line["Bus1"].split(".")[0], voltage_line["Bus2"].split(".")[0])
 	positions = {}
-	print dss.Circuit.AllBusNames()  # BUG HERE
-#	for name in dss.Circuit.AllBusNames():
-#		print name
+	print data
+	for name in dss.Circuit.AllBusNames():
 	#	dss.Circuit.SetActiveBus(name)
 	#	if phase in dss.Bus.Nodes():
 	#		index = dss.Bus.Nodes().index(phase)
@@ -38,5 +38,7 @@ def plotGraph():
 
 if __name__ == "__main__":
 	dss.run_command('Redirect ./IEEE37.dss')
+	dss.run_command('Compile ./IEEE37.dss')
+	dss.run_command('Solv ./IEEE37.dss')
 	plotGraph()
 	dss.run_command('Show voltages')
