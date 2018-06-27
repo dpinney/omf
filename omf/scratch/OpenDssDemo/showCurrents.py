@@ -8,24 +8,19 @@ import pip
 
 
 def calculateGraph(df, phase=1):
-	print len(dss.CktElement.Currents())
-	print len(dss.Bus.Isc())
-	print dss.Bus.Isc()
-	print dss.Bus.NumNodes()
 	graph = nx.Graph()
 	data = df[['Bus1', 'Bus2']].to_dict(orient="index")
 	for key in data:
 		voltage_line = data[key]
 		graph.add_edge(voltage_line["Bus1"].split(".")[0], voltage_line["Bus2"].split(".")[0])
 	positions = {}
+	i = 0
 	for name in dss.Circuit.AllBusNames():
-		i = 0
 		dss.Circuit.SetActiveBus(name)
-		if phase in dss.Bus.Nodes():
-			current = dss.Circuit.YCurrents()[i]
-			distance = dss.Bus.Distance()
-			positions[dss.Bus.Name()] = (distance, current)
-			i += 1
+		current = dss.Circuit.YCurrents()[i]
+		distance = dss.Bus.Distance()
+		positions[dss.Bus.Name()] = (distance, current)
+		i += 2
 	return graph, positions
 
 def plotGraph():
@@ -44,7 +39,4 @@ if __name__ == "__main__":
 	dss.run_command("Redirect ./short_circuit.dss")
 	dss.run_command('Solve')
 	plotGraph()
-	print  dss.Bus.PuVoltage()
-	print dss.Circuit.YCurrents()
-
-	dss.run_command('Show curr')
+	#dss.run_command('Show curr')
