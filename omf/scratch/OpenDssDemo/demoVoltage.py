@@ -19,15 +19,13 @@ def calculateGraph(df, phase=1):
 			voltage = abs(complex(re, im))
 			distance = dss.Bus.Distance()
 			positions[dss.Bus.Name()] = (distance, voltage)
-	print graph
 	return graph, positions
 
 def plotGraph():
 	lines = dss.utils.lines_to_dataframe()
 	graph, position = calculateGraph(lines)
 	fig, ax = plt.subplots(1, 1, figsize=(16, 10))
-	print position
-	#nx.draw_networkx_nodes(graph, position, labels={x: x for x in graph.nodes()})
+	nx.draw_networkx_nodes(graph, position, labels={x: x for x in graph.nodes()})
 	#nx.draw_networkx_nodes(graph, position, labels={x: x for x in graph.nodes()})
 	#nx.draw_networkx_nodes(graph, position, labels={x: x for x in graph.nodes()})
 	#ax.set_xlabel('Distances [km]')
@@ -38,6 +36,6 @@ def plotGraph():
 if __name__ == "__main__":
 	dss.run_command('Redirect ./IEEE37.dss')
 	dss.run_command('Compile ./IEEE37.dss')
-	dss.run_command('Solv ./IEEE37.dss')
+	dss.run_command('Solve ./IEEE37.dss')
 	plotGraph()
 	dss.run_command('Show voltages')
