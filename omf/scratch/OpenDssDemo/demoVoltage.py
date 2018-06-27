@@ -6,6 +6,7 @@ import pip
 
 def calculateGraph(df, phase=1):
 	graph = nx.Graph()
+	print df
 	data = df[['Bus1', 'Bus2']].to_dict(orient="index")
 	for key in data:
 		voltage_line = data[key]
@@ -18,7 +19,6 @@ def calculateGraph(df, phase=1):
 			re, im = dss.Bus.PuVoltage()[index:index+2]
 			voltage = abs(complex(re, im))
 			distance = dss.Bus.Distance()
-			print distance
 			positions[dss.Bus.Name()] = (distance, voltage)
 	return graph, positions
 
@@ -35,37 +35,10 @@ def plotGraph():
 	plt.show()
 
 if __name__ == "__main__":
-	dss.run_command('Redirect ./short_circuit.dss')
-	dss.run_command('New EnergyMeter.Main Line.650632 1')
-	'''
-    dss.run_command(
-        "New Storage.{bus_name} Bus1={bus_name} phases=1 kV=2.2 kWRated={rating} kWhRated={kwh_rating} kWhStored={initial_state} %IdlingkW=0 %reserve=0 %EffCharge=100 %EffDischarge=100 State=CHARGING".format(
-        bus_name='675',
-        rating=20,
-        kwh_rating=20,
-        initial_state=20
-    ))
-    '''
-
-	'''
-    dss.run_command(
-        "New Storage.{bus_name} Bus1={bus_name} phases=1 kV=2.2 kWRated={rating} kWhRated={kwh_rating} kWhStored={initial_state} %IdlingkW=0 %reserve=0 %EffCharge=100 %EffDischarge=100 State=CHARGING".format(
-        bus_name='611',
-        rating=20,
-        kwh_rating=20,
-        initial_state=20
-    ))
-    '''
-	dss.run_command('Solve')
-	'''
-    dss.run_command('Clear')
-	dss.run_command('New Circuit.MyCircuit  BasekV=0.6')
-	dss.run_command('New line.MyLine Bus1=SourceBus  Bus2=LoadBus R1=1 X1=0.5 R0=1 X0=0.5 Length=1')
-	dss.run_command('New Load.MyLoad Bus1=LoadBus kV=0.6 kW=3 PF=0.6')
-	dss.run_command('Show voltages')
-	dss.run_command('Show curr')
-	dss.run_command('Show powers')
-	dss.run_command('Show losses')
-	'''
+	dss.run_command('Redirect ./IEEE37.dss')
+	dss.run_command('Redirect')
 	plotGraph()
-	print dss.Vsources.PU()
+#	dss.run_command('Show voltages')
+#	dss.run_command('Show curr')
+#	dss.run_command('Show powers')
+#	dss.run_command('Show losses')

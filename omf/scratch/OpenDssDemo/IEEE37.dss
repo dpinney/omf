@@ -100,12 +100,12 @@ Set VoltageBases = "230,4.8,0.48"
 CalcVoltageBases
 BusCoords IEEE37_BusXY.csv
 
-! solve mode=direct
+solve mode=direct
 set maxiterations=100
 solve
 
-! show voltages LL Nodes
-! show currents residual=y elements
-! show powers kva elements
-! show taps
+show voltages LL Nodes
+show currents residual=y elements
+show powers kva elements
+show taps
 

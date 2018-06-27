@@ -8,21 +8,24 @@ import pip
 
 
 def calculateGraph(df, phase=1):
+	print len(dss.CktElement.Currents())
+	print len(dss.Bus.Isc())
+	print dss.Bus.Isc()
+	print dss.Bus.NumNodes()
 	graph = nx.Graph()
 	data = df[['Bus1', 'Bus2']].to_dict(orient="index")
 	for key in data:
 		voltage_line = data[key]
 		graph.add_edge(voltage_line["Bus1"].split(".")[0], voltage_line["Bus2"].split(".")[0])
 	positions = {}
-	print dss.CktElement.Currents()
 	for name in dss.Circuit.AllBusNames():
+		i = 0
 		dss.Circuit.SetActiveBus(name)
 		if phase in dss.Bus.Nodes():
-			index = dss.Bus.Nodes().index(phase)
-			current = dss.CktElement.Currents()
-			print current
+			current = dss.Circuit.YCurrents()[i]
 			distance = dss.Bus.Distance()
 			positions[dss.Bus.Name()] = (distance, current)
+			i += 1
 	return graph, positions
 
 def plotGraph():
@@ -33,8 +36,8 @@ def plotGraph():
 	nx.draw_networkx_nodes(graph, position, labels={x: x for x in graph.nodes()})
 	nx.draw_networkx_nodes(graph, position, labels={x: x for x in graph.nodes()})
 	ax.set_xlabel('Distances [km]')
-	ax.set_ylabel('Voltage [P.u]')
-	ax.set_title('VOLTAGE PROFILE')
+	ax.set_ylabel('Current [P.u]')
+	ax.set_title('Current PROFILE')
 	plt.show()
 
 if __name__ == "__main__":
