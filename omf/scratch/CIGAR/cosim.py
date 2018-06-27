@@ -1,5 +1,6 @@
 import os, signal, urllib, urllib2, subprocess, time, warnings, webbrowser
 from datetime import datetime, timedelta
+from httplib import BadStatusLine
 
 def parseDt(dtString):
 	'Parse GridLAB-D date time strings'
@@ -230,14 +231,11 @@ class GridLabWorld(object):
 		'Stop simulation.'
 		try:
 			return urllib2.urlopen(self.baseUrl + 'control/shutdown').read()
+		except BadStatusLine: #HACK: this is what GridLAB-D returns when shutdown succeeds. Sigh.
+			return None
 		except:
-			# TODO: Use Kill -9 to make sure this process is super dead
-			print 'MY PID!', self.procObject.pid
-			# print 'MY GRIDLABD PID!', int(check_output(["pidof", "-s", "gridlabd.bin"]))
-			# HACK: Noticed the value of pid for gridlabd.bin was always 13 greater than the sh pid. Obviously needs to be changed
-			#os.kill(int(self.procObject.pid) + 13, signal.SIGKILL)
-			os.kill(self.procObject.pid, signal.SIGKILL)
-			warnings.warn("Server manually stopped!")
+			warning.warn("Server failed to stop!")
+			return "ERROR"
 
 	def resume(self):
 		try:
@@ -289,7 +287,7 @@ def _test():
 	#	print '* Reading battery_1 state of charge:', glw.read('battery_1' + 'battery_state')
 	print '* Reading inverter_1 input voltage (V_In):', glw.read('inverter_1','V_In')
 	# Stop the simulation.
-	# shutdown()
+	glw.shutdown()
 	# proc.kill() # For those hard-to-stop servers.
 
 def _test2():
@@ -375,6 +373,6 @@ def _testfault():
 	agents = []
 
 if __name__ == '__main__':
-	_test6()
+	_test()
 	thisDir = os.path.dirname(__file__)
 	webbrowser.open_new("file://" + thisDir + "/AgentLog/output.html")
