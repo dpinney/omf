@@ -97,7 +97,7 @@ class WriteAttackAgent(object):
 
 class WriteMultAttackAgent(object):
 	__slots__ = 'agentName', 'attackTime', 'obNameToAttack', 'obPropsAndTargets'
-	# e.g. e.g. "agent1", "2000-01-02 16:00:00", "tm_1", [{"obPropToAttack":"measured_real_energy", "value":"0.0"}, {{"obPropToAttack":"measured_power", "value":"0.0"}}
+	# e.g. e.g. "agent1", "2000-01-02 16:00:00", "tm_1", [{"obPropToAttack":"measured_real_energy", "value":"0.0"}, {"obPropToAttack":"measured_power", "value":"0.0"}]
 
 	def __init__(self, agentName, attackTime, obNameToAttack, obPropsAndTargets):
 		self.agentName = agentName
@@ -141,7 +141,7 @@ class WriteIntervalAttackAgent(object):
 
 class DefendByValueAgent(object):
 	__slots__ = 'agentName', 'obNameToDefend', 'obPropToDefend', 'propTarget'
-	# e.g. "Test_inverter_1", "V_Out", "3.0"
+	# e.g. 'DefendByValueAgent1', "Test_inverter_1", "V_Out", "3.0"
 
 	def __init__(self, agentName, obNameToDefend, obPropToDefend, propTarget):
 		self.agentName = agentName
@@ -153,23 +153,22 @@ class DefendByValueAgent(object):
 		return [{'cmd':'read','obName':self.obNameToDefend,'propName':self.obPropToDefend}]
 
 	def writeStep(self, time, rezList):
-		temp = rezList.pop()
-		rezList.append(temp)
-		if temp != self.propTarget:
-			return [{'cmd':'write','obName':self.obNameToDefend,'propName':self.obPropToDefend,'value':self.propTarget}]
+		for rez in rezList:
+			if (rez.get('obName') == self.obNameToDefend) and (rez.get('propName') == self.obPropToDefend):
+				if rez.get('value') != self.propTarget:
+					return [{'cmd':'write','obName':self.obNameToDefend,'propName':self.obPropToDefend,'value':self.propTarget}]
 		return []
 
 class CopycatAgent(object):
-	__slots__ = 'agentName', 'attackTime', 'obNameToCopy', 'obPropToCopy', 'obNameToPaste', 'obPropToPaste'
-	# e.g. "solar_1", "V_Out", "solar_2", "V_Out"
+	__slots__ = 'agentName', 'attackTime', 'obNameToCopy', 'obPropToCopy', 'obDetailsToChange'
+	# e.g. 'copycat1', 'solar_1', 'V_Out', [{'obNameToPaste':'solar_2', 'obPropToPaste': 'V_Out'}]
 
-	def __init__(self, agentName, attackTime, obNameToCopy, obPropToCopy, obNameToPaste, obPropToPaste):
+	def __init__(self, agentName, attackTime, obNameToCopy, obPropToCopy, obDetailsToChange):
 		self.agentName = agentName
 		self.attackTime = attackTime
 		self.obNameToCopy = obNameToCopy
 		self.obPropToCopy = obPropToCopy
-		self.obNameToPaste = obNameToPaste
-		self.obPropToPaste = obPropToPaste
+		self.obDetailsToChange = obDetailsToChange
 
 	def readStep(self, time):
 		if time == self.attackTime:
@@ -178,7 +177,15 @@ class CopycatAgent(object):
 
 	def writeStep(self, time, rezList):
 		if time == self.attackTime:
-			temp = rezList.pop()
-			rezList.append(temp)
-			return [{'cmd':'write','obName':self.obNameToPaste,'propName':self.obPropToPaste,'value':temp}]
+			for rez in rezList:
+				if (rez.get('obName') == self.obNameToCopy) and (rez.get('propName') == self.obPropToCopy):
+					writeReqs = []
+					for obNameAndProp in self.obDetailsToChange:
+						obNameToPaste = obNameAndProp.get('obNameToPaste')
+						obPropToPaste = obNameAndProp.get('obPropToPaste')
+						writeReqs.append({'cmd':'write','obName':obNameToPaste,'propName':obPropToPaste,'value':rez.get('value')})
+					return writeReqs
 		return []
+
+
+

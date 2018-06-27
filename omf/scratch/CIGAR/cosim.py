@@ -342,14 +342,12 @@ def _test6():
 	import cyberAttack
 	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
 	agents = []
-	#agents.append(cyberAttack.ReadIntervalAttackAgent('2000-01-02 06:00:00', '2000-01-02 18:00:00', 'solar_2', 'area'))
-	agents.append(cyberAttack.DefendByValueAgent('solar_2', 'area', '+323 sf'))
-	agents.append(cyberAttack.CopycatAgent('2000-01-02 12:00:00', 'solar_1', 'area', 'solar_2', 'area'))
+	agents.append(cyberAttack.DefendByValueAgent('defendAreaAgent', 'solar_2', 'area', '+323 sf'))
+	agents.append(cyberAttack.CopycatAgent('copycat1', '2000-01-02 12:00:00', 'solar_1', 'area', [{'obNameToPaste':'solar_2', 'obPropToPaste': 'area'}]))
 	#agents.append(cyberAttack.ReadIntervalAttackAgent('2000-01-02 06:00:00', '2000-01-02 18:00:00', 'inverter_2', 'V_In'))
 	print 'Starting co-sim with a DefendByValueAgent and a CopycatAgent.'
 	coord = Coordinator(agents, cosimProps)
-	print coord.returnLog()
-	# print coord.drawPrettyResults()
+	print coord.drawPrettyResults()
 
 def _test7():
 	# test with ReadMultAttackAgent
@@ -369,7 +367,6 @@ def _test8():
 	agents.append(cyberAttack.WriteMultAttackAgent('WriteMultAttackAgent_1', '2000-01-01 02:00:00', 'tm_1', [{'obPropToAttack':'measured_power', 'value':'0.0'}, {'obPropToAttack':'measured_real_energy', 'value':'0.0'}]))
 	print 'Starting co-sim with 1 ReadMultAttackAgent and 1 WriteMultAttackAgent.'
 	coord = Coordinator(agents, cosimProps)
-	#print coord.returnLog()
 	print coord.drawPrettyResults()
 
 def _testfault():
@@ -378,6 +375,6 @@ def _testfault():
 	agents = []
 
 if __name__ == '__main__':
-	_test8()
+	_test6()
 	thisDir = os.path.dirname(__file__)
 	webbrowser.open_new("file://" + thisDir + "/AgentLog/output.html")
