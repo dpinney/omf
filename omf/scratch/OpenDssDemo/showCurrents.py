@@ -16,11 +16,13 @@ def calculateGraph(df, phase=1):
 	positions = {}
 	i = 0
 	for name in dss.Circuit.AllBusNames():
-		dss.Circuit.SetActiveBus(name)
-		current = dss.Circuit.YCurrents()[i]
-		distance = dss.Bus.Distance()
-		positions[dss.Bus.Name()] = (distance, current)
-		i += 2
+		if phase in dss.Bus.Nodes():
+			index = dss.Bus.Nodes().index(phase)
+			re, im = dss.Bus.PuVoltage()[index:index+2]
+			dss.Circuit.SetActiveBus(name)
+			current = abs(complex(re, im))
+			distance = dss.Bus.Distance()
+			positions[dss.Bus.Name()] = (distance, current)
 	return graph, positions
 
 def plotGraph():

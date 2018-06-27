@@ -6,28 +6,27 @@ import pip
 
 def calculateGraph(df, phase=1):
 	graph = nx.Graph()
-	print df
-	positions = None
 	data = df[['Bus1', 'Bus2']].to_dict(orient="index")
 	for key in data:
 		voltage_line = data[key]
 		graph.add_edge(voltage_line["Bus1"].split(".")[0], voltage_line["Bus2"].split(".")[0])
 	positions = {}
-	print data
 	for name in dss.Circuit.AllBusNames():
-	#	dss.Circuit.SetActiveBus(name)
-	#	if phase in dss.Bus.Nodes():
-	#		index = dss.Bus.Nodes().index(phase)
-	#		re, im = dss.Bus.PuVoltage()[index:index+2]
-	#		voltage = abs(complex(re, im))
-	#		distance = dss.Bus.Distance()
-	#		positions[dss.Bus.Name()] = (distance, voltage)
+		dss.Circuit.SetActiveBus(name)
+		if phase in dss.Bus.Nodes():
+			index = dss.Bus.Nodes().index(phase)
+			re, im = dss.Bus.PuVoltage()[index:index+2]
+			voltage = abs(complex(re, im))
+			distance = dss.Bus.Distance()
+			positions[dss.Bus.Name()] = (distance, voltage)
+	print graph
 	return graph, positions
 
 def plotGraph():
 	lines = dss.utils.lines_to_dataframe()
 	graph, position = calculateGraph(lines)
-	#fig, ax = plt.subplots(1, 1, figsize=(16, 10))
+	fig, ax = plt.subplots(1, 1, figsize=(16, 10))
+	print position
 	#nx.draw_networkx_nodes(graph, position, labels={x: x for x in graph.nodes()})
 	#nx.draw_networkx_nodes(graph, position, labels={x: x for x in graph.nodes()})
 	#nx.draw_networkx_nodes(graph, position, labels={x: x for x in graph.nodes()})
