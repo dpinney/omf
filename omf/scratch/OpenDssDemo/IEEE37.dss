@@ -107,5 +107,4 @@ set maxiterations=100
 solve
 
 Export Voltages Volts.csv
-Export Currents Currents.csv
 
