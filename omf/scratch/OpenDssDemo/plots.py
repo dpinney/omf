@@ -13,4 +13,6 @@ for index, row in coord.iterrows():
 coord['radius'] = hyp
 voltageDF = pd.merge(coord, voltage, on='Bus')
 plt.scatter(voltageDF['radius'], voltageDF[' pu1'])
+plt.xlabel('RADIUS')
+plt.ylabel('VOLTS')
 plt.show()
