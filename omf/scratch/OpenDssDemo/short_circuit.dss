@@ -46,4 +46,4 @@ set normvminpu=0.90
 set normvmaxpu=1.10
 
 export profile short_circuit_profile.csv
-export Currents Currents.csv
+export Currents short_currents.csv
