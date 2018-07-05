@@ -107,4 +107,4 @@ set maxiterations=100
 solve
 
 Export Voltages Volts.csv
-
+Export Circuit circuits.csv
