@@ -9,6 +9,5 @@ col_names = ['Bus', 'X', 'Y']
 coord = pd.read_csv('IEEE37_BusXY.csv', names=col_names)
 bus_x, bus_y = coord.iloc[:, 1].values, coord.iloc[:, 2].values
 x_start, x_end, y_start, y_end = [zeros(len(coord))] * 4
-#print dss.Topology.AllLoopedPairs()
-
-
+print dss.PDElements.Count()
+print dss.Bus.NumNodes()

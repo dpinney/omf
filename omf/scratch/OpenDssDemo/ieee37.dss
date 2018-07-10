@@ -7,8 +7,6 @@ Clear
 New object=circuit.ieee37
 ~ basekv=230 pu=1.00 MVAsc3=200000 MVAsc1=210000
 
-
-
 ! Substation Transformer
 New Transformer.SubXF Phases=3 Windings=2 Xhl=8
 ~ wdg=1 bus=sourcebus conn=Delta kv=230   kva=2500   %r=1
@@ -102,9 +100,23 @@ Set VoltageBases = "230,4.8,0.48"
 CalcVoltageBases
 BusCoords IEEE37_BusXY.csv
 
-solve mode=direct
+
+
+calcincmatrix_o
+Export IncMatrix     ! Exports the incidence branch to node matrix (only the non-zero elements and their coordinates)
+Export IncMatrixRow links.csv  ! Exports the name of the rows (link branches)
+Export IncMatrixCols ! Exports the name of the cols (buses)
+
+
+! solve mode=direct
 set maxiterations=100
 solve
 
-Export Voltages Volts.csv
-Export Circuit circuits.csv
+Export profile profile.csv
+Export voltages volts.csv
+
+! show voltages LL Nodes
+! show currents residual=y elements
+! show powers kva elements
+! show taps
+
