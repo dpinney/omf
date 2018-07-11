@@ -114,6 +114,7 @@ solve
 
 Export profile profile.csv
 Export voltages volts.csv
+Export current current.csv
 
 ! show voltages LL Nodes
 ! show currents residual=y elements

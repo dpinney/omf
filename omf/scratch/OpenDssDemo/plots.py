@@ -13,10 +13,15 @@ for index, row in volt_coord.iterrows():
 	volt_hyp.append(math.sqrt(row['X']**2 + row['Y']**2))
 volt_coord['radius'] = volt_hyp
 voltageDF = pd.merge(volt_coord, voltage, on='Bus')
-plt.scatter(voltageDF['radius'], voltageDF[' pu1'])
-plt.xlabel('RADIUS')
-plt.ylabel('VOLTS')
-plt.show()
+for i in range(1, 4):
+	ind = ' pu' + str(i)
+	plt.scatter(voltageDF['radius'], voltageDF[ind])
+	plt.xlabel('RADIUS')
+	plt.ylabel('VOLTS')
+	plt.title('FOR ' + ind)
+	plt.show()
+
+
 
 
 dss.run_command('Redirect short_circuit.dss')
@@ -32,3 +37,4 @@ plt.scatter(currentDF['radius'], currentDF[' I1_1'])
 plt.xlabel('RADIUS')
 plt.ylabel('CURRENT')
 plt.show()
+
