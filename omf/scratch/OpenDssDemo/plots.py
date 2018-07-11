@@ -14,13 +14,12 @@ for index, row in volt_coord.iterrows():
 volt_coord['radius'] = volt_hyp
 voltageDF = pd.merge(volt_coord, voltage, on='Bus')
 for i in range(1, 4):
-	ind = ' pu' + str(i)
-	plt.scatter(voltageDF['radius'], voltageDF[ind])
+	volt_ind = ' pu' + str(i)
+	plt.scatter(voltageDF['radius'], voltageDF[volt_ind])
 	plt.xlabel('RADIUS')
 	plt.ylabel('VOLTS')
-	plt.title('FOR ' + ind)
+	plt.title('FOR ' + volt_ind)
 	plt.show()
-
 
 
 
@@ -33,8 +32,13 @@ for index, row in curr_coord.iterrows():
 	curr_hyp.append(math.sqrt(row['X']**2 + row['Y']**2))
 curr_coord['radius'] = curr_hyp
 currentDF = pd.concat([curr_coord, current], axis=1)
-plt.scatter(currentDF['radius'], currentDF[' I1_1'])
-plt.xlabel('RADIUS')
-plt.ylabel('CURRENT')
-plt.show()
+for i in range(1, 3):
+	for j in range(1, 4):
+		cur_ind = ' I' + str(i) + '_' + str(j)
+		plt.scatter(currentDF['radius'], currentDF[cur_ind])
+		plt.xlabel('RADIUS')
+		plt.ylabel('CURRENT')
+		plt.title('FOR ' +  cur_ind)
+		plt.show()
+
 
