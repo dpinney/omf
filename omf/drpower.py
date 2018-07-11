@@ -32,8 +32,7 @@ def transmissionConvert(owner, modelName):
 
 def powerPublish(owner, modelName):
 	'Hook to pull data back to DRPOWER main repository.'
-	#TODO: return web.redirect('drpowerHost.com/publishCallback/userName/directoryName/')
-	return 'PNNL PUBLICATION URL GOES HERE'
+	return web.redirect('DRP_PLACEHOLDER_DRP' + '/' + owner + '/' + modelName)
 
 def injectUser(email, passwordHash, modelName):
 	'Create a new user and log that user in. Note that hash should be pbkdf2_sha512'
