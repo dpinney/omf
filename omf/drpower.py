@@ -3,9 +3,9 @@ import omf, os, web, json
 def sigh():
 	return 'SIGH'
 
-def transmissionConvert(owner, modelName):
+def transmissionConvert(owner, modelName, fileName):
 	'First, DRPOWER creates a new transmission model folder.' + \
-	'Then it places an .m file in that folder named convertMe.m' + \
+	'Then it places an .m file in that folder named fileName' + \
 	'Then send a request to this route and redirect the user accordingly'
 	# Model folder full path.
 	modelDir = os.path.join(omf.omfDir, 'data', 'Model', owner, modelName)
@@ -17,7 +17,7 @@ def transmissionConvert(owner, modelName):
 		except:
 			pass # Ignore deletion failure.
 	# Convert and lay out the new file.
-	netJson = omf.network.parse(os.path.join(modelDir, 'convertMe.m'), filePath=True)
+	netJson = omf.network.parse(os.path.join(modelDir, fileName), filePath=True)
 	omf.network.layout(netJson)
 	with open(os.path.join(modelDir,'case.omt'),'w') as outFile:
 		json.dump(netJson, outFile)
@@ -47,7 +47,7 @@ if __name__ == '__main__':
 	model_files = ['models/' + x for x in web.safeListdir('models')]
 	# Add routes.
 	web.app.add_url_rule('/sigh', 'sigh', view_func=sigh)
-	web.app.add_url_rule('/transmissionConvert/<owner>/<modelName>/', 'transmissionConvert', view_func=transmissionConvert)
+	web.app.add_url_rule('/transmissionConvert/<owner>/<modelName>/<fileName>', 'transmissionConvert', view_func=transmissionConvert)
 	web.app.add_url_rule('/publishModel/<owner>/<modelName>/', 'powerPublish', methods=['POST'], view_func=powerPublish)
 	web.app.add_url_rule('/injectUser/<email>/<passwordHash>/<modelName>/', 'injectUser', view_func=injectUser)
 	# def crash(): raise Exception
