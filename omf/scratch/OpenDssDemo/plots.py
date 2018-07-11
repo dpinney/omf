@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import math
 
 
-dss.run_command('Redirect IEEE37.dss')
+dss.run_command('Redirect ieee37.dss')
 voltage = pd.read_csv('volts.csv')
 volt_coord_cols = ['Bus', 'X', 'Y']
 volt_coord = pd.read_csv('IEEE37_BusXY.csv', names=volt_coord_cols)
