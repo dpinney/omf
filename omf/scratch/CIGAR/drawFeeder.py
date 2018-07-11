@@ -16,8 +16,8 @@ for obj in feed.values():
 print x
 
 # Draw it.
-omf.feeder.latLonNxGraph(omf.feeder.treeToNxGraph(feed), labels=False, neatoLayout=True, showPlot=False)
-plt.savefig('blah.png')
+# omf.feeder.latLonNxGraph(omf.feeder.treeToNxGraph(feed), labels=False, neatoLayout=True, showPlot=False)
+# plt.savefig('blah.png')
 
 def voltPlot(glmPath, workDir=None, neatoLayout=False):
 	''' Draw a color-coded map of the voltage drop on a feeder.
@@ -101,7 +101,13 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 	plt.colorbar()
 	return voltChart
 
+# Test code for parsing/modifying feeders.
+# tree = omf.feeder.parse('smsSingle.glm')
+# tree[35]['name'] = 'OH NO CHANGED'
+# from pprint import pprint as pp
+# pp(tree)
+
 # Viz it interactively.
-sys.path.append('../distNetViz/')
-import distNetViz
-distNetViz.viz(FNAME, forceLayout=True, outputPath=None)
+# sys.path.append('../distNetViz/')
+# import distNetViz
+# distNetViz.viz(FNAME, forceLayout=True, outputPath=None)
