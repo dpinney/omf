@@ -3,7 +3,7 @@ USAGE
 2. weather.py, weather.pyc used to generate weatheryearDCA.csv and called in IEEE_quickhouse.glm
 3. python script used to generate these plots is regulator_meter_plots.py.
 	NOTE: to enable X Server and pop out image, comment %matplotlib inline
-4. Seperate plots are saved a .png
+4. Separate plots are saved a .png
 
 TODO
 OOO Get aGosedWeather.py running its tests.
