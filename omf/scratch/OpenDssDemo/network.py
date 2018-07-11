@@ -15,7 +15,7 @@ for index, row in bus_coord.iterrows(): # Get the coordinates.
 	G.add_node(row['Bus'])
 	pos[row['Bus']] = (row['X'], row['Y'])
 
-
+volt_values = {}
 for index, row in volts.iterrows(): # We'll color the nodes according to voltage. FIX: pu1?
 	if row['Bus'] == '799R':
 		row['Bus'] = '799r'
