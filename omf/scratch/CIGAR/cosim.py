@@ -369,10 +369,13 @@ def _test8():
 
 def _testfault():
 	import cyberAttack
-	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./Exercise_4_2_1.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-01 15:00:00', 'stepSizeSeconds':3600}
+	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./Exercise_4_2_1.glm', 'startTime':'2000-01-01 05:00:00','endTime':'2000-01-01 05:30:00', 'stepSizeSeconds':60}
 	agents = []
+	agents.append(cyberAttack.ReadIntervalAttackAgent('FaultChecker', '2000-01-01 05:02:00', '2000-01-01 05:12:00', 'node711-741', 'conductor_resistance'))
+	coord = Coordinator(agents, cosimProps)
+	print coord.drawPrettyResults()
 
 if __name__ == '__main__':
-	_test()
+	_testfault()
 	thisDir = os.path.dirname(__file__)
 	webbrowser.open_new("file://" + thisDir + "/AgentLog/output.html")
