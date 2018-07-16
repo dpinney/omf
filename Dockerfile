@@ -4,9 +4,9 @@ FROM ubuntu:16.04
 MAINTAINER <david.pinney@nreca.coop>
 
 # Install and setup OMF reqs
-RUN apt-get -y update && apt-get install -y python-pip git unixodbc-dev libfreetype6-dev pkg-config python-dev python-numpy alien python-pygraphviz python-pydot ffmpeg mdbtools python-cairocffi octave graphviz python-scipy libblas-dev liblapack-dev libatlas-base-dev gfortran
+RUN apt-get -y update && apt-get install -y git python sudo
 RUN cd home; git clone --depth 1 https://github.com/dpinney/omf
-RUN cd home/omf; python setup.py develop
+RUN cd home/omf; python install.py
 
 # Make sure the docker instance listens externally
 RUN sed -i -e 's/host="127.0.0.1"/host="0.0.0.0"/g' /home/omf/omf/web.py
@@ -19,7 +19,7 @@ CMD ["web.py"]
 # INSTRUCTIONS
 # ============
 # - Navigate to this directory
-# - Build image with command `docker -t <chooseAnImageName> build .`
+# - Build image with command `docker build . -t <chooseAnImageName>`
 # - Run image in background with `docker run -d -p 5000:5000 --name <chooseContainerName> <imageNameFromAbove>`
 # - View at http://127.0.0.1:5000
 # - Stop it with `docker stop <containerNameFromAbove` and remove it with `docker rm <containerNameFromAbove>`.

@@ -2,11 +2,11 @@ import platform, os, sys
 
 # Note: all installations require git to clone the omf first.
 if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu","debian"]:
-	os.system("sudo apt-get install python-pip git unixodbc-dev libfreetype6-dev \
+	os.system("sudo apt-get -y install python-pip git unixodbc-dev libfreetype6-dev \
 	pkg-config python-dev python-numpy alien graphviz python-pygraphviz libgraphviz-dev \
 	python-pydot mdbtools python-tk octave libblas-dev liblapack-dev libatlas-base-dev gfortran wget")
 	try:
-		os.system("sudo apt-get install ffmpeg python-cairocffi")
+		os.system("sudo apt-get -y install ffmpeg python-cairocffi")
 	except:
 		pass # Debian won't bundle a couple packages.
 	os.system("wget https://ufpr.dl.sourceforge.net/project/gridlab-d/gridlab-d/Candidate%20release/gridlabd-4.0.0-1.el6.x86_64.rpm")
