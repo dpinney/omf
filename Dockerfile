@@ -1,5 +1,5 @@
 # A Dockerfile for running the Open Modeling Framework
-# Tested on 19 April 2018 with Docker Version 18.03.0-ce-mac60 (23751)
+# Tested on 16 July 2018 with Docker Version 18.03.1-ce-mac65 (24312)
 FROM ubuntu:16.04
 MAINTAINER <david.pinney@nreca.coop>
 
