@@ -19,14 +19,13 @@ CMD ["web.py"]
 # INSTRUCTIONS
 # ============
 # - Navigate to this directory
-# - Build image with command `docker build . -t <chooseAnImageName>`
-# - Run image in background with `docker run -d -p 5000:5000 --name <chooseContainerName> <imageNameFromAbove>`
+# - Build image with command `docker build . -t <IMAGE_NAME>`
+# - Run image in background with `docker run -d -p 5000:5000 --name <CONT_NAME> <IMAGE_NAME>`
 # - View at http://127.0.0.1:5000
-# - Stop it with `docker stop <containerNameFromAbove` and remove it with `docker rm <containerNameFromAbove>`.
-# - Delete the images with `docker rmi <imageNameFromAbove>`
+# - Stop it with `docker stop <CONT_NAME>` and remove it with `docker rm <CONT_NAME>`.
+# - Delete the images with `docker rmi <IMAGE_NAME>`
 # 
 # FEATURE IDEAS
 # =============
-# - Switch to install.py instead of manual apt commands
 # - Python "build" script to create, start and exit the image
 # - Modify Dockerfile to use a network drive containing the omf repo instead of doing a fresh git pull
