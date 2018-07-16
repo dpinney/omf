@@ -1,6 +1,5 @@
 import platform, os, sys
 
-
 # Note: all installations require git to clone the omf first.
 if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu","debian"]:
 	os.system("sudo apt-get install python-pip git unixodbc-dev libfreetype6-dev \
@@ -11,12 +10,7 @@ if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu
 	except:
 		pass # Debian won't bundle a couple packages.
 	os.system("wget https://ufpr.dl.sourceforge.net/project/gridlab-d/gridlab-d/Candidate%20release/gridlabd-4.0.0-1.el6.x86_64.rpm")
-	os.system("sudo alien gridlabd-4.0.0-1.el6.x86_64.rpm")
-	workDir = os.getcwd()
-	for file in os.listdir(workDir):
-		if file.endswith(".deb"):
-			debFile = file
-	os.system("sudo dpkg -i " + debFile)
+	os.system("sudo alien -i gridlabd-4.0.0-1.el6.x86_64.rpm")
 	os.system("sudo apt-get install -f")
 	os.system("cd omf")
 	os.system("pip install -r requirements.txt")
@@ -70,7 +64,6 @@ elif platform.system()=='Windows':
 	os.system("C:\\Python27\\python.exe -m pip install setuptools>=33.1.1")
 	os.system("C:\\Python27\\python.exe -m pip install -r requirements.txt")
 	os.system("C:\\Python27\\python.exe -m setup.py develop")
-
 elif platform.system()=="Darwin": # MacOS
 	# Install homebrew
 	os.system("/usr/bin/ruby -e '$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)'")
