@@ -85,12 +85,14 @@ def networkPlot(filename):
 		pos[row['Bus']] = (row['X'], row['Y'])
 
 	volt_values = {}
+	labels = {}
 	for index, row in volts.iterrows(): # We'll color the nodes according to voltage. FIX: pu1?
 		if row['Bus'] == '799R':
 			row['Bus'] = '799r'
 		if row['Bus'] == 'SOURCEBUS':
 			row['Bus'] = 'SourceBus'
 		volt_values[row['Bus']] = row[' pu1']
+		labels[row['Bus']] = row['Bus']
 
 
 	colorCode = [volt_values[node] for node in G.nodes()]
@@ -105,6 +107,7 @@ def networkPlot(filename):
 
 	nodes = nx.draw_networkx_nodes(G, pos, node_color=colorCode) # We must seperate this to create a mappable object for colorbar.
 	edges = nx.draw_networkx_edges(G, pos)
+	nx.draw_networkx_labels(G, pos, labels)
 	plt.colorbar(nodes)
 	plt.savefig('networkPlot.png')
 	packagePlots('networkPlots')
@@ -112,7 +115,7 @@ def networkPlot(filename):
 if __name__ == "__main__":
 	start = time()
 	filename = 'ieee37.dss'
-	voltagePlots(filename)
-	currentPlots(filename)
+	#voltagePlots(filename)
+	#currentPlots(filename)
 	networkPlot(filename)
 	print("--- %s seconds ---" % (time() - start)) 
