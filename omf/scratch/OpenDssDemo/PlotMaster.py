@@ -1,15 +1,30 @@
+from time import time
+
 import opendssdirect as dss
 import pandas as pd
 import matplotlib.pyplot as plt
 import networkx as nx
 import math
-import os
+import os, shutil
+
 
 def runDSS(filename):  # Initial file run.
 	homeDir = os.getcwd() # OpenDSS saves plots in a temp file unless you redirect explicitly.
 	dss.run_command('Redirect ' + filename)
 	dss.run_command('set datapath=' + str(homeDir))
 	dss.run_command('Export BusCoords coords.csv') # Get the bus coordinates.
+	
+
+def packagePlots(dirname):
+	os.chdir(os.getcwd())
+	if not os.path.isdir(dirname):
+		os.mkdir(dirname)
+	files = os.listdir(os.getcwd())
+	sourcePath = os.getcwd()
+	destPath = os.getcwd() + '/' + str(dirname)
+	for file in files:
+		if file.endswith('.png'):
+			shutil.move(os.path.join(sourcePath,file), os.path.join(destPath, file))
 
 def voltagePlots(filename):
 	runDSS(filename)
@@ -28,7 +43,8 @@ def voltagePlots(filename):
 		plt.xlabel('RADIUS')
 		plt.ylabel('VOLTS')
 		plt.title('FOR ' + volt_ind)
-		plt.show()
+		plt.savefig(volt_ind + '.png')
+	packagePlots('voltagePlots')
 
 def currentPlots(filename):
 	runDSS(filename)
@@ -48,14 +64,13 @@ def currentPlots(filename):
 			plt.xlabel('RADIUS')
 			plt.ylabel('CURRENT')
 			plt.title('FOR ' +  cur_ind)
-			plt.show()
-
+			plt.savefig(cur_ind + '.png')
+	packagePlots('currentPlots')
 
 def networkPlot(filename):
 	runDSS(filename)
 	dss.run_command('Export voltages volts.csv')
 	volts = pd.read_csv('volts.csv')
-	print volts
 	coord = pd.read_csv('coords.csv', names=['Bus', 'X', 'Y'])
 
 	G = nx.Graph() # Declare networkx object.
@@ -91,10 +106,13 @@ def networkPlot(filename):
 	nodes = nx.draw_networkx_nodes(G, pos, node_color=colorCode) # We must seperate this to create a mappable object for colorbar.
 	edges = nx.draw_networkx_edges(G, pos)
 	plt.colorbar(nodes)
-	plt.show()
+	plt.savefig('networkPlot.png')
+	packagePlots('networkPlots')
 
 if __name__ == "__main__":
+	start = time()
 	filename = 'ieee37.dss'
-	#voltagePlots(filename)
-	#currentPlots(filename)
+	voltagePlots(filename)
+	currentPlots(filename)
 	networkPlot(filename)
+	print("--- %s seconds ---" % (time() - start)) 
