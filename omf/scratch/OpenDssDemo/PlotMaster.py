@@ -1,6 +1,7 @@
 import opendssdirect as dss
 import pandas as pd
 import matplotlib.pyplot as plt
+import networkx as nx
 import math
 import os
 
@@ -12,16 +13,16 @@ def runDSS(filename):  # Initial file run.
 
 def voltagePlots(filename):
 	runDSS(filename)
-	dss.run_command('Export voltages volts.csv') # 
-	voltage = pd.read_csv('volts.csv')
-	volt_coord_cols = ['Bus', 'X', 'Y']
+	dss.run_command('Export voltages volts.csv') # Generate voltage plots.
+	voltage = pd.read_csv('volts.csv') 
+	volt_coord_cols = ['Bus', 'X', 'Y'] # Add defined column names.
 	volt_coord = pd.read_csv('coords.csv', names=volt_coord_cols)
 	volt_hyp = []
-	for index, row in volt_coord.iterrows():
-		volt_hyp.append(math.sqrt(row['X']**2 + row['Y']**2))
+	for index, row in volt_coord.iterrows(): 
+		volt_hyp.append(math.sqrt(row['X']**2 + row['Y']**2)) # Get total distance for each entry.
 	volt_coord['radius'] = volt_hyp
 	voltageDF = pd.merge(volt_coord, voltage, on='Bus')
-	for i in range(1, 4):
+	for i in range(1, 4): 
 		volt_ind = ' pu' + str(i)
 		plt.scatter(voltageDF['radius'], voltageDF[volt_ind])
 		plt.xlabel('RADIUS')
@@ -51,12 +52,20 @@ def currentPlots(filename):
 
 
 def networkPlot(filename):
+	runDSS(filename)
 	dss.run_command('Export voltages volts.csv')
-	voltage = pd.read_csv('volts.csv')
+	volts = pd.read_csv('volts.csv')
+	print volts
+	coord = pd.read_csv('coords.csv', names=['Bus', 'X', 'Y'])
+
 	G = nx.Graph() # Declare networkx object.
 	pos = {}
 
-	for index, row in bus_coord.iterrows(): # Get the coordinates.
+	for index, row in coord.iterrows(): # Get the coordinates.
+ 		if row['Bus'] == '799R':
+			row['Bus'] = '799r'
+		if row['Bus'] == 'SOURCEBUS':
+			row['Bus'] = 'SourceBus'
 		G.add_node(row['Bus'])
 		pos[row['Bus']] = (row['X'], row['Y'])
 
@@ -86,5 +95,6 @@ def networkPlot(filename):
 
 if __name__ == "__main__":
 	filename = 'ieee37.dss'
-	voltagePlots(filename)
-	currentPlots(filename)
+	#voltagePlots(filename)
+	#currentPlots(filename)
+	networkPlot(filename)
