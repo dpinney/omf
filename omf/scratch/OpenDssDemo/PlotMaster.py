@@ -51,7 +51,7 @@ def voltagePlots(filename):
 		plt.savefig('Pu Profile ' + str(i) + '.png') # A per unit plot.
 		plt.clf()
 		plt.scatter(voltageDF['radius'], voltageDF[mag_ind])
-		plt.xlabel('RADIUS')
+		plt.xlabel('Distance From Source')
 		plt.ylabel('VOLTS [kV]')
 		plt.axis([1, 7, 2000, 3000]) # Ignore sourcebus-much greater-for overall magnitude.
 		plt.title('Voltage profile for phase ' + str(i))
@@ -72,17 +72,18 @@ def currentPlots(filename):
 		curr_hyp.append(math.sqrt(row['X']**2 + row['Y']**2))
 	curr_coord['radius'] = curr_hyp
 	currentDF = pd.concat([curr_coord, current], axis=1)
-	print currentDF.columns
 	for i in range(1, 3):
 		for j in range(1, 4):
 			cur_ind = ' I' + str(i) + '_' + str(j)
 			plt.scatter(currentDF['radius'], currentDF[cur_ind])
-			plt.xlabel('RADIUS')
-			plt.ylabel('CURRENT')
+			plt.xlabel('Distance from source')
+			plt.ylabel('Current')
 			plt.title('Current profile for ' + cur_ind)
 			plt.savefig('Profile ' + str(i) +'.png')
 			plt.clf()
 	packagePlots('currentPlots')
+
+''' Plot the physical topology of the circuit. '''
 
 def networkPlot(filename):
 	runDSS(filename)
@@ -124,7 +125,7 @@ def networkPlot(filename):
 
 	nodes = nx.draw_networkx_nodes(G, pos, node_color=colorCode) # We must seperate this to create a mappable object for colorbar.
 	edges = nx.draw_networkx_edges(G, pos)
-	nx.draw_networkx_labels(G, pos, labels)
+	nx.draw_networkx_labels(G, pos, labels) # We'll draw the labels seperately.
 	plt.colorbar(nodes)
 	plt.xlabel('Distance [m]')
 	plt.title('Network Voltage Layout')
@@ -134,7 +135,7 @@ def networkPlot(filename):
 if __name__ == "__main__":
 	start = time()
 	filename = 'ieee37.dss'
-	#voltagePlots(filename)
+	voltagePlots(filename)
 	currentPlots(filename)
-	#networkPlot(filename)
-	print("--- %s seconds ---" % (time() - start)) 
+	networkPlot(filename)
+	print("--- %s seconds ---" % (time() - start)) # Check performace.
