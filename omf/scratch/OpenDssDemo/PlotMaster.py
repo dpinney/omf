@@ -1,5 +1,6 @@
-from time import time
+''' Run OpenDSS and plot the results for arbitrary circuits. '''
 
+from time import time
 import opendssdirect as dss
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -7,17 +8,16 @@ import networkx as nx
 import math
 import os, shutil
 
-''' Run DSS file and set export path.'''
-
 def runDSS(filename):  
+	''' Run DSS file and set export path.'''
 	homeDir = os.getcwd() # OpenDSS saves plots in a temp file unless you redirect explicitly.
 	dss.run_command('Redirect ' + filename)
 	dss.run_command('set datapath=' + str(homeDir))
 	dss.run_command('Export BusCoords coords.csv') # Get the bus coordinates.
 	
-''' Move all png files to individual folder. Ensure that the working folder is free of png files beforehand.'''
-
-def packagePlots(dirname): # Stream all plots to their own folders to avoid cluttering the workspace. 
+def packagePlots(dirname):
+	''' Move all png files to individual folder. Ensure that the working folder is free of png files beforehand.'''
+	# Stream all plots to their own folders to avoid cluttering the workspace. 
 	os.chdir(os.getcwd())
 	if not os.path.isdir(dirname):
 		os.mkdir(dirname)
@@ -28,9 +28,8 @@ def packagePlots(dirname): # Stream all plots to their own folders to avoid clut
 		if file.endswith('.png'):
 			shutil.move(os.path.join(sourcePath,file), os.path.join(destPath, file))
 
-''' Voltage plotting routine.'''
-
 def voltagePlots(filename):
+	''' Voltage plotting routine.'''
 	runDSS(filename)
 	dss.run_command('Export voltages volts.csv') # Generate voltage plots.
 	voltage = pd.read_csv('volts.csv') 
@@ -59,9 +58,8 @@ def voltagePlots(filename):
 		plt.clf()
 	packagePlots('voltagePlots')
 
-''' Current plotting function.'''
-
 def currentPlots(filename):
+	''' Current plotting function.'''
 	runDSS(filename) # This routine mirrors the voltage plots.
 	dss.run_command('Export current currents.csv')
 	current = pd.read_csv('currents.csv')
@@ -83,9 +81,8 @@ def currentPlots(filename):
 			plt.clf()
 	packagePlots('currentPlots')
 
-''' Plot the physical topology of the circuit. '''
-
 def networkPlot(filename):
+	''' Plot the physical topology of the circuit. '''
 	runDSS(filename)
 	dss.run_command('Export voltages volts.csv')
 	volts = pd.read_csv('volts.csv')
