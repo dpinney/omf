@@ -37,13 +37,16 @@ def voltagePlots(filename):
 		volt_hyp.append(math.sqrt(row['X']**2 + row['Y']**2)) # Get total distance for each entry.
 	volt_coord['radius'] = volt_hyp
 	voltageDF = pd.merge(volt_coord, voltage, on='Bus')
+	print voltageDF.columns
+	return
 	for i in range(1, 4): 
 		volt_ind = ' pu' + str(i)
 		plt.scatter(voltageDF['radius'], voltageDF[volt_ind])
+		plt.scatter(voltageDF['radius'], voltageDF[])
 		plt.xlabel('RADIUS')
 		plt.ylabel('VOLTS')
-		plt.title('FOR ' + volt_ind)
-		plt.savefig(volt_ind + '.png')
+		plt.title('Voltage profile for ' + volt_ind)
+		plt.savefig('Profile ' + str(i) '.png')
 	packagePlots('voltagePlots')
 
 def currentPlots(filename):
@@ -63,8 +66,8 @@ def currentPlots(filename):
 			plt.scatter(currentDF['radius'], currentDF[cur_ind])
 			plt.xlabel('RADIUS')
 			plt.ylabel('CURRENT')
-			plt.title('FOR ' +  cur_ind)
-			plt.savefig(cur_ind + '.png')
+			plt.title('Current profile for ' + cur_ind)
+			plt.savefig('Profile ' + str(i) +'.png')
 	packagePlots('currentPlots')
 
 def networkPlot(filename):
@@ -109,13 +112,15 @@ def networkPlot(filename):
 	edges = nx.draw_networkx_edges(G, pos)
 	nx.draw_networkx_labels(G, pos, labels)
 	plt.colorbar(nodes)
+	plt.xlabel('Distance [m]')
+	plt.title('Network Voltage Layout')
 	plt.savefig('networkPlot.png')
 	packagePlots('networkPlots')
 
 if __name__ == "__main__":
 	start = time()
 	filename = 'ieee37.dss'
-	#voltagePlots(filename)
+	voltagePlots(filename)
 	#currentPlots(filename)
-	networkPlot(filename)
+	#networkPlot(filename)
 	print("--- %s seconds ---" % (time() - start)) 
