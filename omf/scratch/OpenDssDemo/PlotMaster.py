@@ -37,16 +37,21 @@ def voltagePlots(filename):
 		volt_hyp.append(math.sqrt(row['X']**2 + row['Y']**2)) # Get total distance for each entry.
 	volt_coord['radius'] = volt_hyp
 	voltageDF = pd.merge(volt_coord, voltage, on='Bus')
-	print voltageDF.columns
-	return
 	for i in range(1, 4): 
 		volt_ind = ' pu' + str(i)
+		mag_ind = ' Magnitude' + str(i)
 		plt.scatter(voltageDF['radius'], voltageDF[volt_ind])
-		plt.scatter(voltageDF['radius'], voltageDF[])
 		plt.xlabel('RADIUS')
-		plt.ylabel('VOLTS')
-		plt.title('Voltage profile for ' + volt_ind)
-		plt.savefig('Profile ' + str(i) '.png')
+		plt.ylabel('VOLTS [PU]')
+		plt.title('Voltage profile for phase ' + str(i))
+		plt.savefig('Pu Profile ' + str(i) + '.png')
+		plt.clf()
+		plt.scatter(voltageDF['radius'], voltageDF[mag_ind])
+		plt.xlabel('RADIUS')
+		plt.ylabel('VOLTS [kV]')
+		plt.title('Voltage profile for phase ' + str(i))
+		plt.savefig('Magnitude Profile ' + str(i) + '.png')
+		plt.clf()
 	packagePlots('voltagePlots')
 
 def currentPlots(filename):
