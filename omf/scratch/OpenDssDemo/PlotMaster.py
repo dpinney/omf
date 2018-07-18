@@ -1,6 +1,6 @@
 ''' Run OpenDSS and plot the results for arbitrary circuits. '''
 
-from time import time
+import time
 import opendssdirect as dss
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -130,9 +130,9 @@ def networkPlot(filename):
 	packagePlots('networkPlots')
 
 if __name__ == "__main__":
-	start = time()
+	start = time.time()
 	filename = 'ieee37.dss'
 	voltagePlots(filename)
 	currentPlots(filename)
 	networkPlot(filename)
-	print("--- %s seconds ---" % (time() - start)) # Check performace.
+	print("--- %s seconds ---" % (time.time() - start)) # Check performace.
