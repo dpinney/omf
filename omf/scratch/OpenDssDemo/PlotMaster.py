@@ -7,24 +7,28 @@ import networkx as nx
 import math
 import os, shutil
 
+''' Run DSS file and set export path.'''
 
-def runDSS(filename):  # Initial file run.
+def runDSS(filename):  
 	homeDir = os.getcwd() # OpenDSS saves plots in a temp file unless you redirect explicitly.
 	dss.run_command('Redirect ' + filename)
 	dss.run_command('set datapath=' + str(homeDir))
 	dss.run_command('Export BusCoords coords.csv') # Get the bus coordinates.
 	
+''' Move all png files to individual folder. Ensure that the working folder is free of png files beforehand.'''
 
-def packagePlots(dirname):
+def packagePlots(dirname): # Stream all plots to their own folders to avoid cluttering the workspace. 
 	os.chdir(os.getcwd())
 	if not os.path.isdir(dirname):
 		os.mkdir(dirname)
 	files = os.listdir(os.getcwd())
 	sourcePath = os.getcwd()
 	destPath = os.getcwd() + '/' + str(dirname)
-	for file in files:
+	for file in files: # Each plotting function calls this function individually, so it is relatively safe to move all png files. 
 		if file.endswith('.png'):
 			shutil.move(os.path.join(sourcePath,file), os.path.join(destPath, file))
+
+''' Voltage plotting routine.'''
 
 def voltagePlots(filename):
 	runDSS(filename)
@@ -44,13 +48,15 @@ def voltagePlots(filename):
 		plt.xlabel('RADIUS')
 		plt.ylabel('VOLTS [PU]')
 		plt.title('Voltage profile for phase ' + str(i))
-		plt.savefig('Pu Profile ' + str(i) + '.png')
+		plt.savefig('Pu Profile ' + str(i) + '.png') # A per unit plot.
 		plt.clf()
 		plt.scatter(voltageDF['radius'], voltageDF[mag_ind])
 		plt.xlabel('RADIUS')
 		plt.ylabel('VOLTS [kV]')
+		plt.axis([1, 7, 2000, 3000]) # Ignore sourcebus-much greater-for overall magnitude.
 		plt.title('Voltage profile for phase ' + str(i))
-		plt.savefig('Magnitude Profile ' + str(i) + '.png')
+		plt.savefig('Magnitude Profile ' + str(i) + '.png') # Actual voltages.
+		plt.show()
 		plt.clf()
 	packagePlots('voltagePlots')
 
