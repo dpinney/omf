@@ -40,7 +40,7 @@ def voltagePlots(filename):
 	for index, row in volt_coord.iterrows(): 
 		volt_hyp.append(math.sqrt(row['X']**2 + row['Y']**2)) # Get total distance for each entry.
 	volt_coord['radius'] = volt_hyp
-	voltageDF = pd.merge(volt_coord, voltage, on='Bus')
+	voltageDF = pd.merge(volt_coord, voltage, on='Bus') # Merge on the bus axis so that all data is in one frame.
 	for i in range(1, 4): 
 		volt_ind = ' pu' + str(i)
 		mag_ind = ' Magnitude' + str(i)
@@ -56,21 +56,23 @@ def voltagePlots(filename):
 		plt.axis([1, 7, 2000, 3000]) # Ignore sourcebus-much greater-for overall magnitude.
 		plt.title('Voltage profile for phase ' + str(i))
 		plt.savefig('Magnitude Profile ' + str(i) + '.png') # Actual voltages.
-		plt.show()
 		plt.clf()
 	packagePlots('voltagePlots')
 
+''' Current plotting function.'''
+
 def currentPlots(filename):
-	runDSS(filename)
+	runDSS(filename) # This routine mirrors the voltage plots.
 	dss.run_command('Export current currents.csv')
 	current = pd.read_csv('currents.csv')
-	curr_coord_cols = ['Index', 'X', 'Y']
+	curr_coord_cols = ['Index', 'X', 'Y'] # DSS buses don't have current, but are connected to it. 
 	curr_coord = pd.read_csv('coords.csv', names=curr_coord_cols)
 	curr_hyp = []
 	for index, row in curr_coord.iterrows():
 		curr_hyp.append(math.sqrt(row['X']**2 + row['Y']**2))
 	curr_coord['radius'] = curr_hyp
 	currentDF = pd.concat([curr_coord, current], axis=1)
+	print currentDF.columns
 	for i in range(1, 3):
 		for j in range(1, 4):
 			cur_ind = ' I' + str(i) + '_' + str(j)
@@ -79,6 +81,7 @@ def currentPlots(filename):
 			plt.ylabel('CURRENT')
 			plt.title('Current profile for ' + cur_ind)
 			plt.savefig('Profile ' + str(i) +'.png')
+			plt.clf()
 	packagePlots('currentPlots')
 
 def networkPlot(filename):
@@ -131,7 +134,7 @@ def networkPlot(filename):
 if __name__ == "__main__":
 	start = time()
 	filename = 'ieee37.dss'
-	voltagePlots(filename)
-	#currentPlots(filename)
+	#voltagePlots(filename)
+	currentPlots(filename)
 	#networkPlot(filename)
 	print("--- %s seconds ---" % (time() - start)) 
