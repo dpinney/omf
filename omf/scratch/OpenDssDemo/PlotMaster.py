@@ -77,7 +77,7 @@ def currentPlots(filename):
 			cur_ind = ' I' + str(i) + '_' + str(j)
 			plt.scatter(currentDF['radius'], currentDF[cur_ind])
 			plt.xlabel('Distance from source [km]')
-			plt.ylabel('Current [pu]')
+			plt.ylabel('Current [Amps]')
 			plt.title('Current profile for ' + cur_ind)
 			plt.savefig('Profile ' + str(i) +'.png')
 			plt.clf()
