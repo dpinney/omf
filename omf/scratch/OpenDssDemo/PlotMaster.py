@@ -45,14 +45,14 @@ def voltagePlots(filename):
 		volt_ind = ' pu' + str(i)
 		mag_ind = ' Magnitude' + str(i)
 		plt.scatter(voltageDF['radius'], voltageDF[volt_ind])
-		plt.xlabel('RADIUS')
-		plt.ylabel('VOLTS [PU]')
+		plt.xlabel('Distance from source[miles]')
+		plt.ylabel('Voltage [PU]')
 		plt.title('Voltage profile for phase ' + str(i))
 		plt.savefig('Pu Profile ' + str(i) + '.png') # A per unit plot.
 		plt.clf()
 		plt.scatter(voltageDF['radius'], voltageDF[mag_ind])
-		plt.xlabel('Distance From Source')
-		plt.ylabel('VOLTS [kV]')
+		plt.xlabel('Distance from source[miles]')
+		plt.ylabel('Volt [V]')
 		plt.axis([1, 7, 2000, 3000]) # Ignore sourcebus-much greater-for overall magnitude.
 		plt.title('Voltage profile for phase ' + str(i))
 		plt.savefig('Magnitude Profile ' + str(i) + '.png') # Actual voltages.
@@ -76,8 +76,8 @@ def currentPlots(filename):
 		for j in range(1, 4):
 			cur_ind = ' I' + str(i) + '_' + str(j)
 			plt.scatter(currentDF['radius'], currentDF[cur_ind])
-			plt.xlabel('Distance from source')
-			plt.ylabel('Current')
+			plt.xlabel('Distance from source [km]')
+			plt.ylabel('Current [pu]')
 			plt.title('Current profile for ' + cur_ind)
 			plt.savefig('Profile ' + str(i) +'.png')
 			plt.clf()
