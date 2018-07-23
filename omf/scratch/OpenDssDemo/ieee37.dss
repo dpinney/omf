@@ -111,10 +111,13 @@ Solve
 set harmonics=[1 5]
 Solve mode=harmonic
 set maxiterations=100
+Solve mode=Dynamics
+Solve mode=FaultStudy
 
 Export profile profile.csv
 Export voltages volts.csv
 Export current current.csv
+Export capacity capacity.csv
 
 ! show voltages LL Nodes
 ! show currents residual=y elements
