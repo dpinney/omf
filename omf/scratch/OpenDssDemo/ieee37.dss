@@ -107,10 +107,10 @@ Export IncMatrix     ! Exports the incidence branch to node matrix (only the non
 Export IncMatrixRow links.csv  ! Exports the name of the rows (link branches)
 Export IncMatrixCols ! Exports the name of the cols (buses)
 
-
-! solve mode=direct
+Solve
+set harmonics=[1 5]
+Solve mode=harmonic
 set maxiterations=100
-solve
 
 Export profile profile.csv
 Export voltages volts.csv
