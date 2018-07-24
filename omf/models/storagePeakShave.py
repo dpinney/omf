@@ -11,16 +11,11 @@ from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
 
 # Model metadata:
-fileName = os.path.basename(__file__)
-modelName = fileName[0:fileName.rfind('.')]
+modelName, template = metadata(__file__)
 tooltip = "The storagePeakShave model calculates the value of a distribution utility deploying energy storage based on three possible battery dispatch strategies."
 
 # # NOTE: used for debugging don't delete.
 # import matplotlib.pyplot as plt
-
-# Our HTML template for the interface:
-with open(pJoin(__neoMetaModel__._myDir,modelName+".html"),"r") as tempFile:
-	template = Template(tempFile.read())
 
 def work(modelDir, inputDict):
 	''' Model processing done here. '''

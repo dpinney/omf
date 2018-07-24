@@ -24,10 +24,8 @@ else:
 	from omf.solvers import gridlabd_gridballast as gridlabd
 
 # Model metadata:
-fileName = os.path.basename(__file__)
-modelName = fileName[0:fileName.rfind('.')]
+modelName, template = metadata(__file__)
 tooltip = 'gridBallast simulator'
-template = Template(open(pJoin(__neoMetaModel__._myDir,modelName+".html"),"r").read()) #HTML Template for showing output.
 hidden = True
 
 # with open(pJoin(__neoMetaModel__._myDir,modelName+".html"),"r") as tempFile:

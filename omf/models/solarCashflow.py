@@ -15,13 +15,8 @@ import random
 from omf.weather import zipCodeToClimateName
 
 # Model metadata:
-fileName = os.path.basename(__file__)
-modelName = fileName[0:fileName.rfind('.')]
+modelName, template = metadata(__file__)
 tooltip = "The solarCashflow model allows a utility to calculate what impact member owned solar systems will have on their costs."
-
-# Our HTML template for the interface:
-with open(pJoin(__neoMetaModel__._myDir,modelName+".html"),"r") as tempFile:
-	template = Template(tempFile.read())
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''

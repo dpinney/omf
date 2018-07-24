@@ -9,13 +9,8 @@ from __neoMetaModel__ import *
 sys.path.append(__neoMetaModel__._omfDir)
 
 # Model metadata:
-fileName = os.path.basename(__file__)
-modelName = fileName[0:fileName.rfind('.')]
+modelName, template = metadata(__file__)
 tooltip = 'Real time circuit simulator'
-
-# Our HTML template for the interface:
-with open(pJoin(__neoMetaModel__._myDir,modelName + ".html"),"r") as tempFile:
-	template = Template(tempFile.read())
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''

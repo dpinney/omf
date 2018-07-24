@@ -11,16 +11,11 @@ from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
 
 # Model metadata:
-fileName = os.path.basename(__file__)
-modelName = fileName[0:fileName.rfind('.')]
+modelName, template = metadata(__file__)
 tooltip = "The storageDeferral model calculates the amount of energy storage capacity needed to reduce the load on a substation transformer or line below a user-defined limi"
 
 # # NOTE: used for debugging don't delete.
 # import matplotlib.pyplot as plt
-
-# Our HTML template for the interface:
-with open(pJoin(__neoMetaModel__._myDir,modelName+".html"),"r") as tempFile:
-	template = Template(tempFile.read())
 
 def work(modelDir, inputDict):
 	''' Run the model in a separate process. web.py calls this to run the model.

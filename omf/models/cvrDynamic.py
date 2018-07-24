@@ -18,12 +18,7 @@ from omf.solvers import gridlabd
 
 # Model metadata:
 tooltip = "The cvrDynamic model calculates the expected costs and benefits for implementing conservation voltage reduction on a given feeder circuit."
-fileName = os.path.basename(__file__)
-modelName = fileName[0:fileName.rfind('.')]
-
-# Our HTML template for the interface:
-with open(pJoin(__neoMetaModel__._myDir,modelName+".html"),"r") as tempFile:
-	template = Template(tempFile.read())
+modelName, template = metadata(__file__)
 
 def work(modelDir,inputDict):
 	'''This reads a glm file, changes the method of powerflow and reruns'''

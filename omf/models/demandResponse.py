@@ -9,13 +9,8 @@ from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
 
 # Model metadata:
-fileName = os.path.basename(__file__)
-modelName = fileName[0:fileName.rfind('.')]
+modelName, template = metadata(__file__)
 tooltip = "The demandResponse model takes in historical demand data (hourly for a year) and calculates what demand changes in residential customers could be expected due to demand response programs. "
-
-# Our HTML template for the interface:
-with open(pJoin(__neoMetaModel__._myDir,modelName+".html"),"r") as tempFile:
-	template = Template(tempFile.read())
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''

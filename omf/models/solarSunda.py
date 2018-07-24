@@ -16,14 +16,8 @@ from omf.solvers import nrelsam2013
 from omf.weather import zipCodeToClimateName
 
 # Model metadata:
-fileName = os.path.basename(__file__)
-modelName = fileName[0:fileName.rfind('.')]
+modelName, template = metadata(__file__)
 tooltip = "The solarSunda model allows you to run multiple instances of the SUNDA Solar Costing Financing Screening Tool and compare their output visually."
-
-# Our HTML template for the interface:
-with open(pJoin(__neoMetaModel__._myDir,modelName+".html"),"r") as tempFile:
-	template = Template(tempFile.read())
-	#only has A,  and V
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''

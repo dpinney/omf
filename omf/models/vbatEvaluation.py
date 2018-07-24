@@ -7,14 +7,9 @@ import __neoMetaModel__
 from __neoMetaModel__ import *
 
 # Model metadata:
-fileName = os.path.basename(__file__)
-modelName = fileName[0:fileName.rfind('.')]
+modelName, template = metadata(__file__)
 tooltip = "Calculate the virtual battery capacity for a collection of thermostically controlled loads."
 hidden = True
-
-# Our HTML template for the interface:
-with open(pJoin(__neoMetaModel__._myDir,modelName + ".html"),"r") as tempFile:
-	template = Template(tempFile.read())
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory.'''

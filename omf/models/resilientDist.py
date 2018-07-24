@@ -19,13 +19,9 @@ from omf.solvers import gridlabd
 from omf.weather import zipCodeToClimateName
 
 # Model metadata:
-fileName = os.path.basename(__file__)
-modelName = fileName[0:fileName.rfind('.')]
+modelName, template = metadata(__file__)
 tooltip = "Model extreme weather and determine optimal investment for distribution resiliency."
 hidden = True
-# Our HTML template for the interface:
-with open(pJoin(__neoMetaModel__._myDir,modelName+".html"),"r") as tempFile:
-	template = Template(tempFile.read())
 
 def getNodePhases(obj, maxRealPhase):
 	''' Convert phase info in GridLAB-D obj (e.g. ABC) to GFM phase format (e.g. [True,True,True].'''
