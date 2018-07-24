@@ -129,10 +129,26 @@ def networkPlot(filename):
 	plt.savefig('networkPlot.png')
 	packagePlots('networkPlots')
 
+def capacityPlot(filename):
+	''' Plot power vs. capacity '''
+	runDSS(filename)
+	dss.run_command('Export Capacity capacity.csv')
+	capacityData = pd.read_csv('capacity.csv')
+	coord = pd.read_csv('coords.csv', names=['Index', 'X', 'Y'])
+	hyp = []
+	for index, row in coord.iterrows():
+		hyp.append(math.sqrt(row['X']**2 + row['Y']**2))
+	coord['radius'] = hyp
+	capacityDF = pd.concat([coord, capacityData], axis=1)
+	plt.scatter(capacityDF['radius'], capacityData[' kW'])
+	packagePlots('CapacityPlot')
+
+
 if __name__ == "__main__":
 	start = time.time()
 	filename = 'ieee37.dss'
 	voltagePlots(filename)
 	currentPlots(filename)
 	networkPlot(filename)
+	capacityPlot(filename)
 	print("--- %s seconds ---" % (time.time() - start)) # Check performace.
