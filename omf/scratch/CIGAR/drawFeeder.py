@@ -1,6 +1,12 @@
 import omf
 import sys
 from matplotlib import pyplot as plt
+import tempfile
+from os.path import join as pJoin
+import csv
+import math
+from networkx.drawing.nx_agraph import graphviz_layout
+import networkx as nx
 
 FNAME = 'smsSingle.glm'
 
@@ -36,7 +42,7 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 	# Run Gridlab.
 	if not workDir:
 		workDir = tempfile.mkdtemp()
-	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=omd.get('attachments',{}), workDir=workDir)
+	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=[], workDir=workDir)
 	with open(pJoin(workDir,'voltDump.csv'),'r') as dumpFile:
 		reader = csv.reader(dumpFile)
 		reader.next() # Burn the header.
@@ -104,8 +110,11 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 # Test code for parsing/modifying feeders.
 # tree = omf.feeder.parse('smsSingle.glm')
 # tree[35]['name'] = 'OH NO CHANGED'
-# from pprint import pprint as pp
-# pp(tree)
+
+chart = voltPlot(FNAME, neatoLayout=True)
+chart.savefig("./VOLTOUT.png")
+from pprint import pprint as pp
+pp(chart)
 
 # Viz it interactively.
 # sys.path.append('../distNetViz/')
