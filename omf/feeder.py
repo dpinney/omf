@@ -172,7 +172,7 @@ def treeToNxGraph(inTree):
 				except: outGraph.node[item['name']]['pos']=(0.0,0.0)
 			elif 'from' in item.keys():
 				myPhase = _phaseCount(item.get('phases','AN'))
-				outGraph.add_edge(item['from'],item['to'],attr_dict={'type':item['object'],'phases':myPhase})
+				outGraph.add_edge(item['from'],item['to'],attr_dict={'name':item.get('name',''),'type':item['object'],'phases':myPhase})
 			elif item['name'] in outGraph:
 				# Edge already led to node's addition, so just set the attributes:
 				outGraph.node[item['name']]['type']=item['object']

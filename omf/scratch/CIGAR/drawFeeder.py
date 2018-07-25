@@ -39,9 +39,11 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 		except: return 0
 	biggestKey = max([safeInt(x) for x in tree.keys()])
 	tree[str(biggestKey*10)] = {"object":"voltdump","filename":"voltDump.csv"}
+	tree[str(biggestKey*10 + 1)] = {"object":"currdump","filename":"currDump.csv"}
 	# Run Gridlab.
 	if not workDir:
 		workDir = tempfile.mkdtemp()
+		print '@@@@@@', workDir
 	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=[], workDir=workDir)
 	with open(pJoin(workDir,'voltDump.csv'),'r') as dumpFile:
 		reader = csv.reader(dumpFile)
@@ -53,10 +55,17 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 			for pos,key in enumerate(keys):
 				rowDict[key] = row[pos]
 			voltTable.append(rowDict)
+	with open(pJoin(workDir,'currDump.csv'),'r') as currDumpFile:
+		reader = csv.reader(currDumpFile)
+		reader.next() # Burn the header.
+		keys = reader.next()
+		currTable = []
+		for row in reader:
+			rowDict = {}
+			for pos,key in enumerate(keys):
+				rowDict[key] = row[pos]
+			currTable.append(rowDict)
 	# Calculate average node voltage deviation. First, helper functions.
-	def pythag(x,y):
-		''' For right triangle with sides a and b, return the hypotenuse. '''
-		return math.sqrt(x**2+y**2)
 	def digits(x):
 		''' Returns number of digits before the decimal in the float x. '''
 		return math.ceil(math.log10(x+1))
@@ -73,21 +82,32 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 	for row in voltTable:
 		allVolts = []
 		for phase in ['A','B','C']:
-			phaseVolt = pythag(float(row['volt'+phase+'_real']),
-							   float(row['volt'+phase+'_imag']))
+			phaseVolt = abs(float(row['volt'+phase+'_real']))
 			if phaseVolt != 0.0:
 				if digits(phaseVolt)>3:
 					# Normalize to 120 V standard
 					phaseVolt = phaseVolt*(120/feedVoltage)
 				allVolts.append(phaseVolt)
 		nodeVolts[row.get('node_name','')] = avg(allVolts)
-	# Color nodes by VOLTAGE.
+	# Add up currents.
+	edgeCurrents = {}
+	for row in currTable:
+		phaseCurr = 0.0
+		for phase in ['A','B','C']:
+			phaseCurr += abs(float(row['curr'+phase+'_real']))
+		edgeCurrents[row.get('link_name','')] = phaseCurr
+	# Build the graph.
 	fGraph = omf.feeder.treeToNxGraph(tree)
 	voltChart = plt.figure(figsize=(15,15))
 	plt.axes(frameon = 0)
 	plt.axis('off')
-	#set axes step equal
 	voltChart.gca().set_aspect('equal')
+	plt.tight_layout()
+	# Need to get edge names from pairs of connected node names.
+	edgeNames = []
+	for e in fGraph.edges():
+		edgeNames.append(fGraph.edge[e[0]][e[1]].get('name','BLANK'))
+	#set axes step equal
 	if neatoLayout:
 		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
 		cleanG = nx.Graph(fGraph.edges())
@@ -95,7 +115,11 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 		positions = graphviz_layout(cleanG, prog='neato')
 	else:
 		positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
-	edgeIm = nx.draw_networkx_edges(fGraph, positions)
+	edgeIm = nx.draw_networkx_edges(fGraph,
+		pos = positions,
+		edge_color = [edgeCurrents.get(n,0) for n in edgeNames],
+		width = 1,
+		cmap = plt.cm.jet)
 	nodeIm = nx.draw_networkx_nodes(fGraph,
 		pos = positions,
 		node_color = [nodeVolts.get(n,0) for n in fGraph.nodes()],
@@ -113,8 +137,8 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 
 chart = voltPlot(FNAME, neatoLayout=True)
 chart.savefig("./VOLTOUT.png")
-from pprint import pprint as pp
-pp(chart)
+# from pprint import pprint as pp
+# pp(chart)
 
 # Viz it interactively.
 # sys.path.append('../distNetViz/')
