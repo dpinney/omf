@@ -127,6 +127,7 @@ def networkPlot(filename):
 	plt.xlabel('Distance [m]')
 	plt.title('Network Voltage Layout')
 	plt.savefig('networkPlot.png')
+	plt.clf()
 	packagePlots('networkPlots')
 
 def capacityPlot(filename):
