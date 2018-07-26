@@ -19,12 +19,12 @@ def transmissionConvert(owner, modelName, fileName):
 	# Convert and lay out the new file.
 	netJson = omf.network.parse(os.path.join(modelDir, fileName), filePath=True)
 	omf.network.layout(netJson)
-	with open(os.path.join(modelDir,'case.omt'),'w') as outFile:
+	with open(os.path.join(modelDir, fileName + '.omt'),'w') as outFile:
 		json.dump(netJson, outFile)
 	# Rewrite allInputData.json
 	with open(os.path.join(modelDir, 'allInputData.json'),'r+') as inFile:
 		inData = json.load(inFile)
-		inData['networkName1'] = 'case'
+		inData['networkName1'] = fileName
 		inFile.seek(0)
 		json.dump(inData,inFile)
 		inFile.truncate()
