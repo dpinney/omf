@@ -5,6 +5,7 @@ import numpy as np
 
 from plotly import __version__
 from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
+from plotly import tools
 import plotly.graph_objs as go
 
 meterData = []
@@ -29,8 +30,14 @@ for i in range(len(meterData)):
 plt.show()
 
 #plotly testing
-plotlyData = []
+#plotlyData = []
+xaxis = [i for i in range(10)]
+fig = tools.make_subplots(rows=len(meterData), cols=1)
+fig.print_grid
 
 for i in range(len(meterData)):
-	plotlyData.append(go.Scatter(y=meterData[i], x=[i for i in range(10)]))
-plot(plotlyData)
+	#plotlyData.append(go.Scatter(y=meterData[i], x=[i for i in range(10)]))
+	print(i)
+	fig.append_trace(go.Scatter(y=meterData[i], x=xaxis),i+1,1)
+
+plot(fig)
