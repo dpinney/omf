@@ -29,4 +29,6 @@ for i in range(len(meterData)):
 plt.show()
 
 #plotly testing
-plot([go.Scatter(x=[1, 2, 3], y=[3, 1, 6])])
+#for i in range(len(meterData))
+
+plot([go.Scatter(x=[1, 2, 3,4,5,6,7,8,9,10], y=[i for i in range(10)])])
