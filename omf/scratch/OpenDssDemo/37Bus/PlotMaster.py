@@ -130,7 +130,7 @@ def networkPlot(filename):
 	packagePlots('networkPlots')
 
 def capacityPlot(filename):
-	''' Plot power vs. capacity '''
+	''' Plot power vs. distance '''
 	runDSS(filename)
 	dss.run_command('Export Capacity capacity.csv')
 	capacityData = pd.read_csv('capacity.csv')
@@ -141,7 +141,10 @@ def capacityPlot(filename):
 	coord['radius'] = hyp
 	capacityDF = pd.concat([coord, capacityData], axis=1)
 	plt.scatter(capacityDF['radius'], capacityData[' kW'])
-	packagePlots('CapacityPlot')
+	plt.xlabel('Distance [m]')
+	plt.ylabel('Power [kW]')
+	plt.savefig('capacityPlot.png')
+	packagePlots('capacityPlots')
 
 
 if __name__ == "__main__":
