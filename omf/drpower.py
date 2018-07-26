@@ -24,7 +24,7 @@ def transmissionConvert(owner, modelName, fileName):
 	# Rewrite allInputData.json
 	with open(os.path.join(modelDir, 'allInputData.json'),'r+') as inFile:
 		inData = json.load(inFile)
-		inData['networkName1'] = fileName + '.omt'
+		inData['networkName1'] = fileName
 		inFile.seek(0)
 		json.dump(inData,inFile)
 		inFile.truncate()
