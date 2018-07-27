@@ -32,7 +32,7 @@ def transmissionConvert(owner, modelName, fileName):
 
 def powerPublish(owner, modelName):
 	'Hook to pull data back to DRPOWER main repository.'
-	return web.redirect('DRP_PLACEHOLDER_DRP' + '/' + owner + '/' + modelName)
+	return web.redirect(os.environ.get('DRP_URL') + '/' + owner + '/' + modelName)
 
 def injectUser(email, passwordHash, modelName):
 	'Create a new user and log that user in. Note that hash should be pbkdf2_sha512'
