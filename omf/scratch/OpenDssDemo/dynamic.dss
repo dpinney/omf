@@ -3,7 +3,7 @@ Clear
 ! Note that this is a 3-wire delta system. 
 ! Node voltages in OpenDSS are normally line-ground and may give strange-looking results
 ! Be careful if you put line-neutral connected loads or other devices on this circuit.
-
+LoadModel=POWERFLOW
 New object=circuit.ieee37
 ~ basekv=230 pu=1.00 MVAsc3=200000 MVAsc1=210000
 
@@ -108,18 +108,16 @@ Export IncMatrixRow links.csv  ! Exports the name of the rows (link branches)
 Export IncMatrixCols ! Exports the name of the cols (buses)
 
 Solve
-Solve Mode=FaultStudy
-set maxiterations=100
+Solve mode=dynamics number=10 stepsize=0.0002
+! put on a SLG fault
+New Fault.F1  Phases=1 Bus1=Mybus.1
+Solve number=500  !  about 6 cycles
+! clear the fault
+Fault.F1.R=1000000
+Solve number=50000  !  200 ms more
 
-
-Export profile profile.csv
-Export voltages volts.csv
-Export current current.csv
-Export capacity capacity.csv
-Export fault faults.csv
-
-
-! export monitor MPCC monitor.csv
+Summary
+Export Powers power.csv
 
 ! show voltages LL Nodes
 ! show currents residual=y elements
