@@ -199,5 +199,5 @@ if __name__ == "__main__":
 	voltagePlots(filename)
 	#currentPlots(filename)
 	#networkPlot(filename)
-	#capacityPlot(filename)
+	capacityPlot(filename)
 	print("--- %s seconds ---" % (time.time() - start)) # Check performace.
