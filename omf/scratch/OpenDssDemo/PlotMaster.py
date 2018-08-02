@@ -144,15 +144,60 @@ def capacityPlot(filename):
 	plt.scatter(capacityDF['radius'], capacityData[' kW'])
 	plt.xlabel('Distance [m]')
 	plt.ylabel('Power [kW]')
-	plt.savefig('capacityPlot.png')
+	plt.savefig('PowerLoad.png')
+	plt.clf()
+	plt.scatter(capacityDF['radius'], capacityData[' Imax'])
+	plt.xlabel('Distance [m]')
+	plt.ylabel('Current [Amps]')
+	plt.savefig('CurrentLoad.png')
+	plt.clf()
+	plt.scatter(capacityDF['radius'], capacityDF.iloc[:, 2]+capacityDF.iloc[:, 3])
+	plt.xlabel('Distance [m]')
+	plt.ylabel('Maximum transformer percentage (One-side)')
+	plt.savefig('CurrentLoad.png')
+	plt.clf()
 	packagePlots('capacityPlots')
 
+def faultPlot(filename):
+	runDSS(filename)
+	dss.run_command('Export fault faults.csv')
+	faultData = pd.read_csv('faults.csv')
+	bus_coord_cols = ['Bus', 'X', 'Y'] # Add defined column names.
+	bus_coord = pd.read_csv('coords.csv', names=bus_coord_cols)
+	bus_hyp = []
+	for index, row in bus_coord.iterrows(): 
+		bus_hyp.append(math.sqrt(row['X']**2 + row['Y']**2)) # Get total distance for each entry.
+	bus_coord['radius'] = bus_hyp
+	faultDF = pd.concat([bus_coord, faultData], axis=1)
+	faultDF.columns = faultDF.columns.str.strip()
+	plt.scatter(faultDF['radius'], faultDF['3-Phase'])
+	plt.xlabel('Distance [m]')
+	plt.ylabel('Current [Amps]')
+	plt.axis([-1, 6, 0, 8000])
+	plt.savefig('3-Phase.png')
+	plt.clf()
+	plt.scatter(faultDF['radius'], faultDF['1-Phase'])
+	plt.xlabel('Distance [m]')
+	plt.ylabel('Current [Amps]')
+	plt.savefig('1-phase.png')
+	plt.axis([-1, 6, 0, 8000])
+	plt.clf()
+	plt.scatter(faultDF['radius'], faultDF['L-L'])
+	plt.xlabel('Distance [m]')
+	plt.ylabel('Current [Amps]')
+	plt.axis([-1, 6, 0, 8000])
+	plt.savefig('L-L.png')
+	plt.clf()
+	packagePlots('FaultPlots')
 
 if __name__ == "__main__":
 	start = time.time()
-	filename = 'ieee37.dss'
-	voltagePlots(filename)
-	currentPlots(filename)
-	networkPlot(filename)
-	capacityPlot(filename)
+	filename = 'dynamic.dss'
+	runDSS(filename)
+	#dss.Solution.SolvePFlow()
+	#faultPlot(filename)
+	#voltagePlots(filename)
+	#currentPlots(filename)
+	#networkPlot(filename)
+	#capacityPlot(filename)
 	print("--- %s seconds ---" % (time.time() - start)) # Check performace.
