@@ -114,9 +114,10 @@ New Fault.F1  Phases=1 Bus1=Mybus.1
 Solve number=500  !  about 6 cycles
 ! clear the fault
 Fault.F1.R=1000000
-Solve number=1000  !  200 ms more
+Solve number=50000  !  200 ms more
 
 export monitor.csv
+Export Powers power.csv
 
 ! show voltages LL Nodes
 ! show currents residual=y elements

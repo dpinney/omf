@@ -194,9 +194,9 @@ if __name__ == "__main__":
 	start = time.time()
 	filename = 'dynamic.dss'
 	runDSS(filename)
-	#dss.Solution.SolvePFlow()
+	dss.Solution.SolvePFlow()
 	#faultPlot(filename)
-	#voltagePlots(filename)
+	voltagePlots(filename)
 	#currentPlots(filename)
 	#networkPlot(filename)
 	#capacityPlot(filename)
