@@ -29,8 +29,7 @@ with open('solar_data.csv', 'rb') as csvfile:
 	for row in csvreader:
 		solarproxy_csv.append(row)
 solarproxy = np.array(solarproxy_csv) 
-print(solarproxy)
-print(np.array(solarproxy))
+
 loadregressors = np.array([55,55,56,57,59,61,63,65,67,70,73,75,75,74,74,72,71,70,68,66,63,61,59,57])
 
 sdmod0 = SolarDisagg2.SolarDisagg_IndvHome(netloads=netload, solarregressors=solarproxy, loadregressors=loadregressors)
@@ -57,9 +56,9 @@ fig = tools.make_subplots(rows=4, cols=1)
 fig.print_grid
 
 for i, model in enumerate(sdmod0.models):
-	#plotlyData.append(go.Scatter(y=meterData[i], x=[i for i in range(10)]))
-	print(sdmod0.models[model]['source'].value.tolist())
-	print([item for sublist in sdmod0.models[model]['source'].value.tolist() for item in sublist])
+	if model != 'AggregateLoad':
+		fig.append_trace(go.Scatter(y=sdmod0.netloads[str(i)], x=xaxis),i+1,1)
+	#print()
 	fig.append_trace(go.Scatter(y=[item for sublist in sdmod0.models[model]['source'].value.tolist() for item in sublist], x=xaxis),i+1,1)
 
 plot(fig)
