@@ -52,13 +52,14 @@ plt.show()
 
 #plotly testing
 #plotlyData = []
-xaxis = [i for i in range(10)]
-fig = tools.make_subplots(rows=len(meterData), cols=1)
+xaxis = [i for i in range(24)]
+fig = tools.make_subplots(rows=4, cols=1)
 fig.print_grid
 
-for i in range(len(meterData)):
+for i, model in enumerate(sdmod0.models):
 	#plotlyData.append(go.Scatter(y=meterData[i], x=[i for i in range(10)]))
-	print(i)
-	fig.append_trace(go.Scatter(y=meterData[i], x=xaxis),i+1,1)
+	print(sdmod0.models[model]['source'].value.tolist())
+	print([item for sublist in sdmod0.models[model]['source'].value.tolist() for item in sublist])
+	fig.append_trace(go.Scatter(y=[item for sublist in sdmod0.models[model]['source'].value.tolist() for item in sublist], x=xaxis),i+1,1)
 
 plot(fig)
