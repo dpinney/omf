@@ -12,8 +12,8 @@ def runDSS(filename):
 	''' Run DSS file and set export path.'''
 	homeDir = os.getcwd() # OpenDSS saves plots in a temp file unless you redirect explicitly.
 	dss.run_command('Redirect ' + filename)
-	dss.run_command('set datapath=' + str(homeDir))
-	dss.run_command('Export BusCoords coords.csv') # Get the bus coordinates.
+	#dss.run_command('set datapath=' + str(homeDir))
+	#dss.run_command('Export BusCoords coords.csv') # Get the bus coordinates.
 	
 def packagePlots(dirname):
 	''' Move all png files to individual folder. Ensure that the working folder is free of png files beforehand.'''
@@ -192,9 +192,9 @@ def faultPlot(filename):
 
 if __name__ == "__main__":
 	start = time.time()
-	filename = 'dynamic.dss'
+	filename = 'ieee519.dss'
 	runDSS(filename)
-	dss.Solution.SolvePFlow()
+#	dss.Solution.SolvePFlow()
 	#faultPlot(filename)
 	voltagePlots(filename)
 	#currentPlots(filename)
