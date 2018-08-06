@@ -10,7 +10,8 @@ import os, shutil
 
 def runDSS(filename):  
 	''' Run DSS file and set export path.'''
-	#homeDir = os.getcwd() # OpenDSS saves plots in a temp file unless you redirect explicitly.
+	#homeDir = os.getcwd() # OpenDSS saves plots in a temp file unless you redirect explicitly.	
+	dss.run_command('set datapath=' + os.getcwd())
 	dss.run_command('Redirect ' + filename)
 	if '37' not in filename:
 		dss.run_command('Export BusCoords coords.csv') # Get the bus coordinates.
@@ -192,20 +193,38 @@ def faultPlot(filename):
 	packagePlots('FaultPlots')
 
 def dynamicPlot():
+	''' Do a dynamic, long-term study of the powerflow. '''
 	dss.run_command('Solve mode=dynamics number=10 stepsize=.0002')
-    dss.run_command('Summary')
-    dss.run_command('Export Powers power.csv')
+	dss.run_command('Export Summary sum.csv')
+	dss.run_command('Export Powers powers.csv')
+	powers = pd.read_csv('powers.csv')
+	powers.columns = powers.columns.str.strip()
+	loads = powers.loc[powers['Element'].str.contains('Load')]
+	individual_loads = loads['Element']
+	individual_watts = loads['P(kW)']
+	plt.figure(figsize=(10, 8))
+	plt.xticks(rotation='vertical')
+	plt.ylabel('Power [kW]')
+	plt.bar(individual_loads, individual_watts)
+	plt.show()
+	packagePlots('DynamicPlots')
 
 def THD():
-	pass
+	''' Calculate and plot harmonics. '''
+	dss.run_command('Solve mode=harmonics')
+	dss.run_command('Export voltages voltharmonics.csv')
+	voltHarmonics = pd.read_csv('voltharmonics.csv')
+	print voltHarmonics
 
 if __name__ == "__main__":
 	start = time.time()
 	filename = 'ieee37.dss'
 	runDSS(filename)
-	faultPlot(filename)
+	#THD()
+	dynamicPlot()
+	#faultPlot(filename)
 #	voltagePlots(filename)
 	#currentPlots(filename)
 	#networkPlot(filename)
-	capacityPlot(filename)
+	#capacityPlot(filename)
 	print("--- %s seconds ---" % (time.time() - start)) # Check performace.
