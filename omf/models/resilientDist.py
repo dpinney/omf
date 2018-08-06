@@ -212,6 +212,9 @@ def convertToGFM(gfmInputTemplate, feederModel):
 				'max_reactive_phase': [0,0,0], #*
 				'has_phase': [False, False, False] #*
 			})
+			criticality = gfmInputTemplate['loadIsCritical']
+			if criticality == "True":
+				newLoad["is_critical"] = True
 			newLoad['id'] = load.get('name','')+'_lod'
 			# Associate the new load with the bus it is attached to.
 			if hasParent:
@@ -335,7 +338,8 @@ def work(modelDir, inputDict):
 		'hardeningUnitCost' : inputDict['hardeningUnitCost'],
 		'switchCost' : inputDict['switchCost'],
 		'generatorCandidates' : inputDict['generatorCandidates'],
-		'lineUnitCost' : inputDict['lineUnitCost']
+		'lineUnitCost' : inputDict['lineUnitCost'],
+		'loadIsCritical' : inputDict['loadIsCritical']
 	}
 	gfmJson = convertToGFM(gfmInputTemplate, feederModel)
 	gfmInputFilename = 'gfmInput.json'
@@ -479,7 +483,7 @@ def work(modelDir, inputDict):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"feederName1": "trip37", # "Winter 2017 Fixed" "debuggedSVEC"
+		"feederName1": "debuggedSVECIslands", # "trip37" "Winter 2017 Fixed" "debuggedSVEC"
 		"modelType": modelName,
 		"runTime": "0:00:30",
 		"layoutAlgorithm": "geospatial",
@@ -495,12 +499,13 @@ def new(modelDir):
 		"newLineCandidates": "TIE_A_to_C,TIE_C_to_B,TIE_B_to_A",
 		"generatorCandidates": "A_node706,A_node707,A_node708,B_node704,B_node705,B_node703",
 		"switchCandidates" : "A_node705-742,A_node705-712",
+		"loadIsCritical": "False",
 		"criticalLoadMet": "0.98",
 		"nonCriticalLoadMet": "0.0",
 		"chanceConstraint": "1.0",
 		"phaseVariation": "0.15",
 		"weatherImpacts": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","wf_clip.asc")).read(),
-		"weatherImpactsFileName": "wf_clip.asc", # "wind_grid_1UCS.asc" "wf_clipSVEC.asc"
+		"weatherImpactsFileName": "wf_clipSVEC.asc", # "wf_clip.asc" "wind_grid_1UCS.asc" "wf_clipSVEC.asc"
 		"xrMatrices":open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","lineCodesTrip37.json")).read(),
 		"xrMatricesFileName":"lineCodesTrip37.json",
 		"scenarios": "",
