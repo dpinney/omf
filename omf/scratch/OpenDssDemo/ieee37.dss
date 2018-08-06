@@ -1,5 +1,6 @@
 Clear
 
+! set datapath='~/GitHub/Work/omf/omf/scratch/OpenDSSDemo'
 ! Note that this is a 3-wire delta system. 
 ! Node voltages in OpenDSS are normally line-ground and may give strange-looking results
 ! Be careful if you put line-neutral connected loads or other devices on this circuit.
@@ -96,11 +97,9 @@ New Load.S742a      Bus1=742.1.2 Phases=1 Conn=Delta Model=2 kV=  4.800 kW=   8.
 New Load.S742b      Bus1=742.2.3 Phases=1 Conn=Delta Model=2 kV=  4.800 kW=  85.0 kVAR=  40.0
 New Load.S744a      Bus1=744.1.2 Phases=1 Conn=Delta Model=1 kV=  4.800 kW=  42.0 kVAR=  21.0
 
-New monitor.M1 Line.L115 1 
-
 Set VoltageBases = "230,4.8,0.48"
 CalcVoltageBases
-BusCoords IEEE37_BusXY.csv
+Export BusCoords coords.csv
 
 
 
@@ -110,21 +109,10 @@ Export IncMatrixRow links.csv  ! Exports the name of the rows (link branches)
 Export IncMatrixCols ! Exports the name of the cols (buses)
 
 Solve
-Solve Mode=Harmonics
 set maxiterations=100
 
 
 Export profile profile.csv
 Export voltages volts.csv
 Export current current.csv
-
-Export monitor M1
-
-
-! export monitor MPCC monitor.csv
-
-! show voltages LL Nodes
-! show currents residual=y elements
-! show powers kva elements
-! show taps
 

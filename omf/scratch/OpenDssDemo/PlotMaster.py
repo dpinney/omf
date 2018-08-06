@@ -10,11 +10,15 @@ import os, shutil
 
 def runDSS(filename):  
 	''' Run DSS file and set export path.'''
-	homeDir = os.getcwd() # OpenDSS saves plots in a temp file unless you redirect explicitly.
+	#homeDir = os.getcwd() # OpenDSS saves plots in a temp file unless you redirect explicitly.
 	dss.run_command('Redirect ' + filename)
-	#dss.run_command('set datapath=' + str(homeDir))
-	#dss.run_command('Export BusCoords coords.csv') # Get the bus coordinates.
-	
+	if '37' not in filename:
+		dss.run_command('Export BusCoords coords.csv') # Get the bus coordinates.
+	else:
+		if not os.path.exists(os.getcwd() + '/coords.csv'):
+			os.system('mv IEEE37_BusXY.csv coords.csv') 
+	dss.run_command('Solve') # Ensure there is no seg fault for specialized plots.
+
 def packagePlots(dirname):
 	''' Move all png files to individual folder. Ensure that the working folder is free of png files beforehand.'''
 	# Stream all plots to their own folders to avoid cluttering the workspace. 
@@ -30,7 +34,6 @@ def packagePlots(dirname):
 
 def voltagePlots(filename):
 	''' Voltage plotting routine.'''
-	runDSS(filename)
 	dss.run_command('Export voltages volts.csv') # Generate voltage plots.
 	voltage = pd.read_csv('volts.csv') 
 	volt_coord_cols = ['Bus', 'X', 'Y'] # Add defined column names.
@@ -60,7 +63,6 @@ def voltagePlots(filename):
 
 def currentPlots(filename):
 	''' Current plotting function.'''
-	runDSS(filename) # This routine mirrors the voltage plots.
 	dss.run_command('Export current currents.csv')
 	current = pd.read_csv('currents.csv')
 	curr_coord_cols = ['Index', 'X', 'Y'] # DSS buses don't have current, but are connected to it. 
@@ -83,7 +85,6 @@ def currentPlots(filename):
 
 def networkPlot(filename):
 	''' Plot the physical topology of the circuit. '''
-	runDSS(filename)
 	dss.run_command('Export voltages volts.csv')
 	volts = pd.read_csv('volts.csv')
 	coord = pd.read_csv('coords.csv', names=['Bus', 'X', 'Y'])
@@ -132,7 +133,6 @@ def networkPlot(filename):
 
 def capacityPlot(filename):
 	''' Plot power vs. distance '''
-	runDSS(filename)
 	dss.run_command('Export Capacity capacity.csv')
 	capacityData = pd.read_csv('capacity.csv')
 	coord = pd.read_csv('coords.csv', names=['Index', 'X', 'Y'])
@@ -159,7 +159,8 @@ def capacityPlot(filename):
 	packagePlots('capacityPlots')
 
 def faultPlot(filename):
-	runDSS(filename)
+	''' Plot fault study. ''' 
+	dss.run_command('Solve Mode=FaultStudy')
 	dss.run_command('Export fault faults.csv')
 	faultData = pd.read_csv('faults.csv')
 	bus_coord_cols = ['Bus', 'X', 'Y'] # Add defined column names.
@@ -190,13 +191,20 @@ def faultPlot(filename):
 	plt.clf()
 	packagePlots('FaultPlots')
 
+def dynamicPlot():
+	dss.run_command('Solve mode=dynamics number=10 stepsize=.0002')
+    dss.run_command('Summary')
+    dss.run_command('Export Powers power.csv')
+
+def THD():
+	pass
+
 if __name__ == "__main__":
 	start = time.time()
-	filename = 'ieee519.dss'
+	filename = 'ieee37.dss'
 	runDSS(filename)
-#	dss.Solution.SolvePFlow()
-	#faultPlot(filename)
-	voltagePlots(filename)
+	faultPlot(filename)
+#	voltagePlots(filename)
 	#currentPlots(filename)
 	#networkPlot(filename)
 	capacityPlot(filename)
