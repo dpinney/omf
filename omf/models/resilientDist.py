@@ -77,13 +77,17 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			phases = line.get('phases')
 			if 'S' in phases:
 				continue # We don't support secondary system transformers.
+			if line.get('object','') == 'switch':
+				has_switch = True
+			else:
+				has_switch = False
 			newLine = dict({
 				'id' : '', #*
 				'node1_id' : '', #*
 				'node2_id' : '', #*
 				'line_code' : '', #*
-				'length' : 1.0, #* Units match line code entries.
-				# 'has_switch' : False,
+				'length' : float(line.get('length',100)), #* Units match line code entries.
+				'has_switch' : has_switch,
 				'construction_cost': float(gfmInputTemplate['lineUnitCost']),
 				'harden_cost': float(gfmInputTemplate['hardeningUnitCost']), # Russel: this exists unless its a trans.
 				'switch_cost': float(gfmInputTemplate['switchCost']), # taken from rdtInTrevor.json.
@@ -99,7 +103,6 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			newLine['id'] = line.get('name','')
 			newLine['node1_id'] = line.get('from','')+'_bus' 
 			newLine['node2_id'] = line.get('to','')+'_bus'
-			newLine['length'] = float(line.get('length',100))
 			newLine['line_code'] = lineCount
 			# Calculate harden_cost, 10.
 			# newLine['capacity'] = 1000000000 # Set it arbitrarily high.
