@@ -1,5 +1,7 @@
 ''' Run OpenDSS and plot the results for arbitrary circuits. '''
 
+from argparse import ArgumentParser
+
 import time
 import opendssdirect as dss
 import pandas as pd
@@ -10,14 +12,8 @@ import os, shutil
 
 def runDSS(filename):  
 	''' Run DSS file and set export path.'''
-	#homeDir = os.getcwd() # OpenDSS saves plots in a temp file unless you redirect explicitly.	
 	dss.run_command('set datapath=' + os.getcwd())
 	dss.run_command('Redirect ' + filename)
-	if '37' not in filename:
-		dss.run_command('Export BusCoords coords.csv') # Get the bus coordinates.
-	else:
-		if not os.path.exists(os.getcwd() + '/coords.csv'):
-			os.system('mv IEEE37_BusXY.csv coords.csv') 
 	dss.run_command('Solve') # Ensure there is no seg fault for specialized plots.
 
 def packagePlots(dirname):
@@ -33,7 +29,7 @@ def packagePlots(dirname):
 		if file.endswith('.png'):
 			shutil.move(os.path.join(sourcePath,file), os.path.join(destPath, file))
 
-def voltagePlots(filename):
+def voltagePlots(coords):
 	''' Voltage plotting routine.'''
 	dss.run_command('Export voltages volts.csv') # Generate voltage plots.
 	voltage = pd.read_csv('volts.csv') 
@@ -209,22 +205,40 @@ def dynamicPlot():
 	plt.show()
 	packagePlots('DynamicPlots')
 
-def THD():
+def THD(coordFile):
 	''' Calculate and plot harmonics. '''
 	dss.run_command('Solve mode=harmonics')
 	dss.run_command('Export voltages voltharmonics.csv')
 	voltHarmonics = pd.read_csv('voltharmonics.csv')
+	regVolts = pd.read_csv('volts.csv')
 	print voltHarmonics
 
 if __name__ == "__main__":
 	start = time.time()
-	filename = 'ieee37.dss'
+	parser = ArgumentParser(description='Plotting options for DSS files.')
+	parser.add_argument("-f", "--file", required=True, help="DSS file.")
+	parser.add_argument("-c", "--coordinates", help="Optional coordinates argument")
+	args = vars(parser.parse_args())
+	filename = args['file']
+	coords = None
+	if args['coordinates']:
+		coordFile = args['coordinates']
+		coords = pd.read_csv(coordFile)
+	else:
+		try:
+			dss.run_command('Export BusCoords coords.csv')
+			coords = pd.read_csv('coords.csv')
+		except OSError as e:
+			if e.errno == errno.EEXIST:
+				print "Error: coodinate file not created properly. Perhaps you need to set your OpenDSS data path correctly?"
+			else:
+				raise Exception('Could not read file')
 	runDSS(filename)
-	#THD()
-	dynamicPlot()
-	#faultPlot(filename)
-#	voltagePlots(filename)
-	#currentPlots(filename)
-	#networkPlot(filename)
-	#capacityPlot(filename)
+	THD(coords)
+	#dynamicPlot(coords)
+	#faultPlot(coords)
+	#voltagePlots(coords)
+	#currentPlots(coords)
+	#networkPlot(coords)
+	#capacityPlot(coords)
 	print("--- %s seconds ---" % (time.time() - start)) # Check performace.
