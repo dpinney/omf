@@ -67,12 +67,8 @@ def currentPlots(curr_coord):
 	''' Current plotting function.'''
 	dss.run_command('Export current currents.csv')
 	current = pd.read_csv('currents.csv')
-	print curr_coord
-	curr_coord.columns = ['Index', 'X', 'Y'] # DSS buses don't have current, but are connected to it. 
+	curr_coord.columns = ['Index', 'X', 'Y', 'radius'] # DSS buses don't have current, but are connected to it. 
 	curr_hyp = []
-	for index, row in curr_coord.iterrows():
-		curr_hyp.append(math.sqrt(row['X']**2 + row['Y']**2))
-	curr_coord['radius'] = curr_hyp
 	currentDF = pd.concat([curr_coord, current], axis=1)
 	for i in range(1, 3):
 		for j in range(1, 4):
@@ -89,8 +85,7 @@ def networkPlot(coords):
 	''' Plot the physical topology of the circuit. '''
 	dss.run_command('Export voltages volts.csv')
 	volts = pd.read_csv('volts.csv')
-	coords.columns = ['Bus', 'X', 'Y']
-
+	coords.columns = ['Bus', 'X', 'Y', 'radius']
 	G = nx.Graph() # Declare networkx object.
 	pos = {}
 	for index, row in coords.iterrows(): # Get the coordinates.
@@ -132,43 +127,36 @@ def networkPlot(coords):
 	plt.clf()
 	packagePlots('networkPlots')
 
-def capacityPlot(coords):
-	''' Plot power vs. distance '''
-	dss.run_command('Export Capacity capacity.csv')
-	capacityData = pd.read_csv('capacity.csv')
-	coords = pd.read_csv('coords.csv', names=['Index', 'X', 'Y'])
-	hyp = []
-	for index, row in coords.iterrows():
-		hyp.append(math.sqrt(row['X']**2 + row['Y']**2))
-	coords['radius'] = hyp
-	capacityDF = pd.concat([coords, capacityData], axis=1)
-	plt.scatter(capacityDF['radius'], capacityData[' kW'])
-	plt.xlabel('Distance [m]')
+def dynamicPlot():
+	''' Do a dynamic, long-term study of the powerflow. '''
+	dss.run_command('Solve mode=dynamics number=10 stepsize=.0002')
+	dss.run_command('Export Summary sum.csv')
+	dss.run_command('Export Powers powers.csv')
+	powers = pd.read_csv('powers.csv')
+	powers.columns = powers.columns.str.strip()
+	loads = powers.loc[powers['Element'].str.contains('Load')]
+	individual_loads = loads['Element']
+	individual_watts = loads['P(kW)']
+	plt.figure(figsize=(10, 8))
+	plt.xticks(rotation='vertical')
 	plt.ylabel('Power [kW]')
-	plt.savefig('PowerLoad.png')
-	plt.clf()
-	plt.scatter(capacityDF['radius'], capacityData[' Imax'])
-	plt.xlabel('Distance [m]')
-	plt.ylabel('Current [Amps]')
-	plt.savefig('CurrentLoad.png')
-	plt.clf()
-	plt.scatter(capacityDF['radius'], capacityDF.iloc[:, 2]+capacityDF.iloc[:, 3])
-	plt.xlabel('Distance [m]')
-	plt.ylabel('Maximum transformer percentage (One-side)')
-	plt.savefig('CurrentLoad.png')
-	plt.clf()
-	packagePlots('capacityPlots')
+	plt.bar(individual_loads, individual_watts)
+	packagePlots('DynamicPlots')
+
+def THD(coordFile):
+	''' Calculate and plot harmonics. '''
+	dss.run_command('Solve mode=harmonics')
+	dss.run_command('Export voltages voltharmonics.csv')
+	voltHarmonics = pd.read_csv('voltharmonics.csv')
+	regVolts = pd.read_csv('volts.csv')
+	print voltHarmonics
 
 def faultPlot(bus_coord):
 	''' Plot fault study. ''' 
 	dss.run_command('Solve Mode=FaultStudy')
 	dss.run_command('Export fault faults.csv')
 	faultData = pd.read_csv('faults.csv')
-	bus_coord.columns = ['Bus', 'X', 'Y'] # Add defined column names.
-	bus_hyp = []
-	for index, row in bus_coord.iterrows(): 
-		bus_hyp.append(math.sqrt(row['X']**2 + row['Y']**2)) # Get total distance for each entry.
-	bus_coord['radius'] = bus_hyp
+	bus_coord.columns = ['Bus', 'X', 'Y', 'radius'] # Add defined column names.
 	faultDF = pd.concat([bus_coord, faultData], axis=1)
 	faultDF.columns = faultDF.columns.str.strip()
 	plt.scatter(faultDF['radius'], faultDF['3-Phase'])
@@ -191,30 +179,28 @@ def faultPlot(bus_coord):
 	plt.clf()
 	packagePlots('FaultPlots')
 
-def dynamicPlot():
-	''' Do a dynamic, long-term study of the powerflow. '''
-	dss.run_command('Solve mode=dynamics number=10 stepsize=.0002')
-	dss.run_command('Export Summary sum.csv')
-	dss.run_command('Export Powers powers.csv')
-	powers = pd.read_csv('powers.csv')
-	powers.columns = powers.columns.str.strip()
-	loads = powers.loc[powers['Element'].str.contains('Load')]
-	individual_loads = loads['Element']
-	individual_watts = loads['P(kW)']
-	plt.figure(figsize=(10, 8))
-	plt.xticks(rotation='vertical')
+def capacityPlot(coords):
+	''' Plot power vs. distance '''
+	dss.run_command('Export Capacity capacity.csv')
+	capacityData = pd.read_csv('capacity.csv')
+	coords.columns = ['Index', 'X', 'Y', 'radius']
+	capacityDF = pd.concat([coords, capacityData], axis=1)
+	plt.scatter(capacityDF['radius'], capacityData[' kW'])
+	plt.xlabel('Distance [m]')
 	plt.ylabel('Power [kW]')
-	plt.bar(individual_loads, individual_watts)
-	plt.show()
-	packagePlots('DynamicPlots')
-
-def THD(coordFile):
-	''' Calculate and plot harmonics. '''
-	dss.run_command('Solve mode=harmonics')
-	dss.run_command('Export voltages voltharmonics.csv')
-	voltHarmonics = pd.read_csv('voltharmonics.csv')
-	regVolts = pd.read_csv('volts.csv')
-	print voltHarmonics
+	plt.savefig('PowerLoad.png')
+	plt.clf()
+	plt.scatter(capacityDF['radius'], capacityData[' Imax'])
+	plt.xlabel('Distance [m]')
+	plt.ylabel('Current [Amps]')
+	plt.savefig('CurrentLoad.png')
+	plt.clf()
+	plt.scatter(capacityDF['radius'], capacityDF.iloc[:, 2]+capacityDF.iloc[:, 3])
+	plt.xlabel('Distance [m]')
+	plt.ylabel('Maximum transformer percentage (One-side)')
+	plt.savefig('CurrentLoad.png')
+	plt.clf()
+	packagePlots('capacityPlots')
 
 if __name__ == "__main__":
 	start = time.time()
@@ -226,11 +212,11 @@ if __name__ == "__main__":
 	base_coords = None
 	if args['coordinates']:
 		coordFile = args['coordinates']
-		base_coords = pd.read_csv(coordFile)
+		base_coords = pd.read_csv(coordFile, header=None)
 	else:
 		try:
 			dss.run_command('Export BusCoords coords.csv')
-			base_coords = pd.read_csv('coords.csv')
+			base_coords = pd.read_csv('coords.csv', header=None)
 		except OSError as e:
 			if e.errno == errno.EEXIST:
 				print "Error: coodinate file not created properly. Perhaps you need to set your OpenDSS data path correctly?"
@@ -238,11 +224,11 @@ if __name__ == "__main__":
 				raise Exception('Could not read file')
 	runDSS(filename)
 	full_coords = createRadii(base_coords)
-	voltagePlots(full_coords)
-	#currentPlots(coords)
-	#networkPlot(coords)
-	#capacityPlot(coords)
-	#dynamicPlot(coords)
-	#faultPlot(coords)
+	#voltagePlots(full_coords) 
+	#currentPlots(full_coords)
+	#networkPlot(full_coords)
+	#dynamicPlot()
+	#faultPlot(full_coords)
+	#capacityPlot(full_coords)
 	#THD(full_coords)
 	print("--- %s seconds ---" % (time.time() - start)) # Check performace.
