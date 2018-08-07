@@ -29,16 +29,20 @@ def packagePlots(dirname):
 		if file.endswith('.png'):
 			shutil.move(os.path.join(sourcePath,file), os.path.join(destPath, file))
 
-def voltagePlots(coords):
+def createRadii(coords):
+	coords.columns = ['Element', 'X', 'Y']
+	hyp = []
+	for index, row in coords.iterrows():
+		hyp.append(math.sqrt(row['X']**2 + row['Y']**2))
+	coords['radius'] = hyp
+	return coords
+
+
+def voltagePlots(volt_coord):
 	''' Voltage plotting routine.'''
 	dss.run_command('Export voltages volts.csv') # Generate voltage plots.
 	voltage = pd.read_csv('volts.csv') 
-	volt_coord_cols = ['Bus', 'X', 'Y'] # Add defined column names.
-	volt_coord = pd.read_csv('coords.csv', names=volt_coord_cols)
-	volt_hyp = []
-	for index, row in volt_coord.iterrows(): 
-		volt_hyp.append(math.sqrt(row['X']**2 + row['Y']**2)) # Get total distance for each entry.
-	volt_coord['radius'] = volt_hyp
+	volt_coord.columns = ['Bus', 'X', 'Y', 'radius']
 	voltageDF = pd.merge(volt_coord, voltage, on='Bus') # Merge on the bus axis so that all data is in one frame.
 	for i in range(1, 4): 
 		volt_ind = ' pu' + str(i)
@@ -57,13 +61,14 @@ def voltagePlots(coords):
 		plt.savefig('Magnitude Profile ' + str(i) + '.png') # Actual voltages.
 		plt.clf()
 	packagePlots('voltagePlots')
+	#volt_coord.drop('radius', 1)
 
-def currentPlots(filename):
+def currentPlots(curr_coord):
 	''' Current plotting function.'''
 	dss.run_command('Export current currents.csv')
 	current = pd.read_csv('currents.csv')
-	curr_coord_cols = ['Index', 'X', 'Y'] # DSS buses don't have current, but are connected to it. 
-	curr_coord = pd.read_csv('coords.csv', names=curr_coord_cols)
+	print curr_coord
+	curr_coord.columns = ['Index', 'X', 'Y'] # DSS buses don't have current, but are connected to it. 
 	curr_hyp = []
 	for index, row in curr_coord.iterrows():
 		curr_hyp.append(math.sqrt(row['X']**2 + row['Y']**2))
@@ -80,16 +85,15 @@ def currentPlots(filename):
 			plt.clf()
 	packagePlots('currentPlots')
 
-def networkPlot(filename):
+def networkPlot(coords):
 	''' Plot the physical topology of the circuit. '''
 	dss.run_command('Export voltages volts.csv')
 	volts = pd.read_csv('volts.csv')
-	coord = pd.read_csv('coords.csv', names=['Bus', 'X', 'Y'])
+	coords.columns = ['Bus', 'X', 'Y']
 
 	G = nx.Graph() # Declare networkx object.
 	pos = {}
-
-	for index, row in coord.iterrows(): # Get the coordinates.
+	for index, row in coords.iterrows(): # Get the coordinates.
  		if row['Bus'] == '799R':
 			row['Bus'] = '799r'
 		if row['Bus'] == 'SOURCEBUS':
@@ -128,16 +132,16 @@ def networkPlot(filename):
 	plt.clf()
 	packagePlots('networkPlots')
 
-def capacityPlot(filename):
+def capacityPlot(coords):
 	''' Plot power vs. distance '''
 	dss.run_command('Export Capacity capacity.csv')
 	capacityData = pd.read_csv('capacity.csv')
-	coord = pd.read_csv('coords.csv', names=['Index', 'X', 'Y'])
+	coords = pd.read_csv('coords.csv', names=['Index', 'X', 'Y'])
 	hyp = []
-	for index, row in coord.iterrows():
+	for index, row in coords.iterrows():
 		hyp.append(math.sqrt(row['X']**2 + row['Y']**2))
-	coord['radius'] = hyp
-	capacityDF = pd.concat([coord, capacityData], axis=1)
+	coords['radius'] = hyp
+	capacityDF = pd.concat([coords, capacityData], axis=1)
 	plt.scatter(capacityDF['radius'], capacityData[' kW'])
 	plt.xlabel('Distance [m]')
 	plt.ylabel('Power [kW]')
@@ -155,13 +159,12 @@ def capacityPlot(filename):
 	plt.clf()
 	packagePlots('capacityPlots')
 
-def faultPlot(filename):
+def faultPlot(bus_coord):
 	''' Plot fault study. ''' 
 	dss.run_command('Solve Mode=FaultStudy')
 	dss.run_command('Export fault faults.csv')
 	faultData = pd.read_csv('faults.csv')
-	bus_coord_cols = ['Bus', 'X', 'Y'] # Add defined column names.
-	bus_coord = pd.read_csv('coords.csv', names=bus_coord_cols)
+	bus_coord.columns = ['Bus', 'X', 'Y'] # Add defined column names.
 	bus_hyp = []
 	for index, row in bus_coord.iterrows(): 
 		bus_hyp.append(math.sqrt(row['X']**2 + row['Y']**2)) # Get total distance for each entry.
@@ -220,25 +223,26 @@ if __name__ == "__main__":
 	parser.add_argument("-c", "--coordinates", help="Optional coordinates argument")
 	args = vars(parser.parse_args())
 	filename = args['file']
-	coords = None
+	base_coords = None
 	if args['coordinates']:
 		coordFile = args['coordinates']
-		coords = pd.read_csv(coordFile)
+		base_coords = pd.read_csv(coordFile)
 	else:
 		try:
 			dss.run_command('Export BusCoords coords.csv')
-			coords = pd.read_csv('coords.csv')
+			base_coords = pd.read_csv('coords.csv')
 		except OSError as e:
 			if e.errno == errno.EEXIST:
 				print "Error: coodinate file not created properly. Perhaps you need to set your OpenDSS data path correctly?"
 			else:
 				raise Exception('Could not read file')
 	runDSS(filename)
-	THD(coords)
-	#dynamicPlot(coords)
-	#faultPlot(coords)
-	#voltagePlots(coords)
+	full_coords = createRadii(base_coords)
+	voltagePlots(full_coords)
 	#currentPlots(coords)
 	#networkPlot(coords)
 	#capacityPlot(coords)
+	#dynamicPlot(coords)
+	#faultPlot(coords)
+	#THD(full_coords)
 	print("--- %s seconds ---" % (time.time() - start)) # Check performace.
