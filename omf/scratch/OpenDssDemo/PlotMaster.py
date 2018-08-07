@@ -160,6 +160,8 @@ def dynamicPlot():
 	plt.xticks(rotation='vertical')
 	plt.ylabel('Power [kW]')
 	plt.bar(individual_loads, individual_watts)
+	plt.savefig('Dynamic.png')
+	plt.clf()
 	packagePlots('DynamicPlots')
 
 
@@ -239,7 +241,7 @@ if __name__ == "__main__":
 	#voltagePlots(full_coords) 
 	#currentPlots(full_coords)
 	#networkPlot(full_coords)
-	#dynamicPlot()
+	dynamicPlot()
 	#faultPlot(full_coords)
 	#capacityPlot(full_coords)
 	THD(full_coords)
