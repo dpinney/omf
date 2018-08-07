@@ -135,7 +135,6 @@ def THD(bus_coords):
 	voltHarmonics = pd.read_csv('voltharmonics.csv')
 	bus_coords.columns = ['Bus', 'X', 'Y', 'radius']
 	voltHarmonics.columns.str.strip()
-	print voltHarmonics.columns
 	for index, row in voltHarmonics.iterrows():
 		voltHarmonics['THD'] = row[' Magnitude1']/(math.sqrt(row[' Magnitude2']**2 + row[' Magnitude3']**2))
 	distortionDF = pd.merge(bus_coords, voltHarmonics, on='Bus') # Merge on the bus axis so that all data is in one frame.
