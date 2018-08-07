@@ -127,6 +127,26 @@ def networkPlot(coords):
 	plt.clf()
 	packagePlots('networkPlots')
 
+
+def THD(bus_coords):
+	''' Calculate and plot harmonics. '''
+	dss.run_command('Solve mode=harmonics')
+	dss.run_command('Export voltages voltharmonics.csv')
+	voltHarmonics = pd.read_csv('voltharmonics.csv')
+	bus_coords.columns = ['Bus', 'X', 'Y', 'radius']
+	voltHarmonics.columns.str.strip()
+	print voltHarmonics.columns
+	for index, row in voltHarmonics.iterrows():
+		voltHarmonics['THD'] = row[' Magnitude1']/(math.sqrt(row[' Magnitude2']**2 + row[' Magnitude3']**2))
+	distortionDF = pd.merge(bus_coords, voltHarmonics, on='Bus') # Merge on the bus axis so that all data is in one frame.
+	plt.scatter(distortionDF['radius'], distortionDF['THD'])
+	plt.xlabel('Radius [m]')
+	plt.ylabel('THD [Percentage]')
+	plt.savefig('THD.png')
+	plt.clf()
+	packagePlots('THD')
+
+
 def dynamicPlot():
 	''' Do a dynamic, long-term study of the powerflow. '''
 	dss.run_command('Solve mode=dynamics number=10 stepsize=.0002')
@@ -143,13 +163,6 @@ def dynamicPlot():
 	plt.bar(individual_loads, individual_watts)
 	packagePlots('DynamicPlots')
 
-def THD(coordFile):
-	''' Calculate and plot harmonics. '''
-	dss.run_command('Solve mode=harmonics')
-	dss.run_command('Export voltages voltharmonics.csv')
-	voltHarmonics = pd.read_csv('voltharmonics.csv')
-	regVolts = pd.read_csv('volts.csv')
-	print voltHarmonics
 
 def faultPlot(bus_coord):
 	''' Plot fault study. ''' 
@@ -230,5 +243,5 @@ if __name__ == "__main__":
 	#dynamicPlot()
 	#faultPlot(full_coords)
 	#capacityPlot(full_coords)
-	#THD(full_coords)
+	THD(full_coords)
 	print("--- %s seconds ---" % (time.time() - start)) # Check performace.
