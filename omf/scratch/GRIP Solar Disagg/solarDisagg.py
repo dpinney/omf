@@ -45,8 +45,13 @@ f, axes = plt.subplots(3, 1, sharey=True, sharex=True)
 
 for i, model in enumerate(sdmod0.models):
 	if sdmod0.models[model]['name'] != 'AggregateLoad':
-		axes[i].plot(sdmod0.models[model]['source'].value, label=('solar' + str(i)))
-		axes[i].plot(sdmod0.netloads[str(i)], label=('meter' + str(i)))
+		#print(type(sdmod0.models[model]['source'].value))
+		#print(type(sdmod0.netloads[str(i)]))
+		solarArray = np.array([item for sublist in sdmod0.models[model]['source'].value.tolist() for item in sublist])
+		disaggLoad = (sdmod0.netloads[str(i)] - solarArray)
+		axes[i].plot(disaggLoad, label=('meter' + str(i)))
+		axes[i].plot(sdmod0.netloads[str(i)], label=('net load' + str(i)))
+		axes[i].plot(solarArray, label=('solar' + str(i)))
 		axes[i].legend()
 
 plt.show()
@@ -54,13 +59,15 @@ plt.show()
 #plotly testing
 #plotlyData = []
 xaxis = [i for i in range(24)]
-fig = tools.make_subplots(rows=4, cols=1)
+fig = tools.make_subplots(rows=3, cols=1)
 fig.print_grid
 
 for i, model in enumerate(sdmod0.models):
 	if model != 'AggregateLoad':
-		fig.append_trace(go.Scatter(y=sdmod0.netloads[str(i)], x=xaxis),i+1,1)
-	#print()
-	fig.append_trace(go.Scatter(y=[item for sublist in sdmod0.models[model]['source'].value.tolist() for item in sublist], x=xaxis),i+1,1)
+		solarArray = np.array([item for sublist in sdmod0.models[model]['source'].value.tolist() for item in sublist])
+		disaggLoad = (sdmod0.netloads[str(i)] - solarArray)
+		fig.append_trace(go.Scatter(y=sdmod0.netloads[str(i)], x=xaxis, name=('net load' + str(i))),i+1,1)
+		fig.append_trace(go.Scatter(y=disaggLoad, x=xaxis, name=('meter' + str(i))),i+1,1)
+		fig.append_trace(go.Scatter(y=np.array([item for sublist in sdmod0.models[model]['source'].value.tolist() for item in sublist]), x=xaxis, name=('solar' + str(i))),i+1,1)
 
-#plot(fig)
+plot(fig)
