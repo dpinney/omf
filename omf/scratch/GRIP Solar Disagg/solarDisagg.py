@@ -37,15 +37,17 @@ sdmod0.constructSolve()
 print(type(sdmod0.modelcounter))
 
 #Set up plots
-f, axes = plt.subplots(4, 1, sharey=True, sharex=True)
+f, axes = plt.subplots(3, 1, sharey=True, sharex=True)
 
 #aggregate = []
 #for i in range(sdmod0.modelcounter):
 #	aggregate.append(sum([x[i] for x in meterData]))
 
 for i, model in enumerate(sdmod0.models):
-	print(sdmod0.models[model]['source'].value)
-	axes[i].plot(sdmod0.models[model]['source'].value)
+	if sdmod0.models[model]['name'] != 'AggregateLoad':
+		axes[i].plot(sdmod0.models[model]['source'].value, label=('solar' + str(i)))
+		axes[i].plot(sdmod0.netloads[str(i)], label=('meter' + str(i)))
+		axes[i].legend()
 
 plt.show()
 
@@ -61,4 +63,4 @@ for i, model in enumerate(sdmod0.models):
 	#print()
 	fig.append_trace(go.Scatter(y=[item for sublist in sdmod0.models[model]['source'].value.tolist() for item in sublist], x=xaxis),i+1,1)
 
-plot(fig)
+#plot(fig)
