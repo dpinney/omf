@@ -9,6 +9,7 @@ from networkx.drawing.nx_agraph import graphviz_layout
 import networkx as nx
 
 FNAME = 'smsSingle.glm'
+# FNAME = 'dist_gen_solar_all.glm'
 
 # help(omf.feeder.parse)
 
@@ -19,7 +20,7 @@ x = set()
 for obj in feed.values():
 	if 'object' in obj:
 		x.add(obj['object'])
-print x
+#print x
 
 # Draw it.
 # omf.feeder.latLonNxGraph(omf.feeder.treeToNxGraph(feed), labels=False, neatoLayout=True, showPlot=False)
@@ -96,6 +97,14 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 		for phase in ['A','B','C']:
 			phaseCurr += abs(float(row['curr'+phase+'_real']))
 		edgeCurrents[row.get('link_name','')] = phaseCurr
+	# create edgeCurrent copy with to and from tuple as keys for labeling
+	edgeTupleCurrents = {}
+	for edge in edgeCurrents:
+		for obj in tree.values():
+			if obj.get('name') == edge:
+				coord = (obj.get('from'), obj.get('to'))
+				currVal = edgeCurrents.get(edge)
+				edgeTupleCurrents[coord] = "{0:.3f}".format(currVal)
 	# Build the graph.
 	fGraph = omf.feeder.treeToNxGraph(tree)
 	voltChart = plt.figure(figsize=(15,15))
@@ -119,15 +128,24 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 		pos = positions,
 		edge_color = [edgeCurrents.get(n,0) for n in edgeNames],
 		width = 1,
-		cmap = plt.cm.jet)
+		edge_vmin = None,
+		edge_vmax = None,
+		edge_cmap = plt.cm.jet)
+	edgeLabelsIm = nx.draw_networkx_edge_labels(fGraph,
+		pos = positions,
+		edge_labels = edgeTupleCurrents,
+		font_size = 10)
 	nodeIm = nx.draw_networkx_nodes(fGraph,
 		pos = positions,
 		node_color = [nodeVolts.get(n,0) for n in fGraph.nodes()],
 		linewidths = 0,
 		node_size = 30,
+		vmin = 110,
+		vmax = 130,
 		cmap = plt.cm.jet)
+
 	plt.sci(nodeIm)
-	plt.clim(110,130)
+	# plt.clim(110,130)
 	plt.colorbar()
 	return voltChart
 
