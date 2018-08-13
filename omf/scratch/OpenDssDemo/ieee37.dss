@@ -108,35 +108,3 @@ Export IncMatrix     ! Exports the incidence branch to node matrix (only the non
 Export IncMatrixRow links.csv  ! Exports the name of the rows (link branches)
 Export IncMatrixCols ! Exports the name of the cols (buses)
 
-Solve
-Solve Mode=Dynamics Stepsize=1 number=10
-Solve
-Export voltages v1.csv
-Export currents c1.csv
-Solve
-Export voltages v2.csv
-Export currents c2.csv
-Solve 
-Export voltages v3.csv
-Export currents c3.csv
-Solve
-Export voltages v4.csv
-Export currents c4.csv
-Solve
-Export voltages v5.csv
-Export currents c5.csv
-Solve
-Export voltages v6.csv
-Export currents c6.csv
-Solve
-Export voltages v7.csv
-Export currents c7.csv
-Solve
-Export voltages v8.csv
-Export currents c8.csv
-Solve
-Export voltages v9.csv
-Export currents c9.csv
-Solve
-Export voltages v10.csv
-Export currents c10.csv

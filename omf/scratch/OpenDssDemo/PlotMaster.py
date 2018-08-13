@@ -146,26 +146,16 @@ def THD(bus_coords):
 	packagePlots('THD')
 
 
-def dynamicPlot():
-	''' Do a dynamic, long-term study of the powerflow. '''
+def dynamicPlot(time_step, iterations):
+	''' Do a dynamic, long-term study of the powerflow. time_step is in seconds. '''
 	dss.run_command('Solve')
-	dss.run_command('New monitor ')
-	dss.run_command('Solve mode=dynamics number=1 stepsize=.2')
-	dss.run_command('Export Summary sum.csv')
-	dss.run_command('Solve number=200')
-	dss.run_command('Export Powers new_powers.csv')
-	powers = pd.read_csv('powers.csv')
-	powers.columns = powers.columns.str.strip()
-	loads = powers.loc[powers['Element'].str.contains('Load')]
-	individual_loads = loads['Element']
-	individual_watts = loads['P(kW)']
-	plt.figure(figsize=(10, 8))
-	plt.xticks(rotation='vertical')
-	plt.ylabel('Power [kW]')
-	plt.bar(individual_loads, individual_watts)
-	plt.savefig('Dynamic.png')
-	plt.clf()
-	packagePlots('DynamicPlots')
+	dynamicCommand = 'Solve mode=dynamics stepsize=%d number=%d' % (time_step, iterations)
+	dss.run_command(dynamicCommand)
+	for i in range(iterations):
+		voltString = 'Export voltages dynamicVolt%d.csv' % i
+		curString = 'Export currents dynamicCurrent%d.csv' % i
+		dss.run_command(voltString)
+		dss.run_command(curString)
 
 
 def faultPlot(bus_coord):
@@ -241,11 +231,5 @@ if __name__ == "__main__":
 				raise Exception('Could not read file')
 	runDSS(filename)
 	full_coords = createRadii(base_coords)
-	#voltagePlots(full_coords) 
-	#currentPlots(full_coords)
-	#networkPlot(full_coords)
-	dynamicPlot()
-	#faultPlot(full_coords)
-	#capacityPlot(full_coords)
-	#THD(full_coords)
+	dynamicPlot(1, 10)
 	print("--- %s seconds ---" % (time.time() - start)) # Check performace.
