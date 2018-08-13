@@ -156,14 +156,21 @@ def dynamicPlot(time_step, iterations):
 		currentString = 'Export currents dynamicCurrent%d.csv' % i
 		dss.run_command(voltString)
 		dss.run_command(currentString)
-	powers = []
+	powerData = []
 	for j in range(iterations):
 		curVolt = 'dynamicvolt%d.csv' % j
 		curCurrent = 'dynamiccurrent%d.csv' % j
 		voltProfile = pd.read_csv(curVolt)
+		voltProfile.columns = voltProfile.columns.str.replace(' ', '')
 		curProfile = pd.read_csv(curCurrent)
+		curProfile.columns = curProfile.columns.str.replace(' ', '')
 		sourceVoltage = voltProfile.loc[voltProfile['Bus'] == 'SOURCEBUS']
 		sourceCurrent = curProfile.loc[curProfile['Element'] == 'Vsource.SOURCE']
+		data_summary = {'Volts': (sourceVoltage['Magnitude1'], sourceVoltage['Magnitude2'], sourceVoltage['Magnitude3']), 
+		'Currents': (sourceCurrent['I1_1'], sourceCurrent['I1_2'], sourceCurrent['I1_3'])}
+		powerData.append(data_summary)
+		
+	
 def faultPlot(bus_coord):
 	''' Plot fault study. ''' 
 	dss.run_command('Solve Mode=FaultStudy')
