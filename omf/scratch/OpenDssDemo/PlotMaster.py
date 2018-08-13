@@ -168,9 +168,18 @@ def dynamicPlot(time_step, iterations):
 		sourceCurrent = curProfile.loc[curProfile['Element'] == 'Vsource.SOURCE']
 		data_summary = {'Volts': (sourceVoltage['Magnitude1'], sourceVoltage['Magnitude2'], sourceVoltage['Magnitude3']), 
 		'Currents': (sourceCurrent['I1_1'], sourceCurrent['I1_2'], sourceCurrent['I1_3'])}
-		powerData.append(data_summary)
-		
-	
+		power_triplet = (data_summary['Volts'][0]*data_summary['Currents'][0], data_summary['Volts'][1]*data_summary['Currents'][1], data_summary['Volts'][2]*data_summary['Currents'][2])
+		powerData.append(power_triplet)
+	first_phase = [item[0] for item in powerData]
+	second_phase = [item[1] for item in powerData]
+	third_phase = [item[2] for item in powerData]
+	plt.plot(first_phase)
+	plt.plot(second_phase)
+	plt.plot(third_phase)
+	plt.show()
+
+
+
 def faultPlot(bus_coord):
 	''' Plot fault study. ''' 
 	dss.run_command('Solve Mode=FaultStudy')
