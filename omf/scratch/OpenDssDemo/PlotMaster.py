@@ -61,7 +61,7 @@ def voltagePlots(volt_coord):
 		plt.savefig('Magnitude Profile ' + str(i) + '.png') # Actual voltages.
 		plt.clf()
 	packagePlots('voltagePlots')
-	#volt_coord.drop('radius', 1)
+	plt.clf()
 
 def currentPlots(curr_coord):
 	''' Current plotting function.'''
@@ -80,6 +80,7 @@ def currentPlots(curr_coord):
 			plt.savefig('Profile ' + str(i) +'.png')
 			plt.clf()
 	packagePlots('currentPlots')
+	plt.clf()
 
 def networkPlot(coords):
 	''' Plot the physical topology of the circuit. '''
@@ -124,8 +125,8 @@ def networkPlot(coords):
 	plt.xlabel('Distance [m]')
 	plt.title('Network Voltage Layout')
 	plt.savefig('networkPlot.png')
-	plt.clf()
 	packagePlots('networkPlots')
+	plt.clf()
 
 
 def THD(bus_coords):
@@ -142,8 +143,8 @@ def THD(bus_coords):
 	plt.xlabel('Radius [m]')
 	plt.ylabel('THD [Percentage]')
 	plt.savefig('THD.png')
-	plt.clf()
 	packagePlots('THD')
+	plt.clf()
 
 
 def dynamicPlot(time_step, iterations):
@@ -173,11 +174,17 @@ def dynamicPlot(time_step, iterations):
 	first_phase = [item[0] for item in powerData]
 	second_phase = [item[1] for item in powerData]
 	third_phase = [item[2] for item in powerData]
-	plt.plot(first_phase)
-	plt.plot(second_phase)
-	plt.plot(third_phase)
-	plt.show()
-
+	plt.plot(first_phase, label='Phase one')
+	plt.plot(second_phase, label='Phase two')
+	plt.plot(third_phase, label='Phase three')
+	plt.legend()
+	plt.xlabel('Time [s]')
+	plt.ylabel('Power [kW]')
+	plt.title('Dynamic Simulation Power Plot')
+	plt.savefig('DynamicPowerPlot.png')
+	packagePlots('DynamicPlots')
+	plt.clf()
+	os.system('rm dynamicvolt* dynamiccurrent*')
 
 
 def faultPlot(bus_coord):
@@ -204,9 +211,10 @@ def faultPlot(bus_coord):
 	plt.xlabel('Distance [m]')
 	plt.ylabel('Current [Amps]')
 	plt.axis([-1, 6, 0, 8000])
+	plt.title('Fault Study')
 	plt.savefig('L-L.png')
-	plt.clf()
 	packagePlots('FaultPlots')
+	plt.clf()
 
 def capacityPlot(coords):
 	''' Plot power vs. distance '''
@@ -227,9 +235,10 @@ def capacityPlot(coords):
 	plt.scatter(capacityDF['radius'], capacityDF.iloc[:, 2]+capacityDF.iloc[:, 3])
 	plt.xlabel('Distance [m]')
 	plt.ylabel('Maximum transformer percentage (One-side)')
+	plt.title('Capacity Simulation')
 	plt.savefig('CurrentLoad.png')
-	plt.clf()
 	packagePlots('capacityPlots')
+	plt.clf()
 
 if __name__ == "__main__":
 	start = time.time()
