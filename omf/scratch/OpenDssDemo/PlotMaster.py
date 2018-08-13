@@ -148,9 +148,12 @@ def THD(bus_coords):
 
 def dynamicPlot():
 	''' Do a dynamic, long-term study of the powerflow. '''
-	dss.run_command('Solve mode=dynamics number=10 stepsize=.0002')
+	dss.run_command('Solve')
+	dss.run_command('New monitor ')
+	dss.run_command('Solve mode=dynamics number=1 stepsize=.2')
 	dss.run_command('Export Summary sum.csv')
-	dss.run_command('Export Powers powers.csv')
+	dss.run_command('Solve number=200')
+	dss.run_command('Export Powers new_powers.csv')
 	powers = pd.read_csv('powers.csv')
 	powers.columns = powers.columns.str.strip()
 	loads = powers.loc[powers['Element'].str.contains('Load')]
@@ -244,5 +247,5 @@ if __name__ == "__main__":
 	dynamicPlot()
 	#faultPlot(full_coords)
 	#capacityPlot(full_coords)
-	THD(full_coords)
+	#THD(full_coords)
 	print("--- %s seconds ---" % (time.time() - start)) # Check performace.
