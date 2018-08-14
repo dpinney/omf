@@ -186,7 +186,6 @@ def dynamicPlot(time_step, iterations):
 	plt.show()
 	plt.savefig('DynamicPowerPlot.png')
 	packagePlots('DynamicPlots')
-	plt.clf()
 	os.system('rm dynamicvolt* dynamiccurrent*')
 
 
