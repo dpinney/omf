@@ -70,6 +70,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 	hardCands = gfmInputTemplate['hardeningCandidates'].strip().replace(' ', '').split(',')
 	newLineCands = gfmInputTemplate["newLineCandidates"].strip().replace(' ', '').split(',')
 	switchCands = gfmInputTemplate["switchCandidates"].strip().replace(' ', '').split(',')
+	critLoads = gfmInputTemplate["criticalLoads"].strip().replace(' ', '').split(',')
 	objToFind = ['transformer', 'regulator', 'underground_line', 'overhead_line', 'fuse', 'switch']
 	lineCount = 0
 	for key, line in jsonTree.iteritems():
@@ -212,9 +213,8 @@ def convertToGFM(gfmInputTemplate, feederModel):
 				'max_reactive_phase': [0,0,0], #*
 				'has_phase': [False, False, False] #*
 			})
-			criticality = gfmInputTemplate['loadIsCritical']
-			if criticality == "True":
-				newLoad["is_critical"] = True
+			if load.get('name','') in critLoads:
+				newLoad['is_critical'] = True
 			newLoad['id'] = load.get('name','')+'_lod'
 			# Associate the new load with the bus it is attached to.
 			if hasParent:
@@ -339,7 +339,7 @@ def work(modelDir, inputDict):
 		'switchCost' : inputDict['switchCost'],
 		'generatorCandidates' : inputDict['generatorCandidates'],
 		'lineUnitCost' : inputDict['lineUnitCost'],
-		'loadIsCritical' : inputDict['loadIsCritical']
+		'criticalLoads' : inputDict['criticalLoads']
 	}
 	gfmJson = convertToGFM(gfmInputTemplate, feederModel)
 	gfmInputFilename = 'gfmInput.json'
@@ -499,7 +499,7 @@ def new(modelDir):
 		"newLineCandidates": "TIE_A_to_C,TIE_C_to_B,TIE_B_to_A",
 		"generatorCandidates": "A_node706,A_node707,A_node708,B_node704,B_node705,B_node703",
 		"switchCandidates" : "A_node705-742,A_node705-712",
-		"loadIsCritical": "False",
+		"criticalLoads": "C_load722",
 		"criticalLoadMet": "0.98",
 		"nonCriticalLoadMet": "0.0",
 		"chanceConstraint": "1.0",

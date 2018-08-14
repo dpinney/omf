@@ -197,11 +197,8 @@
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Critical Loads<span class="classic">A flag indicating whether or not a load is critical or not.</span></label>
-				<select id="loadIsCritical" name="loadIsCritical" />
-					<option value="False">False</option>
-					<option value="True">True</option>
-				</select>
+				<label class="tooltip">Critical Loads<span class="classic">Load IDs that indicate which loads are deemed as critical.</span></label>
+				<input type="text" id="criticalLoads" name="criticalLoads" pattern="^(|([\w\d_-]+)(,[\w\d_-]+)*)$">
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Simulation Specs</p>
