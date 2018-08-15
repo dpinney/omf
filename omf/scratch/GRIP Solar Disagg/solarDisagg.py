@@ -9,30 +9,38 @@ from plotly import tools
 import plotly.graph_objs as go
 
 #import SolarDisagg
-import newcsss
-import SolarDisagg2
+#import newcsss
+#import SolarDisagg2
+
+#import etcss
+import CSSS.csss.SolarDisagg as SolarDisagg
 
 meterData = []
 
 
 #csv reader example
 netload_csv = []
-with open('load_data.csv', 'rb') as csvfile:
+with open('testing.csv', 'rb') as csvfile:
 	csvreader = csv.reader(csvfile, delimiter=',',quoting=csv.QUOTE_NONNUMERIC)
 	for row in csvreader:
 		netload_csv.append(row)
 netload = np.array(netload_csv)
 
 solarproxy_csv = []
-with open('solar_data.csv', 'rb') as csvfile:
+with open('solar_proxy.csv', 'rb') as csvfile:
 	csvreader = csv.reader(csvfile, delimiter=',',quoting=csv.QUOTE_NONNUMERIC)
 	for row in csvreader:
 		solarproxy_csv.append(row)
 solarproxy = np.array(solarproxy_csv) 
 
-loadregressors = np.array([55,55,56,57,59,61,63,65,67,70,73,75,75,74,74,72,71,70,68,66,63,61,59,57])
+loadregressors_csv = []
+with open('weather_regress.csv', 'rb') as csvfile:
+	csvreader = csv.reader(csvfile, delimiter=',',quoting=csv.QUOTE_NONNUMERIC)
+	for row in csvreader:
+		loadregressors_csv.append(row)
+loadregressors = np.array(loadregressors_csv) 
 
-sdmod0 = SolarDisagg2.SolarDisagg_IndvHome(netloads=netload, solarregressors=solarproxy, loadregressors=loadregressors)
+sdmod0 = SolarDisagg.SolarDisagg_IndvHome(netloads=netload, solarregressors=solarproxy, loadregressors=loadregressors)
 sdmod0.constructSolve()
 print(type(sdmod0.modelcounter))
 
@@ -49,8 +57,8 @@ for i, model in enumerate(sdmod0.models):
 		#print(type(sdmod0.netloads[str(i)]))
 		solarArray = np.array([item for sublist in sdmod0.models[model]['source'].value.tolist() for item in sublist])
 		disaggLoad = (sdmod0.netloads[str(i)] - solarArray)
-		axes[i].plot(disaggLoad, label=('meter' + str(i)))
 		axes[i].plot(sdmod0.netloads[str(i)], label=('net load' + str(i)))
+		axes[i].plot(disaggLoad, label=('meter' + str(i)))
 		axes[i].plot(solarArray, label=('solar' + str(i)))
 		axes[i].legend()
 
@@ -58,7 +66,7 @@ plt.show()
 
 #plotly testing
 #plotlyData = []
-xaxis = [i for i in range(24)]
+xaxis = [i for i in range(360)]
 fig = tools.make_subplots(rows=3, cols=1)
 fig.print_grid
 
