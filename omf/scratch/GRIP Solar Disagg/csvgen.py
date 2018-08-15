@@ -32,11 +32,10 @@ meters = np.array([meter1, meter2, meter3]).transpose()
 #print(meter2)
 #print(meter3)
 
-with open('testing.csv', 'wb') as csvfile:
+with open('load_data.csv', 'wb') as csvfile:
 	csvwriter = csv.writer(csvfile, delimiter=',',
 							quotechar='|', quoting=csv.QUOTE_MINIMAL)
 	for i in meters:
-		print(i)
 		csvwriter.writerow(i)
 
 print("Meters generated")

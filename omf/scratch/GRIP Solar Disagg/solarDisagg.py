@@ -20,7 +20,7 @@ meterData = []
 
 #csv reader example
 netload_csv = []
-with open('testing.csv', 'rb') as csvfile:
+with open('load_data.csv', 'rb') as csvfile:
 	csvreader = csv.reader(csvfile, delimiter=',',quoting=csv.QUOTE_NONNUMERIC)
 	for row in csvreader:
 		netload_csv.append(row)
