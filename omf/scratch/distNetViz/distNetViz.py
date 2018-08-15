@@ -45,10 +45,11 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None):
 			if subKey in tree[key]:
 				latLonCount += 1
 	if latLonCount == 0:
+		print('Warning: no lat/lon coordinates detected, so force layout required.')
 		forceLayout = True
 	# Force layout of feeders with no lat/lon information so we can actually see what's there.
 	if forceLayout:
-		print "Force laying out the graph..."
+		print("Force laying out the graph...")
 		# Use graphviz to lay out the graph.
 		inGraph = feeder.treeToNxGraph(tree)
 		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
