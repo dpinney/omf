@@ -574,8 +574,8 @@
 	</div>
 </div>
 <div id='massAddModal' class='modal'>
-	<div class='modalContent' id='massAddModalContent'>
-		<table class='importOptions'>
+	<div class='modalContent' id='massAddModalContent' style='width:330px'>
+		<table class='importOptions' style='width:330px'>
 			<th>Mass Add</th>
 			<tr>
 				<td>Add component:</td>
@@ -609,7 +609,7 @@
 	</div>
 </div>
 <div id='massEditModal' class='modal'>
-	<div class='modalContent' id='massEditModalContent'>
+	<div class='modalContent' id='massEditModalContent' style='width:330px'>
 		<table class='importOptions'>
 			<th>Mass Edit</th>
 			<tr>
@@ -683,13 +683,13 @@
 </div>
 <div id='editAttachmentModal' class='modal'>
 	<div class='modalContent' id='editAttachmentModalContent' style='width:500px'>
-		<table class='importOptions'>
+		<table class='importOptions' style='width:400px'>
 			<tr>
 				<td style='font-weight:bold; font-size:14pt' id='attachmentSelect'></td>
 			</tr>
 			<tr>
 				<td>
-					<textarea rows='25' cols='80' id='editAttachmentBox' name='editAttachmentBox'></textarea>
+					<textarea rows='25' cols='80' id='editAttachmentBox' name='editAttachmentBox' style='width:490px'></textarea>
 				</td>
 			</tr>
 			<tr>
@@ -702,7 +702,7 @@
 	</div>
 </div>
 <div id='climateModal' class='modal'>
-	<div class='modalContent' id='climateModalContent'>
+	<div class='modalContent' id='climateModalContent' style='width:300px'>
 		<div style='font-weight:bold; font-size:14pt'>Climate Change</div>
 			<form onsubmit='climateChange();' action='/climateChange/{{owner}}/{{feederName}}' id='climateChange' enctype='multipart/form-data' method='post'>
 				<input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
