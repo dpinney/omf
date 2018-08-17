@@ -1279,19 +1279,21 @@ def _latCount(name):
                 myLatCount += 1
     print name, 'COUNT', nameCount, 'LAT COUNT', latCount, 'SUCCESS RATE', 1.0*latCount/nameCount
 
-def _tests(keepFiles=False):
+def _tests(
+        keepFiles=False,
+        openPrefix = './static/testFiles/',
+        outPrefix = './scratch/milToGridlabTests/',
+        testFiles = [('Olin-Barre.std','Olin.seq')],
+        testAttachments = {'schedules.glm':'', 'climate.tmy2':open('./data/Climate/KY-LEXINGTON.tmy2','r').read()}
+    ):
     ''' Test convert every windmil feeder we have (in static/testFiles). Return number of exceptions we hit. '''
+    # testFiles = [('INEC-RENOIR.std','INEC.seq'), ('INEC-GRAHAM.std','INEC.seq'),
+    #   ('Olin-Barre.std','Olin.seq'), ('Olin-Brown.std','Olin.seq'),
+    #   ('ABEC-FRANK.std','ABEC.seq'), ('ABEC-COLUMBIA.std','ABEC.seq'),('OMF_Norfork1.std', 'OMF_Norfork1.seq'),('UE yadkin tabernacle.std','UE yadkin tabernacle.seq')]
     # setlocale lives here to avoid changing it globally 
     # locale.setlocale(locale.LC_ALL, 'en_US')
     # Variables for the testing.
     exceptionCount = 0
-    openPrefix = './static/testFiles/'
-    outPrefix = './scratch/milToGridlabTests/'
-    testFiles = [('Olin-Barre.std','Olin.seq')]
-    # testFiles = [('INEC-RENOIR.std','INEC.seq'), ('INEC-GRAHAM.std','INEC.seq'),
-    #   ('Olin-Barre.std','Olin.seq'), ('Olin-Brown.std','Olin.seq'),
-    #   ('ABEC-FRANK.std','ABEC.seq'), ('ABEC-COLUMBIA.std','ABEC.seq'),('OMF_Norfork1.std', 'OMF_Norfork1.seq'),('UE yadkin tabernacle.std','UE yadkin tabernacle.seq')]
-    testAttachments = {'schedules.glm':'', 'climate.tmy2':open('./data/Climate/KY-LEXINGTON.tmy2','r').read()}
     # Create the work directory.
     try:
         shutil.rmtree(outPrefix)
