@@ -4,6 +4,7 @@ from StringIO import StringIO
 from os.path import join as pJoin
 from solvers import gridlabd
 from matplotlib import pyplot as plt
+import omf
 
 def convert(stdString,seqString):
     ''' Take in a .std and .seq strings from Milsoft and spit out a (json dict, int, int).'''
@@ -1281,10 +1282,10 @@ def _latCount(name):
 
 def _tests(
         keepFiles=False,
-        openPrefix = './static/testFiles/',
-        outPrefix = './scratch/milToGridlabTests/',
+        openPrefix = omf.omfDir + '/static/testFiles/',
+        outPrefix = omf.omfDir + '/scratch/milToGridlabTests/',
         testFiles = [('Olin-Barre.std','Olin.seq')],
-        testAttachments = {'schedules.glm':'', 'climate.tmy2':open('./data/Climate/KY-LEXINGTON.tmy2','r').read()}
+        testAttachments = {'schedules.glm':'', 'climate.tmy2':open(omf.omfDir + '/data/Climate/KY-LEXINGTON.tmy2','r').read()}
     ):
     ''' Test convert every windmil feeder we have (in static/testFiles). Return number of exceptions we hit. '''
     # testFiles = [('INEC-RENOIR.std','INEC.seq'), ('INEC-GRAHAM.std','INEC.seq'),
