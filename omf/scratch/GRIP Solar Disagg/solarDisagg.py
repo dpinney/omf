@@ -60,7 +60,7 @@ for row in csv.reader(flike):
 missingTemps = np.interp(missingDates, asosDates, asosTemps)
 
 #limit to one day of weather data for now
-firstDayTemp = missingTemps[360:720]
+firstDayTemp = missingTemps[1080:1440]
 loadregressors=firstDayTemp.reshape(-1,1)
 
 #CSSS run CSSS algo for individual home scenario
@@ -69,14 +69,22 @@ sdmod0.constructSolve()
 
 #Create subplots in plotly
 xaxis = [i for i in range(360)]
-fig = tools.make_subplots(rows=3, cols=1)
+fig = tools.make_subplots(rows=5, cols=1)
 
+#plot weather and solar canary
+fig.append_trace(go.Scatter(y=firstDayTemp, x=xaxis, name=('Weather')),1,1)
+fig.append_trace(go.Scatter(y=np.array([item for sublist in solarproxy for item in sublist]), x=xaxis, name=('Solar Canary')),2,1)
+print(np.array([item for sublist in solarproxy for item in sublist]))
+print(solarproxy)
+
+#plot household loads and solar
 for i, model in enumerate(sdmod0.models):
 	if model != 'AggregateLoad':
 		solarArray = np.array([item for sublist in sdmod0.models[model]['source'].value.tolist() for item in sublist])
+		print(solarArray)
 		disaggLoad = (sdmod0.netloads[str(i)] - solarArray)
-		fig.append_trace(go.Scatter(y=sdmod0.netloads[str(i)], x=xaxis, name=('Measured Load' + str(i))),i+1,1)
-		fig.append_trace(go.Scatter(y=disaggLoad, x=xaxis, name=('Disaggregated Load (Actual)' + str(i))),i+1,1)
-		fig.append_trace(go.Scatter(y=np.array([item for sublist in sdmod0.models[model]['source'].value.tolist() for item in sublist]), x=xaxis, name=('Predicted solar' + str(i))),i+1,1)
+		fig.append_trace(go.Scatter(y=sdmod0.netloads[str(i)], x=xaxis, name=('Measured Load ' + str(i))),i+3,1)
+		fig.append_trace(go.Scatter(y=disaggLoad, x=xaxis, name=('Disaggregated Load (Actual) ' + str(i))),i+3,1)
+		fig.append_trace(go.Scatter(y=np.array([item for sublist in sdmod0.models[model]['source'].value.tolist() for item in sublist]), x=xaxis, name=('Predicted solar ' + str(i))),i+3,1)
 
 plot(fig)
