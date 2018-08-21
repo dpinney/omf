@@ -104,7 +104,7 @@
 					"plotOptions":{
 						"series":{
 							"animation":false,
-							// "pointStart":Date.parse(allOutputData.startDate),wwwwwww
+							// "pointStart":Date.parse(allOutputData.startDate),
 							"shadow":false,
 							"pointInterval":3600000},
 						"line":{"marker":{"enabled":false}}},
@@ -120,7 +120,7 @@
 					"yAxis":{
 						"title":{"enabled":false},// "title":{"text":"Unit","style":{"color":"gray"}},
 					},
-					"title":{"text": "MAE = " + allOutputData.MAE, "verticalAlign":"bottom", "align":"right", "y":-400, "x":-150, "style":{"color":"gray", "fontSize":"24px"}},
+					"title":{"text": "MAE = " + allOutputData.MAE, "verticalAlign":"bottom", "align":"right", "y":-400, "x":-150, "style":{"color":"black", "fontSize":"18px"}},
 					"series":[
 						{"name":"Forecasted Data (kW)","marker":{"enabled":false},"color":"blue","data":allOutputData.forecasted},
 						{"name":"Actual Data (kW)","marker":{"enabled":false},"color":"red","data":allOutputData.actual}
