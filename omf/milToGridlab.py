@@ -1268,8 +1268,8 @@ def convert(stdString,seqString):
 			if 'latitude' in parentOb and 'longitude' in parentOb:
 				thisOb['latitude'] = str(float(parentOb['latitude']) + random.uniform(-5,5))
 				thisOb['longitude'] = str(float(parentOb['longitude']) + random.uniform(-5,5))
-
-	return glmTree, x_scale, y_scale
+	# Final Output
+	return glmTree
 
 
 def _latCount(name):
@@ -1309,7 +1309,7 @@ def _tests(
 		try:
 			# Convert the std+seq.
 			with open(pJoin(openPrefix,stdString),'r') as stdFile, open(pJoin(openPrefix,seqString),'r') as seqFile:
-				outGlm,x,y = convert(stdFile.read(),seqFile.read())
+				outGlm = convert(stdFile.read(),seqFile.read())
 			with open(outPrefix + stdString.replace('.std','.glm'),'w') as outFile:
 				outFile.write(feeder.sortedWrite(outGlm))
 				outFileStats = os.stat(outPrefix + stdString.replace('.std','.glm') )
