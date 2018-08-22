@@ -54,6 +54,7 @@ realTemps.dropna(inplace=True)
 #temporary to get single day of data
 realTemps = realTemps[(realTemps['date'] >= '2017-4-15') & (realTemps['date'] < '2017-4-16')]
 #print(realTemps)
+
 #interpolate the data to use in model
 pdTemps = pd.DataFrame(timeTemp.items(), columns=['date', 'temperature'])
 pdTemps.interpolate(inplace=True, limit_direction='both')
@@ -90,15 +91,18 @@ loadregressors = pdTemps[['temperature']].values
 
 #CSSS run CSSS algo for individual home scenario
 sdmod0 = SolarDisagg.SolarDisagg_IndvHome(netloads=netload, solarregressors=solarproxy, loadregressors=loadregressors)
+#
 sdmod0.constructSolve()
 
 #Create subplots in plotly
-fig = tools.make_subplots(rows=5, cols=1)
+fig = tools.make_subplots(rows=5, cols=1, subplot_titles=('Weather', 'Solar Canary', 'House 1', 'House 2', 'House 3' ))
 #plot weather and solar canary
 fig.append_trace(go.Scatter(y=pdTemps['temperature'], x=pdTemps['date'], name=('interpolated weather ')),1,1)
 fig.append_trace(go.Scatter(y=realTemps['temperature'], x=realTemps['date'], name=('real weather data '), mode = 'markers'),1,1)
+fig['layout']['yaxis1'].update(title='Temperature')
 xaxis = [i for i in range(96)]
 fig.append_trace(go.Scatter(y=np.array([item for sublist in solarproxy for item in sublist]), x=pdTemps['date'], name=('Solar Canary ')),2,1)
+fig['layout']['yaxis2'].update(title='Watts')
 
 #plot household loads and solar
 for i, model in enumerate(sdmod0.models):
@@ -108,5 +112,8 @@ for i, model in enumerate(sdmod0.models):
 		fig.append_trace(go.Scatter(y=sdmod0.netloads[str(i)], x=pdTemps['date'], name=('Measured Load ' + str(i))),i+3,1)
 		fig.append_trace(go.Scatter(y=disaggLoad, x=pdTemps['date'], name=('Disaggregated Load (Actual) ' + str(i))),i+3,1)
 		fig.append_trace(go.Scatter(y=np.array([item for sublist in sdmod0.models[model]['source'].value.tolist() for item in sublist]), x=pdTemps['date'], name=('Predicted solar ' + str(i))),i+3,1)
+		fig['layout']['yaxis' + str(i+3)].update(title='Watts')	
 
+#plot the results
+fig['layout'].update(height=1500)
 plot(fig)
