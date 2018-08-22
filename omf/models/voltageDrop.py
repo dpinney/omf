@@ -9,6 +9,7 @@ from networkx.drawing.nx_agraph import graphviz_layout
 import networkx as nx
 from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
+plt.style.use('seaborn')
 
 # OMF imports 
 import omf.feeder as feeder
@@ -95,9 +96,10 @@ def voltPlot(omd, workDir=None, neatoLayout=False):
 		nodeVolts[row.get('node_name','')] = avg(allVolts)
 	# Color nodes by VOLTAGE.
 	fGraph = feeder.treeToNxGraph(tree)
-	voltChart = plt.figure(figsize=(15,15))
+	voltChart = plt.figure(figsize=(30,30))
 	plt.axes(frameon = 0)
 	plt.axis('off')
+	plt.tight_layout()
 	#set axes step equal
 	voltChart.gca().set_aspect('equal')
 	if neatoLayout:
@@ -113,10 +115,10 @@ def voltPlot(omd, workDir=None, neatoLayout=False):
 		node_color = [nodeVolts.get(n,0) for n in fGraph.nodes()],
 		linewidths = 0,
 		node_size = 30,
-		cmap = plt.cm.jet)
+		cmap = plt.cm.viridis)
 	plt.sci(nodeIm)
 	plt.clim(110,130)
-	plt.colorbar()
+	plt.colorbar(orientation='horizontal', fraction=0.05)
 	return voltChart
 
 def new(modelDir):
@@ -146,7 +148,7 @@ def _debugging():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	renderAndShow(modelLoc)
+	# renderAndShow(modelLoc)
 	# Run the model.
 	runForeground(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
