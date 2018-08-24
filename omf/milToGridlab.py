@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 import omf
 
 def convert(stdString,seqString):
-	''' Take in a .std and .seq strings from Milsoft and spit out a (json dict, int, int).'''
+	''' Take in a .std and .seq strings from Milsoft and spit out a json dict.'''
 	def csvToArray(csvString):
 		''' Simple csv data ingester. '''
 		csvReader = csv.reader(StringIO(csvString))
@@ -1271,6 +1271,23 @@ def convert(stdString,seqString):
 	# Final Output
 	return glmTree
 
+
+def stdSeqToGlm(seqPath, stdPath, glmPath):
+	'''Convert a pair of .std and .seq files directly to .glm'''
+	stdString = open(stdPath).read()
+	seqString = open(seqPath).read()
+	tree = convert(stdString, seqString)
+	# Remove climate and schedules to enforce running one timestep.
+	for key in tree.keys():
+		obj = tree[key]
+		if 'omftype' in obj and obj['omftype']=='#include':
+			del tree[key]
+		elif 'object' in obj and obj['object']=='climate':
+			del tree[key]
+		elif 'module' in obj and obj['module']=='powerflow':
+			obj['solver_method'] = 'FBS'
+	with open(glmPath, 'w') as outFile:
+		outFile.write(omf.feeder.sortedWrite(tree))
 
 def _latCount(name):
 	''' Debug function to count up the meters and such and figure out whether we're lat/lon coding them correctly. '''
