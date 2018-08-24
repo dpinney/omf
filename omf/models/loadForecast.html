@@ -68,11 +68,15 @@
 			</div>
 			<div class="shortInput runningInline postRunInline ">
 				<label>Lower Bound</label>
-				<input type="text" id="lowBound" name="lowBound" pattern="[1-9][0-9]{1,8}" required="required">
+				<input type="text" id="lowBound" name="lowBound" pattern="[1-9][0-9]{0,8}" required="required">
 			</div>
 			<div class="shortInput runningInline postRunInline ">
 				<label>Upper Bound</label>
 				<input type="text" id="upBound" name="upBound" pattern="[1-9][0-9]{1,8}" required="required">
+			<div class="shortInput">
+				<label class="tooltip">Simulation Start Date (YYYY-MM-DD)<span class="classic">Simulation Start Date (YYYY-MM-DD)</span></label>
+				<input type="text" id="simStartDate" name="simStartDate" pattern="^\d\d\d\d-\d\d-\d\d$" required="required">
+			</div>
 			</div>
 			<!-- Required Buttons -->
 			<div class="wideInput" style="text-align:right">
@@ -104,7 +108,7 @@
 					"plotOptions":{
 						"series":{
 							"animation":false,
-							// "pointStart":Date.parse(allOutputData.startDate),
+							"pointStart":Date.parse(allOutputData.startDate),
 							"shadow":false,
 							"pointInterval":3600000},
 						"line":{"marker":{"enabled":false}}},

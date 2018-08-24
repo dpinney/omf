@@ -35,37 +35,11 @@ def work(modelDir, inputDict):
 	(forecasted, MAE) = loadForecast.pullHourlyDayOfWeekForecast(rawData,(inputDict["upBound"]),float(inputDict["lowBound"]))
 	for x in range(len(rawData)):
 		actual.append(float(rawData[x][0]))
+	outData["startDate"] = inputDict["simStartDate"]
 	outData["actual"] = actual
 	outData["forecasted"] = forecasted
 	outData["MAE"] = MAE
 	return outData
-
-# def pullHourlyDayOfWeekForecast(rawData,upBound,lowBound):	#pullHourlyDayOfWeekForecast(rawData,inputDict["upBound"],inputDict["lowBound"])
-# 	forecasted = []
-# 	actual = []
-# 	for w in range(8760):
-# 		# need to start at 4 weeks+1 hour to get enough data to train so 4*7*24 = 672, the +1 is not necessary due to indexing starting at 0
-# 		actual.append((rawData[w][0]))
-# 		if w>=672:
-# 			x = np.array([rawData[w-168][1],rawData[w-336][1],rawData[w-504][1],rawData[w-672][1]]) #training temp
-# 			y = np.array([rawData[w-168][0],rawData[w-336][0],rawData[w-504][0],rawData[w-672][0]]) #training demand
-# 			z = np.polyfit(x, y, 1)
-# 			p = np.poly1d(z)
-# 			forecasted.append(float((p(rawData[w][1]))))
-# 		else:
-# 			forecasted.append(None)
-# 	for i in range(len(forecasted)):
-# 		if forecasted[i]>float(upBound):
-# 			forecasted[i] = None
-# 		elif forecasted[i] <float(lowBound):
-# 			forecasted[i] = None
-# 	MAE = 0		#Mean Average Error calculation
-# 	for i in range(len(forecasted)):
-# 		if forecasted[i]!=None:
-# 			MAE = MAE + abs(forecasted[i]-actual[i])
-# 	MAE = math.trunc(MAE/len(forecasted)) 
-# 	return (forecasted,MAE)
-
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
@@ -74,6 +48,7 @@ def new(modelDir):
 		"demandTemp": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","loadForecastDefault.csv")).read(),
 		"lowBound":500,
 		"upBound":3550,
+		"simStartDate": "2012-04-01",
 		"modelType":modelName}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	return creationCode
