@@ -462,9 +462,7 @@ def milImportBackground(owner, modelName, feederName, feederNum, stdString, seqS
 	modelDir = "data/Model/"+owner+"/"+modelName
 	feederDir = modelDir+"/"+feederName+".omd"
 	newFeeder = dict(**feeder.newFeederWireframe)
-	[newFeeder["tree"], xScale, yScale] = milToGridlab.convert(stdString, seqString)
-	newFeeder["layoutVars"]["xScale"] = xScale
-	newFeeder["layoutVars"]["yScale"] = yScale
+	newFeeder["tree"] = milToGridlab.convert(stdString, seqString)
 	with open("./static/schedules.glm","r") as schedFile:
 		newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
 	try: os.remove(feederDir)
@@ -551,8 +549,6 @@ def gridlabImportBackground(owner, modelName, feederName, feederNum, glmString):
 		feederDir = modelDir+"/"+feederName+".omd"
 		newFeeder = dict(**feeder.newFeederWireframe)
 		newFeeder["tree"] = feeder.parse(glmString, False)
-		newFeeder["layoutVars"]["xScale"] = 0
-		newFeeder["layoutVars"]["yScale"] = 0
 		with open("./static/schedules.glm","r") as schedFile:
 			newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
 		try: os.remove(feederDir)
@@ -730,9 +726,7 @@ def cymeImportBackground(owner, modelName, feederName, feederNum, mdbNetString):
 	feederDir = modelDir+"/"+feederName+".omd"
 	newFeeder = dict(**feeder.newFeederWireframe)
 	print mdbNetString
-	[newFeeder["tree"], xScale, yScale] = cymeToGridlab.convertCymeModel(mdbNetString, modelDir)
-	newFeeder["layoutVars"]["xScale"] = xScale
-	newFeeder["layoutVars"]["yScale"] = yScale
+	newFeeder["tree"] = cymeToGridlab.convertCymeModel(mdbNetString, modelDir)
 	with open("./static/schedules.glm","r") as schedFile:
 		newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
 	try: os.remove(feederDir)

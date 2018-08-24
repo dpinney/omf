@@ -183,7 +183,6 @@ def dynamicPlot(time_step, iterations):
 	plt.xlabel('Time [s]')
 	plt.ylabel('Power [kW]')
 	plt.title('Dynamic Simulation Power Plot')
-	plt.show()
 	plt.savefig('DynamicPowerPlot.png')
 	packagePlots('DynamicPlots')
 	os.system('rm dynamicvolt* dynamiccurrent*')

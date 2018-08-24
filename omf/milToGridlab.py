@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 import omf
 
 def convert(stdString,seqString):
-	''' Take in a .std and .seq strings from Milsoft and spit out a (json dict, int, int).'''
+	''' Take in a .std and .seq strings from Milsoft and spit out a json dict.'''
 	def csvToArray(csvString):
 		''' Simple csv data ingester. '''
 		csvReader = csv.reader(StringIO(csvString))
@@ -150,21 +150,21 @@ def convert(stdString,seqString):
 		def convertConsumer(consList):
 			consumer = convertGenericObject(consList)
 			consumer['phases'] = consList[2]
-
-
-			loadClassMap = {    0 : 'R',
-								1 : 'C',
-								2 : 'C',
-								3 : 'U',
-								4 : 'U',
-								5 : 'A',
-								6 : 'I',
-								7 : 'U',
-								8 : 'U',
-								9 : 'U',
-								10: 'U'
-							}
-			consumer['load_class'] = loadClassMap[int(consList[23])]
+			loadClassMap = {
+				0 : 'R',
+				1 : 'C',
+				2 : 'C',
+				3 : 'U',
+				4 : 'U',
+				5 : 'A',
+				6 : 'I',
+				7 : 'U',
+				8 : 'U',
+				9 : 'U',
+				10: 'U'
+			}
+			#HACK: default to residential.
+			consumer['load_class'] = loadClassMap.get(int(consList[23]),'R')
 			# Determine the commercial load connection wye or delta
 			if consumer['load_class'] == 'C':
 				load_mix = statsByName(consList[8])
@@ -176,7 +176,6 @@ def convert(stdString,seqString):
 				elif load_mix[5] == 'D':#Delta connected load
 					phases = consumer['phases'] + ('D' if len(consList[2]) >= 2 else '')
 					consumer['phases'] = phases
-
 			#MAYBEFIX: support kVars.
 			consumer['constant_power_A'] = str(float(consList[12])*1000) + ('+' if float(consList[15]) >= 0.0 else '-') + str(abs(float(consList[15])*1000)) + 'j'
 			consumer['constant_power_B'] = str(float(consList[13])*1000) + ('+' if float(consList[16]) >= 0.0 else '-') + str(abs(float(consList[16])*1000)) + 'j'
@@ -1268,9 +1267,26 @@ def convert(stdString,seqString):
 			if 'latitude' in parentOb and 'longitude' in parentOb:
 				thisOb['latitude'] = str(float(parentOb['latitude']) + random.uniform(-5,5))
 				thisOb['longitude'] = str(float(parentOb['longitude']) + random.uniform(-5,5))
+	# Final Output
+	return glmTree
 
-	return glmTree, x_scale, y_scale
 
+def stdSeqToGlm(seqPath, stdPath, glmPath):
+	'''Convert a pair of .std and .seq files directly to .glm'''
+	stdString = open(stdPath).read()
+	seqString = open(seqPath).read()
+	tree = convert(stdString, seqString)
+	# Remove climate and schedules to enforce running one timestep.
+	for key in tree.keys():
+		obj = tree[key]
+		if 'omftype' in obj and obj['omftype']=='#include':
+			del tree[key]
+		elif 'object' in obj and obj['object']=='climate':
+			del tree[key]
+		elif 'module' in obj and obj['module']=='powerflow':
+			obj['solver_method'] = 'FBS'
+	with open(glmPath, 'w') as outFile:
+		outFile.write(omf.feeder.sortedWrite(tree))
 
 def _latCount(name):
 	''' Debug function to count up the meters and such and figure out whether we're lat/lon coding them correctly. '''
@@ -1309,7 +1325,7 @@ def _tests(
 		try:
 			# Convert the std+seq.
 			with open(pJoin(openPrefix,stdString),'r') as stdFile, open(pJoin(openPrefix,seqString),'r') as seqFile:
-				outGlm,x,y = convert(stdFile.read(),seqFile.read())
+				outGlm = convert(stdFile.read(),seqFile.read())
 			with open(outPrefix + stdString.replace('.std','.glm'),'w') as outFile:
 				outFile.write(feeder.sortedWrite(outGlm))
 				outFileStats = os.stat(outPrefix + stdString.replace('.std','.glm') )
