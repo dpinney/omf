@@ -163,9 +163,9 @@ def _debugging():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	# renderAndShow(modelLoc)
+	renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
+	runForeground(modelLoc)
 	# Show the output.
 	renderAndShow(modelLoc)
 

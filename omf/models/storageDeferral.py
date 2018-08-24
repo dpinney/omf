@@ -286,7 +286,7 @@ def _tests():
 	# Pre-run.
 	renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
+	runForeground(modelLoc)
 	# Show the output.
 	renderAndShow(modelLoc)
 
