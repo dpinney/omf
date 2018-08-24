@@ -32,9 +32,12 @@ def work(modelDir, inputDict):
 		errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href = 'https://github.com/dpinney/omf/wiki/Models-~-storagePeakShave#demand-file-csv-format'>\nOMF Wiki storagePeakShave - Demand File CSV Format</a>"
 		raise Exception(errorMessage)
 	rawData = list(np.float_(rawData)) #converts all data from float to string
-	(forecasted, MAE) = loadForecast.pullHourlyDayOfWeekForecast(rawData,(inputDict["upBound"]),float(inputDict["lowBound"]))
 	for x in range(len(rawData)):
 		actual.append(float(rawData[x][0]))
+	minInput = min(actual)*0.5
+	maxInput = max(actual)*1.5
+	# (forecasted, MAE) = loadForecast.pullHourlyDayOfWeekForecast(rawData,maxInput,minInput) #uncomment to use a 50% of min max training set limits
+	(forecasted, MAE) = loadForecast.pullHourlyDayOfWeekForecast(rawData,(inputDict["upBound"]),float(inputDict["lowBound"])) #uses a user entered limit for min/max of results
 	outData["startDate"] = inputDict["simStartDate"]
 	outData["actual"] = actual
 	outData["forecasted"] = forecasted
