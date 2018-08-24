@@ -118,16 +118,11 @@ def roundSig(x, sig=3):
 	elif x < 0: return -1*roundPosSig(-1*x, sig)
 	else: return roundPosSig(x, sig)
 
-def run(modelDir, inputDict):
+def run(modelDir):
 	''' Run the model in a separate process. web.py calls this to run the model.
 	This function will return fast, but results take a while to hit the file system.'''
 	# Check whether model exist or not
-	if not os.path.isdir(modelDir):
-		os.makedirs(modelDir)
-		inputDict["created"] = str(datetime.datetime.now())
-	# MAYBEFIX: remove this data dump. Check showModel in web.py and renderTemplate()
-	with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
-		json.dump(inputDict, inputFile, indent = 4)
+	inputDict = json.load(open(pJoin(modelDir, 'allInputData.json')))
 	# If we are re-running, remove output:
 	try:
 		os.remove(pJoin(modelDir,"allOutputData.json"))
@@ -139,12 +134,9 @@ def run(modelDir, inputDict):
 	with open(pJoin(modelDir, "PPID.txt"),"w+") as pPidFile:
 		pPidFile.write(str(backProc.pid))
 
-def runForeground(modelDir, inputDict):
+def runForeground(modelDir):
 	''' Run the model in its directory. WARNING: GRIDLAB CAN TAKE HOURS TO COMPLETE. '''
-	# Check whether model exist or not
-	if not os.path.isdir(modelDir):
-		os.makedirs(modelDir)
-		inputDict["created"] = str(datetime.datetime.now())
+	inputDict = json.load(open(pJoin(modelDir, 'allInputData.json')))
 	print "STARTING TO RUN", modelDir
 	beginTime = datetime.datetime.now()
 	# Get prepare of data and clean workspace if re-run, If re-run remove all the data in the subfolders
@@ -503,7 +495,7 @@ def _tests():
 	# No-input template.
 	renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc, json.load(open(pJoin(modelLoc,"allInputData.json"))))
+	runForeground(modelLoc)
 	## Cancel the model.
 	# time.sleep(2)
 	# cancel(modelLoc)
