@@ -150,21 +150,21 @@ def convert(stdString,seqString):
 		def convertConsumer(consList):
 			consumer = convertGenericObject(consList)
 			consumer['phases'] = consList[2]
-
-
-			loadClassMap = {    0 : 'R',
-								1 : 'C',
-								2 : 'C',
-								3 : 'U',
-								4 : 'U',
-								5 : 'A',
-								6 : 'I',
-								7 : 'U',
-								8 : 'U',
-								9 : 'U',
-								10: 'U'
-							}
-			consumer['load_class'] = loadClassMap[int(consList[23])]
+			loadClassMap = {
+				0 : 'R',
+				1 : 'C',
+				2 : 'C',
+				3 : 'U',
+				4 : 'U',
+				5 : 'A',
+				6 : 'I',
+				7 : 'U',
+				8 : 'U',
+				9 : 'U',
+				10: 'U'
+			}
+			#HACK: default to residential.
+			consumer['load_class'] = loadClassMap.get(int(consList[23]),'R')
 			# Determine the commercial load connection wye or delta
 			if consumer['load_class'] == 'C':
 				load_mix = statsByName(consList[8])
@@ -176,7 +176,6 @@ def convert(stdString,seqString):
 				elif load_mix[5] == 'D':#Delta connected load
 					phases = consumer['phases'] + ('D' if len(consList[2]) >= 2 else '')
 					consumer['phases'] = phases
-
 			#MAYBEFIX: support kVars.
 			consumer['constant_power_A'] = str(float(consList[12])*1000) + ('+' if float(consList[15]) >= 0.0 else '-') + str(abs(float(consList[15])*1000)) + 'j'
 			consumer['constant_power_B'] = str(float(consList[13])*1000) + ('+' if float(consList[16]) >= 0.0 else '-') + str(abs(float(consList[16])*1000)) + 'j'
