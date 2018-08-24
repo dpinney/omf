@@ -74,7 +74,7 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None):
 	#HACK: make sure we get the required files from the right place.
 	SOURCE_DIR = os.path.dirname(__file__) + '/'
 	shutil.copy(SOURCE_DIR + '/distNetViz.html', tempDir + '/viewer.html')
-	shutil.copy(SOURCE_DIR + '/svg-pan-zoom.js', tempDir + '/svg-pan-zoom.js')
+	# shutil.copy(SOURCE_DIR + '/svg-pan-zoom.js', tempDir + '/svg-pan-zoom.js')
 	# Grab the library we need.
 	with open(SOURCE_DIR + 'svg-pan-zoom.js','r') as pzFile:
 		pzData = pzFile.read()
