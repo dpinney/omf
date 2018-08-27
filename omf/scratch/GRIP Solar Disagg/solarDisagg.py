@@ -40,13 +40,23 @@ solarproxy = np.array(solarproxy_csv)
 #Gather weather data from asos and interpolate for 15 minute intervals
 timeTemp = OrderedDict()
 
-flike = StringIO.StringIO(pullAsos('2017','CHO', 'tmpf'))
-next(csv.reader(flike))
-for row in csv.reader(flike):
-	if row[2] != 'M':
-		timeTemp[datetime.datetime.strptime(row[1], "%Y-%m-%d %H:%M")] = float(row[2])
-	elif row[1][14:] in ['00','15','30','45'] and row[2] =='M':
-		timeTemp[datetime.datetime.strptime(row[1], "%Y-%m-%d %H:%M")] = np.nan
+#flike = StringIO.StringIO(pullAsos('2017','CHO', 'tmpf'))
+
+#save asos weather data
+#with open('asosweather.csv', 'wb') as csvfile:
+#	csvwriter = csv.writer(csvfile, delimiter=',')
+#	next(csv.reader(flike))
+#	for row in csv.reader(flike):
+#		csvwriter.writerow(row)
+
+#use cached weather data
+with open('asosweather.csv', 'rb') as flike:
+	#next(csv.reader(flike))
+	for row in csv.reader(flike):
+		if row[2] != 'M':
+			timeTemp[datetime.datetime.strptime(row[1], "%Y-%m-%d %H:%M")] = float(row[2])
+		elif row[1][14:] in ['00','15','30','45'] and row[2] =='M':
+			timeTemp[datetime.datetime.strptime(row[1], "%Y-%m-%d %H:%M")] = np.nan
 
 #Get the actual data for temperatures 
 realTemps = pd.DataFrame(timeTemp.items(), columns=['date', 'temperature'])
@@ -65,7 +75,7 @@ fifteenMinuteTimestamps = pd.date_range(start='2017-1-1', end='2018-1-1', closed
 pdTemps = pdTemps[pdTemps['date'].isin(fifteenMinuteTimestamps)]
 #temporary to get single day of data
 pdTemps = pdTemps[(pdTemps['date'] >= '2017-4-15') & (pdTemps['date'] < '2017-4-16')]
-print(pdTemps)
+#print(pdTemps)
 #pdTemps.set_index('date', inplace=True)
 
 #create load regressor from weather data in correct format as nparray
@@ -106,7 +116,9 @@ fig['layout']['yaxis2'].update(title='Watts')
 
 #plot household loads and solar
 for i, model in enumerate(sdmod0.models):
+	print(sdmod0.models['AggregateLoad'])
 	if model != 'AggregateLoad':
+		print(sdmod0.models[model]['source'].value)
 		solarArray = np.array([item for sublist in sdmod0.models[model]['source'].value.tolist() for item in sublist])
 		disaggLoad = (sdmod0.netloads[str(i)] - solarArray)
 		fig.append_trace(go.Scatter(y=sdmod0.netloads[str(i)], x=pdTemps['date'], name=('Measured Load ' + str(i))),i+3,1)
