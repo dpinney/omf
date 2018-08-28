@@ -70,7 +70,7 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None):
 	if outputPath == None:
 		tempDir = tempfile.mkdtemp()
 	else:
-		tempDir = outputPath
+		tempDir = os.path.abspath(outputPath)
 	#HACK: make sure we get the required files from the right place.
 	SOURCE_DIR = os.path.dirname(__file__) + '/'
 	shutil.copy(SOURCE_DIR + '/distNetViz.html', tempDir + '/viewer.html')
