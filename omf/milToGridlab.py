@@ -1,5 +1,5 @@
 ''' Convert a Milsoft Windmil feeder model into an OMF-compatible version. '''
-import os, feeder, csv, random, math, copy, locale, json, traceback, shutil
+import os, feeder, csv, random, math, copy, locale, json, traceback, shutil, datetime
 from StringIO import StringIO
 from os.path import join as pJoin
 from solvers import gridlabd
@@ -1337,6 +1337,7 @@ def _tests(
 			inFileSize = inFileStats.st_size
 			outFileSize = outFileStats.st_size
 			with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
+				resultsFile.write(str(datetime.datetime.now()) + '\n')
 				resultsFile.write('WROTE GLM FOR ' + stdString + "\n")
 				resultsFile.write('Input .std File Size: ' + str(locale.format("%d", inFileSize, grouping=True))+'\n')
 				resultsFile.write('Output .glm File Size: '+ str(locale.format("%d", outFileSize, grouping=True))+'\n')
