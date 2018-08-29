@@ -1239,7 +1239,7 @@ def convert(stdString,seqString):
 		{"omftype":"#set","argument":"minimum_timestep=60"},
 		{"omftype":"#set","argument":"profiler=1"},
 		{"omftype":"#set","argument":"relax_naming_rules=1"},
-		#{"omftype":"#include","argument":"\"schedules.glm\""},
+		{"omftype":"#include","argument":"\"schedules.glm\""},
 		{"omftype":"module","argument":"generators"},
 		{"omftype":"module","argument":"tape"},
 		{"module":"residential","implicit_enduses":"NONE"},
@@ -1279,11 +1279,11 @@ def stdSeqToGlm(seqPath, stdPath, glmPath):
 	# Remove climate and schedules to enforce running one timestep.
 	for key in tree.keys():
 		obj = tree[key]
-		#if 'omftype' in obj and obj['omftype']=='#include':
-			#del tree[key]
-		if 'object' in obj and obj['object']=='climate':
+		if 'omftype' in obj and obj['omftype']=='#include':
 			del tree[key]
-		if 'module' in obj and obj['module']=='powerflow':
+		elif 'object' in obj and obj['object']=='climate':
+			del tree[key]
+		elif 'module' in obj and obj['module']=='powerflow':
 			obj['solver_method'] = 'FBS'
 	with open(glmPath, 'w') as outFile:
 		outFile.write(omf.feeder.sortedWrite(tree))
