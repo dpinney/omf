@@ -23,7 +23,8 @@ def convert(stdString,seqString):
 	# Get nominal voltage:
 	nominal_voltage = 14400
 	for ob in components:
-		if ob[1] == 9: nominal_voltage = str(float(ob[14])*1000)
+		if ob[1] == 9:
+			nominal_voltage = str(float(ob[14])*1000)
 	# The number of allowable sub objects:
 	subObCount = 100
 	# Helper for lat/lon conversion.
@@ -366,11 +367,13 @@ def convert(stdString,seqString):
 					diameter = hardware[8]
 					if diameter == '0':
 						diameter = '0.721'
-				overhead[myIndex+1][myIndex+condIndex[letter]] = {  'omfEmbeddedConfigObject':'conductor_' + letter + ' object overhead_line_conductor',
-															'name': overhead['name'] + '_conductor_' + letter,
-															'resistance': res,
-															'geometric_mean_radius': geoRad,
-															'diameter' : diameter}
+				overhead[myIndex+1][myIndex+condIndex[letter]] = {
+					'omfEmbeddedConfigObject':'conductor_' + letter + ' object overhead_line_conductor',
+					'name': overhead['name'] + '_conductor_' + letter,
+					'resistance': res,
+					'geometric_mean_radius': geoRad,
+					'diameter' : diameter
+				}
 			# Check to see if there is distributed load on the line
 			# WARNING: distributed load broken in GridLAB-D. Disabled for now.
 			# if 'A' in overhead['phases'] and (ohLineList[19] != '0' or ohLineList[22] != '0'):
@@ -396,8 +399,10 @@ def convert(stdString,seqString):
 				# underground['phases'] = ugLineList[2] + ('D' if len(ugLineList[2]) >= 2 else '')
 				underground['phases'] = ugLineList[2]
 			underground['length'] = ('10' if float(ugLineList[12])<10 else ugLineList[12])
-			underground[myIndex+1] = {  'omfEmbeddedConfigObject':'configuration object line_configuration',
-								'name': underground['name'] + '-LINECONFIG'}
+			underground[myIndex+1] = {
+				'omfEmbeddedConfigObject':'configuration object line_configuration',
+				'name': underground['name'] + '-LINECONFIG'
+			}
 			underground[myIndex+1][myIndex+2] = {   'omfEmbeddedConfigObject' : 'spacing object line_spacing',
 									'name':underground['name'] + '-LINESPACING'}
 			#Grab line spacing distances
@@ -466,18 +471,20 @@ def convert(stdString,seqString):
 					neutral_strands = '6'
 					outer_diameter = 0.98
 					insulation_relative_permitivity = '1'
-					underground[myIndex+1][myIndex+condIndex[letter]] = {   'omfEmbeddedConfigObject':'conductor_' + letter + ' object underground_line_conductor',
-																			'conductor_resistance' : conductor_resistance,
-																			'shield_resistance' : '0.000000',
-																			'neutral_gmr' : neutral_gmr,
-																			'outer_diameter' : '{:0.6f}'.format(outer_diameter),
-																			'neutral_strands' : neutral_strands,
-																			'neutral_resistance' : neutral_resistance,
-																			'neutral_diameter' : '{:0.6f}'.format(neutral_diameter),
-																			'conductor_diameter' : '{:0.6f}'.format(conductor_diameter),
-																			'shield_gmr' : '0.000000',
-																			'conductor_gmr' : conductor_gmr,
-																			'insulation_relative_permitivitty' : insulation_relative_permitivity}
+					underground[myIndex+1][myIndex+condIndex[letter]] = {
+						'omfEmbeddedConfigObject':'conductor_' + letter + ' object underground_line_conductor',
+						'conductor_resistance' : conductor_resistance,
+						'shield_resistance' : '0.000000',
+						'neutral_gmr' : neutral_gmr,
+						'outer_diameter' : '{:0.6f}'.format(outer_diameter),
+						'neutral_strands' : neutral_strands,
+						'neutral_resistance' : neutral_resistance,
+						'neutral_diameter' : '{:0.6f}'.format(neutral_diameter),
+						'conductor_diameter' : '{:0.6f}'.format(conductor_diameter),
+						'shield_gmr' : '0.000000',
+						'conductor_gmr' : conductor_gmr,
+						'insulation_relative_permitivitty' : insulation_relative_permitivity
+					}
 				elif float(hardware[1]) == 2.0:
 					conductor_resistance = hardware[4]
 					if conductor_resistance == '0':
@@ -506,18 +513,20 @@ def convert(stdString,seqString):
 					insulation_relative_permitivity = hardware[11]
 					if insulation_relative_permitivity == '0':
 						insulation_relative_permitivity = '1'
-					underground[myIndex+1][myIndex+condIndex[letter]] = {   'omfEmbeddedConfigObject':'conductor_' + letter + ' object underground_line_conductor',
-																			'conductor_resistance' : conductor_resistance,
-																			'shield_resistance' : '0.000000',
-																			'neutral_gmr' : neutral_gmr,
-																			'outer_diameter' : '{:0.6f}'.format(outer_diameter),
-																			'neutral_strands' : neutral_strands,
-																			'neutral_resistance' : neutral_resistance,
-																			'neutral_diameter' : '{:0.6f}'.format(neutral_diameter),
-																			'conductor_diameter' : '{:0.6f}'.format(conductor_diameter),
-																			'shield_gmr' : '0.000000',
-																			'conductor_gmr' : conductor_gmr,
-																			'insulation_relative_permitivitty' : insulation_relative_permitivity}
+					underground[myIndex+1][myIndex+condIndex[letter]] = {
+						'omfEmbeddedConfigObject':'conductor_' + letter + ' object underground_line_conductor',
+						'conductor_resistance' : conductor_resistance,
+						'shield_resistance' : '0.000000',
+						'neutral_gmr' : neutral_gmr,
+						'outer_diameter' : '{:0.6f}'.format(outer_diameter),
+						'neutral_strands' : neutral_strands,
+						'neutral_resistance' : neutral_resistance,
+						'neutral_diameter' : '{:0.6f}'.format(neutral_diameter),
+						'conductor_diameter' : '{:0.6f}'.format(conductor_diameter),
+						'shield_gmr' : '0.000000',
+						'conductor_gmr' : conductor_gmr,
+						'insulation_relative_permitivitty' : insulation_relative_permitivity
+					}
 			# Check to see if there is distributed load on the line
 			# if 'A' in underground['phases'] and (ugLineList[19] != '0' or ugLineList[22] != '0'):
 			#     underground['distributed_load_A'] = float(ugLineList[19])*1000 + (float(ugLineList[22]))*1000j
@@ -531,6 +540,10 @@ def convert(stdString,seqString):
 			myIndex = components.index(objectList)*subObCount
 			regulator = convertGenericObject(regList)
 			regulator['phases'] = regList[2]
+			# Create an embedded object for the configuration and give it a variable name to make it easy to remember.
+			regulator[myIndex+1] = {}
+			regConfig = regulator[myIndex+1]
+			#MAYBEFIX: figure out whether I'll run into trouble if the previous integer isn't unique.
 			# Grab regulator configuration parameters
 			reg_hardware = statsByName(regList[11])
 			if reg_hardware is not None:
@@ -545,7 +558,6 @@ def convert(stdString,seqString):
 					raise_taps = '16'
 				if float(lower_taps) == 0.0 and float(reg_hardware[5]) > 0.0:
 					lower_taps = '16'
-
 				if float(reg_hardware[4]) > 0.0:
 					regulation = reg_hardware[4]
 				elif float(reg_hardware[5]) > 0.0:
@@ -562,73 +574,80 @@ def convert(stdString,seqString):
 				raise_taps = '16'
 				lower_taps = '16'
 				regulation = '0.1'
-			if regList[9] == '0': # Each phase is controlled independently
+			# Set control mode:
+			if regList[9] == '0':
+				# Each phase is controlled independently
 				band_center = str(float(regList[14])*120)
-				control_level = 'INDIVIDUAL'
-			if regList[9] == '1': # Bank with A as control phase
+				regConfig['control_level'] = 'INDIVIDUAL'
+			elif regList[9] == '1':
+				# Bank with A as control phase
 				band_center = str(float(regList[14])*120)
-				control_level = 'BANK'
-				CT_Phase = 'A'
-				PT_Phase = 'A'
-			if regList[9] == '2': # Bank with B as control phase
+				regConfig['control_level'] = 'BANK'
+				regConfig['CT_phase'] = 'A'
+				regConfig['PT_phase'] = 'A'
+			elif regList[9] == '2':
+				# Bank with B as control phase
 				band_center = str(float(regList[15])*120)
-				control_level = 'BANK'
-				CT_Phase = 'B'
-				PT_Phase = 'B'
-			if regList[9] == '3': # Bank with C as control phase
+				regConfig['control_level'] = 'BANK'
+				regConfig['CT_phase'] = 'B'
+				regConfig['PT_phase'] = 'B'
+			elif regList[9] == '3':
+				# Bank with C as control phase
 				band_center = str(float(regList[16])*120)
-				control_level = 'BANK'
-				CT_Phase = 'C'
-				PT_Phase = 'C'
+				regConfig['control_level'] = 'BANK'
+				regConfig['CT_phase'] = 'C'
+				regConfig['PT_phase'] = 'C'
+			else:
+				# Default to individual control.
+				band_center = str(float(regList[14])*120)
+				regConfig['control_level'] = 'INDIVIDUAL'
+			# Fix wonky band_center
 			if float(band_center) == 0.0:
 				band_center = '122'
-			ldc_r_A = regList[17]
-			ldc_r_B = regList[18]
-			ldc_r_C = regList[19]
-			ldc_x_A = regList[20]
-			ldc_x_B = regList[21]
-			ldc_x_C = regList[22]
-			if float(ldc_r_A) > 0.0 or float(ldc_r_B) > 0.0 or float(ldc_r_C) > 0.0 or float(ldc_x_A) > 0.0 or float(ldc_x_B) > 0.0 or float(ldc_x_C) > 0.0:
-				control = 'LINE_DROP_COMP'
-			else:
-				control = 'OUTPUT_VOLTAGE'
-			#MAYBEFIX: figure out whether I'll run into trouble if the following integer isn't unique:
-			regulator[myIndex+1] = {}
-			regulator[myIndex+1]['name'] = regulator['name'] + '-CONFIG'
-			regulator[myIndex+1]['omfEmbeddedConfigObject'] = 'configuration object regulator_configuration'
+			# Set some additional configuration parameters.
+			regConfig['name'] = regulator['name'] + '-CONFIG'
+			regConfig['omfEmbeddedConfigObject'] = 'configuration object regulator_configuration'
+			regConfig['band_center'] = band_center
+			regConfig['band_width'] = band_width
+			regConfig['raise_taps'] = raise_taps
+			regConfig['lower_taps'] = lower_taps
+			regConfig['regulation'] = regulation
+			regConfig['Type'] = 'A'
 			#MAYBEFIX: change these from just default values:
-			regulator[myIndex+1]['connect_type'] = 'WYE_WYE'
-			regulator[myIndex+1]['band_center'] = band_center
-			regulator[myIndex+1]['band_width'] = band_width
-			regulator[myIndex+1]['time_delay'] = '30.0'
-			regulator[myIndex+1]['raise_taps'] = raise_taps
-			regulator[myIndex+1]['lower_taps'] = lower_taps
-			regulator[myIndex+1]['CT_phase'] = regulator['phases']
-			regulator[myIndex+1]['PT_phase'] = regulator['phases']
-			regulator[myIndex+1]['regulation'] = regulation
+			regConfig['connect_type'] = 'WYE_WYE'
+			regConfig['time_delay'] = '30.0'
+			# Line drop compensation settings.
+			ldc_r_A = float(regList[17])
+			ldc_r_B = float(regList[18])
+			ldc_r_C = float(regList[19])
+			ldc_x_A = float(regList[20])
+			ldc_x_B = float(regList[21])
+			ldc_x_C = float(regList[22])
+			if ldc_r_A > 0.0 or ldc_r_B > 0.0 or ldc_r_C > 0.0 or ldc_x_A > 0.0 or ldc_x_B > 0.0 or ldc_x_C > 0.0:
+				regConfig['Control'] = control = 'LINE_DROP_COMP'
+			else:
+				regConfig['Control'] = control = 'OUTPUT_VOLTAGE'
 			if ctr is not None:
-				regulator[myIndex+1]['current_transducer_ratio'] = ctr
-			if float(ldc_r_A) != 0.0 and 'A' in regulator['phases']:
-				regulator[myIndex+1]['compensator_r_setting_A'] = str(float(ldc_r_A)*120)
-			if float(ldc_x_A) != 0.0 and 'A' in regulator['phases']:
-				regulator[myIndex+1]['compensator_x_setting_A'] = str(float(ldc_x_A)*120)
-			if float(ldc_r_B) != 0.0 and 'B' in regulator['phases']:
-				regulator[myIndex+1]['compensator_r_setting_B'] = str(float(ldc_r_B)*120)
-			if float(ldc_x_B) != 0.0 and 'B' in regulator['phases']:
-				regulator[myIndex+1]['compensator_x_setting_B'] = str(float(ldc_x_B)*120)
-			if float(ldc_r_C) != 0.0 and 'C' in regulator['phases']:
-				regulator[myIndex+1]['compensator_r_setting_C'] = str(float(ldc_r_C)*120)
-			if float(ldc_x_C) != 0.0 and 'C' in regulator['phases']:
-				regulator[myIndex+1]['compensator_x_setting_C'] = str(float(ldc_x_C)*120)
-			regulator[myIndex+1]['Control'] = control
-			regulator[myIndex+1]['control_level'] = control_level
-			regulator[myIndex+1]['Type'] = 'A'
+				regConfig['current_transducer_ratio'] = ctr
+			if ldc_r_A != 0.0 and 'A' in regulator['phases']:
+				regConfig['compensator_r_setting_A'] = str(ldc_r_A*120)
+			if ldc_x_A != 0.0 and 'A' in regulator['phases']:
+				regConfig['compensator_x_setting_A'] = str(ldc_x_A*120)
+			if ldc_r_B != 0.0 and 'B' in regulator['phases']:
+				regConfig['compensator_r_setting_B'] = str(ldc_r_B*120)
+			if ldc_x_B != 0.0 and 'B' in regulator['phases']:
+				regConfig['compensator_x_setting_B'] = str(ldc_x_B*120)
+			if ldc_r_C != 0.0 and 'C' in regulator['phases']:
+				regConfig['compensator_r_setting_C'] = str(ldc_r_C*120)
+			if ldc_x_C != 0.0 and 'C' in regulator['phases']:
+				regConfig['compensator_x_setting_C'] = str(ldc_x_C*120)
+			# Set tap positions.
 			if 'A' in regulator['phases']:
-				regulator[myIndex+1]['tap_pos_A'] = '1'
+				regConfig['tap_pos_A'] = '1'
 			if 'B' in regulator['phases']:
-				regulator[myIndex+1]['tap_pos_B'] = '1'
+				regConfig['tap_pos_B'] = '1'
 			if 'C' in regulator['phases']:
-				regulator[myIndex+1]['tap_pos_C'] = '1'
+				regConfig['tap_pos_C'] = '1'
 			return regulator
 
 		def convertTransformer(transList):
