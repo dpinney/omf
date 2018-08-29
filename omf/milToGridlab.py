@@ -1300,6 +1300,7 @@ def _latCount(name):
 
 def _tests(
 		keepFiles=False,
+		wipeBefore=True,
 		openPrefix = omf.omfDir + '/static/testFiles/',
 		outPrefix = omf.omfDir + '/scratch/milToGridlabTests/',
 		testFiles = [('Olin-Barre.std','Olin.seq')],
@@ -1314,12 +1315,14 @@ def _tests(
 	# Variables for the testing.
 	exceptionCount = 0
 	# Create the work directory.
-	try:
-		shutil.rmtree(outPrefix)
-	except:
-		pass # no test directory yet.
-	finally:
-		os.mkdir(outPrefix)
+	if wipeBefore:
+		try:
+			# Wipe first.
+			shutil.rmtree(outPrefix)
+		except:
+			pass # no test directory yet.
+		finally:
+			os.mkdir(outPrefix)
 	# Run all the tests.
 	for stdString, seqString in testFiles:
 		try:
