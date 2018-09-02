@@ -1,0 +1,20 @@
+#!/bin/bash
+# This file will generate the base gridlabd script to be run
+# This only needs to be run once, since it basically pulls the current
+# path and uses it to populate a bash script
+
+#Just create it from scratch
+echo "#! /bin/sh" > gridlabd
+echo >> gridlabd
+echo "prefix=\"${PWD}\"" >> gridlabd
+echo >> gridlabd
+echo "export GLPATH=\"\${prefix}\"" >> gridlabd
+echo >> gridlabd
+echo "\"\${prefix}/gridlabd.bin\" \"\$@\"" >> gridlabd
+
+#Set the permissions - make it so this runs
+chmod u+x gridlabd
+
+
+
+
