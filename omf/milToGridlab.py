@@ -1,10 +1,13 @@
 ''' Convert a Milsoft Windmil feeder model into an OMF-compatible version. '''
-import os, feeder, csv, random, math, copy, locale, json, traceback, shutil, datetime
+import os, feeder, csv, random, math, copy, locale, json, traceback, shutil, time, datetime
 from StringIO import StringIO
 from os.path import join as pJoin
 from solvers import gridlabd
+from dateutil.tz import tzlocal
 from matplotlib import pyplot as plt
+from pytz import reference
 import omf
+
 
 def convert(stdString,seqString):
 	''' Take in a .std and .seq strings from Milsoft and spit out a json dict.'''
@@ -1325,6 +1328,7 @@ def _tests(
 			os.mkdir(outPrefix)
 	# Run all the tests.
 	for stdString, seqString in testFiles:
+		cur_start_time = time.time()
 		try:
 			# Convert the std+seq.
 			with open(pJoin(openPrefix,stdString),'r') as stdFile, open(pJoin(openPrefix,seqString),'r') as seqFile:
@@ -1337,16 +1341,18 @@ def _tests(
 			inFileSize = inFileStats.st_size
 			outFileSize = outFileStats.st_size
 			with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
-				resultsFile.write(str(datetime.datetime.now()) + '\n')
+				local_time = reference.LocalTimezone()
+				now = datetime.datetime.now()
+				resultsFile.write(str(now) + " at timezone: " + str(local_time.tzname(now)) + '\n')
 				resultsFile.write('WROTE GLM FOR ' + stdString + "\n")
 				resultsFile.write('Input .std File Size: ' + str(locale.format("%d", inFileSize, grouping=True))+'\n')
 				resultsFile.write('Output .glm File Size: '+ str(locale.format("%d", outFileSize, grouping=True))+'\n')
 				if inFileSize < outFileSize:
-					percent = inFileSize/outFileSize
-					resultsFile.write('.std file is %s percent of the glm file' % str(percent))
+					percent = float(inFileSize)/float(outFileSize)
+					resultsFile.write('.std file is %s percent of the glm file\n' % str(percent))
 				else:
-					percent = inFileSize/outFileSize
-					resultsFile.write('.glm file is %s percent of the std file' % str(percent))
+					percent = float(inFileSize)/float(outFileSize)
+					resultsFile.write('.glm file is %s percent of the std file\n' % str(percent))
 			try:
 				# Draw the GLM.
 				myGraph = feeder.treeToNxGraph(outGlm)
@@ -1373,15 +1379,21 @@ def _tests(
 				with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
 					resultsFile.write('RAN GRIDLAB ON ' + stdString + "\n")
 					resultsFile.write('STDERR: ' + gridlabdStderr + "\n\n")
+					resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
+					resultsFile.write("\n" + "====================================================================================" + "\n")
 			except Exception as e:
 				exceptionCount += 1
 				print 'POWERFLOW FAILED', stdString
 				with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
 					resultsFile.write('POWERFLOW FAILED ' + stdString + "\n")
+					resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
+					resultsFile.write("\n" + "====================================================================================" + "\n")
 		except:
 			print 'FAILED CONVERTING', stdString
 			with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
 					resultsFile.write('FAILED CONVERTING ' + stdString + "\n")
+					resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
+					resultsFile.write("\n" + "====================================================================================" + "\n")
 			exceptionCount += 1
 			traceback.print_exc()
 	if not keepFiles:
