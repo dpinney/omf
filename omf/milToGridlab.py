@@ -1364,8 +1364,6 @@ def _tests(
 				now = datetime.datetime.now()
 				resultsFile.write(str(now) + " at timezone: " + str(local_time.tzname(now)) + '\n')
 				resultsFile.write('WROTE GLM FOR ' + stdString + "\n")
-				resultsFile.write('Input .std File Size: ' + str(locale.format("%d", inFileSize, grouping=True))+'\n')
-				resultsFile.write('Output .glm File Size: '+ str(locale.format("%d", outFileSize, grouping=True))+'\n')
 				if inFileSize < outFileSize:
 					percent = float(inFileSize)/float(outFileSize)
 					resultsFile.write('.std file is %s percent of the glm file\n' % str(percent))
