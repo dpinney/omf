@@ -1336,6 +1336,7 @@ def _tests(
 	# locale.setlocale(locale.LC_ALL, 'en_US')
 	# Variables for the testing.
 	exceptionCount = 0
+	timeArray = []
 	# Create the work directory.
 	if wipeBefore:
 		try:
@@ -1398,6 +1399,7 @@ def _tests(
 					resultsFile.write('STDERR: ' + gridlabdStderr + "\n\n")
 					resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
 					resultsFile.write("\n" + "====================================================================================" + "\n")
+					timeArray.append(time.time() - cur_start_time)
 			except Exception as e:
 				exceptionCount += 1
 				print 'POWERFLOW FAILED', stdString
@@ -1405,14 +1407,18 @@ def _tests(
 					resultsFile.write('POWERFLOW FAILED ' + stdString + "\n")
 					resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
 					resultsFile.write("\n" + "====================================================================================" + "\n")
+					timeArray.append(time.time() - cur_start_time)
 		except:
 			print 'FAILED CONVERTING', stdString
 			with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
 					resultsFile.write('FAILED CONVERTING ' + stdString + "\n")
 					resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
 					resultsFile.write("\n" + "====================================================================================" + "\n")
+					timeArray.append(time.time() - cur_start_time)
 			exceptionCount += 1
 			traceback.print_exc()
+	with open('timeResult.txt', 'w') as timeFile:
+		timeFile.write('Total time of %d simulations is: %d' % (len(timeArray), sum(timeArray)))
 	if not keepFiles:
 		shutil.rmtree(outPrefix)
 	return exceptionCount
