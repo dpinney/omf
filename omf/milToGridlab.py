@@ -1367,10 +1367,10 @@ def _tests(
 				resultsFile.write('WROTE GLM FOR ' + stdString + "\n")
 				if inFileSize < outFileSize:
 					percent = float(inFileSize)/float(outFileSize)
-					resultsFile.write('.std file is %s percent of the glm file\n' % str(percent))
+					resultsFile.write('.std file is %s percent of the glm file\n' % str(100*percent))
 				else:
 					percent = float(inFileSize)/float(outFileSize)
-					resultsFile.write('.glm file is %s percent of the std file\n' % str(percent))
+					resultsFile.write('.glm file is %s times as large as the std file\n' % str(percent))
 			try:
 				# Draw the GLM.
 				myGraph = feeder.treeToNxGraph(outGlm)
@@ -1417,8 +1417,8 @@ def _tests(
 					timeArray.append(time.time() - cur_start_time)
 			exceptionCount += 1
 			traceback.print_exc()
-	with open('timeResult.txt', 'w') as timeFile:
-		timeFile.write('Total time of %d simulations is: %d' % (len(timeArray), sum(timeArray)))
+	with open(pJoin(outPrefix, 'convResults.txt'), 'a') as resultFile:
+		resultFile.write('\n\n\nTotal time of %d simulations is: %d' % (len(timeArray), sum(timeArray)))
 	if not keepFiles:
 		shutil.rmtree(outPrefix)
 	return exceptionCount
