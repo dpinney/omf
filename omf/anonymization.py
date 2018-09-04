@@ -628,7 +628,7 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 					genIdx += 1
 		genId += 1
 
-# def _tests():
+def _tests():
 # 	pass
 # 	# DISTRIBUTION FEEDER TESTS
 # 	# Test distPseudomizeNames
@@ -742,7 +742,7 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 # 	# Test tranRandomizeNames
 	# Probably not necessary
 	# FNAME = "case9.omt"
-	# FNAME=pJoin(omfDir,'omf','data','model','admin','Automated Testing of transmission', FNAME)
+	# FNAME=pJoin(omfDir,'omf','static', FNAME)
 	# with open(FNAME, "r") as inFile:
 	# 	inNetwork = json.load(inFile)
 	# 	tranRandomizeNames(inNetwork)
@@ -760,16 +760,18 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 	# with open(FNAMEOUT, "w") as outFile:
 	# 	json.dump(inNetwork, outFile, indent=4)
 
-# 	# Test tranTranslateLocation
-# 	FNAME = "case118.omt"
-# 	with open(FNAME, "r") as inFile:
-# 		inNetwork = json.load(inFile)
-# 		translation = 20
-# 		rotation = 20
-# 		tranTranslateLocations(inNetwork, translation, rotation)
-# 	FNAMEOUT = "118_tranTranslateLocations.omt"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inNetwork, outFile, indent=4)
+	# Test tranTranslateLocation
+	FNAME = "case9.omt"
+	FNAME=pJoin(omfDir,'omf','static', FNAME)
+	with open(FNAME, "r") as inFile:
+		inNetwork = json.load(inFile)
+		translationRight = 100
+		translationUp = 100 
+		rotation = 0
+		tranTranslateLocations(inNetwork, translationRight, translationUp, rotation)
+	FNAMEOUT = "case9_transTranslate.omt"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inNetwork, outFile, indent=4)
 
 # 	# Testing tranAddNoise
 # 	FNAME = "case118.omt"
@@ -791,5 +793,5 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 # 	with open(FNAMEOUT, "w") as outFile:
 # 		json.dump(inNetwork, outFile, indent=4)
 
-# if __name__ == '__main__':
-# 	_tests()
+if __name__ == '__main__':
+	_tests()
