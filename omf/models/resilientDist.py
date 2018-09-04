@@ -412,10 +412,10 @@ def work(modelDir, inputDict):
 		if platform.system() == "Linux":
 			myEnv = os.environ.copy()
 			myEnv['GLPATH'] = omf.omfDir + '/solvers/gridlabdv990/'
-			commandString = omf.omfDir + '/solvers/gridlabdv990/gridlabd.bin feeder.glm'
+			commandString = omf.omfDir + '/solvers/gridlabdv990/gridlabd.bin /solvers/gridlabdv990/feeder.glm'
 		elif platform.system() == "Windows":
 			myEnv = os.environ.copy()
-			commandString = 'gridlabd feeder.glm'
+			commandString =  '"' + pJoin(omf.omfDir, "solvers", "gridlabdv990", "gridlabd.exe") + '"' + " feeder.glm"
 		proc = subprocess.Popen(commandString, stdout=subprocess.PIPE, shell=True, cwd=modelDir, env=myEnv)
 		(out, err) = proc.communicate()
 		with open(pJoin(modelDir, "gldConsoleOut.txt"), "w") as gldConsoleOut:

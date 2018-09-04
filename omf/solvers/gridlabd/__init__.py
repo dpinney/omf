@@ -171,9 +171,10 @@ def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None, g
 					time.sleep(2)
 		return rawOut
 	except:
+		trace = traceback.print_exc()
 		with open(pJoin(workDir, "stderr.txt"), "a+") as stderrFile:
-			traceback.print_exc(file = stderrFile)
-		return {}
+			stderrFile.write(trace)
+		return {"stderr":trace}
 
 def _strClean(x):
 	''' Helper function that translates csv values to reasonable floats (or header values to strings). '''

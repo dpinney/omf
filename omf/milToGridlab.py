@@ -1265,7 +1265,7 @@ def convert(stdString,seqString):
 		{"omftype":"module","argument":"generators"},
 		{"omftype":"module","argument":"tape"},
 		{"module":"residential","implicit_enduses":"NONE"},
-		{"solver_method":"NR","NR_iteration_limit":"50","module":"powerflow"},
+		{"solver_method":"FBS","module":"powerflow"},
 		{"omftype": "module", "argument": "climate"},
 		{"object":"climate", "name":"Climate", "interpolate": "QUADRATIC", "tmyfile": "climate.tmy2"}
 	]
@@ -1354,7 +1354,9 @@ def _tests(
 			with open(pJoin(openPrefix,stdString),'r') as stdFile, open(pJoin(openPrefix,seqString),'r') as seqFile:
 				outGlm = convert(stdFile.read(),seqFile.read())
 			with open(outPrefix + stdString.replace('.std','.glm'),'w') as outFile:
+				outFile.seek(0)
 				outFile.write(feeder.sortedWrite(outGlm))
+				outFile.truncate()
 				outFileStats = os.stat(outPrefix + stdString.replace('.std','.glm') )
 			inFileStats = os.stat(pJoin(openPrefix,stdString))
 			print 'WROTE GLM FOR', stdString
@@ -1367,10 +1369,10 @@ def _tests(
 				resultsFile.write('WROTE GLM FOR ' + stdString + "\n")
 				if inFileSize < outFileSize:
 					percent = float(inFileSize)/float(outFileSize)
-					resultsFile.write('.std file is %s percent of the glm file\n' % str(percent))
+					resultsFile.write('.std file is %s percent of the glm file\n' % str(100*percent))
 				else:
 					percent = float(inFileSize)/float(outFileSize)
-					resultsFile.write('.glm file is %s percent of the std file\n' % str(percent))
+					resultsFile.write('.glm file is %s times as large as the std file\n' % str(percent))
 			try:
 				# Draw the GLM.
 				myGraph = feeder.treeToNxGraph(outGlm)
@@ -1391,8 +1393,10 @@ def _tests(
 					gridlabdStderr = "GridLabD ran successfully without error."
 				else:
 					gridlabdStderr =  output['stderr']
-				with open(outPrefix + stdString.replace('.std','.json'),'a') as outFile:
+				with open(outPrefix + stdString.replace('.std','.json'),'w') as outFile:
+					outFile.seek(0)
 					json.dump(output, outFile, indent=4)
+					outFile.truncate()
 				print 'RAN GRIDLAB ON', stdString
 				with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
 					resultsFile.write('RAN GRIDLAB ON ' + stdString + "\n")
@@ -1417,8 +1421,8 @@ def _tests(
 					timeArray.append(time.time() - cur_start_time)
 			exceptionCount += 1
 			traceback.print_exc()
-	with open('timeResult.txt', 'w') as timeFile:
-		timeFile.write('Total time of %d simulations is: %d' % (len(timeArray), sum(timeArray)))
+	with open(pJoin(outPrefix, 'convResults.txt'), 'a') as resultFile:
+		resultFile.write('\n\n\nTotal time of %d simulations is: %d' % (len(timeArray), sum(timeArray)))
 	if not keepFiles:
 		shutil.rmtree(outPrefix)
 	return exceptionCount
