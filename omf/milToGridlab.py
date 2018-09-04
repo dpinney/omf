@@ -1389,7 +1389,7 @@ def _tests(
 			try:
 				# Run powerflow on the GLM. HACK:blank attachments for now.
 				output = gridlabd.runInFilesystem(outGlm, attachments=testAttachments, keepFiles=False)
-				if output.get('stderr') == "":
+				if output['stderr'] == "":
 					gridlabdStderr = "GridLabD ran successfully without error."
 				else:
 					gridlabdStderr =  output['stderr']
