@@ -1265,7 +1265,7 @@ def convert(stdString,seqString):
 		{"omftype":"module","argument":"generators"},
 		{"omftype":"module","argument":"tape"},
 		{"module":"residential","implicit_enduses":"NONE"},
-		{"solver_method":"NR","NR_iteration_limit":"50","module":"powerflow"},
+		{"solver_method":"FBS","module":"powerflow"},
 		{"omftype": "module", "argument": "climate"},
 		{"object":"climate", "name":"Climate", "interpolate": "QUADRATIC", "tmyfile": "climate.tmy2"}
 	]
@@ -1354,7 +1354,9 @@ def _tests(
 			with open(pJoin(openPrefix,stdString),'r') as stdFile, open(pJoin(openPrefix,seqString),'r') as seqFile:
 				outGlm = convert(stdFile.read(),seqFile.read())
 			with open(outPrefix + stdString.replace('.std','.glm'),'w') as outFile:
+				outFile.seek(0)
 				outFile.write(feeder.sortedWrite(outGlm))
+				outFile.truncate()
 				outFileStats = os.stat(outPrefix + stdString.replace('.std','.glm') )
 			inFileStats = os.stat(pJoin(openPrefix,stdString))
 			print 'WROTE GLM FOR', stdString
@@ -1382,17 +1384,19 @@ def _tests(
 			except:
 				exceptionCount += 1
 				print 'FAILED DRAWING', stdString
-				with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
+				with open(pJoin(outPrefix,'convResults.txt'),'2') as resultsFile:
 					resultsFile.write('FAILED DRAWING ' + stdString + "\n")
 			try:
 				# Run powerflow on the GLM. HACK:blank attachments for now.
 				output = gridlabd.runInFilesystem(outGlm, attachments=testAttachments, keepFiles=False)
-				if output['stderr'] == "":
+				if output.get('stderr') == "":
 					gridlabdStderr = "GridLabD ran successfully without error."
 				else:
 					gridlabdStderr =  output['stderr']
-				with open(outPrefix + stdString.replace('.std','.json'),'a') as outFile:
+				with open(outPrefix + stdString.replace('.std','.json'),'w') as outFile:
+					outFile.seek(0)
 					json.dump(output, outFile, indent=4)
+					outFile.truncate()
 				print 'RAN GRIDLAB ON', stdString
 				with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
 					resultsFile.write('RAN GRIDLAB ON ' + stdString + "\n")
