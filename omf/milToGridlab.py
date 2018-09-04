@@ -1384,7 +1384,7 @@ def _tests(
 			except:
 				exceptionCount += 1
 				print 'FAILED DRAWING', stdString
-				with open(pJoin(outPrefix,'convResults.txt'),'2') as resultsFile:
+				with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
 					resultsFile.write('FAILED DRAWING ' + stdString + "\n")
 			try:
 				# Run powerflow on the GLM. HACK:blank attachments for now.
