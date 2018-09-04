@@ -6,10 +6,10 @@ from math import sqrt
 #solar proxy
 sigma = sqrt(1)
 solarMu = 5
-solarDay =  np.linspace(solarMu - 4*sigma, solarMu + 4*sigma, 32)
+solarDay =  np.linspace(solarMu - 5*sigma, solarMu + 20*sigma, 24)
 solarDay = np.append(solarDay, solarDay[::-1])
 #solarDay = solarDay + np.random.normal(0,.5,240) 
-solarRaw = np.concatenate((np.zeros(16), solarDay, np.zeros(16)))
+solarRaw = np.concatenate((np.zeros(24), solarDay, np.zeros(24)))
 
 randSolar = np.array([solarRaw]).transpose()
 #print(randSolar)

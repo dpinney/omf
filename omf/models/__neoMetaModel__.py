@@ -17,17 +17,16 @@ def metadata(fileUnderObject):
 	template = Template(open(pJoin(_myDir, modelName+".html"),"r").read()) #HTML Template for showing output.
 	return modelName, template
 
-def heavyProcessing(modelDir, inputDict):
+def heavyProcessing(modelDir):
 	''' Wrapper to handle model running safely and uniformly. '''
 	try:
 		# Start a timer.
 		startTime = datetime.datetime.now()
-		# If we are re-running, remove output and old GLD run.
+		# Get the inputs.
+		inputDict = json.load(open(pJoin(modelDir, 'allInputData.json')))
+		# Remove old outputs.
 		try: os.remove(pJoin(modelDir,"allOutputData.json"))
 		except Exception, e: pass
-		# Update the input file.
-		with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
-			json.dump(inputDict, inputFile, indent = 4)
 		# Get the function and run it.
 		work = getattr(omf.models, inputDict['modelType']).work
 		outData = work(modelDir, inputDict)
@@ -47,29 +46,29 @@ def heavyProcessing(modelDir, inputDict):
 		with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
 			json.dump(outData, outFile, indent=4)
 	finally:
-		# Clean up by updating input data 
+		# Clean up by updating input data.
 		try:
 			with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
-					json.dump(inputDict, inFile, indent=4)
+				json.dump(inputDict, inFile, indent=4)
 		except: pass
 		try: os.remove(pJoin(modelDir,"PPID.txt"))
 		except: pass
 
-def run(modelDir, inputDict):
+def run(modelDir):
 	''' Run the model in a separate process. web.py calls this to run the model.
 	This function will return fast, but results take a while to hit the file system.'''
-	backProc = multiprocessing.Process(target = heavyProcessing, args = (modelDir, inputDict,))
+	backProc = multiprocessing.Process(target = heavyProcessing, args = (modelDir,))
 	backProc.start()
 	with open(pJoin(modelDir, "PPID.txt"),"w+") as pPidFile:
 		pPidFile.write(str(backProc.pid))
 	print "SENT TO BACKGROUND", modelDir
 
-def runForeground(modelDir, inputDict):
+def runForeground(modelDir):
 	''' Run all model work immediately in the same thread. '''
 	with open(pJoin(modelDir, "PPID.txt"),"w+") as pPidFile:
 		pPidFile.write('-999') # HACK: put in an invalid PID to indicate the model is running.
 	print "FOREGROUND RUNNING", modelDir
-	heavyProcessing(modelDir, inputDict)
+	heavyProcessing(modelDir)
 
 def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 	''' Render the model template to an HTML string.

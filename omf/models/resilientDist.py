@@ -382,7 +382,7 @@ def work(modelDir, inputDict):
 			json.dump(rdtJson, rdtInputFile, indent=4)
 	# Run GridLAB-D first time to generate xrMatrices.
 	print "RUNNING GLD FOR", modelDir
-	if platform.system() == "Windows":
+	if platform.system() in ["Windows","Linux"]:
 		omdPath = pJoin(modelDir, feederName + ".omd")
 		with open(omdPath, "r") as omd:
 			omd = json.load(omd)
@@ -408,7 +408,15 @@ def work(modelDir, inputDict):
 		#Wire in the file the user specifies via zipcode.
 		climateFileName, latforpvwatts = zipCodeToClimateName(inputDict["simulationZipCode"])
 		shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
-		proc = subprocess.Popen(['gridlabd', 'feeder.glm'], stdout=subprocess.PIPE, shell=True, cwd=modelDir)
+		# Platform specific binaries.
+		if platform.system() == "Linux":
+			myEnv = os.environ.copy()
+			myEnv['GLPATH'] = omf.omfDir + '/solvers/gridlabdv990/'
+			commandString = omf.omfDir + '/solvers/gridlabdv990/gridlabd.bin feeder.glm'
+		elif platform.system() == "Windows":
+			myEnv = os.environ.copy()
+			commandString = 'gridlabd feeder.glm'
+		proc = subprocess.Popen(commandString, stdout=subprocess.PIPE, shell=True, cwd=modelDir, env=myEnv)
 		(out, err) = proc.communicate()
 		with open(pJoin(modelDir, "gldConsoleOut.txt"), "w") as gldConsoleOut:
 			gldConsoleOut.write(out)
@@ -539,7 +547,7 @@ def _runModel():
 	# Pre-run.
 	renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
+	runForeground(modelLoc)
 	# Show the output.
 	renderAndShow(modelLoc)
 

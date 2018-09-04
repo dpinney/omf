@@ -320,7 +320,12 @@ def runModel():
 	# Handle the model name.
 	modelName = pData["modelName"]
 	del pData["modelName"]
-	modelModule.run(os.path.join(_omfDir, "data", "Model", user, modelName), pData)
+	modelDir = os.path.join(_omfDir, "data", "Model", user, modelName)
+	# Update the input file.
+	with open(os.path.join(modelDir, "allInputData.json"),"w") as inputFile:
+		json.dump(pData, inputFile, indent = 4)
+	# Run and return.
+	modelModule.run(modelDir)
 	return redirect("/model/" + user + "/" + modelName)
 
 @app.route("/cancelModel/", methods=["POST"])

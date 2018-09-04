@@ -1,0 +1,9 @@
+#! /bin/sh
+
+#prefix="/home/justin/omf/omf/solvers/gldv990Linux"
+prefix=$(cd $(dirname "$1") && pwd -P) 
+
+export GLPATH="${prefix}"
+
+#echo $GLPATH
+"${prefix}/gridlabd.bin" "$@"

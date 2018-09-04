@@ -40,13 +40,23 @@ solarproxy = np.array(solarproxy_csv)
 #Gather weather data from asos and interpolate for 15 minute intervals
 timeTemp = OrderedDict()
 
-flike = StringIO.StringIO(pullAsos('2017','CHO', 'tmpf'))
-next(csv.reader(flike))
-for row in csv.reader(flike):
-	if row[2] != 'M':
-		timeTemp[datetime.datetime.strptime(row[1], "%Y-%m-%d %H:%M")] = float(row[2])
-	elif row[1][14:] in ['00','15','30','45'] and row[2] =='M':
-		timeTemp[datetime.datetime.strptime(row[1], "%Y-%m-%d %H:%M")] = np.nan
+#flike = StringIO.StringIO(pullAsos('2017','CHO', 'tmpf'))
+
+#save asos weather data
+#with open('asosweather.csv', 'wb') as csvfile:
+#	csvwriter = csv.writer(csvfile, delimiter=',')
+#	next(csv.reader(flike))
+#	for row in csv.reader(flike):
+#		csvwriter.writerow(row)
+
+#use cached weather data
+with open('asosweather.csv', 'rb') as flike:
+	#next(csv.reader(flike))
+	for row in csv.reader(flike):
+		if row[2] != 'M':
+			timeTemp[datetime.datetime.strptime(row[1], "%Y-%m-%d %H:%M")] = float(row[2])
+		elif row[1][14:] in ['00','15','30','45'] and row[2] =='M':
+			timeTemp[datetime.datetime.strptime(row[1], "%Y-%m-%d %H:%M")] = np.nan
 
 #Get the actual data for temperatures 
 realTemps = pd.DataFrame(timeTemp.items(), columns=['date', 'temperature'])
@@ -65,12 +75,47 @@ fifteenMinuteTimestamps = pd.date_range(start='2017-1-1', end='2018-1-1', closed
 pdTemps = pdTemps[pdTemps['date'].isin(fifteenMinuteTimestamps)]
 #temporary to get single day of data
 pdTemps = pdTemps[(pdTemps['date'] >= '2017-4-15') & (pdTemps['date'] < '2017-4-16')]
-print(pdTemps)
+#print(pdTemps)
 #pdTemps.set_index('date', inplace=True)
 
 #create load regressor from weather data in correct format as nparray
-loadregressors = pdTemps[['temperature']].values
+#loadregressors = pdTemps[['temperature']].values
+def createTempInput(temp, size, minTemp=None, maxTemp=None, intercept = False):
+	if (minTemp is None):
+		minTemp=min(temp)
+	if maxTemp is None:
+		maxTemp=max(temp)
+	minBound=int(np.floor(minTemp / size)) * size
+	maxBound=int(np.floor(maxTemp / size)) * size + size
 
+	rangeCount = int((maxBound-minBound) / size)
+	result = np.zeros((len(temp), rangeCount+intercept))
+	t = 0
+	for elem in temp:
+		fullRanges = min( int(np.floor((elem-minBound) / size)), rangeCount-1)
+		fullRanges = max(0, fullRanges)
+		bound      = (minBound+fullRanges*size)
+		lastRange  = elem-bound
+		res        = [size for elem in range(fullRanges)]
+		res.append(lastRange)
+		for var in range(rangeCount-fullRanges-1):
+			res.append(0)
+		if intercept:
+			res.append(1)  ## Include an intercept
+
+		result[t,:] = np.array(res)
+		t +=1
+	return minTemp, maxTemp,result
+
+#hod = pd.Series([t for t in pdTemps['date']])
+#hod = pd.get_dummies(hod)
+#print(hod)
+
+Tmin, Tmax, tempregress = createTempInput(pdTemps['temperature'], 10)
+#print(pdTemps['date'].values)
+#print(tempregress)
+loadregressors = tempregress
+#print(tempregress)
 
 #asosTemps = []
 #asosDates = []
@@ -93,9 +138,10 @@ loadregressors = pdTemps[['temperature']].values
 sdmod0 = SolarDisagg.SolarDisagg_IndvHome(netloads=netload, solarregressors=solarproxy, loadregressors=loadregressors)
 #
 sdmod0.constructSolve()
+#sdmod0.fitTuneModels()
 
 #Create subplots in plotly
-fig = tools.make_subplots(rows=5, cols=1, subplot_titles=('Weather', 'Solar Canary', 'House 1', 'House 2', 'House 3' ))
+fig = tools.make_subplots(rows=6, cols=1, subplot_titles=('Weather', 'Solar Canary', 'Aggregate Load','House 1', 'House 2', 'House 3' ))
 #plot weather and solar canary
 fig.append_trace(go.Scatter(y=pdTemps['temperature'], x=pdTemps['date'], name=('interpolated weather ')),1,1)
 fig.append_trace(go.Scatter(y=realTemps['temperature'], x=realTemps['date'], name=('real weather data '), mode = 'markers'),1,1)
@@ -104,14 +150,22 @@ xaxis = [i for i in range(96)]
 fig.append_trace(go.Scatter(y=np.array([item for sublist in solarproxy for item in sublist]), x=pdTemps['date'], name=('Solar Canary ')),2,1)
 fig['layout']['yaxis2'].update(title='Watts')
 
+#plot net aggregate load 
+#print(sdmod0.models['AggregateLoad']['source'].value)
+fig.append_trace(go.Scatter(y=np.array([item for sublist in sdmod0.models['AggregateLoad']['source'].value.tolist() for item in sublist]), x=pdTemps['date'], name=('Disaggregated Total Load')),3,1)
+fig.append_trace(go.Scatter(y=sdmod0.aggregateSignal, x=pdTemps['date'], name=('Aggregate Total Load')),3,1)
+
 #plot household loads and solar
 for i, model in enumerate(sdmod0.models):
+	#print(sdmod0.models['AggregateLoad']['source'].value)
+	fig.print_grid
 	if model != 'AggregateLoad':
+		#print(sdmod0.models[model]['source'].value)
 		solarArray = np.array([item for sublist in sdmod0.models[model]['source'].value.tolist() for item in sublist])
 		disaggLoad = (sdmod0.netloads[str(i)] - solarArray)
-		fig.append_trace(go.Scatter(y=sdmod0.netloads[str(i)], x=pdTemps['date'], name=('Measured Load ' + str(i))),i+3,1)
-		fig.append_trace(go.Scatter(y=disaggLoad, x=pdTemps['date'], name=('Disaggregated Load (Actual) ' + str(i))),i+3,1)
-		fig.append_trace(go.Scatter(y=np.array([item for sublist in sdmod0.models[model]['source'].value.tolist() for item in sublist]), x=pdTemps['date'], name=('Predicted solar ' + str(i))),i+3,1)
+		fig.append_trace(go.Scatter(y=sdmod0.netloads[str(i)], x=pdTemps['date'], name=('Measured Load ' + str(i))),i+4,1)
+		fig.append_trace(go.Scatter(y=disaggLoad, x=pdTemps['date'], name=('Disaggregated Load (Actual) ' + str(i))),i+4,1)
+		fig.append_trace(go.Scatter(y=np.array([item for sublist in sdmod0.models[model]['source'].value.tolist() for item in sublist]), x=pdTemps['date'], name=('Predicted solar ' + str(i))),i+4,1)
 		fig['layout']['yaxis' + str(i+3)].update(title='Watts')	
 
 #plot the results
