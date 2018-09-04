@@ -433,7 +433,7 @@ def distSmoothLoads(inFeeder):
 
 # TRANSMISSION NETWORK FUNCTIONS 
 def tranPseudomizeNames(inNetwork):
-	#FIXED, not tested 
+	#FIXED, tested 
 	''' Replace all names in the inNetwork transmission system with pseudonames composed of the object type and a random ID. Return a key with name and ID pairs. '''
 	newBusKey = {}
 	randomID = random.randint(0,100)
@@ -467,36 +467,29 @@ def tranRandomizeNames(inNetwork):
 	randomID = random.randint(0,100)
 	# Create busKey dictionary
 	for i in inNetwork['bus']:
-		key = str(i.keys()[0])
-		for prop in i[key]:
-			if 'bus_i' in prop:
-				oldBus = i[key]['bus_i']
-				# convert newBus to unicode
-				newBus = str(randomID).encode("utf-8").decode("utf-8")
-				newBusKey.update({oldBus:newBus})
-				i[key]['bus_i'] = newBus
-				i[newBus] = i.pop(oldBus)
-				randomID += 1
-	# Replace busNames in generators
+		if 'bus_i' in inNetwork['bus'][i]:
+			oldBus = inNetwork['bus'][i]['bus_i']
+			newBus = str(randomID)
+			newBusKey.update({oldBus:newBus})
+			inNetwork['bus'][i]['bus_i'] = newBus
+			inNetwork['bus'][newBus] = inNetwork['bus'].pop(oldBus)
+			randomID += 1
+# Replace busNames in generators
 	for i in inNetwork['gen']:
-		key = str(i.keys()[0])
-		for prop in i[key]:
-			if 'bus' in prop:
-				oldBus = i[key]['bus']
-				i[key]['bus'] = newBusKey[oldBus]
-	# Replace busNames in branches
+		if 'bus' in inNetwork['gen'][i]:
+			oldBus = inNetwork['gen'][i]['bus']
+			inNetwork['gen'][i]['bus'] = newBusKey[oldBus]
+# # Replace busNames in branches
 	for i in inNetwork['branch']:
-		key = str(i.keys()[0])
-		for prop in i[key]:
-			if 'fbus' in prop:
-				oldFrom = i[key]['fbus']
-				i[key]['fbus'] = newBusKey[oldFrom]
-			if 'tbus' in prop:
-				oldTo = i[key]['tbus']
-				i[key]['tbus'] = newBusKey[oldTo]
+		if 'fbus' in inNetwork['branch'][i]:
+			oldFrom = inNetwork['branch'][i]['fbus']
+			inNetwork['branch'][i]['fbus'] = newBusKey[oldFrom]
+		if 'tbus' in inNetwork['branch'][i]:
+			oldTo = inNetwork['branch'][i]['tbus']
+			inNetwork['branch'][i]['tbus'] = newBusKey[oldTo]
 
 def tranRandomizeLocations(inNetwork):
-	#FIXED, not tested
+	#FIXED, tested
 	''' Replace all objects' longitude and latitude positions in the inNetwork transmission system with random values. '''
 	'''make sure dont need to replace lat and longs of gens and branches'''
 	# inNetwork['bus'] = []
@@ -510,9 +503,6 @@ def tranRandomizeLocations(inNetwork):
 
 def tranTranslateLocations(inNetwork, translationRight, translationUp, rotation):
 	#Maybe Fixed, not tested
-	#ASK DAVID IF THE WEB.PY OR WHATEVER POSTS THE REQUEST IS THE SAME AS THE DSITRIBUTION ANONYMIZATION. Need to fix some front end stuff
-	#Fix web.py to include proper arguments
-	#Fix rest of function later
 	''' Move the position of all objects in the inNetwork transmission system by a horizontal translation and counter-clockwise rotation. '''
 	# inNetwork['bus'] = []
 	# inNetwork['gen'] = []
@@ -565,26 +555,28 @@ def tranTranslateLocations(inNetwork, translationRight, translationUp, rotation)
 
 def tranAddNoise(inNetwork, noisePerc):
 	''' Add random noise to properties with numeric values for all objects in the inNetwork transmission system based on a noisePerc magnitude. '''
+	#Fixed not tested
 	noisePerc = float(noisePerc)
 	for array in inNetwork:
 		if (array == 'bus') or (array == 'gen') or (array == 'branch'):
 			arrayId = 0
 			for i in inNetwork[array]:
-				key = str(i.keys()[0])
-				for prop in i[key]:
-					if ('bus' not in prop) and ('status' not in prop):
-						val = i[key][prop]
-						try:
-							parseVal = float(val)
-							randNoise = random.randint(-noisePerc, noisePerc)/100
-							randVal = parseVal + randNoise*parseVal
-							i[key][prop] = str(randVal)
-						except ValueError:
-							print 'error'
-							continue
-				arrayId += 1
+				# key = str(i.keys()[0])
+				# for prop in i[key]:
+				if ('bus' not in inNetwork[array][i]) and ('status' not in inNetwork[array][i]):
+					val = inNetwork[array][i]
+					try:
+						parseVal = float(val)
+						randNoise = random.randint(-noisePerc, noisePerc)/100
+						randVal = parseVal + randNoise*parseVal
+						inNetwork[array][i] = str(randVal)
+					except ValueError:
+						print 'error'
+						continue
+			arrayId += 1
 
 def tranShuffleLoadsAndGens(inNetwork, shufPerc):
+	#Broke
 	''' Shuffle the parent properties between all load and gen objects in the inNetwork transmission system. '''
 	shufPerc = float(shufPerc)
 	# Shuffle Qd and Pd

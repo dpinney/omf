@@ -1118,7 +1118,7 @@ def backgroundAnonymizeTran(modelDir, omtPath):
 			translationRight = request.form.get('translateRight')
 			translationUp = request.form.get('translateUp')
 			rotation = request.form.get('rotate')
-			anonymization.tranTranslateLocations(inFeeder, translationRight, translationUp, rotation)
+			anonymization.tranTranslateLocations(inNetwork, translationRight, translationUp, rotation)
 		elif locOption == 'randomize':
 			anonymization.tranRandomizeLocations(inNetwork)
 		# Electrical Properties
