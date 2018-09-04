@@ -502,7 +502,7 @@ def tranRandomizeLocations(inNetwork):
 			inNetwork['bus'][i]['latitude'] = random.randint(0,1000)
 
 def tranTranslateLocations(inNetwork, translationRight, translationUp, rotation):
-	#Maybe Fixed, not tested
+	#Fixed, tested
 	''' Move the position of all objects in the inNetwork transmission system by a horizontal translation and counter-clockwise rotation. '''
 	# inNetwork['bus'] = []
 	# inNetwork['gen'] = []
@@ -555,24 +555,28 @@ def tranTranslateLocations(inNetwork, translationRight, translationUp, rotation)
 
 def tranAddNoise(inNetwork, noisePerc):
 	''' Add random noise to properties with numeric values for all objects in the inNetwork transmission system based on a noisePerc magnitude. '''
-	#Fixed not tested
+	#Fixed, not tested
 	noisePerc = float(noisePerc)
 	for array in inNetwork:
 		if (array == 'bus') or (array == 'gen') or (array == 'branch'):
 			arrayId = 0
 			for i in inNetwork[array]:
-				# key = str(i.keys()[0])
-				# for prop in i[key]:
-				if ('bus' not in inNetwork[array][i]) and ('status' not in inNetwork[array][i]):
+				if ('bus' not in inNetwork[array][i].keys()) and ('status' not in inNetwork[array][i].keys()):
 					val = inNetwork[array][i]
-					try:
-						parseVal = float(val)
-						randNoise = random.randint(-noisePerc, noisePerc)/100
-						randVal = parseVal + randNoise*parseVal
-						inNetwork[array][i] = str(randVal)
-					except ValueError:
-						print 'error'
-						continue
+					# print val
+					for key in val.keys():
+						# print key
+						# print val[key]
+						try:
+							parseVal = float(val[key])
+							randNoise = random.uniform(-noisePerc, noisePerc)/100
+							randVal = (parseVal + randNoise)*randNoise
+							print val[key]
+							val[key] = str(randVal)
+							print val[key]
+						except ValueError:
+							# print 'error'
+							continue
 			arrayId += 1
 
 def tranShuffleLoadsAndGens(inNetwork, shufPerc):
@@ -761,27 +765,28 @@ def _tests():
 	# 	json.dump(inNetwork, outFile, indent=4)
 
 	# Test tranTranslateLocation
+	# FNAME = "case9.omt"
+	# FNAME=pJoin(omfDir,'omf','static', FNAME)
+	# with open(FNAME, "r") as inFile:
+	# 	inNetwork = json.load(inFile)
+	# 	translationRight = 100
+	# 	translationUp = 100 
+	# 	rotation = 45
+	# 	tranTranslateLocations(inNetwork, translationRight, translationUp, rotation)
+	# FNAMEOUT = "case9_transTranslate.omt"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inNetwork, outFile, indent=4)
+
+# 	# Testing tranAddNoise
 	FNAME = "case9.omt"
 	FNAME=pJoin(omfDir,'omf','static', FNAME)
 	with open(FNAME, "r") as inFile:
 		inNetwork = json.load(inFile)
-		translationRight = 100
-		translationUp = 100 
-		rotation = 0
-		tranTranslateLocations(inNetwork, translationRight, translationUp, rotation)
-	FNAMEOUT = "case9_transTranslate.omt"
+		noisePerc = 100
+		tranAddNoise(inNetwork, noisePerc)
+	FNAMEOUT = "case9_transAddNoise.omt"
 	with open(FNAMEOUT, "w") as outFile:
 		json.dump(inNetwork, outFile, indent=4)
-
-# 	# Testing tranAddNoise
-# 	FNAME = "case118.omt"
-# 	with open(FNAME, "r") as inFile:
-# 		inNetwork = json.load(inFile)
-# 		noisePerc = 100
-#		tranAddNoise(inNetwork, noisePerc)
-# 	FNAMEOUT = "118_tranAddNoise.omt"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inNetwork, outFile, indent=4)
 
 # 	# Testing tranShuffleLoadsAndGens
 #	FNAME = "case118.omt"
