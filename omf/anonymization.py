@@ -433,21 +433,18 @@ def distSmoothLoads(inFeeder):
 
 # TRANSMISSION NETWORK FUNCTIONS 
 def tranPseudomizeNames(inNetwork):
-	#FIXED, problem with build
+	#FIXED, tested
 	''' Replace all names in the inNetwork transmission system with pseudonames composed of the object type and a random ID. Return a key with name and ID pairs. '''
 	newBusKey = {}
 	randomID = random.randint(0,100)
-	print randomID
 	# Create busKey dictionary
 	for i in inNetwork['bus'].keys():
 		if 'bus_i' in inNetwork['bus'][i]:
 			oldBus = inNetwork['bus'][i]['bus_i']
 			newBus = str(randomID)
-			#print (newBus, oldBus)
 			newBusKey.update({oldBus:newBus})
 			inNetwork['bus'][i]['bus_i'] = newBus
 			inNetwork['bus'][newBus] = inNetwork['bus'].pop(i)
-			#print (newBus, oldBus)
 			randomID += 1
 # Replace busNames in generators
 	for i in inNetwork['gen']:
@@ -462,11 +459,9 @@ def tranPseudomizeNames(inNetwork):
 		if 'tbus' in inNetwork['branch'][i]:
 			oldTo = inNetwork['branch'][i]['tbus']
 			inNetwork['branch'][i]['tbus'] = newBusKey[oldTo]
-	print newBusKey
-
 	return newBusKey
 def tranRandomizeNames(inNetwork):
-	#Fixed problem with build
+	#Fixed, tested
 	''' Replace all names in the inNetwork transmission system with pseudonames composed of the object type and a random ID. '''
 	'''pretty sure this makes no sense at all, current data structure has no object types'''
 	newBusKey = {}
@@ -478,7 +473,7 @@ def tranRandomizeNames(inNetwork):
 			newBus = str(randomID)
 			newBusKey.update({oldBus:newBus})
 			inNetwork['bus'][i]['bus_i'] = newBus
-			# inNetwork['bus'][newBus] = inNetwork['bus'].pop(oldBus)
+			inNetwork['bus'][newBus] = inNetwork['bus'].pop(i)
 			randomID += 1
 # Replace busNames in generators
 	for i in inNetwork['gen']:
