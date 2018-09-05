@@ -633,7 +633,7 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 			genId += 1
 
 
-def _tests():
+# def _tests():
 # 	pass
 # 	# DISTRIBUTION FEEDER TESTS
 # 	# Test distPseudomizeNames
@@ -734,15 +734,15 @@ def _tests():
 
 
 # 	TRANSMISSION NETWORK TESTS
-	# Test tranPseudomizeNames	
-	FNAME = "SimpleNetwork.json"
-	FNAME=pJoin(omfDir,'omf','static', FNAME)
-	with open(FNAME, "r") as inFile:
-		inNetwork = json.load(inFile)
-		tranPseudomizeNames(inNetwork)
-	FNAMEOUT = "118_tranPseudomizeNames.omt"
-	with open(FNAMEOUT, "w") as outFile:
-		json.dump(inNetwork, outFile, indent=4)
+	# # Test tranPseudomizeNames	
+	# FNAME = "SimpleNetwork.json"
+	# FNAME=pJoin(omfDir,'omf','static', FNAME)
+	# with open(FNAME, "r") as inFile:
+	# 	inNetwork = json.load(inFile)
+	# 	tranPseudomizeNames(inNetwork)
+	# FNAMEOUT = "118_tranPseudomizeNames.omt"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inNetwork, outFile, indent=4)
 
 # 	# Test tranRandomizeNames
 	# Probably not necessary
@@ -799,5 +799,5 @@ def _tests():
 # 	with open(FNAMEOUT, "w") as outFile:
 # 		json.dump(inNetwork, outFile, indent=4)
 
-if __name__ == '__main__':
-	_tests()
+# if __name__ == '__main__':
+# 	_tests()
