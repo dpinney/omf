@@ -437,14 +437,17 @@ def tranPseudomizeNames(inNetwork):
 	''' Replace all names in the inNetwork transmission system with pseudonames composed of the object type and a random ID. Return a key with name and ID pairs. '''
 	newBusKey = {}
 	randomID = random.randint(0,100)
+	print randomID
 	# Create busKey dictionary
-	for i in inNetwork['bus']:
+	for i in inNetwork['bus'].keys():
 		if 'bus_i' in inNetwork['bus'][i]:
 			oldBus = inNetwork['bus'][i]['bus_i']
 			newBus = str(randomID)
+			#print (newBus, oldBus)
 			newBusKey.update({oldBus:newBus})
 			inNetwork['bus'][i]['bus_i'] = newBus
-			# inNetwork['bus'][newBus] = inNetwork['bus'].pop(oldBus)
+			inNetwork['bus'][newBus] = inNetwork['bus'].pop(i)
+			#print (newBus, oldBus)
 			randomID += 1
 # Replace busNames in generators
 	for i in inNetwork['gen']:
@@ -459,6 +462,8 @@ def tranPseudomizeNames(inNetwork):
 		if 'tbus' in inNetwork['branch'][i]:
 			oldTo = inNetwork['branch'][i]['tbus']
 			inNetwork['branch'][i]['tbus'] = newBusKey[oldTo]
+	print newBusKey
+
 	return newBusKey
 def tranRandomizeNames(inNetwork):
 	#Fixed problem with build
@@ -467,7 +472,7 @@ def tranRandomizeNames(inNetwork):
 	newBusKey = {}
 	randomID = random.randint(0,100)
 	# Create busKey dictionary
-	for i in inNetwork['bus']:
+	for i in inNetwork['bus'].keys():
 		if 'bus_i' in inNetwork['bus'][i]:
 			oldBus = inNetwork['bus'][i]['bus_i']
 			newBus = str(randomID)
@@ -628,7 +633,7 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 			genId += 1
 
 
-# def _tests():
+def _tests():
 # 	pass
 # 	# DISTRIBUTION FEEDER TESTS
 # 	# Test distPseudomizeNames
@@ -730,14 +735,14 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 
 # 	TRANSMISSION NETWORK TESTS
 	# Test tranPseudomizeNames	
-	# FNAME = "SimpleNetwork.json"
-	# FNAME=pJoin(omfDir,'omf','static', FNAME)
-	# with open(FNAME, "r") as inFile:
-	# 	inNetwork = json.load(inFile)
-	# 	tranPseudomizeNames(inNetwork)
-	# FNAMEOUT = "118_tranPseudomizeNames.omt"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inNetwork, outFile, indent=4)
+	FNAME = "SimpleNetwork.json"
+	FNAME=pJoin(omfDir,'omf','static', FNAME)
+	with open(FNAME, "r") as inFile:
+		inNetwork = json.load(inFile)
+		tranPseudomizeNames(inNetwork)
+	FNAMEOUT = "118_tranPseudomizeNames.omt"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inNetwork, outFile, indent=4)
 
 # 	# Test tranRandomizeNames
 	# Probably not necessary
@@ -794,5 +799,5 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 # 	with open(FNAMEOUT, "w") as outFile:
 # 		json.dump(inNetwork, outFile, indent=4)
 
-# if __name__ == '__main__':
-# 	_tests()
+if __name__ == '__main__':
+	_tests()
