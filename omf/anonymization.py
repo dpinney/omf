@@ -433,7 +433,7 @@ def distSmoothLoads(inFeeder):
 
 # TRANSMISSION NETWORK FUNCTIONS 
 def tranPseudomizeNames(inNetwork):
-	#FIXED, tested 
+	#FIXED, problem with build
 	''' Replace all names in the inNetwork transmission system with pseudonames composed of the object type and a random ID. Return a key with name and ID pairs. '''
 	newBusKey = {}
 	randomID = random.randint(0,100)
@@ -461,6 +461,7 @@ def tranPseudomizeNames(inNetwork):
 			inNetwork['branch'][i]['tbus'] = newBusKey[oldTo]
 	return newBusKey
 def tranRandomizeNames(inNetwork):
+	#Fixed problem with build
 	''' Replace all names in the inNetwork transmission system with pseudonames composed of the object type and a random ID. '''
 	'''pretty sure this makes no sense at all, current data structure has no object types'''
 	newBusKey = {}
@@ -580,57 +581,52 @@ def tranAddNoise(inNetwork, noisePerc):
 			arrayId += 1
 
 def tranShuffleLoadsAndGens(inNetwork, shufPerc):
-	#Broke
+	#Fixed, not testec
 	''' Shuffle the parent properties between all load and gen objects in the inNetwork transmission system. '''
 	shufPerc = float(shufPerc)
 	# Shuffle Qd and Pd
 	qParents = []
 	pParents = []
 	busId = 0
-	for i in inNetwork['bus']:
-		key = str(i.keys()[0])
-		for prop in i[key]:
-			if 'Qd' in prop:
-				qParents.append(i[key]['Qd'])
-			if 'Pd' in prop:
-				pParents.append(i[key]['Pd'])
+	for i in inNetwork['bus'].keys():
+		print inNetwork['bus'][i].keys()
+		print type(inNetwork['bus'][i].keys())
+		if 'Qd' in inNetwork['bus'][i].keys():
+			qParents.append(inNetwork['bus'][i]['Qd'])
+		if 'Pd' in inNetwork['bus'][i].keys():
+			pParents.append(inNetwork['bus'][i]['Pd'])
 		busId += 1
 	random.shuffle(qParents)
 	random.shuffle(pParents)
 	qIdx = 0
 	pIdx = 0
 	busId = 0
-	for i in inNetwork['bus']:
-		key = str(i.keys()[0])
-		for prop in i[key]:
-			if random.randint(0,100) < shufPerc:
-				if 'Qd' in prop:
-					i[key]['Qd'] = qParents[qIdx]
-					qIdx += 1
-				if 'Pd' in prop:
-					i[key]['Pd'] = pParents[pIdx]
-					pIdx += 1
+	for i in inNetwork['bus'].keys():
+		if random.randint(0,100) < shufPerc:
+			if 'Qd' in inNetwork['bus'][i].keys():
+				inNetwork['bus'][i]['Qd'] = qParents[qIdx]
+				qIdx += 1
+			if 'Pd' in inNetwork['bus'][i].keys():
+				inNetwork['bus'][i]['Pd'] = pParents[pIdx]
+				pIdx += 1
 		busId += 1
 	# Shuffle Generators
 	genParents = []
 	genId = 0
-	for i in inNetwork['gen']:
-		key = str(i.keys()[0])
-		for prop in i[key]:
-			if 'bus' in prop:
-				genParents.append(i[key]['bus'])
+	for i in inNetwork['gen'].keys():
+		if 'bus' in inNetwork['gen'][i].keys():
+			genParents.append(inNetwork['gen'][i]['bus'])
 		genId += 1
 	random.shuffle(genParents)
 	genId = 0
 	genIdx = 0
-	for i in inNetwork['gen']:
-		key = str(i.keys()[0])
-		for prop in i[key]:
-			if 'bus' in prop:
+	for i in inNetwork['gen'].keys():
+			if 'bus' in inNetwork['gen'][i].keys():
 				if random.randint(0,100) < shufPerc:
-					i[key]['bus'] = genParents[genIdx]
+					inNetwork['gen'][i]['bus'] = genParents[genIdx]
 					genIdx += 1
-		genId += 1
+			genId += 1
+
 
 # def _tests():
 # 	pass
