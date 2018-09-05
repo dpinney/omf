@@ -444,7 +444,7 @@ def tranPseudomizeNames(inNetwork):
 			newBus = str(randomID)
 			newBusKey.update({oldBus:newBus})
 			inNetwork['bus'][i]['bus_i'] = newBus
-			inNetwork['bus'][newBus] = inNetwork['bus'].pop(oldBus)
+			# inNetwork['bus'][newBus] = inNetwork['bus'].pop(oldBus)
 			randomID += 1
 # Replace busNames in generators
 	for i in inNetwork['gen']:
@@ -473,7 +473,7 @@ def tranRandomizeNames(inNetwork):
 			newBus = str(randomID)
 			newBusKey.update({oldBus:newBus})
 			inNetwork['bus'][i]['bus_i'] = newBus
-			inNetwork['bus'][newBus] = inNetwork['bus'].pop(oldBus)
+			# inNetwork['bus'][newBus] = inNetwork['bus'].pop(oldBus)
 			randomID += 1
 # Replace busNames in generators
 	for i in inNetwork['gen']:
