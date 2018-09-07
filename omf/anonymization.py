@@ -433,18 +433,18 @@ def distSmoothLoads(inFeeder):
 
 # TRANSMISSION NETWORK FUNCTIONS 
 def tranPseudomizeNames(inNetwork):
-	#FIXED, not tested 
+	#FIXED, tested
 	''' Replace all names in the inNetwork transmission system with pseudonames composed of the object type and a random ID. Return a key with name and ID pairs. '''
 	newBusKey = {}
 	randomID = random.randint(0,100)
 	# Create busKey dictionary
-	for i in inNetwork['bus']:
+	for i in inNetwork['bus'].keys():
 		if 'bus_i' in inNetwork['bus'][i]:
 			oldBus = inNetwork['bus'][i]['bus_i']
 			newBus = str(randomID)
 			newBusKey.update({oldBus:newBus})
 			inNetwork['bus'][i]['bus_i'] = newBus
-			inNetwork['bus'][newBus] = inNetwork['bus'].pop(oldBus)
+			inNetwork['bus'][newBus] = inNetwork['bus'].pop(i)
 			randomID += 1
 # Replace busNames in generators
 	for i in inNetwork['gen']:
@@ -461,42 +461,36 @@ def tranPseudomizeNames(inNetwork):
 			inNetwork['branch'][i]['tbus'] = newBusKey[oldTo]
 	return newBusKey
 def tranRandomizeNames(inNetwork):
+	#Fixed, tested
 	''' Replace all names in the inNetwork transmission system with pseudonames composed of the object type and a random ID. '''
 	'''pretty sure this makes no sense at all, current data structure has no object types'''
 	newBusKey = {}
 	randomID = random.randint(0,100)
 	# Create busKey dictionary
-	for i in inNetwork['bus']:
-		key = str(i.keys()[0])
-		for prop in i[key]:
-			if 'bus_i' in prop:
-				oldBus = i[key]['bus_i']
-				# convert newBus to unicode
-				newBus = str(randomID).encode("utf-8").decode("utf-8")
-				newBusKey.update({oldBus:newBus})
-				i[key]['bus_i'] = newBus
-				i[newBus] = i.pop(oldBus)
-				randomID += 1
-	# Replace busNames in generators
+	for i in inNetwork['bus'].keys():
+		if 'bus_i' in inNetwork['bus'][i]:
+			oldBus = inNetwork['bus'][i]['bus_i']
+			newBus = str(randomID)
+			newBusKey.update({oldBus:newBus})
+			inNetwork['bus'][i]['bus_i'] = newBus
+			inNetwork['bus'][newBus] = inNetwork['bus'].pop(i)
+			randomID += 1
+# Replace busNames in generators
 	for i in inNetwork['gen']:
-		key = str(i.keys()[0])
-		for prop in i[key]:
-			if 'bus' in prop:
-				oldBus = i[key]['bus']
-				i[key]['bus'] = newBusKey[oldBus]
-	# Replace busNames in branches
+		if 'bus' in inNetwork['gen'][i]:
+			oldBus = inNetwork['gen'][i]['bus']
+			inNetwork['gen'][i]['bus'] = newBusKey[oldBus]
+# # Replace busNames in branches
 	for i in inNetwork['branch']:
-		key = str(i.keys()[0])
-		for prop in i[key]:
-			if 'fbus' in prop:
-				oldFrom = i[key]['fbus']
-				i[key]['fbus'] = newBusKey[oldFrom]
-			if 'tbus' in prop:
-				oldTo = i[key]['tbus']
-				i[key]['tbus'] = newBusKey[oldTo]
+		if 'fbus' in inNetwork['branch'][i]:
+			oldFrom = inNetwork['branch'][i]['fbus']
+			inNetwork['branch'][i]['fbus'] = newBusKey[oldFrom]
+		if 'tbus' in inNetwork['branch'][i]:
+			oldTo = inNetwork['branch'][i]['tbus']
+			inNetwork['branch'][i]['tbus'] = newBusKey[oldTo]
 
 def tranRandomizeLocations(inNetwork):
-	#FIXED, not tested
+	#FIXED, tested
 	''' Replace all objects' longitude and latitude positions in the inNetwork transmission system with random values. '''
 	'''make sure dont need to replace lat and longs of gens and branches'''
 	# inNetwork['bus'] = []
@@ -509,10 +503,7 @@ def tranRandomizeLocations(inNetwork):
 			inNetwork['bus'][i]['latitude'] = random.randint(0,1000)
 
 def tranTranslateLocations(inNetwork, translationRight, translationUp, rotation):
-	#Maybe Fixed, not tested
-	#ASK DAVID IF THE WEB.PY OR WHATEVER POSTS THE REQUEST IS THE SAME AS THE DSITRIBUTION ANONYMIZATION. Need to fix some front end stuff
-	#Fix web.py to include proper arguments
-	#Fix rest of function later
+	#Fixed, tested
 	''' Move the position of all objects in the inNetwork transmission system by a horizontal translation and counter-clockwise rotation. '''
 	# inNetwork['bus'] = []
 	# inNetwork['gen'] = []
@@ -565,76 +556,71 @@ def tranTranslateLocations(inNetwork, translationRight, translationUp, rotation)
 
 def tranAddNoise(inNetwork, noisePerc):
 	''' Add random noise to properties with numeric values for all objects in the inNetwork transmission system based on a noisePerc magnitude. '''
+	#Fixed, tested
 	noisePerc = float(noisePerc)
 	for array in inNetwork:
 		if (array == 'bus') or (array == 'gen') or (array == 'branch'):
 			arrayId = 0
 			for i in inNetwork[array]:
-				key = str(i.keys()[0])
-				for prop in i[key]:
-					if ('bus' not in prop) and ('status' not in prop):
-						val = i[key][prop]
+				for key in inNetwork[array][i].keys():
+					if ('bus' not in key) and ('status' not in key):
+						# print key, inNetwork[array][i][key]
+						val = inNetwork[array][i][key]
 						try:
 							parseVal = float(val)
-							randNoise = random.randint(-noisePerc, noisePerc)/100
-							randVal = parseVal + randNoise*parseVal
-							i[key][prop] = str(randVal)
+							randNoise = random.uniform(-noisePerc, noisePerc)/100
+							randVal = (parseVal + randNoise)*randNoise
+							inNetwork[array][i][key] = str(randVal)
 						except ValueError:
 							print 'error'
 							continue
-				arrayId += 1
+			arrayId += 1
 
 def tranShuffleLoadsAndGens(inNetwork, shufPerc):
+	#Fixed, tested
 	''' Shuffle the parent properties between all load and gen objects in the inNetwork transmission system. '''
 	shufPerc = float(shufPerc)
 	# Shuffle Qd and Pd
 	qParents = []
 	pParents = []
 	busId = 0
-	for i in inNetwork['bus']:
-		key = str(i.keys()[0])
-		for prop in i[key]:
-			if 'Qd' in prop:
-				qParents.append(i[key]['Qd'])
-			if 'Pd' in prop:
-				pParents.append(i[key]['Pd'])
+	for i in inNetwork['bus'].keys():
+		if 'Qd' in inNetwork['bus'][i].keys():
+			qParents.append(inNetwork['bus'][i]['Qd'])
+		if 'Pd' in inNetwork['bus'][i].keys():
+			pParents.append(inNetwork['bus'][i]['Pd'])
 		busId += 1
 	random.shuffle(qParents)
 	random.shuffle(pParents)
 	qIdx = 0
 	pIdx = 0
 	busId = 0
-	for i in inNetwork['bus']:
-		key = str(i.keys()[0])
-		for prop in i[key]:
-			if random.randint(0,100) < shufPerc:
-				if 'Qd' in prop:
-					i[key]['Qd'] = qParents[qIdx]
-					qIdx += 1
-				if 'Pd' in prop:
-					i[key]['Pd'] = pParents[pIdx]
-					pIdx += 1
+	for i in inNetwork['bus'].keys():
+		if random.randint(0,100) < shufPerc:
+			if 'Qd' in inNetwork['bus'][i].keys():
+				inNetwork['bus'][i]['Qd'] = qParents[qIdx]
+				qIdx += 1
+			if 'Pd' in inNetwork['bus'][i].keys():
+				inNetwork['bus'][i]['Pd'] = pParents[pIdx]
+				pIdx += 1
 		busId += 1
 	# Shuffle Generators
 	genParents = []
 	genId = 0
-	for i in inNetwork['gen']:
-		key = str(i.keys()[0])
-		for prop in i[key]:
-			if 'bus' in prop:
-				genParents.append(i[key]['bus'])
+	for i in inNetwork['gen'].keys():
+		if 'bus' in inNetwork['gen'][i].keys():
+			genParents.append(inNetwork['gen'][i]['bus'])
 		genId += 1
 	random.shuffle(genParents)
 	genId = 0
 	genIdx = 0
-	for i in inNetwork['gen']:
-		key = str(i.keys()[0])
-		for prop in i[key]:
-			if 'bus' in prop:
+	for i in inNetwork['gen'].keys():
+			if 'bus' in inNetwork['gen'][i].keys():
 				if random.randint(0,100) < shufPerc:
-					i[key]['bus'] = genParents[genIdx]
+					inNetwork['gen'][i]['bus'] = genParents[genIdx]
 					genIdx += 1
-		genId += 1
+			genId += 1
+
 
 # def _tests():
 # 	pass
@@ -737,7 +723,7 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 
 
 # 	TRANSMISSION NETWORK TESTS
-# 	Test tranPseudomizeNames	
+	# # Test tranPseudomizeNames	
 	# FNAME = "SimpleNetwork.json"
 	# FNAME=pJoin(omfDir,'omf','static', FNAME)
 	# with open(FNAME, "r") as inFile:
@@ -750,7 +736,7 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 # 	# Test tranRandomizeNames
 	# Probably not necessary
 	# FNAME = "case9.omt"
-	# FNAME=pJoin(omfDir,'omf','data','model','admin','Automated Testing of transmission', FNAME)
+	# FNAME=pJoin(omfDir,'omf','static', FNAME)
 	# with open(FNAME, "r") as inFile:
 	# 	inNetwork = json.load(inFile)
 	# 	tranRandomizeNames(inNetwork)
@@ -768,36 +754,40 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 	# with open(FNAMEOUT, "w") as outFile:
 	# 	json.dump(inNetwork, outFile, indent=4)
 
-# 	# Test tranTranslateLocation
-# 	FNAME = "case118.omt"
-# 	with open(FNAME, "r") as inFile:
-# 		inNetwork = json.load(inFile)
-# 		translation = 20
-# 		rotation = 20
-# 		tranTranslateLocations(inNetwork, translation, rotation)
-# 	FNAMEOUT = "118_tranTranslateLocations.omt"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inNetwork, outFile, indent=4)
+	# Test tranTranslateLocation
+	# FNAME = "case9.omt"
+	# FNAME=pJoin(omfDir,'omf','static', FNAME)
+	# with open(FNAME, "r") as inFile:
+	# 	inNetwork = json.load(inFile)
+	# 	translationRight = 100
+	# 	translationUp = 100 
+	# 	rotation = 45
+	# 	tranTranslateLocations(inNetwork, translationRight, translationUp, rotation)
+	# FNAMEOUT = "case9_transTranslate.omt"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inNetwork, outFile, indent=4)
 
 # 	# Testing tranAddNoise
-# 	FNAME = "case118.omt"
-# 	with open(FNAME, "r") as inFile:
-# 		inNetwork = json.load(inFile)
-# 		noisePerc = 100
-#		tranAddNoise(inNetwork, noisePerc)
-# 	FNAMEOUT = "118_tranAddNoise.omt"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inNetwork, outFile, indent=4)
+	# FNAME = "SimpleNetwork.json"
+	# FNAME=pJoin(omfDir,'omf','static', FNAME)
+	# with open(FNAME, "r") as inFile:
+	# 	inNetwork = json.load(inFile)
+	# 	noisePerc = 100
+	# 	tranAddNoise(inNetwork, noisePerc)
+	# FNAMEOUT = "case9_transAddNoise.omt"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inNetwork, outFile, indent=4)
 
 # 	# Testing tranShuffleLoadsAndGens
-#	FNAME = "case118.omt"
-# 	with open(FNAME, "r") as inFile:
-# 		inNetwork = json.load(inFile)
-# 		shufPerc = 100
-# 		tranShuffleLoadsAndGens(inNetwork, shufPerc)
-# 	FNAMEOUT = "118_tranShuffleLoadsAndGens.omt"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inNetwork, outFile, indent=4)
+	# FNAME = "SimpleNetwork.json"
+	# FNAME=pJoin(omfDir,'omf','static', FNAME)
+	# with open(FNAME, "r") as inFile:
+	# 	inNetwork = json.load(inFile)
+	# 	shufPerc = 100
+	# 	tranShuffleLoadsAndGens(inNetwork, shufPerc)
+	# FNAMEOUT = "118_tranShuffleLoadsAndGens.omt"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inNetwork, outFile, indent=4)
 
 # if __name__ == '__main__':
 # 	_tests()
