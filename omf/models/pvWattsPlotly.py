@@ -20,6 +20,7 @@ from omf.weather import zipCodeToClimateName
 # Model metadata:
 tooltip = "The pvWatts model runs the NREL pvWatts tool for quick estimation of solar panel output."
 modelName, template = metadata(__file__)
+hidden = True
 
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
