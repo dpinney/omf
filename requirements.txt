@@ -25,3 +25,4 @@ pulp>=1.6.8
 tqdm>=4.19.6
 scipy>=0.18.1
 flask_compress>=1.4.0
+plotly>=3.0.0
