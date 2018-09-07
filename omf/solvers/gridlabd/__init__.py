@@ -91,6 +91,7 @@ def _addGldToPath():
 		return "gridlabd"
 	else:
 		# No system-level version of Gridlab available, so add ours to the path.
+		_myDir = os.path.dirname(os.path.abspath(__file__))
 		enviro = os.environ
 		if sys.platform == 'win32' or sys.platform == 'cygwin':
 			if platform.machine().endswith('64'):
