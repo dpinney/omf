@@ -4,11 +4,6 @@ import sys, os, subprocess, platform, re, datetime, shutil, traceback, math, tim
 from os.path import join as pJoin
 from copy import deepcopy
 
-# Locational variables so we don't have to rely on OMF being in the system path.
-_myDir = os.path.dirname(os.path.abspath(__file__))
-_omfDir = os.path.dirname(os.path.dirname(_myDir))
-sys.path.append(_omfDir)
-
 # OMF imports.
 import omf
 
@@ -245,9 +240,9 @@ def _tests():
 		assert _strClean(string) == result, "A _strClean operation failed on: " + string
 	# Get a test feeder and test climate.
 	print "Testing GridlabD solver."
-	with open(pJoin(_omfDir,"static","publicFeeders","Simple Market System.omd"),"r") as feederFile:
+	with open(pJoin(omf.omfDir,"static","publicFeeders","Simple Market System.omd"),"r") as feederFile:
 		feederJson = json.load(feederFile)
-	with open(pJoin(_omfDir,"data","Climate","AL-HUNTSVILLE.tmy2"),"r") as climateFile:
+	with open(pJoin(omf.omfDir,"data","Climate","AL-HUNTSVILLE.tmy2"),"r") as climateFile:
 		tmyStr = climateFile.read()
 	# Add climate in.
 	feederJson["attachments"]["climate.tmy2"] = tmyStr
