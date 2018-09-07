@@ -1,0 +1,241 @@
+<head>
+	<title>Open Modeling Framework</title>
+	<meta charset="utf-8">
+	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
+	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	<style>
+	/*Styles will go here*/
+	</style>
+	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
+	<!-- Library Imports -->
+	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
+	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
+	<!-- Data  Imports -->
+	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
+	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
+	<script>modelStatus="{{modelStatus}}"</script>
+	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
+	<!-- Plotly  Import -->
+	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body onload="init()">
+	<div id="header">
+		<div id="headInnerBlock">
+			<div id="menuLeft">
+				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
+				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
+			</div>
+		</div>
+	</div>
+	<p class="reportTitle">Model Input</p>
+	<div id="input" class="content">
+		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+			<div class="shortInput">
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-pvWatts" target="blank">Help?</a></label>
+				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Model Name</label>
+				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+			</div>
+			<div class="shortInput runningInline postRunInline">
+				<label>User</label>
+				<input type="text" id="user" name="user" readonly/>
+			</div>
+			<div class="shortInput runningInline postRunInline ">
+				<label>Created</label>
+				<input type="text" id="created" name="created" readonly/>
+			</div>
+			<div class="shortInput postRunInline">
+				<label>Run Time</label>
+				<input type="text" id="runTime" name="runTime" readonly/>
+			</div>
+			<div class="wideInput">
+				<p class="inputSectionHeader">System Specifications</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
+				<input type="text" id="zipCode" name="zipCode" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">System Size (kWp-DC)<span class="classic">DC output rating of the solar panels in kilowatts.</span></label>
+				<input type="text" id="systemSize" name="systemSize" pattern="^\d+\.?\d*$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Inverter Size (kW-AC)<span class="classic">Size of the total inverters in kW-AC for the system. If zero, it will be set to the system size.</span></label>
+				<input type="text" id="inverterSize" name="inverterSize" pattern="^\d+\.?\d*$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Inverter Efficiency (%)<span class="classic">Inverter Efficiency in converting DC power to AC power. It can be obtained from the Weighted Efficiency (CEC) Method.</span></label>
+				<input type="text" id="inverterEfficiency" name="inverterEfficiency" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Non-Inverter Efficiency (%)<span class="classic">This takes in to account losses from soiling, shading, wiring and diode losses, etc.</span></label>
+				<input type="text" id="nonInverterEfficiency" name="nonInverterEfficiency" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required">
+			</div>
+			<div class="wideInput">
+				<p class="inputSectionHeader">Advanced Options</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Max Power Temperature Coefficient (%/&deg;C)<span class="classic">Percentage decrease  of the solar module's output power for every degree over 25 degrees centigrade.</span></label>
+				<input type="text" id="gamma" name="gamma" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Tracker Rotation Limit (degrees)<span class="classic">How far each module in a tracking system is able to rotate if on a tracker, measured from the horizontal.</span></label>
+				<input type="text" id="rotlim" name="rotlim" pattern="^\d+\.?\d*$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Tracking Mode<span class="classic">Type of tracking system the PV array will use if any.</span></label>
+				<select id="trackingMode" name="trackingMode" />
+					<option value="0">Fixed</option>
+					<option value="1">1 Axis</option>
+					<option value="2">2 Axis</option>
+					<option value="3">Azimuth Axis</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Tilt (degrees)<span class="classic">The tilt of the solar panels measured as an angle in degrees between panels and ground. If '-' is entered, the latitude of the zipcode will be used.</span></label>
+				<input type="text" id="tilt" name="tilt" pattern="^(90|[1-8]\d|\d)?$|-" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Azimuth (degrees)<span class="classic">Cardinal direction the PV system will face. 180 in the northenr hemisphere is due South.</span></label>
+				<input type="text" id="azimuth" name="azimuth" pattern="^\d+\.?\d*$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Wind stow speed (m/s)<span class="classic">When the wind velocity from the weather file for the current hour is greater than or equal to this value, the concentrator moves into stow position to prevent wind damage. The solar power intercepted by the receiver is zero during this hour.</span></label>
+				<input type="text" id="w_stow" name="w_stow" pattern="^\d+\.?\d*$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label>Simulation Start Date (YYYY-MM-DD)</label>
+				<input type="text" id="simStartDate" name="simStartDate" pattern="^\d\d\d\d-\d\d-\d\d$" required="required">
+			</div>
+			<div class="shortInput">
+				<label>Simulation Length</label>
+				<input type="text" id="simLength" name="simLength" pattern="^\d+$" required="required" >
+			</div>
+			<div class="shortInput">
+				<label>Length Units</label>
+				<select id="simLengthUnits" name="simLengthUnits">
+					<!--<option value="minutes">Minutes</option> -->
+					<option value="hours">Hours</option>
+					<option value="days">Days</option>
+				</select>
+			</div>
+			<div class="wideInput" style="text-align:right">
+				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
+				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
+				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
+				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
+			</div>
+		</form>
+	</div>
+	<div id="copyrightNotice" style="width:1000px; margin:-25px auto 10px auto; padding-left:5px; color:gray">PVWatts &copy; was developed by the <a href="http://pvwatts.nrel.gov/">National Renewable Energy Lab</a></div>
+	<div id ="runIndicator" class="content running">
+		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
+	</div>
+	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
+		<pre id='errorText' style='overflow-x:scroll'></pre>
+		<script type="text/javascript">
+		if (typeof(allInputData.stderr) !== 'undefined') {	
+			gebi('stopIndicator').style.visibility = 'visible'
+			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
+		</script>
+	</div>
+	<div id="output">
+		<script type="text/javascript">
+			// Global Highcharts settings.
+			Highcharts.setOptions({global:{useUTC:true}})
+			// Clean up the non-ISO date strings we get.
+			function dateOb(inStr) {return Date.parse(inStr.replace(/-/g,"/"))}
+			pointStart = dateOb(allOutputData.timeStamps[0])
+			pointInterval = dateOb(allOutputData.timeStamps[1]) - pointStart
+		</script>
+		<p class="reportTitle postRun">Hourly Solar Generation</p>
+		<div id="powerGenerationReport" class="tightContent postRun">
+			<div id="powerTimeSeries"></div>
+			<div id="energyBalance"></div>
+			<script>
+				// Handle special case for inverter sizing:
+				if (allInputData.inverterSize == 0) {chartInverter = allInputData.systemSize}
+				else {chartInverter = allInputData.inverterSize}
+				powerSeries = [{"marker":{"enabled":false},"dataLabels":{"enabled":false}, "color":"red","data":allOutputData.Consumption.Power,"name":"Power Generated"}]
+				new Highcharts.Chart({ "credits":{"enabled":false},
+					"plotOptions":{ "series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval, "animation": false}, "line":{"marker":{"enabled":false}}},
+					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
+					"title":{"text":null},
+					"series":powerSeries,
+					"tooltip": false,
+					"yAxis":{"title":{"text":"Power (W-AC)","style":{"color":"gray"}},
+						"min":0,
+						"plotLines":[{"color": "orange",
+							"dashStyle": "ShortDash",
+							"width": 2,
+							"label":{"text":"Panels Nameplate","align":"right","y":12,"x":0},
+							"value": parseFloat(allInputData.systemSize)*1000,"zIndex": 10},
+							{"color": "orange",
+							"dashStyle": "ShortDash",
+							"width": 2,
+							"label":{"text":"Inverter Nameplate","align":"left","y":12,"x":0},
+							"value": parseFloat(chartInverter)*1000,"zIndex": 10} ] },
+					"chart":{"zoomType":"x","marginBottom":35,"width":1000,"height":250,"marginRight":20,"renderTo":"powerTimeSeries","type":"line"},
+					"legend":false } )
+			</script>
+			<div id="powerGenerationPlotly">
+			</div>
+			<script type="text/javascript">
+				Plotly.newPlot("powerGenerationPlotly", JSON.parse(allOutputData["powerGenerationData"]), JSON.parse(allOutputData["powerGenerationLayout"]) || {})
+			</script>
+		</div>
+		<p class="reportTitle postRun">Irradiance</p>
+		<div id="irradianceReport" class="tightContent postRun">
+			<div id="irradianceChartDiv"></div>
+			<script>
+				irradianceSeriesData = [
+					{"name":"Plane of Array Irradiance (W/m^2)","marker":{"enabled":false},"color":"yellow","data":allOutputData.climate["Plane of Array Irradiance (W/m^2)"]},
+					{"name":"Beam Normal Irradiance (W/m^2)","marker":{"enabled":false},"color":"gold","data":allOutputData.climate["Beam Normal Irradiance (W/m^2)"]},
+					{"name":"Diffuse Irradiance (W/m^2)","marker":{"enabled":false},"color":"lemonchiffon","data":allOutputData.climate["Diffuse Irradiance (W/m^2)"]} ]
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{"series":{"animation": false, "pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},
+					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
+					"title":{"text":null},
+					"series":irradianceSeriesData,
+					"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}, "min":0},
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"irradianceChartDiv","type":"line","marginRight":20, "height":250,"width":1000},
+					"tooltip":false,
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
+			<div id="irradiancePlotly">
+			</div>
+			<script type="text/javascript">
+				Plotly.newPlot("irradiancePlotly", JSON.parse(allOutputData["irradianceData"]), JSON.parse(allOutputData["irradianceLayout"]) || {})
+			</script>
+		</div>
+		<p class="reportTitle postRun">Other Climate Variables</p>
+		<div id="climateReport" class="tightContent postRun">
+			<div id="climateChartDiv"></div>
+			<script>
+				climateSeriesData = [
+					{"name":"Ambient Temperature (F)","marker":{"enabled":false},"color":"dimgray","data":allOutputData.climate["Ambient Temperature (F)"]},
+					{"name":"Cell Temperature (F)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Cell Temperature (F)"]},
+					{"name":"Wind Speed (m/s)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Wind Speed (m/s)"]} ]
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{"series":{"animation": false, "pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},
+					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
+					"title":{"text":null},
+					"series":climateSeriesData,
+					"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250,"width":1000},
+					"tooltip":false,
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
+			<div id="otherClimatePlotly">
+			</div>
+			<script type="text/javascript">
+				Plotly.newPlot("otherClimatePlotly", JSON.parse(allOutputData["otherClimateData"]), JSON.parse(allOutputData["otherClimateLayout"]) || {})
+			</script>
+		</div>
+	</div>
+</body>
