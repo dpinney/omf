@@ -1,6 +1,6 @@
 ''' Calculate solar photovoltaic system output using PVWatts. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime, traceback, html
+import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime, traceback
 from os.path import join as pJoin
 from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
