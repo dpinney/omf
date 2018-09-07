@@ -10,7 +10,7 @@ _omfDir = os.path.dirname(os.path.dirname(_myDir))
 sys.path.append(_omfDir)
 
 # OMF imports.
-import feeder
+import omf
 
 def checkStatus(modelDir):
 	'''Reads a current gridlabD simulation time from stdErr.txt,
@@ -141,7 +141,7 @@ def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None, g
 		for attach in attachments:
 			with open (pJoin(workDir,attach),'w') as attachFile:
 				attachFile.write(attachments[attach])
-		glmString = feeder.sortedWrite(localTree)
+		glmString = omf.feeder.sortedWrite(localTree)
 		if not glmName:
 			glmName = "main." + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + ".glm"
 		with open(pJoin(workDir, glmName),'w') as glmFile:
