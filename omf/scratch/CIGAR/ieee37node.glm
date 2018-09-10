@@ -2,11 +2,9 @@
 // There is a line missing between loads 729 and 744
 
 #set iteration_limit=20;
-#set savefile="IEEE_37_test.xml"
-#define stylesheet=http://gridlab-d.svn.sourceforge.net/viewvc/gridlab-d/trunk/core/gridlabd-2_0
 
 clock {
-	timestamp '2000-01-01 0:00:00';
+	starttime '2000-01-01 0:00:00';
 	stoptime '2000-01-01 0:00:20';
 	timezone EST+5EDT;
 }
