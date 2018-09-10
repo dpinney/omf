@@ -494,7 +494,7 @@ def work(modelDir, inputDict):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"feederName1": "trip37", # "trip37" "Winter 2017 Fixed" "debuggedSVEC"
+		"feederName1": "trip37", # "trip37" "UCS Winter 2017 Fixed" "SVECNoIslands"
 		"modelType": modelName,
 		"runTime": "0:00:30",
 		"layoutAlgorithm": "geospatial",
