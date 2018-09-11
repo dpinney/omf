@@ -8,8 +8,10 @@ import math
 from networkx.drawing.nx_agraph import graphviz_layout
 import networkx as nx
 
-FNAME = 'smsSingle.glm'
+# FNAME = 'smsSingle.glm'
 # FNAME = 'dist_gen_solar_all.glm'
+FNAME = 'ieee37node.glm'
+
 
 # help(omf.feeder.parse)
 
@@ -41,6 +43,17 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 	biggestKey = max([safeInt(x) for x in tree.keys()])
 	tree[str(biggestKey*10)] = {"object":"voltdump","filename":"voltDump.csv"}
 	tree[str(biggestKey*10 + 1)] = {"object":"currdump","filename":"currDump.csv"}
+	# Line rating dumps.
+	tree[omf.feeder.getMaxKey(tree) + 1] = {
+		'module': 'tape'
+	}
+	tree[omf.feeder.getMaxKey(tree) + 1] = {
+		'object':'group_recorder', 
+		'group':'"class=underground_line"',
+		'interval':3600,
+		'property':'continuous_rating',
+		'file':'UG_line_cont_rating.csv'
+	}
 	# Run Gridlab.
 	if not workDir:
 		workDir = tempfile.mkdtemp()

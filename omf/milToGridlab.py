@@ -2,11 +2,12 @@
 import os, feeder, csv, random, math, copy, locale, json, traceback, shutil, time, datetime
 from StringIO import StringIO
 from os.path import join as pJoin
-from solvers import gridlabd
+from omf.solvers import gridlabd
 from dateutil.tz import tzlocal
 from matplotlib import pyplot as plt
 from pytz import reference
-import omf, feeder
+import omf
+import omf.feeder as feeder
 
 
 def convert(stdString,seqString):
