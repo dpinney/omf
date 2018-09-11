@@ -32,10 +32,26 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 	''' Draw a color-coded map of the voltage drop on a feeder.
 	Returns a matplotlib object. '''
 	tree = omf.feeder.parse(glmPath)
-	# # Get rid of schedules and climate:
+
+	#dictionary to hold info on lines present in glm
+	edge_bools = dict.fromkeys(['underground_line','overhead_line','triplex_line','transformer','regulator'], False)
+
+	# # Get rid of schedules and climate and check for all edge types:
 	for key in tree.keys():
 		if tree[key].get("argument","") == "\"schedules.glm\"" or tree[key].get("tmyfile","") != "":
 			del tree[key]
+		obtype = tree[key].get("object","")
+		if obtype == 'underground_line':
+			edge_bools['underground_line'] = True
+		elif obtype == 'overhead_line':
+			edge_bools['overhead_line'] = True
+		elif obtype == 'triplex_line':
+			edge_bools['triplex_line'] = True
+		elif obtype == 'transformer':
+			edge_bools['transformer'] = True
+		elif obtype == 'regulator':
+			edge_bools['regulator'] = True
+
 	# Make sure we have a voltDump:
 	def safeInt(x):
 		try: return int(x)
@@ -43,17 +59,19 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 	biggestKey = max([safeInt(x) for x in tree.keys()])
 	tree[str(biggestKey*10)] = {"object":"voltdump","filename":"voltDump.csv"}
 	tree[str(biggestKey*10 + 1)] = {"object":"currdump","filename":"currDump.csv"}
-	# Line rating dumps.
+	# Line rating dumps
 	tree[omf.feeder.getMaxKey(tree) + 1] = {
 		'module': 'tape'
 	}
-	tree[omf.feeder.getMaxKey(tree) + 1] = {
-		'object':'group_recorder', 
-		'group':'"class=underground_line"',
-		'interval':3600,
-		'property':'continuous_rating',
-		'file':'UG_line_cont_rating.csv'
-	}
+	for key in edge_bools.keys():
+		if edge_bools[key]:
+			tree[omf.feeder.getMaxKey(tree) + 1] = {
+				'object':'group_recorder', 
+				'group':'"class='+key+'"',
+				'interval':3600,
+				'property':'continuous_rating',
+				'file':key+'_cont_rating.csv'
+			}
 	# Run Gridlab.
 	if not workDir:
 		workDir = tempfile.mkdtemp()
@@ -143,7 +161,7 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 		width = 1,
 		edge_vmin = None,
 		edge_vmax = None,
-		edge_cmap = plt.cm.jet)
+		edge_cmap = plt.cm.coolwarm)
 	edgeLabelsIm = nx.draw_networkx_edge_labels(fGraph,
 		pos = positions,
 		edge_labels = edgeTupleCurrents,
@@ -153,9 +171,9 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 		node_color = [nodeVolts.get(n,0) for n in fGraph.nodes()],
 		linewidths = 0,
 		node_size = 30,
-		vmin = 110,
-		vmax = 130,
-		cmap = plt.cm.jet)
+		vmin = 0,
+		vmax = 2,
+		cmap = plt.cm.coolwarm)
 
 	plt.sci(nodeIm)
 	# plt.clim(110,130)
