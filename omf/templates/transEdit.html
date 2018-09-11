@@ -279,6 +279,9 @@ var newID = '';
 var newType = '';
 var newBusGenObj = {};
 var scaleTracker = 1
+var maxBusID = -9999999;
+var maxBranchID = -9999999;
+var maxGenID = -9999999;
 
 function saveSvg() {
 	// Redirect to an .svg file that the user can save.
@@ -363,6 +366,9 @@ function buildNetwork() {
 			tBusNum = busNumMap[tNum]
 			fromOb = networkData.bus[fBusNum]
 			toOb = networkData.bus[tBusNum]
+			if(num> maxBranchID) {
+				maxGenID = num
+			}
 			addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],"branch_"+num,"branch" + ' p' + phaseCount(anOb))
 		} catch(e) {}
 	}
@@ -370,6 +376,9 @@ function buildNetwork() {
 	for (num in networkData.bus) {
 		try {
 			anOb = networkData.bus[num]
+			if(anOb[bus_i] > maxBusID) {
+				maxBusID = anOb[bus_i]
+			}
 			addCircle(anOb['longitude'], anOb['latitude'],5,"bus_"+num,"bus")
 		} catch(e) {}
 	}
@@ -381,6 +390,9 @@ function buildNetwork() {
 			var longitude = networkData.bus[busNum]['longitude']
 			var latitude = networkData.bus[busNum]['latitude']
 			var width = 4
+			if(num > maxGenID) {
+				maxGenID = num
+			}
 			addRectangle(longitude-width/2,latitude-width/2,width,width,"gen_"+num,"gen")
 		} catch(e) {}
 	}
@@ -767,18 +779,27 @@ function moveBusListener() {
 	selectionIDSplit = currSel.id.split("_")
 	selBusID = parseInt(selectionIDSplit[1])
 	selBus = networkData["bus"][String(selBusID)]
+	selBus_i_ID = selBus["bus_i"]
 	coords = clickLatLon(event)
-	networkData["bus"][String(selBusID)].longitude = coords[0]
-	networkData["bus"][String(selBusID)].latitude = coords[1]
+	selBus.longitude = coords[0]
+	selBus.latitude = coords[1]
 	for (num in networkData.branch) {
 		selBranch = networkData.branch[String(parseInt(num))]
 		fBusID = selBranch['fbus']
 		tBusID= selBranch['tbus']
-		if(fBusID == selBusID || tBusID == selBusID) {
+		if(fBusID == selBus_i_ID || tBusID == selBus_i_ID) {
 			// Redraw connected lines containing selected bus
-			document.getElementById("branch_" + String(parseInt(num))).remove()
+			document.getElementById("branch_" + String(parseInt(num))).remove()  
 			fromBus = networkData.bus[fBusID]
 			toBus = networkData.bus[tBusID]
+			for(busIDs in networkData.bus){
+				if(networkData.bus[busIDs]['bus_i'] == fBusID) {
+					fromBus = networkData.bus[busIDs]
+				}
+				if(networkData.bus[busIDs]['bus_i'] == tBusID) {
+					toBus = networkData.bus[busIDs]
+				}
+			}
 			x1 = fromBus['longitude']
 			y1 = fromBus['latitude']
 			x2 = toBus['longitude']
@@ -791,19 +812,19 @@ function moveBusListener() {
 			// Redraw adjacent buses
 			r = 5
 			if(fBusID == selBusID) {
-				document.getElementById('bus_' + tBusID).remove()
-				addCircle(x2,y2,r,"bus_"+String(tBusID),"bus")
+				document.getElementById('bus_' + toBus).remove()
+				addCircle(x2,y2,r,"bus_"+String(toBus),"bus")
 				if(scaleTracker != 1.0) {
-					newCir = document.getElementById("bus_"+String(tBusID))
+					newCir = document.getElementById("bus_"+String(toBus))
 					newCir.setAttribute('r', 5*scaleTracker)
 					newCir.setAttribute('stroke-width', 0.5*scaleTracker)
 				}
 			}
 			if(tBusID == selBusID) {
-				document.getElementById('bus_' + fBusID).remove()
-				addCircle(x1,y1,r,"bus_"+String(fBusID),"bus")
+				document.getElementById('bus_' + fromBus).remove()
+				addCircle(x1,y1,r,"bus_"+String(fromBus),"bus")
 				if(scaleTracker != 1.0) {
-					newCir = document.getElementById("bus_"+String(fBusID))
+					newCir = document.getElementById("bus_"+String(fromBus))
 					newCir.setAttribute('r', 5*scaleTracker)
 					newCir.setAttribute('stroke-width', 0.5*scaleTracker)  
 				}     
@@ -852,18 +873,22 @@ function moveBusListener() {
 			}
 		}
 	}
+
 	//Redraw selected bus
-	document.getElementById('bus_' + selBusID).remove()
-	addCircle(coords[0],coords[1],r,"bus_"+String(selBusID),"bus")
+	document.getElementById('bus_' + selBusID).remove() 
+	addCircle(coords[0],coords[1],5,"bus_"+String(selBusID),"bus")  
 	if(scaleTracker != 1.0) {
 		newCir = document.getElementById("bus_"+String(selBusID))
 		newCir.setAttribute('r', 5*scaleTracker)
 		newCir.setAttribute('stroke-width', 0.5*scaleTracker)
 	}
 	//Redraw generator on selected bus
+
 	for(gen in networkData.gen) {
 		busGenID = networkData.gen[String(parseInt(gen))]['bus']
-		if(busGenID == selBusID) {
+		console.log(busGenID)
+		if(busGenID == selBus_i_ID) {
+			console.log("genny")
 			document.getElementById("gen_" + String(parseInt(gen))).remove() 
 			addRectangle(coords[0] - 4/2, coords[1] - 4/2, 4, 4, "gen_" + String(parseInt(gen)), "gen")
 			if(scaleTracker != 1.0) {
