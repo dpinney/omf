@@ -175,7 +175,15 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 				currValPU = (lineVoltage*lineCurrent)/lineRating
 				edgeCurrentsPU[edge] = currValPU
 				edgeTupleCurrentsPU[coord] = "{0:.2f}".format(currValPU)
-
+	# dict with to-from tuples as keys and names as values for debugging
+	edgeTupleNames = {}
+	for edge in edgeCurrents:
+		for obj in tree.values():
+			if obj.get('name') == edge:
+				nodeFrom = obj.get('from')
+				nodeTo = obj.get('to')
+				coord = (nodeFrom, nodeTo)
+				edgeTupleNames[coord] = edge
 
 	# Build the graph.
 	fGraph = omf.feeder.treeToNxGraph(tree)
@@ -206,7 +214,6 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 	edgeLabelsIm = nx.draw_networkx_edge_labels(fGraph,
 		pos = positions,
 		edge_labels = edgeTupleCurrentsPU,
-		alpha = 0.1,
 		font_size = 8)
 	nodeIm = nx.draw_networkx_nodes(fGraph,
 		pos = positions,
