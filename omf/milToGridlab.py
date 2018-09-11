@@ -1428,7 +1428,7 @@ def _tests(
 			exceptionCount += 1
 	with open('convResults.txt', 'a') as resultsFile:
 		resultsFile.write('Ran %d out of %d tests for this simulation.\n' % (len(testFiles), totalLength))
-		resultsFile.write("====================================================================================")
+		resultsFile.write("====================================================================================\n")
 	print '\n\n\n' + 'Total time of %d simulations is: %d seconds.' % (len(timeArray), sum(timeArray)) + '\n' # Print total time to console.
 	if not keepFiles:
 		shutil.rmtree(outPrefix)
