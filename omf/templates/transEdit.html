@@ -367,7 +367,7 @@ function buildNetwork() {
 			fromOb = networkData.bus[fBusNum]
 			toOb = networkData.bus[tBusNum]
 			if(num> maxBranchID) {
-				maxGenID = num
+				maxBranchID = num
 			}
 			addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],"branch_"+num,"branch" + ' p' + phaseCount(anOb))
 		} catch(e) {}
@@ -376,8 +376,10 @@ function buildNetwork() {
 	for (num in networkData.bus) {
 		try {
 			anOb = networkData.bus[num]
-			if(anOb[bus_i] > maxBusID) {
-				maxBusID = anOb[bus_i]
+			console.log(anOb)
+			console.log(anOb['bus_i'])
+			if(anOb['bus_i'] > maxBusID) {
+				maxBusID = anOb['bus_i']
 			}
 			addCircle(anOb['longitude'], anOb['latitude'],5,"bus_"+num,"bus")
 		} catch(e) {}
@@ -886,7 +888,7 @@ function moveBusListener() {
 
 	for(gen in networkData.gen) {
 		busGenID = networkData.gen[String(parseInt(gen))]['bus']
-		console.log(busGenID)
+		//console.log(busGenID)
 		if(busGenID == selBus_i_ID) {
 			console.log("genny")
 			document.getElementById("gen_" + String(parseInt(gen))).remove() 
