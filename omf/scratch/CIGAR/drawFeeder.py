@@ -68,7 +68,7 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 			tree[omf.feeder.getMaxKey(tree) + 1] = {
 				'object':'group_recorder', 
 				'group':'"class='+key+'"',
-				'interval':3600,
+				'limit':1,
 				'property':'continuous_rating',
 				'file':key+'_cont_rating.csv'
 			}
@@ -77,6 +77,7 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 		workDir = tempfile.mkdtemp()
 		print '@@@@@@', workDir
 	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=[], workDir=workDir)
+	# read voltDump values into a dictionary
 	with open(pJoin(workDir,'voltDump.csv'),'r') as dumpFile:
 		reader = csv.reader(dumpFile)
 		reader.next() # Burn the header.
@@ -87,6 +88,7 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 			for pos,key in enumerate(keys):
 				rowDict[key] = row[pos]
 			voltTable.append(rowDict)
+	# read currDump values into a dictionary
 	with open(pJoin(workDir,'currDump.csv'),'r') as currDumpFile:
 		reader = csv.reader(currDumpFile)
 		reader.next() # Burn the header.
@@ -97,6 +99,25 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 			for pos,key in enumerate(keys):
 				rowDict[key] = row[pos]
 			currTable.append(rowDict)
+	# read line rating values into a single dictionary
+	lineRatings = {}
+	for key in edge_bools.keys():
+		if edge_bools[key]:		
+			with open(pJoin(workDir,key+'_cont_rating.csv'),'r') as ratingFile:
+				reader = csv.reader(ratingFile)
+				# loop past the header, 
+				keys = []
+				vals = []
+				for row in reader:
+					if '# timestamp' in row:
+						keys = row
+						i = keys.index('# timestamp')
+						keys.pop(i)
+						vals = reader.next()
+						vals.pop(i)
+				for pos,key in enumerate(keys):
+					lineRatings[key] = abs(float(vals[pos]))
+
 	# Calculate average node voltage deviation. First, helper functions.
 	def digits(x):
 		''' Returns number of digits before the decimal in the float x. '''
@@ -121,6 +142,7 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 					phaseVolt = phaseVolt*(120/feedVoltage)
 				allVolts.append(phaseVolt)
 		nodeVolts[row.get('node_name','')] = avg(allVolts)
+		# Use float("{0:.2f}".format(avg(allVolts))) if displaying the node labels
 	# Add up currents.
 	edgeCurrents = {}
 	for row in currTable:
@@ -133,9 +155,28 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 	for edge in edgeCurrents:
 		for obj in tree.values():
 			if obj.get('name') == edge:
-				coord = (obj.get('from'), obj.get('to'))
+				nodeFrom = obj.get('from')
+				nodeTo = obj.get('to')
+				coord = (nodeFrom, nodeTo)
 				currVal = edgeCurrents.get(edge)
-				edgeTupleCurrents[coord] = "{0:.3f}".format(currVal)
+				edgeTupleCurrents[coord] = "{0:.2f}".format(currVal)
+	#create edgeCurrents dict with values normalized by line ratings
+	edgeCurrentsPU = {}
+	edgeTupleCurrentsPU = {}
+	for edge in edgeCurrents:
+		for obj in tree.values():
+			if obj.get('name') == edge:
+				nodeFrom = obj.get('from')
+				nodeTo = obj.get('to')
+				coord = (nodeFrom, nodeTo)
+				lineVoltage = avg([nodeVolts.get(nodeFrom), nodeVolts.get(nodeTo)])
+				lineCurrent = edgeCurrents.get(edge)
+				lineRating = lineRatings.get(edge)
+				currValPU = (lineVoltage*lineCurrent)/lineRating
+				edgeCurrentsPU[edge] = currValPU
+				edgeTupleCurrentsPU[coord] = "{0:.2f}".format(currValPU)
+
+
 	# Build the graph.
 	fGraph = omf.feeder.treeToNxGraph(tree)
 	voltChart = plt.figure(figsize=(15,15))
@@ -157,23 +198,28 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 		positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
 	edgeIm = nx.draw_networkx_edges(fGraph,
 		pos = positions,
-		edge_color = [edgeCurrents.get(n,0) for n in edgeNames],
+		edge_color = [edgeCurrentsPU.get(n,1) for n in edgeNames],
 		width = 1,
-		edge_vmin = None,
-		edge_vmax = None,
+		edge_vmin = 0,
+		edge_vmax = 2,
 		edge_cmap = plt.cm.coolwarm)
 	edgeLabelsIm = nx.draw_networkx_edge_labels(fGraph,
 		pos = positions,
-		edge_labels = edgeTupleCurrents,
-		font_size = 10)
+		edge_labels = edgeTupleCurrentsPU,
+		alpha = 0.1,
+		font_size = 8)
 	nodeIm = nx.draw_networkx_nodes(fGraph,
 		pos = positions,
-		node_color = [nodeVolts.get(n,0) for n in fGraph.nodes()],
+		node_color = [nodeVolts.get(n,1) for n in fGraph.nodes()],
 		linewidths = 0,
 		node_size = 30,
 		vmin = 0,
 		vmax = 2,
 		cmap = plt.cm.coolwarm)
+	# nodeLabelsIm = nx.draw_networkx_labels(fGraph,
+	# 	pos = positions,
+	# 	labels = nodeVolts,
+	# 	font_size = 8)
 
 	plt.sci(nodeIm)
 	# plt.clim(110,130)
