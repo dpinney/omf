@@ -7,6 +7,7 @@ import csv
 import math
 from networkx.drawing.nx_agraph import graphviz_layout
 import networkx as nx
+import math
 
 # FNAME = 'smsSingle.glm'
 # FNAME = 'dist_gen_solar_all.glm'
@@ -143,7 +144,9 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 	for row in voltTable:
 		allVolts = []
 		for phase in ['A','B','C']:
-			phaseVolt = abs(float(row['volt'+phase+'_real']))
+			realVolt = abs(float(row['volt'+phase+'_real']))
+			imagVolt = abs(float(row['volt'+phase+'_imag']))
+			phaseVolt = math.sqrt((realVolt ** 2) + (imagVolt ** 2))
 			if phaseVolt != 0.0:
 				if digits(phaseVolt)>3:
 					# Normalize to 120 V standard
@@ -154,13 +157,21 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 	nodeNames = {}
 	for key in nodeVolts.keys():
 		nodeNames[key] = key
-	# Add up currents.
-	edgeCurrents = {}
+	# find edge currents by parsing currdump
+	edgeCurrentSum = {}
+	edgeCurrentMax = {}
 	for row in currTable:
-		phaseCurr = 0.0
+		allCurr = []
 		for phase in ['A','B','C']:
-			phaseCurr += abs(float(row['curr'+phase+'_real']))
-		edgeCurrents[row.get('link_name','')] = phaseCurr
+			realCurr = abs(float(row['curr'+phase+'_real']))
+			imagCurr = abs(float(row['curr'+phase+'_imag']))
+			phaseCurr = math.sqrt((realCurr ** 2) + (imagCurr ** 2))
+			allCurr.append(phaseCurr)
+		edgeCurrentSum[row.get('link_name','')] = sum(allCurr)
+		edgeCurrentMax[row.get('link_name','')] = max(allCurr)
+	# When just showing current as labels, use sum of the three lines' current values, when showing the per unit values (current/rating), use the max of the three. Toggle which is used by setting edgeCurrents equal to either edgeCurrentSum or edgeCurrentMax
+	edgeCurrents = edgeCurrentSum
+
 	# create edgeCurrent copy with to and from tuple as keys for labeling
 	edgeTupleCurrents = {}
 	for edge in edgeCurrents:
@@ -226,7 +237,7 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 		edge_cmap = plt.cm.coolwarm)
 	edgeLabelsIm = nx.draw_networkx_edge_labels(fGraph,
 		pos = positions,
-		edge_labels = edgeTupleRatings,
+		edge_labels = edgeTupleCurrents,
 		font_size = 8)
 	nodeIm = nx.draw_networkx_nodes(fGraph,
 		pos = positions,
@@ -238,7 +249,7 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 		cmap = plt.cm.coolwarm)
 	# nodeLabelsIm = nx.draw_networkx_labels(fGraph,
 	# 	pos = positions,
-	# 	labels = nodeNames,
+	# 	labels = nodeVolts,
 	# 	font_size = 8)
 
 	plt.sci(nodeIm)
