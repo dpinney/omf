@@ -9,22 +9,82 @@ from pytz import reference
 import omf
 import omf.feeder as feeder
 
+def _csvToArray(csvString):
+	''' Simple csv data ingester. '''
+	csvReader = csv.reader(StringIO(csvString))
+	outArray = []
+	for row in csvReader:
+		outArray += [row]
+	return outArray
+
+def _convertToPixel():
+	''' By default, Windmil coords are in map feet. This function tries to fit them in to something that our D3 front end can display. TODO: update this to get a more lat/lon-like coordinate system. '''
+	x_list = []
+	y_list = []
+	x_pixel_range = 1200
+	y_pixel_range = 800
+	try:
+		for component in components:
+			x_list.append(float(component[5]))
+			y_list.append(float(component[6]))
+		# according to convert function  f(x) = a * x + b
+		x_a = x_pixel_range / (max(x_list) - min(x_list))
+		x_b = -x_a * min(x_list)
+		y_a = y_pixel_range / (max(y_list) - min(y_list))
+		y_b = -y_a * min(y_list)
+	except:
+		x_a,x_b,y_a,y_b = (0,0,0,0)
+	return x_a, x_b, y_a, y_b
+
+def _safeGet(arr, pos, default):
+	''' Return item at pos in arr, or if it fails return default. '''
+	try:
+		return arr[pos]
+	except:
+		return default
+
+def _convertGenericObject(objectList):
+	''' this converts attributes that are in every milsoft object regardless of hardware type. '''
+	newOb = {}
+	gridlabFields = {
+		1 : 'overhead_line',    # Overhead Line (Type 1)
+		2 : 'capacitor',        # Capacitor (Type 2)
+		3 : 'underground_line', # Underground Line (Type 3)
+		4 : 'regulator',        # Regulator (Type 4)
+		5 : 'transformer',      # Transformer (Type 5)
+		6 : 'switch',           # Switch (Type 6)
+		8 : 'node',             # Node (Type 8)
+		9 : 'node',             # Source (Type 9)
+		10 : 'fuse',            # Overcurrent Device (Type 10)
+		11 : 'ZIPload',         # Motor (Type 11)
+		12 : 'diesel_dg',       # Generator (Type 12)
+		13 : 'load'             # Consumer (Type 13)
+	}
+	try:
+		# Need to replace invalid characters in names:
+		newOb['name'] = objectList[0].replace('.','x')
+		newOb['object'] = gridlabFields[int(objectList[1])]
+		# Convert lat-lon if we have them.
+		# convert to the relative pixel position f(x) = a * x + b
+		newOb['latitude'] = str(x_scale * float(objectList[5]) + x_b)
+		newOb['longitude'] = str(800 - (y_scale * float(objectList[6]) + y_b))
+		# Some non-Gridlab elements:
+		newOb['guid'] = objectList[49].replace('{','').replace('}','')
+		newOb['parentGuid'] = objectList[50].replace('{','').replace('}','')
+		# Make sure names are unique:
+		if allNames.count(newOb['name']) > 1:
+			newOb['name'] = newOb['guid']
+	except:
+		pass
+	return newOb
 
 def convert(stdString,seqString):
 	''' Take in a .std and .seq strings from Milsoft and spit out a json dict.'''
-	def csvToArray(csvString):
-		''' Simple csv data ingester. '''
-		csvReader = csv.reader(StringIO(csvString))
-		outArray = []
-		for row in csvReader:
-			outArray += [row]
-		return outArray
 	# Get all components from the .std:
-	components = csvToArray(stdString)[1:]
-	# Get all hardware stats from the .seq:
-	hardwareStats = csvToArray(seqString)[1:]
-	# We dropped the first rows which are metadata (n.b. there are no headers)
-	# Get nominal voltage:
+	components = _csvToArray(stdString)[1:]
+	# Get all hardware stats from the .seq. We dropped the first rows which are metadata (n.b. there are no headers).
+	hardwareStats = _csvToArray(seqString)[1:]
+	# Use a default for nominal voltage, but try to set it to the source voltage if possible.
 	nominal_voltage = 14400
 	for ob in components:
 		if ob[1] == 9:
@@ -32,44 +92,13 @@ def convert(stdString,seqString):
 	# The number of allowable sub objects:
 	subObCount = 100
 	# Helper for lat/lon conversion.
-	def convertToPixel():
-		x_list = []
-		y_list = []
-		x_pixel_range = 1200
-		y_pixel_range = 800
-		try:
-			for component in components:
-				x_list.append(float(component[5]))
-				y_list.append(float(component[6]))
-			# according to convert function  f(x) = a * x + b
-			x_a = x_pixel_range / (max(x_list) - min(x_list))
-			x_b = -x_a * min(x_list)
-			y_a = y_pixel_range / (max(y_list) - min(y_list))
-			y_b = -y_a * min(y_list)
-		except:
-			x_a,x_b,y_a,y_b = (0,0,0,0)
-		return x_a, x_b, y_a, y_b
-	[x_scale, x_b, y_scale, y_b] = convertToPixel()
+	[x_scale, x_b, y_scale, y_b] = _convertToPixel()
 	def obConvert(objectList):
 		''' take a row in the milsoft .std and turn it into a gridlab-type dict'''
 
 		# -----------------------------------------------
 		# Globals and helper functions:
 		# -----------------------------------------------
-
-		gridlabFields = {   1 : 'overhead_line',    # Overhead Line (Type 1)
-							2 : 'capacitor',        # Capacitor (Type 2)
-							3 : 'underground_line', # Underground Line (Type 3)
-							4 : 'regulator',        # Regulator (Type 4)
-							5 : 'transformer',      # Transformer (Type 5)
-							6 : 'switch',           # Switch (Type 6)
-							8 : 'node',             # Node (Type 8)
-							9 : 'node',             # Source (Type 9)
-							10 : 'fuse',            # Overcurrent Device (Type 10)
-							11 : 'ZIPload',         # Motor (Type 11)
-							12 : 'diesel_dg',       # Generator (Type 12)
-							13 : 'load' }           # Consumer (Type 13)
-
 		allNames = [x[0] for x in components]
 
 		def statsByName(deviceName):
@@ -79,46 +108,17 @@ def convert(stdString,seqString):
 					return row
 			return None
 
-		def safeGet(arr, pos, default):
-			''' Return item at pos in arr, or if it fails return default. '''
-			try:
-				return arr[pos]
-			except:
-				return default
-
-		def convertGenericObject(objectList):
-			''' this converts attributes that are in every milsoft object regardless of hardware type '''
-
-			newOb = {}
-			try:
-				# Need to replace invalid characters in names:
-				newOb['name'] = objectList[0].replace('.','x')
-				newOb['object'] = gridlabFields[int(objectList[1])]
-				# Convert lat-lon if we have them.
-				# convert to the relative pixel position f(x) = a * x + b
-				newOb['latitude'] = str(x_scale * float(objectList[5]) + x_b)
-				newOb['longitude'] = str(800 - (y_scale * float(objectList[6]) + y_b))
-				# Some non-Gridlab elements:
-				newOb['guid'] = objectList[49].replace('{','').replace('}','')
-				newOb['parentGuid'] = objectList[50].replace('{','').replace('}','')
-				# Make sure names are unique:
-				if allNames.count(newOb['name']) > 1:
-					newOb['name'] = newOb['guid']
-			except:
-				pass
-			return newOb
-
 		# -----------------------------------------------
 		# Conversion functions for each type of hardware:
 		# -----------------------------------------------
 		def convertSwitch(switchList):
-			switch = convertGenericObject(switchList)
+			switch = _convertGenericObject(switchList)
 			switch['status'] = ('OPEN' if switchList[9]=='O' else 'CLOSED')
 			switch['phases'] = switchList[2]
 			return switch
 
 		def convertOvercurrentDevice(ocDeviceList):
-			fuse = convertGenericObject(ocDeviceList)
+			fuse = _convertGenericObject(ocDeviceList)
 			fuse['phases'] = ocDeviceList[2]
 			fuse['current_limit'] = '9999.0 A'
 			# TODO: Figure out why code below causes convergence errors for some feeders.
@@ -132,14 +132,14 @@ def convert(stdString,seqString):
 			return fuse
 
 		def convertGenerator(genList):
-			generator = convertGenericObject(genList)
+			generator = _convertGenericObject(genList)
 			generator['Gen_mode'] = 'CONSTANTPQ'
 			generator['Gen_status'] = ('OFFLINE' if genList[26]=='1' else 'ONLINE')
 			generator['phases'] = "ABCN"
 			return generator
 
 		def convertMotor(motorList):
-			motor = convertGenericObject(motorList)
+			motor = _convertGenericObject(motorList)
 			motor['Gen_mode'] = 'CONSTANTPQ'
 			# Convert horsepower to kW:
 			motor['base_power'] = float(motorList[27])*0.73549875
@@ -153,7 +153,7 @@ def convert(stdString,seqString):
 			return motor
 
 		def convertConsumer(consList):
-			consumer = convertGenericObject(consList)
+			consumer = _convertGenericObject(consList)
 			consumer['phases'] = consList[2]
 			loadClassMap = {
 				0 : 'R',
@@ -189,7 +189,7 @@ def convert(stdString,seqString):
 			return consumer
 
 		def convertNode(nodeList):
-			node = convertGenericObject(nodeList)
+			node = _convertGenericObject(nodeList)
 			#Find the connect type
 			load_mix = statsByName(nodeList[8])
 			if load_mix is None or load_mix[5] == 'W':#Wye connected
@@ -212,7 +212,7 @@ def convert(stdString,seqString):
 			return node
 
 		def convertSource(sourceList):
-			source = convertGenericObject(sourceList)
+			source = _convertGenericObject(sourceList)
 			#Find the connect type
 			if sourceList[16] == 'W':#Wye connected
 				source['phases'] = sourceList[2] + 'N'
@@ -223,7 +223,7 @@ def convert(stdString,seqString):
 			return source
 
 		def convertCapacitor(capList):
-			capacitor = convertGenericObject(capList)
+			capacitor = _convertGenericObject(capList)
 			if  capList[17] == '1': #Delta connected
 				capacitor['phases'] = capList[2] + ('D' if len(capList[2]) >= 2 else '')
 			else:
@@ -270,7 +270,7 @@ def convert(stdString,seqString):
 
 		def convertOhLine(ohLineList):
 			myIndex = components.index(objectList)*subObCount
-			overhead = convertGenericObject(ohLineList)
+			overhead = _convertGenericObject(ohLineList)
 			# MAYBEFIX: be smarter about multiple neutrals.
 			load_mix = statsByName(ohLineList[14])
 			if load_mix is None or load_mix[5] == 'W':#Wye connected line
@@ -393,7 +393,7 @@ def convert(stdString,seqString):
 				if ugLineList[i] == '':
 					ugLineList[i] = '0'
 			myIndex = components.index(objectList)*subObCount
-			underground = convertGenericObject(ugLineList)
+			underground = _convertGenericObject(ugLineList)
 			# MAYBEFIX: be smarter about multiple neutrals.
 			load_mix = statsByName(ugLineList[14])
 			if load_mix is None or load_mix[5] == 'W':#Wye connected line
@@ -542,7 +542,7 @@ def convert(stdString,seqString):
 
 		def convertRegulator(regList):
 			myIndex = components.index(objectList)*subObCount
-			regulator = convertGenericObject(regList)
+			regulator = _convertGenericObject(regList)
 			regulator['phases'] = regList[2]
 			# Create an embedded object for the configuration and give it a variable name to make it easy to remember.
 			regulator[myIndex+1] = {}
@@ -656,7 +656,7 @@ def convert(stdString,seqString):
 
 		def convertTransformer(transList):
 			myIndex = components.index(objectList)*subObCount
-			transformer = convertGenericObject(transList)
+			transformer = _convertGenericObject(transList)
 			transformer['phases'] = transList[2]
 			# transformer['nominal_voltage'] = '2400'
 			transformer[myIndex+1] = {}
@@ -669,19 +669,19 @@ def convert(stdString,seqString):
 			# Grab transformer phase hardware. NOTE: the default values were averages from the test files.
 			if 'A' in transformer['phases']:
 				trans_config = statsByName(transList[24])
-				no_load_loss = safeGet(trans_config, 20, 0)
-				percent_z = safeGet(trans_config, 4, 3)
-				x_r_ratio = safeGet(trans_config, 7, 5)
+				no_load_loss = _safeGet(trans_config, 20, 0)
+				percent_z = _safeGet(trans_config, 4, 3)
+				x_r_ratio = _safeGet(trans_config, 7, 5)
 			elif 'B' in transformer['phases']:
 				trans_config = statsByName(transList[25])
-				no_load_loss = safeGet(trans_config, 21, 0)
-				percent_z = safeGet(trans_config, 5, 3)
-				x_r_ratio = safeGet(trans_config, 8, 5)
+				no_load_loss = _safeGet(trans_config, 21, 0)
+				percent_z = _safeGet(trans_config, 5, 3)
+				x_r_ratio = _safeGet(trans_config, 8, 5)
 			else:
 				trans_config = statsByName(transList[26])
-				no_load_loss = safeGet(trans_config, 22, 0)
-				percent_z = safeGet(trans_config, 6, 3)
-				x_r_ratio = safeGet(trans_config, 9, 5)
+				no_load_loss = _safeGet(trans_config, 22, 0)
+				percent_z = _safeGet(trans_config, 6, 3)
+				x_r_ratio = _safeGet(trans_config, 9, 5)
 			# Set the shunt impedance
 			try: 
 				f_no_load_loss = float(no_load_loss)
