@@ -724,7 +724,8 @@ function newNode(typeOfNode) {
 	// Create a new node object.
 	maxBusID = maxBusID + 1
 	newID = maxBusID
-	newBusGenObj = {}
+	iToSVGLookup[String(newID)] = String(newID)
+	sVGToiLookup[String(newID)] = String(newID)
 	newBusGenObj = {
 		longitude: "0",
 		latitude: "0",
@@ -931,7 +932,7 @@ function newGen() {
 		newGenObj = {
 			longitude: selBus.longitude,
 			latitude: selBus.latitude,
-			bus: String(selBusID),
+			bus: String(sVGToiLookup[selBusID]),
 			Pg: "23.54",
 			Qg: "0",
 			Qmax: "150",
@@ -995,8 +996,8 @@ function newLink() {
 			status: "1",
 			angmin: "-360.0",
 			angmax: "360.0",
-			fbus: String(fBusID),
-			tbus: String(tBusID)
+			fbus: String(sVGToiLookup[fBusID]),
+			tbus: String(sVGToiLookup[tBusID])
 		}
 		// Save to tree
 		networkData.branch[String(newCompID)] = newLink
@@ -1027,7 +1028,7 @@ function newLink() {
 		for(gen in networkData.gen) {
 			// Check for connected buses and generators, redraw them to make sure they stay on top.
 			busGenID = networkData.gen[String(parseInt(gen))]['bus']
-			if(busGenID == fBusID) {
+			if(busGenID == sVGToiLookup[fBusID]) {
 				document.getElementById("gen_" + String(parseInt(gen))).remove() 
 				addRectangle(x1 - 4/2, y1 - 4/2, 4, 4, "gen_" + String(parseInt(gen)), "gen")
 				if(scaleTracker != 1.0) {
@@ -1046,7 +1047,7 @@ function newLink() {
 					newRect.setAttribute('y', latitude - (2*scaleTracker))
 				}
 			}
-			if(busGenID == tBusID) {
+			if(busGenID == sVGToiLookup[tBusID]) {
 				document.getElementById("gen_" + String(parseInt(gen))).remove() 
 				addRectangle(x2- 4/2, y2 - 4/2, 4, 4, "gen_" + String(parseInt(gen)), "gen")
 				if(scaleTracker != 1.0) {
