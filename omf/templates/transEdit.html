@@ -373,8 +373,8 @@ function buildNetwork() {
 			tBusNum = busNumMap[tNum]
 			fromOb = networkData.bus[fBusNum]
 			toOb = networkData.bus[tBusNum]
-			if(num> maxBranchID) {
-				maxBranchID = num
+			if(parseInt(num)> maxBranchID) {
+				maxBranchID = parseInt(num)
 			}
 			addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],"branch_"+num,"branch" + ' p' + phaseCount(anOb))
 		} catch(e) {}
@@ -397,8 +397,8 @@ function buildNetwork() {
 			var longitude = networkData.bus[busNum]['longitude']
 			var latitude = networkData.bus[busNum]['latitude']
 			var width = 4
-			if(num > maxGenID) {
-				maxGenID = num
+			if(parseInt(num) > maxGenID) {
+				maxGenID = parseInt(num)
 			}
 			addRectangle(longitude-width/2,latitude-width/2,width,width,"gen_"+num,"gen")
 		} catch(e) {}
@@ -468,6 +468,8 @@ function svgClick(event) {
 		multiSelectionTable()
 	}
 	previousTarget = event.target
+	console.log(previousTarget)
+	console.log(networkData)
 }
 
 function phaseCount(p) {
@@ -597,6 +599,7 @@ function deleteOb() {
 
 	// Delete Lines
 	if (clickType === 'branch') {
+		console.log(previousTarget)
 		previousTarget.remove()
 		delete networkData[clickType][clickID]
 	}
@@ -800,6 +803,8 @@ function moveBusListener() {
 		tBusID= selBranch['tbus']
 		if(fBusID == selBus_i_ID || tBusID == selBus_i_ID) {
 			// Redraw connected lines containing selected bus
+			console.log(num)
+			console.log("branch_" + String(parseInt(num)))
 			document.getElementById("branch_" + String(parseInt(num))).remove()  
 			fromBus = networkData.bus[fBusID]
 			toBus = networkData.bus[tBusID]
@@ -894,7 +899,6 @@ function moveBusListener() {
 		newCir.setAttribute('stroke-width', 0.5*scaleTracker)
 	}
 	//Redraw generator on selected bus
-
 	for(gen in networkData.gen) {
 		busGenID = networkData.gen[String(parseInt(gen))]['bus']
 		if(busGenID == selBus_i_ID) {
