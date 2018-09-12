@@ -43,41 +43,6 @@ def _safeGet(arr, pos, default):
 	except:
 		return default
 
-def _convertGenericObject(objectList):
-	''' this converts attributes that are in every milsoft object regardless of hardware type. '''
-	newOb = {}
-	gridlabFields = {
-		1 : 'overhead_line',    # Overhead Line (Type 1)
-		2 : 'capacitor',        # Capacitor (Type 2)
-		3 : 'underground_line', # Underground Line (Type 3)
-		4 : 'regulator',        # Regulator (Type 4)
-		5 : 'transformer',      # Transformer (Type 5)
-		6 : 'switch',           # Switch (Type 6)
-		8 : 'node',             # Node (Type 8)
-		9 : 'node',             # Source (Type 9)
-		10 : 'fuse',            # Overcurrent Device (Type 10)
-		11 : 'ZIPload',         # Motor (Type 11)
-		12 : 'diesel_dg',       # Generator (Type 12)
-		13 : 'load'             # Consumer (Type 13)
-	}
-	try:
-		# Need to replace invalid characters in names:
-		newOb['name'] = objectList[0].replace('.','x')
-		newOb['object'] = gridlabFields[int(objectList[1])]
-		# Convert lat-lon if we have them.
-		# convert to the relative pixel position f(x) = a * x + b
-		newOb['latitude'] = str(x_scale * float(objectList[5]) + x_b)
-		newOb['longitude'] = str(800 - (y_scale * float(objectList[6]) + y_b))
-		# Some non-Gridlab elements:
-		newOb['guid'] = objectList[49].replace('{','').replace('}','')
-		newOb['parentGuid'] = objectList[50].replace('{','').replace('}','')
-		# Make sure names are unique:
-		if allNames.count(newOb['name']) > 1:
-			newOb['name'] = newOb['guid']
-	except:
-		pass
-	return newOb
-
 def convert(stdString,seqString):
 	''' Take in a .std and .seq strings from Milsoft and spit out a json dict.'''
 	# Get all components from the .std:
@@ -107,6 +72,40 @@ def convert(stdString,seqString):
 				if row[0] == deviceName:
 					return row
 			return None
+		def _convertGenericObject(objectList):
+			''' this converts attributes that are in every milsoft object regardless of hardware type. '''
+			newOb = {}
+			gridlabFields = {
+				1 : 'overhead_line',    # Overhead Line (Type 1)
+				2 : 'capacitor',        # Capacitor (Type 2)
+				3 : 'underground_line', # Underground Line (Type 3)
+				4 : 'regulator',        # Regulator (Type 4)
+				5 : 'transformer',      # Transformer (Type 5)
+				6 : 'switch',           # Switch (Type 6)
+				8 : 'node',             # Node (Type 8)
+				9 : 'node',             # Source (Type 9)
+				10 : 'fuse',            # Overcurrent Device (Type 10)
+				11 : 'ZIPload',         # Motor (Type 11)
+				12 : 'diesel_dg',       # Generator (Type 12)
+				13 : 'load'             # Consumer (Type 13)
+			}
+			try:
+				# Need to replace invalid characters in names:
+				newOb['name'] = objectList[0].replace('.','x')
+				newOb['object'] = gridlabFields[int(objectList[1])]
+				# Convert lat-lon if we have them.
+				# convert to the relative pixel position f(x) = a * x + b
+				newOb['latitude'] = str(x_scale * float(objectList[5]) + x_b)
+				newOb['longitude'] = str(800 - (y_scale * float(objectList[6]) + y_b))
+				# Some non-Gridlab elements:
+				newOb['guid'] = objectList[49].replace('{','').replace('}','')
+				newOb['parentGuid'] = objectList[50].replace('{','').replace('}','')
+				# Make sure names are unique:
+				if allNames.count(newOb['name']) > 1:
+					newOb['name'] = newOb['guid']
+			except:
+				pass
+			return newOb
 
 		# -----------------------------------------------
 		# Conversion functions for each type of hardware:
@@ -876,10 +875,8 @@ def convert(stdString,seqString):
 				return {}
 			else:
 				return candidates[0]
-
 		def phaseMin(x,y):
 			return ''.join(set(x).intersection(set(y)))
-
 		if comp['object'] in ['overhead_line','underground_line','regulator','transformer','switch','fuse']:
 			fromPhases = getByName(comp['from'])['phases']
 			toPhases = getByName(comp['to'])['phases']
@@ -893,7 +890,6 @@ def convert(stdString,seqString):
 							pass
 						else:
 							comp['phases'] = comp['phases'].replace('N','')
-
 			return True
 		else:
 			return False
@@ -1015,11 +1011,9 @@ def convert(stdString,seqString):
 					for y in glm_dict[x]:
 						if type(y) is int:
 							nv = glm_dict[x][y]['secondary_voltage']
-
 					glm_dict[x]['nominal_voltage'] = nv
 				else:
 					glm_dict[x]['nominal_voltage'] = volt_dict[glm_dict[x]['from']]
-
 				volt_dict[glm_dict[x]['name']] = glm_dict[x]['nominal_voltage']
 				for y in glm_dict:
 					if 'name' in glm_dict[y] and glm_dict[y]['name'] == glm_dict[x]['to']:
@@ -1337,7 +1331,7 @@ def _tests(
 		wipeBefore=True,
 		openPrefix = omf.omfDir + '/static/testFiles/',
 		outPrefix = omf.omfDir + '/scratch/milToGridlabTests/',
-		testFiles = [('Olin-Barre.std','Olin.seq'),('UE yadkin tabernacle.std','UE yadkin tabernacle.seq')],
+		testFiles = [('Olin-Barre.std','Olin.seq'),('ABEC-FRANK.std','ABEC.seq')],
 		totalLength = 121,
 		testAttachments = {'schedules.glm':'', 'climate.tmy2':open(omf.omfDir + '/data/Climate/KY-LEXINGTON.tmy2','r').read()}
 	):
