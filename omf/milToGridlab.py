@@ -691,61 +691,59 @@ def convert(stdString,seqString):
 				transformer[myIndex+1]['shunt_impedance'] = str(r_shunt) + '+' + str(x_shunt) + 'j'
 			# Set series impedance
 			try:
-			  if float(percent_z) > 0.0:
-				r_series = float(percent_z)*0.01/math.sqrt(1+(float(x_r_ratio)*float(x_r_ratio)))
-				x_series = r_series*float(x_r_ratio)
-				transformer[myIndex+1]['impedance'] = str(r_series) + '+' + str(x_series) + 'j'
-			  else:
-				transformer[myIndex+1]['impedance'] = '0.00033+0.0022j'
-			  impedance = transformer[myIndex+1]['impedance']
-			  impReal = impedance.split('+')[0]
-			  impImag = impedance.split('+')[1]
-			  # Override zero values for reactance and resistances.
-			  if float(impReal) == 0:
-				impReal = '0.05'
-				impedance = impReal+"+"+impImag
-			  if float(impImag.strip('j')) == 0:
-				print "Reactance for a transformer is 0:"
-				impImag = '0.02j'
-				impedance = impReal+"+"+impImag
-				print "Hacked it to:", str(impedance)
-			  transformer[myIndex+1]['impedance'] = impedance
-			  # NOTE: Windmil doesn't export any information on install type, but Gridlab only puts it in there for info reasons.
-			  # transformer[1]['install_type'] = 'POLETOP'
-			  transPhases = transList[2]
-			  if 1 == len(transPhases):
-				transformer[myIndex+1]['connect_type'] = 'SINGLE_PHASE_CENTER_TAPPED'
-			  else:
-				#MAYBEFIX: support other types of windings (D-D, D-Y, etc.)
-				transformer[myIndex+1]['connect_type'] = 'WYE_WYE'
-			#MAYBEFIX: change these from just default values:
-			  transformer[myIndex+1]['power_rating'] = str(float(transList[19]) + float(transList[20]) + float(transList[21]))
-			  if float(transList[19]) > 0:
-				transformer[myIndex+1]['powerA_rating'] = transList[19]
-
-			  if float(transList[20]) > 0:
-				transformer[myIndex+1]['powerB_rating'] = transList[20]
-
-			  if float(transList[21]) > 0:
-				transformer[myIndex+1]['powerC_rating'] = transList[21]
+				if float(percent_z) > 0.0:
+					r_series = float(percent_z)*0.01/math.sqrt(1+(float(x_r_ratio)*float(x_r_ratio)))
+					x_series = r_series*float(x_r_ratio)
+					transformer[myIndex+1]['impedance'] = str(r_series) + '+' + str(x_series) + 'j'
+				else:
+					transformer[myIndex+1]['impedance'] = '0.00033+0.0022j'
+				impedance = transformer[myIndex+1]['impedance']
+				impReal = impedance.split('+')[0]
+				impImag = impedance.split('+')[1]
+				# Override zero values for reactance and resistances.
+				if float(impReal) == 0:
+					impReal = '0.05'
+					impedance = impReal+"+"+impImag
+				if float(impImag.strip('j')) == 0:
+					print "Reactance for a transformer is 0:"
+					impImag = '0.02j'
+					impedance = impReal+"+"+impImag
+					print "Hacked it to:", str(impedance)
+				transformer[myIndex+1]['impedance'] = impedance
+				# NOTE: Windmil doesn't export any information on install type, but Gridlab only puts it in there for info reasons.
+				# transformer[1]['install_type'] = 'POLETOP'
+				transPhases = transList[2]
+				if 1 == len(transPhases):
+					transformer[myIndex+1]['connect_type'] = 'SINGLE_PHASE_CENTER_TAPPED'
+				else:
+					#MAYBEFIX: support other types of windings (D-D, D-Y, etc.)
+					transformer[myIndex+1]['connect_type'] = 'WYE_WYE'
+				#MAYBEFIX: change these from just default values:
+				transformer[myIndex+1]['power_rating'] = str(float(transList[19]) + float(transList[20]) + float(transList[21]))
+				if float(transList[19]) > 0:
+					transformer[myIndex+1]['powerA_rating'] = transList[19]
+				if float(transList[20]) > 0:
+					transformer[myIndex+1]['powerB_rating'] = transList[20]
+				if float(transList[21]) > 0:
+					transformer[myIndex+1]['powerC_rating'] = transList[21]
 			#MAYBEFIX: and change these, which were added to make the transformer work on multiple phases:
 			except ValueError, e:
-			  print "ERROR FOR: ", e
-			
+				print "ERROR FOR: ", e
 			return transformer
 		# Simple lookup table for which function we need to apply:
-		objectToFun =    {  1 : convertOhLine,
-							2 : convertCapacitor,
-							3 : convertUgLine,
-							4 : convertRegulator,
-							5 : convertTransformer,
-							6 : convertSwitch,
-							8 : convertNode,
-							9 : convertSource,
-							10 : convertOvercurrentDevice,
-							11 : convertMotor,
-							12 : convertGenerator,
-							13 : convertConsumer }
+		objectToFun = {  1 : convertOhLine,
+			2 : convertCapacitor,
+			3 : convertUgLine,
+			4 : convertRegulator,
+			5 : convertTransformer,
+			6 : convertSwitch,
+			8 : convertNode,
+			9 : convertSource,
+			10 : convertOvercurrentDevice,
+			11 : convertMotor,
+			12 : convertGenerator,
+			13 : convertConsumer
+		}
 		# Apply fun:
 		return objectToFun[int(objectList[1])](objectList)
 
@@ -811,12 +809,14 @@ def convert(stdString,seqString):
 				interNode['phases'] = phaseMerge(interNode['phases'],comp['phases'])
 			else:
 				# Gotta insert a node between lines and parentable objects:
-				newNode = {'object':'node',
-						   'phases':comp['phases'],
-						   'name': 'node' + comp['name'] + parent['name'],
-							'nominal_voltage':nominal_voltage,
-							'latitude': comp['latitude'],
-							'longitude': comp['longitude']}
+				newNode = {
+					'object':'node',
+					'phases':comp['phases'],
+					'name': 'node' + comp['name'] + parent['name'],
+					'nominal_voltage':nominal_voltage,
+					'latitude': comp['latitude'],
+					'longitude': comp['longitude']
+				}
 				convertedComponents.append(newNode)
 				parent['to'] = newNode['name']
 				comp['parent'] = newNode['name']
@@ -828,12 +828,14 @@ def convert(stdString,seqString):
 				interNode['phases'] = phaseMerge(interNode['phases'],comp['phases'])
 			else:
 				# Gotta insert a node between two lines:
-				newNode = {'object':'node',
-						   'phases':comp['phases'],
-						   'name': 'node' + comp['name'] + parent['name'],
-							'nominal_voltage':nominal_voltage,
-							'latitude': comp['latitude'],
-							'longitude': comp['longitude']}
+				newNode = {
+					'object':'node',
+					'phases':comp['phases'],
+					'name': 'node' + comp['name'] + parent['name'],
+					'nominal_voltage':nominal_voltage,
+					'latitude': comp['latitude'],
+					'longitude': comp['longitude']
+				}
 				convertedComponents.append(newNode)
 				parent['to'] = newNode['name']
 				comp['from'] = newNode['name']
