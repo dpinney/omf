@@ -1326,18 +1326,17 @@ def _tests(
 		wipeBefore=True,
 		openPrefix = omf.omfDir + '/static/testFiles/',
 		outPrefix = omf.omfDir + '/scratch/milToGridlabTests/',
-		testFiles = [('Olin-Barre.std','Olin.seq')],
+		testFiles = [('Olin-Barre.std','Olin.seq'),('UE yadkin tabernacle.std','UE yadkin tabernacle.seq')],
 		totalLength = 121,
 		testAttachments = {'schedules.glm':'', 'climate.tmy2':open(omf.omfDir + '/data/Climate/KY-LEXINGTON.tmy2','r').read()}
 	):
-	''' Test convert every windmil feeder we have (in static/testFiles). Return number of exceptions we hit. '''
+	''' Test convert every windmil feeder we have (in static/testFiles). '''
 	# testFiles = [('INEC-RENOIR.std','INEC.seq'), ('INEC-GRAHAM.std','INEC.seq'),
 	#   ('Olin-Barre.std','Olin.seq'), ('Olin-Brown.std','Olin.seq'),
 	#   ('ABEC-FRANK.std','ABEC.seq'), ('ABEC-COLUMBIA.std','ABEC.seq'),('OMF_Norfork1.std', 'OMF_Norfork1.seq'),('UE yadkin tabernacle.std','UE yadkin tabernacle.seq')]
 	# setlocale lives here to avoid changing it globally 
 	# locale.setlocale(locale.LC_ALL, 'en_US')
 	# Variables for the testing.
-	exceptionCount = 0
 	timeArray = []
 	# Create the work directory.
 	if wipeBefore:
@@ -1351,8 +1350,13 @@ def _tests(
 	# Run all the tests.
 	for stdString, seqString in testFiles:
 		cur_start_time = time.time()
+		# Write the time info.
+		with open('convResults.txt', 'a') as resultsFile:
+			local_time = reference.LocalTimezone()
+			now = datetime.datetime.now()
+			resultsFile.write(str(now)[0:19] + " at timezone: " + str(local_time.tzname(now)) + '\n')
 		try:
-			# Convert the std+seq.
+			# Convert the std+seq and write it out.
 			with open(pJoin(openPrefix,stdString),'r') as stdFile, open(pJoin(openPrefix,seqString),'r') as seqFile:
 				outGlm = convert(stdFile.read(),seqFile.read())
 			with open(outPrefix + stdString.replace('.std','.glm'),'w') as outFile:
@@ -1360,80 +1364,62 @@ def _tests(
 				outFile.write(feeder.sortedWrite(outGlm))
 				outFile.truncate()
 				outFileStats = os.stat(outPrefix + stdString.replace('.std','.glm') )
-			inFileStats = os.stat(pJoin(openPrefix,stdString))
 			print 'WROTE GLM FOR', stdString
-			inFileSize = inFileStats.st_size
-			outFileSize = outFileStats.st_size
+			# Write the size of the files as a indicator of how good the conversion was.
 			with open('convResults.txt', 'a') as resultsFile:
-				local_time = reference.LocalTimezone()
-				now = datetime.datetime.now()
-				resultsFile.write(str(now)[0:19] + " at timezone: " + str(local_time.tzname(now)) + '\n')
-				if inFileSize < outFileSize:
-					percent = float(inFileSize)/float(outFileSize)
-					resultsFile.write('WROTE GLM FOR ' + stdString + ', THE STD FILE IS %s PERCENT OF THE GLM FILE.\n' % str(100*percent)[0:4])
-				else:
-					percent = float(inFileSize)/float(outFileSize)
-					resultsFile.write('WROTE GLM FOR ' + stdString + ', THE GLM FILE IS %s TIMES AS LARGE AS THE STD FILE.\n' % str(percent)[0:4])
-			try:
-				# Draw the GLM.
-				myGraph = feeder.treeToNxGraph(outGlm)
-				feeder.latLonNxGraph(myGraph, neatoLayout=False)
-				plt.savefig(outPrefix + stdString.replace('.std','.png'))
-				print 'DREW GLM OF', stdString
-				with open('convResults.txt','a') as resultsFile:
-					resultsFile.write('DREW GLM FOR ' + stdString + "\n")
-			except:
-				exceptionCount += 1
-				print 'FAILED DRAWING', stdString
-				with open('convResults.txt','a') as resultsFile:
-					resultsFile.write('FAILED DRAWING ' + stdString + "\n")
-			try:
-				# Run powerflow on the GLM. HACK:blank attachments for now.
-				output = gridlabd.runInFilesystem(outGlm, attachments=testAttachments, keepFiles=False)
-				if output['stderr'] == "":
-					gridlabdStderr = "GridLabD ran successfully without error."
-				else:
-					errorDetails =  output['stderr']
-					errorFlag = True
-				with open(outPrefix + stdString.replace('.std','.json'),'w') as outFile:
-					outFile.seek(0)
-					json.dump(output, outFile, indent=4)
-					outFile.truncate()
-				print 'RAN GRIDLAB ON', stdString
-				with open('convResults.txt'),'a', resultsFile:
-					resultsFile.write('RAN GRIDLAB ON ' + stdString + "\n")
-					resultsFile.write('STDERR: ' + gridlabdStderr + "\n\n")
-					resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
-					resultsFile.write("====================================================================================\n")
-					timeArray.append(time.time() - cur_start_time)
-				if errorFlag:
-					with open('stderr.txt', 'a') as errorFile:
-						resultsFile.write('FOR ' + stdString + ' WE OBTAINED THE FOLLOWING ERRORS\n')
-						resultsFile.write('STDERR: ' + errorDetails + "\n")
-						resultsFile.write("====================================================================================\n")
-			except Exception as e:
-				exceptionCount += 1
-				print 'POWERFLOW FAILED', stdString
-				with open('convResults.txt','a') as resultsFile:
-					resultsFile.write('POWERFLOW FAILED ' + stdString + "\n")
-					resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
-					resultsFile.write("====================================================================================\n")
-					timeArray.append(time.time() - cur_start_time)
+				inFileStats = os.stat(pJoin(openPrefix,stdString))
+				inFileSize = inFileStats.st_size
+				outFileSize = outFileStats.st_size
+				percent = float(inFileSize)/float(outFileSize)
+				resultsFile.write('WROTE GLM FOR ' + stdString + ', THE STD FILE IS %s PERCENT OF THE GLM FILE.\n' % str(100*percent)[0:4])
 		except:
 			print 'FAILED CONVERTING', stdString
 			with open('convResults.txt','a') as resultsFile:
 					resultsFile.write('FAILED CONVERTING ' + stdString + "\n")
-					resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
-					resultsFile.write("====================================================================================\n")
-					timeArray.append(time.time() - cur_start_time)
-			exceptionCount += 1
+		try:
+			# Draw the GLM.
+			# But first make networkx cool it with the warnings.
+			import warnings; warnings.filterwarnings("ignore")
+			myGraph = feeder.treeToNxGraph(outGlm)
+			feeder.latLonNxGraph(myGraph, neatoLayout=False)
+			plt.savefig(outPrefix + stdString.replace('.std','.png'))
+			print 'DREW GLM OF', stdString
+			with open('convResults.txt','a') as resultsFile:
+				resultsFile.write('DREW GLM FOR ' + stdString + "\n")
+		except:
+			print 'FAILED DRAWING', stdString
+			with open('convResults.txt','a') as resultsFile:
+				resultsFile.write('FAILED DRAWING ' + stdString + "\n")
+		try:
+			# Run powerflow on the GLM.
+			output = gridlabd.runInFilesystem(outGlm, attachments=testAttachments, keepFiles=False)
+			if output['stderr'] != "":
+				# Catch GridLAB-D's errors:
+				raise Exception
+			# Dump powerflow results.
+			with open(outPrefix + stdString.replace('.std','.json'),'w') as outFile:
+				outFile.seek(0)
+				json.dump(output, outFile, indent=4)
+				outFile.truncate()
+			print 'RAN GRIDLAB ON', stdString
+			with open('convResults.txt', 'a') as resultsFile:
+				resultsFile.write('RAN GRIDLAB ON ' + stdString + "\n")
+		except Exception as e:
+			print 'POWERFLOW FAILED', stdString
+			with open('convResults.txt','a') as resultsFile:
+				resultsFile.write('POWERFLOW FAILED ' + stdString + "\n")
+		# Write time info.
+		with open('convResults.txt','a') as resultsFile:
+			resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
+			resultsFile.write("====================================================================================\n")
+			timeArray.append(time.time() - cur_start_time)
+	# Write stats for all tests.
 	with open('convResults.txt', 'a') as resultsFile:
 		resultsFile.write('Ran %d out of %d tests for this simulation.\n' % (len(testFiles), totalLength))
+		resultsFile.write('Total time of %d simulations is: %d seconds.' % (len(timeArray), sum(timeArray)) + '\n')
 		resultsFile.write("====================================================================================\n")
-	print '\n\n\n' + 'Total time of %d simulations is: %d seconds.' % (len(timeArray), sum(timeArray)) + '\n' # Print total time to console.
 	if not keepFiles:
 		shutil.rmtree(outPrefix)
-	return exceptionCount
 
 if __name__ == "__main__":
 	_tests()
