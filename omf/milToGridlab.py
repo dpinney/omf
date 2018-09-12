@@ -731,7 +731,8 @@ def convert(stdString,seqString):
 				print "ERROR FOR: ", e
 			return transformer
 		# Simple lookup table for which function we need to apply:
-		objectToFun = {  1 : convertOhLine,
+		objectToFun = {
+			1 : convertOhLine,
 			2 : convertCapacitor,
 			3 : convertUgLine,
 			4 : convertRegulator,
@@ -1112,12 +1113,13 @@ def convert(stdString,seqString):
 			for y in phases:
 				if y != 'N' and y != 'D':
 					new_key = unused_key(glm,subObCount)
-					glm[new_key] = {'object' : 'triplex_node',
-									'name' : glm[loadKey]['name'] + '_' + y,
-									'phases' : y + 'S',
-									'parent' : glm[loadKey]['parent'] + '_' + y,
-									'nominal_voltage' : '120'}
-
+					glm[new_key] = {
+						'object' : 'triplex_node',
+						'name' : glm[loadKey]['name'] + '_' + y,
+						'phases' : y + 'S',
+						'parent' : glm[loadKey]['parent'] + '_' + y,
+						'nominal_voltage' : '120'
+					}
 					if y == 'A':
 						glm[new_key]['power_12'] = glm[loadKey]['constant_power_A']
 					elif y == 'B':
@@ -1130,19 +1132,23 @@ def convert(stdString,seqString):
 			for y in phases:
 				if y != 'N' and y != 'D':
 					new_key = unused_key(glm,subObCount)
-					glm[new_key] = {'object' : 'transformer',
-									'name' : glm[key]['name'] + '_' + y,
-									'phases' : y + 'S',
-									'from' : glm[key]['from'],
-									'to' : glm[key]['to'] + '_' + y}
+					glm[new_key] = {
+						'object' : 'transformer',
+						'name' : glm[key]['name'] + '_' + y,
+						'phases' : y + 'S',
+						'from' : glm[key]['from'],
+						'to' : glm[key]['to'] + '_' + y
+						}
 					for z in glm[key]:
 						if type(z) is int:
-							glm[new_key][new_key+1] = {'omfEmbeddedConfigObject' : 'configuration object transformer_configuration',
-													   'name' : glm[new_key]['name'] + '-CONFIG',
-													   'primary_voltage' : glm[key][z]['primary_voltage'],
-													   'secondary_voltage' : '120.0',
-													   'connect_type' : 'SINGLE_PHASE_CENTER_TAPPED',
-													   'impedance' : glm[key][z]['impedance']}
+							glm[new_key][new_key+1] = {
+								'omfEmbeddedConfigObject' : 'configuration object transformer_configuration',
+								'name' : glm[new_key]['name'] + '-CONFIG',
+								'primary_voltage' : glm[key][z]['primary_voltage'],
+								'secondary_voltage' : '120.0',
+								'connect_type' : 'SINGLE_PHASE_CENTER_TAPPED',
+								'impedance' : glm[key][z]['impedance']
+							}
 							if 'shunt_impedance' in glm[key][z]:
 								glm[new_key][new_key+1]['shunt_impedance'] = glm[key][z]['shunt_impedance']
 							#NOTE: default values are average of all .std data sets we've seen.
