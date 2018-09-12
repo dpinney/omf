@@ -45,6 +45,8 @@ def _safeGet(arr, pos, default):
 
 def convert(stdString,seqString):
 	''' Take in a .std and .seq strings from Milsoft and spit out a json dict.'''
+	start_time = time.time()
+	# print('*** Start Conversion', time.time()-start_time)
 	# Get all components from the .std:
 	components = _csvToArray(stdString)[1:]
 	# Get all hardware stats from the .seq. We dropped the first rows which are metadata (n.b. there are no headers).
@@ -765,21 +767,22 @@ def convert(stdString,seqString):
 		fromToable = ['overhead_line','underground_line','regulator','transformer','switch','fuse']
 		nodable = ['node']
 		parentable = ['capacitor','ZIPload','diesel_dg','load']
-
+		# Update our name index:
+		nameToIndex = {convertedComponents[index].get('name',''):index for index in range(len(convertedComponents))}
+		# Use GUID index.
 		def getByGuid(guid):
-			candidates = [x for x in convertedComponents if 'guid' in x.keys() and x['guid'] == guid]
-			if len(candidates) == 0:
+			try:
+				targetIndex = guidToIndex[guid]
+				return convertedComponents[targetIndex]
+			except:
 				return {}
-			else:
-				return candidates[0]
-
+		# Use name index.
 		def getByName(name):
-			candidates = [x for x in convertedComponents if 'name' in x.keys() and x['name'] == name]
-			if len(candidates) == 0:
+			try:
+				targetIndex = nameToIndex[name]
+				return convertedComponents[targetIndex]
+			except:
 				return {}
-			else:
-				return candidates[0]
-
 		def parentType(ob):
 			thing = getByGuid(ob['guid'])
 			parent = getByGuid(thing['parentGuid'])
@@ -787,18 +790,14 @@ def convert(stdString,seqString):
 				return parent['object']
 			else:
 				pass # print parent
-
 		def phaseMerge(*arg):
 			concated = ''.join(arg)
 			return ''.join(sorted(set(concated)))
-
 		# If we already stripped the GUID, don't process:
 		if 'guid' not in comp.keys():
 			return False
-
 		# Hang on to the component's parent:
 		parent = getByGuid(comp['parentGuid'])
-
 		# Rejigger the attributes:
 		if comp['object'] in parentable and parentType(comp) in nodable:
 			comp['parent'] = parent['name']
@@ -812,11 +811,12 @@ def convert(stdString,seqString):
 				interNode['phases'] = phaseMerge(interNode['phases'],comp['phases'])
 			else:
 				# Gotta insert a node between lines and parentable objects:
+				nodeName = 'node' + comp['name'] + parent['name']
 				newNode = {
-					'object':'node',
-					'phases':comp['phases'],
-					'name': 'node' + comp['name'] + parent['name'],
-					'nominal_voltage':nominal_voltage,
+					'object': 'node',
+					'phases': comp['phases'],
+					'name': nodeName,
+					'nominal_voltage': nominal_voltage,
 					'latitude': comp['latitude'],
 					'longitude': comp['longitude']
 				}
@@ -831,10 +831,11 @@ def convert(stdString,seqString):
 				interNode['phases'] = phaseMerge(interNode['phases'],comp['phases'])
 			else:
 				# Gotta insert a node between two lines:
+				nodeName = 'node' + comp['name'] + parent['name']
 				newNode = {
 					'object':'node',
 					'phases':comp['phases'],
-					'name': 'node' + comp['name'] + parent['name'],
+					'name': nodeName,
 					'nominal_voltage':nominal_voltage,
 					'latitude': comp['latitude'],
 					'longitude': comp['longitude']
@@ -850,6 +851,8 @@ def convert(stdString,seqString):
 		return True
 
 	# Fix the connectivity:
+	# print('*** Connectivity fixing start', time.time()-start_time)
+	guidToIndex = {convertedComponents[index].get('guid',''):index for index in range(len(convertedComponents))}
 	for comp in convertedComponents:
 		fixCompConnectivity(comp)
 
@@ -869,12 +872,12 @@ def convert(stdString,seqString):
 		if 'parentGuid' in glmTree[key]: del glmTree[key]['parentGuid']
 
 	def fixLinkPhases(comp):
+		
+		nameToIndex = {glmTree[key].get('name',''):key for key in glmTree}
 		def getByName(name):
-			candidates = [glmTree[x] for x in glmTree if 'name' in glmTree[x] and glmTree[x]['name'] == name]
-			if len(candidates) == 0:
-				return {}
-			else:
-				return candidates[0]
+			targetIndex = nameToIndex[name]
+			return glmTree[targetIndex]
+
 		def phaseMin(x,y):
 			return ''.join(set(x).intersection(set(y)))
 		if comp['object'] in ['overhead_line','underground_line','regulator','transformer','switch','fuse']:
@@ -894,6 +897,7 @@ def convert(stdString,seqString):
 		else:
 			return False
 
+	# print('*** Link phase fixing', time.time()-start_time)
 	for key in glmTree:
 		fixLinkPhases(glmTree[key])
 
@@ -1001,6 +1005,7 @@ def convert(stdString,seqString):
 	# WARNING: this code creates broken GLMs. Disabled by default.
 	# glmTree = convDistLoadLines(glmTree)
 	# Fix nominal voltage
+	# print('*** Nominal voltage fixing', time.time()-start_time)
 	def fix_nominal_voltage(glm_dict, volt_dict):
 		for x in glm_dict:
 			if 'parent' in glm_dict[x].keys() and glm_dict[x]['parent'] in volt_dict.keys() and glm_dict[x]['name'] not in volt_dict.keys():
@@ -1060,6 +1065,7 @@ def convert(stdString,seqString):
 		if 'object' in glmTree[x].keys() and glmTree[x]['object'] in del_nom_volt_list and 'nominal_voltage' in glmTree[x].keys():
 			del glmTree[x]['nominal_voltage']
 
+	# print('*** Secondary system fixing', time.time()-start_time)
 	def secondarySystemFix(glm):
 		def unused_key(dic, key_multiplier):
 			free_key = (int(max(dic.keys())/key_multiplier) + 1)*key_multiplier
@@ -1253,6 +1259,7 @@ def convert(stdString,seqString):
 				if line['configuration'] in nameDictMap.keys(): line['configuration'] = nameDictMap[line['configuration']]
 
 	# Fully disembed and remove duplicate configuration objects:
+	# print('*** Disembed and dedup', time.time()-start_time)
 	feeder.fullyDeEmbed(glmTree)
 	dedupGlm('transformer_configuration', glmTree)
 	dedupGlm('regulator_configuration', glmTree)
@@ -1296,6 +1303,7 @@ def convert(stdString,seqString):
 				thisOb['latitude'] = str(float(parentOb['latitude']) + random.uniform(-5,5))
 				thisOb['longitude'] = str(float(parentOb['longitude']) + random.uniform(-5,5))
 	# Final Output
+	# print('*** DONE!', time.time()-start_time)
 	return glmTree
 
 
@@ -1331,7 +1339,7 @@ def _tests(
 		wipeBefore=True,
 		openPrefix = omf.omfDir + '/static/testFiles/',
 		outPrefix = omf.omfDir + '/scratch/milToGridlabTests/',
-		testFiles = [('Olin-Barre.std','Olin.seq'),('ABEC-FRANK.std','ABEC.seq')],
+		testFiles = [('Olin-Barre.std','Olin.seq'),('ABEC-FRANK.std','ABEC.seq'),('Olin-Brown.std','Olin.seq'),('INEC-GRAHAM.std','INEC.seq')],
 		totalLength = 121,
 		testAttachments = {'schedules.glm':'', 'climate.tmy2':open(omf.omfDir + '/data/Climate/KY-LEXINGTON.tmy2','r').read()}
 	):
