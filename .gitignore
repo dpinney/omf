@@ -32,6 +32,3 @@ omf/scratch/CIGAR/VOLTOUT.png
 omf/scratch/CIGAR/VoltPostFault.csv
 omf/scratch/CIGAR/VOLTOUT.png
 omf/scratch/CIGAR/scratchwindow.py
-*.png
-omf/models/voltageDrop.py
-*.png
