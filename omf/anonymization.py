@@ -163,7 +163,7 @@ def distTranslateLocations(inFeeder, translationRight, translationUp, rotation):
 
 def distAddNoise(inFeeder, noisePerc):
 	''' Add random noise to properties with numeric values for all objects in the inFeeder distribution system based on a noisePerc magnitude. '''
-	#Problem? Adding noise to names causes duplicates which breaks feeder
+	#Problem? Adding noise to names causes duplicates which breaks feeder. NOT WORKINFG
 	noisePerc = float(noisePerc)
 	for key in inFeeder['tree']:
 		for prop in inFeeder['tree'][key]:
@@ -391,6 +391,7 @@ def distModifyConductorLengths(inFeeder):
 
 def distSmoothLoads(inFeeder):
 	''' Reduce the resolution of load shapes by taking all sub-hourly load dispatch data in the inFeeder distribution system and aggregating to the hour level. ''' 
+	#FIX THIS FIX THIS FIX THIS
 	agList = []
 	outList = []
 	scadaFile = inFeeder['attachments']['subScadaCalibrated1.player']
@@ -433,7 +434,7 @@ def distSmoothLoads(inFeeder):
 
 # TRANSMISSION NETWORK FUNCTIONS 
 def tranPseudomizeNames(inNetwork):
-	#FIXED, tested
+	#May break after shuffling loads
 	''' Replace all names in the inNetwork transmission system with pseudonames composed of the object type and a random ID. Return a key with name and ID pairs. '''
 	newBusKey = {}
 	randomID = random.randint(0,100)
@@ -461,7 +462,7 @@ def tranPseudomizeNames(inNetwork):
 			inNetwork['branch'][i]['tbus'] = newBusKey[oldTo]
 	return newBusKey
 def tranRandomizeNames(inNetwork):
-	#Fixed, tested
+	#Doesnt workl after shuffling loads
 	''' Replace all names in the inNetwork transmission system with pseudonames composed of the object type and a random ID. '''
 	'''pretty sure this makes no sense at all, current data structure has no object types'''
 	newBusKey = {}
@@ -556,20 +557,20 @@ def tranTranslateLocations(inNetwork, translationRight, translationUp, rotation)
 
 def tranAddNoise(inNetwork, noisePerc):
 	''' Add random noise to properties with numeric values for all objects in the inNetwork transmission system based on a noisePerc magnitude. '''
-	#Fixed, tested
+	#NOT WORKING NO IDEA WHY
 	noisePerc = float(noisePerc)
 	for array in inNetwork:
 		if (array == 'bus') or (array == 'gen') or (array == 'branch'):
 			arrayId = 0
 			for i in inNetwork[array]:
 				for key in inNetwork[array][i].keys():
-					if ('bus' not in key) and ('status' not in key):
+					if ('bus' not in key) and ('status' not in key) and ('type' not in key):
 						# print key, inNetwork[array][i][key]
 						val = inNetwork[array][i][key]
 						try:
 							parseVal = float(val)
 							randNoise = random.uniform(-noisePerc, noisePerc)/100
-							randVal = (parseVal + randNoise)*randNoise
+							randVal = parseVal + parseVal * randNoise 
 							inNetwork[array][i][key] = str(randVal)
 						except ValueError:
 							print 'error'
@@ -767,7 +768,7 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 	# with open(FNAMEOUT, "w") as outFile:
 	# 	json.dump(inNetwork, outFile, indent=4)
 
-# 	# Testing tranAddNoise
+	# Testing tranAddNoise
 	# FNAME = "SimpleNetwork.json"
 	# FNAME=pJoin(omfDir,'omf','static', FNAME)
 	# with open(FNAME, "r") as inFile:
