@@ -117,7 +117,15 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 						vals.pop(i)
 				for pos,key in enumerate(keys):
 					lineRatings[key] = abs(float(vals[pos]))
-
+	edgeTupleRatings = {}
+	for edge in lineRatings:
+		for obj in tree.values():
+			if obj.get('name') == edge:
+				nodeFrom = obj.get('from')
+				nodeTo = obj.get('to')
+				coord = (nodeFrom, nodeTo)
+				ratingVal = lineRatings.get(edge)
+				edgeTupleRatings[coord] = ratingVal
 	# Calculate average node voltage deviation. First, helper functions.
 	def digits(x):
 		''' Returns number of digits before the decimal in the float x. '''
@@ -143,6 +151,9 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 				allVolts.append(phaseVolt)
 		nodeVolts[row.get('node_name','')] = avg(allVolts)
 		# Use float("{0:.2f}".format(avg(allVolts))) if displaying the node labels
+	nodeNames = {}
+	for key in nodeVolts.keys():
+		nodeNames[key] = key
 	# Add up currents.
 	edgeCurrents = {}
 	for row in currTable:
@@ -160,8 +171,9 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 				coord = (nodeFrom, nodeTo)
 				currVal = edgeCurrents.get(edge)
 				edgeTupleCurrents[coord] = "{0:.2f}".format(currVal)
-	#create edgeCurrents dict with values normalized by line ratings
+	#create edgeCurrents dict with values normalized per unit by line ratings
 	edgeCurrentsPU = {}
+	edgeTuplePower = {}
 	edgeTupleCurrentsPU = {}
 	for edge in edgeCurrents:
 		for obj in tree.values():
@@ -173,6 +185,7 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 				lineCurrent = edgeCurrents.get(edge)
 				lineRating = lineRatings.get(edge)
 				currValPU = (lineVoltage*lineCurrent)/lineRating
+				edgeTuplePower[coord] = "{0:.2f}".format((lineCurrent * lineVoltage)/1000)
 				edgeCurrentsPU[edge] = currValPU
 				edgeTupleCurrentsPU[coord] = "{0:.2f}".format(currValPU)
 	# dict with to-from tuples as keys and names as values for debugging
@@ -206,14 +219,14 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 		positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
 	edgeIm = nx.draw_networkx_edges(fGraph,
 		pos = positions,
-		edge_color = [edgeCurrentsPU.get(n,1) for n in edgeNames],
+		edge_color = [edgeCurrents.get(n,1) for n in edgeNames],
 		width = 1,
 		edge_vmin = 0,
 		edge_vmax = 2,
 		edge_cmap = plt.cm.coolwarm)
 	edgeLabelsIm = nx.draw_networkx_edge_labels(fGraph,
 		pos = positions,
-		edge_labels = edgeTupleCurrentsPU,
+		edge_labels = edgeTupleRatings,
 		font_size = 8)
 	nodeIm = nx.draw_networkx_nodes(fGraph,
 		pos = positions,
@@ -225,7 +238,7 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 		cmap = plt.cm.coolwarm)
 	# nodeLabelsIm = nx.draw_networkx_labels(fGraph,
 	# 	pos = positions,
-	# 	labels = nodeVolts,
+	# 	labels = nodeNames,
 	# 	font_size = 8)
 
 	plt.sci(nodeIm)

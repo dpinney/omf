@@ -283,6 +283,8 @@ var maxBusID = -9999999;
 var maxBranchID = -9999999;
 var maxGenID = -9999999;
 
+var iToSVGLookup = {};
+var sVGToiLookup = {};
 function saveSvg() {
 	// Redirect to an .svg file that the user can save.
 	alert('We are redirecting you to a static version of the SVG that you can save as a .svg file.')
@@ -334,6 +336,11 @@ function addLine(x1,y1,x2,y2,id,myClass) {
 
 function buildNetwork() {
 	// Find the size we need for the full chart.
+
+	for(bus in networkData.bus) {
+		iToSVGLookup[networkData.bus[String(parseInt(bus))]['bus_i']] = String(parseInt(bus))
+		sVGToiLookup[String(parseInt(bus))] = networkData.bus[String(parseInt(bus))]['bus_i']
+	}
 	var maxLon = 100
 	var maxLat = 100
 	var busNumMap = {}
@@ -376,8 +383,6 @@ function buildNetwork() {
 	for (num in networkData.bus) {
 		try {
 			anOb = networkData.bus[num]
-			console.log(anOb)
-			console.log(anOb['bus_i'])
 			if(anOb['bus_i'] > maxBusID) {
 				maxBusID = anOb['bus_i']
 			}
@@ -717,7 +722,8 @@ function multiSelectionTable() {
 
 function newNode(typeOfNode) {
 	// Create a new node object.
-	newID = (Object.keys(networkData[typeOfNode]).length)+1
+	maxBusID = maxBusID + 1
+	newID = maxBusID
 	newBusGenObj = {}
 	newBusGenObj = {
 		longitude: "0",
@@ -813,20 +819,20 @@ function moveBusListener() {
 			}
 			// Redraw adjacent buses
 			r = 5
-			if(fBusID == selBusID) {
-				document.getElementById('bus_' + toBus).remove()
-				addCircle(x2,y2,r,"bus_"+String(toBus),"bus")
+			if(fBusID == selBus_i_ID) {
+				document.getElementById('bus_' + iToSVGLookup[tBusID]).remove()
+				addCircle(x2,y2,r,"bus_"+String(iToSVGLookup[tBusID]),"bus")
 				if(scaleTracker != 1.0) {
-					newCir = document.getElementById("bus_"+String(toBus))
+					newCir = document.getElementById("bus_"+String(iToSVGLookup[tBusID]))
 					newCir.setAttribute('r', 5*scaleTracker)
 					newCir.setAttribute('stroke-width', 0.5*scaleTracker)
 				}
 			}
-			if(tBusID == selBusID) {
-				document.getElementById('bus_' + fromBus).remove()
-				addCircle(x1,y1,r,"bus_"+String(fromBus),"bus")
+			if(tBusID == selBus_i_ID) {
+				document.getElementById('bus_' + iToSVGLookup[fBusID]).remove()
+				addCircle(x1,y1,r,"bus_"+String(iToSVGLookup[fBusID]),"bus")
 				if(scaleTracker != 1.0) {
-					newCir = document.getElementById("bus_"+String(fromBus))
+					newCir = document.getElementById("bus_"+String(iToSVGLookup[fBusID]))
 					newCir.setAttribute('r', 5*scaleTracker)
 					newCir.setAttribute('stroke-width', 0.5*scaleTracker)  
 				}     
@@ -890,7 +896,6 @@ function moveBusListener() {
 		busGenID = networkData.gen[String(parseInt(gen))]['bus']
 		//console.log(busGenID)
 		if(busGenID == selBus_i_ID) {
-			console.log("genny")
 			document.getElementById("gen_" + String(parseInt(gen))).remove() 
 			addRectangle(coords[0] - 4/2, coords[1] - 4/2, 4, 4, "gen_" + String(parseInt(gen)), "gen")
 			if(scaleTracker != 1.0) {
@@ -973,7 +978,8 @@ function newLink() {
 	busOne = selection[0].id.split("_")
 	busTwo = selection[1].id.split("_")
 	if (selection.length === 2 && String(busOne[0]) == "bus" && String(busTwo[0]) == "bus") {
-		var newCompID = (Object.keys(networkData.branch)).length + 1
+		maxBranchID = maxBranchID + 1
+		var newCompID = maxBranchID
 		var fBusID = parseInt(busOne[1])
 		var tBusID = parseInt(busTwo[1])
 		var newLink = {}
