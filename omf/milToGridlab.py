@@ -712,10 +712,9 @@ def convert(stdString,seqString):
 					impReal = '0.05'
 					impedance = impReal+"+"+impImag
 				if float(impImag.strip('j')) == 0:
-					print "Reactance for a transformer is 0:"
 					impImag = '0.02j'
 					impedance = impReal+"+"+impImag
-					print "Hacked it to:", str(impedance)
+					# print "Reactance for a transformer is 0, hacked it to:", str(impedance)
 				transConfig['impedance'] = impedance
 				# NOTE: Windmil doesn't export any information on install type, but Gridlab only puts it in there for info reasons.
 				# transformer[1]['install_type'] = 'POLETOP'
@@ -867,7 +866,7 @@ def convert(stdString,seqString):
 	for key in glmTree.keys():
 		# if ('from' in glmTree[key].keys() and 'to' not in glmTree[key].keys()) or ('to' in glmTree[key].keys() and 'from' not in glmTree[key].keys()):
 		if glmTree[key]['object'] in ['overhead_line','underground_line','regulator','transformer','switch','fuse'] and ('to' not in glmTree[key].keys() or 'from' not in glmTree[key].keys()):
-			# print [glmTree[key]['name'], glmTree[key]['object']]
+			# print 'Object borked connectivity', glmTree[key]['name'], glmTree[key]['object']
 			del glmTree[key]
 
 	#Strip guids:
