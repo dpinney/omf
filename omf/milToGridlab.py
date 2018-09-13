@@ -17,25 +17,6 @@ def _csvToArray(csvString):
 		outArray += [row]
 	return outArray
 
-def _convertToPixel():
-	''' By default, Windmil coords are in map feet. This function tries to fit them in to something that our D3 front end can display. TODO: update this to get a more lat/lon-like coordinate system. '''
-	x_list = []
-	y_list = []
-	x_pixel_range = 1200
-	y_pixel_range = 800
-	try:
-		for component in components:
-			x_list.append(float(component[5]))
-			y_list.append(float(component[6]))
-		# according to convert function  f(x) = a * x + b
-		x_a = x_pixel_range / (max(x_list) - min(x_list))
-		x_b = -x_a * min(x_list)
-		y_a = y_pixel_range / (max(y_list) - min(y_list))
-		y_b = -y_a * min(y_list)
-	except:
-		x_a,x_b,y_a,y_b = (0,0,0,0)
-	return x_a, x_b, y_a, y_b
-
 def _safeGet(arr, pos, default):
 	''' Return item at pos in arr, or if it fails return default. '''
 	try:
@@ -50,7 +31,7 @@ def _lineDistances(x1,x2,y1,y2):
 def convert(stdString,seqString):
 	''' Take in a .std and .seq strings from Milsoft and spit out a json dict.'''
 	start_time = time.time()
-	# print('*** Start Conversion', time.time()-start_time)
+	print('*** Start Conversion', time.time()-start_time)
 	# Get all components from the .std:
 	components = _csvToArray(stdString)[1:]
 	# Get all hardware stats from the .seq. We dropped the first rows which are metadata (n.b. there are no headers).
@@ -63,6 +44,25 @@ def convert(stdString,seqString):
 	# The number of allowable sub objects:
 	subObCount = 100
 	# Helper for lat/lon conversion.
+	def _convertToPixel():
+		''' By default, Windmil coords are in map feet. This function tries to fit them in to something that our D3 front end can display. TODO: update this to get a more lat/lon-like coordinate system. '''
+		x_list = []
+		y_list = []
+		x_pixel_range = 1200
+		y_pixel_range = 800
+		try:
+			for component in components:
+				x_list.append(float(component[5]))
+				y_list.append(float(component[6]))
+			print 'coordinate boundaries:', min(x_list), max(x_list), min(y_list), max(y_list)
+			# according to convert function  f(x) = a * x + b
+			x_a = x_pixel_range / (max(x_list) - min(x_list))
+			x_b = -x_a * min(x_list)
+			y_a = y_pixel_range / (max(y_list) - min(y_list))
+			y_b = -y_a * min(y_list)
+		except:
+			x_a,x_b,y_a,y_b = (0,0,0,0)
+		return x_a, x_b, y_a, y_b
 	[x_scale, x_b, y_scale, y_b] = _convertToPixel()
 	def obConvert(objectList):
 		''' take a row in the milsoft .std and turn it into a gridlab-type dict'''
@@ -855,7 +855,7 @@ def convert(stdString,seqString):
 		return True
 
 	# Fix the connectivity:
-	# print('*** Connectivity fixing start', time.time()-start_time)
+	print('*** Connectivity fixing start', time.time()-start_time)
 	guidToIndex = {convertedComponents[index].get('guid',''):index for index in range(len(convertedComponents))}
 	for comp in convertedComponents:
 		fixCompConnectivity(comp)
@@ -899,7 +899,7 @@ def convert(stdString,seqString):
 		else:
 			return False
 
-	# print('*** Link phase fixing', time.time()-start_time)
+	print('*** Link phase fixing', time.time()-start_time)
 	for key in glmTree:
 		fixLinkPhases(glmTree[key])
 
@@ -1008,7 +1008,7 @@ def convert(stdString,seqString):
 	# WARNING: this code creates broken GLMs. Disabled by default.
 	# glmTree = convDistLoadLines(glmTree)
 	# Fix nominal voltage
-	# print('*** Nominal voltage fixing', time.time()-start_time)
+	print('*** Nominal voltage fixing', time.time()-start_time)
 
 	# Make sure we have the latest index.
 	nameToIndex = {glmTree[key].get('name',''):key for key in glmTree}
@@ -1073,7 +1073,7 @@ def convert(stdString,seqString):
 		if 'object' in glmTree[x].keys() and glmTree[x]['object'] in del_nom_volt_list and 'nominal_voltage' in glmTree[x].keys():
 			del glmTree[x]['nominal_voltage']
 
-	# print('*** Secondary system fixing', time.time()-start_time)
+	print('*** Secondary system fixing', time.time()-start_time)
 	def secondarySystemFix(glm):
 		def unused_key(dic, key_multiplier):
 			free_key = (int(max(dic.keys())/key_multiplier) + 1)*key_multiplier
@@ -1267,7 +1267,7 @@ def convert(stdString,seqString):
 				if line['configuration'] in nameDictMap.keys(): line['configuration'] = nameDictMap[line['configuration']]
 
 	# Fully disembed and remove duplicate configuration objects:
-	# print('*** Disembed and dedup', time.time()-start_time)
+	print('*** Disembed and dedup', time.time()-start_time)
 	feeder.fullyDeEmbed(glmTree)
 	dedupGlm('transformer_configuration', glmTree)
 	dedupGlm('regulator_configuration', glmTree)
@@ -1311,7 +1311,7 @@ def convert(stdString,seqString):
 				thisOb['latitude'] = str(float(parentOb['latitude']) + random.uniform(-5,5))
 				thisOb['longitude'] = str(float(parentOb['longitude']) + random.uniform(-5,5))
 	# Final Output
-	# print('*** DONE!', time.time()-start_time)
+	print('*** DONE!', time.time()-start_time)
 	return glmTree
 
 
