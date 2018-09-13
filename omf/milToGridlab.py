@@ -876,16 +876,15 @@ def convert(stdString,seqString):
 
 	# First, make an index to massively speed up lookups.
 	nameToIndex = {glmTree[key].get('name',''):key for key in glmTree}
-	def fixLinkPhases(comp):		
+	def fixLinkPhases(comp):
 		def getByName(name):
 			targetIndex = nameToIndex[name]
 			return glmTree[targetIndex]
-		def phaseMin(x,y):
-			return ''.join(set(x).intersection(set(y)))
 		if comp['object'] in ['overhead_line','underground_line','regulator','transformer','switch','fuse']:
 			fromPhases = getByName(comp['from'])['phases']
 			toPhases = getByName(comp['to'])['phases']
-			comp['phases'] = phaseMin(fromPhases, toPhases)
+			# Minimal set of shared phases:
+			comp['phases'] = ''.join(set(fromPhases).intersection(set(toPhases)))
 			if 'N' in comp['phases'] and (comp['object'] == 'overhead_line' or comp['object'] == 'underground_line'):
 				key = 0
 				for y in comp.keys():
@@ -1011,8 +1010,6 @@ def convert(stdString,seqString):
 
 	# Make sure we have the latest index.
 	nameToIndex = {glmTree[key].get('name',''):key for key in glmTree}
-	def getByName(name):
-		return nameToIndex.get(name, None)
 	def fix_nominal_voltage(glm_dict, volt_dict):
 		for x in glm_dict:
 			if 'parent' in glm_dict[x].keys() and glm_dict[x]['parent'] in volt_dict.keys() and glm_dict[x]['name'] not in volt_dict.keys():
@@ -1028,7 +1025,7 @@ def convert(stdString,seqString):
 					glm_dict[x]['nominal_voltage'] = volt_dict[glm_dict[x]['from']]
 				volt_dict[glm_dict[x]['name']] = glm_dict[x]['nominal_voltage']
 				# Huh.
-				y = getByName(glm_dict[x]['to'])
+				y = nameToIndex.get(glm_dict[x]['to'], None)
 				if y is not None:
 					glm_dict[y]['nominal_voltage'] = glm_dict[x]['nominal_voltage']
 					volt_dict[glm_dict[y]['name']] = glm_dict[y]['nominal_voltage']
