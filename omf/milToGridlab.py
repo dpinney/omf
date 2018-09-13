@@ -735,7 +735,8 @@ def convert(stdString,seqString):
 					transConfig['powerC_rating'] = transList[21]
 			#MAYBEFIX: and change these, which were added to make the transformer work on multiple phases:
 			except ValueError, e:
-				print "ERROR FOR: ", e
+				pass
+				# print "ERROR FOR: ", e
 			return transformer
 		# Simple lookup table for which function we need to apply:
 		objectToFun = {
@@ -959,7 +960,8 @@ def convert(stdString,seqString):
 				try:
 					line_segment1['to'] = node12['name']
 				except:
-					print 'ERRRRRR', node12
+					pass
+					# print 'ERRRRRR', node12
 				line_segment2['name'] = glm_dict[y]['name'] + '_LINESG2'
 				line_segment2['length'] = str(float(glm_dict[y]['length'])*3/4)
 				line_segment2['from'] = node12['name']
@@ -1041,7 +1043,8 @@ def convert(stdString,seqString):
 								glm_dict[x][key]['band_center'] = nominalVoltageSwing
 								glm_dict[x][key]['band_width'] =  (bandWidthRegulator * nominalVoltageSwing) / 120
 			except:
-				print "\n   Couldn't set regulator_configuration to the swing bus nominal_voltage."
+				pass
+				# print "\n   Couldn't set regulator_configuration to the swing bus nominal_voltage."
 
 	parent_voltage = {}
 	current_parents = len(parent_voltage)
