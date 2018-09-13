@@ -803,14 +803,8 @@ function moveBusListener() {
 			document.getElementById("branch_" + String(parseInt(num))).remove()  
 			fromBus = networkData.bus[fBusID]
 			toBus = networkData.bus[tBusID]
-			for(busIDs in networkData.bus){
-				if(networkData.bus[busIDs]['bus_i'] == fBusID) {
-					fromBus = networkData.bus[busIDs]
-				}
-				if(networkData.bus[busIDs]['bus_i'] == tBusID) {
-					toBus = networkData.bus[busIDs]
-				}
-			}
+			var fromBus = networkData.bus[iToSVGLookup[fBusID]]
+			var toBus = networkData.bus[iToSVGLookup[tBusID]]
 			x1 = fromBus['longitude']
 			y1 = fromBus['latitude']
 			x2 = toBus['longitude']
