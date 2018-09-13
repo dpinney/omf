@@ -43,6 +43,10 @@ def _safeGet(arr, pos, default):
 	except:
 		return default
 
+def _lineDistances(x1,x2,y1,y2):
+	''' Calculate distance between two points. Divice by 12 is for a feet to inches conversion. '''
+	return math.sqrt((float(x1) - float(x2)) ** 2 + (float(y1) - float(y2)) ** 2) / 12
+
 def convert(stdString,seqString):
 	''' Take in a .std and .seq strings from Milsoft and spit out a json dict.'''
 	start_time = time.time()
@@ -304,12 +308,12 @@ def convert(stdString,seqString):
 				Dcn = 5.0
 			else:
 				# Find the distances in feet between each conductor
-				Dab = math.sqrt(((float(construction_stats[19]) - float(construction_stats[20]))*(float(construction_stats[19]) - float(construction_stats[20]))) + ((float(construction_stats[23]) - float(construction_stats[24]))*(float(construction_stats[23]) - float(construction_stats[24]))))/12
-				Dac = math.sqrt(((float(construction_stats[19]) - float(construction_stats[21]))*(float(construction_stats[19]) - float(construction_stats[21]))) + ((float(construction_stats[23]) - float(construction_stats[25]))*(float(construction_stats[23]) - float(construction_stats[25]))))/12
-				Dan = math.sqrt(((float(construction_stats[19]) - float(construction_stats[22]))*(float(construction_stats[19]) - float(construction_stats[22]))) + ((float(construction_stats[23]) - float(construction_stats[26]))*(float(construction_stats[23]) - float(construction_stats[26]))))/12
-				Dbc = math.sqrt(((float(construction_stats[20]) - float(construction_stats[21]))*(float(construction_stats[20]) - float(construction_stats[21]))) + ((float(construction_stats[24]) - float(construction_stats[25]))*(float(construction_stats[24]) - float(construction_stats[25]))))/12
-				Dbn = math.sqrt(((float(construction_stats[20]) - float(construction_stats[22]))*(float(construction_stats[20]) - float(construction_stats[22]))) + ((float(construction_stats[24]) - float(construction_stats[26]))*(float(construction_stats[24]) - float(construction_stats[26]))))/12
-				Dcn = math.sqrt(((float(construction_stats[21]) - float(construction_stats[22]))*(float(construction_stats[21]) - float(construction_stats[22]))) + ((float(construction_stats[25]) - float(construction_stats[26]))*(float(construction_stats[25]) - float(construction_stats[26]))))/12
+				Dab = _lineDistances(construction_stats[19],construction_stats[20], construction_stats[23], construction_stats[24])
+				Dac = _lineDistances(construction_stats[19],construction_stats[21], construction_stats[23], construction_stats[25])
+				Dan = _lineDistances(construction_stats[19],construction_stats[22], construction_stats[23], construction_stats[26])
+				Dbc = _lineDistances(construction_stats[20],construction_stats[21], construction_stats[24], construction_stats[25])
+				Dbn = _lineDistances(construction_stats[20],construction_stats[22], construction_stats[24], construction_stats[26])
+				Dcn = _lineDistances(construction_stats[21],construction_stats[22], construction_stats[25], construction_stats[26])
 			# Add distances to dictionary when appropriate
 			if 'A' in overhead['phases'] and 'B' in overhead['phases']:
 				if Dab > 0:
@@ -428,12 +432,12 @@ def convert(stdString,seqString):
 				Dcn = 5.0
 			else:
 				# Find the distances in feet between each conductor
-				Dab = math.sqrt(((float(construction_stats[19]) - float(construction_stats[20]))*(float(construction_stats[19]) - float(construction_stats[20]))) + ((float(construction_stats[23]) - float(construction_stats[24]))*(float(construction_stats[23]) - float(construction_stats[24]))))/12
-				Dac = math.sqrt(((float(construction_stats[19]) - float(construction_stats[21]))*(float(construction_stats[19]) - float(construction_stats[21]))) + ((float(construction_stats[23]) - float(construction_stats[25]))*(float(construction_stats[23]) - float(construction_stats[25]))))/12
-				Dan = math.sqrt(((float(construction_stats[19]) - float(construction_stats[22]))*(float(construction_stats[19]) - float(construction_stats[22]))) + ((float(construction_stats[23]) - float(construction_stats[26]))*(float(construction_stats[23]) - float(construction_stats[26]))))/12
-				Dbc = math.sqrt(((float(construction_stats[20]) - float(construction_stats[21]))*(float(construction_stats[20]) - float(construction_stats[21]))) + ((float(construction_stats[24]) - float(construction_stats[25]))*(float(construction_stats[24]) - float(construction_stats[25]))))/12
-				Dbn = math.sqrt(((float(construction_stats[20]) - float(construction_stats[22]))*(float(construction_stats[20]) - float(construction_stats[22]))) + ((float(construction_stats[24]) - float(construction_stats[26]))*(float(construction_stats[24]) - float(construction_stats[26]))))/12
-				Dcn = math.sqrt(((float(construction_stats[21]) - float(construction_stats[22]))*(float(construction_stats[21]) - float(construction_stats[22]))) + ((float(construction_stats[25]) - float(construction_stats[26]))*(float(construction_stats[25]) - float(construction_stats[26]))))/12
+				Dab = _lineDistances(construction_stats[19],construction_stats[20], construction_stats[23], construction_stats[24])
+				Dac = _lineDistances(construction_stats[19],construction_stats[21], construction_stats[23], construction_stats[25])
+				Dan = _lineDistances(construction_stats[19],construction_stats[22], construction_stats[23], construction_stats[26])
+				Dbc = _lineDistances(construction_stats[20],construction_stats[21], construction_stats[24], construction_stats[25])
+				Dbn = _lineDistances(construction_stats[20],construction_stats[22], construction_stats[24], construction_stats[26])
+				Dcn = _lineDistances(construction_stats[21],construction_stats[22], construction_stats[25], construction_stats[26])
 			# Add distances to dictionary when appropriate
 			if 'A' in underground['phases'] and 'B' in underground['phases']:
 				underground[myIndex+1][myIndex+2]['distance_AB'] = '{:0.6f}'.format(Dab)
