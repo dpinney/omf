@@ -468,8 +468,6 @@ function svgClick(event) {
 		multiSelectionTable()
 	}
 	previousTarget = event.target
-	console.log(previousTarget)
-	console.log(networkData)
 }
 
 function phaseCount(p) {
@@ -599,7 +597,6 @@ function deleteOb() {
 
 	// Delete Lines
 	if (clickType === 'branch') {
-		console.log(previousTarget)
 		previousTarget.remove()
 		delete networkData[clickType][clickID]
 	}
@@ -803,8 +800,6 @@ function moveBusListener() {
 		tBusID= selBranch['tbus']
 		if(fBusID == selBus_i_ID || tBusID == selBus_i_ID) {
 			// Redraw connected lines containing selected bus
-			console.log(num)
-			console.log("branch_" + String(parseInt(num)))
 			document.getElementById("branch_" + String(parseInt(num))).remove()  
 			fromBus = networkData.bus[fBusID]
 			toBus = networkData.bus[tBusID]
