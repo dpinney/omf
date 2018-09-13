@@ -126,6 +126,8 @@ def convert(stdString,seqString):
 			fuse = _convertGenericObject(ocDeviceList)
 			fuse['phases'] = ocDeviceList[2]
 			fuse['current_limit'] = '9999.0 A'
+			# To supress replacement time warnings that GridLAB-D *LOVES* to print:
+			fuse['mean_replacement_time'] = '3600.0'
 			# TODO: Figure out why code below causes convergence errors for some feeders.
 			# if 'OC' in fuse['name'] or 'FS' in fuse['name'] or 'NF14' in fuse['name']:
 			#   ocNameInSEQ = ocDeviceList[7]
