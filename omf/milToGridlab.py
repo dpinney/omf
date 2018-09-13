@@ -1009,6 +1009,11 @@ def convert(stdString,seqString):
 	# glmTree = convDistLoadLines(glmTree)
 	# Fix nominal voltage
 	# print('*** Nominal voltage fixing', time.time()-start_time)
+
+	# Make sure we have the latest index.
+	nameToIndex = {glmTree[key].get('name',''):key for key in glmTree}
+	def getByName(name):
+		return nameToIndex.get(name, None)
 	def fix_nominal_voltage(glm_dict, volt_dict):
 		for x in glm_dict:
 			if 'parent' in glm_dict[x].keys() and glm_dict[x]['parent'] in volt_dict.keys() and glm_dict[x]['name'] not in volt_dict.keys():
@@ -1023,10 +1028,11 @@ def convert(stdString,seqString):
 				else:
 					glm_dict[x]['nominal_voltage'] = volt_dict[glm_dict[x]['from']]
 				volt_dict[glm_dict[x]['name']] = glm_dict[x]['nominal_voltage']
-				for y in glm_dict:
-					if 'name' in glm_dict[y] and glm_dict[y]['name'] == glm_dict[x]['to']:
-						glm_dict[y]['nominal_voltage'] = glm_dict[x]['nominal_voltage']
-						volt_dict[glm_dict[y]['name']] = glm_dict[y]['nominal_voltage']
+				# Huh.
+				y = getByName(glm_dict[x]['to'])
+				if y is not None:
+					glm_dict[y]['nominal_voltage'] = glm_dict[x]['nominal_voltage']
+					volt_dict[glm_dict[y]['name']] = glm_dict[y]['nominal_voltage']
 			# Regulator_Configuration set to Swing
 			try:
 				if 'SWING' in glm_dict[x].values():
