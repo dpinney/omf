@@ -765,6 +765,8 @@ def convert(stdString,seqString):
 	# Convert to a list of dicts:
 	convertedComponents = [obConvert(x) for x in components]
 
+	# First, make an index to massively speed up lookups.
+	nameToIndex = {convertedComponents[index].get('name',''):index for index in range(len(convertedComponents))}
 	def fixCompConnectivity(comp):
 		''' Rejigger the connectivity attributes to work with Gridlab '''
 		# Different object connectivity classes:
@@ -772,7 +774,6 @@ def convert(stdString,seqString):
 		nodable = ['node']
 		parentable = ['capacitor','ZIPload','diesel_dg','load']
 		# Update our name index:
-		nameToIndex = {convertedComponents[index].get('name',''):index for index in range(len(convertedComponents))}
 		# Use GUID index.
 		def getByGuid(guid):
 			try:
@@ -782,11 +783,8 @@ def convert(stdString,seqString):
 				return {}
 		# Use name index.
 		def getByName(name):
-			try:
-				targetIndex = nameToIndex[name]
-				return convertedComponents[targetIndex]
-			except:
-				return {}
+			targetIndex = nameToIndex[name]
+			return convertedComponents[targetIndex]
 		def parentType(ob):
 			thing = getByGuid(ob['guid'])
 			parent = getByGuid(thing['parentGuid'])
@@ -825,6 +823,7 @@ def convert(stdString,seqString):
 					'longitude': comp['longitude']
 				}
 				convertedComponents.append(newNode)
+				nameToIndex[nodeName] = len(convertedComponents) - 1
 				parent['to'] = newNode['name']
 				comp['parent'] = newNode['name']
 		elif comp['object'] in fromToable and parentType(comp) in fromToable:
@@ -845,6 +844,7 @@ def convert(stdString,seqString):
 					'longitude': comp['longitude']
 				}
 				convertedComponents.append(newNode)
+				nameToIndex[nodeName] = len(convertedComponents) - 1
 				parent['to'] = newNode['name']
 				comp['from'] = newNode['name']
 		elif comp['object'] in nodable and parentType(comp) in fromToable:
@@ -875,13 +875,12 @@ def convert(stdString,seqString):
 		if 'guid' in glmTree[key]: del glmTree[key]['guid']
 		if 'parentGuid' in glmTree[key]: del glmTree[key]['parentGuid']
 
-	def fixLinkPhases(comp):
-		
-		nameToIndex = {glmTree[key].get('name',''):key for key in glmTree}
+	# First, make an index to massively speed up lookups.
+	nameToIndex = {glmTree[key].get('name',''):key for key in glmTree}
+	def fixLinkPhases(comp):		
 		def getByName(name):
 			targetIndex = nameToIndex[name]
 			return glmTree[targetIndex]
-
 		def phaseMin(x,y):
 			return ''.join(set(x).intersection(set(y)))
 		if comp['object'] in ['overhead_line','underground_line','regulator','transformer','switch','fuse']:
@@ -1343,7 +1342,7 @@ def _tests(
 		wipeBefore=True,
 		openPrefix = omf.omfDir + '/static/testFiles/',
 		outPrefix = omf.omfDir + '/scratch/milToGridlabTests/',
-		testFiles = [('Olin-Barre.std','Olin.seq'),('ABEC-FRANK.std','ABEC.seq'),('Olin-Brown.std','Olin.seq'),('INEC-GRAHAM.std','INEC.seq')],
+		testFiles = [('Olin-Barre.std','Olin.seq'),('Olin-Brown.std','Olin.seq'),('INEC-GRAHAM.std','INEC.seq')],
 		totalLength = 121,
 		testAttachments = {'schedules.glm':'', 'climate.tmy2':open(omf.omfDir + '/data/Climate/KY-LEXINGTON.tmy2','r').read()}
 	):
