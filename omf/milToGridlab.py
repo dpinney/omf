@@ -36,6 +36,14 @@ def convert(stdString,seqString):
 	components = _csvToArray(stdString)[1:]
 	# Get all hardware stats from the .seq. We dropped the first rows which are metadata (n.b. there are no headers).
 	hardwareStats = _csvToArray(seqString)[1:]
+	# List of all component names (to make sure we have uniqueness).
+	allNames = [x[0] for x in components]
+	def statsByName(deviceName):
+		''' Helper function to query the hardware csv. '''
+		for row in hardwareStats:
+			if row[0] == deviceName:
+				return row
+		return None	
 	# Use a default for nominal voltage, but try to set it to the source voltage if possible.
 	nominal_voltage = 14400
 	for ob in components:
@@ -66,18 +74,6 @@ def convert(stdString,seqString):
 	[x_scale, x_b, y_scale, y_b] = _convertToPixel()
 	def obConvert(objectList):
 		''' take a row in the milsoft .std and turn it into a gridlab-type dict'''
-
-		# -----------------------------------------------
-		# Globals and helper functions:
-		# -----------------------------------------------
-		allNames = [x[0] for x in components]
-
-		def statsByName(deviceName):
-			''' Helper function to query the hardware csv. '''
-			for row in hardwareStats:
-				if row[0] == deviceName:
-					return row
-			return None
 		def _convertGenericObject(objectList):
 			''' this converts attributes that are in every milsoft object regardless of hardware type. '''
 			newOb = {}
