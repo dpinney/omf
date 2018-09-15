@@ -9,6 +9,7 @@ omfDir=os.path.dirname(os.path.dirname(__file__))
 # DISTRIBUTION FEEDER FUNCTIONS
 def distPseudomizeNames(inFeeder):
 	''' Replace all names in the inFeeder distribution system with pseudonames composed from the object type and a random ID. Return a key with name and ID pairs. '''
+	#PLOT TWIST: doesnt work. Lineconfig issue
 	newNameKey = {}
 	randomID = random.randint(0,100)
 	# Create nameKey dictionary
@@ -163,7 +164,7 @@ def distTranslateLocations(inFeeder, translationRight, translationUp, rotation):
 
 def distAddNoise(inFeeder, noisePerc):
 	''' Add random noise to properties with numeric values for all objects in the inFeeder distribution system based on a noisePerc magnitude. '''
-	#Problem? Adding noise to names causes duplicates which breaks feeder. NOT WORKINFG
+	#Straihgt up doesnt work NOT WORKINFG. Lineconfig issue
 	noisePerc = float(noisePerc)
 	for key in inFeeder['tree']:
 		for prop in inFeeder['tree'][key]:
@@ -190,6 +191,7 @@ def distAddNoise(inFeeder, noisePerc):
 
 def distShuffleLoads(inFeeder, shufPerc):
 	''' Shuffle the parent properties between all load objects in the inFeeder distribution system. '''
+	#Works 
 	shufPerc = float(shufPerc)
 	houseParents = []
 	zipParents = []
@@ -279,6 +281,7 @@ def distShuffleLoads(inFeeder, shufPerc):
 
 def distModifyTriplexLengths(inFeeder):
 	''' Modifies triplex line length and diameter properties while preserving original impedance in the inFeeder distribution system. '''
+	print "distModifyTriplexLengths activated!"
 	tLookup = {}
 	for key in inFeeder['tree']:
 		tDict = {}
@@ -318,6 +321,7 @@ def distModifyTriplexLengths(inFeeder):
 
 def distModifyConductorLengths(inFeeder):
 	''' Modifies conductor length and diameter properties while preserving original impedance in the inFeeder distribution system. '''
+	#Works totally fine
 	uLookup = {}
 	oLookup = {}
 	for key in inFeeder['tree']:
@@ -434,7 +438,7 @@ def distSmoothLoads(inFeeder):
 
 # TRANSMISSION NETWORK FUNCTIONS 
 def tranPseudomizeNames(inNetwork):
-	#May break after shuffling loads
+	#Works totally fine
 	''' Replace all names in the inNetwork transmission system with pseudonames composed of the object type and a random ID. Return a key with name and ID pairs. '''
 	newBusKey = {}
 	randomID = random.randint(0,100)
@@ -462,7 +466,7 @@ def tranPseudomizeNames(inNetwork):
 			inNetwork['branch'][i]['tbus'] = newBusKey[oldTo]
 	return newBusKey
 def tranRandomizeNames(inNetwork):
-	#Doesnt workl after shuffling loads
+	#Works Totally fine
 	''' Replace all names in the inNetwork transmission system with pseudonames composed of the object type and a random ID. '''
 	'''pretty sure this makes no sense at all, current data structure has no object types'''
 	newBusKey = {}
@@ -557,7 +561,7 @@ def tranTranslateLocations(inNetwork, translationRight, translationUp, rotation)
 
 def tranAddNoise(inNetwork, noisePerc):
 	''' Add random noise to properties with numeric values for all objects in the inNetwork transmission system based on a noisePerc magnitude. '''
-	#NOT WORKING NO IDEA WHY
+	#Fixed, but breaks transmission when it scrambles numbers enough to break MatPower
 	noisePerc = float(noisePerc)
 	for array in inNetwork:
 		if (array == 'bus') or (array == 'gen') or (array == 'branch'):
