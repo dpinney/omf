@@ -8,12 +8,16 @@
 	<array>
 		<dict>
 			<key>CFBundleTypeExtensions</key>
-			<array/>
+			<array>
+				<string>omd</string>
+				<string>glm</string>
+			</array>
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
 			<key>LSItemContentTypes</key>
 			<array>
 				<string>public.item</string>
+				<string>public.folder</string>
 			</array>
 		</dict>
 	</array>
@@ -45,7 +49,7 @@
 		<true/>
 	</dict>
 	<key>NSHumanReadableCopyright</key>
-	<string>© 2017 David Pinney</string>
+	<string>© 2018 David Pinney</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
