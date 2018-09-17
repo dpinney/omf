@@ -1343,6 +1343,7 @@ def _latCount(name):
 def _tests(
 		keepFiles=False,
 		wipeBefore=True,
+		summaryFile='convResults.txt',
 		openPrefix = omf.omfDir + '/static/testFiles/',
 		outPrefix = omf.omfDir + '/scratch/milToGridlabTests/',
 		testFiles = [('Olin-Barre.std','Olin.seq'),('Olin-Brown.std','Olin.seq'),('INEC-GRAHAM.std','INEC.seq')],
@@ -1370,7 +1371,7 @@ def _tests(
 	for stdString, seqString in testFiles:
 		cur_start_time = time.time()
 		# Write the time info.
-		with open('convResults.txt', 'a') as resultsFile:
+		with open(summaryFile, 'a') as resultsFile:
 			local_time = reference.LocalTimezone()
 			now = datetime.datetime.now()
 			resultsFile.write(str(now)[0:19] + " at timezone: " + str(local_time.tzname(now)) + '\n')
@@ -1385,7 +1386,7 @@ def _tests(
 				outFileStats = os.stat(outPrefix + stdString.replace('.std','.glm') )
 			print 'WROTE GLM FOR', stdString
 			# Write the size of the files as a indicator of how good the conversion was.
-			with open('convResults.txt', 'a') as resultsFile:
+			with open(summaryFile, 'a') as resultsFile:
 				inFileStats = os.stat(pJoin(openPrefix,stdString))
 				inFileSize = inFileStats.st_size
 				outFileSize = outFileStats.st_size
@@ -1393,7 +1394,7 @@ def _tests(
 				resultsFile.write('WROTE GLM FOR ' + stdString + ', THE STD FILE IS %s PERCENT OF THE GLM FILE.\n' % str(100*percent)[0:4])
 		except:
 			print 'FAILED CONVERTING', stdString
-			with open('convResults.txt','a') as resultsFile:
+			with open(summaryFile,'a') as resultsFile:
 					resultsFile.write('FAILED CONVERTING ' + stdString + "\n")
 		try:
 			# Draw the GLM.
@@ -1403,11 +1404,11 @@ def _tests(
 			feeder.latLonNxGraph(myGraph, neatoLayout=False)
 			plt.savefig(outPrefix + stdString.replace('.std','.png'))
 			print 'DREW GLM OF', stdString
-			with open('convResults.txt','a') as resultsFile:
+			with open(summaryFile,'a') as resultsFile:
 				resultsFile.write('DREW GLM FOR ' + stdString + "\n")
 		except:
 			print 'FAILED DRAWING', stdString
-			with open('convResults.txt','a') as resultsFile:
+			with open(summaryFile,'a') as resultsFile:
 				resultsFile.write('FAILED DRAWING ' + stdString + "\n")
 		try:
 			# Run powerflow on the GLM.
@@ -1421,19 +1422,19 @@ def _tests(
 				json.dump(output, outFile, indent=4)
 				outFile.truncate()
 			print 'RAN GRIDLAB ON', stdString
-			with open('convResults.txt', 'a') as resultsFile:
+			with open(summaryFile, 'a') as resultsFile:
 				resultsFile.write('RAN GRIDLAB ON ' + stdString + "\n")
 		except Exception as e:
 			print 'POWERFLOW FAILED', stdString
-			with open('convResults.txt','a') as resultsFile:
+			with open(summaryFile,'a') as resultsFile:
 				resultsFile.write('POWERFLOW FAILED ' + stdString + "\n")
 		# Write time info.
-		with open('convResults.txt','a') as resultsFile:
+		with open(summaryFile,'a') as resultsFile:
 			resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
 			resultsFile.write("====================================================================================\n")
 			timeArray.append(time.time() - cur_start_time)
 	# Write stats for all tests.
-	with open('convResults.txt', 'a') as resultsFile:
+	with open(summaryFile, 'a') as resultsFile:
 		resultsFile.write('Ran %d out of %d tests for this simulation.\n' % (len(testFiles), totalLength))
 		resultsFile.write('Total time of %d simulations is: %d seconds.' % (len(timeArray), sum(timeArray)) + '\n')
 		resultsFile.write("====================================================================================\n")
