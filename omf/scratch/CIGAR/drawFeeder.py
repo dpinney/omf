@@ -36,7 +36,6 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 
 	#dictionary to hold info on lines present in glm
 	edge_bools = dict.fromkeys(['underground_line','overhead_line','triplex_line','transformer','regulator'], False)
-	# edge_type_pow = ['transformer','regulator']
 
 	# # Get rid of schedules and climate and check for all edge types:
 	for key in tree.keys():
@@ -74,14 +73,6 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 				'property':'continuous_rating',
 				'file':key+'_cont_rating.csv'
 			}
-			# if key in edge_type_pow:
-			# 	tree[omf.feeder.getMaxKey(tree) + 1] = {
-			# 	'object':'group_recorder', 
-			# 	'group':'"class='+key+'"',
-			# 	'limit':1,
-			# 	'property':'power_in', #need to change to a property for nominal volt amps
-			# 	'file':key+'_nom_power.csv'
-			# }
 	# Run Gridlab.
 	if not workDir:
 		workDir = tempfile.mkdtemp()
@@ -112,8 +103,6 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 	# read line rating values into a single dictionary
 	lineRatings = {}
 	rating_in_VA = []
-	#read simulated line power values of certain edges into dict
-	# line_power = {}
 	for key1 in edge_bools.keys():
 		if edge_bools[key1]:		
 			with open(pJoin(workDir,key1+'_cont_rating.csv'),'r') as ratingFile:
@@ -130,22 +119,6 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 						vals.pop(i)
 				for pos,key2 in enumerate(keys):
 					lineRatings[key2] = abs(float(vals[pos]))
-			# 		if key1 in edge_type_pow:
-			# 			rating_in_VA.append(key2)
-			# if key1 in edge_type_pow:
-			# 	with open(pJoin(workDir,key1+'_nom_power.csv'),'r') as powerFile:
-			# 		reader = csv.reader(powerFile)
-			# 		keys = []
-			# 		vals = []
-			# 		for row in reader:
-			# 			if '# timestamp' in row:
-			# 				keys = row
-			# 				i = keys.index('# timestamp')
-			# 				keys.pop(i)
-			# 				vals = reader.next()
-			# 				vals.pop(i)
-			# 		for pos,key2 in enumerate(keys):
-			# 			line_power[key2] = abs(complex(vals[pos]))
 	#edgeTupleRatings = lineRatings copy with to-from tuple as keys for labeling
 	edgeTupleRatings = {}
 	for edge in lineRatings:
@@ -179,7 +152,6 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 			if phaseVolt != 0.0:
 				# Normalize to 120 V standard
 				phaseVolt = (phaseVolt/feedVoltage)
-				print phase, phaseVolt, feedVoltage
 				allVolts.append(phaseVolt)
 		nodeVolts[row.get('node_name','')] = float("{0:.2f}".format(avg(allVolts)))
 		# Use float("{0:.2f}".format(avg(allVolts))) if displaying the node labels
@@ -220,10 +192,6 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 				currVal = edgeCurrentSum.get(edge)
 				voltVal = avg([nodeVolts.get(nodeFrom), nodeVolts.get(nodeTo)])
 				lineRating = lineRatings.get(edge)
-				# check if rating is in VA
-				# if obname in rating_in_VA:
-				# 	edgePerUnitVal = line_power[obname]/(lineRating *1000)
-				# else:
 				edgePerUnitVal = (edgeCurrentMax.get(edge))/lineRating
 				edgeTupleCurrents[coord] = "{0:.2f}".format(currVal)
 				edgeTuplePower[coord] = "{0:.2f}".format((currVal * voltVal)/1000)
