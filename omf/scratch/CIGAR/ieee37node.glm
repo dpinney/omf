@@ -449,7 +449,7 @@ object node {
 	 voltage_A 2504.88-1446.19314229j;
 	 voltage_B -2504.88-1446.19314229j;
 	 voltage_C -44.88+2814.65184433j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object node {
@@ -458,7 +458,7 @@ object node {
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object node {
@@ -467,7 +467,7 @@ object node {
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object node {
@@ -476,7 +476,7 @@ object node {
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object node {
@@ -485,7 +485,7 @@ object node {
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object node {
@@ -494,7 +494,7 @@ object node {
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object node {
@@ -503,7 +503,7 @@ object node {
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object node {
@@ -512,7 +512,7 @@ object node {
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object node {
@@ -521,7 +521,7 @@ object node {
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object node {
@@ -530,7 +530,7 @@ object node {
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object node {
@@ -539,7 +539,7 @@ object node {
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 //Create loads
@@ -552,7 +552,7 @@ object load {
 	 constant_power_A 140000.000000+70000.000000j;
 	 constant_power_B 140000.000000+70000.000000j;
 	 constant_power_C 350000.000000+175000.000000j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object load {
@@ -562,7 +562,7 @@ object load {
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
 	 constant_power_C 85000.000000+40000.000000j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object load {
@@ -572,7 +572,7 @@ object load {
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
 	 constant_power_C 85000.000000+40000.000000j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object load {
@@ -583,7 +583,7 @@ object load {
 	 voltage_C 0.000000+2771.281292j;
 	 constant_current_A 3.541667 -1.666667j;
 	 constant_current_B -3.991720 -2.747194j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object load {
@@ -593,7 +593,7 @@ object load {
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
 	 constant_impedance_A 221.915014+104.430595j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object load {
@@ -603,7 +603,7 @@ object load {
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
 	 constant_power_C 85000.000000+40000.000000j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object load {
@@ -614,7 +614,7 @@ object load {
 	 voltage_C 0.000000+2771.281292j;
 	 constant_current_B -27.212870 -17.967408j;
 	 constant_current_C -0.383280+4.830528j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object load {
@@ -624,7 +624,7 @@ object load {
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
 	 constant_impedance_B 438.857143+219.428571j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object load {
@@ -634,7 +634,7 @@ object load {
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
 	 constant_power_B 42000.000000+21000.000000j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object load {
@@ -644,7 +644,7 @@ object load {
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
 	 constant_power_C 42000.000000+21000.000000j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object load {
@@ -656,7 +656,7 @@ object load {
 	 constant_power_A 42000.000000+21000.000000j;
 	 constant_power_B 42000.000000+21000.000000j;
 	 constant_power_C 42000.000000+21000.000000j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object load {
@@ -666,7 +666,7 @@ object load {
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
 	 constant_current_A 8.750000 -4.375000j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object load {
@@ -676,7 +676,7 @@ object load {
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
 	 constant_impedance_C 221.915014+104.430595j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object load {
@@ -686,7 +686,7 @@ object load {
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
 	 constant_impedance_B 221.915014+104.430595j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object load {
@@ -696,7 +696,7 @@ object load {
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
 	 constant_power_C 42000.000000+21000.000000j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object load {
@@ -706,7 +706,7 @@ object load {
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
 	 constant_current_A 17.708333 -8.333333j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object load {
@@ -716,7 +716,7 @@ object load {
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
 	 constant_power_C 42000.000000+21000.000000j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object load {
@@ -726,7 +726,7 @@ object load {
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
 	 constant_power_C 85000.000000+40000.000000j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object load {
@@ -736,7 +736,7 @@ object load {
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
 	 constant_impedance_B 438.857143+219.428571j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object load {
@@ -746,7 +746,7 @@ object load {
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
 	 constant_current_A 29.166667 -14.583333j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object load {
@@ -756,7 +756,7 @@ object load {
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
 	 constant_power_A 126000.000000+62000.000000j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object load {
@@ -766,7 +766,7 @@ object load {
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
 	 constant_power_C 85000.000000+40000.000000j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object load {
@@ -776,7 +776,7 @@ object load {
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
 	 constant_current_C -0.586139+9.765222j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object load {
@@ -787,7 +787,7 @@ object load {
 	 voltage_C 0.000000+2771.281292j;
 	 constant_impedance_A 2304.000000+1152.000000j;
 	 constant_impedance_B 221.915014+104.430595j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 
 object load {
@@ -797,7 +797,7 @@ object load {
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
 	 constant_power_A 42000.000000+21000.000000j;
-	 nominal_voltage 4800;
+	 nominal_voltage 2800;
 }
 // This load is a attached to a node by parenting it to a node.
 object load {
