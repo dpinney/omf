@@ -36,6 +36,7 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 
 	#dictionary to hold info on lines present in glm
 	edge_bools = dict.fromkeys(['underground_line','overhead_line','triplex_line','transformer','regulator'], False)
+	edge_type_pow = ['transformer','regulator']
 
 	# # Get rid of schedules and climate and check for all edge types:
 	for key in tree.keys():
@@ -73,6 +74,14 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 				'property':'continuous_rating',
 				'file':key+'_cont_rating.csv'
 			}
+			# if key in edge_type_pow:
+			# 	tree[omf.feeder.getMaxKey(tree) + 1] = {
+			# 	'object':'group_recorder', 
+			# 	'group':'"class='+key+'"',
+			# 	'limit':1,
+			# 	'property':'continuous_rating', #need to change to a property for nominal volt amps
+			# 	'file':key+'_nom_power.csv'
+			# }
 	# Run Gridlab.
 	if not workDir:
 		workDir = tempfile.mkdtemp()
@@ -102,9 +111,10 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 			currTable.append(rowDict)
 	# read line rating values into a single dictionary
 	lineRatings = {}
-	for key in edge_bools.keys():
-		if edge_bools[key]:		
-			with open(pJoin(workDir,key+'_cont_rating.csv'),'r') as ratingFile:
+	rating_in_VA = []
+	for key1 in edge_bools.keys():
+		if edge_bools[key1]:		
+			with open(pJoin(workDir,key1+'_cont_rating.csv'),'r') as ratingFile:
 				reader = csv.reader(ratingFile)
 				# loop past the header, 
 				keys = []
@@ -116,8 +126,25 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 						keys.pop(i)
 						vals = reader.next()
 						vals.pop(i)
-				for pos,key in enumerate(keys):
-					lineRatings[key] = abs(float(vals[pos]))
+				for pos,key2 in enumerate(keys):
+					lineRatings[key2] = abs(float(vals[pos]))
+					if key1 in edge_type_pow:
+						rating_in_VA.append(key2)
+			# if key1 in edge_type_pow:
+			# 	with open(pJoin(workDir,key1+'_nom_power.csv'),'r') as powerFile:
+			# 		reader = csv.reader(ratingFile)
+			# 		keys = []
+			# 		vals = []
+			# 		for row in reader:
+			# 			if '# timestamp' in row:
+			# 				keys = row
+			# 				i = keys.index('# timestamp')
+			# 				keys.pop(i)
+			# 				vals = reader.next()
+			# 				vals.pop(i)
+			# 		for pos,key2 in enumerate(keys):
+			# 			line_power[key2] = abs(float(vals[pos]))
+			# 			edge_name_pow_bool[key2] = True
 	#edgeTupleRatings = lineRatings copy with to-from tuple as keys for labeling
 	edgeTupleRatings = {}
 	for edge in lineRatings:
@@ -148,7 +175,6 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 			realVolt = abs(float(row['volt'+phase+'_real']))
 			imagVolt = abs(float(row['volt'+phase+'_imag']))
 			phaseVolt = math.sqrt((realVolt ** 2) + (imagVolt ** 2))
-			print(row,phaseVolt)
 			if phaseVolt != 0.0:
 				# Normalize to 120 V standard
 				phaseVolt = 2 * (phaseVolt/feedVoltage)
@@ -174,32 +200,36 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 
 	#edgeTupleCurrents = edgeCurrents copy with to-from tuple as keys for labeling
 	edgeTupleCurrents = {}
-	#edgeCurrentsPU = values normalized per unit by line ratings
-	edgeCurrentsPU = {}
-	#edgeTupleCurrentsPU = edgeCurrentsPU copy with to-from tuple as keys for labeling
-	edgeTupleCurrentsPU = {}
+	#edgeValsPU = values normalized per unit by line ratings
+	edgeValsPU = {}
+	#edgeTupleValsPU = edgeValsPU copy with to-from tuple as keys for labeling
+	edgeTupleValsPU = {}
 	#edgeTuplePower = dict with to-from tuples as keys and sim power as values for debugging
 	edgeTuplePower = {}
 	#edgeTupleNames = dict with to-from tuples as keys and names as values for debugging
 	edgeTupleNames = {}
 	for edge in edgeCurrentSum:
 		for obj in tree.values():
-			if obj.get('name','').replace('"','') == edge:
+			obname = obj.get('name','').replace('"','')
+			if obname == edge:
 				nodeFrom = obj.get('from')
 				nodeTo = obj.get('to')
 				coord = (nodeFrom, nodeTo)
 				currVal = edgeCurrentSum.get(edge)
 				voltVal = avg([nodeVolts.get(nodeFrom), nodeVolts.get(nodeTo)])
 				lineRating = lineRatings.get(edge)
-				currValPU = (edgeCurrentMax.get(edge))/lineRating
+				if obname in rating_in_VA:
+					edgePerUnitVal = (voltVal * edgeCurrentMax.get(edge))/lineRating
+				else:
+					edgePerUnitVal = (edgeCurrentMax.get(edge))/lineRating
 				edgeTupleCurrents[coord] = "{0:.2f}".format(currVal)
 				edgeTuplePower[coord] = "{0:.2f}".format((currVal * voltVal)/1000)
-				edgeCurrentsPU[edge] = currValPU
-				edgeTupleCurrentsPU[coord] = "{0:.2f}".format(currValPU)
+				edgeValsPU[edge] = edgePerUnitVal
+				edgeTupleValsPU[coord] = "{0:.2f}".format(edgePerUnitVal)
 				edgeTupleNames[coord] = edge
 
 	#define which dict will be used for edge line color
-	edgeColors = edgeCurrentsPU
+	edgeColors = edgeValsPU
 	#define which dict will be used for edge label
 	edgeLabels = edgeTupleCurrents
 
