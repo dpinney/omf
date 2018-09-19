@@ -1349,7 +1349,7 @@ def _tests(
 		testFiles = [('Olin-Barre.std','Olin.seq'),('Olin-Brown.std','Olin.seq'),('INEC-GRAHAM.std','INEC.seq')],
 		totalLength = 121,
 		testAttachments = {'schedules.glm':'', 'climate.tmy2':open(omf.omfDir + '/data/Climate/KY-LEXINGTON.tmy2','r').read()},
-		fileSuffix = None
+		fileSuffix = '',
 	):
 	''' Test convert every windmil feeder we have (in static/testFiles). '''
 	# testFiles = [('INEC-RENOIR.std','INEC.seq'), ('INEC-GRAHAM.std','INEC.seq'),
@@ -1412,10 +1412,6 @@ def _tests(
 			print 'FAILED DRAWING', stdString
 			with open(fileName,'a') as resultsFile:
 				resultsFile.write('DREW GLM FOR ' + stdString + "\n")
-		except:
-			print 'FAILED DRAWING', stdString
-			with open(fileName, 'a') as resultsFile:
-				resultsFile.write('FAILED DRAWING ' + stdString + "\n")
 		try:
 			# Run powerflow on the GLM.
 			output = gridlabd.runInFilesystem(outGlm, attachments=testAttachments, keepFiles=False)
@@ -1436,12 +1432,6 @@ def _tests(
 				resultsFile.write('POWERFLOW FAILED ' + stdString + "\n")
 		# Write time info.
 		with open(fileName,'a') as resultsFile:
-			resultsFile.write('RAN GRIDLAB ON ' + stdString + "\n")
-		except Exception as e:
-			print 'POWERFLOW FAILED', stdString
-			with open(summaryFile,'a') as resultsFile:
-				resultsFile.write('POWERFLOW FAILED ' + stdString + "\n")
-		# Write time info.
 			resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
 			resultsFile.write("====================================================================================\n")
 			timeArray.append(time.time() - cur_start_time)
