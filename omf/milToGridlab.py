@@ -1343,6 +1343,7 @@ def _latCount(name):
 def _tests(
 		keepFiles=False,
 		wipeBefore=True,
+		summaryFile='convResults.txt',
 		openPrefix = omf.omfDir + '/static/testFiles/',
 		outPrefix = omf.omfDir + '/scratch/milToGridlabTests/',
 		testFiles = [('Olin-Barre.std','Olin.seq'),('Olin-Brown.std','Olin.seq'),('INEC-GRAHAM.std','INEC.seq')],
@@ -1410,6 +1411,10 @@ def _tests(
 		except:
 			print 'FAILED DRAWING', stdString
 			with open(fileName,'a') as resultsFile:
+				resultsFile.write('DREW GLM FOR ' + stdString + "\n")
+		except:
+			print 'FAILED DRAWING', stdString
+			with open(fileName, 'a') as resultsFile:
 				resultsFile.write('FAILED DRAWING ' + stdString + "\n")
 		try:
 			# Run powerflow on the GLM.
@@ -1431,6 +1436,12 @@ def _tests(
 				resultsFile.write('POWERFLOW FAILED ' + stdString + "\n")
 		# Write time info.
 		with open(fileName,'a') as resultsFile:
+			resultsFile.write('RAN GRIDLAB ON ' + stdString + "\n")
+		except Exception as e:
+			print 'POWERFLOW FAILED', stdString
+			with open(summaryFile,'a') as resultsFile:
+				resultsFile.write('POWERFLOW FAILED ' + stdString + "\n")
+		# Write time info.
 			resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
 			resultsFile.write("====================================================================================\n")
 			timeArray.append(time.time() - cur_start_time)
