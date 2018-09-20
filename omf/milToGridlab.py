@@ -1343,7 +1343,7 @@ def _latCount(name):
 def _tests(
 		keepFiles=False,
 		wipeBefore=True,
-		summaryFile='convResults.txt',
+		summaryFile='currentConvResults.txt',
 		openPrefix = omf.omfDir + '/static/testFiles/',
 		outPrefix = omf.omfDir + '/scratch/milToGridlabTests/',
 		testFiles = [('Olin-Barre.std','Olin.seq'),('Olin-Brown.std','Olin.seq'),('INEC-GRAHAM.std','INEC.seq')],
@@ -1358,8 +1358,9 @@ def _tests(
 	# setlocale lives here to avoid changing it globally 
 	# locale.setlocale(locale.LC_ALL, 'en_US')
 	# Variables for the testing.
-	fileName = 'convResults' + str(fileSuffix) + '.txt'
+	fileName = summaryFile + ' ' + str(fileSuffix)
 	timeArray = []
+	statData = []
 	# Create the work directory.
 	if wipeBefore:
 		try:
@@ -1371,6 +1372,8 @@ def _tests(
 			os.mkdir(outPrefix)
 	# Run all the tests.
 	for stdString, seqString in testFiles:
+		curData = {} # Append data for this std file here.
+		curData['file'] = stdString
 		cur_start_time = time.time()
 		# Write the time info.
 		with open(fileName, 'a') as resultsFile:
@@ -1393,6 +1396,7 @@ def _tests(
 				inFileSize = inFileStats.st_size
 				outFileSize = outFileStats.st_size
 				percent = float(inFileSize)/float(outFileSize)
+				curData['percentage'] = percent
 				resultsFile.write('WROTE GLM FOR ' + stdString + ', THE STD FILE IS %s PERCENT OF THE GLM FILE.\n' % str(100*percent)[0:4])
 		except:
 			print 'FAILED CONVERTING', stdString
@@ -1426,22 +1430,31 @@ def _tests(
 			print 'RAN GRIDLAB ON', stdString
 			with open(fileName, 'a') as resultsFile:
 				resultsFile.write('RAN GRIDLAB ON ' + stdString + "\n")
+				resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
+				curData['running_time'] = time.time() - cur_start_time
+				curData['isGridlabSuccess'] = True
+				resultsFile.write("====================================================================================\n")
+				timeArray.append(time.time() - cur_start_time)
 		except Exception as e:
 			print 'POWERFLOW FAILED', stdString
 			with open(fileName,'a') as resultsFile:
 				resultsFile.write('POWERFLOW FAILED ' + stdString + "\n")
-		# Write time info.
-		with open(fileName,'a') as resultsFile:
-			resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
-			resultsFile.write("====================================================================================\n")
-			timeArray.append(time.time() - cur_start_time)
+				curData['running_time'] = time.time() - cur_start_time
+				curData['isGridlabSuccess'] = False
+				resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
+				resultsFile.write("====================================================================================\n")
+				timeArray.append(time.time() - cur_start_time)
+
 	# Write stats for all tests.
+		statData.append(curData)
 	with open(fileName, 'a') as resultsFile:
 		resultsFile.write('Ran %d out of %d tests for this simulation.\n' % (len(testFiles), totalLength))
 		resultsFile.write('Total time of %d simulations is: %d seconds.' % (len(timeArray), sum(timeArray)) + '\n')
 		resultsFile.write("====================================================================================\n")
 	if not keepFiles:
 		shutil.rmtree(outPrefix)
+	return statData
 
 if __name__ == "__main__":
+
 	_tests()
