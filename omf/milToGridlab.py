@@ -1399,6 +1399,7 @@ def _tests(
 				resultsFile.write('WROTE GLM FOR ' + stdString + ', THE STD FILE IS %s PERCENT OF THE GLM FILE.\n' % str(100*percent)[0:4])
 		except:
 			print 'FAILED CONVERTING', stdString
+			curData['percentage'] = 0.0
 			with open(fileName,'a') as resultsFile:
 					resultsFile.write('FAILED CONVERTING ' + stdString + "\n")
 		try:
@@ -1430,7 +1431,6 @@ def _tests(
 			with open(fileName, 'a') as resultsFile:
 				resultsFile.write('RAN GRIDLAB ON ' + stdString + "\n")
 				resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
-				curData['running_time'] = time.time() - cur_start_time
 				curData['isGridlabSuccess'] = True
 				resultsFile.write("====================================================================================\n")
 				timeArray.append(time.time() - cur_start_time)
@@ -1438,12 +1438,12 @@ def _tests(
 			print 'POWERFLOW FAILED', stdString
 			with open(fileName,'a') as resultsFile:
 				resultsFile.write('POWERFLOW FAILED ' + stdString + "\n")
-				curData['running_time'] = time.time() - cur_start_time
 				curData['isGridlabSuccess'] = False
 				resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
 				resultsFile.write("====================================================================================\n")
 				timeArray.append(time.time() - cur_start_time)
-	# Write stats for all tests.
+		# Write stats for all tests.
+		curData['running_time'] = time.time() - cur_start_time
 		statData.append(curData)
 	with open(fileName, 'a') as resultsFile:
 		resultsFile.write('Ran %d out of %d tests for this simulation.\n' % (len(testFiles), totalLength))
