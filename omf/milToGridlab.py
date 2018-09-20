@@ -1341,9 +1341,8 @@ def _latCount(name):
 	print name, 'COUNT', nameCount, 'LAT COUNT', latCount, 'SUCCESS RATE', 1.0*latCount/nameCount
 
 def _tests(
-		keepFiles=False,
-		wipeBefore=True,
-		summaryFile='currentConvResults.txt',
+		keepFiles = False,
+		wipeBefore = True,
 		openPrefix = omf.omfDir + '/static/testFiles/',
 		outPrefix = omf.omfDir + '/scratch/milToGridlabTests/',
 		testFiles = [('Olin-Barre.std','Olin.seq'),('Olin-Brown.std','Olin.seq'),('INEC-GRAHAM.std','INEC.seq')],
@@ -1358,7 +1357,7 @@ def _tests(
 	# setlocale lives here to avoid changing it globally 
 	# locale.setlocale(locale.LC_ALL, 'en_US')
 	# Variables for the testing.
-	fileName = summaryFile + ' ' + str(fileSuffix)
+	fileName = 'convResults.txt' + str(fileSuffix)
 	timeArray = []
 	statData = []
 	# Create the work directory.
@@ -1444,7 +1443,6 @@ def _tests(
 				resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
 				resultsFile.write("====================================================================================\n")
 				timeArray.append(time.time() - cur_start_time)
-
 	# Write stats for all tests.
 		statData.append(curData)
 	with open(fileName, 'a') as resultsFile:
@@ -1456,5 +1454,4 @@ def _tests(
 	return statData
 
 if __name__ == "__main__":
-
 	_tests()
