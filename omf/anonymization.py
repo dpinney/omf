@@ -9,7 +9,7 @@ omfDir=os.path.dirname(os.path.dirname(__file__))
 # DISTRIBUTION FEEDER FUNCTIONS
 def distPseudomizeNames(inFeeder):
 	''' Replace all names in the inFeeder distribution system with pseudonames composed from the object type and a random ID. Return a key with name and ID pairs. '''
-	#PLOT TWIST: doesnt work. Lineconfig issue
+	#Works, tested,
 	newNameKey = {}
 	randomID = random.randint(0,100)
 	# Create nameKey dictionary
@@ -30,6 +30,23 @@ def distPseudomizeNames(inFeeder):
 			oldTo = inFeeder['tree'][key]['to']
 			inFeeder['tree'][key]['from'] = newNameKey[oldFrom]
 			inFeeder['tree'][key]['to'] = newNameKey[oldTo]
+		#Line Configs	
+		if inFeeder['tree'][key].get('object', '') == 'line_configuration':
+			print("activated")
+			for prop in inFeeder['tree'][key]:
+				slist = {'conductor_N', 'conductor_A', 'conductor_B', 'conductor_C'}
+				if prop in slist:
+					print("has detected a conductor")
+					oldCon = inFeeder['tree'][key][prop]
+					inFeeder['tree'][key][prop] = newNameKey[oldCon]
+		#Replace Spacing
+		if 'spacing' in inFeeder['tree'][key]:
+			oldspace = inFeeder['tree'][key]['spacing']
+			inFeeder['tree'][key]['spacing'] = newNameKey[oldspace]
+	#Replace configs general form
+		if 'configuration' in inFeeder['tree'][key]:
+			oldConfig = inFeeder['tree'][key]['configuration']
+			inFeeder['tree'][key]['configuration'] = newNameKey[oldConfig]
 	# Replace names in links
 	for i in range(len(inFeeder['links'])):
 		for key in inFeeder['links'][i]:
@@ -628,18 +645,18 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 
 
 # def _tests():
-# 	pass
-# 	# DISTRIBUTION FEEDER TESTS
+# # 	pass
+# # 	# DISTRIBUTION FEEDER TESTS
 # 	# Test distPseudomizeNames
-	# FNAME = "Simple Market System AnonTest.omd"
-	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
-	# with open(FNAME, "r") as inFile:
-	# 	inFeeder = json.load(inFile)
-	# 	nameKey = distPseudomizeNames(inFeeder)
-	# 	print nameKey
-	# FNAMEOUT = "simpleMarket_distPseudomizeNames.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inFeeder, outFile, indent=4)
+# 	FNAME = "Simple Market System AnonTest.omd"
+# 	FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
+# 	with open(FNAME, "r") as inFile:
+# 		inFeeder = json.load(inFile)
+# 		nameKey = distPseudomizeNames(inFeeder)
+# 		print nameKey
+# 	FNAMEOUT = "simpleMarket_distPseudomizeNames.omd"
+# 	with open(FNAMEOUT, "w") as outFile:
+# 		json.dump(inFeeder, outFile, indent=4)
 
 # # # 	# Test distRandomizeNames
 	# FNAME = "Simple Market System AnonTest.omd"
