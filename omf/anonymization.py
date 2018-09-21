@@ -63,6 +63,7 @@ def distPseudomizeNames(inFeeder):
 
 def distRandomizeNames(inFeeder):
 	''' Replace all names in the inFeeder distribution system with a random ID number. '''
+	#Works, tested, even when addnoise used
 	newNameKey = {}
 	allKeys = range(len(inFeeder['tree'].keys()))
 	random.shuffle(allKeys)
@@ -184,6 +185,7 @@ def distAddNoise(inFeeder, noisePerc):
 	#Works with certain parameters mentioned in brackets below
 	noisePerc = float(noisePerc)
 	distModifyTriplexLengths(inFeeder)
+	distModifyConductorLengths(inFeeder)
 	for key in inFeeder['tree']:
 		for prop in inFeeder['tree'][key]:
 			# Scramble valid properties
@@ -211,7 +213,7 @@ def distAddNoise(inFeeder, noisePerc):
 
 def distShuffleLoads(inFeeder, shufPerc):
 	''' Shuffle the parent properties between all load objects in the inFeeder distribution system. '''
-	#Works 
+	#Works, tested. even when add noise used
 	shufPerc = float(shufPerc)
 	houseParents = []
 	zipParents = []
@@ -415,7 +417,7 @@ def distModifyConductorLengths(inFeeder):
 
 def distSmoothLoads(inFeeder):
 	''' Reduce the resolution of load shapes by taking all sub-hourly load dispatch data in the inFeeder distribution system and aggregating to the hour level. ''' 
-	#FIX THIS FIX THIS FIX THIS
+	#FIX THIS FIX THIS FIX THIS. Ask david for help
 	agList = []
 	outList = []
 	scadaFile = inFeeder['attachments']['subScadaCalibrated1.player']
@@ -706,15 +708,15 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 	# 	json.dump(inFeeder, outFile, indent=4)
 
 # # 	# Test distShuffleLoads
-# 	FNAME = "Simple Market System AnonTest.omd"
-# 	FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
-# 	with open(FNAME, "r") as inFile:
-# 		inFeeder = json.load(inFile)
-# 		shufPerc = 100
-# 		distShuffleLoads(inFeeder, shufPerc)
-# 	FNAMEOUT = "simpleMarket_distShuffleLoads.omd"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inFeeder, outFile, indent=4)
+	# FNAME = "Simple Market System AnonTest.omd"
+	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
+	# with open(FNAME, "r") as inFile:
+	# 	inFeeder = json.load(inFile)
+	# 	shufPerc = 100
+	# 	distShuffleLoads(inFeeder, shufPerc)
+	# FNAMEOUT = "simpleMarket_distShuffleLoads.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inFeeder, outFile, indent=4)
 
 # 	# Test distModifyTriplexLengths
 	# FNAME = "Simple Market System AnonTest.omd"
@@ -739,6 +741,8 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 	# Test distSmoothLoads
 	# FNAME = "Calibrated Feeder1.omd"
 	# FNAME=pJoin(omfDir,'data','model','public', FNAME)
+	# FNAME = "Simple Market System AnonTest.omd"
+	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
 	# with open(FNAME, "r") as inFile:
 	# 	inFeeder = json.load(inFile)
 	# 	distSmoothLoads(inFeeder)
