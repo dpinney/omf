@@ -181,11 +181,14 @@ def distTranslateLocations(inFeeder, translationRight, translationUp, rotation):
 
 def distAddNoise(inFeeder, noisePerc):
 	''' Add random noise to properties with numeric values for all objects in the inFeeder distribution system based on a noisePerc magnitude. '''
-	#Straihgt up doesnt work NOT WORKINFG. Lineconfig issue
+	#Works with certain parameters mentioned in brackets below
 	noisePerc = float(noisePerc)
+	distModifyTriplexLengths(inFeeder)
 	for key in inFeeder['tree']:
 		for prop in inFeeder['tree'][key]:
-			if prop not in ['name', 'from', 'to', 'configuration', 'line_configuration', 'spacing']:
+			# Scramble valid properties
+			if prop in ['latitude', 'longitude','climate', 'ambient_temperature']:
+				print prop
 				val = inFeeder['tree'][key][prop]
 				try:
 					parseVal = float(val)
