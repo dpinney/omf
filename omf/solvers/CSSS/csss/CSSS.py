@@ -1,5 +1,5 @@
 import numpy as np
-import cvxpy as cvp
+# import cvxpy as cvp #cvxpy is a bad bad no good library and we only want to use it when we're using a model using this solver.
 
 class CSSS:
 ### Contextually Supervised Source Seperation Class
@@ -18,6 +18,8 @@ class CSSS:
                   lb = None, # Lower bound on source
                   ub = None  # Upper bound on source
                  ):
+        import cvxpy as cvp #cvxpy is a bad bad no good library and we only want to use it when we're using a model using this solver.
+
         ### This is a method to add a new source
         self.modelcounter += 1   # Increment model counter
 
@@ -67,6 +69,7 @@ class CSSS:
         self.updateSourceObj(name)
 
     def updateSourceObj(self, sourcename):
+        import cvxpy as cvp #cvxpy is a bad bad no good library and we only want to use it when we're using a model using this solver.
         if sourcename.lower() == 'all':
             for name in self.models.keys():
                 self.updateSourceObj(name)
@@ -149,6 +152,8 @@ class CSSS:
         self.constraints.append(constraint)
 
     def constructSolve(self):
+        import cvxpy as cvp #cvxpy is a bad bad no good library and we only want to use it when we're using a model using this solver.
+
         ## This method constructs and solves the optimization
 
         ## Initialize objective function and modeled aggregate signal as 0
@@ -189,6 +194,7 @@ class CSSS:
         #    - For each source, set the price and the remaining sources constant,
         #       - Add individual constraints to individual source updates,
         #       - Solve and update the source.
+        import cvxpy as cvp #cvxpy is a bad bad no good library and we only want to use it when we're using a model using this solver.
         dual_objective=[]
         norm_resid_equality=[]
         aggregateSignalVector=np.array([[elem] for elem in self.aggregateSignal])
