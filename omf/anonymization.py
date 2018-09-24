@@ -9,6 +9,7 @@ omfDir=os.path.dirname(os.path.dirname(__file__))
 # DISTRIBUTION FEEDER FUNCTIONS
 def distPseudomizeNames(inFeeder):
 	''' Replace all names in the inFeeder distribution system with pseudonames composed from the object type and a random ID. Return a key with name and ID pairs. '''
+	#Works, tested,
 	newNameKey = {}
 	randomID = random.randint(0,100)
 	# Create nameKey dictionary
@@ -29,6 +30,23 @@ def distPseudomizeNames(inFeeder):
 			oldTo = inFeeder['tree'][key]['to']
 			inFeeder['tree'][key]['from'] = newNameKey[oldFrom]
 			inFeeder['tree'][key]['to'] = newNameKey[oldTo]
+		#Line Configs	
+		if inFeeder['tree'][key].get('object', '') == 'line_configuration':
+			print("activated")
+			for prop in inFeeder['tree'][key]:
+				slist = {'conductor_N', 'conductor_A', 'conductor_B', 'conductor_C'}
+				if prop in slist:
+					print("has detected a conductor")
+					oldCon = inFeeder['tree'][key][prop]
+					inFeeder['tree'][key][prop] = newNameKey[oldCon]
+		#Replace Spacing
+		if 'spacing' in inFeeder['tree'][key]:
+			oldspace = inFeeder['tree'][key]['spacing']
+			inFeeder['tree'][key]['spacing'] = newNameKey[oldspace]
+	#Replace configs general form
+		if 'configuration' in inFeeder['tree'][key]:
+			oldConfig = inFeeder['tree'][key]['configuration']
+			inFeeder['tree'][key]['configuration'] = newNameKey[oldConfig]
 	# Replace names in links
 	for i in range(len(inFeeder['links'])):
 		for key in inFeeder['links'][i]:
@@ -45,6 +63,7 @@ def distPseudomizeNames(inFeeder):
 
 def distRandomizeNames(inFeeder):
 	''' Replace all names in the inFeeder distribution system with a random ID number. '''
+	#Works, tested, even when addnoise used
 	newNameKey = {}
 	allKeys = range(len(inFeeder['tree'].keys()))
 	random.shuffle(allKeys)
@@ -163,11 +182,15 @@ def distTranslateLocations(inFeeder, translationRight, translationUp, rotation):
 
 def distAddNoise(inFeeder, noisePerc):
 	''' Add random noise to properties with numeric values for all objects in the inFeeder distribution system based on a noisePerc magnitude. '''
-	#Problem? Adding noise to names causes duplicates which breaks feeder. NOT WORKINFG
+	#Works with certain parameters mentioned in brackets below
 	noisePerc = float(noisePerc)
+	distModifyTriplexLengths(inFeeder)
+	distModifyConductorLengths(inFeeder)
 	for key in inFeeder['tree']:
 		for prop in inFeeder['tree'][key]:
-			if prop not in ['name', 'from', 'to', 'configuration', 'line_configuration', 'spacing']:
+			# Scramble valid properties
+			if prop in ['latitude', 'longitude','climate', 'ambient_temperature']:
+				print prop
 				val = inFeeder['tree'][key][prop]
 				try:
 					parseVal = float(val)
@@ -190,6 +213,7 @@ def distAddNoise(inFeeder, noisePerc):
 
 def distShuffleLoads(inFeeder, shufPerc):
 	''' Shuffle the parent properties between all load objects in the inFeeder distribution system. '''
+	#Works, tested. even when add noise used
 	shufPerc = float(shufPerc)
 	houseParents = []
 	zipParents = []
@@ -279,6 +303,7 @@ def distShuffleLoads(inFeeder, shufPerc):
 
 def distModifyTriplexLengths(inFeeder):
 	''' Modifies triplex line length and diameter properties while preserving original impedance in the inFeeder distribution system. '''
+	print "distModifyTriplexLengths activated!"
 	tLookup = {}
 	for key in inFeeder['tree']:
 		tDict = {}
@@ -318,6 +343,7 @@ def distModifyTriplexLengths(inFeeder):
 
 def distModifyConductorLengths(inFeeder):
 	''' Modifies conductor length and diameter properties while preserving original impedance in the inFeeder distribution system. '''
+	#Works totally fine
 	uLookup = {}
 	oLookup = {}
 	for key in inFeeder['tree']:
@@ -391,7 +417,7 @@ def distModifyConductorLengths(inFeeder):
 
 def distSmoothLoads(inFeeder):
 	''' Reduce the resolution of load shapes by taking all sub-hourly load dispatch data in the inFeeder distribution system and aggregating to the hour level. ''' 
-	#FIX THIS FIX THIS FIX THIS
+	#FIX THIS FIX THIS FIX THIS. Ask david for help
 	agList = []
 	outList = []
 	scadaFile = inFeeder['attachments']['subScadaCalibrated1.player']
@@ -434,7 +460,7 @@ def distSmoothLoads(inFeeder):
 
 # TRANSMISSION NETWORK FUNCTIONS 
 def tranPseudomizeNames(inNetwork):
-	#May break after shuffling loads
+	#Works totally fine
 	''' Replace all names in the inNetwork transmission system with pseudonames composed of the object type and a random ID. Return a key with name and ID pairs. '''
 	newBusKey = {}
 	randomID = random.randint(0,100)
@@ -462,7 +488,7 @@ def tranPseudomizeNames(inNetwork):
 			inNetwork['branch'][i]['tbus'] = newBusKey[oldTo]
 	return newBusKey
 def tranRandomizeNames(inNetwork):
-	#Doesnt workl after shuffling loads
+	#Works Totally fine
 	''' Replace all names in the inNetwork transmission system with pseudonames composed of the object type and a random ID. '''
 	'''pretty sure this makes no sense at all, current data structure has no object types'''
 	newBusKey = {}
@@ -557,7 +583,7 @@ def tranTranslateLocations(inNetwork, translationRight, translationUp, rotation)
 
 def tranAddNoise(inNetwork, noisePerc):
 	''' Add random noise to properties with numeric values for all objects in the inNetwork transmission system based on a noisePerc magnitude. '''
-	#NOT WORKING NO IDEA WHY
+	#Fixed, but breaks transmission when it scrambles numbers enough to break MatPower
 	noisePerc = float(noisePerc)
 	for array in inNetwork:
 		if (array == 'bus') or (array == 'gen') or (array == 'branch'):
@@ -624,18 +650,18 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 
 
 # def _tests():
-# 	pass
-# 	# DISTRIBUTION FEEDER TESTS
+# # 	pass
+# # 	# DISTRIBUTION FEEDER TESTS
 # 	# Test distPseudomizeNames
-	# FNAME = "Simple Market System AnonTest.omd"
-	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
-	# with open(FNAME, "r") as inFile:
-	# 	inFeeder = json.load(inFile)
-	# 	nameKey = distPseudomizeNames(inFeeder)
-	# 	print nameKey
-	# FNAMEOUT = "simpleMarket_distPseudomizeNames.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inFeeder, outFile, indent=4)
+# 	FNAME = "Simple Market System AnonTest.omd"
+# 	FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
+# 	with open(FNAME, "r") as inFile:
+# 		inFeeder = json.load(inFile)
+# 		nameKey = distPseudomizeNames(inFeeder)
+# 		print nameKey
+# 	FNAMEOUT = "simpleMarket_distPseudomizeNames.omd"
+# 	with open(FNAMEOUT, "w") as outFile:
+# 		json.dump(inFeeder, outFile, indent=4)
 
 # # # 	# Test distRandomizeNames
 	# FNAME = "Simple Market System AnonTest.omd"
@@ -682,15 +708,15 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 	# 	json.dump(inFeeder, outFile, indent=4)
 
 # # 	# Test distShuffleLoads
-# 	FNAME = "Simple Market System AnonTest.omd"
-# 	FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
-# 	with open(FNAME, "r") as inFile:
-# 		inFeeder = json.load(inFile)
-# 		shufPerc = 100
-# 		distShuffleLoads(inFeeder, shufPerc)
-# 	FNAMEOUT = "simpleMarket_distShuffleLoads.omd"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inFeeder, outFile, indent=4)
+	# FNAME = "Simple Market System AnonTest.omd"
+	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
+	# with open(FNAME, "r") as inFile:
+	# 	inFeeder = json.load(inFile)
+	# 	shufPerc = 100
+	# 	distShuffleLoads(inFeeder, shufPerc)
+	# FNAMEOUT = "simpleMarket_distShuffleLoads.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inFeeder, outFile, indent=4)
 
 # 	# Test distModifyTriplexLengths
 	# FNAME = "Simple Market System AnonTest.omd"
@@ -715,6 +741,8 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 	# Test distSmoothLoads
 	# FNAME = "Calibrated Feeder1.omd"
 	# FNAME=pJoin(omfDir,'data','model','public', FNAME)
+	# FNAME = "Simple Market System AnonTest.omd"
+	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
 	# with open(FNAME, "r") as inFile:
 	# 	inFeeder = json.load(inFile)
 	# 	distSmoothLoads(inFeeder)

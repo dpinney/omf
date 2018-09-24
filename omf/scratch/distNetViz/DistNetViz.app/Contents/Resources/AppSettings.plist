@@ -21,11 +21,14 @@
 	<key>PromptForFileOnLaunch</key>
 	<true/>
 	<key>RemainRunning</key>
-	<true/>
+	<false/>
 	<key>ScriptArgs</key>
 	<array/>
 	<key>Suffixes</key>
-	<array/>
+	<array>
+		<string>omd</string>
+		<string>glm</string>
+	</array>
 	<key>TextBackground</key>
 	<string>#ffffff</string>
 	<key>TextFont</key>
@@ -39,6 +42,7 @@
 	<key>UniformTypes</key>
 	<array>
 		<string>public.item</string>
+		<string>public.folder</string>
 	</array>
 </dict>
 </plist>

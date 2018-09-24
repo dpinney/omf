@@ -36,6 +36,14 @@ def convert(stdString,seqString):
 	components = _csvToArray(stdString)[1:]
 	# Get all hardware stats from the .seq. We dropped the first rows which are metadata (n.b. there are no headers).
 	hardwareStats = _csvToArray(seqString)[1:]
+	# List of all component names (to make sure we have uniqueness).
+	allNames = [x[0] for x in components]
+	def statsByName(deviceName):
+		''' Helper function to query the hardware csv. '''
+		for row in hardwareStats:
+			if row[0] == deviceName:
+				return row
+		return None	
 	# Use a default for nominal voltage, but try to set it to the source voltage if possible.
 	nominal_voltage = 14400
 	for ob in components:
@@ -66,18 +74,6 @@ def convert(stdString,seqString):
 	[x_scale, x_b, y_scale, y_b] = _convertToPixel()
 	def obConvert(objectList):
 		''' take a row in the milsoft .std and turn it into a gridlab-type dict'''
-
-		# -----------------------------------------------
-		# Globals and helper functions:
-		# -----------------------------------------------
-		allNames = [x[0] for x in components]
-
-		def statsByName(deviceName):
-			''' Helper function to query the hardware csv. '''
-			for row in hardwareStats:
-				if row[0] == deviceName:
-					return row
-			return None
 		def _convertGenericObject(objectList):
 			''' this converts attributes that are in every milsoft object regardless of hardware type. '''
 			newOb = {}
@@ -396,7 +392,7 @@ def convert(stdString,seqString):
 			return overhead
 
 		def convertUgLine(ugLineList):
-			for i in range(len(ugLineList)):
+			for i in xrange(len(ugLineList)):
 				if ugLineList[i] == '':
 					ugLineList[i] = '0'
 			myIndex = components.index(objectList)*subObCount
@@ -768,7 +764,7 @@ def convert(stdString,seqString):
 	convertedComponents = [obConvert(x) for x in components]
 
 	# First, make an index to massively speed up lookups.
-	nameToIndex = {convertedComponents[index].get('name',''):index for index in range(len(convertedComponents))}
+	nameToIndex = {convertedComponents[index].get('name',''):index for index in xrange(len(convertedComponents))}
 	def fixCompConnectivity(comp):
 		''' Rejigger the connectivity attributes to work with Gridlab '''
 		# Different object connectivity classes:
@@ -858,7 +854,7 @@ def convert(stdString,seqString):
 
 	# Fix the connectivity:
 	# print('*** Connectivity fixing start', time.time()-start_time)
-	guidToIndex = {convertedComponents[index].get('guid',''):index for index in range(len(convertedComponents))}
+	guidToIndex = {convertedComponents[index].get('guid',''):index for index in xrange(len(convertedComponents))}
 	for comp in convertedComponents:
 		fixCompConnectivity(comp)
 
@@ -1345,13 +1341,14 @@ def _latCount(name):
 	print name, 'COUNT', nameCount, 'LAT COUNT', latCount, 'SUCCESS RATE', 1.0*latCount/nameCount
 
 def _tests(
-		keepFiles=False,
-		wipeBefore=True,
+		keepFiles = False,
+		wipeBefore = True,
 		openPrefix = omf.omfDir + '/static/testFiles/',
 		outPrefix = omf.omfDir + '/scratch/milToGridlabTests/',
 		testFiles = [('Olin-Barre.std','Olin.seq'),('Olin-Brown.std','Olin.seq'),('INEC-GRAHAM.std','INEC.seq')],
 		totalLength = 121,
-		testAttachments = {'schedules.glm':'', 'climate.tmy2':open(omf.omfDir + '/data/Climate/KY-LEXINGTON.tmy2','r').read()}
+		testAttachments = {'schedules.glm':'', 'climate.tmy2':open(omf.omfDir + '/data/Climate/KY-LEXINGTON.tmy2','r').read()},
+		fileSuffix = '',
 	):
 	''' Test convert every windmil feeder we have (in static/testFiles). '''
 	# testFiles = [('INEC-RENOIR.std','INEC.seq'), ('INEC-GRAHAM.std','INEC.seq'),
@@ -1360,7 +1357,9 @@ def _tests(
 	# setlocale lives here to avoid changing it globally 
 	# locale.setlocale(locale.LC_ALL, 'en_US')
 	# Variables for the testing.
+	fileName = 'convResults' +  str(fileSuffix) + '.txt' 
 	timeArray = []
+	statData = []
 	# Create the work directory.
 	if wipeBefore:
 		try:
@@ -1372,9 +1371,11 @@ def _tests(
 			os.mkdir(outPrefix)
 	# Run all the tests.
 	for stdString, seqString in testFiles:
+		curData = {} # Append data for this std file here.
+		curData['file'] = stdString
 		cur_start_time = time.time()
 		# Write the time info.
-		with open('convResults.txt', 'a') as resultsFile:
+		with open(fileName, 'a') as resultsFile:
 			local_time = reference.LocalTimezone()
 			now = datetime.datetime.now()
 			resultsFile.write(str(now)[0:19] + " at timezone: " + str(local_time.tzname(now)) + '\n')
@@ -1389,15 +1390,17 @@ def _tests(
 				outFileStats = os.stat(outPrefix + stdString.replace('.std','.glm') )
 			print 'WROTE GLM FOR', stdString
 			# Write the size of the files as a indicator of how good the conversion was.
-			with open('convResults.txt', 'a') as resultsFile:
+			with open(fileName, 'a') as resultsFile:
 				inFileStats = os.stat(pJoin(openPrefix,stdString))
 				inFileSize = inFileStats.st_size
 				outFileSize = outFileStats.st_size
 				percent = float(inFileSize)/float(outFileSize)
+				curData['percentage'] = percent
 				resultsFile.write('WROTE GLM FOR ' + stdString + ', THE STD FILE IS %s PERCENT OF THE GLM FILE.\n' % str(100*percent)[0:4])
 		except:
 			print 'FAILED CONVERTING', stdString
-			with open('convResults.txt','a') as resultsFile:
+			curData['percentage'] = 0.0
+			with open(fileName,'a') as resultsFile:
 					resultsFile.write('FAILED CONVERTING ' + stdString + "\n")
 		try:
 			# Draw the GLM.
@@ -1407,12 +1410,12 @@ def _tests(
 			feeder.latLonNxGraph(myGraph, neatoLayout=False)
 			plt.savefig(outPrefix + stdString.replace('.std','.png'))
 			print 'DREW GLM OF', stdString
-			with open('convResults.txt','a') as resultsFile:
+			with open(fileName,'a') as resultsFile:
 				resultsFile.write('DREW GLM FOR ' + stdString + "\n")
 		except:
 			print 'FAILED DRAWING', stdString
-			with open('convResults.txt','a') as resultsFile:
-				resultsFile.write('FAILED DRAWING ' + stdString + "\n")
+			with open(fileName,'a') as resultsFile:
+				resultsFile.write('DREW GLM FOR ' + stdString + "\n")
 		try:
 			# Run powerflow on the GLM.
 			output = gridlabd.runInFilesystem(outGlm, attachments=testAttachments, keepFiles=False)
@@ -1425,24 +1428,30 @@ def _tests(
 				json.dump(output, outFile, indent=4)
 				outFile.truncate()
 			print 'RAN GRIDLAB ON', stdString
-			with open('convResults.txt', 'a') as resultsFile:
+			with open(fileName, 'a') as resultsFile:
 				resultsFile.write('RAN GRIDLAB ON ' + stdString + "\n")
+				resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
+				curData['isGridlabSuccess'] = True
+				resultsFile.write("====================================================================================\n")
+				timeArray.append(time.time() - cur_start_time)
 		except Exception as e:
 			print 'POWERFLOW FAILED', stdString
-			with open('convResults.txt','a') as resultsFile:
+			with open(fileName,'a') as resultsFile:
 				resultsFile.write('POWERFLOW FAILED ' + stdString + "\n")
-		# Write time info.
-		with open('convResults.txt','a') as resultsFile:
-			resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
-			resultsFile.write("====================================================================================\n")
-			timeArray.append(time.time() - cur_start_time)
-	# Write stats for all tests.
-	with open('convResults.txt', 'a') as resultsFile:
+				curData['isGridlabSuccess'] = False
+				resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
+				resultsFile.write("====================================================================================\n")
+				timeArray.append(time.time() - cur_start_time)
+		# Write stats for all tests.
+		curData['running_time'] = time.time() - cur_start_time
+		statData.append(curData)
+	with open(fileName, 'a') as resultsFile:
 		resultsFile.write('Ran %d out of %d tests for this simulation.\n' % (len(testFiles), totalLength))
 		resultsFile.write('Total time of %d simulations is: %d seconds.' % (len(timeArray), sum(timeArray)) + '\n')
 		resultsFile.write("====================================================================================\n")
 	if not keepFiles:
 		shutil.rmtree(outPrefix)
+	return statData
 
 if __name__ == "__main__":
 	_tests()

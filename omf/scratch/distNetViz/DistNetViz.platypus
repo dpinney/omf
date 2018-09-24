@@ -12,8 +12,8 @@
 	<string>David Pinney</string>
 	<key>BundledFiles</key>
 	<array>
-		<string>/Users/dpinney/Gdrive/LATERBASE/omf/omf/scratch/distNetViz/distNetViz.html</string>
-		<string>/Users/dpinney/Gdrive/LATERBASE/omf/omf/scratch/distNetViz/svg-pan-zoom.js</string>
+		<string>/Users/dpinney/Google Drive/LATERBASE/omf/omf/scratch/distNetViz/distNetViz.html</string>
+		<string>/Users/dpinney/Google Drive/LATERBASE/omf/omf/scratch/distNetViz/svg-pan-zoom.js</string>
 	</array>
 	<key>Creator</key>
 	<string>Platypus-5.2</string>
@@ -50,13 +50,13 @@
 	<key>PromptForFileOnLaunch</key>
 	<true/>
 	<key>RemainRunning</key>
-	<true/>
+	<false/>
 	<key>RunInBackground</key>
 	<false/>
 	<key>ScriptArgs</key>
 	<array/>
 	<key>ScriptPath</key>
-	<string>/Users/dpinney/Gdrive/LATERBASE/omf/omf/scratch/distNetViz/distNetViz.py</string>
+	<string>/Users/dpinney/Google Drive/LATERBASE/omf/omf/scratch/distNetViz/distNetViz.py</string>
 	<key>StatusItemDisplayType</key>
 	<string>Text</string>
 	<key>StatusItemIcon</key>
@@ -237,7 +237,10 @@
 	<key>StatusItemUseSystemFont</key>
 	<true/>
 	<key>Suffixes</key>
-	<array/>
+	<array>
+		<string>omd</string>
+		<string>glm</string>
+	</array>
 	<key>TextBackground</key>
 	<string>#ffffff</string>
 	<key>TextFont</key>
@@ -251,6 +254,7 @@
 	<key>UniformTypes</key>
 	<array>
 		<string>public.item</string>
+		<string>public.folder</string>
 	</array>
 	<key>UseXMLPlistFormat</key>
 	<false/>

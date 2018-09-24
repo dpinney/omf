@@ -102,9 +102,10 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 			currTable.append(rowDict)
 	# read line rating values into a single dictionary
 	lineRatings = {}
-	for key in edge_bools.keys():
-		if edge_bools[key]:		
-			with open(pJoin(workDir,key+'_cont_rating.csv'),'r') as ratingFile:
+	rating_in_VA = []
+	for key1 in edge_bools.keys():
+		if edge_bools[key1]:		
+			with open(pJoin(workDir,key1+'_cont_rating.csv'),'r') as ratingFile:
 				reader = csv.reader(ratingFile)
 				# loop past the header, 
 				keys = []
@@ -116,8 +117,8 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 						keys.pop(i)
 						vals = reader.next()
 						vals.pop(i)
-				for pos,key in enumerate(keys):
-					lineRatings[key] = abs(float(vals[pos]))
+				for pos,key2 in enumerate(keys):
+					lineRatings[key2] = abs(float(vals[pos]))
 	#edgeTupleRatings = lineRatings copy with to-from tuple as keys for labeling
 	edgeTupleRatings = {}
 	for edge in lineRatings:
@@ -148,12 +149,11 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 			realVolt = abs(float(row['volt'+phase+'_real']))
 			imagVolt = abs(float(row['volt'+phase+'_imag']))
 			phaseVolt = math.sqrt((realVolt ** 2) + (imagVolt ** 2))
-			print(row,phaseVolt)
 			if phaseVolt != 0.0:
 				# Normalize to 120 V standard
-				phaseVolt = 2 * (phaseVolt/feedVoltage)
+				phaseVolt = (phaseVolt/feedVoltage)
 				allVolts.append(phaseVolt)
-		nodeVolts[row.get('node_name','')] = avg(allVolts)
+		nodeVolts[row.get('node_name','')] = float("{0:.2f}".format(avg(allVolts)))
 		# Use float("{0:.2f}".format(avg(allVolts))) if displaying the node labels
 	nodeNames = {}
 	for key in nodeVolts.keys():
@@ -174,34 +174,35 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 
 	#edgeTupleCurrents = edgeCurrents copy with to-from tuple as keys for labeling
 	edgeTupleCurrents = {}
-	#edgeCurrentsPU = values normalized per unit by line ratings
-	edgeCurrentsPU = {}
-	#edgeTupleCurrentsPU = edgeCurrentsPU copy with to-from tuple as keys for labeling
-	edgeTupleCurrentsPU = {}
+	#edgeValsPU = values normalized per unit by line ratings
+	edgeValsPU = {}
+	#edgeTupleValsPU = edgeValsPU copy with to-from tuple as keys for labeling
+	edgeTupleValsPU = {}
 	#edgeTuplePower = dict with to-from tuples as keys and sim power as values for debugging
 	edgeTuplePower = {}
 	#edgeTupleNames = dict with to-from tuples as keys and names as values for debugging
 	edgeTupleNames = {}
 	for edge in edgeCurrentSum:
 		for obj in tree.values():
-			if obj.get('name','').replace('"','') == edge:
+			obname = obj.get('name','').replace('"','')
+			if obname == edge:
 				nodeFrom = obj.get('from')
 				nodeTo = obj.get('to')
 				coord = (nodeFrom, nodeTo)
 				currVal = edgeCurrentSum.get(edge)
 				voltVal = avg([nodeVolts.get(nodeFrom), nodeVolts.get(nodeTo)])
 				lineRating = lineRatings.get(edge)
-				currValPU = (edgeCurrentMax.get(edge))/lineRating
+				edgePerUnitVal = (edgeCurrentMax.get(edge))/lineRating
 				edgeTupleCurrents[coord] = "{0:.2f}".format(currVal)
 				edgeTuplePower[coord] = "{0:.2f}".format((currVal * voltVal)/1000)
-				edgeCurrentsPU[edge] = currValPU
-				edgeTupleCurrentsPU[coord] = "{0:.2f}".format(currValPU)
+				edgeValsPU[edge] = edgePerUnitVal
+				edgeTupleValsPU[coord] = "{0:.2f}".format(edgePerUnitVal)
 				edgeTupleNames[coord] = edge
 
 	#define which dict will be used for edge line color
-	edgeColors = edgeCurrentsPU
+	edgeColors = edgeValsPU
 	#define which dict will be used for edge label
-	edgeLabels = edgeTupleCurrents
+	edgeLabels = edgeTupleValsPU
 
 	# Build the graph.
 	fGraph = omf.feeder.treeToNxGraph(tree)
@@ -243,7 +244,7 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 		cmap = plt.cm.coolwarm)
 	# nodeLabelsIm = nx.draw_networkx_labels(fGraph,
 	# 	pos = positions,
-	# 	labels = nodeNames,
+	# 	labels = nodeVolts,
 	# 	font_size = 8)
 
 	plt.sci(nodeIm)
