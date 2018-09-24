@@ -3,14 +3,8 @@ This contains the loadForecast algorithms
 
 '''
 
-import csv,math
+import math
 import numpy as np
-import matplotlib.pyplot as plt
-import  __neoMetaModel__, json
-from __neoMetaModel__ import *
-
-
-
 
 def pullHourlyDayOfWeekForecast(rawData,upBound,lowBound):
 	'''
