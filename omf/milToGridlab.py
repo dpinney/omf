@@ -392,7 +392,7 @@ def convert(stdString,seqString):
 			return overhead
 
 		def convertUgLine(ugLineList):
-			for i in range(len(ugLineList)):
+			for i in xrange(len(ugLineList)):
 				if ugLineList[i] == '':
 					ugLineList[i] = '0'
 			myIndex = components.index(objectList)*subObCount
@@ -764,7 +764,7 @@ def convert(stdString,seqString):
 	convertedComponents = [obConvert(x) for x in components]
 
 	# First, make an index to massively speed up lookups.
-	nameToIndex = {convertedComponents[index].get('name',''):index for index in range(len(convertedComponents))}
+	nameToIndex = {convertedComponents[index].get('name',''):index for index in xrange(len(convertedComponents))}
 	def fixCompConnectivity(comp):
 		''' Rejigger the connectivity attributes to work with Gridlab '''
 		# Different object connectivity classes:
@@ -854,7 +854,7 @@ def convert(stdString,seqString):
 
 	# Fix the connectivity:
 	# print('*** Connectivity fixing start', time.time()-start_time)
-	guidToIndex = {convertedComponents[index].get('guid',''):index for index in range(len(convertedComponents))}
+	guidToIndex = {convertedComponents[index].get('guid',''):index for index in xrange(len(convertedComponents))}
 	for comp in convertedComponents:
 		fixCompConnectivity(comp)
 
@@ -1357,7 +1357,7 @@ def _tests(
 	# setlocale lives here to avoid changing it globally 
 	# locale.setlocale(locale.LC_ALL, 'en_US')
 	# Variables for the testing.
-	fileName = 'convResults.txt' + str(fileSuffix)
+	fileName = 'convResults' +  str(fileSuffix) + '.txt' 
 	timeArray = []
 	statData = []
 	# Create the work directory.
