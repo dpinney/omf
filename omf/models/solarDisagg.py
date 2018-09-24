@@ -23,8 +23,8 @@ from plotly import tools
 import plotly.graph_objs as go
 
 #folium imports
-import folium
-from folium.plugins import MarkerCluster
+# import folium
+# from folium.plugins import MarkerCluster
 
 # OMF imports
 sys.path.append(__neoMetaModel__._omfDir)
@@ -35,7 +35,7 @@ from bs4 import BeautifulSoup
 
 # Model metadata:
 modelName, template = metadata(__file__)
-hidden = False
+hidden = True
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
@@ -219,29 +219,29 @@ def work(modelDir, inputDict):
 	#print(soup)
 	#print(soup2)
 
-	folMap = folium.Map()
-	marker_cluster = MarkerCluster().add_to(folMap)
-	bounds = []
-	with open(pJoin(modelDir,'lat_lon_uploaded.csv'),'w') as loadTempFile:
-		loadTempFile.write(inputDict['latLonData'])
-	with open(pJoin(modelDir,'lat_lon_uploaded.csv'), 'r') as csvfile:
-		csvreader = csv.DictReader(csvfile, fieldnames=('netLoadName', 'netLoadLat', 'netLoadLon') , delimiter=',')
-		for row in csvreader:
-			bounds.append([float(row['netLoadLat']), float(row['netLoadLon'])])
-			folium.CircleMarker(
-				location=[float(row['netLoadLat']), float(row['netLoadLon'])],
-				tooltip=row['netLoadName'],
-				color='#FFFF00',
-				fill=True,
-				fill_opacity=0.9
-			).add_to(marker_cluster)
-#except:
-	#	errorMessage = "CSV file is incorrect format."
-	#	raise Exception(errorMessage)
+# 	folMap = folium.Map()
+# 	marker_cluster = MarkerCluster().add_to(folMap)
+# 	bounds = []
+# 	with open(pJoin(modelDir,'lat_lon_uploaded.csv'),'w') as loadTempFile:
+# 		loadTempFile.write(inputDict['latLonData'])
+# 	with open(pJoin(modelDir,'lat_lon_uploaded.csv'), 'r') as csvfile:
+# 		csvreader = csv.DictReader(csvfile, fieldnames=('netLoadName', 'netLoadLat', 'netLoadLon') , delimiter=',')
+# 		for row in csvreader:
+# 			bounds.append([float(row['netLoadLat']), float(row['netLoadLon'])])
+# 			folium.CircleMarker(
+# 				location=[float(row['netLoadLat']), float(row['netLoadLon'])],
+# 				tooltip=row['netLoadName'],
+# 				color='#FFFF00',
+# 				fill=True,
+# 				fill_opacity=0.9
+# 			).add_to(marker_cluster)
+# #except:
+# 	#	errorMessage = "CSV file is incorrect format."
+# 	#	raise Exception(errorMessage)
 
 
-	folMap.fit_bounds(bounds)
-	folMap.save(pJoin(modelDir,'folGraph.html'))
+# 	folMap.fit_bounds(bounds)
+# 	folMap.save(pJoin(modelDir,'folGraph.html'))
 
 	#how to pass with escape chars
 	outData['graphJSON'] = graphJSON

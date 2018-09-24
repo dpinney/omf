@@ -26,3 +26,5 @@ tqdm>=4.19.6
 scipy>=0.18.1
 flask_compress>=1.4.0
 plotly>=3.0.0
+cvxpy>=0.4.0,<0.5.0
+sklearn>=0.19
