@@ -731,6 +731,9 @@ def convert(stdString,seqString):
 					transConfig['powerB_rating'] = transList[20]
 				if float(transList[21]) > 0:
 					transConfig['powerC_rating'] = transList[21]
+				# HACK: a zero power rating makes no sense.
+				if float(transConfig['power_rating']) < 1.0:
+					transConfig['power_rating'] = '10.0'
 			#MAYBEFIX: and change these, which were added to make the transformer work on multiple phases:
 			except ValueError, e:
 				pass
