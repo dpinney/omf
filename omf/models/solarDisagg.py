@@ -23,7 +23,7 @@ from bs4 import BeautifulSoup
 
 # Model metadata:
 modelName, template = metadata(__file__)
-hidden = True
+hidden = False
 
 def work(modelDir, inputDict):
 	import pandas as pd
@@ -40,11 +40,6 @@ def work(modelDir, inputDict):
 	# Model operations goes here.
 
 	#read measured load from csv file
-	#print(inputDict)
-	#print(type(inputDict))
-	#print(json.dump(pJoin(modelDir,'load_data.csv')))
-	print(inputDict.get("year"))
-	print(inputDict.keys())
 	meterNames = []
 	netload_csv = []
 	with open(pJoin(modelDir,'meter_data_uploaded.csv'),'w') as loadTempFile:
@@ -118,7 +113,6 @@ def work(modelDir, inputDict):
 	#endMonth = datetime.datetime.strftime(startDate, "%m")
 	#endDay = datetime.datetime.strftime(startDate, "%d")
 	#endDate = endYear + '-' + endMonth + '-' + endDay
-	print(endDate)
 	
 	#end date is manually set for time being before addressing year issue
 	fifteenMinuteTimestamps = pd.date_range(start=inputDict.get("year"), end=endDate, closed='left', freq='15T', tz='UTC')
@@ -245,7 +239,7 @@ def new(modelDir):
 		"meterData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","load_data_three_month.csv")).read(),
 		"solarData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","solar_proxy_three_month.csv")).read(),
 		"weatherData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","asos_three_month.csv")).read(),
-		"latLonData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","lat_lon_data.csv")).read(),
+		"latLonData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","lat_lon_data_plus.csv")).read(),
 		"asos": "CHO",
 		"year": "2017-01-01",
 		"created":str(datetime.datetime.now())
@@ -275,7 +269,6 @@ def pullAsosRevised(start, station, datatype, end=None):
 		endYear = datetime.datetime.strftime(endDate, "%Y")
 		endMonth = datetime.datetime.strftime(endDate, "%m")
 		endDay = datetime.datetime.strftime(endDate, "%d")
-	print(endDay)
 	url = ('https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?station=' + station + '&data=' + datatype + '&year1=' + startYear + 
 		'&month1='+ startMonth +'&day1=' + startDay + '&year2=' + endYear + '&month2=' + endMonth +'&day2=' + endDay + '&tz=Etc%2FUTC&format=onlycomma&latlon=no&direct=no&report_type=1&report_type=2')
 	r = requests.get(url)

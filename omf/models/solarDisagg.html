@@ -183,56 +183,6 @@
 
 			var marker_cluster = L.markerClusterGroup({});
 			map.addLayer(marker_cluster);
-
-			var solar_proxy = L.circleMarker(
-				[33.9, -111.42],
-				{
-				"bubblingMouseEvents": true, 
-				"color": "#FFFF00", 
-				"dashArray": null, 
-				"dashOffset": null, 
-				"fill": true, 
-				"fillColor": "#FFFF00", 
-				"fillOpacity": 0.9, 
-				"fillRule": "evenodd", 
-				"lineCap": "round", 
-				"lineJoin": "round", 
-				"opacity": 1.0, 
-				"radius": 10, 
-				"stroke": true, 
-				"weight": 3
-				}
-			).addTo(map)
-			
-			solar_proxy.bindTooltip(
-				'<div>Solar Proxy</div>',
-				{"sticky": true}
-			);
-
-			var asos_station = L.circleMarker(
-				[34.0, -111.33],
-				{
-				"bubblingMouseEvents": true, 
-				"color": "#FF0000", 
-				"dashArray": null, 
-				"dashOffset": null, 
-				"fill": true, 
-				"fillColor": "#FF0000", 
-				"fillOpacity": 0.9, 
-				"fillRule": "evenodd", 
-				"lineCap": "round", 
-				"lineJoin": "round", 
-				"opacity": 1.0, 
-				"radius": 10, 
-				"stroke": true, 
-				"weight": 3
-				}
-			).addTo(map)
-			
-			asos_station.bindTooltip(
-				'<div>ASOS Station</div>',
-				{"sticky": true}
-			);
 					  
 			for (meter in allOutputData.loadLocations){
 			//console.log(allOutputData.loadLocations[meter])
