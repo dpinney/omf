@@ -5,13 +5,6 @@ from os.path import join as pJoin
 from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
 
-#plotly imports
-import plotly
-from plotly import __version__
-from plotly.offline import download_plotlyjs, plot
-from plotly import tools
-import plotly.graph_objs as go
-
 # OMF imports
 import omf.feeder as feeder
 from omf.solvers import nrelsam2013
@@ -23,6 +16,12 @@ modelName, template = metadata(__file__)
 hidden = True
 
 def work(modelDir, inputDict):
+	#plotly imports. Here for now so web server starts.
+	import plotly
+	# from plotly import __version__
+	# from plotly.offline import download_plotlyjs, plot
+	# from plotly import tools
+	import plotly.graph_objs as go
 	# Copy specific climate data into model directory
 	inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])
 	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 

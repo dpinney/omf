@@ -13,14 +13,6 @@ import scipy
 import StringIO
 import datetime
 from collections import OrderedDict
-import pandas as pd
-
-#plotly imports
-import plotly
-from plotly import __version__
-from plotly.offline import download_plotlyjs, plot
-from plotly import tools
-import plotly.graph_objs as go
 
 # OMF imports
 sys.path.append(__neoMetaModel__._omfDir)
@@ -34,6 +26,14 @@ modelName, template = metadata(__file__)
 hidden = True
 
 def work(modelDir, inputDict):
+	#plotly imports. Moved here for the moment so our web server starts.
+	import pandas as pd
+	import plotly
+	from plotly import __version__
+	from plotly.offline import download_plotlyjs, plot
+	from plotly import tools
+	import plotly.graph_objs as go
+
 	''' Run the model in its directory. '''
 	# Delete output file every run if it exists
 	outData = {}		
@@ -285,7 +285,7 @@ def pullAsosRevised(start, station, datatype, end=None):
 
 def _tests():
 	# Location
-	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated pvWatts Testing")
+	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
