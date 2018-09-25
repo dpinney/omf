@@ -22,10 +22,6 @@ from plotly.offline import download_plotlyjs, plot
 from plotly import tools
 import plotly.graph_objs as go
 
-#folium imports
-# import folium
-# from folium.plugins import MarkerCluster
-
 # OMF imports
 sys.path.append(__neoMetaModel__._omfDir)
 from omf.weather import pullAsos
@@ -186,8 +182,8 @@ def work(modelDir, inputDict):
 	#Create subplots in plotly
 	fig = tools.make_subplots(rows=5, cols=1)
 	#plot weather and solar canary
-	fig.append_trace(go.Scatter(y=pdTemps['temperature'], x=pdTemps.index, name=('interpolated weather '), marker=dict(color='red'), legendgroup='weather'),1,1)
-	fig.append_trace(go.Scatter(y=realTemps['temperature'], x=realTemps.index, name=('real weather data '), mode = 'markers', marker=dict(color='orange'), legendgroup='weather'),1,1)
+	fig.append_trace(go.Scatter(y=pdTemps['temperature'], x=pdTemps.index, name=('Interpolated weather '), marker=dict(color='red'), legendgroup='weather'),1,1)
+	fig.append_trace(go.Scatter(y=realTemps['temperature'], x=realTemps.index, name=('Real weather data '), mode = 'markers', marker=dict(color='orange'), legendgroup='weather'),1,1)
 	fig['layout']['yaxis1'].update(title='Temperature')
 	xaxis = [i for i in range(96)]
 	fig.append_trace(go.Scatter(y=np.array([item for sublist in solarproxy for item in sublist]), x=pdTemps.index, name=('Solar Canary '), marker=dict(color='gold') ),2,1)
@@ -219,29 +215,15 @@ def work(modelDir, inputDict):
 	#print(soup)
 	#print(soup2)
 
-# 	folMap = folium.Map()
-# 	marker_cluster = MarkerCluster().add_to(folMap)
-# 	bounds = []
-# 	with open(pJoin(modelDir,'lat_lon_uploaded.csv'),'w') as loadTempFile:
-# 		loadTempFile.write(inputDict['latLonData'])
-# 	with open(pJoin(modelDir,'lat_lon_uploaded.csv'), 'r') as csvfile:
-# 		csvreader = csv.DictReader(csvfile, fieldnames=('netLoadName', 'netLoadLat', 'netLoadLon') , delimiter=',')
-# 		for row in csvreader:
-# 			bounds.append([float(row['netLoadLat']), float(row['netLoadLon'])])
-# 			folium.CircleMarker(
-# 				location=[float(row['netLoadLat']), float(row['netLoadLon'])],
-# 				tooltip=row['netLoadName'],
-# 				color='#FFFF00',
-# 				fill=True,
-# 				fill_opacity=0.9
-# 			).add_to(marker_cluster)
-# #except:
-# 	#	errorMessage = "CSV file is incorrect format."
-# 	#	raise Exception(errorMessage)
+	loadLocations=[]
+	with open(pJoin(modelDir,'lat_lon_uploaded.csv'),'w') as loadTempFile:
+		loadTempFile.write(inputDict['latLonData'])
+	with open(pJoin(modelDir,'lat_lon_uploaded.csv'), 'r') as csvfile:
+		csvreader = csv.DictReader(csvfile, fieldnames=('netLoadName', 'netLoadLat', 'netLoadLon') , delimiter=',')
+		for row in csvreader:
+			loadLocations.append({'netLoadName': row['netLoadName'], 'netLoadLat': row['netLoadLat'], 'netLoadLon': row['netLoadLon']})
 
-
-# 	folMap.fit_bounds(bounds)
-# 	folMap.save(pJoin(modelDir,'folGraph.html'))
+	outData['loadLocations'] = loadLocations
 
 	#how to pass with escape chars
 	outData['graphJSON'] = graphJSON
