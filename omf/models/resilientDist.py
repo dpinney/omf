@@ -368,6 +368,8 @@ def work(modelDir, inputDict):
 		rdtJsonAsString = rdtInputFile.read()
 		rdtJson = json.loads(rdtJsonAsString)
 	rdtJson["power_flow"] = inputDict["power_flow"]
+	rdtJson["solver_iteration_timeout"] = 300.0
+	rdtJson["algorithm"] = "miqp"
 	# Calculate line costs.
 	lineData = {}
 	for line in rdtJson["lines"]:
@@ -412,7 +414,7 @@ def work(modelDir, inputDict):
 		if platform.system() == "Linux":
 			myEnv = os.environ.copy()
 			myEnv['GLPATH'] = omf.omfDir + '/solvers/gridlabdv990/'
-			commandString = omf.omfDir + '/solvers/gridlabdv990/gridlabd.bin /solvers/gridlabdv990/feeder.glm'
+			commandString = omf.omfDir + '/solvers/gridlabdv990/gridlabd.bin feeder.glm'  
 		elif platform.system() == "Windows":
 			myEnv = os.environ.copy()
 			commandString =  '"' + pJoin(omf.omfDir, "solvers", "gridlabdv990", "gridlabd.exe") + '"' + " feeder.glm"
