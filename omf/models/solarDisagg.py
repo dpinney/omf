@@ -26,24 +26,20 @@ modelName, template = metadata(__file__)
 hidden = True
 
 def work(modelDir, inputDict):
-	#plotly imports. Moved here for the moment so our web server starts.
 	import pandas as pd
+
+	#plotly imports
 	import plotly
 	from plotly import __version__
 	from plotly.offline import download_plotlyjs, plot
 	from plotly import tools
 	import plotly.graph_objs as go
-
 	''' Run the model in its directory. '''
 	# Delete output file every run if it exists
 	outData = {}		
 	# Model operations goes here.
 
 	#read measured load from csv file
-	#print(inputDict)
-	#print(type(inputDict))
-	#print(json.dump(pJoin(modelDir,'load_data.csv')))
-	print(inputDict.keys())
 	meterNames = []
 	netload_csv = []
 	with open(pJoin(modelDir,'meter_data_uploaded.csv'),'w') as loadTempFile:
@@ -77,20 +73,24 @@ def work(modelDir, inputDict):
 	#Gather weather data from asos and interpolate for 15 minute intervals
 	timeTemp = OrderedDict()
 
-	#flike = StringIO.StringIO(pullAsosRevised(inputDict.get("year"),inputDict.get("asos"), 'tmpf'))
-	#next(csv.reader(flike))
-	#for row in csv.reader(flike):
-	#	if row[2] != 'M':
-	#		timeTemp[datetime.datetime.strptime(row[1], "%Y-%m-%d %H:%M")] = float(row[2])
-	#	elif row[1][14:] in ['00','15','30','45'] and row[2] =='M':
-	#		timeTemp[datetime.datetime.strptime(row[1], "%Y-%m-%d %H:%M")] = np.nan
-	#use cached weather data
+	#Uses default weather data for testing
+	#with open(pJoin(modelDir,'weather_data_uploaded.csv'),'w') as loadTempFile:
+	#	loadTempFile.write(inputDict['weatherData'])
+
+	#Pulling data from ASOS
+	startDate = datetime.datetime.strptime(inputDict.get("year"), "%Y-%m-%d")
+	#Use 90 day interval for now
+	endDate = datetime.datetime.strftime(startDate + datetime.timedelta(days=90), "%Y-%m-%d")
+	flike = StringIO.StringIO(pullAsosRevised(inputDict.get("year"),inputDict.get("asos"), 'tmpf', end=endDate))
 	with open(pJoin(modelDir,'weather_data_uploaded.csv'),'w') as loadTempFile:
-		loadTempFile.write(inputDict['weatherData'])
+		csvwriter = csv.writer(loadTempFile, delimiter=',')
+		next(csv.reader(flike))
+		for row in csv.reader(flike):
+			csvwriter.writerow(row)
 	try:
-		with open(pJoin(modelDir,'weather_data_uploaded.csv'), 'r') as flike:
+		with open(pJoin(modelDir,'weather_data_uploaded.csv'), 'r') as csvfile:
 			#next(csv.reader(flike))
-			for row in csv.reader(flike):
+			for row in csv.reader(csvfile):
 				if row[2] != 'M':
 					timeTemp[datetime.datetime.strptime(row[1], "%Y-%m-%d %H:%M")] = float(row[2])
 	except:
@@ -104,10 +104,20 @@ def work(modelDir, inputDict):
 	#realTemps.to_csv('output.csv')
 
 	#Filter data set for 15 minute intervals with interpolated data
-	fifteenMinuteTimestamps = pd.date_range(start='2017-1-1', end='2018-1-1', closed='left', freq='15T', tz='UTC')
+
+	#Use this to calculate end date when full year is pulled
+	#startDate = datetime.datetime.strptime(inputDict.get("year"), "%Y-%m-%d")
+	#Use 90 day interval for now
+	#endDate = datetime.datetime.strftime(startDate + datetime.timedelta(days=90), "%Y-%m-%d")
+	#endYear = str(int(datetime.datetime.strftime(startDate, "%Y"))+1)
+	#endMonth = datetime.datetime.strftime(startDate, "%m")
+	#endDay = datetime.datetime.strftime(startDate, "%d")
+	#endDate = endYear + '-' + endMonth + '-' + endDay
+	
+	#end date is manually set for time being before addressing year issue
+	fifteenMinuteTimestamps = pd.date_range(start=inputDict.get("year"), end=endDate, closed='left', freq='15T', tz='UTC')
 	fifteenMinuteTimestamps = pd.DataFrame(index=fifteenMinuteTimestamps, columns=['temperature']).fillna(np.nan)
 	fifteenMinuteTimestamps.index.rename('date', inplace=True)
-	#print(fifteenMinuteTimestamps)
 	#fifteenMinuteTimestamps.to_csv("true.csv")
 
 	#combine asos with 15 minute intervals and interpolate
@@ -118,7 +128,7 @@ def work(modelDir, inputDict):
 	pdTemps = pdTemps[pdTemps.index.isin(fifteenMinuteTimestamps.index)]
 
 	#create load regressor from weather data in correct format as nparray
-	#loadregressors = pdTemps[['temperature']].values
+	loadregressors = pdTemps[['temperature']].values
 	def createTempInput(temp, size, minTemp=None, maxTemp=None, intercept = False):
 		if (minTemp is None):
 			minTemp=min(temp)
@@ -150,28 +160,11 @@ def work(modelDir, inputDict):
 	#hod = pd.get_dummies(hod)
 	#print(hod)
 
-	Tmin, Tmax, tempregress = createTempInput(pdTemps['temperature'], 1)
+	#Waiting on algo update for tempregress 
+	Tmin, Tmax, tempregress = createTempInput(pdTemps['temperature'], 20)
+	loadregressors = tempregress
 	#print(pdTemps['date'].values)
 	#print(tempregress)
-	loadregressors = tempregress
-	#print(tempregress)
-
-	#asosTemps = []
-	#asosDates = []
-	#missingTemps = []
-	#missingDates = []
-	#for i in timeTemp:
-	#	if timeTemp[i] == 'M':
-	#		missingDates.append(((datetime.datetime.strptime(i, "%Y-%m-%d %H:%M"))-datetime.datetime(2017,1,1)).total_seconds())
-	#	else:
-	#		asosTemps.append(float(timeTemp[i]))
-	#		asosDates.append(((datetime.datetime.strptime(row[1], "%Y-%m-%d %H:%M"))-datetime.datetime(2017,1,1)).total_seconds())
-	#missingTemps = np.interp(missingDates, asosDates, asosTemps)
-	#for i in range(len(missingDates)):
-	#	timeTemp[(datetime.datetime(2017,1,1)+datetime.timedelta(seconds=missingDates[i])).strftime("%Y-%m-%d %H:%M")] = missingTemps[i]
-
-	#limit to one day of weather data for now
-	#loadregressors=firstDayTemp.reshape(-1,1)
 
 	#CSSS run CSSS algo for individual home scenario
 	sdmod0 = SolarDisagg.SolarDisagg_IndvHome(netloads=netload, solarregressors=solarproxy, loadregressors=loadregressors, names=meterNames)
@@ -243,10 +236,10 @@ def new(modelDir):
 	defaultInputs = {
 		"user" : "admin",
 		"modelType": modelName,
-		"meterData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","load_data_year.csv")).read(),
-		"solarData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","solar_proxy_year.csv")).read(),
-		"weatherData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","asosweatherall.csv")).read(),
-		"latLonData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","lat_lon_data.csv")).read(),
+		"meterData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","load_data_three_month.csv")).read(),
+		"solarData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","solar_proxy_three_month.csv")).read(),
+		"weatherData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","asos_three_month.csv")).read(),
+		"latLonData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","lat_lon_data_plus.csv")).read(),
 		"asos": "CHO",
 		"year": "2017-01-01",
 		"created":str(datetime.datetime.now())
@@ -276,7 +269,6 @@ def pullAsosRevised(start, station, datatype, end=None):
 		endYear = datetime.datetime.strftime(endDate, "%Y")
 		endMonth = datetime.datetime.strftime(endDate, "%m")
 		endDay = datetime.datetime.strftime(endDate, "%d")
-	print(endDay)
 	url = ('https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?station=' + station + '&data=' + datatype + '&year1=' + startYear + 
 		'&month1='+ startMonth +'&day1=' + startDay + '&year2=' + endYear + '&month2=' + endMonth +'&day2=' + endDay + '&tz=Etc%2FUTC&format=onlycomma&latlon=no&direct=no&report_type=1&report_type=2')
 	r = requests.get(url)
