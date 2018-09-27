@@ -15,7 +15,7 @@ import math
 # FNAME = 'smsSingle.glm'
 # FNAME = 'dist_gen_solar_all.glm'
 FNAME = 'ieee37node.glm'
-
+# FNAME = 'ieee123nodeBetter.glm'
 
 # help(omf.feeder.parse)
 
