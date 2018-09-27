@@ -34,7 +34,9 @@ for obj in feed.values():
 
 def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=False, nodeCol=False):
 	''' Draw a color-coded map of the voltage drop on a feeder.
-	Returns a matplotlib object. '''
+	edgeLabs property must be either 'Name', 'Current', 'Power', 'Rating', 'PercentOfRating', or None
+	nodeLabs property must be either 'Name', 'Voltage', or None
+	Returns a matplotlib object.'''
 	tree = omf.feeder.parse(glmPath)
 
 	#dictionary to hold info on lines present in glm
