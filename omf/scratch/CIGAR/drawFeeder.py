@@ -1,6 +1,9 @@
 import omf
 import sys
 from matplotlib import pyplot as plt
+from matplotlib.animation import FuncAnimation
+import matplotlib
+matplotlib.pyplot.switch_backend('Agg')
 import tempfile
 from os.path import join as pJoin
 import csv
@@ -223,13 +226,17 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 		positions = graphviz_layout(cleanG, prog='neato')
 	else:
 		positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
+	#create custom colormap
+	custom_cm = matplotlib.colors.LinearSegmentedColormap.from_list('custColMap',[(0.0,'blue'),(0.15,'darkgray'),(0.7,'darkgray'),(1.0,'red')])
+	custom_cm.set_under(color='black')
+
 	edgeIm = nx.draw_networkx_edges(fGraph,
 		pos = positions,
 		edge_color = [edgeColors.get(n,1) for n in edgeNames],
 		width = 1,
 		edge_vmin = 0,
-		edge_vmax = 2,
-		edge_cmap = plt.cm.coolwarm)
+		edge_vmax = 1.25,
+		edge_cmap = custom_cm)
 	edgeLabelsIm = nx.draw_networkx_edge_labels(fGraph,
 		pos = positions,
 		edge_labels = edgeLabels,
@@ -240,8 +247,9 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 		linewidths = 0,
 		node_size = 30,
 		vmin = 0,
-		vmax = 2,
-		cmap = plt.cm.coolwarm)
+		vmax = 1.25,
+		cmap = custom_cm)
+	#plt.cm.coolwarm
 	# nodeLabelsIm = nx.draw_networkx_labels(fGraph,
 	# 	pos = positions,
 	# 	labels = nodeVolts,
