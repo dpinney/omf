@@ -32,7 +32,7 @@ for obj in feed.values():
 # omf.feeder.latLonNxGraph(omf.feeder.treeToNxGraph(feed), labels=False, neatoLayout=True, showPlot=False)
 # plt.savefig('blah.png')
 
-def voltPlot(glmPath, workDir=None, neatoLayout=False):
+def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=False, nodeCol=False):
 	''' Draw a color-coded map of the voltage drop on a feeder.
 	Returns a matplotlib object. '''
 	tree = omf.feeder.parse(glmPath)
@@ -230,41 +230,97 @@ def voltPlot(glmPath, workDir=None, neatoLayout=False):
 	custom_cm = matplotlib.colors.LinearSegmentedColormap.from_list('custColMap',[(0.0,'blue'),(0.15,'darkgray'),(0.7,'darkgray'),(1.0,'red')])
 	custom_cm.set_under(color='black')
 
-	edgeIm = nx.draw_networkx_edges(fGraph,
-		pos = positions,
-		edge_color = [edgeColors.get(n,1) for n in edgeNames],
-		width = 1,
-		edge_vmin = 0,
-		edge_vmax = 1.25,
-		edge_cmap = custom_cm)
-	edgeLabelsIm = nx.draw_networkx_edge_labels(fGraph,
-		pos = positions,
-		edge_labels = edgeLabels,
-		font_size = 8)
-	nodeIm = nx.draw_networkx_nodes(fGraph,
-		pos = positions,
-		node_color = [nodeVolts.get(n,1) for n in fGraph.nodes()],
-		linewidths = 0,
-		node_size = 30,
-		vmin = 0,
-		vmax = 1.25,
-		cmap = custom_cm)
-	#plt.cm.coolwarm
-	# nodeLabelsIm = nx.draw_networkx_labels(fGraph,
-	# 	pos = positions,
-	# 	labels = nodeVolts,
-	# 	font_size = 8)
+	drawColorbar = False
+	emptyColors = {}
+
+	#draw edges with or without colors
+	if edgeCol:
+		drawColorbar = True
+		edgeIm = nx.draw_networkx_edges(fGraph,
+			pos = positions,
+			edge_color = [edgeColors.get(n,1) for n in edgeNames],
+			width = 1,
+			edge_vmin = 0,
+			edge_vmax = 1.25,
+			edge_cmap = custom_cm)
+	else:
+		edgeIm = nx.draw_networkx_edges(fGraph,
+			pos = positions,
+			edge_color = [emptyColors.get(n,.6) for n in edgeNames],
+			width = 1,
+			edge_vmin = 0,
+			edge_vmax = 1.25,
+			edge_cmap = custom_cm)
+
+	#draw edge labels
+	if edgeLabs != None:
+		if edgeLabs == "Name":
+			edgeLabels = edgeTupleNames
+		elif edgeLabs == "Current":
+			edgeLabels = edgeTupleCurrents
+		elif edgeLabs == "Power":
+			edgeLabels = edgeTuplePower
+		elif edgeLabs == "Rating":
+			edgeLabels = edgeTupleRatings
+		elif edgeLabs == "PercentOfRating":
+			edgeLabels = edgeTupleValsPU
+		else:
+			edgeLabs = None
+			print "WARNING: edgeLabs property must be either 'Name', 'Current', 'Power', 'Rating', 'PercentOfRating', or None"
+	if edgeLabs != None:
+		edgeLabelsIm = nx.draw_networkx_edge_labels(fGraph,
+			pos = positions,
+			edge_labels = edgeLabels,
+			font_size = 8)
+	
+	# draw nodes with or without color
+	if nodeCol:
+		drawColorbar = True
+		nodeIm = nx.draw_networkx_nodes(fGraph,
+			pos = positions,
+			node_color = [nodeVolts.get(n,1) for n in fGraph.nodes()],
+			linewidths = 0,
+			node_size = 30,
+			vmin = 0,
+			vmax = 1.25,
+			cmap = custom_cm)
+	else:
+		nodeIm = nx.draw_networkx_nodes(fGraph,
+			pos = positions,
+			node_color = [emptyColors.get(n,.6) for n in fGraph.nodes()],
+			linewidths = 0,
+			node_size = 30,
+			vmin = 0,
+			vmax = 1.25,
+			cmap = custom_cm)
+
+	#draw node labels
+	nodeLabels = {}
+	if nodeLabs != None:
+		if nodeLabs == "Name":
+			nodeLabels = nodeNames
+		elif nodeLabs == "Voltage":
+			nodeLabels = NodeVolts
+		else:
+			nodeLabs = None
+			print "WARNING: nodeLabs property must be either 'Name', 'Voltage', or None"
+	if nodeLabs != None:
+		nodeLabelsIm = nx.draw_networkx_labels(fGraph,
+			pos = positions,
+			labels = nodeLabels,
+			font_size = 8)
 
 	plt.sci(nodeIm)
 	# plt.clim(110,130)
-	plt.colorbar()
+	if drawColorbar:
+		plt.colorbar()
 	return voltChart
 
 # Test code for parsing/modifying feeders.
 # tree = omf.feeder.parse('smsSingle.glm')
 # tree[35]['name'] = 'OH NO CHANGED'
 
-chart = voltPlot(FNAME, neatoLayout=True)
+chart = drawPlot(FNAME, neatoLayout=True, edgeLabs='Current', edgeCol=True)
 chart.savefig("./VOLTOUT.png")
 # from pprint import pprint as pp
 # pp(chart)
