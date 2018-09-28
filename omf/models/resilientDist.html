@@ -241,7 +241,7 @@
 	</div>
 	<div id="output" class="postRun">
 		<p class='reportTitle'><b>One Line Diagram (Scroll to Zoom, Drag to Pan)</b></p>
-		<div class="content">
+		<div class="content" style="margin-top:0px">
 			<div id="diagram">	
 				<img id="oneLineDiagram" style="padding: 0px; display: block; margin-left: auto; margin-right: auto; max-width: 100%; max-height: 100%;"/>
 				<script>gebi("oneLineDiagram").src = "data:image/png;base64," + allOutputData.oneLineDiagram</script>
@@ -252,13 +252,13 @@
 			</div>
 		</div>
 		<p class='reportTitle'><b>Damage Scenarios</b></p>
-		<div class="content">
+		<div class="content" style="margin-top:0px">
 			<div id="scenarioDisplay">
 			</div>
 		</div>
 
 		<p class='reportTitle'><b>Design Solution</b></p>
-		<div class="content">
+		<div class="content" style="margin-top:0px">
 			<div id="designDisplay">
 			</div>
 			<div id="tables">
@@ -355,7 +355,7 @@
 			</div>
 		</div>
 		<p class="reportTitle postRun" style="page-break-before:always">Download Output Data</p>	
-		<div style="text-align:left" class="tightContent">
+		<div style="text-align:left" class="content" style="margin-top:0px">
 			<a style="padding:10px" onclick="downloadTextFile('gfmOutput.txt', allOutputData['gfmRawOut'])">General Fragility Model (GFM) Output</a><br>
 			<a style="padding:10px" onclick="downloadTextFile('rdtOutput.txt', allOutputData['rdtRawOut'])">Resilient Design Tool (RDT) Output</a><br>
 			<a style="padding:10px" onclick="downloadTextFile('gridlabdOutput.txt', JSON.stringify(allOutputData['gridlabdRawOut'], null, 2))">GridLAB-D (GLD) Output</a>
