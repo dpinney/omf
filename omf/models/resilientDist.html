@@ -251,7 +251,6 @@
 				</script>
 			</div>
 		</div>
-
 		<p class='reportTitle'><b>Damage Scenarios</b></p>
 		<div class="content">
 			<div id="scenarioDisplay">
@@ -347,9 +346,11 @@
 
 					var scenarioHTML= "";
 					for (var scenarioID in scenarioDict) {
-						scenarioHTML = scenarioHTML + scenarioDict[scenarioID];
+						scenarioHTML = scenarioHTML + scenarioDict[scenarioID] + "";
 					}
 					scenarioHTML = scenarioHTML + "</table>";
+					gebi("scenarioDisplay").innerHTML = scenarioHTML + "";	
+					gebi("designDisplay").innerHTML = designHTML + "";
 				</script>
 			</div>
 		</div>
