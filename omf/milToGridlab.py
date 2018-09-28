@@ -1375,7 +1375,7 @@ def _tests(
 	# Run all the tests.
 	for stdString, seqString in testFiles:
 		curData = {} # Append data for this std file here.
-		curData['file'] = stdString
+		curData['circuit_name'] = stdString
 		cur_start_time = time.time()
 		# Write the time info.
 		with open(fileName, 'a') as resultsFile:
@@ -1398,13 +1398,14 @@ def _tests(
 				inFileSize = inFileStats.st_size
 				outFileSize = outFileStats.st_size
 				percent = float(inFileSize)/float(outFileSize)
-				curData['percentage'] = percent
+				curData['glm_size_as_perc_of_std'] = percent
+				curData['std_size_mb'] = inFileSize / 1000.0 / 1000.0
 				resultsFile.write('WROTE GLM FOR ' + stdString + ', THE STD FILE IS %s PERCENT OF THE GLM FILE.\n' % str(100*percent)[0:4])
 		except:
 			print 'FAILED CONVERTING', stdString
-			curData['percentage'] = 0.0
+			curData['glm_size_as_perc_of_std'] = 0.0
 			with open(fileName,'a') as resultsFile:
-					resultsFile.write('FAILED CONVERTING ' + stdString + "\n")
+				resultsFile.write('FAILED CONVERTING ' + stdString + "\n")
 		try:
 			# Draw the GLM.
 			# But first make networkx cool it with the warnings.
@@ -1434,19 +1435,19 @@ def _tests(
 			with open(fileName, 'a') as resultsFile:
 				resultsFile.write('RAN GRIDLAB ON ' + stdString + "\n")
 				resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
-				curData['isGridlabSuccess'] = True
+				curData['powerflow_success'] = True
 				resultsFile.write("====================================================================================\n")
 				timeArray.append(time.time() - cur_start_time)
 		except Exception as e:
 			print 'POWERFLOW FAILED', stdString
 			with open(fileName,'a') as resultsFile:
 				resultsFile.write('POWERFLOW FAILED ' + stdString + "\n")
-				curData['isGridlabSuccess'] = False
+				curData['powerflow_success'] = False
 				resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
 				resultsFile.write("====================================================================================\n")
 				timeArray.append(time.time() - cur_start_time)
 		# Write stats for all tests.
-		curData['running_time'] = time.time() - cur_start_time
+		curData['conversion_time_seconds'] = time.time() - cur_start_time
 		statData.append(curData)
 	with open(fileName, 'a') as resultsFile:
 		resultsFile.write('Ran %d out of %d tests for this simulation.\n' % (len(testFiles), totalLength))
