@@ -240,23 +240,16 @@
 		</script>
 	</div>
 	<div id="output" class="postRun">
-		<p class='reportTitle'><b>One Line Diagram</b></p>
+		<p class='reportTitle'><b>One Line Diagram (Scroll to Zoom, Drag to Pan)</b></p>
 		<div class="content">
-			<br>
-			<table>
-				<tr><th><div style="float: left;">Scroll to zoom, drag to pan</div><div style="float: right;" id="powerflowValid"></div></th></tr>
-				<tr><td>
-					<div id="diagram">	
-						<img id="oneLineDiagram" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%; max-height: 100%;"/>
-						<script>gebi("oneLineDiagram").src = "data:image/png;base64," + allOutputData.oneLineDiagram</script>
-						<script src="{{pathPrefix}}/static/wheelzoom.js"></script>
-						<script type="text/javascript">
-								images = wheelzoom(document.querySelectorAll('img'), {zoom: 0.1, maxZoom: 10});
-						</script>
-					</div>
-				</td></tr>
-			</table>
-			<br><br>
+			<div id="diagram">	
+				<img id="oneLineDiagram" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%; max-height: 100%;"/>
+				<script>gebi("oneLineDiagram").src = "data:image/png;base64," + allOutputData.oneLineDiagram</script>
+				<script src="{{pathPrefix}}/static/wheelzoom.js"></script>
+				<script type="text/javascript">
+						images = wheelzoom(document.querySelectorAll('img'), {zoom: 0.1, maxZoom: 10});
+				</script>
+			</div>
 		</div>
 
 		<p class='reportTitle'><b>Damage Scenarios</b></p>
@@ -270,8 +263,6 @@
 			<div id="designDisplay">
 			</div>
 			<div id="tables">
-				<br>
-				<br>
 				<script>
 					var rdtOutput = allOutputData.rdtRawOut;
 					var gfmOutput = allOutputData.gfmRawOut;
@@ -328,7 +319,7 @@
 						secondRunValidStyle =  "color: red;" 
 						secondRunValid = "Powerflow Not Validated";
 					}
-					designHTML = designHTML + '<table id="totalCostTable"><tr><th><div style="float: left;">Total Cost</div><div style="' + secondRunValidStyle + 'float: right;">' + secondRunValid + '</div></th></tr><tr><td>$' + totalCost.toFixed(2) + '</td></tr></table><br>';
+					designHTML = designHTML + '<table id="totalCostTable"><tr><th><div style="float: left;">Total Cost</div><div style="' + secondRunValidStyle + 'float: right;">' + secondRunValid + '</div></th></tr><tr><td>$' + totalCost.toFixed(2) + '</td></tr></table>';
 					designHTML = designHTML + '<table id="solutionComponents">' + tableBuilder + '</table>';
 
 
@@ -356,11 +347,9 @@
 
 					var scenarioHTML= "";
 					for (var scenarioID in scenarioDict) {
-						scenarioHTML = scenarioHTML + scenarioDict[scenarioID] + "<br>";
+						scenarioHTML = scenarioHTML + scenarioDict[scenarioID];
 					}
 					scenarioHTML = scenarioHTML + "</table>";
-					gebi("scenarioDisplay").innerHTML = scenarioHTML + "<br><br>";	
-					gebi("designDisplay").innerHTML = designHTML + "<br><br>";
 				</script>
 			</div>
 		</div>
@@ -370,7 +359,5 @@
 			<a style="padding:10px" onclick="downloadTextFile('rdtOutput.txt', allOutputData['rdtRawOut'])">Resilient Design Tool (RDT) Output</a><br>
 			<a style="padding:10px" onclick="downloadTextFile('gridlabdOutput.txt', JSON.stringify(allOutputData['gridlabdRawOut'], null, 2))">GridLAB-D (GLD) Output</a>
 		</div>
-		<br>
-		<br>	
 	</div>
 </body>
