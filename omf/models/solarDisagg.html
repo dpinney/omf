@@ -85,7 +85,7 @@
 				<input id="meterData" name="meterData" type="hidden">
 				<div>
 					<label for="meterDataFile" class="fileButton">Choose File</label>
-					<input id="meterFileName" name="meterFileName" value='' readonly class="uploadMeterFileName">
+					<input id="meterFileName" name="meterFileName" value='' readonly class="uploadFileName">
 				</div>
 			</div>
 			<div class="shortInput">
@@ -94,7 +94,7 @@
 				<input id="solarData" name="solarData" type="hidden">
 				<div>
 					<label for="solarDataFile" class="fileButton">Choose File</label>
-					<input id="solarFileName" name="solarFileName" value='' readonly class="uploadsolarFileName">
+					<input id="solarFileName" name="solarFileName" value='' readonly class="uploadFileName">
 				</div>
 			</div>
 			<div class="shortInput">
@@ -103,7 +103,7 @@
 				<input id="latLonData" name="latLonData" type="hidden">
 				<div>
 					<label for="latLonDataFile" class="fileButton">Choose File</label>
-					<input id="latLonFileName" name="latLonFileName" value='' readonly class="uploadLatLonFileName">
+					<input id="latLonFileName" name="latLonFileName" value='' readonly class="uploadFileName">
 				</div>
 			</div>
 			<div style="display:none" class="shortInput">
@@ -112,7 +112,7 @@
 				<input id="weatherData" name="weatherData" type="hidden">
 				<div>
 					<label for="weatherDataFile" class="fileButton">Choose File</label>
-					<input id="weatherFileName" name="weatherFileName" value='' readonly class="uploadweatherFileName">
+					<input id="weatherFileName" name="weatherFileName" value='' readonly class="uploadFileName">
 				</div>
 			</div>
 			<div class="shortInput">
@@ -128,9 +128,13 @@
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
 				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
+				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
 				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
 			</div>
 		</form>
+	</div>
+	<div id ="runIndicator" class="content running">
+		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
 	</div>
 	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
 		<pre id='errorText' style='overflow-x:scroll'></pre>
@@ -150,71 +154,72 @@
   				Plotly.newPlot("plotly-div", JSON.parse(allOutputData["graphJSON"]), JSON.parse(allOutputData["layoutJSON"]) || {})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Meter Locations</p>
-		<div id="climateReport" class="tightContent">
-			<div id="map"></div>
-		</div>
+		<div id="mapInsert"></div>
 		<script type="text/javascript">
-			var bounds = [];
+			if(modelStatus === "finished"){
+				mapHtml = '<p class="reportTitle">Meter Locations</p><div id="climateReport" class="tightContent"><div id="map"></div></div>'
+				gebi('mapInsert').innerHTML = mapHtml
+				var bounds = [];
 
-			var map = L.map(
-				'map', {
-				center: [0, 0],
-				zoom: 1,
-				maxBounds: bounds,
-				layers: [],
-				worldCopyJump: false,
-				crs: L.CRS.EPSG3857,
-				zoomControl: true,
-			});
+				var map = L.map(
+					'map', {
+					center: [0, 0],
+					zoom: 1,
+					maxBounds: bounds,
+					layers: [],
+					worldCopyJump: false,
+					crs: L.CRS.EPSG3857,
+					zoomControl: true,
+				});
 
-			var tile_layer = L.tileLayer(
-				'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-				{
-				"attribution": null, 
-				"detectRetina": false, 
-				"maxNativeZoom": 18, 
-				"maxZoom": 18, 
-				"minZoom": 0, 
-				"noWrap": false, 
-				"subdomains": "abc"
+				var tile_layer = L.tileLayer(
+					'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+					{
+					"attribution": null, 
+					"detectRetina": false, 
+					"maxNativeZoom": 18, 
+					"maxZoom": 18, 
+					"minZoom": 0, 
+					"noWrap": false, 
+					"subdomains": "abc"
+					}
+				).addTo(map);
+
+				var marker_cluster = L.markerClusterGroup({});
+				map.addLayer(marker_cluster);
+						  
+				for (meter in allOutputData.loadLocations){
+				//console.log(allOutputData.loadLocations[meter])
+					bounds.push([allOutputData.loadLocations[meter]['netLoadLat'], allOutputData.loadLocations[meter]['netLoadLon']])
+					var circle_marker = L.circleMarker(
+					[allOutputData.loadLocations[meter]['netLoadLat'], allOutputData.loadLocations[meter]['netLoadLon']],
+					{
+						"bubblingMouseEvents": true, 
+						"color": "#0000FF", 
+						"dashArray": null, 
+						"dashOffset": null, 
+						"fill": true, 
+						"fillColor": "#0000FF", 
+						"fillOpacity": 0.9, 
+						"fillRule": "evenodd", 
+						"lineCap": "round", 
+						"lineJoin": "round", 
+						"opacity": 1.0, 
+						"radius": 10, 
+						"stroke": true, 
+						"weight": 3
+					}).addTo(marker_cluster);
+					
+					circle_marker.bindTooltip(
+						'<div>' + allOutputData.loadLocations[meter]['netLoadName'] + '</div>',
+						{"sticky": true}
+					);
 				}
-			).addTo(map);
 
-			var marker_cluster = L.markerClusterGroup({});
-			map.addLayer(marker_cluster);
-					  
-			for (meter in allOutputData.loadLocations){
-			//console.log(allOutputData.loadLocations[meter])
-				bounds.push([allOutputData.loadLocations[meter]['netLoadLat'], allOutputData.loadLocations[meter]['netLoadLon']])
-				var circle_marker = L.circleMarker(
-				[allOutputData.loadLocations[meter]['netLoadLat'], allOutputData.loadLocations[meter]['netLoadLon']],
-				{
-					"bubblingMouseEvents": true, 
-					"color": "#0000FF", 
-					"dashArray": null, 
-					"dashOffset": null, 
-					"fill": true, 
-					"fillColor": "#0000FF", 
-					"fillOpacity": 0.9, 
-					"fillRule": "evenodd", 
-					"lineCap": "round", 
-					"lineJoin": "round", 
-					"opacity": 1.0, 
-					"radius": 10, 
-					"stroke": true, 
-					"weight": 3
-				}).addTo(marker_cluster);
-				
-				circle_marker.bindTooltip(
-					'<div>' + allOutputData.loadLocations[meter]['netLoadName'] + '</div>',
-					{"sticky": true}
+				map.fitBounds(
+					bounds
 				);
 			}
-
-			map.fitBounds(
-				bounds
-			);
 		</script>
 	</div>
 </body>
