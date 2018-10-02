@@ -698,6 +698,11 @@ def convert(stdString,seqString):
 			try:
 				r_series = float(percent_z)*0.01/math.sqrt(1+(float(x_r_ratio)*float(x_r_ratio)))
 				x_series = r_series*float(x_r_ratio)
+				# HACK: we can't have zeros in the impedances.
+				if r_series <= 0.0:
+					r_series = 0.00033
+				if x_series <= 0.0:
+					x_series = 0.0022
 				transConfig['impedance'] = str(r_series) + '+' + str(x_series) + 'j'
 			except:
 				transConfig['impedance'] = '0.00033+0.0022j'
