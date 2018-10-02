@@ -1,5 +1,5 @@
 ''' Convert a Milsoft Windmil feeder model into an OMF-compatible version. '''
-import os, feeder, csv, random, math, copy, locale, json, traceback, shutil, time, datetime
+import os, feeder, csv, random, math, copy, locale, json, traceback, shutil, time, datetime, warnings
 from StringIO import StringIO
 from os.path import join as pJoin
 from omf.solvers import gridlabd
@@ -106,7 +106,7 @@ def convert(stdString,seqString):
 				if allNames.count(newOb['name']) > 1:
 					newOb['name'] = newOb['guid']
 			except:
-				pass
+				warnings.warn('Object creation failed due to missing name, guid, parentGuid, lat, or lon.')
 			return newOb
 
 		# -----------------------------------------------
@@ -214,9 +214,11 @@ def convert(stdString,seqString):
 		def convertSource(sourceList):
 			source = _convertGenericObject(sourceList)
 			#Find the connect type
-			if sourceList[16] == 'W':#Wye connected
+			if sourceList[16] == 'W':
+				#Wye connected
 				source['phases'] = sourceList[2] + 'N'
-			else:#Delta connected
+			else:
+				#Delta connected
 				source['phases'] = sourceList[2] + ('D' if len(sourceList[2]) >= 2 else '')
 			source['nominal_voltage'] = str(float(sourceList[14])*1000)
 			source['bustype'] = 'SWING'
