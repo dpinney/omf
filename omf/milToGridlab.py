@@ -705,14 +705,10 @@ def convert(stdString,seqString):
 			# transformer[1]['install_type'] = 'POLETOP'
 			# Set the connection type
 			transPhases = _safeGet(transList, 2, '')
-			try:
-				if 1 == len(transPhases) and float(transList[27]) != 0.0:
-					# print 'Detected a center-tapped transformer.'
-					transConfig['connect_type'] = 'SINGLE_PHASE_CENTER_TAPPED'
-				else:
-					#MAYBEFIX: support other types of windings (D-D, D-Y, etc.)
-					transConfig['connect_type'] = 'WYE_WYE'
-			except:
+			if len(transPhases) > 2:
+				transConfig['connect_type'] = 'WYE_WYE'
+				#MAYBEFIX: support other types of windings (D-D, D-Y, etc.)
+			else:
 				transConfig['connect_type'] = 'SINGLE_PHASE'
 			# Set the power rating.
 			try:
