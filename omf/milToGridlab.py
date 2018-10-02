@@ -696,34 +696,26 @@ def convert(stdString,seqString):
 				transConfig['shunt_impedance'] = str(r_shunt) + '+' + str(x_shunt) + 'j'
 			# Set series impedance
 			try:
-				if float(percent_z) > 0.0:
-					r_series = float(percent_z)*0.01/math.sqrt(1+(float(x_r_ratio)*float(x_r_ratio)))
-					x_series = r_series*float(x_r_ratio)
-					transConfig['impedance'] = str(r_series) + '+' + str(x_series) + 'j'
-				else:
-					transConfig['impedance'] = '0.00033+0.0022j'
-				impedance = transConfig['impedance']
-				impReal = impedance.split('+')[0]
-				impImag = impedance.split('+')[1]
-				# Override zero values for reactance and resistances.
-				if float(impReal) == 0:
-					impReal = '0.05'
-					impedance = impReal+"+"+impImag
-				if float(impImag.strip('j')) == 0:
-					impImag = '0.02j'
-					impedance = impReal+"+"+impImag
-					# print "Reactance for a transformer is 0, hacked it to:", str(impedance)
-				transConfig['impedance'] = impedance
-				# NOTE: Windmil doesn't export any information on install type, but Gridlab only puts it in there for info reasons.
-				# transformer[1]['install_type'] = 'POLETOP'
-				transPhases = transList[2]
+				r_series = float(percent_z)*0.01/math.sqrt(1+(float(x_r_ratio)*float(x_r_ratio)))
+				x_series = r_series*float(x_r_ratio)
+				transConfig['impedance'] = str(r_series) + '+' + str(x_series) + 'j'
+			except:
+				transConfig['impedance'] = '0.00033+0.0022j'
+			# NOTE: Windmil doesn't export any information on install type, but Gridlab only puts it in there for info reasons.
+			# transformer[1]['install_type'] = 'POLETOP'
+			# Set the connection type
+			transPhases = _safeGet(transList, 2, '')
+			try:
 				if 1 == len(transPhases) and float(transList[27]) != 0.0:
 					# print 'Detected a center-tapped transformer.'
 					transConfig['connect_type'] = 'SINGLE_PHASE_CENTER_TAPPED'
 				else:
 					#MAYBEFIX: support other types of windings (D-D, D-Y, etc.)
 					transConfig['connect_type'] = 'WYE_WYE'
-				#MAYBEFIX: change these from just default values:
+			except:
+				transConfig['connect_type'] = 'SINGLE_PHASE'
+			# Set the power rating.
+			try:
 				transConfig['power_rating'] = str(float(transList[19]) + float(transList[20]) + float(transList[21]))
 				if float(transList[19]) > 0:
 					transConfig['powerA_rating'] = transList[19]
@@ -733,12 +725,11 @@ def convert(stdString,seqString):
 					transConfig['powerC_rating'] = transList[21]
 				# HACK: a zero power rating makes no sense.
 				if float(transConfig['power_rating']) < 1.0:
-					transConfig['power_rating'] = '10.0'
-			#MAYBEFIX: and change these, which were added to make the transformer work on multiple phases:
-			except ValueError, e:
-				pass
-				# print "ERROR FOR: ", e
+					raise Exception
+			except:
+				transConfig['power_rating'] = '500.0'
 			return transformer
+		
 		# Simple lookup table for which function we need to apply:
 		objectToFun = {
 			1 : convertOhLine,
@@ -1422,9 +1413,11 @@ def _tests(
 				resultsFile.write('DREW GLM FOR ' + stdString + "\n")
 		try:
 			# Run powerflow on the GLM.
+			curData['gridlabd_error_code'] = ''
 			output = gridlabd.runInFilesystem(outGlm, attachments=testAttachments, keepFiles=False)
 			if output['stderr'] != "":
 				# Catch GridLAB-D's errors:
+				curData['gridlabd_error_code'] = output['stderr']
 				raise Exception
 			# Dump powerflow results.
 			with open(outPrefix + stdString.replace('.std','.json'),'w') as outFile:
@@ -1458,4 +1451,4 @@ def _tests(
 	return statData
 
 if __name__ == "__main__":
-	_tests()
+	print _tests()
