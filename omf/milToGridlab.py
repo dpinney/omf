@@ -201,16 +201,13 @@ def convert(stdString,seqString):
 				node['phases'] = nodeList[2] + ('D' if len(nodeList[2]) >= 2 else '')
 			else:
 				node['phases'] = nodeList[2] + 'N'
-
 			#MAYBEFIX: can we get nominal voltage from the windmil file?
 			node['nominal_voltage'] = nominal_voltage
-
 			if nodeList[15] != '0' or nodeList[16] != '0' or nodeList[17] != '0' or nodeList[18] != '0' or nodeList[19] != '0' or nodeList[20] != '0': # this node is actually a load
 				node['object'] = 'load'
 				node['constant_power_A'] = str(float(nodeList[15])*1000) + ('+' if float(nodeList[18]) >= 0.0 else '-') + str(abs(float(nodeList[18])*1000)) + 'j'
 				node['constant_power_B'] = str(float(nodeList[16])*1000) + ('+' if float(nodeList[19]) >= 0.0 else '-') + str(abs(float(nodeList[19])*1000)) + 'j'
 				node['constant_power_C'] = str(float(nodeList[17])*1000) + ('+' if float(nodeList[20]) >= 0.0 else '-') + str(abs(float(nodeList[20])*1000)) + 'j'
-
 				node['load_class'] = 'C' #setting all nodes with loads on them as commercial loads as we can't know the load classification. If they want the load to be residential then they need to classify the node as a consumer object in the windmil model.
 			return node
 
@@ -553,18 +550,17 @@ def convert(stdString,seqString):
 			#MAYBEFIX: figure out whether I'll run into trouble if the previous integer isn't unique.
 			# Grab regulator configuration parameters
 			reg_hardware = statsByName(regList[11])
-			if reg_hardware is not None:
+			try:
+				raise_taps = math.ceil(float(reg_hardware[4])/float(reg_hardware[6]))
+				lower_taps = math.ceil(float(reg_hardware[5])/float(reg_hardware[6]))
+				# HACK: GridLAB-D doesn't like either of these to be zero.
+				if raise_taps <= 0.0:
+					raise_taps = 1.0
+				if lower_taps <= 0.0:
+					lower_taps = 1.0
+				raise_taps = str(raise_taps)
+				lower_taps = str(lower_taps)
 				band_width = str(float(reg_hardware[7])*120)
-				if float(reg_hardware[6]) > 0.0:
-					raise_taps = str(math.ceil(float(reg_hardware[4])/float(reg_hardware[6])))
-					lower_taps = str(math.ceil(float(reg_hardware[5])/float(reg_hardware[6])))
-				else:
-					raise_taps = '16'
-					lower_taps = '16'
-				if float(raise_taps) == 0.0 and float(reg_hardware[4]) > 0.0:
-					raise_taps = '16'
-				if float(lower_taps) == 0.0 and float(reg_hardware[5]) > 0.0:
-					lower_taps = '16'
 				if float(reg_hardware[4]) > 0.0:
 					regulation = reg_hardware[4]
 				elif float(reg_hardware[5]) > 0.0:
@@ -575,7 +571,7 @@ def convert(stdString,seqString):
 					ctr = reg_hardware[3]
 				else:
 					ctr = '700'
-			else:
+			except:
 				ctr = '700'
 				band_width = '2'
 				raise_taps = '16'
