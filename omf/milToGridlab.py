@@ -1412,11 +1412,11 @@ def _tests(
 				resultsFile.write('DREW GLM FOR ' + stdString + "\n")
 		try:
 			# Run powerflow on the GLM.
-			curData['gridlabd_error_code'] = ''
+			curData['gridlabd_error_code'] = 'Processing'
 			output = gridlabd.runInFilesystem(outGlm, attachments=testAttachments, keepFiles=False)
 			if output['stderr'] != "":
 				# Catch GridLAB-D's errors:
-				curData['gridlabd_error_code'] = output['stderr']
+				curData['gridlabd_error_code'] = output['stderr'].replace('\n',' ')
 				raise Exception
 			# Dump powerflow results.
 			with open(outPrefix + stdString.replace('.std','.json'),'w') as outFile:
