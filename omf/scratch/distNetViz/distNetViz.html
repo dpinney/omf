@@ -107,7 +107,7 @@
 	div#header{ width:100%; min-width:1000px; height:25px; background:black; padding:0.6em 0 0.6em 0; }
 	div#headInnerBlock{ width:1000px; height:40px; font-size:medium; color:white; margin:4px auto 0 auto; }
 	div#menuLeft{ height:40px; float:left; font-size:medium; color:white; margin-left:5px;}
-	div#menuRight{ height:40px; font-size:medium; color:white; float:right; display:flex; }
+	div#menuRight{ height:40px; font-size:medium; color:white; float:right; display:flex; justify-content: space-between; width: 162px}
 	div#arrow { font-size:8pt; position:absolute; margin-top:2px; margin-left:4px; display:inline; }
 	ul.menu {
 		position:absolute;
@@ -116,27 +116,27 @@
 		z-index: 1000;
 		min-width: 100px;
 		padding: 5px 0px 5px 0px;
-		margin: 1px 0 0;
+		margin: 0px;
 		list-style: none;
 		display: none;
 		text-align:left;
 		background-color:#F8F8F8;
 		padding:0;
-		border: 1px solid #CCC;
+		/*border: 1px solid #CCC;*/
 		-webkit-border-radius: 5px;
 		-moz-border-radius: 5px;
-		border-radius: 5px;
-		-webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-		-moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-		box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+		border-radius: 5px 0px 5px 5px;
+        -webkit-box-shadow: 0 11px 10px rgba(0, 0, 0, 0.2);
+        -moz-box-shadow: 0 11px 10px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 11px 10px rgba(0, 0, 0, 0.2);
 		-webkit-background-clip: padding-box; }
-		ul.menu.right { right:0; left:auto; padding:0 0 0 0; overflow-y:auto; overflow-x:hidden; max-height:550px; }
+		ul.menu.right { right:0; left:auto; padding:5px 0px 5px 0px; overflow-y:auto; overflow-x:hidden; max-height:550px; }
 		ul.menu.left { right:auto; left:auto; padding:0 0 0 0; }
 		ul.menu.center { right:auto; left:-45%; }
 		ul.menu li { padding:0px; }
 		ul.menu li:hover { background:green; color:white; }
 		ul.menu li:hover a { color:white; }
-		ul.menu a { display:block; color:black; padding:4px; }
+		ul.menu a { display:block; color:black; padding:4px; text-decoration: none }
 		ul.menu a:hover {color:white;}
 		ul.menu { display:block; color:black; padding:4px; }
 		ul.menu ul.menu:hover, ul.menu:visited:hover { color:white; }
@@ -155,6 +155,7 @@
 			margin: 0px;
 			margin-top:-5px;
 			padding:0.3em;
+            border-radius: 5px 5px 0 0;
 			background-color:#E0E0E0;
 			display:inline-block;
 			border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;
@@ -205,11 +206,11 @@
 		<!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder Norfork.js'></script> -->
 	</head>
 	<body onkeypress='hotkeys()' style='width:100%;height:100%'>
-		<!-- Start Controls -->
-		<div style='background:orange; top:55px; left:5px' class='divButton' onclick='window.panZoom.zoomIn()' title='Zoom In'>+</div>
-		<div style='background:green; top:95px; left:5px' class='divButton' onclick='window.panZoom.zoomOut()' title='Zoom Out'>-</div>
-		<div style='background:plum; top:135px; left:5px' class='divButton' onclick='window.panZoom.reset()' title='Reset Zoom'>R</div>
-		<div style='background:tomato; top:175px; left:5px;' class='divButton' onclick='scaleTo(parseFloat(prompt("Scale level as a float?", scaleLevel)))' title='Scale To'>S</div>
+		<!-- Start Controls (my-local branch)-->
+		<div style='background:dimgrey; top:55px; left:5px' class='divButton' onclick='window.panZoom.zoomIn()' title='Zoom In'>+</div>
+		<div style='background:dimgrey; top:95px; left:5px' class='divButton' onclick='window.panZoom.zoomOut()' title='Zoom Out'>-</div>
+		<div style='background:dimgrey; top:135px; left:5px' class='divButton' onclick='window.panZoom.reset()' title='Reset Zoom'>R</div>
+		<div style='background:dimgrey; top:175px; left:5px;' class='divButton' onclick='scaleTo(parseFloat(prompt("Scale line thickness by this multiple:", scaleLevel)))' title='Scale To'>S</div>
 		<!-- <div style='background:navy; top:215px; left:5px' id='saveLink' class='divButton' onclick='saveSvg()' title='Save File' download>S</div> -->
 		<!-- End Controls -->
 		<svg id='svgContainer' xmlns='http://www.w3.org/2000/svg' style='width:100%;height:100%' onclick='svgClick(event)' onmousedown='mouseDown(event)' onmouseup='mouseUp(event)'>
@@ -230,25 +231,25 @@
 	<!-- Menu Bar -->
 	<div id='header'>
 		<div id='menuRight'>
-			<div id='saveButton'> 
+            <div id='saveButton'>
 				<div class='buttonGroup'>
 				 	<button id='save' class='pill' onclick="downloadTextFile()">Save </button>
 				 </div>
-			</div>	 	
+			</div>
 			<div id='EditDiv'>
 				<div class='buttonGroup'>
-					<button id='editOps' class='pill' onclick='dropPill(this, "Edit")'>Edit ▾</button> 
+					<button id='editOps' class='pill' onclick='dropPill(this, "Edit")'>Edit ▾</button>
 					<ul id='editMenu' class='menu right' style="display:none">
 						<li><a href='javascript:showModal("findModal")'>Find...</a></li>
-					</ul>  
+					</ul>
 				</div>
 			</div>
 			<div id='addDiv'>
 				<div class='buttonGroup'>
 					<button id='addOps' class='pill' onclick='dropPill(this, "Add")'>Add ▾</button>
 					<ul id='newObjectMenu' class='menu right' style="display:none">
-						<li><a href='javascript:newNode()'>node</a></li>
-						<li><a href='javascript:newLink()'>link</a></li>
+						<li><a href='javascript:newNode()'>Node</a></li>
+						<li><a href='javascript:newLink()'>Link</a></li>
 					</ul>
 				</div>
 			</div>
