@@ -1,5 +1,5 @@
 ''' Convert a Milsoft Windmil feeder model into an OMF-compatible version. '''
-import os, feeder, csv, random, math, copy, locale, json, traceback, shutil, time, datetime
+import os, feeder, csv, random, math, copy, locale, json, traceback, shutil, time, datetime, warnings
 from StringIO import StringIO
 from os.path import join as pJoin
 from omf.solvers import gridlabd
@@ -106,7 +106,7 @@ def convert(stdString,seqString):
 				if allNames.count(newOb['name']) > 1:
 					newOb['name'] = newOb['guid']
 			except:
-				pass
+				warnings.warn('Object creation failed due to missing name, guid, parentGuid, lat, or lon.')
 			return newOb
 
 		# -----------------------------------------------
@@ -201,25 +201,24 @@ def convert(stdString,seqString):
 				node['phases'] = nodeList[2] + ('D' if len(nodeList[2]) >= 2 else '')
 			else:
 				node['phases'] = nodeList[2] + 'N'
-
 			#MAYBEFIX: can we get nominal voltage from the windmil file?
 			node['nominal_voltage'] = nominal_voltage
-
 			if nodeList[15] != '0' or nodeList[16] != '0' or nodeList[17] != '0' or nodeList[18] != '0' or nodeList[19] != '0' or nodeList[20] != '0': # this node is actually a load
 				node['object'] = 'load'
 				node['constant_power_A'] = str(float(nodeList[15])*1000) + ('+' if float(nodeList[18]) >= 0.0 else '-') + str(abs(float(nodeList[18])*1000)) + 'j'
 				node['constant_power_B'] = str(float(nodeList[16])*1000) + ('+' if float(nodeList[19]) >= 0.0 else '-') + str(abs(float(nodeList[19])*1000)) + 'j'
 				node['constant_power_C'] = str(float(nodeList[17])*1000) + ('+' if float(nodeList[20]) >= 0.0 else '-') + str(abs(float(nodeList[20])*1000)) + 'j'
-
 				node['load_class'] = 'C' #setting all nodes with loads on them as commercial loads as we can't know the load classification. If they want the load to be residential then they need to classify the node as a consumer object in the windmil model.
 			return node
 
 		def convertSource(sourceList):
 			source = _convertGenericObject(sourceList)
 			#Find the connect type
-			if sourceList[16] == 'W':#Wye connected
+			if sourceList[16] == 'W':
+				#Wye connected
 				source['phases'] = sourceList[2] + 'N'
-			else:#Delta connected
+			else:
+				#Delta connected
 				source['phases'] = sourceList[2] + ('D' if len(sourceList[2]) >= 2 else '')
 			source['nominal_voltage'] = str(float(sourceList[14])*1000)
 			source['bustype'] = 'SWING'
@@ -553,18 +552,17 @@ def convert(stdString,seqString):
 			#MAYBEFIX: figure out whether I'll run into trouble if the previous integer isn't unique.
 			# Grab regulator configuration parameters
 			reg_hardware = statsByName(regList[11])
-			if reg_hardware is not None:
+			try:
+				raise_taps = math.ceil(float(reg_hardware[4])/float(reg_hardware[6]))
+				lower_taps = math.ceil(float(reg_hardware[5])/float(reg_hardware[6]))
+				# HACK: GridLAB-D doesn't like either of these to be zero.
+				if raise_taps <= 0.0:
+					raise_taps = 1.0
+				if lower_taps <= 0.0:
+					lower_taps = 1.0
+				raise_taps = str(raise_taps)
+				lower_taps = str(lower_taps)
 				band_width = str(float(reg_hardware[7])*120)
-				if float(reg_hardware[6]) > 0.0:
-					raise_taps = str(math.ceil(float(reg_hardware[4])/float(reg_hardware[6])))
-					lower_taps = str(math.ceil(float(reg_hardware[5])/float(reg_hardware[6])))
-				else:
-					raise_taps = '16'
-					lower_taps = '16'
-				if float(raise_taps) == 0.0 and float(reg_hardware[4]) > 0.0:
-					raise_taps = '16'
-				if float(lower_taps) == 0.0 and float(reg_hardware[5]) > 0.0:
-					lower_taps = '16'
 				if float(reg_hardware[4]) > 0.0:
 					regulation = reg_hardware[4]
 				elif float(reg_hardware[5]) > 0.0:
@@ -575,7 +573,7 @@ def convert(stdString,seqString):
 					ctr = reg_hardware[3]
 				else:
 					ctr = '700'
-			else:
+			except:
 				ctr = '700'
 				band_width = '2'
 				raise_taps = '16'
@@ -696,34 +694,27 @@ def convert(stdString,seqString):
 				transConfig['shunt_impedance'] = str(r_shunt) + '+' + str(x_shunt) + 'j'
 			# Set series impedance
 			try:
-				if float(percent_z) > 0.0:
-					r_series = float(percent_z)*0.01/math.sqrt(1+(float(x_r_ratio)*float(x_r_ratio)))
-					x_series = r_series*float(x_r_ratio)
-					transConfig['impedance'] = str(r_series) + '+' + str(x_series) + 'j'
-				else:
-					transConfig['impedance'] = '0.00033+0.0022j'
-				impedance = transConfig['impedance']
-				impReal = impedance.split('+')[0]
-				impImag = impedance.split('+')[1]
-				# Override zero values for reactance and resistances.
-				if float(impReal) == 0:
-					impReal = '0.05'
-					impedance = impReal+"+"+impImag
-				if float(impImag.strip('j')) == 0:
-					impImag = '0.02j'
-					impedance = impReal+"+"+impImag
-					# print "Reactance for a transformer is 0, hacked it to:", str(impedance)
-				transConfig['impedance'] = impedance
-				# NOTE: Windmil doesn't export any information on install type, but Gridlab only puts it in there for info reasons.
-				# transformer[1]['install_type'] = 'POLETOP'
-				transPhases = transList[2]
-				if 1 == len(transPhases) and float(transList[27]) != 0.0:
-					# print 'Detected a center-tapped transformer.'
-					transConfig['connect_type'] = 'SINGLE_PHASE_CENTER_TAPPED'
-				else:
-					#MAYBEFIX: support other types of windings (D-D, D-Y, etc.)
-					transConfig['connect_type'] = 'WYE_WYE'
-				#MAYBEFIX: change these from just default values:
+				r_series = float(percent_z)*0.01/math.sqrt(1+(float(x_r_ratio)*float(x_r_ratio)))
+				x_series = r_series*float(x_r_ratio)
+				# HACK: we can't have zeros in the impedances.
+				if r_series <= 0.0:
+					r_series = 0.00033
+				if x_series <= 0.0:
+					x_series = 0.0022
+				transConfig['impedance'] = str(r_series) + '+' + str(x_series) + 'j'
+			except:
+				transConfig['impedance'] = '0.00033+0.0022j'
+			# NOTE: Windmil doesn't export any information on install type, but Gridlab only puts it in there for info reasons.
+			# transformer[1]['install_type'] = 'POLETOP'
+			# Set the connection type
+			transPhases = _safeGet(transList, 2, '')
+			if len(transPhases) > 2:
+				transConfig['connect_type'] = 'WYE_WYE'
+				#MAYBEFIX: support other types of windings (D-D, D-Y, etc.)
+			else:
+				transConfig['connect_type'] = 'SINGLE_PHASE'
+			# Set the power rating.
+			try:
 				transConfig['power_rating'] = str(float(transList[19]) + float(transList[20]) + float(transList[21]))
 				if float(transList[19]) > 0:
 					transConfig['powerA_rating'] = transList[19]
@@ -733,12 +724,11 @@ def convert(stdString,seqString):
 					transConfig['powerC_rating'] = transList[21]
 				# HACK: a zero power rating makes no sense.
 				if float(transConfig['power_rating']) < 1.0:
-					transConfig['power_rating'] = '10.0'
-			#MAYBEFIX: and change these, which were added to make the transformer work on multiple phases:
-			except ValueError, e:
-				pass
-				# print "ERROR FOR: ", e
+					raise Exception
+			except:
+				transConfig['power_rating'] = '500.0'
 			return transformer
+		
 		# Simple lookup table for which function we need to apply:
 		objectToFun = {
 			1 : convertOhLine,
@@ -1375,7 +1365,7 @@ def _tests(
 	# Run all the tests.
 	for stdString, seqString in testFiles:
 		curData = {} # Append data for this std file here.
-		curData['file'] = stdString
+		curData['circuit_name'] = stdString
 		cur_start_time = time.time()
 		# Write the time info.
 		with open(fileName, 'a') as resultsFile:
@@ -1398,13 +1388,14 @@ def _tests(
 				inFileSize = inFileStats.st_size
 				outFileSize = outFileStats.st_size
 				percent = float(inFileSize)/float(outFileSize)
-				curData['percentage'] = percent
+				curData['glm_size_as_perc_of_std'] = percent
+				curData['std_size_mb'] = inFileSize / 1000.0 / 1000.0
 				resultsFile.write('WROTE GLM FOR ' + stdString + ', THE STD FILE IS %s PERCENT OF THE GLM FILE.\n' % str(100*percent)[0:4])
 		except:
 			print 'FAILED CONVERTING', stdString
-			curData['percentage'] = 0.0
+			curData['glm_size_as_perc_of_std'] = 0.0
 			with open(fileName,'a') as resultsFile:
-					resultsFile.write('FAILED CONVERTING ' + stdString + "\n")
+				resultsFile.write('FAILED CONVERTING ' + stdString + "\n")
 		try:
 			# Draw the GLM.
 			# But first make networkx cool it with the warnings.
@@ -1421,9 +1412,11 @@ def _tests(
 				resultsFile.write('DREW GLM FOR ' + stdString + "\n")
 		try:
 			# Run powerflow on the GLM.
+			curData['gridlabd_error_code'] = 'Processing'
 			output = gridlabd.runInFilesystem(outGlm, attachments=testAttachments, keepFiles=False)
-			if output['stderr'] != "":
+			if output['stderr'].startswith('ERROR'):
 				# Catch GridLAB-D's errors:
+				curData['gridlabd_error_code'] = output['stderr'].replace('\n',' ')
 				raise Exception
 			# Dump powerflow results.
 			with open(outPrefix + stdString.replace('.std','.json'),'w') as outFile:
@@ -1434,19 +1427,19 @@ def _tests(
 			with open(fileName, 'a') as resultsFile:
 				resultsFile.write('RAN GRIDLAB ON ' + stdString + "\n")
 				resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
-				curData['isGridlabSuccess'] = True
+				curData['powerflow_success'] = True
 				resultsFile.write("====================================================================================\n")
 				timeArray.append(time.time() - cur_start_time)
 		except Exception as e:
 			print 'POWERFLOW FAILED', stdString
 			with open(fileName,'a') as resultsFile:
 				resultsFile.write('POWERFLOW FAILED ' + stdString + "\n")
-				curData['isGridlabSuccess'] = False
+				curData['powerflow_success'] = False
 				resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
 				resultsFile.write("====================================================================================\n")
 				timeArray.append(time.time() - cur_start_time)
 		# Write stats for all tests.
-		curData['running_time'] = time.time() - cur_start_time
+		curData['conversion_time_seconds'] = time.time() - cur_start_time
 		statData.append(curData)
 	with open(fileName, 'a') as resultsFile:
 		resultsFile.write('Ran %d out of %d tests for this simulation.\n' % (len(testFiles), totalLength))
@@ -1457,4 +1450,4 @@ def _tests(
 	return statData
 
 if __name__ == "__main__":
-	_tests()
+	print _tests()

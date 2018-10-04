@@ -233,13 +233,19 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	meterDataFile = "load_data_three_month.csv"
+	solarDataFile = "solar_proxy_three_month.csv"
+	latLonDataFile = "lat_lon_data_plus.csv"
 	defaultInputs = {
 		"user" : "admin",
 		"modelType": modelName,
-		"meterData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","load_data_three_month.csv")).read(),
-		"solarData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","solar_proxy_three_month.csv")).read(),
+		"meterData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles",meterDataFile)).read(),
+		"meterFileName": meterDataFile,
+		"solarData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles",solarDataFile)).read(),
+		"solarFileName": solarDataFile,
 		"weatherData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","asos_three_month.csv")).read(),
-		"latLonData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","lat_lon_data_plus.csv")).read(),
+		"latLonData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles",latLonDataFile)).read(),
+		"latLonFileName": latLonDataFile,
 		"asos": "CHO",
 		"year": "2017-01-01",
 		"created":str(datetime.datetime.now())
@@ -288,10 +294,10 @@ def _tests():
 	new(modelLoc)
 	# Pre-run.
 	renderAndShow(modelLoc)
-	# Run the model.
-	runForeground(modelLoc)
-	# Show the output.
-	renderAndShow(modelLoc)
+	# # Run the model.
+	# runForeground(modelLoc)
+	# # Show the output.
+	# renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_tests()

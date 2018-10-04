@@ -11,7 +11,7 @@
 		#damageSummary{width: 100%;height: 25%;}
 		#rdtSummary{width: 100%;height: 100%;}
 		#powerflowCheck{position: absolute;z-index: 10;bottom: 0;right: 0;background-color: red;}
-		table {width: 80%;margin-left:auto; margin-right:auto;}
+		table {width: 100%;margin-left:auto; margin-right:auto;}
 		td {padding:2px; text-align: center;border-top: 1px solid #ccc;}
 		th {padding:2px; text-align: center}
 		#fileBackground {position:absolute;width:205px;max-width:205px;height:29px;margin: -30px 0 0 116px;background-color:gainsboro;}
@@ -84,7 +84,7 @@
 	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-			<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-resilientDist" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
@@ -240,38 +240,28 @@
 		</script>
 	</div>
 	<div id="output" class="postRun">
-		<p class='reportTitle'><b>One Line Diagram</b></p>
-		<div class="content">
-			<br>
-			<table>
-				<tr><th><div style="float: left;">Scroll to zoom, drag to pan</div><div style="float: right;" id="powerflowValid"></div></th></tr>
-				<tr><td>
-					<div id="diagram">	
-						<img id="oneLineDiagram" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%; max-height: 100%;"/>
-						<script>gebi("oneLineDiagram").src = "data:image/png;base64," + allOutputData.oneLineDiagram</script>
-						<script src="{{pathPrefix}}/static/wheelzoom.js"></script>
-						<script type="text/javascript">
-								images = wheelzoom(document.querySelectorAll('img'), {zoom: 0.1, maxZoom: 10});
-						</script>
-					</div>
-				</td></tr>
-			</table>
-			<br><br>
+		<p class='reportTitle'><b>One Line Diagram (Scroll to Zoom, Drag to Pan)</b></p>
+		<div class="content" style="margin-top:0px">
+			<div id="diagram">	
+				<img id="oneLineDiagram" style="padding: 0px; display: block; margin-left: auto; margin-right: auto; max-width: 100%; max-height: 100%;"/>
+				<script>gebi("oneLineDiagram").src = "data:image/png;base64," + allOutputData.oneLineDiagram</script>
+				<script src="{{pathPrefix}}/static/wheelzoom.js"></script>
+				<script type="text/javascript">
+						images = wheelzoom(document.querySelectorAll('img'), {zoom: 0.1, maxZoom: 10});
+				</script>
+			</div>
 		</div>
-
 		<p class='reportTitle'><b>Damage Scenarios</b></p>
-		<div class="content">
+		<div class="content" style="margin-top:0px">
 			<div id="scenarioDisplay">
 			</div>
 		</div>
 
 		<p class='reportTitle'><b>Design Solution</b></p>
-		<div class="content">
+		<div class="content" style="margin-top:0px">
 			<div id="designDisplay">
 			</div>
 			<div id="tables">
-				<br>
-				<br>
 				<script>
 					var rdtOutput = allOutputData.rdtRawOut;
 					var gfmOutput = allOutputData.gfmRawOut;
@@ -328,7 +318,7 @@
 						secondRunValidStyle =  "color: red;" 
 						secondRunValid = "Powerflow Not Validated";
 					}
-					designHTML = designHTML + '<table id="totalCostTable"><tr><th><div style="float: left;">Total Cost</div><div style="' + secondRunValidStyle + 'float: right;">' + secondRunValid + '</div></th></tr><tr><td>$' + totalCost.toFixed(2) + '</td></tr></table><br>';
+					designHTML = designHTML + '<table id="totalCostTable"><tr><th><div style="float: left;">Total Cost</div><div style="' + secondRunValidStyle + 'float: right;">' + secondRunValid + '</div></th></tr><tr><td>$' + totalCost.toFixed(2) + '</td></tr></table>';
 					designHTML = designHTML + '<table id="solutionComponents">' + tableBuilder + '</table>';
 
 
@@ -356,21 +346,19 @@
 
 					var scenarioHTML= "";
 					for (var scenarioID in scenarioDict) {
-						scenarioHTML = scenarioHTML + scenarioDict[scenarioID] + "<br>";
+						scenarioHTML = scenarioHTML + scenarioDict[scenarioID] + "";
 					}
 					scenarioHTML = scenarioHTML + "</table>";
-					gebi("scenarioDisplay").innerHTML = scenarioHTML + "<br><br>";	
-					gebi("designDisplay").innerHTML = designHTML + "<br><br>";
+					gebi("scenarioDisplay").innerHTML = scenarioHTML + "";	
+					gebi("designDisplay").innerHTML = designHTML + "";
 				</script>
 			</div>
 		</div>
 		<p class="reportTitle postRun" style="page-break-before:always">Download Output Data</p>	
-		<div style="text-align:left" class="tightContent">
+		<div style="text-align:left" class="content" style="margin-top:0px">
 			<a style="padding:10px" onclick="downloadTextFile('gfmOutput.txt', allOutputData['gfmRawOut'])">General Fragility Model (GFM) Output</a><br>
 			<a style="padding:10px" onclick="downloadTextFile('rdtOutput.txt', allOutputData['rdtRawOut'])">Resilient Design Tool (RDT) Output</a><br>
 			<a style="padding:10px" onclick="downloadTextFile('gridlabdOutput.txt', JSON.stringify(allOutputData['gridlabdRawOut'], null, 2))">GridLAB-D (GLD) Output</a>
 		</div>
-		<br>
-		<br>	
 	</div>
 </body>
