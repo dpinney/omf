@@ -1414,7 +1414,7 @@ def _tests(
 			# Run powerflow on the GLM.
 			curData['gridlabd_error_code'] = 'Processing'
 			output = gridlabd.runInFilesystem(outGlm, attachments=testAttachments, keepFiles=False)
-			if output['stderr'] != "":
+			if output['stderr'].startswith('ERROR'):
 				# Catch GridLAB-D's errors:
 				curData['gridlabd_error_code'] = output['stderr'].replace('\n',' ')
 				raise Exception

@@ -3,6 +3,7 @@ Load an OMF feeder in to the new viewer.
 '''
 
 import tempfile, shutil, os, fileinput, json, networkx as nx, platform, omf.feeder as feeder, webbrowser, sys
+import omf
 
 def main():
 	''' Handle the command line arguments for distNetViz.'''
@@ -10,7 +11,7 @@ def main():
 	errorMessage = 'Incorrect inputs. Usage: distNetViz -f <Path_to_feeder.glm or .omd>'
 	if argCount == 1:
 		print 'Running tests. Normal usage: distNetViz -f <Path_to_feeder.glm or .omd>'
-		FEEDER_PATH = '../../static/publicFeeders/Simple Market System.omd'
+		FEEDER_PATH = omf.omfDir + '/static/publicFeeders/Simple Market System.omd'
 		DO_FORCE_LAYOUT = True
 	elif argCount == 2:
 		print 'Beginning display of ' + sys.argv[1]
@@ -72,11 +73,10 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None):
 	else:
 		tempDir = os.path.abspath(outputPath)
 	#HACK: make sure we get the required files from the right place.
-	SOURCE_DIR = os.path.dirname(__file__) + '/'
-	shutil.copy(SOURCE_DIR + '/distNetViz.html', tempDir + '/viewer.html')
-	# shutil.copy(SOURCE_DIR + '/svg-pan-zoom.js', tempDir + '/svg-pan-zoom.js')
+	shutil.copy(omf.omfDir + '/templates/distNetViz.html', tempDir + '/viewer.html')
+	# shutil.copy(omf.omfDir + '/static/svg-pan-zoom.js', tempDir + '/svg-pan-zoom.js')
 	# Grab the library we need.
-	with open(SOURCE_DIR + 'svg-pan-zoom.js','r') as pzFile:
+	with open(omf.omfDir + '/static/svg-pan-zoom.js','r') as pzFile:
 		pzData = pzFile.read()
 	# Rewrite the load lines in viewer.html
 	# Note: you can't juse open the file in r+ mode because, based on the way the file is mapped to memory, you can only overwrite a line with another of exactly the same length.
