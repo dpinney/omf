@@ -95,7 +95,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 				'can_harden': False, # Not seen in rdtInTrevor.json.
 				'can_add_switch': True, # Not seen in rdtInTrevor.json.
 				# 'num_poles' : 2,
-				# 'capacity' : 5780, # MVA capacity.
+				'capacity' : 10000, # MVA capacity.
 				'is_transformer' : False,
 				'num_phases' : 3, #*
 				# 'is_new' : False,
@@ -106,7 +106,6 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			newLine['node2_id'] = line.get('to','')+'_bus'
 			newLine['line_code'] = lineCount
 			# Calculate harden_cost, 10.
-			# newLine['capacity'] = 1000000000 # Set it arbitrarily high.
 			if (line.get('name','') in hardCands) or (newLine['harden_cost'] != 0):
 				newLine['can_harden'] = True
 			if line.get('name','') in switchCands:
