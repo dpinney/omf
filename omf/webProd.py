@@ -1,6 +1,9 @@
 import omf, os, web, logging
 from multiprocessing import Process
 
+# Note: sudo python webProd.py on macOS since this will open low numbered ports.
+# If you need some test certs: openssl req -x509 -newkey rsa:4096 -nodes -out omfDevCert.pem -keyout omfDevKey.pem -days 365 -subj '/CN=localhost/O=NoCompany/C=US'
+
 reApp = web.Flask('OMFR')
 
 @reApp.route('/')

@@ -3394,7 +3394,7 @@
             "phases": "ABC", 
             "from": "C_node702", 
             "name": "C_node702-705", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_node705", 
             "length": "400", 
             "configuration": "lc_7241"
@@ -3520,7 +3520,7 @@
             "phases": "ABC", 
             "from": "C_node702", 
             "name": "C_node702-713", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_load713", 
             "length": "360", 
             "configuration": "lc_7231"
@@ -3529,7 +3529,7 @@
             "phases": "ABC", 
             "from": "A_node705", 
             "name": "A_node705-742", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_load742", 
             "length": "320", 
             "configuration": "lc_7241"
@@ -3538,7 +3538,7 @@
             "phases": "ABC", 
             "from": "A_node705", 
             "name": "A_node705-712", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_load712", 
             "length": "240", 
             "configuration": "lc_7241"
@@ -3547,7 +3547,7 @@
             "phases": "ABC", 
             "from": "A_node706", 
             "name": "A_node706-725", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_load725", 
             "length": "280", 
             "configuration": "lc_7241"
@@ -3556,7 +3556,7 @@
             "phases": "ABC", 
             "from": "A_node707", 
             "name": "A_node707-724", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_load724", 
             "length": "760", 
             "configuration": "lc_7241"
@@ -3565,7 +3565,7 @@
             "phases": "ABC", 
             "from": "A_node703", 
             "name": "A_node703-727", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_load727", 
             "length": "240", 
             "configuration": "lc_7241"
@@ -3574,7 +3574,7 @@
             "phases": "ABC", 
             "from": "A_node703", 
             "name": "A_node703-730", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_load730", 
             "length": "600", 
             "configuration": "lc_7231"
@@ -3583,7 +3583,7 @@
             "phases": "ABC", 
             "from": "A_node704", 
             "name": "A_node704-714", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_load714", 
             "length": "80", 
             "configuration": "lc_7241"
@@ -3592,7 +3592,7 @@
             "phases": "ABC", 
             "from": "A_node704", 
             "name": "A_node704-720", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_load720", 
             "length": "800", 
             "configuration": "lc_7231"
@@ -3611,7 +3611,7 @@
             "phases": "ABC", 
             "from": "A_node707", 
             "name": "A_node707-722", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_load722", 
             "length": "120", 
             "configuration": "lc_7241"
@@ -3620,7 +3620,7 @@
             "phases": "ABC", 
             "from": "A_node708", 
             "name": "A_node708-733", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_load733", 
             "length": "320", 
             "configuration": "lc_7231"
@@ -3634,17 +3634,10 @@
         }, 
         "4": {
             "name": "ug_lc_7220", 
-            "conductor_resistance": "0.206000", 
-            "object": "underground_line_conductor", 
-            "shield_resistance": "0.000000", 
-            "neutral_gmr": "0.002620", 
-            "outer_diameter": "1.560000", 
-            "neutral_strands": "16.000000", 
-            "neutral_resistance": "9.375000", 
-            "neutral_diameter": "0.081000", 
-            "conductor_diameter": "0.813000", 
-            "shield_gmr": "0.000000", 
-            "conductor_gmr": "0.026000"
+            "geometric_mean_radius": "0.00813999958336353", 
+            "diameter": "0.527999997138977", 
+            "object": "overhead_line_conductor", 
+            "resistance": "0.484200000762939"
         }, 
         "8": {
             "name": "lc_7211", 
@@ -3677,7 +3670,7 @@
             "phases": "ABC", 
             "from": "B_load737", 
             "name": "B_node737-738", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_load738", 
             "length": "400", 
             "configuration": "lc_7231"
@@ -3686,7 +3679,7 @@
             "phases": "ABC", 
             "from": "B_load738", 
             "name": "B_node738-711", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_node711", 
             "length": "400", 
             "configuration": "lc_7231"
@@ -3695,7 +3688,7 @@
             "phases": "ABC", 
             "from": "B_load744", 
             "name": "B_node744-728", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_load728", 
             "length": "200", 
             "configuration": "lc_7241"
@@ -3704,7 +3697,7 @@
             "phases": "ABC", 
             "from": "B_node781", 
             "name": "B_node781-701", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_load701", 
             "length": "1850", 
             "configuration": "lc_7211"
@@ -3713,7 +3706,7 @@
             "phases": "ABC", 
             "from": "B_load744", 
             "name": "B_node744-729", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_load729", 
             "length": "200", 
             "configuration": "lc_7241"
@@ -3768,7 +3761,7 @@
             "phases": "ABC", 
             "from": "C_node702", 
             "name": "C_node702-703", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_node703", 
             "length": "1320", 
             "configuration": "lc_7221"
@@ -3777,7 +3770,7 @@
             "phases": "ABC", 
             "from": "B_load734", 
             "name": "B_node734-737", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_load737", 
             "length": "640", 
             "configuration": "lc_7231"
@@ -3850,7 +3843,7 @@
             "phases": "ABC", 
             "from": "A_load744", 
             "name": "A_node744-729", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_load729", 
             "length": "200", 
             "configuration": "lc_7241"
@@ -3877,7 +3870,7 @@
             "phases": "ABC", 
             "from": "C_load701", 
             "name": "C_node701-702", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_node702", 
             "length": "960", 
             "configuration": "lc_7221"
@@ -3905,7 +3898,7 @@
             "phases": "ABC", 
             "from": "C_node709", 
             "name": "C_node709-731", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_load731", 
             "length": "600", 
             "configuration": "lc_7231"
@@ -3923,7 +3916,7 @@
             "phases": "ABC", 
             "from": "C_load738", 
             "name": "C_node738-711", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_node711", 
             "length": "400", 
             "configuration": "lc_7231"
@@ -3932,7 +3925,7 @@
             "phases": "ABC", 
             "from": "C_load737", 
             "name": "C_node737-738", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_load738", 
             "length": "400", 
             "configuration": "lc_7231"
@@ -3941,7 +3934,7 @@
             "phases": "ABC", 
             "from": "C_node781", 
             "name": "C_node781-701", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_load701", 
             "length": "1850", 
             "configuration": "lc_7211"
@@ -3950,7 +3943,7 @@
             "phases": "ABC", 
             "from": "C_node708", 
             "name": "C_node708-732", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_load732", 
             "length": "320", 
             "configuration": "lc_7241"
@@ -3959,7 +3952,7 @@
             "phases": "ABC", 
             "from": "C_load733", 
             "name": "C_node733-734", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_load734", 
             "length": "560", 
             "configuration": "lc_7231"
@@ -3968,7 +3961,7 @@
             "phases": "ABC", 
             "from": "C_load730", 
             "name": "C_node730-709", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_node709", 
             "length": "200", 
             "configuration": "lc_7231"
@@ -3977,7 +3970,7 @@
             "phases": "ABC", 
             "from": "C_load734", 
             "name": "C_node734-710", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_node710", 
             "length": "520", 
             "configuration": "lc_7241"
@@ -3986,7 +3979,7 @@
             "phases": "ABC", 
             "from": "C_load734", 
             "name": "C_node734-737", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_load737", 
             "length": "640", 
             "configuration": "lc_7231"
@@ -3995,7 +3988,7 @@
             "phases": "ABC", 
             "from": "B_load727", 
             "name": "B_node727-744", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_load744", 
             "length": "280", 
             "configuration": "lc_7231"
@@ -4004,7 +3997,7 @@
             "phases": "ABC", 
             "from": "B_load720", 
             "name": "B_node720-706", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_node706", 
             "length": "600", 
             "configuration": "lc_7231"
@@ -4030,7 +4023,7 @@
             "phases": "ABC", 
             "from": "B_load713", 
             "name": "B_node713-704", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_node704", 
             "length": "520", 
             "configuration": "lc_7231"
@@ -4039,7 +4032,7 @@
             "phases": "ABC", 
             "from": "B_node711", 
             "name": "B_node711-740", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_load740", 
             "length": "200", 
             "configuration": "lc_7241"
@@ -4048,7 +4041,7 @@
             "phases": "ABC", 
             "from": "B_load720", 
             "name": "B_node720-707", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_node707", 
             "length": "920", 
             "configuration": "lc_7241"
@@ -4057,7 +4050,7 @@
             "phases": "ABC", 
             "from": "B_load714", 
             "name": "B_node714-718", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_load718", 
             "length": "520", 
             "configuration": "lc_7241"
@@ -4137,7 +4130,7 @@
             "phases": "ABC", 
             "from": "C_load744", 
             "name": "C_node744-729", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_load729", 
             "length": "200", 
             "configuration": "lc_7241"
@@ -4163,23 +4156,16 @@
         }, 
         "3": {
             "name": "ug_lc_7210", 
-            "conductor_resistance": "0.105000", 
-            "object": "underground_line_conductor", 
-            "shield_resistance": "0.000000", 
-            "neutral_gmr": "0.003310", 
-            "outer_diameter": "1.980000", 
-            "neutral_strands": "20.000000", 
-            "neutral_resistance": "5.903000", 
-            "neutral_diameter": "0.102000", 
-            "conductor_diameter": "1.150000", 
-            "shield_gmr": "0.000000", 
-            "conductor_gmr": "0.036800"
+           "geometric_mean_radius": "0.00813999958336353", 
+            "diameter": "0.527999997138977", 
+            "object": "overhead_line_conductor", 
+            "resistance": "0.484200000762939"
         }, 
         "177": {
             "phases": "ABC", 
             "from": "C_node708", 
             "name": "C_node708-733", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_load733", 
             "length": "320", 
             "configuration": "lc_7231"
@@ -4208,7 +4194,7 @@
             "phases": "ABC", 
             "from": "B_node710", 
             "name": "B_node710-736", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_load736", 
             "length": "1280", 
             "configuration": "lc_7241"
@@ -4217,7 +4203,7 @@
             "phases": "ABC", 
             "from": "B_node711", 
             "name": "B_node711-741", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_load741", 
             "length": "400", 
             "configuration": "lc_7231"
@@ -4226,7 +4212,7 @@
             "phases": "ABC", 
             "from": "B_node707", 
             "name": "B_node707-722", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_load722", 
             "length": "120", 
             "configuration": "lc_7241"
@@ -4235,7 +4221,7 @@
             "phases": "ABC", 
             "from": "B_node708", 
             "name": "B_node708-733", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_load733", 
             "length": "320", 
             "configuration": "lc_7231"
@@ -4244,7 +4230,7 @@
             "phases": "ABC", 
             "from": "B_node706", 
             "name": "B_node706-725", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_load725", 
             "length": "280", 
             "configuration": "lc_7241"
@@ -4253,7 +4239,7 @@
             "phases": "ABC", 
             "from": "B_node707", 
             "name": "B_node707-724", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_load724", 
             "length": "760", 
             "configuration": "lc_7241"
@@ -4262,7 +4248,7 @@
             "phases": "ABC", 
             "from": "B_node709", 
             "name": "B_node709-708", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_node708", 
             "length": "320", 
             "configuration": "lc_7231"
@@ -4271,7 +4257,7 @@
             "phases": "ABC", 
             "from": "B_node710", 
             "name": "B_node710-735", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_load735", 
             "length": "200", 
             "configuration": "lc_7241"
@@ -4280,7 +4266,7 @@
             "phases": "ABC", 
             "from": "B_node708", 
             "name": "B_node708-732", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_load732", 
             "length": "320", 
             "configuration": "lc_7241"
@@ -4289,7 +4275,7 @@
             "phases": "ABC", 
             "from": "B_node709", 
             "name": "B_node709-731", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_load731", 
             "length": "600", 
             "configuration": "lc_7231"
@@ -4298,7 +4284,7 @@
             "phases": "ABC", 
             "from": "A_load720", 
             "name": "A_node720-707", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_node707", 
             "length": "920", 
             "configuration": "lc_7241"
@@ -4307,7 +4293,7 @@
             "phases": "ABC", 
             "from": "A_load714", 
             "name": "A_node714-718", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_load718", 
             "length": "520", 
             "configuration": "lc_7241"
@@ -4316,7 +4302,7 @@
             "phases": "ABC", 
             "from": "A_node710", 
             "name": "A_node710-735", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_load735", 
             "length": "200", 
             "configuration": "lc_7241"
@@ -4325,7 +4311,7 @@
             "phases": "ABC", 
             "from": "A_node709", 
             "name": "A_node709-708", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_node708", 
             "length": "320", 
             "configuration": "lc_7231"
@@ -4334,7 +4320,7 @@
             "phases": "ABC", 
             "from": "A_node709", 
             "name": "A_node709-731", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_load731", 
             "length": "600", 
             "configuration": "lc_7231"
@@ -4343,7 +4329,7 @@
             "phases": "ABC", 
             "from": "A_node708", 
             "name": "A_node708-732", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_load732", 
             "length": "320", 
             "configuration": "lc_7241"
@@ -4352,7 +4338,7 @@
             "phases": "ABC", 
             "from": "A_load713", 
             "name": "A_node713-704", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_node704", 
             "length": "520", 
             "configuration": "lc_7231"
@@ -4361,7 +4347,7 @@
             "phases": "ABC", 
             "from": "A_node711", 
             "name": "A_node711-740", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_load740", 
             "length": "200", 
             "configuration": "lc_7241"
@@ -4370,7 +4356,7 @@
             "phases": "ABC", 
             "from": "A_node711", 
             "name": "A_node711-741", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_load741", 
             "length": "400", 
             "configuration": "lc_7231"
@@ -4379,7 +4365,7 @@
             "phases": "ABC", 
             "from": "A_node710", 
             "name": "A_node710-736", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_load736", 
             "length": "1280", 
             "configuration": "lc_7241"
@@ -4407,7 +4393,7 @@
             "phases": "ABC", 
             "from": "C_node707", 
             "name": "C_node707-722", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_load722", 
             "length": "120", 
             "configuration": "lc_7241"
@@ -4518,7 +4504,7 @@
             "phases": "ABC", 
             "from": "C_node707", 
             "name": "C_node707-724", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_load724", 
             "length": "760", 
             "configuration": "lc_7241"
@@ -4527,7 +4513,7 @@
             "phases": "ABC", 
             "from": "C_node706", 
             "name": "C_node706-725", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_load725", 
             "length": "280", 
             "configuration": "lc_7241"
@@ -4536,7 +4522,7 @@
             "phases": "ABC", 
             "from": "C_node705", 
             "name": "C_node705-712", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_load712", 
             "length": "240", 
             "configuration": "lc_7241"
@@ -4545,7 +4531,7 @@
             "phases": "ABC", 
             "from": "C_node705", 
             "name": "C_node705-742", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_load742", 
             "length": "320", 
             "configuration": "lc_7241"
@@ -4554,7 +4540,7 @@
             "phases": "ABC", 
             "from": "C_node704", 
             "name": "C_node704-720", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_load720", 
             "length": "800", 
             "configuration": "lc_7231"
@@ -4563,7 +4549,7 @@
             "phases": "ABC", 
             "from": "C_node704", 
             "name": "C_node704-714", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_load714", 
             "length": "80", 
             "configuration": "lc_7241"
@@ -4591,7 +4577,7 @@
             "phases": "ABC", 
             "from": "C_node710", 
             "name": "C_node710-735", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_load735", 
             "length": "200", 
             "configuration": "lc_7241"
@@ -4600,7 +4586,7 @@
             "phases": "ABC", 
             "from": "C_node710", 
             "name": "C_node710-736", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_load736", 
             "length": "1280", 
             "configuration": "lc_7241"
@@ -4609,7 +4595,7 @@
             "phases": "ABC", 
             "from": "C_node711", 
             "name": "C_node711-741", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_load741", 
             "length": "400", 
             "configuration": "lc_7231"
@@ -4618,7 +4604,7 @@
             "phases": "ABC", 
             "from": "C_node709", 
             "name": "C_node709-708", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_node708", 
             "length": "320", 
             "configuration": "lc_7231"
@@ -4639,7 +4625,7 @@
             "phases": "ABC", 
             "from": "C_load720", 
             "name": "C_node720-707", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_node707", 
             "length": "920", 
             "configuration": "lc_7241"
@@ -4648,24 +4634,17 @@
             "phases": "ABC", 
             "from": "C_node711", 
             "name": "C_node711-740", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_load740", 
             "length": "200", 
             "configuration": "lc_7241"
         }, 
         "6": {
             "name": "ug_lc_7240", 
-            "conductor_resistance": "1.540000", 
-            "object": "underground_line_conductor", 
-            "shield_resistance": "0.000000", 
-            "neutral_gmr": "0.002080", 
-            "outer_diameter": "0.980000", 
-            "neutral_strands": "6.000000", 
-            "neutral_resistance": "14.872000", 
-            "neutral_diameter": "0.064000", 
-            "conductor_diameter": "0.292000", 
-            "shield_gmr": "0.000000", 
-            "conductor_gmr": "0.008830"
+            "geometric_mean_radius": "0.00813999958336353", 
+            "diameter": "0.527999997138977", 
+            "object": "overhead_line_conductor", 
+            "resistance": "0.484200000762939"
         }, 
         "220": {
             "phases": "ABCN", 
@@ -4683,7 +4662,7 @@
             "phases": "ABC", 
             "from": "C_load714", 
             "name": "C_node714-718", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_load718", 
             "length": "520", 
             "configuration": "lc_7241"
@@ -4692,7 +4671,7 @@
             "phases": "ABC", 
             "from": "C_load720", 
             "name": "C_node720-706", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_node706", 
             "length": "600", 
             "configuration": "lc_7231"
@@ -4701,7 +4680,7 @@
             "phases": "ABC", 
             "from": "C_load727", 
             "name": "C_node727-744", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_load744", 
             "length": "280", 
             "configuration": "lc_7231"
@@ -4719,7 +4698,7 @@
             "phases": "ABC", 
             "from": "C_load744", 
             "name": "C_node744-728", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_load728", 
             "length": "200", 
             "configuration": "lc_7241"
@@ -4738,7 +4717,7 @@
             "phases": "ABC", 
             "from": "C_load713", 
             "name": "C_node713-704", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_node704", 
             "length": "520", 
             "configuration": "lc_7231"
@@ -4747,7 +4726,7 @@
             "phases": "ABC", 
             "from": "B_node705", 
             "name": "B_node705-712", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_load712", 
             "length": "240", 
             "configuration": "lc_7241"
@@ -4756,7 +4735,7 @@
             "phases": "ABC", 
             "from": "B_node705", 
             "name": "B_node705-742", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_load742", 
             "length": "320", 
             "configuration": "lc_7241"
@@ -4765,7 +4744,7 @@
             "phases": "ABC", 
             "from": "C_node703", 
             "name": "C_node703-727", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_load727", 
             "length": "240", 
             "configuration": "lc_7241"
@@ -4774,7 +4753,7 @@
             "phases": "ABC", 
             "from": "C_node703", 
             "name": "C_node703-730", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_load730", 
             "length": "600", 
             "configuration": "lc_7231"
@@ -4803,7 +4782,7 @@
             "phases": "ABC", 
             "from": "B_node702", 
             "name": "B_node702-705", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_node705", 
             "length": "400", 
             "configuration": "lc_7241"
@@ -4812,7 +4791,7 @@
             "phases": "ABC", 
             "from": "B_load701", 
             "name": "B_node701-702", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_node702", 
             "length": "960", 
             "configuration": "lc_7221"
@@ -4821,7 +4800,7 @@
             "phases": "ABC", 
             "from": "B_node702", 
             "name": "B_node702-703", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_node703", 
             "length": "1320", 
             "configuration": "lc_7221"
@@ -4830,7 +4809,7 @@
             "phases": "ABC", 
             "from": "B_node702", 
             "name": "B_node702-713", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_load713", 
             "length": "360", 
             "configuration": "lc_7231"
@@ -4839,7 +4818,7 @@
             "phases": "ABC", 
             "from": "B_node703", 
             "name": "B_node703-730", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_load730", 
             "length": "600", 
             "configuration": "lc_7231"
@@ -4848,7 +4827,7 @@
             "phases": "ABC", 
             "from": "B_node703", 
             "name": "B_node703-727", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_load727", 
             "length": "240", 
             "configuration": "lc_7241"
@@ -4857,7 +4836,7 @@
             "phases": "ABC", 
             "from": "B_node704", 
             "name": "B_node704-720", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_load720", 
             "length": "800", 
             "configuration": "lc_7231"
@@ -4866,7 +4845,7 @@
             "phases": "ABC", 
             "from": "B_node704", 
             "name": "B_node704-714", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_load714", 
             "length": "80", 
             "configuration": "lc_7241"
@@ -4891,7 +4870,7 @@
             "phases": "ABC", 
             "from": "A_node711", 
             "name": "TIE_A_to_C", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "C_node707", 
             "length": "400", 
             "configuration": "lc_7231"
@@ -4911,7 +4890,7 @@
             "phases": "ABC", 
             "from": "B_node711", 
             "name": "TIE_B_to_A", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_node704", 
             "length": "400", 
             "configuration": "lc_7231"
@@ -4920,7 +4899,7 @@
             "phases": "ABC", 
             "from": "C_node710", 
             "name": "TIE_C_to_B", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_node707", 
             "length": "400", 
             "configuration": "lc_7231"
@@ -4929,7 +4908,7 @@
             "phases": "ABC", 
             "from": "A_node702", 
             "name": "A_node702-705", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_node705", 
             "length": "400", 
             "configuration": "lc_7241"
@@ -4938,7 +4917,7 @@
             "phases": "ABC", 
             "from": "A_load701", 
             "name": "A_node701-702", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_node702", 
             "length": "960", 
             "configuration": "lc_7221"
@@ -4947,7 +4926,7 @@
             "phases": "ABC", 
             "from": "A_node702", 
             "name": "A_node702-703", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_node703", 
             "length": "1320", 
             "configuration": "lc_7221"
@@ -4956,7 +4935,7 @@
             "phases": "ABC", 
             "from": "A_node702", 
             "name": "A_node702-713", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_load713", 
             "length": "360", 
             "configuration": "lc_7231"
@@ -4965,7 +4944,7 @@
             "phases": "ABC", 
             "from": "B_load733", 
             "name": "B_node733-734", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_load734", 
             "length": "560", 
             "configuration": "lc_7231"
@@ -4974,7 +4953,7 @@
             "phases": "ABC", 
             "from": "B_load730", 
             "name": "B_node730-709", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_node709", 
             "length": "200", 
             "configuration": "lc_7231"
@@ -5180,7 +5159,7 @@
             "phases": "ABC", 
             "from": "A_load744", 
             "name": "A_node744-728", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_load728", 
             "length": "200", 
             "configuration": "lc_7241"
@@ -5189,7 +5168,7 @@
             "phases": "ABC", 
             "from": "A_node781", 
             "name": "A_node781-701", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_load701", 
             "length": "1850", 
             "configuration": "lc_7211"
@@ -5198,7 +5177,7 @@
             "phases": "ABC", 
             "from": "A_load737", 
             "name": "A_node737-738", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_load738", 
             "length": "400", 
             "configuration": "lc_7231"
@@ -5207,7 +5186,7 @@
             "phases": "ABC", 
             "from": "B_load734", 
             "name": "B_node734-710", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "B_node710", 
             "length": "520", 
             "configuration": "lc_7241"
@@ -5216,7 +5195,7 @@
             "phases": "ABC", 
             "from": "A_load734", 
             "name": "A_node734-737", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_load737", 
             "length": "640", 
             "configuration": "lc_7231"
@@ -5225,7 +5204,7 @@
             "phases": "ABC", 
             "from": "A_load734", 
             "name": "A_node734-710", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_node710", 
             "length": "520", 
             "configuration": "lc_7241"
@@ -5234,7 +5213,7 @@
             "phases": "ABC", 
             "from": "A_load730", 
             "name": "A_node730-709", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_node709", 
             "length": "200", 
             "configuration": "lc_7231"
@@ -5243,7 +5222,7 @@
             "phases": "ABC", 
             "from": "A_load733", 
             "name": "A_node733-734", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_load734", 
             "length": "560", 
             "configuration": "lc_7231"
@@ -5252,7 +5231,7 @@
             "phases": "ABC", 
             "from": "A_load720", 
             "name": "A_node720-706", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_node706", 
             "length": "600", 
             "configuration": "lc_7231"
@@ -5261,7 +5240,7 @@
             "phases": "ABC", 
             "from": "A_load727", 
             "name": "A_node727-744", 
-            "object": "underground_line", 
+            "object": "overhead_line", 
             "to": "A_load744", 
             "length": "280", 
             "configuration": "lc_7231"
@@ -5272,17 +5251,10 @@
         }, 
         "5": {
             "name": "ug_lc_7230", 
-            "conductor_resistance": "0.769000", 
-            "object": "underground_line_conductor", 
-            "shield_resistance": "0.000000", 
-            "neutral_gmr": "0.002080", 
-            "outer_diameter": "1.100000", 
-            "neutral_strands": "7.000000", 
-            "neutral_resistance": "14.872000", 
-            "neutral_diameter": "0.064000", 
-            "conductor_diameter": "0.414000", 
-            "shield_gmr": "0.000000", 
-            "conductor_gmr": "0.012500"
+           "geometric_mean_radius": "0.00813999958336353", 
+            "diameter": "0.527999997138977", 
+            "object": "overhead_line_conductor", 
+            "resistance": "0.484200000762939"
         }, 
         "9": {
             "name": "lc_7221", 
@@ -7044,7 +7016,7 @@
             "weight": 0, 
             "px": 646.8527737880753, 
             "py": 674.8898650483044, 
-            "objectType": "underground_line_conductor", 
+            "objectType": "line_configuration", 
             "y": 674.8898650483044, 
             "x": 646.8527737880753, 
             "fixed": true, 
@@ -7057,7 +7029,7 @@
             "weight": 0, 
             "px": 406.4908401359631, 
             "py": 759.7755152285084, 
-            "objectType": "underground_line_conductor", 
+            "objectType": "line_configuration", 
             "y": 759.7755152285084, 
             "x": 406.4908401359631, 
             "fixed": true, 
@@ -7070,20 +7042,20 @@
             "weight": 0, 
             "px": 756.0390012660705, 
             "py": 647.5926593662451, 
-            "objectType": "underground_line_conductor", 
+            "objectType": "line_configuration", 
             "y": 647.5926593662451, 
             "x": 756.0390012660705, 
             "fixed": true, 
             "chargeMultiple": 1, 
             "treeIndex": 4
-        }, 
+        },  
         {
             "index": 123, 
             "name": "ug_lc_7210", 
             "weight": 0, 
             "px": 215.67829616789277, 
             "py": 574.0826347768297, 
-            "objectType": "underground_line_conductor", 
+            "objectType": "line_configuration", 
             "y": 574.0826347768297, 
             "x": 215.67829616789277, 
             "fixed": true, 

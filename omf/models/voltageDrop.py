@@ -9,6 +9,7 @@ from networkx.drawing.nx_agraph import graphviz_layout
 import networkx as nx
 from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
+plt.style.use('seaborn')
 
 # OMF imports 
 import omf.feeder as feeder
@@ -95,9 +96,10 @@ def voltPlot(omd, workDir=None, neatoLayout=False):
 		nodeVolts[row.get('node_name','')] = avg(allVolts)
 	# Color nodes by VOLTAGE.
 	fGraph = feeder.treeToNxGraph(tree)
-	voltChart = plt.figure(figsize=(15,15))
+	voltChart = plt.figure(figsize=(30,30))
 	plt.axes(frameon = 0)
 	plt.axis('off')
+	plt.tight_layout()
 	#set axes step equal
 	voltChart.gca().set_aspect('equal')
 	if neatoLayout:
@@ -113,11 +115,26 @@ def voltPlot(omd, workDir=None, neatoLayout=False):
 		node_color = [nodeVolts.get(n,0) for n in fGraph.nodes()],
 		linewidths = 0,
 		node_size = 30,
-		cmap = plt.cm.jet)
+		cmap = plt.cm.viridis)
 	plt.sci(nodeIm)
 	plt.clim(110,130)
-	plt.colorbar()
+	plt.colorbar(orientation='horizontal', fraction=0.05)
 	return voltChart
+
+def glmToModel(glmPath, modelDir):
+	''' One shot model creation from glm. '''
+	tree = omf.feeder.parse(glmPath)
+	# Run powerflow. First name the folder for it.
+	# Remove old copy of the model.
+	shutil.rmtree(modelDir, ignore_errors=True)
+	# Create the model directory.
+	omf.models.voltageDrop.new(modelDir)
+	# Create the .omd.
+	os.remove(modelDir + '/Olin Barre Geo.omd')
+	with open(modelDir + '/Olin Barre Geo.omd','w') as omdFile:
+		omd = dict(omf.feeder.newFeederWireframe)
+		omd['tree'] = tree
+		json.dump(omd, omdFile, indent=4)
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
@@ -148,7 +165,7 @@ def _debugging():
 	# Pre-run.
 	renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
+	runForeground(modelLoc)
 	# Show the output.
 	renderAndShow(modelLoc)
 

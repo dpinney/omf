@@ -2809,7 +2809,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	}
 	# Clean up the csvDump.
 	shutil.rmtree(pJoin(modelDir,'cymeCsvDump'))
-	return glmTree, x_scale, y_scale
+	return glmTree
 
 def _tests(keepFiles=True):
 	testFile = ['IEEE13.mdb']
@@ -2827,7 +2827,7 @@ def _tests(keepFiles=True):
 	for db_network in testFile:
 		try:
 			# Main conversion of CYME model.
-			cyme_base, x, y = convertCymeModel(inputDir + db_network, inputDir)    
+			cyme_base = convertCymeModel(inputDir + db_network, inputDir)    
 			glmString = feeder.sortedWrite(cyme_base)
 			testFilename = db_network[:-4]
 			gfile = open(inputDir+testFilename+".glm", 'w')

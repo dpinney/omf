@@ -1,0 +1,2187 @@
+clock {
+	timezone EST+5EDT;
+	starttime '2000-01-01 0:00:00';
+	stoptime '2000-01-01 0:00:20';
+};
+
+module powerflow {
+	solver_method FBS;
+};
+
+object voltdump {
+	filename trip37 xVoltDump.csv;
+};
+
+object underground_line_conductor {
+	name ug_lc_7210;
+	conductor_resistance 0.105000;
+	shield_resistance 0.000000;
+	neutral_gmr 0.003310;
+	outer_diameter 1.980000;
+	neutral_strands 20.000000;
+	neutral_resistance 5.903000;
+	neutral_diameter 0.102000;
+	conductor_diameter 1.150000;
+	shield_gmr 0.000000;
+	conductor_gmr 0.036800;
+};
+
+object underground_line_conductor {
+	name ug_lc_7220;
+	conductor_resistance 0.206000;
+	shield_resistance 0.000000;
+	neutral_gmr 0.002620;
+	outer_diameter 1.560000;
+	neutral_strands 16.000000;
+	neutral_resistance 9.375000;
+	neutral_diameter 0.081000;
+	conductor_diameter 0.813000;
+	shield_gmr 0.000000;
+	conductor_gmr 0.026000;
+};
+
+object underground_line_conductor {
+	name ug_lc_7230;
+	conductor_resistance 0.769000;
+	shield_resistance 0.000000;
+	neutral_gmr 0.002080;
+	outer_diameter 1.100000;
+	neutral_strands 7.000000;
+	neutral_resistance 14.872000;
+	neutral_diameter 0.064000;
+	conductor_diameter 0.414000;
+	shield_gmr 0.000000;
+	conductor_gmr 0.012500;
+};
+
+object underground_line_conductor {
+	name ug_lc_7240;
+	conductor_resistance 1.540000;
+	shield_resistance 0.000000;
+	neutral_gmr 0.002080;
+	outer_diameter 0.980000;
+	neutral_strands 6.000000;
+	neutral_resistance 14.872000;
+	neutral_diameter 0.064000;
+	conductor_diameter 0.292000;
+	shield_gmr 0.000000;
+	conductor_gmr 0.008830;
+};
+
+object line_spacing {
+	distance_BC 0.500000;
+	name spacing_515;
+	distance_CN 0.000000;
+	distance_AN 0.000000;
+	distance_AB 0.500000;
+	distance_AC 1.000000;
+	distance_BN 0.000000;
+};
+
+object line_configuration {
+	name lc_7211;
+	spacing spacing_515;
+	conductor_A ug_lc_7210;
+	conductor_C ug_lc_7210;
+	conductor_B ug_lc_7210;
+};
+
+object line_configuration {
+	name lc_7221;
+	spacing spacing_515;
+	conductor_A ug_lc_7220;
+	conductor_C ug_lc_7220;
+	conductor_B ug_lc_7220;
+};
+
+object line_configuration {
+	name lc_7231;
+	spacing spacing_515;
+	conductor_A ug_lc_7230;
+	conductor_C ug_lc_7230;
+	conductor_B ug_lc_7230;
+};
+
+object line_configuration {
+	name lc_7241;
+	spacing spacing_515;
+	conductor_A ug_lc_7240;
+	conductor_C ug_lc_7240;
+	conductor_B ug_lc_7240;
+};
+
+object transformer_configuration {
+	power_rating 500;
+	primary_voltage 4800;
+	install_type PADMOUNT;
+	secondary_voltage 480;
+	connect_type 2;
+	resistance 0.09;
+	reactance 1.81;
+	name trans_conf_400;
+};
+
+object underground_line {
+	phases ABC;
+	from A_load701;
+	name A_node701-702;
+	to A_node702;
+	length 960;
+	configuration lc_7221;
+};
+
+object underground_line {
+	phases ABC;
+	from A_node702;
+	name A_node702-705;
+	to A_node705;
+	length 400;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from A_node702;
+	name A_node702-713;
+	to A_load713;
+	length 360;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from A_node702;
+	name A_node702-703;
+	to A_node703;
+	length 1320;
+	configuration lc_7221;
+};
+
+object underground_line {
+	phases ABC;
+	from A_node703;
+	name A_node703-727;
+	to A_load727;
+	length 240;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from A_node703;
+	name A_node703-730;
+	to A_load730;
+	length 600;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from A_node704;
+	name A_node704-714;
+	to A_load714;
+	length 80;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from A_node704;
+	name A_node704-720;
+	to A_load720;
+	length 800;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from A_node705;
+	name A_node705-742;
+	to A_load742;
+	length 320;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from A_node705;
+	name A_node705-712;
+	to A_load712;
+	length 240;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from A_node706;
+	name A_node706-725;
+	to A_load725;
+	length 280;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from A_node707;
+	name A_node707-724;
+	to A_load724;
+	length 760;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from A_node707;
+	name A_node707-722;
+	to A_load722;
+	length 120;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from A_node708;
+	name A_node708-733;
+	to A_load733;
+	length 320;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from A_node708;
+	name A_node708-732;
+	to A_load732;
+	length 320;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from A_node709;
+	name A_node709-731;
+	to A_load731;
+	length 600;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from A_node709;
+	name A_node709-708;
+	to A_node708;
+	length 320;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from A_node710;
+	name A_node710-735;
+	to A_load735;
+	length 200;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from A_node710;
+	name A_node710-736;
+	to A_load736;
+	length 1280;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from A_node711;
+	name A_node711-741;
+	to A_load741;
+	length 400;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from A_node711;
+	name A_node711-740;
+	to A_load740;
+	length 200;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from A_load713;
+	name A_node713-704;
+	to A_node704;
+	length 520;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from A_load714;
+	name A_node714-718;
+	to A_load718;
+	length 520;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from A_load720;
+	name A_node720-707;
+	to A_node707;
+	length 920;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from A_load720;
+	name A_node720-706;
+	to A_node706;
+	length 600;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from A_load727;
+	name A_node727-744;
+	to A_load744;
+	length 280;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from A_load730;
+	name A_node730-709;
+	to A_node709;
+	length 200;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from A_load733;
+	name A_node733-734;
+	to A_load734;
+	length 560;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from A_load734;
+	name A_node734-737;
+	to A_load737;
+	length 640;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from A_load734;
+	name A_node734-710;
+	to A_node710;
+	length 520;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from A_load737;
+	name A_node737-738;
+	to A_load738;
+	length 400;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from A_load744;
+	name A_node744-728;
+	to A_load728;
+	length 200;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from A_node781;
+	name A_node781-701;
+	to A_load701;
+	length 1850;
+	configuration lc_7211;
+};
+
+object underground_line {
+	phases ABC;
+	from A_load744;
+	name A_node744-729;
+	to A_load729;
+	length 200;
+	configuration lc_7241;
+};
+
+object node {
+	phases ABC;
+	name A_node781;
+	bustype SWING;
+	voltage_B -2504.88-1446.19314229j;
+	voltage_C -44.88+2814.65184433j;
+	voltage_A 2504.88-1446.19314229j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name A_node702;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name A_node703;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name A_node704;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name A_node705;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name A_node706;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name A_node707;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name A_node708;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name A_node709;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name A_node710;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name A_node711;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name A_load701;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 350000.000000+175000.000000j;
+	constant_power_B 140000.000000+70000.000000j;
+	constant_power_A 140000.000000+70000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name A_load712;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 85000.000000+40000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name A_load713;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 85000.000000+40000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	voltage_B -2400.000000 -1385.640646j;
+	phases ABCN;
+	name A_load714;
+	constant_current_A 3.541667 -1.666667j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_current_B -3.991720 -2.747194j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name A_load718;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+	constant_impedance_A 221.915014+104.430595j;
+};
+
+object load {
+	phases ABCN;
+	name A_load720;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 85000.000000+40000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name A_load722;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	constant_current_C -0.383280+4.830528j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_current_B -27.212870 -17.967408j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name A_load724;
+	constant_impedance_B 438.857143+219.428571j;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name A_load725;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+	constant_power_B 42000.000000+21000.000000j;
+};
+
+object load {
+	phases ABCN;
+	name A_load727;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 42000.000000+21000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name A_load728;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 42000.000000+21000.000000j;
+	constant_power_B 42000.000000+21000.000000j;
+	constant_power_A 42000.000000+21000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	voltage_B -2400.000000 -1385.640646j;
+	phases ABCN;
+	name A_load729;
+	constant_current_A 8.750000 -4.375000j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name A_load730;
+	constant_impedance_C 221.915014+104.430595j;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name A_load731;
+	constant_impedance_B 221.915014+104.430595j;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name A_load732;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 42000.000000+21000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	voltage_B -2400.000000 -1385.640646j;
+	phases ABCN;
+	name A_load733;
+	constant_current_A 17.708333 -8.333333j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name A_load734;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 42000.000000+21000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name A_load735;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 85000.000000+40000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name A_load736;
+	constant_impedance_B 438.857143+219.428571j;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object load {
+	voltage_B -2400.000000 -1385.640646j;
+	phases ABCN;
+	name A_load737;
+	constant_current_A 29.166667 -14.583333j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name A_load738;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+	constant_power_A 126000.000000+62000.000000j;
+};
+
+object load {
+	phases ABCN;
+	name A_load740;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 85000.000000+40000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name A_load741;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	constant_current_C -0.586139+9.765222j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name A_load742;
+	constant_impedance_B 221.915014+104.430595j;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+	constant_impedance_A 2304.000000+1152.000000j;
+};
+
+object load {
+	phases ABCN;
+	name A_load744;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+	constant_power_A 42000.000000+21000.000000j;
+};
+
+object transformer {
+	phases ABC;
+	from A_node709;
+	name A_xform709-775;
+	to A_node775;
+	configuration trans_conf_400;
+};
+
+object node {
+	phases ABC;
+	name A_node775;
+	voltage_B -240.000000 -138.564065j;
+	voltage_C -0.000000+277.128129j;
+	voltage_A 240.000000 -138.564065j;
+	nominal_voltage 480;
+};
+
+object underground_line {
+	phases ABC;
+	from B_load701;
+	name B_node701-702;
+	to B_node702;
+	length 960;
+	configuration lc_7221;
+};
+
+object underground_line {
+	phases ABC;
+	from B_node702;
+	name B_node702-705;
+	to B_node705;
+	length 400;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from B_node702;
+	name B_node702-713;
+	to B_load713;
+	length 360;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from B_node702;
+	name B_node702-703;
+	to B_node703;
+	length 1320;
+	configuration lc_7221;
+};
+
+object underground_line {
+	phases ABC;
+	from B_node703;
+	name B_node703-727;
+	to B_load727;
+	length 240;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from B_node703;
+	name B_node703-730;
+	to B_load730;
+	length 600;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from B_node704;
+	name B_node704-714;
+	to B_load714;
+	length 80;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from B_node704;
+	name B_node704-720;
+	to B_load720;
+	length 800;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from B_node705;
+	name B_node705-742;
+	to B_load742;
+	length 320;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from B_node705;
+	name B_node705-712;
+	to B_load712;
+	length 240;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from B_node706;
+	name B_node706-725;
+	to B_load725;
+	length 280;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from B_node707;
+	name B_node707-724;
+	to B_load724;
+	length 760;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from B_node707;
+	name B_node707-722;
+	to B_load722;
+	length 120;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from B_node708;
+	name B_node708-733;
+	to B_load733;
+	length 320;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from B_node708;
+	name B_node708-732;
+	to B_load732;
+	length 320;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from B_node709;
+	name B_node709-731;
+	to B_load731;
+	length 600;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from B_node709;
+	name B_node709-708;
+	to B_node708;
+	length 320;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from B_node710;
+	name B_node710-735;
+	to B_load735;
+	length 200;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from B_node710;
+	name B_node710-736;
+	to B_load736;
+	length 1280;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from B_node711;
+	name B_node711-741;
+	to B_load741;
+	length 400;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from B_node711;
+	name B_node711-740;
+	to B_load740;
+	length 200;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from B_load713;
+	name B_node713-704;
+	to B_node704;
+	length 520;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from B_load714;
+	name B_node714-718;
+	to B_load718;
+	length 520;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from B_load720;
+	name B_node720-707;
+	to B_node707;
+	length 920;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from B_load720;
+	name B_node720-706;
+	to B_node706;
+	length 600;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from B_load727;
+	name B_node727-744;
+	to B_load744;
+	length 280;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from B_load730;
+	name B_node730-709;
+	to B_node709;
+	length 200;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from B_load733;
+	name B_node733-734;
+	to B_load734;
+	length 560;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from B_load734;
+	name B_node734-737;
+	to B_load737;
+	length 640;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from B_load734;
+	name B_node734-710;
+	to B_node710;
+	length 520;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from B_load737;
+	name B_node737-738;
+	to B_load738;
+	length 400;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from B_load738;
+	name B_node738-711;
+	to B_node711;
+	length 400;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from B_load744;
+	name B_node744-728;
+	to B_load728;
+	length 200;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from B_node781;
+	name B_node781-701;
+	to B_load701;
+	length 1850;
+	configuration lc_7211;
+};
+
+object underground_line {
+	phases ABC;
+	from B_load744;
+	name B_node744-729;
+	to B_load729;
+	length 200;
+	configuration lc_7241;
+};
+
+object node {
+	phases ABC;
+	name B_node781;
+	bustype SWING;
+	voltage_B -2504.88-1446.19314229j;
+	voltage_C -44.88+2814.65184433j;
+	voltage_A 2504.88-1446.19314229j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name B_node702;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name B_node703;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name B_node704;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name B_node705;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name B_node706;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name B_node707;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name B_node708;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name B_node709;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name B_node710;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name B_node711;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name B_load701;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 350000.000000+175000.000000j;
+	constant_power_B 140000.000000+70000.000000j;
+	constant_power_A 140000.000000+70000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name B_load712;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 85000.000000+40000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name B_load713;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 85000.000000+40000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	voltage_B -2400.000000 -1385.640646j;
+	phases ABCN;
+	name B_load714;
+	constant_current_A 3.541667 -1.666667j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_current_B -3.991720 -2.747194j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name B_load718;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+	constant_impedance_A 221.915014+104.430595j;
+};
+
+object load {
+	phases ABCN;
+	name B_load720;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 85000.000000+40000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name B_load722;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	constant_current_C -0.383280+4.830528j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_current_B -27.212870 -17.967408j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name B_load724;
+	constant_impedance_B 438.857143+219.428571j;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name B_load725;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+	constant_power_B 42000.000000+21000.000000j;
+};
+
+object load {
+	phases ABCN;
+	name B_load727;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 42000.000000+21000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name B_load728;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 42000.000000+21000.000000j;
+	constant_power_B 42000.000000+21000.000000j;
+	constant_power_A 42000.000000+21000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	voltage_B -2400.000000 -1385.640646j;
+	phases ABCN;
+	name B_load729;
+	constant_current_A 8.750000 -4.375000j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name B_load730;
+	constant_impedance_C 221.915014+104.430595j;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name B_load731;
+	constant_impedance_B 221.915014+104.430595j;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name B_load732;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 42000.000000+21000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	voltage_B -2400.000000 -1385.640646j;
+	phases ABCN;
+	name B_load733;
+	constant_current_A 17.708333 -8.333333j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name B_load734;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 42000.000000+21000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name B_load735;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 85000.000000+40000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name B_load736;
+	constant_impedance_B 438.857143+219.428571j;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object load {
+	voltage_B -2400.000000 -1385.640646j;
+	phases ABCN;
+	name B_load737;
+	constant_current_A 29.166667 -14.583333j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name B_load738;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+	constant_power_A 126000.000000+62000.000000j;
+};
+
+object load {
+	phases ABCN;
+	name B_load740;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 85000.000000+40000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name B_load741;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	constant_current_C -0.586139+9.765222j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name B_load742;
+	constant_impedance_B 221.915014+104.430595j;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+	constant_impedance_A 2304.000000+1152.000000j;
+};
+
+object load {
+	phases ABCN;
+	name B_load744;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+	constant_power_A 42000.000000+21000.000000j;
+};
+
+object transformer {
+	phases ABC;
+	from B_node709;
+	name B_xform709-775;
+	to B_node775;
+	configuration trans_conf_400;
+};
+
+object node {
+	phases ABC;
+	name B_node775;
+	voltage_B -240.000000 -138.564065j;
+	voltage_C -0.000000+277.128129j;
+	voltage_A 240.000000 -138.564065j;
+	nominal_voltage 480;
+};
+
+object underground_line {
+	phases ABC;
+	from C_load701;
+	name C_node701-702;
+	to C_node702;
+	length 960;
+	configuration lc_7221;
+};
+
+object underground_line {
+	phases ABC;
+	from C_node702;
+	name C_node702-705;
+	to C_node705;
+	length 400;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from C_node702;
+	name C_node702-713;
+	to C_load713;
+	length 360;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from C_node702;
+	name C_node702-703;
+	to C_node703;
+	length 1320;
+	configuration lc_7221;
+};
+
+object underground_line {
+	phases ABC;
+	from C_node703;
+	name C_node703-727;
+	to C_load727;
+	length 240;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from C_node703;
+	name C_node703-730;
+	to C_load730;
+	length 600;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from C_node704;
+	name C_node704-714;
+	to C_load714;
+	length 80;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from C_node704;
+	name C_node704-720;
+	to C_load720;
+	length 800;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from C_node705;
+	name C_node705-742;
+	to C_load742;
+	length 320;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from C_node705;
+	name C_node705-712;
+	to C_load712;
+	length 240;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from C_node706;
+	name C_node706-725;
+	to C_load725;
+	length 280;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from C_node707;
+	name C_node707-724;
+	to C_load724;
+	length 760;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from C_node707;
+	name C_node707-722;
+	to C_load722;
+	length 120;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from C_node708;
+	name C_node708-733;
+	to C_load733;
+	length 320;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from C_node708;
+	name C_node708-732;
+	to C_load732;
+	length 320;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from C_node709;
+	name C_node709-731;
+	to C_load731;
+	length 600;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from C_node709;
+	name C_node709-708;
+	to C_node708;
+	length 320;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from C_node710;
+	name C_node710-735;
+	to C_load735;
+	length 200;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from C_node710;
+	name C_node710-736;
+	to C_load736;
+	length 1280;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from C_node711;
+	name C_node711-741;
+	to C_load741;
+	length 400;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from C_node711;
+	name C_node711-740;
+	to C_load740;
+	length 200;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from C_load713;
+	name C_node713-704;
+	to C_node704;
+	length 520;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from C_load714;
+	name C_node714-718;
+	to C_load718;
+	length 520;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from C_load720;
+	name C_node720-707;
+	to C_node707;
+	length 920;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from C_load720;
+	name C_node720-706;
+	to C_node706;
+	length 600;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from C_load727;
+	name C_node727-744;
+	to C_load744;
+	length 280;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from C_load730;
+	name C_node730-709;
+	to C_node709;
+	length 200;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from C_load733;
+	name C_node733-734;
+	to C_load734;
+	length 560;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from C_load734;
+	name C_node734-737;
+	to C_load737;
+	length 640;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from C_load734;
+	name C_node734-710;
+	to C_node710;
+	length 520;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from C_load737;
+	name C_node737-738;
+	to C_load738;
+	length 400;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from C_load738;
+	name C_node738-711;
+	to C_node711;
+	length 400;
+	configuration lc_7231;
+};
+
+object underground_line {
+	phases ABC;
+	from C_load744;
+	name C_node744-728;
+	to C_load728;
+	length 200;
+	configuration lc_7241;
+};
+
+object underground_line {
+	phases ABC;
+	from C_node781;
+	name C_node781-701;
+	to C_load701;
+	length 1850;
+	configuration lc_7211;
+};
+
+object underground_line {
+	phases ABC;
+	from C_load744;
+	name C_node744-729;
+	to C_load729;
+	length 200;
+	configuration lc_7241;
+};
+
+object node {
+	phases ABC;
+	name C_node781;
+	bustype SWING;
+	voltage_B -2504.88-1446.19314229j;
+	voltage_C -44.88+2814.65184433j;
+	voltage_A 2504.88-1446.19314229j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name C_node702;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name C_node703;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name C_node704;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name C_node705;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name C_node706;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name C_node707;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name C_node708;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name C_node709;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name C_node710;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object node {
+	phases ABC;
+	name C_node711;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name C_load701;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 350000.000000+175000.000000j;
+	constant_power_B 140000.000000+70000.000000j;
+	constant_power_A 140000.000000+70000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name C_load712;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 85000.000000+40000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name C_load713;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 85000.000000+40000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	voltage_B -2400.000000 -1385.640646j;
+	phases ABCN;
+	name C_load714;
+	constant_current_A 3.541667 -1.666667j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_current_B -3.991720 -2.747194j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name C_load718;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+	constant_impedance_A 221.915014+104.430595j;
+};
+
+object load {
+	phases ABCN;
+	name C_load720;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 85000.000000+40000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name C_load722;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	constant_current_C -0.383280+4.830528j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_current_B -27.212870 -17.967408j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name C_load724;
+	constant_impedance_B 438.857143+219.428571j;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name C_load725;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+	constant_power_B 42000.000000+21000.000000j;
+};
+
+object load {
+	phases ABCN;
+	name C_load727;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 42000.000000+21000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name C_load728;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 42000.000000+21000.000000j;
+	constant_power_B 42000.000000+21000.000000j;
+	constant_power_A 42000.000000+21000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	voltage_B -2400.000000 -1385.640646j;
+	phases ABCN;
+	name C_load729;
+	constant_current_A 8.750000 -4.375000j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name C_load730;
+	constant_impedance_C 221.915014+104.430595j;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name C_load731;
+	constant_impedance_B 221.915014+104.430595j;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name C_load732;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 42000.000000+21000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	voltage_B -2400.000000 -1385.640646j;
+	phases ABCN;
+	name C_load733;
+	constant_current_A 17.708333 -8.333333j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name C_load734;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 42000.000000+21000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name C_load735;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 85000.000000+40000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name C_load736;
+	constant_impedance_B 438.857143+219.428571j;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object load {
+	voltage_B -2400.000000 -1385.640646j;
+	phases ABCN;
+	name C_load737;
+	constant_current_A 29.166667 -14.583333j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name C_load738;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+	constant_power_A 126000.000000+62000.000000j;
+};
+
+object load {
+	phases ABCN;
+	name C_load740;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	constant_power_C 85000.000000+40000.000000j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name C_load741;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	constant_current_C -0.586139+9.765222j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+};
+
+object load {
+	phases ABCN;
+	name C_load742;
+	constant_impedance_B 221.915014+104.430595j;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+	constant_impedance_A 2304.000000+1152.000000j;
+};
+
+object load {
+	phases ABCN;
+	name C_load744;
+	voltage_B -2400.000000 -1385.640646j;
+	voltage_C 0.000000+2771.281292j;
+	voltage_A 2400.000000 -1385.640646j;
+	nominal_voltage 4800;
+	constant_power_A 42000.000000+21000.000000j;
+};
+
+object transformer {
+	phases ABC;
+	from C_node709;
+	name C_xform709-775;
+	to C_node775;
+	configuration trans_conf_400;
+};
+
+object node {
+	phases ABC;
+	name C_node775;
+	voltage_B -240.000000 -138.564065j;
+	voltage_C -0.000000+277.128129j;
+	voltage_A 240.000000 -138.564065j;
+	nominal_voltage 480;
+};
+
+object jsondump {
+	filename_dump_reliability test_JSON_dump.json;
+	write_system_info true;
+	write_per_unit true;
+	system_base 100.0 MVA;
+};

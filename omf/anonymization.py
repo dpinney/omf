@@ -9,6 +9,7 @@ omfDir=os.path.dirname(os.path.dirname(__file__))
 # DISTRIBUTION FEEDER FUNCTIONS
 def distPseudomizeNames(inFeeder):
 	''' Replace all names in the inFeeder distribution system with pseudonames composed from the object type and a random ID. Return a key with name and ID pairs. '''
+	#Works, tested,
 	newNameKey = {}
 	randomID = random.randint(0,100)
 	# Create nameKey dictionary
@@ -29,6 +30,23 @@ def distPseudomizeNames(inFeeder):
 			oldTo = inFeeder['tree'][key]['to']
 			inFeeder['tree'][key]['from'] = newNameKey[oldFrom]
 			inFeeder['tree'][key]['to'] = newNameKey[oldTo]
+		#Line Configs	
+		if inFeeder['tree'][key].get('object', '') == 'line_configuration':
+			print("activated")
+			for prop in inFeeder['tree'][key]:
+				slist = {'conductor_N', 'conductor_A', 'conductor_B', 'conductor_C'}
+				if prop in slist:
+					print("has detected a conductor")
+					oldCon = inFeeder['tree'][key][prop]
+					inFeeder['tree'][key][prop] = newNameKey[oldCon]
+		#Replace Spacing
+		if 'spacing' in inFeeder['tree'][key]:
+			oldspace = inFeeder['tree'][key]['spacing']
+			inFeeder['tree'][key]['spacing'] = newNameKey[oldspace]
+	#Replace configs general form
+		if 'configuration' in inFeeder['tree'][key]:
+			oldConfig = inFeeder['tree'][key]['configuration']
+			inFeeder['tree'][key]['configuration'] = newNameKey[oldConfig]
 	# Replace names in links
 	for i in range(len(inFeeder['links'])):
 		for key in inFeeder['links'][i]:
@@ -45,6 +63,7 @@ def distPseudomizeNames(inFeeder):
 
 def distRandomizeNames(inFeeder):
 	''' Replace all names in the inFeeder distribution system with a random ID number. '''
+	#Works, tested, even when addnoise used
 	newNameKey = {}
 	allKeys = range(len(inFeeder['tree'].keys()))
 	random.shuffle(allKeys)
@@ -94,7 +113,6 @@ def distRandomizeNames(inFeeder):
 			if key == 'name':
 				oldNode = inFeeder['nodes'][i][key]
 				inFeeder['nodes'][i][key] = newNameKey[oldNode]	
-	return newNameKey
 	
 def distRandomizeLocations(inFeeder):
 	''' Replace all objects' longitude and latitude positions in the inFeeder distribution system with random values. '''
@@ -164,11 +182,15 @@ def distTranslateLocations(inFeeder, translationRight, translationUp, rotation):
 
 def distAddNoise(inFeeder, noisePerc):
 	''' Add random noise to properties with numeric values for all objects in the inFeeder distribution system based on a noisePerc magnitude. '''
-	#Problem? Adding noise to names causes duplicates which breaks feeder
+	#Works with certain parameters mentioned in brackets below
 	noisePerc = float(noisePerc)
+	distModifyTriplexLengths(inFeeder)
+	distModifyConductorLengths(inFeeder)
 	for key in inFeeder['tree']:
 		for prop in inFeeder['tree'][key]:
-			if prop not in ['name', 'from', 'to', 'configuration', 'line_configuration', 'spacing']:
+			# Scramble valid properties
+			if prop in ['latitude', 'longitude','climate', 'ambient_temperature']:
+				print prop
 				val = inFeeder['tree'][key][prop]
 				try:
 					parseVal = float(val)
@@ -191,6 +213,7 @@ def distAddNoise(inFeeder, noisePerc):
 
 def distShuffleLoads(inFeeder, shufPerc):
 	''' Shuffle the parent properties between all load objects in the inFeeder distribution system. '''
+	#Works, tested. even when add noise used
 	shufPerc = float(shufPerc)
 	houseParents = []
 	zipParents = []
@@ -280,6 +303,7 @@ def distShuffleLoads(inFeeder, shufPerc):
 
 def distModifyTriplexLengths(inFeeder):
 	''' Modifies triplex line length and diameter properties while preserving original impedance in the inFeeder distribution system. '''
+	print "distModifyTriplexLengths activated!"
 	tLookup = {}
 	for key in inFeeder['tree']:
 		tDict = {}
@@ -319,6 +343,7 @@ def distModifyTriplexLengths(inFeeder):
 
 def distModifyConductorLengths(inFeeder):
 	''' Modifies conductor length and diameter properties while preserving original impedance in the inFeeder distribution system. '''
+	#Works totally fine
 	uLookup = {}
 	oLookup = {}
 	for key in inFeeder['tree']:
@@ -392,6 +417,7 @@ def distModifyConductorLengths(inFeeder):
 
 def distSmoothLoads(inFeeder):
 	''' Reduce the resolution of load shapes by taking all sub-hourly load dispatch data in the inFeeder distribution system and aggregating to the hour level. ''' 
+	#FIX THIS FIX THIS FIX THIS. Ask david for help
 	agList = []
 	outList = []
 	scadaFile = inFeeder['attachments']['subScadaCalibrated1.player']
@@ -432,192 +458,210 @@ def distSmoothLoads(inFeeder):
 	scadaAttach = '\n'.join(outList)
 	inFeeder['attachments']['subScadaCalibrated1.player'] = scadaAttach
 
-# TRANSMISSION NETWORK FUNCTIONS
+# TRANSMISSION NETWORK FUNCTIONS 
 def tranPseudomizeNames(inNetwork):
+	#Works totally fine
 	''' Replace all names in the inNetwork transmission system with pseudonames composed of the object type and a random ID. Return a key with name and ID pairs. '''
 	newBusKey = {}
 	randomID = random.randint(0,100)
 	# Create busKey dictionary
-	for i in inNetwork['bus']:
-		key = str(i.keys()[0])
-		for prop in i[key]:
-			if 'bus_i' in prop:
-				oldBus = i[key]['bus_i']
-				# convert newBus to unicode
-				newBus = str(randomID).encode("utf-8").decode("utf-8")
-				newBusKey.update({oldBus:newBus})
-				i[key]['bus_i'] = newBus
-				i[newBus] = i.pop(oldBus)
-				randomID += 1
-	# Replace busNames in generators
+	for i in inNetwork['bus'].keys():
+		if 'bus_i' in inNetwork['bus'][i]:
+			oldBus = inNetwork['bus'][i]['bus_i']
+			newBus = str(randomID)
+			newBusKey.update({oldBus:newBus})
+			inNetwork['bus'][i]['bus_i'] = newBus
+			inNetwork['bus'][newBus] = inNetwork['bus'].pop(i)
+			randomID += 1
+# Replace busNames in generators
 	for i in inNetwork['gen']:
-		key = str(i.keys()[0])
-		for prop in i[key]:
-			if 'bus' in prop:
-				oldBus = i[key]['bus']
-				i[key]['bus'] = newBusKey[oldBus]
-	# Replace busNames in branches
+		if 'bus' in inNetwork['gen'][i]:
+			oldBus = inNetwork['gen'][i]['bus']
+			inNetwork['gen'][i]['bus'] = newBusKey[oldBus]
+# # Replace busNames in branches
 	for i in inNetwork['branch']:
-		key = str(i.keys()[0])
-		for prop in i[key]:
-			if 'fbus' in prop:
-				oldFrom = i[key]['fbus']
-				i[key]['fbus'] = newBusKey[oldFrom]
-			if 'tbus' in prop:
-				oldTo = i[key]['tbus']
-				i[key]['tbus'] = newBusKey[oldTo]
+		if 'fbus' in inNetwork['branch'][i]:
+			oldFrom = inNetwork['branch'][i]['fbus']
+			inNetwork['branch'][i]['fbus'] = newBusKey[oldFrom]
+		if 'tbus' in inNetwork['branch'][i]:
+			oldTo = inNetwork['branch'][i]['tbus']
+			inNetwork['branch'][i]['tbus'] = newBusKey[oldTo]
 	return newBusKey
-
 def tranRandomizeNames(inNetwork):
+	#Works Totally fine
 	''' Replace all names in the inNetwork transmission system with pseudonames composed of the object type and a random ID. '''
+	'''pretty sure this makes no sense at all, current data structure has no object types'''
 	newBusKey = {}
 	randomID = random.randint(0,100)
 	# Create busKey dictionary
-	for i in inNetwork['bus']:
-		key = str(i.keys()[0])
-		for prop in i[key]:
-			if 'bus_i' in prop:
-				oldBus = i[key]['bus_i']
-				# convert newBus to unicode
-				newBus = str(randomID).encode("utf-8").decode("utf-8")
-				newBusKey.update({oldBus:newBus})
-				i[key]['bus_i'] = newBus
-				i[newBus] = i.pop(oldBus)
-				randomID += 1
-	# Replace busNames in generators
+	for i in inNetwork['bus'].keys():
+		if 'bus_i' in inNetwork['bus'][i]:
+			oldBus = inNetwork['bus'][i]['bus_i']
+			newBus = str(randomID)
+			newBusKey.update({oldBus:newBus})
+			inNetwork['bus'][i]['bus_i'] = newBus
+			inNetwork['bus'][newBus] = inNetwork['bus'].pop(i)
+			randomID += 1
+# Replace busNames in generators
 	for i in inNetwork['gen']:
-		key = str(i.keys()[0])
-		for prop in i[key]:
-			if 'bus' in prop:
-				oldBus = i[key]['bus']
-				i[key]['bus'] = newBusKey[oldBus]
-	# Replace busNames in branches
+		if 'bus' in inNetwork['gen'][i]:
+			oldBus = inNetwork['gen'][i]['bus']
+			inNetwork['gen'][i]['bus'] = newBusKey[oldBus]
+# # Replace busNames in branches
 	for i in inNetwork['branch']:
-		key = str(i.keys()[0])
-		for prop in i[key]:
-			if 'fbus' in prop:
-				oldFrom = i[key]['fbus']
-				i[key]['fbus'] = newBusKey[oldFrom]
-			if 'tbus' in prop:
-				oldTo = i[key]['tbus']
-				i[key]['tbus'] = newBusKey[oldTo]
+		if 'fbus' in inNetwork['branch'][i]:
+			oldFrom = inNetwork['branch'][i]['fbus']
+			inNetwork['branch'][i]['fbus'] = newBusKey[oldFrom]
+		if 'tbus' in inNetwork['branch'][i]:
+			oldTo = inNetwork['branch'][i]['tbus']
+			inNetwork['branch'][i]['tbus'] = newBusKey[oldTo]
 
 def tranRandomizeLocations(inNetwork):
+	#FIXED, tested
 	''' Replace all objects' longitude and latitude positions in the inNetwork transmission system with random values. '''
+	'''make sure dont need to replace lat and longs of gens and branches'''
 	# inNetwork['bus'] = []
 	# inNetwork['gen'] = []
 	# inNetwork['branch'] = []
 	for i in inNetwork['bus']:
-		key = str(i.keys()[0])
-		for prop in i[key]:
-			if 'longitude' in prop:
-				i[key]['longitude'] = random.randint(0,1000)
-			if 'latitude' in prop:
-				i[key]['latitude'] = random.randint(0,1000)
+		if 'longitude' in inNetwork['bus'][i]:
+			inNetwork['bus'][i]['longitude'] = random.randint(0,1000)
+		if 'latitude' in inNetwork['bus'][i]:
+			inNetwork['bus'][i]['latitude'] = random.randint(0,1000)
 
-def tranTranslateLocations(inNetwork, translation, rotation):
+def tranTranslateLocations(inNetwork, translationRight, translationUp, rotation):
+	#Fixed, tested
 	''' Move the position of all objects in the inNetwork transmission system by a horizontal translation and counter-clockwise rotation. '''
 	# inNetwork['bus'] = []
 	# inNetwork['gen'] = []
 	# inNetwork['branch'] = []
-	translation = float(translation)
-	rotation = float(rotation)
+	if translationRight == '':
+		translationRight = 0
+	if translationUp == '':
+		translationUp = 0
+	if rotation == '':
+		rotation = 0
+	translationRight = float(translationRight)
+	translationUp = float(translationUp)
+	#convert from degreeas to radians
+	rotation = math.radians(float(rotation))
+	biggestLat, biggestLon, smallestLat, smallestLon = 0, 0, 0, 0
+
+	#Translate First
 	for i in inNetwork['bus']:
-		key = str(i.keys()[0])
-		for prop in i[key]:
-			if 'longitude' in prop:
-				longitude = float(i[key]['longitude'])
-				i[key]['longitude'] = longitude + translation*math.cos(rotation)
-			if 'latitude' in prop:
-				latitude = float(i[key]['latitude'])
-				i[key]['latitude'] = latitude + translation*math.sin(rotation)
+		if ('longitude' in inNetwork['bus'][i]) or ('latitude' in inNetwork['bus'][i]):
+			longitude = float(inNetwork['bus'][i]['longitude'])
+			latitude = float(inNetwork['bus'][i]['latitude'])
+			#Translate Feeder
+			inNetwork['bus'][i]['longitude']=longitude+translationRight
+			inNetwork['bus'][i]['latitude']=latitude+translationUp
+	#Find composite midpoint to rotate around. It is the average point of the feeder's extrema
+	#Find greatest Lat, least lat, great lon, least lon, then midpoint
+	for key, value1 in inNetwork['bus'].iteritems():
+		if 'latitude' in value1:
+			if value1['latitude']>biggestLat:
+				biggestLat = value1['latitude']
+			if value1['latitude'] < smallestLat:
+				smallestLat = value1['latitude']
+		if 'longitude' in value1:
+			if value1['longitude']>biggestLon:
+				biggestLon = value1['longitude']
+			if value1['longitude'] < smallestLon:
+				smallestLat = value1['longitude']
+	midLon = float((biggestLon + smallestLon))/2
+	midLat = float((biggestLat +smallestLat))/2
+	#Rotate
+	for i in inNetwork['bus']:
+		if ('longitude' in inNetwork['bus'][i]) or ('latitude' in inNetwork['bus'][i]):
+			#Rotate about composite origin (midpoint)
+			#qx = ox + math.cos(angle) * (px - ox) - math.sin(angle) * (py - oy)
+    		#qy = oy + math.sin(angle) * (px - ox) + math.cos(angle) * (py - oy)
+			x = float(inNetwork['bus'][i]['longitude'])
+			y = float(inNetwork['bus'][i]['latitude'])
+			inNetwork['bus'][i]['longitude'] = (midLon) + (math.cos(rotation)*(x-midLon)) - ((y-midLat)*math.sin(rotation))
+			inNetwork['bus'][i]['latitude'] = (midLat) + (math.sin(rotation)*(x-midLon)) + ((y-midLat)* math.cos(rotation))
 
 def tranAddNoise(inNetwork, noisePerc):
 	''' Add random noise to properties with numeric values for all objects in the inNetwork transmission system based on a noisePerc magnitude. '''
+	#Fixed, but breaks transmission when it scrambles numbers enough to break MatPower
 	noisePerc = float(noisePerc)
 	for array in inNetwork:
 		if (array == 'bus') or (array == 'gen') or (array == 'branch'):
 			arrayId = 0
 			for i in inNetwork[array]:
-				key = str(i.keys()[0])
-				for prop in i[key]:
-					if ('bus' not in prop) and ('status' not in prop):
-						val = i[key][prop]
+				for key in inNetwork[array][i].keys():
+					if ('bus' not in key) and ('status' not in key) and ('type' not in key):
+						# print key, inNetwork[array][i][key]
+						val = inNetwork[array][i][key]
 						try:
 							parseVal = float(val)
-							randNoise = random.randint(-noisePerc, noisePerc)/100
-							randVal = parseVal + randNoise*parseVal
-							i[key][prop] = str(randVal)
+							randNoise = random.uniform(-noisePerc, noisePerc)/100
+							randVal = parseVal + parseVal * randNoise 
+							inNetwork[array][i][key] = str(randVal)
 						except ValueError:
 							print 'error'
 							continue
-				arrayId += 1
+			arrayId += 1
 
 def tranShuffleLoadsAndGens(inNetwork, shufPerc):
+	#Fixed, tested
 	''' Shuffle the parent properties between all load and gen objects in the inNetwork transmission system. '''
 	shufPerc = float(shufPerc)
 	# Shuffle Qd and Pd
 	qParents = []
 	pParents = []
 	busId = 0
-	for i in inNetwork['bus']:
-		key = str(i.keys()[0])
-		for prop in i[key]:
-			if 'Qd' in prop:
-				qParents.append(i[key]['Qd'])
-			if 'Pd' in prop:
-				pParents.append(i[key]['Pd'])
+	for i in inNetwork['bus'].keys():
+		if 'Qd' in inNetwork['bus'][i].keys():
+			qParents.append(inNetwork['bus'][i]['Qd'])
+		if 'Pd' in inNetwork['bus'][i].keys():
+			pParents.append(inNetwork['bus'][i]['Pd'])
 		busId += 1
 	random.shuffle(qParents)
 	random.shuffle(pParents)
 	qIdx = 0
 	pIdx = 0
 	busId = 0
-	for i in inNetwork['bus']:
-		key = str(i.keys()[0])
-		for prop in i[key]:
-			if random.randint(0,100) < shufPerc:
-				if 'Qd' in prop:
-					i[key]['Qd'] = qParents[qIdx]
-					qIdx += 1
-				if 'Pd' in prop:
-					i[key]['Pd'] = pParents[pIdx]
-					pIdx += 1
+	for i in inNetwork['bus'].keys():
+		if random.randint(0,100) < shufPerc:
+			if 'Qd' in inNetwork['bus'][i].keys():
+				inNetwork['bus'][i]['Qd'] = qParents[qIdx]
+				qIdx += 1
+			if 'Pd' in inNetwork['bus'][i].keys():
+				inNetwork['bus'][i]['Pd'] = pParents[pIdx]
+				pIdx += 1
 		busId += 1
 	# Shuffle Generators
 	genParents = []
 	genId = 0
-	for i in inNetwork['gen']:
-		key = str(i.keys()[0])
-		for prop in i[key]:
-			if 'bus' in prop:
-				genParents.append(i[key]['bus'])
+	for i in inNetwork['gen'].keys():
+		if 'bus' in inNetwork['gen'][i].keys():
+			genParents.append(inNetwork['gen'][i]['bus'])
 		genId += 1
 	random.shuffle(genParents)
 	genId = 0
 	genIdx = 0
-	for i in inNetwork['gen']:
-		key = str(i.keys()[0])
-		for prop in i[key]:
-			if 'bus' in prop:
+	for i in inNetwork['gen'].keys():
+			if 'bus' in inNetwork['gen'][i].keys():
 				if random.randint(0,100) < shufPerc:
-					i[key]['bus'] = genParents[genIdx]
+					inNetwork['gen'][i]['bus'] = genParents[genIdx]
 					genIdx += 1
-		genId += 1
+			genId += 1
+
 
 # def _tests():
-# 	pass
-# 	# DISTRIBUTION FEEDER TESTS
+# # 	pass
+# # 	# DISTRIBUTION FEEDER TESTS
 # 	# Test distPseudomizeNames
-	# FNAME = "Simple Market System AnonTest.omd"
-	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
-	# with open(FNAME, "r") as inFile:
-	# 	inFeeder = json.load(inFile)
-	# 	nameKey = distPseudomizeNames(inFeeder)
-	# 	print nameKey
-	# FNAMEOUT = "simpleMarket_distPseudomizeNames.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inFeeder, outFile, indent=4)
+# 	FNAME = "Simple Market System AnonTest.omd"
+# 	FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
+# 	with open(FNAME, "r") as inFile:
+# 		inFeeder = json.load(inFile)
+# 		nameKey = distPseudomizeNames(inFeeder)
+# 		print nameKey
+# 	FNAMEOUT = "simpleMarket_distPseudomizeNames.omd"
+# 	with open(FNAMEOUT, "w") as outFile:
+# 		json.dump(inFeeder, outFile, indent=4)
 
 # # # 	# Test distRandomizeNames
 	# FNAME = "Simple Market System AnonTest.omd"
@@ -664,15 +708,15 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 	# 	json.dump(inFeeder, outFile, indent=4)
 
 # # 	# Test distShuffleLoads
-# 	FNAME = "Simple Market System AnonTest.omd"
-# 	FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
-# 	with open(FNAME, "r") as inFile:
-# 		inFeeder = json.load(inFile)
-# 		shufPerc = 100
-# 		distShuffleLoads(inFeeder, shufPerc)
-# 	FNAMEOUT = "simpleMarket_distShuffleLoads.omd"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inFeeder, outFile, indent=4)
+	# FNAME = "Simple Market System AnonTest.omd"
+	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
+	# with open(FNAME, "r") as inFile:
+	# 	inFeeder = json.load(inFile)
+	# 	shufPerc = 100
+	# 	distShuffleLoads(inFeeder, shufPerc)
+	# FNAMEOUT = "simpleMarket_distShuffleLoads.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inFeeder, outFile, indent=4)
 
 # 	# Test distModifyTriplexLengths
 	# FNAME = "Simple Market System AnonTest.omd"
@@ -697,6 +741,8 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 	# Test distSmoothLoads
 	# FNAME = "Calibrated Feeder1.omd"
 	# FNAME=pJoin(omfDir,'data','model','public', FNAME)
+	# FNAME = "Simple Market System AnonTest.omd"
+	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
 	# with open(FNAME, "r") as inFile:
 	# 	inFeeder = json.load(inFile)
 	# 	distSmoothLoads(inFeeder)
@@ -706,19 +752,20 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 
 
 # 	TRANSMISSION NETWORK TESTS
-# 	Test tranPseudomizeNames	
-	# FNAME = "case9.omt"
-	# FNAME=pJoin(omfDir,'omf','data','model','admin','Automated Testing of transmission', FNAME)
+	# # Test tranPseudomizeNames	
+	# FNAME = "SimpleNetwork.json"
+	# FNAME=pJoin(omfDir,'omf','static', FNAME)
 	# with open(FNAME, "r") as inFile:
 	# 	inNetwork = json.load(inFile)
-	# 	busKey = tranPseudomizeNames(inNetwork)
+	# 	tranPseudomizeNames(inNetwork)
 	# FNAMEOUT = "118_tranPseudomizeNames.omt"
 	# with open(FNAMEOUT, "w") as outFile:
 	# 	json.dump(inNetwork, outFile, indent=4)
 
 # 	# Test tranRandomizeNames
+	# Probably not necessary
 	# FNAME = "case9.omt"
-	# FNAME=pJoin(omfDir,'omf','data','model','admin','Automated Testing of transmission', FNAME)
+	# FNAME=pJoin(omfDir,'omf','static', FNAME)
 	# with open(FNAME, "r") as inFile:
 	# 	inNetwork = json.load(inFile)
 	# 	tranRandomizeNames(inNetwork)
@@ -726,45 +773,50 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 	# with open(FNAMEOUT, "w") as outFile:
 	# 	json.dump(inNetwork, outFile, indent=4)
 
-# 	# Test tranRandomizeLocations
-# 	FNAME = "case118.omt"
-# 	with open(FNAME, "r") as inFile:
-# 		inNetwork = json.load(inFile)
-# 		tranRandomizeLocations(inNetwork)
-# 	FNAMEOUT = "118_tranRandomizeLocations.omt"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inNetwork, outFile, indent=4)
+	# Test tranRandomizeLocations
+	# FNAME = "SimpleNetwork.json"
+	# FNAME=pJoin(omfDir,'omf','static', FNAME)
+	# with open(FNAME, "r") as inFile:
+	# 	inNetwork = json.load(inFile)
+	# 	tranRandomizeLocations(inNetwork)
+	# FNAMEOUT = "118_tranRandomizeLocations.omt"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inNetwork, outFile, indent=4)
 
-# 	# Test tranTranslateLocation
-# 	FNAME = "case118.omt"
-# 	with open(FNAME, "r") as inFile:
-# 		inNetwork = json.load(inFile)
-# 		translation = 20
-# 		rotation = 20
-# 		tranTranslateLocations(inNetwork, translation, rotation)
-# 	FNAMEOUT = "118_tranTranslateLocations.omt"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inNetwork, outFile, indent=4)
+	# Test tranTranslateLocation
+	# FNAME = "case9.omt"
+	# FNAME=pJoin(omfDir,'omf','static', FNAME)
+	# with open(FNAME, "r") as inFile:
+	# 	inNetwork = json.load(inFile)
+	# 	translationRight = 100
+	# 	translationUp = 100 
+	# 	rotation = 45
+	# 	tranTranslateLocations(inNetwork, translationRight, translationUp, rotation)
+	# FNAMEOUT = "case9_transTranslate.omt"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inNetwork, outFile, indent=4)
 
-# 	# Testing tranAddNoise
-# 	FNAME = "case118.omt"
-# 	with open(FNAME, "r") as inFile:
-# 		inNetwork = json.load(inFile)
-# 		noisePerc = 100
-#		tranAddNoise(inNetwork, noisePerc)
-# 	FNAMEOUT = "118_tranAddNoise.omt"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inNetwork, outFile, indent=4)
+	# Testing tranAddNoise
+	# FNAME = "SimpleNetwork.json"
+	# FNAME=pJoin(omfDir,'omf','static', FNAME)
+	# with open(FNAME, "r") as inFile:
+	# 	inNetwork = json.load(inFile)
+	# 	noisePerc = 100
+	# 	tranAddNoise(inNetwork, noisePerc)
+	# FNAMEOUT = "case9_transAddNoise.omt"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inNetwork, outFile, indent=4)
 
 # 	# Testing tranShuffleLoadsAndGens
-#	FNAME = "case118.omt"
-# 	with open(FNAME, "r") as inFile:
-# 		inNetwork = json.load(inFile)
-# 		shufPerc = 100
-# 		tranShuffleLoadsAndGens(inNetwork, shufPerc)
-# 	FNAMEOUT = "118_tranShuffleLoadsAndGens.omt"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inNetwork, outFile, indent=4)
+	# FNAME = "SimpleNetwork.json"
+	# FNAME=pJoin(omfDir,'omf','static', FNAME)
+	# with open(FNAME, "r") as inFile:
+	# 	inNetwork = json.load(inFile)
+	# 	shufPerc = 100
+	# 	tranShuffleLoadsAndGens(inNetwork, shufPerc)
+	# FNAMEOUT = "118_tranShuffleLoadsAndGens.omt"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inNetwork, outFile, indent=4)
 
 # if __name__ == '__main__':
 # 	_tests()

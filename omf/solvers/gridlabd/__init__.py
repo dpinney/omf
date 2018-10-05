@@ -4,13 +4,8 @@ import sys, os, subprocess, platform, re, datetime, shutil, traceback, math, tim
 from os.path import join as pJoin
 from copy import deepcopy
 
-# Locational variables so we don't have to rely on OMF being in the system path.
-_myDir = os.path.dirname(os.path.abspath(__file__))
-_omfDir = os.path.dirname(os.path.dirname(_myDir))
-sys.path.append(_omfDir)
-
 # OMF imports.
-import feeder
+import omf
 
 def checkStatus(modelDir):
 	'''Reads a current gridlabD simulation time from stdErr.txt,
@@ -96,6 +91,7 @@ def _addGldToPath():
 		return "gridlabd"
 	else:
 		# No system-level version of Gridlab available, so add ours to the path.
+		_myDir = os.path.dirname(os.path.abspath(__file__))
 		enviro = os.environ
 		if sys.platform == 'win32' or sys.platform == 'cygwin':
 			if platform.machine().endswith('64'):
@@ -141,7 +137,7 @@ def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None, g
 		for attach in attachments:
 			with open (pJoin(workDir,attach),'w') as attachFile:
 				attachFile.write(attachments[attach])
-		glmString = feeder.sortedWrite(localTree)
+		glmString = omf.feeder.sortedWrite(localTree)
 		if not glmName:
 			glmName = "main." + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + ".glm"
 		with open(pJoin(workDir, glmName),'w') as glmFile:
@@ -171,9 +167,10 @@ def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None, g
 					time.sleep(2)
 		return rawOut
 	except:
+		trace = traceback.print_exc()
 		with open(pJoin(workDir, "stderr.txt"), "a+") as stderrFile:
-			traceback.print_exc(file = stderrFile)
-		return {}
+			stderrFile.write(trace)
+		return {"stderr":trace}
 
 def _strClean(x):
 	''' Helper function that translates csv values to reasonable floats (or header values to strings). '''
@@ -244,9 +241,9 @@ def _tests():
 		assert _strClean(string) == result, "A _strClean operation failed on: " + string
 	# Get a test feeder and test climate.
 	print "Testing GridlabD solver."
-	with open(pJoin(_omfDir,"static","publicFeeders","Simple Market System.omd"),"r") as feederFile:
+	with open(pJoin(omf.omfDir,"static","publicFeeders","Simple Market System.omd"),"r") as feederFile:
 		feederJson = json.load(feederFile)
-	with open(pJoin(_omfDir,"data","Climate","AL-HUNTSVILLE.tmy2"),"r") as climateFile:
+	with open(pJoin(omf.omfDir,"data","Climate","AL-HUNTSVILLE.tmy2"),"r") as climateFile:
 		tmyStr = climateFile.read()
 	# Add climate in.
 	feederJson["attachments"]["climate.tmy2"] = tmyStr

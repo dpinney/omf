@@ -66,15 +66,15 @@ elif platform.system()=='Windows':
 	os.system("C:\\Python27\\python.exe -m setup.py develop")
 elif platform.system()=="Darwin": # MacOS
 	# Install homebrew
-	os.system("/usr/bin/ruby -e '$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)'")
-	os.system("brew install wget python ffmpeg git graphviz octave")
+	os.system('/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
+	os.system("brew install wget python@2 ffmpeg git graphviz octave")
 	os.system("brew link --overwrite python")
 	os.system("wget -O gridlabd.dmg --no-check-certificate https://ufpr.dl.sourceforge.net/project/gridlab-d/gridlab-d/Candidate%20release/gridlabd_4.0.0.dmg")
 	os.system("sudo hdiutil attach gridlabd.dmg")
-	os.system("sudo installer -package /Volumes/GridLAB-D\\ 4.0.0/gridlabd.mpkg -target /")
-	os.system("sudo hdiutil detach /Volumes/GridLAB-D\\ 4.0.0")
+	os.system('sudo installer -package "/Volumes/GridLAB-D 4.0.0/gridlabd.mpkg" -target /')
+	os.system('sudo hdiutil detach "/Volumes/GridLAB-D 4.0.0"')
 	os.system("cd omf")
-	os.system("pip install -r requirements.txt")
-	os.system("python setup.py develop")
+	os.system("pip2 install -r requirements.txt")
+	os.system("python2 setup.py develop")
 else:
 	print "Your operating system is not currently supported. Platform detected: " + str(platform.system()) + str(platform.linux_distribution())

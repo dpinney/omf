@@ -3,8 +3,8 @@ from matplotlib import pyplot as plt
 import os
 from os.path import join as pJoin
 # OMF imports
-import feeder
-from solvers import gridlabd
+import omf.feeder as feeder
+from omf.solvers import gridlabd
 import random
 # Plotting
 import numpy as np

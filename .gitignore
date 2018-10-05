@@ -18,3 +18,17 @@ omf/omf.log
 !omf/data/Feeder/public/*
 !omf/data/User/test.json
 !omf/data/User/public.json
+omf/scratch/CIGAR/Fault_check_out.txt
+omf/scratch/CIGAR/IEEE_37_test_RestD.xml
+omf/scratch/CIGAR/load841out.csv
+omf/scratch/CIGAR/Metrics_Output.csv
+omf/scratch/CIGAR/tripline.csv
+omf/scratch/CIGAR/tripout.csv
+omf/scratch/CIGAR/VoltBase.csv
+omf/scratch/CIGAR/VoltFault.csv
+omf/scratch/CIGAR/Voltfuse.csv
+omf/scratch/CIGAR/VOLTOUT.png
+omf/scratch/CIGAR/VOLTOUT.png
+omf/scratch/CIGAR/VoltPostFault.csv
+omf/scratch/CIGAR/VOLTOUT.png
+omf/scratch/CIGAR/scratchwindow.py

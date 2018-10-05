@@ -70,6 +70,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 	hardCands = gfmInputTemplate['hardeningCandidates'].strip().replace(' ', '').split(',')
 	newLineCands = gfmInputTemplate["newLineCandidates"].strip().replace(' ', '').split(',')
 	switchCands = gfmInputTemplate["switchCandidates"].strip().replace(' ', '').split(',')
+	critLoads = gfmInputTemplate["criticalLoads"].strip().replace(' ', '').split(',')
 	objToFind = ['transformer', 'regulator', 'underground_line', 'overhead_line', 'fuse', 'switch']
 	lineCount = 0
 	for key, line in jsonTree.iteritems():
@@ -77,13 +78,17 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			phases = line.get('phases')
 			if 'S' in phases:
 				continue # We don't support secondary system transformers.
+			if line.get('object','') == 'switch':
+				has_switch = True
+			else:
+				has_switch = False
 			newLine = dict({
 				'id' : '', #*
 				'node1_id' : '', #*
 				'node2_id' : '', #*
 				'line_code' : '', #*
-				'length' : 1.0, #* Units match line code entries.
-				# 'has_switch' : False,
+				'length' : float(line.get('length',100)), #* Units match line code entries.
+				'has_switch' : has_switch,
 				'construction_cost': float(gfmInputTemplate['lineUnitCost']),
 				'harden_cost': float(gfmInputTemplate['hardeningUnitCost']), # Russel: this exists unless its a trans.
 				'switch_cost': float(gfmInputTemplate['switchCost']), # taken from rdtInTrevor.json.
@@ -99,7 +104,6 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			newLine['id'] = line.get('name','')
 			newLine['node1_id'] = line.get('from','')+'_bus' 
 			newLine['node2_id'] = line.get('to','')+'_bus'
-			newLine['length'] = float(line.get('length',100))
 			newLine['line_code'] = lineCount
 			# Calculate harden_cost, 10.
 			# newLine['capacity'] = 1000000000 # Set it arbitrarily high.
@@ -212,6 +216,8 @@ def convertToGFM(gfmInputTemplate, feederModel):
 				'max_reactive_phase': [0,0,0], #*
 				'has_phase': [False, False, False] #*
 			})
+			if load.get('name','') in critLoads:
+				newLoad['is_critical'] = True
 			newLoad['id'] = load.get('name','')+'_lod'
 			# Associate the new load with the bus it is attached to.
 			if hasParent:
@@ -335,7 +341,8 @@ def work(modelDir, inputDict):
 		'hardeningUnitCost' : inputDict['hardeningUnitCost'],
 		'switchCost' : inputDict['switchCost'],
 		'generatorCandidates' : inputDict['generatorCandidates'],
-		'lineUnitCost' : inputDict['lineUnitCost']
+		'lineUnitCost' : inputDict['lineUnitCost'],
+		'criticalLoads' : inputDict['criticalLoads']
 	}
 	gfmJson = convertToGFM(gfmInputTemplate, feederModel)
 	gfmInputFilename = 'gfmInput.json'
@@ -361,6 +368,8 @@ def work(modelDir, inputDict):
 		rdtJsonAsString = rdtInputFile.read()
 		rdtJson = json.loads(rdtJsonAsString)
 	rdtJson["power_flow"] = inputDict["power_flow"]
+	rdtJson["solver_iteration_timeout"] = 300.0
+	rdtJson["algorithm"] = "miqp"
 	# Calculate line costs.
 	lineData = {}
 	for line in rdtJson["lines"]:
@@ -375,7 +384,7 @@ def work(modelDir, inputDict):
 			json.dump(rdtJson, rdtInputFile, indent=4)
 	# Run GridLAB-D first time to generate xrMatrices.
 	print "RUNNING GLD FOR", modelDir
-	if platform.system() == "Windows":
+	if platform.system() in ["Windows","Linux"]:
 		omdPath = pJoin(modelDir, feederName + ".omd")
 		with open(omdPath, "r") as omd:
 			omd = json.load(omd)
@@ -401,7 +410,15 @@ def work(modelDir, inputDict):
 		#Wire in the file the user specifies via zipcode.
 		climateFileName, latforpvwatts = zipCodeToClimateName(inputDict["simulationZipCode"])
 		shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
-		proc = subprocess.Popen(['gridlabd', 'feeder.glm'], stdout=subprocess.PIPE, shell=True, cwd=modelDir)
+		# Platform specific binaries.
+		if platform.system() == "Linux":
+			myEnv = os.environ.copy()
+			myEnv['GLPATH'] = omf.omfDir + '/solvers/gridlabdv990/'
+			commandString = omf.omfDir + '/solvers/gridlabdv990/gridlabd.bin feeder.glm'  
+		elif platform.system() == "Windows":
+			myEnv = os.environ.copy()
+			commandString =  '"' + pJoin(omf.omfDir, "solvers", "gridlabdv990", "gridlabd.exe") + '"' + " feeder.glm"
+		proc = subprocess.Popen(commandString, stdout=subprocess.PIPE, shell=True, cwd=modelDir, env=myEnv)
 		(out, err) = proc.communicate()
 		with open(pJoin(modelDir, "gldConsoleOut.txt"), "w") as gldConsoleOut:
 			gldConsoleOut.write(out)
@@ -479,7 +496,7 @@ def work(modelDir, inputDict):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"feederName1": "trip37", # "Winter 2017 Fixed" "debuggedSVEC"
+		"feederName1": "trip37", # "trip37" "UCS Winter 2017 Fixed" "SVECNoIslands"
 		"modelType": modelName,
 		"runTime": "0:00:30",
 		"layoutAlgorithm": "geospatial",
@@ -495,12 +512,13 @@ def new(modelDir):
 		"newLineCandidates": "TIE_A_to_C,TIE_C_to_B,TIE_B_to_A",
 		"generatorCandidates": "A_node706,A_node707,A_node708,B_node704,B_node705,B_node703",
 		"switchCandidates" : "A_node705-742,A_node705-712",
+		"criticalLoads": "C_load722",
 		"criticalLoadMet": "0.98",
 		"nonCriticalLoadMet": "0.0",
 		"chanceConstraint": "1.0",
 		"phaseVariation": "0.15",
 		"weatherImpacts": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","wf_clip.asc")).read(),
-		"weatherImpactsFileName": "wf_clip.asc", # "wind_grid_1UCS.asc" "wf_clipSVEC.asc"
+		"weatherImpactsFileName": "wf_clip.asc", # "wf_clip.asc" "wind_grid_1UCS.asc" "wf_clipSVEC.asc"
 		"xrMatrices":open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","lineCodesTrip37.json")).read(),
 		"xrMatricesFileName":"lineCodesTrip37.json",
 		"scenarios": "",
@@ -531,7 +549,7 @@ def _runModel():
 	# Pre-run.
 	renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
+	runForeground(modelLoc)
 	# Show the output.
 	renderAndShow(modelLoc)
 

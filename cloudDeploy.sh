@@ -18,6 +18,8 @@ else
 	echo "** Setting permissions."
 	chown -R root *
 	chgrp -R root *
+	echo "** Re-run install to handle any missing requirements."
+	python /omf/install.py
 	echo "** Restarting the service."
 	systemctl start omf
 fi

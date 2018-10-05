@@ -220,7 +220,7 @@
 		</div>
 	</div>
 	<div id='anonymizeModal' class='modal'>
-		<div class='modalContent' id='anonymizeModalContent' style='width:475px'>
+		<div class='modalContent' id='anonymizeModalContent' style='width:500px'>
 			<div style='font-weight:bold; font-size:14pt'>Anonymization</div>
 			<br>
 			<form onsubmit='anonymize();' action='/anonymizeTran/{{owner}}/{{networkName}}' id='anonymize' enctype='multipart form-data' method='post'>
@@ -243,7 +243,7 @@
 					<label for='noChange'>No Change</label>
 					<br>
 					<input type='radio' id='translation' name='anonymizeLocationOption' value='translation'>
-					<label for='translation'>Translate <input style='width:40px' type='text' id='translate' name='translate'>[ft] and Rotate <input style='width:30px' type='text' id='rotate' name='rotate'>[degrees]</label>
+					<label for='translation'>Translate <input style='width:10px' type='text' id='translateRight' name='translateRight'>[ft] to right and <input style='width:10px' type='text' id='translateUp' name='translateUp'>[ft] up and Rotate <input style='width:10px' type='text' id='rotate' name='rotate'>[degrees]</label>
 					<br>
 					<input type='radio' id='randomize' name='anonymizeLocationOption' value='randomize'>
 					<label for='randomize'>Random (Force Layout)</label>
@@ -279,6 +279,11 @@ var newID = '';
 var newType = '';
 var newBusGenObj = {};
 var scaleTracker = 1
+var maxBusID = -9999999;
+var maxBranchID = -9999999;
+var maxGenID = -9999999;
+var iToSVGLookup = {}; //Necessary global to reduce runtime.  Otherwise whould have loops within loop looking through components for bus ID.
+var sVGToiLookup = {}; //"  "  "  "
 
 function saveSvg() {
 	// Redirect to an .svg file that the user can save.
@@ -331,6 +336,11 @@ function addLine(x1,y1,x2,y2,id,myClass) {
 
 function buildNetwork() {
 	// Find the size we need for the full chart.
+
+	for(bus in networkData.bus) {
+		iToSVGLookup[networkData.bus[String(parseInt(bus))]['bus_i']] = String(parseInt(bus))
+		sVGToiLookup[String(parseInt(bus))] = networkData.bus[String(parseInt(bus))]['bus_i']
+	}
 	var maxLon = 100
 	var maxLat = 100
 	var busNumMap = {}
@@ -363,6 +373,9 @@ function buildNetwork() {
 			tBusNum = busNumMap[tNum]
 			fromOb = networkData.bus[fBusNum]
 			toOb = networkData.bus[tBusNum]
+			if(parseInt(num)> maxBranchID) {
+				maxBranchID = parseInt(num)
+			}
 			addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],"branch_"+num,"branch" + ' p' + phaseCount(anOb))
 		} catch(e) {}
 	}
@@ -370,6 +383,9 @@ function buildNetwork() {
 	for (num in networkData.bus) {
 		try {
 			anOb = networkData.bus[num]
+			if(parseInt(anOb['bus_i']) > maxBusID) {
+				maxBusID = parseInt(anOb['bus_i'])
+			}
 			addCircle(anOb['longitude'], anOb['latitude'],5,"bus_"+num,"bus")
 		} catch(e) {}
 	}
@@ -381,6 +397,9 @@ function buildNetwork() {
 			var longitude = networkData.bus[busNum]['longitude']
 			var latitude = networkData.bus[busNum]['latitude']
 			var width = 4
+			if(parseInt(num) > maxGenID) {
+				maxGenID = parseInt(num)
+			}
 			addRectangle(longitude-width/2,latitude-width/2,width,width,"gen_"+num,"gen")
 		} catch(e) {}
 	}
@@ -575,29 +594,30 @@ function deleteOb() {
 	// Delete button in selection table.
 	var clickType = previousTarget.id.split("_")[0]
 	var clickID = previousTarget.id.split("_")[1]
+
 	// Delete Lines
 	if (clickType === 'branch') {
 		previousTarget.remove()
-		networkData[clickType][clickID] = {}
+		delete networkData[clickType][clickID]
 	}
 	//Delete Squares
 	if (clickType === 'gen') {
 		previousTarget.remove()
-		networkData[clickType][clickID] = {}
+		delete networkData[clickType][clickID]
 	}
 	// Delete Circles
 	if (clickType === 'bus') {
 		gens = 0
-		for (i = 0, limit = Object.keys(networkData.gen).length; i < limit; i++) {
-			if (parseInt(networkData.gen[String(i+1)]['bus']) === parseInt(clickID)) {
+		for(gen in networkData.gen) {
+			if (parseInt(networkData.gen[String(gen)]['bus']) === parseInt(clickID)) {
 				gens++
 			}
 		}
 		// Check for connected lines
 		lines = 0
-		for (i = 0, limit = Object.keys(networkData.branch).length; i < limit; i++) {
-			if ( (parseInt(networkData.branch[String(i+1)]['fbus']) === parseInt(clickID))
-				|| (parseInt(networkData.branch[String(i+1)]['tbus']) === parseInt(clickID)) ) {
+		for(branch in networkData.branch) {
+			if ( (parseInt(networkData.branch[String(branch)]['fbus']) === parseInt(clickID))
+				|| (parseInt(networkData.branch[String(branch)]['tbus']) === parseInt(clickID)) ) {
 				lines++
 			}
 		}
@@ -606,6 +626,7 @@ function deleteOb() {
 		}
 		else {
 			previousTarget.remove()
+			delete networkData[clickType][clickID]
 		}
 	}
 	unsavedChanges=true
@@ -703,8 +724,10 @@ function multiSelectionTable() {
 
 function newNode(typeOfNode) {
 	// Create a new node object.
-	newID = (Object.keys(networkData[typeOfNode]).length)+1
-	newBusGenObj = {}
+	maxBusID = maxBusID + 1
+	newID = maxBusID
+	iToSVGLookup[String(newID)] = String(newID)
+	sVGToiLookup[String(newID)] = String(newID)
 	newBusGenObj = {
 		longitude: "0",
 		latitude: "0",
@@ -767,18 +790,21 @@ function moveBusListener() {
 	selectionIDSplit = currSel.id.split("_")
 	selBusID = parseInt(selectionIDSplit[1])
 	selBus = networkData["bus"][String(selBusID)]
+	selBus_i_ID = selBus["bus_i"]
 	coords = clickLatLon(event)
-	networkData["bus"][String(selBusID)].longitude = coords[0]
-	networkData["bus"][String(selBusID)].latitude = coords[1]
+	selBus.longitude = coords[0]
+	selBus.latitude = coords[1]
 	for (num in networkData.branch) {
 		selBranch = networkData.branch[String(parseInt(num))]
 		fBusID = selBranch['fbus']
 		tBusID= selBranch['tbus']
-		if(fBusID == selBusID || tBusID == selBusID) {
+		if(fBusID == selBus_i_ID || tBusID == selBus_i_ID) {
 			// Redraw connected lines containing selected bus
-			document.getElementById("branch_" + String(parseInt(num))).remove()
+			document.getElementById("branch_" + String(parseInt(num))).remove()  
 			fromBus = networkData.bus[fBusID]
 			toBus = networkData.bus[tBusID]
+			var fromBus = networkData.bus[iToSVGLookup[fBusID]]
+			var toBus = networkData.bus[iToSVGLookup[tBusID]]
 			x1 = fromBus['longitude']
 			y1 = fromBus['latitude']
 			x2 = toBus['longitude']
@@ -790,20 +816,20 @@ function moveBusListener() {
 			}
 			// Redraw adjacent buses
 			r = 5
-			if(fBusID == selBusID) {
-				document.getElementById('bus_' + tBusID).remove()
-				addCircle(x2,y2,r,"bus_"+String(tBusID),"bus")
+			if(fBusID == selBus_i_ID) {
+				document.getElementById('bus_' + iToSVGLookup[tBusID]).remove()
+				addCircle(x2,y2,r,"bus_"+String(iToSVGLookup[tBusID]),"bus")
 				if(scaleTracker != 1.0) {
-					newCir = document.getElementById("bus_"+String(tBusID))
+					newCir = document.getElementById("bus_"+String(iToSVGLookup[tBusID]))
 					newCir.setAttribute('r', 5*scaleTracker)
 					newCir.setAttribute('stroke-width', 0.5*scaleTracker)
 				}
 			}
-			if(tBusID == selBusID) {
-				document.getElementById('bus_' + fBusID).remove()
-				addCircle(x1,y1,r,"bus_"+String(fBusID),"bus")
+			if(tBusID == selBus_i_ID) {
+				document.getElementById('bus_' + iToSVGLookup[fBusID]).remove()
+				addCircle(x1,y1,r,"bus_"+String(iToSVGLookup[fBusID]),"bus")
 				if(scaleTracker != 1.0) {
-					newCir = document.getElementById("bus_"+String(fBusID))
+					newCir = document.getElementById("bus_"+String(iToSVGLookup[fBusID]))
 					newCir.setAttribute('r', 5*scaleTracker)
 					newCir.setAttribute('stroke-width', 0.5*scaleTracker)  
 				}     
@@ -811,7 +837,7 @@ function moveBusListener() {
 			//Redraw generators on adjacent buses
 			for(gen in networkData.gen) {
 				busGenID = networkData.gen[String(parseInt(gen))]['bus']
-				if(busGenID == fBusID) {
+				if(busGenID == sVGToiLookup[fBusID]) {
 					document.getElementById("gen_" + String(parseInt(gen))).remove() 
 					addRectangle(x1 - 4/2, y1 - 4/2, 4, 4, "gen_" + String(parseInt(gen)), "gen")
 					if(scaleTracker != 1.0) {
@@ -830,7 +856,7 @@ function moveBusListener() {
 						newRect.setAttribute('y', latitude - (2*scaleTracker))
 					}
 				}
-				if(busGenID == tBusID) {
+				if(busGenID == sVGToiLookup[tBusID]) {
 					document.getElementById("gen_" + String(parseInt(gen))).remove() 
 					addRectangle(x2- 4/2, y2 - 4/2, 4, 4, "gen_" + String(parseInt(gen)), "gen")
 					if(scaleTracker != 1.0) {
@@ -852,9 +878,10 @@ function moveBusListener() {
 			}
 		}
 	}
+
 	//Redraw selected bus
-	document.getElementById('bus_' + selBusID).remove()
-	addCircle(coords[0],coords[1],r,"bus_"+String(selBusID),"bus")
+	document.getElementById('bus_' + selBusID).remove() 
+	addCircle(coords[0],coords[1],5,"bus_"+String(selBusID),"bus")  
 	if(scaleTracker != 1.0) {
 		newCir = document.getElementById("bus_"+String(selBusID))
 		newCir.setAttribute('r', 5*scaleTracker)
@@ -863,7 +890,7 @@ function moveBusListener() {
 	//Redraw generator on selected bus
 	for(gen in networkData.gen) {
 		busGenID = networkData.gen[String(parseInt(gen))]['bus']
-		if(busGenID == selBusID) {
+		if(busGenID == selBus_i_ID) {
 			document.getElementById("gen_" + String(parseInt(gen))).remove() 
 			addRectangle(coords[0] - 4/2, coords[1] - 4/2, 4, 4, "gen_" + String(parseInt(gen)), "gen")
 			if(scaleTracker != 1.0) {
@@ -896,10 +923,11 @@ function newGen() {
 		newGenObj = {}
 		selBusID = parseInt(selectionIDSplit[1])
 		selBus = networkData["bus"][String(selBusID)]
+		var newGenObj = {}
 		newGenObj = {
 			longitude: selBus.longitude,
 			latitude: selBus.latitude,
-			bus: String(selBusID),
+			bus: String(sVGToiLookup[selBusID]),
 			Pg: "23.54",
 			Qg: "0",
 			Qmax: "150",
@@ -946,7 +974,8 @@ function newLink() {
 	busOne = selection[0].id.split("_")
 	busTwo = selection[1].id.split("_")
 	if (selection.length === 2 && String(busOne[0]) == "bus" && String(busTwo[0]) == "bus") {
-		var newCompID = (Object.keys(networkData.branch)).length + 1
+		maxBranchID = String(parseInt(maxBranchID) + 1)
+		var newCompID = maxBranchID
 		var fBusID = parseInt(busOne[1])
 		var tBusID = parseInt(busTwo[1])
 		var newLink = {}
@@ -962,8 +991,8 @@ function newLink() {
 			status: "1",
 			angmin: "-360.0",
 			angmax: "360.0",
-			fbus: String(fBusID),
-			tbus: String(tBusID)
+			fbus: String(sVGToiLookup[fBusID]),
+			tbus: String(sVGToiLookup[tBusID])
 		}
 		// Save to tree
 		networkData.branch[String(newCompID)] = newLink
@@ -994,7 +1023,7 @@ function newLink() {
 		for(gen in networkData.gen) {
 			// Check for connected buses and generators, redraw them to make sure they stay on top.
 			busGenID = networkData.gen[String(parseInt(gen))]['bus']
-			if(busGenID == fBusID) {
+			if(busGenID == sVGToiLookup[fBusID]) {
 				document.getElementById("gen_" + String(parseInt(gen))).remove() 
 				addRectangle(x1 - 4/2, y1 - 4/2, 4, 4, "gen_" + String(parseInt(gen)), "gen")
 				if(scaleTracker != 1.0) {
@@ -1013,7 +1042,7 @@ function newLink() {
 					newRect.setAttribute('y', latitude - (2*scaleTracker))
 				}
 			}
-			if(busGenID == tBusID) {
+			if(busGenID == sVGToiLookup[tBusID]) {
 				document.getElementById("gen_" + String(parseInt(gen))).remove() 
 				addRectangle(x2- 4/2, y2 - 4/2, 4, 4, "gen_" + String(parseInt(gen)), "gen")
 				if(scaleTracker != 1.0) {
