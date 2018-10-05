@@ -351,16 +351,13 @@ def work(modelDir, inputDict):
 	gfmBinaryPath = pJoin(__neoMetaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
 	print gfmBinaryPath
 	print gfmInputFilename
+	rdtInputName = 'rdtInput.json'
 	print ' '.join(['java','-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],'-num','3'])
-	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],'-num','-3'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=modelDir)
+	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],'-num','-3','-ro',rdtInputName], stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=modelDir)
 	(stdout,stderr) = proc.communicate()
 	with open(pJoin(modelDir, "gfmConsoleOut.txt"), "w") as gfmConsoleOut:
 		gfmConsoleOut.write(stdout)
-	# HACK: rename the hardcoded gfm output
 	rdtInputFilePath = pJoin(modelDir,'rdtInput.json')
-	#fix for windows web server hangup
-	rdtInputFilePath = pJoin(modelDir,'rdt_OUTPUT.json')
-	#os.rename(pJoin(modelDir,'rdt_OUTPUT.json'),rdtInputFilePath)
 	# Pull GFM input data on lines and generators for HTML presentation.
 	with open(rdtInputFilePath, 'r') as rdtInputFile:
 		# HACK: we use rdtInput as a string in the frontend.
