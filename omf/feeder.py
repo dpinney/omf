@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 # Wireframe for new feeder objects:
 newFeederWireframe = {"links":[],"hiddenLinks":[],"nodes":[],"hiddenNodes":[],
 	"layoutVars":{"theta":"0.8","gravity":"0.01","friction":"0.9","linkStrength":"5",
-	"linkDistance":"5","charge":"-5"}}
+	"linkDistance":"5","charge":"-5"},"attachments":{}}
 
 def parse(inputStr, filePath=True):
 	''' Parse a GLM into an omf.feeder tree. This is so we can walk the tree, change things in bulk, etc.
@@ -34,6 +34,18 @@ def sortedWrite(inTree):
 	except ValueError:
 		raise Exception
 	return output
+
+def glmToOmd(glmPath, omdPath, attachFilePaths=[]):
+	''' Read in a glm file and take a shot at writing an omd. '''
+	tree = parse(glmPath, filePath=True)
+	omd = dict(newFeederWireframe)
+	omd['tree'] = tree
+	# Add attachment files.
+	for attPath in attachFilePaths:
+		dirs, fname = os.path.split(attPath)
+		omf['attachments'][fname] = open(attPath).read()
+	with open(omdPath, 'w') as outFile:
+		json.dump(omd, outFile)
 
 def getMaxKey(inTree):
 	''' Find the largest key value in the tree. We need this because de-embedding causes noncontiguous keys. '''
