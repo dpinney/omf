@@ -190,16 +190,24 @@
 						  
 				for (meter in allOutputData.loadLocations){
 				//console.log(allOutputData.loadLocations[meter])
-					bounds.push([allOutputData.loadLocations[meter]['netLoadLat'], allOutputData.loadLocations[meter]['netLoadLon']])
+					bounds.push([allOutputData.loadLocations[meter]['netLoadLat'], allOutputData.loadLocations[meter]['netLoadLon']]);
+					var circleColor = "#808080";
+					if (allOutputData.loadLocations[meter]['netLoadName'].includes('Solar')) {
+						//console.log("testing");
+						circleColor = '#FFFF00';
+					}
+					else if (allOutputData.loadLocations[meter]['netLoadName'].includes('ASOS')) {
+						circleColor = '#FFA500';
+					}
 					var circle_marker = L.circleMarker(
 					[allOutputData.loadLocations[meter]['netLoadLat'], allOutputData.loadLocations[meter]['netLoadLon']],
 					{
 						"bubblingMouseEvents": true, 
-						"color": "#0000FF", 
+						"color": circleColor, 
 						"dashArray": null, 
 						"dashOffset": null, 
 						"fill": true, 
-						"fillColor": "#0000FF", 
+						"fillColor": circleColor, 
 						"fillOpacity": 0.9, 
 						"fillRule": "evenodd", 
 						"lineCap": "round", 
