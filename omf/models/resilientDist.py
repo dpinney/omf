@@ -95,7 +95,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 				'can_harden': False, # Not seen in rdtInTrevor.json.
 				'can_add_switch': True, # Not seen in rdtInTrevor.json.
 				# 'num_poles' : 2,
-				# 'capacity' : 5780, # MVA capacity.
+				'capacity' : 10000, # MVA capacity.
 				'is_transformer' : False,
 				'num_phases' : 3, #*
 				# 'is_new' : False,
@@ -106,7 +106,6 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			newLine['node2_id'] = line.get('to','')+'_bus'
 			newLine['line_code'] = lineCount
 			# Calculate harden_cost, 10.
-			# newLine['capacity'] = 1000000000 # Set it arbitrarily high.
 			if (line.get('name','') in hardCands) or (newLine['harden_cost'] != 0):
 				newLine['can_harden'] = True
 			if line.get('name','') in switchCands:
@@ -352,16 +351,13 @@ def work(modelDir, inputDict):
 	gfmBinaryPath = pJoin(__neoMetaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
 	print gfmBinaryPath
 	print gfmInputFilename
+	rdtInputName = 'rdtInput.json'
 	print ' '.join(['java','-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],'-num','3'])
-	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],'-num','-3'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=modelDir)
+	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],'-num','-3','-ro',rdtInputName], stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=modelDir)
 	(stdout,stderr) = proc.communicate()
 	with open(pJoin(modelDir, "gfmConsoleOut.txt"), "w") as gfmConsoleOut:
 		gfmConsoleOut.write(stdout)
-	# HACK: rename the hardcoded gfm output
 	rdtInputFilePath = pJoin(modelDir,'rdtInput.json')
-	#fix for windows web server hangup
-	rdtInputFilePath = pJoin(modelDir,'rdt_OUTPUT.json')
-	#os.rename(pJoin(modelDir,'rdt_OUTPUT.json'),rdtInputFilePath)
 	# Pull GFM input data on lines and generators for HTML presentation.
 	with open(rdtInputFilePath, 'r') as rdtInputFile:
 		# HACK: we use rdtInput as a string in the frontend.
