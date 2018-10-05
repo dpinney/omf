@@ -61,5 +61,5 @@ if __name__ == '__main__':
 			delIndex = index
 	del allRules[delIndex]
 	# Start the server.
-    server = WSGIServer(('0.0.0.0', 5001), web.app)
-    server.serve_forever()
+	server = WSGIServer(('0.0.0.0', 5001), web.app)
+	server.serve_forever()
