@@ -42,10 +42,10 @@ def work(modelDir, inputDict):
 	#read measured load from csv file
 	meterNames = []
 	netload_csv = []
-	with open(pJoin(modelDir,'meter_data_uploaded.csv'),'w') as loadTempFile:
+	with open(pJoin(modelDir, inputDict['meterFileName']),'w') as loadTempFile:
 		loadTempFile.write(inputDict['meterData'])
 	try:
-		with open(pJoin(modelDir,'meter_data_uploaded.csv'), 'r') as csvfile:
+		with open(pJoin(modelDir, inputDict['meterFileName']), 'r') as csvfile:
 			csvreader = csv.reader(csvfile, delimiter=',')
 			meterNames = next(csvreader)
 			csvreader = csv.reader(csvfile, delimiter=',',quoting=csv.QUOTE_NONNUMERIC)
@@ -58,10 +58,10 @@ def work(modelDir, inputDict):
 
 	#read the solar proxy from csv file
 	solarproxy_csv = []
-	with open(pJoin(modelDir,'solar_data_uploaded.csv'),'w') as loadTempFile:
+	with open(pJoin(modelDir, inputDict['solarFileName']),'w') as loadTempFile:
 		loadTempFile.write(inputDict['solarData'])
 	try:
-		with open(pJoin(modelDir,'solar_data_uploaded.csv'), 'r') as csvfile:
+		with open(pJoin(modelDir, inputDict['solarFileName']), 'r') as csvfile:
 			csvreader = csv.reader(csvfile, delimiter=',',quoting=csv.QUOTE_NONNUMERIC)
 			for row in csvreader:
 				solarproxy_csv.append(row)
@@ -209,9 +209,9 @@ def work(modelDir, inputDict):
 	#print(soup2)
 
 	loadLocations=[]
-	with open(pJoin(modelDir,'lat_lon_uploaded.csv'),'w') as loadTempFile:
+	with open(pJoin(modelDir, inputDict['latLonFileName']),'w') as loadTempFile:
 		loadTempFile.write(inputDict['latLonData'])
-	with open(pJoin(modelDir,'lat_lon_uploaded.csv'), 'r') as csvfile:
+	with open(pJoin(modelDir, inputDict['latLonFileName']), 'r') as csvfile:
 		csvreader = csv.DictReader(csvfile, fieldnames=('netLoadName', 'netLoadLat', 'netLoadLon') , delimiter=',')
 		for row in csvreader:
 			loadLocations.append({'netLoadName': row['netLoadName'], 'netLoadLat': row['netLoadLat'], 'netLoadLon': row['netLoadLon']})
@@ -295,9 +295,9 @@ def _tests():
 	# Pre-run.
 	renderAndShow(modelLoc)
 	# # Run the model.
-	# runForeground(modelLoc)
+	runForeground(modelLoc)
 	# # Show the output.
-	# renderAndShow(modelLoc)
+	renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_tests()
