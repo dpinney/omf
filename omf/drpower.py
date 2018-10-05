@@ -1,4 +1,5 @@
 import omf, os, web, json
+from gevent.pywsgi import WSGIServer
 
 def sigh():
 	return 'SIGH'
@@ -60,10 +61,5 @@ if __name__ == '__main__':
 			delIndex = index
 	del allRules[delIndex]
 	# Start the server.
-	web.app.run(
-		host='0.0.0.0',
-		port=5001,
-		threaded=True,
-		extra_files=template_files + model_files,
-		# debug=True
-	)
+    server = WSGIServer(('0.0.0.0', 5001), web.app)
+    server.serve_forever()
