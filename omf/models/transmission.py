@@ -162,7 +162,7 @@ def work(modelDir, inputDict):
 		i = i + 1
 	for genName, genInfo in networkJson["gen"].items():
 		x,y =  busLocations[genInfo["bus"]]
-		plt.plot([x], [y], 's', color='gray', zorder=10)
+		plt.plot([x], [y], 's', color='gray', zorder=10, markersize=6.0)
 	for branchName, branchInfo in networkJson["branch"].items():
 		x1, y1 = busLocations[branchInfo["fbus"]]
 		x2, y2 = busLocations[branchInfo["tbus"]]
