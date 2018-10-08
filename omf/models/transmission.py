@@ -32,8 +32,10 @@ def work(modelDir, inputDict):
 	except:
 		networkName = 'case9'
 	networkJson = json.load(open(pJoin(modelDir,networkName+".omt")))
-	matStr = network.netToMat(networkJson, networkName)
-	with open(pJoin(modelDir,networkName+".m"),"w") as outMat:
+	matName = 'matIn'
+	matFileName = matName + '.m'
+	matStr = network.netToMat(networkJson, matName)
+	with open(pJoin(modelDir, matFileName),"w") as outMat:
 		for row in matStr: outMat.write(row)		
 	# Build the MATPOWER command.
 	matDir =  pJoin(__neoMetaModel__._omfDir,'solvers','matpower5.1')
@@ -58,7 +60,7 @@ def work(modelDir, inputDict):
 				octavePath = pathVar
 		# Run Windows-specific Octave command.
 		mpoptArg = "mpoption(" + pfArg + ", " + modelArg + ", " + pfItArg + ", " + pfTolArg+", " + pfEnflArg + ") "
-		cmd = "runpf('"+pJoin(modelDir,networkName+'.m')+"'," + mpoptArg +")"
+		cmd = "runpf('"+pJoin(modelDir,matFileName)+"'," + mpoptArg +")"
 		args = [octavePath + '\\bin\\octave-cli','-p',matPath, "--eval",  cmd]
 		myOut = subprocess.check_output(args, shell=True)
 		with open(pJoin(modelDir, "matout.txt"), "w") as matOut:
@@ -66,8 +68,9 @@ def work(modelDir, inputDict):
 	else:
 		# Run UNIX Octave command.
 		mpoptArg = "mpopt = mpoption("+pfArg+", "+modelArg+", "+pfItArg+", "+pfTolArg+", "+pfEnflArg+"); "
-		command = "octave -p " + matPath + "--no-gui --eval \""+mpoptArg+"runpf('"+pJoin(modelDir,networkName+'.m')+"', mpopt)\" > \"" + pJoin(modelDir,"matout.txt") + "\""
-		proc = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
+		command = "octave -p " + matPath + "--no-gui --eval \""+mpoptArg+"runpf('"+pJoin(modelDir,matFileName)+"', mpopt)\" > \"" + pJoin(modelDir,"matout.txt") + "\""
+		proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+		print command
 		(out, err) = proc.communicate()
 	imgSrc = pJoin(__neoMetaModel__._omfDir,'scratch','transmission','inData')
 	# Read matout.txt and parse into outData.
