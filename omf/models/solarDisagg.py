@@ -23,7 +23,7 @@ from bs4 import BeautifulSoup
 
 # Model metadata:
 modelName, template = metadata(__file__)
-hidden = True
+hidden = False
 
 def work(modelDir, inputDict):
 	import pandas as pd
@@ -174,13 +174,24 @@ def work(modelDir, inputDict):
 
 	#Create subplots in plotly
 	fig = tools.make_subplots(rows=5, cols=1)
+
+	weatherPlotData = []
+
+
 	#plot weather and solar canary
 	fig.append_trace(go.Scatter(y=pdTemps['temperature'], x=pdTemps.index, name=('Interpolated weather '), marker=dict(color='red'), legendgroup='weather'),1,1)
+
+	interpWeatherPlotly = go.Scatter(y=pdTemps['temperature'], x=pdTemps.index, name=('Interpolated weather '), marker=dict(color='red'), legendgroup='weather')
 	fig.append_trace(go.Scatter(y=realTemps['temperature'], x=realTemps.index, name=('Real weather data '), mode = 'markers', marker=dict(color='orange'), legendgroup='weather'),1,1)
-	fig['layout']['yaxis1'].update(title='Temperature')
+	realWeatherPlotly = go.Scatter(y=realTemps['temperature'], x=realTemps.index, name=('Real weather data '), mode = 'markers', marker=dict(color='orange'))
+	weatherPlotData = [interpWeatherPlotly, realWeatherPlotly]
+	weatherPlotLayout = go.Layout(title='Temperature', legend=dict(x=0, y=1.2, orientation="h"), height=400, width=980)
+	weatherPlotLayout['yaxis'].update(title='Fahrenheit')
 	xaxis = [i for i in range(96)]
 	fig.append_trace(go.Scatter(y=np.array([item for sublist in solarproxy for item in sublist]), x=pdTemps.index, name=('Solar Canary '), marker=dict(color='gold') ),2,1)
-	fig['layout']['yaxis2'].update(title='Watts')
+	solarPlotData = [go.Scatter(y=np.array([item for sublist in solarproxy for item in sublist]), x=pdTemps.index, name=('Solar Proxy'), marker=dict(color='gold'))]
+	solarPlotLayout = go.Layout(title='Solar Proxy', showlegend=True, legend=dict(x=0, y=1.2, orientation="h"), height=400, width=980)
+	solarPlotLayout['yaxis'].update(title='Watts')
 
 	#plot net aggregate load 
 	#print(sdmod0.models['AggregateLoad']['source'].value)
@@ -188,14 +199,21 @@ def work(modelDir, inputDict):
 	#fig.append_trace(go.Scatter(y=sdmod0.aggregateSignal, x=pdTemps['date'], name=('Aggregate Total Load')),3,1)
 
 	#plot household loads and solar
+	meterPlot = []
 	for i, model in enumerate(sdmod0.models):
 		if model != 'AggregateLoad':
 			#print(sdmod0.models[model]['source'].value)
 			solarArray = np.array([item for sublist in sdmod0.models[model]['source'].value.tolist() for item in sublist])
 			disaggLoad = (sdmod0.netloads[model] - solarArray)
 			fig.append_trace(go.Scatter(y=sdmod0.netloads[model], x=pdTemps.index, name=(str(model) + ': Measured Load'), marker=dict(color='green'), legendgroup=i),i+3,1)
+			measuredLoad = go.Scatter(y=sdmod0.netloads[model], x=pdTemps.index, name=(str(model) + ': Measured Load'), marker=dict(color='green'))
 			fig.append_trace(go.Scatter(y=disaggLoad, x=pdTemps.index, name=(str(model) + ': Disagreggated Load'), marker=dict(color='blue'), legendgroup=i),i+3,1)
+			disaggregatedLoad = go.Scatter(y=disaggLoad, x=pdTemps.index, name=(str(model) + ': Disagreggated Load'), marker=dict(color='blue'))
 			fig.append_trace(go.Scatter(y=np.array([item for sublist in sdmod0.models[model]['source'].value.tolist() for item in sublist]), x=pdTemps.index, name=(str(model) + ': Actual Load'), marker=dict(color='yellow'), legendgroup=i),i+3,1)
+			actualLoad = go.Scatter(y=np.array([item for sublist in sdmod0.models[model]['source'].value.tolist() for item in sublist]), x=pdTemps.index, name=(str(model) + ': Actual Load'), marker=dict(color='yellow'))
+			meterPlotLayout = go.Layout(title=str(model), legend=dict(x=0, y=1.2, orientation="h"), height=400, width=980)
+			meterPlotLayout['yaxis'].update(title='Watts')
+			meterPlot.append({'data': json.dumps([measuredLoad, disaggregatedLoad, actualLoad], cls=plotly.utils.PlotlyJSONEncoder), 'layout': json.dumps(meterPlotLayout, cls=plotly.utils.PlotlyJSONEncoder)})
 			fig['layout']['yaxis' + str(i+3)].update(title='Watts')
 
 	#plot the results
@@ -203,6 +221,12 @@ def work(modelDir, inputDict):
 	#inlinePlot = plotly.offline.plot(fig, include_plotlyjs=False, output_type='div')
 	graphJSON = json.dumps(fig['data'], cls=plotly.utils.PlotlyJSONEncoder)
 	layoutJSON = json.dumps(fig['layout'], cls=plotly.utils.PlotlyJSONEncoder)
+
+	graphWeatherJSON = json.dumps(weatherPlotData, cls=plotly.utils.PlotlyJSONEncoder)
+	layoutWeatherJSON = json.dumps(weatherPlotLayout, cls=plotly.utils.PlotlyJSONEncoder)
+	graphSolarJSON = json.dumps(solarPlotData, cls=plotly.utils.PlotlyJSONEncoder)
+	layoutSolarJSON = json.dumps(solarPlotLayout, cls=plotly.utils.PlotlyJSONEncoder)
+
 	#soup = html.escape(str(BeautifulSoup(inlinePlot).find("div")))
 	#soup2 = html.escape(str(BeautifulSoup(inlinePlot).find("script")))
 	#print(soup)
@@ -221,6 +245,11 @@ def work(modelDir, inputDict):
 	#how to pass with escape chars
 	outData['graphJSON'] = graphJSON
 	outData['layoutJSON'] = layoutJSON
+	outData['graphWeatherJSON'] = graphWeatherJSON
+	outData['layoutWeatherJSON'] = layoutWeatherJSON
+	outData['graphSolarJSON'] = graphSolarJSON
+	outData['layoutSolarJSON'] = layoutSolarJSON
+	outData['meterJSON'] = meterPlot
 	#outData["plotlyOutput"] = html.escape(soup)
 	#outData["scriptTag"] = html.escape(soup2)
 	outData['year'] = inputDict.get('year')

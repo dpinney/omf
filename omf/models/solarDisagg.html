@@ -146,12 +146,42 @@
 	</div>
 	<!-- Output tables, graphs, etc -->
 	<div id="output">
-		<!-- Integer Sum Table -->
+		<!-- Subgraphs
 		<p class="reportTitle postRun">Solar Disaggregation Results</p>
 		<div id="analysisSummary" class="content postRun">
 			<div id="plotly-div"></div>
 			<script type="text/javascript">
   				Plotly.newPlot("plotly-div", JSON.parse(allOutputData["graphJSON"]), JSON.parse(allOutputData["layoutJSON"]) || {})
+			</script>
+		</div> -->
+		<p class="reportTitle postRun">Solar Disaggregation Results</p>
+		<div id="analysisSummary2" class="content postRun">
+			<div id="plotly-div2"></div>
+			<script type="text/javascript">
+  				Plotly.newPlot("plotly-div2", JSON.parse(allOutputData["graphWeatherJSON"]), JSON.parse(allOutputData["layoutWeatherJSON"]) || {})
+			</script>
+			<div id="plotly-div3"></div>
+			<script type="text/javascript">
+  				Plotly.newPlot("plotly-div3", JSON.parse(allOutputData["graphSolarJSON"]), JSON.parse(allOutputData["layoutSolarJSON"]) || {});
+  				//console.log(allOutputData["layoutSolarJSON"]);
+  				//console.log(allOutputData["graphSolarJSON"]);
+			</script>
+			<div id="plotly-div4"></div>
+			<script type="text/javascript">
+				allPlots = document.getElementById("analysisSummary2");
+				for (meter in allOutputData.meterJSON){
+					let node = document.createElement("div");
+					node.setAttribute("id", "meter-div" + meter);
+					console.log(meter);
+					var graphDiv = gebi("meter-div" + meter);
+					console.log(allOutputData["meterJSON"][meter]['layout']);
+					console.log(allOutputData["meterJSON"][meter]['data']);
+					allPlots.appendChild(node)
+					Plotly.newPlot("meter-div" + meter, JSON.parse(allOutputData['meterJSON'][meter]['data'], JSON.parse(allOutputData["meterJSON"][meter]['layout']) || {}));
+					Plotly.relayout("meter-div" + meter, {"width": 980, "yaxis": {"title": "Watts"}, "title": "Meter", "legend": {"y": 1.2, "x": 0, "orientation": "h"}, "height": 400});
+					console.log(graphDiv);
+					//Plotly.newPlot("plotly-div4", JSON.parse(allOutputData['meterJSON'][3]['data'], JSON.parse(allOutputData["meterJSON"][3]['layout']) || {}))
+				}
 			</script>
 		</div>
 		<div id="mapInsert"></div>
