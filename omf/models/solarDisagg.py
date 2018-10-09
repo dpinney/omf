@@ -23,7 +23,7 @@ from bs4 import BeautifulSoup
 
 # Model metadata:
 modelName, template = metadata(__file__)
-hidden = False
+hidden = True
 
 def work(modelDir, inputDict):
 	import pandas as pd
