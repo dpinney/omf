@@ -352,8 +352,12 @@ def work(modelDir, inputDict):
 	print gfmBinaryPath
 	print gfmInputFilename
 	rdtInputName = 'rdtInput.json'
-	print ' '.join(['java','-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],'-num','3'])
-	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],'-num','-3','-ro',rdtInputName], stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=modelDir)
+	if platform.system() == 'Darwin':
+		#HACK: force use of Java8 on MacOS.
+		javaCmd = '/Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/bin/java'
+	else:
+		javaCmd = 'java'
+	proc = subprocess.Popen([javaCmd,'-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],'-num','-3','-ro',rdtInputName], stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=modelDir)
 	(stdout,stderr) = proc.communicate()
 	with open(pJoin(modelDir, "gfmConsoleOut.txt"), "w") as gfmConsoleOut:
 		gfmConsoleOut.write(stdout)
