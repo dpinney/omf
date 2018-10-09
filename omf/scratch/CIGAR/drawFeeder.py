@@ -35,8 +35,9 @@ for obj in feed.values():
 def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=False, nodeCol=False):
 	''' Draw a color-coded map of the voltage drop on a feeder.
 	edgeLabs property must be either 'Name', 'Current', 'Power', 'Rating', 'PercentOfRating', or None
-	nodeLabs property must be either 'Name', 'Voltage', or None
+	nodeLabs property must be either 'Name', 'Voltage', 'VoltageImbalance', or None
 	Returns a matplotlib object.'''
+	# IMPLEMENT Voltage Imbalance to be another nodeLabs property
 	tree = omf.feeder.parse(glmPath)
 
 	#dictionary to hold info on lines present in glm
@@ -148,8 +149,10 @@ def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=N
 			feedVoltage = float(ob.get('nominal_voltage',1))
 	# Tot it all up.
 	nodeVolts = {}
+	voltImbalances = {}
 	for row in voltTable:
 		allVolts = []
+		allDiffs = []
 		for phase in ['A','B','C']:
 			realVolt = abs(float(row['volt'+phase+'_real']))
 			imagVolt = abs(float(row['volt'+phase+'_imag']))
@@ -158,7 +161,18 @@ def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=N
 				# Normalize to 120 V standard
 				phaseVolt = (phaseVolt/feedVoltage)
 				allVolts.append(phaseVolt)
-		nodeVolts[row.get('node_name','')] = float("{0:.2f}".format(avg(allVolts)))
+		avgVolts = avg(allVolts)
+		nodeVolts[row.get('node_name','')] = float("{0:.2f}".format(avgVolts))
+		voltA = allVolts.pop()
+		voltB = allVolts.pop()
+		voltC = allVolts.pop()
+		allDiffs.append(abs(float(voltA-voltB)))
+		allDiffs.append(abs(float(voltA-voltC)))
+		allDiffs.append(abs(float(voltB-voltC)))
+		maxDiff = max(allDiffs)
+		voltImbal = maxDiff/avgVolts
+		voltImbalances[row.get('node_name','')] = float("{0:.2f}".format(voltImbal))
+
 		# Use float("{0:.2f}".format(avg(allVolts))) if displaying the node labels
 	nodeNames = {}
 	for key in nodeVolts.keys():
@@ -303,9 +317,11 @@ def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=N
 			nodeLabels = nodeNames
 		elif nodeLabs == "Voltage":
 			nodeLabels = NodeVolts
+		elif nodeLabs == "VoltageImbalance":
+			nodeLabels = voltImbalances
 		else:
 			nodeLabs = None
-			print "WARNING: nodeLabs property must be either 'Name', 'Voltage', or None"
+			print "WARNING: nodeLabs property must be either 'Name', 'Voltage', 'VoltageImbalance', or None"
 	if nodeLabs != None:
 		nodeLabelsIm = nx.draw_networkx_labels(fGraph,
 			pos = positions,
@@ -322,7 +338,7 @@ def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=N
 # tree = omf.feeder.parse('smsSingle.glm')
 # tree[35]['name'] = 'OH NO CHANGED'
 
-chart = drawPlot(FNAME, neatoLayout=True, edgeLabs='Current', edgeCol=True)
+chart = drawPlot(FNAME, neatoLayout=True, edgeLabs='Current', edgeCol=True, nodeLabs="VoltageImbalance")
 chart.savefig("./VOLTOUT.png")
 # from pprint import pprint as pp
 # pp(chart)
