@@ -16,6 +16,50 @@
 	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
+	<!-- File Handler -->
+	<script>
+		function insert_file_upload_block(fileName, dataVariableName) {
+			//
+			parentDiv = document.currentScript.parentElement;
+
+			let inputNode1 = document.createElement("input");
+			inputNode1.setAttribute("id", fileName + "Handler");
+			inputNode1.setAttribute("type", "file");
+			inputNode1.style.display = "none";
+			//inputNode1.addEventListener("change", handle_files(this.files,dataVariableName,fileName));
+			parentDiv.appendChild(inputNode1);
+
+			let inputNode2 = document.createElement("input");
+			inputNode2.setAttribute("id", dataVariableName);
+			inputNode2.setAttribute("name", dataVariableName);
+			inputNode2.type = "hidden";
+			parentDiv.appendChild(inputNode2);
+
+			let innerDiv = document.createElement("div");
+			parentDiv.appendChild(innerDiv);
+
+			let labelNode = document.createElement("label");
+			labelNode.setAttribute("for", fileName + "Handler");
+			labelNode.className = "fileButton";
+			labelNode.innerHTML = "Choose File";
+			innerDiv.appendChild(labelNode);
+
+			let inputNode3 = document.createElement("input");
+			inputNode3.setAttribute("id", fileName);
+			inputNode3.setAttribute("name", fileName);
+			inputNode3.value = '';
+			inputNode3.readOnly = true;
+			inputNode3.className = "uploadFileName";
+			innerDiv.appendChild(inputNode3)
+
+			//inputNode1.addEventListener("change", handle_files(this.files,dataVariableName,fileName));
+			inputNode1.addEventListener("change", function (){
+				handle_files(this.files,dataVariableName,fileName);
+			});
+
+		}
+	</script>
+
 	<!-- Plotly  Import -->
 	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
@@ -79,6 +123,7 @@
 				<p class="inputSectionHeader">Model Parameters</p>
 			</div>
 			<hr>
+			<!--
 			<div class="shortInput">
 				<label class="tooltip">Aggregate Net Loads (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
 				<input id="meterDataFile" type="file" style="display:none" onchange="handle_files(this.files,'meterData','meterFileName')">
@@ -87,7 +132,14 @@
 					<label for="meterDataFile" class="fileButton">Choose File</label>
 					<input id="meterFileName" name="meterFileName" value='' readonly class="uploadFileName">
 				</div>
+			</div> -->
+			<div class="shortInput">
+				<label class="tooltip">Aggregate Net Loads (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
+				<script type="text/javascript">
+					insert_file_upload_block('meterFileName', 'meterData');
+				</script>
 			</div>
+			<!--
 			<div class="shortInput">
 				<label class="tooltip">Solar Load (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
 				<input id="solarDataFile" type="file" style="display:none" onchange="handle_files(this.files,'solarData','solarFileName')">
@@ -96,7 +148,14 @@
 					<label for="solarDataFile" class="fileButton">Choose File</label>
 					<input id="solarFileName" name="solarFileName" value='' readonly class="uploadFileName">
 				</div>
+			</div> -->
+			<div class="shortInput">
+				<label class="tooltip">Solar Load (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
+				<script type="text/javascript">
+					insert_file_upload_block('solarFileName', 'solarData');
+				</script>
 			</div>
+			<!--
 			<div class="shortInput">
 				<label class="tooltip">LatLon Coordinates (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
 				<input id="latLonDataFile" type="file" style="display:none" onchange="handle_files(this.files,'latLonData','latLonFileName')">
@@ -105,7 +164,14 @@
 					<label for="latLonDataFile" class="fileButton">Choose File</label>
 					<input id="latLonFileName" name="latLonFileName" value='' readonly class="uploadFileName">
 				</div>
+			</div> -->
+			<div class="shortInput">
+				<label class="tooltip">LatLon Coordinates Dynamic (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
+				<script type="text/javascript">
+					insert_file_upload_block('latLonFileName', 'latLonData');
+				</script>
 			</div>
+			<!--
 			<div style="display:none" class="shortInput">
 				<label class="tooltip">Weather Coordinates (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
 				<input id="weatherDataFile" type="file" style="display:none" onchange="handle_files(this.files,'weatherData','weatherFileName')">
@@ -114,6 +180,12 @@
 					<label for="weatherDataFile" class="fileButton">Choose File</label>
 					<input id="weatherFileName" name="weatherFileName" value='' readonly class="uploadFileName">
 				</div>
+			</div> -->
+			<div style="display:none" class="shortInput">
+				<label class="tooltip">Weather Coordinates (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
+				<script type="text/javascript">
+					insert_file_upload_block('weatherFileName', 'weatherData');
+				</script>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">ASOS Weather Station<span class="classic">Enter a valid ASOS weather station.</span></label>
