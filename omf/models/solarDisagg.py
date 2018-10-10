@@ -23,7 +23,7 @@ from bs4 import BeautifulSoup
 
 # Model metadata:
 modelName, template = metadata(__file__)
-hidden = True
+hidden = False
 
 def work(modelDir, inputDict):
 	import pandas as pd
@@ -82,13 +82,13 @@ def work(modelDir, inputDict):
 	#Use 90 day interval for now
 	endDate = datetime.datetime.strftime(startDate + datetime.timedelta(days=90), "%Y-%m-%d")
 	flike = StringIO.StringIO(pullAsosRevised(inputDict.get("year"),inputDict.get("asos"), 'tmpf', end=endDate))
-	with open(pJoin(modelDir,'weather_data_uploaded.csv'),'w') as loadTempFile:
+	with open(pJoin(modelDir,inputDict['weatherFileName']),'w') as loadTempFile:
 		csvwriter = csv.writer(loadTempFile, delimiter=',')
 		next(csv.reader(flike))
 		for row in csv.reader(flike):
 			csvwriter.writerow(row)
 	try:
-		with open(pJoin(modelDir,'weather_data_uploaded.csv'), 'r') as csvfile:
+		with open(pJoin(modelDir,inputDict['weatherFileName']), 'r') as csvfile:
 			#next(csv.reader(flike))
 			for row in csv.reader(csvfile):
 				if row[2] != 'M':
@@ -265,6 +265,7 @@ def new(modelDir):
 	meterDataFile = "load_data_three_month.csv"
 	solarDataFile = "solar_proxy_three_month.csv"
 	latLonDataFile = "lat_lon_data_plus.csv"
+	weatherDataFile = "asos_three_month.csv"
 	defaultInputs = {
 		"user" : "admin",
 		"modelType": modelName,
@@ -272,7 +273,8 @@ def new(modelDir):
 		"meterFileName": meterDataFile,
 		"solarData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles",solarDataFile)).read(),
 		"solarFileName": solarDataFile,
-		"weatherData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","asos_three_month.csv")).read(),
+		"weatherData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles",weatherDataFile)).read(),
+		"weatherFileName": weatherDataFile,
 		"latLonData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles",latLonDataFile)).read(),
 		"latLonFileName": latLonDataFile,
 		"asos": "CHO",
