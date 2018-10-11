@@ -12,7 +12,7 @@
 		-ms-user-select: none;
 		user-select: none;
 		cursor: pointer;
-		cursor: hand; 
+		cursor: hand;
 		position:fixed;
 		width:30px;
 		height:30px;
@@ -140,7 +140,7 @@
 		ul.menu a:hover {color:white;}
 		ul.menu { display:block; color:black; padding:4px; }
 		ul.menu ul.menu:hover, ul.menu:visited:hover { color:white; }
-		div.buttonGroup { display:inline-block; position:relative; }   
+		div.buttonGroup { display:inline-block; position:relative; }
 		button.pill{
 			-webkit-touch-callout: none;
 			-webkit-user-select: none;
@@ -149,7 +149,7 @@
 			-ms-user-select: none;
 			user-select: none;
 			color:white;
-			font-size:medium;     
+			font-size:medium;
 			width: auto;
 			height:35px;
 			margin: 0px;
@@ -193,14 +193,14 @@
 				border-radius: 5px;
 				border: none;
 				color: white;
-				cursor:pointer; 
+				cursor:pointer;
 				padding:4px 6px 4px;
 			}
 			#blankModal{
 				width: 300px;
 			}
 		</style>
-		<script type='text/javascript' src='svg-pan-zoom.js'></script>
+		<script type='text/javascript' src='/static/svg-pan-zoom.js'></script>
 		<!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder.js'></script> -->
 		<!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder Largest.js'></script> -->
 		<!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder Norfork.js'></script> -->
@@ -276,7 +276,7 @@
 	<p id="loadingMessage" style="font-size:60pt; text-align:center; width:100%; display:inline-block">Feeder Loading...</p>
 </body>
 </html>
-<script id='feederInsert'>
+<script id='feederInsert'>testFeeder={% if data %}{{data | safe}}{% else %}null{% endif %}
 </script>
 <script id='panZoomInsert'>
 </script>
@@ -328,7 +328,7 @@ function addLine(x1,y1,x2,y2,id,myClass) {
 	aLine.setAttribute('class', myClass)
 	if (myClass.indexOf('p2') !== -1) {
 		w = 2
-	} 
+	}
 	else if (myClass.indexOf('p3') !== -1) {
 		w = 3
 	}
@@ -390,7 +390,7 @@ function mouseDown(event) {
 	downX = event.pageX
 	downY = event.pageY
 }
-function mouseUp(event) { 
+function mouseUp(event) {
 	upX = event.pageX
 	upY = event.pageY
 }
@@ -563,7 +563,7 @@ function deleteOb() {
 		}
 		if (lines > 0) {
 			alert('Cannot delete circles with lines still connected')
-		} 
+		}
 		else {
 			previousTarget.remove()
 		}
@@ -710,7 +710,7 @@ function newLink() {
 	nodeTypes = ['node','load','house','meter','triplex_meter','triplex_node','triplex_load','waterheater','ZIPload']
 	if (selection.length === 2){
 		if ((nodeTypes.indexOf(testFeeder.tree[selection[0].id].object)), (nodeTypes.indexOf(testFeeder.tree[selection[1].id].object))
-				 !== -1)    { 
+				 !== -1)    {
 			// Connect the 2 selected nodes.
 			var newTreeId = Object.keys(testFeeder.tree).length
 			var newLink = {
@@ -756,7 +756,7 @@ function newLink() {
 			}
 			selection = []
 			tableDestroy()
-	}	
+	}
 }
 
 function moveNode() {

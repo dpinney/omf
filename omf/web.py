@@ -47,7 +47,7 @@ def getDataNames():
 	for (dirpath, dirnames, filenames) in os.walk(os.path.join(_omfDir, "static","publicFeeders")):
 		for file in filenames:
 			if '.omd' in file and file != 'feeder.omd':
-				publicFeeders.append({'name': file[:-4], 'model': dirpath.split('/')[-1]})		
+				publicFeeders.append({'name': file[:-4], 'model': dirpath.split('/')[-1]})
 	return {"climates":sorted(climates), "feeders":feeders, "networks":networks, "publicFeeders":publicFeeders, "currentUser":currUser}
 
 # @app.before_request
@@ -410,6 +410,28 @@ def networkGet(owner, modelName, networkNum):
 	return render_template("transEdit.html", networks=yourNetworks, publicNetworks=publicNetworks, modelName=modelName, networkData=networkData, networkName=networkName, networkNum=networkNum, ref=request.referrer, is_admin=User.cu()=="admin", public=owner=="public",
 		currUser = User.cu(), owner = owner)
 
+
+@app.route("/distribution/<owner>/<model_name>/<distribution_num>")
+@flask_login.login_required
+def distribution_get(owner, model_name, distribution_num):
+	"""Render the editing interface for distribution networks."""
+	# all_data = getDataNames()
+	# your_feeders = all_data["feeders"]
+	# public_feeders = all_data["publicFeeders"]
+	# omf.distNetViz.forceLayout()
+	model_dir = os.path.join(_omfDir, "data","Model", owner, model_name)
+	with open(model_dir + "/allInputData.json", "r") as json_file:
+		feeder_name = json.load(json_file).get('feederName' + str(distribution_num))
+	feeder_path = model_dir + "/" + feeder_name + ".omd"
+	with open(feeder_path, "r") as data_file:
+		data = json.load(data_file)
+	tree = data['tree']
+	if not omf.distNetViz.contains_coordinates(tree):
+		omf.distNetViz.insert_coordinates(tree)
+	passed_data = json.dumps(data)
+	return render_template("distNetViz.html", data=passed_data)
+
+
 @app.route("/getComponents/")
 @flask_login.login_required
 def getComponents():
@@ -579,7 +601,7 @@ def scadaLoadshape(owner,feederName):
 	if os.path.isfile("data/Model/" + owner + "/" +  modelName + "/calibration.csv"):
 		os.remove("data/Model/" + owner + "/" +  modelName + "/calibration.csv")
 	file = request.files['scadaFile']
-	file.save(os.path.join("data/Model/"+owner+"/"+modelName,loadName+".csv"))	
+	file.save(os.path.join("data/Model/"+owner+"/"+modelName,loadName+".csv"))
 	modelDir = "data/Model/"+owner+"/"+modelName
 	if not os.path.isdir(modelDir+'/calibration/gridlabD'):
 		os.makedirs(modelDir+'/calibration/gridlabD')
@@ -669,7 +691,7 @@ def loadModelingAmi(owner,feederName):
 	if os.path.isfile("data/Model/" + owner + "/" +  modelName + "/amiLoad.csv"):
 		os.remove("data/Model/" + owner + "/" +  modelName + "/amiLoad.csv")
 	file = request.files['amiFile']
-	file.save(os.path.join("data/Model/"+owner+"/"+modelName,loadName+".csv"))	
+	file.save(os.path.join("data/Model/"+owner+"/"+modelName,loadName+".csv"))
 	modelDir = "data/Model/"+owner+"/"+modelName
 	omdPath = modelDir+"/"+feederName+".omd"
 	amiPath = modelDir+"/"+loadName+".csv"
@@ -707,7 +729,7 @@ def checkLoadModelingAmi(modelName):
 # TODO: Check if rename mdb files worked
 @app.route("/cymeImport/<owner>", methods=["POST"])
 @flask_login.login_required
-def cymeImport(owner):   
+def cymeImport(owner):
 	''' API for importing a cyme feeder. '''
 	modelName = request.form.get("modelName","")
 	feederName = str(request.form.get("feederNameC",""))
@@ -781,9 +803,9 @@ def newBlankFeeder(owner):
 	feederNum = request.form.get("feederNum",1)
 	if feederName == '': feederName = 'feeder'
 	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
-	try: 
+	try:
 		os.remove("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
-		print "removed, ", ("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")	
+		print "removed, ", ("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
 	except: pass
 	removeFeeder(owner, modelName, feederNum)
 	newSimpleFeeder(owner, modelName, feederNum, False, feederName)
@@ -799,9 +821,9 @@ def newBlankNetwork(owner):
 	networkNum = request.form.get("networkNum",1)
 	if networkName == '': networkName = 'network1'
 	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
-	try: 
+	try:
 		os.remove("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
-		print "removed, ", ("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")	
+		print "removed, ", ("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
 	except: pass
 	removeNetwork(owner, modelName, networkNum)
 	newSimpleNetwork(owner, modelName, networkNum, False, networkName)
@@ -902,14 +924,14 @@ def removeFeeder(owner, modelName, feederNum, feederName=None):
 			return ('Success',204)
 		except:
 			return ('Failed',204)
-	else: 
+	else:
 		return ('Invalid Login', 204)
 
 @app.route("/loadFeeder/<frfeederName>/<frmodelName>/<modelName>/<feederNum>/<frUser>/<owner>", methods=["GET","POST"])
 @flask_login.login_required
 def loadFeeder(frfeederName, frmodelName, modelName, feederNum, frUser, owner):
 	'''Load a feeder from one model to another.'''
-	if frUser != "public": 
+	if frUser != "public":
 		frUser = User.cu()
 		frmodelDir = "./data/Model/" + frUser + "/" + frmodelName
 	elif frUser == "public":
@@ -966,7 +988,7 @@ def removeNetwork(owner, modelName, networkNum, networkName=None):
 			return ('Success',204)
 		except:
 			return ('Failed',204)
-	else: 
+	else:
 		return ('Invalid Login', 204)
 
 @app.route("/climateChange/<owner>/<feederName>", methods=["POST"])
@@ -1039,7 +1061,7 @@ def checkClimateChange(owner, modelName):
 def anonymize(owner, feederName):
 	modelName = request.form.get('modelName')
 	modelDir = 'data/Model/' + owner + '/' + modelName
-	omdPath = modelDir + '/' + feederName + '.omd'	
+	omdPath = modelDir + '/' + feederName + '.omd'
 	importProc = Process(target=backgroundAnonymize, args =[modelDir, omdPath])
 	importProc.start()
 	pid = str(importProc.pid)
@@ -1095,7 +1117,7 @@ def checkAnonymize(owner, modelName):
 def anonymizeTran(owner, networkName):
 	modelName = request.form.get('modelName')
 	modelDir = 'data/Model/' + owner + '/' + modelName
-	omtPath = modelDir + '/' + networkName + '.omt'	
+	omtPath = modelDir + '/' + networkName + '.omt'
 	importProc = Process(target=backgroundAnonymizeTran, args =[modelDir, omtPath])
 	importProc.start()
 	pid = str(importProc.pid)
