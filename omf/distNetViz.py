@@ -66,7 +66,7 @@ def contains_coordinates(tree):
 	return True
 
 
-def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None):
+def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.html'):
 	''' Vizualize a distribution system.'''
 	# HACK: make sure we have our homebrew binaries available.
 	os.environ['PATH'] += os.pathsep + '/usr/local/bin'
@@ -90,14 +90,14 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None):
 	else:
 		tempDir = os.path.abspath(outputPath)
 	#HACK: make sure we get the required files from the right place.
-	shutil.copy(omf.omfDir + '/templates/distNetViz.html', tempDir + '/viewer.html')
+	shutil.copy(omf.omfDir + '/templates/distNetViz.html', tempDir + '/' + outputName)
 	# shutil.copy(omf.omfDir + '/static/svg-pan-zoom.js', tempDir + '/svg-pan-zoom.js')
 	# Grab the library we need.
 	with open(omf.omfDir + '/static/svg-pan-zoom.js','r') as pzFile:
 		pzData = pzFile.read()
-	# Rewrite the load lines in viewer.html
+	# Rewrite the load lines in html
 	# Note: you can't juse open the file in r+ mode because, based on the way the file is mapped to memory, you can only overwrite a line with another of exactly the same length.
-	for line in fileinput.input(tempDir + '/viewer.html', inplace=1):
+	for line in fileinput.input(tempDir + '/' + outputName, inplace=1):
 		if line.lstrip().startswith("<script id='feederLoadScript''>"):
 			print "" # Remove the existing load.
 		elif line.lstrip().startswith("<script id='feederInsert'>"):
@@ -106,8 +106,8 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None):
 			print "<script id='panZoomInsert'>\n" + pzData # load up the new feeder.
 		else:
 			print line.rstrip()
-	# os.system('open -a "Google Chrome" ' + '"file://' + tempDir + '/viewer.html"')
-	webbrowser.open_new("file://" + tempDir + '/viewer.html')
+	# os.system('open -a "Google Chrome" ' + '"file://' + tempDir + '/' + outputName"')
+	webbrowser.open_new("file://" + tempDir + '/' + outputName)
 
 
 if __name__ == '__main__':

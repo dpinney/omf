@@ -210,7 +210,7 @@
 			arrayOfMaxes = allOutputData.LevelizedCosts.filter(function(x){return x[1]==200})
 			if (arrayOfMaxes.length > 0) {alert("Warning: a levelized cost was higher than the loan algorithms could calculate. It is being displayed as $200/MWh.")}
 			if (parseFloat(allInputData.landAmount) < allOutputData.minLandSize) {alert("Warning: the minimum amount of land required for this system based on its latitude is " + allOutputData.minLandSize + " acres, but you have specified " + allInputData.landAmount + " acres.")}
-			if (parseFloat(allInputData.systemSize) > 2.0 * allInputData.inverterSize) {alert("Warning: the inverter appears to be poorly sized to the Array size.  Please review your inputs. Array size is:" + allInputData.systemSize + "kW and your inverter is only " + allInputData.inverterSize + "kW. Most inverts will not tolerate more than 2x nameplate rating")}
+			if (parseFloat(allInputData.systemSize) > 2.0 * allInputData.inverterSize) {alert("Warning: the inverter appears to be poorly sized to the Array size.  Please review your inputs. Array size is: " + allInputData.systemSize + "kW and your inverter is only " + allInputData.inverterSize + "kW. Most inverts will not tolerate more than 2x nameplate rating")}
 			// Function to add a vector to a table as a row.
 			function insertMetric(tableId, name, vector) {
 				table = gebi(tableId)

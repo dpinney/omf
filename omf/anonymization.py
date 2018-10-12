@@ -182,7 +182,7 @@ def distTranslateLocations(inFeeder, translationRight, translationUp, rotation):
 
 def distAddNoise(inFeeder, noisePerc):
 	''' Add random noise to properties with numeric values for all objects in the inFeeder distribution system based on a noisePerc magnitude. '''
-	#Works with certain parameters mentioned in brackets below
+	#Works with certain parameters mentioned in brackets below. Others need to check so they don't break machine
 	noisePerc = float(noisePerc)
 	distModifyTriplexLengths(inFeeder)
 	distModifyConductorLengths(inFeeder)
@@ -417,7 +417,7 @@ def distModifyConductorLengths(inFeeder):
 
 def distSmoothLoads(inFeeder):
 	''' Reduce the resolution of load shapes by taking all sub-hourly load dispatch data in the inFeeder distribution system and aggregating to the hour level. ''' 
-	#FIX THIS FIX THIS FIX THIS. Ask david for help
+	#FIX THIS FIX THIS FIX THIS. Ask david for help. subScadacalibrate1.player? thing not foundon current data atructure
 	agList = []
 	outList = []
 	scadaFile = inFeeder['attachments']['subScadaCalibrated1.player']

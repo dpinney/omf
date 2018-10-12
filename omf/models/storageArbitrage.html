@@ -1,3 +1,4 @@
+
 <head>
 	<title>Open Modeling Framework</title>
 	<meta charset="utf-8">
@@ -277,7 +278,9 @@
 						"tickColor":"#D3D3D3",
 						"tickLength":-680,
 						"type":"datetime",
-						"lineColor":"gray"},
+						"lineColor":"gray",
+						"dateTimeLabelFormats":{ month: '%b', year: ''}
+					},
 					"yAxis":{
 						"title":{"text":"Power (W)","style":{"color":"gray"}},
 						"min":0,
@@ -286,7 +289,7 @@
 						"dashStyle": "ShortDash",
 						"width": 2,
 						"label":{"text":"Max Power:" + delimitNumbers(allOutputData.batteryDischargekWMax.toFixed(3)/1000) + "kW", "align":"right","y":-5,"x":-790, "style":{"color":"gray", "fontsize":"12px"}},
-						"value": allOutputData.batteryDischargekWMax,"zIndex": 10}],"min":0},
+						"value": allOutputData.batteryDischargekWMax,"zIndex": 10}],"min":-1},
 					"title":{"text":null},
 					"series":[
 						{"name":"Historical","marker":{"enabled":false},"color":"red","data":allOutputData.demand,"enableMouseTracking":false},
@@ -314,7 +317,9 @@
 						"tickColor":"#D3D3D3",
 						"tickLength":-205,
 						"type":"datetime",
-						"lineColor":"gray"},
+						"lineColor":"gray",
+						"dateTimeLabelFormats":{ month: '%b', year: ''}
+					},
 					"yAxis":
 						{"title":{"text":"SoC (%)","style":{"color":"gray"}}, "min":0, "max":100,
 						"minorTickColor":"gray", "minorTickInterval":5,
@@ -333,6 +338,40 @@
 			</script>
 		</div>
 		<!-- TODO: Make into preview graph: http://jsfiddle.net/gh/get/jquery/1.7.2/highslide-software/highcharts.com/tree/master/samples/stock/xaxis/minorticks/	 -->
+		<!-- TEST AREA BEGIN -->
+		<p class="reportTitle postRun">Price Input</p>
+		<div id="Price Input" class="tightContent postRun">
+			<div id="priceChart"></div>
+			<script>
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{
+						"series":{
+							"animation":false,
+							"pointStart":Date.parse(allOutputData.startDate),
+							"shadow":false,
+							"pointInterval":3600000},
+						"line":{"marker":{"enabled":false}}},
+					"xAxis":{"maxZoom":108000000,
+						"tickColor":"#D3D3D3",
+						"tickLength":-205,
+						"type":"datetime",
+						"lineColor":"gray",
+						"dateTimeLabelFormats":{ month: '%b', year: ''}
+					},
+					"yAxis":
+						{"title":{"text":"Price Point ($/kWh)","style":{"color":"gray"}}, "min":0, 
+						"minorTickColor":"gray", "minorTickInterval":5,
+						"min":0},
+					"title":{"text":null},
+					"series":[
+						{"name":"Price Curve","marker":{"enabled":false},"color":"gray","data":allOutputData.price}
+						],
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"priceChart","type":"line","marginRight":20, "height":250,"width":1000},
+					"tooltip":{"valueDecimals":2},
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
+		</div>
+		<!-- TEST AREA END. -->
 		<p class="reportTitle postRun" style="page-break-before:always">Cash Flow</p>
 		<div id="cashFlowReport" class="tightContent postRun">
 			<div id="cashFlowChartDiv"></div>

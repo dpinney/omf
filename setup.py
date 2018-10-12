@@ -4,10 +4,7 @@ omf
 
 OMF, the Open Modeling Framework, is a set of Python libraries for simulating 
 the elctrical grid with an emphasis on cost-benefit analysis of emerging technologies: 
-distributed generation, storage, networked controls, etc.
-
-Included is a web interface. For NRECA members, access to a production system is
- available at https://www.omf.coop.
+distributed generation, storage, networked controls, etc. A web interface is included.
 
 Full documentation is available on our OMF wiki: http://github.com/dpinney/omf/wiki/
 """
@@ -34,7 +31,7 @@ setup(
 		'Development Status :: 4 - Beta',
 		'Environment :: Web Environment',
 		'Intended Audience :: Developers',
-		'License :: TBD', # TODO
+		'License :: GPLv2',
 		'Operating System :: OS Independent',
 		'Programming Language :: Python',
 		'Programming Language :: Python :: 2.7',
@@ -44,15 +41,14 @@ setup(
 	# script_name = '',
 	# script_args = '',
 	# options = '',
-	license = 'TBD',
+	license = 'GPLv2',
 	# keywords = [],
 	platforms = 'any',
 	# cmdclass = [],
 	# data_files = [],
 	# package_dir = {},
-
 	## NOTE: the following keywords are from setuptools package.
-	# include_package_data = True, #HUH?
+	# include_package_data = True,
 	# exclude_package_data = {},
 	# package_data = {},
 	zip_safe = False, 
@@ -68,4 +64,4 @@ setup(
 	# use_2to3 = False,
 	# convert_2to3_doctests = [],
 	# use_2to3_fixers = [],
-	) 
+) 

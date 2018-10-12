@@ -3,14 +3,11 @@
 	<meta charset="utf-8">
 	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
-	<style>
-	/*Styles go here.*/
-	</style>
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
-	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
+	<script src="{{pathPrefix}}/static/d3.v3.js"></script>
 	<!-- Data  Imports -->
 	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
 	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
@@ -123,64 +120,24 @@
 				<p class="inputSectionHeader">Model Parameters</p>
 			</div>
 			<hr>
-			<!--
-			<div class="shortInput">
-				<label class="tooltip">Aggregate Net Loads (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
-				<input id="meterDataFile" type="file" style="display:none" onchange="handle_files(this.files,'meterData','meterFileName')">
-				<input id="meterData" name="meterData" type="hidden">
-				<div>
-					<label for="meterDataFile" class="fileButton">Choose File</label>
-					<input id="meterFileName" name="meterFileName" value='' readonly class="uploadFileName">
-				</div>
-			</div> -->
 			<div class="shortInput">
 				<label class="tooltip">Aggregate Net Loads (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
 				<script type="text/javascript">
 					insert_file_upload_block('meterFileName', 'meterData');
 				</script>
 			</div>
-			<!--
-			<div class="shortInput">
-				<label class="tooltip">Solar Load (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
-				<input id="solarDataFile" type="file" style="display:none" onchange="handle_files(this.files,'solarData','solarFileName')">
-				<input id="solarData" name="solarData" type="hidden">
-				<div>
-					<label for="solarDataFile" class="fileButton">Choose File</label>
-					<input id="solarFileName" name="solarFileName" value='' readonly class="uploadFileName">
-				</div>
-			</div> -->
 			<div class="shortInput">
 				<label class="tooltip">Solar Load (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
 				<script type="text/javascript">
 					insert_file_upload_block('solarFileName', 'solarData');
 				</script>
 			</div>
-			<!--
-			<div class="shortInput">
-				<label class="tooltip">LatLon Coordinates (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
-				<input id="latLonDataFile" type="file" style="display:none" onchange="handle_files(this.files,'latLonData','latLonFileName')">
-				<input id="latLonData" name="latLonData" type="hidden">
-				<div>
-					<label for="latLonDataFile" class="fileButton">Choose File</label>
-					<input id="latLonFileName" name="latLonFileName" value='' readonly class="uploadFileName">
-				</div>
-			</div> -->
 			<div class="shortInput">
 				<label class="tooltip">LatLon Coordinates Dynamic (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
 				<script type="text/javascript">
 					insert_file_upload_block('latLonFileName', 'latLonData');
 				</script>
 			</div>
-			<!--
-			<div style="display:none" class="shortInput">
-				<label class="tooltip">Weather Coordinates (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
-				<input id="weatherDataFile" type="file" style="display:none" onchange="handle_files(this.files,'weatherData','weatherFileName')">
-				<input id="weatherData" name="weatherData" type="hidden">
-				<div>
-					<label for="weatherDataFile" class="fileButton">Choose File</label>
-					<input id="weatherFileName" name="weatherFileName" value='' readonly class="uploadFileName">
-				</div>
-			</div> -->
 			<div style="display:none" class="shortInput">
 				<label class="tooltip">Weather Coordinates (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
 				<script type="text/javascript">
@@ -188,12 +145,24 @@
 				</script>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">ASOS Weather Station<span class="classic">Enter a valid ASOS weather station.</span></label>
-				<input type="text" id="asos" name="asos" required="required" placeholder="CHO"/>
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">Start Date<span class="classic">Enter start date of the period you are uploading.</span></label>
 				<input type="text" id="year" name="year" required="required" placeholder="2017-01-01"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">ASOS Weather Station<span class="classic">Please see the documentation at the green 'Help?' for information on selecting an appropriate ASOS station.</span></label>
+				<select id="asosStation" name="asosStation">
+					<script type="text/javascript">
+						//Load asos station and populate the dropdown list
+						d3.csv("{{pathPrefix}}/static/asosStationTable.csv", function(data) {
+							$.each(data, function(index, value) {
+								let newEntry = value['State'] + '-' + value['County'] + '-' + value['Station Name'] + '-' + value['Station Id'];
+								$("#asosStation").append(
+									$('<option></option>').val(value['Station Id']).html(newEntry));
+							});
+							$("#asosStation").val(allInputData.asosStation);
+						});
+					</script>
+				</select>
 			</div>
 			<!-- Required Buttons -->
 			<div class="wideInput" style="text-align:right">

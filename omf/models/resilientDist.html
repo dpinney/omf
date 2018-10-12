@@ -176,7 +176,7 @@
 					<input id="weatherImpactsFileName" name="weatherImpactsFileName" value='' readonly class="uploadFileName">
 				</div>
 			</div>
-			<div class="shortInput">
+			<!-- <div class="shortInput">
 				<label class="tooltip">XR Matrices (.json file)<span class="classic">Please see the documentation at the help link for the required format. If this field is blank the OMF will re-use the file from the previous run.</span></label>
 				<input id="xrMatricesDataFile" type="file" style="display:none" onchange="handle_files(this.files,'xrMatrices','xrMatricesFileName')">
 				<input id="xrMatrices" name="xrMatrices" type="hidden">
@@ -184,7 +184,7 @@
 					<label for="xrMatricesDataFile" class="fileButton">Choose File</label>
 					<input id="xrMatricesFileName" name="xrMatricesFileName" value='' readonly class="uploadFileName">
 				</div>
-			</div>
+			</div> -->
 			<div class="shortInput">
 				<label class="tooltip">Damage Scenarios (.json file)<span class="classic">Please see the documentation at the help link for the required format. If this field is blank the OMF will re-use the file from the previous run.</span></label>
 				<input id="scenariosDataFile" type="file" style="display:none" onchange="handle_files(this.files,'scenarios','scenariosFileName')">
@@ -274,16 +274,16 @@
 					var nonCritLoadMetDict = [];
 					var dataDict = [];
 					var designHTML = "";
+					var tableBuilder = ""; 
 
-					//Displays RDT outputs into HTML tables
-					var tableBuilder = "<tr><th>Device ID</th><th>Type</th><th>Action</th><th>Cost</th></tr>";
+					//DESIGN SOLUTION
+					tableBuilder = "<tr><th>Device ID</th><th>Type</th><th>Action</th><th>Cost</th></tr>";
 					for(var i = 0; i < rdtOutput.design_solution.generators.length; i++) {
 						generator = rdtOutput.design_solution.generators[i];
 						genCost = parseFloat(allOutputData["generatorData"].replace(/\,/g,''));
 						tableBuilder = tableBuilder + "<tr><td>" + generator.id + "</td><td>Generator</td><td>Built with 5 MW of capacity</td><td>$" + genCost + "</td></tr>";
 						totalCost = totalCost + genCost;
 					}
-
 					for(var j = 0; j < rdtOutput.design_solution.lines.length; j++) {
 						line = rdtOutput.design_solution.lines[j];
 						if(line.id in lineData) {
@@ -321,34 +321,34 @@
 					designHTML = designHTML + '<table id="totalCostTable"><tr><th><div style="float: left;">Total Cost</div><div style="' + secondRunValidStyle + 'float: right;">' + secondRunValid + '</div></th></tr><tr><td>$' + totalCost.toFixed(2) + '</td></tr></table>';
 					designHTML = designHTML + '<table id="solutionComponents">' + tableBuilder + '</table>';
 
-
+					//DAMAGE SCENARIOS
 					for(var j = 0; j < rdtOutput.scenario_solution.length; j++) {
 						scenario = rdtOutput.scenario_solution[j]; 
 						critLoadMetDict[scenario.id] = '<tr><td colspan="4"><b>Scenario ' + parseFloat(j + 1) + ' damage summary: </b>' + scenario.non_critical_load_met.toFixed(2) + ' non-critical load lost, '+ scenario.critical_load_met.toFixed(2) + ' critical load lost</td></tr>';
 					}
-					tableBuilder = "<table>"
+					tableHeader = "<tr><th>Scenario ID</th><th>Device ID</th><th>Type</th><th>Result</th></tr>";
 					for(var j = 0; j < gfmOutput.scenarios.length; j++) {
-						tableBuilder = tableBuilder + "<tr><th>Scenario ID</th><th>Device ID</th><th>Type</th><th>Result</th></tr>";
+						tableBuilder = "";
 						scenario = gfmOutput.scenarios[j]; 
 						for(var k = 0; k < scenario.hardened_disabled_lines.length; k++) {
 							hdLine = scenario.hardened_disabled_lines[k];
-							tableBuilder = tableBuilder + "<tr><td>" + parseFloat(scenario.id + 1) + "</td><td>" + hdLine + "</td><td>Hardened Line</td><td>Disabled</td></tr>";
+							tableBuilder = tableBuilder + "<tr><td>" + String(parseFloat(scenario.id) + 1) + "</td><td>" + hdLine + "</td><td>Hardened Line</td><td>Disabled</td></tr>";
 						}
 						for(k = 0; k < scenario.disable_lines.length; k++) {
 							dLine = scenario.disable_lines[k];
-							tableBuilder = tableBuilder + "<tr><td>" + parseFloat(scenario.id + 1) + "</td><td>" + dLine + "</td><td>Line</td><td>Disabled</td></tr>";
+							tableBuilder = tableBuilder + "<tr><td>" + String(parseFloat(scenario.id) + 1) + "</td><td>" + dLine + "</td><td>Line</td><td>Disabled</td></tr>";
 						}
-						if (scenario.hardened_disabled_lines.length == 0 && scenario.disable_lines.length == 0) {
+						if(scenario.hardened_disabled_lines.length == 0 && scenario.disable_lines.length == 0) {
 							tableBuilder = tableBuilder + "<tr><td colspan='4'>No components affected.</td></tr>";
 						}
 						scenarioDict[parseFloat(scenario.id) + 1] = tableBuilder + critLoadMetDict[parseFloat(scenario.id) + 1];
 					}
-
-					var scenarioHTML= "";
+					var scenarioHTML= tableHeader;
 					for (var scenarioID in scenarioDict) {
 						scenarioHTML = scenarioHTML + scenarioDict[scenarioID] + "";
 					}
-					scenarioHTML = scenarioHTML + "</table>";
+					scenarioHTML = "<table>" + scenarioHTML + "</table>";
+
 					gebi("scenarioDisplay").innerHTML = scenarioHTML + "";	
 					gebi("designDisplay").innerHTML = designHTML + "";
 				</script>

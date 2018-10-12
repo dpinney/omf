@@ -1,5 +1,12 @@
 import platform, os, sys
 
+def pipInstallInOrder(pipCommandString):
+	with open("requirements.txt","r") as f:
+		for line in f:
+			os.system(pipCommandString + " install " + line)
+	# Removes pip log files.
+	os.system("rm \\=*")
+
 # Note: all installations require git to clone the omf first.
 if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu","debian"]:
 	os.system("sudo apt-get -y install python-pip git unixodbc-dev libfreetype6-dev \
@@ -13,7 +20,8 @@ if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu
 	os.system("sudo alien -i gridlabd-4.0.0-1.el6.x86_64.rpm")
 	os.system("sudo apt-get install -f")
 	os.system("cd omf")
-	os.system("pip install -r requirements.txt")
+	os.system("pip install --upgrade pip")
+	pipInstallInOrder("pip")
 	os.system("python setup.py develop")
 elif platform.system() == "Linux" and platform.linux_distribution()[0]=="CentOS Linux":
 	os.system("sudo yum -y install wget git graphviz gcc xerces-c python-devel tkinter octave 'graphviz-devel.x86_64'")
@@ -26,7 +34,7 @@ elif platform.system() == "Linux" and platform.linux_distribution()[0]=="CentOS 
 	os.system("wget --no-check-certificate https://ufpr.dl.sourceforge.net/project/gridlab-d/gridlab-d/Candidate%20release/gridlabd-4.0.0-1.el6.x86_64.rpm")
 	os.system("rpm -Uvh gridlabd-3.2.0-1.x86_64.rpm")
 	os.system("cd omf")
-	os.system("pip install -r requirements.txt")
+	pipInstallInOrder("pip")
 	os.system("pip install --ignore-installed six")
 	os.system("python setup.py develop")
 elif platform.system()=='Windows':
@@ -44,6 +52,7 @@ elif platform.system()=='Windows':
 	os.system("choco install -y graphviz")
 	os.system("choco install -y pip")
 	os.system("choco install -y octave.portable")
+	#TODO: find way to install mdbtools.
 	# HACK: timeout and refreshenv should get all the choco binaries on to the path.
 	os.system("timeout 5")
 	os.system("refreshenv")
@@ -62,19 +71,19 @@ elif platform.system()=='Windows':
 	os.system("refreshenv")
         os.system("C:\\Python27\\python.exe -m pip install scipy")
 	os.system("C:\\Python27\\python.exe -m pip install setuptools>=33.1.1")
-	os.system("C:\\Python27\\python.exe -m pip install -r requirements.txt")
+	pipInstallInOrder("C:\\Python27\\python.exe -m pip")
 	os.system("C:\\Python27\\python.exe -m setup.py develop")
 elif platform.system()=="Darwin": # MacOS
 	# Install homebrew
 	os.system('/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
-	os.system("brew install wget python@2 ffmpeg git graphviz octave")
+	os.system("brew install wget python@2 ffmpeg git graphviz octave mdbtools")
 	os.system("brew link --overwrite python")
 	os.system("wget -O gridlabd.dmg --no-check-certificate https://ufpr.dl.sourceforge.net/project/gridlab-d/gridlab-d/Candidate%20release/gridlabd_4.0.0.dmg")
 	os.system("sudo hdiutil attach gridlabd.dmg")
 	os.system('sudo installer -package "/Volumes/GridLAB-D 4.0.0/gridlabd.mpkg" -target /')
 	os.system('sudo hdiutil detach "/Volumes/GridLAB-D 4.0.0"')
 	os.system("cd omf")
-	os.system("pip2 install -r requirements.txt")
+	pipInstallInOrder("pip2")
 	os.system("python2 setup.py develop")
 else:
 	print "Your operating system is not currently supported. Platform detected: " + str(platform.system()) + str(platform.linux_distribution())
