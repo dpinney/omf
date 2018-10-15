@@ -1,9 +1,10 @@
-'''
+"""
 Load an OMF feeder in to the new viewer.
-'''
+"""
 
 import tempfile, shutil, os, fileinput, json, networkx as nx, platform, omf.feeder as feeder, webbrowser, sys
 import omf
+
 
 def main():
 	''' Handle the command line arguments for distNetViz.'''
@@ -28,6 +29,43 @@ def main():
 		print errorMessage
 	viz(FEEDER_PATH, forceLayout=DO_FORCE_LAYOUT, outputPath=None)
 
+
+def insert_coordinates(tree):
+	# type: (dict) -> None
+	"""Insert additional latitude and longitude data into the dictionary."""
+	print("Force laying out the graph...")
+	# Use graphviz to lay out the graph.
+	inGraph = feeder.treeToNxGraph(tree)
+	# HACK: work on a new graph without attributes because graphViz tries to read attrs.
+	cleanG = nx.Graph(inGraph.edges())
+	# HACK2: might miss nodes without edges without the following.
+	cleanG.add_nodes_from(inGraph)
+	pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
+	# # Charting the feeder in matplotlib:
+	# feeder.latLonNxGraph(inGraph, labels=False, neatoLayout=True, showPlot=True)
+	# Insert the latlons.
+	for key in tree:
+		obName = tree[key].get('name','')
+		thisPos = pos.get(obName, None)
+		if thisPos != None:
+			tree[key]['longitude'] = thisPos[0]
+			tree[key]['latitude'] = thisPos[1]
+
+
+def contains_coordinates(tree):
+	# type: (dict) -> bool
+	"""Return True if the dictionary contains latitude and longitude data, otherwise False."""
+	# If there is zero lat/lon info, do force layout by default.
+	lat_lon_count = 0
+	for key in tree:
+		for sub_key in ['latitude', 'longitude']:
+			if sub_key in tree[key]:
+				lat_lon_count += 1
+	if lat_lon_count == 0:
+		return False
+	return True
+
+
 def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None):
 	''' Vizualize a distribution system.'''
 	# HACK: make sure we have our homebrew binaries available.
@@ -39,34 +77,13 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None):
 		elif pathToOmdOrGlm.endswith('.glm'):
 			thisFeed = {'tree':feeder.parse(pathToOmdOrGlm, filePath=True)}
 		tree = thisFeed['tree']
-	# If there is zero lat/lon info, do force layout by default.
-	latLonCount = 0
-	for key in tree:
-		for subKey in ['latitude', 'longitude']:
-			if subKey in tree[key]:
-				latLonCount += 1
-	if latLonCount == 0:
-		print('Warning: no lat/lon coordinates detected, so force layout required.')
-		forceLayout = True
-	# Force layout of feeders with no lat/lon information so we can actually see what's there.
+	## Force layout of feeders with no lat/lon information so we can actually see what's there.
 	if forceLayout:
-		print("Force laying out the graph...")
-		# Use graphviz to lay out the graph.
-		inGraph = feeder.treeToNxGraph(tree)
-		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
-		cleanG = nx.Graph(inGraph.edges())
-		# HACK2: might miss nodes without edges without the following.
-		cleanG.add_nodes_from(inGraph)
-		pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
-		# # Charting the feeder in matplotlib:
-		# feeder.latLonNxGraph(inGraph, labels=False, neatoLayout=True, showPlot=True)
-		# Insert the latlons.
-		for key in tree:
-			obName = tree[key].get('name','')
-			thisPos = pos.get(obName, None)
-			if thisPos != None:
-				tree[key]['longitude'] = thisPos[0]
-				tree[key]['latitude'] = thisPos[1]
+		print('forceLayout was set to True, so force layout is applied regardless of coordinate detection.')
+		insert_coordinates(tree)
+	elif not contains_coordinates(tree):
+		print('Warning: no lat/lon coordinates detected, so force layout required.')
+		insert_coordinates(tree)
 	# Set up temp directory and copy the feeder and viewer in to it.
 	if outputPath == None:
 		tempDir = tempfile.mkdtemp()
@@ -91,6 +108,7 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None):
 			print line.rstrip()
 	# os.system('open -a "Google Chrome" ' + '"file://' + tempDir + '/viewer.html"')
 	webbrowser.open_new("file://" + tempDir + '/viewer.html')
+
 
 if __name__ == '__main__':
 	main()
