@@ -116,62 +116,6 @@ def convertToGFM(gfmInputTemplate, feederModel):
 				newLine['is_transformer'] = True
  			gfmJson['lines'].append(newLine)
 			lineCount+=1
-	# Line Code Creation
-	xMatrices, rMatrices = {1: [], 2: [], 3: []}, {1: [], 2: [], 3: []}
-	try: 
-		lineCodes = json.loads(gfmInputTemplate['xrMatrices'])['line_codes']
-	except:
-		raise Exception('ERROR: Unable to process user uploaded XR Matrices')
-	for i,code in enumerate(lineCodes):
-		if i > 100: break
-		xMatrices[int(code['num_phases'])].append(code['xmatrix'])
-		rMatrices[int(code['num_phases'])].append(code['rmatrix'])
-	for lineCode in range(0,lineCount):
-		newLineCode = dict({
-			'line_code': '', #*
-			'num_phases': '', #*
-			'xmatrix': [[],[],[]], #* reactance terms: phaseA, phaseB, and phaseC.
-			'rmatrix': [[],[],[]] #* resistance terms: phaseA/B/C.
-		})
-		newLineCode['line_code'] = lineCode
-		# Get phases and which phase a/b/c exists.
-		newLineCode['num_phases'] = gfmJson['lines'][lineCode]['num_phases']
-		if int(newLineCode['num_phases']) < 3: 
-			phasesExist = gfmJson['lines'][lineCode]['has_phase']
-		if int(newLineCode['num_phases']) == 3: 	
-			# Set right x/r matrices for 3 phase.
-			newLineCode['xmatrix'] = xMatrices[3][0]
-			newLineCode['rmatrix'] = rMatrices[3][0]
-			if len(xMatrices[3])>1: xMatrices[3].pop(0)
-			if len(rMatrices[3])>1: rMatrices[3].pop(0)
-		elif int(newLineCode['num_phases']) == 2: 
-			# Set it for 2 phase.
-			xMatrix = [[0.26732955, 0.12200757999999999, 0.0], [0.12200757999999999, 0.27047349, 0.0], [0.0, 0.0, 0.0]]
-			rMatrix = [[0.36553030, 0.04407197, 0.0], [0.04407197, 0.36282197, 0.0], [0.0, 0.0, 0.0]]
-			newLineCode['xmatrix'] = xMatrix
-			newLineCode['rmatrix'] = rMatrix
-		else:
-			# Set it for 1 phase.
-			xMatrix = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
-			rMatrix = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
-			for i,exists in enumerate(phasesExist):
-				if exists:
-					# Set xmatrix.
-					for xSubMatrix in xMatrices[1][0]:
-						for val in xSubMatrix:
-							if float(val) != 0.0: 
-								xMatrix[0][i] = val
-								break
-					# Set rmatrix.
-					for rSubMatrix in rMatrices[1][0]:
-						for val in rSubMatrix:
-							if float(val) != 0.0: 
-								rMatrix[0][i] = val
-								break
-			newLineCode['xmatrix'] = xMatrix
-			newLineCode['rmatrix'] = rMatrix
-		#SET THE newLineCode to the output of GRIDLABD
-		gfmJson['line_codes'].append(newLineCode)
 	# Bus creation:
 	objToFind = ['node', 'load', 'triplex_meter']
 	for key, bus in jsonTree.iteritems():
@@ -331,7 +275,6 @@ def work(modelDir, inputDict):
 		'chance_constraint' : float(inputDict['chanceConstraint']),
 		'critical_load_met' : float(inputDict['criticalLoadMet']),
 		'total_load_met' : 0.9,#(float(inputDict['criticalLoadMet']) + float(inputDict['nonCriticalLoadMet'])),
-		'xrMatrices' : inputDict["xrMatrices"],
 		'maxDGPerGenerator' : float(inputDict["maxDGPerGenerator"]),
 		'dgUnitCost' : float(inputDict["dgUnitCost"]),
 		'newLineCandidates' : inputDict['newLineCandidates'],
@@ -384,63 +327,60 @@ def work(modelDir, inputDict):
 			json.dump(rdtJson, rdtInputFile, indent=4)
 	# Run GridLAB-D first time to generate xrMatrices.
 	print "RUNNING GLD FOR", modelDir
-	if platform.system() in ["Windows","Linux"]:
-		omdPath = pJoin(modelDir, feederName + ".omd")
-		with open(omdPath, "r") as omd:
-			omd = json.load(omd)
-		#REMOVE NEWLINECANDIDATES
-		deleteList = []
-		newLines = inputDict["newLineCandidates"].strip().replace(' ', '').split(',')
-		for newLine in newLines:
-			for omdObj in omd["tree"]:
-				if ("name" in omd["tree"][omdObj]):
-					if (newLine == omd["tree"][omdObj]["name"]):
-						deleteList.append(omdObj)
-		for delItem in deleteList:
-			del omd["tree"][delItem]
-		#Load a blank glm file and use it to write to it
-		feederPath = pJoin(modelDir, 'feeder.glm')
-		with open(feederPath, 'w') as glmFile:
-			toWrite =  omf.feeder.sortedWrite(omd['tree']) + "object jsondump {\n\tfilename_dump_reliability test_JSON_dump.json;\n\twrite_system_info true;\n\twrite_per_unit true;\n\tsystem_base 100.0 MVA;\n};\n"# + "object jsonreader {\n\tfilename " + insertRealRdtOutputNameHere + ";\n};"
-			glmFile.write(toWrite)		
-		#Write attachments from omd, if no file, one will be created
-		for fileName in omd['attachments']:
-			with open(os.path.join(modelDir, fileName),'w') as file:
-				file.write(omd['attachments'][fileName])
-		#Wire in the file the user specifies via zipcode.
-		climateFileName, latforpvwatts = zipCodeToClimateName(inputDict["simulationZipCode"])
-		shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
-		# Platform specific binaries.
-		if platform.system() == "Linux":
-			myEnv = os.environ.copy()
-			myEnv['GLPATH'] = omf.omfDir + '/solvers/gridlabdv990/'
-			commandString = omf.omfDir + '/solvers/gridlabdv990/gridlabd.bin feeder.glm'  
-		elif platform.system() == "Windows":
-			myEnv = os.environ.copy()
-			commandString =  '"' + pJoin(omf.omfDir, "solvers", "gridlabdv990", "gridlabd.exe") + '"' + " feeder.glm"
-		proc = subprocess.Popen(commandString, stdout=subprocess.PIPE, shell=True, cwd=modelDir, env=myEnv)
-		(out, err) = proc.communicate()
-		with open(pJoin(modelDir, "gldConsoleOut.txt"), "w") as gldConsoleOut:
-			gldConsoleOut.write(out)
-		accumulator = ""
-		with open(pJoin(modelDir, "JSON_dump_line.json"), "r") as gldOut:
-			accumulator = json.load(gldOut)
-		outData['gridlabdRawOut'] = accumulator
-		#Data transformation for GLD
-		rdtJson["line_codes"] = accumulator["properties"]["line_codes"]
-		rdtJson["lines"] = accumulator["properties"]["lines"]
-		for item in rdtJson["lines"]:
-			item['node1_id'] = item['node1_id'] + "_bus"
-			item['node2_id'] = item['node2_id'] + "_bus"
-		with open(pJoin(modelDir, rdtInputFilePath), "w") as outFile:
-			json.dump(rdtJson, outFile, indent=4)
-	else:
-		tree = feederModel.get("tree",{})
-		attachments = feederModel.get("attachments",{})
-		climateFileName, latforpvwatts = zipCodeToClimateName(inputDict["simulationZipCode"])
-		shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
-		gridlabdRawOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=modelDir)
-		outData['gridlabdRawOut'] = gridlabdRawOut
+	omdPath = pJoin(modelDir, feederName + ".omd")
+	with open(omdPath, "r") as omd:
+		omd = json.load(omd)
+	# Remove new line candidates to get normal system powerflow results.
+	deleteList = []
+	newLines = inputDict["newLineCandidates"].strip().replace(' ', '').split(',')
+	for newLine in newLines:
+		for omdObj in omd["tree"]:
+			if ("name" in omd["tree"][omdObj]):
+				if (newLine == omd["tree"][omdObj]["name"]):
+					deleteList.append(omdObj)
+	for delItem in deleteList:
+		del omd["tree"][delItem]
+	#Load a blank glm file and use it to write to it
+	feederPath = pJoin(modelDir, 'feeder.glm')
+	with open(feederPath, 'w') as glmFile:
+		toWrite =  omf.feeder.sortedWrite(omd['tree']) + "object jsondump {\n\tfilename_dump_reliability test_JSON_dump.json;\n\twrite_system_info true;\n\twrite_per_unit true;\n\tsystem_base 100.0 MVA;\n};\n"
+		# + "object jsonreader {\n\tfilename " + insertRealRdtOutputNameHere + ";\n};"
+		glmFile.write(toWrite)		
+	#Write attachments from omd, if no file, one will be created
+	for fileName in omd['attachments']:
+		with open(os.path.join(modelDir, fileName),'w') as file:
+			file.write(omd['attachments'][fileName])
+	#Wire in the file the user specifies via zipcode.
+	climateFileName, latforpvwatts = zipCodeToClimateName(inputDict["simulationZipCode"])
+	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
+	# Platform specific binaries.
+	if platform.system() == "Linux":
+		myEnv = os.environ.copy()
+		myEnv['GLPATH'] = omf.omfDir + '/solvers/gridlabdv990/'
+		commandString = omf.omfDir + '/solvers/gridlabdv990/gridlabd.bin feeder.glm'  
+	elif platform.system() == "Windows":
+		myEnv = os.environ.copy()
+		commandString =  '"' + pJoin(omf.omfDir, "solvers", "gridlabdv990", "gridlabd.exe") + '"' + " feeder.glm"
+	elif platform.system() == "Darwin":
+		myEnv = os.environ.copy()
+		myEnv['GLPATH'] = omf.omfDir + '/solvers/gridlabdv990/MacRC4p1_std8/'
+		commandString = '"' + omf.omfDir + '/solvers/gridlabdv990/MacRC4p1_std8/gld.sh" feeder.glm'
+	proc = subprocess.Popen(commandString, stdout=subprocess.PIPE, shell=True, cwd=modelDir, env=myEnv)
+	(out, err) = proc.communicate()
+	with open(pJoin(modelDir, "gldConsoleOut.txt"), "w") as gldConsoleOut:
+		gldConsoleOut.write(out)
+	accumulator = ""
+	with open(pJoin(modelDir, "JSON_dump_line.json"), "r") as gldOut:
+		accumulator = json.load(gldOut)
+	outData['gridlabdRawOut'] = accumulator
+	#Data transformation for GLD
+	rdtJson["line_codes"] = accumulator["properties"]["line_codes"]
+	rdtJson["lines"] = accumulator["properties"]["lines"]
+	for item in rdtJson["lines"]:
+		item['node1_id'] = item['node1_id'] + "_bus"
+		item['node2_id'] = item['node2_id'] + "_bus"
+	with open(pJoin(modelDir, rdtInputFilePath), "w") as outFile:
+		json.dump(rdtJson, outFile, indent=4)
 	# Run RDT.
 	print "RUNNING RDT FOR", modelDir
 	rdtOutFile = modelDir + '/rdtOutput.json'
@@ -519,8 +459,6 @@ def new(modelDir):
 		"phaseVariation": "0.15",
 		"weatherImpacts": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","wf_clip.asc")).read(),
 		"weatherImpactsFileName": "wf_clip.asc", # "wf_clip.asc" "wind_grid_1UCS.asc" "wf_clipSVEC.asc"
-		"xrMatrices":open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","lineCodesTrip37.json")).read(),
-		"xrMatricesFileName":"lineCodesTrip37.json",
 		"scenarios": "",
 		"scenariosFileName": "",
 		"simulationDate": "2012-01-01",
