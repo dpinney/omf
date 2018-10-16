@@ -231,7 +231,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			gfmJson['generators'].append(genObj)
 	return gfmJson
 
-def genDiagram(outputDir, feederJson):
+def genDiagram(outputDir, feederJson, damageDict):
 	# Load required data.
 	tree = feederJson.get("tree",{})
 	links = feederJson.get("links",{})
@@ -255,9 +255,68 @@ def genDiagram(outputDir, feederJson):
 		if aLat is None and aLon is None and aFrom is None:
 			 tree.pop(key)
 	# Create and save the graphic.
-	nxG = feeder.treeToNxGraph(tree)
-	feeder.latLonNxGraph(nxG) # This function creates a .plt reference which can be saved here.
-	plt.savefig(pJoin(outputDir,"feederChart.png"), dpi=800, pad_inches=0.0)	
+	inGraph = feeder.treeToNxGraph(tree)
+	#feeder.latLonNxGraph(nxG) # This function creates a .plt reference which can be saved here.
+	labels=False
+	neatoLayout=False 
+	showPlot=False
+	plt.axis('off')
+	plt.tight_layout()
+	plt.gca().invert_yaxis()
+	plt.gca().set_aspect('equal')
+	# Layout the graph via GraphViz neato. Handy if there's no lat/lon data.
+	if neatoLayout:
+		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
+		cleanG = nx.Graph(inGraph.edges())
+		# HACK2: might miss nodes without edges without the following.
+		cleanG.add_nodes_from(inGraph)
+		pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
+	else:
+		pos = {n:inGraph.node[n].get('pos',(0,0)) for n in inGraph}
+	# Draw all the edges.
+	for e in inGraph.edges():
+		edgeName = inGraph.edge[e[0]][e[1]].get('name')
+		edgeColor = 'black'
+		if edgeName in damageDict:
+			if damageDict[edgeName] == 1:
+				edgeColor = 'yellow'
+			if damageDict[edgeName] == 2:
+				edgeColor = 'orange'
+			if damageDict[edgeName] >= 3:
+				edgeColor = 'red'
+		eType = inGraph.edge[e[0]][e[1]].get('type','underground_line')
+		ePhases = inGraph.edge[e[0]][e[1]].get('phases',1)
+		standArgs = {'edgelist':[e],
+					 'edge_color':edgeColor,
+					 'width':2,
+					 'style':{'parentChild':'dotted','underground_line':'dashed'}.get(eType,'solid') }
+		if ePhases==3:
+			standArgs.update({'width':5})
+			nx.draw_networkx_edges(inGraph,pos,**standArgs)
+			standArgs.update({'width':3,'edge_color':'white'})
+			nx.draw_networkx_edges(inGraph,pos,**standArgs)
+			standArgs.update({'width':1,'edge_color':feeder._obToCol(eType)})
+			nx.draw_networkx_edges(inGraph,pos,**standArgs)
+		if ePhases==2:
+			standArgs.update({'width':3})
+			nx.draw_networkx_edges(inGraph,pos,**standArgs)
+			standArgs.update({'width':1,'edge_color':'white'})
+			nx.draw_networkx_edges(inGraph,pos,**standArgs)
+		else:
+			nx.draw_networkx_edges(inGraph,pos,**standArgs)
+	# Draw nodes and optional labels.
+	nx.draw_networkx_nodes(inGraph,pos,
+						   nodelist=pos.keys(),
+						   node_color=[feeder._obToCol(inGraph.node[n].get('type','underground_line')) for n in inGraph],
+						   linewidths=0,
+						   node_size=10)
+	if labels:
+		nx.draw_networkx_labels(inGraph,pos,
+								font_color='black',
+								font_weight='bold',
+								font_size=0.25)
+	if showPlot: plt.show()
+	plt.savefig(pJoin(outputDir,"feederChart.png"), dpi=800, pad_inches=0.0)
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
@@ -427,7 +486,14 @@ def work(modelDir, inputDict):
 		# TODO: make 2nd run of GridLAB-D work on Unixes.
 		outData["secondGLD"] = str(False)
 	# Draw the feeder.
-	genDiagram(modelDir, feederModel)
+	damageDict = {}
+	for scenario in rdtJson["scenarios"]:
+		for line in scenario["disable_lines"]:
+			if line in damageDict:
+				damageDict[line] = damageDict[line] + 1
+			else:
+				damageDict[line] = 1
+	genDiagram(modelDir, feederModel, damageDict)
 	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
 		outData["oneLineDiagram"] = inFile.read().encode("base64")
 	# And we're done.
