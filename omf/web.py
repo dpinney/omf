@@ -112,13 +112,6 @@ def load_user(username):
 	''' Required by flask_login to return instance of the current user '''
 	return User(json.load(open("./data/User/" + username + ".json")))
 
-def generate_csrf_token():
-	if "_csrf_token" not in session:
-		session["_csrf_token"] = cryptoRandomString()
-	return session["_csrf_token"]
-
-app.jinja_env.globals["csrf_token"] = generate_csrf_token
-
 @app.route("/login", methods = ["POST"])
 def login():
 	''' Authenticate a user and send them to the URL they requested. '''
