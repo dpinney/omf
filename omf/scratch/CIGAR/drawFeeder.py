@@ -14,8 +14,8 @@ import math
 
 # FNAME = 'smsSingle.glm'
 # FNAME = 'dist_gen_solar_all.glm'
-FNAME = 'ieee37node.glm'
-# FNAME = 'ieee123nodeBetter.glm'
+# FNAME = 'ieee37node.glm'
+FNAME = 'ieee123nodeBetter.glm'
 
 # help(omf.feeder.parse)
 
@@ -32,12 +32,12 @@ for obj in feed.values():
 # omf.feeder.latLonNxGraph(omf.feeder.treeToNxGraph(feed), labels=False, neatoLayout=True, showPlot=False)
 # plt.savefig('blah.png')
 
-def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=False, nodeCol=False):
+def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=False, nodeCol=False, colormap=None):
 	''' Draw a color-coded map of the voltage drop on a feeder.
 	edgeLabs property must be either 'Name', 'Current', 'Power', 'Rating', 'PercentOfRating', or None
 	nodeLabs property must be either 'Name', 'Voltage', 'VoltageImbalance', or None
+	colormap property must be either 'viridis', 'grayrating', or None
 	Returns a matplotlib object.'''
-	# IMPLEMENT Voltage Imbalance to be another nodeLabs property
 	tree = omf.feeder.parse(glmPath)
 
 	#dictionary to hold info on lines present in glm
@@ -163,15 +163,16 @@ def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=N
 				allVolts.append(phaseVolt)
 		avgVolts = avg(allVolts)
 		nodeVolts[row.get('node_name','')] = float("{0:.2f}".format(avgVolts))
-		voltA = allVolts.pop()
-		voltB = allVolts.pop()
-		voltC = allVolts.pop()
-		allDiffs.append(abs(float(voltA-voltB)))
-		allDiffs.append(abs(float(voltA-voltC)))
-		allDiffs.append(abs(float(voltB-voltC)))
-		maxDiff = max(allDiffs)
-		voltImbal = maxDiff/avgVolts
-		voltImbalances[row.get('node_name','')] = float("{0:.2f}".format(voltImbal))
+		if len(allVolts) == 3:
+			voltA = allVolts.pop()
+			voltB = allVolts.pop()
+			voltC = allVolts.pop()
+			allDiffs.append(abs(float(voltA-voltB)))
+			allDiffs.append(abs(float(voltA-voltC)))
+			allDiffs.append(abs(float(voltB-voltC)))
+			maxDiff = max(allDiffs)
+			voltImbal = maxDiff/avgVolts
+			voltImbalances[row.get('node_name','')] = float("{0:.2f}".format(voltImbal))
 
 		# Use float("{0:.2f}".format(avg(allVolts))) if displaying the node labels
 	nodeNames = {}
@@ -245,6 +246,9 @@ def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=N
 	#create custom colormap
 	custom_cm = matplotlib.colors.LinearSegmentedColormap.from_list('custColMap',[(0.0,'blue'),(0.15,'darkgray'),(0.7,'darkgray'),(1.0,'red')])
 	custom_cm.set_under(color='black')
+
+	if colormap == 'viridis':
+		custom_cm = plt.cm.get_cmap('viridis')
 
 	drawColorbar = False
 	emptyColors = {}
@@ -338,7 +342,7 @@ def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=N
 # tree = omf.feeder.parse('smsSingle.glm')
 # tree[35]['name'] = 'OH NO CHANGED'
 
-chart = drawPlot(FNAME, neatoLayout=True, edgeLabs='Current', edgeCol=True, nodeLabs="VoltageImbalance")
+chart = drawPlot(FNAME, neatoLayout=True, edgeCol=True, nodeLabs="VoltageImbalance", colormap='viridis')
 chart.savefig("./VOLTOUT.png")
 # from pprint import pprint as pp
 # pp(chart)
