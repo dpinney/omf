@@ -32,18 +32,21 @@ for obj in feed.values():
 # omf.feeder.latLonNxGraph(omf.feeder.treeToNxGraph(feed), labels=False, neatoLayout=True, showPlot=False)
 # plt.savefig('blah.png')
 
-def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=False, nodeCol=False, colormap=None):
+def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=True, nodeCol=True, customColormap=
+	False, perUnitScale=True):
 	''' Draw a color-coded map of the voltage drop on a feeder.
+	glmPath is the full path to the GridLAB-D .glm file.
+	workDir is where GridLAB-D will run, if it's None then a temp dir is used.
+	neatoLayout=True means the circuit is displayed using a force-layout approach.
 	edgeLabs property must be either 'Name', 'Current', 'Power', 'Rating', 'PercentOfRating', or None
 	nodeLabs property must be either 'Name', 'Voltage', 'VoltageImbalance', or None
-	colormap property must be either 'viridis', 'grayrating', or None
+	edgeCol and nodeCol can be set to false to avoid coloring edges or nodes	
+	customColormap=True means use a one that is nicely scaled to perunit values highlighting extremes.
 	Returns a matplotlib object.'''
 	tree = omf.feeder.parse(glmPath)
-
-	#dictionary to hold info on lines present in glm
+	# dictionary to hold info on lines present in glm
 	edge_bools = dict.fromkeys(['underground_line','overhead_line','triplex_line','transformer','regulator'], False)
-
-	# # Get rid of schedules and climate and check for all edge types:
+	# Get rid of schedules and climate and check for all edge types:
 	for key in tree.keys():
 		if tree[key].get("argument","") == "\"schedules.glm\"" or tree[key].get("tmyfile","") != "":
 			del tree[key]
@@ -58,7 +61,6 @@ def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=N
 			edge_bools['transformer'] = True
 		elif obtype == 'regulator':
 			edge_bools['regulator'] = True
-
 	# Make sure we have a voltDump:
 	def safeInt(x):
 		try: return int(x)
@@ -173,7 +175,6 @@ def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=N
 			maxDiff = max(allDiffs)
 			voltImbal = maxDiff/avgVolts
 			voltImbalances[row.get('node_name','')] = float("{0:.2f}".format(voltImbal))
-
 		# Use float("{0:.2f}".format(avg(allVolts))) if displaying the node labels
 	nodeNames = {}
 	for key in nodeVolts.keys():
@@ -191,7 +192,6 @@ def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=N
 		edgeCurrentSum[row.get('link_name','')] = sum(allCurr)
 		edgeCurrentMax[row.get('link_name','')] = max(allCurr)
 	# When just showing current as labels, use sum of the three lines' current values, when showing the per unit values (current/rating), use the max of the three
-
 	#edgeTupleCurrents = edgeCurrents copy with to-from tuple as keys for labeling
 	edgeTupleCurrents = {}
 	#edgeValsPU = values normalized per unit by line ratings
@@ -223,7 +223,6 @@ def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=N
 	edgeColors = edgeValsPU
 	#define which dict will be used for edge label
 	edgeLabels = edgeTupleValsPU
-
 	# Build the graph.
 	fGraph = omf.feeder.treeToNxGraph(tree)
 	voltChart = plt.figure(figsize=(15,15))
@@ -244,34 +243,24 @@ def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=N
 	else:
 		positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
 	#create custom colormap
-	custom_cm = matplotlib.colors.LinearSegmentedColormap.from_list('custColMap',[(0.0,'blue'),(0.15,'darkgray'),(0.7,'darkgray'),(1.0,'red')])
-	custom_cm.set_under(color='black')
-
-	if colormap == 'viridis':
+	if customColormap:
+		custom_cm = matplotlib.colors.LinearSegmentedColormap.from_list('custColMap',[(0.0,'blue'),(0.15,'darkgray'),(0.7,'darkgray'),(1.0,'red')])
+		custom_cm.set_under(color='black')
+	else:
 		custom_cm = plt.cm.get_cmap('viridis')
-
 	drawColorbar = False
 	emptyColors = {}
-
 	#draw edges with or without colors
 	if edgeCol:
 		drawColorbar = True
-		edgeIm = nx.draw_networkx_edges(fGraph,
-			pos = positions,
-			edge_color = [edgeColors.get(n,1) for n in edgeNames],
-			width = 1,
-			edge_vmin = 0,
-			edge_vmax = 1.25,
-			edge_cmap = custom_cm)
+		edgeList = [edgeColors.get(n,1) for n in edgeNames]
 	else:
-		edgeIm = nx.draw_networkx_edges(fGraph,
-			pos = positions,
-			edge_color = [emptyColors.get(n,.6) for n in edgeNames],
-			width = 1,
-			edge_vmin = 0,
-			edge_vmax = 1.25,
-			edge_cmap = custom_cm)
-
+		edgeList = [emptyColors.get(n,.6) for n in edgeNames]
+	edgeIm = nx.draw_networkx_edges(fGraph,
+		pos = positions,
+		edge_color = edgeList,
+		width = 1,
+		edge_cmap = custom_cm)
 	#draw edge labels
 	if edgeLabs != None:
 		if edgeLabs == "Name":
@@ -292,35 +281,33 @@ def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=N
 			pos = positions,
 			edge_labels = edgeLabels,
 			font_size = 8)
-	
 	# draw nodes with or without color
 	if nodeCol:
+		nodeList = [nodeVolts.get(n,1) for n in fGraph.nodes()]
 		drawColorbar = True
-		nodeIm = nx.draw_networkx_nodes(fGraph,
-			pos = positions,
-			node_color = [nodeVolts.get(n,1) for n in fGraph.nodes()],
-			linewidths = 0,
-			node_size = 30,
-			vmin = 0,
-			vmax = 1.25,
-			cmap = custom_cm)
 	else:
-		nodeIm = nx.draw_networkx_nodes(fGraph,
-			pos = positions,
-			node_color = [emptyColors.get(n,.6) for n in fGraph.nodes()],
-			linewidths = 0,
-			node_size = 30,
-			vmin = 0,
-			vmax = 1.25,
-			cmap = custom_cm)
-
+		nodeList = [emptyColors.get(n,.6) for n in fGraph.nodes()]
+	if perUnitScale:
+		vmin = 0
+		vmax = 1.25
+	else:
+		vmin = None
+		vmax = None
+	nodeIm = nx.draw_networkx_nodes(fGraph,
+		pos = positions,
+		node_color = nodeList,
+		linewidths = 0,
+		node_size = 30,
+		vmin = vmin,
+		vmax = vmax,
+		cmap = custom_cm)
 	#draw node labels
 	nodeLabels = {}
 	if nodeLabs != None:
 		if nodeLabs == "Name":
 			nodeLabels = nodeNames
 		elif nodeLabs == "Voltage":
-			nodeLabels = NodeVolts
+			nodeLabels = nodeVolts
 		elif nodeLabs == "VoltageImbalance":
 			nodeLabels = voltImbalances
 		else:
@@ -331,7 +318,6 @@ def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=N
 			pos = positions,
 			labels = nodeLabels,
 			font_size = 8)
-
 	plt.sci(nodeIm)
 	# plt.clim(110,130)
 	if drawColorbar:
@@ -342,11 +328,12 @@ def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=N
 # tree = omf.feeder.parse('smsSingle.glm')
 # tree[35]['name'] = 'OH NO CHANGED'
 
-chart = drawPlot(FNAME, neatoLayout=True, edgeCol=True, nodeLabs="VoltageImbalance", colormap='viridis')
+# chart = drawPlot(FNAME, neatoLayout=True, edgeCol=True, nodeLabs="VoltageImbalance", customColormap=True, perUnitScale=False)
+chart = drawPlot(FNAME, neatoLayout=True, edgeCol=True, nodeLabs="Voltage", edgeLabs="Current", perUnitScale=False)
 chart.savefig("./VOLTOUT.png")
+
 # from pprint import pprint as pp
 # pp(chart)
-
 # Viz it interactively.
 # sys.path.append('../distNetViz/')
 # import distNetViz
