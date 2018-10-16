@@ -438,7 +438,7 @@ def work(modelDir, inputDict):
 	for item in rdtJson["lines"]:
 		item['node1_id'] = item['node1_id'] + "_bus"
 		item['node2_id'] = item['node2_id'] + "_bus"
-	with open(pJoin(modelDir, rdtInputFilePath), "w") as outFile:
+	with open(rdtInputFilePath, "w") as outFile:
 		json.dump(rdtJson, outFile, indent=4)
 	# Run RDT.
 	print "RUNNING RDT FOR", modelDir
@@ -504,7 +504,6 @@ def new(modelDir):
 	defaultInputs = {
 		"feederName1": "trip37", # "trip37" "UCS Winter 2017 Fixed" "SVECNoIslands"
 		"modelType": modelName,
-		"runTime": "0:00:30",
 		"layoutAlgorithm": "geospatial",
 		"modelName": modelDir,
 		"user": "admin",
