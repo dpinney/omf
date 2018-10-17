@@ -265,7 +265,7 @@ def _test():
 	# Read the clock, solar output voltage, battery state of charge, and inverter voltage input.
 	print '* Reading clock:', glw.readClock()
 	print '* Bunch of requests:', glw.doRequests([{'cmd':'read', 'obName':'solar_1', 'propName':'V_Out'},{'cmd':'readClock'}])
-	print '* Reading solar_1 output volatage (V_Out):', glw.read('solar_1', 'V_Out')
+	print '* Reading solar_1 output voltage (V_Out):', glw.read('solar_1', 'V_Out')
 	# print '* Reading battery_1 state of charge:', glw.read('battery_1' + 'battery_state')
 	print '* Reading inverter_1 input voltage (V_In):', glw.read('inverter_1','V_In')
 	# Step the simulation.
@@ -319,18 +319,18 @@ def _test4():
 
 def _test5():
 	# test with AlertAgent, ReadAttackAgent, ReadIntervalAttackAgent, and WriteAttackAgent
-	#shows how WriteAttackAgent and WriteIntervalAttackAgent interact with ReadAttackAgent and ReadIntervalAttackAgent
+	# shows how WriteAttackAgent and WriteIntervalAttackAgent interact with ReadAttackAgent and ReadIntervalAttackAgent
 	import cyberAttack
 	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
 	agents = []
-	agents.append(cyberAttack.AlertAgent('2000-01-03 04:00:00'))
-	agents.append(cyberAttack.ReadAttackAgent('2000-01-02 10:00:00', 'tm_1', 'measured_power'))
-	agents.append(cyberAttack.ReadIntervalAttackAgent('2000-01-02 08:00:00', '2000-01-03 08:00:00', 'tm_1', 'measured_real_energy'))
-	agents.append(cyberAttack.WriteAttackAgent('2000-01-02 16:00:00', 'tm_1', 'measured_real_energy', '0.0'))
-	agents.append(cyberAttack.WriteIntervalAttackAgent('2000-01-03 20:00:00', '2000-01-04 08:00:00', 'inverter_1', 'power_factor', '0.4'))
-	agents.append(cyberAttack.ReadIntervalAttackAgent('2000-01-03 12:00:00', '2000-01-04 12:00:00', 'tm_2', 'measured_reactive_power'))
-	agents.append(cyberAttack.DefendByValueAgent('battery_1', 'generator_status', 'ONLINE'))
-	agents.append(cyberAttack.WriteAttackAgent('2000-01-01 04:00:00', 'battery_1', 'generator_status', 'OFFLINE'))
+	agents.append(cyberAttack.AlertAgent('Joe', '2000-01-03 04:00:00'))
+	agents.append(cyberAttack.ReadAttackAgent('Sue', '2000-01-02 10:00:00', 'tm_1', 'measured_power'))
+	agents.append(cyberAttack.ReadIntervalAttackAgent('David', '2000-01-02 08:00:00', '2000-01-03 08:00:00', 'tm_1', 'measured_real_energy'))
+	agents.append(cyberAttack.WriteAttackAgent('Shammya', '2000-01-02 16:00:00', 'tm_1', 'measured_real_energy', '0.0'))
+	agents.append(cyberAttack.WriteIntervalAttackAgent('Dan', '2000-01-03 20:00:00', '2000-01-04 08:00:00', 'inverter_1', 'power_factor', '0.4'))
+	agents.append(cyberAttack.ReadIntervalAttackAgent('Dan2.0', '2000-01-03 12:00:00', '2000-01-04 12:00:00', 'tm_2', 'measured_reactive_power'))
+	agents.append(cyberAttack.DefendByValueAgent('Dan.biz', 'battery_1', 'generator_status', 'ONLINE'))
+	agents.append(cyberAttack.WriteAttackAgent('Alice', '2000-01-01 04:00:00', 'battery_1', 'generator_status', 'OFFLINE'))
 	print 'Starting co-sim with 8 agents.'
 	coord = Coordinator(agents, cosimProps)
 	# print coord.drawResults()
@@ -376,6 +376,7 @@ def _testfault():
 	print coord.drawPrettyResults()
 
 if __name__ == '__main__':
-	_testfault()
-	thisDir = os.path.dirname(__file__)
-	webbrowser.open_new("file://" + thisDir + "/AgentLog/output.html")
+	_test8()
+	# _testfault()
+	# thisDir = os.path.dirname(__file__)
+	# webbrowser.open_new("file://" + thisDir + "/AgentLog/output.html")

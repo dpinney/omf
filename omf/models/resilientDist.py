@@ -351,8 +351,6 @@ def work(modelDir, inputDict):
 		json.dump(gfmJson, outFile, indent=4)
 	# Run GFM
 	gfmBinaryPath = pJoin(__neoMetaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
-	print gfmBinaryPath
-	print gfmInputFilename
 	rdtInputName = 'rdtInput.json'
 	if platform.system() == 'Darwin':
 		#HACK: force use of Java8 on MacOS.
@@ -385,7 +383,7 @@ def work(modelDir, inputDict):
 		with open(pJoin(rdtInputFilePath), "w") as rdtInputFile:
 			json.dump(rdtJson, rdtInputFile, indent=4)
 	# Run GridLAB-D first time to generate xrMatrices.
-	print "RUNNING GLD FOR", modelDir
+	print "RUNNING 1ST GLD RUN FOR", modelDir
 	omdPath = pJoin(modelDir, feederName + ".omd")
 	with open(omdPath, "r") as omd:
 		omd = json.load(omd)
@@ -456,7 +454,7 @@ def work(modelDir, inputDict):
 		rdtOut = json.loads(rdtRawOut)
 		json.dump(rdtOut, outFile, indent = 4)
 	# Generate and run 2nd copy of GridLAB-D model with changes specified by RDT.
-	print "RUNNING GLD FOR", modelDir
+	print "RUNNING 2ND GLD RUN FOR", modelDir
 	feederCopy = copy.deepcopy(feederModel)
 	lineSwitchList = []
 	for line in rdtOut['design_solution']['lines']:
