@@ -50,15 +50,6 @@ def getDataNames():
 				publicFeeders.append({'name': file[:-4], 'model': dirpath.split('/')[-1]})
 	return {"climates":sorted(climates), "feeders":feeders, "networks":networks, "publicFeeders":publicFeeders, "currentUser":currUser}
 
-# @app.before_request
-# def csrf_protect():
-# 	pass
-	## NOTE: when we fix csrf validation this needs to be uncommented.
-	# if request.method == "POST":
-	#	token = session.get("_csrf_token", None)
-	#	if not token or token != request.form.get("_csrf_token"):
-	#		abort(403)
-
 ###################################################
 # AUTHENTICATION AND USER FUNCTIONS
 ###################################################
@@ -75,6 +66,8 @@ class User:
 	def cu(self):
 		"""Returns current user's username"""
 		return flask_login.current_user.username
+
+app.jinja_env.globals["csrf_token"] = '' #TODO: add.
 
 def cryptoRandomString():
 	''' Generate a cryptographically secure random string for signing/encrypting cookies. '''
