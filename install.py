@@ -20,7 +20,6 @@ if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu
 	os.system("sudo alien -i gridlabd-4.0.0-1.el6.x86_64.rpm")
 	os.system("sudo apt-get install -f")
 	os.system("cd omf")
-	#os.system("pip install -r requirements.txt")
 	pipInstallInOrder("pip")
 	os.system("python setup.py develop")
 elif platform.system() == "Linux" and platform.linux_distribution()[0]=="CentOS Linux":
@@ -34,7 +33,6 @@ elif platform.system() == "Linux" and platform.linux_distribution()[0]=="CentOS 
 	os.system("wget --no-check-certificate https://ufpr.dl.sourceforge.net/project/gridlab-d/gridlab-d/Candidate%20release/gridlabd-4.0.0-1.el6.x86_64.rpm")
 	os.system("rpm -Uvh gridlabd-3.2.0-1.x86_64.rpm")
 	os.system("cd omf")
-	#os.system("pip install -r requirements.txt")
 	pipInstallInOrder("pip")
 	os.system("pip install --ignore-installed six")
 	os.system("python setup.py develop")
@@ -71,7 +69,6 @@ elif platform.system()=='Windows':
 	os.system("refreshenv")
         os.system("C:\\Python27\\python.exe -m pip install scipy")
 	os.system("C:\\Python27\\python.exe -m pip install setuptools>=33.1.1")
-	#os.system("C:\\Python27\\python.exe -m pip install -r requirements.txt")
 	pipInstallInOrder("C:\\Python27\\python.exe -m pip")
 	os.system("C:\\Python27\\python.exe -m setup.py develop")
 elif platform.system()=="Darwin": # MacOS
@@ -84,7 +81,6 @@ elif platform.system()=="Darwin": # MacOS
 	os.system('sudo installer -package "/Volumes/GridLAB-D 4.0.0/gridlabd.mpkg" -target /')
 	os.system('sudo hdiutil detach "/Volumes/GridLAB-D 4.0.0"')
 	os.system("cd omf")
-	#os.system("pip2 install -r requirements.txt")
 	pipInstallInOrder("pip2")
 	os.system("python2 setup.py develop")
 else:
