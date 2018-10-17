@@ -4,8 +4,8 @@ def pipInstallInOrder(pipCommandString):
 	with open("requirements.txt","r") as f:
 		for line in f:
 			os.system(pipCommandString + " install " + line)
+	# Removes pip log files.
 	os.system("rm \\=*")
-
 
 # Note: all installations require git to clone the omf first.
 if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu","debian"]:
