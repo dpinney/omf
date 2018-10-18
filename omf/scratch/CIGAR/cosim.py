@@ -234,7 +234,7 @@ class GridLabWorld(object):
 		except BadStatusLine: #HACK: this is what GridLAB-D returns when shutdown succeeds. Sigh.
 			return None
 		except:
-			warning.warn("Server failed to stop!")
+			warnings.warn("Server failed to stop!")
 			return "ERROR"
 
 	def resume(self):
@@ -259,7 +259,7 @@ class GridLabWorld(object):
 		# HACK: wait for the dang server to start up and simulate.
 		time.sleep(2) #TODO: instead of sleeping, wait 1 second, try to read clock, if it fails then wait 1 more second, loop, etc.
 
-def _test():
+def _test1():
 	glw = GridLabWorld('6267', 'localhost', './smsSingle.glm', '2000-01-02 00:00:00')
 	glw.start()
 	# Read the clock, solar output voltage, battery state of charge, and inverter voltage input.
@@ -294,7 +294,7 @@ def _test2():
 	# test with AlertAgent, ReadAttackAgent
 	import cyberAttack
 	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 12:00:00', 'stepSizeSeconds':3600} #error with having 
-	agents = [cyberAttack.AlertAgent('2000-01-03 12:00:00')] 
+	agents = [cyberAttack.AlertAgent('AlertAgent', '2000-01-03 12:00:00')] 
 	print 'Starting co-sim with 1 agent.'
 	coord = Coordinator(agents, cosimProps)
 	# print coord.drawResults()
@@ -303,7 +303,10 @@ def _test3():
 	# test with AlertAgent, ReadAttackAgent
 	import cyberAttack
 	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
-	agents = [cyberAttack.AlertAgent('2000-01-03 12:00:00'), cyberAttack.ReadAttackAgent('2000-01-02 10:00:00', 'tm_1', 'measured_power')]
+	agents = [
+		cyberAttack.AlertAgent('AlertAgent', '2000-01-03 12:00:00'),
+		cyberAttack.ReadAttackAgent('ReadAttackAgent', '2000-01-02 10:00:00', 'tm_1', 'measured_power')
+	]
 	print 'Starting co-sim with 2 agents.'
 	coord = Coordinator(agents, cosimProps)
 	print coord.drawResults()
@@ -312,7 +315,11 @@ def _test4():
 	# test with AlertAgent, ReadAttackAgent, and ReadAttackIntervalAgent
 	import cyberAttack
 	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
-	agents = [cyberAttack.AlertAgent('2000-01-03 04:00:00'), cyberAttack.ReadAttackAgent('2000-01-02 10:00:00', 'tm_1', 'measured_power'), cyberAttack.ReadIntervalAttackAgent('2000-01-02 08:00:00', '2000-01-03 08:00:00', 'tm_1', 'measured_real_energy')]
+	agents = [
+		cyberAttack.AlertAgent('2000-01-03 04:00:00'),
+		cyberAttack.ReadAttackAgent('2000-01-02 10:00:00', 'tm_1', 'measured_power'),
+		cyberAttack.ReadIntervalAttackAgent('2000-01-02 08:00:00', '2000-01-03 08:00:00', 'tm_1', 'measured_real_energy')
+	]
 	print 'Starting co-sim with 3 agents.'
 	coord = Coordinator(agents, cosimProps)
 	print coord.drawResults()
@@ -351,7 +358,7 @@ def _test7():
 	# test with ReadMultAttackAgent
 	import cyberAttack
 	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
-	agents = [cyberAttack.ReadMultAttackAgent('2000-01-01 01:00:00', 'tm_1', ['measured_power','measured_real_energy'])]
+	agents = [cyberAttack.ReadMultAttackAgent('ReadMult', '2000-01-01 01:00:00', 'tm_1', ['measured_power','measured_real_energy'])]
 	print 'Starting co-sim with 1 ReadMultAttackAgent.'
 	coord = Coordinator(agents, cosimProps)
 	print coord.drawPrettyResults()
@@ -376,7 +383,7 @@ def _testfault():
 	print coord.drawPrettyResults()
 
 if __name__ == '__main__':
-	_test8()
+	_test2()
 	# _testfault()
 	# thisDir = os.path.dirname(__file__)
 	# webbrowser.open_new("file://" + thisDir + "/AgentLog/output.html")
