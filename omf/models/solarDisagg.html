@@ -187,13 +187,91 @@
 					insert_file_upload_block('weatherFileName', 'weatherData');
 				</script>
 			</div>
+			<!--
 			<div class="shortInput">
 				<label class="tooltip">ASOS Weather Station<span class="classic">Enter a valid ASOS weather station.</span></label>
 				<input type="text" id="asos" name="asos" required="required" placeholder="CHO"/>
-			</div>
+			</div> -->
 			<div class="shortInput">
 				<label class="tooltip">Start Date<span class="classic">Enter start date of the period you are uploading.</span></label>
 				<input type="text" id="year" name="year" required="required" placeholder="2017-01-01"/>
+			</div>
+			<div class="shortInput">
+				<label>State</label>
+				<select id="asosState" name="asosState">
+					<script type="text/javascript">
+						var thisState = allInputData.asosState;
+						console.log(modelStatus);
+						//Load states and asos stations
+						$.ajax({
+							dataType: "json",
+							url: "{{pathPrefix}}/static/asos_locations.json",
+							cache: false,
+							//async: false,
+							success: function(data){
+								if (modelStatus != "raunning"){
+								//Sort states and populate option values for dropdown
+								var allStates = [];
+								for (state in data){
+									allStates.push(state);
+								}
+								//$("#asosState").append($('<option></option>').val("").html("Select a state"));
+								allStates.sort();
+								$.each(allStates, function(index, value) {
+									$("#asosState").append(
+										$('<option></option>').val(value).html(value));
+								});
+								$("#asosState").val(allInputData.asosState);
+								
+								//Sort stations and populate option values for dropdown
+								var currentState = allInputData.asosState;
+								var allStations = [];
+								for (station in data[currentState]){
+									allStations.push(station);
+								}
+								//$("#asosStation").append($('<option></option>').val(currentState).html("Select an ASOS Station"));
+								allStations.sort();
+								$.each(allStations, function(index, value) {
+									$("#asosStation").append(
+										$('<option></option>').val(value).html(value))
+								});
+								$("#asosStation").val(allInputData.asosStation);
+								//$('#asosStation option[value="allInputData.asosStation"]').attr("selected",true);
+
+								//AJAX for populating station list based on state selection
+								$( "#asosState" ).change(function() {
+									var currentState = $("#asosState").val();
+									var allStations = [];
+									for (station in data[currentState]){
+										allStations.push(station);
+									}
+									allStations.sort();
+									$("#asosStation").empty();
+										//console.log(allInputData.asosJSON[currentState]);
+									$.each(allStations, function(index, value) {
+										$("#asosStation").append(
+											$('<option></option>').val(value).html(value))
+									});
+								});
+							}
+							//Temporary handling of display during run status
+							//else {
+							//	$("#asosState").append(
+							//			$('<option></option>').val(allInputData.asosState).html(allInputData.asosState));
+							//	$('#asosState option[value="currentState"]').attr("selected",true);
+							//	$("#asosStation").append(
+							//			$('<option></option>').val(allInputData.asosStation).html(allInputData.asosStation));
+							//	$('#asosStation option[value="allInputData.asosStation"]').attr("selected",true);
+							//}
+						}
+						});
+					</script>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">ASOS Weather Station<span class="classic">Enter a valid ASOS weather station.</span></label>
+				<select id="asosStation" name="asosStation">
+				</select>
 			</div>
 			<!-- Required Buttons -->
 			<div class="wideInput" style="text-align:right">
