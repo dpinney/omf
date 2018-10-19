@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # In[1]:
-
+import datetime
 
 import math
 import numpy as np
@@ -123,7 +123,13 @@ app.layout = html.Div([
                     'doubleClick': 'reset'
                 }
             ),
-            
+            dcc.Graph(
+                id = 'graph-2',
+                figure = f,
+                config = {
+                    'doubleClick': 'reset'
+                }
+            ),
             html.Div([
             dcc.Markdown(d("""
                 **Zoom and Relayout Data**
@@ -142,6 +148,19 @@ app.layout = html.Div([
 
 
 # In[11]:
+def gen_ds_image(x_range, y_range, plot_width, plot_height):
+    if x_range is None or y_range is None or plot_width is None or plot_height is None:
+        return None
+    
+    cvs = ds.Canvas(x_range=x_range, y_range=y_range, plot_height=plot_height, plot_width=plot_width)
+    agg_scatter = cvs.points(iris_target_df, 
+                         'sepal_length', 'sepal_width', 
+                          ds.count_cat('target'))
+    img = tf.shade(agg_scatter)
+    img = tf.dynspread(img, threshold=0.95, max_px=5, shape='circle')
+    
+    return img.to_pil()
+
 
 def newGraphplot(nodes, edges, name="", canvas=None, cat=None, x_range=None, y_range=None):
     if canvas is None:
@@ -165,28 +184,48 @@ def newGraphplot(nodes, edges, name="", canvas=None, cat=None, x_range=None, y_r
     Output('relayout-data', 'children'),
     [Input('graph-1', 'relayoutData')])
 def display_selected_data(relayoutData):
+    #print(figure)
     return json.dumps(relayoutData, indent=2)
 
-#@app.callback(
-#	dash.dependencies.Output(),
-#	[dash.dependencies.Input()])
-
 @app.callback(
-    Output('graph-1', 'figure'),
-    [Input('graph-1', 'relayoutData')])
-def update_ds_image(layout, x_range, y_range, plot_width, plot_height):
-    img = f.layout.images[0]
+	Output('graph-2', 'figure'),
+	[Input('graph-1', 'relayoutData'),
+    Input('graph-1', 'figure')])
+def second_graph(relayoutData, figure):
+    #print(figure['layout'])
+    #print(relayoutData)
+    newFig = figure['layout']['images'][0]
+    figure['layout']['title'] = 'test'
+    try:
+        figure['layout']['title'] = relayoutData['xaxis.range[0]']
+        figure['layout']['images'][0]['x'] = relayoutData['xaxis.range[0]']
+        figure['layout']['images'][0]['y'] = relayoutData['yaxis.range[1]']
+        figure['layout']['images'][0]['sizex'] = relayoutData['xaxis.range[0]'] - relayoutData['xaxis.range[1]']
+        figure['layout']['images'][0]['sizey'] = relayoutData['yaxis.range[0]'] - relayoutData['yaxis.range[1]']
+        newImg = newGraphplot(fd, connect_edges(fd,edges), x_range=[relayoutData['xaxis.range[0]'], relayoutData['xaxis.range[1]']], y_range=[relayoutData['yaxis.range[0]'], relayoutData['yaxis.range[1]']])
+        #figure['layout']['images'][0]['source'] = newImg
+    except (TypeError, KeyError) as e:
+        figure['layout']['title'] = 'Starting graph'
+        print("skipped")
+
+    #newDataShade = newGraphplot(fd, connect_edges(fd,edges), x_range=[relayoutData['xaxis.range[0]'], relayoutData['xaxis.range[1]']] , y_range=[relayoutData['yaxis.range[0]'], relayoutData['yaxis.range[1]']])
+    #figure['layout']['images'][0]['source'] = tf.Image(newDataShade).to_pil()
+    #print(newFig)
+    return figure
+
+
+    #img = f.layout.images[0]
     
     # Update with batch_update so all updates happen simultaneously
 
-    img.x = x_range[0]
-    img.y = y_range[1]
-    img.sizex = x_range[1] - x_range[0]
-    img.sizey = y_range[1] - y_range[0]
+    #img.x = x_range[0]
+    #img.y = y_range[1]
+    #img.sizex = x_range[1] - x_range[0]
+    #img.sizey = y_range[1] - y_range[0]
     #update the image source here, rest can stay
-    newDataShade = newGraphplot(fd, connect_edges(fd,edges), x_range=x_range, y_range=y_range)
-    img.source = tf.Image(newDataShade).to_pil()
-    return f
+    #newDataShade = newGraphplot(fd, connect_edges(fd,edges), x_range=x_range, y_range=y_range)
+    #img.source = tf.Image(newDataShade).to_pil()
+    #return f
 
 #f.layout.on_change(update_ds_image, 'xaxis.range', 'yaxis.range', 'width', 'height')
 #newImg
@@ -227,7 +266,7 @@ map_figure.layout.images = [go.layout.Image(
     #sizing = "stretch",
     layer = "above")]
 
-print(map_figure)
+#print(map_figure)
 #map_figure.layout.on_change(update_ds_image, 'xaxis.range', 'yaxis.range', 'width', 'height')
 
 #map_figure
