@@ -118,6 +118,36 @@ f.layout.images = [go.layout.Image(
     #sizing = "stretch",
     layer = "below")]
 
+def newPlotlyGeneration(relayoutData):
+    f = go.Figure(data=[{'x': [relayoutData['xaxis.range[0]'], relayoutData['xaxis.range[1]']], 
+                           'y': [relayoutData['yaxis.range[0]'], relayoutData['yaxis.range[1]']], 
+                           'mode': 'markers',
+                           'marker': {'opacity': 0}}], # invisible trace to init axes and to support autoresize
+                    layout={'width': 800, 
+                            'height': 600}
+                   )
+    newImg = newGraphplot(fd, connect_edges(fd,edges), x_range=[relayoutData['xaxis.range[0]'], relayoutData['xaxis.range[1]']], y_range=[relayoutData['yaxis.range[0]'], relayoutData['yaxis.range[1]']])
+    newPil = tf.Image(newImg).to_pil()
+    #in_mem_file = io.BytesIO()
+    #newPil.save(in_mem_file, format = "PNG")
+    # reset file pointer to start
+    #in_mem_file.seek(0)
+    #img_bytes = in_mem_file.read()
+    #base64_encoded_result_bytes = base64.b64encode(img_bytes)
+    #base64_encoded_result_str = base64_encoded_result_bytes.decode('ascii')
+
+    f.layout.images = [go.layout.Image(
+        source = newPil,  # plotly now performs auto conversion of PIL image to png data URI
+        xref = "x",
+        yref = "y",
+        x = relayoutData['xaxis.range[0]'],
+        y = relayoutData['yaxis.range[1]'],
+        sizex = relayoutData['xaxis.range[1]'] - relayoutData['xaxis.range[0]'],
+        sizey = relayoutData['yaxis.range[1]'] - relayoutData['yaxis.range[0]'],
+        #sizing = "stretch",
+        layer = "below")]
+    return f
+
 flaskServer = flask.Flask(__name__)
 app = dash.Dash(__name__, server=flaskServer)
 
@@ -149,24 +179,6 @@ app.layout = html.Div([
         ], className='three columns')
 
         ])
-
-#f
-
-
-# In[11]:
-def gen_ds_image(x_range, y_range, plot_width, plot_height):
-    if x_range is None or y_range is None or plot_width is None or plot_height is None:
-        return None
-    
-    cvs = ds.Canvas(x_range=x_range, y_range=y_range, plot_height=plot_height, plot_width=plot_width)
-    agg_scatter = cvs.points(iris_target_df, 
-                         'sepal_length', 'sepal_width', 
-                          ds.count_cat('target'))
-    img = tf.shade(agg_scatter)
-    img = tf.dynspread(img, threshold=0.95, max_px=5, shape='circle')
-    
-    return img.to_pil()
-
 
 def newGraphplot(nodes, edges, name="", canvas=None, cat=None, x_range=None, y_range=None):
     if canvas is None:
@@ -200,95 +212,21 @@ def display_selected_data(relayoutData):
 def second_graph(relayoutData, figure):
     #print(figure['layout'])
     #print(relayoutData)
-    newFig = figure['layout']['images'][0]
-    figure['layout']['title'] = 'test'
+    #newFig = figure['layout']['images'][0]
+    #figure['data'][0]['x'] = relayoutData['xaxis.range[0]'] - relayoutData['xaxis.range[1]']
+    #figure['layout']['title'] = (figure['layout']['images'][0]['source'])[0:30]
     try:
-        figure['layout']['title'] = relayoutData['xaxis.range[0]']
-        figure['layout']['images'][0]['x'] = relayoutData['xaxis.range[0]']
-        figure['layout']['images'][0]['y'] = relayoutData['yaxis.range[1]']
-        figure['layout']['images'][0]['sizex'] = relayoutData['xaxis.range[0]'] - relayoutData['xaxis.range[1]']
-        figure['layout']['images'][0]['sizey'] = relayoutData['yaxis.range[0]'] - relayoutData['yaxis.range[1]']
-        newImg = newGraphplot(fd, connect_edges(fd,edges), x_range=[relayoutData['xaxis.range[0]'], relayoutData['xaxis.range[1]']], y_range=[relayoutData['yaxis.range[0]'], relayoutData['yaxis.range[1]']])
-        newPil = tf.Image(newImg).to_pil()
-        in_mem_file = io.BytesIO()
-        newPil.save(in_mem_file, format = "PNG")
-        # reset file pointer to start
-        in_mem_file.seek(0)
-        img_bytes = in_mem_file.read()
-        base64_encoded_result_bytes = base64.b64encode(img_bytes)
-        base64_encoded_result_str = base64_encoded_result_bytes.decode('ascii')
-
-        figure['layout']['title'] = 'data:image/png;base64,' + base64_encoded_result_str[0:10]
-        #try:
-        figure['layout']['images'][0]['source'] = 'data:image/png;base64,' + base64_encoded_result_str
-        #except:
-        #figure['layout']['title'] ='wrong'
+        newFig = newPlotlyGeneration(relayoutData)
+        return newFig
     except (TypeError, KeyError) as e:
-        figure['layout']['title'] = 'Starting graph'
-        print("skipped")
+        return figure
+        #figure['layout']['title'] = 'Starting graph'
+        #print("skipped")
 
     #newDataShade = newGraphplot(fd, connect_edges(fd,edges), x_range=[relayoutData['xaxis.range[0]'], relayoutData['xaxis.range[1]']] , y_range=[relayoutData['yaxis.range[0]'], relayoutData['yaxis.range[1]']])
     #figure['layout']['images'][0]['source'] = tf.Image(newDataShade).to_pil()
     #print(newFig)
-    return figure
-
-
-    #img = f.layout.images[0]
-    
-    # Update with batch_update so all updates happen simultaneously
-
-    #img.x = x_range[0]
-    #img.y = y_range[1]
-    #img.sizex = x_range[1] - x_range[0]
-    #img.sizey = y_range[1] - y_range[0]
-    #update the image source here, rest can stay
-    #newDataShade = newGraphplot(fd, connect_edges(fd,edges), x_range=x_range, y_range=y_range)
-    #img.source = tf.Image(newDataShade).to_pil()
-    #return f
-
-#f.layout.on_change(update_ds_image, 'xaxis.range', 'yaxis.range', 'width', 'height')
-#newImg
-
-
-# In[12]:
-
-
-mapbox_access_token = 'pk.eyJ1IjoiZWp0YWxib3QiLCJhIjoiY2ptMHBlOGdjMmZlaTNwb2dwMHE2Mm54NCJ9.xzceVNmAZy49SyFDb3UMaw'
-
-map_figure = go.Figure(data=[go.Scattermapbox(
-    lat=[fd.x.min(), fd.x.max()],
-    lon=[fd.y.min(), fd.y.max()],
-    mode='markers')], 
-                    # invisible trace to init axes and to support autoresize
-                    layout={'width': plot_width, 
-                            'height': plot_height,
-                            'autosize': True,
-                            'mapbox':{
-                               'accesstoken': mapbox_access_token,
-                               'bearing': 0,
-                               'center': {
-                                   'lat': 0,
-                                   'lon': -0
-                                },
-                               'pitch': 0,
-                            }
-                    })
-
-map_figure.layout.images = [go.layout.Image(
-    source = back_img,  # plotly now performs auto conversion of PIL image to png data URI
-    xref = "paper",
-    yref = "paper",
-    x = x_range[0],
-    y = y_range[1],
-    sizex = x_range[1] - x_range[0],
-    sizey = y_range[1] - y_range[0],
-    #sizing = "stretch",
-    layer = "above")]
-
-#print(map_figure)
-#map_figure.layout.on_change(update_ds_image, 'xaxis.range', 'yaxis.range', 'width', 'height')
-
-#map_figure
+    #return newFig
 
 if __name__ == '__main__':
     flaskServer.run(debug=True)
