@@ -3,6 +3,8 @@
 
 # In[1]:
 import datetime
+import base64
+import io
 
 import math
 import numpy as np
@@ -81,6 +83,10 @@ fd = forcedirected
 fd_d = graphplot(fd, connect_edges(fd,edges)) 
 
 back_img = tf.Image(fd_d).to_pil()
+
+
+#print(base64_encoded_result_str)
+#print(back_img.show())
 
 x_range=fd.x.min(), fd.x.max()
 y_range=fd.y.min(), fd.y.max()
@@ -203,7 +209,20 @@ def second_graph(relayoutData, figure):
         figure['layout']['images'][0]['sizex'] = relayoutData['xaxis.range[0]'] - relayoutData['xaxis.range[1]']
         figure['layout']['images'][0]['sizey'] = relayoutData['yaxis.range[0]'] - relayoutData['yaxis.range[1]']
         newImg = newGraphplot(fd, connect_edges(fd,edges), x_range=[relayoutData['xaxis.range[0]'], relayoutData['xaxis.range[1]']], y_range=[relayoutData['yaxis.range[0]'], relayoutData['yaxis.range[1]']])
-        #figure['layout']['images'][0]['source'] = newImg
+        newPil = tf.Image(newImg).to_pil()
+        in_mem_file = io.BytesIO()
+        newPil.save(in_mem_file, format = "PNG")
+        # reset file pointer to start
+        in_mem_file.seek(0)
+        img_bytes = in_mem_file.read()
+        base64_encoded_result_bytes = base64.b64encode(img_bytes)
+        base64_encoded_result_str = base64_encoded_result_bytes.decode('ascii')
+
+        figure['layout']['title'] = 'data:image/png;base64,' + base64_encoded_result_str[0:10]
+        #try:
+        figure['layout']['images'][0]['source'] = 'data:image/png;base64,' + base64_encoded_result_str
+        #except:
+        #figure['layout']['title'] ='wrong'
     except (TypeError, KeyError) as e:
         figure['layout']['title'] = 'Starting graph'
         print("skipped")
