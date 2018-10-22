@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
-import datetime
-import base64
-import io
+#Converting image imports
+#import base64
+#import io
 
 import math
 import numpy as np
@@ -12,17 +11,20 @@ import pandas as pd
 
 import datashader as ds
 import datashader.transfer_functions as tf
-from datashader.layout import random_layout, circular_layout, forceatlas2_layout
-from datashader.bundling import connect_edges, hammer_bundle
+from datashader.layout import random_layout
+from datashader.bundling import connect_edges
 
-from itertools import chain
+#from itertools import chain
 
-#dash
+#dash imports
 import flask
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
+
+#plotly import
+import plotly
 
 #from example
 import json
@@ -31,7 +33,6 @@ import xarray as xr
 from collections import OrderedDict
 from textwrap import dedent as d
 
-# In[2]:
 styles = {
     'pre': {
         'border': 'thin lightgrey solid',
@@ -39,22 +40,23 @@ styles = {
     }
 }
 
-
+#Create nodes and edges
 np.random.seed(0)
 n=100
 m=200
 
 nodes = pd.DataFrame(["node"+str(i) for i in range(n)], columns=['name'])
-nodes.tail()
+#nodes.tail()
 edges = pd.DataFrame(np.random.randint(0,len(nodes), size=(m, 2)),
                      columns=['source', 'target'])
-edges.tail()
+#edges.tail()
 
 randomloc = random_layout(nodes)
-randomloc.tail()
+#randomloc.tail()
 
 cvsopts = dict(plot_height=600, plot_width=800)
 
+#Creates nodes in datasahder image
 def nodesplot(nodes, name=None, canvas=None, cat=None):
     canvas = ds.Canvas(**cvsopts) if canvas is None else canvas
     aggregator=None if cat is None else ds.count_cat(cat)
@@ -63,10 +65,12 @@ def nodesplot(nodes, name=None, canvas=None, cat=None):
 
 forcedirected = random_layout(nodes, edges)
 
+#creates edges in datashader image
 def edgesplot(edges, name=None, canvas=None):
     canvas = ds.Canvas(**cvsopts) if canvas is None else canvas
     return tf.shade(canvas.line(edges, 'x','y', agg=ds.count()), name=name)
-    
+   
+#combines nodes and edges in datashader image 
 def graphplot(nodes, edges, name="", canvas=None, cat=None):
     if canvas is None:
         xr = nodes.x.min(), nodes.x.max()
@@ -82,11 +86,9 @@ def graphplot(nodes, edges, name="", canvas=None, cat=None):
 fd = forcedirected
 fd_d = graphplot(fd, connect_edges(fd,edges)) 
 
+#convert datashder image to png
 back_img = tf.Image(fd_d).to_pil()
 
-
-#print(base64_encoded_result_str)
-#print(back_img.show())
 
 x_range=fd.x.min(), fd.x.max()
 y_range=fd.y.min(), fd.y.max()
@@ -96,8 +98,8 @@ y_range=fd.y.min(), fd.y.max()
 plot_height=600
 plot_width=800
 
-mapbox_access_token = 'pk.eyJ1IjoiZWp0YWxib3QiLCJhIjoiY2ptMHBlOGdjMmZlaTNwb2dwMHE2Mm54NCJ9.xzceVNmAZy49SyFDb3UMaw'
 
+#Create initial plotly graph with datashader image as background
 import plotly.graph_objs as go
 f = go.Figure(data=[{'x': x_range, 
                            'y': y_range, 
@@ -118,6 +120,7 @@ f.layout.images = [go.layout.Image(
     #sizing = "stretch",
     layer = "below")]
 
+#Fucntion for creating new plotly graph when zooming
 def newPlotlyGeneration(relayoutData):
     f = go.Figure(data=[{'x': [relayoutData['xaxis.range[0]'], relayoutData['xaxis.range[1]']], 
                            'y': [relayoutData['yaxis.range[0]'], relayoutData['yaxis.range[1]']], 
@@ -151,6 +154,7 @@ def newPlotlyGeneration(relayoutData):
 flaskServer = flask.Flask(__name__)
 app = dash.Dash(__name__, server=flaskServer)
 
+#Create html layout for page 
 app.layout = html.Div([
             dcc.Graph(
                 id = 'graph-1',
@@ -166,6 +170,7 @@ app.layout = html.Div([
                     'doubleClick': 'reset'
                 }
             ),
+            html.Div(id='intermediate-value', style={'display': 'none'}),
             html.Div([
             dcc.Markdown(d("""
                 **Zoom and Relayout Data**
@@ -180,6 +185,7 @@ app.layout = html.Div([
 
         ])
 
+#Function to create new datashader image, used in newPlotlyGeneration
 def newGraphplot(nodes, edges, name="", canvas=None, cat=None, x_range=None, y_range=None):
     if canvas is None:
         xr = x_range
@@ -192,11 +198,6 @@ def newGraphplot(nodes, edges, name="", canvas=None, cat=None, x_range=None, y_r
     #print(ep)
     return tf.stack(ep, np, how="over", name=name)
 
-#newG = newGraphPlot(fd, connect_edges(fd,edges), "Force-directed", x_range=x_range, y_range=y_range, plot_width=plot_width, plot_height=plot_height)
-
-#print(newG)
-
-#newImg = tf.Image(newG).to_pil()
 
 @app.callback(
     Output('relayout-data', 'children'),
@@ -204,6 +205,18 @@ def newGraphplot(nodes, edges, name="", canvas=None, cat=None, x_range=None, y_r
 def display_selected_data(relayoutData):
     #print(figure)
     return json.dumps(relayoutData, indent=2)
+
+@app.callback(
+    Output('intermediate-value', 'children'),
+    [Input('graph-1', 'figure')])
+def store_updated_graph(figure):
+    return json.dumps(figure, cls=plotly.utils.PlotlyJSONEncoder)
+
+#@app.callback(
+#    Output('graph-1', 'figure'),
+#    [Input('intermediate-value', 'children')])
+#def render_graph(graph_json):
+#    return go.Figure(graph_json)
 
 @app.callback(
 	Output('graph-2', 'figure'),
@@ -219,14 +232,25 @@ def second_graph(relayoutData, figure):
         newFig = newPlotlyGeneration(relayoutData)
         return newFig
     except (TypeError, KeyError) as e:
-        return figure
-        #figure['layout']['title'] = 'Starting graph'
-        #print("skipped")
+        newFig = go.Figure(data=[{'x': x_range, 
+                           'y': y_range, 
+                           'mode': 'markers',
+                           'marker': {'opacity': 0}}], # invisible trace to init axes and to support autoresize
+                    layout={'width': plot_width, 
+                            'height': plot_height}
+                   )
 
-    #newDataShade = newGraphplot(fd, connect_edges(fd,edges), x_range=[relayoutData['xaxis.range[0]'], relayoutData['xaxis.range[1]']] , y_range=[relayoutData['yaxis.range[0]'], relayoutData['yaxis.range[1]']])
-    #figure['layout']['images'][0]['source'] = tf.Image(newDataShade).to_pil()
-    #print(newFig)
-    #return newFig
+        newFig.layout.images = [go.layout.Image(
+            source = back_img,
+            xref = "x",
+            yref = "y",
+            x = x_range[0],
+            y = y_range[1],
+            sizex = x_range[1] - x_range[0],
+            sizey = y_range[1] - y_range[0],
+            #sizing = "stretch",
+            layer = "below")]
+        return newFig
 
 if __name__ == '__main__':
     flaskServer.run(debug=True)
