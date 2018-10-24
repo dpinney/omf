@@ -25,7 +25,7 @@ def _safeGet(arr, pos, default):
 		return default
 
 def _lineDistances(x1,x2,y1,y2):
-	''' Calculate distance between two points. Divice by 12 is for a feet to inches conversion. '''
+	''' Calculate distance between two points. Divide by 12 is for a feet to inches conversion. '''
 	return math.sqrt((float(x1) - float(x2)) ** 2 + (float(y1) - float(y2)) ** 2) / 12
 
 def convert(stdString,seqString):

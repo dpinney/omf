@@ -1,13 +1,7 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-#Converting image imports
-#import base64
-#import io
-
 import math
 import numpy as np
 import pandas as pd
+import json
 
 import datashader as ds
 import datashader.transfer_functions as tf
@@ -26,24 +20,11 @@ from dash.dependencies import Input, Output
 #plotly import
 import plotly
 
-#from example
-import json
-import copy
-import xarray as xr
-from collections import OrderedDict
-from textwrap import dedent as d
+app = dash.Dash(__name__)
 
-styles = {
-    'pre': {
-        'border': 'thin lightgrey solid',
-        'overflowX': 'scroll'
-    }
-}
-
-#Create nodes and edges
 np.random.seed(0)
-n=100
-m=200
+n=100000
+m=20000
 
 nodes = pd.DataFrame(["node"+str(i) for i in range(n)], columns=['name'])
 #nodes.tail()
@@ -54,7 +35,7 @@ edges = pd.DataFrame(np.random.randint(0,len(nodes), size=(m, 2)),
 randomloc = random_layout(nodes)
 #randomloc.tail()
 
-cvsopts = dict(plot_height=600, plot_width=800)
+cvsopts = dict(plot_height=900, plot_width=1200)
 
 #Creates nodes in datasahder image
 def nodesplot(nodes, name=None, canvas=None, cat=None):
@@ -95,8 +76,8 @@ y_range=fd.y.min(), fd.y.max()
 
 #xr = nodes.x.min(), nodes.x.max()
 #yr = nodes.y.min(), nodes.y.max()
-plot_height=600
-plot_width=800
+plot_height=900
+plot_width=1200
 
 
 #Create initial plotly graph with datashader image as background
@@ -126,8 +107,8 @@ def newPlotlyGeneration(relayoutData):
                            'y': [relayoutData['yaxis.range[0]'], relayoutData['yaxis.range[1]']], 
                            'mode': 'markers',
                            'marker': {'opacity': 0}}], # invisible trace to init axes and to support autoresize
-                    layout={'width': 800, 
-                            'height': 600}
+                    layout={'width': 1200, 
+                            'height': 900}
                    )
     newImg = newGraphplot(fd, connect_edges(fd,edges), x_range=[relayoutData['xaxis.range[0]'], relayoutData['xaxis.range[1]']], y_range=[relayoutData['yaxis.range[0]'], relayoutData['yaxis.range[1]']])
     newPil = tf.Image(newImg).to_pil()
@@ -151,40 +132,6 @@ def newPlotlyGeneration(relayoutData):
         layer = "below")]
     return f
 
-flaskServer = flask.Flask(__name__)
-app = dash.Dash(__name__, server=flaskServer)
-
-#Create html layout for page 
-app.layout = html.Div([
-            dcc.Graph(
-                id = 'graph-1',
-                figure = f,
-                config = {
-                    'doubleClick': 'reset'
-                }
-            ),
-            dcc.Graph(
-                id = 'graph-2',
-                figure = f,
-                config = {
-                    'doubleClick': 'reset'
-                }
-            ),
-            html.Div(id='intermediate-value', style={'display': 'none'}),
-            html.Div([
-            dcc.Markdown(d("""
-                **Zoom and Relayout Data**
-
-                Click and drag on the graph to zoom or click on the zoom
-                buttons in the graph's menu bar.
-                Clicking on legend items will also fire
-                this event.
-            """)),
-            html.Pre(id='relayout-data', style=styles['pre']),
-        ], className='three columns')
-
-        ])
-
 #Function to create new datashader image, used in newPlotlyGeneration
 def newGraphplot(nodes, edges, name="", canvas=None, cat=None, x_range=None, y_range=None):
     if canvas is None:
@@ -199,58 +146,53 @@ def newGraphplot(nodes, edges, name="", canvas=None, cat=None, x_range=None, y_r
     return tf.stack(ep, np, how="over", name=name)
 
 
-@app.callback(
-    Output('relayout-data', 'children'),
-    [Input('graph-1', 'relayoutData')])
-def display_selected_data(relayoutData):
-    #print(figure)
-    return json.dumps(relayoutData, indent=2)
+app.layout = html.Div([
+    html.Div(
+        dcc.Graph(
+            id='g1',
+            config={'displayModeBar': False}
+        ), className='four columns'
+    )
+], className='row')
 
-@app.callback(
-    Output('intermediate-value', 'children'),
-    [Input('graph-1', 'figure')])
-def store_updated_graph(figure):
-    return json.dumps(figure, cls=plotly.utils.PlotlyJSONEncoder)
 
-#@app.callback(
-#    Output('graph-1', 'figure'),
-#    [Input('intermediate-value', 'children')])
-#def render_graph(graph_json):
-#    return go.Figure(graph_json)
+def highlight():
+    def callback(relayoutData):
+        try:
+            newFig = newPlotlyGeneration(relayoutData)
+            return newFig
+        except (TypeError, KeyError) as e:
+            newFig = go.Figure(data=[{'x': x_range, 
+                               'y': y_range, 
+                               'mode': 'markers',
+                               'marker': {'opacity': 0}}], # invisible trace to init axes and to support autoresize
+                        layout={'width': plot_width, 
+                                'height': plot_height}
+                       )
 
-@app.callback(
-	Output('graph-2', 'figure'),
-	[Input('graph-1', 'relayoutData'),
-    Input('graph-1', 'figure')])
-def second_graph(relayoutData, figure):
-    #print(figure['layout'])
-    #print(relayoutData)
-    #newFig = figure['layout']['images'][0]
-    #figure['data'][0]['x'] = relayoutData['xaxis.range[0]'] - relayoutData['xaxis.range[1]']
-    #figure['layout']['title'] = (figure['layout']['images'][0]['source'])[0:30]
-    try:
-        newFig = newPlotlyGeneration(relayoutData)
-        return newFig
-    except (TypeError, KeyError) as e:
-        newFig = go.Figure(data=[{'x': x_range, 
-                           'y': y_range, 
-                           'mode': 'markers',
-                           'marker': {'opacity': 0}}], # invisible trace to init axes and to support autoresize
-                    layout={'width': plot_width, 
-                            'height': plot_height}
-                   )
+            newFig.layout.images = [go.layout.Image(
+                source = back_img,
+                xref = "x",
+                yref = "y",
+                x = x_range[0],
+                y = y_range[1],
+                sizex = x_range[1] - x_range[0],
+                sizey = y_range[1] - y_range[0],
+                #sizing = "stretch",
+                layer = "below")]
+            return newFig
 
-        newFig.layout.images = [go.layout.Image(
-            source = back_img,
-            xref = "x",
-            yref = "y",
-            x = x_range[0],
-            y = y_range[1],
-            sizex = x_range[1] - x_range[0],
-            sizey = y_range[1] - y_range[0],
-            #sizing = "stretch",
-            layer = "below")]
-        return newFig
+    return callback
+
+
+
+# app.callback is a decorator which means that it takes a function
+# as its argument.
+# highlight is a function "generator": it's a function that returns function
+app.callback(
+    Output('g1', 'figure'),
+    [Input('g1', 'relayoutData')]
+)(highlight())
 
 if __name__ == '__main__':
-    flaskServer.run(debug=True)
+    app.run_server(debug=True)
