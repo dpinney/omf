@@ -333,9 +333,9 @@ def work(modelDir, inputDict):
 		'phase_variation' : float(inputDict['phaseVariation']),
 		'chance_constraint' : float(inputDict['chanceConstraint']),
 		'critical_load_met' : float(inputDict['criticalLoadMet']),
-		'total_load_met' : 0.9,#(float(inputDict['criticalLoadMet']) + float(inputDict['nonCriticalLoadMet'])),
-		'maxDGPerGenerator' : float(inputDict["maxDGPerGenerator"]),
-		'dgUnitCost' : float(inputDict["dgUnitCost"]),
+		'total_load_met' : float(inputDict['nonCriticalLoadMet']),
+		'maxDGPerGenerator' : float(inputDict['maxDGPerGenerator']),
+		'dgUnitCost' : float(inputDict['dgUnitCost']),
 		'newLineCandidates' : inputDict['newLineCandidates'],
 		'hardeningCandidates' : inputDict['hardeningCandidates'],
 		'switchCandidates'	: inputDict['switchCandidates'],
@@ -347,7 +347,7 @@ def work(modelDir, inputDict):
 	}
 	gfmJson = convertToGFM(gfmInputTemplate, feederModel)
 	gfmInputFilename = 'gfmInput.json'
-	with open(pJoin(modelDir, gfmInputFilename), "w") as outFile:
+	with open(pJoin(modelDir, gfmInputFilename), 'w') as outFile:
 		json.dump(gfmJson, outFile, indent=4)
 	# Run GFM
 	gfmBinaryPath = pJoin(__neoMetaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
@@ -517,7 +517,7 @@ def new(modelDir):
 		"switchCandidates" : "A_node705-742,A_node705-712",
 		"criticalLoads": "C_load722",
 		"criticalLoadMet": "0.98",
-		"nonCriticalLoadMet": "0.0",
+		"nonCriticalLoadMet": "0.5",
 		"chanceConstraint": "1.0",
 		"phaseVariation": "0.15",
 		"weatherImpacts": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","wf_clip.asc")).read(),
