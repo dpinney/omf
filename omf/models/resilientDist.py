@@ -61,15 +61,11 @@ def convertToGFM(gfmInputTemplate, feederModel):
 		'total_load_met' : gfmInputTemplate.get('total_load_met',0.9),
 		'chance_constraint' : gfmInputTemplate.get('chance_constraint', 1.0),
 		'phase_variation' : gfmInputTemplate.get('phase_variation', 0.15),
-		'scenarios' : [] # Made up fragility damage scenario.
 	}
 	# Get necessary data from .omd.
 	jsonTree = feederModel.get('tree',{})
 	jsonNodes = feederModel.get('nodes',[])
 	#Line Creation
-	hardCands = gfmInputTemplate['hardeningCandidates'].strip().replace(' ', '').split(',')
-	newLineCands = gfmInputTemplate["newLineCandidates"].strip().replace(' ', '').split(',')
-	switchCands = gfmInputTemplate["switchCandidates"].strip().replace(' ', '').split(',')
 	critLoads = gfmInputTemplate["criticalLoads"].strip().replace(' ', '').split(',')
 	objToFind = ['transformer', 'regulator', 'underground_line', 'overhead_line', 'fuse', 'switch']
 	lineCount = 0
@@ -78,42 +74,12 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			phases = line.get('phases')
 			if 'S' in phases:
 				continue # We don't support secondary system transformers.
-			if line.get('object','') == 'switch':
-				has_switch = True
-			else:
-				has_switch = False
-			newLine = dict({
-				'id' : '', #*
-				'node1_id' : '', #*
-				'node2_id' : '', #*
-				'line_code' : '', #*
+			newLine = {
+				'id' : line.get('name',''),
+				'node1_id' : line.get('from','')+'_bus',
+				'node2_id' : line.get('to','')+'_bus',
 				'length' : float(line.get('length',100)), #* Units match line code entries.
-				'has_switch' : has_switch,
-				'construction_cost': float(gfmInputTemplate['lineUnitCost']),
-				'harden_cost': float(gfmInputTemplate['hardeningUnitCost']), # Russel: this exists unless its a trans.
-				'switch_cost': float(gfmInputTemplate['switchCost']), # taken from rdtInTrevor.json.
-				'can_harden': False, # Not seen in rdtInTrevor.json.
-				'can_add_switch': True, # Not seen in rdtInTrevor.json.
-				# 'num_poles' : 2,
-				'capacity' : 10000, # MVA capacity.
-				'is_transformer' : False,
-				'num_phases' : 3, #*
-				# 'is_new' : False,
-				'has_phase' : [True, True, True] #*
-			})
-			newLine['id'] = line.get('name','')
-			newLine['node1_id'] = line.get('from','')+'_bus' 
-			newLine['node2_id'] = line.get('to','')+'_bus'
-			newLine['line_code'] = lineCount
-			# Calculate harden_cost, 10.
-			if (line.get('name','') in hardCands) or (newLine['harden_cost'] != 0):
-				newLine['can_harden'] = True
-			if line.get('name','') in switchCands:
-				newLine['has_switch'] = True
-			if line.get('name','') in newLineCands:
-				newLine['is_new'] = True
-			if line.get('object','') in ['transformer','regulator']: 
-				newLine['is_transformer'] = True
+			}
  			gfmJson['lines'].append(newLine)
 			lineCount+=1
 	# Bus creation:
@@ -336,13 +302,7 @@ def work(modelDir, inputDict):
 		'total_load_met' : float(inputDict['nonCriticalLoadMet']),
 		'maxDGPerGenerator' : float(inputDict['maxDGPerGenerator']),
 		'dgUnitCost' : float(inputDict['dgUnitCost']),
-		'newLineCandidates' : inputDict['newLineCandidates'],
-		'hardeningCandidates' : inputDict['hardeningCandidates'],
-		'switchCandidates'	: inputDict['switchCandidates'],
-		'hardeningUnitCost' : inputDict['hardeningUnitCost'],
-		'switchCost' : inputDict['switchCost'],
 		'generatorCandidates' : inputDict['generatorCandidates'],
-		'lineUnitCost' : inputDict['lineUnitCost'],
 		'criticalLoads' : inputDict['criticalLoads']
 	}
 	gfmJson = convertToGFM(gfmInputTemplate, feederModel)
@@ -400,7 +360,7 @@ def work(modelDir, inputDict):
 	#Load a blank glm file and use it to write to it
 	feederPath = pJoin(modelDir, 'feeder.glm')
 	with open(feederPath, 'w') as glmFile:
-		toWrite =  omf.feeder.sortedWrite(omd['tree']) + "object jsondump {\n\tfilename_dump_reliability test_JSON_dump.json;\n\twrite_system_info true;\n\twrite_per_unit true;\n\tsystem_base 100.0 MVA;\n};\n"
+		toWrite =  omf.feeder.sortedWrite(omd['tree']) + "object jsondump {\n\tfilename_dump_reliability JSON_dump_line.json;\n\twrite_system_info true;\n\twrite_per_unit true;\n\tsystem_base 100.0 MVA;\n};\n"
 		# + "object jsonreader {\n\tfilename " + insertRealRdtOutputNameHere + ";\n};"
 		glmFile.write(toWrite)		
 	#Write attachments from omd, if no file, one will be created
@@ -410,7 +370,7 @@ def work(modelDir, inputDict):
 	#Wire in the file the user specifies via zipcode.
 	climateFileName, latforpvwatts = zipCodeToClimateName(inputDict["simulationZipCode"])
 	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
-	# Platform specific binaries.
+	# Platform specific binaries for GridLAB-D First Run.
 	if platform.system() == "Linux":
 		myEnv = os.environ.copy()
 		myEnv['GLPATH'] = omf.omfDir + '/solvers/gridlabdv990/'
@@ -422,20 +382,39 @@ def work(modelDir, inputDict):
 		myEnv = os.environ.copy()
 		myEnv['GLPATH'] = omf.omfDir + '/solvers/gridlabdv990/MacRC4p1_std8/'
 		commandString = '"' + omf.omfDir + '/solvers/gridlabdv990/MacRC4p1_std8/gld.sh" feeder.glm'
+	# Run GridLAB-D First Time.
 	proc = subprocess.Popen(commandString, stdout=subprocess.PIPE, shell=True, cwd=modelDir, env=myEnv)
 	(out, err) = proc.communicate()
 	with open(pJoin(modelDir, "gldConsoleOut.txt"), "w") as gldConsoleOut:
 		gldConsoleOut.write(out)
-	accumulator = ""
 	with open(pJoin(modelDir, "JSON_dump_line.json"), "r") as gldOut:
-		accumulator = json.load(gldOut)
-	outData['gridlabdRawOut'] = accumulator
-	#Data transformation for GLD
-	rdtJson["line_codes"] = accumulator["properties"]["line_codes"]
-	rdtJson["lines"] = accumulator["properties"]["lines"]
-	for item in rdtJson["lines"]:
-		item['node1_id'] = item['node1_id'] + "_bus"
-		item['node2_id'] = item['node2_id'] + "_bus"
+		gld_json_line_dump = json.load(gldOut)
+	outData['gridlabdRawOut'] = gld_json_line_dump
+	# Add GridLAB-D line objects and line codes in to the RDT model.
+	rdtJson["line_codes"] = gld_json_line_dump["properties"]["line_codes"]
+	rdtJson["lines"] = gld_json_line_dump["properties"]["lines"]
+	hardCands = inputDict['hardeningCandidates'].strip().replace(' ', '').split(',')
+	newLineCands = inputDict['newLineCandidates'].strip().replace(' ', '').split(',')
+	switchCands = inputDict['switchCandidates'].strip().replace(' ', '').split(',')
+	for line in rdtJson["lines"]:
+		line['node1_id'] = line['node1_id'] + "_bus"
+		line['node2_id'] = line['node2_id'] + "_bus"
+		line['capacity'] = 10000
+		line['construction_cost'] = float(inputDict['lineUnitCost'])
+		line['harden_cost'] = float(inputDict['hardeningUnitCost'])
+		line['switch_cost'] = float(inputDict['switchCost'])
+		line_id = line.get('id','')
+		object_type = line.get('object','')
+		if line_id in hardCands:
+			line['can_harden'] = True
+		if line_id in switchCands:
+			line['can_add_switch'] = True
+		if line_id in newLineCands:
+			line['is_new'] = True
+		if object_type in ['transformer','regulator']: 
+			line['is_transformer'] = True
+		if object_type == 'switch':
+			line['has_switch'] = True
 	with open(rdtInputFilePath, "w") as outFile:
 		json.dump(rdtJson, outFile, indent=4)
 	# Run RDT.
