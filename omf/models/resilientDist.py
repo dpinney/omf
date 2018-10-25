@@ -165,15 +165,15 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			gfmJson['loads'].append(newLoad)
 	# Generator creation:
 	genCands = gfmInputTemplate['generatorCandidates'].strip().replace(' ', '').split(',')
-	for key, gens in jsonTree.iteritems():
+	for key, glmOb in jsonTree.iteritems():
 		# Check for a swing node:
-		isSwing = gens.get('bustype','') == 'SWING'
-		if gens.get('name','') in genCands or isSwing:
-			genID = gens.get('name','')+'_gen'
+		isSwing = glmOb.get('bustype','') == 'SWING'
+		if glmOb.get('name','') in genCands or isSwing:
+			genID = glmOb.get('name','')+'_gen'
 			for elem in gfmJson['buses']:
 				if elem['id'][0:-4] == genID[0:-4]:
 					busID = elem['id']
-			numPhases, has_phase, max_real_phase, max_reactive_phase = getNodePhases(gens, gfmInputTemplate['maxDGPerGenerator'])
+			numPhases, has_phase, max_real_phase, max_reactive_phase = getNodePhases(glmOb, gfmInputTemplate['maxDGPerGenerator'])
 			if isSwing:
 				# HACK: swing buses get "infinitely large", i.e. 5 TW, generator capacity.
 				genSize = 5.0 * 1000.0 * 1000.0
@@ -183,8 +183,8 @@ def convertToGFM(gfmInputTemplate, feederModel):
 				# Non swing buses get 1 MW generators.
 				genSize = gfmInputTemplate['maxDGPerGenerator']
 				isNew = True
-			genObj = dict({
-	 			'id': gens.get('name','')+'_gen', #*
+			genObj = {
+	 			'id': glmOb.get('name','')+'_gen', #*
 				'node_id': busID, #*
 				'is_new': isNew, # Whether or not new generation can be built.
 				'microgrid_cost': gfmInputTemplate['dgUnitCost'], # Per MW capacity of building DG.
@@ -193,7 +193,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 				'has_phase': has_phase, #*
 				'max_reactive_phase': [genSize,genSize,genSize], #*
 				'max_real_phase': [genSize,genSize,genSize] #*
-			})
+			}
 			gfmJson['generators'].append(genObj)
 	return gfmJson
 
