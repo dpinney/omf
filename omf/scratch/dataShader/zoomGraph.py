@@ -17,14 +17,15 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
+from textwrap import dedent as d
 #plotly import
 import plotly
 
 app = dash.Dash(__name__)
 
 np.random.seed(0)
-n=100000
-m=20000
+n=100
+m=200
 
 nodes = pd.DataFrame(["node"+str(i) for i in range(n)], columns=['name'])
 #nodes.tail()
@@ -101,7 +102,7 @@ f.layout.images = [go.layout.Image(
     #sizing = "stretch",
     layer = "below")]
 
-#Fucntion for creating new plotly graph when zooming
+#Function for creating new plotly graph when zooming
 def newPlotlyGeneration(relayoutData):
     f = go.Figure(data=[{'x': [relayoutData['xaxis.range[0]'], relayoutData['xaxis.range[1]']], 
                            'y': [relayoutData['yaxis.range[0]'], relayoutData['yaxis.range[1]']], 
@@ -145,18 +146,76 @@ def newGraphplot(nodes, edges, name="", canvas=None, cat=None, x_range=None, y_r
     #print(ep)
     return tf.stack(ep, np, how="over", name=name)
 
+#Function for creating new plotly graph of mapbox type
+def newMapboxGeneration(relayoutData):
+    mapbox_access_token = 'pk.eyJ1IjoiZWp0YWxib3QiLCJhIjoiY2ptMHBlOGdjMmZlaTNwb2dwMHE2Mm54NCJ9.xzceVNmAZy49SyFDb3UMaw'
+
+    map_figure = go.Figure(data=[go.Scattermapbox(
+        lat=[1, 2],
+        lon=[1, 2],
+        mode='markers')], 
+                        # invisible trace to init axes and to support autoresize
+                        layout={'title': str(relayoutData['mapbox.zoom']) +" " +str(relayoutData['mapbox.center']['lat']),
+                                'width': 1200, 
+                                'height': 900,
+                                #'autosize': True,
+                                'mapbox':{
+                                   'accesstoken': mapbox_access_token,
+                                   'bearing': 0,
+                                   'center': {
+                                       'lat': relayoutData['mapbox.center']['lat'],
+                                       'lon': relayoutData['mapbox.center']['lon']
+                                    },
+                                   'pitch': 0,
+                                   'zoom': relayoutData['mapbox.zoom']
+                                }
+                        })
+    
+    #what to use to replace the xaxis values
+    #newImg = newGraphplot(fd, connect_edges(fd,edges), x_range=[relayoutData['xaxis.range[0]'], relayoutData['xaxis.range[1]']], y_range=[relayoutData['yaxis.range[0]'], relayoutData['yaxis.range[1]']])
+    #newPil = tf.Image(newImg).to_pil()
+    
+    map_figure.layout.images = [go.layout.Image(
+        source = back_img,  # plotly now performs auto conversion of PIL image to png data URI
+        #Need to figu
+        xref = "paper",
+        yref = "paper",
+        #Sets the image's x position. How can this be set to reflect lat/lon
+        x = 0,
+        y = 1,
+        #Sets the image container size horizontally. When `xref` is set to `paper`, units are sized relative to the plot width
+        #How can image container reflect lat/lon?
+        sizex = 1,
+        sizey = 1,
+        layer = "above")]
+    return map_figure
 
 app.layout = html.Div([
     html.Div(
         dcc.Graph(
-            id='g1',
-            config={'displayModeBar': False}
+            id='g1'
         ), className='four columns'
-    )
+    ),
+    html.Div(
+        dcc.Graph(
+            id='g2',
+        ), className='four columns'
+    ),
+    html.Div([
+    dcc.Markdown(d("""
+        **Zoom and Relayout Data**
+
+        Click and drag on the graph to zoom or click on the zoom
+        buttons in the graph's menu bar.
+        Clicking on legend items will also fire
+        this event.
+    """)),
+    html.Pre(id='relayout-data'),
+])
 ], className='row')
 
 
-def highlight():
+def zoomResize():
     def callback(relayoutData):
         try:
             newFig = newPlotlyGeneration(relayoutData)
@@ -184,6 +243,75 @@ def highlight():
 
     return callback
 
+def mapResize():
+    def callback(relayoutData):
+        try:
+            newFig = newMapboxGeneration(relayoutData)
+            return newFig
+        except (TypeError, KeyError) as e:
+            mapbox_access_token = 'pk.eyJ1IjoiZWp0YWxib3QiLCJhIjoiY2ptMHBlOGdjMmZlaTNwb2dwMHE2Mm54NCJ9.xzceVNmAZy49SyFDb3UMaw'
+
+            map_figure = go.Figure(data=[go.Scattermapbox(
+                lat=x_range,
+                lon=y_range,
+                mode='markers')], 
+                                # invisible trace to init axes and to support autoresize
+                                layout={'width': plot_width, 
+                                        'height': plot_height,
+                                        #'autosize': True,
+                                        'mapbox':{
+                                           'accesstoken': mapbox_access_token,
+                                           'bearing': 0,
+                                           'center': {
+                                               'lat': 0,
+                                               'lon': -0
+                                            },
+                                           'pitch': 0,
+                                           'zoom': 5
+                                        }
+                                })
+            map_figure.layout.title = str(e)
+
+            return map_figure
+
+    return callback
+
+#def coord_to_tile():
+#    def callback(relayoutData):
+#        lat_rad = math.radians(relayoutData['mapbox.center']['lat'])
+#        n = 2.0 ** relayoutData['mapbox.zoom']
+#        xtile = int((relayoutData['mapbox.center']['lon'] + 180.0) / 360.0 * n)
+#        ytile = int((1.0 - math.log(math.tan(lat_rad) + (1 / math.cos(lat_rad))) / math.pi) / 2.0 * n)
+#        return ("X= " + str(xtile) + " Y= " +str(ytile))
+#    return callback
+
+tileSize = 256
+def coord_to_tile():
+    def callback(relayoutData):
+        newCoordinates = {}
+        newCoordinates['lat'] = relayoutData['mapbox.center']['lat']
+        newCoordinates['lon'] = relayoutData['mapbox.center']['lon']
+        newCoordinates['scale'] = relayoutData['mapbox.zoom']
+        #world coordinates
+        siny = math.sin(relayoutData['mapbox.center']['lat'] * math.pi / 180)
+        siny = min(max(siny, -0.9999), 0.9999)
+        newCoordinates['worldCoordinateX'] = tileSize * (0.5 + relayoutData['mapbox.center']['lon'] / 360)
+        newCoordinates['worldCoordinateY'] =  tileSize * (0.5 - math.log((1 + siny) / (1 - siny)) / (4 * math.pi)) 
+        #pixel coordinate 
+        scale = 1.0 * 2**(relayoutData['mapbox.zoom'])
+        newCoordinates['pixelCoordinateX'] = math.floor(newCoordinates['worldCoordinateX'] * scale)
+        newCoordinates['pixelCoordinateY'] = math.floor(newCoordinates['worldCoordinateY'] * scale)
+        #tilecoordinate
+        newCoordinates['tilecoordinateX'] = math.floor(newCoordinates['worldCoordinateX'] * scale / tileSize)
+        newCoordinates['tilecoordinateY'] = math.floor(newCoordinates['worldCoordinateY'] * scale / tileSize)
+        return json.dumps(newCoordinates, indent=2)
+
+    return callback
+
+#def display_selected_data():
+#    def callback(relayoutData):
+#        return json.dumps(relayoutData, indent=2)
+#    return callback
 
 
 # app.callback is a decorator which means that it takes a function
@@ -192,7 +320,16 @@ def highlight():
 app.callback(
     Output('g1', 'figure'),
     [Input('g1', 'relayoutData')]
-)(highlight())
+)(zoomResize())
 
+app.callback(
+    Output('g2', 'figure'),
+    [Input('g2', 'relayoutData')]
+)(mapResize())
+
+app.callback(
+    Output('relayout-data', 'children'),
+    [Input('g2', 'relayoutData')]
+)(coord_to_tile())
 if __name__ == '__main__':
     app.run_server(debug=True)
