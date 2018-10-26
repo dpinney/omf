@@ -270,7 +270,7 @@ def new(modelDir):
 		'created': '2015-06-12 17:20:39.308239',
 		'dischargeRate': '5',
 		'modelType': modelName,
-		'chargeRate': '5000',
+		'chargeRate': '5',
 		'demandCurve': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','FrankScadaValidCSV_Copy.csv')).read(),
 		'fileName': 'FrankScadaValidCSV_Copy.csv',
 		'dispatchStrategy': 'optimal',
