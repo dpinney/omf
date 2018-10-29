@@ -317,7 +317,7 @@ def work(modelDir, inputDict):
 		javaCmd = '/Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/bin/java'
 	else:
 		javaCmd = 'java'
-	proc = subprocess.Popen([javaCmd,'-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],'-num','-3','-ro',rdtInputName], stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=modelDir)
+	proc = subprocess.Popen([javaCmd,'-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],'-num','3','-ro',rdtInputName], stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=modelDir)
 	(stdout,stderr) = proc.communicate()
 	with open(pJoin(modelDir, "gfmConsoleOut.txt"), "w") as gfmConsoleOut:
 		gfmConsoleOut.write(stdout)
@@ -337,7 +337,7 @@ def work(modelDir, inputDict):
 	outData["lineData"] = lineData
 	outData["generatorData"] = '{:,.2f}'.format(float(inputDict["dgUnitCost"]) * float(inputDict["maxDGPerGenerator"]))
 	outData['gfmRawOut'] = rdtJsonAsString
-	#Inserts scenarios block into RDT input if does not exist
+	# Insert user-specified scenarios block into RDT input
 	if inputDict['scenarios'] != "":
 		rdtJson['scenarios'] = json.loads(inputDict['scenarios'])
 		with open(pJoin(rdtInputFilePath), "w") as rdtInputFile:
@@ -361,7 +361,6 @@ def work(modelDir, inputDict):
 	feederPath = pJoin(modelDir, 'feeder.glm')
 	with open(feederPath, 'w') as glmFile:
 		toWrite =  omf.feeder.sortedWrite(omd['tree']) + "object jsondump {\n\tfilename_dump_reliability JSON_dump_line.json;\n\twrite_system_info true;\n\twrite_per_unit true;\n\tsystem_base 100.0 MVA;\n};\n"
-		# + "object jsonreader {\n\tfilename " + insertRealRdtOutputNameHere + ";\n};"
 		glmFile.write(toWrite)		
 	#Write attachments from omd, if no file, one will be created
 	for fileName in omd['attachments']:
@@ -446,7 +445,7 @@ def work(modelDir, inputDict):
 			if (value['object'] == 'underground_line') or (value['object'] == 'overhead_line'):
 				if value['name'] not in lineSwitchList:
 					del feederCopy['tree'][key]
-	#Add generators to second model.
+	# Add generators to second model.
 	maxTreeKey = int(max(feederCopy['tree'], key=int)) + 1
 	maxTreeKey = max(feederCopy['tree'], key=int)
 	# Load a blank glm file and use it to write to it
