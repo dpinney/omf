@@ -24,7 +24,8 @@ def work(modelDir, inputDict):
 	cellCapacity = float(inputDict['cellCapacity'])
 	(cellCapacity, dischargeRate, chargeRate, cellQuantity, demandCharge, cellCost) = \
 		[float(inputDict[x]) for x in ('cellCapacity', 'dischargeRate', 'chargeRate', 'cellQuantity', 'demandCharge', 'cellCost')]
-	battEff	= float(inputDict.get("batteryEfficiency", 92)) / 100.0 * float(inputDict.get("inverterEfficiency", 92)) / 100.0 * float(inputDict.get("inverterEfficiency", 92)) / 100.0
+	# Note: inverterEfficiency is squared to get round trip efficiency.
+	battEff	= float(inputDict.get('batteryEfficiency', 92)) / 100.0 * (float(inputDict.get('inverterEfficiency', 92)) / 100.0) ** 2
 	discountRate = float(inputDict.get('discountRate', 2.5)) / 100.0
 	retailCost = float(inputDict.get('retailCost', 0.07))
 	dodFactor = float(inputDict.get('dodFactor', 85)) / 100.0
@@ -269,7 +270,7 @@ def new(modelDir):
 		'created': '2015-06-12 17:20:39.308239',
 		'dischargeRate': '5',
 		'modelType': modelName,
-		'chargeRate': '5000',
+		'chargeRate': '5',
 		'demandCurve': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','FrankScadaValidCSV_Copy.csv')).read(),
 		'fileName': 'FrankScadaValidCSV_Copy.csv',
 		'dispatchStrategy': 'optimal',

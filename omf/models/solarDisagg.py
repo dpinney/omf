@@ -81,7 +81,7 @@ def work(modelDir, inputDict):
 	startDate = datetime.datetime.strptime(inputDict.get("year"), "%Y-%m-%d")
 	#Use 90 day interval for now
 	endDate = datetime.datetime.strftime(startDate + datetime.timedelta(days=90), "%Y-%m-%d")
-	flike = StringIO.StringIO(pullAsosRevised(inputDict.get("year"),inputDict.get("asos"), 'tmpf', end=endDate))
+	flike = StringIO.StringIO(pullAsosRevised(inputDict.get("year"),inputDict.get("asosStation"), 'tmpf', end=endDate))
 	with open(pJoin(modelDir,inputDict['weatherFileName']),'w') as loadTempFile:
 		csvwriter = csv.writer(loadTempFile, delimiter=',')
 		next(csv.reader(flike))
@@ -232,6 +232,7 @@ def work(modelDir, inputDict):
 	#print(soup)
 	#print(soup2)
 
+	#Read latlons of loads for map 
 	loadLocations=[]
 	with open(pJoin(modelDir, inputDict['latLonFileName']),'w') as loadTempFile:
 		loadTempFile.write(inputDict['latLonData'])
@@ -277,7 +278,8 @@ def new(modelDir):
 		"weatherFileName": weatherDataFile,
 		"latLonData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles",latLonDataFile)).read(),
 		"latLonFileName": latLonDataFile,
-		"asos": "CHO",
+		"asosStation": "CHO",
+		"asosState": "VA",
 		"year": "2017-01-01",
 		"created":str(datetime.datetime.now())
 	}

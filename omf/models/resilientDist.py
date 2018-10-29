@@ -61,15 +61,11 @@ def convertToGFM(gfmInputTemplate, feederModel):
 		'total_load_met' : gfmInputTemplate.get('total_load_met',0.9),
 		'chance_constraint' : gfmInputTemplate.get('chance_constraint', 1.0),
 		'phase_variation' : gfmInputTemplate.get('phase_variation', 0.15),
-		'scenarios' : [] # Made up fragility damage scenario.
 	}
 	# Get necessary data from .omd.
 	jsonTree = feederModel.get('tree',{})
 	jsonNodes = feederModel.get('nodes',[])
 	#Line Creation
-	hardCands = gfmInputTemplate['hardeningCandidates'].strip().replace(' ', '').split(',')
-	newLineCands = gfmInputTemplate["newLineCandidates"].strip().replace(' ', '').split(',')
-	switchCands = gfmInputTemplate["switchCandidates"].strip().replace(' ', '').split(',')
 	critLoads = gfmInputTemplate["criticalLoads"].strip().replace(' ', '').split(',')
 	objToFind = ['transformer', 'regulator', 'underground_line', 'overhead_line', 'fuse', 'switch']
 	lineCount = 0
@@ -78,100 +74,14 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			phases = line.get('phases')
 			if 'S' in phases:
 				continue # We don't support secondary system transformers.
-			if line.get('object','') == 'switch':
-				has_switch = True
-			else:
-				has_switch = False
-			newLine = dict({
-				'id' : '', #*
-				'node1_id' : '', #*
-				'node2_id' : '', #*
-				'line_code' : '', #*
+			newLine = {
+				'id' : line.get('name',''),
+				'node1_id' : line.get('from','')+'_bus',
+				'node2_id' : line.get('to','')+'_bus',
 				'length' : float(line.get('length',100)), #* Units match line code entries.
-				'has_switch' : has_switch,
-				'construction_cost': float(gfmInputTemplate['lineUnitCost']),
-				'harden_cost': float(gfmInputTemplate['hardeningUnitCost']), # Russel: this exists unless its a trans.
-				'switch_cost': float(gfmInputTemplate['switchCost']), # taken from rdtInTrevor.json.
-				'can_harden': False, # Not seen in rdtInTrevor.json.
-				'can_add_switch': True, # Not seen in rdtInTrevor.json.
-				# 'num_poles' : 2,
-				'capacity' : 10000, # MVA capacity.
-				'is_transformer' : False,
-				'num_phases' : 3, #*
-				# 'is_new' : False,
-				'has_phase' : [True, True, True] #*
-			})
-			newLine['id'] = line.get('name','')
-			newLine['node1_id'] = line.get('from','')+'_bus' 
-			newLine['node2_id'] = line.get('to','')+'_bus'
-			newLine['line_code'] = lineCount
-			# Calculate harden_cost, 10.
-			if (line.get('name','') in hardCands) or (newLine['harden_cost'] != 0):
-				newLine['can_harden'] = True
-			if line.get('name','') in switchCands:
-				newLine['has_switch'] = True
-			if line.get('name','') in newLineCands:
-				newLine['is_new'] = True
-			if line.get('object','') in ['transformer','regulator']: 
-				newLine['is_transformer'] = True
+			}
  			gfmJson['lines'].append(newLine)
 			lineCount+=1
-	# Line Code Creation
-	xMatrices, rMatrices = {1: [], 2: [], 3: []}, {1: [], 2: [], 3: []}
-	try: 
-		lineCodes = json.loads(gfmInputTemplate['xrMatrices'])['line_codes']
-	except:
-		raise Exception('ERROR: Unable to process user uploaded XR Matrices')
-	for i,code in enumerate(lineCodes):
-		if i > 100: break
-		xMatrices[int(code['num_phases'])].append(code['xmatrix'])
-		rMatrices[int(code['num_phases'])].append(code['rmatrix'])
-	for lineCode in range(0,lineCount):
-		newLineCode = dict({
-			'line_code': '', #*
-			'num_phases': '', #*
-			'xmatrix': [[],[],[]], #* reactance terms: phaseA, phaseB, and phaseC.
-			'rmatrix': [[],[],[]] #* resistance terms: phaseA/B/C.
-		})
-		newLineCode['line_code'] = lineCode
-		# Get phases and which phase a/b/c exists.
-		newLineCode['num_phases'] = gfmJson['lines'][lineCode]['num_phases']
-		if int(newLineCode['num_phases']) < 3: 
-			phasesExist = gfmJson['lines'][lineCode]['has_phase']
-		if int(newLineCode['num_phases']) == 3: 	
-			# Set right x/r matrices for 3 phase.
-			newLineCode['xmatrix'] = xMatrices[3][0]
-			newLineCode['rmatrix'] = rMatrices[3][0]
-			if len(xMatrices[3])>1: xMatrices[3].pop(0)
-			if len(rMatrices[3])>1: rMatrices[3].pop(0)
-		elif int(newLineCode['num_phases']) == 2: 
-			# Set it for 2 phase.
-			xMatrix = [[0.26732955, 0.12200757999999999, 0.0], [0.12200757999999999, 0.27047349, 0.0], [0.0, 0.0, 0.0]]
-			rMatrix = [[0.36553030, 0.04407197, 0.0], [0.04407197, 0.36282197, 0.0], [0.0, 0.0, 0.0]]
-			newLineCode['xmatrix'] = xMatrix
-			newLineCode['rmatrix'] = rMatrix
-		else:
-			# Set it for 1 phase.
-			xMatrix = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
-			rMatrix = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
-			for i,exists in enumerate(phasesExist):
-				if exists:
-					# Set xmatrix.
-					for xSubMatrix in xMatrices[1][0]:
-						for val in xSubMatrix:
-							if float(val) != 0.0: 
-								xMatrix[0][i] = val
-								break
-					# Set rmatrix.
-					for rSubMatrix in rMatrices[1][0]:
-						for val in rSubMatrix:
-							if float(val) != 0.0: 
-								rMatrix[0][i] = val
-								break
-			newLineCode['xmatrix'] = xMatrix
-			newLineCode['rmatrix'] = rMatrix
-		#SET THE newLineCode to the output of GRIDLABD
-		gfmJson['line_codes'].append(newLineCode)
 	# Bus creation:
 	objToFind = ['node', 'load', 'triplex_meter']
 	for key, bus in jsonTree.iteritems():
@@ -255,15 +165,15 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			gfmJson['loads'].append(newLoad)
 	# Generator creation:
 	genCands = gfmInputTemplate['generatorCandidates'].strip().replace(' ', '').split(',')
-	for key, gens in jsonTree.iteritems():
+	for key, glmOb in jsonTree.iteritems():
 		# Check for a swing node:
-		isSwing = gens.get('bustype','') == 'SWING'
-		if gens.get('name','') in genCands or isSwing:
-			genID = gens.get('name','')+'_gen'
+		isSwing = glmOb.get('bustype','') == 'SWING'
+		if glmOb.get('name','') in genCands or isSwing:
+			genID = glmOb.get('name','')+'_gen'
 			for elem in gfmJson['buses']:
 				if elem['id'][0:-4] == genID[0:-4]:
 					busID = elem['id']
-			numPhases, has_phase, max_real_phase, max_reactive_phase = getNodePhases(gens, gfmInputTemplate['maxDGPerGenerator'])
+			numPhases, has_phase, max_real_phase, max_reactive_phase = getNodePhases(glmOb, gfmInputTemplate['maxDGPerGenerator'])
 			if isSwing:
 				# HACK: swing buses get "infinitely large", i.e. 5 TW, generator capacity.
 				genSize = 5.0 * 1000.0 * 1000.0
@@ -273,8 +183,8 @@ def convertToGFM(gfmInputTemplate, feederModel):
 				# Non swing buses get 1 MW generators.
 				genSize = gfmInputTemplate['maxDGPerGenerator']
 				isNew = True
-			genObj = dict({
-	 			'id': gens.get('name','')+'_gen', #*
+			genObj = {
+	 			'id': glmOb.get('name','')+'_gen', #*
 				'node_id': busID, #*
 				'is_new': isNew, # Whether or not new generation can be built.
 				'microgrid_cost': gfmInputTemplate['dgUnitCost'], # Per MW capacity of building DG.
@@ -283,11 +193,11 @@ def convertToGFM(gfmInputTemplate, feederModel):
 				'has_phase': has_phase, #*
 				'max_reactive_phase': [genSize,genSize,genSize], #*
 				'max_real_phase': [genSize,genSize,genSize] #*
-			})
+			}
 			gfmJson['generators'].append(genObj)
 	return gfmJson
 
-def genDiagram(outputDir, feederJson):
+def genDiagram(outputDir, feederJson, damageDict):
 	# Load required data.
 	tree = feederJson.get("tree",{})
 	links = feederJson.get("links",{})
@@ -311,9 +221,68 @@ def genDiagram(outputDir, feederJson):
 		if aLat is None and aLon is None and aFrom is None:
 			 tree.pop(key)
 	# Create and save the graphic.
-	nxG = feeder.treeToNxGraph(tree)
-	feeder.latLonNxGraph(nxG) # This function creates a .plt reference which can be saved here.
-	plt.savefig(pJoin(outputDir,"feederChart.png"), dpi=800, pad_inches=0.0)	
+	inGraph = feeder.treeToNxGraph(tree)
+	#feeder.latLonNxGraph(nxG) # This function creates a .plt reference which can be saved here.
+	labels=False
+	neatoLayout=False 
+	showPlot=False
+	plt.axis('off')
+	plt.tight_layout()
+	plt.gca().invert_yaxis()
+	plt.gca().set_aspect('equal')
+	# Layout the graph via GraphViz neato. Handy if there's no lat/lon data.
+	if neatoLayout:
+		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
+		cleanG = nx.Graph(inGraph.edges())
+		# HACK2: might miss nodes without edges without the following.
+		cleanG.add_nodes_from(inGraph)
+		pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
+	else:
+		pos = {n:inGraph.node[n].get('pos',(0,0)) for n in inGraph}
+	# Draw all the edges.
+	for e in inGraph.edges():
+		edgeName = inGraph.edge[e[0]][e[1]].get('name')
+		edgeColor = 'black'
+		if edgeName in damageDict:
+			if damageDict[edgeName] == 1:
+				edgeColor = 'yellow'
+			if damageDict[edgeName] == 2:
+				edgeColor = 'orange'
+			if damageDict[edgeName] >= 3:
+				edgeColor = 'red'
+		eType = inGraph.edge[e[0]][e[1]].get('type','underground_line')
+		ePhases = inGraph.edge[e[0]][e[1]].get('phases',1)
+		standArgs = {'edgelist':[e],
+					 'edge_color':edgeColor,
+					 'width':2,
+					 'style':{'parentChild':'dotted','underground_line':'dashed'}.get(eType,'solid') }
+		if ePhases==3:
+			standArgs.update({'width':5})
+			nx.draw_networkx_edges(inGraph,pos,**standArgs)
+			standArgs.update({'width':3,'edge_color':'white'})
+			nx.draw_networkx_edges(inGraph,pos,**standArgs)
+			standArgs.update({'width':1,'edge_color':feeder._obToCol(eType)})
+			nx.draw_networkx_edges(inGraph,pos,**standArgs)
+		if ePhases==2:
+			standArgs.update({'width':3})
+			nx.draw_networkx_edges(inGraph,pos,**standArgs)
+			standArgs.update({'width':1,'edge_color':'white'})
+			nx.draw_networkx_edges(inGraph,pos,**standArgs)
+		else:
+			nx.draw_networkx_edges(inGraph,pos,**standArgs)
+	# Draw nodes and optional labels.
+	nx.draw_networkx_nodes(inGraph,pos,
+						   nodelist=pos.keys(),
+						   node_color=[feeder._obToCol(inGraph.node[n].get('type','underground_line')) for n in inGraph],
+						   linewidths=0,
+						   node_size=10)
+	if labels:
+		nx.draw_networkx_labels(inGraph,pos,
+								font_color='black',
+								font_weight='bold',
+								font_size=0.25)
+	if showPlot: plt.show()
+	plt.savefig(pJoin(outputDir,"feederChart.png"), dpi=800, pad_inches=0.0)
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
@@ -330,27 +299,18 @@ def work(modelDir, inputDict):
 		'phase_variation' : float(inputDict['phaseVariation']),
 		'chance_constraint' : float(inputDict['chanceConstraint']),
 		'critical_load_met' : float(inputDict['criticalLoadMet']),
-		'total_load_met' : 0.9,#(float(inputDict['criticalLoadMet']) + float(inputDict['nonCriticalLoadMet'])),
-		'xrMatrices' : inputDict["xrMatrices"],
-		'maxDGPerGenerator' : float(inputDict["maxDGPerGenerator"]),
-		'dgUnitCost' : float(inputDict["dgUnitCost"]),
-		'newLineCandidates' : inputDict['newLineCandidates'],
-		'hardeningCandidates' : inputDict['hardeningCandidates'],
-		'switchCandidates'	: inputDict['switchCandidates'],
-		'hardeningUnitCost' : inputDict['hardeningUnitCost'],
-		'switchCost' : inputDict['switchCost'],
+		'total_load_met' : float(inputDict['nonCriticalLoadMet']),
+		'maxDGPerGenerator' : float(inputDict['maxDGPerGenerator']),
+		'dgUnitCost' : float(inputDict['dgUnitCost']),
 		'generatorCandidates' : inputDict['generatorCandidates'],
-		'lineUnitCost' : inputDict['lineUnitCost'],
 		'criticalLoads' : inputDict['criticalLoads']
 	}
 	gfmJson = convertToGFM(gfmInputTemplate, feederModel)
 	gfmInputFilename = 'gfmInput.json'
-	with open(pJoin(modelDir, gfmInputFilename), "w") as outFile:
+	with open(pJoin(modelDir, gfmInputFilename), 'w') as outFile:
 		json.dump(gfmJson, outFile, indent=4)
 	# Run GFM
 	gfmBinaryPath = pJoin(__neoMetaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
-	print gfmBinaryPath
-	print gfmInputFilename
 	rdtInputName = 'rdtInput.json'
 	if platform.system() == 'Darwin':
 		#HACK: force use of Java8 on MacOS.
@@ -383,64 +343,80 @@ def work(modelDir, inputDict):
 		with open(pJoin(rdtInputFilePath), "w") as rdtInputFile:
 			json.dump(rdtJson, rdtInputFile, indent=4)
 	# Run GridLAB-D first time to generate xrMatrices.
-	print "RUNNING GLD FOR", modelDir
-	if platform.system() in ["Windows","Linux"]:
-		omdPath = pJoin(modelDir, feederName + ".omd")
-		with open(omdPath, "r") as omd:
-			omd = json.load(omd)
-		#REMOVE NEWLINECANDIDATES
-		deleteList = []
-		newLines = inputDict["newLineCandidates"].strip().replace(' ', '').split(',')
-		for newLine in newLines:
-			for omdObj in omd["tree"]:
-				if ("name" in omd["tree"][omdObj]):
-					if (newLine == omd["tree"][omdObj]["name"]):
-						deleteList.append(omdObj)
-		for delItem in deleteList:
-			del omd["tree"][delItem]
-		#Load a blank glm file and use it to write to it
-		feederPath = pJoin(modelDir, 'feeder.glm')
-		with open(feederPath, 'w') as glmFile:
-			toWrite =  omf.feeder.sortedWrite(omd['tree']) + "object jsondump {\n\tfilename_dump_reliability test_JSON_dump.json;\n\twrite_system_info true;\n\twrite_per_unit true;\n\tsystem_base 100.0 MVA;\n};\n"# + "object jsonreader {\n\tfilename " + insertRealRdtOutputNameHere + ";\n};"
-			glmFile.write(toWrite)		
-		#Write attachments from omd, if no file, one will be created
-		for fileName in omd['attachments']:
-			with open(os.path.join(modelDir, fileName),'w') as file:
-				file.write(omd['attachments'][fileName])
-		#Wire in the file the user specifies via zipcode.
-		climateFileName, latforpvwatts = zipCodeToClimateName(inputDict["simulationZipCode"])
-		shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
-		# Platform specific binaries.
-		if platform.system() == "Linux":
-			myEnv = os.environ.copy()
-			myEnv['GLPATH'] = omf.omfDir + '/solvers/gridlabdv990/'
-			commandString = omf.omfDir + '/solvers/gridlabdv990/gridlabd.bin feeder.glm'  
-		elif platform.system() == "Windows":
-			myEnv = os.environ.copy()
-			commandString =  '"' + pJoin(omf.omfDir, "solvers", "gridlabdv990", "gridlabd.exe") + '"' + " feeder.glm"
-		proc = subprocess.Popen(commandString, stdout=subprocess.PIPE, shell=True, cwd=modelDir, env=myEnv)
-		(out, err) = proc.communicate()
-		with open(pJoin(modelDir, "gldConsoleOut.txt"), "w") as gldConsoleOut:
-			gldConsoleOut.write(out)
-		accumulator = ""
-		with open(pJoin(modelDir, "JSON_dump_line.json"), "r") as gldOut:
-			accumulator = json.load(gldOut)
-		outData['gridlabdRawOut'] = accumulator
-		#Data transformation for GLD
-		rdtJson["line_codes"] = accumulator["properties"]["line_codes"]
-		rdtJson["lines"] = accumulator["properties"]["lines"]
-		for item in rdtJson["lines"]:
-			item['node1_id'] = item['node1_id'] + "_bus"
-			item['node2_id'] = item['node2_id'] + "_bus"
-		with open(pJoin(modelDir, rdtInputFilePath), "w") as outFile:
-			json.dump(rdtJson, outFile, indent=4)
-	else:
-		tree = feederModel.get("tree",{})
-		attachments = feederModel.get("attachments",{})
-		climateFileName, latforpvwatts = zipCodeToClimateName(inputDict["simulationZipCode"])
-		shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
-		gridlabdRawOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=modelDir)
-		outData['gridlabdRawOut'] = gridlabdRawOut
+	print "RUNNING 1ST GLD RUN FOR", modelDir
+	omdPath = pJoin(modelDir, feederName + ".omd")
+	with open(omdPath, "r") as omd:
+		omd = json.load(omd)
+	# Remove new line candidates to get normal system powerflow results.
+	deleteList = []
+	newLines = inputDict["newLineCandidates"].strip().replace(' ', '').split(',')
+	for newLine in newLines:
+		for omdObj in omd["tree"]:
+			if ("name" in omd["tree"][omdObj]):
+				if (newLine == omd["tree"][omdObj]["name"]):
+					deleteList.append(omdObj)
+	for delItem in deleteList:
+		del omd["tree"][delItem]
+	#Load a blank glm file and use it to write to it
+	feederPath = pJoin(modelDir, 'feeder.glm')
+	with open(feederPath, 'w') as glmFile:
+		toWrite =  omf.feeder.sortedWrite(omd['tree']) + "object jsondump {\n\tfilename_dump_reliability JSON_dump_line.json;\n\twrite_system_info true;\n\twrite_per_unit true;\n\tsystem_base 100.0 MVA;\n};\n"
+		# + "object jsonreader {\n\tfilename " + insertRealRdtOutputNameHere + ";\n};"
+		glmFile.write(toWrite)		
+	#Write attachments from omd, if no file, one will be created
+	for fileName in omd['attachments']:
+		with open(os.path.join(modelDir, fileName),'w') as file:
+			file.write(omd['attachments'][fileName])
+	#Wire in the file the user specifies via zipcode.
+	climateFileName, latforpvwatts = zipCodeToClimateName(inputDict["simulationZipCode"])
+	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
+	# Platform specific binaries for GridLAB-D First Run.
+	if platform.system() == "Linux":
+		myEnv = os.environ.copy()
+		myEnv['GLPATH'] = omf.omfDir + '/solvers/gridlabdv990/'
+		commandString = omf.omfDir + '/solvers/gridlabdv990/gridlabd.bin feeder.glm'  
+	elif platform.system() == "Windows":
+		myEnv = os.environ.copy()
+		commandString =  '"' + pJoin(omf.omfDir, "solvers", "gridlabdv990", "gridlabd.exe") + '"' + " feeder.glm"
+	elif platform.system() == "Darwin":
+		myEnv = os.environ.copy()
+		myEnv['GLPATH'] = omf.omfDir + '/solvers/gridlabdv990/MacRC4p1_std8/'
+		commandString = '"' + omf.omfDir + '/solvers/gridlabdv990/MacRC4p1_std8/gld.sh" feeder.glm'
+	# Run GridLAB-D First Time.
+	proc = subprocess.Popen(commandString, stdout=subprocess.PIPE, shell=True, cwd=modelDir, env=myEnv)
+	(out, err) = proc.communicate()
+	with open(pJoin(modelDir, "gldConsoleOut.txt"), "w") as gldConsoleOut:
+		gldConsoleOut.write(out)
+	with open(pJoin(modelDir, "JSON_dump_line.json"), "r") as gldOut:
+		gld_json_line_dump = json.load(gldOut)
+	outData['gridlabdRawOut'] = gld_json_line_dump
+	# Add GridLAB-D line objects and line codes in to the RDT model.
+	rdtJson["line_codes"] = gld_json_line_dump["properties"]["line_codes"]
+	rdtJson["lines"] = gld_json_line_dump["properties"]["lines"]
+	hardCands = inputDict['hardeningCandidates'].strip().replace(' ', '').split(',')
+	newLineCands = inputDict['newLineCandidates'].strip().replace(' ', '').split(',')
+	switchCands = inputDict['switchCandidates'].strip().replace(' ', '').split(',')
+	for line in rdtJson["lines"]:
+		line['node1_id'] = line['node1_id'] + "_bus"
+		line['node2_id'] = line['node2_id'] + "_bus"
+		line['capacity'] = 10000
+		line['construction_cost'] = float(inputDict['lineUnitCost'])
+		line['harden_cost'] = float(inputDict['hardeningUnitCost'])
+		line['switch_cost'] = float(inputDict['switchCost'])
+		line_id = line.get('id','')
+		object_type = line.get('object','')
+		if line_id in hardCands:
+			line['can_harden'] = True
+		if line_id in switchCands:
+			line['can_add_switch'] = True
+		if line_id in newLineCands:
+			line['is_new'] = True
+		if object_type in ['transformer','regulator']: 
+			line['is_transformer'] = True
+		if object_type == 'switch':
+			line['has_switch'] = True
+	with open(rdtInputFilePath, "w") as outFile:
+		json.dump(rdtJson, outFile, indent=4)
 	# Run RDT.
 	print "RUNNING RDT FOR", modelDir
 	rdtOutFile = modelDir + '/rdtOutput.json'
@@ -457,7 +433,7 @@ def work(modelDir, inputDict):
 		rdtOut = json.loads(rdtRawOut)
 		json.dump(rdtOut, outFile, indent = 4)
 	# Generate and run 2nd copy of GridLAB-D model with changes specified by RDT.
-	print "RUNNING GLD FOR", modelDir
+	print "RUNNING 2ND GLD RUN FOR", modelDir
 	feederCopy = copy.deepcopy(feederModel)
 	lineSwitchList = []
 	for line in rdtOut['design_solution']['lines']:
@@ -487,7 +463,14 @@ def work(modelDir, inputDict):
 		# TODO: make 2nd run of GridLAB-D work on Unixes.
 		outData["secondGLD"] = str(False)
 	# Draw the feeder.
-	genDiagram(modelDir, feederModel)
+	damageDict = {}
+	for scenario in rdtJson["scenarios"]:
+		for line in scenario["disable_lines"]:
+			if line in damageDict:
+				damageDict[line] = damageDict[line] + 1
+			else:
+				damageDict[line] = 1
+	genDiagram(modelDir, feederModel, damageDict)
 	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
 		outData["oneLineDiagram"] = inFile.read().encode("base64")
 	# And we're done.
@@ -498,7 +481,6 @@ def new(modelDir):
 	defaultInputs = {
 		"feederName1": "trip37", # "trip37" "UCS Winter 2017 Fixed" "SVECNoIslands"
 		"modelType": modelName,
-		"runTime": "0:00:30",
 		"layoutAlgorithm": "geospatial",
 		"modelName": modelDir,
 		"user": "admin",
@@ -514,13 +496,11 @@ def new(modelDir):
 		"switchCandidates" : "A_node705-742,A_node705-712",
 		"criticalLoads": "C_load722",
 		"criticalLoadMet": "0.98",
-		"nonCriticalLoadMet": "0.0",
+		"nonCriticalLoadMet": "0.5",
 		"chanceConstraint": "1.0",
 		"phaseVariation": "0.15",
 		"weatherImpacts": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","wf_clip.asc")).read(),
 		"weatherImpactsFileName": "wf_clip.asc", # "wf_clip.asc" "wind_grid_1UCS.asc" "wf_clipSVEC.asc"
-		"xrMatrices":open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","lineCodesTrip37.json")).read(),
-		"xrMatricesFileName":"lineCodesTrip37.json",
 		"scenarios": "",
 		"scenariosFileName": "",
 		"simulationDate": "2012-01-01",

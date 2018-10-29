@@ -67,9 +67,6 @@ def voltPlot(omd, workDir=None, neatoLayout=False):
 				rowDict[key] = row[pos]
 			voltTable.append(rowDict)
 	# Calculate average node voltage deviation. First, helper functions.
-	def pythag(x,y):
-		''' For right triangle with sides a and b, return the hypotenuse. '''
-		return math.sqrt(x**2+y**2)
 	def digits(x):
 		''' Returns number of digits before the decimal in the float x. '''
 		return math.ceil(math.log10(x+1))
@@ -86,8 +83,8 @@ def voltPlot(omd, workDir=None, neatoLayout=False):
 	for row in voltTable:
 		allVolts = []
 		for phase in ['A','B','C']:
-			phaseVolt = pythag(float(row['volt'+phase+'_real']),
-							   float(row['volt'+phase+'_imag']))
+			phaseVolt = math.hypot(float(row['volt'+phase+'_real']),
+								   float(row['volt'+phase+'_imag']))
 			if phaseVolt != 0.0:
 				if digits(phaseVolt)>3:
 					# Normalize to 120 V standard
