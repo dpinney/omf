@@ -193,7 +193,7 @@ def work(modelDir, inputDict):
 		cashFlowCurve = [(peakShaveSum * demandCharge)-(totalYearlyCharge*retailCost) for year in range(projYears)]
 		outData['SPP'] = (cellCost*cellQuantity)/((peakShaveSum*demandCharge)-(totalYearlyCharge*retailCost))
 		outData['kWhtoRecharge'] = chargePerMonth
-	cashFlowCurve[0] -= cellCost * cellQuantity
+	cashFlowCurve.insert(0, -1 * cellCost * cellQuantity)  # insert initial investment
 	
 
 	# Monthly Cost Comparison Table
@@ -266,7 +266,7 @@ def new(modelDir):
 		'chargeRate': '5',
 		'demandCurve': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','FrankScadaValidCSV_Copy.csv')).read(),
 		'fileName': 'FrankScadaValidCSV_Copy.csv',
-		'dispatchStrategy': 'customDispatch',
+		'dispatchStrategy': 'optimal',
 		'cellCost': '7140',
 		'cellQuantity': '10',
 		'runTime': '0:00:03',
