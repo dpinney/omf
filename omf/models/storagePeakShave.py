@@ -170,10 +170,12 @@ def work(modelDir, inputDict):
 		peakShaveSum = sum(ps)
 		# Calculate how much the battery charges per year for cashFlowCurve, SPP calculation, kWhToRecharge
 		chargePerMonth = [sum(month) for month in dischargeGroupByMonth]
+		print chargePerMonth
 		totalYearlyCharge = sum(chargePerMonth)
+		assert totalYearlyCharge >= 0
 	
 	# ------------------------- CALCULATIONS ------------------------- #
-	# peakShave of 0 means no benefits, so make it -1
+	# peakShave of 0 means no benefits, so make it -1 to avoid divide by zero error
 	if peakShaveSum == 0:
 		peakShaveSum = -1	
 	
@@ -181,14 +183,14 @@ def work(modelDir, inputDict):
 	if dispatchStrategy == 'optimal':
 		cashFlowCurve = [peakShaveSum * demandCharge for year in range(projYears)]
 		outData['SPP'] = (cellCost*cellQuantity)/(peakShaveSum*demandCharge)
-		outData['kWhtoRecharge'] = [battCapacity - x for x in ps]
+		outData['kWhtoRecharge'] = ps
 	elif dispatchStrategy == 'daily':
 		#cashFlowCurve is $ in from peak shaving minus the cost to recharge the battery every day of the year
 		cashFlowCurve = [(peakShaveSum * demandCharge)-(battCapacity*365*retailCost) for year in range(projYears)]
 		#simplePayback is also affected by the cost to recharge the battery every day of the year
 		outData['SPP'] = (cellCost*cellQuantity)/((peakShaveSum*demandCharge)-(battCapacity*365*retailCost))
-		#Battery is dispatched and charged everyday, ~30 days per month
-		outData['kWhtoRecharge'] = [battCapacity * 30 - x for x in range(12)]
+		#Battery is dispatched and charged every day, ~30 days per month
+		outData['kWhtoRecharge'] = [x * 30 for x in ps]
 	else:
 		cashFlowCurve = [(peakShaveSum * demandCharge)-(totalYearlyCharge*retailCost) for year in range(projYears)]
 		outData['SPP'] = (cellCost*cellQuantity)/((peakShaveSum*demandCharge)-(totalYearlyCharge*retailCost))
@@ -266,7 +268,7 @@ def new(modelDir):
 		'chargeRate': '5',
 		'demandCurve': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','FrankScadaValidCSV_Copy.csv')).read(),
 		'fileName': 'FrankScadaValidCSV_Copy.csv',
-		'dispatchStrategy': 'optimal',
+		'dispatchStrategy': 'customDispatch',
 		'cellCost': '7140',
 		'cellQuantity': '10',
 		'runTime': '0:00:03',
