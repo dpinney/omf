@@ -1064,6 +1064,10 @@ def convert(stdString,seqString):
 		if 'object' in glmTree[x].keys() and glmTree[x]['object'] in del_nom_volt_list and 'nominal_voltage' in glmTree[x].keys():
 			del glmTree[x]['nominal_voltage']
 
+	# Auxilary function to get number of loads in glmtree.
+	def getLoadCount(glm):
+		return len([x for x in glm if 'object' in glm[x] and glm[x]['object']=='load'])
+
 	# print('*** Secondary system fixing', time.time()-start_time)
 	def secondarySystemFix(glm):
 		def unused_key(dic, key_multiplier):
