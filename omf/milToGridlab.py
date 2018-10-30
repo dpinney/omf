@@ -52,6 +52,8 @@ def convert(stdString,seqString):
 	# The number of allowable sub objects:
 	subObCount = 100
 	# Helper for lat/lon conversion.
+
+	'''
 	def _convertToPixel():
 		''' By default, Windmil coords are in map feet. This function tries to fit them in to something that our D3 front end can display. TODO: update this to get a more lat/lon-like coordinate system. '''
 		x_list = []
@@ -72,6 +74,8 @@ def convert(stdString,seqString):
 			x_a,x_b,y_a,y_b = (0,0,0,0)
 		return x_a, x_b, y_a, y_b
 	[x_scale, x_b, y_scale, y_b] = _convertToPixel()
+	'''
+	
 	def obConvert(objectList):
 		''' take a row in the milsoft .std and turn it into a gridlab-type dict'''
 		def _convertGenericObject(objectList):
