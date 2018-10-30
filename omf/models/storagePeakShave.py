@@ -1,5 +1,13 @@
 ''' Calculate the costs and benefits of energy storage from a distribution utility perspective. '''
 
+'''
+TODO:
+* SoC + charge < capacity not just Soc < capacity, right?
+* original has battery overchargin
+* peakChargeSum = 0 --> -1: I'm not sure why this is necessary
+* correct Charge Rating (kW) from 5000 -> 5
+'''
+
 import os, sys, shutil, csv, datetime as dt
 from os.path import isdir, join as pJoin
 from numpy import npv
@@ -14,7 +22,7 @@ tooltip = ("The storagePeakShave model calculates the value of a distribution ut
 def work(modelDir, inputDict):
 	''' Model processing done here. '''
 	outData = {}  # See bottom of file for outData's structure
-	
+
 	# Trusted variables
 	(cellCapacity, dischargeRate, chargeRate, cellQuantity, demandCharge, cellCost) = \
 		[float(inputDict[x]) for x in ('cellCapacity', 'dischargeRate', 'chargeRate', 
@@ -31,10 +39,12 @@ def work(modelDir, inputDict):
 	# Percents -> Decimals, untrusted
 	discountRate = float(inputDict.get('discountRate', 2.5)) / 100.0
 	dodFactor = float(inputDict.get('dodFactor', 85)) / 100.0
-	inverterEfficiency = float(inputDict.get('inverterEfficiency', 92)) / 100.0
+
+	# Temporarily removed from equations.
+	# inverterEfficiency = float(inputDict.get('inverterEfficiency', 92)) / 100.0
 	# Note: inverterEfficiency is squared to get round trip efficiency.
-	battEff	= float(inputDict.get('batteryEfficiency', 92)) / 100.0 * (inverterEfficiency ** 2)
-	
+	# battEff = float(inputDict.get('batteryEfficiency', 92)) / 100.0 * (inverterEfficiency ** 2)
+
 	# Put demand data in to a file for safe keeping.
 	with open(pJoin(modelDir, 'demand.csv'), 'w') as demandFile:
 		demandFile.write(inputDict['demandCurve'])
@@ -77,32 +87,28 @@ def work(modelDir, inputDict):
 	if dispatchStrategy == 'optimal':	
 		ps = [battDischarge] * 12	
 		monthlyPeakDemand = [max(lDemands) for lDemands in dcGroupByMonth]
-		capacityLimited = True
-		while capacityLimited:
-			battSoC = battCapacity  # Battery state of charge; begins full.
-			battDoD = [battCapacity] * 12  # Depth-of-discharge every month, depends on dodFactor.
-			for row in dc:
-				month = row['month']
-				powerUnderPeak = monthlyPeakDemand[month] - row['power'] - ps[month]
-				isCharging = powerUnderPeak > 0
-				isDischarging = powerUnderPeak <= 0
-				charge = isCharging * min(
-					powerUnderPeak * battEff, # Charge rate <= new monthly peak - row['power']
-					battCharge, # Charge rate <= battery maximum charging rate.
-					battCapacity - battSoC) # Charge rage <= capacity remaining in battery. 
-				discharge = isDischarging * min(
-					abs(powerUnderPeak), # Discharge rate <= new monthly peak - row['power']
-					abs(battDischarge), # Discharge rate <= battery maximum charging rate.
-					abs(battSoC+.001)) # Discharge rate <= capacity remaining in battery. 
-				# (Dis)charge battery
-				battSoC += charge
-				battSoC -= discharge
-				# Update minimum state-of-charge for this month.
-				battDoD[month] = min(battSoC, battDoD[month])
-				row['netpower'] = row['power'] + charge/battEff - discharge
-				row['battSoC'] = battSoC
-			capacityLimited = min(battDoD) < 0
-			ps = [ps[month]-(battDoD[month] < 0) for month in range(12)]
+		battSoC = battCapacity  # Battery state of charge; begins full.
+		battDoD = [battCapacity] * 12  # Depth-of-discharge every month, depends on dodFactor.
+		for row in dc:
+			month = row['month']
+			powerUnderPeak = monthlyPeakDemand[month] - row['power'] - ps[month]
+			isCharging = powerUnderPeak > 0
+			isDischarging = powerUnderPeak <= 0
+			charge = isCharging * min(
+				powerUnderPeak, # new monthly peak - row['power']
+				battCharge, # battery maximum charging rate.
+				battCapacity - battSoC) # capacity remaining in battery. 
+			discharge = isDischarging * min(
+				abs(powerUnderPeak), # Discharge rate <= new monthly peak - row['power']
+				abs(battDischarge), # Discharge rate <= battery maximum charging rate.
+				abs(battSoC+.001)) # Discharge rate <= capacity remaining in battery.
+			battSoC += charge
+			battSoC -= discharge
+			# Update minimum state-of-charge for this month.
+			battDoD[month] = min(battSoC, battDoD[month])
+			row['netpower'] = row['power'] + charge - discharge
+			row['battSoC'] = battSoC
+		ps = [ps[month]-(battDoD[month] < 0) for month in range(12)]
 		peakShaveSum = sum(ps)
 	elif dispatchStrategy == 'daily':
 		battSoC = battCapacity
@@ -118,7 +124,7 @@ def work(modelDir, inputDict):
 			#If hour is outside peak hours and the battery isnt fully charged, charge it
 				if battSoC < battCapacity:
 					battSoC += charge
-					row['netpower'] = row['power'] + charge/battEff
+					row['netpower'] = row['power'] + charge
 				else:
 					row['netpower'] = row['power']
 			row['battSoC'] = battSoC
@@ -156,7 +162,7 @@ def work(modelDir, inputDict):
 				# Otherwise charge the battery.
 				if battSoC < battCapacity:
 					battSoC += charge
-					row['netpower'] = row['power'] + charge/battEff
+					row['netpower'] = row['power'] + charge
 				else:
 					row['netpower'] = row['power']
 			row['battSoC'] = battSoC
@@ -170,7 +176,6 @@ def work(modelDir, inputDict):
 		peakShaveSum = sum(ps)
 		# Calculate how much the battery charges per year for cashFlowCurve, SPP calculation, kWhToRecharge
 		chargePerMonth = [sum(month) for month in dischargeGroupByMonth]
-		print chargePerMonth
 		totalYearlyCharge = sum(chargePerMonth)
 		assert totalYearlyCharge >= 0
 	
@@ -268,7 +273,7 @@ def new(modelDir):
 		'chargeRate': '5',
 		'demandCurve': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','FrankScadaValidCSV_Copy.csv')).read(),
 		'fileName': 'FrankScadaValidCSV_Copy.csv',
-		'dispatchStrategy': 'customDispatch',
+		'dispatchStrategy': 'optimal',
 		'cellCost': '7140',
 		'cellQuantity': '10',
 		'runTime': '0:00:03',
