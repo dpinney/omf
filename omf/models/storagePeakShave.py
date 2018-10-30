@@ -1,13 +1,5 @@
 ''' Calculate the costs and benefits of energy storage from a distribution utility perspective. '''
 
-'''
-TODO:
-* SoC + charge < capacity not just Soc < capacity, right?
-* original has battery overchargin
-* peakChargeSum = 0 --> -1: I'm not sure why this is necessary
-* correct Charge Rating (kW) from 5000 -> 5
-'''
-
 import os, sys, shutil, csv, datetime as dt
 from os.path import isdir, join as pJoin
 from numpy import npv
@@ -18,6 +10,16 @@ from __neoMetaModel__ import *
 modelName, template = metadata(__file__)
 tooltip = ("The storagePeakShave model calculates the value of a distribution utility " 
 	"deploying energy storage based on three possible battery dispatch strategies.")
+
+def _cycleCount(SoC):
+	count, inloop = 0, False
+	for c in SoC:
+		if c < 75.0 and not inloop:
+			count += 1
+			inloop = True
+		if c == 100.0 and inloop:
+			inloop = False
+	return count
 
 def work(modelDir, inputDict):
 	''' Model processing done here. '''
@@ -221,10 +223,8 @@ def work(modelDir, inputDict):
 	# Battery State of Charge Graph
 	outData['batterySoc'] = [t['battSoC']/battCapacity*100.0*dodFactor + (100-100*dodFactor) for t in dc]
 	# Estimate number of cyles the battery went through.
-	SoC = outData['batterySoc']
-	cycleEquivalents = sum([SoC[i]-SoC[i+1] for i, x in enumerate(SoC[0:-1]) if SoC[i+1] < SoC[i]]) / 100.0
-	outData['cycleEquivalents'] = cycleEquivalents
-	outData['batteryLife'] = batteryCycleLife/cycleEquivalents
+	outData['cycleEquivalents'] = _cycleCount(outData['batterySoc'])
+	outData['batteryLife'] = batteryCycleLife/_cycleCount(outData['batterySoc'])
 
 	# Cash Flow Graph
 	outData['netCashflow'] = cashFlowCurve
@@ -273,7 +273,7 @@ def new(modelDir):
 		'chargeRate': '5',
 		'demandCurve': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','FrankScadaValidCSV_Copy.csv')).read(),
 		'fileName': 'FrankScadaValidCSV_Copy.csv',
-		'dispatchStrategy': 'optimal',
+		'dispatchStrategy': 'customDispatch',
 		'cellCost': '7140',
 		'cellQuantity': '10',
 		'runTime': '0:00:03',
