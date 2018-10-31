@@ -101,9 +101,9 @@ def work(modelDir, inputDict):
 				battCharge, # battery maximum charging rate.
 				battCapacity - battSoC) # capacity remaining in battery. 
 			discharge = isDischarging * min(
-				abs(powerUnderPeak), # Discharge rate <= new monthly peak - row['power']
-				abs(battDischarge), # Discharge rate <= battery maximum charging rate.
-				abs(battSoC+.001)) # Discharge rate <= capacity remaining in battery.
+				abs(powerUnderPeak), # new monthly peak - row['power']
+				abs(battDischarge), # battery maximum charging rate.
+				abs(battSoC+.001)) # capacity remaining in battery.
 			battSoC += charge
 			battSoC -= discharge
 			# Update minimum state-of-charge for this month.
@@ -124,11 +124,8 @@ def work(modelDir, inputDict):
 				battSoC -= discharge
 			else:
 			#If hour is outside peak hours and the battery isnt fully charged, charge it
-				if battSoC < battCapacity:
-					battSoC += charge
-					row['netpower'] = row['power'] + charge
-				else:
-					row['netpower'] = row['power']
+				battSoC += charge
+				row['netpower'] = row['power'] + charge
 			row['battSoC'] = battSoC
 
 		simpleDCGroupByMonth = [[t for t in dc if t['month']==x] for x in range(12)]
@@ -179,7 +176,6 @@ def work(modelDir, inputDict):
 		# Calculate how much the battery charges per year for cashFlowCurve, SPP calculation, kWhToRecharge
 		chargePerMonth = [sum(month) for month in dischargeGroupByMonth]
 		totalYearlyCharge = sum(chargePerMonth)
-		assert totalYearlyCharge >= 0
 	
 	# ------------------------- CALCULATIONS ------------------------- #
 	# peakShave of 0 means no benefits, so make it -1 to avoid divide by zero error
@@ -221,18 +217,20 @@ def work(modelDir, inputDict):
 	outData['batteryDischargekWMax'] = max(outData['batteryDischargekW'])
 
 	# Battery State of Charge Graph
+	# Turn dc's SoC into a percentage, with dodFactor considered.
 	outData['batterySoc'] = [t['battSoC']/battCapacity*100.0*dodFactor + (100-100*dodFactor) for t in dc]
 	# Estimate number of cyles the battery went through.
-	outData['cycleEquivalents'] = _cycleCount(outData['batterySoc'])
-	outData['batteryLife'] = batteryCycleLife/_cycleCount(outData['batterySoc'])
+	outData['cycleEquivalents'] = cycleEquivalents = _cycleCount(outData['batterySoc'])
+	outData['batteryLife'] = batteryCycleLife/cycleEquivalents
 
 	# Cash Flow Graph
 	outData['netCashflow'] = cashFlowCurve
 	outData['cumulativeCashflow'] = [sum(cashFlowCurve[:i+1]) for i, d in enumerate(cashFlowCurve)]
 	outData['NPV'] = npv(discountRate, cashFlowCurve)
+	
 	battCostPerCycle = cellQuantity * cellCapacity * cellCost / batteryCycleLife
 	lcoeTotEnergy = cycleEquivalents * cellQuantity * cellCapacity
-	lcoeTotCost = lcoeTotEnergy * retailCost + (battCostPerCycle * cycleEquivalents)
+	lcoeTotCost = cycleEquivalents * retailCost + (battCostPerCycle * cycleEquivalents)
 	LCOE = lcoeTotCost / lcoeTotEnergy
 	outData['LCOE'] = LCOE
 
@@ -264,6 +262,7 @@ def new(modelDir):
 		# used by __neoMetaModel__.py
 		'modelType': modelName,
 		'created': '2015-06-12 17:20:39.308239',
+		'runTime': '0:00:03',
 		# used for this program
 		'batteryEfficiency': '92',
 		'inverterEfficiency': '97.5',
@@ -273,13 +272,12 @@ def new(modelDir):
 		'chargeRate': '5',
 		'demandCurve': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','FrankScadaValidCSV_Copy.csv')).read(),
 		'fileName': 'FrankScadaValidCSV_Copy.csv',
-		'dispatchStrategy': 'customDispatch',
+		'dispatchStrategy': 'daily',
 		'cellCost': '7140',
 		'cellQuantity': '10',
-		'runTime': '0:00:03',
 		'projYears': '15',
 		'demandCharge': '20',
-		'dodFactor': '100',
+		'dodFactor': '97',
 		'retailCost': '0.06',
 		'startPeakHour': '18',
 		'endPeakHour': '22',
@@ -305,8 +303,8 @@ if __name__ == '__main__':
 '''
 outDic {
 	startdate: str
-	batteryDischargekWMax: float
 	stdout: "Success"
+	batteryDischargekWMax: float
 	batteryDischargekw: [8760] float
 	monthlyDemandRed: [12] float
 	ps: [12] float
@@ -316,7 +314,7 @@ outDic {
 	LCOE: float
 	batteryLife: float
 	cumulativeCashflow: [12] float
-	batterySoc:: [8760] float
+	batterySoc: [8760] float
 	demand: [8760] float
 	benefitMonthly: [12] float
 	netCashflow: [12] float
