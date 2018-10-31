@@ -103,7 +103,7 @@ def work(modelDir, inputDict):
 			discharge = isDischarging * min(
 				abs(powerUnderPeak), # new monthly peak - row['power']
 				abs(battDischarge), # battery maximum charging rate.
-				abs(battSoC+.001)) # capacity remaining in battery.
+				abs(battSoC)) # capacity remaining in battery.
 			battSoC += charge
 			battSoC -= discharge
 			# Update minimum state-of-charge for this month.
@@ -124,8 +124,8 @@ def work(modelDir, inputDict):
 				battSoC -= discharge
 			else:
 			#If hour is outside peak hours and the battery isnt fully charged, charge it
-				battSoC += charge
 				row['netpower'] = row['power'] + charge
+				battSoC += charge
 			row['battSoC'] = battSoC
 
 		simpleDCGroupByMonth = [[t for t in dc if t['month']==x] for x in range(12)]
@@ -180,7 +180,7 @@ def work(modelDir, inputDict):
 	# ------------------------- CALCULATIONS ------------------------- #
 	# peakShave of 0 means no benefits, so make it -1 to avoid divide by zero error
 	if peakShaveSum == 0:
-		peakShaveSum = -1	
+		peakShaveSum = -1
 	
 	# dispatch-specific output
 	if dispatchStrategy == 'optimal':
@@ -193,7 +193,7 @@ def work(modelDir, inputDict):
 		#simplePayback is also affected by the cost to recharge the battery every day of the year
 		outData['SPP'] = (cellCost*cellQuantity)/((peakShaveSum*demandCharge)-(battCapacity*365*retailCost))
 		#Battery is dispatched and charged every day, ~30 days per month
-		outData['kWhtoRecharge'] = [x * 30 for x in ps]
+		outData['kWhtoRecharge'] = [battCapacity * 30] * 12
 	else:
 		cashFlowCurve = [(peakShaveSum * demandCharge)-(totalYearlyCharge*retailCost) for year in range(projYears)]
 		outData['SPP'] = (cellCost*cellQuantity)/((peakShaveSum*demandCharge)-(totalYearlyCharge*retailCost))
@@ -216,6 +216,7 @@ def work(modelDir, inputDict):
 	outData['batteryDischargekW'] = [d - dab for d, dab in zip(outData['demand'], outData['demandAfterBattery'])]
 	outData['batteryDischargekWMax'] = max(outData['batteryDischargekW'])
 
+
 	# Battery State of Charge Graph
 	# Turn dc's SoC into a percentage, with dodFactor considered.
 	outData['batterySoc'] = [t['battSoC']/battCapacity*100.0*dodFactor + (100-100*dodFactor) for t in dc]
@@ -230,7 +231,7 @@ def work(modelDir, inputDict):
 	
 	battCostPerCycle = cellQuantity * cellCapacity * cellCost / batteryCycleLife
 	lcoeTotEnergy = cycleEquivalents * cellQuantity * cellCapacity
-	lcoeTotCost = cycleEquivalents * retailCost + (battCostPerCycle * cycleEquivalents)
+	lcoeTotCost = cycleEquivalents*retailCost + battCostPerCycle*cycleEquivalents
 	LCOE = lcoeTotCost / lcoeTotEnergy
 	outData['LCOE'] = LCOE
 
@@ -272,7 +273,7 @@ def new(modelDir):
 		'chargeRate': '5',
 		'demandCurve': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','FrankScadaValidCSV_Copy.csv')).read(),
 		'fileName': 'FrankScadaValidCSV_Copy.csv',
-		'dispatchStrategy': 'daily',
+		'dispatchStrategy': 'optimal',
 		'cellCost': '7140',
 		'cellQuantity': '10',
 		'projYears': '15',
