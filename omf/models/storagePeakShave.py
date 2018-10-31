@@ -17,7 +17,7 @@ def work(modelDir, inputDict):
 	''' Model processing done here. '''
 	outData = {}  # See bottom of file for outData's structure
 	(cellCapacity, dischargeRate, chargeRate, cellQuantity, demandCharge, cellCost) = \
-		[float(inputDict[x]) for x in ('cellCapacity', 'dischargeRate', 'chargeRate', 
+		[float(inputDict[x]) for x in ('cellCapacity', 'dischargeRate', 'chargeRate',
 			'cellQuantity', 'demandCharge', 'cellCost')]
 	dispatchStrategy = str(inputDict.get('dispatchStrategy'))
 	retailCost = float(inputDict.get('retailCost', 0.07))
@@ -38,14 +38,14 @@ def work(modelDir, inputDict):
 	if dispatchStrategy == 'customDispatch':
 		with open(pJoin(modelDir, 'dispatchStrategy.csv'), 'w') as customDispatchFile:
 			customDispatchFile.write(inputDict['customDispatchStrategy'])
-	
+
 	dc = [] # main data table
 	try:
 		dates = [(dt(2011,1,1)+timedelta(hours=1)*x) for x in range(8760)]
 		with open(pJoin(modelDir, 'demand.csv')) as inFile:
 			reader = csv.reader(inFile)
 			for row, date in zip(reader, dates):
-				dc.append({ 
+				dc.append({
 						'datetime': date, 
 						'power': float(row[0]), # row is a list of length 1
 						'month': date.month - 1,
@@ -114,13 +114,10 @@ def work(modelDir, inputDict):
 			if row['dispatch'] == 1:
 				row['netpower'] = row['power'] - discharge
 				battSoC -= discharge
+			# Otherwise charge the battery.
 			else:
-				# Otherwise charge the battery.
-				if battSoC < battCapacity:
-					battSoC += charge
-					row['netpower'] = row['power'] + charge
-				else:
-					row['netpower'] = row['power']
+				row['netpower'] = row['power'] + charge
+				battSoC += charge
 			row['battSoC'] = battSoC
 	else:
 		raise Exception("Invalid dispatch input.")
@@ -150,21 +147,21 @@ def work(modelDir, inputDict):
 	# Turn dc's SoC into a percentage, with dodFactor considered.
 	outData['batterySoc'] = SoC = [t['battSoC']/battCapacity*100.0*dodFactor + (100-100*dodFactor) for t in dc]
 	# Estimate number of cyles the battery went through.
-	cycleEquivalents = len([1 for i, c in enumerate(SoC[:-1]) if SoC[i] < 100 and SoC[i+1] == 100])
+	cycleEquivalents = len([c for i, c in enumerate(SoC[:-1]) if SoC[i] < 100 and SoC[i+1] == 100])
 	outData['cycleEquivalents'] = cycleEquivalents
 	outData['batteryLife'] = batteryCycleLife / cycleEquivalents
 
 	# Cash Flow Graph
-	#cashFlowCurve is $ in from peak shaving minus the cost to recharge the battery every day of the year
+	# cashFlowCurve is $ in from peak shaving minus the cost to recharge the battery every day of the year
 	totalYearlyCharge = sum(outData['kWhtoRecharge'])
 	cashFlowCurve = [(sum(ps) * demandCharge)-(totalYearlyCharge*retailCost) for year in range(projYears)]
 	cashFlowCurve.insert(0, -1 * cellCost * cellQuantity)  # insert initial investment
-	#simplePayback is also affected by the cost to recharge the battery every day of the year
+	# simplePayback is also affected by the cost to recharge the battery every day of the year
 	outData['SPP'] = (cellCost*cellQuantity)/((sum(ps)*demandCharge)-(totalYearlyCharge*retailCost))
 	outData['netCashflow'] = cashFlowCurve
 	outData['cumulativeCashflow'] = [sum(cashFlowCurve[:i+1]) for i, d in enumerate(cashFlowCurve)]
 	outData['NPV'] = npv(discountRate, cashFlowCurve)
-	
+
 	battCostPerCycle = cellQuantity * cellCapacity * cellCost / batteryCycleLife
 	lcoeTotCost = cycleEquivalents*retailCost + battCostPerCycle*cycleEquivalents
 	outData['LCOE'] = lcoeTotCost / (cycleEquivalents * cellQuantity * cellCapacity)
