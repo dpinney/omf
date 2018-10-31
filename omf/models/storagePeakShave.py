@@ -87,13 +87,10 @@ def work(modelDir, inputDict):
 	dcGroupByMonth = [[t['power'] for t in dc if t['month']==x] for x in range(12)]
 
 	if dispatchStrategy == 'optimal':	
-		ps = [battDischarge] * 12	
 		monthlyPeakDemand = [max(lDemands) for lDemands in dcGroupByMonth]
 		battSoC = battCapacity  # Battery state of charge; begins full.
-		battDoD = [battCapacity] * 12  # Depth-of-discharge every month, depends on dodFactor.
 		for row in dc:
-			month = row['month']
-			powerUnderPeak = monthlyPeakDemand[month] - row['power'] - ps[month]
+			powerUnderPeak = monthlyPeakDemand[row['month']] - row['power'] - battDischarge
 			isCharging = powerUnderPeak > 0
 			isDischarging = powerUnderPeak <= 0
 			charge = isCharging * min(
@@ -106,22 +103,19 @@ def work(modelDir, inputDict):
 				abs(battSoC)) # capacity remaining in battery.
 			battSoC += charge
 			battSoC -= discharge
-			# Update minimum state-of-charge for this month.
-			battDoD[month] = min(battSoC, battDoD[month])
 			row['netpower'] = row['power'] + charge - discharge
 			row['battSoC'] = battSoC
 	elif dispatchStrategy == 'daily':
 		battSoC = battCapacity
 		for row in dc:
-			month = int(row['month'])
 			discharge = min(battDischarge, battSoC)
 			charge = min(battCharge, battCapacity-battSoC)
-			#If hour is within peak hours and the battery has charge
+			# If hour is within peak hours and the battery has charge
 			if startPeakHour <= row['hour'] <= endPeakHour and battSoC >= 0:
 				row['netpower'] = row['power'] - discharge
 				battSoC -= discharge
 			else:
-			#If hour is outside peak hours and the battery isnt fully charged, charge it
+			# If hour is outside peak hours and the battery isnt fully charged, charge it
 				row['netpower'] = row['power'] + charge
 				battSoC += charge
 			row['battSoC'] = battSoC
@@ -174,12 +168,6 @@ def work(modelDir, inputDict):
 	if peakShaveSum == 0:
 		peakShaveSum = -1
 	
-	#cashFlowCurve is $ in from peak shaving minus the cost to recharge the battery every day of the year
-	cashFlowCurve = [(peakShaveSum * demandCharge)-(totalYearlyCharge*retailCost) for year in range(projYears)]
-	cashFlowCurve.insert(0, -1 * cellCost * cellQuantity)  # insert initial investment
-	#simplePayback is also affected by the cost to recharge the battery every day of the year
-	outData['SPP'] = (cellCost*cellQuantity)/((peakShaveSum*demandCharge)-(totalYearlyCharge*retailCost))
-	
 	# Monthly Cost Comparison Table
 	outData['monthlyDemand'] = [sum(lDemand)/1000 for lDemand in dcGroupByMonth]
 	outData['monthlyDemandRed'] = [t - p for t, p in zip(outData['monthlyDemand'], ps)]
@@ -203,6 +191,11 @@ def work(modelDir, inputDict):
 	outData['batteryLife'] = batteryCycleLife/cycleEquivalents
 
 	# Cash Flow Graph
+	#cashFlowCurve is $ in from peak shaving minus the cost to recharge the battery every day of the year
+	cashFlowCurve = [(peakShaveSum * demandCharge)-(totalYearlyCharge*retailCost) for year in range(projYears)]
+	cashFlowCurve.insert(0, -1 * cellCost * cellQuantity)  # insert initial investment
+	#simplePayback is also affected by the cost to recharge the battery every day of the year
+	outData['SPP'] = (cellCost*cellQuantity)/((peakShaveSum*demandCharge)-(totalYearlyCharge*retailCost))
 	outData['netCashflow'] = cashFlowCurve
 	outData['cumulativeCashflow'] = [sum(cashFlowCurve[:i+1]) for i, d in enumerate(cashFlowCurve)]
 	outData['NPV'] = npv(discountRate, cashFlowCurve)
@@ -220,7 +213,6 @@ def work(modelDir, inputDict):
 	outData['stdout'] = 'Success' 
 	outData['months'] = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
 	
-
 	# ------------------------ DEBUGGING TOOLS ----------------------- #
 	# import matplotlib.pyplot as plt 
 	# dcThroughTheMonth = [[t for t in iter(dc) if t['month']<=x] for x in range(12)]
@@ -242,6 +234,7 @@ def new(modelDir):
 		'modelType': modelName,
 		'created': '2015-06-12 17:20:39.308239',
 		'runTime': '0:00:03',
+		'fileName': 'FrankScadaValidCSV_Copy.csv',
 		# used for this program
 		'batteryEfficiency': '92',
 		'inverterEfficiency': '97.5',
@@ -250,7 +243,6 @@ def new(modelDir):
 		'dischargeRate': '5',
 		'chargeRate': '5',
 		'demandCurve': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','FrankScadaValidCSV_Copy.csv')).read(),
-		'fileName': 'FrankScadaValidCSV_Copy.csv',
 		'dispatchStrategy': 'optimal',
 		'cellCost': '7140',
 		'cellQuantity': '10',
