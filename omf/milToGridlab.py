@@ -31,7 +31,7 @@ def _lineDistances(x1,x2,y1,y2):
 def convert(stdString,seqString):
 	''' Take in a .std and .seq strings from Milsoft and spit out a json dict.'''
 	start_time = time.time()
-	warnings.warn('*** Start Conversion' + str(time.time()-start_time))
+	# print('*** Start Conversion', time.time()-start_time)
 	# Get all components from the .std:
 	components = _csvToArray(stdString)[1:]
 	# Get all hardware stats from the .seq. We dropped the first rows which are metadata (n.b. there are no headers).
@@ -52,10 +52,8 @@ def convert(stdString,seqString):
 	# The number of allowable sub objects:
 	subObCount = 100
 	# Helper for lat/lon conversion.
-
-	'''
 	def _convertToPixel():
-		By default, Windmil coords are in map feet. This function tries to fit them in to something that our D3 front end can display. TODO: update this to get a more lat/lon-like coordinate system. 
+		''' By default, Windmil coords are in map feet. This function tries to fit them in to something that our D3 front end can display. TODO: update this to get a more lat/lon-like coordinate system. '''
 		x_list = []
 		y_list = []
 		x_pixel_range = 1200
@@ -64,7 +62,7 @@ def convert(stdString,seqString):
 			for component in components:
 				x_list.append(float(component[5]))
 				y_list.append(float(component[6]))
-				warnings.warn('coordinate boundaries: %f, %f, %f, %f' % min(x_list), max(x_list), min(y_list), max(y_list))
+			# print 'coordinate boundaries:', min(x_list), max(x_list), min(y_list), max(y_list)
 			# according to convert function  f(x) = a * x + b
 			x_a = x_pixel_range / (max(x_list) - min(x_list))
 			x_b = -x_a * min(x_list)
@@ -74,8 +72,6 @@ def convert(stdString,seqString):
 			x_a,x_b,y_a,y_b = (0,0,0,0)
 		return x_a, x_b, y_a, y_b
 	[x_scale, x_b, y_scale, y_b] = _convertToPixel()
-	'''
-
 	def obConvert(objectList):
 		''' take a row in the milsoft .std and turn it into a gridlab-type dict'''
 		def _convertGenericObject(objectList):
@@ -126,7 +122,7 @@ def convert(stdString,seqString):
 			fuse = _convertGenericObject(ocDeviceList)
 			fuse['phases'] = ocDeviceList[2]
 			fuse['current_limit'] = '9999.0 A'
-			# To supress replacement time warnings that GridLAB-D *LOVES* to warnings.warn:
+			# To supress replacement time warnings that GridLAB-D *LOVES* to print:
 			fuse['mean_replacement_time'] = '3600.0'
 			# TODO: Figure out why code below causes convergence errors for some feeders.
 			# if 'OC' in fuse['name'] or 'FS' in fuse['name'] or 'NF14' in fuse['name']:
@@ -786,8 +782,7 @@ def convert(stdString,seqString):
 			if 'object' in parent.keys():
 				return parent['object']
 			else:
-				warnings.warn("No object in parent")
-				pass # warnings.warn parent
+				pass # print parent
 		def phaseMerge(*arg):
 			concated = ''.join(arg)
 			return ''.join(sorted(set(concated)))
@@ -851,7 +846,7 @@ def convert(stdString,seqString):
 		return True
 
 	# Fix the connectivity:
-	warnings.warn('*** Connectivity fixing start' + str(time.time()-start_time))
+	# print('*** Connectivity fixing start', time.time()-start_time)
 	guidToIndex = {convertedComponents[index].get('guid',''):index for index in xrange(len(convertedComponents))}
 	for comp in convertedComponents:
 		fixCompConnectivity(comp)
@@ -863,7 +858,7 @@ def convert(stdString,seqString):
 	for key in glmTree.keys():
 		# if ('from' in glmTree[key].keys() and 'to' not in glmTree[key].keys()) or ('to' in glmTree[key].keys() and 'from' not in glmTree[key].keys()):
 		if glmTree[key]['object'] in ['overhead_line','underground_line','regulator','transformer','switch','fuse'] and ('to' not in glmTree[key].keys() or 'from' not in glmTree[key].keys()):
-			warnings.warn('Object borked connectivity' + str(glmTree[key]['name'], glmTree[key]['object']))
+			# print 'Object borked connectivity', glmTree[key]['name'], glmTree[key]['object']
 			del glmTree[key]
 
 	#Strip guids:
@@ -895,7 +890,7 @@ def convert(stdString,seqString):
 		else:
 			return False
 
-	warnings.warn('*** Link phase fixing' + str(time.time()-start_time))
+	# print('*** Link phase fixing', time.time()-start_time)
 	for key in glmTree:
 		fixLinkPhases(glmTree[key])
 
@@ -957,7 +952,7 @@ def convert(stdString,seqString):
 					line_segment1['to'] = node12['name']
 				except:
 					pass
-					warnings.warn('ERRRRRR' + str(node12))
+					# print 'ERRRRRR', node12
 				line_segment2['name'] = glm_dict[y]['name'] + '_LINESG2'
 				line_segment2['length'] = str(float(glm_dict[y]['length'])*3/4)
 				line_segment2['from'] = node12['name']
@@ -1004,7 +999,7 @@ def convert(stdString,seqString):
 	# WARNING: this code creates broken GLMs. Disabled by default.
 	# glmTree = convDistLoadLines(glmTree)
 	# Fix nominal voltage
-	warnings.warn('*** Nominal voltage fixing' + str(time.time()-start_time))
+	# print('*** Nominal voltage fixing', time.time()-start_time)
 
 	# Make sure we have the latest index.
 	nameToIndex = {glmTree[key].get('name',''):key for key in glmTree}
@@ -1039,7 +1034,8 @@ def convert(stdString,seqString):
 								glm_dict[x][key]['band_center'] = nominalVoltageSwing
 								glm_dict[x][key]['band_width'] =  (bandWidthRegulator * nominalVoltageSwing) / 120
 			except:
-				warnings.warn("\nCouldn't set regulator_configuration to the swing bus nominal_voltage.")
+				pass
+				# print "\n   Couldn't set regulator_configuration to the swing bus nominal_voltage."
 
 	parent_voltage = {}
 	current_parents = len(parent_voltage)
@@ -1068,11 +1064,7 @@ def convert(stdString,seqString):
 		if 'object' in glmTree[x].keys() and glmTree[x]['object'] in del_nom_volt_list and 'nominal_voltage' in glmTree[x].keys():
 			del glmTree[x]['nominal_voltage']
 
-	# Auxilary function to get number of loads in glmtree.
-	def getLoadCount(glm):
-		return len([x for x in glm if 'object' in glm[x] and glm[x]['object']=='load'])
-
-	warnings.warn('*** Secondary system fixing' + str(time.time()-start_time))
+	# print('*** Secondary system fixing', time.time()-start_time)
 	def secondarySystemFix(glm):
 		def unused_key(dic, key_multiplier):
 			free_key = (int(max(dic.keys())/key_multiplier) + 1)*key_multiplier
@@ -1218,14 +1210,14 @@ def convert(stdString,seqString):
 
 		dechain(nameMaps)
 
-		#Debug: warnings.warn the amount of collapse:
-		# warnings.warn 'WORKING ON ' + compName
-		# warnings.warn 'Mappings:'
-		# warnings.warn len(nameMaps)
-		# warnings.warn 'Real configs:'
-		# warnings.warn len(realConfigs)
-		# warnings.warn 'Total:'
-		# warnings.warn len(nameMaps) + len(realConfigs)
+		#Debug: print the amount of collapse:
+		# print 'WORKING ON ' + compName
+		# print 'Mappings:'
+		# print len(nameMaps)
+		# print 'Real configs:'
+		# print len(realConfigs)
+		# print 'Total:'
+		# print len(nameMaps) + len(realConfigs)
 
 		nameDictMap = {x[0]:x[1] for x in nameMaps}
 
@@ -1266,7 +1258,7 @@ def convert(stdString,seqString):
 				if line['configuration'] in nameDictMap.keys(): line['configuration'] = nameDictMap[line['configuration']]
 
 	# Fully disembed and remove duplicate configuration objects:
-	warnings.warn('*** Disembed and dedup' + str(time.time()-start_time))
+	# print('*** Disembed and dedup', time.time()-start_time)
 	feeder.fullyDeEmbed(glmTree)
 	dedupGlm('transformer_configuration', glmTree)
 	dedupGlm('regulator_configuration', glmTree)
@@ -1310,7 +1302,7 @@ def convert(stdString,seqString):
 				thisOb['latitude'] = str(float(parentOb['latitude']) + random.uniform(-5,5))
 				thisOb['longitude'] = str(float(parentOb['longitude']) + random.uniform(-5,5))
 	# Final Output
-	warnings.warn('*** DONE! ' + str(time.time()-start_time))
+	# print('*** DONE!', time.time()-start_time)
 	return glmTree
 
 
@@ -1339,6 +1331,7 @@ def _latCount(name):
 			nameCount += 1
 			if 'latitude' in outGlm[key]:
 				myLatCount += 1
+	print name, 'COUNT', nameCount, 'LAT COUNT', latCount, 'SUCCESS RATE', 1.0*latCount/nameCount
 
 def _tests(
 		keepFiles = False,
@@ -1388,7 +1381,7 @@ def _tests(
 				outFile.write(feeder.sortedWrite(outGlm))
 				outFile.truncate()
 				outFileStats = os.stat(outPrefix + stdString.replace('.std','.glm') )
-			warnings.warn('WROTE GLM FOR %s' % stdString)
+			print 'WROTE GLM FOR', stdString
 			# Write the size of the files as a indicator of how good the conversion was.
 			with open(fileName, 'a') as resultsFile:
 				inFileStats = os.stat(pJoin(openPrefix,stdString))
@@ -1399,7 +1392,7 @@ def _tests(
 				curData['std_size_mb'] = inFileSize / 1000.0 / 1000.0
 				resultsFile.write('WROTE GLM FOR ' + stdString + ', THE STD FILE IS %s PERCENT OF THE GLM FILE.\n' % str(100*percent)[0:4])
 		except:
-			#warnings.warn('FAILED CONVERTING%s' % stdString) 
+			print 'FAILED CONVERTING', stdString
 			curData['glm_size_as_perc_of_std'] = 0.0
 			with open(fileName,'a') as resultsFile:
 				resultsFile.write('FAILED CONVERTING ' + stdString + "\n")
@@ -1410,11 +1403,11 @@ def _tests(
 			myGraph = feeder.treeToNxGraph(outGlm)
 			feeder.latLonNxGraph(myGraph, neatoLayout=False)
 			plt.savefig(outPrefix + stdString.replace('.std','.png'))
-			warnings.warn('DREW GLM OF%s' % stdString)
+			print 'DREW GLM OF', stdString
 			with open(fileName,'a') as resultsFile:
 				resultsFile.write('DREW GLM FOR ' + stdString + "\n")
 		except:
-			warnings.warn('FAILED DRAWING ' + stdString)
+			print 'FAILED DRAWING', stdString
 			with open(fileName,'a') as resultsFile:
 				resultsFile.write('DREW GLM FOR ' + stdString + "\n")
 		try:
@@ -1430,7 +1423,7 @@ def _tests(
 				outFile.seek(0)
 				json.dump(output, outFile, indent=4)
 				outFile.truncate()
-			warnings.warn('RAN GRIDLAB ON' + stdString)
+			print 'RAN GRIDLAB ON', stdString
 			with open(fileName, 'a') as resultsFile:
 				resultsFile.write('RAN GRIDLAB ON ' + stdString + "\n")
 				resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
@@ -1438,7 +1431,7 @@ def _tests(
 				resultsFile.write("====================================================================================\n")
 				timeArray.append(time.time() - cur_start_time)
 		except Exception as e:
-			warnings.warn('POWERFLOW FAILED' + stdString)
+			print 'POWERFLOW FAILED', stdString
 			with open(fileName,'a') as resultsFile:
 				resultsFile.write('POWERFLOW FAILED ' + stdString + "\n")
 				curData['powerflow_success'] = False
@@ -1457,4 +1450,4 @@ def _tests(
 	return statData
 
 if __name__ == "__main__":
-	_tests()
+	print _tests()
