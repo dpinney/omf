@@ -110,7 +110,6 @@ def work(modelDir, inputDict):
 			battDoD[month] = min(battSoC, battDoD[month])
 			row['netpower'] = row['power'] + charge - discharge
 			row['battSoC'] = battSoC
-		ps = [ps[month]-(battDoD[month] < 0) for month in range(12)]
 	elif dispatchStrategy == 'daily':
 		battSoC = battCapacity
 		for row in dc:
@@ -126,13 +125,7 @@ def work(modelDir, inputDict):
 				row['netpower'] = row['power'] + charge
 				battSoC += charge
 			row['battSoC'] = battSoC
-
-		simpleDCGroupByMonth = [[t for t in dc if t['month']==x] for x in range(12)]
-		#Finding rows with max power
-		monthlyPeakDemandHist =  [max(dVals, key=lambda x: x['power']) for dVals in simpleDCGroupByMonth]
-		monthlyPeakDemandShav = [max(dVals, key=lambda x: x['netpower']) for dVals in simpleDCGroupByMonth]
-		ps = [h['power']-s['netpower'] for h, s in zip(monthlyPeakDemandHist, monthlyPeakDemandShav)]
-	else: # Custom dispatch.
+	elif dispatchStrategy == 'customDispatch': # Custom dispatch.
 		try:
 			with open(pJoin(modelDir,'dispatchStrategy.csv')) as strategyFile:
 				reader = csv.DictReader(strategyFile)
@@ -163,14 +156,15 @@ def work(modelDir, inputDict):
 				else:
 					row['netpower'] = row['power']
 			row['battSoC'] = battSoC
-		
-		# Calculating how much the battery discharges each month
-		simpleDCGroupByMonth = [[t for t in dc if t['month']==x] for x in range(12)]
-		monthlyPeakDemandHist =  [max(dVals, key=lambda x: x['power']) for dVals in simpleDCGroupByMonth]
-		monthlyPeakDemandShav = [max(dVals, key=lambda x: x['netpower']) for dVals in simpleDCGroupByMonth]
-		ps = [h['power']-s['netpower'] for h, s in zip(monthlyPeakDemandHist, monthlyPeakDemandShav)]
-	
+	else:
+		raise Exception("Invalid dispatch input.")
+
 	# ------------------------- CALCULATIONS ------------------------- #
+	simpleDCGroupByMonth = [[t for t in dc if t['month']==x] for x in range(12)]
+	monthlyPeakDemandHist =  [max(dVals, key=lambda x: x['power']) for dVals in simpleDCGroupByMonth]
+	monthlyPeakDemandShav = [max(dVals, key=lambda x: x['netpower']) for dVals in simpleDCGroupByMonth]
+	ps = [h['power']-s['netpower'] for h, s in zip(monthlyPeakDemandHist, monthlyPeakDemandShav)]
+	
 	dischargeGroupByMonth = [[t['netpower']-t['power'] for t in dc if t['month']==x and t['netpower']-t['power'] > 0] for x in range(12)]
 	chargePerMonth = [sum(discharges) for discharges in dischargeGroupByMonth]
 	totalYearlyCharge = sum(chargePerMonth)
@@ -257,7 +251,7 @@ def new(modelDir):
 		'chargeRate': '5',
 		'demandCurve': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','FrankScadaValidCSV_Copy.csv')).read(),
 		'fileName': 'FrankScadaValidCSV_Copy.csv',
-		'dispatchStrategy': 'daily',
+		'dispatchStrategy': 'optimal',
 		'cellCost': '7140',
 		'cellQuantity': '10',
 		'projYears': '15',
