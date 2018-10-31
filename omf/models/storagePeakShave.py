@@ -111,7 +111,6 @@ def work(modelDir, inputDict):
 			row['netpower'] = row['power'] + charge - discharge
 			row['battSoC'] = battSoC
 		ps = [ps[month]-(battDoD[month] < 0) for month in range(12)]
-		peakShaveSum = sum(ps)
 	elif dispatchStrategy == 'daily':
 		battSoC = battCapacity
 		for row in dc:
@@ -133,7 +132,6 @@ def work(modelDir, inputDict):
 		monthlyPeakDemandHist =  [max(dVals, key=lambda x: x['power']) for dVals in simpleDCGroupByMonth]
 		monthlyPeakDemandShav = [max(dVals, key=lambda x: x['netpower']) for dVals in simpleDCGroupByMonth]
 		ps = [h['power']-s['netpower'] for h, s in zip(monthlyPeakDemandHist, monthlyPeakDemandShav)]
-		peakShaveSum = sum(ps)
 	else: # Custom dispatch.
 		try:
 			with open(pJoin(modelDir,'dispatchStrategy.csv')) as strategyFile:
@@ -167,45 +165,32 @@ def work(modelDir, inputDict):
 			row['battSoC'] = battSoC
 		
 		# Calculating how much the battery discharges each month
-		dischargeGroupByMonth = [[t['netpower']-t['power'] for t in dc if t['month']==x] for x in range(12)]
 		simpleDCGroupByMonth = [[t for t in dc if t['month']==x] for x in range(12)]
 		monthlyPeakDemandHist =  [max(dVals, key=lambda x: x['power']) for dVals in simpleDCGroupByMonth]
 		monthlyPeakDemandShav = [max(dVals, key=lambda x: x['netpower']) for dVals in simpleDCGroupByMonth]
 		ps = [h['power']-s['netpower'] for h, s in zip(monthlyPeakDemandHist, monthlyPeakDemandShav)]
-		peakShaveSum = sum(ps)
-		# Calculate how much the battery charges per year for cashFlowCurve, SPP calculation, kWhToRecharge
-		chargePerMonth = [sum(month) for month in dischargeGroupByMonth]
-		totalYearlyCharge = sum(chargePerMonth)
 	
 	# ------------------------- CALCULATIONS ------------------------- #
+	dischargeGroupByMonth = [[t['netpower']-t['power'] for t in dc if t['month']==x and t['netpower']-t['power'] > 0] for x in range(12)]
+	chargePerMonth = [sum(discharges) for discharges in dischargeGroupByMonth]
+	totalYearlyCharge = sum(chargePerMonth)
+
 	# peakShave of 0 means no benefits, so make it -1 to avoid divide by zero error
+	peakShaveSum = sum(ps)
 	if peakShaveSum == 0:
 		peakShaveSum = -1
 	
-	# dispatch-specific output
-	if dispatchStrategy == 'optimal':
-		cashFlowCurve = [peakShaveSum * demandCharge for year in range(projYears)]
-		outData['SPP'] = (cellCost*cellQuantity)/(peakShaveSum*demandCharge)
-		outData['kWhtoRecharge'] = ps
-	elif dispatchStrategy == 'daily':
-		#cashFlowCurve is $ in from peak shaving minus the cost to recharge the battery every day of the year
-		cashFlowCurve = [(peakShaveSum * demandCharge)-(battCapacity*365*retailCost) for year in range(projYears)]
-		#simplePayback is also affected by the cost to recharge the battery every day of the year
-		outData['SPP'] = (cellCost*cellQuantity)/((peakShaveSum*demandCharge)-(battCapacity*365*retailCost))
-		#Battery is dispatched and charged every day, ~30 days per month
-		outData['kWhtoRecharge'] = [battCapacity * 30] * 12
-	else:
-		cashFlowCurve = [(peakShaveSum * demandCharge)-(totalYearlyCharge*retailCost) for year in range(projYears)]
-		outData['SPP'] = (cellCost*cellQuantity)/((peakShaveSum*demandCharge)-(totalYearlyCharge*retailCost))
-		outData['kWhtoRecharge'] = chargePerMonth
+	#cashFlowCurve is $ in from peak shaving minus the cost to recharge the battery every day of the year
+	cashFlowCurve = [(peakShaveSum * demandCharge)-(totalYearlyCharge*retailCost) for year in range(projYears)]
 	cashFlowCurve.insert(0, -1 * cellCost * cellQuantity)  # insert initial investment
+	#simplePayback is also affected by the cost to recharge the battery every day of the year
+	outData['SPP'] = (cellCost*cellQuantity)/((peakShaveSum*demandCharge)-(totalYearlyCharge*retailCost))
 	
-
 	# Monthly Cost Comparison Table
 	outData['monthlyDemand'] = [sum(lDemand)/1000 for lDemand in dcGroupByMonth]
 	outData['monthlyDemandRed'] = [t - p for t, p in zip(outData['monthlyDemand'], ps)]
 	outData['ps'] = ps
-	# outData['kWhtoRecharge'] see above
+	outData['kWhtoRecharge'] = chargePerMonth
 	outData['benefitMonthly'] = [x * demandCharge for x in ps]
 	outData['costtoRecharge'] = [retailCost * x for x in outData['kWhtoRecharge']]
 	outData['benefitNet'] = [b - c for b, c in zip(outData['benefitMonthly'], outData['costtoRecharge'])]
@@ -215,7 +200,6 @@ def work(modelDir, inputDict):
 	outData['demandAfterBattery'] = [t['netpower']*1000.0 for t in dc]
 	outData['batteryDischargekW'] = [d - dab for d, dab in zip(outData['demand'], outData['demandAfterBattery'])]
 	outData['batteryDischargekWMax'] = max(outData['batteryDischargekW'])
-
 
 	# Battery State of Charge Graph
 	# Turn dc's SoC into a percentage, with dodFactor considered.
@@ -273,7 +257,7 @@ def new(modelDir):
 		'chargeRate': '5',
 		'demandCurve': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','FrankScadaValidCSV_Copy.csv')).read(),
 		'fileName': 'FrankScadaValidCSV_Copy.csv',
-		'dispatchStrategy': 'optimal',
+		'dispatchStrategy': 'daily',
 		'cellCost': '7140',
 		'cellQuantity': '10',
 		'projYears': '15',
