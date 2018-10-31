@@ -1,44 +1,30 @@
 ''' Calculate the costs and benefits of energy storage from a distribution utility perspective. '''
 
-import os, sys, shutil, csv, datetime as dt
+import os, sys, shutil, csv
+from datetime import datetime as dt, timedelta
 from os.path import isdir, join as pJoin
 from numpy import npv
 from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
+# from itertools import groupby
 
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = ("The storagePeakShave model calculates the value of a distribution utility " 
 	"deploying energy storage based on three possible battery dispatch strategies.")
 
-def _cycleCount(SoC):
-	count, inloop = 0, False
-	for c in SoC:
-		if c < 75.0 and not inloop:
-			count += 1
-			inloop = True
-		if c == 100.0 and inloop:
-			inloop = False
-	return count
-
 def work(modelDir, inputDict):
 	''' Model processing done here. '''
 	outData = {}  # See bottom of file for outData's structure
-
-	# Trusted variables
 	(cellCapacity, dischargeRate, chargeRate, cellQuantity, demandCharge, cellCost) = \
 		[float(inputDict[x]) for x in ('cellCapacity', 'dischargeRate', 'chargeRate', 
 			'cellQuantity', 'demandCharge', 'cellCost')]
-
-	# Untrusted variables
+	dispatchStrategy = str(inputDict.get('dispatchStrategy'))
 	retailCost = float(inputDict.get('retailCost', 0.07))
 	projYears = int(inputDict.get('projYears', 10))
 	startPeakHour = int(inputDict.get('startPeakHour', 18))
 	endPeakHour = int(inputDict.get('endPeakHour', 24))
-	dispatchStrategy = str(inputDict.get('dispatchStrategy'))
 	batteryCycleLife = int(inputDict.get('batteryCycleLife', 5000))
-	
-	# Percents -> Decimals, untrusted
 	discountRate = float(inputDict.get('discountRate', 2.5)) / 100.0
 	dodFactor = float(inputDict.get('dodFactor', 85)) / 100.0
 
@@ -47,25 +33,15 @@ def work(modelDir, inputDict):
 	# Note: inverterEfficiency is squared to get round trip efficiency.
 	# battEff = float(inputDict.get('batteryEfficiency', 92)) / 100.0 * (inverterEfficiency ** 2)
 
-	# Put demand data in to a file for safe keeping.
 	with open(pJoin(modelDir, 'demand.csv'), 'w') as demandFile:
 		demandFile.write(inputDict['demandCurve'])
-	
-	# If dispatch is custom, write the strategy to a file in the model directory
 	if dispatchStrategy == 'customDispatch':
 		with open(pJoin(modelDir, 'dispatchStrategy.csv'), 'w') as customDispatchFile:
 			customDispatchFile.write(inputDict['customDispatchStrategy'])
 	
-	# Start running battery simulation.
-	battCapacity = cellQuantity * cellCapacity * dodFactor
-	battDischarge = cellQuantity * dischargeRate
-	battCharge = cellQuantity * chargeRate
-	
-	dates = [(dt.datetime(2011,1,1) + dt.timedelta(hours=1) * x) for x in range(8760)]
-	
-	# Most of our data goes inside the dc "table"
-	dc = []
+	dc = [] # main data table
 	try:
+		dates = [(dt(2011,1,1)+timedelta(hours=1)*x) for x in range(8760)]
 		with open(pJoin(modelDir, 'demand.csv')) as inFile:
 			reader = csv.reader(inFile)
 			for row, date in zip(reader, dates):
@@ -73,45 +49,41 @@ def work(modelDir, inputDict):
 						'datetime': date, 
 						'power': float(row[0]), # row is a list of length 1
 						'month': date.month - 1,
-						'hour': date.hour
-					})
+						'hour': date.hour })
 		assert len(dc) == 8760
 	except:
-		if str(sys.exc_info()[0]) != "<type 'exceptions.SystemExit'>":		
+		if str(sys.exc_info()[0]) != "<type 'exceptions.SystemExit'>":
 			raise Exception("CSV file is incorrect format. Please see valid "
 				"format definition at <a target='_blank' href = 'https://github.com/"
 				"dpinney/omf/wiki/Models-~-storagePeakShave#demand-file-csv-format'>"
 				"\nOMF Wiki storagePeakShave - Demand File CSV Format</a>")
 
 	# list of 12 lists of monthly demands
-	dcGroupByMonth = [[t['power'] for t in dc if t['month']==x] for x in range(12)]
+	demandByMonth = [[t['power'] for t in dc if t['month']==x] for x in range(12)]
+	monthlyPeakDemand = [max(lDemands) for lDemands in demandByMonth]
+	battCapacity = cellQuantity * cellCapacity * dodFactor
+	battDischarge = cellQuantity * dischargeRate
+	battCharge = cellQuantity * chargeRate
 
-	if dispatchStrategy == 'optimal':	
-		monthlyPeakDemand = [max(lDemands) for lDemands in dcGroupByMonth]
+	# calculate battery's effect and input netpower and battSoC into dc
+	if dispatchStrategy == 'optimal':
 		battSoC = battCapacity  # Battery state of charge; begins full.
 		for row in dc:
 			powerUnderPeak = monthlyPeakDemand[row['month']] - row['power'] - battDischarge
-			isCharging = powerUnderPeak > 0
-			isDischarging = powerUnderPeak <= 0
-			charge = isCharging * min(
-				powerUnderPeak, # new monthly peak - row['power']
-				battCharge, # battery maximum charging rate.
-				battCapacity - battSoC) # capacity remaining in battery. 
-			discharge = isDischarging * min(
-				abs(powerUnderPeak), # new monthly peak - row['power']
-				abs(battDischarge), # battery maximum charging rate.
-				abs(battSoC)) # capacity remaining in battery.
+			if powerUnderPeak > 0:
+				charge = min(powerUnderPeak, battCharge, battCapacity - battSoC)
+			else:
+				charge = -1 * min(abs(powerUnderPeak), battDischarge, battSoC)
 			battSoC += charge
-			battSoC -= discharge
-			row['netpower'] = row['power'] + charge - discharge
+			row['netpower'] = row['power'] + charge # could be positive or negative
 			row['battSoC'] = battSoC
 	elif dispatchStrategy == 'daily':
 		battSoC = battCapacity
 		for row in dc:
 			discharge = min(battDischarge, battSoC)
-			charge = min(battCharge, battCapacity-battSoC)
+			charge = min(battCharge, battCapacity - battSoC)
 			# If hour is within peak hours and the battery has charge
-			if startPeakHour <= row['hour'] <= endPeakHour and battSoC >= 0:
+			if startPeakHour <= row['hour'] <= endPeakHour:
 				row['netpower'] = row['power'] - discharge
 				battSoC -= discharge
 			else:
@@ -154,25 +126,16 @@ def work(modelDir, inputDict):
 		raise Exception("Invalid dispatch input.")
 
 	# ------------------------- CALCULATIONS ------------------------- #
-	simpleDCGroupByMonth = [[t for t in dc if t['month']==x] for x in range(12)]
-	monthlyPeakDemandHist =  [max(dVals, key=lambda x: x['power']) for dVals in simpleDCGroupByMonth]
-	monthlyPeakDemandShav = [max(dVals, key=lambda x: x['netpower']) for dVals in simpleDCGroupByMonth]
-	ps = [h['power']-s['netpower'] for h, s in zip(monthlyPeakDemandHist, monthlyPeakDemandShav)]
-	
-	dischargeGroupByMonth = [[t['netpower']-t['power'] for t in dc if t['month']==x and t['netpower']-t['power'] > 0] for x in range(12)]
-	chargePerMonth = [sum(discharges) for discharges in dischargeGroupByMonth]
-	totalYearlyCharge = sum(chargePerMonth)
+	netByMonth = [[t['netpower'] for t in dc if t['month']==x] for x in range(12)]
+	monthlyPeakNet = [max(net) for net in netByMonth]
+	ps = [h-s for h, s in zip(monthlyPeakDemand, monthlyPeakNet)]
+	dischargeByMonth = [[i-j for i, j in zip(k, l) if i-j > 0] for k, l in zip(netByMonth, demandByMonth)]
 
-	# peakShave of 0 means no benefits, so make it -1 to avoid divide by zero error
-	peakShaveSum = sum(ps)
-	if peakShaveSum == 0:
-		peakShaveSum = -1
-	
 	# Monthly Cost Comparison Table
-	outData['monthlyDemand'] = [sum(lDemand)/1000 for lDemand in dcGroupByMonth]
+	outData['monthlyDemand'] = [sum(lDemand)/1000 for lDemand in demandByMonth]
 	outData['monthlyDemandRed'] = [t - p for t, p in zip(outData['monthlyDemand'], ps)]
 	outData['ps'] = ps
-	outData['kWhtoRecharge'] = chargePerMonth
+	outData['kWhtoRecharge'] = [sum(discharges) for discharges in dischargeByMonth]
 	outData['benefitMonthly'] = [x * demandCharge for x in ps]
 	outData['costtoRecharge'] = [retailCost * x for x in outData['kWhtoRecharge']]
 	outData['benefitNet'] = [b - c for b, c in zip(outData['benefitMonthly'], outData['costtoRecharge'])]
@@ -185,26 +148,26 @@ def work(modelDir, inputDict):
 
 	# Battery State of Charge Graph
 	# Turn dc's SoC into a percentage, with dodFactor considered.
-	outData['batterySoc'] = [t['battSoC']/battCapacity*100.0*dodFactor + (100-100*dodFactor) for t in dc]
+	outData['batterySoc'] = SoC = [t['battSoC']/battCapacity*100.0*dodFactor + (100-100*dodFactor) for t in dc]
 	# Estimate number of cyles the battery went through.
-	outData['cycleEquivalents'] = cycleEquivalents = _cycleCount(outData['batterySoc'])
-	outData['batteryLife'] = batteryCycleLife/cycleEquivalents
+	cycleEquivalents = len([1 for i, c in enumerate(SoC[:-1]) if SoC[i] < 100 and SoC[i+1] == 100])
+	outData['cycleEquivalents'] = cycleEquivalents
+	outData['batteryLife'] = batteryCycleLife / cycleEquivalents
 
 	# Cash Flow Graph
 	#cashFlowCurve is $ in from peak shaving minus the cost to recharge the battery every day of the year
-	cashFlowCurve = [(peakShaveSum * demandCharge)-(totalYearlyCharge*retailCost) for year in range(projYears)]
+	totalYearlyCharge = sum(outData['kWhtoRecharge'])
+	cashFlowCurve = [(sum(ps) * demandCharge)-(totalYearlyCharge*retailCost) for year in range(projYears)]
 	cashFlowCurve.insert(0, -1 * cellCost * cellQuantity)  # insert initial investment
 	#simplePayback is also affected by the cost to recharge the battery every day of the year
-	outData['SPP'] = (cellCost*cellQuantity)/((peakShaveSum*demandCharge)-(totalYearlyCharge*retailCost))
+	outData['SPP'] = (cellCost*cellQuantity)/((sum(ps)*demandCharge)-(totalYearlyCharge*retailCost))
 	outData['netCashflow'] = cashFlowCurve
 	outData['cumulativeCashflow'] = [sum(cashFlowCurve[:i+1]) for i, d in enumerate(cashFlowCurve)]
 	outData['NPV'] = npv(discountRate, cashFlowCurve)
 	
 	battCostPerCycle = cellQuantity * cellCapacity * cellCost / batteryCycleLife
-	lcoeTotEnergy = cycleEquivalents * cellQuantity * cellCapacity
 	lcoeTotCost = cycleEquivalents*retailCost + battCostPerCycle*cycleEquivalents
-	LCOE = lcoeTotCost / lcoeTotEnergy
-	outData['LCOE'] = LCOE
+	outData['LCOE'] = lcoeTotCost / (cycleEquivalents * cellQuantity * cellCapacity)
 
 	# Other
 	outData['startDate'] = '2011-01-01'  # dc[0]['datetime'].isoformat()
@@ -212,18 +175,6 @@ def work(modelDir, inputDict):
 	# Seemingly unimportant. Ask permission to delete.
 	outData['stdout'] = 'Success' 
 	outData['months'] = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
-	
-	# ------------------------ DEBUGGING TOOLS ----------------------- #
-	# import matplotlib.pyplot as plt 
-	# dcThroughTheMonth = [[t for t in iter(dc) if t['month']<=x] for x in range(12)]
-	# hoursThroughTheMonth = [len(dcThroughTheMonth[month]) for month in range(12)]
-	# # Output some matplotlib results as well.
-	# plt.plot([t['power'] for t in dc])
-	# plt.plot([t['netpower'] for t in dc])
-	# plt.plot([t['battSoC'] for t in dc])
-	# for month in range(12):
-	#   plt.axvline(hoursThroughTheMonth[month])
-	# plt.savefig(pJoin(modelDir,"plot.png"))
 
 	return outData
 
@@ -297,4 +248,18 @@ outDic {
 	NPV: float
 	benefitNet: 12
 }
+
+# insert into work()
+	# ------------------------ DEBUGGING TOOLS ----------------------- #
+	# import matplotlib.pyplot as plt 
+	# dcThroughTheMonth = [[t for t in iter(dc) if t['month']<=x] for x in range(12)]
+	# hoursThroughTheMonth = [len(dcThroughTheMonth[month]) for month in range(12)]
+	# # Output some matplotlib results as well.
+	# plt.plot([t['power'] for t in dc])
+	# plt.plot([t['netpower'] for t in dc])
+	# plt.plot([t['battSoC'] for t in dc])
+	# for month in range(12):
+	#   plt.axvline(hoursThroughTheMonth[month])
+	# plt.savefig(pJoin(modelDir,"plot.png"))
+
 '''
