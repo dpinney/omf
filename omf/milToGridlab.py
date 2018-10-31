@@ -1390,6 +1390,7 @@ def _tests(
 				percent = float(inFileSize)/float(outFileSize)
 				curData['glm_size_as_perc_of_std'] = percent
 				curData['std_size_mb'] = inFileSize / 1000.0 / 1000.0
+				curData['number_of_load_obj'] = len([x for x in outGlm if outGlm[x].get('object','') in ['load','triplex_load','triplex_node']])
 				resultsFile.write('WROTE GLM FOR ' + stdString + ', THE STD FILE IS %s PERCENT OF THE GLM FILE.\n' % str(100*percent)[0:4])
 		except:
 			print 'FAILED CONVERTING', stdString
