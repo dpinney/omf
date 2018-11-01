@@ -46,6 +46,8 @@ def voltPlot(omd, workDir=None, neatoLayout=False):
 	for key in tree.keys():
 		if tree[key].get("argument","") == "\"schedules.glm\"" or tree[key].get("tmyfile","") != "":
 			del tree[key]
+	# Map to speed up name lookups.
+	nameToIndex = {tree[key].get('name',''):key for key in tree.keys()}
 	# Make sure we have a voltDump:
 	def safeInt(x):
 		try: return int(x)
@@ -73,27 +75,36 @@ def voltPlot(omd, workDir=None, neatoLayout=False):
 	def avg(l):
 		''' Average of a list of ints or floats. '''
 		return sum(l)/len(l)
-	# Detect the feeder nominal voltage:
+	# Use the swing bus voltage as a reasonable default voltage.
 	for key in tree:
 		ob = tree[key]
 		if type(ob)==dict and ob.get('bustype','')=='SWING':
-			feedVoltage = float(ob.get('nominal_voltage',1))
+			swingVoltage = float(ob.get('nominal_voltage',1))
 	# Tot it all up.
 	nodeVolts = {}
 	for row in voltTable:
 		allVolts = []
 		for phase in ['A','B','C']:
-			phaseVolt = math.hypot(float(row['volt'+phase+'_real']),
-								   float(row['volt'+phase+'_imag']))
+			realV = float(row['volt'+phase+'_real'])
+			imagV = float(row['volt'+phase+'_imag'])
+			phaseVolt = math.hypot(realV, imagV)
 			if phaseVolt != 0.0:
 				if digits(phaseVolt)>3:
+					nodeName = row.get('node_name','')
+					treeKey = nameToIndex.get(nodeName, 0)
+					nodeObj = tree.get(treeKey, {})
+					try:
+						nominal_voltage = float(nodeObj['nominal_voltage'])
+					except:
+						nominal_voltage = swingVoltage
 					# Normalize to 120 V standard
-					phaseVolt = phaseVolt*(120/feedVoltage)
+					phaseVolt = phaseVolt*(120/nominal_voltage)
 				allVolts.append(phaseVolt)
+		# Hack: average across phases.
 		nodeVolts[row.get('node_name','')] = avg(allVolts)
 	# Color nodes by VOLTAGE.
 	fGraph = feeder.treeToNxGraph(tree)
-	voltChart = plt.figure(figsize=(30,30))
+	voltChart = plt.figure(figsize=(20,20))
 	plt.axes(frameon = 0)
 	plt.axis('off')
 	plt.tight_layout()
@@ -107,12 +118,14 @@ def voltPlot(omd, workDir=None, neatoLayout=False):
 	else:
 		positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
 	edgeIm = nx.draw_networkx_edges(fGraph, positions)
-	nodeIm = nx.draw_networkx_nodes(fGraph,
+	nodeIm = nx.draw_networkx_nodes(
+		fGraph,
 		pos = positions,
 		node_color = [nodeVolts.get(n,0) for n in fGraph.nodes()],
 		linewidths = 0,
 		node_size = 30,
-		cmap = plt.cm.viridis)
+		cmap = plt.cm.viridis
+	)
 	plt.sci(nodeIm)
 	plt.clim(110,130)
 	plt.colorbar(orientation='horizontal', fraction=0.05)
@@ -160,7 +173,7 @@ def _debugging():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	renderAndShow(modelLoc)
+	# renderAndShow(modelLoc)
 	# Run the model.
 	runForeground(modelLoc)
 	# Show the output.
