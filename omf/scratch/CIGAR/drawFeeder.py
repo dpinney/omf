@@ -14,8 +14,8 @@ import math
 
 # FNAME = 'smsSingle.glm'
 # FNAME = 'dist_gen_solar_all.glm'
-# FNAME = 'ieee37node.glm'
 FNAME = 'ieee123nodeBetter.glm'
+# FNAME = 'Exercise_4_2_1.glm'
 
 # help(omf.feeder.parse)
 
@@ -45,7 +45,7 @@ def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=N
 	Returns a matplotlib object.'''
 	tree = omf.feeder.parse(glmPath)
 	# dictionary to hold info on lines present in glm
-	edge_bools = dict.fromkeys(['underground_line','overhead_line','triplex_line','transformer','regulator'], False)
+	edge_bools = dict.fromkeys(['underground_line','overhead_line','triplex_line','transformer','regulator', 'fuse', 'switch'], False)
 	# Get rid of schedules and climate and check for all edge types:
 	for key in tree.keys():
 		if tree[key].get("argument","") == "\"schedules.glm\"" or tree[key].get("tmyfile","") != "":
@@ -61,6 +61,10 @@ def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=N
 			edge_bools['transformer'] = True
 		elif obtype == 'regulator':
 			edge_bools['regulator'] = True
+		elif obtype == 'fuse':
+			edge_bools['fuse'] = True
+		elif obtype == 'switch':
+			edge_bools['switch'] = True
 	# Make sure we have a voltDump:
 	def safeInt(x):
 		try: return int(x)
@@ -361,7 +365,7 @@ def testAllVarCombos():
 							else:
 								print "****************** Couldn't run drawPlot_" + testName + " ******************"
 							print "Test " + testNum + " of 384 completed." #384 total combinations based on current variable sets
-							testNum++
+							testNum += 1
 				
 # chart = drawPlot(FNAME, neatoLayout=True, edgeCol=True, nodeLabs="VoltageImbalance", customColormap=True, perUnitScale=False)
 chart = drawPlot(FNAME, neatoLayout=True, edgeCol=True, nodeLabs="Voltage", edgeLabs="Current", perUnitScale=False)
