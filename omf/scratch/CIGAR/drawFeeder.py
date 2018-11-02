@@ -11,6 +11,10 @@ import math
 from networkx.drawing.nx_agraph import graphviz_layout
 import networkx as nx
 import math
+import warnings
+
+# Ignore matplotlib's warnings:
+warnings.filterwarnings("ignore")
 
 # FNAME = 'smsSingle.glm'
 # FNAME = 'dist_gen_solar_all.glm'
@@ -91,16 +95,19 @@ def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=N
 		# print '@@@@@@', workDir
 	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=[], workDir=workDir)
 	# read voltDump values into a dictionary
-	with open(pJoin(workDir,'voltDump.csv'),'r') as dumpFile:
-		reader = csv.reader(dumpFile)
-		reader.next() # Burn the header.
-		keys = reader.next()
-		voltTable = []
-		for row in reader:
-			rowDict = {}
-			for pos,key in enumerate(keys):
-				rowDict[key] = row[pos]
-			voltTable.append(rowDict)
+	try:
+		dumpFile = open(pJoin(workDir,'voltDump.csv'),'r')
+	except:
+		raise Exception('GridLAB-D failed to run with the following errors:\n' + gridlabOut['stderr'])
+	reader = csv.reader(dumpFile)
+	reader.next() # Burn the header.
+	keys = reader.next()
+	voltTable = []
+	for row in reader:
+		rowDict = {}
+		for pos,key in enumerate(keys):
+			rowDict[key] = row[pos]
+		voltTable.append(rowDict)
 	# read currDump values into a dictionary
 	with open(pJoin(workDir,'currDump.csv'),'r') as currDumpFile:
 		reader = csv.reader(currDumpFile)
