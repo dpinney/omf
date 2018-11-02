@@ -16,10 +16,13 @@ import warnings
 # Ignore matplotlib's warnings:
 warnings.filterwarnings("ignore")
 
-FNAME = 'test_smsSingle.glm'
-# FNAME = 'test_dist_gen_solar_all.glm'
-# FNAME = 'test_ieee123nodeBetter.glm'
+FNAME = 'test_base_R4-25.00-1.glm_CLEAN.glm'
 # FNAME = 'test_Exercise_4_2_1.glm'
+# FNAME = 'test_ieee37node.glm'
+# FNAME = 'test_ieee123nodeBetter.glm'
+# FNAME = 'test_large-R5-35.00-1.glm_CLEAN.glm'
+# FNAME = 'test_medium-R4-12.47-1.glm_CLEAN.glm'
+# FNAME = 'test_smsSingle.glm'
 
 # help(omf.feeder.parse)
 
@@ -52,8 +55,6 @@ def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=N
 	edge_bools = dict.fromkeys(['underground_line','overhead_line','triplex_line','transformer','regulator', 'fuse', 'switch'], False)
 	# Get rid of schedules and climate and check for all edge types:
 	for key in tree.keys():
-		if tree[key].get("argument","") == "\"schedules.glm\"" or tree[key].get("tmyfile","") != "":
-			del tree[key]
 		obtype = tree[key].get("object","")
 		if obtype == 'underground_line':
 			edge_bools['underground_line'] = True
@@ -222,7 +223,7 @@ def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=N
 				coord = (nodeFrom, nodeTo)
 				currVal = edgeCurrentSum.get(edge)
 				voltVal = avg([nodeVolts.get(nodeFrom), nodeVolts.get(nodeTo)])
-				lineRating = lineRatings.get(edge)
+				lineRating = lineRatings.get(edge, 10.0**9)
 				edgePerUnitVal = (edgeCurrentMax.get(edge))/lineRating
 				edgeTupleCurrents[coord] = "{0:.2f}".format(currVal)
 				edgeTuplePower[coord] = "{0:.2f}".format((currVal * voltVal)/1000)
@@ -236,6 +237,7 @@ def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=N
 	edgeLabels = edgeTupleValsPU
 	# Build the graph.
 	fGraph = omf.feeder.treeToNxGraph(tree)
+	# TODO: consider whether we can set figsize dynamically.
 	voltChart = plt.figure(figsize=(15,15))
 	plt.axes(frameon = 0)
 	plt.axis('off')
