@@ -16,10 +16,10 @@ import warnings
 # Ignore matplotlib's warnings:
 warnings.filterwarnings("ignore")
 
-# FNAME = 'smsSingle.glm'
-# FNAME = 'dist_gen_solar_all.glm'
-FNAME = 'ieee123nodeBetter.glm'
-# FNAME = 'Exercise_4_2_1.glm'
+FNAME = 'test_smsSingle.glm'
+# FNAME = 'test_dist_gen_solar_all.glm'
+# FNAME = 'test_ieee123nodeBetter.glm'
+# FNAME = 'test_Exercise_4_2_1.glm'
 
 # help(omf.feeder.parse)
 
@@ -338,7 +338,6 @@ def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=N
 # Test code for parsing/modifying feeders.
 # tree = omf.feeder.parse('smsSingle.glm')
 # tree[35]['name'] = 'OH NO CHANGED'
-
 
 # Testing for variable combinations
 def testAllVarCombos():
