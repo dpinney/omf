@@ -84,7 +84,7 @@ def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=N
 	# Run Gridlab.
 	if not workDir:
 		workDir = tempfile.mkdtemp()
-		print '@@@@@@', workDir
+		# print '@@@@@@', workDir
 	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=[], workDir=workDir)
 	# read voltDump values into a dictionary
 	with open(pJoin(workDir,'voltDump.csv'),'r') as dumpFile:
@@ -328,9 +328,47 @@ def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=N
 # tree = omf.feeder.parse('smsSingle.glm')
 # tree[35]['name'] = 'OH NO CHANGED'
 
+
+# Testing for variable combinations
+def testAllVarCombos():
+	edgeLabsList = {None : "None", "Name" : "N", "Current" : "C", "Power" : "P", "Rating" : "R", "PercentOfRating" : "Per"}
+	nodeLabsList = {None : "None", "Name" : "N", "Voltage" : "V", "VoltageImbalance" : "VI"}
+	boolList = {True : "T", False : "F"}
+	testNum = 1
+
+	for edgeLabVal in edgeLabsList.keys():
+		for nodeLabVal in nodeLabsList.keys():
+			for edgeColVal in boolList.keys():
+				for nodeColVal in boolList.keys():
+					for customColormapVal in boolList.keys():
+						for perUnitScaleVal in boolList.keys():
+							testName = edgeLabsList.get(edgeLabVal) + "_" + nodeLabsList.get(nodeLabVal) + "_" + boolList.get(edgeColVal) + "_" + boolList.get(nodeColVal) + "_" + boolList.get(customColormapVal) + "_" + boolList.get(perUnitScaleVal)
+							#print testName
+							pngName = "./drawPlotTest/drawPlot_" + testName + ".png"
+							for i in range(10):
+								try:
+									chart = drawPlot(FNAME, neatoLayout=True, edgeLabs=edgeLabVal, nodeLabs=nodeLabVal, edgeCol=edgeColVal, nodeCol=nodeColVal, customColormap=customColormapVal, perUnitScale=perUnitScaleVal)
+								except IOError, e:
+									if e.errno == 2: #catch temporary IOError and retry until it passes
+										print "IOError [Errno 2] for drawPlot_" + testName + ". Retrying..."
+										continue #retry
+								except:
+									print "!!!!!!!!!!!!!!!!!! Error for drawPlot_" + testName + " !!!!!!!!!!!!!!!!!!"
+									pass
+								else:
+									chart.savefig(pngName)
+									break
+							else:
+								print "****************** Couldn't run drawPlot_" + testName + " ******************"
+							print "Test " + testNum + " of 384 completed." #384 total combinations based on current variable sets
+							testNum++
+				
 # chart = drawPlot(FNAME, neatoLayout=True, edgeCol=True, nodeLabs="VoltageImbalance", customColormap=True, perUnitScale=False)
 chart = drawPlot(FNAME, neatoLayout=True, edgeCol=True, nodeLabs="Voltage", edgeLabs="Current", perUnitScale=False)
 chart.savefig("./VOLTOUT.png")
+
+#testAllVarCombos()
+
 
 # from pprint import pprint as pp
 # pp(chart)
