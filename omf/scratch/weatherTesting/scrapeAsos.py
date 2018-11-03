@@ -42,7 +42,7 @@ def get_stations_from_networks():
 				currentSite['Latitude'] = site['geometry']['coordinates'][0]
 				currentSite['Longitude'] = site['geometry']['coordinates'][1]
 				currentSite['Elevation'] = site['properties']['elevation']
-				currentSite['Elevation'] = site['properties']['tzname']
+				currentSite['Time Zone'] = site['properties']['tzname']
 				csvwriter.writerow(currentSite)
 
 	return stations
