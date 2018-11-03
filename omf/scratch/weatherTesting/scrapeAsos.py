@@ -32,6 +32,7 @@ def get_stations_from_networks():
 			data = urlopen(uri)
 			jdict = json.load(data)
 			#map attribute to entry in csv
+			csvwriter.writeheader()
 			for site in jdict['features']:
 				currentSite = {}
 				currentSite['Station Id'] = site['properties']['sid']
