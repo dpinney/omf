@@ -33,25 +33,34 @@ def work(modelDir, inputDict):
 	else:
 		neato = True 
 	chart = voltPlot(omd, workDir=modelDir, neatoLayout=neato)
+	# chart = drawPlot(pJoin(modelDir,feederName + '.omd'), workDir=modelDir, neatoLayout=neato, edgeCol=True, perUnitScale=False, rezSqIn=400)
 	chart.savefig(pJoin(modelDir,"output.png"))
 	with open(pJoin(modelDir,"output.png"),"rb") as inFile:
 		outData["voltageDrop"] = inFile.read().encode("base64")
 	return outData
 		
-def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=True, nodeCol=True, customColormap=
+def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=True, nodeCol=True, customColormap=
 	False, perUnitScale=True, rezSqIn=400):
 	''' Draw a color-coded map of the voltage drop on a feeder.
-	glmPath is the full path to the GridLAB-D .glm file.
+	path is the full path to the GridLAB-D .glm file or OMF .omd file.
 	workDir is where GridLAB-D will run, if it's None then a temp dir is used.
 	neatoLayout=True means the circuit is displayed using a force-layout approach.
 	edgeLabs property must be either 'Name', 'Current', 'Power', 'Rating', 'PercentOfRating', or None
 	nodeLabs property must be either 'Name', 'Voltage', 'VoltageImbalance', or None
-	edgeCol and nodeCol can be set to false to avoid coloring edges or nodes	
+	edgeCol and nodeCol can be set to false to avoid coloring edges or nodes
 	customColormap=True means use a one that is nicely scaled to perunit values highlighting extremes.
 	Returns a matplotlib object.'''
 	# Be quiet matplotlib:
 	warnings.filterwarnings("ignore")
-	tree = omf.feeder.parse(glmPath)
+	if path.endswith('.glm'):
+		tree = omf.feeder.parse(path)
+		attachments = []
+	elif path.endswith('.omd'):
+		omd = json.load(open(path))
+		tree = omd.get('tree', {})
+		attachments = omd.get('attachments',[])
+	else:
+		raise Exception('Invalid input file type. We require a .glm or .omd.')
 	# dictionary to hold info on lines present in glm
 	edge_bools = dict.fromkeys(['underground_line','overhead_line','triplex_line','transformer','regulator', 'fuse', 'switch'], False)
 	# Get rid of schedules and climate and check for all edge types:
@@ -71,6 +80,8 @@ def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=N
 			edge_bools['fuse'] = True
 		elif obtype == 'switch':
 			edge_bools['switch'] = True
+		if tree[key].get("argument","") == "\"schedules.glm\"" or tree[key].get("tmyfile","") != "":
+			del tree[key]
 	# Make sure we have a voltDump:
 	def safeInt(x):
 		try: return int(x)
@@ -95,8 +106,8 @@ def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=N
 	if not workDir:
 		workDir = tempfile.mkdtemp()
 		# print '@@@@@@', workDir
-	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=[], workDir=workDir)
-	# read voltDump values into a dictionary
+	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
+	# read voltDump values into a dictionary.
 	try:
 		dumpFile = open(pJoin(workDir,'voltDump.csv'),'r')
 	except:
@@ -529,5 +540,5 @@ def _debugging():
 	renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	# _debugging()
-	_testingPlot()
+	_debugging()
+	# _testingPlot()
