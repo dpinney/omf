@@ -40,7 +40,7 @@ for obj in feed.values():
 # plt.savefig('blah.png')
 
 def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=True, nodeCol=True, customColormap=
-	False, perUnitScale=True):
+	False, perUnitScale=True, rezSqIn=400):
 	''' Draw a color-coded map of the voltage drop on a feeder.
 	glmPath is the full path to the GridLAB-D .glm file.
 	workDir is where GridLAB-D will run, if it's None then a temp dir is used.
@@ -238,7 +238,8 @@ def drawPlot(glmPath, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=N
 	# Build the graph.
 	fGraph = omf.feeder.treeToNxGraph(tree)
 	# TODO: consider whether we can set figsize dynamically.
-	voltChart = plt.figure(figsize=(15,15))
+	wlVal = int(math.sqrt(float(rezSqIn)))
+	voltChart = plt.figure(figsize=(wlVal, wlVal))
 	plt.axes(frameon = 0)
 	plt.axis('off')
 	voltChart.gca().set_aspect('equal')
@@ -376,7 +377,7 @@ def testAllVarCombos():
 							testNum += 1
 				
 # chart = drawPlot(FNAME, neatoLayout=True, edgeCol=True, nodeLabs="VoltageImbalance", customColormap=True, perUnitScale=False)
-chart = drawPlot(FNAME, neatoLayout=True, edgeCol=True, nodeLabs="Voltage", edgeLabs="Current", perUnitScale=False)
+chart = drawPlot(FNAME, neatoLayout=True, edgeCol=True, nodeLabs="Voltage", edgeLabs="Current", perUnitScale=False, rezSqIn=100)
 chart.savefig("./VOLTOUT.png")
 
 #testAllVarCombos()
