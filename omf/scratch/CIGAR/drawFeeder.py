@@ -31,7 +31,7 @@ FNAME = 'test_base_R4-25.00-1.glm_CLEAN.glm'
 # tree[35]['name'] = 'OH NO CHANGED'
 
 # chart = omf.models.voltageDrop.drawPlot(FNAME, neatoLayout=True, edgeCol=True, nodeLabs="VoltageImbalance", customColormap=True, perUnitScale=False)
-# chart = omf.models.voltageDrop.drawPlot(FNAME, neatoLayout=True, edgeCol=True, nodeLabs="Voltage", edgeLabs="Current", perUnitScale=False, rezSqIn=100)
-# chart.savefig("./VOLTOUT.png")
+chart = omf.models.voltageDrop.drawPlot(FNAME, neatoLayout=True, edgeCol=True, nodeLabs="Voltage", edgeLabs="Current", perUnitScale=False, rezSqIn=600)
+chart.savefig("./VOLTOUT.png")
 
 #testAllVarCombos()

@@ -5,6 +5,7 @@ import traceback
 from os.path import join as pJoin
 from jinja2 import Template
 from matplotlib import pyplot as plt
+import matplotlib
 from networkx.drawing.nx_agraph import graphviz_layout
 import networkx as nx
 from omf.models import __neoMetaModel__
