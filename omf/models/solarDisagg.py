@@ -249,7 +249,6 @@ def new(modelDir):
 		"latLonData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles",latLonDataFile)).read(),
 		"latLonFileName": latLonDataFile,
 		"asosStation": "CHO",
-		"asosState": "VA",
 		"year": "2017-01-01",
 		"created":str(datetime.datetime.now())
 	}
