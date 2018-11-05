@@ -12,6 +12,7 @@ import subprocess, random, webbrowser, multiprocessing
 import pprint as pprint
 import copy
 import os.path
+import warnings
 
 # OMF imports
 import omf.feeder as feeder
@@ -198,6 +199,8 @@ def convertToGFM(gfmInputTemplate, feederModel):
 	return gfmJson
 
 def genDiagram(outputDir, feederJson, damageDict):
+	# Be quiet networkx:
+	warnings.filterwarnings("ignore")
 	# Load required data.
 	tree = feederJson.get("tree",{})
 	links = feederJson.get("links",{})
