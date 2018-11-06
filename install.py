@@ -51,6 +51,7 @@ elif platform.system()=='Windows':
 	os.system("choco install -y graphviz")
 	os.system("choco install -y pip")
 	os.system("choco install -y octave.portable")
+	#TODO: find way to install mdbtools.
 	# HACK: timeout and refreshenv should get all the choco binaries on to the path.
 	os.system("timeout 5")
 	os.system("refreshenv")
@@ -74,7 +75,7 @@ elif platform.system()=='Windows':
 elif platform.system()=="Darwin": # MacOS
 	# Install homebrew
 	os.system('/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
-	os.system("brew install wget python@2 ffmpeg git graphviz octave")
+	os.system("brew install wget python@2 ffmpeg git graphviz octave mdbtools")
 	os.system("brew link --overwrite python")
 	os.system("wget -O gridlabd.dmg --no-check-certificate https://ufpr.dl.sourceforge.net/project/gridlab-d/gridlab-d/Candidate%20release/gridlabd_4.0.0.dmg")
 	os.system("sudo hdiutil attach gridlabd.dmg")
