@@ -1324,115 +1324,115 @@ def stdSeqToGlm(seqPath, stdPath, glmPath):
 		outFile.write(omf.feeder.sortedWrite(tree))
 
 def missingConductorsFix(tree):
-    '''Fixes the missing conductors issue in the tree and returns the altered tree'''    
+	'''Fixes the missing conductors issue in the tree and returns the altered tree'''	
 
-    ### CHECK IF THERE ARE LINE CONFIGS WITHOUT ANY CONDUCTORS ###
-    empty_line_configs = dict()
-    #get line configs missing conductors (dict maps name to key w/in tree)
-    for k,v in tree.iteritems():
-        if v.get('object') == 'line_configuration' and not any('conductor' in vk for vk in v.keys()):
-            empty_line_configs[v['name']] = k
-    
-    #get keys of lines missing conductors
-    empty_lines = [k for k,v in tree.iteritems() if 'line' in v.get('object','') and v.get('configuration') in empty_line_configs]
-    
+	### CHECK IF THERE ARE LINE CONFIGS WITHOUT ANY CONDUCTORS ###
+	empty_line_configs = dict()
+	#get line configs missing conductors (dict maps name to key w/in tree)
+	for k,v in tree.iteritems():
+		if v.get('object') == 'line_configuration' and not any('conductor' in vk for vk in v.keys()):
+			empty_line_configs[v['name']] = k
+	
+	#get keys of lines missing conductors
+	empty_lines = [k for k,v in tree.iteritems() if 'line' in v.get('object','') and v.get('configuration') in empty_line_configs]
+	
 	if not empty_lines:
 		return tree 
-    
+	
 	for line_key in empty_lines:
 
-        #find sibling lines 
-        mom_node = tree[line_key]['from']
-        dotter_node = tree[line_key]['to']
-        brother_key = None
-        grandpa_key = None
-        grandson_key = None
-        for k,v in tree.iteritems():
-            if k not in empty_lines and tree[line_key]['object'] == v.get('object'):
-                if mom_node == v.get('from','') or dotter_node == v.get('to',''):
-                    brother_key = k
-                    break
-                if mom_node == v.get('to', ''): 
-                    grandpa_key = k
-                if dotter_node == v.get('from', ''):
-                    grandson_key = k
-                if grandpa_key and grandson_key:
-                    break
+		#find sibling lines 
+		mom_node = tree[line_key]['from']
+		dotter_node = tree[line_key]['to']
+		brother_key = None
+		grandpa_key = None
+		grandson_key = None
+		for k,v in tree.iteritems():
+			if k not in empty_lines and tree[line_key]['object'] == v.get('object'):
+				if mom_node == v.get('from','') or dotter_node == v.get('to',''):
+					brother_key = k
+					break
+				if mom_node == v.get('to', ''): 
+					grandpa_key = k
+				if dotter_node == v.get('from', ''):
+					grandson_key = k
+				if grandpa_key and grandson_key:
+					break
 
-        nearby = brother_key if brother_key else (grandson_key if grandson_key else grandpa_key)
+		nearby = brother_key if brother_key else (grandson_key if grandson_key else grandpa_key)
 
-        if not nearby:
-            #check child lines of the cousins of the mom node
-            #AKA second cousin lines
+		if not nearby:
+			#check child lines of the cousins of the mom node
+			#AKA second cousin lines
 
-            #first we need to get the parent's cousin's nodes
-            ggma_node_names = []
-            for k,v in tree.iteritems():
-                if 'line' in v.get('object','') and mom_node == v.get('to'):
-                    ggma_node_names.append(v.get('from'))
-            cousin_node_names = [] #dict(name: [] for name in ggma_node_names)
-            for k,v in tree.iteritems():
-                if v.get('from') in ggma_node_names:
-                    cousin_node_names.append(v.get('to'))
-            
-            for k,v in tree.iteritems():
-                if v.get('from') in cousin_node_names and v['object'] == tree[line_key]['object'] and k not in empty_lines:
-                    nearby = k
-                    break
-        
-        if not nearby:
-            for k,v in tree.iteritems():
-                if v.get('object') == tree[line_key]['object'] and k not in empty_lines:
-                    nearby = k
-        
-        if not nearby:
-            #pull in a manual default config
-            print "THERE ARE LITERALLY NO NON-FUCKED %sS IN THE WHOLE FUCKING TREE" % tree[line_key]['object']
-            print empty_lines
+			#first we need to get the parent's cousin's nodes
+			ggma_node_names = []
+			for k,v in tree.iteritems():
+				if 'line' in v.get('object','') and mom_node == v.get('to'):
+					ggma_node_names.append(v.get('from'))
+			cousin_node_names = [] #dict(name: [] for name in ggma_node_names)
+			for k,v in tree.iteritems():
+				if v.get('from') in ggma_node_names:
+					cousin_node_names.append(v.get('to'))
+			
+			for k,v in tree.iteritems():
+				if v.get('from') in cousin_node_names and v['object'] == tree[line_key]['object'] and k not in empty_lines:
+					nearby = k
+					break
+		
+		if not nearby:
+			for k,v in tree.iteritems():
+				if v.get('object') == tree[line_key]['object'] and k not in empty_lines:
+					nearby = k
+		
+		if not nearby:
+			#pull in a manual default config
+			print "THERE ARE LITERALLY NO NON-FUCKED %sS IN THE WHOLE FUCKING TREE" % tree[line_key]['object']
+			print empty_lines
 
-        #grab the conductor from the line configuration
-        nearby_line_config = tree[nearby]['configuration']
-        for k, v in tree.iteritems():
-            if nearby_line_config == v.get('name'):
-                nearby_line_config = v
-                break
-        print v
-        conductor = [v for k,v in v.iteritems() if 'conductor' in k][0]
+		#grab the conductor from the line configuration
+		nearby_line_config = tree[nearby]['configuration']
+		for k, v in tree.iteritems():
+			if nearby_line_config == v.get('name'):
+				nearby_line_config = v
+				break
+		print v
+		conductor = [v for k,v in v.iteritems() if 'conductor' in k][0]
 
-        #assign the empty line config this conductor
-        for phase in tree[line_key].get('phases'):
-            conductor_string = 'conductor_' + phase
-            line_config_key = empty_line_configs[tree[line_key]['configuration']]
-            tree[line_config_key][conductor_string] = conductor
+		#assign the empty line config this conductor
+		for phase in tree[line_key].get('phases'):
+			conductor_string = 'conductor_' + phase
+			line_config_key = empty_line_configs[tree[line_key]['configuration']]
+			tree[line_config_key][conductor_string] = conductor
 
-    ### CHECKS IF THERE EXISTS ANY MISMATCH BETWEEN LINE PHASES AND LINE-CONFIG CONDUCTOR PHASES
-    namesToKeys = {v.get('name'): k for k, v in tree.iteritems()}
-    del namesToKeys[None]
+	### CHECKS IF THERE EXISTS ANY MISMATCH BETWEEN LINE PHASES AND LINE-CONFIG CONDUCTOR PHASES
+	namesToKeys = {v.get('name'): k for k, v in tree.iteritems()}
+	del namesToKeys[None]
 
-    buggy_lines = dict() #maps buggy lines to their line config keys
-    
-    for k, line in tree.iteritems():
-        if 'line' in line.get('object',''):
-            try:
-                line_config_key = namesToKeys[line['configuration']]
-            except KeyError:
-                continue
-            for phase in line.get('phases',''):
-                if not tree[line_config_key].get('conductor_' + phase):
-                    buggy_lines[k] = line_config_key
+	buggy_lines = dict() #maps buggy lines to their line config keys
+	
+	for k, line in tree.iteritems():
+		if 'line' in line.get('object',''):
+			try:
+				line_config_key = namesToKeys[line['configuration']]
+			except KeyError:
+				continue
+			for phase in line.get('phases',''):
+				if not tree[line_config_key].get('conductor_' + phase):
+					buggy_lines[k] = line_config_key
 
-    for line_key, line_config_key in buggy_lines.iteritems():
-        for attr in tree[line_config_key]:
-            if 'conductor' in attr:
-                existing_cond = attr
-                break
+	for line_key, line_config_key in buggy_lines.iteritems():
+		for attr in tree[line_config_key]:
+			if 'conductor' in attr:
+				existing_cond = attr
+				break
 
-        phases = tree[line_key].get('phases')
-        for phase in phases:
-            if not tree[line_config_key].get('conductor_'+phase):
-                tree[line_config_key]['conductor_'+phase] = tree[line_config_key][existing_cond]
+		phases = tree[line_key].get('phases')
+		for phase in phases:
+			if not tree[line_config_key].get('conductor_'+phase):
+				tree[line_config_key]['conductor_'+phase] = tree[line_config_key][existing_cond]
 
-    return tree
+	return tree
 
 
 def _latCount(name):
