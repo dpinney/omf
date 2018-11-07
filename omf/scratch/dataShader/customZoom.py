@@ -2,7 +2,7 @@ import math, json, io, base64
 import numpy as np
 import pandas as pd
 
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, request
 
 import datashader as ds
 import datashader.transfer_functions as tf
@@ -15,19 +15,14 @@ app = Flask(__name__)
 def hello():
 	return "Hello World!"
 
-@app.route("/testing")
-def testingRoute():
-	np.random.seed(0)
-	n=100000
-	m=200000
+@app.route("/testing", methods=["GET", "POST"])
+def testingRoute(x_range=(0,1), y_range=(0,1)):
+	if request.method == 'POST':
+		x_range = (request.form.get("x_range_low", type=float), request.form.get("x_range_high", type=float)) 
+		y_range = (request.form.get("y_range_low", type=float), request.form.get("y_range_high", type=float))
 
-	nodes = pd.DataFrame(["node"+str(i) for i in range(n)], columns=['name'])
-	edges = pd.DataFrame(np.random.randint(0,len(nodes), size=(m, 2)), columns=['source', 'target'])
-
-	randomloc = random_layout(nodes,edges)
-
-	dsPlot = graphplot(randomloc, connect_edges(randomloc,edges)) 
-
+	#dsPlot = graphplot(randomloc, connect_edges(randomloc,edges))
+	dsPlot = newGraphplot(randomloc, connect_edges(randomloc,edges), x_range=x_range, y_range=y_range)
 	#convert datashder image to png
 	back_img = tf.Image(dsPlot).to_pil()
 	in_mem_file = io.BytesIO()
@@ -39,8 +34,22 @@ def testingRoute():
 	base64_encoded_result_str = base64_encoded_result_bytes.decode('ascii')
 	return render_template("testRoute.html", image=base64_encoded_result_bytes)
 
-cvsopts = dict(plot_height=900, plot_width=1200)
+#@app.route("/changeRange", methods=["POST"])
+#def changeRange():
+#	x_range = request.form.get("x_range")
+#	y_range = request.form.get("y_range")
+#	return redirect("/testing")
+np.random.seed(0)
+n=10000
+m=20000
 
+nodes = pd.DataFrame(["node"+str(i) for i in range(n)], columns=['name'])
+edges = pd.DataFrame(np.random.randint(0,len(nodes), size=(m, 2)), columns=['source', 'target'])
+
+randomloc = random_layout(nodes,edges)
+cvsopts = dict(plot_height=600, plot_width=800)
+
+#creaes nodes in datashader image
 def nodesplot(nodes, name=None, canvas=None, cat=None):
     canvas = ds.Canvas(**cvsopts) if canvas is None else canvas
     aggregator=None if cat is None else ds.count_cat(cat)
@@ -49,11 +58,7 @@ def nodesplot(nodes, name=None, canvas=None, cat=None):
 
 #creates edges in datashader image
 def edgesplot(edges, name=None, canvas=None):
-    #print('Start edges', file=sys.stdout)
     canvas = ds.Canvas(**cvsopts) if canvas is None else canvas
-    #print('Made canvas edges', file=sys.stdout)
-    #print(ds.count())
-    #print(canvas.line(edges, 'x','y', agg=ds.count()))
     return tf.shade(canvas.line(edges, 'x','y', agg=ds.count()), name=name)
    
 #combines nodes and edges in datashader image 
@@ -64,10 +69,17 @@ def graphplot(nodes, edges, name="", canvas=None, cat=None):
         canvas = ds.Canvas(x_range=xr, y_range=yr, **cvsopts)
         
     np = nodesplot(nodes, name + " nodes", canvas, cat)
-    #print(np)
     ep = edgesplot(edges, name + " edges", canvas)
-    #print(ep)
+    return tf.stack(ep, np, how="over", name=name)
+
+def newGraphplot(nodes, edges, name="", canvas=None, cat=None, x_range=None, y_range=None):
+    if canvas is None:
+        xr = x_range
+        yr = y_range
+        canvas = ds.Canvas(x_range=xr, y_range=yr, **cvsopts)
+    np = nodesplot(nodes, name + " nodes", canvas, cat)
+    ep = edgesplot(edges, name + " edges", canvas)
     return tf.stack(ep, np, how="over", name=name)
 
 if __name__ == '__main__':
-	app.run(debug=True)
+	app.run(debug=False)

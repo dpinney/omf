@@ -1,4 +1,30 @@
-<head></head>
+<head>
+	<script>
+	function post_to_url(path, params, method) {
+		method = method || 'post' // Set method to post by default, if not specified.
+		var form = document.createElement('form');
+		form.setAttribute('method', method);
+		form.setAttribute('action', path);
+		for(var key in params) {
+			if(params.hasOwnProperty(key)) {
+				var hiddenField = document.createElement('input');
+				hiddenField.setAttribute('type', 'hidden');
+				hiddenField.setAttribute('name', key);
+				hiddenField.setAttribute('value', params[key]);
+				form.appendChild(hiddenField);
+			}
+		}
+		document.body.appendChild(form)
+		form.submit()
+	}
+
+	function changeRange(){
+		console.log("test");
+		post_to_url("/testing", {x_range_low:0, x_range_high:0.5, y_range_low: 0, y_range_high: 0.5});
+	}
+	</script>
+</head>
 <body>
 	<div><img src="data:image/png;base64,{{image}}"></div>
+	<div><button id="publishButton" type="button" onclick="changeRange()">Change Range</button></div>
 </body>
