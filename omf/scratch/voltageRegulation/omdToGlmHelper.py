@@ -19,28 +19,27 @@ omfDIR = '/Users/tuomastalvitie/omf/omf'
 filePath = '/Users/tuomastalvitie/Desktop/UCS_Egan_Housed_Solar.omd'
 with open(filePath, 'r') as inFile:
 	inFeeder = json.load(inFile)
-	inFeeder['tree']['25103'] = {'#include "hot_water_demand1.glm";':""}
-	inFeeder['tree']['25104'] = {'module residential':'implicit_enduses NONE;'}
-	inFeeder['tree']['25105'] = {'class player': 'double value;'}
-	inFeeder['tree']['25106'] = {'object player':'name frequency_values; file frequency.PLAYER1;'}
+	# inFeeder['tree']['25103'] = {'#include "hot_water_demand1.glm";':""}
+	# inFeeder['tree'][u'25103'] = {u'omftype': u'#include', u'argument': u'"hot_water_demand1.glm"'}
+	# inFeeder['tree']['25105'] = {'class player': 'double value;'}
+	# inFeeder['tree'][u'25105'] = {u'class': u'player', u'double': u'value'}# add in manually for now
 	name_volt_dict ={}
 	for key, value in inFeeder['tree'].iteritems():
 		try:#disable freq control
-			if (value['object'] == 'waterheater'):
-				inFeeder['tree'][key].update({'heat_mode':'ELECTRIC'})
-				inFeeder['tree'][key].update({'enable_volt_control':'true'})
-				inFeeder['tree'][key].update({'volt_lowlimit':'113.99'})
-				inFeeder['tree'][key].update({'volt_uplimit':'126.99'}) 
-			elif (value['object']== 'ZIPload'):
-				inFeeder['tree'][key].update({'enable_volt_control':'true'})
-				inFeeder['tree'][key].update({'volt_lowlimit':'113.99'})
-				inFeeder['tree'][key].update({'volt_uplimit':'126.99'})
+		# 	if (value['object'] == 'waterheater'):
+		# 		inFeeder['tree'][key].update({'heat_mode':'ELECTRIC'})
+		# 		inFeeder['tree'][key].update({'enable_volt_control':'true'})
+		# 		inFeeder['tree'][key].update({'volt_lowlimit':'113.99'})
+		# 		inFeeder['tree'][key].update({'volt_uplimit':'126.99'}) 
+		# 	elif (value['object']== 'ZIPload'):
+		# 		inFeeder['tree'][key].update({'enable_volt_control':'true'})
+		# 		inFeeder['tree'][key].update({'volt_lowlimit':'113.99'})
+		# 		inFeeder['tree'][key].update({'volt_uplimit':'126.99'})
 			name_volt_dict[value['name']] = {'Nominal_Voltage': value['nominal_voltage']}
 		except KeyError:
 				pass
-with open('outGLM.glm', "w") as outFile:
-	outFile.write(feeder.sortedWrite(inFeeder['tree']))
-
+# with open('outGLM.glm', "w") as outFile:
+# 	outFile.write(feeder.sortedWrite(inFeeder['tree']))
 os.system('/Users/tuomastalvitie/omf/omf/solvers/gridlabd_gridballast/local_gd/bin/gridlabd outGLM.glm')
 
 data = pd.read_csv(('voltDump.csv'), skiprows=[0])
