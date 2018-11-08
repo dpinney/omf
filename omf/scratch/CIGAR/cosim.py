@@ -260,7 +260,7 @@ class GridLabWorld(object):
 		time.sleep(2) #TODO: instead of sleeping, wait 1 second, try to read clock, if it fails then wait 1 more second, loop, etc.
 
 def _test1():
-	glw = GridLabWorld('6267', 'localhost', './smsSingle.glm', '2000-01-02 00:00:00')
+	glw = GridLabWorld('6267', 'test_localhost', './smsSingle.glm', '2000-01-02 00:00:00')
 	glw.start()
 	# Read the clock, solar output voltage, battery state of charge, and inverter voltage input.
 	print '* Reading clock:', glw.readClock()
@@ -293,7 +293,7 @@ def _test1():
 def _test2():
 	# test with AlertAgent, ReadAttackAgent
 	import cyberAttack
-	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 12:00:00', 'stepSizeSeconds':3600} #error with having 
+	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./test_smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 12:00:00', 'stepSizeSeconds':3600} #error with having 
 	agents = [cyberAttack.AlertAgent('AlertAgent', '2000-01-03 12:00:00')] 
 	print 'Starting co-sim with 1 agent.'
 	coord = Coordinator(agents, cosimProps)
@@ -302,7 +302,7 @@ def _test2():
 def _test3():
 	# test with AlertAgent, ReadAttackAgent
 	import cyberAttack
-	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
+	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./test_smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
 	agents = [
 		cyberAttack.AlertAgent('AlertAgent', '2000-01-03 12:00:00'),
 		cyberAttack.ReadAttackAgent('ReadAttackAgent', '2000-01-02 10:00:00', 'tm_1', 'measured_power')
@@ -314,7 +314,7 @@ def _test3():
 def _test4():
 	# test with AlertAgent, ReadAttackAgent, and ReadAttackIntervalAgent
 	import cyberAttack
-	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
+	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./test_smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
 	agents = [
 		cyberAttack.AlertAgent('2000-01-03 04:00:00'),
 		cyberAttack.ReadAttackAgent('2000-01-02 10:00:00', 'tm_1', 'measured_power'),
@@ -328,7 +328,7 @@ def _test5():
 	# test with AlertAgent, ReadAttackAgent, ReadIntervalAttackAgent, and WriteAttackAgent
 	# shows how WriteAttackAgent and WriteIntervalAttackAgent interact with ReadAttackAgent and ReadIntervalAttackAgent
 	import cyberAttack
-	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
+	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./test_smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
 	agents = []
 	agents.append(cyberAttack.AlertAgent('Joe', '2000-01-03 04:00:00'))
 	agents.append(cyberAttack.ReadAttackAgent('Sue', '2000-01-02 10:00:00', 'tm_1', 'measured_power'))
@@ -345,7 +345,7 @@ def _test5():
 
 def _test6():
 	import cyberAttack
-	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
+	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./test_smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
 	agents = []
 	agents.append(cyberAttack.DefendByValueAgent('defendAreaAgent', 'solar_2', 'area', '+323 sf'))
 	agents.append(cyberAttack.CopycatAgent('copycat1', '2000-01-02 12:00:00', 'solar_1', 'area', [{'obNameToPaste':'solar_2', 'obPropToPaste': 'area'}]))
@@ -357,7 +357,7 @@ def _test6():
 def _test7():
 	# test with ReadMultAttackAgent
 	import cyberAttack
-	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
+	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./test_smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
 	agents = [cyberAttack.ReadMultAttackAgent('ReadMult', '2000-01-01 01:00:00', 'tm_1', ['measured_power','measured_real_energy'])]
 	print 'Starting co-sim with 1 ReadMultAttackAgent.'
 	coord = Coordinator(agents, cosimProps)
@@ -366,7 +366,7 @@ def _test7():
 def _test8():
 	# test with ReadMultAttackAgent and WriteMultAttackAgent
 	import cyberAttack
-	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
+	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./test_smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
 	agents = []
 	agents.append(cyberAttack.ReadMultAttackAgent('ReadMultAttackAgent_1', '2000-01-01 01:00:00', 'tm_1', ['measured_power','measured_real_energy']))
 	agents.append(cyberAttack.WriteMultAttackAgent('WriteMultAttackAgent_1', '2000-01-01 02:00:00', 'tm_1', [{'obPropToAttack':'measured_power', 'value':'0.0'}, {'obPropToAttack':'measured_real_energy', 'value':'0.0'}]))
@@ -376,7 +376,7 @@ def _test8():
 
 def _testfault():
 	import cyberAttack
-	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./Exercise_4_2_1.glm', 'startTime':'2000-01-01 05:00:00','endTime':'2000-01-01 05:30:00', 'stepSizeSeconds':60}
+	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':'./test_Exercise_4_2_1.glm', 'startTime':'2000-01-01 05:00:00','endTime':'2000-01-01 05:30:00', 'stepSizeSeconds':60}
 	agents = []
 	agents.append(cyberAttack.ReadIntervalAttackAgent('FaultChecker', '2000-01-01 05:02:00', '2000-01-01 05:12:00', 'node711-741', 'conductor_resistance'))
 	coord = Coordinator(agents, cosimProps)

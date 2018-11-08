@@ -1,8 +1,6 @@
 // 37-node IEEE feeder
 
 #set iteration_limit=20;
-#define stylesheet=http://gridlab-d.svn.sourceforge.net/viewvc/gridlab-d/trunk/core/gridlabd-2_0
-#set savefile="IEEE_37_test_RestD.xml"
 #set randomseed=12150
 
 // Reliability simple test - modified IEEE 37-node feeder
