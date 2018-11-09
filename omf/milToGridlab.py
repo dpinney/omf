@@ -1545,7 +1545,6 @@ def getRelatives(tree, node_or_line, parent=False):
     return listy 
       
 
-
 def _latCount(name):
 	''' Debug function to count up the meters and such and figure out whether we're lat/lon coding them correctly. '''
 	nameCount, myLatCount = (0,0)

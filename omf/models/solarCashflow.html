@@ -340,7 +340,9 @@
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
 					"plotOptions":{"series":{"animation":false,"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"enableMouseTracking":false, "marker":{"enabled":false}}},
-					"xAxis":{"maxZoom":108000000, "tickColor":"gray","type":"datetime","lineColor":"gray"},
+					"xAxis":{"maxZoom":108000000, "tickColor":"gray","type":"datetime","lineColor":"gray",
+						"dateTimeLabelFormats":{ month: '%b', year: ''}
+					},
 					"rangeSelector":{"selected":1,"enabled":true,"inputDateFormat":'%Y-%m-%d'},
 					"title":{"text":null},
 					"series": [{"marker":{"enabled":false},"color":"red","data":allOutputData.powerOutputAc,"name":"Power Generated"}],
@@ -526,7 +528,8 @@
 					{"name":"Global Horizontal Radiation","marker":{"enabled":false},"color":"goldenrod","data":allOutputData.climate["Global Horizontal Radiation (W/m^2)"],"visible":true} ]
 				new Highcharts.Chart({"credits":{"enabled":false},
 					"plotOptions":{"series":{"animation": false, "pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":true}}},
-					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
+					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray",
+						"dateTimeLabelFormats":{ month: '%b', year: ''} },
 					"title":{"text":null},
 					"series":irradianceSeriesData,
 					"yAxis":{"title":{"text":"Irradiance (W/m^2)","style":{"color":"gray"}}, "min":0},
@@ -545,7 +548,8 @@
 					{"name":"Wind Speed (m/s)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Wind Speed (m/s)"]} ]
 				new Highcharts.Chart({"credits":{"enabled":false},
 					"plotOptions":{"series":{"animation": false, "pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},
-					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
+					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray",
+						"dateTimeLabelFormats":{ month: '%b', year: ''}},
 					"title":{"text":null},
 					"series":climateSeriesData,
 					"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}, "min":0},
