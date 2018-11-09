@@ -1375,11 +1375,13 @@ def missingConductorsFix(tree):
                     break
         
         if not nearby:
+            #second cousins failed us so check the whole tree for a usable config 
             for k,v in tree.iteritems():
                 if v.get('object') == tree[line_key]['object'] and k not in empty_lines:
                     nearby = k
         
         if not nearby:
+            #there is no usable line_config in the whole tree, so we use our default conductor and stick it in the current line_config
             #find our line config's key and check if we've already inserted our default conductor
             default_name = default_equipment[ tree[line_key]['object'] + '_conductor' ]['name']
             not_inserted = True
@@ -1408,7 +1410,6 @@ def missingConductorsFix(tree):
             if nearby_line_config == v.get('name'):
                 nearby_line_config = v
                 break
-        print v
         conductor = [v for k,v in v.iteritems() if 'conductor' in k][0]
 
         #assign the empty line config this conductor
