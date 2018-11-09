@@ -246,19 +246,19 @@ def convert(stdString,seqString):
 				capacitor['control'] = 'MANUAL'
 			#MAYBEFIX: Handle the other control types in WindMil Properly
 			if 'A' in capacitor['phases']:
-				capacitor['capacitor_A'] = str(float(capList[8])*1000)
+				capacitor['capacitor_A'] = str(float(_safeGet(capList, 8, '500'))/1000.0)
 				if capList[13] == '1':
 					capacitor['switchA'] = 'CLOSED'
 				else:
 					capacitor['switchA'] = 'OPEN'
 			if 'B' in capacitor['phases']:
-				capacitor['capacitor_B'] = str(float(capList[9])*1000)
+				capacitor['capacitor_B'] = str(float(_safeGet(capList, 9, '500'))/1000.0)
 				if capList[13] == '1':
 					capacitor['switchB'] = 'CLOSED'
 				else:
 					capacitor['switchB'] = 'OPEN'
 			if 'C' in capacitor['phases']:
-				capacitor['capacitor_C'] = str(float(capList[10])*1000)
+				capacitor['capacitor_C'] = str(float(_safeGet(capList, 10, '500'))/1000.0)
 				if capList[13] == '1':
 					capacitor['switchC'] = 'CLOSED'
 				else:
