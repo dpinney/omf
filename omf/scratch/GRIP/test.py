@@ -6,7 +6,7 @@ import os, webbrowser
 os.chdir('../../..')
 os.system('cp omf/scratch/GRIP/grip.py omf/')
 os.system('cp omf/scratch/GRIP/grip.Dockerfile .')
-# Build and start container.
+# Build and restart container.
 os.system('docker build . -f grip.Dockerfile -t grip')
 os.system('docker stop grip_run')
 os.system('docker rm grip_run')

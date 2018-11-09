@@ -1,5 +1,9 @@
 ''' Web server exposing HTTP API for GRIP. '''
-import omf, os, web, json
+import os
+if not os.getcwd().endswith('omf'):
+	os.chdir('../..')
+
+import omf, web, json
 from gevent.pywsgi import WSGIServer
 
 def sigh():
