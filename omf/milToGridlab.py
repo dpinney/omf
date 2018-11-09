@@ -1305,7 +1305,7 @@ def convert(stdString,seqString):
 	# print('*** DONE!', time.time()-start_time)
 
         # fix missing conductors
-        glmTree = missingConductorFix(glmTree)
+        glmTree = missingConductorsFix(glmTree)
 
 	return glmTree
 
