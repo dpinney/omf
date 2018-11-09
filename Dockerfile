@@ -4,9 +4,11 @@ FROM ubuntu:16.04
 MAINTAINER <david.pinney@nreca.coop>
 
 # Install and setup OMF reqs
-RUN apt-get -y update && apt-get install -y git python sudo
-RUN cd home; git clone --depth 1 https://github.com/dpinney/omf
-RUN cd home/omf; python install.py
+RUN apt-get -y update && apt-get install -y python sudo vim
+RUN mkdir /home/omf
+# TODO: just move install.py and run to setup environment then move the rest. Makes this more cacheable.
+COPY . /home/omf/
+RUN cd /home/omf/; python install.py
 
 # Make sure the docker instance listens externally
 RUN sed -i -e 's/host="127.0.0.1"/host="0.0.0.0"/g' /home/omf/omf/web.py
