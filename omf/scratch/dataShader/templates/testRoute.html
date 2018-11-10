@@ -1,4 +1,5 @@
 <head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 	<script>
 	function post_to_url(path, params, method) {
 		method = method || 'post' // Set method to post by default, if not specified.
@@ -18,13 +19,29 @@
 		form.submit()
 	}
 
-	function changeRange(){
-		console.log("test");
-		post_to_url("/testing", {x_range_low:0, x_range_high:0.5, y_range_low: 0, y_range_high: 0.5});
+	function changeRange(x, y){
+		//var maxHeight = 800;
+		//var maxWidth = 800;
+		//let x_click = x
+		//let x_range_high = Math.min((x / maxWidth + 0.25), 1)
+		//let y_click = y
+		//let y_range_high = Math.min((y / maxHeight + 0.25), 1)
+		post_to_url("/testing", {x_click: x, y_click: y});
 	}
 	</script>
 </head>
 <body>
-	<div><img src="data:image/png;base64,{{image}}"></div>
-	<div><button id="publishButton" type="button" onclick="changeRange()">Change Range</button></div>
+	<div><img id="dsImage" src="data:image/png;base64,{{image}}"></div>
+	<script type="text/javascript">
+	$(document).ready(function() {
+	    $("#dsImage").on("click", function(event) {
+	        var x = (event.pageX - this.offsetLeft);
+	        console.log(x);
+	        var y = (event.pageY - this.offsetTop);
+	        console.log(y);
+	        changeRange(x, y);
+	    });
+	});
+	</script>
+	<div><button id="changeRangeButton" type="button" onclick="changeRange()">Change Range</button></div>
 </body>
