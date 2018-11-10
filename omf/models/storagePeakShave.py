@@ -15,20 +15,21 @@ tooltip = ("The storagePeakShave model calculates the value of a distribution ut
 def work(modelDir, inputDict):
 	''' Model processing done here. '''
 	out = {}  # See bottom of file for out's structure
-	(cellCapacity, dischargeRate, chargeRate, cellQuantity, demandCharge, cellCost) = \
+	cellCapacity, dischargeRate, chargeRate, cellQuantity, demandCharge, cellCost, retailCost = \
 		[float(inputDict[x]) for x in ('cellCapacity', 'dischargeRate', 'chargeRate',
-			'cellQuantity', 'demandCharge', 'cellCost')]
+			'cellQuantity', 'demandCharge', 'cellCost', 'retailCost')]
+	
 	dispatchStrategy = str(inputDict.get('dispatchStrategy'))
-	retailCost = float(inputDict.get('retailCost', 0.07))
-	projYears = int(inputDict.get('projYears', 10))
-	batteryCycleLife = int(inputDict.get('batteryCycleLife', 5000))
-	discountRate = float(inputDict.get('discountRate', 2.5)) / 100.0
-	dodFactor = float(inputDict.get('dodFactor', 85)) / 100.0
+
+	projYears, batteryCycleLife = [int(inputDict[x]) for x in ('projYears', 'batteryCycleLife')]
+	
+	discountRate = float(inputDict.get('discountRate')) / 100.0
+	dodFactor = float(inputDict.get('dodFactor')) / 100.0
 
 	# Efficiency calculation temporarily removed
-	# inverterEfficiency = float(inputDict.get('inverterEfficiency', 92)) / 100.0
+	inverterEfficiency = float(inputDict.get('inverterEfficiency')) / 100.0
 	# Note: inverterEfficiency is squared to get round trip efficiency.
-	# battEff = float(inputDict.get('batteryEfficiency', 92)) / 100.0 * (inverterEfficiency ** 2)
+	battEff = float(inputDict.get('batteryEfficiency')) / 100.0 * (inverterEfficiency ** 2)
 
 	with open(pJoin(modelDir, 'demand.csv'), 'w') as f:
 		f.write(inputDict['demandCurve'])
@@ -75,7 +76,6 @@ def work(modelDir, inputDict):
 						else -1 * min(abs(powerUnderPeak), battDischarge, SoC))
 					if charge == -1 * SoC:
 						incorrect_shave[month] = True
-					# charge = charge*battEff
 					SoC += charge
 					row['netpower'] = row['power'] + charge
 					row['battSoC'] = SoC
@@ -83,13 +83,12 @@ def work(modelDir, inputDict):
 			if not any(incorrect_shave):
 				break
 	elif dispatchStrategy == 'daily':
-		start = int(inputDict.get('startPeakHour', 18))
-		end = int(inputDict.get('endPeakHour', 24))
+		start = int(inputDict.get('startPeakHour'))
+		end = int(inputDict.get('endPeakHour'))
 		for r in dc:
 			# Discharge if hour is within peak hours otherwise charge
 			charge = (-1*min(battDischarge, SoC) if start <= r['hour'] <= end 
 				else min(battCharge, battCapacity - SoC))
-			# charge = charge*battEff
 			r['netpower'] = r['power'] + charge
 			SoC += charge
 			r['battSoC'] = SoC
@@ -112,7 +111,6 @@ def work(modelDir, inputDict):
 			# Discharge if there is a 1 in the dispatch strategy csv, otherwise charge the battery.
 			charge = (-1*min(battDischarge, SoC) if r['dispatch'] == 1 
 				else min(battCharge, battCapacity-SoC))
-			# charge = charge*battEff
 			r['netpower'] = r['power'] + charge
 			SoC += charge
 			r['battSoC'] = SoC
@@ -135,8 +133,8 @@ def work(modelDir, inputDict):
 	out['benefitNet'] = [b-c for b, c in zip(out['benefitMonthly'], out['costtoRecharge'])]
 
 	# Demand Before and After Storage Graph
-	out['demand'] = [t['power']*1000.0 for t in dc]
-	out['demandAfterBattery'] = [t['netpower']*1000.0 for t in dc]
+	out['demand'] = [t['power']*1000.0 for t in dc] # kW -> W
+	out['demandAfterBattery'] = [t['netpower']*1000.0 for t in dc] # kW -> W
 	out['batteryDischargekW'] = [d-b for d, b in zip(out['demand'], out['demandAfterBattery'])]
 	out['batteryDischargekWMax'] = max(out['batteryDischargekW'])
 
@@ -144,17 +142,18 @@ def work(modelDir, inputDict):
 	# Turn dc's SoC into a percentage, with dodFactor considered.
 	out['batterySoc'] = SoC = [t['battSoC']/battCapacity*100*dodFactor + (100-100*dodFactor) for t in dc]
 	# Estimate number of cyles the battery went through. Sums the percent of SoC.
-	cycleEquivalents = sum([SoC[i]-SoC[i+1] for i,x in enumerate(SoC[:-1]) if SoC[i+1] < SoC[i]]) / 100.0
+	cycleEquivalents = sum([SoC[i]-SoC[i+1] for i, x in enumerate(SoC[:-1]) if SoC[i+1] < SoC[i]]) / 100.0
 	out['cycleEquivalents'] = cycleEquivalents
 	out['batteryLife'] = batteryCycleLife / cycleEquivalents
 
 	# Cash Flow Graph
+	# inserting battery efficiency only into the cashflow calculation
 	# cashFlowCurve is $ in from peak shaving minus the cost to recharge the battery every day of the year
-	totalYearlyCharge = sum(out['kWhtoRecharge'])
-	cashFlowCurve = [(sum(ps) * demandCharge)-(totalYearlyCharge*retailCost) for year in range(projYears)]
+	totalYearlyCharge = sum(out['kWhtoRecharge'])/battEff
+	cashFlowCurve = [sum(ps)*demandCharge - totalYearlyCharge*retailCost for year in range(projYears)]
 	cashFlowCurve.insert(0, -1 * cellCost * cellQuantity)  # insert initial investment
 	# simplePayback is also affected by the cost to recharge the battery every day of the year
-	out['SPP'] = (cellCost*cellQuantity)/((sum(ps)*demandCharge)-(totalYearlyCharge*retailCost))
+	out['SPP'] = (cellCost*cellQuantity)/(sum(ps)*demandCharge - totalYearlyCharge*retailCost)
 	out['netCashflow'] = cashFlowCurve
 	out['cumulativeCashflow'] = [sum(cashFlowCurve[:i+1]) for i, d in enumerate(cashFlowCurve)]
 	out['NPV'] = npv(discountRate, cashFlowCurve)
