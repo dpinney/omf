@@ -1,70 +1,78 @@
 ''' Web server exposing HTTP API for GRIP. '''
-import os
-if not os.getcwd().endswith('omf'):
-	os.chdir('../..')
-
-import omf, web, json
+import os, omf
+if not omf.omfDir == os.getcwd():
+	os.chdir(omf.omfDir)
+import web, json
 from gevent.pywsgi import WSGIServer
+from flask import request
 
-def sigh():
-	return 'SIGH'
+@web.app.route('/eatfile', methods=['GET', 'POST'])
+def eatfile():
+	if request.method == 'POST':
+		print 'HEY I GOT A', request.files
+		return 'POSTER_CHOMPED'
+	else:
+		return 'CHOMPED'
 
-def transmissionConvert(owner, modelName, fileName):
-	'First, DRPOWER creates a new transmission model folder.' + \
-	'Then it places an .m file in that folder named fileName' + \
-	'Then send a request to this route and redirect the user accordingly'
-	# Model folder full path.
-	modelDir = os.path.join(omf.omfDir, 'data', 'Model', owner, modelName)
-	# Remove the existing file.
-	existingOmts = [x for x in os.listdir(modelDir) if x.endswith('.omt')]
-	for f in existingOmts:
-		try:
-			os.remove(os.path.join(modelDir,f))
-		except:
-			pass # Ignore deletion failure.
-	# Convert and lay out the new file.
-	netJson = omf.network.parse(os.path.join(modelDir, fileName), filePath=True)
-	omf.network.layout(netJson)
-	with open(os.path.join(modelDir, fileName + '.omt'),'w') as outFile:
-		json.dump(netJson, outFile)
-	# Rewrite allInputData.json
-	with open(os.path.join(modelDir, 'allInputData.json'),'r+') as inFile:
-		inData = json.load(inFile)
-		inData['networkName1'] = fileName
-		inFile.seek(0)
-		json.dump(inData,inFile)
-		inFile.truncate()
-	return 'CONVERTED'
+@web.app.route('/oneLineGridlab', methods=['GET', 'POST'])
+def oneLineGridlab():
+	'''Data Params: {glm: [file]}
+	OMF fuction: omf.feeder.latLonNxGraph()
+	Runtime: should be around 1 to 30 seconds.
+	Result: Create a one line diagram of the circuit with :id in the datastore. Return a path to a folder in a filesystem where the .png was created.
+	'''
+	return 'NOT IMPLEMENTED YET'
 
-def powerPublish(owner, modelName):
-	'Hook to pull data back to DRPOWER main repository.'
-	return web.redirect(os.environ.get('DRP_URL') + '/' + owner + '/' + modelName)
+@web.app.route('/milsoftToGridlab', methods=['GET', 'POST'])
+def milsoftToGridlab():
+	'''Data Params: {std: [file], seq: [file]}
+	Runtime: could take a couple minutes.
+	OMF function: omf.milToGridlab.convert()
+	Result: a .glm file converted from the two input files.'''
+	return 'NOT IMPLEMENTED YET'
 
-def injectUser(email, passwordHash, modelName):
-	'Create a new user and log that user in. Note that hash should be pbkdf2_sha512'
-	user = {'username':email, 'password_digest':passwordHash}
-	web.flask_login.login_user(web.User(user))
-	with open('./data/User/'+ email + '.json','w') as outFile:
-		json.dump(user, outFile, indent=4)
-	return web.redirect('/network/' + email + '/' + modelName + '/1')
+@web.app.route('/cymeToGridlab', methods=['GET', 'POST'])
+def cymeToGridlab():
+	'''Data Params: {mdb: [file]}
+	OMF function: omf.cymeToGridlab.convertCymeModel()
+	Result: a .glm file converted from the input file.'''
+	return 'NOT IMPLEMENTED YET'
 
-if __name__ == '__main__':
-	template_files = ['templates/'+ x  for x in web.safeListdir('templates')]
-	model_files = ['models/' + x for x in web.safeListdir('models')]
-	# Add routes.
-	web.app.add_url_rule('/sigh', 'sigh', view_func=sigh)
-	web.app.add_url_rule('/transmissionConvert/<owner>/<modelName>/<fileName>', 'transmissionConvert', view_func=transmissionConvert)
-	web.app.add_url_rule('/publishModel/<owner>/<modelName>/', 'powerPublish', methods=['POST'], view_func=powerPublish)
-	web.app.add_url_rule('/injectUser/<email>/<passwordHash>/<modelName>/', 'injectUser', view_func=injectUser)
-	# def crash(): raise Exception
-	# web.app.add_url_rule('/crash','crash',view_func=crash)
-	# Remove the bogus old publishModel route.
-	allRules = web.app.url_map._rules
-	del web.app.url_map._rules_by_endpoint['publishModel']
-	for index, rule in enumerate(allRules):
-		if rule.endpoint == 'publishModel':
-			delIndex = index
-	del allRules[delIndex]
-	# Start the server.
+@web.app.route('/gridlabRun', methods=['GET', 'POST'])
+def gridlabRun():
+	'''Data Params: {glm: [file]}
+	Runtime: could take hours. Jeepers.
+	OMF fuction: omf.solvers.gridlabd.runInFileSystem()
+	Result: Run a GridLAB-D model and return the results as JSON.'''
+	return 'NOT IMPLEMENTED YET'
+
+@web.app.route('/samRun', methods=['GET', 'POST'])
+def samRun():
+	'''Data Params: {[system advisor model inputs, approximately 30 floats and strings]}
+	OMF function: omf.solvers.sam.run()
+	Runtime: should only be a couple seconds.
+	Result: Run NREL's system advisor model with the specified parameters. Return the output vectors and floats in JSON'''
+	return 'NOT IMPLEMENTED YET'
+
+@web.app.route('/gridlabdToGfm', methods=['GET', 'POST'])
+def gridlabdToGfm():
+	'''Data Params: {glm: [file]}
+	OMF function: omf.models.resilientDist.convertToGFM()
+	Runtime: should only be a couple seconds.
+	Result: Convert the GridLAB-D model to a GFM model. Return the new id for the converted model. Note that this is not the main fragility model for GRIP.'''
+	return 'NOT IMPLEMENTED YET'
+
+@web.app.route('/runGfm', methods=['GET', 'POST'])
+def runGfm():
+	'''Data Params: {gfm: [file]}
+	OMF function: omf.solvers.gfm.run()
+	Runtime: should be around 1 to 30 seconds.
+	Result: Return the results dictionary/JSON from running LANL's General Fragility Model (GFM) on the input model. Note that this is not the main fragility model for GRIP.'''
+	return 'NOT IMPLEMENTED YET'
+
+def serve():
 	server = WSGIServer(('0.0.0.0', 5000), web.app)
 	server.serve_forever()
+
+if __name__ == '__main__':
+	serve()
