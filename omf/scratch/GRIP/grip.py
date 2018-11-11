@@ -15,7 +15,7 @@ def eatfile():
 	else:
 		return 'CHOMPED'
 
-@web.app.route('/oneLineGridlab', methods=['GET', 'POST'])
+@web.app.route('/oneLineGridlab', methods=['POST'])
 def oneLineGridlab():
 	'''Data Params: {glm: [file], useLatLons: Boolean}
 	OMF fuction: omf.feeder.latLonNxGraph()
