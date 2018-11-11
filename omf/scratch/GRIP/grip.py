@@ -2,26 +2,43 @@
 import os, omf
 if not omf.omfDir == os.getcwd():
 	os.chdir(omf.omfDir)
-import web, json
+import web, json, tempfile
 from gevent.pywsgi import WSGIServer
-from flask import request
+from flask import request, send_from_directory
+from matplotlib import pyplot as plt
 
 @web.app.route('/eatfile', methods=['GET', 'POST'])
 def eatfile():
 	if request.method == 'POST':
-		print 'HEY I GOT A', request.files
+		# print 'HEY I GOT A', request.files
 		return 'POSTER_CHOMPED'
 	else:
 		return 'CHOMPED'
 
 @web.app.route('/oneLineGridlab', methods=['GET', 'POST'])
 def oneLineGridlab():
-	'''Data Params: {glm: [file]}
+	'''Data Params: {glm: [file], useLatLons: Boolean}
 	OMF fuction: omf.feeder.latLonNxGraph()
 	Runtime: should be around 1 to 30 seconds.
-	Result: Create a one line diagram of the circuit with :id in the datastore. Return a path to a folder in a filesystem where the .png was created.
-	'''
-	return 'NOT IMPLEMENTED YET'
+	Result: Create a one line diagram of the input glm. Return a .png of it. If useLatLons is True then draw using the lat/lons, otherwise force layout the graph.'''
+	workDir = tempfile.mkdtemp()
+	fName = 'in.glm'
+	# print workDir
+	f = request.files['glm']
+	glmOnDisk = os.path.join(workDir, fName)
+	f.save(glmOnDisk)
+	feed = omf.feeder.parse(glmOnDisk)
+	graph = omf.feeder.treeToNxGraph(feed)
+	if request.form.get('useLatLons') == 'False':
+		neatoLayout = True
+	else:
+		neatoLayout = False
+	matplotObj = omf.feeder.latLonNxGraph(graph, labels=False, neatoLayout=neatoLayout, showPlot=False)
+	outImgName = 'out.png'
+	outImgPath = os.path.join(workDir, outImgName)
+	plt.savefig(outImgPath)
+	# TODO: delete the tempDir.
+	return send_from_directory(workDir, outImgName)
 
 @web.app.route('/milsoftToGridlab', methods=['GET', 'POST'])
 def milsoftToGridlab():
