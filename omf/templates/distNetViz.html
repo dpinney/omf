@@ -366,22 +366,30 @@ function buildFeeder() {
 	})
 	// Go through and add all lines first
 	for (key in testFeeder.tree) {
-		anOb = testFeeder.tree[key]
-		if ('from' in anOb && 'to' in anOb) {
-			fromOb = testFeeder.tree[nameToKey[anOb['from']]]
-			toOb = testFeeder.tree[nameToKey[anOb['to']]]
-			addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],key,anOb['object'] + ' p' + phaseCount(anOb['phases']))
-		}
-		else if ('parent' in anOb) {
-			pOb = testFeeder.tree[nameToKey[anOb['parent']]]
-			addLine(pOb['longitude'],pOb['latitude'],anOb['longitude'],anOb['latitude'],pOb.name + '_' + anOb.name,'parentChild')
+		try {
+			anOb = testFeeder.tree[key]
+			if ('from' in anOb && 'to' in anOb) {
+				fromOb = testFeeder.tree[nameToKey[anOb['from']]]
+				toOb = testFeeder.tree[nameToKey[anOb['to']]]
+				addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],key,anOb['object'] + ' p' + phaseCount(anOb['phases']))
+			}
+			else if ('parent' in anOb) {
+				pOb = testFeeder.tree[nameToKey[anOb['parent']]]
+				addLine(pOb['longitude'],pOb['latitude'],anOb['longitude'],anOb['latitude'],pOb.name + '_' + anOb.name,'parentChild')
+			}
+		} catch (err) {
+			console.log('Failed to Draw ' + testFeeder.tree[key])
 		}
 	}
 	// Add circles after all lines
 	for (key in testFeeder.tree) {
-		anOb = testFeeder.tree[key]
-		if ('latitude' in anOb && 'longitude' in anOb && 'object' in anOb && !('from' in anOb) && !('to' in anOb)) {
-			addCircle(anOb['longitude'],anOb['latitude'],2,key,anOb['object'])
+		try {
+			anOb = testFeeder.tree[key]
+			if ('latitude' in anOb && 'longitude' in anOb && 'object' in anOb && !('from' in anOb) && !('to' in anOb)) {
+				addCircle(anOb['longitude'],anOb['latitude'],2,key,anOb['object'])
+			}
+		} catch (err) {
+			console.log('Failed to Draw ' + testFeeder.tree[key])
 		}
 	}
 }

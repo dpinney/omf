@@ -1,167 +1,145 @@
 ''' Calculate the costs and benefits of energy storage from a distribution utility perspective. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, traceback, csv
-import multiprocessing
-import numpy as np
-from os.path import join as pJoin
-from  dateutil.parser import parse
+import sys, shutil, csv
+from datetime import datetime as dt, timedelta
+from os.path import isdir, join as pJoin
 from numpy import npv
-from jinja2 import Template
 from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
 
 # Model metadata:
 modelName, template = metadata(__file__)
-tooltip = "The storageArbitrage model calculates the costs and benefits of using energy storage to buy energy in times of low prices and sell that energy at times of high prices."
-
-# # NOTE: used for debugging don't delete.
-# import matplotlib.pyplot as plt
+tooltip = ("The storageArbitrage model calculates the costs and benefits of "
+	"using energy storage to buy energy in times of low prices and sell that "
+	"energy at times of high prices.")
 
 def work(modelDir, inputDict):
 	''' Run the model in a separate process. web.py calls this to run the model.
 	This function will return fast, but results take a while to hit the file system.'''
-	# Delete output file every run if it exists
-	outData = {}
-	# Get variables.
-	cellCapacity = float(inputDict['cellCapacity'])
+	o = {}
 	(cellCapacity, dischargeRate, chargeRate, cellQuantity, cellCost) = \
 		[float(inputDict[x]) for x in ('cellCapacity', 'dischargeRate', 'chargeRate', 'cellQuantity', 'cellCost')]
-	battEff	= float(inputDict.get("batteryEfficiency", 92)) / 100.0 * float(inputDict.get("inverterEfficiency", 92)) / 100.0 * float(inputDict.get("inverterEfficiency", 92)) / 100.0
-	discountRate = float(inputDict.get('discountRate', 2.5)) / 100.0
-	dodFactor = float(inputDict.get('dodFactor', 85)) / 100.0
-	projYears = int(inputDict.get('projYears',10))
-	dischargePriceThreshold	= float(inputDict.get('dischargePriceThreshold',0.15))
-	chargePriceThreshold = float(inputDict.get('chargePriceThreshold',0.07))
-	batteryCycleLife = int(inputDict.get('batteryCycleLife',5000))
+	inverterEfficiency = float(inputDict.get("inverterEfficiency")) / 100.0
+	battEff	= float(inputDict.get("batteryEfficiency")) / 100.0 * (inverterEfficiency ** 2)
+	discountRate = float(inputDict.get('discountRate')) / 100.0
+	dodFactor = float(inputDict.get('dodFactor')) / 100.0
+	projYears = int(inputDict.get('projYears'))
+	dischargePriceThreshold	= float(inputDict.get('dischargePriceThreshold'))
+	chargePriceThreshold = float(inputDict.get('chargePriceThreshold'))
+	batteryCycleLife = int(inputDict.get('batteryCycleLife'))
+	
 	# Put demand data in to a file for safe keeping.
-	with open(pJoin(modelDir,"demand.csv"),"w") as demandFile:
-		demandFile.write(inputDict['demandCurve'])
-	with open(pJoin(modelDir,"priceCurve.csv"),"w") as priceCurve:
-		priceCurve.write(inputDict['priceCurve'])
-	# Start running battery simulation.
-	battCapacity = cellQuantity * cellCapacity * dodFactor
-	battDischarge = cellQuantity * dischargeRate
-	battCharge = cellQuantity * chargeRate
+	with open(pJoin(modelDir,'demand.csv'),'w') as f:
+		f.write(inputDict['demandCurve'])
+	with open(pJoin(modelDir,'priceCurve.csv'),'w') as f:
+		f.write(inputDict['priceCurve'])
+	
 	# Most of our data goes inside the dc "table"
-	dates = [(datetime.datetime(2011,1,1,0,0) + datetime.timedelta(hours=1)*x).strftime("%m/%d/%Y %H:%M:%S") for x in range(8760)]
+	dates = [dt(2011, 1, 1)+timedelta(hours=1)*x for x in range(8760)]
+	dc = []
 	try:
-		dc = []
-		with open(pJoin(modelDir,"demand.csv")) as inFile:
-			reader = csv.reader(inFile)
-			x = 0
-			for row in reader:
-				dc.append({'datetime': parse(dates[x]), 'power': float(row[0])})
-				x += 1
-			if len(dc)!=8760: raise Exception
+		with open(pJoin(modelDir, 'demand.csv')) as f:
+			for row, date in zip(csv.reader(f), dates):
+				dc.append({ 'month': date.month - 1,
+							'power': float(row[0])})
+		assert len(dc) == 8760
 	except:
-			e = sys.exc_info()[0]
-			if str(e) == "<type 'exceptions.SystemExit'>":
-				pass
-			else:
-				errorMessage = "Demand CSV file is incorrect format."
-				raise Exception(errorMessage)
+		if str(sys.exc_info()[0]) != "<type 'exceptions.SystemExit'>":
+			raise Exception("Demand CSV file is incorrect format.")
 	#Add price to dc table
 	try:
-		with open(pJoin(modelDir,'priceCurve.csv')) as priceFile:
-			reader = csv.reader(priceFile)
-			rowCount = 0
-			i = 0
-	 		for row in reader:
-	 			dc[i]['price'] = float(row[0])
-	 			i += 1
-	 		if i!= 8760: raise Exception
+		with open(pJoin(modelDir,'priceCurve.csv')) as f:
+	 		for row, d in zip(csv.reader(f), dc):
+	 			d['price'] = float(row[0])
+	 	assert all(['price' in r for r in dc]) 
 	except:
-	 	e = sys.exc_info()[0]
-		if str(e) == "<type 'exceptions.SystemExit'>":
-			pass
-		else:
-			errorMessage = "Price Curve File is in an incorrect format."
-			raise Exception(errorMessage)
-	for row in dc:
-		row['month'] = row['datetime'].month-1
-		row['hour'] = row['datetime'].hour
-		# row['weekday'] = row['datetime'].weekday() # TODO: figure out why we care about this.
+		if str(sys.exc_info()[0]) != "<type 'exceptions.SystemExit'>":
+			raise Exception("Price Curve File is in an incorrect format.")
+
+	battCapacity = cellQuantity * cellCapacity * dodFactor
 	battSoC = battCapacity
-	for row in dc:
-		outData['startDate'] = '2011-01-01'#dc[0]['datetime'].isoformat()
-		month = int(row['datetime'].month)-1
-		discharge = min(battDischarge,battSoC)
-		charge = min(battCharge, battCapacity-battSoC)
+	for r in dc:
 		#If price of energy is above price threshold and battery has charge, discharge battery
-		if row['price'] >= dischargePriceThreshold and battSoC > 0:
-			row['netpower'] = row['power'] - discharge
-			battSoC -= discharge
-		#If battery has no charge but price is still above charge threshold, dont charge it
-		elif row['price'] > chargePriceThreshold and battSoC == 0:
-			row['netpower'] = row['power']
-		elif row['price'] <= chargePriceThreshold and battSoC < battCapacity:
-			row['netpower'] = row['power'] + charge/battEff
-			battSoC += charge
+		if r['price'] >= dischargePriceThreshold:
+			charge = -1*min(cellQuantity * dischargeRate, battSoC)
+		elif r['price'] <= chargePriceThreshold:
+			charge = min(cellQuantity * chargeRate, battCapacity-battSoC)
 		else:
-			row['netpower'] = row['power']
-		row['battSoC'] = battSoC
-	dischargeGroupByMonth = [[t['netpower']-t['power'] for t in dc if t['datetime'].month-1==x] for x in range(12)]
-	dcGroupByMonth = [[t for t in dc if t['datetime'].month-1==x] for x in range(12)]
+			charge = 0
+		r['netpower'] = r['power'] + charge
+		r['battSoC'] = battSoC
+		battSoC += charge
+
+	# There's definitely a nicer way to make this for loop, apologies
 	monthlyCharge = []
 	monthlyDischarge = []
-	#Calculate the monthly energy discharged/charged
-	for row in dischargeGroupByMonth:
-		chargePower = 0
-		dischargePower = 0
-		for n in row:
-			if n > 0:
-				chargePower += n
-			else:
-				dischargePower += n * -1
-		monthlyCharge.append(chargePower)
-		monthlyDischarge.append(dischargePower)
 	monthlyDischargeSavings = []
 	monthlyChargeCost = []
-	#Calculate the monthly cost to charge and savings by discharging
-	for row in dcGroupByMonth:
+	# Calculate the monthly cost to charge and savings by discharging
+	for x in range(12):
 		chargeCost = 0
 		dischargeSavings = 0
-		for n in row:
-			if n['netpower'] - n['power'] > 0:
-				chargeCost += (n['netpower'] - n['power']) * n['price']
-			if n['netpower'] - n['power'] < 0:
-				dischargeSavings += (n['netpower'] - n['power']) * n['price'] * -1
+		chargePower = 0
+		dischargePower = 0
+		for r in dc:
+			if r['month'] == x:
+				diff = r['netpower'] - r['power']
+				if diff > 0:
+					chargePower += diff
+					chargeCost += diff*r['price']
+				if diff < 0:
+					dischargePower += -1*diff
+					dischargeSavings += -1*diff*r['price']
+		monthlyCharge.append(chargePower)
+		monthlyDischarge.append(dischargePower)
 		monthlyDischargeSavings.append(dischargeSavings)
 		monthlyChargeCost.append(chargeCost)
+	
+	# include BattEff into calculations
+	monthlyCharge = [t/battEff for t in monthlyCharge]
+	monthlyChargeCost = [t/battEff for t in monthlyChargeCost]
+
+	# Monthly Cost Comparison Table
+	o['energyOffset'] = monthlyDischarge
+	o['dischargeSavings'] = monthlyDischargeSavings
+	o['kWhtoRecharge'] =  monthlyCharge
+	o['costToRecharge'] = monthlyChargeCost
+	# NPV, SPP are below
+
+	# Demand Before and After Storage Graph
+	o['demand'] = [t['power']*1000.0 for t in dc]
+	o['demandAfterBattery'] = [t['netpower']*1000.0 for t in dc]
+	o['batteryDischargekW'] = [d-b for d, b in zip(o['demand'], o['demandAfterBattery'])]
+	o['batteryDischargekWMax'] = max(o['batteryDischargekW'])
+	
+	# Price Input Graph
+	o['price'] = [r['price'] for r in dc]
+
+	# Battery SoC Graph
+	o['batterySoc'] = SoC = [t['battSoC']/battCapacity*100.0*dodFactor + (100-100*dodFactor) for t in dc]
+	cycleEquivalents = sum([SoC[i]-SoC[i+1] for i, x in enumerate(SoC[:-1]) if SoC[i+1] < SoC[i]]) / 100.0
+	o['cycleEquivalents'] = cycleEquivalents
+	o['batteryLife'] = batteryCycleLife/cycleEquivalents
+
+	# Cash Flow Graph
 	yearlyDischargeSavings = sum(monthlyDischargeSavings)
 	yearlyChargeCost = sum(monthlyChargeCost)
-	cashFlowCurve = [yearlyDischargeSavings - yearlyChargeCost for year in range(projYears)]
-	outData['demand'] = [t['power']*1000.0 for t in dc]
-	outData['demandAfterBattery'] = [t['netpower']*1000.0 for t in dc]
-	demandAfterBattery = outData['demandAfterBattery']
-	demand = outData['demand']
-	outData['batteryDischargekW'] = [demand - demandAfterBattery for demand, demandAfterBattery in zip(demand, demandAfterBattery)]
-	batteryDischargekWMax = max(outData['batteryDischargekW'])
-	outData['batteryDischargekWMax'] = batteryDischargekWMax
-	outData['energyOffset'] = monthlyDischarge
-	outData['kWhtoRecharge'] = monthlyCharge
-	outData['costToRecharge'] = monthlyChargeCost
-	outData['dischargeSavings'] = monthlyDischargeSavings
-	outData['benefitNet'] = [monthlyDischargeSavings - monthlyChargeCost for monthlyChargeCost, monthlyDischargeSavings in zip(monthlyChargeCost, monthlyDischargeSavings)]
-	outData['batterySoc'] = [t['battSoC']/battCapacity*100.0*dodFactor + (100-100*dodFactor) for t in dc]
-	SoC = outData['batterySoc']
-	cycleEquivalents = sum([SoC[i]-SoC[i+1] for i,x in enumerate(SoC[0:-1]) if SoC[i+1] < SoC[i]]) / 100.0
-	outData['cycleEquivalents'] = cycleEquivalents
-	outData['batteryLife'] = batteryCycleLife/cycleEquivalents
-	cashFlowCurve[0]-= (cellCost * cellQuantity)
-	outData['netCashflow'] = cashFlowCurve
-	outData['cumulativeCashflow'] = [sum(cashFlowCurve[0:i+1]) for i,d in enumerate(cashFlowCurve)]
-	outData['NPV'] = npv(discountRate, cashFlowCurve)
-	outData['SPP'] = (cellCost*cellQuantity)/(yearlyDischargeSavings - yearlyChargeCost)
-	battCostPerCycle =  cellQuantity * cellCapacity  * cellCost / batteryCycleLife
-	lcoeTotCost = (cycleEquivalents * cellQuantity * cellCapacity * chargePriceThreshold) + (battCostPerCycle * cycleEquivalents)
-	loceTotEnergy = cycleEquivalents * cellCapacity * cellQuantity
-	LCOE = lcoeTotCost / loceTotEnergy
-	outData['LCOE'] = LCOE
-	# Stdout/stderr.
-	outData["stdout"] = "Success"
-	outData["stderr"] = ""
-	return outData
+	cashFlowCurve = [yearlyDischargeSavings-yearlyChargeCost]*projYears
+	cashFlowCurve.insert(0, -1*cellCost*cellQuantity)
+	o['benefitNet'] = [ds-cc for cc, ds in zip(o['costToRecharge'], o['dischargeSavings'])]
+	o['netCashflow'] = cashFlowCurve
+	o['cumulativeCashflow'] = [sum(cashFlowCurve[:i+1]) for i, d in enumerate(cashFlowCurve)]
+	o['NPV'] = npv(discountRate, cashFlowCurve)
+	o['SPP'] = (cellCost*cellQuantity)/(yearlyDischargeSavings-yearlyChargeCost)
+	battCostPerCycle =  cellQuantity * cellCost / batteryCycleLife
+	lcoeTotCost = (cycleEquivalents*cellQuantity*cellCapacity*chargePriceThreshold) + (battCostPerCycle*cycleEquivalents)
+	o['LCOE'] = lcoeTotCost / (cycleEquivalents * cellCapacity * cellQuantity)
+
+	# Other
+	o['startDate'] = '2011-01-01'
+	o["stdout"] = "Success"
+	o["stderr"] = ""
+	return o
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
@@ -193,19 +171,12 @@ def _tests():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
-	try:
+	if isdir(modelLoc):
 		shutil.rmtree(modelLoc)
-	except:
-		# No previous test results.
-		pass
-	# Create New.
-	new(modelLoc)
-	# Pre-run.
-	renderAndShow(modelLoc)
-	# Run the model.
-	runForeground(modelLoc)
-	# Show the output.
-	renderAndShow(modelLoc)
+	new(modelLoc) # Create New.
+	renderAndShow(modelLoc) # Pre-run.
+	runForeground(modelLoc) # Run the model.
+	renderAndShow(modelLoc) # Show the output.
 
 if __name__ == '__main__':
 	_tests()

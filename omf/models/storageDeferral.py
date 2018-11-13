@@ -19,20 +19,18 @@ def work(modelDir, inputDict):
 		[float(inputDict[x]) for x in ('cellCapacity', 'dischargeRate', 'chargeRate', 'cellCost')]
 	
 	deferralType = inputDict.get('deferralType')
-	projYears = int(inputDict.get('projYears', 10))
-	avoidedCost = int(inputDict.get('avoidedCost', 2000000))
-	yearsToReplace = int(inputDict.get('yearsToReplace', 2))
-	batteryCycleLife = int(inputDict.get('batteryCycleLife', 5000))
-	retailCost = float(inputDict.get('retailCost', 0.06))
-	discountRate = float(inputDict.get('discountRate', 2.5)) / 100.0
-	dodFactor = float(inputDict.get('dodFactor', 85)) / 100.0
-	carryingCost = float(inputDict.get('carryingCost', 10)) / 100.0
+	projYears = int(inputDict.get('yearsToReplace'))
+	avoidedCost = int(inputDict.get('avoidedCost'))
+	yearsToReplace = int(inputDict.get('yearsToReplace'))
+	batteryCycleLife = int(inputDict.get('batteryCycleLife'))
+	retailCost = float(inputDict.get('retailCost'))
+	dodFactor = float(inputDict.get('dodFactor')) / 100.0
+	carryingCost = float(inputDict.get('carryingCost')) / 100.0
 	
-	threshold = float(inputDict.get('transformerThreshold', 6.5)) * 1000
-	# Temporarily removing battEff from calculations bc of its inconsistent use
-	# inverterEfficiency = float(inputDict.get("inverterEfficiency", 92)) / 100.0
+	threshold = float(inputDict.get('transformerThreshold')) * 1000
+	inverterEfficiency = float(inputDict.get("inverterEfficiency", 92)) / 100.0
 	# NOTE: Inverter Efficiency is round-trip
-	# battEff = float(inputDict.get("batteryEfficiency", 92)) / 100.0 * inverterEfficiency ** 2
+	battEff = float(inputDict.get("batteryEfficiency", 92)) / 100.0 * inverterEfficiency ** 2
 	
 	with open(pJoin(modelDir,'demand.csv'),'w') as f:
 		f.write(inputDict['demandCurve'])
@@ -73,20 +71,30 @@ def work(modelDir, inputDict):
 				inloop, excess = False, []
 	assert len(excessDemandArray) != 0, ("Demand Curve does not exceed "
 		"Threshold Capacity. Lower Threshold Capacity and run again.")	
+	# High threshold
 	numOfUnits = math.ceil(max(excessDemandArray)/chargeRate)
 
-	# Create the new demand curve
-	battCapacity = numOfUnits * cellCapacity * dodFactor
-	SoC = battCapacity
-	for r in dc:
-		charge = (-1*min(numOfUnits*dischargeRate, SoC, r['excessDemand']) if r['power'] > threshold 
-			else min(numOfUnits*chargeRate, battCapacity-SoC, -1*r['excessDemand']))
-		r['netpower'] = r['power'] + charge
-		SoC += charge
-		r['battSoC'] = SoC
+	found = False
+	while True:
+		battCapacity = numOfUnits * cellCapacity * dodFactor
+		SoC = battCapacity
+		for r in dc:
+			charge = (-1*min(numOfUnits*dischargeRate, SoC, r['excessDemand']) if r['power'] > threshold 
+				else min(numOfUnits*chargeRate, battCapacity-SoC, -1*r['excessDemand']))
+			r['netpower'] = r['power'] + charge
+			SoC += charge
+			r['battSoC'] = SoC
 
-	# Ensure that things ran properly
-	# assert all([r['netpower'] <= threshold for r in dc]), "Something's gone wrong"
+		if found:
+			break
+
+		# reduce the 
+		# For particularly low thresholds this will take a while unfortunately.
+		if all([r['netpower'] <= threshold for r in dc]):
+			numOfUnits -= 1
+		else:
+			numOfUnits += 1
+			found = True
 
 	# Convert to negative where appropriate
 	for r in dc:
@@ -111,7 +119,8 @@ def work(modelDir, inputDict):
 	
 	# Avoided Cost Graph
 	out['numOfBatteries'] = numOfUnits
-	out['batteryCost'] = numOfUnits * cellCost
+	rechargeCost = sum([t for t in out['batteryDischargekW'] if t > 0])/battEff*retailCost
+	out['batteryCost'] = numOfUnits * cellCost + rechargeCost
 	out['avoidedCost'] = carryingCost * avoidedCost * yearsToReplace
 	out['netAvoidedCost'] = out['avoidedCost'] - (numOfUnits * cellCost)	
 	lcoeTotCost = cycleEquivalents*battCapacity*retailCost + cellCost/batteryCycleLife*cycleEquivalents
@@ -135,13 +144,13 @@ def new(modelDir):
 		"dischargeRate": "5",
 		"modelType": modelName,
 		"chargeRate": "5",
-		"deferralType": "subTransformer", "demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidCSV_Copy.csv")).read(),
-		#"deferralType": "line", "demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","negativeDemand.csv")).read(),
+		#"deferralType": "subTransformer", "demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidCSV_Copy.csv")).read(),
+		"deferralType": "line", "demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","negativeDemand.csv")).read(),
 		"fileName": "FrankScadaValidCSV_Copy.csv",
 		"cellCost": "7140",
 		"dodFactor":"100",
 		"avoidedCost":"2000000",
-		"transformerThreshold":"6.6",
+		"transformerThreshold":"6.3",
 		"batteryCycleLife": "5000",
 		"carryingCost":"7",
 		"yearsToReplace":"2"

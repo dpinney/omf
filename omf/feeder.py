@@ -230,6 +230,9 @@ def treeToDiNxGraph(inTree):
 
 def latLonNxGraph(inGraph, labels=False, neatoLayout=False, showPlot=False):
 	''' Draw a networkx graph representing a feeder.'''
+	# Be quiet Matplotlib.
+	warnings.filterwarnings("ignore")
+	# Set up figure.
 	plt.axis('off')
 	plt.tight_layout()
 	plt.gca().invert_yaxis()
