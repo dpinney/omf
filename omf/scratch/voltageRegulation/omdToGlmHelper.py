@@ -74,7 +74,7 @@ with open('offenders.csv', 'w') as f:
 	wr.writerow(offenders)
 
 
-# omf.distNetViz.viz('outGLM.glm') #or model.omd
+omf.distNetViz.viz('outGLM.glm') #or model.omd
 
 
 

@@ -1253,4 +1253,4 @@ def uniqObjName(objtype, owner, name, modelName=False):
 if __name__ == "__main__":
 	template_files = ["templates/"+ x  for x in safeListdir("templates")]
 	model_files = ["models/" + x for x in safeListdir("models")]
-	app.run(debug=True, host="127.0.0.1", extra_files=template_files + model_files)
+	app.run(debug=True, host="0.0.0.0", extra_files=template_files + model_files)
