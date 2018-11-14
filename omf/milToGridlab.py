@@ -1480,24 +1480,25 @@ def phasingMismatchFix(tree, jt=5):
                 continue
             kid_phases = set(tree[kid].get('phases',''))
             current_phases = set(tree[current_node].get('phases',''))
-            if not ((kid_phases - set('N')) <= current_phases):
-                #check jt layers north of current_node
+            if not (kid_phases <= current_phases):
                 ancestry = [current_node]
                 dropped = False
+                # We check (jt) generations above the current_node to see if the phase gained in kid_phases  was dropped within 
+                # that range. Ancestry is our listy boi of the nodes within (jt) generations. If we decide that the phases were 
+                # intermittently dropped, then we will overwrite the phases where they were dropped (the nodes in ancestry).
+                # If we decide that the phases were not intermittentely dropped then we set the kid_phases equal to the current_phases
                 for j in range(jt):
-                    ancestry.append(getRelatives(tree, ancestry[-1], parent=True))
-                    parent_phases = set(tree[ancestry[-1]].get('phases',''))
-                    if parent_phases == kid_phases: #account for N?
+                    ancestry.append( getRelatives(tree, ancestry[-1], parent=True) )
+                    parent_phases = set( tree[ancestry[-1]].get('phases','') )
+                    if parent_phases == kid_phases:
                         dropped = True
                         for boi in ancestry:
                             tree[boi]['phases'] = tree[kid].get('phases','')
                         break
                 if not dropped:
-                    intersect = (kid_phases & current_phases) - set("N")
+                    intersect = (kid_phases & current_phases)
                     if intersect:
                         tree[kid]['phases'] = ''.join(intersect)
-                        if 'N' in kid_phases:
-                            tree[kid]['phases'] += 'N'
                     else:
                         tree[kid]['phases'] = tree[current_node]['phases']
 
