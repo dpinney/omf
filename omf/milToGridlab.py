@@ -1547,8 +1547,20 @@ def getRelatives(tree, node_or_line, parent=False):
         if len(listy) > 1:
             print 'MULTIPLE PARENTS 911 SEND HELP'
         return listy[0]
-    return listy 
-      
+    return listy       
+
+def getNamesToKeys(tree):
+    ntk = dict()
+    for k,v in tree.iteritems():
+        if v.get('name'):
+            ntk[v['name']] = k
+    return ntk
+
+def fixOrphanedLoads(tree):
+    orphaned_loads = [ k for k, v in tree.iteritems() if v.get('object') == 'load' and v.get('name') not in getNamesToKeys(tree) ]
+    for orphan in orphaned_loads:
+        del tree[orphan]
+    return tree
 
 def _latCount(name):
 	''' Debug function to count up the meters and such and figure out whether we're lat/lon coding them correctly. '''
@@ -1632,6 +1644,7 @@ def _tests(
 			with open(pJoin(openPrefix,stdString),'r') as stdFile, open(pJoin(openPrefix,seqString),'r') as seqFile:
 				outGlm = convert(stdFile.read(),seqFile.read())
 			        outGlm = missingConductorsFix(outGlm)
+                                outGlm = fixOrphanedLoads(outGlm)
                         with open(outPrefix + stdString.replace('.std','.glm'),'w') as outFile:
 				outFile.seek(0)
 				outFile.write(feeder.sortedWrite(outGlm))
@@ -1665,7 +1678,7 @@ def _tests(
 			with open(fileName,'a') as resultsFile:
 				resultsFile.write('DREW GLM FOR ' + stdString + "\n")
 		except:
-			print 'FAILED DRAWING', stdString
+			# print 'FAILED DRAWING', stdString
 			with open(fileName,'a') as resultsFile:
 				resultsFile.write('DREW GLM FOR ' + stdString + "\n")
                 try:
@@ -1675,7 +1688,7 @@ def _tests(
 			if output['stderr'].startswith('ERROR'):
 				# Catch GridLAB-D's errors:
 				curData['gridlabd_error_code'] = output['stderr'].replace('\n',' ')
-				#raise Exception
+				raise Exception
 			# Dump powerflow results.
 			with open(outPrefix + stdString.replace('.std','.json'),'w') as outFile:
 				outFile.seek(0)
