@@ -1452,6 +1452,103 @@ def missingConductorsFix(tree):
 
     return tree
 
+def phasingMismatchFix(tree, jt=5):
+    '''Working function to fix phase mismatch'''
+    
+    #for k,v in tree.iteritems():
+    #    if v.get('name') == 'NODE150020':
+    #        print v 
+    #        tree[k]['phases'] = 'B'
+    #        break
+
+    current_node = getRootKey(tree)
+    toVisit = [current_node]
+    while toVisit:
+        print toVisit
+        current_node = toVisit.pop(0)
+        try:
+            tree[current_node]['phases']
+        except KeyError:
+            continue
+        kids = getRelatives(tree, current_node)
+        toVisit.extend(list(kids))
+        for kid in kids:
+            try:
+                if tree[kid]['phases'] == '':
+                    tree[kid]['phases'] = tree[current_node]['phases']
+            except KeyError:
+                continue
+            kid_phases = set(tree[kid].get('phases',''))
+            current_phases = set(tree[current_node].get('phases',''))
+            if not ((kid_phases - set('N')) <= current_phases):
+                #check jt layers north of current_node
+                ancestry = [current_node]
+                dropped = False
+                for j in range(jt):
+                    ancestry.append(getRelatives(tree, ancestry[-1], parent=True))
+                    parent_phases = set(tree[ancestry[-1]].get('phases',''))
+                    if parent_phases == kid_phases: #account for N?
+                        dropped = True
+                        for boi in ancestry:
+                            tree[boi]['phases'] = tree[kid].get('phases','')
+                        break
+                if not dropped:
+                    intersect = (kid_phases & current_phases) - set("N")
+                    if intersect:
+                        tree[kid]['phases'] = ''.join(intersect)
+                        if 'N' in kid_phases:
+                            tree[kid]['phases'] += 'N'
+                    else:
+                        tree[kid]['phases'] = tree[current_node]['phases']
+
+    return tree
+
+
+def getRootKey(tree):
+    for k,v in tree.iteritems():
+        if v.get('bustype'):
+            if not getRelatives(tree, k, parent=True):
+                return k
+
+
+def getRelatives(tree, node_or_line, parent=False):
+    '''Returns a list of keys of either parent or children of a given node name.'''
+    listy = []
+
+    if tree[node_or_line].get('object') in ['node', 'triplex_meter']:
+        searchStr = 'to' if parent else 'from'
+        node = node_or_line
+        for k,v in tree.iteritems():
+            if v.get(searchStr) == tree[node].get('name'):
+                listy.append(k)
+                #if parent:
+                    #break
+            elif not parent and v.get('parent') == tree[node].get('name'):
+                listy.append(k)
+
+    
+    elif tree[node_or_line].get('object'):
+        searchStr = 'from' if parent else 'to'
+        line = node_or_line
+
+        try:
+            name = tree[line][searchStr]
+        except KeyError:
+            return []
+
+        for k,v in tree.iteritems():
+            if v.get('name') == name:
+                listy.append(k)
+                break
+    else:
+        return []
+
+    if parent and listy:
+        if len(listy) > 1:
+            print 'MULTIPLE PARENTS 911 SEND HELP'
+        return listy[0]
+    return listy 
+      
 
 def _latCount(name):
 	''' Debug function to count up the meters and such and figure out whether we're lat/lon coding them correctly. '''
@@ -1557,6 +1654,7 @@ def _tests(
 			with open(fileName,'a') as resultsFile:
 				resultsFile.write('FAILED CONVERTING ' + stdString + "\n")
                 try:
+                        3 / 0
 			# Draw the GLM.
 			# But first make networkx cool it with the warnings.
 			import warnings; warnings.filterwarnings("ignore")
@@ -1577,7 +1675,7 @@ def _tests(
 			if output['stderr'].startswith('ERROR'):
 				# Catch GridLAB-D's errors:
 				curData['gridlabd_error_code'] = output['stderr'].replace('\n',' ')
-				raise Exception
+				#raise Exception
 			# Dump powerflow results.
 			with open(outPrefix + stdString.replace('.std','.json'),'w') as outFile:
 				outFile.seek(0)
