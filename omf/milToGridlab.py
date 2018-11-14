@@ -383,11 +383,11 @@ def convert(stdString,seqString):
 			# Check to see if there is distributed load on the line
 			# WARNING: distributed load broken in GridLAB-D. Disabled for now.
 			# if 'A' in overhead['phases'] and (ohLineList[19] != '0' or ohLineList[22] != '0'):
-			#     overhead['distributed_load_A'] = float(ohLineList[19])*1000 + float(ohLineList[22])*1000j
+			#	 overhead['distributed_load_A'] = float(ohLineList[19])*1000 + float(ohLineList[22])*1000j
 			# if 'B' in overhead['phases'] and (ohLineList[20] != '0' or ohLineList[23] != '0'):
-			#     overhead['distributed_load_B'] = float(ohLineList[20])*1000 + float(ohLineList[23])*1000j
+			#	 overhead['distributed_load_B'] = float(ohLineList[20])*1000 + float(ohLineList[23])*1000j
 			# if 'C' in overhead['phases'] and (ohLineList[21] != '0' or ohLineList[24] != '0'):
-			#     overhead['distributed_load_C'] = float(ohLineList[21])*1000 + float(ohLineList[24])*1000j
+			#	 overhead['distributed_load_C'] = float(ohLineList[21])*1000 + float(ohLineList[24])*1000j
 			return overhead
 
 		def convertUgLine(ugLineList):
@@ -535,11 +535,11 @@ def convert(stdString,seqString):
 					}
 			# Check to see if there is distributed load on the line
 			# if 'A' in underground['phases'] and (ugLineList[19] != '0' or ugLineList[22] != '0'):
-			#     underground['distributed_load_A'] = float(ugLineList[19])*1000 + (float(ugLineList[22]))*1000j
+			#	 underground['distributed_load_A'] = float(ugLineList[19])*1000 + (float(ugLineList[22]))*1000j
 			# if 'B' in underground['phases'] and (ugLineList[20] != '0' or ugLineList[23] != '0'):
-			#     underground['distributed_load_B'] = float(ugLineList[20])*1000 + (float(ugLineList[23]))*1000j
+			#	 underground['distributed_load_B'] = float(ugLineList[20])*1000 + (float(ugLineList[23]))*1000j
 			# if 'C' in underground['phases'] and (ugLineList[21] != '0' or ugLineList[24] != '0'):
-			#     underground['distributed_load_C'] = float(ugLineList[21])*1000 + (float(ugLineList[24]))*1000j
+			#	 underground['distributed_load_C'] = float(ugLineList[21])*1000 + (float(ugLineList[24]))*1000j
 			return underground
 
 		def convertRegulator(regList):
@@ -1303,10 +1303,10 @@ def convert(stdString,seqString):
 				thisOb['longitude'] = str(float(parentOb['longitude']) + random.uniform(-5,5))
 	# Final Output
 	# print('*** DONE!', time.time()-start_time)
-
-        # fix missing conductors
-        glmTree = missingConductorsFix(glmTree)
-
+	# fix missing conductors
+        print 'abt to fix missing conductors'
+	glmTree = missingConductorsFix(glmTree)
+        print 'fixed missing conductors :D'
 	return glmTree
 
 
@@ -1328,240 +1328,251 @@ def stdSeqToGlm(seqPath, stdPath, glmPath):
 		outFile.write(omf.feeder.sortedWrite(tree))
 
 def missingConductorsFix(tree):
-    '''Fixes the missing conductors issue in the tree'''    
-    ### CHECK IF THERE ARE LINE CONFIGS WITHOUT ANY CONDUCTORS ###
-    empty_line_configs = dict()
-    #get line configs missing conductors (dict maps name to key w/in tree)
-    for k,v in tree.iteritems():
-        if v.get('object') == 'line_configuration' and not any('conductor' in vk for vk in v.keys()):
-            empty_line_configs[v['name']] = k
-    
-    #get keys of lines missing conductors
-    empty_lines = [k for k,v in tree.iteritems() if 'line' in v.get('object','') and v.get('configuration') in empty_line_configs]
-    
-    for line_key in empty_lines:
-        #find sibling lines 
-        mom_node = tree[line_key]['from']
-        dotter_node = tree[line_key]['to']
-        brother_key = None
-        grandpa_key = None
-        grandson_key = None
-        for k,v in tree.iteritems():
-            if k not in empty_lines and tree[line_key]['object'] == v.get('object'):
-                if mom_node == v.get('from','') or dotter_node == v.get('to',''):
-                    brother_key = k
-                    break
-                if mom_node == v.get('to', ''): 
-                    grandpa_key = k
-                if dotter_node == v.get('from', ''):
-                    grandson_key = k
-                if grandpa_key and grandson_key:
-                    break
+	'''Fixes the missing conductors issue in the tree'''	
+	### CHECK IF THERE ARE LINE CONFIGS WITHOUT ANY CONDUCTORS ###
+	empty_line_configs = dict()
+	#get line configs missing conductors (dict maps name to key w/in tree)
+	for k,v in tree.iteritems():
+		if v.get('object') == 'line_configuration' and not any('conductor' in vk for vk in v.keys()):
+			empty_line_configs[v['name']] = k
+	
+	#get keys of lines missing conductors
+	empty_lines = [k for k,v in tree.iteritems() if 'line' in v.get('object','') and v.get('configuration') in empty_line_configs]
+	
+	for line_key in empty_lines:
+		#find sibling lines 
+		mom_node = tree[line_key]['from']
+		dotter_node = tree[line_key]['to']
+		brother_key = None
+		grandpa_key = None
+		grandson_key = None
+		for k,v in tree.iteritems():
+			if k not in empty_lines and tree[line_key]['object'] == v.get('object'):
+				if mom_node == v.get('from','') or dotter_node == v.get('to',''):
+					brother_key = k
+					break
+				if mom_node == v.get('to', ''): 
+					grandpa_key = k
+				if dotter_node == v.get('from', ''):
+					grandson_key = k
+				if grandpa_key and grandson_key:
+					break
 
-        nearby = brother_key if brother_key else (grandson_key if grandson_key else grandpa_key)
+		nearby = brother_key if brother_key else (grandson_key if grandson_key else grandpa_key)
 
-        if not nearby:
-            #check child lines of the cousins of the mom node
-            #AKA second cousin lines
-            #first we need to get the parent's cousin's nodes
-            ggma_node_names = []
-            for k,v in tree.iteritems():
-                if 'line' in v.get('object','') and mom_node == v.get('to'):
-                    ggma_node_names.append(v.get('from'))
-            cousin_node_names = [] #dict(name: [] for name in ggma_node_names)
-            for k,v in tree.iteritems():
-                if v.get('from') in ggma_node_names:
-                    cousin_node_names.append(v.get('to'))
-            
-            for k,v in tree.iteritems():
-                if v.get('from') in cousin_node_names and v['object'] == tree[line_key]['object'] and k not in empty_lines:
-                    nearby = k
-                    break
-        
-        if not nearby:
-            #second cousins failed us so check the whole tree for a usable config 
-            for k,v in tree.iteritems():
-                if v.get('object') == tree[line_key]['object'] and k not in empty_lines:
-                    nearby = k
-        
-        if not nearby:
-            #there is no usable line_config in the whole tree, so we use our default conductor and stick it in the current line_config
-            #find our line config's key and check if we've already inserted our default conductor
-            default_name = default_equipment[ tree[line_key]['object'] + '_conductor' ]['name']
-            not_inserted = True
-            for k, v in tree.iteritems():
-                if v.get('name') == tree[line_key]['configuration']:
-                    lc_key = k
-                if v.get('name') == default_name:
-                    not_inserted = False
-                    conductor_key = k
+		if not nearby:
+			#check child lines of the cousins of the mom node
+			#AKA second cousin lines
+			#first we need to get the parent's cousin's nodes
+			ggma_node_names = []
+			for k,v in tree.iteritems():
+				if 'line' in v.get('object','') and mom_node == v.get('to'):
+					ggma_node_names.append(v.get('from'))
+			cousin_node_names = [] #dict(name: [] for name in ggma_node_names)
+			for k,v in tree.iteritems():
+				if v.get('from') in ggma_node_names:
+					cousin_node_names.append(v.get('to'))
+			
+			for k,v in tree.iteritems():
+				if v.get('from') in cousin_node_names and v['object'] == tree[line_key]['object'] and k not in empty_lines:
+					nearby = k
+					break
+		
+		if not nearby:
+			#second cousins failed us so check the whole tree for a usable config 
+			for k,v in tree.iteritems():
+				if v.get('object') == tree[line_key]['object'] and k not in empty_lines:
+					nearby = k
+		
+		if not nearby:
+			#there is no usable line_config in the whole tree, so we use our default conductor and stick it in the current line_config
+			#find our line config's key and check if we've already inserted our default conductor
+			default_name = default_equipment[ tree[line_key]['object'] + '_conductor' ]['name']
+			not_inserted = True
+			for k, v in tree.iteritems():
+				if v.get('name') == tree[line_key]['configuration']:
+					lc_key = k
+				if v.get('name') == default_name:
+					not_inserted = False
+					conductor_key = k
 
-            #insert our default conductor if we haven't already
-            if not_inserted:
-                conductor_key = lc_key
-                while( conductor_key in tree.keys() ):
-                    conductor_key -= 1
-                tree[conductor_key] = default_equipment[ tree[line_key]['object'] + '_conductor' ]
-            
-            for phase in tree[line_key]['phases']:
-                tree[lc_key]['conductor_' + phase] = tree[conductor_key]['name']
-            
-            continue
+			#insert our default conductor if we haven't already
+			if not_inserted:
+				conductor_key = lc_key
+				while( conductor_key in tree.keys() ):
+					conductor_key -= 1
+				tree[conductor_key] = default_equipment[ tree[line_key]['object'] + '_conductor' ]
+			
+			for phase in tree[line_key]['phases']:
+				tree[lc_key]['conductor_' + phase] = tree[conductor_key]['name']
+			
+			continue
 
-        #grab the conductor from the line configuration
-        nearby_line_config = tree[nearby]['configuration']
-        for k, v in tree.iteritems():
-            if nearby_line_config == v.get('name'):
-                nearby_line_config = v
-                break
-        conductor = [v for k,v in v.iteritems() if 'conductor' in k][0]
+		#grab the conductor from the line configuration
+		nearby_line_config = tree[nearby]['configuration']
+		for k, v in tree.iteritems():
+			if nearby_line_config == v.get('name'):
+				nearby_line_config = v
+				break
+		conductor = [v for k,v in v.iteritems() if 'conductor' in k][0]
 
-        #assign the empty line config this conductor
-        for phase in tree[line_key].get('phases'):
-            conductor_string = 'conductor_' + phase
-            line_config_key = empty_line_configs[tree[line_key]['configuration']]
-            tree[line_config_key][conductor_string] = conductor
+		#assign the empty line config this conductor
+		for phase in tree[line_key].get('phases'):
+			conductor_string = 'conductor_' + phase
+			line_config_key = empty_line_configs[tree[line_key]['configuration']]
+			tree[line_config_key][conductor_string] = conductor
 
-    ### CHECKS IF THERE EXISTS ANY MISMATCH BETWEEN LINE PHASES AND LINE-CONFIG CONDUCTOR PHASES
-    namesToKeys = {v.get('name'): k for k, v in tree.iteritems()}
-    del namesToKeys[None]
+	### CHECKS IF THERE EXISTS ANY MISMATCH BETWEEN LINE PHASES AND LINE-CONFIG CONDUCTOR PHASES
+	namesToKeys = {v.get('name'): k for k, v in tree.iteritems()}
+	del namesToKeys[None]
 
-    buggy_lines = dict() #maps buggy lines to their line config keys
-    
-    for k, line in tree.iteritems():
-        if 'line' in line.get('object',''):
-            try:
-                line_config_key = namesToKeys[line['configuration']]
-            except KeyError:
-                continue
-            for phase in line.get('phases',''):
-                if not tree[line_config_key].get('conductor_' + phase):
-                    buggy_lines[k] = line_config_key
+	buggy_lines = dict() #maps buggy lines to their line config keys
+	
+	for k, line in tree.iteritems():
+		if 'line' in line.get('object',''):
+			try:
+				line_config_key = namesToKeys[line['configuration']]
+			except KeyError:
+				continue
+			for phase in line.get('phases',''):
+				if not tree[line_config_key].get('conductor_' + phase):
+					buggy_lines[k] = line_config_key
 
-    for line_key, line_config_key in buggy_lines.iteritems():
-        for attr in tree[line_config_key]:
-            if 'conductor' in attr:
-                existing_cond = attr
-                break
+	for line_key, line_config_key in buggy_lines.iteritems():
+		for attr in tree[line_config_key]:
+			if 'conductor' in attr:
+				existing_cond = attr
+				break
 
-        phases = tree[line_key].get('phases')
-        for phase in phases:
-            if not tree[line_config_key].get('conductor_'+phase):
-                tree[line_config_key]['conductor_'+phase] = tree[line_config_key][existing_cond]
-
-
-    return tree
+		phases = tree[line_key].get('phases')
+		for phase in phases:
+			if not tree[line_config_key].get('conductor_'+phase):
+				tree[line_config_key]['conductor_'+phase] = tree[line_config_key][existing_cond]
+	return tree
 
 def phasingMismatchFix(tree, jt=5):
-    '''Working function to fix phase mismatch'''
-    
-    #for k,v in tree.iteritems():
-    #    if v.get('name') == 'NODE150020':
-    #        print v 
-    #        tree[k]['phases'] = 'B'
-    #        break
+	'''Working function to fix phase mismatch'''
+	
+	#for k,v in tree.iteritems():
+	#	if v.get('name') == 'NODE150020':
+	#		print v 
+	#		tree[k]['phases'] = 'B'
+	#		break
 
-    current_node = getRootKey(tree)
-    toVisit = [current_node]
-    while toVisit:
-        print toVisit
-        current_node = toVisit.pop(0)
-        try:
-            tree[current_node]['phases']
-        except KeyError:
-            continue
-        kids = getRelatives(tree, current_node)
-        toVisit.extend(list(kids))
-        for kid in kids:
-            try:
-                if tree[kid]['phases'] == '':
-                    tree[kid]['phases'] = tree[current_node]['phases']
-            except KeyError:
-                continue
-            kid_phases = set(tree[kid].get('phases',''))
-            current_phases = set(tree[current_node].get('phases',''))
-            if not (kid_phases <= current_phases):
-                ancestry = [current_node]
-                dropped = False
-                # We check (jt) generations above the current_node to see if the phase gained in kid_phases  was dropped within 
-                # that range. Ancestry is our listy boi of the nodes within (jt) generations. If we decide that the phases were 
-                # intermittently dropped, then we will overwrite the phases where they were dropped (the nodes in ancestry).
-                # If we decide that the phases were not intermittentely dropped then we set the kid_phases equal to the current_phases
-                for j in range(jt):
-                    ancestry.append( getRelatives(tree, ancestry[-1], parent=True) )
-                    parent_phases = set( tree[ancestry[-1]].get('phases','') )
-                    if parent_phases == kid_phases:
-                        dropped = True
-                        for boi in ancestry:
-                            tree[boi]['phases'] = tree[kid].get('phases','')
-                        break
-                if not dropped:
-                    intersect = (kid_phases & current_phases)
-                    if intersect:
-                        tree[kid]['phases'] = ''.join(intersect)
-                    else:
-                        tree[kid]['phases'] = tree[current_node]['phases']
-
-    return tree
+	current_node = getRootKey(tree)
+	toVisit = [current_node]
+	namesToKeys = getNamesToKeys(tree)
+	while toVisit:
+		print toVisit
+		current_node = toVisit.pop(0)
+		try:
+			tree[current_node]['phases']
+		except KeyError:
+			continue
+		if tree[current_node]['object'] == 'transformer':
+			conf_key = namesToKeys[ tree[current_node]['configuration'] ]
+			add_an_s = True if tree[conf_key]['connect_type'] == 'SINGLE_PHASE_CENTER_TAPPED' else False
+		else:
+			add_an_s = False
+		kids = getRelatives(tree, current_node)
+		toVisit.extend(list(kids))
+		for kid in kids:
+			try:
+				if tree[kid]['phases'] == '':
+					tree[kid]['phases'] = tree[current_node]['phases']
+			except KeyError:
+				continue
+			kid_phases = set(tree[kid].get('phases',''))
+			current_phases = set(tree[current_node].get('phases',''))
+			if not (kid_phases <= current_phases):
+				if add_an_s and (kid_phases - current_phases) == set('S'):
+						continue
+				ancestry = [current_node]
+				dropped = False
+				# We check (jt) generations above the current_node to see if the phase gained in kid_phases  was dropped within 
+				# that range. Ancestry is our listy boi of the nodes within (jt) generations. If we decide that the phases were 
+				# intermittently dropped, then we will overwrite the phases where they were dropped (the nodes in ancestry).
+				# If we decide that the phases were not intermittentely dropped then we set the kid_phases equal to the current_phases
+				for j in range(jt):
+					ancestry.append( getRelatives(tree, ancestry[-1], parent=True) )
+					parent_phases = set( tree[ancestry[-1]].get('phases','') )
+					if parent_phases == kid_phases:
+						dropped = True
+						for boi in ancestry:
+							tree[boi]['phases'] = tree[kid].get('phases','')
+						if add_an_s:
+							tree[kid]['phases'] += 'S'
+						break
+				if not dropped:
+					intersect = (kid_phases & current_phases)
+					if intersect:
+						tree[kid]['phases'] = ''.join(intersect)
+						if add_an_s:
+							tree[kid]['phases'] += 'S'
+					else:
+						tree[kid]['phases'] = tree[current_node]['phases']
+						if add_an_s:
+							tree[kid]['phases'] += 'S'
+	return tree
 
 
 def getRootKey(tree):
-    for k,v in tree.iteritems():
-        if v.get('bustype'):
-            if not getRelatives(tree, k, parent=True):
-                return k
+	for k,v in tree.iteritems():
+		if v.get('bustype'):
+			if not getRelatives(tree, k, parent=True):
+				return k
 
 
 def getRelatives(tree, node_or_line, parent=False):
-    '''Returns a list of keys of either parent or children of a given node name.'''
-    listy = []
+	'''Returns a list of keys of either parent or children of a given node name.'''
+	listy = []
 
-    if tree[node_or_line].get('object') in ['node', 'triplex_meter']:
-        searchStr = 'to' if parent else 'from'
-        node = node_or_line
-        for k,v in tree.iteritems():
-            if v.get(searchStr) == tree[node].get('name'):
-                listy.append(k)
-                #if parent:
-                    #break
-            elif not parent and v.get('parent') == tree[node].get('name'):
-                listy.append(k)
+	if tree[node_or_line].get('object') in ['node', 'triplex_meter']:
+		searchStr = 'to' if parent else 'from'
+		node = node_or_line
+		for k,v in tree.iteritems():
+			if v.get(searchStr) == tree[node].get('name'):
+				listy.append(k)
+				#if parent:
+					#break
+			elif not parent and v.get('parent') == tree[node].get('name'):
+				listy.append(k)
 
-    
-    elif tree[node_or_line].get('object'):
-        searchStr = 'from' if parent else 'to'
-        line = node_or_line
+	
+	elif tree[node_or_line].get('object'):
+		searchStr = 'from' if parent else 'to'
+		line = node_or_line
 
-        try:
-            name = tree[line][searchStr]
-        except KeyError:
-            return []
+		try:
+			name = tree[line][searchStr]
+		except KeyError:
+			return []
 
-        for k,v in tree.iteritems():
-            if v.get('name') == name:
-                listy.append(k)
-                break
-    else:
-        return []
+		for k,v in tree.iteritems():
+			if v.get('name') == name:
+				listy.append(k)
+				break
+	else:
+		return []
 
-    if parent and listy:
-        if len(listy) > 1:
-            print 'MULTIPLE PARENTS 911 SEND HELP'
-        return listy[0]
-    return listy       
+	if parent and listy:
+		if len(listy) > 1:
+			print 'MULTIPLE PARENTS 911 SEND HELP'
+		return listy[0]
+	return listy	   
 
 def getNamesToKeys(tree):
-    ntk = dict()
-    for k,v in tree.iteritems():
-        if v.get('name'):
-            ntk[v['name']] = k
-    return ntk
+	ntk = dict()
+	for k,v in tree.iteritems():
+		if v.get('name'):
+			ntk[v['name']] = k
+	return ntk
 
 def fixOrphanedLoads(tree):
-    orphaned_loads = [ k for k, v in tree.iteritems() if v.get('object') == 'load' and v.get('name') not in getNamesToKeys(tree) ]
-    for orphan in orphaned_loads:
-        del tree[orphan]
-    return tree
+	orphaned_loads = [ k for k, v in tree.iteritems() if v.get('object') == 'load' and v.get('name') not in getNamesToKeys(tree) ]
+	for orphan in orphaned_loads:
+		del tree[orphan]
+	return tree
 
 def _latCount(name):
 	''' Debug function to count up the meters and such and figure out whether we're lat/lon coding them correctly. '''
@@ -1575,28 +1586,28 @@ def _latCount(name):
 
 
 default_equipment = {
-    
-        'underground_line_conductor': {
-            'name': "DG_1000ALTRXLPEJ15",
-            'object': 'underground_line_conductor',
-            'rating.summer.continuous': "725 A",
-            'outer_diameter': "1.175 in",
-            'conductor_gmr': "0.0395 ft",
-            'conductor_diameter': "1.165 in",
-            'conductor_resistance': "0.0141 ohm/kft",
-            'neutral_gmr': "0.0132 ft",
-            'neutral_resistance': "2.3057 ohm/kft",
-            'neutral_diameter': "0.0254 in",
-            'neutral_strands': "7",
-            'shield_gmr': "0.00 ft"
-        },
+	
+		'underground_line_conductor': {
+			'name': "DG_1000ALTRXLPEJ15",
+			'object': 'underground_line_conductor',
+			'rating.summer.continuous': "725 A",
+			'outer_diameter': "1.175 in",
+			'conductor_gmr': "0.0395 ft",
+			'conductor_diameter': "1.165 in",
+			'conductor_resistance': "0.0141 ohm/kft",
+			'neutral_gmr': "0.0132 ft",
+			'neutral_resistance': "2.3057 ohm/kft",
+			'neutral_diameter': "0.0254 in",
+			'neutral_strands': "7",
+			'shield_gmr': "0.00 ft"
+		},
 
-        'overhead_line_conductor': {
-            'name': "1000_CU",
-            'object': 'overhead_line_conductor',
-            'geometric_mean_radius': "1.121921cm",
-            'resistance': "0.042875Ohm/km"
-        }
+		'overhead_line_conductor': {
+			'name': "1000_CU",
+			'object': 'overhead_line_conductor',
+			'geometric_mean_radius': "1.121921cm",
+			'resistance': "0.042875Ohm/km"
+		}
 }
 
 
@@ -1632,10 +1643,10 @@ def _tests(
 			os.mkdir(outPrefix)
 	# Run all the tests.
 	for stdString, seqString in testFiles:
-		curData = {} # Append data for this std file here.
-		curData['circuit_name'] = stdString
-		cur_start_time = time.time()
-		# Write the time info.
+		curData = {} # Append data for this std file here. 
+		curData['circuit_name'] = stdString 
+		cur_start_time = time.time() 
+		# Write the time info.  
 		with open(fileName, 'a') as resultsFile:
 			local_time = reference.LocalTimezone()
 			now = datetime.datetime.now()
@@ -1644,9 +1655,9 @@ def _tests(
 			# Convert the std+seq and write it out.
 			with open(pJoin(openPrefix,stdString),'r') as stdFile, open(pJoin(openPrefix,seqString),'r') as seqFile:
 				outGlm = convert(stdFile.read(),seqFile.read())
-			        outGlm = missingConductorsFix(outGlm)
-                                outGlm = fixOrphanedLoads(outGlm)
-                        with open(outPrefix + stdString.replace('.std','.glm'),'w') as outFile:
+				outGlm = fixOrphanedLoads(outGlm)
+				outGlm = phasingMismatchFix(outGlm)
+			with open(outPrefix + stdString.replace('.std','.glm'),'w') as outFile:
 				outFile.seek(0)
 				outFile.write(feeder.sortedWrite(outGlm))
 				outFile.truncate()
@@ -1667,8 +1678,8 @@ def _tests(
 			curData['glm_size_as_perc_of_std'] = 0.0
 			with open(fileName,'a') as resultsFile:
 				resultsFile.write('FAILED CONVERTING ' + stdString + "\n")
-                try:
-                        3 / 0
+		try:
+			3 / 0
 			# Draw the GLM.
 			# But first make networkx cool it with the warnings.
 			import warnings; warnings.filterwarnings("ignore")
@@ -1682,7 +1693,7 @@ def _tests(
 			# print 'FAILED DRAWING', stdString
 			with open(fileName,'a') as resultsFile:
 				resultsFile.write('DREW GLM FOR ' + stdString + "\n")
-                try:
+		try:
 			# Run powerflow on the GLM.
 			curData['gridlabd_error_code'] = 'Processing'
 			output = gridlabd.runInFilesystem(outGlm, attachments=testAttachments, keepFiles=False)
