@@ -1482,6 +1482,12 @@ def phasingMismatchFix(tree, jt=5):
 					tree[kid]['phases'] = tree[current_node]['phases']
 			except KeyError:
 				continue
+			if tree[kid]['object'] == 'transformer':
+				kid_conf_key = namesToKeys[ tree[kid]['configuration'] ]
+				connect_type = tree[kid_conf_key]['connect_type']
+			else:
+				connect_type = None
+
 			kid_phases = set(tree[kid].get('phases',''))
 			current_phases = set(tree[current_node].get('phases',''))
 			if not (kid_phases <= current_phases):
@@ -1494,25 +1500,27 @@ def phasingMismatchFix(tree, jt=5):
 				# intermittently dropped, then we will overwrite the phases where they were dropped (the nodes in ancestry).
 				# If we decide that the phases were not intermittentely dropped then we set the kid_phases equal to the current_phases
 				for j in range(jt):
-					ancestry.append( getRelatives(tree, ancestry[-1], parent=True) )
-					parent_phases = set( tree[ancestry[-1]].get('phases','') )
+					try:
+						ancestry.append( getRelatives(tree, ancestry[-1], parent=True) )
+						parent_phases = set( tree[ancestry[-1]].get('phases','') )
+					except TypeError:
+						#TypeError for trying to use the empty list as a key in tree if ancestry is empty
+						break
 					if parent_phases == kid_phases:
 						dropped = True
 						for boi in ancestry:
 							tree[boi]['phases'] = tree[kid].get('phases','')
-						if add_an_s:
-							tree[kid]['phases'] += 'S'
-						break
 				if not dropped:
 					intersect = (kid_phases & current_phases)
 					if intersect:
 						tree[kid]['phases'] = ''.join(intersect)
-						if add_an_s:
-							tree[kid]['phases'] += 'S'
 					else:
 						tree[kid]['phases'] = tree[current_node]['phases']
-						if add_an_s:
-							tree[kid]['phases'] += 'S'
+					#fixes + checks for when we modify kid phases
+					# if connect_type == 'WYE_WYE' and len(tree[kid]['phases']) == 1:
+					#	tree[kid_conf_key]['connect_type'] = 'SINGLE_PHASE'
+					if add_an_s:
+						tree[kid]['phases'] += 'S'
 	return tree
 
 
@@ -1655,8 +1663,9 @@ def _tests(
 			# Convert the std+seq and write it out.
 			with open(pJoin(openPrefix,stdString),'r') as stdFile, open(pJoin(openPrefix,seqString),'r') as seqFile:
 				outGlm = convert(stdFile.read(),seqFile.read())
-				outGlm = fixOrphanedLoads(outGlm)
 				outGlm = phasingMismatchFix(outGlm)
+				outGlm = fixOrphanedLoads(outGlm)
+				outGlm = missingConductorsFix(outGlm)
 			with open(outPrefix + stdString.replace('.std','.glm'),'w') as outFile:
 				outFile.seek(0)
 				outFile.write(feeder.sortedWrite(outGlm))
@@ -1700,7 +1709,7 @@ def _tests(
 			if output['stderr'].startswith('ERROR'):
 				# Catch GridLAB-D's errors:
 				curData['gridlabd_error_code'] = output['stderr'].replace('\n',' ')
-				raise Exception
+				# raise Exception
 			# Dump powerflow results.
 			with open(outPrefix + stdString.replace('.std','.json'),'w') as outFile:
 				outFile.seek(0)
