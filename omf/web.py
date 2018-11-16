@@ -380,8 +380,7 @@ def writeToInput(workDir, entry, key):
 		allInput[key] = entry
 		with open(workDir+"/allInputData.json","w") as inputFile:
 			json.dump(allInput, inputFile, indent = 4)
-	except:
-		return "Failed"
+	except: return "Failed"
 
 @app.route("/feeder/<owner>/<modelName>/<feederNum>")
 @flask_login.login_required
@@ -393,11 +392,8 @@ def feederGet(owner, modelName, feederNum):
 	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
 	feederName = json.load(open(modelDir + "/allInputData.json")).get('feederName'+str(feederNum))
 	# MAYBEFIX: fix modelFeeder
-	return render_template(
-		"gridEdit.html", feeders=yourFeeders, publicFeeders=publicFeeders, modelName=modelName, feederName=feederName,
-		feederNum=feederNum, ref=request.referrer, is_admin=User.cu()=="admin", modelFeeder=False,
-		public=owner=="public", currUser=User.cu(), owner=owner
-	)
+	return render_template("gridEdit.html", feeders=yourFeeders, publicFeeders=publicFeeders, modelName=modelName, feederName=feederName, feederNum=feederNum, ref=request.referrer, is_admin=User.cu()=="admin", modelFeeder=False, public=owner=="public",
+		currUser = User.cu(), owner = owner)
 
 @app.route("/network/<owner>/<modelName>/<networkNum>")
 @flask_login.login_required
@@ -415,49 +411,25 @@ def networkGet(owner, modelName, networkNum):
 		currUser = User.cu(), owner = owner)
 
 
-@app.route("/distribution/<owner>/<model_name>/<feeder_num>/test")
-@app.route("/distribution/<owner>/<model_name>/<feeder_num>")
+@app.route("/distribution/<owner>/<model_name>/<distribution_num>")
 @flask_login.login_required
-def distribution_get(owner, model_name, feeder_num):
+def distribution_get(owner, model_name, distribution_num):
 	"""Render the editing interface for distribution networks."""
+	# all_data = getDataNames()
+	# your_feeders = all_data["feeders"]
+	# public_feeders = all_data["publicFeeders"]
+	# omf.distNetViz.forceLayout()
 	model_dir = os.path.join(_omfDir, "data","Model", owner, model_name)
 	with open(model_dir + "/allInputData.json", "r") as json_file:
-		feeder_dict = json.load(json_file)
-		feeder_name = feeder_dict.get('feederName' + str(feeder_num))
-	feeder_file = model_dir + "/" + feeder_name + ".omd"
-	with open(feeder_file, "r") as data_file:
+		feeder_name = json.load(json_file).get('feederName' + str(distribution_num))
+	feeder_path = model_dir + "/" + feeder_name + ".omd"
+	with open(feeder_path, "r") as data_file:
 		data = json.load(data_file)
 	tree = data['tree']
 	if not omf.distNetViz.contains_coordinates(tree):
 		omf.distNetViz.insert_coordinates(tree)
 	passed_data = json.dumps(data)
-	"""Should this be an ajax request? The ajax request could be made while the feeder builds in the browser"""
-	component_json = getComponents()
-	jasmine=spec = None
-	if request.path.endswith("/test") and User.cu() == "admin":
-		tests = load_test_files(["distNetVizSpec.js", "distDataValidationSpec.js"])
-		jasmine = tests["jasmine"]
-		spec = tests["spec"]
-	all_data = getDataNames()
-	user_feeders = all_data["feeders"]
-	public_feeders = all_data["publicFeeders"]
-	# omf.distNetViz.forceLayout()
-	return render_template(
-		"distNetViz.html", thisFeederData=passed_data, thisFeederName=feeder_name, thisFeederNum=feeder_num,
-		thisModelName=model_name, thisOwner=owner, components=component_json, jasmine=jasmine, spec=spec,
-		publicFeeders=public_feeders, userFeeders=user_feeders
-	)
-
-
-def load_test_files(file_names):
-	"""Load the JavaScript unit-test files into a string and return the string"""
-	with open(os.path.join(_omfDir, "static", "lib", "jasmine-3.3.0", "scriptTags.html"), "r") as f:
-		jasmine = f.read()
-	spec = ""
-	for name in file_names:
-		with open(os.path.join(_omfDir, "static", "testFiles", name), "r") as f:
-			spec += f.read()
-	return {"jasmine": jasmine, "spec": spec}
+	return render_template("distNetViz.html", data=passed_data)
 
 
 @app.route("/getComponents/")
@@ -467,20 +439,10 @@ def getComponents():
 	components = {name[0:-5]:json.load(open(path + name)) for name in safeListdir(path)}
 	return json.dumps(components)
 
-@app.route("/checkConversion/<modelName>/<owner>", methods=["POST","GET"])
 @app.route("/checkConversion/<modelName>", methods=["POST","GET"])
-def checkConversion(modelName, owner=None):
-	"""If the path exists, then the conversion is ongoing and the client can't reload their browser yet.
-	If the path does not exist, then either 1) the conversion hasn't started yet or 2) the conversion is
-	finished because the ZPID.txt file is gone.
-	If an error file exists, the the conversion failed and the client should be notified.`
-	"""
+def checkConversion(modelName):
 	print modelName
-	if User.cu() == "admin":
-		if owner is None:
-			owner = User.cu()
-	else:
-		owner = User.cu()
+	owner = User.cu()
 	path = ("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
 	errorPath = "data/Model/"+owner+"/"+modelName+"/gridError.txt"
 	print "Check conversion status:", os.path.exists(path), "for path", path
@@ -506,9 +468,8 @@ def milsoftImport(owner):
 	for file in fileList:
 		if file.endswith(".glm") or file.endswith(".std") or file.endswith(".seq"):
 			os.remove(path+"/"+file)
-	#stdFile, seqFile = map(lambda x: request.files[x], ["stdFile", "seqFile"])
-	stdFile = request.files.get("stdFile")
-	seqFile = request.files.get("seqFile")
+	stdFile, seqFile = map(lambda x: request.files[x], ["stdFile", "seqFile"])
+	# stdFile, seqFile= request.files['stdFile','seqFile']
 	stdFile.save(os.path.join(modelFolder,feederName+'.std'))
 	seqFile.save(os.path.join(modelFolder,feederName+'.seq'))
 	if os.path.isfile("data/Model/"+owner+"/"+modelName+"/gridError.txt"):
@@ -813,10 +774,8 @@ def newSimpleFeeder(owner, modelName, feederNum=1, writeInput=False, feederName=
 					with open(os.path.join(modelDir, feederName+".omd"), "w") as outFile:
 						outFile.write(simpleFeederFile.read())
 				break
-			else:
-				feederName = 'feeder'+str(i)
-		if writeInput:
-			writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
+			else: feederName = 'feeder'+str(i)
+		if writeInput: writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
 		return ('Success',204)
 	else: return ('Invalid Login', 204)
 
@@ -851,8 +810,6 @@ def newBlankFeeder(owner):
 	removeFeeder(owner, modelName, feederNum)
 	newSimpleFeeder(owner, modelName, feederNum, False, feederName)
 	writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
-	if request.form.get("referrer") == "distribution":
-		return redirect(url_for("distribution_get", owner=owner, model_name=modelName, feeder_num=feederNum))
 	return redirect(url_for('feederGet', owner=owner, modelName=modelName, feederNum=feederNum))
 
 @app.route("/newBlankNetwork/<owner>", methods=["POST"])
@@ -913,20 +870,20 @@ def saveNetwork(owner, modelName, networkName):
 			json.dump(payload, outFile, indent=4)
 	return ('Success',204)
 
-@app.route("/renameFeeder/<owner>/<modelName>/<oldName>/<feederName>/<feederNum>", methods=["GET", "POST"])
+@app.route("/renameFeeder/<owner>/<modelName>/<oldName>/<feederName>/<feederNum>", methods=["POST"])
 @flask_login.login_required
 def renameFeeder(owner, modelName, oldName, feederName, feederNum):
 	''' rename a feeder. '''
 	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
-	newFile = os.path.join(modelDir, feederName+'.omd')
-	oldFile = os.path.join(modelDir, oldName+'.omd')
-	if not os.path.isfile(newFile) and os.path.isfile(oldFile):
-		with open(oldFile, "r") as feederIn:
-			with open(newFile, "w") as outFile:
+	feederDir = os.path.join(modelDir, feederName+'.omd')
+	oldfeederDir = os.path.join(modelDir, oldName+'.omd')
+	if not os.path.isfile(feederDir) and os.path.isfile(oldfeederDir):
+		with open(oldfeederDir, "r") as feederIn:
+			with open(feederDir, "w") as outFile:
 				outFile.write(feederIn.read())
-	elif os.path.isfile(newFile): return ('Failure', 204)
-	elif not os.path.isfile(oldFile): return ('Failure', 204)
-	os.remove(oldFile)
+	elif os.path.isfile(feederDir): return ('Failure', 204)
+	elif not os.path.isfile(oldfeederDir): return ('Failure', 204)
+	os.remove(oldfeederDir)
 	writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
 	return ('Success',204)
 
@@ -947,8 +904,8 @@ def renameNetwork(owner, modelName, oldName, networkName, networkNum):
 	writeToInput(modelDir, networkName, 'networkName'+str(networkNum))
 	return ('Success',204)
 
-@app.route("/removeFeeder/<owner>/<modelName>/<feederNum>", methods=["GET", "POST"])
-@app.route("/removeFeeder/<owner>/<modelName>/<feederNum>/<feederName>", methods=["GET", "POST"])
+@app.route("/removeFeeder/<owner>/<modelName>/<feederNum>", methods=["GET","POST"])
+@app.route("/removeFeeder/<owner>/<modelName>/<feederNum>/<feederName>", methods=["GET","POST"])
 @flask_login.login_required
 def removeFeeder(owner, modelName, feederNum, feederName=None):
 	'''Remove a feeder from input data.'''
@@ -963,14 +920,14 @@ def removeFeeder(owner, modelName, feederNum, feederName=None):
 			except: print "Couldn't remove feeder file in web.removeFeeder()."
 			allInput.pop("feederName"+str(feederNum))
 			with open(modelDir+"/allInputData.json","w") as inputFile:
-				json.dump(allInput, inputFile, indent=4)
+				json.dump(allInput, inputFile, indent = 4)
 			return ('Success',204)
 		except:
 			return ('Failed',204)
 	else:
 		return ('Invalid Login', 204)
 
-@app.route("/loadFeeder/<frfeederName>/<frmodelName>/<modelName>/<feederNum>/<frUser>/<owner>", methods=["GET", "POST"])
+@app.route("/loadFeeder/<frfeederName>/<frmodelName>/<modelName>/<feederNum>/<frUser>/<owner>", methods=["GET","POST"])
 @flask_login.login_required
 def loadFeeder(frfeederName, frmodelName, modelName, feederNum, frUser, owner):
 	'''Load a feeder from one model to another.'''
@@ -979,17 +936,14 @@ def loadFeeder(frfeederName, frmodelName, modelName, feederNum, frUser, owner):
 		frmodelDir = "./data/Model/" + frUser + "/" + frmodelName
 	elif frUser == "public":
 		frmodelDir = "./static/publicFeeders"
-	#print "Entered loadFeeder with info: frfeederName %s, frmodelName: %s, modelName: %s, feederNum: %s"%(frfeederName, frmodelName, str(modelName), str(feederNum))
+	print "Entered loadFeeder with info: frfeederName %s, frmodelName: %s, modelName: %s, feederNum: %s"%(frfeederName, frmodelName, str(modelName), str(feederNum))
 	modelDir = "./data/Model/" + owner + "/" + modelName
 	with open(modelDir + "/allInputData.json") as inJson:
 		feederName = json.load(inJson).get('feederName'+str(feederNum))
 	with open(os.path.join(frmodelDir, frfeederName+'.omd'), "r") as inFeeder:
 		with open(os.path.join(modelDir, feederName+".omd"), "w") as outFile:
 			outFile.write(inFeeder.read())
-	if request.form.get("referrer") == "distribution":
-		return redirect(url_for("distribution_get", owner=owner, model_name=modelName, feeder_num=feederNum))
 	return redirect(url_for('feederGet', owner=owner, modelName=modelName, feederNum=feederNum))
-
 
 @app.route("/cleanUpFeeders/<owner>/<modelName>", methods=["GET", "POST"])
 @flask_login.login_required
@@ -1284,20 +1238,16 @@ def downloadModelData(owner, modelName, fullPath):
 @app.route("/uniqObjName/<objtype>/<owner>/<name>/<modelName>")
 @flask_login.login_required
 def uniqObjName(objtype, owner, name, modelName=False):
-	""" Checks if a given object type/owner/name is unique.
-	More like checks if a file exists on the server.
-	"""
+	''' Checks if a given object type/owner/name is unique. '''
 	print "Entered uniqobjname", owner, name, modelName
 	if objtype == "Model":
 		path = "data/Model/" + owner + "/" + name
 	elif objtype == "Feeder":
 		path = "static/publicFeeders/" + name + ".omd"
-		if name == 'feeder':
-			return jsonify(exists=True)
+		if name == 'feeder': return jsonify(exists=True)
 	elif objtype == "Network":
 		path = "data/Model/" + owner + "/" + modelName + "/" + name + ".omt"
-		if name == 'feeder':
-			return jsonify(exists=True)
+		if name == 'feeder': return jsonify(exists=True)
 	return jsonify(exists=os.path.exists(path))
 
 if __name__ == "__main__":
