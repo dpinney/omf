@@ -8,6 +8,7 @@ import json, os, flask_login, hashlib, random, time, datetime as dt, shutil, bot
 import models, feeder, network, milToGridlab, cymeToGridlab, signal, weather, anonymization
 import omf
 from omf.calibrate import omfCalibrate
+from omf.omfStats import genAllImages
 from omf.loadModelingAmi import writeNewGlmAndPlayers
 from flask_compress import Compress
 
@@ -266,6 +267,20 @@ def adminControls():
 		else:
 			user["status"] = "emailExpired"
 	return render_template("adminControls.html", users = users)
+
+@app.route("/omfStats")
+@flask_login.login_required
+def omfStats():
+	'''Render log visualizations'''
+	if User.cu() != "admin":
+		return redirect("/")
+	users = [{"username":f[0:-5]} for f in safeListdir("data/User")
+		if f not in ["admin.json","public.json"]]
+	for user in users:
+		userDict = json.load(open("data/User/" + user["username"] + ".json"))
+		tStamp = userDict.get("timestamp","")
+	genAllImages()
+	return render_template("omfStats.html", users = User.cu())
 
 @app.route("/myaccount")
 @flask_login.login_required
