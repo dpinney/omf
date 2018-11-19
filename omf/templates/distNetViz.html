@@ -150,10 +150,17 @@
 			ul.menu.right { right:0; left:auto; padding:5px 0px 5px 0px; overflow-y:auto; overflow-x:hidden; max-height:550px; }
 			ul.menu.left { right:auto; left:auto; padding:0 0 0 0; }
 			ul.menu.center { right:auto; left:-45%; }
-			ul.menu li { padding:0px; }
+			ul.menu li { 
+                padding: 4px; 
+                }
 			ul.menu li:hover { background:green; color:white; }
 			ul.menu li:hover a { color:white; }
-			ul.menu a { display:block; color:black; padding:4px; text-decoration: none }
+			ul.menu a { 
+                display:block;
+                color:black;
+                /*padding:4px;*/
+                text-decoration: none 
+                }
 			ul.menu a:hover {color:white;}
 			ul.menu { display:block; color:black; padding:4px; }
 			ul.menu ul.menu:hover, ul.menu:visited:hover { color:white; }
@@ -261,6 +268,29 @@
                 color: white;
                 background-color: green;
             }
+            
+            /* Tree tables */
+
+            .treeTable {
+                background-color: white; 
+            }
+            .treeTable tr {
+                border-bottom: 1px solid black;
+            }
+            .treeTable tr:last-child {
+                border: 0px;
+            }
+            .treeTable td {
+                
+            }
+            .deleteButton {
+                background-color: #CC0000;
+                padding: 1px 7px 1px 7px;
+            }
+            .editButton {
+                font-size: small;
+                /*width: 100%;*/
+            }
 
 			/* dataTable */
 
@@ -281,6 +311,7 @@
 			}
 			tbody {
 				/*border: 1px solid black;*/
+                border-collapse: collapse;
 			}
 			td {
 				background:white;
@@ -555,8 +586,7 @@
             </div>
         </div>
         <!-- Modals-->
-        
-		<table id="dataTable">
+		<table id="dataTable" class="treeTable">
 			<tbody>
 				<tr>
 					<th colspan="3"></th>
@@ -570,14 +600,17 @@
 				<tr id="multiButtonRow">
 					<th colspan="3">
 						<!-- should only be visible when the table is showing a node, NOT a line -->
-						<button id="moveButton" onclick="moveNode()">Move</button>
-						<button id="deleteButton" onclick="deleteOb()">Delete</button>
-						<button id="addButton" onclick="tablePlus()">Add Attribute</button>
-						<button onclick="tableSave()">Save</button>
-						<button id="cancelButton" onclick="toggleRowDisplay()">Cancel</button>
+						<button id="moveButton" onclick="moveNode()" class="modalButton editButton">Move</button>
+						<button id="deleteButton" onclick="deleteOb()" class="modalButton editButton">Delete</button>
+						<button id="addButton" onclick="tablePlus()" class="modalButton editButton">Add Attribute</button>
+						<button onclick="tableSave()" class="modalButton editButton">Save</button>
+						<button id="cancelButton" onclick="toggleRowDisplay()" class="modalButton editButton">Cancel</button>
 					</th>
 				</tr>
 			</tbody>
+        </table>
+        <table id="selectionTable" class="treeTable">
+
         </table>
 	</body>
 </html>
@@ -842,6 +875,10 @@ function hotkeys() { // eslint-disable-line
 	}
 }
 
+function createTable() {
+
+}
+
 function tableCreate(inputObject) {
 	// Show the object table that a user has selected.
 	const table = document.getElementById("dataTable");
@@ -911,8 +948,10 @@ function toggleRowContent(tr) {
 	} else {
 		const buttonTd = document.createElement("td");
 		const button = document.createElement("button");
-		button.setAttribute("onclick", "tableDel(this)");
-		button.innerHTML = "&#215"; 
+        button.setAttribute("onclick", "tableDel(this)");
+        button.classList = "modalButton deleteButton";
+        //button.innerHTML = "&#215"; 
+        button.innerHTML = "╳";
 		buttonTd.appendChild(button); 
 		const keyTd = tr.children[0]; 
 		const valTd = tr.children[1];
@@ -1041,7 +1080,7 @@ function tablePlus() { // eslint-disable-line
 	const tbody = document.getElementById("dataTable").children[0];
 	const tr = document.createElement("tr");
 	tr.setAttribute("data-rowstatus", "new");
-	tr.innerHTML = '<td><button onclick="tableDel(this)">&#215;</button></td><td><input data-feederkey="feederkey">' + 
+	tr.innerHTML = '<td><button onclick="tableDel(this)" class="modalButton deleteButton">╳</button></td><td><input data-feederkey="feederkey">' + 
 		'</input></td><td><input data-feederval="feederval"></input></td>';
 	tbody.appendChild(tr);
 }
@@ -1934,34 +1973,6 @@ function postToUrl(path, params, method="post") {
 	form.submit();
 }
 
-//function ajax(url, success, failure, method="GET", formData=null) {
-//    if (method === "POST" && !(formData instanceof FormData)) {
-//        throw "If a POST request is being made, then a form should be an argument";
-//    }
-//    const xhr = new XMLHttpRequest();
-//    xhr.onreadystatechange = function () {
-//        if (xhr.readyState !== 4) return;
-//        if (xhr.status >= 200 && xhr.status < 300) {
-//            //success(xhr.responseText);
-//            success(xhr);
-//        } else {
-//            //failure(xhr.responseText);
-//            failure(xhr);
-//        } 
-//    };
-//    xhr.open(method, url);
-//    if (formData) {
-//        xhr.send(formData);
-//    } else {
-//        xhr.send();
-//    }
-//}
-
-//function failure(xhr) {
-//    alert("Yipee AJAX request was unsuccessful: " + xhr.responseText);
-//    //return false;
-//}
-
 /** This fileOperation is used for two purposes 1) to save the users changes to the .omd file in the server using writeFeeder 2) to 
  * undo some other FileOperation by writing the contents of readFeeder back into the original .omd file.
  */
@@ -2269,29 +2280,6 @@ function renameFeeder() {
 	}
 }
 
-//function checkFeederName(newName) {
-//    ajax(`/uniqObjName/Feeder/${thisOwner}/${newName}/${thisModelName}`, success, failure);
-//    function success(xhr) {
-//        try {
-//            const data = JSON.parse(xhr.responseText);
-//            if (data.exists) {
-//                alert("You already have a feeder named '" + newName + "', please choose a different name.");
-//                renameFeeder();
-//            } else {
-//                //gebi("fileOps").click();
-//                ajax(`/renameFeeder/${thisOwner}/${thisModelName}/${thisFeederName}/${newName}/${thisFeederNum}`, (xhr) => {} , failure);
-//                //document.getElementById('feederName').innerHTML = newName;
-//                thisFeederName = newName; //permits multiple name changes without forcing page refresh.
-//                // Send updated name to model.
-//                //window.opener.$(window.opener.document).trigger('mainWindow', "{{ modelName }};"+"feederName{{feederNum}};"+lastFeederName);			
-//            }
-//        } catch (e) {
-//            alert("Something went wrong in checkFeederName");
-//            console.log(e);
-//        }
-//	}
-//}
-
 /**
  * Save the modified feeder data by overwriting the existing .omd file in the server. The return statement is for integration tests.
  */
@@ -2423,33 +2411,6 @@ ProgressModal.prototype.hide = function() {
     this.self.style.display = "none";
 }
 
-//Ajax.prototype.send = function() {
-//    //return new Promise(function (resolve, reject) {...})
-//    const xhr = new XMLHttpRequest();
-//    xhr.onreadystatechange = function() {
-//        if (xhr.readyState !== 4) return;
-//        if (xhr.status >= 200 && xhr.status < 300) {
-//            //success(xhr.responseText);
-//            //this.success(xhr);
-//            if (this.canceled) {
-//                this.cancel(xhr);
-//            } else {
-//                this.success(xhr);
-//            }
-//        } else {
-//            //failure(xhr.responseText);
-//            this.failure(xhr);
-//        } 
-//    };
-//    xhr.open(this.httpMethod, this.url);
-//    if (this.formData) {
-//        xhr.send(this.formData);
-//    } else {
-//        xhr.send();
-//    }
-//};
-
-
 //**************************************************
 // Data interface v2
 //**************************************************
@@ -2496,8 +2457,8 @@ function isNode(treeObject) {
 }
 
 function getParentTreeObject(treeObject) {
-	const key = Object.keys(feeder.tree).find(key => feeder.tree[key].name === treeObject.data.parent);
-	return new TreeObject(key, feeder.tree[key]);
+	const key = Object.keys(writeFeeder.tree).find(key => writeFeeder.tree[key].name === treeObject.data.parent);
+	return new TreeObject(key, writeFeeder.tree[key]);
 }
 
 function TreeObject(key, data) {
@@ -2669,7 +2630,7 @@ function getAssociatedTreeObjects(treeObject, htmlSelection) {
 	if (isParentChildNode(treeObject)) {
 		if (htmlSelection.length === 1) {
 			const parentKey = htmlSelection[0].id;
-			const parentTreeObject = new TreeObject(parentKey, feeder.tree[parentKey]);
+			const parentTreeObject = new TreeObject(parentKey, writeFeeder.tree[parentKey]);
 			if (isNode(parentTreeObject)) {
 				associatedTreeObjects.parentTreeObject = parentTreeObject;
 				return associatedTreeObjects;
@@ -2689,8 +2650,8 @@ function getAssociatedTreeObjects(treeObject, htmlSelection) {
 		if (htmlSelection.length === 2) {
 			const sourceKey = htmlSelection[0].id;
 			const targetKey = htmlSelection[1].id;
-			const sourceTreeObject = new TreeObject(sourceKey, feeder.tree[sourceKey]);
-			const targetTreeObject = new TreeObject(targetKey, feeder.tree[targetKey]);
+			const sourceTreeObject = new TreeObject(sourceKey, writeFeeder.tree[sourceKey]);
+			const targetTreeObject = new TreeObject(targetKey, writeFeeder.tree[targetKey]);
 			if (isNode(sourceTreeObject) && isNode(targetTreeObject)) {
 				associatedTreeObjects.sourceTreeObject = sourceTreeObject;
 				associatedTreeObjects.targetTreeObject = targetTreeObject;
@@ -2752,8 +2713,8 @@ function setCoordinates(treeObject) {
  * nodes and links.
  */
 function canAddToFeederTree(treeObject) {
-	if (feeder.tree[treeObject.key]) {
-		throw ("feeder.tree insertion error: cannot insert object into feeder.tree. feeder.tree already contains an object with key: " 
+	if (writeFeeder.tree[treeObject.key]) {
+		throw ("writeFeeder.tree insertion error: cannot insert object into writeFeeder.tree. writeFeeder.tree already contains an object with key: " 
 		+ treeObject.key);
 	} else {
 		return true;
@@ -2761,30 +2722,30 @@ function canAddToFeederTree(treeObject) {
 }
 
 function canAddToFeederNodes(treeObject) {
-	if (feeder.nodes.some(obj => obj.treeIndex && obj.treeIndex.toString() === treeObject.key)) {
-		throw ("feeder.nodes insertion error: cannot insert object into feeder.nodes. " +
-			"feeder.nodes already contains an object with treeIndex: " + treeObject.key);
+	if (writeFeeder.nodes.some(obj => obj.treeIndex && obj.treeIndex.toString() === treeObject.key)) {
+		throw ("writeFeeder.nodes insertion error: cannot insert object into writeFeeder.nodes. " +
+			"writeFeeder.nodes already contains an object with treeIndex: " + treeObject.key);
 	} else {
 		return true;
 	}
 }
 
 function canAddToFeederLinks(treeObject) {
-	if (feeder.links.some(obj => obj.treeIndex && obj.treeIndex.toString() === treeObject.key)) {
-		throw ("feeder.links insertion error: cannot insert object into feeder.links." +
-		"feeder.links already contains an object with treeIndex: " + treeObject.key);
+	if (writeFeeder.links.some(obj => obj.treeIndex && obj.treeIndex.toString() === treeObject.key)) {
+		throw ("writeFeeder.links insertion error: cannot insert object into writeFeeder.links." +
+		"writeFeeder.links already contains an object with treeIndex: " + treeObject.key);
 	} else {
 		return true;
 	}
 }
 
 function addToFeederTree(treeObject) {
-	feeder.tree[treeObject.key] = treeObject.data;
+	writeFeeder.tree[treeObject.key] = treeObject.data;
 }
 
 function addToFeederNodes(treeObject) {
 	const node = {
-		index: feeder.nodes.length,
+		index: writeFeeder.nodes.length,
 		treeIndex: parseInt(treeObject.key, 10),
 		weight: 1,
 		px: treeObject.data.longitude, 
@@ -2796,7 +2757,7 @@ function addToFeederNodes(treeObject) {
 		chargeMultiple: 1,
 		name: treeObject.data.name
 	};
-	feeder.nodes.push(node);
+	writeFeeder.nodes.push(node);
 }
 
 function addToFeederLinks(treeObject) {
@@ -2804,20 +2765,20 @@ function addToFeederLinks(treeObject) {
 	if (isParentChildNode(treeObject)) {
 		// I am adding a link that represent the link between THIS TreeObject and its parent
 		link = {
-			source: feeder.nodes.find(obj => obj.name === treeObject.data.name),
-			target: feeder.nodes.find(obj => obj.name === treeObject.data.parent),
+			source: writeFeeder.nodes.find(obj => obj.name === treeObject.data.name),
+			target: writeFeeder.nodes.find(obj => obj.name === treeObject.data.parent),
 			objectType: "parentChild"
 		}
 	} else {
 		// I am adding a link that represents THIS TreeObject.
 		link = {
-			source: feeder.nodes.find(obj => obj.name === treeObject.data.from),
+			source: writeFeeder.nodes.find(obj => obj.name === treeObject.data.from),
 			objectType: "fromTo",
 			treeIndex: treeObject.key,
-			target: feeder.nodes.find(obj => obj.name === treeObject.data.to)
+			target: writeFeeder.nodes.find(obj => obj.name === treeObject.data.to)
 		};
 	}
-	feeder.links.push(link);
+	writeFeeder.links.push(link);
 }
 
 /**
@@ -2825,8 +2786,8 @@ function addToFeederLinks(treeObject) {
  * @return {string} key
  */
 function newTreeKey() { 
-	let nextKey = Object.keys(feeder.tree).length;
-	while(feeder.tree.hasOwnProperty(nextKey.toString())) {
+	let nextKey = Object.keys(writeFeeder.tree).length;
+	while(writeFeeder.tree.hasOwnProperty(nextKey.toString())) {
 		nextKey += 1;
 	}
 	return nextKey.toString();
