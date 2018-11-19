@@ -277,9 +277,9 @@
             .treeTable tr {
                 border-bottom: 1px solid black;
             }
-            .treeTable tr:last-child {
+            /*.treeTable tr:last-child {
                 border: 0px;
-            }
+            }*/
             .treeTable td {
                 
             }
@@ -292,9 +292,9 @@
                 /*width: 100%;*/
             }
 
-			/* dataTable */
+			/* descriptionTable */
 
-			#dataTable {
+			#descriptionTable {
 				width: 300px;
 				border:1px solid black;
 				border-collapse: collapse;
@@ -309,6 +309,10 @@
 				right: 5px;
 				display: none; 
 			}
+            .tableTitle {
+                background-color: black;
+                color: white;
+            }
 			tbody {
 				/*border: 1px solid black;*/
                 border-collapse: collapse;
@@ -594,16 +598,11 @@
             </div>
         </div>
         <!-- Modals-->
-		<table id="dataTable" class="treeTable">
-			<tbody>
-				<tr>
-					<th colspan="3"></th>
-					<th>Selected Elements</th>
-				</tr> 
-				<tr id="editButtonRow">
-					<th colspan="2">
-						<button onclick="toggleRowDisplay()">Edit</button>
-					</th>
+		<table id="descriptionTable" class="treeTable">
+            <thead>
+				<tr class="tableTitle">
+                    <th colspan="2">Object</th>
+                    <th>text...</th>
 				</tr>
 				<tr id="multiButtonRow">
 					<th colspan="3">
@@ -612,14 +611,14 @@
 						<button id="deleteButton" onclick="deleteOb()" class="modalButton editButton">Delete</button>
 						<button id="addButton" onclick="tablePlus()" class="modalButton editButton">Add Attribute</button>
 						<button onclick="tableSave()" class="modalButton editButton">Save</button>
-						<button id="cancelButton" onclick="toggleRowDisplay()" class="modalButton editButton">Cancel</button>
+						<button id="cancelButton" onclick="toggleElementDisplay('descriptionTable')" class="modalButton editButton">Cancel</button>
 					</th>
 				</tr>
+            </thead>
+			<tbody>
 			</tbody>
         </table>
-        <table id="selectionTable" class="treeTable">
-
-        </table>
+        <table id="selectionTable" class="treeTable"> </table>
 	</body>
 </html>
 <script id='componentsInsert'>const components = {% if components %}{{ components | safe }}{% else %}null{% endif %}; 
@@ -883,50 +882,21 @@ function hotkeys() { // eslint-disable-line
 	}
 }
 
-function createTable() {
-
-}
-
 function tableCreate(inputObject) {
 	// Show the object table that a user has selected.
-	const table = document.getElementById("dataTable");
-	table.style.display = "block";
-	const tbody = table.children[0];
-	const headerRow = tbody.children[0];
-	headerRow.children[0].style.display = "table-cell";
-	headerRow.children[0].textContent = "object " + inputObject.object;
-	headerRow.children[1].style.display = "none";
-	document.getElementById("editButtonRow").style.display = "table-row";
-	document.getElementById("multiButtonRow").style.display = "none";
-
-	// Put in first header.
-	//const headRow = document.createElement('tr');
-	//headRow.innerHTML += "<th>object</th><th>" + inputObject.object + "</th>";
-	//tbl.appendChild(headRow);
-
-	// Put in second header.
-	//const buttonRow = document.createElement('tr');
-	//const cell = document.createElement("td");
-	//const button = document.createElement("button");
-	//button.innerHTML = "Edit";
-	//cell.appendChild(button);
-	//cell.setAttribute("colspan", 2);
-	//buttonRow.appendChild(cell);
-	//tbl.appendChild(buttonRow)
-
-	
-	//if ((inputObject.from || inputObject.to) == undefined) {
-	//	//inputObject is a node
-	//	headRow.innerHTML = '<th><button onclick="tablePlus(this)"> + </button><button onclick="moveNode()">Move</button></th>'
-	//}
-	//else if((inputObject.from || inputObject.to) !== undefined) {
-	//	//inputObject is a line that connects two nodes
-	//	headRow.innerHTML = '<th><button onclick="tablePlus(this)">+</button>'
-	//}
-
-	//Use a debugger with previous version of this file to see if they were even using "this"" correctly
-	//headRow.innerHTML += '<th><button id="saveButton" onclick="tableSave(this)">Save</button><button onclick="deleteOb()">Delete Object</button></th>'
-	
+	const table = document.getElementById("descriptionTable");
+    const tbody = table.children[1];
+    while (tbody.hasChildNodes()) {
+        tbody.removeChild(tbody.lastChild);
+    }
+    const thead = table.children[0]
+	const headerRow = thead.children[0]; // tr
+	//headerRow.children[0].style.display = "table-cell";
+	headerRow.children[0].textContent = "object ";
+    headerRow.children[1].textContent =  inputObject.object;
+	//headerRow.children[1].style.display = "none";
+	//document.getElementById("editButtonRow").style.display = "table-row";
+	document.getElementById("multiButtonRow").style.display = "table-row";
 
 	// Put the object in.
 	for (let key in inputObject) {
@@ -938,8 +908,10 @@ function tableCreate(inputObject) {
 		const valTd = document.createElement("td");
 		valTd.textContent = inputObject[key];
 		tr.appendChild(valTd);
-		tbody.appendChild(tr)
+        tbody.appendChild(tr)
+        toggleRowContent(tr);
 	}
+    table.style.display = "block";
 }
 
 /** Toggle the table row content between view-mode and edit-mode. */
@@ -975,38 +947,38 @@ function toggleRowContent(tr) {
 /** 
  * Toggle the display property of particular <tr> elements between none and table-row.
  */
-function toggleRowDisplay() { //eslint-disable-line
-	const tbody = document.getElementById("dataTable").children[0];
-	Array.from(tbody.children).forEach(tr => {
-		if (tr.children[0].tagName.toLowerCase() === "td") {
-			//if (tr.dataset.deleterow === "deleterow") {
-			//	tr.setAttribute("data-deleterow", "");
-			//}
-			if (tr.dataset.rowstatus === "new") {
-				tbody.removeChild(tr);
-			} else {
-				if (tr.dataset.rowstatus === "delete") {
-					//tr.setAttribute("data-rowstatus", "");
-					tr.removeAttribute("data-rowstatus");
-				}
-				toggleRowContent(tr);
-				tr.style.display = "table-row";
-			}
-			//if (tr.dataset.newrow === "newrow") {
-			//	tbody.removeChild(tr);
-			//} 
-		}
-	});
-	const editButtonRow = document.getElementById("editButtonRow");
-	const multiButtonRow = document.getElementById("multiButtonRow");
-	if (editButtonRow.style.display !== "none") {
-		editButtonRow.style.display = "none";
-		multiButtonRow.style.display = "table-row" 
-	} else {
-		editButtonRow.style.display = "table-row";
-		multiButtonRow.style.display = "none"; 
-	}
-}
+//function toggleRowDisplay() { //eslint-disable-line
+//	const tbody = document.getElementById("descriptionTable").children[0];
+//	Array.from(tbody.children).forEach(tr => {
+//		if (tr.children[0].tagName.toLowerCase() === "td") {
+//			//if (tr.dataset.deleterow === "deleterow") {
+//			//	tr.setAttribute("data-deleterow", "");
+//			//}
+//			if (tr.dataset.rowstatus === "new") {
+//				tbody.removeChild(tr);
+//			} else {
+//				if (tr.dataset.rowstatus === "delete") {
+//					//tr.setAttribute("data-rowstatus", "");
+//					tr.removeAttribute("data-rowstatus");
+//				}
+//				toggleRowContent(tr);
+//				tr.style.display = "table-row";
+//			}
+//			//if (tr.dataset.newrow === "newrow") {
+//			//	tbody.removeChild(tr);
+//			//} 
+//		}
+//	});
+//	const editButtonRow = document.getElementById("editButtonRow");
+//	const multiButtonRow = document.getElementById("multiButtonRow");
+//	if (editButtonRow.style.display !== "none") {
+//		editButtonRow.style.display = "none";
+//		multiButtonRow.style.display = "table-row" 
+//	} else {
+//		editButtonRow.style.display = "table-row";
+//		multiButtonRow.style.display = "none"; 
+//	}
+//}
 
 
 /** 
@@ -1085,7 +1057,7 @@ function getMatchingDescendent(root, dataAtr) {
 
 /** Add attribute button functionality in object table. */
 function tablePlus() { // eslint-disable-line
-	const tbody = document.getElementById("dataTable").children[0];
+	const tbody = document.getElementById("descriptionTable").children[0];
 	const tr = document.createElement("tr");
 	tr.setAttribute("data-rowstatus", "new");
 	tr.innerHTML = '<td><button onclick="tableDel(this)" class="modalButton deleteButton">╳</button></td><td><input data-feederkey="feederkey">' + 
@@ -1099,7 +1071,7 @@ which I have changed.
 */
 function tableSave() { // eslint-disable-line
 	// Update tree data structure with changes made in object table.
-	const table = document.getElementById("dataTable");
+	const table = document.getElementById("descriptionTable");
 	var toJson = {}
 	// convert HTML table to JSON
 	const tbody = table.children[0];
@@ -1167,7 +1139,7 @@ function tableSave() { // eslint-disable-line
 
 /** Hide the object table. */
 function tableDestroy() {
-	const table = document.getElementById("dataTable");
+	const table = document.getElementById("descriptionTable");
 	table.style.display = "none";
 	const tbody = table.children[0];
 	const deleteTargets = Array.from(tbody.children).filter(tr => tr.children[0].tagName.toLowerCase() === "td");
@@ -1330,7 +1302,7 @@ function multiSelectionTable() {
 	//const headRow = document.createElement('tr')
 	//headRow.innerHTML = '<th>Selected Elements</th>'
 	//tbl.appendChild(headRow)
-	const table = document.getElementById("dataTable");
+	const table = document.getElementById("descriptionTable");
 	table.style.display = "block";
 	const tbody = table.children[0];
 	tbody.children[0].children[0].style.display = "none";
@@ -1948,6 +1920,20 @@ function toggleElementDisplay(id) {
     } else {
         element.style.display = "none";
     }
+}
+//**************************************************
+// Description and selection table functions 
+//**************************************************
+
+function buildDescriptionTable(TreeObject) {
+
+    function destroyDescriptionTable() {
+
+    }
+}
+
+function destroyTable() {
+
 }
 
 //**************************************************
