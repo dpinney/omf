@@ -150,10 +150,17 @@
 			ul.menu.right { right:0; left:auto; padding:5px 0px 5px 0px; overflow-y:auto; overflow-x:hidden; max-height:550px; }
 			ul.menu.left { right:auto; left:auto; padding:0 0 0 0; }
 			ul.menu.center { right:auto; left:-45%; }
-			ul.menu li { padding:0px; }
+			ul.menu li { 
+                padding: 4px; 
+                }
 			ul.menu li:hover { background:green; color:white; }
 			ul.menu li:hover a { color:white; }
-			ul.menu a { display:block; color:black; padding:4px; text-decoration: none }
+			ul.menu a { 
+                display:block;
+                color:black;
+                /*padding:4px;*/
+                text-decoration: none 
+                }
 			ul.menu a:hover {color:white;}
 			ul.menu { display:block; color:black; padding:4px; }
 			ul.menu ul.menu:hover, ul.menu:visited:hover { color:white; }
@@ -261,10 +268,39 @@
                 color: white;
                 background-color: green;
             }
+            
+            /* Tree tables */
 
-			/* dataTable */
+            #multiButtonRow {
+                /*text-align: center;*/
+            }
+            /*#multiButtonRow button {
+                margin-right: 15px;
+            }*/
+            .treeTable {
+                background-color: white; 
+            }
+            .treeTable tr {
+                border-bottom: 1px solid black;
+            }
+            /*.treeTable tr:last-child {
+                border: 0px;
+            }*/
+            thead td {
+                
+            }
+            .deleteButton {
+                background-color: #CC0000;
+                padding: 1px 7px 1px 7px;
+            }
+            .editButton {
+                font-size: small;
+                /*width: 100%;*/
+            }
 
-			#dataTable {
+			/* descriptionTable */
+
+			#descriptionTable {
 				width: 300px;
 				border:1px solid black;
 				border-collapse: collapse;
@@ -279,8 +315,13 @@
 				right: 5px;
 				display: none; 
 			}
+            .tableTitle {
+                background-color: black;
+                color: white;
+            }
 			tbody {
 				/*border: 1px solid black;*/
+                border-collapse: collapse;
 			}
 			td {
 				background:white;
@@ -332,10 +373,18 @@
 				<div id="helpDiv">
 					<div class="buttonGroup">
 						<button class='pill' type = 'submit'>
-							<a id= 'helpButton' href = 'https://github.com/dpinney/omf/wiki/Tools-~-gridEdit' target = '_blank'>Help</a>
+							<a id='helpButton' href='https://github.com/dpinney/omf/wiki/Tools-~-gridEdit' target='_blank'>Help</a>
 						</button>
 					</div>
-				</div>
+                </div>
+                <div id="editDiv">
+					<div class="buttonGroup">
+                        <button id="addOps" class='pill' onclick='dropPill(this, "Edit")'>Edit ▾</button>
+                        <ul class='menu right' style="display: none">
+							<li><a href='javascript:toggleElementDisplay("findModal");'>Find...</a></li>
+                        </ul>
+                    </div>
+                </div>
 				<div id="addDiv">
 					<div class="buttonGroup">
 						<button id="addOps" class='pill' onclick='dropPill(this, "Add")'>Add ▾</button>
@@ -348,6 +397,7 @@
 						<button id="fileOps" class='pill' onclick='dropPill(this, "File")'>File ▾</button>
 						<ul class='menu right' style="display: none">
 							<li><a href='javascript:saveFeeder();'>Save</a></li>
+							<li><a href='javascript:downloadTextFile();'>View Raw Data</a></li>
 							<li><a href='javascript:renameFeeder();'>Rename</a></li>
                             <li><a href='javascript:toggleElementDisplay("loadModal");'>Load from Model...</a></li>
 							<li><a href='javascript:toggleElementDisplay("blankFeederModal");'>New Blank Feeder...</a></li>
@@ -388,12 +438,11 @@
 					<tr>
 						<td><button style='width:75px' onclick='findPrevious()'>Previous</button></td>
 						<td><button style='width:75px' onclick='findNext()'>Next</button></td>
-						<td><button style='width:75px' onclick='hideModal("findModal")'>Cancel</button></td>
+						<td><button style='width:75px' onclick='toggleElementDisplay("findModal")'>Cancel</button></td>
 					</tr>
 				</table>
 			</div>
         </div>
-
         <div id="loadModal" class="modal" style="display: none">
             <div class="modalContent">
                 <table id="loadModalTable">
@@ -555,30 +604,27 @@
             </div>
         </div>
         <!-- Modals-->
-        
-		<table id="dataTable">
-			<tbody>
-				<tr>
-					<th colspan="3"></th>
-					<th>Selected Elements</th>
-				</tr> 
-				<tr id="editButtonRow">
-					<th colspan="2">
-						<button onclick="toggleRowDisplay()">Edit</button>
-					</th>
+		<table id="descriptionTable" class="treeTable">
+            <thead>
+				<tr class="tableTitle">
+                    <th colspan="2">Object</th>
+                    <th>text...</th>
 				</tr>
 				<tr id="multiButtonRow">
-					<th colspan="3">
-						<!-- should only be visible when the table is showing a node, NOT a line -->
-						<button id="moveButton" onclick="moveNode()">Move</button>
-						<button id="deleteButton" onclick="deleteOb()">Delete</button>
-						<button id="addButton" onclick="tablePlus()">Add Attribute</button>
-						<button onclick="tableSave()">Save</button>
-						<button id="cancelButton" onclick="toggleRowDisplay()">Cancel</button>
-					</th>
+                    <th colspan="3">
+                        <!-- should only be visible when the table is showing a node, NOT a line -->
+                        <button id="moveButton" onclick="moveNode()" class="modalButton editButton">Move</button>
+                        <button id="deleteButton" onclick="deleteOb()" class="modalButton editButton">Delete</button>
+                        <button id="addButton" onclick="tablePlus()" class="modalButton editButton">Add Attribute</button>
+                        <button onclick="tableSave()" class="modalButton editButton">Save</button>
+                        <!--<button id="cancelButton" onclick="toggleElementDisplay('descriptionTable')" class="modalButton editButton">Cancel</button>-->
+                    </th>
 				</tr>
+            </thead>
+			<tbody>
 			</tbody>
         </table>
+        <table id="selectionTable" class="treeTable"> </table>
 	</body>
 </html>
 <script id='componentsInsert'>const components = {% if components %}{{ components | safe }}{% else %}null{% endif %}; 
@@ -704,9 +750,23 @@ function buildFeeder() {
 	let maxLon = 100;
 	let maxLat = 100;
 	for (let key in writeFeeder.tree) {
-		nameToKey[writeFeeder.tree[key]['name']] = key
-		if (writeFeeder.tree[key]['longitude'] > maxLon) {maxLon = writeFeeder.tree[key]['longitude']}
-		if (writeFeeder.tree[key]['latitude'] > maxLat) {maxLat = writeFeeder.tree[key]['latitude']}
+        nameToKey[writeFeeder.tree[key]['name']] = key;
+        const lon = writeFeeder.tree[key].longitude;
+        const lat = writeFeeder.tree[key].latitude;
+        //if (lon) {
+        //    /* Pretend we have really big coordinate values */
+        //    writeFeeder.tree[key].longitude = lon * 12000;
+        //}
+        //if (lat) {
+        //    /* Pretend we have really big coordinate values */
+        //    writeFeeder.tree[key].latitude = lat * 12000;
+        //}
+		if (writeFeeder.tree[key]['longitude'] > maxLon) {
+            maxLon = writeFeeder.tree[key]['longitude']
+        }
+        if (writeFeeder.tree[key]['latitude'] > maxLat) {
+            maxLat = writeFeeder.tree[key]['latitude']
+        }
 	}
 	maxLon = Math.round(maxLon + 20.0)
 	maxLat = Math.round(maxLat + 20.0)
@@ -725,29 +785,10 @@ function buildFeeder() {
         //center: true,
 		//fit: true,
         //contain: true,
-        minZoom: 0.1,
+        zoomScaleSensitivity: 0.2,
+        minZoom: 0.25,
 		maxZoom: 100
 	})
-	// Go through and add all lines first
-//	for (let key in feeder.tree) {
-//		const anOb = feeder.tree[key]
-//		//add the thick lines
-//		if ('from' in anOb && 'to' in anOb) {
-//			const fromOb = feeder.tree[nameToKey[anOb['from']]]
-//			const toOb = feeder.tree[nameToKey[anOb['to']]]
-//			addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],key,anOb['object'] + ' p' + countPhases(anOb['phases']))
-//		}
-//		//add the thin lines. parse the tree to find the parent tree obj, then draw a line to it
-//		else if ('parent' in anOb) {
-//			const pOb = feeder.tree[nameToKey[anOb['parent']]]
-//			addLine(pOb['longitude'],pOb['latitude'],anOb['longitude'],anOb['latitude'],pOb.name + '_' + anOb.name,'parentChild')
-//		}
-//	}
-//	// Add circles after all lines
-//	for (let key in feeder.tree) {
-//		const anOb = feeder.tree[key]
-//		if ('latitude' in anOb && 'longitude' in anOb && 'object' in anOb && !('from' in anOb) && !('to' in anOb)) {
-//			addCircle(anOb['longitude'],anOb['latitude'],2,key,anOb['object'])
 	for (let key in writeFeeder.tree) {
 		try {
 			const anOb = writeFeeder.tree[key];
@@ -843,58 +884,41 @@ function hotkeys() { // eslint-disable-line
 }
 
 function tableCreate(inputObject) {
-	// Show the object table that a user has selected.
-	const table = document.getElementById("dataTable");
-	table.style.display = "block";
-	const tbody = table.children[0];
-	const headerRow = tbody.children[0];
-	headerRow.children[0].style.display = "table-cell";
-	headerRow.children[0].textContent = "object " + inputObject.object;
-	headerRow.children[1].style.display = "none";
-	document.getElementById("editButtonRow").style.display = "table-row";
-	document.getElementById("multiButtonRow").style.display = "none";
-
-	// Put in first header.
-	//const headRow = document.createElement('tr');
-	//headRow.innerHTML += "<th>object</th><th>" + inputObject.object + "</th>";
-	//tbl.appendChild(headRow);
-
-	// Put in second header.
-	//const buttonRow = document.createElement('tr');
-	//const cell = document.createElement("td");
-	//const button = document.createElement("button");
-	//button.innerHTML = "Edit";
-	//cell.appendChild(button);
-	//cell.setAttribute("colspan", 2);
-	//buttonRow.appendChild(cell);
-	//tbl.appendChild(buttonRow)
-
-	
-	//if ((inputObject.from || inputObject.to) == undefined) {
-	//	//inputObject is a node
-	//	headRow.innerHTML = '<th><button onclick="tablePlus(this)"> + </button><button onclick="moveNode()">Move</button></th>'
-	//}
-	//else if((inputObject.from || inputObject.to) !== undefined) {
-	//	//inputObject is a line that connects two nodes
-	//	headRow.innerHTML = '<th><button onclick="tablePlus(this)">+</button>'
-	//}
-
-	//Use a debugger with previous version of this file to see if they were even using "this"" correctly
-	//headRow.innerHTML += '<th><button id="saveButton" onclick="tableSave(this)">Save</button><button onclick="deleteOb()">Delete Object</button></th>'
-	
-
+	const table = document.getElementById("descriptionTable");
+    const tbody = table.children[1];
+    //clear the table
+    while (tbody.hasChildNodes()) {
+        tbody.removeChild(tbody.lastChild);
+    }
+    const thead = table.children[0]
+	const titleRow = thead.children[0]; // tr
+	titleRow.children[0].textContent = "object ";
+    titleRow.children[1].textContent =  inputObject.object;
+    const moveButton = document.getElementById("moveButton");
+    //document.getElementById("editButtonRow").style.display = "table-row";
+    if (Object.keys(inputObject).some((key) => key === "from" || key === "to")) {
+        //hide the move button for a line
+        moveButton.style.display = "none";
+    } else {
+        moveButton.style.display = "";
+    }
 	// Put the object in.
 	for (let key in inputObject) {
-		const tr = document.createElement('tr');
-		const keyTd = document.createElement("td");
-		keyTd.setAttribute("data-feederkey", "feederkey");
-		keyTd.textContent = key;
-		tr.appendChild(keyTd);
-		const valTd = document.createElement("td");
-		valTd.textContent = inputObject[key];
-		tr.appendChild(valTd);
-		tbody.appendChild(tr)
+        if (key !== "from" && key !== "to") {
+            const tr = document.createElement('tr');
+            const keyTd = document.createElement("td");
+            keyTd.setAttribute("data-feederkey", "feederkey");
+            keyTd.textContent = key;
+            tr.appendChild(keyTd);
+            const valTd = document.createElement("td");
+            valTd.textContent = inputObject[key];
+            tr.appendChild(valTd);
+            tbody.appendChild(tr)
+            toggleRowContent(tr);
+        }
 	}
+	document.getElementById("multiButtonRow").style.display = "table-row";
+    table.style.display = "block";
 }
 
 /** Toggle the table row content between view-mode and edit-mode. */
@@ -911,8 +935,10 @@ function toggleRowContent(tr) {
 	} else {
 		const buttonTd = document.createElement("td");
 		const button = document.createElement("button");
-		button.setAttribute("onclick", "tableDel(this)");
-		button.innerHTML = "&#215"; 
+        button.setAttribute("onclick", "tableDel(this)");
+        button.classList = "modalButton deleteButton";
+        //button.innerHTML = "&#215"; 
+        button.innerHTML = "╳";
 		buttonTd.appendChild(button); 
 		const keyTd = tr.children[0]; 
 		const valTd = tr.children[1];
@@ -928,38 +954,38 @@ function toggleRowContent(tr) {
 /** 
  * Toggle the display property of particular <tr> elements between none and table-row.
  */
-function toggleRowDisplay() { //eslint-disable-line
-	const tbody = document.getElementById("dataTable").children[0];
-	Array.from(tbody.children).forEach(tr => {
-		if (tr.children[0].tagName.toLowerCase() === "td") {
-			//if (tr.dataset.deleterow === "deleterow") {
-			//	tr.setAttribute("data-deleterow", "");
-			//}
-			if (tr.dataset.rowstatus === "new") {
-				tbody.removeChild(tr);
-			} else {
-				if (tr.dataset.rowstatus === "delete") {
-					//tr.setAttribute("data-rowstatus", "");
-					tr.removeAttribute("data-rowstatus");
-				}
-				toggleRowContent(tr);
-				tr.style.display = "table-row";
-			}
-			//if (tr.dataset.newrow === "newrow") {
-			//	tbody.removeChild(tr);
-			//} 
-		}
-	});
-	const editButtonRow = document.getElementById("editButtonRow");
-	const multiButtonRow = document.getElementById("multiButtonRow");
-	if (editButtonRow.style.display !== "none") {
-		editButtonRow.style.display = "none";
-		multiButtonRow.style.display = "table-row" 
-	} else {
-		editButtonRow.style.display = "table-row";
-		multiButtonRow.style.display = "none"; 
-	}
-}
+//function toggleRowDisplay() { //eslint-disable-line
+//	const tbody = document.getElementById("descriptionTable").children[0];
+//	Array.from(tbody.children).forEach(tr => {
+//		if (tr.children[0].tagName.toLowerCase() === "td") {
+//			//if (tr.dataset.deleterow === "deleterow") {
+//			//	tr.setAttribute("data-deleterow", "");
+//			//}
+//			if (tr.dataset.rowstatus === "new") {
+//				tbody.removeChild(tr);
+//			} else {
+//				if (tr.dataset.rowstatus === "delete") {
+//					//tr.setAttribute("data-rowstatus", "");
+//					tr.removeAttribute("data-rowstatus");
+//				}
+//				toggleRowContent(tr);
+//				tr.style.display = "table-row";
+//			}
+//			//if (tr.dataset.newrow === "newrow") {
+//			//	tbody.removeChild(tr);
+//			//} 
+//		}
+//	});
+//	const editButtonRow = document.getElementById("editButtonRow");
+//	const multiButtonRow = document.getElementById("multiButtonRow");
+//	if (editButtonRow.style.display !== "none") {
+//		editButtonRow.style.display = "none";
+//		multiButtonRow.style.display = "table-row" 
+//	} else {
+//		editButtonRow.style.display = "table-row";
+//		multiButtonRow.style.display = "none"; 
+//	}
+//}
 
 
 /** 
@@ -1038,10 +1064,10 @@ function getMatchingDescendent(root, dataAtr) {
 
 /** Add attribute button functionality in object table. */
 function tablePlus() { // eslint-disable-line
-	const tbody = document.getElementById("dataTable").children[0];
+	const tbody = document.getElementById("descriptionTable").children[0];
 	const tr = document.createElement("tr");
 	tr.setAttribute("data-rowstatus", "new");
-	tr.innerHTML = '<td><button onclick="tableDel(this)">&#215;</button></td><td><input data-feederkey="feederkey">' + 
+	tr.innerHTML = '<td><button onclick="tableDel(this)" class="modalButton deleteButton">╳</button></td><td><input data-feederkey="feederkey">' + 
 		'</input></td><td><input data-feederval="feederval"></input></td>';
 	tbody.appendChild(tr);
 }
@@ -1052,7 +1078,7 @@ which I have changed.
 */
 function tableSave() { // eslint-disable-line
 	// Update tree data structure with changes made in object table.
-	const table = document.getElementById("dataTable");
+	const table = document.getElementById("descriptionTable");
 	var toJson = {}
 	// convert HTML table to JSON
 	const tbody = table.children[0];
@@ -1120,7 +1146,7 @@ function tableSave() { // eslint-disable-line
 
 /** Hide the object table. */
 function tableDestroy() {
-	const table = document.getElementById("dataTable");
+	const table = document.getElementById("descriptionTable");
 	table.style.display = "none";
 	const tbody = table.children[0];
 	const deleteTargets = Array.from(tbody.children).filter(tr => tr.children[0].tagName.toLowerCase() === "td");
@@ -1283,7 +1309,7 @@ function multiSelectionTable() {
 	//const headRow = document.createElement('tr')
 	//headRow.innerHTML = '<th>Selected Elements</th>'
 	//tbl.appendChild(headRow)
-	const table = document.getElementById("dataTable");
+	const table = document.getElementById("descriptionTable");
 	table.style.display = "block";
 	const tbody = table.children[0];
 	tbody.children[0].children[0].style.display = "none";
@@ -1902,6 +1928,10 @@ function toggleElementDisplay(id) {
         element.style.display = "none";
     }
 }
+//**************************************************
+// Description and selection table functions 
+//**************************************************
+
 
 //**************************************************
 // File menu functions
@@ -1933,34 +1963,6 @@ function postToUrl(path, params, method="post") {
     document.body.appendChild(form);
 	form.submit();
 }
-
-//function ajax(url, success, failure, method="GET", formData=null) {
-//    if (method === "POST" && !(formData instanceof FormData)) {
-//        throw "If a POST request is being made, then a form should be an argument";
-//    }
-//    const xhr = new XMLHttpRequest();
-//    xhr.onreadystatechange = function () {
-//        if (xhr.readyState !== 4) return;
-//        if (xhr.status >= 200 && xhr.status < 300) {
-//            //success(xhr.responseText);
-//            success(xhr);
-//        } else {
-//            //failure(xhr.responseText);
-//            failure(xhr);
-//        } 
-//    };
-//    xhr.open(method, url);
-//    if (formData) {
-//        xhr.send(formData);
-//    } else {
-//        xhr.send();
-//    }
-//}
-
-//function failure(xhr) {
-//    alert("Yipee AJAX request was unsuccessful: " + xhr.responseText);
-//    //return false;
-//}
 
 /** This fileOperation is used for two purposes 1) to save the users changes to the .omd file in the server using writeFeeder 2) to 
  * undo some other FileOperation by writing the contents of readFeeder back into the original .omd file.
@@ -2269,29 +2271,6 @@ function renameFeeder() {
 	}
 }
 
-//function checkFeederName(newName) {
-//    ajax(`/uniqObjName/Feeder/${thisOwner}/${newName}/${thisModelName}`, success, failure);
-//    function success(xhr) {
-//        try {
-//            const data = JSON.parse(xhr.responseText);
-//            if (data.exists) {
-//                alert("You already have a feeder named '" + newName + "', please choose a different name.");
-//                renameFeeder();
-//            } else {
-//                //gebi("fileOps").click();
-//                ajax(`/renameFeeder/${thisOwner}/${thisModelName}/${thisFeederName}/${newName}/${thisFeederNum}`, (xhr) => {} , failure);
-//                //document.getElementById('feederName').innerHTML = newName;
-//                thisFeederName = newName; //permits multiple name changes without forcing page refresh.
-//                // Send updated name to model.
-//                //window.opener.$(window.opener.document).trigger('mainWindow', "{{ modelName }};"+"feederName{{feederNum}};"+lastFeederName);			
-//            }
-//        } catch (e) {
-//            alert("Something went wrong in checkFeederName");
-//            console.log(e);
-//        }
-//	}
-//}
-
 /**
  * Save the modified feeder data by overwriting the existing .omd file in the server. The return statement is for integration tests.
  */
@@ -2423,33 +2402,6 @@ ProgressModal.prototype.hide = function() {
     this.self.style.display = "none";
 }
 
-//Ajax.prototype.send = function() {
-//    //return new Promise(function (resolve, reject) {...})
-//    const xhr = new XMLHttpRequest();
-//    xhr.onreadystatechange = function() {
-//        if (xhr.readyState !== 4) return;
-//        if (xhr.status >= 200 && xhr.status < 300) {
-//            //success(xhr.responseText);
-//            //this.success(xhr);
-//            if (this.canceled) {
-//                this.cancel(xhr);
-//            } else {
-//                this.success(xhr);
-//            }
-//        } else {
-//            //failure(xhr.responseText);
-//            this.failure(xhr);
-//        } 
-//    };
-//    xhr.open(this.httpMethod, this.url);
-//    if (this.formData) {
-//        xhr.send(this.formData);
-//    } else {
-//        xhr.send();
-//    }
-//};
-
-
 //**************************************************
 // Data interface v2
 //**************************************************
@@ -2496,8 +2448,8 @@ function isNode(treeObject) {
 }
 
 function getParentTreeObject(treeObject) {
-	const key = Object.keys(feeder.tree).find(key => feeder.tree[key].name === treeObject.data.parent);
-	return new TreeObject(key, feeder.tree[key]);
+	const key = Object.keys(writeFeeder.tree).find(key => writeFeeder.tree[key].name === treeObject.data.parent);
+	return new TreeObject(key, writeFeeder.tree[key]);
 }
 
 function TreeObject(key, data) {
@@ -2669,7 +2621,7 @@ function getAssociatedTreeObjects(treeObject, htmlSelection) {
 	if (isParentChildNode(treeObject)) {
 		if (htmlSelection.length === 1) {
 			const parentKey = htmlSelection[0].id;
-			const parentTreeObject = new TreeObject(parentKey, feeder.tree[parentKey]);
+			const parentTreeObject = new TreeObject(parentKey, writeFeeder.tree[parentKey]);
 			if (isNode(parentTreeObject)) {
 				associatedTreeObjects.parentTreeObject = parentTreeObject;
 				return associatedTreeObjects;
@@ -2689,8 +2641,8 @@ function getAssociatedTreeObjects(treeObject, htmlSelection) {
 		if (htmlSelection.length === 2) {
 			const sourceKey = htmlSelection[0].id;
 			const targetKey = htmlSelection[1].id;
-			const sourceTreeObject = new TreeObject(sourceKey, feeder.tree[sourceKey]);
-			const targetTreeObject = new TreeObject(targetKey, feeder.tree[targetKey]);
+			const sourceTreeObject = new TreeObject(sourceKey, writeFeeder.tree[sourceKey]);
+			const targetTreeObject = new TreeObject(targetKey, writeFeeder.tree[targetKey]);
 			if (isNode(sourceTreeObject) && isNode(targetTreeObject)) {
 				associatedTreeObjects.sourceTreeObject = sourceTreeObject;
 				associatedTreeObjects.targetTreeObject = targetTreeObject;
@@ -2752,8 +2704,8 @@ function setCoordinates(treeObject) {
  * nodes and links.
  */
 function canAddToFeederTree(treeObject) {
-	if (feeder.tree[treeObject.key]) {
-		throw ("feeder.tree insertion error: cannot insert object into feeder.tree. feeder.tree already contains an object with key: " 
+	if (writeFeeder.tree[treeObject.key]) {
+		throw ("writeFeeder.tree insertion error: cannot insert object into writeFeeder.tree. writeFeeder.tree already contains an object with key: " 
 		+ treeObject.key);
 	} else {
 		return true;
@@ -2761,30 +2713,30 @@ function canAddToFeederTree(treeObject) {
 }
 
 function canAddToFeederNodes(treeObject) {
-	if (feeder.nodes.some(obj => obj.treeIndex && obj.treeIndex.toString() === treeObject.key)) {
-		throw ("feeder.nodes insertion error: cannot insert object into feeder.nodes. " +
-			"feeder.nodes already contains an object with treeIndex: " + treeObject.key);
+	if (writeFeeder.nodes.some(obj => obj.treeIndex && obj.treeIndex.toString() === treeObject.key)) {
+		throw ("writeFeeder.nodes insertion error: cannot insert object into writeFeeder.nodes. " +
+			"writeFeeder.nodes already contains an object with treeIndex: " + treeObject.key);
 	} else {
 		return true;
 	}
 }
 
 function canAddToFeederLinks(treeObject) {
-	if (feeder.links.some(obj => obj.treeIndex && obj.treeIndex.toString() === treeObject.key)) {
-		throw ("feeder.links insertion error: cannot insert object into feeder.links." +
-		"feeder.links already contains an object with treeIndex: " + treeObject.key);
+	if (writeFeeder.links.some(obj => obj.treeIndex && obj.treeIndex.toString() === treeObject.key)) {
+		throw ("writeFeeder.links insertion error: cannot insert object into writeFeeder.links." +
+		"writeFeeder.links already contains an object with treeIndex: " + treeObject.key);
 	} else {
 		return true;
 	}
 }
 
 function addToFeederTree(treeObject) {
-	feeder.tree[treeObject.key] = treeObject.data;
+	writeFeeder.tree[treeObject.key] = treeObject.data;
 }
 
 function addToFeederNodes(treeObject) {
 	const node = {
-		index: feeder.nodes.length,
+		index: writeFeeder.nodes.length,
 		treeIndex: parseInt(treeObject.key, 10),
 		weight: 1,
 		px: treeObject.data.longitude, 
@@ -2796,7 +2748,7 @@ function addToFeederNodes(treeObject) {
 		chargeMultiple: 1,
 		name: treeObject.data.name
 	};
-	feeder.nodes.push(node);
+	writeFeeder.nodes.push(node);
 }
 
 function addToFeederLinks(treeObject) {
@@ -2804,20 +2756,20 @@ function addToFeederLinks(treeObject) {
 	if (isParentChildNode(treeObject)) {
 		// I am adding a link that represent the link between THIS TreeObject and its parent
 		link = {
-			source: feeder.nodes.find(obj => obj.name === treeObject.data.name),
-			target: feeder.nodes.find(obj => obj.name === treeObject.data.parent),
+			source: writeFeeder.nodes.find(obj => obj.name === treeObject.data.name),
+			target: writeFeeder.nodes.find(obj => obj.name === treeObject.data.parent),
 			objectType: "parentChild"
 		}
 	} else {
 		// I am adding a link that represents THIS TreeObject.
 		link = {
-			source: feeder.nodes.find(obj => obj.name === treeObject.data.from),
+			source: writeFeeder.nodes.find(obj => obj.name === treeObject.data.from),
 			objectType: "fromTo",
 			treeIndex: treeObject.key,
-			target: feeder.nodes.find(obj => obj.name === treeObject.data.to)
+			target: writeFeeder.nodes.find(obj => obj.name === treeObject.data.to)
 		};
 	}
-	feeder.links.push(link);
+	writeFeeder.links.push(link);
 }
 
 /**
@@ -2825,8 +2777,8 @@ function addToFeederLinks(treeObject) {
  * @return {string} key
  */
 function newTreeKey() { 
-	let nextKey = Object.keys(feeder.tree).length;
-	while(feeder.tree.hasOwnProperty(nextKey.toString())) {
+	let nextKey = Object.keys(writeFeeder.tree).length;
+	while(writeFeeder.tree.hasOwnProperty(nextKey.toString())) {
 		nextKey += 1;
 	}
 	return nextKey.toString();
