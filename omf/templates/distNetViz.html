@@ -379,7 +379,7 @@
                 </div>
                 <div id="editDiv">
 					<div class="buttonGroup">
-                        <button id="addOps" class='pill' onclick='dropPill(this, "Edit")'>Edit ▾</button>
+                        <button id="addOps" class='pill' onclick='dropPill(this, "Edit")'>Edit &#x25BE;</button>
                         <ul class='menu right' style="display: none">
 							<li><a href='javascript:toggleElementDisplay("findModal");'>Find...</a></li>
                         </ul>
@@ -387,14 +387,14 @@
                 </div>
 				<div id="addDiv">
 					<div class="buttonGroup">
-						<button id="addOps" class='pill' onclick='dropPill(this, "Add")'>Add ▾</button>
+						<button id="addOps" class='pill' onclick='dropPill(this, "Add")'>Add &#x25BE;</button>
 						<ul id='newObjectMenu' class='menu right' style="display: none">
 					</div>
 				</div>
 				<div id="fileDiv">
 					<div class='buttonGroup'>
                     {% if is_admin or not public %}
-						<button id="fileOps" class='pill' onclick='dropPill(this, "File")'>File ▾</button>
+						<button id="fileOps" class='pill' onclick='dropPill(this, "File")'>File &#x25BE;</button>
 						<ul class='menu right' style="display: none">
 							<li><a href='javascript:saveFeeder();'>Save</a></li>
 							<li><a href='javascript:downloadTextFile();'>View Raw Data</a></li>
@@ -938,7 +938,7 @@ function toggleRowContent(tr) {
         button.setAttribute("onclick", "tableDel(this)");
         button.classList = "modalButton deleteButton";
         //button.innerHTML = "&#215"; 
-        button.innerHTML = "╳";
+        button.innerHTML = "&#9587;";
 		buttonTd.appendChild(button); 
 		const keyTd = tr.children[0]; 
 		const valTd = tr.children[1];
@@ -1067,7 +1067,7 @@ function tablePlus() { // eslint-disable-line
 	const tbody = document.getElementById("descriptionTable").children[0];
 	const tr = document.createElement("tr");
 	tr.setAttribute("data-rowstatus", "new");
-	tr.innerHTML = '<td><button onclick="tableDel(this)" class="modalButton deleteButton">╳</button></td><td><input data-feederkey="feederkey">' + 
+	tr.innerHTML = '<td><button onclick="tableDel(this)" class="modalButton deleteButton">&#9587;</button></td><td><input data-feederkey="feederkey">' + 
 		'</input></td><td><input data-feederval="feederval"></input></td>';
 	tbody.appendChild(tr);
 }
@@ -1280,10 +1280,10 @@ function dropPill(thisButton, name) { // eslint-disable-line
 	thisButton.style.background= '#F8F8F8'
 	thisButton.style.textAlign = 'left'
 	thisButton.nextSibling.nextSibling.style.display = 'inline-block'
-	thisButton.innerHTML = name + ' ▴'
+	thisButton.innerHTML = name + ' &#x25B4;'
 	function clickCloseEvent() {
 		thisButton.nextSibling.nextSibling.style.display = 'none'
-		thisButton.innerHTML = name + ' ▾'
+		thisButton.innerHTML = name + ' &#x25BE;'
 		this.removeEventListener('click', arguments.callee, true)
 		thisButton.style.color= 'white'
 		thisButton.style.background= 'transparent'
@@ -1297,7 +1297,7 @@ function dropPill(thisButton, name) { // eslint-disable-line
 	var thisButton = document.getElementById(buttonName);
 	//thisButton.nextSibling.nextSibling.style.display = 'none'
 	thisButton.nextElementSibling.style.display = "none";
-	thisButton.innerHTML = labelName + ' ▾';
+	thisButton.innerHTML = labelName + ' &#x25BE;';
 	//this.removeEventListener('click', arguments.callee, true);
 	//if (window.event.toElement==thisButton) {event.stopPropagation()}
 }*/
