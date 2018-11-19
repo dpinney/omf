@@ -271,6 +271,12 @@
             
             /* Tree tables */
 
+            #multiButtonRow {
+                /*text-align: center;*/
+            }
+            /*#multiButtonRow button {
+                margin-right: 15px;
+            }*/
             .treeTable {
                 background-color: white; 
             }
@@ -280,7 +286,7 @@
             /*.treeTable tr:last-child {
                 border: 0px;
             }*/
-            .treeTable td {
+            thead td {
                 
             }
             .deleteButton {
@@ -605,14 +611,14 @@
                     <th>text...</th>
 				</tr>
 				<tr id="multiButtonRow">
-					<th colspan="3">
-						<!-- should only be visible when the table is showing a node, NOT a line -->
-						<button id="moveButton" onclick="moveNode()" class="modalButton editButton">Move</button>
-						<button id="deleteButton" onclick="deleteOb()" class="modalButton editButton">Delete</button>
-						<button id="addButton" onclick="tablePlus()" class="modalButton editButton">Add Attribute</button>
-						<button onclick="tableSave()" class="modalButton editButton">Save</button>
-						<button id="cancelButton" onclick="toggleElementDisplay('descriptionTable')" class="modalButton editButton">Cancel</button>
-					</th>
+                    <th colspan="3">
+                        <!-- should only be visible when the table is showing a node, NOT a line -->
+                        <button id="moveButton" onclick="moveNode()" class="modalButton editButton">Move</button>
+                        <button id="deleteButton" onclick="deleteOb()" class="modalButton editButton">Delete</button>
+                        <button id="addButton" onclick="tablePlus()" class="modalButton editButton">Add Attribute</button>
+                        <button onclick="tableSave()" class="modalButton editButton">Save</button>
+                        <!--<button id="cancelButton" onclick="toggleElementDisplay('descriptionTable')" class="modalButton editButton">Cancel</button>-->
+                    </th>
 				</tr>
             </thead>
 			<tbody>
@@ -744,9 +750,23 @@ function buildFeeder() {
 	let maxLon = 100;
 	let maxLat = 100;
 	for (let key in writeFeeder.tree) {
-		nameToKey[writeFeeder.tree[key]['name']] = key
-		if (writeFeeder.tree[key]['longitude'] > maxLon) {maxLon = writeFeeder.tree[key]['longitude']}
-		if (writeFeeder.tree[key]['latitude'] > maxLat) {maxLat = writeFeeder.tree[key]['latitude']}
+        nameToKey[writeFeeder.tree[key]['name']] = key;
+        const lon = writeFeeder.tree[key].longitude;
+        const lat = writeFeeder.tree[key].latitude;
+        //if (lon) {
+        //    /* Pretend we have really big coordinate values */
+        //    writeFeeder.tree[key].longitude = lon * 12000;
+        //}
+        //if (lat) {
+        //    /* Pretend we have really big coordinate values */
+        //    writeFeeder.tree[key].latitude = lat * 12000;
+        //}
+		if (writeFeeder.tree[key]['longitude'] > maxLon) {
+            maxLon = writeFeeder.tree[key]['longitude']
+        }
+        if (writeFeeder.tree[key]['latitude'] > maxLat) {
+            maxLat = writeFeeder.tree[key]['latitude']
+        }
 	}
 	maxLon = Math.round(maxLon + 20.0)
 	maxLat = Math.round(maxLat + 20.0)
@@ -765,29 +785,10 @@ function buildFeeder() {
         //center: true,
 		//fit: true,
         //contain: true,
-        minZoom: 0.1,
+        zoomScaleSensitivity: 0.2,
+        minZoom: 0.25,
 		maxZoom: 100
 	})
-	// Go through and add all lines first
-//	for (let key in feeder.tree) {
-//		const anOb = feeder.tree[key]
-//		//add the thick lines
-//		if ('from' in anOb && 'to' in anOb) {
-//			const fromOb = feeder.tree[nameToKey[anOb['from']]]
-//			const toOb = feeder.tree[nameToKey[anOb['to']]]
-//			addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],key,anOb['object'] + ' p' + countPhases(anOb['phases']))
-//		}
-//		//add the thin lines. parse the tree to find the parent tree obj, then draw a line to it
-//		else if ('parent' in anOb) {
-//			const pOb = feeder.tree[nameToKey[anOb['parent']]]
-//			addLine(pOb['longitude'],pOb['latitude'],anOb['longitude'],anOb['latitude'],pOb.name + '_' + anOb.name,'parentChild')
-//		}
-//	}
-//	// Add circles after all lines
-//	for (let key in feeder.tree) {
-//		const anOb = feeder.tree[key]
-//		if ('latitude' in anOb && 'longitude' in anOb && 'object' in anOb && !('from' in anOb) && !('to' in anOb)) {
-//			addCircle(anOb['longitude'],anOb['latitude'],2,key,anOb['object'])
 	for (let key in writeFeeder.tree) {
 		try {
 			const anOb = writeFeeder.tree[key];
@@ -883,34 +884,40 @@ function hotkeys() { // eslint-disable-line
 }
 
 function tableCreate(inputObject) {
-	// Show the object table that a user has selected.
 	const table = document.getElementById("descriptionTable");
     const tbody = table.children[1];
+    //clear the table
     while (tbody.hasChildNodes()) {
         tbody.removeChild(tbody.lastChild);
     }
     const thead = table.children[0]
-	const headerRow = thead.children[0]; // tr
-	//headerRow.children[0].style.display = "table-cell";
-	headerRow.children[0].textContent = "object ";
-    headerRow.children[1].textContent =  inputObject.object;
-	//headerRow.children[1].style.display = "none";
-	//document.getElementById("editButtonRow").style.display = "table-row";
-	document.getElementById("multiButtonRow").style.display = "table-row";
-
+	const titleRow = thead.children[0]; // tr
+	titleRow.children[0].textContent = "object ";
+    titleRow.children[1].textContent =  inputObject.object;
+    const moveButton = document.getElementById("moveButton");
+    //document.getElementById("editButtonRow").style.display = "table-row";
+    if (Object.keys(inputObject).some((key) => key === "from" || key === "to")) {
+        //hide the move button for a line
+        moveButton.style.display = "none";
+    } else {
+        moveButton.style.display = "";
+    }
 	// Put the object in.
 	for (let key in inputObject) {
-		const tr = document.createElement('tr');
-		const keyTd = document.createElement("td");
-		keyTd.setAttribute("data-feederkey", "feederkey");
-		keyTd.textContent = key;
-		tr.appendChild(keyTd);
-		const valTd = document.createElement("td");
-		valTd.textContent = inputObject[key];
-		tr.appendChild(valTd);
-        tbody.appendChild(tr)
-        toggleRowContent(tr);
+        if (key !== "from" && key !== "to") {
+            const tr = document.createElement('tr');
+            const keyTd = document.createElement("td");
+            keyTd.setAttribute("data-feederkey", "feederkey");
+            keyTd.textContent = key;
+            tr.appendChild(keyTd);
+            const valTd = document.createElement("td");
+            valTd.textContent = inputObject[key];
+            tr.appendChild(valTd);
+            tbody.appendChild(tr)
+            toggleRowContent(tr);
+        }
 	}
+	document.getElementById("multiButtonRow").style.display = "table-row";
     table.style.display = "block";
 }
 
@@ -1925,16 +1932,6 @@ function toggleElementDisplay(id) {
 // Description and selection table functions 
 //**************************************************
 
-function buildDescriptionTable(TreeObject) {
-
-    function destroyDescriptionTable() {
-
-    }
-}
-
-function destroyTable() {
-
-}
 
 //**************************************************
 // File menu functions
