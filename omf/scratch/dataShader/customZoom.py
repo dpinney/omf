@@ -1,6 +1,7 @@
 import math, json, io, base64
 import numpy as np
 import pandas as pd
+import gc
 
 from flask import Flask, render_template, redirect, request
 
@@ -17,11 +18,30 @@ def hello():
 
 @app.route("/testing", methods=["GET", "POST"])
 def testingRoute(x_range=(0,1), y_range=(0,1)):
+	print(cvsopts)
 	if request.method == 'POST':
-		x_range = (request.form.get("x_range_low", type=float), request.form.get("x_range_high", type=float)) 
-		y_range = (request.form.get("y_range_low", type=float), request.form.get("y_range_high", type=float))
-
-	#dsPlot = graphplot(randomloc, connect_edges(randomloc,edges))
+		#add in calc for current dimensions of canvas?
+		#counter=request.form.get("counter", type=float) * .5
+		#print(counter)
+		x_click = request.form.get("x_click", type=float)
+		#y_click = abs(request.form.get("y_click", type=float) - cvsopts['plot_height'])
+		y_click = abs(request.form.get("y_click", type=float))
+		#current_x_range = tuple((request.form.get("x_low", type=float), request.form.get("x_high", type=float)))
+		#current_y_range = tuple((request.form.get("y_low", type=float), request.form.get("y_high", type=float)))
+		#print(current_x_range)
+		#print(current_y_range)
+		#x_click, y_click = vectorCalc(current_x_range, current_y_range, x_click, y_click)
+		# p(t) = a*(1-t) + b*t 
+		x_low = request.form.get("x_low", type=float)
+		y_low = request.form.get("y_low", type=float)
+		x_high = request.form.get("x_high", type=float)
+		y_high = request.form.get("y_high", type=float)
+		#x_high = min(x_click+(counter), 1)
+		#y_high = min(y_click +(counter), 1)
+		x_range = (x_low, x_high)
+		y_range = (y_low, y_high)	 
+	print(cvsopts['plot_height'])
+	#print(current_x_range)
 	dsPlot = newGraphplot(randomloc, connect_edges(randomloc,edges), x_range=x_range, y_range=y_range)
 	#convert datashder image to png
 	back_img = tf.Image(dsPlot).to_pil()
@@ -32,13 +52,19 @@ def testingRoute(x_range=(0,1), y_range=(0,1)):
 	img_bytes = in_mem_file.read()
 	base64_encoded_result_bytes = base64.b64encode(img_bytes)
 	base64_encoded_result_str = base64_encoded_result_bytes.decode('ascii')
-	return render_template("testRoute.html", image=base64_encoded_result_bytes)
+	return render_template("testRoute.html", image=base64_encoded_result_str, x_range=x_range, y_range=y_range, x_low=x_range[0], x_high=x_range[1], y_low=x_range[0], y_high=y_range[1])
+
+def vectorCalc(x_range, y_range, x_click, y_click):
+	x_click = x_range[0]*(1-x_click/cvsopts['plot_width']) + x_range[1]*(x_click/cvsopts['plot_width'])
+	y_click = y_range[0]*(1-y_click/cvsopts['plot_height']) + y_range[1]*(y_click/cvsopts['plot_height'])
+	return x_click, y_click
 
 #@app.route("/changeRange", methods=["POST"])
 #def changeRange():
 #	x_range = request.form.get("x_range")
 #	y_range = request.form.get("y_range")
 #	return redirect("/testing")
+
 np.random.seed(0)
 n=10000
 m=20000
@@ -47,7 +73,9 @@ nodes = pd.DataFrame(["node"+str(i) for i in range(n)], columns=['name'])
 edges = pd.DataFrame(np.random.randint(0,len(nodes), size=(m, 2)), columns=['source', 'target'])
 
 randomloc = random_layout(nodes,edges)
-cvsopts = dict(plot_height=600, plot_width=800)
+#how to add to resize function
+
+cvsopts = dict(plot_height=800, plot_width=800)
 
 #creaes nodes in datashader image
 def nodesplot(nodes, name=None, canvas=None, cat=None):
@@ -78,7 +106,9 @@ def newGraphplot(nodes, edges, name="", canvas=None, cat=None, x_range=None, y_r
         yr = y_range
         canvas = ds.Canvas(x_range=xr, y_range=yr, **cvsopts)
     np = nodesplot(nodes, name + " nodes", canvas, cat)
+    print("nodes")
     ep = edgesplot(edges, name + " edges", canvas)
+    print("edges")
     return tf.stack(ep, np, how="over", name=name)
 
 if __name__ == '__main__':

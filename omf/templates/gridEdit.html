@@ -215,7 +215,7 @@
 			<div class='buttonGroup'>
 				{% if is_admin or not public %}
 				<button id="fileOps" class='pill' onclick='dropPill(this, "File")'>File ▾</button>
-				<ul class='menu right'>						
+				<ul class='menu right'>		
 					<li><a href='javascript:saveFeeder();'>Save</a></li>
 					<li><a href='javascript:renameFeeder();'>Rename</a></li>
 					<li><a href='javascript:showModal("loadModal");'>Load from Model...</a></li>
@@ -2930,7 +2930,6 @@ function create_table() {
 				.append($("<td>").html(prop))
 				.append($("<td>").html(valueEl)))
 		}
-
 	}
 }
 
