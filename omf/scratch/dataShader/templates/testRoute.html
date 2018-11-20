@@ -37,5 +37,20 @@
 	    });
 	});
 	</script>
-	<div><button id="changeRangeButton" type="button" onclick="changeRange()">Change Range</button></div>
+	<script type="text/javascript">
+		function changeZoom(){
+			var inputForm = document.getElementById('inputForm');
+		}
+	</script>
+	<div>
+		<form name="inputForm" id="inputForm" onsubmit="changeZoom();" method="post">
+			<input type="text" name="x_click" id="x_click" />
+			<input type="text" name="y_click" id="y_click" />
+			<input type="text" name="x_low" id="x_low" />
+			<input type="text" name="y_low" id="y_low" />
+			<input type="text" name="x_high" id="x_high" />
+			<input type="text" name="y_high" id="y_high" />
+			<button id="changeGraph" type="submit">Zoom button</button>
+		</form>
+	</div>
 </body>

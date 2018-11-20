@@ -17,29 +17,30 @@ def hello():
 	return "Hello World!"
 
 @app.route("/testing", methods=["GET", "POST"])
-def testingRoute(x_range=(0,1), y_range=(0,1), counter=.1):
+def testingRoute(x_range=(0,1), y_range=(0,1)):
 	print(cvsopts)
 	if request.method == 'POST':
 		#add in calc for current dimensions of canvas?
-		counter=request.form.get("counter", type=float) * .5
-		print(counter)
+		#counter=request.form.get("counter", type=float) * .5
+		#print(counter)
 		x_click = request.form.get("x_click", type=float)
-		y_click = abs(request.form.get("y_click", type=float) - cvsopts['plot_height'])
-		current_x_range = tuple((request.form.get("x_low", type=float), request.form.get("x_high", type=float)))
-		current_y_range = tuple((request.form.get("y_low", type=float), request.form.get("y_high", type=float)))
-		print(current_x_range)
-		print(current_y_range)
-		x_click, y_click = vectorCalc(current_x_range, current_y_range, x_click, y_click)
+		#y_click = abs(request.form.get("y_click", type=float) - cvsopts['plot_height'])
+		y_click = abs(request.form.get("y_click", type=float))
+		#current_x_range = tuple((request.form.get("x_low", type=float), request.form.get("x_high", type=float)))
+		#current_y_range = tuple((request.form.get("y_low", type=float), request.form.get("y_high", type=float)))
+		#print(current_x_range)
+		#print(current_y_range)
+		#x_click, y_click = vectorCalc(current_x_range, current_y_range, x_click, y_click)
 		# p(t) = a*(1-t) + b*t 
-		x_low = x_click
-		y_low = y_click
-		x_high = min(x_click+(counter), 1)
-		y_high = min(y_click +(counter), 1)
+		x_low = request.form.get("x_low", type=float)
+		y_low = request.form.get("y_low", type=float)
+		x_high = request.form.get("x_high", type=float)
+		y_high = request.form.get("y_high", type=float)
+		#x_high = min(x_click+(counter), 1)
+		#y_high = min(y_click +(counter), 1)
 		x_range = (x_low, x_high)
 		y_range = (y_low, y_high)	 
 	print(cvsopts['plot_height'])
-	if counter is None:
-		counter = .5
 	#print(current_x_range)
 	dsPlot = newGraphplot(randomloc, connect_edges(randomloc,edges), x_range=x_range, y_range=y_range)
 	#convert datashder image to png
@@ -51,7 +52,7 @@ def testingRoute(x_range=(0,1), y_range=(0,1), counter=.1):
 	img_bytes = in_mem_file.read()
 	base64_encoded_result_bytes = base64.b64encode(img_bytes)
 	base64_encoded_result_str = base64_encoded_result_bytes.decode('ascii')
-	return render_template("testRoute.html", image=base64_encoded_result_str, x_range=x_range, y_range=y_range, x_low=x_range[0], x_high=x_range[1], y_low=x_range[0], y_high=y_range[1], counter=counter)
+	return render_template("testRoute.html", image=base64_encoded_result_str, x_range=x_range, y_range=y_range, x_low=x_range[0], x_high=x_range[1], y_low=x_range[0], y_high=y_range[1])
 
 def vectorCalc(x_range, y_range, x_click, y_click):
 	x_click = x_range[0]*(1-x_click/cvsopts['plot_width']) + x_range[1]*(x_click/cvsopts['plot_width'])
