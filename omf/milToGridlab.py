@@ -1304,11 +1304,8 @@ def convert(stdString,seqString):
 	# Final Output
 	# print('*** DONE!', time.time()-start_time)
 	# fix missing conductors
-        print 'abt to fix missing conductors'
 	glmTree = missingConductorsFix(glmTree)
-        print 'fixed missing conductors :D'
 	return glmTree
-
 
 def stdSeqToGlm(seqPath, stdPath, glmPath):
 	'''Convert a pair of .std and .seq files directly to .glm'''
@@ -1423,8 +1420,7 @@ def missingConductorsFix(tree):
 			tree[line_config_key][conductor_string] = conductor
 
 	### CHECKS IF THERE EXISTS ANY MISMATCH BETWEEN LINE PHASES AND LINE-CONFIG CONDUCTOR PHASES
-	namesToKeys = {v.get('name'): k for k, v in tree.iteritems()}
-	del namesToKeys[None]
+	namesToKeys = getNamesToKeys(tree)
 
 	buggy_lines = dict() #maps buggy lines to their line config keys
 	
@@ -1547,15 +1543,60 @@ def phasingMismatchFix(tree, jt=5):
 	toViset -= set(no_phase)
 	for root in new_roots:
 		_phaseFix(tree, root, toViset)
+	
+	tree = missingPowerFix(tree)
 	return tree
 
+def missingPowerFix(tree):
+	'''Fixes incorrect power ratings on single phase transformers'''
+	from copy import deepcopy
+	namesToKeys = getNamesToKeys(tree)
+	incorrect_phases = dict() #maps configkey_phase to transformer keys
+
+	for k,v in tree.iteritems():
+		if 'transformer' == v.get('object'):
+			config_key = namesToKeys[ v['configuration'] ]
+			for phase in v.get('phases'):
+				if phase == 'S':
+					continue
+				if not tree[config_key].get('power{}_rating'.format(phase)):
+					key = str(config_key) + '_' + phase
+					try:
+						incorrect_phases[key].append(k)
+					except KeyError:
+						incorrect_phases[key] = [k]
+		return tree
+	#create clones of existing transformer configs with the phase of the power rating swapped
+	for config_key_phase, transformers in incorrect_phases.iteritems():
+		config_key = int(config_key_phase.split('_')[0])
+		phase = config_key_phase.split('_')[1]
+		clone_key = config_key
+		while clone_key in tree.keys():
+			clone_key += 1
+		tree[clone_key] = deepcopy(tree[config_key])
+		tree[clone_key]['name'] += '_{}'.format(phase)
+		pr = None
+		for attr, value in tree[clone_key].iteritems():
+			if attr != 'power_rating' and 'power' in attr and '_rating' in attr: #attr is 'power{}_rating'
+				pr = attr
+				break
+			if attr == 'power_rating':
+				pr = attr
+		if not pr:
+			continue
+		tree[clone_key]['power{}_rating'.format(phase)] = tree[clone_key][pr]
+		if pr != 'power_rating':
+			del tree[clone_key][to_remove]
+		for transformer in transformers:
+			tree[transformer]['configuration'] = tree[clone_key]['name']
+	return tree
 
 def getRootKey(tree):
+	'''Returns the key of the tree's root (the substation)'''
 	for k,v in tree.iteritems():
 		if v.get('bustype'):
 			if not getRelatives(tree, k, parent=True):
 				return k
-
 
 def getRelatives(tree, node_or_line, parent=False):
 	'''Returns a list of keys of either parent or children of a given node name.'''
@@ -1596,6 +1637,7 @@ def getRelatives(tree, node_or_line, parent=False):
 	return listy	   
 
 def getNamesToKeys(tree):
+	'''Returns a dictionary of names to keys for the tree'''
 	ntk = dict()
 	for k,v in tree.iteritems():
 		if v.get('name'):
@@ -1603,6 +1645,7 @@ def getNamesToKeys(tree):
 	return ntk
 
 def fixOrphanedLoads(tree):
+	'''Working function to fix orphaned loads'''
 	orphaned_loads = [ k for k, v in tree.iteritems() if v.get('object') == 'load' and v.get('name') not in getNamesToKeys(tree) ]
 	for orphan in orphaned_loads:
 		del tree[orphan]
@@ -1620,7 +1663,6 @@ def _latCount(name):
 
 
 default_equipment = {
-	
 		'underground_line_conductor': {
 			'name': "DG_1000ALTRXLPEJ15",
 			'object': 'underground_line_conductor',
