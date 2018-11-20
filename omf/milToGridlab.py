@@ -1459,72 +1459,94 @@ def phasingMismatchFix(tree, jt=5):
 	#		tree[k]['phases'] = 'B'
 	#		break
 
-	current_node = getRootKey(tree)
-	toVisit = [current_node]
-	namesToKeys = getNamesToKeys(tree)
-	while toVisit:
-		print toVisit
-		current_node = toVisit.pop(0)
-		try:
-			tree[current_node]['phases']
-		except KeyError:
-			continue
-		if tree[current_node]['object'] == 'transformer':
-			conf_key = namesToKeys[ tree[current_node]['configuration'] ]
-			add_an_s = True if tree[conf_key]['connect_type'] == 'SINGLE_PHASE_CENTER_TAPPED' else False
-		else:
-			add_an_s = False
-		if add_an_s:
-			tree[current_node]['phases'] += 'S'
-		kids = getRelatives(tree, current_node)
-		toVisit.extend(list(kids))
-		for kid in kids:
+	def _phaseFix(tree, root, toViset):
+		current_node = root
+		toVisit = [root]
+		namesToKeys = getNamesToKeys(tree)
+		while toVisit:
+			current_node = toVisit.pop(0)
+			if current_node not in toViset:
+				continue
+			toViset -= {current_node}
 			try:
-				if tree[kid]['phases'] == '':
-					tree[kid]['phases'] = tree[current_node]['phases']
+				tree[current_node]['phases']
 			except KeyError:
 				continue
-
-			#if tree[kid]['object'] == 'transformer':
-			#	kid_conf_key = namesToKeys[ tree[kid]['configuration'] ]
-			#	connect_type = tree[kid_conf_key]['connect_type']
-			#else:
-			#	connect_type = None
-
-			kid_phases = set(tree[kid].get('phases',''))
-			current_phases = set(tree[current_node].get('phases',''))
-			#in the case of the child of a SINGLE_PHASE_CENTER_TAPPED transformer
-			if add_an_s and kid_phases != current_phases:
-				tree[kid]['phases'] = tree[current_node]['phases']
-				continue
-			#in the general case
-			if not (kid_phases <= current_phases):
-				ancestry = [current_node]
-				dropped = False
-				# We check (jt) generations above the current_node to see if the phase gained in kid_phases  was dropped within 
-				# that range. Ancestry is our listy boi of the nodes within (jt) generations. If we decide that the phases were 
-				# intermittently dropped, then we will overwrite the phases where they were dropped (the nodes in ancestry).
-				# If we decide that the phases were not intermittentely dropped then we set the kid_phases equal to the current_phases
-				for j in range(jt):
-					try:
-						ancestry.append( getRelatives(tree, ancestry[-1], parent=True) )
-						parent_phases = set( tree[ancestry[-1]].get('phases','') )
-					except TypeError:
-						#TypeError for trying to use the empty list as a key in tree if ancestry is empty
-						break
-					if parent_phases == kid_phases:
-						dropped = True
-						for boi in ancestry:
-							tree[boi]['phases'] = tree[kid].get('phases','')
-				if not dropped:
-					intersect = (kid_phases & current_phases)
-					if intersect:
-						tree[kid]['phases'] = ''.join(intersect)
-					else:
+			if tree[current_node]['object'] == 'transformer':
+				conf_key = namesToKeys[ tree[current_node]['configuration'] ]
+				add_an_s = True if tree[conf_key]['connect_type'] == 'SINGLE_PHASE_CENTER_TAPPED' else False
+			else:
+				add_an_s = False
+			if add_an_s:
+				tree[current_node]['phases'] += 'S'
+			kids = getRelatives(tree, current_node)
+			toVisit.extend(list(kids))
+			for kid in kids:
+				try:
+					if tree[kid]['phases'] == '':
 						tree[kid]['phases'] = tree[current_node]['phases']
-					#fixes + checks for when we modify kid phases
-					# if connect_type == 'WYE_WYE' and len(tree[kid]['phases']) == 1:
-					#	tree[kid_conf_key]['connect_type'] = 'SINGLE_PHASE'
+				except KeyError:
+					continue
+
+				#if tree[kid]['object'] == 'transformer':
+				#	kid_conf_key = namesToKeys[ tree[kid]['configuration'] ]
+				#	connect_type = tree[kid_conf_key]['connect_type']
+				#else:
+				#	connect_type = None
+
+				kid_phases = set(tree[kid].get('phases',''))
+				current_phases = set(tree[current_node].get('phases',''))
+				#in the case of the child of a SINGLE_PHASE_CENTER_TAPPED transformer
+				if add_an_s and kid_phases != current_phases:
+					tree[kid]['phases'] = tree[current_node]['phases']
+					continue
+				#in the general case
+				if not (kid_phases <= current_phases):
+					ancestry = [current_node]
+					dropped = False
+					# We check (jt) generations above the current_node to see if the phase gained in kid_phases  was dropped within 
+					# that range. Ancestry is our listy boi of the nodes within (jt) generations. If we decide that the phases were 
+					# intermittently dropped, then we will overwrite the phases where they were dropped (the nodes in ancestry).
+					# If we decide that the phases were not intermittentely dropped then we set the kid_phases equal to the current_phases
+					for j in range(jt):
+						try:
+							ancestry.append( getRelatives(tree, ancestry[-1], parent=True) )
+							parent_phases = set( tree[ancestry[-1]].get('phases','') )
+						except TypeError:
+							#TypeError for trying to use the empty list as a key in tree if ancestry is empty
+							break
+						if parent_phases == kid_phases:
+							dropped = True
+							for boi in ancestry:
+								tree[boi]['phases'] = tree[kid].get('phases','')
+					if not dropped:
+						intersect = (kid_phases & current_phases)
+						if intersect and intersect != set('S'):
+							tree[kid]['phases'] = ''.join(intersect)
+						else:
+							tree[kid]['phases'] = tree[current_node]['phases']
+						#fixes + checks for when we modify kid phases
+						#if connect_type == 'WYE_WYE' and len(tree[kid]['phases']) == 1:
+						#	tree[kid_conf_key]['connect_type'] = 'SINGLE_PHASE'
+		return tree, toViset
+
+	current_node = getRootKey(tree)
+	toViset= set(tree.keys())
+	tree, toViset = _phaseFix(tree, current_node, toViset)
+	no_phase = []
+	new_roots = list(toViset)
+	for unvisited in toViset:
+		#remove items without phases
+		if not tree[unvisited].get('phases'):
+			no_phase.append(unvisited)
+			new_roots.remove(unvisited)
+		#remove items whose parents are in toViset
+		parental = getRelatives(tree, unvisited, parent = True)
+		if parental and parental in toViset:
+			new_roots.remove(unvisited)
+	toViset -= set(no_phase)
+	for root in new_roots:
+		_phaseFix(tree, root, toViset)
 	return tree
 
 
