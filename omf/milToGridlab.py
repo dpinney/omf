@@ -1474,6 +1474,8 @@ def phasingMismatchFix(tree, jt=5):
 			add_an_s = True if tree[conf_key]['connect_type'] == 'SINGLE_PHASE_CENTER_TAPPED' else False
 		else:
 			add_an_s = False
+		if add_an_s:
+			tree[current_node]['phases'] += 'S'
 		kids = getRelatives(tree, current_node)
 		toVisit.extend(list(kids))
 		for kid in kids:
@@ -1482,17 +1484,21 @@ def phasingMismatchFix(tree, jt=5):
 					tree[kid]['phases'] = tree[current_node]['phases']
 			except KeyError:
 				continue
-			if tree[kid]['object'] == 'transformer':
-				kid_conf_key = namesToKeys[ tree[kid]['configuration'] ]
-				connect_type = tree[kid_conf_key]['connect_type']
-			else:
-				connect_type = None
+
+			#if tree[kid]['object'] == 'transformer':
+			#	kid_conf_key = namesToKeys[ tree[kid]['configuration'] ]
+			#	connect_type = tree[kid_conf_key]['connect_type']
+			#else:
+			#	connect_type = None
 
 			kid_phases = set(tree[kid].get('phases',''))
 			current_phases = set(tree[current_node].get('phases',''))
+			#in the case of the child of a SINGLE_PHASE_CENTER_TAPPED transformer
+			if add_an_s and kid_phases != current_phases:
+				tree[kid]['phases'] = tree[current_node]['phases']
+				continue
+			#in the general case
 			if not (kid_phases <= current_phases):
-				if add_an_s and (kid_phases - current_phases) == set('S'):
-						continue
 				ancestry = [current_node]
 				dropped = False
 				# We check (jt) generations above the current_node to see if the phase gained in kid_phases  was dropped within 
@@ -1519,8 +1525,6 @@ def phasingMismatchFix(tree, jt=5):
 					#fixes + checks for when we modify kid phases
 					# if connect_type == 'WYE_WYE' and len(tree[kid]['phases']) == 1:
 					#	tree[kid_conf_key]['connect_type'] = 'SINGLE_PHASE'
-					if add_an_s:
-						tree[kid]['phases'] += 'S'
 	return tree
 
 
