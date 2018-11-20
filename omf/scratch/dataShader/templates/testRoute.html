@@ -18,28 +18,22 @@
 		document.body.appendChild(form)
 		form.submit()
 	}
-
-	function changeRange(x, y){
-		//var maxHeight = 800;
-		//var maxWidth = 800;
-		//let x_click = x
-		//let x_range_high = Math.min((x / maxWidth + 0.25), 1)
-		//let y_click = y
-		//let y_range_high = Math.min((y / maxHeight + 0.25), 1)
-		post_to_url("/testing", {x_click: x, y_click: y});
-	}
 	</script>
 </head>
 <body>
-	<div><img id="dsImage" src="data:image/png;base64,{{image}}"></div>
+	<div><img id="dsImage" src="data:image/png;base64,{{image}}" height=800 width=800></div>
 	<script type="text/javascript">
 	$(document).ready(function() {
 	    $("#dsImage").on("click", function(event) {
 	        var x = (event.pageX - this.offsetLeft);
-	        console.log(x);
+	        //Keep this.offset which is always 8
+	        console.log(event.pageX);
+	        console.log(this.offsetLeft)
+	        console.log("{{x_range}}");
 	        var y = (event.pageY - this.offsetTop);
-	        console.log(y);
-	        changeRange(x, y);
+	        console.log("{{y_range}}");
+	        var x_low = "{{x_low}}"
+	        post_to_url("/testing", {x_click: x, y_click: y, x_low: "{{x_low}}", x_high: "{{x_high}}", y_low: "{{y_low}}", y_high: "{{y_high}}", counter: "{{counter}}"});
 	    });
 	});
 	</script>

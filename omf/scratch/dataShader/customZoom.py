@@ -17,20 +17,30 @@ def hello():
 	return "Hello World!"
 
 @app.route("/testing", methods=["GET", "POST"])
-def testingRoute(x_range=(0,.5), y_range=(0,1)):
+def testingRoute(x_range=(0,1), y_range=(0,1), counter=.1):
+	print(cvsopts)
 	if request.method == 'POST':
-		#x_range = (request.form.get("x_range_low", type=float), request.form.get("x_range_high", type=float))
-		#y_range = (request.form.get("y_range_low", type=float), request.form.get("y_range_high", type=float))
+		#add in calc for current dimensions of canvas?
+		counter=request.form.get("counter", type=float) * .5
+		print(counter)
 		x_click = request.form.get("x_click", type=float)
-		y_click = abs(request.form.get("y_click", type=float) - 800)
-		x_low = x_click / 800
-		y_low = y_click / 800
-		x_high = min(x_click / 800 +.25, 1)
-		y_high = min(y_click / 800 + .25, 1)
+		y_click = abs(request.form.get("y_click", type=float) - cvsopts['plot_height'])
+		current_x_range = tuple((request.form.get("x_low", type=float), request.form.get("x_high", type=float)))
+		current_y_range = tuple((request.form.get("y_low", type=float), request.form.get("y_high", type=float)))
+		print(current_x_range)
+		print(current_y_range)
+		x_click, y_click = vectorCalc(current_x_range, current_y_range, x_click, y_click)
+		# p(t) = a*(1-t) + b*t 
+		x_low = x_click
+		y_low = y_click
+		x_high = min(x_click+(counter), 1)
+		y_high = min(y_click +(counter), 1)
 		x_range = (x_low, x_high)
-		y_range = (y_low, y_high)			 
+		y_range = (y_low, y_high)	 
 	print(cvsopts['plot_height'])
-	print(x_range, y_range)
+	if counter is None:
+		counter = .5
+	#print(current_x_range)
 	dsPlot = newGraphplot(randomloc, connect_edges(randomloc,edges), x_range=x_range, y_range=y_range)
 	#convert datashder image to png
 	back_img = tf.Image(dsPlot).to_pil()
@@ -41,7 +51,12 @@ def testingRoute(x_range=(0,.5), y_range=(0,1)):
 	img_bytes = in_mem_file.read()
 	base64_encoded_result_bytes = base64.b64encode(img_bytes)
 	base64_encoded_result_str = base64_encoded_result_bytes.decode('ascii')
-	return render_template("testRoute.html", image=base64_encoded_result_str)
+	return render_template("testRoute.html", image=base64_encoded_result_str, x_range=x_range, y_range=y_range, x_low=x_range[0], x_high=x_range[1], y_low=x_range[0], y_high=y_range[1], counter=counter)
+
+def vectorCalc(x_range, y_range, x_click, y_click):
+	x_click = x_range[0]*(1-x_click/cvsopts['plot_width']) + x_range[1]*(x_click/cvsopts['plot_width'])
+	y_click = y_range[0]*(1-y_click/cvsopts['plot_height']) + y_range[1]*(y_click/cvsopts['plot_height'])
+	return x_click, y_click
 
 #@app.route("/changeRange", methods=["POST"])
 #def changeRange():
@@ -57,6 +72,8 @@ nodes = pd.DataFrame(["node"+str(i) for i in range(n)], columns=['name'])
 edges = pd.DataFrame(np.random.randint(0,len(nodes), size=(m, 2)), columns=['source', 'target'])
 
 randomloc = random_layout(nodes,edges)
+#how to add to resize function
+
 cvsopts = dict(plot_height=800, plot_width=800)
 
 #creaes nodes in datashader image
