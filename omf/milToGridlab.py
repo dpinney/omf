@@ -1565,7 +1565,6 @@ def missingPowerFix(tree):
 						incorrect_phases[key].append(k)
 					except KeyError:
 						incorrect_phases[key] = [k]
-		return tree
 	#create clones of existing transformer configs with the phase of the power rating swapped
 	for config_key_phase, transformers in incorrect_phases.iteritems():
 		config_key = int(config_key_phase.split('_')[0])
@@ -1586,7 +1585,7 @@ def missingPowerFix(tree):
 			continue
 		tree[clone_key]['power{}_rating'.format(phase)] = tree[clone_key][pr]
 		if pr != 'power_rating':
-			del tree[clone_key][to_remove]
+			del tree[clone_key][pr]
 		for transformer in transformers:
 			tree[transformer]['configuration'] = tree[clone_key]['name']
 	return tree
