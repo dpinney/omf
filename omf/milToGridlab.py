@@ -1303,7 +1303,8 @@ def convert(stdString,seqString):
 				thisOb['longitude'] = str(float(parentOb['longitude']) + random.uniform(-5,5))
 	# Final Output
 	# print('*** DONE!', time.time()-start_time)
-	# fix missing conductors
+	# 8B research fixes
+	glmTree = phasingMismatchFix(glmTree)
 	glmTree = missingConductorsFix(glmTree)
 	return glmTree
 
