@@ -1,4 +1,4 @@
-import math, json, io, base64
+import math, json, io, base64, param
 import numpy as np
 import pandas as pd
 import gc
@@ -7,7 +7,7 @@ from flask import Flask, render_template, redirect, request
 
 import datashader as ds
 import datashader.transfer_functions as tf
-from datashader.layout import random_layout
+from datashader.layout import random_layout, LayoutAlgorithm
 from datashader.bundling import connect_edges
 
 app = Flask(__name__)
@@ -17,15 +17,15 @@ def hello():
 	return "Hello World!"
 
 @app.route("/testing", methods=["GET", "POST"])
-def testingRoute(x_range=(0,1), y_range=(0,1)):
+def testingRoute(x_range=(0,30), y_range=(0,30)):
 	print(cvsopts)
 	if request.method == 'POST':
 		#add in calc for current dimensions of canvas?
 		#counter=request.form.get("counter", type=float) * .5
 		#print(counter)
-		x_click = request.form.get("x_click", type=float)
+		#x_click = request.form.get("x_click", type=float)
 		#y_click = abs(request.form.get("y_click", type=float) - cvsopts['plot_height'])
-		y_click = abs(request.form.get("y_click", type=float))
+		#y_click = abs(request.form.get("y_click", type=float))
 		#current_x_range = tuple((request.form.get("x_low", type=float), request.form.get("x_high", type=float)))
 		#current_y_range = tuple((request.form.get("y_low", type=float), request.form.get("y_high", type=float)))
 		#print(current_x_range)
@@ -39,7 +39,7 @@ def testingRoute(x_range=(0,1), y_range=(0,1)):
 		#x_high = min(x_click+(counter), 1)
 		#y_high = min(y_click +(counter), 1)
 		x_range = (x_low, x_high)
-		y_range = (y_low, y_high)	 
+		y_range = (y_low, y_high)
 	print(cvsopts['plot_height'])
 	#print(current_x_range)
 	dsPlot = newGraphplot(randomloc, connect_edges(randomloc,edges), x_range=x_range, y_range=y_range)
@@ -59,11 +59,32 @@ def vectorCalc(x_range, y_range, x_click, y_click):
 	y_click = y_range[0]*(1-y_click/cvsopts['plot_height']) + y_range[1]*(y_click/cvsopts['plot_height'])
 	return x_click, y_click
 
-#@app.route("/changeRange", methods=["POST"])
-#def changeRange():
-#	x_range = request.form.get("x_range")
-#	y_range = request.form.get("y_range")
-#	return redirect("/testing")
+@app.route("/changeRange", methods=["POST"])
+def changeRange():
+	x_range = request.form.get("x_range")
+	y_range = request.form.get("y_range")
+	return jsonify("/testing")
+
+class map_layout(LayoutAlgorithm):
+    """
+    Assign coordinates to the nodes randomly.
+
+    Accepts an edges argument for consistency with other layout algorithms,
+    but ignores it.
+    """
+
+    def __call__(self, nodes, edges=None, **params):
+        p = param.ParamOverrides(self, params)
+
+        np.random.seed(p.seed)
+
+        df = nodes.copy()
+        points = np.asarray(30* np.random.random((len(df), 2)))
+
+        df[p.x] = points[:, 0]
+        df[p.y] = points[:, 1]
+
+        return df
 
 np.random.seed(0)
 n=10000
@@ -72,7 +93,8 @@ m=20000
 nodes = pd.DataFrame(["node"+str(i) for i in range(n)], columns=['name'])
 edges = pd.DataFrame(np.random.randint(0,len(nodes), size=(m, 2)), columns=['source', 'target'])
 
-randomloc = random_layout(nodes,edges)
+randomloc = map_layout(nodes,edges)
+print(randomloc.tail())
 #how to add to resize function
 
 cvsopts = dict(plot_height=800, plot_width=800)
