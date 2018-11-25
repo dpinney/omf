@@ -33,18 +33,25 @@
 <body>
 	<div id="mapid"></div>
 	<script type="text/javascript">
-		let x_mean = (parseFloat("{{x_high}}") + parseFloat("{{x_low}}")) / 2
-		let y_mean = (parseFloat("{{y_high}}") + parseFloat("{{y_low}}")) / 2
-		console.log(y_mean, x_mean, "{{x_high}}", "{{y_high}}");
-		var mymap = L.map('mapid').setView([y_mean, x_mean], 5);
+		let x_low = parseFloat("{{x_low}}");
+		let x_high = parseFloat("{{x_high}}");
+		let y_low = parseFloat("{{y_low}}");
+		let y_high = parseFloat("{{y_high}}");
+		//let x_mean = (parseFloat("{{x_high}}") + parseFloat("{{x_low}}")) / 2;
+		//let y_mean = (parseFloat("{{y_high}}") + parseFloat("{{y_low}}")) / 2;
+		let bounds = [[y_high, x_high], [y_low, x_low]];
+		var mymap = L.map('mapid').fitBounds(bounds);
+		mymap.setMaxBounds(bounds);
+		var marker = L.marker([y_low, x_low]).addTo(mymap);
 		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		maxBounds: bounds,
 		attribution: null,
 		maxZoom: 18,
 		id: 'mapbox.streets'
 		//accessToken: 'your.mapbox.access.token'
 		}).addTo(mymap);
 		var imageUrl = 'data:image/png;base64,{{image}}';
-    	var imageBounds = [["{{y_high}}", "{{x_high}}"], ["{{y_low}}", "{{x_low}}"]];
+    	var imageBounds = bounds;
 		L.imageOverlay(imageUrl, imageBounds).addTo(mymap);
 	</script>
 	<script type="text/javascript">

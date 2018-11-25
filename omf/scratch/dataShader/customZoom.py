@@ -17,7 +17,7 @@ def hello():
 	return "Hello World!"
 
 @app.route("/testing", methods=["GET", "POST"])
-def testingRoute(x_range=(0,30), y_range=(0,30)):
+def testingRoute(x_range=(-50,-40), y_range=(-50,-40)):
 	print(cvsopts)
 	if request.method == 'POST':
 		#add in calc for current dimensions of canvas?
@@ -79,7 +79,7 @@ class map_layout(LayoutAlgorithm):
         np.random.seed(p.seed)
 
         df = nodes.copy()
-        points = np.asarray(30* np.random.random((len(df), 2)))
+        points = np.asarray(np.random.uniform(low=-50, high=-40, size=(len(df), 2)))
 
         df[p.x] = points[:, 0]
         df[p.y] = points[:, 1]
