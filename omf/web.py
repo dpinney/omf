@@ -271,16 +271,21 @@ def adminControls():
 @app.route("/omfStats")
 @flask_login.login_required
 def omfStats():
-	'''Render log visualizations'''
+	'''Render log visualizations.'''
 	if User.cu() != "admin":
 		return redirect("/")
-	users = [{"username":f[0:-5]} for f in safeListdir("data/User")
-		if f not in ["admin.json","public.json"]]
-	for user in users:
-		userDict = json.load(open("data/User/" + user["username"] + ".json"))
-		tStamp = userDict.get("timestamp","")
-	genAllImages()
-	return render_template("omfStats.html", users = User.cu())
+	return render_template("omfStats.html")
+
+@app.route("/regenOmfStats")
+@flask_login.login_required
+def regenOmfStats():
+	'''Regenarate stats images.'''
+	if User.cu() != "admin":
+		return redirect("/")
+	genImagesProc = Process(target=genAllImages, args=[])
+	genImagesProc.start()
+	genImagesProc.join()
+	return redirect("/omfStats")
 
 @app.route("/myaccount")
 @flask_login.login_required
