@@ -34,20 +34,21 @@ def work(modelDir, inputDict):
 	else:
 		neato = True 
 	chart = voltPlot(omd, workDir=modelDir, neatoLayout=neato)
-	# chart = drawPlot(pJoin(modelDir,feederName + '.omd'), workDir=modelDir, neatoLayout=neato, edgeCol=True, perUnitScale=False, rezSqIn=400)
+	# chart = drawPlot(pJoin(modelDir,feederName + '.omd'), workDir=modelDir, neatoLayout=neato, edgeCol=True, rezSqIn=400)
 	chart.savefig(pJoin(modelDir,"output.png"))
 	with open(pJoin(modelDir,"output.png"),"rb") as inFile:
 		outData["voltageDrop"] = inFile.read().encode("base64")
 	return outData
 		
-def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=True, nodeCol=True, customColormap=
-	False, perUnitScale=True, rezSqIn=400):
+def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, customColormap=
+	False, rezSqIn=400):
 	''' Draw a color-coded map of the voltage drop on a feeder.
 	path is the full path to the GridLAB-D .glm file or OMF .omd file.
 	workDir is where GridLAB-D will run, if it's None then a temp dir is used.
 	neatoLayout=True means the circuit is displayed using a force-layout approach.
-	edgeLabs property must be either 'Name', 'Current', 'Power', 'Rating', 'PercentOfRating', or None
-	nodeLabs property must be either 'Name', 'Voltage', 'VoltageImbalance', or None
+	edgeCol property must be either 'Current', 'Power', 'Rating', 'PercentOfRating', or None
+	nodeCol property must be either 'Name', 'Voltage', 'VoltageImbalance', 'perUnitVoltage', 'perUnit120Voltage', or None
+	edgeLabs and nodeLabs properties must be either 'Name', 'Value', or None
 	edgeCol and nodeCol can be set to false to avoid coloring edges or nodes
 	customColormap=True means use a one that is nicely scaled to perunit values highlighting extremes.
 	Returns a matplotlib object.'''
@@ -273,12 +274,16 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	if customColormap:
 		custom_cm = matplotlib.colors.LinearSegmentedColormap.from_list('custColMap',[(0.0,'blue'),(0.15,'darkgray'),(0.7,'darkgray'),(1.0,'red')])
 		custom_cm.set_under(color='black')
+		vmin = 0
+		vmax = 1.25
 	else:
 		custom_cm = plt.cm.get_cmap('viridis')
+		vmin = None
+		vmax = None
 	drawColorbar = False
 	emptyColors = {}
 	#draw edges with or without colors
-	if edgeCol:
+	if edgeCol != None:
 		drawColorbar = True
 		edgeList = [edgeColors.get(n,1) for n in edgeNames]
 	else:
@@ -292,34 +297,33 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	if edgeLabs != None:
 		if edgeLabs == "Name":
 			edgeLabels = edgeTupleNames
-		elif edgeLabs == "Current":
-			edgeLabels = edgeTupleCurrents
-		elif edgeLabs == "Power":
-			edgeLabels = edgeTuplePower
-		elif edgeLabs == "Rating":
-			edgeLabels = edgeTupleRatings
-		elif edgeLabs == "PercentOfRating":
-			edgeLabels = edgeTupleValsPU
+		elif edgeLabs == "Value":
+			if edgeCol == "Current":
+				edgeLabels = edgeTupleCurrents
+			elif edgeCol == "Power":
+				edgeLabels = edgeTuplePower
+			elif edgeCol == "Rating":
+				edgeLabels = edgeTupleRatings
+			elif edgeCol == "PercentOfRating":
+				edgeLabels = edgeTupleValsPU
+			else:
+				edgeLabels = None
+				print "WARNING: edgeCol property cannot be set to None when edgeLabs property is set to 'Value'"
 		else:
 			edgeLabs = None
-			print "WARNING: edgeLabs property must be either 'Name', 'Current', 'Power', 'Rating', 'PercentOfRating', or None"
+			print "WARNING: edgeLabs property must be either 'Name', 'Value', or None"
 	if edgeLabs != None:
 		edgeLabelsIm = nx.draw_networkx_edge_labels(fGraph,
 			pos = positions,
 			edge_labels = edgeLabels,
 			font_size = 8)
 	# draw nodes with or without color
-	if nodeCol:
+	if nodeCol != None:
 		nodeList = [nodeVolts.get(n,1) for n in fGraph.nodes()]
 		drawColorbar = True
 	else:
 		nodeList = [emptyColors.get(n,.6) for n in fGraph.nodes()]
-	if perUnitScale:
-		vmin = 0
-		vmax = 1.25
-	else:
-		vmin = None
-		vmax = None
+
 	nodeIm = nx.draw_networkx_nodes(fGraph,
 		pos = positions,
 		node_color = nodeList,
@@ -333,13 +337,23 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	if nodeLabs != None:
 		if nodeLabs == "Name":
 			nodeLabels = nodeNames
-		elif nodeLabs == "Voltage":
-			nodeLabels = nodeVolts
-		elif nodeLabs == "VoltageImbalance":
-			nodeLabels = voltImbalances
+		elif nodeLabs == "Value":
+			if nodeLabs == "Voltage":
+				nodeLabels = nodeVolts
+			elif nodeLabs == "VoltageImbalance":
+				nodeLabels = voltImbalances
+			elif nodeLabs == "perUnitVoltage":
+				nodeLabels = None #nodeVoltsPU
+				# TODO: set up perUnitVoltage labels
+			elif nodeLabs == "perUnit120Voltage":
+				nodeLabels = None #nodeVoltsPU120
+				# TODO: set up perUnit120Voltage labels
+			else:
+				nodeLabels = None
+				print "WARNING: nodeCol property cannot be set to None when nodeLabs property is set to 'Value'"
 		else:
 			nodeLabs = None
-			print "WARNING: nodeLabs property must be either 'Name', 'Voltage', 'VoltageImbalance', or None"
+			print "WARNING: nodeLabs property must be either 'Name', 'Value', or None"
 	if nodeLabs != None:
 		nodeLabelsIm = nx.draw_networkx_labels(fGraph,
 			pos = positions,
@@ -476,36 +490,36 @@ def new(modelDir):
 
 # Testing for variable combinations
 def _testAllVarCombos():
-	edgeLabsList = {None : "None", "Name" : "N", "Current" : "C", "Power" : "P", "Rating" : "R", "PercentOfRating" : "Per"}
-	nodeLabsList = {None : "None", "Name" : "N", "Voltage" : "V", "VoltageImbalance" : "VI"}
+	edgeColsList = {None : "None", "Current" : "C", "Power" : "P", "Rating" : "R", "PercentOfRating" : "Per"}
+	nodeColsList = {None : "None", "Voltage" : "V", "VoltageImbalance" : "VI", "perUnitVoltage" : "PUV", "perUnit120Voltage" : "PUV120"}
+	labsList = {None : "None", "Name" : "N", "Value" : "Val"}
 	boolList = {True : "T", False : "F"}
 	testNum = 1
-	for edgeLabVal in edgeLabsList.keys():
-		for nodeLabVal in nodeLabsList.keys():
-			for edgeColVal in boolList.keys():
-				for nodeColVal in boolList.keys():
+	for edgeColVal in edgeColsList.keys():
+		for nodeColVal in nodeColsList.keys():
+			for edgeLabVal in labsList.keys():
+				for nodeLabVal in labsList.keys():
 					for customColormapVal in boolList.keys():
-						for perUnitScaleVal in boolList.keys():
-							testName = edgeLabsList.get(edgeLabVal) + "_" + nodeLabsList.get(nodeLabVal) + "_" + boolList.get(edgeColVal) + "_" + boolList.get(nodeColVal) + "_" + boolList.get(customColormapVal) + "_" + boolList.get(perUnitScaleVal)
-							#print testName
-							pngName = "./drawPlotTest/drawPlot_" + testName + ".png"
-							for i in range(10):
-								try:
-									chart = drawPlot(FNAME, neatoLayout=True, edgeLabs=edgeLabVal, nodeLabs=nodeLabVal, edgeCol=edgeColVal, nodeCol=nodeColVal, customColormap=customColormapVal, perUnitScale=perUnitScaleVal)
-								except IOError, e:
-									if e.errno == 2: #catch temporary IOError and retry until it passes
-										print "IOError [Errno 2] for drawPlot_" + testName + ". Retrying..."
-										continue #retry
-								except:
-									print "!!!!!!!!!!!!!!!!!! Error for drawPlot_" + testName + " !!!!!!!!!!!!!!!!!!"
-									pass
-								else:
-									chart.savefig(pngName)
-									break
+						testName = edgeColsList.get(edgeColVal) + "_" + nodeColsList.get(nodeColVal) + "_" + labsList.get(edgelabVal) + "_" + labsList.get(nodelabVal) + "_" + boolList.get(customColormapVal)
+						#print testName
+						pngName = "./drawPlotTest/drawPlot_" + testName + ".png"
+						for i in range(10):
+							try:
+								chart = drawPlot(FNAME, neatoLayout=True, edgeLabs=edgeLabVal, nodeLabs=nodeLabVal, edgeCol=edgeColVal, nodeCol=nodeColVal, customColormap=customColormapVal)
+							except IOError, e:
+								if e.errno == 2: #catch temporary IOError and retry until it passes
+									print "IOError [Errno 2] for drawPlot_" + testName + ". Retrying..."
+									continue #retry
+							except:
+								print "!!!!!!!!!!!!!!!!!! Error for drawPlot_" + testName + " !!!!!!!!!!!!!!!!!!"
+								pass
 							else:
-								print "****************** Couldn't run drawPlot_" + testName + " ******************"
-							print "Test " + testNum + " of 384 completed." #384 total combinations based on current variable sets
-							testNum += 1
+								chart.savefig(pngName)
+								break
+						else:
+							print "****************** Couldn't run drawPlot_" + testName + " ******************"
+						print "Test " + testNum + " of 384 completed." #384 total combinations based on current variable sets
+						testNum += 1
 
 def _testingPlot():
 	PREFIX = omf.omfDir + '/scratch/CIGAR/'
@@ -518,7 +532,7 @@ def _testingPlot():
 	# FNAME = 'test_smsSingle.glm'
 	# Hack: Agg backend doesn't work for interactivity. Switch to something we can use:
 	# plt.switch_backend('MacOSX')
-	chart = drawPlot(PREFIX + FNAME, neatoLayout=True, edgeCol=True, nodeLabs="Voltage", edgeLabs="Current", perUnitScale=False, rezSqIn=400)
+	chart = drawPlot(PREFIX + FNAME, neatoLayout=True, edgeCol="Current", nodeCol=None, nodeLabs="Name", edgeLabs="Value", rezSqIn=400)
 	# chart.savefig(PREFIX + "YO_WHATS_GOING_ON.png")
 	# plt.show()
 
