@@ -1,5 +1,94 @@
-<script>
-xdescribe("Unit tests", function() {
+//<script>
+describe("Unit tests", function() {
+
+    describe("createTreeObject()", function() {
+
+        describe("when invoked with (key, tree) arguments", function() {
+
+            it("should throw an error when the given key doesn't exist in the tree", function() {
+                expect(function() {
+                    createTreeObject(10, {});
+                }).toThrowError();
+            });
+
+            it("should return a TreeObject with the passed key", function() {
+                const tree = {
+                    1010: {
+                        prop: "custom value"
+                    },
+                    2020: {
+                        prop: "different value"
+                    }
+                };
+                const tObj = createTreeObject(1010, tree);
+                expect(tObj.key).toEqual(1010);
+            });
+
+            it("should return a TreeObject with the data from the tree", function() {
+                const tree = {
+                    1010: {
+                        prop: "custom value"
+                    },
+                    2020: {
+                        prop: "different value"
+                    }
+                };
+                const tObj = createTreeObject(1010, tree);
+                expect(tObj.data).toEqual(tree["1010"]);
+            })
+        });
+
+        describe("when invoked with (map, tree) arguments", function() {
+
+            it("should return a TreeObject with data equivalent to the map", function() {
+                const map = {
+                    prop: "cool value"
+                }
+                const tObj = createTreeObject(map, {});
+                expect(tObj.data).toEqual(map);
+            });
+
+            it("should return a TreeObject with a key that does not exist in the tree", function() {
+                const tObj = createTreeObject({}, {0: {}});
+                expect(tObj.key).toEqual(1);
+            });
+
+            it("should call update()", function() {
+                const spy = spyOn(treeObjectPrototype, "update").and.callThrough();
+                createTreeObject({}, {});
+                expect(spy).toHaveBeenCalled();
+            });
+
+            it("should throw any error thrown by update()", function() {
+                const error = "Custom Error"
+                const spy = spyOn(treeObjectPrototype, "update").and.throwError(error);
+                expect(function() {
+                    createTreeObject({}, {});
+                }).toThrowError(error)
+            });
+
+            it("should call getNewTreeKey()", function() {
+                const spy = spyOn(window, "getNewTreeKey").and.callThrough();
+                createTreeObject({}, {});
+                expect(spy).toHaveBeenCalled();
+            });
+        });
+    });
+
+    describe("createSvgData()", function() {
+
+        it("should return an object with an array of lines and an array of circles", function() {
+            const svgData = createSvgData()
+            expect(svgData.circles).toEqual(jasmine.any(Array));
+            expect(svgData.lines).toEqual(jasmine.any(Array));
+        });
+    });
+
+    describe("svgDataPrototype", function() {
+
+    });
+
+    
 
     describe("Ajax constructor function prototype", function() {
 
@@ -132,7 +221,7 @@ xdescribe("Unit tests", function() {
 
 
 //Run each test inside this block one at a time, i.e. uncomment one it() function at a time and only run one describe block at a time
-describe("Integration tests that require the environment to be prepared correctly and that should be run one at a time", function() {
+xdescribe("Integration tests that require the environment to be prepared correctly and that should be run one at a time", function() {
 
         let originalTimeout;
         beforeEach(function() {
@@ -292,4 +381,4 @@ setTimeout(
     },
     1000
 );
-</script>
+//</script>

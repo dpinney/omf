@@ -744,38 +744,38 @@ function addLine(x1, y1, x2, y2, id, myClass) {
 //
 //}
 
-function buildFeeder() {
+function createViewport(tree, svgContainer) {
 	// Make a map objectName -> key. And while we're at it, find the size we need for the full chart.
 	const nameToKey = {};
 	let maxLon = 100;
 	let maxLat = 100;
-	for (let key in writeFeeder.tree) {
-        nameToKey[writeFeeder.tree[key]['name']] = key;
-        const lon = writeFeeder.tree[key].longitude;
-        const lat = writeFeeder.tree[key].latitude;
+	for (let key in tree) {
+        nameToKey[tree[key]['name']] = key;
+        const lon = tree[key].longitude;
+        const lat = tree[key].latitude;
         //if (lon) {
         //    /* Pretend we have really big coordinate values */
-        //    writeFeeder.tree[key].longitude = lon * 12000;
+        //    tree[key].longitude = lon * 12000;
         //}
         //if (lat) {
         //    /* Pretend we have really big coordinate values */
-        //    writeFeeder.tree[key].latitude = lat * 12000;
+        //    tree[key].latitude = lat * 12000;
         //}
-		if (writeFeeder.tree[key]['longitude'] > maxLon) {
-            maxLon = writeFeeder.tree[key]['longitude']
+		if (tree[key]['longitude'] > maxLon) {
+            maxLon = tree[key]['longitude']
         }
-        if (writeFeeder.tree[key]['latitude'] > maxLat) {
-            maxLat = writeFeeder.tree[key]['latitude']
+        if (tree[key]['latitude'] > maxLat) {
+            maxLat = tree[key]['latitude']
         }
 	}
 	maxLon = Math.round(maxLon + 20.0)
 	maxLat = Math.round(maxLat + 20.0)
-    const svgOb = document.getElementById('svgContainer')
+    //const svgOb = document.getElementById('svgContainer')
 
 	//svgOb.setAttribute('width', maxLon)
 	//svgOb.setAttribute('height', maxLat)
     //svgOb.setAttribute('viewBox','-10.0 -10.0 ' + maxLon + ' ' + maxLat)
-    svgOb.setAttribute('viewBox',`0 0 ${maxLon} ${maxLat}`);
+    svgContainer.setAttribute('viewBox',`0 0 ${maxLon} ${maxLat}`);
 
 	// Attach the pan/zoom behavior.
 	window.panZoom = svgPanZoom('#svgContainer', {
@@ -788,35 +788,83 @@ function buildFeeder() {
         zoomScaleSensitivity: 0.2,
         minZoom: 0.25,
 		maxZoom: 100
-	})
-	for (let key in writeFeeder.tree) {
-		try {
-			const anOb = writeFeeder.tree[key];
-			if ('from' in anOb && 'to' in anOb) {
-				const fromOb = writeFeeder.tree[nameToKey[anOb['from']]];
-				const toOb = writeFeeder.tree[nameToKey[anOb['to']]];
-				addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],key,anOb['object'] + ' p' + countPhases(anOb['phases']));
-			}
-			else if ('parent' in anOb) {
-				const pOb = writeFeeder.tree[nameToKey[anOb['parent']]];
-				addLine(pOb['longitude'],pOb['latitude'],anOb['longitude'],anOb['latitude'],pOb.name + '_' + anOb.name,'parentChild');
-			}
-		} catch (err) {
-			console.log('Failed to Draw ' + writeFeeder.tree[key]);
-		}
-	}
-	// Add circles after all lines
-	for (let key in writeFeeder.tree) {
-		try {
-			const anOb = writeFeeder.tree[key];
-			if ('latitude' in anOb && 'longitude' in anOb && 'object' in anOb && !('from' in anOb) && !('to' in anOb)) {
-				addCircle(anOb['longitude'],anOb['latitude'],2,key,anOb['object']);
-			}
-		} catch (err) {
-			console.log('Failed to Draw ' + writeFeeder.tree[key]);
-		}
-    }
+	});
 }
+
+//function buildFeeder() {
+//	// Make a map objectName -> key. And while we're at it, find the size we need for the full chart.
+//	const nameToKey = {};
+//	let maxLon = 100;
+//	let maxLat = 100;
+//	for (let key in writeFeeder.tree) {
+//        nameToKey[writeFeeder.tree[key]['name']] = key;
+//        const lon = writeFeeder.tree[key].longitude;
+//        const lat = writeFeeder.tree[key].latitude;
+//        //if (lon) {
+//        //    /* Pretend we have really big coordinate values */
+//        //    writeFeeder.tree[key].longitude = lon * 12000;
+//        //}
+//        //if (lat) {
+//        //    /* Pretend we have really big coordinate values */
+//        //    writeFeeder.tree[key].latitude = lat * 12000;
+//        //}
+//		if (writeFeeder.tree[key]['longitude'] > maxLon) {
+//            maxLon = writeFeeder.tree[key]['longitude']
+//        }
+//        if (writeFeeder.tree[key]['latitude'] > maxLat) {
+//            maxLat = writeFeeder.tree[key]['latitude']
+//        }
+//	}
+//	maxLon = Math.round(maxLon + 20.0)
+//	maxLat = Math.round(maxLat + 20.0)
+//    const svgOb = document.getElementById('svgContainer')
+//
+//	//svgOb.setAttribute('width', maxLon)
+//	//svgOb.setAttribute('height', maxLat)
+//    //svgOb.setAttribute('viewBox','-10.0 -10.0 ' + maxLon + ' ' + maxLat)
+//    svgOb.setAttribute('viewBox',`0 0 ${maxLon} ${maxLat}`);
+//
+//	// Attach the pan/zoom behavior.
+//	window.panZoom = svgPanZoom('#svgContainer', {
+//        /* These are equal to the default values */
+//		//zoomEnabled: true,
+//		//controlIconsEnabled: false,
+//        //center: true,
+//		//fit: true,
+//        //contain: true,
+//        zoomScaleSensitivity: 0.2,
+//        minZoom: 0.25,
+//		maxZoom: 100
+//	})
+
+//	for (let key in writeFeeder.tree) {
+//		try {
+//			const anOb = writeFeeder.tree[key];
+//			if ('from' in anOb && 'to' in anOb) {
+//				const fromOb = writeFeeder.tree[nameToKey[anOb['from']]];
+//				const toOb = writeFeeder.tree[nameToKey[anOb['to']]];
+//				addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],key,anOb['object'] + ' p' + countPhases(anOb['phases']));
+//			}
+//			else if ('parent' in anOb) {
+//				const pOb = writeFeeder.tree[nameToKey[anOb['parent']]];
+//				addLine(pOb['longitude'],pOb['latitude'],anOb['longitude'],anOb['latitude'],pOb.name + '_' + anOb.name,'parentChild');
+//			}
+//		} catch (err) {
+//			console.log('Failed to Draw ' + writeFeeder.tree[key]);
+//		}
+//	}
+//	// Add circles after all lines
+//	for (let key in writeFeeder.tree) {
+//		try {
+//			const anOb = writeFeeder.tree[key];
+//			if ('latitude' in anOb && 'longitude' in anOb && 'object' in anOb && !('from' in anOb) && !('to' in anOb)) {
+//				addCircle(anOb['longitude'],anOb['latitude'],2,key,anOb['object']);
+//			}
+//		} catch (err) {
+//			console.log('Failed to Draw ' + writeFeeder.tree[key]);
+//		}
+//    }
+//}
 
 function mouseDown(event) { // eslint-disable-line
 	downX = event.pageX
@@ -1353,7 +1401,7 @@ function clickLatLon(event) {
 function newNode() { // eslint-disable-line
 	// Start creation of new node.
 	//var newTreeId = Object.keys(writeFeeder.tree).length
-	const newTreeKey = newTreeKey();
+	const newTreeKey = getNewTreeKey(writeFeeder.tree).toString();
 	var newTreeNode = {
 		longitude: 0,
 		latitude: 0,
@@ -1374,7 +1422,7 @@ function newNodeListener() {
 	// Click handler for location of new node.
 	var xloc = event.pageX;
 	var yloc = event.pageY;
-	var newTreeKey = newTreeKey();
+	var newTreeKey = getNewTreeKey(writeFeeder.tree).toString();
 	const coords = clickLatLon(event);
 	xloc = coords.x;
 	yloc = coords.y;
@@ -1425,7 +1473,7 @@ function newLink(componentName) { // eslint-disable-line
 	const newTreeLink = clone(components[componentName]);
 	newTreeLink.from = firstTreeNode.name;
 	newTreeLink.to = secondTreeNode.name;
-	const newTreeKey = newTreeKey();
+	const newTreeKey = getNewTreeKey(writeFeeder.tree).toString();
 	newTreeLink.name = componentName + newTreeKey;
 	// Save to tree
 	writeFeeder.tree[newTreeKey] = newTreeLink;
@@ -1792,7 +1840,7 @@ function getSelectedNode() {
  * @return {object} nodeToAdd
  */
 function newChildAtLocation(component, treeKey) {
-	const newTreeKey = newTreeKey();
+	const newTreeKey = getNewTreeKey(writeFeeder.tree).toString();
 	const newName = component.object + newTreeKey;
 	const parentTreeObj = writeFeeder.tree[treeKey];
 	component['parent'] = parentTreeObj['name'];
@@ -2403,9 +2451,226 @@ ProgressModal.prototype.hide = function() {
 }
 
 //**************************************************
-// Data interface v2
+// Tree interface v2
 //**************************************************
 
+const treeObjectPrototype = {
+    update(map) {
+        this.data = map;
+    }
+};
+
+/** 
+ * @param {(number|object)} input - Either a key or a map of properties to create the TreeObject
+ * @param {tree} - The tree from which to create the TreeObject
+ */
+function createTreeObject(input, tree) {
+    const obj = Object.create(treeObjectPrototype);
+    if (typeof input === "number") {
+        if (tree[input.toString()]) {
+            obj.key = input;
+            obj.data = tree[input.toString()];
+            return obj;
+        }
+        throw new ReferenceError("The passed key to create the TreeObject does not exist in the tree.");
+    } else if (typeof input === "object" && !Array.isArray(input)) {
+        obj.key = getNewTreeKey(tree);
+        obj.update(input);
+        return obj;
+    } 
+    throw new TypeError("Input must be a number or an object.");
+}
+
+//**************************************************
+// Svg interface v2
+//**************************************************
+
+const deletableSvgDataPrototype = {
+    deleteFrom(viewport) {
+        this.svgIds.forEach(id => {
+            viewport.removeChild(document.getElementById(id));
+        });
+    }
+}
+
+/**
+ * @param {Object} tree - A tree of all tree objects that 1) were already deleted from the tree and 2) should also
+ * be deleted from the svg.
+ * @return {Object} DeletableSvgData - Has a method for deleting from a viewport.
+ */
+function createDeletableSvgData(tree) {
+    const obj = Object.create(deletableSvgDataPrototype);
+    obj.svgIds = []
+    Object.keys(tree).forEach(key => {
+        if (isParentChildNode(tree[key])) {
+            obj.svgIds.push(key);
+            const parentChildLineId = `${tree[key].parent}_${tree[key].name}`
+            obj.svgIds.push(parentChildLineId);
+        } else if (isParentlessNode(tree[key])) {
+            obj.svgIds.push(key);
+        } else if (isLine(tree[key])) {
+            obj.svgIds.push(key)
+        } else { 
+            //Preserve David's earlier try-catch in buildFeeder()
+			console.log(`Failed to Delete ${tree[key]}`);
+            //console.log(`Failed to delete tree object at key "${key}"`)
+            //console.log(`Tree object at key: "${key}" is not a parent-child node, a parentless node, or a line. Failed to delete node.`);
+            //throw new Error(`tree key: ${key}, with data: ${tree[key]} is not a parent-child node, a parentless node, or a line.`); 
+        }
+    });
+    return obj;
+}
+
+const addableSvgDataPrototype = {
+    /** Add the svgData to the viewport when the feeder is initially build. 
+     * The lines must be drawn before circles to be underneath the circles. 
+     */
+    addTo(viewport) {
+        this.lines.forEach(line => {
+            viewport.appendChild(line);
+        });
+        this.circles.forEach(circle => {
+            viewport.appendChild(circle);
+        });
+    },
+    redrawTo(viewport) {
+        this.lines.forEach(line => {
+            viewport.removeChild(document.getElementById(line.id));
+        });
+        this.circles.forEach(circle => {
+            viewport.removeChild(document.getElementById(circle.id));
+        });
+        this.lines.forEach(line => {
+            viewport.appendChild(line);
+        });
+        this.circles.forEach(circle => {
+            viewport.appendChild(circle);
+        });
+    }
+};
+
+/**
+ * @param {Object} tree - A tree of all tree objects that 1) are already inside the tree and 2) should also
+ * be added to the svg.
+ * @return {Object} AddableSvgData - Has a method for adding to a viewport and a method for redrawing to 
+ * a viewport. 
+ */
+function createAddableSvgData(tree) {
+    const obj = Object.create(addableSvgDataPrototype);
+    obj.lines = [];
+    obj.circles = [];
+    Object.keys(tree).forEach(key => {
+        if (isParentChildNode(tree[key])) {
+            // Add this circle, which has a parent
+            const circle = createSvgCircle(parseInt(key, 10), tree[key]);
+            obj.circles.push(circle);
+            // Add the parent-child line between this circle and its parent
+            const parent = getParentNodeObject(tree[key], tree);
+            const parentChildLine = createSvgLine(parent, tree[key]);
+            obj.lines.push(parentChildLine);
+        } else if (isParentlessNode(tree[key])) {
+            const circle = createSvgCircle(parseInt(key, 10), tree[key]);
+            obj.circles.push(circle);
+        } else if (isLine(tree[key])) {
+            const nodes = getLineNodeObjects(tree[key], tree);
+            const source = nodes.sourceNode;
+            const target = nodes.targetNode;
+            const line = createSvgLine(source, target, parseInt(key, 10), tree[key]);
+            obj.lines.push(line);
+        } else { 
+            //Preserve David's earlier try-catch in buildFeeder()
+			console.log('Failed to Draw ' + tree[key]);
+            //console.log(`Failed to draw tree object at key "${key}"`)
+            //console.log(`Tree object at key: "${key}" is not a parent-child node, a parentless node, or a line. Failed to draw node.`);
+            //throw new Error(`tree key: ${key}, with data: ${tree[key]} is not a parent-child node, a parentless node, or a line.`); 
+        }
+    });
+    return obj;
+}
+
+/* "Private" helper methods */
+
+function isParentlessNode(obj) {
+    return obj.hasOwnProperty("longitude") && obj.hasOwnProperty("latitude") && !obj.hasOwnProperty("parent") &&
+    !obj.hasOwnProperty("from") && !obj.hasOwnProperty("t0") ? true : false;
+}
+
+function isParentChildNode(obj) {
+	return obj.hasOwnProperty("parent") ? true : false;
+}
+
+function isLine(obj) {
+    return obj.hasOwnProperty("from") && obj.hasOwnProperty("to") ? true : false;
+}
+
+/** TODO: use a regular expression
+ */
+function getParentNodeObject(obj, tree) {
+    const key = Object.keys(tree).find(key => {
+        return tree[key].name === obj.parent;
+    });
+    return tree[key];
+}
+
+/** TODO: use a regular expression
+ */
+function getLineNodeObjects(obj, tree) {
+    const fromKey = Object.keys(tree).find(key => {
+        return tree[key].name === obj.from;
+    });
+    const toKey = Object.keys(tree).find(key => {
+        return tree[key].name === obj.to;
+    });
+    return {
+        sourceNode: tree[fromKey],
+        targetNode: tree[toKey]
+    }
+}
+
+/**
+ * @return {Object} SvgCircle - A fully configured svg circle.
+ */
+function createSvgCircle(key, {longitude, latitude, object}, {r = 2, strokeWidth = 0.5} = {}) {
+    if (typeof key !== "number") {
+        throw new TypeError("key argument must be a number.");
+    }
+	const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+	circle.setAttribute('id', key.toString());
+	circle.setAttribute('cx', longitude);
+	circle.setAttribute('cy', latitude);
+	circle.setAttribute('class', object);
+	circle.setAttribute('r', r);
+    circle.setAttribute('stroke-width', strokeWidth);
+    return circle;
+}
+/** 
+ * @return {Object} SvgLine - A fully configured svg line.
+ */
+function createSvgLine(sourceNode, targetNode, key, thisObject) {
+    const svgLine = document.createElementNS('http://www.w3.org/2000/svg', 'line'); 
+    svgLine.setAttribute("x1", sourceNode.longitude); 
+    svgLine.setAttribute("y1", sourceNode.latitude); 
+    svgLine.setAttribute("x2", targetNode.longitude);
+    svgLine.setAttribute("y2", targetNode.latitude);
+    if (!key && !thisObject) {
+        // key and thisObject weren't included, so this line doesn't represent a real object in the tree, so it's a parent-child line.
+        svgLine.setAttribute("id", `${sourceNode.name}_${targetNode.name}`);
+        svgLine.setAttribute("class", "parentChild");
+        svgLine.setAttribute("stroke-width", 0.25);
+        return svgLine;
+    } else if (key && thisObject) {
+        if (typeof key !== "number") {
+            throw new Error("key argument passed to createSvgLine must be a number");
+        }
+        svgLine.setAttribute("id", key.toString());
+        const phaseCount = countPhases(thisObject.phases).toString();
+        const domClass = `${thisObject.object} p${phaseCount}`;
+        svgLine.setAttribute("class", domClass);
+        svgLine.setAttribute("stroke-width", phaseCount);
+        return svgLine;
+    }
+    throw new Error("key and thisObject arguments must be passed together or not at all");
+}
 
 //**************************************************
 // Data interface
@@ -2431,26 +2696,27 @@ At the time of writing, this includes:
 ["battery", "capacitor", "evcharger_det", "house", "inverter", "load", "meter", "recorder", "solar", "waterheater", 
 "windturb_dg", "ZIPload"];
 */
-function isParentChildNode(treeObject) {
-	return treeObject.data.hasOwnProperty("parent") ? true : false;
-}
+//function isParentChildNode(treeObject) {
+//	return treeObject.data.hasOwnProperty("parent") ? true : false;
+//}
 
 /** Return true if this data represents a node that has no other intrinsic relationship to another node. At the time of writing, this includes:
 ["node", "regulator_configuration", "transformer_configuration", "triplex_line_conductor", "triplex_line_configuration", "triplex_meter",
 "triplex_node", "volt_var_control"];
 */
-function isParentlessNode(treeObject) {
-	return treeObject.data.hasOwnProperty("parent") || treeObject.data.hasOwnProperty("from") || treeObject.data.hasOwnProperty("to") ? false : true;
-}
+//function isParentlessNode(treeObject) {
+//	return treeObject.data.hasOwnProperty("parent") || treeObject.data.hasOwnProperty("from") || treeObject.data.hasOwnProperty("to") ? false : true;
+//}
 
-function isNode(treeObject) {
-	return isParentChildNode(treeObject) || isParentlessNode(treeObject) ? true : false;
-}
+//function isNode(treeObject) {
+//	return isParentChildNode(treeObject) || isParentlessNode(treeObject) ? true : false;
+//}
 
-function getParentTreeObject(treeObject) {
-	const key = Object.keys(writeFeeder.tree).find(key => writeFeeder.tree[key].name === treeObject.data.parent);
-	return new TreeObject(key, writeFeeder.tree[key]);
-}
+
+//function getParentTreeObject(treeObject, tree) {
+//	const key = Object.keys(writeFeeder.tree).find(key => writeFeeder.tree[key].name === treeObject.data.parent);
+//	return new TreeObject(key, writeFeeder.tree[key]);
+//}
 
 function TreeObject(key, data) {
 	if (typeof(key) !== "string" || !data || Array.isArray(data) || typeof(data) !== "object") {
@@ -2462,38 +2728,60 @@ function TreeObject(key, data) {
 
 /** cx refers to longitude, cy refers to latitude.
 */
-function Circle(cx, cy, r, id, domClass, strokeWidth) {
-	if (typeof(cx) !== "number" || typeof(cy) !== "number" || typeof(r) !== "number" || typeof(id) !== "number" || 
-		typeof(domClass) !== "string" || typeof(strokeWidth) !== "number") {
-		throw "Circle constructor function was called with improper arguments";
-	}
-	this.cx = cx;
-	this.cy = cy;
+//function Circle(cx, cy, r, id, domClass, strokeWidth) {
+//	if (typeof(cx) !== "number" || typeof(cy) !== "number" || typeof(r) !== "number" || typeof(id) !== "number" || 
+//		typeof(domClass) !== "string" || typeof(strokeWidth) !== "number") {
+//		throw "Circle constructor function was called with improper arguments";
+//	}
+//	this.cx = cx;
+//	this.cy = cy;
+//	this.r = r;
+//	this.id = id;
+//	this.domClass = domClass;
+//	this.strokeWidth = strokeWidth;
+//}
+
+function Circle(key, {longitude, latitude, object}, {r = 2, strokeWidth = 0.5} = {}) {
+    if (typeof key !== "number") {
+        throw new TypeError("key argument must be a number");
+    }
+	this.cx = longitude;
+	this.cy = latitude;
 	this.r = r;
-	this.id = id;
+	this.id = key.toString();
+	this.domClass = object;
+	this.strokeWidth = strokeWidth;
+}
+/** x refers to longitude, y refers to latitude.
+*/
+//function Line(x1, y1, x2, y2, id, domClass, strokeWidth) {
+//	if (typeof(x1) !== "number" || typeof(y1) !== "number" || typeof(x2) !== "number" || typeof(y2) !== "number" || typeof(id) !== "string" ||
+//		typeof(domClass) !== "string" || typeof(strokeWidth) !== "number") {
+//		throw "Line constructor function was called with improper arguments";
+//	}
+//	this.x1 = x1;
+//	this.y1 = y1;
+//	this.x2 = x2;
+//	this.y2 = y2;
+//	this.id = id;
+//	this.domClass = domClass;
+//	this.strokeWidth = strokeWidth;
+//}
+
+function Line(key, sourceNode, targetNode) {
+	this.x1 = sourceNode.longitude;
+	this.y1 = sourceNode.latitude;
+	this.x2 = targetNode.longitude;
+	this.y2 = targetNode.latitude;
+	this.id = key;
 	this.domClass = domClass;
 	this.strokeWidth = strokeWidth;
 }
 
-/** x refers to longitude, y refers to latitude.
-*/
-function Line(x1, y1, x2, y2, id, domClass, strokeWidth) {
-	if (typeof(x1) !== "number" || typeof(y1) !== "number" || typeof(x2) !== "number" || typeof(y2) !== "number" || typeof(id) !== "string" ||
-		typeof(domClass) !== "string" || typeof(strokeWidth) !== "number") {
-		throw "Line constructor function was called with improper arguments";
-	}
-	this.x1 = x1;
-	this.y1 = y1;
-	this.x2 = x2;
-	this.y2 = y2;
-	this.id = id;
-	this.domClass = domClass;
-	this.strokeWidth = strokeWidth;
-}
 /** Return an SvgData object to be used to draw on the graph, or return null if there is nothing to draw.
 */
 function addFeederObject(componentName, htmlSelection) {
-	const treeObject = new TreeObject(newTreeKey(), clone(components[componentName]));
+	const treeObject = new TreeObject(getNewTreeKey(writeFeeder.tree).toString(), clone(components[componentName]));
 	const associatedTreeObjects = getAssociatedTreeObjects(treeObject, htmlSelection);
 	if (!associatedTreeObjects) {
 		alert("Invalid svg selection. Failed to add object to feeder.");
@@ -2586,28 +2874,6 @@ function addFeederObject(componentName, htmlSelection) {
 		return new SvgData(lines, circles);
 	}
 	return null;
-}
-
-function deleteFeederObject() {
-
-}
-
-function addPropertyToFeederObject() {
-
-}
-
-function deletePropertyFromFeederObject() {
-
-}
-
-/** Make an "isObject" function or something.
-*/
-function changeFeederObjectProperties(treeObject, properties) {
-	if(!(treeObject instanceof TreeObject) || !properties || Array.isArray(properties) || typeof(properties) !== "object") {
-		throw "Invoked with incorrect arguments";
-	}
-
-
 }
 
 /** Return a (possibly empty) object containing feeder.tree objects if the selection was valid, else return null.
@@ -2773,15 +3039,15 @@ function addToFeederLinks(treeObject) {
 }
 
 /**
- * Return a key value which has not been used in tree object.
- * @return {string} key
+ * Return a key value which has not been used in tree.
+ * @return {number} key
  */
-function newTreeKey() { 
-	let nextKey = Object.keys(writeFeeder.tree).length;
-	while(writeFeeder.tree.hasOwnProperty(nextKey.toString())) {
+function getNewTreeKey(tree) { 
+	let nextKey = Object.keys(tree).length;
+	while(tree.hasOwnProperty(nextKey.toString())) {
 		nextKey += 1;
 	}
-	return nextKey.toString();
+	return nextKey;
 }
 
 function deepCopy(oldObject) {
@@ -2823,7 +3089,7 @@ function countPhases(p) {
 }
 
 //**************************************************
-// Svg visualization interface
+// Svg interface
 //**************************************************
 
 /** SvgData is never allowed to be empty. It must always be created with its data. An empty SvgData object would indicate a problem in the data layer.
@@ -2904,11 +3170,20 @@ function addLineNew(line) {
 
 //setTimeout(main,100)
 (() => {
-	buildFeeder();
+    //buildFeeder();
+    createViewport(writeFeeder.tree, document.getElementById("svgContainer"));
+    const viewport = document.getElementsByClassName('svg-pan-zoom_viewport')[0];
+    const svgData = createAddableSvgData(writeFeeder.tree);
+    svgData.addTo(viewport);
     attachFeederList(document.getElementById("publicFeederList"), publicFeeders, "public");
     attachFeederList(document.getElementById("userFeederList"), userFeeders, thisOwner);
     fillObjectMenu(components);
-	document.getElementById('loadingMessage').style.display = 'none'
+    document.getElementById('loadingMessage').style.display = 'none'
+
+    //setTimeout(function() {
+    //    const deleteSvgData = createDeletableSvgData(writeFeeder.tree);
+    //    deleteSvgData.deleteFrom(viewport);
+    //}, 2000);
 })();
 </script>
 <!--<script type='text/javascript' src='/static/distDataValidation.js'></script>-->
