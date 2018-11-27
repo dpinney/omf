@@ -1,5 +1,12 @@
 <head>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+		<!-- Leaflet  Imports -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css"
+	integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+	crossorigin=""/>
+	<script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
+	integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
+	crossorigin=""></script>
 	<script>
 	function post_to_url(path, params, method) {
 		method = method || 'post' // Set method to post by default, if not specified.
@@ -18,30 +25,51 @@
 		document.body.appendChild(form)
 		form.submit()
 	}
-
-	function changeRange(x, y){
-		//var maxHeight = 800;
-		//var maxWidth = 800;
-		//let x_click = x
-		//let x_range_high = Math.min((x / maxWidth + 0.25), 1)
-		//let y_click = y
-		//let y_range_high = Math.min((y / maxHeight + 0.25), 1)
-		post_to_url("/testing", {x_click: x, y_click: y});
-	}
 	</script>
+	<style type="text/css">
+		#mapid { height: 800px; width: 800px; }
+	</style>
 </head>
 <body>
-	<div><img id="dsImage" src="data:image/png;base64,{{image}}"></div>
+	<div id="mapid"></div>
 	<script type="text/javascript">
-	$(document).ready(function() {
-	    $("#dsImage").on("click", function(event) {
-	        var x = (event.pageX - this.offsetLeft);
-	        console.log(x);
-	        var y = (event.pageY - this.offsetTop);
-	        console.log(y);
-	        changeRange(x, y);
-	    });
-	});
+		let x_low = parseFloat("{{x_low}}");
+		let x_high = parseFloat("{{x_high}}");
+		let y_low = parseFloat("{{y_low}}");
+		let y_high = parseFloat("{{y_high}}");
+		//let x_mean = (parseFloat("{{x_high}}") + parseFloat("{{x_low}}")) / 2;
+		//let y_mean = (parseFloat("{{y_high}}") + parseFloat("{{y_low}}")) / 2;
+		let bounds = [[y_high, x_high], [y_low, x_low]];
+		var mymap = L.map('mapid').fitBounds(bounds);
+		mymap.setMaxBounds(bounds);
+		var marker = L.marker([y_low, x_low]).addTo(mymap);
+		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		maxBounds: bounds,
+		attribution: null,
+		maxZoom: 18,
+		id: 'mapbox.streets'
+		//accessToken: 'your.mapbox.access.token'
+		}).addTo(mymap);
+		var imageUrl = 'data:image/png;base64,{{image}}';
+    	var imageBounds = bounds;
+		L.imageOverlay(imageUrl, imageBounds).addTo(mymap);
 	</script>
-	<div><button id="changeRangeButton" type="button" onclick="changeRange()">Change Range</button></div>
+	<script type="text/javascript">
+		function changeZoom(){
+			var inputForm = document.getElementById('inputForm');
+		}
+	</script>
+	<div>
+		<form name="inputForm" id="inputForm" onsubmit="changeZoom();" method="post">
+			<label>x_low</label>
+			<input type="text" name="x_low" id="x_low" value="{{x_low}}"/>
+			<label>y_low</label>
+			<input type="text" name="y_low" id="y_low" value="{{y_low}}"/>
+			<label>x_high</label>
+			<input type="text" name="x_high" id="x_high" value="{{x_high}}"/>
+			<label>y_high</label>
+			<input type="text" name="y_high" id="y_high" value="{{y_high}}"/>
+			<button id="changeGraph" type="submit">Zoom button</button>
+		</form>
+	</div>
 </body>

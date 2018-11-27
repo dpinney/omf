@@ -4,9 +4,6 @@ By david.pinney@nreca.coop and ian.george@nreca.coop in 2017.
 Prereqs: a database file pulled from omf.coop, python, libraries listed below in the import statements (all pip installable).
 Runtime: about 30 seconds.
 OOO Think about what to do with the error log.
-OOO Add a link to search tools: https://www.google.com/webmasters/tools/home?hl=en&authuser=0
-OOO Add a link to AWS monitoring: https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#Instances:InstanceId=i-054cb5c41369df768;sort=tag:Name
-OOO Also throw in uptime monitoring: https://uptimerobot.com/dashboard#780640327
 '''
 
 import os
@@ -19,27 +16,28 @@ import collections
 from geoip import geolite2
 from iso3166 import countries
 import zipfile
+import omf
+# from REPIC import REPIC
 
 plt.style.use('ggplot')
 
 def genModelDatabase(outPath):
 	'''Translates all models on serer to .tsv file'''
-	modelDir = os.path.join(os.getcwd(), 'data/Model')
+	modelDir = os.path.join(omf.omfDir, 'data', 'Model')
 	with open(outPath, 'wb') as statsFile:
 		writer = csv.writer(statsFile, delimiter='\t', lineterminator='\n')
 		writer.writerow(['Owner', 'Model Name', 'Type', 'Runtime (H:M:S)', 'Status', 'Created'])
-		for owner in [x for x in os.listdir(modelDir) if os.path.isdir(x)]:
+		for owner in [x for x in os.listdir(modelDir) if not x.startswith('.')]:
 			ownerDir = os.path.join(modelDir, owner)
-			for project in [x for x in os.listdir(ownerDir) if os.path.isdir(x)]:
+			for project in [x for x in os.listdir(ownerDir) if not x.startswith('.')]:
 				projectDir = os.path.join(ownerDir, project)
 				with open((projectDir + '/allInputData.json')) as j:
 					jData = json.load(j)
-				j.close()
 				created = jData['created'].split('.')[0]
 				if 'runTime' in jData:
-					writer.writerow([owner, project, jData['modelType'], jData['runTime'], created])
+					writer.writerow([owner, project, jData['modelType'], jData['runTime'], 'NOSTATUS', created])
 				else:
-					writer.writerow([owner, project, jData['modelType'], '', created])
+					writer.writerow([owner, project, jData['modelType'], '0:00:00', 'NOSTATUS', created])
 
 def genAllImages():
 	'''Creates tsv database of models and images from log'''
@@ -50,7 +48,7 @@ def genAllImages():
 
 def modelDatabaseStats(dataFilePath, outFilePath):
 	# Last run:
-	# #REPIC(time.strftime("%c"))  #OUTPUT: Sat Nov 17 02:39:05 2018
+	# REPIC(time.strftime("%c"))  #OUTPUT: Mon Nov 26 15:34:39 2018
 	# Import the data.
 	models = []
 	with open(dataFilePath, 'r') as inFile:
@@ -58,32 +56,30 @@ def modelDatabaseStats(dataFilePath, outFilePath):
 		for row in reader:
 			models.append(row)
 	# Example of what the data structure looks like:
-	#REPIC(models[1:3])  #OUTPUT: [{'Status': '2017-02-15 11:11:41', 'Created': None, 'Runtime (H:M:S)': '0:03:39', 'Model Name': 'Demo gridlabMulti scadaCalibration', 'Owner': 'public', 'Type': 'gridlabMulti'}, {'Status': '2014-07-30 11:23:46', 'Created': None, 'Runtime (H:M:S)': '0:00:37', 'Model Name': 'Demo Wind Olin Barre GH Wind', 'Owner': 'public', 'Type': 'gridlabMulti'}]
+	# REPIC(models[1:3])  #OUTPUT: [{'Status': 'NOSTATUS', 'Created': '2018-10-08 11:01:25', 'Runtime (H:M:S)': '0:00:00', 'Model Name': '30bus', 'Owner': 'test', 'Type': 'transmission'}, {'Status': 'NOSTATUS', 'Created': '2018-10-15 12:04:40', 'Runtime (H:M:S)': '0:00:00', 'Model Name': 'inProductionfewf', 'Owner': 'test', 'Type': 'solarDisagg'}]
 	# Model count:
-	#REPIC(len(models))  #OUTPUT: 17
+	# REPIC(len(models))  #OUTPUT: 63
 	# Note that this will undercount users because some users view but don't create models.
 	users = set([x['Owner'] for x in models])
 	# User count:
-	#REPIC(len(users))  #OUTPUT: 2
+	# REPIC(len(users))  #OUTPUT: 3
 	organizations = set([x.split('@')[-1] for x in users])
 	# Organizations with one or more users:
-	#REPIC(len(organizations))  #OUTPUT: 2
+	# REPIC(len(organizations))  #OUTPUT: 3
 	# Counts per model:
 	modelTypes = set([x['Type'] for x in models])
 	modelCounts = {x: len([y for y in models if y['Type'] == x]) for x in modelTypes}
-	#REPIC(modelCounts)  #OUTPUT: {'solarEngineering': 1, 'solarFinancial': 1, 'cvrStatic': 1, 'solarCashflow': 1, 'gridlabMulti': 7, 'solarSunda': 1, 'voltageDrop': 3, 'storagePeakShave': 1, 'pvWatts': 1}
-
+	# REPIC(modelCounts)  #OUTPUT: {'neoPVWatts': 1, '_weatherPull': 1, 'storageDeferral': 2, '_dsoSimStudio': 1, 'distScenGen': 1, 'loadForecast': 1, 'storageArbitrage': 1, 'weatherPull': 1, 'vbatEvaluation': 2, 'resilientDist': 1, 'vbatDispatch': 1, 'pvWattsPlotly': 2, 'solarCashflow': 2, 'gridlabMulti': 8, 'voltageDrop': 5, '_gridBallast': 1, 'storageDispatch': 2, 'solarEngineering': 2, 'solarFinancial': 2, 'cvrStatic': 2, 'solarConsumer': 1, 'demandResponse': 1, 'circuitRealTime': 1, 'solarDisagg': 6, 'cvrDynamic': 1, 'transmission': 7, 'solarSunda': 1, '_storageDispatch': 1, 'storagePeakShave': 1, 'pvWatts': 3, '_vbatDispatch': 1}
 	# Calculate users over time.
 	def getYear(dateString):
 		try:
 			return dateString[0:4]
 		except:
 			return 'dateless'
-
 	earliestDates = {x: min([getYear(y['Created']) for y in models if y['Owner'] == x]) for x in users}
 	userDatePairs = zip(earliestDates.keys(), earliestDates.values())
 	years = set(earliestDates.values())
-	#REPIC(years)  #OUTPUT: set(['dateless'])
+	# REPIC(years)  #OUTPUT: set(['2014', '2017', '2018'])
 	yearUsers = {y: len([x for x in userDatePairs if x[1] == y]) for y in years}
 	# HACK: some models missing dates.
 	#yearUsers['2014'] += yearUsers['']; yearUsers.pop('')
@@ -91,7 +87,7 @@ def modelDatabaseStats(dataFilePath, outFilePath):
 	#yearUsers['2017'] = yearUsers['2017']*2
 	# Sort it for nice plotting.
 	yearUsers = collections.OrderedDict(sorted(yearUsers.items()))
-	#REPIC(yearUsers)  #OUTPUT: OrderedDict([('dateless', 2)])
+	# REPIC(yearUsers)  #OUTPUT: OrderedDict([('2014', 1), ('2017', 1), ('2018', 1)])
 	# Plot users over time
 	plt.figure(figsize=(12, 8))
 	plt.subplot(2, 1, 1)
@@ -113,7 +109,6 @@ def modelDatabaseStats(dataFilePath, outFilePath):
 	plt.xticks([x + 0.4 for x in xRanges], modelCounts.keys(), rotation='vertical')
 	plt.subplots_adjust(bottom=0.2)
 	plt.savefig(outFilePath)
-
 
 def trafficLogStats(logsPath, outFilePath):
 	# Read in a file containing the full access log.
@@ -248,4 +243,4 @@ def trafficLogStats(logsPath, outFilePath):
 	plt.savefig(outFilePath)
 
 if __name__ == '__main__':
-	genAllImages()
+	genModelDatabase()
