@@ -70,13 +70,13 @@ def pullUscrn(year, station, datatype):
 		"SOIL_TEMP_20": 35,
 		"SOIL_TEMP_50": 36,
 		"SOIL_TEMP_100": 37 }
-
 	assert datatype in datatypeDict, "This datatype isn't listed in options!"
 	datatypeID = datatypeDict[datatype]
 	return [float(x.split()[datatypeID]) for x in r.text.splitlines() if len(x) != 0]
 
 def _pullWeatherWunderground(start, end, airport, workDir):
-	''' Download weather CSV data to workDir. 1 file for each day between start and 
+	'''	NOTE: WeatherUnderground moved behind a paywall but we'll keep this in case we get a license. 
+	Download weather CSV data to workDir. 1 file for each day between start and 
 	end (YYYY-MM-DD format). Location is set by airport (three letter airport code, e.g. DCA). '''
 	# Parse start and end dates.
 	start_dt = datetime.strptime(start, "%Y-%m-%d")
