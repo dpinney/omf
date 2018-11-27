@@ -28,8 +28,8 @@ def _lineDistances(x1,x2,y1,y2):
 	''' Calculate distance between two points. Divice by 12 is for a feet to inches conversion. '''
 	return math.sqrt((float(x1) - float(x2)) ** 2 + (float(y1) - float(y2)) ** 2) / 12
 
-def convert(stdString,seqString):
-	''' Take in a .std and .seq strings from Milsoft and spit out a json dict.'''
+def convert(stdString, seqString, rescale=True):
+	''' Take in a .std and .seq strings from Milsoft and spit out a json dict. Rescale to a small size if rescale=True. '''
 	start_time = time.time()
 	# print('*** Start Conversion', time.time()-start_time)
 	# Get all components from the .std:
@@ -71,7 +71,10 @@ def convert(stdString,seqString):
 		except:
 			x_a,x_b,y_a,y_b = (0,0,0,0)
 		return x_a, x_b, y_a, y_b
-	[x_scale, x_b, y_scale, y_b] = _convertToPixel()
+	if rescale:
+		[x_scale, x_b, y_scale, y_b] = _convertToPixel()
+	else:
+		[x_scale, x_b, y_scale, y_b] = [1.0, 0.0, 1.0, 0.0]
 	def obConvert(objectList):
 		''' take a row in the milsoft .std and turn it into a gridlab-type dict'''
 		def _convertGenericObject(objectList):
@@ -1690,7 +1693,7 @@ default_equipment = {
 
 
 def _tests(
-		keepFiles = False,
+		keepFiles = True,
 		wipeBefore = True,
 		openPrefix = omf.omfDir + '/static/testFiles/',
 		outPrefix = omf.omfDir + '/scratch/milToGridlabTests/',
