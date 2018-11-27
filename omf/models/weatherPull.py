@@ -18,11 +18,9 @@ def work(modelDir, inputDict):
 	station = inputDict['stationASOS'] if source == 'ASOS' else inputDict['stationUSCRN']
 	parameter = inputDict['weatherParameterASOS'] if source == 'ASOS' else inputDict['weatherParameterUSCRN']
 	inputs = [inputDict['year'], station, parameter]
-
 	data = pullAsos(*inputs) if source == 'ASOS' else pullUscrn(*inputs)
 	with open(pJoin(modelDir,'weather.csv'), 'w') as f:
 		csv.writer(f).writerows([[x] for x in data])
-
 	return {
 		'rawData': data,
 		'errorCount': len([e for e in data if e in [-9999.0, -99999.0, -999.0, -99.0]]),
@@ -42,14 +40,17 @@ def new(modelDir):
 		"modelType": modelName}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
-def _simpleTest():
+def _tests():
 	modelLoc = pJoin(__neoMetaModel__._omfDir, "data", "Model", "admin", "Automated Testing of " + modelName)
 	if isdir(modelLoc):
 		shutil.rmtree(modelLoc)
 	new(modelLoc) # Create New.
 	renderAndShow(modelLoc) # Pre-run.
-	runForeground(modelLoc) # Run the model.
+	try:
+		runForeground(modelLoc) # Run the model.
+	except:
+		pass # Just ignore errors because sometimes HTTP requests fail.
 	renderAndShow(modelLoc) # Show the output.
 
 if __name__ == '__main__':
-	_simpleTest()
+	_tests()
