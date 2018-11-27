@@ -157,6 +157,7 @@ def zipCodeToClimateName(zipCode):
 	citiesInState = [cn[3:-5] for cn in os.listdir(pJoin(omfDir, 'data', 'Climate')) if zipState == cn[:2]]
 
 	# Approximate closest city with data to given zipcode
+	foundCity = None
 	lowestDistance = float('inf')
 	for cCity in citiesInState:
 		for row in cityData:
@@ -174,6 +175,7 @@ def zipCodeToClimateName(zipCode):
 
 	# int(round((float(foundCity[1])-10)/5.0)*5.0) was 'latforpvwatts' listed as 30 below.
 	# It is never used in codebase. Removal pending.
+	assert foundCity != None, "A city is spelled differently between two datasets. Please notify the OMF team."
 	return '{}-{}'.format(zipState, foundCity), 30
 
 def _tests():
