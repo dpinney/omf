@@ -1,11 +1,11 @@
 ''' Get power and energy limits from PNNL VirtualBatteries (VBAT) load model.'''
-import json, os, shutil, math, requests, csv, __neoMetaModel__
-from os.path import join as pJoin
+import json, shutil, math, requests, csv, __neoMetaModel__
+from os.path import isdir, join as pJoin
 from jinja2 import Template
 from __neoMetaModel__ import *
 from dateutil.parser import parse as parseDt
-import datetime as dt
-from omf import weather
+from datetime import datetime as dt
+from omf.weather import pullAsos, pullUscrn
 
 # Model metadata:
 modelName, template = metadata(__file__)
@@ -14,97 +14,42 @@ hidden = True
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory.'''
-	outData = {}
-	source = inputDict["source"]
-	year = inputDict["year"]
-	if source == "ASOS":
-		station = inputDict["stationASOS"]
-		parameter = inputDict["weatherParameterASOS"]
-	elif source == "USCRN":
-		station = inputDict["stationUSCRN"]
-		parameter = inputDict["weatherParameterUSCRN"]
-	verifiedData = []
-	errorCount = 0
-	#check the source using and use the appropriate function
-	if source == "ASOS":
-		data = weather.pullAsos(year,station,parameter)
-		with open(pJoin(modelDir,"weather.csv"),"w") as file:
-			file.write(data)
-	elif source == "USCRN":
-		data = weather.pullUscrn(year,station,parameter)
-		with open(pJoin(modelDir,"weather.csv"),"w") as file:
-			writer = csv.writer(file)
-			writer.writerows([[x] for x in data])
-	#writing raw data
-	if parameter != "asos" and source == "ASOS":#raw ASOS should not be formated as it is already in its own format and difficult to handle
-		verifiedData = [999.9]*8760
-		firstDT = dt.datetime(int(year),1,1,0)
-		with open(pJoin(modelDir,"weather.csv"),"r") as file:
-			reader = csv.reader(file)
-			for row in reader:
-				if row[1] != "valid" and row[2] != "M":
-					d = parseDt(row[1])
-					deltatime = d - firstDT
-					verifiedData[int(math.floor((deltatime.total_seconds())/(60*60)))] = row[2]
-		#storing good data to allOutputData.json and weather.csv
-		outData["rawData"] = [float(x) for x in verifiedData]
-		with open(pJoin(modelDir,"weather.csv"),"wb") as file:
-			writer = csv.writer(file)
-			writer.writerows([[x] for x in verifiedData])
-	elif source == "USCRN":
-		verifiedData = []
-		with open(pJoin(modelDir,"weather.csv"),"r") as file:
-			reader = csv.reader(file)
-			for row in reader:
-				verifiedData.append(row[0])	
-			outData["rawData"] = [float(x) for x in verifiedData]
-	with open(pJoin(modelDir,"weather.csv"),"wb") as file:
-		writer = csv.writer(file)
-		writer.writerows([[x] for x in verifiedData])
-	#checking how many wrong values there are
-	if source == "ASOS":
-		for each in verifiedData:
-			if each == 999.9:
-				errorCount += 1
-	elif source == "USCRN":
-		for each in verifiedData:
-			if str(each) == str(-9999.0):
-				errorCount += 1
-	outData["errorCount"] = errorCount
-	outData["stdout"] = "Success"
-	return outData
+	source = inputDict['source']
+	station = inputDict['stationASOS'] if source == 'ASOS' else inputDict['stationUSCRN']
+	parameter = inputDict['weatherParameterASOS'] if source == 'ASOS' else inputDict['weatherParameterUSCRN']
+	inputs = [inputDict['year'], station, parameter]
+
+	data = pullAsos(*inputs) if source == 'ASOS' else pullUscrn(*inputs)
+	with open(pJoin(modelDir,'weather.csv'), 'w') as f:
+		csv.writer(f).writerows([[x] for x in data])
+
+	return {
+		'rawData': data,
+		'errorCount': len([e for e in data if e in [-9999.0, -99999.0, -999.0, -99.0]]),
+		'stdout': 'Success' }
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		"user": "admin",
-		"source":"ASOS", #"source":"USCRN",#
-		"year":"2017",
-		"stationASOS":"CHO",
-		"stationUSCRN":"AK_Barrow_4_ENE",
-		"weatherParameterUSCRN":"T_CALC",
-		"weatherParameterASOS":"tmpc",
-		"modelType":modelName}
-	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
-	return creationCode
+		#"source":"ASOS", 
+		"source": "USCRN",
+		"year": "2013",
+		"stationASOS": "LWD",
+		"stationUSCRN": "KY_Versailles_3_NNW",
+		"weatherParameterUSCRN": "SOLARAD",
+		"weatherParameterASOS": "tmpc",
+		"modelType": modelName}
+	return __neoMetaModel__.new(modelDir, defaultInputs)
 
 def _simpleTest():
-	# Location
-	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
-	# Blow away old test results if necessary.
-	try:
+	modelLoc = pJoin(__neoMetaModel__._omfDir, "data", "Model", "admin", "Automated Testing of " + modelName)
+	if isdir(modelLoc):
 		shutil.rmtree(modelLoc)
-	except:
-		# No previous test results.
-		pass
-	# Create New.
-	new(modelLoc)
-	# Pre-run.
-	# renderAndShow(modelLoc)
-	# Run the model.
-	runForeground(modelLoc)
-	# Show the output.
-	renderAndShow(modelLoc)
+	new(modelLoc) # Create New.
+	renderAndShow(modelLoc) # Pre-run.
+	runForeground(modelLoc) # Run the model.
+	renderAndShow(modelLoc) # Show the output.
 
 if __name__ == '__main__':
-	_simpleTest ()
+	_simpleTest()
