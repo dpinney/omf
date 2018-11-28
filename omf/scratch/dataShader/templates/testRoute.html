@@ -27,7 +27,8 @@
 	}
 	</script>
 	<style type="text/css">
-		#mapid { height: 800px; width: 800px; }
+		#mapid { height: 756px; width: 756px; }
+		.leaflet-tile { border: solid black 5px; }
 	</style>
 </head>
 <body>
@@ -37,26 +38,53 @@
 		let x_high = parseFloat("{{x_high}}");
 		let y_low = parseFloat("{{y_low}}");
 		let y_high = parseFloat("{{y_high}}");
+		let h = 800;
+		let w = 800;
 		//let x_mean = (parseFloat("{{x_high}}") + parseFloat("{{x_low}}")) / 2;
 		//let y_mean = (parseFloat("{{y_high}}") + parseFloat("{{y_low}}")) / 2;
 		let bounds = [[y_high, x_high], [y_low, x_low]];
-		var mymap = L.map('mapid').fitBounds(bounds);
-		mymap.setMaxBounds(bounds);
-		var marker = L.marker([y_low, x_low]).addTo(mymap);
+		var mymap = L.map('mapid');
+		mymap.fitBounds([
+			[x_low, y_low],
+			[x_high, y_high]
+			]);
+		console.log(mymap.getBounds())
+		//mymap.setMaxBounds(bounds);
+		var marker = L.marker([x_low, y_low]).addTo(mymap);
 		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-		maxBounds: bounds,
 		attribution: null,
 		maxZoom: 18,
-		id: 'mapbox.streets'
+		//id: 'mapbox.streets'
 		//accessToken: 'your.mapbox.access.token'
 		}).addTo(mymap);
+		console.log(mymap.getSize());
+		//let southWest = mymap.unproject([0, h], 1);
+		//console.log(southWest);
+		//let northEast = mymap.unproject([w, 0], 1);
+		//console.log(northEast);
 		var imageUrl = 'data:image/png;base64,{{image}}';
     	var imageBounds = bounds;
 		L.imageOverlay(imageUrl, imageBounds).addTo(mymap);
+mymap.on('moveend', function(e) {
+   console.log(mymap.getBounds());
+   console.log(mymap.getBounds());
+   console.log(mymap.getBounds()._northEast);
+   console.log(mymap.getBounds()._northEast.lat);
+   changeZoomBeta();
+});
 	</script>
 	<script type="text/javascript">
 		function changeZoom(){
 			var inputForm = document.getElementById('inputForm');
+		}
+	</script>
+	<script type="text/javascript">
+		function changeZoomBeta(){
+			document.getElementById("y_low").value = mymap.getBounds()._southWest.lat;
+			document.getElementById("x_low").value = mymap.getBounds()._southWest.lng;
+			document.getElementById("y_high").value = mymap.getBounds()._northEast.lat;
+			document.getElementById("x_high").value = mymap.getBounds()._northEast.lng;
+			document.getElementById('inputForm').submit();
 		}
 	</script>
 	<div>

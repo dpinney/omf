@@ -17,8 +17,7 @@ def hello():
 	return "Hello World!"
 
 @app.route("/testing", methods=["GET", "POST"])
-def testingRoute(x_range=(-50,-40), y_range=(-50,-40)):
-	print(cvsopts)
+def testingRoute(x_range=(40,50), y_range=(40,50)):
 	if request.method == 'POST':
 		#add in calc for current dimensions of canvas?
 		#counter=request.form.get("counter", type=float) * .5
@@ -40,7 +39,6 @@ def testingRoute(x_range=(-50,-40), y_range=(-50,-40)):
 		#y_high = min(y_click +(counter), 1)
 		x_range = (x_low, x_high)
 		y_range = (y_low, y_high)
-	print(cvsopts['plot_height'])
 	#print(current_x_range)
 	dsPlot = newGraphplot(randomloc, connect_edges(randomloc,edges), x_range=x_range, y_range=y_range)
 	#convert datashder image to png
@@ -79,7 +77,7 @@ class map_layout(LayoutAlgorithm):
         np.random.seed(p.seed)
 
         df = nodes.copy()
-        points = np.asarray(np.random.uniform(low=-50, high=-40, size=(len(df), 2)))
+        points = np.asarray(np.random.uniform(low=40, high=50, size=(len(df), 2)))
 
         df[p.x] = points[:, 0]
         df[p.y] = points[:, 1]
@@ -87,8 +85,8 @@ class map_layout(LayoutAlgorithm):
         return df
 
 np.random.seed(0)
-n=10000
-m=20000
+n=100000
+m=200000
 
 nodes = pd.DataFrame(["node"+str(i) for i in range(n)], columns=['name'])
 edges = pd.DataFrame(np.random.randint(0,len(nodes), size=(m, 2)), columns=['source', 'target'])
@@ -97,7 +95,7 @@ randomloc = map_layout(nodes,edges)
 print(randomloc.tail())
 #how to add to resize function
 
-cvsopts = dict(plot_height=800, plot_width=800)
+cvsopts = dict(plot_height=756, plot_width=756)
 
 #creaes nodes in datashader image
 def nodesplot(nodes, name=None, canvas=None, cat=None):
@@ -128,9 +126,9 @@ def newGraphplot(nodes, edges, name="", canvas=None, cat=None, x_range=None, y_r
         yr = y_range
         canvas = ds.Canvas(x_range=xr, y_range=yr, **cvsopts)
     np = nodesplot(nodes, name + " nodes", canvas, cat)
-    print("nodes")
+    #print("nodes")
     ep = edgesplot(edges, name + " edges", canvas)
-    print("edges")
+    #print("edges")
     return tf.stack(ep, np, how="over", name=name)
 
 if __name__ == '__main__':
