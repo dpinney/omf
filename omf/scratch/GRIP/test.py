@@ -47,6 +47,11 @@ print '##### RESPONSE CONTENT', response1.content
 testGlmPath = omf.omfDir + '/scratch/GRIP/test_ieee123nodeBetter.glm'
 response2 = requests.post('http://localhost:5000/oneLineGridlab', files={'glm':open(testGlmPath).read()}, data={'useLatLons':False})
 # print response2.content # it's a png yo. don't actually print it. duh.
+# Test the file conversion code.
+testStdPath = omf.omfDir + '/static/testFiles/IEEE13.std'
+testSeqPath = omf.omfDir + '/static/testFiles/IEEE13.seq'
+response3 = requests.post('http://localhost:5000/milsoftToGridlab', files={'std':open(testStdPath).read(),'seq':open(testSeqPath).read()})
+# print response3.content # it's a glm.
 # Block until the process terminates.
 # p.join()
 # I SUFFER. KILL ME.
