@@ -17,7 +17,7 @@ def hello():
 	return "Hello World!"
 
 @app.route("/testing", methods=["GET", "POST"])
-def testingRoute(x_range=(40,50), y_range=(40,50)):
+def testingRoute(x_range=(0,1), y_range=(0,1)):
 	dsPlot = newGraphplot(randomloc, connect_edges(randomloc,edges), x_range=x_range, y_range=y_range)
 	#convert datashder image to png
 	back_img = tf.Image(dsPlot).to_pil()
@@ -61,13 +61,30 @@ def changeRange():
 
 @app.route("/zoom", methods=["POST"])
 def zoom():
+	#print(request.get_json())
 	jsonResp = request.get_json()
-	x_low = float(jsonResp["x_low"])
-	print(x_low)
-	y_low = float(jsonResp["y_low"])
-	x_high = float(jsonResp["x_high"])
-	y_high = float(jsonResp["y_high"])
-	return jsonify(x_click=x_low, y_click=y_low)
+	x_down = float(jsonResp["x_down"])
+	y_down = 1 - float(jsonResp["y_down"])
+	x_up = float(jsonResp["x_up"])
+	y_up = 1 - float(jsonResp["y_up"])
+	x_low = min(x_down, x_up)
+	y_low = min(y_down, y_up)
+	x_high = max(x_down, x_up)
+	y_high = max(y_down, y_up)
+	x_range = (x_low, x_high)
+	y_range = (y_low, y_high)
+	#print(x_range, y_range)
+	dsPlot = newGraphplot(randomloc, connect_edges(randomloc,edges), x_range=x_range, y_range=y_range)
+	#convert datashder image to png
+	back_img = tf.Image(dsPlot).to_pil()
+	in_mem_file = io.BytesIO()
+	back_img.save(in_mem_file, format = "PNG")
+	# reset file pointer to start
+	in_mem_file.seek(0)
+	img_bytes = in_mem_file.read()
+	base64_encoded_result_bytes = base64.b64encode(img_bytes)
+	base64_encoded_result_str = 'data:image/png;base64,' + base64_encoded_result_bytes.decode('ascii')
+	return jsonify(newImage=base64_encoded_result_str)
 
 class map_layout(LayoutAlgorithm):
     """
@@ -83,7 +100,7 @@ class map_layout(LayoutAlgorithm):
         np.random.seed(p.seed)
 
         df = nodes.copy()
-        points = np.asarray(np.random.uniform(low=40, high=50, size=(len(df), 2)))
+        points = np.asarray(np.random.uniform(low=0, high=1, size=(len(df), 2)))
 
         df[p.x] = points[:, 0]
         df[p.y] = points[:, 1]

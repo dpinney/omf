@@ -27,36 +27,42 @@
 	<div id="imageClick"></div>
 	<script type="text/javascript">
 	$(document).ready(function() {
-	    $("#dsImage").on("click", function(event) {
-	        var x = (event.pageX - this.offsetLeft);
-	        //Keep this.offset which is always 8
-	        console.log(event.pageX);
-	        console.log(this.offsetLeft)
-	        var y = (event.pageY - this.offsetTop);
-	        console.log(x);
-	        console.log(y);
-	        //var clickForm = document.getElementById('inputForm');
-	        var data = {};
-	        data['x_low'] = x;
-	        data['y_low'] = y;
-	        data['x_high'] = 45;
-	        data['y_high'] = 45;
+		var data = {};
+	    $("#dsImage").on("mousedown", function(event) {
+	    	event.preventDefault();
+	        var x_down = (event.pageX - this.offsetLeft) / this.width;
+	        var y_down = (event.pageY - this.offsetTop) / this.height;
+	        //console.log(x);
+	        //console.log(y);
 
-            $.ajax({
-                type: 'POST',
-                url: '/zoom',
-                dataType: 'json',
-                contentType: 'application/json; charset=utf-8',
-                data: JSON.stringify(data),
-                success: function(callback) {
-                    console.log('testing');
-                    // Watch out for Cross Site Scripting security issues when setting dynamic content!
-                    $('#imageClick').text('x_click: ' + callback.x_click + ' y_click: ' + callback.y_click);
-                },
-                error: function() {
-                    $(this).html("error!");
-                }
-            });
+	        data['x_down'] = x_down;
+	        data['y_down'] = y_down;});
+
+			$("#dsImage").on("mouseup", function(event) {
+			    var x_up = (event.pageX - this.offsetLeft) / this.width;
+			    var y_up = (event.pageY - this.offsetTop) / this.height;
+			    console.log("release mouse");
+			    //console.log(x_high);
+			    //console.log(y_high);
+
+			    data['x_up'] = x_up;
+			    data['y_up'] = y_up;
+			console.log(data);
+
+			$.ajax({
+			    type: 'POST',
+			    url: '/zoom',
+			    dataType: 'json',
+			    contentType: 'application/json; charset=utf-8',
+			    data: JSON.stringify(data),
+			    success: function(callback) {
+			        // Watch out for Cross Site Scripting security issues when setting dynamic content!
+			        $('#dsImage').attr('src', callback.newImage);;
+			    },
+			    error: function() {
+			        $(this).html("error!");
+			    }
+			});
 	    });
 	});
 	</script>
