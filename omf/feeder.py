@@ -46,7 +46,7 @@ def glmToOmd(glmPath, omdPath, attachFilePaths=[]):
 		dirs, fname = os.path.split(attPath)
 		omf['attachments'][fname] = open(attPath).read()
 	with open(omdPath, 'w') as outFile:
-		json.dump(omd, outFile)
+		json.dump(omd, outFile, indent=4)
 
 def getMaxKey(inTree):
 	''' Find the largest key value in the tree. We need this because de-embedding causes noncontiguous keys. '''

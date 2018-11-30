@@ -90,25 +90,33 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.h
 	else:
 		tempDir = os.path.abspath(outputPath)
 	#HACK: make sure we get the required files from the right place.
-	shutil.copy(omf.omfDir + '/templates/distNetViz.html', tempDir + '/' + outputName)
+	# shutil.copy(omf.omfDir + '/templates/distNetViz.html', tempDir + '/' + outputName)
 	# shutil.copy(omf.omfDir + '/static/svg-pan-zoom.js', tempDir + '/svg-pan-zoom.js')
 	# Grab the library we need.
 	with open(omf.omfDir + '/static/svg-pan-zoom.js','r') as pzFile:
 		pzData = pzFile.read()
-	# Rewrite the load lines in html
+	# TEMPLATE HACKING
+	from jinja2 import Template
+	templateCont = open(omf.omfDir + '/templates/distNetViz.html', 'r+').read()
+	templateString = templateCont.encode('utf-8')
+	template = Template(templateString)
+	def id():
+		return ""
+	rend = template.render(thisFeederData=json.dumps(thisFeed), thisFeederName="NoNAME", thisFeederNum=1,
+		thisModelName="NOModel", thisOwner="NONE", components=[], jasmine=None, spec=None,
+		publicFeeders=[], userFeeders=[], csrf_token=id
+	)
+	with open(tempDir + '/' + outputName, 'w') as outFile:
+		outFile.write(rend)
+	# Insert the panZoom library.
 	# Note: you can't juse open the file in r+ mode because, based on the way the file is mapped to memory, you can only overwrite a line with another of exactly the same length.
 	for line in fileinput.input(tempDir + '/' + outputName, inplace=1):
-		if line.lstrip().startswith("<script id='feederLoadScript''>"):
-			print "" # Remove the existing load.
-		elif line.lstrip().startswith("<script id='feederInsert'>"):
-			print "<script id='feederInsert'>\ntestFeeder=" + json.dumps(thisFeed, indent=4) # load up the new feeder.
-		elif line.lstrip().startswith("<script id='panZoomInsert'>"):
+		if line.lstrip().startswith("<script id='panZoomInsert'>"):
 			print "<script id='panZoomInsert'>\n" + pzData # load up the new feeder.
 		else:
 			print line.rstrip()
 	# os.system('open -a "Google Chrome" ' + '"file://' + tempDir + '/' + outputName"')
 	webbrowser.open_new("file://" + tempDir + '/' + outputName)
-
 
 if __name__ == '__main__':
 	main()

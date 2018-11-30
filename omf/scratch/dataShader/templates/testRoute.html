@@ -1,47 +1,94 @@
 <head>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-	<script>
-	function post_to_url(path, params, method) {
-		method = method || 'post' // Set method to post by default, if not specified.
-		var form = document.createElement('form');
-		form.setAttribute('method', method);
-		form.setAttribute('action', path);
-		for(var key in params) {
-			if(params.hasOwnProperty(key)) {
-				var hiddenField = document.createElement('input');
-				hiddenField.setAttribute('type', 'hidden');
-				hiddenField.setAttribute('name', key);
-				hiddenField.setAttribute('value', params[key]);
-				form.appendChild(hiddenField);
-			}
-		}
-		document.body.appendChild(form)
-		form.submit()
-	}
-
-	function changeRange(x, y){
-		//var maxHeight = 800;
-		//var maxWidth = 800;
-		//let x_click = x
-		//let x_range_high = Math.min((x / maxWidth + 0.25), 1)
-		//let y_click = y
-		//let y_range_high = Math.min((y / maxHeight + 0.25), 1)
-		post_to_url("/testing", {x_click: x, y_click: y});
-	}
-	</script>
 </head>
+<style type="text/css">
+	/*#controller {position: absolute}*/
+	/*#imageClick {position: absolute}*/
+	#dsImage {
+		height: 100%;
+		width: 100%;
+	}
+</style>
 <body>
-	<div><img id="dsImage" src="data:image/png;base64,{{image}}"></div>
+	<div id="imageContainer"><img src="{{newImage}}" id="dsImage"></div>
+	<div id="controller">
+		<form name="inputForm" id="inputForm">
+			<label>x_low</label>
+			<input type="text" name="x_low" id="x_low" value="{{x_low}}"/>
+			<label>y_low</label>
+			<input type="text" name="y_low" id="y_low" value="{{y_low}}"/>
+			<label>x_high</label>
+			<input type="text" name="x_high" id="x_high" value="{{x_high}}"/>
+			<label>y_high</label>
+			<input type="text" name="y_high" id="y_high" value="{{y_high}}"/>
+			<button id="changeGraph" type="submit">Zoom button</button>
+		</form>
+	</div>
+	<div id="imageClick"></div>
 	<script type="text/javascript">
 	$(document).ready(function() {
 	    $("#dsImage").on("click", function(event) {
 	        var x = (event.pageX - this.offsetLeft);
-	        console.log(x);
+	        //Keep this.offset which is always 8
+	        console.log(event.pageX);
+	        console.log(this.offsetLeft)
 	        var y = (event.pageY - this.offsetTop);
+	        console.log(x);
 	        console.log(y);
-	        changeRange(x, y);
+	        //var clickForm = document.getElementById('inputForm');
+	        var data = {};
+	        data['x_low'] = x;
+	        data['y_low'] = y;
+	        data['x_high'] = 45;
+	        data['y_high'] = 45;
+
+            $.ajax({
+                type: 'POST',
+                url: '/zoom',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(data),
+                success: function(callback) {
+                    console.log('testing');
+                    // Watch out for Cross Site Scripting security issues when setting dynamic content!
+                    $('#imageClick').text('x_click: ' + callback.x_click + ' y_click: ' + callback.y_click);
+                },
+                error: function() {
+                    $(this).html("error!");
+                }
+            });
 	    });
 	});
 	</script>
-	<div><button id="changeRangeButton" type="button" onclick="changeRange()">Change Range</button></div>
+	<script type="text/javascript">
+        $('#inputForm').submit(function(e) {
+                e.preventDefault();
+
+                var data = {};
+                var Form = this;
+
+                $.each(this.elements, function(i, v) {
+                    var input = $(v);
+                    data[input.attr("name")] = input.val();
+                    delete data["undefined"];
+                });
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/changeRange',
+                    dataType: 'json',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(data),
+                    context: Form,
+                    success: function(callback) {
+                        console.log('testing');
+                        // Watch out for Cross Site Scripting security issues when setting dynamic content!
+                        $('#dsImage').attr('src', callback.newImage);
+                    },
+                    error: function() {
+                        $(this).html("error!");
+                    }
+                });
+            });
+    </script>
 </body>
