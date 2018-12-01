@@ -1,66 +1,18 @@
 <head>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-		<!-- Leaflet  Imports -->
-	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css"
-	integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
-	crossorigin=""/>
-	<script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
-	integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
-	crossorigin=""></script>
-	<script>
-	function post_to_url(path, params, method) {
-		method = method || 'post' // Set method to post by default, if not specified.
-		var form = document.createElement('form');
-		form.setAttribute('method', method);
-		form.setAttribute('action', path);
-		for(var key in params) {
-			if(params.hasOwnProperty(key)) {
-				var hiddenField = document.createElement('input');
-				hiddenField.setAttribute('type', 'hidden');
-				hiddenField.setAttribute('name', key);
-				hiddenField.setAttribute('value', params[key]);
-				form.appendChild(hiddenField);
-			}
-		}
-		document.body.appendChild(form)
-		form.submit()
-	}
-	</script>
-	<style type="text/css">
-		#mapid { height: 800px; width: 800px; }
-	</style>
 </head>
+<style type="text/css">
+	/*#controller {position: absolute}*/
+	/*#imageClick {position: absolute}*/
+	#dsImage {
+		height: 100%;
+		width: 100%;
+	}
+</style>
 <body>
-	<div id="mapid"></div>
-	<script type="text/javascript">
-		let x_low = parseFloat("{{x_low}}");
-		let x_high = parseFloat("{{x_high}}");
-		let y_low = parseFloat("{{y_low}}");
-		let y_high = parseFloat("{{y_high}}");
-		//let x_mean = (parseFloat("{{x_high}}") + parseFloat("{{x_low}}")) / 2;
-		//let y_mean = (parseFloat("{{y_high}}") + parseFloat("{{y_low}}")) / 2;
-		let bounds = [[y_high, x_high], [y_low, x_low]];
-		var mymap = L.map('mapid').fitBounds(bounds);
-		mymap.setMaxBounds(bounds);
-		var marker = L.marker([y_low, x_low]).addTo(mymap);
-		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-		maxBounds: bounds,
-		attribution: null,
-		maxZoom: 18,
-		id: 'mapbox.streets'
-		//accessToken: 'your.mapbox.access.token'
-		}).addTo(mymap);
-		var imageUrl = 'data:image/png;base64,{{image}}';
-    	var imageBounds = bounds;
-		L.imageOverlay(imageUrl, imageBounds).addTo(mymap);
-	</script>
-	<script type="text/javascript">
-		function changeZoom(){
-			var inputForm = document.getElementById('inputForm');
-		}
-	</script>
-	<div>
-		<form name="inputForm" id="inputForm" onsubmit="changeZoom();" method="post">
+	<div id="imageContainer"><img src="{{newImage}}" id="dsImage"></div>
+	<div id="controller">
+		<form name="inputForm" id="inputForm">
 			<label>x_low</label>
 			<input type="text" name="x_low" id="x_low" value="{{x_low}}"/>
 			<label>y_low</label>
@@ -72,4 +24,77 @@
 			<button id="changeGraph" type="submit">Zoom button</button>
 		</form>
 	</div>
+	<div id="imageClick"></div>
+	<script type="text/javascript">
+	$(document).ready(function() {
+		var data = {};
+	    $("#dsImage").on("mousedown", function(event) {
+	    	event.preventDefault();
+	        var x_down = (event.pageX - this.offsetLeft) / this.width;
+	        var y_down = (event.pageY - this.offsetTop) / this.height;
+	        //console.log(x);
+	        //console.log(y);
+
+	        data['x_down'] = x_down;
+	        data['y_down'] = y_down;});
+
+			$("#dsImage").on("mouseup", function(event) {
+			    var x_up = (event.pageX - this.offsetLeft) / this.width;
+			    var y_up = (event.pageY - this.offsetTop) / this.height;
+			    console.log("release mouse");
+			    //console.log(x_high);
+			    //console.log(y_high);
+
+			    data['x_up'] = x_up;
+			    data['y_up'] = y_up;
+			console.log(data);
+
+			$.ajax({
+			    type: 'POST',
+			    url: '/zoom',
+			    dataType: 'json',
+			    contentType: 'application/json; charset=utf-8',
+			    data: JSON.stringify(data),
+			    success: function(callback) {
+			        // Watch out for Cross Site Scripting security issues when setting dynamic content!
+			        $('#dsImage').attr('src', callback.newImage);;
+			    },
+			    error: function() {
+			        $(this).html("error!");
+			    }
+			});
+	    });
+	});
+	</script>
+	<script type="text/javascript">
+        $('#inputForm').submit(function(e) {
+                e.preventDefault();
+
+                var data = {};
+                var Form = this;
+
+                $.each(this.elements, function(i, v) {
+                    var input = $(v);
+                    data[input.attr("name")] = input.val();
+                    delete data["undefined"];
+                });
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/changeRange',
+                    dataType: 'json',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(data),
+                    context: Form,
+                    success: function(callback) {
+                        console.log('testing');
+                        // Watch out for Cross Site Scripting security issues when setting dynamic content!
+                        $('#dsImage').attr('src', callback.newImage);
+                    },
+                    error: function() {
+                        $(this).html("error!");
+                    }
+                });
+            });
+    </script>
 </body>
