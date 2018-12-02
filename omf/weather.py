@@ -163,7 +163,7 @@ def zipCodeToClimateName(zipCode):
 	return '{}-{}'.format(zipState, foundCity), 30
 
 def _tests():
-	# print 'weather.py tests currently disabled to keep them from sending too many HTTP requests.'
+	print 'weather.py tests currently disabled to keep them from sending too many HTTP requests.'
 	# tmpdir .mkdtemp()
 	# print "Beginning to test weather.py in", tmpdir
 	# print zipCodeToClimateName('75001')
