@@ -5,10 +5,9 @@ Source options include NOAA's USCRN, Iowa State University's METAR, and Weather 
 
 import os, urllib, urllib2, requests, csv, re
 from os.path import join as pJoin
-from datetime import timedelta, datetime
+from datetime import timedelta
 from dateutil.parser import parse as parse_dt
 from datetime import datetime as dt
-from bs4 import BeautifulSoup
 
 def pullAsos(year, station, datatype):
 	'''This model pulls hourly data for a specified year and ASOS station. 
@@ -103,25 +102,18 @@ def _pullWeatherWunderground(start, end, airport, workDir):
 		work_day = work_day + timedelta(days = 1) # Advance one day
 
 def airportCodeToLatLon(airport):
-	''' Airport three letter code -> lat/lon of that location. '''
-	# https://opendata.socrata.com/dataset/Airport-Codes-mapped-to-Latitude-Longitude-in-the-/rxrh-4cxm
-	# ^^^ If this function is ever used, consider adding this csv! it'll definitely be faster
-	try:
-		url2 = urllib2.urlopen('http://www.airport-data.com/airport/'+airport+'/#location')
-		# print 'http://www.airport-data.com/airport/'+airport+'/#location'
-		soup = BeautifulSoup(url2, "html.parser")
-		latlon_str = str(soup.find('td', class_='tc0', text='Longitude/Latitude:').next_sibling.contents[2])
-		p = re.compile('([0-9\.\-\/])+')
-		latlon_val = p.search(latlon_str)
-		latlon_val = latlon_val.group()
-		latlon_split=latlon_val.split('/') #latlon_split[0] is longitude; latlon_split[1] is latitude
-		lat = float(latlon_split[1])
-		lon = float(latlon_split[0])
-	except urllib2.URLError, e:
-		print 'Requested URL generated error code:', e.code
-		lat = float(raw_input('Please enter latitude manually:'))
-		lon = float(raw_input('Please enter longitude manually:'))
-	return (lat,lon)
+	''' Airport three letter code -> lat/lon of that location. 
+		Dataset: https://opendata.socrata.com/dataset/Airport-Codes-mapped-
+			to-Latitude-Longitude-in-the-/rxrh-4cxm '''
+	omfDir = os.path.dirname(os.path.abspath(__file__))
+	with open(pJoin(omfDir, 'static/Airports.csv')) as f:
+		for m in list(csv.reader(f))[1:]:
+			if m[0] == airport:
+				return (m[1], m[2])
+	print 'Airport not found: ', airport
+	lat = float(raw_input('Please enter latitude manually:'))
+	lon = float(raw_input('Please enter longitude manually:'))
+	return (lat, lon)
 
 def zipCodeToClimateName(zipCode):
 	''' Given a zipcode, return the closest city for which there's weather data. 
@@ -133,32 +125,27 @@ def zipCodeToClimateName(zipCode):
 	assert isinstance(zipCode, basestring), "To prevent leading zero errors, input zipcode as string"
 	
 	omfDir = os.path.dirname(os.path.abspath(__file__))
-	zipCsvPath = pJoin(omfDir, "static", "zip_codes_states.csv")
+	zipCsvPath = pJoin(omfDir, "static", "zip_codes_altered.csv")
 
 	# Find the state, city, lat, lon for given zipcode
 	with open(zipCsvPath, 'rt') as f:
 		try:
-			row = [r for r in csv.reader(f) if r[0] == zipCode][0]
-			assert float(row[1]), float(row[2])
-			'''
-			All zipcodes are unique. len(row) will be either 1 or 0. Error 
-				would be raised by calling the zero index on an empty array.
-			HACK: if there are empty columns, they can't convert to floats.
-				Consider removing rows w empty columns from csv. '''
+			'''All zipcodes are unique. len(row) will be either 1 or 0. Error 
+				would be raised by calling the zero index on an empty array.'''
+			row = [r for r in list(csv.reader(f))[1:] if r[0] == zipCode][0]
 		except:
-			raise Exception("Invalid Zipcode entered: " + zipCode)
+			raise Exception("Data not available: " + zipCode)
 		zipState = row[4]
 		ziplatlon = row[1], row[2]
 
 	# Collect data from every zipcode in state
 	with open(zipCsvPath, 'rt') as f:
-		cityData = [r for r in csv.reader(f) if r[4] == zipState and r[1] != ''] # HACK: again, remove empty rows from CSV
+		cityData = [r for r in csv.reader(f) if r[4] == zipState]
 	# Collect all names of cities with data from state. Remove the state abbr. from beginning and '.tmy2' from end.
 	citiesInState = [cn[3:-5] for cn in os.listdir(pJoin(omfDir, 'data', 'Climate')) if zipState == cn[:2]]
 
 	# Approximate closest city with data to given zipcode
-	foundCity = None
-	lowestDistance = float('inf')
+	foundCity, lowestDistance = None, float('inf')
 	for cCity in citiesInState:
 		for row in cityData:
 			city = row[3].replace(' ', '_')
@@ -172,21 +159,18 @@ def zipCodeToClimateName(zipCode):
 				if distance < lowestDistance: 
 					lowestDistance = distance
 					foundCity = cCity
-
-	# int(round((float(foundCity[1])-10)/5.0)*5.0) was 'latforpvwatts' listed as 30 below.
-	# It is never used in codebase. Removal pending.
 	assert foundCity != None, "A city is spelled differently between two datasets. Please notify the OMF team."
 	return '{}-{}'.format(zipState, foundCity), 30
 
 def _tests():
-	print 'weather.py tests currently disabled to keep them from sending too many HTTP requests.'
+	# print 'weather.py tests currently disabled to keep them from sending too many HTTP requests.'
 	# tmpdir .mkdtemp()
 	# print "Beginning to test weather.py in", tmpdir
 	# print zipCodeToClimateName('75001')
 	# print zipCodeToClimateName('07030')
 	# print zipCodeToClimateName('64735')
 	# assert ('MO-KANSAS_CITY', 30) == zipCodeToClimateName('64735')
-	# assert (38.947444, -77.459944) == airportCodeToLatLon("IAD"), "airportCode lookup failed."
+	# print airportCodeToLatLon("IAD")
 	# # Testing USCRN
 	# pullUscrn('2017', 'KY_Versailles_3_NNW', 'T_CALC')
 	# print 'USCRN (NOAA) data pulled to ' + tmpdir
