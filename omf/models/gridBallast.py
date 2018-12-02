@@ -33,7 +33,7 @@ hidden = True
 
 def work(modelDir, inputDict):
 	feederName = inputDict["feederName1"]
-	inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])
+	inputDict["climateName"] = zipCodeToClimateName(inputDict["zipCode"])
 	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
 		pJoin(modelDir, "climate.tmy2"))
 	feederJson = json.load(open(pJoin(modelDir, feederName+'.omd')))

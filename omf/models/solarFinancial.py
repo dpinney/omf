@@ -21,7 +21,7 @@ tooltip = "The solarFinancial model gives users the expected financial output of
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	# Copy spcific climate data into model directory
-	inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])
+	inputDict["climateName"] = zipCodeToClimateName(inputDict["zipCode"])
 	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 
 		pJoin(modelDir, "climate.tmy2"))
 	# Set up SAM data structures.

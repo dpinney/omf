@@ -1099,7 +1099,7 @@ def backgroundClimateChange(modelDir, omdPath, outFilePath):
 				feederJson['attachments']['weatherAirport.csv'] = csvFile.read()
 		elif importOption == 'tmyImport':
 			zipCode = request.form.get('zipCode')
-			climateName, latforpvwatts = weather.zipCodeToClimateName(zipCode)
+			climateName = weather.zipCodeToClimateName(zipCode)
 			tmyFilePath = 'data/Climate/' + climateName + '.tmy2'
 			feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'climate','name':'Climate','interpolate':'QUADRATIC', 'tmyfile':'climate.tmy2'}
 			with open(tmyFilePath) as tmyFile:

@@ -160,7 +160,7 @@ def zipCodeToClimateName(zipCode):
 					lowestDistance = distance
 					foundCity = cCity
 	assert foundCity != None, "A city is spelled differently between two datasets. Please notify the OMF team."
-	return '{}-{}'.format(zipState, foundCity), 30
+	return '{}-{}'.format(zipState, foundCity)
 
 def _tests():
 	print 'weather.py tests currently disabled to keep them from sending too many HTTP requests.'

@@ -157,7 +157,7 @@ def runForeground(modelDir):
 			os.makedirs(pJoin(modelDir, feederName)) # create subfolders for feeders
 		shutil.copy(pJoin(modelDir, feederName + ".omd"),
 			pJoin(modelDir, feederName, "feeder.omd"))
-		inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])
+		inputDict["climateName"] = zipCodeToClimateName(inputDict["zipCode"])
 		shutil.copy(pJoin(_omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
 			pJoin(modelDir, feederName, "climate.tmy2"))
 		try:
