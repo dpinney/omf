@@ -96,7 +96,7 @@ def modelDatabaseStats(dataFilePath, outFilePath):
 	ax = plt.gca()
 	ax.set_xlim(-0.2, len(yearUsers.values()))
 	ax = plt.gca()
-	ax.set_title("New Users on omf.coop by Year")
+	ax.set_title('New Users on omf.coop by Year \nGenerated: ' + datetime.now().strftime('%m-%d-%Y'))
 	plt.xticks([x + 0.4 for x in xRanges2], yearUsers.keys())
 	plt.subplots_adjust(bottom=0.2)
 	# Plot the model counts.
@@ -176,7 +176,7 @@ def trafficLogStats(logsPath, outFilePath):
 	log = collections.OrderedDict(sorted(recordCount.items(), key=lambda x: datetime.strptime(x[0], "%b/%Y")))
 	plt.subplot(3, 1, 1)
 	ax = plt.gca()
-	ax.set_title('Session Count By Month. Total: ' + "{:,}".format(sum(log.values())))
+	ax.set_title('Session Count By Month. Total: ' + "{:,}".format(sum(log.values())) + '\nGenerated: ' + datetime.now().strftime('%m-%d-%Y'))
 	barRange = range(len(log))
 	plt.bar(barRange, log.values(), align='center')
 	plt.xticks(barRange, [x.replace('/', '\n') for x in log.keys()])
