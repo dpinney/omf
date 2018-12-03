@@ -452,7 +452,7 @@ def distribution_get(owner, model_name, feeder_num):
 		omf.distNetViz.insert_coordinates(tree)
 	passed_data = json.dumps(data)
 	"""Should this be an ajax request? The ajax request could be made while the feeder builds in the browser"""
-	component_json = getComponents()
+	component_json = get_components()
 	jasmine=spec = None
 	if request.path.endswith("/test") and User.cu() == "admin":
 		tests = load_test_files(["distNetVizSpec.js", "distDataValidationSpec.js"])
@@ -482,7 +482,7 @@ def load_test_files(file_names):
 
 @app.route("/getComponents/")
 @flask_login.login_required
-def getComponents():
+def get_components():
 	path = "data/Component/"
 	components = {name[0:-5]:json.load(open(path + name)) for name in safeListdir(path)}
 	return json.dumps(components)
