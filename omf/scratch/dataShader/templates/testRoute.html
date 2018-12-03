@@ -24,6 +24,10 @@ body, html {
 	height: 100%;
 }
 
+#controller {
+	display: none;
+}
+
 </style>
 <body>
 	<div id="canDiv">
@@ -46,44 +50,85 @@ body, html {
 	</div>
 	 <script>
       var canvas = document.getElementById('imageCanvas');
-      var context = canvas.getContext('2d');
-      var imageObj = new Image();
+      var ctx = canvas.getContext('2d');
 
       var canDiv = document.getElementById('canDiv');
       var domRect = canvas.getBoundingClientRect();
-      console.log(domRect);
+      canvas.width = domRect.width;
+      canvas.height = domRect.height;
+      //console.log(domRect);
       //console.log(imageObj);
     </script>
 	<div id="imageClick"></div>
 	<script type="text/javascript">
 	$(document).ready(function() {
 		var data = {};
+		var isDown = false;
+		var x_start;
+		var y_start;
+
+		$("#imageCanvas").on("mousemove", function(event){
+			//This is in case of window resize
+			var domRect = this.getBoundingClientRect();
+	      	this.width = domRect.width;
+	      	this.height = domRect.height;
+	      	//With above, these needd to be reset, why?
+	      	ctx.fillStyle = "rgba(0, 0, 255, 0.5)";
+	  		ctx.strokeStyle = "lightgray";
+	  		ctx.lineWidth = 3;
+			if (!isDown) {
+		        return;
+			}
+			mouseX = parseFloat(event.pageX - this.offsetLeft);
+		    mouseY = parseFloat(event.pageY - this.offsetTop);
+		    console.log(this.width);
+		    //var ctx = canvas.getContext('2d');
+		    var domRect = this.getBoundingClientRect();
+		    ctx.clearRect(0, 0, canvas.width, canvas.height);
+		    var width = mouseX - x_start;
+		    var height = mouseY - y_start;
+		    console.log(isDown);
+		    console.log(mouseX);
+		    console.log(x_start);
+		    console.log(width);
+		    ctx.beginPath();
+		    ctx.rect(x_start, y_start, width, height);
+		    ctx.fill();
+		    ctx.stroke();
+		});
+
 	    $("#imageCanvas").on("mousedown", function(event) {
 	    	event.preventDefault();
 	    	var domRect = this.getBoundingClientRect();
 	        var x_down = (event.pageX - this.offsetLeft) / domRect.width;
+	        x_start = event.pageX - this.offsetLeft;
 	        console.log(domRect);
 	        //console.log(event.pageX);
 	        //console.log(this.offsetLeft);
 	        //console.log(this.width);
 	        var y_down = (event.pageY - this.offsetTop) / domRect.height;
+	        y_start = event.pageY - this.offsetTop;
 	        //console.log(x_down);
 	        //console.log(y_down);
 
 	        data['x_down'] = x_down;
-	        data['y_down'] = y_down;});
+	        data['y_down'] = y_down;
+	        isDown = true;
+	    });
 
-			$("#imageCanvas").on("mouseup", function(event) {
-				var domRect = this.getBoundingClientRect();
-			    var x_up = (event.pageX - this.offsetLeft) / domRect.width;
-			    var y_up = (event.pageY - this.offsetTop) / domRect.height;
-			    console.log("release mouse");
-			    //console.log(x_high);
-			    //console.log(y_high);
+		$("#imageCanvas").on("mouseup", function(event) {
+			var domRect = this.getBoundingClientRect();
+		    var x_up = (event.pageX - this.offsetLeft) / domRect.width;
+		    var y_up = (event.pageY - this.offsetTop) / domRect.height;
+		    console.log("release mouse");
+		    //console.log(x_high);
+		    //console.log(y_high);
 
-			    data['x_up'] = x_up;
-			    data['y_up'] = y_up;
-			//console.log(data);
+		    data['x_up'] = x_up;
+		    data['y_up'] = y_up;
+		    isDown = false;
+		    ctx.clearRect(0, 0, canvas.width, canvas.height);
+		//console.log(data);
 
 			$.ajax({
 			    type: 'POST',
