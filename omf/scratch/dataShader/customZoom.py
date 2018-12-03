@@ -73,7 +73,7 @@ def zoom():
 	y_high = max(y_down, y_up)
 	x_range = (x_low, x_high)
 	y_range = (y_low, y_high)
-	#print(x_range, y_range)
+	print(x_range, y_range)
 	dsPlot = newGraphplot(randomloc, connect_edges(randomloc,edges), x_range=x_range, y_range=y_range)
 	#convert datashder image to png
 	back_img = tf.Image(dsPlot).to_pil()
@@ -84,7 +84,7 @@ def zoom():
 	img_bytes = in_mem_file.read()
 	base64_encoded_result_bytes = base64.b64encode(img_bytes)
 	base64_encoded_result_str = 'data:image/png;base64,' + base64_encoded_result_bytes.decode('ascii')
-	return jsonify(newImage=base64_encoded_result_str)
+	return jsonify(newImage=base64_encoded_result_str, x_low=x_low, y_low=y_low, x_high=x_high, y_high=y_high)
 
 class map_layout(LayoutAlgorithm):
     """
@@ -108,8 +108,8 @@ class map_layout(LayoutAlgorithm):
         return df
 
 np.random.seed(0)
-n=100000
-m=200000
+n=1000
+m=2000
 
 nodes = pd.DataFrame(["node"+str(i) for i in range(n)], columns=['name'])
 edges = pd.DataFrame(np.random.randint(0,len(nodes), size=(m, 2)), columns=['source', 'target'])
@@ -118,7 +118,7 @@ randomloc = map_layout(nodes,edges)
 print(randomloc.tail())
 #how to add to resize function
 
-cvsopts = dict(plot_height=756, plot_width=756)
+cvsopts = dict(plot_height=800, plot_width=800)
 
 #creaes nodes in datashader image
 def nodesplot(nodes, name=None, canvas=None, cat=None):

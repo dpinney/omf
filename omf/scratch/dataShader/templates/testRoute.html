@@ -2,15 +2,34 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 </head>
 <style type="text/css">
-	/*#controller {position: absolute}*/
-	/*#imageClick {position: absolute}*/
-	#dsImage {
-		height: 100%;
-		width: 100%;
-	}
+
+body, html {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+#imageCanvas {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+}
+
+.img{
+	position:absolute;
+	z-index:-1;
+	width: 100%;
+	height: 100%;
+}
+
 </style>
 <body>
-	<div id="imageContainer"><img src="{{newImage}}" id="dsImage"></div>
+	<div id="canDiv">
+		<img class='img' id="dsImage" src="{{newImage}}" alt="" />
+		<canvas id="imageCanvas" height="800" width="800" >
+		</canvas>
 	<div id="controller">
 		<form name="inputForm" id="inputForm">
 			<label>x_low</label>
@@ -24,30 +43,47 @@
 			<button id="changeGraph" type="submit">Zoom button</button>
 		</form>
 	</div>
+	</div>
+	 <script>
+      var canvas = document.getElementById('imageCanvas');
+      var context = canvas.getContext('2d');
+      var imageObj = new Image();
+
+      var canDiv = document.getElementById('canDiv');
+      var domRect = canvas.getBoundingClientRect();
+      console.log(domRect);
+      //console.log(imageObj);
+    </script>
 	<div id="imageClick"></div>
 	<script type="text/javascript">
 	$(document).ready(function() {
 		var data = {};
-	    $("#dsImage").on("mousedown", function(event) {
+	    $("#imageCanvas").on("mousedown", function(event) {
 	    	event.preventDefault();
-	        var x_down = (event.pageX - this.offsetLeft) / this.width;
-	        var y_down = (event.pageY - this.offsetTop) / this.height;
-	        //console.log(x);
-	        //console.log(y);
+	    	var domRect = this.getBoundingClientRect();
+	        var x_down = (event.pageX - this.offsetLeft) / domRect.width;
+	        console.log(domRect);
+	        //console.log(event.pageX);
+	        //console.log(this.offsetLeft);
+	        //console.log(this.width);
+	        var y_down = (event.pageY - this.offsetTop) / domRect.height;
+	        //console.log(x_down);
+	        //console.log(y_down);
 
 	        data['x_down'] = x_down;
 	        data['y_down'] = y_down;});
 
-			$("#dsImage").on("mouseup", function(event) {
-			    var x_up = (event.pageX - this.offsetLeft) / this.width;
-			    var y_up = (event.pageY - this.offsetTop) / this.height;
+			$("#imageCanvas").on("mouseup", function(event) {
+				var domRect = this.getBoundingClientRect();
+			    var x_up = (event.pageX - this.offsetLeft) / domRect.width;
+			    var y_up = (event.pageY - this.offsetTop) / domRect.height;
 			    console.log("release mouse");
 			    //console.log(x_high);
 			    //console.log(y_high);
 
 			    data['x_up'] = x_up;
 			    data['y_up'] = y_up;
-			console.log(data);
+			//console.log(data);
 
 			$.ajax({
 			    type: 'POST',
@@ -57,7 +93,20 @@
 			    data: JSON.stringify(data),
 			    success: function(callback) {
 			        // Watch out for Cross Site Scripting security issues when setting dynamic content!
-			        $('#dsImage').attr('src', callback.newImage);;
+			        console.log("test");
+					//var canvas = document.getElementById('imageCanvas');
+					//var context = canvas.getContext('2d');
+					//context.clearRect(0, 0, canvas.width, canvas.height);
+					//console.log(callback);
+					//var imageObj = new Image();
+					//imageObj.onload = function() {
+				    //    context.drawImage(imageObj, 0, 0);
+				    //  };
+					//console.log(imageObj);
+					//context.drawImage(imageObj, 0, 0);
+					$('#dsImage').attr('src', callback.newImage);
+					//console.log(imageObj);
+			        //$('#dsImage').attr('src', callback.newImage);;
 			    },
 			    error: function() {
 			        $(this).html("error!");
