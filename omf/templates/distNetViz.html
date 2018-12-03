@@ -641,8 +641,11 @@ const thisModelName = "{% if thisModelName %}{{ thisModelName | safe }}{% else %
 const thisOwner = "{% if thisOwner %}{{ thisOwner | safe }}{% else %}null{% endif %}"; 
 const publicFeeders = {% if publicFeeders %}{{ publicFeeders | safe }}{% else %}null{% endif %};
 const userFeeders = {% if userFeeders %}{{ userFeeders | safe }}{% else %}null{% endif %}; 
-let unsavedChanges = false;
-let writeFeeder = deepCopy(readFeeder);
+//let unsavedChanges = false;
+const writeFeeder = deepCopy(readFeeder);
+/* The globalTree can only be created after the entire file has been parsed */
+let globalTreeWrapper; 
+
 // Global to keep track of previous selection target
 let previousTarget = {};
 // Global to keep track of multiple alt-selections
@@ -769,13 +772,16 @@ function createViewport(tree, svgContainer) {
         }
 	}
 	maxLon = Math.round(maxLon + 20.0)
-	maxLat = Math.round(maxLat + 20.0)
+    maxLat = Math.round(maxLat + 20.0)
+
     //const svgOb = document.getElementById('svgContainer')
 
 	//svgOb.setAttribute('width', maxLon)
 	//svgOb.setAttribute('height', maxLat)
     //svgOb.setAttribute('viewBox','-10.0 -10.0 ' + maxLon + ' ' + maxLat)
     svgContainer.setAttribute('viewBox',`0 0 ${maxLon} ${maxLat}`);
+    //console.log("maxLon: " + maxLon);
+    //console.log("maxLat: " + maxLat);
 
 	// Attach the pan/zoom behavior.
 	window.panZoom = svgPanZoom('#svgContainer', {
@@ -1988,29 +1994,29 @@ function toggleElementDisplay(id) {
 /** TODO: it would be more semantic to use the JS FormData interface
 */
 //function postToUrl(path, params, enctype="application/x-www-form-urlencoded", method="post") {
-function postToUrl(path, params, method="post") {
-	let form = document.createElement('form');
-	form.setAttribute('method', method);
-    form.setAttribute('action', path);
-    //form.setAttribute("enctype", enctype);
-    if (params) {
-        if (typeof(params) === "object" && !Array.isArray(params)) {
-            for(let key in params) {
-                if(params.hasOwnProperty(key)) {
-                    let hiddenField = document.createElement('input');
-                    hiddenField.setAttribute('type', 'hidden');
-                    hiddenField.setAttribute('name', key);
-                    hiddenField.setAttribute('value', params[key]);
-                    form.appendChild(hiddenField);
-                }
-            }
-        } else {
-            throw "params must be a valid JS object";
-        }
-    } 	
-    document.body.appendChild(form);
-	form.submit();
-}
+//function postToUrl(path, params, method="post") {
+//	let form = document.createElement('form');
+//	form.setAttribute('method', method);
+//    form.setAttribute('action', path);
+//    //form.setAttribute("enctype", enctype);
+//    if (params) {
+//        if (typeof(params) === "object" && !Array.isArray(params)) {
+//            for(let key in params) {
+//                if(params.hasOwnProperty(key)) {
+//                    let hiddenField = document.createElement('input');
+//                    hiddenField.setAttribute('type', 'hidden');
+//                    hiddenField.setAttribute('name', key);
+//                    hiddenField.setAttribute('value', params[key]);
+//                    form.appendChild(hiddenField);
+//                }
+//            }
+//        } else {
+//            throw "params must be a valid JS object";
+//        }
+//    } 	
+//    document.body.appendChild(form);
+//	form.submit();
+//}
 
 /** This fileOperation is used for two purposes 1) to save the users changes to the .omd file in the server using writeFeeder 2) to 
  * undo some other FileOperation by writing the contents of readFeeder back into the original .omd file.
@@ -2451,34 +2457,197 @@ ProgressModal.prototype.hide = function() {
 }
 
 //**************************************************
-// Tree interface v2
+// Tree interface
+//**************************************************
+
+const treeWrapperPrototype = {
+    buildNames(tree) {
+        let nameKeyMap = {};
+        Object.keys(tree).forEach(key => {
+            const name = tree[key].name;
+            keyIsStringAndValidNumber(key);
+            nameKeyMap[name] = key;
+        });
+        return nameKeyMap;
+    }
+};
+
+/** Return an object that has an 'tree' object and a 'names' map.
+ * 
+ * The 'tree' object is a reference to the tree that exists in writeFeeder, which is the original source of all data.
+ * The 'names' object maps the name of a tree object to the key of the tree object in the tree. This allows faster
+ * retrieval of to/from/parent nodes when building the svg data. Without this map, we would have to parse the tree to find
+ * every to/from/parent node. This would be slow.
+ * @param {Object} tree - contains all of the objects that will be used to generate the svg.
+ * @return {TreeWrapper} treeWrapper - simply a wrapper around the tree argument. This wrapper also has the name-key map to speed up 
+ * to/from/parent node retrieval.
+ */
+function createTreeWrapper(tree) {
+    if (typeof(tree) !== "object" || Array.isArray(tree)) {
+        throw new Error("tree argument must be a JavaScript object");
+    }
+    const treeWrapper = Object.create(treeWrapperPrototype);
+    treeWrapper.tree = tree;
+    treeWrapper.names = treeWrapper.buildNames(tree);
+    return treeWrapper;
+}
+
+//**************************************************
+// TreeObject interface
 //**************************************************
 
 const treeObjectPrototype = {
+
+    /* "Public" interface methods. Use these methods in event handlers and etc. to do stuff. */
+
     update(map) {
-        this.data = map;
+        this.data = deepCopy(map);
+    },
+    /**
+     * TODO: must update the names map as well!
+     * @param {TreeWrapper} treeWrapper - the treeWrapper that this TreeObject should be deleted from.
+     * @return {Object} subtreeWrapper - the subtreeWrapper that will be affected by the delete operation.
+     */
+    deleteFrom(treeWrapper) {
+        const subtreeWrapper = this.getSubtreeToDelete(treeWrapper);
+        const keyAry = Object.keys(subtreeWrapper.tree);
+        if (keyAry.length === 1) {
+            //Deleting this TreeObject only affects this TreeObject
+            delete treeWrapper.tree[keyAry[0]]
+            return subtreeWrapper;
+        } else {
+            //There are lines or children still connected 
+            alert("There are still nodes or lines connected to this object");
+        }
+    },
+    /**
+     * @param {Object} tree - The tree that this TreeObject and all of its directly connected objects should be deleted from.
+     */
+    deleteConnectedFrom(tree) {
+
+    },
+
+    /* "Private" helper methods. Programmer should not use these directly. They should be used inside of public interface methods. */
+
+    /** Return an object that contains references to objects that will be affected by deleting this TreeObject.
+     * 
+     * The subtree returned by this method contains references to the same objects as in the original TreeWrapper.tree.
+     * Since the original TreeWrapper.tree (almost always) refers to the global writeFeeder.tree, the tree objects 
+     * must be deleted from the original TreeWrapper.tree (not the subtree) so that the objects will eventually be garbage 
+     * collected once the subtree goes out of scope.
+     * @param {TreeWrapper} treeWrapper - contains all objects, including those objects that wil be affected by deleting this TreeObject. 
+     * @return {TreeWrapper} subtreeWrapper - only contains references to objects in the tree that will be affected by deleteing this TreeObject. 
+     */
+    getSubtreeToDelete(treeWrapper) {
+        if (Object.getPrototypeOf(treeWrapper) !== treeWrapperPrototype) {
+            throw new Error("treeWrapper argument must be an instance of TreeWrapper");
+        }
+        if (!treeWrapper.tree[this.key]) {
+            throw new Error(`No object with key: "${this.key}" exists in the treeWrapper.tree`);
+        }
+        let subtree = {};
+        subtree[this.key] = treeWrapper.tree[this.key];
+        const childrenSubtreeWrapper = this.getChildren(treeWrapper);
+        Object.keys(childrenSubtreeWrapper.tree).forEach(key => {
+            subtree[key] = childrenSubtreeWrapper.tree[key];
+        });
+        const lineSubtreeWrapper = this.getConnectedLines(treeWrapper);
+        Object.keys(lineSubtreeWrapper.tree).forEach(key => {
+            subtree[key] = lineSubtreeWrapper.tree[key];
+        });
+        return createTreeWrapper(subtree);
+    },
+    /** Return a subtreeWrapper of the passed treeWrapper that contains only children of this TreeObject.
+     * 
+     * @param {TreeWrapper} treeWrapper - the treeWrapper within which to search for children of this TreeObject. 
+     * @return {TreeWrapper} subtreeWrapper - a subset of the original treeWrapper that contains only children of this TreeObject.
+     */
+    getChildren(treeWrapper) {
+        let subtree = {};
+        // TODO: Build an object in TreeWrapper that allows instant lookup of children for any treeWrapper.tree object
+        Object.keys(treeWrapper.tree).forEach(key => {
+            if (treeWrapper.tree[key].parent === this.data.name) {
+                // This tree object is a child of this TreeObject
+                subtree[key] = treeWrapper.tree[key];
+            }
+        });
+        return createTreeWrapper(subtree);
+    },
+    /** Return a subtreeWrapper of the passed treeWrapper that contains only lines that connect to this TreeObject.
+     * 
+     * @param {TreeWrapper} treeWrapper - the treeWrapper within which to search for connecting lines.
+     * @return {TreeWrapper} subtreeWrapper - a subset of the original treeWrapper that contains only connecting lines.
+     */
+    getConnectedLines(treeWrapper) {
+        let subtree = {};
+        // TODO: Build an object in TreeWrapper that allows instant lookup of to/rom nodes for any treeWrapper.tree object
+        Object.keys(treeWrapper.tree).forEach(key => {
+            if (treeWrapper.tree[key].from === this.data.name || treeWrapper.tree[key].to === this.data.name) {
+                // This tree object represents a line that is connected to this TreeObject
+                subtree[key] = treeWrapper.tree[key];
+            }
+        });
+        return createTreeWrapper(subtree);
     }
 };
 
 /** 
- * @param {(number|object)} input - Either a key or a map of properties to create the TreeObject
- * @param {tree} - The tree from which to create the TreeObject
+ * @param {(number|Object)} input - either a key or a map of properties to create this TreeObject.
+ * @param {TreeWrapper} tree - the treeWrapper from which to create this TreeObject.
  */
-function createTreeObject(input, tree) {
-    const obj = Object.create(treeObjectPrototype);
-    if (typeof input === "number") {
-        if (tree[input.toString()]) {
-            obj.key = input;
-            obj.data = tree[input.toString()];
-            return obj;
+function createTreeObject(input, treeWrapper) {
+    if (Object.getPrototypeOf(treeWrapper) !== treeWrapperPrototype) {
+        throw new Error("treeWrapper argument must be an instance of TreeWrapper");
+    }
+    const treeObject = Object.create(treeObjectPrototype);
+    if (typeof(input) === "string") {
+        keyIsStringAndValidNumber(input);
+        const obj = treeWrapper.tree[input];
+        if (obj) {
+            treeObject.key = input;
+            treeObject.data = deepCopy(obj);
+            return treeObject;
         }
-        throw new ReferenceError("The passed key to create the TreeObject does not exist in the tree.");
+        throw new Error(`The passed key argument: "${input}" to create the TreeObject does not exist in the treeWrapper.tree.`);
     } else if (typeof input === "object" && !Array.isArray(input)) {
-        obj.key = getNewTreeKey(tree);
-        obj.update(input);
-        return obj;
+        treeObject.key = getNewTreeKey(treeWrapper.tree);
+        treeObject.update(input);
+        return treeObject;
     } 
-    throw new TypeError("Input must be a number or an object.");
+    throw new TypeError("Input argument must be a string or an object.");
+}
+
+/* "Private" helper methods */
+
+function deepCopy(oldObject) {
+    if (Object.getPrototypeOf(oldObject) !== Object.prototype) {
+        throw new Error("This function should not be used to copy objects created with a constructor function.");
+    }
+    const properties = Object.getOwnPropertyNames(oldObject);
+    for (let prop of properties) {
+        if (typeof(oldObject[prop]) === "function") {
+            throw new Error("This function should not be used to copy objects with methods.");
+        }
+    }
+    return JSON.parse(JSON.stringify(oldObject));
+}
+
+function keyIsStringAndValidNumber(key) {
+    if (typeof(key) !== "string") {
+        throw new Error("key argument must be a string.");
+    }
+    if (isNaN(parseInt(key, 10))) {
+        throw new Error("key argument must be a string that can be parsed to a valid number");
+    }
+}
+
+//**************************************************
+// Table interface v2
+//**************************************************
+
+/** Need to build the table first! */
+function deleteObject() {
+
 }
 
 //**************************************************
@@ -2511,10 +2680,7 @@ function createDeletableSvgData(tree) {
         } else if (isLine(tree[key])) {
             obj.svgIds.push(key)
         } else { 
-            //Preserve David's earlier try-catch in buildFeeder()
-			console.log(`Failed to Delete ${tree[key]}`);
-            //console.log(`Failed to delete tree object at key "${key}"`)
-            //console.log(`Tree object at key: "${key}" is not a parent-child node, a parentless node, or a line. Failed to delete node.`);
+            console.log(`Failed to delete type: "${tree[key].object}", name: "${tree[key].name}", key: ${key}"`);
             //throw new Error(`tree key: ${key}, with data: ${tree[key]} is not a parent-child node, a parentless node, or a line.`); 
         }
     });
@@ -2522,7 +2688,7 @@ function createDeletableSvgData(tree) {
 }
 
 const addableSvgDataPrototype = {
-    /** Add the svgData to the viewport when the feeder is initially build. 
+    /** Add the svgData to the viewport when the feeder is initially built. 
      * The lines must be drawn before circles to be underneath the circles. 
      */
     addTo(viewport) {
@@ -2533,6 +2699,9 @@ const addableSvgDataPrototype = {
             viewport.appendChild(circle);
         });
     },
+    /* When we are redrawing existing tree objects, they must be deleted from svg first, then 
+    redrawn.
+    */
     redrawTo(viewport) {
         this.lines.forEach(line => {
             viewport.removeChild(document.getElementById(line.id));
@@ -2550,38 +2719,39 @@ const addableSvgDataPrototype = {
 };
 
 /**
- * @param {Object} tree - A tree of all tree objects that 1) are already inside the tree and 2) should also
- * be added to the svg.
- * @return {Object} AddableSvgData - Has a method for adding to a viewport and a method for redrawing to 
+ * @param {Tree} tree - contains all tree objects that 1) are already inside the tree and 2) should also
+ * be added to the svg. Also has a name-key map to speed to/from/parent node retrieval.
+ * @return {Object} AddableSvgData - has a method for adding to a viewport and a method for redrawing to 
  * a viewport. 
  */
-function createAddableSvgData(tree) {
+function createAddableSvgData(treeWrapper) {
+    if (Object.getPrototypeOf(treeWrapper) !== treeWrapperPrototype) {
+        throw new Error("tree argument must be an instance of Tree");
+    }
     const obj = Object.create(addableSvgDataPrototype);
     obj.lines = [];
     obj.circles = [];
+    const tree = treeWrapper.tree;
     Object.keys(tree).forEach(key => {
         if (isParentChildNode(tree[key])) {
             // Add this circle, which has a parent
-            const circle = createSvgCircle(parseInt(key, 10), tree[key]);
+            const circle = createSvgCircle(key, tree[key]);
             obj.circles.push(circle);
             // Add the parent-child line between this circle and its parent
-            const parent = getParentNodeObject(tree[key], tree);
+            const parent = getParentObject(key, treeWrapper);
             const parentChildLine = createSvgLine(parent, tree[key]);
             obj.lines.push(parentChildLine);
         } else if (isParentlessNode(tree[key])) {
-            const circle = createSvgCircle(parseInt(key, 10), tree[key]);
+            const circle = createSvgCircle(key, tree[key]);
             obj.circles.push(circle);
         } else if (isLine(tree[key])) {
-            const nodes = getLineNodeObjects(tree[key], tree);
+            const nodes = getLineEnds(key, treeWrapper);
             const source = nodes.sourceNode;
             const target = nodes.targetNode;
-            const line = createSvgLine(source, target, parseInt(key, 10), tree[key]);
+            const line = createSvgLine(source, target, key, tree[key]);
             obj.lines.push(line);
         } else { 
-            //Preserve David's earlier try-catch in buildFeeder()
-			console.log('Failed to Draw ' + tree[key]);
-            //console.log(`Failed to draw tree object at key "${key}"`)
-            //console.log(`Tree object at key: "${key}" is not a parent-child node, a parentless node, or a line. Failed to draw node.`);
+            //console.log(`Failed to draw type: "${tree[key].object}", name: "${tree[key].name}", key: ${key}"`);
             //throw new Error(`tree key: ${key}, with data: ${tree[key]} is not a parent-child node, a parentless node, or a line.`); 
         }
     });
@@ -2603,27 +2773,78 @@ function isLine(obj) {
     return obj.hasOwnProperty("from") && obj.hasOwnProperty("to") ? true : false;
 }
 
-/** TODO: use a regular expression
+/** Return the parent object of the child object with the key 'childkey' in the TreeWrapper.tree.
+ * 
+ * @param {number} childKey - the key of an object in the TreeWrapper.tree that must have a parent 
+ * somewhere in the TreeWrapper.tree
+ * @param {TreeWrapper} treeWrapper - the TreeWrapper where both the child object and the parent object exist
+ * @return {Object} parent - the parent object of the treeWrapper.tree[childKey] object
  */
-function getParentNodeObject(obj, tree) {
-    const key = Object.keys(tree).find(key => {
-        return tree[key].name === obj.parent;
+function getParentObject(childKey, treeWrapper) {
+    keyIsStringAndValidNumber(childKey);
+    if (Object.getPrototypeOf(treeWrapper) !== treeWrapperPrototype) {
+        throw new Error("treeWrapper argument must be an instance of TreeWrapper");
+    }
+    // New way
+    const parentKey = treeWrapper.names[treeWrapper.tree[childKey].parent];
+    // Old way
+    /* 
+    const parentKey = Object.keys(tree).find(key => {
+        return tree[key].name === tree[childKey].parent;
     });
-    return tree[key];
+    */ 
+    if (!parentKey) {
+        throw new Error(`Could not find parent node with key: "${parentKey}" for the child tree object with key: "${key}"
+        inside of the passed tree argument.`);
+    } 
+    const parent = treeWrapper.tree[parentKey];
+    return parent;
 }
 
-/** TODO: use a regular expression
- */
-function getLineNodeObjects(obj, tree) {
-    const fromKey = Object.keys(tree).find(key => {
-        return tree[key].name === obj.from;
-    });
-    const toKey = Object.keys(tree).find(key => {
-        return tree[key].name === obj.to;
-    });
+function getLineEnds(lineKey, treeWrapper) {
+    keyIsStringAndValidNumber(lineKey);
+    if (Object.getPrototypeOf(treeWrapper) !== treeWrapperPrototype) {
+        throw new Error("treeWrapper argument must be an instance of TreeWrapper")
+    }
+    if (!treeWrapper.tree[lineKey]) {
+        throw new Error(`Could not find tree object with key: "${lineKey}" inside of the treeWrapper argument`)
+    }
+    // New way
+    const fromKey = treeWrapper.names[treeWrapper.tree[lineKey].from];
+    const toKey = treeWrapper.names[treeWrapper.tree[lineKey].to];
+
+    // Old way
+    /* 
+    let fromKey;
+    let toKey;
+    for (let treeKey in tree) {
+        if (tree[treeKey].name === tree[lineKey].from) {
+            fromKey = treeKey;
+            if (toKey) {
+                break;
+            }
+        }
+        if (tree[treeKey].name === tree[lineKey].to) {
+            toKey = treeKey;
+            if (fromKey) {
+                break;
+            }
+        }
+    }
+    */    
+    if (!fromKey) {
+        throw new Error(`For line object with key: "${lineKey}" in treeWrapper.tree, could not
+        find the "from" node with name: "${treeWrapper.tree[lineKey].from}", key: "${fromKey}"
+        in the treeWrapper.tree`);
+    }
+    if (!toKey) {
+        throw new Error(`For line object with key: "${lineKey}" in treeWrapper.tree, could not
+        find the "to" node with name: "${treeWrapper.tree[lineKey].to}", key: "${toKey}"
+        in the treeWrapper.tree`);
+    }
     return {
-        sourceNode: tree[fromKey],
-        targetNode: tree[toKey]
+        sourceNode: treeWrapper.tree[fromKey],
+        targetNode: treeWrapper.tree[toKey]
     }
 }
 
@@ -2631,11 +2852,15 @@ function getLineNodeObjects(obj, tree) {
  * @return {Object} SvgCircle - A fully configured svg circle.
  */
 function createSvgCircle(key, {longitude, latitude, object}, {r = 2, strokeWidth = 0.5} = {}) {
-    if (typeof key !== "number") {
-        throw new TypeError("key argument must be a number.");
+    keyIsStringAndValidNumber(key);
+    if (!longitude || !latitude || !object) {
+        console.log(`For circle with tree key: "${key}", longitude was: "${longitude}",
+        latitude was: "${latitude}", object was: "${object}"`)
+        //throw new Error(`For circle with tree key: "${key}", longitude was: "${longitude}",
+        //latitude was: "${latitude}", object was: "${object}"`);
     }
 	const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-	circle.setAttribute('id', key.toString());
+	circle.setAttribute('id', key);
 	circle.setAttribute('cx', longitude);
 	circle.setAttribute('cy', latitude);
 	circle.setAttribute('class', object);
@@ -2648,6 +2873,15 @@ function createSvgCircle(key, {longitude, latitude, object}, {r = 2, strokeWidth
  */
 function createSvgLine(sourceNode, targetNode, key, thisObject) {
     const svgLine = document.createElementNS('http://www.w3.org/2000/svg', 'line'); 
+    if (!sourceNode.longitude || !sourceNode.latitude || !targetNode.longitude || !targetNode.latitude) {
+        console.log(`For line with tree key: "${key}", sourceNode.name was: "${sourceNode.name}",
+        sourceNode.longitude was: "${sourceNode.longitude}", sourceNode.latitude was: "${sourceNode.latitude}",
+        targetNode.name was: "${targetNode.name}", targetNode.longitude was: "${targetNode.longitude}",
+        targetNode.latitude was: "${targetNode.latitude}"`)
+        //throw new Error(`For line with tree key: "${key}", sourceNode.longitude was: "${sourceNode.longitude}",
+        //sourceNode.latitude was: "${sourceNode.latitude}", targetNode.longitude was: "${targetNode.longitude}",
+        //targetNode.latitudw was: "${targetNode.latitude}"`)
+    }
     svgLine.setAttribute("x1", sourceNode.longitude); 
     svgLine.setAttribute("y1", sourceNode.latitude); 
     svgLine.setAttribute("x2", targetNode.longitude);
@@ -2659,10 +2893,8 @@ function createSvgLine(sourceNode, targetNode, key, thisObject) {
         svgLine.setAttribute("stroke-width", 0.25);
         return svgLine;
     } else if (key && thisObject) {
-        if (typeof key !== "number") {
-            throw new Error("key argument passed to createSvgLine must be a number");
-        }
-        svgLine.setAttribute("id", key.toString());
+        keyIsStringAndValidNumber(key);
+        svgLine.setAttribute("id", key);
         const phaseCount = countPhases(thisObject.phases).toString();
         const domClass = `${thisObject.object} p${phaseCount}`;
         svgLine.setAttribute("class", domClass);
@@ -2683,7 +2915,7 @@ This global array is a hard-coded data-dependency, but it's necessary at this po
 whether or not a property is key to identifying an object in the svg graph. Maybe these hard-coded dependencies could be moved
 so some other configuration file, like the components?
 */
-const nonDeletableTreeProperties = ["name", "object", "latitude", "longitude", "parent", "from", "to", "configuration"];
+const nonDeletableTreeProperties = ["name", "object", "from", "to", "latitude", "longitude", "parent", "configuration"];
 /* If these properties were to be modified for a given feeder.tree object, it would require significantly modifying the 
 corresponding data in feeder.nodes and/or feeder.links. These properties ARE technically modifiable, but allowing 
 the user to change them would require more work than I think is worth it. It is easier just to create a new node.
@@ -2718,13 +2950,13 @@ At the time of writing, this includes:
 //	return new TreeObject(key, writeFeeder.tree[key]);
 //}
 
-function TreeObject(key, data) {
-	if (typeof(key) !== "string" || !data || Array.isArray(data) || typeof(data) !== "object") {
-		throw "key must be a string and data must be a valid non-array object";
-	}
-	this.key = key;
-	this.data = data;
-}
+//function TreeObject(key, data) {
+//	if (typeof(key) !== "string" || !data || Array.isArray(data) || typeof(data) !== "object") {
+//		throw "key must be a string and data must be a valid non-array object";
+//	}
+//	this.key = key;
+//	this.data = data;
+//}
 
 /** cx refers to longitude, cy refers to latitude.
 */
@@ -2741,17 +2973,18 @@ function TreeObject(key, data) {
 //	this.strokeWidth = strokeWidth;
 //}
 
-function Circle(key, {longitude, latitude, object}, {r = 2, strokeWidth = 0.5} = {}) {
-    if (typeof key !== "number") {
-        throw new TypeError("key argument must be a number");
-    }
-	this.cx = longitude;
-	this.cy = latitude;
-	this.r = r;
-	this.id = key.toString();
-	this.domClass = object;
-	this.strokeWidth = strokeWidth;
-}
+//function Circle(key, {longitude, latitude, object}, {r = 2, strokeWidth = 0.5} = {}) {
+//    if (typeof key !== "number") {
+//        throw new TypeError("key argument must be a number");
+//    }
+//	this.cx = longitude;
+//	this.cy = latitude;
+//	this.r = r;
+//	this.id = key.toString();
+//	this.domClass = object;
+//	this.strokeWidth = strokeWidth;
+//}
+
 /** x refers to longitude, y refers to latitude.
 */
 //function Line(x1, y1, x2, y2, id, domClass, strokeWidth) {
@@ -3040,28 +3273,17 @@ function addToFeederLinks(treeObject) {
 
 /**
  * Return a key value which has not been used in tree.
- * @return {number} key
+ * @return {string} key
  */
 function getNewTreeKey(tree) { 
 	let nextKey = Object.keys(tree).length;
 	while(tree.hasOwnProperty(nextKey.toString())) {
 		nextKey += 1;
 	}
-	return nextKey;
+	return nextKey.toString();
 }
 
-function deepCopy(oldObject) {
-    if (oldObject.__proto__ !== Object.prototype) {
-        throw new Error("This function should not be used to copy objects created with a constructor function.");
-    }
-    const properties = Object.getOwnPropertyNames(oldObject);
-    for (let prop of properties) {
-        if (typeof(oldObject[prop]) === "function") {
-            throw new Error("This function should not be used to copy objects with methods.");
-        }
-    }
-    return JSON.parse(JSON.stringify(oldObject));
-}
+
 
 // Deep copy of a given obj.
 function clone(obj) {
@@ -3171,19 +3393,30 @@ function addLineNew(line) {
 //setTimeout(main,100)
 (() => {
     //buildFeeder();
+    //const t0 = performance.now();
     createViewport(writeFeeder.tree, document.getElementById("svgContainer"));
     const viewport = document.getElementsByClassName('svg-pan-zoom_viewport')[0];
-    const svgData = createAddableSvgData(writeFeeder.tree);
+    globalTreeWrapper = createTreeWrapper(writeFeeder.tree);
+
+    const svgData = createAddableSvgData(globalTreeWrapper);
     svgData.addTo(viewport);
+
     attachFeederList(document.getElementById("publicFeederList"), publicFeeders, "public");
     attachFeederList(document.getElementById("userFeederList"), userFeeders, thisOwner);
     fillObjectMenu(components);
     document.getElementById('loadingMessage').style.display = 'none'
-
-    //setTimeout(function() {
-    //    const deleteSvgData = createDeletableSvgData(writeFeeder.tree);
-    //    deleteSvgData.deleteFrom(viewport);
-    //}, 2000);
+    /* 
+    const t1 = performance.now();
+    const time = t1 - t0;
+    console.log(`Tree rendering time was ${time} ms`);
+    */
+    
+    /*
+    setTimeout(function() {
+        const deleteSvgData = createDeletableSvgData(globalTreeWrapper.tree);
+        deleteSvgData.deleteFrom(viewport);
+    }, 2000);
+    */
 })();
 </script>
 <!--<script type='text/javascript' src='/static/distDataValidation.js'></script>-->
