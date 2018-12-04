@@ -41,8 +41,10 @@ def work(modelDir, inputDict):
 	rotlim = 45.0
 	gamma = 0.45
 	if (inputDict.get("tilt",0) == "-"):
-		manualTilt = latforpvwatts
+		tilt_eq_lat = 1.0
+		manualTilt = 0.0
 	else:
+		tilt_eq_lat = 0.0
 		manualTilt = float(inputDict.get("tilt",0))
 	numberInverters = math.ceil(inverterSizeAC/1000/0.5)			
 	# Copy specific climate data into model directory

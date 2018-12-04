@@ -370,7 +370,7 @@ def work(modelDir, inputDict):
 		with open(os.path.join(modelDir, fileName),'w') as file:
 			file.write(omd['attachments'][fileName])
 	#Wire in the file the user specifies via zipcode.
-	climateFileName, latforpvwatts = zipCodeToClimateName(inputDict["simulationZipCode"])
+	climateFileName = zipCodeToClimateName(inputDict["simulationZipCode"])
 	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
 	# Platform specific binaries for GridLAB-D First Run.
 	if platform.system() == "Linux":
