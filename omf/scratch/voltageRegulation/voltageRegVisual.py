@@ -39,3 +39,6 @@ chart = omf.models.voltageDrop.drawPlot(FNAME, neatoLayout=True, edgeCol=True, n
 chart.savefig("./VOLTOUT.png")
 
 #testAllVarCombos()
+
+#put below in voltagedrop.py
+#gridlabOut = omf.solvers.gridlabd_gridballast.runInFilesystem(tree, attachments=attachments, workDir=workDir)

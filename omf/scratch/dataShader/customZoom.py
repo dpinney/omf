@@ -28,11 +28,12 @@ def testingRoute(x_range=(0,1), y_range=(0,1)):
 	img_bytes = in_mem_file.read()
 	base64_encoded_result_bytes = base64.b64encode(img_bytes)
 	base64_encoded_result_str = 'data:image/png;base64,' + base64_encoded_result_bytes.decode('ascii')
-	return render_template("testRoute.html", newImage=base64_encoded_result_str)
+	return render_template("testRoute.html", newImage=base64_encoded_result_str, x_low=0, y_low=0, x_high=1, y_high=1)
 
 def vectorCalc(x_range, y_range, x_click, y_click):
-	x_click = x_range[0]*(1-x_click/cvsopts['plot_width']) + x_range[1]*(x_click/cvsopts['plot_width'])
-	y_click = y_range[0]*(1-y_click/cvsopts['plot_height']) + y_range[1]*(y_click/cvsopts['plot_height'])
+	x_click = x_range[0]*(1-x_click) + x_range[1]*(x_click)
+	print(x_range[1]*(x_click))
+	y_click = y_range[0]*(1-y_click) + y_range[1]*(y_click)
 	return x_click, y_click
 
 @app.route("/changeRange", methods=["POST"])
@@ -63,14 +64,26 @@ def changeRange():
 def zoom():
 	#print(request.get_json())
 	jsonResp = request.get_json()
+	print(jsonResp)
+	#Get the clicks
 	x_down = float(jsonResp["x_down"])
 	y_down = 1 - float(jsonResp["y_down"])
 	x_up = float(jsonResp["x_up"])
 	y_up = 1 - float(jsonResp["y_up"])
+	#Translate from clicks to min/max
 	x_low = min(x_down, x_up)
 	y_low = min(y_down, y_up)
 	x_high = max(x_down, x_up)
 	y_high = max(y_down, y_up)
+	#Get the old range
+	print((float(jsonResp["current_x_low"])))
+	print(type((float(jsonResp["current_x_low"]))))
+	current_x_range = tuple((float(jsonResp["current_x_low"]), float(jsonResp["current_x_high"])))
+	current_y_range = tuple((float(jsonResp["current_y_low"]), float(jsonResp["current_y_high"])))
+	#Vectorizeto fit range
+	x_low, y_low = vectorCalc(current_x_range, current_y_range, x_low, y_low)
+	x_high, y_high = vectorCalc(current_x_range, current_y_range, x_high, y_high)
+
 	x_range = (x_low, x_high)
 	y_range = (y_low, y_high)
 	print(x_range, y_range)
@@ -108,8 +121,8 @@ class map_layout(LayoutAlgorithm):
         return df
 
 np.random.seed(0)
-n=1000
-m=2000
+n=100000
+m=200000
 
 nodes = pd.DataFrame(["node"+str(i) for i in range(n)], columns=['name'])
 edges = pd.DataFrame(np.random.randint(0,len(nodes), size=(m, 2)), columns=['source', 'target'])
@@ -118,7 +131,7 @@ randomloc = map_layout(nodes,edges)
 print(randomloc.tail())
 #how to add to resize function
 
-cvsopts = dict(plot_height=800, plot_width=800)
+cvsopts = dict(plot_height=900, plot_width=1900)
 
 #creaes nodes in datashader image
 def nodesplot(nodes, name=None, canvas=None, cat=None):

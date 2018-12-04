@@ -1,7 +1,9 @@
+from __future__ import print_function
 import math
 import numpy as np
 import pandas as pd
 import json
+import gc, sys
 
 import datashader as ds
 import datashader.transfer_functions as tf
@@ -21,11 +23,14 @@ from textwrap import dedent as d
 #plotly import
 import plotly
 
+#gc.collect()
+
 app = dash.Dash(__name__)
 
 np.random.seed(0)
-n=100
-m=200
+n=1000000
+#Getting to 100000 edges causes malloc and other memory issues after a few zooms
+m=2000000
 
 nodes = pd.DataFrame(["node"+str(i) for i in range(n)], columns=['name'])
 #nodes.tail()
@@ -49,7 +54,12 @@ forcedirected = random_layout(nodes, edges)
 
 #creates edges in datashader image
 def edgesplot(edges, name=None, canvas=None):
+    print('Start edges', file=sys.stdout)
     canvas = ds.Canvas(**cvsopts) if canvas is None else canvas
+    print('Made canvas edges', file=sys.stdout)
+    print(ds.count())
+    print(canvas.line(edges, 'x','y', agg=ds.count()))
+
     return tf.shade(canvas.line(edges, 'x','y', agg=ds.count()), name=name)
    
 #combines nodes and edges in datashader image 
@@ -104,6 +114,8 @@ f.layout.images = [go.layout.Image(
 
 #Function for creating new plotly graph when zooming
 def newPlotlyGeneration(relayoutData):
+    #gc.collect()
+    print('Create plotly data', file=sys.stdout)
     f = go.Figure(data=[{'x': [relayoutData['xaxis.range[0]'], relayoutData['xaxis.range[1]']], 
                            'y': [relayoutData['yaxis.range[0]'], relayoutData['yaxis.range[1]']], 
                            'mode': 'markers',
@@ -111,7 +123,9 @@ def newPlotlyGeneration(relayoutData):
                     layout={'width': 1200, 
                             'height': 900}
                    )
+    print('Create new image', file=sys.stdout)
     newImg = newGraphplot(fd, connect_edges(fd,edges), x_range=[relayoutData['xaxis.range[0]'], relayoutData['xaxis.range[1]']], y_range=[relayoutData['yaxis.range[0]'], relayoutData['yaxis.range[1]']])
+    print('New image created', file=sys.stdout)
     newPil = tf.Image(newImg).to_pil()
     #in_mem_file = io.BytesIO()
     #newPil.save(in_mem_file, format = "PNG")
@@ -141,8 +155,11 @@ def newGraphplot(nodes, edges, name="", canvas=None, cat=None, x_range=None, y_r
         canvas = ds.Canvas(x_range=xr, y_range=yr, **cvsopts)
     #print(x_range)
     np = nodesplot(nodes, name + " nodes", canvas, cat)
+    print('Nodes plot created', file=sys.stdout)
     #print(np)
+    #issue is here with edges
     ep = edgesplot(edges, name + " edges", canvas)
+    print('Edges plot created', file=sys.stdout)
     #print(ep)
     return tf.stack(ep, np, how="over", name=name)
 
@@ -332,4 +349,4 @@ app.callback(
     [Input('g2', 'relayoutData')]
 )(coord_to_tile())
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)

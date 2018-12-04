@@ -24,11 +24,20 @@ body, html {
 	height: 100%;
 }
 
+#controller{
+	background-color: coral;
+	position:absolute;
+	z-index: 1;
+}
+label, input {
+	display: block;
+}
+
 </style>
 <body>
 	<div id="canDiv">
 		<img class='img' id="dsImage" src="{{newImage}}" alt="" />
-		<canvas id="imageCanvas" height="800" width="800" >
+		<canvas id="imageCanvas" height="900" width="1900" >
 		</canvas>
 	<div id="controller">
 		<form name="inputForm" id="inputForm">
@@ -45,45 +54,93 @@ body, html {
 	</div>
 	</div>
 	 <script>
-      var canvas = document.getElementById('imageCanvas');
-      var context = canvas.getContext('2d');
-      var imageObj = new Image();
-
-      var canDiv = document.getElementById('canDiv');
-      var domRect = canvas.getBoundingClientRect();
-      console.log(domRect);
+      //console.log(domRect);
       //console.log(imageObj);
     </script>
 	<div id="imageClick"></div>
 	<script type="text/javascript">
 	$(document).ready(function() {
+		var canvas = document.getElementById('imageCanvas');
+		var ctx = canvas.getContext('2d');
+		var domRect = canvas.getBoundingClientRect();
+		canvas.width = domRect.width;
+		canvas.height = domRect.height;
 		var data = {};
+		var isDown = false;
+		var x_start;
+		var y_start;
+
+		//Style the resizing box
+		ctx.fillStyle = "rgba(0, 0, 255, 0.5)";
+	  	ctx.strokeStyle = "lightgray";
+	  	ctx.lineWidth = 3;
+
+		//Update canvas in case of window resize
+		$(window).resize(function(){
+			var domRect = canvas.getBoundingClientRect();
+			canvas.width = domRect.width;
+			canvas.height = domRect.height;
+			ctx.fillStyle = "rgba(0, 0, 255, 0.5)";
+		  	ctx.strokeStyle = "lightgray";
+		  	ctx.lineWidth = 3;
+		});
+
+		$("#imageCanvas").on("mousemove", function(event){
+			if (!isDown) {
+		        return;
+			}
+			mouseX = parseFloat(event.pageX - this.offsetLeft);
+		    mouseY = parseFloat(event.pageY - this.offsetTop);
+		    ctx.clearRect(0, 0, canvas.width, canvas.height);
+		    var width = mouseX - x_start;
+		    var height = mouseY - y_start;
+		    //console.log(isDown);
+		    //console.log(mouseX);
+		    //console.log(x_start);
+		    //console.log(width);
+		    ctx.beginPath();
+		    ctx.rect(x_start, y_start, width, height);
+		    ctx.fill();
+		    ctx.stroke();
+		});
+
 	    $("#imageCanvas").on("mousedown", function(event) {
 	    	event.preventDefault();
+	    	document.getElementById("inputForm").style.display = 'none';
 	    	var domRect = this.getBoundingClientRect();
 	        var x_down = (event.pageX - this.offsetLeft) / domRect.width;
-	        console.log(domRect);
+	        x_start = event.pageX - this.offsetLeft;
+	        //console.log(domRect);
 	        //console.log(event.pageX);
 	        //console.log(this.offsetLeft);
 	        //console.log(this.width);
 	        var y_down = (event.pageY - this.offsetTop) / domRect.height;
+	        y_start = event.pageY - this.offsetTop;
 	        //console.log(x_down);
 	        //console.log(y_down);
 
 	        data['x_down'] = x_down;
-	        data['y_down'] = y_down;});
+	        data['y_down'] = y_down;
+	        isDown = true;
+	    });
 
-			$("#imageCanvas").on("mouseup", function(event) {
-				var domRect = this.getBoundingClientRect();
-			    var x_up = (event.pageX - this.offsetLeft) / domRect.width;
-			    var y_up = (event.pageY - this.offsetTop) / domRect.height;
-			    console.log("release mouse");
-			    //console.log(x_high);
-			    //console.log(y_high);
+		$("#imageCanvas").on("mouseup", function(event) {
+			var domRect = this.getBoundingClientRect();
+		    var x_up = (event.pageX - this.offsetLeft) / domRect.width;
+		    var y_up = (event.pageY - this.offsetTop) / domRect.height;
+		    console.log("release mouse");
+		    //console.log(x_high);
+		    //console.log(y_high);
 
-			    data['x_up'] = x_up;
-			    data['y_up'] = y_up;
-			//console.log(data);
+		    data['x_up'] = x_up;
+		    data['y_up'] = y_up;
+		    isDown = false;
+		    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+		    data["current_x_low"] = $("#x_low").val();
+		    data["current_y_low"] = $("#y_low").val();
+		    data["current_x_high"] = $("#x_high").val();
+		    data["current_y_high"] = $("#y_high").val();
 
 			$.ajax({
 			    type: 'POST',
@@ -94,17 +151,12 @@ body, html {
 			    success: function(callback) {
 			        // Watch out for Cross Site Scripting security issues when setting dynamic content!
 			        console.log("test");
-					//var canvas = document.getElementById('imageCanvas');
-					//var context = canvas.getContext('2d');
-					//context.clearRect(0, 0, canvas.width, canvas.height);
-					//console.log(callback);
-					//var imageObj = new Image();
-					//imageObj.onload = function() {
-				    //    context.drawImage(imageObj, 0, 0);
-				    //  };
-					//console.log(imageObj);
-					//context.drawImage(imageObj, 0, 0);
+			        document.getElementById("inputForm").style.display = 'block';
 					$('#dsImage').attr('src', callback.newImage);
+					$('#x_low').val(callback.x_low);
+					$('#y_low').val(callback.y_low);
+					$('#x_high').val(callback.x_high);
+					$('#y_high').val(callback.y_high);
 					//console.log(imageObj);
 			        //$('#dsImage').attr('src', callback.newImage);;
 			    },
