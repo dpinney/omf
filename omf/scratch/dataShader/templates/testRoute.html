@@ -22,17 +22,13 @@ body, html {
 	z-index:-1;
 	width: 100%;
 	height: 100%;
-}
-
-#controller {
-	display: none;
-}
+}	
 
 </style>
 <body>
 	<div id="canDiv">
 		<img class='img' id="dsImage" src="{{newImage}}" alt="" />
-		<canvas id="imageCanvas" height="800" width="800" >
+		<canvas id="imageCanvas" height="900" width="1900" >
 		</canvas>
 	<div id="controller">
 		<form name="inputForm" id="inputForm">
@@ -51,8 +47,6 @@ body, html {
 	 <script>
       var canvas = document.getElementById('imageCanvas');
       var ctx = canvas.getContext('2d');
-
-      var canDiv = document.getElementById('canDiv');
       var domRect = canvas.getBoundingClientRect();
       canvas.width = domRect.width;
       canvas.height = domRect.height;
@@ -81,7 +75,6 @@ body, html {
 			}
 			mouseX = parseFloat(event.pageX - this.offsetLeft);
 		    mouseY = parseFloat(event.pageY - this.offsetTop);
-		    console.log(this.width);
 		    //var ctx = canvas.getContext('2d');
 		    var domRect = this.getBoundingClientRect();
 		    ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -128,7 +121,11 @@ body, html {
 		    data['y_up'] = y_up;
 		    isDown = false;
 		    ctx.clearRect(0, 0, canvas.width, canvas.height);
-		//console.log(data);
+
+		    data["current_x_low"] = $("#x_low").val();
+		    data["current_y_low"] = $("#y_low").val();
+		    data["current_x_high"] = $("#x_high").val();
+		    data["current_y_high"] = $("#y_high").val();
 
 			$.ajax({
 			    type: 'POST',
@@ -150,6 +147,10 @@ body, html {
 					//console.log(imageObj);
 					//context.drawImage(imageObj, 0, 0);
 					$('#dsImage').attr('src', callback.newImage);
+					$('#x_low').val(callback.x_low);
+					$('#y_low').val(callback.y_low);
+					$('#x_high').val(callback.x_high);
+					$('#y_high').val(callback.y_high);
 					//console.log(imageObj);
 			        //$('#dsImage').attr('src', callback.newImage);;
 			    },
