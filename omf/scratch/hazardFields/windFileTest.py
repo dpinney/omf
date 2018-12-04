@@ -6,17 +6,17 @@ def parseHazardFile(inPath):
 	with open(inPath, "r") as hazardFile:
 		content = hazardFile.readlines()
 	content = [x.strip() for x in content]
-	hazardFile = {}
+	hazardObj = {}
 	field = []
 	for i in range(len(content)):
 		if i <= 5:
 			line = re.split(r"\s*",content[i])
-			hazardFile[line[0]] = line[1] 
+			hazardObj[line[0]] = line[1] 
 		if i > 5:
 			field.insert((i-6),map(float,content[i].split(" ")))
 	field = np.array(field)
-	hazardFile["field"] = field
-	return hazardFile
+	hazardObj["field"] = field
+	return hazardObj
 
 def exportHazardObj(hazardObj, outPath):
 	ncols = "ncols        " + hazardObj["ncols"] + "\n"
@@ -51,6 +51,7 @@ def scaleField(scaleFactor, hazardFile):
 		a[...] = scaleFactor * a
 
 def randomField():
+	''' '''
 	pass #TODO: implement.
 
 if __name__ == '__main__':
