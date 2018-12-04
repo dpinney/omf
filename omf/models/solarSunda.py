@@ -28,7 +28,7 @@ def work(modelDir, inputDict):
 	startDateTime = simStartDate + " 00:00:00 UTC"		
 	simLengthUnits = "hours"
 	# Associate zipcode to climate data
-	inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])
+	inputDict["climateName"] = zipCodeToClimateName(inputDict["zipCode"])
 	inverterSizeAC = float(inputDict.get("inverterSize",0))
 	if (inputDict.get("systemSize",0) == "-"):
 		arraySizeDC = 1.3908 * inverterSizeAC
@@ -72,9 +72,8 @@ def work(modelDir, inputDict):
 	outData["timeStamps"] = [dt.datetime.strftime(
 		dt.datetime.strptime(startDateTime[0:19],"%Y-%m-%d %H:%M:%S") +
 		dt.timedelta(**{simLengthUnits:x}),"%Y-%m-%d %H:%M:%S") + " UTC" for x in range(simLength)]
-	# Geodata output.			
 	# Geodata output.
-	outData["minLandSize"] = round((arraySizeDC/1390.8*5 + 1)*math.cos(math.radians(22.5))/math.cos(math.radians(latforpvwatts)),0)
+	outData["minLandSize"] = round((arraySizeDC/1390.8*5 + 1)*math.cos(math.radians(22.5))/math.cos(math.radians(30.0)),0)
 	landAmount = float(inputDict.get("landAmount", 6.0))
 	outData["city"] = ssc.ssc_data_get_string(dat, "city")
 	outData["state"] = ssc.ssc_data_get_string(dat, "state")
