@@ -19,10 +19,8 @@ omfDIR = '/Users/tuomastalvitie/omf/omf'
 filePath = '/Users/tuomastalvitie/Desktop/UCS_Egan_Housed_Solar.omd'
 with open(filePath, 'r') as inFile:
 	inFeeder = json.load(inFile)
-	# inFeeder['tree']['25103'] = {'#include "hot_water_demand1.glm";':""}
 	inFeeder['tree'][u'01'] = {u'omftype': u'#include', u'argument': u'"hot_water_demand1.glm"'}
-	# inFeeder['tree']['25105'] = {'class player': 'double value;'}
-	inFeeder['tree'][u'001'] = {u'class': u'player', u'double': u'value'}# add in manually for now
+	inFeeder['tree'][u'011'] = {u'class': u'player', u'double': u'value'}# add in manually for now
 	name_volt_dict ={}
 	for key, value in inFeeder['tree'].iteritems():
 		try:#disable freq control
@@ -92,9 +90,9 @@ print len(offendersNames)
 
 
 
-# with open('offenders.csv', 'w') as f:
-# 	wr = csv.writer(f, quoting=csv.QUOTE_ALL)
-# 	wr.writerow(offenders)
+with open('offenders.csv', 'w') as f:
+	wr = csv.writer(f, quoting=csv.QUOTE_ALL)
+	wr.writerow(offenders)
 
 
 omf.distNetViz.viz('outGLM.glm') #or model.omd
