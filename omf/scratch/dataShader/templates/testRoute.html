@@ -106,6 +106,7 @@ label, input {
 
 	    $("#imageCanvas").on("mousedown", function(event) {
 	    	event.preventDefault();
+	    	document.getElementById("inputForm").style.display = 'none';
 	    	var domRect = this.getBoundingClientRect();
 	        var x_down = (event.pageX - this.offsetLeft) / domRect.width;
 	        x_start = event.pageX - this.offsetLeft;
@@ -150,6 +151,7 @@ label, input {
 			    success: function(callback) {
 			        // Watch out for Cross Site Scripting security issues when setting dynamic content!
 			        console.log("test");
+			        document.getElementById("inputForm").style.display = 'block';
 					$('#dsImage').attr('src', callback.newImage);
 					$('#x_low').val(callback.x_low);
 					$('#y_low').val(callback.y_low);
