@@ -33,6 +33,47 @@ label, input {
 	display: block;
 }
 
+.strafeArrow{
+	opacity: 1;
+}
+
+#strafeLeft {
+	position: absolute;
+	height: 25%;
+	top:50%;
+	left: 0;
+	-webkit-transform: translate(0%, -50%);
+	-ms-transform: translate(0%, -50%);
+	transform: translate(0%, -50%);
+}
+#strafeRight {
+	position: absolute;
+	height: 25%;
+	top: 50%;
+	right: 0;
+	-webkit-transform: translate(0%, -50%);
+	-ms-transform: translate(0%, -50%);
+	transform: translate(0%, -50%);
+}
+#strafeBottom {
+	position: absolute;
+	left: 50%;
+	bottom: 0;
+	-ms-transform: translate(-50%, 0);
+	-webkit-transform: translate(-50%, 0);
+	transform: translate(-50%, 0);
+	width: 25%;
+}
+#strafeTop {
+	position: absolute;
+	left: 50%;
+	top: 0;
+	-ms-transform: translate(-50%, 0);
+	-webkit-transform: translate(-50%, 0);
+	transform: translate(-50%, 0);
+	width: 25%;
+}
+
 </style>
 <body>
 	<div id="canDiv">
@@ -52,10 +93,19 @@ label, input {
 			<button id="changeGraph" type="submit">Zoom button</button>
 		</form>
 	</div>
+	<div id="strafeArrows">
+		<button class="strafeArrow" id="strafeLeft">&lArr;</button>
+		<button class="strafeArrow" id="strafeRight">&rArr;</button>
+		<button class="strafeArrow" id="strafeTop">&uArr;</button>
+		<button class="strafeArrow" id="strafeBottom">&dArr;</button>
+	</div>
 	</div>
 	 <script>
-      //console.log(domRect);
-      //console.log(imageObj);
+	 	/*
+	$('#strafeRight').on('click', function() {
+	    $(this).css('right', -250);
+	    $(this).closest('.sidebar-outer').css('width', 0);
+	});*/
     </script>
 	<div id="imageClick"></div>
 	<script type="text/javascript">
