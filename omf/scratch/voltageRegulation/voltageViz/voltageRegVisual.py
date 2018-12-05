@@ -1,12 +1,16 @@
 import omf
 import sys
-from matplotlib import pyplot as plt
+import os
+from os.path import join as pJoin
 
-print sys.path
-import voltageDropVoltageViz
+from matplotlib import pyplot as plt
+from voltageDropVoltageViz import drawPlot
+
+volRegDir = os.path.dirname(os.path.dirname(__file__))
+FNAME = pJoin(volRegDir, 'UCS_Egan_Housed_Solar.omd')
 
 # FNAME='/Users/tuomastalvitie/omf/omf/scratch/voltageRegulation/outGLM.glm'
-FNAME = '/Users/tuomastalvitie/Desktop/UCS_Egan_Housed_Solar.omd'
+# FNAME = '/Users/tuomastalvitie/Desktop/UCS_Egan_Housed_Solar.omd'
 
 # help(omf.feeder.parse)
 # feed = omf.feeder.parse(FNAME)
@@ -29,11 +33,16 @@ FNAME = '/Users/tuomastalvitie/Desktop/UCS_Egan_Housed_Solar.omd'
 # tree = omf.feeder.parse('smsSingle.glm')
 # tree[35]['name'] = 'OH NO CHANGED'
 
+def voltRegViz(FNAME):
 # chart = omf.models.voltageDrop.drawPlot(FNAME, neatoLayout=True, edgeCol=True, nodeLabs="VoltageImbalance", customColormap=True, perUnitScale=False)
-chart = voltageDropVoltageViz.drawPlot(FNAME, neatoLayout=True, edgeCol=True, nodeLabs="Voltage", edgeLabs="Current", perUnitScale=False, rezSqIn=600)
-chart.savefig("./VOLTOUT.png")
+	chart = drawPlot(FNAME, neatoLayout=True, edgeCol=True, nodeLabs="Voltage", edgeLabs="Current", rezSqIn=1000)
+	chart.savefig("./VOLTOUT.png")
 
 #testAllVarCombos()
 
 #put below in voltagedrop.py
 #gridlabOut = omf.solvers.gridlabd_gridballast.runInFilesystem(tree, attachments=attachments, workDir=workDir)
+
+
+if __name__ == '__main__':
+	voltRegViz(FNAME)

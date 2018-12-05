@@ -6,11 +6,17 @@ import pandas as pd
 import numpy as np
 import csv
 import omf
+import voltageViz
+
+
+#Test
+if __name__ = '__main__':
+	filePath = 'Users/tuomastalvitie/omf/omf/scratch/voltageRegulation/UCS_Egan_Housed_Solar.omd'
 
 #Parse Command Line
 parser = argparse.ArgumentParser(description='Converts an OMD to GLM and runs it on gridlabd')
 parser.add_argument('file_path', metavar='base', type=str,
-                    help='Path to OMD.')
+                    help='Path to OMD. Put in quotes.')
 args = parser.parse_args()
 filePath = args.file_path
 
@@ -92,7 +98,9 @@ with open('offenders.csv', 'w') as f:
 	wr.writerow(offenders)
 
 #Open Distnetviz
-omf.distNetViz.viz('outGLM.glm') #or model.omd
+omf.distNetViz.viz('outGLMtest.glm') #or model.omd
+#Visualize Voltage Regulation
+voltageViz.voltRegViz(filePath)
 
 
 
