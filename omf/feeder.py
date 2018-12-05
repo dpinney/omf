@@ -419,6 +419,7 @@ def _dictToString(inDict):
 		return '#define ' + inDict['#define'] + '\n'
 	elif '#set' in inDict:
 		return '#set ' + inDict['#set'] + '\n'
+		#Following was made to help with gridballast gridlabd functionality, so that frequency player doesn't need to be reopened
 	elif 'class' in inDict and inDict['class'] =='player':
 		return 'class' + ' ' + inDict['class'] + ' {\n' + '     ' + 'double' + ' ' + inDict['double'] + ';' + '\n};\n'
 
