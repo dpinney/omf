@@ -32,9 +32,17 @@ def work(modelDir, inputDict):
 	if inputDict.get("layoutAlgorithm", "geospatial") == "geospatial":
 		neato = False
 	else:
-		neato = True 
-	chart = voltPlot(omd, workDir=modelDir, neatoLayout=neato)
-	# chart = drawPlot(pJoin(modelDir,feederName + '.omd'), workDir=modelDir, neatoLayout=neato, edgeCol=True, rezSqIn=400)
+		neato = True
+	# chart = voltPlot(omd, workDir=modelDir, neatoLayout=neato)
+	chart = drawPlot(
+		pJoin(modelDir,feederName + ".omd"),
+		neatoLayout = neato,
+		edgeCol = inputDict["edgeCol"],
+		nodeCol = inputDict["nodeCol"],
+		nodeLabs = inputDict["nodeLabs"],
+		edgeLabs = inputDict["edgeLabs"],
+		customColormap = inputDict["customColormap"],
+		rezSqIn = inputDict["rezSqIn"])
 	chart.savefig(pJoin(modelDir,"output.png"))
 	with open(pJoin(modelDir,"output.png"),"rb") as inFile:
 		outData["voltageDrop"] = inFile.read().encode("base64")
@@ -65,6 +73,8 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 		raise Exception('Invalid input file type. We require a .glm or .omd.')
 	# dictionary to hold info on lines present in glm
 	edge_bools = dict.fromkeys(['underground_line','overhead_line','triplex_line','transformer','regulator', 'fuse', 'switch'], False)
+	# Map to speed up name lookups.
+	nameToIndex = {tree[key].get('name',''):key for key in tree.keys()}
 	# Get rid of schedules and climate and check for all edge types:
 	for key in tree.keys():
 		obtype = tree[key].get("object","")
@@ -184,20 +194,27 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 		allVolts = []
 		allVoltsPU = []
 		allDiffs = []
+		nodeName = row.get('node_name','')
 		for phase in ['A','B','C']:
 			realVolt = abs(float(row['volt'+phase+'_real']))
 			imagVolt = abs(float(row['volt'+phase+'_imag']))
 			phaseVolt = math.sqrt((realVolt ** 2) + (imagVolt ** 2))
 			if phaseVolt != 0.0:
-				normVolt = (phaseVolt/feedVoltage)
+				treeKey = nameToIndex.get(nodeName, 0)
+				nodeObj = tree.get(treeKey, {})
+				try:
+					nominal_voltage = float(nodeObj['nominal_voltage'])
+				except:
+					nominal_voltage = feedVoltage
 				allVolts.append(phaseVolt)
+				normVolt = (phaseVolt/nominal_voltage)
 				allVoltsPU.append(normVolt)
 		avgVolts = avg(allVolts)
 		avgVoltsPU = avg(allVoltsPU)
 		avgVoltsPU120 = 120 * avgVoltsPU
-		nodeVolts[row.get('node_name','')] = float("{0:.2f}".format(avgVolts))
-		nodeVoltsPU[row.get('node_name','')] = float("{0:.2f}".format(avgVoltsPU))
-		nodeVoltsPU120[row.get('node_name','')] = float("{0:.2f}".format(avgVoltsPU120))
+		nodeVolts[nodeName] = float("{0:.2f}".format(avgVolts))
+		nodeVoltsPU[nodeName] = float("{0:.2f}".format(avgVoltsPU))
+		nodeVoltsPU120[nodeName] = float("{0:.2f}".format(avgVoltsPU120))
 		if len(allVolts) == 3:
 			voltA = allVolts.pop()
 			voltB = allVolts.pop()
@@ -207,7 +224,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 			allDiffs.append(abs(float(voltB-voltC)))
 			maxDiff = max(allDiffs)
 			voltImbal = maxDiff/avgVolts
-			voltImbalances[row.get('node_name','')] = float("{0:.2f}".format(voltImbal))
+			voltImbalances[nodeName] = float("{0:.2f}".format(voltImbal))
 		# Use float("{0:.2f}".format(avg(allVolts))) if displaying the node labels
 	nodeNames = {}
 	for key in nodeVolts.keys():
@@ -255,7 +272,6 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 				edgeValsPU[edge] = edgePerUnitVal
 				edgeTupleValsPU[coord] = "{0:.2f}".format(edgePerUnitVal)
 				edgeTupleNames[coord] = edge
-
 	#define which dict will be used for edge line color
 	edgeColors = edgeValsPU
 	#define which dict will be used for edge label
@@ -515,7 +531,13 @@ def new(modelDir):
 		"feederName1": "Olin Barre Geo",
 		"modelType": modelName,
 		"runTime": "",
-		"layoutAlgorithm": "geospatial"
+		"layoutAlgorithm": "geospatial",
+		"edgeCol" : "Current",
+		"nodeCol" : "Voltage",
+		"nodeLabs" : "Value",
+		"edgeLabs" : "Value",
+		"customColormap" : "False",
+		"rezSqIn" : "225"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
@@ -561,14 +583,14 @@ def _testingPlot():
 	PREFIX = omf.omfDir + '/scratch/CIGAR/'
 	# FNAME = 'test_base_R4-25.00-1.glm_CLEAN.glm'
 	# FNAME = 'test_Exercise_4_2_1.glm'
-	FNAME = 'test_ieee37node.glm'
+	# FNAME = 'test_ieee37node.glm'
 	# FNAME = 'test_ieee123nodeBetter.glm'
-	# FNAME = 'test_large-R5-35.00-1.glm_CLEAN.glm'
+	FNAME = 'test_large-R5-35.00-1.glm_CLEAN.glm'
 	# FNAME = 'test_medium-R4-12.47-1.glm_CLEAN.glm'
 	# FNAME = 'test_smsSingle.glm'
 	# Hack: Agg backend doesn't work for interactivity. Switch to something we can use:
 	# plt.switch_backend('MacOSX')
-	chart = drawPlot(PREFIX + FNAME, neatoLayout=True, edgeCol="PercentOfRating", nodeCol="perUnitVoltage", nodeLabs="Value", edgeLabs="Value", customColormap=True, rezSqIn=225)
+	chart = drawPlot(PREFIX + FNAME, neatoLayout=True, edgeCol="PercentOfRating", nodeCol="perUnitVoltage", nodeLabs="Value", edgeLabs="Name", customColormap=True, rezSqIn=225)
 	chart.savefig(PREFIX + "YO_WHATS_GOING_ON.png")
 	# plt.show()
 
@@ -591,5 +613,5 @@ def _debugging():
 	renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	#_debugging()
-	_testingPlot()
+	_debugging()
+	# _testingPlot()
