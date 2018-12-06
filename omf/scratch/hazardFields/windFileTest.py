@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import re
+import re, random
 
 def parseHazardFile(inPath):
 	with open(inPath, "r") as hazardFile:
@@ -50,14 +50,16 @@ def scaleField(scaleFactor, hazardFile):
 	for a in np.nditer(hazardFile, op_flags=['readwrite']):
 		a[...] = scaleFactor * a
 
-def randomField():
+def randomField(hazardFile, lowerLimit = 0, upperLimit = 100):
 	''' '''
-	pass #TODO: implement.
+	for a in np.nditer(hazardFile, op_flags=['readwrite']):
+		a[...] = random.randint(lowerLimit, upperLimit)
 
 if __name__ == '__main__':
 	hazardObj = parseHazardFile("wf_clip.asc")
 	# print field
-	scaleField(.5, hazardObj["field"])
+	#scaleField(.5, hazardObj["field"])
+	randomField(hazardObj["field"])
 	moveLocation(20,100, hazardObj)
 	changeCellSize(0.5, hazardObj)
 	exportHazardObj(hazardObj, "modWindFile.asc")
