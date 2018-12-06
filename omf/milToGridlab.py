@@ -1303,7 +1303,8 @@ def convert(stdString,seqString):
 				thisOb['longitude'] = str(float(parentOb['longitude']) + random.uniform(-5,5))
 	# Final Output
 	# print('*** DONE!', time.time()-start_time)
-	# fix missing conductors
+	# 8B research fixes
+	glmTree = phasingMismatchFix(glmTree)
 	glmTree = missingConductorsFix(glmTree)
 	return glmTree
 
@@ -1446,8 +1447,8 @@ def missingConductorsFix(tree):
 				tree[line_config_key]['conductor_'+phase] = tree[line_config_key][existing_cond]
 	return tree
 
-def phasingMismatchFix(tree, jt=5):
-	'''Working function to fix phase mismatch'''
+def phasingMismatchFix(tree, intermittent_drop_range=5, islandCount = False):
+	'''Fixes phase mismatch errors in the tree'''
 	
 	#for k,v in tree.iteritems():
 	#	if v.get('name') == 'NODE150020':
@@ -1500,11 +1501,11 @@ def phasingMismatchFix(tree, jt=5):
 				if not (kid_phases <= current_phases):
 					ancestry = [current_node]
 					dropped = False
-					# We check (jt) generations above the current_node to see if the phase gained in kid_phases  was dropped within 
-					# that range. Ancestry is our listy boi of the nodes within (jt) generations. If we decide that the phases were 
+					# We check (intermittent_drop_range) generations above the current_node to see if the phase gained in kid_phases  was dropped within 
+					# that range. Ancestry is our listy boi of the nodes within (intermittent_drop_range) generations. If we decide that the phases were 
 					# intermittently dropped, then we will overwrite the phases where they were dropped (the nodes in ancestry).
 					# If we decide that the phases were not intermittentely dropped then we set the kid_phases equal to the current_phases
-					for j in range(jt):
+					for j in range(intermittent_drop_range):
 						try:
 							ancestry.append( getRelatives(tree, ancestry[-1], parent=True) )
 							parent_phases = set( tree[ancestry[-1]].get('phases','') )
@@ -1541,10 +1542,17 @@ def phasingMismatchFix(tree, jt=5):
 		if parental and parental in toViset:
 			new_roots.remove(unvisited)
 	toViset -= set(no_phase)
+	root_name_list = [ tree[key].get('name', 'name_not_found') for key in [current_node] + new_roots ]
+	if new_roots and islandCount:
+		island_str = '{}, {}'.format(len(new_roots) + 1, ';'.join(root_name_list))
+	elif islandCount:
+		island_str = '0,'
 	for root in new_roots:
 		_phaseFix(tree, root, toViset)
 	
 	tree = missingPowerFix(tree)
+	if islandCount:
+		return tree, island_str
 	return tree
 
 def missingPowerFix(tree):
@@ -1631,7 +1639,8 @@ def getRelatives(tree, node_or_line, parent=False):
 
 	if parent and listy:
 		if len(listy) > 1:
-			print 'MULTIPLE PARENTS 911 SEND HELP'
+			print 'Object with multiple parents detected. Note that this is not fully supported.'
+			return listy
 		return listy[0]
 	return listy	   
 
@@ -1645,7 +1654,7 @@ def getNamesToKeys(tree):
 
 def fixOrphanedLoads(tree):
 	'''Working function to fix orphaned loads'''
-	orphaned_loads = [ k for k, v in tree.iteritems() if v.get('object') == 'load' and v.get('name') not in getNamesToKeys(tree) ]
+	orphaned_loads = [ k for k, v in tree.iteritems() if v.get('object') == 'load' and v.get('parent') not in getNamesToKeys(tree) ]
 	for orphan in orphaned_loads:
 		del tree[orphan]
 	return tree
@@ -1726,13 +1735,14 @@ def _tests(
 			local_time = reference.LocalTimezone()
 			now = datetime.datetime.now()
 			resultsFile.write(str(now)[0:19] + " at timezone: " + str(local_time.tzname(now)) + '\n')
-		try:
+		if True:#try:
 			# Convert the std+seq and write it out.
 			with open(pJoin(openPrefix,stdString),'r') as stdFile, open(pJoin(openPrefix,seqString),'r') as seqFile:
 				outGlm = convert(stdFile.read(),seqFile.read())
-				outGlm = phasingMismatchFix(outGlm)
+				outGlm, island_str = phasingMismatchFix(outGlm, islandCount = True)
+				with open(pJoin(outPrefix, 'islandCount.txt'), 'a') as f:
+					f.write(stdString.split('.')[0] + ',' + island_str + '\n')
 				outGlm = fixOrphanedLoads(outGlm)
-				outGlm = missingConductorsFix(outGlm)
 			with open(outPrefix + stdString.replace('.std','.glm'),'w') as outFile:
 				outFile.seek(0)
 				outFile.write(feeder.sortedWrite(outGlm))
