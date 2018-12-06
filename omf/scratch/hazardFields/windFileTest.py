@@ -51,9 +51,9 @@ def scaleField(scaleFactor, hazardFile):
 		a[...] = scaleFactor * a
 
 def randomField(hazardFile, lowerLimit = 0, upperLimit = 100):
-	''' '''
+	''' Generate random field with user defined limits. '''
 	for a in np.nditer(hazardFile, op_flags=['readwrite']):
-		a[...] = random.randint(lowerLimit, upperLimit)
+		a[...] = random.randint(lowerLimit, upperLimit) 
 
 if __name__ == '__main__':
 	hazardObj = parseHazardFile("wf_clip.asc")
