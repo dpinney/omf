@@ -3,7 +3,7 @@ Created on Nov 19, 2013
 
 @author: fish334
 
-PREREQS!!!!!! sudo apt-get install mdbtools libmdbodbc1 (I dont' think libmdbodbc1 is needed)
+PREREQS!!!!!! sudo apt-get install mdbtools libmdbodbc1
 
 This script converts a CYME feeder model database to an OMF feeder tree dictionary object. The out put is similar to that produced by milToGridlab.py
 
@@ -26,7 +26,7 @@ from os.path import join as pJoin
 import warnings
 from StringIO import StringIO
 import sys, os, json, traceback, shutil
-from solvers import gridlabd
+from omf.solvers import gridlabd
 from pathlib import Path
 import matplotlib
 matplotlib.pyplot.switch_backend('Agg')
@@ -72,7 +72,7 @@ class Map(dict):
 def _csvDump(database_file, modelDir):
 	# Get the list of table names with "mdb-tables"
 	if platform.system() == 'Linux' or platform.system() == 'Darwin':
-		table_names = subprocess.Popen(['mdb-tables', '-1', modelDir + database_file],
+		table_names = subprocess.Popen(["mdb-tables", "-1", database_file],
 			stdout=subprocess.PIPE).communicate()[0]
 		tables = table_names.split('\n')
 		if not os.path.isdir((pJoin(modelDir,'cymeCsvDump'))):
@@ -83,7 +83,7 @@ def _csvDump(database_file, modelDir):
 			if table != '':
 				filename = table.replace(" ","_") + ".csv"
 				file = open(pJoin(modelDir,'cymeCsvDump',filename), 'w+')
-				contents = subprocess.Popen(["mdb-export", modelDir + database_file, table],
+				contents = subprocess.Popen(["mdb-export", database_file, table],
 					stdout=subprocess.PIPE).communicate()[0]
 				file.write(contents)
 				file.close()
