@@ -35,7 +35,7 @@ FNAME = pJoin(volRegDir, 'UCS_Egan_Housed_Solar.omd')
 
 def voltRegViz(FNAME):
 # chart = omf.models.voltageDrop.drawPlot(FNAME, neatoLayout=True, edgeCol=True, nodeLabs="VoltageImbalance", customColormap=True, perUnitScale=False)
-	chart = drawPlot(FNAME, neatoLayout=True, edgeCol=True, nodeLabs="Voltage", edgeLabs="Current", rezSqIn=1000)
+	chart = drawPlot(FNAME, neatoLayout=True, edgeCol=True, nodeLabs="Voltage", edgeLabs="Current", rezSqIn=400)
 	chart.savefig("./VOLTOUT.png")
 
 #testAllVarCombos()
