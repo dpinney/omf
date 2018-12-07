@@ -1450,9 +1450,52 @@ def missingConductorsFix(tree):
 				tree[line_config_key]['conductor_'+phase] = tree[line_config_key][existing_cond]
 	return tree
 
-def phasingMismatchFix(tree, intermittent_drop_range=5):
-	'''Fixes phase mismatch errora in the tree'''
+def islandCount(tree, csv = True, csv_min_lines = 2):
+	def count(root, toViset):
+		size = 0
+		toVisit = [root]
+		while toVisit:
+			current = toVisit.pop(0)
+			if current not in toViset:
+				continue
+			size += 1
+			toViset -= set( [current] )
+			toVisit.extend( list( getRelatives(tree, current) ) )
+		return size
+	main_root = getRootKey(tree)
+	toViset = set(tree.keys())
+	main_size = count(main_root, toViset)
+	island_roots = list(toViset)
+	for unvisited in toViset:
+		#remove items without phases
+		if not tree[unvisited].get('phases'):
+			island_roots.remove(unvisited)
+		#remove items whose parents are in toViset
+		parental = getRelatives(tree, unvisited, parent = True)
+		if parental and parental in toViset:
+			island_roots.remove(unvisited)
+		elif parental:
+			print unvisited
+	island_sizes = []
+	for island_root in island_roots:
+		island_sizes.append( count(island_root, toViset) )
 	
+	island_roots.insert(0, main_root)
+	island_sizes.insert(0, main_size)
+	if csv and len(island_roots) > csv_min_lines:
+		island_root_names = [tree[k].get('name', 'name_not_found') for k in island_roots]
+		island_root_types = [tree[k].get('object') for k in island_roots]
+		island_info = list( zip(island_roots, island_sizes, island_root_names, island_root_types) )
+		island_info = sorted( island_info, key = lambda x: int(x[1]) )
+		island_info = [ '%s,%d,%s,%s' % tup for tup in island_info]
+		return '\n'.join(island_info)
+	elif csv:
+		return ''
+	else:
+		return sum([ 1 if island_sizes[i] > 1 else 0 for i in xrange(len(island_roots)) ])
+
+def phasingMismatchFix(tree, intermittent_drop_range=5):
+	'''Fixes phase mismatch errors in the tree'''
 	#for k,v in tree.iteritems():
 	#	if v.get('name') == 'NODE150020':
 	#		print v 
@@ -1545,6 +1588,7 @@ def phasingMismatchFix(tree, intermittent_drop_range=5):
 		if parental and parental in toViset:
 			new_roots.remove(unvisited)
 	toViset -= set(no_phase)
+	root_name_list = [ tree[key].get('name', 'name_not_found') for key in [current_node] + new_roots ]
 	for root in new_roots:
 		_phaseFix(tree, root, toViset)
 	
@@ -1616,7 +1660,14 @@ def getRelatives(tree, node_or_line, parent=False):
 			elif not parent and v.get('parent') == tree[node].get('name'):
 				listy.append(k)
 
-	
+	elif tree[node_or_line].get('object') in ['load', 'triplex_node'] and parent:
+		parent_name = tree[node_or_line].get('parent')
+		if parent_name:
+			for k,v in tree.iteritems():
+				if v.get('name') == parent_name:
+					return k
+		else:
+			return []
 	elif tree[node_or_line].get('object'):
 		searchStr = 'from' if parent else 'to'
 		line = node_or_line
@@ -1638,7 +1689,7 @@ def getRelatives(tree, node_or_line, parent=False):
 			print 'Object with multiple parents detected. Note that this is not fully supported.'
 			return listy
 		return listy[0]
-	return listy	   
+	return listy
 
 def getNamesToKeys(tree):
 	'''Returns a dictionary of names to keys for the tree'''
@@ -1650,7 +1701,7 @@ def getNamesToKeys(tree):
 
 def fixOrphanedLoads(tree):
 	'''Working function to fix orphaned loads'''
-	orphaned_loads = [ k for k, v in tree.iteritems() if v.get('object') == 'load' and v.get('name') not in getNamesToKeys(tree) ]
+	orphaned_loads = [ k for k, v in tree.iteritems() if v.get('object') == 'load' and v.get('parent') not in getNamesToKeys(tree) ]
 	for orphan in orphaned_loads:
 		del tree[orphan]
 	return tree
@@ -1735,9 +1786,11 @@ def _tests(
 			# Convert the std+seq and write it out.
 			with open(pJoin(openPrefix,stdString),'r') as stdFile, open(pJoin(openPrefix,seqString),'r') as seqFile:
 				outGlm = convert(stdFile.read(),seqFile.read())
-				outGlm = phasingMismatchFix(outGlm)
+				with open(pJoin(outPrefix, stdString.replace('.std', '_islandCount_wo_fol.csv')), 'w') as f:
+					f.write( islandCount(outGlm) )
 				outGlm = fixOrphanedLoads(outGlm)
-				outGlm = missingConductorsFix(outGlm)
+				with open(pJoin(outPrefix, stdString.replace('.std', '_islandCount.csv')), 'w') as f:
+					f.write( islandCount(outGlm) )
 			with open(outPrefix + stdString.replace('.std','.glm'),'w') as outFile:
 				outFile.seek(0)
 				outFile.write(feeder.sortedWrite(outGlm))
