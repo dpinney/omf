@@ -90,11 +90,33 @@ for i in range(len(offenders)):
 print ("average voltage overdose is by a factor of", isum/(len(offenders)))
 print len(offendersNames)
 
-
 # Write out file
 with open('offenders.csv', 'w') as f:
 	wr = csv.writer(f, quoting=csv.QUOTE_ALL)
 	wr.writerow(offenders)
+
+
+substation = pd.read_csv('measured_substation_power', comment='#', names=['timestamp', 'measured_real_power'])
+substation_power = substation['measured_real_power'][0]
+solar1 =  pd.read_csv('measured_solar_1', comment='#', names=['timestamp', 'measured_real_power'])
+solar1_power = solar1['measured_real_power'][0]
+solar2 =  pd.read_csv('measured_solar_2', comment='#', names=['timestamp', 'measured_real_power'])
+solar2_power = solar2['measured_real_power'][0]
+ziploads =  pd.read_csv('measured_load_ziploads', comment='#', names=['timestamp', 'measured_real_power'])
+zipload_power = ziploads['measured_real_power'][0]
+waterheaters = pd.read_csv('measured_load_waterheaters', comment='#', names=['timestamp', 'measured_real_power'])
+waterheater_power = waterheaters['measured_real_power'][0]
+HVAC = pd.read_csv('measured_HVAC', comment='#', names=['timestamp', 'heating_power', 'cooling_power'])
+HVAC_power = HVAC['heating_power'][0], HVAC['cooling_power'][0]
+
+
+print "substation power", substation_power
+print "Solar1 Power", solar1_power
+print "Solar2 Power", solar2_power
+print "Zipload power", zipload_power+1000
+print "waterheater power", waterheater_power*1000
+print "HVAC Power", (HVAC_power[0]+HVAC_power[1])*1000
+
 
 #Open Distnetviz
 omf.distNetViz.viz('outGLMtest.glm') #or model.omd
