@@ -1475,8 +1475,7 @@ def islandCount(tree, csv = True, csv_min_lines = 2):
 			print unvisited
 	island_sizes = []
 	for island_root in island_roots:
-		island_sizes.append( count(island_root, toViset) )
-	
+		island_sizes.append( count(island_root, toViset) )	
 	island_roots.insert(0, main_root)
 	island_sizes.insert(0, main_size)
 	if csv and len(island_roots) > csv_min_lines:
@@ -1698,10 +1697,42 @@ def getNamesToKeys(tree):
 	return ntk
 
 def fixOrphanedLoads(tree):
-	'''Working function to fix orphaned loads'''
-	orphaned_loads = [ k for k, v in tree.iteritems() if v.get('object') == 'load' and v.get('parent') not in getNamesToKeys(tree) ]
-	for orphan in orphaned_loads:
-		del tree[orphan]
+	'''Working function to fix orphans'''
+	namesToKeys = getNamesToKeys(tree)
+	island_listy = islandCount(tree).split('\n')
+	if not island_listy[0]:
+		return tree
+	island_listy = [line.split(',') for line in island_listy]
+	size_1_del = 0
+	size_2_del = 0
+	for key, size, name, obj_type in island_listy:
+		key = int(key)
+		size = int(size)
+		if size == 1:
+			if obj_type != 'load':
+				print 'size 1 island of type ' + obj_type
+				continue
+			del tree[key]
+			size_1_del += 1
+			continue
+		if size == 2:
+			kiddo = getRelatives(tree, key)[0]
+			if tree[kiddo]['object'] != 'load':
+				print 'size 2 island with kid of type ' + tree[kiddo]['object']
+				continue
+			if obj_type != 'node':
+				print 'size 2 island with root of type ' + obj_type
+				continue
+			del tree[key], tree[kiddo]
+			size_2_del += 1
+			continue
+		if 'line' in obj_type:
+			current_from = tree[key]['from']
+			for P in 'ABC':
+				next_from = current_from + '_' + P
+				if namesToKeys.get(next_from):
+					tree[key]['from'] = next_from
+	print '%d size 1 deletions and %d size 2 deletions' % ( size_1_del, size_2_del )
 	return tree
 
 def _latCount(name):
