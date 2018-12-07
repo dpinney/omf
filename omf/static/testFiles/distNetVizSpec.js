@@ -57,6 +57,10 @@ describe("Unit tests", function() {
         testTreeWrapper = createTreeWrapper(testTree);
     });
 
+    describe("Edit menu functions", function() {
+
+    });
+
     describe("Public interface methods", function() {
 
         describe("createTreeWrapper()", function() {

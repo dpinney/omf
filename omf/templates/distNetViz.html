@@ -381,6 +381,8 @@
 					<div class="buttonGroup">
                         <button id="addOps" class='pill' onclick='dropPill(this, "Edit")'>Edit &#x25BE;</button>
                         <ul class='menu right' style="display: none">
+                            <li><a href="javascript:zoomToFit();">Zoom To Fit</a></li>
+                            <li><a href="javascript:zoomReset();">Zoom Reset</a></li>
 							<li><a href='javascript:toggleElementDisplay("findModal");'>Find...</a></li>
                         </ul>
                     </div>
@@ -3418,6 +3420,190 @@ function addLineNew(line) {
     }, 2000);
     */
 })();
+
+//**************************************************
+// Edit menu ported functions
+//**************************************************
+
+/**
+ * Set the viewport to its initial state and center it
+ */
+function zoomReset() {
+    panZoom.fit();
+    panZoom.center();
+}
+
+/**
+ * Set the viewport value to its initial state.
+ */
+function zoomToFit() {
+    panZoom.fit();
+}
+
+function randomGaussian() {
+  // Get a Gaussian from a uniform(0,1) via the Box-Muller transform.
+  do {
+	let x1 = 2 * Math.random() - 1
+	let x2 = 2 * Math.random() - 1
+	let rad = x1 * x1 + x2 * x2
+  } while (rad >= 1 || rad == 0) {
+    let c = Math.sqrt(-2 * Math.log(rad) / rad);
+  }
+  return x1 * c
+}
+
+function randomInt(min,max) {
+	return Math.floor(Math.random()*(max - min + 1) + min)
+}
+
+function randomInt(min,max) {
+	return Math.floor(Math.random()*(max - min + 1) + min)
+}
+
+function randomChoice(inList) {
+	return inList[Math.floor(Math.random() * inList.length)]
+}
+
+function staticLoadsToHouses() {
+	function randomHouse() {
+		const newHouse = {}
+		newHouse['object'] = 'house'
+		newHouse['air_temperature'] = '70'
+		newHouse['cooling_COP'] = randomInt(25, 40) / 10.0 + ''
+		newHouse['cooling_setpoint'] = 'cooling' + randomInt(1, 8) + '*1'
+		newHouse['cooling_system_type'] = randomChoice(['ELECTRIC', 'HEAT_PUMP', 'NONE'])
+		// House sizing distribution from http://www.census.gov/housing/ahs/
+		// between 1100 and 3000. Probably needs a normal distribution.
+		let area = 1800 + 500 * randomGaussian()
+		if (area < 500) {
+			area = 500
+		}
+		area = area.toPrecision(2) * 1.0 + ''
+		newHouse['floor_area'] = area
+		newHouse['heating_COP'] = randomInt(20, 35) / 10.0 + ''
+		newHouse['heating_setpoint'] = 'heating' + randomInt(1, 8) + '*1'
+		newHouse['heating_system_type'] = randomChoice(['RESISTANCE', 'HEAT_PUMP', 'GAS'])
+		newHouse['mass_temperature'] = '70'
+		let skew = 1200 * randomGaussian()
+		skew = skew.toPrecision(3) * 1.0 + ''
+		newHouse['schedule_skew'] = skew
+		newHouse['thermal_integrity_level'] = randomChoice([1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6]) + ''
+		treeNewIndex = nextTreeKey()
+		newHouse['name'] = 'synhouse' + treeNewIndex
+		return newHouse
+	}
+
+	function randomLights() {
+		newLights = {}
+		newLights['object'] = 'ZIPload'
+		newLights['power_fraction'] = '0.400000'
+		newLights['current_fraction'] = '0.300000'
+		newLights['impedance_pf'] = '1.000'
+		newLights['current_pf'] = '1.000'
+		newLights['power_pf'] = '1.000'
+		newLights['impedance_fraction'] = '0.300000'
+		newLights['heatgain_fraction'] = '0.9'
+		power = 1.2 + randomGaussian()
+		if (power < 0) {
+			power = -1 * power
+		}
+		power = power.toPrecision(3) * 1.0 + ''
+		newLights['base_power'] = 'LIGHTS*' + 1.33
+		skew = 2000 * randomGaussian()
+		skew = skew.toPrecision(3) * 1.0 + ''
+		newLights['schedule_skew'] = skew
+		treeNewIndex = nextTreeKey()
+		newLights['name'] = 'synLights' + treeNewIndex
+		return newLights
+	}
+
+	function randomWaterHeater() {
+		newHeater = {}
+		if (randomChoice([1, 2, 3]) == 3) {
+			return false
+		}
+		// Static properties.
+		newHeater['object'] = 'waterheater'
+		newHeater['temperature'] = '135'
+		newHeater['tank_volume'] = '50'
+		newHeater['location'] = 'INSIDE'
+		// Uniformly distributed properties.
+		newHeater['heating_element_capacity'] = randomInt(37, 53) / 10.0 + ''
+		newHeater['thermostat_deadband'] = randomInt(20, 60) / 10.0 + ''
+		newHeater['demand'] = 'water' + randomInt(1, 20) + '*1'
+		newHeater['tank_UA'] = randomInt(20, 40) / 10.0 + ''
+		// Gaussian properties.
+		skew = 2000 * randomGaussian()
+		skew = skew.toPrecision(3) * 1.0 + ''
+		newHeater['schedule_skew'] = skew
+		newHeater['tank_setpoint'] = (randomGaussian() * 2 + 130).toPrecision(3) + ''
+		// between 1100 and 3000. Probably needs a normal distribution.
+		treeNewIndex = nextTreeKey()
+		newHeater['name'] = 'synwaterheater' + treeNewIndex
+		return newHeater
+	}
+
+	function replaceAllHouses() {
+		progressBarUpdate(percentage)
+		if (i < tkeys.length && !in_use && percentage != 100) {
+			in_use = true
+			var limit = i + 100
+			for (; i < tkeys.length && i < limit; i++) {
+				index = tkeys[i]
+				if (tree[index].hasOwnProperty('object') && tree[index].hasOwnProperty('parent') && tree[index]['object'] == 'triplex_node') {
+					//get the parent index in tree, actually it is triplex_meter index
+					parentIndex = findIndex(tree, 'name', tree[index]['parent'])
+					// delete the triplex_node
+					deleteObject(index)
+					// create a new node which parent is
+					newHouse = randomHouse()
+					newLights = randomLights()
+					newHeater = randomWaterHeater()
+					newChildAtLocation(newHouse, parentIndex)
+					houseIndex = findIndex(tree, 'name', newHouse['name'])
+					newChildAtLocation(newLights, houseIndex)
+					if (newHeater != false) {
+						newChildAtLocation(newHeater, houseIndex)
+					}
+				}
+				percentage = Math.round(i / tkeys.length * 100).toFixed(2)
+			}
+			in_use = false
+		} else {
+			redraw()
+			removeProgressDialog()
+			in_use = false;
+			clearInterval(inter)
+		}
+	}
+
+	function progressBarUpdate(percentage) {
+		if (document.getElementById('progBar') != undefined)
+			document.getElementById('progColor').style.width = percentage + '%'
+	}
+
+	function noTriplexNode() {
+		for (x in hiddenNodes) {
+			if (hiddenNodes[x].objectType != undefined && hiddenNodes[x].objectType == 'triplex_node')
+				return true
+		}
+		return false
+	}
+
+	i = 0
+	percentage = 0
+	in_use = false;
+	// TODO: for secondary system has 'load', replace it with triplex_meter and triplex_node
+	tkeys = Object.keys(tree)
+	if (noTriplexNode()) {
+		alert('TRIPLEX NODES have been hidden by the layout, please unfold them first.')
+	} else {
+		showProgressDialog('bar','Please wait. Houses are being generated.','none')
+		// set interval function to run replaceAllHouses every 10 ms, if it is running, will put one request in the queue.
+		inter = setInterval(replaceAllHouses, 10)
+	}
+}
+
 </script>
 <!--<script type='text/javascript' src='/static/distDataValidation.js'></script>-->
 {% if spec %}{{ spec | safe }}{% endif %}
