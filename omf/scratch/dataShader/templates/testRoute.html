@@ -1,56 +1,326 @@
 <head>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-	<script>
-	function post_to_url(path, params, method) {
-		method = method || 'post' // Set method to post by default, if not specified.
-		var form = document.createElement('form');
-		form.setAttribute('method', method);
-		form.setAttribute('action', path);
-		for(var key in params) {
-			if(params.hasOwnProperty(key)) {
-				var hiddenField = document.createElement('input');
-				hiddenField.setAttribute('type', 'hidden');
-				hiddenField.setAttribute('name', key);
-				hiddenField.setAttribute('value', params[key]);
-				form.appendChild(hiddenField);
-			}
-		}
-		document.body.appendChild(form)
-		form.submit()
-	}
-	</script>
 </head>
+<style type="text/css">
+
+body, html {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+#imageCanvas {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+}
+
+.img{
+	position:absolute;
+	z-index:-1;
+	width: 100%;
+	height: 100%;
+}
+
+#controller{
+	background-color: coral;
+	position:absolute;
+	z-index: 1;
+}
+label, input {
+	display: block;
+}
+
+.strafeArrow{
+	opacity: 1;
+}
+
+#strafeLeft {
+	position: absolute;
+	height: 25%;
+	top:50%;
+	left: 0;
+	-webkit-transform: translate(0%, -50%);
+	-ms-transform: translate(0%, -50%);
+	transform: translate(0%, -50%);
+}
+#strafeRight {
+	position: absolute;
+	height: 25%;
+	top: 50%;
+	right: 0;
+	-webkit-transform: translate(0%, -50%);
+	-ms-transform: translate(0%, -50%);
+	transform: translate(0%, -50%);
+}
+#strafeBottom {
+	position: absolute;
+	left: 50%;
+	bottom: 0;
+	-ms-transform: translate(-50%, 0);
+	-webkit-transform: translate(-50%, 0);
+	transform: translate(-50%, 0);
+	width: 25%;
+}
+#strafeTop {
+	position: absolute;
+	left: 50%;
+	top: 0;
+	-ms-transform: translate(-50%, 0);
+	-webkit-transform: translate(-50%, 0);
+	transform: translate(-50%, 0);
+	width: 25%;
+}
+
+</style>
 <body>
-	<div><img id="dsImage" src="data:image/png;base64,{{image}}" height=800 width=800></div>
+	<div id="canDiv">
+		<img class='img' id="dsImage" src="{{newImage}}" alt="" />
+		<canvas id="imageCanvas" height="900" width="1900" >
+		</canvas>
+	<div id="controller">
+		<form name="inputForm" id="inputForm">
+			<label>x_low</label>
+			<input type="text" name="x_low" id="x_low" value="{{x_low}}"/>
+			<label>y_low</label>
+			<input type="text" name="y_low" id="y_low" value="{{y_low}}"/>
+			<label>x_high</label>
+			<input type="text" name="x_high" id="x_high" value="{{x_high}}"/>
+			<label>y_high</label>
+			<input type="text" name="y_high" id="y_high" value="{{y_high}}"/>
+			<button id="changeGraph" type="submit">Set Zoom</button>
+		</form>
+	<div id="zoomButtons">
+		<button class="zoomButton" id="zoomIn" name="zoomIn">Zoom In</button>
+		<button class="zoomButton" id="zoomOut" name="zoomOut">Zoom Out</button>
+	</div>
+	</div>
+	<div id="strafeArrows">
+		<button class="strafeArrow" id="strafeLeft" name="strafeLeft">&lArr;</button>
+		<button class="strafeArrow" id="strafeRight" name="strafeRight">&rArr;</button>
+		<button class="strafeArrow" id="strafeTop" name="strafeTop">&uArr;</button>
+		<button class="strafeArrow" id="strafeBottom" name="strafeBottom">&dArr;</button>
+	</div>
+	</div>
+	 <script>
+	 	/*
+	$('#strafeRight').on('click', function() {
+	    $(this).css('right', -250);
+	    $(this).closest('.sidebar-outer').css('width', 0);
+	});*/
+    </script>
+	<div id="imageClick"></div>
 	<script type="text/javascript">
 	$(document).ready(function() {
-	    $("#dsImage").on("click", function(event) {
-	        var x = (event.pageX - this.offsetLeft);
-	        //Keep this.offset which is always 8
-	        console.log(event.pageX);
-	        console.log(this.offsetLeft)
-	        console.log("{{x_range}}");
-	        var y = (event.pageY - this.offsetTop);
-	        console.log("{{y_range}}");
-	        var x_low = "{{x_low}}"
-	        post_to_url("/testing", {x_click: x, y_click: y, x_low: "{{x_low}}", x_high: "{{x_high}}", y_low: "{{y_low}}", y_high: "{{y_high}}", counter: "{{counter}}"});
+		var canvas = document.getElementById('imageCanvas');
+		var ctx = canvas.getContext('2d');
+		var domRect = canvas.getBoundingClientRect();
+		canvas.width = domRect.width;
+		canvas.height = domRect.height;
+		var data = {};
+		var isDown = false;
+		var x_start;
+		var y_start;
+		data["current_x_low"] = $("#x_low").val();
+		data["current_y_low"] = $("#y_low").val();
+		data["current_x_high"] = $("#x_high").val();
+		data["current_y_high"] = $("#y_high").val();
+
+		//Style the resizing box
+		ctx.fillStyle = "rgba(0, 0, 255, 0.5)";
+	  	ctx.strokeStyle = "lightgray";
+	  	ctx.lineWidth = 3;
+
+		//Update canvas in case of window resize
+		$(window).resize(function(){
+			var domRect = canvas.getBoundingClientRect();
+			canvas.width = domRect.width;
+			canvas.height = domRect.height;
+			ctx.fillStyle = "rgba(0, 0, 255, 0.5)";
+		  	ctx.strokeStyle = "lightgray";
+		  	ctx.lineWidth = 3;
+		});
+
+		$(".zoomButton").on("click", function(event){
+			data["current_x_low"] = $("#x_low").val();
+			data["current_y_low"] = $("#y_low").val();
+			data["current_x_high"] = $("#x_high").val();
+			data["current_y_high"] = $("#y_high").val();
+			var zoomDirection = this.name;
+			data["zoomDirection"] = zoomDirection; 
+			$.ajax({
+			    type: 'POST',
+			    url: '/zoomButton',
+			    dataType: 'json',
+			    contentType: 'application/json; charset=utf-8',
+			    data: JSON.stringify(data),
+			    success: function(callback) {
+			        //console.log("strafe");
+			        document.getElementById("inputForm").style.display = 'block';
+					$(".strafeArrow").show();
+					$('#dsImage').attr('src', callback.newImage);
+					$('#x_low').val(callback.x_low);
+					$('#y_low').val(callback.y_low);
+					$('#x_high').val(callback.x_high);
+					$('#y_high').val(callback.y_high);
+					//console.log(imageObj);
+			        //$('#dsImage').attr('src', callback.newImage);;
+			    },
+			    error: function() {
+			        $(this).html("error!");
+			    }
+			});
+		});
+
+		$(".strafeArrow").on("click", function(event){
+			data["current_x_low"] = $("#x_low").val();
+			data["current_y_low"] = $("#y_low").val();
+			data["current_x_high"] = $("#x_high").val();
+			data["current_y_high"] = $("#y_high").val();
+			var direction = this.name;
+			//console.log(direction);
+			data["direction"] = direction; 
+			$.ajax({
+			    type: 'POST',
+			    url: '/strafeArrow',
+			    dataType: 'json',
+			    contentType: 'application/json; charset=utf-8',
+			    data: JSON.stringify(data),
+			    success: function(callback) {
+			        //console.log("strafe");
+			        document.getElementById("inputForm").style.display = 'block';
+					$(".strafeArrow").show();
+					$(".zoomButton").show();
+					$('#dsImage').attr('src', callback.newImage);
+					$('#x_low').val(callback.x_low);
+					$('#y_low').val(callback.y_low);
+					$('#x_high').val(callback.x_high);
+					$('#y_high').val(callback.y_high);
+					//console.log(imageObj);
+			        //$('#dsImage').attr('src', callback.newImage);;
+			    },
+			    error: function() {
+			        $(this).html("error!");
+			    }
+			});
+		});
+
+		$("#imageCanvas").on("mousemove", function(event){
+			if (!isDown) {
+		        return;
+			}
+			mouseX = parseFloat(event.pageX - this.offsetLeft);
+		    mouseY = parseFloat(event.pageY - this.offsetTop);
+		    ctx.clearRect(0, 0, canvas.width, canvas.height);
+		    var width = mouseX - x_start;
+		    var height = mouseY - y_start;
+		    //console.log(isDown);
+		    //console.log(mouseX);
+		    //console.log(x_start);
+		    //console.log(width);
+		    ctx.beginPath();
+		    ctx.rect(x_start, y_start, width, height);
+		    ctx.fill();
+		    ctx.stroke();
+		});
+
+	    $("#imageCanvas").on("mousedown", function(event) {
+	    	event.preventDefault();
+	    	document.getElementById("inputForm").style.display = 'none';
+	    	$(".strafeArrow").hide();
+			$(".zoomButton").hide();
+	    	var domRect = this.getBoundingClientRect();
+	        var x_down = (event.pageX - this.offsetLeft) / domRect.width;
+	        x_start = event.pageX - this.offsetLeft;
+	        //console.log(domRect);
+	        //console.log(event.pageX);
+	        //console.log(this.offsetLeft);
+	        //console.log(this.width);
+	        var y_down = (event.pageY - this.offsetTop) / domRect.height;
+	        y_start = event.pageY - this.offsetTop;
+	        //console.log(x_down);
+	        //console.log(y_down);
+
+	        data['x_down'] = x_down;
+	        data['y_down'] = y_down;
+	        isDown = true;
+	    });
+
+		$("#imageCanvas").on("mouseup", function(event) {
+			var domRect = this.getBoundingClientRect();
+		    var x_up = (event.pageX - this.offsetLeft) / domRect.width;
+		    var y_up = (event.pageY - this.offsetTop) / domRect.height;
+		    //console.log("release mouse");
+		    //console.log(x_high);
+		    //console.log(y_high);
+
+		    data['x_up'] = x_up;
+		    data['y_up'] = y_up;
+		    isDown = false;
+		    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+		    data["current_x_low"] = $("#x_low").val();
+		    data["current_y_low"] = $("#y_low").val();
+		    data["current_x_high"] = $("#x_high").val();
+		    data["current_y_high"] = $("#y_high").val();
+
+			$.ajax({
+			    type: 'POST',
+			    url: '/zoom',
+			    dataType: 'json',
+			    contentType: 'application/json; charset=utf-8',
+			    data: JSON.stringify(data),
+			    success: function(callback) {
+			        //console.log("testup");
+			        document.getElementById("inputForm").style.display = 'block';
+					$(".strafeArrow").show();
+					$(".zoomButton").show();
+					$('#dsImage').attr('src', callback.newImage);
+					$('#x_low').val(callback.x_low);
+					$('#y_low').val(callback.y_low);
+					$('#x_high').val(callback.x_high);
+					$('#y_high').val(callback.y_high);
+					//console.log(imageObj);
+			        //$('#dsImage').attr('src', callback.newImage);;
+			    },
+			    error: function() {
+			        $(this).html("error!");
+			    }
+			});
 	    });
 	});
 	</script>
 	<script type="text/javascript">
-		function changeZoom(){
-			var inputForm = document.getElementById('inputForm');
-		}
-	</script>
-	<div>
-		<form name="inputForm" id="inputForm" onsubmit="changeZoom();" method="post">
-			<input type="text" name="x_click" id="x_click" />
-			<input type="text" name="y_click" id="y_click" />
-			<input type="text" name="x_low" id="x_low" />
-			<input type="text" name="y_low" id="y_low" />
-			<input type="text" name="x_high" id="x_high" />
-			<input type="text" name="y_high" id="y_high" />
-			<button id="changeGraph" type="submit">Zoom button</button>
-		</form>
-	</div>
+        $('#inputForm').submit(function(e) {
+                e.preventDefault();
+
+                var data = {};
+                var Form = this;
+
+                $.each(this.elements, function(i, v) {
+                    var input = $(v);
+                    data[input.attr("name")] = input.val();
+                    delete data["undefined"];
+                });
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/changeRange',
+                    dataType: 'json',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(data),
+                    context: Form,
+                    success: function(callback) {
+                        //console.log('testing');
+                        // Watch out for Cross Site Scripting security issues when setting dynamic content!
+                        $('#dsImage').attr('src', callback.newImage);
+                    },
+                    error: function() {
+                        $(this).html("error!");
+                    }
+                });
+            });
+    </script>
 </body>

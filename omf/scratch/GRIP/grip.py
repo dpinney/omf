@@ -23,7 +23,6 @@ def oneLineGridlab():
 	Result: Create a one line diagram of the input glm. Return a .png of it. If useLatLons is True then draw using the lat/lons, otherwise force layout the graph.'''
 	workDir = tempfile.mkdtemp()
 	fName = 'in.glm'
-	# print workDir
 	f = request.files['glm']
 	glmOnDisk = os.path.join(workDir, fName)
 	f.save(glmOnDisk)
@@ -40,19 +39,63 @@ def oneLineGridlab():
 	# TODO: delete the tempDir.
 	return send_from_directory(workDir, outImgName)
 
-@web.app.route('/milsoftToGridlab', methods=['GET', 'POST'])
+@web.app.route('/milsoftToGridlab', methods=['POST'])
 def milsoftToGridlab():
 	'''Data Params: {std: [file], seq: [file]}
 	Runtime: could take a couple minutes.
 	OMF function: omf.milToGridlab.convert()
 	Result: a .glm file converted from the two input files.'''
-	return 'NOT IMPLEMENTED YET'
+	workDir = tempfile.mkdtemp()
+	stdFileName = 'in.std'
+	stdFile = request.files['std']
+	stdPath = os.path.join(workDir, stdFileName)
+	stdFile.save(stdPath)
+	seqFileName = 'in.seq'
+	seqFile = request.files['seq']
+	seqPath = os.path.join(workDir, seqFileName)
+	seqFile.save(seqPath)
+	tree = omf.milToGridlab.convert(open(stdPath).read(), open(seqPath).read(), rescale=True)
+	glmName = 'out.glm'
+	glmPath = os.path.join(workDir, glmName)
+	with open(glmPath, 'w') as outFile:
+		outFile.write(omf.feeder.sortedWrite(tree))
+	# TODO: delete the tempDir.
+	return send_from_directory(workDir, glmName)
 
-@web.app.route('/cymeToGridlab', methods=['GET', 'POST'])
+@web.app.route('/cymeToGridlab', methods=['POST'])
 def cymeToGridlab():
 	'''Data Params: {mdb: [file]}
 	OMF function: omf.cymeToGridlab.convertCymeModel()
 	Result: a .glm file converted from the input file.'''
+	workDir = tempfile.mkdtemp()
+	mdbFileName = 'in.mdb'
+	mdbFile = request.files['mdb']
+	mdbPath = os.path.join(workDir, mdbFileName)
+	mdbFile.save(mdbPath)
+	import locale
+	locale.setlocale(locale.LC_ALL, 'en_US')
+	tree = omf.cymeToGridlab.convertCymeModel(mdbPath, workDir)
+	glmName = 'out.glm'
+	glmPath = os.path.join(workDir, glmName)
+	with open(glmPath, 'w') as outFile:
+		outFile.write(omf.feeder.sortedWrite(tree))
+	# TODO: delete the tempDir.
+	return send_from_directory(workDir, glmName)
+
+@web.app.route('/gridlabdToGfm', methods=['GET', 'POST'])
+def gridlabdToGfm():
+	'''Data Params: {glm: [file]}
+	OMF function: omf.models.resilientDist.convertToGFM()
+	Runtime: should only be a couple seconds.
+	Result: Convert the GridLAB-D model to a GFM model. Return the new id for the converted model. Note that this is not the main fragility model for GRIP.'''
+	return 'NOT IMPLEMENTED YET'
+
+@web.app.route('/runGfm', methods=['GET', 'POST'])
+def runGfm():
+	'''Data Params: {gfm: [file]}
+	OMF function: omf.solvers.gfm.run()
+	Runtime: should be around 1 to 30 seconds.
+	Result: Return the results dictionary/JSON from running LANL's General Fragility Model (GFM) on the input model. Note that this is not the main fragility model for GRIP.'''
 	return 'NOT IMPLEMENTED YET'
 
 @web.app.route('/gridlabRun', methods=['GET', 'POST'])
@@ -69,22 +112,6 @@ def samRun():
 	OMF function: omf.solvers.sam.run()
 	Runtime: should only be a couple seconds.
 	Result: Run NREL's system advisor model with the specified parameters. Return the output vectors and floats in JSON'''
-	return 'NOT IMPLEMENTED YET'
-
-@web.app.route('/gridlabdToGfm', methods=['GET', 'POST'])
-def gridlabdToGfm():
-	'''Data Params: {glm: [file]}
-	OMF function: omf.models.resilientDist.convertToGFM()
-	Runtime: should only be a couple seconds.
-	Result: Convert the GridLAB-D model to a GFM model. Return the new id for the converted model. Note that this is not the main fragility model for GRIP.'''
-	return 'NOT IMPLEMENTED YET'
-
-@web.app.route('/runGfm', methods=['GET', 'POST'])
-def runGfm():
-	'''Data Params: {gfm: [file]}
-	OMF function: omf.solvers.gfm.run()
-	Runtime: should be around 1 to 30 seconds.
-	Result: Return the results dictionary/JSON from running LANL's General Fragility Model (GFM) on the input model. Note that this is not the main fragility model for GRIP.'''
 	return 'NOT IMPLEMENTED YET'
 
 def serve():

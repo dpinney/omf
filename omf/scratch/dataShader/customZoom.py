@@ -1,13 +1,13 @@
-import math, json, io, base64
+import math, json, io, base64, param
 import numpy as np
 import pandas as pd
 import gc
 
-from flask import Flask, render_template, redirect, request
+from flask import Flask, render_template, redirect, request, jsonify
 
 import datashader as ds
 import datashader.transfer_functions as tf
-from datashader.layout import random_layout
+from datashader.layout import random_layout, LayoutAlgorithm
 from datashader.bundling import connect_edges
 
 app = Flask(__name__)
@@ -18,30 +18,6 @@ def hello():
 
 @app.route("/testing", methods=["GET", "POST"])
 def testingRoute(x_range=(0,1), y_range=(0,1)):
-	print(cvsopts)
-	if request.method == 'POST':
-		#add in calc for current dimensions of canvas?
-		#counter=request.form.get("counter", type=float) * .5
-		#print(counter)
-		x_click = request.form.get("x_click", type=float)
-		#y_click = abs(request.form.get("y_click", type=float) - cvsopts['plot_height'])
-		y_click = abs(request.form.get("y_click", type=float))
-		#current_x_range = tuple((request.form.get("x_low", type=float), request.form.get("x_high", type=float)))
-		#current_y_range = tuple((request.form.get("y_low", type=float), request.form.get("y_high", type=float)))
-		#print(current_x_range)
-		#print(current_y_range)
-		#x_click, y_click = vectorCalc(current_x_range, current_y_range, x_click, y_click)
-		# p(t) = a*(1-t) + b*t 
-		x_low = request.form.get("x_low", type=float)
-		y_low = request.form.get("y_low", type=float)
-		x_high = request.form.get("x_high", type=float)
-		y_high = request.form.get("y_high", type=float)
-		#x_high = min(x_click+(counter), 1)
-		#y_high = min(y_click +(counter), 1)
-		x_range = (x_low, x_high)
-		y_range = (y_low, y_high)	 
-	print(cvsopts['plot_height'])
-	#print(current_x_range)
 	dsPlot = newGraphplot(randomloc, connect_edges(randomloc,edges), x_range=x_range, y_range=y_range)
 	#convert datashder image to png
 	back_img = tf.Image(dsPlot).to_pil()
@@ -51,31 +27,178 @@ def testingRoute(x_range=(0,1), y_range=(0,1)):
 	in_mem_file.seek(0)
 	img_bytes = in_mem_file.read()
 	base64_encoded_result_bytes = base64.b64encode(img_bytes)
-	base64_encoded_result_str = base64_encoded_result_bytes.decode('ascii')
-	return render_template("testRoute.html", image=base64_encoded_result_str, x_range=x_range, y_range=y_range, x_low=x_range[0], x_high=x_range[1], y_low=x_range[0], y_high=y_range[1])
+	base64_encoded_result_str = 'data:image/png;base64,' + base64_encoded_result_bytes.decode('ascii')
+	return render_template("testRoute.html", newImage=base64_encoded_result_str, x_low=0, y_low=0, x_high=1, y_high=1)
 
 def vectorCalc(x_range, y_range, x_click, y_click):
-	x_click = x_range[0]*(1-x_click/cvsopts['plot_width']) + x_range[1]*(x_click/cvsopts['plot_width'])
-	y_click = y_range[0]*(1-y_click/cvsopts['plot_height']) + y_range[1]*(y_click/cvsopts['plot_height'])
+	x_click = x_range[0]*(1-x_click) + x_range[1]*(x_click)
+	print(x_range[1]*(x_click))
+	y_click = y_range[0]*(1-y_click) + y_range[1]*(y_click)
 	return x_click, y_click
 
-#@app.route("/changeRange", methods=["POST"])
-#def changeRange():
-#	x_range = request.form.get("x_range")
-#	y_range = request.form.get("y_range")
-#	return redirect("/testing")
+@app.route("/changeRange", methods=["POST"])
+def changeRange():
+	jsonResp = request.get_json()
+	x_low = float(jsonResp["x_low"])
+	print(x_low)
+	y_low = float(jsonResp["y_low"])
+	x_high = float(jsonResp["x_high"])
+	y_high = float(jsonResp["y_high"])
+	#x_high = min(x_click+(counter), 1)
+	#y_high = min(y_click +(counter), 1)
+	x_range = (x_low, x_high)
+	y_range = (y_low, y_high)
+	dsPlot = newGraphplot(randomloc, connect_edges(randomloc,edges), x_range=x_range, y_range=y_range)
+	#convert datashder image to png
+	back_img = tf.Image(dsPlot).to_pil()
+	in_mem_file = io.BytesIO()
+	back_img.save(in_mem_file, format = "PNG")
+	# reset file pointer to start
+	in_mem_file.seek(0)
+	img_bytes = in_mem_file.read()
+	base64_encoded_result_bytes = base64.b64encode(img_bytes)
+	base64_encoded_result_str = 'data:image/png;base64,' + base64_encoded_result_bytes.decode('ascii')
+	return jsonify(newImage=base64_encoded_result_str)
+
+@app.route("/zoom", methods=["POST"])
+def zoom():
+	#print(request.get_json())
+	jsonResp = request.get_json()
+	print(jsonResp)
+	#Get the clicks
+	x_down = float(jsonResp["x_down"])
+	y_down = 1 - float(jsonResp["y_down"])
+	x_up = float(jsonResp["x_up"])
+	y_up = 1 - float(jsonResp["y_up"])
+	#Translate from clicks to min/max
+	x_low = min(x_down, x_up)
+	y_low = min(y_down, y_up)
+	x_high = max(x_down, x_up)
+	y_high = max(y_down, y_up)
+	#Get the old range
+	current_x_range = tuple((float(jsonResp["current_x_low"]), float(jsonResp["current_x_high"])))
+	current_y_range = tuple((float(jsonResp["current_y_low"]), float(jsonResp["current_y_high"])))
+	#Vectorizeto fit range
+	x_low, y_low = vectorCalc(current_x_range, current_y_range, x_low, y_low)
+	x_high, y_high = vectorCalc(current_x_range, current_y_range, x_high, y_high)
+
+	x_range = (x_low, x_high)
+	y_range = (y_low, y_high)
+	print(x_range, y_range)
+	dsPlot = newGraphplot(randomloc, connect_edges(randomloc,edges), x_range=x_range, y_range=y_range)
+	#convert datashder image to png
+	back_img = tf.Image(dsPlot).to_pil()
+	in_mem_file = io.BytesIO()
+	back_img.save(in_mem_file, format = "PNG")
+	# reset file pointer to start
+	in_mem_file.seek(0)
+	img_bytes = in_mem_file.read()
+	base64_encoded_result_bytes = base64.b64encode(img_bytes)
+	base64_encoded_result_str = 'data:image/png;base64,' + base64_encoded_result_bytes.decode('ascii')
+	return jsonify(newImage=base64_encoded_result_str, x_low=x_low, y_low=y_low, x_high=x_high, y_high=y_high)
+
+@app.route("/strafeArrow", methods=["POST"])
+def strafeArrow():
+	#print(request.get_json())
+	jsonResp = request.get_json()
+	print(jsonResp)
+	#Get the old range
+	current_x_range = tuple((float(jsonResp["current_x_low"]), float(jsonResp["current_x_high"])))
+	current_y_range = tuple((float(jsonResp["current_y_low"]), float(jsonResp["current_y_high"])))
+	current_y_low, current_y_high = current_y_range[0], current_y_range[1]
+	current_x_low, current_x_high = current_x_range[0], current_x_range[1]
+	print(current_y_range)
+	#Calculate 
+	x_width = current_x_high - current_x_low
+	y_height = current_y_high - current_y_low
+	if jsonResp['direction'] == 'strafeRight':
+		current_x_range = (current_x_high, (current_x_high+ x_width))
+	elif jsonResp['direction'] == 'strafeLeft':
+		current_x_range = ((current_x_low - x_width), current_x_low )
+	elif jsonResp['direction'] == 'strafeBottom':
+		current_y_range = ((current_y_low - y_height), current_y_low )
+	elif jsonResp['direction'] == 'strafeTop':
+		current_y_range = (current_y_high, (current_y_high + y_height ))
+	print(current_y_range)
+	dsPlot = newGraphplot(randomloc, connect_edges(randomloc,edges), x_range=current_x_range, y_range=current_y_range)
+	#convert datashder image to png
+	back_img = tf.Image(dsPlot).to_pil()
+	in_mem_file = io.BytesIO()
+	back_img.save(in_mem_file, format = "PNG")
+	# reset file pointer to start
+	in_mem_file.seek(0)
+	img_bytes = in_mem_file.read()
+	base64_encoded_result_bytes = base64.b64encode(img_bytes)
+	base64_encoded_result_str = 'data:image/png;base64,' + base64_encoded_result_bytes.decode('ascii')
+	return jsonify(newImage=base64_encoded_result_str, x_low=current_x_range[0], y_low=current_y_range[0], x_high=current_x_range[1], y_high=current_y_range[1])
+
+@app.route("/zoomButton", methods=["POST"])
+def zoomButton():
+	#print(request.get_json())
+	jsonResp = request.get_json()
+	print(jsonResp)
+	#Get the old range
+	current_x_range = tuple((float(jsonResp["current_x_low"]), float(jsonResp["current_x_high"])))
+	current_y_range = tuple((float(jsonResp["current_y_low"]), float(jsonResp["current_y_high"])))
+	current_y_low, current_y_high = current_y_range[0], current_y_range[1]
+	current_x_low, current_x_high = current_x_range[0], current_x_range[1]
+	x_middle = (current_x_low + current_x_high) / 2
+	y_middle = (current_y_low + current_y_high) / 2
+	print(current_x_range)
+	print(jsonResp['zoomDirection'])
+	#Calculate 
+	if jsonResp['zoomDirection'] == 'zoomIn':
+		current_x_range = ((current_x_low+x_middle)/2, (current_x_high+x_middle)/2)
+		current_y_range = ((current_x_low+x_middle)/2, (current_x_high+x_middle)/2)
+	else:
+		current_x_range = (current_x_low*2-x_middle, current_x_high*2-x_middle)
+		current_y_range = (current_y_low*2-y_middle, current_y_high*2-y_middle)
+	print(current_x_range)
+	dsPlot = newGraphplot(randomloc, connect_edges(randomloc,edges), x_range=current_x_range, y_range=current_y_range)
+	#convert datashder image to png
+	back_img = tf.Image(dsPlot).to_pil()
+	in_mem_file = io.BytesIO()
+	back_img.save(in_mem_file, format = "PNG")
+	# reset file pointer to start
+	in_mem_file.seek(0)
+	img_bytes = in_mem_file.read()
+	base64_encoded_result_bytes = base64.b64encode(img_bytes)
+	base64_encoded_result_str = 'data:image/png;base64,' + base64_encoded_result_bytes.decode('ascii')
+	return jsonify(newImage=base64_encoded_result_str, x_low=current_x_range[0], y_low=current_y_range[0], x_high=current_x_range[1], y_high=current_y_range[1])
+
+class map_layout(LayoutAlgorithm):
+    """
+    Assign coordinates to the nodes randomly.
+
+    Accepts an edges argument for consistency with other layout algorithms,
+    but ignores it.
+    """
+
+    def __call__(self, nodes, edges=None, **params):
+        p = param.ParamOverrides(self, params)
+
+        np.random.seed(p.seed)
+
+        df = nodes.copy()
+        points = np.asarray(np.random.uniform(low=0, high=1, size=(len(df), 2)))
+
+        df[p.x] = points[:, 0]
+        df[p.y] = points[:, 1]
+
+        return df
 
 np.random.seed(0)
-n=10000
-m=20000
+n=100000
+m=200000
 
 nodes = pd.DataFrame(["node"+str(i) for i in range(n)], columns=['name'])
 edges = pd.DataFrame(np.random.randint(0,len(nodes), size=(m, 2)), columns=['source', 'target'])
 
-randomloc = random_layout(nodes,edges)
+randomloc = map_layout(nodes,edges)
+print(randomloc.tail())
 #how to add to resize function
 
-cvsopts = dict(plot_height=800, plot_width=800)
+cvsopts = dict(plot_height=900, plot_width=1900)
 
 #creaes nodes in datashader image
 def nodesplot(nodes, name=None, canvas=None, cat=None):
@@ -106,9 +229,9 @@ def newGraphplot(nodes, edges, name="", canvas=None, cat=None, x_range=None, y_r
         yr = y_range
         canvas = ds.Canvas(x_range=xr, y_range=yr, **cvsopts)
     np = nodesplot(nodes, name + " nodes", canvas, cat)
-    print("nodes")
+    #print("nodes")
     ep = edgesplot(edges, name + " edges", canvas)
-    print("edges")
+    #print("edges")
     return tf.stack(ep, np, how="over", name=name)
 
 if __name__ == '__main__':

@@ -23,7 +23,7 @@ def work(modelDir, inputDict):
 	# from plotly import tools
 	import plotly.graph_objs as go
 	# Copy specific climate data into model directory
-	inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])
+	inputDict["climateName"] = zipCodeToClimateName(inputDict["zipCode"])
 	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 
 		pJoin(modelDir, "climate.tmy2"))
 	# Set up SAM data structures.

@@ -30,6 +30,7 @@ def sortedWrite(inTree):
 	output = ''
 	try:
 		for key in sortedKeys:
+			# print inTree[key]
 			output += _dictToString(inTree[key]) + '\n'
 	except ValueError:
 		raise Exception
@@ -45,7 +46,7 @@ def glmToOmd(glmPath, omdPath, attachFilePaths=[]):
 		dirs, fname = os.path.split(attPath)
 		omf['attachments'][fname] = open(attPath).read()
 	with open(omdPath, 'w') as outFile:
-		json.dump(omd, outFile)
+		json.dump(omd, outFile, indent=4)
 
 def getMaxKey(inTree):
 	''' Find the largest key value in the tree. We need this because de-embedding causes noncontiguous keys. '''
@@ -418,6 +419,9 @@ def _dictToString(inDict):
 		return '#define ' + inDict['#define'] + '\n'
 	elif '#set' in inDict:
 		return '#set ' + inDict['#set'] + '\n'
+		#Following was made to help with gridballast gridlabd functionality, so that frequency player doesn't need to be reopened
+	elif 'class' in inDict and inDict['class'] =='player':
+		return 'class' + ' ' + inDict['class'] + ' {\n' + '     ' + 'double' + ' ' + inDict['double'] + ';' + '\n};\n'
 
 def _deEmbedOnce(glmTree):
 	''' Take all objects nested inside top-level objects and move them to the top level.
