@@ -4,7 +4,7 @@ import re, random
 
 
 
-class WindFileObj:
+class WindFileObj(object):
 
 	def __init__(self, filePath):
 		''' Use parsing function to set up harzard data in dict format in constructor.'''
