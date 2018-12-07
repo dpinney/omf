@@ -90,8 +90,12 @@ label, input {
 			<input type="text" name="x_high" id="x_high" value="{{x_high}}"/>
 			<label>y_high</label>
 			<input type="text" name="y_high" id="y_high" value="{{y_high}}"/>
-			<button id="changeGraph" type="submit">Zoom button</button>
+			<button id="changeGraph" type="submit">Set Zoom</button>
 		</form>
+	<div id="zoomButtons">
+		<button class="zoomButton" id="zoomIn" name="zoomIn">Zoom In</button>
+		<button class="zoomButton" id="zoomOut" name="zoomOut">Zoom Out</button>
+	</div>
 	</div>
 	<div id="strafeArrows">
 		<button class="strafeArrow" id="strafeLeft" name="strafeLeft">&lArr;</button>
@@ -139,13 +143,44 @@ label, input {
 		  	ctx.lineWidth = 3;
 		});
 
+		$(".zoomButton").on("click", function(event){
+			data["current_x_low"] = $("#x_low").val();
+			data["current_y_low"] = $("#y_low").val();
+			data["current_x_high"] = $("#x_high").val();
+			data["current_y_high"] = $("#y_high").val();
+			var zoomDirection = this.name;
+			data["zoomDirection"] = zoomDirection; 
+			$.ajax({
+			    type: 'POST',
+			    url: '/zoomButton',
+			    dataType: 'json',
+			    contentType: 'application/json; charset=utf-8',
+			    data: JSON.stringify(data),
+			    success: function(callback) {
+			        //console.log("strafe");
+			        document.getElementById("inputForm").style.display = 'block';
+					$(".strafeArrow").show();
+					$('#dsImage').attr('src', callback.newImage);
+					$('#x_low').val(callback.x_low);
+					$('#y_low').val(callback.y_low);
+					$('#x_high').val(callback.x_high);
+					$('#y_high').val(callback.y_high);
+					//console.log(imageObj);
+			        //$('#dsImage').attr('src', callback.newImage);;
+			    },
+			    error: function() {
+			        $(this).html("error!");
+			    }
+			});
+		});
+
 		$(".strafeArrow").on("click", function(event){
-					data["current_x_low"] = $("#x_low").val();
-		data["current_y_low"] = $("#y_low").val();
-		data["current_x_high"] = $("#x_high").val();
-		data["current_y_high"] = $("#y_high").val();
+			data["current_x_low"] = $("#x_low").val();
+			data["current_y_low"] = $("#y_low").val();
+			data["current_x_high"] = $("#x_high").val();
+			data["current_y_high"] = $("#y_high").val();
 			var direction = this.name;
-			console.log(direction);
+			//console.log(direction);
 			data["direction"] = direction; 
 			$.ajax({
 			    type: 'POST',
@@ -154,9 +189,10 @@ label, input {
 			    contentType: 'application/json; charset=utf-8',
 			    data: JSON.stringify(data),
 			    success: function(callback) {
-			        console.log("strafe");
+			        //console.log("strafe");
 			        document.getElementById("inputForm").style.display = 'block';
 					$(".strafeArrow").show();
+					$(".zoomButton").show();
 					$('#dsImage').attr('src', callback.newImage);
 					$('#x_low').val(callback.x_low);
 					$('#y_low').val(callback.y_low);
@@ -175,7 +211,6 @@ label, input {
 			if (!isDown) {
 		        return;
 			}
-			$(".strafeArrow").hide();
 			mouseX = parseFloat(event.pageX - this.offsetLeft);
 		    mouseY = parseFloat(event.pageY - this.offsetTop);
 		    ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -194,6 +229,8 @@ label, input {
 	    $("#imageCanvas").on("mousedown", function(event) {
 	    	event.preventDefault();
 	    	document.getElementById("inputForm").style.display = 'none';
+	    	$(".strafeArrow").hide();
+			$(".zoomButton").hide();
 	    	var domRect = this.getBoundingClientRect();
 	        var x_down = (event.pageX - this.offsetLeft) / domRect.width;
 	        x_start = event.pageX - this.offsetLeft;
@@ -215,7 +252,7 @@ label, input {
 			var domRect = this.getBoundingClientRect();
 		    var x_up = (event.pageX - this.offsetLeft) / domRect.width;
 		    var y_up = (event.pageY - this.offsetTop) / domRect.height;
-		    console.log("release mouse");
+		    //console.log("release mouse");
 		    //console.log(x_high);
 		    //console.log(y_high);
 
@@ -236,9 +273,10 @@ label, input {
 			    contentType: 'application/json; charset=utf-8',
 			    data: JSON.stringify(data),
 			    success: function(callback) {
-			        console.log("testup");
+			        //console.log("testup");
 			        document.getElementById("inputForm").style.display = 'block';
 					$(".strafeArrow").show();
+					$(".zoomButton").show();
 					$('#dsImage').attr('src', callback.newImage);
 					$('#x_low').val(callback.x_low);
 					$('#y_low').val(callback.y_low);
@@ -275,7 +313,7 @@ label, input {
                     data: JSON.stringify(data),
                     context: Form,
                     success: function(callback) {
-                        console.log('testing');
+                        //console.log('testing');
                         // Watch out for Cross Site Scripting security issues when setting dynamic content!
                         $('#dsImage').attr('src', callback.newImage);
                     },

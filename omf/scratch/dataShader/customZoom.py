@@ -132,6 +132,40 @@ def strafeArrow():
 	base64_encoded_result_str = 'data:image/png;base64,' + base64_encoded_result_bytes.decode('ascii')
 	return jsonify(newImage=base64_encoded_result_str, x_low=current_x_range[0], y_low=current_y_range[0], x_high=current_x_range[1], y_high=current_y_range[1])
 
+@app.route("/zoomButton", methods=["POST"])
+def zoomButton():
+	#print(request.get_json())
+	jsonResp = request.get_json()
+	print(jsonResp)
+	#Get the old range
+	current_x_range = tuple((float(jsonResp["current_x_low"]), float(jsonResp["current_x_high"])))
+	current_y_range = tuple((float(jsonResp["current_y_low"]), float(jsonResp["current_y_high"])))
+	current_y_low, current_y_high = current_y_range[0], current_y_range[1]
+	current_x_low, current_x_high = current_x_range[0], current_x_range[1]
+	x_middle = (current_x_low + current_x_high) / 2
+	y_middle = (current_y_low + current_y_high) / 2
+	print(current_x_range)
+	print(jsonResp['zoomDirection'])
+	#Calculate 
+	if jsonResp['zoomDirection'] == 'zoomIn':
+		current_x_range = ((current_x_low+x_middle)/2, (current_x_high+x_middle)/2)
+		current_y_range = ((current_x_low+x_middle)/2, (current_x_high+x_middle)/2)
+	else:
+		current_x_range = (current_x_low*2-x_middle, current_x_high*2-x_middle)
+		current_y_range = (current_y_low*2-y_middle, current_y_high*2-y_middle)
+	print(current_x_range)
+	dsPlot = newGraphplot(randomloc, connect_edges(randomloc,edges), x_range=current_x_range, y_range=current_y_range)
+	#convert datashder image to png
+	back_img = tf.Image(dsPlot).to_pil()
+	in_mem_file = io.BytesIO()
+	back_img.save(in_mem_file, format = "PNG")
+	# reset file pointer to start
+	in_mem_file.seek(0)
+	img_bytes = in_mem_file.read()
+	base64_encoded_result_bytes = base64.b64encode(img_bytes)
+	base64_encoded_result_str = 'data:image/png;base64,' + base64_encoded_result_bytes.decode('ascii')
+	return jsonify(newImage=base64_encoded_result_str, x_low=current_x_range[0], y_low=current_y_range[0], x_high=current_x_range[1], y_high=current_y_range[1])
+
 class map_layout(LayoutAlgorithm):
     """
     Assign coordinates to the nodes randomly.
@@ -154,8 +188,8 @@ class map_layout(LayoutAlgorithm):
         return df
 
 np.random.seed(0)
-n=1000
-m=2000
+n=100000
+m=200000
 
 nodes = pd.DataFrame(["node"+str(i) for i in range(n)], columns=['name'])
 edges = pd.DataFrame(np.random.randint(0,len(nodes), size=(m, 2)), columns=['source', 'target'])

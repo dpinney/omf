@@ -53,6 +53,10 @@ testSeqPath = omf.omfDir + '/static/testFiles/IEEE13.seq'
 response3 = requests.post('http://localhost:5000/milsoftToGridlab', files={'std':open(testStdPath).read(),'seq':open(testSeqPath).read()})
 # print response3.content # it's a glm.
 # Block until the process terminates.
+mdbTestPath = omf.omfDir + '/static/testFiles/IEEE13.mdb'
+response4 = requests.post('http://localhost:5000/cymeToGridlab', files={'mdb':open(mdbTestPath).read()})
+print response4.content # it's a glm.
+
 # p.join()
 # I SUFFER. KILL ME.
 p.terminate()
