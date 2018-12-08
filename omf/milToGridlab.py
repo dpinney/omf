@@ -1660,7 +1660,7 @@ def getRelatives(tree, node_or_line, parent=False):
 			elif not parent and v.get('parent') == tree[node].get('name'):
 				listy.append(k)
 
-	elif tree[node_or_line].get('object') in ['load', 'triplex_node'] and parent:
+	elif tree[node_or_line].get('object') in ['load', 'triplex_node', 'capacitor'] and parent:
 		parent_name = tree[node_or_line].get('parent')
 		if parent_name:
 			for k,v in tree.iteritems():
@@ -1700,7 +1700,7 @@ def getNamesToKeys(tree):
 	return ntk
 
 def fixOrphanedLoads(tree):
-	'''Working function to fix orphans'''
+	'''Fixes orphaned loads and lines in the tree'''
 	namesToKeys = getNamesToKeys(tree)
 	island_listy = islandCount(tree).split('\n')
 	if not island_listy[0]:
