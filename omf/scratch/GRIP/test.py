@@ -55,7 +55,22 @@ response3 = requests.post('http://localhost:5000/milsoftToGridlab', files={'std'
 # Block until the process terminates.
 mdbTestPath = omf.omfDir + '/static/testFiles/IEEE13.mdb'
 response4 = requests.post('http://localhost:5000/cymeToGridlab', files={'mdb':open(mdbTestPath).read()})
-print response4.content # it's a glm.
+# print response4.content # it's a glm.
+response5 = requests.post(
+	'http://localhost:5000/gridlabdToGfm',
+	files={'glm':open(testGlmPath).read()},
+	data = {
+		'phase_variation': '0.15',
+		'chance_constraint': '1.0',
+		'critical_load_met': '0.98',
+		'total_load_met': '0.5',
+		'maxDGPerGenerator': '0.5',
+		'dgUnitCost': '1000000.0',
+		'generatorCandidates': '',
+		'criticalLoads': ''
+	}
+)
+print response5.content # it's a gfm model.
 
 # p.join()
 # I SUFFER. KILL ME.

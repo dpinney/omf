@@ -82,13 +82,35 @@ def cymeToGridlab():
 	# TODO: delete the tempDir.
 	return send_from_directory(workDir, glmName)
 
-@web.app.route('/gridlabdToGfm', methods=['GET', 'POST'])
+@web.app.route('/gridlabdToGfm', methods=['POST'])
 def gridlabdToGfm():
-	'''Data Params: {glm: [file]}
+	'''Data Params: {glm: [file], other_inputs: see source}
 	OMF function: omf.models.resilientDist.convertToGFM()
 	Runtime: should only be a couple seconds.
 	Result: Convert the GridLAB-D model to a GFM model. Return the new id for the converted model. Note that this is not the main fragility model for GRIP.'''
-	return 'NOT IMPLEMENTED YET'
+	workDir = tempfile.mkdtemp()
+	fName = 'in.glm'
+	f = request.files['glm']
+	glmPath = os.path.join(workDir, fName)
+	f.save(glmPath)
+	feederModel = {
+		'nodes': [], # Don't need these.
+		'tree': omf.feeder.parse(glmPath)
+	}
+	gfmInputTemplate = {
+		'phase_variation': float(request.form.get('phase_variation')),
+		'chance_constraint': float(request.form.get('chance_constraint')),
+		'critical_load_met': float(request.form.get('critical_load_met')),
+		'total_load_met': float(request.form.get('total_load_met')),
+		'maxDGPerGenerator': float(request.form.get('maxDGPerGenerator')),
+		'dgUnitCost': float(request.form.get('dgUnitCost')),
+		'generatorCandidates': request.form.get('generatorCandidates'),
+		'criticalLoads': request.form.get('criticalLoads')
+	}
+	gfmDict = omf.models.resilientDist.convertToGFM(gfmInputTemplate, feederModel)
+	# TODO: delete the tempDir.
+	# return send_from_directory(workDir, outImgName)
+	return str(gfmDict)
 
 @web.app.route('/runGfm', methods=['GET', 'POST'])
 def runGfm():
