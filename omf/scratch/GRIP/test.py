@@ -73,7 +73,23 @@ response5 = requests.post(
 # print response5.content # it's a gfm model.
 response6 = requests.post('http://localhost:5000/gridlabRun', files={'glm':open(testGlmPath).read()})
 # print response6.content # it's a big json.
-
+response7 = requests.post(
+	'http://localhost:5000/samRun',
+	data = {
+		'file_name': omf.omfDir + '/data/Climate/CA-SAN_FRANCISCO.tmy2',
+		'system_size': 10.0,
+		'derate': 0.77,
+		'track_mode': 0.0,
+		'azimuth': 180.0,
+		'tilt_eq_lat': 1.0,
+		'tilt': 45.0,
+		'rotlim': 45.0,
+		'gamma': -0.45,
+		'inv_eff': 0.95,
+		'w_stow': 100
+	}
+)
+# print response7.content
 
 # p.join()
 # I SUFFER. KILL ME.

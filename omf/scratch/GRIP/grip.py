@@ -128,7 +128,7 @@ def gridlabdToGfm():
 	# TODO: delete the tempDir.
 	return json.dumps(gfmDict)
 
-@web.app.route('/runGfm', methods=['GET', 'POST'])
+@web.app.route('/runGfm', methods=['POST'])
 def runGfm():
 	'''Data Params: {gfm: [file]}
 	OMF function: omf.solvers.gfm.run()
@@ -136,13 +136,45 @@ def runGfm():
 	Result: Return the results dictionary/JSON from running LANL's General Fragility Model (GFM) on the input model. Note that this is not the main fragility model for GRIP.'''
 	return 'NOT IMPLEMENTED YET'
 
-@web.app.route('/samRun', methods=['GET', 'POST'])
+@web.app.route('/samRun', methods=['POST'])
 def samRun():
 	'''Data Params: {[system advisor model inputs, approximately 30 floats and strings]}
 	OMF function: omf.solvers.sam.run()
 	Runtime: should only be a couple seconds.
 	Result: Run NREL's system advisor model with the specified parameters. Return the output vectors and floats in JSON'''
-	return 'NOT IMPLEMENTED YET'
+	# Set up SAM data structures.
+	ssc = omf.solvers.nrelsam2013.SSCAPI()
+	dat = ssc.ssc_data_create()
+	# Set the inputs.
+	for key in request.form.keys():
+		if key == 'file_name':
+			ssc.ssc_data_set_string(dat, key, request.form.get(key))
+		else:
+			ssc.ssc_data_set_number(dat, key, float(request.form.get(key)))
+	# Run PV system simulation.
+	mod = ssc.ssc_module_create("pvwattsv1")
+	ssc.ssc_module_exec(mod, dat)
+	# Geodata output.
+	outData = {}
+	outData["city"] = ssc.ssc_data_get_string(dat, "city")
+	outData["state"] = ssc.ssc_data_get_string(dat, "state")
+	outData["lat"] = ssc.ssc_data_get_number(dat, "lat")
+	outData["lon"] = ssc.ssc_data_get_number(dat, "lon")
+	outData["elev"] = ssc.ssc_data_get_number(dat, "elev")
+	# Weather output.
+	outData["climate"] = {}
+	outData["climate"]["Plane of Array Irradiance (W/m^2)"] = ssc.ssc_data_get_array(dat, "poa")
+	outData["climate"]["Beam Normal Irradiance (W/m^2)"] = ssc.ssc_data_get_array(dat, "dn")
+	outData["climate"]["Diffuse Irradiance (W/m^2)"] = ssc.ssc_data_get_array(dat, "df")
+	outData["climate"]["Ambient Temperature (F)"] = ssc.ssc_data_get_array(dat, "tamb")
+	outData["climate"]["Cell Temperature (F)"] = ssc.ssc_data_get_array(dat, "tcell")
+	outData["climate"]["Wind Speed (m/s)"] = ssc.ssc_data_get_array(dat, "wspd")
+	# Power generation.
+	outData["Consumption"] = {}
+	outData["Consumption"]["Power"] = ssc.ssc_data_get_array(dat, "ac")
+	outData["Consumption"]["Losses"] = ssc.ssc_data_get_array(dat, "ac")
+	outData["Consumption"]["DG"] = ssc.ssc_data_get_array(dat, "ac")
+	return json.dumps(outData)
 
 def serve():
 	server = WSGIServer(('0.0.0.0', 5000), web.app)
