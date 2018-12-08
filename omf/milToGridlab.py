@@ -1306,6 +1306,7 @@ def convert(stdString,seqString):
 	# 8B research fixes
 	glmTree = phasingMismatchFix(glmTree)
 	glmTree = missingConductorsFix(glmTree)
+	glmTree = fixOrphanedLoads(glmTree)
 	return glmTree
 
 def stdSeqToGlm(seqPath, stdPath, glmPath):
@@ -1602,7 +1603,7 @@ def missingPowerFix(tree):
 		if 'transformer' == v.get('object'):
 			config_key = namesToKeys[ v['configuration'] ]
 			for phase in v.get('phases'):
-				if phase == 'S':
+				if phase in 'NS':
 					continue
 				if not tree[config_key].get('power{}_rating'.format(phase)):
 					key = str(config_key) + '_' + phase
@@ -1815,11 +1816,6 @@ def _tests(
 			# Convert the std+seq and write it out.
 			with open(pJoin(openPrefix,stdString),'r') as stdFile, open(pJoin(openPrefix,seqString),'r') as seqFile:
 				outGlm = convert(stdFile.read(),seqFile.read())
-				with open(pJoin(outPrefix, stdString.replace('.std', '_islandCount_wo_fol.csv')), 'w') as f:
-					f.write( islandCount(outGlm) )
-				outGlm = fixOrphanedLoads(outGlm)
-				with open(pJoin(outPrefix, stdString.replace('.std', '_islandCount.csv')), 'w') as f:
-					f.write( islandCount(outGlm) )
 			with open(outPrefix + stdString.replace('.std','.glm'),'w') as outFile:
 				outFile.seek(0)
 				outFile.write(feeder.sortedWrite(outGlm))
