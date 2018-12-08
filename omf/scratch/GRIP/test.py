@@ -58,7 +58,7 @@ response4 = requests.post('http://localhost:5000/cymeToGridlab', files={'mdb':op
 # print response4.content # it's a glm.
 response5 = requests.post(
 	'http://localhost:5000/gridlabdToGfm',
-	files={'glm':open(testGlmPath).read()},
+	files = {'glm': open(testGlmPath).read()},
 	data = {
 		'phase_variation': '0.15',
 		'chance_constraint': '1.0',
@@ -70,7 +70,7 @@ response5 = requests.post(
 		'criticalLoads': ''
 	}
 )
-# print response5.content # it's a gfm model.
+# print response5.content # it's a gfm model json.
 response6 = requests.post('http://localhost:5000/gridlabRun', files={'glm':open(testGlmPath).read()})
 # print response6.content # it's a big json.
 response7 = requests.post(
@@ -90,7 +90,15 @@ response7 = requests.post(
 	}
 )
 # print response7.content
-
-# p.join()
+response8 = requests.post(
+	'http://localhost:5000/runGfm',
+	files = {
+		'gfm': response5.content,
+		'asc': open(omf.omfDir + '/static/testFiles/wf_clip.asc').read()
+	}
+)
+# print response8.content # it's a json.
 # I SUFFER. KILL ME.
 p.terminate()
+# Or just join and serve forever. I don't care.
+# p.join()

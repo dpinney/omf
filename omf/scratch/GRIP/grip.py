@@ -6,6 +6,8 @@ import web, json, tempfile
 from gevent.pywsgi import WSGIServer
 from flask import request, send_from_directory
 from matplotlib import pyplot as plt
+import platform
+import subprocess
 
 @web.app.route('/eatfile', methods=['GET', 'POST'])
 def eatfile():
@@ -130,15 +132,44 @@ def gridlabdToGfm():
 
 @web.app.route('/runGfm', methods=['POST'])
 def runGfm():
-	'''Data Params: {gfm: [file]}
+	'''Data Params: {gfm: [file], asc: [file]}
 	OMF function: omf.solvers.gfm.run()
 	Runtime: should be around 1 to 30 seconds.
-	Result: Return the results dictionary/JSON from running LANL's General Fragility Model (GFM) on the input model. Note that this is not the main fragility model for GRIP.'''
-	return 'NOT IMPLEMENTED YET'
+	Result: Return the results dictionary/JSON from running LANL's General Fragility Model (GFM) on the input model and .asc hazard field. Note that this is not the main fragility model for GRIP.'''
+	workDir = tempfile.mkdtemp()
+	fName = 'gfm.json'
+	f = request.files['gfm']
+	gfmPath = os.path.join(workDir, fName)
+	f.save(gfmPath)
+	hName = 'hazard.asc'
+	h = request.files['asc']
+	hazardPath = os.path.join(workDir, hName)
+	h.save(hazardPath)
+	# Run GFM
+	gfmBinaryPath = omf.omfDir + '/solvers/gfm/Fragility.jar'
+	if platform.system() == 'Darwin':
+		#HACK: force use of Java8 on MacOS.
+		javaCmd = '/Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/bin/java'
+	else:
+		javaCmd = 'java'
+	outName = 'gfm_out.json'
+	proc = subprocess.Popen(
+		[javaCmd,'-jar', gfmBinaryPath, '-r', fName, '-wf', hName, '-num', '3', '-ro', outName],
+		stdout = subprocess.PIPE,
+		stderr = subprocess.PIPE,
+		cwd = workDir
+	)
+	(stdout,stderr) = proc.communicate()
+	gfmOutPath = os.path.join(workDir, outName)
+	try:
+		out = json.load(open(gfmOutPath))
+	except:
+		out = stdout
+	return out
 
 @web.app.route('/samRun', methods=['POST'])
 def samRun():
-	'''Data Params: {[system advisor model inputs, approximately 30 floats and strings]}
+	'''Data Params: {[system advisor model inputs, approximately 30 floats]}
 	OMF function: omf.solvers.sam.run()
 	Runtime: should only be a couple seconds.
 	Result: Run NREL's system advisor model with the specified parameters. Return the output vectors and floats in JSON'''
