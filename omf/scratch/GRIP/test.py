@@ -7,7 +7,7 @@ XXX Test interface.
 XXX File handling backend and test.
 XXX What routes? https://docs.google.com/presentation/d/17KTL5q3Nd8E_iUehLKGhCDZar8nkyn7hm8JOu6RMZ4Y/edit#slide=id.g389c95e613_0_15
 XXX Implement a route.
-OOO Implement the rest of the routes.
+XXX Implement the rest of the routes.
 '''
 
 import os, webbrowser, omf, grip, requests

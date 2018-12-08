@@ -9,14 +9,6 @@ from matplotlib import pyplot as plt
 import platform
 import subprocess
 
-@web.app.route('/eatfile', methods=['GET', 'POST'])
-def eatfile():
-	if request.method == 'POST':
-		# print 'HEY I GOT A', request.files
-		return 'POSTER_CHOMPED'
-	else:
-		return 'CHOMPED'
-
 @web.app.route('/oneLineGridlab', methods=['POST'])
 def oneLineGridlab():
 	'''Data Params: {glm: [file], useLatLons: Boolean}
