@@ -1,10 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import re, random
+import seaborn as sns
 
 
 
-class WindFileObj:
+class WindFileObj(object):
 
 	def __init__(self, filePath):
 		''' Use parsing function to set up harzard data in dict format in constructor.'''
@@ -54,9 +55,8 @@ class WindFileObj:
 
 	def drawHeatMap(self):
 		''' Draw heat map-color coded image map with user-defined boundaries and cell-size. '''
-		heatMap = plt.imshow(self.hazardObj['field'], cmap='hot', interpolation='nearest', extent=[0, self.hazardObj["xllcorner"], 0, self.hazardObj["yllcorner"]], aspect=self.hazardObj["cellsize"])
+		heatMap = plt.imshow(self.hazardObj['field'], cmap='hot', interpolation='nearest', extent=[0, self.hazardObj["xllcorner"], 0, self.hazardObj["yllcorner"]], aspect='auto')
 		#plt.gca().invert_yaxis() This isn't needed anymore?
-		plt.colorbar(heatMap)
 		plt.title("Hazard Field")
 		plt.show()
 

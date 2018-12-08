@@ -28,6 +28,49 @@ function handle_files(files, contentsId, nameId) {
 	}
 }
 
+function insert_file_upload_block(fileName, dataVariableName) {
+	// Helper function to insert a fully formed and omf-compatible file upload input item.
+	// We built this because there are about 7 variables that refer to each and need to all be set correctly.
+	parentDiv = document.currentScript.parentElement;
+
+	let inputNode1 = document.createElement("input");
+	inputNode1.setAttribute("id", fileName + "Handler");
+	inputNode1.setAttribute("type", "file");
+	inputNode1.style.display = "none";
+	//inputNode1.addEventListener("change", handle_files(this.files,dataVariableName,fileName));
+	parentDiv.appendChild(inputNode1);
+
+	let inputNode2 = document.createElement("input");
+	inputNode2.setAttribute("id", dataVariableName);
+	inputNode2.setAttribute("name", dataVariableName);
+	inputNode2.type = "hidden";
+	parentDiv.appendChild(inputNode2);
+
+	let innerDiv = document.createElement("div");
+	parentDiv.appendChild(innerDiv);
+
+	let labelNode = document.createElement("label");
+	labelNode.setAttribute("for", fileName + "Handler");
+	labelNode.className = "fileButton";
+	labelNode.innerHTML = "Choose File";
+	innerDiv.appendChild(labelNode);
+
+	let inputNode3 = document.createElement("input");
+	inputNode3.setAttribute("id", fileName);
+	inputNode3.setAttribute("name", fileName);
+	inputNode3.value = '';
+	inputNode3.readOnly = true;
+	inputNode3.className = "uploadFileName";
+	innerDiv.appendChild(inputNode3)
+
+	//inputNode1.addEventListener("change", handle_files(this.files,dataVariableName,fileName));
+	inputNode1.addEventListener("change", function (){
+		handle_files(this.files,dataVariableName,fileName);
+	});
+
+}
+
+
 function ajaxReq(requestType, URL, asynch) {
 	var xmlhttp
 	if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari

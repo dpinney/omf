@@ -169,7 +169,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 	for key, glmOb in jsonTree.iteritems():
 		# Check for a swing node:
 		isSwing = glmOb.get('bustype','') == 'SWING'
-		if glmOb.get('name','') in genCands or isSwing:
+		if glmOb.get('name', None) in genCands or isSwing:
 			genID = glmOb.get('name','')+'_gen'
 			for elem in gfmJson['buses']:
 				if elem['id'][0:-4] == genID[0:-4]:
