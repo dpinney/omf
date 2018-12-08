@@ -1660,7 +1660,7 @@ def getRelatives(tree, node_or_line, parent=False):
 			elif not parent and v.get('parent') == tree[node].get('name'):
 				listy.append(k)
 
-	elif tree[node_or_line].get('object') in ['load', 'triplex_node'] and parent:
+	elif tree[node_or_line].get('object') in ['load', 'triplex_node', 'capacitor'] and parent:
 		parent_name = tree[node_or_line].get('parent')
 		if parent_name:
 			for k,v in tree.iteritems():
