@@ -82,6 +82,23 @@ def cymeToGridlab():
 	# TODO: delete the tempDir.
 	return send_from_directory(workDir, glmName)
 
+@web.app.route('/gridlabRun', methods=['POST'])
+def gridlabRun():
+	'''Data Params: {glm: [file]}
+	Runtime: could take hours. Jeepers.
+	OMF fuction: omf.solvers.gridlabd.runInFileSystem()
+	Result: Run a GridLAB-D model and return the results as JSON.
+	TODO: think about attachment support.'''
+	workDir = tempfile.mkdtemp()
+	fName = 'in.glm'
+	f = request.files['glm']
+	glmOnDisk = os.path.join(workDir, fName)
+	f.save(glmOnDisk)
+	feed = omf.feeder.parse(glmOnDisk)
+	outDict = omf.solvers.gridlabd.runInFilesystem(feed, attachments=[], keepFiles=True, workDir=workDir, glmName='out.glm')
+	#TODO: delete the tempDir.
+	return json.dumps(outDict)
+
 @web.app.route('/gridlabdToGfm', methods=['POST'])
 def gridlabdToGfm():
 	'''Data Params: {glm: [file], other_inputs: see source}
@@ -109,8 +126,7 @@ def gridlabdToGfm():
 	}
 	gfmDict = omf.models.resilientDist.convertToGFM(gfmInputTemplate, feederModel)
 	# TODO: delete the tempDir.
-	# return send_from_directory(workDir, outImgName)
-	return str(gfmDict)
+	return json.dumps(gfmDict)
 
 @web.app.route('/runGfm', methods=['GET', 'POST'])
 def runGfm():
@@ -118,14 +134,6 @@ def runGfm():
 	OMF function: omf.solvers.gfm.run()
 	Runtime: should be around 1 to 30 seconds.
 	Result: Return the results dictionary/JSON from running LANL's General Fragility Model (GFM) on the input model. Note that this is not the main fragility model for GRIP.'''
-	return 'NOT IMPLEMENTED YET'
-
-@web.app.route('/gridlabRun', methods=['GET', 'POST'])
-def gridlabRun():
-	'''Data Params: {glm: [file]}
-	Runtime: could take hours. Jeepers.
-	OMF fuction: omf.solvers.gridlabd.runInFileSystem()
-	Result: Run a GridLAB-D model and return the results as JSON.'''
 	return 'NOT IMPLEMENTED YET'
 
 @web.app.route('/samRun', methods=['GET', 'POST'])

@@ -70,7 +70,10 @@ response5 = requests.post(
 		'criticalLoads': ''
 	}
 )
-print response5.content # it's a gfm model.
+# print response5.content # it's a gfm model.
+response6 = requests.post('http://localhost:5000/gridlabRun', files={'glm':open(testGlmPath).read()})
+# print response6.content # it's a big json.
+
 
 # p.join()
 # I SUFFER. KILL ME.
