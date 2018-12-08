@@ -40,9 +40,9 @@ p.start()
 response1 = requests.post('http://localhost:5000/eatfile', files={'test.txt':'NOTHING_TO_SEE_HERE\nMY_DUDE'})
 print '##### RESPONSE STATUS CODE', response1.status_code
 print '##### RESPONSE CONTENT', response1.content
-# print 'YOOOOOOOOOOO', dir(response1)
-# print 'YOOOOOOOOOOO', response1.text
-# print 'YOOOOOOOOOOO', dir(response1.raw)
+# print '##### Rep1', dir(response1)
+# print '##### Rep1', response1.text
+# print '##### Rep1', dir(response1.raw)
 # Test the image drawing route.
 testGlmPath = omf.omfDir + '/scratch/GRIP/test_ieee123nodeBetter.glm'
 response2 = requests.post('http://localhost:5000/oneLineGridlab', files={'glm':open(testGlmPath).read()}, data={'useLatLons':False})
