@@ -86,10 +86,13 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 		allInputData = json.dumps(inJson)
 	except IOError:
 		allInputData = None
+		inJson = None
 	try:
 		allOutputData = open(pJoin(modelDir,"allOutputData.json")).read()
+		outJson = json.load(open(pJoin(modelDir,"allOutputData.json")))
 	except IOError:
 		allOutputData = None
+		outJson = None
 	if absolutePaths:
 		# Parent of current folder.
 		pathPrefix = _omfDir
@@ -97,7 +100,7 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 		pathPrefix = ""
 	return template.render(allInputData=allInputData,
 		allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
-		datastoreNames=datastoreNames, modelName=modelType)
+		datastoreNames=datastoreNames, modelName=modelType, allInputDataDict=inJson, allOutputDataDict=outJson)
 
 def renderAndShow(modelDir, datastoreNames={}):
 	''' Render and open a template (blank or with output) in a local browser. '''

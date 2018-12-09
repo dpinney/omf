@@ -9,9 +9,8 @@ import omf
 import voltageViz
 
 
-#Test
-if __name__ = '__main__':
-	filePath = 'Users/tuomastalvitie/omf/omf/scratch/voltageRegulation/UCS_Egan_Housed_Solar.omd'
+
+# filePath = '/Users/tuomastalvitie/Desktop/UCS_Egan_Housed_Solar.omd'
 
 #Parse Command Line
 parser = argparse.ArgumentParser(description='Converts an OMD to GLM and runs it on gridlabd')
@@ -43,7 +42,7 @@ with open(filePath, 'r') as inFile:
 				pass
 with open('outGLMtest.glm', "w") as outFile:
 	outFile.write(feeder.sortedWrite(inFeeder['tree']))
-os.system('/Users/tuomastalvitie/omf/omf/solvers/gridlabd_gridballast/local_gd/bin/gridlabd outGLMtest.glm')
+os.system(omf.omfDir +'/solvers/gridlabd_gridballast/local_gd/bin/gridlabd outGLMtest.glm')
 
 
 data = pd.read_csv(('voltDump.csv'), skiprows=[0])
@@ -71,18 +70,18 @@ for name, volt in name_volt_dict.iteritems():
 		offenders.append(tuple([name, float(volt['Volt_C'])/float(volt['Nominal_Voltage'])]))
 
 # #Old Code for name recording only
-# # offenders = []
-# # for name, volt in name_volt_dict.iteritems():
-# # 	if (float(volt['Volt_A'])/float(volt['Nominal_Voltage'])) > 1.05:
-# # 		offenders.append(name)
-# # 	if (float(volt['Volt_B'])/float(volt['Nominal_Voltage'])) > 1.05:
-# # 		offenders.append(name)
-# # 	if (float(volt['Volt_C'])/float(volt['Nominal_Voltage'])) > 1.05:
-# # 		offenders.append(name)
+# offenders = []
+# for name, volt in name_volt_dict.iteritems():
+# 	if (float(volt['Volt_A'])/float(volt['Nominal_Voltage'])) > 1.05:
+# 		offenders.append(name)
+# 	if (float(volt['Volt_B'])/float(volt['Nominal_Voltage'])) > 1.05:
+# 		offenders.append(name)
+# 	if (float(volt['Volt_C'])/float(volt['Nominal_Voltage'])) > 1.05:
+# 		offenders.append(name)
 
 #Print General information about offending nodes
 offenders = list(set(offenders))
-print len(offenders)
+# print len(offenders)
 isum = 0
 offendersNames = []
 for i in range(len(offenders)):
@@ -91,16 +90,44 @@ for i in range(len(offenders)):
 print ("average voltage overdose is by a factor of", isum/(len(offenders)))
 print len(offendersNames)
 
-
-#Write out file
+# Write out file
 with open('offenders.csv', 'w') as f:
 	wr = csv.writer(f, quoting=csv.QUOTE_ALL)
 	wr.writerow(offenders)
 
+
+substation = pd.read_csv('measured_substation_power', comment='#', names=['timestamp', 'measured_real_power'])
+substation_power = substation['measured_real_power'][0]
+solar1 =  pd.read_csv('measured_solar_1', comment='#', names=['timestamp', 'measured_real_power'])
+solar1_power = solar1['measured_real_power'][0]
+solar2 =  pd.read_csv('measured_solar_2', comment='#', names=['timestamp', 'measured_real_power'])
+solar2_power = solar2['measured_real_power'][0]
+ziploads =  pd.read_csv('measured_load_ziploads', comment='#', names=['timestamp', 'measured_real_power'])
+zipload_power = ziploads['measured_real_power'][0]
+waterheaters = pd.read_csv('measured_load_waterheaters', comment='#', names=['timestamp', 'measured_real_power'])
+waterheater_power = waterheaters['measured_real_power'][0]
+HVAC = pd.read_csv('measured_HVAC', comment='#', names=['timestamp', 'heating_power', 'cooling_power'])
+HVAC_power = HVAC['heating_power'][0], HVAC['cooling_power'][0]
+
+
+print "substation power", substation_power
+print "Solar1 Power", solar1_power
+print "Solar2 Power", solar2_power
+print "Zipload power", zipload_power+1000
+print "waterheater power", waterheater_power*1000
+print "HVAC Power", (HVAC_power[0]+HVAC_power[1])*1000
+
+
 #Open Distnetviz
 omf.distNetViz.viz('outGLMtest.glm') #or model.omd
+
+#Remove Feeder
+os.remove('outGLMtest.glm')
+
 #Visualize Voltage Regulation
-voltageViz.voltRegViz(filePath)
+voltageRegVisual.voltRegViz(filePath)
+
+
 
 
 
