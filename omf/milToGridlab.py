@@ -1,5 +1,5 @@
 ''' Convert a Milsoft Windmil feeder model into an OMF-compatible version. '''
-import os, feeder, csv, random, math, copy, locale, json, traceback, shutil, time, datetime, warnings
+import os, feeder, csv, random, math, copy, locale, json, traceback, shutil, time, datetime, warnings, gc
 from StringIO import StringIO
 from os.path import join as pJoin
 from omf.solvers import gridlabd
@@ -1697,7 +1697,8 @@ def _tests(
 		wipeBefore = True,
 		openPrefix = omf.omfDir + '/static/testFiles/',
 		outPrefix = omf.omfDir + '/scratch/milToGridlabTests/',
-		testFiles = [('Olin-Barre.std','Olin.seq'),('Olin-Brown.std','Olin.seq'),('INEC-GRAHAM.std','INEC.seq')],
+		# testFiles = [('Olin-Barre.std','Olin.seq'),('Olin-Brown.std','Olin.seq'),('INEC-GRAHAM.std','INEC.seq')],
+		testFiles = [('Olin-Barre.std','Olin.seq')],
 		totalLength = 121,
 		testAttachments = {'schedules.glm':'', 'climate.tmy2':open(omf.omfDir + '/data/Climate/KY-LEXINGTON.tmy2','r').read()},
 		fileSuffix = '',
@@ -1764,8 +1765,12 @@ def _tests(
 			# But first make networkx cool it with the warnings.
 			import warnings; warnings.filterwarnings("ignore")
 			myGraph = feeder.treeToNxGraph(outGlm)
-			feeder.latLonNxGraph(myGraph, neatoLayout=False)
+			x = feeder.latLonNxGraph(myGraph, neatoLayout=False)
 			plt.savefig(outPrefix + stdString.replace('.std','.png'))
+			# Clear memory since matplotlib likes to eat a lot.
+			plt.close()
+			del x
+			gc.collect()
 			print 'DREW GLM OF', stdString
 			with open(fileName,'a') as resultsFile:
 				resultsFile.write('DREW GLM FOR ' + stdString + "\n")
