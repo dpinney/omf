@@ -1452,6 +1452,11 @@ def missingConductorsFix(tree):
 	return tree
 
 def islandCount(tree, csv = True, csv_min_lines = 2):
+	'''Walks the tree, counting the number of islands.
+	If csv = True, returns a string in which each line represents one island, with the following information on each line (comma separated):
+	island root key, num of objects in island, island root name, island root object type
+	It will return an empty string if there are fewer than csv_min_lines islands.
+	if csv = False, it returns an integer representing the number of islands.'''
 	def count(root, toViset):
 		size = 0
 		toVisit = [root]
