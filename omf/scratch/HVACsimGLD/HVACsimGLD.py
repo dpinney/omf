@@ -1,12 +1,13 @@
 import os, omf, csv
 from matplotlib import pyplot as plt
 from pprint import pprint as pp
+from dateutil.parser import parse as parse_dt
 
 ''' TODOS
 XXX A little bit of plotting.
 XXX Additional devices? See superHouse.glm.
-OOO Parse datetimes correctly. {'# timestamp': '2012-01-01 23:53:00 EST'}
-OOO Other variables to watch?
+OOO Parse and display datetimes correctly. {'# timestamp': '2012-01-01 23:53:00 EST'}
+OOO Other variables to watch? Studies to do?
 OOO Switch to superHouse.glm?
 '''
 
@@ -19,7 +20,11 @@ for x in range(8):
 	# Burn the headers.
 	fileOb.readline()
 data = list(csv.DictReader(fileOb))
-pp(data)
+# pp(data)
+
+# Do something about datetimes.
+# dt = parse_dt("Aug 28 1999 12:00AM")
+# print dt
 
 # Plot something.
 plt.switch_backend('MacOSX')
