@@ -1309,6 +1309,7 @@ def convert(stdString, seqString, rescale=True):
 	# 8B research fixes
 	glmTree = phasingMismatchFix(glmTree)
 	glmTree = missingConductorsFix(glmTree)
+	glmTree = fixOrphanedLoads(glmTree)
 	return glmTree
 
 def stdSeqToGlm(seqPath, stdPath, glmPath):
@@ -1450,9 +1451,56 @@ def missingConductorsFix(tree):
 				tree[line_config_key]['conductor_'+phase] = tree[line_config_key][existing_cond]
 	return tree
 
+def islandCount(tree, csv = True, csv_min_lines = 2):
+	'''Walks the tree, counting the number of islands.
+	If csv = True, returns a string in which each line represents one island, with the following information on each line (comma separated):
+	island root key, num of objects in island, island root name, island root object type
+	It will return an empty string if there are fewer than csv_min_lines islands.
+	if csv = False, it returns an integer representing the number of islands.'''
+	def count(root, toViset):
+		size = 0
+		toVisit = [root]
+		while toVisit:
+			current = toVisit.pop(0)
+			if current not in toViset:
+				continue
+			size += 1
+			toViset -= set( [current] )
+			toVisit.extend( list( getRelatives(tree, current) ) )
+		return size
+	main_root = getRootKey(tree)
+	toViset = set(tree.keys())
+	main_size = count(main_root, toViset)
+	island_roots = list(toViset)
+	for unvisited in toViset:
+		#remove items without phases
+		if not tree[unvisited].get('phases'):
+			island_roots.remove(unvisited)
+		#remove items whose parents are in toViset
+		parental = getRelatives(tree, unvisited, parent = True)
+		if parental and parental in toViset:
+			island_roots.remove(unvisited)
+		elif parental:
+			print unvisited
+	island_sizes = []
+	for island_root in island_roots:
+		island_sizes.append( count(island_root, toViset) )	
+	island_roots.insert(0, main_root)
+	island_sizes.insert(0, main_size)
+	if csv and len(island_roots) > csv_min_lines:
+		island_root_names = [tree[k].get('name', 'name_not_found') for k in island_roots]
+		island_root_types = [tree[k].get('object') for k in island_roots]
+		island_info = list( zip(island_roots, island_sizes, island_root_names, island_root_types) )
+		island_info = sorted( island_info, key = lambda x: int(x[1]) )
+		island_info = [ '%s,%d,%s,%s' % tup for tup in island_info]
+		return '\n'.join(island_info)
+	elif csv:
+		return ''
+	else:
+		return sum([ 1 if island_sizes[i] > 1 else 0 for i in xrange(len(island_roots)) ])
+
 def phasingMismatchFix(tree, intermittent_drop_range=5):
-	'''Fixes phase mismatch errora in the tree'''
-	
+	'''Fixes phase mismatch errors in the tree'''
 	#for k,v in tree.iteritems():
 	#	if v.get('name') == 'NODE150020':
 	#		print v 
@@ -1545,6 +1593,7 @@ def phasingMismatchFix(tree, intermittent_drop_range=5):
 		if parental and parental in toViset:
 			new_roots.remove(unvisited)
 	toViset -= set(no_phase)
+	root_name_list = [ tree[key].get('name', 'name_not_found') for key in [current_node] + new_roots ]
 	for root in new_roots:
 		_phaseFix(tree, root, toViset)
 	
@@ -1561,7 +1610,7 @@ def missingPowerFix(tree):
 		if 'transformer' == v.get('object'):
 			config_key = namesToKeys[ v['configuration'] ]
 			for phase in v.get('phases'):
-				if phase == 'S':
+				if phase in 'NS':
 					continue
 				if not tree[config_key].get('power{}_rating'.format(phase)):
 					key = str(config_key) + '_' + phase
@@ -1616,7 +1665,14 @@ def getRelatives(tree, node_or_line, parent=False):
 			elif not parent and v.get('parent') == tree[node].get('name'):
 				listy.append(k)
 
-	
+	elif tree[node_or_line].get('object') in ['load', 'triplex_node', 'capacitor'] and parent:
+		parent_name = tree[node_or_line].get('parent')
+		if parent_name:
+			for k,v in tree.iteritems():
+				if v.get('name') == parent_name:
+					return k
+		else:
+			return []
 	elif tree[node_or_line].get('object'):
 		searchStr = 'from' if parent else 'to'
 		line = node_or_line
@@ -1638,7 +1694,7 @@ def getRelatives(tree, node_or_line, parent=False):
 			print 'Object with multiple parents detected. Note that this is not fully supported.'
 			return listy
 		return listy[0]
-	return listy	   
+	return listy
 
 def getNamesToKeys(tree):
 	'''Returns a dictionary of names to keys for the tree'''
@@ -1649,10 +1705,42 @@ def getNamesToKeys(tree):
 	return ntk
 
 def fixOrphanedLoads(tree):
-	'''Working function to fix orphaned loads'''
-	orphaned_loads = [ k for k, v in tree.iteritems() if v.get('object') == 'load' and v.get('name') not in getNamesToKeys(tree) ]
-	for orphan in orphaned_loads:
-		del tree[orphan]
+	'''Fixes orphaned loads and lines in the tree'''
+	namesToKeys = getNamesToKeys(tree)
+	island_listy = islandCount(tree).split('\n')
+	if not island_listy[0]:
+		return tree
+	island_listy = [line.split(',') for line in island_listy]
+	size_1_del = 0
+	size_2_del = 0
+	for key, size, name, obj_type in island_listy:
+		key = int(key)
+		size = int(size)
+		if size == 1:
+			if obj_type != 'load':
+				print 'size 1 island of type ' + obj_type
+				continue
+			del tree[key]
+			size_1_del += 1
+			continue
+		if size == 2:
+			kiddo = getRelatives(tree, key)[0]
+			if tree[kiddo]['object'] != 'load':
+				print 'size 2 island with kid of type ' + tree[kiddo]['object']
+				continue
+			if obj_type != 'node':
+				print 'size 2 island with root of type ' + obj_type
+				continue
+			del tree[key], tree[kiddo]
+			size_2_del += 1
+			continue
+		if 'line' in obj_type:
+			current_from = tree[key]['from']
+			for P in 'ABC':
+				next_from = current_from + '_' + P
+				if namesToKeys.get(next_from):
+					tree[key]['from'] = next_from
+	print '%d size 1 deletions and %d size 2 deletions' % ( size_1_del, size_2_del )
 	return tree
 
 def _latCount(name):
@@ -1736,9 +1824,6 @@ def _tests(
 			# Convert the std+seq and write it out.
 			with open(pJoin(openPrefix,stdString),'r') as stdFile, open(pJoin(openPrefix,seqString),'r') as seqFile:
 				outGlm = convert(stdFile.read(),seqFile.read())
-				outGlm = phasingMismatchFix(outGlm)
-				outGlm = fixOrphanedLoads(outGlm)
-				outGlm = missingConductorsFix(outGlm)
 			with open(outPrefix + stdString.replace('.std','.glm'),'w') as outFile:
 				outFile.seek(0)
 				outFile.write(feeder.sortedWrite(outGlm))
