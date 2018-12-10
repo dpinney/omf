@@ -87,8 +87,7 @@ offendersNames = []
 for i in range(len(offenders)):
 	isum = isum + offenders[i][1]
 	offendersNames.append(offenders[i][0])
-print ("average voltage overdose is by a factor of", isum/(len(offenders)))
-print len(offendersNames)
+
 
 # Write out file
 with open('offenders.csv', 'w') as f:
@@ -110,6 +109,8 @@ HVAC = pd.read_csv('measured_HVAC', comment='#', names=['timestamp', 'heating_po
 HVAC_power = HVAC['heating_power'][0], HVAC['cooling_power'][0]
 
 
+print ("average voltage overdose is by a factor of", isum/(len(offenders)))
+print len(offendersNames)
 print "substation power", substation_power
 print "Solar1 Power", solar1_power
 print "Solar2 Power", solar2_power
