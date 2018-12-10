@@ -1,6 +1,6 @@
 ''' Functions for manipulting electrical distribution feeder models. '''
 
-import datetime, copy, os, re, warnings, networkx as nx, json
+import datetime, copy, os, re, warnings, networkx as nx, json, matplotlib
 from matplotlib import pyplot as plt
 
 # Wireframe for new feeder objects:
@@ -232,7 +232,7 @@ def treeToDiNxGraph(inTree):
 def latLonNxGraph(inGraph, labels=False, neatoLayout=False, showPlot=False):
 	''' Draw a networkx graph representing a feeder.'''
 	# Be quiet Matplotlib.
-	warnings.filterwarnings("ignore")
+	warnings.filterwarnings("ignore",category=matplotlib.cbook.mplDeprecation)
 	# Set up figure.
 	plt.axis('off')
 	plt.tight_layout()

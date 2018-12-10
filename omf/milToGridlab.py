@@ -1776,15 +1776,20 @@ default_equipment = {
 	}
 }
 
+def _writeResultsCsv(testOutput, outName):
+	with open(outName, 'w') as f:
+		w = csv.DictWriter(f, testOutput[0].keys(), delimiter=',', lineterminator='\n')
+		w.writeheader()
+		w.writerows(testOutput)
+
 def _tests(
 		keepFiles = True,
 		wipeBefore = False,
 		openPrefix = omf.omfDir + '/static/testFiles/',
 		outPrefix = omf.omfDir + '/scratch/milToGridlabTests/',
-		testFiles = [('Olin-Barre.std','Olin.seq')],
+		testFiles = [('Olin-Barre.std','Olin.seq'), ('Olin-Brown.std','Olin.seq')],
 		totalLength = 121,
 		testAttachments = {'schedules.glm':'', 'climate.tmy2':open(omf.omfDir + '/data/Climate/KY-LEXINGTON.tmy2','r').read()},
-		fileSuffix = '',
 	):
 	''' Test convert every windmil feeder we have (in static/testFiles). '''
 	# testFiles = [('INEC-RENOIR.std','INEC.seq'), ('INEC-GRAHAM.std','INEC.seq'),
@@ -1793,9 +1798,7 @@ def _tests(
 	# setlocale lives here to avoid changing it globally 
 	# locale.setlocale(locale.LC_ALL, 'en_US')
 	# Variables for the testing.
-	fileName = 'convResults' +  str(fileSuffix) + '.txt'
-	timeArray = []
-	statData = []
+	allResults = []
 	# Create the work directory.
 	if wipeBefore:
 		try:
@@ -1806,20 +1809,25 @@ def _tests(
 			pass
 		finally:
 			os.mkdir(outPrefix)
+	else:
+		try:
+			os.mkdir(outPrefix)
+		except:
+			# Couldn't create.
+			pass
 	# Run all the tests.
 	for stdString, seqString in testFiles:
-		curData = {} # Append data for this std file here. 
-		curData['circuit_name'] = stdString 
+		# Output data structure.
+		currentResults = {}
+		currentResults['circuit_name'] = stdString 
 		cur_start_time = time.time() 
-		# Write the time info.
-		with open(fileName, 'a') as resultsFile:
-			local_time = reference.LocalTimezone()
-			now = datetime.datetime.now()
-			resultsFile.write(str(now)[0:19] + " at timezone: " + str(local_time.tzname(now)) + '\n')
 		try:
 			# Convert the std+seq and write it out.
 			with open(pJoin(openPrefix,stdString),'r') as stdFile, open(pJoin(openPrefix,seqString),'r') as seqFile:
-				outGlm = convert(stdFile.read(),seqFile.read())
+				# Catch warnings too:
+				with warnings.catch_warnings(record=True) as caught_warnings:
+					outGlm = convert(stdFile.read(),seqFile.read())
+				currentResults['all_warnings'] = ';'.join([str(x.message) for x in caught_warnings])
 			with open(outPrefix + stdString.replace('.std','.glm'),'w') as outFile:
 				outFile.seek(0)
 				outFile.write(feeder.sortedWrite(outGlm))
@@ -1827,24 +1835,19 @@ def _tests(
 				outFileStats = os.stat(outPrefix + stdString.replace('.std','.glm') )
 			print 'WROTE GLM FOR', stdString
 			# Write the size of the files as a indicator of how good the conversion was.
-			with open(fileName, 'a') as resultsFile:
-				inFileStats = os.stat(pJoin(openPrefix,stdString))
-				inFileSize = inFileStats.st_size
-				outFileSize = outFileStats.st_size
-				percent = float(inFileSize)/float(outFileSize)
-				curData['glm_size_as_perc_of_std'] = percent
-				curData['std_size_mb'] = inFileSize / 1000.0 / 1000.0
-				curData['number_of_load_obj'] = len([x for x in outGlm if outGlm[x].get('object','') in ['load','triplex_load','triplex_node']])
-				resultsFile.write('WROTE GLM FOR ' + stdString + ', THE STD FILE IS %s PERCENT OF THE GLM FILE.\n' % str(100*percent)[0:4])
+			inFileStats = os.stat(pJoin(openPrefix,stdString))
+			inFileSize = inFileStats.st_size
+			outFileSize = outFileStats.st_size
+			percent = float(inFileSize)/float(outFileSize)
+			currentResults['glm_size_as_perc_of_std'] = percent
+			currentResults['std_size_mb'] = inFileSize / 1000.0 / 1000.0
+			currentResults['number_of_load_obj'] = len([x for x in outGlm if outGlm[x].get('object','') in ['load','triplex_load','triplex_node']])
 		except:
 			print 'FAILED CONVERTING', stdString
-			curData['glm_size_as_perc_of_std'] = 0.0
-			with open(fileName,'a') as resultsFile:
-				resultsFile.write('FAILED CONVERTING ' + stdString + "\n")
+			currentResults['glm_size_as_perc_of_std'] = 0.0
 		try:
 			# Draw the GLM.
 			# But first make networkx cool it with the warnings.
-			import warnings; warnings.filterwarnings("ignore")
 			myGraph = feeder.treeToNxGraph(outGlm)
 			x = feeder.latLonNxGraph(myGraph, neatoLayout=False)
 			plt.savefig(outPrefix + stdString.replace('.std','.png'))
@@ -1853,19 +1856,17 @@ def _tests(
 			del x
 			gc.collect()
 			print 'DREW GLM OF', stdString
-			with open(fileName,'a') as resultsFile:
-				resultsFile.write('DREW GLM FOR ' + stdString + "\n")
+			currentResults['drawing_success'] = True
 		except:
 			print 'FAILED DRAWING', stdString
-			with open(fileName,'a') as resultsFile:
-				resultsFile.write('DREW GLM FOR ' + stdString + "\n")
+			currentResults['drawing_success'] = False
 		try:
 			# Run powerflow on the GLM.
-			curData['gridlabd_error_code'] = 'Processing'
+			currentResults['gridlabd_error_code'] = 'Processing'
 			output = gridlabd.runInFilesystem(outGlm, attachments=testAttachments, keepFiles=False)
 			if output['stderr'].startswith('ERROR'):
 				# Catch GridLAB-D's errors:
-				curData['gridlabd_error_code'] = output['stderr'].replace('\n',' ')
+				currentResults['gridlabd_error_code'] = output['stderr'].replace('\n',' ')
 				raise Exception
 			# Dump powerflow results.
 			with open(outPrefix + stdString.replace('.std','.json'),'w') as outFile:
@@ -1873,30 +1874,18 @@ def _tests(
 				json.dump(output, outFile, indent=4)
 				outFile.truncate()
 			print 'RAN GRIDLAB ON', stdString
-			with open(fileName, 'a') as resultsFile:
-				resultsFile.write('RAN GRIDLAB ON ' + stdString + "\n")
-				resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
-				curData['powerflow_success'] = True
-				resultsFile.write("====================================================================================\n")
-				timeArray.append(time.time() - cur_start_time)
+			currentResults['powerflow_success'] = True
 		except Exception as e:
 			print 'POWERFLOW FAILED', stdString
-			with open(fileName,'a') as resultsFile:
-				resultsFile.write('POWERFLOW FAILED ' + stdString + "\n")
-				curData['powerflow_success'] = False
-				resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
-				resultsFile.write("====================================================================================\n")
-				timeArray.append(time.time() - cur_start_time)
+			currentResults['powerflow_success'] = False
 		# Write stats for all tests.
-		curData['conversion_time_seconds'] = time.time() - cur_start_time
-		statData.append(curData)
-	with open(fileName, 'a') as resultsFile:
-		resultsFile.write('Ran %d out of %d tests for this simulation.\n' % (len(testFiles), totalLength))
-		resultsFile.write('Total time of %d simulations is: %d seconds.' % (len(timeArray), sum(timeArray)) + '\n')
-		resultsFile.write("====================================================================================\n")
+		currentResults['conversion_time_seconds'] = time.time() - cur_start_time
+		_writeResultsCsv([currentResults], outPrefix + stdString.replace('.std','.csv'))
+		# Append to multi-circuit output and continue.
+		allResults.append(currentResults)
 	if not keepFiles:
 		shutil.rmtree(outPrefix)
-	return statData
+	return allResults
 
 if __name__ == "__main__":
 	print _tests()
