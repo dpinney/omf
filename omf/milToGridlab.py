@@ -1753,39 +1753,34 @@ def _latCount(name):
 				myLatCount += 1
 	print name, 'COUNT', nameCount, 'LAT COUNT', latCount, 'SUCCESS RATE', 1.0*latCount/nameCount
 
-
 default_equipment = {
-		'underground_line_conductor': {
-			'name': "DG_1000ALTRXLPEJ15",
-			'object': 'underground_line_conductor',
-			'rating.summer.continuous': "725 A",
-			'outer_diameter': "1.175 in",
-			'conductor_gmr': "0.0395 ft",
-			'conductor_diameter': "1.165 in",
-			'conductor_resistance': "0.0141 ohm/kft",
-			'neutral_gmr': "0.0132 ft",
-			'neutral_resistance': "2.3057 ohm/kft",
-			'neutral_diameter': "0.0254 in",
-			'neutral_strands': "7",
-			'shield_gmr': "0.00 ft"
-		},
-
-		'overhead_line_conductor': {
-			'name': "1000_CU",
-			'object': 'overhead_line_conductor',
-			'geometric_mean_radius': "1.121921cm",
-			'resistance': "0.042875Ohm/km"
-		}
+	'underground_line_conductor': {
+		'name': "DG_1000ALTRXLPEJ15",
+		'object': 'underground_line_conductor',
+		'rating.summer.continuous': "725 A",
+		'outer_diameter': "1.175 in",
+		'conductor_gmr': "0.0395 ft",
+		'conductor_diameter': "1.165 in",
+		'conductor_resistance': "0.0141 ohm/kft",
+		'neutral_gmr': "0.0132 ft",
+		'neutral_resistance': "2.3057 ohm/kft",
+		'neutral_diameter': "0.0254 in",
+		'neutral_strands': "7",
+		'shield_gmr': "0.00 ft"
+	},
+	'overhead_line_conductor': {
+		'name': "1000_CU",
+		'object': 'overhead_line_conductor',
+		'geometric_mean_radius': "1.121921cm",
+		'resistance': "0.042875Ohm/km"
+	}
 }
-
-
 
 def _tests(
 		keepFiles = True,
-		wipeBefore = True,
+		wipeBefore = False,
 		openPrefix = omf.omfDir + '/static/testFiles/',
 		outPrefix = omf.omfDir + '/scratch/milToGridlabTests/',
-		# testFiles = [('Olin-Barre.std','Olin.seq'),('Olin-Brown.std','Olin.seq'),('INEC-GRAHAM.std','INEC.seq')],
 		testFiles = [('Olin-Barre.std','Olin.seq')],
 		totalLength = 121,
 		testAttachments = {'schedules.glm':'', 'climate.tmy2':open(omf.omfDir + '/data/Climate/KY-LEXINGTON.tmy2','r').read()},
@@ -1798,7 +1793,7 @@ def _tests(
 	# setlocale lives here to avoid changing it globally 
 	# locale.setlocale(locale.LC_ALL, 'en_US')
 	# Variables for the testing.
-	fileName = 'convResults' +  str(fileSuffix) + '.txt' 
+	fileName = 'convResults' +  str(fileSuffix) + '.txt'
 	timeArray = []
 	statData = []
 	# Create the work directory.
@@ -1807,7 +1802,8 @@ def _tests(
 			# Wipe first.
 			shutil.rmtree(outPrefix)
 		except:
-			pass # no test directory yet.
+			# Couldn't delete, just keep going.
+			pass
 		finally:
 			os.mkdir(outPrefix)
 	# Run all the tests.
@@ -1815,7 +1811,7 @@ def _tests(
 		curData = {} # Append data for this std file here. 
 		curData['circuit_name'] = stdString 
 		cur_start_time = time.time() 
-		# Write the time info.  
+		# Write the time info.
 		with open(fileName, 'a') as resultsFile:
 			local_time = reference.LocalTimezone()
 			now = datetime.datetime.now()
