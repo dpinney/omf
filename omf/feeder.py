@@ -422,6 +422,8 @@ def _dictToString(inDict):
 	#Following was made to help with gridballast gridlabd functionality, so that frequency player doesn't need to be reopened
 	elif 'class' in inDict and inDict['class'] =='player':
 		return 'class' + ' ' + inDict['class'] + ' {\n' + '     ' + 'double' + ' ' + inDict['double'] + ';' + '\n};\n'
+	# elif 'collector' in inDict and 'group' in inDict and inDict['group'] =='class=ZIPload':
+	# 	return 'object' + ' ' + inDict['object'] + ' {\n' + '	' + 'name' + ' ' + 'collector_ZIPloads' + ';'+'\n' +'group' + ' ' + inDict['group']+';'+'\n'+'property' +' '+inDict['property']+';'+'\n'+'interval'+' '+inDict['interval']+';'+'\n'+'file'+' '+inDict['file']+'\n};\n'
 
 def _deEmbedOnce(glmTree):
 	''' Take all objects nested inside top-level objects and move them to the top level.

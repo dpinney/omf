@@ -10,7 +10,7 @@ import voltageViz
 
 
 
-# filePath = '/Users/tuomastalvitie/Desktop/UCS_Egan_Housed_Solar.omd'
+filePath = '/Users/tuomastalvitie/Desktop/UCS_Egan_Housed_Solar.omd'
 
 #Parse Command Line
 parser = argparse.ArgumentParser(description='Converts an OMD to GLM and runs it on gridlabd')
@@ -25,6 +25,9 @@ with open(filePath, 'r') as inFile:
 	inFeeder = json.load(inFile)
 	inFeeder['tree'][u'01'] = {u'omftype': u'#include', u'argument': u'"hot_water_demand1.glm"'}
 	inFeeder['tree'][u'011'] = {u'class': u'player', u'double': u'value'}# add in manually for now
+	# inFeeder['tree'][u'012'] = {u'object': u'collector', u'group': u'class=ZIPload', u'property': u'sum(heating_demand), sum(cooling_demand)'
+	# 								,u'interval':u'60', u'file':u'measured_HVAC.csv'}
+
 	name_volt_dict ={}
 	for key, value in inFeeder['tree'].iteritems():
 		try:#disable freq control
@@ -42,7 +45,7 @@ with open(filePath, 'r') as inFile:
 				pass
 with open('outGLMtest.glm', "w") as outFile:
 	outFile.write(feeder.sortedWrite(inFeeder['tree']))
-os.system(omf.omfDir +'/solvers/gridlabd_gridballast/local_gd/bin/gridlabd outGLMtest.glm')
+os.system(omf.omfDir +'/solvers/gridlabd_gridballast/local_gd/bin/gridlabd outGLM.glm')
 
 
 data = pd.read_csv(('voltDump.csv'), skiprows=[0])
@@ -114,9 +117,20 @@ print len(offendersNames)
 print "substation power", substation_power
 print "Solar1 Power", solar1_power
 print "Solar2 Power", solar2_power
-print "Zipload power", zipload_power+1000
+print "Zipload power", zipload_power*1000
 print "waterheater power", waterheater_power*1000
 print "HVAC Power", (HVAC_power[0]+HVAC_power[1])*1000
+
+df=pd.DataFrame(columns=('result', 'value'))
+df.loc[0]=["number of offenders", len(offendersNames)]
+df.loc[1]=["substation power", substation_power]
+df.loc[2]=["Solar1 Power", solar1_power]
+df.loc[3]=["Solar2 Power", solar2_power]
+df.loc[4]=["Zipload power", zipload_power*1000]
+df.loc[5]=["waterheater power", waterheater_power*1000]
+df.loc[6]=["HVAC Power", (HVAC_power[0]+HVAC_power[1])*1000]
+
+df.to_csv('Results.csv')
 
 
 #Open Distnetviz
