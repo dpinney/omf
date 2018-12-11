@@ -13,6 +13,7 @@ import pprint as pprint
 import copy
 import os.path
 import warnings
+import numpy as np
 
 # OMF imports
 import omf.feeder as feeder
@@ -23,6 +24,90 @@ from omf.weather import zipCodeToClimateName
 modelName, template = metadata(__file__)
 tooltip = "Model extreme weather and determine optimal investment for distribution resiliency."
 hidden = True
+
+class HazardField(object):
+	''' Object to modify a hazard field from an .asc file. '''
+
+	def __init__(self, filePath):
+		''' Use parsing function to set up harzard data in dict format in constructor.'''
+		self.hazardObj = self.parseHazardFile(filePath)
+
+	def parseHazardFile(self, inPath):
+		''' Parse input .asc file. '''
+		with open(inPath, "r") as hazardFile: # Parse the file, strip away whitespaces.
+			content = hazardFile.readlines()
+		content = [x.strip() for x in content]
+		hazardObj = {}
+		field = []
+		for i in range(len(content)): 
+			if i <= 5: # First, get the the parameters for the export function below. Each gets their own entry in our object.
+				line = re.split(r"\s*",content[i])
+				hazardObj[line[0]] = float(line[1])
+			if i > 5: # Then, get the numerical data, mapping each number to its appropriate parameter.
+				field.insert((i-6),map(float,content[i].split(" "))) 
+		field = np.array(field)
+		hazardObj["field"] = field
+		return hazardObj
+
+	def exportHazardObj(self, outPath):
+		''' Export file. ''' 
+		ncols = "ncols        " + str(self.hazardObj["ncols"]) + "\n" # Get parameters from object.
+		nrows = "nrows        " + str(self.hazardObj["nrows"]) + "\n"
+		xllcorner = "xllcorner    " + str(self.hazardObj["xllcorner"]) + "\n"
+		yllcorner = "yllcorner    " + str(self.hazardObj["yllcorner"]) + "\n"
+		cellsize = "cellsize     " + str(self.hazardObj["cellsize"]) + "\n"
+		NODATA_value = "NODATA_value " + str(self.hazardObj["NODATA_value"]) + "\n"
+		output = ncols + nrows + xllcorner + yllcorner + cellsize + NODATA_value
+		fieldList = self.hazardObj["field"].tolist() # Get numerical data, convert each number to a string and add that onto the to-be exported data. 
+		for i in range(len(fieldList)):
+			output = output + " ".join(map(str, fieldList[i])) + "\n"
+		with open(outPath, "w") as newHazardFile: # Export to new file.
+			newHazardFile.write("%s" % output)
+
+	def moveLocation(self, x, y): 
+		''' Shift temporal boundaries for image plot. ''' 
+		self.hazardObj["xllcorner"] = x
+		self.hazardObj["yllcorner"] = y
+
+	def changeCellSize(self, cellSize): 
+		''' Scale the cell size in image plot. '''
+		self.hazardObj["cellsize"] = cellSize
+
+	def drawHeatMap(self):
+		''' Draw heat map-color coded image map with user-defined boundaries and cell-size. '''
+		heatMap = plt.imshow(
+			self.hazardObj['field'],
+			cmap = 'hot',
+			interpolation = 'nearest',
+			extent = [
+				self.hazardObj["xllcorner"],
+				self.hazardObj["xllcorner"] + self.hazardObj["ncols"] * self.hazardObj["cellsize"],
+				self.hazardObj["yllcorner"],
+				self.hazardObj["yllcorner"] + self.hazardObj["nrows"] * self.hazardObj["cellsize"]
+			],
+			aspect='auto')
+		#plt.gca().invert_yaxis() This isn't needed anymore?
+		plt.title("Hazard Field")
+		plt.show()
+
+	def scaleField(self, scaleFactor):
+		''' Numerically scale the field with user defined scaling factor. ''' 
+		for a in np.nditer(self.hazardObj["field"], op_flags=['readwrite']):
+			a[...] = scaleFactor * a
+
+	def randomField(self, lowerLimit = 0, upperLimit = 100):
+		''' Generate random field with user defined limits. '''
+		for a in np.nditer(self.hazardObj["field"], op_flags=['readwrite']):
+			a[...] = random.uniform(lowerLimit, upperLimit) 
+
+def _testHazards():
+	hazard = HazardField(omf.omfDir + "/static/testFiles/wf_clip.asc")
+	hazard.scaleField(.5)
+	hazard.moveLocation(20, 100)
+	hazard.changeCellSize(0.5)
+	hazard.randomField()
+	# hazard.exportHazardObj("modWindFile.asc")
+	# hazard.drawHeatMap()
 
 def getNodePhases(obj, maxRealPhase):
 	''' Convert phase info in GridLAB-D obj (e.g. ABC) to GFM phase format (e.g. [True,True,True].'''
@@ -518,6 +603,8 @@ def new(modelDir):
 	return creationCode
 
 def _runModel():
+	# Testing the hazard class.
+	_testHazards()
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
