@@ -58,11 +58,7 @@ def work(modelDir, inputDict):
 		customColormapValue = True
 	else:
 		customColormapValue = False
-	# Type correction for rezSqIn, maybe?
-
-
 	# chart = voltPlot(omd, workDir=modelDir, neatoLayout=neato)
-
 	chart = drawPlot(
 		pJoin(modelDir,feederName + ".omd"),
 		neatoLayout = neato,
