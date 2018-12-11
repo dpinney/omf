@@ -33,23 +33,51 @@ def work(modelDir, inputDict):
 		neato = False
 	else:
 		neato = True
+	# None cheack for edgeCol
+	if inputDict.get("edgeCol", "None") == "None":
+		edgeColValue = None
+	else:
+		edgeColValue = inputDict["edgeCol"]
+	# None cheack for nodeCol
+	if inputDict.get("nodeCol", "None") == "None":
+		nodeColValue = None
+	else:
+		nodeColValue = inputDict["nodeCol"]
+	# None cheack for edgeLabs
+	if inputDict.get("edgeLabs", "None") == "None":
+		edgeLabsValue = None
+	else:
+		edgeLabsValue = inputDict["edgeLabs"]
+	# None cheack for nodeLabs
+	if inputDict.get("nodeLabs", "None") == "None":
+		nodeLabsValue = None
+	else:
+		nodeLabsValue = inputDict["nodeLabs"]
+	# Type correction for colormap input
+	if inputDict.get("customColormap", "True") == "True":
+		customColormapValue = True
+	else:
+		customColormapValue = False
+	# Type correction for rezSqIn, maybe?
+
+
 	# chart = voltPlot(omd, workDir=modelDir, neatoLayout=neato)
+
 	chart = drawPlot(
 		pJoin(modelDir,feederName + ".omd"),
 		neatoLayout = neato,
-		edgeCol = inputDict["edgeCol"],
-		nodeCol = inputDict["nodeCol"],
-		nodeLabs = inputDict["nodeLabs"],
-		edgeLabs = inputDict["edgeLabs"],
-		customColormap = inputDict["customColormap"],
-		rezSqIn = inputDict["rezSqIn"])
+		edgeCol = edgeColValue,
+		nodeCol = nodeColValue,
+		nodeLabs = nodeLabsValue,
+		edgeLabs = edgeLabsValue,
+		customColormap = customColormapValue,
+		rezSqIn = int(inputDict["rezSqIn"]))
 	chart.savefig(pJoin(modelDir,"output.png"))
 	with open(pJoin(modelDir,"output.png"),"rb") as inFile:
 		outData["voltageDrop"] = inFile.read().encode("base64")
 	return outData
 		
-def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, customColormap=
-	False, rezSqIn=400):
+def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, customColormap=False, rezSqIn=400):
 	''' Draw a color-coded map of the voltage drop on a feeder.
 	path is the full path to the GridLAB-D .glm file or OMF .omd file.
 	workDir is where GridLAB-D will run, if it's None then a temp dir is used.
