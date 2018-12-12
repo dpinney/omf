@@ -509,6 +509,7 @@ def work(modelDir, inputDict):
 	rdtOutFile = modelDir + '/rdtOutput.json'
 	rdtSolverFolder = pJoin(__neoMetaModel__._omfDir,'solvers','rdt')
 	rdtJarPath = pJoin(rdtSolverFolder,'micot-rdt.jar')
+	# TODO: modify path, don't assume SCIP installation.
 	proc = subprocess.Popen(['java', "-Djna.library.path=" + rdtSolverFolder, '-jar', rdtJarPath, '-c', rdtInputFilePath, '-e', rdtOutFile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	(stdout,stderr) = proc.communicate()
 	with open(pJoin(modelDir, "rdtConsoleOut.txt"), "w") as rdtConsoleOut:

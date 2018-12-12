@@ -30,6 +30,14 @@
 				color:white;
 			}
 			body {margin:0px;}
+			a {
+				text-decoration: none;
+                color: mediumseagreen;
+                /*color: black;*/
+			}
+            a:visited {
+                color: seagreen;
+            }
 
             /* SVG */
 
@@ -98,13 +106,11 @@
 				}
 			}
 
-			/* HEADER and MENU LINKS */
+            /**************************************************
+            // Header and menu links
+            **************************************************/
 
-			a {
-				text-decoration: none;
-				color: white;
-			}
-			div#header {
+			#header {
 				width:100%;
 				height: var(--header-height);
 				padding-top: var(--header-padding-top);
@@ -113,9 +119,11 @@
                 /*position: absolute;*/
 				/*min-width:1000px;*/
 			}
-			div#headInnerBlock{ width:1000px; height:40px; font-size:medium; color:white; margin:4px auto 0 auto; }
-			div#menuLeft{ height:40px; float:left; font-size:medium; color:white; margin-left:5px;}
-			div#menuRight{ 
+            #helpDiv a {
+                color: white;
+            }
+			/*#menuLeft{ height:40px; float:left; font-size:medium; color:white; margin-left:5px;}*/
+			#menuRight{ 
 				/*height:40px;
 				font-size:medium;
 				color:white;*/
@@ -124,9 +132,13 @@
 				/*justify-content: space-between;
 				width: 162px*/
 			}
-			div#arrow { font-size:8pt; position:absolute; margin-top:2px; margin-left:4px; display:inline; }
+			/*#arrow { font-size:8pt; position:absolute; margin-top:2px; margin-left:4px; display:inline; }*/
+            .headerDiv {
+                margin-right: 15px;
+                cursor: pointer;
+            }
 			ul.menu {
-				position:absolute;
+				position: absolute;
 				top: 100%;
 				left: 0;
 				z-index: 1000;
@@ -147,7 +159,15 @@
 				box-shadow: 0 11px 10px rgba(0, 0, 0, 0.2);
 				-webkit-background-clip: padding-box;
 			}
-			ul.menu.right { right:0; left:auto; padding:5px 0px 5px 0px; overflow-y:auto; overflow-x:hidden; max-height:550px; }
+			ul.menu.right { 
+                right:0;
+                left:auto;
+                padding:5px 0px 5px 0px;
+                overflow-y:auto;
+                overflow-x:hidden;
+                max-height:550px; 
+                cursor: pointer;
+            }
 			ul.menu.left { right:auto; left:auto; padding:0 0 0 0; }
 			ul.menu.center { right:auto; left:-45%; }
 			ul.menu li { 
@@ -159,7 +179,6 @@
                 display:block;
                 color:black;
                 /*padding:4px;*/
-                text-decoration: none 
                 }
 			ul.menu a:hover {color:white;}
 			ul.menu { display:block; color:black; padding:4px; }
@@ -185,10 +204,13 @@
 				border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;
 				white-space: nowrap;
 				display:inline-block;
+                cursor: pointer;
 			}
 			button.pill:hover{background:transparent;}
 
-			/* MODAL DIALOGS */
+            /**************************************************
+            // Modal Dialogs
+            **************************************************/
 
             #loadModalTable {
                 width: 890px;
@@ -201,6 +223,12 @@
             }
             #progressModal {
                 z-index: 1;
+            }
+            #massAddModal .modalContent {
+                width: 400px;
+            }
+            #climateModal label {
+                white-space: nowrap;
             }
 			.modal {
                 position: fixed;
@@ -259,6 +287,7 @@
                 list-style-type: none;
                 margin: 0px 0px 0px 20px;
                 padding: 0;
+                cursor: pointer;
             }
             .feederItem {
                 padding: 5px 5px 5px 5px;
@@ -301,20 +330,17 @@
 			/* descriptionTable */
 
 			#descriptionTable {
-				width: 300px;
 				border:1px solid black;
 				border-collapse: collapse;
 				text-align: left;
 				table-layout:fixed;
 				overflow-y: auto;
 				overflow-x: hidden;
-				width: auto;
 				max-height:90%;
 				position: fixed;
-				top: 55px;
-				right: 5px;
-				display: none; 
-			}
+                top: 55px;
+				display: none;
+            }
             .tableTitle {
                 background-color: black;
                 color: white;
@@ -350,7 +376,10 @@
 				outline: none; 
 				background:mediumseagreen;
 			}
-		</style>
+        </style>
+        <link rel="stylesheet" href="/static/jquery-ui.min.css">
+        <script type="text/javascript" src="/static/jquery.js"></script>
+        <script type="text/javascript" src="/static/jquery-ui.min.js"></script>
 		<script type='text/javascript' src='/static/svg-pan-zoom.js'></script>
 		{% if jasmine %}{{ jasmine | safe }}{% endif %}
 		<!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder.js'></script> -->
@@ -370,40 +399,50 @@
 		<!-- Menu Bar -->
 		<div id='header'>
 			<div id="menuRight">
-				<div id="helpDiv">
+				<div id="helpDiv" class="headerDiv">
 					<div class="buttonGroup">
 						<button class='pill' type = 'submit'>
 							<a id='helpButton' href='https://github.com/dpinney/omf/wiki/Tools-~-gridEdit' target='_blank'>Help</a>
 						</button>
 					</div>
                 </div>
-                <div id="editDiv">
+                <div id="editDiv" class="headerDiv">
 					<div class="buttonGroup">
                         <button id="addOps" class='pill' onclick='dropPill(this, "Edit")'>Edit &#x25BE;</button>
-                        <ul class='menu right' style="display: none">
-							<li><a href='javascript:toggleElementDisplay("findModal");'>Find...</a></li>
+                        <ul id = "editMenu" class='menu right' style="display: none">
+                            <li>Zoom To Fit</li>
+                            <li>Zoom Reset</li>
+                            <li>Static Loads to Houses</li>
+                            <li>Scada Loadshapes...</li>
+                            <li>Add AMI Profiles...</li>
+                            <li>Find...</li>
+                            <li>Mass Add...</li>
+                            <li>Mass Edit...</li>
+                            <li>Attachments...</li>
+                            <li>Climate...</li>
+                            <li>Anonymization...</li>
                         </ul>
                     </div>
                 </div>
-				<div id="addDiv">
+				<div id="addDiv" class="headerDiv">
 					<div class="buttonGroup">
 						<button id="addOps" class='pill' onclick='dropPill(this, "Add")'>Add &#x25BE;</button>
-						<ul id='newObjectMenu' class='menu right' style="display: none">
+						<ul id='componentList' class='menu right' style="display: none">
 					</div>
 				</div>
-				<div id="fileDiv">
+				<div id="fileDiv" class="headerDiv">
 					<div class='buttonGroup'>
                     {% if is_admin or not public %}
 						<button id="fileOps" class='pill' onclick='dropPill(this, "File")'>File &#x25BE;</button>
-						<ul class='menu right' style="display: none">
-							<li><a href='javascript:saveFeeder();'>Save</a></li>
-							<li><a href='javascript:downloadTextFile();'>View Raw Data</a></li>
-							<li><a href='javascript:renameFeeder();'>Rename</a></li>
-                            <li><a href='javascript:toggleElementDisplay("loadModal");'>Load from Model...</a></li>
-							<li><a href='javascript:toggleElementDisplay("blankFeederModal");'>New Blank Feeder...</a></li>
-							<li><a href='javascript:toggleElementDisplay("milsoftModal");'>Windmil Conversion...</a></li>
-							<li><a href='javascript:toggleElementDisplay("gridlabModal");'>GridLAB-D Conversion...</a></li>
-							<li><a href='javascript:toggleElementDisplay("cymeModal");'>CYMDIST Conversion...</a></li>
+                        <ul id='fileMenu' class='menu right' style="display: none">
+							<li>Save</li>
+							<li>View Raw Data</li>
+							<li>Rename</li>
+                            <li>Load from Model...</li>
+							<li>New Blank Feeder...</li>
+							<li>Windmil Conversion...</li>
+							<li>GridLAB-D Conversion...</li>
+							<li>CYMDIST Conversion...</li>
 						</ul>
                     {% endif %}
 					</div>
@@ -428,20 +467,26 @@
         </svg>
         <!-- Modals -->
 		<div id='findModal' class="modal" style="display: none">
-			<div class='modalContent' id='findModalContent' style='width:300px'>
-				<table class='importOptions' style='padding:4px; word-wrap:break-word'>
+			<div class='modalContent'>
+				<table>
 					<tr>
 						<td>Term</td>
-						<td><input id='searchTerm' type='text'></td>
-						<td id='searchHitCount' style='font-size:8pt; text-align:center'></td>
+						<td><input id='searchInput' type='text' value="Enter a search term" class="modalInput"></td>
 					</tr>
 					<tr>
-						<td><button style='width:75px' onclick='findPrevious()'>Previous</button></td>
-						<td><button style='width:75px' onclick='findNext()'>Next</button></td>
-						<td><button style='width:75px' onclick='toggleElementDisplay("findModal")'>Cancel</button></td>
+						<td><button id="findPrevious" class="modalButton">Previous</button></td>
+						<td><button id="findNext" class="modalButton">Next</button></td>
+						<td><button class="modalButton" onclick='toggleElementDisplay("findModal")'>Cancel</button></td>
 					</tr>
 				</table>
 			</div>
+        </div>
+        <div id="progressModal" class="modal" style="display: none">
+            <div class="modalContent">
+                <img src="/static/spinner.gif">
+                <h2>text...</h2>
+                <button class="modalButton" id="progressModalCancel">Cancel</button>
+            </div>
         </div>
         <div id="loadModal" class="modal" style="display: none">
             <div class="modalContent">
@@ -466,8 +511,8 @@
         </div>
         <div id="blankFeederModal" class="modal" style="display: none">
             <div class='modalContent'>
-                <form onsubmit="submitForm('blankFeederInput', 'blankFeederForm'); return false;"
-                action="/newBlankFeeder/{{thisOwner}}" method="POST" id="blankFeederForm">
+                <form onsubmit="submitForm({formId:'blankFeederForm'}); return false;"
+                 action="/newBlankFeeder/{{thisOwner}}" id="blankFeederForm">
                     <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
                     <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
                     <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
@@ -495,12 +540,12 @@
         </div>
         <div id='milsoftModal' class='modal' style="display: none">
             <div class='modalContent'>
-                <form onsubmit="submitForm('milsoftInput', 'milsoftForm'); return false;"
-                action="/milsoftImport/{{thisOwner}}" id="milsoftForm">
+                <form onsubmit="submitForm({formId:'milsoftForm', pollUrl:'/checkConversion/{{thisModelName}}/{{thisOwner}}', inputId:'milsoftInput'}); return false;"
+                 action="/milsoftImport/{{thisOwner}}" id="milsoftForm">
                     <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
                     <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
                     <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
-                    <input type='hidden' name='referrer' value='distribution'/>
+                    <!--<input type='hidden' name='referrer' value='distribution'/>-->
                     <table>
                         <tbody>
                             <tr>
@@ -530,24 +575,24 @@
                 </form>
             </div>
         </div>
-        <div id='gridlabModal' class='modal' style="display: none">
+        <div id='gridlabdModal' class='modal' style="display: none">
             <div class='modalContent'>
-                <form onsubmit="submitForm('gridlabInput', 'gridlabForm'); return false;"
-                action="/gridlabdImport/{{thisOwner}}" id="gridlabForm">
+                <form onsubmit="submitForm({formId:'gridlabdForm', pollUrl:'/checkConversion/{{thisModelName}}/{{thisOwner}}', inputId:'gridlabdInput'}); return false;"
+                 action="/gridlabdImport/{{thisOwner}}" id="gridlabdForm">
                     <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
                     <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
                     <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
-                    <input type='hidden' name='referrer' value='distribution'/>
+                    <!--<input type='hidden' name='referrer' value='distribution'/>-->
                     <table>
                         <tbody>
                             <tr>
                                 <th class="modalTableHeader modalTableRow">GridLab-D Conversion</th>
                             </tr>
                             <tr>
-                                <td><label for="gridlabInput">Name</label></td>
+                                <td><label for="gridlabdInput">Name</label></td>
                                 <td>
                                     <!-- TODO: add better validation than just the 'required' attribute-->
-                                    <input type='text' required id="gridlabInput" name='feederNameG' class="modalInput"/>
+                                    <input type='text' required id="gridlabdInput" name='feederNameG' class="modalInput"/>
                                 </td>
                             </tr>
                             <tr>
@@ -555,7 +600,7 @@
                                 <td><input type='file' required id="csvFile" name='glmFile' accept='.glm' class="modalInput"/></td>
                             </tr>
                             <tr>
-                                <td><button type="button" onclick="toggleElementDisplay('gridlabModal')" class="modalButton">Cancel</button></td>
+                                <td><button type="button" onclick="toggleElementDisplay('gridlabdModal')" class="modalButton">Cancel</button></td>
                                 <td><button type="submit" class="modalButton">Import</button></td>
                             </tr>
                         </tbody>
@@ -565,12 +610,12 @@
         </div>
         <div id='cymeModal' class='modal' style="display: none">
             <div class='modalContent'>
-                <form onsubmit="submitForm('cymeInput', 'cymeForm'); return false;"
-                action="/cymeImport/{{thisOwner}}" id="cymeForm">
+                <form onsubmit="submitForm({formId:'cymeForm', pollUrl:'/checkConversion/{{thisModelName}}/{{thisOwner}}', inputId:'cymeInput'}); return false;"
+                 action="/cymeImport/{{thisOwner}}" id="cymeForm">
                     <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
                     <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
                     <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
-                    <input type='hidden' name='referrer' value='distribution'/>
+                    <!--<input type='hidden' name='referrer' value='distribution'/>-->
                     <table>
                         <tbody>
                             <tr>
@@ -596,15 +641,238 @@
                 </form>
             </div>
         </div>
-        <div id="progressModal" class="modal" style="display: none">
-            <div class="modalContent">
-                <img src="/static/spinner.gif">
-                <h2>text...</h2>
-                <button class="modalButton" id="progressModalCancel">Cancel</button>
+        <div id="scadaModal" class="modal" style="display: none">
+            <div class='modalContent'>
+                <form onsubmit="submitForm({formId:'scadaForm', pollUrl:'/checkScadaLoadshape/{{thisModelName}}'}); return false;"
+                 action="/scadaLoadshape/{{thisOwner}}/{{thisFeederName}}" id="scadaForm">
+                    <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
+                    <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
+                    <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
+                    <!--<input type='hidden' name='referrer' value='distribution'/>-->
+                    <table>
+                        <tbody>
+                            <tr>
+                                <th class="modalTableHeader modalTableRow">Scada Loadshapes</th>
+                                <th style='float:right;'>
+                                    <a href='https://github.com/dpinney/omf/wiki/Tools-~-gridEdit#scada-loadshapes' target='_blank'>Format Help</a>
+                                </th>
+                            </tr>
+                            <tr>
+                                <td>File containing Scada load data (.csv)</td>
+                                <td><input type='file' required id="scadaFile" name='scadaFile' accept='.csv' class="modalInput"/></td>
+                            </tr>
+                            <tr>
+                                <td colspan='100%'>Note: Model "Simulation Start Date" should lie within the Scada load's dates.</td>
+                            </tr>
+                            <tr>
+                                <td><button type="button" onclick="toggleElementDisplay('scadaModal')" class="modalButton">Cancel</button></td>
+                                <td><button type="submit" class="modalButton">Import</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+        <div id='amiModal' class='modal' style="display: none">
+            <div class='modalContent'>
+                <form onsubmit="submitForm({formId:'amiForm', pollUrl:'/checkLoadModelingAmi/{{thisModelName}}'}); return false;"
+                 action="/loadModelingAmi/{{thisOwner}}/{{thisFeederName}}" id="amiForm">
+                    <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
+                    <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
+                    <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
+                    <!--<input type='hidden' name='referrer' value='distribution'/>-->
+                    <table>
+                        <tbody>
+                            <tr>
+                                <th class="modalTableHeader modalTableRow">AMI Profiles</th>
+                                <th style='float:right;'>
+                                    <a href='https://github.com/dpinney/omf/wiki/Tools-~-gridEdit' target='_blank'>Format Help</a>
+                                </th>
+                            </tr>
+                            <tr>
+                                <td>File containing AMI load data (.csv)</td>
+                                <td><input type='file' required id="amiFile" name='amiFile' accept='.csv' class="modalInput"/></td>
+                            </tr>
+                            <tr>
+                                <td colspan='100%'>Note: Model "Simulation Start Date" should lie within the AMI profiles's dates.</td>
+                            </tr>
+                            <tr>
+                                <td><button type="button" onclick="toggleElementDisplay('amiModal')" class="modalButton">Cancel</button></td>
+                                <td><button type="submit" class="modalButton">Import</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+        <div id='massAddModal' class='modal' style="display: none">
+            <div class='modalContent'>
+                <table>
+                    <tbody>
+                        <tr>
+                            <th class="modalTableHeader modalTableRow">Mass Add</th>
+                        </tr>
+                        <tr>
+                            <td>Add component:</td>
+                            <td><select id='componentSelect'></select></td>
+                        </tr>
+                        <tr>
+                            <td>To each:</td>
+                            <td><select id='massAddTargetSelect'></select></td>
+                        </tr>
+                        <tr>
+                            <td>With probability for each attachment (float between 0.0 and 1.0):</td>
+                            <td><input type='text' id='percent' pattern='^0\.\d+|1(\.0+)?$' value='1.0' required class="modalInput"/></td>
+                        </tr>
+                        <tr>
+                            <td><button onclick="toggleElementDisplay('massAddModal')" class="modalButton">Cancel</button></td>
+                            <td><button onclick="massAdd(); toggleElementDisplay('massAddModal');" class="modalButton">Apply</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div id='massEditModal' class='modal' style="display: none">
+            <div class='modalContent'>
+                <table>
+                    <tbody>
+                        <tr>
+                            <th class="modalTableHeader">Mass Edit</th>
+                        </tr>
+                        <tr>
+                            <td>For each object of type</td>
+                            <td><select id='massEditTargetSelect'></select></td>
+                            <td>with attribute</td>
+                            <td><input type='text' id='massEditAttribute' required class="modalInput"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="radio" name="attributeOperation" value="addTo">Add value to attribute</td>
+                            <td><input type='text' id='addToValue' pattern='^0\.\d+|1(\.0+)?$' required class="modalInput"/></td>
+                        </tr>
+                        <tr>
+                            <td><input type="radio" name="attributeOperation" value="delete">Delete Attribute</td>
+                        </tr>
+                        <tr>
+                            <td><input type="radio" name="attributeOperation" value="change">Change attribute to</td>
+                            <td><input type='text' id='changeValue' pattern='^0\.\d+|1(\.0+)?$' required class="modalInput"/></td>
+                        </tr>
+                        </tr>
+                        <tr>		
+                            <td><input type="radio" name="attributeOperation" value="multiplyBy">Multiply attribute by</td>
+                            <td><input type='text' id='multiplyValue' pattern='^0\.\d+|1(\.0+)?$' required class="modalInput"/></td>
+                            <td style="text-align: center" >and add</td>
+                            <td><input type='text' id='andAddValue' pattern='^0\.\d+|1(\.0+)?$' required class="modalInput"/></td>
+                        </tr>
+                        <tr>
+                            <td>Or</td>
+                        </tr>
+                        <tr>
+                            <td><input type="radio" name="attributeOperation" value="addAttribute"> Add new attribute</td>
+                            <td><input type='text' id='newAttributeKey' required class="modalInput"></td>
+                            <td style="text-align: center">with value</td>
+                            <td><input type='text' id='newAttributeValue' pattern='^0\.\d+|1(\.0+)?$' required class="modalInput"/></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <button onclick="toggleElementDisplay('massEditModal')" class="modalButton" style="float: right">Cancel</button>
+                            </td>
+                            <td>
+                                <button onclick="massEdit(); toggleElementDisplay('massEditModal');" class="modalButton" style="float: left">Apply</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!--
+        <div id='attachmentsModal' class='modal' style="display: none">
+            <div class='modalContent'>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td><select id='attachmentSelect'></select></td>
+                        </tr>
+                        <tr>
+                            <td><button onclick="toggleElementDisplay('attachmentsModal')" class="modalButton">Cancel</button></td>
+                            <td><button onclick="editAttachment(); toggleElementDisplay('attachmentsModal');" class="modalButton">Select</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div id='editAttachmentModal' class='modal' style="display: none">
+            <div class='modalContent'>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td style='font-weight:bold; font-size:14pt' id='attachmentTd'></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <textarea rows='25' cols='80' id='editAttachmentBox' style='width:490px'></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><button onclick="toggleElementDisplay('editAttachmentModal')" class="modalButton">Cancel</button></td>
+                            <td><button onclick="saveAttachment(); toggleElementDisplay('editAttachmentModal');" class="modalButton">Save</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        -->
+        <div id='climateModal' class='modal' style="display: none">
+            <div class='modalContent'>
+                <form onsubmit="submitForm({formId:'climateForm', pollUrl:'/checkClimateChange/{{thisOwner}}/{{thisModelName}}'}); return false;"
+                action="/climateChange/{{thisOwner}}/{{thisFeederName}}" id="climateForm">
+                    <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
+                    <!--<input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>-->
+                    <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
+                    <!--<input type='hidden' name='referrer' value='distribution'/>-->
+                    <table>
+                        <tbody>
+                            <tr>
+                                <th class="modalTableHeader modalTableRow">Climate Change</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input id='historicalImport' type='radio' name='climateImportOption' value='historicalImport'>
+                                    <label for='historicalImport'>Historical Weather</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><label for='startDate'>Start Date (YYYY-MM-DD):</label></td>
+                                <td><input id='startDate' type='text' name='startDate' pattern='^\d{4}-\d{2}-\d{2}$' class="modalInput"></td>
+                            </tr>
+                            <tr>
+                                <td><label for='endDate'>End Date (YYYY-MM-DD):</label></td>
+                                <td><input id='endDate' type='text' name='endDate' pattern='^\d{4}-\d{2}-\d{2}$' class="modalInput"></td>
+                            </tr>
+                            <tr>
+                                <td><label for='airport'>Airport Code:</label></td>
+                                <td><input id='airport' type='text' name='airport' pattern='^[A-Z]{3}$' class="modalInput"></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input id='tmyImport' type='radio' name='climateImportOption' value='tmyImport'>
+                                    <label for='tmyImport'>tmy Import</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><label for='zipCode'>Zip Code:</label></td>
+                                <td><input id='zipCode' type="text" name="zipCode" pattern='^\d{5}$' class="modalInput"></td>
+                            </tr>
+                            <tr>
+                                <td><button type="button" onclick="toggleElementDisplay('climateModal')" class="modalButton">Cancel</button></td>
+                                <td><button type="submit" class="modalButton">Apply</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
             </div>
         </div>
         <!-- Modals-->
-		<table id="descriptionTable" class="treeTable">
+		<table id="descriptionTable" class="treeTable" style="right: 5px">
             <thead>
 				<tr class="tableTitle">
                     <th colspan="2">Object</th>
@@ -614,10 +882,9 @@
                     <th colspan="3">
                         <!-- should only be visible when the table is showing a node, NOT a line -->
                         <button id="moveButton" onclick="moveNode()" class="modalButton editButton">Move</button>
-                        <button id="deleteButton" onclick="deleteOb()" class="modalButton editButton">Delete</button>
+                        <button id="deleteButton" onclick="deleteObject(previousTarget.id)" class="modalButton editButton">Delete</button>
                         <button id="addButton" onclick="tablePlus()" class="modalButton editButton">Add Attribute</button>
-                        <button onclick="tableSave()" class="modalButton editButton">Save</button>
-                        <!--<button id="cancelButton" onclick="toggleElementDisplay('descriptionTable')" class="modalButton editButton">Cancel</button>-->
+                        <button onclick="tableSave(previousTarget)" class="modalButton editButton">Save</button>
                     </th>
 				</tr>
             </thead>
@@ -627,7 +894,7 @@
         <table id="selectionTable" class="treeTable"> </table>
 	</body>
 </html>
-<script id='componentsInsert'>const components = {% if components %}{{ components | safe }}{% else %}null{% endif %}; 
+<script id='componentsInsert'>const globalComponents = {% if components %}{{ components | safe }}{% else %}null{% endif %}; 
 </script>
 <script id='feederInsert'>const readFeeder = {% if thisFeederData %}{{ thisFeederData | safe }}{% else %}null{% endif %}; 
 </script>
@@ -641,15 +908,16 @@ const thisModelName = "{% if thisModelName %}{{ thisModelName | safe }}{% else %
 const thisOwner = "{% if thisOwner %}{{ thisOwner | safe }}{% else %}null{% endif %}"; 
 const publicFeeders = {% if publicFeeders %}{{ publicFeeders | safe }}{% else %}null{% endif %};
 const userFeeders = {% if userFeeders %}{{ userFeeders | safe }}{% else %}null{% endif %}; 
-//let unsavedChanges = false;
 const writeFeeder = deepCopy(readFeeder);
 /* The globalTree can only be created after the entire file has been parsed */
 let globalTreeWrapper; 
+let globalLonOffset = null;
+let globalLatOffset = null;
 
 // Global to keep track of previous selection target
 let previousTarget = {};
 // Global to keep track of multiple alt-selections
-let selection = []; 
+//let selection = []; 
 // Globals to keep track of mouse coordinates
 let downX, downY, upX, upY;
 //let newNodeGenObj = {}; // What does this do?
@@ -668,7 +936,7 @@ function saveSvg() { // eslint-disable-line
 	win.document.write(svg)
 }
 
-function downloadTextFile() { // eslint-disable-line
+function downloadTextFile() {
 	// WARNING! Performance is very bad because the JSON is enormous! This can hang your browser!
 	alert('We are opening a window with JSON in it that you can save as a .json file.')
 	var modJson = JSON.stringify(writeFeeder);
@@ -685,8 +953,8 @@ function downloadTextFile() { // eslint-disable-line
 function addCircle(x,y,r,id,myClass) {
 	const svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0];
 	const aCirc = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-	aCirc.setAttribute('cx', x);
-	aCirc.setAttribute('cy', y);
+	aCirc.setAttribute('cx', x - globalLonOffset);
+	aCirc.setAttribute('cy', y - globalLatOffset);
 	aCirc.setAttribute('r', r);
 	aCirc.setAttribute('id', id);
 	aCirc.setAttribute('class', myClass);
@@ -704,10 +972,10 @@ function addCircle(x,y,r,id,myClass) {
 function addLine(x1, y1, x2, y2, id, myClass) {
 	const svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0];
 	const aLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-	aLine.setAttribute('x1', x1);
-	aLine.setAttribute('y1', y1);
-	aLine.setAttribute('x2', x2);
-	aLine.setAttribute('y2', y2);
+	aLine.setAttribute('x1', x1 - globalLonOffset);
+	aLine.setAttribute('y1', y1 - globalLatOffset);
+	aLine.setAttribute('x2', x2 - globalLonOffset);
+	aLine.setAttribute('y2', y2 - globalLatOffset);
 	aLine.setAttribute('id', id);
 	aLine.setAttribute('class', myClass);
 	let w;
@@ -724,66 +992,48 @@ function addLine(x1, y1, x2, y2, id, myClass) {
 	svgOb.appendChild(aLine);
 }
 
-//function buildFeeder2() {
-//	const maxLat = Math.round(Object.values(feeder.tree).reduce((obj1, obj2) => {
-//		return obj1.latitude > obj2.latitude ? obj1 : obj2;
-//	}).latitude + 20.0);
-//	const maxLon = Math.round(Object.values(feeder.tree).reduce((obj1, obj2) => {
-//		return obj1.longitude > obj2.longitude ? obj1 : obj2;
-//	}).longitude + 20.0);
-//	const svgOb = document.getElementById('svgContainer');
-//	svgOb.setAttribute('width', maxLon);
-//	svgOb.setAttribute('height', maxLat);
-//	svgOb.setAttribute('viewBox','-10.0 -10.0 ' + maxLon + ' ' + maxLat);
-//	// Attach the pan/zoom behavior.
-//	window.panZoom = svgPanZoom('#svgContainer', {
-//		zoomEnabled: true,
-//		controlIconsEnabled: false,
-//		fit: true,
-//		center: true,
-//		minZoom: 0.5,
-//		maxZoom: 100
-//	});
-//
-//}
 
-function createViewport(tree, svgContainer) {
-	// Make a map objectName -> key. And while we're at it, find the size we need for the full chart.
-	const nameToKey = {};
-	let maxLon = 100;
-	let maxLat = 100;
-	for (let key in tree) {
-        nameToKey[tree[key]['name']] = key;
-        const lon = tree[key].longitude;
-        const lat = tree[key].latitude;
-        //if (lon) {
-        //    /* Pretend we have really big coordinate values */
-        //    tree[key].longitude = lon * 12000;
-        //}
-        //if (lat) {
-        //    /* Pretend we have really big coordinate values */
-        //    tree[key].latitude = lat * 12000;
-        //}
-		if (tree[key]['longitude'] > maxLon) {
-            maxLon = tree[key]['longitude']
+function createViewport(treeWrapper, svgContainer) {
+    const tree = treeWrapper.tree;
+    const keys = Object.keys(tree);
+    // Set the longitude and latitude to be within the bounds of the provided data
+    const firstKey = keys.find(key => {
+        return tree[key].longitude !== undefined && tree[key].latitude !== undefined;
+    });
+    let minLon = parseFloat(tree[firstKey].longitude);
+    let maxLon = minLon;
+    let minLat = parseFloat(tree[firstKey].latitude);
+    let maxLat = minLat;
+    /* Find the minimum and maximum longitudes and latitudes. That's not good enough. I need to find a RANGE of values
+    for each and scale the viewport to the RANGE
+    */
+    keys.forEach(key => {
+        let lon = tree[key].longitude;
+        let lat = tree[key].latitude;
+        if (lon !== undefined && lat !== undefined) {
+            lon = parseFloat(lon);
+            lat = parseFloat(lat);
+            if (lon < minLon) {
+                minLon = lon;
+            }
+            if (lon > maxLon) {
+                maxLon = lon;
+            }
+            if (lat < minLat) {
+                minLat = lat;
+            }
+            if (lat > maxLat) {
+                maxLat = lat;
+            }
         }
-        if (tree[key]['latitude'] > maxLat) {
-            maxLat = tree[key]['latitude']
-        }
-	}
-	maxLon = Math.round(maxLon + 20.0)
-    maxLat = Math.round(maxLat + 20.0)
-
-    //const svgOb = document.getElementById('svgContainer')
-
-	//svgOb.setAttribute('width', maxLon)
-	//svgOb.setAttribute('height', maxLat)
-    //svgOb.setAttribute('viewBox','-10.0 -10.0 ' + maxLon + ' ' + maxLat)
-    svgContainer.setAttribute('viewBox',`0 0 ${maxLon} ${maxLat}`);
-    //console.log("maxLon: " + maxLon);
-    //console.log("maxLat: " + maxLat);
-
-	// Attach the pan/zoom behavior.
+    });
+    //const translatedMaxLon = maxLon - minLon;
+    const translatedMaxLon = (maxLon - minLon);
+    globalLonOffset = minLon;
+    const translatedMaxLat = maxLat - minLat;
+    globalLatOffset = minLat;
+    // Create the viewport
+    svgContainer.setAttribute('viewBox',`0 0 ${translatedMaxLon} ${translatedMaxLat}`);
 	window.panZoom = svgPanZoom('#svgContainer', {
         /* These are equal to the default values */
 		//zoomEnabled: true,
@@ -794,83 +1044,8 @@ function createViewport(tree, svgContainer) {
         zoomScaleSensitivity: 0.2,
         minZoom: 0.25,
 		maxZoom: 100
-	});
+    });
 }
-
-//function buildFeeder() {
-//	// Make a map objectName -> key. And while we're at it, find the size we need for the full chart.
-//	const nameToKey = {};
-//	let maxLon = 100;
-//	let maxLat = 100;
-//	for (let key in writeFeeder.tree) {
-//        nameToKey[writeFeeder.tree[key]['name']] = key;
-//        const lon = writeFeeder.tree[key].longitude;
-//        const lat = writeFeeder.tree[key].latitude;
-//        //if (lon) {
-//        //    /* Pretend we have really big coordinate values */
-//        //    writeFeeder.tree[key].longitude = lon * 12000;
-//        //}
-//        //if (lat) {
-//        //    /* Pretend we have really big coordinate values */
-//        //    writeFeeder.tree[key].latitude = lat * 12000;
-//        //}
-//		if (writeFeeder.tree[key]['longitude'] > maxLon) {
-//            maxLon = writeFeeder.tree[key]['longitude']
-//        }
-//        if (writeFeeder.tree[key]['latitude'] > maxLat) {
-//            maxLat = writeFeeder.tree[key]['latitude']
-//        }
-//	}
-//	maxLon = Math.round(maxLon + 20.0)
-//	maxLat = Math.round(maxLat + 20.0)
-//    const svgOb = document.getElementById('svgContainer')
-//
-//	//svgOb.setAttribute('width', maxLon)
-//	//svgOb.setAttribute('height', maxLat)
-//    //svgOb.setAttribute('viewBox','-10.0 -10.0 ' + maxLon + ' ' + maxLat)
-//    svgOb.setAttribute('viewBox',`0 0 ${maxLon} ${maxLat}`);
-//
-//	// Attach the pan/zoom behavior.
-//	window.panZoom = svgPanZoom('#svgContainer', {
-//        /* These are equal to the default values */
-//		//zoomEnabled: true,
-//		//controlIconsEnabled: false,
-//        //center: true,
-//		//fit: true,
-//        //contain: true,
-//        zoomScaleSensitivity: 0.2,
-//        minZoom: 0.25,
-//		maxZoom: 100
-//	})
-
-//	for (let key in writeFeeder.tree) {
-//		try {
-//			const anOb = writeFeeder.tree[key];
-//			if ('from' in anOb && 'to' in anOb) {
-//				const fromOb = writeFeeder.tree[nameToKey[anOb['from']]];
-//				const toOb = writeFeeder.tree[nameToKey[anOb['to']]];
-//				addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],key,anOb['object'] + ' p' + countPhases(anOb['phases']));
-//			}
-//			else if ('parent' in anOb) {
-//				const pOb = writeFeeder.tree[nameToKey[anOb['parent']]];
-//				addLine(pOb['longitude'],pOb['latitude'],anOb['longitude'],anOb['latitude'],pOb.name + '_' + anOb.name,'parentChild');
-//			}
-//		} catch (err) {
-//			console.log('Failed to Draw ' + writeFeeder.tree[key]);
-//		}
-//	}
-//	// Add circles after all lines
-//	for (let key in writeFeeder.tree) {
-//		try {
-//			const anOb = writeFeeder.tree[key];
-//			if ('latitude' in anOb && 'longitude' in anOb && 'object' in anOb && !('from' in anOb) && !('to' in anOb)) {
-//				addCircle(anOb['longitude'],anOb['latitude'],2,key,anOb['object']);
-//			}
-//		} catch (err) {
-//			console.log('Failed to Draw ' + writeFeeder.tree[key]);
-//		}
-//    }
-//}
 
 function mouseDown(event) { // eslint-disable-line
 	downX = event.pageX
@@ -958,7 +1133,7 @@ function tableCreate(inputObject) {
     }
 	// Put the object in.
 	for (let key in inputObject) {
-        if (key !== "from" && key !== "to") {
+        //if (key !== "from" && key !== "to") {
             const tr = document.createElement('tr');
             const keyTd = document.createElement("td");
             keyTd.setAttribute("data-feederkey", "feederkey");
@@ -969,7 +1144,7 @@ function tableCreate(inputObject) {
             tr.appendChild(valTd);
             tbody.appendChild(tr)
             toggleRowContent(tr);
-        }
+        //}
 	}
 	document.getElementById("multiButtonRow").style.display = "table-row";
     table.style.display = "block";
@@ -1069,26 +1244,6 @@ function getClosestAncestor(el, tag) {
     return el;
 }
 
-/**
- * Get the closest descended element with the specified data attribute, using BFS.
- * @param {HTMLElement} el - The element to search downwards from.
- * @param {string} dataAtr - The data attribute that the descendent should have.
- * @returns {(HTMLElement | null)} - The descendent that matched the given data attribute or null.
- */
-/*function getClosestDescendent(el, dataAtr) {
-	if 
-	
-	let child;
-	while()
-		const child = Array.from(el.children).find(elm => elm.dataset[dataAtr] === dataAtr);
-		if (child) {
-			return child;
-		}
-
-	while ((el = el.firstElementChild) && el.dataset[dataAtr] !== dataAtr);
-	return el;
-}*/
-
 
 /**
  * Get a descendent node that has the specified data attribute from the root node using DFS.
@@ -1117,8 +1272,8 @@ function getMatchingDescendent(root, dataAtr) {
 //There cannot be any cycles, so no need to mark nodes?
 
 /** Add attribute button functionality in object table. */
-function tablePlus() { // eslint-disable-line
-	const tbody = document.getElementById("descriptionTable").children[0];
+function tablePlus() {
+	const tbody = document.getElementById("descriptionTable").children[1];
 	const tr = document.createElement("tr");
 	tr.setAttribute("data-rowstatus", "new");
 	tr.innerHTML = '<td><button onclick="tableDel(this)" class="modalButton deleteButton">&#9587;</button></td><td><input data-feederkey="feederkey">' + 
@@ -1130,12 +1285,12 @@ function tablePlus() { // eslint-disable-line
 /* How did this function work originally? Let's see! It's fine as it is, except that it depends on the exact structure of the table,
 which I have changed. 
 */
-function tableSave() { // eslint-disable-line
+function tableSave(previousTarget) {
 	// Update tree data structure with changes made in object table.
 	const table = document.getElementById("descriptionTable");
 	var toJson = {}
 	// convert HTML table to JSON
-	const tbody = table.children[0];
+	const tbody = table.children[1];
 	Array.from(tbody.children).forEach(tr => {
 		if (tr.dataset.rowstatus !== "delete") {
 			let keyElement = getMatchingDescendent(tr, "feederkey");
@@ -1222,81 +1377,33 @@ This is happening because I'm deleting from feeder regardless duh
 
 Am I sure that everything is being completely removed from the entire data model? No. But it seems like it.
 */
-function deleteOb() { // eslint-disable-line
-	// Delete Lines 
-	if (previousTarget.tagName === 'line') {
-		previousTarget.remove()
-		let idx = writeFeeder.links.findIndex(line => line.treeIndex == previousTarget.id);
-		writeFeeder.links.splice(idx, 1);
-		delete writeFeeder.tree[previousTarget.id];
-		//writeFeeder.tree[previousTarget.id] = {}
-	}
-	// Delete Circles
-	if (previousTarget.tagName === 'circle') {
-		const circleName = writeFeeder.tree[previousTarget.id].name;
-		if (Object.values(writeFeeder.tree).some(obj => obj.from === circleName || obj.to === circleName)) {
-			alert('Cannot delete circles with lines still connected')
-		} else {
-			previousTarget.remove();
-			let idx = writeFeeder.nodes.findIndex(node => node.treeIndex == previousTarget.id);
-			writeFeeder.nodes.splice(idx, 1);	
-			// If the node I'm deleting has a parent, then I need to delete the line between this node and its parent
-			if (writeFeeder.tree[previousTarget.id].parent) {
-				idx = writeFeeder.links.findIndex(line => line.source.name == writeFeeder.tree[previousTarget.id].name);
-				const svgLineId = writeFeeder.links[idx].target.name + "_" + writeFeeder.links[idx].source.name;
-				document.getElementById(svgLineId).remove();
-				writeFeeder.links.splice(idx, 1);
-			} 
-			delete writeFeeder.tree[previousTarget.id];
-		}
-	}
+function deleteObject(key) { 
+    const tree = globalTreeWrapper.tree;
+    if (tree[key].hasOwnProperty("from") && tree[key].hasOwnProperty("to")) {
+        // Delete Lines 
+        //remove the line from the svg
+        document.getElementById(key).remove();
+        delete tree[key];
+        //writeFeeder.tree[previousTarget.id] = {}
+    } else {
+        // Delete Circles
+        const circleName = tree[key].name;
+        if (Object.values(tree).some(obj => obj.from === circleName || obj.to === circleName)) {
+            alert('Cannot delete circles with lines still connected')
+        } else {
+            //remove the circle from the svg
+            document.getElementById(key).remove();
+            // If the node I'm deleting has a parent, then I need to delete the line between this node and its parent
+            if (tree[key].parent !== undefined) {
+                const lineId = `${tree[key].parent}_${tree[key].name}`;
+                document.getElementById(lineId).remove();
+            } 
+            delete tree[key];
+        }
+    }
 	// Hide the object table.
 	tableDestroy();
 }
-
-// ported function
-//function deleteObject(treeIndex) {
-//	// Figure out whether we have a node or an link:
-//	var isNode = true
-//	for (prop in tree[treeIndex])
-//		if (prop == 'from') isNode = false
-//	if (isNode) {
-//		// Check for connections and abort if we have them.
-//		nodeName = tree[treeIndex].name
-//		for (indexVar in tree) {
-//			if (tree[indexVar].from == nodeName || tree[indexVar].to == nodeName || tree[indexVar].parent == nodeName) {
-//				alert('We can only delete nodes that aren\'t connected')
-//				return false
-//			}
-//		}
-//		// No connection, so delete the node:
-//		var nodeIndex
-//		for (x = 0; x < nodes.length; x++) {
-//			if (nodes[x].treeIndex == treeIndex) nodeIndex = x
-//		}
-//		nodes.splice(nodeIndex, 1)
-//		// If we have a parent child situation, delete the link:
-//		if (tree[treeIndex].parent != undefined) {
-//			var linkIndex
-//			for (x = 0; x < links.length; x++) {
-//				if (links[x].source.name == nodeName) linkIndex = x
-//			}
-//			links.splice(linkIndex, 1)
-//		}
-//	} else {
-//		// Delete link:
-//		var linkIndex
-//		for (x = 0; x < links.length; x++) {
-//			if (links[x].treeIndex == treeIndex) linkIndex = x
-//		}
-//		links.splice(linkIndex, 1)
-//	}
-//	// Delete tree object:
-//	delete tree[treeIndex]
-//	clearSelection()
-//	redraw() 
-//}
-// ported function
 
 function scaleTo(x) {
 	// Scale the thickness of all lines and size of all circles. This helps user see details.
@@ -1407,7 +1514,7 @@ function clickLatLon(event) {
 function newNode() { // eslint-disable-line
 	// Start creation of new node.
 	//var newTreeId = Object.keys(writeFeeder.tree).length
-	const newTreeKey = getNewTreeKey(writeFeeder.tree).toString();
+	const newTreeKey = getNewTreeKey(writeFeeder.tree);
 	var newTreeNode = {
 		longitude: 0,
 		latitude: 0,
@@ -1428,7 +1535,7 @@ function newNodeListener() {
 	// Click handler for location of new node.
 	var xloc = event.pageX;
 	var yloc = event.pageY;
-	var newTreeKey = getNewTreeKey(writeFeeder.tree).toString();
+	var newTreeKey = getNewTreeKey(writeFeeder.tree);
 	const coords = clickLatLon(event);
 	xloc = coords.x;
 	yloc = coords.y;
@@ -1476,26 +1583,13 @@ function newLink(componentName) { // eslint-disable-line
 		return;
 	}
 	//I have concerns about adding inconsistent data to the graph. See my meeting notes.
-	const newTreeLink = clone(components[componentName]);
+	const newTreeLink = clone(globalComponents[componentName]);
 	newTreeLink.from = firstTreeNode.name;
 	newTreeLink.to = secondTreeNode.name;
-	const newTreeKey = getNewTreeKey(writeFeeder.tree).toString();
+	const newTreeKey = getNewTreeKey(writeFeeder.tree);
 	newTreeLink.name = componentName + newTreeKey;
 	// Save to tree
 	writeFeeder.tree[newTreeKey] = newTreeLink;
-
-	// lines don't have the schedule_skew property.
-	//const newTreeLink = {
-	//	phases: 'A', //Some treeLinks also have a value of 'A'
-	//	from: firstTreeNode.name, //Fine
-	//	name: 'newLink' + newTreeKey, //No other treeLink has 'newLink' in the name
-	//	object: 'overhead_line', //This is fine
-	//	//longitude
-	//	to: secondTreeNode.name, //Fine
-	//	//length. None of the default components have this.
-	//	//latitude. None of the default components have this.
-	//	configuration: 'configuration' //No other treeLink has a value of 'configuration'
-	//}
 
 	// Save to links
 	const newLink = {
@@ -1530,71 +1624,6 @@ function moveNode() {
 	clickTarget.addEventListener('click', moveNodeListener, false)
 }
 
-/**
- * An orphan node is a node that has no lines connected to it at all.
- * @param {object} node - The node in feeder.tree that I am examining.
- * @return {boolean} - Return true if the object 1) is a node (and NOT a line) 2) does not have a "parent" property. 
- * Otherwise return false.
- */
-//function isOrphanNode(node) {
-//	if (node.from === undefined && node.parent === undefined) {
-//		return true;
-//	}
-//	return false;
-//} 
-
-//function moveConnectedLines(node) {
-//	//Move the node
-//
-//	//Move any lines that are connected to the node. Must parse the tree to find these lines.	
-//	Object.keys(feeder.tree).forEach(firstKey => {
-//		//Not all objects in feeder.tree are lines, but I'm only operating on an object if is a line, hence the variable name.
-//		let line = feeder.tree[firstKey];
-//		if (line.from == node.name || line.to == node.name) {
-//			const outerX = node.longitude;
-//			const outerY = node.latitude;
-//			const outerId = firstKey;
-//			const outerClass = node.object;
-//			let innerX, innerY, innerId, innerClass;
-//			Object.keys(feeder.tree).forEach(secondKey => {
-//				const pairedNode = feeder.tree[secondKey];
-//				if ((pairedNode.name == line.from || pairedNode.name == line.to) 
-//					&& pairedNode.name != node.name) {
-//						innerX = pairedNode.longitude;
-//						innerY = pairedNode.latitude;
-//						innerId = secondKey;
-//						innerClass = pairedNode.object;
-//				}
-//			}); 
-//			document.getElementById(firstKey).remove();
-//			let x1, y1, x2, y2, fromNum, toNum, fromClass, toClass;
-//			if (line.from == node.name) {
-//				addLine(outerX, outerY, innerX, innerY, firstKey, line.object + ' p' + countPhases(line.phases));
-//				//redraw nodes
-//				//x1 = outerX;
-//				//y1 = outerY;
-//				//x2 = innerX;
-//				//y2 = innerY;
-//				fromNum = outerId;
-//				fromClass = outerClass;
-//				toNum = innerId;
-//				toClass = innerClass;
-//			} else {
-//				addLine(innerX, innerY, outerX, outerY, line.object + ' p' + countPhases(line.phases));
-//				//redraw nodes
-//				//x1 = innerX;
-//				//y1 = innerY;
-//				//x2 = outerX;
-//				//y2 = outerY;
-//				fromNum = innerId;
-//				fromClass = innerClass;
-//				toNum = outerId;
-//				toClass = outerClass;
-//			}
-//		}
-//	});
-//}
-
 //Get an array of keys that correspond to the connected line.
 function getConnectedLineKeys(node) {
 	return Object.keys(writeFeeder.tree).filter(key => {
@@ -1611,11 +1640,10 @@ I don't think this updates the data correctly. It updates writeFeeder.tree, but 
 */
 function moveNodeListener() {
 	let clickedNode = writeFeeder.tree[lastElementSelected.id];
-	// Lat and Lon are reversed, but the function was originally written this way...
-	const newLat = clickLatLon(event).y;
-	const newLon = clickLatLon(event).x
-	//let newLat = clickLatLon(event)[1];
-	//let newLon = clickLatLon(event)[0];
+	//const newLat = clickLatLon(event).y;
+    //const newLon = clickLatLon(event).x
+    const newLat = clickLatLon(event).y + globalLatOffset; //store the real lat. Add back the offset when storing data. Subtract it when rendering
+    const newLon = clickLatLon(event).x + globalLonOffset; //store the real lon. Add back the offset when storing data. Subtract it when rendering
 	clickedNode["latitude"] = newLat;
 	clickedNode["longitude"] = newLon;
 	// This value can be undefined when the node isn't connected to anything. Is that a problem?!? yep.
@@ -1623,7 +1651,7 @@ function moveNodeListener() {
 	const connectedLineKeys = getConnectedLineKeys(clickedNode);
 	if (connectedLineKeys.length === 0 && clickedNode.parent === undefined) {
 		document.getElementById(lastElementSelected.id).remove();
-		addCircle(newLon,newLat,2,lastElementSelected.id,writeFeeder.tree[lastElementSelected.id].object);
+		addCircle(newLon, newLat, 2, lastElementSelected.id, writeFeeder.tree[lastElementSelected.id].object);
 	} else {
 		//Runs through writeFeeder lines (links) determines if clicked node is an end or target for any line in writeFeeder
 		for (let num in writeFeeder.tree) {
@@ -1631,12 +1659,12 @@ function moveNodeListener() {
 			// Move line between clicked node and its treeOb child. This is checking if clickedNode HAS children
 			if (treeOb.parent == clickedNode.name) {
 				document.getElementById(clickedNode.name + "_" + treeOb.name).remove()
-				addLine(newLon,newLat,treeOb.longitude,treeOb.latitude,clickedNode.name + "_" + treeOb.name,'parentChild')
+				addLine(newLon, newLat, treeOb.longitude, treeOb.latitude, clickedNode.name + "_" + treeOb.name, 'parentChild');
 				document.getElementById(num).remove()
-				addCircle(treeOb.longitude,treeOb.latitude,2,num,treeOb.object)
+                addCircle(treeOb.longitude, treeOb.latitude, 2, num, treeOb.object);
 				document.getElementById(lastElementSelected.id).remove()
-				addCircle(newLon,newLat,2,lastElementSelected.id,clickedNode.object)
-			}
+                addCircle(newLon, newLat, 2, lastElementSelected.id, clickedNode.object); 
+            }
 			/* Move line between clicked node and its treeOb parent (if it is a child). 
 			I found an object in writeFeeder.tree that is 1) NOT a line 2) is the parent of the currently selected node.
 			*/
@@ -1645,13 +1673,13 @@ function moveNodeListener() {
 				concatenation of their names, and I want to remove that line. Yep.
 				*/
 				document.getElementById(treeOb.name + "_" + clickedNode.name).remove()
-				addLine(newLon,newLat,treeOb.longitude,treeOb.latitude,treeOb.name + "_" + clickedNode.name,'parentChild')
+				addLine(newLon, newLat, treeOb.longitude, treeOb.latitude, treeOb.name + "_" + clickedNode.name, 'parentChild');
 				//Remove the parent node? Oh maybe to redraw it on top of the new line.
 				document.getElementById(num).remove()
-				addCircle(treeOb.longitude,treeOb.latitude,2,num,treeOb.object)
+				addCircle(treeOb.longitude, treeOb.latitude, 2, num, treeOb.object);
 				//Remove the current node and redraw it where it's supposed to go.
 				document.getElementById(lastElementSelected.id).remove()
-				addCircle(newLon,newLat,2,lastElementSelected.id,clickedNode.object)
+				addCircle(newLon, newLat, 2, lastElementSelected.id, clickedNode.object);
 			}
 			if (treeOb.from !== undefined && treeOb.to !== undefined) {
 				// Move all lines from or to the clicked node.
@@ -1680,19 +1708,19 @@ function moveNodeListener() {
 							myClasst = writeFeeder.tree[subEl].object
 						}
 					}
-					addLine(x1, y1, x2, y2, num, treeOb['object'] + ' p' + countPhases(treeOb['phases']))
+                    addLine(x1, y1, x2, y2, num, treeOb['object'] + ' p' + countPhases(treeOb['phases']));
 					// Redraw nodes after line so they aren't below the newly drawn lines. Up to 3 nodes for case where we are moving node between 2 from-to lines.
 					if (treeOb.from == clickedNode.name) {
-						addCircle(x2,y2,2,numt,myClasst)
+						addCircle(x2, y2, 2, numt, myClasst);
 						document.getElementById(numt).remove()
 					}
 					if (treeOb.to == clickedNode.name) {
-						addCircle(x1,y1,2,numf,myClassf)
+						addCircle(x1, y1, 2, numf, myClassf);
 						document.getElementById(numf).remove()
 					}
 					// Finally, draw the clicked node in its new location. Leave this bit here. Other moving functions go inside.
 					document.getElementById(lastElementSelected.id).remove()
-					addCircle(newLon,newLat,2,lastElementSelected.id,writeFeeder.tree[lastElementSelected.id].object)
+					addCircle(newLon, newLat, 2, lastElementSelected.id, writeFeeder.tree[lastElementSelected.id].object);
 				}
 			}
 		}
@@ -1705,81 +1733,132 @@ function moveNodeListener() {
 	clickTarget.removeEventListener('click', moveNodeListener, false)
 }
 
-function findNext() {
-	// Find the next object matching the user input.
-	var term = document.getElementById('searchTerm').value
-	var hits = findElementsViaString(term)
-	document.getElementById('searchHitCount').innerHTML = hits.length + ' Hits'
-	// If we can't find anything, stop.
-	if (hits.length == 0) {
-		alert('No objects found containing term.')
-		return false
-	}
-	// Clear the current selection.
-	for (let i = 0; i < document.getElementsByClassName("selection").length; i++) {
-	//for (let i=0; i<selection.length; i++) {
-		selection[i].classList.remove('selected')
-	}
-	selection = []
-	tableDestroy()
-	// Find the tree index of the next item.
-	if (searchCursor == undefined) {
-		searchCursor = 0
-	} else {
-		searchCursor = (searchCursor + 1) % hits.length
-	}
-	var hitId = hits[searchCursor]
-	// Find the location to zoom to.
-	let svgOb = document.getElementById(hitId.toString())
-	let cx = svgOb.getAttribute('cx')
-	let cy = svgOb.getAttribute('cy')
-	let x, y;
-	if (cx !== null && cy !== null) {
-		// Circle object, just get cx and cy
-		x = cx
-		y = cy
-	} else {
-		// Line object, get midpoint to zoom to
-		x = (parseFloat(svgOb.getAttribute('x1')) + parseFloat(svgOb.getAttribute('x2'))) / 2;
-		y = (parseFloat(svgOb.getAttribute('y1')) + parseFloat(svgOb.getAttribute('y2'))) / 2;
-	}
-	// Pan to the next hit.
-	window.panZoom.pan({x:0, y:0})
+//**************************************************
+// Find modal interface
+//**************************************************
+
+function prepareSearchResults() {
+    const tree = globalTreeWrapper.tree;
+    const keys = getMatchingKeys(this.value, tree);
+    const nextButton = document.getElementById("findNext");
+    const previousButton = document.getElementById("findPrevious");
+    //Array.from(document.getElementsByClassName("selected")).forEach(element => element.classList.remove("selected"));
+    tableDestroy();
+    if (keys.length === 0 || this.value === "") {
+        alert(`No results found for term: "${this.value}"`)
+        const feedback = function() {
+            alert("Please enter a new term to search for"); 
+        }
+        nextButton.onclick = feedback;
+        previousButton.onclick = feedback;
+        return;
+    }
+    const upperIndex = keys.length - 1;
+    let idx = 0;
+    tableCreate(tree[keys[idx]]);
+    viewElement(keys[idx]);
+    nextButton.onclick = function() {
+        idx++;
+        if (idx > upperIndex) {
+            idx = 0;
+        }
+        tableCreate(tree[keys[idx]]);
+        viewElement(keys[idx]);
+    }
+    previousButton.onclick = function() {
+        idx--;
+        if (idx < 0) {
+            idx = upperIndex;
+        }
+        tableCreate(tree[keys[idx]]);
+        viewElement(keys[idx]);
+    }
+}
+
+function getMatchingKeys(term, tree) {
+    const keys = [];
+    for (let key in tree) {
+        for (let prop in tree[key]) {
+            let string = tree[key][prop];
+            if (typeof(string) !== "string") {
+                string = tree[key][prop].toString();
+            }
+            // Only add the key if it represents an object that was drawn
+            if (string.includes(term) && ((tree[key].latitude !== undefined && tree[key].longitude !== undefined) || 
+            (tree[key].to !== undefined && tree[key].from !== undefined))) {
+                keys.push(key);
+                break;
+            }
+        }
+    }
+    return keys;
+}
+
+function viewElement(key) {
+    Array.from(document.getElementsByClassName("selected")).forEach(element => element.classList.remove("selected"));
+    const element = document.getElementById(key);
+	element.classList.add('selected');
+    let x, y;
+    if (!isNullOrUndefined(element.getAttribute("cx")) && !isNullOrUndefined(element.getAttribute("cy"))) {
+        x = element.getAttribute("cx");
+        y = element.getAttribute("cy");
+    } else {
+		x = (parseFloat(element.getAttribute('x1')) + parseFloat(element.getAttribute('x2'))) / 2;
+		y = (parseFloat(element.getAttribute('y1')) + parseFloat(element.getAttribute('y2'))) / 2;
+    }
+    // I can't make this work 
+    //panZoom.zoomAtPoint(2, {x: x, y: y});
+    // Do this instead 
+	panZoom.pan({x:0, y:0})
 	var realZoom = window.panZoom.getSizes().realZoom
 	var width = window.panZoom.getSizes().width / 2
 	var height = window.panZoom.getSizes().height / 2
-	window.panZoom.pan({x:width - (x * realZoom), y:height - (y * realZoom)})
-	// TODO: Zoom in close
-	// Udpate the selection.
-	svgOb.classList.add('selected')
-	//selection.push(svgOb)
-	tableCreate(writeFeeder.tree[hitId])
+    panZoom.pan({x:width - (x * realZoom), y:height - (y * realZoom)})
+    panZoom.zoom(15);
 }
 
-function findPrevious() { // eslint-disable-line
-	var term = document.getElementById('searchTerm').value
-	var hits = findElementsViaString(term)
-	if (searchCursor == undefined) {
-		findNext()
-	} else if (searchCursor == 0) {
-		// Wrapped around.
-		searchCursor = (hits.length) - 2
-		findNext()
-	} else {
-		searchCursor -= 2
-		findNext()
-	}
+function isNullOrUndefined(obj) {
+    if (obj === undefined || obj === null) {
+        return true;
+    }
+    return false;
 }
 
-function findElementsViaString(inString) {
-	var results = []
-	for (let key in writeFeeder.tree) {
-		const subIndex = JSON.stringify(writeFeeder.tree[key]).indexOf(inString)
-		if (subIndex != -1 && writeFeeder.tree[key]['object'] != 'player' && (writeFeeder.tree[key].hasOwnProperty('object') || writeFeeder.tree[key].hasOwnProperty('module'))) {
-			results.push(key)
-		}
-	}
-	return results
+//**************************************************
+// jQuery handling for distNetViz.py
+//**************************************************
+
+/** If this interface is being used as a file, we can't import jQuery with <script> so we can't use jQuery
+ * styling. This function is only called when jQuery is available.
+ */
+ function applyJQueryStyles() {
+    // Make stuff draggable
+    $("#findModal .modalContent").draggable();
+    $("#loadModal .modalContent").draggable();
+    $("#blankFeederModal .modalContent").draggable();
+    $("#milsoftModal .modalContent").draggable();
+    $("#gridlabdModal .modalContent").draggable();
+    $("#cymeModal .modalContent").draggable();
+    $("#scadaModal .modalContent").draggable();
+    $("#amiModal .modalContent").draggable();
+    $("#massAddModal .modalContent").draggable();
+    $("#massEditModal .modalContent").draggable();
+    $("#descriptionTable").draggable();
+    // Position the description table depending on whether or not it is draggable
+    document.getElementById("descriptionTable").removeAttribute("style");
+    document.getElementById("descriptionTable").style.left = "70vw";
+}
+
+/** Ajax requests depend on jQuery, so any function that uses $.ajax() cannot be used if this interface
+ * is loaded as a file. This function is called when jQuery isn't available.
+ */
+function disableJQueryFunctionality() {
+    //Hide stuff that doesn't work in distNetViz.py
+    Array.from(document.getElementById("fileMenu").children).forEach(child => {
+        if (child.textContent !== "View Raw Data") {
+            child.remove();
+        }
+    });
 }
 
 function fixPhases () {
@@ -1842,65 +1921,44 @@ function getSelectedNode() {
 /**
  * Append a node to its parents.
  * @param  {object} component - An object that contains the unconfigured data for a specific component.
- * @param  {number} treeKey - A key in the tree object. The value of this key is another object stored inside of the tree.
+ * @param  {number} parentKey - A key in the tree object. The value of this key is another object stored inside of the tree.
  * @return {object} nodeToAdd
  */
-function newChildAtLocation(component, treeKey) {
-	const newTreeKey = getNewTreeKey(writeFeeder.tree).toString();
+function newChildAtLocation(component, parentKey) {
+    const tree = globalTreeWrapper.tree;
+	const newTreeKey = getNewTreeKey(tree);
 	const newName = component.object + newTreeKey;
-	const parentTreeObj = writeFeeder.tree[treeKey];
-	component['parent'] = parentTreeObj['name'];
+	const parentTreeObj = tree[parentKey];
+	component['parent'] = parentTreeObj.name;
 	// decide which attribute should be put into node and tree
 	let nodeToAdd;
-	if (parentTreeObj.latitude != undefined && parentTreeObj.longitude != undefined) {
-		component['latitude'] = parseFloat(parentTreeObj.latitude) + Math.random() * 4 - 2;
-		component['longitude'] = parseFloat(parentTreeObj.longitude) + Math.random() * 4 - 2;
+	if (parentTreeObj.latitude !== undefined && parentTreeObj.longitude !== undefined) {
+		component['latitude'] = parseFloat(parentTreeObj.latitude) + Math.random() * 10 - 5;
+		component['longitude'] = parseFloat(parentTreeObj.longitude) + Math.random() * 10 - 5;
 		// Put the component in the tree with a new name.
-		writeFeeder.tree[newTreeKey] = component;
-		writeFeeder.tree[newTreeKey].name = newName;
-		// Add to the nodes.
-		nodeToAdd = {
-			name: component.name,
-			objectType: component.object,
-			treeIndex: newTreeKey,
-			chargeMultiple: 1,
-			x: component['latitude'],
-			y: component['longitude']
-			//fixed: isFixed
-		}
-		writeFeeder.nodes.push(nodeToAdd)
+		tree[newTreeKey] = component;
+        tree[newTreeKey].name = newName;
+        addLine(parentTreeObj.longitude, parentTreeObj.latitude, component.longitude, component.latitude, parentTreeObj.name + "_" + component.name, "parentChild");
+        addCircle(component.longitude, component.latitude, 2, newTreeKey, component.object);
+        // Redraw the parent on top
+        document.getElementById(parentKey).remove();
+        addCircle(parentTreeObj.longitude, parentTreeObj.latitude, 2, parentKey, parentTreeObj.object); 
+        scaleTo(scaleLevel);
 	} else {
-		writeFeeder.tree[newTreeKey] = component;
-		writeFeeder.tree[newTreeKey].name = newName;
-		nodeToAdd = {
-			name: component.name,
-			objectType: component.object,
-			treeIndex: newTreeKey,
-			chargeMultiple: 1
-			//fixed: isFixed
-		}
-		writeFeeder.nodes.push(nodeToAdd);
+        console.log("Cannot insert child at location because its defined parent doesn't have longitude and latitude!");
+        //throw new Error("Cannot insert child at location because its defined parent doesn't have longitude and latitude!");
+		//writeFeeder.tree[newTreeKey] = component;
+		//writeFeeder.tree[newTreeKey].name = newName;
 	}
-	// Add to the links. Why am I adding a node to links? Makes no sense! Ah because when a node is added, there is a link between parent and child.
-	let linkToAdd = {
-		source: writeFeeder.nodes[findIndex(writeFeeder.nodes, 'name', newName)],
-		target: writeFeeder.nodes[findIndex(writeFeeder.nodes, 'name', parentTreeObj['name'])],
-		objectType: 'parentChild'
-	};
-	writeFeeder.links.push(linkToAdd);
-	//return nodeToAdd;
-
 	// Draw new line on svg
-	addLine(nodeToAdd.y, nodeToAdd.x, parentTreeObj.longitude, parentTreeObj.latitude, parentTreeObj.name + "_" + nodeToAdd.name, "parentChild");
+	//addLine(nodeToAdd.y, nodeToAdd.x, parentTreeObj.longitude, parentTreeObj.latitude, parentTreeObj.name + "_" + nodeToAdd.name, "parentChild");
 	// Draw new node on svg
 	//const y = writeFeeder.tree[newTreeId].longitude
 	//const x = writeFeeder.tree[newTreeId].latitude
 	//const id = newTreeId
 	//const myClass = writeFeeder.tree[newTreeId].object
-	const myClass = parentTreeObj.object;
+	//const myClass = parentTreeObj.object;
 	// TODO: Figure out why I have to switch the y and x arguments here to make the new node display properly.
-	addCircle(nodeToAdd.y, nodeToAdd.x, 2, nodeToAdd.treeIndex, component.object);
-	scaleTo(scaleLevel);
 
 	/* So I know that addLine() adds the line with the specific id to the document, and that this id matters for moving nodes around.
 	So when I add a circle, I ALSO need to add the correct line with the correct property values AND correct location.
@@ -1917,7 +1975,7 @@ function newChildAtLocation(component, treeKey) {
 
 /**
  * Add a new child node at selected component
- * @param  {string} componentName - The name of the component. This name is also a key in the global components object.
+ * @param  {string} componentName - The name of the component. This name is also a key in the globalComponents object.
  */
 function newChildAtSelected(componentName) { //eslint-disable-line
 	const node = getSelectedNode();
@@ -1925,36 +1983,47 @@ function newChildAtSelected(componentName) { //eslint-disable-line
 		alert('I am sorry, but we cannot insert a child element there.');
 		return false;
 	}
-	const component = clone(components[componentName]);
+	const component = clone(globalComponents[componentName]);
 	newChildAtLocation(component, node['treeIndex']);
 }
 
 //**************************************************
-// Populate menu functions
+// Header menu functions
 //**************************************************
 
-/**
+function attachHandlers() {
+    //fillObjectMenu(globalComponents);
+    addComponents();
+    attachFeederList(document.getElementById("publicFeederList"), publicFeeders, "public");
+    attachFeederList(document.getElementById("userFeederList"), userFeeders, thisOwner);
+    addFileMenuHandlers();
+    addEditMenuHandlers();
+}
+
+/** TODO: add unit-tests
  * Fill menu of "Add" button and add its handler functions.
  */
-function fillObjectMenu(components) {
-	const menu = document.getElementById('newObjectMenu');
-	for (let componentName in components) {
+//function fillObjectMenu(globalComponents) {
+function addComponents() {
+	const ul = document.getElementById("componentList");
+    const select = document.getElementById("componentSelect");
+	for (let componentName in globalComponents) {
 		const li = document.createElement("li");
 		li.textContent = componentName;
 		li.addEventListener("click", function() {
-			//Using componentName here is a closure right?
 			addSvgObjects(addFeederObject(componentName, document.getElementsByClassName("selected")));
 		});
-		menu.appendChild(li);
+		ul.appendChild(li);
+        select.innerHTML += `<option value=${componentName}>${componentName}</option>`;
 	}
 }
 
 /** TODO: add unit-tests
- * @param ul {Element} - An html element where the list will be attached
- * @param feeders {array} - An array of objects, where each object has properties "model" and "name", or null. 
- * @param owner {string} - Either "public" or the owner of the current writeFeeder.
+ * @param {Element} ul - An html element where the list will be attached
+ * @param {Array} feeders - An array of objects, where each object has properties "model" and "name", or null. 
+ * @param {string} owner - Either "public" or the owner of the current writeFeeder.
  */
-function attachFeederList(ul, feeders, owner) {
+function attachFeederList (ul, feeders, owner) {
     if (!feeders) return;
     for (let writeFeeder of feeders) {
         if (writeFeeder.name != thisFeederName) {
@@ -1970,385 +2039,636 @@ function attachFeederList(ul, feeders, owner) {
     }
 }
 
+function addFileMenuHandlers() {
+    const menu = document.getElementById("fileMenu");
+    const items = Array.from(menu.children);
+    if (items.length !== 8) {
+        throw new Error("Please update this function to ensure the correct handlers are attached");
+    }
+    items[0].addEventListener("click", function() {
+        saveFeeder(writeFeeder);
+    });
+    items[1].addEventListener("click", downloadTextFile);
+    items[2].addEventListener("click", renameFeeder);
+    items[3].addEventListener("click", function() { toggleElementDisplay("loadModal"); });
+    items[4].addEventListener("click", function() { toggleElementDisplay("blankFeederModal"); });
+    items[5].addEventListener("click", function() { toggleElementDisplay("milsoftModal"); });
+    items[6].addEventListener("click", function() { toggleElementDisplay("gridlabdModal"); });
+    items[7].addEventListener("click", function() { toggleElementDisplay("cymeModal"); });
+}
+
+function addEditMenuHandlers() {
+    const menu = document.getElementById("editMenu");
+    const items = Array.from(menu.children);
+    if (items.length != 11) {
+        throw new Error("Please update this function to ensure the correct handlers are attached");
+    }
+    items[0].addEventListener("click", zoomToFit);
+    items[1].addEventListener("click", zoomReset);
+    //items[2].addEventListener("click", staticLoadsToHouses);
+    items[3].addEventListener("click", function() { toggleElementDisplay("scadaModal"); });
+    items[4].addEventListener("click", function() { toggleElementDisplay("amiModal"); });
+    items[5].addEventListener("click", function() { toggleElementDisplay("findModal"); });
+    items[6].addEventListener("click", function() {
+        updateAttachTargets("massAddTargetSelect", globalTreeWrapper.tree);
+        toggleElementDisplay("massAddModal");
+    });
+    items[7].addEventListener("click", function() {
+        updateAttachTargets("massEditTargetSelect", globalTreeWrapper.tree);
+        toggleElementDisplay("massEditModal");
+    });
+    //items[8].addEventListener("click", function() {
+    //    getattachmentslist()
+    //    toggleElementDisplay("attachmentsModal");
+    //});
+    items[9].addEventListener("click", function() { toggleElementDisplay("climateModal"); });
+    //items[10].addEventListener("click", function() { toggleElementDisplay("anonymizeModal"); });
+}
+
 /** If an element isn't displayed, set it's inline display value to the default browser value.
  * If the element is displayed, then hide it.
  */
 function toggleElementDisplay(id) {
-//function toggleDisplayAttribute(element) {
     const element = document.getElementById(id);
     if (element.style.display === "none") {
         element.removeAttribute("style");
     } else {
         element.style.display = "none";
+        if (id === "findModal") {
+            return;
+        }
+        // When we hide a modal, set any of the text fields to empty
+        const queryString = `#${id} input[type=text]`;
+        document.querySelectorAll(queryString).forEach(input => {
+            input.value = "";
+        });
     }
 }
 //**************************************************
 // Description and selection table functions 
 //**************************************************
 
-
 //**************************************************
-// File menu functions
+// Edit menu interface
 //**************************************************
 
-/** TODO: it would be more semantic to use the JS FormData interface
-*/
-//function postToUrl(path, params, enctype="application/x-www-form-urlencoded", method="post") {
-//function postToUrl(path, params, method="post") {
-//	let form = document.createElement('form');
-//	form.setAttribute('method', method);
-//    form.setAttribute('action', path);
-//    //form.setAttribute("enctype", enctype);
-//    if (params) {
-//        if (typeof(params) === "object" && !Array.isArray(params)) {
-//            for(let key in params) {
-//                if(params.hasOwnProperty(key)) {
-//                    let hiddenField = document.createElement('input');
-//                    hiddenField.setAttribute('type', 'hidden');
-//                    hiddenField.setAttribute('name', key);
-//                    hiddenField.setAttribute('value', params[key]);
-//                    form.appendChild(hiddenField);
-//                }
-//            }
-//        } else {
-//            throw "params must be a valid JS object";
-//        }
-//    } 	
-//    document.body.appendChild(form);
-//	form.submit();
-//}
-
-/** This fileOperation is used for two purposes 1) to save the users changes to the .omd file in the server using writeFeeder 2) to 
- * undo some other FileOperation by writing the contents of readFeeder back into the original .omd file.
+/**
+ * Set the viewport to its initial state and center it
  */
-function getSaveFileOperation(feeder) {
-    const formData = new FormData();
-    formData.set("feederObjectJson", JSON.stringify(feeder));
-    const ajax = new Ajax(`/saveFeeder/${thisOwner}/${thisModelName}/${thisFeederName}`, "POST", formData);
-    let save;
-    if (feeder === readFeeder) {
-        //Undo the previous file operation
-        const pm = new ProgressModal("Cancelling the previous operation...", "", false);
-        save = new FileOperation
-        (
-            ajax,
-            (xhr, resolve, reject) => {
-                alert("Success. Previous operation was canceled");
-                resolve();
-            },
-            (xhr, resolve, reject) => {
-                //Should never be called
-                reject();
-            },
-            (xhr, resolve, reject) => {
-                alert("We were unable to cancel the previous operation.")
-                reject();
-            },
-            pm
-        );
-    } else if (feeder === writeFeeder) {
-        //Normal save operation
-        const pm = new ProgressModal("Saving changes to your file...", "You have canceled the save.", true);
-        save = new FileOperation
-        (
-            ajax,
-            (xhr, resolve, reject) => {
-                alert("Success. Your data was saved.");
-                resolve();
-                reloadWrapper();
-            },
-            (xhr, resolve, reject) => {
-                reject("canceled");
-            },
-            (xhr, resolve, reject) => {
-                alert(`We were unable to save your data. Please try again. If you refresh the page without first saving,
-                your current changes will be lost.`);
-                reject();
-            },
-            pm
-        );
-    }
-    return save;
-}
-
-/** 
- * Submits a GET request to the /uniqeObjName route which returns true if a matching .omd file exists in /static/publicFeeders.
- * /uniqObjName route ignores 'thisOwner' anad 'serverModelName' because objType is /Feeder. Perhaps some functionality hasn't been added yet.
- * 
- * Then submits a POST request to /loadFeeder which overwrites the original .omd file with some other .omd file in /static/publicFeeders. 
- * While a POST request is submitted, nothing is actually posted as all the data is appended to the url.
- * 
- * @param {string} serverFeederName - The name the server will use to find the corresponding .omd feeder file in /static/publicFeeders.
- * @param {string} serverModelName - The model name that the server will use to find and overwrite the original .omd file.
- * @param {string} thisOwner - Either 'public' or the owner of THIS feeder.
- */
-
-function loadFeeder(serverFeederName, serverModelName, owner) {
-    const checkFileExists = new FileOperation
-    (
-        new Ajax(`/uniqObjName/Feeder/${thisOwner}/${serverFeederName}/${serverModelName}`),
-        (xhr, resolve, reject) => {
-            try {
-                const data = JSON.parse(xhr.responseText);
-                if (data.exists) {
-                    resolve();
-                } else {
-                    alert('This feeder no longer exists. Please refresh the page, or select another feeder.');
-                    reject();
-                }
-            } catch (e) {
-                reject(e);
-            }
-        },
-        (xhr, resolve, reject) => { 
-            //Should never be called
-            reject(); 
-        },
-        (xhr, resolve, reject) => { 
-            alert("We were unable to load the feeder. Please refresh the page and try again.");
-            reject(); 
-        }
-    );
-    let formData = new FormData();
-    formData.set("referrer", "distribution");
-    const loadFile = new FileOperation
-    (
-        new Ajax (`/loadFeeder/${serverFeederName}/${serverModelName}/${thisModelName}/${thisFeederNum}/${owner}/${thisOwner}`, "POST", formData),
-        (xhr, resolve, reject) => {
-            resolve();
-            reloadWrapper();
-        },
-        (xhr, resolve, reject) => {
-            reject("canceled"); 
-        },
-        (xhr, resolve, reject) => {
-            alert("We were unable to load the feeder. Please refresh the page and try again.");
-            reject();
-        },
-        new ProgressModal("Loading feeder from server...", "You have canceled loading the feeder.", true)
-    );
-    checkFileExists.start().
-    then(function() {
-        return loadFile.start();
-    }).
-    catch(function(rejectionReason) {
-        if (rejectionReason === "canceled") {
-            const saveFile = getSaveFileOperation(readFeeder);
-            saveFile.start();
-        }
-    });
-}
-
-function getCheckFileOperation(fileName) {
-    const checkFileExists = new FileOperation
-    (
-        new Ajax(`/uniqObjName/Feeder/${thisOwner}/${fileName}/${thisModelName}`),
-        (xhr, resolve, reject) => {
-            try {
-                const data = JSON.parse(xhr.responseText);
-                if (data.exists) {
-                    alert(`You already have a feeder named "${fileName}". Please choose a different name.`);
-                    reject();
-                } else {
-                    resolve();
-                }
-            } catch (e) {
-                reject(e);
-            }
-        },
-        (xhr, resolve, reject) => { 
-            //Should never be called
-            reject(); 
-        },
-        (xhr, resolve, reject) => { 
-            alert("We were unable to submit your file. Please refresh the page and try again.");
-            reject(); 
-        }
-    );
-    return checkFileExists;
-}
-
-function submitForm(inputId, formId) {
-    const fileName = document.getElementById(inputId).value;
-    const checkFileExists = getCheckFileOperation(fileName);
-    const formElement = document.getElementById(formId);
-    const formData = new FormData(formElement);
-    const url = formElement.action;
-    const submitForm = new FileOperation
-    (
-        new Ajax(url, "POST", formData),
-        (xhr, resolve, reject) => {
-            if (formId === "blankFeederForm") {
-                reloadWrapper();
-            }
-            resolve();
-        },
-        (xhr, resolve, reject) => {
-            //Likely shouldn't be called 
-            reject("canceled");
-        },
-        (xhr, resolve, reject) => {
-            alert("We were unable to submit your file. Please refresh the page and try again.");
-            reject();
-        },
-        //Server code is such that it isn't currently possible to truly cancel a "new blank feeder" request
-        new ProgressModal("Submitting your file...", "", false)
-    );
-    const pollServer = new FileOperation
-    (
-        new Ajax(`/checkConversion/${thisModelName}/${thisOwner}`),
-        (xhr, resolve, reject) => {
-            if (xhr.responseText === 'glmError') {
-                alert('The glm file used is incorrectly formatted.');
-                reject();
-            } else if (xhr.responseText === 'milError') {
-                alert('The .std and .seq files used are incorrectly formatted.');
-                reject();
-            } else {
-                try {
-                    const data = JSON.parse(xhr.responseText);
-                    if (data.exists === false) {
-                        //alert('Conversion complete.');
-                        reloadWrapper();
-                        /** The progressModal seems to disappear prematurely, but it actually lasts the correct amount of time.
-                         * After the reload occurs and the success function executes, the progressModal is hidden by design. It's
-                         * just that the reload itself takes a long time, which is why the progressModal seems to disappear early.
-                         */
-                        resolve();
-                    } else {
-                        reject("in progress");
-                    }
-                } catch (e) {
-                    reject(e);
-                }
-            }
-        },
-        (xhr, resolve, reject) => {
-            reject("canceled");
-        },
-        (xhr, resolve, reject) => {
-            alert("We were unable to convert your file. Please refresh the page and try again.");
-            reject();
-        },
-        new ProgressModal("Converting your file...", "You canceled the file conversion.", true)
-    );
-    return checkFileExists.start().then(function() {
-        return submitForm.start();
-    }).then(function() {
-        pollServer.progressModal.show();
-        return new Promise((resolve, reject) => {
-            const intervalId = window.setInterval(function() {
-                pollServer.start().then(
-                    () => {
-                        //Should never be called
-                        window.clearInterval(intervalId);
-                        resolve(); 
-                    },
-                    (rejectionReason) => {
-                        pollServer.progressModal.show();
-                        if (rejectionReason === "canceled") {
-                            window.clearInterval(intervalId);
-                            reject("canceled");
-                        } else if (rejectionReason !== "in progress") {
-                            window.clearInterval(intervalId);
-                            reject();
-                        }
-                    });
-            }, 5000);
-        });
-    }).catch(function(rejectionReason) {
-        //Server code is such that it isn't possible to truly cancel a file conversion. Load a new blank feeder instead.
-        if (rejectionReason === "canceled") {
-            const formElement = document.getElementById("blankFeederForm");
-            const formData = new FormData(formElement);
-            const url = formElement.action;
-            const submitForm = new FileOperation
-            (
-                new Ajax(url, "POST", formData),
-                (xhr, resolve, reject) => {
-                    reloadWrapper();
-                    //resolve(); Don't resolve because
-                },
-                (xhr, resolve, reject) => {
-                    //Likely shouldn't be called 
-                    reject("canceled");
-                },
-                (xhr, resolve, reject) => {
-                    alert("We were unable to submit your file. Please refresh the page and try again.");
-                    reject();
-                },
-                //Server code is such that it isn't currently possible to truly cancel a "new blank feeder" request
-                new ProgressModal("Submitting your file...", "", false)
-            );
-            submitForm.start();
-        }
-    });
-}
-
-/** It's inefficeint to convert both feeders to strings and compare them. On the other hand, this strategy guarantees
- * no unsaved changes will be missed.
- */
-function renameFeeder() {
-	if (JSON.stringify(readFeeder) !== JSON.stringify(writeFeeder)){
-		alert('You have unsaved changes. Please save the feeder before proceeding.')
-	}
-	else {
-		let newName = prompt("Rename the feeder to", `${thisFeederName}`);
-		while (! /^[\w\s]+$/.test(newName) || /^\s+$/.test(newName)){
-			newName = prompt("Only letters, digits and underscore are allowed.\nPlease enter a different name", `${thisFeederName}`);
-		}
-		if (newName){
-            const checkFileExists = getCheckFileOperation(newName);
-            const renameFile = new FileOperation
-            (
-                new Ajax(`/renameFeeder/${thisOwner}/${thisModelName}/${thisFeederName}/${newName}/${thisFeederNum}`),
-                (xhr, resolve, reject) => {
-                    alert("Feeder file was successfully renamed.");
-                    thisFeederName = newName;
-                    resolve();
-                },
-                (xhr, resolve, reject) => {
-                    //Should never be called
-                    reject();
-                },
-                (xhr, resolve, reject) => {
-                    alert("We were unable to rename your file.");
-                    reject();
-                }
-            );
-            return checkFileExists.start().then(function() {
-                return renameFile.start();
-            }).catch(function() {
-                //Should never be called, unless there was a bad ajax request
-            });
-		}
-	}
+ function zoomReset() {
+    panZoom.fit();
+    panZoom.center();
 }
 
 /**
- * Save the modified feeder data by overwriting the existing .omd file in the server. The return statement is for integration tests.
+ * Set the viewport value to its initial state.
  */
-function saveFeeder() {
-    const saveFile = getSaveFileOperation(writeFeeder);
-    return saveFile.start().catch(function(rejectionReason) {
-        if (rejectionReason === "canceled") {
-            const undoSave = getSaveFileOperation(readFeeder);
-            undoSave.start();
+function zoomToFit() {
+    panZoom.fit();
+}
+
+function randomGaussian() {
+  // Get a Gaussian from a uniform(0,1) via the Box-Muller transform.
+  let rad;
+  let x1;
+  let x2;
+  let c;
+  do {
+	x1 = 2 * Math.random() - 1
+	x2 = 2 * Math.random() - 1
+	rad = x1 * x1 + x2 * x2
+  } while (rad >= 1 || rad == 0) {
+    c = Math.sqrt(-2 * Math.log(rad) / rad);
+  }
+  return x1 * c
+}
+
+function randomInt(min,max) {
+	return Math.floor(Math.random()*(max - min + 1) + min)
+}
+
+function randomInt(min,max) {
+	return Math.floor(Math.random()*(max - min + 1) + min)
+}
+
+function randomChoice(inList) {
+	return inList[Math.floor(Math.random() * inList.length)]
+}
+
+//Table this for now
+function staticLoadsToHouses() {
+	// TODO: for secondary system has 'load', replace it with triplex_meter and triplex_node
+    let tkeys = Object.keys(globalTreeWrapper.tree);
+    let modal = new ProgressModal("Please wait. Houses are being generated.", "", false);
+	if (noTriplexNode()) {
+		alert('TRIPLEX NODES have been hidden by the layout, please unfold them first.')
+	} else {
+        modal.show();
+		// set interval function to run replaceAllHouses every 10 ms, if it is running, will put one request in the queue.
+        //inter = setInterval(replaceAllHouses, 10)
+        replaceAllHouses();
+        modal.hide();
+		//showProgressDialog('bar','Please wait. Houses are being generated.','none')
+    }
+
+	function randomHouse() {
+		const newHouse = {}
+		newHouse['object'] = 'house'
+		newHouse['air_temperature'] = '70'
+		newHouse['cooling_COP'] = randomInt(25, 40) / 10.0 + ''
+		newHouse['cooling_setpoint'] = 'cooling' + randomInt(1, 8) + '*1'
+		newHouse['cooling_system_type'] = randomChoice(['ELECTRIC', 'HEAT_PUMP', 'NONE'])
+		// House sizing distribution from http://www.census.gov/housing/ahs/
+		// between 1100 and 3000. Probably needs a normal distribution.
+		let area = 1800 + 500 * randomGaussian()
+		if (area < 500) {
+			area = 500
+		}
+		area = area.toPrecision(2) * 1.0 + ''
+		newHouse['floor_area'] = area
+		newHouse['heating_COP'] = randomInt(20, 35) / 10.0 + ''
+		newHouse['heating_setpoint'] = 'heating' + randomInt(1, 8) + '*1'
+		newHouse['heating_system_type'] = randomChoice(['RESISTANCE', 'HEAT_PUMP', 'GAS'])
+		newHouse['mass_temperature'] = '70'
+		let skew = 1200 * randomGaussian()
+		skew = skew.toPrecision(3) * 1.0 + ''
+		newHouse['schedule_skew'] = skew
+		newHouse['thermal_integrity_level'] = randomChoice([1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6]) + ''
+		const newKey = getNewTreeKey(globalTreeWrapper.tree);
+		newHouse['name'] = 'synhouse' + newKey
+		return {
+            house: newHouse,
+            key: newKey
+        }
+	}
+
+	function randomLights() {
+		const newLights = {}
+		newLights['object'] = 'ZIPload'
+		newLights['power_fraction'] = '0.400000'
+		newLights['current_fraction'] = '0.300000'
+		newLights['impedance_pf'] = '1.000'
+		newLights['current_pf'] = '1.000'
+		newLights['power_pf'] = '1.000'
+		newLights['impedance_fraction'] = '0.300000'
+		newLights['heatgain_fraction'] = '0.9'
+		let power = 1.2 + randomGaussian()
+		if (power < 0) {
+			power = -1 * power
+		}
+		power = power.toPrecision(3) * 1.0 + ''
+		newLights['base_power'] = 'LIGHTS*' + 1.33
+		let skew = 2000 * randomGaussian()
+		skew = skew.toPrecision(3) * 1.0 + ''
+		newLights['schedule_skew'] = skew
+		const newKey = getNewTreeKey(globalTreeWrapper.tree);
+		newLights['name'] = 'synLights' + newKey
+		return {
+            lights: newLights,
+            key: newKey
+        }
+	}
+
+	function randomWaterHeater() {
+		const newHeater = {}
+		if (randomChoice([1, 2, 3]) == 3) {
+			return false
+		}
+		// Static properties.
+		newHeater['object'] = 'waterheater'
+		newHeater['temperature'] = '135'
+		newHeater['tank_volume'] = '50'
+		newHeater['location'] = 'INSIDE'
+		// Uniformly distributed properties.
+		newHeater['heating_element_capacity'] = randomInt(37, 53) / 10.0 + ''
+		newHeater['thermostat_deadband'] = randomInt(20, 60) / 10.0 + ''
+		newHeater['demand'] = 'water' + randomInt(1, 20) + '*1'
+		newHeater['tank_UA'] = randomInt(20, 40) / 10.0 + ''
+		// Gaussian properties.
+		let skew = 2000 * randomGaussian()
+		skew = skew.toPrecision(3) * 1.0 + ''
+		newHeater['schedule_skew'] = skew
+		newHeater['tank_setpoint'] = (randomGaussian() * 2 + 130).toPrecision(3) + ''
+		// between 1100 and 3000. Probably needs a normal distribution.
+		const newKey = getNewTreeKey(globalTreeWrapper.tree);
+		newHeater['name'] = 'synwaterheater' + newKey;
+		return {
+            heater: newHeater,
+            key: newKey
+        }
+	}
+
+	function replaceAllHouses() {
+        const tree = globalTreeWrapper.tree;
+        Object.keys(tree).forEach(treeKey => {
+            if(tree[treeKey].object === "house") {
+                // Get key of parent of house (triplex_meter)
+                const parentKey = globalTreeWrapper.names[tree[treeKey].parent];
+                // Delete the house itself
+                deleteObject(treeKey);
+                let houseObj = randomHouse();
+                let lightsObj = randomLights();
+                let heaterObj = randomWaterHeater();
+                // Add a NEW house to the triple_meter
+                newChildAtLocation(houseObj.house, parentKey);
+                // Add stuff to the new house
+                newChildAtLocation(lightsObj.lights, houseObj.key);
+                if (heaterObj != false) {
+                    newChildAtLocation(heaterObj.heater, houseObj.key);
+                }
+                // but what happend to children of the old house that was deleted? They're hanging!
+            }
+        });
+        //redraw the houses on top
+        //Object.keys(tree).forEach(key => {
+        //    if(tree[key].object === "house") {
+        //        const lat = tree[key].latitude;
+        //        const lon = tree[key].longitude;
+        //        document.getElementById(key).remove();
+        //        addCircle(lon, lat, 2, key, "house");
+        //    }
+        //});
+        scaleTo(scaleLevel);
+    }
+
+	function noTriplexNode() {
+        const hiddenNodes = writeFeeder.hiddenNodes;
+        for (let node of hiddenNodes) {
+			if (node.objectType !== undefined && node.objectType === 'triplex_node') {
+				return true;
+            }
+        }
+		return false;
+    }
+}
+
+/** TODO: add better validation for percent to ensure 1) it's a float and 2) it's in a valid range. Do this on the input if possible
+ * General Function to Add Components 'inverter', 'triplex_meter', PERC
+ */
+ function massAdd() {
+    let tree = globalTreeWrapper.tree;
+	const componentName = document.getElementById('componentSelect').value;
+	const attachType = document.getElementById('massAddTargetSelect').value;
+    const percent = document.getElementById('percent').value;
+    if (isNaN(percent) || percent === "") {
+        alert("Please enter a valid number for attachment probability");
+        return
+    }
+	let objectsAdded = 0;
+	if (globalComponents.hasOwnProperty(componentName)) {
+		for (let key in tree) {
+			if (tree[key].hasOwnProperty('object') && tree[key].object === attachType) {
+				if (Math.random() < percent) {
+					const newComponent = JSON.parse(JSON.stringify(globalComponents[componentName]));
+					newChildAtLocation(newComponent, key);
+					objectsAdded += 1
+				}
+			}
+		}
+		alert(`${objectsAdded} ${componentName} objects added to the feeder`);
+	} 
+}
+
+function updateAttachTargets(id, tree) {
+	/* Clearing each list so we dont get duplicates in the list. This must be done because the attachTarget list must be 
+    refreshed, since the user could have added a new object type to the data which they now want to attach to.
+    */
+    document.getElementById(id).innerHTML = "";
+	let attachList = [];
+	for (let key in tree) {
+        /* Only list an object type as a valid attachTarget if 1) its object property matches a known component and 2)
+        the object type already exists in the graph. "1" is to prevent things like weird configuration nodes from 
+        being presented to the user, since the user could not attach anything to those weird objects. "2" is to ensure
+        that the user must attach to things that already exist in a particular model.
+        */
+        if (globalComponents.hasOwnProperty(tree[key].object)) {
+			if (!attachList.includes(tree[key].object)) {
+                attachList.push(tree[key].object);
+                document.getElementById(id).innerHTML += `<option value=${tree[key].object}>${tree[key].object}</option>`;
+            }
+        }
+    }
+}
+
+function massEdit() {
+    const tree = globalTreeWrapper.tree;
+    const objectType = document.getElementById("massEditTargetSelect").value;
+    const keys = [];
+    for (let key in tree){
+		if (tree[key].object === objectType) {
+            keys.push(key);
+        }
+    }
+    let operation = document.querySelector("input[name=attributeOperation]:checked");
+    if (isNullOrUndefined(operation)) {
+        alert("Please select an operation with radio buttons on the 'Mass Edit' menu.");
+        return;
+    }
+    operation = operation.value;
+    if (operation === "addAttribute") {
+        massEditAdd(keys);
+        return;
+    }
+    const attributeKey = document.getElementById("massEditAttribute").value;
+    for (let key of keys) {
+        if (tree[key][attributeKey] === undefined) {
+            alert(`Invalid operation. One or more of the objects you selected does not have the attribute you are trying to edit.
+            Attribute "${attributeKey}" is missing from tree object with key "${key}".`);
+            return;
+        }
+    }
+    switch (operation) {
+        case "addTo":
+            const operand = parseFloat(document.getElementById("addToValue").value);
+            if (isNaN(operand)) {
+                alert("Invalid operation. Please enter a valid number if you choose 'Add to Value'.");
+                return;
+            } else {
+                for (let key of keys) {
+                    const value = parseFloat(tree[key][attributeKey]);
+                    if (isNaN(value)) {
+                        alert("Invalid operation. The attribute you are trying to add to is not a number.");
+                        return;
+                    }
+                    tree[key][attributeKey] = (value + operand).toString();
+                }
+            }
+            break;
+        case "change":
+            const newValue = document.getElementById("changeValue").value;
+            for (let key of keys) {
+                tree[key][attributeKey] = newValue;
+            }
+            break;
+        case "delete":
+            for (let key of keys) {
+                delete tree[key][attributeKey];
+            }
+            break;
+        case "multiplyBy":
+            const multiplyOperand = parseFloat(document.getElementById("multiplyValue").value);
+            const addOperand = parseFloat(document.getElementById("andAddValue").value);
+            if (isNaN(multiplyOperand) || (addOperand !== "" && isNaN(addOperand))) {
+                alert("Invalid operation. Please enter valid numbers if you choose 'Multiply attribute by'.");
+            }
+            for (let key of keys) {
+                const value = parseFloat(tree[key][attributeKey]);
+                if (isNaN(value)) {
+                    alert("Invalid operation. The attribute you are trying to multiply by is not a number.");
+                    return;
+                }
+                tree[key][attributeKey] = ((value * multiplyOperand) + addOperand).toString();
+            }
+            break;
+    }
+    alert(`${keys.length} ${objectType} objects edited.`);
+}
+
+function massEditAdd(keys) {
+    const tree = globalTreeWrapper.tree;
+    const newKey = document.getElementById("newAttributeKey").value;
+    const newValue = document.getElementById("newAttributeValue").value;
+    for (let key of keys) {
+        tree[key][newKey] = newValue;
+    }
+    const objectType = document.getElementById("massEditTargetSelect").value;
+    alert(`${keys.length} ${objectType} objects edited.`);
+}
+
+/*
+function editAttachment(attachment) {
+	document.body.style.cursor = 'wait'
+	setTimeout(function(){
+		toggleElementDisplay('editAttachmentModal');
+		let attachment = document.getElementById('attachmentSelect').value; //get the select. attachmentsList = attachmentSelect
+		document.getElementById('attachmentTd').innerHTML = attachment  //get the td. attachmentSelect = attachmentTd
+		document.getElementById('editAttachmentBox').innerHTML = attachments[attachment];
+		document.body.style.cursor = 'auto'
+	}, 100);
+}
+*/
+//**************************************************
+// File menu interface v3
+//**************************************************
+
+/** Used to save the new changes or undo an operation by resaving the old changes.
+ * 
+ */ 
+function saveFeeder(feeder) {
+    const formData = new FormData();
+    formData.set("feederObjectJson", JSON.stringify(feeder));
+    const postRequest = $.ajax({
+        type: "POST",
+        url: `/saveFeeder/${thisOwner}/${thisModelName}/${thisFeederName}`,
+        data: formData,
+        processData: false,
+        contentType: false,
+    });
+    let cancelled = false;
+    let progressModal;
+    if (feeder === readFeeder) {
+        progressModal = new ProgressModal("Cancelling the previous operation...", "", false);
+        postRequest.done(function() {
+            progressModal.hide();
+            alert("Success. Previous operation was canceled");
+        });
+    } else if (feeder === writeFeeder) {
+        progressModal = new ProgressModal("Saving changes to your file...", "You have canceled the save.", true);
+        progressModal.button.addEventListener("click", function() {
+            cancelled = true;
+            progressModal.header.textContent = progressModal.cancelMessage;
+            progressModal.button.style.display = "none";
+        });
+        postRequest.done(function() {
+            if (cancelled) {
+                saveFeeder(readFeeder);
+            } else {
+                progressModal.hide();
+                alert("Success. Your data was saved.");
+            }
+        });
+    }
+    progressModal.show();
+}
+
+async function loadFeeder(serverFeederName, serverModelName, owner) {
+    let submitForm = false;
+    await $.ajax({
+        url: `/uniqObjName/Feeder/${thisOwner}/${serverFeederName}/${serverModelName}`
+    }).done(function(data) {
+        if (data.exists) {
+            submitForm = true;
+        } else {
+            alert('This feeder no longer exists. Please refresh the page, or select another feeder.');
         }
     });
+    if (submitForm === false) {
+        return;
+    }
+    let formData = new FormData();
+    formData.set("referrer", "distribution");
+    const progressModal = new ProgressModal("Loading feeder from server...", "You have canceled loading the feeder.", true);
+    let cancelled = false;
+    progressModal.button.addEventListener("click", function() {
+        cancelled = true;
+        progressModal.header.textContent = progressModal.cancelMessage;
+        progressModal.button.style.display = "none";
+    });
+    progressModal.show();
+    $.ajax({
+        type: "POST",
+        url: `/loadFeeder/${serverFeederName}/${serverModelName}/${thisModelName}/${thisFeederNum}/${owner}/${thisOwner}`,
+        data: formData,
+        processData: false,
+        contentType: false,
+    }).done(function() {
+        if (cancelled) {
+            saveFeeder(readFeeder);
+        } else {
+            reloadWrapper();
+        }
+    });
+}
+
+/** TODO: add back ability to cancel these operations
+ * 
+ */
+async function submitForm({formId, pollUrl, inputId}) {
+    let submitForm = true;
+    if (inputId !== undefined) {
+        // inputId was defined, therefore we need to check the file name on the server before submitting the form
+        submitForm = false;
+        const fileName = document.getElementById(inputId).value;
+        // Check if the file exists, using the user-provided fileName
+        await $.ajax({
+            url: `/uniqObjName/Feeder/${thisOwner}/${fileName}/${thisModelName}`
+        }).done(function(data) {
+            console.log(data);
+            if (data.exists === true) {
+                alert(`You already have a feeder named "${fileName}". Please choose a different name.`);
+            } else {
+                // The file does not exist. Submit the form.
+                submitForm = true;
+            }
+        });
+    }
+    if (submitForm === false) {
+        return;
+    }
+    const form = document.getElementById(formId);
+    const formData = new FormData(form);
+    const submitModal = new ProgressModal("Submitting your file...", "", false);
+    submitModal.show();
+    // Submit the form to the server with an ajax request
+    const formRequest = $.ajax({
+        type: "POST",
+        url: form.action,
+        data: formData,
+        processData: false,
+        contentType: false,
+    });
+    if (pollUrl === undefined) {
+        // We don't want to poll the server. Just reload the page.
+        formRequest.done(function() {
+            reloadWrapper();
+        });
+    } else {
+        formRequest.done(function(data) {
+            let cancelled = false;
+            const pollModal = new ProgressModal("Converting your file...", "You canceled the file conversion.", true);
+            pollModal.button.addEventListener("click", function() {
+                cancelled = true;
+                pollModal.header.textContent = pollModal.cancelMessage;
+                pollModal.button.style.display = "none";
+            });
+            pollModal.show();
+            // Poll the server
+            const intervalId = setInterval(function() {
+                $.ajax({
+                    //url: `/checkConversion/${thisModelName}/${thisOwner}`
+                    url: pollUrl
+                }).done(function(data) {
+                    if (cancelled) {
+                        clearInterval(intervalId);
+                        pollModal.hide();
+                        alert("You cancelled the operation");
+                        saveFeeder(readFeeder);
+                    }
+                    if (data.exists === true) {
+                        //processing is ongoing 
+                    } else if (data.exists === false) {
+                        // The pollModal isn't hidden before the alert happens. This has nothing to do with the reload wrapper.
+                        clearInterval(intervalId);
+                        pollModal.hide();
+                        alert("Conversion complete");
+                        reloadWrapper();
+                    } else if (data === "milError") {
+                        clearInterval(intervalId);
+                        pollModal.hide()
+                        alert('The .std and .seq files used are incorrectly formatted.');
+                        //TODO: submit the readFeeder
+                    } else if (data === "glmError") {
+                        clearInterval(intervalId);
+                        pollModal.hide()
+                        alert('The .glm file used is incorrectly formatted.');
+                        //TODO: submit the readFeeder
+                    } else {
+                        console.log(data);
+                        clearInterval(intervalId);
+                        pollModal.hide()
+                        alert('There was a problem. Operation was cancelled');
+                    }
+                });
+            }, 5000);
+        });
+    }
+}
+
+async function renameFeeder() {
+	if (JSON.stringify(readFeeder) !== JSON.stringify(writeFeeder)){
+		alert('You have unsaved changes. Please save the feeder before proceeding.')
+	} else {
+		let newName = prompt("Rename the feeder to", `${thisFeederName}`);
+		while (! /^[\w\s]+$/.test(newName) || /^\s+$/.test(newName)) {
+			newName = prompt("Only letters, digits and underscore are allowed.\nPlease enter a different name", `${thisFeederName}`);
+		}
+		if (newName){
+            let submitRequest = false;
+            await $.ajax({
+                url: `/uniqObjName/Feeder/${thisOwner}/${newName}/${thisModelName}`
+            }).done(function(data) {
+                if (data.exists) {
+                    alert(`You already have a feeder named "${newName}". Please choose a different name.`);
+                } else {
+                    submitRequest = true;
+                }
+            });
+            if (submitRequest === false) {
+                return;
+            }
+            $.ajax({
+                url: `/renameFeeder/${thisOwner}/${thisModelName}/${thisFeederName}/${newName}/${thisFeederNum}`
+            }).done(function() {
+                thisFeederName = newName;
+                alert("Feeder file was successfully renamed.");
+            })
+		}
+	} 
 }
 
 //ADD PROMPT TO SAVE CHANGES BEFORE EXIT
 {% if is_admin or not public %}
 	window.onbeforeunload = function(e) {
-		let confirmationMessage = 'It looks like you have been editing something. ';
-		confirmationMessage += 'If you leave before saving, your changes will be lost.';
-		if (unsavedChanges) return confirmationMessage;
+        let confirmationMessage = `It looks like you have been editing something. 
+        If you leave before saving, your changes will be lost.`;
+        if (JSON.stringify(readFeeder) !== JSON.stringify(writeFeeder)) {
+            return confirmationMessage;
+        }
 	};
 {% endif %}
 
 //**************************************************
-// File menu functions v2
+// File menu functions 
 //**************************************************
 
 /** This is done for testing reasons.
@@ -2358,80 +2678,6 @@ function reloadWrapper() {
     */
     window.location.reload(true);
 }
-
-function FileOperation(ajax, success, cancel, failure, progressModal) {
-    if (!(ajax instanceof Ajax) || (progressModal && !(progressModal instanceof ProgressModal)))
-        throw new Error("Arguments must be instances of Ajax and ProgressModal constructor functions");
-    this.ajax = ajax;
-    this.success = success;
-    this.cancel = cancel;
-    this.failure = failure;
-    this.canceled = false;
-    if (progressModal) {
-        this.progressModal = progressModal;
-        this.progressModal.button.onclick = () => {
-            if (confirm("Are you sure you want to cancel this operation?")) {
-                this.canceled = true;
-                this.progressModal.header.textContent = this.progressModal.cancelMessage;
-                this.progressModal.button.removeAttribute("onclick");
-                this.progressModal.button.style.display = "none";
-            }
-        }
-    }
-}
-
-FileOperation.prototype.start = function() {
-    if (this.progressModal)
-        this.progressModal.show();
-    return new Promise((resolve, reject) => {
-        this.ajax.send().then(
-           (xhr) => {
-                if (this.canceled) {
-                    this.cancel(xhr, resolve, reject);
-                } else {
-                    this.success(xhr, resolve, reject);
-                }
-                if (this.progressModal)
-                    this.progressModal.hide();            
-            },
-            (xhr) => {
-                this.failure(xhr, resolve, reject);
-                if (this.progressModal)
-                    this.progressModal.hide();            
-            }
-        )
-    });
-};
-
-function Ajax(url, httpMethod="GET", formData) {
-    if (httpMethod == "POST" && !(formData instanceof FormData))
-        throw new Error("formData must be an instance of FormData");
-    this.url = url;
-    this.httpMethod = httpMethod;
-    this.formData = formData;
-};
-
-Ajax.prototype.send = function() {
-    return new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open(this.httpMethod, this.url);
-        xhr.onload = function() {
-            if (this.status >= 200 && this.status < 400) {
-                resolve(xhr);
-            } else {
-                reject(xhr); 
-            }
-        };
-        xhr.onerror = function() {
-            reject(xhr);
-        };
-        if (this.httpMethod == "POST" && this.formData) {
-            xhr.send(this.formData);
-        } else {
-            xhr.send();
-        }
-    });
-};
 
 function ProgressModal(message, cancelMessage, showButton) {
     this.self = document.getElementById("progressModal");
@@ -2461,14 +2707,14 @@ ProgressModal.prototype.hide = function() {
 //**************************************************
 
 const treeWrapperPrototype = {
-    buildNames(tree) {
+    buildNames() {
         let nameKeyMap = {};
-        Object.keys(tree).forEach(key => {
-            const name = tree[key].name;
+        Object.keys(this.tree).forEach(key => {
+            const name = this.tree[key].name;
             keyIsStringAndValidNumber(key);
             nameKeyMap[name] = key;
         });
-        return nameKeyMap;
+        this.names = nameKeyMap;
     }
 };
 
@@ -2488,7 +2734,8 @@ function createTreeWrapper(tree) {
     }
     const treeWrapper = Object.create(treeWrapperPrototype);
     treeWrapper.tree = tree;
-    treeWrapper.names = treeWrapper.buildNames(tree);
+    treeWrapper.buildNames();
+    //treeWrapper.names = treeWrapper.buildNames(tree);
     return treeWrapper;
 }
 
@@ -2645,11 +2892,6 @@ function keyIsStringAndValidNumber(key) {
 // Table interface v2
 //**************************************************
 
-/** Need to build the table first! */
-function deleteObject() {
-
-}
-
 //**************************************************
 // Svg interface v2
 //**************************************************
@@ -2762,7 +3004,7 @@ function createAddableSvgData(treeWrapper) {
 
 function isParentlessNode(obj) {
     return obj.hasOwnProperty("longitude") && obj.hasOwnProperty("latitude") && !obj.hasOwnProperty("parent") &&
-    !obj.hasOwnProperty("from") && !obj.hasOwnProperty("t0") ? true : false;
+    !obj.hasOwnProperty("from") && !obj.hasOwnProperty("to") ? true : false;
 }
 
 function isParentChildNode(obj) {
@@ -2771,6 +3013,10 @@ function isParentChildNode(obj) {
 
 function isLine(obj) {
     return obj.hasOwnProperty("from") && obj.hasOwnProperty("to") ? true : false;
+}
+
+function isNode(obj) {
+    return isParentChildNode(obj) || isParentlessNode(obj);
 }
 
 /** Return the parent object of the child object with the key 'childkey' in the TreeWrapper.tree.
@@ -2853,7 +3099,7 @@ function getLineEnds(lineKey, treeWrapper) {
  */
 function createSvgCircle(key, {longitude, latitude, object}, {r = 2, strokeWidth = 0.5} = {}) {
     keyIsStringAndValidNumber(key);
-    if (!longitude || !latitude || !object) {
+    if (longitude === undefined || latitude === undefined || object === undefined) {
         console.log(`For circle with tree key: "${key}", longitude was: "${longitude}",
         latitude was: "${latitude}", object was: "${object}"`)
         //throw new Error(`For circle with tree key: "${key}", longitude was: "${longitude}",
@@ -2861,11 +3107,20 @@ function createSvgCircle(key, {longitude, latitude, object}, {r = 2, strokeWidth
     }
 	const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
 	circle.setAttribute('id', key);
-	circle.setAttribute('cx', longitude);
-	circle.setAttribute('cy', latitude);
 	circle.setAttribute('class', object);
 	circle.setAttribute('r', r);
     circle.setAttribute('stroke-width', strokeWidth);
+    // Set coordinates and consider if they need to be translated
+    longitude = parseFloat(longitude);
+    latitude = parseFloat(latitude);
+    if (globalLonOffset !== null) {
+        longitude -= globalLonOffset;
+    }
+    if (globalLatOffset !== null) {
+        latitude -= globalLatOffset;
+    }
+    circle.setAttribute('cx', longitude);
+    circle.setAttribute('cy', latitude);
     return circle;
 }
 /** 
@@ -2873,7 +3128,8 @@ function createSvgCircle(key, {longitude, latitude, object}, {r = 2, strokeWidth
  */
 function createSvgLine(sourceNode, targetNode, key, thisObject) {
     const svgLine = document.createElementNS('http://www.w3.org/2000/svg', 'line'); 
-    if (!sourceNode.longitude || !sourceNode.latitude || !targetNode.longitude || !targetNode.latitude) {
+    if (sourceNode.longitude === undefined || sourceNode.latitude === undefined || 
+    targetNode.longitude === undefined || targetNode.latitude === undefined) {
         console.log(`For line with tree key: "${key}", sourceNode.name was: "${sourceNode.name}",
         sourceNode.longitude was: "${sourceNode.longitude}", sourceNode.latitude was: "${sourceNode.latitude}",
         targetNode.name was: "${targetNode.name}", targetNode.longitude was: "${targetNode.longitude}",
@@ -2882,10 +3138,23 @@ function createSvgLine(sourceNode, targetNode, key, thisObject) {
         //sourceNode.latitude was: "${sourceNode.latitude}", targetNode.longitude was: "${targetNode.longitude}",
         //targetNode.latitudw was: "${targetNode.latitude}"`)
     }
-    svgLine.setAttribute("x1", sourceNode.longitude); 
-    svgLine.setAttribute("y1", sourceNode.latitude); 
-    svgLine.setAttribute("x2", targetNode.longitude);
-    svgLine.setAttribute("y2", targetNode.latitude);
+    // Set coordinates and consider if they need to be translated
+    let sourceLon = parseFloat(sourceNode.longitude);
+    let sourceLat = parseFloat(sourceNode.latitude);
+    let targetLon = parseFloat(targetNode.longitude);
+    let targetLat = parseFloat(targetNode.latitude); 
+    if (globalLonOffset !== null) {
+        sourceLon -= globalLonOffset;
+        targetLon -= globalLonOffset;
+    }
+    if (globalLatOffset !== null) {
+        sourceLat -= globalLatOffset;
+        targetLat -= globalLatOffset;
+    }
+    svgLine.setAttribute("x1", sourceLon); 
+    svgLine.setAttribute("x2", targetLon);
+    svgLine.setAttribute("y1", sourceLat); 
+    svgLine.setAttribute("y2", targetLat);
     if (!key && !thisObject) {
         // key and thisObject weren't included, so this line doesn't represent a real object in the tree, so it's a parent-child line.
         svgLine.setAttribute("id", `${sourceNode.name}_${targetNode.name}`);
@@ -2944,34 +3213,33 @@ At the time of writing, this includes:
 //	return isParentChildNode(treeObject) || isParentlessNode(treeObject) ? true : false;
 //}
 
+function getParentTreeObject(treeObject, tree) {
+	const key = Object.keys(writeFeeder.tree).find(key => writeFeeder.tree[key].name === treeObject.data.parent);
+	return new TreeObject(key, writeFeeder.tree[key]);
+}
 
-//function getParentTreeObject(treeObject, tree) {
-//	const key = Object.keys(writeFeeder.tree).find(key => writeFeeder.tree[key].name === treeObject.data.parent);
-//	return new TreeObject(key, writeFeeder.tree[key]);
-//}
-
-//function TreeObject(key, data) {
-//	if (typeof(key) !== "string" || !data || Array.isArray(data) || typeof(data) !== "object") {
-//		throw "key must be a string and data must be a valid non-array object";
-//	}
-//	this.key = key;
-//	this.data = data;
-//}
+function TreeObject(key, data) {
+	if (typeof(key) !== "string" || !data || Array.isArray(data) || typeof(data) !== "object") {
+		throw "key must be a string and data must be a valid non-array object";
+	}
+	this.key = key;
+	this.data = data;
+}
 
 /** cx refers to longitude, cy refers to latitude.
 */
-//function Circle(cx, cy, r, id, domClass, strokeWidth) {
-//	if (typeof(cx) !== "number" || typeof(cy) !== "number" || typeof(r) !== "number" || typeof(id) !== "number" || 
-//		typeof(domClass) !== "string" || typeof(strokeWidth) !== "number") {
-//		throw "Circle constructor function was called with improper arguments";
-//	}
-//	this.cx = cx;
-//	this.cy = cy;
-//	this.r = r;
-//	this.id = id;
-//	this.domClass = domClass;
-//	this.strokeWidth = strokeWidth;
-//}
+function Circle(cx, cy, r, id, domClass, strokeWidth) {
+	if (typeof(cx) !== "number" || typeof(cy) !== "number" || typeof(r) !== "number" || typeof(id) !== "number" || 
+		typeof(domClass) !== "string" || typeof(strokeWidth) !== "number") {
+		throw "Circle constructor function was called with improper arguments";
+	}
+	this.cx = cx;
+	this.cy = cy;
+	this.r = r;
+	this.id = id;
+	this.domClass = domClass;
+	this.strokeWidth = strokeWidth;
+}
 
 //function Circle(key, {longitude, latitude, object}, {r = 2, strokeWidth = 0.5} = {}) {
 //    if (typeof key !== "number") {
@@ -2987,37 +3255,37 @@ At the time of writing, this includes:
 
 /** x refers to longitude, y refers to latitude.
 */
-//function Line(x1, y1, x2, y2, id, domClass, strokeWidth) {
-//	if (typeof(x1) !== "number" || typeof(y1) !== "number" || typeof(x2) !== "number" || typeof(y2) !== "number" || typeof(id) !== "string" ||
-//		typeof(domClass) !== "string" || typeof(strokeWidth) !== "number") {
-//		throw "Line constructor function was called with improper arguments";
-//	}
-//	this.x1 = x1;
-//	this.y1 = y1;
-//	this.x2 = x2;
-//	this.y2 = y2;
-//	this.id = id;
-//	this.domClass = domClass;
-//	this.strokeWidth = strokeWidth;
-//}
-
-function Line(key, sourceNode, targetNode) {
-	this.x1 = sourceNode.longitude;
-	this.y1 = sourceNode.latitude;
-	this.x2 = targetNode.longitude;
-	this.y2 = targetNode.latitude;
-	this.id = key;
+function Line(x1, y1, x2, y2, id, domClass, strokeWidth) {
+	if (typeof(x1) !== "number" || typeof(y1) !== "number" || typeof(x2) !== "number" || typeof(y2) !== "number" || typeof(id) !== "string" ||
+		typeof(domClass) !== "string" || typeof(strokeWidth) !== "number") {
+		throw "Line constructor function was called with improper arguments";
+	}
+	this.x1 = x1;
+	this.y1 = y1;
+	this.x2 = x2;
+	this.y2 = y2;
+	this.id = id;
 	this.domClass = domClass;
 	this.strokeWidth = strokeWidth;
 }
 
+//function Line(key, sourceNode, targetNode) {
+//	this.x1 = sourceNode.longitude;
+//	this.y1 = sourceNode.latitude;
+//	this.x2 = targetNode.longitude;
+//	this.y2 = targetNode.latitude;
+//	this.id = key;
+//	this.domClass = domClass;
+//	this.strokeWidth = strokeWidth;
+//}
+
 /** Return an SvgData object to be used to draw on the graph, or return null if there is nothing to draw.
 */
 function addFeederObject(componentName, htmlSelection) {
-	const treeObject = new TreeObject(getNewTreeKey(writeFeeder.tree).toString(), clone(components[componentName]));
+	const treeObject = new TreeObject(getNewTreeKey(writeFeeder.tree).toString(), clone(globalComponents[componentName]));
 	const associatedTreeObjects = getAssociatedTreeObjects(treeObject, htmlSelection);
 	if (!associatedTreeObjects) {
-		alert("Invalid svg selection. Failed to add object to feeder.");
+		//alert("Invalid svg selection. Failed to add object to feeder.");
 		return null;
 	}
 	if(!configureTreeObject(treeObject, associatedTreeObjects)) {
@@ -3026,16 +3294,13 @@ function addFeederObject(componentName, htmlSelection) {
 	}
 	let circles = [];
 	let lines = [];
-	if (isNode(treeObject)) {
-		if (canAddToFeederTree(treeObject && canAddToFeederNodes(treeObject))) {
-			addToFeederNodes(treeObject);
+	if (isNode(treeObject.data)) {
+		if (canAddToFeederTree(treeObject)) { //&& canAddToFeederNodes(treeObject))) {
+			//addToFeederNodes(treeObject);
 			addToFeederTree(treeObject);
 			// Add the circle for THIS treeObject
 			circles.push(new Circle(treeObject.data.longitude, treeObject.data.latitude, 2, parseInt(treeObject.key, 10), treeObject.data.object, 0.5));
-			if (isParentChildNode(treeObject)) {
-
-				//Nope don't need to do this
-				addToFeederLinks(treeObject);
+			if (isParentChildNode(treeObject.data)) {
 
 				const parentTreeObject = getParentTreeObject(treeObject);
 				// Add the circle for the parent of this treeObject (it must be redrawn on top of the new line)
@@ -3064,8 +3329,8 @@ function addFeederObject(componentName, htmlSelection) {
 			}
 		}
 	} else {
-		if (canAddToFeederTree(treeObject) && canAddToFeederLinks(treeObject)) {
-			addToFeederLinks(treeObject);
+		if (canAddToFeederTree(treeObject)) {//&& canAddToFeederLinks(treeObject)) {
+			//addToFeederLinks(treeObject);
 			addToFeederTree(treeObject);
 			const sourceTreeObject = associatedTreeObjects.sourceTreeObject;
 			const targetTreeObject = associatedTreeObjects.targetTreeObject;
@@ -3117,11 +3382,11 @@ function getAssociatedTreeObjects(treeObject, htmlSelection) {
 		throw "treeObject should be an object and htmlSelection should be an HTMLCollection";
 	}
 	let associatedTreeObjects = {};
-	if (isParentChildNode(treeObject)) {
+	if (isParentChildNode(treeObject.data)) {
 		if (htmlSelection.length === 1) {
 			const parentKey = htmlSelection[0].id;
 			const parentTreeObject = new TreeObject(parentKey, writeFeeder.tree[parentKey]);
-			if (isNode(parentTreeObject)) {
+			if (isNode(parentTreeObject.data)) {
 				associatedTreeObjects.parentTreeObject = parentTreeObject;
 				return associatedTreeObjects;
 			} else {
@@ -3130,7 +3395,7 @@ function getAssociatedTreeObjects(treeObject, htmlSelection) {
 		} else {
 			alert("Please select exactly one node to attach this object to.");
 		}
-	} else if (isParentlessNode(treeObject)) {
+	} else if (isParentlessNode(treeObject.data)) {
 		if (htmlSelection.length === 0) {
 			return associatedTreeObjects;
 		} else {
@@ -3142,7 +3407,7 @@ function getAssociatedTreeObjects(treeObject, htmlSelection) {
 			const targetKey = htmlSelection[1].id;
 			const sourceTreeObject = new TreeObject(sourceKey, writeFeeder.tree[sourceKey]);
 			const targetTreeObject = new TreeObject(targetKey, writeFeeder.tree[targetKey]);
-			if (isNode(sourceTreeObject) && isNode(targetTreeObject)) {
+			if (isNode(sourceTreeObject.data) && isNode(targetTreeObject.data)) {
 				associatedTreeObjects.sourceTreeObject = sourceTreeObject;
 				associatedTreeObjects.targetTreeObject = targetTreeObject;
 				return associatedTreeObjects;
@@ -3187,14 +3452,14 @@ function setCoordinates(treeObject) {
 	if (!(treeObject instanceof TreeObject)) {
 		throw "treeObject must be a instance of TreeObject";
 	}
-	if (isParentChildNode(treeObject)) {
+	if (isParentChildNode(treeObject.data)) {
 		const parentTreeObject = getParentTreeObject(treeObject);
 		treeObject.data.latitude = parentTreeObject.data.latitude + Math.random() * 10 - 5;
 		treeObject.data.longitude = parentTreeObject.data.longitude + Math.random() * 10 - 5;
-	} else if (isParentlessNode(treeObject)) {
+	} else if (isParentlessNode(treeObject.data)) {
 		const coords = clickLatLon(event);
-		treeObject.data.latitude = coords.y;
-		treeObject.data.longitude = coords.x;
+		treeObject.data.latitude = coords.y + globalLatOffset;
+		treeObject.data.longitude = coords.x + globalLonOffset;
 	}
 }
 
@@ -3211,64 +3476,8 @@ function canAddToFeederTree(treeObject) {
 	}
 }
 
-function canAddToFeederNodes(treeObject) {
-	if (writeFeeder.nodes.some(obj => obj.treeIndex && obj.treeIndex.toString() === treeObject.key)) {
-		throw ("writeFeeder.nodes insertion error: cannot insert object into writeFeeder.nodes. " +
-			"writeFeeder.nodes already contains an object with treeIndex: " + treeObject.key);
-	} else {
-		return true;
-	}
-}
-
-function canAddToFeederLinks(treeObject) {
-	if (writeFeeder.links.some(obj => obj.treeIndex && obj.treeIndex.toString() === treeObject.key)) {
-		throw ("writeFeeder.links insertion error: cannot insert object into writeFeeder.links." +
-		"writeFeeder.links already contains an object with treeIndex: " + treeObject.key);
-	} else {
-		return true;
-	}
-}
-
 function addToFeederTree(treeObject) {
 	writeFeeder.tree[treeObject.key] = treeObject.data;
-}
-
-function addToFeederNodes(treeObject) {
-	const node = {
-		index: writeFeeder.nodes.length,
-		treeIndex: parseInt(treeObject.key, 10),
-		weight: 1,
-		px: treeObject.data.longitude, 
-		py: treeObject.data.latitude, 
-		objectType: treeObject.data.object,
-		x: treeObject.data.longitude, 
-		y: treeObject.data.latitude, 
-		fixed: true,
-		chargeMultiple: 1,
-		name: treeObject.data.name
-	};
-	writeFeeder.nodes.push(node);
-}
-
-function addToFeederLinks(treeObject) {
-	let link;
-	if (isParentChildNode(treeObject)) {
-		// I am adding a link that represent the link between THIS TreeObject and its parent
-		link = {
-			source: writeFeeder.nodes.find(obj => obj.name === treeObject.data.name),
-			target: writeFeeder.nodes.find(obj => obj.name === treeObject.data.parent),
-			objectType: "parentChild"
-		}
-	} else {
-		// I am adding a link that represents THIS TreeObject.
-		link = {
-			source: writeFeeder.nodes.find(obj => obj.name === treeObject.data.from),
-			objectType: "fromTo",
-			treeIndex: treeObject.key,
-			target: writeFeeder.nodes.find(obj => obj.name === treeObject.data.to)
-		};
-	}
-	writeFeeder.links.push(link);
 }
 
 /**
@@ -3329,12 +3538,13 @@ it is rewritten.
 */
 function addSvgObjects(svgData) {
 	if (svgData === null) {
-		alert("No svgData was generated. No svg elements were added.");
+		//alert("No svgData was generated. No svg elements were added.");
 		return; 
 	}
 	deleteSvgObjects(svgData);
 	svgData.lines.forEach(line => addLineNew(line));
-	svgData.circles.forEach(circle => addCircleNew(circle));
+    svgData.circles.forEach(circle => addCircleNew(circle));
+    scaleTo(scaleLevel);
 }
 
 /** This function will remove a DOM element based on its id. It's used for 1) deleting svg elements outright and 2) deleting svg elements
@@ -3365,8 +3575,8 @@ function addCircleNew(circle) {
 		throw "circle argument must be an instance returned by the Circle constructor function";
 	}
 	const svgCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-	svgCircle.setAttribute("cx", circle.cx);
-	svgCircle.setAttribute("cy", circle.cy);
+	svgCircle.setAttribute("cx", circle.cx - globalLonOffset);
+	svgCircle.setAttribute("cy", circle.cy - globalLatOffset);
 	svgCircle.setAttribute("r", circle.r);
 	svgCircle.setAttribute("id", circle.id);
 	svgCircle.setAttribute("class", circle.domClass);
@@ -3380,10 +3590,10 @@ function addLineNew(line) {
 		throw "line argument must be an instance returned by the Line constructor function";
 	}
 	const svgLine = document.createElementNS('http://www.w3.org/2000/svg', 'line'); 
-	svgLine.setAttribute("x1", line.x1);
-	svgLine.setAttribute("y1", line.y1);
-	svgLine.setAttribute("x2", line.x2);
-	svgLine.setAttribute("y2", line.y2);
+	svgLine.setAttribute("x1", line.x1 - globalLonOffset);
+	svgLine.setAttribute("y1", line.y1 - globalLatOffset);
+	svgLine.setAttribute("x2", line.x2 - globalLonOffset);
+	svgLine.setAttribute("y2", line.y2 - globalLatOffset);
 	svgLine.setAttribute("id", line.id);
 	svgLine.setAttribute("class", line.domClass);
 	svgLine.setAttribute("stroke-width", line.strokeWidth);
@@ -3394,16 +3604,23 @@ function addLineNew(line) {
 (() => {
     //buildFeeder();
     //const t0 = performance.now();
-    createViewport(writeFeeder.tree, document.getElementById("svgContainer"));
-    const viewport = document.getElementsByClassName('svg-pan-zoom_viewport')[0];
     globalTreeWrapper = createTreeWrapper(writeFeeder.tree);
+    createViewport(globalTreeWrapper, document.getElementById("svgContainer"));
+    const viewport = document.getElementsByClassName('svg-pan-zoom_viewport')[0];
 
     const svgData = createAddableSvgData(globalTreeWrapper);
     svgData.addTo(viewport);
 
-    attachFeederList(document.getElementById("publicFeederList"), publicFeeders, "public");
-    attachFeederList(document.getElementById("userFeederList"), userFeeders, thisOwner);
-    fillObjectMenu(components);
+    attachHandlers();
+    // Interface setup
+    document.getElementById("searchInput").addEventListener("change", prepareSearchResults);
+    // jQuery
+    if (window.jQuery !== undefined) {
+        applyJQueryStyles();
+    } else {
+        disableJQueryFunctionality();
+    }
+
     document.getElementById('loadingMessage').style.display = 'none'
     /* 
     const t1 = performance.now();
@@ -3418,6 +3635,7 @@ function addLineNew(line) {
     }, 2000);
     */
 })();
+
 </script>
 <!--<script type='text/javascript' src='/static/distDataValidation.js'></script>-->
 {% if spec %}{{ spec | safe }}{% endif %}
