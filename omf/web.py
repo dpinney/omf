@@ -503,7 +503,7 @@ def checkConversion(modelName, owner=None):
 		owner = User.cu()
 	path = ("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
 	errorPath = "data/Model/"+owner+"/"+modelName+"/gridError.txt"
-	print "Check conversion status:", os.path.exists(path), "for path", path
+	#print "Check conversion status:", os.path.exists(path), "for path", path
 	if os.path.isfile(errorPath):
 		with open(errorPath) as errorFile:
 			errorString = errorFile.read()
@@ -668,13 +668,15 @@ def scadaLoadshape(owner,feederName):
 	feederPath = modelDir+"/"+feederName+".omd"
 	scadaPath = modelDir+"/"+loadName+".csv"
 	# TODO: parse the csv using .csv library, set simStartDate to earliest timeStamp, length to number of rows, units to difference between first 2 timestamps (which is a function in datetime library). We'll need a link to the docs in the import dialog and a short blurb saying how the CSV should be built.
-	with open(scadaPath) as csvFile:
-		scadaReader = csv.DictReader(csvFile, delimiter='\t')
-		allData = [row for row in scadaReader]
-	firstDateTime = dt.datetime.strptime(allData[1]["timestamp"], "%m/%d/%Y %H:%M:%S")
-	secondDateTime = dt.datetime.strptime(allData[2]["timestamp"], "%m/%d/%Y %H:%M:%S")
-	csvLength = len(allData)
-	units =  (secondDateTime - firstDateTime).total_seconds()
+	with open(scadaPath) as csv_file:
+		#reader = csv.DictReader(csvFile, delimiter='\t')
+		rows = [row for row in csv.DictReader(csv_file)]
+		#reader = csv.DictReader(csvFile)
+		#rows = [row for row in reader]
+	firstDateTime = dt.datetime.strptime(rows[1]["timestamp"], "%m/%d/%Y %H:%M:%S")
+	secondDateTime = dt.datetime.strptime(rows[2]["timestamp"], "%m/%d/%Y %H:%M:%S")
+	csvLength = len(rows)
+	units = (secondDateTime - firstDateTime).total_seconds()
 	if abs(units/3600) == 1.0:
 		simLengthUnits = 'hours'
 	simDate = firstDateTime
@@ -1323,4 +1325,5 @@ def uniqObjName(objtype, owner, name, modelName=False):
 if __name__ == "__main__":
 	template_files = ["templates/"+ x  for x in safeListdir("templates")]
 	model_files = ["models/" + x for x in safeListdir("models")]
-	app.run(debug=True, host="0.0.0.0", extra_files=template_files + model_files)
+	#app.run(debug=True, host="0.0.0.0", extra_files=template_files + model_files)
+	app.run(debug=True, host="0.0.0.0", extra_files=model_files)
