@@ -992,28 +992,6 @@ function addLine(x1, y1, x2, y2, id, myClass) {
 	svgOb.appendChild(aLine);
 }
 
-//function buildFeeder2() {
-//	const maxLat = Math.round(Object.values(feeder.tree).reduce((obj1, obj2) => {
-//		return obj1.latitude > obj2.latitude ? obj1 : obj2;
-//	}).latitude + 20.0);
-//	const maxLon = Math.round(Object.values(feeder.tree).reduce((obj1, obj2) => {
-//		return obj1.longitude > obj2.longitude ? obj1 : obj2;
-//	}).longitude + 20.0);
-//	const svgOb = document.getElementById('svgContainer');
-//	svgOb.setAttribute('width', maxLon);
-//	svgOb.setAttribute('height', maxLat);
-//	svgOb.setAttribute('viewBox','-10.0 -10.0 ' + maxLon + ' ' + maxLat);
-//	// Attach the pan/zoom behavior.
-//	window.panZoom = svgPanZoom('#svgContainer', {
-//		zoomEnabled: true,
-//		controlIconsEnabled: false,
-//		fit: true,
-//		center: true,
-//		minZoom: 0.5,
-//		maxZoom: 100
-//	});
-//
-//}
 
 function createViewport(treeWrapper, svgContainer) {
     const tree = treeWrapper.tree;
@@ -1066,130 +1044,8 @@ function createViewport(treeWrapper, svgContainer) {
         zoomScaleSensitivity: 0.2,
         minZoom: 0.25,
 		maxZoom: 100
-	});
-	// Make a map objectName -> key. And while we're at it, find the size we need for the full chart.
-	//const nameToKey = {};
-	//let maxLon = 100;
-	//let maxLat = 100;
-	//for (let key in tree) {
- //       nameToKey[tree[key]['name']] = key;
- //       const lon = tree[key].longitude;
- //       const lat = tree[key].latitude;
- //       //if (lon) {
- //       //    /* Pretend we have really big coordinate values */
- //       //    tree[key].longitude = lon * 12000;
- //       //}
- //       //if (lat) {
- //       //    /* Pretend we have really big coordinate values */
- //       //    tree[key].latitude = lat * 12000;
- //       //}
-	//	if (tree[key]['longitude'] > maxLon) {
- //           maxLon = tree[key]['longitude']
- //       }
- //       if (tree[key]['latitude'] > maxLat) {
- //           maxLat = tree[key]['latitude']
- //       }
-	//}
-	//maxLon = Math.round(maxLon + 20.0)
- //   maxLat = Math.round(maxLat + 20.0)
-
-    //const svgOb = document.getElementById('svgContainer')
-
-	//svgOb.setAttribute('width', maxLon)
-	//svgOb.setAttribute('height', maxLat)
-    //svgOb.setAttribute('viewBox','-10.0 -10.0 ' + maxLon + ' ' + maxLat)
-    //svgContainer.setAttribute('viewBox',`0 0 ${maxLon} ${maxLat}`);
-    //console.log("maxLon: " + maxLon);
-    //console.log("maxLat: " + maxLat);
-
-	// Attach the pan/zoom behavior.
-	//window.panZoom = svgPanZoom('#svgContainer', {
- //       /* These are equal to the default values */
-	//	//zoomEnabled: true,
-	//	//controlIconsEnabled: false,
- //       //center: true,
-	//	//fit: true,
- //       //contain: true,
- //       zoomScaleSensitivity: 0.2,
- //       minZoom: 0.25,
-	//	maxZoom: 100
-	//});
+    });
 }
-
-//function buildFeeder() {
-//	// Make a map objectName -> key. And while we're at it, find the size we need for the full chart.
-//	const nameToKey = {};
-//	let maxLon = 100;
-//	let maxLat = 100;
-//	for (let key in writeFeeder.tree) {
-//        nameToKey[writeFeeder.tree[key]['name']] = key;
-//        const lon = writeFeeder.tree[key].longitude;
-//        const lat = writeFeeder.tree[key].latitude;
-//        //if (lon) {
-//        //    /* Pretend we have really big coordinate values */
-//        //    writeFeeder.tree[key].longitude = lon * 12000;
-//        //}
-//        //if (lat) {
-//        //    /* Pretend we have really big coordinate values */
-//        //    writeFeeder.tree[key].latitude = lat * 12000;
-//        //}
-//		if (writeFeeder.tree[key]['longitude'] > maxLon) {
-//            maxLon = writeFeeder.tree[key]['longitude']
-//        }
-//        if (writeFeeder.tree[key]['latitude'] > maxLat) {
-//            maxLat = writeFeeder.tree[key]['latitude']
-//        }
-//	}
-//	maxLon = Math.round(maxLon + 20.0)
-//	maxLat = Math.round(maxLat + 20.0)
-//    const svgOb = document.getElementById('svgContainer')
-//
-//	//svgOb.setAttribute('width', maxLon)
-//	//svgOb.setAttribute('height', maxLat)
-//    //svgOb.setAttribute('viewBox','-10.0 -10.0 ' + maxLon + ' ' + maxLat)
-//    svgOb.setAttribute('viewBox',`0 0 ${maxLon} ${maxLat}`);
-//
-//	// Attach the pan/zoom behavior.
-//	window.panZoom = svgPanZoom('#svgContainer', {
-//        /* These are equal to the default values */
-//		//zoomEnabled: true,
-//		//controlIconsEnabled: false,
-//        //center: true,
-//		//fit: true,
-//        //contain: true,
-//        zoomScaleSensitivity: 0.2,
-//        minZoom: 0.25,
-//		maxZoom: 100
-//	})
-
-//	for (let key in writeFeeder.tree) {
-//		try {
-//			const anOb = writeFeeder.tree[key];
-//			if ('from' in anOb && 'to' in anOb) {
-//				const fromOb = writeFeeder.tree[nameToKey[anOb['from']]];
-//				const toOb = writeFeeder.tree[nameToKey[anOb['to']]];
-//				addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],key,anOb['object'] + ' p' + countPhases(anOb['phases']));
-//			}
-//			else if ('parent' in anOb) {
-//				const pOb = writeFeeder.tree[nameToKey[anOb['parent']]];
-//				addLine(pOb['longitude'],pOb['latitude'],anOb['longitude'],anOb['latitude'],pOb.name + '_' + anOb.name,'parentChild');
-//			}
-//		} catch (err) {
-//			console.log('Failed to Draw ' + writeFeeder.tree[key]);
-//		}
-//	}
-//	// Add circles after all lines
-//	for (let key in writeFeeder.tree) {
-//		try {
-//			const anOb = writeFeeder.tree[key];
-//			if ('latitude' in anOb && 'longitude' in anOb && 'object' in anOb && !('from' in anOb) && !('to' in anOb)) {
-//				addCircle(anOb['longitude'],anOb['latitude'],2,key,anOb['object']);
-//			}
-//		} catch (err) {
-//			console.log('Failed to Draw ' + writeFeeder.tree[key]);
-//		}
-//    }
-//}
 
 function mouseDown(event) { // eslint-disable-line
 	downX = event.pageX
@@ -1388,26 +1244,6 @@ function getClosestAncestor(el, tag) {
     return el;
 }
 
-/**
- * Get the closest descended element with the specified data attribute, using BFS.
- * @param {HTMLElement} el - The element to search downwards from.
- * @param {string} dataAtr - The data attribute that the descendent should have.
- * @returns {(HTMLElement | null)} - The descendent that matched the given data attribute or null.
- */
-/*function getClosestDescendent(el, dataAtr) {
-	if 
-	
-	let child;
-	while()
-		const child = Array.from(el.children).find(elm => elm.dataset[dataAtr] === dataAtr);
-		if (child) {
-			return child;
-		}
-
-	while ((el = el.firstElementChild) && el.dataset[dataAtr] !== dataAtr);
-	return el;
-}*/
-
 
 /**
  * Get a descendent node that has the specified data attribute from the root node using DFS.
@@ -1568,52 +1404,6 @@ function deleteObject(key) {
 	// Hide the object table.
 	tableDestroy();
 }
-
-// ported function
-//function deleteObject(treeKey) {
-//	// Figure out whether we have a node or an link:
-//    var isNode = true
-//    const tree = globalTreeWrapper.tree;
-//    if (tree[treeKey].hasOwnProperty("from")) {
-//        isNode = false;
-//    }
-//	if (isNode) {
-//		// Check for connections and abort if we have them.
-//		let nodeName = tree[treeKey].name;
-//		for (let key in tree) {
-//			if (tree[key].from === nodeName || tree[key].to === nodeName || tree[key].parent === nodeName) {
-//                alert('We can only delete nodes that aren\'t connected')
-//                return;
-//				//return false
-//			}
-//		}
-//		// No connection, so delete the node:
-//		var nodeIndex
-//		for (x = 0; x < nodes.length; x++) {
-//			if (nodes[x].treeKey == treeKey) nodeIndex = x
-//		}
-//		nodes.splice(nodeIndex, 1)
-//		// If we have a parent child situation, delete the link:
-//		if (tree[treeKey].parent != undefined) {
-//			var linkIndex
-//			for (x = 0; x < links.length; x++) {
-//				if (links[x].source.name == nodeName) linkIndex = x
-//			}
-//			links.splice(linkIndex, 1)
-//		}
-//	} else {
-//		// Delete link:
-//		var linkIndex
-//		for (x = 0; x < links.length; x++) {
-//			if (links[x].treeKey == treeKey) linkIndex = x
-//		}
-//		links.splice(linkIndex, 1)
-//	}
-//	// Delete tree object:
-//	delete tree[treeKey]
-//	clearSelection()
-//	redraw() 
-//}
 
 function scaleTo(x) {
 	// Scale the thickness of all lines and size of all circles. This helps user see details.
@@ -1801,19 +1591,6 @@ function newLink(componentName) { // eslint-disable-line
 	// Save to tree
 	writeFeeder.tree[newTreeKey] = newTreeLink;
 
-	// lines don't have the schedule_skew property.
-	//const newTreeLink = {
-	//	phases: 'A', //Some treeLinks also have a value of 'A'
-	//	from: firstTreeNode.name, //Fine
-	//	name: 'newLink' + newTreeKey, //No other treeLink has 'newLink' in the name
-	//	object: 'overhead_line', //This is fine
-	//	//longitude
-	//	to: secondTreeNode.name, //Fine
-	//	//length. None of the default globalComponents have this.
-	//	//latitude. None of the default globalComponents have this.
-	//	configuration: 'configuration' //No other treeLink has a value of 'configuration'
-	//}
-
 	// Save to links
 	const newLink = {
 		source: writeFeeder.nodes.find(obj => obj.treeIndex == selection[0].id), //good
@@ -1847,71 +1624,6 @@ function moveNode() {
 	clickTarget.addEventListener('click', moveNodeListener, false)
 }
 
-/**
- * An orphan node is a node that has no lines connected to it at all.
- * @param {object} node - The node in feeder.tree that I am examining.
- * @return {boolean} - Return true if the object 1) is a node (and NOT a line) 2) does not have a "parent" property. 
- * Otherwise return false.
- */
-//function isOrphanNode(node) {
-//	if (node.from === undefined && node.parent === undefined) {
-//		return true;
-//	}
-//	return false;
-//} 
-
-//function moveConnectedLines(node) {
-//	//Move the node
-//
-//	//Move any lines that are connected to the node. Must parse the tree to find these lines.	
-//	Object.keys(feeder.tree).forEach(firstKey => {
-//		//Not all objects in feeder.tree are lines, but I'm only operating on an object if is a line, hence the variable name.
-//		let line = feeder.tree[firstKey];
-//		if (line.from == node.name || line.to == node.name) {
-//			const outerX = node.longitude;
-//			const outerY = node.latitude;
-//			const outerId = firstKey;
-//			const outerClass = node.object;
-//			let innerX, innerY, innerId, innerClass;
-//			Object.keys(feeder.tree).forEach(secondKey => {
-//				const pairedNode = feeder.tree[secondKey];
-//				if ((pairedNode.name == line.from || pairedNode.name == line.to) 
-//					&& pairedNode.name != node.name) {
-//						innerX = pairedNode.longitude;
-//						innerY = pairedNode.latitude;
-//						innerId = secondKey;
-//						innerClass = pairedNode.object;
-//				}
-//			}); 
-//			document.getElementById(firstKey).remove();
-//			let x1, y1, x2, y2, fromNum, toNum, fromClass, toClass;
-//			if (line.from == node.name) {
-//				addLine(outerX, outerY, innerX, innerY, firstKey, line.object + ' p' + countPhases(line.phases));
-//				//redraw nodes
-//				//x1 = outerX;
-//				//y1 = outerY;
-//				//x2 = innerX;
-//				//y2 = innerY;
-//				fromNum = outerId;
-//				fromClass = outerClass;
-//				toNum = innerId;
-//				toClass = innerClass;
-//			} else {
-//				addLine(innerX, innerY, outerX, outerY, line.object + ' p' + countPhases(line.phases));
-//				//redraw nodes
-//				//x1 = innerX;
-//				//y1 = innerY;
-//				//x2 = outerX;
-//				//y2 = outerY;
-//				fromNum = innerId;
-//				fromClass = innerClass;
-//				toNum = outerId;
-//				toClass = outerClass;
-//			}
-//		}
-//	});
-//}
-
 //Get an array of keys that correspond to the connected line.
 function getConnectedLineKeys(node) {
 	return Object.keys(writeFeeder.tree).filter(key => {
@@ -1939,13 +1651,7 @@ function moveNodeListener() {
 	const connectedLineKeys = getConnectedLineKeys(clickedNode);
 	if (connectedLineKeys.length === 0 && clickedNode.parent === undefined) {
 		document.getElementById(lastElementSelected.id).remove();
-		addCircle(
-            newLon,
-            newLat,
-            2,
-            lastElementSelected.id,
-            writeFeeder.tree[lastElementSelected.id].object
-        );
+		addCircle(newLon, newLat, 2, lastElementSelected.id, writeFeeder.tree[lastElementSelected.id].object);
 	} else {
 		//Runs through writeFeeder lines (links) determines if clicked node is an end or target for any line in writeFeeder
 		for (let num in writeFeeder.tree) {
@@ -1953,31 +1659,12 @@ function moveNodeListener() {
 			// Move line between clicked node and its treeOb child. This is checking if clickedNode HAS children
 			if (treeOb.parent == clickedNode.name) {
 				document.getElementById(clickedNode.name + "_" + treeOb.name).remove()
-				addLine(
-                    newLon,
-                    newLat,
-                    treeOb.longitude,
-                    treeOb.latitude,
-                    clickedNode.name + "_" + treeOb.name,
-                    'parentChild'
-                );
+				addLine(newLon, newLat, treeOb.longitude, treeOb.latitude, clickedNode.name + "_" + treeOb.name, 'parentChild');
 				document.getElementById(num).remove()
-                addCircle(
-                    treeOb.longitude,
-                    treeOb.latitude,
-                    2,
-                    num,
-                    treeOb.object
-                );
+                addCircle(treeOb.longitude, treeOb.latitude, 2, num, treeOb.object);
 				document.getElementById(lastElementSelected.id).remove()
-				addCircle(
-                    newLon,
-                    newLat,
-                    2,
-                    lastElementSelected.id,
-                    clickedNode.object
-                );
-			}
+                addCircle(newLon, newLat, 2, lastElementSelected.id, clickedNode.object); 
+            }
 			/* Move line between clicked node and its treeOb parent (if it is a child). 
 			I found an object in writeFeeder.tree that is 1) NOT a line 2) is the parent of the currently selected node.
 			*/
@@ -1986,32 +1673,13 @@ function moveNodeListener() {
 				concatenation of their names, and I want to remove that line. Yep.
 				*/
 				document.getElementById(treeOb.name + "_" + clickedNode.name).remove()
-				addLine(
-                    newLon,
-                    newLat,
-                    treeOb.longitude,
-                    treeOb.latitude,
-                    treeOb.name + "_" + clickedNode.name,
-                    'parentChild'
-                );
+				addLine(newLon, newLat, treeOb.longitude, treeOb.latitude, treeOb.name + "_" + clickedNode.name, 'parentChild');
 				//Remove the parent node? Oh maybe to redraw it on top of the new line.
 				document.getElementById(num).remove()
-				addCircle(
-                    treeOb.longitude,
-                    treeOb.latitude,
-                    2,
-                    num,
-                    treeOb.object
-                );
+				addCircle(treeOb.longitude, treeOb.latitude, 2, num, treeOb.object);
 				//Remove the current node and redraw it where it's supposed to go.
 				document.getElementById(lastElementSelected.id).remove()
-				addCircle(
-                    newLon,
-                    newLat,
-                    2,
-                    lastElementSelected.id,
-                    clickedNode.object
-                );
+				addCircle(newLon, newLat, 2, lastElementSelected.id, clickedNode.object);
 			}
 			if (treeOb.from !== undefined && treeOb.to !== undefined) {
 				// Move all lines from or to the clicked node.
@@ -2040,44 +1708,19 @@ function moveNodeListener() {
 							myClasst = writeFeeder.tree[subEl].object
 						}
 					}
-                    addLine(
-                        x1,
-                        y1,
-                        x2,
-                        y2,
-                        num,
-                        treeOb['object'] + ' p' + countPhases(treeOb['phases'])
-                    );
+                    addLine(x1, y1, x2, y2, num, treeOb['object'] + ' p' + countPhases(treeOb['phases']));
 					// Redraw nodes after line so they aren't below the newly drawn lines. Up to 3 nodes for case where we are moving node between 2 from-to lines.
 					if (treeOb.from == clickedNode.name) {
-						addCircle(
-                            x2,
-                            y2,
-                            2,
-                            numt,
-                            myClasst
-                        );
+						addCircle(x2, y2, 2, numt, myClasst);
 						document.getElementById(numt).remove()
 					}
 					if (treeOb.to == clickedNode.name) {
-						addCircle(
-                            x1,
-                            y1,
-                            2,
-                            numf,
-                            myClassf
-                        );
+						addCircle(x1, y1, 2, numf, myClassf);
 						document.getElementById(numf).remove()
 					}
 					// Finally, draw the clicked node in its new location. Leave this bit here. Other moving functions go inside.
 					document.getElementById(lastElementSelected.id).remove()
-					addCircle(
-                        newLon,
-                        newLat,
-                        2,
-                        lastElementSelected.id,
-                        writeFeeder.tree[lastElementSelected.id].object
-                    );
+					addCircle(newLon, newLat, 2, lastElementSelected.id, writeFeeder.tree[lastElementSelected.id].object);
 				}
 			}
 		}
@@ -2218,89 +1861,6 @@ function disableJQueryFunctionality() {
     });
 }
 
-
-
-//function findNext() {
-//	// Find the next object matching the user input.
-//	var term = document.getElementById('searchInput').value
-//	var hits = findElementsViaString(term)
-//	document.getElementById('searchHitCount').innerHTML = hits.length + ' Hits'
-//	// If we can't find anything, stop.
-//	if (hits.length == 0) {
-//		alert('No objects found containing term.')
-//		return false
-//	}
-//	// Clear the current selection.
-//	for (let i = 0; i < document.getElementsByClassName("selection").length; i++) {
-//	//for (let i=0; i<selection.length; i++) {
-//		selection[i].classList.remove('selected')
-//	}
-//	//selection = []
-//	tableDestroy()
-//	// Find the tree index of the next item.
-//	if (searchCursor == undefined) {
-//		searchCursor = 0
-//	} else {
-//		searchCursor = (searchCursor + 1) % hits.length
-//	}
-//	var hitId = hits[searchCursor]
-//	// Find the location to zoom to.
-//	let svgOb = document.getElementById(hitId.toString())
-//	let cx = svgOb.getAttribute('cx')
-//	let cy = svgOb.getAttribute('cy')
-//	let x, y;
-//	if (cx !== null && cy !== null) {
-//		// Circle object, just get cx and cy
-//		x = cx
-//		y = cy
-//	} else {
-//		// Line object, get midpoint to zoom to
-//		x = (parseFloat(svgOb.getAttribute('x1')) + parseFloat(svgOb.getAttribute('x2'))) / 2;
-//		y = (parseFloat(svgOb.getAttribute('y1')) + parseFloat(svgOb.getAttribute('y2'))) / 2;
-//	}
-//    // Pan to the next hit.
-//    /*
-//	panZoom.pan({x:0, y:0})
-//	var realZoom = window.panZoom.getSizes().realZoom
-//	var width = window.panZoom.getSizes().width / 2
-//	var height = window.panZoom.getSizes().height / 2
-//    panZoom.pan({x:width - (x * realZoom), y:height - (y * realZoom)})
-//    */
-//    // Zoom in close
-//    panZoom.publicZoomAtPoint(2, {x: x, y: y}, true);
-//
-//	// Udpate the selection.
-//	svgOb.classList.add('selected')
-//	//selection.push(svgOb)
-//	tableCreate(writeFeeder.tree[hitId])
-//}
-//
-//function findPrevious() {
-//	var term = document.getElementById('searchInput').value
-//	var hits = findElementsViaString(term)
-//	if (searchCursor == undefined) {
-//		findNext()
-//	} else if (searchCursor == 0) {
-//		// Wrapped around.
-//		searchCursor = (hits.length) - 2
-//		findNext()
-//	} else {
-//		searchCursor -= 2
-//		findNext()
-//	}
-//}
-//
-//function findElementsViaString(inString) {
-//	var results = []
-//	for (let key in writeFeeder.tree) {
-//		const subIndex = JSON.stringify(writeFeeder.tree[key]).indexOf(inString)
-//		if (subIndex != -1 && writeFeeder.tree[key]['object'] != 'player' && (writeFeeder.tree[key].hasOwnProperty('object') || writeFeeder.tree[key].hasOwnProperty('module'))) {
-//			results.push(key)
-//		}
-//	}
-//	return results
-//}
-
 function fixPhases () {
 	// Todo: complete this to walk the tree and fix phasing.
 	for (let i in writeFeeder.tree){
@@ -2378,30 +1938,11 @@ function newChildAtLocation(component, parentKey) {
 		// Put the component in the tree with a new name.
 		tree[newTreeKey] = component;
         tree[newTreeKey].name = newName;
-        addLine(
-            parentTreeObj.longitude,
-            parentTreeObj.latitude,
-            component.longitude,
-            component.latitude,
-            parentTreeObj.name + "_" + component.name,
-            "parentChild"
-        );
-        addCircle(
-            component.longitude,
-            component.latitude,
-            2,
-            newTreeKey,
-            component.object
-        );
+        addLine(parentTreeObj.longitude, parentTreeObj.latitude, component.longitude, component.latitude, parentTreeObj.name + "_" + component.name, "parentChild");
+        addCircle(component.longitude, component.latitude, 2, newTreeKey, component.object);
         // Redraw the parent on top
         document.getElementById(parentKey).remove();
-        addCircle(
-            parentTreeObj.longitude,
-            parentTreeObj.latitude,
-            2,
-            parentKey,
-            parentTreeObj.object
-        );
+        addCircle(parentTreeObj.longitude, parentTreeObj.latitude, 2, parentKey, parentTreeObj.object); 
         scaleTo(scaleLevel);
 	} else {
         console.log("Cannot insert child at location because its defined parent doesn't have longitude and latitude!");
@@ -2566,229 +2107,6 @@ function toggleElementDisplay(id) {
 //**************************************************
 // Description and selection table functions 
 //**************************************************
-
-
-//**************************************************
-// File menu functions
-//**************************************************
-
-/** TODO: it would be more semantic to use the JS FormData interface
-*/
-//function postToUrl(path, params, enctype="application/x-www-form-urlencoded", method="post") {
-//function postToUrl(path, params, method="post") {
-//	let form = document.createElement('form');
-//	form.setAttribute('method', method);
-//    form.setAttribute('action', path);
-//    //form.setAttribute("enctype", enctype);
-//    if (params) {
-//        if (typeof(params) === "object" && !Array.isArray(params)) {
-//            for(let key in params) {
-//                if(params.hasOwnProperty(key)) {
-//                    let hiddenField = document.createElement('input');
-//                    hiddenField.setAttribute('type', 'hidden');
-//                    hiddenField.setAttribute('name', key);
-//                    hiddenField.setAttribute('value', params[key]);
-//                    form.appendChild(hiddenField);
-//                }
-//            }
-//        } else {
-//            throw "params must be a valid JS object";
-//        }
-//    } 	
-//    document.body.appendChild(form);
-//	form.submit();
-//}
-
-/** This fileOperation is used for two purposes 1) to save the users changes to the .omd file in the server using writeFeeder 2) to 
- * undo some other FileOperation by writing the contents of readFeeder back into the original .omd file.
- */
-//function getSaveFileOperation(feeder) {
-//    const formData = new FormData();
-//    formData.set("feederObjectJson", JSON.stringify(feeder));
-//    const ajax = new Ajax(`/saveFeeder/${thisOwner}/${thisModelName}/${thisFeederName}`, "POST", formData);
-//    let save;
-//    if (feeder === readFeeder) {
-//        //Undo the previous file operation
-//        const pm = new ProgressModal("Cancelling the previous operation...", "", false);
-//        save = new FileOperation
-//        (
-//            ajax,
-//            (xhr, resolve, reject) => {
-//                alert("Success. Previous operation was canceled");
-//                resolve();
-//            },
-//            (xhr, resolve, reject) => {
-//                //Should never be called
-//                reject();
-//            },
-//            (xhr, resolve, reject) => {
-//                alert("We were unable to cancel the previous operation.")
-//                reject();
-//            },
-//            pm
-//        );
-//    } else if (feeder === writeFeeder) {
-//        //Normal save operation
-//        const pm = new ProgressModal("Saving changes to your file...", "You have canceled the save.", true);
-//        save = new FileOperation
-//        (
-//            ajax,
-//            (xhr, resolve, reject) => {
-//                alert("Success. Your data was saved.");
-//                resolve();
-//                reloadWrapper();
-//            },
-//            (xhr, resolve, reject) => {
-//                reject("canceled");
-//            },
-//            (xhr, resolve, reject) => {
-//                alert(`We were unable to save your data. Please try again. If you refresh the page without first saving,
-//                your current changes will be lost.`);
-//                reject();
-//            },
-//            pm
-//        );
-//    }
-//    return save;
-//}
-
-/** 
- * Submits a GET request to the /uniqeObjName route which returns true if a matching .omd file exists in /static/publicFeeders.
- * /uniqObjName route ignores 'thisOwner' anad 'serverModelName' because objType is /Feeder. Perhaps some functionality hasn't been added yet.
- * 
- * Then submits a POST request to /loadFeeder which overwrites the original .omd file with some other .omd file in /static/publicFeeders. 
- * While a POST request is submitted, nothing is actually posted as all the data is appended to the url.
- * 
- * @param {string} serverFeederName - The name the server will use to find the corresponding .omd feeder file in /static/publicFeeders.
- * @param {string} serverModelName - The model name that the server will use to find and overwrite the original .omd file.
- * @param {string} thisOwner - Either 'public' or the owner of THIS feeder.
- */
-
-//function loadFeeder(serverFeederName, serverModelName, owner) {
-//    const checkFileExists = new FileOperation
-//    (
-//        new Ajax(`/uniqObjName/Feeder/${thisOwner}/${serverFeederName}/${serverModelName}`),
-//        (xhr, resolve, reject) => {
-//            try {
-//                const data = JSON.parse(xhr.responseText);
-//                if (data.exists) {
-//                    resolve();
-//                } else {
-//                    alert('This feeder no longer exists. Please refresh the page, or select another feeder.');
-//                    reject();
-//                }
-//            } catch (e) {
-//                reject(e);
-//            }
-//        },
-//        (xhr, resolve, reject) => { 
-//            //Should never be called
-//            reject(); 
-//        },
-//        (xhr, resolve, reject) => { 
-//            alert("We were unable to load the feeder. Please refresh the page and try again.");
-//            reject(); 
-//        }
-//    );
-//    let formData = new FormData();
-//    formData.set("referrer", "distribution");
-//    const loadFile = new FileOperation
-//    (
-//        new Ajax (`/loadFeeder/${serverFeederName}/${serverModelName}/${thisModelName}/${thisFeederNum}/${owner}/${thisOwner}`, "POST", formData),
-//        (xhr, resolve, reject) => {
-//            resolve();
-//            reloadWrapper();
-//        },
-//        (xhr, resolve, reject) => {
-//            reject("canceled"); 
-//        },
-//        (xhr, resolve, reject) => {
-//            alert("We were unable to load the feeder. Please refresh the page and try again.");
-//            reject();
-//        },
-//        new ProgressModal("Loading feeder from server...", "You have canceled loading the feeder.", true)
-//    );
-//    checkFileExists.start().
-//    then(function() {
-//        return loadFile.start();
-//    }).
-//    catch(function(rejectionReason) {
-//        if (rejectionReason === "canceled") {
-//            const saveFile = getSaveFileOperation(readFeeder);
-//            saveFile.start();
-//        }
-//    });
-//}
-
-//function getCheckFileOperation(fileName) {
-//    const checkFileExists = new FileOperation
-//    (
-//        new Ajax(`/uniqObjName/Feeder/${thisOwner}/${fileName}/${thisModelName}`),
-//        (xhr, resolve, reject) => {
-//            try {
-//                const data = JSON.parse(xhr.responseText);
-//                if (data.exists) {
-//                    alert(`You already have a feeder named "${fileName}". Please choose a different name.`);
-//                    reject();
-//                } else {
-//                    resolve();
-//                }
-//            } catch (e) {
-//                reject(e);
-//            }
-//        },
-//        (xhr, resolve, reject) => { 
-//            //Should never be called
-//            reject(); 
-//        },
-//        (xhr, resolve, reject) => { 
-//            alert("We were unable to submit your file. Please refresh the page and try again.");
-//            reject(); 
-//        }
-//    );
-//    return checkFileExists;
-//}
-
-//function createPollServerOperation(progressModal) {
-//    //const progressModal = new ProgressModal("Converting your file...", "You canceled the file conversion.", true);
-//    const pollServer = new FileOperation (
-//        //new Ajax(`/checkConversion/${thisModelName}/${thisOwner}`),
-//        (xhr, resolve, reject) => {
-//            if (xhr.responseText === 'glmError') {
-//                alert('The glm file used is incorrectly formatted.');
-//                reject();
-//            } else if (xhr.responseText === 'milError') {
-//                alert('The .std and .seq files used are incorrectly formatted.');
-//                reject();
-//            } else {
-//                try {
-//                    const data = JSON.parse(xhr.responseText);
-//                    if (data.exists === false) {
-//                        //alert('Conversion complete.');
-//                        reloadWrapper();
-//                        /** The progressModal seems to disappear prematurely, but it actually lasts the correct amount of time.
-//                         * After the reload occurs and the success function executes, the progressModal is hidden by design. It's
-//                         * just that the reload itself takes a long time, which is why the progressModal seems to disappear early.
-//                         */
-//                        resolve();
-//                    } else {
-//                        reject("in progress");
-//                    }
-//                } catch (e) {
-//                    reject(e);
-//                }
-//            }
-//        },
-//        (xhr, resolve, reject) => {
-//            reject("canceled");
-//        },
-//        (xhr, resolve, reject) => {
-//            alert("We were unable to convert your file. Please refresh the page and try again.");
-//            reject();
-//        },
-//        progressModal
-//    );
-//}
 
 //**************************************************
 // Edit menu interface
@@ -3338,182 +2656,6 @@ async function renameFeeder() {
 	} 
 }
 
-
-
-//**************************************************
-// File interface v2
-//**************************************************
-
-//function submitForm(inputId, formId) {
-//    const fileName = document.getElementById(inputId).value;
-//    const checkFileExists = getCheckFileOperation(fileName);
-//    const formElement = document.getElementById(formId);
-//    const formData = new FormData(formElement);
-//    const url = formElement.action;
-//    const submitForm = new FileOperation
-//    (
-//        new Ajax(url, "POST", formData),
-//        (xhr, resolve, reject) => {
-//            if (formId === "blankFeederForm") {
-//                reloadWrapper();
-//            }
-//            resolve();
-//        },
-//        (xhr, resolve, reject) => {
-//            //Likely shouldn't be called 
-//            reject("canceled");
-//        },
-//        (xhr, resolve, reject) => {
-//            alert("We were unable to submit your file. Please refresh the page and try again.");
-//            reject();
-//        },
-//        //Server code is such that it isn't currently possible to truly cancel a "new blank feeder" request
-//        new ProgressModal("Submitting your file...", "", false)
-//    );
-//    const pollServer = new FileOperation
-//    (
-//        new Ajax(`/checkConversion/${thisModelName}/${thisOwner}`),
-//        (xhr, resolve, reject) => {
-//            if (xhr.responseText === 'glmError') {
-//                alert('The glm file used is incorrectly formatted.');
-//                reject();
-//            } else if (xhr.responseText === 'milError') {
-//                alert('The .std and .seq files used are incorrectly formatted.');
-//                reject();
-//            } else {
-//                try {
-//                    const data = JSON.parse(xhr.responseText);
-//                    if (data.exists === false) {
-//                        //alert('Conversion complete.');
-//                        reloadWrapper();
-//                        /** The progressModal seems to disappear prematurely, but it actually lasts the correct amount of time.
-//                         * After the reload occurs and the success function executes, the progressModal is hidden by design. It's
-//                         * just that the reload itself takes a long time, which is why the progressModal seems to disappear early.
-//                         */
-//                        resolve();
-//                    } else {
-//                        reject("in progress");
-//                    }
-//                } catch (e) {
-//                    reject(e);
-//                }
-//            }
-//        },
-//        (xhr, resolve, reject) => {
-//            reject("canceled");
-//        },
-//        (xhr, resolve, reject) => {
-//            alert("We were unable to convert your file. Please refresh the page and try again.");
-//            reject();
-//        },
-//        new ProgressModal("Converting your file...", "You canceled the file conversion.", true)
-//    );
-//    return checkFileExists.start().then(function() {
-//        return submitForm.start();
-//    }).then(function() {
-//        pollServer.progressModal.show();
-//        return new Promise((resolve, reject) => {
-//            const intervalId = window.setInterval(function() {
-//                pollServer.start().then(
-//                    () => {
-//                        //Should never be called
-//                        window.clearInterval(intervalId);
-//                        resolve(); 
-//                    },
-//                    (rejectionReason) => {
-//                        pollServer.progressModal.show();
-//                        if (rejectionReason === "canceled") {
-//                            window.clearInterval(intervalId);
-//                            reject("canceled");
-//                        } else if (rejectionReason !== "in progress") {
-//                            window.clearInterval(intervalId);
-//                            reject();
-//                        }
-//                    });
-//            }, 5000);
-//        });
-//    }).catch(function(rejectionReason) {
-//        //Server code is such that it isn't possible to truly cancel a file conversion. Load a new blank feeder instead.
-//        if (rejectionReason === "canceled") {
-//            const formElement = document.getElementById("blankFeederForm");
-//            const formData = new FormData(formElement);
-//            const url = formElement.action;
-//            const submitForm = new FileOperation
-//            (
-//                new Ajax(url, "POST", formData),
-//                (xhr, resolve, reject) => {
-//                    reloadWrapper();
-//                    //resolve(); Don't resolve because
-//                },
-//                (xhr, resolve, reject) => {
-//                    //Likely shouldn't be called 
-//                    reject("canceled");
-//                },
-//                (xhr, resolve, reject) => {
-//                    alert("We were unable to submit your file. Please refresh the page and try again.");
-//                    reject();
-//                },
-//                //Server code is such that it isn't currently possible to truly cancel a "new blank feeder" request
-//                new ProgressModal("Submitting your file...", "", false)
-//            );
-//            submitForm.start();
-//        }
-//    });
-//}
-
-/** It's inefficeint to convert both feeders to strings and compare them. On the other hand, this strategy guarantees
- * no unsaved changes will be missed.
- */
-//function renameFeeder() {
-//	if (JSON.stringify(readFeeder) !== JSON.stringify(writeFeeder)){
-//		alert('You have unsaved changes. Please save the feeder before proceeding.')
-//	}
-//	else {
-//		let newName = prompt("Rename the feeder to", `${thisFeederName}`);
-//		while (! /^[\w\s]+$/.test(newName) || /^\s+$/.test(newName)){
-//			newName = prompt("Only letters, digits and underscore are allowed.\nPlease enter a different name", `${thisFeederName}`);
-//		}
-//		if (newName){
-//            const checkFileExists = getCheckFileOperation(newName);
-//            const renameFile = new FileOperation
-//            (
-//                new Ajax(`/renameFeeder/${thisOwner}/${thisModelName}/${thisFeederName}/${newName}/${thisFeederNum}`),
-//                (xhr, resolve, reject) => {
-//                    alert("Feeder file was successfully renamed.");
-//                    thisFeederName = newName;
-//                    resolve();
-//                },
-//                (xhr, resolve, reject) => {
-//                    //Should never be called
-//                    reject();
-//                },
-//                (xhr, resolve, reject) => {
-//                    alert("We were unable to rename your file.");
-//                    reject();
-//                }
-//            );
-//            return checkFileExists.start().then(function() {
-//                return renameFile.start();
-//            }).catch(function() {
-//                //Should never be called, unless there was a bad ajax request
-//            });
-//		}
-//	}
-//}
-
-/**
- * Save the modified feeder data by overwriting the existing .omd file in the server. The return statement is for integration tests.
- */
-//function saveFeeder() {
-//    const saveFile = getSaveFileOperation(writeFeeder);
-//    return saveFile.start().catch(function(rejectionReason) {
-//        if (rejectionReason === "canceled") {
-//            const undoSave = getSaveFileOperation(readFeeder);
-//            undoSave.start();
-//        }
-//    });
-//}
-
 //ADD PROMPT TO SAVE CHANGES BEFORE EXIT
 {% if is_admin or not public %}
 	window.onbeforeunload = function(e) {
@@ -3536,82 +2678,6 @@ function reloadWrapper() {
     */
     window.location.reload(true);
 }
-
-function FileOperation(ajax, success, cancel, failure, progressModal) {
-    if (!(ajax instanceof Ajax) || (progressModal && !(progressModal instanceof ProgressModal)))
-        throw new Error("Arguments must be instances of Ajax and ProgressModal constructor functions");
-    this.ajax = ajax;
-    this.success = success;
-    this.cancel = cancel;
-    this.failure = failure;
-    this.canceled = false;
-    if (progressModal) {
-        this.progressModal = progressModal;
-        this.progressModal.button.onclick = () => {
-            if (confirm("Are you sure you want to cancel this operation?")) {
-                this.canceled = true;
-                this.progressModal.header.textContent = this.progressModal.cancelMessage;
-                this.progressModal.button.removeAttribute("onclick");
-                this.progressModal.button.style.display = "none";
-            }
-        }
-    }
-}
-
-FileOperation.prototype.start = function() {
-    if (this.progressModal)
-        this.progressModal.show();
-    return new Promise((resolve, reject) => {
-        this.ajax.send().then(
-           (xhr) => {
-                if (this.canceled) {
-                    this.cancel(xhr, resolve, reject);
-                } else {
-                    this.success(xhr, resolve, reject);
-                }
-                if (this.progressModal !== undefined) {
-                    this.progressModal.hide();            
-                }
-            },
-            (xhr) => {
-                this.failure(xhr, resolve, reject);
-                if (this.progressModal) {
-                    this.progressModal.hide();            
-                }
-            }
-        )
-    });
-};
-
-function Ajax(url, httpMethod="GET", formData) {
-    if (httpMethod == "POST" && !(formData instanceof FormData))
-        throw new Error("formData must be an instance of FormData");
-    this.url = url;
-    this.httpMethod = httpMethod;
-    this.formData = formData;
-};
-
-Ajax.prototype.send = function() {
-    return new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open(this.httpMethod, this.url);
-        xhr.onload = function() {
-            if (this.status >= 200 && this.status < 400) {
-                resolve(xhr);
-            } else {
-                reject(xhr); 
-            }
-        };
-        xhr.onerror = function() {
-            reject(xhr);
-        };
-        if (this.httpMethod == "POST" && this.formData) {
-            xhr.send(this.formData);
-        } else {
-            xhr.send();
-        }
-    });
-};
 
 function ProgressModal(message, cancelMessage, showButton) {
     this.self = document.getElementById("progressModal");
@@ -4410,65 +3476,9 @@ function canAddToFeederTree(treeObject) {
 	}
 }
 
-//function canAddToFeederNodes(treeObject) {
-//	if (writeFeeder.nodes.some(obj => obj.treeIndex && obj.treeIndex.toString() === treeObject.key)) {
-//		throw ("writeFeeder.nodes insertion error: cannot insert object into writeFeeder.nodes. " +
-//			"writeFeeder.nodes already contains an object with treeIndex: " + treeObject.key);
-//	} else {
-//		return true;
-//	}
-//}
-
-//function canAddToFeederLinks(treeObject) {
-//	if (writeFeeder.links.some(obj => obj.treeIndex && obj.treeIndex.toString() === treeObject.key)) {
-//		throw ("writeFeeder.links insertion error: cannot insert object into writeFeeder.links." +
-//		"writeFeeder.links already contains an object with treeIndex: " + treeObject.key);
-//	} else {
-//		return true;
-//	}
-//}
-
 function addToFeederTree(treeObject) {
 	writeFeeder.tree[treeObject.key] = treeObject.data;
 }
-
-//function addToFeederNodes(treeObject) {
-//	const node = {
-//		index: writeFeeder.nodes.length,
-//		treeIndex: parseInt(treeObject.key, 10),
-//		weight: 1,
-//		px: treeObject.data.longitude, 
-//		py: treeObject.data.latitude, 
-//		objectType: treeObject.data.object,
-//		x: treeObject.data.longitude, 
-//		y: treeObject.data.latitude, 
-//		fixed: true,
-//		chargeMultiple: 1,
-//		name: treeObject.data.name
-//	};
-//	writeFeeder.nodes.push(node);
-//}
-
-//function addToFeederLinks(treeObject) {
-//	let link;
-//	if (isParentChildNode(treeObject)) {
-//		// I am adding a link that represent the link between THIS TreeObject and its parent
-//		link = {
-//			source: writeFeeder.nodes.find(obj => obj.name === treeObject.data.name),
-//			target: writeFeeder.nodes.find(obj => obj.name === treeObject.data.parent),
-//			objectType: "parentChild"
-//		}
-//	} else {
-//		// I am adding a link that represents THIS TreeObject.
-//		link = {
-//			source: writeFeeder.nodes.find(obj => obj.name === treeObject.data.from),
-//			objectType: "fromTo",
-//			treeIndex: treeObject.key,
-//			target: writeFeeder.nodes.find(obj => obj.name === treeObject.data.to)
-//		};
-//	}
-//	writeFeeder.links.push(link);
-//}
 
 /**
  * Return a key value which has not been used in tree.
@@ -4625,12 +3635,6 @@ function addLineNew(line) {
     }, 2000);
     */
 })();
-
-//**************************************************
-// Edit menu ported functions
-//**************************************************
-
-
 
 </script>
 <!--<script type='text/javascript' src='/static/distDataValidation.js'></script>-->
