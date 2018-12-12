@@ -796,25 +796,25 @@ def cymeImport(owner):
 	feederName = str(request.form.get("feederNameC",""))
 	feederNum = request.form.get("feederNum",1)
 	modelFolder = "data/Model/"+owner+"/"+modelName
-	mdbNetString = request.files["mdbNetFile"]
+	mdbFileObject = request.files["mdbNetFile"]
 	# Saves .mdb files to model folder
-	mdbNetString.save(os.path.join(modelFolder,mdbNetString.filename))
+	mdbFileObject.save(os.path.join(modelFolder,mdbFileObject.filename))
 	if os.path.isfile("data/Model/"+owner+"/"+modelName+"/gridError.txt"):
 		os.remove("data/Model/"+owner+"/"+modelName+"/gridError.txt")
-	importProc = Process(target=cymeImportBackground, args=[owner, modelName, feederName, feederNum, mdbNetString.filename])
+	importProc = Process(target=cymeImportBackground, args=[owner, modelName, feederName, feederNum, mdbFileObject.filename])
 	importProc.start()
 	pid = str(importProc.pid)
 	with open(modelFolder+"/ZPID.txt", "w+") as outFile:
 		outFile.write(pid)
 	return ('',204)
 
-def cymeImportBackground(owner, modelName, feederName, feederNum, mdbNetString):
+def cymeImportBackground(owner, modelName, feederName, feederNum, mdbFileName):
 	''' Function to run in the background for Milsoft import. '''
 	modelDir = "data/Model/"+owner+"/"+modelName+"/"
 	feederDir = modelDir+"/"+feederName+".omd"
 	newFeeder = dict(**feeder.newFeederWireframe)
-	print mdbNetString
-	newFeeder["tree"] = cymeToGridlab.convertCymeModel(mdbNetString, modelDir)
+	print mdbFileName
+	newFeeder["tree"] = cymeToGridlab.convertCymeModel(modelDir + mdbFileName, modelDir)
 	with open("./static/schedules.glm","r") as schedFile:
 		newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
 	try: os.remove(feederDir)
