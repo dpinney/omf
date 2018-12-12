@@ -953,8 +953,8 @@ function downloadTextFile() {
 function addCircle(x,y,r,id,myClass) {
 	const svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0];
 	const aCirc = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-	aCirc.setAttribute('cx', x);
-	aCirc.setAttribute('cy', y);
+	aCirc.setAttribute('cx', x - globalLonOffset);
+	aCirc.setAttribute('cy', y - globalLatOffset);
 	aCirc.setAttribute('r', r);
 	aCirc.setAttribute('id', id);
 	aCirc.setAttribute('class', myClass);
@@ -972,10 +972,10 @@ function addCircle(x,y,r,id,myClass) {
 function addLine(x1, y1, x2, y2, id, myClass) {
 	const svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0];
 	const aLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-	aLine.setAttribute('x1', x1);
-	aLine.setAttribute('y1', y1);
-	aLine.setAttribute('x2', x2);
-	aLine.setAttribute('y2', y2);
+	aLine.setAttribute('x1', x1 - globalLonOffset);
+	aLine.setAttribute('y1', y1 - globalLatOffset);
+	aLine.setAttribute('x2', x2 - globalLonOffset);
+	aLine.setAttribute('y2', y2 - globalLatOffset);
 	aLine.setAttribute('id', id);
 	aLine.setAttribute('class', myClass);
 	let w;
@@ -1026,7 +1026,9 @@ function createViewport(treeWrapper, svgContainer) {
     let maxLon = minLon;
     let minLat = parseFloat(tree[firstKey].latitude);
     let maxLat = minLat;
-    // Find the minimum and maximum longitudes and latitudes
+    /* Find the minimum and maximum longitudes and latitudes. That's not good enough. I need to find a RANGE of values
+    for each and scale the viewport to the RANGE
+    */
     keys.forEach(key => {
         let lon = tree[key].longitude;
         let lat = tree[key].latitude;
@@ -1047,19 +1049,11 @@ function createViewport(treeWrapper, svgContainer) {
             }
         }
     });
-    let translatedMaxLon = maxLon;
-    let translatedMaxLat = maxLat;
-    // Offset the longitude and/or latitude if the data contained negative values
-    if (minLon < 0) {
-        translatedMaxLon = maxLon + -minLon;
-        // Whenever we add an svg item, we must translate it because we have adjusted the viewport
-        globalLonOffset = -minLon;
-    }
-    if (minLat < 0) {
-        translatedMaxLat = maxLat + -minLat;
-        // Whenever we add an svg item, we must translate it because we have adjusted the viewport
-        globalLatOffset = -minLat;
-    }
+    //const translatedMaxLon = maxLon - minLon;
+    const translatedMaxLon = (maxLon - minLon);
+    globalLonOffset = minLon;
+    const translatedMaxLat = maxLat - minLat;
+    globalLatOffset = minLat;
     // Create the viewport
     svgContainer.setAttribute('viewBox',`0 0 ${translatedMaxLon} ${translatedMaxLat}`);
 	window.panZoom = svgPanZoom('#svgContainer', {
@@ -1934,11 +1928,10 @@ I don't think this updates the data correctly. It updates writeFeeder.tree, but 
 */
 function moveNodeListener() {
 	let clickedNode = writeFeeder.tree[lastElementSelected.id];
-	// Lat and Lon are reversed, but the function was originally written this way...
-	const newLat = clickLatLon(event).y;
-	const newLon = clickLatLon(event).x
-	//let newLat = clickLatLon(event)[1];
-	//let newLon = clickLatLon(event)[0];
+	//const newLat = clickLatLon(event).y;
+    //const newLon = clickLatLon(event).x
+    const newLat = clickLatLon(event).y + globalLatOffset; //store the real lat. Add back the offset when storing data. Subtract it when rendering
+    const newLon = clickLatLon(event).x + globalLonOffset; //store the real lon. Add back the offset when storing data. Subtract it when rendering
 	clickedNode["latitude"] = newLat;
 	clickedNode["longitude"] = newLon;
 	// This value can be undefined when the node isn't connected to anything. Is that a problem?!? yep.
@@ -1946,7 +1939,13 @@ function moveNodeListener() {
 	const connectedLineKeys = getConnectedLineKeys(clickedNode);
 	if (connectedLineKeys.length === 0 && clickedNode.parent === undefined) {
 		document.getElementById(lastElementSelected.id).remove();
-		addCircle(newLon,newLat,2,lastElementSelected.id,writeFeeder.tree[lastElementSelected.id].object);
+		addCircle(
+            newLon,
+            newLat,
+            2,
+            lastElementSelected.id,
+            writeFeeder.tree[lastElementSelected.id].object
+        );
 	} else {
 		//Runs through writeFeeder lines (links) determines if clicked node is an end or target for any line in writeFeeder
 		for (let num in writeFeeder.tree) {
@@ -1954,11 +1953,30 @@ function moveNodeListener() {
 			// Move line between clicked node and its treeOb child. This is checking if clickedNode HAS children
 			if (treeOb.parent == clickedNode.name) {
 				document.getElementById(clickedNode.name + "_" + treeOb.name).remove()
-				addLine(newLon,newLat,treeOb.longitude,treeOb.latitude,clickedNode.name + "_" + treeOb.name,'parentChild')
+				addLine(
+                    newLon,
+                    newLat,
+                    treeOb.longitude,
+                    treeOb.latitude,
+                    clickedNode.name + "_" + treeOb.name,
+                    'parentChild'
+                );
 				document.getElementById(num).remove()
-				addCircle(treeOb.longitude,treeOb.latitude,2,num,treeOb.object)
+                addCircle(
+                    treeOb.longitude,
+                    treeOb.latitude,
+                    2,
+                    num,
+                    treeOb.object
+                );
 				document.getElementById(lastElementSelected.id).remove()
-				addCircle(newLon,newLat,2,lastElementSelected.id,clickedNode.object)
+				addCircle(
+                    newLon,
+                    newLat,
+                    2,
+                    lastElementSelected.id,
+                    clickedNode.object
+                );
 			}
 			/* Move line between clicked node and its treeOb parent (if it is a child). 
 			I found an object in writeFeeder.tree that is 1) NOT a line 2) is the parent of the currently selected node.
@@ -1968,13 +1986,32 @@ function moveNodeListener() {
 				concatenation of their names, and I want to remove that line. Yep.
 				*/
 				document.getElementById(treeOb.name + "_" + clickedNode.name).remove()
-				addLine(newLon,newLat,treeOb.longitude,treeOb.latitude,treeOb.name + "_" + clickedNode.name,'parentChild')
+				addLine(
+                    newLon,
+                    newLat,
+                    treeOb.longitude,
+                    treeOb.latitude,
+                    treeOb.name + "_" + clickedNode.name,
+                    'parentChild'
+                );
 				//Remove the parent node? Oh maybe to redraw it on top of the new line.
 				document.getElementById(num).remove()
-				addCircle(treeOb.longitude,treeOb.latitude,2,num,treeOb.object)
+				addCircle(
+                    treeOb.longitude,
+                    treeOb.latitude,
+                    2,
+                    num,
+                    treeOb.object
+                );
 				//Remove the current node and redraw it where it's supposed to go.
 				document.getElementById(lastElementSelected.id).remove()
-				addCircle(newLon,newLat,2,lastElementSelected.id,clickedNode.object)
+				addCircle(
+                    newLon,
+                    newLat,
+                    2,
+                    lastElementSelected.id,
+                    clickedNode.object
+                );
 			}
 			if (treeOb.from !== undefined && treeOb.to !== undefined) {
 				// Move all lines from or to the clicked node.
@@ -2003,19 +2040,44 @@ function moveNodeListener() {
 							myClasst = writeFeeder.tree[subEl].object
 						}
 					}
-					addLine(x1, y1, x2, y2, num, treeOb['object'] + ' p' + countPhases(treeOb['phases']))
+                    addLine(
+                        x1,
+                        y1,
+                        x2,
+                        y2,
+                        num,
+                        treeOb['object'] + ' p' + countPhases(treeOb['phases'])
+                    );
 					// Redraw nodes after line so they aren't below the newly drawn lines. Up to 3 nodes for case where we are moving node between 2 from-to lines.
 					if (treeOb.from == clickedNode.name) {
-						addCircle(x2,y2,2,numt,myClasst)
+						addCircle(
+                            x2,
+                            y2,
+                            2,
+                            numt,
+                            myClasst
+                        );
 						document.getElementById(numt).remove()
 					}
 					if (treeOb.to == clickedNode.name) {
-						addCircle(x1,y1,2,numf,myClassf)
+						addCircle(
+                            x1,
+                            y1,
+                            2,
+                            numf,
+                            myClassf
+                        );
 						document.getElementById(numf).remove()
 					}
 					// Finally, draw the clicked node in its new location. Leave this bit here. Other moving functions go inside.
 					document.getElementById(lastElementSelected.id).remove()
-					addCircle(newLon,newLat,2,lastElementSelected.id,writeFeeder.tree[lastElementSelected.id].object)
+					addCircle(
+                        newLon,
+                        newLat,
+                        2,
+                        lastElementSelected.id,
+                        writeFeeder.tree[lastElementSelected.id].object
+                    );
 				}
 			}
 		}
@@ -2316,11 +2378,30 @@ function newChildAtLocation(component, parentKey) {
 		// Put the component in the tree with a new name.
 		tree[newTreeKey] = component;
         tree[newTreeKey].name = newName;
-        addLine(parentTreeObj.longitude, parentTreeObj.latitude, component.longitude, component.latitude, parentTreeObj.name + "_" + component.name, "parentChild");
-        addCircle(component.longitude, component.latitude, 2, newTreeKey, component.object);
+        addLine(
+            parentTreeObj.longitude,
+            parentTreeObj.latitude,
+            component.longitude,
+            component.latitude,
+            parentTreeObj.name + "_" + component.name,
+            "parentChild"
+        );
+        addCircle(
+            component.longitude,
+            component.latitude,
+            2,
+            newTreeKey,
+            component.object
+        );
         // Redraw the parent on top
         document.getElementById(parentKey).remove();
-        addCircle(parentTreeObj.longitude, parentTreeObj.latitude, 2, parentKey, parentTreeObj.object);
+        addCircle(
+            parentTreeObj.longitude,
+            parentTreeObj.latitude,
+            2,
+            parentKey,
+            parentTreeObj.object
+        );
         scaleTo(scaleLevel);
 	} else {
         console.log("Cannot insert child at location because its defined parent doesn't have longitude and latitude!");
@@ -3967,10 +4048,10 @@ function createSvgCircle(key, {longitude, latitude, object}, {r = 2, strokeWidth
     longitude = parseFloat(longitude);
     latitude = parseFloat(latitude);
     if (globalLonOffset !== null) {
-        longitude += globalLonOffset;
+        longitude -= globalLonOffset;
     }
     if (globalLatOffset !== null) {
-        latitude += globalLatOffset;
+        latitude -= globalLatOffset;
     }
     circle.setAttribute('cx', longitude);
     circle.setAttribute('cy', latitude);
@@ -3997,12 +4078,12 @@ function createSvgLine(sourceNode, targetNode, key, thisObject) {
     let targetLon = parseFloat(targetNode.longitude);
     let targetLat = parseFloat(targetNode.latitude); 
     if (globalLonOffset !== null) {
-        sourceLon += globalLonOffset;
-        targetLon += globalLonOffset;
+        sourceLon -= globalLonOffset;
+        targetLon -= globalLonOffset;
     }
     if (globalLatOffset !== null) {
-        sourceLat += globalLatOffset;
-        targetLat += globalLatOffset;
+        sourceLat -= globalLatOffset;
+        targetLat -= globalLatOffset;
     }
     svgLine.setAttribute("x1", sourceLon); 
     svgLine.setAttribute("x2", targetLon);
@@ -4311,8 +4392,8 @@ function setCoordinates(treeObject) {
 		treeObject.data.longitude = parentTreeObject.data.longitude + Math.random() * 10 - 5;
 	} else if (isParentlessNode(treeObject.data)) {
 		const coords = clickLatLon(event);
-		treeObject.data.latitude = coords.y;
-		treeObject.data.longitude = coords.x;
+		treeObject.data.latitude = coords.y + globalLatOffset;
+		treeObject.data.longitude = coords.x + globalLonOffset;
 	}
 }
 
@@ -4484,8 +4565,8 @@ function addCircleNew(circle) {
 		throw "circle argument must be an instance returned by the Circle constructor function";
 	}
 	const svgCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-	svgCircle.setAttribute("cx", circle.cx);
-	svgCircle.setAttribute("cy", circle.cy);
+	svgCircle.setAttribute("cx", circle.cx - globalLonOffset);
+	svgCircle.setAttribute("cy", circle.cy - globalLatOffset);
 	svgCircle.setAttribute("r", circle.r);
 	svgCircle.setAttribute("id", circle.id);
 	svgCircle.setAttribute("class", circle.domClass);
@@ -4499,10 +4580,10 @@ function addLineNew(line) {
 		throw "line argument must be an instance returned by the Line constructor function";
 	}
 	const svgLine = document.createElementNS('http://www.w3.org/2000/svg', 'line'); 
-	svgLine.setAttribute("x1", line.x1);
-	svgLine.setAttribute("y1", line.y1);
-	svgLine.setAttribute("x2", line.x2);
-	svgLine.setAttribute("y2", line.y2);
+	svgLine.setAttribute("x1", line.x1 - globalLonOffset);
+	svgLine.setAttribute("y1", line.y1 - globalLatOffset);
+	svgLine.setAttribute("x2", line.x2 - globalLonOffset);
+	svgLine.setAttribute("y2", line.y2 - globalLatOffset);
 	svgLine.setAttribute("id", line.id);
 	svgLine.setAttribute("class", line.domClass);
 	svgLine.setAttribute("stroke-width", line.strokeWidth);
