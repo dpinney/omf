@@ -320,11 +320,7 @@
             }
             .deleteButton {
                 background-color: #CC0000;
-                padding: 1px 7px 1px 7px;
-            }
-            .editButton {
-                font-size: small;
-                /*width: 100%;*/
+                /*padding: 1px 7px 1px 7px;*/
             }
 
 			/* descriptionTable */
@@ -410,8 +406,8 @@
 					<div class="buttonGroup">
                         <button id="addOps" class='pill' onclick='dropPill(this, "Edit")'>Edit &#x25BE;</button>
                         <ul id = "editMenu" class='menu right' style="display: none">
-                            <li>Zoom To Fit</li>
-                            <li>Zoom Reset</li>
+                            <!--<li>Zoom To Fit</li>-->
+                            <!--<li>Zoom Reset</li>-->
                             <li>Static Loads to Houses</li>
                             <li>Scada Loadshapes...</li>
                             <li>Add AMI Profiles...</li>
@@ -784,7 +780,7 @@
                 </table>
             </div>
         </div>
-        <!--
+
         <div id='attachmentsModal' class='modal' style="display: none">
             <div class='modalContent'>
                 <table>
@@ -820,7 +816,7 @@
                 </table>
             </div>
         </div>
-        -->
+
         <div id='climateModal' class='modal' style="display: none">
             <div class='modalContent'>
                 <form onsubmit="submitForm({formId:'climateForm', pollUrl:'/checkClimateChange/{{thisOwner}}/{{thisModelName}}'}); return false;"
@@ -881,10 +877,10 @@
 				<tr id="multiButtonRow">
                     <th colspan="3">
                         <!-- should only be visible when the table is showing a node, NOT a line -->
-                        <button id="moveButton" onclick="moveNode()" class="modalButton editButton">Move</button>
-                        <button id="deleteButton" onclick="deleteObject(previousTarget.id)" class="modalButton editButton">Delete</button>
-                        <button id="addButton" onclick="tablePlus()" class="modalButton editButton">Add Attribute</button>
-                        <button onclick="tableSave(previousTarget)" class="modalButton editButton">Save</button>
+                        <button id="moveButton" onclick="moveNode()" class="modalButton">Move</button>
+                        <button id="deleteButton" onclick="deleteObject(previousTarget.id)" class="modalButton deleteButton">Delete</button>
+                        <button id="addButton" onclick="tablePlus()" class="modalButton">Add Attribute</button>
+                        <button onclick="tableSave(previousTarget)" class="modalButton">Save</button>
                     </th>
 				</tr>
             </thead>
@@ -1379,10 +1375,12 @@ Am I sure that everything is being completely removed from the entire data model
 */
 function deleteObject(key) { 
     const tree = globalTreeWrapper.tree;
+    const names = globalTreeWrapper.names;
     if (tree[key].hasOwnProperty("from") && tree[key].hasOwnProperty("to")) {
         // Delete Lines 
         //remove the line from the svg
         document.getElementById(key).remove();
+        delete names[tree[key].name];
         delete tree[key];
         //writeFeeder.tree[previousTarget.id] = {}
     } else {
@@ -1398,6 +1396,7 @@ function deleteObject(key) {
                 const lineId = `${tree[key].parent}_${tree[key].name}`;
                 document.getElementById(lineId).remove();
             } 
+            delete names[tree[key].name];
             delete tree[key];
         }
     }
@@ -1834,6 +1833,7 @@ function isNullOrUndefined(obj) {
  function applyJQueryStyles() {
     // Make stuff draggable
     $("#findModal .modalContent").draggable();
+    $("#progressModal .modalContent").draggable();
     $("#loadModal .modalContent").draggable();
     $("#blankFeederModal .modalContent").draggable();
     $("#milsoftModal .modalContent").draggable();
@@ -1843,6 +1843,7 @@ function isNullOrUndefined(obj) {
     $("#amiModal .modalContent").draggable();
     $("#massAddModal .modalContent").draggable();
     $("#massEditModal .modalContent").draggable();
+    $("#attachmentsModal .modalContent").draggable();
     $("#descriptionTable").draggable();
     // Position the description table depending on whether or not it is draggable
     document.getElementById("descriptionTable").removeAttribute("style");
@@ -2060,29 +2061,29 @@ function addFileMenuHandlers() {
 function addEditMenuHandlers() {
     const menu = document.getElementById("editMenu");
     const items = Array.from(menu.children);
-    if (items.length != 11) {
+    if (items.length != 9) {
         throw new Error("Please update this function to ensure the correct handlers are attached");
     }
-    items[0].addEventListener("click", zoomToFit);
-    items[1].addEventListener("click", zoomReset);
-    //items[2].addEventListener("click", staticLoadsToHouses);
-    items[3].addEventListener("click", function() { toggleElementDisplay("scadaModal"); });
-    items[4].addEventListener("click", function() { toggleElementDisplay("amiModal"); });
-    items[5].addEventListener("click", function() { toggleElementDisplay("findModal"); });
-    items[6].addEventListener("click", function() {
+    //items[0].addEventListener("click", zoomToFit);
+    //items[1].addEventListener("click", zoomReset);
+    items[0].addEventListener("click", staticLoadsToHouses);
+    items[1].addEventListener("click", function() { toggleElementDisplay("scadaModal"); });
+    items[2].addEventListener("click", function() { toggleElementDisplay("amiModal"); });
+    items[3].addEventListener("click", function() { toggleElementDisplay("findModal"); });
+    items[4].addEventListener("click", function() {
         updateAttachTargets("massAddTargetSelect", globalTreeWrapper.tree);
         toggleElementDisplay("massAddModal");
     });
-    items[7].addEventListener("click", function() {
+    items[5].addEventListener("click", function() {
         updateAttachTargets("massEditTargetSelect", globalTreeWrapper.tree);
         toggleElementDisplay("massEditModal");
     });
-    //items[8].addEventListener("click", function() {
+    items[6].addEventListener("click", function() {
     //    getattachmentslist()
-    //    toggleElementDisplay("attachmentsModal");
-    //});
-    items[9].addEventListener("click", function() { toggleElementDisplay("climateModal"); });
-    //items[10].addEventListener("click", function() { toggleElementDisplay("anonymizeModal"); });
+        toggleElementDisplay("attachmentsModal");
+    });
+    items[7].addEventListener("click", function() { toggleElementDisplay("climateModal"); });
+    //items[8].addEventListener("click", function() { toggleElementDisplay("anonymizeModal"); });
 }
 
 /** If an element isn't displayed, set it's inline display value to the default browser value.
@@ -2115,17 +2116,17 @@ function toggleElementDisplay(id) {
 /**
  * Set the viewport to its initial state and center it
  */
- function zoomReset() {
-    panZoom.fit();
-    panZoom.center();
-}
+//function zoomReset() {
+//    panZoom.fit();
+//    panZoom.center();
+//}
 
 /**
  * Set the viewport value to its initial state.
  */
-function zoomToFit() {
-    panZoom.fit();
-}
+//function zoomToFit() {
+//    panZoom.fit();
+//}
 
 function randomGaussian() {
   // Get a Gaussian from a uniform(0,1) via the Box-Muller transform.
@@ -2155,20 +2156,66 @@ function randomChoice(inList) {
 	return inList[Math.floor(Math.random() * inList.length)]
 }
 
-//Table this for now
+
+// TODO: for secondary system has 'load', replace it with triplex_meter and triplex_node
+// TODO: rename this function?
 function staticLoadsToHouses() {
-	// TODO: for secondary system has 'load', replace it with triplex_meter and triplex_node
-    let tkeys = Object.keys(globalTreeWrapper.tree);
-    let modal = new ProgressModal("Please wait. Houses are being generated.", "", false);
-	if (noTriplexNode()) {
-		alert('TRIPLEX NODES have been hidden by the layout, please unfold them first.')
+    const tree = globalTreeWrapper.tree;
+    const names = globalTreeWrapper.names;
+	if (!containsTriplexNodes(tree)) {
+        alert("There are no triplex nodes in this model");
+        return;
 	} else {
+        let modal = new ProgressModal("Please wait. Houses are being generated.", "", false);
         modal.show();
-		// set interval function to run replaceAllHouses every 10 ms, if it is running, will put one request in the queue.
-        //inter = setInterval(replaceAllHouses, 10)
-        replaceAllHouses();
-        modal.hide();
-		//showProgressDialog('bar','Please wait. Houses are being generated.','none')
+        // Replace 100 nodes at a time (maximum), to prevent the browser from hanging
+        const keys = Object.keys(tree);
+        let start = 0;
+        let end = 100;
+        const intervalId = setInterval(function() {
+            //console.log("start: " + start);
+            //console.log("end: " + end);
+            replaceAllHouses(start, end, keys);
+            if (end >= keys.length) {
+                clearInterval(intervalId);
+                modal.hide();
+            } else {
+                start = end + 1;
+                end += 100;
+            }
+        }, 10);
+    }
+
+    function containsTriplexNodes(tree) {
+        for (let key in tree) {
+            if (tree[key].object === "triplex_node" && tree[key].hasOwnProperty("parent")) {
+                return true;
+            } 
+        }   
+        return false;
+    }
+
+	function replaceAllHouses(start, end, keys) {
+        if (end >= keys.length) {
+            end = keys.length - 1;
+        }
+        for (let i = start; i <= end; i++) {
+            if (tree[keys[i]].hasOwnProperty('parent') && tree[keys[i]].object === "triplex_node") {
+                // Get the key of the parent of this triplex node, which is a triplex meter (i.e. another node)
+                let parentKey = names[tree[keys[i]].parent];
+                // Delete the triplex_node itself
+                deleteObject(keys[i]);
+                // Create a new house object to replace the triplex node
+                let houseObj = randomHouse();
+                let lightsObj = randomLights();
+                let heaterObj = randomWaterHeater();
+                newChildAtLocation(houseObj.house, parentKey);
+                newChildAtLocation(lightsObj.lights, houseObj.key);
+                if (heaterObj != false) {
+                    newChildAtLocation(heaterObj.heater, houseObj.key);
+                }
+            }
+        }
     }
 
 	function randomHouse() {
@@ -2257,49 +2304,6 @@ function staticLoadsToHouses() {
             key: newKey
         }
 	}
-
-	function replaceAllHouses() {
-        const tree = globalTreeWrapper.tree;
-        Object.keys(tree).forEach(treeKey => {
-            if(tree[treeKey].object === "house") {
-                // Get key of parent of house (triplex_meter)
-                const parentKey = globalTreeWrapper.names[tree[treeKey].parent];
-                // Delete the house itself
-                deleteObject(treeKey);
-                let houseObj = randomHouse();
-                let lightsObj = randomLights();
-                let heaterObj = randomWaterHeater();
-                // Add a NEW house to the triple_meter
-                newChildAtLocation(houseObj.house, parentKey);
-                // Add stuff to the new house
-                newChildAtLocation(lightsObj.lights, houseObj.key);
-                if (heaterObj != false) {
-                    newChildAtLocation(heaterObj.heater, houseObj.key);
-                }
-                // but what happend to children of the old house that was deleted? They're hanging!
-            }
-        });
-        //redraw the houses on top
-        //Object.keys(tree).forEach(key => {
-        //    if(tree[key].object === "house") {
-        //        const lat = tree[key].latitude;
-        //        const lon = tree[key].longitude;
-        //        document.getElementById(key).remove();
-        //        addCircle(lon, lat, 2, key, "house");
-        //    }
-        //});
-        scaleTo(scaleLevel);
-    }
-
-	function noTriplexNode() {
-        const hiddenNodes = writeFeeder.hiddenNodes;
-        for (let node of hiddenNodes) {
-			if (node.objectType !== undefined && node.objectType === 'triplex_node') {
-				return true;
-            }
-        }
-		return false;
-    }
 }
 
 /** TODO: add better validation for percent to ensure 1) it's a float and 2) it's in a valid range. Do this on the input if possible
@@ -2407,8 +2411,14 @@ function massEdit() {
             break;
         case "multiplyBy":
             const multiplyOperand = parseFloat(document.getElementById("multiplyValue").value);
-            const addOperand = parseFloat(document.getElementById("andAddValue").value);
-            if (isNaN(multiplyOperand) || (addOperand !== "" && isNaN(addOperand))) {
+            const rawAddOperand = document.getElementById("andAddValue").value;
+            let addOperand;
+            if (rawAddOperand === "") {
+                addOperand = 0;
+            } else {
+                addOperand = parseFloat(rawAddOperand);
+            }
+            if (isNaN(multiplyOperand) || isNaN(addOperand)) {
                 alert("Invalid operation. Please enter valid numbers if you choose 'Multiply attribute by'.");
             }
             for (let key of keys) {
@@ -2435,7 +2445,6 @@ function massEditAdd(keys) {
     alert(`${keys.length} ${objectType} objects edited.`);
 }
 
-/*
 function editAttachment(attachment) {
 	document.body.style.cursor = 'wait'
 	setTimeout(function(){
@@ -2446,7 +2455,7 @@ function editAttachment(attachment) {
 		document.body.style.cursor = 'auto'
 	}, 100);
 }
-*/
+
 //**************************************************
 // File menu interface v3
 //**************************************************
@@ -3128,9 +3137,8 @@ function createSvgCircle(key, {longitude, latitude, object}, {r = 2, strokeWidth
  */
 function createSvgLine(sourceNode, targetNode, key, thisObject) {
     const svgLine = document.createElementNS('http://www.w3.org/2000/svg', 'line'); 
-    if (sourceNode.longitude === undefined || sourceNode.latitude === undefined || 
-    targetNode.longitude === undefined || targetNode.latitude === undefined) {
-        console.log(`For line with tree key: "${key}", sourceNode.name was: "${sourceNode.name}",
+    if (sourceNode.longitude === undefined || sourceNode.latitude === undefined || targetNode.longitude === undefined || targetNode.latitude === undefined) {
+        console.log(`For line with tree key: "${key === undefined ? "parentChild" : key}", sourceNode.name was: "${sourceNode.name}",
         sourceNode.longitude was: "${sourceNode.longitude}", sourceNode.latitude was: "${sourceNode.latitude}",
         targetNode.name was: "${targetNode.name}", targetNode.longitude was: "${targetNode.longitude}",
         targetNode.latitude was: "${targetNode.latitude}"`)
