@@ -320,11 +320,7 @@
             }
             .deleteButton {
                 background-color: #CC0000;
-                padding: 1px 7px 1px 7px;
-            }
-            .editButton {
-                font-size: small;
-                /*width: 100%;*/
+                /*padding: 1px 7px 1px 7px;*/
             }
 
 			/* descriptionTable */
@@ -881,10 +877,10 @@
 				<tr id="multiButtonRow">
                     <th colspan="3">
                         <!-- should only be visible when the table is showing a node, NOT a line -->
-                        <button id="moveButton" onclick="moveNode()" class="modalButton editButton">Move</button>
-                        <button id="deleteButton" onclick="deleteObject(previousTarget.id)" class="modalButton editButton">Delete</button>
-                        <button id="addButton" onclick="tablePlus()" class="modalButton editButton">Add Attribute</button>
-                        <button onclick="tableSave(previousTarget)" class="modalButton editButton">Save</button>
+                        <button id="moveButton" onclick="moveNode()" class="modalButton">Move</button>
+                        <button id="deleteButton" onclick="deleteObject(previousTarget.id)" class="modalButton deleteButton">Delete</button>
+                        <button id="addButton" onclick="tablePlus()" class="modalButton">Add Attribute</button>
+                        <button onclick="tableSave(previousTarget)" class="modalButton">Save</button>
                     </th>
 				</tr>
             </thead>
@@ -2414,8 +2410,14 @@ function massEdit() {
             break;
         case "multiplyBy":
             const multiplyOperand = parseFloat(document.getElementById("multiplyValue").value);
-            const addOperand = parseFloat(document.getElementById("andAddValue").value);
-            if (isNaN(multiplyOperand) || (addOperand !== "" && isNaN(addOperand))) {
+            const rawAddOperand = document.getElementById("andAddValue").value;
+            let addOperand;
+            if (rawAddOperand === "") {
+                addOperand = 0;
+            } else {
+                addOperand = parseFloat(rawAddOperand);
+            }
+            if (isNaN(multiplyOperand) || isNaN(addOperand)) {
                 alert("Invalid operation. Please enter valid numbers if you choose 'Multiply attribute by'.");
             }
             for (let key of keys) {
