@@ -780,7 +780,7 @@
                 </table>
             </div>
         </div>
-        <!--
+
         <div id='attachmentsModal' class='modal' style="display: none">
             <div class='modalContent'>
                 <table>
@@ -816,7 +816,7 @@
                 </table>
             </div>
         </div>
-        -->
+
         <div id='climateModal' class='modal' style="display: none">
             <div class='modalContent'>
                 <form onsubmit="submitForm({formId:'climateForm', pollUrl:'/checkClimateChange/{{thisOwner}}/{{thisModelName}}'}); return false;"
@@ -1843,6 +1843,7 @@ function isNullOrUndefined(obj) {
     $("#amiModal .modalContent").draggable();
     $("#massAddModal .modalContent").draggable();
     $("#massEditModal .modalContent").draggable();
+    $("#attachmentsModal .modalContent").draggable();
     $("#descriptionTable").draggable();
     // Position the description table depending on whether or not it is draggable
     document.getElementById("descriptionTable").removeAttribute("style");
@@ -2077,10 +2078,10 @@ function addEditMenuHandlers() {
         updateAttachTargets("massEditTargetSelect", globalTreeWrapper.tree);
         toggleElementDisplay("massEditModal");
     });
-    //items[6].addEventListener("click", function() {
+    items[6].addEventListener("click", function() {
     //    getattachmentslist()
-    //    toggleElementDisplay("attachmentsModal");
-    //});
+        toggleElementDisplay("attachmentsModal");
+    });
     items[7].addEventListener("click", function() { toggleElementDisplay("climateModal"); });
     //items[8].addEventListener("click", function() { toggleElementDisplay("anonymizeModal"); });
 }
@@ -2444,7 +2445,6 @@ function massEditAdd(keys) {
     alert(`${keys.length} ${objectType} objects edited.`);
 }
 
-/*
 function editAttachment(attachment) {
 	document.body.style.cursor = 'wait'
 	setTimeout(function(){
@@ -2455,7 +2455,7 @@ function editAttachment(attachment) {
 		document.body.style.cursor = 'auto'
 	}, 100);
 }
-*/
+
 //**************************************************
 // File menu interface v3
 //**************************************************
@@ -3137,9 +3137,8 @@ function createSvgCircle(key, {longitude, latitude, object}, {r = 2, strokeWidth
  */
 function createSvgLine(sourceNode, targetNode, key, thisObject) {
     const svgLine = document.createElementNS('http://www.w3.org/2000/svg', 'line'); 
-    if (sourceNode.longitude === undefined || sourceNode.latitude === undefined || 
-    targetNode.longitude === undefined || targetNode.latitude === undefined) {
-        console.log(`For line with tree key: "${key}", sourceNode.name was: "${sourceNode.name}",
+    if (sourceNode.longitude === undefined || sourceNode.latitude === undefined || targetNode.longitude === undefined || targetNode.latitude === undefined) {
+        console.log(`For line with tree key: "${key === undefined ? "parentChild" : key}", sourceNode.name was: "${sourceNode.name}",
         sourceNode.longitude was: "${sourceNode.longitude}", sourceNode.latitude was: "${sourceNode.latitude}",
         targetNode.name was: "${targetNode.name}", targetNode.longitude was: "${targetNode.longitude}",
         targetNode.latitude was: "${targetNode.latitude}"`)
