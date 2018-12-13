@@ -460,6 +460,10 @@ def distribution_get(owner, model_name, feeder_num):
 		spec = tests["spec"]
 	all_data = getDataNames()
 	user_feeders = all_data["feeders"]
+	# Must get rid of the 'u' for unicode strings before passing the strings to JavaScript
+	for dictionary in user_feeders:
+		dictionary['model'] = str(dictionary['model'])
+		dictionary['name'] = str(dictionary['name'])
 	public_feeders = all_data["publicFeeders"]
 	# omf.distNetViz.forceLayout()
 	return render_template(
