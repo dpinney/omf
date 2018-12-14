@@ -10,16 +10,16 @@ import voltageViz
 import re
 
 
-filePath = '/Users/tuomastalvitie/Desktop/UCS_Egan_Housed_Solar.omd'
+# filePath = '/Users/tuomastalvitie/Desktop/UCS_Egan_Housed_Solar.omd'
 
 #Parse Command Line
-# parser = argparse.ArgumentParser(description='Converts an OMD to GLM and runs it on gridlabd')
-# parser.add_argument('file_path', metavar='base', type=str,
-#                     help='Path to OMD. Put in quotes.')
-# args = parser.parse_args()
-# filePath = args.file_path
+parser = argparse.ArgumentParser(description='Converts an OMD to GLM and runs it on gridlabd')
+parser.add_argument('file_path', metavar='base', type=str,
+                    help='Path to OMD. Put in quotes.')
+args = parser.parse_args()
+filePath = args.file_path
 
-# filePath = pJoin(os.path.dirname(os.path.realpath(__file__)), 'UCS_Egan_Housed_Solar.omd')
+filePath = pJoin(os.path.dirname(os.path.realpath(__file__)), 'UCS_Egan_Housed_Solar.omd')
 # #Import OMD, add in frequency and gridballast control properties
 with open(filePath, 'r') as inFile:
 	inFeeder = json.load(inFile)
@@ -67,65 +67,38 @@ with open(filePath, 'r') as inFile:
 		recorderw.append(("object recorder {\n\tinterval "+str(interval)+";\n\tproperty Pconv;\n\tfile 'measured_wind_"+str(i)+".csv';\n\tparent "+str(wind_obs[i])+";\n\t};\n"))
 
 with open('outGLMtest.glm', "w") as outFile:
-	outFile.write(feeder.sortedWrite(inFeeder['tree'])+collectorw+collectorz+collectorw+(r for r in recorders)+(r for r in recorderw))
+	addedString = collectorw+collectorz+collectorw+recordersub
+	for i in recorders:
+		addedString = addedString+i
+	for i in recorderw:
+		addedString = addedString + i
+	outFile.write(feeder.sortedWrite(inFeeder['tree'])+addedString)
 
-# object recorder {
-# 	interval 60;
-# 	property measured_real_power;
-# 	file measured_substation_power.csv;
-# 	parent EGAN25;
-# };
+os.system(omf.omfDir +'/solvers/gridlabd_gridballast/local_gd/bin/gridlabd /Users/tuomastalvitie/Desktop/gridballast_gld_simulations/Feeders/outGLM.glm')
 
-# object recorder {
-# 	interval 60;
-# 	property P_Out, rated_power;
-# 	file measured_solar_1.csv;
-# 	parent solar25097;
-# };
+data = pd.read_csv(('voltDump.csv'), skiprows=[0])
+for i, row in data['voltA_real'].iteritems():
+	voltA_real = data.loc[i,'voltA_real']
+	voltA_imag = data.loc[i,'voltA_imag']
+	voltA_mag = np.sqrt(np.add((voltA_real*voltA_real), (voltA_imag*voltA_imag)))
+	name_volt_dict[data.loc[i, 'node_name']].update({'Volt_A':voltA_mag})
+	voltB_real = data.loc[i,'voltB_real']
+	voltB_imag = data.loc[i,'voltB_imag']
+	voltB_mag = np.sqrt(np.add((voltB_real*voltB_real), (voltB_imag*voltB_imag)))
+	name_volt_dict[data.loc[i, 'node_name']].update({'Volt_B':voltB_mag})
+	voltC_real = data.loc[i,'voltC_real']
+	voltC_imag = data.loc[i,'voltC_imag']
+	voltC_mag = np.sqrt(np.add((voltC_real*voltC_real), (voltC_imag*voltC_imag)))
+	name_volt_dict[data.loc[i, 'node_name']].update({'Volt_C':voltC_mag})
 
-# object recorder {
-# 	interval 60;
-# 	property P_Out, rated_power;
-# 	file measured_solar_2.csv;
-# 	parent solar25102;
-# };
-
-# object recorder {
-# 	interval 60;
-# 	property Pconv;
-# 	file measured_wind_1.csv;
-# 	parent windturb_dg25099;
-# };
-
-
-
-
-# os.system(omf.omfDir +'/solvers/gridlabd_gridballast/local_gd/bin/gridlabd /Users/tuomastalvitie/Desktop/gridballast_gld_simulations/Feeders/outGLM.glm')
-
-
-# data = pd.read_csv(('voltDump.csv'), skiprows=[0])
-# for i, row in data['voltA_real'].iteritems():
-# 	voltA_real = data.loc[i,'voltA_real']
-# 	voltA_imag = data.loc[i,'voltA_imag']
-# 	voltA_mag = np.sqrt(np.add((voltA_real*voltA_real), (voltA_imag*voltA_imag)))
-# 	name_volt_dict[data.loc[i, 'node_name']].update({'Volt_A':voltA_mag})
-# 	voltB_real = data.loc[i,'voltB_real']
-# 	voltB_imag = data.loc[i,'voltB_imag']
-# 	voltB_mag = np.sqrt(np.add((voltB_real*voltB_real), (voltB_imag*voltB_imag)))
-# 	name_volt_dict[data.loc[i, 'node_name']].update({'Volt_B':voltB_mag})
-# 	voltC_real = data.loc[i,'voltC_real']
-# 	voltC_imag = data.loc[i,'voltC_imag']
-# 	voltC_mag = np.sqrt(np.add((voltC_real*voltC_real), (voltC_imag*voltC_imag)))
-# 	name_volt_dict[data.loc[i, 'node_name']].update({'Volt_C':voltC_mag})
-
-# # offenders = []
-# # for name, volt in name_volt_dict.iteritems():
-# # 	if (float(volt['Volt_A'])/float(volt['Nominal_Voltage'])) > 1.05:
-# # 		offenders.append(tuple([name, float(volt['Volt_A'])/float(volt['Nominal_Voltage'])]))
-# # 	if (float(volt['Volt_B'])/float(volt['Nominal_Voltage'])) > 1.05:
-# # 		offenders.append(tuple([name, float(volt['Volt_B'])/float(volt['Nominal_Voltage'])]))
-# # 	if (float(volt['Volt_C'])/float(volt['Nominal_Voltage'])) > 1.05:
-# # 		offenders.append(tuple([name, float(volt['Volt_C'])/float(volt['Nominal_Voltage'])]))
+offenders = []
+for name, volt in name_volt_dict.iteritems():
+	if (float(volt['Volt_A'])/float(volt['Nominal_Voltage'])) > 1.05:
+		offenders.append(tuple([name, float(volt['Volt_A'])/float(volt['Nominal_Voltage'])]))
+	if (float(volt['Volt_B'])/float(volt['Nominal_Voltage'])) > 1.05:
+		offenders.append(tuple([name, float(volt['Volt_B'])/float(volt['Nominal_Voltage'])]))
+	if (float(volt['Volt_C'])/float(volt['Nominal_Voltage'])) > 1.05:
+		offenders.append(tuple([name, float(volt['Volt_C'])/float(volt['Nominal_Voltage'])]))
 
 # # #Old Code for name recording only
 # offenders = []
@@ -137,68 +110,68 @@ with open('outGLMtest.glm', "w") as outFile:
 # 	if (float(volt['Volt_C'])/float(volt['Nominal_Voltage'])) > 1.05:
 # 		offenders.append(name)
 
-# #Print General information about offending nodes
-# offenders = list(set(offenders))
-# print len(offenders)
-# # isum = 0
-# # offendersNames = []
-# # for i in range(len(offenders)):
-# # 	isum = isum + offenders[i][1]
-# # 	offendersNames.append(offenders[i][0])
+#Print General information about offending nodes
+offenders = list(set(offenders))
+print len(offenders)
+isum = 0
+offendersNames = []
+for i in range(len(offenders)):
+	isum = isum + offenders[i][1]
+	offendersNames.append(offenders[i][0])
 
 
-# # Write out file
-# with open('offenders.csv', 'w') as f:
-# 	wr = csv.writer(f, quoting=csv.QUOTE_ALL)
-# 	wr.writerow(offenders)
+# Write out file
+with open('offenders.csv', 'w') as f:
+	wr = csv.writer(f, quoting=csv.QUOTE_ALL)
+	wr.writerow(offenders)
 
 
-# substation = pd.read_csv('measured_substation_power', comment='#', names=['timestamp', 'measured_real_power'])
-# substation_power = substation['measured_real_power'][0]
-# solar1 =  pd.read_csv('measured_solar_1', comment='#', names=['timestamp', 'measured_real_power'])
-# solar1_power = solar1['measured_real_power'][0]
-# solar2 =  pd.read_csv('measured_solar_2', comment='#', names=['timestamp', 'measured_real_power'])
-# solar2_power = solar2['measured_real_power'][0]
-# ziploads =  pd.read_csv('measured_load_ziploads', comment='#', names=['timestamp', 'measured_real_power'])
-# zipload_power = ziploads['measured_real_power'][0]
-# waterheaters = pd.read_csv('measured_load_waterheaters', comment='#', names=['timestamp', 'measured_real_power'])
-# waterheater_power = waterheaters['measured_real_power'][0]
-# HVAC = pd.read_csv('measured_HVAC', comment='#', names=['timestamp', 'heating_power', 'cooling_power'])
-# HVAC_power = HVAC['heating_power'][0], HVAC['cooling_power'][0]
-# wind = pd.read_csv('measured_wind_1', comment='#', names=['timestamp', 'Pconv'])
-# wind_power = wind['Pconv'][0]
+substation = pd.read_csv('measured_substation_power', comment='#', names=['timestamp', 'measured_real_power'])
+substation_power = substation['measured_real_power'][0]
+solar1 =  pd.read_csv('measured_solar_1', comment='#', names=['timestamp', 'measured_real_power'])
+solar1_power = solar1['measured_real_power'][0]
+solar2 =  pd.read_csv('measured_solar_2', comment='#', names=['timestamp', 'measured_real_power'])
+solar2_power = solar2['measured_real_power'][0]
+ziploads =  pd.read_csv('measured_load_ziploads', comment='#', names=['timestamp', 'measured_real_power'])
+zipload_power = ziploads['measured_real_power'][0]
+waterheaters = pd.read_csv('measured_load_waterheaters', comment='#', names=['timestamp', 'measured_real_power'])
+waterheater_power = waterheaters['measured_real_power'][0]
+HVAC = pd.read_csv('measured_HVAC', comment='#', names=['timestamp', 'heating_power', 'cooling_power'])
+HVAC_power = HVAC['heating_power'][0], HVAC['cooling_power'][0]
+wind = pd.read_csv('measured_wind_1', comment='#', names=['timestamp', 'Pconv'])
+wind_power = wind['Pconv'][0]
 
-# print ("average voltage overdose is by a factor of", isum/(len(offenders)))
-# print len(offendersNames)
-# print "substation power", substation_power
-# print "Solar1 Power", solar1_power
-# print "Solar2 Power", solar2_power
-# print "Zipload power", zipload_power*1000
-# print "waterheater power", waterheater_power*1000
-# print "HVAC Power", (HVAC_power[0]+HVAC_power[1])*1000
+print ("average voltage overdose is by a factor of", isum/(len(offenders)))
+print len(offendersNames)
+print "substation power", substation_power
+print "Solar1 Power", solar1_power
+print "Solar2 Power", solar2_power
+print "Zipload power", zipload_power*1000
+print "waterheater power", waterheater_power*1000
+print "HVAC Power", (HVAC_power[0]+HVAC_power[1])*1000
 
-# df=pd.DataFrame(columns=('result', 'value'))
-# df.loc[0]=["number of offenders", len(offendersNames)]
-# df.loc[1]=["substation power", substation_power]
-# df.loc[2]=["Solar1 Power", solar1_power]
-# df.loc[3]=["Solar2 Power", solar2_power]
-# df.loc[4]=["Zipload power", zipload_power*1000]
-# df.loc[5]=["waterheater power", waterheater_power*1000]
-# df.loc[6]=["HVAC Power", (HVAC_power[0]+HVAC_power[1])*1000]
-# df.loc[7]=['wind power', wind_power]
+df=pd.DataFrame(columns=('result', 'value'))
+df.loc[0]=["number of offenders", len(offendersNames)]
+df.loc[1]=["substation power", substation_power]
+df.loc[2]=["Solar1 Power", solar1_power]
+df.loc[3]=["Solar2 Power", solar2_power]
+df.loc[4]=["Zipload power", zipload_power*1000]
+df.loc[5]=["waterheater power", waterheater_power*1000]
+df.loc[6]=["HVAC Power", (HVAC_power[0]+HVAC_power[1])*1000]
+df.loc[7]=['wind power', wind_power]
 
-# df.to_csv('Results.csv')
+df.to_csv('Results.csv')
 
 
 # Open Distnetviz
-# omf.distNetViz.viz('outGLM.glm') #or model.omd
+omf.distNetViz.viz('outGLM.glm') #or model.omd
 
-# # Remove Feeder
-# os.remove('outGLMtest.glm')
+# Remove Feeder
+os.remove('outGLMtest.glm')
 
 
 # Visualize Voltage Regulation
-# voltageRegVisual.voltRegViz(filePath)
+voltageRegVisual.voltRegViz(filePath)
 
 
 
