@@ -1,7 +1,16 @@
 <head>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+		<!-- Leaflet  Imports -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css"
+	integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+	crossorigin=""/>
+	<script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
+	integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
+	crossorigin=""></script>
 </head>
 <style type="text/css">
+
+.leaflet-tile { border: solid black 5px; }
 
 body, html {
     width: 100%;
@@ -17,7 +26,24 @@ body, html {
 	position: absolute;
 }
 
+#mapid {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	z-index: -2;
+	/*
+	visibility: hidden;
+	*/
+/*	top: 50%;
+	left: 50%;
+	-ms-transform: translate(-50%, 0);
+	-webkit-transform: translate(-50%, 0);
+	transform: translate(-50%, -50%);*/
+}
+
 .img{
+
+	/*display: none;*/
 	position:absolute;
 	z-index:-1;
 	width: 100%;
@@ -83,13 +109,13 @@ label, input {
 	<div id="controller">
 		<form name="inputForm" id="inputForm">
 			<label>x_low</label>
-			<input type="text" name="x_low" id="x_low" value="{{x_low}}"/>
+			<input type="text" name="x_low" id="x_low" value="-115"/>
 			<label>y_low</label>
-			<input type="text" name="y_low" id="y_low" value="{{y_low}}"/>
+			<input type="text" name="y_low" id="y_low" value="30"/>
 			<label>x_high</label>
-			<input type="text" name="x_high" id="x_high" value="{{x_high}}"/>
+			<input type="text" name="x_high" id="x_high" value="-105"/>
 			<label>y_high</label>
-			<input type="text" name="y_high" id="y_high" value="{{y_high}}"/>
+			<input type="text" name="y_high" id="y_high" value="40"/>
 			<button id="changeGraph" type="submit">Set Zoom</button>
 		</form>
 	<div id="zoomButtons">
@@ -103,6 +129,7 @@ label, input {
 		<button class="strafeArrow" id="strafeTop" name="strafeTop">&uArr;</button>
 		<button class="strafeArrow" id="strafeBottom" name="strafeBottom">&dArr;</button>
 	</div>
+	<div id="mapid"></div>
 	</div>
 	 <script>
 	 	/*
@@ -114,6 +141,36 @@ label, input {
 	<div id="imageClick"></div>
 	<script type="text/javascript">
 	$(document).ready(function() {
+		let x_low = parseFloat("{{x_low}}");
+		let x_high = parseFloat("{{x_high}}");
+		let y_low = parseFloat("{{y_low}}");
+		let y_high = parseFloat("{{y_high}}");
+		//let h = 800;
+		//let w = 800;
+		//let x_mean = (parseFloat("{{x_high}}") + parseFloat("{{x_low}}")) / 2;
+		//let y_mean = (parseFloat("{{y_high}}") + parseFloat("{{y_low}}")) / 2;
+		let bounds = [[y_high, x_high], [y_low, x_low]];
+		var mymap = L.map('mapid');
+		mymap.fitBounds([
+			[x_low, y_low],
+			[x_high, y_high]
+			]);
+		console.log(mymap.getBounds())
+		//mymap.setMaxBounds(bounds);
+		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		attribution: null,
+		maxZoom: 18,
+		//id: 'mapbox.streets'
+		//accessToken: 'your.mapbox.access.token'
+		}).addTo(mymap);
+		//var markerLow = L.marker([x_low, y_low]).addTo(mymap);
+		//var markerHigh = L.marker([x_high, y_high]).addTo(mymap);
+		//var markerTop= L.marker([50, 50]).addTo(mymap);
+		//var imageUrl = 'data:image/png;base64,{{image}}';
+    	//var imageBounds = bounds;
+		//var image = L.imageOverlay(imageUrl, imageBounds);
+		//image.addTo(mymap)
+		console.log(mymap.getSize());
 		var canvas = document.getElementById('imageCanvas');
 		var ctx = canvas.getContext('2d');
 		var domRect = canvas.getBoundingClientRect();
@@ -123,6 +180,10 @@ label, input {
 		var isDown = false;
 		var x_start;
 		var y_start;
+		var x_down;
+		var y_down;
+		var x_up;
+		var y_up;
 		data["current_x_low"] = $("#x_low").val();
 		data["current_y_low"] = $("#y_low").val();
 		data["current_x_high"] = $("#x_high").val();
@@ -144,12 +205,52 @@ label, input {
 		});
 
 		$(".zoomButton").on("click", function(event){
-			data["current_x_low"] = $("#x_low").val();
-			data["current_y_low"] = $("#y_low").val();
-			data["current_x_high"] = $("#x_high").val();
-			data["current_y_high"] = $("#y_high").val();
+			//ghet current x and y values
+			var new_x_low = parseFloat($("#x_low").val());
+			var new_y_low = parseFloat($("#y_low").val());
+			var new_x_high = parseFloat($("#x_high").val());
+			var new_y_high = parseFloat($("#y_high").val());
+			// get midpoint for zoom calc
+			var x_middle = (new_x_low + new_x_high) / 2;
+			var y_middle = (new_y_low + new_y_high) / 2;
 			var zoomDirection = this.name;
-			data["zoomDirection"] = zoomDirection; 
+			data["zoomDirection"] = zoomDirection;
+			if (zoomDirection == 'zoomIn') {
+				new_x_low = (new_x_low + x_middle) /2;
+				new_y_low = (new_y_low + y_middle)/2;
+				new_x_high = (new_x_high + x_middle)/2;
+				new_y_high = (new_y_high + y_middle)/2;
+			}
+			else if (zoomDirection == 'zoomOut') {
+				new_x_low = (new_x_low*2 - x_middle);
+				new_y_low = (new_y_low*2 - y_middle);
+				new_x_high = (new_x_high*2 - x_middle);
+				new_y_high = (new_y_high*2 - y_middle);
+			}
+			$('#x_low').val(new_x_low);
+			$('#y_low').val(new_y_low);
+			$('#x_high').val(new_x_high);
+			$('#y_high').val(new_y_high);
+  			console.log('before setting new bounds')
+  			console.log(mymap.getBounds());
+  			console.log(mymap.getCenter());
+			console.log(mymap.getZoom());
+			mymap.fitBounds([
+				[new_y_high, new_x_high],
+				[new_y_low, new_x_low]
+			]);
+		});
+		mymap.on("moveend", function(event){
+			console.log('setting new bounds');
+			console.log(mymap.getBounds());
+			console.log(mymap.getCenter());
+			console.log(mymap.getZoom());
+			//console.log(mymap.getBounds());
+			data["current_x_low"] = mymap.getBounds().getWest();
+			data["current_y_low"] = mymap.getBounds().getSouth();
+			data["current_x_high"] = mymap.getBounds().getEast();
+			data["current_y_high"] = mymap.getBounds().getNorth();
+			mymap.invalidateSize();
 			$.ajax({
 			    type: 'POST',
 			    url: '/zoomButton',
@@ -160,12 +261,30 @@ label, input {
 			        //console.log("strafe");
 			        document.getElementById("inputForm").style.display = 'block';
 					$(".strafeArrow").show();
+					$(".zoomButton").show();
 					$('#dsImage').attr('src', callback.newImage);
-					$('#x_low').val(callback.x_low);
-					$('#y_low').val(callback.y_low);
-					$('#x_high').val(callback.x_high);
-					$('#y_high').val(callback.y_high);
-					//console.log(imageObj);
+					console.log('in ajax now');
+					console.log(mymap.getBounds());
+					//imageUrl = callback.newImage;
+					//imageBounds = [[mymap.getBounds().getSouth(), mymap.getBounds().getWest()], [mymap.getBounds().getNorth(), mymap.getBounds().getEast()]];
+					//image = L.imageOverlay(imageUrl, imageBounds);
+					//console.log('image');
+					//console.log(imageBounds);
+					//image.addTo(mymap);
+					//console.log('final bounds')
+					//console.log(mymap.getBounds());
+					//mymap.fitBounds([
+					//	[new_y_high, new_x_high],
+					//	[new_x_low, new_y_low]
+					//]);
+					//console.log(mymap.getBounds());
+					//$('#x_low').val(callback.x_low);
+					//$('#y_low').val(callback.y_low);
+					//$('#x_high').val(callback.x_high);
+					//$('#y_high').val(callback.y_high);
+
+					console.log(mymap.getCenter());
+					console.log(mymap.getZoom());
 			        //$('#dsImage').attr('src', callback.newImage);;
 			    },
 			    error: function() {
@@ -175,36 +294,41 @@ label, input {
 		});
 
 		$(".strafeArrow").on("click", function(event){
-			data["current_x_low"] = $("#x_low").val();
-			data["current_y_low"] = $("#y_low").val();
-			data["current_x_high"] = $("#x_high").val();
-			data["current_y_high"] = $("#y_high").val();
+			map_x_low = parseFloat($("#x_low").val());
+			map_y_low = parseFloat($("#y_low").val());
+			map_x_high = parseFloat($("#x_high").val());
+			map_y_high = parseFloat($("#y_high").val());
 			var direction = this.name;
 			//console.log(direction);
-			data["direction"] = direction; 
-			$.ajax({
-			    type: 'POST',
-			    url: '/strafeArrow',
-			    dataType: 'json',
-			    contentType: 'application/json; charset=utf-8',
-			    data: JSON.stringify(data),
-			    success: function(callback) {
-			        //console.log("strafe");
-			        document.getElementById("inputForm").style.display = 'block';
-					$(".strafeArrow").show();
-					$(".zoomButton").show();
-					$('#dsImage').attr('src', callback.newImage);
-					$('#x_low').val(callback.x_low);
-					$('#y_low').val(callback.y_low);
-					$('#x_high').val(callback.x_high);
-					$('#y_high').val(callback.y_high);
-					//console.log(imageObj);
-			        //$('#dsImage').attr('src', callback.newImage);;
-			    },
-			    error: function() {
-			        $(this).html("error!");
-			    }
-			});
+			var x_width = map_x_high - map_x_low;
+			var y_height = map_y_high - map_y_low;
+			if (direction == 'strafeRight'){
+				map_x_low = map_x_high; 
+				map_x_high = map_x_high + x_width;
+			}
+			else if (direction == 'strafeLeft'){
+				map_x_high = map_x_low;
+				map_x_low = map_x_low - x_width;
+			}
+			else if (direction == 'strafeBottom'){
+				map_y_high = map_y_low;
+				map_y_low = map_y_low - y_height;
+			}
+			else if (direction == 'strafeTop'){
+				map_y_low = map_y_high;
+				map_y_high = map_y_high + y_height;
+			}
+			console.log(map_x_low);
+			console.log(map_x_high);
+			$('#x_low').val(map_x_low);
+			$('#y_low').val(map_y_low);
+			$('#x_high').val(map_x_high);
+			$('#y_high').val(map_y_high);
+			mymap.fitBounds([
+				[map_y_high, map_x_high],
+				[map_y_low, map_x_low]
+			]);
+			//data["direction"] = direction; 
 		});
 
 		$("#imageCanvas").on("mousemove", function(event){
@@ -232,13 +356,16 @@ label, input {
 	    	$(".strafeArrow").hide();
 			$(".zoomButton").hide();
 	    	var domRect = this.getBoundingClientRect();
-	        var x_down = (event.pageX - this.offsetLeft) / domRect.width;
+	        x_down = mymap.mouseEventToLatLng(event).lng;
 	        x_start = event.pageX - this.offsetLeft;
+	        console.log(mymap.mouseEventToLatLng(event).lat);
+	        //console.log(mymap.mouseEventToLatLng(x_down));
+	        //console.log(mymap.mouseEventToLatLng(x_start));
 	        //console.log(domRect);
 	        //console.log(event.pageX);
 	        //console.log(this.offsetLeft);
 	        //console.log(this.width);
-	        var y_down = (event.pageY - this.offsetTop) / domRect.height;
+	        y_down = mymap.mouseEventToLatLng(event).lat;
 	        y_start = event.pageY - this.offsetTop;
 	        //console.log(x_down);
 	        //console.log(y_down);
@@ -250,8 +377,8 @@ label, input {
 
 		$("#imageCanvas").on("mouseup", function(event) {
 			var domRect = this.getBoundingClientRect();
-		    var x_up = (event.pageX - this.offsetLeft) / domRect.width;
-		    var y_up = (event.pageY - this.offsetTop) / domRect.height;
+		    x_up = mymap.mouseEventToLatLng(event).lng;
+		    y_up = mymap.mouseEventToLatLng(event).lat;
 		    //console.log("release mouse");
 		    //console.log(x_high);
 		    //console.log(y_high);
@@ -261,34 +388,16 @@ label, input {
 		    isDown = false;
 		    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-		    data["current_x_low"] = $("#x_low").val();
-		    data["current_y_low"] = $("#y_low").val();
-		    data["current_x_high"] = $("#x_high").val();
-		    data["current_y_high"] = $("#y_high").val();
-
-			$.ajax({
-			    type: 'POST',
-			    url: '/zoom',
-			    dataType: 'json',
-			    contentType: 'application/json; charset=utf-8',
-			    data: JSON.stringify(data),
-			    success: function(callback) {
-			        //console.log("testup");
-			        document.getElementById("inputForm").style.display = 'block';
-					$(".strafeArrow").show();
-					$(".zoomButton").show();
-					$('#dsImage').attr('src', callback.newImage);
-					$('#x_low').val(callback.x_low);
-					$('#y_low').val(callback.y_low);
-					$('#x_high').val(callback.x_high);
-					$('#y_high').val(callback.y_high);
-					//console.log(imageObj);
-			        //$('#dsImage').attr('src', callback.newImage);;
-			    },
-			    error: function() {
-			        $(this).html("error!");
-			    }
-			});
+		    console.log(mymap.getBounds().getWest());
+			
+			$('#x_low').val(Math.min(x_down, x_up));
+			$('#y_low').val(Math.min(y_down, y_up));
+			$('#x_high').val(Math.max(x_down, x_up));
+			$('#y_high').val(Math.max(y_down, y_up));
+			mymap.fitBounds([
+				[Math.max(y_down, y_up), Math.max(x_down, x_up)],
+				[Math.min(y_down, y_up), Math.min(x_down, x_up)]
+			]);
 	    });
 	});
 	</script>
