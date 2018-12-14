@@ -230,6 +230,9 @@
             #climateModal label {
                 white-space: nowrap;
             }
+            #anonymizeModal {
+                white-space: nowrap;
+            }
 			.modal {
                 position: fixed;
                 top: 0px;
@@ -257,6 +260,11 @@
                 background-color: gainsboro;
                 width: 100%;
             }
+            .modalInputLine {
+                font-size: medium;
+                border: 0px;
+                background-color: gainsboro;
+            }
             .modalButton {
                 font-size: medium;
                 background-color: seagreen;
@@ -275,7 +283,6 @@
                 text-align: right;
             }
             .modalTableHeader {
-                font-weight: bold;
                 text-align: left;
             }
             .modalTableRow {
@@ -297,7 +304,13 @@
                 color: white;
                 background-color: green;
             }
-            
+            input:valid {
+                border: 1px solid white; 
+            }
+            input:invalid {
+                border: 1px solid red;
+            }            
+
             /* Tree tables */
 
             #multiButtonRow {
@@ -354,7 +367,7 @@
 				border-collapse: collapse;
 			}
 			th {
-				font-weight: normal;
+				/*font-weight: normal;*/
 				/*background:black;*/
 				/*color:white;*/
 				padding: 5px;
@@ -405,18 +418,18 @@
                 <div id="editDiv" class="headerDiv">
 					<div class="buttonGroup">
                         <button id="addOps" class='pill' onclick='dropPill(this, "Edit")'>Edit &#x25BE;</button>
-                        <ul id = "editMenu" class='menu right' style="display: none">
+                        <ul id="editMenu" class='menu right' style="display: none">
                             <!--<li>Zoom To Fit</li>-->
                             <!--<li>Zoom Reset</li>-->
                             <li>Static Loads to Houses</li>
-                            <li>Scada Loadshapes...</li>
-                            <li>Add AMI Profiles...</li>
+                            <li data-web>Scada Loadshapes...</li>
+                            <li data-web>Add AMI Profiles...</li>
                             <li>Find...</li>
                             <li>Mass Add...</li>
                             <li>Mass Edit...</li>
                             <li>Attachments...</li>
-                            <li>Climate...</li>
-                            <li>Anonymization...</li>
+                            <li data-web>Climate...</li>
+                            <li data-web>Anonymization...</li>
                         </ul>
                     </div>
                 </div>
@@ -431,14 +444,14 @@
                     {% if is_admin or not public %}
 						<button id="fileOps" class='pill' onclick='dropPill(this, "File")'>File &#x25BE;</button>
                         <ul id='fileMenu' class='menu right' style="display: none">
-							<li>Save</li>
+							<li data-web>Save</li>
 							<li>View Raw Data</li>
-							<li>Rename</li>
-                            <li>Load from Model...</li>
-							<li>New Blank Feeder...</li>
-							<li>Windmil Conversion...</li>
-							<li>GridLAB-D Conversion...</li>
-							<li>CYMDIST Conversion...</li>
+							<li data-web>Rename</li>
+                            <li data-web>Load from Model...</li>
+							<li data-web>New Blank Feeder...</li>
+							<li data-web>Windmil Conversion...</li>
+							<li data-web>GridLAB-D Conversion...</li>
+							<li data-web>CYMDIST Conversion...</li>
 						</ul>
                     {% endif %}
 					</div>
@@ -466,8 +479,9 @@
 			<div class='modalContent'>
 				<table>
 					<tr>
-						<td>Term</td>
-						<td><input id='searchInput' type='text' value="Enter a search term" class="modalInput"></td>
+                        <td>Term</td>
+                        <td><input id='searchInput' type='text' value="Enter a search term" class="modalInput"></td>
+                        <td id="searchCount"></td>
 					</tr>
 					<tr>
 						<td><button id="findPrevious" class="modalButton">Previous</button></td>
@@ -703,29 +717,32 @@
         </div>
         <div id='massAddModal' class='modal' style="display: none">
             <div class='modalContent'>
-                <table>
-                    <tbody>
-                        <tr>
-                            <th class="modalTableHeader modalTableRow">Mass Add</th>
-                        </tr>
-                        <tr>
-                            <td>Add component:</td>
-                            <td><select id='componentSelect'></select></td>
-                        </tr>
-                        <tr>
-                            <td>To each:</td>
-                            <td><select id='massAddTargetSelect'></select></td>
-                        </tr>
-                        <tr>
-                            <td>With probability for each attachment (float between 0.0 and 1.0):</td>
-                            <td><input type='text' id='percent' pattern='^0\.\d+|1(\.0+)?$' value='1.0' required class="modalInput"/></td>
-                        </tr>
-                        <tr>
-                            <td><button onclick="toggleElementDisplay('massAddModal')" class="modalButton">Cancel</button></td>
-                            <td><button onclick="massAdd(); toggleElementDisplay('massAddModal');" class="modalButton">Apply</button></td>
-                        </tr>
-                    </tbody>
-                </table>
+                <form onsubmit="massAdd(); toggleElementDisplay('massAddModal'); return false;">
+                    <table>
+                        <tbody>
+                            <tr>
+                                <th class="modalTableHeader modalTableRow">Mass Add</th>
+                            </tr>
+                            <tr>
+                                <td>Add component:</td>
+                                <td><select id='componentSelect'></select></td>
+                            </tr>
+                            <tr>
+                                <td>To each:</td>
+                                <td><select id='massAddTargetSelect'></select></td>
+                            </tr>
+                            <tr>
+                                <td>With probability for each attachment (float between 0.0 and 1.0):</td>
+                                <td><input type='text' pattern="^(1.0)|(0?(\.\d+))$" required id='percent' value='1.0' class="modalInput"/></td>
+
+                            </tr>
+                            <tr>
+                                <td><button onclick="toggleElementDisplay('massAddModal')" class="modalButton">Cancel</button></td>
+                                <td><button type="submit" class="modalButton">Apply</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
             </div>
         </div>
         <div id='massEditModal' class='modal' style="display: none">
@@ -739,34 +756,34 @@
                             <td>For each object of type</td>
                             <td><select id='massEditTargetSelect'></select></td>
                             <td>with attribute</td>
-                            <td><input type='text' id='massEditAttribute' required class="modalInput"></td>
+                            <td><input type='text' id='massEditAttribute' class="modalInput"></td>
                         </tr>
                         <tr>
                             <td><input type="radio" name="attributeOperation" value="addTo">Add value to attribute</td>
-                            <td><input type='text' id='addToValue' pattern='^0\.\d+|1(\.0+)?$' required class="modalInput"/></td>
+                            <td><input type='text' id='addToValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
                         </tr>
                         <tr>
                             <td><input type="radio" name="attributeOperation" value="delete">Delete Attribute</td>
                         </tr>
                         <tr>
                             <td><input type="radio" name="attributeOperation" value="change">Change attribute to</td>
-                            <td><input type='text' id='changeValue' pattern='^0\.\d+|1(\.0+)?$' required class="modalInput"/></td>
+                            <td><input type='text' id='changeValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
                         </tr>
                         </tr>
                         <tr>		
                             <td><input type="radio" name="attributeOperation" value="multiplyBy">Multiply attribute by</td>
-                            <td><input type='text' id='multiplyValue' pattern='^0\.\d+|1(\.0+)?$' required class="modalInput"/></td>
+                            <td><input type='text' id='multiplyValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
                             <td style="text-align: center" >and add</td>
-                            <td><input type='text' id='andAddValue' pattern='^0\.\d+|1(\.0+)?$' required class="modalInput"/></td>
+                            <td><input type='text' id='andAddValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
                         </tr>
                         <tr>
                             <td>Or</td>
                         </tr>
                         <tr>
                             <td><input type="radio" name="attributeOperation" value="addAttribute"> Add new attribute</td>
-                            <td><input type='text' id='newAttributeKey' required class="modalInput"></td>
+                            <td><input type='text' id='newAttributeKey' class="modalInput"></td>
                             <td style="text-align: center">with value</td>
-                            <td><input type='text' id='newAttributeValue' pattern='^0\.\d+|1(\.0+)?$' required class="modalInput"/></td>
+                            <td><input type='text' id='newAttributeValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
                         </tr>
                         <tr>
                             <td colspan="2">
@@ -780,7 +797,6 @@
                 </table>
             </div>
         </div>
-
         <div id='attachmentsModal' class='modal' style="display: none">
             <div class='modalContent'>
                 <table>
@@ -790,7 +806,7 @@
                         </tr>
                         <tr>
                             <td><button onclick="toggleElementDisplay('attachmentsModal')" class="modalButton">Cancel</button></td>
-                            <td><button onclick="editAttachment(); toggleElementDisplay('attachmentsModal');" class="modalButton">Select</button></td>
+                            <td><button onclick="toggleElementDisplay('attachmentsModal'); editAttachment()" class="modalButton">Select</button></td>
                         </tr>
                     </tbody>
                 </table>
@@ -801,11 +817,11 @@
                 <table>
                     <tbody>
                         <tr>
-                            <td style='font-weight:bold; font-size:14pt' id='attachmentTd'></td>
+                            <td id='attachmentTd'></td>
                         </tr>
                         <tr>
                             <td>
-                                <textarea rows='25' cols='80' id='editAttachmentBox' style='width:490px'></textarea>
+                                <textarea rows='25' cols='80' id='editAttachmentBox'></textarea>
                             </td>
                         </tr>
                         <tr>
@@ -816,7 +832,6 @@
                 </table>
             </div>
         </div>
-
         <div id='climateModal' class='modal' style="display: none">
             <div class='modalContent'>
                 <form onsubmit="submitForm({formId:'climateForm', pollUrl:'/checkClimateChange/{{thisOwner}}/{{thisModelName}}'}); return false;"
@@ -861,6 +876,87 @@
                             <tr>
                                 <td><button type="button" onclick="toggleElementDisplay('climateModal')" class="modalButton">Cancel</button></td>
                                 <td><button type="submit" class="modalButton">Apply</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+        <div id='anonymizeModal' class='modal' style="display: none">
+            <div class='modalContent'>
+                <form onsubmit="submitForm({formId:'anonymizeForm', pollUrl:'/checkAnonymize/{{thisOwner}}/{{thisModelName}}'}); return false;"
+                action='/anonymize/{{thisOwner}}/{{thisFeederName}}' id="anonymizeForm">
+                    <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
+                    <!--<input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>-->
+                    <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
+                    <!--<input type='hidden' name='referrer' value='distribution'/>-->
+                    <table>
+                        <tbody>
+                            <tr><th>Anonymization</th></tr>
+                            <tr><th class="modalTableHeader">Names and labels:</th></tr>
+                            <tr>
+                                <td>
+                                    <select name='anonymizeNameOption'>
+                                        <option value="noChange">No change</option>
+                                        <option value="pseudonymize">Pseudonymize</option>
+                                        <option value="randomize">Randomize</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr><th class="modalTableHeader">Locations:</th></tr>
+                            <tr>
+                                <td>
+                                    <input type='radio' id='noChange' name='anonymizeLocationOption' value='noChange' checked>
+                                    <label for='noChange'>No Change</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type='radio' id='translation' name='anonymizeLocationOption' value='translation'>
+                                    <label for='translation'>Translate</label>
+                                </td>
+                            </tr>
+                            <tr><td><input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='translateRight' class="modalInputLine"> [ft] to the right and</td></tr>
+                            <tr><td><input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='translateUp' class="modalInputLine"> [ft] up with a</td></tr>
+                            <tr><td><input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='rotate' class="modalInputLine"> [degree] rotation.</td></tr>
+                            <tr>
+                                <td>
+                                    <input type='radio' id='randomize' name='anonymizeLocationOption' value='randomize'>
+                                    <label for='randomize'>Random (Force Layout)</label>
+                                </td>
+                            </tr>
+                            <tr><th class="modalTableHeader">Electrical properties:</th></tr>
+                            <tr>
+                                <td>
+                                    <input type='checkbox' id='modifyLengthSize' name='modifyLengthSize' value='modifyLengthSize'>
+                                    <label for='modifyLengthSize'>Modify conductor length and cable size</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type='checkbox' id='smoothLoadGen' name='smoothLoadGen' value='smoothLoadGen'>
+                                    <label for='smoothLoadGen'>Smooth loads and generators</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type='checkbox' id='shuffleLoadGen' name='shuffleLoadGen' value='shuffleLoadGen'>
+                                    <label for='shuffleLoadGen'>Shuffle loads and generators:</label>
+                                    <input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='shufflePerc' class="modalInputLine"> [%]</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type='checkbox' id='addNoise' name='addNoise' value='addNoise'>
+                                    <label for='addNoise'>Add noise:</label>
+                                    <input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='noisePerc' class="modalInputLine"> [%]</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <button type="button" onclick="toggleElementDisplay('anonymizeModal')" class="modalButton">Cancel</button>
+                                    <button type="submit" class="modalButton" style="float: right">Apply</button>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -1582,7 +1678,7 @@ function newLink(componentName) { // eslint-disable-line
 		return;
 	}
 	//I have concerns about adding inconsistent data to the graph. See my meeting notes.
-	const newTreeLink = clone(globalComponents[componentName]);
+	const newTreeLink = deepCopy(globalComponents[componentName]);
 	newTreeLink.from = firstTreeNode.name;
 	newTreeLink.to = secondTreeNode.name;
 	const newTreeKey = getNewTreeKey(writeFeeder.tree);
@@ -1736,12 +1832,12 @@ function moveNodeListener() {
 // Find modal interface
 //**************************************************
 
-function prepareSearchResults() {
+function getSearchResults() {
     const tree = globalTreeWrapper.tree;
     const keys = getMatchingKeys(this.value, tree);
+    document.getElementById("searchCount").textContent = `hits: ${keys.length}`;
     const nextButton = document.getElementById("findNext");
     const previousButton = document.getElementById("findPrevious");
-    //Array.from(document.getElementsByClassName("selected")).forEach(element => element.classList.remove("selected"));
     tableDestroy();
     if (keys.length === 0 || this.value === "") {
         alert(`No results found for term: "${this.value}"`)
@@ -1793,6 +1889,9 @@ function getMatchingKeys(term, tree) {
     return keys;
 }
 
+/** Clears the "selected" class from previous elements before making the viewed element "selected"
+ *
+ */
 function viewElement(key) {
     Array.from(document.getElementsByClassName("selected")).forEach(element => element.classList.remove("selected"));
     const element = document.getElementById(key);
@@ -1855,10 +1954,8 @@ function isNullOrUndefined(obj) {
  */
 function disableJQueryFunctionality() {
     //Hide stuff that doesn't work in distNetViz.py
-    Array.from(document.getElementById("fileMenu").children).forEach(child => {
-        if (child.textContent !== "View Raw Data") {
-            child.remove();
-        }
+    Array.from(document.querySelectorAll("[data-web]")).forEach(li => {
+        li.remove();
     });
 }
 
@@ -1984,7 +2081,7 @@ function newChildAtSelected(componentName) { //eslint-disable-line
 		alert('I am sorry, but we cannot insert a child element there.');
 		return false;
 	}
-	const component = clone(globalComponents[componentName]);
+	const component = deepCopy(globalComponents[componentName]);
 	newChildAtLocation(component, node['treeIndex']);
 }
 
@@ -2079,11 +2176,11 @@ function addEditMenuHandlers() {
         toggleElementDisplay("massEditModal");
     });
     items[6].addEventListener("click", function() {
-    //    getattachmentslist()
+        loadAttachments(); 
         toggleElementDisplay("attachmentsModal");
     });
     items[7].addEventListener("click", function() { toggleElementDisplay("climateModal"); });
-    //items[8].addEventListener("click", function() { toggleElementDisplay("anonymizeModal"); });
+    items[8].addEventListener("click", function() { toggleElementDisplay("anonymizeModal"); });
 }
 
 /** If an element isn't displayed, set it's inline display value to the default browser value.
@@ -2319,18 +2416,40 @@ function staticLoadsToHouses() {
         return
     }
 	let objectsAdded = 0;
-	if (globalComponents.hasOwnProperty(componentName)) {
-		for (let key in tree) {
-			if (tree[key].hasOwnProperty('object') && tree[key].object === attachType) {
+    let modal = new ProgressModal(`Please wait. We are adding ${componentName} objects to all ${attachType} objects.`, "", false);
+    modal.show();
+    // Add 100 nodes at a time (maximum), to prevent the browser from hanging
+    const keys = Object.keys(tree);
+    let start = 0;
+    let end = 100;
+    const intervalId = setInterval(function() {
+        console.log("start: " + start);
+        console.log("end: " + end);
+        massAddComponent(start, end, keys);
+        if (end >= keys.length) {
+            clearInterval(intervalId);
+            modal.hide();
+            alert(`${objectsAdded} ${componentName} objects added to the feeder`);
+        } else {
+            start = end + 1;
+            end += 100;
+        }
+    }, 100);
+
+    function massAddComponent(start, end, keys) {
+        if (end >= keys.length) {
+            end = keys.length - 1;
+        }
+        for (let i = start; i <= end; i++) {
+            if (tree[keys[i]].object === attachType) {
 				if (Math.random() < percent) {
-					const newComponent = JSON.parse(JSON.stringify(globalComponents[componentName]));
-					newChildAtLocation(newComponent, key);
+					const newComponent = deepCopy(globalComponents[componentName]);
+					newChildAtLocation(newComponent, keys[i]);
 					objectsAdded += 1
 				}
-			}
-		}
-		alert(`${objectsAdded} ${componentName} objects added to the feeder`);
-	} 
+            }
+        }
+    }
 }
 
 function updateAttachTargets(id, tree) {
@@ -2445,15 +2564,28 @@ function massEditAdd(keys) {
     alert(`${keys.length} ${objectType} objects edited.`);
 }
 
-function editAttachment(attachment) {
-	document.body.style.cursor = 'wait'
-	setTimeout(function(){
+function loadAttachments() {
+    const selectElement = document.getElementById("attachmentSelect");
+    selectElement.innerHTML = "";
+	for (let key in writeFeeder.attachments) {
+        selectElement.innerHTML += `<option value=${key}>${key}</option>`;
+    }
+}
+
+function editAttachment() {
+	//document.body.style.cursor = 'wait'
+	//setTimeout(function(){
 		toggleElementDisplay('editAttachmentModal');
-		let attachment = document.getElementById('attachmentSelect').value; //get the select. attachmentsList = attachmentSelect
-		document.getElementById('attachmentTd').innerHTML = attachment  //get the td. attachmentSelect = attachmentTd
-		document.getElementById('editAttachmentBox').innerHTML = attachments[attachment];
-		document.body.style.cursor = 'auto'
-	}, 100);
+		let name =  document.getElementById('attachmentSelect').value; //get the select. attachmentsList = attachmentSelect
+		document.getElementById('attachmentTd').innerHTML = name;  //get the td. attachmentSelect = attachmentTd
+		document.getElementById('editAttachmentBox').innerHTML = writeFeeder.attachments[name];
+		//document.body.style.cursor = 'auto'
+	//}, 100);
+}
+
+function saveAttachment() {
+	let name = document.getElementById('attachmentSelect').value;
+	writeFeeder.attachments[name] = document.getElementById('editAttachmentBox').value;
 }
 
 //**************************************************
@@ -3290,7 +3422,7 @@ function Line(x1, y1, x2, y2, id, domClass, strokeWidth) {
 /** Return an SvgData object to be used to draw on the graph, or return null if there is nothing to draw.
 */
 function addFeederObject(componentName, htmlSelection) {
-	const treeObject = new TreeObject(getNewTreeKey(writeFeeder.tree).toString(), clone(globalComponents[componentName]));
+	const treeObject = new TreeObject(getNewTreeKey(writeFeeder.tree).toString(), deepCopy(globalComponents[componentName]));
 	const associatedTreeObjects = getAssociatedTreeObjects(treeObject, htmlSelection);
 	if (!associatedTreeObjects) {
 		//alert("Invalid svg selection. Failed to add object to feeder.");
@@ -3503,18 +3635,18 @@ function getNewTreeKey(tree) {
 
 
 // Deep copy of a given obj.
-function clone(obj) {
-	if (null === obj || Array.isArray(obj) || typeof(obj) !== "object") {
-		throw "This function only supports cloning a valid non-array object.";
-	}
-	const copy = obj.constructor();
-	for (let key in obj) {
-		if (obj.hasOwnProperty(key)) {
-			copy[key] = obj[key];
-		}
-	}
-	return copy;
-}
+//function clone(obj) {
+//	if (null === obj || Array.isArray(obj) || typeof(obj) !== "object") {
+//		throw "This function only supports cloning a valid non-array object.";
+//	}
+//	const copy = obj.constructor();
+//	for (let key in obj) {
+//		if (obj.hasOwnProperty(key)) {
+//			copy[key] = obj[key];
+//		}
+//	}
+//	return copy;
+//}
 
 // Fix this function. Some lines have CLOSED instead of ABCN or something.
 function countPhases(p) {
@@ -3621,7 +3753,7 @@ function addLineNew(line) {
 
     attachHandlers();
     // Interface setup
-    document.getElementById("searchInput").addEventListener("change", prepareSearchResults);
+    document.getElementById("searchInput").addEventListener("change", getSearchResults);
     // jQuery
     if (window.jQuery !== undefined) {
         applyJQueryStyles();

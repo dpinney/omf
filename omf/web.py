@@ -469,7 +469,7 @@ def distribution_get(owner, model_name, feeder_num):
 	return render_template(
 		"distNetViz.html", thisFeederData=passed_data, thisFeederName=feeder_name, thisFeederNum=feeder_num,
 		thisModelName=model_name, thisOwner=owner, components=component_json, jasmine=jasmine, spec=spec,
-		publicFeeders=public_feeders, userFeeders=user_feeders
+		publicFeeders=public_feeders, userFeeders=user_feeders, is_admin=User.cu() == "admin"
 	)
 
 
@@ -1146,6 +1146,7 @@ def backgroundAnonymize(modelDir, omdPath):
 		inFeeder = json.load(inFile)
 		# Name Option
 		nameOption = request.form.get('anonymizeNameOption')
+		newNameKey = None
 		if nameOption == 'pseudonymize':
 			newNameKey = anonymization.distPseudomizeNames(inFeeder)
 		elif nameOption == 'randomize':
