@@ -26,54 +26,48 @@ with open(filePath, 'r') as inFile:
 	inFeeder['tree'][u'01'] = {u'omftype': u'#include', u'argument': u'"hot_water_demand1.glm"'}
 	inFeeder['tree'][u'011'] = {u'class': u'player', u'double': u'value'}# add in manually for now
 	name_volt_dict ={}
+	solar_meters=[]
+	wind_obs=[]
+	substation = None 
 	for key, value in inFeeder['tree'].iteritems():
-		try:
-			if 'minimum_timestep' in value['argument']:
-				interval = int(re.search(r'\d+', value['argument']).group())
-			if (value['object'] == 'waterheater'):
-				inFeeder['tree'][key].update({'heat_mode':'ELECTRIC'})
-				inFeeder['tree'][key].update({'enable_volt_control':'true'})
-				inFeeder['tree'][key].update({'volt_lowlimit':'113.99'})
-				inFeeder['tree'][key].update({'volt_uplimit':'126.99'}) 
-			elif (value['object']== 'ZIPload'):
-				inFeeder['tree'][key].update({'enable_volt_control':'true'})
-				inFeeder['tree'][key].update({'volt_lowlimit':'113.99'})
-				inFeeder['tree'][key].update({'volt_uplimit':'126.99'})
+		if 'name' in value and 'solar' in value['name']:
+			inverter_ob = value['parent']
+			for key, value in inFeeder['tree'].iteritems():
+				if 'name' in value and value['name']==inverter_ob:
+					solar_meters.append(value['parent'])
+		if 'name' in value and 'wind' in value['name']:
+			wind_obs.append(value['name'])
+		if 'name' in value and 'nominal_voltage' in value:
 			name_volt_dict[value['name']] = {'Nominal_Voltage': value['nominal_voltage']}
-		except KeyError:
-				pass
+		if 'object' in value and (value['object'] == 'waterheater'):
+			inFeeder['tree'][key].update({'heat_mode':'ELECTRIC'})
+			inFeeder['tree'][key].update({'enable_volt_control':'true'})
+			inFeeder['tree'][key].update({'volt_lowlimit':'113.99'})
+			inFeeder['tree'][key].update({'volt_uplimit':'126.99'}) 
+		if'object' in value and (value['object']== 'ZIPload'):
+			inFeeder['tree'][key].update({'enable_volt_control':'true'})
+			inFeeder['tree'][key].update({'volt_lowlimit':'113.99'})
+			inFeeder['tree'][key].update({'volt_uplimit':'126.99'})
+		if 'argument' in value and ('minimum_timestep' in value['argument']):
+				interval = int(re.search(r'\d+', value['argument']).group())
+		if 'bustype' in value and 'SWING' in value['bustype']:
+			substation = value['name']
 
-	collectorw=("object collector {\n\tname collector_Waterheater;\n\tgroup class=waterheater;\n\tproperty sum(actual_load);\n\tinterval "+str(interval)+"\n\t"+"file 'measured_load_waterheaters.csv';\n};\n")
-	collectorz=("object collector {\n\tname collector_ZIPloads;\n\tgroup class=ZIPload;\n\tproperty sum(base_power);\n\tinterval "+str(interval)+"\n\t"+"file 'measured_load_ziploads.csv';\n};\n")
-	collectorw=("object collector {\n\tname collector_HVAC;\n\tgroup class=house;\n\tproperty sum(heating_demand), sum(cooling_demand);\n\tinterval "+str(interval)+"\n\t"+"file 'measured_HVAC.csv';\n};\n")
+
+	collectorw=("object collector {\n\tname collector_Waterheater;\n\tgroup class=waterheater;\n\tproperty sum(actual_load);\n\tinterval "+str(interval)+";\n\tfile 'measured_load_waterheaters.csv';\n};\n")
+	collectorz=("object collector {\n\tname collector_ZIPloads;\n\tgroup class=ZIPload;\n\tproperty sum(base_power);\n\tinterval "+str(interval)+";\n\tfile 'measured_load_ziploads.csv';\n};\n")
+	collectorw=("object collector {\n\tname collector_HVAC;\n\tgroup class=house;\n\tproperty sum(heating_demand), sum(cooling_demand);\n\tinterval "+str(interval)+";\n\tfile 'measured_HVAC.csv';\n};\n")
+	recordersub=("object recorder {\n\tinterval "+str(interval)+";\n\tproperty measured_real_power;\n\tfile 'measured_substation_power.csv';\n\tparent "+str(substation)+";\n\t};\n")
+	recorders = []
+	recorderw=[]
+	for i in range(len(solar_meters)):
+		print i
+		recorders.append(("object recorder {\n\tinterval "+str(interval)+";\n\tproperty measured_real_power;\n\tfile 'measured_solar_"+str(i)+".csv';\n\tparent "+str(solar_meters[i])+";\n\t};\n"))
+	for i in range(len(wind_obs)):
+		recorderw.append(("object recorder {\n\tinterval "+str(interval)+";\n\tproperty Pconv;\n\tfile 'measured_wind_"+str(i)+".csv';\n\tparent "+str(wind_obs[i])+";\n\t};\n"))
 
 with open('outGLMtest.glm', "w") as outFile:
-	outFile.write(feeder.sortedWrite(inFeeder['tree'])+collectorw+collectorz+collectorw)
-
-# object collector {
-#   name collector_Waterheater;
-#   group class=waterheater;
-#   property sum(actual_load);
-#   interval 60;
-#   file "measured_load_waterheaters.csv";
-# };
-
-# object collector {
-#   name collector_ZIPloads;
-#   group class=ZIPload;
-#   property sum(base_power);
-#   interval 60;
-#   file "measured_load_ziploads.csv";
-# };
-
-# object collector {
-#   name collector_HVAC;
-#   group class=house;
-#   property sum(heating_demand), sum(cooling_demand);
-#   interval 60;
-#   file "measured_HVAC.csv";
-# };
-
+	outFile.write(feeder.sortedWrite(inFeeder['tree'])+collectorw+collectorz+collectorw+(r for r in recorders)+(r for r in recorderw))
 
 # object recorder {
 # 	interval 60;
@@ -197,7 +191,7 @@ with open('outGLMtest.glm', "w") as outFile:
 
 
 # Open Distnetviz
-# omf.distNetViz.viz('outGLMtest.glm') #or model.omd
+# omf.distNetViz.viz('outGLM.glm') #or model.omd
 
 # # Remove Feeder
 # os.remove('outGLMtest.glm')
