@@ -469,7 +469,7 @@ def distribution_get(owner, model_name, feeder_num):
 	return render_template(
 		"distNetViz.html", thisFeederData=passed_data, thisFeederName=feeder_name, thisFeederNum=feeder_num,
 		thisModelName=model_name, thisOwner=owner, components=component_json, jasmine=jasmine, spec=spec,
-		publicFeeders=public_feeders, userFeeders=user_feeders, is_admin=User.cu() == "admin"
+		publicFeeders=public_feeders, userFeeders=user_feeders, is_admin=User.cu() == "admin", public=owner == "public"
 	)
 
 

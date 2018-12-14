@@ -304,9 +304,11 @@
                 color: white;
                 background-color: green;
             }
+            /*
             input:valid {
                 border: 1px solid white; 
             }
+            */
             input:invalid {
                 border: 1px solid red;
             }            
@@ -330,6 +332,12 @@
             }*/
             thead td {
                 
+            }
+            .tableInput {
+                font-size: small;
+                background-color: gainsboro;
+                padding: 3px;
+                border: 0px;
             }
             .deleteButton {
                 background-color: #CC0000;
@@ -1264,6 +1272,7 @@ function toggleRowContent(tr) {
 		const keyTd = tr.children[0]; 
 		const valTd = tr.children[1];
 		const valInput = document.createElement("input");
+        valInput.setAttribute("class", "tableInput");
 		valInput.setAttribute("data-feederval", "feederval");
 		valInput.setAttribute("value", valTd.textContent);
 		keyTd.parentElement.insertBefore(buttonTd, keyTd); 
@@ -1482,22 +1491,30 @@ function deleteObject(key) {
     } else {
         // Delete Circles
         const circleName = tree[key].name;
-        if (Object.values(tree).some(obj => obj.from === circleName || obj.to === circleName)) {
+        if (circleName === undefined) {
+            removeCircle(key);
+        } else if (Object.values(tree).some(obj => obj.from === circleName || obj.to === circleName)) {
             alert('Cannot delete circles with lines still connected')
         } else {
-            //remove the circle from the svg
-            document.getElementById(key).remove();
-            // If the node I'm deleting has a parent, then I need to delete the line between this node and its parent
-            if (tree[key].parent !== undefined) {
-                const lineId = `${tree[key].parent}_${tree[key].name}`;
-                document.getElementById(lineId).remove();
-            } 
-            delete names[tree[key].name];
-            delete tree[key];
+            removeCircle(key);
         }
     }
 	// Hide the object table.
 	tableDestroy();
+}
+
+function removeCircle(key) {
+    const tree = globalTreeWrapper.tree;
+    const names = globalTreeWrapper.names;
+    //remove the circle from the svg
+    document.getElementById(key).remove();
+    // If the node I'm deleting has a parent, then I need to delete the line between this node and its parent
+    if (tree[key].parent !== undefined) {
+        const lineId = `${tree[key].parent}_${tree[key].name}`;
+        document.getElementById(lineId).remove();
+    } 
+    delete names[tree[key].name];
+    delete tree[key];
 }
 
 function scaleTo(x) {
@@ -2139,6 +2156,7 @@ function attachFeederList (ul, feeders, owner) {
 
 function addFileMenuHandlers() {
     const menu = document.getElementById("fileMenu");
+    if (isNullOrUndefined(menu)) return;
     const items = Array.from(menu.children);
     if (items.length !== 8) {
         throw new Error("Please update this function to ensure the correct handlers are attached");
@@ -3767,6 +3785,7 @@ function addLineNew(line) {
     const time = t1 - t0;
     console.log(`Tree rendering time was ${time} ms`);
     */
+    
     
     /*
     setTimeout(function() {
