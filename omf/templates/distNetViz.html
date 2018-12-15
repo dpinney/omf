@@ -447,9 +447,9 @@
 						<ul id='componentList' class='menu right' style="display: none">
 					</div>
 				</div>
+                {% if showFileMenu %}
 				<div id="fileDiv" class="headerDiv">
 					<div class='buttonGroup'>
-                    {% if is_admin or not public %}
 						<button id="fileOps" class='pill' onclick='dropPill(this, "File")'>File &#x25BE;</button>
                         <ul id='fileMenu' class='menu right' style="display: none">
 							<li data-web>Save</li>
@@ -461,9 +461,9 @@
 							<li data-web>GridLAB-D Conversion...</li>
 							<li data-web>CYMDIST Conversion...</li>
 						</ul>
-                    {% endif %}
 					</div>
-				</div>
+                </div>
+                {% endif %}
 			</div>
         </div>
         <!-- Svg container -->
@@ -1890,16 +1890,21 @@ function getSearchResults() {
 function getMatchingKeys(term, tree) {
     const keys = [];
     for (let key in tree) {
-        for (let prop in tree[key]) {
-            let string = tree[key][prop];
-            if (typeof(string) !== "string") {
-                string = tree[key][prop].toString();
-            }
-            // Only add the key if it represents an object that was drawn
-            if (string.includes(term) && ((tree[key].latitude !== undefined && tree[key].longitude !== undefined) || 
-            (tree[key].to !== undefined && tree[key].from !== undefined))) {
-                keys.push(key);
-                break;
+        // Only add the key if it represents an object that was drawn
+        if (((!isNullOrUndefined(tree[key].latitude) && !isNullOrUndefined(tree[key].longitude)) ||
+         (!isNullOrUndefined(tree[key].to) && !isNullOrUndefined(tree[key].from)))) {
+            for (let propertyKey in tree[key]) {
+                let propertyVal = tree[key][propertyKey];
+                if (typeof(propertyVal) !== "string") {
+                    propertyVal += "";
+                }
+                if (propertyKey.toLowerCase().includes(term.toLowerCase())) {
+                    keys.push(key);
+                    break;
+                } else if (propertyVal.toLowerCase().includes(term.toLowerCase())) {
+                    keys.push(key);
+                    break;
+                }
             }
         }
     }
@@ -2607,8 +2612,9 @@ function saveAttachment() {
 }
 
 //**************************************************
-// File menu interface v3
+// File menu interface
 //**************************************************
+{% if showFileMenu %}
 
 /** Used to save the new changes or undo an operation by resaving the old changes.
  * 
@@ -2814,21 +2820,7 @@ async function renameFeeder() {
 		}
 	} 
 }
-
-//ADD PROMPT TO SAVE CHANGES BEFORE EXIT
-{% if is_admin or not public %}
-	window.onbeforeunload = function(e) {
-        let confirmationMessage = `It looks like you have been editing something. 
-        If you leave before saving, your changes will be lost.`;
-        if (JSON.stringify(readFeeder) !== JSON.stringify(writeFeeder)) {
-            return confirmationMessage;
-        }
-	};
 {% endif %}
-
-//**************************************************
-// File menu functions 
-//**************************************************
 
 /** This is done for testing reasons.
  */
@@ -3795,6 +3787,16 @@ function addLineNew(line) {
     */
 })();
 
+//ADD PROMPT TO SAVE CHANGES BEFORE EXIT
+{% if showFileMenu %}
+	window.onbeforeunload = function(e) {
+        if (JSON.stringify(readFeeder) !== JSON.stringify(writeFeeder)) {
+            const confirmationMessage = `It looks like you have been editing something. 
+            If you leave before saving, your changes will be lost.`;
+            return confirmationMessage;
+        }
+	};
+{% endif %}
 </script>
 <!--<script type='text/javascript' src='/static/distDataValidation.js'></script>-->
 {% if spec %}{{ spec | safe }}{% endif %}
