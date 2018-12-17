@@ -19,7 +19,7 @@ parser.add_argument('file_path', metavar='base', type=str,
 args = parser.parse_args()
 filePath = args.file_path
 
-filePath = pJoin(os.path.dirname(os.path.realpath(__file__)), 'UCS_Egan_Housed_Solar.omd')
+# filePath = pJoin(os.path.dirname(os.path.realpath(__file__)), 'UCS_Egan_Housed_Solar.omd')
 # #Import OMD, add in frequency and gridballast control properties
 with open(filePath, 'r') as inFile:
 	inFeeder = json.load(inFile)
@@ -164,7 +164,7 @@ df.to_csv('Results.csv')
 
 
 # Open Distnetviz
-omf.distNetViz.viz('outGLM.glm') #or model.omd
+omf.distNetViz.viz('outGLMtest.glm') #or model.omd
 
 # Remove Feeder
 os.remove('outGLMtest.glm')
