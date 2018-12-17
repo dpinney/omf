@@ -1,274 +1,190 @@
 ''' Evaluate demand response energy and economic savings available using PNNL VirtualBatteries (VBAT) model. '''
 
-import json, os, shutil, subprocess, platform, collections, csv, pulp
+import json, shutil, subprocess, platform, csv, pulp
 from os.path import join as pJoin
-from jinja2 import Template
+import datetime as dt
+from numpy import npv
 import __neoMetaModel__
 from __neoMetaModel__ import *
-import matplotlib.pyplot as plt
-import pandas as pd
 
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = "Calculate the energy storage capacity for a collection of thermostatically controlled loads."
 
-def work(modelDir, inputDict):
-	''' Run the model in its directory.'''
-	outData = {}
-	# Run VBAT code.
-	vbatPath = os.path.join(omf.omfDir,'solvers','vbat')
+def runOctave(modelDir, inputDict):
 	plat = platform.system()
-	if inputDict['load_type'] == '4':
-		inputDict['runTimeEstimate'] = 'This configuration will take an approximate run time of: ' + str(4) +' minutes.'
-		#HACK: dump input immediately to show runtime estimate.
-	else:
-		inputDict['runTimeEstimate'] = 'This configuration will take an approximate run time of: 0.5 minutes.'
-	with open(pJoin(modelDir,'allInputData.json'), 'w') as dictFile:
-		json.dump(inputDict, dictFile, indent=4)
-	if plat == 'Windows':
-		octBin = 'c:\\Octave\\Octave-4.2.1\\bin\\octave-cli'
-	elif plat == 'Darwin':
-		octBin = 'octave --no-gui'
-	else:
-		octBin = 'octave --no-window-system'
-	with open(pJoin(modelDir,"temp.csv"),"w") as tempFile:
-		tempFile.write(inputDict['tempCurve'])
+	octBin = ('c:\\Octave\\Octave-4.2.1\\bin\\octave-cli' if plat == 'Windows'
+				else ('octave --no-gui' if plat == 'Darwin' else 'octave --no-window-system'))
+	vbatPath = pJoin(omf.omfDir, 'solvers', 'vbat')
+	ARGS = "'{}/temp.csv',{},[{},{},{},{},{},{},{}]".format(
+		modelDir, inputDict['load_type'], inputDict['capacitance'], 
+		inputDict['resistance'], inputDict['power'], inputDict['cop'],
+		inputDict['deadband'], inputDict['setpoint'], inputDict['number_devices'])
+
+	command = '{} --eval "addpath(genpath(\'{}\'));VB_func({})"'.format(octBin, vbatPath, ARGS)
+	if plat != 'Windows':
+		command = [command]
+	mo, _ = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True).communicate()
+
+	def parse(key, mo):
+		'''some pretty ugly string wrestling'''
+		return [float(m) for m in mo.partition(key+' =\n\n')[2].partition('\n\n')[0].split('\n')]
 	try:
-		with open(pJoin(modelDir,"temp.csv")) as inFile:
-			reader = csv.DictReader(inFile)
-			tempFilePath = modelDir
-	except:
-		errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href = 'https://github.com/dpinney/omf/wiki/Models-~-storagePeakShave#demand-file-csv-format'>\nOMF Wiki storagePeakShave - Demand File CSV Format</a>"
-		raise Exception(errorMessage)
-	with open(pJoin(modelDir,"temp.csv"),"r") as tempFile:
-		reader = csv.reader(tempFile)
-		temp = list(reader)
-	newTemp = ""
-	for i in range(8760):
-		if temp[i][0] == '999.0':
-			temp[i][0] = inputDict['setpoint']
-		newTemp += (str(temp[i][0])+'\n')
-	with open(pJoin(modelDir,"temp.csv"),"w") as tempFile:
-		tempFile.write(newTemp)
-	command = 'OCTBIN --eval "addpath(genpath(\'FULLPATH\'));VB_func(ARGS)"'\
-	 	.replace('FULLPATH', vbatPath)\
-	 	.replace('OCTBIN',octBin)\
-		.replace('ARGS', "'" + str(tempFilePath) + "/temp.csv'," + inputDict['load_type'] +',[' + inputDict['capacitance'] + ','+ inputDict['resistance'] + 
-			',' + inputDict['power'] + ',' + inputDict['cop'] + ',' + inputDict['deadband'] + ',' + inputDict['setpoint'] + ',' +
-			inputDict['number_devices'] + ']')
-	demandList = []
-	demandAdjustedList = []
-	dates = []
-	with open(pJoin(modelDir,"demand.csv"),"w") as demandFile:
-		demandFile.write(inputDict['demandCurve'].replace('\r',''))
-	try:
-		with open(pJoin(modelDir,"demand.csv")) as inFile:
-			reader = csv.reader(inFile)
-			for row in reader:
-				demandList.append(float(row[0]))
-	 		if len(demandList) != 8760:
-	 			raise Exception
-	except:
-		errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href = 'https://github.com/dpinney/omf/wiki/Models-~-storagePeakShave#demand-file-csv-format'>\nOMF Wiki storagePeakShave - Demand File CSV Format</a>"
-		raise Exception(errorMessage)
-	peakDemand = [0]*12
-	peakAdjustedDemand = [0]*12
-	energyMonthly = [0]*12
-	energyAdjustedMonthly = [0]*12
-	energyCost = [0]*12
-	energyCostAdjusted = [0]*12
-	demandCharge = [0]*12
-	demandChargeAdjusted = [0]*12
-	totalCost = [0]*12
-	totalCostAdjusted = [0]*12
-	savings = [0]*12
-	cashFlow = 0
-	cashFlowList = [0]*int(inputDict["projectionLength"])
-	cumulativeCashflow = [0]*int(inputDict["projectionLength"])
-	NPV = 0
-	calendar = collections.OrderedDict()
-	calendar['1'] = 31
-	calendar['2'] = 28
-	calendar['3'] = 31
-	calendar['4'] = 30
-	calendar['5'] = 31
-	calendar['6'] = 30
-	calendar['7'] = 31
-	calendar['8'] = 31
-	calendar['9'] = 30
-	calendar['10'] = 31
-	calendar['11'] = 30
-	calendar['12'] = 31
-	hourCounter = -1
-	peakHourOfMonth = [0]*12
-	for monthNum in calendar:					#month number in year
-		for x in range(calendar[monthNum]):		#day number-1 in number of days in month
-			for y in range(24):					#hour of the day-1 out of 24
-				hourCounter += 1					#hour out of the year-1 
-				if demandList[hourCounter] > peakDemand[int(monthNum)-1]:
-					peakDemand[int(monthNum)-1] = demandList[hourCounter]
-					peakHourOfMonth[int(monthNum)-1] = hourCounter
-				energyMonthly[int(monthNum)-1] += demandList[hourCounter]
-	if plat == 'Windows':
-		# myOut = subprocess.check_output(command, shell=True, cwd=vbatPath)
-		proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
-		with open(pJoin(modelDir, "PID.txt"),"w") as pidFile:
-			pidFile.write(str(proc.pid))
-		(myOut, err) = proc.communicate()
-	else:
-		proc = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
-		with open(pJoin(modelDir, "PID.txt"),"w") as pidFile:
-			pidFile.write(str(proc.pid))
-		(myOut, err) = proc.communicate()
-	try:
-		P_lower = myOut.partition("P_lower =\n\n")[2]
-		P_lower = P_lower.partition("\n\nn")[0]
-		P_lower = map(float,P_lower.split('\n'))
-		P_upper = myOut.partition("P_upper =\n\n")[2]
-		P_upper = P_upper.partition("\n\nn")[0]
-		P_upper = map(float,P_upper.split('\n'))
-		E_UL = myOut.partition("E_UL =\n\n")[2]
-		E_UL = E_UL.partition("\n\n")[0]
-		E_UL = map(float,E_UL.split('\n'))
+		return parse('P_lower', mo), parse('P_upper', mo), parse('E_UL', mo)
 	except:
 		raise Exception('Parsing error, check power data')
-	outData["minPowerSeries"] = [-1*x for x in P_lower]
-	outData["maxPowerSeries"] = P_upper
-	outData["minEnergySeries"] = [-1*x for x in E_UL]
-	outData["maxEnergySeries"] = E_UL
-	### Di's Modified dispatch code begings
-	month_index=range(1,13)
-	beta=float(inputDict["demandChargeCost"])
-	C=float(inputDict["capacitance"])
-	R=float(inputDict["resistance"])
-	deltaT=1
-	alpha=1- deltaT/(C*R) # hourly self discharge rate
-	e0=0 # VB initial energy state
-	model = pulp.LpProblem("Demand charge minimization problem", pulp.LpMinimize) 	# start demand charge reduction LP problem
-	VBpower = pulp.LpVariable.dicts("ChargingPower",((i+1) for i in range(8760)))	# decision variable of VB charging power; dim: 8760 by 1
-	for i in range(8760):
-		VBpower[i+1].lowBound = -P_lower[i]
-		VBpower[i+1].upBound = P_upper[i]
-	VBenergy = pulp.LpVariable.dicts("EnergyState",((i+1) for i in range(8760)))	# decision variable of VB energy state; dim: 8760 by 1
-	for i in range(8760):
-	    VBenergy[i+1].lowBound = -E_UL[i]
-	    VBenergy[i+1].upBound = E_UL[i]
-	Demand = pulp.LpVariable.dicts("MonthlyDemand",((month) for month in month_index),lowBound=0)
-	model += pulp.lpSum([Demand[month] * beta] for month in month_index)# objective function: sum of monthly demand charge
-	for i in range(8760):	# VB energy state as a function of VB power
-		i += 1
-		if i==1:
-			model += VBenergy[i] == alpha * e0 + VBpower[i] * deltaT
-		else:
-		    model += VBenergy[i] == alpha * VBenergy[i-1] + VBpower[i] * deltaT
-	hourCounter = 0
-	for monthNum in calendar:					#month number in year
-		for x in range(calendar[monthNum]):		#day number-1 in number of days in month
-			for y in range(24):					#hour of the day-1 out of 24
-				model += (Demand[int(monthNum)] >= demandList[hourCounter] + VBpower[hourCounter+1])
-				hourCounter += 1
-	model.solve()
-	powerReduc = []
-	energyReduc = []
-	for i in range(1,8761):
-	    powerReduc.append(VBpower[i].varValue)
-	    energyReduc.append(VBenergy[i].varValue)
-	outData["VBpower"] = powerReduc
-	outData["VBenergy"] = energyReduc
-	### Di's Modified dispatch code ends
-	for each in demandList:
-		demandAdjustedList.append(each)
-	for x in peakHourOfMonth:
-		y = x - x%24
-		for z in range(y,y+24):
-			demandAdjustedList[z] = (powerReduc[z]+demandList[z])
-	for i in range(10):
-		hourCounter = -1
-		peakHourOfMonth = [0]*12
-		for monthNum in calendar:					#month number in year
-			peakValMonth = 0
-			for x in range(calendar[monthNum]):		#day number-1 in number of days in month
-				for y in range(24):					#hour of the day-1 out of 24
-					hourCounter += 1					#hour out of the year-1 
-					if demandAdjustedList[hourCounter] > peakValMonth:
-						peakValMonth = demandAdjustedList[hourCounter]
-						peakHourOfMonth[int(monthNum)-1] = hourCounter				
-		for x in peakHourOfMonth:
-			y = x - x%24
-			for z in range(y,y+24):
-				demandAdjustedList[z] = (powerReduc[z]+demandList[z])
-	for i in range(12):
-		peakAdjustedDemand[i] = demandAdjustedList[peakHourOfMonth[i]]
-	hourCounter = 0
-	for monthNum in calendar:					#month number in year
-		for x in range(calendar[monthNum]):		#day number-1 in number of days in month
-			for y in range(24):					#hour of the day-1 out of 24
-				energyAdjustedMonthly[int(monthNum)-1] += demandAdjustedList[hourCounter]
-				hourCounter += 1
-	rms = 0
-	for each in P_lower:
-		rms = rms + (each**2)**0.5
-	for each in P_upper:
-		rms = rms + (each**2)**0.5
-	if rms == 0:
-		outData["dataCheck"] = 'VBAT returns no values for your inputs'
-	else:
-		outData["dataCheck"] = ''
-	outData["demand"] = demandList
-	outData["peakDemand"] = peakDemand
-	outData["energyMonthly"] = energyMonthly
-	outData["demandAdjusted"] = demandAdjustedList
-	outData["peakAdjustedDemand"] = peakAdjustedDemand
-	outData["energyAdjustedMonthly"] = energyAdjustedMonthly
-	for x in range(12):
-		energyCost[x] = energyMonthly[x]*float(inputDict["electricityCost"])
-		energyCostAdjusted[x] = energyAdjustedMonthly[x]*float(inputDict["electricityCost"])
-		demandCharge[x] = peakDemand[x]*float(inputDict["demandChargeCost"])
-		demandChargeAdjusted[x] = peakAdjustedDemand[x]*float(inputDict["demandChargeCost"])
-		totalCost[x] = energyCost[x] + demandCharge[x]
-		totalCostAdjusted[x] = energyCostAdjusted[x] + demandChargeAdjusted[x]
-		savings[x] = totalCost[x] - totalCostAdjusted[x]
-		cashFlow += savings[x]
-	cashFlowList[0] = cashFlow
-	if cashFlow ==0:
-		SPP = 0
-	else:
-		SPP = (float(inputDict["unitDeviceCost"])+float(inputDict["unitUpkeepCost"]))*float(inputDict["number_devices"])/cashFlow
-	for x in range(int(inputDict["projectionLength"])):
-		if x >0:
-			cashFlowList[x] = (cashFlowList[x-1])/(1+float(inputDict["discountRate"])/100)
-	for x in cashFlowList:
-		NPV +=x
-	NPV -= float(inputDict["unitDeviceCost"])*float(inputDict["number_devices"])
-	cashFlowList[0] -= float(inputDict["unitDeviceCost"])*float(inputDict["number_devices"])
-	for x in range(int(inputDict["projectionLength"])):
-		if x == 0:
-			cumulativeCashflow[x] = cashFlowList[x]
-		else:
-			cumulativeCashflow[x] = cumulativeCashflow[x-1] + cashFlowList[x]
-	for x in cumulativeCashflow:
-		x -= float(inputDict["unitUpkeepCost"])
-	for x in cashFlowList:
-		x -= float(inputDict["unitUpkeepCost"])
-	dispatchedPower = []
-	for x,y in zip(demandAdjustedList,demandList):
-		dispatchedPower.append(x-y)
-	outData["VBdispatch"] = dispatchedPower
-	outData["energyCost"] = energyCost
-	outData["energyCostAdjusted"] = energyCostAdjusted
-	outData["demandCharge"] = demandCharge
-	outData["demandChargeAdjusted"] = demandChargeAdjusted
-	outData["totalCost"] = totalCost
-	outData["totalCostAdjusted"] = totalCostAdjusted
-	outData["savings"] = savings
-	outData["NPV"] = NPV
-	outData["SPP"] = SPP
-	outData["netCashflow"] = cashFlowList
-	outData["cumulativeCashflow"] = cumulativeCashflow
-	# Stdout/stderr.
-	outData["stdout"] = "Success"
-	return outData
 
+def pulpFunc(inputDict, demand, P_lower, P_upper, E_UL, monthHours):
+	### Di's Modified dispatch code	
+	alpha = 1-(1/(float(inputDict["capacitance"])*float(inputDict["resistance"])))  #1-(deltaT/(C*R)) hourly self discharge rate
+
+	# LP Variables
+	model = pulp.LpProblem("Demand charge minimization problem", pulp.LpMinimize)
+	VBpower = pulp.LpVariable.dicts("ChargingPower", range(8760)) # decision variable of VB charging power; dim: 8760 by 1
+	VBenergy = pulp.LpVariable.dicts("EnergyState", range(8760)) # decision variable of VB energy state; dim: 8760 by 1
+	for i in range(8760):
+		VBpower[i].lowBound = -1*P_lower[i]
+		VBpower[i].upBound = P_upper[i]
+		VBenergy[i].lowBound = -1*E_UL[i]
+		VBenergy[i].upBound = E_UL[i]
+	pDemand = pulp.LpVariable.dicts("MonthlyDemand", range(12), lowBound=0)
+	
+	# Objective function: Minimize sum of peak demands
+	model += pulp.lpSum(pDemand) 
+
+	# VB energy state as a function of VB power
+	model += VBenergy[0] == VBpower[0]
+	for i in range(1, 8760):
+		model += VBenergy[i] == alpha * VBenergy[i-1] + VBpower[i]
+
+	for month, (s, f) in zip(range(12), monthHours):
+		for i in range(s, f):
+			model += pDemand[month] >= demand[i] + VBpower[i]
+
+	'''
+	# Constrain to N hours per month
+	for (s, f) in monthHours:
+		model += len([VBpower[i] for i in range(s, f) if VBpower[i] != 0]) <= 740
+	'''
+	model.solve()
+	return [VBpower[i].varValue for i in range(8760)], [VBenergy[i].varValue for i in range(8760)]
+
+def work(modelDir, inputDict):
+	''' Run the model in its directory.'''
+	out = {}
+	try:
+		with open(pJoin(modelDir, 'demand.csv'), 'w') as f:
+			f.write(inputDict['demandCurve'].replace('\r', ''))
+		with open(pJoin(modelDir, 'demand.csv')) as f:
+			demand = [float(r[0]) for r in csv.reader(f)]
+	 		assert len(demand) == 8760	
+		
+		with open(pJoin(modelDir, 'temp.csv'), 'w') as f:
+			lines = inputDict['tempCurve'].split('\n')
+			correctData = [x+'\n' if x != '999.0' else inputDict['setpoint']+'\n' for x in lines][:-1]
+			f.write(''.join(correctData))
+			assert len(correctData) == 8760
+	except:
+		raise Exception("CSV file is incorrect format. Please see valid format "
+			"definition at <a target='_blank' href = 'https://github.com/dpinney/"
+			"omf/wiki/Models-~-storagePeakShave#demand-file-csv-format'>\nOMF Wiki "
+			"storagePeakShave - Demand File CSV Format</a>")
+	
+	# # created using calendar = {'1': 31, '2': 28, ..., '12': 31}
+	# m = [calendar[key]*24 for key in calendar]
+	# monthHours = [(sum(m[:i]), sum(m[:i+1])) for i, _ in enumerate(m)]
+	monthHours = [(0, 744), (744, 1416), (1416, 2160), (2160, 2880), 
+					(2880, 3624), (3624, 4344), (4344, 5088), (5088, 5832), 
+					(5832, 6552), (6552, 7296), (7296, 8016), (8016, 8760)]
+
+	P_lower, P_upper, E_UL = runOctave(modelDir, inputDict)
+
+	out["minPowerSeries"] = [-1*x for x in P_lower]
+	out["maxPowerSeries"] = P_upper
+	out["minEnergySeries"] = [-1*x for x in E_UL]
+	out["maxEnergySeries"] = E_UL
+	
+	out["VBpower"], out["VBenergy"] = pulpFunc(inputDict, demand, P_lower, P_upper, E_UL, monthHours)
+
+	peakDemand = [max(demand[s:f]) for s, f in monthHours] 
+	energyMonthly = [sum(demand[s:f]) for s, f in monthHours]
+	peakHourOfMonth = [demand.index(p, s, f) for p, (s, f) in zip(peakDemand, monthHours)]
+	demandAdj = [d+p for d, p in zip(demand, out["VBpower"])]
+	peakAdjustedDemand = [max(demandAdj[s:f]) for s, f in monthHours]
+	energyAdjustedMonthly = [sum(demandAdj[s:f]) for s, f in monthHours]
+
+	rms = all([x == 0 for x in P_lower]) and all([x == 0 for x in P_upper])
+	out["dataCheck"] = 'VBAT returns no values for your inputs' if rms else ''
+	out["demand"] = demand
+	out["peakDemand"] = peakDemand
+	out["energyMonthly"] = energyMonthly
+	out["demandAdjusted"] = demandAdj
+	out["peakAdjustedDemand"] = peakAdjustedDemand
+	out["energyAdjustedMonthly"] = energyAdjustedMonthly
+	
+	cellCost = float(inputDict["unitDeviceCost"])*float(inputDict["number_devices"])
+	eCost = float(inputDict["electricityCost"])
+	dCharge = float(inputDict["demandChargeCost"])
+
+	out["VBdispatch"] = [dal-d for dal, d in zip(demandAdj, demand)]
+	out["energyCost"] = [em*eCost for em in energyMonthly]
+	out["energyCostAdjusted"] = [eam*eCost for eam in energyAdjustedMonthly]
+	out["demandCharge"] = [peak*dCharge for peak in peakDemand]
+	out["demandChargeAdjusted"] = [pad*dCharge for pad in out["peakAdjustedDemand"]]
+	out["totalCost"] = [ec+dcm for ec, dcm in zip(out["energyCost"], out["demandCharge"])]
+	out["totalCostAdjusted"] = [eca+dca for eca, dca in zip(out["energyCostAdjusted"], out["demandChargeAdjusted"])]
+	out["savings"] = [tot-tota for tot, tota in zip(out["totalCost"], out["totalCostAdjusted"])]
+
+	annualEarnings = sum(out["savings"]) - float(inputDict["unitUpkeepCost"])*float(inputDict["number_devices"])
+	cashFlowList = [annualEarnings] * int(inputDict["projectionLength"])
+	cashFlowList.insert(0, -1*cellCost)
+
+	out["NPV"] = npv(float(inputDict["discountRate"])/100, cashFlowList)
+	out["SPP"] = cellCost / annualEarnings
+	out["netCashflow"] = cashFlowList
+	out["cumulativeCashflow"] = [sum(cashFlowList[:i+1]) for i, d in enumerate(cashFlowList)]
+
+	out["stdout"] = "Success"
+	return out
+
+def new(modelDir):
+	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	defaultInputs = {
+		"user": "admin",
+		"load_type": "1",
+		"number_devices": "2000",
+		"power": "5.6",
+		"capacitance": "2",
+		"resistance": "2",
+		"cop": "2.5",
+		"setpoint": "22.5",
+		"deadband": "0.625",
+		"demandChargeCost":"25",
+		"electricityCost":"0.06",
+		"projectionLength":"15",
+		"discountRate":"2",
+		"unitDeviceCost":"150",
+		"unitUpkeepCost":"5",
+		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidVBAT.csv")).read(),
+		"tempCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","weatherNoaaTemp.csv")).read(),
+		"fileName": "FrankScadaValidVBAT.csv",
+		"tempFileName": "weatherNoaaTemp.csv",
+		"modelType": modelName}
+	return __neoMetaModel__.new(modelDir, defaultInputs)
+
+def _simpleTest():
+	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
+	if os.path.isdir(modelLoc):
+		shutil.rmtree(modelLoc)
+	new(modelLoc) # Create New.
+	renderAndShow(modelLoc) # Pre-run.
+	runForeground(modelLoc) # Run the model.
+	renderAndShow(modelLoc) # Show the output.
+
+if __name__ == '__main__':
+	_simpleTest ()
+
+"""
 def carpetPlot(tempData):
 	#tempData is a 8760 list that contains the temperature data to be displayed in a carpet plot
 	#takes about one minute to run
@@ -325,50 +241,4 @@ def carpetPlot(tempData):
 	axarr[8,30].axis('off')
 	axarr[10,30].axis('off')
 	plt.savefig('vbatDispatchCarpetPlot.png')
-
-def new(modelDir):
-	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	defaultInputs = {
-		"user": "admin",
-		"load_type": "1",
-		"number_devices": "2000",
-		"power": "5.6",
-		"capacitance": "2",
-		"resistance": "2",
-		"cop": "2.5",
-		"setpoint": "22.5",
-		"deadband": "0.625",
-		"demandChargeCost":"25",
-		"electricityCost":"0.06",
-		"projectionLength":"15",
-		"discountRate":"2",
-		"unitDeviceCost":"150",
-		"unitUpkeepCost":"5",
-		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidVBAT.csv")).read(),
-		"tempCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","weatherNoaaTemp.csv")).read(),
-		"fileName": "FrankScadaValidVBAT.csv",
-		"tempFileName": "weatherNoaaTemp.csv",
-		"modelType":modelName}
-	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
-	return creationCode
-
-def _simpleTest():
-	# Location
-	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
-	# Blow away old test results if necessary.
-	try:
-		shutil.rmtree(modelLoc)
-	except:
-		# No previous test results.
-		pass
-	# Create New.
-	new(modelLoc)
-	# Pre-run.
-	# renderAndShow(modelLoc)
-	# Run the model.
-	runForeground(modelLoc)
-	# Show the output.
-	renderAndShow(modelLoc)
-
-if __name__ == '__main__':
-	_simpleTest ()
+"""

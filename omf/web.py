@@ -451,9 +451,8 @@ def distribution_get(owner, model_name, feeder_num):
 	if not omf.distNetViz.contains_coordinates(tree):
 		omf.distNetViz.insert_coordinates(tree)
 	passed_data = json.dumps(data)
-	"""Should this be an ajax request? The ajax request could be made while the feeder builds in the browser"""
 	component_json = get_components()
-	jasmine=spec = None
+	jasmine = spec = None
 	if request.path.endswith("/test") and User.cu() == "admin":
 		tests = load_test_files(["distNetVizSpec.js", "distDataValidationSpec.js"])
 		jasmine = tests["jasmine"]
@@ -465,11 +464,12 @@ def distribution_get(owner, model_name, feeder_num):
 		dictionary['model'] = str(dictionary['model'])
 		dictionary['name'] = str(dictionary['name'])
 	public_feeders = all_data["publicFeeders"]
+	showFileMenu = User.cu() == "admin" or owner != "public"
 	# omf.distNetViz.forceLayout()
 	return render_template(
 		"distNetViz.html", thisFeederData=passed_data, thisFeederName=feeder_name, thisFeederNum=feeder_num,
 		thisModelName=model_name, thisOwner=owner, components=component_json, jasmine=jasmine, spec=spec,
-		publicFeeders=public_feeders, userFeeders=user_feeders, is_admin=User.cu() == "admin", public=owner == "public"
+		publicFeeders=public_feeders, userFeeders=user_feeders, showFileMenu=showFileMenu
 	)
 
 
