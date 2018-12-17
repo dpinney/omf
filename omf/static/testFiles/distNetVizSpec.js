@@ -1,9 +1,413 @@
 //<script>
+// 32 objects
+const rawTree = {
+    // weirdNode1
+    "0": {
+        "timezone": "PST+8PDT", 
+        "stoptime": "'2000-01-02 00:00:00'", 
+        "starttime": "'2000-01-01 00:00:00'", 
+        "clock": "clock"
+    }, 
+    // weirdNode2
+    "1": {
+        "omftype": "#set", 
+        "argument": "minimum_timestep=60"
+    }, 
+    // node1
+    "245000": {
+        "phases": "ABC", 
+        "name": "nodeT10263825298", 
+        "object": "node", 
+        "longitude": "571.1273158682793", 
+        "nominal_voltage": "7200.0", 
+        "latitude": "279.0611346507024"
+    }, 
+    // node1Line1
+    "368700": {
+        "phases": "BS", 
+        "from": "nodeT10263825298", 
+        "name": "T10263_B", 
+        "object": "transformer", 
+        "to": "nodeS1707-03-015T10263_B", 
+        "configuration": "1807--T325_B-CONFIG"
+    }, 
+    // node1Line1End
+    "285800": {
+        "phases": "BS", 
+        "name": "nodeS1707-03-015T10263_B", 
+        "object": "triplex_meter", 
+        "longitude": "594.4864602890987", 
+        "nominal_voltage": "120", 
+        "latitude": "255.701990229883"
+    }, 
+    // node1Line1EndChild1
+    "326000": {
+        "phases": "BS", 
+        "power_12": "2668.11+1983.57j", 
+        "name": "S1707-03-015_B", 
+        "parent": "nodeS1707-03-015T10263_B", 
+        "object": "triplex_node", 
+        "longitude": "622.0927218773398", 
+        "nominal_voltage": "120", 
+        "latitude": "253.57843164617213"
+    }, 
+    // node1Line2
+    "368500": {
+        "phases": "AS", 
+        "from": "nodeT10263825298", 
+        "name": "T10263_A", 
+        "object": "transformer", 
+        "to": "nodeS1707-03-015T10263_A", 
+        "configuration": "T10285_A-CONFIG"
+    }, 
+    // node1Line2End
+    "285600": {
+        "phases": "AS", 
+        "name": "nodeS1707-03-015T10263_A", 
+        "object": "triplex_meter", 
+        "longitude": "619.4382736477013", 
+        "nominal_voltage": "120", 
+        "latitude": "297.6422560567061"
+    }, 
+    // node1Line2EndChild1
+    "325800": {
+        "phases": "AS", 
+        "power_12": "2668.11+1983.57j", 
+        "name": "S1707-03-015_A", 
+        "parent": "nodeS1707-03-015T10263_A", 
+        "object": "triplex_node", 
+        "longitude": "605.104253207653", 
+        "nominal_voltage": "120", 
+        "latitude": "320.47051083159784"
+    }, 
+    // node1Line3
+    "368600": {
+        "phases": "CS", 
+        "from": "nodeT10263825298", 
+        "name": "T10263_C", 
+        "object": "transformer", 
+        "to": "nodeS1707-03-015T10263_C", 
+        "configuration": "1807--T325_C-CONFIG"
+    }, 
+    // node1Line3End
+    "285700": {
+        "phases": "CS", 
+        "name": "nodeS1707-03-015T10263_C", 
+        "object": "triplex_meter", 
+        "longitude": "563.6948608252912", 
+        "nominal_voltage": "120", 
+        "latitude": "243.49152837354555"
+    }, 
+    // node1Line3EndChild1
+    "325900": {
+        "phases": "CS", 
+        "power_12": "2668.11+1983.57j", 
+        "name": "S1707-03-015_C", 
+        "parent": "nodeS1707-03-015T10263_C", 
+        "object": "triplex_node", 
+        "longitude": "545.644612863749", 
+        "nominal_voltage": "120", 
+        "latitude": "228.09572864164187"
+    }, 
+    // node1Line4
+    "116900": {
+        "phases": "ACB", 
+        "from": "node825298923940", 
+        "name": "825298", 
+        "object": "underground_line", 
+        "longitude": "529.037660472", 
+        "to": "nodeT10263825298", 
+        "length": "621", 
+        "latitude": "284.670992574", 
+        "configuration": "825456-LINECONFIG"
+    }, 
+    // node2 === node1Line4End (node off the main part of ABEC)
+    "244900": {
+        "phases": "ABC", 
+        "name": "node825298923940", 
+        "object": "node", 
+        "longitude": "529.037660472", 
+        "nominal_voltage": "7200.0", 
+        "latitude": "274.670992574"
+    }, 
+    // node2Line1
+    "117200": {
+        "phases": "B", 
+        "from": "node825298923940", 
+        "name": "923941", 
+        "object": "underground_line", 
+        "longitude": "534.263309411", 
+        "to": "nodeT6247418245957866", 
+        "length": "417", 
+        "latitude": "258.557647233", 
+        "configuration": "825117-LINECONFIG"
+    }, 
+    // node2Line1End == node3
+    // node2Line2
+    "116800": {
+        "phases": "ACB", 
+        "from": "node7055970558", 
+        "name": "923940", 
+        "object": "underground_line", 
+        "longitude": "524.65806898", 
+        "to": "node825298923940", 
+        "length": "630", 
+        "latitude": "263.265155066", 
+        "configuration": "923991-LINECONFIG"
+    }, 
+    // node2Line2End
+    "140120": {
+        "phases": "ABCN", 
+        "name": "node7055970558", 
+        "object": "node", 
+        "longitude": "558.3859643660142", 
+        "nominal_voltage": "7200.0", 
+        "latitude": "312.50718234414836"
+    }, 
+    // node2Line2EndChild1
+    "60720": {
+        "control": "VOLT", 
+        "dwell_time": "0.0", 
+        "object": "capacitor", 
+        "name": "CAP134", 
+        "parent": "node7055970558", 
+        "capacitor_B": "0.10 MVAr", 
+        "capacitor_C": "0.10 MVAr", 
+        "capacitor_A": "0.10 MVAr", 
+        "phases": "ABCN", 
+        "longitude": "620.7180398965284", 
+        "time_delay": "300.0", 
+        "switchC": "CLOSED", 
+        "nominal_voltage": "2401.7771", 
+        "voltage_set_high": "2350.0", 
+        "voltage_set_low": "2340.0", 
+        "latitude": "470.93253526327317", 
+        "control_level": "INDIVIDUAL", 
+        "switchA": "CLOSED", 
+        "switchB": "CLOSED", 
+        "phases_connected": "ABCN", 
+        "pt_phase": "ABCN"
+    }, 
+    // node2Line3
+    "117600": {
+        "phases": "ACB", 
+        "from": "node825298923940", 
+        "name": "923942", 
+        "object": "underground_line", 
+        "longitude": "563.750899855", 
+        "to": "nodeT6246217033670559", 
+        "length": "1904", 
+        "latitude": "244.93844218", 
+        "configuration": "923991-LINECONFIG"
+    }, 
+    // node2Line3End
+    "140220": {
+        "phases": "ABCN", 
+        "name": "nodeT6246217033670559", 
+        "object": "node", 
+        "longitude": "522.8163580888573", 
+        "nominal_voltage": "7200.0", 
+        "latitude": "345.42234039166664"
+    }, 
+    // node2Line3EndLine
+    "52220": {
+        "phases": "AN", 
+        "from": "nodeT6246217033670559", 
+        "name": "17127", 
+        "object": "overhead_line", 
+        "longitude": "622.2431817865727", 
+        "to": "nodeF526917127", 
+        "length": "25.2353", 
+        "latitude": "469.0231890245341", 
+        "configuration": "18949line_configuration24501"
+    }, 
+    // node2Line3EndLineEnd
+    "140320": {
+        "phases": "AN", 
+        "name": "nodeF526917127", 
+        "object": "node", 
+        "longitude": "546.7063921556045", 
+        "nominal_voltage": "7200.0", 
+        "latitude": "360.28725047764266"
+    }, 
+    // node3 === node2Line1End (main node of 3 houses)
+    "136420": {
+        "phases": "AN", 
+        "name": "nodeT6247418245957866", 
+        "object": "node", 
+        "longitude": "454.528228025527", 
+        "nominal_voltage": "7200.0", 
+        "latitude": "377.2278969234081"
+    }, 
+    // node3Line1
+    "46420": {
+        "phases": "AS", 
+        "from": "nodeT6247418245957866", 
+        "name": "T62474182459", 
+        "object": "transformer", 
+        "longitude": "104.18010219805728", 
+        "to": "node62474182499T62474182459", 
+        "latitude": "666.852052925009", 
+        "configuration": "T62474206624transformer_configuration90001"
+    }, 
+    // node3Line1End (parent of 3 houses)
+    "136520": {
+        "phases": "AS", 
+        "name": "node62474182499T62474182459", 
+        "object": "triplex_meter", 
+        "longitude": 410.7928844905687,
+        "nominal_voltage": "120", 
+        "latitude": 467.61430322224993
+    }, 
+    // node3Line1EndChild1 (house with 2 children)
+    "172262": {
+        "schedule_skew": "761", 
+        "name": "house172262", 
+        "parent": "node62474182499T62474182459", 
+        "floor_area": "2200", 
+        "cooling_COP": "3.4", 
+        "object": "house", 
+        "cooling_system_type": "ELECTRIC", 
+        "longitude": 276.67116431669666, 
+        "heating_setpoint": "heating4*1", 
+        "cooling_setpoint": "cooling7*1", 
+        "air_temperature": "70", 
+        "thermal_integrity_level": "5", 
+        "heating_COP": "2.4", 
+        "latitude": 441.3730674413469, 
+        "mass_temperature": "70", 
+        "heating_system_type": "HEAT_PUMP"
+    }, 
+    // node3Line1EndChild1Child1
+    "172263": {
+        "parent": "house172262", 
+        "schedule_skew": "1100", 
+        "name": "ZIPload172263", 
+        "power_fraction": "0.400000", 
+        "object": "ZIPload", 
+        "current_fraction": "0.300000", 
+        "longitude": 274.72737127069854, 
+        "base_power": "LIGHTS*1.33", 
+        "latitude": 399.5815169523868, 
+        "current_pf": "1.000", 
+        "power_pf": "1.000", 
+        "heatgain_fraction": "0.9", 
+        "impedance_fraction": "0.300000", 
+        "impedance_pf": "1.000"
+    }, 
+    // node3Line1EndChild1Child2
+    "172295": {
+        "schedule_skew": "998", 
+        "heating_element_capacity": "5.2", 
+        "parent": "house172262", 
+        "tank_volume": "50", 
+        "object": "waterheater", 
+        "longitude": 237.79530339673374, 
+        "thermostat_deadband": "4.6", 
+        "location": "INSIDE", 
+        "demand": "water16*1", 
+        "latitude": 479.2770614982388, 
+        "temperature": "135", 
+        "tank_setpoint": "132", 
+        "tank_UA": "2.6", 
+        "name": "waterheater172295"
+    }, 
+    // node3Line1EndChild2 (house with single child)
+    "172260": {
+        "schedule_skew": "-2400", 
+        "name": "house172260", 
+        "parent": "node62474182499T62474182459", 
+        "floor_area": "1400", 
+        "cooling_COP": "2.9", 
+        "object": "house", 
+        "cooling_system_type": "NONE", 
+        "longitude": 359.2823687716179, 
+        "heating_setpoint": "heating5*1", 
+        "cooling_setpoint": "cooling8*1", 
+        "air_temperature": "70", 
+        "thermal_integrity_level": "6", 
+        "heating_COP": "3.3", 
+        "latitude": 523.0124050331971, 
+        "mass_temperature": "70", 
+        "heating_system_type": "RESISTANCE"
+    }, 
+    // node3Line1EndChild2Child1
+    "172261": {
+        "parent": "house172260", 
+        "schedule_skew": "3510", 
+        "name": "ZIPload172261", 
+        "power_fraction": "0.400000", 
+        "object": "ZIPload", 
+        "current_fraction": "0.300000", 
+        "longitude": 319.4346113286559, 
+        "base_power": "LIGHTS*1.33", 
+        "latitude": 557.0287833381647, 
+        "current_pf": "1.000", 
+        "power_pf": "1.000", 
+        "heatgain_fraction": "0.9", 
+        "impedance_fraction": "0.300000", 
+        "impedance_pf": "1.000"
+    }, 
+    // node3Line1EndChild3 (house with no children)
+    "172264": {
+        "schedule_skew": "-1600", 
+        "name": "house172264", 
+        "parent": "node62474182499T62474182459", 
+        "floor_area": "1500", 
+        "cooling_COP": "2.6", 
+        "object": "house", 
+        "cooling_system_type": "NONE", 
+        "longitude": 442.86546974953814, 
+        "heating_setpoint": "heating4*1", 
+        "cooling_setpoint": "cooling3*1", 
+        "air_temperature": "70", 
+        "thermal_integrity_level": "4", 
+        "heating_COP": "2.8", 
+        "latitude": 549.2536111541721,
+        "mass_temperature": "70", 
+        "heating_system_type": "RESISTANCE"
+    }, 
+    // orphanNode1
+    "172265": {
+        "parent": "madeUpHouse", 
+        "schedule_skew": "-3120", 
+        "name": "ZIPload172265", 
+        "power_fraction": "0.400000", 
+        "object": "ZIPload", 
+        "current_fraction": "0.300000", 
+        "longitude": 409.82098796756964, 
+        "base_power": "LIGHTS*1.33", 
+        "latitude": 588.129472074135, 
+        "current_pf": "1.000", 
+        "power_pf": "1.000", 
+        "heatgain_fraction": "0.9", 
+        "impedance_fraction": "0.300000", 
+        "impedance_pf": "1.000"
+    }, 
+    // orphanLine1
+    "33420": {
+        "phases": "ACBN", 
+        "from": "node1778317643", 
+        "name": "17783", 
+        "object": "overhead_line", 
+        "longitude": 405.7790593997488, 
+        "to": "node1817717783", 
+        "length": "338.245", 
+        "latitude": 614.664711377176, 
+        "configuration": "16564line_configuration32701"
+    }
+};
+let testTree = deepCopy(rawTree);
+let testTreeWrapper = createTreeWrapper(testTree);
+
 describe("Unit tests", function() {
 
     /* TODO: If key === 0, longitude === 0, latitude === 0 (or some other property === 0), the code could 
     break in funny ways. I need to check for undefined explicitly instead of using !<property>
     TODO: build a tree that is more representative of the actual data
+    */
+
+    /* Some latitudes and longitudes are strings while others are numbers in the .omd files. Is this a problem?
     */
 
     /* Hardcoding test data like this is bad because if the original data ever changes structure, the methods will fail but
@@ -12,77 +416,46 @@ describe("Unit tests", function() {
     */
     let testTree;
     let testTreeWrapper;
-    const parentKey = "172645";
-    const childKey = "172646";
-    const lineKey = "57720";
-    const lineNodeKey = "144420"
-    const grandParentKey = "136920";
-    const childLineKey = "0";
-    const childLineNodeKey = "-1";
+    // 34 keys for 32 objects
+    const weirdNode1Key = "0";
+    const weirdNode2Key = "1";
+    const node1Key = "245000";
+    const node1Line1 = "368700";
+    const node1Line1End = "285800";
+    const node1Line1EndChild1 = "326000";
+    const node1Line2 = "368500";
+    const node1Line2End = "285600";
+    const node1Line2EndChild1 = "325800";
+    const node1Line3 = "368600";
+    const node1Line3End = "285700";
+    const node1Line3EndChild1 = "325900";
+    const node1Line4 = "116900";
+    const node1Line4End = "244900";
+    const node2 = node1Line4End;
+    const node2Line1 = "117200";
+    const node2Line1End  = "136420";
+    const node2Line2 = "116800";
+    const node2Line2End = "140120";
+    const node2Line2EndChild1 = "60720";
+    const node2Line3 = "117600";
+    const node2Line3End = "140220";
+    const node2Line3EndLine = "52220";
+    const node2Line3EndLineEnd = "140320";
+    const node3 = node2Line1End;
+    const node3Line1 = "46420";
+    const node3Line1End = "136520";
+    const node3Line1EndChild1 = "172262";
+    const node3Line1EndChild1Child1 = "172263";
+    const node3Line1EndChild1Child2 = "172295";
+    const node3Line1EndChild2 = "172260";
+    const node3Line1EndChild2Child1 = "172261";
+    const node3Line1EndChild3 = "172264";
+    const orphanNode1 = "172265";
+    const orphanLine1 = "33420";
 
     beforeEach(function() {
         // Tree does NOT contain any cycles
-        testTree = {
-            //Parent node
-            "172645": {
-                "name": "house172645", 
-                "parent": "node62474181379T62474181443", 
-                "object": "house", 
-                "longitude": 92.46050261745904, 
-                "latitude": 1012.0545354006846, 
-            }, 
-            //Parent node of parent node (grandparent node)
-            "136920": {
-                "name": "node62474181379T62474181443", 
-                "object": "triplex_meter", 
-                "longitude": 110.54543561193137, 
-                "latitude": 650.800448635241
-            }, 
-            //Child of parent node
-            "172646": {
-                "parent": "house172645", 
-                "name": "ZIPload172646", 
-                "object": "ZIPload", 
-                "longitude": 93.65197702537034, 
-                "latitude": 1011.8227442648296, 
-            }, 
-            //Line connected to parent node
-            "57720": {
-                "from": "nodeT6246210126716194", 
-                "name": "15631", 
-                "object": "overhead_line", 
-                "longitude": 452.44826409302914, 
-                "to": "house172645", 
-                "latitude": 324.0822385660431, 
-                "configuration": "16194line_configuration57101",
-                "phases": "CN"
-            }, 
-            //Node on the other end of a line connected to the parent node
-            "144420": {
-                "name": "nodeT6246210126716194", 
-                "object": "node", 
-                "longitude": 469.95529889121826, 
-                "latitude": 328.98233583846013
-            }, 
-            //Line connected to child node
-            "0": {
-                "from": "ZIPload172646", 
-                "name": "338044", 
-                "object": "overhead_line", 
-                "longitude": 552.44826409302914, 
-                "to": "nodeT9000", 
-                "latitude": 124.0822385660431, 
-                "configuration": "16194line_configuration57101",
-                "phases": "CN"
-            }, 
-            //Node on the other end of a line connected to the child node
-            "-1": {
-                "name": "nodeT9000", 
-                "object": "node", 
-                "longitude": 300.552, 
-                "latitude": 23480.5588
-            }, 
-        };
+        testTree = deepCopy(rawTree);
         testTreeWrapper = createTreeWrapper(testTree);
     });
 
@@ -90,29 +463,21 @@ describe("Unit tests", function() {
 
         describe("createTreeWrapper()", function() {
 
-            it("should return a TreeWrapper with an 'tree' property that is identical to the passed tree argument", function() {
+            it("should return a TreeWrapper with a 'tree' property that is identical to the passed tree argument", function() {
                 expect(testTreeWrapper.tree).toBe(testTree);
             });
 
-            it(`should return a TreeWrapper with a 'names' property that is a map between every name and key of an object in the 
-            tree`, function() {
-                expect(testTreeWrapper.names).toEqual(
-                    {
-                        "house172645": "172645",
-                        "node62474181379T62474181443": "136920",
-                        "ZIPload172646": "172646",
-                        "15631": "57720",
-                        "nodeT6246210126716194": "144420",
-                        "338044": "0",
-                        "nodeT9000": "-1"
-                    }
-                );
+            it(`should return a TreeWrapper with a 'names' property that was created with buildNames()`, function() {
+                const spy = spyOn(treeWrapperPrototype, "buildNames").and.callThrough();
+                newTreeWrapper = createTreeWrapper(testTree);
+                expect(newTreeWrapper.names).toBeDefined();
+                expect(spy).toHaveBeenCalled();
             });
         });
 
         describe("treeWrapperPrototype", function() {
             
-            describe("delete()", function() {
+            xdescribe("delete()", function() {
 
                 describe("when the tree object with the passed key argument has NO children or connected lines", function() {
 
@@ -149,7 +514,7 @@ describe("Unit tests", function() {
                 });
             });
 
-            describe("recursiveDelete()", function() {
+            xdescribe("recursiveDelete()", function() {
 
                 describe("when the tree object with the passed key argument is a node", function() {
 
@@ -221,7 +586,7 @@ describe("Unit tests", function() {
                 });
             });
 
-            describe("insert()", function() {
+            xdescribe("insert()", function() {
 
                 describe("when the TreeObject does not exist in the TreeWrapper", function() {
 
@@ -298,7 +663,7 @@ describe("Unit tests", function() {
             });
         });
 
-        describe("createTreeObject()", function() {
+        xdescribe("createTreeObject()", function() {
 
             describe("when invoked with (key, treeWrapper) arguments", function() {
 
@@ -380,11 +745,11 @@ describe("Unit tests", function() {
             });
         });
 
-        describe("treeObjectPrototype", function() {
+        xdescribe("treeObjectPrototype", function() {
             //no public methods?
         });
 
-        describe("createAddableSvgData()", function() {
+        xdescribe("createAddableSvgData()", function() {
 
             it("should return an object with an array of lines and an array of circles", function() {
                 const treeWrapper = createTreeWrapper({});
@@ -412,31 +777,130 @@ describe("Unit tests", function() {
 
         describe("treeWrapperPrototype", function() {
 
+            describe("buildNames()", function() {
+
+                it("should return an object that maps the name of every tree object to its key", function() {
+                    const names = {};
+                    for (let key in testTree) {
+                        let name = testTree[key].name;
+                        if (name !== undefined && name !== null) {
+                            names[name] = key;
+                        }
+                    }
+                    expect(testTreeWrapper.buildNames()).toEqual(names);
+                });
+
+                it("should exclude a tree object if it does not have a name property", function() {
+                    // 33 objects, 2 weird nodes are missing 'name'
+                    expect(Object.keys(testTreeWrapper.buildNames()).length).toEqual(31);  
+                    expect(testTreeWrapper.names[undefined]).not.toBeDefined();
+                });
+            });
+
+            describe("contains()", function() {
+
+                it("should return true if this TreeWrapper contains a tree object with the 'key' argument.", function() {
+                    expect(testTreeWrapper.tree[node1Key]).toBeDefined();
+                    expect(testTreeWrapper.contains(node1Key)).toEqual(true);
+                });
+
+                it("should return false if this TreeWrapper does not contain a tree object with the 'key' argument", function() {
+                    expect(testTreeWrapper.tree["foo"]).toBeUndefined();
+                    expect(testTreeWrapper.contains("foo")).toEqual(false);
+                });
+            });
+
+            describe("add()", function() {
+
+                describe("when the 'key' argument does not exist in 'treeWrapper' argument", function() {
+
+                    it("should call console.log(), not modify this TreeWrapper, and return", function() {
+                        expect(testTreeWrapper.tree["foo"]).toBeUndefined();
+                        const spy = spyOn(console, "log");
+                        const tWrapper = createTreeWrapper({});
+                        const emptyWrapper = createTreeWrapper({});
+                        tWrapper.add("foo", testTreeWrapper);
+                        expect(tWrapper).toEqual(emptyWrapper);
+                        expect(spy).toHaveBeenCalled();
+                    });
+                });
+
+                describe(`when the tree object with the 'key' argument exists in the 'treeWrapper' argument,
+                but does not have a 'name' property`, function() {
+
+                    it(`should 1) add the tree object to the 'tree' property of this TreeWrapper, 2) not
+                    modify the 'names' property of this TreeWrapper, 3) call console.log()`, function() {
+                        expect(testTreeWrapper.tree[weirdNode1Key]).toBeDefined();
+                        expect(testTreeWrapper.tree[weirdNode1Key].name).toBeUndefined();
+                        const spy = spyOn(console, "log");
+                        const tWrapper = createTreeWrapper({});
+                        tWrapper.add(weirdNode1Key, testTreeWrapper);
+                        expect(spy).toHaveBeenCalled();
+                        expect(Object.keys(tWrapper.tree).length).toEqual(1);
+                        expect(Object.keys(tWrapper.names).length).toEqual(0);
+                    });
+                });
+
+                describe("when the tree object with the key exists, and has a 'name' property", function() {
+
+                    it(`should add the tree object argument to the 'tree' and 'names' properties of 
+                    this treeWrapper`, function() {
+                        expect(testTreeWrapper.tree[node1Key]).toBeDefined();
+                        expect(testTreeWrapper.tree[node1Key].name).toBeDefined();
+                        const tWrapper = createTreeWrapper({});
+                        tWrapper.add(node1Key, testTreeWrapper);
+                        expect(Object.keys(tWrapper.tree).length).toEqual(1);
+                        expect(Object.keys(tWrapper.names).length).toEqual(1);
+                    });
+                });
+            });
+
             describe("getChildrenOf()", function() {
 
-                describe("when the tree object with the passed key argument has children", function() {
+                it(`should return a TreeWrapper that excludes tree objects that lack a 'parent' 
+                property.` , function() {
+                    const t = {
+                        "0": {
+                            "climate": "humid"
+                        }
+                    };
+                    const emptyWrapper = createTreeWrapper({});
+                    const children = createTreeWrapper(t).getChildrenOf("0");
+                    expect(children).toEqual(emptyWrapper);
+                });
 
-                    it(`should return a TreeWrapper that only contains references to child tree objects of
-                    the tree object with the passed key argument`, function() {
-                        const subtreeWrapper = testTreeWrapper.getChildrenOf(parentKey);
-                        expect(subtreeWrapper.tree[childKey]).toBe(testTreeWrapper.tree[childKey]);
-                        expect(Object.keys(subtreeWrapper.tree).length).toEqual(1);
-                        expect(subtreeWrapper.names[subtreeWrapper.tree[childKey].name]).toEqual(testTreeWrapper.names[testTreeWrapper.tree[childKey].name]);
-                        expect(Object.keys(subtreeWrapper.names).length).toEqual(1);
+                describe("when the tree object with the passed 'key' argument has children", function() {
+
+                    it(`should return a TreeWrapper that only contains references to its child tree objects`, function() {
+                        // Get 2 children
+                        let tWrapper = createTreeWrapper({});
+                        tWrapper.add(node3Line1EndChild1Child2, testTreeWrapper);
+                        tWrapper.add(node3Line1EndChild1Child1, testTreeWrapper);
+                        let children = testTreeWrapper.getChildrenOf(node3Line1EndChild1);
+                        expect(children).toEqual(tWrapper);
+
+                    });
+
+                    it(`should return a TreeWrapper that only contains references to its child tree objects`, function() {
+                        // Get 1 child
+                        const tWrapper = createTreeWrapper({});
+                        tWrapper.add(node2Line2EndChild1, testTreeWrapper);
+                        const children = testTreeWrapper.getChildrenOf(node2Line2End)
+                        expect(children).toEqual(tWrapper);
                     });
                 });
 
                 describe("when the tree object with the passed key argument does not have children", function() {
 
                     it("should return an empty TreeWrapper", function() {
-                        const subtreeWrapper = testTreeWrapper.getChildrenOf(lineKey);
-                        expect(Object.keys(subtreeWrapper.tree).length).toEqual(0);
-                        expect(Object.keys(subtreeWrapper.names).length).toEqual(0);
+                        const emptyWrapper = createTreeWrapper({});
+                        const children = testTreeWrapper.getChildrenOf(node2Line3End);                        
+                        expect(children).toEqual(emptyWrapper);
                     });
                 });
             });
             
-            describe("getConnectedLinesOf()", function() {
+            xdescribe("getConnectedLinesOf()", function() {
 
                 describe("when the tree object with the passed key argument has connected lines", function() {
 
@@ -460,7 +924,7 @@ describe("Unit tests", function() {
                 });
             });
 
-            describe("merge()", function() {
+            xdescribe("merge()", function() {
 
                 describe("when no keys array is passed", function() {
 
@@ -497,7 +961,7 @@ describe("Unit tests", function() {
                 });
             });
 
-            describe(`getSubtreeToDelete()`, function() {
+            xdescribe(`getSubtreeToDelete()`, function() {
 
                 describe("when the tree object with the passed key argument is a node", function() {
 
@@ -566,7 +1030,7 @@ describe("Unit tests", function() {
                 });
             });
 
-            describe("getParentOf()", function() {
+            xdescribe("getParentOf()", function() {
 
                 describe("when the tree object with the passed key argument has a parent", function() {
 
@@ -590,7 +1054,7 @@ describe("Unit tests", function() {
                 });
             });
 
-            describe("getPairedNodesOf()", function() {
+            xdescribe("getPairedNodesOf()", function() {
 
                 describe("when the tree object with the passed key has paired nodes", function() {
 
@@ -625,7 +1089,7 @@ describe("Unit tests", function() {
                 });
             });
 
-            describe("getNodeEndsOf()", function() {
+            xdescribe("getNodeEndsOf()", function() {
 
                 describe("when the tree object with the passed key argument is a line", function() {
 
@@ -652,7 +1116,7 @@ describe("Unit tests", function() {
                 });
             });
 
-            describe("getSubtreeToRedraw()", function() {
+            xdescribe("getSubtreeToRedraw()", function() {
 
                 describe("when tree object with the passed key argument is a node", function() {
 
@@ -687,9 +1151,12 @@ describe("Unit tests", function() {
             });
         });
 
-        describe("treeObjectPrototype", function() {
+        xdescribe("treeObjectPrototype", function() {
             // no private methods?
         });
+    });
+
+    describe("Utility methods", function() {
 
         describe("getNewTreeKey()", function() {
 
@@ -711,6 +1178,7 @@ describe("Unit tests", function() {
         });
     });
 
+        /*
         describe("Ajax constructor function prototype", function() {
 
             it("should throw an error when http method is POST and there is no instance of FormData", function() {
@@ -780,8 +1248,9 @@ describe("Unit tests", function() {
                 });
             });
         });
+        */
 
-        describe("deepCopy()", function() {
+        xdescribe("deepCopy()", function() {
 
             it("should throw an error if the object being copied contains a method", function() {
                 const obj = {
@@ -998,6 +1467,13 @@ setTimeout(
         jasmineDiv.style.position = "relative";
         jasmineDiv.style["z-index"] = 1;
         document.body.prepend(jasmineDiv);
+        // Replace the real tree with the testing tree
+        let svg = createDeletableSvgData(gTreeWrapper.tree);
+        svg.deleteFrom(gViewport);
+        svg = createAddableSvgData(createTreeWrapper(deepCopy(rawTree)));
+        svg.addTo(gViewport);
+        // Hack
+        gTreeWrapper = testTreeWrapper;
     },
     1000
 );

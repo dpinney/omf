@@ -455,7 +455,7 @@ def distribution_get(owner, model_name, feeder_num):
 	component_json = get_components()
 	jasmine=spec = None
 	if request.path.endswith("/test") and User.cu() == "admin":
-		tests = load_test_files(["distNetVizSpec.js", "distDataValidationSpec.js"])
+		tests = load_test_files(["distNetVizSpec.js"])
 		jasmine = tests["jasmine"]
 		spec = tests["spec"]
 	all_data = getDataNames()
