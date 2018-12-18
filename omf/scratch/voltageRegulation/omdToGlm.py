@@ -74,7 +74,7 @@ with open('outGLMtest.glm', "w") as outFile:
 		addedString = addedString + i
 	outFile.write(feeder.sortedWrite(inFeeder['tree'])+addedString)
 
-os.system(omf.omfDir +'/solvers/gridlabd_gridballast/local_gd/bin/gridlabd /Users/tuomastalvitie/Desktop/gridballast_gld_simulations/Feeders/outGLM.glm')
+os.system(omf.omfDir +'/solvers/gridlabd_gridballast/local_gd/bin/gridlabd outGLMtest.glm')
 
 data = pd.read_csv(('voltDump.csv'), skiprows=[0])
 for i, row in data['voltA_real'].iteritems():
