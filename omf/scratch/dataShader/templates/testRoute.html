@@ -41,7 +41,23 @@ body, html {
 	transform: translate(-50%, -50%);*/
 }
 
-.img{
+#loadingScreen {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	z-index: -3;
+}
+
+#spinner {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	-webkit-transform: translate(-50%, -50%);
+	-ms-transform: translate(-50%, -50%);
+	transform: translate(-50%, -50%);
+}
+
+#dsImage{
 
 	/*display: none;*/
 	position:absolute;
@@ -49,6 +65,7 @@ body, html {
 	width: 100%;
 	height: 100%;
 }
+
 
 #controller{
 	background-color: coral;
@@ -130,6 +147,9 @@ label, input {
 		<button class="strafeArrow" id="strafeBottom" name="strafeBottom">&dArr;</button>
 	</div>
 	<div id="mapid"></div>
+	<div id="loadingScreen">
+		<img id="spinner" src="{{url_for('static', filename='spinner.gif')}}" />
+	</div>
 	</div>
 	 <script>
 	 	/*
@@ -138,7 +158,6 @@ label, input {
 	    $(this).closest('.sidebar-outer').css('width', 0);
 	});*/
     </script>
-	<div id="imageClick"></div>
 	<script type="text/javascript">
 	$(document).ready(function() {
 		let x_low = parseFloat("{{x_low}}");
@@ -150,7 +169,7 @@ label, input {
 		//let x_mean = (parseFloat("{{x_high}}") + parseFloat("{{x_low}}")) / 2;
 		//let y_mean = (parseFloat("{{y_high}}") + parseFloat("{{y_low}}")) / 2;
 		let bounds = [[y_high, x_high], [y_low, x_low]];
-		var mymap = L.map('mapid');
+		var mymap = L.map('mapid', { zoomControl:false });
 		mymap.fitBounds([
 			[x_low, y_low],
 			[x_high, y_high]
@@ -176,6 +195,10 @@ label, input {
 		var domRect = canvas.getBoundingClientRect();
 		canvas.width = domRect.width;
 		canvas.height = domRect.height;
+		var loadingScreen = document.getElementById('loadingScreen');
+		loadingScreen.width = domRect.width;
+		loadingScreen.height = domRect.height;
+		console.log(loadingScreen.height);
 		var data = {};
 		var isDown = false;
 		var x_start;
@@ -205,6 +228,7 @@ label, input {
 		});
 
 		$(".zoomButton").on("click", function(event){
+			$('#loadingScreen').css('z-index', 3);
 			//ghet current x and y values
 			var new_x_low = parseFloat($("#x_low").val());
 			var new_y_low = parseFloat($("#y_low").val());
@@ -263,6 +287,7 @@ label, input {
 					$(".strafeArrow").show();
 					$(".zoomButton").show();
 					$('#dsImage').attr('src', callback.newImage);
+					$('#loadingScreen').css('z-index', -3);
 					console.log('in ajax now');
 					console.log(mymap.getBounds());
 					//imageUrl = callback.newImage;
@@ -294,6 +319,8 @@ label, input {
 		});
 
 		$(".strafeArrow").on("click", function(event){
+			$('#loadingScreen').css('z-index', 3);
+			console.log(document.getElementById('loadingScreen').style.zIndex);
 			map_x_low = parseFloat($("#x_low").val());
 			map_y_low = parseFloat($("#y_low").val());
 			map_x_high = parseFloat($("#x_high").val());
@@ -376,6 +403,7 @@ label, input {
 	    });
 
 		$("#imageCanvas").on("mouseup", function(event) {
+			$('#loadingScreen').css('z-index', 3);
 			var domRect = this.getBoundingClientRect();
 		    x_up = mymap.mouseEventToLatLng(event).lng;
 		    y_up = mymap.mouseEventToLatLng(event).lat;
