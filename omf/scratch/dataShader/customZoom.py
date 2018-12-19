@@ -17,8 +17,8 @@ def hello():
 	return "Hello World!"
 
 @app.route("/testing", methods=["GET", "POST"])
-def testingRoute(x_range=(-115,-105), y_range=(30,40)):
-	dsPlot = newGraphplot(randomloc, connect_edges(randomloc,edges), x_range=x_range, y_range=y_range)
+def testingRoute():
+	dsPlot = newGraphplot(randomloc, connect_edges(randomloc,edges), x_range=(xMin,xMax), y_range=(yMin,yMax))
 	#convert datashder image to png
 	back_img = tf.Image(dsPlot).to_pil()
 	in_mem_file = io.BytesIO()
@@ -28,7 +28,7 @@ def testingRoute(x_range=(-115,-105), y_range=(30,40)):
 	img_bytes = in_mem_file.read()
 	base64_encoded_result_bytes = base64.b64encode(img_bytes)
 	base64_encoded_result_str = 'data:image/png;base64,' + base64_encoded_result_bytes.decode('ascii')
-	return render_template("testRoute.html", newImage=base64_encoded_result_str, x_low=40, y_low=40, x_high=50, y_high=50)
+	return render_template("testRoute.html", newImage=base64_encoded_result_str, x_low=xMin, y_low=yMin, x_high=xMax, y_high=yMax)
 
 def vectorCalc(x_range, y_range, x_click, y_click):
 	x_click = x_range[0]*(1-x_click) + x_range[1]*(x_click)
@@ -36,135 +36,16 @@ def vectorCalc(x_range, y_range, x_click, y_click):
 	y_click = y_range[0]*(1-y_click) + y_range[1]*(y_click)
 	return x_click, y_click
 
-@app.route("/changeRange", methods=["POST"])
-def changeRange():
-	jsonResp = request.get_json()
-	x_low = float(jsonResp["x_low"])
-	print(x_low)
-	y_low = float(jsonResp["y_low"])
-	x_high = float(jsonResp["x_high"])
-	y_high = float(jsonResp["y_high"])
-	#x_high = min(x_click+(counter), 1)
-	#y_high = min(y_click +(counter), 1)
-	x_range = (x_low, x_high)
-	y_range = (y_low, y_high)
-	dsPlot = newGraphplot(randomloc, connect_edges(randomloc,edges), x_range=x_range, y_range=y_range)
-	#convert datashder image to png
-	back_img = tf.Image(dsPlot).to_pil()
-	in_mem_file = io.BytesIO()
-	back_img.save(in_mem_file, format = "PNG")
-	# reset file pointer to start
-	in_mem_file.seek(0)
-	img_bytes = in_mem_file.read()
-	base64_encoded_result_bytes = base64.b64encode(img_bytes)
-	base64_encoded_result_str = 'data:image/png;base64,' + base64_encoded_result_bytes.decode('ascii')
-	return jsonify(newImage=base64_encoded_result_str)
-
-@app.route("/zoom", methods=["POST"])
-def zoom():
-	#print(request.get_json())
-	jsonResp = request.get_json()
-	print(jsonResp)
-	#Get the clicks
-	x_down = float(jsonResp["x_down"])
-	y_down = float(jsonResp["y_down"])
-	x_up = float(jsonResp["x_up"])
-	y_up = float(jsonResp["y_up"])
-	'''
-	x_down = float(jsonResp["x_down"])
-	y_down = 1 - float(jsonResp["y_down"])
-	x_up = float(jsonResp["x_up"])
-	y_up = 1 - float(jsonResp["y_up"])
-	'''
-	#Translate from clicks to min/max
-	'''
-	x_low = min(x_down, x_up)
-	y_low = min(y_down, y_up)
-	x_high = max(x_down, x_up)
-	y_high = max(y_down, y_up)
-	#Get the old range
-	current_x_range = tuple((float(jsonResp["current_x_low"]), float(jsonResp["current_x_high"])))
-	current_y_range = tuple((float(jsonResp["current_y_low"]), float(jsonResp["current_y_high"])))
-	#Vectorizeto fit range
-	x_low, y_low = vectorCalc(current_x_range, current_y_range, x_low, y_low)
-	x_high, y_high = vectorCalc(current_x_range, current_y_range, x_high, y_high)
-	'''
-	x_range = (x_low, x_high)
-	y_range = (y_low, y_high)
-	print(x_range, y_range)
-	dsPlot = newGraphplot(randomloc, connect_edges(randomloc,edges), x_range=x_range, y_range=y_range)
-	#convert datashder image to png
-	back_img = tf.Image(dsPlot).to_pil()
-	in_mem_file = io.BytesIO()
-	back_img.save(in_mem_file, format = "PNG")
-	# reset file pointer to start
-	in_mem_file.seek(0)
-	img_bytes = in_mem_file.read()
-	base64_encoded_result_bytes = base64.b64encode(img_bytes)
-	base64_encoded_result_str = 'data:image/png;base64,' + base64_encoded_result_bytes.decode('ascii')
-	return jsonify(newImage=base64_encoded_result_str, x_low=x_low, y_low=y_low, x_high=x_high, y_high=y_high)
-
-
-@app.route("/strafeArrow", methods=["POST"])
-def strafeArrow():
-	#print(request.get_json())
-	jsonResp = request.get_json()
-	print(jsonResp)
-	#Get the old range
-	current_x_range = tuple((float(jsonResp["current_x_low"]), float(jsonResp["current_x_high"])))
-	current_y_range = tuple((float(jsonResp["current_y_low"]), float(jsonResp["current_y_high"])))
-	'''
-	Commented out for js
-	current_y_low, current_y_high = current_y_range[0], current_y_range[1]
-	current_x_low, current_x_high = current_x_range[0], current_x_range[1]
-	print(current_y_range)
-	#Calculate 
-	x_width = current_x_high - current_x_low
-	y_height = current_y_high - current_y_low
-	if jsonResp['direction'] == 'strafeRight':
-		current_x_range = (current_x_high, (current_x_high+ x_width))
-	elif jsonResp['direction'] == 'strafeLeft':
-		current_x_range = ((current_x_low - x_width), current_x_low )
-	elif jsonResp['direction'] == 'strafeBottom':
-		current_y_range = ((current_y_low - y_height), current_y_low )
-	elif jsonResp['direction'] == 'strafeTop':
-		current_y_range = (current_y_high, (current_y_high + y_height ))
-	print(current_y_range)
-	'''
-	dsPlot = newGraphplot(randomloc, connect_edges(randomloc,edges), x_range=current_x_range, y_range=current_y_range)
-	#convert datashder image to png
-	back_img = tf.Image(dsPlot).to_pil()
-	in_mem_file = io.BytesIO()
-	back_img.save(in_mem_file, format = "PNG")
-	# reset file pointer to start
-	in_mem_file.seek(0)
-	img_bytes = in_mem_file.read()
-	base64_encoded_result_bytes = base64.b64encode(img_bytes)
-	base64_encoded_result_str = 'data:image/png;base64,' + base64_encoded_result_bytes.decode('ascii')
-	return jsonify(newImage=base64_encoded_result_str, x_low=current_x_range[0], y_low=current_y_range[0], x_high=current_x_range[1], y_high=current_y_range[1])
-
-@app.route("/zoomButton", methods=["POST"])
+@app.route("/mapResize", methods=["POST"])
 def zoomButton():
-	#print(request.get_json())
+
 	jsonResp = request.get_json()
-	print(jsonResp)
 	#Get the old range
 	current_x_range = tuple((float(jsonResp["current_x_low"]), float(jsonResp["current_x_high"])))
 	current_y_range = tuple((float(jsonResp["current_y_low"]), float(jsonResp["current_y_high"])))
 	current_y_low, current_y_high = current_y_range[0], current_y_range[1]
 	current_x_low, current_x_high = current_x_range[0], current_x_range[1]
-	x_middle = (current_x_low + current_x_high) / 2
-	y_middle = (current_y_low + current_y_high) / 2
-	#print(current_x_range)
-	#print(jsonResp['zoomDirection'])
-	#Calculate 
-	#if jsonResp['zoomDirection'] == 'zoomIn':
-	#	current_x_range = ((current_x_low+x_middle)/2, (current_x_high+x_middle)/2)
-	#	current_y_range = ((current_x_low+x_middle)/2, (current_x_high+x_middle)/2)
-	#else:
-	#	current_x_range = (current_x_low*2-x_middle, current_x_high*2-x_middle)
-	#	current_y_range = (current_y_low*2-y_middle, current_y_high*2-y_middle)
-	print(current_x_range)
+
 	dsPlot = newGraphplot(randomloc, connect_edges(randomloc,edges), x_range=current_x_range, y_range=current_y_range)
 	#convert datashder image to png
 	back_img = tf.Image(dsPlot).to_pil()
@@ -179,7 +60,7 @@ def zoomButton():
 
 class map_layout(LayoutAlgorithm):
     """
-    Assign coordinates to the nodes randomly.
+    Custom layout function for testing different scenarios with positions for node and edges layout
 
     Accepts an edges argument for consistency with other layout algorithms,
     but ignores it.
@@ -207,8 +88,11 @@ nodes = pd.DataFrame(["node"+str(i) for i in range(n)], columns=['name'])
 edges = pd.DataFrame(np.random.randint(0,len(nodes), size=(m, 2)), columns=['source', 'target'])
 
 randomloc = map_layout(nodes,edges)
-print(randomloc.tail())
-#how to add to resize function
+#print(randomloc.tail())
+xMin = randomloc['x'].min()
+yMin = randomloc['y'].min()
+xMax = randomloc['x'].max()
+yMax = randomloc['y'].max()
 
 cvsopts = dict(plot_height=900, plot_width=1900)
 

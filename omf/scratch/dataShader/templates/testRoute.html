@@ -120,19 +120,19 @@ label, input {
 </style>
 <body>
 	<div id="canDiv">
-		<img class='img' id="dsImage" src="{{newImage}}" alt="" />
+		<img class='img' id="dsImage" alt="" />
 		<canvas id="imageCanvas" height="900" width="1900" >
 		</canvas>
 	<div id="controller">
 		<form name="inputForm" id="inputForm">
 			<label>x_low</label>
-			<input type="text" name="x_low" id="x_low" value="-115"/>
+			<input type="text" name="x_low" id="x_low" value="{{x_low}}"/>
 			<label>y_low</label>
-			<input type="text" name="y_low" id="y_low" value="30"/>
+			<input type="text" name="y_low" id="y_low" value="{{y_low}}"/>
 			<label>x_high</label>
-			<input type="text" name="x_high" id="x_high" value="-105"/>
+			<input type="text" name="x_high" id="x_high" value="{{x_high}}"/>
 			<label>y_high</label>
-			<input type="text" name="y_high" id="y_high" value="40"/>
+			<input type="text" name="y_high" id="y_high" value="{{y_high}}"/>
 			<button id="changeGraph" type="submit">Set Zoom</button>
 		</form>
 	<div id="zoomButtons">
@@ -164,18 +164,14 @@ label, input {
 		let x_high = parseFloat("{{x_high}}");
 		let y_low = parseFloat("{{y_low}}");
 		let y_high = parseFloat("{{y_high}}");
-		//let h = 800;
-		//let w = 800;
-		//let x_mean = (parseFloat("{{x_high}}") + parseFloat("{{x_low}}")) / 2;
-		//let y_mean = (parseFloat("{{y_high}}") + parseFloat("{{y_low}}")) / 2;
+
 		let bounds = [[y_high, x_high], [y_low, x_low]];
 		var mymap = L.map('mapid', { zoomControl:false });
 		mymap.fitBounds([
-			[x_low, y_low],
-			[x_high, y_high]
+			[-180, -180],
+			[180, 180]
 			]);
-		console.log(mymap.getBounds())
-		//mymap.setMaxBounds(bounds);
+		//console.log(mymap.getBounds())
 		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 		attribution: null,
 		maxZoom: 18,
@@ -189,7 +185,6 @@ label, input {
     	//var imageBounds = bounds;
 		//var image = L.imageOverlay(imageUrl, imageBounds);
 		//image.addTo(mymap)
-		console.log(mymap.getSize());
 		var canvas = document.getElementById('imageCanvas');
 		var ctx = canvas.getContext('2d');
 		var domRect = canvas.getBoundingClientRect();
@@ -198,7 +193,6 @@ label, input {
 		var loadingScreen = document.getElementById('loadingScreen');
 		loadingScreen.width = domRect.width;
 		loadingScreen.height = domRect.height;
-		console.log(loadingScreen.height);
 		var data = {};
 		var isDown = false;
 		var x_start;
@@ -255,20 +249,12 @@ label, input {
 			$('#y_low').val(new_y_low);
 			$('#x_high').val(new_x_high);
 			$('#y_high').val(new_y_high);
-  			console.log('before setting new bounds')
-  			console.log(mymap.getBounds());
-  			console.log(mymap.getCenter());
-			console.log(mymap.getZoom());
 			mymap.fitBounds([
 				[new_y_high, new_x_high],
 				[new_y_low, new_x_low]
 			]);
 		});
 		mymap.on("moveend", function(event){
-			console.log('setting new bounds');
-			console.log(mymap.getBounds());
-			console.log(mymap.getCenter());
-			console.log(mymap.getZoom());
 			//console.log(mymap.getBounds());
 			data["current_x_low"] = mymap.getBounds().getWest();
 			data["current_y_low"] = mymap.getBounds().getSouth();
@@ -277,40 +263,20 @@ label, input {
 			mymap.invalidateSize();
 			$.ajax({
 			    type: 'POST',
-			    url: '/zoomButton',
+			    url: '/mapResize',
 			    dataType: 'json',
 			    contentType: 'application/json; charset=utf-8',
 			    data: JSON.stringify(data),
 			    success: function(callback) {
-			        //console.log("strafe");
 			        document.getElementById("inputForm").style.display = 'block';
 					$(".strafeArrow").show();
 					$(".zoomButton").show();
 					$('#dsImage').attr('src', callback.newImage);
 					$('#loadingScreen').css('z-index', -3);
-					console.log('in ajax now');
-					console.log(mymap.getBounds());
 					//imageUrl = callback.newImage;
 					//imageBounds = [[mymap.getBounds().getSouth(), mymap.getBounds().getWest()], [mymap.getBounds().getNorth(), mymap.getBounds().getEast()]];
 					//image = L.imageOverlay(imageUrl, imageBounds);
-					//console.log('image');
-					//console.log(imageBounds);
 					//image.addTo(mymap);
-					//console.log('final bounds')
-					//console.log(mymap.getBounds());
-					//mymap.fitBounds([
-					//	[new_y_high, new_x_high],
-					//	[new_x_low, new_y_low]
-					//]);
-					//console.log(mymap.getBounds());
-					//$('#x_low').val(callback.x_low);
-					//$('#y_low').val(callback.y_low);
-					//$('#x_high').val(callback.x_high);
-					//$('#y_high').val(callback.y_high);
-
-					console.log(mymap.getCenter());
-					console.log(mymap.getZoom());
-			        //$('#dsImage').attr('src', callback.newImage);;
 			    },
 			    error: function() {
 			        $(this).html("error!");
@@ -355,7 +321,6 @@ label, input {
 				[map_y_high, map_x_high],
 				[map_y_low, map_x_low]
 			]);
-			//data["direction"] = direction; 
 		});
 
 		$("#imageCanvas").on("mousemove", function(event){
@@ -385,13 +350,6 @@ label, input {
 	    	var domRect = this.getBoundingClientRect();
 	        x_down = mymap.mouseEventToLatLng(event).lng;
 	        x_start = event.pageX - this.offsetLeft;
-	        console.log(mymap.mouseEventToLatLng(event).lat);
-	        //console.log(mymap.mouseEventToLatLng(x_down));
-	        //console.log(mymap.mouseEventToLatLng(x_start));
-	        //console.log(domRect);
-	        //console.log(event.pageX);
-	        //console.log(this.offsetLeft);
-	        //console.log(this.width);
 	        y_down = mymap.mouseEventToLatLng(event).lat;
 	        y_start = event.pageY - this.offsetTop;
 	        //console.log(x_down);
@@ -407,16 +365,12 @@ label, input {
 			var domRect = this.getBoundingClientRect();
 		    x_up = mymap.mouseEventToLatLng(event).lng;
 		    y_up = mymap.mouseEventToLatLng(event).lat;
-		    //console.log("release mouse");
-		    //console.log(x_high);
-		    //console.log(y_high);
 
 		    data['x_up'] = x_up;
 		    data['y_up'] = y_up;
 		    isDown = false;
 		    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-		    console.log(mymap.getBounds().getWest());
 			
 			$('#x_low').val(Math.min(x_down, x_up));
 			$('#y_low').val(Math.min(y_down, y_up));
@@ -427,6 +381,7 @@ label, input {
 				[Math.min(y_down, y_up), Math.min(x_down, x_up)]
 			]);
 	    });
+		mymap.fitBounds(bounds);
 	});
 	</script>
 	<script type="text/javascript">
