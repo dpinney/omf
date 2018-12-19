@@ -213,7 +213,9 @@ label, input {
 
 		//Update canvas in case of window resize
 		$(window).resize(function(){
-			var domRect = canvas.getBoundingClientRect();
+			$('#loadingScreen').css('z-index', 3);
+			domRect = canvas.getBoundingClientRect();
+			console.log(domRect.width);
 			canvas.width = domRect.width;
 			canvas.height = domRect.height;
 			ctx.fillStyle = "rgba(0, 0, 255, 0.5)";
@@ -255,11 +257,13 @@ label, input {
 			]);
 		});
 		mymap.on("moveend", function(event){
-			//console.log(mymap.getBounds());
+			console.log(domRect.width);
 			data["current_x_low"] = mymap.getBounds().getWest();
 			data["current_y_low"] = mymap.getBounds().getSouth();
 			data["current_x_high"] = mymap.getBounds().getEast();
 			data["current_y_high"] = mymap.getBounds().getNorth();
+			data['width'] = domRect.width;
+			data['height'] = domRect.height;
 			mymap.invalidateSize();
 			$.ajax({
 			    type: 'POST',

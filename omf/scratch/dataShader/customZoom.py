@@ -18,21 +18,10 @@ def hello():
 
 @app.route("/testing", methods=["GET", "POST"])
 def testingRoute():
-	dsPlot = newGraphplot(randomloc, connect_edges(randomloc,edges), x_range=(xMin,xMax), y_range=(yMin,yMax))
-	#convert datashder image to png
-	back_img = tf.Image(dsPlot).to_pil()
-	in_mem_file = io.BytesIO()
-	back_img.save(in_mem_file, format = "PNG")
-	# reset file pointer to start
-	in_mem_file.seek(0)
-	img_bytes = in_mem_file.read()
-	base64_encoded_result_bytes = base64.b64encode(img_bytes)
-	base64_encoded_result_str = 'data:image/png;base64,' + base64_encoded_result_bytes.decode('ascii')
-	return render_template("testRoute.html", newImage=base64_encoded_result_str, x_low=xMin, y_low=yMin, x_high=xMax, y_high=yMax)
+	return render_template("testRoute.html", x_low=xMin, y_low=yMin, x_high=xMax, y_high=yMax)
 
 def vectorCalc(x_range, y_range, x_click, y_click):
 	x_click = x_range[0]*(1-x_click) + x_range[1]*(x_click)
-	print(x_range[1]*(x_click))
 	y_click = y_range[0]*(1-y_click) + y_range[1]*(y_click)
 	return x_click, y_click
 
@@ -40,7 +29,8 @@ def vectorCalc(x_range, y_range, x_click, y_click):
 def zoomButton():
 
 	jsonResp = request.get_json()
-	#Get the old range
+	cvsopts['plot_height'] = int(jsonResp["height"])
+	cvsopts['plot_width'] = int(jsonResp["width"])
 	current_x_range = tuple((float(jsonResp["current_x_low"]), float(jsonResp["current_x_high"])))
 	current_y_range = tuple((float(jsonResp["current_y_low"]), float(jsonResp["current_y_high"])))
 	current_y_low, current_y_high = current_y_range[0], current_y_range[1]
