@@ -698,77 +698,6 @@ function downloadTextFile() { // eslint-disable-line
 	win.document.write(modJson);
 }
 
-/**
- * Adds a circle to the svg.
- * @param {number} r - Has something to do with the scale factor of the svg. Everything seems to start with r=2
- * TODO: Switch the x and y arguments? This function (and addLine()) might be PART of the reason the graph gets flipped around vs. the 
- * graph in gridEdit.html. Or is gridEdit.html the one that is fipped??!!??
- */
-function addCircle(x,y,r,id,myClass) {
-	const svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0];
-	const aCirc = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-	aCirc.setAttribute('cx', x);
-	aCirc.setAttribute('cy', y);
-	aCirc.setAttribute('r', r);
-	aCirc.setAttribute('id', id);
-	aCirc.setAttribute('class', myClass);
-	aCirc.setAttribute('stroke-width', 0.5);
-	svgOb.appendChild(aCirc);
-}
-
-/*
- * Note that longitude should refer to a x coordinate and latitude should refer to an y coordinate.
- * @param {number} x1 - The longitude of the "from" node of this line.
- * @param {number} y1 - The latitude of the "from" node of this line.
- * @param {number} x2 - The longitude of the "to" node of this line.
- * @param {number} y2 - The latitude of the "to" node of this line.
- */
-function addLine(x1, y1, x2, y2, id, myClass) {
-	const svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0];
-	const aLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-	aLine.setAttribute('x1', x1);
-	aLine.setAttribute('y1', y1);
-	aLine.setAttribute('x2', x2);
-	aLine.setAttribute('y2', y2);
-	aLine.setAttribute('id', id);
-	aLine.setAttribute('class', myClass);
-	let w;
-	if (myClass.indexOf('p2') !== -1) {
-		w = 2
-	} else if (myClass.indexOf('p3') !== -1) {
-		w = 3
-	} else if (myClass.indexOf('parentChild') !== -1) {
-		w = 0.5
-	} else {
-		w = 1
-	}
-	aLine.setAttribute('stroke-width', w);
-	svgOb.appendChild(aLine);
-}
-
-//function buildFeeder2() {
-//	const maxLat = Math.round(Object.values(feeder.tree).reduce((obj1, obj2) => {
-//		return obj1.latitude > obj2.latitude ? obj1 : obj2;
-//	}).latitude + 20.0);
-//	const maxLon = Math.round(Object.values(feeder.tree).reduce((obj1, obj2) => {
-//		return obj1.longitude > obj2.longitude ? obj1 : obj2;
-//	}).longitude + 20.0);
-//	const svgOb = document.getElementById('svgContainer');
-//	svgOb.setAttribute('width', maxLon);
-//	svgOb.setAttribute('height', maxLat);
-//	svgOb.setAttribute('viewBox','-10.0 -10.0 ' + maxLon + ' ' + maxLat);
-//	// Attach the pan/zoom behavior.
-//	window.panZoom = svgPanZoom('#svgContainer', {
-//		zoomEnabled: true,
-//		controlIconsEnabled: false,
-//		fit: true,
-//		center: true,
-//		minZoom: 0.5,
-//		maxZoom: 100
-//	});
-//
-//}
-
 function createViewport(tree, svgContainer) {
 	// Make a map objectName -> key. And while we're at it, find the size we need for the full chart.
 	const nameToKey = {};
@@ -818,81 +747,6 @@ function createViewport(tree, svgContainer) {
 		maxZoom: 100
 	});
 }
-
-//function buildFeeder() {
-//	// Make a map objectName -> key. And while we're at it, find the size we need for the full chart.
-//	const nameToKey = {};
-//	let maxLon = 100;
-//	let maxLat = 100;
-//	for (let key in writeFeeder.tree) {
-//        nameToKey[writeFeeder.tree[key]['name']] = key;
-//        const lon = writeFeeder.tree[key].longitude;
-//        const lat = writeFeeder.tree[key].latitude;
-//        //if (lon) {
-//        //    /* Pretend we have really big coordinate values */
-//        //    writeFeeder.tree[key].longitude = lon * 12000;
-//        //}
-//        //if (lat) {
-//        //    /* Pretend we have really big coordinate values */
-//        //    writeFeeder.tree[key].latitude = lat * 12000;
-//        //}
-//		if (writeFeeder.tree[key]['longitude'] > maxLon) {
-//            maxLon = writeFeeder.tree[key]['longitude']
-//        }
-//        if (writeFeeder.tree[key]['latitude'] > maxLat) {
-//            maxLat = writeFeeder.tree[key]['latitude']
-//        }
-//	}
-//	maxLon = Math.round(maxLon + 20.0)
-//	maxLat = Math.round(maxLat + 20.0)
-//    const svgOb = document.getElementById('svgContainer')
-//
-//	//svgOb.setAttribute('width', maxLon)
-//	//svgOb.setAttribute('height', maxLat)
-//    //svgOb.setAttribute('viewBox','-10.0 -10.0 ' + maxLon + ' ' + maxLat)
-//    svgOb.setAttribute('viewBox',`0 0 ${maxLon} ${maxLat}`);
-//
-//	// Attach the pan/zoom behavior.
-//	window.panZoom = svgPanZoom('#svgContainer', {
-//        /* These are equal to the default values */
-//		//zoomEnabled: true,
-//		//controlIconsEnabled: false,
-//        //center: true,
-//		//fit: true,
-//        //contain: true,
-//        zoomScaleSensitivity: 0.2,
-//        minZoom: 0.25,
-//		maxZoom: 100
-//	})
-
-//	for (let key in writeFeeder.tree) {
-//		try {
-//			const anOb = writeFeeder.tree[key];
-//			if ('from' in anOb && 'to' in anOb) {
-//				const fromOb = writeFeeder.tree[nameToKey[anOb['from']]];
-//				const toOb = writeFeeder.tree[nameToKey[anOb['to']]];
-//				addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],key,anOb['object'] + ' p' + countPhases(anOb['phases']));
-//			}
-//			else if ('parent' in anOb) {
-//				const pOb = writeFeeder.tree[nameToKey[anOb['parent']]];
-//				addLine(pOb['longitude'],pOb['latitude'],anOb['longitude'],anOb['latitude'],pOb.name + '_' + anOb.name,'parentChild');
-//			}
-//		} catch (err) {
-//			console.log('Failed to Draw ' + writeFeeder.tree[key]);
-//		}
-//	}
-//	// Add circles after all lines
-//	for (let key in writeFeeder.tree) {
-//		try {
-//			const anOb = writeFeeder.tree[key];
-//			if ('latitude' in anOb && 'longitude' in anOb && 'object' in anOb && !('from' in anOb) && !('to' in anOb)) {
-//				addCircle(anOb['longitude'],anOb['latitude'],2,key,anOb['object']);
-//			}
-//		} catch (err) {
-//			console.log('Failed to Draw ' + writeFeeder.tree[key]);
-//		}
-//    }
-//}
 
 function mouseDown(event) { // eslint-disable-line
 	downX = event.pageX
@@ -1490,331 +1344,6 @@ function clearGlobalSelectionArray() {
 	Array.from(document.getElementsByClassName("selected")).forEach(element => element.classList.remove("selected"));
 }
 
-//function newLink(componentName) { // eslint-disable-line
-//	//hard-coded, but necessary, data dependency
-//	const nodeTypes = ['node','load','house','meter','triplex_meter','triplex_node','triplex_load','waterheater','ZIPload'];
-//	if (document.getElementsByClassName("selected").length !== 2) {
-//	//if (selection.length != 2) {
-//		alert("Please hold down the 'alt' key and click exactly two nodes to connect.");
-//		clearGlobalSelectionArray();
-//		tableDestroy();
-//		return;
-//	} 
-//	const firstTreeNode = writeFeeder.tree[selection[0].id];
-//	const secondTreeNode = writeFeeder.tree[selection[1].id];
-//	if (!nodeTypes.includes(firstTreeNode.object) || !nodeTypes.includes(secondTreeNode.object)) {
-//		alert("Please only select nodes");
-//		clearGlobalSelectionArray();
-//		tableDestroy();
-//		return;
-//	}
-//	//I have concerns about adding inconsistent data to the graph. See my meeting notes.
-//	const newTreeLink = clone(components[componentName]);
-//	newTreeLink.from = firstTreeNode.name;
-//	newTreeLink.to = secondTreeNode.name;
-//	const newTreeKey = getNewTreeKey(writeFeeder.tree).toString();
-//	newTreeLink.name = componentName + newTreeKey;
-//	// Save to tree
-//	writeFeeder.tree[newTreeKey] = newTreeLink;
-//
-//	// lines don't have the schedule_skew property.
-//	//const newTreeLink = {
-//	//	phases: 'A', //Some treeLinks also have a value of 'A'
-//	//	from: firstTreeNode.name, //Fine
-//	//	name: 'newLink' + newTreeKey, //No other treeLink has 'newLink' in the name
-//	//	object: 'overhead_line', //This is fine
-//	//	//longitude
-//	//	to: secondTreeNode.name, //Fine
-//	//	//length. None of the default components have this.
-//	//	//latitude. None of the default components have this.
-//	//	configuration: 'configuration' //No other treeLink has a value of 'configuration'
-//	//}
-//
-//	// Save to links
-//	const newLink = {
-//		source: writeFeeder.nodes.find(obj => obj.treeIndex == selection[0].id), //good
-//		target: writeFeeder.nodes.find(obj => obj.treeIndex == selection[0].id), //good
-//		treeIndex: newTreeKey, //good
-//		objectType: 'fromTo' //good. It's not parent child, right? What happens if this replaces a parent child? Hmm
-//	}
-//	writeFeeder.links.push(newLink);
-//	// Draw on svg
-//	const x1 = firstTreeNode.longitude;
-//	const y1 = firstTreeNode.latitude;
-//	const x2 = secondTreeNode.longitude;
-//	const y2 = secondTreeNode.latitude;
-//	//const id = newTreeId;
-//	const myClass = writeFeeder.tree[newTreeKey].object;
-//	addLine(x1, y1, x2, y2, newTreeKey, myClass);
-//	//then below fixes the build order so cirlces come in last
-//	selection[0].remove();
-//	selection[1].remove();
-//	addCircle(x1,y1,2,selection[0].id,firstTreeNode.object);
-//	addCircle(x2,y2,2,selection[1].id,secondTreeNode.object);
-//	scaleTo(scaleLevel);
-//	clearGlobalSelectionArray();
-//	//selection = [];
-//}
-
-//function moveNode() {
-//	// When user clicks drag, add a listener to effect the movement on next click.
-//	document.body.style.cursor = 'crosshair'
-//	const clickTarget = document.getElementById('svgContainer')
-//	clickTarget.addEventListener('click', moveNodeListener, false)
-//}
-
-/**
- * An orphan node is a node that has no lines connected to it at all.
- * @param {object} node - The node in feeder.tree that I am examining.
- * @return {boolean} - Return true if the object 1) is a node (and NOT a line) 2) does not have a "parent" property. 
- * Otherwise return false.
- */
-//function isOrphanNode(node) {
-//	if (node.from === undefined && node.parent === undefined) {
-//		return true;
-//	}
-//	return false;
-//} 
-
-//function moveConnectedLines(node) {
-//	//Move the node
-//
-//	//Move any lines that are connected to the node. Must parse the tree to find these lines.	
-//	Object.keys(feeder.tree).forEach(firstKey => {
-//		//Not all objects in feeder.tree are lines, but I'm only operating on an object if is a line, hence the variable name.
-//		let line = feeder.tree[firstKey];
-//		if (line.from == node.name || line.to == node.name) {
-//			const outerX = node.longitude;
-//			const outerY = node.latitude;
-//			const outerId = firstKey;
-//			const outerClass = node.object;
-//			let innerX, innerY, innerId, innerClass;
-//			Object.keys(feeder.tree).forEach(secondKey => {
-//				const pairedNode = feeder.tree[secondKey];
-//				if ((pairedNode.name == line.from || pairedNode.name == line.to) 
-//					&& pairedNode.name != node.name) {
-//						innerX = pairedNode.longitude;
-//						innerY = pairedNode.latitude;
-//						innerId = secondKey;
-//						innerClass = pairedNode.object;
-//				}
-//			}); 
-//			document.getElementById(firstKey).remove();
-//			let x1, y1, x2, y2, fromNum, toNum, fromClass, toClass;
-//			if (line.from == node.name) {
-//				addLine(outerX, outerY, innerX, innerY, firstKey, line.object + ' p' + countPhases(line.phases));
-//				//redraw nodes
-//				//x1 = outerX;
-//				//y1 = outerY;
-//				//x2 = innerX;
-//				//y2 = innerY;
-//				fromNum = outerId;
-//				fromClass = outerClass;
-//				toNum = innerId;
-//				toClass = innerClass;
-//			} else {
-//				addLine(innerX, innerY, outerX, outerY, line.object + ' p' + countPhases(line.phases));
-//				//redraw nodes
-//				//x1 = innerX;
-//				//y1 = innerY;
-//				//x2 = outerX;
-//				//y2 = outerY;
-//				fromNum = innerId;
-//				fromClass = innerClass;
-//				toNum = outerId;
-//				toClass = outerClass;
-//			}
-//		}
-//	});
-//}
-
-//Get an array of keys that correspond to the connected line.
-//function getConnectedLineKeys(node) {
-//	return Object.keys(writeFeeder.tree).filter(key => {
-//		let line = writeFeeder.tree[key];
-//		if (line.from == node.name || line.to == node.name) {
-//			return true;
-//		}
-//		return false;
-//	});
-//}
-
-/* Listener to allow a node to move once the user clicks the target location.
-I don't think this updates the data correctly. It updates writeFeeder.tree, but not writeFeeder.nodes
-*/
-//function moveNodeListener() {
-	//let clickedNode = writeFeeder.tree[lastElementSelected.id];
-	//// Lat and Lon are reversed, but the function was originally written this way...
-	//const newLat = clickLatLon(event).y;
-	//const newLon = clickLatLon(event).x
-	////let newLat = clickLatLon(event)[1];
-	////let newLon = clickLatLon(event)[0];
-	//clickedNode["latitude"] = newLat;
-	//clickedNode["longitude"] = newLon;
-	//// This value can be undefined when the node isn't connected to anything. Is that a problem?!? yep.
-	////let parent = clickedNode.parent;
-	//const connectedLineKeys = getConnectedLineKeys(clickedNode);
-	//if (connectedLineKeys.length === 0 && clickedNode.parent === undefined) {
-		//document.getElementById(lastElementSelected.id).remove();
-		//addCircle(newLon,newLat,2,lastElementSelected.id,writeFeeder.tree[lastElementSelected.id].object);
-	//} else {
-		////Runs through writeFeeder lines (links) determines if clicked node is an end or target for any line in writeFeeder
-		//for (let num in writeFeeder.tree) {
-			//let treeOb = writeFeeder.tree[num];
-			//// Move line between clicked node and its treeOb child. This is checking if clickedNode HAS children
-			//if (treeOb.parent == clickedNode.name) {
-				//document.getElementById(clickedNode.name + "_" + treeOb.name).remove()
-				//addLine(newLon,newLat,treeOb.longitude,treeOb.latitude,clickedNode.name + "_" + treeOb.name,'parentChild')
-				//document.getElementById(num).remove()
-				//addCircle(treeOb.longitude,treeOb.latitude,2,num,treeOb.object)
-				//document.getElementById(lastElementSelected.id).remove()
-				//addCircle(newLon,newLat,2,lastElementSelected.id,clickedNode.object)
-			//}
-			///* Move line between clicked node and its treeOb parent (if it is a child). 
-			//I found an object in writeFeeder.tree that is 1) NOT a line 2) is the parent of the currently selected node.
-			//*/
-			//if (clickedNode.parent != undefined && clickedNode.parent == treeOb.name && treeOb.from == undefined && treeOb.to == undefined) {
-				///* treeOb.name is the parent's name, clickedNode.name is the clicked node's name. There is a line with an id that is a 
-				//concatenation of their names, and I want to remove that line. Yep.
-				//*/
-				//document.getElementById(treeOb.name + "_" + clickedNode.name).remove()
-				//addLine(newLon,newLat,treeOb.longitude,treeOb.latitude,treeOb.name + "_" + clickedNode.name,'parentChild')
-				////Remove the parent node? Oh maybe to redraw it on top of the new line.
-				//document.getElementById(num).remove()
-				//addCircle(treeOb.longitude,treeOb.latitude,2,num,treeOb.object)
-				////Remove the current node and redraw it where it's supposed to go.
-				//document.getElementById(lastElementSelected.id).remove()
-				//addCircle(newLon,newLat,2,lastElementSelected.id,clickedNode.object)
-			//}
-			//if (treeOb.from !== undefined && treeOb.to !== undefined) {
-				//// Move all lines from or to the clicked node.
-				//if (treeOb.from == clickedNode.name || treeOb.to == clickedNode.name) {
-					//// If the current object is a line connected to the current node, move it.
-					//document.getElementById(num).remove()
-					//let x1;
-					//let y1;
-					//let numf;
-					//let myClassf;
-					//let x2;
-					//let y2;
-					//let numt;
-					//let myClasst;
-					//for (let subEl in writeFeeder.tree) {
-						//// Find the coordinates on the other end of the moving line.
-						//if (treeOb.from == writeFeeder.tree[subEl].name) {
-							//x1 = writeFeeder.tree[subEl]['longitude']
-							//y1 = writeFeeder.tree[subEl]['latitude']
-							//numf = subEl
-							//myClassf = writeFeeder.tree[subEl].object
-						//} else if (treeOb.to == writeFeeder.tree[subEl].name) {
-							//x2 = writeFeeder.tree[subEl]['longitude']
-							//y2 = writeFeeder.tree[subEl]['latitude']
-							//numt = subEl
-							//myClasst = writeFeeder.tree[subEl].object
-						//}
-					//}
-					//addLine(x1, y1, x2, y2, num, treeOb['object'] + ' p' + countPhases(treeOb['phases']))
-					//// Redraw nodes after line so they aren't below the newly drawn lines. Up to 3 nodes for case where we are moving node between 2 from-to lines.
-					//if (treeOb.from == clickedNode.name) {
-						//addCircle(x2,y2,2,numt,myClasst)
-						//document.getElementById(numt).remove()
-					//}
-					//if (treeOb.to == clickedNode.name) {
-						//addCircle(x1,y1,2,numf,myClassf)
-						//document.getElementById(numf).remove()
-					//}
-					//// Finally, draw the clicked node in its new location. Leave this bit here. Other moving functions go inside.
-					//document.getElementById(lastElementSelected.id).remove()
-					//addCircle(newLon,newLat,2,lastElementSelected.id,writeFeeder.tree[lastElementSelected.id].object)
-				//}
-			//}
-		//}
-	//}
-	//// Fix scaling of new objects.
-	//scaleTo(scaleLevel)
-	//// Return the cursor to its default.
-	//document.body.style.cursor = 'auto'
-	//const clickTarget = document.getElementById('svgContainer')
-	//clickTarget.removeEventListener('click', moveNodeListener, false)
-//}
-
-function findNext() {
-	// Find the next object matching the user input.
-	var term = document.getElementById('searchTerm').value
-	var hits = findElementsViaString(term)
-	document.getElementById('searchHitCount').innerHTML = hits.length + ' Hits'
-	// If we can't find anything, stop.
-	if (hits.length == 0) {
-		alert('No objects found containing term.')
-		return false
-	}
-	// Clear the current selection.
-	for (let i = 0; i < document.getElementsByClassName("selection").length; i++) {
-	//for (let i=0; i<selection.length; i++) {
-		selection[i].classList.remove('selected')
-	}
-	selection = []
-	tableDestroy()
-	// Find the tree index of the next item.
-	if (searchCursor == undefined) {
-		searchCursor = 0
-	} else {
-		searchCursor = (searchCursor + 1) % hits.length
-	}
-	var hitId = hits[searchCursor]
-	// Find the location to zoom to.
-	let svgOb = document.getElementById(hitId.toString())
-	let cx = svgOb.getAttribute('cx')
-	let cy = svgOb.getAttribute('cy')
-	let x, y;
-	if (cx !== null && cy !== null) {
-		// Circle object, just get cx and cy
-		x = cx
-		y = cy
-	} else {
-		// Line object, get midpoint to zoom to
-		x = (parseFloat(svgOb.getAttribute('x1')) + parseFloat(svgOb.getAttribute('x2'))) / 2;
-		y = (parseFloat(svgOb.getAttribute('y1')) + parseFloat(svgOb.getAttribute('y2'))) / 2;
-	}
-	// Pan to the next hit.
-	window.panZoom.pan({x:0, y:0})
-	var realZoom = window.panZoom.getSizes().realZoom
-	var width = window.panZoom.getSizes().width / 2
-	var height = window.panZoom.getSizes().height / 2
-	window.panZoom.pan({x:width - (x * realZoom), y:height - (y * realZoom)})
-	// TODO: Zoom in close
-	// Udpate the selection.
-	svgOb.classList.add('selected')
-	//selection.push(svgOb)
-	tableCreate(writeFeeder.tree[hitId])
-}
-
-function findPrevious() { // eslint-disable-line
-	var term = document.getElementById('searchTerm').value
-	var hits = findElementsViaString(term)
-	if (searchCursor == undefined) {
-		findNext()
-	} else if (searchCursor == 0) {
-		// Wrapped around.
-		searchCursor = (hits.length) - 2
-		findNext()
-	} else {
-		searchCursor -= 2
-		findNext()
-	}
-}
-
-//function findElementsViaString(inString) {
-//	var results = []
-//	for (let key in writeFeeder.tree) {
-//		const subIndex = JSON.stringify(writeFeeder.tree[key]).indexOf(inString)
-//		if (subIndex != -1 && writeFeeder.tree[key]['object'] != 'player' && (writeFeeder.tree[key].hasOwnProperty('object') || writeFeeder.tree[key].hasOwnProperty('module'))) {
-//			results.push(key)
-//		}
-//	}
-//	return results
-//}
-
 function fixPhases () {
 	// Todo: complete this to walk the tree and fix phasing.
 	for (let i in writeFeeder.tree){
@@ -1839,24 +1368,6 @@ function fixPhases () {
 }
 
 
-
-/**
- * Find the index of an object in an array, based on the property value inside of the object.
- * @param  {array} ary
- * @param  {(string|number)} field
- * @param  {(string|number)} val
- * @return {number} idx - return idx inside of object that pairs with the desired value, else empty string.
- */
- //writeFeeder.nodes, 'name', 172820
-//function findIndex(ary, field, val) {
-//	for (let idx in ary) {
-//		if (ary[idx][field] == val) {
-//			return idx;
-//		}
-//	}
-//	return '';
-//}
-
 /**
  * Return a node object, if the node is selected.
  * @return {(Object | undefined)} node - return single node object if it is found, else undefined.
@@ -1871,82 +1382,6 @@ function getSelectedNode() {
 		return undefined
 	}
 }
-
-/**
- * Append a node to its parents.
- * @param  {object} component - An object that contains the unconfigured data for a specific component.
- * @param  {number} treeKey - A key in the tree object. The value of this key is another object stored inside of the tree.
- * @return {object} nodeToAdd
- */
-//function newChildAtLocation(component, treeKey) {
-//	const newTreeKey = getNewTreeKey(writeFeeder.tree).toString();
-//	const newName = component.object + newTreeKey;
-//	const parentTreeObj = writeFeeder.tree[treeKey];
-//	component['parent'] = parentTreeObj['name'];
-//	// decide which attribute should be put into node and tree
-//	let nodeToAdd;
-//	if (parentTreeObj.latitude != undefined && parentTreeObj.longitude != undefined) {
-//		component['latitude'] = parseFloat(parentTreeObj.latitude) + Math.random() * 4 - 2;
-//		component['longitude'] = parseFloat(parentTreeObj.longitude) + Math.random() * 4 - 2;
-//		// Put the component in the tree with a new name.
-//		writeFeeder.tree[newTreeKey] = component;
-//		writeFeeder.tree[newTreeKey].name = newName;
-//		// Add to the nodes.
-//		nodeToAdd = {
-//			name: component.name,
-//			objectType: component.object,
-//			treeIndex: newTreeKey,
-//			chargeMultiple: 1,
-//			x: component['latitude'],
-//			y: component['longitude']
-//			//fixed: isFixed
-//		}
-//		writeFeeder.nodes.push(nodeToAdd)
-//	} else {
-//		writeFeeder.tree[newTreeKey] = component;
-//		writeFeeder.tree[newTreeKey].name = newName;
-//		nodeToAdd = {
-//			name: component.name,
-//			objectType: component.object,
-//			treeIndex: newTreeKey,
-//			chargeMultiple: 1
-//			//fixed: isFixed
-//		}
-//		writeFeeder.nodes.push(nodeToAdd);
-//	}
-//	// Add to the links. Why am I adding a node to links? Makes no sense! Ah because when a node is added, there is a link between parent and child.
-//	let linkToAdd = {
-//		source: writeFeeder.nodes[findIndex(writeFeeder.nodes, 'name', newName)],
-//		target: writeFeeder.nodes[findIndex(writeFeeder.nodes, 'name', parentTreeObj['name'])],
-//		objectType: 'parentChild'
-//	};
-//	writeFeeder.links.push(linkToAdd);
-//	//return nodeToAdd;
-//
-//	// Draw new line on svg
-//	addLine(nodeToAdd.y, nodeToAdd.x, parentTreeObj.longitude, parentTreeObj.latitude, parentTreeObj.name + "_" + nodeToAdd.name, "parentChild");
-//	// Draw new node on svg
-//	//const y = writeFeeder.tree[newTreeId].longitude
-//	//const x = writeFeeder.tree[newTreeId].latitude
-//	//const id = newTreeId
-//	//const myClass = writeFeeder.tree[newTreeId].object
-//	const myClass = parentTreeObj.object;
-//	// TODO: Figure out why I have to switch the y and x arguments here to make the new node display properly.
-//	addCircle(nodeToAdd.y, nodeToAdd.x, 2, nodeToAdd.treeIndex, component.object);
-//	scaleTo(scaleLevel);
-//
-//	/* So I know that addLine() adds the line with the specific id to the document, and that this id matters for moving nodes around.
-//	So when I add a circle, I ALSO need to add the correct line with the correct property values AND correct location.
-//	1) Use the properties in nodeToAdd (i.e. the new node to be drawn) and writeFeeder.tree["treeIndex"] (i.e. the parent node) to
-//	provide the correct configuration for the new line
-//	2) draw the line 
-//	
-//	I either need to copy the code from moveNodeListener() or call it maybe? Or perhaps there should be a separate function entirely
-//	that moveNodeListener() and this function use to correctly add new circles and lines to the document.
-//	*/
-//	//document.getElementById(treeOb.name + "_" + currentNode.name).remove()
-//	//addLine(newLon,newLat,treeOb.longitude,treeOb.latitude,treeOb.name + "_" + currentNode.name,'parentChild')
-//}
 
 /**
  * Add a new child node at selected component
@@ -2022,357 +1457,6 @@ function toggleElementDisplay(id) {
 //**************************************************
 
 
-//**************************************************
-// File menu functions
-//**************************************************
-
-/** TODO: it would be more semantic to use the JS FormData interface
-*/
-//function postToUrl(path, params, enctype="application/x-www-form-urlencoded", method="post") {
-//function postToUrl(path, params, method="post") {
-//	let form = document.createElement('form');
-//	form.setAttribute('method', method);
-//    form.setAttribute('action', path);
-//    //form.setAttribute("enctype", enctype);
-//    if (params) {
-//        if (typeof(params) === "object" && !Array.isArray(params)) {
-//            for(let key in params) {
-//                if(params.hasOwnProperty(key)) {
-//                    let hiddenField = document.createElement('input');
-//                    hiddenField.setAttribute('type', 'hidden');
-//                    hiddenField.setAttribute('name', key);
-//                    hiddenField.setAttribute('value', params[key]);
-//                    form.appendChild(hiddenField);
-//                }
-//            }
-//        } else {
-//            throw "params must be a valid JS object";
-//        }
-//    } 	
-//    document.body.appendChild(form);
-//	form.submit();
-//}
-
-/** This fileOperation is used for two purposes 1) to save the users changes to the .omd file in the server using writeFeeder 2) to 
- * undo some other FileOperation by writing the contents of readFeeder back into the original .omd file.
- */
-function getSaveFileOperation(feeder) {
-    const formData = new FormData();
-    formData.set("feederObjectJson", JSON.stringify(feeder));
-    const ajax = new Ajax(`/saveFeeder/${thisOwner}/${thisModelName}/${thisFeederName}`, "POST", formData);
-    let save;
-    if (feeder === readFeeder) {
-        //Undo the previous file operation
-        const pm = new ProgressModal("Cancelling the previous operation...", "", false);
-        save = new FileOperation
-        (
-            ajax,
-            (xhr, resolve, reject) => {
-                alert("Success. Previous operation was canceled");
-                resolve();
-            },
-            (xhr, resolve, reject) => {
-                //Should never be called
-                reject();
-            },
-            (xhr, resolve, reject) => {
-                alert("We were unable to cancel the previous operation.")
-                reject();
-            },
-            pm
-        );
-    } else if (feeder === writeFeeder) {
-        //Normal save operation
-        const pm = new ProgressModal("Saving changes to your file...", "You have canceled the save.", true);
-        save = new FileOperation
-        (
-            ajax,
-            (xhr, resolve, reject) => {
-                alert("Success. Your data was saved.");
-                resolve();
-                reloadWrapper();
-            },
-            (xhr, resolve, reject) => {
-                reject("canceled");
-            },
-            (xhr, resolve, reject) => {
-                alert(`We were unable to save your data. Please try again. If you refresh the page without first saving,
-                your current changes will be lost.`);
-                reject();
-            },
-            pm
-        );
-    }
-    return save;
-}
-
-/** 
- * Submits a GET request to the /uniqeObjName route which returns true if a matching .omd file exists in /static/publicFeeders.
- * /uniqObjName route ignores 'thisOwner' anad 'serverModelName' because objType is /Feeder. Perhaps some functionality hasn't been added yet.
- * 
- * Then submits a POST request to /loadFeeder which overwrites the original .omd file with some other .omd file in /static/publicFeeders. 
- * While a POST request is submitted, nothing is actually posted as all the data is appended to the url.
- * 
- * @param {string} serverFeederName - The name the server will use to find the corresponding .omd feeder file in /static/publicFeeders.
- * @param {string} serverModelName - The model name that the server will use to find and overwrite the original .omd file.
- * @param {string} thisOwner - Either 'public' or the owner of THIS feeder.
- */
-
-function loadFeeder(serverFeederName, serverModelName, owner) {
-    const checkFileExists = new FileOperation
-    (
-        new Ajax(`/uniqObjName/Feeder/${thisOwner}/${serverFeederName}/${serverModelName}`),
-        (xhr, resolve, reject) => {
-            try {
-                const data = JSON.parse(xhr.responseText);
-                if (data.exists) {
-                    resolve();
-                } else {
-                    alert('This feeder no longer exists. Please refresh the page, or select another feeder.');
-                    reject();
-                }
-            } catch (e) {
-                reject(e);
-            }
-        },
-        (xhr, resolve, reject) => { 
-            //Should never be called
-            reject(); 
-        },
-        (xhr, resolve, reject) => { 
-            alert("We were unable to load the feeder. Please refresh the page and try again.");
-            reject(); 
-        }
-    );
-    let formData = new FormData();
-    formData.set("referrer", "distribution");
-    const loadFile = new FileOperation
-    (
-        new Ajax (`/loadFeeder/${serverFeederName}/${serverModelName}/${thisModelName}/${thisFeederNum}/${owner}/${thisOwner}`, "POST", formData),
-        (xhr, resolve, reject) => {
-            resolve();
-            reloadWrapper();
-        },
-        (xhr, resolve, reject) => {
-            reject("canceled"); 
-        },
-        (xhr, resolve, reject) => {
-            alert("We were unable to load the feeder. Please refresh the page and try again.");
-            reject();
-        },
-        new ProgressModal("Loading feeder from server...", "You have canceled loading the feeder.", true)
-    );
-    checkFileExists.start().
-    then(function() {
-        return loadFile.start();
-    }).
-    catch(function(rejectionReason) {
-        if (rejectionReason === "canceled") {
-            const saveFile = getSaveFileOperation(readFeeder);
-            saveFile.start();
-        }
-    });
-}
-
-function getCheckFileOperation(fileName) {
-    const checkFileExists = new FileOperation
-    (
-        new Ajax(`/uniqObjName/Feeder/${thisOwner}/${fileName}/${thisModelName}`),
-        (xhr, resolve, reject) => {
-            try {
-                const data = JSON.parse(xhr.responseText);
-                if (data.exists) {
-                    alert(`You already have a feeder named "${fileName}". Please choose a different name.`);
-                    reject();
-                } else {
-                    resolve();
-                }
-            } catch (e) {
-                reject(e);
-            }
-        },
-        (xhr, resolve, reject) => { 
-            //Should never be called
-            reject(); 
-        },
-        (xhr, resolve, reject) => { 
-            alert("We were unable to submit your file. Please refresh the page and try again.");
-            reject(); 
-        }
-    );
-    return checkFileExists;
-}
-
-function submitForm(inputId, formId) {
-    const fileName = document.getElementById(inputId).value;
-    const checkFileExists = getCheckFileOperation(fileName);
-    const formElement = document.getElementById(formId);
-    const formData = new FormData(formElement);
-    const url = formElement.action;
-    const submitForm = new FileOperation
-    (
-        new Ajax(url, "POST", formData),
-        (xhr, resolve, reject) => {
-            if (formId === "blankFeederForm") {
-                reloadWrapper();
-            }
-            resolve();
-        },
-        (xhr, resolve, reject) => {
-            //Likely shouldn't be called 
-            reject("canceled");
-        },
-        (xhr, resolve, reject) => {
-            alert("We were unable to submit your file. Please refresh the page and try again.");
-            reject();
-        },
-        //Server code is such that it isn't currently possible to truly cancel a "new blank feeder" request
-        new ProgressModal("Submitting your file...", "", false)
-    );
-    const pollServer = new FileOperation
-    (
-        new Ajax(`/checkConversion/${thisModelName}/${thisOwner}`),
-        (xhr, resolve, reject) => {
-            if (xhr.responseText === 'glmError') {
-                alert('The glm file used is incorrectly formatted.');
-                reject();
-            } else if (xhr.responseText === 'milError') {
-                alert('The .std and .seq files used are incorrectly formatted.');
-                reject();
-            } else {
-                try {
-                    const data = JSON.parse(xhr.responseText);
-                    if (data.exists === false) {
-                        //alert('Conversion complete.');
-                        reloadWrapper();
-                        /** The progressModal seems to disappear prematurely, but it actually lasts the correct amount of time.
-                         * After the reload occurs and the success function executes, the progressModal is hidden by design. It's
-                         * just that the reload itself takes a long time, which is why the progressModal seems to disappear early.
-                         */
-                        resolve();
-                    } else {
-                        reject("in progress");
-                    }
-                } catch (e) {
-                    reject(e);
-                }
-            }
-        },
-        (xhr, resolve, reject) => {
-            reject("canceled");
-        },
-        (xhr, resolve, reject) => {
-            alert("We were unable to convert your file. Please refresh the page and try again.");
-            reject();
-        },
-        new ProgressModal("Converting your file...", "You canceled the file conversion.", true)
-    );
-    return checkFileExists.start().then(function() {
-        return submitForm.start();
-    }).then(function() {
-        pollServer.progressModal.show();
-        return new Promise((resolve, reject) => {
-            const intervalId = window.setInterval(function() {
-                pollServer.start().then(
-                    () => {
-                        //Should never be called
-                        window.clearInterval(intervalId);
-                        resolve(); 
-                    },
-                    (rejectionReason) => {
-                        pollServer.progressModal.show();
-                        if (rejectionReason === "canceled") {
-                            window.clearInterval(intervalId);
-                            reject("canceled");
-                        } else if (rejectionReason !== "in progress") {
-                            window.clearInterval(intervalId);
-                            reject();
-                        }
-                    });
-            }, 5000);
-        });
-    }).catch(function(rejectionReason) {
-        //Server code is such that it isn't possible to truly cancel a file conversion. Load a new blank feeder instead.
-        if (rejectionReason === "canceled") {
-            const formElement = document.getElementById("blankFeederForm");
-            const formData = new FormData(formElement);
-            const url = formElement.action;
-            const submitForm = new FileOperation
-            (
-                new Ajax(url, "POST", formData),
-                (xhr, resolve, reject) => {
-                    reloadWrapper();
-                    //resolve(); Don't resolve because
-                },
-                (xhr, resolve, reject) => {
-                    //Likely shouldn't be called 
-                    reject("canceled");
-                },
-                (xhr, resolve, reject) => {
-                    alert("We were unable to submit your file. Please refresh the page and try again.");
-                    reject();
-                },
-                //Server code is such that it isn't currently possible to truly cancel a "new blank feeder" request
-                new ProgressModal("Submitting your file...", "", false)
-            );
-            submitForm.start();
-        }
-    });
-}
-
-/** It's inefficeint to convert both feeders to strings and compare them. On the other hand, this strategy guarantees
- * no unsaved changes will be missed.
- */
-function renameFeeder() {
-	if (JSON.stringify(readFeeder) !== JSON.stringify(writeFeeder)){
-		alert('You have unsaved changes. Please save the feeder before proceeding.')
-	}
-	else {
-		let newName = prompt("Rename the feeder to", `${thisFeederName}`);
-		while (! /^[\w\s]+$/.test(newName) || /^\s+$/.test(newName)){
-			newName = prompt("Only letters, digits and underscore are allowed.\nPlease enter a different name", `${thisFeederName}`);
-		}
-		if (newName){
-            const checkFileExists = getCheckFileOperation(newName);
-            const renameFile = new FileOperation
-            (
-                new Ajax(`/renameFeeder/${thisOwner}/${thisModelName}/${thisFeederName}/${newName}/${thisFeederNum}`),
-                (xhr, resolve, reject) => {
-                    alert("Feeder file was successfully renamed.");
-                    thisFeederName = newName;
-                    resolve();
-                },
-                (xhr, resolve, reject) => {
-                    //Should never be called
-                    reject();
-                },
-                (xhr, resolve, reject) => {
-                    alert("We were unable to rename your file.");
-                    reject();
-                }
-            );
-            return checkFileExists.start().then(function() {
-                return renameFile.start();
-            }).catch(function() {
-                //Should never be called, unless there was a bad ajax request
-            });
-		}
-	}
-}
-
-/**
- * Save the modified feeder data by overwriting the existing .omd file in the server. The return statement is for integration tests.
- */
-function saveFeeder() {
-    const saveFile = getSaveFileOperation(writeFeeder);
-    return saveFile.start().catch(function(rejectionReason) {
-        if (rejectionReason === "canceled") {
-            const undoSave = getSaveFileOperation(readFeeder);
-            undoSave.start();
-        }
-    });
-}
-
 //ADD PROMPT TO SAVE CHANGES BEFORE EXIT
 {% if is_admin or not public %}
 	window.onbeforeunload = function(e) {
@@ -2393,80 +1477,6 @@ function reloadWrapper() {
     */
     window.location.reload(true);
 }
-
-function FileOperation(ajax, success, cancel, failure, progressModal) {
-    if (!(ajax instanceof Ajax) || (progressModal && !(progressModal instanceof ProgressModal)))
-        throw new Error("Arguments must be instances of Ajax and ProgressModal constructor functions");
-    this.ajax = ajax;
-    this.success = success;
-    this.cancel = cancel;
-    this.failure = failure;
-    this.canceled = false;
-    if (progressModal) {
-        this.progressModal = progressModal;
-        this.progressModal.button.onclick = () => {
-            if (confirm("Are you sure you want to cancel this operation?")) {
-                this.canceled = true;
-                this.progressModal.header.textContent = this.progressModal.cancelMessage;
-                this.progressModal.button.removeAttribute("onclick");
-                this.progressModal.button.style.display = "none";
-            }
-        }
-    }
-}
-
-FileOperation.prototype.start = function() {
-    if (this.progressModal)
-        this.progressModal.show();
-    return new Promise((resolve, reject) => {
-        this.ajax.send().then(
-           (xhr) => {
-                if (this.canceled) {
-                    this.cancel(xhr, resolve, reject);
-                } else {
-                    this.success(xhr, resolve, reject);
-                }
-                if (this.progressModal)
-                    this.progressModal.hide();            
-            },
-            (xhr) => {
-                this.failure(xhr, resolve, reject);
-                if (this.progressModal)
-                    this.progressModal.hide();            
-            }
-        )
-    });
-};
-
-function Ajax(url, httpMethod="GET", formData) {
-    if (httpMethod == "POST" && !(formData instanceof FormData))
-        throw new Error("formData must be an instance of FormData");
-    this.url = url;
-    this.httpMethod = httpMethod;
-    this.formData = formData;
-};
-
-Ajax.prototype.send = function() {
-    return new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open(this.httpMethod, this.url);
-        xhr.onload = function() {
-            if (this.status >= 200 && this.status < 400) {
-                resolve(xhr);
-            } else {
-                reject(xhr); 
-            }
-        };
-        xhr.onerror = function() {
-            reject(xhr);
-        };
-        if (this.httpMethod == "POST" && this.formData) {
-            xhr.send(this.formData);
-        } else {
-            xhr.send();
-        }
-    });
-};
 
 function ProgressModal(message, cancelMessage, showButton) {
     this.self = document.getElementById("progressModal");
@@ -2505,19 +1515,21 @@ const treeWrapperPrototype = {
      * @return {TreeWrapper} tWrapper - contains 1 tree object that was affected by the delete operation.
      */
     delete(key) {
-        const tWrapper = createTreeWrapper({});
+        const tWrapper = createTreeWrapper();
         if (!this.contains(key)) {
             console.log(`Unable to perform delete operation. This TreeWrapper does not contain a tree object with key: "${key}".`);
             return tWrapper;
         }
         const childKeys = Object.keys(this.getChildrenOf(key).tree);
         if (childKeys.length > 0) {
-            console.log(`Cannot delete tree object with key "${key}" from the tree because it has existing children`);
+            throw new Error(`Cannot delete tree object with key "${key}" from the tree because it has existing children`);
+            //console.log(`Cannot delete tree object with key "${key}" from the tree because it has existing children`);
             return tWrapper;
         }
         const lineKeys = Object.keys(this.getConnectedLinesOf(key).tree);
         if (lineKeys.length > 0) {
-            console.log(`Cannot delete tree object with key "${key}" from the tree because it has connected lines`);
+            throw new Error(`Cannot delete tree object with key "${key}" from the tree because it has connected lines`);
+            //console.log(`Cannot delete tree object with key "${key}" from the tree because it has connected lines`);
             return tWrapper;
         }
         tWrapper.add(key, this);
@@ -2562,7 +1574,7 @@ const treeWrapperPrototype = {
     insert(treeObject) {
         this.tree[treeObject.key] = treeObject.data;
         this.names[treeObject.data.name] = treeObject.key;
-        const tWrapper = createTreeWrapper({});
+        const tWrapper = createTreeWrapper();
         tWrapper.add(treeObject.key, this);
         tWrapper.merge(this.getSubtreeToRedraw(treeObject.key));
         return tWrapper;
@@ -2570,11 +1582,13 @@ const treeWrapperPrototype = {
 
     /* "Private" helper methods */
 
-    /** Use the key argument to find a tree object inside of the treeWrapper argument. 
-     * Add that tree object to this treeWrapper.
+    /** Use the key argument to find a tree object inside of the (source) treeWrapper argument. 
+     * Add that tree object to this (destination) treeWrapper.
      */
     add(key, treeWrapper) {
         if (!treeWrapper.contains(key)) {
+            console.log(`Unable to add the key to this TreeWrapper. 
+            The tree object with the key: "${key}" does not exist in the treeWrapper argument.`)
             return;
         }
         this.tree[key] = treeWrapper.tree[key];
@@ -2590,13 +1604,16 @@ const treeWrapperPrototype = {
      * @return {TreeWrapper} childrenTreeWrapper - contains only children tree objects of the parentKey tree object.
      */
     getChildrenOf(parentKey) {
-        const tWrapper = createTreeWrapper({});
+        const tWrapper = createTreeWrapper();
         if (!this.contains(parentKey)) {
             console.log(`Unable to get the children of the tree object with key: "${parentKey}". The key does not exist in this
             TreeWrapper.`);
             return tWrapper;
         }
-        const parentObj = this.tree[parentKey];
+        if (!isParentChildNode(this.tree[parentKey]) && !isParentlessNode(this.tree[parentKey])) {
+            // This tree object is not a node, therefore it cannot have any children
+            return tWrapper;
+        }
         let parentName = this.tree[parentKey].name;
         if (parentName == null) {
             console.log(`Unable to get the children of the tree object with key: "${parentKey}". The parent tree object
@@ -2615,11 +1632,20 @@ const treeWrapperPrototype = {
     /** Return a TreeWrapper that contains lines connected to the tree object with the passed key argument.
      *
      * @param {string} nodeKey - the key of the tree object that presumably has lines connected to it.
-     * @return {TreeWrapper} lineTreeWrapper - contains only line tree objects that connect to the nodeKey tree object.
+     * @return {TreeWrapper} subWrapper - contains only line tree objects that connect to the nodeKey tree object.
      */
     getConnectedLinesOf(nodeKey) {
-        //this.validateKey(nodeKey);
-        const linesTreeWrapper = createTreeWrapper({});
+        const tWrapper = createTreeWrapper();
+        if (!this.contains(nodeKey)) {
+            console.log(`Unable to find lines that connect to this node with key: "${nodeKey}". The key does not exist in this
+            TreeWrapper.`);
+            return tWrapper;
+        } else if (!isParentChildNode(this.tree[nodeKey]) && !isParentlessNode(this.tree[nodeKey])) {
+            // This tree object is not a node, therefore no lines can connect to it
+            return tWrapper;
+        }
+
+        const linesTreeWrapper = createTreeWrapper();
         // TODO: Build an object in TreeWrapper that allows instant lookup of connected lines for any TreeWrapper.tree object
         Object.keys(this.tree).forEach(key => {
             if (this.tree[key].to === this.tree[nodeKey].name || this.tree[key].from === this.tree[nodeKey].name) {
@@ -2661,7 +1687,7 @@ const treeWrapperPrototype = {
             throw new Error("Visited argument must be an array");
         }
         visited.push(key);
-        const subWrapper = createTreeWrapper({});
+        const subWrapper = createTreeWrapper();
         const childrensubWrapper = this.getChildrenOf(key);
         subWrapper.merge(childrensubWrapper);
         subWrapper.merge(this.getConnectedLinesOf(key));
@@ -2674,31 +1700,34 @@ const treeWrapperPrototype = {
         }
         return subWrapper;
     },
-    /** TODO: add unit tests
-     * Return a TreeWrapper that contains only the parent of the child tree object with the passed key argument.
+    /**
+     * Return a TreeWrapper that contains only the parent tree object of the child tree object.
      * 
-     * @param {string} key - the key of the child tree object.
+     * @param {string} childKey - the key of the child tree object.
      * @return {TreeWrapper} subWrapper - contains only the parent tree object of the child tree object.
      */
-    getParentOf(key) {
-        //this.validateKey(key);
-        const parentName = this.tree[key].parent;
+    getParentOf(childKey) {
+        const tWrapper = createTreeWrapper();
+        if (!this.contains(childKey)) {
+            console.log(`Unable to get the parent of the tree object with key: "${childKey}". The key does not exist in this
+            TreeWrapper.`);
+            return tWrapper;
+        }  
+        const parentName = this.tree[childKey].parent;
         if (parentName == null) {
             // This tree object doesn't have a parent, which is fine.
-            return createTreeWrapper({});
-        } else {
-            const parentKey = this.names[parentName];
-            if (parentKey == null) {
-                /* If parentKey is undefind, then either 1) a child node has a nonexistent parent or 
-                2) the names object of a TreeWrapper was built incorrectly */
-                console.log(`Child tree object with key: "${key}" has a nonexistent parent`);
-                //throw new Error(`Child tree object with key: "${key}" has a nonexistent parent`);
-                return createTreeWrapper({});
-            }
-            const subtree = {};
-            subtree[parentKey] = this.tree[parentKey];
-            return createTreeWrapper(subtree);
+            return tWrapper
         }
+        const parentKey = this.names[parentName];
+        if (parentKey == null) {
+            /* If parentKey is undefind, then either 1) the child node has a parent that doesn't exist in this graph or 
+            2) the names object of a TreeWrapper was built incorrectly */
+            //console.log(`Unable to get the parent of the child tree object with key: "${childKey}". The parent does not 
+            //exist in this TreeWrapper.`); //or the 'names' property is being built wrong.
+            return tWrapper;
+        }
+        tWrapper.add(parentKey, this);
+        return tWrapper;
     },
     /** Return a TreeWrapper that contains only tree objects that are on the other ends of lines that connect
      * to the tree object with the passed key argument.
@@ -2711,7 +1740,7 @@ const treeWrapperPrototype = {
     getPairedNodesOf(key) {
         //this.validateKey(key);
         const linesTreeWrapper = this.getConnectedLinesOf(key);
-        const pairedNodesTreeWrapper = createTreeWrapper({});
+        const pairedNodesTreeWrapper = createTreeWrapper();
         for (let lineKey in linesTreeWrapper.tree) {
             const fromKey = this.names[this.tree[lineKey].from];
             const toKey = this.names[this.tree[lineKey].to];
@@ -2728,8 +1757,7 @@ const treeWrapperPrototype = {
         }
         return pairedNodesTreeWrapper;
     },
-    /** TODO: add unit tests
-     * 
+    /** 
      * Return a TreeWrapper that contains nodes on either end of the line that is represented by the
      * tree object with the passed key argument.
      * @param {string} key - the key of the tree object that is a line. 
@@ -2737,13 +1765,14 @@ const treeWrapperPrototype = {
      * or 0 tree objects if the tree object isn't a line!
      */
     getNodeEndsOf(key) {
-        const tWrapper = createTreeWrapper({});
+        const tWrapper = createTreeWrapper();
         if (!this.contains(key) || !isLine(this.tree[key])) {
+            //TODO add console message and maybe split these up
             return tWrapper;
         }
         const fromKey = this.names[this.tree[key].from];
         const toKey = this.names[this.tree[key].to];
-        const subWrapper = createTreeWrapper({});
+        const subWrapper = createTreeWrapper();
         if (fromKey == null) {
             if (toKey == null) {
                 console.log(`Tree object with key: "${key}" has nonexistent "from" and "to" nodes.`);
@@ -2762,17 +1791,17 @@ const treeWrapperPrototype = {
         subWrapper.add(toKey, this);
         return subWrapper;
     },
-    /** good
+    /**
      * 
      */
     getSubtreeToRedraw(key) {
-        const subWrapper = createTreeWrapper({});
-        subWrapper.merge(this.getParentOf(key));
-        subWrapper.merge(this.getChildrenOf(key));
-        subWrapper.merge(this.getConnectedLinesOf(key));
-        subWrapper.merge(this.getPairedNodesOf(key));
-        subWrapper.merge(this.getNodeEndsOf(key));
-        return subWrapper;
+        const tWrapper = createTreeWrapper();
+        tWrapper.merge(this.getParentOf(key));
+        tWrapper.merge(this.getChildrenOf(key));
+        tWrapper.merge(this.getConnectedLinesOf(key));
+        tWrapper.merge(this.getPairedNodesOf(key));
+        tWrapper.merge(this.getNodeEndsOf(key));
+        return tWrapper;
     },
     /** Return true if the tree of this TreeWrapper has the 'key' argument, otherwise return false;
      * 
@@ -2780,7 +1809,9 @@ const treeWrapperPrototype = {
     //validateKey(key) {
     contains(key) {
         if (this.tree[key] == null) {
-            console.log(`No tree object with key: "${key}" exists in this TreeWrapper.`);
+            // Methods that use this method have more specific error messages that make this one redundant
+            //console.log(`Unable to perform any operations with the 'key' argument.
+            //No tree object with key: "${key}" exists in this TreeWrapper.`);
             return false;
         }
         const name = this.tree[key].name;
@@ -2833,7 +1864,7 @@ const treeWrapperPrototype = {
  * that contain data.
  * @return {TreeWrapper} treeWrapper - a wrapper around the tree argument.  
  */
-function createTreeWrapper(tree) {
+function createTreeWrapper(tree = {}) {
     if (typeof(tree) !== "object" || Array.isArray(tree)) {
         throw new Error("tree argument must be a JavaScript object");
     }
@@ -2954,7 +1985,7 @@ const addableSvgDataPrototype = {
     addParentChildLine(key) {
         const parent = Object.values(this.treeWrapper.getParentOf(key).tree)[0];
         if (parent == null) {
-            console.log(`Could not draw the parent-child line for child tree object with key: "${key}"`);
+            //console.log(`Could not draw the parent-child line for child tree object with key: "${key}"`);
             return;
         }
         const parentChildLine = createSvgLine(parent, this.treeWrapper.tree[key]);
@@ -3279,10 +2310,6 @@ function createDescriptionTable(id, tWrapper) {
     return table;
 }
 
-//**************************************************
-// Table button interface
-//**************************************************
-
 function createMoveButton(treeObject, tWrapper) {
 
     //console.log("move button created for treeObject");
@@ -3305,6 +2332,9 @@ function createClickListener(treeObject, tWrapper) {
     element.addEventListener("click", getCoordinates, true);
     element.setAttribute("style", "cursor: crosshair");
 
+    /* TODO: this will change the lon/lat of lines, but the redraw doesn't show it
+    this will add lon/lat to objects that didn't have it to begin with
+    */
     function getCoordinates(event) {
         event.stopPropagation();
         document.getElementById("svgContainerWrapper").removeEventListener("click", getCoordinates, true);
@@ -3317,10 +2347,6 @@ function createClickListener(treeObject, tWrapper) {
         element.setAttribute("style", "cursor: default");
     }
 }
-
-//**************************************************
-// Table row interface
-//**************************************************
 
 const rowPrototype = {
     validateKeyInput(key) {
@@ -3464,6 +2490,12 @@ function createContentRow(key, map) {
     }, 2000);
     */
 })();
+
+function recursiveDeleteDemo(key) {
+    const tWrapper = gTreeWrapper.recursiveDelete(key);
+    const svg = createDeletableSvgData(tWrapper.tree);
+    svg.deleteFrom(gViewport);
+}
 </script>
 <!--<script type='text/javascript' src='/static/distDataValidation.js'></script>-->
 {% if spec %}{{ spec | safe }}{% endif %}

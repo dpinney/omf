@@ -1,5 +1,5 @@
 //<script>
-// 32 objects
+// 35 objects
 const rawTree = {
     // weirdNode1
     "0": {
@@ -395,7 +395,25 @@ const rawTree = {
         "length": "338.245", 
         "latitude": 614.664711377176, 
         "configuration": "16564line_configuration32701"
-    }
+    },
+    // funkyLine1
+    "121212": {
+        "phases": "CS", 
+        "from": "house172262", 
+        "name": "Decepticon", 
+        "object": "transformer", 
+        "to": "house172260", 
+        "configuration": "1807--T325_C-CONFIG"
+    }, 
+    // funkyLine2
+    "343434": {
+        "phases": "CS", 
+        "from": "house172260", 
+        "name": "AutoBot", 
+        "object": "transformer", 
+        "to": "house172264", 
+        "configuration": "1807--T325_C-CONFIG"
+    }, 
 };
 let testTree = deepCopy(rawTree);
 let testTreeWrapper = createTreeWrapper(testTree);
@@ -416,10 +434,10 @@ describe("Unit tests", function() {
     */
     let testTree;
     let testTreeWrapper;
-    // 34 keys for 32 objects
-    const weirdNode1Key = "0";
-    const weirdNode2Key = "1";
-    const node1Key = "245000";
+    // 37 keys for 35 objects
+    const weirdNode1 = "0";
+    const weirdNode2 = "1";
+    const node1 = "245000";
     const node1Line1 = "368700";
     const node1Line1End = "285800";
     const node1Line1EndChild1 = "326000";
@@ -452,6 +470,16 @@ describe("Unit tests", function() {
     const node3Line1EndChild3 = "172264";
     const orphanNode1 = "172265";
     const orphanLine1 = "33420";
+    const funkyLine1 = "121212";
+    const funkyLine2 = "343434";
+
+    const allKeys = [weirdNode1, weirdNode2, node1, node1Line1, node1Line1End, node1Line1EndChild1, node1Line2,
+        node1Line2End, node1Line2EndChild1, node1Line3, node1Line3End, node1Line3EndChild1, node1Line4, node1Line4End,
+        node2Line1, node2Line1End , node2Line2, node2Line2End, node2Line2EndChild1, node2Line3, node2Line3End,
+        node2Line3EndLine, node2Line3EndLineEnd, node3Line1, node3Line1End, node3Line1EndChild1,
+        node3Line1EndChild1Child1, node3Line1EndChild1Child2, node3Line1EndChild2, node3Line1EndChild2Child1,
+        node3Line1EndChild3, orphanNode1, orphanLine1, funkyLine1, funkyLine2  
+    ];
 
     beforeEach(function() {
         // Tree does NOT contain any cycles
@@ -477,30 +505,21 @@ describe("Unit tests", function() {
 
         describe("treeWrapperPrototype", function() {
             
-            xdescribe("delete()", function() {
+            describe("delete()", function() {
 
                 describe("when the tree object with the passed key argument has NO children or connected lines", function() {
 
                     it(`should delete the tree object with the passed key from this TreeWrapper`, function() {
-                        expect(testTreeWrapper.tree[childLineKey]).toBeDefined();
-                        expect(testTreeWrapper.names[testTreeWrapper.tree[childLineKey].name]).toBeDefined(); 
-                        expect(Object.keys(testTreeWrapper.tree).length).toEqual(7);
-                        expect(Object.keys(testTreeWrapper.names).length).toEqual(7);
-                        testTreeWrapper.delete(childLineKey);
-                        expect(testTreeWrapper.tree[childLineKey]).toBeUndefined();
-                        expect(testTreeWrapper.names[testTreeWrapper.tree[childLineKey]]).toBeUndefined();
-                        expect(Object.keys(testTreeWrapper.tree).length).toEqual(6);
-                        expect(Object.keys(testTreeWrapper.names).length).toEqual(6);
+                        expect(testTreeWrapper.tree[node3Line1EndChild2Child1]).toBeDefined();
+                        testTreeWrapper.delete(node3Line1EndChild2Child1);
+                        expect(testTreeWrapper.tree[node3Line1EndChild2Child1]).toBeUndefined();
                     });
 
                     it("should return a TreeWrapper that contains only the tree object with the passed key argument", function() {
-                        const deletedObject = testTreeWrapper.tree[childLineKey]
-                        const deletedKey = childLineKey;
-                        const subtreeWrapper = testTreeWrapper.delete(childLineKey);
-                        expect(subtreeWrapper.tree[childLineKey]).toBe(deletedObject);
-                        expect(subtreeWrapper.names[subtreeWrapper.tree[childLineKey].name]).toEqual(deletedKey);
-                        expect(Object.keys(subtreeWrapper.tree).length).toEqual(1);
-                        expect(Object.keys(subtreeWrapper.names).length).toEqual(1);
+                        const tWrapper = createTreeWrapper();
+                        tWrapper.add(node3Line1EndChild2Child1, testTreeWrapper);
+                        const subWrapper = testTreeWrapper.delete(node3Line1EndChild2Child1);
+                        expect(subWrapper).toEqual(tWrapper);
                     });
                 });
 
@@ -508,85 +527,71 @@ describe("Unit tests", function() {
 
                     it("should throw an error", function() {
                         expect(function() {
-                            testTreeWrapper.delete(childLineNodeKey);
+                            testTreeWrapper.delete(node3Line1EndChild2);
                         }).toThrowError();
                     });
                 });
             });
 
-            xdescribe("recursiveDelete()", function() {
+            describe("recursiveDelete()", function() {
 
                 describe("when the tree object with the passed key argument is a node", function() {
 
                     it(`should delete from this TreeWrapper: 1) the tree object with the passed key 2) its direct children 
                     3) all children of children recursively 4) lines connected to the tree object with the passed key 
-                    5) lines that are connected to children of children`, function() {
-                        const keys = [grandParentKey, parentKey, childKey, lineKey, childLineKey];
-                        const names = []
+                    5) lines that are connected to children of children.`, function() {
+                        const keys = [node3Line1EndChild1, node3Line1EndChild2, node3Line1EndChild3, node3Line1,
+                            node3Line1EndChild1Child1, node3Line1EndChild1Child2, node3Line1EndChild2Child1, node3Line1End,
+                            funkyLine1, funkyLine2]
+                        const names = [];
                         for (let key of keys) {
                             expect(testTreeWrapper.tree[key]).toBeDefined();
-                            const name = testTreeWrapper.tree[key].name;
-                            names.push(name);
-                            expect(testTreeWrapper.names[name]).toBeDefined();
+                            expect(testTreeWrapper.names[testTreeWrapper.tree[key].name]).toBeDefined();
+                            names.push(testTreeWrapper.tree[key].name);
                         }
-                        expect(Object.keys(testTreeWrapper.tree).length).toEqual(7);
-                        expect(Object.keys(testTreeWrapper.names).length).toEqual(7);
-                        testTreeWrapper.recursiveDelete(grandParentKey);
+                        testTreeWrapper.recursiveDelete(node3Line1End);
                         for (let key of keys) {
                             expect(testTreeWrapper.tree[key]).toBeUndefined();
-                            expect(testTreeWrapper.names[names.shift()]).toBeUndefined();
+                            expect(testTreeWrapper.names[names.pop()]).toBeUndefined();
                         }
-                        expect(Object.keys(testTreeWrapper.tree).length).toEqual(2);
-                        expect(Object.keys(testTreeWrapper.names).length).toEqual(2);
                     });
 
-                    it(`should return a TreeWrapper that contains 1) the tree object with the passed key
-                    2) its direct children (if they exist), 3) all children of children 4) lines
-                    connected to the tree object with the passed key 5) lines that are connected to children
-                    of children`, function() {
-                        const keys = [grandParentKey, parentKey, childKey, lineKey, childLineKey];
-                        const deletedObjects = []
-                        const deletedKeys = [];
+                    it(`should return a TreeWrapper that contains the objects that were deleted.`, function() {
+                        const keys = [node3Line1EndChild1, node3Line1EndChild2, node3Line1EndChild3, node3Line1,
+                            node3Line1EndChild1Child1, node3Line1EndChild1Child2, node3Line1EndChild2Child1, node3Line1End,
+                            funkyLine1, funkyLine2];
                         for (let key of keys) {
-                            deletedObjects.push(testTreeWrapper.tree[key]);
-                            deletedKeys.push(key);
+                            expect(testTreeWrapper.tree[key]).toBeDefined();
+                            expect(testTreeWrapper.names[testTreeWrapper.tree[key].name]).toBeDefined();
                         }
-                        const subtreeWrapper = testTreeWrapper.recursiveDelete(grandParentKey);
+                        const tWrapper = createTreeWrapper();
                         for (let key of keys) {
-                            expect(subtreeWrapper.tree[key]).toBe(deletedObjects.shift());
-                            expect(subtreeWrapper.names[subtreeWrapper.tree[key].name]).toEqual(deletedKeys.shift());
-                        }
-                        expect(Object.keys(subtreeWrapper.tree).length).toEqual(keys.length); 
-                        expect(Object.keys(subtreeWrapper.names).length).toEqual(keys.length); 
+                            tWrapper.add(key, testTreeWrapper);
+                        } 
+                        const subWrapper = testTreeWrapper.recursiveDelete(node3Line1End);
+                        expect(subWrapper).toEqual(tWrapper);
                     });
                 });
 
                 describe("when the tree argument with the passed key argument is a line", function() {
 
                     it("should delete only the line from this TreeWrapper", function() {
-                        const deletedObject = testTreeWrapper.tree[childLineKey];
-                        expect(Object.keys(testTreeWrapper.tree).length).toEqual(7); 
-                        expect(Object.keys(testTreeWrapper.names).length).toEqual(7); 
-                        testTreeWrapper.recursiveDelete(childLineKey);
-                        expect(testTreeWrapper.tree[childLineKey]).toBeUndefined();
-                        expect(testTreeWrapper.names[deletedObject.name]).toBeUndefined();
-                        expect(Object.keys(testTreeWrapper.tree).length).toEqual(6); 
-                        expect(Object.keys(testTreeWrapper.names).length).toEqual(6); 
+                        expect(testTreeWrapper.tree[node1Line1]).toBeDefined();
+                        testTreeWrapper.recursiveDelete(node1Line1);
+                        expect(testTreeWrapper.tree[node1Line1]).toBeUndefined();
                     });
 
                     it(`should return a TreeWrapper that only contains the line`, function() {
-                        const deletedObject = testTreeWrapper.tree[childLineKey]
-                        const deletedKey = childLineKey;
-                        const subtreeWrapper = testTreeWrapper.recursiveDelete(childLineKey);
-                        expect(subtreeWrapper.tree[childLineKey]).toBe(deletedObject);
-                        expect(subtreeWrapper.names[subtreeWrapper.tree[childLineKey].name]).toEqual(deletedKey);
-                        expect(Object.keys(subtreeWrapper.tree).length).toEqual(1);
-                        expect(Object.keys(subtreeWrapper.names).length).toEqual(1);
+                        expect(testTreeWrapper.tree[node1Line1]).toBeDefined();
+                        const tWrapper = createTreeWrapper();
+                        tWrapper.add(node1Line1, testTreeWrapper);
+                        const subWrapper = testTreeWrapper.recursiveDelete(node1Line1);
+                        expect(subWrapper).toEqual(tWrapper);
                     });
                 });
             });
 
-            xdescribe("insert()", function() {
+            describe("insert()", function() {
 
                 describe("when the TreeObject does not exist in the TreeWrapper", function() {
 
@@ -599,13 +604,11 @@ describe("Unit tests", function() {
                             "latitude": 800.489571934734, 
                         }
                         const tObj = createTreeObject(map, testTreeWrapper);
-                        expect(Object.keys(testTreeWrapper.tree).length).toEqual(7);
-                        expect(Object.keys(testTreeWrapper.names).length).toEqual(7);
-                        testTreeWrapper.insert(tObj);
-                        expect(testTreeWrapper.tree[tObj.key]).toBe(tObj.data);
-                        expect(testTreeWrapper.names[tObj.data.name]).toEqual(tObj.key);
-                        expect(Object.keys(testTreeWrapper.tree).length).toEqual(8);
-                        expect(Object.keys(testTreeWrapper.names).length).toEqual(8);
+                        expect(Object.keys(testTreeWrapper.tree).length).toEqual(35);
+                        expect(Object.keys(testTreeWrapper.names).length).toEqual(33);
+                        testTreeWrapper.insert(tObj);      
+                        expect(Object.keys(testTreeWrapper.tree).length).toEqual(36);
+                        expect(Object.keys(testTreeWrapper.names).length).toEqual(34);
                     });
                 });
 
@@ -613,17 +616,17 @@ describe("Unit tests", function() {
                 in this TreeWrapper`, function() {
 
                     it(`should overwrite the tree object data with data from the TreeObject`, function() {
-                        const tObj = createTreeObject(parentKey, testTreeWrapper);
+                        const tObj = createTreeObject(node1, testTreeWrapper);
                         tObj.data.object = "blahblahblah";
                         tObj.data.longitude = "-1000";
                         tObj.data.latitude = "-1111";
-                        expect(Object.keys(testTreeWrapper.tree).length).toEqual(7);
-                        expect(Object.keys(testTreeWrapper.names).length).toEqual(7);
+                        expect(Object.keys(testTreeWrapper.tree).length).toEqual(35);
+                        expect(Object.keys(testTreeWrapper.names).length).toEqual(33);
                         testTreeWrapper.insert(tObj);
-                        expect(testTreeWrapper.tree[parentKey]).toBe(tObj.data);
-                        expect(testTreeWrapper.names[testTreeWrapper.tree[parentKey].name]).toEqual(tObj.key);
-                        expect(Object.keys(testTreeWrapper.tree).length).toEqual(7);
-                        expect(Object.keys(testTreeWrapper.names).length).toEqual(7);
+                        expect(testTreeWrapper.tree[node1]).toBe(tObj.data);
+                        expect(testTreeWrapper.names[testTreeWrapper.tree[node1].name]).toEqual(tObj.key);
+                        expect(Object.keys(testTreeWrapper.tree).length).toEqual(35);
+                        expect(Object.keys(testTreeWrapper.names).length).toEqual(33);
                     });
                 });
 
@@ -633,15 +636,15 @@ describe("Unit tests", function() {
                     2) the parent of the tree object (if one exists) 3) the direct children of the tree object (if they exist)
                     4) lines that are connected to the tree object (if there are any) 5) nodes on the other ends of lines that
                     are connected to the tree object (if there are connected lines)`, function() {
-                        const tObj = createTreeObject(parentKey, testTreeWrapper);
-                        const keys = [parentKey, grandParentKey, childKey, lineKey, lineNodeKey];
-                        const subtreeWrapper = testTreeWrapper.insert(tObj);
+                        const keys = [node3Line1End, node3Line1EndChild1, node3Line1EndChild2, node3Line1EndChild3, node3Line1, node3];
+                        const tObj = createTreeObject(node3Line1End, testTreeWrapper);
+                        const subWrapper = testTreeWrapper.insert(tObj);
                         for (let key of keys) {
-                            expect(subtreeWrapper.tree[key]).toBe(testTreeWrapper.tree[key]);
-                            expect(subtreeWrapper.names[subtreeWrapper.tree[key].name]).toEqual(testTreeWrapper.names[testTreeWrapper.tree[key].name]);
+                            expect(subWrapper.tree[key]).toBe(testTreeWrapper.tree[key]);
+                            expect(subWrapper.names[subWrapper.tree[key].name]).toEqual(testTreeWrapper.names[testTreeWrapper.tree[key].name]);
                         }
-                        expect(Object.keys(subtreeWrapper.tree).length).toEqual(keys.length);
-                        expect(Object.keys(subtreeWrapper.names).length).toEqual(keys.length);
+                        expect(Object.keys(subWrapper.tree).length).toEqual(keys.length);
+                        expect(Object.keys(subWrapper.names).length).toEqual(keys.length);
                     });
                 });
 
@@ -649,21 +652,21 @@ describe("Unit tests", function() {
 
                     it(`should return a TreeWrapper that contains the line and the nodes on either end of
                     the line`, function() {
-                        const keys = [lineKey, parentKey, lineNodeKey];
-                        const tObj = createTreeObject(lineKey, testTreeWrapper);
-                        const subtreeWrapper = testTreeWrapper.insert(tObj);
+                        const keys = [node3Line1, node3Line1End, node3]
+                        const tObj = createTreeObject(node3Line1, testTreeWrapper);
+                        const subWrapper = testTreeWrapper.insert(tObj);
                         for (let key of keys) {
-                            expect(subtreeWrapper.tree[key]).toBe(testTreeWrapper.tree[key]);
-                            expect(subtreeWrapper.names[subtreeWrapper.tree[key].name]).toEqual(testTreeWrapper.names[testTreeWrapper.tree[key].name]);
+                            expect(subWrapper.tree[key]).toBe(testTreeWrapper.tree[key]);
+                            expect(subWrapper.names[subWrapper.tree[key].name]).toEqual(testTreeWrapper.names[testTreeWrapper.tree[key].name]);
                         }
-                        expect(Object.keys(subtreeWrapper.tree).length).toEqual(keys.length);
-                        expect(Object.keys(subtreeWrapper.names).length).toEqual(keys.length);
+                        expect(Object.keys(subWrapper.tree).length).toEqual(keys.length);
+                        expect(Object.keys(subWrapper.names).length).toEqual(keys.length);
                     });
                 });
             });
         });
 
-        xdescribe("createTreeObject()", function() {
+        describe("createTreeObject()", function() {
 
             describe("when invoked with (key, treeWrapper) arguments", function() {
 
@@ -698,7 +701,7 @@ describe("Unit tests", function() {
 
                 it("should throw an error when the given key doesn't exist in the tree", function() {
                     expect(function() {
-                        createTreeObject(10, createTreeWrapper({}));
+                        createTreeObject(10, createTreeWrapper());
                     }).toThrowError();
                 });
             });
@@ -709,7 +712,7 @@ describe("Unit tests", function() {
                     const map = {
                         prop: "cool value"
                     }
-                    const tObj = createTreeObject(map, createTreeWrapper({}));
+                    const tObj = createTreeObject(map, createTreeWrapper());
                     expect(tObj.data).not.toBe(map);
                     expect(tObj.data).toEqual(map);
                 });
@@ -725,7 +728,7 @@ describe("Unit tests", function() {
 
                 it("should call update()", function() {
                     const spy = spyOn(treeObjectPrototype, "update").and.callThrough();
-                    createTreeObject({}, createTreeWrapper({}));
+                    createTreeObject({}, createTreeWrapper());
                     expect(spy).toHaveBeenCalled();
                 });
 
@@ -733,13 +736,13 @@ describe("Unit tests", function() {
                     const error = "Custom Error"
                     const spy = spyOn(treeObjectPrototype, "update").and.throwError(error);
                     expect(function() {
-                        createTreeObject({}, createTreeWrapper({}));
+                        createTreeObject({}, createTreeWrapper());
                     }).toThrowError(error)
                 });
 
                 it("should call getNewTreeKey()", function() {
                     const spy = spyOn(window, "getNewTreeKey").and.callThrough();
-                    createTreeObject({}, createTreeWrapper({}));
+                    createTreeObject({}, createTreeWrapper());
                     expect(spy).toHaveBeenCalled();
                 });
             });
@@ -749,10 +752,10 @@ describe("Unit tests", function() {
             //no public methods?
         });
 
-        xdescribe("createAddableSvgData()", function() {
+        describe("createAddableSvgData()", function() {
 
             it("should return an object with an array of lines and an array of circles", function() {
-                const treeWrapper = createTreeWrapper({});
+                const treeWrapper = createTreeWrapper();
                 const svgData = createAddableSvgData(treeWrapper);
                 expect(svgData.circles).toEqual(jasmine.any(Array));
                 expect(svgData.lines).toEqual(jasmine.any(Array));
@@ -762,12 +765,8 @@ describe("Unit tests", function() {
 
                 it("should return an object with the correct number of circles and lines", function() {
                     const svgData = createAddableSvgData(testTreeWrapper);
-                    /* circles: grandparent, parent, child, lineNode, childLineNode
-                        lines: line, childLine, 
-                        parent-child lines: child-parent, parent-grandparent
-                    */
-                    expect(svgData.circles.length).toEqual(5);
-                    expect(svgData.lines.length).toEqual(4);
+                    expect(svgData.circles.length).toEqual(21);
+                    expect(svgData.lines.length).toEqual(21);
                 });
             });
         });
@@ -791,8 +790,8 @@ describe("Unit tests", function() {
                 });
 
                 it("should exclude a tree object if it does not have a name property", function() {
-                    // 33 objects, 2 weird nodes are missing 'name'
-                    expect(Object.keys(testTreeWrapper.buildNames()).length).toEqual(31);  
+                    // 35 objects exist, but only 33 have names because 2 weird nodes are missing 'name'
+                    expect(Object.keys(testTreeWrapper.buildNames()).length).toEqual(33);  
                     expect(testTreeWrapper.names[undefined]).not.toBeDefined();
                 });
             });
@@ -800,8 +799,8 @@ describe("Unit tests", function() {
             describe("contains()", function() {
 
                 it("should return true if this TreeWrapper contains a tree object with the 'key' argument.", function() {
-                    expect(testTreeWrapper.tree[node1Key]).toBeDefined();
-                    expect(testTreeWrapper.contains(node1Key)).toEqual(true);
+                    expect(testTreeWrapper.tree[node1]).toBeDefined();
+                    expect(testTreeWrapper.contains(node1)).toEqual(true);
                 });
 
                 it("should return false if this TreeWrapper does not contain a tree object with the 'key' argument", function() {
@@ -817,8 +816,8 @@ describe("Unit tests", function() {
                     it("should call console.log(), not modify this TreeWrapper, and return", function() {
                         expect(testTreeWrapper.tree["foo"]).toBeUndefined();
                         const spy = spyOn(console, "log");
-                        const tWrapper = createTreeWrapper({});
-                        const emptyWrapper = createTreeWrapper({});
+                        const emptyWrapper = createTreeWrapper();
+                        const tWrapper = createTreeWrapper();
                         tWrapper.add("foo", testTreeWrapper);
                         expect(tWrapper).toEqual(emptyWrapper);
                         expect(spy).toHaveBeenCalled();
@@ -829,13 +828,11 @@ describe("Unit tests", function() {
                 but does not have a 'name' property`, function() {
 
                     it(`should 1) add the tree object to the 'tree' property of this TreeWrapper, 2) not
-                    modify the 'names' property of this TreeWrapper, 3) call console.log()`, function() {
-                        expect(testTreeWrapper.tree[weirdNode1Key]).toBeDefined();
-                        expect(testTreeWrapper.tree[weirdNode1Key].name).toBeUndefined();
-                        const spy = spyOn(console, "log");
-                        const tWrapper = createTreeWrapper({});
-                        tWrapper.add(weirdNode1Key, testTreeWrapper);
-                        expect(spy).toHaveBeenCalled();
+                    modify the 'names' property of this TreeWrapper.`, function() {
+                        expect(testTreeWrapper.tree[weirdNode1]).toBeDefined();
+                        expect(testTreeWrapper.tree[weirdNode1].name).toBeUndefined();
+                        const tWrapper = createTreeWrapper();
+                        tWrapper.add(weirdNode1, testTreeWrapper);
                         expect(Object.keys(tWrapper.tree).length).toEqual(1);
                         expect(Object.keys(tWrapper.names).length).toEqual(0);
                     });
@@ -845,10 +842,10 @@ describe("Unit tests", function() {
 
                     it(`should add the tree object argument to the 'tree' and 'names' properties of 
                     this treeWrapper`, function() {
-                        expect(testTreeWrapper.tree[node1Key]).toBeDefined();
-                        expect(testTreeWrapper.tree[node1Key].name).toBeDefined();
-                        const tWrapper = createTreeWrapper({});
-                        tWrapper.add(node1Key, testTreeWrapper);
+                        expect(testTreeWrapper.tree[node1]).toBeDefined();
+                        expect(testTreeWrapper.tree[node1].name).toBeDefined();
+                        const tWrapper = createTreeWrapper();
+                        tWrapper.add(node1, testTreeWrapper);
                         expect(Object.keys(tWrapper.tree).length).toEqual(1);
                         expect(Object.keys(tWrapper.names).length).toEqual(1);
                     });
@@ -857,6 +854,12 @@ describe("Unit tests", function() {
 
             describe("getChildrenOf()", function() {
 
+                it("should call contains() to validate the 'key' argument", function() {
+                    const spy = spyOn(treeWrapperPrototype, "contains");
+                    testTreeWrapper.getChildrenOf("0");
+                    expect(spy).toHaveBeenCalled();
+                });
+
                 it(`should return a TreeWrapper that excludes tree objects that lack a 'parent' 
                 property.` , function() {
                     const t = {
@@ -864,26 +867,25 @@ describe("Unit tests", function() {
                             "climate": "humid"
                         }
                     };
-                    const emptyWrapper = createTreeWrapper({});
+                    const emptyWrapper = createTreeWrapper();
                     const children = createTreeWrapper(t).getChildrenOf("0");
                     expect(children).toEqual(emptyWrapper);
                 });
 
                 describe("when the tree object with the passed 'key' argument has children", function() {
 
-                    it(`should return a TreeWrapper that only contains references to its child tree objects`, function() {
+                    it(`should return a TreeWrapper that only contains its child tree objects`, function() {
                         // Get 2 children
-                        let tWrapper = createTreeWrapper({});
+                        const tWrapper = createTreeWrapper();
                         tWrapper.add(node3Line1EndChild1Child2, testTreeWrapper);
                         tWrapper.add(node3Line1EndChild1Child1, testTreeWrapper);
-                        let children = testTreeWrapper.getChildrenOf(node3Line1EndChild1);
+                        const children = testTreeWrapper.getChildrenOf(node3Line1EndChild1);
                         expect(children).toEqual(tWrapper);
-
                     });
 
-                    it(`should return a TreeWrapper that only contains references to its child tree objects`, function() {
+                    it(`should return a TreeWrapper that only contains its child tree objects`, function() {
                         // Get 1 child
-                        const tWrapper = createTreeWrapper({});
+                        const tWrapper = createTreeWrapper();
                         tWrapper.add(node2Line2EndChild1, testTreeWrapper);
                         const children = testTreeWrapper.getChildrenOf(node2Line2End)
                         expect(children).toEqual(tWrapper);
@@ -893,38 +895,68 @@ describe("Unit tests", function() {
                 describe("when the tree object with the passed key argument does not have children", function() {
 
                     it("should return an empty TreeWrapper", function() {
-                        const emptyWrapper = createTreeWrapper({});
+                        const emptyWrapper = createTreeWrapper();
                         const children = testTreeWrapper.getChildrenOf(node2Line3End);                        
+                        expect(children).toEqual(emptyWrapper);
+                    });
+
+                    it("should return an empty TreeWrapper", function() {
+                        // test for weird nodes
+                        const emptyWrapper = createTreeWrapper();
+                        const children = testTreeWrapper.getChildrenOf(weirdNode2);
                         expect(children).toEqual(emptyWrapper);
                     });
                 });
             });
             
-            xdescribe("getConnectedLinesOf()", function() {
+            describe("getConnectedLinesOf()", function() {
 
-                describe("when the tree object with the passed key argument has connected lines", function() {
+                it("should call contains to validate the 'key' argument", function() {
+                    const spy = spyOn(treeWrapperPrototype, "contains");
+                    testTreeWrapper.getConnectedLinesOf("0");
+                    expect(spy).toHaveBeenCalled();
+                });
 
-                    it(`should return a TreeWrapper that only contains references to tree objects that are lines
-                    which connect to the tree object with passed key argument`, function() {
-                        const subtreeWrapper = testTreeWrapper.getConnectedLinesOf(childKey);
-                        expect(subtreeWrapper.tree[childLineKey]).toBe(testTreeWrapper.tree[childLineKey]);
-                        expect(Object.keys(subtreeWrapper.tree).length).toEqual(1);
-                        expect(subtreeWrapper.names[subtreeWrapper.tree[childLineKey].name]).toEqual(testTreeWrapper.names[testTreeWrapper.tree[childLineKey].name]);
-                        expect(Object.keys(subtreeWrapper.names).length).toEqual(1);
+                describe("when the tree object with the passed 'key' argument has connected lines", function() {
+
+                    it(`should return a new TreeWrapper that only contains tree objects that are lines
+                    which connect to the tree object argument`, function() {
+                        const tWrapper = createTreeWrapper();
+                        tWrapper.add(node2Line1, testTreeWrapper);
+                        tWrapper.add(node2Line2, testTreeWrapper);
+                        tWrapper.add(node2Line3, testTreeWrapper);
+                        tWrapper.add(node1Line4, testTreeWrapper);
+                        const subWrapper = testTreeWrapper.getConnectedLinesOf(node2);
+                        expect(subWrapper).toEqual(tWrapper);
                     });
                 });
 
-                describe("when the tree object with the passed key argument has no connected lines", function() {
+                describe("when the tree object with the passed 'key' argument does not have connected lines", function() {
 
                     it("should return an empty TreeWrapper", function() {
-                        const subtreeWrapper = testTreeWrapper.getConnectedLinesOf(lineKey);
-                        expect(Object.keys(subtreeWrapper.tree).length).toEqual(0);
-                        expect(Object.keys(subtreeWrapper.names).length).toEqual(0);
+                        // Test for nodes without lines
+                        const emptyWrapper = createTreeWrapper();
+                        const subWrapper = testTreeWrapper.getConnectedLinesOf(node2Line2EndChild1);
+                        expect(subWrapper).toEqual(emptyWrapper);
+                    });
+
+                    it("should return an empty TreeWrapper", function() {
+                        // Test for lines (since lines don't connect to other lines)
+                        const emptyWrapper = createTreeWrapper();
+                        const subWrapper = testTreeWrapper.getConnectedLinesOf(node1Line4);
+                        expect(subWrapper).toEqual(emptyWrapper);
+                    });
+
+                    it("should return an empty TreeWrapper", function() {
+                        // Test for weird nodes
+                        const emptyWrapper = createTreeWrapper();
+                        const subWrapper = testTreeWrapper.getConnectedLinesOf(weirdNode1);
+                        expect(subWrapper).toEqual(emptyWrapper);
                     });
                 });
             });
 
-            xdescribe("merge()", function() {
+            describe("merge()", function() {
 
                 describe("when no keys array is passed", function() {
 
@@ -932,15 +964,14 @@ describe("Unit tests", function() {
                         /* Both TreeWrapper.trees should contain the same objects. Both TreeWrapper.names 
                         should contain the same names
                         */
-                        const keys = [grandParentKey, parentKey, childKey, lineKey, lineNodeKey, childLineKey, childLineNodeKey];
-                        const subtreeWrapper = createTreeWrapper({});
-                        subtreeWrapper.merge(testTreeWrapper);
-                        for (let key of keys) {
-                            expect(subtreeWrapper.tree[key]).toBe(testTreeWrapper.tree[key]);
-                            expect(subtreeWrapper.names[subtreeWrapper.tree[key].name]).toEqual(testTreeWrapper.names[testTreeWrapper.tree[key].name]);
+                        const subWrapper = createTreeWrapper();
+                        subWrapper.merge(testTreeWrapper);
+                        for (let key of allKeys) {
+                            expect(subWrapper.tree[key]).toBe(testTreeWrapper.tree[key]);
+                            expect(subWrapper.names[subWrapper.tree[key].name]).toEqual(testTreeWrapper.names[testTreeWrapper.tree[key].name]);
                         }
-                        expect(Object.keys(subtreeWrapper.tree).length).toEqual(Object.keys(testTreeWrapper.tree).length);
-                        expect(Object.keys(subtreeWrapper.names).length).toEqual(Object.keys(testTreeWrapper.tree).length);
+                        expect(Object.keys(subWrapper.tree).length).toEqual(Object.keys(testTreeWrapper.tree).length);
+                        expect(Object.keys(subWrapper.names).length).toEqual(Object.keys(testTreeWrapper.names).length);
                     });
                 });
 
@@ -948,45 +979,37 @@ describe("Unit tests", function() {
                     
                     it(`should merge only tree objects with the specified keys from the TreeWrapper agument into this
                     TreeWrapper`, function() {
-                        const keys = [grandParentKey, lineNodeKey];
-                        const subtreeWrapper = createTreeWrapper({});
-                        subtreeWrapper.merge(testTreeWrapper, keys);
+                        const keys = [node2Line3EndLine, node2Line3End];
+                        const subWrapper = createTreeWrapper();
+                        subWrapper.merge(testTreeWrapper, keys);
                         for (let key of keys) {
-                            expect(subtreeWrapper.tree[key]).toBe(testTreeWrapper.tree[key]);
-                            expect(subtreeWrapper.names[subtreeWrapper.tree[key].name]).toEqual(testTreeWrapper.names[testTreeWrapper.tree[key].name]);
+                            expect(subWrapper.tree[key]).toBe(testTreeWrapper.tree[key]);
+                            expect(subWrapper.names[subWrapper.tree[key].name]).toEqual(testTreeWrapper.names[testTreeWrapper.tree[key].name]);
                         }
-                        expect(Object.keys(subtreeWrapper.tree).length).toEqual(keys.length);
-                        expect(Object.keys(subtreeWrapper.names).length).toEqual(keys.length);
+                        expect(Object.keys(subWrapper.tree).length).toEqual(keys.length);
+                        expect(Object.keys(subWrapper.names).length).toEqual(keys.length);
                     });
                 });
             });
 
-            xdescribe(`getSubtreeToDelete()`, function() {
+            describe(`getSubtreeToDelete()`, function() {
 
                 describe("when the tree object with the passed key argument is a node", function() {
 
-                    it(`should return a TreeWrapper that contains direct children and lines that connect to the tree object
-                    with the passed key argument`, function() {
-                        const keys = [childKey, lineKey];
-                        const subtreeWrapper = testTreeWrapper.getSubtreeToDelete(parentKey, []);
-                        for (let key of keys) {
-                            expect(subtreeWrapper.tree[key]).toBe(testTreeWrapper.tree[key]);
-                            expect(subtreeWrapper.names[subtreeWrapper.tree[key].name]).toEqual(testTreeWrapper.names[testTreeWrapper.tree[key].name]);
-                        }
-                        expect(Object.keys(subtreeWrapper.tree).length).toEqual(3); //child, line, and line connected to child
-                        expect(Object.keys(subtreeWrapper.names).length).toEqual(3); //child, line, and line connected to child
-                    });
-
                     it(`should return a TreeWrapper that contains children of children (etc.) and all lines that connect to 
                     any of those children`, function() { 
-                        const keys = [parentKey, lineKey, childKey, childLineKey];
-                        const subtreeWrapper = testTreeWrapper.getSubtreeToDelete(grandParentKey, []);
-                        for (let key of keys) {
-                            expect(subtreeWrapper.tree[key]).toBe(testTreeWrapper.tree[key]);
-                            expect(subtreeWrapper.names[subtreeWrapper.tree[key].name]).toEqual(testTreeWrapper.names[testTreeWrapper.tree[key].name]);
-                        }
-                        expect(Object.keys(subtreeWrapper.tree).length).toEqual(4); //parent, line connected to parent, child, line connected to child (4)
-                        expect(Object.keys(subtreeWrapper.names).length).toEqual(4); //parent, line connected to parent, child, line connected to child (4)
+                        const tWrapper = createTreeWrapper();
+                        tWrapper.add(node3Line1EndChild1, testTreeWrapper);
+                        tWrapper.add(node3Line1EndChild2, testTreeWrapper);
+                        tWrapper.add(node3Line1EndChild3, testTreeWrapper);
+                        tWrapper.add(node3Line1, testTreeWrapper);
+                        tWrapper.add(funkyLine1, testTreeWrapper);
+                        tWrapper.add(funkyLine2, testTreeWrapper);
+                        tWrapper.add(node3Line1EndChild1Child1, testTreeWrapper);
+                        tWrapper.add(node3Line1EndChild1Child2, testTreeWrapper);
+                        tWrapper.add(node3Line1EndChild2Child1, testTreeWrapper);
+                        const subWrapper = testTreeWrapper.getSubtreeToDelete(node3Line1End, []);
+                        expect(subWrapper).toEqual(tWrapper);
                     });
 
                     it(`should not recurse infinitely if a cycle exists in the graph`, function() {
@@ -1009,114 +1032,179 @@ describe("Unit tests", function() {
                                 "name": "whatever"
                             }
                         };
-                        const treeWrapper = createTreeWrapper(tree);
-                        const subtreeWrapper = treeWrapper.getSubtreeToDelete("1", []);
-                        expect(subtreeWrapper.tree["1"]).toBe(treeWrapper.tree["1"]);
-                        expect(subtreeWrapper.tree["2"]).toBe(treeWrapper.tree["2"]);
-                        expect(Object.keys(subtreeWrapper.tree).length).toEqual(2);
-                        expect(subtreeWrapper.names["node226"]).toEqual(treeWrapper.names["node226"]);
-                        expect(subtreeWrapper.names["node134"]).toEqual(treeWrapper.names["node134"]);
-                        expect(Object.keys(subtreeWrapper.names).length).toEqual(2);
+                        const smallWrapper = createTreeWrapper(tree);
+                        const tWrapper = createTreeWrapper();
+                        tWrapper.add("1", smallWrapper);
+                        tWrapper.add("2", smallWrapper);
+                        const subWrapper = tWrapper.getSubtreeToDelete("1", []);
+                        expect(subWrapper).toEqual(tWrapper);
                     });
                 });
                 
                 describe("when the tree object with the passed key argument is a line", function() {
 
                     it(`should return an empty TreeWrapper`, function() {
-                        const subtreeWrapper = testTreeWrapper.getSubtreeToDelete(lineKey, []);
-                        expect(Object.keys(subtreeWrapper.tree).length).toEqual(0);
-                        expect(Object.keys(subtreeWrapper.names).length).toEqual(0);
+                        const emptyWrapper = createTreeWrapper();
+                        const subWrapper = testTreeWrapper.getSubtreeToDelete(funkyLine1, []);
+                        expect(subWrapper).toEqual(emptyWrapper);
                     });
                 });
             });
+            
+            describe("getParentOf()", function() {
 
-            xdescribe("getParentOf()", function() {
+                it("should call contains() to validate the 'key' argument", function() {
+                    const spy = spyOn(treeWrapperPrototype, "contains");
+                    testTreeWrapper.getParentOf("0");
+                    expect(spy).toHaveBeenCalled();
+                });
 
-                describe("when the tree object with the passed key argument has a parent", function() {
+                describe(`when the tree object with the 'key' argument has a parent that exists in 
+                the TreeWrapper`, function() {
 
-                    it(`should return a TreeWrapper that contains only the parent of the tree object with the passed key
-                    argument`, function() {
-                        const subtreeWrapper = testTreeWrapper.getParentOf(parentKey);
-                        expect(subtreeWrapper.tree[grandParentKey]).toBe(testTreeWrapper.tree[grandParentKey]);
-                        expect(subtreeWrapper.names[subtreeWrapper.tree[grandParentKey].name]).toEqual(testTreeWrapper.names[testTreeWrapper.tree[grandParentKey].name]);
-                        expect(Object.keys(subtreeWrapper.tree).length).toEqual(1);
-                        expect(Object.keys(subtreeWrapper.names).length).toEqual(1);
+                    it(`should return a new TreeWrapper that contains only the parent of the tree object.`, function() {
+                        const tWrapper = createTreeWrapper();
+                        tWrapper.add(node2Line2End, testTreeWrapper);
+                        const subWrapper = testTreeWrapper.getParentOf(node2Line2EndChild1);
+                        expect(subWrapper).toEqual(tWrapper);
                     });
                 });
 
-                describe("when the tree object with the passed key doesn't have a parent", function() {
+                describe(`when the tree object with the 'key' argument has a parent, but that parent does not exist
+                in the TreeWrapper`, function() {
+
+                    xit("should call console.log()", function() {
+                        /* When the graph is first built, the log messages are helpful for finding bad data. Once I'm moving
+                        stuff around in the interface, the same error messages appear even when the code is behaving as intended.
+                        That's why this is disabled.
+                        */
+                        const spy = spyOn(console, "log");
+                        const subWrapper = testTreeWrapper.getParentOf(orphanNode1);
+                        expect(spy).toHaveBeenCalled();
+                    });
+
+                    it("should return a new empty TreeWrapper.", function() {
+                        const emptyWrapper = createTreeWrapper();
+                        const subWrapper = testTreeWrapper.getParentOf(orphanNode1);
+                        expect(subWrapper).toEqual(emptyWrapper);
+                    });
+                });
+
+                describe("when the tree object with the passed key doesn't have a 'parent' property at all", function() {
+
+                    it(`should return an empty TreeWrapper.`, function() {
+                        // Test for parentless nodes
+                        const emptyWrapper = createTreeWrapper();
+                        const subWrapper = testTreeWrapper.getParentOf(node1Line2End);
+                        expect(subWrapper).toEqual(emptyWrapper);
+                    });
 
                     it(`should return an empty TreeWrapper`, function() {
-                        const subtreeWrapper = testTreeWrapper.getParentOf(lineKey);
-                        expect(Object.keys(subtreeWrapper.tree).length).toEqual(0);
-                        expect(Object.keys(subtreeWrapper.names).length).toEqual(0);
+                        // Test for lines
+                        const emptyWrapper = createTreeWrapper();
+                        const subWrapper = testTreeWrapper.getParentOf(node1Line4);
+                        expect(subWrapper).toEqual(emptyWrapper);
                     });
+
+                    it("should return an empty TreeWrapper", function() {
+                        // Test for weird objects
+                        const emptyWrapper = createTreeWrapper();
+                        const subWrapper = testTreeWrapper.getParentOf(weirdNode2);
+                        expect(subWrapper).toEqual(emptyWrapper);
+                    })
                 });
             });
 
-            xdescribe("getPairedNodesOf()", function() {
+            describe("getPairedNodesOf()", function() {
+
+                it("should call contains() to validate the 'key' argument", function() {
+                    const spy = spyOn(treeWrapperPrototype, "contains");
+                    testTreeWrapper.getPairedNodesOf("0");
+                    expect(spy).toHaveBeenCalled();
+                });
 
                 describe("when the tree object with the passed key has paired nodes", function() {
 
                     it(`should return a TreeWrapper that contains only those nodes which are on the other ends of lines
-                    that are connected to the tree object with the passed key argument`, function() {
-                        // Test for when the searched key is the "from" node and the paired node is the "to" node
-                        const subtreeWrapper = testTreeWrapper.getPairedNodesOf(childKey);
-                        expect(subtreeWrapper.tree[childLineNodeKey]).toBe(testTreeWrapper.tree[childLineNodeKey]);
-                        expect(subtreeWrapper.names[subtreeWrapper.tree[childLineNodeKey].name]).toEqual(testTreeWrapper.names[testTreeWrapper.tree[childLineNodeKey].name]);
-                        expect(Object.keys(subtreeWrapper.tree).length).toEqual(1);
-                        expect(Object.keys(subtreeWrapper.names).length).toEqual(1);
-                    });
-
-                    it(`should return a TreeWrapper that contains only those nodes which are on the other ends of lines
-                    that are connected to the tree object with the passed key argument`, function() {
-                        // Test for when the searched key is the "to" node and the paired node is the "from" node
-                        const subtreeWrapper = testTreeWrapper.getPairedNodesOf(parentKey);
-                        expect(subtreeWrapper.tree[lineNodeKey]).toBe(testTreeWrapper.tree[lineNodeKey]);
-                        expect(subtreeWrapper.names[subtreeWrapper.tree[lineNodeKey].name]).toEqual(testTreeWrapper.names[testTreeWrapper.tree[lineNodeKey].name]);
-                        expect(Object.keys(subtreeWrapper.tree).length).toEqual(1);
-                        expect(Object.keys(subtreeWrapper.names).length).toEqual(1);
+                    that are connected to the tree object.`, function() {
+                        const tWrapper = createTreeWrapper();
+                        tWrapper.add(node2Line1End, testTreeWrapper);
+                        tWrapper.add(node2Line2End, testTreeWrapper);
+                        tWrapper.add(node2Line3End, testTreeWrapper);
+                        tWrapper.add(node1, testTreeWrapper);
+                        const paired = testTreeWrapper.getPairedNodesOf(node2);
+                        expect(paired).toEqual(tWrapper);
                     });
                 });
 
                 describe("when the tree object with the passed key has no paired nodes", function() {
 
                     it(`should return an empty TreeWrapper`, function() {
-                        const subtreeWrapper = testTreeWrapper.getPairedNodesOf(lineKey);
-                        expect(Object.keys(subtreeWrapper.tree).length).toEqual(0);
-                        expect(Object.keys(subtreeWrapper.names).length).toEqual(0);
+                        // Test for node that has no connected lines
+                        const emptyWrapper = createTreeWrapper();
+                        const subWrapper = testTreeWrapper.getPairedNodesOf(node1Line1EndChild1);
+                        expect(subWrapper).toEqual(emptyWrapper);
+                    });
+
+                    it(`should return an empty TreeWrapper`, function() {
+                        // Test for line (since lines don't have paired nodes)
+                        const emptyWrapper = createTreeWrapper();
+                        const subWrapper = testTreeWrapper.getPairedNodesOf(node3Line1);
+                        expect(subWrapper).toEqual(emptyWrapper);
+                    });
+
+                    it(`should return an empty TreeWrapper`, function() {
+                        // Test for weird node
+                        const emptyWrapper = createTreeWrapper();
+                        const subWrapper = testTreeWrapper.getPairedNodesOf(weirdNode2);
+                        expect(subWrapper).toEqual(emptyWrapper);
                     });
                 });
             });
 
-            xdescribe("getNodeEndsOf()", function() {
+            describe("getNodeEndsOf()", function() {
+
+                it("should call contains() to validate the 'key' argument", function() {
+                    const spy = spyOn(treeWrapperPrototype, "contains");
+                    testTreeWrapper.getNodeEndsOf("0");
+                    expect(spy).toHaveBeenCalled();
+                });
 
                 describe("when the tree object with the passed key argument is a line", function() {
 
                     it(`should return a TreeWrapper that contains only those nodes which are on either side of the line
-                    that is represented by the tree object with the passed key argument.`, function() {
-                        const keys = [parentKey, lineNodeKey];
-                        const subtreeWrapper = testTreeWrapper.getNodeEndsOf(lineKey);
-                        for (let key of keys) {
-                            expect(subtreeWrapper.tree[key]).toBe(testTreeWrapper.tree[key]);
-                            expect(subtreeWrapper.names[subtreeWrapper.tree[key].name]).toEqual(testTreeWrapper.names[testTreeWrapper.tree[key].name]);
-                        }
-                        expect(Object.keys(subtreeWrapper.tree).length).toEqual(keys.length);
-                        expect(Object.keys(subtreeWrapper.names).length).toEqual(keys.length);
+                    that is represented by the tree object.`, function() {
+                        const tWrapper = createTreeWrapper();
+                        tWrapper.add(node2, testTreeWrapper);
+                        tWrapper.add(node2Line3End, testTreeWrapper);
+                        const subWrapper = testTreeWrapper.getNodeEndsOf(node2Line3);
+                        expect(subWrapper).toEqual(tWrapper);
                     });
                 });
 
                 describe("when the tree object with the passed key argument is NOT a line", function() {
 
                     it(`should return an empty TreeWrapper`, function() {
-                        const subtreeWrapper = testTreeWrapper.getNodeEndsOf(childKey);
-                        expect(Object.keys(subtreeWrapper.tree).length).toEqual(0);
-                        expect(Object.keys(subtreeWrapper.names).length).toEqual(0);
+                        const emptyWrapper = createTreeWrapper();
+                        const subWrapper = testTreeWrapper.getNodeEndsOf(node2);
+                        expect(subWrapper).toEqual(emptyWrapper);
+                    });
+
+                    it("should return an empty TreeWrapper", function() {
+                        // Test for weird nodes
+                        const emptyWrapper = createTreeWrapper();
+                        const subWrapper = testTreeWrapper.getNodeEndsOf(weirdNode2);
+                        expect(subWrapper).toEqual(emptyWrapper);
                     });
                 });
             });
 
-            xdescribe("getSubtreeToRedraw()", function() {
+            describe("getSubtreeToRedraw()", function() {
+
+                /* Should NOT call contains(), because the other private helper methods can be used
+                in different methods besides just this one, so they should contain their own validation and
+                not rely entirely on this method to validate the key.
+                */
 
                 describe("when tree object with the passed key argument is a node", function() {
 
@@ -1124,28 +1212,26 @@ describe("Unit tests", function() {
                     2) direct children of the tree object with the passed key argument, 3) the parent of the tree object with the 
                     passed key argument 4) nodes on the other ends of lines that connect to the tree object with the passed key 
                     argument`, function() {
-                        const keys = [grandParentKey, childKey, lineKey, lineNodeKey];
-                        const subtreeWrapper = testTreeWrapper.getSubtreeToRedraw(parentKey);
-                        for (let key of keys) {
-                            expect(subtreeWrapper.tree[key]).toBe(testTreeWrapper.tree[key]);
-                            expect(subtreeWrapper.names[subtreeWrapper.tree[key].name]).toEqual(testTreeWrapper.names[testTreeWrapper.tree[key].name]);
-                        }
-                        expect(Object.keys(subtreeWrapper.tree).length).toEqual(4);
-                        expect(Object.keys(subtreeWrapper.names).length).toEqual(4);
+                        const tWrapper = createTreeWrapper();
+                        tWrapper.add(node3Line1End, testTreeWrapper);
+                        tWrapper.add(node3Line1EndChild2Child1, testTreeWrapper);
+                        tWrapper.add(node3Line1EndChild1, testTreeWrapper);
+                        tWrapper.add(node3Line1EndChild3, testTreeWrapper);
+                        tWrapper.add(funkyLine1, testTreeWrapper);
+                        tWrapper.add(funkyLine2, testTreeWrapper);
+                        const subWrapper = testTreeWrapper.getSubtreeToRedraw(node3Line1EndChild2);
+                        expect(subWrapper).toEqual(tWrapper);
                     });
                 });
 
                 describe("when the tree object with the passed key argument is a line", function() {
 
                     it(`should return a TreeWrapper containing 2 nodes on either end of the line`, function() {
-                        const keys = [parentKey, lineNodeKey];
-                        const subtreeWrapper = testTreeWrapper.getSubtreeToRedraw(lineKey);
-                        for (let key of keys) {
-                            expect(subtreeWrapper.tree[key]).toBe(testTreeWrapper.tree[key]);
-                            expect(subtreeWrapper.names[subtreeWrapper.tree[key].name]).toEqual(testTreeWrapper.names[testTreeWrapper.tree[key].name]);
-                        }
-                        expect(Object.keys(subtreeWrapper.tree).length).toEqual(keys.length);
-                        expect(Object.keys(subtreeWrapper.names).length).toEqual(keys.length);
+                        const tWrapper = createTreeWrapper();
+                        tWrapper.add(node2Line3End, testTreeWrapper);
+                        tWrapper.add(node2Line3EndLineEnd, testTreeWrapper);
+                        const subWrapper = testTreeWrapper.getSubtreeToRedraw(node2Line3EndLine);
+                        expect(subWrapper).toEqual(tWrapper);
                     });
                 });
             });
@@ -1250,7 +1336,7 @@ describe("Unit tests", function() {
         });
         */
 
-        xdescribe("deepCopy()", function() {
+        describe("deepCopy()", function() {
 
             it("should throw an error if the object being copied contains a method", function() {
                 const obj = {
@@ -1350,7 +1436,7 @@ xdescribe("Integration tests that require the environment to be prepared correct
 //        xit("should call saveFeeder if something goes wrong")
 //    });
 
-    xdescribe("saveFeeder()", function() {
+    describe("saveFeeder()", function() {
 
         describe("when not cancelled", function() {
 
@@ -1436,21 +1522,21 @@ xdescribe("Integration tests that require the environment to be prepared correct
             });
         });
 
-        xdescribe("when submitting milsoft form", function() {
+        describe("when submitting milsoft form", function() {
 
             describe ("when not canceled", function() {
 
             });
         });
 
-        xdescribe("when submitting gridlab form", function() {
+        describe("when submitting gridlab form", function() {
 
             describe("when not canceled", function() {
 
             });
         });
 
-        xdescribe("when submitting cyme form", function() {
+        describe("when submitting cyme form", function() {
 
             describe("when not canceled", function() {
 
@@ -1475,6 +1561,6 @@ setTimeout(
         // Hack
         gTreeWrapper = testTreeWrapper;
     },
-    1000
+    2000
 );
 //</script>
