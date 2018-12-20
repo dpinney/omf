@@ -943,7 +943,7 @@
                             <tr>
                                 <td>
                                     <input type='checkbox' id='smoothLoadGen' name='smoothLoadGen' value='smoothLoadGen'>
-                                    <label for='smoothLoadGen'>Smooth loads and generators</label>
+                                    <label for='smoothLoadGen'>Smooth AMI Loadshapes</label>
                                 </td>
                             </tr>
                             <tr>
@@ -2282,8 +2282,9 @@ function randomChoice(inList) {
 function staticLoadsToHouses() {
     const tree = globalTreeWrapper.tree;
     const names = globalTreeWrapper.names;
-	if (!containsTriplexNodes(tree)) {
-        alert("There are no triplex nodes in this model");
+	//if (!containsTriplexNodes(tree)) {
+	if (!containsTriplexNodeOrLoad(tree)) {
+        alert("There are no triplex nodes or triplex loads in this model.");
         return;
 	} else {
         let modal = new ProgressModal("Please wait. Houses are being generated.", "", false);
@@ -2306,9 +2307,13 @@ function staticLoadsToHouses() {
         }, 10);
     }
 
-    function containsTriplexNodes(tree) {
+    /* Triplex loads should have a "parent" property. Triplex nodes should NOT have a "parent" property usually.
+    Therefore, if the parent property DOES exist on either a node/load I should use it. However, it it DOESN'T exist,
+    then I should carry on as normal too.
+    */
+    function containsTriplexNodeOrLoad(tree) {
         for (let key in tree) {
-            if (tree[key].object === "triplex_node" && tree[key].hasOwnProperty("parent")) {
+            if (tree[key].object === "triplex_node" || tree[key].object === "triplex_load") {
                 return true;
             } 
         }   
@@ -2320,6 +2325,17 @@ function staticLoadsToHouses() {
             end = keys.length - 1;
         }
         for (let i = start; i <= end; i++) {
+            if (tree[keys[i]].object === "triplex_node" || tree[keys[i]].object === "triplex_load") {
+                let parentKey = names[tree[keys[i]].parent];
+                if (parentKey == null) {
+                    //There is no parent. No big deal
+
+                } else {
+                    //There is a parent. Use the parent to place the new house
+
+                }
+            }
+            /*
             if (tree[keys[i]].hasOwnProperty('parent') && tree[keys[i]].object === "triplex_node") {
                 // Get the key of the parent of this triplex node, which is a triplex meter (i.e. another node)
                 let parentKey = names[tree[keys[i]].parent];
@@ -2335,6 +2351,7 @@ function staticLoadsToHouses() {
                     newChildAtLocation(heaterObj.heater, houseObj.key);
                 }
             }
+            */
         }
     }
 
