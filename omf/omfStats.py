@@ -33,7 +33,7 @@ def genModelDatabase(outPath):
 				projectDir = os.path.join(ownerDir, project)
 				with open((projectDir + '/allInputData.json')) as j:
 					jData = json.load(j)
-				created = jData['created'].split('.')[0]
+				created = jData.get('created','2014-07-15 12:00:00').split('.')[0]
 				if 'runTime' in jData:
 					writer.writerow([owner, project, jData['modelType'], jData['runTime'], 'NOSTATUS', created])
 				else:

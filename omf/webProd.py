@@ -20,7 +20,7 @@ def before_request():
 		return web.redirect(url, code=code)
 
 if __name__ == "__main__":
-	logging.basicConfig(filename='omf.log', level=logging.DEBUG)
+	logging.basicConfig(filename='omf.log', level=logging.INFO)
 	# Start redirector:
 	reServer = WSGIServer(('0.0.0.0', 80), reApp)
 	Process(target=reServer.serve_forever).start()
