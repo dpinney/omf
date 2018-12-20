@@ -38,17 +38,17 @@ def work(modelDir, inputDict):
 		edgeColValue = None
 	else:
 		edgeColValue = inputDict["edgeCol"]
-	# None cheack for nodeCol
+	# None check for nodeCol
 	if inputDict.get("nodeCol", "None") == "None":
 		nodeColValue = None
 	else:
 		nodeColValue = inputDict["nodeCol"]
-	# None cheack for edgeLabs
+	# None check for edgeLabs
 	if inputDict.get("edgeLabs", "None") == "None":
 		edgeLabsValue = None
 	else:
 		edgeLabsValue = inputDict["edgeLabs"]
-	# None cheack for nodeLabs
+	# None check for nodeLabs
 	if inputDict.get("nodeLabs", "None") == "None":
 		nodeLabsValue = None
 	else:
@@ -607,9 +607,9 @@ def _testingPlot():
 	PREFIX = omf.omfDir + '/scratch/CIGAR/'
 	# FNAME = 'test_base_R4-25.00-1.glm_CLEAN.glm'
 	# FNAME = 'test_Exercise_4_2_1.glm'
-	# FNAME = 'test_ieee37node.glm'
+	FNAME = 'test_ieee37node.glm'
 	# FNAME = 'test_ieee123nodeBetter.glm'
-	FNAME = 'test_large-R5-35.00-1.glm_CLEAN.glm'
+	# FNAME = 'test_large-R5-35.00-1.glm_CLEAN.glm'
 	# FNAME = 'test_medium-R4-12.47-1.glm_CLEAN.glm'
 	# FNAME = 'test_smsSingle.glm'
 	# Hack: Agg backend doesn't work for interactivity. Switch to something we can use:
@@ -637,5 +637,5 @@ def _debugging():
 	renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	_debugging()
-	# _testingPlot()
+	# _debugging()
+	_testingPlot()
