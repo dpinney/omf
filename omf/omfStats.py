@@ -17,6 +17,7 @@ from geoip import geolite2
 from iso3166 import countries
 import zipfile
 import omf
+from dateutil.parser import parse as parseDt
 # from REPIC import REPIC
 
 plt.style.use('ggplot')
@@ -89,14 +90,14 @@ def modelDatabaseStats(dataFilePath, outFilePath):
 	yearUsers = collections.OrderedDict(sorted(yearUsers.items()))
 	# REPIC(yearUsers)  #OUTPUT: OrderedDict([('2014', 1), ('2017', 1), ('2018', 1)])
 	# Plot users over time
-	plt.figure(figsize=(12, 8))
+	plt.figure(figsize=(15, 8))
 	plt.subplot(2, 1, 1)
 	xRanges2 = range(len(yearUsers.values()))
 	plt.bar(xRanges2, yearUsers.values())
 	ax = plt.gca()
 	ax.set_xlim(-0.2, len(yearUsers.values()))
 	ax = plt.gca()
-	ax.set_title('New Users on omf.coop by Year \nGenerated: ' + datetime.now().strftime('%m-%d-%Y'))
+	ax.set_title('New Users on omf.coop by Year \nGenerated: ' + datetime.now().strftime('%Y-%m-%d'))
 	plt.xticks([x + 0.4 for x in xRanges2], yearUsers.keys())
 	plt.subplots_adjust(bottom=0.2)
 	# Plot the model counts.
@@ -173,16 +174,16 @@ def trafficLogStats(logsPath, outFilePath):
 	plt.figure(figsize=(15, 15))
 	ggColors = [x['color'] for x in plt.rcParams['axes.prop_cycle']]
 	# Session counts by month:
-	log = collections.OrderedDict(sorted(recordCount.items(), key=lambda x: datetime.strptime(x[0], "%b/%Y")))
+	log = collections.OrderedDict(sorted(recordCount.items(), key=lambda x: parseDt(x[0])))
 	plt.subplot(3, 1, 1)
 	ax = plt.gca()
-	ax.set_title('Session Count By Month. Total: ' + "{:,}".format(sum(log.values())) + '\nGenerated: ' + datetime.now().strftime('%m-%d-%Y'))
+	ax.set_title('Session Count By Month. Total: ' + "{:,}".format(sum(log.values())) + '\nGenerated: ' + datetime.now().strftime('%Y-%m-%d'))
 	barRange = range(len(log))
 	plt.bar(barRange, log.values(), align='center')
 	plt.xticks(barRange, [x.replace('/', '\n') for x in log.keys()])
 	plt.axis('tight')
 	# Hit counts by month:
-	log = collections.OrderedDict(sorted(monthCount.items(), key=lambda x: datetime.strptime(x[0], "%b/%Y")))
+	log = collections.OrderedDict(sorted(monthCount.items(), key=lambda x: parseDt(x[0])))
 	plt.subplot(3, 1, 2)
 	ax = plt.gca()
 	ax.set_title('Hit Count By Month. Total: ' + "{:,}".format(sum(log.values())))
@@ -243,4 +244,4 @@ def trafficLogStats(logsPath, outFilePath):
 	plt.savefig(outFilePath)
 
 if __name__ == '__main__':
-	genModelDatabase()
+	genAllImages()
