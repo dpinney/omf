@@ -1,1 +1,1 @@
-{"object":"triplex_load","name":"S1808-19-003_A","nominal_voltage":"120","phases":"AS","base_power_12":"3000","impedance_fraction_12":"0.5","impedance_pf_12":"0.9","current_fraction_12":"0.0","current_pf_12":"0.9","power_fraction_12":"0.5","power_pf_12":"0.9"}
+{"object":"triplex_load","name":"S1808-19-003_A","nominal_voltage":"120","phases":"AS","base_power_12":"3000","impedance_fraction_12":"0.5","impedance_pf_12":"0.9","current_fraction_12":"0.0","current_pf_12":"0.9","power_fraction_12":"0.5","power_pf_12":"0.9","parent":"NULL"}
