@@ -556,10 +556,10 @@ def new(modelDir):
 		"modelType": modelName,
 		"runTime": "",
 		"layoutAlgorithm": "geospatial",
-		"edgeCol" : "Current",
+		"edgeCol" : "None",
 		"nodeCol" : "Voltage",
-		"nodeLabs" : "Value",
-		"edgeLabs" : "Value",
+		"nodeLabs" : "None",
+		"edgeLabs" : "None",
 		"customColormap" : "False",
 		"rezSqIn" : "225"
 	}
