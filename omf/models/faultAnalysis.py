@@ -19,7 +19,6 @@ from omf.solvers import gridlabd
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = "The voltageDrop model runs loadflow to show system voltages at all nodes."
-# Hide the module for now (until fully functional and ready for deployment)
 hidden = True
 
 def work(modelDir, inputDict):
