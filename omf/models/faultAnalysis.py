@@ -19,6 +19,8 @@ from omf.solvers import gridlabd
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = "The voltageDrop model runs loadflow to show system voltages at all nodes."
+# Hide the module for now (until fully functional and ready for deployment)
+hidden = True
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
@@ -106,17 +108,22 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 	biggestKey = max([safeInt(x) for x in tree.keys()])
 	# Add Reliability module
 	tree[str(biggestKey*10)] = {"module":"reliability","maximum_event_length":"18000","report_event_log":"true"}
-	CLOCK_RANGE = '2000-01-01 0:00:00,2000-01-01 0:00:20'
+	CLOCK_START = '2000-01-01 0:00:00'
+	CLOCK_END = '2000-01-01 0:00:20'
+	CLOCK_RANGE = CLOCK_START + ',' + CLOCK_END
 	# Add eventgen object (the fault)
 	tree[str(biggestKey*10 + 1)] = {"object":"eventgen","name":"ManualEventGen","parent":"RelMetrics", "fault_type":faultType, "manual_outages":faultLoc + ',' + CLOCK_RANGE} # TODO: change CLOCK_RANGE to read the actual start and stop time, not just hard-coded
-	# Add reliabilty metrics object
-	tree[str(biggestKey*10 + 2)] = {"object":"metrics", "name":"RelMetrics", "report_file":"Metrics_Output.csv", "module_metrics_object":"PwrMetrics", "metrics_of_interest":'"SAIFI,SAIDI,CAIDI,ASAI,MAIFI"', "customer_group":'"groupid=METERTEST"', "metric_interval":"5 h", "report_interval":"5 h"}
 	# Add fault_check object
-	tree[str(biggestKey*10 + 3)] = {"object":"fault_check","name":"test_fault","check_mode":"ONCHANGE", "eventgen_object":"ManualEventGen", "output_filename":"Fault_check_out.txt"}
+	tree[str(biggestKey*10 + 2)] = {"object":"fault_check","name":"test_fault","check_mode":"ONCHANGE", "eventgen_object":"ManualEventGen", "output_filename":"Fault_check_out.txt"}
+	# Add reliabilty metrics object
+	tree[str(biggestKey*10 + 3)] = {"object":"metrics", "name":"RelMetrics", "report_file":"Metrics_Output.csv", "module_metrics_object":"PwrMetrics", "metrics_of_interest":'"SAIFI,SAIDI,CAIDI,ASAI,MAIFI"', "customer_group":'"groupid=METERTEST"', "metric_interval":"5 h", "report_interval":"5 h"}
 	# Add power_metrics object
 	tree[str(biggestKey*10 + 4)] = {"object":"power_metrics","name":"PwrMetrics","base_time_value":"1 h"}
 
-	
+	for key in tree:
+		if 'clock' in tree[key]:
+			tree[key]['starttime'] = CLOCK_START
+			tree[key]['stoptime'] = CLOCK_STOP
 
 	# dictionary to hold info on lines present in glm
 	edge_bools = dict.fromkeys(['underground_line','overhead_line','triplex_line','transformer','regulator', 'fuse', 'switch'], False)
@@ -638,7 +645,7 @@ def _testingPlot():
 	# FNAME = 'test_smsSingle.glm'
 	# Hack: Agg backend doesn't work for interactivity. Switch to something we can use:
 	# plt.switch_backend('MacOSX')
-	chart = drawPlotFault(PREFIX + FNAME, neatoLayout=True, edgeCol="PercentOfRating", nodeCol="perUnitVoltage", nodeLabs="Value", edgeLabs="Name", faultLoc="node702-713", faultType="SLG-A", customColormap=True, rezSqIn=225)
+	chart = drawPlotFault(PREFIX + FNAME, neatoLayout=True, edgeCol="PercentOfRating", nodeCol="perUnitVoltage", nodeLabs="Name", edgeLabs=None, faultLoc="node702-713", faultType="SLG-A", customColormap=True, rezSqIn=225)
 	chart.savefig(PREFIX + "YO_WHATS_GOING_ON.png")
 	# plt.show()
 

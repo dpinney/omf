@@ -140,7 +140,7 @@ object underground_line {
 	 phases "ABC";
 	 name node702-713;
 	 from node702;
-	 to load713meter;
+	 to load713;
 	 length 360;
 	 configuration lc_7231;
 }
@@ -568,14 +568,14 @@ object load {
 object meter {
 	groupid METERTEST;
 	phases ABCD;
-	name load713meter;
+	name dummy_meter;
 	nominal_voltage 2800;
+	parent load713;
 }
 
 object load {
 	 phases "ABCD";
 	 name load713;
-	 parent load713meter;
 	 voltage_A 2400.000000 -1385.640646j;
 	 voltage_B -2400.000000 -1385.640646j;
 	 voltage_C 0.000000+2771.281292j;
