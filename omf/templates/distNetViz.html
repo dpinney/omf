@@ -1981,31 +1981,6 @@ function disableJQueryFunctionality() {
     });
 }
 
-function fixPhases () {
-	// Todo: complete this to walk the tree and fix phasing.
-	for (let i in writeFeeder.tree){
-		if (writeFeeder.tree[i].name != undefined) {
-			const nodeName = writeFeeder.tree[i].name
-			for (let j in writeFeeder.tree) {
-				if (writeFeeder.tree[j].from != undefined) {
-					const linkFrom = writeFeeder.tree[j].from
-					if (nodeName == linkFrom) {
-						const node = writeFeeder.tree[i]
-						const link = writeFeeder.tree[j]
-						const nodePhase = node.phases.split('').sort().join('').trim()
-						const linkPhase = link.phases.split('').sort().join('').trim()
-						if (linkPhase.length > nodePhase.length) {
-							linkPhase==nodePhase
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-
-
 /**
  * Find the index of an object in an array, based on the property value inside of the object.
  * @param  {array} ary
