@@ -6,6 +6,7 @@ USAGE
 4. Separate plots are saved a .png
 
 TODO
+XXX Move scapeAsos.py in to weather.py.
 OOO Get aGosedWeather.py running its tests.
 OOO Pull the weather data from weatherNoaaHourly.py instead of weather.py.
 OOO Update climateChange function in web.py
