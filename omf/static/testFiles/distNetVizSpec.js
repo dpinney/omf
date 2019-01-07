@@ -432,8 +432,6 @@ describe("Unit tests", function() {
     these unit tests will still pass. However, it is necessary because the alternative would be to use the real testTree from a .omd
     file and then these unit tests would be dependent on a particular .omd file which is even worse.
     */
-    let testTree;
-    let testTreeWrapper;
     // 37 keys for 35 objects
     const weirdNode1 = "0";
     const weirdNode2 = "1";
@@ -507,6 +505,16 @@ describe("Unit tests", function() {
             
             describe("delete()", function() {
 
+                describe("when the key argument does not exist in this TreeWrapper", function() {
+
+                    it("should call console.log() and return an empty TreeWrapper", function() {
+                        const spy = spyOn(console, "log");
+                        const emptyWrapper = createTreeWrapper();
+                        expect(testTreeWrapper.delete("made up key that doesn't exist!!!")).toEqual(emptyWrapper);
+                        expect(spy).toHaveBeenCalled();
+                    });
+                });
+
                 describe("when the tree object with the passed key argument has NO children or connected lines", function() {
 
                     it(`should delete the tree object with the passed key from this TreeWrapper`, function() {
@@ -534,6 +542,22 @@ describe("Unit tests", function() {
             });
 
             describe("recursiveDelete()", function() {
+
+                it("should call contains() to verify that the key argument exists in the TreeWrapper", function() {
+                    const spy = spyOn(treeWrapperPrototype, "contains");
+                    testTreeWrapper.recursiveDelete("");
+                    expect(spy).toHaveBeenCalled();
+                });
+
+                describe("when the key argument does not exist in the TreeWrapper", function() {
+
+                    it("should call console.log() and return an empty TreeWrapper", function() {
+                        const spy = spyOn(console, "log");
+                        const emptyWrapper = createTreeWrapper();
+                        expect(testTreeWrapper.recursiveDelete("made up key that doesn't exist!!!")).toEqual(emptyWrapper);
+                        expect(spy).toHaveBeenCalled();
+                    });
+                });
 
                 describe("when the tree object with the passed key argument is a node", function() {
 
@@ -699,10 +723,16 @@ describe("Unit tests", function() {
                     expect(tObj.data).toEqual(treeWrapper.tree["1010"]);
                 });
 
-                it("should throw an error when the given key doesn't exist in the tree", function() {
+                it("should throw an error if the key argument doesn't exist in the treeWrapper argument", function() {
+                    expect(function() {
+                        createTreeObject("10", createTreeWrapper());
+                    }).toThrowError(`The passed key argument: "10" to create the TreeObject does not exist in the treeWrapper.tree.`);
+                });
+
+                it("should throw an error if the key argument is not a string", function() {
                     expect(function() {
                         createTreeObject(10, createTreeWrapper());
-                    }).toThrowError();
+                    }).toThrowError("Input argument must be a string or an object."); 
                 });
             });
 
@@ -726,29 +756,70 @@ describe("Unit tests", function() {
                     expect(tObj.key).toEqual("1");
                 });
 
-                it("should call update()", function() {
-                    const spy = spyOn(treeObjectPrototype, "update").and.callThrough();
-                    createTreeObject({}, createTreeWrapper());
-                    expect(spy).toHaveBeenCalled();
-                });
+                //it("should call update()", function() {
+                //    const spy = spyOn(treeObjectPrototype, "update").and.callThrough();
+                //    createTreeObject({}, createTreeWrapper());
+                //    expect(spy).toHaveBeenCalled();
+                //});
 
-                it("should throw any error thrown by update()", function() {
-                    const error = "Custom Error"
-                    const spy = spyOn(treeObjectPrototype, "update").and.throwError(error);
-                    expect(function() {
-                        createTreeObject({}, createTreeWrapper());
-                    }).toThrowError(error)
-                });
+                //it("should throw any error thrown by update()", function() {
+                //    const error = "Custom Error"
+                //    const spy = spyOn(treeObjectPrototype, "update").and.throwError(error);
+                //    expect(function() {
+                //        createTreeObject({}, createTreeWrapper());
+                //    }).toThrowError(error)
+                //});
 
-                it("should call getNewTreeKey()", function() {
-                    const spy = spyOn(window, "getNewTreeKey").and.callThrough();
-                    createTreeObject({}, createTreeWrapper());
-                    expect(spy).toHaveBeenCalled();
-                });
+                //it("should call getNewTreeKey()", function() {
+                //    const spy = spyOn(window, "getNewTreeKey").and.callThrough();
+                //    createTreeObject({}, createTreeWrapper());
+                //    expect(spy).toHaveBeenCalled();
+                //});
             });
         });
 
-        xdescribe("treeObjectPrototype", function() {
+        describe("createRow()", function() {
+
+            it("should throw an error if the key argument does not exist in the map argument and the key is not an empty string",
+            function() {
+                const table = document.createElement("table");
+                const map = {
+                    "schedule_skew": 129
+                };
+                expect(function() {
+                    createRow({map: map, key: "doesn't exist"});
+                }).toThrowError();
+            });
+
+            it("should throw an error if a non-null/undefined key argument is passed with a null/undefined map argument",
+            function() {
+                expect(function() {
+                    createRow({map: null, key: ""});
+                }).toThrowError();
+            });
+
+            it("should not throw an error if the key argument exists in the map argument", function() {
+                const table = document.createElement("table");
+                const map = {
+                    "schedule_skew": 129
+                };
+                expect(function() {
+                    createRow({map: map, key: "schedule_skew"});
+                }).not.toThrowError();
+            });
+
+            it("should not throw an error if the key argument equals an empty string", function() {
+                const table = document.createElement("table");
+                const map = {
+                    "schedule_skew": 399
+                };
+                expect(function() {
+                    createRow({map: map, key: ""});
+                }).not.toThrowError();
+            });
+        });
+
+        xdescribe("treeObjectPrototype()", function() {
             //no public methods?
         });
 
@@ -765,8 +836,32 @@ describe("Unit tests", function() {
 
                 it("should return an object with the correct number of circles and lines", function() {
                     const svgData = createAddableSvgData(testTreeWrapper);
-                    expect(svgData.circles.length).toEqual(21);
+                    expect(svgData.circles.length).toEqual(23);
                     expect(svgData.lines.length).toEqual(21);
+                });
+            });
+        });
+
+        describe("createDeletableSvgData", function() {
+
+        });
+
+        describe("deletableSvgDataPrototype", function() {
+
+            describe("deleteFrom()", function() {
+
+                describe("When an element id does not exist in the document viewport", function() {
+                    
+                    it("should not throw an error", function() {
+                        const tree = {
+                            "crazy made up key": {}
+                        };
+                        const svg = createDeletableSvgData(tree);
+                        expect(svg.ids[0]).toEqual("crazy made up key");
+                        expect(function() {
+                            svg.deleteFrom(gViewport)
+                        }).not.toThrowError();
+                    });
                 });
             });
         });
@@ -1115,6 +1210,7 @@ describe("Unit tests", function() {
                 });
             });
 
+            //Problem?!
             describe("getPairedNodesOf()", function() {
 
                 it("should call contains() to validate the 'key' argument", function() {
@@ -1240,6 +1336,268 @@ describe("Unit tests", function() {
         xdescribe("treeObjectPrototype", function() {
             // no private methods?
         });
+
+        describe("rowPrototype", function() {
+
+            let map;
+
+            beforeEach(function() {
+                table = document.createElement("table");
+                map = {
+                    "schedule_skew": "349" 
+                };
+            });
+
+            describe("validateNewKey()", function() {
+
+                it("should return false if the key argument matches an existing key in the map (i.e. no duplicate keys allowed)",
+                function() {
+                    const newKey = "schedule_skew";
+                    const row = createRow({map: map, key: "schedule_skew"});
+                    expect(row.validateNewKey(newKey)).toBe(false);
+                });
+
+                it("should return true if the key argument is an empty string", function() {
+                    const newKey = "";
+                    const map = {
+                        "schedule_skew": 520,
+                    };
+                    const row = createRow({map: map, key: "schedule_skew"});
+                    expect(row.validateNewKey(newKey)).toBe(true);
+                });
+
+                it("should return true if the key argument does NOT already exist in the map", function() {
+                    const newKey = "new key";
+                    const row = createRow({map: map, key: "schedule_skew"});
+                    expect(row.validateNewKey(newKey)).toBe(true);
+                });
+            });
+
+            describe("updateMapKey()", function() {
+
+                describe("when the value of the input element argument is a valid key for this row", function() {
+
+                    let row;
+                    let input;
+
+                    beforeEach(function() {
+                        spyOn(rowPrototype, "validateNewKey").and.returnValue(true);
+                        row = createRow({map: map, key: "schedule_skew"});
+                        input = document.createElement("input");
+                        input.value = "new valid key";
+                    });
+
+                    it("should remove leading and ending whitespace from the new key", function() {
+                        const key = "   key with spaces   ";
+                        input.value = key;
+                        row.updateMapKey(input);
+                        expect(row.key).toEqual("key with spaces");
+                    });
+
+                    it("should replace the key of this row with the textContent of the input argument", function() {
+                        expect(row.key).toEqual("schedule_skew");
+                        row.updateMapKey(input);
+                        expect(row.key).toEqual("new valid key");
+                    });
+
+                    it("should replace the old key with the new key in the map of this row", function() {
+                        expect(row.map["schedule_skew"]).toBeDefined();
+                        expect(row.map["new valid key"]).toBeUndefined();
+                        row.updateMapKey(input);
+                        expect(row.map["schedule_skew"]).toBeUndefined();
+                        expect(row.map["new valid key"]).toBeDefined();
+                    });
+                });
+
+                describe(`when this row previously had a key of "" that didn't exist in the map because it represented an
+                attribute that hadn't been added to the map yet`, function() {
+
+                    it(`should set this.map[<new key>] === "", even though technically it should
+                    be undefined, since (this.map[""] === undefined && this.map[<new key>] === this.map[""])`, function() {
+                        const row = createRow({map: map, key: ""});
+                        const input = document.createElement("input");
+                        input.value = "new key";
+                        row.updateMapKey(input);
+                        expect(row.map["new key"]).toEqual("");
+                    });
+                });
+
+                describe("when the textContent of the input element argument is not a valid key for this row", function() {
+
+                    it("should set the value of the input element argument to be the key of this row", function() {
+                        spyOn(window, "alert");
+                        spyOn(rowPrototype, "validateNewKey").and.returnValue(false);
+                        const row = createRow({map: map, key: "schedule_skew"});
+                        const input = document.createElement("input");
+                        input.value = "invalid key";
+                        row.updateMapKey(input);
+                        expect(input.value).toEqual("schedule_skew");
+                    });
+
+                    it("should call alert()", function() {
+                        spyOn(rowPrototype, "validateNewKey").and.returnValue(false);
+                        const spy = spyOn(window, "alert");
+                        const row = createRow({map: map, key: "schedule_skew"});
+                        const input = document.createElement("input");
+                        input.value = "invalid key";
+                        row.updateMapKey(input);
+                        expect(spy).toHaveBeenCalled();
+                    });
+                });
+            });
+
+            describe("getKeyElement()", function() {
+
+                it(`should return a <td> HTMLElement with 0 children and textContent equal to the key of this row,
+                if the row.key is not null and not an empty string`, function() {
+                    const row = createRow({map: map, key: "schedule_skew"});
+                    const td = row.getKeyElement();
+                    expect(td instanceof HTMLTableCellElement).toBe(true);
+                    expect(td.textContent).toEqual("schedule_skew");
+                    expect(td.children.length).toEqual(0);
+                });
+
+                it(`should return a <td> HTMLElement with 1 <input> child element, if the row.key equals an empty string`, function() {
+                    const row = createRow({map: map, key: ""});
+                    const td = row.getKeyElement();
+                    expect(td instanceof HTMLTableCellElement).toBe(true);
+                    expect(td.children[0] instanceof HTMLInputElement).toBe(true);
+                    expect(td.children.length).toEqual(1);
+                });
+
+                it(`should return a <td> HTMLElement with 0 children and with textContent equal to an empty string,
+                when the row.key and row.map are null`, function() {
+                    const row = createRow();
+                    const td = row.getKeyElement();
+                    expect(td instanceof HTMLTableCellElement).toBe(true);
+                    expect(td.textContent).toEqual("");
+                    expect(td.children.length).toEqual(0);
+                });
+            });
+
+            describe("validateNewValue()", function() {
+
+                describe("when the key is either 'longitude' or 'latitude'", function() {
+
+                    it("should return false if the value argument is not a valid number", function() {
+                        expect(true).toEqual(false);
+                    });
+                });
+            });
+
+            describe("updateMapValue", function() {
+
+                it("should remove leading and trailing whitespace from the value", function() {
+                    const row = createRow({map: map, key: "schedule_skew"});
+                    const input = document.createElement("input");
+                    input.value = "   value with whitespace         ";
+                    row.updateMapValue(input);
+                    expect(row.map["schedule_skew"]).toEqual("value with whitespace");
+                });
+            });
+
+            describe("getValueElement()", function() {
+
+                it(`should return a <td> HTMLElement with 0 children and textContent equal to an empty string,
+                if the value argument is null/undefined`, function() {
+                    const row = createRow();
+                    const td = row.getValueElement()
+                    expect(td instanceof HTMLTableCellElement).toBe(true);
+                    expect(td.children.length).toEqual(0);
+                    expect(td.textContent).toEqual("");
+                });
+
+                it(`should return a <td> HTMLElement with 0 children and textContent equal to the value argument,
+                if the value argument is not null/undefined and the corresponding key is contained within the
+                nonModifiableProperties array`, function() {
+                    const nonModifiableProperties = ["schedule_skew"];
+                    const row = createRow({key: "schedule_skew", map: map});
+                    const td = row.getValueElement(row.map[row.key], nonModifiableProperties);
+                    expect(td instanceof HTMLTableCellElement).toBe(true);
+                    expect(td.children.length).toEqual(0);
+                    expect(td.textContent).toEqual("349");
+                });
+
+                it(`should return a <td> HTMLElement with 1 <input> child element whose value equals the value argument,
+                if the value argument is not null/undefined and is not contained with the nonModifiableProperties array`,
+                function() {
+                    const nonModifiableProperties = ["schedule_skew"];
+                    const row = createRow();
+                    const td = row.getValueElement("", nonModifiableProperties);
+                    expect(td instanceof HTMLTableCellElement).toBe(true);
+                    expect(td.children.length).toEqual(1);
+                    expect(td.children[0].value).toEqual(""); 
+                });
+            });
+
+            describe("delete()", function() {
+
+                it("should delete the key of this row from the the map", function() {
+                    const row = createRow({map: map, key: "schedule_skew"});
+                    const table = document.createElement("table");
+                    table.append(row.self);
+                    expect(row.map[row.key]).toBeDefined();
+                    row.delete();
+                    expect(row.map[row.key]).toBeUndefined();
+
+                });
+
+                it("should remove the self <tr> HTMLElement of the row from its parent", function() {
+                    const row = createRow({map: map, key: "schedule_skew"});
+                    const table = document.createElement("table");
+                    table.append(row.self);
+                    expect(table.children.length).toEqual(1);
+                    row.delete();
+                    expect(table.children.length).toEqual(0);
+                });
+            });
+        });
+
+        describe("buttonPrototype", function() {
+
+            //describe("saveObject", function() {
+
+            //    it("should update the TreeWrapper of this button with the value of the TreeObject of this button", function() {
+            //        const tObject = createTreeObject(node3Line1EndChild1Child1, testTreeWrapper);
+            //        tObject.data = {foo: "bar"};
+            //        const button = createButton({action: "save", tObject: tObject, tWrapper: testTreeWrapper});
+            //        expect(button.tWrapper.tree[node3Line1EndChild1Child1]).not.toBe(tObject.data);
+            //        button.saveObject();
+            //        expect(button.tWrapper.tree[node3Line1EndChild1Child1]).toBe(tObject.data);
+            //    });
+
+            //    it("should update the svg", function() {
+            //        const spy1 = spyOn(window, "createAddableSvgData").and.callThrough();
+            //        const spy2 = spyOn(addableSvgDataPrototype, "redrawTo"); 
+            //        const tObject = createTreeObject({}, testTreeWrapper);
+            //        const button = createButton({action: "save", tObject: tObject, tWrapper: testTreeWrapper});
+            //        button.saveObject();
+            //        expect(spy1).toHaveBeenCalled();
+            //        expect(spy2).toHaveBeenCalled();
+            //    });
+            //});
+
+            describe("deleteObject", function() {
+
+                it("should delete the TreeObject of this button from the TreeWrapper of this button", function() {
+                    const tObject = createTreeObject(node3Line1EndChild2Child1, testTreeWrapper);
+                    const button = createButton({action: "delete", tObject: tObject, tWrapper: testTreeWrapper, tableBody: {}});
+                    expect(testTreeWrapper.tree[node3Line1EndChild2Child1]).toBeDefined();
+                    button.deleteObject();
+                    expect(testTreeWrapper.tree[node3Line1EndChild2Child1]).toBeUndefined();
+                });
+
+                it("should remove the corresponding TreeObject from the svg", function() {
+                    const spy1 = spyOn(window, "createDeletableSvgData").and.callThrough();
+                    const spy2 = spyOn(deletableSvgDataPrototype, "deleteFrom");
+                    const tObject = createTreeObject(node3Line1EndChild2Child1, testTreeWrapper);
+                    const button = createButton({action: "delete", tObject: tObject, tWrapper: testTreeWrapper, tableBody: {}});
+                    button.deleteObject();
+                    expect(spy1).toHaveBeenCalled();
+                    expect(spy2).toHaveBeenCalled();
+                });
+            });
+        });
     });
 
     describe("Utility methods", function() {
@@ -1260,6 +1618,27 @@ describe("Unit tests", function() {
                 expect(key1).toEqual("0");
                 const key2 = getNewTreeKey(testTreeWrapper.tree);
                 expect(key2).toEqual(Object.keys(testTreeWrapper.tree).length.toString());
+            });
+        });
+
+        describe("isParentlessNode()", function() {
+
+            it("should return true if the object is a node without a parent", function() {
+                const obj = {
+                    latitude: "4",
+                    longitude: "5",
+                }
+                expect(isParentlessNode(obj)).toBe(true);
+            });
+
+            it("should return false if the object is a line", function() {
+                const obj = {
+                    latitude: "4",
+                    longitude: "5",
+                    from: "node1",
+                    to: "node2"
+                }
+                expect(isParentlessNode(obj)).toBe(false);
             });
         });
     });
@@ -1358,6 +1737,16 @@ describe("Unit tests", function() {
                 }).toThrowError();
             });
 
+            it("should throw an error if the argument object has an undefined value", function() {
+                const obj = {
+                    foo: undefined,
+                    bar: 2
+                };
+                expect(function() {
+                    deepCopy(obj)
+                }).toThrowError();
+            });
+
             it("should produce a deep copy of a basic object", function() {
                 const obj1 = {
                     prop1: "a",
@@ -1369,28 +1758,8 @@ describe("Unit tests", function() {
                         }
                     }
                 };
-                const obj2 = {
-                    prop1: "a",
-                    prop2: {
-                        prop1: 123,
-                        prop2: {
-                            prop1: true,
-                            prop2: ["10", 11, false]
-                        }
-                    }
-                };
-                const obj3 = {
-                    prop1: "a",
-                    prop2: {
-                        prop1: 123,
-                        prop2: {
-                            prop1: true,
-                            prop2: ["10", 11, true]
-                        }
-                    }
-                };
-                expect(deepCopy(obj1)).toEqual(obj2);
-                expect(deepCopy(obj1)).not.toEqual(obj3);
+                expect(deepCopy(obj1)).toEqual(obj1);
+                expect(deepCopy(obj1)).not.toBe(obj1);
             });
         });
     });
