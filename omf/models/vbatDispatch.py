@@ -3,7 +3,7 @@
 import json, shutil, subprocess, platform, csv, pulp
 from os.path import join as pJoin
 import datetime as dt
-from numpy import npv
+from numpy import array, npv, arctan as atan
 import __neoMetaModel__
 from __neoMetaModel__ import *
 
@@ -34,14 +34,68 @@ def runOctave(modelDir, inputDict):
 	except:
 		raise Exception('Parsing error, check power data')
 
+def octaveEquivalent(modelDir, inputDict):
+	ltype = int(inputDict['load_type'])
+	if ltype == 4:
+		return runOctave(modelDir, inputDict)
+
+	C = float(inputDict['capacitance'])
+	R = float(inputDict['resistance']) 
+	P = float(inputDict['power'])
+	eta = float(inputDict['cop'])
+	delta = float(inputDict['deadband'])
+	theta_s = float(inputDict['setpoint'])
+	N = float(inputDict['number_devices'])
+
+	with open(pJoin(modelDir, 'temp.csv')) as f:
+		theta_a = [float(r[0]) for r in csv.reader(f)]
+
+	theta_a = array(theta_a)
+
+	if ltype in (1, 2, 3):
+		# radians or degrees default numpy v octave
+		if ltype == 1:
+			participation = (atan(theta_a-27) - atan(20-27))/((atan(45-27) - atan(20-27)));
+		elif ltype == 2:
+			participation = 1-(atan(theta_a-10) - atan(0-10))/((atan(25-10) - atan(0-10)))
+		elif ltype == 3:
+			participation = [1]*8760
+
+		# converts participation to regular list as well
+		participation = [0 if p < 0 else p for p in participation]
+		participation = [1 if p > 1 else p for p in participation]
+
+		if ltype in (1, 3):
+			P_value = (theta_a - theta_s)/R/eta
+		elif ltype == 2:
+			P_value = (theta_s - theta_a)/R/eta
+
+		# P_value now also just a regular list
+		P_value = [0 if p < 0 else p for p in P_value]
+
+		P_lower = [N*part*d for part, d in zip(participation, P_value)]
+		P_upper = [N*part*(P - d) for part, d in zip(participation, P_value)]
+		P_upper = [0 if p < 0 else p for p in P_upper]
+		E_UL = [N*part*C*delta/2/eta for part in participation]
+
+
+	#temperature_a = read(csv) sans header
+	# if device_type == 3:
+	# temperature_a = 20*ones(8760, 1)
+
+	# if case 4 transpose the variables
+
+	return P_lower, P_upper, E_UL
+
 def pulpFunc(inputDict, demand, P_lower, P_upper, E_UL, monthHours):
 	### Di's Modified dispatch code	
 	alpha = 1-(1/(float(inputDict["capacitance"])*float(inputDict["resistance"])))  #1-(deltaT/(C*R)) hourly self discharge rate
-
 	# LP Variables
 	model = pulp.LpProblem("Demand charge minimization problem", pulp.LpMinimize)
 	VBpower = pulp.LpVariable.dicts("ChargingPower", range(8760)) # decision variable of VB charging power; dim: 8760 by 1
 	VBenergy = pulp.LpVariable.dicts("EnergyState", range(8760)) # decision variable of VB energy state; dim: 8760 by 1
+	VBdispatch = pulp.LpVariable.dicts("NumberTimesDispatched", range(8760), lowBound=0) #upBound=1.5)
+
 	for i in range(8760):
 		VBpower[i].lowBound = -1*P_lower[i]
 		VBpower[i].upBound = P_upper[i]
@@ -61,12 +115,8 @@ def pulpFunc(inputDict, demand, P_lower, P_upper, E_UL, monthHours):
 		for i in range(s, f):
 			model += pDemand[month] >= demand[i] + VBpower[i]
 
-	'''
-	# Constrain to N hours per month
-	for (s, f) in monthHours:
-		model += len([VBpower[i] for i in range(s, f) if VBpower[i] != 0]) <= 740
-	'''
 	model.solve()
+
 	return [VBpower[i].varValue for i in range(8760)], [VBenergy[i].varValue for i in range(8760)]
 
 def work(modelDir, inputDict):
@@ -81,6 +131,7 @@ def work(modelDir, inputDict):
 		
 		with open(pJoin(modelDir, 'temp.csv'), 'w') as f:
 			lines = inputDict['tempCurve'].split('\n')
+			out["tempData"] = [float(x) if x != '999.0' else float(inputDict['setpoint']) for x in lines[:-1]]
 			correctData = [x+'\n' if x != '999.0' else inputDict['setpoint']+'\n' for x in lines][:-1]
 			f.write(''.join(correctData))
 			assert len(correctData) == 8760
@@ -97,14 +148,24 @@ def work(modelDir, inputDict):
 					(2880, 3624), (3624, 4344), (4344, 5088), (5088, 5832), 
 					(5832, 6552), (6552, 7296), (7296, 8016), (8016, 8760)]
 
-	P_lower, P_upper, E_UL = runOctave(modelDir, inputDict)
+	P_lower, P_upper, E_UL = octaveEquivalent(modelDir, inputDict)
 
 	out["minPowerSeries"] = [-1*x for x in P_lower]
 	out["maxPowerSeries"] = P_upper
 	out["minEnergySeries"] = [-1*x for x in E_UL]
 	out["maxEnergySeries"] = E_UL
 	
-	out["VBpower"], out["VBenergy"] = pulpFunc(inputDict, demand, P_lower, P_upper, E_UL, monthHours)
+	VBpower, out["VBenergy"] = pulpFunc(inputDict, demand, P_lower, P_upper, E_UL, monthHours)
+	out["VBpower"] = VBpower
+	out["dispatch_number"] = [len([p for p in VBpower[s:f] if p != 0]) for (s, f) in monthHours]
+	#out["tempData"] = 
+	# ---------------- Implementing limitations on dispatch ----------------- #
+	# N = 10
+	
+	# number_of_dispatches = 
+	# month_good = [nd <= N for nd in number_of_dispatches]
+
+	# print number_of_dispatches
 
 	peakDemand = [max(demand[s:f]) for s, f in monthHours] 
 	energyMonthly = [sum(demand[s:f]) for s, f in monthHours]
