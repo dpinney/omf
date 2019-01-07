@@ -804,45 +804,9 @@ function svgClick(event) { // eslint-disable-line
 //	}
 //}
 
-//function tableCreate(inputObject) {
-//	const table = document.getElementById("descriptionTable");
-//    const tbody = table.children[1];
-//    //clear the table
-//    while (tbody.hasChildNodes()) {
-//        tbody.removeChild(tbody.lastChild);
-//    }
-//    const thead = table.children[0]
-//	const titleRow = thead.children[0]; // tr
-//	titleRow.children[0].textContent = "object ";
-//    titleRow.children[1].textContent =  inputObject.object;
-//    const moveButton = document.getElementById("moveButton");
-//    //document.getElementById("editButtonRow").style.display = "table-row";
-//    if (Object.keys(inputObject).some((key) => key === "from" || key === "to")) {
-//        //hide the move button for a line
-//        moveButton.style.display = "none";
-//    } else {
-//        moveButton.style.display = "";
-//    }
-//	// Put the object in.
-//	for (let key in inputObject) {
-//        if (key !== "from" && key !== "to") {
-//            const tr = document.createElement('tr');
-//            const keyTd = document.createElement("td");
-//            keyTd.setAttribute("data-feederkey", "feederkey");
-//            keyTd.textContent = key;
-//            tr.appendChild(keyTd);
-//            const valTd = document.createElement("td");
-//            valTd.textContent = inputObject[key];
-//            tr.appendChild(valTd);
-//            tbody.appendChild(tr)
-//            toggleRowContent(tr);
-//        }
-//	}
-//	document.getElementById("multiButtonRow").style.display = "table-row";
-//    table.style.display = "block";
-//}
-
-/** Toggle the table row content between view-mode and edit-mode. */
+/** Toggle the table row content between view-mode and edit-mode. 
+ * Potentially useful when I want to update how the table saves
+ */
 function toggleRowContent(tr) {
 	if (tr.children[0].tagName.toLowerCase() !== "td") {
 		throw new TypeError("Invalid table-cell modification. This function should only modify <tr> elements " + 
@@ -871,200 +835,6 @@ function toggleRowContent(tr) {
 	} 
 }
 
-
-/** 
- * Toggle the display property of particular <tr> elements between none and table-row.
- */
-//function toggleRowDisplay() { //eslint-disable-line
-//	const tbody = document.getElementById("descriptionTable").children[0];
-//	Array.from(tbody.children).forEach(tr => {
-//		if (tr.children[0].tagName.toLowerCase() === "td") {
-//			//if (tr.dataset.deleterow === "deleterow") {
-//			//	tr.setAttribute("data-deleterow", "");
-//			//}
-//			if (tr.dataset.rowstatus === "new") {
-//				tbody.removeChild(tr);
-//			} else {
-//				if (tr.dataset.rowstatus === "delete") {
-//					//tr.setAttribute("data-rowstatus", "");
-//					tr.removeAttribute("data-rowstatus");
-//				}
-//				toggleRowContent(tr);
-//				tr.style.display = "table-row";
-//			}
-//			//if (tr.dataset.newrow === "newrow") {
-//			//	tbody.removeChild(tr);
-//			//} 
-//		}
-//	});
-//	const editButtonRow = document.getElementById("editButtonRow");
-//	const multiButtonRow = document.getElementById("multiButtonRow");
-//	if (editButtonRow.style.display !== "none") {
-//		editButtonRow.style.display = "none";
-//		multiButtonRow.style.display = "table-row" 
-//	} else {
-//		editButtonRow.style.display = "table-row";
-//		multiButtonRow.style.display = "none"; 
-//	}
-//}
-
-
-/** 
- * Needs to ACTUALLY delete a row in the table
- * Merely hides a row in the table 
- */
-function tableDel(button) { // eslint-disable-line
-	const tr = getClosestAncestor(button, "tr");
-	if (tr.dataset.rowstatus !== "new") {
-		tr.setAttribute("data-rowstatus", "delete");
-	}
-	tr.style.display = "none";
-	//const tbody = tr.parentElement;
-	//tr.style.display = "none";
-	//tbody.removeChild(tr);
-}
-
-
-/**
- * Get the closest ancestor element of the specified tag.
- * @param {HTMLElement} el - The element to search upwards from.
- * @param {string} tag - The tag that the returned ancestor should have.
- * @returns {HTMLElement} - The ancestor that matches the given tag.
- */
-function getClosestAncestor(el, tag) {
-    while ((el = el.parentElement) && el.tagName.toLowerCase() !== tag);
-    return el;
-}
-
-/**
- * Get the closest descended element with the specified data attribute, using BFS.
- * @param {HTMLElement} el - The element to search downwards from.
- * @param {string} dataAtr - The data attribute that the descendent should have.
- * @returns {(HTMLElement | null)} - The descendent that matched the given data attribute or null.
- */
-/*function getClosestDescendent(el, dataAtr) {
-	if 
-	
-	let child;
-	while()
-		const child = Array.from(el.children).find(elm => elm.dataset[dataAtr] === dataAtr);
-		if (child) {
-			return child;
-		}
-
-	while ((el = el.firstElementChild) && el.dataset[dataAtr] !== dataAtr);
-	return el;
-}*/
-
-
-/**
- * Get a descendent node that has the specified data attribute from the root node using DFS.
- * @param {HTMLElement} root - The Element to start DFS from.
- * @param {string} dataAtr - The data attribute value to search for. This assumes that a data attribute declaration 
- * and its value are the same. E.g. data-<value>="<value>"
- * @return {HTMLElement} - The first child descendent that had the desired data attribute.
- * TODO: modify this function so that it takes an additional argument that is a function so that any visit criteria can be used.
- */
-function getMatchingDescendent(root, dataAtr) {
-	//visit the node based on the assumed criteria
-	if (root.dataset[dataAtr] === dataAtr) {
-		return root;
-	}
-	//run DFS on each child of the node
-	const childElements = root.children;
-	for (let i = 0, len = childElements.length; i < len; i++) {
-		let element = getMatchingDescendent(childElements[i], dataAtr);
-		if (element) {
-			return element;
-		}
-	}
-	return null;
-}
-
-//There cannot be any cycles, so no need to mark nodes?
-
-/** Add attribute button functionality in object table. */
-function tablePlus() { // eslint-disable-line
-	const tbody = document.getElementById("descriptionTable").children[0];
-	const tr = document.createElement("tr");
-	tr.setAttribute("data-rowstatus", "new");
-	tr.innerHTML = '<td><button onclick="tableDel(this)" class="modalButton deleteButton">&#9587;</button></td><td><input data-feederkey="feederkey">' + 
-		'</input></td><td><input data-feederval="feederval"></input></td>';
-	tbody.appendChild(tr);
-}
-
-
-/* How did this function work originally? Let's see! It's fine as it is, except that it depends on the exact structure of the table,
-which I have changed. 
-*/
-function tableSave() { // eslint-disable-line
-	// Update tree data structure with changes made in object table.
-	const table = document.getElementById("descriptionTable");
-	var toJson = {}
-	// convert HTML table to JSON
-	const tbody = table.children[0];
-	Array.from(tbody.children).forEach(tr => {
-		if (tr.dataset.rowstatus !== "delete") {
-			let keyElement = getMatchingDescendent(tr, "feederkey");
-			if (keyElement && (keyElement.textContent || keyElement.value)) {
-				let key;
-				if (keyElement.textContent) {
-					key = keyElement.textContent;
-				} else {
-					key = keyElement.value;
-				}
-				const val = getMatchingDescendent(tr, "feederval").value;
-				if(val) {
-					toJson[key] = val;
-				}
-			}
-		}
-	});
-	// Update tree with new values
-	for (let key in toJson) {
-		writeFeeder.tree[previousTarget.id][key] = toJson[key]
-	}
-	// Delete properties from tree
-	for (let key in writeFeeder.tree[previousTarget.id]) {
-		if (!toJson.hasOwnProperty(key)) {
-			delete writeFeeder.tree[previousTarget.id][key]
-		}
-	}
-	// Update SVG
-	if (previousTarget.tagName === 'circle') {
-		// Update Circle
-		previousTarget.setAttribute('cx', toJson['longitude'])
-		previousTarget.setAttribute('cy', toJson['latitude'])
-		// Update Line
-		const circleName = writeFeeder.tree[previousTarget.id].name;
-		const keyAry = Object.keys(writeFeeder.tree);
-		for (let i = 0; i < keyAry.length; i++) {
-			if (writeFeeder.tree[keyAry[i]].from === circleName) {
-				document.getElementById(keyAry[i]).setAttribute('x1', toJson['longitude']);
-				document.getElementById(keyAry[i]).setAttribute('y1', toJson['latitude']);
-			} else if (writeFeeder.tree[keyAry[i]].to === circleName) { 
-				document.getElementById(keyAry[i]).setAttribute('x2', toJson['longitude']);
-				document.getElementById(keyAry[i]).setAttribute('y2', toJson['latitude']);
-			}
-		}
-		// Update Line
-		//for (let i = 0, limit = Object.keys(feeder.tree).length; i < limit; i++) { 
-		//	if (feeder.tree[i]['from'] === feeder.tree[previousTarget.id]['name']) {
-		//		document.getElementById(i).setAttribute('x1', toJson['longitude'])
-		//		document.getElementById(i).setAttribute('y1', toJson['latitude'])
-		//	} 
-		//	else if (feeder.tree[i]['to'] === feeder.tree[previousTarget.id]['name']) {
-		//		document.getElementById(i).setAttribute('x2', toJson['longitude'])
-		//		document.getElementById(i).setAttribute('y2', toJson['latitude'])
-		//	}
-
-		//}
-	}
-	tableDestroy()
-	tableCreate(toJson)
-	alert('Updated object: ' + writeFeeder.tree[previousTarget.id].name)
-}
-
 /** Hide the object table. */
 function tableDestroy() {
     const tableInsert = document.getElementById("tableInsert");
@@ -1079,95 +849,6 @@ function tableDestroy() {
 	//	tbody.removeChild(node);
 	//})
 }
-
-/* I don't think this is removing data from the feeder. I think it only changes the svg, and badly at that.
-Nope. Deleting a circle from the svg removes the circle (and removes the element from the dom),
- but feeder.tree is the same as it was before. Same length, and the object at the index is NOT empty.
-Can I finally start unit testing now?
-
-This function causes some crazy glitch to happen. This will be fun. 
-Reproduce the bug:
-1) click on a triplex meter and TRY to delete it
-2) move it's parent node. 
-This is happening because I'm deleting from feeder regardless duh
-
-Am I sure that everything is being completely removed from the entire data model? No. But it seems like it.
-*/
-function deleteOb() { // eslint-disable-line
-	// Delete Lines 
-	if (previousTarget.tagName === 'line') {
-		previousTarget.remove()
-		let idx = writeFeeder.links.findIndex(line => line.treeIndex == previousTarget.id);
-		writeFeeder.links.splice(idx, 1);
-		delete writeFeeder.tree[previousTarget.id];
-		//writeFeeder.tree[previousTarget.id] = {}
-	}
-	// Delete Circles
-	if (previousTarget.tagName === 'circle') {
-		const circleName = writeFeeder.tree[previousTarget.id].name;
-		if (Object.values(writeFeeder.tree).some(obj => obj.from === circleName || obj.to === circleName)) {
-			alert('Cannot delete circles with lines still connected')
-		} else {
-			previousTarget.remove();
-			let idx = writeFeeder.nodes.findIndex(node => node.treeIndex == previousTarget.id);
-			writeFeeder.nodes.splice(idx, 1);	
-			// If the node I'm deleting has a parent, then I need to delete the line between this node and its parent
-			if (writeFeeder.tree[previousTarget.id].parent) {
-				idx = writeFeeder.links.findIndex(line => line.source.name == writeFeeder.tree[previousTarget.id].name);
-				const svgLineId = writeFeeder.links[idx].target.name + "_" + writeFeeder.links[idx].source.name;
-				document.getElementById(svgLineId).remove();
-				writeFeeder.links.splice(idx, 1);
-			} 
-			delete writeFeeder.tree[previousTarget.id];
-		}
-	}
-	// Hide the object table.
-	tableDestroy();
-}
-
-// ported function
-//function deleteObject(treeIndex) {
-//	// Figure out whether we have a node or an link:
-//	var isNode = true
-//	for (prop in tree[treeIndex])
-//		if (prop == 'from') isNode = false
-//	if (isNode) {
-//		// Check for connections and abort if we have them.
-//		nodeName = tree[treeIndex].name
-//		for (indexVar in tree) {
-//			if (tree[indexVar].from == nodeName || tree[indexVar].to == nodeName || tree[indexVar].parent == nodeName) {
-//				alert('We can only delete nodes that aren\'t connected')
-//				return false
-//			}
-//		}
-//		// No connection, so delete the node:
-//		var nodeIndex
-//		for (x = 0; x < nodes.length; x++) {
-//			if (nodes[x].treeIndex == treeIndex) nodeIndex = x
-//		}
-//		nodes.splice(nodeIndex, 1)
-//		// If we have a parent child situation, delete the link:
-//		if (tree[treeIndex].parent != undefined) {
-//			var linkIndex
-//			for (x = 0; x < links.length; x++) {
-//				if (links[x].source.name == nodeName) linkIndex = x
-//			}
-//			links.splice(linkIndex, 1)
-//		}
-//	} else {
-//		// Delete link:
-//		var linkIndex
-//		for (x = 0; x < links.length; x++) {
-//			if (links[x].treeIndex == treeIndex) linkIndex = x
-//		}
-//		links.splice(linkIndex, 1)
-//	}
-//	// Delete tree object:
-//	delete tree[treeIndex]
-//	clearSelection()
-//	redraw() 
-//}
-// ported function
 
 function scaleTo(x) {
 	// Scale the thickness of all lines and size of all circles. This helps user see details.
@@ -1276,86 +957,12 @@ function clickLatLon(event) {
 	return coords;
 }
 
-//function newNode() { // eslint-disable-line
-//	// Start creation of new node.
-//	//var newTreeId = Object.keys(writeFeeder.tree).length
-//	const newTreeKey = getNewTreeKey(writeFeeder.tree).toString();
-//	var newTreeNode = {
-//		longitude: 0,
-//		latitude: 0,
-//		name: 'newNode' + newTreeKey,
-//		nominal_voltage: 1000,
-//		object: 'node',
-//		phases: 'A'
-//	}
-//	// Save to tree
-//	writeFeeder.tree[newTreeKey] = newTreeNode
-//	// Click location to add
-//	const clickTarget = document.getElementById('svgContainer')
-//	clickTarget.addEventListener('click', newNodeListener, false)
-//	document.body.style.cursor = 'crosshair'
-//}
-
-//function newNodeListener() {
-//	// Click handler for location of new node.
-//	var xloc = event.pageX;
-//	var yloc = event.pageY;
-//	var newTreeKey = getNewTreeKey(writeFeeder.tree).toString();
-//	const coords = clickLatLon(event);
-//	xloc = coords.x;
-//	yloc = coords.y;
-//	//xloc = coords[0]
-//	//yloc = coords[1]
-//	writeFeeder.tree[newTreeKey].longitude = xloc;
-//	writeFeeder.tree[newTreeKey].latitude = yloc;
-//	// Draw new node on svg
-//	const x = writeFeeder.tree[newTreeKey].longitude
-//	const y = writeFeeder.tree[newTreeKey].latitude
-//	const r = 2
-//	//const id = newTreeId
-//	const myClass = writeFeeder.tree[newTreeKey].object
-//	addCircle(x, y, r, newTreeKey, myClass)
-//	scaleTo(scaleLevel)
-//	const clickTarget = document.getElementById('svgContainer')
-//	clickTarget.removeEventListener('click', newNodeListener, false)
-//	document.body.style.cursor = 'auto'
-//}
-
 function clearGlobalSelectionArray() {
 	//selection.forEach(element => {
 	//	element.classList.remove("selected");
 	//})
 	//selection = [];
 	Array.from(document.getElementsByClassName("selected")).forEach(element => element.classList.remove("selected"));
-}
-
-/**
- * Return a node object, if the node is selected.
- * @return {(Object | undefined)} node - return single node object if it is found, else undefined.
- */
-function getSelectedNode() {
-	try {
-		const hits = document.getElementsByClassName('selected');
-		const nodeIndex = findIndex(writeFeeder.nodes, 'treeIndex', hits[0]['id']);//.substr(1));
-		return writeFeeder.nodes[nodeIndex];
-	} catch (err) {
-		// We had no selection, or the selection wasn't in the links.
-		return undefined
-	}
-}
-
-/**
- * Add a new child node at selected component
- * @param  {string} componentName - The name of the component. This name is also a key in the global components object.
- */
-function newChildAtSelected(componentName) { //eslint-disable-line
-	const node = getSelectedNode();
-	if (node == undefined) {
-		alert('I am sorry, but we cannot insert a child element there.');
-		return false;
-	}
-	const component = clone(components[componentName]);
-	newChildAtLocation(component, node['treeIndex']);
 }
 
 //**************************************************
@@ -1532,8 +1139,8 @@ const treeWrapperPrototype = {
     recursiveDelete(key) {
         const tWrapper = createTreeWrapper();
         if (!this.contains(key)) {
-            console.log(`Unable to perform a recursive delete operation. The tree object with key "${key}" does not exist
-            in this TreeWrapper`);
+            //console.log(`Unable to perform a recursive delete operation. The tree object with key "${key}" does not exist
+            //in this TreeWrapper`);
             return tWrapper;
         }
         tWrapper.add(key, this);
@@ -1574,18 +1181,20 @@ const treeWrapperPrototype = {
     getChildrenOf(parentKey) {
         const tWrapper = createTreeWrapper();
         if (!this.contains(parentKey)) {
-            console.log(`Unable to get the children of the tree object with key: "${parentKey}". The key does not exist in this
-            TreeWrapper.`);
+            //console.log(`Unable to get the children of the tree object with key: "${parentKey}". The key does not exist in this
+            //TreeWrapper.`);
             return tWrapper;
         }
         if (!isParentChildNode(this.tree[parentKey]) && !isParentlessNode(this.tree[parentKey])) {
-            // This tree object is not a node, therefore it cannot have any children
             return tWrapper;
         }
         let parentName = this.tree[parentKey].name;
         if (parentName == null) {
-            console.log(`Unable to get the children of the tree object with key: "${parentKey}". The parent tree object
-            does not have a name.`);
+            /* Children reference their parent with the parent's name. If a node doesn't have a name, then it must not
+            have children.
+            */
+            //console.log(`Unable to get the children of the tree object with key: "${parentKey}". The tree object
+            //does not have a name.`);
             return tWrapper;
         } 
         // TODO: Build an object in TreeWrapper that allows instant lookup of children for any TreeWrapper.tree object
@@ -1606,8 +1215,8 @@ const treeWrapperPrototype = {
     getConnectedLinesOf(nodeKey) {
         const tWrapper = createTreeWrapper();
         if (!this.contains(nodeKey)) {
-            console.log(`Unable to find lines that connect to this node with key: "${nodeKey}". The key does not exist in this
-            TreeWrapper.`);
+            //console.log(`Unable to find lines that connect to this node with key: "${nodeKey}". The key does not exist in this
+            //TreeWrapper.`);
             return tWrapper;
         } else if (!isParentChildNode(this.tree[nodeKey]) && !isParentlessNode(this.tree[nodeKey])) {
             // This tree object is not a node, therefore no lines can connect to it
@@ -1682,8 +1291,8 @@ const treeWrapperPrototype = {
     getParentOf(childKey) {
         const tWrapper = createTreeWrapper();
         if (!this.contains(childKey)) {
-            console.log(`Unable to get the parent of the tree object with key: "${childKey}". The key does not exist in this
-            TreeWrapper.`);
+            //console.log(`Unable to get the parent of the tree object with key: "${childKey}". The key does not exist in this
+            //TreeWrapper.`);
             return tWrapper;
         }  
         const parentName = this.tree[childKey].parent;
@@ -1714,8 +1323,8 @@ const treeWrapperPrototype = {
     getPairedNodesOf(key) {
         const tWrapper = createTreeWrapper();
         if (!this.contains(key)) {
-            console.log(`Unable to get the paired nodes of the tree object with the key: "${key}". The key does not exist
-            in this TreeWrapper`);
+            //console.log(`Unable to get the paired nodes of the tree object with the key: "${key}". The key does not exist
+            //in this TreeWrapper`);
             return tWrapper;
         }
         const linesTreeWrapper = this.getConnectedLinesOf(key);
@@ -1795,8 +1404,8 @@ const treeWrapperPrototype = {
         }
         const name = this.tree[key].name;
         if (name == null) {
-            console.log(`The tree object with the key: "${key}" does not have a 'name' property, therefore it isn't
-            contained in the 'names' property of this TreeWrapper.`);
+            //console.log(`The tree object with the key: "${key}" does not have a 'name' property, therefore it isn't
+            //contained in the 'names' property of this TreeWrapper.`);
         } else if (this.names[this.tree[key].name] == null) {
             console.log(`The 'names' property of this TreeWrapper is missing an entry for tree object with key: "${key}",
             name: "${this.tree[key].name}".`); 
@@ -1983,7 +1592,7 @@ const addableSvgDataPrototype = {
     addParentChildLine(key) {
         const parent = Object.values(this.treeWrapper.getParentOf(key).tree)[0];
         if (parent == null) {
-            //console.log(`Could not draw the parent-child line for child tree object with key: "${key}"`);
+            console.log(`Could not draw the parent-child line for child tree object with key: "${key}"`);
             return;
         }
         const parentChildLine = createSvgLine(parent, this.treeWrapper.tree[key]);
@@ -1999,6 +1608,22 @@ const addableSvgDataPrototype = {
         node.latitude = 0;
         const circle = createSvgCircle(key, node);
         this.circles.push(circle);
+    },
+
+    /**
+     * TODO: add unit tests
+     */
+    addParentChildNode(key, obj) {
+        /* There are some weird config nodes that have "parent" but no "longitude" and "latitude" properties and the
+        interface breaks if I don't do this.
+        */
+        if (obj.longitude == null || obj.latitude == null) {
+            this.addConfigurationNode(key);
+        } else {
+            const circle = createSvgCircle(key, obj);
+            this.circles.push(circle);
+        }
+        this.addParentChildLine(key);
     }
 };
 
@@ -2022,9 +1647,7 @@ function createAddableSvgData(treeWrapper) {
     const tree = treeWrapper.tree;
     Object.keys(tree).forEach(key => {
         if (isParentChildNode(tree[key])) {
-            const circle = createSvgCircle(key, tree[key]);
-            obj.circles.push(circle);
-            obj.addParentChildLine(key);
+            obj.addParentChildNode(key, tree[key]);
         } else if (isParentlessNode(tree[key])) {
             const circle = createSvgCircle(key, tree[key]);
             obj.circles.push(circle);
@@ -2033,8 +1656,7 @@ function createAddableSvgData(treeWrapper) {
         } else if (isConfigurationNode(tree[key])) {
             obj.addConfigurationNode(key);
         } else { 
-            //console.log(`Failed to draw type: "${tree[key].object}", name: "${tree[key].name}", key: ${key}"`);
-            //throw new Error(`tree key: ${key}, with data: ${tree[key]} is not a parent-child node, a parentless node, or a line.`); 
+            console.log(`Failed to draw type: "${tree[key].object}", name: "${tree[key].name}", key: "${key}"`);
         }
     });
     return obj;
@@ -2047,9 +1669,9 @@ function isParentlessNode(obj) {
     obj.latitude != null && obj.longitude != null;
 }
 
-// add unit tests
 function isParentChildNode(obj) {
-    return obj.parent != null && obj.latitude != null && obj.longitude != null;
+    //return obj.parent != null && obj.latitude != null && obj.longitude != null;
+    return obj.parent != null;
 }
 
 // add unit tests
@@ -2059,7 +1681,8 @@ function isLine(obj) {
 
 // add unit tests
 function isConfigurationNode(obj) {
-    return obj.longitude == null && obj.latitude == null && obj.from == null && obj.to == null && obj.parent == null;
+    //return obj.longitude == null && obj.latitude == null && obj.from == null && obj.to == null && obj.parent == null;
+    return obj.longitude == null && obj.latitude == null && obj.from == null && obj.to == null;
 }
 
 /** 
@@ -2069,10 +1692,8 @@ function isConfigurationNode(obj) {
 function createSvgCircle(key, {longitude, latitude, object}, {r = 2, strokeWidth = 0.5} = {}) {
     keyIsStringAndValidNumber(key);
     if (longitude == null || latitude == null || object == null) {
-        console.log(`For circle with tree key: "${key}", longitude was: "${longitude}",
-        latitude was: "${latitude}", object was: "${object}"`)
-        //throw new Error(`For circle with tree key: "${key}", longitude was: "${longitude}",
-        //latitude was: "${latitude}", object was: "${object}"`);
+        //console.log(`For circle with tree key: "${key}", longitude was: "${longitude}",
+        //latitude was: "${latitude}", object was: "${object}"`)
     }
 	const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
 	circle.setAttribute('id', key);
@@ -2444,44 +2065,6 @@ function validateButtonArguments(args) {
         throw new Error(`The action argument must match an existing action`);
     }
 }
-
-//function createMoveButton(treeObject, tWrapper) {
-//
-//    //console.log("move button created for treeObject");
-//    //console.log(treeObject.key);
-//    //console.log(treeObject.data);
-//
-//    const button = document.createElement("button");
-//    button.textContent = "move";
-//    button.setAttribute("class", "modalButton");
-//    button.addEventListener("click", function() {
-//        createClickListener(treeObject, tWrapper);
-//    });
-//    return button;
-//}
-
-////function createClickListener(treeObject) {
-//function createClickListener(treeObject, tWrapper) {
-////function createClickListener(treeObject, tWrapper, viewport) {
-//    const element = document.getElementById("svgContainerWrapper");
-//    element.addEventListener("click", getCoordinates, true);
-//    element.setAttribute("style", "cursor: crosshair");
-//
-//    /* TODO: this will change the lon/lat of lines, but the redraw doesn't show it
-//    this will add lon/lat to objects that didn't have it to begin with
-//    */
-//    function getCoordinates(event) {
-//        event.stopPropagation();
-//        document.getElementById("svgContainerWrapper").removeEventListener("click", getCoordinates, true);
-//        const coords = clickLatLon(event);
-//        treeObject.data.longitude = coords.x;
-//        treeObject.data.latitude = coords.y;
-//
-//        const subWrapper = tWrapper.insert(treeObject);
-//        createAddableSvgData(subWrapper).redrawTo(gViewport);
-//        element.setAttribute("style", "cursor: default");
-//    }
-//}
 
 const rowPrototype = {
 

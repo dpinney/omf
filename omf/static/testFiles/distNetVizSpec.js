@@ -551,11 +551,11 @@ describe("Unit tests", function() {
 
                 describe("when the key argument does not exist in the TreeWrapper", function() {
 
-                    it("should call console.log() and return an empty TreeWrapper", function() {
-                        const spy = spyOn(console, "log");
+                    it("should call return an empty TreeWrapper", function() {
+                        //const spy = spyOn(console, "log");
                         const emptyWrapper = createTreeWrapper();
                         expect(testTreeWrapper.recursiveDelete("made up key that doesn't exist!!!")).toEqual(emptyWrapper);
-                        expect(spy).toHaveBeenCalled();
+                        //expect(spy).toHaveBeenCalled();
                     });
                 });
 
@@ -1641,6 +1641,20 @@ describe("Unit tests", function() {
                 expect(isParentlessNode(obj)).toBe(false);
             });
         });
+
+        describe("isParentChildNode()", function() {
+
+            it("should return true if the node has a parent property, even if it has no latitude or longitude property", function() {
+                const obj = {
+                    "parent": "FRIENDSHIP", 
+                    "property": "measured_real_power,measured_reactive_power,measured_power", 
+                    "file": "caliSubCheck.csv", 
+                    "object": "recorder", 
+                    "interval": "3600"
+                };
+                expect(isParentChildNode(obj)).toBe(true);
+            });
+        });
     });
 
         /*
@@ -1925,10 +1939,11 @@ setTimeout(
         // Replace the real tree with the testing tree
         let svg = createDeletableSvgData(gTreeWrapper.tree);
         svg.deleteFrom(gViewport);
-        svg = createAddableSvgData(createTreeWrapper(deepCopy(rawTree)));
+        const tWrapper = createTreeWrapper(deepCopy(rawTree));
+        svg = createAddableSvgData(tWrapper);
         svg.addTo(gViewport);
         // Hack
-        gTreeWrapper = testTreeWrapper;
+        gTreeWrapper = tWrapper;
     },
     2000
 );
