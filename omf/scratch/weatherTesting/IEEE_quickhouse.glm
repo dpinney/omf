@@ -4,41 +4,40 @@
 #set threadcount=1;
 #set randomseed=1;
 #set relax_naming_rules=1;
-#set minimum_timestep=60
+#set minimum_timestep=60;
 
 clock {
 	timezone EST+5EDT;
 	timestamp '2010-01-01 0:00:00';
-	stoptime '2011-01-01 0:00:00';
+	stoptime '2010-01-02 0:00:00';
 }
 
 module tape;
-//module generators;
-module powerflow{
+
+module generators;
+
+module powerflow {
 	solver_method FBS;
 	default_maximum_voltage_error 1e-9;
 };
-module climate;
+
 module residential {
 	implicit_enduses NONE;
 };
-object csv_reader{
-	name CsvReader;
-	filename weatheryearDCA.csv;
-};
 
-object climate{
-	name MyClimate;
-	tmyfile weatheryearDCA.csv;
-	reader CsvReader;
-};
-object recorder {
-	parent MyClimate;
-	property temperature,wind_speed,humidity, solar_direct,solar_diffuse,solar_global;
-	interval -1;//3600;
-	//limit 24;
-	file "weather_climate_data.csv";
-}
+//module climate;
+//
+//object csv_reader {
+//	name CsvReader;
+//	filename weatheryearDCA.csv;
+//};
+//
+//object climate {
+//	name MyClimate;
+//	tmyfile weatheryearDCA.csv;
+//	reader CsvReader;
+//};
+
 schedule waterdemand1 {
 	* 0-5 * * * 0;
 	0-16 6 * * * 0;
@@ -511,11 +510,11 @@ object meter { //node: 650
 	voltage_B -1200.8886-2080.000j;
 	voltage_C -1200.8886+2080.000j;
 	nominal_voltage 2401.7771;
-	object recorder {
-		property measured_real_energy;
-		file "weather_regulator_meter_energy.csv";
-		interval 900;
-	};
+	//object recorder {
+	//	property measured_real_energy;
+	//	file "xout_regulator_meter_energy.csv";
+	//	interval 900;
+	//};
 } 
  
 object node:671 {
@@ -1202,7 +1201,7 @@ object regulator {
 	configuration regulator_configuration:6506321;
 	object multi_recorder {
 		property power_out.real, power_out.imag, power_losses.real;
-		file "weather_regulator_power_data.csv";
+		file "xout_power_data.csv";
 		interval 900;
 	};
 }
@@ -1481,7 +1480,6 @@ object house:..20 {
 	};
 }
 
-
 //object multi_recorder {
 	//property center_tap_1:power_out_real,center_tap_2:power_out_real,center_tap_3:power_out_real;
 	//file "weather_trasnformer_power_real.csv";
@@ -1506,6 +1504,14 @@ object house:..20 {
 object collector {
 	group "class=triplex_meter";
 	property max(measured_voltage_1.mag),max(measured_voltage_2.mag),avg(measured_voltage_1.mag),avg(measured_voltage_2.mag),min(measured_voltage_1.mag),min(measured_voltage_2.mag),sum(measured_real_energy),sum(measured_reactive_energy);
-	file "weather_triplex_meter_all.csv";
+	file "xout_all_trip_meters.csv";
 	interval 900;//900;
+};
+
+object recorder {
+	parent MyClimate;
+	property temperature,wind_speed,humidity, solar_direct,solar_diffuse,solar_global;
+	interval -1;//3600;
+	//limit 24;
+	file "xout_weather.csv";
 };

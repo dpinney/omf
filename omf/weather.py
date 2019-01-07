@@ -16,8 +16,10 @@ def pullAsos(year, station, datatype):
 		weater stations, they collect data at hourly intervals, they're run by 
 		NWS, FAA, and DOD, and there is data going back to 1901 in some sites.
 	* AKA METAR data, which is the name of the format its stored in.
-	* For ASOS station code: https://www.faa.gov/air_traffic/weather/asos/
-	* Note for USA stations (beginning with a K) you must NOT include the 'K' '''
+	* For ASOS station code see https://www.faa.gov/air_traffic/weather/asos/
+	* For datatypes see bottom of https://mesonet.agron.iastate.edu/request/download.phtml
+	* Note for USA stations (beginning with a K) you must NOT include the 'K' 
+	'''
 	url = ('https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?'
 		'station={}&data={}&year1={}&month1=1&day1=1&year2={}&month2=1&day2=1'
 		'&tz=Etc%2FUTC&format=onlycomma&latlon=no&direct=no&report_type=1'
