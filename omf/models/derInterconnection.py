@@ -22,6 +22,7 @@ modelName, template = metadata(__file__)
 tooltip = ("The derInterconnection model runs the key modeling and analysis steps involved "
 	"in a DER Impact Study including Load Flow, Short Circuit, "
 	"and Effective Grounding screenings.")
+hidden = True
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
