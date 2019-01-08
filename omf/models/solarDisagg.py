@@ -19,7 +19,6 @@ sys.path.append(__neoMetaModel__._omfDir)
 from omf.weather import pullAsos
 from omf.solvers import CSSS
 import CSSS.csss.SolarDisagg as SolarDisagg
-from bs4 import BeautifulSoup
 
 # Model metadata:
 modelName, template = metadata(__file__)

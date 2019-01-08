@@ -26,7 +26,7 @@ from os.path import join as pJoin
 import warnings
 from StringIO import StringIO
 import sys, os, json, traceback, shutil
-from solvers import gridlabd
+from omf.solvers import gridlabd
 from pathlib import Path
 import matplotlib
 matplotlib.pyplot.switch_backend('Agg')

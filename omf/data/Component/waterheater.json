@@ -1,0 +1,1 @@
+{"tank_volume": "50", "parent": "NULL", "tank_setpoint": "133", "object": "waterheater", "name": "waterheater", "thermostat_deadband": "4.3", "heating_element_capacity": "5", "demand": "water6*1", "temperature": "135", "tank_UA": "2.7", "location": "INSIDE"}

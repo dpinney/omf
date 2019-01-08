@@ -1,5 +1,5 @@
 ''' Convert a Milsoft Windmil feeder model into an OMF-compatible version. '''
-import os, feeder, csv, random, math, copy, locale, json, traceback, shutil, time, datetime, warnings
+import os, feeder, csv, random, math, copy, locale, json, traceback, shutil, time, datetime, warnings, gc
 from StringIO import StringIO
 from os.path import join as pJoin
 from omf.solvers import gridlabd
@@ -28,8 +28,8 @@ def _lineDistances(x1,x2,y1,y2):
 	''' Calculate distance between two points. Divice by 12 is for a feet to inches conversion. '''
 	return math.sqrt((float(x1) - float(x2)) ** 2 + (float(y1) - float(y2)) ** 2) / 12
 
-def convert(stdString,seqString):
-	''' Take in a .std and .seq strings from Milsoft and spit out a json dict.'''
+def convert(stdString, seqString, rescale=True):
+	''' Take in a .std and .seq strings from Milsoft and spit out a json dict. Rescale to a small size if rescale=True. '''
 	start_time = time.time()
 	# print('*** Start Conversion', time.time()-start_time)
 	# Get all components from the .std:
@@ -71,7 +71,10 @@ def convert(stdString,seqString):
 		except:
 			x_a,x_b,y_a,y_b = (0,0,0,0)
 		return x_a, x_b, y_a, y_b
-	[x_scale, x_b, y_scale, y_b] = _convertToPixel()
+	if rescale:
+		[x_scale, x_b, y_scale, y_b] = _convertToPixel()
+	else:
+		[x_scale, x_b, y_scale, y_b] = [1.0, 0.0, 1.0, 0.0]
 	def obConvert(objectList):
 		''' take a row in the milsoft .std and turn it into a gridlab-type dict'''
 		def _convertGenericObject(objectList):
@@ -383,11 +386,11 @@ def convert(stdString,seqString):
 			# Check to see if there is distributed load on the line
 			# WARNING: distributed load broken in GridLAB-D. Disabled for now.
 			# if 'A' in overhead['phases'] and (ohLineList[19] != '0' or ohLineList[22] != '0'):
-			#     overhead['distributed_load_A'] = float(ohLineList[19])*1000 + float(ohLineList[22])*1000j
+			#	 overhead['distributed_load_A'] = float(ohLineList[19])*1000 + float(ohLineList[22])*1000j
 			# if 'B' in overhead['phases'] and (ohLineList[20] != '0' or ohLineList[23] != '0'):
-			#     overhead['distributed_load_B'] = float(ohLineList[20])*1000 + float(ohLineList[23])*1000j
+			#	 overhead['distributed_load_B'] = float(ohLineList[20])*1000 + float(ohLineList[23])*1000j
 			# if 'C' in overhead['phases'] and (ohLineList[21] != '0' or ohLineList[24] != '0'):
-			#     overhead['distributed_load_C'] = float(ohLineList[21])*1000 + float(ohLineList[24])*1000j
+			#	 overhead['distributed_load_C'] = float(ohLineList[21])*1000 + float(ohLineList[24])*1000j
 			return overhead
 
 		def convertUgLine(ugLineList):
@@ -535,11 +538,11 @@ def convert(stdString,seqString):
 					}
 			# Check to see if there is distributed load on the line
 			# if 'A' in underground['phases'] and (ugLineList[19] != '0' or ugLineList[22] != '0'):
-			#     underground['distributed_load_A'] = float(ugLineList[19])*1000 + (float(ugLineList[22]))*1000j
+			#	 underground['distributed_load_A'] = float(ugLineList[19])*1000 + (float(ugLineList[22]))*1000j
 			# if 'B' in underground['phases'] and (ugLineList[20] != '0' or ugLineList[23] != '0'):
-			#     underground['distributed_load_B'] = float(ugLineList[20])*1000 + (float(ugLineList[23]))*1000j
+			#	 underground['distributed_load_B'] = float(ugLineList[20])*1000 + (float(ugLineList[23]))*1000j
 			# if 'C' in underground['phases'] and (ugLineList[21] != '0' or ugLineList[24] != '0'):
-			#     underground['distributed_load_C'] = float(ugLineList[21])*1000 + (float(ugLineList[24]))*1000j
+			#	 underground['distributed_load_C'] = float(ugLineList[21])*1000 + (float(ugLineList[24]))*1000j
 			return underground
 
 		def convertRegulator(regList):
@@ -1303,12 +1306,11 @@ def convert(stdString,seqString):
 				thisOb['longitude'] = str(float(parentOb['longitude']) + random.uniform(-5,5))
 	# Final Output
 	# print('*** DONE!', time.time()-start_time)
-
-        # fix missing conductors
-        glmTree = missingConductorsFix(glmTree)
-
+	# 8B research fixes
+	glmTree = phasingMismatchFix(glmTree)
+	glmTree = missingConductorsFix(glmTree)
+	glmTree = fixOrphanedLoads(glmTree)
 	return glmTree
-
 
 def stdSeqToGlm(seqPath, stdPath, glmPath):
 	'''Convert a pair of .std and .seq files directly to .glm'''
@@ -1328,130 +1330,418 @@ def stdSeqToGlm(seqPath, stdPath, glmPath):
 		outFile.write(omf.feeder.sortedWrite(tree))
 
 def missingConductorsFix(tree):
-    '''Fixes the missing conductors issue in the tree'''    
-    ### CHECK IF THERE ARE LINE CONFIGS WITHOUT ANY CONDUCTORS ###
-    empty_line_configs = dict()
-    #get line configs missing conductors (dict maps name to key w/in tree)
-    for k,v in tree.iteritems():
-        if v.get('object') == 'line_configuration' and not any('conductor' in vk for vk in v.keys()):
-            empty_line_configs[v['name']] = k
-    
-    #get keys of lines missing conductors
-    empty_lines = [k for k,v in tree.iteritems() if 'line' in v.get('object','') and v.get('configuration') in empty_line_configs]
-    
-    for line_key in empty_lines:
-        #find sibling lines 
-        mom_node = tree[line_key]['from']
-        dotter_node = tree[line_key]['to']
-        brother_key = None
-        grandpa_key = None
-        grandson_key = None
-        for k,v in tree.iteritems():
-            if k not in empty_lines and tree[line_key]['object'] == v.get('object'):
-                if mom_node == v.get('from','') or dotter_node == v.get('to',''):
-                    brother_key = k
-                    break
-                if mom_node == v.get('to', ''): 
-                    grandpa_key = k
-                if dotter_node == v.get('from', ''):
-                    grandson_key = k
-                if grandpa_key and grandson_key:
-                    break
+	'''Fixes the missing conductors issue in the tree'''	
+	### CHECK IF THERE ARE LINE CONFIGS WITHOUT ANY CONDUCTORS ###
+	empty_line_configs = dict()
+	#get line configs missing conductors (dict maps name to key w/in tree)
+	for k,v in tree.iteritems():
+		if v.get('object') == 'line_configuration' and not any('conductor' in vk for vk in v.keys()):
+			empty_line_configs[v['name']] = k
+	
+	#get keys of lines missing conductors
+	empty_lines = [k for k,v in tree.iteritems() if 'line' in v.get('object','') and v.get('configuration') in empty_line_configs]
+	
+	for line_key in empty_lines:
+		#find sibling lines 
+		mom_node = tree[line_key]['from']
+		dotter_node = tree[line_key]['to']
+		brother_key = None
+		grandpa_key = None
+		grandson_key = None
+		for k,v in tree.iteritems():
+			if k not in empty_lines and tree[line_key]['object'] == v.get('object'):
+				if mom_node == v.get('from','') or dotter_node == v.get('to',''):
+					brother_key = k
+					break
+				if mom_node == v.get('to', ''): 
+					grandpa_key = k
+				if dotter_node == v.get('from', ''):
+					grandson_key = k
+				if grandpa_key and grandson_key:
+					break
 
-        nearby = brother_key if brother_key else (grandson_key if grandson_key else grandpa_key)
+		nearby = brother_key if brother_key else (grandson_key if grandson_key else grandpa_key)
 
-        if not nearby:
-            #check child lines of the cousins of the mom node
-            #AKA second cousin lines
-            #first we need to get the parent's cousin's nodes
-            ggma_node_names = []
-            for k,v in tree.iteritems():
-                if 'line' in v.get('object','') and mom_node == v.get('to'):
-                    ggma_node_names.append(v.get('from'))
-            cousin_node_names = [] #dict(name: [] for name in ggma_node_names)
-            for k,v in tree.iteritems():
-                if v.get('from') in ggma_node_names:
-                    cousin_node_names.append(v.get('to'))
-            
-            for k,v in tree.iteritems():
-                if v.get('from') in cousin_node_names and v['object'] == tree[line_key]['object'] and k not in empty_lines:
-                    nearby = k
-                    break
-        
-        if not nearby:
-            #second cousins failed us so check the whole tree for a usable config 
-            for k,v in tree.iteritems():
-                if v.get('object') == tree[line_key]['object'] and k not in empty_lines:
-                    nearby = k
-        
-        if not nearby:
-            #there is no usable line_config in the whole tree, so we use our default conductor and stick it in the current line_config
-            #find our line config's key and check if we've already inserted our default conductor
-            default_name = default_equipment[ tree[line_key]['object'] + '_conductor' ]['name']
-            not_inserted = True
-            for k, v in tree.iteritems():
-                if v.get('name') == tree[line_key]['configuration']:
-                    lc_key = k
-                if v.get('name') == default_name:
-                    not_inserted = False
-                    conductor_key = k
+		if not nearby:
+			#check child lines of the cousins of the mom node
+			#AKA second cousin lines
+			#first we need to get the parent's cousin's nodes
+			ggma_node_names = []
+			for k,v in tree.iteritems():
+				if 'line' in v.get('object','') and mom_node == v.get('to'):
+					ggma_node_names.append(v.get('from'))
+			cousin_node_names = [] #dict(name: [] for name in ggma_node_names)
+			for k,v in tree.iteritems():
+				if v.get('from') in ggma_node_names:
+					cousin_node_names.append(v.get('to'))
+			
+			for k,v in tree.iteritems():
+				if v.get('from') in cousin_node_names and v['object'] == tree[line_key]['object'] and k not in empty_lines:
+					nearby = k
+					break
+		
+		if not nearby:
+			#second cousins failed us so check the whole tree for a usable config 
+			for k,v in tree.iteritems():
+				if v.get('object') == tree[line_key]['object'] and k not in empty_lines:
+					nearby = k
+		
+		if not nearby:
+			#there is no usable line_config in the whole tree, so we use our default conductor and stick it in the current line_config
+			#find our line config's key and check if we've already inserted our default conductor
+			default_name = default_equipment[ tree[line_key]['object'] + '_conductor' ]['name']
+			not_inserted = True
+			for k, v in tree.iteritems():
+				if v.get('name') == tree[line_key]['configuration']:
+					lc_key = k
+				if v.get('name') == default_name:
+					not_inserted = False
+					conductor_key = k
 
-            #insert our default conductor if we haven't already
-            if not_inserted:
-                conductor_key = lc_key
-                while( conductor_key in tree.keys() ):
-                    conductor_key -= 1
-                tree[conductor_key] = default_equipment[ tree[line_key]['object'] + '_conductor' ]
-            
-            for phase in tree[line_key]['phases']:
-                tree[lc_key]['conductor_' + phase] = tree[conductor_key]['name']
-            
-            continue
+			#insert our default conductor if we haven't already
+			if not_inserted:
+				conductor_key = lc_key
+				while( conductor_key in tree.keys() ):
+					conductor_key -= 1
+				tree[conductor_key] = default_equipment[ tree[line_key]['object'] + '_conductor' ]
+			
+			for phase in tree[line_key]['phases']:
+				tree[lc_key]['conductor_' + phase] = tree[conductor_key]['name']
+			
+			continue
 
-        #grab the conductor from the line configuration
-        nearby_line_config = tree[nearby]['configuration']
-        for k, v in tree.iteritems():
-            if nearby_line_config == v.get('name'):
-                nearby_line_config = v
-                break
-        conductor = [v for k,v in v.iteritems() if 'conductor' in k][0]
+		#grab the conductor from the line configuration
+		nearby_line_config = tree[nearby]['configuration']
+		for k, v in tree.iteritems():
+			if nearby_line_config == v.get('name'):
+				nearby_line_config = v
+				break
+		conductor = [v for k,v in v.iteritems() if 'conductor' in k][0]
 
-        #assign the empty line config this conductor
-        for phase in tree[line_key].get('phases'):
-            conductor_string = 'conductor_' + phase
-            line_config_key = empty_line_configs[tree[line_key]['configuration']]
-            tree[line_config_key][conductor_string] = conductor
+		#assign the empty line config this conductor
+		for phase in tree[line_key].get('phases'):
+			conductor_string = 'conductor_' + phase
+			line_config_key = empty_line_configs[tree[line_key]['configuration']]
+			tree[line_config_key][conductor_string] = conductor
 
-    ### CHECKS IF THERE EXISTS ANY MISMATCH BETWEEN LINE PHASES AND LINE-CONFIG CONDUCTOR PHASES
-    namesToKeys = {v.get('name'): k for k, v in tree.iteritems()}
-    del namesToKeys[None]
+	### CHECKS IF THERE EXISTS ANY MISMATCH BETWEEN LINE PHASES AND LINE-CONFIG CONDUCTOR PHASES
+	namesToKeys = getNamesToKeys(tree)
 
-    buggy_lines = dict() #maps buggy lines to their line config keys
-    
-    for k, line in tree.iteritems():
-        if 'line' in line.get('object',''):
-            try:
-                line_config_key = namesToKeys[line['configuration']]
-            except KeyError:
-                continue
-            for phase in line.get('phases',''):
-                if not tree[line_config_key].get('conductor_' + phase):
-                    buggy_lines[k] = line_config_key
+	buggy_lines = dict() #maps buggy lines to their line config keys
+	
+	for k, line in tree.iteritems():
+		if 'line' in line.get('object',''):
+			try:
+				line_config_key = namesToKeys[line['configuration']]
+			except KeyError:
+				continue
+			for phase in line.get('phases',''):
+				if not tree[line_config_key].get('conductor_' + phase):
+					buggy_lines[k] = line_config_key
 
-    for line_key, line_config_key in buggy_lines.iteritems():
-        for attr in tree[line_config_key]:
-            if 'conductor' in attr:
-                existing_cond = attr
-                break
+	for line_key, line_config_key in buggy_lines.iteritems():
+		for attr in tree[line_config_key]:
+			if 'conductor' in attr:
+				existing_cond = attr
+				break
 
-        phases = tree[line_key].get('phases')
-        for phase in phases:
-            if not tree[line_config_key].get('conductor_'+phase):
-                tree[line_config_key]['conductor_'+phase] = tree[line_config_key][existing_cond]
+		phases = tree[line_key].get('phases')
+		for phase in phases:
+			if not tree[line_config_key].get('conductor_'+phase):
+				tree[line_config_key]['conductor_'+phase] = tree[line_config_key][existing_cond]
+	return tree
 
+def islandCount(tree, csv = True, csv_min_lines = 2):
+	'''Walks the tree, counting the number of islands.
+	If csv = True, returns a string in which each line represents one island, with the following information on each line (comma separated):
+	island root key, num of objects in island, island root name, island root object type
+	It will return an empty string if there are fewer than csv_min_lines islands.
+	if csv = False, it returns an integer representing the number of islands.'''
+	def count(root, toViset):
+		size = 0
+		toVisit = [root]
+		while toVisit:
+			current = toVisit.pop(0)
+			if current not in toViset:
+				continue
+			size += 1
+			toViset -= set( [current] )
+			toVisit.extend( list( getRelatives(tree, current) ) )
+		return size
+	main_root = getRootKey(tree)
+	toViset = set(tree.keys())
+	main_size = count(main_root, toViset)
+	island_roots = list(toViset)
+	for unvisited in toViset:
+		#remove items without phases
+		if not tree[unvisited].get('phases'):
+			island_roots.remove(unvisited)
+		#remove items whose parents are in toViset
+		parental = getRelatives(tree, unvisited, parent = True)
+		if parental and parental in toViset:
+			island_roots.remove(unvisited)
+		elif parental:
+			print unvisited
+	island_sizes = []
+	for island_root in island_roots:
+		island_sizes.append( count(island_root, toViset) )	
+	island_roots.insert(0, main_root)
+	island_sizes.insert(0, main_size)
+	if csv and len(island_roots) > csv_min_lines:
+		island_root_names = [tree[k].get('name', 'name_not_found') for k in island_roots]
+		island_root_types = [tree[k].get('object') for k in island_roots]
+		island_info = list( zip(island_roots, island_sizes, island_root_names, island_root_types) )
+		island_info = sorted( island_info, key = lambda x: int(x[1]) )
+		island_info = [ '%s,%d,%s,%s' % tup for tup in island_info]
+		return '\n'.join(island_info)
+	elif csv:
+		return ''
+	else:
+		return sum([ 1 if island_sizes[i] > 1 else 0 for i in xrange(len(island_roots)) ])
 
-    return tree
+def phasingMismatchFix(tree, intermittent_drop_range=5):
+	'''Fixes phase mismatch errors in the tree'''
+	#for k,v in tree.iteritems():
+	#	if v.get('name') == 'NODE150020':
+	#		print v 
+	#		tree[k]['phases'] = 'B'
+	#		break
 
+	def _phaseFix(tree, root, toViset):
+		current_node = root
+		toVisit = [root]
+		namesToKeys = getNamesToKeys(tree)
+		while toVisit:
+			current_node = toVisit.pop(0)
+			if current_node not in toViset:
+				continue
+			toViset -= {current_node}
+			try:
+				tree[current_node]['phases']
+			except KeyError:
+				continue
+			if tree[current_node]['object'] == 'transformer':
+				conf_key = namesToKeys[ tree[current_node]['configuration'] ]
+				add_an_s = True if tree[conf_key]['connect_type'] == 'SINGLE_PHASE_CENTER_TAPPED' else False
+			else:
+				add_an_s = False
+			if add_an_s:
+				tree[current_node]['phases'] += 'S'
+			kids = getRelatives(tree, current_node)
+			toVisit.extend(list(kids))
+			for kid in kids:
+				try:
+					if tree[kid]['phases'] == '':
+						tree[kid]['phases'] = tree[current_node]['phases']
+				except KeyError:
+					continue
+
+				#if tree[kid]['object'] == 'transformer':
+				#	kid_conf_key = namesToKeys[ tree[kid]['configuration'] ]
+				#	connect_type = tree[kid_conf_key]['connect_type']
+				#else:
+				#	connect_type = None
+
+				kid_phases = set(tree[kid].get('phases',''))
+				current_phases = set(tree[current_node].get('phases',''))
+				#in the case of the child of a SINGLE_PHASE_CENTER_TAPPED transformer
+				if add_an_s and kid_phases != current_phases:
+					tree[kid]['phases'] = tree[current_node]['phases']
+					continue
+				#in the general case
+				if not (kid_phases <= current_phases):
+					ancestry = [current_node]
+					dropped = False
+					# We check (intermittent_drop_range) generations above the current_node to see if the phase gained in kid_phases  was dropped within 
+					# that range. Ancestry is our listy boi of the nodes within (intermittent_drop_range) generations. If we decide that the phases were 
+					# intermittently dropped, then we will overwrite the phases where they were dropped (the nodes in ancestry).
+					# If we decide that the phases were not intermittentely dropped then we set the kid_phases equal to the current_phases
+					for j in range(intermittent_drop_range):
+						try:
+							ancestry.append( getRelatives(tree, ancestry[-1], parent=True) )
+							parent_phases = set( tree[ancestry[-1]].get('phases','') )
+						except TypeError:
+							#TypeError for trying to use the empty list as a key in tree if ancestry is empty
+							break
+						if parent_phases == kid_phases:
+							dropped = True
+							for boi in ancestry:
+								tree[boi]['phases'] = tree[kid].get('phases','')
+					if not dropped:
+						intersect = (kid_phases & current_phases)
+						if intersect and intersect != set('S'):
+							tree[kid]['phases'] = ''.join(intersect)
+						else:
+							tree[kid]['phases'] = tree[current_node]['phases']
+						#fixes + checks for when we modify kid phases
+						#if connect_type == 'WYE_WYE' and len(tree[kid]['phases']) == 1:
+						#	tree[kid_conf_key]['connect_type'] = 'SINGLE_PHASE'
+		return tree, toViset
+
+	current_node = getRootKey(tree)
+	toViset= set(tree.keys())
+	tree, toViset = _phaseFix(tree, current_node, toViset)
+	no_phase = []
+	new_roots = list(toViset)
+	for unvisited in toViset:
+		#remove items without phases
+		if not tree[unvisited].get('phases'):
+			no_phase.append(unvisited)
+			new_roots.remove(unvisited)
+		#remove items whose parents are in toViset
+		parental = getRelatives(tree, unvisited, parent = True)
+		if parental and parental in toViset:
+			new_roots.remove(unvisited)
+	toViset -= set(no_phase)
+	root_name_list = [ tree[key].get('name', 'name_not_found') for key in [current_node] + new_roots ]
+	for root in new_roots:
+		_phaseFix(tree, root, toViset)
+	
+	tree = missingPowerFix(tree)
+	return tree
+
+def missingPowerFix(tree):
+	'''Fixes incorrect power ratings on single phase transformers'''
+	from copy import deepcopy
+	namesToKeys = getNamesToKeys(tree)
+	incorrect_phases = dict() #maps configkey_phase to transformer keys
+
+	for k,v in tree.iteritems():
+		if 'transformer' == v.get('object'):
+			config_key = namesToKeys[ v['configuration'] ]
+			for phase in v.get('phases'):
+				if phase in 'NS':
+					continue
+				if not tree[config_key].get('power{}_rating'.format(phase)):
+					key = str(config_key) + '_' + phase
+					try:
+						incorrect_phases[key].append(k)
+					except KeyError:
+						incorrect_phases[key] = [k]
+	#create clones of existing transformer configs with the phase of the power rating swapped
+	for config_key_phase, transformers in incorrect_phases.iteritems():
+		config_key = int(config_key_phase.split('_')[0])
+		phase = config_key_phase.split('_')[1]
+		clone_key = config_key
+		while clone_key in tree.keys():
+			clone_key += 1
+		tree[clone_key] = deepcopy(tree[config_key])
+		tree[clone_key]['name'] += '_{}'.format(phase)
+		pr = None
+		for attr, value in tree[clone_key].iteritems():
+			if attr != 'power_rating' and 'power' in attr and '_rating' in attr: #attr is 'power{}_rating'
+				pr = attr
+				break
+			if attr == 'power_rating':
+				pr = attr
+		if not pr:
+			continue
+		tree[clone_key]['power{}_rating'.format(phase)] = tree[clone_key][pr]
+		if pr != 'power_rating':
+			del tree[clone_key][pr]
+		for transformer in transformers:
+			tree[transformer]['configuration'] = tree[clone_key]['name']
+	return tree
+
+def getRootKey(tree):
+	'''Returns the key of the tree's root (the substation)'''
+	for k,v in tree.iteritems():
+		if v.get('bustype'):
+			if not getRelatives(tree, k, parent=True):
+				return k
+
+def getRelatives(tree, node_or_line, parent=False):
+	'''Returns a list of keys of either parent or children of a given node name.'''
+	listy = []
+
+	if tree[node_or_line].get('object') in ['node', 'triplex_meter']:
+		searchStr = 'to' if parent else 'from'
+		node = node_or_line
+		for k,v in tree.iteritems():
+			if v.get(searchStr) == tree[node].get('name'):
+				listy.append(k)
+				#if parent:
+					#break
+			elif not parent and v.get('parent') == tree[node].get('name'):
+				listy.append(k)
+
+	elif tree[node_or_line].get('object') in ['load', 'triplex_node', 'capacitor'] and parent:
+		parent_name = tree[node_or_line].get('parent')
+		if parent_name:
+			for k,v in tree.iteritems():
+				if v.get('name') == parent_name:
+					return k
+		else:
+			return []
+	elif tree[node_or_line].get('object'):
+		searchStr = 'from' if parent else 'to'
+		line = node_or_line
+
+		try:
+			name = tree[line][searchStr]
+		except KeyError:
+			return []
+
+		for k,v in tree.iteritems():
+			if v.get('name') == name:
+				listy.append(k)
+				break
+	else:
+		return []
+
+	if parent and listy:
+		if len(listy) > 1:
+			print 'Object with multiple parents detected. Note that this is not fully supported.'
+			return listy
+		return listy[0]
+	return listy
+
+def getNamesToKeys(tree):
+	'''Returns a dictionary of names to keys for the tree'''
+	ntk = dict()
+	for k,v in tree.iteritems():
+		if v.get('name'):
+			ntk[v['name']] = k
+	return ntk
+
+def fixOrphanedLoads(tree):
+	'''Fixes orphaned loads and lines in the tree'''
+	namesToKeys = getNamesToKeys(tree)
+	island_listy = islandCount(tree).split('\n')
+	if not island_listy[0]:
+		return tree
+	island_listy = [line.split(',') for line in island_listy]
+	size_1_del = 0
+	size_2_del = 0
+	for key, size, name, obj_type in island_listy:
+		key = int(key)
+		size = int(size)
+		if size == 1:
+			if obj_type != 'load':
+				print 'size 1 island of type ' + obj_type
+				continue
+			del tree[key]
+			size_1_del += 1
+			continue
+		if size == 2:
+			kiddo = getRelatives(tree, key)[0]
+			if tree[kiddo]['object'] != 'load':
+				print 'size 2 island with kid of type ' + tree[kiddo]['object']
+				continue
+			if obj_type != 'node':
+				print 'size 2 island with root of type ' + obj_type
+				continue
+			del tree[key], tree[kiddo]
+			size_2_del += 1
+			continue
+		if 'line' in obj_type:
+			current_from = tree[key]['from']
+			for P in 'ABC':
+				next_from = current_from + '_' + P
+				if namesToKeys.get(next_from):
+					tree[key]['from'] = next_from
+	print '%d size 1 deletions and %d size 2 deletions' % ( size_1_del, size_2_del )
+	return tree
 
 def _latCount(name):
 	''' Debug function to count up the meters and such and figure out whether we're lat/lon coding them correctly. '''
@@ -1463,43 +1753,43 @@ def _latCount(name):
 				myLatCount += 1
 	print name, 'COUNT', nameCount, 'LAT COUNT', latCount, 'SUCCESS RATE', 1.0*latCount/nameCount
 
-
 default_equipment = {
-    
-        'underground_line_conductor': {
-            'name': "DG_1000ALTRXLPEJ15",
-            'object': 'underground_line_conductor',
-            'rating.summer.continuous': "725 A",
-            'outer_diameter': "1.175 in",
-            'conductor_gmr': "0.0395 ft",
-            'conductor_diameter': "1.165 in",
-            'conductor_resistance': "0.0141 ohm/kft",
-            'neutral_gmr': "0.0132 ft",
-            'neutral_resistance': "2.3057 ohm/kft",
-            'neutral_diameter': "0.0254 in",
-            'neutral_strands': "7",
-            'shield_gmr': "0.00 ft"
-        },
-
-        'overhead_line_conductor': {
-            'name': "1000_CU",
-            'object': 'overhead_line_conductor',
-            'geometric_mean_radius': "1.121921cm",
-            'resistance': "0.042875Ohm/km"
-        }
+	'underground_line_conductor': {
+		'name': "DG_1000ALTRXLPEJ15",
+		'object': 'underground_line_conductor',
+		'rating.summer.continuous': "725 A",
+		'outer_diameter': "1.175 in",
+		'conductor_gmr': "0.0395 ft",
+		'conductor_diameter': "1.165 in",
+		'conductor_resistance': "0.0141 ohm/kft",
+		'neutral_gmr': "0.0132 ft",
+		'neutral_resistance': "2.3057 ohm/kft",
+		'neutral_diameter': "0.0254 in",
+		'neutral_strands': "7",
+		'shield_gmr': "0.00 ft"
+	},
+	'overhead_line_conductor': {
+		'name': "1000_CU",
+		'object': 'overhead_line_conductor',
+		'geometric_mean_radius': "1.121921cm",
+		'resistance': "0.042875Ohm/km"
+	}
 }
 
-
+def _writeResultsCsv(testOutput, outName):
+	with open(outName, 'w') as f:
+		w = csv.DictWriter(f, testOutput[0].keys(), delimiter=',', lineterminator='\n')
+		w.writeheader()
+		w.writerows(testOutput)
 
 def _tests(
-		keepFiles = False,
-		wipeBefore = True,
+		keepFiles = True,
+		wipeBefore = False,
 		openPrefix = omf.omfDir + '/static/testFiles/',
 		outPrefix = omf.omfDir + '/scratch/milToGridlabTests/',
-		testFiles = [('Olin-Barre.std','Olin.seq'),('Olin-Brown.std','Olin.seq'),('INEC-GRAHAM.std','INEC.seq')],
+		testFiles = [('Olin-Barre.std','Olin.seq'), ('Olin-Brown.std','Olin.seq')],
 		totalLength = 121,
 		testAttachments = {'schedules.glm':'', 'climate.tmy2':open(omf.omfDir + '/data/Climate/KY-LEXINGTON.tmy2','r').read()},
-		fileSuffix = '',
 	):
 	''' Test convert every windmil feeder we have (in static/testFiles). '''
 	# testFiles = [('INEC-RENOIR.std','INEC.seq'), ('INEC-GRAHAM.std','INEC.seq'),
@@ -1508,75 +1798,75 @@ def _tests(
 	# setlocale lives here to avoid changing it globally 
 	# locale.setlocale(locale.LC_ALL, 'en_US')
 	# Variables for the testing.
-	fileName = 'convResults' +  str(fileSuffix) + '.txt' 
-	timeArray = []
-	statData = []
+	allResults = []
 	# Create the work directory.
 	if wipeBefore:
 		try:
 			# Wipe first.
 			shutil.rmtree(outPrefix)
 		except:
-			pass # no test directory yet.
+			# Couldn't delete, just keep going.
+			pass
 		finally:
 			os.mkdir(outPrefix)
+	else:
+		try:
+			os.mkdir(outPrefix)
+		except:
+			# Couldn't create.
+			pass
 	# Run all the tests.
 	for stdString, seqString in testFiles:
-		curData = {} # Append data for this std file here.
-		curData['circuit_name'] = stdString
-		cur_start_time = time.time()
-		# Write the time info.
-		with open(fileName, 'a') as resultsFile:
-			local_time = reference.LocalTimezone()
-			now = datetime.datetime.now()
-			resultsFile.write(str(now)[0:19] + " at timezone: " + str(local_time.tzname(now)) + '\n')
+		# Output data structure.
+		currentResults = {}
+		currentResults['circuit_name'] = stdString 
+		cur_start_time = time.time() 
 		try:
 			# Convert the std+seq and write it out.
 			with open(pJoin(openPrefix,stdString),'r') as stdFile, open(pJoin(openPrefix,seqString),'r') as seqFile:
-				outGlm = convert(stdFile.read(),seqFile.read())
-			        outGlm = missingConductorsFix(outGlm)
-                        with open(outPrefix + stdString.replace('.std','.glm'),'w') as outFile:
+				# Catch warnings too:
+				with warnings.catch_warnings(record=True) as caught_warnings:
+					outGlm = convert(stdFile.read(),seqFile.read())
+				currentResults['all_warnings'] = ';'.join([str(x.message) for x in caught_warnings])
+			with open(outPrefix + stdString.replace('.std','.glm'),'w') as outFile:
 				outFile.seek(0)
 				outFile.write(feeder.sortedWrite(outGlm))
 				outFile.truncate()
 				outFileStats = os.stat(outPrefix + stdString.replace('.std','.glm') )
 			print 'WROTE GLM FOR', stdString
 			# Write the size of the files as a indicator of how good the conversion was.
-			with open(fileName, 'a') as resultsFile:
-				inFileStats = os.stat(pJoin(openPrefix,stdString))
-				inFileSize = inFileStats.st_size
-				outFileSize = outFileStats.st_size
-				percent = float(inFileSize)/float(outFileSize)
-				curData['glm_size_as_perc_of_std'] = percent
-				curData['std_size_mb'] = inFileSize / 1000.0 / 1000.0
-				curData['number_of_load_obj'] = len([x for x in outGlm if outGlm[x].get('object','') in ['load','triplex_load','triplex_node']])
-				resultsFile.write('WROTE GLM FOR ' + stdString + ', THE STD FILE IS %s PERCENT OF THE GLM FILE.\n' % str(100*percent)[0:4])
+			inFileStats = os.stat(pJoin(openPrefix,stdString))
+			inFileSize = inFileStats.st_size
+			outFileSize = outFileStats.st_size
+			percent = float(inFileSize)/float(outFileSize)
+			currentResults['glm_size_as_perc_of_std'] = percent
+			currentResults['std_size_mb'] = inFileSize / 1000.0 / 1000.0
+			currentResults['number_of_load_obj'] = len([x for x in outGlm if outGlm[x].get('object','') in ['load','triplex_load','triplex_node']])
 		except:
 			print 'FAILED CONVERTING', stdString
-			curData['glm_size_as_perc_of_std'] = 0.0
-			with open(fileName,'a') as resultsFile:
-				resultsFile.write('FAILED CONVERTING ' + stdString + "\n")
-                try:
+			currentResults['glm_size_as_perc_of_std'] = 0.0
+		try:
 			# Draw the GLM.
 			# But first make networkx cool it with the warnings.
-			import warnings; warnings.filterwarnings("ignore")
 			myGraph = feeder.treeToNxGraph(outGlm)
-			feeder.latLonNxGraph(myGraph, neatoLayout=False)
+			x = feeder.latLonNxGraph(myGraph, neatoLayout=False)
 			plt.savefig(outPrefix + stdString.replace('.std','.png'))
+			# Clear memory since matplotlib likes to eat a lot.
+			plt.close()
+			del x
+			gc.collect()
 			print 'DREW GLM OF', stdString
-			with open(fileName,'a') as resultsFile:
-				resultsFile.write('DREW GLM FOR ' + stdString + "\n")
+			currentResults['drawing_success'] = True
 		except:
 			print 'FAILED DRAWING', stdString
-			with open(fileName,'a') as resultsFile:
-				resultsFile.write('DREW GLM FOR ' + stdString + "\n")
-                try:
+			currentResults['drawing_success'] = False
+		try:
 			# Run powerflow on the GLM.
-			curData['gridlabd_error_code'] = 'Processing'
+			currentResults['gridlabd_error_code'] = 'Processing'
 			output = gridlabd.runInFilesystem(outGlm, attachments=testAttachments, keepFiles=False)
 			if output['stderr'].startswith('ERROR'):
 				# Catch GridLAB-D's errors:
-				curData['gridlabd_error_code'] = output['stderr'].replace('\n',' ')
+				currentResults['gridlabd_error_code'] = output['stderr'].replace('\n',' ')
 				raise Exception
 			# Dump powerflow results.
 			with open(outPrefix + stdString.replace('.std','.json'),'w') as outFile:
@@ -1584,30 +1874,18 @@ def _tests(
 				json.dump(output, outFile, indent=4)
 				outFile.truncate()
 			print 'RAN GRIDLAB ON', stdString
-			with open(fileName, 'a') as resultsFile:
-				resultsFile.write('RAN GRIDLAB ON ' + stdString + "\n")
-				resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
-				curData['powerflow_success'] = True
-				resultsFile.write("====================================================================================\n")
-				timeArray.append(time.time() - cur_start_time)
+			currentResults['powerflow_success'] = True
 		except Exception as e:
 			print 'POWERFLOW FAILED', stdString
-			with open(fileName,'a') as resultsFile:
-				resultsFile.write('POWERFLOW FAILED ' + stdString + "\n")
-				curData['powerflow_success'] = False
-				resultsFile.write('Running time for this file is: %d ' % (time.time() - cur_start_time) + "seconds.\n")
-				resultsFile.write("====================================================================================\n")
-				timeArray.append(time.time() - cur_start_time)
+			currentResults['powerflow_success'] = False
 		# Write stats for all tests.
-		curData['conversion_time_seconds'] = time.time() - cur_start_time
-		statData.append(curData)
-	with open(fileName, 'a') as resultsFile:
-		resultsFile.write('Ran %d out of %d tests for this simulation.\n' % (len(testFiles), totalLength))
-		resultsFile.write('Total time of %d simulations is: %d seconds.' % (len(timeArray), sum(timeArray)) + '\n')
-		resultsFile.write("====================================================================================\n")
+		currentResults['conversion_time_seconds'] = time.time() - cur_start_time
+		_writeResultsCsv([currentResults], outPrefix + stdString.replace('.std','.csv'))
+		# Append to multi-circuit output and continue.
+		allResults.append(currentResults)
 	if not keepFiles:
 		shutil.rmtree(outPrefix)
-	return statData
+	return allResults
 
 if __name__ == "__main__":
 	print _tests()

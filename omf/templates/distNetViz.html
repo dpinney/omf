@@ -1,295 +1,1034 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<meta charset="UTF-8">
-	<style>
-	* { font-family: Helvetica, Arial, Sans-Serif;}
-	div.divButton {
-		-webkit-touch-callout: none;
-		-webkit-user-select: none;
-		-khtml-user-select: none;
-		-moz-user-select: none;
-		-ms-user-select: none;
-		user-select: none;
-		cursor: pointer;
-		cursor: hand;
-		position:fixed;
-		width:30px;
-		height:30px;
-		text-align:center;
-		font-size:30px;
-		line-height:30px;
-		color:white;
-	}
-	div#tableScroller {
-		overflow-y: auto;
-		overflow-x: hidden;
-		position: fixed;
-		width: 315px;
-		top: 55px;
-		right: 5px;
-		max-height:90%;
-	}
-	table {
-		width: 300px;
-		border:1px solid black;
-		border-collapse: collapse;
-		text-align: left;
-		table-layout:fixed;
-	}
-	body {margin:0px;}
-	td {
-		background:white;
-		color:black;
-		word-wrap:break-word;
-	}
-	th {
-		background:black;
-		color:white;
-	}
-	svg {
-		position: absolute;
-		left: 0%;
-		top: 0%;
-		width: 100%;
-		height: 100%;
-		z-index: -1;
-	}
-	#saveButton {
-		float:right;
-	}
-	input {
-		width:140px;
-	}
-	/* Load Spinner */
-	.loader {
-		margin: 60px auto;
-		font-size: 10px;
-		position: relative;
-		text-indent: -9999em;
-		border-top: 1.1em solid rgba(255, 255, 255, 0.2);
-		border-right: 1.1em solid rgba(255, 255, 255, 0.2);
-		border-bottom: 1.1em solid rgba(255, 255, 255, 0.2);
-		border-left: 1.1em solid #ffffff;
-		-webkit-transform: translateZ(0);
-		-ms-transform: translateZ(0);
-		transform: translateZ(0);
-		-webkit-animation: load8 1.1s infinite linear;
-		animation: load8 1.1s infinite linear;
-	}
-	.loader,
-	.loader:after {
-		border-radius: 50%;
-		width: 10em;
-		height: 10em;
-	}
-	@-webkit-keyframes load8 {
-		0% {
-			-webkit-transform: rotate(0deg);
-			transform: rotate(0deg);
-		}
-		100% {
-			-webkit-transform: rotate(360deg);
-			transform: rotate(360deg);
-		}
-	}
-	@keyframes load8 {
-		0% {
-			-webkit-transform: rotate(0deg);
-			transform: rotate(0deg);
-		}
-		100% {
-			-webkit-transform: rotate(360deg);
-			transform: rotate(360deg);
-		}
-	}
-	/* HEADER and MENU LINKS */
-	div#header{ width:100%; min-width:1000px; height:25px; background:black; padding:0.6em 0 0.6em 0; }
-	div#headInnerBlock{ width:1000px; height:40px; font-size:medium; color:white; margin:4px auto 0 auto; }
-	div#menuLeft{ height:40px; float:left; font-size:medium; color:white; margin-left:5px;}
-	div#menuRight{ height:40px; font-size:medium; color:white; float:right; display:flex; justify-content: space-between; width: 162px}
-	div#arrow { font-size:8pt; position:absolute; margin-top:2px; margin-left:4px; display:inline; }
-	ul.menu {
-		position:absolute;
-		top: 100%;
-		left: 0;
-		z-index: 1000;
-		min-width: 100px;
-		padding: 5px 0px 5px 0px;
-		margin: 0px;
-		list-style: none;
-		display: none;
-		text-align:left;
-		background-color:#F8F8F8;
-		padding:0;
-		/*border: 1px solid #CCC;*/
-		-webkit-border-radius: 5px;
-		-moz-border-radius: 5px;
-		border-radius: 5px 0px 5px 5px;
-        -webkit-box-shadow: 0 11px 10px rgba(0, 0, 0, 0.2);
-        -moz-box-shadow: 0 11px 10px rgba(0, 0, 0, 0.2);
-        box-shadow: 0 11px 10px rgba(0, 0, 0, 0.2);
-		-webkit-background-clip: padding-box; }
-		ul.menu.right { right:0; left:auto; padding:5px 0px 5px 0px; overflow-y:auto; overflow-x:hidden; max-height:550px; }
-		ul.menu.left { right:auto; left:auto; padding:0 0 0 0; }
-		ul.menu.center { right:auto; left:-45%; }
-		ul.menu li { padding:0px; }
-		ul.menu li:hover { background:green; color:white; }
-		ul.menu li:hover a { color:white; }
-		ul.menu a { display:block; color:black; padding:4px; text-decoration: none }
-		ul.menu a:hover {color:white;}
-		ul.menu { display:block; color:black; padding:4px; }
-		ul.menu ul.menu:hover, ul.menu:visited:hover { color:white; }
-		div.buttonGroup { display:inline-block; position:relative; }
-		button.pill{
-			-webkit-touch-callout: none;
-			-webkit-user-select: none;
-			-khtml-user-select: none;
-			-moz-user-select: none;
-			-ms-user-select: none;
-			user-select: none;
-			color:white;
-			font-size:medium;
-			width: auto;
-			height:35px;
-			margin: 0px;
-			margin-top:-5px;
-			padding:0.3em;
-            border-radius: 5px 5px 0 0;
-			background-color:#E0E0E0;
-			display:inline-block;
-			border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;
-			white-space: nowrap;
-			display:inline-block;}
-			button.pill:hover{background:transparent;}
-			/* MODAL DIALOGS */
-			.modal{
-				display: none; /* Hidden by default */
-				position: fixed; /* Stay in place */
-				z-index: 1; /* Sit on top */
+	<head>
+		<meta charset="UTF-8">
+		<style >
+            /* Define global css variables */
+            :root {
+                --header-height: 25px;
+                --header-padding-top: 10px;
+                --header-padding-bottom: 10px;
+            }
+			* { 
+                font-family: Helvetica, Arial, Sans-Serif;
+            }
+			div.divButton {
+				-webkit-touch-callout: none;
+				-webkit-user-select: none;
+				-khtml-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				user-select: none;
+				cursor: pointer;
+				cursor: hand;
+				position:fixed;
+				width:30px;
+				height:30px;
+				text-align:center;
+				font-size:30px;
+				line-height:30px;
+				color:white;
+			}
+			body {margin:0px;}
+			a {
+				text-decoration: none;
+                color: mediumseagreen;
+                /*color: black;*/
+			}
+            a:visited {
+                color: seagreen;
+            }
+
+            /* SVG */
+
+            /* This is the element that acts as a hook for svg-pan-zoom.js to attach a viewport, which it creates itself */
+			svg#svgContainer {
+                /* width must be 100%, meaning 100% of the document */
+				width: 100%; 
+                /* height must be manually set to a hard value */
+				height: calc(100vh - var(--header-height) - var(--header-padding-bottom) - var(--header-padding-top) - 5px);
+                /* overflow: hidden is set by svg-pan-zoom.js itself. No need to change that here. */
+			}
+			#saveButton {
+				float:right;
+			}
+
+            div#loadingMessage {
+                width: 100%;
+                height: 100%;
+				/*background-color: rgba(0,0,0,0.4); */
+                background-color: white;
+                position: fixed;
+                top: 0px;
+            }
+
+			/* Load Spinner */
+
+			.loader {
+				margin: 60px auto;
+				font-size: 10px;
+				position: relative;
+				text-indent: -9999em;
+				border-top: 1.1em solid rgba(255, 255, 255, 0.2);
+				border-right: 1.1em solid rgba(255, 255, 255, 0.2);
+				border-bottom: 1.1em solid rgba(255, 255, 255, 0.2);
+				border-left: 1.1em solid #ffffff;
+				-webkit-transform: translateZ(0);
+				-ms-transform: translateZ(0);
+				transform: translateZ(0);
+				-webkit-animation: load8 1.1s infinite linear;
+				animation: load8 1.1s infinite linear;
+			}
+			.loader,
+			.loader:after {
+				border-radius: 50%;
+				width: 10em;
+				height: 10em;
+			}
+			@-webkit-keyframes load8 {
+				0% {
+					-webkit-transform: rotate(0deg);
+					transform: rotate(0deg);
+				}
+				100% {
+					-webkit-transform: rotate(360deg);
+					transform: rotate(360deg);
+				}
+			}
+			@keyframes load8 {
+				0% {
+					-webkit-transform: rotate(0deg);
+					transform: rotate(0deg);
+				}
+				100% {
+					-webkit-transform: rotate(360deg);
+					transform: rotate(360deg);
+				}
+			}
+
+            /**************************************************
+            // Header and menu links
+            **************************************************/
+
+			#header {
+				width:100%;
+				height: var(--header-height);
+				padding-top: var(--header-padding-top);
+				padding-bottom: var(--header-padding-bottom);
+				background:black;
+                /*position: absolute;*/
+				/*min-width:1000px;*/
+			}
+            #helpDiv a {
+                color: white;
+            }
+			/*#menuLeft{ height:40px; float:left; font-size:medium; color:white; margin-left:5px;}*/
+			#menuRight{ 
+				/*height:40px;
+				font-size:medium;
+				color:white;*/
+				float:right;
+				display:flex;
+				/*justify-content: space-between;
+				width: 162px*/
+			}
+			/*#arrow { font-size:8pt; position:absolute; margin-top:2px; margin-left:4px; display:inline; }*/
+            .headerDiv {
+                margin-right: 15px;
+                cursor: pointer;
+            }
+			ul.menu {
+				position: absolute;
+				top: 100%;
 				left: 0;
-				top: 0;
-				width: 100%; /* Full width */
-				height: 100%; /* Full height */
-				overflow: hidden; /* If scroll is needed change to auto */
-				background-color: rgb(0,0,0); /* Fallback color */
-				background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-			}
-			.modalContent{
-				background-color: #fefefe;
-				margin: 15% auto; /* 15% from the top and centered */
-				padding: 20px;
-				border: 1px solid #888;
-				width: 50%; /* Could be more or less, depending on screen size */
-				border-radius: 5px;
-				text-align: center;
-			}
-			#modalCancel{
-				width:45px;
-				font-size:small;
-				background:seagreen;
+				z-index: 1000;
+				min-width: 100px;
+				padding: 5px 0px 5px 0px;
+				margin: 0px;
+				list-style: none;
+				display: none;
+				text-align:left;
+				background-color:#F8F8F8;
+				padding:0;
+				/*border: 1px solid #CCC;*/
 				-webkit-border-radius: 5px;
 				-moz-border-radius: 5px;
-				border-radius: 5px;
-				border: none;
+				border-radius: 5px 0px 5px 5px;
+				-webkit-box-shadow: 0 11px 10px rgba(0, 0, 0, 0.2);
+				-moz-box-shadow: 0 11px 10px rgba(0, 0, 0, 0.2);
+				box-shadow: 0 11px 10px rgba(0, 0, 0, 0.2);
+				-webkit-background-clip: padding-box;
+			}
+			ul.menu.right { 
+                right:0;
+                left:auto;
+                padding:5px 0px 5px 0px;
+                overflow-y:auto;
+                overflow-x:hidden;
+                max-height:550px; 
+                cursor: pointer;
+            }
+			ul.menu.left { right:auto; left:auto; padding:0 0 0 0; }
+			ul.menu.center { right:auto; left:-45%; }
+			ul.menu li { 
+                padding: 4px; 
+                }
+			ul.menu li:hover { background:green; color:white; }
+			ul.menu li:hover a { color:white; }
+			ul.menu a { 
+                display:block;
+                color:black;
+                /*padding:4px;*/
+                }
+			ul.menu a:hover {color:white;}
+			ul.menu { display:block; color:black; padding:4px; }
+			ul.menu ul.menu:hover, ul.menu:visited:hover { color:white; }
+			div.buttonGroup { display:inline-block; position:relative; }
+			button.pill {
+				-webkit-touch-callout: none;
+				-webkit-user-select: none;
+				-khtml-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				user-select: none;
+				color:white;
+				font-size:medium;
+				width: auto;
+				height:35px;
+				margin: 0px;
+				margin-top:-5px;
+				padding:0.3em;
+				border-radius: 5px 5px 0 0;
+				background-color:#E0E0E0;
+				display:inline-block;
+				border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;
+				white-space: nowrap;
+				display:inline-block;
+                cursor: pointer;
+			}
+			button.pill:hover{background:transparent;}
+
+            /**************************************************
+            // Modal Dialogs
+            **************************************************/
+
+            #loadModalTable {
+                width: 890px;
+            }
+            /*#milsoftInput {
+                width: 100%;
+            }*/
+            #progressModalCancel {
+                background-color: crimson;
+            }
+            #progressModal {
+                z-index: 1;
+            }
+            #massAddModal .modalContent {
+                width: 400px;
+            }
+            #climateModal label {
+                white-space: nowrap;
+            }
+            #anonymizeModal {
+                white-space: nowrap;
+            }
+			.modal {
+                position: fixed;
+                top: 0px;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+				background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+			}
+	 		.modalContent {
+                padding: 20px;
+                border-radius: 10px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: space-evenly;
+				background-color: #fefefe;
+                /*height: 380px;*/
+                overflow: hidden;
+			}
+            .modalInput {
+                font-size: medium;
+                border: 0px;
+                background-color: gainsboro;
+                width: 100%;
+            }
+            .modalInputLine {
+                font-size: medium;
+                border: 0px;
+                background-color: gainsboro;
+            }
+            .modalButton {
+                font-size: medium;
+                background-color: seagreen;
+                -webkit-border-radius: 5px;
+                -moz-border-radius: 5px;
+                border-radius: 5px;
+                border: none;
+                color: white;
+                cursor: pointer;
+                padding: 4px 6px 4px;
+            }
+            #cancelButton {
+                background-color: crimson;
+            }
+            .modalContent td:nth-of-type(2) {
+                text-align: right;
+            }
+            .modalTableHeader {
+                text-align: left;
+            }
+            .modalTableRow {
+                width: 50%;
+            }
+            .scrollableList {
+                overflow: auto;
+                height: 240px;
+                list-style-type: none;
+                margin: 0px 0px 0px 20px;
+                padding: 0;
+                cursor: pointer;
+            }
+            .feederItem {
+                padding: 5px 5px 5px 5px;
+                margin: 10px 0px 10px 0px;
+            }
+            .feederItem:hover {
+                color: white;
+                background-color: green;
+            }
+            /*
+            input:valid {
+                border: 1px solid white; 
+            }
+            */
+            input:invalid {
+                border: 1px solid red;
+            }            
+
+            /* Tree tables */
+
+            #multiButtonRow {
+                /*text-align: center;*/
+            }
+            /*#multiButtonRow button {
+                margin-right: 15px;
+            }*/
+            .treeTable {
+                background-color: white; 
+            }
+            .treeTable tr {
+                border-bottom: 1px solid black;
+            }
+            /*.treeTable tr:last-child {
+                border: 0px;
+            }*/
+            thead td {
+                
+            }
+            .tableInput {
+                font-size: small;
+                background-color: gainsboro;
+                padding: 3px;
+                border: 0px;
+            }
+            .deleteButton {
+                background-color: #CC0000;
+                /*padding: 1px 7px 1px 7px;*/
+            }
+
+			/* descriptionTable */
+
+			#descriptionTable {
+				border:1px solid black;
+				border-collapse: collapse;
+				text-align: left;
+				table-layout:fixed;
+				overflow-y: auto;
+				overflow-x: hidden;
+				max-height:90%;
+				position: fixed;
+                top: 55px;
+				display: none;
+            }
+            .tableTitle {
+                background-color: black;
+                color: white;
+            }
+			tbody {
+				/*border: 1px solid black;*/
+                border-collapse: collapse;
+			}
+			td {
+				background:white;
+				/*color:black;*/
+				/*word-wrap:break-word;*/
+				padding: 5px;
+				/*border-bottom: 1px solid black;*/
+				border-collapse: collapse;
+			}
+			th {
+				/*font-weight: normal;*/
+				/*background:black;*/
+				/*color:white;*/
+				padding: 5px;
+			}
+			#editButtonRow button {
+				font-size: small;
 				color: white;
-				cursor:pointer;
-				padding:4px 6px 4px;
+				background: seagreen;
+				padding: 5px;
+				border-radius: 5px;
+				width: 100%;
 			}
-			#blankModal{
-				width: 300px;
+			#editButtonRow button:hover {
+				/*outline:0;*/
+				outline: none; 
+				background:mediumseagreen;
 			}
-		</style>
+        </style>
+        <link rel="stylesheet" href="/static/jquery-ui.min.css">
+        <script type="text/javascript" src="/static/jquery.js"></script>
+        <script type="text/javascript" src="/static/jquery-ui.min.js"></script>
 		<script type='text/javascript' src='/static/svg-pan-zoom.js'></script>
+		{% if jasmine %}{{ jasmine | safe }}{% endif %}
 		<!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder.js'></script> -->
 		<!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder Largest.js'></script> -->
 		<!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder Norfork.js'></script> -->
 	</head>
 	<body onkeypress='hotkeys()' style='width:100%;height:100%'>
-		<!-- Start Controls (my-local branch)-->
+        <div id="loadingMessage">
+            <p style="font-size:60pt; text-align:center; width:100%;">Feeder Loading...</p>
+        </div>
+		<!-- Controls -->
 		<div style='background:dimgrey; top:55px; left:5px' class='divButton' onclick='window.panZoom.zoomIn()' title='Zoom In'>+</div>
 		<div style='background:dimgrey; top:95px; left:5px' class='divButton' onclick='window.panZoom.zoomOut()' title='Zoom Out'>-</div>
 		<div style='background:dimgrey; top:135px; left:5px' class='divButton' onclick='window.panZoom.reset()' title='Reset Zoom'>R</div>
 		<div style='background:dimgrey; top:175px; left:5px;' class='divButton' onclick='scaleTo(parseFloat(prompt("Scale line thickness by this multiple:", scaleLevel)))' title='Scale To'>S</div>
 		<!-- <div style='background:navy; top:215px; left:5px' id='saveLink' class='divButton' onclick='saveSvg()' title='Save File' download>S</div> -->
-		<!-- End Controls -->
-		<svg id='svgContainer' xmlns='http://www.w3.org/2000/svg' style='width:100%;height:100%' onclick='svgClick(event)' onmousedown='mouseDown(event)' onmouseup='mouseUp(event)'>
-			<style type="text/css">
-			<![CDATA[
-			.house {fill:blue;}
-			.triplex_meter {fill:orange;}
-			.underground_line {stroke:gray;}
-			.transformer {stroke:orange;}
-			.regulator {stroke:red;}
-			line {stroke:black;}
-			line.parentChild {stroke:LightGrey;}
-			circle {stroke:white; fill:gray;}
-			line.selected, circle.selected {stroke:lime;}
-			]]>
-		</style>
-	</svg>
-	<!-- Menu Bar -->
-	<div id='header'>
-		<div id='menuRight'>
-            <div id='saveButton'>
-				<div class='buttonGroup'>
-				 	<button id='save' class='pill' onclick="downloadTextFile()">Save </button>
-				 </div>
-			</div>
-			<div id='EditDiv'>
-				<div class='buttonGroup'>
-					<button id='editOps' class='pill' onclick='dropPill(this, "Edit")'>Edit ▾</button>
-					<ul id='editMenu' class='menu right' style="display:none">
-						<li><a href='javascript:showModal("findModal")'>Find...</a></li>
-					</ul>
+		<!-- Menu Bar -->
+		<div id='header'>
+			<div id="menuRight">
+				<div id="helpDiv" class="headerDiv">
+					<div class="buttonGroup">
+						<button class='pill' type = 'submit'>
+							<a id='helpButton' href='https://github.com/dpinney/omf/wiki/Tools-~-gridEdit' target='_blank'>Help</a>
+						</button>
+					</div>
+                </div>
+                <div id="editDiv" class="headerDiv">
+					<div class="buttonGroup">
+                        <button id="addOps" class='pill' onclick='dropPill(this, "Edit")'>Edit &#x25BE;</button>
+                        <ul id="editMenu" class='menu right' style="display: none">
+                            <!--<li>Zoom To Fit</li>-->
+                            <!--<li>Zoom Reset</li>-->
+                            <li>Static Loads to Houses</li>
+                            <li data-web>Scada Loadshapes...</li>
+                            <li data-web>Add AMI Profiles...</li>
+                            <li>Find...</li>
+                            <li>Mass Add...</li>
+                            <li>Mass Edit...</li>
+                            <li>Attachments...</li>
+                            <li data-web>Climate...</li>
+                            <li data-web>Anonymization...</li>
+                        </ul>
+                    </div>
+                </div>
+				<div id="addDiv" class="headerDiv">
+					<div class="buttonGroup">
+						<button id="addOps" class='pill' onclick='dropPill(this, "Add")'>Add &#x25BE;</button>
+						<ul id='componentList' class='menu right' style="display: none">
+					</div>
 				</div>
+                {% if showFileMenu %}
+				<div id="fileDiv" class="headerDiv">
+					<div class='buttonGroup'>
+						<button id="fileOps" class='pill' onclick='dropPill(this, "File")'>File &#x25BE;</button>
+                        <ul id='fileMenu' class='menu right' style="display: none">
+							<li data-web>Save</li>
+							<li>View Raw Data</li>
+							<li data-web>Rename</li>
+                            <li data-web>Load from Model...</li>
+							<li data-web>New Blank Feeder...</li>
+							<li data-web>Windmil Conversion...</li>
+							<li data-web>GridLAB-D Conversion...</li>
+							<li data-web>CYMDIST Conversion...</li>
+						</ul>
+					</div>
+                </div>
+                {% endif %}
 			</div>
-			<div id='addDiv'>
-				<div class='buttonGroup'>
-					<button id='addOps' class='pill' onclick='dropPill(this, "Add")'>Add ▾</button>
-					<ul id='newObjectMenu' class='menu right' style="display:none">
-						<li><a href='javascript:newNode()'>Node</a></li>
-						<li><a href='javascript:newLink()'>Link</a></li>
-					</ul>
-				</div>
+        </div>
+        <!-- Svg container -->
+        <svg id='svgContainer' xmlns='http://www.w3.org/2000/svg' onclick='svgClick(event)' onmousedown='mouseDown(event)' onmouseup='mouseUp(event)'>
+            <style type="text/css">
+                <![CDATA[
+                .house {fill:blue;}
+                .triplex_meter {fill:orange;}
+                .underground_line {stroke:gray;}
+                .transformer {stroke:orange;}
+                .regulator {stroke:red;}
+                line {stroke:black;}
+                line.parentChild {stroke:LightGrey;}
+                circle {stroke:white; fill:gray;}
+                line.selected, circle.selected {stroke:lime;}
+                ]]>
+            </style>
+        </svg>
+        <!-- Modals -->
+		<div id='findModal' class="modal" style="display: none">
+			<div class='modalContent'>
+				<table>
+					<tr>
+                        <td>Term</td>
+                        <td><input id='searchInput' type='text' value="Enter a search term" class="modalInput"></td>
+                        <td id="searchCount"></td>
+					</tr>
+					<tr>
+						<td><button id="findPrevious" class="modalButton">Previous</button></td>
+						<td><button id="findNext" class="modalButton">Next</button></td>
+						<td><button class="modalButton" onclick='toggleElementDisplay("findModal")'>Cancel</button></td>
+					</tr>
+				</table>
 			</div>
-		</div>
-	</div>
-	<!-- Modals: findModal -->
-	<div id='findModal' class='modal'>
-		<div class='modalContent' id='findModalContent' style='width:300px'>
-			<table class='importOptions' style='padding:4px; word-wrap:break-word'>
-				<tr>
-					<td>Term</td>
-					<td><input id='searchTerm' type='text'></td>
-					<td id='searchHitCount' style='font-size:8pt; text-align:center'></td>
+        </div>
+        <div id="progressModal" class="modal" style="display: none">
+            <div class="modalContent">
+                <img src="/static/spinner.gif">
+                <h2>text...</h2>
+                <button class="modalButton" id="progressModalCancel">Cancel</button>
+            </div>
+        </div>
+        <div id="loadModal" class="modal" style="display: none">
+            <div class="modalContent">
+                <table id="loadModalTable">
+                    <tbody>
+                        <tr>
+                            <th class="modalTableHeader modalTableRow">Public Feeders</th>
+                            <th class="modalTableHeader modalTableRow">My Feeders</th>
+                        </tr>	
+                        <tr>
+                            <td class="modalTableRow"> 
+                                <ul id="publicFeederList" class="scrollableList"></ul>
+                            </td>
+                            <td class="modalTableRow"> 
+                                <ul id="userFeederList" class="scrollableList"></ul>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button onclick="toggleElementDisplay('loadModal')" class="modalButton">Cancel</button>
+            </div>
+        </div>
+        <div id="blankFeederModal" class="modal" style="display: none">
+            <div class='modalContent'>
+                <form onsubmit="submitForm({formId:'blankFeederForm'}); return false;"
+                 action="/newBlankFeeder/{{thisOwner}}" id="blankFeederForm">
+                    <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
+                    <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
+                    <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
+                    <input type='hidden' name='referrer' value='distribution'/>
+                    <table>
+                        <tbody>
+                            <tr>
+                                <th class="modalTableHeader modalTableRow">Blank Feeder</th>
+                            </tr>
+                            <tr>
+                                <td><label for="blankFeederInput">Name</label></td>
+                                <td>
+                                    <!-- TODO: add better validation than just the 'required' attribute-->
+                                    <input type='text' required id="blankFeederInput" name='feederNameNew' class="modalInput"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><button type="button" onclick="toggleElementDisplay('blankFeederModal')" class="modalButton">Cancel</button></td>
+                                <td><button type="submit" class="modalButton">Create</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+        <div id='milsoftModal' class='modal' style="display: none">
+            <div class='modalContent'>
+                <form onsubmit="submitForm({formId:'milsoftForm', pollUrl:'/checkConversion/{{thisModelName}}/{{thisOwner}}', inputId:'milsoftInput'}); return false;"
+                 action="/milsoftImport/{{thisOwner}}" id="milsoftForm">
+                    <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
+                    <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
+                    <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
+                    <!--<input type='hidden' name='referrer' value='distribution'/>-->
+                    <table>
+                        <tbody>
+                            <tr>
+                                <th class="modalTableHeader modalTableRow">Milsoft Conversion</th>
+                            </tr>
+                            <tr>
+                                <td><label for="milsoftInput">Name</label></td>
+                                <td>
+                                    <!-- TODO: add better validation than just the 'required' attribute-->
+                                    <input type='text' required id="milsoftInput" name='feederNameM' class="modalInput"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Data File (.std)</td>
+                                <td><input type='file' required id="stdFile" name='stdFile' accept='.std' class="modalInput"/></td>
+                            </tr>
+                            <tr>
+                                <td>Equipment File (.seq)</td>
+                                <td><input type='file' required id="seqFile" name='seqFile' accept='.seq' class="modalInput"/></td>
+                            </tr>
+                            <tr>
+                                <td><button type="button" onclick="toggleElementDisplay('milsoftModal')" class="modalButton">Cancel</button></td>
+                                <td><button type="submit" class="modalButton">Import</button></td>
+                            </tr>
+                        </tbody>
+                    </table> 
+                </form>
+            </div>
+        </div>
+        <div id='gridlabdModal' class='modal' style="display: none">
+            <div class='modalContent'>
+                <form onsubmit="submitForm({formId:'gridlabdForm', pollUrl:'/checkConversion/{{thisModelName}}/{{thisOwner}}', inputId:'gridlabdInput'}); return false;"
+                 action="/gridlabdImport/{{thisOwner}}" id="gridlabdForm">
+                    <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
+                    <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
+                    <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
+                    <!--<input type='hidden' name='referrer' value='distribution'/>-->
+                    <table>
+                        <tbody>
+                            <tr>
+                                <th class="modalTableHeader modalTableRow">GridLab-D Conversion</th>
+                            </tr>
+                            <tr>
+                                <td><label for="gridlabdInput">Name</label></td>
+                                <td>
+                                    <!-- TODO: add better validation than just the 'required' attribute-->
+                                    <input type='text' required id="gridlabdInput" name='feederNameG' class="modalInput"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Data File (.glm)</td>
+                                <td><input type='file' required id="csvFile" name='glmFile' accept='.glm' class="modalInput"/></td>
+                            </tr>
+                            <tr>
+                                <td><button type="button" onclick="toggleElementDisplay('gridlabdModal')" class="modalButton">Cancel</button></td>
+                                <td><button type="submit" class="modalButton">Import</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+        <div id='cymeModal' class='modal' style="display: none">
+            <div class='modalContent'>
+                <form onsubmit="submitForm({formId:'cymeForm', pollUrl:'/checkConversion/{{thisModelName}}/{{thisOwner}}', inputId:'cymeInput'}); return false;"
+                 action="/cymeImport/{{thisOwner}}" id="cymeForm">
+                    <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
+                    <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
+                    <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
+                    <!--<input type='hidden' name='referrer' value='distribution'/>-->
+                    <table>
+                        <tbody>
+                            <tr>
+                                <th class="modalTableHeader modalTableRow">Cyme Conversion</th>
+                            </tr>
+                            <tr>
+                                <td><label for="cymeInput">Name</label></td>
+                                <td>
+                                    <!-- TODO: add better validation than just the 'required' attribute-->
+                                    <input type='text' required id="cymeInput" name='feederNameC' class="modalInput"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Network File (.mdb)</td>
+                                <td><input type='file' required id="mdbNetFile" name='mdbNetFile' accept='.mdb' class="modalInput"/></td>
+                            </tr>
+                            <tr>
+                                <td><button type="button" onclick="toggleElementDisplay('cymeModal')" class="modalButton">Cancel</button></td>
+                                <td><button type="submit" class="modalButton">Import</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+        <div id="scadaModal" class="modal" style="display: none">
+            <div class='modalContent'>
+                <form onsubmit="submitForm({formId:'scadaForm', pollUrl:'/checkScadaLoadshape/{{thisModelName}}'}); return false;"
+                 action="/scadaLoadshape/{{thisOwner}}/{{thisFeederName}}" id="scadaForm">
+                    <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
+                    <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
+                    <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
+                    <!--<input type='hidden' name='referrer' value='distribution'/>-->
+                    <table>
+                        <tbody>
+                            <tr>
+                                <th class="modalTableHeader modalTableRow">Scada Loadshapes</th>
+                                <th style='float:right;'>
+                                    <a href='https://github.com/dpinney/omf/wiki/Tools-~-gridEdit#scada-loadshapes' target='_blank'>Format Help</a>
+                                </th>
+                            </tr>
+                            <tr>
+                                <td>File containing Scada load data (.csv)</td>
+                                <td><input type='file' required id="scadaFile" name='scadaFile' accept='.csv' class="modalInput"/></td>
+                            </tr>
+                            <tr>
+                                <td colspan='100%'>Note: Model "Simulation Start Date" should lie within the Scada load's dates.</td>
+                            </tr>
+                            <tr>
+                                <td><button type="button" onclick="toggleElementDisplay('scadaModal')" class="modalButton">Cancel</button></td>
+                                <td><button type="submit" class="modalButton">Import</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+        <div id='amiModal' class='modal' style="display: none">
+            <div class='modalContent'>
+                <form onsubmit="submitForm({formId:'amiForm', pollUrl:'/checkLoadModelingAmi/{{thisModelName}}'}); return false;"
+                 action="/loadModelingAmi/{{thisOwner}}/{{thisFeederName}}" id="amiForm">
+                    <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
+                    <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
+                    <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
+                    <!--<input type='hidden' name='referrer' value='distribution'/>-->
+                    <table>
+                        <tbody>
+                            <tr>
+                                <th class="modalTableHeader modalTableRow">AMI Profiles</th>
+                                <th style='float:right;'>
+                                    <a href='https://github.com/dpinney/omf/wiki/Tools-~-gridEdit' target='_blank'>Format Help</a>
+                                </th>
+                            </tr>
+                            <tr>
+                                <td>File containing AMI load data (.csv)</td>
+                                <td><input type='file' required id="amiFile" name='amiFile' accept='.csv' class="modalInput"/></td>
+                            </tr>
+                            <tr>
+                                <td colspan='100%'>Note: Model "Simulation Start Date" should lie within the AMI profiles's dates.</td>
+                            </tr>
+                            <tr>
+                                <td><button type="button" onclick="toggleElementDisplay('amiModal')" class="modalButton">Cancel</button></td>
+                                <td><button type="submit" class="modalButton">Import</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+        <div id='massAddModal' class='modal' style="display: none">
+            <div class='modalContent'>
+                <form onsubmit="massAdd(); toggleElementDisplay('massAddModal'); return false;">
+                    <table>
+                        <tbody>
+                            <tr>
+                                <th class="modalTableHeader modalTableRow">Mass Add</th>
+                            </tr>
+                            <tr>
+                                <td>Add component:</td>
+                                <td><select id='componentSelect'></select></td>
+                            </tr>
+                            <tr>
+                                <td>To each:</td>
+                                <td><select id='massAddTargetSelect'></select></td>
+                            </tr>
+                            <tr>
+                                <td>With probability for each attachment (float between 0.0 and 1.0):</td>
+                                <td><input type='text' pattern="^(1.0)|(0?(\.\d+))$" required id='percent' value='1.0' class="modalInput"/></td>
+
+                            </tr>
+                            <tr>
+                                <td><button onclick="toggleElementDisplay('massAddModal')" class="modalButton">Cancel</button></td>
+                                <td><button type="submit" class="modalButton">Apply</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+        <div id='massEditModal' class='modal' style="display: none">
+            <div class='modalContent'>
+                <table>
+                    <tbody>
+                        <tr>
+                            <th class="modalTableHeader">Mass Edit</th>
+                        </tr>
+                        <tr>
+                            <td>For each object of type</td>
+                            <td><select id='massEditTargetSelect'></select></td>
+                            <td>with attribute</td>
+                            <td><input type='text' id='massEditAttribute' class="modalInput"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="radio" name="attributeOperation" value="addTo">Add value to attribute</td>
+                            <td><input type='text' id='addToValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
+                        </tr>
+                        <tr>
+                            <td><input type="radio" name="attributeOperation" value="delete">Delete Attribute</td>
+                        </tr>
+                        <tr>
+                            <td><input type="radio" name="attributeOperation" value="change">Change attribute to</td>
+                            <td><input type='text' id='changeValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
+                        </tr>
+                        </tr>
+                        <tr>		
+                            <td><input type="radio" name="attributeOperation" value="multiplyBy">Multiply attribute by</td>
+                            <td><input type='text' id='multiplyValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
+                            <td style="text-align: center" >and add</td>
+                            <td><input type='text' id='andAddValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
+                        </tr>
+                        <tr>
+                            <td>Or</td>
+                        </tr>
+                        <tr>
+                            <td><input type="radio" name="attributeOperation" value="addAttribute"> Add new attribute</td>
+                            <td><input type='text' id='newAttributeKey' class="modalInput"></td>
+                            <td style="text-align: center">with value</td>
+                            <td><input type='text' id='newAttributeValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <button onclick="toggleElementDisplay('massEditModal')" class="modalButton" style="float: right">Cancel</button>
+                            </td>
+                            <td>
+                                <button onclick="massEdit(); toggleElementDisplay('massEditModal');" class="modalButton" style="float: left">Apply</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div id='attachmentsModal' class='modal' style="display: none">
+            <div class='modalContent'>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td><select id='attachmentSelect'></select></td>
+                        </tr>
+                        <tr>
+                            <td><button onclick="toggleElementDisplay('attachmentsModal')" class="modalButton">Cancel</button></td>
+                            <td><button onclick="toggleElementDisplay('attachmentsModal'); editAttachment()" class="modalButton">Select</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div id='editAttachmentModal' class='modal' style="display: none">
+            <div class='modalContent'>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td id='attachmentTd'></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <textarea rows='25' cols='80' id='editAttachmentBox'></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><button onclick="toggleElementDisplay('editAttachmentModal')" class="modalButton">Cancel</button></td>
+                            <td><button onclick="saveAttachment(); toggleElementDisplay('editAttachmentModal');" class="modalButton">Save</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div id='climateModal' class='modal' style="display: none">
+            <div class='modalContent'>
+                <form onsubmit="submitForm({formId:'climateForm', pollUrl:'/checkClimateChange/{{thisOwner}}/{{thisModelName}}'}); return false;"
+                action="/climateChange/{{thisOwner}}/{{thisFeederName}}" id="climateForm">
+                    <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
+                    <!--<input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>-->
+                    <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
+                    <!--<input type='hidden' name='referrer' value='distribution'/>-->
+                    <table>
+                        <tbody>
+                            <tr>
+                                <th class="modalTableHeader modalTableRow">Climate Change</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input id='historicalImport' type='radio' name='climateImportOption' value='historicalImport'>
+                                    <label for='historicalImport'>Historical Weather</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><label for='startDate'>Start Date (YYYY-MM-DD):</label></td>
+                                <td><input id='startDate' type='text' name='startDate' pattern='^\d{4}-\d{2}-\d{2}$' class="modalInput"></td>
+                            </tr>
+                            <tr>
+                                <td><label for='endDate'>End Date (YYYY-MM-DD):</label></td>
+                                <td><input id='endDate' type='text' name='endDate' pattern='^\d{4}-\d{2}-\d{2}$' class="modalInput"></td>
+                            </tr>
+                            <tr>
+                                <td><label for='airport'>Airport Code:</label></td>
+                                <td><input id='airport' type='text' name='airport' pattern='^[A-Z]{3}$' class="modalInput"></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input id='tmyImport' type='radio' name='climateImportOption' value='tmyImport'>
+                                    <label for='tmyImport'>tmy Import</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><label for='zipCode'>Zip Code:</label></td>
+                                <td><input id='zipCode' type="text" name="zipCode" pattern='^\d{5}$' class="modalInput"></td>
+                            </tr>
+                            <tr>
+                                <td><button type="button" onclick="toggleElementDisplay('climateModal')" class="modalButton">Cancel</button></td>
+                                <td><button type="submit" class="modalButton">Apply</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+        <div id='anonymizeModal' class='modal' style="display: none">
+            <div class='modalContent'>
+                <form onsubmit="submitForm({formId:'anonymizeForm', pollUrl:'/checkAnonymize/{{thisOwner}}/{{thisModelName}}'}); return false;"
+                action='/anonymize/{{thisOwner}}/{{thisFeederName}}' id="anonymizeForm">
+                    <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
+                    <!--<input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>-->
+                    <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
+                    <!--<input type='hidden' name='referrer' value='distribution'/>-->
+                    <table>
+                        <tbody>
+                            <tr><th>Anonymization</th></tr>
+                            <tr><th class="modalTableHeader">Names and labels:</th></tr>
+                            <tr>
+                                <td>
+                                    <select name='anonymizeNameOption'>
+                                        <option value="noChange">No change</option>
+                                        <option value="pseudonymize">Pseudonymize</option>
+                                        <option value="randomize">Randomize</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr><th class="modalTableHeader">Locations:</th></tr>
+                            <tr>
+                                <td>
+                                    <input type='radio' id='noChange' name='anonymizeLocationOption' value='noChange' checked>
+                                    <label for='noChange'>No Change</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type='radio' id='translation' name='anonymizeLocationOption' value='translation'>
+                                    <label for='translation'>Translate</label>
+                                </td>
+                            </tr>
+                            <tr><td><input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='translateRight' class="modalInputLine"> [ft] to the right and</td></tr>
+                            <tr><td><input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='translateUp' class="modalInputLine"> [ft] up with a</td></tr>
+                            <tr><td><input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='rotate' class="modalInputLine"> [degree] rotation.</td></tr>
+                            <tr>
+                                <td>
+                                    <input type='radio' id='randomize' name='anonymizeLocationOption' value='randomize'>
+                                    <label for='randomize'>Random (Force Layout)</label>
+                                </td>
+                            </tr>
+                            <tr><th class="modalTableHeader">Electrical properties:</th></tr>
+                            <tr>
+                                <td>
+                                    <input type='checkbox' id='modifyLengthSize' name='modifyLengthSize' value='modifyLengthSize'>
+                                    <label for='modifyLengthSize'>Modify conductor length and cable size</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type='checkbox' id='smoothLoadGen' name='smoothLoadGen' value='smoothLoadGen'>
+                                    <label for='smoothLoadGen'>Smooth loads and generators</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type='checkbox' id='shuffleLoadGen' name='shuffleLoadGen' value='shuffleLoadGen'>
+                                    <label for='shuffleLoadGen'>Shuffle loads and generators:</label>
+                                    <input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='shufflePerc' class="modalInputLine"> [%]</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type='checkbox' id='addNoise' name='addNoise' value='addNoise'>
+                                    <label for='addNoise'>Add noise:</label>
+                                    <input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='noisePerc' class="modalInputLine"> [%]</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <button type="button" onclick="toggleElementDisplay('anonymizeModal')" class="modalButton">Cancel</button>
+                                    <button type="submit" class="modalButton" style="float: right">Apply</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+        <!-- Modals-->
+		<table id="descriptionTable" class="treeTable" style="right: 5px">
+            <thead>
+				<tr class="tableTitle">
+                    <th colspan="2">Object</th>
+                    <th>text...</th>
 				</tr>
-				<tr>
-					<td><button style='width:75px' onclick='findPrevious()'>Previous</button></td>
-					<td><button style='width:75px' onclick='findNext()'>Next</button></td>
-					<td><button style='width:75px' onclick='closeModal("findModal")'>Cancel</button></td>
+				<tr id="multiButtonRow">
+                    <th colspan="3">
+                        <!-- should only be visible when the table is showing a node, NOT a line -->
+                        <button id="moveButton" onclick="moveNode()" class="modalButton">Move</button>
+                        <button id="deleteButton" onclick="deleteObject(previousTarget.id)" class="modalButton deleteButton">Delete</button>
+                        <button id="addButton" onclick="tablePlus()" class="modalButton">Add Attribute</button>
+                        <button onclick="tableSave(previousTarget)" class="modalButton">Save</button>
+                    </th>
 				</tr>
-			</table>
-		</div>
-	</div>
-	<div id='tableScroller'></div>
-	<p id="loadingMessage" style="font-size:60pt; text-align:center; width:100%; display:inline-block">Feeder Loading...</p>
-</body>
+            </thead>
+			<tbody>
+			</tbody>
+        </table>
+        <table id="selectionTable" class="treeTable"> </table>
+	</body>
 </html>
-<script id='feederInsert'>testFeeder={% if data %}{{data | safe}}{% else %}null{% endif %}
+<script id='componentsInsert'>const globalComponents = {% if components %}{{ components | safe }}{% else %}null{% endif %}; 
+</script>
+<script id='feederInsert'>const readFeeder = {% if thisFeederData %}{{ thisFeederData | safe }}{% else %}null{% endif %}; 
 </script>
 <script id='panZoomInsert'>
 </script>
 <script type='text/javascript'>
-var previousTarget = {} // Global to keep track of previous selection target
-var selection = [] // Global to keep track of multiple alt-selections
-var downX, downY, upX, upY // Globals to keep track of mouse coordinates
-var newNodeGenObj = {};
-var lastElementSelected = {}// Global to keep track of last element, for use in movebus function
-var searchCursor // Keeping track of search location
-var scaleLevel = 1.0 // Scale that all SVG objects are drawn at
+//"use strict";
+let thisFeederName = "{% if thisFeederName %}{{ thisFeederName | safe }}{% else %}null{% endif %}";
+const thisFeederNum = {% if thisFeederNum %}{{ thisFeederNum | safe }}{% else %}null{% endif %}; 
+const thisModelName = "{% if thisModelName %}{{ thisModelName | safe }}{% else %}null{% endif %}"; 
+const thisOwner = "{% if thisOwner %}{{ thisOwner | safe }}{% else %}null{% endif %}"; 
+const publicFeeders = {% if publicFeeders %}{{ publicFeeders | safe }}{% else %}null{% endif %};
+const userFeeders = {% if userFeeders %}{{ userFeeders | safe }}{% else %}null{% endif %}; 
+const writeFeeder = deepCopy(readFeeder);
+/* The globalTree can only be created after the entire file has been parsed */
+let globalTreeWrapper; 
+let globalLonOffset = null;
+let globalLatOffset = null;
 
-function saveSvg() {
+// Global to keep track of previous selection target
+let previousTarget = {};
+// Global to keep track of multiple alt-selections
+//let selection = []; 
+// Globals to keep track of mouse coordinates
+let downX, downY, upX, upY;
+//let newNodeGenObj = {}; // What does this do?
+// Global to keep track of last element, for use in movebus function
+let lastElementSelected = {};
+// Keeping track of search location
+let searchCursor;
+// Scale that all SVG objects are drawn at
+let scaleLevel = 1.0; 
+
+function saveSvg() { // eslint-disable-line
 	// Create an SVG that can be saved.
 	alert('We are redirecting you to a static version of the SVG that you can save as a .svg file.')
 	var svg = document.getElementById('svgContainer').outerHTML
@@ -300,156 +1039,165 @@ function saveSvg() {
 function downloadTextFile() {
 	// WARNING! Performance is very bad because the JSON is enormous! This can hang your browser!
 	alert('We are opening a window with JSON in it that you can save as a .json file.')
-	var modJson = JSON.stringify(testFeeder)
-	var win = window.open()
-	win.document.write(modJson)
+	var modJson = JSON.stringify(writeFeeder);
+	var win = window.open();
+	win.document.write(modJson);
 }
 
+/**
+ * Adds a circle to the svg.
+ * @param {number} r - Has something to do with the scale factor of the svg. Everything seems to start with r=2
+ * TODO: Switch the x and y arguments? This function (and addLine()) might be PART of the reason the graph gets flipped around vs. the 
+ * graph in gridEdit.html. Or is gridEdit.html the one that is fipped??!!??
+ */
 function addCircle(x,y,r,id,myClass) {
-	svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0]
-	aCirc = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
-	aCirc.setAttribute('cx', x)
-	aCirc.setAttribute('cy', y)
-	aCirc.setAttribute('r', r)
-	aCirc.setAttribute('id', id)
-	aCirc.setAttribute('class', myClass)
-	aCirc.setAttribute('stroke-width', 0.5)
-	svgOb.appendChild(aCirc)
+	const svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0];
+	const aCirc = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+	aCirc.setAttribute('cx', x - globalLonOffset);
+	aCirc.setAttribute('cy', y - globalLatOffset);
+	aCirc.setAttribute('r', r);
+	aCirc.setAttribute('id', id);
+	aCirc.setAttribute('class', myClass);
+	aCirc.setAttribute('stroke-width', 0.5);
+	svgOb.appendChild(aCirc);
 }
 
-function addLine(x1,y1,x2,y2,id,myClass) {
-	svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0]
-	aLine = document.createElementNS('http://www.w3.org/2000/svg', 'line')
-	aLine.setAttribute('x1', x1)
-	aLine.setAttribute('y1', y1)
-	aLine.setAttribute('x2', x2)
-	aLine.setAttribute('y2', y2)
-	aLine.setAttribute('id', id)
-	aLine.setAttribute('class', myClass)
+/*
+ * Note that longitude should refer to a x coordinate and latitude should refer to an y coordinate.
+ * @param {number} x1 - The longitude of the "from" node of this line.
+ * @param {number} y1 - The latitude of the "from" node of this line.
+ * @param {number} x2 - The longitude of the "to" node of this line.
+ * @param {number} y2 - The latitude of the "to" node of this line.
+ */
+function addLine(x1, y1, x2, y2, id, myClass) {
+	const svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0];
+	const aLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+	aLine.setAttribute('x1', x1 - globalLonOffset);
+	aLine.setAttribute('y1', y1 - globalLatOffset);
+	aLine.setAttribute('x2', x2 - globalLonOffset);
+	aLine.setAttribute('y2', y2 - globalLatOffset);
+	aLine.setAttribute('id', id);
+	aLine.setAttribute('class', myClass);
+	let w;
 	if (myClass.indexOf('p2') !== -1) {
 		w = 2
-	}
-	else if (myClass.indexOf('p3') !== -1) {
+	} else if (myClass.indexOf('p3') !== -1) {
 		w = 3
-	}
-	else if (myClass.indexOf('parentChild') !== -1) {
+	} else if (myClass.indexOf('parentChild') !== -1) {
 		w = 0.5
-	}
-	else {
+	} else {
 		w = 1
 	}
-	aLine.setAttribute('stroke-width', w)
-	svgOb.appendChild(aLine)
-}
-function buildFeeder() {
-	// Make a map objectName -> key. And while we're at it, find the size we need for the full chart.
-	nameToKey = {}, maxLon = 100, maxLat = 100
-	for (key in testFeeder.tree) {
-		nameToKey[testFeeder.tree[key]['name']] = key
-		if (testFeeder.tree[key]['longitude'] > maxLon) {maxLon = testFeeder.tree[key]['longitude']}
-		if (testFeeder.tree[key]['latitude'] > maxLat) {maxLat = testFeeder.tree[key]['latitude']}
-	}
-	maxLon = Math.round(maxLon + 20.0)
-	maxLat = Math.round(maxLat + 20.0)
-	svgOb = document.getElementById('svgContainer')
-	svgOb.setAttribute('width', maxLon)
-	svgOb.setAttribute('height', maxLat)
-	svgOb.setAttribute('viewBox','-10.0 -10.0 ' + maxLon + ' ' + maxLat)
-	// Attach the pan/zoom behavior.
-	window.panZoom = svgPanZoom('#svgContainer', {
-		zoomEnabled: true,
-		controlIconsEnabled: false,
-		fit: true,
-		center: true,
-		minZoom: 0.5,
-		maxZoom: 100
-	})
-	// Go through and add all lines first
-	for (key in testFeeder.tree) {
-		try {
-			anOb = testFeeder.tree[key]
-			if ('from' in anOb && 'to' in anOb) {
-				fromOb = testFeeder.tree[nameToKey[anOb['from']]]
-				toOb = testFeeder.tree[nameToKey[anOb['to']]]
-				addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],key,anOb['object'] + ' p' + phaseCount(anOb['phases']))
-			}
-			else if ('parent' in anOb) {
-				pOb = testFeeder.tree[nameToKey[anOb['parent']]]
-				addLine(pOb['longitude'],pOb['latitude'],anOb['longitude'],anOb['latitude'],pOb.name + '_' + anOb.name,'parentChild')
-			}
-		} catch (err) {
-			console.log('Failed to Draw ' + testFeeder.tree[key])
-		}
-	}
-	// Add circles after all lines
-	for (key in testFeeder.tree) {
-		try {
-			anOb = testFeeder.tree[key]
-			if ('latitude' in anOb && 'longitude' in anOb && 'object' in anOb && !('from' in anOb) && !('to' in anOb)) {
-				addCircle(anOb['longitude'],anOb['latitude'],2,key,anOb['object'])
-			}
-		} catch (err) {
-			console.log('Failed to Draw ' + testFeeder.tree[key])
-		}
-	}
+	aLine.setAttribute('stroke-width', w);
+	svgOb.appendChild(aLine);
 }
 
-function mouseDown(event) {
+
+function createViewport(treeWrapper, svgContainer) {
+    const tree = treeWrapper.tree;
+    const keys = Object.keys(tree);
+    // Set the longitude and latitude to be within the bounds of the provided data
+    const firstKey = keys.find(key => {
+        return tree[key].longitude !== undefined && tree[key].latitude !== undefined;
+    });
+    let minLon = parseFloat(tree[firstKey].longitude);
+    let maxLon = minLon;
+    let minLat = parseFloat(tree[firstKey].latitude);
+    let maxLat = minLat;
+    /* Find the minimum and maximum longitudes and latitudes. That's not good enough. I need to find a RANGE of values
+    for each and scale the viewport to the RANGE
+    */
+    keys.forEach(key => {
+        let lon = tree[key].longitude;
+        let lat = tree[key].latitude;
+        if (lon !== undefined && lat !== undefined) {
+            lon = parseFloat(lon);
+            lat = parseFloat(lat);
+            if (lon < minLon) {
+                minLon = lon;
+            }
+            if (lon > maxLon) {
+                maxLon = lon;
+            }
+            if (lat < minLat) {
+                minLat = lat;
+            }
+            if (lat > maxLat) {
+                maxLat = lat;
+            }
+        }
+    });
+    //const translatedMaxLon = maxLon - minLon;
+    const translatedMaxLon = (maxLon - minLon);
+    globalLonOffset = minLon;
+    const translatedMaxLat = maxLat - minLat;
+    globalLatOffset = minLat;
+    // Create the viewport
+    svgContainer.setAttribute('viewBox',`0 0 ${translatedMaxLon} ${translatedMaxLat}`);
+	window.panZoom = svgPanZoom('#svgContainer', {
+        /* These are equal to the default values */
+		//zoomEnabled: true,
+		//controlIconsEnabled: false,
+        //center: true,
+		//fit: true,
+        //contain: true,
+        zoomScaleSensitivity: 0.2,
+        minZoom: 0.25,
+		maxZoom: 100
+    });
+}
+
+function mouseDown(event) { // eslint-disable-line
 	downX = event.pageX
 	downY = event.pageY
 }
-function mouseUp(event) {
+function mouseUp(event) { // eslint-disable-line
 	upX = event.pageX
 	upY = event.pageY
 }
 
-function svgClick(event) {
+function svgClick(event) { // eslint-disable-line
 	// Listener on the SVG object that handles user clicks.
 	if (downX !== upX || downY !== upY) {
-		// Ignore drags, those should be handled by svz-panzoom.
+		// Ignore drags, those should be handled by svg-panzoom.
 		return
 	}
 	if (!event.altKey) {
 		// Not holding alt and clicking the canvas, so clear the selection.
-		for (i=0; i<selection.length; i++) {
-			selection[i].classList.remove('selected')
-		}
-		selection = []
-		tableDestroy()
+		clearGlobalSelectionArray();
+		tableDestroy();
 	}
-	if (event.target.id != 'svgContainer' && selection.indexOf(testFeeder.tree[event.target.id]) === -1 && testFeeder.tree[event.target.id] !== undefined) {
+	if (
+		event.target.id != 'svgContainer' &&
+		!Array.from(document.getElementsByClassName("selected")).includes(document.getElementById(event.target.id)) &&
+		//!selection.includes(document.getElementById(event.target.id)) &&
+		writeFeeder.tree[event.target.id] !== undefined
+	) {
 		// Clicking on an item selects it.
-		lastElementSelected = (event.target)
-		event.target.classList.add('selected')
-		tableDestroy()
-		tableCreate(testFeeder.tree[event.target.id])
-		selection.push(event.target)
+		lastElementSelected = (event.target);
+		event.target.classList.add('selected');
+		tableDestroy();
+		tableCreate(writeFeeder.tree[event.target.id]);
+		//selection.push(event.target);
 	}
 	// Alt for multiple selection.
-	if (selection.length >= 2) {
+	if (document.getElementsByClassName("selection").length >= 2) {
+	//if (selection.length >= 2) {
 		tableDestroy()
 		multiSelectionTable()
 	}
 	previousTarget = event.target
 }
 
-function phaseCount(p) {
-	// Return the number of phases a line has.
-	total = 0
-	if (p.search('A') > -1) {total++}
-	if (p.search('B') > -1) {total++}
-	if (p.search('C') > -1) {total++}
-	return total
-}
-
-function hotkeys() {
+function hotkeys() { // eslint-disable-line
 	// Handle hotkey presses.
+	let x;
 	if (window.event) {
 		// IE8 and earlier
-		var x = event.keyCode
+		x = event.keyCode
 	} else if (event.which) {
 		// IE9/Firefox/Chrome/Opera/Safari
-		var x = event.which
+		x = event.which
 	}
 	var keychar = String.fromCharCode(x);
 	if (event.target.type != 'text') {
@@ -465,63 +1213,210 @@ function hotkeys() {
 }
 
 function tableCreate(inputObject) {
-	// Show the object table that a user has selected.
-	var tabScroll = document.getElementById('tableScroller')
-	var tbl = document.createElement('table')
-	// Put in the header.
-	var headRow = document.createElement('tr')
-	if ((inputObject.from || inputObject.to) == undefined){
-		headRow.innerHTML = '<th><button onclick="tablePlus(this)">+</button><button onclick="moveNode()">Move</button></th>'
-	}
-	else if((inputObject.from || inputObject.to) !== undefined){
-		headRow.innerHTML = '<th><button onclick="tablePlus(this)">+</button>'
-	}
-	headRow.innerHTML += '<th><button id="saveButton" onclick="tableSave(this)">Save</button><button onclick="deleteOb()">Delete Object</button></th>'
-	tbl.appendChild(headRow)
+	const table = document.getElementById("descriptionTable");
+    const tbody = table.children[1];
+    //clear the table
+    while (tbody.hasChildNodes()) {
+        tbody.removeChild(tbody.lastChild);
+    }
+    const thead = table.children[0]
+	const titleRow = thead.children[0]; // tr
+	titleRow.children[0].textContent = "object ";
+    titleRow.children[1].textContent =  inputObject.object;
+    const moveButton = document.getElementById("moveButton");
+    //document.getElementById("editButtonRow").style.display = "table-row";
+    if (Object.keys(inputObject).some((key) => key === "from" || key === "to")) {
+        //hide the move button for a line
+        moveButton.style.display = "none";
+    } else {
+        moveButton.style.display = "";
+    }
 	// Put the object in.
-	for (key in inputObject) {
-		row = document.createElement('tr')
-		row.innerHTML = '<td><button onclick="tableDel(this)">&#215;</button><input style="width:112px" value=' + key + '></input></td>'
-		row.innerHTML += '<td><input value="' + inputObject[key] + '"></input></td>'
-		tbl.appendChild(row)
+	for (let key in inputObject) {
+        //if (key !== "from" && key !== "to") {
+            const tr = document.createElement('tr');
+            const keyTd = document.createElement("td");
+            keyTd.setAttribute("data-feederkey", "feederkey");
+            keyTd.textContent = key;
+            tr.appendChild(keyTd);
+            const valTd = document.createElement("td");
+            valTd.textContent = inputObject[key];
+            tr.appendChild(valTd);
+            tbody.appendChild(tr)
+            toggleRowContent(tr);
+        //}
 	}
-	tabScroll.appendChild(tbl)
+	document.getElementById("multiButtonRow").style.display = "table-row";
+    table.style.display = "block";
 }
 
-function tableDel(me) {
-	// Delete button functionality in object table.
-	myRow = me.parentElement.parentElement
-	myTable = myRow.parentElement
-	myTable.removeChild(myRow)
+/** Toggle the table row content between view-mode and edit-mode. */
+function toggleRowContent(tr) {
+	if (tr.children[0].tagName.toLowerCase() !== "td") {
+		throw new TypeError("Invalid table-cell modification. This function should only modify <tr> elements " + 
+		" that contain <td> elements, not <th> elements.");
+	}
+	if (tr.children.length === 3) {
+		tr.removeChild(tr.children[0]);
+		const valTd = tr.children[1];
+		const val = valTd.children[0].getAttribute("value");
+		valTd.innerHTML = val; 
+	} else {
+		const buttonTd = document.createElement("td");
+		const button = document.createElement("button");
+        button.setAttribute("onclick", "tableDel(this)");
+        button.classList = "modalButton deleteButton";
+        //button.innerHTML = "&#215"; 
+        button.innerHTML = "&#9587;";
+		buttonTd.appendChild(button); 
+		const keyTd = tr.children[0]; 
+		const valTd = tr.children[1];
+		const valInput = document.createElement("input");
+        valInput.setAttribute("class", "tableInput");
+		valInput.setAttribute("data-feederval", "feederval");
+		valInput.setAttribute("value", valTd.textContent);
+		keyTd.parentElement.insertBefore(buttonTd, keyTd); 
+		valTd.replaceChild(valInput, valTd.childNodes[0]);
+	} 
 }
 
-function tablePlus(me) {
-	// Add attribute button functionality in object table.
-	myTable = me.parentElement.parentElement.parentElement
-	newRow = myTable.insertRow(1)
-	newRow.innerHTML = '<td><button onclick="tableDel(this)">&#215;</button><input style="width:112px"></input></td>'
-	newRow.innerHTML += '<td><input></input></td>'
+
+/** 
+ * Toggle the display property of particular <tr> elements between none and table-row.
+ */
+//function toggleRowDisplay() { //eslint-disable-line
+//	const tbody = document.getElementById("descriptionTable").children[0];
+//	Array.from(tbody.children).forEach(tr => {
+//		if (tr.children[0].tagName.toLowerCase() === "td") {
+//			//if (tr.dataset.deleterow === "deleterow") {
+//			//	tr.setAttribute("data-deleterow", "");
+//			//}
+//			if (tr.dataset.rowstatus === "new") {
+//				tbody.removeChild(tr);
+//			} else {
+//				if (tr.dataset.rowstatus === "delete") {
+//					//tr.setAttribute("data-rowstatus", "");
+//					tr.removeAttribute("data-rowstatus");
+//				}
+//				toggleRowContent(tr);
+//				tr.style.display = "table-row";
+//			}
+//			//if (tr.dataset.newrow === "newrow") {
+//			//	tbody.removeChild(tr);
+//			//} 
+//		}
+//	});
+//	const editButtonRow = document.getElementById("editButtonRow");
+//	const multiButtonRow = document.getElementById("multiButtonRow");
+//	if (editButtonRow.style.display !== "none") {
+//		editButtonRow.style.display = "none";
+//		multiButtonRow.style.display = "table-row" 
+//	} else {
+//		editButtonRow.style.display = "table-row";
+//		multiButtonRow.style.display = "none"; 
+//	}
+//}
+
+
+/** 
+ * Needs to ACTUALLY delete a row in the table
+ * Merely hides a row in the table 
+ */
+function tableDel(button) { // eslint-disable-line
+	const tr = getClosestAncestor(button, "tr");
+	if (tr.dataset.rowstatus !== "new") {
+		tr.setAttribute("data-rowstatus", "delete");
+	}
+	tr.style.display = "none";
+	//const tbody = tr.parentElement;
+	//tr.style.display = "none";
+	//tbody.removeChild(tr);
 }
 
-function tableSave(me) {
-	// Update tree data structure with changes made in object table.
-	tbl = me.parentElement.parentElement.parentElement
-	var toJson = {}
-	// convert HTML table to JSON
-	for (i = 1; i < tbl.rows.length; i++) {
-		key = tbl.rows[i].cells[0].lastElementChild.value
-		if (key !== '') {
-			toJson[key] = tbl.rows[i].cells[1].lastElementChild.value
+
+/**
+ * Get the closest ancestor element of the specified tag.
+ * @param {HTMLElement} el - The element to search upwards from.
+ * @param {string} tag - The tag that the returned ancestor should have.
+ * @returns {HTMLElement} - The ancestor that matches the given tag.
+ */
+function getClosestAncestor(el, tag) {
+    while ((el = el.parentElement) && el.tagName.toLowerCase() !== tag);
+    return el;
+}
+
+
+/**
+ * Get a descendent node that has the specified data attribute from the root node using DFS.
+ * @param {HTMLElement} root - The Element to start DFS from.
+ * @param {string} dataAtr - The data attribute value to search for. This assumes that a data attribute declaration 
+ * and its value are the same. E.g. data-<value>="<value>"
+ * @return {HTMLElement} - The first child descendent that had the desired data attribute.
+ * TODO: modify this function so that it takes an additional argument that is a function so that any visit criteria can be used.
+ */
+function getMatchingDescendent(root, dataAtr) {
+	//visit the node based on the assumed criteria
+	if (root.dataset[dataAtr] === dataAtr) {
+		return root;
+	}
+	//run DFS on each child of the node
+	const childElements = root.children;
+	for (let i = 0, len = childElements.length; i < len; i++) {
+		let element = getMatchingDescendent(childElements[i], dataAtr);
+		if (element) {
+			return element;
 		}
 	}
+	return null;
+}
+
+//There cannot be any cycles, so no need to mark nodes?
+
+/** Add attribute button functionality in object table. */
+function tablePlus() {
+	const tbody = document.getElementById("descriptionTable").children[1];
+	const tr = document.createElement("tr");
+	tr.setAttribute("data-rowstatus", "new");
+	tr.innerHTML = '<td><button onclick="tableDel(this)" class="modalButton deleteButton">&#9587;</button></td><td><input data-feederkey="feederkey">' + 
+		'</input></td><td><input data-feederval="feederval"></input></td>';
+	tbody.appendChild(tr);
+}
+
+
+/* How did this function work originally? Let's see! It's fine as it is, except that it depends on the exact structure of the table,
+which I have changed. 
+*/
+function tableSave(previousTarget) {
+	// Update tree data structure with changes made in object table.
+	const table = document.getElementById("descriptionTable");
+	var toJson = {}
+	// convert HTML table to JSON
+	const tbody = table.children[1];
+	Array.from(tbody.children).forEach(tr => {
+		if (tr.dataset.rowstatus !== "delete") {
+			let keyElement = getMatchingDescendent(tr, "feederkey");
+			if (keyElement && (keyElement.textContent || keyElement.value)) {
+				let key;
+				if (keyElement.textContent) {
+					key = keyElement.textContent;
+				} else {
+					key = keyElement.value;
+				}
+				const val = getMatchingDescendent(tr, "feederval").value;
+				if(val) {
+					toJson[key] = val;
+				}
+			}
+		}
+	});
 	// Update tree with new values
-	for (key in toJson) {
-		testFeeder.tree[previousTarget.id][key] = toJson[key]
+	for (let key in toJson) {
+		writeFeeder.tree[previousTarget.id][key] = toJson[key]
 	}
 	// Delete properties from tree
-	for (key in testFeeder.tree[previousTarget.id]) {
+	for (let key in writeFeeder.tree[previousTarget.id]) {
 		if (!toJson.hasOwnProperty(key)) {
-			delete testFeeder.tree[previousTarget.id][key]
+			delete writeFeeder.tree[previousTarget.id][key]
 		}
 	}
 	// Update SVG
@@ -530,54 +1425,96 @@ function tableSave(me) {
 		previousTarget.setAttribute('cx', toJson['longitude'])
 		previousTarget.setAttribute('cy', toJson['latitude'])
 		// Update Line
-		for (i = 0, limit = Object.keys(testFeeder.tree).length; i < limit; i++) {
-			if (testFeeder.tree[i]['from'] === testFeeder.tree[previousTarget.id]['name']) {
-				document.getElementById(i).setAttribute('x1', toJson['longitude'])
-				document.getElementById(i).setAttribute('y1', toJson['latitude'])
-			}
-			else if (testFeeder.tree[i]['to'] === testFeeder.tree[previousTarget.id]['name']) {
-				document.getElementById(i).setAttribute('x2', toJson['longitude'])
-				document.getElementById(i).setAttribute('y2', toJson['latitude'])
+		const circleName = writeFeeder.tree[previousTarget.id].name;
+		const keyAry = Object.keys(writeFeeder.tree);
+		for (let i = 0; i < keyAry.length; i++) {
+			if (writeFeeder.tree[keyAry[i]].from === circleName) {
+				document.getElementById(keyAry[i]).setAttribute('x1', toJson['longitude']);
+				document.getElementById(keyAry[i]).setAttribute('y1', toJson['latitude']);
+			} else if (writeFeeder.tree[keyAry[i]].to === circleName) { 
+				document.getElementById(keyAry[i]).setAttribute('x2', toJson['longitude']);
+				document.getElementById(keyAry[i]).setAttribute('y2', toJson['latitude']);
 			}
 		}
+		// Update Line
+		//for (let i = 0, limit = Object.keys(feeder.tree).length; i < limit; i++) { 
+		//	if (feeder.tree[i]['from'] === feeder.tree[previousTarget.id]['name']) {
+		//		document.getElementById(i).setAttribute('x1', toJson['longitude'])
+		//		document.getElementById(i).setAttribute('y1', toJson['latitude'])
+		//	} 
+		//	else if (feeder.tree[i]['to'] === feeder.tree[previousTarget.id]['name']) {
+		//		document.getElementById(i).setAttribute('x2', toJson['longitude'])
+		//		document.getElementById(i).setAttribute('y2', toJson['latitude'])
+		//	}
+
+		//}
 	}
 	tableDestroy()
 	tableCreate(toJson)
-	alert('Updated object: ' + testFeeder.tree[previousTarget.id].name)
+	alert('Updated object: ' + writeFeeder.tree[previousTarget.id].name)
 }
 
+/** Hide the object table. */
 function tableDestroy() {
-	// Hide the object table.
-	tabScroll = document.getElementById('tableScroller')
-	kid = tabScroll.children[0]
-	if (!(kid === undefined)) {tabScroll.removeChild(kid)}
+	const table = document.getElementById("descriptionTable");
+	table.style.display = "none";
+	const tbody = table.children[0];
+	const deleteTargets = Array.from(tbody.children).filter(tr => tr.children[0].tagName.toLowerCase() === "td");
+	deleteTargets.forEach(node => {
+		tbody.removeChild(node);
+	})
 }
 
-function deleteOb() {
-	// Delete Lines
-	if (previousTarget.tagName === 'line') {
-		previousTarget.remove()
-		testFeeder.tree[previousTarget.id] = {}
-	}
-	// Delete Circles
-	if (previousTarget.tagName === 'circle') {
-		// Check for connected lines
-		lines = 0
-		for (i = 0, limit = Object.keys(testFeeder.tree).length; i < limit; i++) {
-			if ( (testFeeder.tree[i]['from'] === testFeeder.tree[previousTarget.id]['name'])
-				|| (testFeeder.tree[i]['to'] === testFeeder.tree[previousTarget.id]['name']) ) {
-				lines++
-			}
-		}
-		if (lines > 0) {
-			alert('Cannot delete circles with lines still connected')
-		}
-		else {
-			previousTarget.remove()
-		}
-	}
+/* I don't think this is removing data from the feeder. I think it only changes the svg, and badly at that.
+Nope. Deleting a circle from the svg removes the circle (and removes the element from the dom),
+ but feeder.tree is the same as it was before. Same length, and the object at the index is NOT empty.
+Can I finally start unit testing now?
+
+This function causes some crazy glitch to happen. This will be fun. 
+Reproduce the bug:
+1) click on a triplex meter and TRY to delete it
+2) move it's parent node. 
+This is happening because I'm deleting from feeder regardless duh
+
+Am I sure that everything is being completely removed from the entire data model? No. But it seems like it.
+*/
+function deleteObject(key) { 
+    const tree = globalTreeWrapper.tree;
+    const names = globalTreeWrapper.names;
+    if (tree[key].hasOwnProperty("from") && tree[key].hasOwnProperty("to")) {
+        // Delete Lines 
+        //remove the line from the svg
+        document.getElementById(key).remove();
+        delete names[tree[key].name];
+        delete tree[key];
+        //writeFeeder.tree[previousTarget.id] = {}
+    } else {
+        // Delete Circles
+        const circleName = tree[key].name;
+        if (circleName === undefined) {
+            removeCircle(key);
+        } else if (Object.values(tree).some(obj => obj.from === circleName || obj.to === circleName)) {
+            alert('Cannot delete circles with lines still connected')
+        } else {
+            removeCircle(key);
+        }
+    }
 	// Hide the object table.
-	tableDestroy()
+	tableDestroy();
+}
+
+function removeCircle(key) {
+    const tree = globalTreeWrapper.tree;
+    const names = globalTreeWrapper.names;
+    //remove the circle from the svg
+    document.getElementById(key).remove();
+    // If the node I'm deleting has a parent, then I need to delete the line between this node and its parent
+    if (tree[key].parent !== undefined) {
+        const lineId = `${tree[key].parent}_${tree[key].name}`;
+        document.getElementById(lineId).remove();
+    } 
+    delete names[tree[key].name];
+    delete tree[key];
 }
 
 function scaleTo(x) {
@@ -586,15 +1523,15 @@ function scaleTo(x) {
 	if (!x) {
 		return
 	}
-	circles = document.getElementsByTagName('circle')
-	lines = document.getElementsByTagName('line')
+	const circles = document.getElementsByTagName('circle')
+	const lines = document.getElementsByTagName('line')
 	// Scale Circles
-	for (i = 0; i < circles.length; i++) {
+	for (let i = 0; i < circles.length; i++) {
 		circles[i].setAttribute('r', 2*x)
 		circles[i].setAttribute('stroke-width', 0.5*x)
 	}
 	// Scale Lines
-	for (i = 0; i < lines.length; i++) {
+	for (let i = 0; i < lines.length; i++) {
 		if (lines[i].getAttribute('class').indexOf('p2') !== -1) {
 			lines[i].setAttribute('stroke-width', 2*x)
 		}
@@ -610,16 +1547,16 @@ function scaleTo(x) {
 	}
 }
 
-function dropPill(thisButton, name) {
+function dropPill(thisButton, name) { // eslint-disable-line
 	// This function is used to make the dropdown menus work.
 	thisButton.style.color= 'black'
 	thisButton.style.background= '#F8F8F8'
 	thisButton.style.textAlign = 'left'
 	thisButton.nextSibling.nextSibling.style.display = 'inline-block'
-	thisButton.innerHTML = name + ' ▴'
+	thisButton.innerHTML = name + ' &#x25B4;'
 	function clickCloseEvent() {
 		thisButton.nextSibling.nextSibling.style.display = 'none'
-		thisButton.innerHTML = name + ' ▾'
+		thisButton.innerHTML = name + ' &#x25BE;'
 		this.removeEventListener('click', arguments.callee, true)
 		thisButton.style.color= 'white'
 		thisButton.style.background= 'transparent'
@@ -628,217 +1565,275 @@ function dropPill(thisButton, name) {
 	document.body.addEventListener('click', clickCloseEvent, true)
 }
 
-function clickCloseEvent(labelName, buttonName) {
+/*function clickCloseEvent(labelName, buttonName) { // eslint-disable-line
 	// This event allows users to close the dropdown menus.
 	var thisButton = document.getElementById(buttonName);
-	thisButton.nextSibling.nextSibling.style.display = 'none'
-	thisButton.innerHTML = labelName + ' ▾'
-	this.removeEventListener('click', arguments.callee, true)
-	if (window.event.toElement==thisButton) {event.stopPropagation()}
-}
+	//thisButton.nextSibling.nextSibling.style.display = 'none'
+	thisButton.nextElementSibling.style.display = "none";
+	thisButton.innerHTML = labelName + ' &#x25BE;';
+	//this.removeEventListener('click', arguments.callee, true);
+	//if (window.event.toElement==thisButton) {event.stopPropagation()}
+}*/
 
 function multiSelectionTable() {
 	// Display the table when a user has selected multiple objects.
-	tabScroll = document.getElementById('tableScroller')
-	tbl = document.createElement('table')
-	// Put in the header.
-	headRow = document.createElement('tr')
-	headRow.innerHTML = '<th>Selected Elements</th>'
-	tbl.appendChild(headRow)
+	//const tabScroll = document.getElementById('tableScroller')
+	//const tbl = document.createElement('table')
+	//const headRow = document.createElement('tr')
+	//headRow.innerHTML = '<th>Selected Elements</th>'
+	//tbl.appendChild(headRow)
+	const table = document.getElementById("descriptionTable");
+	table.style.display = "block";
+	const tbody = table.children[0];
+	tbody.children[0].children[0].style.display = "none";
+	//tbody.children[0].children[1].style.display = "none";
+	tbody.children[0].children[1].style.display = "table-cell";
+	tbody.children[1].style.display = "none";
+	tbody.children[2].style.display = "none";
 	// Put the object in.
-	for (i = 0; i < selection.length; i++) {
-		row = document.createElement('tr')
-		row.innerHTML = '<td>' + testFeeder.tree[selection[i].id].name + '</td>'
-		tbl.appendChild(row)
+	for (let i = 0; i < document.getElementsByClassName("selected").length; i++) {
+	//for (let i = 0; i < selection.length; i++) {
+		const row = document.createElement('tr');
+		row.innerHTML = '<td>' + writeFeeder.tree[selection[i].id].name + '</td>';
+		tbody.appendChild(row)
 	}
-	tabScroll.appendChild(tbl)
+	//tabScroll.appendChild(tbl)
 }
 
 function clickLatLon(event) {
 	//Returns real Lat/Long of a click event, used in the moveBus function
-	var pan = window.panZoom.getPan();
-	var sizes = window.panZoom.getSizes();
-	var zoom = sizes.realZoom;
-	var x, y, pt;
-	var svg = document.getElementById('svgContainer');
-	var pt = svg.createSVGPoint();
+	const pan = window.panZoom.getPan();
+	const sizes = window.panZoom.getSizes();
+	const zoom = sizes.realZoom;
+	const svg = document.getElementById('svgContainer');
+	let pt = svg.createSVGPoint();
 	pt.x = event.clientX;
 	pt.y = event.clientY;
 	pt = pt.matrixTransform(svg.getScreenCTM().inverse());
-	x = pt.x;
-	y = pt.y;
-	x = (x - pan.x) / zoom;
-	y = (y - pan.y) / zoom;
-	return [x,y];
+	let x = pt.x;
+	let y = pt.y;
+	//x = (x - pan.x) / zoom;
+	//y = (y - pan.y) / zoom;
+	//return [x,y];
+	// maybe this should be a class? We'll see...
+	const coords = {
+		x: (x - pan.x) / zoom,
+		y: (y - pan.y) / zoom
+	};
+	return coords;
 }
 
-function newNode() {
+function newNode() { // eslint-disable-line
 	// Start creation of new node.
-	var newTreeId = Object.keys(testFeeder.tree).length
+	//var newTreeId = Object.keys(writeFeeder.tree).length
+	const newTreeKey = getNewTreeKey(writeFeeder.tree);
 	var newTreeNode = {
 		longitude: 0,
 		latitude: 0,
-		name: 'newNode' + String(newTreeId),
+		name: 'newNode' + newTreeKey,
 		nominal_voltage: 1000,
 		object: 'node',
 		phases: 'A'
 	}
 	// Save to tree
-	testFeeder.tree[newTreeId] = newTreeNode
+	writeFeeder.tree[newTreeKey] = newTreeNode
 	// Click location to add
-	clickTarget = document.getElementById('svgContainer')
+	const clickTarget = document.getElementById('svgContainer')
 	clickTarget.addEventListener('click', newNodeListener, false)
 	document.body.style.cursor = 'crosshair'
 }
 
 function newNodeListener() {
 	// Click handler for location of new node.
-	var xloc = event.pageX
-	var yloc = event.pageY
-	var newTreeId = (Object.keys(testFeeder.tree).length)-1
-	coords = clickLatLon(event)
-	xloc = coords[0]
-	yloc = coords[1]
-	testFeeder.tree[newTreeId].longitude = xloc
-	testFeeder.tree[newTreeId].latitude = yloc
+	var xloc = event.pageX;
+	var yloc = event.pageY;
+	var newTreeKey = getNewTreeKey(writeFeeder.tree);
+	const coords = clickLatLon(event);
+	xloc = coords.x;
+	yloc = coords.y;
+	//xloc = coords[0]
+	//yloc = coords[1]
+	writeFeeder.tree[newTreeKey].longitude = xloc;
+	writeFeeder.tree[newTreeKey].latitude = yloc;
 	// Draw new node on svg
-	x = testFeeder.tree[newTreeId].longitude
-	y = testFeeder.tree[newTreeId].latitude
-	r = 2
-	id = newTreeId
-	myClass = testFeeder.tree[newTreeId].object
-	addCircle(x,y,r,id,myClass)
+	const x = writeFeeder.tree[newTreeKey].longitude
+	const y = writeFeeder.tree[newTreeKey].latitude
+	const r = 2
+	//const id = newTreeId
+	const myClass = writeFeeder.tree[newTreeKey].object
+	addCircle(x, y, r, newTreeKey, myClass)
 	scaleTo(scaleLevel)
+	const clickTarget = document.getElementById('svgContainer')
 	clickTarget.removeEventListener('click', newNodeListener, false)
 	document.body.style.cursor = 'auto'
 }
 
-function newLink() {
-	// Create new link object.
-	nodeTypes = ['node','load','house','meter','triplex_meter','triplex_node','triplex_load','waterheater','ZIPload']
-	if (selection.length === 2){
-		if ((nodeTypes.indexOf(testFeeder.tree[selection[0].id].object)), (nodeTypes.indexOf(testFeeder.tree[selection[1].id].object))
-				 !== -1)    {
-			// Connect the 2 selected nodes.
-			var newTreeId = Object.keys(testFeeder.tree).length
-			var newLink = {
-				//creates newlink variable in testFeeder.tree
-				name: 'newLink' + String(newTreeId),
-				object: 'overhead_line',
-				phases: 'A',
-				configuration: 'configuration',
-				from: testFeeder.tree[selection[0].id].name,
-				to: testFeeder.tree[selection[1].id].name
-			}
-			// Save to tree
-			testFeeder.tree[newTreeId] = newLink
-			// Draw on svg
-			x1 = testFeeder.tree[selection[0].id].longitude
-			y1 = testFeeder.tree[selection[0].id].latitude
-			x2 = testFeeder.tree[selection[1].id].longitude
-			y2 = testFeeder.tree[selection[1].id].latitude
-			id = newTreeId
-			myClass = testFeeder.tree[newTreeId].object
-			addLine(x1,y1,x2,y2,id,myClass)
-			//then below fixes the build order so cirlces come in last
-			selection[0].remove()
-			selection[1].remove()
-			addCircle(x1,y1,2,selection[0].id,testFeeder.tree[selection[0].id].object)
-			addCircle(x2,y2,2,selection[1].id,testFeeder.tree[selection[1].id].object)
-			scaleTo(scaleLevel)
-			selection = []
-		}
-		else if (((nodeTypes.indexOf(testFeeder.tree[selection[0].id].object)) || (nodeTypes.indexOf(testFeeder.tree[selection[1].id].object))== -1)) {
-			alert("Please only select nodes")
-			for (i=0; i<selection.length; i++) {
-			selection[i].classList.remove('selected')
-			}
-			selection = []
-			tableDestroy()
-		}
+function clearGlobalSelectionArray() {
+	//selection.forEach(element => {
+	//	element.classList.remove("selected");
+	//})
+	//selection = [];
+	Array.from(document.getElementsByClassName("selected")).forEach(element => element.classList.remove("selected"));
+}
+
+function newLink(componentName) { // eslint-disable-line
+	//hard-coded, but necessary, data dependency
+	const nodeTypes = ['node','load','house','meter','triplex_meter','triplex_node','triplex_load','waterheater','ZIPload'];
+	if (document.getElementsByClassName("selected").length !== 2) {
+	//if (selection.length != 2) {
+		alert("Please hold down the 'alt' key and click exactly two nodes to connect.");
+		clearGlobalSelectionArray();
+		tableDestroy();
+		return;
+	} 
+	const firstTreeNode = writeFeeder.tree[selection[0].id];
+	const secondTreeNode = writeFeeder.tree[selection[1].id];
+	if (!nodeTypes.includes(firstTreeNode.object) || !nodeTypes.includes(secondTreeNode.object)) {
+		alert("Please only select nodes");
+		clearGlobalSelectionArray();
+		tableDestroy();
+		return;
 	}
-	else {
-		alert("Please hold down the 'alt' key and select two nodes to connect.")
-		for (i=0; i<selection.length; i++) {
-			selection[i].classList.remove('selected')
-			}
-			selection = []
-			tableDestroy()
+	//I have concerns about adding inconsistent data to the graph. See my meeting notes.
+	const newTreeLink = deepCopy(globalComponents[componentName]);
+	newTreeLink.from = firstTreeNode.name;
+	newTreeLink.to = secondTreeNode.name;
+	const newTreeKey = getNewTreeKey(writeFeeder.tree);
+	newTreeLink.name = componentName + newTreeKey;
+	// Save to tree
+	writeFeeder.tree[newTreeKey] = newTreeLink;
+
+	// Save to links
+	const newLink = {
+		source: writeFeeder.nodes.find(obj => obj.treeIndex == selection[0].id), //good
+		target: writeFeeder.nodes.find(obj => obj.treeIndex == selection[0].id), //good
+		treeIndex: newTreeKey, //good
+		objectType: 'fromTo' //good. It's not parent child, right? What happens if this replaces a parent child? Hmm
 	}
+	writeFeeder.links.push(newLink);
+	// Draw on svg
+	const x1 = firstTreeNode.longitude;
+	const y1 = firstTreeNode.latitude;
+	const x2 = secondTreeNode.longitude;
+	const y2 = secondTreeNode.latitude;
+	//const id = newTreeId;
+	const myClass = writeFeeder.tree[newTreeKey].object;
+	addLine(x1, y1, x2, y2, newTreeKey, myClass);
+	//then below fixes the build order so cirlces come in last
+	selection[0].remove();
+	selection[1].remove();
+	addCircle(x1,y1,2,selection[0].id,firstTreeNode.object);
+	addCircle(x2,y2,2,selection[1].id,secondTreeNode.object);
+	scaleTo(scaleLevel);
+	clearGlobalSelectionArray();
+	//selection = [];
 }
 
 function moveNode() {
 	// When user clicks drag, add a listener to effect the movement on next click.
 	document.body.style.cursor = 'crosshair'
-	clickTarget = document.getElementById('svgContainer')
+	const clickTarget = document.getElementById('svgContainer')
 	clickTarget.addEventListener('click', moveNodeListener, false)
 }
 
+//Get an array of keys that correspond to the connected line.
+function getConnectedLineKeys(node) {
+	return Object.keys(writeFeeder.tree).filter(key => {
+		let line = writeFeeder.tree[key];
+		if (line.from == node.name || line.to == node.name) {
+			return true;
+		}
+		return false;
+	});
+}
+
+/* Listener to allow a node to move once the user clicks the target location.
+I don't think this updates the data correctly. It updates writeFeeder.tree, but not writeFeeder.nodes
+*/
 function moveNodeListener() {
-	// Listener to allow a node to move once the user clicks the target location.
-	// Define local variables.
-	var currSelId = lastElementSelected.id
-	var currSel = testFeeder.tree[currSelId]
-	var newLat = clickLatLon(event)[1]
-	var newLon = clickLatLon(event)[0]
-	var currSelP = currSel.parent
-	// Update the coordinate values on the object.
-	currSel["longitude"] = newLon
-	currSel["latitude"] = newLat
-	//Runs through testFeeder lines (links) determines if clicked node is an end or target for any line in feeder
-	for (num in testFeeder.tree) {
-		var treeOb = testFeeder.tree[num]
-		// Move line between clicked node and its treeOb child.
-		if (treeOb.parent == currSel.name) {
-			document.getElementById(currSel.name + "_" + treeOb.name).remove()
-			addLine(newLon,newLat,treeOb.longitude,treeOb.latitude,currSel.name + "_" + treeOb.name,'parentChild')
-			document.getElementById(num).remove()
-			addCircle(treeOb.longitude,treeOb.latitude,2,num,treeOb.object)
-			document.getElementById(currSelId).remove()
-			addCircle(newLon,newLat,2,currSelId,currSel.object)
-		}
-		// Move line between clicked node and its treeOb parent (if it is a child).
-		if (currSelP != undefined && currSelP == treeOb.name && treeOb.from == undefined && treeOb.to == undefined) {
-			document.getElementById(treeOb.name + "_" + currSel.name).remove()
-			addLine(newLon,newLat,treeOb.longitude,treeOb.latitude,treeOb.name + "_" + currSel.name,'parentChild')
-			document.getElementById(num).remove()
-			addCircle(treeOb.longitude,treeOb.latitude,2,num,treeOb.object)
-			document.getElementById(currSelId).remove()
-			addCircle(newLon,newLat,2,currSelId,currSel.object)
-		}
-		if (treeOb.from !== undefined && treeOb.to !== undefined){
-			// Move all lines from or to the clicked node.
-			if (treeOb.from == currSel.name || treeOb.to == currSel.name) {
-				// If the current object is a line connected to the current node, move it.
+	let clickedNode = writeFeeder.tree[lastElementSelected.id];
+	//const newLat = clickLatLon(event).y;
+    //const newLon = clickLatLon(event).x
+    const newLat = clickLatLon(event).y + globalLatOffset; //store the real lat. Add back the offset when storing data. Subtract it when rendering
+    const newLon = clickLatLon(event).x + globalLonOffset; //store the real lon. Add back the offset when storing data. Subtract it when rendering
+	clickedNode["latitude"] = newLat;
+	clickedNode["longitude"] = newLon;
+	// This value can be undefined when the node isn't connected to anything. Is that a problem?!? yep.
+	//let parent = clickedNode.parent;
+	const connectedLineKeys = getConnectedLineKeys(clickedNode);
+	if (connectedLineKeys.length === 0 && clickedNode.parent === undefined) {
+		document.getElementById(lastElementSelected.id).remove();
+		addCircle(newLon, newLat, 2, lastElementSelected.id, writeFeeder.tree[lastElementSelected.id].object);
+	} else {
+		//Runs through writeFeeder lines (links) determines if clicked node is an end or target for any line in writeFeeder
+		for (let num in writeFeeder.tree) {
+			let treeOb = writeFeeder.tree[num];
+			// Move line between clicked node and its treeOb child. This is checking if clickedNode HAS children
+			if (treeOb.parent == clickedNode.name) {
+				document.getElementById(clickedNode.name + "_" + treeOb.name).remove()
+				addLine(newLon, newLat, treeOb.longitude, treeOb.latitude, clickedNode.name + "_" + treeOb.name, 'parentChild');
 				document.getElementById(num).remove()
-				for (subEl in testFeeder.tree) {
-					// Find the coordinates on the other end of the moving line.
-					if (treeOb.from == testFeeder.tree[subEl].name) {
-						x1 = testFeeder.tree[subEl]['longitude']
-						y1 = testFeeder.tree[subEl]['latitude']
-						numf = subEl
-						myClassf = testFeeder.tree[subEl].object
-					} else if (treeOb.to == testFeeder.tree[subEl].name) {
-						x2 = testFeeder.tree[subEl]['longitude']
-						y2 = testFeeder.tree[subEl]['latitude']
-						numt = subEl
-						myClasst = testFeeder.tree[subEl].object
+                addCircle(treeOb.longitude, treeOb.latitude, 2, num, treeOb.object);
+				document.getElementById(lastElementSelected.id).remove()
+                addCircle(newLon, newLat, 2, lastElementSelected.id, clickedNode.object); 
+            }
+			/* Move line between clicked node and its treeOb parent (if it is a child). 
+			I found an object in writeFeeder.tree that is 1) NOT a line 2) is the parent of the currently selected node.
+			*/
+			if (clickedNode.parent != undefined && clickedNode.parent == treeOb.name && treeOb.from == undefined && treeOb.to == undefined) {
+				/* treeOb.name is the parent's name, clickedNode.name is the clicked node's name. There is a line with an id that is a 
+				concatenation of their names, and I want to remove that line. Yep.
+				*/
+				document.getElementById(treeOb.name + "_" + clickedNode.name).remove()
+				addLine(newLon, newLat, treeOb.longitude, treeOb.latitude, treeOb.name + "_" + clickedNode.name, 'parentChild');
+				//Remove the parent node? Oh maybe to redraw it on top of the new line.
+				document.getElementById(num).remove()
+				addCircle(treeOb.longitude, treeOb.latitude, 2, num, treeOb.object);
+				//Remove the current node and redraw it where it's supposed to go.
+				document.getElementById(lastElementSelected.id).remove()
+				addCircle(newLon, newLat, 2, lastElementSelected.id, clickedNode.object);
+			}
+			if (treeOb.from !== undefined && treeOb.to !== undefined) {
+				// Move all lines from or to the clicked node.
+				if (treeOb.from == clickedNode.name || treeOb.to == clickedNode.name) {
+					// If the current object is a line connected to the current node, move it.
+					document.getElementById(num).remove()
+					let x1;
+					let y1;
+					let numf;
+					let myClassf;
+					let x2;
+					let y2;
+					let numt;
+					let myClasst;
+					for (let subEl in writeFeeder.tree) {
+						// Find the coordinates on the other end of the moving line.
+						if (treeOb.from == writeFeeder.tree[subEl].name) {
+							x1 = writeFeeder.tree[subEl]['longitude']
+							y1 = writeFeeder.tree[subEl]['latitude']
+							numf = subEl
+							myClassf = writeFeeder.tree[subEl].object
+						} else if (treeOb.to == writeFeeder.tree[subEl].name) {
+							x2 = writeFeeder.tree[subEl]['longitude']
+							y2 = writeFeeder.tree[subEl]['latitude']
+							numt = subEl
+							myClasst = writeFeeder.tree[subEl].object
+						}
 					}
+                    addLine(x1, y1, x2, y2, num, treeOb['object'] + ' p' + countPhases(treeOb['phases']));
+					// Redraw nodes after line so they aren't below the newly drawn lines. Up to 3 nodes for case where we are moving node between 2 from-to lines.
+					if (treeOb.from == clickedNode.name) {
+						addCircle(x2, y2, 2, numt, myClasst);
+						document.getElementById(numt).remove()
+					}
+					if (treeOb.to == clickedNode.name) {
+						addCircle(x1, y1, 2, numf, myClassf);
+						document.getElementById(numf).remove()
+					}
+					// Finally, draw the clicked node in its new location. Leave this bit here. Other moving functions go inside.
+					document.getElementById(lastElementSelected.id).remove()
+					addCircle(newLon, newLat, 2, lastElementSelected.id, writeFeeder.tree[lastElementSelected.id].object);
 				}
-				// Draw the line.
-				addLine(x1,y1,x2,y2,num,treeOb['object'] + ' p' + phaseCount(treeOb['phases']))
-				// Redraw nodes after line so they aren't below the newly drawn lines. Up to 3 nodes for case where we are moving node between 2 from-to lines.
-				if (treeOb.from == currSel.name) {
-					addCircle(x2,y2,2,numt,myClasst)
-					document.getElementById(numt).remove()
-				}
-				if (treeOb.to == currSel.name) {
-					addCircle(x1,y1,2,numf,myClassf)
-					document.getElementById(numf).remove()
-				}
-				// Finally, draw the clicked node in its new location.
-				document.getElementById(currSelId).remove()
-				addCircle(newLon,newLat,2,currSelId,testFeeder.tree[currSelId].object)
 			}
 		}
 	}
@@ -846,107 +1841,159 @@ function moveNodeListener() {
 	scaleTo(scaleLevel)
 	// Return the cursor to its default.
 	document.body.style.cursor = 'auto'
+	const clickTarget = document.getElementById('svgContainer')
 	clickTarget.removeEventListener('click', moveNodeListener, false)
 }
 
-function showModal(element){
-	// Make a modal dialog visible.
-	document.getElementById(element).style.display = 'block'
+//**************************************************
+// Find modal interface
+//**************************************************
+
+function getSearchResults() {
+    const tree = globalTreeWrapper.tree;
+    const keys = getMatchingKeys(this.value, tree);
+    document.getElementById("searchCount").textContent = `hits: ${keys.length}`;
+    const nextButton = document.getElementById("findNext");
+    const previousButton = document.getElementById("findPrevious");
+    tableDestroy();
+    if (keys.length === 0 || this.value === "") {
+        alert(`No results found for term: "${this.value}"`)
+        const feedback = function() {
+            alert("Please enter a new term to search for"); 
+        }
+        nextButton.onclick = feedback;
+        previousButton.onclick = feedback;
+        return;
+    }
+    const upperIndex = keys.length - 1;
+    let idx = 0;
+    tableCreate(tree[keys[idx]]);
+    viewElement(keys[idx]);
+    nextButton.onclick = function() {
+        idx++;
+        if (idx > upperIndex) {
+            idx = 0;
+        }
+        tableCreate(tree[keys[idx]]);
+        viewElement(keys[idx]);
+    }
+    previousButton.onclick = function() {
+        idx--;
+        if (idx < 0) {
+            idx = upperIndex;
+        }
+        tableCreate(tree[keys[idx]]);
+        viewElement(keys[idx]);
+    }
 }
 
-function closeModal(element){
-	// Hide a modal dialog.
-	document.getElementById(element).style.display = 'none'
+function getMatchingKeys(term, tree) {
+    const keys = [];
+    for (let key in tree) {
+        // Only add the key if it represents an object that was drawn
+        if (((!isNullOrUndefined(tree[key].latitude) && !isNullOrUndefined(tree[key].longitude)) ||
+         (!isNullOrUndefined(tree[key].to) && !isNullOrUndefined(tree[key].from)))) {
+            for (let propertyKey in tree[key]) {
+                let propertyVal = tree[key][propertyKey];
+                if (typeof(propertyVal) !== "string") {
+                    propertyVal += "";
+                }
+                if (propertyKey.toLowerCase().includes(term.toLowerCase())) {
+                    keys.push(key);
+                    break;
+                } else if (propertyVal.toLowerCase().includes(term.toLowerCase())) {
+                    keys.push(key);
+                    break;
+                }
+            }
+        }
+    }
+    return keys;
 }
 
-function findNext() {
-	// Find the next object matching the user input.
-	var term = document.getElementById('searchTerm').value
-	var hits = findElementsViaString(term)
-	document.getElementById('searchHitCount').innerHTML = hits.length + ' Hits'
-	// If we can't find anything, stop.
-	if (hits.length == 0) {
-		alert('No objects found containing term.')
-		return false
-	}
-	// Clear the current selection.
-	for (i=0; i<selection.length; i++) {
-		selection[i].classList.remove('selected')
-	}
-	selection = []
-	tableDestroy()
-	// Find the tree index of the next item.
-	if (searchCursor == undefined) {
-		searchCursor = 0
-	} else {
-		searchCursor = (searchCursor + 1) % hits.length
-	}
-	var hitId = hits[searchCursor]
-	// Find the location to zoom to.
-	var svgOb = document.getElementById(hitId.toString())
-	var cx = svgOb.getAttribute('cx')
-	var cy = svgOb.getAttribute('cy')
-	if (cx !== null && cy !== null) {
-		// Circle object, just get cx and cy
-		var x = cx
-		var y = cy
-	} else {
-		// Line object, get midpoint to zoom to
-		var x = (parseFloat(svgOb.getAttribute('x1')) + parseFloat(svgOb.getAttribute('x2'))) / 2
-		var y = (parseFloat(svgOb.getAttribute('y1')) + parseFloat(svgOb.getAttribute('y2'))) / 2
-	}
-	// Pan to the next hit.
-	window.panZoom.pan({x:0, y:0})
+/** Clears the "selected" class from previous elements before making the viewed element "selected"
+ *
+ */
+function viewElement(key) {
+    Array.from(document.getElementsByClassName("selected")).forEach(element => element.classList.remove("selected"));
+    const element = document.getElementById(key);
+	element.classList.add('selected');
+    let x, y;
+    if (!isNullOrUndefined(element.getAttribute("cx")) && !isNullOrUndefined(element.getAttribute("cy"))) {
+        x = element.getAttribute("cx");
+        y = element.getAttribute("cy");
+    } else {
+		x = (parseFloat(element.getAttribute('x1')) + parseFloat(element.getAttribute('x2'))) / 2;
+		y = (parseFloat(element.getAttribute('y1')) + parseFloat(element.getAttribute('y2'))) / 2;
+    }
+    // I can't make this work 
+    //panZoom.zoomAtPoint(2, {x: x, y: y});
+    // Do this instead 
+	panZoom.pan({x:0, y:0})
 	var realZoom = window.panZoom.getSizes().realZoom
 	var width = window.panZoom.getSizes().width / 2
 	var height = window.panZoom.getSizes().height / 2
-	window.panZoom.pan({x:width - (x * realZoom), y:height - (y * realZoom)})
-	// TODO: Zoom in close
-	// Udpate the selection.
-	svgOb.classList.add('selected')
-	selection.push(svgOb)
-	tableCreate(testFeeder.tree[hitId])
+    panZoom.pan({x:width - (x * realZoom), y:height - (y * realZoom)})
+    panZoom.zoom(15);
 }
 
-function findPrevious() {
-	var term = document.getElementById('searchTerm').value
-	var hits = findElementsViaString(term)
-	if (searchCursor == undefined) {
-		findNext()
-	} else if (searchCursor == 0) {
-		// Wrapped around.
-		searchCursor = (hits.length) - 2
-		findNext()
-	} else {
-		searchCursor -= 2
-		findNext()
-	}
+function isNullOrUndefined(obj) {
+    if (obj === undefined || obj === null) {
+        return true;
+    }
+    return false;
 }
 
-function findElementsViaString(inString) {
-	var results = []
-	for (key in testFeeder.tree) {
-		subIndex = JSON.stringify(testFeeder.tree[key]).indexOf(inString)
-		if (subIndex != -1 && testFeeder.tree[key]['object'] != 'player' && (testFeeder.tree[key].hasOwnProperty('object') || testFeeder.tree[key].hasOwnProperty('module'))) {
-			results.push(key)
-		}
-	}
-	return results
+//**************************************************
+// jQuery handling for distNetViz.py
+//**************************************************
+
+/** If this interface is being used as a file, we can't import jQuery with <script> so we can't use jQuery
+ * styling. This function is only called when jQuery is available.
+ */
+ function applyJQueryStyles() {
+    // Make stuff draggable
+    $("#findModal .modalContent").draggable();
+    $("#progressModal .modalContent").draggable();
+    $("#loadModal .modalContent").draggable();
+    $("#blankFeederModal .modalContent").draggable();
+    $("#milsoftModal .modalContent").draggable();
+    $("#gridlabdModal .modalContent").draggable();
+    $("#cymeModal .modalContent").draggable();
+    $("#scadaModal .modalContent").draggable();
+    $("#amiModal .modalContent").draggable();
+    $("#massAddModal .modalContent").draggable();
+    $("#massEditModal .modalContent").draggable();
+    $("#attachmentsModal .modalContent").draggable();
+    $("#descriptionTable").draggable();
+    // Position the description table depending on whether or not it is draggable
+    document.getElementById("descriptionTable").removeAttribute("style");
+    document.getElementById("descriptionTable").style.left = "70vw";
+}
+
+/** Ajax requests depend on jQuery, so any function that uses $.ajax() cannot be used if this interface
+ * is loaded as a file. This function is called when jQuery isn't available.
+ */
+function disableJQueryFunctionality() {
+    //Hide stuff that doesn't work in distNetViz.py
+    Array.from(document.querySelectorAll("[data-web]")).forEach(li => {
+        li.remove();
+    });
 }
 
 function fixPhases () {
 	// Todo: complete this to walk the tree and fix phasing.
-	for (i in testFeeder.tree){
-		if (testFeeder.tree[i].name != undefined) {
-			nodeName = testFeeder.tree[i].name
-			for (j in testFeeder.tree) {
-				if (testFeeder.tree[j].from != undefined) {
-					linkFrom = testFeeder.tree[j].from
+	for (let i in writeFeeder.tree){
+		if (writeFeeder.tree[i].name != undefined) {
+			const nodeName = writeFeeder.tree[i].name
+			for (let j in writeFeeder.tree) {
+				if (writeFeeder.tree[j].from != undefined) {
+					const linkFrom = writeFeeder.tree[j].from
 					if (nodeName == linkFrom) {
-						node = testFeeder.tree[i]
-						link = testFeeder.tree[j]
-						nodePhase = node.phases.split('').sort().join('').trim()
-						linkPhase = link.phases.split('').sort().join('').trim()
+						const node = writeFeeder.tree[i]
+						const link = writeFeeder.tree[j]
+						const nodePhase = node.phases.split('').sort().join('').trim()
+						const linkPhase = link.phases.split('').sort().join('').trim()
 						if (linkPhase.length > nodePhase.length) {
 							linkPhase==nodePhase
 						}
@@ -957,12 +2004,1799 @@ function fixPhases () {
 	}
 }
 
-function loadingStuff() {
-	// Start the feeder building and when it's done, remove the loading message.
-	buildFeeder();
-	document.getElementById('loadingMessage').style.display = 'none'
+
+
+/**
+ * Find the index of an object in an array, based on the property value inside of the object.
+ * @param  {array} ary
+ * @param  {(string|number)} field
+ * @param  {(string|number)} val
+ * @return {number} idx - return idx inside of object that pairs with the desired value, else empty string.
+ */
+ //writeFeeder.nodes, 'name', 172820
+function findIndex(ary, field, val) {
+	for (let idx in ary) {
+		if (ary[idx][field] == val) {
+			return idx;
+		}
+	}
+	return '';
 }
 
-// Run loading stuff.
-setTimeout(loadingStuff,100)
+/**
+ * Return a node object, if the node is selected.
+ * @return {(Object | undefined)} node - return single node object if it is found, else undefined.
+ */
+function getSelectedNode() {
+	try {
+		const hits = document.getElementsByClassName('selected');
+		const nodeIndex = findIndex(writeFeeder.nodes, 'treeIndex', hits[0]['id']);//.substr(1));
+		return writeFeeder.nodes[nodeIndex];
+	} catch (err) {
+		// We had no selection, or the selection wasn't in the links.
+		return undefined
+	}
+}
+
+/**
+ * Append a node to its parents.
+ * @param  {object} component - An object that contains the unconfigured data for a specific component.
+ * @param  {number} parentKey - A key in the tree object. The value of this key is another object stored inside of the tree.
+ * @return {object} nodeToAdd
+ */
+function newChildAtLocation(component, parentKey) {
+    const tree = globalTreeWrapper.tree;
+	const newTreeKey = getNewTreeKey(tree);
+	const newName = component.object + newTreeKey;
+	const parentTreeObj = tree[parentKey];
+	component['parent'] = parentTreeObj.name;
+	// decide which attribute should be put into node and tree
+	let nodeToAdd;
+	if (parentTreeObj.latitude !== undefined && parentTreeObj.longitude !== undefined) {
+		component['latitude'] = parseFloat(parentTreeObj.latitude) + Math.random() * 10 - 5;
+		component['longitude'] = parseFloat(parentTreeObj.longitude) + Math.random() * 10 - 5;
+		// Put the component in the tree with a new name.
+		tree[newTreeKey] = component;
+        tree[newTreeKey].name = newName;
+        addLine(parentTreeObj.longitude, parentTreeObj.latitude, component.longitude, component.latitude, parentTreeObj.name + "_" + component.name, "parentChild");
+        addCircle(component.longitude, component.latitude, 2, newTreeKey, component.object);
+        // Redraw the parent on top
+        document.getElementById(parentKey).remove();
+        addCircle(parentTreeObj.longitude, parentTreeObj.latitude, 2, parentKey, parentTreeObj.object); 
+        scaleTo(scaleLevel);
+	} else {
+        console.log("Cannot insert child at location because its defined parent doesn't have longitude and latitude!");
+        //throw new Error("Cannot insert child at location because its defined parent doesn't have longitude and latitude!");
+		//writeFeeder.tree[newTreeKey] = component;
+		//writeFeeder.tree[newTreeKey].name = newName;
+	}
+	// Draw new line on svg
+	//addLine(nodeToAdd.y, nodeToAdd.x, parentTreeObj.longitude, parentTreeObj.latitude, parentTreeObj.name + "_" + nodeToAdd.name, "parentChild");
+	// Draw new node on svg
+	//const y = writeFeeder.tree[newTreeId].longitude
+	//const x = writeFeeder.tree[newTreeId].latitude
+	//const id = newTreeId
+	//const myClass = writeFeeder.tree[newTreeId].object
+	//const myClass = parentTreeObj.object;
+	// TODO: Figure out why I have to switch the y and x arguments here to make the new node display properly.
+
+	/* So I know that addLine() adds the line with the specific id to the document, and that this id matters for moving nodes around.
+	So when I add a circle, I ALSO need to add the correct line with the correct property values AND correct location.
+	1) Use the properties in nodeToAdd (i.e. the new node to be drawn) and writeFeeder.tree["treeIndex"] (i.e. the parent node) to
+	provide the correct configuration for the new line
+	2) draw the line 
+	
+	I either need to copy the code from moveNodeListener() or call it maybe? Or perhaps there should be a separate function entirely
+	that moveNodeListener() and this function use to correctly add new circles and lines to the document.
+	*/
+	//document.getElementById(treeOb.name + "_" + currentNode.name).remove()
+	//addLine(newLon,newLat,treeOb.longitude,treeOb.latitude,treeOb.name + "_" + currentNode.name,'parentChild')
+}
+
+/**
+ * Add a new child node at selected component
+ * @param  {string} componentName - The name of the component. This name is also a key in the globalComponents object.
+ */
+function newChildAtSelected(componentName) { //eslint-disable-line
+	const node = getSelectedNode();
+	if (node == undefined) {
+		alert('I am sorry, but we cannot insert a child element there.');
+		return false;
+	}
+	const component = deepCopy(globalComponents[componentName]);
+	newChildAtLocation(component, node['treeIndex']);
+}
+
+//**************************************************
+// Header menu functions
+//**************************************************
+
+function attachHandlers() {
+    //fillObjectMenu(globalComponents);
+    addComponents();
+    attachFeederList(document.getElementById("publicFeederList"), publicFeeders, "public");
+    attachFeederList(document.getElementById("userFeederList"), userFeeders, thisOwner);
+    addFileMenuHandlers();
+    addEditMenuHandlers();
+}
+
+/** TODO: add unit-tests
+ * Fill menu of "Add" button and add its handler functions.
+ */
+//function fillObjectMenu(globalComponents) {
+function addComponents() {
+	const ul = document.getElementById("componentList");
+    const select = document.getElementById("componentSelect");
+	for (let componentName in globalComponents) {
+		const li = document.createElement("li");
+		li.textContent = componentName;
+		li.addEventListener("click", function() {
+			addSvgObjects(addFeederObject(componentName, document.getElementsByClassName("selected")));
+		});
+		ul.appendChild(li);
+        select.innerHTML += `<option value=${componentName}>${componentName}</option>`;
+	}
+}
+
+/** TODO: add unit-tests
+ * @param {Element} ul - An html element where the list will be attached
+ * @param {Array} feeders - An array of objects, where each object has properties "model" and "name", or null. 
+ * @param {string} owner - Either "public" or the owner of the current writeFeeder.
+ */
+function attachFeederList (ul, feeders, owner) {
+    if (!feeders) return;
+    for (let writeFeeder of feeders) {
+        if (writeFeeder.name != thisFeederName) {
+            const li = document.createElement("li");
+            li.classList.add("feederItem");
+            li.innerHTML = `<strong>${writeFeeder.name}</strong> from <br>"${writeFeeder.model}"`;
+            li.addEventListener("click", function() {
+                //overwriteFeeder(writeFeeder.name, writeFeeder.model, owner);
+                loadFeeder(writeFeeder.name, writeFeeder.model, owner);
+            });
+            ul.append(li);
+        }
+    }
+}
+
+function addFileMenuHandlers() {
+    const menu = document.getElementById("fileMenu");
+    if (isNullOrUndefined(menu)) return;
+    const items = Array.from(menu.children);
+    if (items.length !== 8) {
+        throw new Error("Please update this function to ensure the correct handlers are attached");
+    }
+    items[0].addEventListener("click", function() {
+        saveFeeder(writeFeeder);
+    });
+    items[1].addEventListener("click", downloadTextFile);
+    items[2].addEventListener("click", renameFeeder);
+    items[3].addEventListener("click", function() { toggleElementDisplay("loadModal"); });
+    items[4].addEventListener("click", function() { toggleElementDisplay("blankFeederModal"); });
+    items[5].addEventListener("click", function() { toggleElementDisplay("milsoftModal"); });
+    items[6].addEventListener("click", function() { toggleElementDisplay("gridlabdModal"); });
+    items[7].addEventListener("click", function() { toggleElementDisplay("cymeModal"); });
+}
+
+function addEditMenuHandlers() {
+    const menu = document.getElementById("editMenu");
+    const items = Array.from(menu.children);
+    if (items.length != 9) {
+        throw new Error("Please update this function to ensure the correct handlers are attached");
+    }
+    //items[0].addEventListener("click", zoomToFit);
+    //items[1].addEventListener("click", zoomReset);
+    items[0].addEventListener("click", staticLoadsToHouses);
+    items[1].addEventListener("click", function() { toggleElementDisplay("scadaModal"); });
+    items[2].addEventListener("click", function() { toggleElementDisplay("amiModal"); });
+    items[3].addEventListener("click", function() { toggleElementDisplay("findModal"); });
+    items[4].addEventListener("click", function() {
+        updateAttachTargets("massAddTargetSelect", globalTreeWrapper.tree);
+        toggleElementDisplay("massAddModal");
+    });
+    items[5].addEventListener("click", function() {
+        updateAttachTargets("massEditTargetSelect", globalTreeWrapper.tree);
+        toggleElementDisplay("massEditModal");
+    });
+    items[6].addEventListener("click", function() {
+        loadAttachments(); 
+        toggleElementDisplay("attachmentsModal");
+    });
+    items[7].addEventListener("click", function() { toggleElementDisplay("climateModal"); });
+    items[8].addEventListener("click", function() { toggleElementDisplay("anonymizeModal"); });
+}
+
+/** If an element isn't displayed, set it's inline display value to the default browser value.
+ * If the element is displayed, then hide it.
+ */
+function toggleElementDisplay(id) {
+    const element = document.getElementById(id);
+    if (element.style.display === "none") {
+        element.removeAttribute("style");
+    } else {
+        element.style.display = "none";
+        if (id === "findModal") {
+            return;
+        }
+        // When we hide a modal, set any of the text fields to empty
+        const queryString = `#${id} input[type=text]`;
+        document.querySelectorAll(queryString).forEach(input => {
+            input.value = "";
+        });
+    }
+}
+//**************************************************
+// Description and selection table functions 
+//**************************************************
+
+//**************************************************
+// Edit menu interface
+//**************************************************
+
+/**
+ * Set the viewport to its initial state and center it
+ */
+//function zoomReset() {
+//    panZoom.fit();
+//    panZoom.center();
+//}
+
+/**
+ * Set the viewport value to its initial state.
+ */
+//function zoomToFit() {
+//    panZoom.fit();
+//}
+
+function randomGaussian() {
+  // Get a Gaussian from a uniform(0,1) via the Box-Muller transform.
+  let rad;
+  let x1;
+  let x2;
+  let c;
+  do {
+	x1 = 2 * Math.random() - 1
+	x2 = 2 * Math.random() - 1
+	rad = x1 * x1 + x2 * x2
+  } while (rad >= 1 || rad == 0) {
+    c = Math.sqrt(-2 * Math.log(rad) / rad);
+  }
+  return x1 * c
+}
+
+function randomInt(min,max) {
+	return Math.floor(Math.random()*(max - min + 1) + min)
+}
+
+function randomInt(min,max) {
+	return Math.floor(Math.random()*(max - min + 1) + min)
+}
+
+function randomChoice(inList) {
+	return inList[Math.floor(Math.random() * inList.length)]
+}
+
+
+// TODO: for secondary system has 'load', replace it with triplex_meter and triplex_node
+// TODO: rename this function?
+function staticLoadsToHouses() {
+    const tree = globalTreeWrapper.tree;
+    const names = globalTreeWrapper.names;
+	if (!containsTriplexNodes(tree)) {
+        alert("There are no triplex nodes in this model");
+        return;
+	} else {
+        let modal = new ProgressModal("Please wait. Houses are being generated.", "", false);
+        modal.show();
+        // Replace 100 nodes at a time (maximum), to prevent the browser from hanging
+        const keys = Object.keys(tree);
+        let start = 0;
+        let end = 100;
+        const intervalId = setInterval(function() {
+            //console.log("start: " + start);
+            //console.log("end: " + end);
+            replaceAllHouses(start, end, keys);
+            if (end >= keys.length) {
+                clearInterval(intervalId);
+                modal.hide();
+            } else {
+                start = end + 1;
+                end += 100;
+            }
+        }, 10);
+    }
+
+    function containsTriplexNodes(tree) {
+        for (let key in tree) {
+            if (tree[key].object === "triplex_node" && tree[key].hasOwnProperty("parent")) {
+                return true;
+            } 
+        }   
+        return false;
+    }
+
+	function replaceAllHouses(start, end, keys) {
+        if (end >= keys.length) {
+            end = keys.length - 1;
+        }
+        for (let i = start; i <= end; i++) {
+            if (tree[keys[i]].hasOwnProperty('parent') && tree[keys[i]].object === "triplex_node") {
+                // Get the key of the parent of this triplex node, which is a triplex meter (i.e. another node)
+                let parentKey = names[tree[keys[i]].parent];
+                // Delete the triplex_node itself
+                deleteObject(keys[i]);
+                // Create a new house object to replace the triplex node
+                let houseObj = randomHouse();
+                let lightsObj = randomLights();
+                let heaterObj = randomWaterHeater();
+                newChildAtLocation(houseObj.house, parentKey);
+                newChildAtLocation(lightsObj.lights, houseObj.key);
+                if (heaterObj != false) {
+                    newChildAtLocation(heaterObj.heater, houseObj.key);
+                }
+            }
+        }
+    }
+
+	function randomHouse() {
+		const newHouse = {}
+		newHouse['object'] = 'house'
+		newHouse['air_temperature'] = '70'
+		newHouse['cooling_COP'] = randomInt(25, 40) / 10.0 + ''
+		newHouse['cooling_setpoint'] = 'cooling' + randomInt(1, 8) + '*1'
+		newHouse['cooling_system_type'] = randomChoice(['ELECTRIC', 'HEAT_PUMP', 'NONE'])
+		// House sizing distribution from http://www.census.gov/housing/ahs/
+		// between 1100 and 3000. Probably needs a normal distribution.
+		let area = 1800 + 500 * randomGaussian()
+		if (area < 500) {
+			area = 500
+		}
+		area = area.toPrecision(2) * 1.0 + ''
+		newHouse['floor_area'] = area
+		newHouse['heating_COP'] = randomInt(20, 35) / 10.0 + ''
+		newHouse['heating_setpoint'] = 'heating' + randomInt(1, 8) + '*1'
+		newHouse['heating_system_type'] = randomChoice(['RESISTANCE', 'HEAT_PUMP', 'GAS'])
+		newHouse['mass_temperature'] = '70'
+		let skew = 1200 * randomGaussian()
+		skew = skew.toPrecision(3) * 1.0 + ''
+		newHouse['schedule_skew'] = skew
+		newHouse['thermal_integrity_level'] = randomChoice([1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6]) + ''
+		const newKey = getNewTreeKey(globalTreeWrapper.tree);
+		newHouse['name'] = 'synhouse' + newKey
+		return {
+            house: newHouse,
+            key: newKey
+        }
+	}
+
+	function randomLights() {
+		const newLights = {}
+		newLights['object'] = 'ZIPload'
+		newLights['power_fraction'] = '0.400000'
+		newLights['current_fraction'] = '0.300000'
+		newLights['impedance_pf'] = '1.000'
+		newLights['current_pf'] = '1.000'
+		newLights['power_pf'] = '1.000'
+		newLights['impedance_fraction'] = '0.300000'
+		newLights['heatgain_fraction'] = '0.9'
+		let power = 1.2 + randomGaussian()
+		if (power < 0) {
+			power = -1 * power
+		}
+		power = power.toPrecision(3) * 1.0 + ''
+		newLights['base_power'] = 'LIGHTS*' + 1.33
+		let skew = 2000 * randomGaussian()
+		skew = skew.toPrecision(3) * 1.0 + ''
+		newLights['schedule_skew'] = skew
+		const newKey = getNewTreeKey(globalTreeWrapper.tree);
+		newLights['name'] = 'synLights' + newKey
+		return {
+            lights: newLights,
+            key: newKey
+        }
+	}
+
+	function randomWaterHeater() {
+		const newHeater = {}
+		if (randomChoice([1, 2, 3]) == 3) {
+			return false
+		}
+		// Static properties.
+		newHeater['object'] = 'waterheater'
+		newHeater['temperature'] = '135'
+		newHeater['tank_volume'] = '50'
+		newHeater['location'] = 'INSIDE'
+		// Uniformly distributed properties.
+		newHeater['heating_element_capacity'] = randomInt(37, 53) / 10.0 + ''
+		newHeater['thermostat_deadband'] = randomInt(20, 60) / 10.0 + ''
+		newHeater['demand'] = 'water' + randomInt(1, 20) + '*1'
+		newHeater['tank_UA'] = randomInt(20, 40) / 10.0 + ''
+		// Gaussian properties.
+		let skew = 2000 * randomGaussian()
+		skew = skew.toPrecision(3) * 1.0 + ''
+		newHeater['schedule_skew'] = skew
+		newHeater['tank_setpoint'] = (randomGaussian() * 2 + 130).toPrecision(3) + ''
+		// between 1100 and 3000. Probably needs a normal distribution.
+		const newKey = getNewTreeKey(globalTreeWrapper.tree);
+		newHeater['name'] = 'synwaterheater' + newKey;
+		return {
+            heater: newHeater,
+            key: newKey
+        }
+	}
+}
+
+/** TODO: add better validation for percent to ensure 1) it's a float and 2) it's in a valid range. Do this on the input if possible
+ * General Function to Add Components 'inverter', 'triplex_meter', PERC
+ */
+ function massAdd() {
+    let tree = globalTreeWrapper.tree;
+	const componentName = document.getElementById('componentSelect').value;
+	const attachType = document.getElementById('massAddTargetSelect').value;
+    const percent = document.getElementById('percent').value;
+    if (isNaN(percent) || percent === "") {
+        alert("Please enter a valid number for attachment probability");
+        return
+    }
+	let objectsAdded = 0;
+    let modal = new ProgressModal(`Please wait. We are adding ${componentName} objects to all ${attachType} objects.`, "", false);
+    modal.show();
+    // Add 100 nodes at a time (maximum), to prevent the browser from hanging
+    const keys = Object.keys(tree);
+    let start = 0;
+    let end = 100;
+    const intervalId = setInterval(function() {
+        console.log("start: " + start);
+        console.log("end: " + end);
+        massAddComponent(start, end, keys);
+        if (end >= keys.length) {
+            clearInterval(intervalId);
+            modal.hide();
+            alert(`${objectsAdded} ${componentName} objects added to the feeder`);
+        } else {
+            start = end + 1;
+            end += 100;
+        }
+    }, 100);
+
+    function massAddComponent(start, end, keys) {
+        if (end >= keys.length) {
+            end = keys.length - 1;
+        }
+        for (let i = start; i <= end; i++) {
+            if (tree[keys[i]].object === attachType) {
+				if (Math.random() < percent) {
+					const newComponent = deepCopy(globalComponents[componentName]);
+					newChildAtLocation(newComponent, keys[i]);
+					objectsAdded += 1
+				}
+            }
+        }
+    }
+}
+
+function updateAttachTargets(id, tree) {
+	/* Clearing each list so we dont get duplicates in the list. This must be done because the attachTarget list must be 
+    refreshed, since the user could have added a new object type to the data which they now want to attach to.
+    */
+    document.getElementById(id).innerHTML = "";
+	let attachList = [];
+	for (let key in tree) {
+        /* Only list an object type as a valid attachTarget if 1) its object property matches a known component and 2)
+        the object type already exists in the graph. "1" is to prevent things like weird configuration nodes from 
+        being presented to the user, since the user could not attach anything to those weird objects. "2" is to ensure
+        that the user must attach to things that already exist in a particular model.
+        */
+        if (globalComponents.hasOwnProperty(tree[key].object)) {
+			if (!attachList.includes(tree[key].object)) {
+                attachList.push(tree[key].object);
+                document.getElementById(id).innerHTML += `<option value=${tree[key].object}>${tree[key].object}</option>`;
+            }
+        }
+    }
+}
+
+function massEdit() {
+    const tree = globalTreeWrapper.tree;
+    const objectType = document.getElementById("massEditTargetSelect").value;
+    const keys = [];
+    for (let key in tree){
+		if (tree[key].object === objectType) {
+            keys.push(key);
+        }
+    }
+    let operation = document.querySelector("input[name=attributeOperation]:checked");
+    if (isNullOrUndefined(operation)) {
+        alert("Please select an operation with radio buttons on the 'Mass Edit' menu.");
+        return;
+    }
+    operation = operation.value;
+    if (operation === "addAttribute") {
+        massEditAdd(keys);
+        return;
+    }
+    const attributeKey = document.getElementById("massEditAttribute").value;
+    for (let key of keys) {
+        if (tree[key][attributeKey] === undefined) {
+            alert(`Invalid operation. One or more of the objects you selected does not have the attribute you are trying to edit.
+            Attribute "${attributeKey}" is missing from tree object with key "${key}".`);
+            return;
+        }
+    }
+    switch (operation) {
+        case "addTo":
+            const operand = parseFloat(document.getElementById("addToValue").value);
+            if (isNaN(operand)) {
+                alert("Invalid operation. Please enter a valid number if you choose 'Add to Value'.");
+                return;
+            } else {
+                for (let key of keys) {
+                    const value = parseFloat(tree[key][attributeKey]);
+                    if (isNaN(value)) {
+                        alert("Invalid operation. The attribute you are trying to add to is not a number.");
+                        return;
+                    }
+                    tree[key][attributeKey] = (value + operand).toString();
+                }
+            }
+            break;
+        case "change":
+            const newValue = document.getElementById("changeValue").value;
+            for (let key of keys) {
+                tree[key][attributeKey] = newValue;
+            }
+            break;
+        case "delete":
+            for (let key of keys) {
+                delete tree[key][attributeKey];
+            }
+            break;
+        case "multiplyBy":
+            const multiplyOperand = parseFloat(document.getElementById("multiplyValue").value);
+            const rawAddOperand = document.getElementById("andAddValue").value;
+            let addOperand;
+            if (rawAddOperand === "") {
+                addOperand = 0;
+            } else {
+                addOperand = parseFloat(rawAddOperand);
+            }
+            if (isNaN(multiplyOperand) || isNaN(addOperand)) {
+                alert("Invalid operation. Please enter valid numbers if you choose 'Multiply attribute by'.");
+            }
+            for (let key of keys) {
+                const value = parseFloat(tree[key][attributeKey]);
+                if (isNaN(value)) {
+                    alert("Invalid operation. The attribute you are trying to multiply by is not a number.");
+                    return;
+                }
+                tree[key][attributeKey] = ((value * multiplyOperand) + addOperand).toString();
+            }
+            break;
+    }
+    alert(`${keys.length} ${objectType} objects edited.`);
+}
+
+function massEditAdd(keys) {
+    const tree = globalTreeWrapper.tree;
+    const newKey = document.getElementById("newAttributeKey").value;
+    const newValue = document.getElementById("newAttributeValue").value;
+    for (let key of keys) {
+        tree[key][newKey] = newValue;
+    }
+    const objectType = document.getElementById("massEditTargetSelect").value;
+    alert(`${keys.length} ${objectType} objects edited.`);
+}
+
+function loadAttachments() {
+    const selectElement = document.getElementById("attachmentSelect");
+    selectElement.innerHTML = "";
+	for (let key in writeFeeder.attachments) {
+        selectElement.innerHTML += `<option value=${key}>${key}</option>`;
+    }
+}
+
+function editAttachment() {
+	//document.body.style.cursor = 'wait'
+	//setTimeout(function(){
+		toggleElementDisplay('editAttachmentModal');
+		let name =  document.getElementById('attachmentSelect').value; //get the select. attachmentsList = attachmentSelect
+		document.getElementById('attachmentTd').innerHTML = name;  //get the td. attachmentSelect = attachmentTd
+		document.getElementById('editAttachmentBox').innerHTML = writeFeeder.attachments[name];
+		//document.body.style.cursor = 'auto'
+	//}, 100);
+}
+
+function saveAttachment() {
+	let name = document.getElementById('attachmentSelect').value;
+	writeFeeder.attachments[name] = document.getElementById('editAttachmentBox').value;
+}
+
+//**************************************************
+// File menu interface
+//**************************************************
+{% if showFileMenu %}
+
+/** Used to save the new changes or undo an operation by resaving the old changes.
+ * 
+ */ 
+function saveFeeder(feeder) {
+    const formData = new FormData();
+    formData.set("feederObjectJson", JSON.stringify(feeder));
+    const postRequest = $.ajax({
+        type: "POST",
+        url: `/saveFeeder/${thisOwner}/${thisModelName}/${thisFeederName}`,
+        data: formData,
+        processData: false,
+        contentType: false,
+    });
+    let cancelled = false;
+    let progressModal;
+    if (feeder === readFeeder) {
+        progressModal = new ProgressModal("Cancelling the previous operation...", "", false);
+        postRequest.done(function() {
+            progressModal.hide();
+            alert("Success. Previous operation was canceled");
+        });
+    } else if (feeder === writeFeeder) {
+        progressModal = new ProgressModal("Saving changes to your file...", "You have canceled the save.", true);
+        progressModal.button.addEventListener("click", function() {
+            cancelled = true;
+            progressModal.header.textContent = progressModal.cancelMessage;
+            progressModal.button.style.display = "none";
+        });
+        postRequest.done(function() {
+            if (cancelled) {
+                saveFeeder(readFeeder);
+            } else {
+                progressModal.hide();
+                alert("Success. Your data was saved.");
+            }
+        });
+    }
+    progressModal.show();
+}
+
+async function loadFeeder(serverFeederName, serverModelName, owner) {
+    let submitForm = false;
+    await $.ajax({
+        url: `/uniqObjName/Feeder/${thisOwner}/${serverFeederName}/${serverModelName}`
+    }).done(function(data) {
+        if (data.exists) {
+            submitForm = true;
+        } else {
+            alert('This feeder no longer exists. Please refresh the page, or select another feeder.');
+        }
+    });
+    if (submitForm === false) {
+        return;
+    }
+    let formData = new FormData();
+    formData.set("referrer", "distribution");
+    const progressModal = new ProgressModal("Loading feeder from server...", "You have canceled loading the feeder.", true);
+    let cancelled = false;
+    progressModal.button.addEventListener("click", function() {
+        cancelled = true;
+        progressModal.header.textContent = progressModal.cancelMessage;
+        progressModal.button.style.display = "none";
+    });
+    progressModal.show();
+    $.ajax({
+        type: "POST",
+        url: `/loadFeeder/${serverFeederName}/${serverModelName}/${thisModelName}/${thisFeederNum}/${owner}/${thisOwner}`,
+        data: formData,
+        processData: false,
+        contentType: false,
+    }).done(function() {
+        if (cancelled) {
+            saveFeeder(readFeeder);
+        } else {
+            reloadWrapper();
+        }
+    });
+}
+
+/** TODO: add back ability to cancel these operations
+ * 
+ */
+async function submitForm({formId, pollUrl, inputId}) {
+    let submitForm = true;
+    if (inputId !== undefined) {
+        // inputId was defined, therefore we need to check the file name on the server before submitting the form
+        submitForm = false;
+        const fileName = document.getElementById(inputId).value;
+        // Check if the file exists, using the user-provided fileName
+        await $.ajax({
+            url: `/uniqObjName/Feeder/${thisOwner}/${fileName}/${thisModelName}`
+        }).done(function(data) {
+            console.log(data);
+            if (data.exists === true) {
+                alert(`You already have a feeder named "${fileName}". Please choose a different name.`);
+            } else {
+                // The file does not exist. Submit the form.
+                submitForm = true;
+            }
+        });
+    }
+    if (submitForm === false) {
+        return;
+    }
+    const form = document.getElementById(formId);
+    const formData = new FormData(form);
+    const submitModal = new ProgressModal("Submitting your file...", "", false);
+    submitModal.show();
+    // Submit the form to the server with an ajax request
+    const formRequest = $.ajax({
+        type: "POST",
+        url: form.action,
+        data: formData,
+        processData: false,
+        contentType: false,
+    });
+    if (pollUrl === undefined) {
+        // We don't want to poll the server. Just reload the page.
+        formRequest.done(function() {
+            reloadWrapper();
+        });
+    } else {
+        formRequest.done(function(data) {
+            let cancelled = false;
+            const pollModal = new ProgressModal("Converting your file...", "You canceled the file conversion.", true);
+            pollModal.button.addEventListener("click", function() {
+                cancelled = true;
+                pollModal.header.textContent = pollModal.cancelMessage;
+                pollModal.button.style.display = "none";
+            });
+            pollModal.show();
+            // Poll the server
+            const intervalId = setInterval(function() {
+                $.ajax({
+                    //url: `/checkConversion/${thisModelName}/${thisOwner}`
+                    url: pollUrl
+                }).done(function(data) {
+                    if (cancelled) {
+                        clearInterval(intervalId);
+                        pollModal.hide();
+                        alert("You cancelled the operation");
+                        saveFeeder(readFeeder);
+                    }
+                    if (data.exists === true) {
+                        //processing is ongoing 
+                    } else if (data.exists === false) {
+                        // The pollModal isn't hidden before the alert happens. This has nothing to do with the reload wrapper.
+                        clearInterval(intervalId);
+                        pollModal.hide();
+                        alert("Conversion complete");
+                        reloadWrapper();
+                    } else if (data === "milError") {
+                        clearInterval(intervalId);
+                        pollModal.hide()
+                        alert('The .std and .seq files used are incorrectly formatted.');
+                        //TODO: submit the readFeeder
+                    } else if (data === "glmError") {
+                        clearInterval(intervalId);
+                        pollModal.hide()
+                        alert('The .glm file used is incorrectly formatted.');
+                        //TODO: submit the readFeeder
+                    } else {
+                        console.log(data);
+                        clearInterval(intervalId);
+                        pollModal.hide()
+                        alert('There was a problem. Operation was cancelled');
+                    }
+                });
+            }, 5000);
+        });
+    }
+}
+
+async function renameFeeder() {
+	if (JSON.stringify(readFeeder) !== JSON.stringify(writeFeeder)){
+		alert('You have unsaved changes. Please save the feeder before proceeding.')
+	} else {
+		let newName = prompt("Rename the feeder to", `${thisFeederName}`);
+		while (! /^[\w\s]+$/.test(newName) || /^\s+$/.test(newName)) {
+			newName = prompt("Only letters, digits and underscore are allowed.\nPlease enter a different name", `${thisFeederName}`);
+		}
+		if (newName){
+            let submitRequest = false;
+            await $.ajax({
+                url: `/uniqObjName/Feeder/${thisOwner}/${newName}/${thisModelName}`
+            }).done(function(data) {
+                if (data.exists) {
+                    alert(`You already have a feeder named "${newName}". Please choose a different name.`);
+                } else {
+                    submitRequest = true;
+                }
+            });
+            if (submitRequest === false) {
+                return;
+            }
+            $.ajax({
+                url: `/renameFeeder/${thisOwner}/${thisModelName}/${thisFeederName}/${newName}/${thisFeederNum}`
+            }).done(function() {
+                thisFeederName = newName;
+                alert("Feeder file was successfully renamed.");
+            })
+		}
+	} 
+}
+{% endif %}
+
+/** This is done for testing reasons.
+ */
+function reloadWrapper() {
+    /* Force the client to always request new files from the server without using the browser cache. 
+    */
+    window.location.reload(true);
+}
+
+function ProgressModal(message, cancelMessage, showButton) {
+    this.self = document.getElementById("progressModal");
+    this.button = this.self.getElementsByTagName("button")[0];
+    this.header = this.self.getElementsByTagName("h2")[0];
+    this.message = message;
+    this.cancelMessage = cancelMessage;
+    this.showButton = showButton;
+}
+
+ProgressModal.prototype.show = function() {
+    this.header.textContent = this.message;
+    this.self.removeAttribute("style");
+    if (this.showButton) {
+        this.button.removeAttribute("style");
+    } else {
+        this.button.style.display = "none";
+    }
+}
+
+ProgressModal.prototype.hide = function() {
+    this.self.style.display = "none";
+}
+
+//**************************************************
+// Tree interface
+//**************************************************
+
+const treeWrapperPrototype = {
+    buildNames() {
+        let nameKeyMap = {};
+        Object.keys(this.tree).forEach(key => {
+            const name = this.tree[key].name;
+            keyIsStringAndValidNumber(key);
+            nameKeyMap[name] = key;
+        });
+        this.names = nameKeyMap;
+    }
+};
+
+/** Return an object that has an 'tree' object and a 'names' map.
+ * 
+ * The 'tree' object is a reference to the tree that exists in writeFeeder, which is the original source of all data.
+ * The 'names' object maps the name of a tree object to the key of the tree object in the tree. This allows faster
+ * retrieval of to/from/parent nodes when building the svg data. Without this map, we would have to parse the tree to find
+ * every to/from/parent node. This would be slow.
+ * @param {Object} tree - contains all of the objects that will be used to generate the svg.
+ * @return {TreeWrapper} treeWrapper - simply a wrapper around the tree argument. This wrapper also has the name-key map to speed up 
+ * to/from/parent node retrieval.
+ */
+function createTreeWrapper(tree) {
+    if (typeof(tree) !== "object" || Array.isArray(tree)) {
+        throw new Error("tree argument must be a JavaScript object");
+    }
+    const treeWrapper = Object.create(treeWrapperPrototype);
+    treeWrapper.tree = tree;
+    treeWrapper.buildNames();
+    //treeWrapper.names = treeWrapper.buildNames(tree);
+    return treeWrapper;
+}
+
+//**************************************************
+// TreeObject interface
+//**************************************************
+
+const treeObjectPrototype = {
+
+    /* "Public" interface methods. Use these methods in event handlers and etc. to do stuff. */
+
+    update(map) {
+        this.data = deepCopy(map);
+    },
+    /**
+     * TODO: must update the names map as well!
+     * @param {TreeWrapper} treeWrapper - the treeWrapper that this TreeObject should be deleted from.
+     * @return {Object} subtreeWrapper - the subtreeWrapper that will be affected by the delete operation.
+     */
+    deleteFrom(treeWrapper) {
+        const subtreeWrapper = this.getSubtreeToDelete(treeWrapper);
+        const keyAry = Object.keys(subtreeWrapper.tree);
+        if (keyAry.length === 1) {
+            //Deleting this TreeObject only affects this TreeObject
+            delete treeWrapper.tree[keyAry[0]]
+            return subtreeWrapper;
+        } else {
+            //There are lines or children still connected 
+            alert("There are still nodes or lines connected to this object");
+        }
+    },
+    /**
+     * @param {Object} tree - The tree that this TreeObject and all of its directly connected objects should be deleted from.
+     */
+    deleteConnectedFrom(tree) {
+
+    },
+
+    /* "Private" helper methods. Programmer should not use these directly. They should be used inside of public interface methods. */
+
+    /** Return an object that contains references to objects that will be affected by deleting this TreeObject.
+     * 
+     * The subtree returned by this method contains references to the same objects as in the original TreeWrapper.tree.
+     * Since the original TreeWrapper.tree (almost always) refers to the global writeFeeder.tree, the tree objects 
+     * must be deleted from the original TreeWrapper.tree (not the subtree) so that the objects will eventually be garbage 
+     * collected once the subtree goes out of scope.
+     * @param {TreeWrapper} treeWrapper - contains all objects, including those objects that wil be affected by deleting this TreeObject. 
+     * @return {TreeWrapper} subtreeWrapper - only contains references to objects in the tree that will be affected by deleteing this TreeObject. 
+     */
+    getSubtreeToDelete(treeWrapper) {
+        if (Object.getPrototypeOf(treeWrapper) !== treeWrapperPrototype) {
+            throw new Error("treeWrapper argument must be an instance of TreeWrapper");
+        }
+        if (!treeWrapper.tree[this.key]) {
+            throw new Error(`No object with key: "${this.key}" exists in the treeWrapper.tree`);
+        }
+        let subtree = {};
+        subtree[this.key] = treeWrapper.tree[this.key];
+        const childrenSubtreeWrapper = this.getChildren(treeWrapper);
+        Object.keys(childrenSubtreeWrapper.tree).forEach(key => {
+            subtree[key] = childrenSubtreeWrapper.tree[key];
+        });
+        const lineSubtreeWrapper = this.getConnectedLines(treeWrapper);
+        Object.keys(lineSubtreeWrapper.tree).forEach(key => {
+            subtree[key] = lineSubtreeWrapper.tree[key];
+        });
+        return createTreeWrapper(subtree);
+    },
+    /** Return a subtreeWrapper of the passed treeWrapper that contains only children of this TreeObject.
+     * 
+     * @param {TreeWrapper} treeWrapper - the treeWrapper within which to search for children of this TreeObject. 
+     * @return {TreeWrapper} subtreeWrapper - a subset of the original treeWrapper that contains only children of this TreeObject.
+     */
+    getChildren(treeWrapper) {
+        let subtree = {};
+        // TODO: Build an object in TreeWrapper that allows instant lookup of children for any treeWrapper.tree object
+        Object.keys(treeWrapper.tree).forEach(key => {
+            if (treeWrapper.tree[key].parent === this.data.name) {
+                // This tree object is a child of this TreeObject
+                subtree[key] = treeWrapper.tree[key];
+            }
+        });
+        return createTreeWrapper(subtree);
+    },
+    /** Return a subtreeWrapper of the passed treeWrapper that contains only lines that connect to this TreeObject.
+     * 
+     * @param {TreeWrapper} treeWrapper - the treeWrapper within which to search for connecting lines.
+     * @return {TreeWrapper} subtreeWrapper - a subset of the original treeWrapper that contains only connecting lines.
+     */
+    getConnectedLines(treeWrapper) {
+        let subtree = {};
+        // TODO: Build an object in TreeWrapper that allows instant lookup of to/rom nodes for any treeWrapper.tree object
+        Object.keys(treeWrapper.tree).forEach(key => {
+            if (treeWrapper.tree[key].from === this.data.name || treeWrapper.tree[key].to === this.data.name) {
+                // This tree object represents a line that is connected to this TreeObject
+                subtree[key] = treeWrapper.tree[key];
+            }
+        });
+        return createTreeWrapper(subtree);
+    }
+};
+
+/** 
+ * @param {(number|Object)} input - either a key or a map of properties to create this TreeObject.
+ * @param {TreeWrapper} tree - the treeWrapper from which to create this TreeObject.
+ */
+function createTreeObject(input, treeWrapper) {
+    if (Object.getPrototypeOf(treeWrapper) !== treeWrapperPrototype) {
+        throw new Error("treeWrapper argument must be an instance of TreeWrapper");
+    }
+    const treeObject = Object.create(treeObjectPrototype);
+    if (typeof(input) === "string") {
+        keyIsStringAndValidNumber(input);
+        const obj = treeWrapper.tree[input];
+        if (obj) {
+            treeObject.key = input;
+            treeObject.data = deepCopy(obj);
+            return treeObject;
+        }
+        throw new Error(`The passed key argument: "${input}" to create the TreeObject does not exist in the treeWrapper.tree.`);
+    } else if (typeof input === "object" && !Array.isArray(input)) {
+        treeObject.key = getNewTreeKey(treeWrapper.tree);
+        treeObject.update(input);
+        return treeObject;
+    } 
+    throw new TypeError("Input argument must be a string or an object.");
+}
+
+/* "Private" helper methods */
+
+function deepCopy(oldObject) {
+    if (Object.getPrototypeOf(oldObject) !== Object.prototype) {
+        throw new Error("This function should not be used to copy objects created with a constructor function.");
+    }
+    const properties = Object.getOwnPropertyNames(oldObject);
+    for (let prop of properties) {
+        if (typeof(oldObject[prop]) === "function") {
+            throw new Error("This function should not be used to copy objects with methods.");
+        }
+    }
+    return JSON.parse(JSON.stringify(oldObject));
+}
+
+function keyIsStringAndValidNumber(key) {
+    if (typeof(key) !== "string") {
+        throw new Error("key argument must be a string.");
+    }
+    if (isNaN(parseInt(key, 10))) {
+        throw new Error("key argument must be a string that can be parsed to a valid number");
+    }
+}
+
+//**************************************************
+// Table interface v2
+//**************************************************
+
+//**************************************************
+// Svg interface v2
+//**************************************************
+
+const deletableSvgDataPrototype = {
+    deleteFrom(viewport) {
+        this.svgIds.forEach(id => {
+            viewport.removeChild(document.getElementById(id));
+        });
+    }
+}
+
+/**
+ * @param {Object} tree - A tree of all tree objects that 1) were already deleted from the tree and 2) should also
+ * be deleted from the svg.
+ * @return {Object} DeletableSvgData - Has a method for deleting from a viewport.
+ */
+function createDeletableSvgData(tree) {
+    const obj = Object.create(deletableSvgDataPrototype);
+    obj.svgIds = []
+    Object.keys(tree).forEach(key => {
+        if (isParentChildNode(tree[key])) {
+            obj.svgIds.push(key);
+            const parentChildLineId = `${tree[key].parent}_${tree[key].name}`
+            obj.svgIds.push(parentChildLineId);
+        } else if (isParentlessNode(tree[key])) {
+            obj.svgIds.push(key);
+        } else if (isLine(tree[key])) {
+            obj.svgIds.push(key)
+        } else { 
+            console.log(`Failed to delete type: "${tree[key].object}", name: "${tree[key].name}", key: ${key}"`);
+            //throw new Error(`tree key: ${key}, with data: ${tree[key]} is not a parent-child node, a parentless node, or a line.`); 
+        }
+    });
+    return obj;
+}
+
+const addableSvgDataPrototype = {
+    /** Add the svgData to the viewport when the feeder is initially built. 
+     * The lines must be drawn before circles to be underneath the circles. 
+     */
+    addTo(viewport) {
+        this.lines.forEach(line => {
+            viewport.appendChild(line);
+        });
+        this.circles.forEach(circle => {
+            viewport.appendChild(circle);
+        });
+    },
+    /* When we are redrawing existing tree objects, they must be deleted from svg first, then 
+    redrawn.
+    */
+    redrawTo(viewport) {
+        this.lines.forEach(line => {
+            viewport.removeChild(document.getElementById(line.id));
+        });
+        this.circles.forEach(circle => {
+            viewport.removeChild(document.getElementById(circle.id));
+        });
+        this.lines.forEach(line => {
+            viewport.appendChild(line);
+        });
+        this.circles.forEach(circle => {
+            viewport.appendChild(circle);
+        });
+    }
+};
+
+/**
+ * @param {Tree} tree - contains all tree objects that 1) are already inside the tree and 2) should also
+ * be added to the svg. Also has a name-key map to speed to/from/parent node retrieval.
+ * @return {Object} AddableSvgData - has a method for adding to a viewport and a method for redrawing to 
+ * a viewport. 
+ */
+function createAddableSvgData(treeWrapper) {
+    if (Object.getPrototypeOf(treeWrapper) !== treeWrapperPrototype) {
+        throw new Error("tree argument must be an instance of Tree");
+    }
+    const obj = Object.create(addableSvgDataPrototype);
+    obj.lines = [];
+    obj.circles = [];
+    const tree = treeWrapper.tree;
+    Object.keys(tree).forEach(key => {
+        if (isParentChildNode(tree[key])) {
+            // Add this circle, which has a parent
+            const circle = createSvgCircle(key, tree[key]);
+            obj.circles.push(circle);
+            // Add the parent-child line between this circle and its parent
+            const parent = getParentObject(key, treeWrapper);
+            const parentChildLine = createSvgLine(parent, tree[key]);
+            obj.lines.push(parentChildLine);
+        } else if (isParentlessNode(tree[key])) {
+            const circle = createSvgCircle(key, tree[key]);
+            obj.circles.push(circle);
+        } else if (isLine(tree[key])) {
+            const nodes = getLineEnds(key, treeWrapper);
+            const source = nodes.sourceNode;
+            const target = nodes.targetNode;
+            const line = createSvgLine(source, target, key, tree[key]);
+            obj.lines.push(line);
+        } else { 
+            //console.log(`Failed to draw type: "${tree[key].object}", name: "${tree[key].name}", key: ${key}"`);
+            //throw new Error(`tree key: ${key}, with data: ${tree[key]} is not a parent-child node, a parentless node, or a line.`); 
+        }
+    });
+    return obj;
+}
+
+/* "Private" helper methods */
+
+function isParentlessNode(obj) {
+    return obj.hasOwnProperty("longitude") && obj.hasOwnProperty("latitude") && !obj.hasOwnProperty("parent") &&
+    !obj.hasOwnProperty("from") && !obj.hasOwnProperty("to") ? true : false;
+}
+
+function isParentChildNode(obj) {
+	return obj.hasOwnProperty("parent") ? true : false;
+}
+
+function isLine(obj) {
+    return obj.hasOwnProperty("from") && obj.hasOwnProperty("to") ? true : false;
+}
+
+function isNode(obj) {
+    return isParentChildNode(obj) || isParentlessNode(obj);
+}
+
+/** Return the parent object of the child object with the key 'childkey' in the TreeWrapper.tree.
+ * 
+ * @param {number} childKey - the key of an object in the TreeWrapper.tree that must have a parent 
+ * somewhere in the TreeWrapper.tree
+ * @param {TreeWrapper} treeWrapper - the TreeWrapper where both the child object and the parent object exist
+ * @return {Object} parent - the parent object of the treeWrapper.tree[childKey] object
+ */
+function getParentObject(childKey, treeWrapper) {
+    keyIsStringAndValidNumber(childKey);
+    if (Object.getPrototypeOf(treeWrapper) !== treeWrapperPrototype) {
+        throw new Error("treeWrapper argument must be an instance of TreeWrapper");
+    }
+    // New way
+    const parentKey = treeWrapper.names[treeWrapper.tree[childKey].parent];
+    // Old way
+    /* 
+    const parentKey = Object.keys(tree).find(key => {
+        return tree[key].name === tree[childKey].parent;
+    });
+    */ 
+    if (!parentKey) {
+        throw new Error(`Could not find parent node with key: "${parentKey}" for the child tree object with key: "${key}"
+        inside of the passed tree argument.`);
+    } 
+    const parent = treeWrapper.tree[parentKey];
+    return parent;
+}
+
+function getLineEnds(lineKey, treeWrapper) {
+    keyIsStringAndValidNumber(lineKey);
+    if (Object.getPrototypeOf(treeWrapper) !== treeWrapperPrototype) {
+        throw new Error("treeWrapper argument must be an instance of TreeWrapper")
+    }
+    if (!treeWrapper.tree[lineKey]) {
+        throw new Error(`Could not find tree object with key: "${lineKey}" inside of the treeWrapper argument`)
+    }
+    // New way
+    const fromKey = treeWrapper.names[treeWrapper.tree[lineKey].from];
+    const toKey = treeWrapper.names[treeWrapper.tree[lineKey].to];
+
+    // Old way
+    /* 
+    let fromKey;
+    let toKey;
+    for (let treeKey in tree) {
+        if (tree[treeKey].name === tree[lineKey].from) {
+            fromKey = treeKey;
+            if (toKey) {
+                break;
+            }
+        }
+        if (tree[treeKey].name === tree[lineKey].to) {
+            toKey = treeKey;
+            if (fromKey) {
+                break;
+            }
+        }
+    }
+    */    
+    if (!fromKey) {
+        throw new Error(`For line object with key: "${lineKey}" in treeWrapper.tree, could not
+        find the "from" node with name: "${treeWrapper.tree[lineKey].from}", key: "${fromKey}"
+        in the treeWrapper.tree`);
+    }
+    if (!toKey) {
+        throw new Error(`For line object with key: "${lineKey}" in treeWrapper.tree, could not
+        find the "to" node with name: "${treeWrapper.tree[lineKey].to}", key: "${toKey}"
+        in the treeWrapper.tree`);
+    }
+    return {
+        sourceNode: treeWrapper.tree[fromKey],
+        targetNode: treeWrapper.tree[toKey]
+    }
+}
+
+/**
+ * @return {Object} SvgCircle - A fully configured svg circle.
+ */
+function createSvgCircle(key, {longitude, latitude, object}, {r = 2, strokeWidth = 0.5} = {}) {
+    keyIsStringAndValidNumber(key);
+    if (longitude === undefined || latitude === undefined || object === undefined) {
+        console.log(`For circle with tree key: "${key}", longitude was: "${longitude}",
+        latitude was: "${latitude}", object was: "${object}"`)
+        //throw new Error(`For circle with tree key: "${key}", longitude was: "${longitude}",
+        //latitude was: "${latitude}", object was: "${object}"`);
+    }
+	const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+	circle.setAttribute('id', key);
+	circle.setAttribute('class', object);
+	circle.setAttribute('r', r);
+    circle.setAttribute('stroke-width', strokeWidth);
+    // Set coordinates and consider if they need to be translated
+    longitude = parseFloat(longitude);
+    latitude = parseFloat(latitude);
+    if (globalLonOffset !== null) {
+        longitude -= globalLonOffset;
+    }
+    if (globalLatOffset !== null) {
+        latitude -= globalLatOffset;
+    }
+    circle.setAttribute('cx', longitude);
+    circle.setAttribute('cy', latitude);
+    return circle;
+}
+/** 
+ * @return {Object} SvgLine - A fully configured svg line.
+ */
+function createSvgLine(sourceNode, targetNode, key, thisObject) {
+    const svgLine = document.createElementNS('http://www.w3.org/2000/svg', 'line'); 
+    if (sourceNode.longitude === undefined || sourceNode.latitude === undefined || targetNode.longitude === undefined || targetNode.latitude === undefined) {
+        console.log(`For line with tree key: "${key === undefined ? "parentChild" : key}", sourceNode.name was: "${sourceNode.name}",
+        sourceNode.longitude was: "${sourceNode.longitude}", sourceNode.latitude was: "${sourceNode.latitude}",
+        targetNode.name was: "${targetNode.name}", targetNode.longitude was: "${targetNode.longitude}",
+        targetNode.latitude was: "${targetNode.latitude}"`)
+        //throw new Error(`For line with tree key: "${key}", sourceNode.longitude was: "${sourceNode.longitude}",
+        //sourceNode.latitude was: "${sourceNode.latitude}", targetNode.longitude was: "${targetNode.longitude}",
+        //targetNode.latitudw was: "${targetNode.latitude}"`)
+    }
+    // Set coordinates and consider if they need to be translated
+    let sourceLon = parseFloat(sourceNode.longitude);
+    let sourceLat = parseFloat(sourceNode.latitude);
+    let targetLon = parseFloat(targetNode.longitude);
+    let targetLat = parseFloat(targetNode.latitude); 
+    if (globalLonOffset !== null) {
+        sourceLon -= globalLonOffset;
+        targetLon -= globalLonOffset;
+    }
+    if (globalLatOffset !== null) {
+        sourceLat -= globalLatOffset;
+        targetLat -= globalLatOffset;
+    }
+    svgLine.setAttribute("x1", sourceLon); 
+    svgLine.setAttribute("x2", targetLon);
+    svgLine.setAttribute("y1", sourceLat); 
+    svgLine.setAttribute("y2", targetLat);
+    if (!key && !thisObject) {
+        // key and thisObject weren't included, so this line doesn't represent a real object in the tree, so it's a parent-child line.
+        svgLine.setAttribute("id", `${sourceNode.name}_${targetNode.name}`);
+        svgLine.setAttribute("class", "parentChild");
+        svgLine.setAttribute("stroke-width", 0.25);
+        return svgLine;
+    } else if (key && thisObject) {
+        keyIsStringAndValidNumber(key);
+        svgLine.setAttribute("id", key);
+        const phaseCount = countPhases(thisObject.phases).toString();
+        const domClass = `${thisObject.object} p${phaseCount}`;
+        svgLine.setAttribute("class", domClass);
+        svgLine.setAttribute("stroke-width", phaseCount);
+        return svgLine;
+    }
+    throw new Error("key and thisObject arguments must be passed together or not at all");
+}
+
+//**************************************************
+// Data interface
+//**************************************************
+
+/* These are names of properties in most objects in feeder.tree that cannot be deleted from objects in feeder.tree.
+They are a mix of properties that can be found in feeder.tree objects with a parent, feeder.tree objects without a parent,
+and feeder.tree objects that represent lines. See my notes for reasoning behind designating these properties as non-deleteable.
+This global array is a hard-coded data-dependency, but it's necessary at this point because the raw data does not define
+whether or not a property is key to identifying an object in the svg graph. Maybe these hard-coded dependencies could be moved
+so some other configuration file, like the components?
+*/
+const nonDeletableTreeProperties = ["name", "object", "from", "to", "latitude", "longitude", "parent", "configuration"];
+/* If these properties were to be modified for a given feeder.tree object, it would require significantly modifying the 
+corresponding data in feeder.nodes and/or feeder.links. These properties ARE technically modifiable, but allowing 
+the user to change them would require more work than I think is worth it. It is easier just to create a new node.
+We can remove or add properteis to this array as the needs of the interface change.
+*/
+const nonModifiableTreeProperties = ["name", "object", "from", "to"];
+
+/** Return true if this data represents a node that has a parent-child relationship with another node, otherwise false.
+At the time of writing, this includes:
+["battery", "capacitor", "evcharger_det", "house", "inverter", "load", "meter", "recorder", "solar", "waterheater", 
+"windturb_dg", "ZIPload"];
+*/
+//function isParentChildNode(treeObject) {
+//	return treeObject.data.hasOwnProperty("parent") ? true : false;
+//}
+
+/** Return true if this data represents a node that has no other intrinsic relationship to another node. At the time of writing, this includes:
+["node", "regulator_configuration", "transformer_configuration", "triplex_line_conductor", "triplex_line_configuration", "triplex_meter",
+"triplex_node", "volt_var_control"];
+*/
+//function isParentlessNode(treeObject) {
+//	return treeObject.data.hasOwnProperty("parent") || treeObject.data.hasOwnProperty("from") || treeObject.data.hasOwnProperty("to") ? false : true;
+//}
+
+//function isNode(treeObject) {
+//	return isParentChildNode(treeObject) || isParentlessNode(treeObject) ? true : false;
+//}
+
+function getParentTreeObject(treeObject, tree) {
+	const key = Object.keys(writeFeeder.tree).find(key => writeFeeder.tree[key].name === treeObject.data.parent);
+	return new TreeObject(key, writeFeeder.tree[key]);
+}
+
+function TreeObject(key, data) {
+	if (typeof(key) !== "string" || !data || Array.isArray(data) || typeof(data) !== "object") {
+		throw "key must be a string and data must be a valid non-array object";
+	}
+	this.key = key;
+	this.data = data;
+}
+
+/** cx refers to longitude, cy refers to latitude.
+*/
+function Circle(cx, cy, r, id, domClass, strokeWidth) {
+	if (typeof(cx) !== "number" || typeof(cy) !== "number" || typeof(r) !== "number" || typeof(id) !== "number" || 
+		typeof(domClass) !== "string" || typeof(strokeWidth) !== "number") {
+		throw "Circle constructor function was called with improper arguments";
+	}
+	this.cx = cx;
+	this.cy = cy;
+	this.r = r;
+	this.id = id;
+	this.domClass = domClass;
+	this.strokeWidth = strokeWidth;
+}
+
+//function Circle(key, {longitude, latitude, object}, {r = 2, strokeWidth = 0.5} = {}) {
+//    if (typeof key !== "number") {
+//        throw new TypeError("key argument must be a number");
+//    }
+//	this.cx = longitude;
+//	this.cy = latitude;
+//	this.r = r;
+//	this.id = key.toString();
+//	this.domClass = object;
+//	this.strokeWidth = strokeWidth;
+//}
+
+/** x refers to longitude, y refers to latitude.
+*/
+function Line(x1, y1, x2, y2, id, domClass, strokeWidth) {
+	if (typeof(x1) !== "number" || typeof(y1) !== "number" || typeof(x2) !== "number" || typeof(y2) !== "number" || typeof(id) !== "string" ||
+		typeof(domClass) !== "string" || typeof(strokeWidth) !== "number") {
+		throw "Line constructor function was called with improper arguments";
+	}
+	this.x1 = x1;
+	this.y1 = y1;
+	this.x2 = x2;
+	this.y2 = y2;
+	this.id = id;
+	this.domClass = domClass;
+	this.strokeWidth = strokeWidth;
+}
+
+//function Line(key, sourceNode, targetNode) {
+//	this.x1 = sourceNode.longitude;
+//	this.y1 = sourceNode.latitude;
+//	this.x2 = targetNode.longitude;
+//	this.y2 = targetNode.latitude;
+//	this.id = key;
+//	this.domClass = domClass;
+//	this.strokeWidth = strokeWidth;
+//}
+
+/** Return an SvgData object to be used to draw on the graph, or return null if there is nothing to draw.
+*/
+function addFeederObject(componentName, htmlSelection) {
+	const treeObject = new TreeObject(getNewTreeKey(writeFeeder.tree).toString(), deepCopy(globalComponents[componentName]));
+	const associatedTreeObjects = getAssociatedTreeObjects(treeObject, htmlSelection);
+	if (!associatedTreeObjects) {
+		//alert("Invalid svg selection. Failed to add object to feeder.");
+		return null;
+	}
+	if(!configureTreeObject(treeObject, associatedTreeObjects)) {
+		alert("Unable to configure the new component. Failed to add object to feeder.");
+		return null;
+	}
+	let circles = [];
+	let lines = [];
+	if (isNode(treeObject.data)) {
+		if (canAddToFeederTree(treeObject)) { //&& canAddToFeederNodes(treeObject))) {
+			//addToFeederNodes(treeObject);
+			addToFeederTree(treeObject);
+			// Add the circle for THIS treeObject
+			circles.push(new Circle(treeObject.data.longitude, treeObject.data.latitude, 2, parseInt(treeObject.key, 10), treeObject.data.object, 0.5));
+			if (isParentChildNode(treeObject.data)) {
+
+				const parentTreeObject = getParentTreeObject(treeObject);
+				// Add the circle for the parent of this treeObject (it must be redrawn on top of the new line)
+				circles.push(
+					new Circle(
+						parentTreeObject.data.longitude,
+						parentTreeObject.data.latitude,
+						2,
+						parseInt(parentTreeObject.key, 10),
+						parentTreeObject.data.object,
+						0.5
+					)
+				);
+				// Add the parentChild line
+				lines.push(
+					new Line(
+						parentTreeObject.data.longitude,
+						parentTreeObject.data.latitude,
+						treeObject.data.longitude,
+						treeObject.data.latitude,
+						parentTreeObject.data.name + "_" + treeObject.data.name,
+						"parentChild",
+						0.5
+					)
+				);
+			}
+		}
+	} else {
+		if (canAddToFeederTree(treeObject)) {//&& canAddToFeederLinks(treeObject)) {
+			//addToFeederLinks(treeObject);
+			addToFeederTree(treeObject);
+			const sourceTreeObject = associatedTreeObjects.sourceTreeObject;
+			const targetTreeObject = associatedTreeObjects.targetTreeObject;
+			// Add the circle for source treeObject. It must be redrawn over the line.
+			circles.push(
+				new Circle(
+					sourceTreeObject.data.longitude,
+					sourceTreeObject.data.latitude,
+					2,
+					parseInt(sourceTreeObject.key, 10),
+					sourceTreeObject.data.object,
+					0.5 
+				),
+				// Add the circle for the target treeObject. It must be redrawn over the line
+				new Circle(
+					targetTreeObject.data.longitude,
+					targetTreeObject.data.latitude,
+					2,
+					parseInt(targetTreeObject.key, 10),
+					targetTreeObject.data.object,
+					0.5 
+				)
+			);
+			// Add the new line, which represents THIS treeObject
+			lines.push(
+				new Line(
+					sourceTreeObject.data.longitude,
+					sourceTreeObject.data.latitude,
+					targetTreeObject.data.longitude,
+					targetTreeObject.data.latitude,
+					treeObject.key,
+					treeObject.data.object + " p" + countPhases(treeObject.data.phases), //how does the number of phases affect anything?
+					countPhases(treeObject.data.phases) // 1, 2, 3, or 4
+				)
+			);
+		}
+	}
+	if (circles.length > 0) { 
+		return new SvgData(lines, circles);
+	}
+	return null;
+}
+
+/** Return a (possibly empty) object containing feeder.tree objects if the selection was valid, else return null.
+Update this function so that htmlSelection triggers something? I should be able to use this to change an existing treeObject's properties.
+*/
+function getAssociatedTreeObjects(treeObject, htmlSelection) {
+	if (!(treeObject instanceof TreeObject) || !HTMLCollection.prototype.isPrototypeOf(htmlSelection)) {
+		throw "treeObject should be an object and htmlSelection should be an HTMLCollection";
+	}
+	let associatedTreeObjects = {};
+	if (isParentChildNode(treeObject.data)) {
+		if (htmlSelection.length === 1) {
+			const parentKey = htmlSelection[0].id;
+			const parentTreeObject = new TreeObject(parentKey, writeFeeder.tree[parentKey]);
+			if (isNode(parentTreeObject.data)) {
+				associatedTreeObjects.parentTreeObject = parentTreeObject;
+				return associatedTreeObjects;
+			} else {
+				alert("Please select a node, not a line, to attach this object to.");
+			}
+		} else {
+			alert("Please select exactly one node to attach this object to.");
+		}
+	} else if (isParentlessNode(treeObject.data)) {
+		if (htmlSelection.length === 0) {
+			return associatedTreeObjects;
+		} else {
+			alert("Please do not select any nodes or lines in order to add this object.");
+		} 	
+	} else {
+		if (htmlSelection.length === 2) {
+			const sourceKey = htmlSelection[0].id;
+			const targetKey = htmlSelection[1].id;
+			const sourceTreeObject = new TreeObject(sourceKey, writeFeeder.tree[sourceKey]);
+			const targetTreeObject = new TreeObject(targetKey, writeFeeder.tree[targetKey]);
+			if (isNode(sourceTreeObject.data) && isNode(targetTreeObject.data)) {
+				associatedTreeObjects.sourceTreeObject = sourceTreeObject;
+				associatedTreeObjects.targetTreeObject = targetTreeObject;
+				return associatedTreeObjects;
+			} else {
+				alert("Please select only 2 nodes, not lines, to insert this line");
+			}
+		} else {
+			alert("Please select exactly two nodes to insert this line.");
+		}
+	}
+	return null;
+}
+
+/** Return true if configuration was successful, otherwise false.
+*/
+function configureTreeObject(treeObject, associatedTreeObjects) {
+	if (!(treeObject instanceof TreeObject) || !associatedTreeObjects || typeof(associatedTreeObjects) !== "object") {
+		throw "treeObject must be an instance of TreeObject and associatedTreeObjects must be an object.";
+	}
+	treeObject.data.name = treeObject.data.object + treeObject.key;
+	if (associatedTreeObjects.parentTreeObject) {
+		treeObject.data.parent = associatedTreeObjects.parentTreeObject.data.name;
+		setCoordinates(treeObject);
+		return true;
+	} else if (associatedTreeObjects.sourceTreeObject && associatedTreeObjects.targetTreeObject) {
+		treeObject.data.from = associatedTreeObjects.sourceTreeObject.data.name;
+		treeObject.data.to = associatedTreeObjects.targetTreeObject.data.name;
+		return true;
+	} else if (Object.keys(associatedTreeObjects).length === 0) {
+		setCoordinates(treeObject);
+		return true;
+	} else {
+		return false;
+	}
+}
+
+/** Only set the coordinates for node types, not link types. Link objects have latitude and longitude in default data, 
+ * but I don't understand why. Ideally, the coordinates would be an input to this function so I don't rely on 
+ * clickLatLon().
+*/
+function setCoordinates(treeObject) {
+	if (!(treeObject instanceof TreeObject)) {
+		throw "treeObject must be a instance of TreeObject";
+	}
+	if (isParentChildNode(treeObject.data)) {
+		const parentTreeObject = getParentTreeObject(treeObject);
+		treeObject.data.latitude = parentTreeObject.data.latitude + Math.random() * 10 - 5;
+		treeObject.data.longitude = parentTreeObject.data.longitude + Math.random() * 10 - 5;
+	} else if (isParentlessNode(treeObject.data)) {
+		const coords = clickLatLon(event);
+		treeObject.data.latitude = coords.y + globalLatOffset;
+		treeObject.data.longitude = coords.x + globalLonOffset;
+	}
+}
+
+/** Ideally, instead of "canAddToFeederTree()" and "addToFeederTree()", there would be some sort of object that encapsulates 
+ * 1) some feeder.tree data and 2) a boolean that indicates whether or not that data is allowed to modify the data. Same for 
+ * nodes and links.
+ */
+function canAddToFeederTree(treeObject) {
+	if (writeFeeder.tree[treeObject.key]) {
+		throw ("writeFeeder.tree insertion error: cannot insert object into writeFeeder.tree. writeFeeder.tree already contains an object with key: " 
+		+ treeObject.key);
+	} else {
+		return true;
+	}
+}
+
+function addToFeederTree(treeObject) {
+	writeFeeder.tree[treeObject.key] = treeObject.data;
+}
+
+/**
+ * Return a key value which has not been used in tree.
+ * @return {string} key
+ */
+function getNewTreeKey(tree) { 
+	let nextKey = Object.keys(tree).length;
+	while(tree.hasOwnProperty(nextKey.toString())) {
+		nextKey += 1;
+	}
+	return nextKey.toString();
+}
+
+
+
+// Deep copy of a given obj.
+//function clone(obj) {
+//	if (null === obj || Array.isArray(obj) || typeof(obj) !== "object") {
+//		throw "This function only supports cloning a valid non-array object.";
+//	}
+//	const copy = obj.constructor();
+//	for (let key in obj) {
+//		if (obj.hasOwnProperty(key)) {
+//			copy[key] = obj[key];
+//		}
+//	}
+//	return copy;
+//}
+
+// Fix this function. Some lines have CLOSED instead of ABCN or something.
+function countPhases(p) {
+	// Return the number of phases a line has.
+	//return p.length
+	let total = 0
+	if (p.search('A') > -1) {total++}
+	if (p.search('B') > -1) {total++}
+	if (p.search('C') > -1) {total++}
+	return total;
+}
+
+//**************************************************
+// Svg interface
+//**************************************************
+
+/** SvgData is never allowed to be empty. It must always be created with its data. An empty SvgData object would indicate a problem in the data layer.
+*/
+function SvgData(lines, circles) {
+	if (!Array.isArray(lines) || !Array.isArray(circles)) {
+		throw "SvgData arguments must be arrays";
+	}
+	this.lines = lines;
+	this.circles = circles;
+}
+
+/** Write new lines and circles in the svg. If a line or cicle inside of svgData argument already exists, delete it before
+it is rewritten.
+*/
+function addSvgObjects(svgData) {
+	if (svgData === null) {
+		//alert("No svgData was generated. No svg elements were added.");
+		return; 
+	}
+	deleteSvgObjects(svgData);
+	svgData.lines.forEach(line => addLineNew(line));
+    svgData.circles.forEach(circle => addCircleNew(circle));
+    scaleTo(scaleLevel);
+}
+
+/** This function will remove a DOM element based on its id. It's used for 1) deleting svg elements outright and 2) deleting svg elements
+before they are eventually redrawn.
+*/
+function deleteSvgObjects(svgData) {
+	if (svgData === null) {
+		alert("No svgData was generated. No svg elements were deleted.");
+		return;
+	}
+	svgData.lines.forEach(line => {
+		const oldLine = document.getElementById(line.id);
+		if (oldLine) {
+			oldLine.remove();
+		}
+	});
+	svgData.circles.forEach(circle => {
+		const oldCircle = document.getElementById(circle.id);
+		if (oldCircle) {
+			oldCircle.remove();	
+		}
+	});
+}
+
+//rename once working
+function addCircleNew(circle) {
+	if (!(circle instanceof Circle)) {
+		throw "circle argument must be an instance returned by the Circle constructor function";
+	}
+	const svgCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+	svgCircle.setAttribute("cx", circle.cx - globalLonOffset);
+	svgCircle.setAttribute("cy", circle.cy - globalLatOffset);
+	svgCircle.setAttribute("r", circle.r);
+	svgCircle.setAttribute("id", circle.id);
+	svgCircle.setAttribute("class", circle.domClass);
+	svgCircle.setAttribute("stroke-width", circle.strokeWidth);
+	document.getElementsByClassName("svg-pan-zoom_viewport")[0].appendChild(svgCircle);
+}
+
+//rename once working
+function addLineNew(line) {
+	if (!(line instanceof Line)) {
+		throw "line argument must be an instance returned by the Line constructor function";
+	}
+	const svgLine = document.createElementNS('http://www.w3.org/2000/svg', 'line'); 
+	svgLine.setAttribute("x1", line.x1 - globalLonOffset);
+	svgLine.setAttribute("y1", line.y1 - globalLatOffset);
+	svgLine.setAttribute("x2", line.x2 - globalLonOffset);
+	svgLine.setAttribute("y2", line.y2 - globalLatOffset);
+	svgLine.setAttribute("id", line.id);
+	svgLine.setAttribute("class", line.domClass);
+	svgLine.setAttribute("stroke-width", line.strokeWidth);
+	document.getElementsByClassName("svg-pan-zoom_viewport")[0].appendChild(svgLine);
+}
+
+//setTimeout(main,100)
+(() => {
+    //buildFeeder();
+    //const t0 = performance.now();
+    globalTreeWrapper = createTreeWrapper(writeFeeder.tree);
+    createViewport(globalTreeWrapper, document.getElementById("svgContainer"));
+    const viewport = document.getElementsByClassName('svg-pan-zoom_viewport')[0];
+
+    const svgData = createAddableSvgData(globalTreeWrapper);
+    svgData.addTo(viewport);
+
+    attachHandlers();
+    // Interface setup
+    document.getElementById("searchInput").addEventListener("change", getSearchResults);
+    // jQuery
+    if (window.jQuery !== undefined) {
+        applyJQueryStyles();
+    } else {
+        disableJQueryFunctionality();
+    }
+
+    document.getElementById('loadingMessage').style.display = 'none'
+    /* 
+    const t1 = performance.now();
+    const time = t1 - t0;
+    console.log(`Tree rendering time was ${time} ms`);
+    */
+    
+    
+    /*
+    setTimeout(function() {
+        const deleteSvgData = createDeletableSvgData(globalTreeWrapper.tree);
+        deleteSvgData.deleteFrom(viewport);
+    }, 2000);
+    */
+})();
+
+//ADD PROMPT TO SAVE CHANGES BEFORE EXIT
+{% if showFileMenu %}
+	window.onbeforeunload = function(e) {
+        if (JSON.stringify(readFeeder) !== JSON.stringify(writeFeeder)) {
+            const confirmationMessage = `It looks like you have been editing something. 
+            If you leave before saving, your changes will be lost.`;
+            return confirmationMessage;
+        }
+	};
+{% endif %}
 </script>
+<!--<script type='text/javascript' src='/static/distDataValidation.js'></script>-->
+{% if spec %}{{ spec | safe }}{% endif %}

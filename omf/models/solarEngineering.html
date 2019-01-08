@@ -90,12 +90,12 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
-				<input type="text" id="zipCode" name="zipCode" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
+				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location. Use 5-digit Zip Code format</span></label>
+				<input type="text" id="zipCode" name="zipCode" pattern="[0-9]{5}" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Simulation Length<span class="classic">Number of time steps in the installation. Due to large data volumes, the current limit is 9999.</span></label>
-				<input type="text" id="simLength" name="simLength" required="required" pattern="^(\d{1,4})$"/>
+				<label class="tooltip">Simulation Length<span class="classic">Number of time steps in the installation. The current range of acceptable values is 3 - 9999.</span></label>
+				<input type="number" id="simLength" name="simLength" required="required" min ="3" max = "9999"/>
 			</div>
 			<div class="shortInput">
 				<label>Length Units</label>

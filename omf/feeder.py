@@ -1,6 +1,6 @@
 ''' Functions for manipulting electrical distribution feeder models. '''
 
-import datetime, copy, os, re, warnings, networkx as nx, json
+import datetime, copy, os, re, warnings, networkx as nx, json, matplotlib
 from matplotlib import pyplot as plt
 
 # Wireframe for new feeder objects:
@@ -30,6 +30,7 @@ def sortedWrite(inTree):
 	output = ''
 	try:
 		for key in sortedKeys:
+			# print inTree[key]
 			output += _dictToString(inTree[key]) + '\n'
 	except ValueError:
 		raise Exception
@@ -45,7 +46,7 @@ def glmToOmd(glmPath, omdPath, attachFilePaths=[]):
 		dirs, fname = os.path.split(attPath)
 		omf['attachments'][fname] = open(attPath).read()
 	with open(omdPath, 'w') as outFile:
-		json.dump(omd, outFile)
+		json.dump(omd, outFile, indent=4)
 
 def getMaxKey(inTree):
 	''' Find the largest key value in the tree. We need this because de-embedding causes noncontiguous keys. '''
@@ -231,7 +232,7 @@ def treeToDiNxGraph(inTree):
 def latLonNxGraph(inGraph, labels=False, neatoLayout=False, showPlot=False):
 	''' Draw a networkx graph representing a feeder.'''
 	# Be quiet Matplotlib.
-	warnings.filterwarnings("ignore")
+	warnings.filterwarnings("ignore",category=matplotlib.cbook.mplDeprecation)
 	# Set up figure.
 	plt.axis('off')
 	plt.tight_layout()
@@ -418,6 +419,11 @@ def _dictToString(inDict):
 		return '#define ' + inDict['#define'] + '\n'
 	elif '#set' in inDict:
 		return '#set ' + inDict['#set'] + '\n'
+	#Following was made to help with gridballast gridlabd functionality, so that frequency player doesn't need to be reopened
+	elif 'class' in inDict and inDict['class'] =='player':
+		return 'class' + ' ' + inDict['class'] + ' {\n' + '     ' + 'double' + ' ' + inDict['double'] + ';' + '\n};\n'
+	# elif 'collector' in inDict and 'group' in inDict and inDict['group'] =='class=ZIPload':
+	# 	return 'object' + ' ' + inDict['object'] + ' {\n' + '	' + 'name' + ' ' + 'collector_ZIPloads' + ';'+'\n' +'group' + ' ' + inDict['group']+';'+'\n'+'property' +' '+inDict['property']+';'+'\n'+'interval'+' '+inDict['interval']+';'+'\n'+'file'+' '+inDict['file']+'\n};\n'
 
 def _deEmbedOnce(glmTree):
 	''' Take all objects nested inside top-level objects and move them to the top level.
