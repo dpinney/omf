@@ -1357,19 +1357,27 @@ describe("Unit tests", function() {
                     expect(row.validateNewKey(newKey)).toBe(false);
                 });
 
-                it("should return true if the key argument is an empty string", function() {
+                it("should return false if the key argument is an empty string", function() {
                     const newKey = "";
                     const map = {
                         "schedule_skew": 520,
                     };
                     const row = createRow({map: map, key: "schedule_skew"});
-                    expect(row.validateNewKey(newKey)).toBe(true);
+                    expect(row.validateNewKey(newKey)).toBe(false);
                 });
 
                 it("should return true if the key argument does NOT already exist in the map", function() {
                     const newKey = "new key";
                     const row = createRow({map: map, key: "schedule_skew"});
                     expect(row.validateNewKey(newKey)).toBe(true);
+                });
+            });
+
+            describe("validateCurrentKey()", function() {
+
+                it("should return false if the current key is an empty string", function() {
+                    const row = createRow({map: map, key: ""});
+                    expect(row.validateCurrentKey()).toBe(false);
                 });
             });
 
@@ -1485,6 +1493,7 @@ describe("Unit tests", function() {
                 });
             });
 
+
             describe("updateMapValue", function() {
 
                 it("should remove leading and trailing whitespace from the value", function() {
@@ -1493,6 +1502,34 @@ describe("Unit tests", function() {
                     input.value = "   value with whitespace         ";
                     row.updateMapValue(input);
                     expect(row.map["schedule_skew"]).toEqual("value with whitespace");
+                });
+
+                describe("when the current key is invalid regardless of the value", function() {
+
+                    let row, input, spy;
+
+                    beforeEach(function() {
+                        spyOn(window, "alert");
+                        spy = spyOn(rowPrototype, "validateCurrentKey").and.returnValue(false);
+                        row = createRow({map: map, key: "schedule_skew"});
+                        input = document.createElement("input");
+                        input.value = "ok";
+                    });
+
+                    it("should not update the map value", function() {
+                        row.updateMapValue(input);
+                        expect(row.map["key"]).toBeUndefined();
+                    });
+
+                    it("should call validateCurrentKey()", function() {
+                        row.updateMapValue(input);
+                        expect(spy).toHaveBeenCalled();
+                    });
+
+                    it("should set the value of the input to be an empty string", function() {
+                        row.updateMapValue(input);
+                        expect(input.value).toEqual("");
+                    });
                 });
             });
 

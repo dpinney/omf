@@ -649,17 +649,15 @@ let downX, downY, upX, upY;
 //let lastElementSelected = {};
 
 // Global to keep track of previous selection target
-let previousTarget = {};
+//let previousTarget = {};
 
 // Global to keep track of multiple alt-selections
-let selection = []; 
+//let selection = []; 
 
 //**************************************************
 // Deprecated globals
 //**************************************************
 
-// Keeping track of search location
-let searchCursor;
 // Scale that all SVG objects are drawn at
 let scaleLevel = 1.0; 
 
@@ -778,7 +776,7 @@ function svgClick(event) { // eslint-disable-line
 		tableDestroy()
 		multiSelectionTable()
 	}
-	previousTarget = event.target
+	//previousTarget = event.target
 }
 
 //function hotkeys() {
@@ -2071,15 +2069,25 @@ const rowPrototype = {
     /* Private helper methods */
 
     /**
-     * Return false if the key already exists in the map, otherwise return true.
+     * Return false if the key already exists in the map or, otherwise return true.
      * @param {string} key - the incoming key that the user wants to write into the map belonging to this Row.
+     * @return {boolean}
      */
     validateNewKey(key) {
-        if (this.map[key] !== undefined) {
+        if (this.map[key] !== undefined || key === "") {
             return false;
         }
         return true;
     },
+
+    /** 
+     * Return false if the current key is an empty string, otherwise return true.
+     * @return {boolean}
+     */
+    validateCurrentKey() {
+        return this.key === "" ? false : true;
+    },
+
     /**
      * Update a key in the map that belongs to this Row.
      * @param {HTMLInputElement} input - contains the new key that should be written to the map, if it is valid.
@@ -2091,7 +2099,7 @@ const rowPrototype = {
             delete this.map[this.key];
             this.key = newKey;
         } else {
-            alert(`The key "${newKey}" already exists in this object. Please enter a unique key.`);
+            alert(`Please enter a unique, valid key for this object.`);
             input.value = this.key;
         } 
     },
@@ -2108,6 +2116,10 @@ const rowPrototype = {
             const that = this;
 
             input.required = true;
+            input.pattern = "[\\s]*[\\S]+.*";
+            //if (input.validity.valueMissing) {
+            //    input.setCustomValidity("Please fill out this field. Alternatively, delete this row.");
+            //}
 
             input.addEventListener("change", function() {
                 that.updateMapKey(this);
@@ -2136,6 +2148,11 @@ const rowPrototype = {
      * @param {HTMLInputElement} input - contains the new value that should be written to the map, if the value is valid.
      */
     updateMapValue(input) {
+        if (!this.validateCurrentKey()) {
+            alert("Please enter a valid key for this row before entering a value.");
+            input.value = "";
+            return;
+        }
         const newValue = input.value.trim();
         if (this.validateNewValue(newValue)) {
             this.map[this.key] = newValue;
