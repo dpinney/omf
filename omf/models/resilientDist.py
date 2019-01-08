@@ -25,6 +25,13 @@ modelName, template = metadata(__file__)
 tooltip = "Model extreme weather and determine optimal investment for distribution resiliency."
 hidden = True
 
+'''
+if ...
+	arr
+	warningTemplate = Template("Warning: Hazard Field of size {{ coordinates }} larger than circuit.")
+	warningTemplate.render(coordinates=arr)
+'''
+
 class HazardField(object):
 	''' Object to modify a hazard field from an .asc file. '''
 
@@ -284,11 +291,17 @@ def convertToGFM(gfmInputTemplate, feederModel):
 	return gfmJson
 
 def genDiagram(outputDir, feederJson, damageDict):
-	# Be quiet networkx:
 	warnings.filterwarnings("ignore")
 	# Load required data.
 	tree = feederJson.get("tree",{})
 	links = feederJson.get("links",{})
+	
+	# Get swing buses.
+	green_list = []
+	for node in tree:
+		if 'bustype' in tree[node] and tree[node]['bustype'] == 'SWING':
+			green_list.append(tree[node]['name'])
+
 	# Generate lat/lons from nodes and links structures.
 	for link in links:
 		for typeLink in link.keys():
@@ -327,7 +340,7 @@ def genDiagram(outputDir, feederJson, damageDict):
 		pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
 	else:
 		pos = {n:inGraph.node[n].get('pos',(0,0)) for n in inGraph}
-	# Draw all the edges.
+	# Draw all the edges
 	for e in inGraph.edges():
 		edgeName = inGraph.edge[e[0]][e[1]].get('name')
 		edgeColor = 'black'
@@ -359,11 +372,44 @@ def genDiagram(outputDir, feederJson, damageDict):
 		else:
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
 	# Draw nodes and optional labels.
+	red_list, blue_list, grey_list  = ([] for i in range(3))
+	for key in pos.keys(): # Sort keys into seperate lists. Is there a more elegant way of doing this.
+		if key not in green_list:
+			prefix = key[:3]
+			if prefix == 'C_l':
+				red_list.append(key)
+			elif prefix == "B_l":
+				blue_list.append(key)
+			else:
+				grey_list.append(key)
+
+	nx.draw_networkx_nodes(inGraph, pos, 
+						   nodelist=green_list,
+						   node_color='green',
+						   linewidths=0,
+						   node_size=10)
+	nx.draw_networkx_nodes(inGraph,pos,
+						   nodelist=red_list,
+						   node_color='red',
+						   linewidths=0,
+						   node_size=10)
+	nx.draw_networkx_nodes(inGraph,pos,
+						   nodelist=blue_list,
+						   node_color='blue',
+						   linewidths=0,
+						   node_size=10)
+	nx.draw_networkx_nodes(inGraph,pos,
+						   nodelist=grey_list,
+						   node_color='grey',
+						   node_size=10)
+
+	'''
 	nx.draw_networkx_nodes(inGraph,pos,
 						   nodelist=pos.keys(),
 						   node_color=[feeder._obToCol(inGraph.node[n].get('type','underground_line')) for n in inGraph],
 						   linewidths=0,
 						   node_size=10)
+	'''
 	if labels:
 		nx.draw_networkx_labels(inGraph,pos,
 								font_color='black',
