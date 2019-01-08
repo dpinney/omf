@@ -299,9 +299,9 @@
                 /*width: 100%;*/
             }
 
-			/* descriptionTable */
+			/* dataTable */
 
-			.descriptionTable {
+			.dataTable {
 				position: fixed;
 				top: 55px;
 				right: 5px;
@@ -311,15 +311,15 @@
                 overflow-x: hidden;
 				max-height: 80%;
 			}
-            .descriptionTable tr {
+            .dataTable tr {
                 border-bottom: 1px solid black;
             }
-            .descriptionTable tr:last-child {
+            .dataTable tr:last-child {
                 border: 0px;
             }
-            .descriptionTable p {
+            /*.dataTable p {
                 margin: 0px;
-            }
+            }*/
             .tableTitle {
                 background-color: black;
                 color: white;
@@ -615,7 +615,8 @@
             </div>
         </div>
         <!-- Modals-->
-        <div id="tableInsert"></div>
+        <div id="descriptionTables"></div>
+        <div id="selectionTable"></div>
 	</body>
 </html>
 <script id='componentsInsert'>const components = {% if components %}{{ components | safe }}{% else %}null{% endif %}; 
@@ -727,27 +728,53 @@ function createViewport(tree, svgContainer) {
 	});
 }
 
-function mouseDown(event) { // eslint-disable-line
+function mouseDown(event) {
 	downX = event.pageX
 	downY = event.pageY
 }
-function mouseUp(event) { // eslint-disable-line
+function mouseUp(event) {
 	upX = event.pageX
 	upY = event.pageY
 }
 
-function svgClick(event) { // eslint-disable-line
-	// Listener on the SVG object that handles user clicks.
-	if (downX !== upX || downY !== upY) {
+/**
+ * TODO: add unit tests
+ * Listener on the SVG object that handles user clicks.
+ */
+function svgClick(downEvent, upEvent) {
+    if (downEvent.clientX !== upEvent.clientX || downEvent.clientY !== upEvent.clientY) {
 		// Ignore drags, those should be handled by svg-panzoom.
-		return
-	}
-	if (!event.altKey) {
+        return;
+    }
+    const element = downEvent.target;
+    if (downEvent.altKey && element.id !== "svgContainer" && !element.classList.contains("parentChild")) {
+        destroyTables(["descriptionTables", "selectionTable"]);
+        if (!element.classList.contains("selected")) {
+            element.classList.add("selected");
+        } 
+        let ids = [];
+        getSelected().forEach(e => { ids.push(e.id); });
+        const table = createSelectionTable(ids, gTreeWrapper);
+        document.getElementById("selectionTable").appendChild(table);
+        return;
+    } 
+    if (!downEvent.altKey) {
+        getSelected().forEach(e => { e.classList.remove("selected"); });
+        destroyTables(["descriptionTables", "selectionTable"]);
+        if (element.id !== "svgContainer" && !element.classList.contains("parentChild")) {
+            element.classList.add("selected");
+            const table = createDescriptionTable(element.id, gTreeWrapper);
+            document.getElementById("descriptionTables").appendChild(table);
+        } 
+    }
+    return;
+
+    /*
+    if (!event.altKey) {
 		// Not holding alt and clicking the canvas, so clear the selection.
 		clearGlobalSelectionArray();
-		tableDestroy();
+		destroyTables();
     }
-	//if (event.target.id !== 'svgContainer' && !Array.from(document.getElementsByClassName("selected")).includes(document.getElementById(event.target.id) && /*!selection.includes(document.getElementById(event.target.id)) && writeFeeder.tree[event.target.id] !== undefined)*/) {
     if (event.target.id !== 'svgContainer') {
         const element = event.target;
         if (element.classList.contains("parentChild")) {
@@ -761,22 +788,19 @@ function svgClick(event) { // eslint-disable-line
 		//lastElementSelected = (event.target);
         //event.target.classList.add('selected');
 
-        tableDestroy();
-        /* This alone is creating nodes, I don't even have to attach the table to the document
-        */
-        const table = createTable([event.target.id], gTreeWrapper);
-        document.getElementById("tableInsert").appendChild(table);
-        
-		//tableCreate(writeFeeder.tree[event.target.id]);
-		//selection.push(event.target);
+        destroyTables();
+        //const table = createTable([event.target.id], gTreeWrapper);
+        const table = createDescriptionTable(event.target.id, gTreeWrapper);
+        document.getElementById("descriptionTables").appendChild(table);
 	}
 	// Alt for multiple selection.
 	if (document.getElementsByClassName("selection").length >= 2) {
 	//if (selection.length >= 2) {
-		tableDestroy()
+		destroyTables()
 		multiSelectionTable()
 	}
-	//previousTarget = event.target
+    //previousTarget = event.target
+    */
 }
 
 //function hotkeys() {
@@ -833,19 +857,16 @@ function toggleRowContent(tr) {
 	} 
 }
 
-/** Hide the object table. */
-function tableDestroy() {
-    const tableInsert = document.getElementById("tableInsert");
-    Array.from(tableInsert.children).forEach(childNode => {
-        tableInsert.removeChild(childNode);
+/**
+ * TODO: add unit tests
+ */
+function destroyTables(ids) {
+    ids.forEach(id => {
+        const tableDiv = document.getElementById(id);
+        Array.from(tableDiv.children).forEach(t => {
+            tableDiv.removeChild(t);
+        });
     });
-	//const table = document.getElementById("descriptionTable");
-	//table.style.display = "none";
-	//const tbody = table.children[0];
-	//const deleteTargets = Array.from(tbody.children).filter(tr => tr.children[0].tagName.toLowerCase() === "td");
-	//deleteTargets.forEach(node => {
-	//	tbody.removeChild(node);
-	//})
 }
 
 function scaleTo(x) {
@@ -906,30 +927,30 @@ function dropPill(thisButton, name) { // eslint-disable-line
 	//if (window.event.toElement==thisButton) {event.stopPropagation()}
 }*/
 
-function multiSelectionTable() {
-	// Display the table when a user has selected multiple objects.
-	//const tabScroll = document.getElementById('tableScroller')
-	//const tbl = document.createElement('table')
-	//const headRow = document.createElement('tr')
-	//headRow.innerHTML = '<th>Selected Elements</th>'
-	//tbl.appendChild(headRow)
-	const table = document.getElementById("descriptionTable");
-	table.style.display = "block";
-	const tbody = table.children[0];
-	tbody.children[0].children[0].style.display = "none";
-	//tbody.children[0].children[1].style.display = "none";
-	tbody.children[0].children[1].style.display = "table-cell";
-	tbody.children[1].style.display = "none";
-	tbody.children[2].style.display = "none";
-	// Put the object in.
-	for (let i = 0; i < document.getElementsByClassName("selected").length; i++) {
-	//for (let i = 0; i < selection.length; i++) {
-		const row = document.createElement('tr');
-		row.innerHTML = '<td>' + writeFeeder.tree[selection[i].id].name + '</td>';
-		tbody.appendChild(row)
-	}
-	//tabScroll.appendChild(tbl)
-}
+//function multiSelectionTable() {
+//	// Display the table when a user has selected multiple objects.
+//	//const tabScroll = document.getElementById('tableScroller')
+//	//const tbl = document.createElement('table')
+//	//const headRow = document.createElement('tr')
+//	//headRow.innerHTML = '<th>Selected Elements</th>'
+//	//tbl.appendChild(headRow)
+//	const table = document.getElementById("descriptionTable");
+//	table.style.display = "block";
+//	const tbody = table.children[0];
+//	tbody.children[0].children[0].style.display = "none";
+//	//tbody.children[0].children[1].style.display = "none";
+//	tbody.children[0].children[1].style.display = "table-cell";
+//	tbody.children[1].style.display = "none";
+//	tbody.children[2].style.display = "none";
+//	// Put the object in.
+//	for (let i = 0; i < document.getElementsByClassName("selected").length; i++) {
+//	//for (let i = 0; i < selection.length; i++) {
+//		const row = document.createElement('tr');
+//		row.innerHTML = '<td>' + writeFeeder.tree[selection[i].id].name + '</td>';
+//		tbody.appendChild(row)
+//	}
+//	//tabScroll.appendChild(tbl)
+//}
 
 function clickLatLon(event) {
 	//Returns real Lat/Long of a click event, used in the moveBus function
@@ -961,6 +982,13 @@ function clearGlobalSelectionArray() {
 	//})
 	//selection = [];
 	Array.from(document.getElementsByClassName("selected")).forEach(element => element.classList.remove("selected"));
+}
+
+/**
+ * TODO: add unit tests
+ */
+function getSelected() {
+	return Array.from(document.getElementsByClassName("selected"));
 }
 
 //**************************************************
@@ -1884,21 +1912,59 @@ const nonModifiableProperties = ["name", "object", "from", "to", "parent"];
 
 const titleProperties = ["object"];
 
-/** Return a fully formed html table that can be attached to the DOM.
- * 
+/** 
+ * TODO: add unit tests
+ * Return a fully formed html table that can be attached to the DOM.
  */
-function createTable(ids, tWrapper) {
-    if (!Array.isArray(ids)) {
-        throw new Error("ids argument must be an array");
-    }
-    if (ids.length === 1) {
-        return createDescriptionTable(ids[0], tWrapper);
-    } 
-}
+//function createTable(ids, tWrapper) {
+//    if (!Array.isArray(ids)) {
+//        throw new Error("ids argument must be an array");
+//    }
+//    if (ids.length === 1) {
+//        return createDescriptionTable(ids[0], tWrapper);
+//    } 
+//}
 
 /**
  * TODO: add unit tests
- * 
+ * If an object has no name, just get the first property in the object.
+ */
+function createSelectionTable(ids, tWrapper) {
+    const table = document.createElement("table");
+    const tHead = document.createElement("thead");
+    const tBody = document.createElement("tbody"); 
+
+    const row = createRow({key: "Selected Elements"});
+    Array.from(row.self.children).forEach(td => { td.classList.add("tableTitle") });
+    row.self.children[1].setAttribute("colspan", "2");
+
+    tHead.append(row.self);
+    table.append(tHead);
+    table.append(tBody);
+    table.classList.add("dataTable");
+
+    ids.forEach(id => {
+        let obj = tWrapper.tree[id];
+        let name = obj.name != null ? obj.name : Object.keys(obj)[0];
+        let row = createRow({key: name, deletable: true});
+        let button = document.createElement("button");
+        button.textContent = "view";
+        button.classList.add("modalButton");
+        button.addEventListener("click", function() {
+            const table = createDescriptionTable(id, tWrapper);
+            document.getElementById("descriptionTables").append(table);
+        });
+        let td = Array.from(row.self.getElementsByTagName("td")).find(td => {
+            return td.dataset.placeholder === "viewButton" ? true : false;
+        });
+        td.append(button);
+        tBody.append(row.self);
+    });
+    return table;
+}
+
+/**
+ * TODO: add unit tests, don't allow longitude and latitude to be editted for lines!, turn all key inputs into plain text upon clicking save (would look nice)
  * The form element is only used to take advantage of the "required" form validation functionality that is native to the
  * browser.
  */
@@ -1914,11 +1980,9 @@ function createDescriptionTable(id, tWrapper) {
     table.append(tBody);
     tBody.append(buttonRow);
     buttonRow.append(buttonCell);
-    table.classList.add("descriptionTable");
+    table.classList.add("dataTable");
     buttonRow.classList.add("buttonRow");
     buttonCell.setAttribute("colspan", "3");
-
-    // TODO: Don't allow longitude and latitude to be editted for lines!
     const tObject = createTreeObject(id, tWrapper);
     if (!isLine(tObject.data)) {
         buttonCell.append(createButton({action: "move", tObject: tObject, tWrapper: tWrapper, tableBody: tBody}).self);
@@ -1926,15 +1990,12 @@ function createDescriptionTable(id, tWrapper) {
     buttonCell.append(createButton({action: "delete", tObject: tObject, tWrapper: tWrapper, tableBody: tBody}).self);
     buttonCell.append(createButton({action: "add", tObject: tObject, tableBody: tBody}).self);
     buttonCell.append(createButton({action: "save"}).self);
-
     form.addEventListener("submit", function(event) {
         event.preventDefault();
         const svg = createAddableSvgData(tWrapper.insert(tObject));
         svg.redrawTo(gViewport);
         alert("Object saved");
-        // TODO: turn all key inputs into plain text upon clicking save (would look nice)
     });
-
     Object.keys(tObject.data).forEach(key => {
         let row;
         if (titleProperties.includes(key)) {
@@ -2010,7 +2071,7 @@ function createButton({action, tableBody=null, tObject=null, tWrapper=null}) {
     const button = Object.create(buttonPrototype);
     button.self = document.createElement("button");
     button.self.textContent = action;
-    button.self.classList.add("modalButton", "tableButton");
+    button.self.classList.add("modalButton");
     button.tObject = tObject;
     button.tWrapper = tWrapper;
     button.tableBody = tableBody;
@@ -2025,7 +2086,7 @@ function createButton({action, tableBody=null, tObject=null, tWrapper=null}) {
             button.self.classList.add("deleteButton");
             button.self.addEventListener("click", function() {
                 button.deleteObject();                
-                document.getElementById("tableInsert").removeChild(tableBody.parentElement.parentElement);
+                document.getElementById("descriptionTables").removeChild(tableBody.parentElement.parentElement);
             });
             break;
         case "add":
@@ -2170,6 +2231,7 @@ const rowPrototype = {
     getValueElement(value, nonModifiableProperties) {
         const td = document.createElement("td");
         if (value == null) {
+            td.dataset.placeholder = "viewButton";
             return td;
         } else if (nonModifiableProperties.includes(this.key)) {
             td.textContent = value;
@@ -2239,7 +2301,7 @@ const rowPrototype = {
  */ 
 function createRow({key=null, deletable=false, map=null} = {}) {
     if (map == null && key != null) {
-        throw new Error("A key argument cannot be passed if a map argument is not passed");
+        //throw new Error("A key argument cannot be passed if a map argument is not passed");
     }
     if (map != null && map[key] === undefined && key !== "") {
         throw new Error("A row should be instantiated with a key field that exists in the map argument");
@@ -2259,6 +2321,16 @@ function createRow({key=null, deletable=false, map=null} = {}) {
 // Initialization
 //**************************************************
 
+function attachMouseListeners() {
+    let downEvent;
+    document.getElementById("svgContainer").addEventListener("mousedown", function(event) {
+        downEvent = event;
+    });
+    document.getElementById("svgContainer").addEventListener("mouseup", function(upEvent) {
+        svgClick(downEvent, upEvent);
+    });
+}
+
 
 //setTimeout(main,100)
 (() => {
@@ -2272,9 +2344,10 @@ function createRow({key=null, deletable=false, map=null} = {}) {
     const addSvgData = createAddableSvgData(gTreeWrapper);
     addSvgData.addTo(gViewport);
 
-    document.getElementById("svgContainer").addEventListener("click", function(event) {
-        svgClick(event);
-    });
+    //document.getElementById("svgContainer").addEventListener("click", function(event) {
+    //    svgClick(event);
+    //});
+    attachMouseListeners();
 
     /*
     attachFeederList(document.getElementById("publicFeederList"), publicFeeders, "public");
