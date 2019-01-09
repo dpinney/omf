@@ -722,6 +722,7 @@ function createViewport(tree, svgContainer) {
         //center: true,
 		//fit: true,
         //contain: true,
+        dblClickZoomEnabled: false,
         zoomScaleSensitivity: 0.2,
         minZoom: 0.25,
 		maxZoom: 100
@@ -751,11 +752,15 @@ function svgClick(downEvent, upEvent) {
         destroyTables(["descriptionTables", "selectionTable"]);
         if (!element.classList.contains("selected")) {
             element.classList.add("selected");
-        } 
+        } else {
+            element.classList.remove("selected");
+        }
         let ids = [];
         getSelected().forEach(e => { ids.push(e.id); });
-        const table = createSelectionTable(ids, gTreeWrapper);
-        document.getElementById("selectionTable").appendChild(table);
+        if (ids.length > 0) {
+            const table = createSelectionTable(ids, gTreeWrapper);
+            document.getElementById("selectionTable").appendChild(table);
+        }
         return;
     } 
     if (!downEvent.altKey) {
@@ -1933,20 +1938,16 @@ function createSelectionTable(ids, tWrapper) {
     const table = document.createElement("table");
     const tHead = document.createElement("thead");
     const tBody = document.createElement("tbody"); 
-
     const row = createRow({key: "Selected Elements"});
     Array.from(row.self.children).forEach(td => { td.classList.add("tableTitle") });
     row.self.children[1].setAttribute("colspan", "2");
-
     tHead.append(row.self);
     table.append(tHead);
     table.append(tBody);
     table.classList.add("dataTable");
-
     ids.forEach(id => {
         let obj = tWrapper.tree[id];
         let name = obj.name != null ? obj.name : Object.keys(obj)[0];
-        let row = createRow({key: name, deletable: true});
         let button = document.createElement("button");
         button.textContent = "view";
         button.classList.add("modalButton");
@@ -1954,10 +1955,7 @@ function createSelectionTable(ids, tWrapper) {
             const table = createDescriptionTable(id, tWrapper);
             document.getElementById("descriptionTables").append(table);
         });
-        let td = Array.from(row.self.getElementsByTagName("td")).find(td => {
-            return td.dataset.placeholder === "viewButton" ? true : false;
-        });
-        td.append(button);
+        let row = createRow({key: name, value: button, deletable: true}, id);
         tBody.append(row.self);
     });
     return table;
@@ -2130,6 +2128,21 @@ const rowPrototype = {
     /* Private helper methods */
 
     /**
+     * Throw an error if arguments passed to createRow() were invalid.
+     * @param {Object} args - an object containing the arguments that were passed to createRow()
+     */
+    validateArguments(args) {
+        if (args.key != null && args.value != null && args.map != null) {
+            throw new Error(`If there are key and map arguments, then the value of the row is determined by map[key] and passing a value
+            argument is invalid`);
+        } else if (args.map != null && args.map[args.key] === undefined && args.key !== "") {
+            throw new Error("If a map argument is passed, the key argument should exist in that map.");
+        } else if (args.key === "" && args.map == null) {
+            throw new Error("If the key is an empty string, a map argument should be passed to the function");
+        }
+    },
+
+    /**
      * Return false if the key already exists in the map or, otherwise return true.
      * @param {string} key - the incoming key that the user wants to write into the map belonging to this Row.
      * @return {boolean}
@@ -2174,19 +2187,16 @@ const rowPrototype = {
             const input = document.createElement("input");
             input.classList.add("modalInput");
             td.appendChild(input);
-            const that = this;
-
             input.required = true;
             input.pattern = "[\\s]*[\\S]+.*";
             //if (input.validity.valueMissing) {
             //    input.setCustomValidity("Please fill out this field. Alternatively, delete this row.");
             //}
-
+            const that = this;
             input.addEventListener("change", function() {
                 that.updateMapKey(this);
-                //this.required = true;
             });
-        } else if (this.key != null) {
+        } else {
             td.textContent = this.key;
         } 
         return td;
@@ -2224,34 +2234,45 @@ const rowPrototype = {
     },
     /** 
      * Return an HTMLTableRowElement.
-     * @param {string} value - the value to display within this HTMLTableRowElement.
      * @param {Array} nonModifiableProperties - a hard-coded array of properties that the user shouldn't be able to modify.
      * @return {HTMLTableRowElement}
      */
-    getValueElement(value, nonModifiableProperties) {
+    getValueElement(nonModifiableProperties) {
         const td = document.createElement("td");
-        if (value == null) {
-            td.dataset.placeholder = "viewButton";
+        if (typeof(this.value) === "string") {
+            td.textContent = this.value;
             return td;
-        } else if (nonModifiableProperties.includes(this.key)) {
-            td.textContent = value;
-        } else {
-            const input = document.createElement("input");
-            if (this.key === "longitude") {
-                input.dataset.coordinate = "longitude";
-            } else if (this.key === "latitude") {
-                input.dataset.coordinate = "latitude";
+        } else if (this.value instanceof HTMLElement) {
+            td.append(this.value);
+            return td;
+        } else if (this.value == null) {
+            if (this.map == null) {
+                return td;
+            } else {
+                const value = this.key === "" ? "" : this.map[this.key];
+                if (nonModifiableProperties.includes(this.key)) {
+                    td.textContent = value;
+                } else {
+                    const input = document.createElement("input");
+                    if (this.key === "longitude") {
+                        input.dataset.coordinate = "longitude";
+                    } else if (this.key === "latitude") {
+                        input.dataset.coordinate = "latitude";
+                    }
+                    input.classList.add("modalInput");
+                    td.appendChild(input);
+                    const that = this;
+                    input.addEventListener("change", function() {
+                        that.updateMapValue(this);
+                    });
+                    input.value = value;
+                }
+                return td;
             }
-            input.classList.add("modalInput");
-            td.appendChild(input);
-            const that = this;
-            input.addEventListener("change", function() {
-                that.updateMapValue(this);
-            });
-            input.value = value;
-        } 
-        return td;
+        }
+        throw new Error("Invalid value was provided for this row");
     },
+
     /** 
      * TODO: add unit tests
      * Return an HTMLTableRowElement.
@@ -2276,10 +2297,16 @@ const rowPrototype = {
     },
 
     /**
-     *  Delete the row from the table and the map.
+     * Delete the row from the table. Delete the key from the map, if there was a map.
+     * Remove "selected" from the classList of the element, if elementId is set.
      */
     delete() {
-        delete this.map[this.key];
+        if (this.map != null) {
+            delete this.map[this.key];
+        } 
+        if (this.elementId != null) {
+            document.getElementById(this.elementId).classList.remove("selected");
+        }
         this.self.parentElement.removeChild(this.self);
     },
 
@@ -2294,28 +2321,29 @@ const rowPrototype = {
 /** 
  * Return a Row that can be appended to a table.
  * 
- * @param {string} key - the key of a property in the map object.
+ * @param {string} key - the key of the row, which must be a property of the map argument if the map argument is not null.
+ * @param {string|HTMLElement} - an optional value of the row.
+ * @param {Object} map - an optional object that contains the data being manipulated by all of the rows. 
  * @param {boolean} deletable - whether or not the row should have a delete button.
- * @param {Object} map - an object that contains the data being manipulated by all of the rows. 
  * @return {Row} - A wrapper object around the HTMLTableRowElement.
  */ 
-function createRow({key=null, deletable=false, map=null} = {}) {
-    if (map == null && key != null) {
-        //throw new Error("A key argument cannot be passed if a map argument is not passed");
-    }
-    if (map != null && map[key] === undefined && key !== "") {
-        throw new Error("A row should be instantiated with a key field that exists in the map argument");
-    }
+function createRow({key, value=null, map=null, deletable=false}) {
     const obj = Object.create(rowPrototype);
+    obj.validateArguments(arguments[0]);
     obj.key = key;
+    obj.value = value;
     obj.map = map;
     obj.self = document.createElement("tr");
     obj.self.append(obj.getDeleteElement(deletable, nonDeletableProperties));
     obj.self.append(obj.getKeyElement());
-    const value = map == null ? null : key === "" ? "" : map[key];
-    obj.self.append(obj.getValueElement(value, nonModifiableProperties));
+    obj.self.append(obj.getValueElement(nonModifiableProperties));
+    if (arguments[1] != null) {
+        obj.elementId = arguments[1];
+    }
     return obj;
 }
+
+
 
 //**************************************************
 // Initialization

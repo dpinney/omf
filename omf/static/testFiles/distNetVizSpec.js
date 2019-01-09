@@ -780,42 +780,10 @@ describe("Unit tests", function() {
 
         describe("createRow()", function() {
 
-            it("should throw an error if the key argument does not exist in the map argument and the key is not an empty string",
-            function() {
-                const table = document.createElement("table");
-                const map = {
-                    "schedule_skew": 129
-                };
-                expect(function() {
-                    createRow({map: map, key: "doesn't exist"});
-                }).toThrowError();
-            });
-
-            it("should throw an error if a non-null/undefined key argument is passed with a null/undefined map argument",
-            function() {
-                expect(function() {
-                    createRow({map: null, key: ""});
-                }).toThrowError();
-            });
-
-            it("should not throw an error if the key argument exists in the map argument", function() {
-                const table = document.createElement("table");
-                const map = {
-                    "schedule_skew": 129
-                };
-                expect(function() {
-                    createRow({map: map, key: "schedule_skew"});
-                }).not.toThrowError();
-            });
-
-            it("should not throw an error if the key argument equals an empty string", function() {
-                const table = document.createElement("table");
-                const map = {
-                    "schedule_skew": 399
-                };
-                expect(function() {
-                    createRow({map: map, key: ""});
-                }).not.toThrowError();
+            it("should call validateArguments()", function() {
+                const spy = spyOn(rowPrototype, "validateArguments").and.callThrough();
+                createRow({key: "some key"});
+                expect(spy).toHaveBeenCalled();
             });
         });
 
@@ -1342,10 +1310,41 @@ describe("Unit tests", function() {
             let map;
 
             beforeEach(function() {
-                table = document.createElement("table");
+                //table = document.createElement("table");
                 map = {
-                    "schedule_skew": "349" 
+                    "schedule_skew": "349",
+                    "fixed value": "permanent"
                 };
+            });
+
+            describe("validateArguments()", function() {
+
+                it("should throw an error if args.key, args.value, and args.map are all defined", function() {
+                    expect(function() {
+                        createRow({key: "some key", value: "some value", map: map});
+                    }).toThrowError();
+                });
+
+                describe("when args.key and args.map are defined", function() {
+
+                    it("should throw an error if args.key doesn't exist in args.map and args.key is not an empty string", function() {
+                        expect(function() {
+                            createRow({key: " ", map: map});
+                        }).toThrowError();
+                    });
+
+                    it("should not throw an error if args.key doesn't exist in args.map and args.key is an empty string", function() {
+                        expect(function() {
+                            createRow({key: "", map: map});
+                        }).not.toThrowError();
+                    });
+                });
+
+                it("should throw an error if args.key is an empty string and args.map is not defined", function() {
+                    expect(function() {
+                        createRow({key:""});
+                    }).toThrowError();
+                });
             });
 
             describe("validateNewKey()", function() {
@@ -1456,30 +1455,35 @@ describe("Unit tests", function() {
 
             describe("getKeyElement()", function() {
 
-                it(`should return a <td> HTMLElement with 0 children and textContent equal to the key of this row,
-                if the row.key is not null and not an empty string`, function() {
-                    const row = createRow({map: map, key: "schedule_skew"});
-                    const td = row.getKeyElement();
-                    expect(td instanceof HTMLTableCellElement).toBe(true);
-                    expect(td.textContent).toEqual("schedule_skew");
-                    expect(td.children.length).toEqual(0);
+                describe("when the key is not an empty string", function() {
+
+                    it(`should return an HTMLTableCellElement with textContent equal to this row.key`, function() {
+                        const row = createRow({map: map, key: "schedule_skew"});
+                        const td = row.getKeyElement();
+                        expect(td instanceof HTMLTableCellElement).toBe(true);
+                        expect(td.textContent).toEqual("schedule_skew");
+                    });
+
+                    it("should return an HTMLTableCellElement with 0 children", function() {
+                        const row = createRow({map: map, key: "schedule_skew"});
+                        const td = row.getKeyElement();
+                        expect(td.children.length).toEqual(0);
+                    });
                 });
 
-                it(`should return a <td> HTMLElement with 1 <input> child element, if the row.key equals an empty string`, function() {
-                    const row = createRow({map: map, key: ""});
-                    const td = row.getKeyElement();
-                    expect(td instanceof HTMLTableCellElement).toBe(true);
-                    expect(td.children[0] instanceof HTMLInputElement).toBe(true);
-                    expect(td.children.length).toEqual(1);
-                });
+                describe("when the key is an empty string", function() {
 
-                it(`should return a <td> HTMLElement with 0 children and with textContent equal to an empty string,
-                when the row.key and row.map are null`, function() {
-                    const row = createRow();
-                    const td = row.getKeyElement();
-                    expect(td instanceof HTMLTableCellElement).toBe(true);
-                    expect(td.textContent).toEqual("");
-                    expect(td.children.length).toEqual(0);
+                    it(`should return an HTMLTableCellElement with 1 child that is an HTMLInputElement
+                    which has its 'required' and 'pattern' attributes set `, function() {
+                        const row = createRow({map: map, key: ""});
+                        const td = row.getKeyElement();
+                        const input = td.children[0];
+                        expect(td instanceof HTMLTableCellElement).toBe(true);
+                        expect(td.children.length).toEqual(1);
+                        expect(input instanceof HTMLInputElement).toBe(true);
+                        expect(input.required).toBeDefined();
+                        expect(input.pattern).toBeDefined();
+                    });
                 });
             });
 
@@ -1494,7 +1498,7 @@ describe("Unit tests", function() {
             });
 
 
-            describe("updateMapValue", function() {
+            describe("updateMapValue()", function() {
 
                 it("should remove leading and trailing whitespace from the value", function() {
                     const row = createRow({map: map, key: "schedule_skew"});
@@ -1535,57 +1539,126 @@ describe("Unit tests", function() {
 
             describe("getValueElement()", function() {
 
-                it(`should return a <td> HTMLElement with 0 children and textContent equal to an empty string,
-                if the value argument is null/undefined`, function() {
-                    const row = createRow();
-                    const td = row.getValueElement()
-                    expect(td instanceof HTMLTableCellElement).toBe(true);
-                    expect(td.children.length).toEqual(0);
-                    expect(td.textContent).toEqual("");
+                const nonModifiableProperties = ["fixed value"];
+
+                describe("when this row has a key and a value but no map", function() {
+
+                    describe("when this row.value is a string", function() {
+
+                        it("should return an HTMLTableCellElement with textContent equal to this row.value", function() {
+                            const row = createRow({key: "some key", value: "some value"});
+                            const td = row.getValueElement(nonModifiableProperties)
+                            expect(td instanceof HTMLTableCellElement).toBe(true);
+                            expect(td.textContent).toEqual("some value");
+                            expect(td.children.length).toEqual(0);
+                        });
+
+                        it("should return an HTMLTableCellElement with 0 children", function() {
+                            const row = createRow({key: "some key", value: "some value"});
+                            const td = row.getValueElement(nonModifiableProperties)
+                            expect(td instanceof HTMLTableCellElement).toBe(true);
+                            expect(td.children.length).toEqual(0);
+                        });
+                    });
+
+                    describe("when this row.value is an HTMLElement", function() {
+
+                        it("should return an HTMLTableCellElement with 1 child that is this row.value", function() {
+                            const button = document.createElement("button");
+                            const row = createRow({key: "some key", value: button});
+                            const td = row.getValueElement(nonModifiableProperties)
+                            expect(td instanceof HTMLTableCellElement).toBe(true);
+                            expect(td.children.length).toEqual(1);
+                            expect(td.children[0]).toBe(button);
+                        });
+                    });
                 });
 
-                it(`should return a <td> HTMLElement with 0 children and textContent equal to the value argument,
-                if the value argument is not null/undefined and the corresponding key is contained within the
-                nonModifiableProperties array`, function() {
-                    const nonModifiableProperties = ["schedule_skew"];
-                    const row = createRow({key: "schedule_skew", map: map});
-                    const td = row.getValueElement(row.map[row.key], nonModifiableProperties);
-                    expect(td instanceof HTMLTableCellElement).toBe(true);
-                    expect(td.children.length).toEqual(0);
-                    expect(td.textContent).toEqual("349");
+                describe("when this row has a key and a map but no value", function() {
+
+                    describe("when this row.map[row.key] is not in the nonModifiableProperties array", function() {
+
+                        it(`should return an HTMLTableCellElement with 1 child that is an HTMLInputElement whose
+                        value equals this row.map[row.key]`, function() {
+                            const row = createRow({key: "schedule_skew", map: map});
+                            const td = row.getValueElement(nonModifiableProperties);
+                            const input = td.children[0];
+                            expect(td instanceof HTMLTableCellElement).toBe(true);
+                            expect(td.children.length).toEqual(1);
+                            expect(input instanceof HTMLInputElement).toBe(true);
+                            expect(input.value).toEqual("349");
+                        });
+                    });
+
+                    describe("when this row.map[row.key] is in the nonModifiableProperties array", function() {
+
+                        it(`should return an HTMLTableCellElement with textContent equal to this row.map[row.key]`, function() {
+                            const row = createRow({key: "fixed value", map: map});
+                            const td = row.getValueElement(nonModifiableProperties);
+                            expect(td instanceof HTMLTableCellElement).toBe(true);
+                            expect(td.textContent).toEqual("permanent");
+                        });
+
+                        it("should return an HTMLTableCellElement with 0 children", function() {
+                            const row = createRow({key: "fixed value", map: map});
+                            const td = row.getValueElement(nonModifiableProperties);
+                            expect(td instanceof HTMLTableCellElement).toBe(true);
+                            expect(td.children.length).toEqual(0);
+                        });
+                    });
                 });
 
-                it(`should return a <td> HTMLElement with 1 <input> child element whose value equals the value argument,
-                if the value argument is not null/undefined and is not contained with the nonModifiableProperties array`,
-                function() {
-                    const nonModifiableProperties = ["schedule_skew"];
-                    const row = createRow();
-                    const td = row.getValueElement("", nonModifiableProperties);
-                    expect(td instanceof HTMLTableCellElement).toBe(true);
-                    expect(td.children.length).toEqual(1);
-                    expect(td.children[0].value).toEqual(""); 
+                describe("when this row has a key, but no value or map", function() {
+
+                    it("should return an HTMLTableCellElement with textContent equal to an empty string", function() {
+                        const row = createRow({key: "some key"});
+                        const td = row.getValueElement(nonModifiableProperties);
+                        expect(td instanceof HTMLTableCellElement).toBe(true);
+                        expect(td.textContent).toEqual("");
+                    });
+
+                    it("should return an HTMLTableCellElement with no children", function() {
+                        const row = createRow({key: "some key"});
+                        const td = row.getValueElement(nonModifiableProperties);
+                        expect(td instanceof HTMLTableCellElement).toBe(true);
+                        expect(td.children.length).toEqual(0);
+                    });
                 });
             });
 
             describe("delete()", function() {
 
-                it("should delete the key of this row from the the map", function() {
-                    const row = createRow({map: map, key: "schedule_skew"});
-                    const table = document.createElement("table");
-                    table.append(row.self);
-                    expect(row.map[row.key]).toBeDefined();
-                    row.delete();
-                    expect(row.map[row.key]).toBeUndefined();
+                describe("if this row has a map", function() {
 
+                    it("should delete the key of this row from the map", function() {
+                        const row = createRow({map: map, key: "schedule_skew"});
+                        const table = document.createElement("table");
+                        table.append(row.self);
+                        expect(row.map[row.key]).toBeDefined();
+                        row.delete();
+                        expect(row.map[row.key]).toBeUndefined();
+                    });
+
+                    it("should remove the self <tr> HTMLElement of the row from its parent", function() {
+                        const row = createRow({map: map, key: "schedule_skew"});
+                        const table = document.createElement("table");
+                        table.append(row.self);
+                        expect(table.children.length).toEqual(1);
+                        row.delete();
+                        expect(table.children.length).toEqual(0);
+                    });
                 });
 
-                it("should remove the self <tr> HTMLElement of the row from its parent", function() {
-                    const row = createRow({map: map, key: "schedule_skew"});
-                    const table = document.createElement("table");
-                    table.append(row.self);
-                    expect(table.children.length).toEqual(1);
-                    row.delete();
-                    expect(table.children.length).toEqual(0);
+                describe("if this row does not have a map", function() {
+
+                    it("should remove the self <tr> HTMLElement of the row from its parent", function() {
+                        const row = createRow({key: "key"});
+                        const table = document.createElement("table");
+                        table.append(row.self);
+                        expect(table.children.length).toEqual(1);
+                        row.delete();
+                        expect(table.children.length).toEqual(0);
+                    });
                 });
             });
         });
