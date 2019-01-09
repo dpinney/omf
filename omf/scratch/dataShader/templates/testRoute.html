@@ -1,16 +1,128 @@
 <head>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+		<!-- Leaflet  Imports -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css"
+	integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+	crossorigin=""/>
+	<script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
+	integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
+	crossorigin=""></script>
 </head>
 <style type="text/css">
-	/*#controller {position: absolute}*/
-	/*#imageClick {position: absolute}*/
-	#dsImage {
-		height: 100%;
-		width: 100%;
-	}
+
+.leaflet-tile { border: solid black 5px; }
+
+body, html {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+#imageCanvas {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+}
+
+#mapid {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	z-index: -2;
+	/*
+	visibility: hidden;
+	*/
+/*	top: 50%;
+	left: 50%;
+	-ms-transform: translate(-50%, 0);
+	-webkit-transform: translate(-50%, 0);
+	transform: translate(-50%, -50%);*/
+}
+
+#loadingScreen {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	z-index: -3;
+}
+
+#spinner {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	-webkit-transform: translate(-50%, -50%);
+	-ms-transform: translate(-50%, -50%);
+	transform: translate(-50%, -50%);
+}
+
+#dsImage{
+
+	/*display: none;*/
+	position:absolute;
+	z-index:-1;
+	width: 100%;
+	height: 100%;
+}
+
+
+#controller{
+	background-color: coral;
+	position:absolute;
+	z-index: 1;
+}
+label, input {
+	display: block;
+}
+
+.strafeArrow{
+	opacity: 1;
+}
+
+#strafeLeft {
+	position: absolute;
+	height: 25%;
+	top:50%;
+	left: 0;
+	-webkit-transform: translate(0%, -50%);
+	-ms-transform: translate(0%, -50%);
+	transform: translate(0%, -50%);
+}
+#strafeRight {
+	position: absolute;
+	height: 25%;
+	top: 50%;
+	right: 0;
+	-webkit-transform: translate(0%, -50%);
+	-ms-transform: translate(0%, -50%);
+	transform: translate(0%, -50%);
+}
+#strafeBottom {
+	position: absolute;
+	left: 50%;
+	bottom: 0;
+	-ms-transform: translate(-50%, 0);
+	-webkit-transform: translate(-50%, 0);
+	transform: translate(-50%, 0);
+	width: 25%;
+}
+#strafeTop {
+	position: absolute;
+	left: 50%;
+	top: 0;
+	-ms-transform: translate(-50%, 0);
+	-webkit-transform: translate(-50%, 0);
+	transform: translate(-50%, 0);
+	width: 25%;
+}
+
 </style>
 <body>
-	<div id="imageContainer"><img src="{{newImage}}" id="dsImage"></div>
+	<div id="canDiv">
+		<img class='img' id="dsImage" alt="" />
+		<canvas id="imageCanvas" height="900" width="1900" >
+		</canvas>
 	<div id="controller">
 		<form name="inputForm" id="inputForm">
 			<label>x_low</label>
@@ -21,49 +133,259 @@
 			<input type="text" name="x_high" id="x_high" value="{{x_high}}"/>
 			<label>y_high</label>
 			<input type="text" name="y_high" id="y_high" value="{{y_high}}"/>
-			<button id="changeGraph" type="submit">Zoom button</button>
+			<button id="changeGraph" type="submit">Set Zoom</button>
 		</form>
+	<div id="zoomButtons">
+		<button class="zoomButton" id="zoomIn" name="zoomIn">Zoom In</button>
+		<button class="zoomButton" id="zoomOut" name="zoomOut">Zoom Out</button>
 	</div>
-	<div id="imageClick"></div>
+	</div>
+	<div id="strafeArrows">
+		<button class="strafeArrow" id="strafeLeft" name="strafeLeft">&lArr;</button>
+		<button class="strafeArrow" id="strafeRight" name="strafeRight">&rArr;</button>
+		<button class="strafeArrow" id="strafeTop" name="strafeTop">&uArr;</button>
+		<button class="strafeArrow" id="strafeBottom" name="strafeBottom">&dArr;</button>
+	</div>
+	<div id="mapid"></div>
+	<div id="loadingScreen">
+		<img id="spinner" src="{{url_for('static', filename='spinner.gif')}}" />
+	</div>
+	</div>
+	 <script>
+	 	/*
+	$('#strafeRight').on('click', function() {
+	    $(this).css('right', -250);
+	    $(this).closest('.sidebar-outer').css('width', 0);
+	});*/
+    </script>
 	<script type="text/javascript">
 	$(document).ready(function() {
+		let x_low = parseFloat("{{x_low}}");
+		let x_high = parseFloat("{{x_high}}");
+		let y_low = parseFloat("{{y_low}}");
+		let y_high = parseFloat("{{y_high}}");
+
+		let bounds = [[y_high, x_high], [y_low, x_low]];
+		var mymap = L.map('mapid', { zoomControl:false });
+		mymap.fitBounds([
+			[-180, -180],
+			[180, 180]
+			]);
+		//console.log(mymap.getBounds())
+		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		attribution: null,
+		maxZoom: 18,
+		//id: 'mapbox.streets'
+		//accessToken: 'your.mapbox.access.token'
+		}).addTo(mymap);
+		//var markerLow = L.marker([x_low, y_low]).addTo(mymap);
+		//var markerHigh = L.marker([x_high, y_high]).addTo(mymap);
+		//var markerTop= L.marker([50, 50]).addTo(mymap);
+		//var imageUrl = 'data:image/png;base64,{{image}}';
+    	//var imageBounds = bounds;
+		//var image = L.imageOverlay(imageUrl, imageBounds);
+		//image.addTo(mymap)
+		var canvas = document.getElementById('imageCanvas');
+		var ctx = canvas.getContext('2d');
+		var domRect = canvas.getBoundingClientRect();
+		canvas.width = domRect.width;
+		canvas.height = domRect.height;
+		var loadingScreen = document.getElementById('loadingScreen');
+		loadingScreen.width = domRect.width;
+		loadingScreen.height = domRect.height;
 		var data = {};
-	    $("#dsImage").on("mousedown", function(event) {
-	    	event.preventDefault();
-	        var x_down = (event.pageX - this.offsetLeft) / this.width;
-	        var y_down = (event.pageY - this.offsetTop) / this.height;
-	        //console.log(x);
-	        //console.log(y);
+		var isDown = false;
+		var x_start;
+		var y_start;
+		var x_down;
+		var y_down;
+		var x_up;
+		var y_up;
+		data["current_x_low"] = $("#x_low").val();
+		data["current_y_low"] = $("#y_low").val();
+		data["current_x_high"] = $("#x_high").val();
+		data["current_y_high"] = $("#y_high").val();
 
-	        data['x_down'] = x_down;
-	        data['y_down'] = y_down;});
+		//Style the resizing box
+		ctx.fillStyle = "rgba(0, 0, 255, 0.5)";
+	  	ctx.strokeStyle = "lightgray";
+	  	ctx.lineWidth = 3;
 
-			$("#dsImage").on("mouseup", function(event) {
-			    var x_up = (event.pageX - this.offsetLeft) / this.width;
-			    var y_up = (event.pageY - this.offsetTop) / this.height;
-			    console.log("release mouse");
-			    //console.log(x_high);
-			    //console.log(y_high);
+		//Update canvas in case of window resize
+		$(window).resize(function(){
+			$('#loadingScreen').css('z-index', 3);
+			domRect = canvas.getBoundingClientRect();
+			console.log(domRect.width);
+			canvas.width = domRect.width;
+			canvas.height = domRect.height;
+			ctx.fillStyle = "rgba(0, 0, 255, 0.5)";
+		  	ctx.strokeStyle = "lightgray";
+		  	ctx.lineWidth = 3;
+		});
 
-			    data['x_up'] = x_up;
-			    data['y_up'] = y_up;
-			console.log(data);
-
+		$(".zoomButton").on("click", function(event){
+			$('#loadingScreen').css('z-index', 3);
+			//ghet current x and y values
+			var new_x_low = parseFloat($("#x_low").val());
+			var new_y_low = parseFloat($("#y_low").val());
+			var new_x_high = parseFloat($("#x_high").val());
+			var new_y_high = parseFloat($("#y_high").val());
+			// get midpoint for zoom calc
+			var x_middle = (new_x_low + new_x_high) / 2;
+			var y_middle = (new_y_low + new_y_high) / 2;
+			var zoomDirection = this.name;
+			data["zoomDirection"] = zoomDirection;
+			if (zoomDirection == 'zoomIn') {
+				new_x_low = (new_x_low + x_middle) /2;
+				new_y_low = (new_y_low + y_middle)/2;
+				new_x_high = (new_x_high + x_middle)/2;
+				new_y_high = (new_y_high + y_middle)/2;
+			}
+			else if (zoomDirection == 'zoomOut') {
+				new_x_low = (new_x_low*2 - x_middle);
+				new_y_low = (new_y_low*2 - y_middle);
+				new_x_high = (new_x_high*2 - x_middle);
+				new_y_high = (new_y_high*2 - y_middle);
+			}
+			$('#x_low').val(new_x_low);
+			$('#y_low').val(new_y_low);
+			$('#x_high').val(new_x_high);
+			$('#y_high').val(new_y_high);
+			mymap.fitBounds([
+				[new_y_high, new_x_high],
+				[new_y_low, new_x_low]
+			]);
+		});
+		mymap.on("moveend", function(event){
+			console.log(domRect.width);
+			data["current_x_low"] = mymap.getBounds().getWest();
+			data["current_y_low"] = mymap.getBounds().getSouth();
+			data["current_x_high"] = mymap.getBounds().getEast();
+			data["current_y_high"] = mymap.getBounds().getNorth();
+			data['width'] = domRect.width;
+			data['height'] = domRect.height;
+			mymap.invalidateSize();
 			$.ajax({
 			    type: 'POST',
-			    url: '/zoom',
+			    url: '/mapResize',
 			    dataType: 'json',
 			    contentType: 'application/json; charset=utf-8',
 			    data: JSON.stringify(data),
 			    success: function(callback) {
-			        // Watch out for Cross Site Scripting security issues when setting dynamic content!
-			        $('#dsImage').attr('src', callback.newImage);;
+			        document.getElementById("inputForm").style.display = 'block';
+					$(".strafeArrow").show();
+					$(".zoomButton").show();
+					$('#dsImage').attr('src', callback.newImage);
+					$('#loadingScreen').css('z-index', -3);
+					//imageUrl = callback.newImage;
+					//imageBounds = [[mymap.getBounds().getSouth(), mymap.getBounds().getWest()], [mymap.getBounds().getNorth(), mymap.getBounds().getEast()]];
+					//image = L.imageOverlay(imageUrl, imageBounds);
+					//image.addTo(mymap);
 			    },
 			    error: function() {
 			        $(this).html("error!");
 			    }
 			});
+		});
+
+		$(".strafeArrow").on("click", function(event){
+			$('#loadingScreen').css('z-index', 3);
+			console.log(document.getElementById('loadingScreen').style.zIndex);
+			map_x_low = parseFloat($("#x_low").val());
+			map_y_low = parseFloat($("#y_low").val());
+			map_x_high = parseFloat($("#x_high").val());
+			map_y_high = parseFloat($("#y_high").val());
+			var direction = this.name;
+			//console.log(direction);
+			var x_width = map_x_high - map_x_low;
+			var y_height = map_y_high - map_y_low;
+			if (direction == 'strafeRight'){
+				map_x_low = map_x_high; 
+				map_x_high = map_x_high + x_width;
+			}
+			else if (direction == 'strafeLeft'){
+				map_x_high = map_x_low;
+				map_x_low = map_x_low - x_width;
+			}
+			else if (direction == 'strafeBottom'){
+				map_y_high = map_y_low;
+				map_y_low = map_y_low - y_height;
+			}
+			else if (direction == 'strafeTop'){
+				map_y_low = map_y_high;
+				map_y_high = map_y_high + y_height;
+			}
+			console.log(map_x_low);
+			console.log(map_x_high);
+			$('#x_low').val(map_x_low);
+			$('#y_low').val(map_y_low);
+			$('#x_high').val(map_x_high);
+			$('#y_high').val(map_y_high);
+			mymap.fitBounds([
+				[map_y_high, map_x_high],
+				[map_y_low, map_x_low]
+			]);
+		});
+
+		$("#imageCanvas").on("mousemove", function(event){
+			if (!isDown) {
+		        return;
+			}
+			mouseX = parseFloat(event.pageX - this.offsetLeft);
+		    mouseY = parseFloat(event.pageY - this.offsetTop);
+		    ctx.clearRect(0, 0, canvas.width, canvas.height);
+		    var width = mouseX - x_start;
+		    var height = mouseY - y_start;
+		    //console.log(isDown);
+		    //console.log(mouseX);
+		    //console.log(x_start);
+		    //console.log(width);
+		    ctx.beginPath();
+		    ctx.rect(x_start, y_start, width, height);
+		    ctx.fill();
+		    ctx.stroke();
+		});
+
+	    $("#imageCanvas").on("mousedown", function(event) {
+	    	event.preventDefault();
+	    	document.getElementById("inputForm").style.display = 'none';
+	    	$(".strafeArrow").hide();
+			$(".zoomButton").hide();
+	    	var domRect = this.getBoundingClientRect();
+	        x_down = mymap.mouseEventToLatLng(event).lng;
+	        x_start = event.pageX - this.offsetLeft;
+	        y_down = mymap.mouseEventToLatLng(event).lat;
+	        y_start = event.pageY - this.offsetTop;
+	        //console.log(x_down);
+	        //console.log(y_down);
+
+	        data['x_down'] = x_down;
+	        data['y_down'] = y_down;
+	        isDown = true;
 	    });
+
+		$("#imageCanvas").on("mouseup", function(event) {
+			$('#loadingScreen').css('z-index', 3);
+			var domRect = this.getBoundingClientRect();
+		    x_up = mymap.mouseEventToLatLng(event).lng;
+		    y_up = mymap.mouseEventToLatLng(event).lat;
+
+		    data['x_up'] = x_up;
+		    data['y_up'] = y_up;
+		    isDown = false;
+		    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+			
+			$('#x_low').val(Math.min(x_down, x_up));
+			$('#y_low').val(Math.min(y_down, y_up));
+			$('#x_high').val(Math.max(x_down, x_up));
+			$('#y_high').val(Math.max(y_down, y_up));
+			mymap.fitBounds([
+				[Math.max(y_down, y_up), Math.max(x_down, x_up)],
+				[Math.min(y_down, y_up), Math.min(x_down, x_up)]
+			]);
+	    });
+		mymap.fitBounds(bounds);
 	});
 	</script>
 	<script type="text/javascript">
@@ -87,7 +409,7 @@
                     data: JSON.stringify(data),
                     context: Form,
                     success: function(callback) {
-                        console.log('testing');
+                        //console.log('testing');
                         // Watch out for Cross Site Scripting security issues when setting dynamic content!
                         $('#dsImage').attr('src', callback.newImage);
                     },

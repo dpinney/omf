@@ -182,7 +182,7 @@
 	</div>
 	<div id ="runIndicator" class="content running">
 		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.<br>
-		{{allInputData[allInputData.find('"runTimeEstimate"') + 20:allInputData.find('minutes.", ') + 8]}}
+		If you chose the 'Water Heater' configuration, expect 4 minute run time. Otherwise 30 seconds.
 	</div>
 	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
 		<pre id='errorText' style='overflow-x:scroll'></pre>
@@ -194,6 +194,75 @@
 	</div>
 	<!-- Output tables, graphs, etc. -->
 	<div id="output" class="postRun">
+		<p class="reportTitle postRun" style="page-break-before:always">Temperature Data</p>
+		<div id="tempReport" class="tightContent postRun">
+			<div id="tempChart"></div>
+			<script>
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{
+						"series":{
+							"animation":false,
+							// "pointStart":Date.parse(allOutputData.startDate),
+							"shadow":false,
+							"pointInterval":3600000},
+						"line":{"marker":{"enabled":false}}},
+					"xAxis":{
+						"maxZoom":108000000,
+						"tickColor":"gray",
+						"dateTimeLabelFormats":{
+							"month": '%b %e'
+						},
+						"type":"datetime",
+						"lineColor":"gray"
+					},
+					"yAxis":{
+						"title":{"text":"Temperature (C)","style":{"color":"gray"}},
+					},
+					"title":{"text": allOutputData.dataCheck, "verticalAlign":"bottom", "align":"right", "y":-400, "x":-150, "style":{"color":"gray", "fontSize":"36px"}},
+					"series":[
+						{"name":"Temperature (C)","marker":{"enabled":false},"color":"purple","data":allOutputData.tempData},
+					],
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"tempChart","type":"line","marginRight":20, "height":500,"width":1000},
+					"tooltip":{"valueDecimals":1},
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
+		</div>
+		<p class="reportTitle postRun" style="page-break-before:always">Participation Heuristic</p>
+		<div id="tempReport" class="tightContent postRun">
+			<div id="participationChart"></div>
+			<script>
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{
+						"series":{
+							"animation":false,
+							// "pointStart":Date.parse(allOutputData.startDate),
+							"shadow":false,
+							"pointInterval":3600000},
+						"line":{"marker":{"enabled":false}}},
+					"xAxis":{
+						"maxZoom":108000000,
+						"tickColor":"gray",
+						"dateTimeLabelFormats":{
+							"month": '%b %e'
+						},
+						"type":"datetime",
+						"lineColor":"gray"
+					},
+					"yAxis":{
+						"title":{"text":"Power (kW)","style":{"color":"gray"}},
+					},
+					"title":{"text": allOutputData.dataCheck, "verticalAlign":"bottom", "align":"right", "y":-400, "x":-150, "style":{"color":"gray", "fontSize":"36px"}},
+					"series":[
+						{"name":"Minimum Power (kW)","marker":{"enabled":false},"color":"black","data":allOutputData.minPowerSeries},
+						{"name":"Maximum Power (kW)","marker":{"enabled":false},"color":"gray","data":allOutputData.maxPowerSeries},
+						{"name":"Minimum Energy (kWh)","marker":{"enabled":false},"color":"purple","data":allOutputData.minEnergySeries},
+						{"name":"Maximum Energy (kWh)","marker":{"enabled":false},"color":"blue","data":allOutputData.maxEnergySeries},
+					],
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"participationChart","type":"line","marginRight":20, "height":500,"width":1000},
+					"tooltip":{"valueDecimals":1},
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
+		</div>
 		<p class="reportTitle postRun" style="page-break-before:always">VBAT Energy Available & Demand Impact</p>
 		<div id="powerReport" class="tightContent postRun">
 			<div id="powerChart"></div>
@@ -220,17 +289,17 @@
 					},
 					"title":{"text": allOutputData.dataCheck, "verticalAlign":"bottom", "align":"right", "y":-400, "x":-150, "style":{"color":"gray", "fontSize":"36px"}},
 					"series":[
-						{"name":"VBAT power (kW)","marker":{"enabled":false},"color":"red","data":allOutputData.VBpower,"pointPlacement": +0.1},
+						{"name":"Optimal dispatch (kW)","marker":{"enabled":false},"color":"red","data":allOutputData.VBpower,"pointPlacement": +0.1},
 						{"name":"VBAT state of charge (kWh)","marker":{"enabled":false},"color":"purple","data":allOutputData.VBenergy,"pointPlacement": -0.2},
-						{"name":"VBAT dispatched (kW)","marker":{"enabled":false},"color":"green","data":allOutputData.VBdispatch,visible: false},
 						{"name":"Demand (kW)","marker":{"enabled":false},"color":"gray","data":allOutputData.demand},
 						{"name":"Demand after VBAT (kW)","marker":{"enabled":false},"color":"blue","data":allOutputData.demandAdjusted},
 					],
 					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"powerChart","type":"line","marginRight":20, "height":500,"width":1000},
-					"tooltip":false,
+					"tooltip":{"valueDecimals":1},
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
+		
 		<!--<p class="reportTitle postRun" style="page-break-before:always">VBAT Demand Impact</p>
 		<div id="demandReport" class="tightContent postRun">
 			<div id="demandChart"></div>

@@ -20,7 +20,7 @@ tooltip = "The solarCashflow model allows a utility to calculate what impact mem
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
-	inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])
+	inputDict["climateName"] = zipCodeToClimateName(inputDict["zipCode"])
 	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
 		pJoin(modelDir, "climate.tmy2"))
 	# Set up SAM data structures.

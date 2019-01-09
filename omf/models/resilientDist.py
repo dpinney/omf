@@ -13,6 +13,7 @@ import pprint as pprint
 import copy
 import os.path
 import warnings
+import numpy as np
 
 # OMF imports
 import omf.feeder as feeder
@@ -23,6 +24,97 @@ from omf.weather import zipCodeToClimateName
 modelName, template = metadata(__file__)
 tooltip = "Model extreme weather and determine optimal investment for distribution resiliency."
 hidden = True
+
+'''
+if ...
+	arr
+	warningTemplate = Template("Warning: Hazard Field of size {{ coordinates }} larger than circuit.")
+	warningTemplate.render(coordinates=arr)
+'''
+
+class HazardField(object):
+	''' Object to modify a hazard field from an .asc file. '''
+
+	def __init__(self, filePath):
+		''' Use parsing function to set up harzard data in dict format in constructor.'''
+		self.hazardObj = self.parseHazardFile(filePath)
+
+	def parseHazardFile(self, inPath):
+		''' Parse input .asc file. '''
+		with open(inPath, "r") as hazardFile: # Parse the file, strip away whitespaces.
+			content = hazardFile.readlines()
+		content = [x.strip() for x in content]
+		hazardObj = {}
+		field = []
+		for i in range(len(content)): 
+			if i <= 5: # First, get the the parameters for the export function below. Each gets their own entry in our object.
+				line = re.split(r"\s*",content[i])
+				hazardObj[line[0]] = float(line[1])
+			if i > 5: # Then, get the numerical data, mapping each number to its appropriate parameter.
+				field.insert((i-6),map(float,content[i].split(" "))) 
+		field = np.array(field)
+		hazardObj["field"] = field
+		return hazardObj
+
+	def exportHazardObj(self, outPath):
+		''' Export file. ''' 
+		ncols = "ncols        " + str(self.hazardObj["ncols"]) + "\n" # Get parameters from object.
+		nrows = "nrows        " + str(self.hazardObj["nrows"]) + "\n"
+		xllcorner = "xllcorner    " + str(self.hazardObj["xllcorner"]) + "\n"
+		yllcorner = "yllcorner    " + str(self.hazardObj["yllcorner"]) + "\n"
+		cellsize = "cellsize     " + str(self.hazardObj["cellsize"]) + "\n"
+		NODATA_value = "NODATA_value " + str(self.hazardObj["NODATA_value"]) + "\n"
+		output = ncols + nrows + xllcorner + yllcorner + cellsize + NODATA_value
+		fieldList = self.hazardObj["field"].tolist() # Get numerical data, convert each number to a string and add that onto the to-be exported data. 
+		for i in range(len(fieldList)):
+			output = output + " ".join(map(str, fieldList[i])) + "\n"
+		with open(outPath, "w") as newHazardFile: # Export to new file.
+			newHazardFile.write("%s" % output)
+
+	def moveLocation(self, x, y): 
+		''' Shift temporal boundaries for image plot. ''' 
+		self.hazardObj["xllcorner"] = x
+		self.hazardObj["yllcorner"] = y
+
+	def changeCellSize(self, cellSize): 
+		''' Scale the cell size in image plot. '''
+		self.hazardObj["cellsize"] = cellSize
+
+	def drawHeatMap(self):
+		''' Draw heat map-color coded image map with user-defined boundaries and cell-size. '''
+		heatMap = plt.imshow(
+			self.hazardObj['field'],
+			cmap = 'hot',
+			interpolation = 'nearest',
+			extent = [
+				self.hazardObj["xllcorner"],
+				self.hazardObj["xllcorner"] + self.hazardObj["ncols"] * self.hazardObj["cellsize"],
+				self.hazardObj["yllcorner"],
+				self.hazardObj["yllcorner"] + self.hazardObj["nrows"] * self.hazardObj["cellsize"]
+			],
+			aspect='auto')
+		#plt.gca().invert_yaxis() This isn't needed anymore?
+		plt.title("Hazard Field")
+		plt.show()
+
+	def scaleField(self, scaleFactor):
+		''' Numerically scale the field with user defined scaling factor. ''' 
+		for a in np.nditer(self.hazardObj["field"], op_flags=['readwrite']):
+			a[...] = scaleFactor * a
+
+	def randomField(self, lowerLimit = 0, upperLimit = 100):
+		''' Generate random field with user defined limits. '''
+		for a in np.nditer(self.hazardObj["field"], op_flags=['readwrite']):
+			a[...] = random.uniform(lowerLimit, upperLimit) 
+
+def _testHazards():
+	hazard = HazardField(omf.omfDir + "/static/testFiles/wf_clip.asc")
+	hazard.scaleField(.5)
+	hazard.moveLocation(20, 100)
+	hazard.changeCellSize(0.5)
+	hazard.randomField()
+	# hazard.exportHazardObj("modWindFile.asc")
+	# hazard.drawHeatMap()
 
 def getNodePhases(obj, maxRealPhase):
 	''' Convert phase info in GridLAB-D obj (e.g. ABC) to GFM phase format (e.g. [True,True,True].'''
@@ -169,7 +261,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 	for key, glmOb in jsonTree.iteritems():
 		# Check for a swing node:
 		isSwing = glmOb.get('bustype','') == 'SWING'
-		if glmOb.get('name','') in genCands or isSwing:
+		if glmOb.get('name', None) in genCands or isSwing:
 			genID = glmOb.get('name','')+'_gen'
 			for elem in gfmJson['buses']:
 				if elem['id'][0:-4] == genID[0:-4]:
@@ -199,11 +291,17 @@ def convertToGFM(gfmInputTemplate, feederModel):
 	return gfmJson
 
 def genDiagram(outputDir, feederJson, damageDict):
-	# Be quiet networkx:
 	warnings.filterwarnings("ignore")
 	# Load required data.
 	tree = feederJson.get("tree",{})
 	links = feederJson.get("links",{})
+	
+	# Get swing buses.
+	green_list = []
+	for node in tree:
+		if 'bustype' in tree[node] and tree[node]['bustype'] == 'SWING':
+			green_list.append(tree[node]['name'])
+
 	# Generate lat/lons from nodes and links structures.
 	for link in links:
 		for typeLink in link.keys():
@@ -242,7 +340,7 @@ def genDiagram(outputDir, feederJson, damageDict):
 		pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
 	else:
 		pos = {n:inGraph.node[n].get('pos',(0,0)) for n in inGraph}
-	# Draw all the edges.
+	# Draw all the edges
 	for e in inGraph.edges():
 		edgeName = inGraph.edge[e[0]][e[1]].get('name')
 		edgeColor = 'black'
@@ -274,11 +372,44 @@ def genDiagram(outputDir, feederJson, damageDict):
 		else:
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
 	# Draw nodes and optional labels.
+	red_list, blue_list, grey_list  = ([] for i in range(3))
+	for key in pos.keys(): # Sort keys into seperate lists. Is there a more elegant way of doing this.
+		if key not in green_list:
+			prefix = key[:3]
+			if prefix == 'C_l':
+				red_list.append(key)
+			elif prefix == "B_l":
+				blue_list.append(key)
+			else:
+				grey_list.append(key)
+
+	nx.draw_networkx_nodes(inGraph, pos, 
+						   nodelist=green_list,
+						   node_color='green',
+						   linewidths=0,
+						   node_size=10)
+	nx.draw_networkx_nodes(inGraph,pos,
+						   nodelist=red_list,
+						   node_color='red',
+						   linewidths=0,
+						   node_size=10)
+	nx.draw_networkx_nodes(inGraph,pos,
+						   nodelist=blue_list,
+						   node_color='blue',
+						   linewidths=0,
+						   node_size=10)
+	nx.draw_networkx_nodes(inGraph,pos,
+						   nodelist=grey_list,
+						   node_color='grey',
+						   node_size=10)
+
+	'''
 	nx.draw_networkx_nodes(inGraph,pos,
 						   nodelist=pos.keys(),
 						   node_color=[feeder._obToCol(inGraph.node[n].get('type','underground_line')) for n in inGraph],
 						   linewidths=0,
 						   node_size=10)
+	'''
 	if labels:
 		nx.draw_networkx_labels(inGraph,pos,
 								font_color='black',
@@ -370,7 +501,7 @@ def work(modelDir, inputDict):
 		with open(os.path.join(modelDir, fileName),'w') as file:
 			file.write(omd['attachments'][fileName])
 	#Wire in the file the user specifies via zipcode.
-	climateFileName, latforpvwatts = zipCodeToClimateName(inputDict["simulationZipCode"])
+	climateFileName = zipCodeToClimateName(inputDict["simulationZipCode"])
 	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
 	# Platform specific binaries for GridLAB-D First Run.
 	if platform.system() == "Linux":
@@ -424,6 +555,7 @@ def work(modelDir, inputDict):
 	rdtOutFile = modelDir + '/rdtOutput.json'
 	rdtSolverFolder = pJoin(__neoMetaModel__._omfDir,'solvers','rdt')
 	rdtJarPath = pJoin(rdtSolverFolder,'micot-rdt.jar')
+	# TODO: modify path, don't assume SCIP installation.
 	proc = subprocess.Popen(['java', "-Djna.library.path=" + rdtSolverFolder, '-jar', rdtJarPath, '-c', rdtInputFilePath, '-e', rdtOutFile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	(stdout,stderr) = proc.communicate()
 	with open(pJoin(modelDir, "rdtConsoleOut.txt"), "w") as rdtConsoleOut:
@@ -490,9 +622,9 @@ def new(modelDir):
 		"lineUnitCost": "3000.0",
 		"switchCost": "10000.0",
 		"dgUnitCost": "1000000.0",
-		"hardeningUnitCost": "1000.0",
-		"maxDGPerGenerator": "0.5",
-		"hardeningCandidates": "A_node705-742,A_node705-712,A_node706-725,SCL33937,SCL33938,SCL38094",
+		"hardeningUnitCost": "10.0",
+		"maxDGPerGenerator": "1.0",
+		"hardeningCandidates": "A_node701-702,A_node702-705,A_node702-713,A_node702-703,A_node703-727,A_node703-730,A_node704-714,A_node704-720,A_node705-742,A_node705-712,A_node706-725,A_node707-724,A_node707-722,A_node708-733,A_node708-732,A_node709-731,A_node709-708,A_node710-735,A_node710-736,A_node711-741,A_node711-740,A_node713-704,A_node714-718,A_node720-707,A_node720-706,A_node727-744,A_node730-709,A_node733-734,A_node734-737,A_node734-710,A_node737-738,A_node744-728,A_node781-701,A_node744-729,B_node701-702,B_node702-705,B_node702-713,B_node702-703,B_node703-727,B_node703-730,B_node704-714,B_node704-720,B_node705-742,B_node705-712,B_node706-725,B_node707-724,B_node707-722,B_node708-733,B_node708-732,B_node709-731,B_node709-708,B_node710-735,B_node710-736,B_node711-741,B_node711-740,B_node713-704,B_node714-718,B_node720-707,B_node720-706,B_node727-744,B_node730-709,B_node733-734,B_node734-737,B_node734-710,B_node737-738,B_node738-711,B_node744-728,B_node781-701,B_node744-729,C_node701-702,C_node702-705,C_node702-713,C_node702-703,C_node703-727,C_node703-730,C_node704-714,C_node704-720,C_node705-742,C_node705-712,C_node706-725,C_node707-724,C_node707-722,C_node708-733,C_node708-732,C_node709-731,C_node709-708,C_node710-735,C_node710-736,C_node711-741,C_node711-740,C_node713-704,C_node714-718,C_node720-707,C_node720-706,C_node727-744,C_node730-709,C_node733-734,C_node734-737,C_node734-710,C_node737-738,C_node738-711,C_node744-728,C_node781-701,C_node744-729",
 		"newLineCandidates": "TIE_A_to_C,TIE_C_to_B,TIE_B_to_A",
 		"generatorCandidates": "A_node706,A_node707,A_node708,B_node704,B_node705,B_node703",
 		"switchCandidates" : "A_node705-742,A_node705-712",
@@ -518,6 +650,8 @@ def new(modelDir):
 	return creationCode
 
 def _runModel():
+	# Testing the hazard class.
+	_testHazards()
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
@@ -529,7 +663,7 @@ def _runModel():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	renderAndShow(modelLoc)
+	# renderAndShow(modelLoc)
 	# Run the model.
 	runForeground(modelLoc)
 	# Show the output.

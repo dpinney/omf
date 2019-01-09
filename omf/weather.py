@@ -3,12 +3,12 @@ Pull weather data from various sources.
 Source options include NOAA's USCRN, Iowa State University's METAR, and Weather Underground (currently deprecated).
 '''
 
-import os, urllib, urllib2, requests, csv, re
+import os, urllib, urllib2, requests, csv, re, json
 from os.path import join as pJoin
-from datetime import timedelta, datetime
+from datetime import timedelta
 from dateutil.parser import parse as parse_dt
 from datetime import datetime as dt
-from bs4 import BeautifulSoup
+from urllib2 import urlopen
 
 def pullAsos(year, station, datatype):
 	'''This model pulls hourly data for a specified year and ASOS station. 
@@ -16,36 +16,66 @@ def pullAsos(year, station, datatype):
 		weater stations, they collect data at hourly intervals, they're run by 
 		NWS, FAA, and DOD, and there is data going back to 1901 in some sites.
 	* AKA METAR data, which is the name of the format its stored in.
-	* For ASOS station code: https://www.faa.gov/air_traffic/weather/asos/
-	* Note for USA stations (beginning with a K) you must NOT include the 'K' '''
+	* For ASOS station code see https://www.faa.gov/air_traffic/weather/asos/
+	* For datatypes see bottom of https://mesonet.agron.iastate.edu/request/download.phtml
+	* Note for USA stations (beginning with a K) you must NOT include the 'K' 
+	'''
 	url = ('https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?'
 		'station={}&data={}&year1={}&month1=1&day1=1&year2={}&month2=1&day2=1'
 		'&tz=Etc%2FUTC&format=onlycomma&latlon=no&direct=no&report_type=1'
 		'&report_type=2').format(station, datatype, year, int(year)+1)
 	r = requests.get(url)
-	
 	assert r.status_code != 404, "Dataset URL does not exist. " + url
-	
 	data = [x.split(',') for x in r.text.splitlines()[1:]]
 	verifiedData = [-9999.0] * 8760
 	firstDT = dt(int(year), 1, 1)
 	for r in data:
 		if 'M' not in r:
 			deltatime = parse_dt(r[1]) - firstDT
-			verifiedData[int(deltatime.total_seconds()/3600)] = float(r[2])
-	
+			verifiedData[int(deltatime.total_seconds()/3600)] = float(r[2])	
 	return verifiedData
+
+def pullAsosStations(filePath):
+    """Build a station list for the ASOS data. Put them in filePath with their details. """
+    stations = []
+    states = """AK AL AR AZ CA CO CT DE FL GA HI IA ID IL IN KS KY LA MA MD ME
+     MI MN MO MS MT NC ND NE NH NJ NM NV NY OH OK OR PA RI SC SD TN TX UT VA VT
+     WA WI WV WY"""
+    networks = []
+    for state in states.split():
+        networks.append("%s_ASOS" % (state,))
+    with open(filePath, 'wb') as csvfile:
+    	fieldnames = ['Station Id', 'Station Name', 'County', 'State', 'Latitude', 'Longitude', 'Elevation', 'Time Zone']
+    	csvwriter = csv.DictWriter(csvfile, delimiter=',', fieldnames=fieldnames)
+    	for network in networks:
+			current = []
+			current.append(network)
+			uri = ("https://mesonet.agron.iastate.edu/"
+			"geojson/network/%s.geojson") % (network,)
+			data = urlopen(uri)
+			jdict = json.load(data)
+			#map attribute to entry in csv
+			csvwriter.writeheader()
+			for site in jdict['features']:
+				currentSite = {}
+				currentSite['Station Id'] = site['properties']['sid']
+				currentSite['Station Name'] = site['properties']['sname']
+				currentSite['County'] = site['properties']['county']
+				currentSite['State'] = site['properties']['state']
+				currentSite['Latitude'] = site['geometry']['coordinates'][0]
+				currentSite['Longitude'] = site['geometry']['coordinates'][1]
+				currentSite['Elevation'] = site['properties']['elevation']
+				currentSite['Time Zone'] = site['properties']['tzname']
+				csvwriter.writerow(currentSite)
 
 def pullUscrn(year, station, datatype):
 	'''Returns hourly weather data from NOAA's quality-controlled USCRN dataset as array.
 	* Documentation: https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02/README.txt
 	* List of available stations: https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02'''
-	
 	url = ('https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02/{0}/'
 		'CRNH0203-{0}-{1}.txt'.format(year, station))
 	r = requests.get(url)
 	assert r.status_code != 404, "Dataset URL does not exist. " + url 
-
 	# Columns name and index (subtracted 1 from readme's Field #)
 	datatypeDict = {
 		"T_CALC": 8,
@@ -103,25 +133,18 @@ def _pullWeatherWunderground(start, end, airport, workDir):
 		work_day = work_day + timedelta(days = 1) # Advance one day
 
 def airportCodeToLatLon(airport):
-	''' Airport three letter code -> lat/lon of that location. '''
-	# https://opendata.socrata.com/dataset/Airport-Codes-mapped-to-Latitude-Longitude-in-the-/rxrh-4cxm
-	# ^^^ If this function is ever used, consider adding this csv! it'll definitely be faster
-	try:
-		url2 = urllib2.urlopen('http://www.airport-data.com/airport/'+airport+'/#location')
-		# print 'http://www.airport-data.com/airport/'+airport+'/#location'
-		soup = BeautifulSoup(url2, "html.parser")
-		latlon_str = str(soup.find('td', class_='tc0', text='Longitude/Latitude:').next_sibling.contents[2])
-		p = re.compile('([0-9\.\-\/])+')
-		latlon_val = p.search(latlon_str)
-		latlon_val = latlon_val.group()
-		latlon_split=latlon_val.split('/') #latlon_split[0] is longitude; latlon_split[1] is latitude
-		lat = float(latlon_split[1])
-		lon = float(latlon_split[0])
-	except urllib2.URLError, e:
-		print 'Requested URL generated error code:', e.code
-		lat = float(raw_input('Please enter latitude manually:'))
-		lon = float(raw_input('Please enter longitude manually:'))
-	return (lat,lon)
+	''' Airport three letter code -> lat/lon of that location. 
+		Dataset: https://opendata.socrata.com/dataset/Airport-Codes-mapped-
+			to-Latitude-Longitude-in-the-/rxrh-4cxm '''
+	omfDir = os.path.dirname(os.path.abspath(__file__))
+	with open(pJoin(omfDir, 'static/Airports.csv')) as f:
+		for m in list(csv.reader(f))[1:]:
+			if m[0] == airport:
+				return (m[1], m[2])
+	print 'Airport not found: ', airport
+	lat = float(raw_input('Please enter latitude manually:'))
+	lon = float(raw_input('Please enter longitude manually:'))
+	return (lat, lon)
 
 def zipCodeToClimateName(zipCode):
 	''' Given a zipcode, return the closest city for which there's weather data. 
@@ -131,34 +154,25 @@ def zipCodeToClimateName(zipCode):
 	* Zip code lat/lon/city/state data taken from https://www.gaslampmedia.com
 		/download-zip-code-latitude-longitude-city-state-county-csv/ '''
 	assert isinstance(zipCode, basestring), "To prevent leading zero errors, input zipcode as string"
-	
 	omfDir = os.path.dirname(os.path.abspath(__file__))
-	zipCsvPath = pJoin(omfDir, "static", "zip_codes_states.csv")
-
+	zipCsvPath = pJoin(omfDir, "static", "zip_codes_altered.csv")
 	# Find the state, city, lat, lon for given zipcode
 	with open(zipCsvPath, 'rt') as f:
 		try:
-			row = [r for r in csv.reader(f) if r[0] == zipCode][0]
-			assert float(row[1]), float(row[2])
-			'''
-			All zipcodes are unique. len(row) will be either 1 or 0. Error 
-				would be raised by calling the zero index on an empty array.
-			HACK: if there are empty columns, they can't convert to floats.
-				Consider removing rows w empty columns from csv. '''
+			'''All zipcodes are unique. len(row) will be either 1 or 0. Error 
+				would be raised by calling the zero index on an empty array.'''
+			row = [r for r in list(csv.reader(f))[1:] if r[0] == zipCode][0]
 		except:
-			raise Exception("Invalid Zipcode entered: " + zipCode)
+			raise Exception("Data not available: " + zipCode)
 		zipState = row[4]
 		ziplatlon = row[1], row[2]
-
 	# Collect data from every zipcode in state
 	with open(zipCsvPath, 'rt') as f:
-		cityData = [r for r in csv.reader(f) if r[4] == zipState and r[1] != ''] # HACK: again, remove empty rows from CSV
+		cityData = [r for r in csv.reader(f) if r[4] == zipState]
 	# Collect all names of cities with data from state. Remove the state abbr. from beginning and '.tmy2' from end.
 	citiesInState = [cn[3:-5] for cn in os.listdir(pJoin(omfDir, 'data', 'Climate')) if zipState == cn[:2]]
-
 	# Approximate closest city with data to given zipcode
-	foundCity = None
-	lowestDistance = float('inf')
+	foundCity, lowestDistance = None, float('inf')
 	for cCity in citiesInState:
 		for row in cityData:
 			city = row[3].replace(' ', '_')
@@ -172,11 +186,8 @@ def zipCodeToClimateName(zipCode):
 				if distance < lowestDistance: 
 					lowestDistance = distance
 					foundCity = cCity
-
-	# int(round((float(foundCity[1])-10)/5.0)*5.0) was 'latforpvwatts' listed as 30 below.
-	# It is never used in codebase. Removal pending.
 	assert foundCity != None, "A city is spelled differently between two datasets. Please notify the OMF team."
-	return '{}-{}'.format(zipState, foundCity), 30
+	return '{}-{}'.format(zipState, foundCity)
 
 def _tests():
 	print 'weather.py tests currently disabled to keep them from sending too many HTTP requests.'
@@ -186,13 +197,14 @@ def _tests():
 	# print zipCodeToClimateName('07030')
 	# print zipCodeToClimateName('64735')
 	# assert ('MO-KANSAS_CITY', 30) == zipCodeToClimateName('64735')
-	# assert (38.947444, -77.459944) == airportCodeToLatLon("IAD"), "airportCode lookup failed."
+	# print airportCodeToLatLon("IAD")
 	# # Testing USCRN
 	# pullUscrn('2017', 'KY_Versailles_3_NNW', 'T_CALC')
 	# print 'USCRN (NOAA) data pulled to ' + tmpdir
 	# # Testing ASOS
 	# pullAsos('2017','CHO', 'tmpc')
 	# print 'ASOS (Iowa) data pulled to ' + tmpdir
+	# pullAsosStations('./asosStationTable.csv')
 
 if __name__ == "__main__":
 	_tests()

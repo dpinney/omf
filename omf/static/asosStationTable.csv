@@ -1,0 +1,2686 @@
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+PADK,ADAK NAS/MITCHELL,Aleutians West,AK,-176.646,51.878,4.0,America/Adak
+PAKH,AKHIOK,Lake & Peninsula,AK,-154.18,56.94,13.0,America/Anchorage
+PAUT,Akun,Aleutians East,AK,-165.6041,54.1446,20.6849,America/Nome
+PALP,Alpine,North Slope,AK,-150.9447,70.3443,7.99874,America/Anchorage
+PAFM,AMBLER,Northwest Arctic,AK,-157.8575,67.1063,88.0,America/Anchorage
+PAKP,ANAKTUVUK PASS,Yukon-koyukuk,AK,-151.7433,68.1336,643.0,America/Anchorage
+PANC,ANCHORAGE INTL ARPT (ASOS),Kenai Peninsula,AK,-150.0261,61.1697,40.0,America/Anchorage
+PAGN,ANGOON,Skagway-Yakutat-Ango,AK,-134.5851,57.5036,6.9889,America/Juneau
+PANI,ANIAK (AWOS),Bethel,AK,-159.543,61.5816,26.0,America/Anchorage
+PANT,ANNETTE ISLAND (ASOS),Prince of Wales,AK,-131.5722,55.0424,34.0,America/Metlakatla
+PANV,ANVIK AIRPORT,Yukon-koyukuk,AK,-160.1901,62.6473,99.0,America/Anchorage
+PARC,ARCTIC VILLAGE,Yukon-koyukuk,AK,-145.5794,68.1147,636.0,America/Anchorage
+PAAK,ATKA AIRPORT,Aleutians West,AK,-174.2062,52.2206,17.0,America/Adak
+PATQ,ATQASUK,North Slope,AK,-157.4357,70.4673,29.0,America/Anchorage
+PABR,BARROW/POST-ROGERS (ASOS),North Slope,AK,-156.7922,71.2826,4.0,America/Anchorage
+PABA,BARTER ISLAND(AWOS),North Slope,AK,-143.5819,70.134,2.0,America/Anchorage
+PABE,BETHEL AIRPORT (ASOS),Bethel,AK,-161.8264,60.7858,46.0,America/Anchorage
+PABT,BETTLES FIELD (ASOS),Yukon-koyukuk,AK,-151.5089,66.9161,196.0,America/Anchorage
+PALV,BIG RIVER LAKE,Kenai Peninsula,AK,-152.302,60.816,12.0,America/Anchorage
+PABV,BIRCHWOOD,Kenai Peninsula,AK,-149.5072,61.4164,29.0,America/Anchorage
+PFKT,Brevig Mission,Nome,AK,-166.4657,65.3313,1.0,America/Nome
+PABL,BUCKLAND,Nome,AK,-161.1491,65.9816,13.1251,America/Anchorage
+PATW,CANTWELL,Matanuska-Susitna,AK,-148.9556,63.3912,668.0,America/Anchorage
+PALU,CAPE LISBURNE(AWOS),North Slope,AK,-166.1333,68.8833,3.0,America/Nome
+PAEH,CAPE NEWENHAM(AWOS),Bethel,AK,-162.0628,58.6464,165.0,America/Nome
+PACZ,CAPE ROMANZOFF AWOS,Bethel,AK,-166.0387,61.7803,146.0,America/Nome
+PACE,Central,SE Fairbanks,AK,-144.7809,65.5739,286.0,America/Anchorage
+PARL,CENTRAL AIRPORT,SE Fairbanks,AK,-144.7765,65.571,284.0,America/Anchorage
+PALR,CHANDALAR LAKE,Yukon-koyukuk,AK,-148.4832,67.5045,585.0,America/Anchorage
+PAVA,Chevak,Bethel,AK,-165.6009,61.5408,23.0,America/Nome
+PAJC,CHIGNIK,Lake & Peninsula,AK,-158.3732,56.3115,20.0,America/Anchorage
+PAEC,CHULITNA,Matanuska-Susitna,AK,-149.8333,62.8833,381.0,America/Anchorage
+PFCL,Clarks Point,Dillingham,AK,-158.5294,58.8337,14.8405,America/Anchorage
+PACD,COLD BAY AIRPORT (ASOS),Aleutians East,AK,-162.7245,55.2052,31.0,America/Nome
+PACV,CORDOVA/MILE 13,Valdez-Cordova,AK,-145.4511,60.4889,13.0,America/Anchorage
+PASC,DEADHORSE (ASOS),North Slope,AK,-148.4652,70.1947,17.0,America/Anchorage
+PADE,DEERING AIRPORT (ASOS),Nome,AK,-162.7664,66.0696,4.0,America/Nome
+PADL,DILLINGHAM (AMOS),Lake & Peninsula,AK,-158.5055,59.0447,29.0,America/Anchorage
+PADU,DUTCH HARBOR,Aleutians West,AK,-166.5435,53.9001,4.0,America/Adak
+PAEG,EAGLE AIRPORT (ASOS),SE Fairbanks,AK,-141.1496,64.7781,77.0,America/Anchorage
+PAII,EGEGIK(AWOS),Lake and Peninsula,AK,-157.3856,58.1853,119.0,America/Anchorage
+PAEI,EIELSON AFB,Fairbanks North Star,AK,-147.1015,64.6657,167.0,America/Anchorage
+PAEL,ELFIN COVE SEAPLANE,Hoonah-Angoon,AK,-136.3474,58.1952,9.02062,America/Juneau
+PFEL,Elim,Nome,AK,-162.2705,64.615,1.0,America/Nome
+PAED,ELMENDORF AFB,Kenai Peninsula,AK,-149.8065,61.2514,65.0,America/Anchorage
+PAEM,EMMONAK,Wade-Hampton,AK,-164.4907,62.7861,3.0,America/Nome
+PAZK,EUREKA,Valdez-Cordova,AK,-147.169,61.937,1002.0,America/Anchorage
+PAFA,FAIRBANKS INTL ARPT (ASOS),Fairbanks North Star,AK,-147.8761,64.8039,138.0,America/Anchorage
+PAKF,False Pass Airport,Aleutians East,AK,-163.4103,54.8474,6.0,America/Nome
+PAFL,Farewell,Yukon-koyukuk,AK,-153.6111,62.5316,395.0,America/Anchorage
+PAFK,FAREWELL LAKE SEAPLANE,Yukon-koyukuk,AK,-153.6225,62.5425,321.0,America/Anchorage
+PFYU,FORT YUKON (AWOS),Yukon-koyukuk,AK,-145.2667,66.5667,131.0,America/Anchorage
+PABI,FT.GREELY/ALLEN AAF (ASOS),SE Fairbanks,AK,-145.7183,63.995,398.0,America/Anchorage
+PAFR,Ft. Richardson,Anchorage,AK,-149.6531,61.2664,121.0,America/Anchorage
+PAGB,GALBRAITH LAKE,North Slope,AK,-149.4899,68.4797,814.0,America/Anchorage
+PAGA,GALENA AIRPORT,Yukon-koyukuk,AK,-156.9374,64.7362,46.0,America/Anchorage
+PAGM,GAMBELL (AWOS),Nome,AK,-171.7328,63.7668,8.0,America/Nome
+PAGL,GOLOVIN,Nome,AK,-163.0394,64.5433,8.0,America/Nome
+PAGK,GULKANA ARPT (ASOS),Valdez-Cordova,AK,-145.457,62.1602,481.0,America/Anchorage
+PAGS,GUSTAVUS,Haines,AK,-135.7074,58.4253,9.0,America/Juneau
+PAHN,Haines,Haines,AK,-135.5117,59.2429,7.0,America/Juneau
+PAHZ,HAYES RIVER,Matanuska-Susitna,AK,-152.086,61.983,305.0,America/Anchorage
+PAHV,HEALY RIVER AIRPORT,Yukon-koyukuk,AK,-148.9689,63.8661,396.0,America/Anchorage
+PAHC,HOLY CROSS,Bethel,AK,-159.7749,62.1883,21.0,America/Anchorage
+PAHO,HOMER MUNICIPAL (ASOS),Kenai Peninsula,AK,-151.4766,59.6456,22.0,America/Anchorage
+PAOH,HOONAH SEAPLANE,Hoonah-Angoon,AK,-135.4519,58.1122,0.0,America/Juneau
+PAHP,HOOPER BAY (AWOS),Wade Hampton,AK,-166.1466,61.5239,5.0,America/Nome
+PAHL,Huslia,Northwest Arctic,AK,-156.3514,65.6979,67.0,America/Anchorage
+PAHS,HUSLIA,Northwest Arctic,AK,-156.3833,65.7,55.0,America/Anchorage
+PAHY,Hydaburg Seaplane Base,Prince of Wales-Hyder,AK,-132.8281,55.2061,0.140871,America/Juneau
+PAIG,IGIUGIG,Lake & Peninsula,AK,-155.9018,59.324,29.0,America/Anchorage
+PAIL,ILIAMNA ARPT (ASOS),Lake & Peninsula,AK,-154.9092,59.7492,49.0,America/Anchorage
+PAIM,INDIAN MTN AFS AWOS,Yukon-koyukuk,AK,-153.7038,65.9928,389.0,America/Anchorage
+PAJN,JUNEAU INTL AIRPORT (ASOS),Juneau,AK,-134.5763,58.355,7.0,America/Juneau
+PAFE,KAKE SEAPLANE BASE,Wrangell-Petersburg,AK,-133.9103,56.9614,42.0774,America/Juneau
+PALG,KALSKAG,Bethel,AK,-160.3413,61.5363,17.0,America/Anchorage
+PAKV,KALTAG AIRPORT (ASOS),Yukon-koyukuk,AK,-158.7413,64.319,60.0,America/Anchorage
+PAEN,KENAI MUNICIPAL (ASOS),Kenai Peninsula,AK,-151.2391,60.5797,29.0,America/Anchorage
+PAKT,KETCHIKAN INTL ARPT (ASOS),Ketchikan Gateway,AK,-131.7117,55.3567,29.0,America/Juneau
+PAIK,Kiana,Northwest Arctic,AK,-160.4365,66.9759,51.0,America/Anchorage
+PAVC,KING COVE,Aleutians East,AK,-162.2662,55.1163,47.0,America/Nome
+PAKN,KING SALMON (ASOS),Lake & Peninsula,AK,-156.6539,58.6836,15.0,America/Anchorage
+PAKI,KIPNUK,Bethel,AK,-164.03,59.93,3.0,America/Nome
+PAVL,KIVALINA AIRPORT (ASOS),Northwest Arctic,AK,-164.5483,67.7317,3.0,America/Nome
+PAKW,KLAWOCK (ASOS),Prince of Wales,AK,-133.076,55.5792,15.0,America/Juneau
+PADQ,KODIAK (ASOS),Kodiak Island,AK,-152.4939,57.75,34.0,America/Anchorage
+PAJZ,KOLIGANEK,Lake & Peninsula,AK,-157.2595,59.7266,82.0,America/Anchorage
+PAOT,KOTZEBUE/RALPH WIEN (ASOS),Northwest Arctic,AK,-162.5985,66.8847,5.0,America/Nome
+PAKK,KOYUK,Nome,AK,-161.1543,64.9395,40.0,America/Anchorage
+PAKU,KUPARUK AIRPORT,North Slope,AK,-149.5975,70.3308,20.0,America/Anchorage
+PFKW,Kwethluk,Bethel,AK,-161.4437,60.7903,6.0,America/Anchorage
+PALH,LAKE HOOD SEAPLANE (ASOS),Kenai Peninsula,AK,-149.97,61.18,22.0,America/Anchorage
+PAML,MANLEY HOT SPRINGS,Yukon-koyukuk,AK,-150.6441,64.9976,82.0,America/Anchorage
+PAMB,MANOKOTAK,Lake & Peninsula,AK,-159.05,58.9833,16.0,America/Anchorage
+PADM,MARSHALL,Bethel,AK,-162.0261,61.8643,31.0,America/Nome
+PAMX,MCCARTHY,Valdez-Cordova,AK,-142.9333,61.4333,455.0,America/Anchorage
+PAMC,MCGRATH (ASOS),Yukon-koyukuk,AK,-155.607,62.9528,103.0,America/Anchorage
+PAIN,MCKINLEY PARK,Yukon-koyukuk,AK,-148.9106,63.7326,524.0,America/Anchorage
+PAMY,MEKORYUK,Bethel,AK,-166.27,60.37,15.0,America/Nome
+PAMR,Merrill Field,Anchorage,AK,-149.8573,61.2163,30.0,America/Anchorage
+PAER,MERRILL PASS WEST,Kenai Peninsula,AK,-153.82,61.25,358.0,America/Anchorage
+PAMM,Metlakatla Seaplane Base,Prince of Wales,AK,-131.5762,55.1308,5.9122,America/Juneau
+PAMD,MIDDLETON ISL. AMOS,Valdez-Cordova,AK,-146.338,59.432,14.0,America/Anchorage
+PAMH,MINCHUMINA,Yukon-koyukuk,AK,-152.3019,63.886,214.0,America/Anchorage
+PAMO,MOUNTAIN VILLAGE,Bethel,AK,-163.6819,62.0953,102.0,America/Nome
+PABN,NABESNA/DEVIL MTN,Valdez-Cordova,AK,-142.9953,62.4017,882.0,America/Anchorage
+PANA,Napakiak,Bethel,AK,-161.9785,60.6903,1.0,America/Anchorage
+PAOU,NELSON LAGOON,Aleutians East,AK,-161.16,56.01,4.0,America/Anchorage
+PANN,NENANA/MUN. (ASOS),Yukon-koyukuk,AK,-149.074,64.5473,110.0,America/Anchorage
+PANW,NEW STUYAHOK,Lake & Peninsula,AK,-157.33,59.45,92.0,America/Anchorage
+PAEW,Newtok,Bethel,AK,-164.6413,60.9391,6.76295,America/Nome
+PAFS,NIKOLAI,Yukon-koyukuk,AK,-154.36,63.02,126.0,America/Anchorage
+PAWN,NOATAK,Northwest Arctic,AK,-162.975,67.5661,30.0,America/Nome
+PAOM,NOME (ASOS),Nome,AK,-165.4452,64.5122,7.0,America/Nome
+PFNO,Noorvik,Northwest Arctic,AK,-161.0223,66.8175,16.8,America/Anchorage
+PAOR,NORTHWAY (ASOS),Valdez-Cordova,AK,-141.9292,62.9614,525.0,America/Anchorage
+PFNU,Nuiqsut,North Slope,AK,-150.2535,70.4954,-2.0,America/Anchorage
+PAQT,NUIQSUT (ASOS),North Slope,AK,-151.0056,70.21,17.0,America/Anchorage
+PPNU,Nuiqsut/Pioneer,North Slope,AK,-150.0186,70.4141,15.0,America/Anchorage
+PPIT,Nunapitchuk,Bethel,AK,-162.4406,60.906,1.0,America/Nome
+PAAQ,PALMER MUNICIPAL (ASOS),Matanuska-Susitna,AK,-149.0887,61.5949,71.0,America/Anchorage
+PAXK,PAXSON,Valdez-Cordova,AK,-145.5006,63.0246,809.0,America/Anchorage
+PAPG,Petersburg,Wrangell-Petersburg,AK,-132.9501,56.7999,26.4769,America/Juneau
+PAPN,PILOT POINT,Lake & Peninsula,AK,-157.57,57.58,17.0,America/Anchorage
+PAPM,PLATINUM,Bethel,AK,-161.82,59.01,5.0,America/Anchorage
+PAPO,POINT HOPE (AWOS),North Slope,AK,-166.8,68.35,4.0,America/Nome
+PPIZ,POINT LAY(DEW/AWOS),North Slope,AK,-163.0053,69.7329,6.0,America/Nome
+PAAD,Point Thomson Airstrip,North Slope,AK,-146.2901,70.136,5.0,America/Anchorage
+PATO,PORTAGE GLACIER CENTER (ASOS),Kenai Peninsula,AK,-148.8389,60.785,29.0,America/Anchorage
+PAAP,PORT ALEXANDER,Sitka,AK,-134.6481,56.2468,1.0,America/Juneau
+PALJ,PORT ALSWORTH,Lake & Peninsula,AK,-154.319,60.204,81.0,America/Anchorage
+PAPC,Port Clarence,,PO,-166.8585,65.2537,5.0,America/Nome
+PAPH,PORT HEIDEN (AMOS),Lake & Peninsula,AK,-158.6334,56.9591,29.0,America/Anchorage
+PAPR,PROSPECT CREEK,Yukon-koyukuk,AK,-150.6436,66.8141,335.0,America/Anchorage
+PAPT,PUNTILLA (LAKE),Matanuska-Susitna,AK,-152.75,62.1,560.0,America/Anchorage
+PAQH,Quinhagak,Bethel,AK,-161.8454,59.7551,12.0,America/Anchorage
+PADG,Red Dog,Northwest Arctic,AK,-162.8992,68.0321,295.4,America/Nome
+PARD,RED DOG,Northwest Arctic,AK,-162.9031,68.0314,288.979,America/Nome
+PARY,RUBY,Yukon-koyukuk,AK,-155.47,64.73,199.0,America/Anchorage
+PARS,RUSSIAN MISSION,Bethel,AK,-161.3194,61.7749,16.0,America/Anchorage
+PASM,SAINT MARY S (AWOS),Bethel,AK,-163.3018,62.0608,95.0,America/Nome
+PASN,SAINT PAUL ISLAND (ASOS),Aleutians West,AK,-170.2222,57.1553,9.0,America/Nome
+PASD,SAND POINT,Aleutians East,AK,-160.5214,55.3137,7.0,America/Anchorage
+PASA,SAVOONGA AIRPORT,Nome,AK,-170.4926,63.6864,16.0,America/Nome
+PACM,SCAMMON BAY,Bethel,AK,-165.5737,61.8445,4.0,America/Nome
+PASK,SELAWIK,Northwest Arctic,AK,-159.9857,66.6001,8.0,America/Anchorage
+PASO,SELDOVIA (ASOS),Kenai Peninsula,AK,-151.704,59.4424,10.0,America/Anchorage
+PAWD,SEWARD (ASOS),Kenai Peninsula,AK,-149.4186,60.1269,18.0,America/Anchorage
+PAHX,Shageluk,Yukon-koyukuk,AK,-159.5692,62.6923,17.0,America/Anchorage
+PFSH,Shaktoolik,Nome,AK,-161.224,64.3711,7.0,America/Anchorage
+PASP,SHEEP MOUNTAIN,Valdez-Cordova,AK,-147.5044,61.8122,838.0,America/Anchorage
+PASY,SHEMYA AFB,Aleutians West,AK,174.1169,52.7141,30.0,America/Adak
+PASH,SHISHMAREF (AWOS),Nome,AK,-166.0893,66.2496,2.0,America/Nome
+PAGH,Shungnak,Northwest Arctic,AK,-157.1624,66.8881,60.0,America/Anchorage
+PASI,SITKA/JAPONSKI ARPT (ASOS),Sitka,AK,-135.3616,57.0471,20.0,America/Juneau
+PAGY,SKAGWAY (ASOS),Haines,AK,-135.3157,59.4601,5.0,America/Juneau
+PASW,SKWENTNA,Matanuska-Susitna,AK,-151.1914,61.9653,45.0,America/Anchorage
+PADT,SLANA AIRPORT,Valdez-Cordova,AK,-143.9811,62.7089,730.0,America/Anchorage
+PASL,SLEETMUTE,Bethel,AK,-157.15,61.7167,54.0,America/Anchorage
+PALK,SNOWSHOE LAKE,Valdez-Cordova,AK,-142.6667,62.0333,735.0,America/Anchorage
+PASX,SOLDOTNA,Kenai Peninsula,AK,-151.0342,60.4758,33.0,America/Anchorage
+PFWS,South Naknek,Bristol Bay,AK,-157.0026,58.7021,46.5957,America/Anchorage
+PASV,SPARREVOHN (AWOS),Bethel,AK,-155.5748,61.0972,484.0,America/Anchorage
+PAPB,ST GEORGE ISLAND (ASOS),Aleutians West,AK,-169.6631,56.5769,35.0,America/Adak
+PAMK,ST MICHAEL,Nome,AK,-162.11,63.49,28.0,America/Nome
+PAJV,SUTTON,Matanuska-Susitna,AK,-148.8833,61.7167,265.0,America/Anchorage
+PATK,TALKEETNA (ASOS),Matanuska-Susitna,AK,-150.095,62.32,109.0,America/Anchorage
+PATA,TANANA/CALHOUN MEM (ASOS),Yukon-koyukuk,AK,-152.1069,65.1744,67.0,America/Anchorage
+PATL,TATALINA (AWOS),Yukon-koyukuk,AK,-155.9765,62.8944,294.0,America/Anchorage
+PATE,Teller,Nome,AK,-166.3393,65.2404,90.0,America/Nome
+PATC,TIN CITY AFS (AWOS),Nome,AK,-167.9225,65.564,83.0,America/Nome
+PATG,TOGIAC VILLAGE AWOS,Dillingham,AK,-160.3969,59.0536,6.0,America/Anchorage
+PAOO,TOOKSOK BAY,Bethel,AK,-165.0872,60.5413,18.0,America/Nome
+PAUM,Umiat,North Slope,AK,-152.135,69.3711,83.0,America/Anchorage
+PAUN,UNALAKLEET (AWOS),Nome,AK,-160.7991,63.8885,6.0,America/Anchorage
+PAVW,VALDEZ,Valdez-Cordova,AK,-146.35,61.1333,10.0,America/Anchorage
+PAVD,VALDEZ,Valdez-Cordova,AK,-146.248,61.134,37.0,America/Anchorage
+PAFB,WAINWRIGHT AAF,Fairbanks North Star,AK,-147.6144,64.8375,137.0,America/Anchorage
+PAWI,WAINWRIGHT AIRPORT (ASOS),North Slope,AK,-159.9948,70.638,27.0,America/Anchorage
+PAIW,Wales,Nome,AK,-168.0949,65.6226,6.7,America/Nome
+PAWS,WASILLA NEW ARPT,Matanuska-Susitna,AK,-149.5406,61.5719,113.0,America/Anchorage
+PAWM,White Mountain,Nome,AK,-163.4128,64.6892,81.0,America/Nome
+PAWR,WHITTIER,Valdez-Cordova,AK,-148.722,60.777,9.0,America/Anchorage
+PAUO,WILLOW AIRPORT,Matanuska-Susitna,AK,-150.0517,61.7542,67.0,America/Anchorage
+PAWG,WRANGELL,Wrangell-Petersburg,AK,-132.3698,56.4843,13.0,America/Juneau
+WRG,Wrangler,Wrangell,AK,-132.3698,56.4843,12.9616,America/Sitka
+PAYA,YAKUTAT (ASOS),Skagway-Yakutat-Ango,AK,-139.6602,59.5033,9.0,America/Yakutat
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+EET,ALABASTER,Shelby,AL,-86.78,33.18,178.0,America/Chicago
+8A0,Albertville,Marshall,AL,-86.2558,34.2291,315.0,America/Chicago
+ALX,ALEXANDER_CITY,Tallapoosa,AL,-85.963,32.9147,209.0,America/Chicago
+79J,ANDALUSIA/OPP ARPT,Covington,AL,-86.3938,31.3087,94.0,America/Chicago
+ANB,ANNISTON/CALHOUN CO,Calhoun,AL,-85.8581,33.5882,186.0,America/Chicago
+AUO,AUBURN-OPELIKA APT,Lee,AL,-85.434,32.6151,236.0,America/Chicago
+AUB,AUBURN UNIV. (AM,Lee,AL,-85.5,32.6,198.0,America/Chicago
+EKY,Bessemer,Jefferson,AL,-86.9263,33.3126,213.726,America/Chicago
+BHM,BIRMINGHAM MUNI,Jefferson,AL,-86.7449,33.5655,192.0,America/Chicago
+OZR,CAIRNS AAF/OZARK,Dale,AL,-85.7134,31.2758,91.0,America/Chicago
+9A4,Courtland,Lawrence,AL,-87.3488,34.6594,179.0,America/Chicago
+CMD,Cullman,Cullman,AL,-86.858,34.2687,289.024,America/Chicago
+3A1,CULLMAN/FOLSOM_FIELD_ARPT,Cullman,AL,-86.86,34.27,294.0,America/Chicago
+DCU,DECATUR/PRYOR FIELD,Limestone,AL,-86.9453,34.6525,177.0,America/Chicago
+DYA,Demopolis ,Marengo,AL,-87.9541,32.4638,32.2452,America/Chicago
+DHN,DOTHAN MUNICIPAL,Dale,AL,-85.45,31.32,122.0,America/Chicago
+EDN,Enterprise ,Coffee,AL,-85.9048,31.2982,104.847,America/Chicago
+EUF,Eufaula,Barbour,AL,-85.1289,31.9513,87.0,America/Chicago
+GZH,EVERGREEN,Conecuh,AL,-87.0441,31.4158,79.0,America/Chicago
+4R4,Fairhope,Baldwin,AL,-87.877,30.4605,27.7,America/Chicago
+CQF,Fairhope,Baldwin,AL,-87.877,30.4605,27.0,America/Chicago
+0J4,Florala,Covington,AL,-86.3116,31.0425,95.7,America/Chicago
+NBJ,Foley,Baldwin,AL,-87.6353,30.3891,15.187,America/Chicago
+4A9,FORT_PAYNE,De Kalb,AL,-85.7214,34.4737,267.0,America/Chicago
+HEY,Fort Rucker,Dale,AL,-85.6543,31.346,97.0,America/Chicago
+GAD,GADSDEN MUNI (AWOS),Etowah,AL,-86.0891,33.9727,173.0,America/Chicago
+PRN,Greenville,Butler,AL,-86.6107,31.8457,137.5,America/Chicago
+JKA,Gulf Shores,Baldwin,AL,-87.6718,30.2905,4.9,America/Chicago
+1M4,Haleyville,Winston,AL,-87.6004,34.2803,284.0,America/Chicago
+HSV,HUNTSVILLE/MADISON,Madison,AL,-86.7861,34.6439,196.0,America/Chicago
+MDQ,HUNTSVILLE/MADISON COUNTY EXEC,Madison,AL,-86.56,34.86,230.0,America/Chicago
+LOR,LOWE AHP/FT. RUCKER,Dale,AL,-85.7511,31.3558,74.0,America/Chicago
+JFX,Manchester,Walker,AL,-87.3142,33.902,147.0,America/Chicago
+A08,Marion,Perry,AL,-87.3848,32.5105,62.9503,America/Chicago
+MXF,MAXWELL AFB/MONTGOM,Montgomery,AL,-86.3658,32.3829,51.0,America/Chicago
+MOB,MOBILE/BATES FIELD,Mobile,AL,-88.2456,30.6883,67.0,America/Chicago
+BFM,MOBILE DOWNTOWN,Mobile,AL,-88.0681,30.6268,8.0,America/Chicago
+MGM,MONTGOMERY/DANNELLY,Montgomery,AL,-86.394,32.3006,62.0,America/Chicago
+MSL,MUSCLE SHOALS RGNL,Colbert,AL,-87.5996,34.7439,168.0,America/Chicago
+PLR,Pell City,St. Clair,AL,-86.2491,33.5588,144.686,America/Chicago
+RAM,PHI OIL PLAT,GMZ577,GM,-88.0833,29.05,10.0,America/Chicago
+1A9,Prattville,Autauga,AL,-86.5127,32.4387,63.5634,America/Chicago
+HUA,REDSTONE ARSENAL,Madison,AL,-86.6848,34.6786,209.0,America/Chicago
+4A6,Scottsburo,Jackson,AL,-86.0059,34.6887,198.0,America/Chicago
+SEM,Selma,Dallas,AL,-86.9878,32.3439,44.255,America/Chicago
+SXS,Shell AHP,Coffee,AL,-85.8549,31.3612,122.259,America/Chicago
+SCD,Sylacauga,Talladega,AL,-86.3055,33.1718,170.504,America/Chicago
+ASN,Talladega ,Talladega,AL,-86.0512,33.5695,155.316,America/Chicago
+TOI,TROY MUNICIPAL,Pike,AL,-86.0121,31.8604,121.0,America/Chicago
+TCL,TUSCALOOSA MUNI,Tuscaloosa,AL,-87.6161,33.2119,52.0,America/Chicago
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+ADF,Arkadelphia,Clark,AR,-93.0661,34.0998,57.5938,America/Chicago
+M89,Arkadeplhia,Clark,AR,-93.0661,34.0998,56.0,America/Chicago
+BVX,BATESVILLE (AWOS),Independence,AR,-91.6472,35.7261,141.0,America/Chicago
+VBT,BENTONVILLE (AWOS),Benton,AR,-94.2194,36.3457,395.0,America/Chicago
+HKA,BLYTHEVILLE,Mississippi,AR,-89.83,35.94,78.0,America/Chicago
+CDH,Camden,Calhoun,AR,-92.7634,33.6228,39.6,America/Chicago
+CCA,Clinton,Van Buren,AR,-92.4516,35.5978,156.7,America/Chicago
+CXW,Conway,Faulkner,AR,-92.5551,35.0199,81.7547,America/Chicago
+4M9,Corning,Clay,AR,-90.6479,36.4042,89.3,America/Chicago
+BYH,EAKER AFB,Mississippi,AR,-89.9439,35.9643,78.0,America/Chicago
+ELD,EL DORADO/GOODWIN,Union,AR,-92.8133,33.221,77.0,America/Chicago
+FYV,FAYETTEVILLE/DRAKE,Washington,AR,-94.1701,36.0051,381.0,America/Chicago
+FLP,FLIPPIN (AWOS),Marion,AR,-92.5902,36.2909,350.0,America/Chicago
+FSM,FORT SMITH MUNI,Sebastian,AR,-94.3674,35.3366,141.0,America/Chicago
+HRO,HARRISON/BOONE CO.,Boone,AR,-93.1547,36.2615,416.0,America/Chicago
+HOT,HOT SPRINGS,Hot Spring,AR,-93.0962,34.478,165.0,America/Chicago
+DEQ,J LYNN HELMS/DE QUEEN,Sevier,AR,-94.3994,34.047,108.0,America/Chicago
+JBR,JONESBORO MUNICIPAL,Craighead,AR,-90.6464,35.8317,80.0,America/Chicago
+LIT,LITTLE ROCK/ADAMS,Pulaski,AR,-92.2357,34.7273,79.0,America/Chicago
+LRF,LITTLE ROCK AFB,Pulaski,AR,-92.1465,34.9168,95.0,America/Chicago
+MEZ,MENA INTERMOUNTAIN MUNI,Polk,AR,-94.2026,34.5454,329.0,America/Chicago
+LLQ,MONTICELLO,Drew,AR,-91.75,33.64,82.0,America/Chicago
+BPK,MOUNTAIN HOME/BAXTER COUNTY,Marion,AR,-92.47,36.37,283.0,America/Chicago
+MWT,MOUNT IDA,Montgomery,AR,-93.5781,34.5467,241.0,America/Chicago
+M19,Newport,Jackson,AR,-91.1764,35.6377,72.8,America/Chicago
+LZK,NORTH LITTLE ROCK,Pulaski,AR,-92.2594,34.835,165.0,America/Chicago
+XNA,NORTHWEST ARKANSAS REGIONAL APT,Benton,AR,-94.307,36.282,392.0,America/Chicago
+PBF,PINE BLUFF/GRIDER,Jefferson,AR,-91.9347,34.175,63.0,America/Chicago
+ROG,ROGERS (AWOS),Benton,AR,-94.107,36.3724,415.0,America/Chicago
+RUE,RUSSELLVILLE MUNICIPAL AIRPORT,Yell,AR,-93.0947,35.2578,123.0,America/Chicago
+SRC,SEARCY MUNI AIRPORT (M07),White,AR,-91.74,35.21,80.0,America/Chicago
+SLG,SILOAM SPRING(AWOS),Washington,AR,-94.49,36.1919,300.0,America/Chicago
+ASG,SPRINGDALE MUNI,Washington,AR,-94.1193,36.1764,412.0,America/Chicago
+SGT,STUTTGART (AWOS),Prairie,AR,-91.575,34.5995,68.0,America/Chicago
+TXK,TEXARKANA RGNL/WEBB,Miller,AR,-93.991,33.4537,119.0,America/Chicago
+ARG,WALNUT RIDGE (AWOS),Lawrence,AR,-90.9251,36.1247,83.0,America/Chicago
+AWM,WEST MEMPHIS MUNI,Crittenden,AR,-90.2344,35.1351,65.0,America/Chicago
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+BXK,Buckeye,Maricopa,AZ,-112.6862,33.4204,311.2,America/Phoenix
+IFP,BULL HEAD CITY,Mohave,AZ,-114.5595,35.1574,167.0,America/Phoenix
+CGZ,CASA GRANDA (AWOS),Pinal,AZ,-111.7668,32.9549,446.0,America/Phoenix
+CHD,CHANDLER MUNICIPAL AIRPORT,Pinal,AZ,-111.81,33.27,379.0,America/Phoenix
+AZC,Colorado City,Mohave,AZ,-113.0139,36.9599,1480.56,America/Phoenix
+P08,Coolidge,Pinal,AZ,-111.4265,32.936,473.332,America/Phoenix
+DMA,DAVIS-MONTHAN AFB,Pima,AZ,-110.883,32.166,824.0,America/Phoenix
+DVT,DEER VALLEY/PHOENIX,Maricopa,AZ,-112.0826,33.6883,450.0,America/Phoenix
+DUG,DOUGLAS BISBEE INTL,Cochise,AZ,-109.6037,31.469,1265.0,America/Phoenix
+FLG,FLAGSTAFF (AMOS),Yavapai,AZ,-111.6722,35.1403,2137.0,America/Phoenix
+FHU,FORT HUACHUCA/LIBBY,Cochise,AZ,-110.3442,31.5883,1438.0,America/Phoenix
+GBN,GILA BEND (AAF),Maricopa,AZ,-112.72,32.8875,262.0,America/Phoenix
+GXF,Gila Bend Af Aux,Maricopa,AZ,-112.7199,32.8875,259.443,America/Phoenix
+GEU,GLENDALE,Maricopa,AZ,-112.2951,33.5269,325.0,America/Phoenix
+GYR,GOODYEAR MUNICIPAL,Maricopa,AZ,-112.3736,33.4224,295.0,America/Phoenix
+GCN,GRAND CANYON PARK,Coconino,AZ,-112.1547,35.9461,2014.0,America/Phoenix
+40G,GRAND CANYON/VALLE,Coconino,AZ,-112.15,35.65,1830.0,America/Phoenix
+IGM,KINGMAN (AMOS),Mohave,AZ,-113.933,35.2577,1033.0,America/Phoenix
+HII,Lake Havasu City,Mohave,AZ,-114.3583,34.5711,226.631,America/Los_Angeles
+LUF,LUKE AFB/PHOENIX,Maricopa,AZ,-112.383,33.535,332.0,America/Phoenix
+A39,Maricopa - Ak-chin,Pinal,AZ,-111.9185,32.9908,391.137,America/Phoenix
+FFZ,MESA/FALCON FIELD,Maricopa,AZ,-111.7283,33.4608,424.0,America/Phoenix
+OLS,NOGALES INTL AIRPORT,Santa Cruz,AZ,-110.8458,31.4208,1206.0,America/Phoenix
+PGA,PAGE MUNI (AMOS),Coconino,AZ,-111.4484,36.9261,1304.0,America/Denver
+PAN,Payson,Gila,AZ,-111.3393,34.2568,1571.9,America/Phoenix
+P48,Peoria Pleasant Valley,Maricopa,AZ,-112.2507,33.8006,483.927,America/Phoenix
+PHX,PHOENIX/SKY HARBOR,Pinal,AZ,-112.0116,33.4343,337.0,America/Phoenix
+ALK,Pioneer Airfield,Cochise,AZ,-110.4281,31.6072,1453.0,America/Phoenix
+PRC,PRESCOTT/LOVE FLD,Yavapai,AZ,-112.42,34.65,1537.0,America/Phoenix
+SAD,SAFFORD MUNICIPAL,Graham,AZ,-109.6353,32.8547,968.0,America/Phoenix
+SDL,SCOTTSDALE MUNI,Maricopa,AZ,-111.9105,33.6229,460.0,America/Phoenix
+SEZ,Sedona,Yavapai,AZ,-111.7884,34.8486,1472.0,America/Phoenix
+SOW,SHOW LOW MUNICIPAL,Navajo,AZ,-110.0057,34.2655,1954.0,America/Phoenix
+JTC,Springerville,Apache,AZ,-109.3109,34.1294,2148.36,America/Phoenix
+SJN,ST. JOHNS AIR PARK,Apache,AZ,-109.38,34.52,1747.0,America/Phoenix
+TUS,TUCSON INTL AIRPORT,Pima,AZ,-110.938,32.1203,779.0,America/Phoenix
+AVQ,Tucson - Marana ,Pima,AZ,-111.2184,32.4096,615.817,America/Phoenix
+RYN,TUCSON/RYAN FLD ,Cochise,AZ,-111.1746,32.1422,737.0,America/Phoenix
+NOZ,Wellton,Yuma,AZ,-114.4673,32.5095,94.9748,America/Phoenix
+CMR,Williams,Yavapai,AZ,-112.1947,35.3054,2036.0,America/Phoenix
+IWA,WILLIAMS AFB/CHANDL,Pinal,AZ,-111.6555,33.3078,422.0,America/Phoenix
+RQE,WINDOW ROCK (WAS P34),Apache,AZ,-109.0614,35.6575,2054.0,America/Denver
+INW,WINSLOW (AUT),Navajo,AZ,-110.7225,35.0219,1488.0,America/Phoenix
+YUM,YUMA INTL AIRPORT,Yuma,AZ,-114.606,32.6566,63.0,America/Phoenix
+NYL,YUMA MCAS,Yuma,AZ,-114.606,32.6566,65.0,America/Phoenix
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+AAT,ALTURAS (WAS O00),Modoc,CA,-120.5644,41.4914,1333.0,America/Los_Angeles
+ACV,ARCATA/EUREKA ARPT,Humboldt,CA,-124.1086,40.9781,66.0,America/Los_Angeles
+AUN,AURBURN MUNICIPAL AIRPORT,El Dorado,CA,-121.0817,38.9548,467.0,America/Los_Angeles
+AVX,AVALON/CATALINA,Los Angeles,CA,-118.4158,33.405,488.0,America/Los_Angeles
+BFL,BAKERSFIELD/MEADOWS,Kern,CA,-119.0542,35.4344,150.0,America/Los_Angeles
+DAG,BARSTOW-DAGGETT,San Bernardino,CA,-116.7858,34.8536,587.0,America/Los_Angeles
+BAB,BEALE AFB/MARYSVILE,Sutter,CA,-121.4366,39.1361,34.0,America/Los_Angeles
+BUO,BEAUMONT,Riverside,CA,-116.9667,33.9333,692.0,America/Los_Angeles
+BYS,BICYCLE LAKE    ,San Bernardino,CA,-116.63,35.2805,716.0,America/Los_Angeles
+L35,Big Bear City,San Bernardino,CA,-116.856,34.2638,2058.0,America/Los_Angeles
+BIH,BISHOP AIRPORT,Inyo,CA,-118.3636,37.3731,1263.0,America/Los_Angeles
+BLU,BLUE CANYON (AMOS),Placer,CA,-120.7097,39.275,1611.0,America/Los_Angeles
+BLH,BLYTHE AIRPORT,Riverside,CA,-114.7169,33.6192,121.0,America/Los_Angeles
+L08,Borrego Springs ,San Diego,CA,-116.321,33.259,160.025,America/Los_Angeles
+BUR,BURBANK/GLENDALE,Los Angeles,CA,-118.3587,34.2007,236.0,America/Los_Angeles
+C83,Byron,Contra Costa,CA,-121.6244,37.8276,15.7458,America/Los_Angeles
+CXL,CALEXICO INTL   ,Imperial,CA,-115.5133,32.6695,1.0,America/Santa_Isabel
+CMA,CAMARILLO (AWOS),Ventura,CA,-119.0944,34.2137,23.0,America/Los_Angeles
+CZZ,CAMPO (AWRS),San Diego,CA,-116.4683,32.6261,802.0,America/Los_Angeles
+NXF,Camp Pendleton,San Diego,CA,-117.4565,33.2856,27.0,America/Los_Angeles
+NFG,CAMP PENDLETON MCAS,San Diego,CA,-117.3551,33.3011,24.0,America/Los_Angeles
+CRQ,CARLSBAD/PALOMAR,San Diego,CA,-117.28,33.13,100.0,America/Los_Angeles
+CIC,CHICO MUNICIPAL,Butte,CA,-121.8584,39.7954,73.0,America/Los_Angeles
+NID,CHINA LAKE (NAF),Kern,CA,-117.692,35.6855,696.0,America/Los_Angeles
+CNO,CHINO AIRPORT,San Bernardino,CA,-117.6361,33.9753,198.0,America/Los_Angeles
+O22,Columbia,Stanislaus,CA,-120.4146,38.0304,646.0,America/Los_Angeles
+CCR,Concord/Buchanan,Contra Costa,CA,-122.0526,37.9916,4.87477,America/Los_Angeles
+AJO,Corona,Orange,CA,-117.6024,33.8977,162.5,America/Los_Angeles
+CEC,Crescent City,Del Norte,CA,-124.238,41.7837,19.5743,America/Los_Angeles
+EDW,EDWARDS AFB,Kern,CA,-117.8837,34.9054,702.0,America/Los_Angeles
+9L2,EDWARDS N-AUX   ,San Bernardino,CA,-117.8631,34.9908,701.0,America/Los_Angeles
+NJK,EL CENTRO NAF,Imperial,CA,-115.6717,32.8292,-17.0,America/Los_Angeles
+EMT,EL MONTE,Los Angeles,CA,-118.035,34.086,90.0,America/Los_Angeles
+NZJ,EL TORO MCAS,Los Angeles,CA,-117.731,33.676,117.0,America/Los_Angeles
+EKA,EUREKA,Humboldt,CA,-124.1603,40.8097,18.0,America/Los_Angeles
+L18,Fallbrook,San Diego,CA,-117.2509,33.3542,213.528,America/Los_Angeles
+FOT,Fortuna,Humboldt,CA,-124.1327,40.5539,112.336,America/Los_Angeles
+FAT,FRESNO AIR TERMINAL,Fresno,CA,-119.7194,36.78,100.0,America/Los_Angeles
+FCH,Fresno - Chandler,Fresno,CA,-119.8203,36.7321,95.9209,America/Los_Angeles
+FUL,FULLERTON MUNICIPAL,Orange,CA,-117.98,33.87,29.0,America/Los_Angeles
+GOO,Grass Valley,Nevada,CA,-121.0031,39.224,949.514,America/Los_Angeles
+HAF,Half Moon Bay,San Mateo,CA,-122.4996,37.5136,9.36677,America/Los_Angeles
+HJO,Hanford,Kings,CA,-119.6232,36.3114,76.3667,America/Los_Angeles
+HHR,HAWTHORNE MUNICIPAL,Los Angeles,CA,-118.3352,33.9228,19.0,America/Los_Angeles
+HWD,Hayward,Alameda,CA,-122.1212,37.6588,8.88734,America/Los_Angeles
+CVH,Hollister,Monterey,CA,-121.4103,36.8933,70.1,America/Los_Angeles
+IPL,IMPERIAL,Imperial,CA,-115.5787,32.8342,-15.0,America/Los_Angeles
+NRS,IMPERIAL BEACH/REAM,San Diego,CA,-117.11,32.5631,7.0,America/Los_Angeles
+IYK,INYOKERN,Kern,CA,-117.8295,35.6587,749.0,America/Los_Angeles
+JAQ,Jackson,Amador,CA,-120.7943,38.3742,511.722,America/Los_Angeles
+WJF,LANCASTER/FOX FIELD,Los Angeles,CA,-118.2186,34.7411,715.0,America/Los_Angeles
+POC,LA VERNE/BRACKETT,Los Angeles,CA,-117.7818,34.0917,308.0,America/Los_Angeles
+WHP,LA / WHITEMAN   ,Los Angeles,CA,-118.4134,34.2593,306.0,America/Los_Angeles
+NLC,LEMOORE NAS/REEVES,Kings,CA,-119.9521,36.333,72.0,America/Los_Angeles
+LHM,Lincoln,Placer,CA,-121.3513,38.9092,36.9,America/Los_Angeles
+LVK,Livermore,Alameda,CA,-121.8149,37.6931,117.814,America/Los_Angeles
+LPC,LOMPOC (AWOS),Santa Barbara,CA,-120.4675,34.6656,27.0,America/Los_Angeles
+LGB,LONG BEACH AIRPORT,Los Angeles,CA,-118.1472,33.8118,12.0,America/Los_Angeles
+SLI,LOS ALAMITOS AAF,Los Angeles,CA,-118.052,33.79,11.0,America/Los_Angeles
+CQT,LOS ANGELES DOWNTOWN/USC,Los Angeles,CA,-118.2912,34.0235,56.0,America/Los_Angeles
+LAX,LOS ANGELES INTL,Los Angeles,CA,-118.3865,33.9382,32.0,America/Los_Angeles
+MAE,Madera,Madera,CA,-120.1107,36.9849,76.4507,America/Los_Angeles
+MMH,MAMMOTH/JUNE LAKES,Mono,CA,-118.8388,37.6241,2173.0,America/Los_Angeles
+RIV,MARCH AFB/RIVERSIDE,Riverside,CA,-117.25,33.9,469.0,America/Los_Angeles
+MYV,Marysville/Yuba County,Yuba,CA,-121.5688,39.102,16.997,America/Los_Angeles
+MHR,MATHER FIELD,Sacramento,CA,-121.2973,38.5553,29.0,America/Los_Angeles
+MCE,Merced,Merced,CA,-120.5179,37.286,45.5413,America/Los_Angeles
+MER,MERCED/CASTLE AF,Fresno,CA,-120.5682,37.3805,57.0,America/Los_Angeles
+NKX,MIRAMAR NAS,San Diego,CA,-117.1366,32.8645,128.0,America/Los_Angeles
+MOD,MODESTO CITY/SHAM,Stanislaus,CA,-120.9544,37.6258,30.0,America/Los_Angeles
+NUQ,MOFFETT NAS/MTN VIE,Santa Clara,CA,-122.049,37.4059,12.0,America/Los_Angeles
+MHV,MOJAVE,Kern,CA,-118.152,35.059,849.0,America/Los_Angeles
+SIY,Montague/Siskiyou,Siskiyou,CA,-122.4682,41.7737,804.946,America/Los_Angeles
+MRY,Monterey Peninsula,Monterey,CA,-121.8488,36.5904,45.8595,America/Los_Angeles
+MHS,Mount Shasta City,Siskiyou,CA,-122.3171,41.3149,1080.77,America/Los_Angeles
+MWS,MOUNT WILSON,Los Angeles,CA,-118.0667,34.2333,1739.0,America/Los_Angeles
+F70,Murrieta,Riverside,CA,-117.1285,33.5742,409.443,America/Los_Angeles
+APC,Napa County,Napa,CA,-122.2804,38.2075,7.96539,America/Los_Angeles
+EED,NEEDLES AIRPORT,San Bernardino,CA,-114.6233,34.7664,302.0,America/Los_Angeles
+3A6,NEWHALL,Los Angeles,CA,-118.5667,34.3667,427.0,America/Los_Angeles
+NZY,NORTH ISLAND NAS,San Diego,CA,-117.2098,32.6922,8.0,America/Los_Angeles
+DVO,Novato,Marin,CA,-122.5561,38.1436,1.0,America/Los_Angeles
+OAK,OAKLAND,Alameda,CA,-122.2207,37.7213,3.0,America/Los_Angeles
+L52,Oceano County,San Luis Obispo,CA,-120.6224,35.1015,5.0,America/Los_Angeles
+OKB,OCEANSIDE MUNICIPAL (WAS L32),San Diego,CA,-117.35,33.22,9.0,America/Los_Angeles
+ONT,ONTARIO INTL ARPT,San Bernardino,CA,-117.6012,34.056,287.0,America/Los_Angeles
+OVE,OROVILLE,Butte,CA,-121.62,39.49,58.0,America/Los_Angeles
+OXR,OXNARD,Ventura,CA,-119.2072,34.2008,13.0,America/Los_Angeles
+GXA,Palmdale,Los Angeles,CA,-117.6704,34.5666,923.0,America/Los_Angeles
+PMD,PALMDALE PRODUCTION,Los Angeles,CA,-118.0845,34.6294,774.0,America/Los_Angeles
+PSP,PALM SPRINGS RGNL,Riverside,CA,-116.5067,33.8297,141.0,America/Los_Angeles
+PAO,PALO ALTO AIRPORT,San Mateo,CA,-122.1151,37.4611,2.0,America/Los_Angeles
+PRB,Paso Robles,San Luis Obispo,CA,-120.6291,35.6694,251.19,America/Los_Angeles
+O69,Petaluma,Sonoma,CA,-122.6053,38.2578,27.5,America/Los_Angeles
+PVF,Placerville,El Dorado,CA,-120.7533,38.7242,788.0,America/Los_Angeles
+PTV,PORTERVILLE (AWOS),Tulare,CA,-119.0627,36.0296,135.0,America/Los_Angeles
+NTD,PT MUGU NAWS,Ventura,CA,-119.12,34.12,2.0,America/Los_Angeles
+87Q,PT PIEDRAS(CG/AMOS),Sanluis Obispo,CA,-121.2847,35.6656,21.0,America/Los_Angeles
+RNM,RAMONA AIRPORT,San Diego,CA,-116.9153,33.0392,425.0,America/Los_Angeles
+RBL,RED BLUFF MUNICIPAL,Tehama,CA,-122.2536,40.1519,108.0,America/Los_Angeles
+RDD,REDDING MUNICIPAL,Shasta,CA,-122.2934,40.509,153.0,America/Los_Angeles
+O32,Reedley,Fresno,CA,-119.451,36.671,118.204,America/Los_Angeles
+RAL,RIVERSIDE MUNICIPAL,Riverside,CA,-117.4451,33.9519,249.0,America/Los_Angeles
+SAC,SACRAMENTO/EXECUTIV,Sacramento,CA,-121.495,38.5069,8.0,America/Los_Angeles
+MCC,Sacramento McClellan,Sacramento,CA,-121.4006,38.667,23.0,America/Los_Angeles
+SMF,SACRAMENTO METRO,Sacramento,CA,-121.5908,38.6954,7.0,America/Los_Angeles
+SNS,Salinas,Monterey,CA,-121.6093,36.6635,16.1444,America/Los_Angeles
+CPU,San Andreas,Calaveras,CA,-120.6482,38.1461,405.21,America/Los_Angeles
+SBD,San Bernardino,San Bernardino,CA,-117.2349,34.0954,353.0,America/Los_Angeles
+SQL,SAN CARLOS AIRPORT,San Mateo,CA,-122.2483,37.5119,1.0,America/Los_Angeles
+NUC,SAN CLEMENTE (AWOS),Los Angeles,CA,-118.5885,33.0228,55.0,America/Los_Angeles
+SDB,SANDBURG (AUT),Los Angeles,CA,-118.7253,34.7434,1379.0,America/Los_Angeles
+SDM,SAN DIEGO/BROWN FLD,San Diego,CA,-116.98,32.57,160.0,America/Los_Angeles
+SEE,SAN DIEGO/GILLESPIE,San Diego,CA,-116.9724,32.8262,117.0,America/Los_Angeles
+SAN,SAN DIEGO/LINDBERG,San Diego,CA,-117.1845,32.7339,9.0,America/Los_Angeles
+MYF,SAN DIEGO/MONTG,San Diego,CA,-117.1396,32.8157,124.0,America/Los_Angeles
+SFO,SAN FRANCISCO INTL,San Mateo,CA,-122.3749,37.619,5.0,America/Los_Angeles
+SJC,SAN JOSE INTL A,Santa Clara,CA,-121.9244,37.3594,17.0,America/Los_Angeles
+RHV,SAN JOSE/REID/HILLV,Santa Clara,CA,-121.82,37.33,41.0,America/Los_Angeles
+SBP,San Luis Obispo,San Luis Obispo,CA,-120.6441,35.2381,55.6028,America/Los_Angeles
+E16,San Martin,Santa Clara,CA,-121.5968,37.0816,86.0,America/Los_Angeles
+NSI,SAN NICOLAS ISLAND,Ventura,CA,-119.4582,33.2398,154.0,America/Los_Angeles
+SNA,SANTA ANA/JON-WAYNE,Orange,CA,-117.8682,33.6757,16.0,America/Los_Angeles
+SBA,SANTA BARBARA MUNI,Santa Barbara,CA,-119.8436,34.4261,3.0,America/Los_Angeles
+SMX,SANTA MARIA PUBLIC,Santa Barbara,CA,-120.45,34.9,73.0,America/Los_Angeles
+SMO,SANTA MONICA MUNI,Los Angeles,CA,-118.4471,34.021,53.0,America/Los_Angeles
+STS,Santa Rosa,Sonoma,CA,-122.811,38.5037,31.3469,America/Los_Angeles
+IZA,SANTA YNEZ,Santa Barbara,CA,-120.0756,34.6068,205.0,America/Los_Angeles
+O87,SHELTER COVE,Humboldt,CA,-124.0667,40.0167,21.0,America/Los_Angeles
+TVL,SOUTH LAKE TAHOE,El Dorado,CA,-119.9953,38.8939,1909.0,America/Los_Angeles
+SCK,STOCKTON METRO,San Joaquin,CA,-121.2383,37.8942,8.0,America/Los_Angeles
+SVE,Susanville,Lassen,CA,-120.5727,40.3757,1260.84,America/Los_Angeles
+TSP,Tehachapi,Kern,CA,-118.4392,35.135,1219.5,America/Los_Angeles
+TRM,THERMAL AIRPORT,Riverside,CA,-116.1597,33.6267,-37.0,America/Los_Angeles
+TOA,TORRANCE MUNICIPAL,Los Angeles,CA,-118.3396,33.8034,31.0,America/Los_Angeles
+TCY,Tracy,San Joaquin,CA,-121.4416,37.6889,56.524,America/Los_Angeles
+SUU,TRAVIS AFB/FAIRFLD,Solano,CA,-121.9275,38.2627,19.0,America/Los_Angeles
+O86,Trinity Center,Trinity,CA,-122.6937,40.9828,729.635,America/Los_Angeles
+TRK,TRUCKEE-TAHOE,Nevada,CA,-120.1396,39.32,1798.0,America/Los_Angeles
+NXP,TWENTYNINE PALMS,San Bernardino,CA,-116.1622,34.2962,626.0,America/Los_Angeles
+UKI,Ukiah,Mendocino,CA,-123.2008,39.1258,184.984,America/Los_Angeles
+EDU,University,Yolo,CA,-121.7865,38.5315,21.0,America/Los_Angeles
+BAN,Usmc Mtn Warfare Tra,Tuolumne,CA,-119.52,38.3636,2067.0,America/Los_Angeles
+VCB,VACAVILLE (WAS O45),Solano,CA,-121.9575,38.3775,34.0,America/Los_Angeles
+VBG,VANDENBERG AFB,Santa Barbara,CA,-120.5768,34.7297,112.0,America/Los_Angeles
+XVW,VANDENBERG RANGE,Santa Barbara,CA,-120.5783,34.7275,100.0,America/Los_Angeles
+VNY,VAN NUYS AIRPORT,Los Angeles,CA,-118.4892,34.2097,244.0,America/Los_Angeles
+VCV,VICTORVILLE,San Bernardino,CA,-117.383,34.5975,876.0,America/Los_Angeles
+VIS,VISALIA MUNI (AWOS),Tulare,CA,-119.3929,36.3187,89.0,America/Los_Angeles
+WVI,Watsonville,Santa Cruz,CA,-121.79,36.9394,49.7,America/Los_Angeles
+O54,Weaverville,Trinity,CA,-122.9223,40.7473,716.0,America/Los_Angeles
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+AFF,AIR FORCE ACADEMY,El Paso,CO,-104.8128,38.9697,2003.0,America/Denver
+AKO,AKRON/WASHINGTON CO,Washington,CO,-103.222,40.1756,1431.0,America/Denver
+ALS,ALAMOSA MUNI(AWOS),Alamosa,CO,-105.8614,37.4389,2299.0,America/Denver
+ASE,ASPEN/SARDY FIELD,Gunnison,CO,-106.8689,39.2232,2382.0,America/Denver
+0CO,Berthoud Pass,Clear Creek,CO,-105.7639,39.7939,3792.0,America/Denver
+BDU,Boulder,Boulder,CO,-105.2258,40.0394,1612.0,America/Denver
+BJC,BROOMFIELD/JEFFCO,Boulder,CO,-105.1172,39.9088,1724.0,America/Denver
+BKF,BUCKLEY ANGB/DENVER,Arapahoe,CO,-104.7517,39.7017,1726.0,America/Denver
+AEJ,BUENA VISTA     ,Chaffee,CO,-106.1207,38.8142,2422.0,America/Denver
+ITR,BURLINGTON,Kit Carson,CO,-102.2854,39.2425,1285.0,America/Denver
+1V6,Canon City ,Fremont,CO,-105.1058,38.428,1645.15,America/Denver
+CWN,Cheyenne Mountain,El Paso,CO,-104.85,38.75,2227.65,America/Denver
+00V,Colorado Springs,El Paso,CO,-104.5699,38.9457,2095.2,America/Denver
+COS,COLORADO SPRINGS,El Paso,CO,-104.7008,38.8058,1881.0,America/Denver
+CRV,CORONA PASS (CDOT),Boulder,CO,-105.589,40.055,3538.0,America/Denver
+CEZ,CORTEZ/MONTEZUMA CO,Montezuma,CO,-108.6281,37.303,1803.0,America/Denver
+7BM,COTTONWOOD PASS ,Chaffee,CO,-106.2181,38.7825,2995.0,America/Denver
+CAG,CRAIG-MOFFAT(AMOS),Moffat,CO,-107.5216,40.4952,1915.0,America/Denver
+RCV,Del Norte,Rio Grande,CO,-106.352,37.7138,2411.79,America/Denver
+AJZ,Delta,Delta,CO,-108.0636,38.7864,1572.59,America/Denver
+APA,DENVER/CENTENNIAL,Arapahoe,CO,-104.85,39.57,1793.0,America/Denver
+DEN,DENVER INTNL ARPT,Denver,CO,-104.6575,39.8328,1656.0,America/Denver
+DRO,DURANGO/LA PLATA CO,La Plata,CO,-107.7538,37.1515,2038.0,America/Denver
+EGE,EAGLE CO. REGIONAL,Eagle,CO,-106.9177,39.6426,1993.0,America/Denver
+ABH,ELLICOTT-B AFA  ,Pueblo,CO,-104.3083,38.7578,1840.0,America/Denver
+EIK,Erie,Weld,CO,-105.048,40.0102,1563.6,America/Denver
+FCS,FORT CARSON/BUTTS,El Paso,CO,-104.7566,38.6784,1789.0,America/Denver
+FNL,FORT COLLINS (AWOS),Larimer,CO,-105.0113,40.4518,1529.0,America/Denver
+FMM,Fort Morgan,Morgan,CO,-103.8041,40.334,1376.01,America/Denver
+FTG,Front Range,Adams,CO,-104.5431,39.7852,1680.1,America/Denver
+GNB,Granby,Grand,CO,-105.9113,40.0904,2501.84,America/Denver
+GJT,GRAND JUNCTION,Mesa,CO,-108.54,39.1342,1475.0,America/Denver
+GXY,GREELEY/WELD (AWOS),Weld,CO,-104.6332,40.4374,1420.0,America/Denver
+GUC,GUNNISON CO. (AWOS),Gunnison,CO,-106.933,38.5339,2339.0,America/Denver
+HDN,HAYDEN/YAMPA (AWOS),Routt,CO,-107.22,40.48,2012.0,America/Denver
+HEQ,Holyoke,Yuma,CO,-102.2727,40.5694,1137.0,America/Denver
+20V,KREMMLING,Grand,CO,-106.3689,40.0537,2259.0,America/Denver
+LHX,LA JUNTA MUNICIPAL,Otero,CO,-103.5122,38.0494,1292.0,America/Denver
+LAA,LAMAR,Prowers,CO,-102.6881,38.07,1103.0,America/Denver
+VTP,LA VETA PASS (CDOT),Costilla,CO,-105.1668,37.5007,3114.0,America/Denver
+LXV,LEADVILLE/LAKE CO.,Gunnison,CO,-106.3161,39.2281,3026.0,America/Denver
+LIC,LIMON MUNICIPAL,Lincoln,CO,-103.6659,39.2748,1635.0,America/Denver
+LMO,LONGMONT/VBRAND ,Boulder,CO,-105.163,40.1637,1541.0,America/Denver
+FLY,Meadow Lake,El Paso,CO,-104.5699,38.9457,2082.0,America/Denver
+EEO,MEEKER,Garfield,CO,-107.8859,40.0488,1957.0,America/Denver
+MYP,MONARCH PASS (CDOT),Chaffee,CO,-106.3168,38.484,3667.0,America/Denver
+MTJ,MONTROSE CO. ARPT,Montrose,CO,-107.8975,38.505,1755.0,America/Denver
+MNH,MONUMENT/ELBERT (CDOT),Elbert,CO,-104.6422,39.2231,2152.0,America/Denver
+3MW,MT WERNER SBS,Jackson,CO,-106.75,40.45,3241.0,America/Denver
+AIB,Nucla,Montrose,CO,-108.5633,38.2388,1810.15,America/Denver
+PSO,Pagosa Springs,Archuleta,CO,-107.056,37.2863,2336.0,America/Denver
+PUB,PUEBLO MEMORIAL(AW),Pueblo,CO,-104.4983,38.29,1439.0,America/Denver
+4V0,Rangely,Rio Blanco,CO,-108.7593,40.0956,1605.03,America/Denver
+CCU,RED CLIFF PASS (CDOT),Park,CO,-106.153,39.475,3680.0,America/Denver
+RIL,RIFLE/GARFIELD RGNL,Garfield,CO,-107.7269,39.5263,1691.0,America/Denver
+04V,SAGUACHE MUNI,Saguache,CO,-106.17,38.1,2385.0,America/Denver
+ANK,Salida,Saguache,CO,-106.0486,38.5383,2293.0,America/Denver
+SHM,Schriever AFB,El Paso,CO,-104.5167,38.8,1896.57,America/Denver
+SPD,SPRINGFIELD/COMANCHE NATL GRASS,Baca,CO,-102.6139,37.2833,1335.0,America/Denver
+SBS,STEAMBOAT SPRINGS,Jackson,CO,-106.8663,40.5162,2096.0,America/Denver
+STK,Sterling,Washington,CO,-103.2648,40.6153,1230.0,America/Denver
+5SM,Sunlight,Garfield,CO,-107.379,39.426,3232.0,America/Denver
+TEX,TELLURIDE REGIONAL,San Juan,CO,-107.9085,37.9538,2769.0,America/Denver
+TAD,TRINIDAD/ANIMAS CO.,Las Animas,CO,-104.3407,37.2594,1756.0,America/Denver
+33V,Walden,Grand,CO,-106.2715,40.7503,2484.0,America/Denver
+C07,Walton Peak,Routt,CO,-106.6992,40.3544,3210.79,America/Denver
+4BM,WILKERSON PASS  ,Teller,CO,-105.514,39.05,3438.0,America/Denver
+CPW,WOLF CREEK PASS (CDOT),Mineral,CO,-106.8,37.45,3584.0,America/Denver
+2V5,Wray,Yuma,CO,-102.241,40.1003,1117.7,America/Denver
+2V6,Yuma,Yuma,CO,-102.7128,40.1046,1255.88,America/Denver
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+BDR,Bridgeport/Sikorsky,Fairfield,CT,-73.1289,41.1583,5.0,America/New_York
+SNC,Chester,Middlesex,CT,-72.5059,41.3839,126.8,America/New_York
+DXR,DANBURY MUNICIPAL,Fairfield,CT,-73.48,41.37,139.0,America/New_York
+GON,GROTON/NEW LONDON,New London,CT,-72.05,41.33,3.0,America/New_York
+BDL,HARTFORD/BRADLEY,Hartford,CT,-72.6825,41.9381,55.0,America/New_York
+HFD,HARTFORD/BRAINARD,Hartford,CT,-72.6494,41.7367,6.0,America/New_York
+MMK,MERIDEN MARKHAM MUNI AIRPORT,New Haven,CT,-72.83,41.51,31.0,America/New_York
+HVN,NEW HAVEN/TWEED,New Haven,CT,-72.8868,41.2638,4.0,America/New_York
+OXC,OXFORD (AWOS),New Haven,CT,-73.1354,41.4741,222.0,America/New_York
+IJD,WILLIMANTIC (ASOS),Windham,CT,-72.1836,41.7419,76.0,America/New_York
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+33N,Cheswold,Kent,DE,-75.6005,39.2187,13.9957,America/New_York
+DOV,DOVER AFB,Kent,DE,-75.466,39.1295,9.0,America/New_York
+GED,GEORGETOWN/SUSSEX,Sussex,DE,-75.3589,38.6892,16.0,America/New_York
+ILG,WILMINGTON AIRPORT,New Castle,DE,-75.6008,39.6728,24.0,America/New_York
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+AAF,APALACHICOLA MUNI (ASOS),Franklin,FL,-85.0274,29.7276,6.0,America/New_York
+AGR,Avon Park,Polk,FL,-81.3416,27.6478,21.8031,America/New_York
+BOW,Bartow,Polk,FL,-81.7834,27.9434,38.1,America/New_York
+BCT,BOCA RATON AIRPORT,Palm Beach,FL,-80.11,26.38,4.0,America/New_York
+BKV,BROOKSVILLE (ASOS),Pasco,FL,-82.4554,28.4736,20.0,America/New_York
+FIN,Bunnell,Flagler,FL,-81.2087,29.4657,5.52994,America/New_York
+XMR,Cape Canaveral,Brevard,FL,-80.5668,28.4677,3.0,America/New_York
+VSH,Chipley,Washington,FL,-85.598,30.7799,23.6211,America/Chicago
+NFJ,Choctaw,Santa Rosa,FL,-86.9597,30.5069,30.9975,America/Chicago
+CLW,Clearwater Air Park,Pinellas,FL,-82.7563,27.9742,23.2339,America/New_York
+CEW,CRESTVIEW/BOB SIKES,Okaloosa,FL,-86.52,30.78,65.0,America/Chicago
+CTY,CROSS CITY (AMOS),Dixie,FL,-83.1047,29.6355,13.0,America/New_York
+CGC,Crystal River,Citrus,FL,-82.5713,28.8673,2.7,America/New_York
+DAB,DAYTONA BEACH RGNL,Volusia,FL,-81.0581,29.1799,11.0,America/New_York
+54J,DeFuniak,Walton,FL,-86.1538,30.7311,85.67,America/Chicago
+DED,DeLand,Volusia,FL,-81.2837,29.067,21.2664,America/New_York
+DTS,Destin - Fort Walton Beach,Okaloosa,FL,-86.4674,30.3934,7.30864,America/Chicago
+EGI,DUKE FLD/EGLIN  ,Walton,FL,-86.5229,30.6503,59.0,America/Chicago
+VPS,EGLIN AFB/VALPARAIS,Okaloosa,FL,-86.5254,30.4833,26.0,America/Chicago
+EGC,EVERGLADES CITY,Collier,FL,-81.3833,25.85,2.0,America/New_York
+FHB,Fernandina Beach,Nassau,FL,-81.4612,30.6118,5.0,America/New_York
+FXE,FORT LAUDERDALE,Broward,FL,-80.17,26.2,4.0,America/New_York
+FMY,FORT MYERS/PAGE FLD,Lee,FL,-81.8615,26.5849,5.0,America/New_York
+FLL,FT LAUDERDALE/HOLLY,Broward,FL,-80.15,26.07,7.0,America/New_York
+RSW,FT MYERS/SW FLORIDA,Lee,FL,-81.7567,26.5381,9.0,America/New_York
+FPR,FT PIERCE/ST LUCIE,St Lucie,FL,-80.3767,27.4981,7.0,America/New_York
+GNV,GAINESVILLE RGNL,Alachua,FL,-82.276,29.6917,46.0,America/New_York
+HWO,HOLLYWOOD/N. PERRY,Broward,FL,-80.2412,25.9995,3.0,America/New_York
+HST,HOMESTEAD AFB,Dade,FL,-80.3837,25.4884,2.0,America/New_York
+HRT,HURLBURT FIELD (AF),Okaloosa,FL,-86.6893,30.4278,12.0,America/Chicago
+IMM,Immokalee Auxiliary,Collier,FL,-81.401,26.4332,14.0078,America/New_York
+INF,Inverness,Citrus,FL,-82.3182,28.8036,15.7325,America/New_York
+X40,Inverness,Citrus,FL,-82.3179,28.8063,15.0,America/New_York
+CRG,JACKSONVILLE/CRAIG,Duval,FL,-81.5147,30.3361,12.0,America/New_York
+HEG,Jacksonville - Herlong,Duval,FL,-81.8059,30.2778,20.7985,America/New_York
+JAX,JACKSONVILLE INTL,Duval,FL,-81.6879,30.4941,9.0,America/New_York
+NIP,JACKSONVILLE NAS,St Johns,FL,-81.6747,30.2342,7.0,America/New_York
+VQQ,Jacksonville VQQ,Duval,FL,-81.8767,30.2187,24.7,America/New_York
+42J,Keystone Heights,Bradford,FL,-82.0475,29.8448,60.0,America/New_York
+EYW,Key West,Monroe,FL,-81.7596,24.5561,1.0,America/New_York
+NQX,KEY WEST NAS,Monroe,FL,-81.6888,24.5757,2.0,America/New_York
+ISM,KISSIMMEE MUNI AIRPORT/ORLANDO,Osceola,FL,-81.44,28.29,25.0,America/New_York
+LCQ,Lake City,Columbia,FL,-82.5769,30.1821,57.0,America/New_York
+LAL,LAKELAND REGIONAL,Polk,FL,-82.0186,27.9889,43.0,America/New_York
+X07,Lake Wales,Polk,FL,-81.6167,27.8934,37.0806,America/New_York
+LEE,LEESBURG MUNICIPAL AIRPORT,Lake,FL,-81.81,28.82,24.0,America/New_York
+24J,Live Oak,Suwannee,FL,-83.0247,30.3001,35.9482,America/New_York
+MCF,MACDILL AFB/TAMPA,Hillsborough,FL,-82.52,27.85,4.0,America/New_York
+MTH,Marathon,Monroe,FL,-81.0514,24.7262,2.0,America/New_York
+MKY,Marco Island ,Collier,FL,-81.6725,25.995,4.51561,America/New_York
+MAI,MARIANA,Jackson,FL,-85.1839,30.8356,34.0,America/Chicago
+NRB,MAYPORT NS,Duval,FL,-81.4245,30.3914,5.0,America/New_York
+MLB,MELBOURNE REGIONAL,Brevard,FL,-80.6453,28.1028,11.0,America/New_York
+MBF,MIAMI BEACH,Dade,FL,-80.1333,25.7667,1.0,America/New_York
+MIA,MIAMI INTL AIRPORT,Dade,FL,-80.3169,25.788,4.0,America/New_York
+TMB,MIAMI/KENDALL-TAMIA,Monroe,FL,-80.4347,25.6423,3.0,America/New_York
+OPF,MIAMI/OPA LOCKA,Dade,FL,-80.2828,25.9102,3.0,America/New_York
+NDZ,Milton,Escambia,FL,-87.0231,30.7044,54.0,America/Chicago
+APF,NAPLES MUNICIPAL,Collier,FL,-81.7753,26.1525,3.0,America/New_York
+TTS,NASA SHUTTLE FCLTY,Brevard,FL,-80.6944,28.6149,3.0,America/New_York
+EVB,NEW SMYRNA BEACH MUNI,Volusia,FL,-80.9489,29.0557,3.0,America/New_York
+OCF,Ocala,Marion,FL,-82.221,29.1636,28.2818,America/New_York
+OBE,Okeechobee,Martin,FL,-80.8498,27.2628,10.4,America/New_York
+ORL,ORLANDO/HERNDON,Orange,FL,-81.3329,28.5455,34.0,America/New_York
+MCO,ORLANDO JETPORT,Orange,FL,-81.309,28.4294,32.0,America/New_York
+OMN,ORMOND BEACH MUNI,Volusia,FL,-81.1136,29.3006,9.0,America/New_York
+28J,Palatka,Putnam,FL,-81.6889,29.6586,9.36347,America/New_York
+XFL,Palm Coast,Flagler,FL,-81.2063,29.4674,10.0,America/New_York
+ECP,Panama City,Bay,FL,-85.7956,30.3582,69.0,America/Chicago
+PFN,PANAMA CITY/BAY CO.,Bay,FL,-85.6828,30.2121,6.0,America/Chicago
+TDR,Panama City Beach - Drone Runway,Bay,FL,-85.5765,30.07,3.8309,America/Chicago
+COF,PATRICK AFB/COCOA B,Brevard,FL,-80.61,28.235,3.0,America/New_York
+NPA,PENSACOLA NAS,Escambia,FL,-87.318,30.3533,9.0,America/Chicago
+PNS,PENSACOLA REGIONAL,Escambia,FL,-87.1869,30.4781,37.0,America/Chicago
+40J,PERRY-FOLEY,Taylor,FL,-83.5736,30.0719,14.0,America/New_York
+54A,Placida,Charlotte,FL,-82.2526,26.8537,1.55252,America/New_York
+PCM,Plant City,Hillsborough,FL,-82.1642,28.0002,46.9,America/New_York
+PMP,POMPANO BEACH,Broward,FL,-80.111,26.2464,7.0,America/New_York
+PGD,PUNTA GORDA,Charlotte,FL,-81.9914,26.9172,8.0,America/New_York
+2J9,Quincy,Gadsden,FL,-84.5574,30.5979,69.0,America/New_York
+SPG,SAINT PETERSBURG,Hillsborough,FL,-82.627,27.7651,2.0,America/New_York
+PIE,SAINT PETERSBURG,Hillsborough,FL,-82.6874,27.91,3.0,America/New_York
+SFB,SANFORD/ORLANDO,Orange,FL,-81.2436,28.7797,17.0,America/New_York
+SRQ,SARASOTA-BRADENTON,Manatee,FL,-82.5586,27.4014,9.0,America/New_York
+SEF,Sebring,Highlands,FL,-81.3416,27.4547,17.0581,America/New_York
+SGJ,ST AUGUSTINE AIRPT,St Johns,FL,-81.3397,29.9593,3.0,America/New_York
+TLH,TALLAHASSEE RGNL,Leon,FL,-84.3513,30.3935,21.0,America/New_York
+TPA,TAMPA INTL AIRPORT,Hillsborough,FL,-82.5403,27.9619,3.0,America/New_York
+TPF,Tampa/Knight,Hillsborough,FL,-82.4493,27.9156,2.4,America/New_York
+VVG,The VIllages,Sumter,FL,-81.9698,28.9446,26.9418,America/New_York
+TIX,TITUSVILLE,Brevard,FL,-80.7992,28.5148,11.0,America/New_York
+1J0,Tri County,Holmes,FL,-85.6014,30.8458,26.0,America/Chicago
+PAM,TYNDALL AFB,Bay,FL,-85.5754,30.0696,5.0,America/Chicago
+VDF,VANDENBERG AIRPORT/TAMPA,Hillsborough,FL,-82.3453,28.014,7.0,America/New_York
+VNC,Venice,Sarasota,FL,-82.4403,27.0716,6.0,America/New_York
+VRB,VERO BEACH MUNI,Indian River,FL,-80.4179,27.6556,8.0,America/New_York
+LNA,West Palm Beach,Palm Beach,FL,-80.0848,26.5925,8.12399,America/New_York
+F45,West Palm Beach,Palm Beach,FL,-80.2223,26.8459,8.88546,America/New_York
+PBI,WEST PALM BEACH,Palm Beach,FL,-80.0994,26.6847,6.0,America/New_York
+NSE,WHITING FLD NAS-N.,Escambia,FL,-87.0219,30.7242,61.0,America/Chicago
+X60,Williston,Levy,FL,-82.4719,29.3557,25.3371,America/New_York
+GIF,WINTER HAVEN (ASOS),Polk,FL,-81.7533,28.0629,44.0,America/New_York
+SUA,WITHAM FIELD AIRPORT/STUART,Martin,FL,-80.22,27.18,6.0,America/New_York
+ZPH,Zephyrville,Pasco,FL,-82.1559,28.2281,29.1026,America/New_York
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+ABY,ALBANY MUNICIPAL,Dougherty,GA,-84.1945,31.5355,59.0,America/New_York
+AMG,ALMA/BACON CO.,Bacon,GA,-82.5066,31.5361,61.0,America/New_York
+ACJ,Americus,Sumter,GA,-84.1889,32.1108,143.0,America/New_York
+AHN,ATHENS MUNICIPAL,Oconee,GA,-83.3264,33.9486,247.0,America/New_York
+PDK,ATLANTA/DEKALB,De Kalb,GA,-84.302,33.8756,305.0,America/New_York
+FTY,ATLANTA/FULTON CO.,Cobb,GA,-84.52,33.78,256.0,America/New_York
+ATL,ATLANTA INTL ARPT,Fulton,GA,-84.4418,33.6301,315.0,America/New_York
+DNL,AUGUSTA,Richmond,GA,-82.0382,33.4669,130.0,America/New_York
+AGS,AUGUSTA/BUSH FIELD,Richmond,GA,-81.9645,33.3699,45.0,America/New_York
+BGE,BAINBRIDGE/DECATUR COUNTY INDUS,Decatur,GA,-84.6369,30.9716,43.0,America/New_York
+BHC,Baxley,Appling,GA,-82.3938,31.7138,64.042,America/New_York
+DZJ,Blairsville,Union,GA,-83.9973,34.8544,582.0,America/New_York
+BIJ,BLAKELY,Early,GA,-84.8948,31.3975,65.0,America/New_York
+BQK,BRUNSWICK/GLYNCO,Glynn,GA,-81.4665,31.2588,8.0,America/New_York
+SSI,BRUNSWICK/MALCOLM,Glynn,GA,-81.3908,31.1522,6.0,America/New_York
+6A1,Butler,Taylor,GA,-84.2507,32.5674,203.0,America/New_York
+CZL,Calhoun,Gordon,GA,-84.9392,34.4554,193.826,America/New_York
+CXU,Camilla,Mitchell,GA,-84.2352,31.2132,51.8067,America/New_York
+18A,Canon,Franklin,GA,-83.1308,34.3404,258.55,America/New_York
+47A,CANTON/CHEROKEE_CNTY_ARPT,Cherokee,GA,-84.4239,34.3106,372.0,America/New_York
+CTJ,Carrollton,Carroll,GA,-85.1523,33.6317,353.9,America/New_York
+VPC,CARTERSVILLE AIRPORT,Fulton,GA,-84.8487,34.1232,233.0,America/New_York
+CNI,Cherokee County,Cherokee,GA,-84.4239,34.3106,372.0,America/New_York
+CWV,Claxton,Evans,GA,-81.8696,32.1951,34.0,America/New_York
+CSG,COLUMBUS METRO ARPT,Chattahoochee,GA,-84.9422,32.5161,121.0,America/New_York
+CKF,Cordele,Crisp,GA,-83.7739,31.9888,93.437,America/New_York
+AJR,Cornelia,Habersham,GA,-83.5567,34.4998,434.794,America/New_York
+9A1,Covington,Newton,GA,-83.8496,33.6325,242.0,America/New_York
+CVC,Covington ,Newton,GA,-83.8474,33.6323,238.558,America/New_York
+PUJ,Dallas,Paulding,GA,-84.9406,33.912,393.0,America/New_York
+DNN,DALTON MUNI AIRPORT,Whitfield,GA,-84.87,34.72,216.0,America/New_York
+MGE,DOBBINS AFB/MARIETT,Cobb,GA,-84.5163,33.9153,326.0,America/New_York
+17J,Donalsonville,Seminole,GA,-84.8776,31.007,47.2481,America/New_York
+DQH,DOUGLAS_MUNI_ARPT,Coffee,GA,-82.8606,31.4767,78.0,America/New_York
+DBN,Dublin,Laurens,GA,-82.9853,32.5644,94.0,America/New_York
+EZM,Eastman,Dodge,GA,-83.1287,32.2164,93.0,America/New_York
+EBA,Elberton,Elbert,GA,-82.8175,34.0954,180.633,America/New_York
+27A,ELBERTON,Elbert,GA,-82.8159,34.0952,184.0,America/New_York
+49A,Ellijay,Gilmer,GA,-84.5271,34.6301,444.842,America/New_York
+FZG,Fitzgerald,Ben Hill,GA,-83.2709,31.6839,104.145,America/New_York
+LSF,FORT BENNING,Russell,GA,-84.9913,32.3373,71.0,America/New_York
+LHW,FT STEWART/WRIGHT,Long,GA,-81.5623,31.8891,14.0,America/New_York
+GVL,GAINSVILLE,Hall,GA,-83.8303,34.2719,38.0,America/New_York
+3J7,Greensboro,Greene,GA,-83.139,33.5977,206.0,America/New_York
+4A7,Hampton,Henry,GA,-84.3324,33.3891,257.574,America/New_York
+HMP,Hampton,Henry,GA,-84.331,33.3899,256.725,America/New_York
+AZE,Hazlehurst,Jeff Davis,GA,-82.6474,31.8847,79.0952,America/New_York
+HOE,Homerville,Clinch,GA,-82.7741,31.0559,56.7,America/New_York
+SVN,HUNTER (AAF),Liberty,GA,-81.146,32.01,13.0,America/New_York
+19A,Jackson County Airport,Jackson,GA,-83.5616,34.1759,290.0,America/New_York
+JZP,Jasper,Pickens,GA,-84.4572,34.4535,457.988,America/New_York
+JCA,Jefferson,Jackson,GA,-83.5583,34.1739,283.649,America/New_York
+JES,Jesup,Long,GA,-81.8825,31.554,32.6,America/New_York
+9A5,LaFayette,Walker,GA,-85.2903,34.6885,236.013,America/New_York
+LGC,LA_GRANGE,Troup,GA,-85.0726,33.0089,211.0,America/New_York
+LZU,LAWRENCEVILLE,Gwinnett,GA,-83.9624,33.9781,323.0,America/New_York
+2J3,Louisville,Jefferson,GA,-82.3857,32.9865,97.5989,America/New_York
+MCN,MACON/LEWIS WILSON,Bibb,GA,-83.6492,32.6928,110.0,America/New_York
+RYY,MARIETTA,Cobb,GA,-84.5986,34.0131,317.0,America/New_York
+MLJ,Milledgeville,Baldwin,GA,-83.2407,33.1542,117.0,America/New_York
+D73,Monroe,Walton,GA,-83.6928,33.7825,256.934,America/New_York
+VAD,MOODY AFB/VALDOSTA,Lowndes,GA,-83.193,30.9678,71.0,America/New_York
+MGR,MOULTRIE,Colquitt,GA,-83.8033,31.0849,90.0,America/New_York
+MUL,MOULTRIE/SPENCE ,Cook,GA,-83.7041,31.1377,89.0,America/New_York
+CCO,NEWNAN COWETA COUNTY AIRPORT,Coweta,GA,-84.77,33.31,296.0,America/New_York
+FFC,PEACHTREE CITY,Coweta,GA,-84.5669,33.3553,264.0,America/New_York
+PXE,Perry,Peach,GA,-83.7673,32.5106,125.392,America/New_York
+PIM,Pine Mountain,Harris,GA,-84.8824,32.8407,272.096,America/New_York
+RMG,ROME/RUSSELL(RAMOS),Floyd,GA,-85.1611,34.3478,196.0,America/New_York
+OKZ,Sandersville ,Washington,GA,-82.8382,32.9667,128.724,America/New_York
+SAV,SAVANNAH MUNICIPAL,Chatham,GA,-81.2021,32.1276,15.0,America/New_York
+6A2,Spalding,Spalding,GA,-84.2749,33.227,292.0,America/New_York
+TBR,STATESBORO/BULLOCH CO,Bulloch,GA,-81.7369,32.4827,57.0,America/New_York
+SBO,Swainsboro,Emanuel,GA,-82.3699,32.6091,327.0,America/New_York
+JYL,SYLVANIA,Bulloch,GA,-81.5971,32.6453,57.0,America/New_York
+OPN,THOMASTON,Upson,GA,-84.2594,32.9539,243.0,America/New_York
+TVI,Thomasville,Thomas,GA,-83.8811,30.9018,80.0,America/New_York
+HQU,THOMSON,Warren,GA,-82.5164,33.5297,152.0,America/New_York
+TMA,Tifton,Tift,GA,-83.4885,31.429,108.2,America/New_York
+TOC,Toccoa,Stephens,GA,-83.2964,34.5928,295.528,America/New_York
+VLD,VALDOSTA REGIONAL,Lowndes,GA,-83.2767,30.7825,62.0,America/New_York
+VDI,VIDALIA MUNI AIRPORT,Toombs,GA,-82.37,32.19,84.0,America/New_York
+WRB,WARNER ROBINS AFB,Houston,GA,-83.5918,32.6401,90.0,America/New_York
+IIY,Washington,Wilkes,GA,-82.8158,33.7794,191.419,America/New_York
+AYS,WAYCROSS/WARE CO.,Ware,GA,-82.3955,31.2491,46.0,America/New_York
+WDR,WINDER,Barrow,GA,-83.6674,33.9829,287.0,America/New_York
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+PHSF,BRADSHAW_AAF/HAWAII,Hawaii,HI,-155.5538,19.76,1887.0,Pacific/Honolulu
+PHHN,HANA/MAUI,Maui,HI,-156.0156,20.7945,26.0,Pacific/Honolulu
+PHIK,Hickman AFB,Honolulu,HI,-157.9224,21.3187,5.84233,Pacific/Honolulu
+PHTO,HILO/LYMAN_FIELD_(ASOS),Hawaii,HI,-155.0485,19.7203,11.0,Pacific/Honolulu
+PHNL,HONOLULU_INTL/OAHU_(ASOS),Honolulu,HI,-157.9224,21.3187,5.0,Pacific/Honolulu
+PHOG,KAHULUI_ARPT/MAUI_(ASOS),Maui,HI,-156.43,20.9,20.0,Pacific/Honolulu
+PHJR,KALAELOA_AIRPORT,Honolulu,HI,-158.0703,21.3073,10.0,Pacific/Honolulu
+PHNG,KANEOHE_MCAS/OAHU,Honolulu,HI,-157.7629,21.4509,3.0,Pacific/Honolulu
+PHKO,KEAHOLE_POINT/KONA_(ASOS),Hawaii,HI,-156.0456,19.7388,13.0,Pacific/Honolulu
+PHBK,KEKAHA,Kauai,HI,-159.7851,22.0228,4.0,Pacific/Honolulu
+PHJH,LAHAINA/WEST_MAUI,Maui,HI,-156.6748,20.963,40.0,Pacific/Honolulu
+PHNY,LANAI_CITY_AIRPORT,Maui,HI,-156.9514,20.7856,399.0,Pacific/Honolulu
+PHLI,LIHUE/KAUAI_ISLAND_(ASOS),Kauai,HI,-159.3406,21.9839,45.0,Pacific/Honolulu
+PHMK,MOLOKAI_(ASOS),Maui,HI,-157.0963,21.1529,137.0,Pacific/Honolulu
+PMDY,Sand Island,Kauai,HI,-177.3756,28.2082,7.68665,Pacific/Midway
+PHHI,WHEELER_AFB/OAHU,Honolulu,HI,-158.0443,21.4776,255.0,Pacific/Honolulu
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+AMW,Ames,Story,IA,-93.6185,41.9904,280.0,America/Chicago
+BRL,BURLINGTON,Des Moines,IA,-91.1255,40.7729,213.0,America/Chicago
+CID,CEDAR RAPIDS,Linn,IA,-91.7246,41.8829,265.0,America/Chicago
+DSM,DES MOINES,Polk,IA,-93.6531,41.5339,294.0,America/Chicago
+DBQ,DUBUQUE,Dubuque,IA,-90.7091,42.3984,329.0,America/Chicago
+EST,ESTHERVILLE,Emmet,IA,-94.7476,43.4008,401.0,America/Chicago
+IOW,IOWA CITY,Johnson,IA,-91.5445,41.6394,204.0,America/Chicago
+LWD,LAMONI,Decatur,IA,-93.9005,40.6306,333.0,America/Chicago
+MIW,MARSHALLTOWN,Marshall,IA,-92.9163,42.1106,297.0,America/Chicago
+MCW,MASON CITY,Cerro Gordo,IA,-93.3261,43.1544,370.0,America/Chicago
+OTM,OTTUMWA,Jasper,IA,-92.4446,41.1008,258.0,America/Chicago
+DVN,QUAD CITIES,Scott,IA,-90.5948,41.6133,229.0,America/Chicago
+SUX,SIOUX CITY,Woodbury,IA,-96.3795,42.3917,336.0,America/Chicago
+SPW,SPENCER,Clay,IA,-95.2101,43.1682,403.0,America/Chicago
+ALO,Waterloo,Black Hawk,IA,-92.4013,42.5544,268.0,America/Chicago
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+BOI,BOISE MUNICIPAL,Owyhee,ID,-116.2406,43.5667,874.0,America/Boise
+65S,Bonners Ferry,Boundary,ID,-116.2952,48.726,711.0,America/Los_Angeles
+BYI,BURLEY MUNICIPAL,Cassia,ID,-113.7715,42.5426,1265.0,America/Boise
+EUL,CALDWELL,Owyhee,ID,-116.6358,43.6419,740.0,America/Boise
+LLJ,CHALLIS (AMOS),Custer,ID,-114.215,44.5228,1546.0,America/Boise
+COE,COEUR D ALENE(AWOS),Kootenai,ID,-116.8196,47.7743,707.0,America/Los_Angeles
+DIJ,Driggs,Teton,ID,-111.0979,43.7419,1898.0,America/Boise
+P69,ELK CITY (RAMOS),Idaho,ID,-115.5964,46.1442,1249.0,America/Los_Angeles
+GIC,Grangeville,Idaho,ID,-116.1234,45.9426,1010.0,America/Los_Angeles
+SUN,HAILEY/FRIEDMAN MEM,Blaine,ID,-114.2956,43.5038,1620.0,America/Boise
+IDA,IDAHO FALLS/FANNING,Bingham,ID,-112.0708,43.5137,1445.0,America/Boise
+JER,JEROME COUNTY AIRPORT,Jerome,ID,-114.4566,42.7267,1222.0,America/Boise
+LWS,LEWISTON (AMOS),Nez Perce,ID,-117.0154,46.3745,438.0,America/Los_Angeles
+MLD,MALAD CITY,Oneida,ID,-112.2966,42.1666,1373.0,America/Boise
+77M,MALTA,Cassia,ID,-113.334,42.316,1375.0,America/Boise
+MYL,MC CALL,Valley,ID,-116.1017,44.8889,1531.0,America/Boise
+MUO,MOUNTAIN HOME AFB,Owyhee,ID,-115.8724,43.0436,913.0,America/Boise
+MLP,MULLAN PASS VOR,Shoshone,ID,-115.6697,47.4542,1837.0,America/Denver
+MAN,Nampa Mun,Owyhee,ID,-116.5231,43.5813,771.0,America/Boise
+PIH,POCATELLO MUNICIPAL,Bannock,ID,-112.5959,42.9098,1365.0,America/Boise
+RXE,REXBURG-MADISON COUNTY AIRPORT,Madison,ID,-111.8051,43.8339,1481.0,America/Boise
+SMN,SALMON/LEMHI (AWOS),Lemhi,ID,-113.8813,45.1238,1233.0,America/Boise
+SZT,SANDPOINT,Bonner,ID,-116.56,48.2994,648.0,America/Los_Angeles
+U78,SODA SPRINGS/TIGERT,Caribou,ID,-111.5799,42.6416,1780.0,America/Boise
+S14,SPENCER,Clark,ID,-112.1833,44.35,1800.0,America/Boise
+SNT,Stanley Ranger Station,Custer,ID,-114.9269,44.1708,1979.94,America/Boise
+TWF,TWIN FALLS/JOSLIN,Twin Falls,ID,-114.4878,42.4818,1265.0,America/Boise
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+ALN,ALTON/ST LOUIS R,Madison,IL,-90.046,38.8899,166.0,America/Chicago
+BMI,BLOOMINGTON/NORM,Mclean,IL,-88.9159,40.4771,267.0,America/Chicago
+CPS,CAHOKIA/ST LOUIS,St. Charles,IL,-90.1562,38.5707,126.0,America/Chicago
+CIR,Cairo,Mississippi,IL,-89.2196,37.0647,97.8,America/Chicago
+MDH,CARBONDALE/MURPH,Jackson,IL,-89.25,37.78,130.0,America/Chicago
+CUL,Carmi,White,IL,-88.1231,38.0895,118.0,America/Chicago
+ENL,CENTRALIA,Marion,IL,-89.0911,38.5151,163.0,America/Chicago
+CMI,CHAMPAIGN/URBANA,Champaign,IL,-88.2778,40.0388,228.0,America/Chicago
+MDW,CHICAGO,Cook,IL,-87.7524,41.786,188.0,America/Chicago
+ARR,CHICAGO/AURORA,Kane,IL,-88.48,41.77,215.0,America/Chicago
+DPA,CHICAGO/DUPAGE,DuPage,IL,-88.2486,41.9078,231.0,America/Chicago
+IGQ,CHICAGO/LANSING,Lake,IL,-87.5295,41.5349,188.0,America/Chicago
+CGX,CHICAGO/MEIGS,Cook,IL,-87.6079,41.8588,181.0,America/Chicago
+ORD,CHICAGO O HARE,Cook,IL,-87.9319,41.9875,200.0,America/Chicago
+06C,Chicago - Schaumburg ,DuPage,IL,-88.1012,41.9893,243.485,America/Chicago
+DNV,DANVILLE,Vermilion,IL,-87.5955,40.1997,212.0,America/Chicago
+DEC,DECATUR,Macon,IL,-88.8657,39.8346,207.0,America/Chicago
+DKB,DE KALB,De Kalb,IL,-88.7057,41.9338,279.0,America/Chicago
+1H2,EFFINGHAM,Effingham,IL,-88.5335,39.0705,179.0,America/Chicago
+FWC,FAIRFIELD,Wayne,IL,-88.4126,38.3786,133.0,America/Chicago
+FOA,FLORA,Clay,IL,-88.4531,38.665,144.0,America/Chicago
+FEP,FREEPORT,Stephenson,IL,-89.582,42.2462,262.0,America/Chicago
+GBG,GALESBURG,Knox,IL,-90.4311,40.938,245.0,America/Chicago
+HSB,HARRISBURG,Saline,IL,-88.5503,37.8113,121.0,America/Chicago
+IJX,JACKSONVILLE,Morgan,IL,-90.2383,39.7746,190.0,America/Chicago
+JOT,JOLIET,Will,IL,-88.1756,41.5177,177.0,America/Chicago
+IKK,KANKAKEE,Kankakee,IL,-87.8463,41.0714,192.0,America/Chicago
+C75,LACON,Marshall,IL,-89.3864,41.0193,173.0,America/Chicago
+LWV,LAWRENCEVILLE,Knox,IL,-87.6055,38.7643,131.0,America/Chicago
+AAA,Lincoln,Logan,IL,-89.335,40.1587,182.0,America/Chicago
+3LF,Litchfield,Montgomery,IL,-89.6746,39.1625,210.0,America/Chicago
+MQB,MACOMB MUNI,McDonough,IL,-90.65,40.52,215.0,America/Chicago
+MWA,MARION REGIONAL,Williamson,IL,-89.0111,37.755,144.0,America/Chicago
+MTO,MATTOON/CHARLEST,Coles,IL,-88.2792,39.4779,214.0,America/Chicago
+M30,Metropolis  IL,Massac,IL,-88.7506,37.1859,384.0,America/Chicago
+MLI,Moline,Rock Island,IL,-90.5075,41.4485,181.0,America/Chicago
+C09,MORRIS-WASHBURN,Grundy,IL,-88.4186,41.4253,178.0,America/Chicago
+AJG,Mount Carmel,Knox,IL,-87.7267,38.6065,131.0,America/Chicago
+I63,Mount Sterling,Brown,IL,-90.8042,39.9875,219.738,America/Chicago
+MVN,MOUNT VERNON,Jefferson,IL,-88.8583,38.3233,146.0,America/Chicago
+OLY,OLNEY-NOBLE,Richland,IL,-88.1764,38.7218,147.0,America/Chicago
+PWK,PALWAUKEE,Cook,IL,-87.9047,42.1208,203.0,America/Chicago
+PRG,PARIS,Edgar,IL,-87.67,39.7,199.0,America/Chicago
+PIA,PEORIA,Peoria,IL,-89.6839,40.6675,205.0,America/Chicago
+VYS,PERU,La Salle,IL,-89.1531,41.3519,199.0,America/Chicago
+PPQ,PITTSFIELD,Pike,IL,-90.7784,39.6389,216.0,America/Chicago
+PNT,PONTIAC,Livingston,IL,-88.6239,40.9244,201.0,America/Chicago
+UIN,QUINCY,Adams,IL,-91.1946,39.9428,234.0,America/Chicago
+TIP,RANTOUL         ,Champaign,IL,-88.1424,40.2936,225.0,America/Chicago
+RSV,Robinson,Sullivan,IL,-87.6498,39.016,141.0,America/Chicago
+RPJ,Rochelle,Lee,IL,-89.0783,41.893,238.0,America/Chicago
+RFD,ROCKFORD,Winnebago,IL,-89.093,42.1927,221.0,America/Chicago
+LOT,ROMEOVILLE/CHI,Will,IL,-88.0962,41.6081,205.0,America/Chicago
+SLO,SALEM/LECKRONE,Marion,IL,-88.9642,38.6429,175.0,America/Chicago
+SFY,Savanna,Carroll,IL,-90.1079,42.0458,188.0,America/Chicago
+BLV,SCOTT AFB/BELLEV,St. Clair,IL,-89.8352,38.5452,138.0,America/Chicago
+SAR,SPARTA,Randolph,IL,-89.7,38.15,164.0,America/Chicago
+SPI,SPRINGFIELD,Sangamon,IL,-89.6839,39.8447,181.0,America/Chicago
+SQI,STERLING ROCKFAL,Whiteside,IL,-89.6763,41.7428,197.0,America/Chicago
+TAZ,TAYLORVILLE,Sangamon,IL,-89.3278,39.5342,190.0,America/Chicago
+UGN,WAUKEGAN,Lake,IL,-87.8679,42.4222,222.0,America/Chicago
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+AID,ANDERSON MUNICIP,Henry,IN,-85.613,40.1086,280.0,America/Indiana/Indianapolis
+ANQ,Angola,Steuben,IN,-85.0835,41.6397,293.448,America/Indiana/Indianapolis
+GWB,Auburn,De Kalb,IN,-85.0644,41.3072,268.2,America/Indiana/Indianapolis
+HLB,Batesville,Franklin,IN,-85.2583,39.3445,296.386,America/Indiana/Indianapolis
+BMG,Bloomington,Monroe,IN,-86.6167,39.146,257.0,America/Indiana/Indianapolis
+BAK,COLUMBUS/BALKALA,Bartholomew,IN,-85.8963,39.2619,200.0,America/Indiana/Indianapolis
+CFJ,Crawfordsville,Montgomery,IN,-86.9199,39.9756,243.507,America/Indiana/Indianapolis
+DCY,Daviess City,Daviess,IN,-87.1297,38.7004,141.0,America/Indiana/Vincennes
+EKM,ELKHART MUNICIPA,Elkhart,IN,-86,41.72,237.0,America/Indiana/Indianapolis
+EVV,EVANSVILLE,Vanderburgh,IN,-87.5205,38.0441,117.0,America/Chicago
+FWA,FORT WAYNE,Allen,IN,-85.1871,40.9781,248.0,America/Indiana/Indianapolis
+FKR,Frankfort ,Clinton,IN,-86.5622,40.2734,261.597,America/Indiana/Indianapolis
+FRH,French Lick,Orange,IN,-86.6369,38.5062,237.245,America/Indiana/Indianapolis
+GYY,GARY REGIONAL,Lake,IN,-87.4128,41.6163,180.0,America/Chicago
+GSH,GOSHEN,Elkhart,IN,-85.7922,41.5272,252.0,America/Indiana/Indianapolis
+4I7,Greencastle,Putnam,IN,-86.8138,39.6336,253.585,America/Indiana/Indianapolis
+GPC,Greencastle,Putnam,IN,-86.8155,39.6354,255.939,America/Indiana/Indianapolis
+GUS,GRISSOM AFB/PERU,Miami,IN,-86.1521,40.6481,247.0,America/Indiana/Indianapolis
+HBE,Himsel Aaf,Bartholomew,IN,-86.0305,39.3417,214.47,America/Indiana/Indianapolis
+HNB,HUNTINGBURG,Dubois,IN,-86.95,38.25,161.0,America/Indiana/Vincennes
+HHG,Huntington,Huntington,IN,-85.4571,40.8529,244.008,America/Indiana/Indianapolis
+IND,INDIANAPOLIS,Marion,IN,-86.3048,39.7084,241.0,America/Indiana/Indianapolis
+EYE,INDIANAPOLIS,Marion,IN,-86.2958,39.825,248.0,America/Indiana/Indianapolis
+TYQ,Indianapolis Exec,Boone,IN,-86.2514,40.0306,281.0,America/Indiana/Indianapolis
+HFY,Indianapolis - Greenwood Muni,Johnson,IN,-86.088,39.6276,249.978,America/Indiana/Indianapolis
+MQJ,Indianapolis Mount Comfort,Hancock,IN,-85.8971,39.8435,260.994,America/Indiana/Indianapolis
+C62,Kendallville,Noble,IN,-85.2541,41.4739,304.407,America/Indiana/Indianapolis
+OXI,Knox,La Porte,IN,-86.6648,41.3302,208.8,America/Indiana/Knox
+OKK,KOKOMO,Howard,IN,-86.059,40.5282,253.0,America/Indiana/Indianapolis
+LAF,LAFAYETTE,Tippecanoe,IN,-86.9333,40.4148,182.0,America/Indiana/Indianapolis
+PPO,La Porte,La Porte,IN,-86.7345,41.5725,241.049,America/Chicago
+GGP,Logansport,Cass,IN,-86.3727,40.7113,223.241,America/Indiana/Indianapolis
+IMS,Madison,Jefferson,IN,-85.4655,38.7589,242.615,America/Indiana/Indianapolis
+MZZ,Marion,Grant,IN,-85.6797,40.4899,261.8,America/Indiana/Indianapolis
+MGC,Michigan City,La Porte,IN,-86.8212,41.7033,197.082,America/Chicago
+MCX,Monticello,White,IN,-86.7668,40.7088,204.231,America/Indiana/Indianapolis
+MIE,MUNCIE,Delaware,IN,-85.3958,40.2425,285.0,America/Indiana/Indianapolis
+1II,Nineveh,Bartholomew,IN,-86.0305,39.3417,214.46,America/Indiana/Indianapolis
+C65,Plymouth,Marshall,IN,-86.3005,41.3651,244.199,America/Indiana/Indianapolis
+PLD,Portland,Jay,IN,-84.9901,40.4508,278.69,America/Indiana/Indianapolis
+RZL,Rensselaer,Jasper,IN,-87.1826,40.9479,213.0,America/Chicago
+RID,Richmond,Wayne,IN,-84.8428,39.7572,345.132,America/Indiana/Indianapolis
+RCR,Rochester,Fulton,IN,-86.1817,41.0655,240.8,America/Indiana/Indianapolis
+GEZ,SHELBYVILLE,Shelby,IN,-85.8048,39.5831,245.0,America/Indiana/Indianapolis
+SBN,SOUTH BEND,St. Joseph,IN,-86.3164,41.7072,237.0,America/Indiana/Indianapolis
+HUF,TERRE HAUTE,Vigo,IN,-87.3076,39.4515,179.0,America/Indiana/Indianapolis
+VPZ,VALPARAISO,Porter,IN,-87.0071,41.454,231.0,America/Chicago
+ASW,WARSAW MUNI,Kosciusko,IN,-85.8401,41.2747,259.0,America/Indiana/Indianapolis
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+3AU,Augusta,Butler,KS,-97.0779,37.6716,405.839,America/Chicago
+1K1,Benton,Butler,KS,-97.1132,37.7744,413.555,America/Chicago
+UKL,Burlington,Coffey,KS,-95.725,38.3025,357.5,America/Chicago
+CNU,CHANUTE,Neosho,KS,-95.4842,37.6703,305.0,America/Chicago
+CFV,COFFEYVILLE,Montgomery,KS,-95.5719,37.0941,226.0,America/Chicago
+CBK,COLBY           ,Thomas,KS,-101.0466,39.4274,971.0,America/Chicago
+CNK,CONCORDIA,Cloud,KS,-97.65,39.55,452.0,America/Chicago
+DDC,DODGE_CITY,Ford,KS,-99.9654,37.7631,790.0,America/Chicago
+EQA,El Dorado ,Butler,KS,-96.8176,37.7741,422.516,America/Chicago
+EHA,ELKHART,Morton,KS,-101.88,37.0008,1099.0,America/Chicago
+EMP,EMPORIA,Lyon,KS,-96.1897,38.3306,368.0,America/Chicago
+FLV,FORT LEAVENWORTH,Clay,KS,-94.9147,39.3683,235.0,America/Chicago
+FRI,Fort Riley,Geary,KS,-96.7645,39.0526,324.6,America/Chicago
+FSK,Fort Scott,Bourbon,KS,-94.7694,37.7984,279.8,America/Chicago
+GCK,GARDEN_CITY,Finney,KS,-100.7244,37.9275,881.0,America/Chicago
+GLD,GOODLAND,Sherman,KS,-101.6933,39.3672,1111.0,America/Denver
+GBD,GREAT_BEND,Barton,KS,-98.8592,38.3443,575.0,America/Chicago
+HYS,HAYS_MUNI,Ellis,KS,-99.2732,38.8422,609.0,America/Chicago
+HLC,HILL_CITY,Graham,KS,-99.8297,39.3756,678.0,America/Chicago
+HQG,Hugoton,Stevens,KS,-101.3705,37.1631,956.52,America/Chicago
+HUT,HUTCHINSON,Reno,KS,-97.8606,38.0655,470.0,America/Chicago
+IDP,Independence,Montgomery,KS,-95.7784,37.1584,251.0,America/Chicago
+K88,Iola,Allen,KS,-95.3869,37.8682,306.192,America/Chicago
+JHN,Johnson,Stanton,KS,-101.7304,37.5782,1012.71,America/Chicago
+LWC,Lawrence,Douglas,KS,-95.2115,39.0077,253.47,America/Chicago
+LBL,LIBERAL_MUNI,Seward,KS,-100.9599,37.0442,879.0,America/Chicago
+LYO,Lyons,Rice,KS,-98.2286,38.3403,518.295,America/Chicago
+MHK,MANHATTAN,Geary,KS,-96.6778,39.1353,322.0,America/Chicago
+MYZ,Marysville,Marshall,KS,-96.6306,39.8553,393.169,America/Chicago
+IAB,MCCONNELL_AFB,Sedgwick,KS,-97.2673,37.623,418.0,America/Chicago
+P28,MEDICINE_LODGE,Barber,KS,-98.5528,37.2839,468.0,America/Chicago
+EWK,NEWTON,Harvey,KS,-97.2745,38.0582,467.0,America/Chicago
+NRN,NORTON          ,Rooks,KS,-99.8947,39.8504,720.0,America/Chicago
+OIN,OBERLIN         ,Sheridan,KS,-100.5393,39.8339,824.0,America/Chicago
+IXD,OLATHE (IXD),Johnson,KS,-94.8903,38.8309,343.0,America/Chicago
+OJC,OLATHE (OJC),Johnson,KS,-94.7392,38.85,334.0,America/Chicago
+OWI,Ottawa,Franklin,KS,-95.2542,38.5409,292.66,America/Chicago
+PPF,PARSONS,Montgomery,KS,-95.5042,37.3278,274.0,America/Chicago
+PHG,PHILLIPSBURG    ,Rooks,KS,-99.3171,39.7358,581.0,America/Chicago
+PTS,Pittsburg,Crawford,KS,-94.7311,37.4495,289.6,America/Chicago
+PTT,Pratt,Pratt,KS,-98.7469,37.7016,595.0,America/Chicago
+RSL,RUSSELL,Russell,KS,-98.8118,38.8721,568.0,America/Chicago
+SLN,SALINA,Saline,KS,-97.6522,38.791,388.0,America/Chicago
+SYF,St Francis,Sherman,KS,-101.7959,39.7611,1037.35,America/Denver
+19S,Sublette,Haskell,KS,-100.8329,37.4969,892.566,America/Chicago
+3K3,Syracuse,Hamilton,KS,-101.7463,37.9917,1005.7,America/Denver
+FOE,TOPEKA (FOE),Shawnee,KS,-95.6636,38.9509,329.0,America/Chicago
+TOP,TOPEKA (TOP),Shawnee,KS,-95.62,39.07,270.0,America/Chicago
+ULS,Ulysses ,Grant,KS,-101.3736,37.604,930.429,America/Chicago
+ICT,WICHITA,Sedgwick,KS,-97.43,37.65,408.0,America/Chicago
+AAO,WICHITA (AAO),Sedgwick,KS,-97.22,37.75,433.0,America/Chicago
+BEC,Wichita Beech Factory,Sedgwick,KS,-97.215,37.6945,424.671,America/Chicago
+WLD,WINFIELD,Cowley,KS,-97.0369,37.1681,351.0,America/Chicago
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+DWU,Ashland,Greenup,KY,-82.738,38.5545,165.281,America/New_York
+BRY,Bardstown - Samuels Field,Nelson,KY,-85.4996,37.8143,194.31,America/New_York
+SJS,Big Sandy,Martin,KY,-82.6367,37.751,363.95,America/New_York
+BWG,BOWLING GREEN,Warren,KY,-86.4197,36.9645,167.0,America/Chicago
+FFT,CAPITAL CITY AIRPORT/FRANKFORT,Franklin,KY,-84.9033,38.1847,237.0,America/New_York
+CVG,Cincinnati / N Kentucky Intl,Hamilton,KY,-84.6717,39.0431,267.0,America/New_York
+DVK,Danville,Lincoln,KY,-84.7697,37.5779,311.5,America/New_York
+EKX,Elizabethtown,Hardin,KY,-85.925,37.686,232.355,America/New_York
+SYM,Fleming,Fleming,KY,-83.5874,38.215,328.182,America/New_York
+FGX,Flemingsburg ,Mason,KY,-83.7434,38.5418,274.017,America/New_York
+HOP,FORT CAMPBELL (AAF),Christian,KY,-87.4962,36.6686,174.0,America/Chicago
+FTK,FORT KNOX/GODMAN,Hardin,KY,-85.9721,37.9071,230.0,America/New_York
+27K,Georgetown,Scott,KY,-84.4347,38.2344,285.672,America/New_York
+GLW,GLASGOW MUNI,Barren,KY,-85.9537,37.0318,218.0,America/Chicago
+M21,Greenville,Muhlenberg,KY,-87.1564,37.2262,125.566,America/Chicago
+KY8,Hancock,Hancock,KY,-86.8592,37.953,120.593,America/Chicago
+I35,Harlan Tucker Memorial,Harlan,KY,-83.3585,36.8593,465.732,America/New_York
+EHR,HENDERSON CITY,Henderson,KY,-87.6857,37.8078,117.0,America/Chicago
+JKL,JACKSON/J. CARROLL,Breathitt,KY,-83.3144,37.5914,421.0,America/New_York
+6I2,Lebanon - Springfield,Washington,KY,-85.2418,37.6352,256.484,America/New_York
+LEX,LEXINGTON/BLUEGRASS,Fayette,KY,-84.6058,38.0408,301.0,America/New_York
+LOZ,LONDON-CORBIN ARPT,Laurel,KY,-84.077,37.087,369.0,America/New_York
+LOU,LOUISVILLE/BOWMAN,Jefferson,KY,-85.6637,38.228,167.0,America/New_York
+SDF,LOUISVILLE/STANDIFO,Jefferson,KY,-85.736,38.1744,149.0,America/New_York
+2I0,Madisonville,Hopkins,KY,-87.3982,37.3559,134.0,America/Chicago
+5M9,Marion,Crittenden,KY,-88.1097,37.3363,191.316,America/Chicago
+M25,Mayfield,Graves,KY,-88.5847,36.7691,153.778,America/Chicago
+1A6,MIDDLESBORO-BELL,Grainger,KY,-83.7374,36.6106,352.0,America/New_York
+EKQ,Monticello,Wayne,KY,-84.8561,36.8553,293.5,America/Kentucky/Monticello
+IOB,Mount Sterling,Montgomery,KY,-83.9829,38.0575,306.067,America/New_York
+CEY,Murray,Calloway,KY,-88.3728,36.6646,173.0,America/Chicago
+OWB,OWENSBORO/DAVIESS,Daviess,KY,-87.1668,37.7388,124.0,America/Chicago
+PAH,PADUCAH/BARKLEY,Massac,KY,-88.7744,37.0563,120.0,America/Chicago
+PBX,Pikeville,Pike,KY,-82.5674,37.5587,445.992,America/New_York
+K22,Prestonsburg,Martin,KY,-82.6367,37.751,363.95,America/New_York
+I39,Richmond,Madison,KY,-84.3323,37.6308,309.0,America/New_York
+SME,SOMERSET(AWOS),Pulaski,KY,-84.6156,37.0536,283.0,America/New_York
+AAS,Taylor County,Taylor,KY,-85.3151,37.3569,269.409,America/New_York
+BYL,Williamsburg,Whitley,KY,-84.1995,36.795,353.963,America/New_York
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+IYA,Abbeville,Vermilion,LA,-92.0842,29.9758,5.0,America/Chicago
+0R3,Abbeville,Vermilion,LA,-92.0842,29.9758,4.6,America/Chicago
+ESF,ALEXANDRIA/ESLER,Rapides,LA,-92.2958,31.3949,34.0,America/Chicago
+AEX,ALEXANDRIA INTL/ENGLAND AFB,Rapides,LA,-92.5586,31.3347,27.0,America/Chicago
+7R3,AMELIA/LAKE PALOURD,Terrebonne,LA,-91.0986,29.6931,2.0,America/Chicago
+ATP,Atlantis,GMZ013,GM,-90.0269,27.1956,0.0,America/Chicago
+AUD,AUDUBON PARK,Jefferson,LA,-90.1333,29.9333,2.0,America/Chicago
+BAD,BARKSDALE AFB,Bossier,LA,-93.6626,32.5019,51.0,America/Chicago
+BQP,Bastrop,Morehouse,LA,-91.8806,32.7561,50.9,America/Chicago
+BTR,BATON ROUGE/RYAN,W Baton Rouge,LA,-91.1469,30.5372,21.0,America/Chicago
+WBF,Block WR29,GMZ013,LA,-90.5,26.93,0.0,America/Chicago
+BXA,Bogalusa,Hancock,LA,-89.865,30.8137,35.8701,America/Chicago
+BVE,BOOTHVILLE,Plaquemines,LA,-89.4075,29.3333,1.0,America/Chicago
+1B7,BOOTHVILLE/R L SUGGS HELIPORT,Plaquemines,LA,-89.4333,29.35,1.0,America/Chicago
+LNQ,Buras,Plaquemines,LA,-89.438,29.364,1.0,America/Chicago
+CVW,Cameron,Cameron,LA,-93.3,29.784,2.64563,America/Chicago
+7R5,CAMERON HELIPORT,Cameron,LA,-93.3,29.7833,1.0,America/Chicago
+CWF,CHENAULT AIRPARK,Calcasieu,LA,-93.1432,30.2106,4.0,America/Chicago
+5R8,De Quincy,Calcasieu,LA,-93.4736,30.4411,27.5793,America/Chicago
+DRI,DE RIDDER/BEAUREGARD REGIONAL,Beauregard,LA,-93.34,30.83,62.0,America/Chicago
+EHC,East Cameron,GMZ013,GM,-92.878,28.429,0.0,America/Chicago
+CMB,East Cameron 47,GMZ452,GM,-92.9792,29.4406,0.0,America/Chicago
+EIR,Eugene Island 215,GMZ475,GM,-91.489,28.634,0.0,America/Chicago
+3B6,EUGENE ISLAND 330,GMZ013,GM,-91.68,28.22,0.0,America/Chicago
+POE,FORT POLK (ARMY),Vernon,LA,-93.1916,31.0448,100.0,America/Chicago
+9F2,FOURCHON (SAWRS),Lafourche,LA,-90.2,29.1,2.0,America/Chicago
+BKB,FULLERTON FLS/JRTK_FT_POLK ASOS,Vernon,LA,-92.9107,31.0217,90.0,America/Chicago
+GAO,Galliano,Jefferson,LA,-90.2611,29.4448,-0.395924,America/Chicago
+2GL,GALLIANO HELIPRT,Lafourche,LA,-90.288,29.409,3.0,America/Chicago
+SQE,GOMEX Ship Shoal 354 ,GMZ570,GM,-90.819,28.083,-146.0,America/Chicago
+REG,Gonzale,Ascension,LA,-90.9333,30.1667,7.98628,America/Chicago
+L38,Gonzales,Ascension,LA,-90.9406,30.1727,1.64286,America/Chicago
+3L4,Grand Chenier,Cameron,LA,-92.804,29.8,4.78308,America/Chicago
+AXO,GRAND ISLE (SAWRS),Plaquemines,LA,-89.9667,29.25,2.0,America/Chicago
+XCN,GREEN_CANYON_184,GMZ013,GM,-91.5167,27.7667,0.0,America/Chicago
+XER,Green Canyon 19,Terrebonne,LA,-91,27.95,40.0,America/Chicago
+GRY,Green Canyon 338,GMZ013,GM,-90.441,27.625,0.0,America/Chicago
+HDC,HAMMOND MUNI AIRPORT,Livingston,LA,-90.42,30.52,13.0,America/Chicago
+XIH,High Island 179A,GMZ355,GM,-94.521,29.18,0.0,America/Chicago
+H08,HIGH ISLAND 264C,GMZ013,GM,-93.7333,28.4667,1.0,America/Chicago
+HUM,HOUMA-TERREBONNE,Terrebonne,LA,-90.6604,29.5665,3.0,America/Chicago
+IPN,Independence (GoM),GMZ013,GM,-87.9858,28.085,0.0,America/Chicago
+7R4,INTRACOASTAL CITY,Vermilion,LA,-92.13,29.78,5.0,America/Chicago
+3R7,Jennings,Jeff n Davis,LA,-92.6735,30.2427,5.5129,America/Chicago
+LFT,Lafayette Regional,Lafayette,LA,-91.981,30.2115,10.4567,America/Chicago
+LCH,LAKE CHARLES MUNI,Calcasieu,LA,-93.2283,30.1247,10.0,America/Chicago
+GBK,Magnolia (GoM),GMZ013,GM,-92.2025,27.2039,0.0,America/Chicago
+3F3,Mansfield,De Soto,LA,-93.764,32.0717,99.3397,America/Chicago
+MNE,Minden,Webster,LA,-93.2981,32.646,84.7,America/Chicago
+F24,Minden,Webster,LA,-93.2981,32.646,84.7,America/Chicago
+CYD,MISS CANYAN 807,GMZ572,GM,-89.2167,28.1667,1.0,America/Chicago
+MDJ,Mississippi Canyon,Plaquemines,LA,-89.7942,28.6425,0.0,America/Chicago
+DSF,Mississippi Canyon 650,Plaquemines,LA,-88.2667,28.35,0.0,America/Chicago
+MLU,MONROE REGIONAL,Richland,LA,-92.0377,32.5109,24.0,America/Chicago
+IER,NATTCHITOCHES REGIONAL AIRPORT,Natchitoches,LA,-93.0991,31.7357,37.0,America/Chicago
+ARA,NEW IBERIA/ACADIANA,Iberia,LA,-91.8839,30.0378,7.0,America/Chicago
+7N0,New Orleans Downtown,Orleans,LA,-90.0827,29.9527,8.79244,America/Chicago
+NEW,NEW ORLEANS/LAKEFRO,Orleans,LA,-90.0282,30.0424,3.0,America/Chicago
+MSY,NEW ORLEANS/MOISANT,Jefferson,LA,-90.2511,29.9933,9.0,America/Chicago
+NBG,NEW ORLEANS NAS,Plaquemines,LA,-90.035,29.8253,-6.0,America/Chicago
+HZR,New Roads,Pointe Coupee,LA,-91.4787,30.7183,10.8868,America/Chicago
+ACP,OAKDALE/ALLEN PARISH ARPT,Allen,LA,-92.69,30.75,33.0,America/Chicago
+H78,Offshort,GMZ575,GM,-88.48,28.18,0.0,America/Chicago
+4C0,Oil Platform,Cameron,LA,-93.18,29.78,1.0,America/Chicago
+OPL,Opelousas,St Landry,LA,-92.0994,30.5584,23.4477,America/Chicago
+PTN,PATTERSON MEMORIAL,Terrebonne,LA,-91.339,29.7096,3.0,America/Chicago
+AQV,PEASON RIDGE/JRTK_FT_POLK ASOS,Vernon,LA,-93.2833,31.4,114.0,America/Chicago
+QT8,PHI OIL PLATF,GMZ013,GM,-92.43,27.53,1.0,America/Chicago
+QT9,PHI OIL PLATF,GMZ013,GM,-90.63,27.78,1.0,America/Chicago
+XPY,Port Fourchon,Lafourche,LA,-90.202,29.123,2.0,America/Chicago
+APS,Reserve,St. John The Baptist,LA,-90.5842,30.086,4.18874,America/Chicago
+1L0,Reserve,St John Baptist,LA,-90.5827,30.087,1.79009,America/Chicago
+RSN,Ruston,Lincoln,LA,-92.5883,32.5144,95.0,America/Chicago
+VBS,Sabine 13B,Cameron,LA,-93.6383,29.4783,0.0,America/Chicago
+GHB,Salsa,GMZ013,GM,-91.99,27.84,0.0,America/Chicago
+P92,SALT POINT (RAMOS),Terrebonne,LA,-91.5256,29.5622,3.0,America/Chicago
+DNK,SELF FLS/JRTK_FT_POLK ASOS,Vernon,LA,-93.1533,31.1106,113.0,America/Chicago
+GSM,SHIP SHOAL 207A,GMZ570,GM,-90.9833,28.5333,1.0,America/Chicago
+SPR,Ship Shoal (GoM),GMZ570,GM,-91.206,28.599,0.0,America/Chicago
+DTN,SHREVEPORT DOWNTOWN,Bossier,LA,-93.745,32.5402,55.0,America/Chicago
+SHV,SHREVEPORT REGIONAL,Bossier,LA,-93.8244,32.4472,79.0,America/Chicago
+ASD,SLIDELL,St Tammany,LA,-89.8222,30.3433,8.0,America/Chicago
+SCF,South Marsh 268,Iberia,LA,-91.8711,29.1158,0.0,America/Chicago
+7R8,SOUTH MARSH ISLAND,GMZ013,GM,-91.9833,28.3,1.0,America/Chicago
+SRN,SOUTH MARSH ISLAND BLOCK 268A,GMZ455,GM,-91.8667,29.1167,0.0,America/Chicago
+STZ,South Timbalier,GMZ570,GM,-90.666,28.16,0.0,America/Chicago
+S58,SOUTH TIMBALIER,GMZ570,GM,-90.5833,28.5333,1.0,America/Chicago
+UXL,Sulphur,Calcasieu,LA,-93.3761,30.1314,3.0,America/Chicago
+VNP,Vermillion 26,Vermilion,LA,-92.368,29.467,4.0,America/Chicago
+VQT,Vermillion 331,GMZ013,GM,-92.264,28.27,0.0,America/Chicago
+TVR,Vicksburg / Tallulah,Madison,LA,-91.0299,32.3481,28.1093,America/Chicago
+0R4,Vidalia,Concordia,LA,-91.5065,31.562,14.5318,America/Chicago
+VOA,Viosca Knoll,GMZ013,GM,-87.781,29.229,0.0,America/Chicago
+W60,W. CAMERON 560,GMZ470,GM,-93.35,29.15,1.0,America/Chicago
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+BVY,BEVERLY MUNICIPAL,Essex,MA,-70.9161,42.5841,33.0,America/New_York
+BOS,BOSTON/LOGAN INTL,Suffolk,MA,-71.0097,42.3606,9.0,America/New_York
+CQX,CHATHAM MUNI ARPT,Barnstable,MA,-69.9933,41.6875,19.0,America/New_York
+CEF,CHICOPEE/WESTOVER,Hampden,MA,-72.5348,42.194,75.0,America/New_York
+MQE,EAST MILTON/BLUE HILL OBSERV,Norfolk,MA,-71.1142,42.2121,200.0,America/New_York
+FIT,FITCHBURG,Worcester,MA,-71.7558,42.5519,106.0,America/New_York
+BED,HANSCOM FLD/BEDFORD,Middlesex,MA,-71.289,42.4699,41.0,America/New_York
+HYA,HYANNIS/POLANDO FLD,Barnstable,MA,-70.28,41.67,16.0,America/New_York
+LWM,LAWRENCE MUNICIPAL,Middlesex,MA,-71.1234,42.7172,45.0,America/New_York
+GHG,Marshfield,Plymouth,MA,-70.6721,42.0982,3.4,America/New_York
+3B2,Marshfield Airport,Plymouth,MA,-70.677,42.0965,3.0,America/New_York
+MVY,MARTHAS VINEYARD,Dukes,MA,-70.615,41.3931,21.0,America/New_York
+ACK,NANTUCKET MEMORIAL,Nantucket,MA,-70.0603,41.2531,15.0,America/New_York
+EWB,NEW BEDFORD MUNI,Bristol,MA,-70.9583,41.6764,24.0,America/New_York
+AQW,NORTH ADAMS,Berkshire,MA,-73.1702,42.6962,476.0,America/New_York
+OWD,NORWOOD MEMORIAL,Norfolk,MA,-71.1733,42.1912,15.0,America/New_York
+ORE,ORANGE (ASOS),Worcester,MA,-72.2886,42.5701,164.0,America/New_York
+FMH,OTIS ANGB,Barnstable,MA,-70.5215,41.6585,40.0,America/New_York
+PSF,PITTSFIELD MUNI,Berkshire,MA,-73.2892,42.4272,364.0,America/New_York
+PYM,PLYMOUTH MUNICIPAL,Plymouth,MA,-70.7288,41.909,45.0,America/New_York
+PVC,PROVINCETOWN (AWOS),Barnstable,MA,-70.22,42.07,2.0,America/New_York
+TAN,TAUNTON MUNI AIRPORT,Bristol,MA,-71.0211,41.8756,13.0,America/New_York
+BAF,WESTFIELD/BARNES,Hampden,MA,-72.7161,42.1578,83.0,America/New_York
+ORH,WORCESTER (AMOS),Worcester,MA,-71.8757,42.2673,308.0,America/New_York
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+ADW,ANDREWS AFB,Prince Georges,MD,-76.867,38.8108,86.0,America/New_York
+NAK,Annapolis,Anne Arundel,MD,-76.4891,38.9913,1.33359,America/New_York
+DMH,BALTIMORE INNER HARBOR,Baltimore City,MD,-76.61,39.28,6.0,America/New_York
+MTN,BALTIMORE/MARTIN,Baltimore,MD,-76.4138,39.3257,7.0,America/New_York
+BWI,BALTIMORE/WASH INTL,Anne Arundel,MD,-76.6683,39.1754,47.0,America/New_York
+CGE,Cambridge,Dorchester,MD,-76.0304,38.5393,5.8,America/New_York
+RSP,Camp David,Frederick,MD,-77.468,39.645,561.0,America/New_York
+CGS,College Park,Washington,MD,-76.9223,38.9806,14.6,America/New_York
+CBE,Cumberland,Allegany,MD,-78.7609,39.6154,236.2,America/New_York
+ESN,Easton,Talbot,MD,-76.069,38.8042,21.9,America/New_York
+FME,Fort Meade,Anne Arundel,MD,-76.7594,39.0854,46.0,America/New_York
+FDK,FREDERICK MUNI APT,Frederick,MD,-77.3743,39.4176,92.0,America/New_York
+GAI,Gaithersburg,Montgomery,MD,-77.166,39.1683,164.3,America/New_York
+HGR,HAGERSTOWN REGIONAL,Washington,MD,-77.7297,39.7078,215.0,America/New_York
+2W6,Leonardtown,St Marys,MD,-76.5501,38.3154,43.3,America/New_York
+2G4,Oakland,Garrett,MD,-79.3394,39.5803,894.0,America/New_York
+OXB,OCEAN CITY MUNI,Worcester,MD,-75.1239,38.3083,4.0,America/New_York
+NHK,PATUXENT RIVER NAS,St Marys,MD,-76.4118,38.286,12.0,America/New_York
+APG,PHILLIPS AAF/ABERDN,Harford,MD,-76.1688,39.4662,18.0,America/New_York
+RJD,Ridgely,Queen Annes,MD,-75.8663,38.9701,20.0,America/New_York
+SBY,SALISBURY REGIONAL,Worcester,MD,-75.5103,38.3405,16.0,America/New_York
+W29,Stevensville,Queen Annes,MD,-76.3296,38.9764,5.0,America/New_York
+NUI,St Inigoes,St Marys,MD,-76.4285,38.146,6.7,America/New_York
+DMW,Westminster,Carroll,MD,-77.0077,39.6083,240.5,America/New_York
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+LEW,AUBURN-LEWISTON,Cumberland,ME,-70.2835,44.0485,88.0,America/New_York
+AUG,AUGUSTA STATE ARPT,Lincoln,ME,-69.8,44.32,107.0,America/New_York
+BGR,BANGOR INTL ARPT,Hancock,ME,-68.8281,44.8074,59.0,America/New_York
+BHB,BAR HARBOR (AWOS),Hancock,ME,-68.3616,44.4498,26.0,America/New_York
+NHZ,BRUNSWICK NAS,Cumberland,ME,-69.9386,43.8922,23.0,America/New_York
+CAR,CARIBOU MUNICIPAL,Penobscot,ME,-68.02,46.87,190.0,America/New_York
+40B,CLAYTON LAKE,Aroostook,ME,-69.531,46.609,314.0,America/New_York
+EPM,EASTPORT        ,Washington,ME,-67.0127,44.9101,14.0,America/New_York
+FVE,FRENCHVILLE,Aroostook,ME,-68.3127,47.2855,301.0,America/New_York
+IZG,FRYEBERG,Oxford,ME,-70.9479,43.9911,138.0,America/New_York
+GNR,GREENVILLE (AMOS),Piscataquis,ME,-69.5953,45.4622,316.0,America/New_York
+HUL,HOULTON INTL ARPT,Aroostook,ME,-67.7921,46.1231,150.0,America/New_York
+MLT,MILLINOCKET MUNI,Penobscot,ME,-68.6856,45.6478,124.0,America/New_York
+OLD,OLD TOWN/DEWITT ,Hancock,ME,-68.6743,44.9525,39.0,America/New_York
+PWM,PORTLAND INTL JET,Cumberland,ME,-70.3044,43.6424,19.0,America/New_York
+PQI,PRESQUE ISLE (AWOS),Aroostook,ME,-68.0448,46.689,146.0,America/New_York
+8B0,Rangeley,Franklin,ME,-70.6646,44.9919,552.508,America/New_York
+RKD,ROCKLAND/KNOX(AWOS),Knox,ME,-69.0993,44.0601,17.0,America/New_York
+SFM,SANFORD MUNI (AWOS),York,ME,-70.708,43.3939,74.0,America/New_York
+WVL,WATERVILLE (AWOS),Kennebec,ME,-69.6755,44.5333,101.0,America/New_York
+IWI,WISCASSET,Lincoln,ME,-69.7126,43.9614,21.0,America/New_York
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+ADG,ADRIAN          ,Fulton,MI,-84.0773,41.8677,241.0,America/Detroit
+AMN,Alma,Gratiot,MI,-84.6879,43.3221,229.8,America/Detroit
+APN,ALPENA,Alpena,MI,-83.5644,45.0717,210.0,America/Detroit
+ARB,ANN ARBOR,Washtenaw,MI,-83.7397,42.224,251.0,America/Detroit
+BAX,BAD AXE,Huron,MI,-82.9854,43.7802,234.0,America/Detroit
+BTL,BATTLE CREEK,Calhoun,MI,-85.2515,42.3073,290.0,America/Detroit
+SJX,BEAVER ISLAND,Charlevoix,MI,-85.5666,45.6923,204.0,America/Detroit
+ACB,BELLAIRE,Antrim,MI,-85.1984,44.9886,190.0,America/Detroit
+BEH,BENTON HARBOR,Berrien,MI,-86.4285,42.1286,191.0,America/Detroit
+RQB,BIG RAPIDS,Mecosta,MI,-85.5041,43.7226,302.0,America/Detroit
+CAD,CADILLAC/WEXFORD,Wexford,MI,-85.4189,44.2753,398.0,America/Detroit
+CFS,Caro,Tuscola,MI,-83.4454,43.4588,214.0,America/Detroit
+CVX,CHARLEVOIX,Charlevoix,MI,-85.2747,45.3047,204.0,America/Detroit
+FPK,CHARLOTTE,Eaton,MI,-84.8114,42.5745,272.0,America/Detroit
+SLH,CHEBOYGAN,Cheboygan,MI,-84.5193,45.6537,195.0,America/Detroit
+CIU,CHIPPEWA INTL,Chippewa,MI,-84.47,46.25,244.0,America/Detroit
+OEB,COLDWATER,Branch,MI,-85.0525,41.9333,292.0,America/Detroit
+P59,COPPER HARBOR,Keweenaw,MI,-87.875,47.4669,190.0,America/Detroit
+DET,DETROIT/CITY AIR,Wayne,MI,-83.0099,42.4092,190.0,America/Detroit
+ONZ,DETROIT/GROSSE I,Wayne,MI,-83.1615,42.0991,180.0,America/Detroit
+DTW,DETROIT/WAYNE,Wayne,MI,-83.33,42.23,195.0,America/Detroit
+YIP,DETROIT/WILLOW,Wayne,MI,-83.5304,42.2379,215.0,America/Detroit
+DRM,Drummond Island,Chippewa,MI,-83.7439,46.0093,203.6,America/Detroit
+ESC,ESCANABA,Delta,MI,-87.0937,45.7227,187.0,America/Detroit
+FNT,FLINT,Genesee,MI,-83.7494,42.9667,233.0,America/Detroit
+FKS,Frankfort,Benzie,MI,-86.2008,44.6252,193.0,America/Detroit
+FFX,Freemont,Muskegon,MI,-85.9949,43.4393,235.3,America/Detroit
+GLR,GAYLORD,Otsego,MI,-84.7036,45.0135,407.0,America/Detroit
+GRR,GRAND RAPIDS,Kent,MI,-85.52,42.88,237.0,America/Detroit
+GOV,GRAYLING AF,Crawford,MI,-84.73,44.68,353.0,America/Detroit
+SAW,GWINN/SAWYER AFB,Marquette,MI,-87.3954,46.3536,372.0,America/Detroit
+CMX,HANCOCK,Houghton,MI,-88.4891,47.1684,326.0,America/Detroit
+MGN,HARBOR SPRINGS,Emmet,MI,-84.9134,45.4256,209.0,America/Detroit
+JYM,HILLSDALE,Hillsdale,MI,-84.5858,41.9213,360.0,America/Detroit
+BIV,HOLLAND,Allegan,MI,-86.0967,42.7461,208.0,America/Detroit
+HTL,HOUGHTON LAKE,Roscommon,MI,-84.6711,44.3598,351.0,America/Detroit
+OZW,HOWELL,Livingston,MI,-83.9822,42.6294,293.0,America/Detroit
+Y70,Ionia,Ionia,MI,-85.0606,42.938,249.3,America/Detroit
+IMT,IRON MOUNTAIN,Florence,MI,-88.1146,45.8184,349.0,America/Menominee
+IWD,IRONWOOD,Gogebic,MI,-90.1314,46.5275,375.0,America/Menominee
+JXN,JACKSON/REYNOLDS,Jackson,MI,-84.4594,42.2598,305.0,America/Detroit
+AZO,KALAMAZOO,Kalamazoo,MI,-85.5519,42.2347,272.0,America/Detroit
+DUH,LAMBERTVILLE,Monroe,MI,-83.6553,41.7358,204.0,America/Detroit
+LAN,LANSING,Clinton,MI,-84.58,42.78,264.0,America/Detroit
+D95,Lapeer,Lapeer,MI,-83.2723,43.0666,253.037,America/Detroit
+LDM,LUDINGTON/MASON,Mason,MI,-86.4079,43.9625,197.0,America/Detroit
+MCD,MACKINAC ISLAND,Mackinac,MI,-84.6372,45.865,226.0,America/Detroit
+MBL,MANISTEE,Manistee,MI,-86.2469,44.2725,189.0,America/Detroit
+ISQ,MANISTIQUE,Schoolcraft,MI,-86.1718,45.9746,209.0,America/Detroit
+P75,MANISTIQUE,Schoolcraft,MI,-86.23,45.95,178.0,America/Detroit
+RMY,MARSHALL,Calhoun,MI,-84.9554,42.2512,287.0,America/Detroit
+TEW,MASON,Ingham,MI,-84.4232,42.5658,280.0,America/Detroit
+MNM,MENOMINEE,Marinette,MI,-87.6384,45.1266,191.0,America/Menominee
+IKW,Midland,Midland,MI,-84.2613,43.6629,193.5,America/Detroit
+TTF,MONROE,Monroe,MI,-83.4347,41.9399,188.0,America/Detroit
+MOP,MOUNT PLEASANT,Isabella,MI,-84.7372,43.6217,230.0,America/Detroit
+P53,Munising,Alger,MI,-86.6508,46.4119,182.381,America/Detroit
+MKG,MUSKEGON,Muskegon,MI,-86.2367,43.1711,191.0,America/Detroit
+ERY,NEWBERRY,Luce,MI,-85.4572,46.3111,265.0,America/Detroit
+OSC,OSCODA/WURTSMITH,Iosco,MI,-83.3942,44.4515,193.0,America/Detroit
+RNP,Owosso,Shiawassee,MI,-84.1389,42.9929,224.0,America/Detroit
+PLN,PELLSTON,Emmet,MI,-84.7967,45.5709,217.0,America/Detroit
+PTK,PONTIAC,Oakland,MI,-83.4201,42.6655,299.0,America/Detroit
+P58,PORT HOPE,Huron,MI,-82.7931,44.0219,179.0,America/Detroit
+PHN,PORT HURON,St. Clair,MI,-82.5289,42.911,198.0,America/Detroit
+PZQ,Rogers City,Presque Isle,MI,-83.8129,45.4071,204.0,America/Detroit
+MBS,SAGINAW,Saginaw,MI,-84.08,43.53,202.0,America/Detroit
+HYX,SAGINAW/BROWNE,Saginaw,MI,-83.8623,43.4334,183.0,America/Detroit
+ANJ,SAULT STE MARIE,Chippewa,MI,-84.3684,46.4792,218.0,America/Detroit
+MTC,SELFRIDGE ANGB,Macomb,MI,-82.8355,42.6083,177.0,America/Detroit
+LWA,South Haven,Van Buren,MI,-86.2561,42.3508,203.0,America/Detroit
+IRS,STURGIS/KIRSCH,St. Joseph,MI,-85.4389,41.8133,282.0,America/Detroit
+HAI,Three Rivers,St. Joseph,MI,-85.5934,41.9597,251.0,America/Detroit
+TVC,TRAVERSE CIT,Grand Traverse,MI,-85.5824,44.7416,190.0,America/Detroit
+VLL,Troy,Oakland,MI,-83.1779,42.5429,222.0,America/Detroit
+Y31,West Branch,Ogemaw,MI,-84.1798,44.2448,261.813,America/Detroit
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+AIT,AITKIN NDB,Aitkin,MN,-93.6768,46.5484,367.0,America/Chicago
+AEL,ALBERT LEA,Freeborn,MN,-93.3672,43.6815,383.0,America/Chicago
+AXN,ALEXANDRIA,Douglas,MN,-95.3947,45.8663,433.0,America/Chicago
+AQP,APPLETON MUNICIP,Lac qui Parle,MN,-96.0043,45.2275,311.0,America/Chicago
+AUM,AUSTIN MUNI,Mower,MN,-92.9333,43.6647,375.0,America/Chicago
+BDE,BAUDETTE,Lake Of Woods,MN,-94.6122,48.7284,329.0,America/Chicago
+BJI,BEMIDJI,Beltrami,MN,-94.9337,47.5094,420.0,America/Chicago
+BBB,BENSON MUNI,Swift,MN,-95.6506,45.3319,317.0,America/Chicago
+FOZ,BIGFORK,Itasca,MN,-93.6502,47.7828,411.0,America/Chicago
+BRD,BRAINERD,Crow Wing,MN,-94.1308,46.4047,372.0,America/Chicago
+CFE,Buffalo,Wright,MN,-93.8433,45.159,295.0,America/Chicago
+CBG,CAMBRIDGE MUNI,Isanti,MN,-93.2642,45.5575,287.0,America/Chicago
+CNB,Canby,Yellow Medicin,MN,-96.266,44.7295,363.0,America/Chicago
+COQ,CLOQUET,St. Louis,MN,-92.5036,46.7011,390.0,America/Chicago
+CQM,COOK MUNI AIRPOR,St. Louis,MN,-92.6894,47.8219,404.0,America/Chicago
+CDD,CRANE LAKE,St. Louis,MN,-92.483,48.266,350.0,America/Chicago
+CKN,CROOKSTON MUNI,Polk,MN,-96.6214,47.8417,273.0,America/Chicago
+DTL,DETROIT LAKES,Becker,MN,-95.8856,46.8252,426.0,America/Chicago
+TOB,DODGE CENTER,Dodge,MN,-92.8315,44.018,398.0,America/Chicago
+DLH,DULUTH,St Louis,MN,-92.1936,46.8421,435.0,America/Chicago
+DYT,DULUTH (SKY HARB,St. Louis,MN,-92.0434,46.7219,186.0,America/Chicago
+Y63,Elbow Lake,Grant,MN,-95.992,45.9861,367.0,America/Chicago
+ELO,Ely,St. Louis,MN,-91.8371,47.8287,434.048,America/Chicago
+EVM,EVELETH MUNI,St. Louis,MN,-92.4981,47.4251,421.0,America/Chicago
+FRM,FAIRMONT MUNI,Martin,MN,-94.4156,43.6439,354.0,America/Chicago
+FBL,FARIBAULT MUNI,Rice,MN,-93.3108,44.3247,322.0,America/Chicago
+FFM,FERGUS FALLS,Otter Tail,MN,-96.1567,46.2844,361.0,America/Chicago
+FGN,FLAG ISLAND,Lake of the Woods,MN,-94.9028,49.3183,328.0,America/Chicago
+FSE,FOSSTON,Polk,MN,-95.7735,47.5928,389.0,America/Chicago
+GYL,GLENCOE,Mcleod,MN,-94.0812,44.756,302.0,America/Chicago
+GHW,GLENWOOD,Pope,MN,-95.3204,45.6439,425.0,America/Chicago
+GNA,GRAND MARAIS,Cook,MN,-90.3457,47.7453,185.0,America/Chicago
+CKC,GRAND MARAIS/COO,Cook,MN,-90.3829,47.8383,548.0,America/Chicago
+GPZ,GRAND RAPIDS,Itasca,MN,-93.5097,47.2111,413.0,America/Chicago
+GDB,Granite Falls,Yellow Medicine,MN,-95.556,44.7533,319.0,America/Chicago
+HCO,HALLOCK,Kittson,MN,-96.943,48.7527,250.0,America/Chicago
+HIB,HIBBING,St Louis,MN,-92.839,47.3866,412.0,America/Chicago
+04W,Hinckley,Pine,MN,-92.8952,46.0229,311.0,America/Chicago
+HCD,HUTCHINSON,McLeod,MN,-94.3825,44.8599,323.0,America/Chicago
+INL,INTERNTNL FALLS,Koochiching,MN,-93.3981,48.5614,360.0,America/Chicago
+MJQ,JACKSON MUNI,Jackson,MN,-94.9865,43.65,441.0,America/Chicago
+LJF,LITCHFIELD,Meeker,MN,-94.5072,45.0971,348.0,America/Chicago
+LXL,LITTLE FALLS,Morrison,MN,-94.3469,45.9492,351.0,America/Chicago
+14Y,Long Prairie,Todd,MN,-94.8739,45.8983,406.0,America/Chicago
+XVG,LONGVILLE,Cass,MN,-94.2039,46.99,407.0,America/Chicago
+LYV,Luverne,Rock,MN,-96.2158,43.6212,436.0,America/Chicago
+DXX,MADISON,Lac qui Parle,MN,-96.1779,44.9864,330.0,America/Chicago
+3N8,Mahnomen,Mahnomen,MN,-95.9281,47.2605,375.216,America/Chicago
+MKT,MANKATO,Blue Earth,MN,-93.92,44.22,311.0,America/Chicago
+MGG,MAPLE LAKE,Wright,MN,-93.9856,45.236,313.0,America/Chicago
+MML,MARSHALL/RYAN,Lyon,MN,-95.82,44.45,359.0,America/Chicago
+HZX,McGregor,Aitkin,MN,-93.3098,46.6188,374.0,America/Chicago
+ANE,MINNEAPLS/BLAINE,Hennepin,MN,-93.2102,45.1449,278.0,America/Chicago
+MSP,MINNEAPOLIS,Hennepin,MN,-93.2313,44.8854,265.0,America/Chicago
+LVN,MNPLS/AIRLAKE,Dakota,MN,-93.2273,44.6252,293.0,America/Chicago
+MIC,MNPLS/CRYSTAL,Hennepin,MN,-93.3539,45.062,265.0,America/Chicago
+FCM,MNPLS/FLYING CLD,Hennepin,MN,-93.47,44.83,280.0,America/Chicago
+MVE,MONTEVIDEO,Chippewa,MN,-95.7103,44.9691,315.0,America/Chicago
+JKJ,MOORHEAD MUNI,Clay,MN,-96.664,46.8393,280.0,America/Chicago
+MZH,MOOSE LAKE,Carlton,MN,-92.8048,46.4186,328.0,America/Chicago
+JMR,MORA,Kanabec,MN,-93.2718,45.8861,309.0,America/Chicago
+MOX,MORRIS MUNI,Stevens,MN,-95.9672,45.566,344.0,America/Chicago
+ULM,NEW ULM MUNI,Nicollet,MN,-94.5,44.32,308.0,America/Chicago
+OVL,OLIVIA,Renville,MN,-95.0328,44.7786,328.0,America/Chicago
+ORB,ORR,St. Louis,MN,-92.856,48.0159,397.0,America/Chicago
+VVV,ORTONVILLE,Big Stone,MN,-96.4244,45.3057,335.0,America/Chicago
+OWA,OWATONNA,Steele,MN,-93.2606,44.1233,350.0,America/Chicago
+PKD,PARK RAPIDS,Hubbard,MN,-95.07,46.9,442.0,America/Chicago
+PEX,Paynesville,Stearns,MN,-94.7466,45.3723,360.0,America/Chicago
+PWC,PINE RIVER REGIO,Cass,MN,-94.3817,46.7248,395.0,America/Chicago
+PQN,PIPESTONE,Pipestone,MN,-96.3004,43.9821,529.0,America/Chicago
+FKA,PRESTON (AWOS),Fillmore,MN,-92.1797,43.6767,389.0,America/Chicago
+PNM,PRINCETON MUNI,Sherburne,MN,-93.6082,45.5599,298.0,America/Chicago
+RYM,Ray Miller Army Field,Morrison,MN,-94.3605,46.0912,345.898,America/Chicago
+RGK,RED WING,Goodhue,MN,-92.4868,44.5915,239.0,America/Chicago
+RWF,REDWOOD FALL,Redwood,MN,-95.082,44.5469,311.0,America/Chicago
+RST,ROCHESTER,Olmsted,MN,-92.4916,43.9041,403.0,America/Chicago
+9MN,Rochester / St Mary,Olmsted,MN,-92.4831,44.0198,355.0,America/Chicago
+ROX,ROSEAU MUNI,Roseau,MN,-95.6971,48.856,323.0,America/Chicago
+ROS,RUSH CITY,Chisago,MN,-92.953,45.698,281.0,America/Chicago
+D39,Sauk Centre,Stearns,MN,-94.9334,45.7066,379.2,America/Chicago
+BFW,Silver Bay,Lake,MN,-91.4098,47.2521,333.571,America/Chicago
+60Y,Slayton,Murray,MN,-95.7762,43.9853,495.0,America/Chicago
+DVP,Slayton,Murray,MN,-95.7826,43.9868,495.0,America/Chicago
+SGS,SOUTH ST PAUL,Dakota,MN,-93.0329,44.8571,250.0,America/Chicago
+SYN,Stanton,Goodhue,MN,-93.0163,44.4755,280.0,America/Chicago
+SAZ,STAPLES,Wadena,MN,-94.8066,46.3809,392.0,America/Chicago
+STC,ST. CLOUD,Sherburne,MN,-94.0513,45.5433,314.0,America/Chicago
+JYG,ST. JAMES,Watonwan,MN,-94.5579,43.9863,325.0,America/Chicago
+STP,ST. PAUL,Ramsey,MN,-93.06,44.9345,219.0,America/Chicago
+21D,St Paul / Lake Elmo,Washington,MN,-92.8557,44.9975,284.4,America/Chicago
+TVF,THIEF RIVER,Polk,MN,-96.185,48.0657,340.0,America/Chicago
+P61,TOFTE (RAMOS)   ,Cook,MN,-90.8231,47.588,241.0,America/Chicago
+TKC,Tracy,Lyon,MN,-95.6072,44.2491,408.0,America/Chicago
+TWM,TWO HARBORS,Lake,MN,-91.745,47.0492,328.0,America/Chicago
+ADC,WADENA MUNI,Otter Tail,MN,-95.2109,46.4503,418.0,America/Chicago
+Y49,Walker,Cass,MN,-94.6453,47.1595,410.995,America/Chicago
+RRT,WARROAD,Roseau,MN,-95.3483,48.9414,327.0,America/Chicago
+ACQ,WASECA (AWOS),Steele,MN,-93.5529,44.0735,343.0,America/Chicago
+VWU,WASKISH MUNI,Beltrami,MN,-94.5167,48.1539,360.0,America/Chicago
+ETH,WHEATON NDB,Roberts,MN,-96.5435,45.7805,313.0,America/Chicago
+BDH,Willmar,Kandiyohi,MN,-95.1304,45.1177,247.0,America/Chicago
+ILL,WILLMAR/RICE,Kandiyohi,MN,-95.0888,45.1157,344.0,America/Chicago
+MWM,WINDOM MUNI AIRP,Cottonwood,MN,-95.1094,43.9134,430.0,America/Chicago
+ONA,WINONA MUNI,Buffalo,MN,-91.7083,44.0772,200.0,America/Chicago
+OTG,WORTHINGTON,Nobles,MN,-95.5792,43.6551,480.0,America/Chicago
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+VER,Booneville,Cooper,MO,-92.6827,38.9467,218.0,America/Chicago
+BBG,Branson,Taney,MO,-93.2005,36.5321,397.0,America/Chicago
+FWB,Branson West Muni,Stone,MO,-93.4022,36.6985,393.81,America/Chicago
+H21,Camdenton,Camden,MO,-92.6912,37.974,323.0,America/Chicago
+OZS,Camdenton ,Camden,MO,-92.6912,37.974,324.937,America/Chicago
+EZZ,Cameron,Clinton,MO,-94.2764,39.7276,310.526,America/Chicago
+CGI,CAPE GIRARDEAU,Cape Girardeau,MO,-89.5708,37.2253,102.0,America/Chicago
+94K,Cassville,Barry,MO,-93.9005,36.6974,453.245,America/Chicago
+CDJ,CHILLICOTHE,Livingston,MO,-93.5792,39.8233,234.0,America/Chicago
+GLY,Clinton,Henry,MO,-93.6842,38.3566,250.5,America/Chicago
+COU,COLUMBIA,Boone,MO,-92.2183,38.8169,271.0,America/Chicago
+FAM,FARMINGTON,Ste. Genevieve,MO,-90.4286,37.761,288.0,America/Chicago
+TBN,FORT LEONARD WOO,Pulaski,MO,-92.1407,37.7416,353.0,America/Chicago
+GVW,GRANDVIEW,Cass,MO,-94.5603,38.8439,337.0,America/Chicago
+HAE,Hannibal,Marion,MO,-91.4439,39.7252,235.191,America/Chicago
+LRY,Harrisonville,Cass,MO,-94.3421,38.611,271.578,America/Chicago
+JEF,JEFFERSON CITY,Callaway,MO,-92.1561,38.5912,168.0,America/Chicago
+JLN,Joplin,Jasper,MO,-94.4952,37.1522,293.322,America/Chicago
+AIZ,KAISER MEM,Miller,MO,-92.5495,38.096,265.0,America/Chicago
+MKC,KANSAS CITY/DNTN,Clay,MO,-94.593,39.123,227.0,America/Chicago
+MCI,KANSAS CITY/INTL,Platte,MO,-94.7139,39.2976,320.0,America/Chicago
+TKX,Kennett,Dunklin,MO,-90.0366,36.2259,78.21,America/Chicago
+IRK,KIRKSVILLE,Adair,MO,-92.5433,40.0972,293.0,America/Chicago
+LBO,Lebanon,Laclede,MO,-92.6524,37.6483,401.232,America/Chicago
+LXT,Lee s Summit,Jackson,MO,-94.3714,38.9597,306.0,America/Chicago
+MAW,Malden,Dunklin,MO,-89.9922,36.6005,88.3306,America/Chicago
+MHL,Marshall,Saline,MO,-93.2028,39.0955,238.506,America/Chicago
+EVU,Maryville,Nodaway,MO,-94.915,40.3525,346.99,America/Chicago
+MYJ,Mexico,Audrain,MO,-91.8183,39.1575,248.044,America/Chicago
+MBY,Moberly,Randolph,MO,-92.4244,39.464,263.826,America/Chicago
+HFJ,Monett,Barry,MO,-94.0128,36.9062,400.5,America/Chicago
+GPH,Mosby,Clay,MO,-94.3096,39.3325,232.748,America/Chicago
+PCD,Perryville,Perry,MO,-89.8651,37.8667,110.893,America/Chicago
+K02,Perryville ,Perry,MO,-89.8621,37.8687,113.677,America/Chicago
+POF,POPULAR BLUFF,Butler,MO,-90.3249,36.7739,99.0,America/Chicago
+DMO,SEDALIA,Pettis,MO,-93.1759,38.7074,274.0,America/Chicago
+SIK,Sikeston,Scott,MO,-89.5577,36.9027,92.4019,America/Chicago
+SGF,SPRINGFIELD,Greene,MO,-93.3897,37.2397,390.0,America/Chicago
+SET,ST. CHARLES,St Charles,MO,-90.43,38.93,134.0,America/Chicago
+STJ,ST. JOSEPH,Buchanan,MO,-94.9097,39.7719,247.0,America/Chicago
+STL,ST. LOUIS,St. Charles,MO,-90.3734,38.7525,171.0,America/Chicago
+SUS,ST. LOUIS/SPIRIT,St. Charles,MO,-90.6558,38.6572,141.0,America/Chicago
+VIH,VICHY/ROLLA,Maries,MO,-91.77,38.13,333.0,America/Chicago
+RCM,Warrensburg,Johnson,MO,-93.8029,38.7842,243.0,America/Chicago
+RAW,Warsaw,Benton,MO,-93.3454,38.3469,285.56,America/Chicago
+FYG,Washington,Warren,MO,-90.9938,38.5876,146.343,America/Chicago
+UNO,WEST PLAINS,Howell,MO,-91.9027,36.8784,372.0,America/Chicago
+SZL,WHITEMAN AFB,Pettis,MO,-93.548,38.7303,265.0,America/Chicago
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+M40,Aberdeen,Monroe,MS,-88.4897,33.8738,67.6483,America/Chicago
+PMU,Batesville,Panola,MS,-89.8929,34.3635,65.7121,America/Chicago
+HSA,BAY_ST._LOUIS,Hancock,MS,-89.4546,30.3678,7.0,America/Chicago
+01M,Belmond,Tishomingo,MS,-88.2011,34.4917,173.012,America/Chicago
+1R7,Brookhaven,Lincoln,MS,-90.4093,31.6058,149.0,America/Chicago
+CKM,Clarksdale,Coahoma,MS,-90.5123,34.2997,52.7,America/Chicago
+RNV,Cleveland,Bolivar,MS,-90.7579,33.7611,41.9956,America/Chicago
+0R0,Columbia,Marion,MS,-89.8128,31.297,78.9417,America/Chicago
+CBM,COLUMBUS AFB,Lowndes,MS,-88.4438,33.6438,67.0,America/Chicago
+CRX,Corinth,Alcorn,MS,-88.6035,34.915,129.0,America/Chicago
+GTR,GOLDEN TRI(AWOS),Lowndes,MS,-88.5914,33.4503,80.0,America/Chicago
+GLH,GREENVILLE MUNI,Washington,MS,-90.9856,33.4829,40.0,America/Chicago
+GWO,GREENWOOD/LEFLORE,Carroll,MS,-90.0847,33.4943,47.0,America/Chicago
+GNF,Grenada ,Grenada,MS,-89.7982,33.8325,58.3321,America/Chicago
+GPT,GULFPORT-BILOXI,Harrison,MS,-89.0701,30.4073,9.0,America/Chicago
+HBG,HATTIESBURG MUNI,Forrest,MS,-89.2529,31.2649,46.0,America/Chicago
+IDL,Indianola,Sunflower,MS,-90.6789,33.4857,37.0,America/Chicago
+MYT,Innovator (GoM),GMZ572,GM,-89.615,28.2206,0.0,America/Chicago
+HKS,JACKSON/HAWKINS FIELD,Hinds,MS,-90.2225,32.3348,104.0,America/Chicago
+JAN,JACKSON/THOMPSON,Hinds,MS,-90.08,32.32,101.0,America/Chicago
+BIX,KEESLER AFB/BILOXI,Harrison,MS,-88.9244,30.4104,10.0,America/Chicago
+LUL,Laurel,Jones,MS,-89.1728,31.673,72.7725,America/Chicago
+MBO,Madison,Madison,MS,-90.1014,32.4384,99.6256,America/Chicago
+MIS,Main Pass 140B,GMZ555,GM,-88.842,29.296,32.0,America/Chicago
+MCB,MCCOMB/LEWIS FIELD,Pike,MS,-90.47,31.18,126.0,America/Chicago
+MEI,MERIDIAN/KEY FIELD,Lauderdale,MS,-88.7511,32.3347,94.0,America/Chicago
+NMM,MERIDIAN NAS/MCCAIN,Lauderdale,MS,-88.5556,32.5521,97.0,America/Chicago
+IKT,Nakika,GMZ575,GM,-88.2889,28.5208,25.0,America/Chicago
+HEZ,NATCHEZ/HARDY(AWOS),Adams,MS,-91.2973,31.6137,83.0,America/Chicago
+OLV,Olive Branch,De Soto,MS,-89.7869,34.9787,122.5,America/Chicago
+UOX,Oxford,Lafayette,MS,-89.5368,34.3843,137.8,America/Chicago
+PQL,PASCAGOULA,Jackson,MS,-88.5319,30.4636,5.0,America/Chicago
+PIB,PINE BELT RGNL AWOS,Jones,MS,-89.3371,31.4671,91.0,America/Chicago
+M16,Raymond,Hinds,MS,-90.4105,32.3045,75.3,America/Chicago
+JVW,Raymond,Hinds,MS,-90.4105,32.3045,75.0,America/Chicago
+STF,Starkbville,Oktibbeha,MS,-88.8486,33.4331,101.5,America/Chicago
+UTA,TUNICA MUNICIPAL AIRPORT,Tunica,MS,-90.3467,34.6811,59.0,America/Chicago
+TUP,TUPELO/C.D. LEMONS,Lee,MS,-88.7711,34.2608,110.0,America/Chicago
+VKS,Vicksburg,Warren,MS,-90.9282,32.2391,30.1164,America/Chicago
+DLP,West Delta,GMZ552,GM,-89.5472,29.1214,0.0,America/Chicago
+5A6,Winona,Montgomery,MS,-89.7302,33.465,106.493,America/Chicago
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+BHK,BAKER,Fallon,MT,-104.2595,46.3476,906.0,America/Denver
+BIL,BILLINGS/LOGAN INTL,Yellowstone,MT,-108.5422,45.8069,1088.0,America/Denver
+BZN,BOZEMAN/GALLATIN,Gallatin,MT,-111.1608,45.7881,1364.0,America/Denver
+BTM,BUTTE/BERT MOONEY,Silver Bow,MT,-112.4975,45.9548,1690.0,America/Denver
+S71,Chinook Edgar G Obie,Blaine,MT,-109.2506,48.5921,736.0,America/Denver
+M46,Colstrip,Rosebud,MT,-106.7093,45.8528,1044.0,America/Denver
+CTB,CUT BANK (AWOS),Glacier,MT,-112.3761,48.6084,1175.0,America/Denver
+DLN,DILLON AIRPORT,Beaverhead,MT,-112.5525,45.2554,1597.0,America/Denver
+3DU,DRUMMOND,Granite,MT,-113.15,46.6667,1202.0,America/Denver
+EKS,Ennis,Madison,MT,-111.6486,45.2718,1630.24,America/Denver
+88M,Eureka,Lincoln,MT,-115.0764,48.9738,813.0,America/Denver
+1S3,Forsyth Tillitt Field,Rosebud,MT,-106.6239,46.2712,831.0,America/Denver
+79S,Fort Benton,Chouteau,MT,-110.6365,47.8451,874.0,America/Denver
+GGW,GLASGOW INTL ARPT,Valley,MT,-106.6214,48.2138,700.0,America/Denver
+GDV,GLENDIVE(AWOS),Prairie,MT,-104.8072,47.1387,749.0,America/Denver
+MVH,Grassrange,Beaverhead,MT,-108.9368,46.8381,1338.99,America/Denver
+GTF,GREAT FALLS INTL,Cascade,MT,-111.3822,47.4733,1115.0,America/Denver
+6S5,Hamilton,Ravalli,MT,-114.1255,46.2515,1110.0,America/Denver
+HMM,HAMILTON/RAVALLI CO,Ravalli,MT,-114.15,46.25,1110.0,America/Denver
+HVR,HAVRE (AMOS),Hill,MT,-109.7633,48.5428,792.0,America/Denver
+HLN,HELENA REGIONAL,Lewis & Clark,MT,-111.9636,46.6056,1188.0,America/Denver
+JDN,JORDAN (RAMOS),Garfield,MT,-106.9475,47.3258,811.0,America/Denver
+GPI,KALISPELL       ,Flathead,MT,-114.2636,48.3042,908.0,America/Denver
+LWT,LEWISTOWN MUNICIPAL,Fergus,MT,-109.4667,47.0493,1270.0,America/Denver
+S59,Libby,Lincoln,MT,-115.4902,48.2838,792.0,America/Denver
+LVM,LIVINGSTON/MISSION,Park,MT,-110.45,45.7,1419.0,America/Denver
+GFA,MALMSTROM AFB,Cascade,MT,-111.1873,47.5047,1075.0,America/Denver
+M75,Malta ,Phillips,MT,-107.9179,48.3689,683.273,America/Denver
+MLS,MILES CITY,Custer,MT,-105.8863,46.428,801.0,America/Denver
+MSO,MISSOULA/BELL FIELD,Missoula,MT,-114.0925,46.9208,972.0,America/Denver
+PO1,Poplar,Roosevelt,MT,-105.1621,48.1344,617.0,America/Denver
+RPX,Roundup ,Musselshell,MT,-108.5434,46.475,1049.58,America/Denver
+SDY,SIDNEY-RICHLAND,Richland,MT,-104.1926,47.7069,605.0,America/Denver
+8S0,STARR-BROWNING AIRSTRIP AIRPORT,Glacier,MT,-113.1148,48.6014,1419.0,America/Denver
+WYS,West Yellowstone,Fremont,MT,-111.1176,44.6884,2026.6,America/Denver
+WEY,WEST YELLOWSTONE,Fremont,MT,-111.1,44.65,2031.0,America/Denver
+OLF,WOLF POINT INTL,Roosevelt,MT,-105.5751,48.0945,605.0,America/Denver
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+ASJ,AHOSKIE_TRI_COU,Hertford,NC,-77.17,36.3,21.0,America/New_York
+VUJ,ALBEMARLE,Stanly,NC,-80.1508,35.4167,186.0,America/New_York
+RHP,ANDREWS-MURPHY_AIRPORT,Cherokee,NC,-83.863,35.1952,518.0,America/New_York
+HBI,ASHEBORO_MUNI_ARPT,Randolph,NC,-79.8948,35.6545,205.0,America/New_York
+GEV,ASHE_COUNTY_ARPT,Wilkes,NC,-81.42,36.43,969.0,America/New_York
+AVL,ASHEVILLE_MUNICIPAL_(ASOS),Buncombe,NC,-82.5375,35.4319,661.0,America/New_York
+NJM,Bogue Field,Carteret,NC,-77.0294,34.694,3.16357,America/New_York
+BUY,BURLINGTON-ALAMANCE_REG_(ASOS),Alamance,NC,-79.4749,36.0485,188.0,America/New_York
+CLT,CHARLOTTE/DOUGLAS_(ASOS),Mecklenburg,NC,-80.9543,35.2225,228.0,America/New_York
+NKT,CHERRY_POINT_MCAS,Carteret,NC,-76.88,34.9,9.0,America/New_York
+CTZ,CLINTON,Sampson,NC,-78.3644,34.9756,45.0,America/New_York
+CPC,COLUMBUS_CNTY_MUNI_ARPT,Columbus,NC,-78.7146,34.2753,30.0,America/New_York
+JQF,CONCORD,Cabarrus,NC,-80.7091,35.3878,210.0,America/New_York
+ONX,Currituck,Currituck,NC,-76.0154,36.3999,5.5,America/New_York
+2DP,Dare County Gunnery Range,Dare,NC,-75.9,35.6667,0.34185,America/New_York
+EDE,EDENTON_NORTHEA,Chowan,NC,-76.5671,36.0277,6.0,America/New_York
+ECG,ELIZABETH_CITY(CGS)_(ASOS),Pasquotank,NC,-76.1746,36.2606,4.0,America/New_York
+EYF,ELIZABETHTOWN/CURTIS_BROWN_FIELD,Bladen,NC,-78.58,34.6,40.0,America/New_York
+7W6,Engelhard,Mainland Hyde,NC,-75.9552,35.5624,1.26786,America/New_York
+HRJ,ERWIN/HARNETT_COUNTY_ARPT,Harnett,NC,-78.7336,35.3786,60.0,America/New_York
+FAY,FAYETTEVILLE_RGNL_(ASOS),Cumberland,NC,-78.8803,34.9912,57.0,America/New_York
+FBG,FORT_BRAGG/SIMMONS,Cumberland,NC,-78.9367,35.1318,74.0,America/New_York
+1A5,FRANKLIN,Macon,NC,-83.42,35.22,616.0,America/New_York
+AKH,GASTONIA_MCPL_(ASOS),Gaston,NC,-81.1558,35.1967,244.0,America/New_York
+GWW,GOLDSBORO-WAYNE_MUNI_ARPT,Wayne,NC,-77.9649,35.4606,41.0,America/New_York
+GSO,GREENSBORO/PIEDMONT_(ASOS),Guilford,NC,-79.9436,36.0975,270.0,America/New_York
+HSE,HATTERAS_(ASOS),Mainland Dare,NC,-75.6225,35.2322,3.0,America/New_York
+HNZ,HENDERSON-OXFORD_ARPT,Granville,NC,-78.53,36.36,161.0,America/New_York
+HKY,HICKORY_REGIONAL_(ASOS),Catawba,NC,-81.3895,35.7411,362.0,America/New_York
+OAJ,JACKSONVILLE_(AWOS),Onslow,NC,-77.6121,34.8292,29.0,America/New_York
+NR02,Jordan Field,Montgomery,NC,-79.9956,35.2378,183.0,America/New_York
+DPL,KENANSVILLE/DUPLIN_COUNTY,Duplin,NC,-77.98,35,42.0,America/New_York
+FFA,KILL_DEVIL_HILLS,Currituck,NC,-75.67,36.02,4.0,America/New_York
+ISO,KINSTON/STALLINGS,Lenoir,NC,-77.61,35.33,29.0,America/New_York
+MEB,LAURINBURG-MAXTON_ARPT_(ASOS),Robeson,NC,-79.3658,34.7919,67.0,America/New_York
+EXX,LEXINGTON_DAVIDSON_COUNTY_AIRP,Rowan,NC,-80.3038,35.7811,223.0,America/New_York
+IPJ,LINCOLNTON,Lincoln,NC,-81.1612,35.4833,267.0,America/New_York
+LHZ,LOUISBURG/FRANKLIN_CNTY_ARPT,Wake,NC,-78.3303,36.0233,113.0,America/New_York
+LBT,LUMBERTON_MUNI_AIRPORT_(ASOS),Robeson,NC,-79.06,34.61,38.0,America/New_York
+HFF,MACKALL_AAF,Scotland,NC,-79.4974,35.0367,115.0,America/New_York
+MQI,MANTEO/DARE_CO_RGNL,Mainland Dare,NC,-75.6955,35.919,4.0,America/New_York
+EQY,MONROE_AIRPORT_(ASOS),Union,NC,-80.6206,35.0169,207.0,America/New_York
+MRN,MORGANTON-LENOIR_AIRPORT,Burke,NC,-81.61,35.82,387.0,America/New_York
+MWK,MOUNT_AIRY/SURRY_COUNTY_APRT,Surry,NC,-80.55,36.46,380.0,America/New_York
+EWN,NEW_BERN/CRAVEN_CO_(ASOS),Carteret,NC,-77.0472,35.0675,6.0,America/New_York
+NCA,NEW_RIVER_MCAS,Onslow,NC,-77.4397,34.7084,8.0,America/New_York
+UKF,NORTH_WILKESBORO/WILKES_CNTY,Wilkes,NC,-81.0983,36.2228,396.0,America/New_York
+NBT,Piney Island,Carteret,NC,-76.4625,35.0222,5.0,America/New_York
+PGV,PITT-GREENVILLE_APRT,Pitt,NC,-77.3853,35.6352,8.0,America/New_York
+POB,POPE_AFB,Cumberland,NC,-79.0145,35.1709,66.0,America/New_York
+RDU,RALEIGH-DURHAM_(ASOS),Wake,NC,-78.7875,35.8776,134.0,America/New_York
+SIF,Reidsville,Rockingham,NC,-79.851,36.4372,211.0,America/New_York
+IXA,Roanoke Rapids,Halifax,NC,-77.6352,36.3298,44.0,America/New_York
+RZZ,ROANOKE_RAPIDS_(ASOS),Halifax,NC,-77.71,36.44,77.0,America/New_York
+RCZ,ROCKINGHAM,Richmond,NC,-79.76,34.89,109.0,America/New_York
+RWI,ROCKY_MOUNT-WILSON_(ASOS),Wilson,NC,-77.8919,35.8563,48.0,America/New_York
+RUQ,ROWAN_COUNTY_AIRPORT,Rowan,NC,-80.5203,35.6459,236.0,America/New_York
+TDF,ROXBORO,Person,NC,-78.9842,36.2849,186.0,America/New_York
+FQD,RUTHERFORDTON,Rutherford,NC,-81.9351,35.4282,329.0,America/New_York
+TTA,SANFORD-LEE_COUNTY_RGNL_AIRPORT,Harnett,NC,-79.1,35.58,75.0,America/New_York
+GSB,SEYMOUR-JOHNSON_AFB,Wayne,NC,-77.9606,35.3394,33.0,America/New_York
+EHO,SHELBY_MUNI_ARPT,Cleveland,NC,-81.6011,35.2556,258.0,America/New_York
+SCR,Silver City,Chatham,NC,-79.5043,35.7043,180.535,America/New_York
+5W8,Silver City,Chatham,NC,-79.504,35.7045,183.0,America/New_York
+JNX,SMITHFIELD,Johnston,NC,-78.3903,35.5409,50.0,America/New_York
+MRH,SMITH_FIELD/BEAUFORT_(ASOS),Carteret,NC,-76.6606,34.7336,3.0,America/New_York
+SOP,SOUTHERN_PINES_AWOS,Moore,NC,-79.3911,35.2372,141.0,America/New_York
+SUT,SOUTHPORT/BRUNSWICK,Brunswick,NC,-78.0747,33.9292,8.0,America/New_York
+SVH,STATESVILLE,Catawba,NC,-80.9539,35.765,294.0,America/New_York
+24A,Sylva,Jackson,NC,-83.2071,35.3159,851.583,America/New_York
+ETC,Tarboro,Edgecombe,NC,-77.5465,35.9373,15.0,America/New_York
+AFP,Wadesboro,Anson,NC,-80.0771,35.0206,91.4,America/New_York
+OCW,WASHINGTON/WARREN_FIELD_APRT,Beaufort,NC,-77.05,35.57,12.0,America/New_York
+TNB,WATAUGA_CNTY_HOSP_HELIP,Watauga,NC,-81.65,36.2,959.0,America/New_York
+IGX,WILLIAMS_AIRPORT_(ASOS),Chatham,NC,-79.0642,35.9333,155.0,America/New_York
+ILM,WILMINGTON/NEW_HAN_(ASOS),New Hanover,NC,-77.9,34.27,10.0,America/New_York
+INT,WINSTON-SALEM/SMITH_(ASOS),Forsyth,NC,-80.222,36.1337,296.0,America/New_York
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+20U,Beach Beach,Golden Valley,ND,-103.9821,46.9252,840.0,America/Denver
+BIS,BISMARCK,Burleigh,ND,-100.7458,46.7727,506.0,America/Chicago
+BPP,Bowman,Bowman,ND,-103.4281,46.187,901.6,America/Denver
+9D7,Cando,Towner,ND,-99.2364,48.48,451.0,America/Chicago
+46D,Carrington,Foster,ND,-99.1513,47.4511,489.8,America/Chicago
+2C8,Cavalier,Pembina,ND,-97.632,48.7837,272.0,America/Chicago
+D50,Crosby,Divide,ND,-103.2973,48.9285,594.0,America/Chicago
+DVL,DEVILS_LAKE,Ramsey,ND,-98.9083,48.1146,443.0,America/Chicago
+DIK,DICKINSON,Stark,ND,-102.8019,46.7973,789.0,America/Denver
+FAR,FARGO,Cass,ND,-96.8111,46.9253,274.0,America/Chicago
+N60,GARRISON,McLean,ND,-101.4394,47.6458,587.0,America/Chicago
+D57,Glen Ullin,Morton,ND,-101.8602,46.8128,633.142,America/North_Dakota/New_Salem
+GAF,Grafton,Walsh,ND,-97.3709,48.4047,251.0,America/Chicago
+GFK,GRAND_FORKS,Grand Forks,ND,-97.1761,47.9492,257.0,America/Chicago
+RDR,GRAND_FORKS_AFB,Grand Forks,ND,-97.4012,47.9611,278.0,America/Chicago
+GWR,Gwinner,Sargent,ND,-97.6435,46.2187,385.0,America/Chicago
+5H4,Harvey,Wells,ND,-99.9317,47.7912,489.0,America/Chicago
+HZE,Hazen,Mercer,ND,-101.581,47.2899,552.0,America/North_Dakota/Beulah
+HEI,HETTINGER,Adams,ND,-102.656,46.0149,828.0,America/Denver
+JMS,JAMESTOWN,Stutsman,ND,-98.68,46.93,457.0,America/Chicago
+D55,Langdon,Cavalier,ND,-98.3937,48.7531,490.0,America/Chicago
+P67,LIDGERWOOD (RAMO,Richland,ND,-97.15,46.1,351.0,America/Chicago
+7L2,Linton,Emmons,ND,-100.2456,46.2206,541.0,America/Chicago
+Y19,Mandam,Morton,ND,-100.8944,46.768,592.0,America/North_Dakota/New_Salem
+MIB,MINOT_AFB,Ward,ND,-101.358,48.4158,508.0,America/Chicago
+MOT,MINOT_INTL,Ward,ND,-101.2803,48.2594,523.0,America/Chicago
+2D5,Oakes,Dickey,ND,-98.0799,46.1731,407.0,America/Chicago
+S32,Rands,Griggs,ND,-98.1059,47.4228,434.0,America/Chicago
+06D,Rolla,Rolette,ND,-99.6208,48.8844,555.0,America/Chicago
+RUG,Rugby,Pierce,ND,-100.0243,48.3904,471.0,America/Chicago
+08D,Stanley,Mountrail,ND,-102.4064,48.3008,682.0,America/Chicago
+D60,Tioga,Williams,ND,-102.8974,48.3803,690.0,America/Chicago
+BAC,Valley City,Barnes,ND,-98.018,46.9412,427.3,America/Chicago
+BWP,Wahpeton,Richland,ND,-96.6074,46.2441,294.7,America/Chicago
+96D,Walhalla,Pembina,ND,-97.9028,48.9406,287.0,America/Chicago
+S25,Watford,Mckenzie,ND,-103.2552,47.7966,642.0,America/Chicago
+ISN,WILLISTON,Williams,ND,-103.6366,48.1738,581.0,America/Chicago
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+ANW,AINSWORTH MUNICI,Brown,NE,-99.993,42.5792,787.113,America/Chicago
+BVN,Albion,Boone,NE,-98.0558,41.7286,545.36,America/Chicago
+AIA,ALLIANCE,Box Butte,NE,-102.8,42.0572,1195.58,America/Denver
+AUH,AURORA,Merrick,NE,-97.9946,40.8941,546.414,America/Chicago
+BIE,BEATRICE MUNICIP,Gage,NE,-96.7541,40.3013,398.87,America/Chicago
+BTA,Blair,Washington,NE,-96.109,41.4148,396.512,America/Chicago
+BBW,BROKEN BOW MUNI,Custer,NE,-99.6385,41.4365,769.268,America/Chicago
+CDR,CHADRON,Dawes,NE,-103.0954,42.8376,999.031,America/Denver
+OLU,COLUMBUS MUNI,Butler,NE,-97.3426,41.448,438.393,America/Chicago
+CZD,COZAD,Dawson,NE,-100.0042,40.8696,760.598,America/Chicago
+FNB,FALLS CITY/BRENN,Richardson,NE,-95.592,40.0788,303.686,America/Chicago
+FET,FREMONT MUNI ARP,Saunders,NE,-96.52,41.45,362.003,America/Chicago
+GRN,Gordon,Sheridan,NE,-102.1753,42.806,1079.0,America/Denver
+GRI,GRAND ISLAND,Hall,NE,-98.3096,40.9675,563.46,America/Chicago
+HSI,HASTINGS,Adams,NE,-98.4279,40.6052,591.841,America/Chicago
+HJH,Hebron,Thayer,NE,-97.587,40.1523,444.534,America/Chicago
+HDE,HOLDREGE/BREWSTR,Phelps,NE,-99.3365,40.4521,706.728,America/Chicago
+IML,IMPERIAL MUNICIP,Chase,NE,-101.6201,40.5103,995.0,America/Denver
+EAR,KEARNEY MUNI,Buffalo,NE,-99.0068,40.727,649.639,America/Chicago
+IBM,Kimball,Kimball,NE,-103.6774,41.1881,1497.1,America/Denver
+LXN,LEXINGTON,Dawson,NE,-99.7759,40.7904,730.419,America/Chicago
+LNK,LINCOLN,Lancaster,NE,-96.7647,40.8478,352.341,America/Chicago
+MCK,MCCOOK,Red Willow,NE,-100.5921,40.2063,781.959,America/Chicago
+MLE,MILLARD,Douglas,NE,-96.112,41.196,322.072,America/Chicago
+AFK,NEBRASKA CITY,Otoe,NE,-95.8657,40.6069,351.558,America/Chicago
+OFK,NORFOLK,Madison,NE,-97.4351,41.9855,467.518,America/Chicago
+LBF,NORTH PLATTE,Lincoln,NE,-100.67,41.12,843.005,America/Chicago
+OFF,OFFUTT AFB/BELLE,Sarpy,NE,-95.9125,41.1183,298.659,America/Chicago
+OGA,OGALLALA,Keith,NE,-101.7697,41.1195,992.277,America/Denver
+OMA,OMAHA/EPPLEY,Douglas,NE,-95.8992,41.3103,295.667,America/Chicago
+ONL,O NEILL,Holt,NE,-98.6881,42.4697,616.826,America/Chicago
+ODX,ORD/SHARP FIELD,Valley,NE,-98.9517,41.6236,628.415,America/Chicago
+PMV,Plattsmouth,Cass,NE,-95.9179,40.9502,365.229,America/Chicago
+BFF,SCOTTSBLUFF,Scotts Bluff,NE,-103.5956,41.874,1203.49,America/Denver
+SNY,SIDNEY,Cheyenne,NE,-102.9847,41.1014,1303.84,America/Denver
+TQE,TEKAMAH,Burt,NE,-96.1779,41.7635,308.657,America/Chicago
+TIF,Thedford,Thomas,NE,-100.569,41.9622,887.295,America/Chicago
+VTN,VALENTINE,Cherry,NE,-100.5489,42.8567,789.239,America/Chicago
+AHQ,Wahoo,Saunders,NE,-96.5946,41.2406,370.219,America/Chicago
+LCG,Wayne,Wayne,NE,-96.9814,42.2419,432.564,America/Chicago
+JYR,York,Merrick,NE,-97.6228,40.8967,504.64,America/Chicago
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+BML,BERLIN MUNICIPAL,Coos,NH,-71.1786,44.5761,353.0,America/New_York
+CON,CONCORD MUNICIPAL,Hillsborough,NH,-71.5011,43.1953,105.0,America/New_York
+AFN,JAFFREY MUNICIPAL,Cheshire,NH,-72.003,42.8051,317.0,America/New_York
+EEN,KEENE/DILLANT(AWOS),Cheshire,NH,-72.27,42.9,149.0,America/New_York
+LCI,LACONIA MUNI (AWOS),Merrimack,NH,-71.42,43.57,166.0,America/New_York
+LEB,LEBANON MUNICIPAL,Grafton,NH,-72.3042,43.6261,182.0,America/New_York
+MHT,MANCHESTER AIRPARK,Rockingham,NH,-71.4357,42.9328,71.0,America/New_York
+MWN,Mount Washington,Coos,NH,-71.3035,44.2708,1910.0,America/New_York
+ASH,NASHUA/BOIRE FIELD,Hillsborough,NH,-71.5148,42.7818,61.0,America/New_York
+PSM,PEASE AFB/PORTSMOUT,York,NH,-70.8233,43.0779,31.0,America/New_York
+1P1,Plymouth,Grafton,NH,-71.7537,43.7792,153.9,America/New_York
+DAW,ROCHESTER (WAS 6B1),York,NH,-70.92,43.28,104.0,America/New_York
+HIE,WHITEFIELD (ASOS),Grafton,NH,-71.5445,44.3676,319.0,America/New_York
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+12N,ANDOVER/AEROFLEX-ANDOVER AIRPORT,Morris,NJ,-74.7367,41.0089,178.0,America/New_York
+ACY,ATLANTIC CITY INTL,Atlantic,NJ,-74.5772,39.4576,20.0,America/New_York
+BLM,BELMAR-FARMDALE,Monmouth,NJ,-74.13,40.18,48.0,America/New_York
+CDW,CALDWELL/ESSEX CO.,Essex,NJ,-74.2831,40.8764,53.0,America/New_York
+NEL,LAKEHURST NAS,Ocean,NJ,-74.3536,40.0334,31.0,America/New_York
+LDJ,Linden,Union,NJ,-74.2446,40.6174,7.0,America/New_York
+WRI,MCGUIRE AFB,Burlington,NJ,-74.5917,40.0156,41.0,America/New_York
+MIV,MILLVILLE MUNICIPAL,Cumberland,NJ,-75.0783,39.3661,25.0,America/New_York
+MMU,MORRISTOWN MUNI,Morris,NJ,-74.4149,40.7993,57.0,America/New_York
+EWR,NEWARK INTL AIRPORT,Essex,NJ,-74.1693,40.6827,9.0,America/New_York
+SMQ,SOMERVILLE (WAS SJB  N52),Somerset,NJ,-74.6694,40.6239,32.0,America/New_York
+VAY,SOUTH JERSEY REGIONAL AIRPORT,Camden,NJ,-74.8457,39.9429,16.0,America/New_York
+FWN,SUSSEX_AIRPORT,Sussex,NJ,-74.6231,41.2002,128.0,America/New_York
+TEB,TETERBORO AIRPORT,Bergen,NJ,-74.0562,40.859,3.0,America/New_York
+MJX,Toms River,Ocean,NJ,-74.2924,39.9275,25.0,America/New_York
+TTN,TRENTON/MERCER CO.,Mercer,NJ,-74.8159,40.2768,65.0,America/New_York
+WWD,WILDWOOD(AWOS),Cape May,NJ,-74.9083,39.0085,7.0,America/New_York
+OBI,Woodbine,Cape May,NJ,-74.7948,39.2191,10.5166,America/New_York
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+ALM,ALAMOGORDO-WHITE,Otero,NM,-105.9906,32.8399,1279.0,America/Denver
+AEG,ALBUQUERQUE/DOUBLE EAGLE II APT,Bernalillo,NM,-106.7952,35.1452,1779.0,America/Denver
+ABQ,ALBUQUERQUE INTL,Bernalillo,NM,-106.6155,35.0419,1620.0,America/Denver
+E80,Alexander,Valencia,NM,-106.8337,34.6452,1583.0,America/Denver
+AXX,Angel Fire,Taos,NM,-105.2899,36.422,2554.0,America/Denver
+ATS,ARTESIA,Eddy,NM,-104.4677,32.8525,1081.0,America/Denver
+CVS,CANNON AFB/CLOVIS,Roosevelt,NM,-103.3222,34.3828,1309.0,America/Denver
+CNM,CARLSBAD/CAVERN CTY,Eddy,NM,-104.2633,32.3375,1004.0,America/Denver
+E33,CHAMA,Rio Arriba,NM,-106.5833,36.9,2393.0,America/Denver
+CAO,CLAYTON MUNI(AMOS),Union,NM,-103.1539,36.4486,1515.0,America/Denver
+CQC,CLINES CORNERS,Torrance,NM,-105.6628,35.0028,2160.0,America/Denver
+CVN,CLOVIS MUNI  (AWOS),Roosevelt,NM,-103.0793,34.4251,1284.0,America/Denver
+4CR,CORONA/LINCOLN,Lincoln,NM,-105.68,34.1,1981.0,America/Denver
+DMN,DEMING MUNICIPAL,Luna,NM,-107.7206,32.2623,1313.0,America/Denver
+5T6,DONA ANA COUNTY AT SANTA TERESA,Dona Ana,NM,-106.7048,31.881,1253.0,America/Denver
+FMN,FARMINGTON REGIONAL,San Juan,NM,-108.2292,36.7436,1677.0,America/Denver
+GUP,GALLUP MUNI/CLARKE,Mckinley,NM,-108.7893,35.5111,1972.0,America/Denver
+GNT,GRANTS-MILAN MUNI,Cibola,NM,-107.9021,35.1673,1987.0,America/Denver
+HBB,Hobbs,Lea,NM,-103.2167,32.7667,1130.0,America/Denver
+HOB,HOBBS/LEA CO.,Lea,NM,-103.217,32.6875,1115.0,America/Denver
+HMN,HOLLOMAN AFB,Otero,NM,-106.1085,32.8519,1248.0,America/Denver
+LRU,LAS CRUCES INTL,Dona Ana,NM,-106.922,32.2894,1358.0,America/Denver
+LVS,LAS VEGAS MUNICIPAL,San Miguel,NM,-105.1424,35.6542,2095.0,America/Denver
+LSB,Lordsburg,Hidalgo,NM,-108.6917,32.3335,1302.63,America/Denver
+LAM,LOS ALAMOS,Sandoval,NM,-106.2694,35.8798,2179.0,America/Denver
+M63,McGregor Range Base Camp,Crittenden,NM,-106.15,32.07,1250.26,America/Denver
+4MR,Melrose Gunary Ran,Roosevelt,NM,-103.8,34.3,1326.0,America/Denver
+0E0,Moriarty,Torrance,NM,-106.0095,34.9856,1889.0,America/Denver
+4MY,MORIARTY,Torrance,NM,-106.05,34.9833,1890.0,America/Denver
+RTN,RATON/CREWS FLD,Colfax,NM,-104.5022,36.7415,1935.0,America/Denver
+ROW,ROSWELL/INDUSTRIAL,Chaves,NM,-104.53,33.3,1118.0,America/Denver
+SRR,RUIDOSO REGIONAL,Lincoln,NM,-105.5348,33.4629,2076.0,America/Denver
+SAF,SANTA FE CO. MUNI,Santa Fe,NM,-106.0894,35.6171,1934.0,America/Denver
+SXU,Santa Rosa,Guadalupe,NM,-104.6426,34.9357,1453.13,America/Denver
+DNA,Santa Teresa,Dona Ana,NM,-106.7032,31.8804,1249.16,America/Denver
+SVC,SILVER CITY/GRANT,Grant,NM,-108.1564,32.6365,1659.0,America/Denver
+ONM,Socorro,Socorro,NM,-106.9031,34.0225,1485.9,America/Denver
+SKX,TAOS MUNI APT(AWOS),Taos,NM,-105.6724,36.4582,2161.0,America/Denver
+4SL,TORREON,Sandoval,NM,-107.1833,35.8,2106.0,America/Denver
+TCS,TRUTH OR CONSEQUENC,Sierra,NM,-107.2681,33.2367,1481.0,America/Denver
+TCC,TUCUMCARI MUNICIPAL,Quay,NM,-103.6032,35.1828,1239.0,America/Denver
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+TMT,Austin,Lander,NV,-117.1971,39.4643,1749.34,America/Los_Angeles
+U31,AUSTIN,Lander,NV,-117.0833,39.5,2014.0,America/Los_Angeles
+BAM,Battle Mountain,Lander,NV,-116.8743,40.599,1382.36,America/Los_Angeles
+B23,BATTLE MOUNTAIN,Lander,NV,-116.8667,40.6,1381.0,America/Los_Angeles
+BVU,Boulder City,Clark,NV,-114.8611,35.9475,671.0,America/Los_Angeles
+P38,CALIENTE (AMOS),Lincoln,NV,-114.5264,37.6122,1335.0,America/Los_Angeles
+CXP,Carson City,Carson City,NV,-119.7326,39.1923,1431.0,America/Los_Angeles
+EKO,ELKO,Elko,NV,-115.786,40.8242,1367.0,America/Los_Angeles
+ELY,ELY/YELLAND FLD,White Pine,NV,-114.8453,39.295,1909.0,America/Los_Angeles
+05U,Eureka,Eureka,NV,-116.0051,39.6042,1811.23,America/Los_Angeles
+P68,EUREKA (RAMOS),Eureka,NV,-116.0056,39.6014,1993.0,America/Los_Angeles
+NFL,FALLON NAS,Churchill,NV,-118.701,39.4166,1199.0,America/Los_Angeles
+HTH,Hawthorne ,Mineral,NV,-118.6315,38.5448,1282.89,America/Los_Angeles
+HND,HENDERSON_AIRPORT,Clark,NV,-115.1344,35.9729,749.0,America/Los_Angeles
+INS,INDIAN SPRINGS  ,Clark,NV,-115.6733,36.5872,955.0,America/Los_Angeles
+LAS,LAS VEGAS/MCCARRAN,Clark,NV,-115.1522,36.0801,664.0,America/Los_Angeles
+LOL,Lovelock / Derby Field,Pershing,NV,-118.5701,40.0684,1192.43,America/Los_Angeles
+DRA,MERCURY/DESERT ROCK,Nye,NV,-116.0278,36.6206,1009.0,America/Los_Angeles
+MEV,Miden - Tahoe,Douglas,NV,-119.75,38.9963,1441.42,America/Los_Angeles
+LSV,NELLIS AFB,Clark,NV,-115.0343,36.2362,570.0,America/Los_Angeles
+VGT,NORTH LAS VEGAS,Clark,NV,-115.1944,36.2107,671.0,America/Los_Angeles
+RTS,Reno,Washoe,NV,-119.8764,39.6682,1539.0,America/Los_Angeles
+RNO,RENO/CANNON INTL,Washoe,NV,-119.7711,39.4839,1341.0,America/Los_Angeles
+TPH,TONOPAH AIRPORT,Nye,NV,-117.0904,38.0505,1654.0,America/Los_Angeles
+BJN,TONOPAH RANGE74 ,Inyo,NV,-116.2642,37.6142,1756.0,America/Los_Angeles
+9BB,WELLS,Elko,NV,-114.9667,41.1167,1723.0,America/Los_Angeles
+AWH,WILDHORSE RES/ELKO,Elko,NV,-115.784,41.666,1902.0,America/Los_Angeles
+WMC,WINNEMUCCA MUNI,Humboldt,NV,-117.8072,40.9019,1315.0,America/Los_Angeles
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+ALB,ALBANY COUNTY ARPT,Albany,NY,-73.8036,42.7576,89.0,America/New_York
+GVQ,Batavia,Genesee,NY,-78.1675,43.0317,275.451,America/New_York
+BGM,BINGHAMTON/BROOME,Broome,NY,-75.9797,42.2086,497.0,America/New_York
+HWV,BROOKHAVEN AIRPORT/SHIRLEY,Suffolk,NY,-72.8689,40.8217,25.0,America/New_York
+BUF,BUFFALO INTL ARPT,Erie,NY,-78.7358,42.9408,215.0,America/New_York
+N03,Courtland,Cortland,NY,-76.2149,42.5926,352.805,America/New_York
+DSV,DANSVILLE MUNICIPAL,Steuben,NY,-77.713,42.5709,209.0,America/New_York
+DKK,DUNKIRK AIRPORT,Chautauqua,NY,-79.272,42.4933,203.0,America/New_York
+HTO,EAST HAMPTON,Suffolk,NY,-72.25,40.96,17.0,America/New_York
+ELM,ELMIRA/CORNING RGNL,Chemung,NY,-76.8916,42.1599,291.0,America/New_York
+FRG,FARMINGDALE/REPUBLC,Suffolk,NY,-73.4134,40.7288,25.0,America/New_York
+GTB,FORT DRUM/WHEELER,Jefferson,NY,-75.7195,44.0556,207.0,America/New_York
+GFL,GLEN FALLS/WARREN,Warren,NY,-73.6103,43.3412,100.0,America/New_York
+RME,GRIFFISS AFB/ROME,Oneida,NY,-75.407,43.2338,154.0,America/New_York
+ISP,ISLIP/MACARTHUR,Suffolk,NY,-73.1017,40.7939,30.0,America/New_York
+ITH,Ithaca,Tompkins,NY,-76.4584,42.491,335.0,America/New_York
+JHW,JAMESTOWN (AWOS),Chautauqua,NY,-79.258,42.1534,525.0,America/New_York
+NY0,Johnstown,Fulton,NY,-74.3296,42.9982,263.01,America/New_York
+JRB,Manhattan - Wall Street,New York,NY,-74.009,40.7012,0.0,America/New_York
+MSS,MASSENA/RICHARDS,St Lawrence,NY,-74.8456,44.9358,65.0,America/New_York
+MTP,MONTAUK AIRPORT,Suffolk,NY,-71.9233,41.0731,6.0,America/New_York
+MSV,MONTICELLO(AWOS),Sullivan,NY,-74.795,41.7016,428.0,America/New_York
+SWF,NEWBURGH/STEWART,Orange,NY,-74.1048,41.5041,150.0,America/New_York
+NYC,NEW YORK CITY,New York,NY,-73.9693,40.779,27.0,America/New_York
+JFK,NEW YORK/JF KENNEDY,Queens,NY,-73.7622,40.6386,7.0,America/New_York
+LGA,NEW YORK/LA GUARDIA,Queens,NY,-73.8803,40.7794,9.0,America/New_York
+IAG,NIAGARA FALLS INTL,Niagara,NY,-78.9462,43.1073,180.0,America/New_York
+OGS,OGDENSBURG INTL,St Lawrence,NY,-75.4655,44.6819,91.0,America/New_York
+OLE,Olean,Cattaraugus,NY,-78.3714,42.2413,649.32,America/New_York
+MGJ,ORANGE COUNTY AIRPORT,Orange,NY,-74.265,41.5092,111.0,America/New_York
+FZY,OSWEGO COUNTY AIRPORT/FULTON,Cayuga,NY,-76.3847,43.3497,139.0,America/New_York
+PEO,PENN YAN AIRPORT,Yates,NY,-77.0529,42.6371,298.0,America/New_York
+PBG,PLATTSBURGH AFB ,Chittenden,NY,-73.4681,44.6509,72.0,America/New_York
+PLB,PLATTSBURGH/CLINTON,Clinton,NY,-73.5245,44.6875,113.0,America/New_York
+PTD,Potsdam,St. Lawrence,NY,-74.9484,44.6767,140.494,America/New_York
+POU,POUGHKEEPSIE,Dutchess,NY,-73.8842,41.6266,51.0,America/New_York
+ROC,ROCHESTER/MONROE CO,Monroe,NY,-77.6767,43.1167,169.0,America/New_York
+SLK,SARANAC LAKE/ADIRON,Franklin,NY,-74.2062,44.3853,507.0,America/New_York
+SCH,SCHENECTADY AIRPORT,Schenectady,NY,-73.93,42.85,115.0,America/New_York
+6B9,Skaneateles,Onondaga,NY,-76.4408,42.914,304.325,America/New_York
+XNT,Springville - Bertrand Chaffee,Erie,NY,-78.6581,42.5084,423.819,America/New_York
+SYR,SYRACUSE/HANCOCK,Onondaga,NY,-76.1063,43.1112,124.0,America/New_York
+UCA,UTICA/ONEIDA CO.,Madison,NY,-75.3839,43.1451,226.0,America/New_York
+ART,WATERTOWN INTL ARPT,Jefferson,NY,-76.0262,43.9888,99.0,America/New_York
+ELZ,WELLSVILLE MUNICIPAL AIRPORT,Allegany,NY,-77.99,42.11,647.0,America/New_York
+FOK,WESTHAMPTON BEACH,Suffolk,NY,-72.6318,40.8436,20.0,America/New_York
+HPN,WHITE PLAINS,Westchester,NY,-73.7075,41.0669,134.0,America/New_York
+SDC,Williamson,Wayne,NY,-77.1195,43.2346,127.863,America/New_York
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+AKR,Akron,Summit,OH,-81.4669,41.0375,325.0,America/New_York
+CAK,Akron / Canton,Carroll,OH,-81.4422,40.9161,374.0,America/New_York
+UNI,Albany,Athens,OH,-82.2293,39.2119,233.5,America/New_York
+HZY,ASHTABULA,Ashtabula,OH,-80.6955,41.778,276.0,America/New_York
+I69,Batavia ,Clermont,OH,-84.2102,39.0784,252.272,America/New_York
+EDJ,Bellefontaine,Logan,OH,-83.8192,40.3723,342.0,America/New_York
+TZR,BOLTON FIELD AIR,Franklin,OH,-83.1369,39.9012,276.0,America/New_York
+CDI,Cambridge,Guernsey,OH,-81.5776,39.975,241.535,America/New_York
+RZT,Chillicothe,Ross,OH,-83.0231,39.4404,214.96,America/New_York
+LUK,CINCINNAT/LUNKEN,Hamilton,OH,-84.4186,39.1033,155.0,America/New_York
+CLE,CLEVELAND,Cuyahoga,OH,-81.8528,41.405,233.0,America/New_York
+BKL,Cleveland Burke Lakefront,Cuyahoga,OH,-81.6833,41.5175,178.0,America/New_York
+CGF,CLEVLND/CUYAHOGA,Lake,OH,-81.4864,41.5651,268.0,America/New_York
+CMH,COLUMBUS,Franklin,OH,-82.8808,39.9914,247.0,America/New_York
+OSU,COLUMBUS/ST UNIV,Franklin,OH,-83.08,40.08,280.0,America/New_York
+DAY,DAYTON,Montgomery,OH,-84.2186,39.9061,305.0,America/New_York
+MGY,DAYTON,Montgomery,OH,-84.2249,39.589,289.0,America/New_York
+I19,Dayton - Green County,Greene,OH,-83.992,39.691,279.937,America/New_York
+DFI,DEFIANCE,Defiance,OH,-84.4288,41.3375,219.0,America/New_York
+DLZ,Delaware,Delaware,OH,-83.1148,40.2797,287.0,America/New_York
+FDY,FINDLAY,Hancock,OH,-83.6686,41.0136,247.0,America/New_York
+HAO,HAMILTON,Butler,OH,-84.5219,39.3638,188.0,America/New_York
+I67,Harrison,Hamilton,OH,-84.7743,39.2589,176.488,America/New_York
+LHQ,LANCASTER,Fairfield,OH,-82.6571,39.7556,260.0,America/New_York
+I68,Lebanon,Warren,OH,-84.2532,39.4664,272.75,America/New_York
+AOH,LIMA,Allen,OH,-84.0267,40.7069,296.0,America/New_York
+UYF,London,Madison,OH,-83.462,39.9327,320.226,America/New_York
+LPR,LORAIN/ELYRIA,Lorain,OH,-82.1794,41.3461,241.0,America/New_York
+MFD,MANSFIELD,Richland,OH,-82.52,40.82,395.0,America/New_York
+MNN,MARION,Marion,OH,-83.0635,40.6163,301.0,America/New_York
+MRT,Marysville,Union,OH,-83.3516,40.2247,311.2,America/New_York
+1G5,Medina,Medina,OH,-81.7649,41.1314,349.81,America/New_York
+MWO,Middletown,Butler,OH,-84.3953,39.531,198.0,America/New_York
+4I3,Mount Vernon,Knox,OH,-82.5261,40.3289,363.0,America/New_York
+VTA,NEWARK,Licking,OH,-82.4618,40.0247,268.0,America/New_York
+PHD,NEW PHILADELPHIA,Tuscarawas,OH,-81.4236,40.4719,272.0,America/New_York
+OWX,Ottawa,Putnam,OH,-83.982,41.0356,229.345,America/New_York
+OXD,Oxford,Butler,OH,-84.7844,39.5022,315.969,America/New_York
+PCW,Port Clinton,Ottawa,OH,-82.8687,41.5163,173.939,America/New_York
+PMH,Portsmouth,Scioto,OH,-82.8473,38.8405,199.983,America/New_York
+29G,Ravenna,Portage,OH,-81.2516,41.2102,365.0,America/New_York
+POV,Ravenna,Portage,OH,-81.2516,41.2102,365.0,America/New_York
+LCK,RICKENBACKER ANG,Franklin,OH,-82.9278,39.8138,227.0,America/New_York
+SGH,Springfield,Clark,OH,-83.8402,39.8403,320.3,America/New_York
+TDZ,TOLEDO,Lucas,OH,-83.4764,41.5631,189.0,America/New_York
+TOL,TOLEDO,Lucas,OH,-83.8014,41.5886,210.0,America/New_York
+VES,Versailles,Darke,OH,-84.5319,40.2044,306.9,America/New_York
+AXV,Wapakoneta,Auglaize,OH,-84.2989,40.4934,274.301,America/New_York
+I23,Washington Court House,Fayette,OH,-83.4205,39.5704,297.0,America/New_York
+USE,Wauseon ,Fulton,OH,-84.1272,41.6101,234.916,America/New_York
+LNN,Willoughby,Lake,OH,-81.3898,41.684,188.732,America/New_York
+ILN,WILMINGTON,Clinton,OH,-83.8217,39.4203,322.0,America/New_York
+BJJ,WOOSTER,Wayne,OH,-81.8882,40.8748,343.0,America/New_York
+FFO,WRIGHT PATERSON,Clark,OH,-84.0483,39.8261,251.0,America/New_York
+YNG,YOUNGSTOWN,Trumbull,OH,-80.6739,41.2544,360.0,America/New_York
+ZZV,ZANESVILLE,Muskingum,OH,-81.8921,39.9445,268.0,America/New_York
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+ADH,ADA_MUNICIPAL_AIRPORT,Pontotoc,OK,-96.6712,34.8043,310.0,America/Chicago
+AXS,Altus,Jackson,OK,-99.3385,34.6988,436.8,America/Chicago
+LTS,ALTUS AFB,Tillman,OK,-99.2667,34.6671,420.0,America/Chicago
+AVK,ALVA RGNL AIRPORT,Woods,OK,-98.67,36.7732,449.0,America/Chicago
+1F0,ARDMORE DOWNTOWN EXEC AIRPORT,Carter,OK,-97.1226,34.147,257.0,America/Chicago
+ADM,ARDMORE MUNICIPAL,Carter,OK,-97.0195,34.3032,232.0,America/Chicago
+AQR,ATOKA MUNI AIRPORT,Atoka,OK,-96.15,34.4,180.0,America/Chicago
+BVO,BARTLESVILLE/PHILLI,Osage,OK,-96.0112,36.7625,218.0,America/Chicago
+BKN,Blackwell,Kay,OK,-97.3496,36.7451,313.9,America/Chicago
+CQB,CHANDLER MUNI AIRPORT,Lincoln,OK,-96.8203,35.7238,300.0,America/Chicago
+CHK,CHICKASHA MUNI AIRPORT,Grady,OK,-97.9677,35.0974,351.0,America/Chicago
+GCM,CLAREMORE RGNL AIRPORT,Rogers,OK,-95.48,36.29,221.0,America/Chicago
+CLK,Clinton,Custer,OK,-98.9327,35.5383,492.3,America/Chicago
+CSM,CLINTON-SHERMAN,Washita,OK,-99.2005,35.3398,586.0,America/Chicago
+CUH,Cushing,Payne,OK,-96.7731,35.9499,279.0,America/Chicago
+DUA,DURANT,Bryan,OK,-96.3945,33.9423,213.0,America/Chicago
+ELK,Elk City,Beckham,OK,-99.3943,35.4308,605.07,America/Chicago
+RQO,El Reno,Canadian,OK,-98.0058,35.4727,431.9,America/Chicago
+WDG,ENID/WOODRING MUNI,Garfield,OK,-97.7911,36.3792,356.0,America/Chicago
+FSI,FORT SILL,Comanche,OK,-98.4033,34.6449,362.0,America/Chicago
+FDR,FREDERICK,Tillman,OK,-98.9839,34.3521,382.0,America/Chicago
+GAG,GAGE/SHATTUCK,Ellis,OK,-99.7764,36.2955,678.0,America/Chicago
+GMJ,GROVE MUNI AIRPORT,Delaware,OK,-94.7386,36.6068,254.0,America/Chicago
+GOK,GUTHRIE,Logan,OK,-97.4156,35.8498,326.0,America/Chicago
+GUY,GUYMON,Texas,OK,-101.5053,36.6817,952.0,America/Chicago
+DUC,HALLIBURTON FIELD AIRPORT/DUNCAN,Stephens,OK,-97.96,34.47,339.0,America/Chicago
+HBR,HOBART MUNICIPAL,Kiowa,OK,-99.0514,34.9913,477.0,America/Chicago
+HHW,Hugo,Choctaw,OK,-95.5419,34.0348,170.115,America/Chicago
+4O4,Idabel,Mccurtain,OK,-94.8594,33.9094,144.0,America/Chicago
+LAW,LAWTON MUNICIPAL,Comanche,OK,-98.4166,34.5677,338.0,America/Chicago
+MLC,MC ALESTER REGIONAL,Pittsburg,OK,-95.7831,34.8822,235.0,America/Chicago
+MKO,MUSKOGEE/DAVIS FLD,Muskogee,OK,-95.3614,35.6567,186.0,America/Chicago
+OUN,NORMAN/WESTHEIMER,Mcclain,OK,-97.4708,35.2435,357.0,America/Chicago
+RCE,OKC - Yukon,Canadian,OK,-97.8236,35.4881,412.7,America/Chicago
+OKC,Oklahoma City,Oklahoma,OK,-97.6006,35.3889,397.0,America/Chicago
+PWA,OKLAHOMA CITY/WILEY,Oklahoma,OK,-97.6471,35.5342,396.0,America/Chicago
+OKM,OKMULGEE MUNI AIRPORT,Okmulgee,OK,-95.95,35.67,220.0,America/Chicago
+PVJ,PAULS VALLEY MUNI AIRPORT,Garvin,OK,-97.2231,34.7108,295.0,America/Chicago
+PNC,PONCA CITY MUNI,Kay,OK,-97.1,36.73,307.0,America/Chicago
+RKR,ROBERT S KERR AIRPORT/POTEAU,Le Flore,OK,-94.62,35.02,138.0,America/Chicago
+JSV,SALLISAW MUNI AIRPORT,Sequoyah,OK,-94.8028,35.4381,161.0,America/Chicago
+OWP,Sand Springs,Osage,OK,-96.1518,36.1753,270.634,America/Chicago
+SRE,Seminole,Pottawatomie,OK,-96.6752,35.2747,312.0,America/Chicago
+SNL,SHAWNEE MUNI AIRPORT,Pottawatomie,OK,-96.9428,35.3573,327.0,America/Chicago
+GZL,Stigler,Haskell,OK,-95.0939,35.2891,182.6,America/Chicago
+SWO,STILLWATER MUNI,Payne,OK,-97.0857,36.1612,300.0,America/Chicago
+TQH,TAHLEQUAH MUNI,Cherokee,OK,-95,35.93,266.0,America/Chicago
+TIK,TINKER AFB,Oklahoma,OK,-97.3866,35.4147,394.0,America/Chicago
+TUL,TULSA INTL ARPT(AW),Tulsa,OK,-95.8881,36.1984,206.0,America/Chicago
+RVS,TULSA/LLOYD JONES,Tulsa,OK,-95.9846,36.0396,193.0,America/Chicago
+END,VANCE AFB/ENID,Garfield,OK,-97.9165,36.3392,398.0,America/Chicago
+JWG,WATONGA,Blaine,OK,-98.4207,35.8647,472.0,America/Chicago
+OJA,Weatherford,Custer,OK,-98.6685,35.5448,489.2,America/Chicago
+WWR,WEST WOODWARD,Ellis,OK,-99.5227,36.438,667.0,America/Chicago
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+AST,ASTORIA/CLATSOP,Clatsop,OR,-123.8825,46.1569,7.0,America/Los_Angeles
+UAO,AURORA STATE,Marion,OR,-122.77,45.25,60.0,America/Los_Angeles
+BKE,BAKER MUNICIPAL,Baker,OR,-117.8091,44.8374,1027.0,America/Los_Angeles
+BDN,Bend,Deschutes,OR,-121.2002,44.0946,1054.6,America/Los_Angeles
+BOK,Brookings,Curry,OR,-124.2901,42.0746,139.9,America/Los_Angeles
+4BK,BROOKINGS,Curry,OR,-124.2833,42.05,24.0,America/Los_Angeles
+BNO,BURNS MUNI (AMO,Harney,OR,-118.9564,43.595,1271.0,America/Los_Angeles
+CZK,CASCADE LOCKS STATE,Hood River,OR,-121.8789,45.6769,46.0,America/Los_Angeles
+CVO,CORVALLIS MUNI AWOS,Benton,OR,-123.2895,44.4971,75.0,America/Los_Angeles
+EUG,EUGENE/MAHLON SWEET,Lane,OR,-123.212,44.1246,114.0,America/Los_Angeles
+6S2,Florence,Lane,OR,-124.1114,43.9828,15.5,America/Los_Angeles
+4S1,Gold Beach,Curry,OR,-124.4249,42.4153,6.0,America/Los_Angeles
+3S8,Grants Pass,Josephine,OR,-123.3886,42.509,337.913,America/Los_Angeles
+HRI,HERMISTON,Morrow,OR,-119.2611,45.8258,195.0,America/Los_Angeles
+4S2,Hood River,Hood River,OR,-121.5365,45.6726,186.216,America/Los_Angeles
+GCD,John Day,Grant,OR,-118.9625,44.4042,1126.8,America/Los_Angeles
+LMT,KLAMATH FALLS/KINGS,Klamath,OR,-121.7242,42.1469,1247.0,America/Los_Angeles
+LGD,LA GRANDE (AWOS),Union,OR,-118.0071,45.2902,827.0,America/Los_Angeles
+LKV,LAKEVIEW (AWOS),Lake,OR,-120.3991,42.1611,1441.0,America/Los_Angeles
+S33,Madras City,Jefferson,OR,-121.1551,44.6702,736.27,America/Los_Angeles
+MMV,MCMINNVILLE MUNICIPAL AIRPORT,Marion,OR,-123.1361,45.1945,48.0,America/Los_Angeles
+MEH,MEACHAM (AMOS),Union,OR,-118.4247,45.5114,1236.0,America/Los_Angeles
+MFR,MEDFORD/JACKSON CO.,Jackson,OR,-122.8722,42.3811,405.0,America/Los_Angeles
+JNW,NEWPORT,Lincoln,OR,-124.0667,44.5833,48.0,America/Los_Angeles
+ONP,NEWPORT MUNICIP,Lincoln,OR,-124.0579,44.5804,48.0,America/Los_Angeles
+OTH,North Bend,Coos,OR,-124.2437,43.4195,2.16071,America/Los_Angeles
+ONO,ONTARIO MUNICIPAL,Malheur,OR,-117.0128,44.0206,668.0,America/Boise
+PDT,PENDLETON MUNICIPAL,Umatilla,OR,-118.8414,45.6951,456.0,America/Los_Angeles
+HIO,PORTLAND/HILLSBORO,Washington,OR,-122.9502,45.5406,62.0,America/Los_Angeles
+PDX,PORTLAND INTL ARPT,Multnomah,OR,-122.6003,45.5908,12.0,America/Los_Angeles
+TTD,PORTLAND/TROUTDALE,Multnomah,OR,-122.4089,45.5511,11.0,America/Los_Angeles
+S39,Prineville,Crook,OR,-120.9038,44.287,986.0,America/Los_Angeles
+RDM,REDMOND (AWOS),Deschutes,OR,-121.15,44.2539,938.0,America/Los_Angeles
+REO,ROME,Malheur,OR,-117.8644,42.5906,1235.0,America/Boise
+RBG,ROSEBURG MUNICIPAL,Douglas,OR,-123.3559,43.2388,160.0,America/Los_Angeles
+SLE,SALEM/MCNARY,Marion,OR,-123.0025,44.9095,61.0,America/Los_Angeles
+SPB,SCAPPOOSE INDUSTRIAL APK (1S4),Washington,OR,-122.86,45.77,17.0,America/Los_Angeles
+SXT,SEXTON SUMMIT(AMOS),Josephine,OR,-123.3642,42.6003,1171.0,America/Los_Angeles
+DLS,THE DALLES MUNI,Wasco,OR,-121.1673,45.6186,74.0,America/Los_Angeles
+TMK,Tillamook,Tillamook,OR,-123.8144,45.4182,11.0,America/Los_Angeles
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+XLL,Allentown,Lehigh,PA,-75.4883,40.5703,122.0,America/New_York
+JVU,Allentown,Lehigh,PA,-75.4883,40.5703,122.0,America/New_York
+ABE,ALLENTOWN-BETHLEHEM,Lehigh,PA,-75.4492,40.6508,117.0,America/New_York
+AOO,ALTOONA/BLAIR CO.,Bedford,PA,-78.32,40.2964,458.0,America/New_York
+BVI,BEAVER FALLS ARPT,Beaver,PA,-80.3914,40.7725,382.0,America/New_York
+HMZ,Bedford,Bedford,PA,-78.5122,40.0853,350.626,America/New_York
+BFD,BRADFORD REGIONAL,Mckean,PA,-78.6401,41.8031,653.0,America/New_York
+BTP,BUTLER CO. (AWOS),Butler,PA,-79.9497,40.7769,380.0,America/New_York
+FIG,CLEARFIELD-LAWRENCE APT(WAS N97),Clearfield,PA,-78.4117,41.0467,462.0,America/New_York
+MQS,Coatesville,Chester,PA,-75.8655,39.979,201.2,America/New_York
+DYL,DOYLESTOWN AIRPORT,Montgomery,PA,-75.1223,40.3331,120.0,America/New_York
+DUJ,DU BOIS (AWOS),Jefferson,PA,-78.9,41.18,554.0,America/New_York
+ERI,ERIE INTL AIRPORT,Erie,PA,-80.18,42.08,225.0,America/New_York
+RYT,Fountain Dale,Adams,PA,-77.43,39.734,274.0,America/New_York
+FKL,FRANKLIN(AWOS),Venango,PA,-79.8604,41.3779,469.0,America/New_York
+CXY,HARRISBURG/CAPITAL,York,PA,-76.8515,40.2171,106.0,America/New_York
+HZL,Hazelton,Luzerne,PA,-75.9949,40.9868,488.811,America/New_York
+IDI,INDIANA/STEWART FLD,Westmoreland,PA,-79.1055,40.6322,429.0,America/New_York
+JST,JOHNSTOWN/CAMBRIA,Cambria,PA,-78.8339,40.3161,696.0,America/New_York
+LNS,LANCASTER,York,PA,-76.2944,40.1203,123.0,America/New_York
+LBE,LATROBE/WESTMORLAND,Somerset,PA,-79.4048,40.2759,361.0,America/New_York
+22N,Lehighton,Carbon,PA,-75.7615,40.8095,158.072,America/New_York
+GKJ,MEADVILLE,Crawford,PA,-80.2147,41.6265,428.0,America/New_York
+MDT,MIDDLETOWN/OLMSTED,Dauphin,PA,-76.7633,40.1936,94.0,America/New_York
+MPO,MT POCONO,Monroe,PA,-75.3794,41.1389,577.0,America/New_York
+MUI,MUIR AAF/INDIANTOWN,Lebanon,PA,-76.5693,40.4348,149.0,America/New_York
+UCP,New Castle,Lawrence,PA,-80.4134,41.0253,326.7,America/New_York
+CKZ,Perkasie,Bucks,PA,-75.2905,40.3892,165.069,America/New_York
+PHL,PHILADELPHIA INTL,Gloucester,PA,-75.2311,39.8683,9.0,America/New_York
+PNE,PHILADELPHIA NE,Burlington,PA,-75.0134,40.0789,37.0,America/New_York
+LOM,PHILADELPHIA/WINGS FIELD,Montgomery,PA,-75.2651,40.1376,92.0,America/New_York
+PSB,PHILIPSBURG/MID-ST,Centre,PA,-78.0873,40.8844,594.0,America/New_York
+AGC,PITTSBURGH/ALLEGHEN,Washington,PA,-79.9217,40.3547,382.0,America/New_York
+PIT,PITTSBURGH INTL,Allegheny,PA,-80.2329,40.4915,373.0,America/New_York
+PTW,POTTSTOWN LIMERICK AIRPORT,Chester,PA,-75.5572,40.2383,94.0,America/New_York
+UKT,QUAKERTOWN_ARPT,Montgomery,PA,-75.3819,40.4352,160.0,America/New_York
+RDG,READING/SPAATZ FLD,Berks,PA,-75.9652,40.3785,105.0,America/New_York
+SEG,SELINSGROVE,Snyder,PA,-76.8639,40.8206,137.0,America/New_York
+2G9,Somerset,Somerset,PA,-79.015,40.0389,679.994,America/New_York
+UNV,STATE COLLEGE,Centre,PA,-77.85,40.85,378.0,America/New_York
+OYM,St Marys ,Elk,PA,-78.5026,41.4125,579.19,America/New_York
+THV,THOMASVILLE/YORK,York,PA,-76.873,39.917,148.0,America/New_York
+AFJ,WASHINGTON (AWOS),Washington,PA,-80.2902,40.1365,361.0,America/New_York
+N38,Wellsboro,Tioga,PA,-77.3965,41.7279,572.879,America/New_York
+OQN,West Chester,Chester,PA,-75.5803,39.9889,139.362,America/New_York
+AVP,WILKES-BARRE/SCRANT,Luzerne,PA,-75.7227,41.3335,289.0,America/New_York
+IPT,WILLIAMSPORT,Lycoming,PA,-76.9217,41.2433,160.0,America/New_York
+NXX,WILLOW GROVE NAS,Montgomery,PA,-75.15,40.2,110.0,America/New_York
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+BID,BLOCK ISLAND (AWOS),Washington,RI,-71.58,41.17,33.0,America/New_York
+UUU,NEWPORT,Bristol,RI,-71.2815,41.5324,29.0,America/New_York
+OQU,N. KINGSTON/QUONSET,Washington,RI,-71.4121,41.5971,6.0,America/New_York
+SFZ,PAWTUCKET (AWOS),Providence,RI,-71.4914,41.9208,134.0,America/New_York
+PVD,PROVIDENCE/GREEN,Kent,RI,-71.4325,41.7219,19.0,America/New_York
+WST,Westerly,New London,RI,-71.7989,41.3497,24.0,America/New_York
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+AIK,Aiken,Aiken,SC,-81.685,33.6494,160.9,America/New_York
+AQX,Allendale,Allendale,SC,-81.2703,32.9951,48.7062,America/New_York
+AND,ANDERSON CO AIRPORT,Anderson,SC,-82.7094,34.4946,238.0,America/New_York
+BNL,Barnwell,Barnwell,SC,-81.3883,33.2578,75.0,America/New_York
+ARW,Beaufort,Beaufort,SC,-80.6344,32.4122,3.0,America/New_York
+NBC,BEAUFORT MCAS,Beaufort,SC,-80.7232,32.4774,12.0,America/New_York
+BBP,Bennettsville,Marlboro,SC,-79.7344,34.6217,44.8,America/New_York
+CDN,Camden,Kershaw,SC,-80.5649,34.2836,92.0,America/New_York
+CHS,Charleston,Charleston,SC,-80.0405,32.8986,10.0245,America/New_York
+JZI,Charleston Exec,Charleston,SC,-80.0029,32.7009,5.2,America/New_York
+CQW,Cheraw,Chesterfield,SC,-79.957,34.7129,72.8,America/New_York
+DCM,Chester,Chester,SC,-81.1958,34.7893,199.9,America/New_York
+CEU,CLEMSON/OCONEE COUNTY,Pickens,SC,-82.8868,34.6719,272.0,America/New_York
+CAE,COLUMBIA METRO,Lexington,SC,-81.1181,33.9419,69.0,America/New_York
+CUB,COLUMBIA OWENS DOWNTOWN AIRPORT,Richland,SC,-80.9938,33.972,59.0,America/New_York
+HYW,Conway,Horry,SC,-79.1222,33.8285,10.7,America/New_York
+UDG,DARLINGTON COUNTY JETPORT,Darlington,SC,-79.89,34.45,59.0,America/New_York
+FLO,FLORENCE REGIONAL,Florence,SC,-79.7239,34.1854,45.0,America/New_York
+GGE,Georgetown,Georgetown,SC,-79.3196,33.3117,11.9,America/New_York
+GYH,Greenville,Anderson,SC,-82.3764,34.7583,291.0,America/New_York
+GMU,GREENVILLE DOWNTOWN,Greenville,SC,-82.3461,34.8461,319.0,America/New_York
+GSP,GREENVILLE/SPARTANB,Spartanburg,SC,-82.2239,34.8847,296.0,America/New_York
+GRD,GREENWOOD COUNTY AIRPORT,Greenwood,SC,-82.16,34.25,192.0,America/New_York
+HVS,Hartsville,Darlington,SC,-80.1192,34.4031,110.9,America/New_York
+HXD,HILTON_HEAD_(AWOS),Beaufort,SC,-80.6975,32.2244,6.0,America/New_York
+CKI,Kingstree,Williamsburg,SC,-79.857,33.7172,20.4,America/New_York
+LKR,Lancaster,Lancaster,SC,-80.8544,34.723,148.1,America/New_York
+LUX,Laurens,Laurens,SC,-81.9472,34.5071,212.4,America/New_York
+MNI,Manning,Clarendon,SC,-80.2087,33.5871,31.4,America/New_York
+MAO,Marion,Horry,SC,-79.3347,34.1812,28.0,America/New_York
+MMT,MCENTIRE ANG BASE,Richland,SC,-80.8,33.92,77.0,America/New_York
+MKS,Moncks Corner,Charleston,SC,-80.0362,33.1855,22.3,America/New_York
+LRO,Mount Pleasant,Charleston,SC,-79.7829,32.8978,3.7,America/New_York
+MYR,MYRTLE BEACH(CIV),Horry,SC,-78.93,33.68,8.0,America/New_York
+EOE,Newberry,Newberry,SC,-81.6397,34.3093,173.1,America/New_York
+XNO,North Air Force,Orangeburg,SC,-81.0701,33.6117,91.324,America/New_York
+CRE,NORTH MYRTLE BEACH,Horry,SC,-78.7239,33.8118,10.0,America/New_York
+OGB,ORANGEBURG,Orangeburg,SC,-80.8595,33.4568,60.0,America/New_York
+LQK,Pickens County,Pickens,SC,-82.7029,34.81,308.0,America/New_York
+UZA,ROCK HILL (WAS 29J),York,SC,-81.0572,34.9878,202.0,America/New_York
+SSC,SHAW AFB/SUMTER,Sumter,SC,-80.47,33.97,74.0,America/New_York
+SPA,Spartanburg,Spartanburg,SC,-81.9565,34.9157,244.1,America/New_York
+DYB,Summersville,Charleston,SC,-80.2793,33.0634,17.1,America/New_York
+SMS,Sumter,Sumter,SC,-80.3613,33.995,55.5,America/New_York
+RBW,Walterboro,Colleton,SC,-80.6406,32.921,30.8,America/New_York
+FDW,Winnsboro,Fairfield,SC,-81.1088,34.3155,175.9,America/New_York
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+ABR,ABERDEEN,Brown,SD,-98.42,45.45,394.998,America/Chicago
+EFC,BELLE FOURCHE,Butte,SD,-103.862,44.7342,966.0,America/Denver
+BRA,BRANDT          ,Brookings,SD,-96.85,44.6833,520.502,America/Chicago
+BKX,BROOKINGS,Brookings,SD,-96.8169,44.3048,490.282,America/Chicago
+2WX,BUFFALO,Harding,SD,-103.5464,45.6044,919.069,America/Denver
+9V9,CHAMBERLAIN,Brule,SD,-99.3183,43.7667,509.757,America/Chicago
+CUT,CUSTER,Custer,SD,-103.6114,43.7331,1686.81,America/Denver
+RCA,ELLSWORTH AFB,Pennington,SD,-103.1036,44.1451,977.434,America/Denver
+D07,FAITH,Meade,SD,-102.02,45.03,778.504,America/Denver
+HON,HURON,Beadle,SD,-98.2286,44.3852,384.371,America/Chicago
+Y22,LEMMON          ,Perkins,SD,-102.1667,45.9167,771.001,America/Denver
+LEM,LEMMON US12     ,Perkins,SD,-102.1062,45.9187,782.375,America/Denver
+MDS,Madison,Lake,SD,-97.0859,44.016,520.798,America/Chicago
+MHE,MITCHELL,Davison,SD,-98.0386,43.7748,395.727,America/Chicago
+MBG,MOBRIDGE,Walworth,SD,-100.4078,45.5464,515.168,America/Chicago
+PHP,PHILIP,Haakon,SD,-101.6,44.05,671.744,America/Denver
+PIR,PIERRE,Hughes,SD,-100.286,44.3827,522.028,America/Chicago
+IEN,PINE RIDGE,Shannon,SD,-102.511,43.0225,1008.84,America/Denver
+UNR,Rapid City,Pennington,SD,-103.2,44.0667,972.998,America/Denver
+RAP,RAPID CITY,Pennington,SD,-103.0574,44.0453,964.707,America/Denver
+FSD,SIOUX FALLS,Minnehaha,SD,-96.7536,43.5769,428.942,America/Chicago
+8D3,SISSETON,Roberts,SD,-96.9914,45.6689,351.807,America/Chicago
+SPF,Spearfish,Pennington,SD,-103.783,44.4803,1186.17,America/Denver
+ATY,WATERTOWN,Codington,SD,-97.1547,44.914,525.882,America/Chicago
+SFD,Winner,Tripp,SD,-99.8421,43.3902,612.307,America/Chicago
+ICR,WINNER,Tripp,SD,-99.8422,43.3903,611.932,America/Chicago
+YKN,YANKTON,Yankton,SD,-97.3859,42.9167,389.539,America/Chicago
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+MMI,Athens ,Mcminn,TN,-84.5626,35.3973,245.046,America/New_York
+M08,Bolivar,Hardeman,TN,-89.0434,35.2145,149.56,America/Chicago
+TRI,BRISTOL/TRI-CITY,Sullivan,TN,-82.4074,36.4752,463.0,America/New_York
+CHA,CHATTANOOGA/LOVELL,Hamilton,TN,-85.2038,35.0353,210.0,America/New_York
+CKV,CLARKSVILLE/OUTLAW,Montgomery,TN,-87.415,36.6219,168.0,America/Chicago
+RZR,Cleveland,Bradley,TN,-84.7998,35.2115,242.884,America/New_York
+MRC,Columbia,Maury,TN,-87.1791,35.5544,200.75,America/Chicago
+M04,Covington,Tipton,TN,-89.5872,35.5834,81.6118,America/Chicago
+CSV,CROSSVILLE MEMORIAL,Cumberland,TN,-85.085,35.9513,573.0,America/Chicago
+2A0,Dayton,Rhea,TN,-84.9322,35.4817,214.875,America/New_York
+M02,Dickson,Dickson,TN,-87.4298,36.1279,263.08,America/Chicago
+DYR,DYERSBURG(AWOS),Dyer,TN,-89.4066,35.998,103.0,America/Chicago
+0A9,Elizabethton,Carter,TN,-82.1734,36.3712,486.0,America/New_York
+UCY,Everett-Stewart ,Weakley,TN,-88.9857,36.3797,97.5416,America/Chicago
+FYM,Fayetteville,Lincoln,TN,-86.564,35.0597,296.959,America/Chicago
+M33,Gallatin,Sumner,TN,-86.4088,36.3768,165.665,America/Chicago
+GCY,Greenville,Greene,TN,-82.811,36.196,487.085,America/New_York
+HZD,Huntingdon,Carroll,TN,-88.4654,36.089,142.968,America/Chicago
+JAU,Jacksboro,Campbell,TN,-84.163,36.3341,349.912,America/New_York
+MKL,JACKSON/MCKELLAR,Madison,TN,-88.9167,35.5931,132.0,America/Chicago
+JWN,John C Tune,Davidson,TN,-86.8867,36.1824,146.24,America/Chicago
+DKX,Knoxville Downtown,Knox,TN,-83.8737,35.9638,251.118,America/New_York
+TYS,KNOXVILLE MUNICIPAL,Blount,TN,-83.9858,35.8181,299.0,America/New_York
+2M2,Lawrenceburg,Lawrence,TN,-87.2579,35.2343,281.342,America/Chicago
+M54,Lebanon,Wilson,TN,-86.3157,36.1904,179.0,America/Chicago
+PVE,Levington - Parson Beech River,Henderson,TN,-88.1954,35.6564,153.901,America/Chicago
+LUG,Lewisburg-Ellington,Marshall,TN,-86.803,35.5136,213.608,America/Chicago
+8A3,Livingston,Overton,TN,-85.3116,36.4121,409.921,America/Chicago
+MNV,Madisonville,Monroe,TN,-84.3804,35.5452,306.085,America/New_York
+RNC,Mc Minnville,Warren,TN,-85.8438,35.6987,308.852,America/Chicago
+MEM,MEMPHIS INTL ARPT,Shelby,TN,-89.985,35.0611,87.0,America/Chicago
+NQA,MEMPHIS NAS,Shelby,TN,-89.8703,35.3567,98.0,America/Chicago
+MOR,Morristown Moore-Murrell,Hamblen,TN,-83.3754,36.1794,392.44,America/New_York
+MBT,Murfreesboro ,Rutherford,TN,-86.3775,35.8775,186.754,America/Chicago
+BNA,NASHVILLE METRO,Davidson,TN,-86.6892,36.1189,180.0,America/Chicago
+OQT,OAK RIDGE,Knox,TN,-84.2336,36.023,277.0,America/New_York
+PHT,Paris,Henry,TN,-88.3844,36.3359,173.784,America/Chicago
+1M5,Portland,Sumner,TN,-86.4769,36.5929,243.656,America/Chicago
+GZS,Pulaski,Giles,TN,-87.0568,35.1537,200.875,America/Chicago
+RKW,Rockwood,Cumberland,TN,-84.6897,35.9223,503.078,America/Chicago
+SNH,Savannah,Hardin,TN,-88.2167,35.1703,141.184,America/Chicago
+GKT,Sevierville,Sevier,TN,-83.5287,35.8578,301.313,America/New_York
+SYI,Shelbyville ,Bedford,TN,-86.4425,35.5594,243.672,America/Chicago
+SZY,Sibley ,McNairy,TN,-88.4984,35.2029,182.929,America/Chicago
+MQY,SMYRNA,Rutherford,TN,-86.5201,36.009,166.0,America/Chicago
+FYE,Somerville,Fayette,TN,-89.3929,35.2061,132.875,America/Chicago
+SRB,Sparta,White,TN,-85.5307,36.0559,307.913,America/Chicago
+M91,Springfield,Robertson,TN,-86.9189,36.5363,211.108,America/Chicago
+XNX,Sumner,Sumner,TN,-86.4084,36.3751,167.92,America/Chicago
+THA,Tullahoma,Coffee,TN,-86.2467,35.38,326.264,America/Chicago
+BGF,Winchester,Franklin,TN,-86.0662,35.1775,296.237,America/Chicago
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+ABI,ABILENE MUNICIPAL,Taylor,TX,-99.6819,32.4113,546.0,America/Chicago
+ALI,ALICE INTL AIRPORT,Jim Wells,TX,-98.0269,27.7409,54.0,America/Chicago
+E38,ALPINE,Brewster,TX,-103.684,30.384,1376.0,America/Chicago
+AMA,AMARILLO ARPT(AWOS),Potter,TX,-101.7059,35.2194,1099.0,America/Chicago
+E11,Andews,Andrews,TX,-102.5295,32.3311,963.142,America/Chicago
+LBX,ANGLETON/LAKE JACKS,Brazoria,TX,-95.4621,29.1086,8.0,America/Chicago
+GKY,ARLINGTON (WAS F54),Tarrant,TX,-97.0943,32.6639,192.0,America/Chicago
+F44,Athens,Henderson,TX,-95.8284,32.1638,135.396,America/Chicago
+ATT,Austin,Travis,TX,-97.7601,30.3208,189.0,America/Chicago
+EDC,Austin,Bastrop,TX,-97.5621,30.3925,187.5,America/Chicago
+AUS,Austin Bergstrom,Travis,TX,-97.6699,30.1945,189.0,America/Chicago
+BSM,Austin - Bergstrom AFB (BSM),Travis,TX,-97.6699,30.1945,148.707,America/Chicago
+BYY,BAY_CITY,Matagorda,TX,-95.8634,28.9733,14.0,America/Chicago
+BMT,Beaumont,Jefferson,TX,-94.2151,30.0702,9.8,America/Chicago
+BPT,BEAUMONT/PORT ARTHU,Jefferson,TX,-94.02,29.95,7.0,America/Chicago
+BEA,Beeville,Bee,TX,-97.791,28.3619,81.7,America/Chicago
+BPG,BIG_SPRING,Howard,TX,-101.5216,32.2126,784.0,America/Chicago
+F00,Bonham,Fannin,TX,-96.1793,33.6131,189.558,America/Chicago
+VAF,Boomvang,GMZ011,GM,-94.6253,27.3536,0.0,America/Chicago
+BGD,BORGER/HUTCHINSON,Hutchinson,TX,-101.3937,35.7009,931.0,America/Chicago
+0F2,Bowie,Montague,TX,-97.7756,33.6017,335.6,America/Chicago
+BBD,Brady,Mcculloch,TX,-99.3239,31.1793,557.0,America/Chicago
+CFD,Brazos,Brazos,TX,-96.3314,30.7157,102.431,America/Chicago
+BBF,Brazos 133,GMZ275,GM,-96.014,27.833,0.0,America/Chicago
+BQX,Brazos 451,Matagorda,TX,-95.7244,28.4936,0.0,America/Chicago
+BKD,Breckenridge,Stephens,TX,-98.891,32.719,391.4,America/Chicago
+11R,BRENHAM_MUNICIPAL_APT,Washington,TX,-96.3742,30.2189,94.0,America/Chicago
+XBP,Bridgeport,Wise,TX,-97.8284,33.1753,259.7,America/Chicago
+BRO,BROWNSVILLE INTL,Cameron,TX,-97.4231,25.9146,6.0,America/Chicago
+BWD,BROWNWOOD MUNICIPAL,Brown,TX,-98.9565,31.7936,422.0,America/Chicago
+BMQ,BURNET MUNICIPAL/KATE CRADDOCK,Burnet,TX,-98.2386,30.7389,389.0,America/Chicago
+RWV,Caldwell,Lee,TX,-96.7041,30.5155,119.0,America/Chicago
+T35,Cameron,Milam,TX,-96.9711,30.8794,124.161,America/Chicago
+HHF,CANADIAN,Hemphill,TX,-100.404,35.895,730.0,America/Chicago
+FTN,Carrizo Springs,Dimmit,TX,-100.0188,28.2086,236.0,America/Chicago
+CZT,Carrizo Springs,Dimmit,TX,-99.8236,28.5222,178.272,America/Chicago
+CVB,Castroville,Medina,TX,-98.8509,29.3419,235.0,America/Chicago
+F17,Center,Shelby,TX,-94.1564,31.8316,95.2382,America/Chicago
+CDS,CHILDRESS MUNICIPAL,Childress,TX,-100.2881,34.4339,595.0,America/Chicago
+GZN,Cisco,Eastland,TX,-99.0237,32.3658,523.064,America/Chicago
+LBR,CLARKSVILLE,Red River,TX,-95.0636,33.5932,134.0,America/Chicago
+CPT,CLEBURNE,Johnson,TX,-97.4338,32.3537,260.0,America/Chicago
+6R3,Cleveland,Liberty,TX,-95.008,30.3564,45.7,America/Chicago
+COM,Coleman,Coleman,TX,-99.4036,31.8411,517.2,America/Chicago
+CLL,COLLEGE STATION,Burleson,TX,-96.3639,30.5881,98.0,America/Chicago
+66R,Columbus,Colorado,TX,-96.5158,29.6411,74.3404,America/Chicago
+MKN,COMANCHE COUNTY/CITY ARPT,Comanche,TX,-98.6,31.92,423.0,America/Chicago
+CXO,CONROE/MONTGOMERY COUNTY AIRPORT,Montgomery,TX,-95.4145,30.3524,75.0,America/Chicago
+CRP,CORPUS CHRISTI INTL,Nueces,TX,-97.5128,27.7731,13.0,America/Chicago
+NGP,CORPUS CHRISTI NAS,Nueces,TX,-97.2911,27.6926,6.0,America/Chicago
+CRS,CORSICANA,Navarro,TX,-96.4,32.03,137.0,America/Chicago
+COT,COTULLA MUNICIPAL,La Salle,TX,-99.2183,28.4567,144.0,America/Chicago
+DKR,Crocket,Trinity,TX,-95.4038,31.307,106.1,America/Chicago
+DHT,DALHART MUNICIPAL,Hartley,TX,-102.5473,36.0226,1216.0,America/Chicago
+ADS,DALLAS/ADDISON ARPT,Dallas,TX,-96.8364,32.9686,196.0,America/Chicago
+DFW,DALLAS/FT WORTH,Dallas,TX,-97.038,32.8968,182.0,America/Chicago
+DAL,DALLAS/LOVE FIELD,Dallas,TX,-96.8518,32.8471,148.0,America/Chicago
+RBD,DALLAS/REDBIRD ARPT,Dallas,TX,-96.87,32.68,201.0,America/Chicago
+LUD,DECATUR,Wise,TX,-97.5805,33.2542,319.0,America/Chicago
+DRT,DEL RIO INTL (AUT),Val Verde,TX,-100.9272,29.3742,307.0,America/Chicago
+DTO,DENTON (ASOS),Denton,TX,-97.1989,33.2061,197.0,America/Chicago
+FWS,DFW NEXRAD,Tarrant,TX,-97.3033,32.573,208.026,America/Chicago
+6R6,DRYDEN,Terrell,TX,-102.2129,30.046,702.0,America/Chicago
+DUX,DUMAS,Moore,TX,-102.013,35.858,1129.0,America/Chicago
+DYS,DYESS AFB/ABILENE,Taylor,TX,-99.855,32.421,545.0,America/Chicago
+ELA,Eagle Lake,Colorado,TX,-96.3219,29.6006,56.8021,America/Chicago
+EMK,East Breaks (GoM),GMZ011,GM,-94.3228,27.8186,0.0,America/Chicago
+ETN,Eastland,Eastland,TX,-98.8098,32.4135,444.626,America/Chicago
+EBG,EDINBURG,Hidalgo,TX,-98.1222,26.4417,24.0,America/Chicago
+ELP,EL PASO INTL ARPT,Dona Ana,TX,-106.3758,31.8111,1194.0,America/Denver
+BKS,FALFURRIAS/BROOKS COUNTY AIRPORT,Brooks,TX,-98.1211,27.2067,34.0,America/Chicago
+BIF,Fort Bliss,El Paso,TX,-106.38,31.8495,1203.0,America/Denver
+GRK,FORT HOOD/GRAY AAF,Williamson,TX,-97.83,31.07,309.0,America/Chicago
+FST,FORT STOCKTON,Pecos,TX,-102.9167,30.9119,917.0,America/Chicago
+AFW,Fort Worth - Alliance,Tarrant,TX,-97.3179,32.9716,204.819,America/Chicago
+FTW,FORT WORTH/MEACHAM,Tarrant,TX,-97.3624,32.8198,216.0,America/Chicago
+NFW,FORT WORTH NAS,Tarrant,TX,-97.4365,32.781,198.0,America/Chicago
+T82,FREDERICKSBURG/GILLESPIE COUNTY,Gillespie,TX,-98.9092,30.2432,517.0,America/Chicago
+HLR,FT HOOD AAF/KILLEEN,Bell,TX,-97.7145,31.1387,283.0,America/Chicago
+GLE,GAINESVILLE,Cooke,TX,-97.1969,33.6514,256.0,America/Chicago
+GVX,Galveston 424,Brazoria,TX,-94.9767,28.5767,0.0,America/Chicago
+GLS,GALVESTON/SCHOLES,Galveston,TX,-94.8604,29.2653,16.0,America/Chicago
+GOP,GATESVILLE,Coryell,TX,-97.797,31.4213,276.0,America/Chicago
+GTU,GEORGETOWN (AWOS),Williamson,TX,-97.6767,30.6808,240.0,America/Chicago
+GYB,GIDDINGS-LEE_CNTY_ARPT,Lee,TX,-96.98,30.17,148.0,America/Chicago
+JXI,GILMER/FOX_STEPHENS_FIELD,Upshur,TX,-94.95,32.7,127.0,America/Chicago
+T20,Gonzales,Gonzales,TX,-97.4614,29.528,108.132,America/Chicago
+RPH,GRAHAM_MUNI_ARPT,Young,TX,-98.555,33.11,344.0,America/Chicago
+GDJ,GRANBURY,Johnson,TX,-97.8169,32.4444,237.0,America/Chicago
+GPM,GRAND_PRAIRIE,Tarrant,TX,-97.0469,32.6988,180.0,America/Chicago
+GVT,GREENVILLE/MAJORS,Hunt,TX,-96.0653,33.0678,163.0,America/Chicago
+GDP,GUADALUPE PASS AMOS,Culberson,TX,-104.8098,31.8331,1662.0,America/Chicago
+GUL,Gunnison (GoM),GMZ013,GM,-93.5383,27.3039,0.0,America/Chicago
+MNZ,Hamilton,Coryell,TX,-98.1486,31.6659,395.9,America/Chicago
+HRL,HARLINGEN INTL ARPT,Cameron,TX,-97.6544,26.2285,11.0,America/Chicago
+LHB,HEARNE,Milam,TX,-96.62,30.87,87.0,America/Chicago
+HBV,HEBBRONVILLE,Jim Hogg,TX,-98.7369,27.3496,202.0,America/Chicago
+RFI,Henderson,Rusk,TX,-94.8517,32.1417,134.7,America/Chicago
+F12,HENDERSON RUSK C,Panola,TX,-94.8517,32.1417,135.0,America/Chicago
+HRX,Hereford,Deaf Smith,TX,-102.3264,34.8578,1153.0,America/Chicago
+HQI,High Island 376,GMZ013,GM,-93.6708,27.962,0.0,America/Chicago
+INJ,HILLSBORO,Hill,TX,-97.0972,32.0836,209.0,America/Chicago
+HDO,HONDO MUNICIPAL,Medina,TX,-99.1742,29.3594,283.0,America/Chicago
+HHV,Hoover Diana,GMZ011,GM,-94.6886,26.9392,0.0,America/Chicago
+DZB,Horseshoe,Llano,TX,-98.3588,30.5271,333.0,America/Chicago
+LVJ,HOUSTON (CLOVER FIELD WAS T02),Brazoria,TX,-95.24,29.52,13.0,America/Chicago
+MCJ,Houston Dunn,Harris,TX,-95.3955,29.7133,69.0,America/Chicago
+DWH,HOUSTON/D.W. HOOKS,Harris,TX,-95.5562,30.068,46.0,America/Chicago
+EFD,HOUSTON/ELLINGTON,Harris,TX,-95.1587,29.6073,10.0,America/Chicago
+TME,Houston Exec,Waller,TX,-95.8979,29.805,50.6,America/Chicago
+SGR,HOUSTON/HULL FIELD,Fort Bend,TX,-95.6565,29.6223,2.0,America/Chicago
+IAH,HOUSTON/INTERCONTIN,Harris,TX,-95.3414,29.9844,33.0,America/Chicago
+AXH,Houston SW,Brazoria,TX,-95.4769,29.5061,20.7,America/Chicago
+HOU,HOUSTON/WILL HOBBY,Harris,TX,-95.2824,29.6375,14.0,America/Chicago
+UTS,HUNTSVILLE MUNICIPAL AIRPORT,Walker,TX,-95.5872,30.7469,112.0,America/Chicago
+TFP,Ingleside,Nueces,TX,-97.2115,27.913,5.0,America/Chicago
+JSO,JACKSONVILLE,Cherokee,TX,-95.22,31.87,206.0,America/Chicago
+JAS,JASPER COUNTY-BELL FIELD AIRPORT,Jasper,TX,-94.0349,30.8857,65.0,America/Chicago
+JCT,JUNCTION (AMOS),Kimble,TX,-99.7664,30.5108,522.0,America/Chicago
+SKF,KELLY AFB,Bexar,TX,-98.5811,29.3842,210.0,America/Chicago
+ERV,KERRVILLE MUNICIPAL,Kerr,TX,-99.0855,29.9767,493.0,America/Chicago
+CWC,Kickapoo,Wichita,TX,-98.4904,33.8578,304.0,America/Chicago
+ILE,KILLEEN MUNI (AWOS),Bell,TX,-97.6865,31.0858,258.0,America/Chicago
+IKG,Kingsville,Kleberg,TX,-98.0309,27.5509,39.115,America/Chicago
+NQI,KINGSVILLE NAS,Kleberg,TX,-97.8097,27.5072,15.0,America/Chicago
+RYW,Lago Vista,Williamson,TX,-97.9659,30.4967,375.2,America/Chicago
+3T5,LA GRANGE/FAYETTE REGIONAL,Fayette,TX,-96.95,29.91,99.0,America/Chicago
+LUV,Lamesa,Dawson,TX,-101.9202,32.7563,911.58,America/Chicago
+2F5,Lamesa,Dawson,TX,-101.9018,32.7479,902.633,America/Chicago
+LZZ,Lampasas,Lampasas,TX,-98.1959,31.1062,370.3,America/Chicago
+LNC,LANCASTER,Henderson,TX,-96.719,32.5792,153.0,America/Chicago
+LRD,LAREDO INTL AIRPORT,Webb,TX,-99.4615,27.5438,155.0,America/Chicago
+T70,Laughlin AFB,Kinney,TX,-100.481,29.126,297.55,America/Chicago
+DLF,LAUGHLIN AFB,Kinney,TX,-100.778,29.3595,330.0,America/Chicago
+AQO,LLANO_MUNI_ARPT,Llano,TX,-98.6619,30.7836,336.0,America/Chicago
+GGG,LONGVIEW/GREGG CO.,Rusk,TX,-94.7115,32.384,124.0,America/Chicago
+LBB,LUBBOCK INTL ARPT,Lubbock,TX,-101.8228,33.6636,988.0,America/Chicago
+LFK,LUFKIN/ANGELINA CO.,Angelina,TX,-94.75,31.234,88.0,America/Chicago
+MRF,MARFA MUNI (AMOS),Presidio,TX,-104.02,30.37,1481.0,America/Chicago
+ASL,Marshall,Harrison,TX,-94.3078,32.5205,108.8,America/Chicago
+5T9,Maverick County,Maverick,TX,-100.5135,28.8571,267.384,America/Chicago
+MFE,MCALLEN/MILLER INTL,Hidalgo,TX,-98.2386,26.1758,33.0,America/Chicago
+PWG,MC GREGOR (AWOS),Mclennan,TX,-97.3165,31.4849,180.0,America/Chicago
+TKI,MC KINNEY,Collin,TX,-96.59,33.18,179.0,America/Chicago
+NMT,McMullen,Mcmullen,TX,-98.7242,28.2361,89.3064,America/Chicago
+HQZ,MESQUITE,Dallas,TX,-96.5304,32.747,136.0,America/Chicago
+LXY,Mexia Limestone,Limestone,TX,-96.5145,31.6412,166.29,America/Chicago
+MDD,MIDLAND,Midland,TX,-102.101,32.0365,854.0,America/Chicago
+MAF,MIDLAND REGIONAL,Midland,TX,-102.1892,31.9425,872.0,America/Chicago
+JWY,MIDLOTHIAN/WAXAC,Ellis,TX,-96.9125,32.4561,217.0,America/Chicago
+JDD,MINEOLA/QUITMAN,Van Zandt,TX,-95.4965,32.7422,132.0,America/Chicago
+MWL,MINERAL WELLS MUNI,Palo Pinto,TX,-98.0602,32.7816,296.0,America/Chicago
+OSA,MOUNT PLEASANT AIRPORT,Titus,TX,-94.9614,33.0956,111.0,America/Chicago
+MIU,Mustang Island 31,GMZ270,GM,-96.7367,27.2917,0.0,America/Chicago
+MZG,Mustang Island A85A,GMZ275,GM,-96.1911,27.7269,0.0,America/Chicago
+OCH,NACOGDOCHES (AWOS),Nacogdoches,TX,-94.7094,31.5778,108.0,America/Chicago
+BAZ,NEW BRAUNFELS MUNI APT (WAS 3R5),Guadalupe,TX,-98.045,29.709,195.0,America/Chicago
+OPM,North Padre Island,GMZ175,GM,-96.94,26.8328,3.0,America/Chicago
+ODO,ODESSA-SCHLEMEYER FLD (WAS E02),Ector,TX,-102.3867,31.9206,915.0,America/Chicago
+ORG,Orange,Orange,TX,-93.8036,30.0692,4.0,America/Chicago
+NOG,ORANGE GROVE    ,Kleberg,TX,-98.0517,27.9011,78.0,America/Chicago
+OZA,Ozona,Crockett,TX,-101.203,30.7353,725.7,America/Chicago
+PSX,PALACIOS MUNICIPAL,Matagorda,TX,-96.25,28.73,5.0,America/Chicago
+PSN,PALESTINE,Anderson,TX,-95.7063,31.7797,129.0,America/Chicago
+BPC,Pampa ,Roberts,TX,-101.0301,35.8893,845.0,America/Chicago
+PPA,PAMPA,Gray,TX,-100.9963,35.613,1050.0,America/Chicago
+PRX,PARIS/COX FIELD,Lamar,TX,-95.4507,33.6366,167.0,America/Chicago
+PEQ,PECOS,Ward,TX,-103.51,31.38,796.0,America/Chicago
+PYX,PERRYTON/OCHILTREE COUNTY APT,Ochiltree,TX,-100.75,36.414,889.0,America/Chicago
+25T,PHI OIL PLAT,GMZ011,GM,-94.68,26.93,10.0,America/Chicago
+PVW,PLAINVIEW,Hale,TX,-101.7173,34.1681,1028.0,America/Chicago
+PEZ,Pleasanton,Atascosa,TX,-98.52,28.9542,131.1,America/Chicago
+RAS,PORT ARANSAS/MUSTANG BEACH ARPT,Nueces,TX,-97.09,27.81,2.0,America/Chicago
+PIL,PORT ISABEL-CAMERON COUNTY APT,Cameron,TX,-97.3378,26.1597,6.0,America/Chicago
+PKV,PORT_LAVACA,Calhoun,TX,-96.681,28.654,9.0,America/Chicago
+T77,Presidio,Presidio,TX,-104.3616,29.6341,889.22,America/Chicago
+PRS,Presidio Lely,Presidio,TX,-104.3615,29.6342,888.865,America/Chicago
+RND,RANDOLPH AFB,Bexar,TX,-98.28,29.53,232.0,America/Chicago
+6P9,Ranger,Eastland,TX,-98.5948,32.4317,455.307,America/Chicago
+RBO,ROBSTOWN,Nueces,TX,-97.6905,27.7785,24.0,America/Chicago
+RKP,ROCKPORT/ARANSAS CO,Aransas,TX,-97.0464,28.0836,8.0,America/Chicago
+ECU,ROCKSPRINGS,Edwards,TX,-100.1739,29.9469,723.0,America/Chicago
+F46,Rockwall,Rockwall,TX,-96.4355,32.9306,178.257,America/Chicago
+RPE,SABINE PASS,Jefferson,TX,-93.95,29.7,3.0,America/Chicago
+SJT,SAN ANGELO/MATHIS,Tom Green,TX,-100.495,31.3517,582.0,America/Chicago
+5C1,San Antonio ,Bexar,TX,-98.6946,29.7239,422.1,America/Chicago
+SAT,SAN ANTONIO INTL,Bexar,TX,-98.4698,29.5337,242.0,America/Chicago
+SSF,SAN ANTONIO/STINSON,Bexar,TX,-98.4711,29.337,176.0,America/Chicago
+HYI,SAN MARCOS (AWOS),Caldwell,TX,-97.863,29.8927,182.0,America/Chicago
+GNC,Seminole,Gaines,TX,-102.6527,32.6753,1010.0,America/Chicago
+F39,SHERMAN-DENISON,Grayson,TX,-96.6667,33.7167,228.0,America/Chicago
+GYI,SHERMAN/DENISON,Grayson,TX,-96.6737,33.7141,228.0,America/Chicago
+SNK,SNYDER,Scurry,TX,-100.9505,32.6934,741.0,America/Chicago
+SOA,SONORA MUNI,Sutton,TX,-100.6486,30.5857,652.0,America/Chicago
+SPL,South Padre Island,Cameron,TX,-97.1572,26.0706,3.0,America/Chicago
+SEP,STEPHENVILLE/CLARK,Comanche,TX,-98.1777,32.2153,402.0,America/Chicago
+SLR,SULPHUR_SPRINGS,Hopkins,TX,-95.62,33.16,149.0,America/Chicago
+SWW,SWEETWATER/AVENGER FIELD AIRPORT,Nolan,TX,-100.4666,32.4674,727.0,America/Chicago
+TPL,TEMPLE/MILLER(AWOS),Bell,TX,-97.4078,31.1525,208.0,America/Chicago
+TRL,TERRELL,Kaufman,TX,-96.27,32.71,145.0,America/Chicago
+TYR,TYLER/POUNDS FLD,Smith,TX,-95.4024,32.3541,166.0,America/Chicago
+UVA,UVALDE/GARNER_FIELD_ARPT,Uvalde,TX,-99.7436,29.2113,287.0,America/Chicago
+F05,VERNON,Wilbarger,TX,-99.2837,34.2257,386.0,America/Chicago
+VCT,VICTORIA REGIONAL,Victoria,TX,-96.9303,28.8614,36.0,America/Chicago
+ACT,Waco,Mclennan,TX,-97.2283,31.618,155.0,America/Chicago
+CNW,Waco,Mclennan,TX,-97.0741,31.6378,143.0,America/Chicago
+TXW,Weslaco,Hidalgo,TX,-97.9731,26.1775,21.3016,America/Chicago
+T65,WESLACO/MID VALLEY AIRPORT,Hidalgo,TX,-97.9731,26.1776,21.0,America/Chicago
+CRH,West Cameron,GMZ472,GM,-93.3016,28.9086,0.0,America/Chicago
+ARM,WHARTON REGIONAL ARPT,Wharton,TX,-96.1544,29.2543,30.0,America/Chicago
+SPS,WICHITA FALLS/SHEP,Wichita,TX,-98.4928,33.9786,314.0,America/Chicago
+INK,WINK/WINKLER CO.,Reeves,TX,-103.2,31.78,859.0,America/Chicago
+APY,Zapata,Zapata,TX,-99.2489,26.9688,128.6,America/Chicago
+VKY,Zapata-Yorktowntlat,GMZ577,GM,-88.441,29.248,0.0,America/Chicago
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+BDG,Blanding,San Juan,UT,-109.4831,37.5828,1774.18,America/Denver
+4BL,BLANDING,San Juan,UT,-109.4667,37.6167,1840.0,America/Denver
+BMC,Brigham City,Box Elder,UT,-112.0622,41.5524,1289.94,America/Denver
+BCE,BRYCE CANYON,Garfield,UT,-112.1456,37.7064,2312.0,America/Denver
+CDC,CEDAR CITY MUNI,Iron,UT,-113.1,37.7,1714.0,America/Denver
+DTA,Delta,Millard,UT,-112.5077,39.3806,1448.54,America/Denver
+U24,DELTA,Millard,UT,-112.5861,39.3375,1414.0,America/Denver
+DPG,DUGWAY PRVG GROUND,Tooele,UT,-112.9351,40.1974,1326.0,America/Denver
+U16,Eagle View,Box Elder,UT,-113.0667,41.05,1307.75,America/Denver
+QCA,Granite Peak,Tooele,UT,-113.3497,40.1664,1310.12,America/Denver
+U28,GREEN RIVER RANGE,Grand,UT,-110.1667,39,1241.0,America/Denver
+HVE,Hanksville,Wayne,UT,-110.704,38.418,1354.6,America/Denver
+4HV,HANKSVILLE,Wayne,UT,-110.715,38.371,1314.0,America/Denver
+36U,Heber,Utah,UT,-111.4288,40.4818,1718.2,America/Denver
+HCR,Heber City,Wasatch,UT,-111.43,40.47,1724.01,America/Denver
+HIF,HILL AFB/OGDEN,Davis,UT,-111.973,41.1239,1459.0,America/Denver
+LGU,LOGAN-CACHE AIRPORT,Cache,UT,-111.8516,41.7913,1358.0,America/Denver
+MLF,MILFORD MUNICIPAL,Beaver,UT,-113.0125,38.4266,1536.0,America/Denver
+CNY,MOAB/CANYONLANDS,Grand,UT,-109.7548,38.755,1388.0,America/Denver
+OGD,OGDEN-HINCKLEY MUNI,Weber,UT,-112.0129,41.1957,1362.0,America/Denver
+PUC,PRICE/CARBON(RAMOS),Emery,UT,-110.7547,39.6092,1799.0,America/Denver
+PVU,PROVO MUNI (AWOS),Utah,UT,-111.7234,40.2192,1369.0,America/Denver
+74V,Roosevelt,Duchesne,UT,-110.0513,40.2783,1568.65,America/Denver
+SLC,SALT LAKE CITY INTL,Salt Lake,UT,-111.97,40.78,1288.0,America/Denver
+U42,Salt Lake City Muni No2,Salt Lake,UT,-111.9902,40.6196,1402.74,America/Denver
+SGU,St George,Washington,UT,-113.5103,37.0364,874.732,America/Denver
+DXZ,St George,Washington,UT,-113.5103,37.0364,875.0,America/Denver
+TVY,Tooele,Tooele,UT,-112.3508,40.6126,1310.59,America/Denver
+T62,TOOELE,Tooele,UT,-112.3,40.3167,1628.0,America/Denver
+VEL,VERNAL,Uintah,UT,-109.5099,40.4409,1608.0,America/Denver
+ENV,WENDOVER (AUT),Tooele,UT,-114.0309,40.7187,1292.0,America/Denver
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+VJI,ABINGTON,Washington,VA,-82.0333,36.6871,631.0,America/New_York
+BKT,Blackstone,Nottoway,VA,-77.9575,37.0742,125.723,America/New_York
+VBW,Bridgewater,Rockingham,VA,-78.9603,38.3667,349.153,America/New_York
+0V4,Brookneal,Campbell,VA,-79.0164,37.1417,178.731,America/New_York
+7W4,Bumpass,Louisa,VA,-77.7459,37.9658,104.052,America/New_York
+CHO,CHARLOTTESVILLE,Albemarle,VA,-78.4529,38.1386,195.0,America/New_York
+CXE,Chase City,Mecklenburg,VA,-78.5016,36.7883,148.682,America/New_York
+CPK,CHESAPEAKE,Chesapeake,VA,-76.3207,36.6656,6.0,America/New_York
+FCI,Chesterfield,Chesterfield,VA,-77.5248,37.4064,72.0,America/New_York
+W63,Clarksville / Marks,Mecklenburg,VA,-78.5601,36.5958,115.033,America/New_York
+W81,Crewe,Nottoway,VA,-78.0983,37.181,119.95,America/New_York
+CJR,CULPEPER,Culpeper,VA,-77.8589,38.5267,95.0,America/New_York
+DAN,DANVILLE REGIONAL,Danville City,VA,-79.3361,36.5729,174.0,America/New_York
+PSK,DUBLIN/NEW RIV VLLY,Pulaski,VA,-80.6785,37.1373,642.0,America/New_York
+EMV,EMPORIA-GREENSVILLE RGL AIRPORT,Greensville,VA,-77.4827,36.6869,39.0,America/New_York
+FVX,FARMVILLE,Prince Edward,VA,-78.4378,37.3575,125.0,America/New_York
+NFE,Fentress,Chesapeake,VA,-76.1356,36.695,5.0,America/New_York
+DAA,FORT BELVOIR/DAVISO,Fairfax,VA,-77.181,38.715,21.0,America/New_York
+FAF,FORT EUSTIS/FELKER,Isle Of Wight,VA,-76.6088,37.1325,4.0,America/New_York
+FKN,FRANKLIN/J B ROSE,Suffolk City,VA,-76.9038,36.6981,12.0,America/New_York
+FRR,Front Royal,Warren,VA,-78.2535,38.9175,212.932,America/New_York
+GVE,Gordonsville,Orange,VA,-78.1658,38.156,133.063,America/New_York
+HLX,HILLSVILLE,Carroll,VA,-80.8236,36.7661,834.0,America/New_York
+HSP,HOT SPRINGS/INGALLS,Alleghany,VA,-79.8339,37.9514,1156.0,America/New_York
+0VG,Jonesville,Lee,VA,-83.2178,36.6541,416.0,America/New_York
+W31,Kenbridge,Lunenburg,VA,-78.185,36.9601,156.776,America/New_York
+LFI,LANGLEY AFB/HAMPTON,Hampton City,VA,-76.3605,37.0828,3.0,America/New_York
+LVL,Lawrenceville,Brunswick,VA,-77.7943,36.7728,99.509,America/New_York
+JYO,LEESBURG/GODFREY,Loudoun,VA,-77.5575,39.078,119.0,America/New_York
+LKU,LOUISA COUNTY/FREEMAN FIELD,Louisa,VA,-77.97,38.01,150.0,America/New_York
+LUA,Luray,Page,VA,-78.5006,38.6671,275.0,America/New_York
+W45,Luray,Page,VA,-78.5006,38.6671,274.9,America/New_York
+LYH,LYNCHBURG/P. GLENN,Campbell,VA,-79.2067,37.3208,286.0,America/New_York
+HEF,MANASSAS MUNI(AWOS),Manassas City,VA,-77.5154,38.7214,59.0,America/New_York
+MKJ,MARION / WYTHEVILLE,Smyth,VA,-81.3499,36.8949,780.0,America/New_York
+MTV,MARTINSVILLE,Henry,VA,-80.0133,36.6272,287.0,America/New_York
+MFV,MELFA/ACCOMACK ARPT,Accomack,VA,-75.7611,37.6469,15.0,America/New_York
+8W2,New Market,Shenandoah,VA,-78.7081,38.6557,289.735,America/New_York
+PHF,NEWPORT NEWS,Isle Of Wight,VA,-76.493,37.1319,13.0,America/New_York
+PVG,Norfolk/Hampton Roads,Pasquotank,VA,-76.4488,36.7801,7.0,America/New_York
+ORF,NORFOLK INTL ARPT,Virginia Beach,VA,-76.1922,36.9033,9.0,America/New_York
+NGU,NORFOLK NAS/CHAMBER,Norfolk City,VA,-76.2893,36.9375,5.0,America/New_York
+NTU,OCEANA NAS/SOUCEK,Virginia Beach,VA,-76.0335,36.8207,7.0,America/New_York
+OMH,ORANGE/ORANGE CO,Orange,VA,-78.0456,38.2472,142.0,America/New_York
+PTB,PETERSBURG (AWOS),Dinwiddie,VA,-77.5074,37.1838,59.0,America/New_York
+NYG,QUANTICO MCAF,Charles,VA,-77.3053,38.5017,4.0,America/New_York
+W96,Quinton,New Kent,VA,-77.1255,37.5032,34.549,America/New_York
+JFZ,Richlands,Russell,VA,-81.7983,37.0637,808.6,America/New_York
+6V3,RICHLANDS/TAZEWELL COUNTY APT,Russell,VA,-81.7981,37.0636,808.0,America/New_York
+OFP,RICHMOND (ASOS),Henrico,VA,-77.4366,37.7089,63.0,America/New_York
+RIC,RICHMOND/BYRD FIELD,Chesterfield,VA,-77.3234,37.5115,54.0,America/New_York
+ROA,ROANOKE MUNICIPAL,Roanoke City,VA,-79.9742,37.3169,358.0,America/New_York
+W75,Saluda Hummel Field,Middlesex,VA,-76.4467,37.6024,10.8147,America/New_York
+EZF,SHANNON ARPT,Spotsylvania,VA,-77.4494,38.2662,26.0,America/New_York
+W78,South Boston,Halifax,VA,-78.848,36.71,115.141,America/New_York
+AVC,SOUTH HILL/MECKLENBURG-BRUNSWICK,Mecklenburg,VA,-78.0545,36.6883,135.0,America/New_York
+RMN,STAFFORD,Stafford,VA,-77.4555,38.3981,65.0,America/New_York
+SHD,STAUNTON/SHENANDOAH,Augusta,VA,-78.8964,38.2638,366.0,America/New_York
+SFQ,SUFFOLK,Suffolk City,VA,-76.6019,36.6823,22.0,America/New_York
+TGI,Tangier Island,Accomack,VA,-75.9978,37.8251,1.72636,America/New_York
+XSA,Tappahannock,King William,VA,-76.8941,37.8596,41.1,America/New_York
+BCB,VIRGINIA TECH ARPT,Montgomery,VA,-80.4078,37.2076,650.0,America/New_York
+AKQ,WAKEFIELD (NEXRAD),Southampton,VA,-77.0072,36.9839,64.0,America/New_York
+WAL,WALLOPS ISLAND STN,Accomack,VA,-75.4631,37.9406,41.0,America/New_York
+HWY,Warrenton,Culpeper,VA,-77.7106,38.5863,102.0,America/New_York
+IAD,WASHINGTON/DULLES,Loudoun,VA,-77.4473,38.9348,98.0,America/New_York
+DCA,WASHINGTON/NATIONAL,Washington,VA,-77.0345,38.8472,20.0,America/New_York
+W13,Waynesboro,Augusta,VA,-78.9444,38.0769,430.88,America/New_York
+FYJ,WEST_POINT,New Kent,VA,-76.7647,37.5211,7.0,America/New_York
+JGG,WILLIAMSBURG,Surry,VA,-76.7161,37.2392,15.0,America/New_York
+OKV,WINCHESTER RGNL,Winchester,VA,-78.1444,39.1435,222.0,America/New_York
+LNP,WISE/LONESOME PINE,Wise,VA,-82.53,36.9875,817.0,America/New_York
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+MPV,BARRE-MONTPELIER,Orange,VT,-72.5623,44.2035,355.0,America/New_York
+DDH,BENNINGTON STATE (WAS 5B5),Bennington,VT,-73.2461,42.8912,252.0,America/New_York
+BTV,BURLINGTON INTL,Chittenden,VT,-73.15,44.47,104.0,America/New_York
+FSO,Highgate,Franklin,VT,-73.0975,44.9403,69.5,America/New_York
+CDA,Lyndonville,Caledonia,VT,-72.018,44.5691,362.1,America/New_York
+6B0,Middlebury,Addison,VT,-73.0955,43.9855,148.706,America/New_York
+MVL,MORRISVILLE,Washington,VT,-72.614,44.5346,234.0,America/New_York
+EFK,Newport,Orleans,VT,-72.2292,44.8888,283.5,America/New_York
+RUT,RUTLAND STATE(AWOS),Rutland,VT,-72.95,43.53,240.0,America/New_York
+VSF,SPRINGFIELD/HARTNES,Windsor,VT,-72.5173,43.3436,176.0,America/New_York
+1V4,ST. JOHNSBURY(AMOS),Caledonia,VT,-72.02,44.42,217.0,America/New_York
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+AWO,ARLINGTON MUNI,Snohomish,WA,-122.159,48.1608,42.0,America/Los_Angeles
+BLI,BELLINGHAM INTL,Whatcom,WA,-122.5375,48.7927,48.0,America/Los_Angeles
+PWT,BREMERTON NTNL AWOS,Kitsap,WA,-122.7648,47.4903,147.0,America/Los_Angeles
+BVS,BURLINGTON/MT_VE,Skagit,WA,-122.42,48.47,44.0,America/Los_Angeles
+CLS,Chehalis,Lewis,WA,-122.9827,46.677,54.0,America/Los_Angeles
+CQV,COLVILLE MUNICIPAL,Stevens,WA,-117.8833,48.55,572.0,America/Los_Angeles
+DEW,DEER PARK,Spokane,WA,-117.4211,47.9689,672.0,America/Los_Angeles
+ORS,EASTSOUND/ORCAS ISLAND AIRPORT,San Juan,WA,-122.91,48.71,8.0,America/Los_Angeles
+ELN,ELLENSBURG/BOWERS,Yakima,WA,-120.5307,47.033,538.0,America/Los_Angeles
+EPH,EPHRATA MUNICIPAL,Grant,WA,-119.5147,47.3081,388.0,America/Los_Angeles
+PAE,EVERETT/PAINE FIELD,Snohomish,WA,-122.2816,47.907,185.0,America/Los_Angeles
+SKA,FAIRCHILD AFB,Spokane,WA,-117.6558,47.6151,750.0,America/Los_Angeles
+GRF,FORT LEWIS/GRAY AAF,Thurston,WA,-122.58,47.08,92.0,America/Los_Angeles
+FHR,FRIDAY HARBOR,San Juan,WA,-123.0244,48.522,33.0,America/Los_Angeles
+HMS,HANFORD,Benton,WA,-119.6,46.5667,223.0,America/Los_Angeles
+HQM,HOQUIAM/BOWERMAN,Grays Harbor,WA,-123.9366,46.9712,4.0,America/Los_Angeles
+KLS,KELSO-LONGVEIW AWOS,Columbia,WA,-122.9,46.12,5.0,America/Los_Angeles
+TCM,MC CHORD AFB/TACOMA,Thurston,WA,-122.4765,47.1377,98.0,America/Los_Angeles
+MWH,MOSES LAKE/GRANT CO,Adams,WA,-119.3191,47.2086,361.0,America/Los_Angeles
+OKH,Oak Harbor,Island,WA,-122.6737,48.2515,58.8,America/Los_Angeles
+OLM,OLYMPIA,Thurston,WA,-122.9033,46.9733,61.0,America/Los_Angeles
+OMK,OMAK AIRPORT,Okanogan,WA,-119.5181,48.4644,396.0,America/Los_Angeles
+PSC,PASCO/TRI-CITIES,Benton,WA,-119.119,46.2647,124.0,America/Los_Angeles
+VUO,PEARSON AIRPARK  VANCOUVER,Multnomah,WA,-122.6565,45.6204,8.0,America/Los_Angeles
+NOW,Port Angeles,Clallam,WA,-123.414,48.1413,-75.0,America/Los_Angeles
+CLM,PORT ANGELES INTL,Jefferson,WA,-123.5,48.12,88.0,America/Los_Angeles
+0S9,Port Townsend ,Jefferson,WA,-122.8106,48.0538,34.0181,America/Los_Angeles
+PUW,PULLMAN/MOSCOW RGNL,Whitman,WA,-117.1096,46.7439,778.0,America/Los_Angeles
+PLU,Puyallup,Thurston,WA,-122.2872,47.1039,164.0,America/Los_Angeles
+UIL,QUILLAYUTE STATE,Jefferson,WA,-124.5626,47.9366,62.0,America/Los_Angeles
+RNT,RENTON MUNICIPAL,King,WA,-122.2157,47.4931,9.0,America/Los_Angeles
+RLD,Richland,Benton,WA,-119.3012,46.3015,115.79,America/Los_Angeles
+BFI,SEATTLE/BOEING FLD,King,WA,-122.3,47.53,5.0,America/Los_Angeles
+SEA,SEATTLE-TACOMA INTL,King,WA,-122.3144,47.4447,137.0,America/Los_Angeles
+SHN,SHELTON/SANDERSON,Mason,WA,-123.1476,47.2336,85.0,America/Los_Angeles
+SFF,SPOKANE/FELTS FIELD,Spokane,WA,-117.3226,47.6828,595.0,America/Los_Angeles
+GEG,SPOKANE INTL ARPT,Spokane,WA,-117.528,47.6216,721.0,America/Los_Angeles
+SMP,STAMPEDE PASS(AMOS),King,WA,-121.3372,47.2767,1209.0,America/Los_Angeles
+1S5,Sunnyside,Yakima,WA,-119.9704,46.3271,229.914,America/Los_Angeles
+TIW,TACOMA NARROWS,Pierce,WA,-122.5761,47.2675,89.0,America/Los_Angeles
+TDO,TOLEDO-WINLOCK MEM,Lewis,WA,-122.8065,46.4772,113.0,America/Los_Angeles
+1YT,Vagabond,Yakima,WA,-120.45,46.66,475.515,America/Los_Angeles
+ALW,WALLA WALLA RGN,Walla Walla,WA,-118.289,46.0948,367.0,America/Los_Angeles
+EAT,WENATCHEE/PANGBORN,Kittitas,WA,-120.207,47.399,379.0,America/Los_Angeles
+NUW,WHIDBEY ISLAND NAS,Skagit,WA,-122.656,48.3518,14.0,America/Los_Angeles
+YKM,YAKIMA AIR TERMINAL,Yakima,WA,-120.5441,46.5682,325.0,America/Los_Angeles
+1QW,Yakima Training,Kittitas,WA,-120.1667,46.8,903.84,America/Los_Angeles
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+AIG,ANTIGO,Shawano,WI,-89.1107,45.1542,464.0,America/Chicago
+ATW,APPLETON/OUTAGAM,Outagamie,WI,-88.5191,44.2581,280.0,America/Chicago
+ASX,Ashland,Ashland,WI,-90.9189,46.5487,249.225,America/Chicago
+GRB,Ashwaubenon,Brown,WI,-88.1367,44.4794,206.099,America/Chicago
+BCK,Black River Falls,Jackson,WI,-90.8553,44.2507,254.0,America/Chicago
+OVS,BOSCOBEL,Grant,WI,-90.6775,43.1561,202.0,America/Chicago
+BUU,BURLINGTON,Walworth,WI,-88.3046,42.6907,237.0,America/Chicago
+Y23,Chetek,Barron,WI,-91.6381,45.3106,316.782,America/Chicago
+CLI,CLINTONVILLE,Waupaca,WI,-88.7314,44.6139,250.0,America/Chicago
+UBE,Cumberland,Barron,WI,-91.9811,45.506,378.0,America/Chicago
+DLL,DELLS/BARABOO,Sauk,WI,-89.771,43.522,298.0,America/Chicago
+EGV,EAGLE RIVER,Vilas,WI,-89.2683,45.9323,500.0,America/Chicago
+57C,East Troy,Walworth,WI,-88.3726,42.7972,254.34,America/Chicago
+EAU,EAU CLAIRE,Chippewa,WI,-91.4843,44.8658,276.0,America/Chicago
+3D2,Ephraim,Door,WI,-87.1881,45.1357,229.912,America/Chicago
+FLD,FOND DU LAC,Fond du Lac,WI,-88.4884,43.7712,240.0,America/Chicago
+HYR,HAYWARD,Sawyer,WI,-91.4442,46.0253,370.0,America/Chicago
+JVL,JANESVILLE/ROCK,Rock,WI,-89.0416,42.6202,246.0,America/Chicago
+UNU,JUNEAU,Dodge,WI,-88.7038,43.4265,285.0,America/Chicago
+ENW,KENOSHA,Kenosha,WI,-87.9381,42.595,219.0,America/Chicago
+LSE,LA CROSSE,La Crosse,WI,-91.25,43.88,199.0,America/Chicago
+RCX,Ladysmith,Rusk,WI,-91.0005,45.4968,377.3,America/Chicago
+LNL,Land O Lakes,Vilas,WI,-89.2121,46.154,519.0,America/Chicago
+4R5,La Pointe,Ashland,WI,-90.7587,46.7887,190.068,America/Chicago
+82C,Lisbon Union,Juneau,WI,-90.1377,43.8387,271.17,America/Chicago
+LNR,LONE ROCK,Sauk,WI,-90.1798,43.2119,217.0,America/Chicago
+MSN,MADISON,Dane,WI,-89.3453,43.1406,261.0,America/Chicago
+MTW,MANITOWAC MUNI,Manitowoc,WI,-87.6806,44.1288,198.0,America/Chicago
+D25,Manitowish Waters,Vilas,WI,-89.8822,46.1202,488.6,America/Chicago
+MFI,MARSHFIELD,Wood,WI,-90.1893,44.6369,379.0,America/Chicago
+MDZ,MEDFORD,Marathon,WI,-90.3033,45.1008,448.0,America/Chicago
+LUM,Menomonie  WI,Dunn,WI,-91.8678,44.8923,273.0,America/Chicago
+RRL,MERRILL,Lincoln,WI,-89.7129,45.1989,401.0,America/Chicago
+C29,Middleton,Dane,WI,-89.5315,43.1143,282.9,America/Chicago
+MKE,MILWAUKEE,Milwaukee,WI,-87.8967,42.9472,206.0,America/Chicago
+MWC,MILWAUKEE/LAWREN,Milwaukee,WI,-88.0344,43.1104,227.0,America/Chicago
+MRJ,MINERAL POINT,Iowa,WI,-90.2362,42.8868,359.0,America/Chicago
+ARV,MINOCQUA/WOODRUF,Vilas,WI,-89.7309,45.9279,496.0,America/Chicago
+EFT,MONROE,Green,WI,-89.5904,42.6149,331.0,America/Chicago
+CWA,MOSINEE/CENTRAL,Marathon,WI,-89.6668,44.7776,389.0,America/Chicago
+RNH,NEW RICHMOND MUN,St  Croix,WI,-92.5381,45.1483,304.0,America/Chicago
+OCQ,Oconto,Oconto,WI,-87.9096,44.8742,179.852,America/Chicago
+OEO,OSCEOLA,Polk,WI,-92.69,45.3086,275.0,America/Chicago
+OSH,OSHKOSH,Winnebago,WI,-88.557,43.9843,248.0,America/Chicago
+PBH,PHILLIPS/PRICE,Price,WI,-90.4025,45.7089,449.0,America/Chicago
+PVB,Platteville,Grant,WI,-90.4444,42.6894,312.0,America/Chicago
+PDC,PRAIRIE DU CHIEN,Crawford,WI,-91.1237,43.0193,201.0,America/Chicago
+RAC,RACINE,Racine,WI,-87.8136,42.7611,203.0,America/Chicago
+C35,Reedsburg,Sauk,WI,-89.9832,43.5259,272.426,America/Chicago
+RHI,RHINELANDER,Oneida,WI,-89.4675,45.6312,485.0,America/Chicago
+RPD,RICE LAKE,Barron,WI,-91.7733,45.4201,347.0,America/Chicago
+EZS,Shawano,Oconto,WI,-88.56,44.7873,248.0,America/Chicago
+SBM,SHEBOYGAN,Sheboygan,WI,-87.8517,43.7698,232.0,America/Chicago
+RZN,SIREN,Burnett,WI,-92.3725,45.8227,301.0,America/Chicago
+OLG,Solon Springs ,Douglas,WI,-91.8164,46.3148,328.527,America/Chicago
+CMY,SPARTA/MCCOY AAF,Monroe,WI,-90.7379,43.9584,256.0,America/Chicago
+STE,STEVENS POINT,Portage,WI,-89.5303,44.5451,338.0,America/Chicago
+SUE,STURGEON BAY,Door,WI,-87.4216,44.8437,221.0,America/Chicago
+SUW,SUPERIOR,Douglas,WI,-92.0947,46.6897,206.0,America/Chicago
+TKV,Tomahawk,Lincoln,WI,-89.8057,45.469,453.0,America/Chicago
+T08,Tomahawk,Lincoln,WI,-89.8057,45.469,453.0,America/Chicago
+Y51,Viroqua,Vernon,WI,-90.8965,43.5794,393.8,America/Chicago
+VOK,VOLK/CAMP DOUGLA,Juneau,WI,-90.2532,43.9392,277.0,America/Chicago
+2P2,Washington Island,Door,WI,-86.924,45.3883,190.16,America/Chicago
+RYV,WATERTOWN,Jefferson,WI,-88.7232,43.1696,254.0,America/Chicago
+UES,WAUKESHA CNTY,Waukesha,WI,-88.2371,43.041,285.0,America/Chicago
+PCZ,Waupaca,Waupaca,WI,-89.0198,44.3333,251.8,America/Chicago
+AUW,WAUSAU,Marathon,WI,-89.6266,44.9262,362.0,America/Chicago
+Y50,Wautoma,Waushara,WI,-89.3045,44.0416,261.8,America/Chicago
+ETB,WEST BEND,Washington,WI,-88.1279,43.4222,270.0,America/Chicago
+ISW,WISCONSIN RAPIDS,Wood,WI,-89.8369,44.3592,307.0,America/Chicago
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+BKW,BECKLEY MEMORIAL,Raleigh,WV,-81.1242,37.7873,766.0,America/New_York
+BLF,BLUEFIELD/MERCER CO,Bland,WV,-81.2077,37.2958,871.0,America/New_York
+W22,BUCKHANNON,Upshur,WV,-80.2737,39.0005,498.0,America/New_York
+CRW,CHARLESTON/KANAWHA,Kanawha,WV,-81.59,38.3794,299.0,America/New_York
+CKB,CLARKSBURG/BENEDUM,Harrison,WV,-80.2281,39.2966,367.0,America/New_York
+EKN,ELKINS/RANDOLPH FLD,Randolph,WV,-79.8528,38.8853,609.0,America/New_York
+W99,GRANT_COUNTY_AIRPORT,Hardy,WV,-79.1459,38.9949,293.0,America/New_York
+HTS,HUNTINGTON/TRI STAT,Wayne,WV,-82.555,38.365,255.0,America/New_York
+LWB,LEWISBURG/GREENBRIE,Greenbrier,WV,-80.3995,37.8583,702.0,America/New_York
+6L4,Logan,Logan,WV,-81.9159,37.8557,502.911,America/New_York
+MRB,MARTINSBURG RGNL,Washington,WV,-77.9847,39.4019,170.0,America/New_York
+MGW,MORGANTOWN/HART FLD,Monongalia,WV,-79.9163,39.6429,380.0,America/New_York
+PKB,PARKERSBURG/WILSON,Washington,WV,-81.4392,39.3451,262.0,America/New_York
+I16,PINEVILLE,Wyoming,WV,-81.56,37.6,544.0,America/New_York
+3I2,Point Pleasant,Gallia,WV,-82.0986,38.9146,196.0,America/New_York
+48I,Sutton,Webster,WV,-80.6518,38.687,387.0,America/New_York
+HLG,WHEELING/OHIO CO.,Jefferson,WV,-80.6463,40.175,365.0,America/New_York
+Station Id,Station Name,County,State,Latitude,Longitude,Elevation,Time Zone
+TMH,20 MILE HILL    ,Natrona,WY,-106.3333,43.1167,1743.0,America/Denver
+AFO,Afton,Lincoln,WY,-110.9422,42.7112,1882.1,America/Denver
+46U,Alpine,Lincoln,WY,-111.0424,43.1846,1713.61,America/Denver
+ARL,Arlington,Albany,WY,-106.21,41.71,2194.0,America/Denver
+BVR,BEAVER RIM      ,Fremont,WY,-108.2833,42.5833,2072.0,America/Denver
+BFU,BELLE FOURCHE   ,Campbell,WY,-105.45,43.9333,1422.0,America/Denver
+BPI,BIG PINEY (AMOS),Lincoln,WY,-110.1111,42.5851,2124.0,America/Denver
+BIT,BITTERCREEK     ,Sweetwater,WY,-108.5833,41.65,2160.0,America/Denver
+BRX,BORDEAUX        ,Laramie,WY,-104.95,41.9333,1524.0,America/Denver
+TBX,Boysen Reservoir,Hot Springs,WY,-108.2384,43.4646,2223.74,America/Denver
+BYG,BUFFALO/JOHNSON COUNTY,Johnson,WY,-106.72,44.38,1514.0,America/Denver
+CPR,CASPER/NATRONA INTL,Natrona,WY,-106.4644,42.908,1612.0,America/Denver
+CMS,CEMETERY SEPARA ,Sweetwater,WY,-109.4667,41.5333,1949.0,America/Denver
+FEW,Cheyenne FEW,Laramie,WY,-104.8672,41.1333,1878.0,America/Denver
+CYS,CHEYENNE/WARREN AFB,Laramie,WY,-104.8105,41.1556,1871.0,America/Denver
+CHJ,CHIEF JOSEPH    ,Park,WY,-109.37,44.75,2512.0,America/Denver
+COD,CODY MUNI (AWOS),Park,WY,-109.0238,44.5202,1553.0,America/Denver
+CTD,CONTINENTAL DIV ,Carbon,WY,-107.7833,41.7167,2146.0,America/Denver
+U68,Cowley,Big Horn,WY,-108.4455,44.9117,1243.1,America/Denver
+DHS,DEAD HORSE      ,Johnson,WY,-106.1,44.2167,1241.0,America/Denver
+DRC,DEER CREEK      ,Converse,WY,-105.8667,42.8333,1543.0,America/Denver
+DWX,DIxon,Carbon,WY,-107.4925,41.0374,1983.86,America/Denver
+DGW,DOUGLAS/CONVERSE COUNTY AIRPORT,Converse,WY,-105.3858,42.7972,1502.0,America/Denver
+DUB,Dubois,Fremont,WY,-109.6903,43.5484,2210.36,America/Denver
+EHY,Elk Mountain,Carbon,WY,-106.4594,41.7253,2225.0,America/Denver
+EVW,EVANSTON/BURNS FLD,Uinta,WY,-111.0306,41.2731,2183.0,America/Denver
+FIR,FIRST DIVIDE    ,Summit,WY,-110.7667,41.3,2294.0,America/Denver
+FBR,Fort Bridger,Uinta,WY,-110.4059,41.3941,2140.58,America/Denver
+GCC,GILLETTE (AMOS),Campbell,WY,-105.5394,44.3489,1230.0,America/Denver
+GEY,GREYBULL/SOUTH BIG HORN CNTY APT,Big Horn,WY,-108.0828,44.5168,1201.0,America/Denver
+GUR,Guernsey,Platte,WY,-104.7283,42.2597,1330.24,America/Denver
+GUN,GUNBARREL       ,Laramie,WY,-104.34,41.43,1695.0,America/Denver
+HLD,HILAND          ,Natrona,WY,-107.3167,43.1,1846.0,America/Denver
+W43,Hulett ,Crook,WY,-104.5678,44.6629,1280.64,America/Denver
+IDV,I-25 DIVIDE     ,Johnson,WY,-106.65,43.9333,1531.0,America/Denver
+IKA,INYAN KARA      ,Weston,WY,-104.6333,44.3,1319.0,America/Denver
+JAC,JACKSON HOLE (AWOS),Teton,WY,-110.737,43.6128,1964.0,America/Denver
+EMM,Kemmerer ,Lincoln,WY,-110.557,41.8241,2217.59,America/Denver
+LND,LANDER/HUNT FIELD,Fremont,WY,-108.7298,42.8152,1694.0,America/Denver
+LAR,LARAMIE/GEN. BREES,Albany,WY,-105.675,41.3121,2218.0,America/Denver
+AJL,Lava Mountain,Fremont,WY,-110.031,43.674,3155.81,America/Denver
+LSK,Lusk,Niobrara,WY,-104.4046,42.7538,1509.1,America/Denver
+ECS,Newcastle,Weston,WY,-104.3179,43.8854,1272.0,America/Denver
+PAT,PATHFINDER HILL ,Carbon,WY,-106.85,42.5667,1912.0,America/Denver
+82V,Pine Bluffs,Laramie,WY,-104.1302,41.1533,1563.21,America/Denver
+PNA,PINEDALE/RALPH WENZ FIELD,Sublette,WY,-109.8071,42.7955,2160.0,America/Denver
+PIN,PINEY CREEK     ,Johnson,WY,-106.8167,44.5667,1392.0,America/Denver
+POY,Powell,Park,WY,-108.7934,44.8672,1538.5,America/Denver
+PUM,PUMPKIN VINE    ,Laramie,WY,-105.4667,41.05,2420.0,America/Denver
+RWL,RAWLINS MUNICIPAL,Carbon,WY,-107.1999,41.8056,2077.0,America/Denver
+RIM,RIM / PINEDALE  ,Lincoln,WY,-110.32,43.1,2294.0,America/Denver
+RIW,RIVERTON,Fremont,WY,-108.4598,43.0642,1688.0,America/Denver
+RKS,ROCK SPRINGS,Sweetwater,WY,-109.0652,41.5942,2060.0,America/Denver
+SGE,SAGE / JUNCTION ,Uinta,WY,-110.5,41.79,2354.0,America/Denver
+SAA,Saratoga,Carbon,WY,-106.8275,41.4435,2114.3,America/Denver
+SHR,SHERIDAN CO. ARPT,Sheridan,WY,-106.97,44.77,1209.0,America/Denver
+SHC,SHUTE CREEK     ,Sweetwater,WY,-109.96,41.93,2043.0,America/Denver
+SIB,SIBLEY PEAK     ,Platte,WY,-105.0333,42.45,1500.0,America/Denver
+SKL,SKYLINE         ,Carbon,WY,-106.56,41.13,2451.0,America/Denver
+FWZ,South Pass,Fremont,WY,-108.7772,42.5134,2585.02,America/Denver
+JPD,Ten Sleep,Washakie,WY,-107.17,44.15,2741.0,America/Denver
+HSG,Thermopolis,Hot Springs,WY,-108.3897,43.7136,1485.38,America/Denver
+TOR,TORRINGTON MUNICIPAL AIRPORT,Goshen,WY,-104.1528,42.0647,1282.0,America/Denver
+VDW,Vedauwoo,Albany,WY,-105.4,41.15,2543.0,America/Denver
+EAN,Wheatland,Platte,WY,-104.9286,42.0555,1453.1,America/Denver
+WTR,WHITAKER        ,Laramie,WY,-104.87,41.41,1882.0,America/Denver
+WRL,WORLAND MUNICIPAL,Fremont,WY,-107.9508,43.9657,1294.0,America/Denver
+P60,YELLOWSTONE (RAMOS),Y stone Nat l,WY,-110.4211,44.5444,2368.0,America/Denver

@@ -107,7 +107,7 @@ reportLabel {
 	font-weight: 600;
 	display: inline; 
 	line-height: 16pt;}
-select, input[type='text'], input[type='email'], input[type='file'], button {
+select, input[type='text'], input[type='email'], input[type='file'], input[type='number'], button {
 	width:100%;
 	background:gainsboro;
 	font-size: medium; 

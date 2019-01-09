@@ -32,22 +32,54 @@ def work(modelDir, inputDict):
 	if inputDict.get("layoutAlgorithm", "geospatial") == "geospatial":
 		neato = False
 	else:
-		neato = True 
-	chart = voltPlot(omd, workDir=modelDir, neatoLayout=neato)
-	# chart = drawPlot(pJoin(modelDir,feederName + '.omd'), workDir=modelDir, neatoLayout=neato, edgeCol=True, rezSqIn=400)
+		neato = True
+	# None cheack for edgeCol
+	if inputDict.get("edgeCol", "None") == "None":
+		edgeColValue = None
+	else:
+		edgeColValue = inputDict["edgeCol"]
+	# None check for nodeCol
+	if inputDict.get("nodeCol", "None") == "None":
+		nodeColValue = None
+	else:
+		nodeColValue = inputDict["nodeCol"]
+	# None check for edgeLabs
+	if inputDict.get("edgeLabs", "None") == "None":
+		edgeLabsValue = None
+	else:
+		edgeLabsValue = inputDict["edgeLabs"]
+	# None check for nodeLabs
+	if inputDict.get("nodeLabs", "None") == "None":
+		nodeLabsValue = None
+	else:
+		nodeLabsValue = inputDict["nodeLabs"]
+	# Type correction for colormap input
+	if inputDict.get("customColormap", "True") == "True":
+		customColormapValue = True
+	else:
+		customColormapValue = False
+	# chart = voltPlot(omd, workDir=modelDir, neatoLayout=neato)
+	chart = drawPlot(
+		pJoin(modelDir,feederName + ".omd"),
+		neatoLayout = neato,
+		edgeCol = edgeColValue,
+		nodeCol = nodeColValue,
+		nodeLabs = nodeLabsValue,
+		edgeLabs = edgeLabsValue,
+		customColormap = customColormapValue,
+		rezSqIn = int(inputDict["rezSqIn"]))
 	chart.savefig(pJoin(modelDir,"output.png"))
 	with open(pJoin(modelDir,"output.png"),"rb") as inFile:
 		outData["voltageDrop"] = inFile.read().encode("base64")
 	return outData
 		
-def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, customColormap=
-	False, rezSqIn=400):
+def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, customColormap=False, rezSqIn=400):
 	''' Draw a color-coded map of the voltage drop on a feeder.
 	path is the full path to the GridLAB-D .glm file or OMF .omd file.
 	workDir is where GridLAB-D will run, if it's None then a temp dir is used.
 	neatoLayout=True means the circuit is displayed using a force-layout approach.
 	edgeCol property must be either 'Current', 'Power', 'Rating', 'PercentOfRating', or None
-	nodeCol property must be either 'Name', 'Voltage', 'VoltageImbalance', 'perUnitVoltage', 'perUnit120Voltage', or None
+	nodeCol property must be either 'Voltage', 'VoltageImbalance', 'perUnitVoltage', 'perUnit120Voltage', or None
 	edgeLabs and nodeLabs properties must be either 'Name', 'Value', or None
 	edgeCol and nodeCol can be set to false to avoid coloring edges or nodes
 	customColormap=True means use a one that is nicely scaled to perunit values highlighting extremes.
@@ -65,6 +97,8 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 		raise Exception('Invalid input file type. We require a .glm or .omd.')
 	# dictionary to hold info on lines present in glm
 	edge_bools = dict.fromkeys(['underground_line','overhead_line','triplex_line','transformer','regulator', 'fuse', 'switch'], False)
+	# Map to speed up name lookups.
+	nameToIndex = {tree[key].get('name',''):key for key in tree.keys()}
 	# Get rid of schedules and climate and check for all edge types:
 	for key in tree.keys():
 		obtype = tree[key].get("object","")
@@ -177,20 +211,34 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 			feedVoltage = float(ob.get('nominal_voltage',1))
 	# Tot it all up.
 	nodeVolts = {}
+	nodeVoltsPU = {}
+	nodeVoltsPU120 = {}
 	voltImbalances = {}
 	for row in voltTable:
 		allVolts = []
+		allVoltsPU = []
 		allDiffs = []
+		nodeName = row.get('node_name','')
 		for phase in ['A','B','C']:
 			realVolt = abs(float(row['volt'+phase+'_real']))
 			imagVolt = abs(float(row['volt'+phase+'_imag']))
 			phaseVolt = math.sqrt((realVolt ** 2) + (imagVolt ** 2))
 			if phaseVolt != 0.0:
-				# Normalize to 120 V standard
-				phaseVolt = (phaseVolt/feedVoltage)
+				treeKey = nameToIndex.get(nodeName, 0)
+				nodeObj = tree.get(treeKey, {})
+				try:
+					nominal_voltage = float(nodeObj['nominal_voltage'])
+				except:
+					nominal_voltage = feedVoltage
 				allVolts.append(phaseVolt)
+				normVolt = (phaseVolt/nominal_voltage)
+				allVoltsPU.append(normVolt)
 		avgVolts = avg(allVolts)
-		nodeVolts[row.get('node_name','')] = float("{0:.2f}".format(avgVolts))
+		avgVoltsPU = avg(allVoltsPU)
+		avgVoltsPU120 = 120 * avgVoltsPU
+		nodeVolts[nodeName] = float("{0:.2f}".format(avgVolts))
+		nodeVoltsPU[nodeName] = float("{0:.2f}".format(avgVoltsPU))
+		nodeVoltsPU120[nodeName] = float("{0:.2f}".format(avgVoltsPU120))
 		if len(allVolts) == 3:
 			voltA = allVolts.pop()
 			voltB = allVolts.pop()
@@ -200,7 +248,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 			allDiffs.append(abs(float(voltB-voltC)))
 			maxDiff = max(allDiffs)
 			voltImbal = maxDiff/avgVolts
-			voltImbalances[row.get('node_name','')] = float("{0:.2f}".format(voltImbal))
+			voltImbalances[nodeName] = float("{0:.2f}".format(voltImbal))
 		# Use float("{0:.2f}".format(avg(allVolts))) if displaying the node labels
 	nodeNames = {}
 	for key in nodeVolts.keys():
@@ -228,6 +276,8 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	edgeTuplePower = {}
 	#edgeTupleNames = dict with to-from tuples as keys and names as values for debugging
 	edgeTupleNames = {}
+	#edgeTupleNames = dict with to-from tuples as keys and names as values for debugging
+	edgePower = {}
 	for edge in edgeCurrentSum:
 		for obj in tree.values():
 			obname = obj.get('name','').replace('"','')
@@ -237,14 +287,15 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 				coord = (nodeFrom, nodeTo)
 				currVal = edgeCurrentSum.get(edge)
 				voltVal = avg([nodeVolts.get(nodeFrom), nodeVolts.get(nodeTo)])
+				power = (currVal * voltVal)/1000
 				lineRating = lineRatings.get(edge, 10.0**9)
 				edgePerUnitVal = (edgeCurrentMax.get(edge))/lineRating
 				edgeTupleCurrents[coord] = "{0:.2f}".format(currVal)
-				edgeTuplePower[coord] = "{0:.2f}".format((currVal * voltVal)/1000)
+				edgeTuplePower[coord] = "{0:.2f}".format(power)
+				edgePower[edge] = power
 				edgeValsPU[edge] = edgePerUnitVal
 				edgeTupleValsPU[coord] = "{0:.2f}".format(edgePerUnitVal)
 				edgeTupleNames[coord] = edge
-
 	#define which dict will be used for edge line color
 	edgeColors = edgeValsPU
 	#define which dict will be used for edge label
@@ -285,7 +336,21 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	#draw edges with or without colors
 	if edgeCol != None:
 		drawColorbar = True
-		edgeList = [edgeColors.get(n,1) for n in edgeNames]
+		if edgeCol == "Current":
+			edgeList = [edgeCurrentSum.get(n,1) for n in edgeNames]
+			drawColorbar = True
+		elif edgeCol == "Power":
+			edgeList = [edgePower.get(n,1) for n in edgeNames]
+			drawColorbar = True
+		elif edgeCol == "Rating":
+			edgeList = [lineRatings.get(n, 10.0**9) for n in edgeNames]
+			drawColorbar = True
+		elif edgeCol == "PercentOfRating":
+			edgeList = [edgeValsPU.get(n,.5) for n in edgeNames]
+			drawColorbar = True
+		else:
+			edgeList = [emptyColors.get(n,.6) for n in edgeNames]
+			print "WARNING: edgeCol property must be 'Current', 'Power', 'Rating', 'PercentOfRating', or None"
 	else:
 		edgeList = [emptyColors.get(n,.6) for n in edgeNames]
 	edgeIm = nx.draw_networkx_edges(fGraph,
@@ -319,8 +384,21 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 			font_size = 8)
 	# draw nodes with or without color
 	if nodeCol != None:
-		nodeList = [nodeVolts.get(n,1) for n in fGraph.nodes()]
-		drawColorbar = True
+		if nodeCol == "Voltage":
+			nodeList = [nodeVolts.get(n,1) for n in fGraph.nodes()]
+			drawColorbar = True
+		elif nodeCol == "VoltageImbalance":
+			nodeList = [voltImbalances.get(n,1) for n in fGraph.nodes()]
+			drawColorbar = True
+		elif nodeCol == "perUnitVoltage":
+			nodeList = [nodeVoltsPU.get(n,.5) for n in fGraph.nodes()]
+			drawColorbar = True
+		elif nodeCol == "perUnit120Voltage":
+			nodeList = [nodeVoltsPU120.get(n,60) for n in fGraph.nodes()]
+			drawColorbar = True
+		else:
+			nodeList = [emptyColors.get(n,1) for n in fGraph.nodes()]
+			print "WARNING: nodeCol property must be 'Voltage', 'VoltageImbalance', 'perUnitVoltage', 'perUnit120Voltage', or None"
 	else:
 		nodeList = [emptyColors.get(n,.6) for n in fGraph.nodes()]
 
@@ -338,16 +416,14 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 		if nodeLabs == "Name":
 			nodeLabels = nodeNames
 		elif nodeLabs == "Value":
-			if nodeLabs == "Voltage":
+			if nodeCol == "Voltage":
 				nodeLabels = nodeVolts
-			elif nodeLabs == "VoltageImbalance":
+			elif nodeCol == "VoltageImbalance":
 				nodeLabels = voltImbalances
-			elif nodeLabs == "perUnitVoltage":
-				nodeLabels = None #nodeVoltsPU
-				# TODO: set up perUnitVoltage labels
-			elif nodeLabs == "perUnit120Voltage":
-				nodeLabels = None #nodeVoltsPU120
-				# TODO: set up perUnit120Voltage labels
+			elif nodeCol == "perUnitVoltage":
+				nodeLabels = nodeVoltsPU
+			elif nodeCol == "perUnit120Voltage":
+				nodeLabels = nodeVoltsPU120
 			else:
 				nodeLabels = None
 				print "WARNING: nodeCol property cannot be set to None when nodeLabs property is set to 'Value'"
@@ -479,7 +555,13 @@ def new(modelDir):
 		"feederName1": "Olin Barre Geo",
 		"modelType": modelName,
 		"runTime": "",
-		"layoutAlgorithm": "geospatial"
+		"layoutAlgorithm": "geospatial",
+		"edgeCol" : "None",
+		"nodeCol" : "Voltage",
+		"nodeLabs" : "None",
+		"edgeLabs" : "None",
+		"customColormap" : "False",
+		"rezSqIn" : "225"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
@@ -523,17 +605,17 @@ def _testAllVarCombos():
 
 def _testingPlot():
 	PREFIX = omf.omfDir + '/scratch/CIGAR/'
-	FNAME = 'test_base_R4-25.00-1.glm_CLEAN.glm'
+	# FNAME = 'test_base_R4-25.00-1.glm_CLEAN.glm'
 	# FNAME = 'test_Exercise_4_2_1.glm'
-	# FNAME = 'test_ieee37node.glm'
+	FNAME = 'test_ieee37node.glm'
 	# FNAME = 'test_ieee123nodeBetter.glm'
 	# FNAME = 'test_large-R5-35.00-1.glm_CLEAN.glm'
 	# FNAME = 'test_medium-R4-12.47-1.glm_CLEAN.glm'
 	# FNAME = 'test_smsSingle.glm'
 	# Hack: Agg backend doesn't work for interactivity. Switch to something we can use:
 	# plt.switch_backend('MacOSX')
-	chart = drawPlot(PREFIX + FNAME, neatoLayout=True, edgeCol="Current", nodeCol=None, nodeLabs="Name", edgeLabs="Value", rezSqIn=400)
-	# chart.savefig(PREFIX + "YO_WHATS_GOING_ON.png")
+	chart = drawPlot(PREFIX + FNAME, neatoLayout=True, edgeCol="PercentOfRating", nodeCol="perUnitVoltage", nodeLabs="Value", edgeLabs="Name", customColormap=True, rezSqIn=225)
+	chart.savefig(PREFIX + "YO_WHATS_GOING_ON.png")
 	# plt.show()
 
 def _debugging():
@@ -555,5 +637,5 @@ def _debugging():
 	renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	_debugging()
-	# _testingPlot()
+	# _debugging()
+	_testingPlot()
