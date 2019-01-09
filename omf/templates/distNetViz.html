@@ -352,13 +352,31 @@
 
 			/* dataTable */
 
+            #descriptionTables {
+                position: absolute;
+                top: 0px;
+                height:0px;
+            }
+
+            #selectionTable {
+                position: absolute;
+                top: 0px;
+                height:0px;
+            }
+
+            .formContainer {
+				/*position: fixed;*/
+				/*top: 55px;*/
+                height:0px;
+				/*right: 5px;*/
+            }
+
 			.dataTable {
-				position: fixed;
+                position: fixed;
 				top: 55px;
-				right: 5px;
 				border:1px solid black;
 				border-collapse: collapse;
-                display: block;
+                /*display: block;*/
                 overflow-x: hidden;
 				max-height: 80%;
 			}
@@ -1159,11 +1177,17 @@ function svgClick(downEvent, upEvent) {
     }
     const element = downEvent.target;
     if (downEvent.altKey && element.id !== "svgContainer" && !element.classList.contains("parentChild")) {
-        destroyTables(["descriptionTables", "selectionTable"]);
+        //destroyTables(["descriptionTables", "selectionTable"]);
+        destroyTables(["selectionTable"]);
         if (!element.classList.contains("selected")) {
             element.classList.add("selected");
         } else {
             element.classList.remove("selected");
+            //Copied from rowPrototype.delete(). Refactor needed
+            const table = document.getElementById(`table_${element.id}`);
+            if (table != null) {
+                document.getElementById("descriptionTables").removeChild(table);
+            }
         }
         let ids = [];
         getSelected().forEach(e => { ids.push(e.id); });
@@ -3143,6 +3167,10 @@ function createSelectionTable(ids, tWrapper) {
         let row = createRow({key: name, value: button, deletable: true}, id);
         tBody.append(row.self);
     });
+    if (window.jQuery != null) {
+        table.style.left = "50vw";
+        $(table).draggable();
+    }
     return table;
 }
 
@@ -3153,19 +3181,20 @@ function createSelectionTable(ids, tWrapper) {
  */
 function createDescriptionTable(id, tWrapper) {
     const form = document.createElement("form");
+    form.classList.add("formContainer");
     const table = document.createElement("table");
+    table.classList.add("dataTable");
     const tHead = document.createElement("thead");
     const tBody = document.createElement("tbody");
     const buttonRow = document.createElement("tr");
+    buttonRow.classList.add("buttonRow");
     const buttonCell = document.createElement("td");
+    buttonCell.setAttribute("colspan", "3");
     form.append(table);
     table.append(tHead);
     table.append(tBody);
     tBody.append(buttonRow);
     buttonRow.append(buttonCell);
-    table.classList.add("dataTable");
-    buttonRow.classList.add("buttonRow");
-    buttonCell.setAttribute("colspan", "3");
     const tObject = createTreeObject(id, tWrapper);
     if (!isLine(tObject.data)) {
         buttonCell.append(createButton({action: "move", tObject: tObject, tWrapper: tWrapper, tableBody: tBody}).self);
@@ -3194,7 +3223,10 @@ function createDescriptionTable(id, tWrapper) {
     });
     if (window.jQuery != null) {
         //TODO: fix this
-        $(form).draggable();
+        //form.style.left = "50vw";
+        //$(form).draggable();
+        table.style.left = "50vw";
+        $(table).draggable();
     }
     return form;
 }
