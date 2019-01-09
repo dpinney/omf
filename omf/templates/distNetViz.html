@@ -760,7 +760,7 @@ function svgClick(downEvent, upEvent) {
         if (ids.length > 0) {
             const table = createSelectionTable(ids, gTreeWrapper);
             document.getElementById("selectionTable").appendChild(table);
-        }
+        } 
         return;
     } 
     if (!downEvent.altKey) {
@@ -773,39 +773,6 @@ function svgClick(downEvent, upEvent) {
         } 
     }
     return;
-
-    /*
-    if (!event.altKey) {
-		// Not holding alt and clicking the canvas, so clear the selection.
-		clearGlobalSelectionArray();
-		destroyTables();
-    }
-    if (event.target.id !== 'svgContainer') {
-        const element = event.target;
-        if (element.classList.contains("parentChild")) {
-            // We don't do anything with thin parent-child lines, but we could!
-            return;
-        }
-        if (!element.classList.contains("selected")) {
-            element.classList.add("selected");
-        }
-		// Clicking on an item selects it.
-		//lastElementSelected = (event.target);
-        //event.target.classList.add('selected');
-
-        destroyTables();
-        //const table = createTable([event.target.id], gTreeWrapper);
-        const table = createDescriptionTable(event.target.id, gTreeWrapper);
-        document.getElementById("descriptionTables").appendChild(table);
-	}
-	// Alt for multiple selection.
-	if (document.getElementsByClassName("selection").length >= 2) {
-	//if (selection.length >= 2) {
-		destroyTables()
-		multiSelectionTable()
-	}
-    //previousTarget = event.target
-    */
 }
 
 //function hotkeys() {
@@ -931,31 +898,6 @@ function dropPill(thisButton, name) { // eslint-disable-line
 	//this.removeEventListener('click', arguments.callee, true);
 	//if (window.event.toElement==thisButton) {event.stopPropagation()}
 }*/
-
-//function multiSelectionTable() {
-//	// Display the table when a user has selected multiple objects.
-//	//const tabScroll = document.getElementById('tableScroller')
-//	//const tbl = document.createElement('table')
-//	//const headRow = document.createElement('tr')
-//	//headRow.innerHTML = '<th>Selected Elements</th>'
-//	//tbl.appendChild(headRow)
-//	const table = document.getElementById("descriptionTable");
-//	table.style.display = "block";
-//	const tbody = table.children[0];
-//	tbody.children[0].children[0].style.display = "none";
-//	//tbody.children[0].children[1].style.display = "none";
-//	tbody.children[0].children[1].style.display = "table-cell";
-//	tbody.children[1].style.display = "none";
-//	tbody.children[2].style.display = "none";
-//	// Put the object in.
-//	for (let i = 0; i < document.getElementsByClassName("selected").length; i++) {
-//	//for (let i = 0; i < selection.length; i++) {
-//		const row = document.createElement('tr');
-//		row.innerHTML = '<td>' + writeFeeder.tree[selection[i].id].name + '</td>';
-//		tbody.appendChild(row)
-//	}
-//	//tabScroll.appendChild(tbl)
-//}
 
 function clickLatLon(event) {
 	//Returns real Lat/Long of a click event, used in the moveBus function
@@ -1917,19 +1859,6 @@ const nonModifiableProperties = ["name", "object", "from", "to", "parent"];
 
 const titleProperties = ["object"];
 
-/** 
- * TODO: add unit tests
- * Return a fully formed html table that can be attached to the DOM.
- */
-//function createTable(ids, tWrapper) {
-//    if (!Array.isArray(ids)) {
-//        throw new Error("ids argument must be an array");
-//    }
-//    if (ids.length === 1) {
-//        return createDescriptionTable(ids[0], tWrapper);
-//    } 
-//}
-
 /**
  * TODO: add unit tests
  * If an object has no name, just get the first property in the object.
@@ -1938,9 +1867,12 @@ function createSelectionTable(ids, tWrapper) {
     const table = document.createElement("table");
     const tHead = document.createElement("thead");
     const tBody = document.createElement("tbody"); 
+
     const row = createRow({key: "Selected Elements"});
     Array.from(row.self.children).forEach(td => { td.classList.add("tableTitle") });
     row.self.children[1].setAttribute("colspan", "2");
+    row.self.children[2].remove();
+
     tHead.append(row.self);
     table.append(tHead);
     table.append(tBody);
@@ -1952,8 +1884,12 @@ function createSelectionTable(ids, tWrapper) {
         button.textContent = "view";
         button.classList.add("modalButton");
         button.addEventListener("click", function() {
-            const table = createDescriptionTable(id, tWrapper);
-            document.getElementById("descriptionTables").append(table);
+            let table = document.getElementById(`table_${id}`);
+            if (table == null) {
+                const table = createDescriptionTable(id, tWrapper);
+                table.id = `table_${id}`;
+                document.getElementById("descriptionTables").append(table);
+            }           
         });
         let row = createRow({key: name, value: button, deletable: true}, id);
         tBody.append(row.self);
@@ -2297,6 +2233,7 @@ const rowPrototype = {
     },
 
     /**
+     * TODO: update unit tests
      * Delete the row from the table. Delete the key from the map, if there was a map.
      * Remove "selected" from the classList of the element, if elementId is set.
      */
@@ -2306,6 +2243,19 @@ const rowPrototype = {
         } 
         if (this.elementId != null) {
             document.getElementById(this.elementId).classList.remove("selected");
+            const table = document.getElementById(`table_${this.elementId}`);
+            if (table != null) {
+                document.getElementById("descriptionTables").removeChild(table);
+            }
+            //const tables = Array.from(document.querySelectorAll("[data-tableid]"));
+            //tables.forEach(t => {
+            //    if (t.dataset.tableid === this.elementId) {
+            //        document.getElementById("descriptionTables").removeChild(t);
+            //    }
+            //});
+            if (getSelected().length === 0) {
+                destroyTables(["selectionTable"]);
+            }
         }
         this.self.parentElement.removeChild(this.self);
     },
