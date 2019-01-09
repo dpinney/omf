@@ -1,0 +1,584 @@
+<head>
+	<title>Open Modeling Framework</title>
+	<meta charset="utf-8">
+	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
+	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	<style>
+		.tab {
+		    overflow: hidden;
+		    margin-left: auto;
+		    margin-right: auto;
+		    width: 1000px;
+		}
+
+		.tab button {
+			color: black;
+		    background-color: inherit;
+		    float: left;
+		    border: none;
+		    outline: none;
+		    cursor: pointer;
+		    padding: 14px 16px;
+		    border-radius: 5px 5px 0px 0px;
+		}
+
+		.tab button:hover {
+		    background-color: white;
+		}
+
+		.tab button.active {
+		    background-color: seagreen;
+		    color: white;
+		}
+
+		.tabcontent {
+		    display: none;
+		} 
+	</style>
+	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
+	<!-- Library Imports -->
+	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
+	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	<!-- Data  Imports -->
+	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
+	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
+	<script>modelStatus="{{modelStatus}}"</script>
+	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
+	<script type="text/javascript">
+		function editFeeder(modelName, feederNum) {
+			console.log("modelName:",modelName)
+			studyUser = allInputData.user
+			window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
+		}
+	</script>
+	<script type="text/javascript">
+
+		function displayAppropriately(){
+			//console.log("der " + $('input[name="derRadio"]:checked').val());
+			//console.log("load " + $('input[name="loadRadio"]:checked').val());
+			$('.tabPlots').hide();
+			var derOn = $('input[name="derRadio"]:checked').val() == 1;
+			var peakLoad = $('input[name="loadRadio"]:checked').val() == 1;
+			if (derOn && peakLoad) 			{$('#derOnPeakLoad').show();	}
+			else if (derOn && !peakLoad) 	{$('#derOnMinLoad').show();		}
+			else if (!derOn && peakLoad) 	{$('#derOffPeakLoad').show(); 	}
+			else 							{$('#derOffMinLoad').show();	}
+		}
+
+		function openTab(evt, tabName) {
+		    
+		    var i, tabContent, tabLinks;
+
+		    // Get all elements with class="tabContent" and hide them
+			$(".tabContent").hide();
+
+		    // Get all elements with class="tabLinks" and remove the class "active"
+		    tabLinks = document.getElementsByClassName("tabLinks");
+		    for (i = 0; i < tabLinks.length; i++) {
+		        tabLinks[i].className = tabLinks[i].className.replace(" active", "");
+		    }
+
+		    // Show the current tab, and add an "active" class to the button that opened the tab
+		    $("." + tabName).show();
+		    //gebi(tabName).style.display = "block";
+		    evt.currentTarget.className += " active";
+		}
+
+		function insert_file_upload_block(fileName, dataVariableName) {
+			parentDiv = document.currentScript.parentElement;
+
+			let inputNode1 = document.createElement("input");
+			inputNode1.setAttribute("id", fileName + "Handler");
+			inputNode1.setAttribute("type", "file");
+			inputNode1.style.display = "none";
+			//inputNode1.addEventListener("change", handle_files(this.files,dataVariableName,fileName));
+			parentDiv.appendChild(inputNode1);
+
+			let inputNode2 = document.createElement("input");
+			inputNode2.setAttribute("id", dataVariableName);
+			inputNode2.setAttribute("name", dataVariableName);
+			inputNode2.type = "hidden";
+			parentDiv.appendChild(inputNode2);
+
+			let innerDiv = document.createElement("div");
+			parentDiv.appendChild(innerDiv);
+
+			let labelNode = document.createElement("label");
+			labelNode.setAttribute("for", fileName + "Handler");
+			labelNode.className = "fileButton";
+			labelNode.innerHTML = "Choose File";
+			innerDiv.appendChild(labelNode);
+
+			let inputNode3 = document.createElement("input");
+			inputNode3.setAttribute("id", fileName);
+			inputNode3.setAttribute("name", fileName);
+			inputNode3.value = '';
+			inputNode3.readOnly = true;
+			inputNode3.className = "uploadFileName";
+			innerDiv.appendChild(inputNode3)
+
+			//inputNode1.addEventListener("change", handle_files(this.files,dataVariableName,fileName));
+			inputNode1.addEventListener("change", function (){
+				handle_files(this.files,dataVariableName,fileName);
+			});
+
+		}
+	</script>
+</head>
+
+<body onload="init()">
+	
+	<div id="header">
+		<div id="headInnerBlock">
+			<div id="menuLeft">
+				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
+				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
+			</div>
+		</div>
+	</div>
+
+	<p class="reportTitle">Model Input</p>
+	<div id="input" class="content">
+		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+			<div class="shortInput">
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-voltageDrop" target="blank">Help?</a></label>
+				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Model Name</label>
+				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+			</div>
+			<div class="shortInput runningInline postRunInline">
+				<label>User</label>
+				<input type="text" id="user" name="user" readonly/>
+			</div>
+			<div class="runningInline postRunInline shortInput">
+				<label>Created</label>
+				<input type="text" id="created" name="created" readonly/>
+			</div>
+			<div class="postRunInline shortInput">
+				<label>Run Time</label>
+				<input type="text" id="runTime" name="runTime" readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Feeder</label>
+				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
+				<input type="text" id="feederName1" name="feederName1" style="display:none">
+			</div>
+			<hr>
+			<!-- model inputs -->
+			<div class="shortInput">
+				<label class="tooltip">Added System Name
+					<span class="classic">Name of the added generation in the circuit</span>
+				</label>
+				<input type="text" id="newGeneration" name="newGeneration" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Generation Step-up Transformer Name
+					<span class="classic">Name of the step-up transformer at the added generation</span>
+				</label>
+				<input type="text" id="newGenerationStepup" name="newGenerationStepup" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Max Thermal loading(&percnt;)
+					<span class="classic">Higher line loadings will be considered violations</span>
+				</label>
+				<input type="text" id="thermalThreshold" name="thermalThreshold" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Max Voltage Flicker(&percnt;)
+					<span class="classic">Higher voltage flickers will be considered violations</span>
+				</label>
+				<input type="text" id="flickerThreshold" name="flickerThreshold" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Max Tap Position Difference
+					<span class="classic">Higher differences in tap positions between the DER on and DER off scenarios will be considered violations</span>
+				</label>
+				<input type="text" id="tapThreshold" name="tapThreshold" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Peak Load (.csv file)
+					<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span>
+				</label>
+				<script type="text/javascript">
+					insert_file_upload_block('peakLoadFileName', 'peakLoadData');
+				</script>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Min Load (.csv file)
+					<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span>
+				</label>
+				<script type="text/javascript">
+					insert_file_upload_block('minLoadFileName', 'minLoadData');
+				</script>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Layout Algorithm<span class="classic">Geospatial shows the circuit the same way it was defined in the feeder editor. Force Directed uses an algorithm to show the circuit elements evenly spaced (useful for circuits without location data).</span></label>
+				<select id="layoutAlgorithm" name="layoutAlgorithm">
+					<option value="geospatial">Geospatial</option>
+					<option value="forceDirected">Force Directed</option>
+				</select>
+			</div>
+			<div class="wideInput" style="text-align:right">
+				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
+				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
+				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
+				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
+				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
+			</div>
+		</form>
+	</div>
+
+	<div id ="runIndicator" class="content running">
+		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
+	</div>
+
+	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
+		<pre id='errorText' style='overflow-x:scroll'></pre>
+		<script type="text/javascript">
+		if (typeof(allInputData.stderr) !== 'undefined') {
+			gebi('stopIndicator').style.visibility = 'visible'
+			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
+		</script>
+	</div>
+
+	<div id="output" class="postRun">
+
+		<p class="reportTitle" style="page-break-before:always">Load Flow Analysis</p>
+
+		<!-- Radio Buttons -->
+		<div class="content"><table style="width: 100%">
+			<tr>
+				<td style="text-align: left">
+					Distributed Energy Resource Status:
+					<label>	<input class="plotRadios" type="radio" name="derRadio" value="1" checked="true" onchange="displayAppropriately()">On</label>
+					<label><input class="plotRadios" type="radio" name="derRadio" value="0" onchange="displayAppropriately()">Off</label>
+				</td>
+				<td style="text-align: left">
+					Load Type:
+					<label><input class="plotRadios" type="radio" name="loadRadio" value="1" checked="true" onchange="displayAppropriately()">Peak</label>
+					<label><input class="plotRadios" type="radio" name="loadRadio" value="0" onchange="displayAppropriately()">Minimum</label>
+				</td>
+			</tr>
+		</table></div>
+
+		<!-- Tab links -->
+		<div class="tab">
+		  <button class="tabLinks active" onclick="openTab(event, 'voltageDiagram')">Voltage</button>
+		  <button class="tabLinks" onclick="openTab(event, 'currentDiagram')">Current</button>
+		  <button class="tabLinks" onclick="openTab(event, 'thermalDiagram')">Thermal</button>
+		  <button class="tabLinks" onclick="openTab(event, 'flickerDiagram')">Flicker</button>
+		</div>
+
+		<!-- Tab content -->
+		<div id="derOnPeakLoad" class="tabPlots" style="display: block;">
+			<!--DEBUG derOn peakLoad-->
+			<div class="tightContent tabContent voltageDiagram firstTab">
+				<!--DEBUG volt-->
+				<img id="voltageDerOnPeakChart" style="width:1000px;height:1000px;" />
+				<script type="text/javascript">gebi("voltageDerOnPeakChart").src = "data:image/png;base64," + allOutputData.voltageDerOnPeak</script>
+			</div>
+			<div class="tightContent tabContent currentDiagram">
+				<!--DEBUG curr-->
+				<img id="currentDerOnPeakChart" style="width:1000px;height:1000px;" />
+				<script type="text/javascript">gebi("currentDerOnPeakChart").src = "data:image/png;base64," + allOutputData.currentDerOnPeak</script>
+			</div>
+			<div class="tightContent tabContent thermalDiagram">
+				<!--DEBUG therm-->
+				<img id="thermalDerOnPeakChart" style="width:1000px;height:1000px;" />
+				<script type="text/javascript">gebi("thermalDerOnPeakChart").src = "data:image/png;base64," + allOutputData.thermalDerOnPeak</script>
+			</div>
+			<div class="tightContent tabContent flickerDiagram">
+				<!--DEBUG flick-->
+				<img id="flickerDerOnPeakChart" style="width:1000px;height:1000px;" />
+				<script type="text/javascript">gebi("flickerDerOnPeakChart").src = "data:image/png;base64," + allOutputData.flickerPeak</script>
+			</div>
+		</div>
+
+		<div id="derOffPeakLoad" class="tabPlots" style="display: none;">
+			<!--DEBUG derOff peakLoad-->
+			<div class="tightContent tabContent voltageDiagram firstTab">
+				<!--DEBUG volt-->
+				<img id="voltageDerOffPeakChart" style="width:1000px;height:1000px;" />
+				<script type="text/javascript">gebi("voltageDerOffPeakChart").src = "data:image/png;base64," + allOutputData.voltageDerOffPeak</script>
+			</div>
+			<div class="tightContent tabContent currentDiagram">
+				<!--DEBUG curr-->
+				<img id="currentDerOffPeakChart" style="width:1000px;height:1000px;" />
+				<script type="text/javascript">gebi("currentDerOffPeakChart").src = "data:image/png;base64," + allOutputData.currentDerOffPeak</script>
+			</div>
+			<div class="tightContent tabContent thermalDiagram">
+				<!--DEBUG therm-->
+				<img id="thermalDerOffPeakChart" style="width:1000px;height:1000px;" />
+				<script type="text/javascript">gebi("thermalDerOffPeakChart").src = "data:image/png;base64," + allOutputData.thermalDerOffPeak</script>
+			</div>
+			<div class="tightContent tabContent flickerDiagram">
+				<!--DEBUG flick-->
+				<img id="flickerDerOffPeakChart" style="width:1000px;height:1000px;" />
+				<script type="text/javascript">gebi("flickerDerOffPeakChart").src = "data:image/png;base64," + allOutputData.flickerPeak</script>
+			</div>
+		</div>
+		
+		<div id="derOnMinLoad" class="tabPlots" style="display: none;">
+			<!--DEBUG derOn minLoad-->
+			<div class="tightContent tabContent voltageDiagram firstTab">
+				<!--DEBUG volt-->
+				<img id="voltageDerOnMinChart" style="width:1000px;height:1000px;" />
+				<script type="text/javascript">gebi("voltageDerOnMinChart").src = "data:image/png;base64," + allOutputData.voltageDerOnMin</script>
+			</div>
+			<div class="tightContent tabContent currentDiagram">
+				<!--DEBUG curr-->
+				<img id="currentDerOnMinChart" style="width:1000px;height:1000px;" />
+				<script type="text/javascript">gebi("currentDerOnMinChart").src = "data:image/png;base64," + allOutputData.currentDerOnMin</script>
+			</div>
+			<div class="tightContent tabContent thermalDiagram">
+				<!--DEBUG therm-->
+				<img id="thermalDerOnMinChart" style="width:1000px;height:1000px;" />
+				<script type="text/javascript">gebi("thermalDerOnMinChart").src = "data:image/png;base64," + allOutputData.thermalDerOnMin</script>
+			</div>
+			<div class="tightContent tabContent flickerDiagram">
+				<!--DEBUG flick-->
+				<img id="flickerDerOnMinChart" style="width:1000px;height:1000px;" />
+				<script type="text/javascript">gebi("flickerDerOnMinChart").src = "data:image/png;base64," + allOutputData.flickerMin</script>
+			</div>
+		</div>
+
+		<div id="derOffMinLoad" class="tabPlots" style="display: none;"> 
+			<!--DEBUG derOff minLoad-->
+			<div class="tightContent tabContent voltageDiagram firstTab">
+				<!--DEBUG volt-->
+				<img id="voltageDerOffMinChart" style="width:1000px;height:1000px;" />
+				<script type="text/javascript">gebi("voltageDerOffMinChart").src = "data:image/png;base64," + allOutputData.voltageDerOffMin</script>
+			</div>
+			<div class="tightContent tabContent currentDiagram">
+				<!--DEBUG curr-->
+				<img id="currentDerOffMinChart" style="width:1000px;height:1000px;" />
+				<script type="text/javascript">gebi("currentDerOffMinChart").src = "data:image/png;base64," + allOutputData.currentDerOffMin</script>
+			</div>
+			<div class="tightContent tabContent thermalDiagram">
+				<!--DEBUG therm-->
+				<img id="thermalDerOffMinChart" style="width:1000px;height:1000px;" />
+				<script type="text/javascript">gebi("thermalDerOffMinChart").src = "data:image/png;base64," + allOutputData.thermalDerOffMin</script>
+			</div>
+			<div class="tightContent tabContent flickerDiagram">
+				<!--DEBUG flick-->
+				<img id="flickerDerOffMinChart" style="width:1000px;height:1000px;" />
+				<script type="text/javascript">gebi("flickerDerOffMinChart").src = "data:image/png;base64," + allOutputData.flickerMin</script>
+			</div>
+		</div>
+
+		<script type="text/javascript">
+			//show first tab 
+			$(".firstTab").css('display', 'block')
+		</script>
+
+		<p class="reportTitle" style="page-break-before:always">Maximum and Minimum Voltages</p>
+		<div class="content">
+			<table id="minMaxVolts" class="centeredTable">
+			<tr>
+				<th rowspan="2">DER Status</th>
+				<th rowspan="2">Load Condition</th>
+				<th colspan="2">Max Voltage</th>
+				<th colspan="2">Min Voltage</th>
+			</tr>
+			<tr> <th>V</th> <th>Location</th> <th>V</th> <th>Location</th> </tr>
+			<tr> 
+				<td>On</td> <td>Peak</td> 
+				<td id="derOnMaxVoltValPeak"></td>
+				<script type="text/javascript">
+					gebi("derOnMaxVoltValPeak").innerHTML = allOutputData['maxVoltsPeakDerOn'][1]
+				</script>  
+				<td id="derOnMaxVoltLocPeak"></td>
+				<script type="text/javascript">
+					gebi("derOnMaxVoltLocPeak").innerHTML = allOutputData['maxVoltsPeakDerOn'][0]
+				</script> 
+				<td id="derOnMinVoltValPeak"></td>
+				<script type="text/javascript">
+					gebi("derOnMinVoltValPeak").innerHTML = allOutputData['minVoltsPeakDerOn'][1]
+				</script>  
+				<td id="derOnMinVoltLocPeak"></td>
+				<script type="text/javascript">
+					gebi("derOnMinVoltLocPeak").innerHTML = allOutputData['minVoltsPeakDerOn'][0]
+				</script> 
+			</tr>
+			<tr> 
+				<td>On</td> <td>Min</td> 
+				<td id="derOnMaxVoltValMin"></td>
+				<script type="text/javascript">
+					gebi("derOnMaxVoltValMin").innerHTML = allOutputData['maxVoltsMinDerOn'][1]
+				</script>  
+				<td id="derOnMaxVoltLocMin"></td>
+				<script type="text/javascript">
+					gebi("derOnMaxVoltLocMin").innerHTML = allOutputData['maxVoltsMinDerOn'][0]
+				</script>  
+				<td id="derOnMinVoltValMin"></td>
+				<script type="text/javascript">
+					gebi("derOnMinVoltValMin").innerHTML = allOutputData['minVoltsMinDerOn'][1]
+				</script>  
+				<td id="derOnMinVoltLocMin"></td>
+				<script type="text/javascript">
+					gebi("derOnMinVoltLocMin").innerHTML = allOutputData['minVoltsMinDerOn'][0]
+				</script> 
+			</tr>
+			<tr> 
+				<td>Off</td> <td>Peak</td> 
+				<td id="derOffMaxVoltValPeak"></td>
+				<script type="text/javascript">
+					gebi("derOffMaxVoltValPeak").innerHTML = allOutputData['maxVoltsPeakDerOff'][1]
+				</script>  
+				<td id="derOffMaxVoltLocPeak"></td>
+				<script type="text/javascript">
+					gebi("derOffMaxVoltLocPeak").innerHTML = allOutputData['maxVoltsPeakDerOff'][0]
+				</script>  
+				<td id="derOffMinVoltValPeak"></td>
+				<script type="text/javascript">
+					gebi("derOffMinVoltValPeak").innerHTML = allOutputData['minVoltsPeakDerOff'][1]
+				</script>  
+				<td id="derOffMinVoltLocPeak"></td>
+				<script type="text/javascript">
+					gebi("derOffMinVoltLocPeak").innerHTML = allOutputData['minVoltsPeakDerOff'][0]
+				</script> 
+			</tr>
+			<tr> 
+				<td>Off</td> <td>Min</td> 
+				<td id="derOffMaxVoltValMin"></td>
+				<script type="text/javascript">
+					gebi("derOffMaxVoltValMin").innerHTML = allOutputData['maxVoltsMinDerOff'][1]
+				</script>  
+				<td id="derOffMaxVoltLocMin"></td>
+				<script type="text/javascript">
+					gebi("derOffMaxVoltLocMin").innerHTML = allOutputData['maxVoltsMinDerOff'][0]
+				</script>  
+				<td id="derOffMinVoltValMin"></td>
+				<script type="text/javascript">
+					gebi("derOffMinVoltValMin").innerHTML = allOutputData['minVoltsMinDerOff'][1]
+				</script>  
+				<td id="derOffMinVoltLocMin"></td>
+				<script type="text/javascript">
+					gebi("derOffMinVoltLocMin").innerHTML = allOutputData['minVoltsMinDerOff'][0]
+				</script> 
+			</tr>
+			</table>
+		</div>
+
+		<p class="reportTitle" style="page-break-before:always">Maximum Voltage Flicker</p>
+		<div class="content">
+			<table id="maxVoltFlicker" class="centeredTable">
+			<tr> <th>Load Condition</th> <th>&percnt;</th> <th>Location</th> </tr>
+			<tr> 
+				<td>Peak</td> 
+				<td id="flickerValPeak"></td>
+				<script type="text/javascript">
+					gebi("flickerValPeak").innerHTML = allOutputData['maxFlickerPeak'][1].toFixed(2)
+				</script>
+				<td id="flickerLocPeak"></td> 
+				<script type="text/javascript">
+					gebi("flickerLocPeak").innerHTML = allOutputData['maxFlickerPeak'][0]
+				</script>
+			</tr>
+			<tr> 
+				<td>Min</td> 
+				<td id="flickerValMin"></td> 
+				<script type="text/javascript">
+					gebi("flickerValMin").innerHTML = allOutputData['maxFlickerMin'][1].toFixed(2)
+				</script>
+				<td id="flickerLocMin"></td> 
+				<script type="text/javascript">
+					gebi("flickerLocMin").innerHTML = allOutputData['maxFlickerMin'][0]
+				</script>
+			</tr>
+			</table>
+		</div>
+
+		<p class="reportTitle" style="page-break-before:always">Thermal Loading</p>
+		<div class="content">
+			<table id="thermalViolations" class="centeredTable">
+			<tr> <th>Location</th> <th>Thermal Load</th> <th>DER Status</th> </tr>
+			</table>
+			<script type="text/javascript">
+				var thermalViolations = allOutputData['thermalViolations'];
+				var content = '';
+				for (var i = 0; i<thermalViolations.length; i++) {
+					content = '<td>' + thermalViolations[i][0] + '</td><td>' + thermalViolations[i][1].toFixed(2) + '&percnt;</td><td>' + thermalViolations[i][2] + '</td>';
+					if (thermalViolations[i][3] == true)
+						content = '<tr style=\"color: red\">' + content + '</tr>';
+					else content = '<tr>' + content + '</tr>';
+					gebi("thermalViolations").innerHTML += content
+				}
+			</script> 
+			<span style="color: red">Thermal loading values greater or equal to the input thermal threshold are displayed in red</span>
+		</div>
+		
+		<p class="reportTitle" style="page-break-before:always">Regulator Power Flow</p>
+		<div class="content">
+			<table id="reversePowerFlow" class="centeredTable">
+			<tr> <th>Location</th> <th>Power</th> <th>DER Status</th> </tr>
+			</table>
+			<script type="text/javascript">
+				var reversePowerFlow = allOutputData['reversePowerFlow'];
+				var content = '';
+				for (var i = 0; i<reversePowerFlow.length; i++) {
+					content = '<td>' + reversePowerFlow[i][0] + '</td><td>' + 
+						reversePowerFlow[i][1].toFixed(2) + '</td><td>' + 
+						reversePowerFlow[i][2] + '</td>';
+					if (reversePowerFlow[i][3] == true)
+						content = '<tr style=\"color: red\">' + content + '</tr>';
+					else content = '<tr>' + content + '</tr>';
+					gebi("reversePowerFlow").innerHTML += content
+				}
+			</script> 
+			<span style="color: red">Reverse power flow violations displayed in red</span>
+		</div>
+
+		<p class="reportTitle" style="page-break-before:always">Tap Changes</p>
+		<div class="content">
+			<table id="tapChanges" class="centeredTable">
+			<tr> <th>Load Condition</th> <th>Location</th> <th>Tap Position DER On</th> <th>Tap Position DER Off</th> <th>Difference</th> </tr>
+			</table>
+			<script type="text/javascript">
+				var tapDifferences = allOutputData['tapDifferences'];
+				var content = '';
+				for (var i = 0; i<tapDifferences.length; i++) {
+					content = '<td>' + tapDifferences[i][0] + '</td><td>' + tapDifferences[i][1] + 
+					'</td><td>' + tapDifferences[i][2] + '</td><td>' + tapDifferences[i][3] + 
+					'</td><td>' + tapDifferences[i][4] + '</td>';
+					if (tapDifferences[i][5] == true)
+						content = '<tr style=\"color: red\">' + content + '</tr>';
+					else content = '<tr>' + content + '</tr>';
+					gebi("tapChanges").innerHTML += content;
+				}
+			</script> 
+			<span style="color: red">Tap change differences greater or equal to the input max tap change difference are displayed in red</span>
+		</div>
+
+		<p class="reportTitle" style="page-break-before:always">Short Circuit Analysis</p>
+		<div class="content">
+			<table id="shortCircuit" class="centeredTable">
+			<tr>
+				<th rowspan="2">DER Status</th>
+				<th colspan="2">Feeder Breaker</th>
+				<th colspan="2">Substation Transformer</th>
+				<th colspan="2">POI</th>
+			</tr>
+			<tr> <th>LLL</th> <th>LG</th> <th>LLL</th> <th>LG</th> <th>LLL</th> <th>LG</th> </tr>
+			</table>
+		</div>
+
+		<p class="reportTitle" style="page-break-before:always">Fault Current Violations</p>
+		<div class="content">
+			<table id="faultCurrentViolations" class="centeredTable">
+			<tr> <th>Location</th> <th>Fault Current</th> <th>DER Status</th> </tr>
+			</table>
+		</div>
+
+		<p class="reportTitle" style="page-break-before:always">Effective Grounding Screening</p>
+		<div class="content">
+			<table id="groundScreening" class="centeredTable">
+			<tr> <td style="border: none; text-align: left;" colspan="3">Line to Ground Fault at the POI</td> </tr>
+			<tr> <th>Pre-fault Current</th> <th>Post-fault Current</th> <th>Percent Change</th> </tr>
+			</table>
+		</div>
+	
+	</div>
+</body>

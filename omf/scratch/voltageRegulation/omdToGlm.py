@@ -8,10 +8,8 @@ import csv
 import omf
 from voltageViz import voltageRegVisual
 import re
+from datetime import datetime
 
-
-
-# filePath = pJoin(os.path.dirname(os.path.realpath(__file__)), 'UCS_Egan_Housed_Solar.omd')
 
 def ConvertAndwork(filePath):
 	#Converts omd to glm, adds in necessary recorder, collector, and attributes+parameters for gridballast gld to run on waterheaters and ziploads
@@ -35,11 +33,11 @@ def ConvertAndwork(filePath):
 				name_volt_dict[value['name']] = {'Nominal_Voltage': value['nominal_voltage']}
 			if 'object' in value and (value['object'] == 'waterheater'):
 				inFeeder['tree'][key].update({'heat_mode':'ELECTRIC'})
-				inFeeder['tree'][key].update({'enable_volt_control':'true'})
+				inFeeder['tree'][key].update({'enable_volt_control':'false'})
 				inFeeder['tree'][key].update({'volt_lowlimit':'113.99'})
 				inFeeder['tree'][key].update({'volt_uplimit':'126.99'}) 
 			if'object' in value and (value['object']== 'ZIPload'):
-				inFeeder['tree'][key].update({'enable_volt_control':'true'})
+				inFeeder['tree'][key].update({'enable_volt_control':'false'})
 				inFeeder['tree'][key].update({'volt_lowlimit':'113.99'})
 				inFeeder['tree'][key].update({'volt_uplimit':'126.99'})
 			if 'argument' in value and ('minimum_timestep' in value['argument']):
@@ -56,7 +54,6 @@ def ConvertAndwork(filePath):
 		recorders = []
 		recorderw=[]
 		for i in range(len(solar_meters)):
-			print i
 			recorders.append(("object recorder {\n\tinterval "+str(interval)+";\n\tproperty measured_real_power;\n\tfile measured_solar_"+str(i)+".csv;\n\tparent "+str(solar_meters[i])+";\n\t};\n"))
 		for i in range(len(wind_obs)):
 			recorderw.append(("object recorder {\n\tinterval "+str(interval)+";\n\tproperty Pconv;\n\tfile measured_wind_"+str(i)+".csv;\n\tparent "+str(wind_obs[i])+";\n\t};\n"))
@@ -74,7 +71,7 @@ def ConvertAndwork(filePath):
 	return name_volt_dict
 
 def ListOffenders(name_volt_dict):
-	#Finds objects that carry too much voltage, these are called 'Offenders'
+	#Finds objects that carry too much voltage, these are called 'Offenders', write to disk
 	data = pd.read_csv(('voltDump.csv'), skiprows=[0])
 	for i, row in data['voltA_real'].iteritems():
 		voltA_real = data.loc[i,'voltA_real']
@@ -91,42 +88,40 @@ def ListOffenders(name_volt_dict):
 		name_volt_dict[data.loc[i, 'node_name']].update({'Volt_C':voltC_mag})
 
 	offenders = []
+	offendersGen = []
 	for name, volt in name_volt_dict.iteritems():
 		if (float(volt['Volt_A'])/float(volt['Nominal_Voltage'])) > 1.05:
 			offenders.append(tuple([name, float(volt['Volt_A'])/float(volt['Nominal_Voltage'])]))
+			offendersGen.append(name)
 		if (float(volt['Volt_B'])/float(volt['Nominal_Voltage'])) > 1.05:
 			offenders.append(tuple([name, float(volt['Volt_B'])/float(volt['Nominal_Voltage'])]))
+			offendersGen.append(name)
 		if (float(volt['Volt_C'])/float(volt['Nominal_Voltage'])) > 1.05:
 			offenders.append(tuple([name, float(volt['Volt_C'])/float(volt['Nominal_Voltage'])]))
+			offendersGen.append(name)
 
-	# # #Old Code for name recording only
-	# offenders = []
-	# for name, volt in name_volt_dict.iteritems():
-	# 	if (float(volt['Volt_A'])/float(volt['Nominal_Voltage'])) > 1.05:
-	# 		offenders.append(name)
-	# 	if (float(volt['Volt_B'])/float(volt['Nominal_Voltage'])) > 1.05:
-	# 		offenders.append(name)
-	# 	if (float(volt['Volt_C'])/float(volt['Nominal_Voltage'])) > 1.05:
-	# 		offenders.append(name)
+
 
 	#Print General information about offending nodes
 	offenders = list(set(offenders))
-	print len(offenders)
+	# print len(offenders)
 	isum = 0
 	offendersNames = []
 	for i in range(len(offenders)):
 		isum = isum + offenders[i][1]
 		offendersNames.append(offenders[i][0])
-
+	offendersGen = list(set(offendersGen))
 	print ("average voltage overdose is by a factor of", isum/(len(offenders)))
-	print len(offendersNames)
+	print ("Number of offenders is", len(offendersGen))
 	# Write out file
 	with open('offenders.csv', 'w') as f:
 		wr = csv.writer(f, quoting=csv.QUOTE_ALL)
 		wr.writerow(offenders)
-	return offendersNames
+	return offendersGen
 
-def writeResults(offendersNames):
+def writeResults(offendersGen):
+	#Write powerflow results for generation and waterheater, zipload, and hvac (house) load objects
+	#need to fix up testing for if file exsists based upon name written
 	substation = pd.read_csv(('measured_substation_power.csv'), comment='#', names=['timestamp', 'measured_real_power'])
 	substation_power = substation['measured_real_power'][0]
 	solar1 =  pd.read_csv(('measured_solar_0.csv'), comment='#', names=['timestamp', 'measured_real_power'])
@@ -139,26 +134,30 @@ def writeResults(offendersNames):
 	waterheater_power = waterheaters['measured_real_power'][0]
 	HVAC = pd.read_csv(('measured_HVAC.csv'), comment='#', names=['timestamp', 'heating_power', 'cooling_power'])
 	HVAC_power = HVAC['heating_power'][0], HVAC['cooling_power'][0]
-	wind = pd.read_csv(('measured_wind_0.csv'), comment='#', names=['timestamp', 'Pconv'])
-	wind_power = wind['Pconv'][0]
+	if os.path.isfile('measured_wind_0'):
+		wind = pd.read_csv(('measured_wind_0.csv'), comment='#', names=['timestamp', 'Pconv'])
+		wind_power = wind['Pconv'][0]
 
 	#Print Results
-	print "substation power", substation_power
+	print "Substation power", substation_power
 	print "Solar1 Power", solar1_power
 	print "Solar2 Power", solar2_power
-	print "Zipload power", zipload_power*1000
-	print "waterheater power", waterheater_power*1000
-	print "HVAC Power", (HVAC_power[0]+HVAC_power[1])*1000
+	print "Zipload Power Use", zipload_power*1000
+	print "Waterheater Power Use", waterheater_power*1000
+	print "HVAC Power Use", (HVAC_power[0]+HVAC_power[1])*1000
 	#convert results to watts, write to dataframe
 	df=pd.DataFrame(columns=('result', 'value'))
-	df.loc[0]=["number of offenders", len(offendersNames)]
-	df.loc[1]=["substation power", substation_power]
+	df.loc[0]=["Number of offenders", len(offendersGen)]
+	df.loc[1]=["Substation Power", substation_power]
 	df.loc[2]=["Solar1 Power", solar1_power]
 	df.loc[3]=["Solar2 Power", solar2_power]
-	df.loc[4]=["Zipload power", zipload_power*1000]
-	df.loc[5]=["waterheater power", waterheater_power*1000]
-	df.loc[6]=["HVAC Power", (HVAC_power[0]+HVAC_power[1])*1000]
-	df.loc[7]=['wind power', wind_power]
+	df.loc[4]=["Zipload Power Use", zipload_power*1000]
+	df.loc[5]=["Waterheater Power Use", waterheater_power*1000]
+	df.loc[6]=["HVAC Power Use", (HVAC_power[0]+HVAC_power[1])*1000]
+	if os.path.isfile('measured_wind_0'):
+		#temporary test
+		df.loc[7]=['wind power', wind_power]
+	df.loc[8]=['current time', datetime.today()]
 	#Write Dataframe to .csv
 	df.to_csv('Results.csv')
 
@@ -168,9 +167,16 @@ def _debugging(filePath):
 	# Location
 	# modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
+	fileNames = ['measured_substation_power.csv', 'measured_solar_0.csv', 'measured_solar_1.csv', 'measured_load_ziploads.csv', 
+					'measured_load_waterheaters.csv', 'measured_HVAC.csv', 'Results.csv']
+	files = [f for f in os.listdir('.')]
+	for f in files:
+		if f in fileNames:
+			os.remove(f) 
+	#Begin Main Function
 	name_volt_dict = ConvertAndwork(filePath)
-	offendersNames = ListOffenders(name_volt_dict)
-	writeResults(offendersNames)
+	offendersGen = ListOffenders(name_volt_dict)
+	writeResults(offendersGen)
 	# Open Distnetviz on glm
 	omf.distNetViz.viz('outGLMtest.glm') #or model.omd
 
@@ -189,7 +195,7 @@ if __name__ == '__main__':
 		filePath = args.file_path
 		_debugging(filePath)
 	except:
-		#_debugging(#path to sample feeder)
+		#_debugging()
 
 
 
