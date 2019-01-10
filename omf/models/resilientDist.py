@@ -443,6 +443,9 @@ def work(modelDir, inputDict):
 	gfmInputFilename = 'gfmInput.json'
 	with open(pJoin(modelDir, gfmInputFilename), 'w') as outFile:
 		json.dump(gfmJson, outFile, indent=4)
+	# Check for overlap between hazard field and GFM circuit input.
+	for key in gfmJson:
+		pass #TODO: check bus coordinates. if violation, set outData['warning'] = 'Hazard no overlap!'
 	# Run GFM
 	gfmBinaryPath = pJoin(__neoMetaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
 	rdtInputName = 'rdtInput.json'
