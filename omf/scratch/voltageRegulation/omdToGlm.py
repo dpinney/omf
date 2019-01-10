@@ -33,11 +33,11 @@ def ConvertAndwork(filePath):
 				name_volt_dict[value['name']] = {'Nominal_Voltage': value['nominal_voltage']}
 			if 'object' in value and (value['object'] == 'waterheater'):
 				inFeeder['tree'][key].update({'heat_mode':'ELECTRIC'})
-				inFeeder['tree'][key].update({'enable_volt_control':'false'})
+				inFeeder['tree'][key].update({'enable_volt_control':'true'})
 				inFeeder['tree'][key].update({'volt_lowlimit':'113.99'})
 				inFeeder['tree'][key].update({'volt_uplimit':'126.99'}) 
 			if'object' in value and (value['object']== 'ZIPload'):
-				inFeeder['tree'][key].update({'enable_volt_control':'false'})
+				inFeeder['tree'][key].update({'enable_volt_control':'true'})
 				inFeeder['tree'][key].update({'volt_lowlimit':'113.99'})
 				inFeeder['tree'][key].update({'volt_uplimit':'126.99'})
 			if 'argument' in value and ('minimum_timestep' in value['argument']):
@@ -181,7 +181,7 @@ def _debugging(filePath):
 	omf.distNetViz.viz('outGLMtest.glm') #or model.omd
 
 	# Remove Feeder
-	os.remove('outGLMtest.glm')
+	# os.remove('outGLMtest.glm')
 
 	# Visualize Voltage Regulation
 	voltageRegVisual.voltRegViz(filePath)
@@ -195,7 +195,7 @@ if __name__ == '__main__':
 		filePath = args.file_path
 		_debugging(filePath)
 	except:
-		#_debugging()
+		_debugging('/Users/tuomastalvitie/Desktop/gridballast_gld_simulations/Feeders/UCS_Egan_Housed_Solar.omd')
 
 
 
