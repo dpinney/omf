@@ -1,3 +1,5 @@
+import sys
+sys.path.append('../CIGAR')
 from cosim import GridLabWorld
 
 glw = GridLabWorld('6267', 'localhost', 'GC-solarAdd.glm', '2000-01-01 0:00:00')
@@ -13,4 +15,3 @@ print (glw.readClock())
 glw.resume()
 print (glw.readClock())
 #glw.shutdown()
-proc.kill()
