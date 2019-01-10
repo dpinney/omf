@@ -230,12 +230,10 @@ class GridLabWorld(object):
 	def shutdown(self):
 		'Stop simulation.'
 		try:
-			return urllib2.urlopen(self.baseUrl + 'control/shutdown').read()
-		except BadStatusLine: #HACK: this is what GridLAB-D returns when shutdown succeeds. Sigh.
-			return None
+			urllib2.urlopen(self.baseUrl + 'control/shutdown').read()
 		except:
-			warnings.warn("Server failed to stop!")
-			return "ERROR"
+			# For those hard-to-stop servers.
+			self.procObject.kill()
 
 	def resume(self):
 		try:
@@ -260,7 +258,7 @@ class GridLabWorld(object):
 		time.sleep(2) #TODO: instead of sleeping, wait 1 second, try to read clock, if it fails then wait 1 more second, loop, etc.
 
 def _test1():
-	glw = GridLabWorld('6267', 'test_localhost', './smsSingle.glm', '2000-01-02 00:00:00')
+	glw = GridLabWorld('6267', 'localhost', './test_smsSingle.glm', '2000-01-02 00:00:00')
 	glw.start()
 	# Read the clock, solar output voltage, battery state of charge, and inverter voltage input.
 	print '* Reading clock:', glw.readClock()
@@ -288,7 +286,6 @@ def _test1():
 	print '* Reading inverter_1 input voltage (V_In):', glw.read('inverter_1','V_In')
 	# Stop the simulation.
 	glw.shutdown()
-	# proc.kill() # For those hard-to-stop servers.
 
 def _test2():
 	# test with AlertAgent, ReadAttackAgent
@@ -383,7 +380,7 @@ def _testfault():
 	print coord.drawPrettyResults()
 
 if __name__ == '__main__':
-	_test2()
+	_test1()
 	# _testfault()
 	# thisDir = os.path.dirname(__file__)
 	# webbrowser.open_new("file://" + thisDir + "/AgentLog/output.html")

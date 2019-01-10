@@ -120,6 +120,8 @@ def _addGldToPath():
 def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None, glmName=None, gldBinary=None):
 	''' Execute gridlab in the local filesystem. Return a nice dictionary of results. '''
 	try:
+		#Runs standard gridlabd binary if binary is not specified, runs gldBinary parameter path if specified. 
+		#gldBinary must be path to binary
 		if not gldBinary:
 			binaryName = "gridlabd"
 		else:
