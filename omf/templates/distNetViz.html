@@ -29,7 +29,11 @@
 				line-height:30px;
 				color:white;
 			}
-			body {margin:0px;}
+			body {
+                /*width: 100%;
+                height: 100%;*/
+                margin:0px;
+            }
 			a {
 				text-decoration: none;
                 color: mediumseagreen;
@@ -41,12 +45,16 @@
 
             /* SVG */
 
+            #interfaceContainer {
+                position: relative;
+            }
+
             /* This is the element that acts as a hook for svg-pan-zoom.js to attach a viewport, which it creates itself */
-			svg#svgContainer {
+			#svgContainer {
                 /* width must be 100%, meaning 100% of the document */
 				width: 100%; 
                 /* height must be manually set to a hard value */
-				height: calc(100vh - var(--header-height) - var(--header-padding-bottom) - var(--header-padding-top) - 5px);
+				height: calc(100vh - var(--header-height) - var(--header-padding-bottom) - var(--header-padding-top));
                 /* overflow: hidden is set by svg-pan-zoom.js itself. No need to change that here. */
 			}
 			#saveButton {
@@ -310,7 +318,7 @@
             }
             */
             input:invalid {
-                border: 1px solid red;
+                /*Aborder: 1px solid red;*/
             }            
 
             /* Tree tables */
@@ -371,14 +379,15 @@
 				/*right: 5px;*/
             }
 
+            /* Don't set overflow-y to hidden */
 			.dataTable {
                 position: fixed;
 				top: 55px;
 				border:1px solid black;
 				border-collapse: collapse;
-                /*display: block;*/
+                display: block;
                 overflow-x: hidden;
-				max-height: 80%;
+				max-height: 90vh;
 			}
             .dataTable tr {
                 border-bottom: 1px solid black;
@@ -435,581 +444,582 @@
 		<!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder Largest.js'></script> -->
 		<!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder Norfork.js'></script> -->
 	</head>
-	<!--<body onkeypress='hotkeys()' style='width:100%;height:100%'>-->
-	<body style='width:100%;height:100%'>
-        <div id="loadingMessage">
-            <p style="font-size:60pt; text-align:center; width:100%;">Feeder Loading...</p>
-        </div>
-		<!-- Controls -->
-		<div style='background:dimgrey; top:55px; left:5px' class='divButton' onclick='window.panZoom.zoomIn()' title='Zoom In'>+</div>
-		<div style='background:dimgrey; top:95px; left:5px' class='divButton' onclick='window.panZoom.zoomOut()' title='Zoom Out'>-</div>
-		<div style='background:dimgrey; top:135px; left:5px' class='divButton' onclick='window.panZoom.reset()' title='Reset Zoom'>R</div>
-		<div style='background:dimgrey; top:175px; left:5px;' class='divButton' onclick='scaleTo(parseFloat(prompt("Scale line thickness by this multiple:", scaleLevel)))' title='Scale To'>S</div>
-		<!-- <div style='background:navy; top:215px; left:5px' id='saveLink' class='divButton' onclick='saveSvg()' title='Save File' download>S</div> -->
-		<!-- Menu Bar -->
-		<div id='header'>
-			<div id="menuRight">
-				<div id="helpDiv" class="headerDiv">
-					<div class="buttonGroup">
-						<button class='pill' type = 'submit'>
-							<a id='helpButton' href='https://github.com/dpinney/omf/wiki/Tools-~-gridEdit' target='_blank'>Help</a>
-						</button>
-					</div>
-                </div>
-                <div id="editDiv" class="headerDiv">
-					<div class="buttonGroup">
-                        <button id="addOps" class='pill' onclick='dropPill(this, "Edit")'>Edit &#x25BE;</button>
-                        <ul id="editMenu" class='menu right' style="display: none">
-                            <!--<li>Zoom To Fit</li>-->
-                            <!--<li>Zoom Reset</li>-->
-                            <li>Static Loads to Houses</li>
-                            <li data-web>Scada Loadshapes...</li>
-                            <li data-web>Add AMI Profiles...</li>
-                            <li>Find...</li>
-                            <li>Mass Add...</li>
-                            <li>Mass Edit...</li>
-                            <li>Attachments...</li>
-                            <li data-web>Climate...</li>
-                            <li data-web>Anonymization...</li>
-                        </ul>
+	<!--<body onkeypress='hotkeys()'>-->
+    <body>
+        <div id="interfaceContainer">
+            <div id="loadingMessage">
+                <p style="font-size:60pt; text-align:center; width:100%;">Feeder Loading...</p>
+            </div>
+            <div id="descriptionTables"></div>
+            <div id="selectionTable"></div>
+            <!-- Controls -->
+            <div style='background:dimgrey; top:55px; left:5px' class='divButton' onclick='window.panZoom.zoomIn()' title='Zoom In'>+</div>
+            <div style='background:dimgrey; top:95px; left:5px' class='divButton' onclick='window.panZoom.zoomOut()' title='Zoom Out'>-</div>
+            <div style='background:dimgrey; top:135px; left:5px' class='divButton' onclick='window.panZoom.reset()' title='Reset Zoom'>R</div>
+            <div style='background:dimgrey; top:175px; left:5px;' class='divButton' onclick='scaleTo(parseFloat(prompt("Scale line thickness by this multiple:", scaleLevel)))' title='Scale To'>S</div>
+            <!-- <div style='background:navy; top:215px; left:5px' id='saveLink' class='divButton' onclick='saveSvg()' title='Save File' download>S</div> -->
+            <!-- Menu Bar -->
+            <div id='header'>
+                <div id="menuRight">
+                    <div id="helpDiv" class="headerDiv">
+                        <div class="buttonGroup">
+                            <button class='pill' type = 'submit'>
+                                <a id='helpButton' href='https://github.com/dpinney/omf/wiki/Tools-~-gridEdit' target='_blank'>Help</a>
+                            </button>
+                        </div>
                     </div>
+                    <div id="editDiv" class="headerDiv">
+                        <div class="buttonGroup">
+                            <button id="addOps" class='pill' onclick='dropPill(this, "Edit")'>Edit &#x25BE;</button>
+                            <ul id="editMenu" class='menu right' style="display: none">
+                                <!--<li>Zoom To Fit</li>-->
+                                <!--<li>Zoom Reset</li>-->
+                                <li>Static Loads to Houses</li>
+                                <li data-web>Scada Loadshapes...</li>
+                                <li data-web>Add AMI Profiles...</li>
+                                <li>Find...</li>
+                                <li>Mass Add...</li>
+                                <li>Mass Edit...</li>
+                                <li>Attachments...</li>
+                                <li data-web>Climate...</li>
+                                <li data-web>Anonymization...</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div id="addDiv" class="headerDiv">
+                        <div class="buttonGroup">
+                            <button id="addOps" class='pill' onclick='dropPill(this, "Add")'>Add &#x25BE;</button>
+                            <ul id='componentList' class='menu right' style="display: none">
+                        </div>
+                    </div>
+                    {% if showFileMenu %}
+                    <div id="fileDiv" class="headerDiv">
+                        <div class='buttonGroup'>
+                            <button id="fileOps" class='pill' onclick='dropPill(this, "File")'>File &#x25BE;</button>
+                            <ul id='fileMenu' class='menu right' style="display: none">
+                                <li data-web>Save</li>
+                                <li>View Raw Data</li>
+                                <li data-web>Rename</li>
+                                <li data-web>Load from Model...</li>
+                                <li data-web>New Blank Feeder...</li>
+                                <li data-web>Windmil Conversion...</li>
+                                <li data-web>GridLAB-D Conversion...</li>
+                                <li data-web>CYMDIST Conversion...</li>
+                            </ul>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
-				<div id="addDiv" class="headerDiv">
-					<div class="buttonGroup">
-						<button id="addOps" class='pill' onclick='dropPill(this, "Add")'>Add &#x25BE;</button>
-						<ul id='componentList' class='menu right' style="display: none">
-					</div>
-				</div>
-                {% if showFileMenu %}
-				<div id="fileDiv" class="headerDiv">
-					<div class='buttonGroup'>
-						<button id="fileOps" class='pill' onclick='dropPill(this, "File")'>File &#x25BE;</button>
-                        <ul id='fileMenu' class='menu right' style="display: none">
-							<li data-web>Save</li>
-							<li>View Raw Data</li>
-							<li data-web>Rename</li>
-                            <li data-web>Load from Model...</li>
-							<li data-web>New Blank Feeder...</li>
-							<li data-web>Windmil Conversion...</li>
-							<li data-web>GridLAB-D Conversion...</li>
-							<li data-web>CYMDIST Conversion...</li>
-						</ul>
-					</div>
-                </div>
-                {% endif %}
-			</div>
-        </div>
-        <!-- Svg container -->
-        <!--<div id="svgContainerWrapper" style="height: auto; background-color: blue;">-->
-        <div id="svgContainerWrapper" style="height: auto;">
-            <svg id='svgContainer' xmlns='http://www.w3.org/2000/svg'>
-                <style type="text/css">
-                    <![CDATA[
-                    .house {fill:blue;}
-                    .triplex_meter {fill:orange;}
-                    .underground_line {stroke:gray;}
-                    .transformer {stroke:orange;}
-                    .regulator {stroke:red;}
-                    line {stroke:black;}
-                    line.parentChild {stroke:LightGrey;}
-                    circle {stroke:white; fill:gray;}
-                    line.selected, circle.selected {stroke:lime;}
-                    ]]>
-                </style>
-            </svg>
-        </div>
-        <!-- Modals -->
-		<div id='findModal' class="modal" style="display: none">
-			<div class='modalContent'>
-				<table>
-					<tr>
-                        <td>Term</td>
-                        <td><input id='searchInput' type='text' value="Enter a search term" class="modalInput"></td>
-                        <td id="searchCount"></td>
-					</tr>
-					<tr>
-						<td><button id="findPrevious" class="modalButton">Previous</button></td>
-						<td><button id="findNext" class="modalButton">Next</button></td>
-						<td><button class="modalButton" onclick='toggleElementDisplay("findModal")'>Cancel</button></td>
-					</tr>
-				</table>
-			</div>
-        </div>
-        <div id="progressModal" class="modal" style="display: none">
-            <div class="modalContent">
-                <img src="/static/spinner.gif">
-                <h2>text...</h2>
-                <button class="modalButton" id="progressModalCancel">Cancel</button>
             </div>
-        </div>
-        <div id="loadModal" class="modal" style="display: none">
-            <div class="modalContent">
-                <table id="loadModalTable">
-                    <tbody>
+            <!-- Svg container -->
+            <div id="svgContainerWrapper" style="height: auto;">
+                <svg id='svgContainer' xmlns='http://www.w3.org/2000/svg'>
+                    <style type="text/css">
+                        <![CDATA[
+                        .house {fill:blue;}
+                        .triplex_meter {fill:orange;}
+                        .underground_line {stroke:gray;}
+                        .transformer {stroke:orange;}
+                        .regulator {stroke:red;}
+                        line {stroke:black;}
+                        line.parentChild {stroke:LightGrey;}
+                        circle {stroke:white; fill:gray;}
+                        line.selected, circle.selected {stroke:lime;}
+                        ]]>
+                    </style>
+                </svg>
+            </div>
+            <!-- Modals -->
+            <div id='findModal' class="modal" style="display: none">
+                <div class='modalContent'>
+                    <table>
                         <tr>
-                            <th class="modalTableHeader modalTableRow">Public Feeders</th>
-                            <th class="modalTableHeader modalTableRow">My Feeders</th>
-                        </tr>	
-                        <tr>
-                            <td class="modalTableRow"> 
-                                <ul id="publicFeederList" class="scrollableList"></ul>
-                            </td>
-                            <td class="modalTableRow"> 
-                                <ul id="userFeederList" class="scrollableList"></ul>
-                            </td>
+                            <td>Term</td>
+                            <td><input id='searchInput' type='text' value="Enter a search term" class="modalInput"></td>
+                            <td id="searchCount"></td>
                         </tr>
-                    </tbody>
-                </table>
-                <button onclick="toggleElementDisplay('loadModal')" class="modalButton">Cancel</button>
+                        <tr>
+                            <td><button id="findPrevious" class="modalButton">Previous</button></td>
+                            <td><button id="findNext" class="modalButton">Next</button></td>
+                            <td><button class="modalButton" onclick='toggleElementDisplay("findModal")'>Cancel</button></td>
+                        </tr>
+                    </table>
+                </div>
             </div>
-        </div>
-        <div id="blankFeederModal" class="modal" style="display: none">
-            <div class='modalContent'>
-                <form onsubmit="submitForm({formId:'blankFeederForm'}); return false;"
-                 action="/newBlankFeeder/{{thisOwner}}" id="blankFeederForm">
-                    <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
-                    <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
-                    <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
-                    <input type='hidden' name='referrer' value='distribution'/>
-                    <table>
+            <div id="progressModal" class="modal" style="display: none">
+                <div class="modalContent">
+                    <img src="/static/spinner.gif">
+                    <h2>text...</h2>
+                    <button class="modalButton" id="progressModalCancel">Cancel</button>
+                </div>
+            </div>
+            <div id="loadModal" class="modal" style="display: none">
+                <div class="modalContent">
+                    <table id="loadModalTable">
                         <tbody>
                             <tr>
-                                <th class="modalTableHeader modalTableRow">Blank Feeder</th>
-                            </tr>
+                                <th class="modalTableHeader modalTableRow">Public Feeders</th>
+                                <th class="modalTableHeader modalTableRow">My Feeders</th>
+                            </tr>	
                             <tr>
-                                <td><label for="blankFeederInput">Name</label></td>
-                                <td>
-                                    <!-- TODO: add better validation than just the 'required' attribute-->
-                                    <input type='text' required id="blankFeederInput" name='feederNameNew' class="modalInput"/>
+                                <td class="modalTableRow"> 
+                                    <ul id="publicFeederList" class="scrollableList"></ul>
+                                </td>
+                                <td class="modalTableRow"> 
+                                    <ul id="userFeederList" class="scrollableList"></ul>
                                 </td>
                             </tr>
-                            <tr>
-                                <td><button type="button" onclick="toggleElementDisplay('blankFeederModal')" class="modalButton">Cancel</button></td>
-                                <td><button type="submit" class="modalButton">Create</button></td>
-                            </tr>
                         </tbody>
                     </table>
-                </form>
+                    <button onclick="toggleElementDisplay('loadModal')" class="modalButton">Cancel</button>
+                </div>
             </div>
-        </div>
-        <div id='milsoftModal' class='modal' style="display: none">
-            <div class='modalContent'>
-                <form onsubmit="submitForm({formId:'milsoftForm', pollUrl:'/checkConversion/{{thisModelName}}/{{thisOwner}}', inputId:'milsoftInput'}); return false;"
-                 action="/milsoftImport/{{thisOwner}}" id="milsoftForm">
-                    <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
-                    <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
-                    <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
-                    <!--<input type='hidden' name='referrer' value='distribution'/>-->
-                    <table>
-                        <tbody>
-                            <tr>
-                                <th class="modalTableHeader modalTableRow">Milsoft Conversion</th>
-                            </tr>
-                            <tr>
-                                <td><label for="milsoftInput">Name</label></td>
-                                <td>
-                                    <!-- TODO: add better validation than just the 'required' attribute-->
-                                    <input type='text' required id="milsoftInput" name='feederNameM' class="modalInput"/>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Data File (.std)</td>
-                                <td><input type='file' required id="stdFile" name='stdFile' accept='.std' class="modalInput"/></td>
-                            </tr>
-                            <tr>
-                                <td>Equipment File (.seq)</td>
-                                <td><input type='file' required id="seqFile" name='seqFile' accept='.seq' class="modalInput"/></td>
-                            </tr>
-                            <tr>
-                                <td><button type="button" onclick="toggleElementDisplay('milsoftModal')" class="modalButton">Cancel</button></td>
-                                <td><button type="submit" class="modalButton">Import</button></td>
-                            </tr>
-                        </tbody>
-                    </table> 
-                </form>
+            <div id="blankFeederModal" class="modal" style="display: none">
+                <div class='modalContent'>
+                    <form onsubmit="submitForm({formId:'blankFeederForm'}); return false;"
+                    action="/newBlankFeeder/{{thisOwner}}" id="blankFeederForm">
+                        <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
+                        <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
+                        <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
+                        <input type='hidden' name='referrer' value='distribution'/>
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th class="modalTableHeader modalTableRow">Blank Feeder</th>
+                                </tr>
+                                <tr>
+                                    <td><label for="blankFeederInput">Name</label></td>
+                                    <td>
+                                        <!-- TODO: add better validation than just the 'required' attribute-->
+                                        <input type='text' required id="blankFeederInput" name='feederNameNew' class="modalInput"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><button type="button" onclick="toggleElementDisplay('blankFeederModal')" class="modalButton">Cancel</button></td>
+                                    <td><button type="submit" class="modalButton">Create</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
             </div>
-        </div>
-        <div id='gridlabdModal' class='modal' style="display: none">
-            <div class='modalContent'>
-                <form onsubmit="submitForm({formId:'gridlabdForm', pollUrl:'/checkConversion/{{thisModelName}}/{{thisOwner}}', inputId:'gridlabdInput'}); return false;"
-                 action="/gridlabdImport/{{thisOwner}}" id="gridlabdForm">
-                    <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
-                    <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
-                    <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
-                    <!--<input type='hidden' name='referrer' value='distribution'/>-->
-                    <table>
-                        <tbody>
-                            <tr>
-                                <th class="modalTableHeader modalTableRow">GridLab-D Conversion</th>
-                            </tr>
-                            <tr>
-                                <td><label for="gridlabdInput">Name</label></td>
-                                <td>
-                                    <!-- TODO: add better validation than just the 'required' attribute-->
-                                    <input type='text' required id="gridlabdInput" name='feederNameG' class="modalInput"/>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Data File (.glm)</td>
-                                <td><input type='file' required id="csvFile" name='glmFile' accept='.glm' class="modalInput"/></td>
-                            </tr>
-                            <tr>
-                                <td><button type="button" onclick="toggleElementDisplay('gridlabdModal')" class="modalButton">Cancel</button></td>
-                                <td><button type="submit" class="modalButton">Import</button></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </form>
+            <div id='milsoftModal' class='modal' style="display: none">
+                <div class='modalContent'>
+                    <form onsubmit="submitForm({formId:'milsoftForm', pollUrl:'/checkConversion/{{thisModelName}}/{{thisOwner}}', inputId:'milsoftInput'}); return false;"
+                    action="/milsoftImport/{{thisOwner}}" id="milsoftForm">
+                        <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
+                        <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
+                        <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
+                        <!--<input type='hidden' name='referrer' value='distribution'/>-->
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th class="modalTableHeader modalTableRow">Milsoft Conversion</th>
+                                </tr>
+                                <tr>
+                                    <td><label for="milsoftInput">Name</label></td>
+                                    <td>
+                                        <!-- TODO: add better validation than just the 'required' attribute-->
+                                        <input type='text' required id="milsoftInput" name='feederNameM' class="modalInput"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Data File (.std)</td>
+                                    <td><input type='file' required id="stdFile" name='stdFile' accept='.std' class="modalInput"/></td>
+                                </tr>
+                                <tr>
+                                    <td>Equipment File (.seq)</td>
+                                    <td><input type='file' required id="seqFile" name='seqFile' accept='.seq' class="modalInput"/></td>
+                                </tr>
+                                <tr>
+                                    <td><button type="button" onclick="toggleElementDisplay('milsoftModal')" class="modalButton">Cancel</button></td>
+                                    <td><button type="submit" class="modalButton">Import</button></td>
+                                </tr>
+                            </tbody>
+                        </table> 
+                    </form>
+                </div>
             </div>
-        </div>
-        <div id='cymeModal' class='modal' style="display: none">
-            <div class='modalContent'>
-                <form onsubmit="submitForm({formId:'cymeForm', pollUrl:'/checkConversion/{{thisModelName}}/{{thisOwner}}', inputId:'cymeInput'}); return false;"
-                 action="/cymeImport/{{thisOwner}}" id="cymeForm">
-                    <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
-                    <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
-                    <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
-                    <!--<input type='hidden' name='referrer' value='distribution'/>-->
-                    <table>
-                        <tbody>
-                            <tr>
-                                <th class="modalTableHeader modalTableRow">Cyme Conversion</th>
-                            </tr>
-                            <tr>
-                                <td><label for="cymeInput">Name</label></td>
-                                <td>
-                                    <!-- TODO: add better validation than just the 'required' attribute-->
-                                    <input type='text' required id="cymeInput" name='feederNameC' class="modalInput"/>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Network File (.mdb)</td>
-                                <td><input type='file' required id="mdbNetFile" name='mdbNetFile' accept='.mdb' class="modalInput"/></td>
-                            </tr>
-                            <tr>
-                                <td><button type="button" onclick="toggleElementDisplay('cymeModal')" class="modalButton">Cancel</button></td>
-                                <td><button type="submit" class="modalButton">Import</button></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </form>
+            <div id='gridlabdModal' class='modal' style="display: none">
+                <div class='modalContent'>
+                    <form onsubmit="submitForm({formId:'gridlabdForm', pollUrl:'/checkConversion/{{thisModelName}}/{{thisOwner}}', inputId:'gridlabdInput'}); return false;"
+                    action="/gridlabdImport/{{thisOwner}}" id="gridlabdForm">
+                        <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
+                        <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
+                        <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
+                        <!--<input type='hidden' name='referrer' value='distribution'/>-->
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th class="modalTableHeader modalTableRow">GridLab-D Conversion</th>
+                                </tr>
+                                <tr>
+                                    <td><label for="gridlabdInput">Name</label></td>
+                                    <td>
+                                        <!-- TODO: add better validation than just the 'required' attribute-->
+                                        <input type='text' required id="gridlabdInput" name='feederNameG' class="modalInput"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Data File (.glm)</td>
+                                    <td><input type='file' required id="csvFile" name='glmFile' accept='.glm' class="modalInput"/></td>
+                                </tr>
+                                <tr>
+                                    <td><button type="button" onclick="toggleElementDisplay('gridlabdModal')" class="modalButton">Cancel</button></td>
+                                    <td><button type="submit" class="modalButton">Import</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
             </div>
-        </div>
-        <div id="scadaModal" class="modal" style="display: none">
-            <div class='modalContent'>
-                <form onsubmit="submitForm({formId:'scadaForm', pollUrl:'/checkScadaLoadshape/{{thisModelName}}'}); return false;"
-                 action="/scadaLoadshape/{{thisOwner}}/{{thisFeederName}}" id="scadaForm">
-                    <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
-                    <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
-                    <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
-                    <!--<input type='hidden' name='referrer' value='distribution'/>-->
-                    <table>
-                        <tbody>
-                            <tr>
-                                <th class="modalTableHeader modalTableRow">Scada Loadshapes</th>
-                                <th style='float:right;'>
-                                    <a href='https://github.com/dpinney/omf/wiki/Tools-~-gridEdit#scada-loadshapes' target='_blank'>Format Help</a>
-                                </th>
-                            </tr>
-                            <tr>
-                                <td>File containing Scada load data (.csv)</td>
-                                <td><input type='file' required id="scadaFile" name='scadaFile' accept='.csv' class="modalInput"/></td>
-                            </tr>
-                            <tr>
-                                <td colspan='100%'>Note: Model "Simulation Start Date" should lie within the Scada load's dates.</td>
-                            </tr>
-                            <tr>
-                                <td><button type="button" onclick="toggleElementDisplay('scadaModal')" class="modalButton">Cancel</button></td>
-                                <td><button type="submit" class="modalButton">Import</button></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </form>
+            <div id='cymeModal' class='modal' style="display: none">
+                <div class='modalContent'>
+                    <form onsubmit="submitForm({formId:'cymeForm', pollUrl:'/checkConversion/{{thisModelName}}/{{thisOwner}}', inputId:'cymeInput'}); return false;"
+                    action="/cymeImport/{{thisOwner}}" id="cymeForm">
+                        <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
+                        <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
+                        <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
+                        <!--<input type='hidden' name='referrer' value='distribution'/>-->
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th class="modalTableHeader modalTableRow">Cyme Conversion</th>
+                                </tr>
+                                <tr>
+                                    <td><label for="cymeInput">Name</label></td>
+                                    <td>
+                                        <!-- TODO: add better validation than just the 'required' attribute-->
+                                        <input type='text' required id="cymeInput" name='feederNameC' class="modalInput"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Network File (.mdb)</td>
+                                    <td><input type='file' required id="mdbNetFile" name='mdbNetFile' accept='.mdb' class="modalInput"/></td>
+                                </tr>
+                                <tr>
+                                    <td><button type="button" onclick="toggleElementDisplay('cymeModal')" class="modalButton">Cancel</button></td>
+                                    <td><button type="submit" class="modalButton">Import</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
             </div>
-        </div>
-        <div id='amiModal' class='modal' style="display: none">
-            <div class='modalContent'>
-                <form onsubmit="submitForm({formId:'amiForm', pollUrl:'/checkLoadModelingAmi/{{thisModelName}}'}); return false;"
-                 action="/loadModelingAmi/{{thisOwner}}/{{thisFeederName}}" id="amiForm">
-                    <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
-                    <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
-                    <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
-                    <!--<input type='hidden' name='referrer' value='distribution'/>-->
-                    <table>
-                        <tbody>
-                            <tr>
-                                <th class="modalTableHeader modalTableRow">AMI Profiles</th>
-                                <th style='float:right;'>
-                                    <a href='https://github.com/dpinney/omf/wiki/Tools-~-gridEdit' target='_blank'>Format Help</a>
-                                </th>
-                            </tr>
-                            <tr>
-                                <td>File containing AMI load data (.csv)</td>
-                                <td><input type='file' required id="amiFile" name='amiFile' accept='.csv' class="modalInput"/></td>
-                            </tr>
-                            <tr>
-                                <td colspan='100%'>Note: Model "Simulation Start Date" should lie within the AMI profiles's dates.</td>
-                            </tr>
-                            <tr>
-                                <td><button type="button" onclick="toggleElementDisplay('amiModal')" class="modalButton">Cancel</button></td>
-                                <td><button type="submit" class="modalButton">Import</button></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </form>
+            <div id="scadaModal" class="modal" style="display: none">
+                <div class='modalContent'>
+                    <form onsubmit="submitForm({formId:'scadaForm', pollUrl:'/checkScadaLoadshape/{{thisModelName}}'}); return false;"
+                    action="/scadaLoadshape/{{thisOwner}}/{{thisFeederName}}" id="scadaForm">
+                        <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
+                        <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
+                        <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
+                        <!--<input type='hidden' name='referrer' value='distribution'/>-->
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th class="modalTableHeader modalTableRow">Scada Loadshapes</th>
+                                    <th style='float:right;'>
+                                        <a href='https://github.com/dpinney/omf/wiki/Tools-~-gridEdit#scada-loadshapes' target='_blank'>Format Help</a>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <td>File containing Scada load data (.csv)</td>
+                                    <td><input type='file' required id="scadaFile" name='scadaFile' accept='.csv' class="modalInput"/></td>
+                                </tr>
+                                <tr>
+                                    <td colspan='100%'>Note: Model "Simulation Start Date" should lie within the Scada load's dates.</td>
+                                </tr>
+                                <tr>
+                                    <td><button type="button" onclick="toggleElementDisplay('scadaModal')" class="modalButton">Cancel</button></td>
+                                    <td><button type="submit" class="modalButton">Import</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
             </div>
-        </div>
-        <div id='massAddModal' class='modal' style="display: none">
-            <div class='modalContent'>
-                <form onsubmit="massAdd(); toggleElementDisplay('massAddModal'); return false;">
-                    <table>
-                        <tbody>
-                            <tr>
-                                <th class="modalTableHeader modalTableRow">Mass Add</th>
-                            </tr>
-                            <tr>
-                                <td>Add component:</td>
-                                <td><select id='componentSelect'></select></td>
-                            </tr>
-                            <tr>
-                                <td>To each:</td>
-                                <td><select id='massAddTargetSelect'></select></td>
-                            </tr>
-                            <tr>
-                                <td>With probability for each attachment (float between 0.0 and 1.0):</td>
-                                <td><input type='text' pattern="^(1.0)|(0?(\.\d+))$" required id='percent' value='1.0' class="modalInput"/></td>
+            <div id='amiModal' class='modal' style="display: none">
+                <div class='modalContent'>
+                    <form onsubmit="submitForm({formId:'amiForm', pollUrl:'/checkLoadModelingAmi/{{thisModelName}}'}); return false;"
+                    action="/loadModelingAmi/{{thisOwner}}/{{thisFeederName}}" id="amiForm">
+                        <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
+                        <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
+                        <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
+                        <!--<input type='hidden' name='referrer' value='distribution'/>-->
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th class="modalTableHeader modalTableRow">AMI Profiles</th>
+                                    <th style='float:right;'>
+                                        <a href='https://github.com/dpinney/omf/wiki/Tools-~-gridEdit' target='_blank'>Format Help</a>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <td>File containing AMI load data (.csv)</td>
+                                    <td><input type='file' required id="amiFile" name='amiFile' accept='.csv' class="modalInput"/></td>
+                                </tr>
+                                <tr>
+                                    <td colspan='100%'>Note: Model "Simulation Start Date" should lie within the AMI profiles's dates.</td>
+                                </tr>
+                                <tr>
+                                    <td><button type="button" onclick="toggleElementDisplay('amiModal')" class="modalButton">Cancel</button></td>
+                                    <td><button type="submit" class="modalButton">Import</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+            </div>
+            <div id='massAddModal' class='modal' style="display: none">
+                <div class='modalContent'>
+                    <form onsubmit="massAdd(); toggleElementDisplay('massAddModal'); return false;">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th class="modalTableHeader modalTableRow">Mass Add</th>
+                                </tr>
+                                <tr>
+                                    <td>Add component:</td>
+                                    <td><select id='componentSelect'></select></td>
+                                </tr>
+                                <tr>
+                                    <td>To each:</td>
+                                    <td><select id='massAddTargetSelect'></select></td>
+                                </tr>
+                                <tr>
+                                    <td>With probability for each attachment (float between 0.0 and 1.0):</td>
+                                    <td><input type='text' pattern="^(1.0)|(0?(\.\d+))$" required id='percent' value='1.0' class="modalInput"/></td>
 
-                            </tr>
-                            <tr>
-                                <td><button onclick="toggleElementDisplay('massAddModal')" class="modalButton">Cancel</button></td>
-                                <td><button type="submit" class="modalButton">Apply</button></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </form>
+                                </tr>
+                                <tr>
+                                    <td><button onclick="toggleElementDisplay('massAddModal')" class="modalButton">Cancel</button></td>
+                                    <td><button type="submit" class="modalButton">Apply</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
             </div>
-        </div>
-        <div id='massEditModal' class='modal' style="display: none">
-            <div class='modalContent'>
-                <table>
-                    <tbody>
-                        <tr>
-                            <th class="modalTableHeader">Mass Edit</th>
-                        </tr>
-                        <tr>
-                            <td>For each object of type</td>
-                            <td><select id='massEditTargetSelect'></select></td>
-                            <td>with attribute</td>
-                            <td><input type='text' id='massEditAttribute' class="modalInput"></td>
-                        </tr>
-                        <tr>
-                            <td><input type="radio" name="attributeOperation" value="addTo">Add value to attribute</td>
-                            <td><input type='text' id='addToValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
-                        </tr>
-                        <tr>
-                            <td><input type="radio" name="attributeOperation" value="delete">Delete Attribute</td>
-                        </tr>
-                        <tr>
-                            <td><input type="radio" name="attributeOperation" value="change">Change attribute to</td>
-                            <td><input type='text' id='changeValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
-                        </tr>
-                        </tr>
-                        <tr>		
-                            <td><input type="radio" name="attributeOperation" value="multiplyBy">Multiply attribute by</td>
-                            <td><input type='text' id='multiplyValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
-                            <td style="text-align: center" >and add</td>
-                            <td><input type='text' id='andAddValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
-                        </tr>
-                        <tr>
-                            <td>Or</td>
-                        </tr>
-                        <tr>
-                            <td><input type="radio" name="attributeOperation" value="addAttribute"> Add new attribute</td>
-                            <td><input type='text' id='newAttributeKey' class="modalInput"></td>
-                            <td style="text-align: center">with value</td>
-                            <td><input type='text' id='newAttributeValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">
-                                <button onclick="toggleElementDisplay('massEditModal')" class="modalButton" style="float: right">Cancel</button>
-                            </td>
-                            <td>
-                                <button onclick="massEdit(); toggleElementDisplay('massEditModal');" class="modalButton" style="float: left">Apply</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div id='attachmentsModal' class='modal' style="display: none">
-            <div class='modalContent'>
-                <table>
-                    <tbody>
-                        <tr>
-                            <td><select id='attachmentSelect'></select></td>
-                        </tr>
-                        <tr>
-                            <td><button onclick="toggleElementDisplay('attachmentsModal')" class="modalButton">Cancel</button></td>
-                            <td><button onclick="toggleElementDisplay('attachmentsModal'); editAttachment()" class="modalButton">Select</button></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div id='editAttachmentModal' class='modal' style="display: none">
-            <div class='modalContent'>
-                <table>
-                    <tbody>
-                        <tr>
-                            <td id='attachmentTd'></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <textarea rows='25' cols='80' id='editAttachmentBox'></textarea>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><button onclick="toggleElementDisplay('editAttachmentModal')" class="modalButton">Cancel</button></td>
-                            <td><button onclick="saveAttachment(); toggleElementDisplay('editAttachmentModal');" class="modalButton">Save</button></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div id='climateModal' class='modal' style="display: none">
-            <div class='modalContent'>
-                <form onsubmit="submitForm({formId:'climateForm', pollUrl:'/checkClimateChange/{{thisOwner}}/{{thisModelName}}'}); return false;"
-                action="/climateChange/{{thisOwner}}/{{thisFeederName}}" id="climateForm">
-                    <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
-                    <!--<input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>-->
-                    <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
-                    <!--<input type='hidden' name='referrer' value='distribution'/>-->
+            <div id='massEditModal' class='modal' style="display: none">
+                <div class='modalContent'>
                     <table>
                         <tbody>
                             <tr>
-                                <th class="modalTableHeader modalTableRow">Climate Change</th>
+                                <th class="modalTableHeader">Mass Edit</th>
                             </tr>
                             <tr>
-                                <td>
-                                    <input id='historicalImport' type='radio' name='climateImportOption' value='historicalImport'>
-                                    <label for='historicalImport'>Historical Weather</label>
+                                <td>For each object of type</td>
+                                <td><select id='massEditTargetSelect'></select></td>
+                                <td>with attribute</td>
+                                <td><input type='text' id='massEditAttribute' class="modalInput"></td>
+                            </tr>
+                            <tr>
+                                <td><input type="radio" name="attributeOperation" value="addTo">Add value to attribute</td>
+                                <td><input type='text' id='addToValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
+                            </tr>
+                            <tr>
+                                <td><input type="radio" name="attributeOperation" value="delete">Delete Attribute</td>
+                            </tr>
+                            <tr>
+                                <td><input type="radio" name="attributeOperation" value="change">Change attribute to</td>
+                                <td><input type='text' id='changeValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
+                            </tr>
+                            </tr>
+                            <tr>		
+                                <td><input type="radio" name="attributeOperation" value="multiplyBy">Multiply attribute by</td>
+                                <td><input type='text' id='multiplyValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
+                                <td style="text-align: center" >and add</td>
+                                <td><input type='text' id='andAddValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
+                            </tr>
+                            <tr>
+                                <td>Or</td>
+                            </tr>
+                            <tr>
+                                <td><input type="radio" name="attributeOperation" value="addAttribute"> Add new attribute</td>
+                                <td><input type='text' id='newAttributeKey' class="modalInput"></td>
+                                <td style="text-align: center">with value</td>
+                                <td><input type='text' id='newAttributeValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <button onclick="toggleElementDisplay('massEditModal')" class="modalButton" style="float: right">Cancel</button>
                                 </td>
-                            </tr>
-                            <tr>
-                                <td><label for='startDate'>Start Date (YYYY-MM-DD):</label></td>
-                                <td><input id='startDate' type='text' name='startDate' pattern='^\d{4}-\d{2}-\d{2}$' class="modalInput"></td>
-                            </tr>
-                            <tr>
-                                <td><label for='endDate'>End Date (YYYY-MM-DD):</label></td>
-                                <td><input id='endDate' type='text' name='endDate' pattern='^\d{4}-\d{2}-\d{2}$' class="modalInput"></td>
-                            </tr>
-                            <tr>
-                                <td><label for='airport'>Airport Code:</label></td>
-                                <td><input id='airport' type='text' name='airport' pattern='^[A-Z]{3}$' class="modalInput"></td>
-                            </tr>
-                            <tr>
                                 <td>
-                                    <input id='tmyImport' type='radio' name='climateImportOption' value='tmyImport'>
-                                    <label for='tmyImport'>tmy Import</label>
+                                    <button onclick="massEdit(); toggleElementDisplay('massEditModal');" class="modalButton" style="float: left">Apply</button>
                                 </td>
-                            </tr>
-                            <tr>
-                                <td><label for='zipCode'>Zip Code:</label></td>
-                                <td><input id='zipCode' type="text" name="zipCode" pattern='^\d{5}$' class="modalInput"></td>
-                            </tr>
-                            <tr>
-                                <td><button type="button" onclick="toggleElementDisplay('climateModal')" class="modalButton">Cancel</button></td>
-                                <td><button type="submit" class="modalButton">Apply</button></td>
                             </tr>
                         </tbody>
                     </table>
-                </form>
+                </div>
             </div>
-        </div>
-        <div id='anonymizeModal' class='modal' style="display: none">
-            <div class='modalContent'>
-                <form onsubmit="submitForm({formId:'anonymizeForm', pollUrl:'/checkAnonymize/{{thisOwner}}/{{thisModelName}}'}); return false;"
-                action='/anonymize/{{thisOwner}}/{{thisFeederName}}' id="anonymizeForm">
-                    <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
-                    <!--<input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>-->
-                    <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
-                    <!--<input type='hidden' name='referrer' value='distribution'/>-->
+            <div id='attachmentsModal' class='modal' style="display: none">
+                <div class='modalContent'>
                     <table>
                         <tbody>
-                            <tr><th>Anonymization</th></tr>
-                            <tr><th class="modalTableHeader">Names and labels:</th></tr>
                             <tr>
-                                <td>
-                                    <select name='anonymizeNameOption'>
-                                        <option value="noChange">No change</option>
-                                        <option value="pseudonymize">Pseudonymize</option>
-                                        <option value="randomize">Randomize</option>
-                                    </select>
-                                </td>
-                            </tr>
-                            <tr><th class="modalTableHeader">Locations:</th></tr>
-                            <tr>
-                                <td>
-                                    <input type='radio' id='noChange' name='anonymizeLocationOption' value='noChange' checked>
-                                    <label for='noChange'>No Change</label>
-                                </td>
+                                <td><select id='attachmentSelect'></select></td>
                             </tr>
                             <tr>
-                                <td>
-                                    <input type='radio' id='translation' name='anonymizeLocationOption' value='translation'>
-                                    <label for='translation'>Translate</label>
-                                </td>
-                            </tr>
-                            <tr><td><input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='translateRight' class="modalInputLine"> [ft] to the right and</td></tr>
-                            <tr><td><input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='translateUp' class="modalInputLine"> [ft] up with a</td></tr>
-                            <tr><td><input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='rotate' class="modalInputLine"> [degree] rotation.</td></tr>
-                            <tr>
-                                <td>
-                                    <input type='radio' id='randomize' name='anonymizeLocationOption' value='randomize'>
-                                    <label for='randomize'>Random (Force Layout)</label>
-                                </td>
-                            </tr>
-                            <tr><th class="modalTableHeader">Electrical properties:</th></tr>
-                            <tr>
-                                <td>
-                                    <input type='checkbox' id='modifyLengthSize' name='modifyLengthSize' value='modifyLengthSize'>
-                                    <label for='modifyLengthSize'>Modify conductor length and cable size</label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <input type='checkbox' id='smoothLoadGen' name='smoothLoadGen' value='smoothLoadGen'>
-                                    <label for='smoothLoadGen'>Smooth AMI Loadshapes</label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <input type='checkbox' id='shuffleLoadGen' name='shuffleLoadGen' value='shuffleLoadGen'>
-                                    <label for='shuffleLoadGen'>Shuffle loads and generators:</label>
-                                    <input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='shufflePerc' class="modalInputLine"> [%]</label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <input type='checkbox' id='addNoise' name='addNoise' value='addNoise'>
-                                    <label for='addNoise'>Add noise:</label>
-                                    <input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='noisePerc' class="modalInputLine"> [%]</label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <button type="button" onclick="toggleElementDisplay('anonymizeModal')" class="modalButton">Cancel</button>
-                                    <button type="submit" class="modalButton" style="float: right">Apply</button>
-                                </td>
+                                <td><button onclick="toggleElementDisplay('attachmentsModal')" class="modalButton">Cancel</button></td>
+                                <td><button onclick="toggleElementDisplay('attachmentsModal'); editAttachment()" class="modalButton">Select</button></td>
                             </tr>
                         </tbody>
                     </table>
-                </form>
+                </div>
             </div>
+            <div id='editAttachmentModal' class='modal' style="display: none">
+                <div class='modalContent'>
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td id='attachmentTd'></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <textarea rows='25' cols='80' id='editAttachmentBox'></textarea>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><button onclick="toggleElementDisplay('editAttachmentModal')" class="modalButton">Cancel</button></td>
+                                <td><button onclick="saveAttachment(); toggleElementDisplay('editAttachmentModal');" class="modalButton">Save</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div id='climateModal' class='modal' style="display: none">
+                <div class='modalContent'>
+                    <form onsubmit="submitForm({formId:'climateForm', pollUrl:'/checkClimateChange/{{thisOwner}}/{{thisModelName}}'}); return false;"
+                    action="/climateChange/{{thisOwner}}/{{thisFeederName}}" id="climateForm">
+                        <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
+                        <!--<input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>-->
+                        <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
+                        <!--<input type='hidden' name='referrer' value='distribution'/>-->
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th class="modalTableHeader modalTableRow">Climate Change</th>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input id='historicalImport' type='radio' name='climateImportOption' value='historicalImport'>
+                                        <label for='historicalImport'>Historical Weather</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><label for='startDate'>Start Date (YYYY-MM-DD):</label></td>
+                                    <td><input id='startDate' type='text' name='startDate' pattern='^\d{4}-\d{2}-\d{2}$' class="modalInput"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for='endDate'>End Date (YYYY-MM-DD):</label></td>
+                                    <td><input id='endDate' type='text' name='endDate' pattern='^\d{4}-\d{2}-\d{2}$' class="modalInput"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for='airport'>Airport Code:</label></td>
+                                    <td><input id='airport' type='text' name='airport' pattern='^[A-Z]{3}$' class="modalInput"></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input id='tmyImport' type='radio' name='climateImportOption' value='tmyImport'>
+                                        <label for='tmyImport'>tmy Import</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><label for='zipCode'>Zip Code:</label></td>
+                                    <td><input id='zipCode' type="text" name="zipCode" pattern='^\d{5}$' class="modalInput"></td>
+                                </tr>
+                                <tr>
+                                    <td><button type="button" onclick="toggleElementDisplay('climateModal')" class="modalButton">Cancel</button></td>
+                                    <td><button type="submit" class="modalButton">Apply</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+            </div>
+            <div id='anonymizeModal' class='modal' style="display: none">
+                <div class='modalContent'>
+                    <form onsubmit="submitForm({formId:'anonymizeForm', pollUrl:'/checkAnonymize/{{thisOwner}}/{{thisModelName}}'}); return false;"
+                    action='/anonymize/{{thisOwner}}/{{thisFeederName}}' id="anonymizeForm">
+                        <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
+                        <!--<input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>-->
+                        <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
+                        <!--<input type='hidden' name='referrer' value='distribution'/>-->
+                        <table>
+                            <tbody>
+                                <tr><th>Anonymization</th></tr>
+                                <tr><th class="modalTableHeader">Names and labels:</th></tr>
+                                <tr>
+                                    <td>
+                                        <select name='anonymizeNameOption'>
+                                            <option value="noChange">No change</option>
+                                            <option value="pseudonymize">Pseudonymize</option>
+                                            <option value="randomize">Randomize</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr><th class="modalTableHeader">Locations:</th></tr>
+                                <tr>
+                                    <td>
+                                        <input type='radio' id='noChange' name='anonymizeLocationOption' value='noChange' checked>
+                                        <label for='noChange'>No Change</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input type='radio' id='translation' name='anonymizeLocationOption' value='translation'>
+                                        <label for='translation'>Translate</label>
+                                    </td>
+                                </tr>
+                                <tr><td><input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='translateRight' class="modalInputLine"> [ft] to the right and</td></tr>
+                                <tr><td><input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='translateUp' class="modalInputLine"> [ft] up with a</td></tr>
+                                <tr><td><input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='rotate' class="modalInputLine"> [degree] rotation.</td></tr>
+                                <tr>
+                                    <td>
+                                        <input type='radio' id='randomize' name='anonymizeLocationOption' value='randomize'>
+                                        <label for='randomize'>Random (Force Layout)</label>
+                                    </td>
+                                </tr>
+                                <tr><th class="modalTableHeader">Electrical properties:</th></tr>
+                                <tr>
+                                    <td>
+                                        <input type='checkbox' id='modifyLengthSize' name='modifyLengthSize' value='modifyLengthSize'>
+                                        <label for='modifyLengthSize'>Modify conductor length and cable size</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input type='checkbox' id='smoothLoadGen' name='smoothLoadGen' value='smoothLoadGen'>
+                                        <label for='smoothLoadGen'>Smooth AMI Loadshapes</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input type='checkbox' id='shuffleLoadGen' name='shuffleLoadGen' value='shuffleLoadGen'>
+                                        <label for='shuffleLoadGen'>Shuffle loads and generators:</label>
+                                        <input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='shufflePerc' class="modalInputLine"> [%]</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input type='checkbox' id='addNoise' name='addNoise' value='addNoise'>
+                                        <label for='addNoise'>Add noise:</label>
+                                        <input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='noisePerc' class="modalInputLine"> [%]</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <button type="button" onclick="toggleElementDisplay('anonymizeModal')" class="modalButton">Cancel</button>
+                                        <button type="submit" class="modalButton" style="float: right">Apply</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+            </div>
+            <!-- Modals-->
         </div>
-        <!-- Modals-->
-        <div id="descriptionTables"></div>
-        <div id="selectionTable"></div>
 	</body>
 </html>
 <script id='componentsInsert'>const globalComponents = {% if components %}{{ components | safe }}{% else %}null{% endif %}; 
@@ -1153,12 +1163,7 @@ function createViewport(treeWrapper, svgContainer) {
     // Create the viewport
     svgContainer.setAttribute('viewBox',`0 0 ${translatedMaxLon} ${translatedMaxLat}`);
 	window.panZoom = svgPanZoom('#svgContainer', {
-        /* These are equal to the default values */
-		//zoomEnabled: true,
-		//controlIconsEnabled: false,
-        //center: true,
-		//fit: true,
-        //contain: true,
+        /* Override the default values set by 'optionsDefaults' in svg-pan-zoom.js */
         dblClickZoomEnabled: false,
         zoomScaleSensitivity: 0.2,
         minZoom: 0.25,
@@ -1200,6 +1205,7 @@ function svgClick(downEvent, upEvent) {
     if (!downEvent.altKey) {
         getSelected().forEach(e => { e.classList.remove("selected"); });
         destroyTables(["descriptionTables", "selectionTable"]);
+        //destroyTables(["selectionTable"]);
         if (element.id !== "svgContainer" && !element.classList.contains("parentChild")) {
             element.classList.add("selected");
             const table = createDescriptionTable(element.id, gTreeWrapper);
@@ -1290,7 +1296,8 @@ function dropPill(thisButton, name) { // eslint-disable-line
 		thisButton.style.background= 'transparent'
 		if (window.event.toElement==thisButton) {event.stopPropagation()}
 	}
-	document.body.addEventListener('click', clickCloseEvent, true)
+    //document.body.addEventListener('click', clickCloseEvent, true)
+    document.getElementById("interfaceContainer").addEventListener('click', clickCloseEvent, true)
 }
 
 /*function clickCloseEvent(labelName, buttonName) { // eslint-disable-line
@@ -1355,7 +1362,7 @@ function getSearchResults() {
     document.getElementById("searchCount").textContent = `hits: ${keys.length}`;
     const nextButton = document.getElementById("findNext");
     const previousButton = document.getElementById("findPrevious");
-    tableDestroy();
+    destroyTables(["descriptionTables"]);
     if (keys.length === 0 || this.value === "") {
         alert(`No results found for term: "${this.value}"`)
         const feedback = function() {
@@ -1367,14 +1374,15 @@ function getSearchResults() {
     }
     const upperIndex = keys.length - 1;
     let idx = 0;
-    tableCreate(tree[keys[idx]]);
+    document.getElementById("descriptionTables").appendChild(createDescriptionTable(tree[keys[idx]], gTreeWrapper));
     viewElement(keys[idx]);
     nextButton.onclick = function() {
         idx++;
         if (idx > upperIndex) {
             idx = 0;
         }
-        tableCreate(tree[keys[idx]]);
+        destroyTables(["descriptionTables"]);
+        document.getElementById("descriptionTables").appendChild(createDescriptionTable(tree[keys[idx]], gTreeWrapper));
         viewElement(keys[idx]);
     }
     previousButton.onclick = function() {
@@ -1382,7 +1390,8 @@ function getSearchResults() {
         if (idx < 0) {
             idx = upperIndex;
         }
-        tableCreate(tree[keys[idx]]);
+        destroyTables(["descriptionTables"]);
+        document.getElementById("descriptionTables").appendChild(createDescriptionTable(tree[keys[idx]], gTreeWrapper));
         viewElement(keys[idx]);
     }
 }
@@ -1394,8 +1403,8 @@ function getMatchingKeys(term, tree) {
     const keys = [];
     for (let key in tree) {
         // Only add the key if it represents an object that was drawn
-        if (((!isNullOrUndefined(tree[key].latitude) && !isNullOrUndefined(tree[key].longitude)) ||
-         (!isNullOrUndefined(tree[key].to) && !isNullOrUndefined(tree[key].from)))) {
+        if ((tree[key].latitude != null && tree[key].longitude != null) ||
+        (tree[key].to != null && tree[key].from != null)) {
             for (let propertyKey in tree[key]) {
                 let propertyVal = tree[key][propertyKey];
                 if (typeof(propertyVal) !== "string") {
@@ -1423,7 +1432,7 @@ function viewElement(key) {
     const element = document.getElementById(key);
 	element.classList.add('selected');
     let x, y;
-    if (!isNullOrUndefined(element.getAttribute("cx")) && !isNullOrUndefined(element.getAttribute("cy"))) {
+    if (element.getAttribute("cx") != null && element.getAttribute("cy") != null) {
         x = element.getAttribute("cx");
         y = element.getAttribute("cy");
     } else {
@@ -1439,16 +1448,6 @@ function viewElement(key) {
 	var height = window.panZoom.getSizes().height / 2
     panZoom.pan({x:width - (x * realZoom), y:height - (y * realZoom)})
     panZoom.zoom(15/scaleLevel);
-}
-
-/** 
- * TODO: remove this and everywhere that uses it
- */
-function isNullOrUndefined(obj) {
-    if (obj === undefined || obj === null) {
-        return true;
-    }
-    return false;
 }
 
 //**************************************************
@@ -1474,7 +1473,6 @@ function isNullOrUndefined(obj) {
     $("#massAddModal .modalContent").draggable();
     $("#massEditModal .modalContent").draggable();
     $("#attachmentsModal .modalContent").draggable();
-    //$("#descriptionTable").draggable();
     // Position the description table depending on whether or not it is draggable
     //document.getElementById("descriptionTable").removeAttribute("style");
     //document.getElementById("descriptionTable").style.left = "70vw";
@@ -1496,7 +1494,6 @@ function disableJQueryFunctionality() {
 //**************************************************
 
 function attachHandlers() {
-    //fillObjectMenu(globalComponents);
     addComponents();
     attachFeederList(document.getElementById("publicFeederList"), publicFeeders, "public");
     attachFeederList(document.getElementById("userFeederList"), userFeeders, thisOwner);
@@ -1505,21 +1502,25 @@ function attachHandlers() {
 }
 
 /** 
- * TODO: add unit-tests, delete this I think. Actually just modify it
+ * TODO: add unit-tests
  * Fill menu of "Add" button and add its handler functions.
  */
-//function fillObjectMenu(globalComponents) {
 function addComponents() {
 	const ul = document.getElementById("componentList");
     const select = document.getElementById("componentSelect");
-	for (let componentName in globalComponents) {
+	for (let name in globalComponents) {
 		const li = document.createElement("li");
-		li.textContent = componentName;
+		li.textContent = name;
 		li.addEventListener("click", function() {
-			addSvgObjects(addFeederObject(componentName, document.getElementsByClassName("selected")));
+            // TODO: configure the TreeObject because it has no parent and no lat/lon!!!
+            const tObject = createTreeObject(globalComponents[name], gTreeWrapper);
+            const svg = createAddableSvgData(gTreeWrapper.insert(tObject));
+            //This will fail because the new component needs to be added but stuff it is connected to needs to be redraw (i.e. deleted)
+            svg.drawTo(gViewport);
+            //addSvgObjects(addFeederObject(name, document.getElementsByClassName("selected")));
 		});
 		ul.appendChild(li);
-        select.innerHTML += `<option value=${componentName}>${componentName}</option>`;
+        select.innerHTML += `<option value=${name}>${name}</option>`;
 	}
 }
 
@@ -1550,7 +1551,9 @@ function attachFeederList (ul, feeders, owner) {
  */
 function addFileMenuHandlers() {
     const menu = document.getElementById("fileMenu");
-    if (isNullOrUndefined(menu)) return;
+    if (menu == null) {
+        return;
+    }
     const items = Array.from(menu.children);
     if (items.length !== 8) {
         throw new Error("Please update this function to ensure the correct handlers are attached");
@@ -1935,7 +1938,7 @@ function massEdit() {
         }
     }
     let operation = document.querySelector("input[name=attributeOperation]:checked");
-    if (isNullOrUndefined(operation)) {
+    if (operation == null) {
         alert("Please select an operation with radio buttons on the 'Mass Edit' menu.");
         return;
     }
@@ -2397,62 +2400,66 @@ const treeWrapperPrototype = {
 
     /** 
      * Return a TreeWrapper that contains direct children of the tree object with the passed key argument.
-     * @param {string} parentKey - the key of the tree object that is presumably a parent to some other tree objects.
-     * @return {TreeWrapper} childrenTreeWrapper - contains only children tree objects of the parentKey tree object.
+     * @param {string} key - the key of the tree object that is presumably a parent to some other tree objects.
+     * @return {TreeWrapper} childrenTreeWrapper - contains only children tree objects of the key tree object.
      */
-    getChildrenOf(parentKey) {
+    getChildrenOf(key) {
         const tWrapper = createTreeWrapper();
-        if (!this.contains(parentKey)) {
-            //console.log(`Unable to get the children of the tree object with key: "${parentKey}". The key does not exist in this
+        if (!this.contains(key)) {
+            //console.log(`Unable to get the children of the tree object with key: "${key}". The key does not exist in this
             //TreeWrapper.`);
             return tWrapper;
         }
-        if (!isParentChildNode(this.tree[parentKey]) && !isParentlessNode(this.tree[parentKey])) {
-            return tWrapper;
+        const type = getType(this.tree[key]);
+        if (type === "parentChildNode" || type === "independentNode") {
+            const thisName = this.tree[key].name;
+            if (thisName == null) {
+                /* Children reference their parent with the parent's name. If a node doesn't have a name, then it must not
+                have children. */
+                //console.log(`Unable to get the children of the tree object with key: "${key}". The tree object
+                //does not have a name.`);
+                return tWrapper;
+            } 
+            // TODO: Build an object in TreeWrapper that allows instant lookup of children for any TreeWrapper.tree object
+            Object.keys(this.tree).forEach(key => {
+                if (this.tree[key].parent === thisName) {
+                    tWrapper.add(key, this);
+                }
+            });
         }
-        let parentName = this.tree[parentKey].name;
-        if (parentName == null) {
-            /* Children reference their parent with the parent's name. If a node doesn't have a name, then it must not
-            have children.
-            */
-            //console.log(`Unable to get the children of the tree object with key: "${parentKey}". The tree object
-            //does not have a name.`);
-            return tWrapper;
-        } 
-        // TODO: Build an object in TreeWrapper that allows instant lookup of children for any TreeWrapper.tree object
-        Object.keys(this.tree).forEach(key => {
-            parentName = this.tree[key].parent;
-            if (parentName != null && parentName === this.tree[parentKey].name) {
-                tWrapper.add(key, this);
-            }
-        });
         return tWrapper;
     },
 
-    /** Return a TreeWrapper that contains lines connected to the tree object with the passed key argument.
-     *
-     * @param {string} nodeKey - the key of the tree object that presumably has lines connected to it.
-     * @return {TreeWrapper} subWrapper - contains only line tree objects that connect to the nodeKey tree object.
+    /** 
+     * Return a TreeWrapper that contains lines connected to the tree object with the passed key argument.
+     * @param {string} key - the key of the tree object that presumably has lines connected to it.
+     * @return {TreeWrapper} - contains only line tree objects that connect to the desired tree object.
      */
-    getConnectedLinesOf(nodeKey) {
+    getConnectedLinesOf(key) {
         const tWrapper = createTreeWrapper();
-        if (!this.contains(nodeKey)) {
-            //console.log(`Unable to find lines that connect to this node with key: "${nodeKey}". The key does not exist in this
+        if (!this.contains(key)) {
+            //console.log(`Unable to find lines that connect to this node with key: "${key}". The key does not exist in this
             //TreeWrapper.`);
             return tWrapper;
-        } else if (!isParentChildNode(this.tree[nodeKey]) && !isParentlessNode(this.tree[nodeKey])) {
-            // This tree object is not a node, therefore no lines can connect to it
-            return tWrapper;
+        } 
+        const type = getType(this.tree[key]);
+        if (type === "parentChildNode" || type === "independentNode") {
+            const thisName = this.tree[key].name;
+            if (thisName == null) {
+                /* Lines reference their connected nodes with the node's name. If a node doesn't have a name, then it must not
+                have lines. */
+                //console.log(`Unable to get the lines of the tree object with key: "${key}". The tree object
+                //does not have a name.`);
+                return tWrapper;
+            } 
+            // TODO: Build an object in TreeWrapper that allows instant lookup of connected lines for any TreeWrapper.tree object
+            Object.keys(this.tree).forEach(key => {
+                if (this.tree[key].to === thisName || this.tree[key].from === thisName) {
+                    tWrapper.add(key, this);
+                }
+            });
         }
-
-        const linesTreeWrapper = createTreeWrapper();
-        // TODO: Build an object in TreeWrapper that allows instant lookup of connected lines for any TreeWrapper.tree object
-        Object.keys(this.tree).forEach(key => {
-            if (this.tree[key].to === this.tree[nodeKey].name || this.tree[key].from === this.tree[nodeKey].name) {
-                linesTreeWrapper.add(key, this);
-            }
-        });
-        return linesTreeWrapper;
+        return tWrapper;
     },
 
     /** Merge the treeWrapper argument into this TreeWrapper.
@@ -2575,34 +2582,41 @@ const treeWrapperPrototype = {
      */
     getNodeEndsOf(key) {
         const tWrapper = createTreeWrapper();
-        if (!this.contains(key) || !isLine(this.tree[key])) {
-            //TODO add console message and maybe split these up
+        if (!this.contains(key)) {
+            //console.log(`Unable to get the node ends of the tree object with the key: "${key}". The key does not exist
+            //in this TreeWrapper`);
             return tWrapper;
-        }
-        const fromKey = this.names[this.tree[key].from];
-        const toKey = this.names[this.tree[key].to];
-        const subWrapper = createTreeWrapper();
-        if (fromKey == null) {
-            if (toKey == null) {
-                console.log(`Tree object with key: "${key}" has nonexistent "from" and "to" nodes.`);
-                return subWrapper;
+        } 
+        const type = getType(this.tree[key]);
+        if (type === "line") {
+            const fromKey = this.names[this.tree[key].from];
+            const toKey = this.names[this.tree[key].to];
+            //const subWrapper = createTreeWrapper();
+            if (fromKey == null) {
+                if (toKey == null) {
+                    console.log(`Tree object with key: "${key}" has nonexistent "from" and "to" nodes.`);
+                    return tWrapper;
+                } else {
+                    console.log(`Tree object line with key: "${key}" has nonexistent "from" node.`);
+                    tWrapper.add(toKey, this);
+                    return tWrapper;
+                }
+            } else if (toKey == null) {
+                console.log(`Tree object line with key: "${key}" has nonexistent "to" node.`);
+                tWrapper.add(fromKey, this);
+                return tWrapper;
             } else {
-                console.log(`Tree object line with key: "${key}" has nonexistent "from" node.`);
-                subWrapper.add(toKey, this);
-                return subWrapper;
+                tWrapper.add(fromKey, this);
+                tWrapper.add(toKey, this);
             }
-        } else if (toKey == null) {
-            console.log(`Tree object line with key: "${key}" has nonexistent "to" node.`);
-            subWrapper.add(fromKey, this);
-            return subWrapper;
         }
-        subWrapper.add(fromKey, this);
-        subWrapper.add(toKey, this);
-        return subWrapper;
+        return tWrapper;
     },
 
     /**
-     * 
+     * Return a treeWrapper that contains tree objects that will be affected by drawing the tree object with the key argument.
+     * @param {string} key
+     * @return {TreeWrapper}
      */
     getSubtreeToRedraw(key) {
         const tWrapper = createTreeWrapper();
@@ -2719,67 +2733,45 @@ function createDeletableSvgData(tree) {
     const obj = Object.create(deletableSvgDataPrototype);
     obj.ids = []
     Object.keys(tree).forEach(key => {
-        if (isParentChildNode(tree[key])) {
+        let type = getType(tree[key]);
+        if (type === "parentChildNode") {
             obj.ids.push(key);
             const parentChildLineId = `${tree[key].parent}_${tree[key].name}`
             obj.ids.push(parentChildLineId);
         } else {
             obj.ids.push(key);
         }
-        /*
-        else if (isParentlessNode(tree[key])) {
-            obj.ids.push(key);
-        } else if (isLine(tree[key])) {
-            obj.ids.push(key)
-        } else if (isConfigurationNode(tree[key])) {
-
-        } else { 
-            //console.log(`Failed to delete type: "${tree[key].object}", name: "${tree[key].name}", key: ${key}"`);
-            //throw new Error(`tree key: ${key}, with data: ${tree[key]} is not a parent-child node, a parentless node, or a line.`); 
-        }
-        */
+        //console.log(`Failed to delete type: "${tree[key].object}", name: "${tree[key].name}", key: ${key}"`);
+        //throw new Error(`tree key: ${key}, with data: ${tree[key]} is not a parent-child node, a parentless node, or a line.`); 
     });
     return obj;
 }
 
-/** 
- * TODO: add unit tests
- * 
- */
 const addableSvgDataPrototype = {
 
     /* "Public" interface methods */
 
-    /** 
-     * TODO: add unit tests
-     * Add the svgData to the viewport when the feeder is initially built. The lines must be drawn before
-     * circles to be underneath the circles. 
-     */
-    addTo(viewport) {
-        this.lines.forEach(line => {
-            viewport.appendChild(line);
-        });
-        this.circles.forEach(circle => {
-            viewport.appendChild(circle);
-        });
-    },
-
     /**
-     *  TODO: add unit tests
+     * Deletes lines and circles from the viewport if they exist, then draws all lines and circles on the viewport.
+     * @param {HTMLElement} viewport - a viewport created by svg-pan-zoom.
      */
-    redrawTo(viewport) {
+    drawTo(viewport) {
         this.lines.forEach(line => {
-            //viewport.removeChild(document.getElementById(line.id).parentNode.childNodes);
-            document.getElementById(line.id).remove();
-        });
-        this.circles.forEach(circle => {
-            //viewport.removeChild(document.getElementById(circle.id).parent);
-            document.getElementById(circle.id).remove();
-        });
-        this.lines.forEach(line => {
+            let e = document.getElementById(line.id);
+            if (e != null) {
+                e.parentNode.removeChild(e);
+                //viewport.removeChild(document.getElementById(line.id).parentNode.childNodes);
+                //document.getElementById(line.id).remove();
+            }
             viewport.appendChild(line);
         });
         this.circles.forEach(circle => {
+            let e = document.getElementById(circle.id);
+            if (e != null) {
+                e.parentNode.removeChild(e);
+                //viewport.removeChild(document.getElementById(circle.id).parent);
+                //document.getElementById(circle.id).remove();
+            }
             viewport.appendChild(circle);
         });
         scaleTo(scaleLevel);
@@ -2793,7 +2785,7 @@ const addableSvgDataPrototype = {
     addLine(key) {
         const nodes = Object.values(this.treeWrapper.getNodeEndsOf(key).tree);
         if (nodes.length < 2) {
-            console.log(`Could not find the nodes on either end of a line with key: "${key}". Line was not drawn`);
+            console.log(`Could not find both of the nodes on either end of a line with key: "${key}". Line was not drawn`);
             /* TODO: Draw the line anyway with some kind of default values so the user can see there's a broken line?
             I could have a second viewport that is contained in a table with all the broken lines and circles! Neat!
             */
@@ -2815,7 +2807,7 @@ const addableSvgDataPrototype = {
     addParentChildLine(key) {
         const parent = Object.values(this.treeWrapper.getParentOf(key).tree)[0];
         if (parent == null) {
-            console.log(`Could not draw the parent-child line for child tree object with key: "${key}"`);
+            //console.log(`Could not draw the parent-child line for child tree object with key: "${key}"`);
             return;
         }
         const parentChildLine = createSvgLine(parent, this.treeWrapper.tree[key]);
@@ -2823,40 +2815,46 @@ const addableSvgDataPrototype = {
     },
 
     /**
-     * TODO: add unit tests
+     * TODO: add unit tests, inject coordinates in a smart way if needed
      */
-    addConfigurationNode(key) {
-        const node = this.treeWrapper.tree[key];
-        node.longitude = 0;
-        node.latitude = 0;
-        const circle = createSvgCircle(key, node);
+    addConfigurationNode(key, obj) {
+        if (obj.longitude == null || obj.latitude == null) {
+            // configuration algorithm
+            obj.longitude = 0;
+            obj.latitude = 0;
+        }
+        const circle = createSvgCircle(key, obj);
         this.circles.push(circle);
     },
 
     /**
-     * TODO: add unit tests
+     * TODO: add unit tests, inject coordinates if they don't exist based on the parent
      */
     addParentChildNode(key, obj) {
         /* There are some weird config nodes that have "parent" but no "longitude" and "latitude" properties and the
-        interface breaks if I don't do this.
-        */
-        if (obj.longitude == null || obj.latitude == null) {
-            this.addConfigurationNode(key);
-        } else {
-            const circle = createSvgCircle(key, obj);
-            this.circles.push(circle);
-        }
-        this.addParentChildLine(key);
+        interface breaks if I don't do this. */
+        //if (obj.longitude == null || obj.latitude == null) {
+        //    //this.addConfigurationNode(key);
+        //} else {
+        const circle = createSvgCircle(key, obj);
+        this.circles.push(circle);
+        //}
+    },
+
+    /**
+     * TODO: add unit tests, inject coordinates if they don't exist somehow
+     */
+    addIndependentNode(key, obj) {
+        const circle = createSvgCircle(key, obj);
+        this.circles.push(circle);
     }
 };
 
 /** 
  * Return an AddableSvgData instance.
  * 
- * An AddableSvgData instance contains an array of circles and an array of lines that can be redrawn or added
- * to the svg. It also has methods for adding to the svg and redrawing to it.
- * 
- * @param {TreeWrapper} treeWrapper - contains all tree objects that should be added to the svg.
+ * An AddableSvgData instance contains an array of circles and an array of lines that can be draw to the svg.
+ * @param {TreeWrapper} treeWrapper - contains all tree objects that should be drawn to to the svg.
  * @return {AddableSvgData} - the svg data to add.
  */
 function createAddableSvgData(treeWrapper) {
@@ -2869,43 +2867,86 @@ function createAddableSvgData(treeWrapper) {
     obj.circles = [];
     const tree = treeWrapper.tree;
     Object.keys(tree).forEach(key => {
-        if (isParentChildNode(tree[key])) {
-            obj.addParentChildNode(key, tree[key]);
-        } else if (isParentlessNode(tree[key])) {
-            const circle = createSvgCircle(key, tree[key]);
-            obj.circles.push(circle);
-        } else if (isLine(tree[key])) {
+        let type = getType(tree[key]);
+        if (type === "line") {
             obj.addLine(key);
-        } else if (isConfigurationNode(tree[key])) {
-            obj.addConfigurationNode(key);
-        } else { 
-            console.log(`Failed to draw type: "${tree[key].object}", name: "${tree[key].name}", key: "${key}"`);
+        } else if (type === "configurationNode") {
+            obj.addConfigurationNode(key, tree[key]);
+        } else if (type === "parentChildNode") {
+            obj.addParentChildNode(key, tree[key]);
+            obj.addParentChildLine(key);
+        } else if (type === "independentNode") {
+            obj.addIndependentNode(key, tree[key]);
+        } else {
+            console.log(`Failed to draw object type: "${tree[key].object}", name: "${tree[key].name}", key: "${key}"`);
         }
     });
     return obj;
 }
 
-/* Utility methods */
+/**
+ * Utility methods.
+ * There are 4 types of objects: lines, parent-child nodes, independent nodes, and config nodes.
+ * The line between a parent and child doesn't exist in the data itself, it's merely shown in the svg
+ * to demonstrate the relationship between two nodes.
+ */
 
-function isParentlessNode(obj) {
-    return obj.parent == null && obj.from == null && obj.to == null &&
-    obj.latitude != null && obj.longitude != null;
+/* Public interface methods */
+
+/**
+ * Return the type of the object with regard to this interface.
+ * 
+ * This function is important because the order in which an object is checked matters. For example, an object
+ * could be both a 'line' type and a 'configurationNode' type, but the 'line' type should take precedence over the 
+ * 'configurationNode' type, so 'line' should be returned.
+ * @param {Object} obj
+ * @return {string}
+ */
+//For all three node types, if coordinates don't exist, inject them in other functions.
+function getType(obj) {
+    if (isLine(obj)) {
+        return "line";
+    } else if (isConfigurationNode(obj)) {
+        return "configurationNode";
+    } else if (isParentChildNode(obj)) {
+        return "parentChildNode";
+    } else {
+        return "independentNode"
+    }
 }
 
+/* Private helper methods */
+
+/**
+ * Return true if the object has a 'parent' property, otherwise return false.
+ * @param {Object} obj
+ * @return {boolean}
+ */
 function isParentChildNode(obj) {
-    //return obj.parent != null && obj.latitude != null && obj.longitude != null;
     return obj.parent != null;
 }
 
-// add unit tests
+/**
+ * TODO: add unit tests
+ * Return true if the object has 'from' and 'to' properties, otherwise return false.
+ * @param {Object} obj
+ * @return {boolean}
+ */
 function isLine(obj) {
     return obj.from != null && obj.to != null;
 }
 
-// add unit tests
+/**
+ * TODO: add unit tests
+ * Return true if the object is a configuration node.
+ * @param {Object} obj
+ * @return {boolean}
+ */
 function isConfigurationNode(obj) {
-    //return obj.longitude == null && obj.latitude == null && obj.from == null && obj.to == null && obj.parent == null;
-    return obj.longitude == null && obj.latitude == null && obj.from == null && obj.to == null;
+    if (obj.object == null || configObjectTypes.includes(obj.object)) {
+        return true;
+    }
+    return false;
 }
 
 /** 
@@ -3011,9 +3052,9 @@ const treeObjectPrototype = {
     /** 
      * TODO: add unit tests
      */
-    //update(map) {
-    //    this.data = deepCopy(map);
-    //},
+    update(map) {
+        this.data = deepCopy(map);
+    },
 
     /* "Private" helper methods */
 };
@@ -3057,8 +3098,8 @@ function createTreeObject(input, treeWrapper) {
     if (Object.getPrototypeOf(treeWrapper) !== treeWrapperPrototype) {
         throw new Error("treeWrapper argument must be an instance of TreeWrapper");
     }
-    //const treeObject = Object.create(treeObjectPrototype);
-    const treeObject = {};
+    const treeObject = Object.create(treeObjectPrototype);
+    //const treeObject = {};
     if (typeof(input) === "string") {
         keyIsStringAndValidNumber(input);
         const obj = treeWrapper.tree[input];
@@ -3115,25 +3156,28 @@ function keyIsStringAndValidNumber(key) {
 // Table interface 
 //**************************************************
 
-/* These are names of properties in most objects in writeFeeder.tree that cannot be deleted from objects. 
-They are a mix of properties that can be found in objects with a parent, objects without a parent,
-and objects that represent lines. See my notes for reasoning behind designating these properties as non-deleteable.
-This global array is a hard-coded data-dependency, but it's necessary at this point because the raw data does not define
-whether or not a property is key to identifying an object in the svg graph. Maybe these hard-coded dependencies could be moved
-so some other configuration file, like the components?
+/*
+These are names of properties in most objects in writeFeeder.tree that should not be deleted from objects because
+doing so might make that object hard to identify with reference to the rest of the data.
 */
 const nonDeletableProperties = ["name", "object", "from", "to", "latitude", "longitude", "parent", "configuration"];
 /* If these properties were to be modified for a given writeFeeder.tree object, it would require significantly modifying the 
 other objects.  These properties ARE technically modifiable, but allowing the user to change them would require more work 
 than I think is worth it. It is easier just to create a new node.
-We can remove or add properteis to this array as the needs of the interface change.
 */
 const nonModifiableProperties = ["name", "object", "from", "to", "parent"];
-
 const titleProperties = ["object"];
+/* This array is used to determine if an object is a configuration node, based on the "object" property of that node. If a node
+lacks the "object" property entirely, then I know its a configuration node.
+
+TODO: I'm unsure about the player and recorder object types.
+*/
+const configObjectTypes = ["regulator_configuration", "transformer_configuration", "triplex_line_configuration", "line_configuration",
+"volt_var_control", "line_spacing", "climate", "overhead_line_conductor", "underground_line_conductor", "triplex_line_conductor",
+"player", "recorder"];
 
 /**
- * TODO: add unit tests
+ * TODO: add unit tests, $().draggable make the text unfocusable
  * If an object has no name, just get the first property in the object.
  */
 function createSelectionTable(ids, tWrapper) {
@@ -3175,7 +3219,14 @@ function createSelectionTable(ids, tWrapper) {
 }
 
 /**
- * TODO: add unit tests, don't allow longitude and latitude to be editted for lines!, turn all key inputs into plain text upon clicking save (would look nice)
+ * TODO: add unit tests, don't allow longitude and latitude to be editted for lines!,
+ * turn all key inputs into plain text upon clicking save (would look nice), 
+ * 
+ * Bugs: $().draggable() makes text unfocusable via double click. Unfortunately,
+ * this is set behavior of the library because the demo on the jQuery wesbsite behaves the same way. Users must right click
+ * text in a table to select it.
+ * 
+ * 
  * The form element is only used to take advantage of the "required" form validation functionality that is native to the
  * browser.
  */
@@ -3205,7 +3256,7 @@ function createDescriptionTable(id, tWrapper) {
     form.addEventListener("submit", function(event) {
         event.preventDefault();
         const svg = createAddableSvgData(tWrapper.insert(tObject));
-        svg.redrawTo(gViewport);
+        svg.drawTo(gViewport);
         alert("Object saved");
     });
     Object.keys(tObject.data).forEach(key => {
@@ -3222,9 +3273,6 @@ function createDescriptionTable(id, tWrapper) {
         }
     });
     if (window.jQuery != null) {
-        //TODO: fix this
-        //form.style.left = "50vw";
-        //$(form).draggable();
         table.style.left = "50vw";
         $(table).draggable();
     }
@@ -3244,15 +3292,17 @@ const buttonPrototype = {
         const element = document.getElementById("svgContainerWrapper");
         element.setAttribute("style", "cursor: crosshair");
         const that = this;
-        element.addEventListener("click", moveNode, true);
+        //element.addEventListener("click", moveNode, true);
+        element.addEventListener("mousedown", moveNode, true);
         function moveNode(event) {
             event.stopPropagation();
-            document.getElementById("svgContainerWrapper").removeEventListener("click", moveNode, true);
+            //document.getElementById("svgContainerWrapper").removeEventListener("click", moveNode, true);
+            document.getElementById("svgContainerWrapper").removeEventListener("mousedown", moveNode, true);
             const coords = clickLatLon(event);
             that.tObject.data.longitude = coords.x;
             that.tObject.data.latitude = coords.y;
             const subWrapper = that.tWrapper.insert(that.tObject);
-            createAddableSvgData(subWrapper).redrawTo(gViewport);
+            createAddableSvgData(subWrapper).drawTo(gViewport);
             element.setAttribute("style", "cursor: default");
             // Update the table with the new coordinates
             Array.from(that.tableBody.getElementsByTagName("input")).forEach(input => {
@@ -3603,7 +3653,7 @@ function attachMouseListeners() {
     createViewport(gTreeWrapper, document.getElementById("svgContainer"));
     gViewport = document.getElementsByClassName('svg-pan-zoom_viewport')[0];
     const svg = createAddableSvgData(gTreeWrapper);
-    svg.addTo(gViewport);
+    svg.drawTo(gViewport);
 
     //document.getElementById("svgContainer").addEventListener("click", function(event) {
     //    svgClick(event);

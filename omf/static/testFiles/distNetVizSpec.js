@@ -791,8 +791,11 @@ describe("Unit tests", function() {
             });
         });
 
-        xdescribe("treeObjectPrototype()", function() {
-            //no public methods?
+        describe("treeObjectPrototype()", function() {
+            
+            describe("update()", function() {
+
+            });
         });
 
         describe("createAddableSvgData()", function() {
@@ -807,6 +810,9 @@ describe("Unit tests", function() {
             describe("when the treeWrapper.tree argument is non-empty", function() {
 
                 it("should return an object with the correct number of circles and lines", function() {
+                    /* There is 1 extra child in the svg-pan-zoom_viewport element in the document. It is the style
+                    element.
+                    */
                     const svgData = createAddableSvgData(testTreeWrapper);
                     expect(svgData.circles.length).toEqual(23);
                     expect(svgData.lines.length).toEqual(21);
@@ -814,7 +820,23 @@ describe("Unit tests", function() {
             });
         });
 
-        describe("createDeletableSvgData", function() {
+        describe("addableSvgDataPrototype", function() {
+
+            describe("drawTo()", function() {
+
+                it("should not throw an error if an svg object does not already exist in the document svg", function() {
+                    /* Nothing inside of testTreeWrapper exists in the document viewport until the initialization function
+                    that occurs after all tests have finished running.
+                    */
+                    const svg = createAddableSvgData(testTreeWrapper);
+                    expect(function() {
+                        svg.drawTo(gViewport);
+                    }).not.toThrowError();
+                });
+            });
+        });
+
+        xdescribe("createDeletableSvgData", function() {
 
         });
 
@@ -1305,7 +1327,7 @@ describe("Unit tests", function() {
             });
         });
 
-        xdescribe("treeObjectPrototype", function() {
+        describe("treeObjectPrototype", function() {
             // no private methods?
         });
 
@@ -1735,113 +1757,114 @@ describe("Unit tests", function() {
             });
         });
 
-        describe("isParentlessNode()", function() {
+        describe("getType()", function() {
+            
+            // This should basically never happen, but you never know
+            describe("when the object argument is a line and a configuration node", function() {
 
-            it("should return true if the object is a node without a parent", function() {
-                const obj = {
-                    latitude: "4",
-                    longitude: "5",
-                }
-                expect(isParentlessNode(obj)).toBe(true);
+                it("should return 'line'", function() {
+                    spyOn(window, "isLine").and.returnValue(true);
+                    spyOn(window, "isParentChildNode").and.returnValue(false);
+                    spyOn(window, "isConfigurationNode").and.returnValue(true);
+                    expect(getType({})).toEqual("line");
+                });
             });
 
-            it("should return false if the object is a line", function() {
-                const obj = {
-                    latitude: "4",
-                    longitude: "5",
-                    from: "node1",
-                    to: "node2"
-                }
-                expect(isParentlessNode(obj)).toBe(false);
+            // Double check with David
+            describe("when the object argument is a parent-child node and a configuration node", function() {
+
+                it("should return 'configurationNode'", function() {
+                    spyOn(window, "isLine").and.returnValue(false);
+                    spyOn(window, "isParentChildNode").and.returnValue(true);
+                    spyOn(window, "isConfigurationNode").and.returnValue(true);
+                    expect(getType({})).toEqual("configurationNode");
+                });
+            });
+
+            describe("when the object is not a line, nor a parent-child node, nor a configuration node", function() {
+
+                it("should return 'independentNode'", function() {
+                    spyOn(window, "isLine").and.returnValue(false);
+                    spyOn(window, "isParentChildNode").and.returnValue(false);
+                    spyOn(window, "isConfigurationNode").and.returnValue(false);
+                    expect(getType({})).toEqual("independentNode");
+                });
+            });
+        });
+
+        describe("isLine()", function() {
+
+            describe("when the argument object has both 'from' and 'to' properties", function() {
+
+                it("should return true", function() {
+                    const obj = {
+                        from: "there",
+                        to: "here"
+                    };
+                    expect(isLine(obj)).toBe(true);
+                });
+            });
+
+            describe("when the argument object is missing 'from and/or 'to' properties", function() {
+
+                it("should return false", function() {
+                    const obj1 = {from: "here"};
+                    const obj2 = {to: "there"};
+                    const obj3 = {};
+                    expect(isLine(obj1)).toBe(false);
+                    expect(isLine(obj2)).toBe(false);
+                    expect(isLine(obj3)).toBe(false);
+                });
+            });
+        });
+        
+        describe("isConfigurationNode()", function() {
+
+            describe("when the argument object lacks the 'object' property", function() {
+
+                it("should return true", function() {
+                    expect(isConfigurationNode({})).toBe(true);
+                });
+            });
+
+            describe("when the argument object has an 'object' property", function() {
+
+                describe("when the 'object' property value  exists in the 'configObjectTypes' global array", function() {
+
+                    it("should return true", function() {
+                        expect(configObjectTypes).toBeDefined();
+                        configObjectTypes.forEach(type => {
+                            expect(isConfigurationNode({object: type})).toBe(true);
+                        })
+                    });
+                });
+
+                describe("when the 'object' property value does not exist in the global 'configObjectTypes' array", function() {
+
+                    it("should return false", function() {
+                        expect(isConfigurationNode({object: "some other type"})).toBe(false);
+                    });
+                });
             });
         });
 
         describe("isParentChildNode()", function() {
 
-            it("should return true if the node has a parent property, even if it has no latitude or longitude property", function() {
-                const obj = {
-                    "parent": "FRIENDSHIP", 
-                    "property": "measured_real_power,measured_reactive_power,measured_power", 
-                    "file": "caliSubCheck.csv", 
-                    "object": "recorder", 
-                    "interval": "3600"
-                };
-                expect(isParentChildNode(obj)).toBe(true);
-            });
-        });
-    });
+            describe("when the argument object does not have a 'parent' property", function() {
 
-        /*
-        describe("Ajax constructor function prototype", function() {
-
-            it("should throw an error when http method is POST and there is no instance of FormData", function() {
-                expect(function() {
-                    new Ajax(null, "POST", null);
-                }).toThrowError();
+                it("should return false", function() {
+                    expect(isParentChildNode({})).toBe(false);
+                });
             });
 
-            describe("send()", function() {
+            describe("when the argument object has a 'parent' property", function() {
 
-                it ("should not send an instance of FormData when the http method is not POST", function() {
-                    const spy = spyOn(XMLHttpRequest.prototype, "send");
-                    const ajax = new Ajax(null, "GET", new FormData());
-                    ajax.send();
-                    expect(spy).toHaveBeenCalled();
-                    expect(spy.calls.first().args).toEqual([]);
-                });
-
-                it("should return a promise", function() {
-                    const request = new Ajax("#");
-                    expect(request.send()).toEqual(jasmine.any(Promise));
-                });
-
-                it("should send an instance of FormData when the http method is POST", function() {
-                    const spy = spyOn(XMLHttpRequest.prototype, "send");
-                    const ajax = new Ajax(null, "POST", new FormData());
-                    ajax.send();
-                    expect(spy).toHaveBeenCalled();
-                    expect(spy.calls.first().args[0]).toEqual(jasmine.any(FormData));
-                });
-
-                it("should resolve to an instance of XMLHttpRequest", function() {
-                    const request = new Ajax("#");
-                    return expectAsync(request.send()).toBeResolvedTo(jasmine.any(XMLHttpRequest));
-                });
-
-                it("should reject with an instance of XMLHttpRequest", function() {
-                    const request = new Ajax("invalid/url");
-                    return expectAsync(request.send()).toBeRejectedWith(jasmine.any(XMLHttpRequest));
-                })
-            });
-        });
-
-        describe("FileOperation constructor function prototype,", function() {
-
-            it("should not throw an error when no ProgressModal is provided as an argument", function() {
-                expect(function() {
-                    new FileOperation(new Ajax("#"), (xhr, resolve, reject) => { resolve(); });
-                }).not.toThrowError();
-            });
-
-            describe("start(),", function() {
-                
-                it("should return a promise.", function() {
-                    const fileOp = new FileOperation(new Ajax("#"), (xhr, resolve, reject) => {resolve();});
-                    expect(fileOp.start()).toEqual(jasmine.any(Promise));
-                });
-
-                it(`should call its own success callback when its cancelled flag is false and the underlying 
-                Ajax request resolved successfully`, async function() {
-                    spyOn(Ajax.prototype, 'send').and.returnValue(Promise.resolve());
-                    const success = (xhr, resolve, reject) => { resolve(); }
-                    const op = new FileOperation(new Ajax("#"), success);
-                    const spy = spyOn(op, "success").and.callThrough();
-                    await op.start();
-                    expect(spy).toHaveBeenCalled();
+                it("should return true", function() {
+                    const obj = {parent: "dad"};
+                    expect(isParentChildNode(obj)).toBe(true);
                 });
             });
         });
-        */
 
         describe("deepCopy()", function() {
 
@@ -1891,6 +1914,7 @@ describe("Unit tests", function() {
             });
         });
     });
+});
 
 //Run each test inside this block one at a time, i.e. uncomment one it() function at a time and only run one describe block at a time
 xdescribe("Integration tests that require the environment to be prepared correctly and that should be run one at a time", function() {
@@ -2055,7 +2079,7 @@ setTimeout(
         svg.deleteFrom(gViewport);
         const tWrapper = createTreeWrapper(deepCopy(rawTree));
         svg = createAddableSvgData(tWrapper);
-        svg.addTo(gViewport);
+        svg.drawTo(gViewport);
         // Hack
         gTreeWrapper = tWrapper;
     },
