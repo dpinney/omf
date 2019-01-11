@@ -1,0 +1,6 @@
+TODO
+XXX Move scapeAsos.py in to weather.py.
+XXX Get aGosedWeather.py running its tests.
+XXX Pull the weather data from the new weather.py, ASOS, instead of oldWeather.py.
+OOO Figure out how to map new data from ASOS or USCRN to insolation. Or use NSRDB.
+OOO Update climateChange function in web.py.

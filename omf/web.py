@@ -141,7 +141,7 @@ def login():
 def login_page():
 	nextUrl = str(request.args.get("next","/"))
 	if flask_login.current_user.is_authenticated():
-		return redirect(urlTarget)
+		return redirect(nextUrl)
 	return render_template("clusterLogin.html", next=nextUrl)
 
 @app.route("/logout")
@@ -451,21 +451,25 @@ def distribution_get(owner, model_name, feeder_num):
 	if not omf.distNetViz.contains_coordinates(tree):
 		omf.distNetViz.insert_coordinates(tree)
 	passed_data = json.dumps(data)
-	"""Should this be an ajax request? The ajax request could be made while the feeder builds in the browser"""
 	component_json = get_components()
-	jasmine=spec = None
+	jasmine = spec = None
 	if request.path.endswith("/test") and User.cu() == "admin":
 		tests = load_test_files(["distNetVizSpec.js", "distDataValidationSpec.js"])
 		jasmine = tests["jasmine"]
 		spec = tests["spec"]
 	all_data = getDataNames()
 	user_feeders = all_data["feeders"]
+	# Must get rid of the 'u' for unicode strings before passing the strings to JavaScript
+	for dictionary in user_feeders:
+		dictionary['model'] = str(dictionary['model'])
+		dictionary['name'] = str(dictionary['name'])
 	public_feeders = all_data["publicFeeders"]
+	showFileMenu = User.cu() == "admin" or owner != "public"
 	# omf.distNetViz.forceLayout()
 	return render_template(
 		"distNetViz.html", thisFeederData=passed_data, thisFeederName=feeder_name, thisFeederNum=feeder_num,
 		thisModelName=model_name, thisOwner=owner, components=component_json, jasmine=jasmine, spec=spec,
-		publicFeeders=public_feeders, userFeeders=user_feeders
+		publicFeeders=public_feeders, userFeeders=user_feeders, showFileMenu=showFileMenu
 	)
 
 
@@ -503,7 +507,7 @@ def checkConversion(modelName, owner=None):
 		owner = User.cu()
 	path = ("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
 	errorPath = "data/Model/"+owner+"/"+modelName+"/gridError.txt"
-	print "Check conversion status:", os.path.exists(path), "for path", path
+	#print "Check conversion status:", os.path.exists(path), "for path", path
 	if os.path.isfile(errorPath):
 		with open(errorPath) as errorFile:
 			errorString = errorFile.read()
@@ -668,13 +672,15 @@ def scadaLoadshape(owner,feederName):
 	feederPath = modelDir+"/"+feederName+".omd"
 	scadaPath = modelDir+"/"+loadName+".csv"
 	# TODO: parse the csv using .csv library, set simStartDate to earliest timeStamp, length to number of rows, units to difference between first 2 timestamps (which is a function in datetime library). We'll need a link to the docs in the import dialog and a short blurb saying how the CSV should be built.
-	with open(scadaPath) as csvFile:
-		scadaReader = csv.DictReader(csvFile, delimiter='\t')
-		allData = [row for row in scadaReader]
-	firstDateTime = dt.datetime.strptime(allData[1]["timestamp"], "%m/%d/%Y %H:%M:%S")
-	secondDateTime = dt.datetime.strptime(allData[2]["timestamp"], "%m/%d/%Y %H:%M:%S")
-	csvLength = len(allData)
-	units =  (secondDateTime - firstDateTime).total_seconds()
+	with open(scadaPath) as csv_file:
+		#reader = csv.DictReader(csvFile, delimiter='\t')
+		rows = [row for row in csv.DictReader(csv_file)]
+		#reader = csv.DictReader(csvFile)
+		#rows = [row for row in reader]
+	firstDateTime = dt.datetime.strptime(rows[1]["timestamp"], "%m/%d/%Y %H:%M:%S")
+	secondDateTime = dt.datetime.strptime(rows[2]["timestamp"], "%m/%d/%Y %H:%M:%S")
+	csvLength = len(rows)
+	units = (secondDateTime - firstDateTime).total_seconds()
 	if abs(units/3600) == 1.0:
 		simLengthUnits = 'hours'
 	simDate = firstDateTime
@@ -794,25 +800,25 @@ def cymeImport(owner):
 	feederName = str(request.form.get("feederNameC",""))
 	feederNum = request.form.get("feederNum",1)
 	modelFolder = "data/Model/"+owner+"/"+modelName
-	mdbNetString = request.files["mdbNetFile"]
+	mdbFileObject = request.files["mdbNetFile"]
 	# Saves .mdb files to model folder
-	mdbNetString.save(os.path.join(modelFolder,mdbNetString.filename))
+	mdbFileObject.save(os.path.join(modelFolder,mdbFileObject.filename))
 	if os.path.isfile("data/Model/"+owner+"/"+modelName+"/gridError.txt"):
 		os.remove("data/Model/"+owner+"/"+modelName+"/gridError.txt")
-	importProc = Process(target=cymeImportBackground, args=[owner, modelName, feederName, feederNum, mdbNetString.filename])
+	importProc = Process(target=cymeImportBackground, args=[owner, modelName, feederName, feederNum, mdbFileObject.filename])
 	importProc.start()
 	pid = str(importProc.pid)
 	with open(modelFolder+"/ZPID.txt", "w+") as outFile:
 		outFile.write(pid)
 	return ('',204)
 
-def cymeImportBackground(owner, modelName, feederName, feederNum, mdbNetString):
+def cymeImportBackground(owner, modelName, feederName, feederNum, mdbFileName):
 	''' Function to run in the background for Milsoft import. '''
 	modelDir = "data/Model/"+owner+"/"+modelName+"/"
 	feederDir = modelDir+"/"+feederName+".omd"
 	newFeeder = dict(**feeder.newFeederWireframe)
-	print mdbNetString
-	newFeeder["tree"] = cymeToGridlab.convertCymeModel(mdbNetString, modelDir)
+	print mdbFileName
+	newFeeder["tree"] = cymeToGridlab.convertCymeModel(modelDir + mdbFileName, modelDir)
 	with open("./static/schedules.glm","r") as schedFile:
 		newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
 	try: os.remove(feederDir)
@@ -1140,6 +1146,7 @@ def backgroundAnonymize(modelDir, omdPath):
 		inFeeder = json.load(inFile)
 		# Name Option
 		nameOption = request.form.get('anonymizeNameOption')
+		newNameKey = None
 		if nameOption == 'pseudonymize':
 			newNameKey = anonymization.distPseudomizeNames(inFeeder)
 		elif nameOption == 'randomize':

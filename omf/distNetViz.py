@@ -65,6 +65,15 @@ def contains_coordinates(tree):
 		return False
 	return True
 
+def get_components():
+	path = "data/Component/"
+	components = {name[0:-5]:json.load(open(path + name)) for name in safeListdir(path)}
+	return json.dumps(components)
+
+def safeListdir(path):
+	''' Helper function that returns [] for dirs that don't exist. Otherwise new users can cause exceptions. '''
+	try: return [x for x in os.listdir(path) if not x.startswith(".")]
+	except:	return []
 
 def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.html'):
 	''' Vizualize a distribution system.'''
@@ -102,9 +111,10 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.h
 	template = Template(templateString)
 	def id():
 		return ""
+	component_json = get_components()
 	rend = template.render(thisFeederData=json.dumps(thisFeed), thisFeederName="NoNAME", thisFeederNum=1,
-		thisModelName="NOModel", thisOwner="NONE", components=[], jasmine=None, spec=None,
-		publicFeeders=[], userFeeders=[], csrf_token=id
+		thisModelName="NOModel", thisOwner="NONE", components=component_json, jasmine=None, spec=None,
+		publicFeeders=[], userFeeders=[], csrf_token=id, showFileMenu=True
 	)
 	with open(tempDir + '/' + outputName, 'w') as outFile:
 		outFile.write(rend)

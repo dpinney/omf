@@ -67,6 +67,74 @@
 					<option value="forceDirected">Force Directed</option>
 				</select>
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Node Coloring By<span class="classic">Select the simulation output value that will be used to color the nodes in the circuit.</span></label>
+				<select id="nodeCol" name="nodeCol">
+					<option value="Voltage">Voltage (V)</option>
+					<option value="VoltageImbalance">Voltage Imbalance (%)</option>
+					<option value="perUnitVoltage">Per-Unit Voltage (unitless)</option>
+					<option value="perUnit120Voltage">120 V Scaled Per-Unit Voltage (V)</option>
+					<option value="None">No Node Coloring</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Line Coloring By<span class="classic">Select the simulation output value that will be used to color the lines in the circuit.</span></label>
+				<select id="edgeCol" name="edgeCol">
+					<option value="Current">Current (A)</option>
+					<option value="Power">Power (W)</option>
+					<option value="Rating">Line Rating (A)</option>
+					<option value="PercentOfRating">Current vs. Line Rating (%)</option>
+					<option value="None">No Line Coloring</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Node Labels<span class="classic">Text labels on nodes.</span></label>
+				<select id="nodeLabs" name="nodeLabs">
+					<option value="Name">Component Name</option>
+					<option value="Value">Simulation Value</option>
+					<option value="None">No Label</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Line Labels<span class="classic">Text labels on lines</span></label>
+				<select id="edgeLabs" name="edgeLabs">
+					<option value="Name">Component Name</option>
+					<option value="Value">Simulation Value</option>
+					<option value="None">No Label</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Color Map<span class="classic">Select a gradient for coloring the physical values</span></label>
+				<select id="customColormap" name="customColormap">
+					<option value="False">Viridis</option>
+					<option value="True">Gray, Red, Blue</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Image Resolution (sq. in.)<span class="classic">Please select a value lower than 10,000</span></label>
+				<input type="text" id="rezSqIn" name="rezSqIn" pattern="^\d{1,4}$"/>
+			</div>
+			<div class="shortInput">
+				<label>Fault Location (Name of Line)<span class="classic">Please indicate the line in which the fault should occur</span></label>
+				<input type="text" id="faultLoc" name="faultLoc"/>
+			</div>
+			<div class="shortInput">
+				<label>Fault Type <span class="classic">Select the type of fault to simulate</span></label>
+				<select id="faultType" name="faultType">
+					<option value="SLG-A">Single-line-ground A</option>
+					<option value="SLG-B">Single-line-ground B</option>
+					<option value="SLG-C">Single-line-ground C</option>
+					<option value="SLG-X">Single-line-ground Random</option>
+					<option value="DLG-AB">Double-line-ground AB</option>
+					<option value="DLG-BC">Double-line-ground BC</option>
+					<option value="DLG-CA">Double-line-ground CA</option>
+					<option value="DLG-X">Double-line-ground Random</option>
+					<option value="LL-AB">Line-Line AB</option>
+					<option value="LL-BC">Line-Line BC</option>
+					<option value="LL-CA">Line-Line CA</option>
+					<option value="LL-X">Line-Line Random</option>
+				</select>
+			</div>
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
@@ -95,10 +163,3 @@
 		</div>
 	</div>
 </body>
-
-
-<!-- 
-for (var key in testFeeder.tree){
-	if (offenders.includes(testFeeder.tree[key]['name'])){
-		document.getElementById(key).setAttribute('class', "node selected");}
-} -->

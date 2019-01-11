@@ -1,13 +1,15 @@
 clock {
 	timezone EST5;
-	starttime '2012-01-01 12:00:00';
-	stoptime '2012-01-01 15:00:00';
+	starttime '2012-01-01 00:00:00';
+	stoptime '2012-01-02 00:00:00';
 };
-#include "hot_water_demand1.glm";
+
 #set minimum_timestep=60;
 #set profiler=1;
 #set relax_naming_rules=1;
+
 module generators;
+
 module tape;
 
 module residential {
@@ -21,7 +23,6 @@ module powerflow {
 
 module climate;
 
-
 module residential;
 
 object climate {
@@ -32,11 +33,10 @@ object climate {
 
 object recorder {
 	interval 60;
-	property heating_demand, cooling_demand;
+	property heating_demand, cooling_demand, heating_setpoint, air_temperature, outdoor_temperature;
 	file measured_house_power.csv;
 	parent R1_SingleFamilyHome_1960-1969_11543;
 };
-
 
 object house {
 	glass_type 1;
