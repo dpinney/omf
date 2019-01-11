@@ -68,6 +68,46 @@ def pullAsosStations(filePath):
 				currentSite['Time Zone'] = site['properties']['tzname']
 				csvwriter.writerow(currentSite)
 
+def pullDarksky(year, lat, lon, datatype, api_key = os.environ['DARKSKY'], path = None):
+	'''Returns hourly weather data from the DarkSky API as array.
+
+	* For more on the DarkSky API: https://darksky.net/dev/docs#overview
+	* List of available datatypes: https://darksky.net/dev/docs#data-point
+	
+	year, lat, lon: may be numerical or string
+	datatype: string, must be one of the available datatypes (case-sensitive)
+	api_key: string
+	path: string, must be a path to a folder if provided.
+		if a path is provided, the data for all datatypes for the given year and location will be cached there as a csv.'''
+	from pandas import date_range
+
+	coords = '{},{}'.format(lat, lon)
+	if path:
+		assert os.access(path, os.F_OK), 'Path does not exist'
+		try:
+			pass#read and return the datatype from filename
+		except IOError:
+			pass
+	#now we begin the actual scraping
+	times = list(date_range('{}-01-01'.format(year), '{}-12-31'.format(year)))
+	urls = ['https://api.darksky.net/forecast/%s/%s,%s,%s?exclude=currently,minutely,daily' % ( api_key, lat, lon, time.isoformat() ) for time in times]
+	
+	data = [requests.get(url).json() for url in urls]
+	out = []
+	out_csv = []
+	
+
+	for d in data:
+		hourly =
+		if path:
+			#add the hourly data to out_csv	
+		else:
+			out.extend(d['hourly']['data'][datatype])
+
+	if path:
+		#write the whole csv
+	return out
+
 def pullUscrn(year, station, datatype):
 	'''Returns hourly weather data from NOAA's quality-controlled USCRN dataset as array.
 	* Documentation: https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02/README.txt
