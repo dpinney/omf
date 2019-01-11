@@ -20,10 +20,10 @@ def before_request():
 		return web.redirect(url, code=code)
 
 if __name__ == "__main__":
-	logging.basicConfig(filename='omf.log', level=logging.DEBUG)
+	logging.basicConfig(filename='omf.log', level=logging.INFO)
 	# Start redirector:
 	reServer = WSGIServer(('0.0.0.0', 80), reApp)
 	Process(target=reServer.serve_forever).start()
 	# Start application:
-	server = WSGIServer(('0.0.0.0', 443), web.app, keyfile='omfDevKey.pem', certfile='omfDevCert.pem')
+	server = WSGIServer(('0.0.0.0', 443), web.app, keyfile='omfDevKey.pem', certfile='omfDevCert.pem', log=web.app.logger)
 	Process(target=server.serve_forever).start()

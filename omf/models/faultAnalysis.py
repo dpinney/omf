@@ -16,9 +16,13 @@ plt.switch_backend('Agg')
 import omf.feeder as feeder
 from omf.solvers import gridlabd
 
+# dateutil imports
+from dateutil import parser
+from dateutil.relativedelta import *
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = "The voltageDrop model runs loadflow to show system voltages at all nodes."
+hidden = True
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
@@ -33,7 +37,7 @@ def work(modelDir, inputDict):
 		neato = False
 	else:
 		neato = True
-	# None cheack for edgeCol
+	# None check for edgeCol
 	if inputDict.get("edgeCol", "None") == "None":
 		edgeColValue = None
 	else:
@@ -59,7 +63,7 @@ def work(modelDir, inputDict):
 	else:
 		customColormapValue = False
 	# chart = voltPlot(omd, workDir=modelDir, neatoLayout=neato)
-	chart = drawPlot(
+	chart = drawPlotFault(
 		pJoin(modelDir,feederName + ".omd"),
 		neatoLayout = neato,
 		edgeCol = edgeColValue,
@@ -67,13 +71,16 @@ def work(modelDir, inputDict):
 		nodeLabs = nodeLabsValue,
 		edgeLabs = edgeLabsValue,
 		customColormap = customColormapValue,
-		rezSqIn = int(inputDict["rezSqIn"]))
+		faultLoc = inputDict["faultLoc"],
+		faultType = inputDict["faultType"],
+		rezSqIn = int(inputDict["rezSqIn"]),
+		simTime = '2000-01-01 0:00:00') #TODO: Wire in input from HTML
 	chart.savefig(pJoin(modelDir,"output.png"))
 	with open(pJoin(modelDir,"output.png"),"rb") as inFile:
 		outData["voltageDrop"] = inFile.read().encode("base64")
 	return outData
-#Optional gldBinary parameter added
-def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, customColormap=False, rezSqIn=400, gldBinary=None):
+
+def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, faultLoc=None, faultType=None, customColormap=False, rezSqIn=400, simTime='2000-01-01 0:00:00'):
 	''' Draw a color-coded map of the voltage drop on a feeder.
 	path is the full path to the GridLAB-D .glm file or OMF .omd file.
 	workDir is where GridLAB-D will run, if it's None then a temp dir is used.
@@ -83,6 +90,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	edgeLabs and nodeLabs properties must be either 'Name', 'Value', or None
 	edgeCol and nodeCol can be set to false to avoid coloring edges or nodes
 	customColormap=True means use a one that is nicely scaled to perunit values highlighting extremes.
+	faultType and faultLoc are the type of fault and the name of the line that it occurs on.
 	Returns a matplotlib object.'''
 	# Be quiet matplotlib:
 	warnings.filterwarnings("ignore")
@@ -95,6 +103,35 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 		attachments = omd.get('attachments',[])
 	else:
 		raise Exception('Invalid input file type. We require a .glm or .omd.')
+
+	# add fault object to tree
+	def safeInt(x):
+		try: return int(x)
+		except: return 0
+	biggestKey = max([safeInt(x) for x in tree.keys()])
+	# Add Reliability module
+	tree[str(biggestKey*10)] = {"module":"reliability","maximum_event_length":"18000","report_event_log":"true"}
+	CLOCK_START = simTime
+	CLOCK_END = '2000-01-01 0:00:20'
+	CLOCK_RANGE = CLOCK_START + ',' + CLOCK_END
+	# Add eventgen object (the fault)
+	tree[str(biggestKey*10 + 1)] = {"object":"eventgen","name":"ManualEventGen","parent":"RelMetrics", "fault_type":faultType, "manual_outages":faultLoc + ',' + CLOCK_RANGE} # TODO: change CLOCK_RANGE to read the actual start and stop time, not just hard-coded
+	# Add fault_check object
+	tree[str(biggestKey*10 + 2)] = {"object":"fault_check","name":"test_fault","check_mode":"ONCHANGE", "eventgen_object":"ManualEventGen", "output_filename":"Fault_check_out.txt"}
+	# Add reliabilty metrics object
+	tree[str(biggestKey*10 + 3)] = {"object":"metrics", "name":"RelMetrics", "report_file":"Metrics_Output.csv", "module_metrics_object":"PwrMetrics", "metrics_of_interest":'"SAIFI,SAIDI,CAIDI,ASAI,MAIFI"', "customer_group":'"groupid=METERTEST"', "metric_interval":"5 h", "report_interval":"5 h"}
+	# Add power_metrics object
+	tree[str(biggestKey*10 + 4)] = {"object":"power_metrics","name":"PwrMetrics","base_time_value":"1 h"}
+
+	for key in tree:
+		if 'clock' in tree[key]:
+			tree[key]['starttime'] = CLOCK_START
+			dt_start = parser.parse(CLOCK_START)
+			print dt_start
+			dt_end = dt_start + relativedelta(seconds=+20)
+			print dt_end
+			tree[key]['stoptime'] = CLOCK_END
+
 	# dictionary to hold info on lines present in glm
 	edge_bools = dict.fromkeys(['underground_line','overhead_line','triplex_line','transformer','regulator', 'fuse', 'switch'], False)
 	# Map to speed up name lookups.
@@ -118,13 +155,9 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 			edge_bools['switch'] = True
 		if tree[key].get("argument","") == "\"schedules.glm\"" or tree[key].get("tmyfile","") != "":
 			del tree[key]
-	# Make sure we have a voltDump:
-	def safeInt(x):
-		try: return int(x)
-		except: return 0
-	biggestKey = max([safeInt(x) for x in tree.keys()])
-	tree[str(biggestKey*10)] = {"object":"voltdump","filename":"voltDump.csv"}
-	tree[str(biggestKey*10 + 1)] = {"object":"currdump","filename":"currDump.csv"}
+	# Make sure we have a voltage dump and current dump:
+	tree[str(biggestKey*10 + 5)] = {"object":"voltdump","filename":"voltDump.csv"}
+	tree[str(biggestKey*10 + 6)] = {"object":"currdump","filename":"currDump.csv"}
 	# Line rating dumps
 	tree[omf.feeder.getMaxKey(tree) + 1] = {
 		'module': 'tape'
@@ -142,7 +175,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	if not workDir:
 		workDir = tempfile.mkdtemp()
 		# print '@@@@@@', workDir
-	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir, gldBinary=gldBinary)
+	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 	# read voltDump values into a dictionary.
 	try:
 		dumpFile = open(pJoin(workDir,'voltDump.csv'),'r')
@@ -549,6 +582,7 @@ def glmToModel(glmPath, modelDir):
 		omd['tree'] = tree
 		json.dump(omd, omdFile, indent=4)
 
+# TODO: Need name of default line to produce fault on!!!
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
@@ -556,10 +590,12 @@ def new(modelDir):
 		"modelType": modelName,
 		"runTime": "",
 		"layoutAlgorithm": "geospatial",
-		"edgeCol" : "None",
+		"edgeCol" : "Current",
 		"nodeCol" : "Voltage",
-		"nodeLabs" : "None",
-		"edgeLabs" : "None",
+		"nodeLabs" : "Value",
+		"edgeLabs" : "Value",
+		"faultLoc" : "NEEDNAME",
+		"faultType" : "SLG-A",
 		"customColormap" : "False",
 		"rezSqIn" : "225"
 	}
@@ -571,6 +607,7 @@ def new(modelDir):
 	return creationCode
 
 # Testing for variable combinations
+# TODO: Add additional values for drawPlotFault (currently testing drawPlot)
 def _testAllVarCombos():
 	edgeColsList = {None : "None", "Current" : "C", "Power" : "P", "Rating" : "R", "PercentOfRating" : "Per"}
 	nodeColsList = {None : "None", "Voltage" : "V", "VoltageImbalance" : "VI", "perUnitVoltage" : "PUV", "perUnit120Voltage" : "PUV120"}
@@ -606,15 +643,16 @@ def _testAllVarCombos():
 def _testingPlot():
 	PREFIX = omf.omfDir + '/scratch/CIGAR/'
 	# FNAME = 'test_base_R4-25.00-1.glm_CLEAN.glm'
-	FNAME = 'test_Exercise_4_2_1.glm'
+	# FNAME = 'test_Exercise_4_2_1.glm'
 	# FNAME = 'test_ieee37node.glm'
+	FNAME = 'test_ieee37nodeFaultTester.glm'
 	# FNAME = 'test_ieee123nodeBetter.glm'
 	# FNAME = 'test_large-R5-35.00-1.glm_CLEAN.glm'
 	# FNAME = 'test_medium-R4-12.47-1.glm_CLEAN.glm'
 	# FNAME = 'test_smsSingle.glm'
 	# Hack: Agg backend doesn't work for interactivity. Switch to something we can use:
 	# plt.switch_backend('MacOSX')
-	chart = drawPlot(PREFIX + FNAME, neatoLayout=True, edgeCol="PercentOfRating", nodeCol="perUnitVoltage", nodeLabs="Value", edgeLabs="Name", customColormap=True, rezSqIn=225)
+	chart = drawPlotFault(PREFIX + FNAME, neatoLayout=True, edgeCol="PercentOfRating", nodeCol="perUnitVoltage", nodeLabs="Name", edgeLabs=None, faultLoc="node702-713", faultType="SLG-A", customColormap=True, rezSqIn=225, simTime='2000-01-01 0:00:00')
 	chart.savefig(PREFIX + "YO_WHATS_GOING_ON.png")
 	# plt.show()
 

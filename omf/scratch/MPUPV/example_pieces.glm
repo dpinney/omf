@@ -1,0 +1,45 @@
+object meter {
+	 phases "ABC";
+	 name node781;
+	 bustype SWING;
+	 voltage_A 2504.88-1446.19314229j;
+	 voltage_B -2504.88-1446.19314229j;
+	 voltage_C -44.88+2814.65184433j;
+	 nominal_voltage 2800;
+}
+
+object recorder {
+	name subRecorder;
+	filename 'sub.csv';
+	property power_A, power_B, power_C;
+	limit 0;
+	parent node781;
+}
+
+object collector {
+	group class=transformer;
+	property sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag);
+	limit 0;
+	file ZlossesTransformer.csv;
+};
+
+object collector {
+	group class=underground_line;
+	property sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag);
+	limit 0;
+	file ZlossesUnderground.csv;
+};
+
+object collector {
+	group class=overhead_line;
+	property sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag);
+	limit 0;
+	file ZlossesOverhead.csv;
+};
+
+object collector {
+	group class=inverter;
+	property sum(power_out.real)...;
+	limit 0;
+	file distributedGen.csv;
+}
