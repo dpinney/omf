@@ -385,7 +385,7 @@
 				top: 55px;
 				border:1px solid black;
 				border-collapse: collapse;
-                display: block;
+                display: inline-block;
                 overflow-x: hidden;
 				max-height: 90vh;
 			}
@@ -1037,21 +1037,61 @@ const thisOwner = "{% if thisOwner %}{{ thisOwner | safe }}{% else %}null{% endi
 const publicFeeders = {% if publicFeeders %}{{ publicFeeders | safe }}{% else %}null{% endif %};
 const userFeeders = {% if userFeeders %}{{ userFeeders | safe }}{% else %}null{% endif %}; 
 const writeFeeder = deepCopy(readFeeder);
-/* The globalTree can only be created after the entire file has been parsed */
+// The global TreeWrapper can only be created after the entire file has been parsed.
 let gTreeWrapper; 
 let gViewport; 
-let globalLonOffset = null;
-let globalLatOffset = null;
-// Globals to keep track of mouse coordinates
-let downX, downY, upX, upY;
-//let newNodeGenObj = {}; // What does this do?
-
-//**************************************************
-// Deprecated globals
-//**************************************************
-
+let gLonOffset = null;
+let gLatOffset = null;
 // Scale that all SVG objects are drawn at
 let scaleLevel = 1.0; 
+
+//**************************************************
+// Selection Interface
+//**************************************************
+
+/* We need this only because the 'to' and 'from' properties of a line depend on which element was selected first.
+We can't accomplish that purely with document.getElementsByClassName("selected") becauese the order of that array
+depends on how elements are ordered in the DOM, not on the order in which the user clicked.
+*/
+let isSelected;
+let removeSelected;
+let addSelected;
+let clearSelected;
+let getSelected;
+/**
+ * TODO: add unit tests
+ */
+{
+    let gSelectedElements = [];
+    isSelected = function(element) {
+        return element.classList.contains("selected");
+    };
+    removeSelected = function(element) {
+        if (element.classList.contains("selected")) {
+            element.classList.remove("selected");
+            const idx = gSelectedElements.findIndex(e => { return e === element; });
+            if (idx < 0) {
+                throw new Error("The previously selected element was not found in the selection array and couldn't be removed");
+            } 
+            gSelectedElements.splice(idx, 1);
+        }
+    };
+    addSelected = function(element) {
+        if (!element.classList.contains("selected")) {
+            element.classList.add("selected");
+            gSelectedElements.push(element);
+        }
+    };
+    clearSelected = function() {
+        Array.from(document.getElementsByClassName("selected")).forEach(e => {
+            e.classList.remove("selected");
+        });
+        gSelectedElements = [];
+    };
+    getSelected = function() {
+        return gSelectedElements;
+    }
+}
 
 function saveSvg() {
 	// Create an SVG that can be saved.
@@ -1079,8 +1119,8 @@ function downloadTextFile() {
 //function addCircle(x,y,r,id,myClass) {
 //	const svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0];
 //	const aCirc = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-//	aCirc.setAttribute('cx', x - globalLonOffset);
-//	aCirc.setAttribute('cy', y - globalLatOffset);
+//	aCirc.setAttribute('cx', x - gLonOffset);
+//	aCirc.setAttribute('cy', y - gLatOffset);
 //	aCirc.setAttribute('r', r);
 //	aCirc.setAttribute('id', id);
 //	aCirc.setAttribute('class', myClass);
@@ -1098,10 +1138,10 @@ function downloadTextFile() {
 //function addLine(x1, y1, x2, y2, id, myClass) {
 //	const svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0];
 //	const aLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-//	aLine.setAttribute('x1', x1 - globalLonOffset);
-//	aLine.setAttribute('y1', y1 - globalLatOffset);
-//	aLine.setAttribute('x2', x2 - globalLonOffset);
-//	aLine.setAttribute('y2', y2 - globalLatOffset);
+//	aLine.setAttribute('x1', x1 - gLonOffset);
+//	aLine.setAttribute('y1', y1 - gLatOffset);
+//	aLine.setAttribute('x2', x2 - gLonOffset);
+//	aLine.setAttribute('y2', y2 - gLatOffset);
 //	aLine.setAttribute('id', id);
 //	aLine.setAttribute('class', myClass);
 //	let w;
@@ -1157,9 +1197,9 @@ function createViewport(treeWrapper, svgContainer) {
     });
     //const translatedMaxLon = maxLon - minLon;
     const translatedMaxLon = (maxLon - minLon);
-    globalLonOffset = minLon;
+    gLonOffset = minLon;
     const translatedMaxLat = maxLat - minLat;
-    globalLatOffset = minLat;
+    gLatOffset = minLat;
     // Create the viewport
     svgContainer.setAttribute('viewBox',`0 0 ${translatedMaxLon} ${translatedMaxLat}`);
 	window.panZoom = svgPanZoom('#svgContainer', {
@@ -1184,15 +1224,15 @@ function svgClick(downEvent, upEvent) {
     if (downEvent.altKey && element.id !== "svgContainer" && !element.classList.contains("parentChild")) {
         //destroyTables(["descriptionTables", "selectionTable"]);
         destroyTables(["selectionTable"]);
-        if (!element.classList.contains("selected")) {
-            element.classList.add("selected");
-        } else {
-            element.classList.remove("selected");
+        if (isSelected(element)) {
+            removeSelected(element);
             //Copied from rowPrototype.delete(). Refactor needed
             const table = document.getElementById(`table_${element.id}`);
             if (table != null) {
                 document.getElementById("descriptionTables").removeChild(table);
             }
+        } else {
+            addSelected(element);
         }
         let ids = [];
         getSelected().forEach(e => { ids.push(e.id); });
@@ -1200,19 +1240,16 @@ function svgClick(downEvent, upEvent) {
             const table = createSelectionTable(ids, gTreeWrapper);
             document.getElementById("selectionTable").appendChild(table);
         } 
-        return;
-    } 
-    if (!downEvent.altKey) {
-        getSelected().forEach(e => { e.classList.remove("selected"); });
+    } else if (!downEvent.altKey) {
+        clearSelected();
         destroyTables(["descriptionTables", "selectionTable"]);
         //destroyTables(["selectionTable"]);
         if (element.id !== "svgContainer" && !element.classList.contains("parentChild")) {
-            element.classList.add("selected");
+            addSelected(element);
             const table = createDescriptionTable(element.id, gTreeWrapper);
             document.getElementById("descriptionTables").appendChild(table);
         } 
     }
-    return;
 }
 
 //function hotkeys() {
@@ -1326,27 +1363,11 @@ function clickLatLon(event) {
 	//x = (x - pan.x) / zoom;
 	//y = (y - pan.y) / zoom;
 	//return [x,y];
-	// maybe this should be a class? We'll see...
 	const coords = {
 		x: (x - pan.x) / zoom,
 		y: (y - pan.y) / zoom
 	};
 	return coords;
-}
-
-function clearGlobalSelectionArray() {
-	//selection.forEach(element => {
-	//	element.classList.remove("selected");
-	//})
-	//selection = [];
-	Array.from(document.getElementsByClassName("selected")).forEach(element => element.classList.remove("selected"));
-}
-
-/**
- * TODO: add unit tests
- */
-function getSelected() {
-	return Array.from(document.getElementsByClassName("selected"));
 }
 
 //**************************************************
@@ -1425,13 +1446,12 @@ function getMatchingKeys(term, tree) {
 
 /** 
  * TODO: add unit tests
- * Clears the "selected" class from previous elements before making the viewed element "selected"
  */
 function viewElement(key) {
-    Array.from(document.getElementsByClassName("selected")).forEach(element => element.classList.remove("selected"));
+    clearSelected();
     const element = document.getElementById(key);
-	element.classList.add('selected');
-    let x, y;
+    addSelected(element);
+   let x, y;
     if (element.getAttribute("cx") != null && element.getAttribute("cy") != null) {
         x = element.getAttribute("cx");
         y = element.getAttribute("cy");
@@ -2318,7 +2338,12 @@ const treeWrapperPrototype = {
      */
      insert(treeObject) {
         this.tree[treeObject.key] = treeObject.data;
-        this.names[treeObject.data.name] = treeObject.key;
+        const name = treeObject.data.name;
+        if (name != null) {
+            this.names[name] = treeObject.key;
+        } else {
+            //console.log(`Inserted TreeObject with key "${treeObject.key}" did not have a "name" property.`);
+        }
         const tWrapper = createTreeWrapper();
         tWrapper.add(treeObject.key, this);
         tWrapper.merge(this.getSubtreeToRedraw(treeObject.key));
@@ -2438,8 +2463,8 @@ const treeWrapperPrototype = {
     getConnectedLinesOf(key) {
         const tWrapper = createTreeWrapper();
         if (!this.contains(key)) {
-            //console.log(`Unable to find lines that connect to this node with key: "${key}". The key does not exist in this
-            //TreeWrapper.`);
+            console.log(`Unable to find lines that connect to this node with key: "${key}". The key does not exist in this
+            TreeWrapper.`);
             return tWrapper;
         } 
         const type = getType(this.tree[key]);
@@ -2967,11 +2992,11 @@ function createSvgCircle(key, {longitude, latitude, object}, {r = 2, strokeWidth
     // Set coordinates and consider if they need to be translated
     longitude = parseFloat(longitude);
     latitude = parseFloat(latitude);
-    if (globalLonOffset !== null) {
-        longitude -= globalLonOffset;
+    if (gLonOffset !== null) {
+        longitude -= gLonOffset;
     }
-    if (globalLatOffset !== null) {
-        latitude -= globalLatOffset;
+    if (gLatOffset !== null) {
+        latitude -= gLatOffset;
     }
     circle.setAttribute('cx', longitude);
     circle.setAttribute('cy', latitude);
@@ -2998,13 +3023,13 @@ function createSvgLine(sourceNode, targetNode, key, thisObject) {
     let sourceLat = parseFloat(sourceNode.latitude);
     let targetLon = parseFloat(targetNode.longitude);
     let targetLat = parseFloat(targetNode.latitude); 
-    if (globalLonOffset !== null) {
-        sourceLon -= globalLonOffset;
-        targetLon -= globalLonOffset;
+    if (gLonOffset !== null) {
+        sourceLon -= gLonOffset;
+        targetLon -= gLonOffset;
     }
-    if (globalLatOffset !== null) {
-        sourceLat -= globalLatOffset;
-        targetLat -= globalLatOffset;
+    if (gLatOffset !== null) {
+        sourceLat -= gLatOffset;
+        targetLat -= gLatOffset;
     }
     svgLine.setAttribute("x1", sourceLon); 
     svgLine.setAttribute("x2", targetLon);
@@ -3208,7 +3233,7 @@ function createSelectionTable(ids, tWrapper) {
                 document.getElementById("descriptionTables").append(table);
             }           
         });
-        let row = createRow({key: name, value: button, deletable: true}, id);
+        let row = createRow({key: name, value: button, deletable: true}, document.getElementById(id));
         tBody.append(row.self);
     });
     if (window.jQuery != null) {
@@ -3294,22 +3319,25 @@ const buttonPrototype = {
         const that = this;
         //element.addEventListener("click", moveNode, true);
         element.addEventListener("mousedown", moveNode, true);
+        // Really need to test this to ensure that I remember to include gLonOffset and gLatOffset
         function moveNode(event) {
             event.stopPropagation();
             //document.getElementById("svgContainerWrapper").removeEventListener("click", moveNode, true);
             document.getElementById("svgContainerWrapper").removeEventListener("mousedown", moveNode, true);
             const coords = clickLatLon(event);
-            that.tObject.data.longitude = coords.x;
-            that.tObject.data.latitude = coords.y;
+            //that.tObject.data.longitude = coords.x;
+            that.tObject.data.longitude = coords.x + gLonOffset;
+            //that.tObject.data.latitude = coords.y;
+            that.tObject.data.latitude = coords.y + gLatOffset;
             const subWrapper = that.tWrapper.insert(that.tObject);
             createAddableSvgData(subWrapper).drawTo(gViewport);
             element.setAttribute("style", "cursor: default");
             // Update the table with the new coordinates
             Array.from(that.tableBody.getElementsByTagName("input")).forEach(input => {
                 if (input.dataset.coordinate === "latitude") {
-                    input.value = coords.y;
+                    input.value = coords.y + gLatOffset;
                 } else if (input.dataset.coordinate === "longitude") {
-                    input.value = coords.x;
+                    input.value = coords.x + gLonOffset;
                 }
             });
         }
@@ -3570,37 +3598,31 @@ const rowPrototype = {
     /**
      * TODO: update unit tests
      * Delete the row from the table. Delete the key from the map, if there was a map.
-     * Remove "selected" from the classList of the element, if elementId is set.
      */
     delete() {
+        this.self.parentElement.removeChild(this.self);
         if (this.map != null) {
             delete this.map[this.key];
         } 
-        if (this.elementId != null) {
-            document.getElementById(this.elementId).classList.remove("selected");
-            const table = document.getElementById(`table_${this.elementId}`);
+        if (this.element != null) {
+            removeSelected(this.element);
+            //document.getElementById(this.element).classList.remove("selected");
+            const table = document.getElementById(`table_${this.element.id}`);
             if (table != null) {
                 document.getElementById("descriptionTables").removeChild(table);
             }
-            //const tables = Array.from(document.querySelectorAll("[data-tableid]"));
-            //tables.forEach(t => {
-            //    if (t.dataset.tableid === this.elementId) {
-            //        document.getElementById("descriptionTables").removeChild(t);
-            //    }
-            //});
             if (getSelected().length === 0) {
                 destroyTables(["selectionTable"]);
             }
         }
-        this.self.parentElement.removeChild(this.self);
     },
 
     /**
      * TODO: add unit tests
      */
-    updateInput() {
-        //need a direct reference to the input of the row for convenience.
-    }
+    //updateInput() {
+    //    //need a direct reference to the input of the row for convenience.
+    //}
 }
 
 /** 
@@ -3623,7 +3645,7 @@ function createRow({key, value=null, map=null, deletable=false}) {
     obj.self.append(obj.getKeyElement());
     obj.self.append(obj.getValueElement(nonModifiableProperties));
     if (arguments[1] != null) {
-        obj.elementId = arguments[1];
+        obj.element = arguments[1];
     }
     return obj;
 }
