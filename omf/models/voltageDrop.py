@@ -72,8 +72,8 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir,"output.png"),"rb") as inFile:
 		outData["voltageDrop"] = inFile.read().encode("base64")
 	return outData
-		
-def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, customColormap=False, rezSqIn=400):
+#Optional gldBinary parameter added
+def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, customColormap=False, rezSqIn=400, gldBinary=None):
 	''' Draw a color-coded map of the voltage drop on a feeder.
 	path is the full path to the GridLAB-D .glm file or OMF .omd file.
 	workDir is where GridLAB-D will run, if it's None then a temp dir is used.
@@ -142,7 +142,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	if not workDir:
 		workDir = tempfile.mkdtemp()
 		# print '@@@@@@', workDir
-	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
+	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir, gldBinary=gldBinary)
 	# read voltDump values into a dictionary.
 	try:
 		dumpFile = open(pJoin(workDir,'voltDump.csv'),'r')
@@ -606,8 +606,8 @@ def _testAllVarCombos():
 def _testingPlot():
 	PREFIX = omf.omfDir + '/scratch/CIGAR/'
 	# FNAME = 'test_base_R4-25.00-1.glm_CLEAN.glm'
-	# FNAME = 'test_Exercise_4_2_1.glm'
-	FNAME = 'test_ieee37node.glm'
+	FNAME = 'test_Exercise_4_2_1.glm'
+	# FNAME = 'test_ieee37node.glm'
 	# FNAME = 'test_ieee123nodeBetter.glm'
 	# FNAME = 'test_large-R5-35.00-1.glm_CLEAN.glm'
 	# FNAME = 'test_medium-R4-12.47-1.glm_CLEAN.glm'

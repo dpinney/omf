@@ -28,8 +28,7 @@ hidden = True
 '''
 if ...
 	arr
-	warningTemplate = Template("Warning: Hazard Field of size {{ coordinates }} larger than circuit.")
-	warningTemplate.render(coordinates=arr)
+	
 '''
 
 class HazardField(object):
@@ -418,6 +417,23 @@ def genDiagram(outputDir, feederJson, damageDict):
 	if showPlot: plt.show()
 	plt.savefig(pJoin(outputDir,"feederChart.png"), dpi=800, pad_inches=0.0)
 
+
+def checkHazardFieldBounds(hazard, gfmJson):
+	''' Detect if hazard field extends beyond circuit boundaries, issue a warning to the front-end if it does. '''
+	x_min = hazard.hazardObj["xllcorner"],
+	x_max =	hazard.hazardObj["xllcorner"] + hazard.hazardObj["ncols"] * hazard.hazardObj["cellsize"],
+	y_min =	hazard.hazardObj["yllcorner"],
+	y_max = hazard.hazardObj["yllcorner"] + hazard.hazardObj["nrows"] * hazard.hazardObj["cellsize"]
+
+	for bus in gfmJson['buses']:
+		if x_min <= bus['x'] or x_max >= bus['x'] or y_min <= bus['y'] or y_max >= bus['y']: # Check to see if the hazard field extends beyond the circuit domains.
+			bounds = [hazard.hazardObj["ncols"] * hazard.hazardObj["cellsize"], hazard.hazardObj["nrows"] * hazard.hazardObj["cellsize"]] # Get as much data as possible for the warning.
+			location = [bus['x'], bus['y']]
+			bus_id = [bus['id']]
+			warningTemplate = Template("Warning: Hazard Field of size {{ coordinates }} exceed circuit bounds. Bus at {{ location }} with ID {{ bus_id }} detects warning.")
+			warningTemplate.render(coordinates=bounds)
+
+
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	outData = {}
@@ -443,6 +459,9 @@ def work(modelDir, inputDict):
 	gfmInputFilename = 'gfmInput.json'
 	with open(pJoin(modelDir, gfmInputFilename), 'w') as outFile:
 		json.dump(gfmJson, outFile, indent=4)
+	# Check for overlap between hazard field and GFM circuit input: NOTE: We need a hazard object to invoke this.
+	#for key in gfmJson:
+	#	print key #TODO: check bus coordinates. if violation, set outData['warning'] = 'Hazard no overlap!'
 	# Run GFM
 	gfmBinaryPath = pJoin(__neoMetaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
 	rdtInputName = 'rdtInput.json'

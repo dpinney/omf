@@ -117,10 +117,15 @@ def _addGldToPath():
 			# Platform not supported, so just return the standard binary and pray it works:
 			return "gridlabd"
 
-def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None, glmName=None):
+def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None, glmName=None, gldBinary=None):
 	''' Execute gridlab in the local filesystem. Return a nice dictionary of results. '''
 	try:
-		binaryName = "gridlabd"
+		#Runs standard gridlabd binary if binary is not specified, runs gldBinary parameter path if specified. 
+		#gldBinary must be path to binary
+		if not gldBinary:
+			binaryName = "gridlabd"
+		else:
+			binaryName = gldBinary
 		# Create a running directory and fill it, unless we've specified where we're running.
 		if not workDir:
 			workDir = tempfile.mkdtemp()
@@ -145,7 +150,7 @@ def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None, g
 		# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!) 
 		with open(pJoin(workDir,'stdout.txt'),'w') as stdout, open(pJoin(workDir,'stderr.txt'),'w') as stderr, open(pJoin(workDir,'PID.txt'),'w') as pidFile:
 			# MAYBEFIX: turn standerr WARNINGS back on once we figure out how to supress the 500MB of lines gridlabd wants to write...
-			proc = subprocess.Popen([binaryName,'-w', glmName], cwd=workDir, stdout=stdout, stderr=stderr)
+			proc = subprocess.Popen([binaryName, '-w', glmName], cwd=workDir, stdout=stdout, stderr=stderr)
 			pidFile.write(str(proc.pid))
 		returnCode = proc.wait()
 		# Build raw JSON output.
@@ -228,7 +233,8 @@ def anaDataTree(studyPath, fileNameTest):
 def _tests():
 	print "Full path to Gridlab executable we're using:", _addGldToPath()
 	print "Testing string cleaning."
-	strTestCases = [("+954.877", 954.877),
+	strTestCases = [
+		("+954.877", 954.877),
 		("+2.18351e+006", 2183510.0),
 		("+7244.99+1.20333e-005d", 7244.99),
 		# ("+7244.99+120d", 7245.98372204), # Fails due to float rounding but should pass.
@@ -236,7 +242,8 @@ def _tests():
 		("1", 1.0),
 		("-32.4", -32.4),
 		("+7200+0d", 7200.0),
-		("+175020+003133", 0.0)]
+		("+175020+003133", 0.0)
+	]
 	for (string, result) in strTestCases:
 		assert _strClean(string) == result, "A _strClean operation failed on: " + string
 	# Get a test feeder and test climate.
