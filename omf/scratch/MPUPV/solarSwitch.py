@@ -1,6 +1,4 @@
-import sys
-sys.path.append('../CIGAR')
-from cosim import GridLabWorld
+from omf.cosim import GridLabWorld
 
 glw = GridLabWorld('6267', 'localhost', 'GC-solarAdd.glm', '2000-01-01 0:00:00')
 glw.start()
