@@ -16,6 +16,9 @@ plt.switch_backend('Agg')
 import omf.feeder as feeder
 from omf.solvers import gridlabd
 
+# dateutil imports
+from dateutil import parser
+from dateutil.relativedelta import *
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = "The voltageDrop model runs loadflow to show system voltages at all nodes."
@@ -70,13 +73,14 @@ def work(modelDir, inputDict):
 		customColormap = customColormapValue,
 		faultLoc = inputDict["faultLoc"],
 		faultType = inputDict["faultType"],
-		rezSqIn = int(inputDict["rezSqIn"]))
+		rezSqIn = int(inputDict["rezSqIn"]),
+		simTime = '2000-01-01 0:00:00') #TODO: Wire in input from HTML
 	chart.savefig(pJoin(modelDir,"output.png"))
 	with open(pJoin(modelDir,"output.png"),"rb") as inFile:
 		outData["voltageDrop"] = inFile.read().encode("base64")
 	return outData
 
-def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, faultLoc=None, faultType=None, customColormap=False, rezSqIn=400):
+def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, faultLoc=None, faultType=None, customColormap=False, rezSqIn=400, simTime='2000-01-01 0:00:00'):
 	''' Draw a color-coded map of the voltage drop on a feeder.
 	path is the full path to the GridLAB-D .glm file or OMF .omd file.
 	workDir is where GridLAB-D will run, if it's None then a temp dir is used.
@@ -107,7 +111,7 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 	biggestKey = max([safeInt(x) for x in tree.keys()])
 	# Add Reliability module
 	tree[str(biggestKey*10)] = {"module":"reliability","maximum_event_length":"18000","report_event_log":"true"}
-	CLOCK_START = '2000-01-01 0:00:00'
+	CLOCK_START = simTime
 	CLOCK_END = '2000-01-01 0:00:20'
 	CLOCK_RANGE = CLOCK_START + ',' + CLOCK_END
 	# Add eventgen object (the fault)
@@ -122,7 +126,11 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 	for key in tree:
 		if 'clock' in tree[key]:
 			tree[key]['starttime'] = CLOCK_START
-			tree[key]['stoptime'] = CLOCK_STOP
+			dt_start = parser.parse(CLOCK_START)
+			print dt_start
+			dt_end = dt_start + relativedelta(seconds=+20)
+			print dt_end
+			tree[key]['stoptime'] = CLOCK_END
 
 	# dictionary to hold info on lines present in glm
 	edge_bools = dict.fromkeys(['underground_line','overhead_line','triplex_line','transformer','regulator', 'fuse', 'switch'], False)
@@ -644,7 +652,7 @@ def _testingPlot():
 	# FNAME = 'test_smsSingle.glm'
 	# Hack: Agg backend doesn't work for interactivity. Switch to something we can use:
 	# plt.switch_backend('MacOSX')
-	chart = drawPlotFault(PREFIX + FNAME, neatoLayout=True, edgeCol="PercentOfRating", nodeCol="perUnitVoltage", nodeLabs="Name", edgeLabs=None, faultLoc="node702-713", faultType="SLG-A", customColormap=True, rezSqIn=225)
+	chart = drawPlotFault(PREFIX + FNAME, neatoLayout=True, edgeCol="PercentOfRating", nodeCol="perUnitVoltage", nodeLabs="Name", edgeLabs=None, faultLoc="node702-713", faultType="SLG-A", customColormap=True, rezSqIn=225, simTime='2000-01-01 0:00:00')
 	chart.savefig(PREFIX + "YO_WHATS_GOING_ON.png")
 	# plt.show()
 
