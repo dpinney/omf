@@ -112,7 +112,9 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 	# Add Reliability module
 	tree[str(biggestKey*10)] = {"module":"reliability","maximum_event_length":"18000","report_event_log":"true"}
 	CLOCK_START = simTime
-	CLOCK_END = '2000-01-01 0:00:20'
+	dt_start = parser.parse(CLOCK_START)
+	dt_end = dt_start + relativedelta(seconds=+20)
+	CLOCK_END = str(dt_end)
 	CLOCK_RANGE = CLOCK_START + ',' + CLOCK_END
 	# Add eventgen object (the fault)
 	tree[str(biggestKey*10 + 1)] = {"object":"eventgen","name":"ManualEventGen","parent":"RelMetrics", "fault_type":faultType, "manual_outages":faultLoc + ',' + CLOCK_RANGE} # TODO: change CLOCK_RANGE to read the actual start and stop time, not just hard-coded
@@ -122,16 +124,18 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 	tree[str(biggestKey*10 + 3)] = {"object":"metrics", "name":"RelMetrics", "report_file":"Metrics_Output.csv", "module_metrics_object":"PwrMetrics", "metrics_of_interest":'"SAIFI,SAIDI,CAIDI,ASAI,MAIFI"', "customer_group":'"groupid=METERTEST"', "metric_interval":"5 h", "report_interval":"5 h"}
 	# Add power_metrics object
 	tree[str(biggestKey*10 + 4)] = {"object":"power_metrics","name":"PwrMetrics","base_time_value":"1 h"}
-
 	for key in tree:
 		if 'clock' in tree[key]:
-			tree[key]['starttime'] = CLOCK_START
-			dt_start = parser.parse(CLOCK_START)
-			print dt_start
-			dt_end = dt_start + relativedelta(seconds=+20)
-			print dt_end
-			tree[key]['stoptime'] = CLOCK_END
-
+			tree[key]['starttime'] = "'" + CLOCK_START + "'"
+			tree[key]['stoptime'] = "'" + CLOCK_END + "'"
+	# HACK: set groupid for all meters so outage stats are collected.
+	noMeters = True
+	for key in tree:
+		if tree[key].get('object','') == 'meter':
+			tree[key]['groupid'] = "METERTEST"
+			noMeters = False
+	if noMeters:
+		raise Exception("No meters detected on the circuit. Please add at least one meter to allow for collection of outage statistics.")
 	# dictionary to hold info on lines present in glm
 	edge_bools = dict.fromkeys(['underground_line','overhead_line','triplex_line','transformer','regulator', 'fuse', 'switch'], False)
 	# Map to speed up name lookups.
@@ -167,14 +171,13 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 			tree[omf.feeder.getMaxKey(tree) + 1] = {
 				'object':'group_recorder', 
 				'group':'"class='+key+'"',
-				'limit':1,
 				'property':'continuous_rating',
 				'file':key+'_cont_rating.csv'
 			}
 	# Run Gridlab.
 	if not workDir:
 		workDir = tempfile.mkdtemp()
-		# print '@@@@@@', workDir
+		print '@@@@@@', workDir
 	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 	# read voltDump values into a dictionary.
 	try:
@@ -236,7 +239,8 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 		return math.ceil(math.log10(x+1))
 	def avg(l):
 		''' Average of a list of ints or floats. '''
-		return sum(l)/len(l)
+		# HACK: add a small value to the denominator to avoid divide by zero for out of service locations (i.e. zero voltage).
+		return sum(l)/(len(l) + 0.00000000000000001)
 	# Detect the feeder nominal voltage:
 	for key in tree:
 		ob = tree[key]
@@ -652,7 +656,7 @@ def _testingPlot():
 	# FNAME = 'test_smsSingle.glm'
 	# Hack: Agg backend doesn't work for interactivity. Switch to something we can use:
 	# plt.switch_backend('MacOSX')
-	chart = drawPlotFault(PREFIX + FNAME, neatoLayout=True, edgeCol="PercentOfRating", nodeCol="perUnitVoltage", nodeLabs="Name", edgeLabs=None, faultLoc="node702-713", faultType="SLG-A", customColormap=True, rezSqIn=225, simTime='2000-01-01 0:00:00')
+	chart = drawPlotFault(PREFIX + FNAME, neatoLayout=True, edgeCol="Current", nodeCol=None, nodeLabs="Name", edgeLabs=None, faultLoc="node713-704", faultType="TLG", customColormap=False, rezSqIn=225, simTime='2000-01-01 0:00:00')
 	chart.savefig(PREFIX + "YO_WHATS_GOING_ON.png")
 	# plt.show()
 
