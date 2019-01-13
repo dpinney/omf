@@ -489,7 +489,7 @@ describe("Unit tests", function() {
 
     });
 
-    describe("Public interface methods", function() {
+    describe("Public methods", function() {
 
         describe("createTreeWrapper()", function() {
 
@@ -505,7 +505,7 @@ describe("Unit tests", function() {
             });
         });
 
-        describe("treeWrapperPrototype", function() {
+        describe("Public treeWrapperPrototype methods", function() {
             
             describe("delete()", function() {
 
@@ -760,25 +760,20 @@ describe("Unit tests", function() {
                     expect(tObj.key).toEqual("1");
                 });
 
-                //it("should call update()", function() {
-                //    const spy = spyOn(treeObjectPrototype, "update").and.callThrough();
-                //    createTreeObject({}, createTreeWrapper());
-                //    expect(spy).toHaveBeenCalled();
-                //});
+                it("should call getNewTreeKey()", function() {
+                    const spy = spyOn(window, "getNewTreeKey").and.callThrough();
+                    createTreeObject({}, createTreeWrapper());
+                    expect(spy).toHaveBeenCalled();
+                });
 
-                //it("should throw any error thrown by update()", function() {
-                //    const error = "Custom Error"
-                //    const spy = spyOn(treeObjectPrototype, "update").and.throwError(error);
-                //    expect(function() {
-                //        createTreeObject({}, createTreeWrapper());
-                //    }).toThrowError(error)
-                //});
-
-                //it("should call getNewTreeKey()", function() {
-                //    const spy = spyOn(window, "getNewTreeKey").and.callThrough();
-                //    createTreeObject({}, createTreeWrapper());
-                //    expect(spy).toHaveBeenCalled();
-                //});
+                it(`should set the 'name' property to be a concatenation of the 'object' property and the id, if
+                this TreeObject has a 'name' property`, function() {
+                    const map = {
+                        name: "Austin"
+                    };
+                    const tObject = createTreeObject(map, testTreeWrapper);
+                    expect(tObject.data.name).toEqual("Austin" + tObject.key);
+                });
             });
         });
 
@@ -791,9 +786,37 @@ describe("Unit tests", function() {
             });
         });
 
-        describe("treeObjectPrototype()", function() {
+        describe("Public treeObjectPrototype methods", function() {
             
             describe("update()", function() {
+
+                it("should call getType() to determine how to update this TreeObject based on its type", function() {
+
+                });
+
+                describe("when this TreeObject has a type of 'childNode'", function() {
+
+                    it("should throw an error if a 'parent' argument is not passed", function() {
+                        spyOn(window, "getType").and.returnValue("childNode");
+                        const tObject = createTreeObject({}, testTreeWrapper);
+                        expect(function() {
+                            tObject.update();
+                        }).toThrowError();
+                    });
+
+                    it("should call setupChildNode()", function() {
+                        spyOn(window, "getType").and.returnValue("childNode");
+                        const spy = spyOn(window, "setupChildNode");
+                        const tObject = createTreeObject({}, testTreeWrapper);
+                        tObject.update({parent: {}});
+                        expect(spy).toHaveBeenCalled();
+                    });
+                });
+
+                describe("when this TreeObject has a type of 'line'", function() {
+
+                });
+
 
             });
         });
@@ -820,7 +843,7 @@ describe("Unit tests", function() {
             });
         });
 
-        describe("addableSvgDataPrototype", function() {
+        describe("Public addableSvgDataPrototype methods", function() {
 
             describe("drawTo()", function() {
 
@@ -859,9 +882,118 @@ describe("Unit tests", function() {
                 });
             });
         });
+
+        describe("Public utility methods", function() {
+
+            describe("moveNode()", function() {
+
+            });
+
+            describe("deepCopy()", function() {
+
+                it("should throw an error if the object being copied contains a method", function() {
+                    const obj = {
+                        prop1: "a",
+                        prop2: function() {}
+                    };
+                    expect(function() {
+                        deepCopy(obj);
+                    }).toThrowError();
+                });
+    
+                it("should throw an error if the object being copied was created with a constructor function", function() {
+                    function myObj() {
+                        this.prop = 5;
+                    }
+                    const obj = new myObj();
+                    expect(function() {
+                        deepCopy(obj);
+                    }).toThrowError();
+                });
+    
+                it("should throw an error if the argument object has an undefined value", function() {
+                    const obj = {
+                        foo: undefined,
+                        bar: 2
+                    };
+                    expect(function() {
+                        deepCopy(obj)
+                    }).toThrowError();
+                });
+    
+                it("should produce a deep copy of a basic object", function() {
+                    const obj1 = {
+                        prop1: "a",
+                        prop2: {
+                            prop1: 123,
+                            prop2: {
+                                prop1: true,
+                                prop2: ["10", 11, false]
+                            }
+                        }
+                    };
+                    expect(deepCopy(obj1)).toEqual(obj1);
+                    expect(deepCopy(obj1)).not.toBe(obj1);
+                });
+            });
+
+            describe("getNewTreeKey()", function() {
+
+                it(`should return a string that is a valid number`, function() {
+                    const key1 = getNewTreeKey({});
+                    expect(key1).toEqual(jasmine.any(String));
+                    expect(parseInt(key1, 10)).not.toBeNaN();
+                    const key2 = getNewTreeKey(testTreeWrapper.tree);
+                    expect(key2).toEqual(jasmine.any(String));
+                    expect(parseInt(key2, 10)).not.toBeNaN();
+                });
+    
+                it("should return a key that doesn't exist in the passed tree argument", function() {
+                    const key1 = getNewTreeKey({});
+                    expect(key1).toEqual("0");
+                    const key2 = getNewTreeKey(testTreeWrapper.tree);
+                    expect(key2).toEqual(Object.keys(testTreeWrapper.tree).length.toString());
+                });
+            });
+    
+            describe("getType()", function() {
+                
+                // This should basically never happen, but you never know
+                describe("when the object argument is a line and a configuration node", function() {
+    
+                    it("should return 'line'", function() {
+                        spyOn(window, "isLine").and.returnValue(true);
+                        spyOn(window, "isChildNode").and.returnValue(false);
+                        spyOn(window, "isConfigurationNode").and.returnValue(true);
+                        expect(getType({})).toEqual("line");
+                    });
+                });
+    
+                // Double check with David
+                describe("when the object argument is a child node and a configuration node", function() {
+    
+                    it("should return 'configurationNode'", function() {
+                        spyOn(window, "isLine").and.returnValue(false);
+                        spyOn(window, "isChildNode").and.returnValue(true);
+                        spyOn(window, "isConfigurationNode").and.returnValue(true);
+                        expect(getType({})).toEqual("configurationNode");
+                    });
+                });
+    
+                describe("when the object is not a line, nor a child node, nor a configuration node", function() {
+
+                    it("should return 'independentNode'", function() {
+                        spyOn(window, "isLine").and.returnValue(false);
+                        spyOn(window, "isChildNode").and.returnValue(false);
+                        spyOn(window, "isConfigurationNode").and.returnValue(false);
+                        expect(getType({})).toEqual("independentNode");
+                    });
+                });
+            });
+        });
     });
 
-    describe("Private helper methods", function() {
+    describe("Private TreeWrapper methods", function() {
 
         describe("treeWrapperPrototype", function() {
 
@@ -1204,7 +1336,6 @@ describe("Unit tests", function() {
                 });
             });
 
-            //Problem?!
             describe("getPairedNodesOf()", function() {
 
                 it("should call contains() to validate the 'key' argument", function() {
@@ -1325,10 +1456,61 @@ describe("Unit tests", function() {
                     });
                 });
             });
+
+            describe("insertCoordinates()", function() {
+
+                describe("when an object does not contain 'longitude' and 'latitude' properties", function() {
+
+                    let tree, tWrapper;
+                    const distance = 101;
+
+                    beforeEach(function() {
+                        tree = {
+                            "0": {},
+                            "1": {},
+                            "2": {}
+                        };
+                        tWrapper = createTreeWrapper(tree);
+                    });
+
+                    describe(`when an object has a type of "line"`, function() {
+
+                        it("should not add coordinates", function() {
+                            spyOn(window, "getType").and.returnValue("line");
+                            tWrapper.insertCoordinates(distance);
+                            const keys = Object.keys(tWrapper.tree);
+                            for (let key of keys) {
+                                expect(tWrapper.tree[key].longitude).toBeUndefined();
+                                expect(tWrapper.tree[key].latitude).toBeUndefined();
+                            }
+                        });
+                    });
+
+                    describe(`when an object has a type other than "line"`, function() {
+
+                        it("should add coordinates", function() {
+                            spyOn(window, "getType").and.returnValue("childNode");
+                            tWrapper.insertCoordinates(101);
+                            const keys = Object.keys(tWrapper.tree);
+                            expect(tWrapper.tree[keys[0]].longitude).toEqual(0);
+                            expect(tWrapper.tree[keys[0]].latitude).toEqual(0);
+                            expect(tWrapper.tree[keys[1]].longitude).toEqual(0);
+                            expect(tWrapper.tree[keys[1]].latitude).toEqual(distance);
+                            expect(tWrapper.tree[keys[2]].longitude).toEqual(distance);
+                            expect(tWrapper.tree[keys[2]].latitude).toEqual(distance);
+                        });
+                    });
+                });
+            });
         });
 
+
+
         describe("treeObjectPrototype", function() {
-            // no private methods?
+
+            it("should", function() {
+                expect(true).toBe(false);
+            });
         });
 
         describe("rowPrototype", function() {
@@ -1522,7 +1704,6 @@ describe("Unit tests", function() {
                     });
                 });
             });
-
 
             describe("updateMapValue()", function() {
 
@@ -1734,183 +1915,124 @@ describe("Unit tests", function() {
                 });
             });
         });
-    });
 
-    describe("Utility methods", function() {
+        describe("Private utility methods", function() {
 
-        describe("getNewTreeKey()", function() {
+            describe("isLine()", function() {
 
-            it(`should return a string that is a valid number`, function() {
-                const key1 = getNewTreeKey({});
-                expect(key1).toEqual(jasmine.any(String));
-                expect(parseInt(key1, 10)).not.toBeNaN();
-                const key2 = getNewTreeKey(testTreeWrapper.tree);
-                expect(key2).toEqual(jasmine.any(String));
-                expect(parseInt(key2, 10)).not.toBeNaN();
-            });
-
-            it("should return a key that doesn't exist in the passed tree argument", function() {
-                const key1 = getNewTreeKey({});
-                expect(key1).toEqual("0");
-                const key2 = getNewTreeKey(testTreeWrapper.tree);
-                expect(key2).toEqual(Object.keys(testTreeWrapper.tree).length.toString());
-            });
-        });
-
-        describe("getType()", function() {
-            
-            // This should basically never happen, but you never know
-            describe("when the object argument is a line and a configuration node", function() {
-
-                it("should return 'line'", function() {
-                    spyOn(window, "isLine").and.returnValue(true);
-                    spyOn(window, "isParentChildNode").and.returnValue(false);
-                    spyOn(window, "isConfigurationNode").and.returnValue(true);
-                    expect(getType({})).toEqual("line");
-                });
-            });
-
-            // Double check with David
-            describe("when the object argument is a parent-child node and a configuration node", function() {
-
-                it("should return 'configurationNode'", function() {
-                    spyOn(window, "isLine").and.returnValue(false);
-                    spyOn(window, "isParentChildNode").and.returnValue(true);
-                    spyOn(window, "isConfigurationNode").and.returnValue(true);
-                    expect(getType({})).toEqual("configurationNode");
-                });
-            });
-
-            describe("when the object is not a line, nor a parent-child node, nor a configuration node", function() {
-
-                it("should return 'independentNode'", function() {
-                    spyOn(window, "isLine").and.returnValue(false);
-                    spyOn(window, "isParentChildNode").and.returnValue(false);
-                    spyOn(window, "isConfigurationNode").and.returnValue(false);
-                    expect(getType({})).toEqual("independentNode");
-                });
-            });
-        });
-
-        describe("isLine()", function() {
-
-            describe("when the argument object has both 'from' and 'to' properties", function() {
-
-                it("should return true", function() {
-                    const obj = {
-                        from: "there",
-                        to: "here"
-                    };
-                    expect(isLine(obj)).toBe(true);
-                });
-            });
-
-            describe("when the argument object is missing 'from and/or 'to' properties", function() {
-
-                it("should return false", function() {
-                    const obj1 = {from: "here"};
-                    const obj2 = {to: "there"};
-                    const obj3 = {};
-                    expect(isLine(obj1)).toBe(false);
-                    expect(isLine(obj2)).toBe(false);
-                    expect(isLine(obj3)).toBe(false);
-                });
-            });
-        });
-        
-        describe("isConfigurationNode()", function() {
-
-            describe("when the argument object lacks the 'object' property", function() {
-
-                it("should return true", function() {
-                    expect(isConfigurationNode({})).toBe(true);
-                });
-            });
-
-            describe("when the argument object has an 'object' property", function() {
-
-                describe("when the 'object' property value  exists in the 'configObjectTypes' global array", function() {
-
+                describe("when the argument object has both 'from' and 'to' properties", function() {
+    
                     it("should return true", function() {
-                        expect(configObjectTypes).toBeDefined();
-                        configObjectTypes.forEach(type => {
-                            expect(isConfigurationNode({object: type})).toBe(true);
-                        })
+                        const obj = {
+                            from: "there",
+                            to: "here"
+                        };
+                        expect(isLine(obj)).toBe(true);
                     });
                 });
-
-                describe("when the 'object' property value does not exist in the global 'configObjectTypes' array", function() {
-
+    
+                describe("when the argument object is missing 'from and/or 'to' properties", function() {
+    
                     it("should return false", function() {
-                        expect(isConfigurationNode({object: "some other type"})).toBe(false);
+                        const obj1 = {from: "here"};
+                        const obj2 = {to: "there"};
+                        const obj3 = {};
+                        expect(isLine(obj1)).toBe(false);
+                        expect(isLine(obj2)).toBe(false);
+                        expect(isLine(obj3)).toBe(false);
                     });
                 });
             });
-        });
-
-        describe("isParentChildNode()", function() {
-
-            describe("when the argument object does not have a 'parent' property", function() {
-
-                it("should return false", function() {
-                    expect(isParentChildNode({})).toBe(false);
+            
+            describe("isConfigurationNode()", function() {
+    
+                describe("when the argument object lacks the 'object' property", function() {
+    
+                    it("should return true", function() {
+                        expect(isConfigurationNode({})).toBe(true);
+                    });
+                });
+    
+                describe("when the argument object has an 'object' property", function() {
+    
+                    describe("when the 'object' property value  exists in the 'configObjectTypes' global array", function() {
+    
+                        it("should return true", function() {
+                            expect(configObjectTypes).toBeDefined();
+                            configObjectTypes.forEach(type => {
+                                expect(isConfigurationNode({object: type})).toBe(true);
+                            })
+                        });
+                    });
+    
+                    describe("when the 'object' property value does not exist in the global 'configObjectTypes' array", function() {
+    
+                        it("should return false", function() {
+                            expect(isConfigurationNode({object: "some other type"})).toBe(false);
+                        });
+                    });
+                });
+            });
+    
+            describe("isChildNode()", function() {
+    
+                describe("when the argument object does not have a 'parent' property", function() {
+    
+                    it("should return false", function() {
+                        expect(isChildNode({})).toBe(false);
+                    });
+                });
+    
+                describe("when the argument object has a 'parent' property", function() {
+    
+                    it("should return true", function() {
+                        const obj = {parent: "dad"};
+                        expect(isChildNode(obj)).toBe(true);
+                    });
                 });
             });
 
-            describe("when the argument object has a 'parent' property", function() {
+            describe("setupChildNode()", function() {
 
-                it("should return true", function() {
-                    const obj = {parent: "dad"};
-                    expect(isParentChildNode(obj)).toBe(true);
+                it(`should throw an error when the 'parent' argument is missing the 'name', 'longitude',
+                or 'latitude' property`, function() {
+                    expect(function() {
+                        setupChildNode({}, {});
+                    }).toThrowError();
+                });
+
+                it(`should set the 'parent' property of the child to equal the 'name' property
+                of the parent `, function() {
+                    const child = {};
+                    const parent = {
+                        name: "Joe",
+                        longitude: "0",
+                        latitude: "0"
+                    };
+                    setupChildNode(child, parent);
+                    expect(child.parent).toEqual(parent.name);
+                });
+
+                //Within 5 - 10
+                it(`should set the 'longitude' and 'latitude' of the child argument to be within 10 of the 'longitude'
+                and 'latitude' of the parent argument`, function() {
+                    expect(true).toBe(false);
+                    const child = {};
+                    const parent = {
+                        name: "Joe",
+                        longitude: 100,
+                        latitude: 100
+                    };
+                    setupChildNode(child, parent);
+                    expect(Math.abs(parent.longitude - child.longitude)).toBeLessThanOrEqual(10);
+                    expect(Math.abs(parent.latitude - child.latitude)).toBeLessThanOrEqual(10);
                 });
             });
-        });
 
-        describe("deepCopy()", function() {
-
-            it("should throw an error if the object being copied contains a method", function() {
-                const obj = {
-                    prop1: "a",
-                    prop2: function() {}
-                };
-                expect(function() {
-                    deepCopy(obj);
-                }).toThrowError();
-            });
-
-            it("should throw an error if the object being copied was created with a constructor function", function() {
-                function myObj() {
-                    this.prop = 5;
-                }
-                const obj = new myObj();
-                expect(function() {
-                    deepCopy(obj);
-                }).toThrowError();
-            });
-
-            it("should throw an error if the argument object has an undefined value", function() {
-                const obj = {
-                    foo: undefined,
-                    bar: 2
-                };
-                expect(function() {
-                    deepCopy(obj)
-                }).toThrowError();
-            });
-
-            it("should produce a deep copy of a basic object", function() {
-                const obj1 = {
-                    prop1: "a",
-                    prop2: {
-                        prop1: 123,
-                        prop2: {
-                            prop1: true,
-                            prop2: ["10", 11, false]
-                        }
-                    }
-                };
-                expect(deepCopy(obj1)).toEqual(obj1);
-                expect(deepCopy(obj1)).not.toBe(obj1);
+            xdescribe("getCoordinatesGenerator()", function() {
+                
+                it("should return a generator", function() {
+                });
             });
         });
     });

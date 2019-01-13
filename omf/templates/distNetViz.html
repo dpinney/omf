@@ -1022,7 +1022,7 @@
         </div>
 	</body>
 </html>
-<script id='componentsInsert'>const globalComponents = {% if components %}{{ components | safe }}{% else %}null{% endif %}; 
+<script id='componentsInsert'>const gComponents = {% if components %}{{ components | safe }}{% else %}null{% endif %}; 
 </script>
 <script id='feederInsert'>const readFeeder = {% if thisFeederData %}{{ thisFeederData | safe }}{% else %}null{% endif %}; 
 </script>
@@ -1057,7 +1057,8 @@ let isSelected;
 let removeSelected;
 let addSelected;
 let clearSelected;
-let getSelected;
+//let getSelectedElements;
+let getSelectedWrapper;
 /**
  * TODO: add unit tests
  */
@@ -1088,9 +1089,24 @@ let getSelected;
         });
         gSelectedElements = [];
     };
-    getSelected = function() {
-        return gSelectedElements;
-    }
+
+    /**
+     * Return an array of HTMLElements that have the "selected" class.
+     */
+    //getSelectedElements = function() {
+    //    return gSelectedElements;
+    //};
+
+    /**
+     * Return a TreeWrapper that contains tree objects that correspond to HTMLElements with the "selected" class.
+     */
+    getSelectedWrapper = function() {
+        const tWrapper = createTreeWrapper();
+        gSelectedElements.forEach(e => {
+            tWrapper.add(e.id, gTreeWrapper);            
+        });
+        return tWrapper;
+    };
 }
 
 function saveSvg() {
@@ -1108,55 +1124,6 @@ function downloadTextFile() {
 	var win = window.open();
 	win.document.write(modJson);
 }
-
-//TODO: keep the offset part but delete these functions
-/**
- * Adds a circle to the svg.
- * @param {number} r - Has something to do with the scale factor of the svg. Everything seems to start with r=2
- * TODO: Switch the x and y arguments? This function (and addLine()) might be PART of the reason the graph gets flipped around vs. the 
- * graph in gridEdit.html. Or is gridEdit.html the one that is fipped??!!??
- */
-//function addCircle(x,y,r,id,myClass) {
-//	const svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0];
-//	const aCirc = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-//	aCirc.setAttribute('cx', x - gLonOffset);
-//	aCirc.setAttribute('cy', y - gLatOffset);
-//	aCirc.setAttribute('r', r);
-//	aCirc.setAttribute('id', id);
-//	aCirc.setAttribute('class', myClass);
-//	aCirc.setAttribute('stroke-width', 0.5);
-//	svgOb.appendChild(aCirc);
-//}
-//
-///*
-// * Note that longitude should refer to a x coordinate and latitude should refer to an y coordinate.
-// * @param {number} x1 - The longitude of the "from" node of this line.
-// * @param {number} y1 - The latitude of the "from" node of this line.
-// * @param {number} x2 - The longitude of the "to" node of this line.
-// * @param {number} y2 - The latitude of the "to" node of this line.
-// */
-//function addLine(x1, y1, x2, y2, id, myClass) {
-//	const svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0];
-//	const aLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-//	aLine.setAttribute('x1', x1 - gLonOffset);
-//	aLine.setAttribute('y1', y1 - gLatOffset);
-//	aLine.setAttribute('x2', x2 - gLonOffset);
-//	aLine.setAttribute('y2', y2 - gLatOffset);
-//	aLine.setAttribute('id', id);
-//	aLine.setAttribute('class', myClass);
-//	let w;
-//	if (myClass.indexOf('p2') !== -1) {
-//		w = 2
-//	} else if (myClass.indexOf('p3') !== -1) {
-//		w = 3
-//	} else if (myClass.indexOf('parentChild') !== -1) {
-//		w = 0.5
-//	} else {
-//		w = 1
-//	}
-//	aLine.setAttribute('stroke-width', w);
-//	svgOb.appendChild(aLine);
-//}
 
 /**
  * TODO: add unit tests
@@ -1227,15 +1194,14 @@ function svgClick(downEvent, upEvent) {
         if (isSelected(element)) {
             removeSelected(element);
             //Copied from rowPrototype.delete(). Refactor needed
-            const table = document.getElementById(`table_${element.id}`);
+            const table = document.getElementById(`descriptionTable_${element.id}`);
             if (table != null) {
                 document.getElementById("descriptionTables").removeChild(table);
             }
         } else {
             addSelected(element);
         }
-        let ids = [];
-        getSelected().forEach(e => { ids.push(e.id); });
+        let ids = Object.keys(getSelectedWrapper().tree);
         if (ids.length > 0) {
             const table = createSelectionTable(ids, gTreeWrapper);
             document.getElementById("selectionTable").appendChild(table);
@@ -1252,40 +1218,27 @@ function svgClick(downEvent, upEvent) {
     }
 }
 
-//function hotkeys() {
-//	// Handle hotkey presses.
-//	let x;
-//	if (window.event) {
-//		// IE8 and earlier
-//		x = event.keyCode
-//	} else if (event.which) {
-//		// IE9/Firefox/Chrome/Opera/Safari
-//		x = event.which
-//	}
-//	var keychar = String.fromCharCode(x);
-//	if (event.target.type !== 'text') {
-//		// Dispatch the key:
-//		if (keychar == '-') {
-//			window.panZoom.zoomOut()
-//		} else if (keychar == '=') {
-//			window.panZoom.zoomIn()
-//		} else if (keychar =='m') {
-//			moveNode()
-//		}
-//	}
-//}
-
-
-/**
- * TODO: add unit tests
- */
-function destroyTables(ids) {
-    ids.forEach(id => {
-        const tableDiv = document.getElementById(id);
-        Array.from(tableDiv.children).forEach(t => {
-            tableDiv.removeChild(t);
-        });
-    });
+function hotkeys() {
+	// Handle hotkey presses.
+	let x;
+	if (window.event) {
+		// IE8 and earlier
+		x = event.keyCode
+	} else if (event.which) {
+		// IE9/Firefox/Chrome/Opera/Safari
+		x = event.which
+	}
+	var keychar = String.fromCharCode(x);
+	if (event.target.type !== 'text') {
+		// Dispatch the key:
+		if (keychar == '-') {
+			window.panZoom.zoomOut()
+		} else if (keychar == '=') {
+			window.panZoom.zoomIn()
+		} else if (keychar =='m') {
+			moveNode()
+		}
+	}
 }
 
 function scaleTo(x) {
@@ -1522,26 +1475,90 @@ function attachHandlers() {
 }
 
 /** 
- * TODO: add unit-tests
+ * TODO: add unit-tests, add a click listener instead of doing it backwards!
  * Fill menu of "Add" button and add its handler functions.
  */
 function addComponents() {
 	const ul = document.getElementById("componentList");
     const select = document.getElementById("componentSelect");
-	for (let name in globalComponents) {
+	for (let name in gComponents) {
 		const li = document.createElement("li");
 		li.textContent = name;
 		li.addEventListener("click", function() {
-            // TODO: configure the TreeObject because it has no parent and no lat/lon!!!
-            const tObject = createTreeObject(globalComponents[name], gTreeWrapper);
-            const svg = createAddableSvgData(gTreeWrapper.insert(tObject));
-            //This will fail because the new component needs to be added but stuff it is connected to needs to be redraw (i.e. deleted)
-            svg.drawTo(gViewport);
-            //addSvgObjects(addFeederObject(name, document.getElementsByClassName("selected")));
+            const tObject = createTreeObject(gComponents[name], gTreeWrapper);
+            const tWrapper = getSelectedWrapper();
+            if (updateTreeObject(tObject, tWrapper)) {
+                const svg = createAddableSvgData(gTreeWrapper.insert(tObject));
+                svg.drawTo(gViewport);
+            } else {
+                alert(getSelectionErrorMessage(getType(tObject.data)));
+            }
 		});
 		ul.appendChild(li);
         select.innerHTML += `<option value=${name}>${name}</option>`;
 	}
+}
+
+/**
+ * TODO: add unit tests, get rid of TreeObject.update()
+ * Return true if the TreeObject argument was successfully updated based on the selected HTMLElements, otherwise return false.
+ */
+function updateTreeObject(tObject, tWrapper) {
+    const keys = Object.keys(tWrapper.tree);
+    const type = getType(tObject.data);
+    switch (type) {
+        case "line":
+            if (keys.length === 2 && 
+                keys.every(key => {
+                    let objectType = getType(tWrapper.tree[key]);
+                    // Can only add a line between childNodes and/or independentNodes
+                    return objectType === "childNode" || objectType === "independentNode"
+                })
+            ) {
+                tObject.update({to: tWrapper.tree[keys[0]], from: tWrapper.tree[keys[1]]});
+                return true
+            }
+            break;
+        case "configurationNode":
+            break;
+        case "childNode":
+            if (keys.length === 1) {
+                const objectType = getType(tWrapper.tree[keys[0]]);
+                if (objectType === "childNode" || objectType === "independentNode") {
+                    // Can only add a childNode to another childNode or an independentNode
+                    tObject.update({parent: tWrapper.tree[keys[0]]});
+                    return true
+                }
+            } 
+            break;
+        case "independentNode":
+            break;
+    }
+    return false;
+}
+
+/**
+ * TODO: add unit tests
+ */
+function getSelectionErrorMessage(type) {
+    let msg;
+    switch (type) {
+        case "line":
+            msg = "Please select exactly 2 circles to insert this object. These circles must not be configuration objects. "; 
+            break;
+        case "childNode":
+            msg = "Please select exactly 1 circle to act as the parent of this object. This circle must not be a configuration object. ";
+            break;
+        case "configurationNode":
+            msg = "Please?";
+            break;
+        case "independentNode":
+            msg = "what?";
+            break;
+    }
+    msg += "Select an object by holding the 'alt' key and left clicking the object. After selecting the correct objects, " +
+    "open the 'add' menu again and click on the object you want to add."
+    return msg;
 }
 
 /** 
@@ -1676,10 +1693,6 @@ function randomGaussian() {
     c = Math.sqrt(-2 * Math.log(rad) / rad);
   }
   return x1 * c
-}
-
-function randomInt(min,max) {
-	return Math.floor(Math.random()*(max - min + 1) + min)
 }
 
 function randomInt(min,max) {
@@ -1918,7 +1931,7 @@ function massAdd() {
         for (let i = start; i <= end; i++) {
             if (tree[keys[i]].object === attachType) {
 				if (Math.random() < percent) {
-					const newComponent = deepCopy(globalComponents[componentName]);
+					const newComponent = deepCopy(gComponents[componentName]);
 					newChildAtLocation(newComponent, keys[i]);
 					objectsAdded += 1
 				}
@@ -1939,7 +1952,7 @@ function updateAttachTargets(id, tree) {
         being presented to the user, since the user could not attach anything to those weird objects. "2" is to ensure
         that the user must attach to things that already exist in a particular model.
         */
-        if (globalComponents.hasOwnProperty(tree[key].object)) {
+        if (gComponents.hasOwnProperty(tree[key].object)) {
 			if (!attachList.includes(tree[key].object)) {
                 attachList.push(tree[key].object);
                 document.getElementById(id).innerHTML += `<option value=${tree[key].object}>${tree[key].object}</option>`;
@@ -2320,7 +2333,7 @@ ProgressModal.prototype.hide = function() {
 
 const treeWrapperPrototype = {
 
-    /* "Public" interface methods */
+    /* "Public" TreeWrapper methods */
 
     /** 
      * Return a TreeWrapper that represents which tree objects need to be redrawn as a result of inserting 
@@ -2402,7 +2415,7 @@ const treeWrapperPrototype = {
         return tWrapper;
     },
 
-    /* "Private" helper methods */
+    /* "Private" TreeWrapper methods */
 
     /** 
      * Add an object from the tWrapper argument into this TreeWrapper.
@@ -2436,7 +2449,7 @@ const treeWrapperPrototype = {
             return tWrapper;
         }
         const type = getType(this.tree[key]);
-        if (type === "parentChildNode" || type === "independentNode") {
+        if (type === "childNode" || type === "independentNode") {
             const thisName = this.tree[key].name;
             if (thisName == null) {
                 /* Children reference their parent with the parent's name. If a node doesn't have a name, then it must not
@@ -2468,7 +2481,7 @@ const treeWrapperPrototype = {
             return tWrapper;
         } 
         const type = getType(this.tree[key]);
-        if (type === "parentChildNode" || type === "independentNode") {
+        if (type === "childNode" || type === "independentNode") {
             const thisName = this.tree[key].name;
             if (thisName == null) {
                 /* Lines reference their connected nodes with the node's name. If a node doesn't have a name, then it must not
@@ -2487,7 +2500,8 @@ const treeWrapperPrototype = {
         return tWrapper;
     },
 
-    /** Merge the treeWrapper argument into this TreeWrapper.
+    /** 
+     * Merge the treeWrapper argument into this TreeWrapper.
      * 
      * If no keys argument is passed, the entire treeWrapper argument is merged into this TreeWrapper.
      * If a keys argument is passed, only those tree objects with matching keys inside of the treeWrapper argument are merged
@@ -2612,8 +2626,7 @@ const treeWrapperPrototype = {
             //in this TreeWrapper`);
             return tWrapper;
         } 
-        const type = getType(this.tree[key]);
-        if (type === "line") {
+        if (getType(this.tree[key]) === "line") {
             const fromKey = this.names[this.tree[key].from];
             const toKey = this.names[this.tree[key].to];
             //const subWrapper = createTreeWrapper();
@@ -2654,7 +2667,9 @@ const treeWrapperPrototype = {
     },
 
     /** 
-     * Return true if the tree of this TreeWrapper has the 'key' argument, otherwise return false;
+     * Return true if the tree of this TreeWrapper contains the 'key' argument as a property, otherwise return false;
+     * @param {string} key - the key to search for in the TreeWrapper.tree
+     * @return {boolean}
      */
     contains(key) {
         if (this.tree[key] == null) {
@@ -2701,6 +2716,32 @@ const treeWrapperPrototype = {
             }
         });
         return nameKeyMap;
+    },
+
+    /**
+     * TODO: do some sort of pre-scan to find an empty square in the graph to insert the configuration objects.
+     * Parse this TreeWrapper.tree and insert longitude and latitude properties if a non-line type object does not contain them.
+     * @param {number} distance - how far apart the nodes should be spaced from one another
+     */
+    insertCoordinates(distance) {
+        let keys = Object.keys(this.tree);
+        let count = 0;
+        let dimension = 0;
+        let squared = 1;
+        let gen = getCoordinatesGenerator(dimension, distance);
+        keys.forEach(key => {
+            let obj = this.tree[key];
+            if (getType(obj) !== "line" && (obj.longitude == null || obj.latitude == null)) {
+                count++;
+                let coords = gen.next().value;
+                obj.longitude = coords.longitude;
+                obj.latitude = coords.latitude;
+            }
+            if (count >= squared) {
+                gen = getCoordinatesGenerator(++dimension, distance);
+                squared = Math.pow(dimension + 1, 2);
+            }
+        });
     }
 };
 
@@ -2758,8 +2799,7 @@ function createDeletableSvgData(tree) {
     const obj = Object.create(deletableSvgDataPrototype);
     obj.ids = []
     Object.keys(tree).forEach(key => {
-        let type = getType(tree[key]);
-        if (type === "parentChildNode") {
+        if (getType(tree[key]) === "childNode") {
             obj.ids.push(key);
             const parentChildLineId = `${tree[key].parent}_${tree[key].name}`
             obj.ids.push(parentChildLineId);
@@ -2855,7 +2895,7 @@ const addableSvgDataPrototype = {
     /**
      * TODO: add unit tests, inject coordinates if they don't exist based on the parent
      */
-    addParentChildNode(key, obj) {
+    addChildNode(key, obj) {
         /* There are some weird config nodes that have "parent" but no "longitude" and "latitude" properties and the
         interface breaks if I don't do this. */
         //if (obj.longitude == null || obj.latitude == null) {
@@ -2897,8 +2937,8 @@ function createAddableSvgData(treeWrapper) {
             obj.addLine(key);
         } else if (type === "configurationNode") {
             obj.addConfigurationNode(key, tree[key]);
-        } else if (type === "parentChildNode") {
-            obj.addParentChildNode(key, tree[key]);
+        } else if (type === "childNode") {
+            obj.addChildNode(key, tree[key]);
             obj.addParentChildLine(key);
         } else if (type === "independentNode") {
             obj.addIndependentNode(key, tree[key]);
@@ -2909,14 +2949,56 @@ function createAddableSvgData(treeWrapper) {
     return obj;
 }
 
+//**************************************************
+// Utility methods
+//**************************************************
+
 /**
- * Utility methods.
- * There are 4 types of objects: lines, parent-child nodes, independent nodes, and config nodes.
+ * There are 4 types of objects: lines, child nodes, independent nodes, and configuration nodes.
  * The line between a parent and child doesn't exist in the data itself, it's merely shown in the svg
  * to demonstrate the relationship between two nodes.
  */
 
-/* Public interface methods */
+/* Public utility methods */
+
+// Really need to test this to ensure that I remember to include gLonOffset and gLatOffset
+/**
+ * This is currently broken
+ */
+function moveNode(event) {
+    event.stopPropagation();
+    //document.getElementById("svgContainerWrapper").removeEventListener("click", moveNode, true);
+    document.getElementById("svgContainerWrapper").removeEventListener("mousedown", moveNode, true);
+    const coords = clickLatLon(event);
+    //that.tObject.data.longitude = coords.x;
+    that.tObject.data.longitude = coords.x + gLonOffset;
+    //that.tObject.data.latitude = coords.y;
+    that.tObject.data.latitude = coords.y + gLatOffset;
+    const subWrapper = that.tWrapper.insert(that.tObject);
+    createAddableSvgData(subWrapper).drawTo(gViewport);
+    element.setAttribute("style", "cursor: default");
+    // Update the table with the new coordinates
+    Array.from(that.tableBody.getElementsByTagName("input")).forEach(input => {
+        if (input.dataset.coordinate === "latitude") {
+            input.value = coords.y + gLatOffset;
+        } else if (input.dataset.coordinate === "longitude") {
+            input.value = coords.x + gLonOffset;
+        }
+    });
+}
+
+/**
+ * TODO: add unit tests
+ * Add a click listener to the svgContainerWrapper which is the direct parent of the svgContainer. The
+ * svgContainerWrapper will intercept a click before it reaches the svgContainer and invoke moveNode().
+ */
+function addMoveListener() {
+    const element = document.getElementById("svgContainerWrapper");
+    element.setAttribute("style", "cursor: crosshair");
+    //const that = this;
+    //element.addEventListener("click", moveNode, true);
+    element.addEventListener("mousedown", moveNode, true);
+}
 
 /**
  * Return the type of the object with regard to this interface.
@@ -2927,32 +3009,64 @@ function createAddableSvgData(treeWrapper) {
  * @param {Object} obj
  * @return {string}
  */
-//For all three node types, if coordinates don't exist, inject them in other functions.
 function getType(obj) {
     if (isLine(obj)) {
         return "line";
     } else if (isConfigurationNode(obj)) {
         return "configurationNode";
-    } else if (isParentChildNode(obj)) {
-        return "parentChildNode";
+    } else if (isChildNode(obj)) {
+        return "childNode";
     } else {
         return "independentNode"
     }
 }
 
-/* Private helper methods */
+/** 
+ * Return an object that is a copy of the argument object.
+ * JSON.stringify will not copy a property of an object with an undefined value.
+ * @param {Object} oldObject - the object to copy.
+ * @return {Object} - a copy of the object argument.
+ */
+ function deepCopy(oldObject) {
+    if (Object.getPrototypeOf(oldObject) !== Object.prototype) {
+        throw new Error("This function cannot be used to copy objects created with a constructor function.");
+    }
+    const properties = Object.getOwnPropertyNames(oldObject);
+    const keys = Object.keys(oldObject);
+    for (let key of keys) {
+        if (typeof(oldObject[key]) === "function") {
+            throw new Error("This function cannot be used to copy objects with methods.");
+        } else if (oldObject[key] === undefined) {
+            throw new Error("JSON.stringify silently ignores properties with undefined values, so this function cannot handle undefined values.");
+        }
+    }
+    return JSON.parse(JSON.stringify(oldObject));
+}
+
+/**  
+ * TODO: add unit tests
+ */
+function keyIsStringAndValidNumber(key) {
+    if (typeof(key) !== "string") {
+        throw new Error("key argument must be a string.");
+    }
+    if (isNaN(parseFloat(key))) {
+        throw new Error("key argument must be a string that can be parsed to a valid number");
+    }
+}
+
+/* Private utility methods */
 
 /**
  * Return true if the object has a 'parent' property, otherwise return false.
  * @param {Object} obj
  * @return {boolean}
  */
-function isParentChildNode(obj) {
+function isChildNode(obj) {
     return obj.parent != null;
 }
 
 /**
- * TODO: add unit tests
  * Return true if the object has 'from' and 'to' properties, otherwise return false.
  * @param {Object} obj
  * @return {boolean}
@@ -2962,7 +3076,6 @@ function isLine(obj) {
 }
 
 /**
- * TODO: add unit tests
  * Return true if the object is a configuration node.
  * @param {Object} obj
  * @return {boolean}
@@ -2973,6 +3086,69 @@ function isConfigurationNode(obj) {
     }
     return false;
 }
+
+/**
+ * Configure the child object based on the property values of the parent object.
+ * @param {Object} child
+ * @param {Object} parent
+ */
+function setupChildNode(child, parent) {
+    if (parent.name == null || parent.longitude == null || parent.latitude == null) {
+        throw new Error(`Cannot add a child to a parent with name "${parent.name}", longitude "${parent.longitude}", and
+        latitude ${parent.latitude}.`);
+    }
+    child.parent = parent.name;
+    const lonValue = Math.random() * 10; 
+    child.longitude = Math.random() < 0.5 ? parent.longitude + lonValue : parent.longitude - lonValue;
+    const latValue = Math.random() * 10;
+    child.latitude = Math.random() < 0.5 ? parent.latitude + latValue : parent.latitude - latValue;
+}
+
+function setupLine() {
+
+}
+
+/**
+ * TODO: add unit tests
+ * Return a generator that will provide the longitude and latitude for an object.
+ * 
+ * @param {number} dimension - the dimensions of the square that we are currently filling in.
+ * For example, dimension = 1 means we are filling in the edges of a 2 * 2 square, filling in the bottom 
+ * then the right edges. dimension = 2 means we are filling in the edges of a 3 * 3 square, filling in 
+ * the bottom then the right edges. 
+ * @param {number} distance - how far apart to space a node from adjacent nodes in the square.
+ * @return {Generator} 
+ */
+function * getCoordinatesGenerator(dimension, distance) {
+    if (typeof(dimension) !== "number" || typeof(distance) !== "number") {
+        throw new Error("The 'dimension' and 'distance' arguments must be numbers");
+    }
+    let x = 0;
+    let y = 0;
+    if (dimension === 0) {
+        yield {
+            longitude: 0,
+            latitude: 0
+        }
+    }
+    while (y < dimension) {
+        if (x <= dimension) {
+            yield {
+                longitude: x++ * distance,
+                latitude: (dimension) * distance
+            }
+        } else {
+            yield {
+                longitude: (dimension) * distance,
+                latitude: y++ * distance
+            }
+        }
+    }
+}
+
+//**************************************************
+// SVG interface
+//**************************************************
 
 /** 
  * TODO: add unit tests
@@ -3054,19 +3230,6 @@ function createSvgLine(sourceNode, targetNode, key, thisObject) {
 }
 
 //**************************************************
-// SVG interface
-//**************************************************
-
-
-/** What kind of event am I listening for? Just clicks? What about the drag box I thought about?
- * svg-pan-zoom handles drag events. So if the user held alt THEN dragged, then I could make a drag box.
- * 
- */
-function svgContainerHandler(event) {
-    //event.target.id
-    //console.log(event.altKey);
-}
-//**************************************************
 // TreeObject interface
 //**************************************************
 
@@ -3077,8 +3240,16 @@ const treeObjectPrototype = {
     /** 
      * TODO: add unit tests
      */
-    update(map) {
-        this.data = deepCopy(map);
+    update({parent=null, coords=null, to=null, from=null}) {
+        const type = getType(this.data);
+        if (type === "childNode") {
+            if (parent == null) {
+                throw new Error("A parent must be provided to configure a child node");
+            }
+            setupChildNode(this.data, parent);
+        } else if (type == "configurationNode") {
+
+        }
     },
 
     /* "Private" helper methods */
@@ -3123,58 +3294,25 @@ function createTreeObject(input, treeWrapper) {
     if (Object.getPrototypeOf(treeWrapper) !== treeWrapperPrototype) {
         throw new Error("treeWrapper argument must be an instance of TreeWrapper");
     }
-    const treeObject = Object.create(treeObjectPrototype);
-    //const treeObject = {};
+    const tObject = Object.create(treeObjectPrototype);
     if (typeof(input) === "string") {
-        keyIsStringAndValidNumber(input);
+        keyIsStringAndValidNumber(input); // I don't like this
         const obj = treeWrapper.tree[input];
         if (obj != null) {
-            treeObject.key = input;
-            treeObject.data = deepCopy(obj);
-            return treeObject;
+            tObject.key = input;
+            tObject.data = deepCopy(obj);
+            return tObject;
         }
         throw new Error(`The passed key argument: "${input}" to create the TreeObject does not exist in the treeWrapper.tree.`);
     } else if (typeof input === "object" && !Array.isArray(input)) {
-        treeObject.key = getNewTreeKey(treeWrapper.tree);
-        treeObject.data = deepCopy(input);
-        //treeObject.update(input);
-        return treeObject;
+        tObject.key = getNewTreeKey(treeWrapper.tree);
+        tObject.data = deepCopy(input);
+        if (tObject.data.name != null) {
+            tObject.data.name += tObject.key;
+        }
+        return tObject;
     } 
     throw new Error("Input argument must be a string or an object.");
-}
-
-/** 
- * Return an object that is a copy of the argument object.
- * JSON.stringify will not copy a property of an object with an undefined value.
- * @param {Object} oldObject - the object to copy.
- * @return {Object} - a copy of the object argument.
- */
-function deepCopy(oldObject) {
-    if (Object.getPrototypeOf(oldObject) !== Object.prototype) {
-        throw new Error("This function cannot be used to copy objects created with a constructor function.");
-    }
-    const properties = Object.getOwnPropertyNames(oldObject);
-    const keys = Object.keys(oldObject);
-    for (let key of keys) {
-        if (typeof(oldObject[key]) === "function") {
-            throw new Error("This function cannot be used to copy objects with methods.");
-        } else if (oldObject[key] === undefined) {
-            throw new Error("JSON.stringify silently ignores properties with undefined values, so this function cannot handle undefined values.");
-        }
-    }
-    return JSON.parse(JSON.stringify(oldObject));
-}
-
-/**  
- * TODO: add unit tests
- */
-function keyIsStringAndValidNumber(key) {
-    if (typeof(key) !== "string") {
-        throw new Error("key argument must be a string.");
-    }
-    if (isNaN(parseFloat(key))) {
-        throw new Error("key argument must be a string that can be parsed to a valid number");
-    }
 }
 
 //**************************************************
@@ -3194,12 +3332,13 @@ const nonModifiableProperties = ["name", "object", "from", "to", "parent"];
 const titleProperties = ["object"];
 /* This array is used to determine if an object is a configuration node, based on the "object" property of that node. If a node
 lacks the "object" property entirely, then I know its a configuration node.
+Player is a configuration object. Recorder can have a parent, so it is NOT a configuration object.
 
-TODO: I'm unsure about the player and recorder object types.
+Apparently nodes can be children of lines.
 */
 const configObjectTypes = ["regulator_configuration", "transformer_configuration", "triplex_line_configuration", "line_configuration",
 "volt_var_control", "line_spacing", "climate", "overhead_line_conductor", "underground_line_conductor", "triplex_line_conductor",
-"player", "recorder"];
+"player"];
 
 /**
  * TODO: add unit tests, $().draggable make the text unfocusable
@@ -3226,10 +3365,10 @@ function createSelectionTable(ids, tWrapper) {
         button.textContent = "view";
         button.classList.add("modalButton");
         button.addEventListener("click", function() {
-            let table = document.getElementById(`table_${id}`);
+            let table = document.getElementById(`descriptionTable_${id}`);
             if (table == null) {
                 const table = createDescriptionTable(id, tWrapper);
-                table.id = `table_${id}`;
+                table.id = `descriptionTable_${id}`;
                 document.getElementById("descriptionTables").append(table);
             }           
         });
@@ -3251,7 +3390,6 @@ function createSelectionTable(ids, tWrapper) {
  * this is set behavior of the library because the demo on the jQuery wesbsite behaves the same way. Users must right click
  * text in a table to select it.
  * 
- * 
  * The form element is only used to take advantage of the "required" form validation functionality that is native to the
  * browser.
  */
@@ -3272,9 +3410,9 @@ function createDescriptionTable(id, tWrapper) {
     tBody.append(buttonRow);
     buttonRow.append(buttonCell);
     const tObject = createTreeObject(id, tWrapper);
-    if (!isLine(tObject.data)) {
+    if (getType(tObject.data) !== "line") {
         buttonCell.append(createButton({action: "move", tObject: tObject, tWrapper: tWrapper, tableBody: tBody}).self);
-    } 
+    }
     buttonCell.append(createButton({action: "delete", tObject: tObject, tWrapper: tWrapper, tableBody: tBody}).self);
     buttonCell.append(createButton({action: "add", tObject: tObject, tableBody: tBody}).self);
     buttonCell.append(createButton({action: "save"}).self);
@@ -3304,46 +3442,24 @@ function createDescriptionTable(id, tWrapper) {
     return form;
 }
 
+/**
+ * TODO: add unit tests
+ */
+ function destroyTables(ids) {
+    ids.forEach(id => {
+        const tableDiv = document.getElementById(id);
+        Array.from(tableDiv.children).forEach(t => {
+            tableDiv.removeChild(t);
+        });
+    });
+}
+
 const buttonPrototype = {
 
     /* Private helper methods */
 
     /**
-     * TODO: add unit tests
-     * Add a click listener to the svgContainerWrapper which is the direct parent of the svgContainer. The
-     * svgContainerWrapper will intercept a click before it reaches the svgContainer and invoke moveNode().
-     */
-    addMoveListener() {
-        const element = document.getElementById("svgContainerWrapper");
-        element.setAttribute("style", "cursor: crosshair");
-        const that = this;
-        //element.addEventListener("click", moveNode, true);
-        element.addEventListener("mousedown", moveNode, true);
-        // Really need to test this to ensure that I remember to include gLonOffset and gLatOffset
-        function moveNode(event) {
-            event.stopPropagation();
-            //document.getElementById("svgContainerWrapper").removeEventListener("click", moveNode, true);
-            document.getElementById("svgContainerWrapper").removeEventListener("mousedown", moveNode, true);
-            const coords = clickLatLon(event);
-            //that.tObject.data.longitude = coords.x;
-            that.tObject.data.longitude = coords.x + gLonOffset;
-            //that.tObject.data.latitude = coords.y;
-            that.tObject.data.latitude = coords.y + gLatOffset;
-            const subWrapper = that.tWrapper.insert(that.tObject);
-            createAddableSvgData(subWrapper).drawTo(gViewport);
-            element.setAttribute("style", "cursor: default");
-            // Update the table with the new coordinates
-            Array.from(that.tableBody.getElementsByTagName("input")).forEach(input => {
-                if (input.dataset.coordinate === "latitude") {
-                    input.value = coords.y + gLatOffset;
-                } else if (input.dataset.coordinate === "longitude") {
-                    input.value = coords.x + gLonOffset;
-                }
-            });
-        }
-    },
-
-    /**
+     * TODO: update unit tests
      * Delete the TreeObject of this button from the TreeWrapper of this button
      */
     deleteObject() {
@@ -3358,14 +3474,35 @@ const buttonPrototype = {
             }
         }
     },
+
+    /**
+     * TODO: add unit tests
+     */
+    validateArguments(args) {
+        if (args.action === "move") {
+            //if (args.tObject == null || args.tWrapper == null || args.tableBody == null) {
+            //    throw new Error(`A button with a "${args.action}" action must have non-null tObject, tWrapper, and tableBody arguments`);
+            //}
+        } else if (args.action === "delete") {
+            if (args.tObject == null || args.tWrapper == null || args.tableBody == null) {
+                throw new Error(`A button with a "delete" action must have non-null tObject, tWrapper, and tableBody arguments`);
+            }
+        } else if (args.action === "add") {
+            if (args.tObject == null || args.tableBody == null) {
+                throw new Error(`A button with an "add" action must have non-null tObject and tableBody arguments`);
+            }
+        } else if (args.action !== "save") {
+            throw new Error(`The action argument must match an existing action`);
+        }
+    }
 }
 
 /**
  * TODO: add unit tests
  */
 function createButton({action, tableBody=null, tObject=null, tWrapper=null}) {
-    validateButtonArguments(arguments[0]);
     const button = Object.create(buttonPrototype);
+    button.validateArguments(arguments[0]);
     button.self = document.createElement("button");
     button.self.textContent = action;
     button.self.classList.add("modalButton");
@@ -3376,7 +3513,8 @@ function createButton({action, tableBody=null, tObject=null, tWrapper=null}) {
     switch (action) {
         case "move":
             button.self.addEventListener("click", function() {
-                button.addMoveListener();
+                addMoveListener();
+                //button.addMoveListener();
             });
             break;
         case "delete":
@@ -3399,27 +3537,6 @@ function createButton({action, tableBody=null, tObject=null, tWrapper=null}) {
             throw new Error("The action argument must be a string that matches an existing action for this button.");
     }
     return button;
-}
-
-/**
- * TODO: add unit tests
- */
-function validateButtonArguments(args) {
-    if (args.action === "move") {
-        if (args.tObject == null || args.tWrapper == null || args.tableBody == null) {
-            throw new Error(`A button with a "${args.action}" action must have non-null tObject, tWrapper, and tableBody arguments`);
-        }
-    } else if (args.action === "delete") {
-        if (args.tObject == null || args.tWrapper == null || args.tableBody == null) {
-            throw new Error(`A button with a "delete" action must have non-null tObject, tWrapper, and tableBody arguments`);
-        }
-    } else if (args.action === "add") {
-        if (args.tObject == null || args.tableBody == null) {
-            throw new Error(`A button with an "add" action must have non-null tObject and tableBody arguments`);
-        }
-    } else if (args.action !== "save") {
-        throw new Error(`The action argument must match an existing action`);
-    }
 }
 
 const rowPrototype = {
@@ -3607,11 +3724,11 @@ const rowPrototype = {
         if (this.element != null) {
             removeSelected(this.element);
             //document.getElementById(this.element).classList.remove("selected");
-            const table = document.getElementById(`table_${this.element.id}`);
+            const table = document.getElementById(`descriptionTable_${this.element.id}`);
             if (table != null) {
                 document.getElementById("descriptionTables").removeChild(table);
             }
-            if (getSelected().length === 0) {
+            if (Object.keys(getSelectedWrapper().tree).length === 0) {
                 destroyTables(["selectionTable"]);
             }
         }
@@ -3671,6 +3788,7 @@ function attachMouseListeners() {
     //const t0 = performance.now();
 
     gTreeWrapper = createTreeWrapper(writeFeeder.tree);
+    gTreeWrapper.insertCoordinates(5);
     //createViewport(writeFeeder.tree, document.getElementById("svgContainer"));
     createViewport(gTreeWrapper, document.getElementById("svgContainer"));
     gViewport = document.getElementsByClassName('svg-pan-zoom_viewport')[0];
