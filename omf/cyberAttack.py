@@ -186,6 +186,3 @@ class CopycatAgent(object):
 						writeReqs.append({'cmd':'write','obName':obNameToPaste,'propName':obPropToPaste,'value':rez.get('value')})
 					return writeReqs
 		return []
-
-
-
