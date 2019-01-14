@@ -194,40 +194,8 @@
 	</div>
 	<!-- Output tables, graphs, etc. -->
 	<div id="output" class="postRun">
-		<p class="reportTitle postRun" style="page-break-before:always">Temperature Data</p>
-		<div id="tempReport" class="tightContent postRun">
-			<div id="tempChart"></div>
-			<script>
-				new Highcharts.Chart({"credits":{"enabled":false},
-					"plotOptions":{
-						"series":{
-							"animation":false,
-							// "pointStart":Date.parse(allOutputData.startDate),
-							"shadow":false,
-							"pointInterval":3600000},
-						"line":{"marker":{"enabled":false}}},
-					"xAxis":{
-						"maxZoom":108000000,
-						"tickColor":"gray",
-						"dateTimeLabelFormats":{
-							"month": '%b %e'
-						},
-						"type":"datetime",
-						"lineColor":"gray"
-					},
-					"yAxis":{
-						"title":{"text":"Temperature (C)","style":{"color":"gray"}},
-					},
-					"title":{"text": allOutputData.dataCheck, "verticalAlign":"bottom", "align":"right", "y":-400, "x":-150, "style":{"color":"gray", "fontSize":"36px"}},
-					"series":[
-						{"name":"Temperature (C)","marker":{"enabled":false},"color":"purple","data":allOutputData.tempData},
-					],
-					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"tempChart","type":"line","marginRight":20, "height":500,"width":1000},
-					"tooltip":{"valueDecimals":1},
-					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
-			</script>
-		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Participation Heuristic</p>
+		<!-- Removed to avoid confusion -->
+		<!-- <p class="reportTitle postRun" style="page-break-before:always">Participation Heuristic</p>
 		<div id="tempReport" class="tightContent postRun">
 			<div id="participationChart"></div>
 			<script>
@@ -262,7 +230,8 @@
 					"tooltip":{"valueDecimals":1},
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
-		</div>
+		</div> -->
+		<!--  -->
 		<p class="reportTitle postRun" style="page-break-before:always">VBAT Energy Available & Demand Impact</p>
 		<div id="powerReport" class="tightContent postRun">
 			<div id="powerChart"></div>
@@ -413,6 +382,39 @@
 					],
 					"yAxis":{"title":{"text":"Income ($)","style":{"color":"gray"}}},
 					"chart":{"marginBottom":55,"zoomType":"x","renderTo":"cashFlowChartDiv","type":"column","marginRight":20, "height":250,"width":1000},
+					"tooltip":{"valueDecimals":1},
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
+		</div>
+		<p class="reportTitle postRun" style="page-break-before:always">Temperature Data</p>
+		<div id="tempReport" class="tightContent postRun">
+			<div id="tempChart"></div>
+			<script>
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{
+						"series":{
+							"animation":false,
+							// "pointStart":Date.parse(allOutputData.startDate),
+							"shadow":false,
+							"pointInterval":3600000},
+						"line":{"marker":{"enabled":false}}},
+					"xAxis":{
+						"maxZoom":108000000,
+						"tickColor":"gray",
+						"dateTimeLabelFormats":{
+							"month": '%b %e'
+						},
+						"type":"datetime",
+						"lineColor":"gray"
+					},
+					"yAxis":{
+						"title":{"text":"Temperature (C)","style":{"color":"gray"}},
+					},
+					"title":{"text": allOutputData.dataCheck, "verticalAlign":"bottom", "align":"right", "y":-400, "x":-150, "style":{"color":"gray", "fontSize":"36px"}},
+					"series":[
+						{"name":"Temperature (C)","marker":{"enabled":false},"color":"purple","data":allOutputData.tempData},
+					],
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"tempChart","type":"line","marginRight":20, "height":333,"width":1000},
 					"tooltip":{"valueDecimals":1},
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
