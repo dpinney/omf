@@ -1056,11 +1056,13 @@ depends on how elements are ordered in the DOM, not on the order in which the us
 let isSelected;
 let removeSelected;
 let addSelected;
-let clearSelected;
-//let getSelectedElements;
+let emptySelected;
+let getSelectedElements;
 let getSelectedWrapper;
+let validateSelected;
 /**
- * TODO: add unit tests
+ * TODO: add unit tests, maybe delete this because node selection for lines happens afterwards now. Maybe I can add components
+ * both ways, in which case this would still be needed?
  */
 {
     let gSelectedElements = [];
@@ -1083,19 +1085,32 @@ let getSelectedWrapper;
             gSelectedElements.push(element);
         }
     };
-    clearSelected = function() {
+    emptySelected = function() {
         Array.from(document.getElementsByClassName("selected")).forEach(e => {
             e.classList.remove("selected");
         });
         gSelectedElements = [];
     };
-
+    
+    /**
+     * Return true if the selected elements are valid for performing an operation with an object of the given type, otherwise
+     * return false.
+     * @param {string} type - the type of the object used to modify or be modified by the selection. 
+     * @return {boolean}
+     */
+    validateSelected = function({type=null, operation=null}) {
+        /* I want to add a child component to stuff, but I can only add to childNodes and independentNodes.
+        I want to add a line component, but I can only add lines between childNodes and independentNodes
+        I want to add an independent or config component, but 
+        I want to move objects, but I can only move configNodes, childNodes, and independentNodes.
+        */ 
+    }
     /**
      * Return an array of HTMLElements that have the "selected" class.
      */
-    //getSelectedElements = function() {
-    //    return gSelectedElements;
-    //};
+    getSelectedElements = function() {
+        return gSelectedElements;
+    };
 
     /**
      * Return a TreeWrapper that contains tree objects that correspond to HTMLElements with the "selected" class.
@@ -1178,6 +1193,12 @@ function createViewport(treeWrapper, svgContainer) {
     });
 }
 
+//**************************************************
+// Click event functions
+//**************************************************
+
+
+
 /**
  * TODO: add unit tests
  * Listener on the SVG object that handles user clicks.
@@ -1185,7 +1206,7 @@ function createViewport(treeWrapper, svgContainer) {
 function svgClick(downEvent, upEvent) {
     if (downEvent.clientX !== upEvent.clientX || downEvent.clientY !== upEvent.clientY) {
 		// Ignore drags, those should be handled by svg-panzoom.
-        return;
+        //return;
     }
     const element = downEvent.target;
     if (downEvent.altKey && element.id !== "svgContainer" && !element.classList.contains("parentChild")) {
@@ -1207,7 +1228,7 @@ function svgClick(downEvent, upEvent) {
             document.getElementById("selectionTable").appendChild(table);
         } 
     } else if (!downEvent.altKey) {
-        clearSelected();
+        emptySelected();
         destroyTables(["descriptionTables", "selectionTable"]);
         //destroyTables(["selectionTable"]);
         if (element.id !== "svgContainer" && !element.classList.contains("parentChild")) {
@@ -1401,7 +1422,7 @@ function getMatchingKeys(term, tree) {
  * TODO: add unit tests
  */
 function viewElement(key) {
-    clearSelected();
+    emptySelected();
     const element = document.getElementById(key);
     addSelected(element);
    let x, y;
@@ -1500,7 +1521,7 @@ function addComponents() {
 }
 
 /**
- * TODO: add unit tests, get rid of TreeObject.update()
+ * TODO: add unit tests, get rid of TreeObject.update(), get rid of this entirely
  * Return true if the TreeObject argument was successfully updated based on the selected HTMLElements, otherwise return false.
  */
 function updateTreeObject(tObject, tWrapper) {
@@ -2424,8 +2445,8 @@ const treeWrapperPrototype = {
      */
     add(key, tWrapper) {
         if (!tWrapper.contains(key)) {
-            console.log(`Unable to add the key to this TreeWrapper. The tree object with the key: "${key}" does
-            not exist in the tWrapper argument.`)
+            console.log(`Unable to add the desired tree object to this TreeWrapper. The tree object with the key: "${key}" does
+            not exist in the source tWrapper argument.`)
             return;
         }
         this.tree[key] = tWrapper.tree[key];
@@ -2721,25 +2742,19 @@ const treeWrapperPrototype = {
     /**
      * TODO: do some sort of pre-scan to find an empty square in the graph to insert the configuration objects.
      * Parse this TreeWrapper.tree and insert longitude and latitude properties if a non-line type object does not contain them.
-     * @param {number} distance - how far apart the nodes should be spaced from one another
+     * @param {number} initX - the longitude of the top left corner of the square.
+     * @param {number} initY - the latitude of the top left corner of the square.
+     * @param {number} spacing - how far apart the nodes should be spaced from one another
      */
-    insertCoordinates(distance) {
+    insertCoordinates(initX, initY, spacing) {
         let keys = Object.keys(this.tree);
-        let count = 0;
-        let dimension = 0;
-        let squared = 1;
-        let gen = getCoordinatesGenerator(dimension, distance);
+        let gen = getCoordinatesGenerator(initX, initY, spacing);
         keys.forEach(key => {
             let obj = this.tree[key];
             if (getType(obj) !== "line" && (obj.longitude == null || obj.latitude == null)) {
-                count++;
                 let coords = gen.next().value;
                 obj.longitude = coords.longitude;
                 obj.latitude = coords.latitude;
-            }
-            if (count >= squared) {
-                gen = getCoordinatesGenerator(++dimension, distance);
-                squared = Math.pow(dimension + 1, 2);
             }
         });
     }
@@ -3112,39 +3127,41 @@ function setupLine() {
  * TODO: add unit tests
  * Return a generator that will provide the longitude and latitude for an object.
  * 
- * @param {number} dimension - the dimensions of the square that we are currently filling in.
- * For example, dimension = 1 means we are filling in the edges of a 2 * 2 square, filling in the bottom 
- * then the right edges. dimension = 2 means we are filling in the edges of a 3 * 3 square, filling in 
- * the bottom then the right edges. 
- * @param {number} distance - how far apart to space a node from adjacent nodes in the square.
+ * @param {number} initX - the longitude of the top left corner of the square.
+ * @param {number} initY - the latitude of the top left corner of the square.
+ * @param {number} spacing - how far apart to space a node from adjacent nodes in the square.
  * @return {Generator} 
  */
-function * getCoordinatesGenerator(dimension, distance) {
-    if (typeof(dimension) !== "number" || typeof(distance) !== "number") {
-        throw new Error("The 'dimension' and 'distance' arguments must be numbers");
+function * getCoordinatesGenerator(initX, initY, spacing) {
+    yield {
+        longitude: initX,
+        latitude: initY
     }
     let x = 0;
     let y = 0;
-    if (dimension === 0) {
-        yield {
-            longitude: 0,
-            latitude: 0
-        }
-    }
-    while (y < dimension) {
+    let dimension = 1;
+    while (true) {
         if (x <= dimension) {
             yield {
-                longitude: x++ * distance,
-                latitude: (dimension) * distance
+                longitude: initX + (x++ * spacing),
+                latitude: initY + (dimension * spacing)
             }
         } else {
             yield {
-                longitude: (dimension) * distance,
-                latitude: y++ * distance
+                longitude: initX + (dimension * spacing),
+                latitude: initY + (y++ * spacing)
             }
+        }
+        if (y === dimension) {
+            dimension++;
+            x = 0;
+            y = 0;
         }
     }
 }
+/*
+If generator is done (for a dimension), pass the next dimension to next() and keep calling!
+*/
 
 //**************************************************
 // SVG interface
@@ -3498,7 +3515,7 @@ const buttonPrototype = {
 }
 
 /**
- * TODO: add unit tests
+ * TODO: add unit tests, DON'T remove tObject argument, remove tWrapper argument
  */
 function createButton({action, tableBody=null, tObject=null, tWrapper=null}) {
     const button = Object.create(buttonPrototype);
@@ -3788,7 +3805,7 @@ function attachMouseListeners() {
     //const t0 = performance.now();
 
     gTreeWrapper = createTreeWrapper(writeFeeder.tree);
-    gTreeWrapper.insertCoordinates(5);
+    gTreeWrapper.insertCoordinates(500, 0, 5);
     //createViewport(writeFeeder.tree, document.getElementById("svgContainer"));
     createViewport(gTreeWrapper, document.getElementById("svgContainer"));
     gViewport = document.getElementsByClassName('svg-pan-zoom_viewport')[0];

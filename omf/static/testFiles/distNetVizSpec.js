@@ -886,7 +886,10 @@ describe("Unit tests", function() {
         describe("Public utility methods", function() {
 
             describe("moveNode()", function() {
-
+                
+                it("should not add 'longitude' or 'latitude' properties to objects that don't already have them", function() {
+                    expect(true).toBe(false);
+                });
             });
 
             describe("deepCopy()", function() {
@@ -1463,12 +1466,18 @@ describe("Unit tests", function() {
 
                     let tree, tWrapper;
                     const distance = 101;
+                    const initX = 52;
+                    const initY = 53;
 
                     beforeEach(function() {
                         tree = {
                             "0": {},
                             "1": {},
-                            "2": {}
+                            "2": {},
+                            "3": {},
+                            "4": {},
+                            "5": {},
+                            "6": {}
                         };
                         tWrapper = createTreeWrapper(tree);
                     });
@@ -1477,7 +1486,7 @@ describe("Unit tests", function() {
 
                         it("should not add coordinates", function() {
                             spyOn(window, "getType").and.returnValue("line");
-                            tWrapper.insertCoordinates(distance);
+                            tWrapper.insertCoordinates(initX, initY, distance);
                             const keys = Object.keys(tWrapper.tree);
                             for (let key of keys) {
                                 expect(tWrapper.tree[key].longitude).toBeUndefined();
@@ -1490,14 +1499,22 @@ describe("Unit tests", function() {
 
                         it("should add coordinates", function() {
                             spyOn(window, "getType").and.returnValue("childNode");
-                            tWrapper.insertCoordinates(101);
+                            tWrapper.insertCoordinates(initX, initY, distance);
                             const keys = Object.keys(tWrapper.tree);
-                            expect(tWrapper.tree[keys[0]].longitude).toEqual(0);
-                            expect(tWrapper.tree[keys[0]].latitude).toEqual(0);
-                            expect(tWrapper.tree[keys[1]].longitude).toEqual(0);
-                            expect(tWrapper.tree[keys[1]].latitude).toEqual(distance);
-                            expect(tWrapper.tree[keys[2]].longitude).toEqual(distance);
-                            expect(tWrapper.tree[keys[2]].latitude).toEqual(distance);
+                            expect(tWrapper.tree[keys[0]].longitude).toEqual(initX);
+                            expect(tWrapper.tree[keys[0]].latitude).toEqual(initY);
+                            expect(tWrapper.tree[keys[1]].longitude).toEqual(initX);
+                            expect(tWrapper.tree[keys[1]].latitude).toEqual(initY + distance);
+                            expect(tWrapper.tree[keys[2]].longitude).toEqual(initX + distance);
+                            expect(tWrapper.tree[keys[2]].latitude).toEqual(initY + distance);
+                            expect(tWrapper.tree[keys[3]].longitude).toEqual(initX + distance);
+                            expect(tWrapper.tree[keys[3]].latitude).toEqual(initY);
+                            expect(tWrapper.tree[keys[4]].longitude).toEqual(initX);
+                            expect(tWrapper.tree[keys[4]].latitude).toEqual(initY + (2 * distance));
+                            expect(tWrapper.tree[keys[5]].longitude).toEqual(initX + distance);
+                            expect(tWrapper.tree[keys[5]].latitude).toEqual(initY + (2 * distance));
+                            expect(tWrapper.tree[keys[6]].longitude).toEqual(initX + (2 * distance));
+                            expect(tWrapper.tree[keys[6]].latitude).toEqual(initY + (2 * distance));
                         });
                     });
                 });
@@ -2200,6 +2217,7 @@ setTimeout(
         let svg = createDeletableSvgData(gTreeWrapper.tree);
         svg.deleteFrom(gViewport);
         const tWrapper = createTreeWrapper(deepCopy(rawTree));
+        tWrapper.insertCoordinates(0, 0, 5);
         svg = createAddableSvgData(tWrapper);
         svg.drawTo(gViewport);
         // Hack
