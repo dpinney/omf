@@ -464,12 +464,12 @@ def distribution_get(owner, model_name, feeder_num):
 		dictionary['model'] = str(dictionary['model'])
 		dictionary['name'] = str(dictionary['name'])
 	public_feeders = all_data["publicFeeders"]
-	showFileMenu = User.cu() == "admin" or owner != "public"
+	show_file_menu = User.cu() == "admin" or owner != "public"
 	# omf.distNetViz.forceLayout()
 	return render_template(
 		"distNetViz.html", thisFeederData=passed_data, thisFeederName=feeder_name, thisFeederNum=feeder_num,
 		thisModelName=model_name, thisOwner=owner, components=component_json, jasmine=jasmine, spec=spec,
-		publicFeeders=public_feeders, userFeeders=user_feeders, showFileMenu=showFileMenu
+		publicFeeders=public_feeders, userFeeders=user_feeders, showFileMenu=show_file_menu
 	)
 
 

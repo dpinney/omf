@@ -289,7 +289,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			gfmJson['generators'].append(genObj)
 	return gfmJson
 
-def genDiagram(outputDir, feederJson, damageDict):
+def genDiagram(outputDir, feederJson, damageDict, critLoads):
 	warnings.filterwarnings("ignore")
 	# Load required data.
 	tree = feederJson.get("tree",{})
@@ -375,7 +375,7 @@ def genDiagram(outputDir, feederJson, damageDict):
 	for key in pos.keys(): # Sort keys into seperate lists. Is there a more elegant way of doing this.
 		if key not in green_list:
 			prefix = key[:3]
-			if prefix == 'C_l':
+			if key in critLoads:
 				red_list.append(key)
 			elif prefix == "B_l":
 				blue_list.append(key)
@@ -385,21 +385,25 @@ def genDiagram(outputDir, feederJson, damageDict):
 	nx.draw_networkx_nodes(inGraph, pos, 
 						   nodelist=green_list,
 						   node_color='green',
+						   label='Swing Buses',
 						   linewidths=0,
 						   node_size=10)
 	nx.draw_networkx_nodes(inGraph,pos,
 						   nodelist=red_list,
 						   node_color='red',
+						   label='Critical Load',
 						   linewidths=0,
 						   node_size=10)
 	nx.draw_networkx_nodes(inGraph,pos,
 						   nodelist=blue_list,
 						   node_color='blue',
+						   label='Regular Loads',
 						   linewidths=0,
 						   node_size=10)
 	nx.draw_networkx_nodes(inGraph,pos,
 						   nodelist=grey_list,
 						   node_color='grey',
+						   label='Other',
 						   node_size=10)
 
 	'''
@@ -414,6 +418,7 @@ def genDiagram(outputDir, feederJson, damageDict):
 								font_color='black',
 								font_weight='bold',
 								font_size=0.25)
+	plt.legend(loc='lower right') 
 	if showPlot: plt.show()
 	plt.savefig(pJoin(outputDir,"feederChart.png"), dpi=800, pad_inches=0.0)
 
@@ -445,6 +450,7 @@ def work(modelDir, inputDict):
 		feederModel = json.load(jsonIn)
 	# Create GFM input file.
 	print "RUNNING GFM FOR", modelDir
+	critLoads = inputDict['criticalLoads']
 	gfmInputTemplate = {
 		'phase_variation' : float(inputDict['phaseVariation']),
 		'chance_constraint' : float(inputDict['chanceConstraint']),
@@ -623,7 +629,7 @@ def work(modelDir, inputDict):
 				damageDict[line] = damageDict[line] + 1
 			else:
 				damageDict[line] = 1
-	genDiagram(modelDir, feederModel, damageDict)
+	genDiagram(modelDir, feederModel, damageDict, critLoads)
 	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
 		outData["oneLineDiagram"] = inFile.read().encode("base64")
 	# And we're done.

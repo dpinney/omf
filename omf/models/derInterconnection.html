@@ -34,6 +34,15 @@
 		.tabcontent {
 		    display: none;
 		} 
+
+		table { width: 100%; border-spacing: 2px; }
+		td,th { 
+			border: 1px;
+			border-style: solid;
+			border-color: black;
+			text-align: center;
+			vertical-align: center;
+		 }
 	</style>
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->
@@ -177,7 +186,13 @@
 				<label class="tooltip">Generation Step-up Transformer Name
 					<span class="classic">Name of the step-up transformer at the added generation</span>
 				</label>
-				<input type="text" id="newGenerationStepup" name="newGenerationStepup" required="required"/>
+				<input type="text" id="newGenerationStepUp" name="newGenerationStepUp" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Generation Breaker Name
+					<span class="classic">Name of the breaker at the added generation</span>
+				</label>
+				<input type="text" id="newGenerationBreaker" name="newGenerationBreaker" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Max Thermal loading(&percnt;)
@@ -250,12 +265,12 @@
 		<!-- Radio Buttons -->
 		<div class="content"><table style="width: 100%">
 			<tr>
-				<td style="text-align: left">
+				<td style="text-align: left; border: 0px;">
 					Distributed Energy Resource Status:
 					<label>	<input class="plotRadios" type="radio" name="derRadio" value="1" checked="true" onchange="displayAppropriately()">On</label>
 					<label><input class="plotRadios" type="radio" name="derRadio" value="0" onchange="displayAppropriately()">Off</label>
 				</td>
-				<td style="text-align: left">
+				<td style="text-align: left; border: 0px;">
 					Load Type:
 					<label><input class="plotRadios" type="radio" name="loadRadio" value="1" checked="true" onchange="displayAppropriately()">Peak</label>
 					<label><input class="plotRadios" type="radio" name="loadRadio" value="0" onchange="displayAppropriately()">Minimum</label>
@@ -375,7 +390,7 @@
 
 		<p class="reportTitle" style="page-break-before:always">Maximum and Minimum Voltages</p>
 		<div class="content">
-			<table id="minMaxVolts" class="centeredTable">
+			<table id="minMaxVolts">
 			<tr>
 				<th rowspan="2">DER Status</th>
 				<th rowspan="2">Load Condition</th>
@@ -462,9 +477,9 @@
 			</table>
 		</div>
 
-		<p class="reportTitle" style="page-break-before:always">Maximum Voltage Flicker</p>
+		<p class="reportTitle" style="page-break-before:always">Maximum Voltage Flicker when DER is turned off</p>
 		<div class="content">
-			<table id="maxVoltFlicker" class="centeredTable">
+			<table id="maxVoltFlicker">
 			<tr> <th>Load Condition</th> <th>&percnt;</th> <th>Location</th> </tr>
 			<tr> 
 				<td>Peak</td> 
@@ -491,9 +506,51 @@
 			</table>
 		</div>
 
+		<p class="reportTitle" style="page-break-before:always">Voltage Values</p>
+		<div class="content">
+			<table id="voltageViolations">
+			<tr> <th>Location</th> <th>Nominal Voltage</th> <th>Voltage Value</th> <th>&percnt Change</th> <th>DER Status</th> </tr>
+			</table>
+			<script type="text/javascript">
+				var voltageViolations = allOutputData['voltageViolations'];
+				var content = '';
+				for (var i = 0; i<voltageViolations.length; i++) {
+					content = '<td>' + voltageViolations[i][0] + '</td><td>' + 
+					voltageViolations[i][1].toFixed(2) + '</td><td>' + 
+					voltageViolations[i][2].toFixed(2) + '</td><td>' + 
+					voltageViolations[i][3].toFixed(2) + '&percnt;</td><td>' + 
+					voltageViolations[i][4] + '</td>';
+					if (voltageViolations[i][5] == true)
+						content = '<tr style=\"color: red\">' + content + '</tr>';
+					else content = '<tr>' + content + '</tr>';
+					gebi("voltageViolations").innerHTML += content
+				}
+			</script> 
+			<span style="color: red">Voltage values non-compliant with ANSI C84.1 Range A Service voltages are displayed in red</span>
+		</div>
+
+		<p class="reportTitle" style="page-break-before:always">Voltage Flicker when DER is turned off</p>
+		<div class="content">
+			<table id="flickerViolations">
+			<tr> <th>Location</th> <th>Voltage Flicker</th> <th>Load Condition</th> </tr>
+			</table>
+			<script type="text/javascript">
+				var flickerViolations = allOutputData['flickerViolations'];
+				var content = '';
+				for (var i = 0; i<flickerViolations.length; i++) {
+					content = '<td>' + flickerViolations[i][0] + '</td><td>' + flickerViolations[i][1].toFixed(2) + '&percnt;</td><td>' + flickerViolations[i][2] + '</td>';
+					if (flickerViolations[i][3] == true)
+						content = '<tr style=\"color: red\">' + content + '</tr>';
+					else content = '<tr>' + content + '</tr>';
+					gebi("flickerViolations").innerHTML += content
+				}
+			</script> 
+			<span style="color: red">Voltage flicker values greater or equal to the input flicker threshold are displayed in red</span>
+		</div>
+
 		<p class="reportTitle" style="page-break-before:always">Thermal Loading</p>
 		<div class="content">
-			<table id="thermalViolations" class="centeredTable">
+			<table id="thermalViolations">
 			<tr> <th>Location</th> <th>Thermal Load</th> <th>DER Status</th> </tr>
 			</table>
 			<script type="text/javascript">
@@ -512,7 +569,7 @@
 		
 		<p class="reportTitle" style="page-break-before:always">Regulator Power Flow</p>
 		<div class="content">
-			<table id="reversePowerFlow" class="centeredTable">
+			<table id="reversePowerFlow">
 			<tr> <th>Location</th> <th>Power</th> <th>DER Status</th> </tr>
 			</table>
 			<script type="text/javascript">
@@ -533,7 +590,7 @@
 
 		<p class="reportTitle" style="page-break-before:always">Tap Changes</p>
 		<div class="content">
-			<table id="tapChanges" class="centeredTable">
+			<table id="tapChanges">
 			<tr> <th>Load Condition</th> <th>Location</th> <th>Tap Position DER On</th> <th>Tap Position DER Off</th> <th>Difference</th> </tr>
 			</table>
 			<script type="text/javascript">
@@ -554,7 +611,7 @@
 
 		<p class="reportTitle" style="page-break-before:always">Short Circuit Analysis</p>
 		<div class="content">
-			<table id="shortCircuit" class="centeredTable">
+			<table id="shortCircuit">
 			<tr>
 				<th rowspan="2">DER Status</th>
 				<th colspan="2">Feeder Breaker</th>
@@ -567,14 +624,14 @@
 
 		<p class="reportTitle" style="page-break-before:always">Fault Current Violations</p>
 		<div class="content">
-			<table id="faultCurrentViolations" class="centeredTable">
+			<table id="faultCurrentViolations">
 			<tr> <th>Location</th> <th>Fault Current</th> <th>DER Status</th> </tr>
 			</table>
 		</div>
 
 		<p class="reportTitle" style="page-break-before:always">Effective Grounding Screening</p>
 		<div class="content">
-			<table id="groundScreening" class="centeredTable">
+			<table id="groundScreening">
 			<tr> <td style="border: none; text-align: left;" colspan="3">Line to Ground Fault at the POI</td> </tr>
 			<tr> <th>Pre-fault Current</th> <th>Post-fault Current</th> <th>Percent Change</th> </tr>
 			</table>
