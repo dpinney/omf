@@ -5,6 +5,29 @@ This contains the loadForecast algorithms
 
 import math
 import numpy as np
+from datetime import datetime as dt
+
+# source: https://www.energygps.com/HomeTools/PowerCalendar
+nercHolidays = {
+	dt(2019, 1, 1): 'New Years',
+	dt(2019, 5, 27): 'Memorial',
+	dt(2019, 7, 4): 'Independence',
+	dt(2019, 9, 2): 'Labor',
+	dt(2019, 11, 28): 'Thanksgiving',
+	dt(2019, 12, 25): 'Christmas',
+	dt(2020, 1, 1): 'New Years',
+	dt(2020, 5, 25): 'Memorial',
+	dt(2020, 7, 4): 'Independence',
+	dt(2020, 9, 7): 'Labor',
+	dt(2020, 11, 26): 'Thanksgiving',
+	dt(2020, 12, 25): 'Christmas',
+	dt(2021, 1, 1): 'New Years',
+	dt(2021, 5, 31): 'Memorial',
+	dt(2021, 7, 5): 'Independence',
+	dt(2021, 9, 6): 'Labor',
+	dt(2021, 11, 25): 'Thanksgiving',
+	dt(2021, 12, 25): 'Christmas'
+}
 
 def pullHourlyDayOfWeekForecast(rawData,upBound,lowBound):
 	'''
