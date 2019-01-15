@@ -289,7 +289,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			gfmJson['generators'].append(genObj)
 	return gfmJson
 
-def genDiagram(outputDir, feederJson, damageDict):
+def genDiagram(outputDir, feederJson, damageDict, critLoads):
 	warnings.filterwarnings("ignore")
 	# Load required data.
 	tree = feederJson.get("tree",{})
@@ -375,7 +375,7 @@ def genDiagram(outputDir, feederJson, damageDict):
 	for key in pos.keys(): # Sort keys into seperate lists. Is there a more elegant way of doing this.
 		if key not in green_list:
 			prefix = key[:3]
-			if prefix == 'C_l':
+			if key in critLoads:
 				red_list.append(key)
 			elif prefix == "B_l":
 				blue_list.append(key)
@@ -450,6 +450,7 @@ def work(modelDir, inputDict):
 		feederModel = json.load(jsonIn)
 	# Create GFM input file.
 	print "RUNNING GFM FOR", modelDir
+	critLoads = inputDict['criticalLoads']
 	gfmInputTemplate = {
 		'phase_variation' : float(inputDict['phaseVariation']),
 		'chance_constraint' : float(inputDict['chanceConstraint']),
@@ -628,7 +629,7 @@ def work(modelDir, inputDict):
 				damageDict[line] = damageDict[line] + 1
 			else:
 				damageDict[line] = 1
-	genDiagram(modelDir, feederModel, damageDict)
+	genDiagram(modelDir, feederModel, damageDict, critLoads)
 	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
 		outData["oneLineDiagram"] = inFile.read().encode("base64")
 	# And we're done.
