@@ -287,6 +287,9 @@ def convertToGFM(gfmInputTemplate, feederModel):
 				'max_real_phase': [genSize,genSize,genSize] #*
 			}
 			gfmJson['generators'].append(genObj)
+
+	hazard = HazardField(omf.omfDir + "/static/testFiles/wf_clip.asc")
+	checkHazardFieldBounds(hazard, gfmJson) # Check boundary function.
 	return gfmJson
 
 def genDiagram(outputDir, feederJson, damageDict, critLoads):
