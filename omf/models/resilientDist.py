@@ -377,10 +377,10 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads):
 	red_list, blue_list, grey_list  = ([] for i in range(3))
 	for key in pos.keys(): # Sort keys into seperate lists. Is there a more elegant way of doing this.
 		if key not in green_list:
-			prefix = key[:3]
+			load = key[2:6]
 			if key in critLoads:
 				red_list.append(key)
-			elif prefix == "B_l":
+			elif load == 'load':
 				blue_list.append(key)
 			else:
 				grey_list.append(key)
