@@ -385,21 +385,25 @@ def genDiagram(outputDir, feederJson, damageDict):
 	nx.draw_networkx_nodes(inGraph, pos, 
 						   nodelist=green_list,
 						   node_color='green',
+						   label='green nodes',
 						   linewidths=0,
 						   node_size=10)
 	nx.draw_networkx_nodes(inGraph,pos,
 						   nodelist=red_list,
 						   node_color='red',
+						   label='red nodes',
 						   linewidths=0,
 						   node_size=10)
 	nx.draw_networkx_nodes(inGraph,pos,
 						   nodelist=blue_list,
 						   node_color='blue',
+						   label='blue nodes',
 						   linewidths=0,
 						   node_size=10)
 	nx.draw_networkx_nodes(inGraph,pos,
 						   nodelist=grey_list,
 						   node_color='grey',
+						   label='grey_nodes',
 						   node_size=10)
 
 	'''
@@ -414,7 +418,10 @@ def genDiagram(outputDir, feederJson, damageDict):
 								font_color='black',
 								font_weight='bold',
 								font_size=0.25)
-	if showPlot: plt.show()
+	plt.legend()
+	print "OUTPUTTING LEGEND"
+	plt.show()
+	#if showPlot: plt.show()
 	plt.savefig(pJoin(outputDir,"feederChart.png"), dpi=800, pad_inches=0.0)
 
 
