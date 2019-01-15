@@ -364,7 +364,7 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads):
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
 			standArgs.update({'width':3,'edge_color':'white'})
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
-			standArgs.update({'width':1,'edge_color':feeder._obToCol(eType)})
+			standArgs.update({'width':1,'edge_color':'white'})
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
 		if ePhases==2:
 			standArgs.update({'width':3})
