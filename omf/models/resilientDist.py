@@ -385,25 +385,25 @@ def genDiagram(outputDir, feederJson, damageDict):
 	nx.draw_networkx_nodes(inGraph, pos, 
 						   nodelist=green_list,
 						   node_color='green',
-						   label='green nodes',
+						   label='Swing Buses',
 						   linewidths=0,
 						   node_size=10)
 	nx.draw_networkx_nodes(inGraph,pos,
 						   nodelist=red_list,
 						   node_color='red',
-						   label='red nodes',
+						   label='Critical Load',
 						   linewidths=0,
 						   node_size=10)
 	nx.draw_networkx_nodes(inGraph,pos,
 						   nodelist=blue_list,
 						   node_color='blue',
-						   label='blue nodes',
+						   label='Regular Loads',
 						   linewidths=0,
 						   node_size=10)
 	nx.draw_networkx_nodes(inGraph,pos,
 						   nodelist=grey_list,
 						   node_color='grey',
-						   label='grey_nodes',
+						   label='Other',
 						   node_size=10)
 
 	'''
@@ -418,10 +418,8 @@ def genDiagram(outputDir, feederJson, damageDict):
 								font_color='black',
 								font_weight='bold',
 								font_size=0.25)
-	plt.legend()
-	print "OUTPUTTING LEGEND"
-	plt.show()
-	#if showPlot: plt.show()
+	plt.legend(loc='lower right') 
+	if showPlot: plt.show()
 	plt.savefig(pJoin(outputDir,"feederChart.png"), dpi=800, pad_inches=0.0)
 
 
