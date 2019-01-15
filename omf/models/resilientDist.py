@@ -390,24 +390,24 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads):
 						   node_color='green',
 						   label='Swing Buses',
 						   linewidths=0,
-						   node_size=10)
+						   node_size=1)
 	nx.draw_networkx_nodes(inGraph,pos,
 						   nodelist=red_list,
 						   node_color='red',
 						   label='Critical Load',
 						   linewidths=0,
-						   node_size=10)
+						   node_size=1)
 	nx.draw_networkx_nodes(inGraph,pos,
 						   nodelist=blue_list,
 						   node_color='blue',
 						   label='Regular Loads',
 						   linewidths=0,
-						   node_size=10)
+						   node_size=1)
 	nx.draw_networkx_nodes(inGraph,pos,
 						   nodelist=grey_list,
 						   node_color='grey',
 						   label='Other',
-						   node_size=10)
+						   node_size=1)
 
 	'''
 	nx.draw_networkx_nodes(inGraph,pos,
