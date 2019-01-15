@@ -1751,7 +1751,15 @@ function getConnectedLineKeys(node) {
 I don't think this updates the data correctly. It updates writeFeeder.tree, but not writeFeeder.nodes
 */
 function moveNodeListener() {
-	let clickedNode = writeFeeder.tree[lastElementSelected.id];
+    // Return the cursor to its default.
+	document.body.style.cursor = 'auto'
+	const clickTarget = document.getElementById('svgContainer')
+	clickTarget.removeEventListener('click', moveNodeListener, false)
+    let clickedNode = writeFeeder.tree[lastElementSelected.id];
+    if (clickedNode.from != null || clickedNode.to != null) {
+        //Prevent users from moving lines
+        return
+    }
 	//const newLat = clickLatLon(event).y;
     //const newLon = clickLatLon(event).x
     const newLat = clickLatLon(event).y + globalLatOffset; //store the real lat. Add back the offset when storing data. Subtract it when rendering
@@ -1839,10 +1847,6 @@ function moveNodeListener() {
 	}
 	// Fix scaling of new objects.
 	scaleTo(scaleLevel)
-	// Return the cursor to its default.
-	document.body.style.cursor = 'auto'
-	const clickTarget = document.getElementById('svgContainer')
-	clickTarget.removeEventListener('click', moveNodeListener, false)
 }
 
 //**************************************************
