@@ -420,7 +420,7 @@ object underground_line {
 object underground_line {
 	 phases "ABC";
 	 name node781-701;
-	 from node781;
+	 from SwingNode781;
 	 to load701;
 	 length 1850;
 	 configuration lc_7211;
@@ -444,7 +444,7 @@ object underground_line {
 //Create extra node for other side of regulator
 object node {
 	 phases "ABC";
-	 name node781;
+	 name SwingNode781;
 	 bustype SWING;
 	 voltage_A 2504.88-1446.19314229j;
 	 voltage_B -2504.88-1446.19314229j;
