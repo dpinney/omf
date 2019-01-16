@@ -208,7 +208,7 @@ def samRun():
 	return json.dumps(outData)
 
 def serve():
-	server = WSGIServer(('0.0.0.0', 5000), web.app)
+	server = WSGIServer(('0.0.0.0', 5100), web.app)
 	server.serve_forever()
 
 if __name__ == '__main__':
