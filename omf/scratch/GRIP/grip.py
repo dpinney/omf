@@ -24,6 +24,7 @@ def oneLineGridlab():
 	Runtime: should be around 1 to 30 seconds.
 	Result: Create a one line diagram of the input glm. Return a .png of it. If useLatLons is True then draw using the lat/lons, otherwise force layout the graph.'''
 	workDir = tempfile.mkdtemp()
+	print workDir
 	fName = 'in.glm'
 	f = request.files['glm']
 	glmOnDisk = os.path.join(workDir, fName)
@@ -34,11 +35,14 @@ def oneLineGridlab():
 		neatoLayout = True
 	else:
 		neatoLayout = False
+	# Clear old plots.
+	plt.clf()
+	plt.close()
+	# Plot new plot.
 	matplotObj = omf.feeder.latLonNxGraph(graph, labels=False, neatoLayout=neatoLayout, showPlot=False)
 	outImgName = 'out.png'
 	outImgPath = os.path.join(workDir, outImgName)
 	plt.savefig(outImgPath)
-	# TODO: delete the tempDir.
 	return send_from_directory(workDir, outImgName)
 
 @web.app.route('/milsoftToGridlab', methods=['POST'])
