@@ -74,38 +74,68 @@ def pullDarksky(year, lat, lon, datatype, api_key = os.environ['DARKSKY'], path 
 	* For more on the DarkSky API: https://darksky.net/dev/docs#overview
 	* List of available datatypes: https://darksky.net/dev/docs#data-point
 	
-	year, lat, lon: may be numerical or string
-	datatype: string, must be one of the available datatypes (case-sensitive)
-	api_key: string
-	path: string, must be a path to a folder if provided.
-		if a path is provided, the data for all datatypes for the given year and location will be cached there as a csv.'''
+	* year, lat, lon: may be numerical or string
+	* datatype: string, must be one of the available datatypes (case-sensitive)
+	* api_key: string
+	* path: string, must be a path to a folder if provided.
+		* if a path is provided, the data for all datatypes for the given year and location will be cached there as a csv.'''
 	from pandas import date_range
 
-	coords = '{},{}'.format(lat, lon)
+	coords = '%0.2f,%0.2f' % (lat, lon) # this gets us 11.1 km unc <https://gis.stackexchange.com/questions/8650/measuring-accuracy-of-latitude-and-longitude>
 	if path:
-		assert os.access(path, os.F_OK), 'Path does not exist'
+		assert os.path.isdir(path), 'Path does not exist'
+		filename = coords + "_" + str(year) + ".csv"
 		try:
-			pass#read and return the datatype from filename
+			with open(filename, 'rb') as csvfile:
+				reader = csv.reader(csvfile)
+				in_csv = [row for row in reader]
+			index = in_csv[0].index(datatype)
+		except IndexError:
+			print 'Requested datatype not present in cache, an attempt will be made to fetch from the API'
 		except IOError:
-			pass
+			print 'Cache not found, data will be fetched from the API'	
 	#now we begin the actual scraping
-	times = list(date_range('{}-01-01'.format(year), '{}-12-31'.format(year)))
-	urls = ['https://api.darksky.net/forecast/%s/%s,%s,%s?exclude=currently,minutely,daily' % ( api_key, lat, lon, time.isoformat() ) for time in times]
-	
-	data = [requests.get(url).json() for url in urls]
-	out = []
-	out_csv = []
-	
 
-	for d in data:
-		hourly =
-		if path:
-			#add the hourly data to out_csv	
+	#behold: a convoluted way to get a list of days in a year
+	times = list(date_range('{}-01-01'.format(year), '{}-12-31'.format(year)))
+
+	urls = ['https://api.darksky.net/forecast/%s/%s,%0.0f?exclude=currently,minutely,daily' % ( api_key, coords, time.timestamp() ) for time in times]
+	data = [requests.get(url).json() for url in urls]
+
+	#a fun little annoyance: let's de-unicode those strings
+	def ascii_me(obj):
+		if isinstance(obj, unicode):
+			return obj.encode('ascii','ignore')
+		if isinstance(obj, list):
+			return map(ascii_me, obj)
+		if isinstance(obj, dict):
+			new_dict = dict()
+			for k, v in obj.iteritems():
+				k = k.encode('ascii','ignore') if type(k) is type(u'') else k
+				new_dict[k] = ascii_me(v)
+			return new_dict
 		else:
-			out.extend(d['hourly']['data'][datatype])
+			return obj
+
+	data = ascii_me(data)
+	out = []
+	
+	if path:
+			# determine the columns from the first day of data
+			columns = data[0]['hourly']['data'][0].keys()
+			out_csv = [columns]
+	for day in data:
+		for hour in day['hourly']['data']:
+			if path:
+				out_csv.append( [hour.get(key) for key in columns] )
+			#add the hourly data to out_csv	
+			out.append(hour.get(datatype))
 
 	if path:
-		#write the whole csv
+		with open(filename, 'wb') as csvfile:
+			writer = csv.writer(csvfile)
+			for row in out_csv:
+				writer.writerow(row)
 	return out
 
 def pullUscrn(year, station, datatype):
