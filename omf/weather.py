@@ -68,7 +68,7 @@ def pullAsosStations(filePath):
 				currentSite['Time Zone'] = site['properties']['tzname']
 				csvwriter.writerow(currentSite)
 
-def pullDarksky(year, lat, lon, datatype, api_key = os.environ['DARKSKY'], path = None):
+def pullDarksky(year, lat, lon, datatype, units='si', api_key = os.environ['DARKSKY'], path = None):
 	'''Returns hourly weather data from the DarkSky API as array.
 
 	* For more on the DarkSky API: https://darksky.net/dev/docs#overview
@@ -77,14 +77,18 @@ def pullDarksky(year, lat, lon, datatype, api_key = os.environ['DARKSKY'], path 
 	* year, lat, lon: may be numerical or string
 	* datatype: string, must be one of the available datatypes (case-sensitive)
 	* api_key: string
+	* units: string, either 'us' or 'si'
 	* path: string, must be a path to a folder if provided.
 		* if a path is provided, the data for all datatypes for the given year and location will be cached there as a csv.'''
 	from pandas import date_range
+	lat, lon = float(lat), float(lon)
+	int(year) # if year isn't castable... something's up
 
 	coords = '%0.2f,%0.2f' % (lat, lon) # this gets us 11.1 km unc <https://gis.stackexchange.com/questions/8650/measuring-accuracy-of-latitude-and-longitude>
 	if path:
 		assert os.path.isdir(path), 'Path does not exist'
 		filename = coords + "_" + str(year) + ".csv"
+		filename = pJoin(path, filename)
 		try:
 			with open(filename, 'rb') as csvfile:
 				reader = csv.reader(csvfile)
@@ -98,8 +102,8 @@ def pullDarksky(year, lat, lon, datatype, api_key = os.environ['DARKSKY'], path 
 
 	#behold: a convoluted way to get a list of days in a year
 	times = list(date_range('{}-01-01'.format(year), '{}-12-31'.format(year)))
-
-	urls = ['https://api.darksky.net/forecast/%s/%s,%0.0f?exclude=currently,minutely,daily' % ( api_key, coords, time.timestamp() ) for time in times]
+	#time.isoformat() has no tzinfo in this case, so darksky parses it as local time
+	urls = ['https://api.darksky.net/forecast/%s/%s,%s?exclude=daily&units=%s' % ( api_key, coords, time.isoformat(), units ) for time in times]
 	data = [requests.get(url).json() for url in urls]
 
 	#a fun little annoyance: let's de-unicode those strings
@@ -124,11 +128,11 @@ def pullDarksky(year, lat, lon, datatype, api_key = os.environ['DARKSKY'], path 
 			# determine the columns from the first day of data
 			columns = data[0]['hourly']['data'][0].keys()
 			out_csv = [columns]
+	# parse our json-dict
 	for day in data:
 		for hour in day['hourly']['data']:
 			if path:
 				out_csv.append( [hour.get(key) for key in columns] )
-			#add the hourly data to out_csv	
 			out.append(hour.get(datatype))
 
 	if path:
