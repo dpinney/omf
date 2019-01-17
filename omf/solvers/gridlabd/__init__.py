@@ -125,7 +125,10 @@ def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None, g
 		if not gldBinary:
 			binaryName = "gridlabd"
 		else:
-			binaryName = gldBinary
+			binaryName = str(gldBinary)
+			print(binaryName)
+			print type(binaryName)
+
 		# Create a running directory and fill it, unless we've specified where we're running.
 		if not workDir:
 			workDir = tempfile.mkdtemp()

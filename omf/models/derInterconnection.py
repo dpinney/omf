@@ -94,6 +94,34 @@ def work(modelDir, inputDict):
 				'file':key+'_cont_rating.csv'
 			}
 
+	if edge_bools['regulator']:
+		#print('here')
+		tree[omf.feeder.getMaxKey(tree) + 1] = {
+			'object':'group_recorder', 
+			'group':'"class=regulator"',
+			'limit':1000,
+			'property':'tap_A',
+			'file':'tap_A.csv',
+			'interval':0
+		}
+
+		tree[omf.feeder.getMaxKey(tree) + 1] = {
+			'object':'group_recorder', 
+			'group':'"class=regulator"',
+			'limit':1,
+			'property':'tap_B',
+			'file':'tap_B.csv'
+		}
+
+		tree[omf.feeder.getMaxKey(tree) + 1] = {
+			'object':'group_recorder', 
+			'group':'"class=regulator"',
+			'limit':1,
+			'property':'tap_C',
+			'file':'tap_C.csv'
+		}			
+
+
 	#create second tree without the der generation
 	treeNoDer = copy.deepcopy(tree)
 	for key in treeNoDer.keys():
@@ -205,6 +233,8 @@ def work(modelDir, inputDict):
 	[maxFlickerLocationMin, maxFlickerValMin] = ['',0]
 	peakFlicker = copy.deepcopy(dataPeakNoDer['nodeVolts'])
 	minFlicker = copy.deepcopy(dataMinNoDer['nodeVolts'])
+	flickerViolations = []
+	flickerThreshold = float(inputDict['flickerThreshold'])
 	for key in peakFlicker.keys():
 		voltsPeakDerOff = float(dataPeakNoDer['nodeVolts'][key])
 		voltsPeakDerOn = float(dataPeak['nodeVolts'][key])
@@ -222,8 +252,18 @@ def work(modelDir, inputDict):
 			maxFlickerValMin = minFlicker[key]
 			maxFlickerLocationMin = key
 
+		flickerVal = peakFlicker[key]
+		content = [key, flickerVal,'Peak Load',(flickerVal>=flickerThreshold)]
+		flickerViolations.append(content)
+
+		flickerVal = minFlicker[key]
+		content = [key, flickerVal,'Min Load',(flickerVal>=flickerThreshold)]
+		flickerViolations.append(content)
+
+
 	outData['maxFlickerPeak'] = [maxFlickerLocationPeak, maxFlickerValPeak]
 	outData['maxFlickerMin'] = [maxFlickerLocationMin, maxFlickerValMin]
+	outData['flickerViolations'] = flickerViolations
 	
 	#peak flicker
 	chart = drawPlot(treeNoDerMinLoad,nodeDict=peakFlicker, neatoLayout=neato)
@@ -237,7 +277,7 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir,"flickerMinChart.png"),"rb") as inFile:
 		outData["flickerMin"] = inFile.read().encode("base64")	
 
-	# get min and max volts for each scenario
+	# get min and max volts for each scenario and find voltage bandwidth violations
 	[maxVoltsLocationPeakDerOn, maxVoltsValPeakDerOn] = ['',0]
 	[maxVoltsLocationPeakDerOff, maxVoltsValPeakDerOff] = ['',0]
 	[maxVoltsLocationMinDerOn, maxVoltsValMinDerOn] = ['',0]
@@ -246,7 +286,9 @@ def work(modelDir, inputDict):
 	[minVoltsLocationPeakDerOff, minVoltsValPeakDerOff] = ['',float('inf')]
 	[minVoltsLocationMinDerOn, minVoltsValMinDerOn] = ['',float('inf')]
 	[minVoltsLocationMinDerOff, minVoltsValMinDerOff] = ['',float('inf')]
+	voltageViolations = []
 
+	[upperVoltThresh, lowerVoltThresh, lowerVoltThresh600] = [1.05,0.95,0.975]
 	for key in dataPeakNoDer['nodeVolts'].keys():
 		
 		if maxVoltsValPeakDerOn < float(dataPeak['nodeVolts'][key]):
@@ -280,7 +322,55 @@ def work(modelDir, inputDict):
 		if minVoltsValMinDerOff > float(dataMinNoDer['nodeVolts'][key]):
 			minVoltsValMinDerOff = dataMinNoDer['nodeVolts'][key]
 			minVoltsLocationMinDerOff = key
-		
+
+		voltVal = float(dataPeak['nodeVolts'][key])
+		nominalVoltVal = float(dataPeak['nominalVolts'][key])
+		change = 100*((voltVal-nominalVoltVal)/nominalVoltVal)
+		if voltVal > 600:
+			violation = (voltVal >= (upperVoltThresh*nominalVoltVal)) or \
+			(voltVal <= (lowerVoltThresh600*nominalVoltVal))
+		else:
+			violaton = (voltVal >= (upperVoltThresh*nominalVoltVal)) or \
+			(voltVal <= (lowerVoltThresh*nominalVoltVal))
+		content = [key, nominalVoltVal, voltVal, change, 'Peak Load, DER On',violation]
+		voltageViolations.append(content)
+
+		voltVal = float(dataPeakNoDer['nodeVolts'][key])
+		nominalVoltVal = float(dataPeakNoDer['nominalVolts'][key])
+		change = 100*((voltVal-nominalVoltVal)/nominalVoltVal)
+		if voltVal > 600:
+			violation = (voltVal >= (upperVoltThresh*nominalVoltVal)) or \
+			(voltVal <= (lowerVoltThresh600*nominalVoltVal))
+		else:
+			violaton = (voltVal >= (upperVoltThresh*nominalVoltVal)) or \
+			(voltVal <= (lowerVoltThresh*nominalVoltVal))
+		content = [key, nominalVoltVal, voltVal, change, 'Peak Load, DER Off',violation]
+		voltageViolations.append(content)
+
+		voltVal = float(dataMin['nodeVolts'][key])
+		nominalVoltVal = float(dataMin['nominalVolts'][key])
+		change = 100*((voltVal-nominalVoltVal)/nominalVoltVal)
+		if voltVal > 600:
+			violation = (voltVal >= (upperVoltThresh*nominalVoltVal)) or \
+			(voltVal <= (lowerVoltThresh600*nominalVoltVal))
+		else:
+			violaton = (voltVal >= (upperVoltThresh*nominalVoltVal)) or \
+			(voltVal <= (lowerVoltThresh*nominalVoltVal))
+		content = [key, nominalVoltVal, voltVal, change, 'Min Load, DER On',violation]
+		voltageViolations.append(content)
+
+		voltVal = float(dataMinNoDer['nodeVolts'][key])
+		nominalVoltVal = float(dataMinNoDer['nominalVolts'][key])
+		change = 100*((voltVal-nominalVoltVal)/nominalVoltVal)
+		if voltVal > 600:
+			violation = (voltVal >= (upperVoltThresh*nominalVoltVal)) or \
+			(voltVal <= (lowerVoltThresh600*nominalVoltVal))
+		else:
+			violaton = (voltVal >= (upperVoltThresh*nominalVoltVal)) or \
+			(voltVal <= (lowerVoltThresh*nominalVoltVal))
+		content = [key, nominalVoltVal, voltVal, change, 'Min Load, DER Off',violation]
+		voltageViolations.append(content)
+	
 	outData['maxVoltsPeakDerOn'] = [maxVoltsLocationPeakDerOn, maxVoltsValPeakDerOn]
 	outData['maxVoltsPeakDerOff'] = [maxVoltsLocationPeakDerOff, maxVoltsValPeakDerOff]
 	outData['maxVoltsMinDerOn'] = [maxVoltsLocationMinDerOn, maxVoltsValMinDerOn]
@@ -289,6 +379,7 @@ def work(modelDir, inputDict):
 	outData['minVoltsPeakDerOff'] = [minVoltsLocationPeakDerOff, minVoltsValPeakDerOff]
 	outData['minVoltsMinDerOn'] = [minVoltsLocationMinDerOn, minVoltsValMinDerOn]
 	outData['minVoltsMinDerOff'] = [minVoltsLocationMinDerOff, minVoltsValMinDerOff]
+	outData['voltageViolations'] = voltageViolations
 
 	#check for thermal violations
 	thermalThreshold = float(inputDict['thermalThreshold'])/100
@@ -334,20 +425,19 @@ def work(modelDir, inputDict):
 			tapBPeakDerOff = treeNoDer[key].get("tap_B","Unspecified")
 			tapCPeakDerOff = treeNoDer[key].get("tap_C","Unspecified")
 
-
 			tapDiff = 0
 			if (tapAPeakDerOn is not "Unspecified") and (tapAPeakDerOff is not "Unspecified"):
-				tapDiff = abs(tapAPeakDerOn - tapAPeakDerOff)
+				tapDiff = abs(float(tapAPeakDerOn) - float(tapAPeakDerOff))
 			tapDifferences.append(['Peak', obname+' Tap A', tapAPeakDerOn, tapAPeakDerOff, tapDiff,(tapDiff >= tapThresh)])
 			
 			tapDiff = 0
 			if (tapBPeakDerOn is not "Unspecified") and (tapBPeakDerOff is not "Unspecified"):
-				tapDiff = abs(tapBPeakDerOn - tapBPeakDerOff)
+				tapDiff = abs(float(tapBPeakDerOn) - float(tapBPeakDerOff))
 			tapDifferences.append(['Peak', obname+' Tap B', tapBPeakDerOn, tapBPeakDerOff, tapDiff,(tapDiff >= tapThresh)])
 			
 			tapDiff = 0
 			if (tapCPeakDerOn is not "Unspecified") and (tapCPeakDerOff is not "Unspecified"):
-				tapDiff = abs(tapCPeakDerOn - tapCPeakDerOff)
+				tapDiff = abs(float(tapCPeakDerOn) - float(tapCPeakDerOff))
 			tapDifferences.append(['Peak', obname+' Tap C', tapCPeakDerOn, tapCPeakDerOff, tapDiff,(tapDiff >= tapThresh)])
 
 
@@ -361,17 +451,17 @@ def work(modelDir, inputDict):
 
 			tapDiff = 0
 			if (tapAMinDerOn is not "Unspecified") and (tapAMinDerOff is not "Unspecified"):
-				tapDiff = abs(tapAMinDerOn - tapAMinDerOff)
+				tapDiff = abs(float(tapAMinDerOn) - float(tapAMinDerOff))
 			tapDifferences.append(['Min', obname+' Tap A', tapAMinDerOn, tapAMinDerOff, tapDiff,(tapDiff >= tapThresh)])
 			
 			tapDiff = 0
 			if (tapBMinDerOn is not "Unspecified") and (tapBMinDerOff is not "Unspecified"):
-				tapDiff = abs(tapBMinDerOn - tapBMinDerOff)
+				tapDiff = abs(float(tapBMinDerOn) - float(tapBMinDerOff))
 			tapDifferences.append(['Min', obname+' Tap B', tapBMinDerOn, tapBMinDerOff, tapDiff,(tapDiff >= tapThresh)])
 			
 			tapDiff = 0
 			if (tapCMinDerOn is not "Unspecified") and (tapCMinDerOff is not "Unspecified"):
-				tapDiff = abs(tapCMinDerOn - tapCMinDerOff)
+				tapDiff = abs(float(tapCMinDerOn) - float(tapCMinDerOff))
 			tapDifferences.append(['Min', obname+' Tap C', tapCMinDerOn, tapCMinDerOff, tapDiff,(tapDiff >= tapThresh)])
 
 
@@ -394,6 +484,58 @@ def work(modelDir, inputDict):
 
 	outData['reversePowerFlow'] = reversePowerFlow	
 	outData['tapDifferences'] = tapDifferences	
+
+	#induce line to ground fault on a single line at the DER transformer
+	[startTime,stopTime] = ['','']
+	for key in tree.keys():
+		starttime = tree[key].get("starttime","")
+		stoptime = tree[key].get("stoptime","")
+		if starttime!='' and stoptime!='':
+			#print('time')
+			startTime = tree[key]['starttime']
+			stopTime = tree[key]['stoptime']
+
+	tree[omf.feeder.getMaxKey(tree) + 1] = {
+		'object': 'eventgen',
+		'name': 'ManualEventGen',
+		'parent': 'RelMetrics',
+		'fault_type': '"SLG-B"',
+		'manual_outages': '"'+inputDict['newGenerationStepUp']+' '+startTime+','+stopTime+'"'
+	}
+	
+	tree[omf.feeder.getMaxKey(tree) + 1] = {
+		'object': 'fault_check ',
+		'name': 'test_fault',
+		'check_mode': 'ONCHANGE',
+		'eventgen_object': 'ManualEventGen',
+		'output_filename': 'Fault_check_out.txt'
+	}
+
+	tree[omf.feeder.getMaxKey(tree) + 1] = {
+		'object': 'metrics',
+		'name': 'RelMetrics',
+		'report_file': 'Metrics_Output.csv',
+		'module_metrics_object': 'PwrMetrics',
+		'metrics_of_interest': '"SAIFI,SAIDI,CAIDI,ASAI,MAIFI"',
+		'customer_group': '"groupid=METERTEST"',
+		'metric_interval': '5 h',
+		'report_interval': '5 h'
+	}
+
+	tree[omf.feeder.getMaxKey(tree) + 1] = {
+		'object': 'power_metrics',
+		'name': 'PwrMetrics',
+		'base_time_value': '1 h'
+	}
+
+	#print(dataPeak['edgeCurrentSum'].keys())
+	#currVal = dataPeak['edgeCurrentSum'][str(inputDict['newGenerationStepUp'])]
+	currVal = dataPeak['edgeCurrentSum']['T1']
+	print('prefault: ', currVal)
+	dataPeakPostFault = runGridlabAndProcessData(tree, attachments, edge_bools, workDir=modelDir)
+	#currVal = dataPeakPostFault['edgeCurrentSum'][str(inputDict['newGenerationStepUp'])]
+	currVal = dataPeakPostFault['edgeCurrentSum']['T2']
+	print('postFault: ', currVal)
 
 	return outData
 	
@@ -506,8 +648,14 @@ def runGridlabAndProcessData(tree, attachments, edge_bools, workDir=False):
 		# Use float("{0:.2f}".format(avg(allVolts))) if displaying the node labels
 	
 	nodeNames = {}
+	nominalVolts = {}
 	for key in nodeVolts.keys():
 		nodeNames[key] = key
+		for treeKey in tree:
+			ob = tree[treeKey]
+			obName = ob.get('name','')
+			if obName==key:
+				nominalVolts[key] = float(ob.get('nominal_voltage',1))
 	
 	# find edge currents by parsing currdump
 	edgeCurrentSum = {}
@@ -555,7 +703,7 @@ def runGridlabAndProcessData(tree, attachments, edge_bools, workDir=False):
 				edgePower[edge] = ((currVal * voltVal)/1000)
 				edgeTuplePower[coord] = "{0:.2f}".format(edgePower[edge])
 
-	return {"nodeNames":nodeNames, "nodeVolts":nodeVolts, "nodeVoltImbalances":voltImbalances, 
+	return {"nodeNames":nodeNames, "nominalVolts":nominalVolts, "nodeVolts":nodeVolts, "nodeVoltImbalances":voltImbalances, 
 	"edgeTupleNames":edgeTupleNames, "edgeCurrentSum":edgeCurrentSum, "edgeCurrentMax":edgeCurrentMax,
 	"edgeTupleCurrents":edgeTupleCurrents, "edgePower":edgePower, "edgeTuplePower":edgeTuplePower,
 	"edgeLineRatings":lineRatings, "edgeTupleLineRatings":edgeTupleRatings, "edgeValsPU":edgeValsPU, 
