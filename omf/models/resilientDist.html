@@ -47,8 +47,8 @@
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<!-- Data  Imports -->
-	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
-	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
+	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
+	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 	<script type="text/javascript">
@@ -242,7 +242,8 @@
 	<div id="output" class="postRun">
 		<p class='reportTitle'><b>One Line Diagram (Scroll to Zoom, Drag to Pan)</b></p>
 		<div class="content" style="margin-top:0px">
-			<div id="diagram">	
+			<p>{{ allOutputDataDict.get('warning','') }}</p>
+			<div id="diagram">
 				<img id="oneLineDiagram" style="padding: 0px; display: block; margin-left: auto; margin-right: auto; max-width: 100%; max-height: 100%;"/>
 				<script>gebi("oneLineDiagram").src = "data:image/png;base64," + allOutputData.oneLineDiagram</script>
 				<script src="{{pathPrefix}}/static/wheelzoom.js"></script>
