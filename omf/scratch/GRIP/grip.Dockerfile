@@ -10,6 +10,7 @@ RUN mkdir /home/omf
 COPY install.py /home/omf/
 COPY requirements.txt /home/omf/
 COPY setup.py /home/omf/
+COPY omf/scratch/GRIP/grip.py /home/omf/omf/
 RUN cd /home/omf/; python install.py
 # Put the rest of the source in there.
 COPY omf /home/omf/omf
@@ -18,12 +19,3 @@ COPY omf /home/omf/omf
 WORKDIR /home/omf/omf
 ENTRYPOINT ["python"]
 CMD ["grip.py"]
-
-# INSTRUCTIONS
-# ============
-# - Navigate to this directory
-# - Build image with command `docker build grip.Dockerfile -t <IMAGE_NAME>`
-# - Run image in background with `docker run -d -p 5000:5000 --name <CONT_NAME> <IMAGE_NAME>`
-# - View at http://127.0.0.1:5000
-# - Stop it with `docker stop <CONT_NAME>` and remove it with `docker rm <CONT_NAME>`.
-# - Delete the images with `docker rmi <IMAGE_NAME>`
