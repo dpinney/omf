@@ -135,7 +135,7 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 	# HACK: set groupid for all meters so outage stats are collected.
 	noMeters = True
 	for key in tree:
-		if tree[key].get('object','') == 'meter':
+		if tree[key].get('object','') in ['meter', 'triplex_meter']:
 			tree[key]['groupid'] = "METERTEST"
 			noMeters = False
 	if noMeters:
