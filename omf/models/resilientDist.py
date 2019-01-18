@@ -360,11 +360,11 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads):
 					 'width':2,
 					 'style':{'parentChild':'dotted','underground_line':'dashed'}.get(eType,'solid') }
 		if ePhases==3:
-			standArgs.update({'width':5})
+			standArgs.update({'width':5, 'edge_color': 'black'})
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
-			standArgs.update({'width':3,'edge_color':'white'})
+			standArgs.update({'width':3,'edge_color':'black'})
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
-			standArgs.update({'width':1,'edge_color':'white'})
+			standArgs.update({'width':1,'edge_color':'black'})
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
 		if ePhases==2:
 			standArgs.update({'width':3})
@@ -390,24 +390,24 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads):
 						   node_color='green',
 						   label='Swing Buses',
 						   linewidths=0,
-						   node_size=1)
+						   node_size=5)
 	nx.draw_networkx_nodes(inGraph,pos,
 						   nodelist=red_list,
 						   node_color='red',
 						   label='Critical Load',
 						   linewidths=0,
-						   node_size=1)
+						   node_size=5)
 	nx.draw_networkx_nodes(inGraph,pos,
 						   nodelist=blue_list,
 						   node_color='blue',
 						   label='Regular Loads',
 						   linewidths=0,
-						   node_size=1)
+						   node_size=5)
 	nx.draw_networkx_nodes(inGraph,pos,
 						   nodelist=grey_list,
 						   node_color='grey',
 						   label='Other',
-						   node_size=1)
+						   node_size=5)
 
 	'''
 	nx.draw_networkx_nodes(inGraph,pos,
@@ -635,6 +635,11 @@ def work(modelDir, inputDict):
 	genDiagram(modelDir, feederModel, damageDict, critLoads)
 	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
 		outData["oneLineDiagram"] = inFile.read().encode("base64")
+	
+
+	#damageData = np.loadtxt(omf.omfDir + "/static/testFiles/wf_clip.asc")
+	# Generate damage field.
+
 	# And we're done.
 	return outData
 
@@ -676,6 +681,7 @@ def new(modelDir):
 	except:
 		return False
 	return creationCode
+
 
 def _runModel():
 	# Testing the hazard class.
