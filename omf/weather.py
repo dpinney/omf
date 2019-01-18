@@ -68,6 +68,80 @@ def pullAsosStations(filePath):
 				currentSite['Time Zone'] = site['properties']['tzname']
 				csvwriter.writerow(currentSite)
 
+def pullDarksky(year, lat, lon, datatype, units='si', api_key = os.environ.get('DARKSKY',''), path = None):
+	'''Returns hourly weather data from the DarkSky API as array.
+
+	* For more on the DarkSky API: https://darksky.net/dev/docs#overview
+	* List of available datatypes: https://darksky.net/dev/docs#data-point
+	
+	* year, lat, lon: may be numerical or string
+	* datatype: string, must be one of the available datatypes (case-sensitive)
+	* api_key: string
+	* units: string, either 'us' or 'si'
+	* path: string, must be a path to a folder if provided.
+		* if a path is provided, the data for all datatypes for the given year and location will be cached there as a csv.'''
+	from pandas import date_range
+	lat, lon = float(lat), float(lon)
+	int(year) # if year isn't castable... something's up
+
+	coords = '%0.2f,%0.2f' % (lat, lon) # this gets us 11.1 km unc <https://gis.stackexchange.com/questions/8650/measuring-accuracy-of-latitude-and-longitude>
+	if path:
+		assert os.path.isdir(path), 'Path does not exist'
+		filename = coords + "_" + str(year) + ".csv"
+		filename = pJoin(path, filename)
+		try:
+			with open(filename, 'rb') as csvfile:
+				reader = csv.reader(csvfile)
+				in_csv = [row for row in reader]
+			index = in_csv[0].index(datatype)
+		except IndexError:
+			print 'Requested datatype not present in cache, an attempt will be made to fetch from the API'
+		except IOError:
+			print 'Cache not found, data will be fetched from the API'	
+	#now we begin the actual scraping
+
+	#behold: a convoluted way to get a list of days in a year
+	times = list(date_range('{}-01-01'.format(year), '{}-12-31'.format(year)))
+	#time.isoformat() has no tzinfo in this case, so darksky parses it as local time
+	urls = ['https://api.darksky.net/forecast/%s/%s,%s?exclude=daily&units=%s' % ( api_key, coords, time.isoformat(), units ) for time in times]
+	data = [requests.get(url).json() for url in urls]
+
+	#a fun little annoyance: let's de-unicode those strings
+	def ascii_me(obj):
+		if isinstance(obj, unicode):
+			return obj.encode('ascii','ignore')
+		if isinstance(obj, list):
+			return map(ascii_me, obj)
+		if isinstance(obj, dict):
+			new_dict = dict()
+			for k, v in obj.iteritems():
+				k = k.encode('ascii','ignore') if type(k) is type(u'') else k
+				new_dict[k] = ascii_me(v)
+			return new_dict
+		else:
+			return obj
+
+	data = ascii_me(data)
+	out = []
+	
+	if path:
+			# determine the columns from the first day of data
+			columns = data[0]['hourly']['data'][0].keys()
+			out_csv = [columns]
+	# parse our json-dict
+	for day in data:
+		for hour in day['hourly']['data']:
+			if path:
+				out_csv.append( [hour.get(key) for key in columns] )
+			out.append(hour.get(datatype))
+
+	if path:
+		with open(filename, 'wb') as csvfile:
+			writer = csv.writer(csvfile)
+			for row in out_csv:
+				writer.writerow(row)
+	return out
+
 def pullUscrn(year, station, datatype):
 	'''Returns hourly weather data from NOAA's quality-controlled USCRN dataset as array.
 	* Documentation: https://www1.ncdc.noaa.gov/pub/data/uscrn/products/hourly02/README.txt

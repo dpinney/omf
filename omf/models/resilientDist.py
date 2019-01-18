@@ -287,9 +287,12 @@ def convertToGFM(gfmInputTemplate, feederModel):
 				'max_real_phase': [genSize,genSize,genSize] #*
 			}
 			gfmJson['generators'].append(genObj)
+
+	hazard = HazardField(omf.omfDir + "/static/testFiles/wf_clip.asc")
+	checkHazardFieldBounds(hazard, gfmJson) # Check boundary function.
 	return gfmJson
 
-def genDiagram(outputDir, feederJson, damageDict):
+def genDiagram(outputDir, feederJson, damageDict, critLoads):
 	warnings.filterwarnings("ignore")
 	# Load required data.
 	tree = feederJson.get("tree",{})
@@ -361,7 +364,7 @@ def genDiagram(outputDir, feederJson, damageDict):
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
 			standArgs.update({'width':3,'edge_color':'white'})
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
-			standArgs.update({'width':1,'edge_color':feeder._obToCol(eType)})
+			standArgs.update({'width':1,'edge_color':'white'})
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
 		if ePhases==2:
 			standArgs.update({'width':3})
@@ -374,10 +377,10 @@ def genDiagram(outputDir, feederJson, damageDict):
 	red_list, blue_list, grey_list  = ([] for i in range(3))
 	for key in pos.keys(): # Sort keys into seperate lists. Is there a more elegant way of doing this.
 		if key not in green_list:
-			prefix = key[:3]
-			if prefix == 'C_l':
+			load = key[2:6]
+			if key in critLoads:
 				red_list.append(key)
-			elif prefix == "B_l":
+			elif load == 'load':
 				blue_list.append(key)
 			else:
 				grey_list.append(key)
@@ -385,22 +388,26 @@ def genDiagram(outputDir, feederJson, damageDict):
 	nx.draw_networkx_nodes(inGraph, pos, 
 						   nodelist=green_list,
 						   node_color='green',
+						   label='Swing Buses',
 						   linewidths=0,
-						   node_size=10)
+						   node_size=1)
 	nx.draw_networkx_nodes(inGraph,pos,
 						   nodelist=red_list,
 						   node_color='red',
+						   label='Critical Load',
 						   linewidths=0,
-						   node_size=10)
+						   node_size=1)
 	nx.draw_networkx_nodes(inGraph,pos,
 						   nodelist=blue_list,
 						   node_color='blue',
+						   label='Regular Loads',
 						   linewidths=0,
-						   node_size=10)
+						   node_size=1)
 	nx.draw_networkx_nodes(inGraph,pos,
 						   nodelist=grey_list,
 						   node_color='grey',
-						   node_size=10)
+						   label='Other',
+						   node_size=1)
 
 	'''
 	nx.draw_networkx_nodes(inGraph,pos,
@@ -414,6 +421,7 @@ def genDiagram(outputDir, feederJson, damageDict):
 								font_color='black',
 								font_weight='bold',
 								font_size=0.25)
+	plt.legend(loc='lower right') 
 	if showPlot: plt.show()
 	plt.savefig(pJoin(outputDir,"feederChart.png"), dpi=800, pad_inches=0.0)
 
@@ -445,6 +453,7 @@ def work(modelDir, inputDict):
 		feederModel = json.load(jsonIn)
 	# Create GFM input file.
 	print "RUNNING GFM FOR", modelDir
+	critLoads = inputDict['criticalLoads']
 	gfmInputTemplate = {
 		'phase_variation' : float(inputDict['phaseVariation']),
 		'chance_constraint' : float(inputDict['chanceConstraint']),
@@ -623,7 +632,7 @@ def work(modelDir, inputDict):
 				damageDict[line] = damageDict[line] + 1
 			else:
 				damageDict[line] = 1
-	genDiagram(modelDir, feederModel, damageDict)
+	genDiagram(modelDir, feederModel, damageDict, critLoads)
 	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
 		outData["oneLineDiagram"] = inFile.read().encode("base64")
 	# And we're done.

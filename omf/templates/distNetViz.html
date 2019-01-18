@@ -1344,6 +1344,235 @@ function clickLatLon(event) {
 	return coords;
 }
 
+<<<<<<< HEAD
+=======
+function newNode() { // eslint-disable-line
+	// Start creation of new node.
+	//var newTreeId = Object.keys(writeFeeder.tree).length
+	const newTreeKey = getNewTreeKey(writeFeeder.tree);
+	var newTreeNode = {
+		longitude: 0,
+		latitude: 0,
+		name: 'newNode' + newTreeKey,
+		nominal_voltage: 1000,
+		object: 'node',
+		phases: 'A'
+	}
+	// Save to tree
+	writeFeeder.tree[newTreeKey] = newTreeNode
+	// Click location to add
+	const clickTarget = document.getElementById('svgContainer')
+	clickTarget.addEventListener('click', newNodeListener, false)
+	document.body.style.cursor = 'crosshair'
+}
+
+function newNodeListener() {
+	// Click handler for location of new node.
+	var xloc = event.pageX;
+	var yloc = event.pageY;
+	var newTreeKey = getNewTreeKey(writeFeeder.tree);
+	const coords = clickLatLon(event);
+	xloc = coords.x;
+	yloc = coords.y;
+	//xloc = coords[0]
+	//yloc = coords[1]
+	writeFeeder.tree[newTreeKey].longitude = xloc;
+	writeFeeder.tree[newTreeKey].latitude = yloc;
+	// Draw new node on svg
+	const x = writeFeeder.tree[newTreeKey].longitude
+	const y = writeFeeder.tree[newTreeKey].latitude
+	const r = 2
+	//const id = newTreeId
+	const myClass = writeFeeder.tree[newTreeKey].object
+	addCircle(x, y, r, newTreeKey, myClass)
+	scaleTo(scaleLevel)
+	const clickTarget = document.getElementById('svgContainer')
+	clickTarget.removeEventListener('click', newNodeListener, false)
+	document.body.style.cursor = 'auto'
+}
+
+function clearGlobalSelectionArray() {
+	//selection.forEach(element => {
+	//	element.classList.remove("selected");
+	//})
+	//selection = [];
+	Array.from(document.getElementsByClassName("selected")).forEach(element => element.classList.remove("selected"));
+}
+
+function newLink(componentName) { // eslint-disable-line
+	//hard-coded, but necessary, data dependency
+	const nodeTypes = ['node','load','house','meter','triplex_meter','triplex_node','triplex_load','waterheater','ZIPload'];
+	if (document.getElementsByClassName("selected").length !== 2) {
+	//if (selection.length != 2) {
+		alert("Please hold down the 'alt' key and click exactly two nodes to connect.");
+		clearGlobalSelectionArray();
+		tableDestroy();
+		return;
+	} 
+	const firstTreeNode = writeFeeder.tree[selection[0].id];
+	const secondTreeNode = writeFeeder.tree[selection[1].id];
+	if (!nodeTypes.includes(firstTreeNode.object) || !nodeTypes.includes(secondTreeNode.object)) {
+		alert("Please only select nodes");
+		clearGlobalSelectionArray();
+		tableDestroy();
+		return;
+	}
+	//I have concerns about adding inconsistent data to the graph. See my meeting notes.
+	const newTreeLink = deepCopy(globalComponents[componentName]);
+	newTreeLink.from = firstTreeNode.name;
+	newTreeLink.to = secondTreeNode.name;
+	const newTreeKey = getNewTreeKey(writeFeeder.tree);
+	newTreeLink.name = componentName + newTreeKey;
+	// Save to tree
+	writeFeeder.tree[newTreeKey] = newTreeLink;
+
+	// Save to links
+	const newLink = {
+		source: writeFeeder.nodes.find(obj => obj.treeIndex == selection[0].id), //good
+		target: writeFeeder.nodes.find(obj => obj.treeIndex == selection[0].id), //good
+		treeIndex: newTreeKey, //good
+		objectType: 'fromTo' //good. It's not parent child, right? What happens if this replaces a parent child? Hmm
+	}
+	writeFeeder.links.push(newLink);
+	// Draw on svg
+	const x1 = firstTreeNode.longitude;
+	const y1 = firstTreeNode.latitude;
+	const x2 = secondTreeNode.longitude;
+	const y2 = secondTreeNode.latitude;
+	//const id = newTreeId;
+	const myClass = writeFeeder.tree[newTreeKey].object;
+	addLine(x1, y1, x2, y2, newTreeKey, myClass);
+	//then below fixes the build order so cirlces come in last
+	selection[0].remove();
+	selection[1].remove();
+	addCircle(x1,y1,2,selection[0].id,firstTreeNode.object);
+	addCircle(x2,y2,2,selection[1].id,secondTreeNode.object);
+	scaleTo(scaleLevel);
+	clearGlobalSelectionArray();
+	//selection = [];
+}
+
+function moveNode() {
+	// When user clicks drag, add a listener to effect the movement on next click.
+	document.body.style.cursor = 'crosshair'
+	const clickTarget = document.getElementById('svgContainer')
+	clickTarget.addEventListener('click', moveNodeListener, false)
+}
+
+//Get an array of keys that correspond to the connected line.
+function getConnectedLineKeys(node) {
+	return Object.keys(writeFeeder.tree).filter(key => {
+		let line = writeFeeder.tree[key];
+		if (line.from == node.name || line.to == node.name) {
+			return true;
+		}
+		return false;
+	});
+}
+
+/* Listener to allow a node to move once the user clicks the target location.
+I don't think this updates the data correctly. It updates writeFeeder.tree, but not writeFeeder.nodes
+*/
+function moveNodeListener() {
+    // Return the cursor to its default.
+	document.body.style.cursor = 'auto'
+	const clickTarget = document.getElementById('svgContainer')
+	clickTarget.removeEventListener('click', moveNodeListener, false)
+    let clickedNode = writeFeeder.tree[lastElementSelected.id];
+    if (clickedNode.from != null || clickedNode.to != null) {
+        //Prevent users from moving lines
+        return
+    }
+	//const newLat = clickLatLon(event).y;
+    //const newLon = clickLatLon(event).x
+    const newLat = clickLatLon(event).y + globalLatOffset; //store the real lat. Add back the offset when storing data. Subtract it when rendering
+    const newLon = clickLatLon(event).x + globalLonOffset; //store the real lon. Add back the offset when storing data. Subtract it when rendering
+	clickedNode["latitude"] = newLat;
+	clickedNode["longitude"] = newLon;
+	// This value can be undefined when the node isn't connected to anything. Is that a problem?!? yep.
+	//let parent = clickedNode.parent;
+	const connectedLineKeys = getConnectedLineKeys(clickedNode);
+	if (connectedLineKeys.length === 0 && clickedNode.parent === undefined) {
+		document.getElementById(lastElementSelected.id).remove();
+		addCircle(newLon, newLat, 2, lastElementSelected.id, writeFeeder.tree[lastElementSelected.id].object);
+	} else {
+		//Runs through writeFeeder lines (links) determines if clicked node is an end or target for any line in writeFeeder
+		for (let num in writeFeeder.tree) {
+			let treeOb = writeFeeder.tree[num];
+			// Move line between clicked node and its treeOb child. This is checking if clickedNode HAS children
+			if (treeOb.parent == clickedNode.name) {
+				document.getElementById(clickedNode.name + "_" + treeOb.name).remove()
+				addLine(newLon, newLat, treeOb.longitude, treeOb.latitude, clickedNode.name + "_" + treeOb.name, 'parentChild');
+				document.getElementById(num).remove()
+                addCircle(treeOb.longitude, treeOb.latitude, 2, num, treeOb.object);
+				document.getElementById(lastElementSelected.id).remove()
+                addCircle(newLon, newLat, 2, lastElementSelected.id, clickedNode.object); 
+            }
+			/* Move line between clicked node and its treeOb parent (if it is a child). 
+			I found an object in writeFeeder.tree that is 1) NOT a line 2) is the parent of the currently selected node.
+			*/
+			if (clickedNode.parent != undefined && clickedNode.parent == treeOb.name && treeOb.from == undefined && treeOb.to == undefined) {
+				/* treeOb.name is the parent's name, clickedNode.name is the clicked node's name. There is a line with an id that is a 
+				concatenation of their names, and I want to remove that line. Yep.
+				*/
+				document.getElementById(treeOb.name + "_" + clickedNode.name).remove()
+				addLine(newLon, newLat, treeOb.longitude, treeOb.latitude, treeOb.name + "_" + clickedNode.name, 'parentChild');
+				//Remove the parent node? Oh maybe to redraw it on top of the new line.
+				document.getElementById(num).remove()
+				addCircle(treeOb.longitude, treeOb.latitude, 2, num, treeOb.object);
+				//Remove the current node and redraw it where it's supposed to go.
+				document.getElementById(lastElementSelected.id).remove()
+				addCircle(newLon, newLat, 2, lastElementSelected.id, clickedNode.object);
+			}
+			if (treeOb.from !== undefined && treeOb.to !== undefined) {
+				// Move all lines from or to the clicked node.
+				if (treeOb.from == clickedNode.name || treeOb.to == clickedNode.name) {
+					// If the current object is a line connected to the current node, move it.
+					document.getElementById(num).remove()
+					let x1;
+					let y1;
+					let numf;
+					let myClassf;
+					let x2;
+					let y2;
+					let numt;
+					let myClasst;
+					for (let subEl in writeFeeder.tree) {
+						// Find the coordinates on the other end of the moving line.
+						if (treeOb.from == writeFeeder.tree[subEl].name) {
+							x1 = writeFeeder.tree[subEl]['longitude']
+							y1 = writeFeeder.tree[subEl]['latitude']
+							numf = subEl
+							myClassf = writeFeeder.tree[subEl].object
+						} else if (treeOb.to == writeFeeder.tree[subEl].name) {
+							x2 = writeFeeder.tree[subEl]['longitude']
+							y2 = writeFeeder.tree[subEl]['latitude']
+							numt = subEl
+							myClasst = writeFeeder.tree[subEl].object
+						}
+					}
+                    addLine(x1, y1, x2, y2, num, treeOb['object'] + ' p' + countPhases(treeOb['phases']));
+					// Redraw nodes after line so they aren't below the newly drawn lines. Up to 3 nodes for case where we are moving node between 2 from-to lines.
+					if (treeOb.from == clickedNode.name) {
+						addCircle(x2, y2, 2, numt, myClasst);
+						document.getElementById(numt).remove()
+					}
+					if (treeOb.to == clickedNode.name) {
+						addCircle(x1, y1, 2, numf, myClassf);
+						document.getElementById(numf).remove()
+					}
+					// Finally, draw the clicked node in its new location. Leave this bit here. Other moving functions go inside.
+					document.getElementById(lastElementSelected.id).remove()
+					addCircle(newLon, newLat, 2, lastElementSelected.id, writeFeeder.tree[lastElementSelected.id].object);
+				}
+			}
+		}
+	}
+	// Fix scaling of new objects.
+	scaleTo(scaleLevel)
+}
+
+>>>>>>> master
 //**************************************************
 // Find modal interface
 //**************************************************
