@@ -265,7 +265,8 @@ def zipCodeToClimateName(zipCode):
 
 def _tests():
 	print 'weather.py tests currently disabled to keep them from sending too many HTTP requests.'
-	# tmpdir .mkdtemp()
+	# from tempfile import mkdtemp
+	# tmpdir = mkdtemp()
 	# print "Beginning to test weather.py in", tmpdir
 	# print zipCodeToClimateName('75001')
 	# print zipCodeToClimateName('07030')
@@ -279,6 +280,9 @@ def _tests():
 	# pullAsos('2017','CHO', 'tmpc')
 	# print 'ASOS (Iowa) data pulled to ' + tmpdir
 	# pullAsosStations('./asosStationTable.csv')
+	# # Testing DarkSky
+	# pullDarksky(2018, 36.64, -93.30, 'temperature', path = tmpdir)
+	# print 'Darksky data pulled to ' + tmpdir
 
 if __name__ == "__main__":
 	_tests()
