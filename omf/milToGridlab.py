@@ -1836,7 +1836,6 @@ def _tests(
 		try:
 			# Convert the std+seq and write it out.
 			with open(pJoin(openPrefix,stdString),'r') as stdFile, open(pJoin(openPrefix,seqString),'r') as seqFile:
-				outGlm = convert(stdFile.read(),seqFile.read())
 				# Catch warnings too:
 				with warnings.catch_warnings(record=True) as caught_warnings:
 					outGlm = convert(stdFile.read(),seqFile.read())
