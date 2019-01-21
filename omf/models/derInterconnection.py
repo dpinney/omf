@@ -646,7 +646,11 @@ def new(modelDir):
 		'flickerThreshold': '2',
 		'newGeneration': 'addedDer',
 		'newGenerationStepUp': 'addedDerStepUp',
-		'newGenerationBreaker': 'addedDerBreaker'
+		'newGenerationBreaker': 'addedDerBreaker',
+		'thermalThreshold': '100',
+		'peakLoadData': '',
+		'minLoadData': '',
+		'tapThreshold': '6'
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
