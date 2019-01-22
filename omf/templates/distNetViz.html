@@ -1038,10 +1038,13 @@ const publicFeeders = {% if publicFeeders %}{{ publicFeeders | safe }}{% else %}
 const userFeeders = {% if userFeeders %}{{ userFeeders | safe }}{% else %}null{% endif %}; 
 const writeFeeder = deepCopy(readFeeder);
 // The global TreeWrapper can only be created after the entire file has been parsed.
+let gSelection;
 let gTreeWrapper; 
 let gViewport; 
-let gLonOffset = null;
-let gLatOffset = null;
+let gOffsetX; 
+let gOffsetY;
+let gDownX;
+let gDownY;
 // Scale that all SVG objects are drawn at
 let scaleLevel = 1.0; 
 
@@ -1049,79 +1052,176 @@ let scaleLevel = 1.0;
 // Selection Interface
 //**************************************************
 
-/* We need this only because the 'to' and 'from' properties of a line depend on which element was selected first.
-We can't accomplish that purely with document.getElementsByClassName("selected") becauese the order of that array
-depends on how elements are ordered in the DOM, not on the order in which the user clicked.
-*/
-let isSelected;
-let removeSelected;
-let addSelected;
-let emptySelected;
-let getSelectedElements;
-let getSelectedWrapper;
-let validateSelected;
+/**
+ * TODO: add unit tests
+ */
+const selectionPrototype = {
+
+    /* Public selection methods */
+
+    includes(element) {
+        return this.selectedElements.includes(element)
+    },
+    remove(element) {
+        //const idx = this.selectedElements.findIndex(e => e === element);
+        const elements = this.selectedElements.filter(e => e.id === element.id);
+        if (elements.length === 0) {
+            throw new Error("Remove operation failed. The element argument does not exist in this selection.");
+        }
+        elements.forEach(e => {
+            e.classList.remove("selected");
+            this.selectedElements.splice(this.selectedElements.indexOf(e), 1);
+        });
+    },
+    add(element) {
+        if (this.selectedElements.includes(element)) {
+            throw new Error("Add operation failed. The element argument already exists in this selection.");
+        } else if (element.classList.contains("selected")) {
+            throw new Error("Add operation failed. The element argument already has the 'selected' class.");
+        }
+        element.classList.add("selected");
+        this.selectedElements.push(element);
+    },
+    empty() {
+        this.selectedElements.forEach(e => {
+            e.classList.remove("selected");
+        });
+        this.selectedElements = [];
+    },
+    getWrapper() {
+        const tWrapper = createTreeWrapper();
+        this.selectedElements.forEach(e => {
+            tWrapper.add(e.id, gTreeWrapper);            
+        });
+        return tWrapper;
+    },
+}
+
+/**
+ * DELETE THIS, but first incorporate it into isValidForAdd()
+ * TODO: add unit tests, get rid of TreeObject.update(), get rid of this entirely
+ * Return true if the TreeObject argument was successfully updated based on the selected HTMLElements, otherwise return false.
+ */
+ function updateTreeObject(tObject, tWrapper) {
+    const keys = Object.keys(tWrapper.tree);
+    const type = getType(tObject.data);
+    switch (type) {
+        case "line":
+            if (keys.length === 2 && 
+                keys.every(key => {
+                    let objectType = getType(tWrapper.tree[key]);
+                    // Can only add a line between childNodes and/or independentNodes
+                    return objectType === "childNode" || objectType === "independentNode"
+                })
+            ) {
+                tObject.update({to: tWrapper.tree[keys[0]], from: tWrapper.tree[keys[1]]});
+                return true
+            }
+            break;
+        case "configurationNode":
+            break;
+        case "childNode":
+            if (keys.length === 1) {
+                const objectType = getType(tWrapper.tree[keys[0]]);
+                if (objectType === "childNode" || objectType === "independentNode") {
+                    // Can only add a childNode to another childNode or an independentNode
+                    tObject.update({parent: tWrapper.tree[keys[0]]});
+                    return true
+                }
+            } 
+            break;
+        case "independentNode":
+            break;
+    }
+    return false;
+}
+
+function createSelection() {
+    const obj = Object.create(selectionPrototype);
+    obj.selectedElements = [];
+    return obj;
+}
+
+//let removeSelected;
+//let addSelected;
+//let emptySelected;
+//let getSelectedElements;
+//let getSelectedWrapper;
+//let validateSelectedForAdd;
+//let validateSelectedForMove;
 /**
  * TODO: add unit tests, maybe delete this because node selection for lines happens afterwards now. Maybe I can add components
  * both ways, in which case this would still be needed?
  */
 {
-    let gSelectedElements = [];
-    isSelected = function(element) {
-        return element.classList.contains("selected");
-    };
-    removeSelected = function(element) {
-        if (element.classList.contains("selected")) {
-            element.classList.remove("selected");
-            const idx = gSelectedElements.findIndex(e => { return e === element; });
-            if (idx < 0) {
-                throw new Error("The previously selected element was not found in the selection array and couldn't be removed");
-            } 
-            gSelectedElements.splice(idx, 1);
-        }
-    };
-    addSelected = function(element) {
-        if (!element.classList.contains("selected")) {
-            element.classList.add("selected");
-            gSelectedElements.push(element);
-        }
-    };
-    emptySelected = function() {
-        Array.from(document.getElementsByClassName("selected")).forEach(e => {
-            e.classList.remove("selected");
-        });
-        gSelectedElements = [];
-    };
-    
+    //let gSelectedElements = [];
+    //removeSelected = function(element) {
+    //    if (element.classList.contains("selected")) {
+    //        element.classList.remove("selected");
+    //        const idx = gSelectedElements.findIndex(e => { return e === element; });
+    //        if (idx < 0) {
+    //            throw new Error("The previously selected element was not found in the selection array and couldn't be removed");
+    //        } 
+    //        gSelectedElements.splice(idx, 1);
+    //    }
+    //};
+    //addSelected = function(element) {
+    //    if (!element.classList.contains("selected")) {
+    //        element.classList.add("selected");
+    //        gSelectedElements.push(element);
+    //    }
+    //};
+    //emptySelected = function() {
+    //    Array.from(document.getElementsByClassName("selected")).forEach(e => {
+    //        e.classList.remove("selected");
+    //    });
+    //    gSelectedElements = [];
+    //};
     /**
-     * Return true if the selected elements are valid for performing an operation with an object of the given type, otherwise
-     * return false.
+     * Return true if the selected elements are valid for adding an object with the given type, otherwise return false.
+     * 
      * @param {string} type - the type of the object used to modify or be modified by the selection. 
      * @return {boolean}
      */
-    validateSelected = function({type=null, operation=null}) {
-        /* I want to add a child component to stuff, but I can only add to childNodes and independentNodes.
-        I want to add a line component, but I can only add lines between childNodes and independentNodes
-        I want to add an independent or config component, but 
-        I want to move objects, but I can only move configNodes, childNodes, and independentNodes.
-        */ 
-    }
+    validateSelectedForAdd = function(type) {
+
+    };
+
+    /**
+     * TODO: add unit tests
+     * Return true if the selected elements can be moved, otherwise return false.
+     * @return {boolean}
+     */
+    //validateSelectedForMove = function() {
+    //    if (gSelectedElements.length === 0) {
+    //        alert("Please select at least one circle to move.");
+    //        return false
+    //    } 
+    //    const lines = gSelectedElements.filter(e => getType(e) === "line");        
+    //    if (lines.length !== 0) {
+    //        const names = gSelectedElements.map(e => e.name);
+    //        alert("Lines cannot be moved. Please unselect the following lines: " + names);
+    //        return false
+    //    }
+    //    return true
+    //}
     /**
      * Return an array of HTMLElements that have the "selected" class.
      */
-    getSelectedElements = function() {
-        return gSelectedElements;
-    };
+    //getSelectedElements = function() {
+    //    return gSelectedElements;
+    //};
 
     /**
      * Return a TreeWrapper that contains tree objects that correspond to HTMLElements with the "selected" class.
      */
-    getSelectedWrapper = function() {
-        const tWrapper = createTreeWrapper();
-        gSelectedElements.forEach(e => {
-            tWrapper.add(e.id, gTreeWrapper);            
-        });
-        return tWrapper;
-    };
+    //getSelectedWrapper = function() {
+    //    const tWrapper = createTreeWrapper();
+    //    gSelectedElements.forEach(e => {
+    //        tWrapper.add(e.id, gTreeWrapper);            
+    //    });
+    //    return tWrapper;
+    //};
 }
 
 function saveSvg() {
@@ -1177,11 +1277,10 @@ function createViewport(treeWrapper, svgContainer) {
             }
         }
     });
-    //const translatedMaxLon = maxLon - minLon;
     const translatedMaxLon = (maxLon - minLon);
-    gLonOffset = minLon;
+    gOffsetX = minLon;
     const translatedMaxLat = maxLat - minLat;
-    gLatOffset = minLat;
+    gOffsetY = minLat;
     // Create the viewport
     svgContainer.setAttribute('viewBox',`0 0 ${translatedMaxLon} ${translatedMaxLat}`);
 	window.panZoom = svgPanZoom('#svgContainer', {
@@ -1197,70 +1296,70 @@ function createViewport(treeWrapper, svgContainer) {
 // Click event functions
 //**************************************************
 
-
-
 /**
- * TODO: add unit tests
+ * TODO: add unit tests, this should only handle selection objects. creating tables is a special listener attached to svgContainer,
+ * not svgContainerWrapper
  * Listener on the SVG object that handles user clicks.
  */
-function svgClick(downEvent, upEvent) {
-    if (downEvent.clientX !== upEvent.clientX || downEvent.clientY !== upEvent.clientY) {
+function handleSelection(event) {
+    if (gDownX !== event.clientX || gDownY !== event.clientY) {
 		// Ignore drags, those should be handled by svg-panzoom.
-        //return;
+        return
     }
-    const element = downEvent.target;
-    if (downEvent.altKey && element.id !== "svgContainer" && !element.classList.contains("parentChild")) {
-        //destroyTables(["descriptionTables", "selectionTable"]);
-        destroyTables(["selectionTable"]);
-        if (isSelected(element)) {
-            removeSelected(element);
+    const element = event.target;
+    if (event.altKey && element.id !== "svgContainer" && !element.classList.contains("parentChild")) {
+        if (gSelection.includes(element)) {
+            gSelection.remove(element);
             //Copied from rowPrototype.delete(). Refactor needed
             const table = document.getElementById(`descriptionTable_${element.id}`);
             if (table != null) {
                 document.getElementById("descriptionTables").removeChild(table);
             }
         } else {
-            addSelected(element);
+            gSelection.add(element);
         }
-        let ids = Object.keys(getSelectedWrapper().tree);
+        //destroyTables(["descriptionTables", "selectionTable"]);
+        destroyTables(["selectionTable"]);
+        let ids = Object.keys(gSelection.getWrapper().tree);
         if (ids.length > 0) {
             const table = createSelectionTable(ids, gTreeWrapper);
             document.getElementById("selectionTable").appendChild(table);
         } 
-    } else if (!downEvent.altKey) {
-        emptySelected();
+    } else if (!event.altKey) {
+        gSelection.empty();
         destroyTables(["descriptionTables", "selectionTable"]);
         //destroyTables(["selectionTable"]);
         if (element.id !== "svgContainer" && !element.classList.contains("parentChild")) {
-            addSelected(element);
+            gSelection.add(element);
             const table = createDescriptionTable(element.id, gTreeWrapper);
+            table.id = `descriptionTable_${element.id}`;
             document.getElementById("descriptionTables").appendChild(table);
         } 
     }
 }
 
-function hotkeys() {
-	// Handle hotkey presses.
-	let x;
-	if (window.event) {
-		// IE8 and earlier
-		x = event.keyCode
-	} else if (event.which) {
-		// IE9/Firefox/Chrome/Opera/Safari
-		x = event.which
-	}
-	var keychar = String.fromCharCode(x);
-	if (event.target.type !== 'text') {
-		// Dispatch the key:
-		if (keychar == '-') {
-			window.panZoom.zoomOut()
-		} else if (keychar == '=') {
-			window.panZoom.zoomIn()
-		} else if (keychar =='m') {
-			moveNode()
-		}
-	}
-}
+//function hotkeys() {
+//	// Handle hotkey presses.
+//	let x;
+//	if (window.event) {
+//		// IE8 and earlier
+//		x = event.keyCode
+//	} else if (event.which) {
+//		// IE9/Firefox/Chrome/Opera/Safari
+//		x = event.which
+//	}
+//	var keychar = String.fromCharCode(x);
+//	if (event.target.type !== 'text') {
+//		// Dispatch the key:
+//		if (keychar == '-') {
+//			window.panZoom.zoomOut()
+//		} else if (keychar == '=') {
+//			window.panZoom.zoomIn()
+//		} else if (keychar =='m') {
+//            attachMoveSelectionListener();
+//		}
+//	}
+//}
 
 function scaleTo(x) {
 	// Scale the thickness of all lines and size of all circles. This helps user see details.
@@ -1344,235 +1443,6 @@ function clickLatLon(event) {
 	return coords;
 }
 
-<<<<<<< HEAD
-=======
-function newNode() { // eslint-disable-line
-	// Start creation of new node.
-	//var newTreeId = Object.keys(writeFeeder.tree).length
-	const newTreeKey = getNewTreeKey(writeFeeder.tree);
-	var newTreeNode = {
-		longitude: 0,
-		latitude: 0,
-		name: 'newNode' + newTreeKey,
-		nominal_voltage: 1000,
-		object: 'node',
-		phases: 'A'
-	}
-	// Save to tree
-	writeFeeder.tree[newTreeKey] = newTreeNode
-	// Click location to add
-	const clickTarget = document.getElementById('svgContainer')
-	clickTarget.addEventListener('click', newNodeListener, false)
-	document.body.style.cursor = 'crosshair'
-}
-
-function newNodeListener() {
-	// Click handler for location of new node.
-	var xloc = event.pageX;
-	var yloc = event.pageY;
-	var newTreeKey = getNewTreeKey(writeFeeder.tree);
-	const coords = clickLatLon(event);
-	xloc = coords.x;
-	yloc = coords.y;
-	//xloc = coords[0]
-	//yloc = coords[1]
-	writeFeeder.tree[newTreeKey].longitude = xloc;
-	writeFeeder.tree[newTreeKey].latitude = yloc;
-	// Draw new node on svg
-	const x = writeFeeder.tree[newTreeKey].longitude
-	const y = writeFeeder.tree[newTreeKey].latitude
-	const r = 2
-	//const id = newTreeId
-	const myClass = writeFeeder.tree[newTreeKey].object
-	addCircle(x, y, r, newTreeKey, myClass)
-	scaleTo(scaleLevel)
-	const clickTarget = document.getElementById('svgContainer')
-	clickTarget.removeEventListener('click', newNodeListener, false)
-	document.body.style.cursor = 'auto'
-}
-
-function clearGlobalSelectionArray() {
-	//selection.forEach(element => {
-	//	element.classList.remove("selected");
-	//})
-	//selection = [];
-	Array.from(document.getElementsByClassName("selected")).forEach(element => element.classList.remove("selected"));
-}
-
-function newLink(componentName) { // eslint-disable-line
-	//hard-coded, but necessary, data dependency
-	const nodeTypes = ['node','load','house','meter','triplex_meter','triplex_node','triplex_load','waterheater','ZIPload'];
-	if (document.getElementsByClassName("selected").length !== 2) {
-	//if (selection.length != 2) {
-		alert("Please hold down the 'alt' key and click exactly two nodes to connect.");
-		clearGlobalSelectionArray();
-		tableDestroy();
-		return;
-	} 
-	const firstTreeNode = writeFeeder.tree[selection[0].id];
-	const secondTreeNode = writeFeeder.tree[selection[1].id];
-	if (!nodeTypes.includes(firstTreeNode.object) || !nodeTypes.includes(secondTreeNode.object)) {
-		alert("Please only select nodes");
-		clearGlobalSelectionArray();
-		tableDestroy();
-		return;
-	}
-	//I have concerns about adding inconsistent data to the graph. See my meeting notes.
-	const newTreeLink = deepCopy(globalComponents[componentName]);
-	newTreeLink.from = firstTreeNode.name;
-	newTreeLink.to = secondTreeNode.name;
-	const newTreeKey = getNewTreeKey(writeFeeder.tree);
-	newTreeLink.name = componentName + newTreeKey;
-	// Save to tree
-	writeFeeder.tree[newTreeKey] = newTreeLink;
-
-	// Save to links
-	const newLink = {
-		source: writeFeeder.nodes.find(obj => obj.treeIndex == selection[0].id), //good
-		target: writeFeeder.nodes.find(obj => obj.treeIndex == selection[0].id), //good
-		treeIndex: newTreeKey, //good
-		objectType: 'fromTo' //good. It's not parent child, right? What happens if this replaces a parent child? Hmm
-	}
-	writeFeeder.links.push(newLink);
-	// Draw on svg
-	const x1 = firstTreeNode.longitude;
-	const y1 = firstTreeNode.latitude;
-	const x2 = secondTreeNode.longitude;
-	const y2 = secondTreeNode.latitude;
-	//const id = newTreeId;
-	const myClass = writeFeeder.tree[newTreeKey].object;
-	addLine(x1, y1, x2, y2, newTreeKey, myClass);
-	//then below fixes the build order so cirlces come in last
-	selection[0].remove();
-	selection[1].remove();
-	addCircle(x1,y1,2,selection[0].id,firstTreeNode.object);
-	addCircle(x2,y2,2,selection[1].id,secondTreeNode.object);
-	scaleTo(scaleLevel);
-	clearGlobalSelectionArray();
-	//selection = [];
-}
-
-function moveNode() {
-	// When user clicks drag, add a listener to effect the movement on next click.
-	document.body.style.cursor = 'crosshair'
-	const clickTarget = document.getElementById('svgContainer')
-	clickTarget.addEventListener('click', moveNodeListener, false)
-}
-
-//Get an array of keys that correspond to the connected line.
-function getConnectedLineKeys(node) {
-	return Object.keys(writeFeeder.tree).filter(key => {
-		let line = writeFeeder.tree[key];
-		if (line.from == node.name || line.to == node.name) {
-			return true;
-		}
-		return false;
-	});
-}
-
-/* Listener to allow a node to move once the user clicks the target location.
-I don't think this updates the data correctly. It updates writeFeeder.tree, but not writeFeeder.nodes
-*/
-function moveNodeListener() {
-    // Return the cursor to its default.
-	document.body.style.cursor = 'auto'
-	const clickTarget = document.getElementById('svgContainer')
-	clickTarget.removeEventListener('click', moveNodeListener, false)
-    let clickedNode = writeFeeder.tree[lastElementSelected.id];
-    if (clickedNode.from != null || clickedNode.to != null) {
-        //Prevent users from moving lines
-        return
-    }
-	//const newLat = clickLatLon(event).y;
-    //const newLon = clickLatLon(event).x
-    const newLat = clickLatLon(event).y + globalLatOffset; //store the real lat. Add back the offset when storing data. Subtract it when rendering
-    const newLon = clickLatLon(event).x + globalLonOffset; //store the real lon. Add back the offset when storing data. Subtract it when rendering
-	clickedNode["latitude"] = newLat;
-	clickedNode["longitude"] = newLon;
-	// This value can be undefined when the node isn't connected to anything. Is that a problem?!? yep.
-	//let parent = clickedNode.parent;
-	const connectedLineKeys = getConnectedLineKeys(clickedNode);
-	if (connectedLineKeys.length === 0 && clickedNode.parent === undefined) {
-		document.getElementById(lastElementSelected.id).remove();
-		addCircle(newLon, newLat, 2, lastElementSelected.id, writeFeeder.tree[lastElementSelected.id].object);
-	} else {
-		//Runs through writeFeeder lines (links) determines if clicked node is an end or target for any line in writeFeeder
-		for (let num in writeFeeder.tree) {
-			let treeOb = writeFeeder.tree[num];
-			// Move line between clicked node and its treeOb child. This is checking if clickedNode HAS children
-			if (treeOb.parent == clickedNode.name) {
-				document.getElementById(clickedNode.name + "_" + treeOb.name).remove()
-				addLine(newLon, newLat, treeOb.longitude, treeOb.latitude, clickedNode.name + "_" + treeOb.name, 'parentChild');
-				document.getElementById(num).remove()
-                addCircle(treeOb.longitude, treeOb.latitude, 2, num, treeOb.object);
-				document.getElementById(lastElementSelected.id).remove()
-                addCircle(newLon, newLat, 2, lastElementSelected.id, clickedNode.object); 
-            }
-			/* Move line between clicked node and its treeOb parent (if it is a child). 
-			I found an object in writeFeeder.tree that is 1) NOT a line 2) is the parent of the currently selected node.
-			*/
-			if (clickedNode.parent != undefined && clickedNode.parent == treeOb.name && treeOb.from == undefined && treeOb.to == undefined) {
-				/* treeOb.name is the parent's name, clickedNode.name is the clicked node's name. There is a line with an id that is a 
-				concatenation of their names, and I want to remove that line. Yep.
-				*/
-				document.getElementById(treeOb.name + "_" + clickedNode.name).remove()
-				addLine(newLon, newLat, treeOb.longitude, treeOb.latitude, treeOb.name + "_" + clickedNode.name, 'parentChild');
-				//Remove the parent node? Oh maybe to redraw it on top of the new line.
-				document.getElementById(num).remove()
-				addCircle(treeOb.longitude, treeOb.latitude, 2, num, treeOb.object);
-				//Remove the current node and redraw it where it's supposed to go.
-				document.getElementById(lastElementSelected.id).remove()
-				addCircle(newLon, newLat, 2, lastElementSelected.id, clickedNode.object);
-			}
-			if (treeOb.from !== undefined && treeOb.to !== undefined) {
-				// Move all lines from or to the clicked node.
-				if (treeOb.from == clickedNode.name || treeOb.to == clickedNode.name) {
-					// If the current object is a line connected to the current node, move it.
-					document.getElementById(num).remove()
-					let x1;
-					let y1;
-					let numf;
-					let myClassf;
-					let x2;
-					let y2;
-					let numt;
-					let myClasst;
-					for (let subEl in writeFeeder.tree) {
-						// Find the coordinates on the other end of the moving line.
-						if (treeOb.from == writeFeeder.tree[subEl].name) {
-							x1 = writeFeeder.tree[subEl]['longitude']
-							y1 = writeFeeder.tree[subEl]['latitude']
-							numf = subEl
-							myClassf = writeFeeder.tree[subEl].object
-						} else if (treeOb.to == writeFeeder.tree[subEl].name) {
-							x2 = writeFeeder.tree[subEl]['longitude']
-							y2 = writeFeeder.tree[subEl]['latitude']
-							numt = subEl
-							myClasst = writeFeeder.tree[subEl].object
-						}
-					}
-                    addLine(x1, y1, x2, y2, num, treeOb['object'] + ' p' + countPhases(treeOb['phases']));
-					// Redraw nodes after line so they aren't below the newly drawn lines. Up to 3 nodes for case where we are moving node between 2 from-to lines.
-					if (treeOb.from == clickedNode.name) {
-						addCircle(x2, y2, 2, numt, myClasst);
-						document.getElementById(numt).remove()
-					}
-					if (treeOb.to == clickedNode.name) {
-						addCircle(x1, y1, 2, numf, myClassf);
-						document.getElementById(numf).remove()
-					}
-					// Finally, draw the clicked node in its new location. Leave this bit here. Other moving functions go inside.
-					document.getElementById(lastElementSelected.id).remove()
-					addCircle(newLon, newLat, 2, lastElementSelected.id, writeFeeder.tree[lastElementSelected.id].object);
-				}
-			}
-		}
-	}
-	// Fix scaling of new objects.
-	scaleTo(scaleLevel)
-}
-
->>>>>>> master
 //**************************************************
 // Find modal interface
 //**************************************************
@@ -1651,9 +1521,11 @@ function getMatchingKeys(term, tree) {
  * TODO: add unit tests
  */
 function viewElement(key) {
-    emptySelected();
+    //emptySelected();
+    gSelection.empty();
     const element = document.getElementById(key);
-    addSelected(element);
+    //addSelected(element);
+    gSelection.add(element);
    let x, y;
     if (element.getAttribute("cx") != null && element.getAttribute("cy") != null) {
         x = element.getAttribute("cx");
@@ -1717,7 +1589,7 @@ function disableJQueryFunctionality() {
 //**************************************************
 
 function attachHandlers() {
-    addComponents();
+    attachAddComponentListeners();
     attachFeederList(document.getElementById("publicFeederList"), publicFeeders, "public");
     attachFeederList(document.getElementById("userFeederList"), userFeeders, thisOwner);
     addFileMenuHandlers();
@@ -1728,63 +1600,49 @@ function attachHandlers() {
  * TODO: add unit-tests, add a click listener instead of doing it backwards!
  * Fill menu of "Add" button and add its handler functions.
  */
-function addComponents() {
+function attachAddComponentListeners() {
 	const ul = document.getElementById("componentList");
     const select = document.getElementById("componentSelect");
-	for (let name in gComponents) {
+	for (const name in gComponents) {
 		const li = document.createElement("li");
 		li.textContent = name;
+        const tObject = createTreeObject(gComponents[name], gTreeWrapper);
 		li.addEventListener("click", function() {
-            const tObject = createTreeObject(gComponents[name], gTreeWrapper);
-            const tWrapper = getSelectedWrapper();
-            if (updateTreeObject(tObject, tWrapper)) {
-                const svg = createAddableSvgData(gTreeWrapper.insert(tObject));
-                svg.drawTo(gViewport);
-            } else {
-                alert(getSelectionErrorMessage(getType(tObject.data)));
+            const tWrapper = gSelection.getWrapper();
+            if (tWrapper.isValidForAdd(tObject.data)) {
+
+            } else if (keys.length === 0) {
+
             }
+
+            const keys = Object.keys(tWrapper.tree);
+            if (keys.length === 0) {
+                //add the proper event listener
+            } else if (tWrapper.isValidForAdd(getType(tObject.data))) {
+
+            } else {
+
+            }
+            /*
+            */
+
+
+            /* If the selection is valid for an add, then use the selection. If not, (look at notecards)*/
+
+            if (gSelection.isValidForAdd(tObject.data)) {
+
+            }
+
+            //if (updateTreeObject(tObject, tWrapper)) {
+            //    const svg = createAddableSvgData(gTreeWrapper.insert(tObject));
+            //    svg.drawTo(gViewport);
+            //} else {
+            //    alert(getSelectionErrorMessage(getType(tObject.data)));
+            //}
 		});
 		ul.appendChild(li);
         select.innerHTML += `<option value=${name}>${name}</option>`;
 	}
-}
-
-/**
- * TODO: add unit tests, get rid of TreeObject.update(), get rid of this entirely
- * Return true if the TreeObject argument was successfully updated based on the selected HTMLElements, otherwise return false.
- */
-function updateTreeObject(tObject, tWrapper) {
-    const keys = Object.keys(tWrapper.tree);
-    const type = getType(tObject.data);
-    switch (type) {
-        case "line":
-            if (keys.length === 2 && 
-                keys.every(key => {
-                    let objectType = getType(tWrapper.tree[key]);
-                    // Can only add a line between childNodes and/or independentNodes
-                    return objectType === "childNode" || objectType === "independentNode"
-                })
-            ) {
-                tObject.update({to: tWrapper.tree[keys[0]], from: tWrapper.tree[keys[1]]});
-                return true
-            }
-            break;
-        case "configurationNode":
-            break;
-        case "childNode":
-            if (keys.length === 1) {
-                const objectType = getType(tWrapper.tree[keys[0]]);
-                if (objectType === "childNode" || objectType === "independentNode") {
-                    // Can only add a childNode to another childNode or an independentNode
-                    tObject.update({parent: tWrapper.tree[keys[0]]});
-                    return true
-                }
-            } 
-            break;
-        case "independentNode":
-            break;
-    }
-    return false;
 }
 
 /**
@@ -2327,6 +2185,7 @@ function saveAttachment() {
 }
 
 //ADD PROMPT TO SAVE CHANGES BEFORE EXIT
+/*
 {% if is_admin or not public %}
 	window.onbeforeunload = function(e) {
 		let confirmationMessage = 'It looks like you have been editing something. ';
@@ -2334,6 +2193,7 @@ function saveAttachment() {
 		//if (unsavedChanges) return confirmationMessage;
 	};
 {% endif %}
+*/
 
 //**************************************************
 // File menu interface
@@ -2577,27 +2437,29 @@ ProgressModal.prototype.hide = function() {
     this.self.style.display = "none";
 }
 
+/**
+ * TODO: this should go at the top of the file
+ */
 //**************************************************
 // TreeWrapper interface
 //**************************************************
 
 const treeWrapperPrototype = {
 
-    /* "Public" TreeWrapper methods */
+    /* Public TreeWrapper methods */
 
     /** 
      * Return a TreeWrapper that represents which tree objects need to be redrawn as a result of inserting 
      * this TreeObject.
      * 
      * If the TreeObject.key does not exist in this TreeWrapper, the new TreeObject.key and new TreeObject.data are added to the
-     * TreeWrapper. If the TreeObject.key does exist in this TreeWrapper, the data at the existing key is overwritten.
-     * This is a public interface method, which means it should be used in event handlers and other places to do stuff.
-     * While this method will work for ANY TreeWrapper, it is intended to be used with the "gTreeWrapper" only.
-     * The gTreeWrapper encapsulates all the data of the model, which is what we want to work with.
+     * TreeWrapper. If the TreeObject.key does exist in this TreeWrapper, the data at the existing key is overwritten. This is a
+     * public method, which means it should be used in event handlers and other places to do stuff. While this method will work
+     * for ANY TreeWrapper, it is intended to be used with the "gTreeWrapper" only. The gTreeWrapper encapsulates all the data of
+     * the model, which is what we want to work with.
      * @param {TreeObject} treeObject - contains a key and some data that will be used to add or overwite
      * data inside of this TreeWrapper.
-     * @return {TreeWrapper} tWrapper - contains all of the tree objects that need to be redrawn as a result of 
-     * modifying the data.
+     * @return {TreeWrapper} - contains all of the tree objects that need to be redrawn as a result of modifying the data.
      */
      insert(treeObject) {
         this.tree[treeObject.key] = treeObject.data;
@@ -2627,13 +2489,11 @@ const treeWrapperPrototype = {
         const childKeys = Object.keys(this.getChildrenOf(key).tree);
         if (childKeys.length > 0) {
             throw new Error(`Cannot delete object with key "${key}" because it has existing children. Please delete the children first.`);
-            //console.log(`Cannot delete tree object with key "${key}" from the tree because it has existing children`);
             return tWrapper;
         }
         const lineKeys = Object.keys(this.getConnectedLinesOf(key).tree);
         if (lineKeys.length > 0) {
             throw new Error(`Cannot delete object with key "${key}" because it has connected lines. Please delete the connected lines first.`);
-            //console.log(`Cannot delete tree object with key "${key}" from the tree because it has connected lines`);
             return tWrapper;
         }
         tWrapper.add(key, this);
@@ -2665,7 +2525,131 @@ const treeWrapperPrototype = {
         return tWrapper;
     },
 
-    /* "Private" TreeWrapper methods */
+    /**
+     * TODO: do some sort of pre-scan to find an empty square in the graph to insert the configuration objects.
+     * Parse this TreeWrapper.tree and insert longitude and latitude properties if a non-line type object does not contain them.
+     * @param {number} initX - the longitude of the top left corner of the square.
+     * @param {number} initY - the latitude of the top left corner of the square.
+     * @param {number} spacing - how far apart the nodes should be spaced from one another
+     */
+    insertCoordinates(initX, initY, spacing) {
+        let keys = Object.keys(this.tree);
+        let gen = getCoordinates(initX, initY, spacing);
+        keys.forEach(key => {
+            let obj = this.tree[key];
+            if (getType(obj) !== "line" && (obj.longitude == null || obj.latitude == null)) {
+                let coords = gen.next().value;
+                obj.longitude = coords.longitude;
+                obj.latitude = coords.latitude;
+            }
+        });
+    },
+
+    /**
+     * Translate the 'longitude' and 'latitude' properties of all nodes in this TreeWrapper according
+     * to the arguments.
+     * 
+     * These x, y coordinate arguments are relative to the viewport, which means they have a minimum
+     * value of 0 and that the gOffsetX and gOffsetY must be added to them before they are real 
+     * coordinates to be stored in the tree.
+     * @param {number} x - an x coordinate relative to the viewport, usually created with a click on the screen.
+     * @param {number} y - a y coordinate relative to the viewport, usually created with a click on the screen.
+     * @param {number} offsetX - corresponds to gOffsetX, which is how much the gTreeWrapper is translated on 
+     * the x-axis to fit in the created viewport.
+     * @param {number} offsetY - corresponds to gOffsetY, which is how much the gTreeWrapper is translated on 
+     * the y-axis to fit in the created viewport.
+     */
+    move({x, y}, {offsetX, offsetY}) {
+        const allKeys = Object.keys(this.tree);
+        const nodeKeys = [];
+        let avgLon = 0;
+        let avgLat = 0;
+        for (let i = 0; i < allKeys.length; i++) {
+            if (getType(this.tree[allKeys[i]]) === "line") {
+                continue
+            }
+            nodeKeys.push(allKeys[i]);
+            avgLon += parseFloat(this.tree[allKeys[i]].longitude);
+            avgLat += parseFloat(this.tree[allKeys[i]].latitude);
+        }
+        if (nodeKeys.length === 0) {
+            return
+        }
+        avgLon /= nodeKeys.length;
+        avgLat /= nodeKeys.length;
+        nodeKeys.forEach(key => {
+            this.tree[key].longitude = parseFloat(this.tree[key].longitude) + offsetX + x - avgLon; 
+            this.tree[key].latitude = parseFloat(this.tree[key].latitude) + offsetY + y - avgLat;
+        });
+    },
+
+    /**
+     * Return true if this TreeWrapper can be moved, otherwise return false;
+     * @return {boolean}
+     */
+    isValidForMove() {
+        const objects = Object.values(this.tree);
+        if (objects.length === 0) {
+            return false
+        }
+        const names = this.getNamesOfTypes("line");
+        if (names.length !== 0) {
+            alert(`Lines cannot be moved. Please unselect the following lines: "` + names + `"`);
+            return false
+        }
+        return true
+    },
+
+    /**
+     * Return true if this TreeWrapper contains objects that can be added-to by the 'obj' argument, otherwise return false.
+     * @param {Object} obj - the object to add to the data, using every object in this TreeWrapper.
+     * @return {boolean}
+     */
+    isValidForAdd(obj) {
+        const objects = Object.values(this.tree);
+        if (objects.length === 0) {
+            return false
+        }
+        const type = getType(obj);
+        const names = this.getNamesOfTypes("line", "configurationNode");
+        switch (type) {
+            case "independentNode":
+            case "configurationNode":
+                alert(`This component cannot be added to another object. Please unselect all objects before adding this component again.`);
+                return false;
+            case "childNode":
+                if (names.length > 0 && obj.object !== "recorder") {
+                    alert(`This component cannot be added as a child of a line or a configuration node. Please unselect the following objects: "` + names + `" before adding this component again.`);
+                    return false;
+                }
+                return true;
+            case "line":
+                if (objects.length < 2) {
+                    alert("Please select at least 2 circles to add this line.");
+                    return false;
+                }
+                if (names.length > 0) {
+                    alert(`A line cannot be added to another line or a configuration node. Please unselect the following objects: "` + names + `" before adding this line again.`)
+                    return false;
+                }
+                return true;
+        }
+    },
+
+    /**
+     * TODO: add unit tests 
+     * @param {Array} types - the types of objects we want to select from this TreeWrapper.
+     * @return {string} - the names of objects with the specified types.
+     */
+    getNamesOfTypes(...types) {
+        return Object.values(this.tree).filter(obj => {
+            const type = getType(obj);
+            return types.includes(type);
+            //return type === "line" || type === "configurationNode"
+        }).map(obj => obj.name !== undefined ? obj.name : Object.values(obj)[0]).join(", ");
+    },
+
+    /* Private TreeWrapper methods */
 
     /** 
      * Add an object from the tWrapper argument into this TreeWrapper.
@@ -2674,6 +2658,7 @@ const treeWrapperPrototype = {
      */
     add(key, tWrapper) {
         if (!tWrapper.contains(key)) {
+            // TODO: I've seen a case where this gets triggerred because somehow the viewport is added to the TreeWrapper
             console.log(`Unable to add the desired tree object to this TreeWrapper. The tree object with the key: "${key}" does
             not exist in the source tWrapper argument.`)
             return;
@@ -2726,8 +2711,8 @@ const treeWrapperPrototype = {
     getConnectedLinesOf(key) {
         const tWrapper = createTreeWrapper();
         if (!this.contains(key)) {
-            console.log(`Unable to find lines that connect to this node with key: "${key}". The key does not exist in this
-            TreeWrapper.`);
+            //console.log(`Unable to find lines that connect to this node with key: "${key}". The key does not exist in this
+            //TreeWrapper.`);
             return tWrapper;
         } 
         const type = getType(this.tree[key]);
@@ -2773,7 +2758,8 @@ const treeWrapperPrototype = {
         }
     },
 
-    /** Return a TreeWrapper that contains all tree objects that will be deleted as a result of deleting the
+    /** 
+     * Return a TreeWrapper that contains all tree objects that will be deleted as a result of deleting the
      * tree object with the passed key argument.
      * 
      * @param {string} key - the key of the tree object for which to find its deletable subtree.
@@ -2830,7 +2816,8 @@ const treeWrapperPrototype = {
         return tWrapper;
     },
 
-    /** Return a TreeWrapper that contains only tree objects that are on the other ends of lines that connect
+    /** 
+     * Return a TreeWrapper that contains only tree objects that are on the other ends of lines that connect
      * to the tree object with the passed key argument.
      * 
      * @param {string} key - the tree object for which to search for its paired nodes. Nodes have a paired relationship
@@ -2845,18 +2832,21 @@ const treeWrapperPrototype = {
             //in this TreeWrapper`);
             return tWrapper;
         }
-        const linesTreeWrapper = this.getConnectedLinesOf(key);
-        for (let lineKey in linesTreeWrapper.tree) {
-            const fromKey = this.names[this.tree[lineKey].from];
-            const toKey = this.names[this.tree[lineKey].to];
-            if (key === fromKey) {
-                // The 'from' node points to this tree object, so we want the other tree object
-                tWrapper.add(toKey, this);
-            } else if (key === toKey) {
-                // The 'to' node points to this tree object, so we want the other tree object
-                tWrapper.add(fromKey, this);
-            } else {
-                throw new Error(`There was a problem finding a "from" or "to" node for line with key: "${lineKey}"`);
+        const type = getType(this.tree[key]);
+        if (type === "childNode" || type == "independentNode") {
+            const linesTreeWrapper = this.getConnectedLinesOf(key);
+            for (let lineKey in linesTreeWrapper.tree) {
+                const fromKey = this.names[this.tree[lineKey].from];
+                const toKey = this.names[this.tree[lineKey].to];
+                if (key === fromKey) {
+                    // The 'from' node points to this tree object, so we want the other tree object
+                    tWrapper.add(toKey, this);
+                } else if (key === toKey) {
+                    // The 'to' node points to this tree object, so we want the other tree object
+                    tWrapper.add(fromKey, this);
+                } else {
+                    throw new Error(`There was a problem finding a "from" or "to" node for line with key: "${lineKey}"`);
+                }
             }
         }
         return tWrapper;
@@ -2879,19 +2869,18 @@ const treeWrapperPrototype = {
         if (getType(this.tree[key]) === "line") {
             const fromKey = this.names[this.tree[key].from];
             const toKey = this.names[this.tree[key].to];
-            //const subWrapper = createTreeWrapper();
             if (fromKey == null) {
                 if (toKey == null) {
                     console.log(`Tree object with key: "${key}" has nonexistent "from" and "to" nodes.`);
                     return tWrapper;
                 } else {
                     console.log(`Tree object line with key: "${key}" has nonexistent "from" node.`);
-                    tWrapper.add(toKey, this);
+                    //tWrapper.add(toKey, this);
                     return tWrapper;
                 }
             } else if (toKey == null) {
                 console.log(`Tree object line with key: "${key}" has nonexistent "to" node.`);
-                tWrapper.add(fromKey, this);
+                //tWrapper.add(fromKey, this);
                 return tWrapper;
             } else {
                 tWrapper.add(fromKey, this);
@@ -2939,18 +2928,6 @@ const treeWrapperPrototype = {
         return true;
     },
 
-    ///** TODO: add unit tests
-    // * 
-    // */
-    //getKeyWithName(name) {
-    //    const key = this.names[name];
-    //    if (key == null) {
-    //        console.log(`The name "${name}" does not exist in this TreeWrapper.names`);
-    //        return null;
-    //    }
-    //    return key;
-    //},
-
     /** 
      * It would be nice if createTreeWrapper() could accept another treeWrapper. That way instead of rebuilding a new
      * names object for each treeWrapper I could (maybe) reuse the pre-existing names object in the TreeWrapper argument?
@@ -2967,26 +2944,6 @@ const treeWrapperPrototype = {
         });
         return nameKeyMap;
     },
-
-    /**
-     * TODO: do some sort of pre-scan to find an empty square in the graph to insert the configuration objects.
-     * Parse this TreeWrapper.tree and insert longitude and latitude properties if a non-line type object does not contain them.
-     * @param {number} initX - the longitude of the top left corner of the square.
-     * @param {number} initY - the latitude of the top left corner of the square.
-     * @param {number} spacing - how far apart the nodes should be spaced from one another
-     */
-    insertCoordinates(initX, initY, spacing) {
-        let keys = Object.keys(this.tree);
-        let gen = getCoordinatesGenerator(initX, initY, spacing);
-        keys.forEach(key => {
-            let obj = this.tree[key];
-            if (getType(obj) !== "line" && (obj.longitude == null || obj.latitude == null)) {
-                let coords = gen.next().value;
-                obj.longitude = coords.longitude;
-                obj.latitude = coords.latitude;
-            }
-        });
-    }
 };
 
 /** 
@@ -3062,31 +3019,37 @@ const addableSvgDataPrototype = {
 
     /**
      * Deletes lines and circles from the viewport if they exist, then draws all lines and circles on the viewport.
+     * 
+     * I know why elements lose their selected status. I'm removing old circles and adding completely new ones each time!
+     * The old circles/lines have coordinates that are no good. Would it be smart to modify them instead of always replacing them?
      * @param {HTMLElement} viewport - a viewport created by svg-pan-zoom.
      */
     drawTo(viewport) {
         this.lines.forEach(line => {
-            let e = document.getElementById(line.id);
-            if (e != null) {
-                e.parentNode.removeChild(e);
-                //viewport.removeChild(document.getElementById(line.id).parentNode.childNodes);
-                //document.getElementById(line.id).remove();
-            }
-            viewport.appendChild(line);
+            this.drawObject(line, viewport);
         });
         this.circles.forEach(circle => {
-            let e = document.getElementById(circle.id);
-            if (e != null) {
-                e.parentNode.removeChild(e);
-                //viewport.removeChild(document.getElementById(circle.id).parent);
-                //document.getElementById(circle.id).remove();
-            }
-            viewport.appendChild(circle);
+            this.drawObject(circle, viewport);
         });
         scaleTo(scaleLevel);
     },
 
     /* "Private" helper methods */
+
+    /**
+     * TODO: add unit tests
+     */
+    drawObject(obj, viewport) {
+        let e = document.getElementById(obj.id);
+        if (e != null) {
+            if (e.classList.contains("selected")) {
+                gSelection.remove(e);
+                gSelection.add(obj);
+            }
+            e.parentNode.removeChild(e);
+        } 
+        viewport.appendChild(obj);
+    },
 
     /** 
      * TOOD: add unit tests
@@ -3122,41 +3085,6 @@ const addableSvgDataPrototype = {
         const parentChildLine = createSvgLine(parent, this.treeWrapper.tree[key]);
         this.lines.push(parentChildLine);
     },
-
-    /**
-     * TODO: add unit tests, inject coordinates in a smart way if needed
-     */
-    addConfigurationNode(key, obj) {
-        if (obj.longitude == null || obj.latitude == null) {
-            // configuration algorithm
-            obj.longitude = 0;
-            obj.latitude = 0;
-        }
-        const circle = createSvgCircle(key, obj);
-        this.circles.push(circle);
-    },
-
-    /**
-     * TODO: add unit tests, inject coordinates if they don't exist based on the parent
-     */
-    addChildNode(key, obj) {
-        /* There are some weird config nodes that have "parent" but no "longitude" and "latitude" properties and the
-        interface breaks if I don't do this. */
-        //if (obj.longitude == null || obj.latitude == null) {
-        //    //this.addConfigurationNode(key);
-        //} else {
-        const circle = createSvgCircle(key, obj);
-        this.circles.push(circle);
-        //}
-    },
-
-    /**
-     * TODO: add unit tests, inject coordinates if they don't exist somehow
-     */
-    addIndependentNode(key, obj) {
-        const circle = createSvgCircle(key, obj);
-        this.circles.push(circle);
-    }
 };
 
 /** 
@@ -3177,20 +3105,25 @@ function createAddableSvgData(treeWrapper) {
     const tree = treeWrapper.tree;
     Object.keys(tree).forEach(key => {
         let type = getType(tree[key]);
-        if (type === "line") {
-            obj.addLine(key);
-        } else if (type === "configurationNode") {
-            obj.addConfigurationNode(key, tree[key]);
-        } else if (type === "childNode") {
-            obj.addChildNode(key, tree[key]);
-            obj.addParentChildLine(key);
-        } else if (type === "independentNode") {
-            obj.addIndependentNode(key, tree[key]);
-        } else {
-            console.log(`Failed to draw object type: "${tree[key].object}", name: "${tree[key].name}", key: "${key}"`);
+        switch (type) {
+            case "line":
+                obj.addLine(key);
+                break;
+            case "childNode":
+                obj.circles.push(createSvgCircle(key, tree[key]));
+                obj.addParentChildLine(key);
+                break;
+            case "configurationNode":
+                obj.circles.push(createSvgCircle(key, tree[key]));
+                break;
+            case "independentNode":
+                obj.circles.push(createSvgCircle(key, tree[key]));
+                break;
+            default:
+                console.log(`Failed to draw object type: "${tree[key].object}", name: "${tree[key].name}", key: "${key}"`);
         }
     });
-    return obj;
+    return obj
 }
 
 //**************************************************
@@ -3205,45 +3138,6 @@ function createAddableSvgData(treeWrapper) {
 
 /* Public utility methods */
 
-// Really need to test this to ensure that I remember to include gLonOffset and gLatOffset
-/**
- * This is currently broken
- */
-function moveNode(event) {
-    event.stopPropagation();
-    //document.getElementById("svgContainerWrapper").removeEventListener("click", moveNode, true);
-    document.getElementById("svgContainerWrapper").removeEventListener("mousedown", moveNode, true);
-    const coords = clickLatLon(event);
-    //that.tObject.data.longitude = coords.x;
-    that.tObject.data.longitude = coords.x + gLonOffset;
-    //that.tObject.data.latitude = coords.y;
-    that.tObject.data.latitude = coords.y + gLatOffset;
-    const subWrapper = that.tWrapper.insert(that.tObject);
-    createAddableSvgData(subWrapper).drawTo(gViewport);
-    element.setAttribute("style", "cursor: default");
-    // Update the table with the new coordinates
-    Array.from(that.tableBody.getElementsByTagName("input")).forEach(input => {
-        if (input.dataset.coordinate === "latitude") {
-            input.value = coords.y + gLatOffset;
-        } else if (input.dataset.coordinate === "longitude") {
-            input.value = coords.x + gLonOffset;
-        }
-    });
-}
-
-/**
- * TODO: add unit tests
- * Add a click listener to the svgContainerWrapper which is the direct parent of the svgContainer. The
- * svgContainerWrapper will intercept a click before it reaches the svgContainer and invoke moveNode().
- */
-function addMoveListener() {
-    const element = document.getElementById("svgContainerWrapper");
-    element.setAttribute("style", "cursor: crosshair");
-    //const that = this;
-    //element.addEventListener("click", moveNode, true);
-    element.addEventListener("mousedown", moveNode, true);
-}
-
 /**
  * Return the type of the object with regard to this interface.
  * 
@@ -3256,13 +3150,12 @@ function addMoveListener() {
 function getType(obj) {
     if (isLine(obj)) {
         return "line";
-    } else if (isConfigurationNode(obj)) {
-        return "configurationNode";
     } else if (isChildNode(obj)) {
         return "childNode";
-    } else {
-        return "independentNode"
+    } else if (isConfigurationNode(obj)) {
+        return "configurationNode";
     }
+    return "independentNode"
 }
 
 /** 
@@ -3307,7 +3200,7 @@ function keyIsStringAndValidNumber(key) {
  * @return {boolean}
  */
 function isChildNode(obj) {
-    return obj.parent != null;
+    return obj.parent !== undefined;
 }
 
 /**
@@ -3316,7 +3209,7 @@ function isChildNode(obj) {
  * @return {boolean}
  */
 function isLine(obj) {
-    return obj.from != null && obj.to != null;
+    return obj.from !== undefined && obj.to !== undefined;
 }
 
 /**
@@ -3325,31 +3218,10 @@ function isLine(obj) {
  * @return {boolean}
  */
 function isConfigurationNode(obj) {
-    if (obj.object == null || configObjectTypes.includes(obj.object)) {
+    if (obj.object == null || configurationTypes.includes(obj.object)) {
         return true;
     }
     return false;
-}
-
-/**
- * Configure the child object based on the property values of the parent object.
- * @param {Object} child
- * @param {Object} parent
- */
-function setupChildNode(child, parent) {
-    if (parent.name == null || parent.longitude == null || parent.latitude == null) {
-        throw new Error(`Cannot add a child to a parent with name "${parent.name}", longitude "${parent.longitude}", and
-        latitude ${parent.latitude}.`);
-    }
-    child.parent = parent.name;
-    const lonValue = Math.random() * 10; 
-    child.longitude = Math.random() < 0.5 ? parent.longitude + lonValue : parent.longitude - lonValue;
-    const latValue = Math.random() * 10;
-    child.latitude = Math.random() < 0.5 ? parent.latitude + latValue : parent.latitude - latValue;
-}
-
-function setupLine() {
-
 }
 
 /**
@@ -3359,9 +3231,9 @@ function setupLine() {
  * @param {number} initX - the longitude of the top left corner of the square.
  * @param {number} initY - the latitude of the top left corner of the square.
  * @param {number} spacing - how far apart to space a node from adjacent nodes in the square.
- * @return {Generator} 
+ * @return {Generator}
  */
-function * getCoordinatesGenerator(initX, initY, spacing) {
+function * getCoordinates(initX, initY, spacing) {
     yield {
         longitude: initX,
         latitude: initY
@@ -3388,9 +3260,6 @@ function * getCoordinatesGenerator(initX, initY, spacing) {
         }
     }
 }
-/*
-If generator is done (for a dimension), pass the next dimension to next() and keep calling!
-*/
 
 //**************************************************
 // SVG interface
@@ -3412,18 +3281,13 @@ function createSvgCircle(key, {longitude, latitude, object}, {r = 2, strokeWidth
 	circle.setAttribute('r', r);
     circle.setAttribute('stroke-width', strokeWidth);
     // Set coordinates and consider if they need to be translated
-    longitude = parseFloat(longitude);
-    latitude = parseFloat(latitude);
-    if (gLonOffset !== null) {
-        longitude -= gLonOffset;
-    }
-    if (gLatOffset !== null) {
-        latitude -= gLatOffset;
-    }
+    longitude = parseFloat(longitude) - gOffsetX;
+    latitude = parseFloat(latitude) - gOffsetY;
     circle.setAttribute('cx', longitude);
     circle.setAttribute('cy', latitude);
     return circle;
 }
+
 /** 
  * TODO: add unit tests
  * @return {Object} SvgLine - A fully configured svg line.
@@ -3441,18 +3305,10 @@ function createSvgLine(sourceNode, targetNode, key, thisObject) {
         //targetNode.latitudw was: "${targetNode.latitude}"`)
     }
     // Set coordinates and consider if they need to be translated
-    let sourceLon = parseFloat(sourceNode.longitude);
-    let sourceLat = parseFloat(sourceNode.latitude);
-    let targetLon = parseFloat(targetNode.longitude);
-    let targetLat = parseFloat(targetNode.latitude); 
-    if (gLonOffset !== null) {
-        sourceLon -= gLonOffset;
-        targetLon -= gLonOffset;
-    }
-    if (gLatOffset !== null) {
-        sourceLat -= gLatOffset;
-        targetLat -= gLatOffset;
-    }
+    let sourceLon = parseFloat(sourceNode.longitude) - gOffsetX;
+    let sourceLat = parseFloat(sourceNode.latitude) - gOffsetY;
+    let targetLon = parseFloat(targetNode.longitude) - gOffsetX;
+    let targetLat = parseFloat(targetNode.latitude) - gOffsetY; 
     svgLine.setAttribute("x1", sourceLon); 
     svgLine.setAttribute("x2", targetLon);
     svgLine.setAttribute("y1", sourceLat); 
@@ -3481,21 +3337,60 @@ function createSvgLine(sourceNode, targetNode, key, thisObject) {
 
 const treeObjectPrototype = {
 
-    /* "Public" interface methods.*/
+    /* Public TreeObject methods.*/
 
-    /** 
-     * TODO: add unit tests
+    /**
+     * Set the 'parent', 'longitude', and 'latitude' properties of this TreeObject.data based on the 'parent' argument.
+     * @param {Object} parent - the object to set as the parent of this child.
      */
-    update({parent=null, coords=null, to=null, from=null}) {
-        const type = getType(this.data);
-        if (type === "childNode") {
-            if (parent == null) {
-                throw new Error("A parent must be provided to configure a child node");
-            }
-            setupChildNode(this.data, parent);
-        } else if (type == "configurationNode") {
-
+    setupChildNode(parent) {
+        if (getType(this.data) !== "childNode") {
+            throw new Error("This TreeObject should have a type of 'childNode'.");
         }
+        if (getType(parent) !== "childNode" && getType(parent) !== "independentNode") {
+            throw new Error("The 'parent' argument should have a type of 'childNode', 'independentNode', or 'line'.");
+        }
+        if (parent.name == null || parent.longitude == null || parent.latitude == null) {
+            throw new Error("The 'parent' argument is missing properties.");
+        }
+        this.data.parent = parent.name;
+        const lonValue = (Math.random() * 5) + 5; 
+        this.data.longitude = Math.random() < 0.5 ? parent.longitude + lonValue : parent.longitude - lonValue;
+        const latValue = (Math.random() * 5) + 5;
+        this.data.latitude = Math.random() < 0.5 ? parent.latitude + latValue : parent.latitude - latValue;
+    },
+
+    /**
+     * Set the 'from', 'to', and 'phases' properties of this TreeObject.data based on the 'source' and 'target' arguments.
+     * @param {Object} source - the starting node of the line.
+     * @param {Object} target - the ending node of the line.
+     */
+    setupLine(source, target) {
+        if (getType(this.data) !== "line") {
+            throw new Error("This TreeObject should have a type of 'line'.");
+        }
+        const sType = getType(source);
+        if (sType !== "childNode" && sType !== "independentNode") {
+            throw new Error("The 'source' argument should have a type of 'childNode' or 'independentNode'.");
+        }
+        const tType = getType(target);
+        if (tType !== "childNode" && tType !== "independentNode") {
+            throw new Error("The 'target' argument should have a type of 'childNode' or 'independentNode'.");
+        }
+        if (source.name === undefined) {
+            throw new Error("The 'source' argument should have a 'name' property.");
+        }
+        if (target.name === undefined) {
+            throw new Error("The 'target' argument should have a 'name' property.");
+        }
+        if (source.phases === undefined) {
+            const name = source.name !== undefined ? source.name : Object.values(source)[0]; 
+            alert(`The source node of this line, "${name}", does not have a 'phases' property.`);
+        } else {
+            this.data.phases = source.phases;
+        }
+        this.data.from = source.name;
+        this.data.to = target.name;
     },
 
     /* "Private" helper methods */
@@ -3541,6 +3436,7 @@ function createTreeObject(input, treeWrapper) {
         throw new Error("treeWrapper argument must be an instance of TreeWrapper");
     }
     const tObject = Object.create(treeObjectPrototype);
+    //const tObject = {};
     if (typeof(input) === "string") {
         keyIsStringAndValidNumber(input); // I don't like this
         const obj = treeWrapper.tree[input];
@@ -3582,7 +3478,7 @@ Player is a configuration object. Recorder can have a parent, so it is NOT a con
 
 Apparently nodes can be children of lines.
 */
-const configObjectTypes = ["regulator_configuration", "transformer_configuration", "triplex_line_configuration", "line_configuration",
+const configurationTypes = ["regulator_configuration", "transformer_configuration", "triplex_line_configuration", "line_configuration",
 "volt_var_control", "line_spacing", "climate", "overhead_line_conductor", "underground_line_conductor", "triplex_line_conductor",
 "player"];
 
@@ -3705,6 +3601,31 @@ const buttonPrototype = {
     /* Private helper methods */
 
     /**
+     * TODO: add unit tests
+     */
+    attachButtonMoveListener() {
+        const element = document.getElementById("svgContainer");
+        element.setAttribute("style", "cursor: crosshair");
+        if (getType(this.tObject.data) === "line") {
+            alert("Lines cannot be moved directly.");    
+            return
+        }
+        const tWrapper = createTreeWrapper();
+        tWrapper.add(this.tObject.key, this.tWrapper);
+        const moveNode = getMoveNodesFunction(tWrapper, this.tableBody, this.tObject);
+        //element.addEventListener("click", moveNode);
+        element.onclick = moveNode;
+
+        /* A table only exists for an existing tree object. Therefore, I can use the key of the tObject of this button
+        to 1) create a new TreeWrapper consisting of just that object 2) move that TreeWrapper 3) get the subtree to
+        redraw referencing the gTreeWrapper.
+        This means that I'm moving the REAL tree object, and updating the TreeObject. If after the move I don't click save,
+        any modifications to the TreeObject won't be persisted to the tree object. This is unlike before, where I modified the
+        TreeObject AND inserted it.
+        */
+    },
+
+    /**
      * TODO: update unit tests
      * Delete the TreeObject of this button from the TreeWrapper of this button
      */
@@ -3759,8 +3680,7 @@ function createButton({action, tableBody=null, tObject=null, tWrapper=null}) {
     switch (action) {
         case "move":
             button.self.addEventListener("click", function() {
-                addMoveListener();
-                //button.addMoveListener();
+                button.attachButtonMoveListener();
             });
             break;
         case "delete":
@@ -3791,7 +3711,7 @@ const rowPrototype = {
 
     /**
      * Throw an error if arguments passed to createRow() were invalid.
-     * @param {Object} args - an object containing the arguments that were passed to createRow()
+     * @param {Object} args - an object containing the arguments that were passed to createRow().
      */
     validateArguments(args) {
         if (args.key != null && args.value != null && args.map != null) {
@@ -3968,13 +3888,12 @@ const rowPrototype = {
             delete this.map[this.key];
         } 
         if (this.element != null) {
-            removeSelected(this.element);
-            //document.getElementById(this.element).classList.remove("selected");
+            gSelection.remove(this.element);
             const table = document.getElementById(`descriptionTable_${this.element.id}`);
             if (table != null) {
                 document.getElementById("descriptionTables").removeChild(table);
             }
-            if (Object.keys(getSelectedWrapper().tree).length === 0) {
+            if (Object.keys(gSelection.getWrapper().tree).length === 0) {
                 destroyTables(["selectionTable"]);
             }
         }
@@ -4014,48 +3933,143 @@ function createRow({key, value=null, map=null, deletable=false}) {
 }
 
 //**************************************************
+// Event listeners
+//**************************************************
+
+/**
+ * TODO: add unit tests
+ */
+ function getMoveNodesFunction(tWrapper, tBody=null, tObject=null) {
+    if (Object.keys(tWrapper.tree).length > 1 && tBody != null) {
+        throw new Error("Cannot update a description table when multiple nodes have been selected to be moved.");
+    }
+    const moveNodes = function(event) {
+        event.stopPropagation();
+        const element = document.getElementById("svgContainer");
+        //element.removeEventListener("click", moveNodes);
+        element.onclick = null;
+        element.setAttribute("style", "cursor: default");
+        const coords = clickLatLon(event);
+        tWrapper.move(coords, {offsetX: gOffsetX, offsetY: gOffsetY});
+        // redraw here because we ALWAYS want to redraw after moving. If there was callback, would we want to do something else after moving? No.
+        // this will not go on forever. Object.keys() returns an array. That array doesn't change even though the tWrapper changes.
+        Object.keys(tWrapper.tree).forEach(key => {
+            tWrapper.merge(gTreeWrapper.getSubtreeToRedraw(key));
+        });
+        createAddableSvgData(tWrapper).drawTo(gViewport);
+        if (tObject != null) {
+            tObject.data.longitude = tWrapper.tree[tObject.key].longitude;
+            tObject.data.latitude = tWrapper.tree[tObject.key].latitude;
+        }
+        if (tBody != null) {
+            Array.from(tBody.getElementsByTagName("input")).forEach(input => {
+                if (input.dataset.coordinate === "latitude") {
+                    input.value = coords.y + gOffsetY;
+                } else if (input.dataset.coordinate === "longitude") {
+                    input.value = coords.x + gOffsetX;
+                }
+            });
+        }
+    };
+    return moveNodes
+}
+
+/*
+function attachAddListener() {
+    if (gSelection.isValidforAdd()) {
+
+    }
+}
+*/
+
+/**
+ * TODO: add unit tests
+ */
+ function attachMoveSelectionListener() {
+    if (gSelection.isValidForMove()) {
+        const element = document.getElementById("svgContainer");
+        element.setAttribute("style", "cursor: crosshair");
+        //destroyTables(["descriptionTables", "selectionTable"]);
+        destroyTables(["descriptionTables"]);
+        const moveNodes = getMoveNodesFunction(gSelection.getWrapper());
+        element.onclick = moveNodes;
+        //element.addEventListener("click", moveNodes);
+    }
+}
+
+function detachListener() {
+    const element = document.getElementById("svgContainer");
+    element.setAttribute("style", "cursor: default");
+    element.onclick = null;
+}
+
+//**************************************************
 // Initialization
 //**************************************************
 
 function attachMouseListeners() {
-    let downEvent;
-    document.getElementById("svgContainer").addEventListener("mousedown", function(event) {
-        downEvent = event;
+    document.getElementById("svgContainerWrapper").addEventListener("click", function(event) {
+        handleSelection(event);
     });
-    document.getElementById("svgContainer").addEventListener("mouseup", function(upEvent) {
-        svgClick(downEvent, upEvent);
+    document.getElementById("svgContainerWrapper").addEventListener("mousedown", function(event) {
+        gDownX = event.clientX;
+    });
+    document.getElementById("svgContainerWrapper").addEventListener("mouseup", function(event) {
+        gDownY = event.clientY;
     });
 }
 
+function attachKeyListener() {
+    document.body.addEventListener("keydown", function(event) {
+        //console.log(event.key);
+        switch (event.key) {
+            case "m":
+                attachMoveSelectionListener();
+                break;
+            case "-":
+                panZoom.zoomOut();
+                break;
+            case "=":
+                panZoom.zoomIn();
+                break;
+            case "Escape":
+                detachListener();
+                break;
+        }
+    });
+}
 
-//setTimeout(main,100)
-(() => {
-    //buildFeeder();
-    //const t0 = performance.now();
-
+function createInterface() {
     gTreeWrapper = createTreeWrapper(writeFeeder.tree);
-    gTreeWrapper.insertCoordinates(500, 0, 5);
-    //createViewport(writeFeeder.tree, document.getElementById("svgContainer"));
+    gTreeWrapper.insertCoordinates(0, 0, 5);
+    gSelection = createSelection();
     createViewport(gTreeWrapper, document.getElementById("svgContainer"));
     gViewport = document.getElementsByClassName('svg-pan-zoom_viewport')[0];
     const svg = createAddableSvgData(gTreeWrapper);
     svg.drawTo(gViewport);
+}
 
-    //document.getElementById("svgContainer").addEventListener("click", function(event) {
-    //    svgClick(event);
-    //});
-    attachMouseListeners();
-
-    attachHandlers();
-    // Interface setup
-    document.getElementById("searchInput").addEventListener("change", getSearchResults);
-    // jQuery
+function initializeJQuery() {
     if (window.jQuery != null) {
         applyJQueryStyles();
     } else {
         disableJQueryFunctionality();
     }
+}
+
+(function initialize() {
+    createInterface();
+    initializeJQuery();
+    attachMouseListeners();
+    attachKeyListener();
+    attachHandlers();
+    document.getElementById("searchInput").addEventListener("change", getSearchResults);
     document.getElementById('loadingMessage').style.display = 'none'
+})();
+
+    //buildFeeder();
+    //const t0 = performance.now();
+
     /* 
     const t1 = performance.now();
     const time = t1 - t0;
@@ -4068,7 +4082,6 @@ function attachMouseListeners() {
         deleteSvgData.deleteFrom(viewport);
     }, 2000);
     */
-})();
 
 //ADD PROMPT TO SAVE CHANGES BEFORE EXIT
 {% if showFileMenu %}
