@@ -20,6 +20,6 @@ def before_request():
 if __name__ == "__main__":
 	logging.basicConfig(filename='omf.log', level=logging.INFO)
 	# Start redirector:
-	redirProc = Popen(['gunicorn', '-w', '5', '-b', '0.0.0.0:80', 'webProdGunicorn:reApp'])
+	redirProc = Popen(['gunicorn', '-w', '5', '-b', '0.0.0.0:80', 'webProd:reApp'])
 	# Start application:
 	appProc = Popen(['gunicorn', '-w', '5', '-b', '0.0.0.0:443', '--certfile=omfDevCert.pem', '--keyfile=omfDevKey.pem', '--preload', 'web:app','--log-file','omf.error.log','--capture-output'])
