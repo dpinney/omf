@@ -18,9 +18,8 @@ def before_request():
 		return web.redirect(url, code=code)
 
 if __name__ == "__main__":
-	logging.basicConfig(filename='omf.log', level=logging.INFO)
 	# Start redirector:
 	redirProc = Popen(['gunicorn', '-w', '5', '-b', '0.0.0.0:80', 'webProd:reApp'])
 	# Start application:
-	appProc = Popen(['gunicorn', '-w', '5', '-b', '0.0.0.0:443', '--certfile=omfDevCert.pem', '--keyfile=omfDevKey.pem', '--preload', 'web:app', '--error-logfile','omf.error.log', '--capture-output', '--worker-class=gevent'])
+	appProc = Popen(['gunicorn', '-w', '5', '-b', '0.0.0.0:443', '--certfile=omfDevCert.pem', '--keyfile=omfDevKey.pem', '--preload', 'web:app','--worker-class=gevent', '--access-logfile', 'omf.access.log', '--error-logfile', 'omf.error.log', '--capture-output'])
 	appProc.wait()
