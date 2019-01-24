@@ -2917,33 +2917,121 @@ const treeWrapperPrototype = {
             //No tree object with key: "${key}" exists in this TreeWrapper.`);
             return false;
         }
-        const name = this.tree[key].name;
-        if (name == null) {
-            //console.log(`The tree object with the key: "${key}" does not have a 'name' property, therefore it isn't
-            //contained in the 'names' property of this TreeWrapper.`);
-        } else if (this.names[this.tree[key].name] == null) {
-            console.log(`The 'names' property of this TreeWrapper is missing an entry for tree object with key: "${key}",
-            name: "${this.tree[key].name}".`); 
-        }
+        //const name = this.tree[key].name;
+        //if (name == null) {
+        //    //console.log(`The tree object with the key: "${key}" does not have a 'name' property, therefore it isn't
+        //    //contained in the 'names' property of this TreeWrapper.`);
+        //} else if (this.names[this.tree[key].name] == null) {
+        //    console.log(`The 'names' property of this TreeWrapper is missing an entry for tree object with key: "${key}",
+        //    name: "${this.tree[key].name}".`); 
+        //}
         return true;
     },
 
-    /** 
-     * It would be nice if createTreeWrapper() could accept another treeWrapper. That way instead of rebuilding a new
-     * names object for each treeWrapper I could (maybe) reuse the pre-existing names object in the TreeWrapper argument?
-     * It's a micro-optimization I think.
+    /**
+     * Return an object that maps the name of every tree object to its key, if a tree object has a name.
+     * 
+     * This must run before I can build any other property. O(2n) is much better than O(n^2).
+     * @return {Object}
      */
-    buildNames() {
-        const nameKeyMap = {};
-        Object.keys(this.tree).forEach(key => {
-            const name = this.tree[key].name;
-            if (name != null) {
-                keyIsStringAndValidNumber(key);
-                nameKeyMap[name] = key;
-            }
-        });
-        return nameKeyMap;
+    mapNames() {
+        const map = {};
+        const keys = Object.keys(this.tree);
+        for (let i = 0; i < keys.length; i++) {
+            let name = this.tree[keys[i]].name;
+            if (name == null) continue;
+            let stringName = String(name).toLowerCase();
+            if (stringName === "null" || stringName === "undefined") continue;
+            map[name] = keys[i];
+        }
+        return map;
     },
+
+    /**
+     * Return an object that maps the key of every tree object to either 1) an array of child keys or 2) null
+     * if there are no children.
+     * @return {Object} 
+     */
+    buildChildren3() {
+        const children = {};
+        const keys = Object.keys(this.tree);
+        for (let i = 0; i < keys.length; i++) {
+            //if (children[keys[i]] === undefined) {
+            //    children[keys[i]] = null;
+            //} 
+            //let parentName = this.tree[keys[i]].parent;
+            //if (parentName === undefined) {
+            //    continue;
+            //}
+            //let parentKey;
+            //try {
+            //    parentKey = this.getKeyFromName(parentName);
+            //} catch (e) {
+            //    console.error(`The child object named "${this.tree[keys[i]].name}" has a non-existant parent object with the name "${parentName}".`);
+            //    continue;
+            //}
+            //if (children[parentKey] == null) {
+            //    children[parentKey] = [keys[i]];
+            //} else {
+            //    children[parentKey].push(keys[i]);
+            //}
+        }
+        return children;
+    },
+
+    /**
+     * If the parentName is null, that name will never be found in TreeWrapper.names, so an error will be thrown always.
+     */
+    mapChild(key) {
+        //call contains
+        let parentName = this.tree[key].parent;
+        if (parentName === undefined) {
+            return;
+        }
+        let parentKey;
+        try {
+            parentKey = this.getKeyFromName(parentName);
+        } catch (e) {
+            console.error(`The child object named "${this.tree[key].name}" has a non-existant parent object with the name "${parentName}".`);
+            return;
+        }
+        if (this.children[parentKey] == null) {
+            this.children[parentKey] = [key];
+        } else if (!this.children[parentKey].includes(key)) {
+            this.children[parentKey].push(key);
+        }
+    },
+
+    /**
+     * 
+     */
+    registerLine(key) {
+        let sourceName = this.tree[key].from;
+        let targetName = this.tree[key].to;
+        //if ()
+    },
+
+    /**
+     * Return the key of the object with a 'name' property value that matches the 'name' argument. If there is no such object,
+     * throw an error.
+     * @param {string} name - the name to search for.
+     * @return {string}
+     */
+    getKeyFromName(name) {
+        const key = this.names[name];
+        if (key === undefined) {
+            throw new Error(`The name "${name}" does not exist in this TreeWrapper.names.`);
+        }
+        return key
+    },
+
+    buildChildrenAndLines() {
+        const keys = Object.keys(this.tree);
+        for (let i = 0; i < keys.length; i++) {
+            mapChild(keys[i]);
+            buildLines(keys[i]);
+        }
+    }
 };
 
 /** 
@@ -2958,13 +3046,18 @@ const treeWrapperPrototype = {
  * to/from/parent node retrieval.
  */
 function createTreeWrapper(tree = {}) {
-    if (typeof(tree) !== "object" || Array.isArray(tree)) {
-        throw new Error("tree argument must be a JavaScript object");
-    }
-    const treeWrapper = Object.create(treeWrapperPrototype);
-    treeWrapper.tree = tree;
-    treeWrapper.names = treeWrapper.buildNames();
-    return treeWrapper;
+    Object.keys(tree).forEach(key => {
+        if (!isNumberString(key)) {
+            throw new Error(`The key "${key}" in the 'tree' argument cannot be parsed to a valid number.`);
+        }
+    });
+    const tWrapper = Object.create(treeWrapperPrototype);
+    tWrapper.tree = tree;
+    tWrapper.children = {};
+    tWrapper.lines = {};
+    tWrapper.names = tWrapper.mapNames();
+    //tWrapper.buildChildrenAndLines();
+    return tWrapper;
 }
 
 //**************************************************
@@ -3139,6 +3232,16 @@ function createAddableSvgData(treeWrapper) {
 /* Public utility methods */
 
 /**
+ * Return true if the string is a valid number, otherwise return false. Thanks stackoverflow.
+ * @param {string}
+ * @return {boolean}
+ */
+function isNumberString(str) {
+    if (typeof str !== "string" || /\s/.test(str)) return false;
+    return !isNaN(str) && !isNaN(parseFloat(str))
+}
+
+/**
  * Return the type of the object with regard to this interface.
  * 
  * This function is important because the order in which an object is checked matters. For example, an object
@@ -3180,6 +3283,24 @@ function getType(obj) {
     return JSON.parse(JSON.stringify(oldObject));
 }
 
+/**
+ * 
+ * This seems unncessary, but what if a user opens up their .omd file in a text program and messes up a key somewhere?
+ */
+function formatKey(key) {
+    if (!isFinite(key)) {
+
+    }
+
+    if (isNaN(parseFloat(key))) {
+        throw new Error("key argument must be a string that can be parsed to a valid number");
+    } 
+}
+
+function formatNumericString(string) {
+
+}
+
 /**  
  * TODO: add unit tests
  */
@@ -3189,6 +3310,15 @@ function keyIsStringAndValidNumber(key) {
     }
     if (isNaN(parseFloat(key))) {
         throw new Error("key argument must be a string that can be parsed to a valid number");
+    }
+}
+
+function formatKey(key) {
+    if (isNaN(parseFloat(key))) {
+        throw new Error(`The key ${key} is not a valid number.`);
+    }
+    if (typeof(key) !== "string") {
+        
     }
 }
 
