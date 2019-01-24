@@ -284,7 +284,6 @@ def regenOmfStats():
 		return redirect("/")
 	genImagesProc = Process(target=genAllImages, args=[])
 	genImagesProc.start()
-	genImagesProc.join()
 	return redirect("/omfStats")
 
 @app.route("/myaccount")

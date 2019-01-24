@@ -6,11 +6,11 @@ from os.path import join as pJoin
 from matplotlib import pyplot as plt
 from voltageDropVoltageViz import drawPlot
 
-volRegDir = os.path.dirname(os.path.dirname(__file__))
-FNAME = pJoin(volRegDir, 'UCS_Egan_Housed_Solar.omd')
+# volRegDir = os.path.dirname(os.path.dirname(__file__))
+# FNAME = pJoin(volRegDir, 'UCS_Egan_Housed_Solar.omd')
 
-# FNAME='/Users/tuomastalvitie/omf/omf/scratch/voltageRegulation/outGLM.glm'
-# FNAME = '/Users/tuomastalvitie/Desktop/UCS_Egan_Housed_Solar.omd'
+# FNAME='/Users/tuomastalvitie/omf/omf/scratch/voltageRegulation/outGLMtest.glm'
+FNAME = './outGLMtest.glm'
 
 # help(omf.feeder.parse)
 # feed = omf.feeder.parse(FNAME)

@@ -1,4 +1,5 @@
 from pyproj import Proj, transform
+import webbrowser
 
 # Source: https://github.com/fitnr/stateplane/blob/master/stateplane/dicts.py
 # These are NAD83 EPSG identifiers.
@@ -35,10 +36,11 @@ def dd2dms(dd):
 	return (d, m, sd)
 
 def dms2dd(degrees, minutes, seconds, direction):
-    dd = float(degrees) + float(minutes)/60 + float(seconds)/(60*60);
-    if direction == 'E' or direction == 'N':
-        dd *= -1
-    return dd;
+	'Degree/minute/second to decimal degrees'
+	dd = float(degrees) + float(minutes)/60 + float(seconds)/(60*60);
+	if direction == 'E' or direction == 'N':
+		dd *= -1
+	return dd;
 
 def decLatLonToLetter(lat, lon):
 	"Decimal lat lon to GridLAB-D's weird Degree/Minute/Second format."
@@ -69,12 +71,20 @@ def letterLatLonToDec(letLat, letLon):
 	lonDd = dms2dd(weird2dms(letLon, 'E', 'W'))
 	return (latDms, lonDd)
 
+def openInGoogleMaps(lat, lon):
+	"Open a browser to the (lat, lon) in Google Maps"
+	loc = 'https://www.google.com/maps/place/{}+{}/'.format(lat,lon)
+	webbrowser.open_new(loc)
+
 def _tests():
-	e, n = 1186.1488466689188, 249.2419752733258
-	lat, lon = statePlaneToLatLon(e, n, 26993)
-	e2, n2 = latLonToStatePlane(lat, lon)
-	print (e2, n2)
-	x = '32N24:12'
+	e, n = 249.2419752733258, 1186.1488466689188
+	lat, lon = statePlaneToLatLon(e, n, 2205)
+	print (lat, lon) #(37.37267827914456, -89.89482331256504)
+	e2, n2 = latLonToStatePlane(lat, lon, epsg=2205)
+	print (e2, n2) # (249.24197527189972, 1186.1488466408398)
+	letLat, letLon = decLatLonToLetter(lat, lon)
+	print (letLat, letLon) # ('37N22:21.6418049204', '89W53:41.3639252341')
+	# openInGoogleMaps(lat, lon)
 
 if __name__ == '__main__':
 	_tests()

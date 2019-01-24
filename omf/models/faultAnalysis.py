@@ -22,7 +22,7 @@ from dateutil.relativedelta import *
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = "The voltageDrop model runs loadflow to show system voltages at all nodes."
-hidden = True
+#hidden = True
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
@@ -62,6 +62,10 @@ def work(modelDir, inputDict):
 		customColormapValue = True
 	else:
 		customColormapValue = False
+	if inputDict.get("simTime", "") == "":
+		simTimeValue = '2000-01-01 0:00:00'
+	else:
+		simTimeValue = inputDict["simTime"]
 	# chart = voltPlot(omd, workDir=modelDir, neatoLayout=neato)
 	chart = drawPlotFault(
 		pJoin(modelDir,feederName + ".omd"),
@@ -74,7 +78,8 @@ def work(modelDir, inputDict):
 		faultLoc = inputDict["faultLoc"],
 		faultType = inputDict["faultType"],
 		rezSqIn = int(inputDict["rezSqIn"]),
-		simTime = '2000-01-01 0:00:00') #TODO: Wire in input from HTML
+		simTime = simTimeValue,
+		workDir = modelDir)
 	chart.savefig(pJoin(modelDir,"output.png"))
 	with open(pJoin(modelDir,"output.png"),"rb") as inFile:
 		outData["voltageDrop"] = inFile.read().encode("base64")
@@ -131,7 +136,7 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 	# HACK: set groupid for all meters so outage stats are collected.
 	noMeters = True
 	for key in tree:
-		if tree[key].get('object','') == 'meter':
+		if tree[key].get('object','') in ['meter', 'triplex_meter']:
 			tree[key]['groupid'] = "METERTEST"
 			noMeters = False
 	if noMeters:
@@ -578,7 +583,7 @@ def glmToModel(glmPath, modelDir):
 	# Remove old copy of the model.
 	shutil.rmtree(modelDir, ignore_errors=True)
 	# Create the model directory.
-	omf.models.voltageDrop.new(modelDir)
+	omf.models.voltageDrop.new(modelDir) 
 	# Create the .omd.
 	os.remove(modelDir + '/Olin Barre Geo.omd')
 	with open(modelDir + '/Olin Barre Geo.omd','w') as omdFile:
@@ -596,12 +601,13 @@ def new(modelDir):
 		"layoutAlgorithm": "geospatial",
 		"edgeCol" : "Current",
 		"nodeCol" : "Voltage",
-		"nodeLabs" : "Value",
-		"edgeLabs" : "Value",
-		"faultLoc" : "NEEDNAME",
+		"nodeLabs" : "None",
+		"edgeLabs" : "None",
+		"faultLoc" : "17720",
 		"faultType" : "SLG-A",
 		"customColormap" : "False",
-		"rezSqIn" : "225"
+		"rezSqIn" : "400",
+		"simTime" : '2000-01-01 0:00:00'
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
@@ -679,5 +685,5 @@ def _debugging():
 	renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	# _debugging()
-	_testingPlot()
+	_debugging()
+	# _testingPlot()

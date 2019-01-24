@@ -1,7 +1,5 @@
 import omf, os, web, logging
-from multiprocessing import Process
-from gevent.pywsgi import WSGIServer
-
+from subprocess import Popen
 
 # Note: sudo python webProd.py on macOS since this will open low numbered ports.
 # If you need some test certs: openssl req -x509 -newkey rsa:4096 -nodes -out omfDevCert.pem -keyout omfDevKey.pem -days 365 -subj '/CN=localhost/O=NoCompany/C=US'
@@ -20,10 +18,8 @@ def before_request():
 		return web.redirect(url, code=code)
 
 if __name__ == "__main__":
-	logging.basicConfig(filename='omf.log', level=logging.INFO)
 	# Start redirector:
-	reServer = WSGIServer(('0.0.0.0', 80), reApp)
-	Process(target=reServer.serve_forever).start()
+	redirProc = Popen(['gunicorn', '-w', '5', '-b', '0.0.0.0:80', 'webProd:reApp'])
 	# Start application:
-	server = WSGIServer(('0.0.0.0', 443), web.app, keyfile='omfDevKey.pem', certfile='omfDevCert.pem', log=web.app.logger)
-	Process(target=server.serve_forever).start()
+	appProc = Popen(['gunicorn', '-w', '5', '-b', '0.0.0.0:443', '--certfile=omfDevCert.pem', '--keyfile=omfDevKey.pem', '--preload', 'web:app','--worker-class=gevent', '--access-logfile', 'omf.access.log', '--error-logfile', 'omf.error.log', '--capture-output'])
+	appProc.wait()
