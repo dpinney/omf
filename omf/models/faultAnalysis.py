@@ -78,7 +78,8 @@ def work(modelDir, inputDict):
 		faultLoc = inputDict["faultLoc"],
 		faultType = inputDict["faultType"],
 		rezSqIn = int(inputDict["rezSqIn"]),
-		simTime = simTimeValue)
+		simTime = simTimeValue,
+		workDir = modelDir)
 	chart.savefig(pJoin(modelDir,"output.png"))
 	with open(pJoin(modelDir,"output.png"),"rb") as inFile:
 		outData["voltageDrop"] = inFile.read().encode("base64")
