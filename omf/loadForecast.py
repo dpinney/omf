@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 from os.path import join as pJoin
 from datetime import datetime as dt
+from datetime import timedelta
 
 # source: https://www.energygps.com/HomeTools/PowerCalendar
 nercHolidays = {
@@ -115,6 +116,11 @@ def pullWeeklyDayofHourForecast(rawData, startDate, modelDir):
 	time_model = svmNextDayPeakTime()
 	size_model = SVR(C = 10000, epsilon = 0.25, gamma = 0.0001)
 	forecasted_peak_time = list( time_model._cv_predict(df = df).hour_pred )
+	dates = list(daily_dti.to_pydatetime())
+	dates = dates[:len(forecasted_peak_time)]
+	for i in range(len(dates)):
+		dates[i] += timedelta(hours = forecasted_peak_time[i])
+	forecasted_peak_time = [date.isoformat() for date in dates]
 	forecasted_peak_demand = list( cross_val_predict(size_model, X = df[['tdy_peak_demand', 'tdy_temp', 'tmr_temp']], y = df.tmr_peak_demand, cv = 3) )
 	return (forecasted_peak_time, forecasted_peak_demand)
 

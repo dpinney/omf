@@ -35,11 +35,13 @@ def work(modelDir, inputDict):
 	for x in range(len(rawData)):
 		actual.append(float(rawData[x][0]))
 	(forecasted, MAE) = loadForecast.pullHourlyDayOfWeekForecast( rawData, float(inputDict["upBound"]), float(inputDict["lowBound"]) ) #uses a user entered limit for min/max of results
-	(hour_prediction, demand_prediction) = loadForecast.pullWeeklyDayofHourForecast
+	pred_demand = loadForecast.pullWeeklyDayofHourForecast( rawData, inputDict["simStartDate"], modelDir)
+	pred_demand = np.transpose(np.array(pred_demand)).tolist()
 	outData["startDate"] = inputDict["simStartDate"]
 	outData["actual"] = actual
 	outData["forecasted"] = forecasted
 	outData["MAE"] = MAE
+	outData["peakDemand"] = pred_demand
 	return outData
 
 def new(modelDir):
