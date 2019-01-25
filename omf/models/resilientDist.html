@@ -49,8 +49,8 @@
 	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
 	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
 	<script>modelStatus="{{modelStatus}}"</script>
-<!-- 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
- -->	<script type="text/javascript">
+	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
+	<script type="text/javascript">
 		function editFeeder(modelName, feederNum) {
 			console.log("modelName:",modelName)
 			studyUser = allInputData.user
