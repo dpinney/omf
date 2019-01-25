@@ -34,10 +34,8 @@ def work(modelDir, inputDict):
 	rawData = list(np.float_(rawData)) #converts all data from float to string
 	for x in range(len(rawData)):
 		actual.append(float(rawData[x][0]))
-	minInput = min(actual)*0.5
-	maxInput = max(actual)*1.5
-	# (forecasted, MAE) = loadForecast.pullHourlyDayOfWeekForecast(rawData,maxInput,minInput) #uncomment to use a 50% of min max training set limits
-	(forecasted, MAE) = loadForecast.pullHourlyDayOfWeekForecast(rawData,(inputDict["upBound"]),float(inputDict["lowBound"])) #uses a user entered limit for min/max of results
+	(forecasted, MAE) = loadForecast.pullHourlyDayOfWeekForecast( rawData, float(inputDict["upBound"]), float(inputDict["lowBound"]) ) #uses a user entered limit for min/max of results
+	(hour_prediction, demand_prediction) = loadForecast.pullWeeklyDayofHourForecast
 	outData["startDate"] = inputDict["simStartDate"]
 	outData["actual"] = actual
 	outData["forecasted"] = forecasted
