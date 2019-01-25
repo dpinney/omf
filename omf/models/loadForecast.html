@@ -139,16 +139,14 @@
 		<script>
 			var peakDemandData = [];
 			for (var i = 0; i < allOutputData.peakDemand.length; i++) {
-				allOutputData.peakDemand[i][0] = new Date(allOutputData.peakDemand[i][0]);
+				allOutputData.peakDemand[i][0] = new Date(allOutputData.peakDemand[i][0]).getTime();
 				allOutputData.peakDemand[i][1] = parseFloat(allOutputData.peakDemand[i][1]);
 			}
 			new Highcharts.Chart({"credits":{"enabled":false},
 					"plotOptions":{
 						"series":{
 							"animation":false,
-							"pointStart":Date.parse(allOutputData.startDate),
-							"shadow":false,
-							"pointInterval":3600000},
+							"shadow":false},
 						"line":{"marker":{"enabled":false}}},
 					"xAxis":{
 						"maxZoom":108000000,
@@ -163,8 +161,17 @@
 						"title":{"enabled":false},// "title":{"text":"Unit","style":{"color":"gray"}},
 					},
 					"series":[
-						{"name":"Actual Data (kW)","marker":{"enabled":false},"color":"black","data":allOutputData.actual, "type": "line"},
-						{"name":"Predicted Peaks (kW)","color":"red","data":allOutputData.peakDemand, "type": "scatter"}
+						{"name":"Actual Data (kW)",
+							"marker":{"enabled":false},
+							"color":"black",
+							"data":allOutputData.actual,
+							"type": "line",
+							"pointStart": Date.parse(allOutputData.startDate),
+							"pointInterval": 1000*60*60},
+						{"name":"Predicted Peaks (kW)",
+							"color":"red",
+							"data":allOutputData.peakDemand,
+							"type": "scatter"}
 					],
 					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"dataChart2","type":"line","marginRight":20, "height":500,"width":1000},
 					"tooltip":false,
