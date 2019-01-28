@@ -24,6 +24,11 @@
 				restoreInputs()
 				$("#modelName").prop("readonly", true)
 			}
+			if (allOutputData != null) {
+				if (allOutputData['oldVersion'] == true) {
+					document.getElementById("triangle-parent").style.visibility = "visible";
+				}
+			}
 			// Depending on status, show different things.
 			if (modelStatus == "finished") {
 				console.log("FINISHED")
@@ -60,6 +65,10 @@
 				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
 			</div>
 		</div>
+	</div>
+	<div id="triangle-parent">
+		<div id="triangle-message">New Model Version Available<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
+		<div id="triangle-topright"></div>
 	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
