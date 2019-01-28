@@ -78,9 +78,9 @@ def vbat24hr(ind, temp24):
 		return [list(i) for i in VB.HP(*variables).generate()] # heat pump
 	elif vbType == '3':
 		return [list(i) for i in VB.RG(*variables).generate()] # refrigerator
-	elif vbType == '4':
-		raise Exception('Water Heater testing not yet available')
-	'''
+	#elif vbType == '4':
+		#raise Exception('Water Heater testing not yet available')
+
 	elif vbType == '4':
 		ambient = np.array([[i]*60 for i in list(variables[0])]).reshape(24*60, 1)
 		variables[0] = ambient
@@ -88,8 +88,7 @@ def vbat24hr(ind, temp24):
 		file = pJoin(__neoMetaModel__._omfDir,'static','testFiles',"Flow_raw_1minute_BPA.csv")
 		water = np.genfromtxt(file, delimiter=',')
 		variables.append(water)
-		return [list(i) for i in VB.WH(*variables).generate()] # water heater
-	'''
+		return [list(i) for i in VB.WH24(*variables).generate()] # water heater
 
 def shouldDispatch(peak, month, df, conf, goal, deferral):
 	if goal != 'deferral':
@@ -144,6 +143,7 @@ def work(modelDir, ind):
 	# retrieve goal
 	goal = ind['goal']
 	threshold = float(ind['transformerThreshold'])*1000
+	confidence = float(ind['confidence'])/100
 
 	# train model on previous data
 	all_X = makeUsefulDf(df)
@@ -160,14 +160,14 @@ def work(modelDir, ind):
 	dailyLoadPredictions = [predictions[i:i+24] for i in range(0, len(predictions), 24)]	
 	weather = df['tempc'][-8760:]
 	dailyWeatherPredictions = [weather[i:i+24] for i in range(0, len(weather), 24)]
-	month = df['month'][-8760:]	
+	month = df['month'][-8760:]
 
 	dispatched = [False]*365
 	# decide to implement VBAT every day for a year
 	VB_power, VB_energy = [], []
 	for i, (load24, temp24, m) in enumerate(zip(dailyLoadPredictions, dailyWeatherPredictions, month)):
 		peak = max(load24)
-		if shouldDispatch(peak, m, df, float(ind['confidence'])/100, goal, threshold):
+		if shouldDispatch(peak, m, df, confidence, goal, threshold):
 			dispatched[i] = True
 			P_lower, P_upper, E_UL = vbat24hr(ind, temp24)
 			vbp, vbe = pulp24hr(ind, load24, P_lower, P_upper, E_UL)
@@ -178,7 +178,7 @@ def work(modelDir, ind):
 			VB_energy.extend([0]*24)
 
 	# -------------------- MODEL ACCURACY ANALYSIS -------------------------- #
-	
+
 	o['predictedLoad'] = list(clf.predict(X_test))
 	o['trainAccuracy'] = round(clf.score(X_train, y_train) * 100, 2)
 	o['testAccuracy'] = round(clf.score(X_test, y_test) * 100, 2)
@@ -198,6 +198,8 @@ def work(modelDir, ind):
 	falseNegative = len([b for b in [(not i) and j for (i, j) in zip(dispatched, shouldHaveDispatched)] if b])
 	o['precision'] = round(truePositive / float(truePositive + falsePositive) * 100, 2)
 	o['recall'] = round(truePositive / float(truePositive + falseNegative) * 100, 2)
+	o['number_of_dispatches'] = len([i for i in dispatched if i])
+	o['MAE'] = round(sum([abs(l-m)/m*100 for l, m in zip(predictions, list(y_test))])/8760., 2)
 
 	# ---------------------- FINANCIAL ANALYSIS ----------------------------- #
 
@@ -274,7 +276,7 @@ def new(modelDir):
 		"unitUpkeepCost":"5",
 		"historicalData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_17yr_TempAndLoad.csv")).read(),
 		"filename": "Texas_17yr_TempAndLoad.csv",
-		"goal": 'deferral', #"peakShave", # or 'deferral'
+		"goal": 'peakShave', #'deferral',
 		"transformerThreshold": "20",
 		"modelType": modelName
 	}
