@@ -116,17 +116,6 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 			elif outJson['htmlHash'] != currentHtmlHash or outJson['pythonHash'] != currentPythonHash:
 				print('render and mismatch')
 				outJson['oldVersion'] = True
-				#Renders the static old version of the saved template
-				with open(pJoin(modelDir,"inlineTemplate.html"), "r") as inlineTemplate:
-  					filedata = inlineTemplate.readlines()
-				with open(pJoin(modelDir,"inlineTemplate.html"), "w") as inlineTemplate:
-					for line in filedata:
-						inlineTemplate.write(line.replace('"oldVersion": false', '"oldVersion": true'))
-				oldTemplate = Template(io.open(pJoin(modelDir,'inlineTemplate.html'), "r", encoding="utf-8").read())
-				#Updates output json file to include the old version
-				with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
-					json.dump(outJson, outFile, indent=4)
-				return oldTemplate.render()
 			#If the hashes match, mark the model as up to date
 			else:	
 				print('render and maintained')
@@ -142,64 +131,6 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 		pathPrefix = _omfDir
 	else:
 		pathPrefix = ""
-	
-
-	#Save the rendered template. Still need css and js library imports
-	template.stream(modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
-		datastoreNames=datastoreNames, modelName=modelType, allInputDataDict=inJson, allOutputDataDict=outJson).dump(pJoin(modelDir,"baseTemplate.html"))
-	#Use regex to traverse the saved template and save the source files with model
-	#Fix the static file references to be local? - how will this interact with being served by webserver. Delete referece from file and reinsert?
-	'''
-	with open(pJoin(modelDir,"baseTemplate.html"), "r") as baseTemplate:
-		for line in baseTemplate:
-			#add backslash to regex between single and double quote
-			matchObj = re.match( r"(.*)/static(.+?)(['"])(.+?)", line, re.M|re.I)
-			if matchObj:
-				print ("matchObj.group() : " + "/static"+ matchObj.group(2))
-				sourceFile = open(_omfDir + "/static"+ matchObj.group(2)).read()
-				#copy the source .js, .css, or other file and create the static directroy if needed for saving
-				try:
-					filePath = modelDir + "/static"+ matchObj.group(2)
-					path, file = os.path.split(filePath)
-					if not os.path.exists(path):
-						 os.makedirs(path)
-					with open(filePath, "w") as newFile:
-						newFile.write(sourceFile) 
-				except IOError:
-					pass
-	'''
-	#Create a new template that contains external js and css inline 
-	with io.open(pJoin(modelDir,"baseTemplate.html"), "r", encoding='utf-8') as baseTemplate:
-		with io.open(pJoin(modelDir,'inlineTemplate.html'), 'w', encoding='utf-8') as inlineTemplate:
-			for line in baseTemplate:
-				#add backslash to regex between signle and double quote
-				matchObj = re.match( r"(.*)/static(.+?)(['\"])(.+?)", line, re.M|re.I)
-				scriptTags = re.match( r"(.*)<script(.*)static/(.*)</script>", line, re.M|re.I)
-				styleTags = re.match( r"(.*)<link(.*)stylesheet", line, re.M|re.I)
-				if scriptTags:
-					sourceFile = open(_omfDir + "/static"+ matchObj.group(2)).read()
-					with io.open(_omfDir + "/static"+ matchObj.group(2), 'r', encoding='utf-8') as yFile:
-						tempfile = yFile.readlines()
-					tmp = '<script>'+sourceFile+'</script>'
-					inlineTemplate.write(unicode('<script>'))
-					for i in tempfile:
-						try:
-							inlineTemplate.write(i)
-						except (UnicodeEncodeError):
-							print(i)
-					inlineTemplate.write(unicode('</script>'))
-				elif styleTags:
-					with io.open(_omfDir + "/static"+ matchObj.group(2), 'r', encoding='utf-8') as yFile:
-						tempfile = yFile.readlines()
-					inlineTemplate.write(unicode('<style>'))
-					for i in tempfile:
-						try:
-							inlineTemplate.write(i)
-						except (UnicodeEncodeError):
-							print(i)
-					inlineTemplate.write(unicode('</style>'))
-				else:
-					inlineTemplate.write(line)
 	return template.render(allInputData=allInputData, allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
 		datastoreNames=datastoreNames, modelName=modelType, allInputDataDict=inJson, allOutputDataDict=outJson)
 
