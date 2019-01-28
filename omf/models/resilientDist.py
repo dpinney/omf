@@ -4,6 +4,7 @@ import traceback
 import platform, re
 from os.path import join as pJoin
 from jinja2 import Template
+from numpy import interp
 from matplotlib import pyplot as plt
 import networkx as nx
 from omf.models import __neoMetaModel__
@@ -73,7 +74,18 @@ class HazardField(object):
 		''' Scale the cell size in image plot. '''
 		self.hazardObj["cellsize"] = cellSize
 
-	def drawHeatMap(self):
+	def mapValue(value, fromMin, fromMax, toMin=.7, toMax=1):
+		newValue = float(value - fromMind) / float(fromMax-fromMin)
+		return toMin + (newValue * (toMax-toMin))
+
+	def mapRanges(values, fromMin, fromMax):
+		newValues = []
+		for value in values:
+			newValues.append(mapValue(value, fromMin, fromMax))
+		return newValues
+
+
+	def drawHeatMap(self, isDamageField=False):
 		''' Draw heat map-color coded image map with user-defined boundaries and cell-size. '''
 		heatMap = plt.imshow(
 			self.hazardObj['field'],
@@ -284,6 +296,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 	return gfmJson
 
 def genDiagram(outputDir, feederJson, damageDict, critLoads):
+	print damageDict
 	warnings.filterwarnings("ignore")
 	# Load required data.
 	tree = feederJson.get("tree",{})

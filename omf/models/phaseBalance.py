@@ -1,4 +1,4 @@
-''' Graph the voltage drop on a feeder. '''
+''' Calculate phase unbalance and determine mitigation options. '''
 
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math, warnings
 import traceback
@@ -16,13 +16,10 @@ plt.switch_backend('Agg')
 import omf.feeder as feeder
 from omf.solvers import gridlabd
 
-# dateutil imports
-from dateutil import parser
-from dateutil.relativedelta import *
 # Model metadata:
 modelName, template = metadata(__file__)
-tooltip = "The voltageDrop model runs loadflow to show system voltages at all nodes."
-#hidden = True
+tooltip = "Calculate phase unbalance and determine mitigation options."
+hidden = True
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
@@ -37,7 +34,7 @@ def work(modelDir, inputDict):
 		neato = False
 	else:
 		neato = True
-	# None check for edgeCol
+	# None cheack for edgeCol
 	if inputDict.get("edgeCol", "None") == "None":
 		edgeColValue = None
 	else:
@@ -62,12 +59,8 @@ def work(modelDir, inputDict):
 		customColormapValue = True
 	else:
 		customColormapValue = False
-	if inputDict.get("simTime", "") == "":
-		simTimeValue = '2000-01-01 0:00:00'
-	else:
-		simTimeValue = inputDict["simTime"]
 	# chart = voltPlot(omd, workDir=modelDir, neatoLayout=neato)
-	chart = drawPlotFault(
+	chart = drawPlot(
 		pJoin(modelDir,feederName + ".omd"),
 		neatoLayout = neato,
 		edgeCol = edgeColValue,
@@ -75,17 +68,13 @@ def work(modelDir, inputDict):
 		nodeLabs = nodeLabsValue,
 		edgeLabs = edgeLabsValue,
 		customColormap = customColormapValue,
-		faultLoc = inputDict["faultLoc"],
-		faultType = inputDict["faultType"],
-		rezSqIn = int(inputDict["rezSqIn"]),
-		simTime = simTimeValue,
-		workDir = modelDir)
+		rezSqIn = int(inputDict["rezSqIn"]))
 	chart.savefig(pJoin(modelDir,"output.png"))
 	with open(pJoin(modelDir,"output.png"),"rb") as inFile:
 		outData["voltageDrop"] = inFile.read().encode("base64")
 	return outData
-
-def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, faultLoc=None, faultType=None, customColormap=False, rezSqIn=400, simTime='2000-01-01 0:00:00'):
+#Optional gldBinary parameter added
+def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, customColormap=False, rezSqIn=400, gldBinary=None):
 	''' Draw a color-coded map of the voltage drop on a feeder.
 	path is the full path to the GridLAB-D .glm file or OMF .omd file.
 	workDir is where GridLAB-D will run, if it's None then a temp dir is used.
@@ -95,7 +84,6 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 	edgeLabs and nodeLabs properties must be either 'Name', 'Value', or None
 	edgeCol and nodeCol can be set to false to avoid coloring edges or nodes
 	customColormap=True means use a one that is nicely scaled to perunit values highlighting extremes.
-	faultType and faultLoc are the type of fault and the name of the line that it occurs on.
 	Returns a matplotlib object.'''
 	# Be quiet matplotlib:
 	warnings.filterwarnings("ignore")
@@ -108,39 +96,6 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 		attachments = omd.get('attachments',[])
 	else:
 		raise Exception('Invalid input file type. We require a .glm or .omd.')
-
-	# add fault object to tree
-	def safeInt(x):
-		try: return int(x)
-		except: return 0
-	biggestKey = max([safeInt(x) for x in tree.keys()])
-	# Add Reliability module
-	tree[str(biggestKey*10)] = {"module":"reliability","maximum_event_length":"18000","report_event_log":"true"}
-	CLOCK_START = simTime
-	dt_start = parser.parse(CLOCK_START)
-	dt_end = dt_start + relativedelta(seconds=+20)
-	CLOCK_END = str(dt_end)
-	CLOCK_RANGE = CLOCK_START + ',' + CLOCK_END
-	# Add eventgen object (the fault)
-	tree[str(biggestKey*10 + 1)] = {"object":"eventgen","name":"ManualEventGen","parent":"RelMetrics", "fault_type":faultType, "manual_outages":faultLoc + ',' + CLOCK_RANGE} # TODO: change CLOCK_RANGE to read the actual start and stop time, not just hard-coded
-	# Add fault_check object
-	tree[str(biggestKey*10 + 2)] = {"object":"fault_check","name":"test_fault","check_mode":"ONCHANGE", "eventgen_object":"ManualEventGen", "output_filename":"Fault_check_out.txt"}
-	# Add reliabilty metrics object
-	tree[str(biggestKey*10 + 3)] = {"object":"metrics", "name":"RelMetrics", "report_file":"Metrics_Output.csv", "module_metrics_object":"PwrMetrics", "metrics_of_interest":'"SAIFI,SAIDI,CAIDI,ASAI,MAIFI"', "customer_group":'"groupid=METERTEST"', "metric_interval":"5 h", "report_interval":"5 h"}
-	# Add power_metrics object
-	tree[str(biggestKey*10 + 4)] = {"object":"power_metrics","name":"PwrMetrics","base_time_value":"1 h"}
-	for key in tree:
-		if 'clock' in tree[key]:
-			tree[key]['starttime'] = "'" + CLOCK_START + "'"
-			tree[key]['stoptime'] = "'" + CLOCK_END + "'"
-	# HACK: set groupid for all meters so outage stats are collected.
-	noMeters = True
-	for key in tree:
-		if tree[key].get('object','') in ['meter', 'triplex_meter']:
-			tree[key]['groupid'] = "METERTEST"
-			noMeters = False
-	if noMeters:
-		raise Exception("No meters detected on the circuit. Please add at least one meter to allow for collection of outage statistics.")
 	# dictionary to hold info on lines present in glm
 	edge_bools = dict.fromkeys(['underground_line','overhead_line','triplex_line','transformer','regulator', 'fuse', 'switch'], False)
 	# Map to speed up name lookups.
@@ -164,9 +119,13 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 			edge_bools['switch'] = True
 		if tree[key].get("argument","") == "\"schedules.glm\"" or tree[key].get("tmyfile","") != "":
 			del tree[key]
-	# Make sure we have a voltage dump and current dump:
-	tree[str(biggestKey*10 + 5)] = {"object":"voltdump","filename":"voltDump.csv"}
-	tree[str(biggestKey*10 + 6)] = {"object":"currdump","filename":"currDump.csv"}
+	# Make sure we have a voltDump:
+	def safeInt(x):
+		try: return int(x)
+		except: return 0
+	biggestKey = max([safeInt(x) for x in tree.keys()])
+	tree[str(biggestKey*10)] = {"object":"voltdump","filename":"voltDump.csv"}
+	tree[str(biggestKey*10 + 1)] = {"object":"currdump","filename":"currDump.csv"}
 	# Line rating dumps
 	tree[omf.feeder.getMaxKey(tree) + 1] = {
 		'module': 'tape'
@@ -176,14 +135,15 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 			tree[omf.feeder.getMaxKey(tree) + 1] = {
 				'object':'group_recorder', 
 				'group':'"class='+key+'"',
+				'limit':1,
 				'property':'continuous_rating',
 				'file':key+'_cont_rating.csv'
 			}
 	# Run Gridlab.
 	if not workDir:
 		workDir = tempfile.mkdtemp()
-		print '@@@@@@', workDir
-	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
+		# print '@@@@@@', workDir
+	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir, gldBinary=gldBinary)
 	# read voltDump values into a dictionary.
 	try:
 		dumpFile = open(pJoin(workDir,'voltDump.csv'),'r')
@@ -244,8 +204,7 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 		return math.ceil(math.log10(x+1))
 	def avg(l):
 		''' Average of a list of ints or floats. '''
-		# HACK: add a small value to the denominator to avoid divide by zero for out of service locations (i.e. zero voltage).
-		return sum(l)/(len(l) + 0.00000000000000001)
+		return sum(l)/len(l)
 	# Detect the feeder nominal voltage:
 	for key in tree:
 		ob = tree[key]
@@ -483,115 +442,6 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 		plt.colorbar()
 	return voltChart
 
-def voltPlot(omd, workDir=None, neatoLayout=False):
-	''' Draw a color-coded map of the voltage drop on a feeder.
-	Returns a matplotlib object. '''
-	tree = omd.get('tree',{})
-	# # Get rid of schedules and climate:
-	for key in tree.keys():
-		if tree[key].get("argument","") == "\"schedules.glm\"" or tree[key].get("tmyfile","") != "":
-			del tree[key]
-	# Map to speed up name lookups.
-	nameToIndex = {tree[key].get('name',''):key for key in tree.keys()}
-	# Make sure we have a voltDump:
-	def safeInt(x):
-		try: return int(x)
-		except: return 0
-	biggestKey = max([safeInt(x) for x in tree.keys()])
-	tree[str(biggestKey*10)] = {"object":"voltdump","filename":"voltDump.csv"}
-	# Run Gridlab.
-	if not workDir:
-		workDir = tempfile.mkdtemp()
-	gridlabOut = gridlabd.runInFilesystem(tree, attachments=omd.get('attachments',{}), workDir=workDir)
-	with open(pJoin(workDir,'voltDump.csv'),'r') as dumpFile:
-		reader = csv.reader(dumpFile)
-		reader.next() # Burn the header.
-		keys = reader.next()
-		voltTable = []
-		for row in reader:
-			rowDict = {}
-			for pos,key in enumerate(keys):
-				rowDict[key] = row[pos]
-			voltTable.append(rowDict)
-	# Calculate average node voltage deviation. First, helper functions.
-	def digits(x):
-		''' Returns number of digits before the decimal in the float x. '''
-		return math.ceil(math.log10(x+1))
-	def avg(l):
-		''' Average of a list of ints or floats. '''
-		return sum(l)/len(l)
-	# Use the swing bus voltage as a reasonable default voltage.
-	for key in tree:
-		ob = tree[key]
-		if type(ob)==dict and ob.get('bustype','')=='SWING':
-			swingVoltage = float(ob.get('nominal_voltage',1))
-	# Tot it all up.
-	nodeVolts = {}
-	for row in voltTable:
-		allVolts = []
-		for phase in ['A','B','C']:
-			realV = float(row['volt'+phase+'_real'])
-			imagV = float(row['volt'+phase+'_imag'])
-			phaseVolt = math.hypot(realV, imagV)
-			if phaseVolt != 0.0:
-				if digits(phaseVolt)>3:
-					nodeName = row.get('node_name','')
-					treeKey = nameToIndex.get(nodeName, 0)
-					nodeObj = tree.get(treeKey, {})
-					try:
-						nominal_voltage = float(nodeObj['nominal_voltage'])
-					except:
-						nominal_voltage = swingVoltage
-					# Normalize to 120 V standard
-					phaseVolt = phaseVolt*(120/nominal_voltage)
-				allVolts.append(phaseVolt)
-		# Hack: average across phases.
-		nodeVolts[row.get('node_name','')] = avg(allVolts)
-	# Color nodes by VOLTAGE.
-	fGraph = feeder.treeToNxGraph(tree)
-	voltChart = plt.figure(figsize=(20,20))
-	plt.axes(frameon = 0)
-	plt.axis('off')
-	plt.tight_layout()
-	#set axes step equal
-	voltChart.gca().set_aspect('equal')
-	if neatoLayout:
-		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
-		cleanG = nx.Graph(fGraph.edges())
-		cleanG.add_nodes_from(fGraph)
-		positions = graphviz_layout(cleanG, prog='neato')
-	else:
-		positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
-	edgeIm = nx.draw_networkx_edges(fGraph, positions)
-	nodeIm = nx.draw_networkx_nodes(
-		fGraph,
-		pos = positions,
-		node_color = [nodeVolts.get(n,0) for n in fGraph.nodes()],
-		linewidths = 0,
-		node_size = 30,
-		cmap = plt.cm.viridis
-	)
-	plt.sci(nodeIm)
-	plt.clim(110,130)
-	plt.colorbar(orientation='horizontal', fraction=0.05)
-	return voltChart
-
-def glmToModel(glmPath, modelDir):
-	''' One shot model creation from glm. '''
-	tree = omf.feeder.parse(glmPath)
-	# Run powerflow. First name the folder for it.
-	# Remove old copy of the model.
-	shutil.rmtree(modelDir, ignore_errors=True)
-	# Create the model directory.
-	omf.models.voltageDrop.new(modelDir) 
-	# Create the .omd.
-	os.remove(modelDir + '/Olin Barre Geo.omd')
-	with open(modelDir + '/Olin Barre Geo.omd','w') as omdFile:
-		omd = dict(omf.feeder.newFeederWireframe)
-		omd['tree'] = tree
-		json.dump(omd, omdFile, indent=4)
-
-# TODO: Need name of default line to produce fault on!!!
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
@@ -599,15 +449,12 @@ def new(modelDir):
 		"modelType": modelName,
 		"runTime": "",
 		"layoutAlgorithm": "geospatial",
-		"edgeCol" : "Current",
+		"edgeCol" : "None",
 		"nodeCol" : "Voltage",
 		"nodeLabs" : "None",
 		"edgeLabs" : "None",
-		"faultLoc" : "17720",
-		"faultType" : "SLG-A",
 		"customColormap" : "False",
-		"rezSqIn" : "400",
-		"simTime" : '2000-01-01 0:00:00'
+		"rezSqIn" : "225"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
@@ -616,53 +463,18 @@ def new(modelDir):
 		return False
 	return creationCode
 
-# Testing for variable combinations
-# TODO: Add additional values for drawPlotFault (currently testing drawPlot)
-def _testAllVarCombos():
-	edgeColsList = {None : "None", "Current" : "C", "Power" : "P", "Rating" : "R", "PercentOfRating" : "Per"}
-	nodeColsList = {None : "None", "Voltage" : "V", "VoltageImbalance" : "VI", "perUnitVoltage" : "PUV", "perUnit120Voltage" : "PUV120"}
-	labsList = {None : "None", "Name" : "N", "Value" : "Val"}
-	boolList = {True : "T", False : "F"}
-	testNum = 1
-	for edgeColVal in edgeColsList.keys():
-		for nodeColVal in nodeColsList.keys():
-			for edgeLabVal in labsList.keys():
-				for nodeLabVal in labsList.keys():
-					for customColormapVal in boolList.keys():
-						testName = edgeColsList.get(edgeColVal) + "_" + nodeColsList.get(nodeColVal) + "_" + labsList.get(edgelabVal) + "_" + labsList.get(nodelabVal) + "_" + boolList.get(customColormapVal)
-						#print testName
-						pngName = "./drawPlotTest/drawPlot_" + testName + ".png"
-						for i in range(10):
-							try:
-								chart = drawPlot(FNAME, neatoLayout=True, edgeLabs=edgeLabVal, nodeLabs=nodeLabVal, edgeCol=edgeColVal, nodeCol=nodeColVal, customColormap=customColormapVal)
-							except IOError, e:
-								if e.errno == 2: #catch temporary IOError and retry until it passes
-									print "IOError [Errno 2] for drawPlot_" + testName + ". Retrying..."
-									continue #retry
-							except:
-								print "!!!!!!!!!!!!!!!!!! Error for drawPlot_" + testName + " !!!!!!!!!!!!!!!!!!"
-								pass
-							else:
-								chart.savefig(pngName)
-								break
-						else:
-							print "****************** Couldn't run drawPlot_" + testName + " ******************"
-						print "Test " + testNum + " of 384 completed." #384 total combinations based on current variable sets
-						testNum += 1
-
 def _testingPlot():
 	PREFIX = omf.omfDir + '/scratch/CIGAR/'
 	# FNAME = 'test_base_R4-25.00-1.glm_CLEAN.glm'
-	# FNAME = 'test_Exercise_4_2_1.glm'
+	FNAME = 'test_Exercise_4_2_1.glm'
 	# FNAME = 'test_ieee37node.glm'
-	FNAME = 'test_ieee37nodeFaultTester.glm'
 	# FNAME = 'test_ieee123nodeBetter.glm'
 	# FNAME = 'test_large-R5-35.00-1.glm_CLEAN.glm'
 	# FNAME = 'test_medium-R4-12.47-1.glm_CLEAN.glm'
 	# FNAME = 'test_smsSingle.glm'
 	# Hack: Agg backend doesn't work for interactivity. Switch to something we can use:
 	# plt.switch_backend('MacOSX')
-	chart = drawPlotFault(PREFIX + FNAME, neatoLayout=True, edgeCol="Current", nodeCol=None, nodeLabs="Name", edgeLabs=None, faultLoc="node713-704", faultType="TLG", customColormap=False, rezSqIn=225, simTime='2000-01-01 0:00:00')
+	chart = drawPlot(PREFIX + FNAME, neatoLayout=True, edgeCol="PercentOfRating", nodeCol="perUnitVoltage", nodeLabs="Value", edgeLabs="Name", customColormap=True, rezSqIn=225)
 	chart.savefig(PREFIX + "YO_WHATS_GOING_ON.png")
 	# plt.show()
 

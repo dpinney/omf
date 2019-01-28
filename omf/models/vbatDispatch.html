@@ -14,8 +14,8 @@
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<!-- Data  Imports -->
-	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
-	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
+	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
+	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 </head>
@@ -27,6 +27,10 @@
 				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
 			</div>
 		</div>
+	</div>
+	<div id="triangle-parent">
+		<div id="triangle-message">New Model Version Available<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
+		<div id="triangle-topright"></div>
 	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
