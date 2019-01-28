@@ -1,6 +1,6 @@
 """ Common functions for all models """
 
-import json, os, sys, tempfile, webbrowser, math, shutil, datetime, omf, multiprocessing, traceback
+import json, os, sys, tempfile, webbrowser, math, shutil, datetime, omf, multiprocessing, traceback, hashlib, traceback, re, io
 from jinja2 import Template
 from os.path import join as pJoin
 from os.path import split as pSplit
@@ -29,6 +29,7 @@ def heavyProcessing(modelDir):
 		except Exception, e: pass
 		# Get the function and run it.
 		work = getattr(omf.models, inputDict['modelType']).work
+		#This grabs the new outData model
 		outData = work(modelDir, inputDict)
 	except:
 		# If input range wasn't valid delete output, write error to disk.
@@ -43,6 +44,15 @@ def heavyProcessing(modelDir):
 		endTime = datetime.datetime.now()
 		inputDict["runTime"] = str(datetime.timedelta(seconds=int((endTime - startTime).total_seconds())))
 		# Write output.
+		modelType = inputDict["modelType"]
+		#Get current file hashes and dd to the output
+		htmlFile = open(pJoin(_myDir, modelType+".html"),"r").read()
+		currentHtmlHash = hashlib.sha256(htmlFile).hexdigest()
+		pythonFile = open(pJoin(_myDir, modelType+".py"),"r").read()
+		currentPythonHash = hashlib.sha256(pythonFile).hexdigest()
+		outData['htmlHash'] = currentHtmlHash
+		outData['pythonHash'] = currentPythonHash
+		outData['oldVersion'] = False
 		with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
 			json.dump(outData, outFile, indent=4)
 	finally:
@@ -84,12 +94,50 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 		modelType = inJson["modelType"]
 		template = getattr(omf.models, modelType).template
 		allInputData = json.dumps(inJson)
+		#Get hashes for model python and html files 
+		htmlFile = open(pJoin(_myDir, modelType+".html"),"r").read()
+		currentHtmlHash = hashlib.sha256(htmlFile).hexdigest()
+		pythonFile = open(pJoin(_myDir, modelType+".py"),"r").read()
+		currentPythonHash = hashlib.sha256(pythonFile).hexdigest()
 	except IOError:
 		allInputData = None
 		inJson = None
 	try:
 		allOutputData = open(pJoin(modelDir,"allOutputData.json")).read()
 		outJson = json.load(open(pJoin(modelDir,"allOutputData.json")))
+		try:
+			#Needed? Should this be handled a different way? Add hashes to the output if they are not yet present
+			if ('pythonHash' not in outJson) or ('htmlHash' not in outJson):
+				print('new model')
+				outJson['htmlHash'] = currentHtmlHash
+				outJson['pythonHash'] = currentPythonHash
+				outJson['oldVersion'] = False
+			#If the hashes do not match, mark the model as an old version
+			elif outJson['htmlHash'] != currentHtmlHash or outJson['pythonHash'] != currentPythonHash:
+				print('render and mismatch')
+				outJson['oldVersion'] = True
+				''' Render the old static file
+				#with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
+				#	json.dump(outJson, outFile, indent=4)
+				#Renders the static old version of the saved template
+				with open(pJoin(modelDir,"inlineTemplate.html"), "r") as inlineTemplate:
+  					filedata = inlineTemplate.readlines()
+				with open(pJoin(modelDir,"inlineTemplate.html"), "w") as inlineTemplate:
+					for line in filedata:
+						inlineTemplate.write(line.replace('"oldVersion": false', '"oldVersion": true'))
+				oldTemplate = Template(io.open(pJoin(modelDir,'inlineTemplate.html'), "r", encoding="utf-8").read())
+				#Updates output json file to include the old version
+				with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
+					json.dump(outJson, outFile, indent=4)
+				return oldTemplate.render()
+				'''
+			#If the hashes match, mark the model as up to date
+			else:	
+				print('render and maintained')
+				outJson['oldVersion'] = False
+		except (UnboundLocalError, KeyError), e:
+			print(traceback.print_exc())
+			print('error:' + str(e))
 	except IOError:
 		allOutputData = None
 		outJson = None
@@ -98,14 +146,83 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 		pathPrefix = _omfDir
 	else:
 		pathPrefix = ""
-	return template.render(allInputData=allInputData,
-		allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
+	
+	''' Create the static file 
+	#Save the rendered template. Still need css and js library imports
+	template.stream(modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
+		datastoreNames=datastoreNames, modelName=modelType, allInputDataDict=inJson, allOutputDataDict=outJson).dump(pJoin(modelDir,"baseTemplate.html"))
+	#Use regex to traverse the saved template and save the source files with model
+	#Fix the static file references to be local? - how will this interact with being served by webserver. Delete referece from file and reinsert? 
+	with open(pJoin(modelDir,"baseTemplate.html"), "r") as baseTemplate:
+		for line in baseTemplate:
+			#add backslash to regex between single and double quote
+			matchObj = re.match( r"(.*)/static(.+?)(['"])(.+?)", line, re.M|re.I)
+			if matchObj:
+				print ("matchObj.group() : " + "/static"+ matchObj.group(2))
+				sourceFile = open(_omfDir + "/static"+ matchObj.group(2)).read()
+				#copy the source .js, .css, or other file and create the static directroy if needed for saving
+				try:
+					filePath = modelDir + "/static"+ matchObj.group(2)
+					path, file = os.path.split(filePath)
+					if not os.path.exists(path):
+						 os.makedirs(path)
+					with open(filePath, "w") as newFile:
+						newFile.write(sourceFile) 
+				except IOError:
+					pass
+	#Create a new template that contains external js and css inline 
+	with io.open(pJoin(modelDir,"baseTemplate.html"), "r", encoding='utf-8') as baseTemplate:
+		with io.open(pJoin(modelDir,'inlineTemplate.html'), 'w', encoding='utf-8') as inlineTemplate:
+			for line in baseTemplate:
+				#add backslash to regex between signle and double quote
+				matchObj = re.match( r"(.*)/static(.+?)(['"])(.+?)", line, re.M|re.I)
+				scriptTags = re.match( r"(.*)<script(.*)static(.*)</script>", line, re.M|re.I)
+				styleTags = re.match( r"(.*)<link(.*)stylesheet", line, re.M|re.I)
+				if scriptTags:
+					sourceFile = open(_omfDir + "/static"+ matchObj.group(2)).read()
+					with io.open(_omfDir + "/static"+ matchObj.group(2), 'r', encoding='utf-8') as yFile:
+						tempfile = yFile.readlines()
+					#print(line)
+					tmp = '<script>'+sourceFile+'</script>'
+					inlineTemplate.write(unicode('<script>'))
+					for i in tempfile:
+						try:
+							inlineTemplate.write(i)
+						except (UnicodeEncodeError):
+							#print(i.encode('utf-8'))
+							print(i)
+					inlineTemplate.write(unicode('</script>'))
+					#print('<script>'+sourceFile+'</script>')
+				elif styleTags:
+					with io.open(_omfDir + "/static"+ matchObj.group(2), 'r', encoding='utf-8') as yFile:
+						tempfile = yFile.readlines()
+					#sourceFile = open(_omfDir + "/static"+ matchObj.group(2)).read()
+					#inlineTemplate.write('<link href="/static/omf.css" type="text/css" rel="stylesheet"/>')
+					inlineTemplate.write(unicode('<style>'))
+					for i in tempfile:
+						try:
+							inlineTemplate.write(i)
+						except (UnicodeEncodeError):
+							#print(i.encode('utf-8'))
+							print(i)
+					inlineTemplate.write(unicode('</style>'))
+				else:
+					inlineTemplate.write(line)'''
+	return template.render(allInputData=allInputData, allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
 		datastoreNames=datastoreNames, modelName=modelType, allInputDataDict=inJson, allOutputDataDict=outJson)
+
 
 def renderAndShow(modelDir, datastoreNames={}):
 	''' Render and open a template (blank or with output) in a local browser. '''
 	with tempfile.NamedTemporaryFile(suffix=".html", delete=False) as temp:
 		temp.write(renderTemplate(modelDir, absolutePaths=True))
+		temp.flush()
+		webbrowser.open("file://" + temp.name)
+
+def renderTemplateToFile(modelDir, datastoreNames={}):
+	''' Render and open a template (blank or with output) in a local browser. '''
+	with tempfile.NamedTemporaryFile(suffix=".html", delete=False) as temp:
+		temp.write(renderTemplate(modelDir, absolutePaths=False))
 		temp.flush()
 		webbrowser.open("file://" + temp.name)
 

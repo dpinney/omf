@@ -361,3 +361,58 @@ MODAL DIALOGS
 #blankModal{
 	width: 300px;
 }
+
+/**********************************************
+VERSION FLAGS
+**********************************************/
+div#triangle-parent {
+	width: 250; 
+	height: 250;
+	position: absolute;
+	visibility: hidden;
+}
+div#triangle-message {
+	position: absolute;
+ 	text-align: center;
+ 	z-index:1;
+ 	transform:rotate(-45deg);
+ 	top:5.5em;
+ 	color: #000000; 
+	outline: none;
+	cursor: help; 
+	text-decoration:underline;
+	text-decoration-style: dotted;
+ }
+div#triangle-message span {
+	margin-left: -999em;
+	position: absolute;
+	display: inline-block;
+}
+div#triangle-message:hover span {
+	border-radius: 5px 5px; 
+	-moz-border-radius: 5px; 
+	-webkit-border-radius: 5px; 
+	box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1); 
+	-webkit-box-shadow: 5px 5px rgba(0, 0, 0, 0.1); 
+	-moz-box-shadow: 5px 5px rgba(0, 0, 0, 0.1);
+	font-family: Calibri, Tahoma, Geneva, sans-serif;
+	position: absolute;
+	right: -1.5em;
+	top: 4.75em;
+	z-index: 99;
+	margin-left: 0;
+	width: 200px;
+	transform:rotate(45deg);
+}
+div#triangle-topright { 
+	width: 0;
+	height: 0;
+	border-top: 250px solid #FF0000;
+	border-right: 250px solid transparent;
+	position: relative;
+}
+span.classic-triangle {
+	background: #A9A9A9; 
+	color: white;
+	padding: 5px 5px;
+}
