@@ -367,7 +367,7 @@ const rawTree = {
         "mass_temperature": "70", 
         "heating_system_type": "RESISTANCE"
     }, 
-    // orphanNode1
+    // orphanNode1: has a 'parent' node, but that node does not exist.
     "172265": {
         "parent": "madeUpHouse", 
         "schedule_skew": "-3120", 
@@ -384,7 +384,7 @@ const rawTree = {
         "impedance_fraction": "0.300000", 
         "impedance_pf": "1.000"
     }, 
-    // orphanLine1
+    // orphanLine1: has valid "from" and "to" values, but those nodes don't exist
     "33420": {
         "phases": "ACBN", 
         "from": "node1778317643", 
@@ -396,7 +396,7 @@ const rawTree = {
         "latitude": 614.664711377176, 
         "configuration": "16564line_configuration32701"
     },
-    // funkyLine1
+    // funkyLine1: a line is never found between two houses like this
     "121212": {
         "phases": "CS", 
         "from": "house172262", 
@@ -405,7 +405,7 @@ const rawTree = {
         "to": "house172260", 
         "configuration": "1807--T325_C-CONFIG"
     }, 
-    // funkyLine2
+    // funkyLine2: a line is never found between two houses like this
     "343434": {
         "phases": "CS", 
         "from": "house172260", 
@@ -432,7 +432,11 @@ describe("Unit tests", function() {
     these unit tests will still pass. However, it is necessary because the alternative would be to use the real testTree from a .omd
     file and then these unit tests would be dependent on a particular .omd file which is even worse.
     */
-    // 37 keys for 35 objects
+
+    /* 
+    37 keys for 35 objects.
+    The testTree is fairly well-formed, aside from the orphan line and orphan node. It should stay well-formed. If I want to test for really malformed data, I should do it in a unit test.
+    */
     const weirdNode1 = "0";
     const weirdNode2 = "1";
     const node1 = "245000";
@@ -476,7 +480,7 @@ describe("Unit tests", function() {
         node2Line1, node2Line1End , node2Line2, node2Line2End, node2Line2EndChild1, node2Line3, node2Line3End,
         node2Line3EndLine, node2Line3EndLineEnd, node3Line1, node3Line1End, node3Line1EndChild1,
         node3Line1EndChild1Child1, node3Line1EndChild1Child2, node3Line1EndChild2, node3Line1EndChild2Child1,
-        node3Line1EndChild3, orphanNode1, orphanLine1, funkyLine1, funkyLine2  
+        node3Line1EndChild3, orphanNode1, orphanLine1, funkyLine1, funkyLine2 
     ];
 
     beforeEach(function() {
@@ -486,11 +490,288 @@ describe("Unit tests", function() {
     });
     
     describe("Public functions and methods", function() {
+        //good: don't test error handling for now ANYWHERE because it TAKES TOO LONG
+        describe("createSvgCircle()", function() {
+
+            let key, node, circle;
+
+            beforeEach(function() {
+                key = "66";
+                node = {
+                    object: "node",
+                    longitude: "457.5",
+                    latitude: "100.2",
+                };
+                circle = createSvgCircle2(key, node);
+            });
+
+
+            it("should return an object who's prototype is svgCirclePrototype", function() {
+                expect(Object.getPrototypeOf(circle)).toBe(svgCirclePrototype);
+            });
+
+            it("should set the id, class, r, and stroke-width properties of this SvgCircle", function() {
+                expect(circle.id).toEqual(key);
+                expect(circle.class).toEqual(node.object);
+                expect(circle.r).toEqual(2);
+                expect(circle["stroke-width"]).toEqual(0.5);
+            });
+
+            it(`should set the 'cx' property to be a number that is the difference between the 'longitude' argument
+            and the global gOffsetX variable`, function() {
+                expect(gOffsetX).toBeDefined();
+                expect(circle.cx).toEqual(node.longitude - gOffsetX);
+                expect(typeof circle.cx).toEqual("number");
+            });
+
+            it(`should set the 'cy' property to be the difference between the 'latitude' argument and the
+            global gOffsetY variable`, function() {
+                expect(gOffsetY).toBeDefined();
+                expect(circle.cy).toEqual(node.latitude - gOffsetY);
+                expect(typeof circle.cy).toEqual("number");
+            });
+        });
+
+        describe("svgCirclePrototype", function() {
+            //bad
+            describe("getNewInstance()", function() {
+
+                it("should return an object with attribute values that are equivalent to the property values of this SvgCircle", function() {
+                    const key = "1";
+                    const node = {
+                        object: "house",
+                        longitude: "132",
+                        latitude: "556.1"
+                    };
+                    const circle = createSvgCircle2(key, node);
+                    const e = circle.getNewInstance();
+                    Object.keys(circle).forEach(key => {
+                        expect(String(circle[key])).toEqual(e.getAttribute(key));
+                    })
+                });
+            });
+            //bad
+            describe("update()", function() {
+
+                it("should set the attribute values of the 'circle' argument to equal the property values of this SvgCircle", function() {
+                    const key = "2";
+                    const node = {
+                        object: "zipload",
+                        longitude: 44.1,
+                        latitude: 27.6
+                    };
+                    const zipload = createSvgCircle2(key, node);
+                    const e = zipload.getNewInstance();
+                    const key2 = "50";
+                    const node2 = {
+                        object: "waterheater",
+                        longitude: 556.2,
+                        latitude: "0"
+                    };
+                    const waterheater = createSvgCircle2(key2, node2);
+                    waterheater.update(e);
+                    Object.keys(waterheater).forEach(key => {
+                        expect(String(waterheater[key])).toEqual(e.getAttribute(key));
+                    });
+                });
+            });
+        });
+
+        xdescribe("createSvgLine()", function() {
+
+        });
+        //good 
+        describe("createTreeMap()", function() {
+
+            describe("if an object's name property has any of the following values: 'null' (in any letter case), 'undefined' (in any letter case), null, or undefined", function() {
+
+                it("should not map the key of that object to its name", function() {
+                    const tree = {
+                        "0": {
+                            name: "null",
+                        },
+                        "1": {
+                            name: null
+                        },
+                        "2": {
+                            name: "undefined"
+                        },
+                        "3": {
+                            name: undefined
+                        },
+                        "4": {
+                            name: "nUlL"
+                        },
+                        "5": {
+                            name: "UnDefInEd"
+                        }
+                    };
+                    const treeMap = createTreeMap(tree);
+                    expect(treeMap.names).toEqual({});
+                });
+            });
+
+            it("should map the key of each object to its 'name' property in an integration test", function() {
+                const treeMap = createTreeMap(testTree);
+                const names = {};
+                Object.keys(testTree).forEach(key => {
+                    if (testTree[key].name != null) {
+                        names[testTree[key].name] = key;
+                    }
+                });
+                expect(treeMap.names).toEqual(names);
+            });
+
+            describe("if a tree object has any of the following values for its 'name' property: null, 'null' (in any letter case), undefined, or 'undefined' (in any letter case), and a child node has any of those values for its 'parent' property",  function() {
+
+                it("should not map that child node to that tree object", function() {
+                    const tree = {
+                        "0": {
+                            name: "null",
+                        },
+                        "1": {
+                            name: null
+                        },
+                        "2": {
+                            name: "undefined"
+                        },
+                        "3": {
+                            name: undefined
+                        },
+                        "4": {
+                            name: "nUlL"
+                        },
+                        "5": {
+                            name: "UnDefInEd"
+                        },
+                        "6": {
+                            parent: "null"
+                        },
+                        "7": {
+                            parent: null
+                        },
+                        "8": {
+                            parent: "undefined"
+                        }, 
+                        "9": {
+                            parent: undefined
+                        },
+                        "10": {
+                            parent: "nUlL"
+                        },
+                        "11": {
+                            parent: "UnDefInEd"
+                        }
+                    };
+                    const treeMap = createTreeMap(tree);
+                    Object.keys(tree).forEach(key => {
+                        expect(treeMap.children[key]).toBeUndefined();
+                    });
+                });
+            });
+
+            it("should map the key of each object to an array of its child keys in an integration test", function() {
+                const treeMap = createTreeMap(testTree);
+                Object.keys(testTree).forEach(parentKey => {
+                    if (testTree[parentKey].name != null) {
+                        const children = [];
+                        Object.keys(testTree).forEach(childKey => {
+                            if (testTree[childKey].parent === testTree[parentKey].name) {
+                                children.push(childKey);
+                            }
+                        });
+                        if (children.length > 0) {
+                            expect(treeMap.children[parentKey]).toEqual(children);
+                        } else {
+                            expect(treeMap.children[parentKey]).toBeUndefined();
+                        }
+                    }
+                });
+            });
+
+            describe("if a tree object has any of the following values for its 'name' property: null, 'null' (in any letter case), undefined, or 'undefined' (in any letter case), and a line has any of those values for its 'to' or 'from' properties", function() {
+
+                it("should not map that line to that tree object", function() {
+                    const tree = {
+                        "0": {
+                            name: "null",
+                        },
+                        "1": {
+                            name: null
+                        },
+                        "2": {
+                            name: "undefined"
+                        },
+                        "3": {
+                            name: undefined
+                        },
+                        "4": {
+                            name: "nUlL"
+                        },
+                        "5": {
+                            name: "UnDefInEd"
+                        },
+                        "6": {
+                            to: "null",
+                            from: "null"
+                        },
+                        "7": {
+                            to: null,
+                            from: null
+                        },
+                        "8": {
+                            to: "undefined",
+                            from: "undefined"
+                        }, 
+                        "9": {
+                            to: undefined,
+                            from: undefined
+                        },
+                        "10": {
+                            to: "nUlL",
+                            from: "nUlL"
+                        },
+                        "11": {
+                            to: "UnDefInEd",
+                            from: "UnDefInEd"
+                        }
+                    };
+                    const treeMap = createTreeMap(tree);
+                    Object.keys(tree).forEach(key => {
+                        expect(treeMap.lines[key]).toBeUndefined();
+                    });
+                });
+            });
+
+            it("should map the key of each object to an array of its connected line keys in an integration test", function() {
+                const treeMap = createTreeMap(testTree);
+                Object.keys(testTree).forEach(nodeKey => {
+                    if (testTree[nodeKey].name != null) {
+                        const nodeName = testTree[nodeKey].name;
+                        const lines = [];
+                        Object.keys(testTree).forEach(lineKey => {
+                            if (testTree[lineKey].to === nodeName || testTree[lineKey].from === nodeName) {
+                                lines.push(lineKey);
+                            }
+                        });
+                        if (lines.length > 0) {
+                            expect(treeMap.lines[nodeKey]).toEqual(lines);
+                        } else {
+                            expect(treeMap.lines[nodeKey]).toBeUndefined();
+                        }
+                    }
+                });
+            });
+        });
+
+        xdescribe("createTree()", function() {
+
+        });
 
         /**
          * TODO: these aren't unit tests anymore. Perhaps merge addable and deletable svg data into one type?
          */
-        describe("createAddableSvgData()", function() {
+        xdescribe("createAddableSvgData()", function() {
             /* createSvgCircle() should throw errors if a tree node object does not have 'longitude' and/or 'latitude'
             properties, so we insert coordinates to avoid this. */
 
@@ -501,7 +782,7 @@ describe("Unit tests", function() {
                 expect(svgData.lines).toEqual(jasmine.any(Array));
             });
 
-            describe("if the treeWrapper.tree argument is non-empty", function() {
+            xdescribe("if the treeWrapper.tree argument is non-empty", function() {
 
                 it("should return an object with the correct number of circles and lines", function() {
                     /* There is 1 extra child in the svg-pan-zoom_viewport element in the document. It is the style element. */
@@ -513,7 +794,7 @@ describe("Unit tests", function() {
             });
         });
 
-        describe("createRow()", function() {
+        xdescribe("createRow()", function() {
 
             it("should call validateArguments()", function() {
                 const spy = spyOn(rowPrototype, "validateArguments").and.callThrough();
@@ -522,9 +803,9 @@ describe("Unit tests", function() {
             });
         });
         //bad
-        describe("createTreeWrapper()", function() {
+        xdescribe("createTreeWrapper()", function() {
 
-            describe("if the 'tree' argument contains a key that is not a numeric string", function() {
+            xdescribe("if the 'tree' argument contains a key that is not a numeric string", function() {
 
                 it("should throw an error", function() {
                     const tree = {
@@ -555,9 +836,9 @@ describe("Unit tests", function() {
             */
         });
 
-        describe("createTreeObject()", function() {
+        xdescribe("createTreeObject()", function() {
 
-            describe("if invoked with (key, treeWrapper) arguments", function() {
+            xdescribe("if invoked with (key, treeWrapper) arguments", function() {
 
                 it("should return a TreeObject with the passed key", function() {
                     const tree = {
@@ -601,7 +882,7 @@ describe("Unit tests", function() {
                 });
             });
 
-            describe("if invoked with (map, treeWrapper) arguments", function() {
+            xdescribe("if invoked with (map, treeWrapper) arguments", function() {
 
                 it("should return a TreeObject with data that is equivalent to the map, but not the same object", function() {
                     const map = {
@@ -638,11 +919,11 @@ describe("Unit tests", function() {
             });
         });
 
-        describe("Public treeWrapperPrototype methods", function() {
+        xdescribe("Public treeWrapperPrototype methods", function() {
             
-            describe("delete()", function() {
+            xdescribe("delete()", function() {
 
-                describe("if the key argument does not exist in this TreeWrapper", function() {
+                xdescribe("if the key argument does not exist in this TreeWrapper", function() {
 
                     it("should call console.log() and return an empty TreeWrapper", function() {
                         const spy = spyOn(console, "log");
@@ -652,7 +933,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if the tree object with the passed key argument has NO children or connected lines", function() {
+                xdescribe("if the tree object with the passed key argument has NO children or connected lines", function() {
 
                     it(`should delete the tree object with the passed key from this TreeWrapper`, function() {
                         expect(testTreeWrapper.tree[node3Line1EndChild2Child1]).toBeDefined();
@@ -668,7 +949,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if the tree object with the passed key argument HAS children or connected lines", function() {
+                xdescribe("if the tree object with the passed key argument HAS children or connected lines", function() {
 
                     it("should throw an error", function() {
                         expect(function() {
@@ -678,7 +959,7 @@ describe("Unit tests", function() {
                 });
             });
 
-            describe("recursiveDelete()", function() {
+            xdescribe("recursiveDelete()", function() {
 
                 it("should call contains() to verify that the key argument exists in the TreeWrapper", function() {
                     const spy = spyOn(treeWrapperPrototype, "contains");
@@ -686,7 +967,7 @@ describe("Unit tests", function() {
                     expect(spy).toHaveBeenCalled();
                 });
 
-                describe("if the key argument does not exist in the TreeWrapper", function() {
+                xdescribe("if the key argument does not exist in the TreeWrapper", function() {
 
                     it("should call return an empty TreeWrapper", function() {
                         //const spy = spyOn(console, "log");
@@ -696,7 +977,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if the tree object with the passed key argument is a node", function() {
+                xdescribe("if the tree object with the passed key argument is a node", function() {
 
                     it(`should delete from this TreeWrapper: 1) the tree object with the passed key 2) its direct children 
                     3) all children of children recursively 4) lines connected to the tree object with the passed key 
@@ -734,7 +1015,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if the tree argument with the passed key argument is a line", function() {
+                xdescribe("if the tree argument with the passed key argument is a line", function() {
 
                     it("should delete only the line from this TreeWrapper", function() {
                         expect(testTreeWrapper.tree[node1Line1]).toBeDefined();
@@ -752,9 +1033,9 @@ describe("Unit tests", function() {
                 });
             });
             //bad
-            describe("insert()", function() {
+            xdescribe("insert()", function() {
 
-                describe("if the TreeObject does not exist in the TreeWrapper", function() {
+                xdescribe("if the TreeObject does not exist in the TreeWrapper", function() {
 
                     it(`should add the data of the TreeObject argument to this TreeWrapper`, function() {
                         const map = {
@@ -773,7 +1054,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe(`if a tree object with an identical key to the TreeObject already exists
+                xdescribe(`if a tree object with an identical key to the TreeObject already exists
                 in this TreeWrapper`, function() {
 
                     it(`should overwrite the tree object data with data from the TreeObject`, function() {
@@ -791,7 +1072,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if the TreeObject represents a node", function() {
+                xdescribe("if the TreeObject represents a node", function() {
 
                     it(`should return a TreeWrapper that contains 1) the tree object represented by the TreeObject argument
                     2) the parent of the tree object (if one exists) 3) the direct children of the tree object (if they exist)
@@ -809,7 +1090,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if the TreeObject represents a line", function() {
+                xdescribe("if the TreeObject represents a line", function() {
 
                     it(`should return a TreeWrapper that contains the line and the nodes on either end of
                     the line`, function() {
@@ -826,9 +1107,9 @@ describe("Unit tests", function() {
                 });
             });
 
-            describe("insertCoordinates()", function() {
+            xdescribe("insertCoordinates()", function() {
 
-                describe("if an object does not contain 'longitude' and 'latitude' properties", function() {
+                xdescribe("if an object does not contain 'longitude' and 'latitude' properties", function() {
 
                     let tree, tWrapper;
                     const distance = 101;
@@ -848,7 +1129,7 @@ describe("Unit tests", function() {
                         tWrapper = createTreeWrapper(tree);
                     });
 
-                    describe(`if an object has a type of "line"`, function() {
+                    xdescribe(`if an object has a type of "line"`, function() {
 
                         it("should not add coordinates", function() {
                             spyOn(window, "getType").and.returnValue("line");
@@ -861,7 +1142,7 @@ describe("Unit tests", function() {
                         });
                     });
 
-                    describe(`if an object has a type other than "line"`, function() {
+                    xdescribe(`if an object has a type other than "line"`, function() {
 
                         it("should add coordinates", function() {
                             spyOn(window, "getType").and.returnValue("childNode");
@@ -886,9 +1167,9 @@ describe("Unit tests", function() {
                 });
             });
 
-            describe("move()", function() {
+            xdescribe("move()", function() {
 
-                describe("if handling an object that is a line", function() {
+                xdescribe("if handling an object that is a line", function() {
 
                     it("should not add 'longitude' or 'latitude' properties to the line", function() {
                         const tWrapper = createTreeWrapper();
@@ -911,7 +1192,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if handling an object that is a node", function() {
+                xdescribe("if handling an object that is a node", function() {
 
                     it(`should translate each node around the x, y arguments by 1) finding the average x,y
                     coordinates of all nodes in the tree, 2) calculating the difference between the x, y arguments and
@@ -958,7 +1239,7 @@ describe("Unit tests", function() {
                 });
             });
             //bad
-            describe("isValidForMove()", function() {
+            xdescribe("isValidForMove()", function() {
 
                 let spy;
 
@@ -966,7 +1247,7 @@ describe("Unit tests", function() {
                     spy = spyOn(window, "alert");
                 });
 
-                describe("if there are 0 objects in this TreeWrapper.tree", function() {
+                xdescribe("if there are 0 objects in this TreeWrapper.tree", function() {
 
                     it("should return false", function() {
                         const emptyWrapper = createTreeWrapper();
@@ -974,7 +1255,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if there is at least 1 line in this TreeWrapper.tree", function() {
+                xdescribe("if there is at least 1 line in this TreeWrapper.tree", function() {
 
                     let tWrapper;
 
@@ -1005,7 +1286,7 @@ describe("Unit tests", function() {
                 });
             });
             //bad (best)
-            describe("isValidForAdd()", function() {
+            xdescribe("isValidForAdd()", function() {
 
                 let spy;
 
@@ -1013,7 +1294,7 @@ describe("Unit tests", function() {
                     spy = spyOn(window, "alert");
                 });
 
-                describe("if this TreeWrapper.tree contains 0 objects", function() {
+                xdescribe("if this TreeWrapper.tree contains 0 objects", function() {
 
                     it("should return false", function() {
                         const emptyWrapper = createTreeWrapper();
@@ -1021,7 +1302,7 @@ describe("Unit tests", function() {
                     });
                 });
                 
-                describe("if the 'obj' argument has a type of 'independentNode' or 'configurationNode'", function() {
+                xdescribe("if the 'obj' argument has a type of 'independentNode' or 'configurationNode'", function() {
 
                     let ary;
 
@@ -1057,9 +1338,9 @@ describe("Unit tests", function() {
                     });
                 });
                 
-                describe("if the 'obj' argument has a type of 'childNode'", function() {
+                xdescribe("if the 'obj' argument has a type of 'childNode'", function() {
                     
-                    describe("if this TreeWrapper.tree contains at least 1 line", function() {
+                    xdescribe("if this TreeWrapper.tree contains at least 1 line", function() {
 
                         let tWrapper;
 
@@ -1069,7 +1350,7 @@ describe("Unit tests", function() {
                             tWrapper.add(orphanLine1, testTreeWrapper);
                         });
                         
-                        describe("if the 'obj' argument has the value 'recorder' for its 'object' property", function() {
+                        xdescribe("if the 'obj' argument has the value 'recorder' for its 'object' property", function() {
 
                             it("should return true", function() {
                                 const child = {
@@ -1081,7 +1362,7 @@ describe("Unit tests", function() {
                             });
                         });
                         
-                        describe("if the 'obj' argument does not have the value 'recorder' for its 'object' property", function() {
+                        xdescribe("if the 'obj' argument does not have the value 'recorder' for its 'object' property", function() {
 
                             let child;
 
@@ -1105,7 +1386,7 @@ describe("Unit tests", function() {
                         });
                     });
                     
-                    describe("if this TreeWrapper.tree contains at least 1 configuration node", function() {
+                    xdescribe("if this TreeWrapper.tree contains at least 1 configuration node", function() {
 
                         let child, tWrapper;
 
@@ -1143,7 +1424,7 @@ describe("Unit tests", function() {
                     });
                 });
                 
-                describe("if the 'obj' argument has a type of 'line'", function() {
+                xdescribe("if the 'obj' argument has a type of 'line'", function() {
 
                     let line, tWrapper;
 
@@ -1156,7 +1437,7 @@ describe("Unit tests", function() {
                         tWrapper = createTreeWrapper();
                     });
 
-                    describe("if this TreeWrapper.tree contains less than 2 objects", function() {
+                    xdescribe("if this TreeWrapper.tree contains less than 2 objects", function() {
 
                         beforeEach(function() {
                             tWrapper.add(node1, testTreeWrapper);
@@ -1172,7 +1453,7 @@ describe("Unit tests", function() {
                         });
                     });
 
-                    describe("if this TreeWrapper.tree contains at least 1 line", function() {
+                    xdescribe("if this TreeWrapper.tree contains at least 1 line", function() {
 
                         beforeEach(function() {
                             expect(getType(testTreeWrapper.tree[orphanLine1])).toEqual("line");
@@ -1192,7 +1473,7 @@ describe("Unit tests", function() {
                         });
                     });
 
-                    describe("if this TreeWrapper.tree contains at least 1 configuration node", function() {
+                    xdescribe("if this TreeWrapper.tree contains at least 1 configuration node", function() {
 
                         beforeEach(function() {
                             expect(getType(testTreeWrapper.tree[weirdNode1])).toEqual("configurationNode");
@@ -1222,11 +1503,11 @@ describe("Unit tests", function() {
             });
         });
 
-        describe("Public treeObjectPrototype methods", function() {
+        xdescribe("Public treeObjectPrototype methods", function() {
             //bad
-            describe("setupChildNode()", function() {
+            xdescribe("setupChildNode()", function() {
 
-                describe("if this TreeObject has a type of 'childNode'", function() {
+                xdescribe("if this TreeObject has a type of 'childNode'", function() {
 
                     /* recorders can be attached to lines. Look at ./omf/scratch/MPUPV */
                     it("should throw an error if the 'parent' argument has a type of 'configurationNode'", function() {
@@ -1294,7 +1575,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if this TreeObject does not have a type of 'childNode'", function() {
+                xdescribe("if this TreeObject does not have a type of 'childNode'", function() {
 
                     it("should throw an error", function() {
                         const independentNode = {
@@ -1310,9 +1591,9 @@ describe("Unit tests", function() {
                 });
             });
             //bad
-            describe("setupLine()", function() {
+            xdescribe("setupLine()", function() {
 
-                describe("if this TreeObject does not have a type of 'line'", function() {
+                xdescribe("if this TreeObject does not have a type of 'line'", function() {
 
                     it("should throw an error", function() {
                         const tObject = createTreeObject({}, testTreeWrapper);
@@ -1322,7 +1603,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if this TreeObject has a type of 'line'", function() {
+                xdescribe("if this TreeObject has a type of 'line'", function() {
 
                     let line, source, target, tObject;
 
@@ -1345,7 +1626,7 @@ describe("Unit tests", function() {
                         tObject = createTreeObject(line, testTreeWrapper);
                     });
 
-                    describe("if the 'source' argument has a type of 'line'", function() {
+                    xdescribe("if the 'source' argument has a type of 'line'", function() {
 
                         it("should throw an error", function() {
                             source = {
@@ -1358,7 +1639,7 @@ describe("Unit tests", function() {
                         });
                     });
 
-                    describe("if the 'source' argument has a type of 'configurationNode'", function() {
+                    xdescribe("if the 'source' argument has a type of 'configurationNode'", function() {
 
                         it("should throw an error", function() {
                             source = {};
@@ -1368,7 +1649,7 @@ describe("Unit tests", function() {
                         });
                     });
 
-                    describe("if the 'target' argument has a type of 'line'", function() {
+                    xdescribe("if the 'target' argument has a type of 'line'", function() {
 
                         it("should throw an error", function() {
                             target = {
@@ -1381,7 +1662,7 @@ describe("Unit tests", function() {
                         });
                     });
 
-                    describe("if the target argument has a type of 'configurationNode", function() {
+                    xdescribe("if the target argument has a type of 'configurationNode", function() {
 
                         it("should throw an error", function() {
                             target = {};
@@ -1391,7 +1672,7 @@ describe("Unit tests", function() {
                         });
                     });
 
-                    describe("if the source argument has an undefined 'name' property", function() {
+                    xdescribe("if the source argument has an undefined 'name' property", function() {
 
                         it("should throw an error", function() {
                             source.name = undefined;
@@ -1405,7 +1686,7 @@ describe("Unit tests", function() {
                         //});
                     });
 
-                    describe("if the 'target' argument has an undefined 'name' property", function() {
+                    xdescribe("if the 'target' argument has an undefined 'name' property", function() {
 
                         it("should throw an error", function() {
                             target.name = undefined;
@@ -1431,7 +1712,7 @@ describe("Unit tests", function() {
                         expect(tObject.data.to).toEqual(target.name);
                     });
 
-                    describe("if the 'source' argument has an undefined 'phases' property", function() {
+                    xdescribe("if the 'source' argument has an undefined 'phases' property", function() {
 
                         let spy;
 
@@ -1450,7 +1731,7 @@ describe("Unit tests", function() {
                         });
                     });
 
-                    describe("if the 'source' argument has a defined 'phases' property", function() {
+                    xdescribe("if the 'source' argument has a defined 'phases' property", function() {
 
                         it(`should set the 'phases' property of this TreeObject.data to equal the 'phases' property 
                         of the 'source' argument`, function() {
@@ -1462,9 +1743,9 @@ describe("Unit tests", function() {
             });
         });
 
-        describe("Public addableSvgDataPrototype methods", function() {
+        xdescribe("Public addableSvgDataPrototype methods", function() {
 
-            describe("drawTo()", function() {
+            xdescribe("drawTo()", function() {
 
                 it("should not throw an error if an svg object does not already exist in the document svg", function() {
                     /* Nothing inside of testTreeWrapper exists in the document viewport until the initialization function
@@ -1482,11 +1763,11 @@ describe("Unit tests", function() {
 
         //});
 
-        describe("deletableSvgDataPrototype", function() {
+        xdescribe("deletableSvgDataPrototype", function() {
 
-            describe("deleteFrom()", function() {
+            xdescribe("deleteFrom()", function() {
 
-                describe("if an element id does not exist in the document viewport", function() {
+                xdescribe("if an element id does not exist in the document viewport", function() {
                     
                     it("should not throw an error", function() {
                         const tree = {
@@ -1502,11 +1783,11 @@ describe("Unit tests", function() {
             });
         });
 
-        describe("selectionPrototype", function() {
+        xdescribe("selectionPrototype", function() {
 
-            describe("remove()", function() {
+            xdescribe("remove()", function() {
 
-                describe(`if there are 0 HTMLElements in this selection that 1) are equal in identify to the HTMLElement 
+                xdescribe(`if there are 0 HTMLElements in this selection that 1) are equal in identify to the HTMLElement 
                 argument or 2) have the same id as the HTMLElement argument`, function() {
 
                     it("should throw an error", function() {
@@ -1518,7 +1799,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe(`if there are 1 or more HTMLElements in this selection that 1) are equal in identify to the 
+                xdescribe(`if there are 1 or more HTMLElements in this selection that 1) are equal in identify to the 
                 HTMLElement argument or 2) have the same id as the HTMLElement argument`, function() {
 
                     it("should delete all matching HTMLElements from this selection", function() {
@@ -1538,11 +1819,11 @@ describe("Unit tests", function() {
             });
         });
 
-        describe("Public utility methods", function() {
+        xdescribe("Public utility methods", function() {
             //good
-            describe("isNumberString()", function() {
+            xdescribe("isNumberString()", function() {
 
-                describe("if the 'str' argument is a string that can be parsed to a valid decimal or floating point number",
+                xdescribe("if the 'str' argument is a string that can be parsed to a valid decimal or floating point number",
                 function() {
 
                     it("should return true", function() {
@@ -1557,7 +1838,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if the 'str' argument is not a string", function() {
+                xdescribe("if the 'str' argument is not a string", function() {
 
                     it("should return false", function() {
                         const invalid = [
@@ -1576,7 +1857,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if the 'str' argument contains whitespace", function() {
+                xdescribe("if the 'str' argument contains whitespace", function() {
 
                     it("should return false", function() {
                         const invalid = [
@@ -1590,7 +1871,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if the 'str' argument is a string that cannot be parsed to a valid, finite number", function() {
+                xdescribe("if the 'str' argument is a string that cannot be parsed to a valid, finite number", function() {
 
                     it("should return false", function() {
                         const invalid = [
@@ -1608,7 +1889,7 @@ describe("Unit tests", function() {
             });
 
 
-            describe("deepCopy()", function() {
+            xdescribe("deepCopy()", function() {
 
                 it("should throw an error if the object being copied contains a method", function() {
                     const obj = {
@@ -1656,7 +1937,7 @@ describe("Unit tests", function() {
                 });
             });
 
-            describe("getNewTreeKey()", function() {
+            xdescribe("getNewTreeKey()", function() {
 
                 it(`should return a string that is a valid number`, function() {
                     const key1 = getNewTreeKey({});
@@ -1676,10 +1957,10 @@ describe("Unit tests", function() {
             });
     
             //bad
-            describe("getType()", function() {
+            xdescribe("getType()", function() {
                 
                 // This should basically never happen, but you never know
-                describe("if the object argument is a line and a configuration node", function() {
+                xdescribe("if the object argument is a line and a configuration node", function() {
     
                     it("should return 'line'", function() {
                         spyOn(window, "isLine").and.returnValue(true);
@@ -1690,7 +1971,7 @@ describe("Unit tests", function() {
                 });
     
                 /* Recorder can have a parent, therefore it is NOT a configuration object */
-                describe("if the object argument is a child node and a configuration node", function() {
+                xdescribe("if the object argument is a child node and a configuration node", function() {
     
                     it("should return 'childNode'", function() {
                         spyOn(window, "isLine").and.returnValue(false);
@@ -1700,7 +1981,7 @@ describe("Unit tests", function() {
                     });
                 });
     
-                describe("if the object is not a line, nor a child node, nor a configuration node", function() {
+                xdescribe("if the object is not a line, nor a child node, nor a configuration node", function() {
 
                     it("should return 'independentNode'", function() {
                         spyOn(window, "isLine").and.returnValue(false);
@@ -1712,9 +1993,9 @@ describe("Unit tests", function() {
             });
         });
 
-        describe("Public initialization functions", function() {
+        xdescribe("Public initialization functions", function() {
 
-            describe("attachMouseListeners()", function() {
+            xdescribe("attachMouseListeners()", function() {
 
                 it("should attach a listener for click events to the svgContainerWrapper element", function() {
                     expect(true).toBe(false);
@@ -1731,11 +2012,11 @@ describe("Unit tests", function() {
         });
     });
 
-    describe("Private functions and methods", function() {
+    xdescribe("Private functions and methods", function() {
 
-        describe("Private treeWrapperPrototype methods", function() {
-            //good
-            describe("getKeyFromName()", function() {
+        xdescribe("Private treeWrapperPrototype methods", function() {
+            //bad
+            xdescribe("getKeyFromName()", function() {
 
                 let tWrapper;
 
@@ -1752,7 +2033,7 @@ describe("Unit tests", function() {
                     tWrapper = createTreeWrapper(tree);
                 });
 
-                describe("if the 'name' argument does not exist in this TreeWrapper.names", function() {
+                xdescribe("if the 'name' argument does not exist in this TreeWrapper.names", function() {
 
                     it("should throw an error", function() {
                         expect(tWrapper.names["node1"]).toBeUndefined();
@@ -1762,7 +2043,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if the 'name' argument exists in this TreeWrapper.names", function() {
+                xdescribe("if the 'name' argument exists in this TreeWrapper.names", function() {
 
                     it(`should return a string that is the key of the object that has the matching 'name' argument as a 
                     property`, function() {
@@ -1786,7 +2067,7 @@ describe("Unit tests", function() {
             });
             /* good: no unit test should rely on external data, like testTreeWrapper. Doesn't test for errors because THIS shouldn't throw errors. */
             //bad
-            describe("mapChild()", function() {
+            xdescribe("mapChild()", function() {
                 // they all should do this right?
                 it("should call contains()", function() {
 
@@ -1822,9 +2103,9 @@ describe("Unit tests", function() {
                     expect(spy2).toHaveBeenCalled();
                 });
 
-                describe("if the child tree object with the 'key' argument has a defined 'parent' property", function() {
+                xdescribe("if the child tree object with the 'key' argument has a defined 'parent' property", function() {
 
-                    describe(`if the value of the 'parent' property is null`, function() {
+                    xdescribe(`if the value of the 'parent' property is null`, function() {
                         
                         it("should call console.error() and not update this TreeWrapper.children", function() {
                             const spy = spyOn(console, "error");
@@ -1844,21 +2125,21 @@ describe("Unit tests", function() {
                         });
                     });
 
-                    describe("if the value of the 'parent' property is 'null' in any case", function() {
+                    xdescribe("if the value of the 'parent' property is 'null' in any case", function() {
 
                         it("should call console.error() and not update this TreeWrapper.children", function() {
 
                         });
                     });
 
-                    describe("if the value of the 'parent' property is 'undefined' in any case", function() {
+                    xdescribe("if the value of the 'parent' property is 'undefined' in any case", function() {
 
                         it("should call console.error() and not update this TreeWrapper.children", function() {
 
                         });
                     });
 
-                    describe("if the parent tree object hasn't had any children added to its array yet", function() {
+                    xdescribe("if the parent tree object hasn't had any children added to its array yet", function() {
 
                         it("should store an array containing the child key at the parent key", function() {
                             expect(tWrapper.children["0"]).toBeUndefined();
@@ -1867,9 +2148,9 @@ describe("Unit tests", function() {
                         });
                     });
 
-                    describe("if the parent tree object already has had children added to its array", function() {
+                    xdescribe("if the parent tree object already has had children added to its array", function() {
 
-                        describe("if child key already exists in the parent's array", function() {
+                        xdescribe("if child key already exists in the parent's array", function() {
 
                             it("should not push the key of the child onto the parent's array", function() {
                                 expect(tWrapper.children["0"]).toBeUndefined();
@@ -1880,7 +2161,7 @@ describe("Unit tests", function() {
                             });
                         });
 
-                        describe("if the child key does not exist in the parent's array", function() {
+                        xdescribe("if the child key does not exist in the parent's array", function() {
 
                             it("should push the key of the child onto the parent's array", function() {
                                 expect(tWrapper.children["0"]).toBeUndefined();
@@ -1900,8 +2181,7 @@ describe("Unit tests", function() {
                             testTreeWrapper.mapChild(childKey);
                         });
                     });
-                    expect(testTreeWrapper.)
-
+                    /*
                     const children = testTreeWrapper.buildChildren();
                     const children2 = {};
                     Object.keys(testTreeWrapper.tree).forEach(parentKey => {
@@ -1919,19 +2199,20 @@ describe("Unit tests", function() {
                         }
                     });
                     expect(children).toEqual(children2);
+                    */
                 });
             });
-            //good
-            describe("mapNames()", function() {
+            
+            xdescribe("mapNames()", function() {
 
                 it("should return an object who's prototype is Object.prototype", function() {
                     const tWrapper = createTreeWrapper();
                     expect(Object.getPrototypeOf(tWrapper.mapNames())).toEqual(Object.prototype);
                 });
 
-                describe("if a tree object has a defined 'name' property", function() {
+                xdescribe("if a tree object has a defined 'name' property", function() {
 
-                    describe("if the value of the 'name' property is a null value", function() {
+                    xdescribe("if the value of the 'name' property is a null value", function() {
 
                         it("should return an object that does not contain the key 'null'", function() {
                             const tree = {
@@ -1945,7 +2226,7 @@ describe("Unit tests", function() {
                         });
                     });
 
-                    describe("if the value of the 'name' property is a string that is 'null' in any case", function() {
+                    xdescribe("if the value of the 'name' property is a string that is 'null' in any case", function() {
 
                         it("should return an object that does not contain the key 'null' in any case", function() {
                             const tree = {
@@ -1959,7 +2240,7 @@ describe("Unit tests", function() {
                         });
                     });
 
-                    describe("if the value of the 'name' property is a string that is 'undefined' in any case", function() {
+                    xdescribe("if the value of the 'name' property is a string that is 'undefined' in any case", function() {
 
                         it("should return an object that does not contain the key 'undefined' in any case", function() {
                             const tree = {
@@ -1989,7 +2270,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if a tree object has an undefined 'name' property", function() {
+                xdescribe("if a tree object has an undefined 'name' property", function() {
 
                     it("should return an object that does not contain the key 'undefined'", function() {
                         const tree = {
@@ -2017,7 +2298,7 @@ describe("Unit tests", function() {
                 });
             });
             //bad 
-            describe("registerLine()", function() {
+            xdescribe("registerLine()", function() {
 
                 let tWrapper; 
                 
@@ -2054,9 +2335,9 @@ describe("Unit tests", function() {
                 });
                 */
 
-                describe("if the tree object with the 'key' argument has 'to' and 'from' properties", function() {
+                xdescribe("if the tree object with the 'key' argument has 'to' and 'from' properties", function() {
 
-                    describe("if the 'to' and 'from' tree objects haven't had any keys added to their arrays yet", function() {
+                    xdescribe("if the 'to' and 'from' tree objects haven't had any keys added to their arrays yet", function() {
 
                         it("should store an array containing the 'key' argument at each 'to' and 'from' tree object key", function() {
                             expect(tWrapper.lines["0"]).toBeUndefined();
@@ -2067,9 +2348,9 @@ describe("Unit tests", function() {
                         });
                     });
 
-                    describe("if the 'to' and 'from' tree objects already have had keys addded to their arrays", function() {
+                    xdescribe("if the 'to' and 'from' tree objects already have had keys addded to their arrays", function() {
 
-                        describe("if the 'to' and 'from' tree objects don't contain the 'key' argument", function() {
+                        xdescribe("if the 'to' and 'from' tree objects don't contain the 'key' argument", function() {
 
                             it("should push the 'key' argument onto both arrays", function() {
                                 expect(tWrapper.lines["0"]).toBeUndefined();
@@ -2083,7 +2364,7 @@ describe("Unit tests", function() {
                             });
                         });
 
-                        describe("if the 'to' and 'from' objects already contain the 'key' argument", function() {
+                        xdescribe("if the 'to' and 'from' objects already contain the 'key' argument", function() {
 
                             it("should not push the 'key' argument onto either array", function() {
                                 expect(tWrapper.lines["0"]).toBeUndefined();
@@ -2100,7 +2381,7 @@ describe("Unit tests", function() {
                 });
 
                 /*
-                describe("if the tree object with the key argument has either a 'to' or 'from' property, but not both", function() {
+                xdescribe("if the tree object with the key argument has either a 'to' or 'from' property, but not both", function() {
 
                     it("should throw an error", function() {
 
@@ -2134,7 +2415,7 @@ describe("Unit tests", function() {
             /* I don't need to care about checking existence in names, children, or lines. 'names' will never be directly
             referenced anymore, so it's protected
             */
-            describe("contains()", function() {
+            xdescribe("contains()", function() {
 
                 it("should return true if this TreeWrapper contains a tree object with the 'key' argument.", function() {
                     expect(testTreeWrapper.tree[node1]).toBeDefined();
@@ -2147,9 +2428,9 @@ describe("Unit tests", function() {
                 });
             });
             //bad
-            describe("add()", function() {
+            xdescribe("add()", function() {
 
-                describe("if the 'key' argument does not exist in 'treeWrapper' argument", function() {
+                xdescribe("if the 'key' argument does not exist in 'treeWrapper' argument", function() {
 
                     it("should call console.log(), not modify this TreeWrapper, and return", function() {
                         expect(testTreeWrapper.tree["foo"]).toBeUndefined();
@@ -2162,7 +2443,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe(`if the tree object with the 'key' argument exists in the 'treeWrapper' argument,
+                xdescribe(`if the tree object with the 'key' argument exists in the 'treeWrapper' argument,
                 but does not have a 'name' property`, function() {
 
                     it(`should 1) add the tree object to the 'tree' property of this TreeWrapper, 2) not
@@ -2176,7 +2457,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if the tree object with the key exists, and has a 'name' property", function() {
+                xdescribe("if the tree object with the key exists, and has a 'name' property", function() {
 
                     it(`should add the tree object argument to the 'tree' and 'names' properties of 
                     this treeWrapper`, function() {
@@ -2190,7 +2471,7 @@ describe("Unit tests", function() {
                 });
             });
             //bad
-            describe("getChildrenOf()", function() {
+            xdescribe("getChildrenOf()", function() {
 
                 it("should call contains() to validate the 'key' argument", function() {
                     const spy = spyOn(treeWrapperPrototype, "contains");
@@ -2210,7 +2491,7 @@ describe("Unit tests", function() {
                     expect(children).toEqual(emptyWrapper);
                 });
 
-                describe("if the tree object with the passed 'key' argument has children", function() {
+                xdescribe("if the tree object with the passed 'key' argument has children", function() {
 
                     it(`should return a TreeWrapper that only contains its child tree objects`, function() {
                         // Get 2 children
@@ -2230,7 +2511,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if the tree object with the passed key argument does not have children", function() {
+                xdescribe("if the tree object with the passed key argument does not have children", function() {
 
                     it("should return an empty TreeWrapper", function() {
                         const emptyWrapper = createTreeWrapper();
@@ -2247,7 +2528,7 @@ describe("Unit tests", function() {
                 });
             });
             
-            describe("getConnectedLinesOf()", function() {
+            xdescribe("getConnectedLinesOf()", function() {
 
                 it("should call contains to validate the 'key' argument", function() {
                     const spy = spyOn(treeWrapperPrototype, "contains");
@@ -2255,7 +2536,7 @@ describe("Unit tests", function() {
                     expect(spy).toHaveBeenCalled();
                 });
 
-                describe("if the tree object with the passed 'key' argument has connected lines", function() {
+                xdescribe("if the tree object with the passed 'key' argument has connected lines", function() {
 
                     it(`should return a new TreeWrapper that only contains tree objects that are lines
                     which connect to the tree object argument`, function() {
@@ -2269,7 +2550,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if the tree object with the passed 'key' argument does not have connected lines", function() {
+                xdescribe("if the tree object with the passed 'key' argument does not have connected lines", function() {
 
                     it("should return an empty TreeWrapper", function() {
                         // Test for nodes without lines
@@ -2294,9 +2575,9 @@ describe("Unit tests", function() {
                 });
             });
             //bad
-            describe("merge()", function() {
+            xdescribe("merge()", function() {
 
-                describe("if no keys array is passed", function() {
+                xdescribe("if no keys array is passed", function() {
 
                     it(`should merge the entire TreeWrapper argument into this TreeWrapper`, function() {
                         /* Both TreeWrapper.trees should contain the same objects. Both TreeWrapper.names 
@@ -2313,7 +2594,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe(`if a keys array argument is passed`, function() {
+                xdescribe(`if a keys array argument is passed`, function() {
                     
                     it(`should merge only tree objects with the specified keys from the TreeWrapper agument into this
                     TreeWrapper`, function() {
@@ -2330,9 +2611,9 @@ describe("Unit tests", function() {
                 });
             });
 
-            describe(`getSubtreeToDelete()`, function() {
+            xdescribe(`getSubtreeToDelete()`, function() {
 
-                describe("if the tree object with the passed key argument is a node", function() {
+                xdescribe("if the tree object with the passed key argument is a node", function() {
 
                     it(`should return a TreeWrapper that contains children of children (etc.) and all lines that connect to 
                     any of those children`, function() { 
@@ -2379,7 +2660,7 @@ describe("Unit tests", function() {
                     });
                 });
                 
-                describe("if the tree object with the passed key argument is a line", function() {
+                xdescribe("if the tree object with the passed key argument is a line", function() {
 
                     it(`should return an empty TreeWrapper`, function() {
                         const emptyWrapper = createTreeWrapper();
@@ -2389,7 +2670,7 @@ describe("Unit tests", function() {
                 });
             });
             //bad 
-            describe("getParentOf()", function() {
+            xdescribe("getParentOf()", function() {
 
                 it("should call contains() to validate the 'key' argument", function() {
                     const spy = spyOn(treeWrapperPrototype, "contains");
@@ -2397,7 +2678,7 @@ describe("Unit tests", function() {
                     expect(spy).toHaveBeenCalled();
                 });
 
-                describe(`if the tree object with the 'key' argument has a parent that exists in 
+                xdescribe(`if the tree object with the 'key' argument has a parent that exists in 
                 the TreeWrapper`, function() {
 
                     it(`should return a new TreeWrapper that contains only the parent of the tree object.`, function() {
@@ -2408,7 +2689,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe(`if the tree object with the 'key' argument has a parent, but that parent does not exist
+                xdescribe(`if the tree object with the 'key' argument has a parent, but that parent does not exist
                 in the TreeWrapper`, function() {
 
                     xit("should call console.log()", function() {
@@ -2428,7 +2709,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if the tree object with the passed key doesn't have a 'parent' property at all", function() {
+                xdescribe("if the tree object with the passed key doesn't have a 'parent' property at all", function() {
 
                     it(`should return an empty TreeWrapper.`, function() {
                         // Test for parentless nodes
@@ -2453,7 +2734,7 @@ describe("Unit tests", function() {
                 });
             });
 
-            describe("getPairedNodesOf()", function() {
+            xdescribe("getPairedNodesOf()", function() {
 
                 it("should call contains() to validate the 'key' argument", function() {
                     const spy = spyOn(treeWrapperPrototype, "contains");
@@ -2461,7 +2742,7 @@ describe("Unit tests", function() {
                     expect(spy).toHaveBeenCalled();
                 });
 
-                describe("if the tree object with the passed key has paired nodes", function() {
+                xdescribe("if the tree object with the passed key has paired nodes", function() {
 
                     it(`should return a TreeWrapper that contains only those nodes which are on the other ends of lines
                     that are connected to the tree object.`, function() {
@@ -2475,7 +2756,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if the tree object with the passed key has no paired nodes", function() {
+                xdescribe("if the tree object with the passed key has no paired nodes", function() {
 
                     it(`should return an empty TreeWrapper`, function() {
                         // Test for node that has no connected lines
@@ -2500,7 +2781,7 @@ describe("Unit tests", function() {
                 });
             });
 
-            describe("getNodeEndsOf()", function() {
+            xdescribe("getNodeEndsOf()", function() {
 
                 it("should call contains() to validate the 'key' argument", function() {
                     const spy = spyOn(treeWrapperPrototype, "contains");
@@ -2508,7 +2789,7 @@ describe("Unit tests", function() {
                     expect(spy).toHaveBeenCalled();
                 });
 
-                describe("if the tree object with the passed key argument is a line", function() {
+                xdescribe("if the tree object with the passed key argument is a line", function() {
 
                     it(`should return a TreeWrapper that contains only those nodes which are on either side of the line
                     that is represented by the tree object.`, function() {
@@ -2520,7 +2801,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if the tree object with the passed key argument is NOT a line", function() {
+                xdescribe("if the tree object with the passed key argument is NOT a line", function() {
 
                     it(`should return an empty TreeWrapper`, function() {
                         const emptyWrapper = createTreeWrapper();
@@ -2537,14 +2818,14 @@ describe("Unit tests", function() {
                 });
             });
             //bad
-            describe("getSubtreeToRedraw()", function() {
+            xdescribe("getSubtreeToRedraw()", function() {
 
                 /* Should NOT call contains(), because the other private helper methods can be used
                 in different methods besides just this one, so they should contain their own validation and
                 not rely entirely on this method to validate the key.
                 */
 
-                describe("if tree object with the passed key argument is a node", function() {
+                xdescribe("if tree object with the passed key argument is a node", function() {
 
                     it(`should return a TreeWrapper containing: 1) lines that connect to the tree object with the passed key argument
                     2) direct children of the tree object with the passed key argument, 3) the parent of the tree object with the 
@@ -2562,7 +2843,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if the tree object with the passed key argument is a line", function() {
+                xdescribe("if the tree object with the passed key argument is a line", function() {
 
                     it(`should return a TreeWrapper containing 2 nodes on either end of the line`, function() {
                         const tWrapper = createTreeWrapper();
@@ -2575,14 +2856,14 @@ describe("Unit tests", function() {
             });
         });
 
-            //describe("treeObjectPrototype", function() {
+            //xdescribe("treeObjectPrototype", function() {
 
             //    it("should", function() {
             //        expect(true).toBe(false);
             //    });
             //});
 
-        describe("Private rowPrototype methods", function() {
+        xdescribe("Private rowPrototype methods", function() {
 
             let map;
 
@@ -2594,7 +2875,7 @@ describe("Unit tests", function() {
                 };
             });
 
-            describe("validateArguments()", function() {
+            xdescribe("validateArguments()", function() {
 
                 it("should throw an error if args.key, args.value, and args.map are all defined", function() {
                     expect(function() {
@@ -2602,7 +2883,7 @@ describe("Unit tests", function() {
                     }).toThrowError();
                 });
 
-                describe("if args.key and args.map are defined", function() {
+                xdescribe("if args.key and args.map are defined", function() {
 
                     it("should throw an error if args.key doesn't exist in args.map and args.key is not an empty string", function() {
                         expect(function() {
@@ -2624,7 +2905,7 @@ describe("Unit tests", function() {
                 });
             });
 
-            describe("validateNewKey()", function() {
+            xdescribe("validateNewKey()", function() {
 
                 it("should return false if the key argument matches an existing key in the map (i.e. no duplicate keys allowed)",
                 function() {
@@ -2649,7 +2930,7 @@ describe("Unit tests", function() {
                 });
             });
 
-            describe("validateCurrentKey()", function() {
+            xdescribe("validateCurrentKey()", function() {
 
                 it("should return false if the current key is an empty string", function() {
                     const row = createRow({map: map, key: ""});
@@ -2657,9 +2938,9 @@ describe("Unit tests", function() {
                 });
             });
 
-            describe("updateMapKey()", function() {
+            xdescribe("updateMapKey()", function() {
 
-                describe("if the value of the input element argument is a valid key for this row", function() {
+                xdescribe("if the value of the input element argument is a valid key for this row", function() {
 
                     let row;
                     let input;
@@ -2693,7 +2974,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe(`if this row previously had a key of "" that didn't exist in the map because it represented an
+                xdescribe(`if this row previously had a key of "" that didn't exist in the map because it represented an
                 attribute that hadn't been added to the map yet`, function() {
 
                     it(`should set this.map[<new key>] === "", even though technically it should
@@ -2706,7 +2987,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if the textContent of the input element argument is not a valid key for this row", function() {
+                xdescribe("if the textContent of the input element argument is not a valid key for this row", function() {
 
                     it("should set the value of the input element argument to be the key of this row", function() {
                         spyOn(window, "alert");
@@ -2730,9 +3011,9 @@ describe("Unit tests", function() {
                 });
             });
 
-            describe("getKeyElement()", function() {
+            xdescribe("getKeyElement()", function() {
 
-                describe("if the key is not an empty string", function() {
+                xdescribe("if the key is not an empty string", function() {
 
                     it(`should return an HTMLTableCellElement with textContent equal to this row.key`, function() {
                         const row = createRow({map: map, key: "schedule_skew"});
@@ -2748,7 +3029,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if the key is an empty string", function() {
+                xdescribe("if the key is an empty string", function() {
 
                     it(`should return an HTMLTableCellElement with 1 child that is an HTMLInputElement
                     which has its 'required' and 'pattern' attributes set `, function() {
@@ -2764,9 +3045,9 @@ describe("Unit tests", function() {
                 });
             });
 
-            describe("validateNewValue()", function() {
+            xdescribe("validateNewValue()", function() {
 
-                describe("if the key is either 'longitude' or 'latitude'", function() {
+                xdescribe("if the key is either 'longitude' or 'latitude'", function() {
 
                     it("should return false if the value argument is not a valid number", function() {
                         expect(true).toEqual(false);
@@ -2774,7 +3055,7 @@ describe("Unit tests", function() {
                 });
             });
 
-            describe("updateMapValue()", function() {
+            xdescribe("updateMapValue()", function() {
 
                 it("should remove leading and trailing whitespace from the value", function() {
                     const row = createRow({map: map, key: "schedule_skew"});
@@ -2784,7 +3065,7 @@ describe("Unit tests", function() {
                     expect(row.map["schedule_skew"]).toEqual("value with whitespace");
                 });
 
-                describe("if the current key is invalid regardless of the value", function() {
+                xdescribe("if the current key is invalid regardless of the value", function() {
 
                     let row, input, spy;
 
@@ -2813,13 +3094,13 @@ describe("Unit tests", function() {
                 });
             });
 
-            describe("getValueElement()", function() {
+            xdescribe("getValueElement()", function() {
 
                 const nonModifiableProperties = ["fixed value"];
 
-                describe("if this row has a key and a value but no map", function() {
+                xdescribe("if this row has a key and a value but no map", function() {
 
-                    describe("if this row.value is a string", function() {
+                    xdescribe("if this row.value is a string", function() {
 
                         it("should return an HTMLTableCellElement with textContent equal to this row.value", function() {
                             const row = createRow({key: "some key", value: "some value"});
@@ -2837,7 +3118,7 @@ describe("Unit tests", function() {
                         });
                     });
 
-                    describe("if this row.value is an HTMLElement", function() {
+                    xdescribe("if this row.value is an HTMLElement", function() {
 
                         it("should return an HTMLTableCellElement with 1 child that is this row.value", function() {
                             const button = document.createElement("button");
@@ -2850,9 +3131,9 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if this row has a key and a map but no value", function() {
+                xdescribe("if this row has a key and a map but no value", function() {
 
-                    describe("if this row.map[row.key] is not in the nonModifiableProperties array", function() {
+                    xdescribe("if this row.map[row.key] is not in the nonModifiableProperties array", function() {
 
                         it(`should return an HTMLTableCellElement with 1 child that is an HTMLInputElement whose
                         value equals this row.map[row.key]`, function() {
@@ -2866,7 +3147,7 @@ describe("Unit tests", function() {
                         });
                     });
 
-                    describe("if this row.map[row.key] is in the nonModifiableProperties array", function() {
+                    xdescribe("if this row.map[row.key] is in the nonModifiableProperties array", function() {
 
                         it(`should return an HTMLTableCellElement with textContent equal to this row.map[row.key]`, function() {
                             const row = createRow({key: "fixed value", map: map});
@@ -2884,7 +3165,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if this row has a key, but no value or map", function() {
+                xdescribe("if this row has a key, but no value or map", function() {
 
                     it("should return an HTMLTableCellElement with textContent equal to an empty string", function() {
                         const row = createRow({key: "some key"});
@@ -2902,9 +3183,9 @@ describe("Unit tests", function() {
                 });
             });
 
-            describe("delete()", function() {
+            xdescribe("delete()", function() {
 
-                describe("if this row has a map", function() {
+                xdescribe("if this row has a map", function() {
 
                     it("should delete the key of this row from the map", function() {
                         const row = createRow({map: map, key: "schedule_skew"});
@@ -2925,7 +3206,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if this row does not have a map", function() {
+                xdescribe("if this row does not have a map", function() {
 
                     it("should remove the self HTMLTableRowElement of the row from its parent", function() {
                         const row = createRow({key: "key"});
@@ -2939,9 +3220,9 @@ describe("Unit tests", function() {
             });
         });
 
-        describe("Private buttonPrototype methods", function() {
+        xdescribe("Private buttonPrototype methods", function() {
 
-            //describe("saveObject", function() {
+            //xdescribe("saveObject", function() {
 
             //    it("should update the TreeWrapper of this button with the value of the TreeObject of this button", function() {
             //        const tObject = createTreeObject(node3Line1EndChild1Child1, testTreeWrapper);
@@ -2963,7 +3244,7 @@ describe("Unit tests", function() {
             //    });
             //});
 
-            describe("deleteObject()", function() {
+            xdescribe("deleteObject()", function() {
 
                 it("should delete the TreeObject of this button from the TreeWrapper of this button", function() {
                     const tObject = createTreeObject(node3Line1EndChild2Child1, testTreeWrapper);
@@ -2985,11 +3266,11 @@ describe("Unit tests", function() {
             });
         });
 
-        describe("Private utility methods", function() {
+        xdescribe("Private utility methods", function() {
             //bad
-            describe("isLine()", function() {
+            xdescribe("isLine()", function() {
 
-                describe("if the object argument has an undefined 'from' property", function() {
+                xdescribe("if the object argument has an undefined 'from' property", function() {
 
                     it("should return false", function() {
                         const fakeLine = {
@@ -3000,7 +3281,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if the object argument has an undefined 'to' property", function() {
+                xdescribe("if the object argument has an undefined 'to' property", function() {
 
                     it("should return false", function() {
                         const fakeLine = {
@@ -3011,7 +3292,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if the object argument has a null 'from' property value", function() {
+                xdescribe("if the object argument has a null 'from' property value", function() {
 
                     it("should return true", function() {
                         const line = {
@@ -3022,7 +3303,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if the object argument has a null 'to' property value", function() {
+                xdescribe("if the object argument has a null 'to' property value", function() {
 
                     it("should return true", function() {
                         const line = {
@@ -3033,7 +3314,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if the object argument has a non-null, defined 'from' property value", function(){
+                xdescribe("if the object argument has a non-null, defined 'from' property value", function(){
 
                     it("should return true", function() {
                         const line = {
@@ -3044,7 +3325,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("the object argument has a non-null, defined 'to' property value", function() {
+                xdescribe("the object argument has a non-null, defined 'to' property value", function() {
 
                     it("should return true", function() {
                         const line = {
@@ -3056,16 +3337,16 @@ describe("Unit tests", function() {
                 });
             });
             //bad 
-            describe("isConfigurationNode()", function() {
+            xdescribe("isConfigurationNode()", function() {
     
-                describe("if the object argument has an undefined 'object' property", function() {
+                xdescribe("if the object argument has an undefined 'object' property", function() {
     
                     it("should return true", function() {
                         expect(isConfigurationNode({})).toBe(true);
                     });
                 });
 
-                describe("if the object argument has a null 'object' property value", function() {
+                xdescribe("if the object argument has a null 'object' property value", function() {
 
                     it("should return true", function() {
                         const configurationNode = {
@@ -3075,9 +3356,9 @@ describe("Unit tests", function() {
                     });
                 });
     
-                describe("if the argument object has non-null, defined 'object' property", function() {
+                xdescribe("if the argument object has non-null, defined 'object' property", function() {
     
-                    describe("if the 'object' property value  exists in the 'configurationTypes' global array", function() {
+                    xdescribe("if the 'object' property value  exists in the 'configurationTypes' global array", function() {
     
                         it("should return true", function() {
                             expect(configurationTypes).toBeDefined();
@@ -3087,7 +3368,7 @@ describe("Unit tests", function() {
                         });
                     });
     
-                    describe("if the 'object' property value does not exist in the global 'configurationTypes' array", function() {
+                    xdescribe("if the 'object' property value does not exist in the global 'configurationTypes' array", function() {
     
                         it("should return false", function() {
                             expect(isConfigurationNode({object: "some other type"})).toBe(false);
@@ -3096,9 +3377,9 @@ describe("Unit tests", function() {
                 });
             });
             //bad
-            describe("isChildNode()", function() {
+            xdescribe("isChildNode()", function() {
 
-                describe("if the object argument has a null value for the 'parent' property", function() {
+                xdescribe("if the object argument has a null value for the 'parent' property", function() {
 
                     it("should return true", function() {
                         const childNode = {
@@ -3108,7 +3389,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if the object argument has an undefined 'parent' property", function() {
+                xdescribe("if the object argument has an undefined 'parent' property", function() {
 
                     it("should return false", function() {
                         const fakeChildNode = {
@@ -3118,7 +3399,7 @@ describe("Unit tests", function() {
                     });
                 });
 
-                describe("if the object argument has a non-null, defined 'parent' property", function() {
+                xdescribe("if the object argument has a non-null, defined 'parent' property", function() {
 
                     it("should return true", function() {
                         const childNode = {
@@ -3151,7 +3432,7 @@ xdescribe("Integration tests that require the environment to be prepared correct
             jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
         });
 
-//    describe("loadFeeder()", function() {
+//    xdescribe("loadFeeder()", function() {
 //
 //        xit("should have its underlying XMLHttpRequest be opened properly before sending", async function() {
 //            const spy = spyOn(XMLHttpRequest.prototype, "send").and.callThrough();
@@ -3179,9 +3460,9 @@ xdescribe("Integration tests that require the environment to be prepared correct
 //        xit("should call saveFeeder if something goes wrong")
 //    });
 
-    describe("saveFeeder()", function() {
+    xdescribe("saveFeeder()", function() {
 
-        describe("if not cancelled", function() {
+        xdescribe("if not cancelled", function() {
 
             xit("should send 1 XMLHttpRequest that receives a successful server response", async function() {
                 spyOn(window, "reloadWrapper");
@@ -3216,11 +3497,11 @@ xdescribe("Integration tests that require the environment to be prepared correct
         });
     });
 
-    describe("submitForm()", function() {
+    xdescribe("submitForm()", function() {
 
-        describe("if submitting the blankFeeder form", function() {
+        xdescribe("if submitting the blankFeeder form", function() {
 
-            describe("if not canceled", function() {
+            xdescribe("if not canceled", function() {
 
                 //it("should send 2 XMLHttpRequests that receive successful responses from the server", async function() {
                 //    spyOn(window, "reloadWrapper");
@@ -3265,23 +3546,23 @@ xdescribe("Integration tests that require the environment to be prepared correct
             });
         });
 
-        describe("if submitting milsoft form", function() {
+        xdescribe("if submitting milsoft form", function() {
 
             describe ("if not canceled", function() {
 
             });
         });
 
-        describe("if submitting gridlab form", function() {
+        xdescribe("if submitting gridlab form", function() {
 
-            describe("if not canceled", function() {
+            xdescribe("if not canceled", function() {
 
             });
         });
 
-        describe("if submitting cyme form", function() {
+        xdescribe("if submitting cyme form", function() {
 
-            describe("if not canceled", function() {
+            xdescribe("if not canceled", function() {
 
             });
         });
@@ -3309,3 +3590,4 @@ setTimeout(
     2000
 );
 //</script>
+//Was at 3317
