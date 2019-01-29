@@ -312,14 +312,17 @@
 					secondRunValidStyle = ""
 					if(allOutputData.secondGLD == "True") {
 						secondRunValidStyle =  "color: #54c465;" 
-						secondRunValid = "Powerflow Validated";
+						secondRunValid = "Powerflow Validated:  ";
+						designHTML = designHTML + '<table id="totalCostTable"><tr><th><div style="float: left;">Total Cost</div><div style="' + secondRunValidStyle + 'float: right;">' + secondRunValid + '</div></th></tr><tr><td>$' + totalCost.toFixed(2) + '</td></tr></table>';
+						designHTML = designHTML + '<table id="solutionComponents">' + tableBuilder + '</table>';
 					}
 					else {
 						secondRunValidStyle =  "color: red;" 
-						secondRunValid = "Powerflow Not Validated";
+						secondRunValid = "Powerflow Not Validated:  ";
+						designHTML = designHTML + '<table id="solutionComponents">' + tableBuilder + '</table>';
+						designHTML = designHTML + '<table id="totalCostTable"><tr><td valign="bottom"><div style="float: left;">Total Cost</div><div style="' + secondRunValidStyle + 'float: right;">' + secondRunValid + totalCost.toFixed(2) + '</div></td></tr></table>';
 					}
-					designHTML = designHTML + '<table id="totalCostTable"><tr><th><div style="float: left;">Total Cost</div><div style="' + secondRunValidStyle + 'float: right;">' + secondRunValid + '</div></th></tr><tr><td>$' + totalCost.toFixed(2) + '</td></tr></table>';
-					designHTML = designHTML + '<table id="solutionComponents">' + tableBuilder + '</table>';
+					
 
 					//DAMAGE SCENARIOS
 					for(var j = 0; j < rdtOutput.scenario_solution.length; j++) {
