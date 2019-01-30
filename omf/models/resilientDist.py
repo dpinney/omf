@@ -4,6 +4,7 @@ import traceback
 import platform, re
 from os.path import join as pJoin
 from jinja2 import Template
+from numpy import interp
 from matplotlib import pyplot as plt
 import networkx as nx
 from omf.models import __neoMetaModel__
@@ -24,12 +25,6 @@ from omf.weather import zipCodeToClimateName
 modelName, template = metadata(__file__)
 tooltip = "Model extreme weather and determine optimal investment for distribution resiliency."
 hidden = True
-
-'''
-if ...
-	arr
-	
-'''
 
 class HazardField(object):
 	''' Object to modify a hazard field from an .asc file. '''
@@ -79,7 +74,18 @@ class HazardField(object):
 		''' Scale the cell size in image plot. '''
 		self.hazardObj["cellsize"] = cellSize
 
-	def drawHeatMap(self):
+	def mapValue(value, fromMin, fromMax, toMin=.7, toMax=1):
+		newValue = float(value - fromMind) / float(fromMax-fromMin)
+		return toMin + (newValue * (toMax-toMin))
+
+	def mapRanges(values, fromMin, fromMax):
+		newValues = []
+		for value in values:
+			newValues.append(mapValue(value, fromMin, fromMax))
+		return newValues
+
+
+	def drawHeatMap(self, isDamageField=False):
 		''' Draw heat map-color coded image map with user-defined boundaries and cell-size. '''
 		heatMap = plt.imshow(
 			self.hazardObj['field'],
@@ -289,7 +295,8 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			gfmJson['generators'].append(genObj)
 	return gfmJson
 
-def genDiagram(outputDir, feederJson, damageDict):
+def genDiagram(outputDir, feederJson, damageDict, critLoads):
+	print damageDict
 	warnings.filterwarnings("ignore")
 	# Load required data.
 	tree = feederJson.get("tree",{})
@@ -361,7 +368,7 @@ def genDiagram(outputDir, feederJson, damageDict):
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
 			standArgs.update({'width':3,'edge_color':'white'})
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
-			standArgs.update({'width':1,'edge_color':feeder._obToCol(eType)})
+			standArgs.update({'width':1,'edge_color':edgeColor})
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
 		if ePhases==2:
 			standArgs.update({'width':3})
@@ -374,77 +381,83 @@ def genDiagram(outputDir, feederJson, damageDict):
 	red_list, blue_list, grey_list  = ([] for i in range(3))
 	for key in pos.keys(): # Sort keys into seperate lists. Is there a more elegant way of doing this.
 		if key not in green_list:
-			prefix = key[:3]
-			if prefix == 'C_l':
+			load = key[2:6]
+			if key in critLoads:
 				red_list.append(key)
-			elif prefix == "B_l":
+			elif load == 'load':
 				blue_list.append(key)
 			else:
 				grey_list.append(key)
-
-	nx.draw_networkx_nodes(inGraph, pos, 
-						   nodelist=green_list,
-						   node_color='green',
-						   linewidths=0,
-						   node_size=10)
-	nx.draw_networkx_nodes(inGraph,pos,
-						   nodelist=red_list,
-						   node_color='red',
-						   linewidths=0,
-						   node_size=10)
-	nx.draw_networkx_nodes(inGraph,pos,
-						   nodelist=blue_list,
-						   node_color='blue',
-						   linewidths=0,
-						   node_size=10)
-	nx.draw_networkx_nodes(inGraph,pos,
-						   nodelist=grey_list,
-						   node_color='grey',
-						   node_size=10)
-
-	'''
-	nx.draw_networkx_nodes(inGraph,pos,
-						   nodelist=pos.keys(),
-						   node_color=[feeder._obToCol(inGraph.node[n].get('type','underground_line')) for n in inGraph],
-						   linewidths=0,
-						   node_size=10)
-	'''
+	nx.draw_networkx_nodes(
+		inGraph,
+		pos, 
+		nodelist=green_list,
+		node_color='green',
+		label='Swing Buses',
+		node_size=12
+	)
+	nx.draw_networkx_nodes(
+		inGraph,
+		pos,
+		nodelist=red_list,
+		node_color='red',
+		label='Critical Loads',
+		node_size=12
+	)
+	nx.draw_networkx_nodes(
+		inGraph,
+		pos,
+		nodelist=blue_list,
+		node_color='blue',
+		label='Regular Loads',
+		node_size=12
+	)
+	nx.draw_networkx_nodes(
+		inGraph,
+		pos,
+		nodelist=grey_list,
+		node_color='grey',
+		label='Other',
+		node_size=12
+	)
 	if labels:
-		nx.draw_networkx_labels(inGraph,pos,
-								font_color='black',
-								font_weight='bold',
-								font_size=0.25)
+		nx.draw_networkx_labels(
+			inGraph,
+			pos,
+			font_color='black',
+			font_weight='bold',
+			font_size=0.25
+		)
+	plt.legend(loc='lower right') 
 	if showPlot: plt.show()
 	plt.savefig(pJoin(outputDir,"feederChart.png"), dpi=800, pad_inches=0.0)
 
-
-def checkHazardFieldBounds(hazard, gfmJson):
+def circuitOutsideOfHazard(hazard, gfmJson):
 	''' Detect if hazard field extends beyond circuit boundaries, issue a warning to the front-end if it does. '''
-	x_min = hazard.hazardObj["xllcorner"],
-	x_max =	hazard.hazardObj["xllcorner"] + hazard.hazardObj["ncols"] * hazard.hazardObj["cellsize"],
-	y_min =	hazard.hazardObj["yllcorner"],
+	x_min = hazard.hazardObj["xllcorner"]
+	x_max =	hazard.hazardObj["xllcorner"] + hazard.hazardObj["ncols"] * hazard.hazardObj["cellsize"]
+	y_min =	hazard.hazardObj["yllcorner"]
 	y_max = hazard.hazardObj["yllcorner"] + hazard.hazardObj["nrows"] * hazard.hazardObj["cellsize"]
-
+	returnCode = True
 	for bus in gfmJson['buses']:
-		if x_min <= bus['x'] or x_max >= bus['x'] or y_min <= bus['y'] or y_max >= bus['y']: # Check to see if the hazard field extends beyond the circuit domains.
-			bounds = [hazard.hazardObj["ncols"] * hazard.hazardObj["cellsize"], hazard.hazardObj["nrows"] * hazard.hazardObj["cellsize"]] # Get as much data as possible for the warning.
-			location = [bus['x'], bus['y']]
-			bus_id = [bus['id']]
-			warningTemplate = Template("Warning: Hazard Field of size {{ coordinates }} exceed circuit bounds. Bus at {{ location }} with ID {{ bus_id }} detects warning.")
-			warningTemplate.render(coordinates=bounds)
-
+		busInsideBox = x_min <= bus['x'] <= x_max and y_min <= bus['y'] <= y_max
+		if busInsideBox:
+			returnCode = False
+	return returnCode
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	outData = {}
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict["feederName1"] = feederName
-	with open(pJoin(modelDir,inputDict['weatherImpactsFileName']),'w') as hazardFile:
+	hazardPath = pJoin(modelDir,inputDict['weatherImpactsFileName'])
+	with open(hazardPath,'w') as hazardFile:
 		hazardFile.write(inputDict['weatherImpacts'])
 	with open(pJoin(modelDir, feederName + '.omd'), "r") as jsonIn:
 		feederModel = json.load(jsonIn)
 	# Create GFM input file.
 	print "RUNNING GFM FOR", modelDir
+	critLoads = inputDict['criticalLoads']
 	gfmInputTemplate = {
 		'phase_variation' : float(inputDict['phaseVariation']),
 		'chance_constraint' : float(inputDict['chanceConstraint']),
@@ -459,9 +472,10 @@ def work(modelDir, inputDict):
 	gfmInputFilename = 'gfmInput.json'
 	with open(pJoin(modelDir, gfmInputFilename), 'w') as outFile:
 		json.dump(gfmJson, outFile, indent=4)
-	# Check for overlap between hazard field and GFM circuit input: NOTE: We need a hazard object to invoke this.
-	#for key in gfmJson:
-	#	print key #TODO: check bus coordinates. if violation, set outData['warning'] = 'Hazard no overlap!'
+	# Check for overlap between hazard field and GFM circuit input:
+	hazard = HazardField(hazardPath)
+	if circuitOutsideOfHazard(hazard, gfmJson):
+		outData['warning'] = 'Warning: the hazard field does not overlap with the circuit.'
 	# Run GFM
 	gfmBinaryPath = pJoin(__neoMetaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
 	rdtInputName = 'rdtInput.json'
@@ -623,9 +637,14 @@ def work(modelDir, inputDict):
 				damageDict[line] = damageDict[line] + 1
 			else:
 				damageDict[line] = 1
-	genDiagram(modelDir, feederModel, damageDict)
+	genDiagram(modelDir, feederModel, damageDict, critLoads)
 	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
 		outData["oneLineDiagram"] = inFile.read().encode("base64")
+	
+
+	#damageData = np.loadtxt(omf.omfDir + "/static/testFiles/wf_clip.asc")
+	# Generate damage field.
+
 	# And we're done.
 	return outData
 
@@ -667,6 +686,7 @@ def new(modelDir):
 	except:
 		return False
 	return creationCode
+
 
 def _runModel():
 	# Testing the hazard class.

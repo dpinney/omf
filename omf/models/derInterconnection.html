@@ -34,14 +34,23 @@
 		.tabcontent {
 		    display: none;
 		} 
+
+		table { width: 100%; border-spacing: 2px; }
+		td,th { 
+			border: 1px;
+			border-style: solid;
+			border-color: black;
+			text-align: center;
+			vertical-align: center;
+		 }
 	</style>
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<!-- Data  Imports -->
-	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
-	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
+	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
+	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 	<script type="text/javascript">
@@ -136,7 +145,10 @@
 			</div>
 		</div>
 	</div>
-
+	<div id="triangle-parent">
+		<div id="triangle-message">New Model Version Available<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
+		<div id="triangle-topright"></div>
+	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
@@ -177,7 +189,13 @@
 				<label class="tooltip">Generation Step-up Transformer Name
 					<span class="classic">Name of the step-up transformer at the added generation</span>
 				</label>
-				<input type="text" id="newGenerationStepup" name="newGenerationStepup" required="required"/>
+				<input type="text" id="newGenerationStepUp" name="newGenerationStepUp" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Generation Breaker Name
+					<span class="classic">Name of the breaker at the added generation</span>
+				</label>
+				<input type="text" id="newGenerationBreaker" name="newGenerationBreaker" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Max Thermal loading(&percnt;)
@@ -196,6 +214,18 @@
 					<span class="classic">Higher differences in tap positions between the DER on and DER off scenarios will be considered violations</span>
 				</label>
 				<input type="text" id="tapThreshold" name="tapThreshold" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Max Fault Current Difference(&percnt;)
+					<span class="classic">Higher absolute differences in pre-fault and post-fault currents as a percentage of pre-fault current will be considered violations</span>
+				</label>
+				<input type="text" id="faultCurrentThreshold" name="faultCurrentThreshold" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Max Fault Voltage at POI(&percnt;)
+					<span class="classic">If the post-fault voltage as a percentage of pre-fault voltage is higher than this threshold, it will be considered a violation</span>
+				</label>
+				<input type="text" id="faultVoltsThreshold" name="faultVoltsThreshold" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Peak Load (.csv file)
@@ -250,12 +280,12 @@
 		<!-- Radio Buttons -->
 		<div class="content"><table style="width: 100%">
 			<tr>
-				<td style="text-align: left">
+				<td style="text-align: left; border: 0px;">
 					Distributed Energy Resource Status:
 					<label>	<input class="plotRadios" type="radio" name="derRadio" value="1" checked="true" onchange="displayAppropriately()">On</label>
 					<label><input class="plotRadios" type="radio" name="derRadio" value="0" onchange="displayAppropriately()">Off</label>
 				</td>
-				<td style="text-align: left">
+				<td style="text-align: left; border: 0px;">
 					Load Type:
 					<label><input class="plotRadios" type="radio" name="loadRadio" value="1" checked="true" onchange="displayAppropriately()">Peak</label>
 					<label><input class="plotRadios" type="radio" name="loadRadio" value="0" onchange="displayAppropriately()">Minimum</label>
@@ -375,7 +405,7 @@
 
 		<p class="reportTitle" style="page-break-before:always">Maximum and Minimum Voltages</p>
 		<div class="content">
-			<table id="minMaxVolts" class="centeredTable">
+			<table id="minMaxVolts">
 			<tr>
 				<th rowspan="2">DER Status</th>
 				<th rowspan="2">Load Condition</th>
@@ -462,9 +492,9 @@
 			</table>
 		</div>
 
-		<p class="reportTitle" style="page-break-before:always">Maximum Voltage Flicker</p>
+		<p class="reportTitle" style="page-break-before:always">Maximum Voltage Flicker when DER is turned off</p>
 		<div class="content">
-			<table id="maxVoltFlicker" class="centeredTable">
+			<table id="maxVoltFlicker">
 			<tr> <th>Load Condition</th> <th>&percnt;</th> <th>Location</th> </tr>
 			<tr> 
 				<td>Peak</td> 
@@ -491,9 +521,51 @@
 			</table>
 		</div>
 
+		<p class="reportTitle" style="page-break-before:always">Voltage Values</p>
+		<div class="content">
+			<table id="voltageViolations">
+			<tr> <th>Location</th> <th>Nominal Voltage</th> <th>Voltage Value</th> <th>&percnt; Change</th> <th>DER Status</th> </tr>
+			</table>
+			<script type="text/javascript">
+				var voltageViolations = allOutputData['voltageViolations'];
+				var content = '';
+				for (var i = 0; i<voltageViolations.length; i++) {
+					content = '<td>' + voltageViolations[i][0] + '</td><td>' + 
+					voltageViolations[i][1].toFixed(2) + '</td><td>' + 
+					voltageViolations[i][2].toFixed(2) + '</td><td>' + 
+					voltageViolations[i][3].toFixed(2) + '&percnt;</td><td>' + 
+					voltageViolations[i][4] + '</td>';
+					if (voltageViolations[i][5] == true)
+						content = '<tr style=\"color: red\">' + content + '</tr>';
+					else content = '<tr>' + content + '</tr>';
+					gebi("voltageViolations").innerHTML += content
+				}
+			</script> 
+			<span style="color: red">Voltage values non-compliant with ANSI C84.1 Range A Service voltages are displayed in red</span>
+		</div>
+
+		<p class="reportTitle" style="page-break-before:always">Voltage Flicker when DER is turned off</p>
+		<div class="content">
+			<table id="flickerViolations">
+			<tr> <th>Location</th> <th>Voltage Flicker</th> <th>Load Condition</th> </tr>
+			</table>
+			<script type="text/javascript">
+				var flickerViolations = allOutputData['flickerViolations'];
+				var content = '';
+				for (var i = 0; i<flickerViolations.length; i++) {
+					content = '<td>' + flickerViolations[i][0] + '</td><td>' + flickerViolations[i][1].toFixed(2) + '&percnt;</td><td>' + flickerViolations[i][2] + '</td>';
+					if (flickerViolations[i][3] == true)
+						content = '<tr style=\"color: red\">' + content + '</tr>';
+					else content = '<tr>' + content + '</tr>';
+					gebi("flickerViolations").innerHTML += content
+				}
+			</script> 
+			<span style="color: red">Voltage flicker values greater or equal to the input flicker threshold are displayed in red</span>
+		</div>
+
 		<p class="reportTitle" style="page-break-before:always">Thermal Loading</p>
 		<div class="content">
-			<table id="thermalViolations" class="centeredTable">
+			<table id="thermalViolations">
 			<tr> <th>Location</th> <th>Thermal Load</th> <th>DER Status</th> </tr>
 			</table>
 			<script type="text/javascript">
@@ -512,7 +584,7 @@
 		
 		<p class="reportTitle" style="page-break-before:always">Regulator Power Flow</p>
 		<div class="content">
-			<table id="reversePowerFlow" class="centeredTable">
+			<table id="reversePowerFlow">
 			<tr> <th>Location</th> <th>Power</th> <th>DER Status</th> </tr>
 			</table>
 			<script type="text/javascript">
@@ -533,17 +605,17 @@
 
 		<p class="reportTitle" style="page-break-before:always">Tap Changes</p>
 		<div class="content">
-			<table id="tapChanges" class="centeredTable">
+			<table id="tapChanges">
 			<tr> <th>Load Condition</th> <th>Location</th> <th>Tap Position DER On</th> <th>Tap Position DER Off</th> <th>Difference</th> </tr>
 			</table>
 			<script type="text/javascript">
-				var tapDifferences = allOutputData['tapDifferences'];
+				var tapViolations = allOutputData['tapViolations'];
 				var content = '';
-				for (var i = 0; i<tapDifferences.length; i++) {
-					content = '<td>' + tapDifferences[i][0] + '</td><td>' + tapDifferences[i][1] + 
-					'</td><td>' + tapDifferences[i][2] + '</td><td>' + tapDifferences[i][3] + 
-					'</td><td>' + tapDifferences[i][4] + '</td>';
-					if (tapDifferences[i][5] == true)
+				for (var i = 0; i<tapViolations.length; i++) {
+					content = '<td>' + tapViolations[i][0] + '</td><td>' + tapViolations[i][1] + 
+					'</td><td>' + tapViolations[i][2] + '</td><td>' + tapViolations[i][3] + 
+					'</td><td>' + tapViolations[i][4] + '</td>';
+					if (tapViolations[i][5] == true)
 						content = '<tr style=\"color: red\">' + content + '</tr>';
 					else content = '<tr>' + content + '</tr>';
 					gebi("tapChanges").innerHTML += content;
@@ -554,30 +626,99 @@
 
 		<p class="reportTitle" style="page-break-before:always">Short Circuit Analysis</p>
 		<div class="content">
-			<table id="shortCircuit" class="centeredTable">
+			<table id="faultBreaker">
+			<tr> <td style="border: none; text-align: left;" colspan="5">DER Breaker Fault Current</td> </tr>
 			<tr>
-				<th rowspan="2">DER Status</th>
-				<th colspan="2">Feeder Breaker</th>
-				<th colspan="2">Substation Transformer</th>
-				<th colspan="2">POI</th>
+				<th>Load Condition</th>
+				<th>Fault Type</th>
+				<th>DER On</th>
+				<th>DER Off</th>
+				<th>Difference</th>
 			</tr>
-			<tr> <th>LLL</th> <th>LG</th> <th>LLL</th> <th>LG</th> <th>LLL</th> <th>LG</th> </tr>
 			</table>
+			<script type="text/javascript">
+				var faultBreaker = allOutputData['faultBreaker'];
+				var content = '';
+				for (var i = 0; i<faultBreaker.length; i++) {
+					content = '<td>' + faultBreaker[i][0] + '</td><td>' + 
+						faultBreaker[i][1] + '</td><td>' + faultBreaker[i][2] + 
+						'</td><td>' + faultBreaker[i][3] + '</td><td>' + 
+						faultBreaker[i][4] + '</td>';
+					content = '<tr>' + content + '</tr>';
+					gebi("faultBreaker").innerHTML += content;
+				}
+			</script> 
+			<table id="faultStepUp">
+			<tr> <td style="border: none; text-align: left;" colspan="5">DER Transformer Fault Current</td> </tr>
+			<tr>
+				<th>Load Condition</th>
+				<th>Fault Type</th>
+				<th>DER On</th>
+				<th>DER Off</th>
+				<th>Difference</th>
+			</tr>
+			</table>
+			<script type="text/javascript">
+				var faultStepUp = allOutputData['faultStepUp'];
+				var content = '';
+				for (var i = 0; i<faultStepUp.length; i++) {
+					content = '<td>' + faultStepUp[i][0] + '</td><td>' + 
+						faultStepUp[i][1] + '</td><td>' + faultStepUp[i][2] + 
+						'</td><td>' + faultStepUp[i][3] + '</td><td>' + 
+						faultStepUp[i][4] + '</td>';
+					content = '<tr>' + content + '</tr>';
+					gebi("faultStepUp").innerHTML += content;
+				}
+			</script> 
 		</div>
 
-		<p class="reportTitle" style="page-break-before:always">Fault Current Violations</p>
+		<p class="reportTitle" style="page-break-before:always">Fault Current Violations with DER On</p>
 		<div class="content">
-			<table id="faultCurrentViolations" class="centeredTable">
-			<tr> <th>Location</th> <th>Fault Current</th> <th>DER Status</th> </tr>
+			<table id="faultCurrentViolations">
+			<tr> <th>Fault Location</th> <th>Fault Type</th> <th>Measurement Location</th> <th>Pre-fault Current</th> <th>Post-fault Current</th> <th>Absolute Difference</th> </tr>
 			</table>
+			<script type="text/javascript">
+				var faultCurrentViolations=allOutputData['faultCurrentViolations'];
+				var content = '';
+				for (var i = 0; i<faultCurrentViolations.length; i++) {
+					content = '<td>' + faultCurrentViolations[i][0] + '</td><td>' +
+						faultCurrentViolations[i][1] + '</td><td>' + 
+						faultCurrentViolations[i][2] + '</td><td>' + 
+						faultCurrentViolations[i][3] + '</td><td>' + 
+						faultCurrentViolations[i][4] + '</td><td>' + 
+						faultCurrentViolations[i][5] + '</td>';
+					if (faultCurrentViolations[i][6] == true)
+						content = '<tr style=\"color: red\">' + content + '</tr>';
+					else content = '<tr>' + content + '</tr>';
+					gebi("faultCurrentViolations").innerHTML += content;
+				}
+			</script> 
+			<span style="color: red">Fault current differences as a percent of the pre-fault current that are greater than or equal to the input threshold are displayed in red</span>
 		</div>
 
 		<p class="reportTitle" style="page-break-before:always">Effective Grounding Screening</p>
 		<div class="content">
-			<table id="groundScreening" class="centeredTable">
+			<table id="faultPOIVolts">
 			<tr> <td style="border: none; text-align: left;" colspan="3">Line to Ground Fault at the POI</td> </tr>
-			<tr> <th>Pre-fault Current</th> <th>Post-fault Current</th> <th>Percent Change</th> </tr>
+			<tr> <th>DER Status</th> <th>Fault Location</th> <th>Fault Type</th> <th>Pre-fault Voltage</th> <th>Post-fault Voltage</th> <th>Post-fault Percent</th> </tr>
 			</table>
+			<script type="text/javascript">
+				var faultPOIVolts=allOutputData['faultPOIVolts'];
+				var content = '';
+				for (var i = 0; i<faultPOIVolts.length; i++) {
+					content = '<td>' + faultPOIVolts[i][0] + '</td><td>' +
+						faultPOIVolts[i][1] + '</td><td>' + 
+						faultPOIVolts[i][2] + '</td><td>' + 
+						faultPOIVolts[i][3] + '</td><td>' + 
+						faultPOIVolts[i][4] + '</td><td>' + 
+						faultPOIVolts[i][5] + '</td>';
+					if (faultPOIVolts[i][6] == true)
+						content = '<tr style=\"color: red\">' + content + '</tr>';
+					else content = '<tr>' + content + '</tr>';
+					gebi("faultPOIVolts").innerHTML += content;
+				}
+			</script> 
+			<span style="color: red">Post-fault voltage  values as a percent of the pre-fault voltage that are greater than or equal to the input threshold are displayed in red</span>
 		</div>
 	
 	</div>

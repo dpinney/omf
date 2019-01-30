@@ -4,7 +4,7 @@ from omf import feeder
 import anonymization
 
 
-
+#below should be paths to nhec models to anonymize
 feeder.glmToOmd('/Users/tuomastalvitie/Desktop/Random_Feeder_files/Chester_Jan2017_fixed.glm', '/Users/tuomastalvitie/Desktop/Random_Feeder_files/Chester_Jan2017_fixed.omd')
 feeder.glmToOmd('/Users/tuomastalvitie/Desktop/Random_Feeder_files/Conway_Jan2017_fixed.glm', '/Users/tuomastalvitie/Desktop/Random_Feeder_files/Conway_Jan2017_fixed.omd')
 feeder.glmToOmd('/Users/tuomastalvitie/Desktop/Random_Feeder_files/Fairgrounds_Jan2017_fixed.glm', '/Users/tuomastalvitie/Desktop/Random_Feeder_files/Fairgrounds_Jan2017_fixed.omd')

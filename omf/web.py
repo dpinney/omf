@@ -284,7 +284,6 @@ def regenOmfStats():
 		return redirect("/")
 	genImagesProc = Process(target=genAllImages, args=[])
 	genImagesProc.start()
-	genImagesProc.join()
 	return redirect("/omfStats")
 
 @app.route("/myaccount")
@@ -464,12 +463,12 @@ def distribution_get(owner, model_name, feeder_num):
 		dictionary['model'] = str(dictionary['model'])
 		dictionary['name'] = str(dictionary['name'])
 	public_feeders = all_data["publicFeeders"]
-	showFileMenu = User.cu() == "admin" or owner != "public"
+	show_file_menu = User.cu() == "admin" or owner != "public"
 	# omf.distNetViz.forceLayout()
 	return render_template(
 		"distNetViz.html", thisFeederData=passed_data, thisFeederName=feeder_name, thisFeederNum=feeder_num,
 		thisModelName=model_name, thisOwner=owner, components=component_json, jasmine=jasmine, spec=spec,
-		publicFeeders=public_feeders, userFeeders=user_feeders, showFileMenu=showFileMenu
+		publicFeeders=public_feeders, userFeeders=user_feeders, showFileMenu=show_file_menu
 	)
 
 
@@ -545,7 +544,7 @@ def milsoftImport(owner):
 		conFile.write("WORKING")
 	importProc = Process(target=milImportBackground, args=[owner, modelName, feederName, feederNum, stdString, seqString])
 	importProc.start()
-	return ('',204)
+	return 'Success'
 
 def milImportBackground(owner, modelName, feederName, feederNum, stdString, seqString):
 	''' Function to run in the background for Milsoft import. '''
@@ -587,7 +586,7 @@ def matpowerImport(owner):
 		conFile.write("WORKING")
 	importProc = Process(target=matImportBackground, args=[owner, modelName, networkName, networkNum])
 	importProc.start()
-	return ('',204)
+	return 'Success'
 
 def matImportBackground(owner, modelName, networkName, networkNum):
 	''' Function to run in the background for Milsoft import. '''
@@ -630,7 +629,7 @@ def gridlabdImport(owner):
 		conFile.write("WORKING")
 	importProc = Process(target=gridlabImportBackground, args=[owner, modelName, feederName, feederNum, glmString])
 	importProc.start()
-	return ('',204)
+	return 'Success'
 
 def gridlabImportBackground(owner, modelName, feederName, feederNum, glmString):
 	''' Function to run in the background for Milsoft import. '''
@@ -693,7 +692,7 @@ def scadaLoadshape(owner,feederName):
 	pid = str(importProc.pid)
 	with open(modelDir+"/CPID.txt", "w+") as outFile:
 		outFile.write(pid)
-	return ('',204)
+	return 'Success'
 
 def backgroundScadaLoadshape(owner, modelName, workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, solver, calibrateError, trim):
 	# heavy lifting background process/omfCalibrate and then deletes PID file
@@ -744,7 +743,7 @@ def cancelScadaLoadshape(modelName):
 	os.kill(pidNum, signal.SIGTERM)
 	os.remove("data/Model/" + owner + "/" +  modelName + "/CPID.txt")
 	shutil.rmtree("data/Model/" + owner + "/" +  modelName + "/calibration")
-	return ('cancel',204)
+	return 'cancel'
 
 @app.route("/loadModelingAmi/<owner>/<feederName>", methods=["POST"])
 def loadModelingAmi(owner,feederName):
@@ -765,7 +764,7 @@ def loadModelingAmi(owner,feederName):
 	pid = str(importProc.pid)
 	with open(modelDir+"/APID.txt", "w+") as outFile:
 		outFile.write(pid)
-	return ('',204)
+	return ''
 
 def backgroundLoadModelingAmi(owner, modelName, workDir, omdPath, amiPath):
 	outDir = workDir + '/amiOutput/'
@@ -810,7 +809,7 @@ def cymeImport(owner):
 	pid = str(importProc.pid)
 	with open(modelFolder+"/ZPID.txt", "w+") as outFile:
 		outFile.write(pid)
-	return ('',204)
+	return ''
 
 def cymeImportBackground(owner, modelName, feederName, feederNum, mdbFileName):
 	''' Function to run in the background for Milsoft import. '''
@@ -843,8 +842,9 @@ def newSimpleFeeder(owner, modelName, feederNum=1, writeInput=False, feederName=
 				feederName = 'feeder'+str(i)
 		if writeInput:
 			writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
-		return ('Success',204)
-	else: return ('Invalid Login', 204)
+		return 'Success'
+	else:
+		return 'Invalid Login'
 
 @app.route("/newSimpleNetwork/<owner>/<modelName>/<networkNum>/<writeInput>", methods=["POST", "GET"])
 def newSimpleNetwork(owner, modelName, networkNum=1, writeInput=False, networkName='network1'):
@@ -858,8 +858,9 @@ def newSimpleNetwork(owner, modelName, networkNum=1, writeInput=False, networkNa
 				break
 			else: networkName = 'network'+str(i)
 		if writeInput: writeToInput(modelDir, networkName, 'networkName'+str(networkNum))
-		return ('Success',204)
-	else: return ('Invalid Login', 204)
+		return 'Success'
+	else:
+		return 'Invalid Login'
 
 @app.route("/newBlankFeeder/<owner>", methods=["POST"])
 @flask_login.login_required
@@ -926,7 +927,7 @@ def saveFeeder(owner, modelName, feederName):
 		with open("data/Model/" + owner + "/" + modelName + "/" + feederName + ".omd", "w") as outFile:
 			payload = json.loads(request.form.to_dict().get("feederObjectJson","{}"))
 			json.dump(payload, outFile, indent=4)
-	return ('Success',204)
+	return 'Success'
 
 @app.route("/saveNetwork/<owner>/<modelName>/<networkName>", methods=["POST"])
 @flask_login.login_required
@@ -937,7 +938,7 @@ def saveNetwork(owner, modelName, networkName):
 		with open("data/Model/" + owner + "/" + modelName + "/" + networkName + ".omt", "w") as outFile:
 			payload = json.loads(request.form.to_dict().get("networkObjectJson","{}"))
 			json.dump(payload, outFile, indent=4)
-	return ('Success',204)
+	return 'Success'
 
 @app.route("/renameFeeder/<owner>/<modelName>/<oldName>/<feederName>/<feederNum>", methods=["GET", "POST"])
 @flask_login.login_required
@@ -950,11 +951,13 @@ def renameFeeder(owner, modelName, oldName, feederName, feederNum):
 		with open(oldFile, "r") as feederIn:
 			with open(newFile, "w") as outFile:
 				outFile.write(feederIn.read())
-	elif os.path.isfile(newFile): return ('Failure', 204)
-	elif not os.path.isfile(oldFile): return ('Failure', 204)
+	elif os.path.isfile(newFile):
+		return 'Failure'
+	elif not os.path.isfile(oldFile):
+		return 'Failure'
 	os.remove(oldFile)
 	writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
-	return ('Success',204)
+	return 'Success'
 
 @app.route("/renameNetwork/<owner>/<modelName>/<oldName>/<networkName>/<networkNum>", methods=["POST"])
 @flask_login.login_required
@@ -967,11 +970,13 @@ def renameNetwork(owner, modelName, oldName, networkName, networkNum):
 		with open(oldnetworkDir, "r") as networkIn:
 			with open(networkDir, "w") as outFile:
 				outFile.write(networkIn.read())
-	elif os.path.isfile(networkDir): return ('Failure', 204)
-	elif not os.path.isfile(oldnetworkDir): return ('Failure', 204)
+	elif os.path.isfile(networkDir):
+		return 'Failure'
+	elif not os.path.isfile(oldnetworkDir):
+		return 'Failure'
 	os.remove(oldnetworkDir)
 	writeToInput(modelDir, networkName, 'networkName'+str(networkNum))
-	return ('Success',204)
+	return 'Success'
 
 @app.route("/removeFeeder/<owner>/<modelName>/<feederNum>", methods=["GET", "POST"])
 @app.route("/removeFeeder/<owner>/<modelName>/<feederNum>/<feederName>", methods=["GET", "POST"])
@@ -990,11 +995,11 @@ def removeFeeder(owner, modelName, feederNum, feederName=None):
 			allInput.pop("feederName"+str(feederNum))
 			with open(modelDir+"/allInputData.json","w") as inputFile:
 				json.dump(allInput, inputFile, indent=4)
-			return ('Success',204)
+			return 'Success'
 		except:
-			return ('Failed',204)
+			return 'Failed'
 	else:
-		return ('Invalid Login', 204)
+		return 'Invalid Login'
 
 @app.route("/loadFeeder/<frfeederName>/<frmodelName>/<modelName>/<feederNum>/<frUser>/<owner>", methods=["GET", "POST"])
 @flask_login.login_required
@@ -1057,11 +1062,11 @@ def removeNetwork(owner, modelName, networkNum, networkName=None):
 			allInput.pop("networkName"+str(networkNum))
 			with open(modelDir+"/allInputData.json","w") as inputFile:
 				json.dump(allInput, inputFile, indent = 4)
-			return ('Success',204)
+			return 'Success'
 		except:
-			return ('Failed',204)
+			return 'Failed'
 	else:
-		return ('Invalid Login', 204)
+		return 'Invalid Login'
 
 @app.route("/climateChange/<owner>/<feederName>", methods=["POST"])
 @flask_login.login_required
@@ -1077,7 +1082,7 @@ def climateChange(owner, feederName):
 	pid = str(importProc.pid)
 	with open(modelDir + '/WPID.txt', 'w+') as outFile:
 		outFile.write(pid)
-	return ('',204)
+	return 'Success'
 
 def backgroundClimateChange(modelDir, omdPath, outFilePath):
 	with open(omdPath, 'r') as inFile:
@@ -1139,7 +1144,7 @@ def anonymize(owner, feederName):
 	pid = str(importProc.pid)
 	with open(modelDir + '/PPID.txt', 'w+') as outFile:
 		outFile.write(pid)
-	return ('Success',204)
+	return 'Success'
 
 def backgroundAnonymize(modelDir, omdPath):
 	with open(omdPath, 'r') as inFile:
@@ -1196,7 +1201,7 @@ def anonymizeTran(owner, networkName):
 	pid = str(importProc.pid)
 	with open(modelDir + '/TPPID.txt', 'w+') as outFile:
 		outFile.write(pid)
-	return ('Success',204)
+	return 'Success'
 
 def backgroundAnonymizeTran(modelDir, omtPath):
 	with open(omtPath, 'r') as inFile:

@@ -3637,6 +3637,7 @@
             "geometric_mean_radius": "0.00813999958336353", 
             "diameter": "0.527999997138977", 
             "object": "overhead_line_conductor", 
+            "rating.summer.continuous": "300",
             "resistance": "0.484200000762939"
         }, 
         "8": {
@@ -4156,9 +4157,10 @@
         }, 
         "3": {
             "name": "ug_lc_7210", 
-           "geometric_mean_radius": "0.00813999958336353", 
+            "geometric_mean_radius": "0.00813999958336353", 
             "diameter": "0.527999997138977", 
             "object": "overhead_line_conductor", 
+            "rating.summer.continuous": "300",
             "resistance": "0.484200000762939"
         }, 
         "177": {
@@ -4644,6 +4646,7 @@
             "geometric_mean_radius": "0.00813999958336353", 
             "diameter": "0.527999997138977", 
             "object": "overhead_line_conductor", 
+            "rating.summer.continuous": "300",
             "resistance": "0.484200000762939"
         }, 
         "220": {
@@ -5251,9 +5254,10 @@
         }, 
         "5": {
             "name": "ug_lc_7230", 
-           "geometric_mean_radius": "0.00813999958336353", 
+            "geometric_mean_radius": "0.00813999958336353", 
             "diameter": "0.527999997138977", 
             "object": "overhead_line_conductor", 
+            "rating.summer.continuous": "300",
             "resistance": "0.484200000762939"
         }, 
         "9": {

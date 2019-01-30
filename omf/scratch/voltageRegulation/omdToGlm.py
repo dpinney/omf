@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 import csv
 import omf
-from voltageViz import voltageRegVisual
+from models.voltageDrop import drawPlot
 import re
 from datetime import datetime
 
@@ -184,7 +184,8 @@ def _debugging(filePath):
 	# os.remove('outGLMtest.glm')
 
 	# Visualize Voltage Regulation
-	voltageRegVisual.voltRegViz(filePath)
+	chart = drawPlot('outGLMtest.glm', neatoLayout=True, edgeCol="PercentOfRating", nodeCol="perUnitVoltage", nodeLabs="Value", edgeLabs="Name", customColormap=True, rezSqIn=225, gldBinary=omf.omfDir + '/solvers/gridlabd_gridballast/local_gd/bin/gridabd.bin')
+	chart.savefig('outGLM.png')
 if __name__ == '__main__':
 	try: 
 		#Parse Command Line

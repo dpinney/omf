@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 from pytz import reference
 import omf
 import omf.feeder as feeder
+import omf.geo as geo
 
 def _csvToArray(csvString):
 	''' Simple csv data ingester. '''
@@ -1741,6 +1742,17 @@ def fixOrphanedLoads(tree):
 				if namesToKeys.get(next_from):
 					tree[key]['from'] = next_from
 	print '%d size 1 deletions and %d size 2 deletions' % ( size_1_del, size_2_del )
+	return tree
+
+def rewriteStatePlaneToLatLon(tree, epsg = None):
+	''' For the input tree, convert state plane coordinates to latLon.
+	Note that we need the tree to come from convert(stdString, seqString, rescale=False). Please see the wiki at https://github.com/dpinney/omf/wiki/Other-~-Windmil-Data-Import#transforming-to-latitude-and-longitude-coordinates for the way to get the epsg code; if you don't choose an epsg, we locate the map near the geographical center of the USA.
+	'''
+	#TODO: double check the x/y order.
+	for key in tree:
+		if 'latitude' in tree[key] and 'longitude' in tree[key]:
+			newCoords = geo.statePlaneToLatLon(tree[key]['longitude'], tree[key]['latitude'], epsg = epsg)
+			tree[key]['latitude'], tree[key]['longitude'] = newCoords
 	return tree
 
 def _latCount(name):

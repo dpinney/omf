@@ -45,7 +45,7 @@ def genAllImages():
 	model_db_path = './scratch/modelDatabase.tsv'
 	genModelDatabase(model_db_path)  # Overwrite is good.
 	modelDatabaseStats(model_db_path, './static/model_db_stats.png')
-	trafficLogStats('./omf.log', './static/traffic_log_stats.png')
+	trafficLogStats('./omf.access.log', './static/traffic_log_stats.png')
 
 def modelDatabaseStats(dataFilePath, outFilePath):
 	# Last run:
@@ -93,7 +93,7 @@ def modelDatabaseStats(dataFilePath, outFilePath):
 	plt.figure(figsize=(15, 8))
 	plt.subplot(2, 1, 1)
 	xRanges2 = range(len(yearUsers.values()))
-	plt.bar(xRanges2, yearUsers.values())
+	plt.bar(xRanges2, yearUsers.values(), align='edge')
 	ax = plt.gca()
 	ax.set_xlim(-0.2, len(yearUsers.values()))
 	ax = plt.gca()
@@ -103,7 +103,7 @@ def modelDatabaseStats(dataFilePath, outFilePath):
 	# Plot the model counts.
 	plt.subplot(2, 1, 2)
 	xRanges = range(len(modelCounts.values()))
-	plt.bar(xRanges, modelCounts.values())
+	plt.bar(xRanges, modelCounts.values(), align='edge')
 	ax = plt.gca()
 	ax.set_title("Count of Models on omf.coop by Type")
 	ax.set_xlim(-0.2, len(modelCounts.values()))
@@ -134,56 +134,62 @@ def trafficLogStats(logsPath, outFilePath):
 	# Process the log file to generate hit and session counts.
 	# Filter out lines containing these strings.
 	for line in lines:
-		# Skip any errors.
-		if not line.startswith('INFO') or '* Running on' in line:
-			continue
-		# HACK: make werkzeug format match Apache's.
-		comp = line.split(':')
-		goodComps = comp[0] + ':' + comp[1]
-		line = line.replace(goodComps + ':', goodComps + ' ')
 		# Now split and define things.
 		words = line.split()
-		ip = geolite2.lookup(words[1])
+		try:
+			ip = geolite2.lookup(words[0])
+		except:
+			ip = None
 		if ip is not None and ip.country is not None:
 			if ip.country == 'XK':
 				IPCount["Kosovo"] += 1
 			else:
 				nation = countries.get(ip.country)
 				IPCount[nation.name] += 1
-		if "GET" in words[6]:  # If this is a GET request...
-			if "Chrome" in line:
-				browserCount["Chrome"] += 1
-			elif "Firefox" in line:
-				browserCount["FireFox"] += 1
-			elif "Safari" in line:
-				browserCount["Safari"] += 1
-			elif "Explorer" in line:
-				browserCount["Internet Explorer"] += 1
-			else:
-				browserCount["Other"] += 1
+		# Browser Type
+		if "Chrome" in line:
+			browserCount["Chrome"] += 1
+		elif "Firefox" in line:
+			browserCount["FireFox"] += 1
+		elif "Safari" in line:
+			browserCount["Safari"] += 1
+		elif "Explorer" in line:
+			browserCount["Internet Explorer"] += 1
+		else:
 			browserCount["Other"] += 1
-			startIndex = line.index("[")
-			endIndex = line.index("]")
-			parsedLine = line[startIndex + 1:endIndex]  # Get date of access.
-			if words[1] not in users:  # Is this is a unique viewer?
-				recordCount[parsedLine[3:11]] += 1  # Add another user to the count.
-				users.add(words[1])
-			monthCount[parsedLine[3:11]] += 1  # No matter what, we update the monthly count.
-			userCount[words[1]] += 1
+		browserCount["Other"] += 1
+		# Get date of access.
+		try:
+			dtStr = words[3][1:].replace(':', ' ', 1)
+			dt = parseDt(dtStr)
+			accessDt = str(dt.year) + '-' + str(dt.month).zfill(2)
+		except:
+			accessDt = '2019-01'
+		# Is this is a unique viewer?
+		ipStr = words[0]
+		if ipStr not in users:
+			# Add another user to the count.
+			recordCount[accessDt] += 1
+			users.add(ipStr)
+		# No matter what, we update the monthly count.
+		monthCount[accessDt] += 1
+		userCount[ipStr] += 1
 	# Set up plotting:
 	plt.figure(figsize=(15, 15))
 	ggColors = [x['color'] for x in plt.rcParams['axes.prop_cycle']]
 	# Session counts by month:
-	log = collections.OrderedDict(sorted(recordCount.items(), key=lambda x: parseDt(x[0])))
+	log = collections.OrderedDict(sorted(recordCount.items(), key=lambda x:x[0]))
 	plt.subplot(3, 1, 1)
 	ax = plt.gca()
-	ax.set_title('Session Count By Month. Total: ' + "{:,}".format(sum(log.values())) + '\nGenerated: ' + datetime.now().strftime('%Y-%m-%d'))
+	totalSessions = "{:,}".format(sum(log.values()))
+	creationTime = datetime.now().strftime('%Y-%m-%d')
+	ax.set_title('Session Count By Month. Total: ' + totalSessions + '\nGenerated: ' + creationTime)
 	barRange = range(len(log))
 	plt.bar(barRange, log.values(), align='center')
 	plt.xticks(barRange, [x.replace('/', '\n') for x in log.keys()])
 	plt.axis('tight')
 	# Hit counts by month:
-	log = collections.OrderedDict(sorted(monthCount.items(), key=lambda x: parseDt(x[0])))
+	log = collections.OrderedDict(sorted(monthCount.items(), key=lambda x:x[0]))
 	plt.subplot(3, 1, 2)
 	ax = plt.gca()
 	ax.set_title('Hit Count By Month. Total: ' + "{:,}".format(sum(log.values())))
@@ -237,8 +243,7 @@ def trafficLogStats(logsPath, outFilePath):
 	plt.pie(sorted(browserValues, reverse=True), colors=ggColors)
 	browserLabels = [(l, s) for l, s in zip(b_label_list, browserValues)]
 	plt.legend(labels=sorted(browserLabels, key=lambda x: x[1], reverse=True), shadow=True)
-	title = 'Browser Type Breakdown'
-	plt.title(title)
+	plt.title('Browser Type Breakdown')
 	# Adjust and write out the image.
 	plt.subplots_adjust(left=0.1, right=0.9)
 	plt.savefig(outFilePath)

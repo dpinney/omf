@@ -19,23 +19,21 @@ from omf.solvers import gridlabd
 
 # Model metadata:
 modelName, template = metadata(__file__)
-tooltip = ("The derInterconnection model runs the key modeling and analysis steps involved "
-	"in a DER Impact Study including Load Flow, Short Circuit, "
-	"and Effective Grounding screenings.")
-hidden = True
+tooltip = ('The derInterconnection model runs the key modeling and analysis steps involved '
+	'in a DER Impact Study including Load Flow, Short Circuit, '
+	'and Effective Grounding screenings.')
+#hidden = True
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	
 	outData = {}
 
-	# feederName = inputDict["feederName1"]
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
-	inputDict["feederName1"] = feederName
+	inputDict['feederName1'] = feederName
 	
-	# print "*DEBUG: feederName:", feederName
 	omd = json.load(open(pJoin(modelDir,feederName + '.omd')))
-	if inputDict.get("layoutAlgorithm", "geospatial") == "geospatial":
+	if inputDict.get('layoutAlgorithm', 'geospatial') == 'geospatial':
 		neato = False
 	else:
 		neato = True 
@@ -50,11 +48,12 @@ def work(modelDir, inputDict):
 		attachments = omd.get('attachments',[])
 	else:
 		raise Exception('Invalid input file type. We require a .glm or .omd.')
+	
 	# dictionary to hold info on lines present in glm
 	edge_bools = dict.fromkeys(['underground_line','overhead_line','triplex_line','transformer','regulator', 'fuse', 'switch'], False)
 	# Get rid of schedules and climate and check for all edge types:
 	for key in tree.keys():
-		obtype = tree[key].get("object","")
+		obtype = tree[key].get('object','')
 		if obtype == 'underground_line':
 			edge_bools['underground_line'] = True
 		elif obtype == 'overhead_line':
@@ -69,7 +68,7 @@ def work(modelDir, inputDict):
 			edge_bools['fuse'] = True
 		elif obtype == 'switch':
 			edge_bools['switch'] = True
-		if tree[key].get("argument","") == "\"schedules.glm\"" or tree[key].get("tmyfile","") != "":
+		if tree[key].get('argument','') == '\"schedules.glm\"' or tree[key].get('tmyfile','') != '':
 			del tree[key]
 			
 	# Make sure we have a voltDump:
@@ -77,13 +76,11 @@ def work(modelDir, inputDict):
 		try: return int(x)
 		except: return 0
 	biggestKey = max([safeInt(x) for x in tree.keys()])
-	tree[str(biggestKey*10)] = {"object":"voltdump","filename":"voltDump.csv"}
-	tree[str(biggestKey*10 + 1)] = {"object":"currdump","filename":"currDump.csv"}
+	tree[str(biggestKey*10)] = {'object':'voltdump','filename':'voltDump.csv'}
+	tree[str(biggestKey*10 + 1)] = {'object':'currdump','filename':'currDump.csv'}
+	
 	# Line rating dumps
-	tree[omf.feeder.getMaxKey(tree) + 1] = {
-		'module': 'tape'
-	}
-
+	tree[omf.feeder.getMaxKey(tree) + 1] = {'module': 'tape'}
 	for key in edge_bools.keys():
 		if edge_bools[key]:
 			tree[omf.feeder.getMaxKey(tree) + 1] = {
@@ -94,309 +91,372 @@ def work(modelDir, inputDict):
 				'file':key+'_cont_rating.csv'
 			}
 
-	#create second tree without the der generation
-	treeNoDer = copy.deepcopy(tree)
-	for key in treeNoDer.keys():
-		name = treeNoDer[key].get("name","")
-		if name == inputDict["newGeneration"]:
-			del treeNoDer[key]
-			break
+	if edge_bools['regulator']:
+		#print('here')
+		tree[omf.feeder.getMaxKey(tree) + 1] = {
+			'object':'group_recorder', 
+			'group':'"class=regulator"',
+			'limit':1000,
+			'property':'tap_A',
+			'file':'tap_A.csv',
+			'interval':0
+		}
 
-	#create a version of both trees under min load
-	if inputDict['peakLoadData'] is not '':
-		peakLoadData = inputDict['peakLoadData'].split('\r\n')
-		for data in peakLoadData:
-			if str(data) is not '':
-				key = data.split(',')[0]
-				val = data.split(',')[1]
-				tree[key]['power_12'] = val
-				treeNoDer[key]['power_12'] = val
-	
-	treeMinLoad = copy.deepcopy(tree)
-	treeNoDerMinLoad = copy.deepcopy(treeNoDer)
-	
-	if inputDict['minLoadData'] is not '':
-		minLoadData = inputDict['minLoadData'].split('\r\n')
-		for data in minLoadData:
-			if str(data) is not '':
-				key = data.split(',')[0]
-				val = data.split(',')[1]
-				treeMinLoad[key]['power_12'] = val
-				treeNoDerMinLoad[key]['power_12'] = val
-				
-	else:
-		for key in treeMinLoad.keys():
-			obtype = treeMinLoad[key].get("object","")
-			if obtype == 'triplex_node':
-				load = float(treeMinLoad[key].get("power_12",""))
-				minLoad = (load/3)+(load*0.1*random.triangular(-1,1))
-				treeMinLoad[key]['power_12'] = str(minLoad)
-				treeNoDerMinLoad[key]['power_12'] = str(minLoad)
+		tree[omf.feeder.getMaxKey(tree) + 1] = {
+			'object':'group_recorder', 
+			'group':'"class=regulator"',
+			'limit':1000,
+			'property':'tap_B',
+			'file':'tap_B.csv',
+			'interval':0
+		}
 
+		tree[omf.feeder.getMaxKey(tree) + 1] = {
+			'object':'group_recorder', 
+			'group':'"class=regulator"',
+			'limit':1000,
+			'property':'tap_C',
+			'file':'tap_C.csv',
+			'interval':0
+		}
 
-	# create and save all of the plots for all 4 scenarios
-
-	#DER on, Peak load
-	dataPeak = runGridlabAndProcessData(tree, attachments, edge_bools, workDir=modelDir)
-
-	chart = drawPlot(tree,nodeDict=dataPeak["nodeVolts"], neatoLayout=neato)
-	chart.savefig(pJoin(modelDir,"voltageDerOnPeakChart.png"))
-	with open(pJoin(modelDir,"voltageDerOnPeakChart.png"),"rb") as inFile:
-		outData["voltageDerOnPeak"] = inFile.read().encode("base64")
-	chart = drawPlot(tree,edgeDict=dataPeak["edgeCurrentSum"], neatoLayout=neato)
-	chart.savefig(pJoin(modelDir,"currentDerOnPeakChart.png"))
-	with open(pJoin(modelDir,"currentDerOnPeakChart.png"),"rb") as inFile:
-		outData["currentDerOnPeak"] = inFile.read().encode("base64")
-	chart = drawPlot(tree,edgeDict=dataPeak["edgeValsPU"], neatoLayout=neato)
-	chart.savefig(pJoin(modelDir,"thermalDerOnPeakChart.png"))
-	with open(pJoin(modelDir,"thermalDerOnPeakChart.png"),"rb") as inFile:
-		outData["thermalDerOnPeak"] = inFile.read().encode("base64")
-
-	#DER off, Peak load
-	dataPeakNoDer = runGridlabAndProcessData(treeNoDer, attachments, edge_bools, workDir=modelDir)
-	
-	chart = drawPlot(treeNoDer,nodeDict=dataPeakNoDer["nodeVolts"], neatoLayout=neato)
-	chart.savefig(pJoin(modelDir,"voltageDerOffPeakChart.png"))
-	with open(pJoin(modelDir,"voltageDerOffPeakChart.png"),"rb") as inFile:
-		outData["voltageDerOffPeak"] = inFile.read().encode("base64")
-	chart = drawPlot(treeNoDer,edgeDict=dataPeakNoDer["edgeCurrentSum"], neatoLayout=neato)
-	chart.savefig(pJoin(modelDir,"currentDerOffPeakChart.png"))
-	with open(pJoin(modelDir,"currentDerOffPeakChart.png"),"rb") as inFile:
-		outData["currentDerOffPeak"] = inFile.read().encode("base64")
-	chart = drawPlot(treeNoDer,edgeDict=dataPeakNoDer["edgeValsPU"], neatoLayout=neato)
-	chart.savefig(pJoin(modelDir,"thermalDerOffPeakChart.png"))
-	with open(pJoin(modelDir,"thermalDerOffPeakChart.png"),"rb") as inFile:
-		outData["thermalDerOffPeak"] = inFile.read().encode("base64")
-
-	#DER on, Min load
-	dataMin = runGridlabAndProcessData(treeMinLoad, attachments, edge_bools, workDir=modelDir)
-	
-	chart = drawPlot(treeMinLoad,nodeDict=dataMin["nodeVolts"], neatoLayout=neato)
-	chart.savefig(pJoin(modelDir,"voltageDerOnMinChart.png"))
-	with open(pJoin(modelDir,"voltageDerOnMinChart.png"),"rb") as inFile:
-		outData["voltageDerOnMin"] = inFile.read().encode("base64")
-	chart = drawPlot(treeMinLoad,edgeDict=dataMin["edgeCurrentSum"], neatoLayout=neato)
-	chart.savefig(pJoin(modelDir,"currentDerOnMinChart.png"))
-	with open(pJoin(modelDir,"currentDerOnMinChart.png"),"rb") as inFile:
-		outData["currentDerOnMin"] = inFile.read().encode("base64")
-	chart = drawPlot(treeMinLoad,edgeDict=dataMin["edgeValsPU"], neatoLayout=neato)
-	chart.savefig(pJoin(modelDir,"thermalDerOnMinChart.png"))
-	with open(pJoin(modelDir,"thermalDerOnMinChart.png"),"rb") as inFile:
-		outData["thermalDerOnMin"] = inFile.read().encode("base64")
-	
-	#DER off, Min load
-	dataMinNoDer = runGridlabAndProcessData(treeNoDerMinLoad, attachments, edge_bools, workDir=modelDir)
-
-	chart = drawPlot(treeNoDerMinLoad,nodeDict=dataMinNoDer["nodeVolts"], neatoLayout=neato)
-	chart.savefig(pJoin(modelDir,"voltageDerOffMinChart.png"))
-	with open(pJoin(modelDir,"voltageDerOffMinChart.png"),"rb") as inFile:
-		outData["voltageDerOffMin"] = inFile.read().encode("base64")
-	chart = drawPlot(treeNoDerMinLoad,edgeDict=dataMinNoDer["edgeCurrentSum"], neatoLayout=neato)
-	chart.savefig(pJoin(modelDir,"currentDerOffMinChart.png"))
-	with open(pJoin(modelDir,"currentDerOffMinChart.png"),"rb") as inFile:
-		outData["currentDerOffMin"] = inFile.read().encode("base64")
-	chart = drawPlot(treeNoDerMinLoad,edgeDict=dataMinNoDer["edgeValsPU"], neatoLayout=neato)
-	chart.savefig(pJoin(modelDir,"thermalDerOffMinChart.png"))
-	with open(pJoin(modelDir,"thermalDerOffMinChart.png"),"rb") as inFile:
-		outData["thermalDerOffMin"] = inFile.read().encode("base64")
-
-	#calculate flicker when DER is switched off under peak and min load
-	[maxFlickerLocationPeak, maxFlickerValPeak] = ['',0]
-	[maxFlickerLocationMin, maxFlickerValMin] = ['',0]
-	peakFlicker = copy.deepcopy(dataPeakNoDer['nodeVolts'])
-	minFlicker = copy.deepcopy(dataMinNoDer['nodeVolts'])
-	for key in peakFlicker.keys():
-		voltsPeakDerOff = float(dataPeakNoDer['nodeVolts'][key])
-		voltsPeakDerOn = float(dataPeak['nodeVolts'][key])
-		voltsMinDerOff = float(dataMinNoDer['nodeVolts'][key])
-		voltsMinDerOn = float(dataMin['nodeVolts'][key])
-		peakFlicker[key] = 100*abs(voltsPeakDerOn-voltsPeakDerOff)/(voltsPeakDerOn)
-		minFlicker[key] = 100*abs(voltsMinDerOn-voltsMinDerOff)/(voltsMinDerOn)
-
-		#print('peak:', 'max', maxFlickerValPeak, 'current', peakFlicker[key])
-		if maxFlickerValPeak <= peakFlicker[key]:
-			maxFlickerValPeak = peakFlicker[key]
-			maxFlickerLocationPeak = key
-
-		if maxFlickerValMin <= minFlicker[key]:
-			maxFlickerValMin = minFlicker[key]
-			maxFlickerLocationMin = key
-
-	outData['maxFlickerPeak'] = [maxFlickerLocationPeak, maxFlickerValPeak]
-	outData['maxFlickerMin'] = [maxFlickerLocationMin, maxFlickerValMin]
-	
-	#peak flicker
-	chart = drawPlot(treeNoDerMinLoad,nodeDict=peakFlicker, neatoLayout=neato)
-	chart.savefig(pJoin(modelDir,"flickerPeakChart.png"))
-	with open(pJoin(modelDir,"flickerPeakChart.png"),"rb") as inFile:
-		outData["flickerPeak"] = inFile.read().encode("base64")
-	
-	#min flicker
-	chart = drawPlot(treeNoDerMinLoad,nodeDict=minFlicker, neatoLayout=neato)
-	chart.savefig(pJoin(modelDir,"flickerMinChart.png"))
-	with open(pJoin(modelDir,"flickerMinChart.png"),"rb") as inFile:
-		outData["flickerMin"] = inFile.read().encode("base64")	
-
-	# get min and max volts for each scenario
-	[maxVoltsLocationPeakDerOn, maxVoltsValPeakDerOn] = ['',0]
-	[maxVoltsLocationPeakDerOff, maxVoltsValPeakDerOff] = ['',0]
-	[maxVoltsLocationMinDerOn, maxVoltsValMinDerOn] = ['',0]
-	[maxVoltsLocationMinDerOff, maxVoltsValMinDerOff] = ['',0]
-	[minVoltsLocationPeakDerOn, minVoltsValPeakDerOn] = ['',float('inf')]
-	[minVoltsLocationPeakDerOff, minVoltsValPeakDerOff] = ['',float('inf')]
-	[minVoltsLocationMinDerOn, minVoltsValMinDerOn] = ['',float('inf')]
-	[minVoltsLocationMinDerOff, minVoltsValMinDerOff] = ['',float('inf')]
-
-	for key in dataPeakNoDer['nodeVolts'].keys():
-		
-		if maxVoltsValPeakDerOn < float(dataPeak['nodeVolts'][key]):
-			maxVoltsValPeakDerOn = dataPeak['nodeVolts'][key]
-			maxVoltsLocationPeakDerOn = key
-
-		if maxVoltsValPeakDerOff < float(dataPeakNoDer['nodeVolts'][key]):
-			maxVoltsValPeakDerOff = dataPeakNoDer['nodeVolts'][key]
-			maxVoltsLocationPeakDerOff = key
-		
-		if maxVoltsValMinDerOn < float(dataMin['nodeVolts'][key]):
-			maxVoltsValMinDerOn = dataMin['nodeVolts'][key]
-			maxVoltsLocationMinDerOn = key
-		
-		if maxVoltsValMinDerOff < float(dataMinNoDer['nodeVolts'][key]):
-			maxVoltsValMinDerOff = dataMinNoDer['nodeVolts'][key]
-			maxVoltsLocationMinDerOff = key
-		
-		if minVoltsValPeakDerOn > float(dataPeak['nodeVolts'][key]):
-			minVoltsValPeakDerOn = dataPeak['nodeVolts'][key]
-			minVoltsLocationPeakDerOn = key
-		
-		if minVoltsValPeakDerOff > float(dataPeakNoDer['nodeVolts'][key]):
-			minVoltsValPeakDerOff = dataPeakNoDer['nodeVolts'][key]
-			minVoltsLocationPeakDerOff = key
-		
-		if minVoltsValMinDerOn > float(dataMin['nodeVolts'][key]):
-			minVoltsValMinDerOn = dataMin['nodeVolts'][key]
-			minVoltsLocationMinDerOn = key
-		
-		if minVoltsValMinDerOff > float(dataMinNoDer['nodeVolts'][key]):
-			minVoltsValMinDerOff = dataMinNoDer['nodeVolts'][key]
-			minVoltsLocationMinDerOff = key
-		
-	outData['maxVoltsPeakDerOn'] = [maxVoltsLocationPeakDerOn, maxVoltsValPeakDerOn]
-	outData['maxVoltsPeakDerOff'] = [maxVoltsLocationPeakDerOff, maxVoltsValPeakDerOff]
-	outData['maxVoltsMinDerOn'] = [maxVoltsLocationMinDerOn, maxVoltsValMinDerOn]
-	outData['maxVoltsMinDerOff'] = [maxVoltsLocationMinDerOff, maxVoltsValMinDerOff]
-	outData['minVoltsPeakDerOn'] = [minVoltsLocationPeakDerOn, minVoltsValPeakDerOn]
-	outData['minVoltsPeakDerOff'] = [minVoltsLocationPeakDerOff, minVoltsValPeakDerOff]
-	outData['minVoltsMinDerOn'] = [minVoltsLocationMinDerOn, minVoltsValMinDerOn]
-	outData['minVoltsMinDerOff'] = [minVoltsLocationMinDerOff, minVoltsValMinDerOff]
-
-	#check for thermal violations
-	thermalThreshold = float(inputDict['thermalThreshold'])/100
-	thermalViolations = []
-	for key in dataPeak['edgeValsPU'].keys():
-		
-		thermalVal = float(dataPeak['edgeValsPU'][key])
-		content = [key, 100*thermalVal,'Peak Load, DER On',(thermalVal>=thermalThreshold)]
-		thermalViolations.append(content)
-
-		thermalVal = float(dataPeakNoDer['edgeValsPU'][key])
-		content = [key, 100*thermalVal,'Peak Load, DER Off',(thermalVal>=thermalThreshold)]
-		thermalViolations.append(content)
-
-		thermalVal = float(dataMin['edgeValsPU'][key])
-		content = [key, 100*thermalVal,'Min Load, DER On',(thermalVal>=thermalThreshold)]
-		thermalViolations.append(content)
-
-		thermalVal = float(dataMinNoDer['edgeValsPU'][key])
-		content = [key, 100*thermalVal,'Min Load, DER Off',(thermalVal>=thermalThreshold)]
-		thermalViolations.append(content)
-
-	outData['thermalViolations'] = thermalViolations
-
-	
-	#check for reverse powerflow and tap changes
-	reversePowerFlow = []
-	tapDifferences = []
- 	tapThresh = float(inputDict['tapThreshold'])
-
+	# get start and stop time for the simulation
+	[startTime,stopTime] = ['','']
 	for key in tree.keys():
-		
-		obtype = tree[key].get("object","")	
-		obname = tree[key].get("name","")
-		
-		if obtype == 'regulator':
+		obname = tree[key].get('object','')
+		starttime = tree[key].get('starttime','')
+		stoptime = tree[key].get('stoptime','')
+		if starttime!='' and stoptime!='':
+			print(obname)
+			startTime = tree[key]['starttime']
+			stopTime = tree[key]['stoptime']
+			break			
 
-			# check tap positions at Peak Load
-			tapAPeakDerOn = tree[key].get("tap_A","Unspecified")
-			tapBPeakDerOn = tree[key].get("tap_B","Unspecified")
-			tapCPeakDerOn = tree[key].get("tap_C","Unspecified")
-			tapAPeakDerOff = treeNoDer[key].get("tap_A","Unspecified")
-			tapBPeakDerOff = treeNoDer[key].get("tap_B","Unspecified")
-			tapCPeakDerOff = treeNoDer[key].get("tap_C","Unspecified")
-
-
-			tapDiff = 0
-			if (tapAPeakDerOn is not "Unspecified") and (tapAPeakDerOff is not "Unspecified"):
-				tapDiff = abs(tapAPeakDerOn - tapAPeakDerOff)
-			tapDifferences.append(['Peak', obname+' Tap A', tapAPeakDerOn, tapAPeakDerOff, tapDiff,(tapDiff >= tapThresh)])
-			
-			tapDiff = 0
-			if (tapBPeakDerOn is not "Unspecified") and (tapBPeakDerOff is not "Unspecified"):
-				tapDiff = abs(tapBPeakDerOn - tapBPeakDerOff)
-			tapDifferences.append(['Peak', obname+' Tap B', tapBPeakDerOn, tapBPeakDerOff, tapDiff,(tapDiff >= tapThresh)])
-			
-			tapDiff = 0
-			if (tapCPeakDerOn is not "Unspecified") and (tapCPeakDerOff is not "Unspecified"):
-				tapDiff = abs(tapCPeakDerOn - tapCPeakDerOff)
-			tapDifferences.append(['Peak', obname+' Tap C', tapCPeakDerOn, tapCPeakDerOff, tapDiff,(tapDiff >= tapThresh)])
-
-
-			# check tap positions at Min Load
-			tapAMinDerOn = treeMinLoad[key].get("tap_A","Unspecified")
-			tapBMinDerOn = treeMinLoad[key].get("tap_B","Unspecified")
-			tapCMinDerOn = treeMinLoad[key].get("tap_C","Unspecified")
-			tapAMinDerOff = treeNoDerMinLoad[key].get("tap_A","Unspecified")
-			tapBMinDerOff = treeNoDerMinLoad[key].get("tap_B","Unspecified")
-			tapCMinDerOff = treeNoDerMinLoad[key].get("tap_C","Unspecified")
-
-			tapDiff = 0
-			if (tapAMinDerOn is not "Unspecified") and (tapAMinDerOff is not "Unspecified"):
-				tapDiff = abs(tapAMinDerOn - tapAMinDerOff)
-			tapDifferences.append(['Min', obname+' Tap A', tapAMinDerOn, tapAMinDerOff, tapDiff,(tapDiff >= tapThresh)])
-			
-			tapDiff = 0
-			if (tapBMinDerOn is not "Unspecified") and (tapBMinDerOff is not "Unspecified"):
-				tapDiff = abs(tapBMinDerOn - tapBMinDerOff)
-			tapDifferences.append(['Min', obname+' Tap B', tapBMinDerOn, tapBMinDerOff, tapDiff,(tapDiff >= tapThresh)])
-			
-			tapDiff = 0
-			if (tapCMinDerOn is not "Unspecified") and (tapCMinDerOff is not "Unspecified"):
-				tapDiff = abs(tapCMinDerOn - tapCMinDerOff)
-			tapDifferences.append(['Min', obname+' Tap C', tapCMinDerOn, tapCMinDerOff, tapDiff,(tapDiff >= tapThresh)])
-
-
-			#check for reverse powerflow
-			powerVal = float(dataPeak['edgeCurrentSum'][obname])
-			content = [obname, powerVal,'Peak Load, DER On',(powerVal<0)]
-			reversePowerFlow.append(content)
-
-			powerVal = float(dataPeakNoDer['edgeCurrentSum'][obname])
-			content = [obname, powerVal,'Peak Load, DER Off',(powerVal<0)]
-			reversePowerFlow.append(content)
-
-			powerVal = float(dataMin['edgeCurrentSum'][obname])
-			content = [obname, powerVal,'Min Load, DER On',(powerVal<0)]
-			reversePowerFlow.append(content)
-
-			powerVal = float(dataMinNoDer['edgeCurrentSum'][obname])
-			content = [obname, powerVal,'Min Load, DER Off',(powerVal<0)]
-			reversePowerFlow.append(content)
-
-	outData['reversePowerFlow'] = reversePowerFlow	
-	outData['tapDifferences'] = tapDifferences	
-
-	return outData
+	# Map to speed up name lookups.
+	nameToIndex = {tree[key].get('name',''):key for key in tree.keys()}
 	
+	# find the key of the relavant added DER components  
+	addedDerKey = nameToIndex[inputDict['newGeneration']]
+	addedDerInverterKey = nameToIndex[tree[addedDerKey]['parent']]
+	addedBreakKey = nameToIndex[inputDict['newGenerationBreaker']]
+	poi = tree[addedBreakKey]['to']
+	
+	# initialize variables
+	flickerViolations = []
+	flickerThreshold = float(inputDict['flickerThreshold'])
+	voltageViolations = []
+	[upperVoltThresh, lowerVoltThresh, lowerVoltThresh600] = [1.05,0.95,0.975]
+	thermalViolations = []
+	thermalThreshold = float(inputDict['thermalThreshold'])/100
+	reversePowerFlow = []
+	tapViolations = []
+	tapThreshold = float(inputDict['tapThreshold'])
+	faultBreaker = [[],[],[],[]]
+	faultStepUp = [[],[],[],[]]
+	faultCurrentViolations = []
+	faultCurrentThreshold = float(inputDict['faultCurrentThreshold'])
+	faultPOIVolts = [[],[],[],[]]
+	faultVoltsThreshold = float(inputDict['faultVoltsThreshold'])
+
+	# run analysis for both load conditions
+	for loadCondition in ['Peak', 'Min']:
+
+		# if a peak load file is provided, use it to set peak loads in the tree
+		if (loadCondition == 'Peak') and (inputDict['peakLoadData'] != ''):
+			peakLoadData = inputDict['peakLoadData'].split('\r\n')
+			for data in peakLoadData:
+				if str(data) != '':
+					key = data.split(',')[0]
+					val = data.split(',')[1]
+					tree[key]['power_12'] = val
+		
+		elif (loadCondition == 'Min'):
+			# if a min load file is provided use is to set the min loads
+			if inputDict['minLoadData'] != '':
+				minLoadData = inputDict['minLoadData'].split('\r\n')
+				for data in minLoadData:
+					if str(data) != '':
+						key = data.split(',')[0]
+						val = data.split(',')[1]
+						tree[key]['power_12'] = val
+		
+			else: # if no min load file is provided set min load to be 1/3 of peak + noise				
+				for key in tree.keys():
+					obtype = tree[key].get('object','')
+					if obtype == 'triplex_node':
+						load = tree[key].get('power_12','')
+						if load != '':
+							load = float(load)
+							minLoad = (load/3)+(load*0.1*random.triangular(-1,1))
+							tree[key]['power_12'] = str(minLoad)
+
+		# initialize variables
+		flicker = {}
+		[maxFlickerLocation, maxFlickerVal] = ['',0]
+
+		# run analysis with DER on and off under both load conditions
+		for der in ['On', 'Off']:
+
+
+			# if der is Off set added DER offline, if its On set DER online
+			if der is 'Off':
+				tree[addedDerKey]['generator_status'] = 'OFFLINE'
+				tree[addedDerInverterKey]['generator_status'] = 'OFFLINE'
+			else: # der is on 
+				tree[addedDerKey]['generator_status'] = 'ONLINE'
+				tree[addedDerInverterKey]['generator_status'] = 'ONLINE'
+
+			# run gridlab solver
+			data = runGridlabAndProcessData(tree, attachments, edge_bools, workDir=modelDir)
+
+			# generate voltage, current and thermal plots
+			filename = 'voltageDer' + der + loadCondition
+			chart = drawPlot(tree,nodeDict=data['nodeVolts'], neatoLayout=neato)
+			chart.savefig(pJoin(modelDir, filename + 'Chart.png'))
+			with open(pJoin(modelDir,filename + 'Chart.png'),'rb') as inFile:
+				outData[filename] = inFile.read().encode('base64')
+
+			filename = 'currentDer' + der + loadCondition
+			chart = drawPlot(tree,nodeDict=data['edgeCurrentSum'], neatoLayout=neato)
+			chart.savefig(pJoin(modelDir, filename + 'Chart.png'))
+			with open(pJoin(modelDir,filename + 'Chart.png'),'rb') as inFile:
+				outData[filename] = inFile.read().encode('base64')
+
+			filename = 'thermalDer' + der + loadCondition
+			chart = drawPlot(tree,nodeDict=data['edgeValsPU'], neatoLayout=neato)
+			chart.savefig(pJoin(modelDir, filename + 'Chart.png'))
+			with open(pJoin(modelDir,filename + 'Chart.png'),'rb') as inFile:
+				outData[filename] = inFile.read().encode('base64')
+
+			# calculate max and min voltage and track badwidth violations
+			[maxVoltsLocation, maxVoltsVal] = ['',0]
+			[minVoltsLocation, minVoltsVal] = ['',float('inf')]
+			for key in data['nodeVolts'].keys():
+				
+				voltVal = float(data['nodeVolts'][key])
+				nominalVoltVal = float(data['nominalVolts'][key])
+				
+				if maxVoltsVal <= voltVal:
+					maxVoltsVal = voltVal
+					maxVoltsLocation = key
+				if minVoltsVal >= voltVal:
+					minVoltsVal = voltVal
+					minVoltsLocation = key
+
+				change = 100*((voltVal-nominalVoltVal)/nominalVoltVal)
+				if voltVal > 600:
+					violation = (voltVal >= (upperVoltThresh*nominalVoltVal)) or \
+						(voltVal <= (lowerVoltThresh600*nominalVoltVal))
+				else:
+					violaton = (voltVal >= (upperVoltThresh*nominalVoltVal)) or \
+						(voltVal <= (lowerVoltThresh*nominalVoltVal))
+				content = [key, nominalVoltVal, voltVal, change, \
+					loadCondition +' Load, DER ' + der,violation]
+				voltageViolations.append(content)
+
+			outData['maxVolts'+loadCondition+'Der'+der] = [maxVoltsLocation, maxVoltsVal]
+			outData['minVolts'+loadCondition+'Der'+der] = [minVoltsLocation, minVoltsVal]
+
+			# check for thermal violations
+			for key in data['edgeValsPU'].keys():
+				thermalVal = float(data['edgeValsPU'][key])
+				content = [key, 100*thermalVal,\
+					loadCondition+' Load, DER '+der,(thermalVal>=thermalThreshold)]
+				thermalViolations.append(content)
+
+			# check for reverse regulator powerflow
+			for key in tree.keys():
+				obtype = tree[key].get("object","")	
+				obname = tree[key].get("name","")
+				if obtype == 'regulator':
+					powerVal = float(data['edgePower'][obname])
+					content = [obname, powerVal,\
+						loadCondition+' Load, DER '+der,(powerVal<0)]
+					reversePowerFlow.append(content)
+
+			# check for tap_position values and violations
+			if der == 'On':
+				tapPositions = copy.deepcopy(data['tapPositions'])
+			else: # der off
+				for tapType in ['tapA','tapB','tapC']:
+					for key in tapPositions[tapType].keys():
+						# calculate tapPositions
+						tapDerOn = int(tapPositions[tapType][key])
+						tapDerOff = int(data['tapPositions'][tapType][key])
+						tapDifference = abs(tapDerOn-tapDerOff)
+						# check for violations
+						content = [loadCondition, key+' '+tapType, tapDerOn, \
+							tapDerOff,tapDifference, (tapDifference>=tapThreshold)]
+						tapViolations.append(content)
+
+			#induce faults and measure fault currents
+			for faultLocation in [inputDict['newGenerationBreaker'],\
+				inputDict['newGenerationStepUp']]:
+				for faultNum, faultType in enumerate(\
+					['SLG-A','SLG-B','SLG-C','TLG']):
+
+					treeCopy =  createTreeWithFault( tree, \
+						faultType, faultLocation, startTime, stopTime )
+					faultData = runGridlabAndProcessData(treeCopy, attachments, \
+						edge_bools, workDir=modelDir)
+					faultVolts = faultData['nodeVolts']
+					faultCurrents = faultData['edgeCurrentSum']
+
+					# get fault current values at the breaker when 
+					# the fault is at the breaker
+					if faultLocation == inputDict['newGenerationBreaker']:
+						if der == 'On':
+							faultBreaker[faultNum] = [loadCondition, faultType]
+							faultBreaker[faultNum].append(\
+								float(faultCurrents[\
+									inputDict['newGenerationBreaker']]))
+						else: #der off
+							faultBreaker[faultNum].append(\
+								float(faultCurrents[inputDict['newGenerationBreaker']]))
+							faultBreaker[faultNum].append(\
+								faultBreaker[faultNum][2] - \
+								faultBreaker[faultNum][3])
+
+						# get fault voltage values at POI
+						preFaultval = data['nodeVolts'][poi]
+						postFaultVal = faultVolts[poi]
+						percentChange = 100*(postFaultVal/preFaultval)
+						faultPOIVolts[faultNum] = ['Der '+ der + \
+							loadCondition + ' Load', poi, faultType, preFaultval,\
+								postFaultVal, percentChange, \
+								(percentChange>=faultVoltsThreshold)]
+
+					# get fault current values at the transformer when 
+					# the fault is at the transformer
+					else: #faultLocation == newGenerationStepUp
+						if der == 'On':
+							faultStepUp[faultNum] = [loadCondition, faultType]
+							faultStepUp[faultNum].append(\
+								float(faultCurrents[\
+									inputDict['newGenerationStepUp']]))
+						else: #der off
+							faultStepUp[faultNum].append(\
+								float(faultCurrents[inputDict[\
+									'newGenerationStepUp']]))
+							faultStepUp[faultNum].append(\
+								faultStepUp[faultNum][2] - \
+								faultStepUp[faultNum][3])
+
+					# get fault violations when der is on
+					if der == 'On':
+						for key in faultCurrents.keys():
+							preFaultval = float(data['edgeCurrentSum'][key])
+							postFaultVal = float(faultCurrents[key])
+							difference = abs(preFaultval-postFaultVal)
+							percentChange = 100*(difference/preFaultval)
+							content = [faultLocation, faultType, key, \
+								preFaultval, postFaultVal, difference, \
+								(percentChange>=faultCurrentThreshold)]
+							faultCurrentViolations.append(content)
+
+			# calculate flicker, keep track of max, and violations
+			if der == 'On':
+				flicker = copy.deepcopy(data['nodeVolts'])
+			else: # der off
+				for key in flicker.keys():
+					# calculate flicker
+					derOn = float(flicker[key])
+					derOff = float(data['nodeVolts'][key])
+					flickerVal = 100*(1-(derOff/derOn))
+					flicker[key] = flickerVal
+					# check for max
+					if maxFlickerVal <= flickerVal:
+						maxFlickerVal = flickerVal
+						maxFlickerLocation = key
+					# check for violations
+					content = [key, flickerVal,loadCondition+' Load',\
+					(flickerVal>=flickerThreshold)]
+					flickerViolations.append(content)
+
+		# plot flicker
+		filename = 'flicker' + loadCondition
+		chart = drawPlot(tree,nodeDict=flicker, neatoLayout=neato)
+		chart.savefig(pJoin(modelDir,filename + 'Chart.png'))
+		with open(pJoin(modelDir,filename + 'Chart.png'),"rb") as inFile:
+			outData[filename] = inFile.read().encode("base64")
+
+		# save max flicker info to output dictionary
+		outData['maxFlicker'+loadCondition] = [maxFlickerLocation, maxFlickerVal]
+
+	outData['voltageViolations'] = voltageViolations
+	outData['flickerViolations'] = flickerViolations
+	outData['thermalViolations'] = thermalViolations
+	outData['reversePowerFlow'] = reversePowerFlow	
+	outData['tapViolations'] = tapViolations
+	outData['faultBreaker']	 = faultBreaker
+	outData['faultStepUp'] = faultStepUp
+	outData['faultCurrentViolations'] = faultCurrentViolations
+	outData['faultPOIVolts'] = faultPOIVolts
+	
+	return outData
+
+def createTreeWithFault( tree, faultType, faultLocation, startTime, stopTime ):
+	
+	treeCopy = copy.deepcopy(tree)
+
+	faultType = '"'+faultType+'"'
+	outageParams = '"'+faultLocation+','+startTime.replace('\'','') + \
+		','+stopTime.replace('\'','')+'"'
+	treeCopy[omf.feeder.getMaxKey(treeCopy) + 1] = {
+		'object': 'eventgen',
+		'name': 'ManualEventGen',
+		'parent': 'RelMetrics',
+		'fault_type': faultType,
+		'manual_outages': str(outageParams)
+	}
+
+	treeCopy[omf.feeder.getMaxKey(treeCopy) + 1] = {
+		'object': 'fault_check ',
+		'name': 'test_fault',
+		'check_mode': 'ONCHANGE',
+		'eventgen_object': 'ManualEventGen',
+		'output_filename': 'Fault_check_out.txt'
+	}
+
+	treeCopy[omf.feeder.getMaxKey(treeCopy) + 1] = {
+		'object': 'metrics',
+		'name': 'RelMetrics',
+		'report_file': 'Metrics_Output.csv',
+		'module_metrics_object': 'PwrMetrics',
+		'metrics_of_interest': '"SAIFI,SAIDI,CAIDI,ASAI,MAIFI"',
+		'customer_group': '"groupid=METERTEST"',
+		'metric_interval': '5 h',
+		'report_interval': '5 h'
+	}
+
+	treeCopy[omf.feeder.getMaxKey(treeCopy) + 1] = {
+		'object': 'power_metrics',
+		'name': 'PwrMetrics',
+		'base_time_value': '1 h'
+	}
+
+	return treeCopy
+
+
+def readGroupRecorderCSV( filename ):
+
+	# read regulator tap position values values into a single dictionary
+	dataDictionary = {}
+	with open(filename,'r') as csvFile:
+		reader = csv.reader(csvFile)
+		# loop past the header, 
+		[keys,vals] = [[],[]]
+		for row in reader:
+			if '# timestamp' in row:
+				keys = row
+				i = keys.index('# timestamp')
+				keys.pop(i)
+				vals = reader.next()
+				vals.pop(i)
+		for pos,key in enumerate(keys):
+			dataDictionary[key] = vals[pos]
+			
+	return dataDictionary	
 
 def runGridlabAndProcessData(tree, attachments, edge_bools, workDir=False):
 	
@@ -451,7 +511,7 @@ def runGridlabAndProcessData(tree, attachments, edge_bools, workDir=False):
 						vals = reader.next()
 						vals.pop(i)
 				for pos,key2 in enumerate(keys):
-					lineRatings[key2] = abs(float(vals[pos]))
+					lineRatings[key2] = abs(float(vals[pos]))				
 
 	#edgeTupleRatings = lineRatings copy with to-from tuple as keys for labeling
 	edgeTupleRatings = {}
@@ -506,8 +566,14 @@ def runGridlabAndProcessData(tree, attachments, edge_bools, workDir=False):
 		# Use float("{0:.2f}".format(avg(allVolts))) if displaying the node labels
 	
 	nodeNames = {}
+	nominalVolts = {}
 	for key in nodeVolts.keys():
 		nodeNames[key] = key
+		for treeKey in tree:
+			ob = tree[treeKey]
+			obName = ob.get('name','')
+			if obName==key:
+				nominalVolts[key] = float(ob.get('nominal_voltage',1))
 	
 	# find edge currents by parsing currdump
 	edgeCurrentSum = {}
@@ -555,11 +621,17 @@ def runGridlabAndProcessData(tree, attachments, edge_bools, workDir=False):
 				edgePower[edge] = ((currVal * voltVal)/1000)
 				edgeTuplePower[coord] = "{0:.2f}".format(edgePower[edge])
 
-	return {"nodeNames":nodeNames, "nodeVolts":nodeVolts, "nodeVoltImbalances":voltImbalances, 
-	"edgeTupleNames":edgeTupleNames, "edgeCurrentSum":edgeCurrentSum, "edgeCurrentMax":edgeCurrentMax,
-	"edgeTupleCurrents":edgeTupleCurrents, "edgePower":edgePower, "edgeTuplePower":edgeTuplePower,
-	"edgeLineRatings":lineRatings, "edgeTupleLineRatings":edgeTupleRatings, "edgeValsPU":edgeValsPU, 
-	"edgeTupleValsPU":edgeTupleValsPU }
+	# read regulator tap position values values into a single dictionary
+	tapPositions = {}
+	tapPositions['tapA'] = readGroupRecorderCSV(pJoin(workDir,'tap_A.csv'))
+	tapPositions['tapB'] = readGroupRecorderCSV(pJoin(workDir,'tap_B.csv'))
+	tapPositions['tapC'] = readGroupRecorderCSV(pJoin(workDir,'tap_C.csv'))
+
+	return {'nodeNames':nodeNames, 'nominalVolts':nominalVolts, 'nodeVolts':nodeVolts, 'nodeVoltImbalances':voltImbalances, 
+	'edgeTupleNames':edgeTupleNames, 'edgeCurrentSum':edgeCurrentSum, 'edgeCurrentMax':edgeCurrentMax,
+	'edgeTupleCurrents':edgeTupleCurrents, 'edgePower':edgePower, 'edgeTuplePower':edgeTuplePower,
+	'edgeLineRatings':lineRatings, 'edgeTupleLineRatings':edgeTupleRatings, 'edgeValsPU':edgeValsPU, 
+	'edgeTupleValsPU':edgeTupleValsPU, 'tapPositions':tapPositions }
 
 def drawPlot(tree, nodeDict=None, edgeDict=None, edgeLabsDict=None, displayLabs=False, customColormap=False, 
 	perUnitScale=False, rezSqIn=400, neatoLayout=False):
@@ -573,7 +645,7 @@ def drawPlot(tree, nodeDict=None, edgeDict=None, edgeLabsDict=None, displayLabs=
 	customColormap=True means use a one that is nicely scaled to perunit values highlighting extremes.
 	Returns a matplotlib object.'''
 	# Be quiet matplotlib:
-	warnings.filterwarnings("ignore")
+	warnings.filterwarnings('ignore')
 
 	# Build the graph.
 	fGraph = omf.feeder.treeToNxGraph(tree)
@@ -684,11 +756,20 @@ def glmToModel(glmPath, modelDir):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"feederName1": "Olin Barre Geo",
-		"modelType": modelName,
-		"runTime": "",
-		"layoutAlgorithm": "geospatial",
-		"flickerThreshold": "2"
+		'feederName1': 'Simple Market Modified DER',
+		'modelType': modelName,
+		'runTime': '',
+		'layoutAlgorithm': 'forceDirected',
+		'flickerThreshold': '2',
+		'newGeneration': 'addedDer',
+		'newGenerationStepUp': 'addedDerStepUp',
+		'newGenerationBreaker': 'addedDerBreaker',
+		'thermalThreshold': '100',
+		'peakLoadData': '',
+		'minLoadData': '',
+		'tapThreshold': '6',
+		'faultCurrentThreshold': '10',
+		'faultVoltsThreshold': '138'
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:

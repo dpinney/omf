@@ -772,9 +772,11 @@ object inverter {
 	name test_solar_inverter;
 	parent test_solar_meter;
 	generator_status ONLINE;
-	inverter_type PWM;
-	power_factor 1.0;
-	generator_mode CONSTANT_PF;
+	inverter_type FOUR_QUADRANT;
+	four_quadrant_control_mode CONSTANT_PQ;
+	generator_mode SUPPLY_DRIVEN;
+	inverter_efficiency 0.95;
+	rated_power 9000.0;
 };
 
 object solar {

@@ -11,8 +11,8 @@
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<!-- Data  Imports -->
-	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
-	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
+	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
+	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 	<script type="text/javascript">
@@ -31,6 +31,10 @@
 				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
 			</div>
 		</div>
+	</div>
+	<div id="triangle-parent">
+		<div id="triangle-message">New Model Version Available<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
+		<div id="triangle-topright"></div>
 	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
@@ -115,28 +119,42 @@
 				<input type="text" id="rezSqIn" name="rezSqIn" pattern="^\d{1,4}$"/>
 			</div>
 			<div class="shortInput">
-				<label>Fault Location (Name of Line)<span class="classic">Please indicate the line in which the fault should occur</span></label>
+				<label class="tooltip">Fault Location (Name of Line)<span class="classic">Please indicate the line in which the fault should occur</span></label>
 				<input type="text" id="faultLoc" name="faultLoc"/>
 			</div>
 			<div class="shortInput">
-				<label>Fault Type <span class="classic">Select the type of fault to simulate</span></label>
+				<label class="tooltip">Fault Type <span class="classic">Select the type of fault to simulate</span></label>
 				<select id="faultType" name="faultType">
-					<option value="SLG-A">Single-line-ground A</option>
-					<option value="SLG-B">Single-line-ground B</option>
-					<option value="SLG-C">Single-line-ground C</option>
-					<option value="SLG-X">Single-line-ground Random</option>
-					<option value="DLG-AB">Double-line-ground AB</option>
-					<option value="DLG-BC">Double-line-ground BC</option>
-					<option value="DLG-CA">Double-line-ground CA</option>
-					<option value="DLG-X">Double-line-ground Random</option>
+					<option value="SLG-A">Single-Line-Ground A</option>
+					<option value="SLG-B">Single-Line-Ground B</option>
+					<option value="SLG-C">Single-Line-Ground C</option>
+					<option value="SLG-X">Single-Line-Ground Random</option>
+					<option value="DLG-AB">Double-Line-Ground AB</option>
+					<option value="DLG-BC">Double-Line-Ground BC</option>
+					<option value="DLG-CA">Double-Line-Ground CA</option>
+					<option value="DLG-X">Double-Line-Ground Random</option>
 					<option value="LL-AB">Line-Line AB</option>
 					<option value="LL-BC">Line-Line BC</option>
 					<option value="LL-CA">Line-Line CA</option>
 					<option value="LL-X">Line-Line Random</option>
+					<option value="TLG">Triple-Line-Ground</option>
+					<option value="OC-A">Single Open Conductor A</option>
+					<option value="OC1-A">Single Open Conductor A</option>
+					<option value="OC-B">Single Open Conductor B</option>
+					<option value="OC1-B">Single Open Conductor B</option>
+					<option value="OC-C">Single Open Conductor C</option>
+					<option value="OC1-C">Single Open Conductor C</option>
+					<option value="OC-X">Single Open Conductor Random</option>
+					<option value="OC1-X">Single Open Conductor Random</option>
+					<option value="OC2-AB">Double Open Conductor AB</option>
+					<option value="OC2-BC">Double Open Conductor BC</option>
+					<option value="OC2-CA">Double Open Conductor CA</option>
+					<option value="OC2-X">Double Open Conductor Random</option>
+					<option value="OC3">Triple Open Conductor</option>
 				</select>
 			</div>
 			<div class="shortInput">
-				<label>Simulation Time<span class="classic">Please indicate the time at which the simulation will occur</span></label>
+				<label class="tooltip">Simulation Time<span class="classic">Please indicate the time at which the simulation will occur in format YYYY-MM-DD hh-mm-ss</span></label>
 				<input type="text" id="simTime" name="simTime"/>
 			</div>
 			<div class="wideInput" style="text-align:right">

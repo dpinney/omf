@@ -68,7 +68,7 @@ def pullAsosStations(filePath):
 				currentSite['Time Zone'] = site['properties']['tzname']
 				csvwriter.writerow(currentSite)
 
-def pullDarksky(year, lat, lon, datatype, units='si', api_key = os.environ['DARKSKY'], path = None):
+def pullDarksky(year, lat, lon, datatype, units='si', api_key = os.environ.get('DARKSKY',''), path = None):
 	'''Returns hourly weather data from the DarkSky API as array.
 
 	* For more on the DarkSky API: https://darksky.net/dev/docs#overview

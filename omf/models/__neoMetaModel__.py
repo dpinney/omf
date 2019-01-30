@@ -1,6 +1,6 @@
 """ Common functions for all models """
 
-import json, os, sys, tempfile, webbrowser, math, shutil, datetime, omf, multiprocessing, traceback
+import json, os, sys, tempfile, webbrowser, math, shutil, datetime, omf, multiprocessing, traceback, hashlib, traceback, re, io
 from jinja2 import Template
 from os.path import join as pJoin
 from os.path import split as pSplit
@@ -29,6 +29,7 @@ def heavyProcessing(modelDir):
 		except Exception, e: pass
 		# Get the function and run it.
 		work = getattr(omf.models, inputDict['modelType']).work
+		#This grabs the new outData model
 		outData = work(modelDir, inputDict)
 	except:
 		# If input range wasn't valid delete output, write error to disk.
@@ -43,6 +44,15 @@ def heavyProcessing(modelDir):
 		endTime = datetime.datetime.now()
 		inputDict["runTime"] = str(datetime.timedelta(seconds=int((endTime - startTime).total_seconds())))
 		# Write output.
+		modelType = inputDict["modelType"]
+		#Get current file hashes and dd to the output
+		htmlFile = open(pJoin(_myDir, modelType+".html"),"r").read()
+		currentHtmlHash = hashlib.sha256(htmlFile).hexdigest()
+		pythonFile = open(pJoin(_myDir, modelType+".py"),"r").read()
+		currentPythonHash = hashlib.sha256(pythonFile).hexdigest()
+		outData['htmlHash'] = currentHtmlHash
+		outData['pythonHash'] = currentPythonHash
+		outData['oldVersion'] = False
 		with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
 			json.dump(outData, outFile, indent=4)
 	finally:
@@ -84,12 +94,35 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 		modelType = inJson["modelType"]
 		template = getattr(omf.models, modelType).template
 		allInputData = json.dumps(inJson)
+		#Get hashes for model python and html files 
+		htmlFile = open(pJoin(_myDir, modelType+".html"),"r").read()
+		currentHtmlHash = hashlib.sha256(htmlFile).hexdigest()
+		pythonFile = open(pJoin(_myDir, modelType+".py"),"r").read()
+		currentPythonHash = hashlib.sha256(pythonFile).hexdigest()
 	except IOError:
 		allInputData = None
 		inJson = None
 	try:
 		allOutputData = open(pJoin(modelDir,"allOutputData.json")).read()
 		outJson = json.load(open(pJoin(modelDir,"allOutputData.json")))
+		try:
+			#Needed? Should this be handled a different way? Add hashes to the output if they are not yet present
+			if ('pythonHash' not in outJson) or ('htmlHash' not in outJson):
+				print('new model')
+				outJson['htmlHash'] = currentHtmlHash
+				outJson['pythonHash'] = currentPythonHash
+				outJson['oldVersion'] = False
+			#If the hashes do not match, mark the model as an old version
+			elif outJson['htmlHash'] != currentHtmlHash or outJson['pythonHash'] != currentPythonHash:
+				print('render and mismatch')
+				outJson['oldVersion'] = True
+			#If the hashes match, mark the model as up to date
+			else:	
+				print('render and maintained')
+				outJson['oldVersion'] = False
+		except (UnboundLocalError, KeyError), e:
+			print(traceback.print_exc())
+			print('error:' + str(e))
 	except IOError:
 		allOutputData = None
 		outJson = None
@@ -98,14 +131,21 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 		pathPrefix = _omfDir
 	else:
 		pathPrefix = ""
-	return template.render(allInputData=allInputData,
-		allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
+	return template.render(allInputData=allInputData, allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
 		datastoreNames=datastoreNames, modelName=modelType, allInputDataDict=inJson, allOutputDataDict=outJson)
+
 
 def renderAndShow(modelDir, datastoreNames={}):
 	''' Render and open a template (blank or with output) in a local browser. '''
 	with tempfile.NamedTemporaryFile(suffix=".html", delete=False) as temp:
 		temp.write(renderTemplate(modelDir, absolutePaths=True))
+		temp.flush()
+		webbrowser.open("file://" + temp.name)
+
+def renderTemplateToFile(modelDir, datastoreNames={}):
+	''' Render and open a template (blank or with output) in a local browser. '''
+	with tempfile.NamedTemporaryFile(suffix=".html", delete=False) as temp:
+		temp.write(renderTemplate(modelDir, absolutePaths=False))
 		temp.flush()
 		webbrowser.open("file://" + temp.name)
 

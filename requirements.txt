@@ -31,3 +31,5 @@ gevent
 python-geoip
 python-geoip-geolite2
 iso3166
+pyproj
+gunicorn

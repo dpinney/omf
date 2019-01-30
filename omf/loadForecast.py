@@ -43,7 +43,7 @@ def pullHourlyDayOfWeekForecast(rawData,upBound,lowBound):
 	'''
 	forecasted = []
 	actual = []
-	for w in range(8760):
+	for w in range(len(rawData)):
 		# need to start at 4 weeks+1 hour to get enough data to train so 4*7*24 = 672, the +1 is not necessary due to indexing starting at 0
 		actual.append((rawData[w][0]))
 		if w>=672:

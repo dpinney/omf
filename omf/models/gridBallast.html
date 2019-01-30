@@ -13,8 +13,8 @@
   <script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
   <script src="{{pathPrefix}}/static/d3.v3.js"></script>
   <!-- Data  Imports -->
-  <script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
-  <script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
+  <script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
+  <script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
   <script>modelStatus="{{modelStatus}}"</script>
   <script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
   <!-- Global Functions -->

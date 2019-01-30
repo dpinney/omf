@@ -943,7 +943,7 @@
                             <tr>
                                 <td>
                                     <input type='checkbox' id='smoothLoadGen' name='smoothLoadGen' value='smoothLoadGen'>
-                                    <label for='smoothLoadGen'>Smooth loads and generators</label>
+                                    <label for='smoothLoadGen'>Smooth AMI Loadshapes</label>
                                 </td>
                             </tr>
                             <tr>
@@ -1751,7 +1751,15 @@ function getConnectedLineKeys(node) {
 I don't think this updates the data correctly. It updates writeFeeder.tree, but not writeFeeder.nodes
 */
 function moveNodeListener() {
-	let clickedNode = writeFeeder.tree[lastElementSelected.id];
+    // Return the cursor to its default.
+	document.body.style.cursor = 'auto'
+	const clickTarget = document.getElementById('svgContainer')
+	clickTarget.removeEventListener('click', moveNodeListener, false)
+    let clickedNode = writeFeeder.tree[lastElementSelected.id];
+    if (clickedNode.from != null || clickedNode.to != null) {
+        //Prevent users from moving lines
+        return
+    }
 	//const newLat = clickLatLon(event).y;
     //const newLon = clickLatLon(event).x
     const newLat = clickLatLon(event).y + globalLatOffset; //store the real lat. Add back the offset when storing data. Subtract it when rendering
@@ -1839,10 +1847,6 @@ function moveNodeListener() {
 	}
 	// Fix scaling of new objects.
 	scaleTo(scaleLevel)
-	// Return the cursor to its default.
-	document.body.style.cursor = 'auto'
-	const clickTarget = document.getElementById('svgContainer')
-	clickTarget.removeEventListener('click', moveNodeListener, false)
 }
 
 //**************************************************
@@ -1934,7 +1938,7 @@ function viewElement(key) {
 	var width = window.panZoom.getSizes().width / 2
 	var height = window.panZoom.getSizes().height / 2
     panZoom.pan({x:width - (x * realZoom), y:height - (y * realZoom)})
-    panZoom.zoom(15);
+    panZoom.zoom(15/scaleLevel);
 }
 
 function isNullOrUndefined(obj) {
@@ -1980,31 +1984,6 @@ function disableJQueryFunctionality() {
         li.remove();
     });
 }
-
-function fixPhases () {
-	// Todo: complete this to walk the tree and fix phasing.
-	for (let i in writeFeeder.tree){
-		if (writeFeeder.tree[i].name != undefined) {
-			const nodeName = writeFeeder.tree[i].name
-			for (let j in writeFeeder.tree) {
-				if (writeFeeder.tree[j].from != undefined) {
-					const linkFrom = writeFeeder.tree[j].from
-					if (nodeName == linkFrom) {
-						const node = writeFeeder.tree[i]
-						const link = writeFeeder.tree[j]
-						const nodePhase = node.phases.split('').sort().join('').trim()
-						const linkPhase = link.phases.split('').sort().join('').trim()
-						if (linkPhase.length > nodePhase.length) {
-							linkPhase==nodePhase
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-
 
 /**
  * Find the index of an object in an array, based on the property value inside of the object.
@@ -2282,8 +2261,9 @@ function randomChoice(inList) {
 function staticLoadsToHouses() {
     const tree = globalTreeWrapper.tree;
     const names = globalTreeWrapper.names;
-	if (!containsTriplexNodes(tree)) {
-        alert("There are no triplex nodes in this model");
+	//if (!containsTriplexNodes(tree)) {
+	if (!containsTriplexNodeOrLoad(tree)) {
+        alert("There are no triplex nodes or triplex loads in this model.");
         return;
 	} else {
         let modal = new ProgressModal("Please wait. Houses are being generated.", "", false);
@@ -2306,9 +2286,13 @@ function staticLoadsToHouses() {
         }, 10);
     }
 
-    function containsTriplexNodes(tree) {
+    /* Triplex loads should have a "parent" property. Triplex nodes should NOT have a "parent" property usually.
+    Therefore, if the parent property DOES exist on either a node/load I should use it. However, it it DOESN'T exist,
+    then I should carry on as normal too.
+    */
+    function containsTriplexNodeOrLoad(tree) {
         for (let key in tree) {
-            if (tree[key].object === "triplex_node" && tree[key].hasOwnProperty("parent")) {
+            if (tree[key].object === "triplex_node" || tree[key].object === "triplex_load") {
                 return true;
             } 
         }   
@@ -2320,6 +2304,17 @@ function staticLoadsToHouses() {
             end = keys.length - 1;
         }
         for (let i = start; i <= end; i++) {
+            if (tree[keys[i]].object === "triplex_node" || tree[keys[i]].object === "triplex_load") {
+                let parentKey = names[tree[keys[i]].parent];
+                if (parentKey == null) {
+                    //There is no parent. No big deal
+
+                } else {
+                    //There is a parent. Use the parent to place the new house
+
+                }
+            }
+            /*
             if (tree[keys[i]].hasOwnProperty('parent') && tree[keys[i]].object === "triplex_node") {
                 // Get the key of the parent of this triplex node, which is a triplex meter (i.e. another node)
                 let parentKey = names[tree[keys[i]].parent];
@@ -2335,6 +2330,7 @@ function staticLoadsToHouses() {
                     newChildAtLocation(heaterObj.heater, houseObj.key);
                 }
             }
+            */
         }
     }
 
