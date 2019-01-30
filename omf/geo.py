@@ -36,11 +36,11 @@ def dd2dms(dd):
 	return (d, m, sd)
 
 def dms2dd(degrees, minutes, seconds, direction):
-    'Degree/minute/second to decimal degrees'
-    dd = float(degrees) + float(minutes)/60 + float(seconds)/(60*60);
-    if direction == 'E' or direction == 'N':
-        dd *= -1
-    return dd;
+	'Degree/minute/second to decimal degrees'
+	dd = float(degrees) + float(minutes)/60 + float(seconds)/(60*60);
+	if direction == 'E' or direction == 'N':
+		dd *= -1
+	return dd;
 
 def decLatLonToLetter(lat, lon):
 	"Decimal lat lon to GridLAB-D's weird Degree/Minute/Second format."

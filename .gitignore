@@ -33,3 +33,5 @@ omf/scratch/CIGAR/VoltPostFault.csv
 omf/scratch/CIGAR/VOLTOUT.png
 omf/scratch/CIGAR/scratchwindow.py
 gridlabd.dmg
+omf/omf.error.log
+*.pem

@@ -78,7 +78,8 @@ def work(modelDir, inputDict):
 		faultLoc = inputDict["faultLoc"],
 		faultType = inputDict["faultType"],
 		rezSqIn = int(inputDict["rezSqIn"]),
-		simTime = simTimeValue)
+		simTime = simTimeValue,
+		workDir = modelDir)
 	chart.savefig(pJoin(modelDir,"output.png"))
 	with open(pJoin(modelDir,"output.png"),"rb") as inFile:
 		outData["voltageDrop"] = inFile.read().encode("base64")
@@ -600,12 +601,12 @@ def new(modelDir):
 		"layoutAlgorithm": "geospatial",
 		"edgeCol" : "Current",
 		"nodeCol" : "Voltage",
-		"nodeLabs" : "Value",
-		"edgeLabs" : "Value",
-		"faultLoc" : "node713-704",
+		"nodeLabs" : "None",
+		"edgeLabs" : "None",
+		"faultLoc" : "17720",
 		"faultType" : "SLG-A",
 		"customColormap" : "False",
-		"rezSqIn" : "225",
+		"rezSqIn" : "400",
 		"simTime" : '2000-01-01 0:00:00'
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
@@ -684,5 +685,5 @@ def _debugging():
 	renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	# _debugging()
-	_testingPlot()
+	_debugging()
+	# _testingPlot()

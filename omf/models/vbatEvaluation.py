@@ -85,7 +85,7 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		"user": "admin",
-		"load_type": "1",
+		"load_type": "4",
 		"zipcode": "'default'",
 		"number_devices": "100",
 		"power": "5.6",

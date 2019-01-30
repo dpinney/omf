@@ -128,7 +128,7 @@ def run(modelDir):
 		os.remove(pJoin(modelDir,"allOutputData.json"))
 	except:
 		pass
-	backProc = multiprocessing.Process(target = runForeground, args = (modelDir, inputDict,))
+	backProc = multiprocessing.Process(target = runForeground, args = (modelDir,))
 	backProc.start()
 	print "SENT TO BACKGROUND", modelDir
 	with open(pJoin(modelDir, "PPID.txt"),"w+") as pPidFile:
