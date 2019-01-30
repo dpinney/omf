@@ -576,26 +576,10 @@ def voltPlot(omd, workDir=None, neatoLayout=False):
 	plt.colorbar(orientation='horizontal', fraction=0.05)
 	return voltChart
 
-def glmToModel(glmPath, modelDir):
-	''' One shot model creation from glm. '''
-	tree = omf.feeder.parse(glmPath)
-	# Run powerflow. First name the folder for it.
-	# Remove old copy of the model.
-	shutil.rmtree(modelDir, ignore_errors=True)
-	# Create the model directory.
-	omf.models.voltageDrop.new(modelDir) 
-	# Create the .omd.
-	os.remove(modelDir + '/Olin Barre Geo.omd')
-	with open(modelDir + '/Olin Barre Geo.omd','w') as omdFile:
-		omd = dict(omf.feeder.newFeederWireframe)
-		omd['tree'] = tree
-		json.dump(omd, omdFile, indent=4)
-
-# TODO: Need name of default line to produce fault on!!!
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"feederName1": "Olin Barre Geo",
+		"feederName1": "Olin Barre Fault",
 		"modelType": modelName,
 		"runTime": "",
 		"layoutAlgorithm": "geospatial",
