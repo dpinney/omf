@@ -134,4 +134,49 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 		</script>
 	</div>
+	<div id="dataPlot2" class="tightContent postRun">
+		<div id="dataChart2"></div>
+		<script>
+			var peakDemandData = [];
+			for (var i = 0; i < allOutputData.peakDemand.length; i++) { //casting these to Highcharts-friendly formats
+				allOutputData.peakDemand[i][0] = new Date(allOutputData.peakDemand[i][0]).getTime();
+				allOutputData.peakDemand[i][1] = parseFloat(allOutputData.peakDemand[i][1]);
+			}
+			new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{
+						"series":{
+							"animation":false,
+							"shadow":false},
+						"line":{"marker":{"enabled":false}}},
+					"xAxis":{
+						"maxZoom":108000000,
+						"tickColor":"gray",
+						"dateTimeLabelFormats":{
+							"month": '%b %e'
+						},
+						"type":"datetime",
+						"lineColor":"gray"
+					},
+					"yAxis":{
+						"title":{"enabled":false},// "title":{"text":"Unit","style":{"color":"gray"}},
+					},
+					"title":{"text":undefined},
+					"series":[
+						{"name":"Actual Data (kW)",
+							"marker":{"enabled":false},
+							"color":"red",
+							"data":allOutputData.actual,
+							"type": "line",
+							"pointStart": Date.parse(allOutputData.startDate),
+							"pointInterval": 1000*60*60},
+						{"name":"Predicted Peaks (kW)",
+							"color":"black",
+							"data":allOutputData.peakDemand,
+							"type": "scatter"}
+					],
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"dataChart2","type":"line","marginRight":20, "height":500,"width":1000},
+					"tooltip":false,
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+		</script>
+	</div>
 </body>
