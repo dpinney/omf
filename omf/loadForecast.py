@@ -71,14 +71,23 @@ def pullHourlyDayOfWeekForecast(rawData,upBound,lowBound):
 	'''
 
 def pullWeeklyDayofHourForecast(rawData, startDate, modelDir):
-	''' docstring '''
+	'''
+	This model takes the inputs rawData, a dataset that holds hourly values in two columns with no indexes
+	The first column rawData[:][0] holds the hourly demand
+	The second column rawData[:][1] holds the hourly temperature
+	modelDir is the directory the model is running in, for the purposes of having somewhere to write the df
+
+	The model returns a tuple of two python lists. 
+	The first list of the tuple contains ISO formatted datetime strings of the daily predicted peak times,
+	the second list of the tuple contains floats of daily predicted peak demand.
+	'''
 	from sklearn.model_selection import cross_val_predict
 	from sklearn.svm import SVR
 	#loading rawData into pandas
 	datetime_index = pd.date_range(start = startDate, periods = len(rawData), freq = 'H')
 	input_df = pd.DataFrame(rawData, index = datetime_index)
 	input_df.columns = ['demand', 'tdy_temp']
-	input_df.to_csv(pJoin(modelDir, 'indata.csv')) #TODO: best way to name cache? hash str(rawData)?
+	input_df.to_csv(pJoin(modelDir, 'indata.csv'))
 	daily_dti = datetime_index.floor('D').unique() 
 	df = pd.DataFrame(index = daily_dti)
 
@@ -95,6 +104,7 @@ def pullWeeklyDayofHourForecast(rawData, startDate, modelDir):
 	de = input_df.demand.resample('H').mean()
 	peak_demand = de.resample('D').max()
 	peak_time = de.resample('D').aggregate(lambda S: S.idxmax().hour + S.idxmax().minute/60)
+	# calculating two peaks per day: 0-12, 12-24
 	peak_time_12 = de.resample('12H').aggregate(lambda S: S.idxmax().hour + S.idxmax().minute/60)
 	peak_time_m = peak_time_12[peak_time_12.index.hour == 0]
 	peak_time_a = peak_time_12[peak_time_12.index.hour == 12].resample('D').sum()
@@ -106,7 +116,6 @@ def pullWeeklyDayofHourForecast(rawData, startDate, modelDir):
 	df['tmr_morning_peak'] = peak_time_m.shift(-1)
 	df['tmr_afternoon_peak'] = peak_time_a.shift(-1)
 	df['tmr_afternoon_peak_bool'] = afternoon_peak_bool.shift(-1)
-	
 
 	#cache it and dropNaN
 	df = df.dropna()
@@ -115,13 +124,20 @@ def pullWeeklyDayofHourForecast(rawData, startDate, modelDir):
 	# initiate my model bois
 	time_model = svmNextDayPeakTime()
 	size_model = SVR(C = 10000, epsilon = 0.25, gamma = 0.0001)
+	
+	# get cross-validated time predictions over the full interval
 	forecasted_peak_time = list( time_model._cv_predict(df = df).hour_pred )
+	
+	# convert these float hour values into ISO formatted dates and times
 	dates = list(daily_dti.to_pydatetime())
 	dates = dates[:len(forecasted_peak_time)]
 	for i in range(len(dates)):
 		dates[i] += timedelta(hours = forecasted_peak_time[i])
 	forecasted_peak_time = [date.isoformat() for date in dates]
+	
+	#get cross-validated demand predictions over the full interval
 	forecasted_peak_demand = list( cross_val_predict(size_model, X = df[['tdy_peak_demand', 'tdy_temp', 'tmr_temp']], y = df.tmr_peak_demand, cv = 3) )
+	
 	return (forecasted_peak_time, forecasted_peak_demand)
 
 class svmNextDayPeakTime:
@@ -131,7 +147,8 @@ class svmNextDayPeakTime:
 		self.morning_regressor = SVR(C = 10, epsilon = 0.05, gamma = 0.1)
 		self.afternoon_regressor = SVR(C = 10, epsilon = 0.25, gamma = 0.1)
 
-	def fit(self, csv): #fit using all of the available data
+	def fit(self, csv): 
+		'''Fits using all of the given data in csv'''
 		df = pd.read_csv(csv).dropna()
 		x = df.loc[:, ['tmr_temp', 'tmr_weekend']]
 		y = df.tmr_afternoon_peak_bool.astype('bool')
@@ -142,6 +159,8 @@ class svmNextDayPeakTime:
 		self.afternoon_regressor.fit(x, df.tmr_afternoon_peak)
 
 	def predict(self,csv):
+		'''Predicts using all of the given data in csv.
+		Returns the csv as a dataframe with an added hour_pred column.'''
 		df = pd.read_csv(csv, parse_dates = [0])
 		x = df.loc[:, ['tmr_temp', 'tmr_weekend']]
 		indices = []
@@ -159,8 +178,10 @@ class svmNextDayPeakTime:
 		return df
 
 	def cv_metrics(self, csv, metric, random_state = None, splits = None, *args, **kwargs):
-		#returns a cross-validated regression metric
+		'''Computes cross-validated metrics for the model.'''
+		#imports
 		from sklearn.metrics import explained_variance_score, mean_absolute_error, mean_squared_error, mean_squared_log_error, median_absolute_error, r2_score
+		#dicty boi for passing in metrics as strings
 		metric_string_to_function = {'explained_variance_score': explained_variance_score, 'mean_absolute_error': mean_absolute_error, 'mean_squared_error': mean_squared_error, 'mean_squared_log_error': mean_squared_log_error, 'median_absolute_error': median_absolute_error, 'r2_score': r2_score}
 		if metric not in metric_string_to_function.keys():
 			print 'Metric not recognized'
@@ -172,13 +193,12 @@ class svmNextDayPeakTime:
 		return metric(y, results, **kwargs)
 
 	def _cv_predict(self, csv = None, df = None, random_state = None, splits = 3): #cross-validated predict
+		'''Returns cross validated prediction as column of pandas dataframe'''
 		from sklearn.model_selection import StratifiedKFold
-		self.skf = StratifiedKFold(shuffle = True, n_splits = 3)
 		self._cv_classifiers = []
 		self._cv_morning_regressors = []
 		self._cv_afternoon_regressors = []
-		if random_state or splits != 3:
-			self.skf = StratifiedKFold(shuffle = True, random_state=random_state, n_splits=splits)
+		self.skf = StratifiedKFold(shuffle = True, random_state=random_state, n_splits=splits)
 
 		if csv and not df:
 			df = pd.read_csv(csv, parse_dates=[0]).dropna().rename(columns = {'Unnamed: 0': 'Time'})

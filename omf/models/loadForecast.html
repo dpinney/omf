@@ -138,7 +138,7 @@
 		<div id="dataChart2"></div>
 		<script>
 			var peakDemandData = [];
-			for (var i = 0; i < allOutputData.peakDemand.length; i++) {
+			for (var i = 0; i < allOutputData.peakDemand.length; i++) { //casting these to Highcharts-friendly formats
 				allOutputData.peakDemand[i][0] = new Date(allOutputData.peakDemand[i][0]).getTime();
 				allOutputData.peakDemand[i][1] = parseFloat(allOutputData.peakDemand[i][1]);
 			}
@@ -160,16 +160,17 @@
 					"yAxis":{
 						"title":{"enabled":false},// "title":{"text":"Unit","style":{"color":"gray"}},
 					},
+					"title":{"text":undefined},
 					"series":[
 						{"name":"Actual Data (kW)",
 							"marker":{"enabled":false},
-							"color":"black",
+							"color":"red",
 							"data":allOutputData.actual,
 							"type": "line",
 							"pointStart": Date.parse(allOutputData.startDate),
 							"pointInterval": 1000*60*60},
 						{"name":"Predicted Peaks (kW)",
-							"color":"red",
+							"color":"black",
 							"data":allOutputData.peakDemand,
 							"type": "scatter"}
 					],
