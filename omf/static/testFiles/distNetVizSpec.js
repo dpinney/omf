@@ -1714,7 +1714,7 @@ describe("Unit tests", function() {
 
         describe("Public initialization functions", function() {
 
-            describe("attachMouseListeners()", function() {
+            xdescribe("attachMouseListeners()", function() {
 
                 it("should attach a listener for click events to the svgContainerWrapper element", function() {
                     expect(true).toBe(false);
@@ -1786,7 +1786,7 @@ describe("Unit tests", function() {
             });
             /* good: no unit test should rely on external data, like testTreeWrapper. Doesn't test for errors because THIS shouldn't throw errors. */
             //bad
-            describe("mapChild()", function() {
+            xdescribe("mapChild()", function() {
                 // they all should do this right?
                 it("should call contains()", function() {
 
@@ -1900,8 +1900,6 @@ describe("Unit tests", function() {
                             testTreeWrapper.mapChild(childKey);
                         });
                     });
-                    expect(testTreeWrapper.)
-
                     const children = testTreeWrapper.buildChildren();
                     const children2 = {};
                     Object.keys(testTreeWrapper.tree).forEach(parentKey => {
@@ -2017,7 +2015,7 @@ describe("Unit tests", function() {
                 });
             });
             //bad 
-            describe("registerLine()", function() {
+            xdescribe("registerLine()", function() {
 
                 let tWrapper; 
                 
@@ -2480,7 +2478,7 @@ describe("Unit tests", function() {
                     it(`should return an empty TreeWrapper`, function() {
                         // Test for node that has no connected lines
                         const emptyWrapper = createTreeWrapper();
-                        const subWrapper = testTreeWrapper.getPairedNodesOf(Child1);
+                        const subWrapper = testTreeWrapper.getPairedNodesOf(orphanNode1);
                         expect(subWrapper).toEqual(emptyWrapper);
                     });
 
