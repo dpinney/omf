@@ -366,31 +366,31 @@ MODAL DIALOGS
 VERSION FLAGS
 **********************************************/
 div#triangle-parent {
-	width: 50px; 
-	height: 50px;
 	position: absolute;
 	visibility: hidden;
 }
 
 div#triangle-message {
+	width: 50px;
+	transform:rotate(-45deg);
 	position: absolute;
 	text-align: center;
 	z-index:1;
-	top:10px;
+	top:5px;
 	color: #000000; 
 	outline: none;
-	cursor: help; 
-	text-decoration:underline;
-	text-decoration-style: dotted;
+	cursor: help;
 }
 
 div#triangle-message span {
-	margin-left: -999em;
+	text-align: left;
+	transform:rotate(45deg);
 	position: absolute;
-	display: inline-block;
+	display: none;
 }
 
 div#triangle-message:hover span {
+	display: inline-block;
 	border-radius: 5px 5px; 
 	-moz-border-radius: 5px; 
 	-webkit-border-radius: 5px; 
@@ -399,23 +399,23 @@ div#triangle-message:hover span {
 	-moz-box-shadow: 5px 5px rgba(0, 0, 0, 0.1);
 	font-family: Calibri, Tahoma, Geneva, sans-serif;
 	position: absolute;
-	right: -1.5em;
-	top: 4.75em;
+	right: -90px;
+	top: 90px;
 	z-index: 99;
-	margin-left: 0;
 	width: 200px;
 }
 
 div#triangle-topright { 
 	width: 0;
 	height: 0;
-	border-top: 50px solid #FF0000;
-	border-right: 50px solid transparent;
+	border-top: 75px solid #FF0000;
+	border-right: 75px solid transparent;
 	position: relative;
 }
 
 span.classic-triangle {
 	background: #A9A9A9; 
 	color: white;
+	line-height: 16pt;
 	padding: 5px 5px;
 }
