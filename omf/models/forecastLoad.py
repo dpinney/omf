@@ -1,4 +1,4 @@
-#Hourly Day Of Week Forecasting
+# Hourly Day Of Week Forecasting
 # This code using an hourly day of week forecasting technique that linearizes the relationship between temperature and demand for the 4 previous
 # days same days of the week at the same hour. Take the 4 mondays at 14:00 to predict the next based on the forecasted temperature.
 
@@ -34,8 +34,8 @@ def work(modelDir, inputDict):
 	rawData = list(np.float_(rawData)) #converts all data from float to string
 	for x in range(len(rawData)):
 		actual.append(float(rawData[x][0]))
-	(forecasted, MAE) = loadForecast.pullHourlyDayOfWeekForecast( rawData, float(inputDict["upBound"]), float(inputDict["lowBound"]) ) #uses a user entered limit for min/max of results
-	pred_demand = loadForecast.pullWeeklyDayofHourForecast( rawData, inputDict["simStartDate"], modelDir)
+	(forecasted, MAE) = loadForecast.rollingDylanForecast( rawData, float(inputDict["upBound"]), float(inputDict["lowBound"]) ) #uses a user entered limit for min/max of results
+	pred_demand = loadForecast.nextDayPeakKatrinaForecast( rawData, inputDict["simStartDate"], modelDir)
 	pred_demand = np.transpose(np.array(pred_demand)).tolist()
 	outData["startDate"] = inputDict["simStartDate"]
 	outData["actual"] = actual
