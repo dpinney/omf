@@ -1053,8 +1053,9 @@ let gTreeWrapper;
 let gViewport; 
 let gOffsetX;
 let gOffsetY;
-let gLongitudeRange;
-let gLatitudeRange;
+//let gLongitudeRange;
+//let gLatitudeRange;
+let gDrawScaleFactor;
 let gDownX;
 let gDownY;
 // Scale that all SVG objects are drawn at
@@ -1136,6 +1137,7 @@ function downloadTextFile() {
 /**
  * TODO: add unit tests
  * Get dimensions with: panZoom.getSizes()
+ * scale of .0000004 displays real lat/lon fairly well
  */
 function createViewport(tree, svgContainer) {
     const keys = Object.keys(tree);
@@ -1170,12 +1172,21 @@ function createViewport(tree, svgContainer) {
             }
         }
     });
-    gLongitudeRange = maxLon - minLon;
+    const gLongitudeRange = maxLon - minLon;
     gOffsetX = minLon;
-    gLatitudeRange = maxLat - minLat;
+    const gLatitudeRange = maxLat - minLat;
     gOffsetY = minLat;
+    //experiment
+    /* Multiply by the gDrawScaleFactor when drawing. Divide by the gDrawScaleFactor when storing. */
+    if (gLongitudeRange < gLatitudeRange) {
+        gDrawScaleFactor = 1000/gLongitudeRange;
+    } else {
+        gDrawScaleFactor = 1000/gLatitudeRange;
+    }
+    svgContainer.setAttribute('viewBox',`0 0 ${1000} ${1000}`);
+    //experiment
     // Create the viewport
-    svgContainer.setAttribute('viewBox',`0 0 ${gLongitudeRange} ${gLatitudeRange}`);
+    //svgContainer.setAttribute('viewBox',`0 0 ${gLongitudeRange} ${gLatitudeRange}`);
 	window.panZoom = svgPanZoom('#svgContainer', {
         /* Override the default values set by 'optionsDefaults' in svg-pan-zoom.js */
         dblClickZoomEnabled: false,
@@ -1415,7 +1426,7 @@ function viewElement(key) {
 	var width = window.panZoom.getSizes().width / 2
 	var height = window.panZoom.getSizes().height / 2
     panZoom.pan({x:width - (x * realZoom), y:height - (y * realZoom)})
-    panZoom.zoom(15/scaleLevel);
+    panZoom.zoom(20/scaleLevel);
 }
 
 //**************************************************
@@ -2539,8 +2550,10 @@ function move(objects, {x, y}, {offsetX, offsetY}) {
     avgLon /= nodes.length;
     avgLat /= nodes.length;
     nodes.forEach(node => {
-        node.longitude = parseFloat(node.longitude) + offsetX + x - avgLon; 
-        node.latitude = parseFloat(node.latitude) + offsetY + y - avgLat;
+        node.longitude = parseFloat(node.longitude) - avgLon + offsetX + x/gDrawScaleFactor;
+        node.latitude = parseFloat(node.latitude) - avgLat + offsetY + y/gDrawScaleFactor;
+        //node.longitude = parseFloat(node.longitude) + offsetX + x - avgLon; 
+        //node.latitude = parseFloat(node.latitude) + offsetY + y - avgLat;
     });
 }
 
@@ -3386,8 +3399,10 @@ function createSvgCircle(key, {longitude, latitude, object}, {r = 2, strokeWidth
 	circle.setAttribute('r', r);
     circle.setAttribute('stroke-width', strokeWidth);
     // Set coordinates and consider if they need to be translated
-    longitude = parseFloat(longitude) - gOffsetX;
-    latitude = parseFloat(latitude) - gOffsetY;
+    longitude = (parseFloat(longitude) - gOffsetX) * gDrawScaleFactor;
+    //longitude = parseFloat(longitude) - gOffsetX;
+    latitude = (parseFloat(latitude) - gOffsetY) * gDrawScaleFactor;
+    //latitude = parseFloat(latitude) - gOffsetY;
     circle.setAttribute('cx', longitude);
     circle.setAttribute('cy', latitude);
     return circle;
@@ -3410,10 +3425,14 @@ function createSvgLine(sourceNode, targetNode, key, thisObject) {
         //targetNode.latitudw was: "${targetNode.latitude}"`)
     }
     // Set coordinates and consider if they need to be translated
-    let sourceLon = parseFloat(sourceNode.longitude) - gOffsetX;
-    let sourceLat = parseFloat(sourceNode.latitude) - gOffsetY;
-    let targetLon = parseFloat(targetNode.longitude) - gOffsetX;
-    let targetLat = parseFloat(targetNode.latitude) - gOffsetY; 
+    let sourceLon = (parseFloat(sourceNode.longitude) - gOffsetX) * gDrawScaleFactor;
+    let sourceLat = (parseFloat(sourceNode.latitude) - gOffsetY) * gDrawScaleFactor;
+    let targetLon = (parseFloat(targetNode.longitude) - gOffsetX) * gDrawScaleFactor;
+    let targetLat = (parseFloat(targetNode.latitude) - gOffsetY) * gDrawScaleFactor;
+    //let sourceLon = parseFloat(sourceNode.longitude) - gOffsetX;
+    //let sourceLat = parseFloat(sourceNode.latitude) - gOffsetY;
+    //let targetLon = parseFloat(targetNode.longitude) - gOffsetX;
+    //let targetLat = parseFloat(targetNode.latitude) - gOffsetY; 
     svgLine.setAttribute("x1", sourceLon); 
     svgLine.setAttribute("x2", targetLon);
     svgLine.setAttribute("y1", sourceLat); 
@@ -4093,9 +4112,11 @@ function getMoveNodesFunction(objects, tBody=null, tObject=null) {
         if (tBody != null) {
             Array.from(tBody.getElementsByTagName("input")).forEach(input => {
                 if (input.dataset.coordinate === "latitude") {
-                    input.value = coords.y + gOffsetY;
+                    input.value = coords.y/gDrawScaleFactor + gOffsetY;
+                    //input.value = coords.y + gOffsetY;
                 } else if (input.dataset.coordinate === "longitude") {
-                    input.value = coords.x + gOffsetX;
+                    input.value = coords.x/gDrawScaleFactor + gOffsetX;
+                    //input.value = coords.x + gOffsetX;
                 }
             });
         }
@@ -4160,7 +4181,8 @@ function createInterface() {
     createViewport(writeFeeder.tree, document.getElementById("svgContainer"));
     gTreeWrapper = createTreeWrapper(writeFeeder.tree);
     const objects = Object.values(gTreeWrapper.tree);
-    insertCoordinates(objects, gOffsetX, gOffsetY, gLongitudeRange * .01);
+    insertCoordinates(objects, gOffsetX, gOffsetY, (1000/gDrawScaleFactor) * .01);
+    //insertCoordinates(objects, gOffsetX, gOffsetY, gLongitudeRange * .01);
     //gTreeWrapper.insertCoordinates(0, 0, 5);
     gSelection = createSelection();
     gViewport = document.getElementsByClassName('svg-pan-zoom_viewport')[0];
