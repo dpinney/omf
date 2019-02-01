@@ -236,7 +236,10 @@ function init() {
 	}
 	if (allOutputData != null) {
 		if (allOutputData['oldVersion'] == true) {
-			document.getElementById("triangle-parent").style.visibility = "visible";
+			try {
+				document.getElementById("triangle-parent").style.visibility = "visible";
+			}
+			catch (e){}
 		}
 	} 
 	// Depending on status, show different things.
