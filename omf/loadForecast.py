@@ -32,7 +32,7 @@ nercHolidays = {
 	dt(2021, 12, 25): 'Christmas'
 }
 
-def pullHourlyDayOfWeekForecast(rawData,upBound,lowBound):
+def rollingDylanForecast(rawData,upBound,lowBound):
 	'''
 	This model takes the inputs rawData, a dataset that holds 8760 values in two columns with no indexes
 	The first column rawData[:][0] holds the hourly demand for one year
@@ -70,7 +70,7 @@ def pullHourlyDayOfWeekForecast(rawData,upBound,lowBound):
 	MAE is an int and is the mean average error of the forecasted/actual data correlation
 	'''
 
-def pullWeeklyDayofHourForecast(rawData, startDate, modelDir):
+def nextDayPeakKatrinaForecast(rawData, startDate, modelDir):
 	'''
 	This model takes the inputs rawData, a dataset that holds hourly values in two columns with no indexes
 	The first column rawData[:][0] holds the hourly demand
