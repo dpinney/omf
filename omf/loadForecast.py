@@ -169,18 +169,19 @@ def nextDayPeakKatrinaForecast(rawData, startDate, modelDir):
 	return (forecasted_peak_time, forecasted_peak_demand)
 
 
-def rollingZuccForecast(rawData, startDate):
+def prophetForecast(rawData, startDate, modelDir):
 	"""Forecasting with fbprophet"""
 	from fbprophet import Prophet
 	from fbprophet.diagnostics import cross_validation
 
-	zucc = Prophet()
+	prophet = Prophet()
 	dates = pd.date_range(start=startDate, periods=len(rawData), freq="H")
 	input_df = pd.DataFrame(rawData, columns=["y", "temp"])
 	input_df["ds"] = dates.to_pydatetime()
-	zucc.fit(input_df)
-	out_df = cross_validation(zucc, horizon="672 hours", period="672 hours")
-	out_df.to_csv("~/zucca.csv")
+	input_df.to_csv(pJoin(modelDir, "prophetin.csv"))
+	prophet.fit(input_df)
+	out_df = cross_validation(prophet, initial="672 hours", horizon="672 hours", period="672 hours")
+	out_df.to_csv(pJoin(modelDir, "prophetout.csv"))
 	return (list(out_df.yhat), list(out_df.yhat_lower), list(out_df.yhat_upper))
 
 

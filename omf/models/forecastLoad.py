@@ -44,8 +44,8 @@ def work(modelDir, inputDict):
 		rawData, inputDict["simStartDate"], modelDir
 	)
 	pred_demand = np.transpose(np.array(pred_demand)).tolist()
-	zucc, zucc_low, zucc_high = loadForecast.rollingZuccForecast(
-		rawData, inputDict["simStartDate"]
+	zucc, zucc_low, zucc_high = loadForecast.prophetForecast(
+		rawData, inputDict["simStartDate"], modelDir
 	)
 	outData["startDate"] = inputDict["simStartDate"]
 	outData["actual"] = actual
