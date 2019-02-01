@@ -388,6 +388,7 @@
                 display: inline-block;
                 overflow-x: hidden;
 				max-height: 90vh;
+                right: 10px;
 			}
             .dataTable tr {
                 border-bottom: 1px solid black;
@@ -1145,10 +1146,24 @@ function createViewport(tree, svgContainer) {
     const firstKey = keys.find(key => {
         return tree[key].longitude !== undefined && tree[key].latitude !== undefined;
     });
-    let minLon = parseFloat(tree[firstKey].longitude);
-    let maxLon = minLon;
-    let minLat = parseFloat(tree[firstKey].latitude);
-    let maxLat = minLat;
+    let minLon;
+    let maxLon;
+    let minLat;
+    let maxLat;
+    if (firstKey == null) {
+        // There were no coordinates, so insert some!
+        const objects = Object.values(tree);
+        insertCoordinates(objects, 0, 0, 5);
+        minLon = 0;
+        maxLon = 0;
+        minLat = 0;
+        maxLat = 0;
+    } else {
+        minLon = parseFloat(tree[firstKey].longitude);
+        maxLon = minLon;
+        minLat = parseFloat(tree[firstKey].latitude);
+        maxLat = minLat;
+    }
     /* Find the minimum and maximum longitudes and latitudes. That's not good enough. I need to find a RANGE of values
     for each and scale the viewport to the RANGE
     */
@@ -1176,7 +1191,6 @@ function createViewport(tree, svgContainer) {
     gOffsetX = minLon;
     const gLatitudeRange = maxLat - minLat;
     gOffsetY = minLat;
-    //experiment
     /* Multiply by the gDrawScaleFactor when drawing. Divide by the gDrawScaleFactor when storing. */
     if (gLongitudeRange < gLatitudeRange) {
         gDrawScaleFactor = 1000/gLongitudeRange;
@@ -1184,7 +1198,6 @@ function createViewport(tree, svgContainer) {
         gDrawScaleFactor = 1000/gLatitudeRange;
     }
     svgContainer.setAttribute('viewBox',`0 0 ${1000} ${1000}`);
-    //experiment
     // Create the viewport
     //svgContainer.setAttribute('viewBox',`0 0 ${gLongitudeRange} ${gLatitudeRange}`);
 	window.panZoom = svgPanZoom('#svgContainer', {
@@ -1466,6 +1479,7 @@ function disableJQueryFunctionality() {
     Array.from(document.querySelectorAll("[data-web]")).forEach(li => {
         li.remove();
     });
+    //document.getElementById("findModal").style.justifyContent = "left";
 }
 
 //**************************************************
@@ -1814,6 +1828,19 @@ function randomChoice(inList) {
 
 // TODO: for secondary system has 'load', replace it with triplex_meter and triplex_node
 // TODO: rename this function?
+/*
+Don't touch existing houses or their loads
+Don't ever replace regular load objects
+1) Delete triplex nodes (have NO parent) and replace them with houses that have randomly generated loads
+2) Replace triplex loads (have parent) with houses that have randomly generated loads
+
+-There are no files with both triplex loads and triplex nodes.
+-File with triplex loads: ./omf/data/Model/public/Demo gridlabMulti scadaCalibration/Calibrated Feeder.omd
+-File with triplex nodes: 
+    ./omf/data/Model/public/Demo gridlabMulti scadaCalibration/Uncalibrated Feeder.omd
+    ./omf/data/Model/public/Demo superModel/superModel Today.omd
+
+*/
 function staticLoadsToHouses() {
     const tree = gTreeWrapper.tree;
     const names = gTreeWrapper.names;
@@ -2316,7 +2343,7 @@ async function submitForm({formId, pollUrl, inputId}) {
         await $.ajax({
             url: `/uniqObjName/Feeder/${thisOwner}/${fileName}/${thisModelName}`
         }).done(function(data) {
-            console.log(data);
+            //console.log(data);
             if (data.exists === true) {
                 alert(`You already have a feeder named "${fileName}". Please choose a different name.`);
             } else {
@@ -3605,7 +3632,7 @@ Apparently nodes can be children of lines.
 */
 const configurationTypes = ["regulator_configuration", "transformer_configuration", "triplex_line_configuration", "line_configuration",
 "volt_var_control", "line_spacing", "climate", "overhead_line_conductor", "underground_line_conductor", "triplex_line_conductor",
-"player"];
+"player", "schedule"];
 
 // delete this eventually
 function rebuildSelectionTable() {
@@ -4204,10 +4231,10 @@ function initializeJQuery() {
 
 (function initialize() {
     createInterface();
+    attachHandlers();
     initializeJQuery();
     attachMouseListeners();
     attachKeyListener();
-    attachHandlers();
     document.getElementById("searchInput").addEventListener("change", getSearchResults);
     document.getElementById('loadingMessage').style.display = 'none'
 })();

@@ -447,8 +447,8 @@ def distribution_get(owner, model_name, feeder_num):
 	with open(feeder_file, "r") as data_file:
 		data = json.load(data_file)
 	tree = data['tree']
-	if not omf.distNetViz.contains_coordinates(tree):
-		omf.distNetViz.insert_coordinates(tree)
+	#if not omf.distNetViz.contains_coordinates(tree):
+		#omf.distNetViz.insert_coordinates(tree)
 	passed_data = json.dumps(data)
 	component_json = get_components()
 	jasmine = spec = None
@@ -638,6 +638,8 @@ def gridlabImportBackground(owner, modelName, feederName, feederNum, glmString):
 		feederDir = modelDir+"/"+feederName+".omd"
 		newFeeder = dict(**feeder.newFeederWireframe)
 		newFeeder["tree"] = feeder.parse(glmString, False)
+		if not omf.distNetViz.contains_coordinates(newFeeder["tree"]):
+			omf.distNetViz.insert_coordinates(newFeeder["tree"])
 		with open("./static/schedules.glm","r") as schedFile:
 			newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
 		try: os.remove(feederDir)
