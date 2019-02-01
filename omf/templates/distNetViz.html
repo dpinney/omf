@@ -525,7 +525,9 @@
                         line.parentChild {stroke:LightGrey;}
                         circle {stroke:white; fill:gray;}
                         line.selected, circle.selected {stroke:lime;}
+                        .undefined, .regulator_configuration, .transformer_configuration, .triplex_line_configuration, .line_configuration, .volt_var_control, .line_spacing, .climate, .overhead_line_conductor, .underground_line_conductor, .triplex_line_conductor, .player {fill: #bfbfbf;}
                         ]]>
+                        
                     </style>
                 </svg>
             </div>
@@ -534,9 +536,17 @@
                 <div class='modalContent'>
                     <table>
                         <tr>
-                            <td>Term</td>
-                            <td><input id='searchInput' type='text' value="Enter a search term" class="modalInput"></td>
+                            <!--<td colspan="2">Term</td>-->
+                            <!--<td>Term</td>-->
+                            <td colspan="2"><input id='searchInput' type='text' value="Enter a search term" class="modalInput"></td>
                             <td id="searchCount"></td>
+                        </tr>
+                        <tr>
+                            <td>Key of current object:</td>
+                            <td id="foundElementKey"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="checkbox" id="showTableOnFind">Show table on view</td>
                         </tr>
                         <tr>
                             <td><button id="findPrevious" class="modalButton">Previous</button></td>
@@ -772,7 +782,7 @@
             </div>
             <div id='massAddModal' class='modal' style="display: none">
                 <div class='modalContent'>
-                    <form onsubmit="massAdd(); toggleElementDisplay('massAddModal'); return false;">
+                    <form onsubmit="massAdd(); return false;">
                         <table>
                             <tbody>
                                 <tr>
@@ -845,7 +855,7 @@
                                     <button onclick="toggleElementDisplay('massEditModal')" class="modalButton" style="float: right">Cancel</button>
                                 </td>
                                 <td>
-                                    <button onclick="massEdit(); toggleElementDisplay('massEditModal');" class="modalButton" style="float: left">Apply</button>
+                                    <button onclick="massEdit();" class="modalButton" style="float: left">Apply</button>
                                 </td>
                             </tr>
                         </tbody>
@@ -1041,8 +1051,10 @@ const writeFeeder = deepCopy(readFeeder);
 let gSelection;
 let gTreeWrapper; 
 let gViewport; 
-let gOffsetX; 
+let gOffsetX;
 let gOffsetY;
+let gLongitudeRange;
+let gLatitudeRange;
 let gDownX;
 let gDownY;
 // Scale that all SVG objects are drawn at
@@ -1123,9 +1135,9 @@ function downloadTextFile() {
 
 /**
  * TODO: add unit tests
+ * Get dimensions with: panZoom.getSizes()
  */
-function createViewport(treeWrapper, svgContainer) {
-    const tree = treeWrapper.tree;
+function createViewport(tree, svgContainer) {
     const keys = Object.keys(tree);
     // Set the longitude and latitude to be within the bounds of the provided data
     const firstKey = keys.find(key => {
@@ -1158,18 +1170,18 @@ function createViewport(treeWrapper, svgContainer) {
             }
         }
     });
-    const translatedMaxLon = (maxLon - minLon);
+    gLongitudeRange = maxLon - minLon;
     gOffsetX = minLon;
-    const translatedMaxLat = maxLat - minLat;
+    gLatitudeRange = maxLat - minLat;
     gOffsetY = minLat;
     // Create the viewport
-    svgContainer.setAttribute('viewBox',`0 0 ${translatedMaxLon} ${translatedMaxLat}`);
+    svgContainer.setAttribute('viewBox',`0 0 ${gLongitudeRange} ${gLatitudeRange}`);
 	window.panZoom = svgPanZoom('#svgContainer', {
         /* Override the default values set by 'optionsDefaults' in svg-pan-zoom.js */
         dblClickZoomEnabled: false,
         zoomScaleSensitivity: 0.2,
-        minZoom: 0.25,
-		maxZoom: 100
+        minZoom: 0.1,
+		maxZoom: 500
     });
 }
 
@@ -1183,10 +1195,7 @@ function createViewport(treeWrapper, svgContainer) {
  * Listener on the SVG object that handles user clicks.
  */
 function handleSelection(event) {
-    if (gDownX !== event.clientX || gDownY !== event.clientY) {
-		// Ignore drags, those should be handled by svg-panzoom.
-        return
-    }
+    if (detectDrag(event)) return;
     const element = event.target;
     if (event.altKey && (element.tagName === "circle" || element.tagName === "line") && !element.classList.contains("parentChild")) {
         if (gSelection.hasId(element.id)) {
@@ -1206,7 +1215,7 @@ function handleSelection(event) {
         //destroyTables(["selectionTable"]);
         if ((element.tagName === "circle" || element.tagName === "line") && !element.classList.contains("parentChild")) {
             gSelection.add(element);
-            const table = createDescriptionTable(element.id, gTreeWrapper);
+            const table = createDescriptionTable(element.id);
             table.id = `descriptionTable_${element.id}`;
             document.getElementById("descriptionTables").appendChild(table);
         } 
@@ -1317,15 +1326,14 @@ function clickLatLon(event) {
  */
 function getSearchResults() {
     const tree = gTreeWrapper.tree;
-    const keys = getMatchingKeys(this.value, tree);
+    const keys = getMatchingKeys(this.value.trim(), tree);
     document.getElementById("searchCount").textContent = `hits: ${keys.length}`;
     const nextButton = document.getElementById("findNext");
     const previousButton = document.getElementById("findPrevious");
-    destroyTables(["descriptionTables"]);
     if (keys.length === 0 || this.value === "") {
-        alert(`No results found for term: "${this.value}"`)
+        alert(`No results found for term: "${this.value}".`)
         const feedback = function() {
-            alert("Please enter a new term to search for"); 
+            alert("Please enter a new term to search for."); 
         }
         nextButton.onclick = feedback;
         previousButton.onclick = feedback;
@@ -1333,15 +1341,12 @@ function getSearchResults() {
     }
     const upperIndex = keys.length - 1;
     let idx = 0;
-    document.getElementById("descriptionTables").appendChild(createDescriptionTable(tree[keys[idx]], gTreeWrapper));
     viewElement(keys[idx]);
     nextButton.onclick = function() {
         idx++;
         if (idx > upperIndex) {
             idx = 0;
         }
-        destroyTables(["descriptionTables"]);
-        document.getElementById("descriptionTables").appendChild(createDescriptionTable(tree[keys[idx]], gTreeWrapper));
         viewElement(keys[idx]);
     }
     previousButton.onclick = function() {
@@ -1349,8 +1354,6 @@ function getSearchResults() {
         if (idx < 0) {
             idx = upperIndex;
         }
-        destroyTables(["descriptionTables"]);
-        document.getElementById("descriptionTables").appendChild(createDescriptionTable(tree[keys[idx]], gTreeWrapper));
         viewElement(keys[idx]);
     }
 }
@@ -1360,10 +1363,12 @@ function getSearchResults() {
  */
 function getMatchingKeys(term, tree) {
     const keys = [];
+    if (term === "") {
+        return keys;
+    }
     for (let key in tree) {
-        // Only add the key if it represents an object that was drawn
-        if ((tree[key].latitude != null && tree[key].longitude != null) ||
-        (tree[key].to != null && tree[key].from != null)) {
+        // Only add the key if it represents an object that was drawn. Everything gets drawn.
+        //if ((tree[key].latitude != null && tree[key].longitude != null) || (tree[key].to != null && tree[key].from != null)) {
             for (let propertyKey in tree[key]) {
                 let propertyVal = tree[key][propertyKey];
                 if (typeof(propertyVal) !== "string") {
@@ -1377,7 +1382,7 @@ function getMatchingKeys(term, tree) {
                     break;
                 }
             }
-        }
+        //}
     }
     return keys;
 }
@@ -1386,12 +1391,15 @@ function getMatchingKeys(term, tree) {
  * TODO: add unit tests
  */
 function viewElement(key) {
-    //emptySelected();
+    destroyTables(["descriptionTables"]);
+    if (document.getElementById("showTableOnFind").checked) {
+        document.getElementById("descriptionTables").appendChild(createDescriptionTable(key));
+    }
+    document.getElementById("foundElementKey").textContent = key;
     gSelection.empty();
     const element = document.getElementById(key);
-    //addSelected(element);
     gSelection.add(element);
-   let x, y;
+    let x, y;
     if (element.getAttribute("cx") != null && element.getAttribute("cy") != null) {
         x = element.getAttribute("cx");
         y = element.getAttribute("cy");
@@ -1476,6 +1484,7 @@ function insertIndependentComponent(component) {
     const svgContainer = document.getElementById("svgContainer");
     svgContainer.setAttribute("style", "cursor: crosshair");
     svgContainer.onclick = function(event) {
+        if (detectDrag(event)) return;
         const tObject = createTreeObject(component, gTreeWrapper);
         insertCoordinates([tObject.data], 0, 0, 0);
         getMoveNodesFunction([tObject.data])(event);
@@ -1494,6 +1503,7 @@ function insertChildComponent(component) {
         alert("Please click on another circle that is not a configuration node to add this component as a child.");
         svgContainer.setAttribute("style", "cursor: crosshair");
         svgContainer.onclick = function(event) {
+            if (detectDrag(event)) return;
             event.stopPropagation();
             svgContainer.onclick = null;
             svgContainer.setAttribute("style", "cursor: default");
@@ -1530,6 +1540,7 @@ function insertLineComponent(component) {
         const nodes = [];
         svgContainer.setAttribute("style", "cursor: crosshair");
         svgContainer.onclick = function(event) {
+            if (detectDrag(event)) return;
             event.stopPropagation();
             const node = gTreeWrapper.tree[event.target.id];
             if (node != null && (getType(node) === "childNode" || getType(node) === "independentNode")) {
@@ -1708,7 +1719,10 @@ function addEditMenuHandlers() {
         toggleElementDisplay("attachmentsModal");
     });
     items[3].addEventListener("click", function() { toggleElementDisplay("climateModal"); });
-    items[4].addEventListener("click", function() { toggleElementDisplay("findModal"); });
+    items[4].addEventListener("click", function() {
+        toggleElementDisplay("findModal"); 
+        document.getElementById("searchInput").focus(); 
+    });
     items[5].addEventListener("click", function() {
         updateAttachTargets("massAddTargetSelect", gTreeWrapper.tree);
         toggleElementDisplay("massAddModal");
@@ -1978,64 +1992,42 @@ function attachFeederList(ul, feeders, owner) {
 }
 
 function massAdd() {
-    let tree = gTreeWrapper.tree;
-	const componentName = document.getElementById('componentSelect').value;
-	const attachType = document.getElementById('massAddTargetSelect').value;
     const percent = document.getElementById('percent').value;
     if (!isNumberString(percent)) {
         alert("Please enter a valid number for attachment probability");
         return;
     }
-	let objectsAdded = 0;
-    let modal = new ProgressModal(`Please wait. We are adding ${componentName} objects to all ${attachType} objects.`, "", false);
-    modal.show();
-    // Add 100 nodes at a time (maximum), to prevent the browser from hanging
-    const keys = Object.keys(tree);
-    let start = 0;
-    let end = 100;
-    const intervalId = setInterval(function() {
-        console.log("start: " + start);
-        console.log("end: " + end);
-        massAddComponent(start, end, keys);
-        if (end >= keys.length) {
-            clearInterval(intervalId);
-            modal.hide();
-            alert(`${objectsAdded} ${componentName} objects added to the feeder`);
-        } else {
-            start = end + 1;
-            end += 100;
+    let tree = gTreeWrapper.tree;
+	const componentName = document.getElementById('componentSelect').value;
+	const attachObject = document.getElementById('massAddTargetSelect').value;
+    const newWrapper = createTreeWrapper();
+    let count = 0;
+    Object.keys(gTreeWrapper.tree).forEach(key => {
+        if (gTreeWrapper.tree[key].object === attachObject) {
+            count++;
+            const tObject = createTreeObject(gComponents[componentName], gTreeWrapper);
+            tObject.setupChildNode(gTreeWrapper.tree[key]);
+            gTreeWrapper.dirtyInsert(tObject);
+            newWrapper.add(tObject.key, gTreeWrapper);
+            newWrapper.merge(gTreeWrapper.getParentOf(tObject.key));
         }
-    }, 100);
-
-    function massAddComponent(start, end, keys) {
-        if (end >= keys.length) {
-            end = keys.length - 1;
-        }
-        for (let i = start; i <= end; i++) {
-            if (tree[keys[i]].object === attachType) {
-				if (Math.random() < percent) {
-					const newComponent = deepCopy(gComponents[componentName]);
-					newChildAtLocation(newComponent, keys[i]);
-					objectsAdded += 1
-				}
-            }
-        }
-    }
+    });
+    createAddableSvgData(newWrapper).drawTo(gViewport);
+    alert(`${count} "${componentName}" objects added to the feeder`);
+    toggleElementDisplay('massAddModal');
 }
 
-//Delete this eventually. At least prepare it so that it can be used in new Tree interface
-function massAddComponent(tObject) {
-
-}
-
+/* Clearing each list so we dont get duplicates in the list. This must be done because the attachTarget list must be 
+refreshed, since the user could have added a new object type to the data which they now want to attach to.
+*/
 function updateAttachTargets(id, tree) {
-	/* Clearing each list so we dont get duplicates in the list. This must be done because the attachTarget list must be 
-    refreshed, since the user could have added a new object type to the data which they now want to attach to.
-    */
     document.getElementById(id).innerHTML = "";
 	let attachList = [];
 	for (let key in tree) {
-        let isValidType = getType(tree[key]) !== "line" && getType(tree[key]) !== "configurationNode";
+        let isValidType = true;
+        if (id === "massAddTargetSelect") {
+            isValidType = getType(tree[key]) !== "line" && getType(tree[key]) !== "configurationNode";
+        }
         let isComponent = gComponents.hasOwnProperty(tree[key].object);
         let notAlreadyAdded = !attachList.includes(tree[key].object);
         if (isValidType && isComponent && notAlreadyAdded) {
@@ -2048,95 +2040,133 @@ function updateAttachTargets(id, tree) {
     });
 }
 
-function massEdit() {
+// keep this, rename it
+function getKeysOfObjectsWithoutNumericValues(keys, attributeKey) {
     const tree = gTreeWrapper.tree;
-    const objectType = document.getElementById("massEditTargetSelect").value;
-    const keys = [];
-    for (let key in tree){
-		if (tree[key].object === objectType) {
-            keys.push(key);
+    invalidKeys = keys.filter(key => {
+        let value = tree[key][attributeKey];
+        if (typeof value !== "string") {
+            value = String(tree[key][attributeKey]);
         }
-    }
+        if (!isNumberString(value)) {
+            return true;
+        }
+    });
+    return invalidKeys;
+}
+
+//only toggle upon successful completion of operation
+function massEdit() {
     let operation = document.querySelector("input[name=attributeOperation]:checked");
     if (operation == null) {
         alert("Please select an operation with radio buttons on the 'Mass Edit' menu.");
         return;
     }
     operation = operation.value;
+    const objectType = document.getElementById("massEditTargetSelect").value;
+    const keys = Object.keys(gTreeWrapper.tree).filter(key => gTreeWrapper.tree[key].object === objectType)
     if (operation === "addAttribute") {
-        massEditAdd(keys);
+    massAttributeAdd(keys, objectType);
         return;
     }
-    const attributeKey = document.getElementById("massEditAttribute").value;
+    const tree = gTreeWrapper.tree;
+    const attributeKey = document.getElementById("massEditAttribute").value.trim();
+    //Make sure the attribute exists
+    let invalidKeys = [];
     for (let key of keys) {
         if (tree[key][attributeKey] === undefined) {
-            alert(`Invalid operation. One or more of the objects you selected does not have the attribute you are trying to edit.
-            Attribute "${attributeKey}" is missing from tree object with key "${key}".`);
-            return;
+            invalidKeys.push(key);
         }
     }
+    if (invalidKeys.length > 0) {
+        alert(`Mass edit failed. The attribute "${attributeKey}" is missing from one or more objects:\nObject names: "${invalidKeys.map(key => tree[key].name).join(", ")}".\nObject keys: "${invalidKeys.join(", ")}".`);
+        return;
+    }
+    //Make sure the attribute exists
     switch (operation) {
         case "addTo":
-            const operand = parseFloat(document.getElementById("addToValue").value);
-            if (isNaN(operand)) {
-                alert("Invalid operation. Please enter a valid number if you choose 'Add to Value'.");
-                return;
-            } else {
-                for (let key of keys) {
-                    const value = parseFloat(tree[key][attributeKey]);
-                    if (isNaN(value)) {
-                        alert("Invalid operation. The attribute you are trying to add to is not a number.");
-                        return;
-                    }
-                    tree[key][attributeKey] = (value + operand).toString();
-                }
-            }
-            break;
+        case "multiplyBy":
         case "change":
-            const newValue = document.getElementById("changeValue").value;
-            for (let key of keys) {
-                tree[key][attributeKey] = newValue;
+            if (nonModifiableProperties.includes(attributeKey)) {
+                alert(`Mass edit failed. The following properties cannot be modified: "${nonModifiableProperties.join(", ")}".`);
+                return;
+            }
+            if (operation === "addTo" || operation === "multiplyBy") {
+                invalidKeys = getKeysOfObjectsWithoutNumericValues(keys, attributeKey);
+                if (invalidKeys.length > 0) {
+                    alert(`Mass edit failed. The attribute "${attributeKey}" does not have a numeric value in the following objects: \nObject names: "${invalidKeys.map(key => tree[key].name).join(", ")}".\nObject keys: "${invalidKeys.join(", ")}".`);
+                    return;
+                }
+                if (operation === "addTo") {
+                    massAddition(keys, attributeKey, objectType);
+                } else if (operation === "multiplyBy") {
+                    massMultiplication(keys, attributeKey, objectType);
+                }
+            } else if (operation === "change") {
+                const newValue = document.getElementById("changeValue").value.trim();
+                for (let key of keys) {
+                    tree[key][attributeKey] = newValue;
+                }
+                alert(`${keys.length} ${objectType} objects had the "${attributeKey}" attribute changed.`);
+                toggleElementDisplay('massEditModal');
             }
             break;
         case "delete":
+            if (nonDeletableProperties.includes(attributeKey)) {
+                alert(`Mass edit failed. The properties "${nonDeletableProperties.join(", ")}" cannot be deleted.`);
+                return;
+            }
             for (let key of keys) {
                 delete tree[key][attributeKey];
             }
-            break;
-        case "multiplyBy":
-            const multiplyOperand = parseFloat(document.getElementById("multiplyValue").value);
-            const rawAddOperand = document.getElementById("andAddValue").value;
-            let addOperand;
-            if (rawAddOperand === "") {
-                addOperand = 0;
-            } else {
-                addOperand = parseFloat(rawAddOperand);
-            }
-            if (isNaN(multiplyOperand) || isNaN(addOperand)) {
-                alert("Invalid operation. Please enter valid numbers if you choose 'Multiply attribute by'.");
-            }
-            for (let key of keys) {
-                const value = parseFloat(tree[key][attributeKey]);
-                if (isNaN(value)) {
-                    alert("Invalid operation. The attribute you are trying to multiply by is not a number.");
-                    return;
-                }
-                tree[key][attributeKey] = ((value * multiplyOperand) + addOperand).toString();
-            }
+            alert(`${keys.length} ${objectType} objects had the "${attributeKey}" attribute deleted.`);
+            toggleElementDisplay('massEditModal');
             break;
     }
-    alert(`${keys.length} ${objectType} objects edited.`);
 }
 
-function massEditAdd(keys) {
-    const tree = gTreeWrapper.tree;
-    const newKey = document.getElementById("newAttributeKey").value;
+function massAddition(keys, attributeKey, objectType) {
+    let operand = document.getElementById("addToValue").value.trim();
+    if (!isNumberString(operand)) {
+        alert("Mass edit failed. Please enter a valid number if you choose 'Add to Value'.");
+        return;
+    }
+    operand = parseFloat(operand);
+    for (let key of keys) {
+        gTreeWrapper.tree[key][attributeKey] = (parseFloat(gTreeWrapper.tree[key][attributeKey]) + operand).toString();
+    }
+    alert(`${keys.length} ${objectType} objects had their "${attributeKey}" attribute edited.`);
+    toggleElementDisplay('massEditModal');
+}
+
+function massMultiplication(keys, attributeKey, objectType) {
+    let multiplyOperand = document.getElementById("multiplyValue").value.trim();
+    let addOperand = document.getElementById("andAddValue").value.trim() === "" ? "0" : document.getElementById("andAddValue").value.trim();
+    if (!isNumberString(multiplyOperand) || !isNumberString(addOperand)) {
+        alert("Mass edit failed. Please enter valid operands if you choose 'Multiply attribute by'.");
+        return;
+    }
+    multiplyOperand = parseFloat(multiplyOperand);
+    addOperand = parseFloat(addOperand);
+    for (let key of keys) {
+        gTreeWrapper.tree[key][attributeKey] = ((parseFloat(gTreeWrapper.tree[key][attributeKey]) * multiplyOperand) + addOperand).toString();
+    }
+    alert(`${keys.length} ${objectType} objects had their "${attributeKey}" attribute edited.`);
+    toggleElementDisplay('massEditModal');
+}
+
+function massAttributeAdd(keys, objectType) {
+    const newKey = document.getElementById("newAttributeKey").value.trim();
+    if (nonModifiableProperties.includes(newKey)) {
+        alert(`Mass edit failed. The properties "${nonModifiableProperties.join(", ")}" cannot be overwritten.`);
+        return;
+    }
     const newValue = document.getElementById("newAttributeValue").value;
     for (let key of keys) {
-        tree[key][newKey] = newValue;
+        gTreeWrapper.tree[key][newKey] = newValue;
     }
-    const objectType = document.getElementById("massEditTargetSelect").value;
-    alert(`${keys.length} ${objectType} objects edited.`);
+    alert(`${keys.length} ${objectType} objects had the "${newKey}" attribute added.`);
+    toggleElementDisplay('massEditModal');
 }
 
 function loadAttachments() {
@@ -3537,7 +3567,7 @@ function createTreeObject(input, treeWrapper) {
 These are names of properties in most objects in writeFeeder.tree that should not be deleted from objects because
 doing so might make that object hard to identify with reference to the rest of the data.
 */
-const nonDeletableProperties = ["name", "object", "from", "to", "latitude", "longitude", "parent", "configuration"];
+const nonDeletableProperties = ["name", "object", "from", "to", "parent", "latitude", "longitude", "configuration"];
 /* If these properties were to be modified for a given writeFeeder.tree object, it would require significantly modifying the 
 other objects.  These properties ARE technically modifiable, but allowing the user to change them would require more work 
 than I think is worth it. It is easier just to create a new node.
@@ -3615,7 +3645,7 @@ function getDisplayTableFunction(id) {
     let displayTable = function() {
         let table = document.getElementById(`descriptionTable_${id}`);
         if (table == null) {
-            const table = createDescriptionTable(id, gTreeWrapper);
+            const table = createDescriptionTable(id);
             table.id = `descriptionTable_${id}`;
             document.getElementById("descriptionTables").append(table);
         }           
@@ -3643,7 +3673,7 @@ function getTableButton(text, func) {
  * The form element is only used to take advantage of the "required" form validation functionality that is native to the
  * browser.
  */
-function createDescriptionTable(id, tWrapper) {
+function createDescriptionTable(id) {
     const form = document.createElement("form");
     form.classList.add("formContainer");
     const table = document.createElement("table");
@@ -3661,16 +3691,16 @@ function createDescriptionTable(id, tWrapper) {
     table.append(tHead);
     table.append(tBody);
     tBody.append(buttonRow);
-    const tObject = createTreeObject(id, tWrapper);
+    const tObject = createTreeObject(id, gTreeWrapper);
     if (getType(tObject.data) !== "line") {
-        buttonCell.append(createButton({action: "move", tObject: tObject, tWrapper: tWrapper, tableBody: tBody}).self);
+        buttonCell.append(createButton({action: "move", tObject: tObject, tableBody: tBody}).self);
     }
-    buttonCell.append(createButton({action: "delete", tObject: tObject, tWrapper: tWrapper, tableBody: tBody}).self);
+    buttonCell.append(createButton({action: "delete", tObject: tObject, tableBody: tBody}).self);
     buttonCell.append(createButton({action: "add", tObject: tObject, tableBody: tBody}).self);
     buttonCell.append(createButton({action: "save"}).self);
     form.addEventListener("submit", function(event) {
         event.preventDefault();
-        const svg = createAddableSvgData(tWrapper.insert(tObject));
+        const svg = createAddableSvgData(gTreeWrapper.insert(tObject));
         svg.drawTo(gViewport);
         alert("Object saved");
     });
@@ -3711,53 +3741,28 @@ const buttonPrototype = {
     /* Private helper methods */
 
     /**
-     * TODO: delete?
-     */
-    attachButtonMoveListener() {
-        if (getType(this.tObject.data) === "line") {
-            alert("Lines cannot be moved directly.");    
-            return
-        }
-        const tWrapper = createTreeWrapper();
-        tWrapper.add(this.tObject.key, this.tWrapper);
-        attachMoveListener(tWrapper);
-
-        //const element = document.getElementById("svgContainer");
-        //element.setAttribute("style", "cursor: crosshair");
-        //const tWrapper = createTreeWrapper();
-        //tWrapper.add(this.tObject.key, this.tWrapper);
-        //const moveNode = getMoveNodesFunction(tWrapper, this.tableBody, this.tObject);
-        //element.onclick = moveNode;
-
-        /* A table only exists for an existing tree object. Therefore, I can use the key of the tObject of this button
-        to 1) create a new TreeWrapper consisting of just that object 2) move that TreeWrapper 3) get the subtree to
-        redraw referencing the gTreeWrapper.
-        This means that I'm moving the REAL tree object, and updating the TreeObject. If after the move I don't click save,
-        any modifications to the TreeObject won't be persisted to the tree object. This is unlike before, where I modified the
-        TreeObject AND inserted it.
-        */
-    },
-
-    /**
      * TODO: update unit tests
      * Delete the TreeObject of this button from the TreeWrapper of this button
      */
     deleteObject() {
         let subWrapper;
         const key = this.tObject.key;
+        const svgContainer = document.getElementById("svgContainer");
         try {
-            subWrapper = this.tWrapper.delete(this.tObject.key);
+            subWrapper = gTreeWrapper.delete(this.tObject.key);
+            detachListener();
             gSelection.remove(document.getElementById(key));
             rebuildSelectionTable();
             createDeletableSvgData(subWrapper.tree).deleteFrom(gViewport);
         } catch (e) {
             if (confirm(e + " Alternatively, do you wish to delete this node and all of its immediately connected objects?")) {
-                subWrapper = this.tWrapper.recursiveDelete(this.tObject.key);
+                subWrapper = gTreeWrapper.recursiveDelete(this.tObject.key);
                 Object.keys(subWrapper.tree).forEach(key => {
                     if (gSelection.hasId(key)) {
                         gSelection.remove(document.getElementById(key));
                     }
                 });
+                detachListener();
                 rebuildSelectionTable();
                 createDeletableSvgData(subWrapper.tree).deleteFrom(gViewport);
             }
@@ -3773,8 +3778,8 @@ const buttonPrototype = {
             //    throw new Error(`A button with a "${args.action}" action must have non-null tObject, tWrapper, and tableBody arguments`);
             //}
         } else if (args.action === "delete") {
-            if (args.tObject == null || args.tWrapper == null || args.tableBody == null) {
-                throw new Error(`A button with a "delete" action must have non-null tObject, tWrapper, and tableBody arguments`);
+            if (args.tObject == null || args.tableBody == null) {
+                throw new Error(`A button with a "delete" action must have non-null tObject and tableBody arguments`);
             }
         } else if (args.action === "add") {
             if (args.tObject == null || args.tableBody == null) {
@@ -3789,21 +3794,20 @@ const buttonPrototype = {
 /**
  * TODO: add unit tests, DON'T remove tObject argument, remove tWrapper argument
  */
-function createButton({action, tableBody=null, tObject=null, tWrapper=null}) {
+function createButton({action, tableBody=null, tObject=null}) {
     const button = Object.create(buttonPrototype);
     button.validateArguments(arguments[0]);
     button.self = document.createElement("button");
     button.self.textContent = action;
     button.self.classList.add("modalButton");
     button.tObject = tObject;
-    button.tWrapper = tWrapper;
     button.tableBody = tableBody;
     button.self.type = "button";
     switch (action) {
         case "move":
             button.self.addEventListener("click", function() {
                 const newWrapper = createTreeWrapper();
-                newWrapper.add(tObject.key, tWrapper);
+                newWrapper.add(tObject.key, gTreeWrapper);
                 attachMoveListener(newWrapper, tableBody, tObject);
             });
             break;
@@ -3854,7 +3858,7 @@ const rowPrototype = {
      * @return {boolean}
      */
     validateNewKey(key) {
-        if (this.map[key] !== undefined || key === "") {
+        if (this.map[key] !== undefined || key === "" || key === "to" || key === "from" || key === "parent") {
             return false;
         }
         return true;
@@ -4070,10 +4074,7 @@ function getMoveNodesFunction(objects, tBody=null, tObject=null) {
     }
     const moveNodes = function(event) {
         event.stopPropagation();
-        const svgContainer = document.getElementById("svgContainer");
-        //element.removeEventListener("click", moveNodes);
-        svgContainer.onclick = null;
-        svgContainer.setAttribute("style", "cursor: default");
+        detachListener();
         const coords = clickLatLon(event);
         move(objects, coords, {offsetX: gOffsetX, offsetY: gOffsetY});
         // redraw here because we ALWAYS want to redraw after moving. If there was callback, would we want to do something else after moving? No.
@@ -4108,6 +4109,11 @@ function detachListener() {
     element.onclick = null;
 }
 
+// Ignore drags, those should be handled by svg-panzoom.
+function detectDrag(event) {
+    return (gDownX !== event.clientX || gDownY !== event.clientY) ? true : false;
+}
+
 //**************************************************
 // Initialization
 //**************************************************
@@ -4139,8 +4145,11 @@ function attachKeyListener() {
                     panZoom.zoomIn();
                     break;
                 case "Escape":
-                    alert("Operation cancelled");
-                    detachListener();
+                    const svgContainer = document.getElementById("svgContainer");
+                    if (svgContainer.onclick != null) {
+                        alert("Operation cancelled");
+                        detachListener();
+                    }
                     break;
             }
         }
@@ -4148,12 +4157,12 @@ function attachKeyListener() {
 }
 
 function createInterface() {
+    createViewport(writeFeeder.tree, document.getElementById("svgContainer"));
     gTreeWrapper = createTreeWrapper(writeFeeder.tree);
     const objects = Object.values(gTreeWrapper.tree);
-    insertCoordinates(objects, 0, 0, 5);
+    insertCoordinates(objects, gOffsetX, gOffsetY, gLongitudeRange * .01);
     //gTreeWrapper.insertCoordinates(0, 0, 5);
     gSelection = createSelection();
-    createViewport(gTreeWrapper, document.getElementById("svgContainer"));
     gViewport = document.getElementsByClassName('svg-pan-zoom_viewport')[0];
     const svg = createAddableSvgData(gTreeWrapper);
     svg.drawTo(gViewport);
