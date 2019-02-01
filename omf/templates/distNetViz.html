@@ -551,7 +551,7 @@
                         <tr>
                             <td><button id="findPrevious" class="modalButton">Previous</button></td>
                             <td><button id="findNext" class="modalButton">Next</button></td>
-                            <td><button class="modalButton" onclick='toggleElementDisplay("findModal")'>Cancel</button></td>
+                            <td><button class="modalButton" onclick='toggleElementDisplay("findModal")'>Close</button></td>
                         </tr>
                     </table>
                 </div>
@@ -2077,7 +2077,7 @@ function massEdit() {
     const objectType = document.getElementById("massEditTargetSelect").value;
     const keys = Object.keys(gTreeWrapper.tree).filter(key => gTreeWrapper.tree[key].object === objectType)
     if (operation === "addAttribute") {
-    massAttributeAdd(keys, objectType);
+    massAddAttribute(keys, objectType);
         return;
     }
     const tree = gTreeWrapper.tree;
@@ -2166,8 +2166,12 @@ function massMultiplication(keys, attributeKey, objectType) {
     toggleElementDisplay('massEditModal');
 }
 
-function massAttributeAdd(keys, objectType) {
+function massAddAttribute(keys, objectType) {
     const newKey = document.getElementById("newAttributeKey").value.trim();
+    if (newKey === "") {
+        alert(`Mass edit failed. Please enter a name for the attribute you want to add.`);
+        return;
+    }
     if (nonModifiableProperties.includes(newKey)) {
         alert(`Mass edit failed. The properties "${nonModifiableProperties.join(", ")}" cannot be overwritten.`);
         return;
@@ -3481,9 +3485,9 @@ const treeObjectPrototype = {
             throw new Error("The 'parent' argument is missing properties.");
         }
         this.data.parent = parent.name;
-        const lonValue = (Math.random() * 5) + 5; 
+        const lonValue = ((Math.random() * 5) + 5)/gDrawScaleFactor; 
         this.data.longitude = Math.random() < 0.5 ? parent.longitude + lonValue : parent.longitude - lonValue;
-        const latValue = (Math.random() * 5) + 5;
+        const latValue = ((Math.random() * 5) + 5)/gDrawScaleFactor;
         this.data.latitude = Math.random() < 0.5 ? parent.latitude + latValue : parent.latitude - latValue;
     },
 
