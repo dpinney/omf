@@ -392,6 +392,10 @@
 		</div>
 		<p class="reportTitle postRun" style="page-break-before:always">Model accuracy and effectiveness</p>
 		<div id="reportTitle postRun" class="tightContent postRun detailsContainer" style="position: relative;">
+			When confidence is:
+			<pre id="confidence" style="font-size:13px; text-align:left; padding-left: 10px;overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
+			<script>gebi("confidence").innerHTML = allOutputData.confidence + "%"</script><br>
+			
 			Load prediction train accuracy:
 			<pre id="trainAccuracy" style="font-size:13px; text-align:left; padding-left: 10px;overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
 			<script>gebi("trainAccuracy").innerHTML = allOutputData.trainAccuracy + "%"</script><br>
@@ -403,7 +407,13 @@
 			<script>gebi("precision").innerHTML = "True Positive / (True Positive + False Positive)\n" + allOutputData.precision + "%"</script><br>
 			Peak identification recall:
 			<pre id="recall" style="font-size:13px; text-align:left; padding-left: 10px;overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
-			<script>gebi("recall").innerHTML = "True Positive / (True Positive + False Negative)\n" + allOutputData.recall + "%"</script>
+			<script>gebi("recall").innerHTML = "True Positive / (True Positive + False Negative)\n" + allOutputData.recall + "%"</script><br>
+			Number of dispatches:
+			<pre id="number_of_dispatches" style="font-size:13px; text-align:left; padding-left: 10px;overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
+			<script>gebi("number_of_dispatches").innerHTML = allOutputData.number_of_dispatches</script><br>
+			MAE:
+			<pre id="MAE" style="font-size:13px; text-align:left; padding-left: 10px;overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
+			<script>gebi("MAE").innerHTML = allOutputData.MAE + '%'</script>
 		</div>
 	</div>
 </body>
