@@ -28,7 +28,12 @@
 				font-size:30px;
 				line-height:30px;
 				color:white;
+                background-color: dimgrey;
+                left: 5px;
 			}
+            #scaleButton {
+                top: 175px;
+            }
 			body {
                 /*width: 100%;
                 height: 100%;*/
@@ -454,10 +459,10 @@
             <div id="descriptionTables"></div>
             <div id="selectionTable"></div>
             <!-- Controls -->
-            <div style='background:dimgrey; top:55px; left:5px' class='divButton' onclick='window.panZoom.zoomIn()' title='Zoom In'>+</div>
-            <div style='background:dimgrey; top:95px; left:5px' class='divButton' onclick='window.panZoom.zoomOut()' title='Zoom Out'>-</div>
-            <div style='background:dimgrey; top:135px; left:5px' class='divButton' onclick='window.panZoom.reset()' title='Reset Zoom'>R</div>
-            <div style='background:dimgrey; top:175px; left:5px;' class='divButton' onclick='scaleTo(parseFloat(prompt("Scale line thickness by this multiple:", scaleLevel)))' title='Scale To'>S</div>
+            <div style="top:55px;" class='divButton' onclick='window.panZoom.zoomIn()' title='Zoom In'>+</div>
+            <div style="top:95px;" class='divButton' onclick='window.panZoom.zoomOut()' title='Zoom Out'>-</div>
+            <div style="top:135px;" class='divButton' onclick='window.panZoom.reset()' title='Reset Zoom'>R</div>
+            <div id="scaleButton" class='divButton' title='Scale To'>S</div>
             <!-- <div style='background:navy; top:215px; left:5px' id='saveLink' class='divButton' onclick='saveSvg()' title='Save File' download>S</div> -->
             <!-- Menu Bar -->
             <div id='header'>
@@ -1060,7 +1065,7 @@ let gDrawScaleFactor;
 let gDownX;
 let gDownY;
 // Scale that all SVG objects are drawn at
-let scaleLevel = 1.0; 
+let gScaleLevel = 1.0; 
 //**************************************************
 // Selection Interface
 //**************************************************
@@ -1202,6 +1207,8 @@ function createViewport(tree, svgContainer) {
     //svgContainer.setAttribute('viewBox',`0 0 ${gLongitudeRange} ${gLatitudeRange}`);
 	window.panZoom = svgPanZoom('#svgContainer', {
         /* Override the default values set by 'optionsDefaults' in svg-pan-zoom.js */
+        //contain: false,
+        //fit: false,
         dblClickZoomEnabled: false,
         zoomScaleSensitivity: 0.2,
         minZoom: 0.1,
@@ -1271,10 +1278,10 @@ function handleSelection(event) {
 
 function scaleTo(x) {
 	// Scale the thickness of all lines and size of all circles. This helps user see details.
-	scaleLevel = x
-	if (!x) {
-		return
-	}
+    gScaleLevel = x;
+    if (!isNumberString(String(x))) {
+        throw new Error("Invalid scale value!");
+    }
 	const circles = document.getElementsByTagName('circle')
 	const lines = document.getElementsByTagName('line')
 	// Scale Circles
@@ -1439,7 +1446,7 @@ function viewElement(key) {
 	var width = window.panZoom.getSizes().width / 2
 	var height = window.panZoom.getSizes().height / 2
     panZoom.pan({x:width - (x * realZoom), y:height - (y * realZoom)})
-    panZoom.zoom(20/scaleLevel);
+    panZoom.zoom(20/gScaleLevel);
 }
 
 //**************************************************
@@ -3170,7 +3177,7 @@ const addableSvgDataPrototype = {
         this.circles.forEach(circle => {
             this.drawObject(circle, viewport);
         });
-        scaleTo(scaleLevel);
+        scaleTo(gScaleLevel);
     },
 
     /* "Private" helper methods */
@@ -3603,7 +3610,6 @@ function createTreeObject(input, treeWrapper) {
         tObject.data = deepCopy(input);
         if (tObject.data.name != null && tObject.data.object != null) {
             tObject.data.name = tObject.data.object + tObject.key;
-            //tObject.data.name += tObject.key;
         }
         return tObject;
     } 
@@ -4180,6 +4186,12 @@ function attachMouseListeners() {
     });
     document.getElementById("svgContainerWrapper").addEventListener("mouseup", function(event) {
         gDownY = event.clientY;
+    });
+    document.getElementById("scaleButton").addEventListener("click", function() {
+        const userScale = prompt("Scale line thickness by this multiple:", gScaleLevel);
+        if (isNumberString(userScale)) {
+            scaleTo(parseFloat(userScale));
+        }
     });
 }
 
