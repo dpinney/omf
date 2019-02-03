@@ -1059,8 +1059,8 @@ let gTreeWrapper;
 let gViewport; 
 let gOffsetX;
 let gOffsetY;
-//let gLongitudeRange;
-//let gLatitudeRange;
+let gLongitudeRange;
+let gLatitudeRange;
 let gDrawScaleFactor;
 let gDownX;
 let gDownY;
@@ -1192,19 +1192,23 @@ function createViewport(tree, svgContainer) {
             }
         }
     });
-    const gLongitudeRange = maxLon - minLon;
+    gLongitudeRange = maxLon - minLon;
     gOffsetX = minLon;
-    const gLatitudeRange = maxLat - minLat;
+    gLatitudeRange = maxLat - minLat;
     gOffsetY = minLat;
-    /* Multiply by the gDrawScaleFactor when drawing. Divide by the gDrawScaleFactor when storing. */
-    if (gLongitudeRange < gLatitudeRange) {
+    /* Multiply by the gDrawScaleFactor when drawing. Divide by the gDrawScaleFactor when storing. 
+    We use the larger of the range values to set the gDrawScaleFactor to make the graph fit in the viewport initially.
+    */
+    if (gLongitudeRange > gLatitudeRange) {
         gDrawScaleFactor = 1000/gLongitudeRange;
     } else {
         gDrawScaleFactor = 1000/gLatitudeRange;
     }
     svgContainer.setAttribute('viewBox',`0 0 ${1000} ${1000}`);
-    // Create the viewport
+    /* Uncomment below to make gScaleFactor go away */
+    //gDrawScaleFactor = 1;
     //svgContainer.setAttribute('viewBox',`0 0 ${gLongitudeRange} ${gLatitudeRange}`);
+    /* Uncomment above to make gScaleFactor go away */
 	window.panZoom = svgPanZoom('#svgContainer', {
         /* Override the default values set by 'optionsDefaults' in svg-pan-zoom.js */
         //contain: false,
