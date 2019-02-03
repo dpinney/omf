@@ -105,21 +105,41 @@ def work(modelDir, inputDict):
 		tree[omf.feeder.getMaxKey(tree) + 1] = {
 			'object':'group_recorder', 
 			'group':'"class=regulator"',
-			'limit':1,
+			'limit':1000,
 			'property':'tap_B',
-			'file':'tap_B.csv'
+			'file':'tap_B.csv',
+			'interval':0
 		}
 
 		tree[omf.feeder.getMaxKey(tree) + 1] = {
 			'object':'group_recorder', 
 			'group':'"class=regulator"',
-			'limit':1,
+			'limit':1000,
 			'property':'tap_C',
-			'file':'tap_C.csv'
-		}			
+			'file':'tap_C.csv',
+			'interval':0
+		}
+
+	# get start and stop time for the simulation
+	[startTime,stopTime] = ['','']
+	for key in tree.keys():
+		obname = tree[key].get('object','')
+		starttime = tree[key].get('starttime','')
+		stoptime = tree[key].get('stoptime','')
+		if starttime!='' and stoptime!='':
+			print(obname)
+			startTime = tree[key]['starttime']
+			stopTime = tree[key]['stoptime']
+			break			
 
 	# Map to speed up name lookups.
 	nameToIndex = {tree[key].get('name',''):key for key in tree.keys()}
+	
+	# find the key of the relavant added DER components  
+	addedDerKey = nameToIndex[inputDict['newGeneration']]
+	addedDerInverterKey = nameToIndex[tree[addedDerKey]['parent']]
+	addedBreakKey = nameToIndex[inputDict['newGenerationBreaker']]
+	poi = tree[addedBreakKey]['to']
 	
 	# initialize variables
 	flickerViolations = []
@@ -129,6 +149,14 @@ def work(modelDir, inputDict):
 	thermalViolations = []
 	thermalThreshold = float(inputDict['thermalThreshold'])/100
 	reversePowerFlow = []
+	tapViolations = []
+	tapThreshold = float(inputDict['tapThreshold'])
+	faultBreaker = [[],[],[],[]]
+	faultStepUp = [[],[],[],[]]
+	faultCurrentViolations = []
+	faultCurrentThreshold = float(inputDict['faultCurrentThreshold'])
+	faultPOIVolts = [[],[],[],[]]
+	faultVoltsThreshold = float(inputDict['faultVoltsThreshold'])
 
 	# run analysis for both load conditions
 	for loadCondition in ['Peak', 'Min']:
@@ -169,9 +197,6 @@ def work(modelDir, inputDict):
 		# run analysis with DER on and off under both load conditions
 		for der in ['On', 'Off']:
 
-			# find the key of the added DER 
-			addedDerKey = nameToIndex[inputDict['newGeneration']]
-			addedDerInverterKey = nameToIndex[tree[addedDerKey]['parent']]
 
 			# if der is Off set added DER offline, if its On set DER online
 			if der is 'Off':
@@ -203,7 +228,6 @@ def work(modelDir, inputDict):
 			with open(pJoin(modelDir,filename + 'Chart.png'),'rb') as inFile:
 				outData[filename] = inFile.read().encode('base64')
 
-
 			# calculate max and min voltage and track badwidth violations
 			[maxVoltsLocation, maxVoltsVal] = ['',0]
 			[minVoltsLocation, minVoltsVal] = ['',float('inf')]
@@ -222,12 +246,12 @@ def work(modelDir, inputDict):
 				change = 100*((voltVal-nominalVoltVal)/nominalVoltVal)
 				if voltVal > 600:
 					violation = (voltVal >= (upperVoltThresh*nominalVoltVal)) or \
-					(voltVal <= (lowerVoltThresh600*nominalVoltVal))
+						(voltVal <= (lowerVoltThresh600*nominalVoltVal))
 				else:
 					violaton = (voltVal >= (upperVoltThresh*nominalVoltVal)) or \
-					(voltVal <= (lowerVoltThresh*nominalVoltVal))
+						(voltVal <= (lowerVoltThresh*nominalVoltVal))
 				content = [key, nominalVoltVal, voltVal, change, \
-				loadCondition +' Load, DER ' + der,violation]
+					loadCondition +' Load, DER ' + der,violation]
 				voltageViolations.append(content)
 
 			outData['maxVolts'+loadCondition+'Der'+der] = [maxVoltsLocation, maxVoltsVal]
@@ -237,7 +261,7 @@ def work(modelDir, inputDict):
 			for key in data['edgeValsPU'].keys():
 				thermalVal = float(data['edgeValsPU'][key])
 				content = [key, 100*thermalVal,\
-				loadCondition+' Load, DER '+der,(thermalVal>=thermalThreshold)]
+					loadCondition+' Load, DER '+der,(thermalVal>=thermalThreshold)]
 				thermalViolations.append(content)
 
 			# check for reverse regulator powerflow
@@ -247,8 +271,88 @@ def work(modelDir, inputDict):
 				if obtype == 'regulator':
 					powerVal = float(data['edgePower'][obname])
 					content = [obname, powerVal,\
-					loadCondition+' Load, DER '+der,(powerVal<0)]
+						loadCondition+' Load, DER '+der,(powerVal<0)]
 					reversePowerFlow.append(content)
+
+			# check for tap_position values and violations
+			if der == 'On':
+				tapPositions = copy.deepcopy(data['tapPositions'])
+			else: # der off
+				for tapType in ['tapA','tapB','tapC']:
+					for key in tapPositions[tapType].keys():
+						# calculate tapPositions
+						tapDerOn = int(tapPositions[tapType][key])
+						tapDerOff = int(data['tapPositions'][tapType][key])
+						tapDifference = abs(tapDerOn-tapDerOff)
+						# check for violations
+						content = [loadCondition, key+' '+tapType, tapDerOn, \
+							tapDerOff,tapDifference, (tapDifference>=tapThreshold)]
+						tapViolations.append(content)
+
+			#induce faults and measure fault currents
+			for faultLocation in [inputDict['newGenerationBreaker'],\
+				inputDict['newGenerationStepUp']]:
+				for faultNum, faultType in enumerate(\
+					['SLG-A','SLG-B','SLG-C','TLG']):
+
+					treeCopy =  createTreeWithFault( tree, \
+						faultType, faultLocation, startTime, stopTime )
+					faultData = runGridlabAndProcessData(treeCopy, attachments, \
+						edge_bools, workDir=modelDir)
+					faultVolts = faultData['nodeVolts']
+					faultCurrents = faultData['edgeCurrentSum']
+
+					# get fault current values at the breaker when 
+					# the fault is at the breaker
+					if faultLocation == inputDict['newGenerationBreaker']:
+						if der == 'On':
+							faultBreaker[faultNum] = [loadCondition, faultType]
+							faultBreaker[faultNum].append(\
+								float(faultCurrents[\
+									inputDict['newGenerationBreaker']]))
+						else: #der off
+							faultBreaker[faultNum].append(\
+								float(faultCurrents[inputDict['newGenerationBreaker']]))
+							faultBreaker[faultNum].append(\
+								faultBreaker[faultNum][2] - \
+								faultBreaker[faultNum][3])
+
+						# get fault voltage values at POI
+						preFaultval = data['nodeVolts'][poi]
+						postFaultVal = faultVolts[poi]
+						percentChange = 100*(postFaultVal/preFaultval)
+						faultPOIVolts[faultNum] = ['Der '+ der + \
+							loadCondition + ' Load', poi, faultType, preFaultval,\
+								postFaultVal, percentChange, \
+								(percentChange>=faultVoltsThreshold)]
+
+					# get fault current values at the transformer when 
+					# the fault is at the transformer
+					else: #faultLocation == newGenerationStepUp
+						if der == 'On':
+							faultStepUp[faultNum] = [loadCondition, faultType]
+							faultStepUp[faultNum].append(\
+								float(faultCurrents[\
+									inputDict['newGenerationStepUp']]))
+						else: #der off
+							faultStepUp[faultNum].append(\
+								float(faultCurrents[inputDict[\
+									'newGenerationStepUp']]))
+							faultStepUp[faultNum].append(\
+								faultStepUp[faultNum][2] - \
+								faultStepUp[faultNum][3])
+
+					# get fault violations when der is on
+					if der == 'On':
+						for key in faultCurrents.keys():
+							preFaultval = float(data['edgeCurrentSum'][key])
+							postFaultVal = float(faultCurrents[key])
+							difference = abs(preFaultval-postFaultVal)
+							percentChange = 100*(difference/preFaultval)
+							content = [faultLocation, faultType, key, \
+								preFaultval, postFaultVal, difference, \
+								(percentChange>=faultCurrentThreshold)]
+							faultCurrentViolations.append(content)
 
 			# calculate flicker, keep track of max, and violations
 			if der == 'On':
@@ -258,7 +362,7 @@ def work(modelDir, inputDict):
 					# calculate flicker
 					derOn = float(flicker[key])
 					derOff = float(data['nodeVolts'][key])
-					flickerVal = 100*abs(derOn-derOff)/derOn
+					flickerVal = 100*(1-(derOff/derOn))
 					flicker[key] = flickerVal
 					# check for max
 					if maxFlickerVal <= flickerVal:
@@ -283,34 +387,30 @@ def work(modelDir, inputDict):
 	outData['flickerViolations'] = flickerViolations
 	outData['thermalViolations'] = thermalViolations
 	outData['reversePowerFlow'] = reversePowerFlow	
-	return outData
-			
-
-
-
-
-
+	outData['tapViolations'] = tapViolations
+	outData['faultBreaker']	 = faultBreaker
+	outData['faultStepUp'] = faultStepUp
+	outData['faultCurrentViolations'] = faultCurrentViolations
+	outData['faultPOIVolts'] = faultPOIVolts
 	
-'''
-	#induce line to ground fault on a single line at the DER transformer
-	[startTime,stopTime] = ['','']
-	for key in tree.keys():
-		starttime = tree[key].get('starttime','')
-		stoptime = tree[key].get('stoptime','')
-		if starttime!='' and stoptime!='':
-			#print('time')
-			startTime = tree[key]['starttime']
-			stopTime = tree[key]['stoptime']
+	return outData
 
-	tree[omf.feeder.getMaxKey(tree) + 1] = {
+def createTreeWithFault( tree, faultType, faultLocation, startTime, stopTime ):
+	
+	treeCopy = copy.deepcopy(tree)
+
+	faultType = '"'+faultType+'"'
+	outageParams = '"'+faultLocation+','+startTime.replace('\'','') + \
+		','+stopTime.replace('\'','')+'"'
+	treeCopy[omf.feeder.getMaxKey(treeCopy) + 1] = {
 		'object': 'eventgen',
 		'name': 'ManualEventGen',
 		'parent': 'RelMetrics',
-		'fault_type': '"SLG-B",
-		'manual_outages': '"'+inputDict['newGenerationStepUp']+' '+startTime+','+stopTime+'"'
+		'fault_type': faultType,
+		'manual_outages': str(outageParams)
 	}
-	
-	tree[omf.feeder.getMaxKey(tree) + 1] = {
+
+	treeCopy[omf.feeder.getMaxKey(treeCopy) + 1] = {
 		'object': 'fault_check ',
 		'name': 'test_fault',
 		'check_mode': 'ONCHANGE',
@@ -318,7 +418,7 @@ def work(modelDir, inputDict):
 		'output_filename': 'Fault_check_out.txt'
 	}
 
-	tree[omf.feeder.getMaxKey(tree) + 1] = {
+	treeCopy[omf.feeder.getMaxKey(treeCopy) + 1] = {
 		'object': 'metrics',
 		'name': 'RelMetrics',
 		'report_file': 'Metrics_Output.csv',
@@ -329,23 +429,34 @@ def work(modelDir, inputDict):
 		'report_interval': '5 h'
 	}
 
-	tree[omf.feeder.getMaxKey(tree) + 1] = {
+	treeCopy[omf.feeder.getMaxKey(treeCopy) + 1] = {
 		'object': 'power_metrics',
 		'name': 'PwrMetrics',
 		'base_time_value': '1 h'
 	}
 
-	#print(dataPeak['edgeCurrentSum'].keys())
-	#currVal = dataPeak['edgeCurrentSum'][str(inputDict['newGenerationStepUp'])]
-	currVal = dataPeak['edgeCurrentSum']['T1']
-	print('prefault: ', currVal)
-	dataPeakPostFault = runGridlabAndProcessData(tree, attachments, edge_bools, workDir=modelDir)
-	#currVal = dataPeakPostFault['edgeCurrentSum'][str(inputDict['newGenerationStepUp'])]
-	currVal = dataPeakPostFault['edgeCurrentSum']['T2']
-	print('postFault: ', currVal)
-'''
+	return treeCopy
 
-	
+
+def readGroupRecorderCSV( filename ):
+
+	# read regulator tap position values values into a single dictionary
+	dataDictionary = {}
+	with open(filename,'r') as csvFile:
+		reader = csv.reader(csvFile)
+		# loop past the header, 
+		[keys,vals] = [[],[]]
+		for row in reader:
+			if '# timestamp' in row:
+				keys = row
+				i = keys.index('# timestamp')
+				keys.pop(i)
+				vals = reader.next()
+				vals.pop(i)
+		for pos,key in enumerate(keys):
+			dataDictionary[key] = vals[pos]
+			
+	return dataDictionary	
 
 def runGridlabAndProcessData(tree, attachments, edge_bools, workDir=False):
 	
@@ -400,7 +511,7 @@ def runGridlabAndProcessData(tree, attachments, edge_bools, workDir=False):
 						vals = reader.next()
 						vals.pop(i)
 				for pos,key2 in enumerate(keys):
-					lineRatings[key2] = abs(float(vals[pos]))
+					lineRatings[key2] = abs(float(vals[pos]))				
 
 	#edgeTupleRatings = lineRatings copy with to-from tuple as keys for labeling
 	edgeTupleRatings = {}
@@ -510,11 +621,17 @@ def runGridlabAndProcessData(tree, attachments, edge_bools, workDir=False):
 				edgePower[edge] = ((currVal * voltVal)/1000)
 				edgeTuplePower[coord] = "{0:.2f}".format(edgePower[edge])
 
+	# read regulator tap position values values into a single dictionary
+	tapPositions = {}
+	tapPositions['tapA'] = readGroupRecorderCSV(pJoin(workDir,'tap_A.csv'))
+	tapPositions['tapB'] = readGroupRecorderCSV(pJoin(workDir,'tap_B.csv'))
+	tapPositions['tapC'] = readGroupRecorderCSV(pJoin(workDir,'tap_C.csv'))
+
 	return {'nodeNames':nodeNames, 'nominalVolts':nominalVolts, 'nodeVolts':nodeVolts, 'nodeVoltImbalances':voltImbalances, 
 	'edgeTupleNames':edgeTupleNames, 'edgeCurrentSum':edgeCurrentSum, 'edgeCurrentMax':edgeCurrentMax,
 	'edgeTupleCurrents':edgeTupleCurrents, 'edgePower':edgePower, 'edgeTuplePower':edgeTuplePower,
 	'edgeLineRatings':lineRatings, 'edgeTupleLineRatings':edgeTupleRatings, 'edgeValsPU':edgeValsPU, 
-	'edgeTupleValsPU':edgeTupleValsPU }
+	'edgeTupleValsPU':edgeTupleValsPU, 'tapPositions':tapPositions }
 
 def drawPlot(tree, nodeDict=None, edgeDict=None, edgeLabsDict=None, displayLabs=False, customColormap=False, 
 	perUnitScale=False, rezSqIn=400, neatoLayout=False):
@@ -650,7 +767,9 @@ def new(modelDir):
 		'thermalThreshold': '100',
 		'peakLoadData': '',
 		'minLoadData': '',
-		'tapThreshold': '6'
+		'tapThreshold': '6',
+		'faultCurrentThreshold': '10',
+		'faultVoltsThreshold': '138'
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:

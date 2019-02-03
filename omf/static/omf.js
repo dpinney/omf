@@ -234,6 +234,14 @@ function init() {
 		restoreInputs()
 		$("#modelName").prop("readonly", true)
 	}
+	if (allOutputData != null) {
+		if (allOutputData['oldVersion'] == true) {
+			try {
+				document.getElementById("triangle-parent").style.visibility = "visible";
+			}
+			catch (e){}
+		}
+	} 
 	// Depending on status, show different things.
 	if (modelStatus == "finished") {
 		console.log("FINISHED")

@@ -2761,7 +2761,7 @@ describe("Unit tests", function() {
                     it(`should return an empty TreeWrapper`, function() {
                         // Test for node that has no connected lines
                         const emptyWrapper = createTreeWrapper();
-                        const subWrapper = testTreeWrapper.getPairedNodesOf(Child1);
+                        const subWrapper = testTreeWrapper.getPairedNodesOf(orphanNode1);
                         expect(subWrapper).toEqual(emptyWrapper);
                     });
 
