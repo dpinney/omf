@@ -3601,8 +3601,9 @@ function createTreeObject(input, treeWrapper) {
     } else if (typeof input === "object" && !Array.isArray(input)) {
         tObject.key = getNewTreeKey(treeWrapper.tree);
         tObject.data = deepCopy(input);
-        if (tObject.data.name != null) {
-            tObject.data.name += tObject.key;
+        if (tObject.data.name != null && tObject.data.object != null) {
+            tObject.data.name = tObject.data.object + tObject.key;
+            //tObject.data.name += tObject.key;
         }
         return tObject;
     } 
