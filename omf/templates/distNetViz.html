@@ -3513,9 +3513,9 @@ const treeObjectPrototype = {
         }
         this.data.parent = parent.name;
         const lonValue = ((Math.random() * 5) + 5)/gDrawScaleFactor; 
-        this.data.longitude = Math.random() < 0.5 ? parent.longitude + lonValue : parent.longitude - lonValue;
+        this.data.longitude = Math.random() < 0.5 ? parseFloat(parent.longitude) + lonValue : parseFloat(parent.longitude) - lonValue;
         const latValue = ((Math.random() * 5) + 5)/gDrawScaleFactor;
-        this.data.latitude = Math.random() < 0.5 ? parent.latitude + latValue : parent.latitude - latValue;
+        this.data.latitude = Math.random() < 0.5 ? parseFloat(parent.latitude) + latValue : parseFloat(parent.latitude) - latValue;
     },
 
     /**
