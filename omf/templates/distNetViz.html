@@ -1140,6 +1140,16 @@ function downloadTextFile() {
 	win.document.write(modJson);
 }
 
+function scaleGraphForVisualAppearance(objectCount) {
+    if (objectCount < 100) {
+        gScaleLevel = 5;
+    } else if (objectCount < 1000) {
+        gScaleLevel = 1;
+    } else {
+        gScaleLevel = .6;
+    }
+}
+
 /**
  * TODO: add unit tests
  * Get dimensions with: panZoom.getSizes()
@@ -1147,6 +1157,7 @@ function downloadTextFile() {
  */
 function createViewport(tree, svgContainer) {
     const keys = Object.keys(tree);
+    scaleGraphForVisualAppearance(keys.length);
     // Set the longitude and latitude to be within the bounds of the provided data
     const firstKey = keys.find(key => {
         return tree[key].longitude !== undefined && tree[key].latitude !== undefined;
@@ -1342,9 +1353,6 @@ function clickLatLon(event) {
 	pt = pt.matrixTransform(svg.getScreenCTM().inverse());
 	let x = pt.x;
 	let y = pt.y;
-	//x = (x - pan.x) / zoom;
-	//y = (y - pan.y) / zoom;
-	//return [x,y];
 	const coords = {
 		x: (x - pan.x) / zoom,
 		y: (y - pan.y) / zoom
@@ -3003,15 +3011,15 @@ const treeWrapperPrototype = {
             const toKey = this.names[this.tree[key].to];
             if (fromKey == null) {
                 if (toKey == null) {
-                    console.log(`Tree object with key: "${key}" has nonexistent "from" and "to" nodes.`);
+                    console.error(`Tree object with key: "${key}" has nonexistent "from" and "to" nodes.`);
                     return tWrapper;
                 } else {
-                    console.log(`Tree object line with key: "${key}" has nonexistent "from" node.`);
+                    console.error(`Tree object line with key: "${key}" has nonexistent "from" node.`);
                     //tWrapper.add(toKey, this);
                     return tWrapper;
                 }
             } else if (toKey == null) {
-                console.log(`Tree object line with key: "${key}" has nonexistent "to" node.`);
+                console.error(`Tree object line with key: "${key}" has nonexistent "to" node.`);
                 //tWrapper.add(fromKey, this);
                 return tWrapper;
             } else {
@@ -3207,7 +3215,7 @@ const addableSvgDataPrototype = {
     addLine(key) {
         const nodes = Object.values(this.treeWrapper.getNodeEndsOf(key).tree);
         if (nodes.length < 2) {
-            console.log(`Could not find both of the nodes on either end of a line with key: "${key}". Line was not drawn`);
+            console.error(`Could not find both of the nodes on either end of a line with key: "${key}". Line was not drawn`);
             /* TODO: Draw the line anyway with some kind of default values so the user can see there's a broken line?
             I could have a second viewport that is contained in a table with all the broken lines and circles! Neat!
             */
