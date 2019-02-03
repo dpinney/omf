@@ -1707,18 +1707,32 @@ function getSelectionErrorMessage(type) {
  */
 function attachFeederList (ul, feeders, owner) {
     if (!feeders) return;
-    for (let writeFeeder of feeders) {
-        if (writeFeeder.name != thisFeederName) {
+    const sortedNames = feeders.map(feeder => feeder.name.toLowerCase()).sort();
+    sortedNames.forEach(lowercaseName => {
+        const feeder = feeders.find(feeder => {
+            return feeder.name.toLowerCase() === lowercaseName;
+        });
+        if (feeder.name != thisFeederName) {
             const li = document.createElement("li");
             li.classList.add("feederItem");
-            li.innerHTML = `<strong>${writeFeeder.name}</strong> from <br>"${writeFeeder.model}"`;
+            li.innerHTML = `<strong>${feeder.name}</strong> from <br>"${feeder.model}"`;
             li.addEventListener("click", function() {
-                //overwriteFeeder(writeFeeder.name, writeFeeder.model, owner);
-                loadFeeder(writeFeeder.name, writeFeeder.model, owner);
+                loadFeeder(feeder.name, feeder.model, owner);
             });
             ul.append(li);
         }
-    }
+    });
+    //for (let writeFeeder of feeders) {
+    //    if (writeFeeder.name != thisFeederName) {
+    //        const li = document.createElement("li");
+    //        li.classList.add("feederItem");
+    //        li.innerHTML = `<strong>${writeFeeder.name}</strong> from <br>"${writeFeeder.model}"`;
+    //        li.addEventListener("click", function() {
+    //            loadFeeder(writeFeeder.name, writeFeeder.model, owner);
+    //        });
+    //        ul.append(li);
+    //    }
+    //}
 }
 
 /**
@@ -2023,29 +2037,6 @@ function staticLoadsToHouses() {
             key: newKey
         }
 	}
-}
-
-/** 
- * TODO: add better validation for percent to ensure 1) it's a float and 2) it's in a valid range. Do this on the input if possible
- * General Function to Add Components 'inverter', 'triplex_meter', PERC
- * Did this function get chopped in half?
- */
-function attachFeederList(ul, feeders, owner) {
-    if (feeders === null || feeders === undefined) {
-        return
-    } 
-    for (let writeFeeder of feeders) {
-        if (writeFeeder.name !== thisFeederName) {
-            const li = document.createElement("li");
-            li.classList.add("feederItem");
-            li.innerHTML = `<strong>${writeFeeder.name}</strong> from <br>"${writeFeeder.model}"`;
-            li.addEventListener("click", function() {
-                //overwriteFeeder(writeFeeder.name, writeFeeder.model, owner);
-                loadFeeder(writeFeeder.name, writeFeeder.model, owner);
-            });
-            ul.append(li);
-        }
-    }
 }
 
 function massAdd() {
@@ -4237,7 +4228,7 @@ function createInterface() {
     createViewport(writeFeeder.tree, document.getElementById("svgContainer"));
     gTreeWrapper = createTreeWrapper(writeFeeder.tree);
     const objects = Object.values(gTreeWrapper.tree);
-    insertCoordinates(objects, gOffsetX, gOffsetY, (1000/gDrawScaleFactor) * .01);
+    insertCoordinates(objects, gOffsetX, gOffsetY, (1000/gDrawScaleFactor) * .005);
     //insertCoordinates(objects, gOffsetX, gOffsetY, gLongitudeRange * .01);
     //gTreeWrapper.insertCoordinates(0, 0, 5);
     gSelection = createSelection();
