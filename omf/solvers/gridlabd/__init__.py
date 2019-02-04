@@ -7,6 +7,8 @@ from copy import deepcopy
 # OMF imports.
 import omf
 
+# _myDir = os.path.dirname(os.path.abspath(__file__))
+
 def checkStatus(modelDir):
 	'''Reads a current gridlabD simulation time from stdErr.txt,
 	compares it to the total input simulation time and outputs a
@@ -153,7 +155,7 @@ def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None, g
 		# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!) 
 		with open(pJoin(workDir,'stdout.txt'),'w') as stdout, open(pJoin(workDir,'stderr.txt'),'w') as stderr, open(pJoin(workDir,'PID.txt'),'w') as pidFile:
 			# MAYBEFIX: turn standerr WARNINGS back on once we figure out how to supress the 500MB of lines gridlabd wants to write...
-			proc = subprocess.Popen([binaryName, '-w', glmName], cwd=workDir, stdout=stdout, stderr=stderr)
+			proc = subprocess.Popen([binaryName, '-w', glmName], shell=True, cwd=workDir, stdout=stdout, stderr=stderr)
 			pidFile.write(str(proc.pid))
 		returnCode = proc.wait()
 		# Build raw JSON output.
