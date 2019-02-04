@@ -30,6 +30,8 @@ def work(modelDir, inputDict):
 	# Create voltage drop plot.
 	# print "*DEBUG: feederName:", feederName
 	omd = json.load(open(pJoin(modelDir,feederName + '.omd')))
+	tree = omd['tree']
+	# TODO: modify tree to add MPUPV collectors.
 	if inputDict.get("layoutAlgorithm", "geospatial") == "geospatial":
 		neato = False
 	else:
@@ -73,6 +75,7 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir,"output.png"),"rb") as inFile:
 		outData["voltageDrop"] = inFile.read().encode("base64")
 	return outData
+
 #Optional gldBinary parameter added
 def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, customColormap=False, rezSqIn=400, gldBinary=None):
 	''' Draw a color-coded map of the voltage drop on a feeder.
@@ -143,7 +146,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	if not workDir:
 		workDir = tempfile.mkdtemp()
 		# print '@@@@@@', workDir
-	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir, gldBinary=gldBinary)
+	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 	# read voltDump values into a dictionary.
 	try:
 		dumpFile = open(pJoin(workDir,'voltDump.csv'),'r')
