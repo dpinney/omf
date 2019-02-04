@@ -7,6 +7,8 @@ from copy import deepcopy
 # OMF imports.
 import omf
 
+# _myDir = os.path.dirname(os.path.abspath(__file__))
+
 def checkStatus(modelDir):
 	'''Reads a current gridlabD simulation time from stdErr.txt,
 	compares it to the total input simulation time and outputs a
@@ -122,13 +124,10 @@ def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None, g
 	try:
 		#Runs standard gridlabd binary if binary is not specified, runs gldBinary parameter path if specified. 
 		#gldBinary must be path to binary
-		if not gldBinary:
+		if gldBinary is None:
 			binaryName = "gridlabd"
 		else:
 			binaryName = str(gldBinary)
-			print(binaryName)
-			print type(binaryName)
-
 		# Create a running directory and fill it, unless we've specified where we're running.
 		if not workDir:
 			workDir = tempfile.mkdtemp()

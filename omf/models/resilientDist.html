@@ -275,6 +275,7 @@
 					var dataDict = [];
 					var designHTML = "";
 					var tableBuilder = ""; 
+					var loadBuilder = "";
 
 					//DESIGN SOLUTION
 					tableBuilder = "<tr><th>Device ID</th><th>Type</th><th>Action</th><th>Cost</th></tr>";
@@ -323,12 +324,8 @@
 						designHTML = designHTML + '<table id="totalCostTable"><tr><td valign="bottom"><div style="float: left;">Total Cost</div><div style="' + secondRunValidStyle + 'float: right;">' + secondRunValid + totalCost.toFixed(2) + '</div></td></tr></table>';
 					}
 					
-
-					//DAMAGE SCENARIOS
-					for(var j = 0; j < rdtOutput.scenario_solution.length; j++) {
-						scenario = rdtOutput.scenario_solution[j]; 
-						critLoadMetDict[scenario.id] = '<tr><td colspan="4"><b>Scenario ' + parseFloat(j + 1) + ' damage summary: </b>' + scenario.non_critical_load_met.toFixed(2) + ' non-critical load lost, '+ scenario.critical_load_met.toFixed(2) + ' critical load lost</td></tr>';
-					}
+					// Load Lost scenarios.
+	
 					tableHeader = "<tr><th>Scenario ID</th><th>Device ID</th><th>Type</th><th>Result</th></tr>";
 					for(var j = 0; j < gfmOutput.scenarios.length; j++) {
 						tableBuilder = "";
