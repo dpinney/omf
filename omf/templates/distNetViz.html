@@ -28,7 +28,12 @@
 				font-size:30px;
 				line-height:30px;
 				color:white;
+                background-color: dimgrey;
+                left: 5px;
 			}
+            #scaleButton {
+                top: 175px;
+            }
 			body {
                 /*width: 100%;
                 height: 100%;*/
@@ -454,10 +459,10 @@
             <div id="descriptionTables"></div>
             <div id="selectionTable"></div>
             <!-- Controls -->
-            <div style='background:dimgrey; top:55px; left:5px' class='divButton' onclick='window.panZoom.zoomIn()' title='Zoom In'>+</div>
-            <div style='background:dimgrey; top:95px; left:5px' class='divButton' onclick='window.panZoom.zoomOut()' title='Zoom Out'>-</div>
-            <div style='background:dimgrey; top:135px; left:5px' class='divButton' onclick='window.panZoom.reset()' title='Reset Zoom'>R</div>
-            <div style='background:dimgrey; top:175px; left:5px;' class='divButton' onclick='scaleTo(parseFloat(prompt("Scale line thickness by this multiple:", scaleLevel)))' title='Scale To'>S</div>
+            <div style="top:55px;" class='divButton' onclick='window.panZoom.zoomIn()' title='Zoom In'>+</div>
+            <div style="top:95px;" class='divButton' onclick='window.panZoom.zoomOut()' title='Zoom Out'>-</div>
+            <div style="top:135px;" class='divButton' onclick='window.panZoom.reset()' title='Reset Zoom'>R</div>
+            <div id="scaleButton" class='divButton' title='Scale To'>S</div>
             <!-- <div style='background:navy; top:215px; left:5px' id='saveLink' class='divButton' onclick='saveSvg()' title='Save File' download>S</div> -->
             <!-- Menu Bar -->
             <div id='header'>
@@ -1054,13 +1059,13 @@ let gTreeWrapper;
 let gViewport; 
 let gOffsetX;
 let gOffsetY;
-//let gLongitudeRange;
-//let gLatitudeRange;
+let gLongitudeRange;
+let gLatitudeRange;
 let gDrawScaleFactor;
 let gDownX;
 let gDownY;
 // Scale that all SVG objects are drawn at
-let scaleLevel = 1.0; 
+let gScaleLevel = 1.0; 
 //**************************************************
 // Selection Interface
 //**************************************************
@@ -1135,6 +1140,16 @@ function downloadTextFile() {
 	win.document.write(modJson);
 }
 
+function scaleGraphForVisualAppearance(objectCount) {
+    if (objectCount < 100) {
+        gScaleLevel = 5;
+    } else if (objectCount < 1000) {
+        gScaleLevel = 1;
+    } else {
+        gScaleLevel = .6;
+    }
+}
+
 /**
  * TODO: add unit tests
  * Get dimensions with: panZoom.getSizes()
@@ -1142,6 +1157,7 @@ function downloadTextFile() {
  */
 function createViewport(tree, svgContainer) {
     const keys = Object.keys(tree);
+    scaleGraphForVisualAppearance(keys.length);
     // Set the longitude and latitude to be within the bounds of the provided data
     const firstKey = keys.find(key => {
         return tree[key].longitude !== undefined && tree[key].latitude !== undefined;
@@ -1187,21 +1203,27 @@ function createViewport(tree, svgContainer) {
             }
         }
     });
-    const gLongitudeRange = maxLon - minLon;
+    gLongitudeRange = maxLon - minLon;
     gOffsetX = minLon;
-    const gLatitudeRange = maxLat - minLat;
+    gLatitudeRange = maxLat - minLat;
     gOffsetY = minLat;
-    /* Multiply by the gDrawScaleFactor when drawing. Divide by the gDrawScaleFactor when storing. */
-    if (gLongitudeRange < gLatitudeRange) {
+    /* Multiply by the gDrawScaleFactor when drawing. Divide by the gDrawScaleFactor when storing. 
+    We use the larger of the range values to set the gDrawScaleFactor to make the graph fit in the viewport initially.
+    */
+    if (gLongitudeRange > gLatitudeRange) {
         gDrawScaleFactor = 1000/gLongitudeRange;
     } else {
         gDrawScaleFactor = 1000/gLatitudeRange;
     }
     svgContainer.setAttribute('viewBox',`0 0 ${1000} ${1000}`);
-    // Create the viewport
+    /* Uncomment below to make gScaleFactor go away */
+    //gDrawScaleFactor = 1;
     //svgContainer.setAttribute('viewBox',`0 0 ${gLongitudeRange} ${gLatitudeRange}`);
+    /* Uncomment above to make gScaleFactor go away */
 	window.panZoom = svgPanZoom('#svgContainer', {
         /* Override the default values set by 'optionsDefaults' in svg-pan-zoom.js */
+        //contain: false,
+        //fit: false,
         dblClickZoomEnabled: false,
         zoomScaleSensitivity: 0.2,
         minZoom: 0.1,
@@ -1271,10 +1293,10 @@ function handleSelection(event) {
 
 function scaleTo(x) {
 	// Scale the thickness of all lines and size of all circles. This helps user see details.
-	scaleLevel = x
-	if (!x) {
-		return
-	}
+    gScaleLevel = x;
+    if (!isNumberString(String(x))) {
+        throw new Error("Invalid scale value!");
+    }
 	const circles = document.getElementsByTagName('circle')
 	const lines = document.getElementsByTagName('line')
 	// Scale Circles
@@ -1331,9 +1353,6 @@ function clickLatLon(event) {
 	pt = pt.matrixTransform(svg.getScreenCTM().inverse());
 	let x = pt.x;
 	let y = pt.y;
-	//x = (x - pan.x) / zoom;
-	//y = (y - pan.y) / zoom;
-	//return [x,y];
 	const coords = {
 		x: (x - pan.x) / zoom,
 		y: (y - pan.y) / zoom
@@ -1439,7 +1458,7 @@ function viewElement(key) {
 	var width = window.panZoom.getSizes().width / 2
 	var height = window.panZoom.getSizes().height / 2
     panZoom.pan({x:width - (x * realZoom), y:height - (y * realZoom)})
-    panZoom.zoom(20/scaleLevel);
+    panZoom.zoom(20/gScaleLevel);
 }
 
 //**************************************************
@@ -1688,18 +1707,32 @@ function getSelectionErrorMessage(type) {
  */
 function attachFeederList (ul, feeders, owner) {
     if (!feeders) return;
-    for (let writeFeeder of feeders) {
-        if (writeFeeder.name != thisFeederName) {
+    const sortedNames = feeders.map(feeder => feeder.name.toLowerCase()).sort();
+    sortedNames.forEach(lowercaseName => {
+        const feeder = feeders.find(feeder => {
+            return feeder.name.toLowerCase() === lowercaseName;
+        });
+        if (feeder.name != thisFeederName) {
             const li = document.createElement("li");
             li.classList.add("feederItem");
-            li.innerHTML = `<strong>${writeFeeder.name}</strong> from <br>"${writeFeeder.model}"`;
+            li.innerHTML = `<strong>${feeder.name}</strong> from <br>"${feeder.model}"`;
             li.addEventListener("click", function() {
-                //overwriteFeeder(writeFeeder.name, writeFeeder.model, owner);
-                loadFeeder(writeFeeder.name, writeFeeder.model, owner);
+                loadFeeder(feeder.name, feeder.model, owner);
             });
             ul.append(li);
         }
-    }
+    });
+    //for (let writeFeeder of feeders) {
+    //    if (writeFeeder.name != thisFeederName) {
+    //        const li = document.createElement("li");
+    //        li.classList.add("feederItem");
+    //        li.innerHTML = `<strong>${writeFeeder.name}</strong> from <br>"${writeFeeder.model}"`;
+    //        li.addEventListener("click", function() {
+    //            loadFeeder(writeFeeder.name, writeFeeder.model, owner);
+    //        });
+    //        ul.append(li);
+    //    }
+    //}
 }
 
 /**
@@ -2004,29 +2037,6 @@ function staticLoadsToHouses() {
             key: newKey
         }
 	}
-}
-
-/** 
- * TODO: add better validation for percent to ensure 1) it's a float and 2) it's in a valid range. Do this on the input if possible
- * General Function to Add Components 'inverter', 'triplex_meter', PERC
- * Did this function get chopped in half?
- */
-function attachFeederList(ul, feeders, owner) {
-    if (feeders === null || feeders === undefined) {
-        return
-    } 
-    for (let writeFeeder of feeders) {
-        if (writeFeeder.name !== thisFeederName) {
-            const li = document.createElement("li");
-            li.classList.add("feederItem");
-            li.innerHTML = `<strong>${writeFeeder.name}</strong> from <br>"${writeFeeder.model}"`;
-            li.addEventListener("click", function() {
-                //overwriteFeeder(writeFeeder.name, writeFeeder.model, owner);
-                loadFeeder(writeFeeder.name, writeFeeder.model, owner);
-            });
-            ul.append(li);
-        }
-    }
 }
 
 function massAdd() {
@@ -2992,15 +3002,15 @@ const treeWrapperPrototype = {
             const toKey = this.names[this.tree[key].to];
             if (fromKey == null) {
                 if (toKey == null) {
-                    console.log(`Tree object with key: "${key}" has nonexistent "from" and "to" nodes.`);
+                    console.error(`Tree object with key: "${key}" has nonexistent "from" and "to" nodes.`);
                     return tWrapper;
                 } else {
-                    console.log(`Tree object line with key: "${key}" has nonexistent "from" node.`);
+                    console.error(`Tree object line with key: "${key}" has nonexistent "from" node.`);
                     //tWrapper.add(toKey, this);
                     return tWrapper;
                 }
             } else if (toKey == null) {
-                console.log(`Tree object line with key: "${key}" has nonexistent "to" node.`);
+                console.error(`Tree object line with key: "${key}" has nonexistent "to" node.`);
                 //tWrapper.add(fromKey, this);
                 return tWrapper;
             } else {
@@ -3170,7 +3180,7 @@ const addableSvgDataPrototype = {
         this.circles.forEach(circle => {
             this.drawObject(circle, viewport);
         });
-        scaleTo(scaleLevel);
+        scaleTo(gScaleLevel);
     },
 
     /* "Private" helper methods */
@@ -3196,7 +3206,7 @@ const addableSvgDataPrototype = {
     addLine(key) {
         const nodes = Object.values(this.treeWrapper.getNodeEndsOf(key).tree);
         if (nodes.length < 2) {
-            console.log(`Could not find both of the nodes on either end of a line with key: "${key}". Line was not drawn`);
+            console.error(`Could not find both of the nodes on either end of a line with key: "${key}". Line was not drawn`);
             /* TODO: Draw the line anyway with some kind of default values so the user can see there's a broken line?
             I could have a second viewport that is contained in a table with all the broken lines and circles! Neat!
             */
@@ -3513,9 +3523,9 @@ const treeObjectPrototype = {
         }
         this.data.parent = parent.name;
         const lonValue = ((Math.random() * 5) + 5)/gDrawScaleFactor; 
-        this.data.longitude = Math.random() < 0.5 ? parent.longitude + lonValue : parent.longitude - lonValue;
+        this.data.longitude = Math.random() < 0.5 ? parseFloat(parent.longitude) + lonValue : parseFloat(parent.longitude) - lonValue;
         const latValue = ((Math.random() * 5) + 5)/gDrawScaleFactor;
-        this.data.latitude = Math.random() < 0.5 ? parent.latitude + latValue : parent.latitude - latValue;
+        this.data.latitude = Math.random() < 0.5 ? parseFloat(parent.latitude) + latValue : parseFloat(parent.latitude) - latValue;
     },
 
     /**
@@ -3601,8 +3611,8 @@ function createTreeObject(input, treeWrapper) {
     } else if (typeof input === "object" && !Array.isArray(input)) {
         tObject.key = getNewTreeKey(treeWrapper.tree);
         tObject.data = deepCopy(input);
-        if (tObject.data.name != null) {
-            tObject.data.name += tObject.key;
+        if (tObject.data.name != null && tObject.data.object != null) {
+            tObject.data.name = tObject.data.object + tObject.key;
         }
         return tObject;
     } 
@@ -4180,6 +4190,12 @@ function attachMouseListeners() {
     document.getElementById("svgContainerWrapper").addEventListener("mouseup", function(event) {
         gDownY = event.clientY;
     });
+    document.getElementById("scaleButton").addEventListener("click", function() {
+        const userScale = prompt("Scale line thickness by this multiple:", gScaleLevel);
+        if (isNumberString(userScale)) {
+            scaleTo(parseFloat(userScale));
+        }
+    });
 }
 
 function attachKeyListener() {
@@ -4212,7 +4228,7 @@ function createInterface() {
     createViewport(writeFeeder.tree, document.getElementById("svgContainer"));
     gTreeWrapper = createTreeWrapper(writeFeeder.tree);
     const objects = Object.values(gTreeWrapper.tree);
-    insertCoordinates(objects, gOffsetX, gOffsetY, (1000/gDrawScaleFactor) * .01);
+    insertCoordinates(objects, gOffsetX, gOffsetY, (1000/gDrawScaleFactor) * .005);
     //insertCoordinates(objects, gOffsetX, gOffsetY, gLongitudeRange * .01);
     //gTreeWrapper.insertCoordinates(0, 0, 5);
     gSelection = createSelection();
