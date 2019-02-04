@@ -40,6 +40,8 @@ def ConvertAndwork(filePath):
 				inFeeder['tree'][key].update({'enable_volt_control':'true'})
 				inFeeder['tree'][key].update({'volt_lowlimit':'113.99'})
 				inFeeder['tree'][key].update({'volt_uplimit':'126.99'})
+			if 'object' in value and (value['object']== 'house'):
+				houseMeter = value['parent']
 			if 'argument' in value and ('minimum_timestep' in value['argument']):
 					interval = int(re.search(r'\d+', value['argument']).group())
 			if 'bustype' in value and 'SWING' in value['bustype']:
@@ -111,9 +113,11 @@ def ListOffenders(name_volt_dict):
 		isum = isum + offenders[i][1]
 		offendersNames.append(offenders[i][0])
 	offendersGen = list(set(offendersGen))
-	print ("average voltage overdose is by a factor of", isum/(len(offenders)))
+	#print ("average voltage overdose is by a factor of", isum/(len(offenders)))
 	print ("Number of offenders is", len(offendersGen))
 	# Write out file
+	voltSum = data['voltA_real'].sum() + data['voltB_real'].sum() + data['voltC_real'].sum()
+	print "volt total", voltSum
 	with open('offenders.csv', 'w') as f:
 		wr = csv.writer(f, quoting=csv.QUOTE_ALL)
 		wr.writerow(offenders)
@@ -167,12 +171,12 @@ def _debugging(filePath):
 	# Location
 	# modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
-	fileNames = ['measured_substation_power.csv', 'measured_solar_0.csv', 'measured_solar_1.csv', 'measured_load_ziploads.csv', 
-					'measured_load_waterheaters.csv', 'measured_HVAC.csv', 'Results.csv']
-	files = [f for f in os.listdir('.')]
-	for f in files:
-		if f in fileNames:
-			os.remove(f) 
+	# fileNames = ['measured_substation_power.csv', 'measured_solar_0.csv', 'measured_solar_1.csv', 'measured_load_ziploads.csv', 
+	# 				'measured_load_waterheaters.csv', 'measured_HVAC.csv', 'Results.csv']
+	# files = [f for f in os.listdir('.')]
+	# for f in files:
+	# 	if f in fileNames:
+	# 		os.remove(f) 
 	#Begin Main Function
 	name_volt_dict = ConvertAndwork(filePath)
 	offendersGen = ListOffenders(name_volt_dict)
@@ -181,10 +185,10 @@ def _debugging(filePath):
 	omf.distNetViz.viz('outGLMtest.glm') #or model.omd
 
 	# Remove Feeder
-	# os.remove('outGLMtest.glm')
+	os.remove('outGLMtest.glm')
 
 	# Visualize Voltage Regulation
-	chart = drawPlot('outGLMtest.glm', neatoLayout=True, edgeCol="PercentOfRating", nodeCol="perUnitVoltage", nodeLabs="Value", edgeLabs="Name", customColormap=True, rezSqIn=225, gldBinary=omf.omfDir + '/solvers/gridlabd_gridballast/local_gd/bin/gridabd.bin')
+	chart = drawPlot('outGLMtest.glm', neatoLayout=True, edgeCol="PercentOfRating", workDir = './testing', nodeCol="perUnitVoltage", nodeLabs="Value", edgeLabs="Name", customColormap=True, rezSqIn=225, gldBinary=omf.omfDir + '/solvers/gridlabd_gridballast/local_gd/bin/gridlabd')
 	chart.savefig('outGLM.png')
 if __name__ == '__main__':
 	try: 
