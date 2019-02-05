@@ -131,9 +131,9 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 		pathPrefix = _omfDir
 	else:
 		pathPrefix = ""
+
 	return template.render(allInputData=allInputData, allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
 		datastoreNames=datastoreNames, modelName=modelType, allInputDataDict=inJson, allOutputDataDict=outJson)
-
 
 def renderAndShow(modelDir, datastoreNames={}):
 	''' Render and open a template (blank or with output) in a local browser. '''
@@ -144,10 +144,40 @@ def renderAndShow(modelDir, datastoreNames={}):
 
 def renderTemplateToFile(modelDir, datastoreNames={}):
 	''' Render and open a template (blank or with output) in a local browser. '''
-	with tempfile.NamedTemporaryFile(suffix=".html", delete=False) as temp:
-		temp.write(renderTemplate(modelDir, absolutePaths=False))
-		temp.flush()
-		webbrowser.open("file://" + temp.name)
+	with tempfile.NamedTemporaryFile(suffix=".html", delete=False) as baseTemplate:
+		baseTemplate.write(renderTemplate(modelDir, absolutePaths=False))
+		baseTemplate.flush()
+		baseTemplate.seek(0)
+		with io.open(pJoin(modelDir,'inlineTemplate.html'), 'w', encoding='utf-8') as inlineTemplate:
+			for line in baseTemplate:
+				#add backslash to regex between signle and double quote
+				matchObj = re.match( r"(.*)/static(.+?)(['\"])(.+?)", line, re.M|re.I)
+				scriptTags = re.match( r"(.*)<script(.*)static/(.*)</script>", line, re.M|re.I)
+				styleTags = re.match( r"(.*)<link(.*)stylesheet", line, re.M|re.I)
+				if scriptTags:
+					sourceFile = open(_omfDir + "/static"+ matchObj.group(2)).read()
+					with io.open(_omfDir + "/static"+ matchObj.group(2), 'r', encoding='utf-8') as yFile:
+						ttempfile = yFile.readlines()
+					tmp = '<script>'+sourceFile+'</script>'
+					inlineTemplate.write(unicode('<script>'))
+					for i in ttempfile:
+						try:
+							inlineTemplate.write(i)
+						except (UnicodeEncodeError):
+							print(i)
+					inlineTemplate.write(unicode('</script>'))
+				elif styleTags:
+					with io.open(_omfDir + "/static"+ matchObj.group(2), 'r', encoding='utf-8') as yFile:
+						ttempfile = yFile.readlines()
+					inlineTemplate.write(unicode('<style>'))
+					for i in ttempfile:
+						try:
+							inlineTemplate.write(i)
+						except (UnicodeEncodeError):
+							print(i)
+					inlineTemplate.write(unicode('</style>'))
+				else:
+					inlineTemplate.write(unicode(line))
 
 def getStatus(modelDir):
 	''' Is the model stopped, running or finished? '''
