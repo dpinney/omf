@@ -770,7 +770,7 @@ def glmToModel(glmPath, modelDir):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		'feederName1': 'Simple Market Modified DER',
+		'feederName1': 'Olin Barre Geo Modified DER',
 		'modelType': modelName,
 		'runTime': '',
 		'layoutAlgorithm': 'forceDirected',
