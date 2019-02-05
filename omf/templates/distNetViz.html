@@ -1114,8 +1114,8 @@ const selectionPrototype = {
         return this.selectedElements.map(element => {
             return element.id;
         });
-    }
-    /*
+    },
+    //delete this eventually
     getWrapper() {
         const tWrapper = createTreeWrapper();
         this.selectedElements.forEach(e => {
@@ -1123,7 +1123,6 @@ const selectionPrototype = {
         });
         return tWrapper;
     },
-    */
 }
 
 function createSelection() {
@@ -1418,22 +1417,20 @@ function getMatchingKeys(term, tree) {
         return keys;
     }
     for (let key in tree) {
-        // Only add the key if it represents an object that was drawn. Everything gets drawn.
-        //if ((tree[key].latitude != null && tree[key].longitude != null) || (tree[key].to != null && tree[key].from != null)) {
-            for (let propertyKey in tree[key]) {
-                let propertyVal = tree[key][propertyKey];
-                if (typeof(propertyVal) !== "string") {
-                    propertyVal += "";
-                }
-                if (propertyKey.toLowerCase().includes(term.toLowerCase())) {
-                    keys.push(key);
-                    break;
-                } else if (propertyVal.toLowerCase().includes(term.toLowerCase())) {
-                    keys.push(key);
-                    break;
-                }
+        if (term == key) keys.push(key);
+        for (let propertyKey in tree[key]) {
+            let propertyVal = tree[key][propertyKey];
+            if (typeof(propertyVal) !== "string") {
+                propertyVal += "";
             }
-        //}
+            if (propertyKey.toLowerCase().includes(term.toLowerCase())) {
+                keys.push(key);
+                break;
+            } else if (propertyVal.toLowerCase().includes(term.toLowerCase())) {
+                keys.push(key);
+                break;
+            }
+        }
     }
     return keys;
 }
@@ -2514,103 +2511,176 @@ const treeMapPrototype = {
     /* Public methods */
 
     /**
-     * TODO: add unit tests
+     * good. doesn't need unit tests
      */
-    getKey(name) {
-        const key = this.names[name];
-        if (key === undefined) {
-            throw new Exception(`Did not find the name "${name}" in this.names.`);
-        }
-        return key 
-    },
-
-    /**
-     * TODO: add unit tests
-     */
-    getChildKeys(key) {
-        return this.children[key];
-    },
-
-    /**
-     * TODO: add unit tests
-     */
-    getLineKeys(key) {
-        return this.lines[key];
-    },
-
-    /**
-     * TODO: add unit tests
-     */ 
     add(key) {
         this.mapName(key);
         this.mapChild(key);
         this.mapLine(key);
     },
 
+    /**
+     * good. doesn't need unit tests
+     */
     remove(key) {
-
+        this.unmapLine(key);
+        this.unmapChild(key);
+        this.unmapName(key);
     },
 
-    /* Private methods. */
-
-    mapChild(key) {
-        const parentName = this.tree[key].parent;
-        if (parentName === undefined) {
-            return;
+    /**
+     * good. doesn't need unit tests
+     * This should throw an exception. If I provide what I believe is a valid name, I expect to get a key!
+     */
+    getKey(name) {
+        if (name == null) throw new Exception(`getKey() failed. The name: "${name}" is invalid.`);
+        const key = this.names[name];
+        if (key === undefined) {
+            throw new Exception(`getKey() failed. Did not find the name "${name}" in this.names.`);
         }
+        return key 
+    },
+
+    /**
+     * good. doesn't need unit tests
+     */
+    getChildKeys(key) {
+        return this.children[key];
+    },
+
+    /**
+     * good. doesn't need unit tests
+     */
+    getLineKeys(key) {
+        return this.lines[key];
+    },
+
+    /**
+     * good. doesn't need unit tests
+     */
+    getParentKey(childKey) {
+        const parentName = this.tree[childKey].parent;
+        if (parentName === undefined) return;
         let parentKey;
         try {
             parentKey = this.getKey(parentName);
         } catch (e) {
-            console.error(`The child object named "${this.tree[key].name}" has a non-existant parent object named "${parentName}". The parent-child line was not drawn.`);
+            console.error(`The child object named "${this.tree[childKey].name}" has a non-existant parent object named "${parentName}".`);
             return;
         }
-        if (this.children[parentKey] == null) {
-            this.children[parentKey] = [key];
-        } else if (!this.children[parentKey].includes(key)) {
-            this.children[parentKey].push(key);
-        } 
+        return parentKey;
     },
 
-    mapName(key) {
-        const name = this.tree[key].name;
-        if (name != null) {
-            const stringName = String(name).toLowerCase();
-            if (stringName === "null" || stringName === "undefined") {
-                return;
-            } 
-            this.names[name] = key;
-        } 
-    },
+    /* Private TreeMap methods. Don't touch! */
 
-    mapLine(key) {
-        const sourceName = this.tree[key].to;
-        const targetName = this.tree[key].from;
-        if (sourceName === undefined && targetName === undefined) {
-            return;
-        }
+    /**
+     * good. not tested b/c private
+     */
+    getNodeEndKeys(lineKey) {
+        const sourceName = this.tree[lineKey].to;
+        const targetName = this.tree[lineKey].from;
+        let sourceKey, targetKey;
+        if (sourceName === undefined && targetName === undefined) return {};
         if (sourceName !== undefined && targetName !== undefined) {
-            let sourceKey, targetKey;
             try {
                 sourceKey = this.getKey(sourceName);
                 targetKey = this.getKey(targetName);
             } catch(e) {
-                console.error(`The line object named "${this.tree[key].name}" has non-existant 'to' and/or 'from' nodes. Line was not drawn.`);
+                console.error(`The line object named "${this.tree[lineKey].name}" has non-existant 'to' and/or 'from' nodes.`);
+                return {};
             }
-            if (this.lines[sourceKey] == null) {
-                this.lines[sourceKey] = [key];
-            } else if (!this.lines[sourceKey].includes(key)) {
-                this.lines[sourceKey].push(key);
-            }
-            if (this.lines[targetKey] == null) {
-                this.lines[targetKey] = [key];
-            } else if (!this.lines[targetKey].includes(key)) {
-                this.lines[targetKey].push(key);
-            }
-            return;
+        } else {
+            console.error(`The line object named "${this.tree[lineKey].name}" is missing a 'to' or 'from' property.`);
+            return {};
         }
-        console.error(`The line object named "${this.tree[key].name}" is missing a 'to' or 'from' property. Line was not drawn.`);
-    }
+        return {sourceKey: sourceKey, targetKey: targetKey};
+    },
+
+    /**
+     * good. doesn't need unit tests
+     */
+    mapName(key) {
+        const name = this.tree[key].name;
+        if (name == null) return;
+        const lowercaseName = String(name).toLowerCase();
+        if (lowercaseName === "null" || lowercaseName === "undefined") return;
+        this.names[name] = key;
+    },
+
+    /**
+     * good. doesn't need unit tests
+     */
+    unmapName(name) {
+        if (this.names[name] == null) return;
+        delete this.names[name];
+    },
+
+    /**
+     * good
+     */
+    mapChild(childKey) {
+        const parentKey = this.getParentKey(childKey);
+        if (parentKey == null) return;
+        if (this.children[parentKey] == null) {
+            this.children[parentKey] = [childKey];
+        } else if (!this.children[parentKey].includes(childKey)) {
+            this.children[parentKey].push(childKey);
+        } 
+    },
+
+    /**
+     * good
+     */
+    unmapChild(childKey) {
+        const parentKey = this.getParentKey(childKey);
+        if (parentKey == null) return;
+        const idx = this.children[parentKey].indexOf(childKey);
+        if (idx >= 0) {
+            this.children[parentKey].splice(idx, 1);
+            if (this.children[parentKey].length === 0) {
+                delete this.children[parentKey];
+            }
+        } else {
+            console.error(`Could not unmap child with key "${childKey}" from parent with key ${parentKey}.`);
+        }
+    },
+
+    /**
+     * good
+     */
+    mapLine(lineKey) {
+        let {sourceKey, targetKey} = this.getNodeEndKeys(lineKey);
+        if (sourceKey == null || targetKey == null) return;
+        if (this.lines[sourceKey] == null) {
+            this.lines[sourceKey] = [lineKey];
+        } else if (!this.lines[sourceKey].includes(lineKey)) {
+            this.lines[sourceKey].push(lineKey);
+        }
+        if (this.lines[targetKey] == null) {
+            this.lines[targetKey] = [lineKey];
+        } else if (!this.lines[targetKey].includes(lineKey)) {
+            this.lines[targetKey].push(lineKey);
+        }
+    },
+
+    /**
+     * good
+     */
+    unmapLine(lineKey) {
+        let {sourceKey, targetKey} = this.getNodeEndKeys(lineKey);
+        if (sourceKey == null || targetKey == null) return;
+        [sourceKey, targetKey].forEach(key => {
+            const idx = this.lines[key].indexOf(lineKey);
+            if (idx >= 0) {
+                this.lines[key].splice(idx, 1);
+                if (this.lines[key].length === 0) {
+                    delete this.lines[key];
+                }
+            } else {
+                console.error(`Could not unmap line with key "${lineKey}" from node with key "${key}".`);
+            }
+        });
+    },
 };
 
 /**
@@ -2643,6 +2713,12 @@ function createTreeMap(tree) {
  * 3) State action taken (or NOT taken), if any.
  */
 
+/*
+I need to think about this. When I ask for children or connected lines, I expect that sometimes the result will be undefined
+because not all nodes/lines have children and/or connected lines. When I ask for a parent, do I expect the result to be undefined
+sometimes? Yes, I do. When I ask for an object, do I expect the result to be undefined sometimes? No. I don't
+*/
+
 const treePrototype = {
 
     /* Public methods 
@@ -2650,65 +2726,71 @@ const treePrototype = {
     */
 
     /**
-     * TODO: add unit tests
+     * good.
+     * This should throw an exception. If I provide what I believe is a valid key, I should always get an object.
      */
     getObject(key) {
         const obj = this.tree[key];
-        if (obj == null) {
-            console.error(`The object with the key "${key}" does not exist in the Tree.`);
-        } else {
-            return this.tree[key];
-        }
+        if (obj == null) throw new Error(`getObject() failed. The object with the key "${key}" does not exist in the Tree.`);
+        return this.tree[key];
     },
 
     /**
-     * TODO: add unit tests
+     * good. doesn't need unit tests
+     * Convenience method
      */
-    getParentKey(nodeKey) {
-        return this.treeMap.getKey(this.tree[nodeKey].parent);
+    getParent(childKey) {
+        const parentKey = this.treeMap.getParentKey(childKey);
+        if (parentKey == null) return;
+        return this.getObject(parentKey);
     },
 
     /**
-     * TODO: add unit tests
-     */
-    getParent(nodeKey) {
-        return this.getObject(this.getParentKey(nodeKey));
-    },
-
-    /**
-     * TODO: add unit tests
+     * good. doesn't need unit tests
      */
     getToNodeKey(lineKey) {
-        return this.treeMap.getKey(this.tree[lineKey].to);
+        const sourceName = this.tree[lineKey].to;
+        if (sourceName == null) return;
+        return this.treeMap.getKey(sourceName);
     },
 
     /**
-     * TODO: add unit tests
+     * good. doesn't need unit tests
+     * Convenience method
      */
     getToNode(lineKey) {
-        return this.getObject(this.getToNodeKey(lineKey));
+        const sourceKey = this.getToNodeKey(lineKey);
+        if (sourceKey == null) return;
+        return this.getObject(sourceKey);
     },
 
     /**
-     * TODO: add unit tests
+     * good. doesn't need unit tests
      */
     getFromNodeKey(lineKey) {
-        return this.treeMap.getKey(this.tree[lineKey].from);
+        const targetName = this.tree[lineKey].from;
+        if (targetName == null) return;
+        return this.treeMap.getKey(targetName);
     },
 
     /**
-     * TODO: add unit test
+     * good. doesn't need unit tests
+     * Convenience method
      */
     getFromNode(lineKey) {
-        return this.getObject(this.getFromNodeKey(lineKey));
+        const targetKey = this.getFromNodeKey(lineKey);
+        if (targetKey == null) return;
+        return this.getObject(targetKey);
     },
 
     /**
-     * TODO: add unit tests
+     * good. doesn't need unit tests
+     * Get the keys of nodes that are on the other ends of lines connected to nodeKey.
      */
     getPairedNodeKeys(nodeKey) {
         const pairedNodes = [];
-        const lineKeys = this.treeMap.getLineKeys(key);
+        const lineKeys = this.treeMap.getLineKeys(nodeKey);
+        if (lineKeys == null) return;
         lineKeys.forEach(key => {
             if (this.getToNodeKey(key) === nodeKey) {
                 pairedNodes.push(this.getFromNodeKey(key));
@@ -2720,74 +2802,73 @@ const treePrototype = {
     },
 
     /**
-     * TODO: do some sort of pre-scan to find an empty square in the graph to insert the configuration objects.
-     * Parse this TreeWrapper.tree and insert longitude and latitude properties if a non-line type object does not contain them.
-     * @param {number} initX - the longitude of the top left corner of the square.
-     * @param {number} initY - the latitude of the top left corner of the square.
-     * @param {number} spacing - how far apart the nodes should be spaced from one another
-     */
-     insertCoordinates(initX, initY, spacing) {
-        let keys = Object.keys(this.tree);
-        let gen = getCoordinates(initX, initY, spacing);
-        keys.forEach(key => {
-            let obj = this.tree[key];
-            if (getType(obj) !== "line" && (obj.longitude == null || obj.latitude == null)) {
-                let coords = gen.next().value;
-                obj.longitude = coords.longitude;
-                obj.latitude = coords.latitude;
-            }
-        });
-    },
-
-    /**
-     * TODO: add unit tests
+     * good
      */
     insert(treeObject) {
         this.tree[treeObject.key] = treeObject.data;
         this.treeMap.add(treeObject.key);
-        if (treeObject.data.name == null) {
-            console.log(`You inserted an object with key "${treeObject.key}". However, this object does not a "name" property.`);
-        }
     },
 
     /** 
-     * TODO: add unit tests
-     * Delete the tree object with the passed key argument from this Tree.
-     * @param {string} key - the key used to identify the tree object to delete.
+     * good
+     * When I delete an object, first it must be deleted from the svg before deleting it from the tree. So, I need to call
+     * this method BEFORE I create the SvgData to delete to make sure I don't delete some svg elements and discover that whoops
+     * it was actually illegal to do so.
+     */
+    isDeletable(key) {
+        this.getObject(key);
+        const children = this.treeMap.getChildKeys(key);
+        if (children != null) return false;
+        const lines = this.treeMap.getLineKeys(key);
+        if (lines != null) return false;
+        return true;
+    },
+
+    /**
+     * good. doesn't need unit tests
      */
     delete(key) {
-        /* See if this object has any children or connected lines. If it has children, throw an error. If it has connected lines, throw an error. If it doesn't have either, delete it from names. Next, check if IT is a child and delete it from its parent's children array. Next, check if IT is a line and delete it from its node(s) arrays(s). */
-        const parentKey = this.getParentKey(key);
-        if (parentKey != null) {
-            const children = this.treeMap.getChildKeys(parentKey);
-            const idx = children.indexOf(key)
-            if (idx >= 0) {
-                children.splice(idx, 1);
-            } else {
-                throw new Error(`Child node with key "${key}" was not mapped as a child of parent with key "${parentKey}".`)
-            }
-        }
-        const 
-
-        //const tWrapper = createTreeWrapper();
-        if (!this.contains(key)) {
-            console.log(`Unable to perform delete operation. This TreeWrapper does not contain a tree object with key: "${key}".`);
-            return tWrapper;
-        }
-        const childKeys = Object.keys(this.getChildrenOf(key).tree);
-        if (childKeys.length > 0) {
-            throw new Error(`Cannot delete object with key "${key}" because it has existing children. Please delete the children first.`);
-            return tWrapper;
-        }
-        const lineKeys = Object.keys(this.getConnectedLinesOf(key).tree);
-        if (lineKeys.length > 0) {
-            throw new Error(`Cannot delete object with key "${key}" because it has connected lines. Please delete the connected lines first.`);
-            return tWrapper;
-        }
-        tWrapper.add(key, this);
-        delete this.names[this.tree[key].name];
+        this.getObject(key);
+        //if (isDeletable(key)) {
+        this.treeMap.remove(key);
         delete this.tree[key];
-        return tWrapper;
+        //} else {
+            // This should never be called on purpose
+            /*
+            const children = this.treeMap.getChildKeys(key);
+            if (children != null) {
+                throw new Error(`Delete operation failed. Tree object with key: "${key}" named "${obj.name}" has children named: "${children.map(childKey => this.getObject(childKey).name).join(", ")}".`);
+            }
+            const lines = this.treeMap.getLineKeys(key);
+            if (lines != null) {
+                throw new Error(`Delete operation failed. Tree object with key: "${key}" named "${obj.name}" has lines named: "${lines.map(lineKey => this.getObject(lineKey).name).join(", ")}".`);
+            }
+            */
+        //}
+    },
+
+    /** 
+     * Return an array of keys that need to be deleted as a result of deleting a tree object.
+     * 
+     * @param {string} key - the key of the tree object for which to find its deletable subtree.
+     * @param {Array} visited - contains keys of tree objects that have already been visited so the method dosen't
+     * recurse infinitely in case of a cycle.
+     * @return {Array}
+     */
+    getSubtreeToDelete(key, visited = []) {
+        if (!Array.isArray(visited)) throw new Error("Visited argument must be an array");
+        visited.push(key);
+        const keySet = new Set();
+        const lines = this.treeMap.getLineKeys(key);
+        const children = this.treeMap.getChildKeys(key);
+        if (lines != null) lines.forEach(key => keySet.add(key));
+        if (children != null) children.forEach(key => keySet.add(key));
+        keySet.forEach(outerKey => {
+            if (!visited.includes(outerKey)) {
+                this.getSubtreeToDelete(outerKey, visited).forEach(innerKey => keySet.add(innerKey));
+            }
+        });
+        return Array.from(keySet);
     },
 
     /** 
@@ -2797,14 +2878,11 @@ const treePrototype = {
      * @return {TreeWrapper} - contains all of the tree objects that need to be removed from the svg
      * as a result of the recursive delete operation.
      */
+    /*
     recursiveDelete(key) {
-        const tWrapper = createTreeWrapper();
-        if (!this.contains(key)) {
-            //console.log(`Unable to perform a recursive delete operation. The tree object with key "${key}" does not exist
-            //in this TreeWrapper`);
-            return tWrapper;
-        }
-        tWrapper.add(key, this);
+        const keys = [];
+        //const tWrapper = createTreeWrapper();
+        //tWrapper.add(key, this);
         tWrapper.merge(this.getSubtreeToDelete(key, []));
         for (let key in tWrapper.tree) {
             delete this.names[this.tree[key].name];
@@ -2812,17 +2890,36 @@ const treePrototype = {
         }
         return tWrapper;
     },
+    */
 
     /* Private methods */
 
 };
 
-function createTree(tree) {
+/**
+ * good
+ */
+function createTree(tree = {}) {
+    const invalidKeys = [];
+    const invalidCoordinateKeys = [];
     Object.keys(tree).forEach(key => {
-        if (!isNumberString(key)) {
-            throw new Error(`The key "${key}" in the 'tree' argument cannot be parsed to a valid number.`);
-        }
+        if (!isNumberString(key)) invalidKeys.push(key);
+        ["longitude", "latitude"].forEach(prop => {
+            if (tree[key][prop] != null) {
+                if (isNumberString(tree[key][prop])) {
+                    tree[key][prop] = parseFloat(tree[key][prop])
+                } else if (typeof tree[key][prop] !== "number") {
+                    invalidCoordinateKeys.push(key);
+                }
+            }
+        });
     });
+    if (invalidKeys.length !== 0) {
+        throw new Error(`Interface could not be built. The following object keys aren't numbers: "${invalidKeys}".`);
+    }
+    if (invalidCoordinateKeys.length !== 0) {
+        throw new Error(`Interface could not be built. The following object keys have objects with non-numeric longitude or latitude values: "${invalidCoordinateKeys.join(", ")}".`);
+    }
     const treeWrapper = Object.create(treePrototype);
     treeWrapper.tree = tree;
     treeWrapper.treeMap = createTreeMap(tree);
@@ -3097,6 +3194,35 @@ const treeWrapperPrototype = {
         return tWrapper;
     },
 
+    //Need to keep this for now so stuff doesn't break
+    /** 
+     * Return a TreeWrapper that contains all tree objects that will be deleted as a result of deleting the
+     * tree object with the passed key argument.
+     * 
+     * @param {string} key - the key of the tree object for which to find its deletable subtree.
+     * @param {Array} visited - contains keys of tree objects that have already been visited so the method dosen't
+     * recurse infinitely in case of a cycle.
+     * @return {TreeWrapper}
+     */
+     getSubtreeToDelete(key, visited) {
+        if (!Array.isArray(visited)) {
+            throw new Error("Visited argument must be an array");
+        }
+        visited.push(key);
+        const tWrapper = createTreeWrapper();
+        const children = this.getChildrenOf(key);
+        tWrapper.merge(children);
+        tWrapper.merge(this.getConnectedLinesOf(key));
+        if (Object.keys(children.tree).length > 0) {
+            for (let childKey in children.tree) {
+                if (!visited.includes(childKey)) {
+                    tWrapper.merge(this.getSubtreeToDelete(childKey, visited));
+                }
+            }
+        }
+        return tWrapper;
+    },
+
     /** 
      * Delete the tree object with the passed key argument from this TreeWrapper. Also recursively delete any connected
      * lines and children. 
@@ -3230,34 +3356,6 @@ const treeWrapperPrototype = {
         } else {
             throw new Error("If the keys argument is passed, it must be an array");
         }
-    },
-
-    /** 
-     * Return a TreeWrapper that contains all tree objects that will be deleted as a result of deleting the
-     * tree object with the passed key argument.
-     * 
-     * @param {string} key - the key of the tree object for which to find its deletable subtree.
-     * @param {Array} visited - contains keys of tree objects that have already been visited so the method dosen't
-     * recurse infinitely in case of a cycle.
-     * @return {TreeWrapper}
-     */
-    getSubtreeToDelete(key, visited) {
-        if (!Array.isArray(visited)) {
-            throw new Error("Visited argument must be an array");
-        }
-        visited.push(key);
-        const tWrapper = createTreeWrapper();
-        const children = this.getChildrenOf(key);
-        tWrapper.merge(children);
-        tWrapper.merge(this.getConnectedLinesOf(key));
-        if (Object.keys(children.tree).length > 0) {
-            for (let childKey in children.tree) {
-                if (!visited.includes(childKey)) {
-                    tWrapper.merge(this.getSubtreeToDelete(childKey, visited));
-                }
-            }
-        }
-        return tWrapper;
     },
 
     /**
@@ -3776,7 +3874,7 @@ function * getCoordinates(initX, initY, spacing) {
 
 const svgCirclePrototype = {
     /**
-     * TODO: update unit tests
+     * good. doesn't need tests
      */
     getNewInstance() {
         const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
@@ -3784,7 +3882,7 @@ const svgCirclePrototype = {
         return circle; 
     },
     /**
-     * TODO: update unit tests
+     * good. doesn't need tests
      */
     update(circle) {
         circle.setAttribute('id', this.id);
@@ -3797,40 +3895,35 @@ const svgCirclePrototype = {
 };
 
 /**
- * TODO: update unit tests
+ * good.
  */
 function createSvgCircle2(key, {longitude, latitude, object}, {r = 2, strokeWidth = 0.5} = {}) {
-    let error = "";
-    if (!isNumberString(key)) {
-        error += `The 'key' argument, "${key}", must be formatted as a string that can be parsed to a valid number. `
-    } 
-    if (typeof longitude !== "number" && !isNumberString(longitude)) {
-        error += `The 'longitude' argument, "${longitude}", must be formatted as either 1) a string that can be parsed to a valid number or 2) a number. `
-    }
-    if (typeof latitude !== "number" && !isNumberString(latitude)) {
-        error += `The 'latitude' argument, "${latitude}", must be formatted as either 1) a string that can be parsed to a valid number or 2) a number. `
-    }
-    if (error !== "") {
-        error = `The circle with key "${key}" was not drawn. ` + error;
-        console.error(error);
-        return;
-    }
+    if (typeof longitude !== "number") throw new Error(`SvgCircle creation failed. 'longitude' must be a number.`);
+    if (typeof latitude !== "number") throw new Error(`SvgCircle creation failed. 'latitude' must be a number.`);
+    if (!isNumberString(key)) throw new Error(`SvgCircle creation failed. 'key' must be a number string.`);
     const circle = Object.create(svgCirclePrototype);
     circle.id = key;
     circle.class = object;
     circle.r = r;
     circle["stroke-width"] = strokeWidth;
-    circle.cx = longitude - gOffsetX;
-    circle.cy = latitude - gOffsetY;
+    circle.cx = (longitude - gOffsetX) * gDrawScaleFactor;
+    circle.cy = (latitude - gOffsetY) * gDrawScaleFactor;
     return circle;
 }
 
 const svgLinePrototype = {
+    /**
+     * good. doesn't need tests
+     */
     getNewInstance() {
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         this.update(line);
         return line; 
     },
+
+    /**
+     * good. doesn't need tests
+     */
     update(line) {
         line.setAttribute('id', this.id);
         line.setAttribute('class', this.class);
@@ -3843,7 +3936,8 @@ const svgLinePrototype = {
 };
 
 /**
- * TODO: add unit tests, add error handling
+ * @param {Object} source - either the parent or the from node
+ * @param {Object} target - either the child or the to node
  */
 function createSvgLine2(source, target, key=null, lineObject=null) {
     const line = Object.create(svgLinePrototype);
@@ -3927,6 +4021,7 @@ const svgDataPrototype = {
 /**
  * TODO: add unit tests. See if all this works, then add in the subtree redraw etc.
  */
+/*
 function createSvgData(tree, keys=null) {
     const svgData = Object.create(svgDataPrototype);
     svgData.lines = [];
@@ -3958,6 +4053,7 @@ function createSvgData(tree, keys=null) {
     });
     return svgData;
 }
+*/
 
 /** 
  * TODO: add unit tests
@@ -4134,28 +4230,36 @@ function countPhases(p) {
  * inside of the treeWrapper argument.
  */
 function createTreeObject(input, tree) {
-    //if (Object.getPrototypeOf(treeWrapper) !== treeWrapperPrototype) {
-    //    throw new Error("treeWrapper argument must be an instance of TreeWrapper");
-    //}
+    //if (Object.getPrototypeOf(tree) !== treePrototype) throw new Error("'tree' argument must be an instance of the Tree class.");
     const tObject = Object.create(treeObjectPrototype);
     if (typeof(input) === "string") {
-        keyIsStringAndValidNumber(input); // I don't like this
-        const obj = tree.tree[input];
-        if (obj != null) {
+        if (isNumberString(input)) {
+            const obj = tree.tree[input];
+            if (obj == null) throw new Error(`TreeObject creation failed. The key: "${input}" needed to create the TreeObject does not exist in this Tree.`);
             tObject.key = input;
             tObject.data = deepCopy(obj);
+            ['longitude', 'latitude'].forEach(prop => {
+                if (tObject.data[prop] != null && typeof tObject.data[prop] === "string") {
+                    // uncommet this!
+                    //throw new Error(`TreeObject creation failed. The tree object with key: "${input}" has a string value for its "${prop}" property.`);
+                }
+            });
             return tObject;
+        } else {
+            throw new Error(`TreeObject creation failed. If the 'input' argument is a string, it must be a numeric string.`);
         }
-        throw new Error(`The passed key argument: "${input}" to create the TreeObject does not exist in the treeWrapper.tree.`);
     } else if (typeof input === "object" && !Array.isArray(input)) {
         tObject.key = getNewTreeKey(tree.tree);
         tObject.data = deepCopy(input);
-        if (tObject.data.name != null && tObject.data.object != null) {
-            tObject.data.name = tObject.data.object + tObject.key;
-        }
+        if (tObject.data.name != null && tObject.data.object != null) tObject.data.name = tObject.data.object + tObject.key;
+        ['longitude', 'latitude'].forEach(prop => {
+            if (tObject.data[prop] != null && typeof tObject.data[prop] === "string") {
+                tObject.data[prop] = parseFloat(tObject.data[prop]);
+            }
+        });
         return tObject;
     } 
-    throw new Error("Input argument must be a string or an object.");
+    throw new Error("TreeObject creation failed. The 'input' argument must be a string or an object.");
 }
 
 //**************************************************
@@ -4773,10 +4877,10 @@ function createInterface() {
     //gTreeWrapper.insertCoordinates(0, 0, 5);
     gSelection = createSelection();
     gViewport = document.getElementsByClassName('svg-pan-zoom_viewport')[0];
-    //const svg = createAddableSvgData(gTreeWrapper);
-    const svgData = createSvgData(gTree);
-    //svg.drawTo(gViewport);
-    svgData.drawTo(gViewport);
+    const svg = createAddableSvgData(gTreeWrapper);
+    svg.drawTo(gViewport);
+    //const svgData = createSvgData(gTree);
+    //svgData.drawTo(gViewport);
 }
 
 function initializeJQuery() {

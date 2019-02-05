@@ -1,5 +1,5 @@
 //<script>
-// 35 objects
+"use strict";
 const rawTree = {
     // weirdNode1
     "0": {
@@ -414,29 +414,40 @@ const rawTree = {
         "to": "house172264", 
         "configuration": "1807--T325_C-CONFIG"
     }, 
+    // childOfLine (node2Line1)
+    "00900": {
+        object: "waterheater",
+        name: "waterheater00900",
+        parent: "T62474182459",
+        longitude: 408.17398807424905,
+        latitude: 403.9973646798732
+    }
 };
-let testTree = deepCopy(rawTree);
-let testTreeWrapper = createTreeWrapper(testTree);
+let rawTreeCopy = deepCopy(rawTree);
+let testTreeWrapper = createTreeWrapper(rawTreeCopy);
+let testTree = createTree(rawTreeCopy);
+/* 
+TODO: If key === 0, longitude === 0, latitude === 0 (or some other property === 0), the code could 
+break in funny ways. I need to check for undefined explicitly instead of using !<property>
+TODO: build a tree that is more representative of the actual data
 
+Tree does NOT contain any cycles
+
+Some latitudes and longitudes are strings while others are numbers in the .omd files. Is this a problem?
+
+Hardcoding test data like this is bad because if the original data ever changes structure, the methods will fail but
+these unit tests will still pass. However, it is necessary because the alternative would be to use the real rawTreeCopy from a .omd
+file and then these unit tests would be dependent on a particular .omd file which is even worse.
+
+38 keys for 36 objects.
+The rawTreeCopy is fairly well-formed, aside from the orphan line and orphan node. It should stay well-formed. If I want to test for really malformed data, I should do it in a unit test.
+
+I should only be testing public functions and methods! 
+
+do not test error handling. It's always changing. But error handling is what matters and is tricky! But I move too slow if I test every error condition. Unit tests need to be as few and as simple as possible or there's too many and it's overwhelming and more harmful than helpful. Also, remember that I'm never testing what DOESN'T happen, unless it's for a very specific tricky case. If I encouter and fix a bug, I can add a test to prevent regressions. Unit tests are BASIC!!!!!
+*/
 describe("Unit tests", function() {
 
-    /* TODO: If key === 0, longitude === 0, latitude === 0 (or some other property === 0), the code could 
-    break in funny ways. I need to check for undefined explicitly instead of using !<property>
-    TODO: build a tree that is more representative of the actual data
-    */
-
-    /* Some latitudes and longitudes are strings while others are numbers in the .omd files. Is this a problem?
-    */
-
-    /* Hardcoding test data like this is bad because if the original data ever changes structure, the methods will fail but
-    these unit tests will still pass. However, it is necessary because the alternative would be to use the real testTree from a .omd
-    file and then these unit tests would be dependent on a particular .omd file which is even worse.
-    */
-
-    /* 
-    37 keys for 35 objects.
-    The testTree is fairly well-formed, aside from the orphan line and orphan node. It should stay well-formed. If I want to test for really malformed data, I should do it in a unit test.
-    */
     const weirdNode1 = "0";
     const weirdNode2 = "1";
     const node1 = "245000";
@@ -474,24 +485,28 @@ describe("Unit tests", function() {
     const orphanLine1 = "33420";
     const funkyLine1 = "121212";
     const funkyLine2 = "343434";
+    const childOfLine = "00900";
 
     const allKeys = [weirdNode1, weirdNode2, node1, node1Line1, node1Line1End, node1Line1EndChild1, node1Line2,
         node1Line2End, node1Line2EndChild1, node1Line3, node1Line3End, node1Line3EndChild1, node1Line4, node1Line4End,
         node2Line1, node2Line1End , node2Line2, node2Line2End, node2Line2EndChild1, node2Line3, node2Line3End,
         node2Line3EndLine, node2Line3EndLineEnd, node3Line1, node3Line1End, node3Line1EndChild1,
         node3Line1EndChild1Child1, node3Line1EndChild1Child2, node3Line1EndChild2, node3Line1EndChild2Child1,
-        node3Line1EndChild3, orphanNode1, orphanLine1, funkyLine1, funkyLine2 
+        node3Line1EndChild3, orphanNode1, orphanLine1, funkyLine1, funkyLine2, childOfLine
     ];
 
+    let consoleErrorSpy;
+
     beforeEach(function() {
-        // Tree does NOT contain any cycles
-        testTree = deepCopy(rawTree);
-        testTreeWrapper = createTreeWrapper(testTree);
+        //testTree = deepCopy(rawTree);
+        consoleErrorSpy = spyOn(console, "error");
+        rawTreeCopy = deepCopy(rawTree);
+        testTreeWrapper = createTreeWrapper(rawTreeCopy);
+        testTree = createTree(rawTreeCopy);
     });
-    
     describe("Public functions and methods", function() {
-        //good: don't test error handling for now ANYWHERE because it TAKES TOO LONG
-        describe("createSvgCircle()", function() {
+        //good
+        describe("createSvgCircle2()", function() {
 
             let key, node, circle;
 
@@ -499,12 +514,25 @@ describe("Unit tests", function() {
                 key = "66";
                 node = {
                     object: "node",
-                    longitude: "457.5",
-                    latitude: "100.2",
+                    longitude: 457.5,
+                    latitude: 100.2,
                 };
                 circle = createSvgCircle2(key, node);
             });
 
+            it(`should set the 'cx' attribute to be: (longitude - gOffsetX) * gDrawScaleValue`, function() {
+                const cx = (node.longitude - gOffsetX) * gDrawScaleFactor;
+                expect(typeof cx).toEqual("number");
+                expect(isNaN(cx)).toBe(false);
+                expect(circle.cx).toEqual(cx);
+            });
+
+            it(`should set the 'cy' attribute to be: (latitude - gOffsetY) * gDrawScaleValue`, function() {
+                const cy = (node.latitude - gOffsetY) * gDrawScaleFactor;
+                expect(typeof cy).toEqual("number");
+                expect(isNaN(cy)).toBe(false);
+                expect(circle.cy).toEqual(cy);
+            });
 
             it("should return an object who's prototype is svgCirclePrototype", function() {
                 expect(Object.getPrototypeOf(circle)).toBe(svgCirclePrototype);
@@ -516,24 +544,11 @@ describe("Unit tests", function() {
                 expect(circle.r).toEqual(2);
                 expect(circle["stroke-width"]).toEqual(0.5);
             });
-
-            it(`should set the 'cx' property to be a number that is the difference between the 'longitude' argument
-            and the global gOffsetX variable`, function() {
-                expect(gOffsetX).toBeDefined();
-                expect(circle.cx).toEqual(node.longitude - gOffsetX);
-                expect(typeof circle.cx).toEqual("number");
-            });
-
-            it(`should set the 'cy' property to be the difference between the 'latitude' argument and the
-            global gOffsetY variable`, function() {
-                expect(gOffsetY).toBeDefined();
-                expect(circle.cy).toEqual(node.latitude - gOffsetY);
-                expect(typeof circle.cy).toEqual("number");
-            });
         });
 
         describe("svgCirclePrototype", function() {
-            //bad
+            //good
+            /*
             describe("getNewInstance()", function() {
 
                 it("should return an object with attribute values that are equivalent to the property values of this SvgCircle", function() {
@@ -549,11 +564,14 @@ describe("Unit tests", function() {
                         expect(String(circle[key])).toEqual(e.getAttribute(key));
                     })
                 });
+
+                // No need for integration test
             });
-            //bad
+            //good. Did this really need a test?
             describe("update()", function() {
 
-                it("should set the attribute values of the 'circle' argument to equal the property values of this SvgCircle", function() {
+                it(`should set the attribute values of the 'circle' element argument to equal the property values
+                of this SvgCircle`, function() {
                     const key = "2";
                     const node = {
                         object: "zipload",
@@ -566,7 +584,8 @@ describe("Unit tests", function() {
                     const node2 = {
                         object: "waterheater",
                         longitude: 556.2,
-                        latitude: "0"
+                        latitude: "0",
+                        temperature: 100.1
                     };
                     const waterheater = createSvgCircle2(key2, node2);
                     waterheater.update(e);
@@ -574,11 +593,72 @@ describe("Unit tests", function() {
                         expect(String(waterheater[key])).toEqual(e.getAttribute(key));
                     });
                 });
+
+                // No need for integration test
             });
+            */
         });
+        //incomplete
+        describe("createSvgLine2()", function() {
 
-        xdescribe("createSvgLine()", function() {
+            let independentNode1, independentNode2, parentNode, childNode, line;
 
+            beforeEach(function() {
+                independentNode1 = {
+                    object: "node",
+                    name: "node0",
+                    latitude: .22901,
+                    longitude: 100.55
+                };
+                independentNode2 = {
+                    object: "node",
+                    name: "node1",
+                    latitude: 76.8,
+                    longitude: 1.14
+                };
+                parentNode = {
+                    object: "triplex_meter",
+                    name: "triplex_meter2",
+                    latitude: 99.91,
+                    longitude: 23.2
+                };
+                childNode = {
+                    object: "house",
+                    name: "house3",
+                    parent: "triplex_meter2",// or line4
+                    latitude: 1000.3,
+                    longitude: 4
+                };
+                line = {
+                    from: "node0",
+                    to: "node1",
+                    name: "line4",
+                    phases: "BCN",
+                    object: "transformer"
+                }
+            });
+
+            describe("if the 'target' argument has a type of 'line", function() {
+
+                it("should throw an error", function() {
+                    expect(function() {
+                        createSvgLine2(parentNode, line)
+                    }).toThrowError("SvgLine creation failed. 'target' argument must have a type of 'childNode' or 'independentNode'.");
+                });
+            });
+
+            describe("if the 'source' argument has a type of 'line'", function() {
+
+                it("should set the 'x1' property of the line to be the average of the longitudes of the nodes on the ends of the line", function() {
+                    const svgLine = createSvgLine2(line, childNode);
+                    const avgLon = 
+                    expect(svgLine.longitude).toEqual();
+                });
+
+                it("should set the 'y1' property of the line to be the average of the latitudes of the nodes on the ends of the line", function() {
+                    
+                });
+            });
         });
         //good 
         describe("createTreeMap()", function() {
@@ -612,11 +692,11 @@ describe("Unit tests", function() {
             });
 
             it("should map the key of each object to its 'name' property in an integration test", function() {
-                const treeMap = createTreeMap(testTree);
+                const treeMap = createTreeMap(rawTreeCopy);
                 const names = {};
-                Object.keys(testTree).forEach(key => {
-                    if (testTree[key].name != null) {
-                        names[testTree[key].name] = key;
+                Object.keys(rawTreeCopy).forEach(key => {
+                    if (rawTreeCopy[key].name != null) {
+                        names[rawTreeCopy[key].name] = key;
                     }
                 });
                 expect(treeMap.names).toEqual(names);
@@ -671,12 +751,12 @@ describe("Unit tests", function() {
             });
 
             it("should map the key of each object to an array of its child keys in an integration test", function() {
-                const treeMap = createTreeMap(testTree);
-                Object.keys(testTree).forEach(parentKey => {
-                    if (testTree[parentKey].name != null) {
+                const treeMap = createTreeMap(rawTreeCopy);
+                Object.keys(rawTreeCopy).forEach(parentKey => {
+                    if (rawTreeCopy[parentKey].name != null) {
                         const children = [];
-                        Object.keys(testTree).forEach(childKey => {
-                            if (testTree[childKey].parent === testTree[parentKey].name) {
+                        Object.keys(rawTreeCopy).forEach(childKey => {
+                            if (rawTreeCopy[childKey].parent === rawTreeCopy[parentKey].name) {
                                 children.push(childKey);
                             }
                         });
@@ -743,14 +823,14 @@ describe("Unit tests", function() {
                 });
             });
 
-            it("should map the key of each object to an array of its connected line keys in an integration test", function() {
-                const treeMap = createTreeMap(testTree);
-                Object.keys(testTree).forEach(nodeKey => {
-                    if (testTree[nodeKey].name != null) {
-                        const nodeName = testTree[nodeKey].name;
+            it("should pass an integration test that maps the key of each object to an array of its connected line keys", function() {
+                const treeMap = createTreeMap(rawTreeCopy);
+                Object.keys(rawTreeCopy).forEach(nodeKey => {
+                    if (rawTreeCopy[nodeKey].name != null) {
+                        const nodeName = rawTreeCopy[nodeKey].name;
                         const lines = [];
-                        Object.keys(testTree).forEach(lineKey => {
-                            if (testTree[lineKey].to === nodeName || testTree[lineKey].from === nodeName) {
+                        Object.keys(rawTreeCopy).forEach(lineKey => {
+                            if (rawTreeCopy[lineKey].to === nodeName || rawTreeCopy[lineKey].from === nodeName) {
                                 lines.push(lineKey);
                             }
                         });
@@ -763,9 +843,585 @@ describe("Unit tests", function() {
                 });
             });
         });
+        //good
+        describe("treeMapPrototype", function() {
 
-        xdescribe("createTree()", function() {
+            describe("children mapping function", function() {
 
+                let treeMap;
+
+                beforeEach(function() {
+                    const tree = {
+                        "0": {
+                            object: "node",
+                            name: "node0"
+                        },
+                        "1": {
+                            object: "childNode",
+                            parent: "node0"
+                        },
+                        "2": {
+                            object: "childNode",
+                            parent: "node0"
+                        }
+                    };
+                    treeMap = createTreeMap(tree);
+                });
+                //good
+                describe("mapChild()", function() {
+
+                    describe("if the parent hasn't had any children added to its array yet", function() {
+
+                        it("should store an array containing the child key at the parent key", function() {
+                            treeMap.children = {};
+                            expect(treeMap.children["0"]).toBeUndefined();
+                            treeMap.mapChild("1");
+                            expect(treeMap.children["0"]).toEqual(["1"]);
+                        });
+                    });
+
+                    describe("if the parent already has had children added to its array", function() {
+
+                        describe("if child key already exists in the parent's array", function() {
+
+                            it("should not push the key of the child onto the parent's array", function() {
+                                treeMap.children = {};
+                                expect(treeMap.children["0"]).toBeUndefined();
+                                treeMap.mapChild("1");
+                                expect(treeMap.children["0"]).toEqual(["1"]); 
+                                treeMap.mapChild("1");
+                                expect(treeMap.children["0"]).toEqual(["1"]); 
+                            });
+                        });
+                    });
+
+                    describe("if the child key does not exist in the parent's array", function() {
+
+                        it("should push the child key onto the parent's array", function() {
+                            treeMap.children = {};
+                            expect(treeMap.children["0"]).toBeUndefined();
+                            treeMap.mapChild("1");
+                            expect(treeMap.children["0"]).toEqual(["1"]);
+                            treeMap.mapChild("2");
+                            expect(treeMap.children["0"]).toEqual(["1", "2"]);
+                        });
+                    });
+
+                    it("should pass an integration test that maps children to parents", function() {
+                        const treeMap = createTreeMap(rawTreeCopy);
+                        treeMap.children = {};
+                        Object.keys(rawTreeCopy).forEach(key => {
+                            treeMap.mapChild(key);
+                        });
+                        expect(testTree.treeMap.children).toEqual(treeMap.children);
+                    });
+                });
+                //good
+                describe("unmapChild()", function() {
+
+                    describe("if the child key exists in the parent's array", function() {
+
+                        it("should remove the child key from the parent's array", function() {
+                            expect(treeMap.children["0"]).toEqual(["1", "2"]);
+                            treeMap.unmapChild("2");
+                            expect(treeMap.children["0"]).toEqual(["1"]);
+                            treeMap.unmapChild("1");
+                            expect(treeMap.children["0"]).toBeUndefined();
+                        });
+                    });
+
+                    describe("if the object is not a child of any node or line", function() {
+
+                        it("should call console.error()", function() {
+                            treeMap.unmapChild("0");
+                            expect(treeMap.children).toEqual({"0": ["1", "2"]});
+                            expect(consoleErrorSpy).toHaveBeenCalled();
+                        });
+                    });
+
+                    it("should pass an integration test that unmaps all children from parents", function() {
+                        expect(testTree.treeMap.children).not.toEqual({});
+                        Object.keys(rawTreeCopy).forEach(key => {
+                            testTree.treeMap.unmapChild(key);
+                        });
+                        expect(testTree.treeMap.children).toEqual({}); 
+                    });
+                });
+            });
+
+            describe("line mapping functions", function() {
+
+                let treeMap;
+
+                beforeEach(function() {
+                    const tree = {
+                        "0": {
+                            object: "node",
+                            name: "node0"
+                        },
+                        "1": {
+                            object: "node",
+                            name: "node1"
+                        },
+                        "2": {
+                            object: "line",
+                            name: "line2",
+                            from: "node0",
+                            to: "node1"
+                        },
+                        "3": {
+                            object: "line",
+                            name: "line3",
+                            from: "node1",
+                            to: "node0"
+                        }
+                    };
+                    treeMap = createTreeMap(tree);
+                });
+                //good
+                describe("mapLine()", function() {
+
+                    describe("if the node hasn't had any line keys mapped to it yet", function() {
+
+                        it("should set this TreeMap.lines[nodeKey] to an array containing the lineKey", function() {
+                            treeMap.lines = {};
+                            expect(treeMap.lines["0"]).toBeUndefined();
+                            expect(treeMap.lines["1"]).toBeUndefined();
+                            treeMap.mapLine("2");
+                            expect(treeMap.lines["0"]).toEqual(["2"]);
+                            expect(treeMap.lines["1"]).toEqual(["2"]);
+                        });
+                    });
+
+                    describe("if the node has not been mapped to a particular line key", function() {
+
+                        it("should push the line key onto the lines array of the node", function() {
+                            treeMap.lines = {};
+                            expect(treeMap.lines["0"]).toBeUndefined();
+                            expect(treeMap.lines["1"]).toBeUndefined();
+                            treeMap.mapLine("2");
+                            expect(treeMap.lines["0"]).toEqual(["2"]);
+                            expect(treeMap.lines["1"]).toEqual(["2"]);
+                            treeMap.mapLine("3");
+                            expect(treeMap.lines["0"]).toEqual(["2", "3"]);
+                            expect(treeMap.lines["1"]).toEqual(["2", "3"]);
+                        });
+                    });
+
+                    describe("if the node has already been mapped to a particular line key", function() {
+
+                        it("should not push the line key onto the lines array of the node", function() {
+                            treeMap.lines = {};
+                            expect(treeMap.lines["0"]).toBeUndefined();
+                            expect(treeMap.lines["1"]).toBeUndefined();
+                            treeMap.mapLine("2");
+                            expect(treeMap.lines["0"]).toEqual(["2"]);
+                            expect(treeMap.lines["1"]).toEqual(["2"]);
+                            treeMap.mapLine("2");
+                            expect(treeMap.lines["0"]).toEqual(["2"]);
+                            expect(treeMap.lines["1"]).toEqual(["2"]);
+                        });
+                    });
+
+                    it("should pass an integration test that maps lines to their nodes", function() {
+                        const treeMap = createTreeMap(rawTreeCopy);
+                        treeMap.lines = {};
+                        Object.keys(rawTreeCopy).forEach(key => {
+                            treeMap.mapLine(key);
+                        });
+                        expect(testTree.treeMap.lines).toEqual(treeMap.lines);
+                    });
+                });
+                //good
+                describe("unmapLine()", function() {
+
+                    describe("if the line key exists in the node's array", function() {
+
+                        it("should remove the line key from the array", function() {
+                            expect(treeMap.lines["0"]).toEqual(["2", "3"]);
+                            treeMap.unmapLine("3");
+                            expect(treeMap.lines["0"]).toEqual(["2"]);
+                        });
+                    });
+
+                    describe("if the object is not connected to any node", function() {
+
+                        it("should call console.error", function() {
+                            expect(treeMap.lines["0"]).toEqual(["2", "3"]);
+                            treeMap.unmapLine("0");
+                            expect(treeMap.lines["0"]).toEqual(["2", "3"]);
+                            expect(consoleErrorSpy).toHaveBeenCalled();
+                        });
+                    });
+
+                    it("should pass an integration test that unmaps every line from its nodes", function() {
+                        const treeMap = createTreeMap(rawTreeCopy);
+                        expect(treeMap.lines).not.toEqual({});
+                        Object.keys(rawTreeCopy).forEach(key => {
+                            treeMap.unmapLine(key);
+                        });
+                        expect(treeMap.lines).toEqual({});
+                    });
+                });
+            });
+        });
+        //good
+        describe("createTree()", function() {
+
+            it("should format all 'longitude' and 'latitude' property values into numbers if they are strings", function() {
+                let tree = {
+                    "0": {
+                        object: "house",
+                        longitude: "50",
+                        latitude: "50"
+                    },
+                };
+                tree = createTree(tree);
+                expect(tree.tree["0"].longitude).toEqual(50);
+                expect(tree.tree["0"].latitude).toEqual(50);
+            });
+
+            it("should pass an integration test that converts all 'longitude' and 'latitude' property values into numbers", function() {
+                Object.keys(rawTreeCopy).forEach(key => {
+                    ["longitude", "latitude"].forEach(prop => {
+                        if (rawTreeCopy[key][prop] != null) {
+                            expect(parseFloat(rawTreeCopy[key][prop])).toEqual(testTree.tree[key][prop]);
+                        }
+                    });
+                });
+            });
+        });
+
+        describe("treePrototype", function() {
+            //good
+            describe("getObject()", function() {
+
+                it("should throw an exception if the key doesn't exist in the tree", function() {
+                    const tree = createTree();
+                    expect(function() {
+                        tree.getObject("100");
+                    }).toThrowError(`getObject() failed. The object with the key "100" does not exist in the Tree.`)
+                });
+
+                it("should return an object in the tree", function() {
+                    let tree = {
+                        "0": {}
+                    };
+                    tree = createTree(tree);
+                    expect(tree.getObject("0")).toBe(tree.tree["0"]);
+                });
+            });
+            //good
+            describe("insert()", function() {
+
+                describe("if the TreeObject does not match a corresponding tree object in the tree", function() {
+
+                    it(`should add the data of the TreeObject argument to this Tree`, function() {
+                        const map = {
+                            "parent": "house172645", 
+                            "name": "waterheater444555666", 
+                            "object": "waterheater", 
+                            "longitude": 233.258917459014, 
+                            "latitude": 800.489571934734, 
+                        }
+                        const tree = createTree();
+                        const tObj = createTreeObject(map, tree);
+                        expect(Object.keys(tree.tree).length).toEqual(0);
+                        tree.insert(tObj);
+                        expect(Object.keys(tree.tree).length).toEqual(1);
+                        expect(tree.tree["0"]).toBe(tObj.data);
+                    });
+                });
+    
+                describe(`if a tree object with an identical key to the TreeObject already exists
+                in this TreeWrapper`, function() {
+
+                    it(`should overwrite the tree object data with data from the TreeObject`, function() {
+                        let tree = {
+                            "0": {
+                                object: "node",
+                                name: "node0"
+                            }
+                        };
+                        tree = createTree(tree);
+                        const tObject = createTreeObject("0", tree);
+                        const map = {
+                            object: "house",
+                            name: "house57" 
+                        };
+                        tObject.data = map;
+                        tree.insert(tObject);
+                        expect(tree.tree["0"]).toBe(tObject.data);
+                    });
+                });
+    
+                /*
+                xdescribe("if the TreeObject represents a node", function() {
+
+                    it(`should return a TreeWrapper that contains 1) the tree object represented by the TreeObject argument
+                    2) the parent of the tree object (if one exists) 3) the direct children of the tree object (if they exist)
+                    4) lines that are connected to the tree object (if there are any) 5) nodes on the other ends of lines that
+                    are connected to the tree object (if there are connected lines)`, function() {
+                        const keys = [node3Line1End, node3Line1EndChild1, node3Line1EndChild2, node3Line1EndChild3, node3Line1, node3];
+                        const tObj = createTreeObject(node3Line1End, testTreeWrapper);
+                        const subWrapper = testTreeWrapper.insert(tObj);
+                        for (let key of keys) {
+                            expect(subWrapper.tree[key]).toBe(testTreeWrapper.tree[key]);
+                            expect(subWrapper.names[subWrapper.tree[key].name]).toEqual(testTreeWrapper.names[testTreeWrapper.tree[key].name]);
+                        }
+                        expect(Object.keys(subWrapper.tree).length).toEqual(keys.length);
+                        expect(Object.keys(subWrapper.names).length).toEqual(keys.length);
+                    });
+                });
+
+                xdescribe("if the TreeObject represents a line", function() {
+
+                    it(`should return a TreeWrapper that contains the line and the nodes on either end of
+                    the line`, function() {
+                        const keys = [node3Line1, node3Line1End, node3]
+                        const tObj = createTreeObject(node3Line1, testTreeWrapper);
+                        const subWrapper = testTreeWrapper.insert(tObj);
+                        for (let key of keys) {
+                            expect(subWrapper.tree[key]).toBe(testTreeWrapper.tree[key]);
+                            expect(subWrapper.names[subWrapper.tree[key].name]).toEqual(testTreeWrapper.names[testTreeWrapper.tree[key].name]);
+                        }
+                        expect(Object.keys(subWrapper.tree).length).toEqual(keys.length);
+                        expect(Object.keys(subWrapper.names).length).toEqual(keys.length);
+                    });
+                });
+                */
+            });
+            //good
+            describe("isDeletable()", function() {
+
+                let tree;
+
+                beforeEach(function() {
+                    tree = {
+                        "0": {//parent
+                            object: "node",
+                            name: "node0"
+                        },
+                        "1": {//child
+                            object: "house",
+                            name: "house1",
+                            parent: "node0"
+                        },
+                        "2": {//independent node
+                            object: "node",
+                            name: "node2"
+                        },
+                        "3": {//independent node
+                            object: "node",
+                            name: "node3"
+                        },
+                        "4": {//line
+                            object: "line",
+                            name: "line4",
+                            from: "node2",
+                            to: "node3"
+                        },
+                        "5": {//child
+                            object: "recorder",
+                            name: "recorder5",
+                            parent: "line4"
+                        },
+                        "6": {//line
+                            object: "line",
+                            name: "line6",
+                            from: "node3",
+                            to: "node2"
+                        }
+                    };
+                    tree = createTree(tree);
+                });
+
+                it("should return false if the tree object has children", function() {
+                    expect(tree.isDeletable("0")).toBe(false);
+                    expect(tree.isDeletable("4")).toBe(false);
+                });
+
+                it("should return false if the tree object has connected lines", function() {
+                    expect(tree.isDeletable("2")).toBe(false);
+                    expect(tree.isDeletable("3")).toBe(false);
+                });
+
+                it("should return true if the tree object has neither connected lines nor children", function() {
+                    expect(tree.isDeletable("1")).toBe(true);
+                    expect(tree.isDeletable("6")).toBe(true);
+                });
+            });
+            //good 
+            describe("getSubtreeToDelete()", function() {
+
+                describe("if the tree object has connected lines and/or children", function() {
+
+                    it("it should return the keys of 1) lines that connect to this object 2) children of this object 3) children of children and any lines that connect to any children", function() { 
+                        const keysToDelete = [
+                            node3Line1EndChild1,
+                            node3Line1EndChild2,
+                            node3Line1EndChild3,
+                            node3Line1,
+                            funkyLine1,
+                            funkyLine2,
+                            node3Line1EndChild1Child1,
+                            node3Line1EndChild1Child2,
+                            node3Line1EndChild2Child1,
+                            childOfLine,
+                        ];
+                        const keys = testTree.getSubtreeToDelete(node3Line1End).sort();
+                        console.log(keys);
+                        expect(keys).toEqual(keysToDelete.sort());
+                    });
+
+                    it(`should not recurse infinitely if a cycle exists in the graph`, function() {
+                        let tree = {
+                            "1": {
+                                "parent": "node226",
+                                "name": "node134", 
+                                "object": "triplex_meter", 
+                                "longitude": 110.54543561193137, 
+                                "latitude": 650.800448635241
+                            }, 
+                            "2": {
+                                "parent": "node134", 
+                                "name": "node226", 
+                                "object": "ZIPload", 
+                                "longitude": 93.65197702537034, 
+                                "latitude": 1011.8227442648296, 
+                            },
+                            "3": {
+                                "name": "whatever"
+                            }
+                        };
+                        tree = createTree(tree);
+                        expect(tree.getSubtreeToDelete("1")).toEqual(["2", "1"]);
+                    });
+                });
+                
+                describe("if the tree object with the passed key argument is a line", function() {
+
+                    it("should return children of the line", function() {
+
+                    });
+                    /*
+                    it(`should return an empty TreeWrapper`, function() {
+                        const emptyWrapper = createTreeWrapper();
+                        const subWrapper = testTreeWrapper.getSubtreeToDelete(funkyLine1, []);
+                        expect(subWrapper).toEqual(emptyWrapper);
+                    });
+                    */
+                });
+            });
+        });
+        //good
+        describe("createTreeObject()", function() {
+
+            describe("if invoked with (key, tree) arguments", function() {
+
+                it("should return a TreeObject with the passed key", function() {
+                    let tree = {
+                        1010: {
+                            prop: "custom value"
+                        }
+                    };
+                    tree = createTree(tree); 
+                    const tObj = createTreeObject("1010", tree);
+                    expect(tObj.key).toEqual("1010");
+                });
+
+                it("should return a TreeObject with data that is equivalent to the tree object, but not the same object", function() {
+                    let tree = {
+                        1010: {
+                            prop: "custom value",
+                            longitude: 50.1,
+                            latitude: .77
+                        }
+                    };
+                    tree = createTree(tree);
+                    const tObj = createTreeObject("1010", tree);
+                    expect(tObj.data).not.toBe(tree.tree[tObj.key]);
+                    expect(tObj.data).toEqual(tree.tree[tObj.key]);
+                });
+
+                it("should throw an error if the key argument doesn't exist in the treeWrapper argument", function() {
+                    expect(function() {
+                        createTreeObject("10", createTree());
+                    }).toThrowError(`TreeObject creation failed. The key: "10" needed to create the TreeObject does not exist in this Tree.`);
+                });
+
+                it("should throw an error if the key argument is not a string", function() {
+                    expect(function() {
+                        createTreeObject(10, createTree());
+                    }).toThrowError("TreeObject creation failed. The 'input' argument must be a string or an object."); 
+                });
+
+                it("should throw an error if the tree object has a string value stored at its 'longitude' or 'latitude' property",
+                function() {
+                    const tree = createTree();
+                    tree.tree["0"] = {
+                        object: "node",
+                        longitude: "50",
+                        latitude: "50"
+                    }
+                    expect(function() {
+                        createTreeObject("0", tree);
+                    }).toThrowError(`TreeObject creation failed. The tree object with key: "0" has a string value for its "longitude" property.`);
+                });
+            });
+
+            describe("if invoked with (map, tree) arguments", function() {
+
+                describe("if the map has 'longitude' and 'latitude' properties", function() {
+
+                    it("should set the 'longitude' and 'latitude' to be numbers if they are strings", function() {
+                        const map = {
+                            object: "node",
+                            longitude: "50",
+                            latitude: "50"
+                        };
+                        const tObject = createTreeObject(map, createTree());
+                        expect(tObject.data.longitude).toEqual(50);
+                        expect(tObject.data.latitude).toEqual(50);
+                    });
+                });
+
+                it("should return a TreeObject with data that is equivalent to the map, but not the same object", function() {
+                    const map = {
+                        prop: "cool value"
+                    }
+                    const tObj = createTreeObject(map, createTree());
+                    expect(tObj.data).not.toBe(map);
+                    expect(tObj.data).toEqual(map);
+                });
+
+                it("should return a TreeObject with a key that does not exist in the treeWrapper.tree", function() {
+                    let tree = {
+                        0: {}
+                    };
+                    tree = createTree(tree);
+                    const tObj = createTreeObject({}, tree);
+                    expect(tObj.key).toEqual("1");
+                });
+
+                it("should call getNewTreeKey()", function() {
+                    const spy = spyOn(window, "getNewTreeKey").and.callThrough();
+                    const tree = createTree();
+                    expect(spy).not.toHaveBeenCalled();
+                    createTreeObject({}, tree);
+                    expect(spy).toHaveBeenCalled();
+                });
+
+                it(`should set the 'name' property to be a concatenation of the 'object' property and the id, if
+                this TreeObject has a 'name' property`, function() {
+                    const map = {
+                        object: "Austin",
+                        name: "XXX"
+                    };
+                    const tObject = createTreeObject(map, createTree());
+                    expect(tObject.data.name).toEqual("Austin0");
+                });
+            });
         });
 
         /**
@@ -823,101 +1479,20 @@ describe("Unit tests", function() {
             });
 
             it("should return a TreeWrapper with a 'tree' property that is identical to the passed tree argument", function() {
-                expect(testTreeWrapper.tree).toBe(testTree);
+                expect(testTreeWrapper.tree).toBe(rawTreeCopy);
             });
 
             /*
             it(`should return a TreeWrapper with a 'names' property that was created with mapNames()`, function() {
                 const spy = spyOn(treeWrapperPrototype, "mapNames").and.callThrough();
-                newTreeWrapper = createTreeWrapper(testTree);
+                newTreeWrapper = createTreeWrapper(rawTreeCopy);
                 expect(newTreeWrapper.names).toBeDefined();
                 expect(spy).toHaveBeenCalled();
             });
             */
         });
 
-        xdescribe("createTreeObject()", function() {
 
-            xdescribe("if invoked with (key, treeWrapper) arguments", function() {
-
-                it("should return a TreeObject with the passed key", function() {
-                    const tree = {
-                        1010: {
-                            prop: "custom value"
-                        },
-                        2020: {
-                            prop: "different value"
-                        }
-                    };
-                    const treeWrapper = createTreeWrapper(tree);
-                    const tObj = createTreeObject("1010", treeWrapper);
-                    expect(tObj.key).toEqual("1010");
-                });
-
-                it("should return a TreeObject with data that is equivalent to the tree object, but not the same object", function() {
-                    const tree = {
-                        1010: {
-                            prop: "custom value"
-                        },
-                        2020: {
-                            prop: "different value"
-                        }
-                    };
-                    const treeWrapper = createTreeWrapper(tree);
-                    const tObj = createTreeObject("1010", treeWrapper);
-                    expect(tObj.data).not.toBe(treeWrapper.tree[tObj.key]);
-                    expect(tObj.data).toEqual(treeWrapper.tree["1010"]);
-                });
-
-                it("should throw an error if the key argument doesn't exist in the treeWrapper argument", function() {
-                    expect(function() {
-                        createTreeObject("10", createTreeWrapper());
-                    }).toThrowError(`The passed key argument: "10" to create the TreeObject does not exist in the treeWrapper.tree.`);
-                });
-
-                it("should throw an error if the key argument is not a string", function() {
-                    expect(function() {
-                        createTreeObject(10, createTreeWrapper());
-                    }).toThrowError("Input argument must be a string or an object."); 
-                });
-            });
-
-            xdescribe("if invoked with (map, treeWrapper) arguments", function() {
-
-                it("should return a TreeObject with data that is equivalent to the map, but not the same object", function() {
-                    const map = {
-                        prop: "cool value"
-                    }
-                    const tObj = createTreeObject(map, createTreeWrapper());
-                    expect(tObj.data).not.toBe(map);
-                    expect(tObj.data).toEqual(map);
-                });
-
-                it("should return a TreeObject with a key that does not exist in the treeWrapper.tree", function() {
-                    const tree = {
-                        0: {}
-                    };
-                    const treeWrapper = createTreeWrapper(tree);
-                    const tObj = createTreeObject({}, treeWrapper);
-                    expect(tObj.key).toEqual("1");
-                });
-
-                it("should call getNewTreeKey()", function() {
-                    const spy = spyOn(window, "getNewTreeKey").and.callThrough();
-                    createTreeObject({}, createTreeWrapper());
-                    expect(spy).toHaveBeenCalled();
-                });
-
-                it(`should set the 'name' property to be a concatenation of the 'object' property and the id, if
-                this TreeObject has a 'name' property`, function() {
-                    const map = {
-                        name: "Austin"
-                    };
-                    const tObject = createTreeObject(map, testTreeWrapper);
-                    expect(tObject.data.name).toEqual("Austin" + tObject.key);
-                });
-            });
-        });
 
         xdescribe("Public treeWrapperPrototype methods", function() {
             
@@ -1033,80 +1608,6 @@ describe("Unit tests", function() {
                 });
             });
             //bad
-            xdescribe("insert()", function() {
-
-                xdescribe("if the TreeObject does not exist in the TreeWrapper", function() {
-
-                    it(`should add the data of the TreeObject argument to this TreeWrapper`, function() {
-                        const map = {
-                            "parent": "house172645", 
-                            "name": "waterheater444555666", 
-                            "object": "waterheater", 
-                            "longitude": 233.258917459014, 
-                            "latitude": 800.489571934734, 
-                        }
-                        const tObj = createTreeObject(map, testTreeWrapper);
-                        expect(Object.keys(testTreeWrapper.tree).length).toEqual(35);
-                        expect(Object.keys(testTreeWrapper.names).length).toEqual(33);
-                        testTreeWrapper.insert(tObj);      
-                        expect(Object.keys(testTreeWrapper.tree).length).toEqual(36);
-                        expect(Object.keys(testTreeWrapper.names).length).toEqual(34);
-                    });
-                });
-
-                xdescribe(`if a tree object with an identical key to the TreeObject already exists
-                in this TreeWrapper`, function() {
-
-                    it(`should overwrite the tree object data with data from the TreeObject`, function() {
-                        const tObj = createTreeObject(node1, testTreeWrapper);
-                        tObj.data.object = "blahblahblah";
-                        tObj.data.longitude = "-1000";
-                        tObj.data.latitude = "-1111";
-                        expect(Object.keys(testTreeWrapper.tree).length).toEqual(35);
-                        expect(Object.keys(testTreeWrapper.names).length).toEqual(33);
-                        testTreeWrapper.insert(tObj);
-                        expect(testTreeWrapper.tree[node1]).toBe(tObj.data);
-                        expect(testTreeWrapper.names[testTreeWrapper.tree[node1].name]).toEqual(tObj.key);
-                        expect(Object.keys(testTreeWrapper.tree).length).toEqual(35);
-                        expect(Object.keys(testTreeWrapper.names).length).toEqual(33);
-                    });
-                });
-
-                xdescribe("if the TreeObject represents a node", function() {
-
-                    it(`should return a TreeWrapper that contains 1) the tree object represented by the TreeObject argument
-                    2) the parent of the tree object (if one exists) 3) the direct children of the tree object (if they exist)
-                    4) lines that are connected to the tree object (if there are any) 5) nodes on the other ends of lines that
-                    are connected to the tree object (if there are connected lines)`, function() {
-                        const keys = [node3Line1End, node3Line1EndChild1, node3Line1EndChild2, node3Line1EndChild3, node3Line1, node3];
-                        const tObj = createTreeObject(node3Line1End, testTreeWrapper);
-                        const subWrapper = testTreeWrapper.insert(tObj);
-                        for (let key of keys) {
-                            expect(subWrapper.tree[key]).toBe(testTreeWrapper.tree[key]);
-                            expect(subWrapper.names[subWrapper.tree[key].name]).toEqual(testTreeWrapper.names[testTreeWrapper.tree[key].name]);
-                        }
-                        expect(Object.keys(subWrapper.tree).length).toEqual(keys.length);
-                        expect(Object.keys(subWrapper.names).length).toEqual(keys.length);
-                    });
-                });
-
-                xdescribe("if the TreeObject represents a line", function() {
-
-                    it(`should return a TreeWrapper that contains the line and the nodes on either end of
-                    the line`, function() {
-                        const keys = [node3Line1, node3Line1End, node3]
-                        const tObj = createTreeObject(node3Line1, testTreeWrapper);
-                        const subWrapper = testTreeWrapper.insert(tObj);
-                        for (let key of keys) {
-                            expect(subWrapper.tree[key]).toBe(testTreeWrapper.tree[key]);
-                            expect(subWrapper.names[subWrapper.tree[key].name]).toEqual(testTreeWrapper.names[testTreeWrapper.tree[key].name]);
-                        }
-                        expect(Object.keys(subWrapper.tree).length).toEqual(keys.length);
-                        expect(Object.keys(subWrapper.names).length).toEqual(keys.length);
-                    });
-                });
-            });
-
             xdescribe("insertCoordinates()", function() {
 
                 xdescribe("if an object does not contain 'longitude' and 'latitude' properties", function() {
@@ -2011,7 +2512,7 @@ describe("Unit tests", function() {
             });
         });
     });
-
+    //I shouldn't be testing these!
     xdescribe("Private functions and methods", function() {
 
         xdescribe("Private treeWrapperPrototype methods", function() {
@@ -2065,143 +2566,8 @@ describe("Unit tests", function() {
                     });
                 });
             });
-            /* good: no unit test should rely on external data, like testTreeWrapper. Doesn't test for errors because THIS shouldn't throw errors. */
             //bad
-            xdescribe("mapChild()", function() {
-                // they all should do this right?
-                it("should call contains()", function() {
 
-                });
-
-                let tWrapper; 
-
-                beforeEach(function() {
-                    const tree = {
-                        "0": {
-                            object: "node",
-                            name: "node0"
-                        },
-                        "1": {
-                            object: "childNode",
-                            parent: "node0"
-                        },
-                        "2": {
-                            object: "childNode",
-                            parent: "node0"
-                        }
-                    };
-                    tWrapper = createTreeWrapper(tree);
-                });
-
-                it("should catch errors thrown by getKeyFromName() and call console.error()", function() {
-                    const spy = spyOn(treeWrapperPrototype, "getKeyFromName").and.throwError("test");
-                    const spy2 = spyOn(console, "error");
-                    expect(function() {
-                        tWrapper.mapChild("0");
-                    }).not.toThrowError("test");
-                    expect(spy).toHaveBeenCalled();
-                    expect(spy2).toHaveBeenCalled();
-                });
-
-                xdescribe("if the child tree object with the 'key' argument has a defined 'parent' property", function() {
-
-                    xdescribe(`if the value of the 'parent' property is null`, function() {
-                        
-                        it("should call console.error() and not update this TreeWrapper.children", function() {
-                            const spy = spyOn(console, "error");
-                            const tree = {
-                                "0": {
-                                    object: "node",
-                                    name: null
-                                },
-                                "1": {
-                                    object: "house",
-                                    parent: null
-                                }
-                            };
-                            const tWrapper = createTreeWrapper(tree);
-                            tWrapper.mapChild("1");
-                            expect(spy).toHaveBeenCalled();
-                        });
-                    });
-
-                    xdescribe("if the value of the 'parent' property is 'null' in any case", function() {
-
-                        it("should call console.error() and not update this TreeWrapper.children", function() {
-
-                        });
-                    });
-
-                    xdescribe("if the value of the 'parent' property is 'undefined' in any case", function() {
-
-                        it("should call console.error() and not update this TreeWrapper.children", function() {
-
-                        });
-                    });
-
-                    xdescribe("if the parent tree object hasn't had any children added to its array yet", function() {
-
-                        it("should store an array containing the child key at the parent key", function() {
-                            expect(tWrapper.children["0"]).toBeUndefined();
-                            tWrapper.mapChild("1");
-                            expect(tWrapper.children["0"]).toEqual(["1"]);
-                        });
-                    });
-
-                    xdescribe("if the parent tree object already has had children added to its array", function() {
-
-                        xdescribe("if child key already exists in the parent's array", function() {
-
-                            it("should not push the key of the child onto the parent's array", function() {
-                                expect(tWrapper.children["0"]).toBeUndefined();
-                                tWrapper.mapChild("1");
-                                expect(tWrapper.children["0"]).toEqual(["1"]); 
-                                tWrapper.mapChild("1");
-                                expect(tWrapper.children["0"]).toEqual(["1"]); 
-                            });
-                        });
-
-                        xdescribe("if the child key does not exist in the parent's array", function() {
-
-                            it("should push the key of the child onto the parent's array", function() {
-                                expect(tWrapper.children["0"]).toBeUndefined();
-                                tWrapper.mapChild("1");
-                                expect(tWrapper.children["0"]).toEqual(["1"]);
-                                tWrapper.mapChild("2");
-                                expect(tWrapper.children["0"]).toEqual(["1", "2"]);
-                            });
-                        });
-                    });
-                });
-
-                it("should pass an integration test", function() {
-                    const children = {};
-                    Object.keys(testTreeWrapper.tree).forEach(childKey => {
-                        Object.keys(testTreeWrapper.tree).forEach(parentKey => {
-                            testTreeWrapper.mapChild(childKey);
-                        });
-                    });
-                    /*
-                    const children = testTreeWrapper.buildChildren();
-                    const children2 = {};
-                    Object.keys(testTreeWrapper.tree).forEach(parentKey => {
-                        const childKeys = Object.keys(testTreeWrapper.tree).filter(childKey => {
-                            if (testTreeWrapper.tree[parentKey].name !== undefined) {
-                                return testTreeWrapper.tree[parentKey].name === testTreeWrapper.tree[childKey].parent;
-                            } else {
-                                return false;
-                            }
-                        });
-                        if (childKeys.length !== 0) {
-                            children2[parentKey] = childKeys;
-                        } else {
-                            children2[parentKey] = null;
-                        }
-                    });
-                    expect(children).toEqual(children2);
-                    */
-                });
-            });
             
             xdescribe("mapNames()", function() {
 
@@ -2611,64 +2977,6 @@ describe("Unit tests", function() {
                 });
             });
 
-            xdescribe(`getSubtreeToDelete()`, function() {
-
-                xdescribe("if the tree object with the passed key argument is a node", function() {
-
-                    it(`should return a TreeWrapper that contains children of children (etc.) and all lines that connect to 
-                    any of those children`, function() { 
-                        const tWrapper = createTreeWrapper();
-                        tWrapper.add(node3Line1EndChild1, testTreeWrapper);
-                        tWrapper.add(node3Line1EndChild2, testTreeWrapper);
-                        tWrapper.add(node3Line1EndChild3, testTreeWrapper);
-                        tWrapper.add(node3Line1, testTreeWrapper);
-                        tWrapper.add(funkyLine1, testTreeWrapper);
-                        tWrapper.add(funkyLine2, testTreeWrapper);
-                        tWrapper.add(node3Line1EndChild1Child1, testTreeWrapper);
-                        tWrapper.add(node3Line1EndChild1Child2, testTreeWrapper);
-                        tWrapper.add(node3Line1EndChild2Child1, testTreeWrapper);
-                        const subWrapper = testTreeWrapper.getSubtreeToDelete(node3Line1End, []);
-                        expect(subWrapper).toEqual(tWrapper);
-                    });
-
-                    it(`should not recurse infinitely if a cycle exists in the graph`, function() {
-                        tree = {
-                            "1": {
-                                "parent": "node226",
-                                "name": "node134", 
-                                "object": "triplex_meter", 
-                                "longitude": 110.54543561193137, 
-                                "latitude": 650.800448635241
-                            }, 
-                            "2": {
-                                "parent": "node134", 
-                                "name": "node226", 
-                                "object": "ZIPload", 
-                                "longitude": 93.65197702537034, 
-                                "latitude": 1011.8227442648296, 
-                            },
-                            "3": {
-                                "name": "whatever"
-                            }
-                        };
-                        const smallWrapper = createTreeWrapper(tree);
-                        const tWrapper = createTreeWrapper();
-                        tWrapper.add("1", smallWrapper);
-                        tWrapper.add("2", smallWrapper);
-                        const subWrapper = tWrapper.getSubtreeToDelete("1", []);
-                        expect(subWrapper).toEqual(tWrapper);
-                    });
-                });
-                
-                xdescribe("if the tree object with the passed key argument is a line", function() {
-
-                    it(`should return an empty TreeWrapper`, function() {
-                        const emptyWrapper = createTreeWrapper();
-                        const subWrapper = testTreeWrapper.getSubtreeToDelete(funkyLine1, []);
-                        expect(subWrapper).toEqual(emptyWrapper);
-                    });
-                });
-            });
             //bad 
             xdescribe("getParentOf()", function() {
 
@@ -3581,7 +3889,7 @@ setTimeout(
         let svg = createDeletableSvgData(gTreeWrapper.tree);
         svg.deleteFrom(gViewport);
         const tWrapper = createTreeWrapper(deepCopy(rawTree));
-        tWrapper.insertCoordinates(0, 0, 5);
+        insertCoordinates(Object.values(tWrapper.tree), 0, 0, 5);
         svg = createAddableSvgData(tWrapper);
         svg.drawTo(gViewport);
         // Hack
@@ -3590,4 +3898,3 @@ setTimeout(
     2000
 );
 //</script>
-//Was at 3317
