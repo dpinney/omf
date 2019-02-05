@@ -35,14 +35,21 @@
 		    display: none;
 		} 
 
-		table { width: 100%; border-spacing: 2px; }
+		table { width: 100%; border-spacing: 2px; table-layout: fixed;  }
 		td,th { 
 			border: 1px;
 			border-style: solid;
 			border-color: black;
 			text-align: center;
 			vertical-align: center;
+			overflow-wrap: break-word
 		 }
+
+		 .tableContainer {max-height: 80%; overflow-y: auto;}
+		 @media print{
+		 	.tableContainer{max-height: none; overflow: visible;}
+		 }
+
 	</style>
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->
@@ -91,6 +98,48 @@
 		    $("." + tabName).show();
 		    //gebi(tabName).style.display = "block";
 		    evt.currentTarget.className += " active";
+		}
+
+		function updateTable(button, pageNumId, tableId, data) {
+				var content = '';
+				gebi(tableId).innerHTML = content
+				numPages = Math.ceil(data.length / 20)
+
+				pageString = gebi(pageNumId).innerHTML;
+				pageString = pageString.split('of');
+				pageNum = parseInt(pageString[0]);
+
+				console.log(button)
+				console.log(pageNum)
+				if (button == 'prev'){
+					if (pageNum > 1) {
+						pageNum--;
+					}
+				}
+				else {//button == 'next'
+					if (pageNum < numPages) {
+						pageNum++;
+					}
+				}
+
+				console.log(pageNum)
+				
+				var start = 21*(pageNum-1);
+
+				for (var i = start; i<start+20; i++) {
+					content = '<td>' + data[i][0] + '</td><td>' + 
+					data[i][1].toFixed(2) + '</td><td>' + 
+					data[i][2].toFixed(2) + '</td><td>' + 
+					data[i][3].toFixed(2) + '&percnt;</td><td>' + 
+					data[i][4] + '</td>';
+					if (data[i][5] == true)
+						content = '<tr style=\"color: red\">' + content + '</tr>';
+					else content = '<tr>' + content + '</tr>';
+					gebi(tableId).innerHTML += content
+				}
+				
+				gebi(pageNumId).innerHTML = pageNum + ' of ' + numPages;
+				
 		}
 
 		function insert_file_upload_block(fileName, dataVariableName) {
@@ -153,7 +202,7 @@
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-voltageDrop" target="blank">Help?</a></label>
+				<label>Model Type <a href="" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
@@ -184,6 +233,12 @@
 					<span class="classic">Name of the added generation in the circuit</span>
 				</label>
 				<input type="text" id="newGeneration" name="newGeneration" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Added System Insolation (W/sf)
+					<span class="classic">Insolation of the added solar generation between 0 and 1000 W per sq ft</span>
+				</label>
+				<input type="text" id="newGenerationInsolation" name="newGenerationInsolation" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Generation Step-up Transformer Name
@@ -278,7 +333,8 @@
 		<p class="reportTitle" style="page-break-before:always">Load Flow Analysis</p>
 
 		<!-- Radio Buttons -->
-		<div class="content"><table style="width: 100%">
+		<div class="content">
+			<table style="width: 100%">
 			<tr>
 				<td style="text-align: left; border: 0px;">
 					Distributed Energy Resource Status:
@@ -291,7 +347,8 @@
 					<label><input class="plotRadios" type="radio" name="loadRadio" value="0" onchange="displayAppropriately()">Minimum</label>
 				</td>
 			</tr>
-		</table></div>
+			</table>
+		</div>
 
 		<!-- Tab links -->
 		<div class="tab">
@@ -400,11 +457,12 @@
 
 		<script type="text/javascript">
 			//show first tab 
-			$(".firstTab").css('display', 'block')
+			$(".firstTab").css('display', 'block');
 		</script>
 
+		<!-- Tables-->
 		<p class="reportTitle" style="page-break-before:always">Maximum and Minimum Voltages</p>
-		<div class="content">
+		<div class="content tableContainer">
 			<table id="minMaxVolts">
 			<tr>
 				<th rowspan="2">DER Status</th>
@@ -493,7 +551,7 @@
 		</div>
 
 		<p class="reportTitle" style="page-break-before:always">Maximum Voltage Flicker when DER is turned off</p>
-		<div class="content">
+		<div class="content tableContainer">
 			<table id="maxVoltFlicker">
 			<tr> <th>Load Condition</th> <th>&percnt;</th> <th>Location</th> </tr>
 			<tr> 
@@ -522,14 +580,24 @@
 		</div>
 
 		<p class="reportTitle" style="page-break-before:always">Voltage Values</p>
-		<div class="content">
-			<table id="voltageViolations">
+		<div class="content tableContainer">
+			<table>
 			<tr> <th>Location</th> <th>Nominal Voltage</th> <th>Voltage Value</th> <th>&percnt; Change</th> <th>DER Status</th> </tr>
 			</table>
+			<table id="voltageViolations"></table>
+			<div style="text-align: center;">
+				<span onclick="updateTable('prev','voltPage','voltageViolations',allOutputData['voltageViolations'])">prev </span>
+				<span id="voltPage"></span>
+				<span onclick="updateTable('next','voltPage','voltageViolations',allOutputData['voltageViolations'])"> next</span>
+			</div>
 			<script type="text/javascript">
 				var voltageViolations = allOutputData['voltageViolations'];
+				//debugger;
 				var content = '';
-				for (var i = 0; i<voltageViolations.length; i++) {
+				numPages = Math.ceil(voltageViolations.length / 20)
+
+				//for (var i = 0; i<voltageViolations.length; i++) {
+				for (var i = 0; i<20; i++) {
 					content = '<td>' + voltageViolations[i][0] + '</td><td>' + 
 					voltageViolations[i][1].toFixed(2) + '</td><td>' + 
 					voltageViolations[i][2].toFixed(2) + '</td><td>' + 
@@ -540,19 +608,22 @@
 					else content = '<tr>' + content + '</tr>';
 					gebi("voltageViolations").innerHTML += content
 				}
+				gebi("voltPage").innerHTML = '1 of ' + numPages;
 			</script> 
+			
 			<span style="color: red">Voltage values non-compliant with ANSI C84.1 Range A Service voltages are displayed in red</span>
 		</div>
 
 		<p class="reportTitle" style="page-break-before:always">Voltage Flicker when DER is turned off</p>
-		<div class="content">
+		<div class="content tableContainer">
 			<table id="flickerViolations">
 			<tr> <th>Location</th> <th>Voltage Flicker</th> <th>Load Condition</th> </tr>
 			</table>
 			<script type="text/javascript">
 				var flickerViolations = allOutputData['flickerViolations'];
 				var content = '';
-				for (var i = 0; i<flickerViolations.length; i++) {
+				//for (var i = 0; i<flickerViolations.length; i++) {
+				for (var i = 0; i<20; i++) {
 					content = '<td>' + flickerViolations[i][0] + '</td><td>' + flickerViolations[i][1].toFixed(2) + '&percnt;</td><td>' + flickerViolations[i][2] + '</td>';
 					if (flickerViolations[i][3] == true)
 						content = '<tr style=\"color: red\">' + content + '</tr>';
@@ -564,14 +635,15 @@
 		</div>
 
 		<p class="reportTitle" style="page-break-before:always">Thermal Loading</p>
-		<div class="content">
+		<div class="content tableContainer">
 			<table id="thermalViolations">
 			<tr> <th>Location</th> <th>Thermal Load</th> <th>DER Status</th> </tr>
 			</table>
 			<script type="text/javascript">
 				var thermalViolations = allOutputData['thermalViolations'];
 				var content = '';
-				for (var i = 0; i<thermalViolations.length; i++) {
+				//for (var i = 0; i<thermalViolations.length; i++) {
+				for (var i = 0; i<20; i++) {
 					content = '<td>' + thermalViolations[i][0] + '</td><td>' + thermalViolations[i][1].toFixed(2) + '&percnt;</td><td>' + thermalViolations[i][2] + '</td>';
 					if (thermalViolations[i][3] == true)
 						content = '<tr style=\"color: red\">' + content + '</tr>';
@@ -583,14 +655,15 @@
 		</div>
 		
 		<p class="reportTitle" style="page-break-before:always">Regulator Power Flow</p>
-		<div class="content">
+		<div class="content tableContainer">
 			<table id="reversePowerFlow">
 			<tr> <th>Location</th> <th>Power</th> <th>DER Status</th> </tr>
 			</table>
 			<script type="text/javascript">
 				var reversePowerFlow = allOutputData['reversePowerFlow'];
 				var content = '';
-				for (var i = 0; i<reversePowerFlow.length; i++) {
+				//for (var i = 0; i<reversePowerFlow.length; i++) {
+				for (var i = 0; i<20; i++) {
 					content = '<td>' + reversePowerFlow[i][0] + '</td><td>' + 
 						reversePowerFlow[i][1].toFixed(2) + '</td><td>' + 
 						reversePowerFlow[i][2] + '</td>';
@@ -604,14 +677,15 @@
 		</div>
 
 		<p class="reportTitle" style="page-break-before:always">Tap Changes</p>
-		<div class="content">
+		<div class="content tableContainer">
 			<table id="tapChanges">
 			<tr> <th>Load Condition</th> <th>Location</th> <th>Tap Position DER On</th> <th>Tap Position DER Off</th> <th>Difference</th> </tr>
 			</table>
 			<script type="text/javascript">
 				var tapViolations = allOutputData['tapViolations'];
 				var content = '';
-				for (var i = 0; i<tapViolations.length; i++) {
+				//for (var i = 0; i<tapViolations.length; i++) {
+				for (var i = 0; i<20; i++) {
 					content = '<td>' + tapViolations[i][0] + '</td><td>' + tapViolations[i][1] + 
 					'</td><td>' + tapViolations[i][2] + '</td><td>' + tapViolations[i][3] + 
 					'</td><td>' + tapViolations[i][4] + '</td>';
@@ -625,7 +699,8 @@
 		</div>
 
 		<p class="reportTitle" style="page-break-before:always">Short Circuit Analysis</p>
-		<div class="content">
+		<div class="content tableContainer">
+			
 			<table id="faultBreaker">
 			<tr> <td style="border: none; text-align: left;" colspan="5">DER Breaker Fault Current</td> </tr>
 			<tr>
@@ -639,7 +714,8 @@
 			<script type="text/javascript">
 				var faultBreaker = allOutputData['faultBreaker'];
 				var content = '';
-				for (var i = 0; i<faultBreaker.length; i++) {
+				//for (var i = 0; i<faultBreaker.length; i++) {
+				for (var i = 0; i<20; i++) {
 					content = '<td>' + faultBreaker[i][0] + '</td><td>' + 
 						faultBreaker[i][1] + '</td><td>' + faultBreaker[i][2] + 
 						'</td><td>' + faultBreaker[i][3] + '</td><td>' + 
@@ -647,7 +723,9 @@
 					content = '<tr>' + content + '</tr>';
 					gebi("faultBreaker").innerHTML += content;
 				}
-			</script> 
+			</script>
+		</div>
+		<div class="content tableContainer">
 			<table id="faultStepUp">
 			<tr> <td style="border: none; text-align: left;" colspan="5">DER Transformer Fault Current</td> </tr>
 			<tr>
@@ -661,7 +739,8 @@
 			<script type="text/javascript">
 				var faultStepUp = allOutputData['faultStepUp'];
 				var content = '';
-				for (var i = 0; i<faultStepUp.length; i++) {
+				//for (var i = 0; i<faultStepUp.length; i++) {
+				for (var i = 0; i<20; i++) {
 					content = '<td>' + faultStepUp[i][0] + '</td><td>' + 
 						faultStepUp[i][1] + '</td><td>' + faultStepUp[i][2] + 
 						'</td><td>' + faultStepUp[i][3] + '</td><td>' + 
@@ -673,14 +752,15 @@
 		</div>
 
 		<p class="reportTitle" style="page-break-before:always">Fault Current Violations with DER On</p>
-		<div class="content">
+		<div class="content tableContainer">
 			<table id="faultCurrentViolations">
 			<tr> <th>Fault Location</th> <th>Fault Type</th> <th>Measurement Location</th> <th>Pre-fault Current</th> <th>Post-fault Current</th> <th>Absolute Difference</th> </tr>
 			</table>
 			<script type="text/javascript">
 				var faultCurrentViolations=allOutputData['faultCurrentViolations'];
 				var content = '';
-				for (var i = 0; i<faultCurrentViolations.length; i++) {
+				//for (var i = 0; i<faultCurrentViolations.length; i++) {
+				for (var i = 0; i<20; i++) {
 					content = '<td>' + faultCurrentViolations[i][0] + '</td><td>' +
 						faultCurrentViolations[i][1] + '</td><td>' + 
 						faultCurrentViolations[i][2] + '</td><td>' + 
@@ -697,7 +777,7 @@
 		</div>
 
 		<p class="reportTitle" style="page-break-before:always">Effective Grounding Screening</p>
-		<div class="content">
+		<div class="content tableContainer">
 			<table id="faultPOIVolts">
 			<tr> <td style="border: none; text-align: left;" colspan="3">Line to Ground Fault at the POI</td> </tr>
 			<tr> <th>DER Status</th> <th>Fault Location</th> <th>Fault Type</th> <th>Pre-fault Voltage</th> <th>Post-fault Voltage</th> <th>Post-fault Percent</th> </tr>
@@ -705,7 +785,8 @@
 			<script type="text/javascript">
 				var faultPOIVolts=allOutputData['faultPOIVolts'];
 				var content = '';
-				for (var i = 0; i<faultPOIVolts.length; i++) {
+				//for (var i = 0; i<faultPOIVolts.length; i++) {
+				for (var i = 0; i<20; i++) {
 					content = '<td>' + faultPOIVolts[i][0] + '</td><td>' +
 						faultPOIVolts[i][1] + '</td><td>' + 
 						faultPOIVolts[i][2] + '</td><td>' + 
