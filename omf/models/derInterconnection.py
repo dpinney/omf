@@ -70,6 +70,8 @@ def work(modelDir, inputDict):
 			edge_bools['switch'] = True
 		if tree[key].get('argument','') == '\"schedules.glm\"' or tree[key].get('tmyfile','') != '':
 			del tree[key]
+
+	print edge_bools
 			
 	# Make sure we have a voltDump:
 	def safeInt(x):
@@ -92,7 +94,6 @@ def work(modelDir, inputDict):
 			}
 
 	if edge_bools['regulator']:
-		#print('here')
 		tree[omf.feeder.getMaxKey(tree) + 1] = {
 			'object':'group_recorder', 
 			'group':'"class=regulator"',
@@ -127,7 +128,6 @@ def work(modelDir, inputDict):
 		starttime = tree[key].get('starttime','')
 		stoptime = tree[key].get('stoptime','')
 		if starttime!='' and stoptime!='':
-			print(obname)
 			startTime = tree[key]['starttime']
 			stopTime = tree[key]['stoptime']
 			break			
@@ -140,6 +140,14 @@ def work(modelDir, inputDict):
 	addedDerInverterKey = nameToIndex[tree[addedDerKey]['parent']]
 	addedBreakKey = nameToIndex[inputDict['newGenerationBreaker']]
 	poi = tree[addedBreakKey]['to']
+
+	# set solar generation to provided insolation value
+	insolation = float(inputDict['newGenerationInsolation'])
+	if insolation > 1000:
+		insolation = 1000
+	elif insolation < 0:
+		insolation = 0
+	tree[addedDerKey]['shading_factor'] = insolation/1000
 	
 	# initialize variables
 	flickerViolations = []
@@ -248,7 +256,7 @@ def work(modelDir, inputDict):
 					violation = (voltVal >= (upperVoltThresh*nominalVoltVal)) or \
 						(voltVal <= (lowerVoltThresh600*nominalVoltVal))
 				else:
-					violaton = (voltVal >= (upperVoltThresh*nominalVoltVal)) or \
+					violation = (voltVal >= (upperVoltThresh*nominalVoltVal)) or \
 						(voltVal <= (lowerVoltThresh*nominalVoltVal))
 				content = [key, nominalVoltVal, voltVal, change, \
 					loadCondition +' Load, DER ' + der,violation]
@@ -264,30 +272,31 @@ def work(modelDir, inputDict):
 					loadCondition+' Load, DER '+der,(thermalVal>=thermalThreshold)]
 				thermalViolations.append(content)
 
-			# check for reverse regulator powerflow
-			for key in tree.keys():
-				obtype = tree[key].get("object","")	
-				obname = tree[key].get("name","")
-				if obtype == 'regulator':
-					powerVal = float(data['edgePower'][obname])
-					content = [obname, powerVal,\
-						loadCondition+' Load, DER '+der,(powerVal<0)]
-					reversePowerFlow.append(content)
+			if edge_bools['regulator']:
+				# check for reverse regulator powerflow
+				for key in tree.keys():
+					obtype = tree[key].get("object","")	
+					obname = tree[key].get("name","")
+					if obtype == 'regulator':
+						powerVal = float(data['edgePower'][obname])
+						content = [obname, powerVal,\
+							loadCondition+' Load, DER '+der,(powerVal<0)]
+						reversePowerFlow.append(content)
 
-			# check for tap_position values and violations
-			if der == 'On':
-				tapPositions = copy.deepcopy(data['tapPositions'])
-			else: # der off
-				for tapType in ['tapA','tapB','tapC']:
-					for key in tapPositions[tapType].keys():
-						# calculate tapPositions
-						tapDerOn = int(tapPositions[tapType][key])
-						tapDerOff = int(data['tapPositions'][tapType][key])
-						tapDifference = abs(tapDerOn-tapDerOff)
-						# check for violations
-						content = [loadCondition, key+' '+tapType, tapDerOn, \
-							tapDerOff,tapDifference, (tapDifference>=tapThreshold)]
-						tapViolations.append(content)
+				# check for tap_position values and violations
+				if der == 'On':
+					tapPositions = copy.deepcopy(data['tapPositions'])
+				else: # der off
+					for tapType in ['tapA','tapB','tapC']:
+						for key in tapPositions[tapType].keys():
+							# calculate tapPositions
+							tapDerOn = int(tapPositions[tapType][key])
+							tapDerOff = int(data['tapPositions'][tapType][key])
+							tapDifference = abs(tapDerOn-tapDerOff)
+							# check for violations
+							content = [loadCondition, key+' '+tapType, tapDerOn, \
+								tapDerOff,tapDifference, (tapDifference>=tapThreshold)]
+							tapViolations.append(content)
 
 			#induce faults and measure fault currents
 			for faultLocation in [inputDict['newGenerationBreaker'],\
@@ -348,7 +357,11 @@ def work(modelDir, inputDict):
 							preFaultval = float(data['edgeCurrentSum'][key])
 							postFaultVal = float(faultCurrents[key])
 							difference = abs(preFaultval-postFaultVal)
-							percentChange = 100*(difference/preFaultval)
+							if preFaultval == 0:
+								percentChange = 0
+							else:
+								percentChange = 100*(difference/preFaultval)
+
 							content = [faultLocation, faultType, key, \
 								preFaultval, postFaultVal, difference, \
 								(percentChange>=faultCurrentThreshold)]
@@ -623,9 +636,10 @@ def runGridlabAndProcessData(tree, attachments, edge_bools, workDir=False):
 
 	# read regulator tap position values values into a single dictionary
 	tapPositions = {}
-	tapPositions['tapA'] = readGroupRecorderCSV(pJoin(workDir,'tap_A.csv'))
-	tapPositions['tapB'] = readGroupRecorderCSV(pJoin(workDir,'tap_B.csv'))
-	tapPositions['tapC'] = readGroupRecorderCSV(pJoin(workDir,'tap_C.csv'))
+	if edge_bools['regulator']:
+		tapPositions['tapA'] = readGroupRecorderCSV(pJoin(workDir,'tap_A.csv'))
+		tapPositions['tapB'] = readGroupRecorderCSV(pJoin(workDir,'tap_B.csv'))
+		tapPositions['tapC'] = readGroupRecorderCSV(pJoin(workDir,'tap_C.csv'))
 
 	return {'nodeNames':nodeNames, 'nominalVolts':nominalVolts, 'nodeVolts':nodeVolts, 'nodeVoltImbalances':voltImbalances, 
 	'edgeTupleNames':edgeTupleNames, 'edgeCurrentSum':edgeCurrentSum, 'edgeCurrentMax':edgeCurrentMax,
@@ -756,7 +770,7 @@ def glmToModel(glmPath, modelDir):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		'feederName1': 'Simple Market Modified DER',
+		'feederName1': 'Olin Barre Geo Modified DER',
 		'modelType': modelName,
 		'runTime': '',
 		'layoutAlgorithm': 'forceDirected',
@@ -769,7 +783,8 @@ def new(modelDir):
 		'minLoadData': '',
 		'tapThreshold': '6',
 		'faultCurrentThreshold': '10',
-		'faultVoltsThreshold': '138'
+		'faultVoltsThreshold': '138',
+		'newGenerationInsolation': '10'
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
