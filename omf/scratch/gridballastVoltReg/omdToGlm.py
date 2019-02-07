@@ -53,16 +53,16 @@ def ConvertAndwork(filePath, gb_on_off='on'):
 				value['object'] = 'meter'
 
 
-		collectorwat=("object collector {\n\tname collector_Waterheater;\n\tgroup class=waterheater;\n\tproperty sum(actual_load);\n\tinterval "+str(interval)+";\n\tfile measured_load_waterheaters.csv;\n};\n")
-		collectorz=("object collector {\n\tname collector_ZIPloads;\n\tgroup class=ZIPload;\n\tproperty sum(base_power);\n\tinterval "+str(interval)+";\n\tfile measured_load_ziploads.csv;\n};\n")
-		collectorh=("object collector {\n\tname collector_HVAC;\n\tgroup class=house;\n\tproperty sum(heating_demand), sum(cooling_demand);\n\tinterval "+str(interval)+";\n\tfile measured_HVAC.csv;\n};\n")
-		recordersub=("object recorder {\n\tinterval "+str(interval)+";\n\tproperty measured_real_power;\n\tfile measured_substation_power.csv;\n\tparent "+str(substation)+";\n\t};\n")
+		collectorwat=("object collector {\n\tname collector_Waterheater;\n\tgroup class=waterheater;\n\tproperty sum(actual_load);\n\tinterval "+str(interval)+";\n\tfile out_load_waterheaters.csv;\n};\n")
+		collectorz=("object collector {\n\tname collector_ZIPloads;\n\tgroup class=ZIPload;\n\tproperty sum(base_power);\n\tinterval "+str(interval)+";\n\tfile out_load_ziploads.csv;\n};\n")
+		collectorh=("object collector {\n\tname collector_HVAC;\n\tgroup class=house;\n\tproperty sum(heating_demand), sum(cooling_demand);\n\tinterval "+str(interval)+";\n\tfile out_load_HVAC.csv;\n};\n")
+		recordersub=("object recorder {\n\tinterval "+str(interval)+";\n\tproperty measured_real_power;\n\tfile out_substation_power.csv;\n\tparent "+str(substation)+";\n\t};\n")
 		recorders = []
 		recorderw=[]
 		for i in range(len(solar_meters)):
-			recorders.append(("object recorder {\n\tinterval "+str(interval)+";\n\tproperty measured_real_power;\n\tfile measured_solar_"+str(i)+".csv;\n\tparent "+str(solar_meters[i])+";\n\t};\n"))
+			recorders.append(("object recorder {\n\tinterval "+str(interval)+";\n\tproperty measured_real_power;\n\tfile out_solar_gen_"+str(i)+".csv;\n\tparent "+str(solar_meters[i])+";\n\t};\n"))
 		for i in range(len(wind_obs)):
-			recorderw.append(("object recorder {\n\tinterval "+str(interval)+";\n\tproperty Pconv;\n\tfile measured_wind_"+str(i)+".csv;\n\tparent "+str(wind_obs[i])+";\n\t};\n"))
+			recorderw.append(("object recorder {\n\tinterval "+str(interval)+";\n\tproperty Pconv;\n\tfile out_wind_gen"+str(i)+".csv;\n\tparent "+str(wind_obs[i])+";\n\t};\n"))
 
 	with open('outGLM.glm', "w") as outFile:
 		addedString = collectorwat+collectorz+collectorh+recordersub
@@ -130,17 +130,17 @@ def ListOffenders(name_volt_dict):
 def writeResults(offendersGen):
 	#Write powerflow results for generation and waterheater, zipload, and hvac (house) load objects
 	#need to fix up testing for if file exsists based upon name written
-	substation = pd.read_csv(('measured_substation_power.csv'), comment='#', names=['timestamp', 'measured_real_power'])
+	substation = pd.read_csv(('out_substation_power.csv'), comment='#', names=['timestamp', 'measured_real_power'])
 	substation_power = substation['measured_real_power'][0]
-	solar1 =  pd.read_csv(('measured_solar_0.csv'), comment='#', names=['timestamp', 'measured_real_power'])
+	solar1 =  pd.read_csv(('out_solar_gen_0.csv'), comment='#', names=['timestamp', 'measured_real_power'])
 	solar1_power = solar1['measured_real_power'][0]
-	solar2 =  pd.read_csv(('measured_solar_1.csv'), comment='#', names=['timestamp', 'measured_real_power'])
+	solar2 =  pd.read_csv(('out_solar_gen_1.csv'), comment='#', names=['timestamp', 'measured_real_power'])
 	solar2_power = solar2['measured_real_power'][0]
-	ziploads =  pd.read_csv(('measured_load_ziploads.csv'), comment='#', names=['timestamp', 'measured_real_power'])
+	ziploads =  pd.read_csv(('out_load_ziploads.csv'), comment='#', names=['timestamp', 'measured_real_power'])
 	zipload_power = ziploads['measured_real_power'][0]
-	waterheaters = pd.read_csv(('measured_load_waterheaters.csv'), comment='#', names=['timestamp', 'measured_real_power'])
+	waterheaters = pd.read_csv(('out_load_waterheaters.csv'), comment='#', names=['timestamp', 'measured_real_power'])
 	waterheater_power = waterheaters['measured_real_power'][0]
-	HVAC = pd.read_csv(('measured_HVAC.csv'), comment='#', names=['timestamp', 'heating_power', 'cooling_power'])
+	HVAC = pd.read_csv(('out_load_HVAC.csv'), comment='#', names=['timestamp', 'heating_power', 'cooling_power'])
 	HVAC_power = HVAC['heating_power'][0], HVAC['cooling_power'][0]
 	if os.path.isfile('measured_wind_0'):
 		wind = pd.read_csv(('measured_wind_0.csv'), comment='#', names=['timestamp', 'Pconv'])
@@ -177,9 +177,9 @@ def _debugging(filePath, gb_on_off='on'):
 	offendersGen = ListOffenders(name_volt_dict)
 	writeResults(offendersGen)
 	# Open Distnetviz on glm
-	omf.distNetViz.viz('outGLMtest.glm') #or model.omd
+	omf.distNetViz.viz('outGLM.glm') #or model.omd
 	# Visualize Voltage Regulation
-	chart = voltageRegVisual.voltRegViz(filePath)
+	chart = voltageRegVisual.voltRegViz('outGLM.glm')
 	# Remove Feeder
 	os.remove('outGLM.glm')
 if __name__ == '__main__':
@@ -194,7 +194,7 @@ if __name__ == '__main__':
 		gb_on_off = args.gridballast_on_off
 		_debugging(filePath, gb_on_off)
 	except:
-		_debugging('/Users/tuomastalvitie/Desktop/gridballast_gld_simulations/Feeders/UCS_Egan_Housed_Solar.omd', gb_on_off='on')
+		_debugging('/Users/tuomastalvitie/Desktop/gridballast_gld_simulations/Feeders/UCS_Egan_Housed_Solar.omd', gb_on_off='off')
 
 
 
