@@ -1053,10 +1053,9 @@ const thisOwner = "{% if thisOwner %}{{ thisOwner | safe }}{% else %}null{% endi
 const publicFeeders = {% if publicFeeders %}{{ publicFeeders | safe }}{% else %}null{% endif %};
 const userFeeders = {% if userFeeders %}{{ userFeeders | safe }}{% else %}null{% endif %}; 
 const writeFeeder = deepCopy(readFeeder);
-// The global TreeWrapper can only be created after the entire file has been parsed.
-let gSelection;
-let gTreeWrapper; 
+// The global gTree can only be created after the entire file has been parsed.
 let gTree;
+let gSelection;
 let gViewport; 
 let gOffsetX;
 let gOffsetY;
@@ -1071,17 +1070,12 @@ let gScaleLevel = 1.0;
 // Selection Interface
 //**************************************************
 
-/**
- * TODO: add unit tests
- */
 const selectionPrototype = {
 
     /* Public methods */
 
     hasId(id) {
-        if (this.selectedElements.find(e => e.id === id) != null) {
-            return true;
-        }
+        if (this.selectedElements.find(e => e.id === id) != null) return true;
         return false;
     },
     remove(element) {
@@ -1114,14 +1108,6 @@ const selectionPrototype = {
         return this.selectedElements.map(element => {
             return element.id;
         });
-    },
-    //delete this eventually
-    getWrapper() {
-        const tWrapper = createTreeWrapper();
-        this.selectedElements.forEach(e => {
-            tWrapper.add(e.id, gTreeWrapper);            
-        });
-        return tWrapper;
     },
 }
 
@@ -1298,12 +1284,12 @@ function handleSelection(event) {
 //	}
 //}
 
+/**
+ * Scale the thickness of all lines and size of all circles. This helps user see details.
+ * @param {number} x
+ */
 function scaleTo(x) {
-	// Scale the thickness of all lines and size of all circles. This helps user see details.
     gScaleLevel = x;
-    if (!isNumberString(String(x))) {
-        throw new Error("Invalid scale value!");
-    }
 	const circles = document.getElementsByTagName('circle')
 	const lines = document.getElementsByTagName('line')
 	// Scale Circles
@@ -1375,7 +1361,7 @@ function clickLatLon(event) {
  * TODO: add unit tests
  */
 function getSearchResults() {
-    const tree = gTreeWrapper.tree;
+    const tree = gTree.tree;
     const keys = getMatchingKeys(this.value.trim(), tree);
     document.getElementById("searchCount").textContent = `hits: ${keys.length}`;
     const nextButton = document.getElementById("findNext");
@@ -1519,15 +1505,6 @@ function attachHandlers() {
     addEditMenuHandlers();
 }
 
-// delete this eventually
-function drawDirtyTreeWrapper(tWrapper) {
-    createSvgData(Object.keys(tWrapper.tree)).draw(gViewport);
-    //Object.keys(tWrapper.tree).forEach(key => {
-    //    tWrapper.merge(gTreeWrapper.getSubtreeToRedraw(key));
-    //});
-    //createAddableSvgData(tWrapper).drawTo(gViewport);
-}
-
 //delete this eventually
 function insertIndependentComponent(component) {
     alert("Please click a location on the graph to insert this component.");
@@ -1535,104 +1512,99 @@ function insertIndependentComponent(component) {
     svgContainer.setAttribute("style", "cursor: crosshair");
     svgContainer.onclick = function(event) {
         if (detectDrag(event)) return;
-        const tObject = createTreeObject(component, gTreeWrapper);
+        const tObject = createTreeObject(component, gTree);
         insertCoordinates([tObject.data], 0, 0, 0);
         getMoveNodesFunction([tObject.data])(event);
-        gTreeWrapper.dirtyInsert(tObject);
-        const newWrapper = createTreeWrapper();
-        newWrapper.add(tObject.key, gTreeWrapper);
-        drawDirtyTreeWrapper(newWrapper);
+        gTree.insert(tObject);
+        createSvgData([tObject.key]).draw(gViewport);
     }
 }
 
 //delete this eventually
-function insertChildComponent(component) {
+function insertChildComponent(keys, component) {
     const svgContainer = document.getElementById("svgContainer");
-    const selection = Object.values(gSelection.getWrapper().tree);
-    if (selection.length === 0) {
-        alert("Please click on another circle that is not a configuration node to add this component as a child.");
+    if (keys.length === 0) {
+        alert("Please click on another circle/line object that is not a configuration node to add this component as a child.");
         svgContainer.setAttribute("style", "cursor: crosshair");
         svgContainer.onclick = function(event) {
             if (detectDrag(event)) return;
             event.stopPropagation();
-            svgContainer.onclick = null;
-            svgContainer.setAttribute("style", "cursor: default");
-            const parent = gTreeWrapper.tree[event.target.id];
-            if (parent != null && (getType(parent) === "childNode" || getType(parent) === "independentNode")) {
-                const tObject = createTreeObject(component, gTreeWrapper);
-                tObject.setupChildNode(parent);
-                gTreeWrapper.dirtyInsert(tObject);
-                const newWrapper = createTreeWrapper();
-                newWrapper.add(tObject.key, gTreeWrapper);
-                drawDirtyTreeWrapper(newWrapper);
-            } else {
-                alert("Insertion failed. You clicked on an invalid object.");
+            detachListener();
+            let parent;
+            try {
+                parent = gTree.getObject(event.target.id);
+                if (parent != null && getType(parent) !== "configurationNode") {
+                    const tObject = createTreeObject(component, gTree);
+                    tObject.setupChildNode(event.target.id);
+                    gTree.insert(tObject);
+                    createSvgData([tObject.key]).draw(gViewport);
+                } else {
+                    alert("Insertion failed. You clicked on a configuration node.");
+                }
+            } catch (e) {
+                alert("Insertion failed. You click on an invalid object");
             }
         }
     } else {
-        const tWrapper = createTreeWrapper();
-        selection.forEach(parent => {
-            const tObject = createTreeObject(component, gTreeWrapper);
-            tObject.setupChildNode(parent);
-            gTreeWrapper.dirtyInsert(tObject);
-            tWrapper.add(tObject.key, gTreeWrapper);
+        const newObjects = [];
+        keys.forEach(key => {
+            const tObject = createTreeObject(component, gTree);
+            tObject.setupChildNode(key);
+            gTree.insert(tObject);
+            newObjects.push(tObject.key);
         });
-        drawDirtyTreeWrapper(tWrapper);
+        createSvgData(newObjects).draw(gViewport); 
     }
 }
 
 // delete this eventually
-function insertLineComponent(component) {
+function insertLineComponent(keys, component) {
     const svgContainer = document.getElementById("svgContainer");
-    const selection = Object.values(gSelection.getWrapper().tree);
-    if (selection.length === 0) {
+    if (keys.length === 0) {
         alert("Please click on two circles that are not configuration nodes to add this line.");
         const nodes = [];
         svgContainer.setAttribute("style", "cursor: crosshair");
         svgContainer.onclick = function(event) {
             if (detectDrag(event)) return;
             event.stopPropagation();
-            const node = gTreeWrapper.tree[event.target.id];
-            if (node != null && (getType(node) === "childNode" || getType(node) === "independentNode")) {
-                if (!gSelection.hasId(event.target.id)) {
-                    gSelection.add(event.target);
-                    nodes.push(node);
+            try {
+                const node = gTree.getObject(event.target.id);
+                const type = getType(node);
+                if (type === "childNode" || type === "independentNode") {
+                    if (!gSelection.hasId(event.target.id)) {
+                        gSelection.add(event.target);
+                        nodes.push(event.target.id);
+                    }
+                } else {
+                    alert(`You clicked on a "${type}" type object. Please click on a circle that is not a configuration node.`);
+                    return;
                 }
-            } else {
-                alert("Insertion failed. You clicked on an invalid object.");
-                gSelection.empty();
-                svgContainer.onclick = null;
-                svgContainer.setAttribute("style", "cursor: default");
+            } catch (e) {
+                alert(`You clicked on an invalid object. Please click on a circle that is not a configuration node.`);
                 return;
             }
             if (nodes.length === 2) {
-                const tObject = createTreeObject(component, gTreeWrapper);
+                const tObject = createTreeObject(component, gTree);
                 tObject.setupLine(nodes[0], nodes[1]);
-                gTreeWrapper.dirtyInsert(tObject);
-                const newWrapper = createTreeWrapper();
-                newWrapper.add(tObject.key, gTreeWrapper);
-                drawDirtyTreeWrapper(newWrapper);
-                svgContainer.onclick = null;
-                svgContainer.setAttribute("style", "cursor: default");
+                gTree.insert(tObject);
+                createSvgData([tObject.key]).draw(gViewport)
+                gSelection.empty();
+                detachListener();
             }
         }
     } else {
-        /* I know the selection is valid and contains only nodes. But I still need the order in which the nodes were clicked! */
-        const nodes = gSelection.selectedElements;
-        const newWrapper = createTreeWrapper();
-        for (let i = 0; i < nodes.length - 1; i++) {
-            let tObject = createTreeObject(component, gTreeWrapper);
-            let source = gTreeWrapper.tree[nodes[i].id];
-            let target = gTreeWrapper.tree[nodes[i + 1].id];
-            tObject.setupLine(source, target);
-            gTreeWrapper.dirtyInsert(tObject);
-            newWrapper.add(tObject.key, gTreeWrapper);
+        const newObjects = [];
+        for (let i = 0; i < keys.length - 1; i++) {
+            let tObject = createTreeObject(component, gTree);
+            tObject.setupLine(keys[i], keys[i + 1]);
+            gTree.insert(tObject);
+            newObjects.push(tObject.key);
         }
-        drawDirtyTreeWrapper(newWrapper);
+        createSvgData(newObjects).draw(gViewport);
     }
 }
 /** 
- * TODO: add unit-tests, add a click listener instead of doing it backwards!
+ * TODO: add a click listener instead of doing it backwards!
  * Fill menu of "Add" button and add its handler functions.
  */
 function attachAddComponentListeners() {
@@ -1653,26 +1625,23 @@ function attachAddComponentListeners() {
             case "independentNode":
             case "configurationNode":
                 li.addEventListener("click", function() {
-                    const selection = Object.values(gSelection.getWrapper().tree);
-                    if (selectionIsValidForAdd(selection, component)) {
+                    if (isValidForAdd(gSelection.getKeys(), component)) {
                         insertIndependentComponent(component);
                     }
                 });
                 break;
             case "childNode":
                 li.addEventListener("click", function() {
-                    const selection = Object.values(gSelection.getWrapper().tree);
-                    if (selectionIsValidForAdd(selection, component)) {
-                        insertChildComponent(component);
+                    if (isValidForAdd(gSelection.getKeys(), component)) {
+                        insertChildComponent(gSelection.getKeys(), component);
                     }
                 });
                 select.innerHTML += `<option value=${key}>${key}</option>`;
                 break;
             case "line":
                 li.addEventListener("click", function() {
-                    const selection = Object.values(gSelection.getWrapper().tree);
-                    if (selectionIsValidForAdd(selection, component)) {
-                        insertLineComponent(component);
+                    if (isValidForAdd(gSelection.getKeys(), component)) {
+                        insertLineComponent(gSelection.getKeys(), component);
                     }
                 });
                 break;
@@ -1788,11 +1757,11 @@ function addEditMenuHandlers() {
         document.getElementById("searchInput").focus(); 
     });
     items[5].addEventListener("click", function() {
-        updateAttachTargets("massAddTargetSelect", gTreeWrapper.tree);
+        updateAttachTargets("massAddTargetSelect", gTree.tree);
         toggleElementDisplay("massAddModal");
     });
     items[6].addEventListener("click", function() {
-        updateAttachTargets("massEditTargetSelect", gTreeWrapper.tree);
+        updateAttachTargets("massEditTargetSelect", gTree.tree);
         toggleElementDisplay("massEditModal");
     });
     items[7].addEventListener("click", function() { toggleElementDisplay("scadaModal"); });
@@ -1881,8 +1850,8 @@ Don't ever replace regular load objects
 
 */
 function staticLoadsToHouses() {
-    const tree = gTreeWrapper.tree;
-    const names = gTreeWrapper.names;
+    const tree = gTree.tree;
+    const names = gTree.treeMap.names;
 	//if (!containsTriplexNodes(tree)) {
 	if (!containsTriplexNodeOrLoad(tree)) {
         alert("There are no triplex nodes or triplex loads in this model.");
@@ -1980,7 +1949,7 @@ function staticLoadsToHouses() {
 		skew = skew.toPrecision(3) * 1.0 + ''
 		newHouse['schedule_skew'] = skew
 		newHouse['thermal_integrity_level'] = randomChoice([1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6]) + ''
-		const newKey = getNewTreeKey(gTreeWrapper.tree);
+		const newKey = getNewTreeKey(gTree.tree);
 		newHouse['name'] = 'synhouse' + newKey
 		return {
             house: newHouse,
@@ -2007,7 +1976,7 @@ function staticLoadsToHouses() {
 		let skew = 2000 * randomGaussian()
 		skew = skew.toPrecision(3) * 1.0 + ''
 		newLights['schedule_skew'] = skew
-		const newKey = getNewTreeKey(gTreeWrapper.tree);
+		const newKey = getNewTreeKey(gTree.tree);
 		newLights['name'] = 'synLights' + newKey
 		return {
             lights: newLights,
@@ -2036,7 +2005,7 @@ function staticLoadsToHouses() {
 		newHeater['schedule_skew'] = skew
 		newHeater['tank_setpoint'] = (randomGaussian() * 2 + 130).toPrecision(3) + ''
 		// between 1100 and 3000. Probably needs a normal distribution.
-		const newKey = getNewTreeKey(gTreeWrapper.tree);
+		const newKey = getNewTreeKey(gTree.tree);
 		newHeater['name'] = 'synwaterheater' + newKey;
 		return {
             heater: newHeater,
@@ -2051,24 +2020,19 @@ function massAdd() {
         alert("Please enter a valid number for attachment probability");
         return;
     }
-    let tree = gTreeWrapper.tree;
 	const componentName = document.getElementById('componentSelect').value;
 	const attachObject = document.getElementById('massAddTargetSelect').value;
-    const newWrapper = createTreeWrapper();
-    let count = 0;
-    Object.keys(gTreeWrapper.tree).forEach(key => {
-        if (gTreeWrapper.tree[key].object === attachObject) {
-            count++;
-            const tObject = createTreeObject(gComponents[componentName], gTreeWrapper);
-            tObject.setupChildNode(gTreeWrapper.tree[key]);
-            gTreeWrapper.dirtyInsert(tObject);
-            newWrapper.add(tObject.key, gTreeWrapper);
-            //newWrapper.merge(gTreeWrapper.getParentOf(tObject.key));
+    const newObjects = [];
+    Object.keys(gTree.tree).forEach(key => {
+        if (gTree.getObject(key).object === attachObject) {
+            const tObject = createTreeObject(gComponents[componentName], gTree);
+            tObject.setupChildNode(gTree.tree[key]);
+            gTree.insert(tObject);
+            newObjects.push(tObject.key);
         }
     });
-    createSvgData(Object.keys(newWrapper.tree)).draw(gViewport);
-    //createAddableSvgData(newWrapper).drawTo(gViewport);
-    alert(`${count} "${componentName}" objects added to the feeder`);
+    createSvgData(newObjects).draw(gViewport);
+    alert(`${newObjects.length} "${componentName}" objects added to the feeder`);
     toggleElementDisplay('massAddModal');
 }
 
@@ -2097,7 +2061,7 @@ function updateAttachTargets(id, tree) {
 
 // keep this, rename it
 function getKeysOfObjectsWithoutNumericValues(keys, attributeKey) {
-    const tree = gTreeWrapper.tree;
+    const tree = gTree.tree;
     invalidKeys = keys.filter(key => {
         let value = tree[key][attributeKey];
         if (typeof value !== "string") {
@@ -2119,12 +2083,12 @@ function massEdit() {
     }
     operation = operation.value;
     const objectType = document.getElementById("massEditTargetSelect").value;
-    const keys = Object.keys(gTreeWrapper.tree).filter(key => gTreeWrapper.tree[key].object === objectType)
+    const keys = Object.keys(gTree.tree).filter(key => gTree.tree[key].object === objectType)
     if (operation === "addAttribute") {
     massAddAttribute(keys, objectType);
         return;
     }
-    const tree = gTreeWrapper.tree;
+    const tree = gTree.tree;
     const attributeKey = document.getElementById("massEditAttribute").value.trim();
     //Make sure the attribute exists
     let invalidKeys = [];
@@ -2188,7 +2152,7 @@ function massAddition(keys, attributeKey, objectType) {
     }
     operand = parseFloat(operand);
     for (let key of keys) {
-        gTreeWrapper.tree[key][attributeKey] = (parseFloat(gTreeWrapper.tree[key][attributeKey]) + operand).toString();
+        gTree.tree[key][attributeKey] = (parseFloat(gTree.tree[key][attributeKey]) + operand).toString();
     }
     alert(`${keys.length} ${objectType} objects had their "${attributeKey}" attribute edited.`);
     toggleElementDisplay('massEditModal');
@@ -2204,7 +2168,7 @@ function massMultiplication(keys, attributeKey, objectType) {
     multiplyOperand = parseFloat(multiplyOperand);
     addOperand = parseFloat(addOperand);
     for (let key of keys) {
-        gTreeWrapper.tree[key][attributeKey] = ((parseFloat(gTreeWrapper.tree[key][attributeKey]) * multiplyOperand) + addOperand).toString();
+        gTree.tree[key][attributeKey] = ((parseFloat(gTree.tree[key][attributeKey]) * multiplyOperand) + addOperand).toString();
     }
     alert(`${keys.length} ${objectType} objects had their "${attributeKey}" attribute edited.`);
     toggleElementDisplay('massEditModal');
@@ -2222,7 +2186,7 @@ function massAddAttribute(keys, objectType) {
     }
     const newValue = document.getElementById("newAttributeValue").value;
     for (let key of keys) {
-        gTreeWrapper.tree[key][newKey] = newValue;
+        gTree.tree[key][newKey] = newValue;
     }
     alert(`${keys.length} ${objectType} objects had the "${newKey}" attribute added.`);
     toggleElementDisplay('massEditModal');
@@ -2523,24 +2487,31 @@ const treeMapPrototype = {
 
     /**
      * good. doesn't need unit tests
+     * @param {Array} keys
      */
-    remove(key) {
-        this.unmapLine(key);
-        this.unmapChild(key);
-        this.unmapName(key);
+    remove(keys) {
+        keys.forEach(key => {
+            this.unmapLine(key);
+            this.unmapChild(key);
+        });
+        keys.forEach(key => {
+            this.unmapName(key);
+        });
     },
 
     /**
      * good. doesn't need unit tests
-     * This should throw an exception. If I provide what I believe is a valid name, I expect to get a key!
+     * This should throw an Error. If I provide what I believe is a valid name, I expect to get a key!
      */
     getKey(name) {
-        if (name == null) throw new Exception(`getKey() failed. The name: "${name}" is invalid.`);
+        if (name == null) {
+            throw new Error(`getKey() failed. The name: "${name}" is invalid.`);
+        }
         const key = this.names[name];
         if (key === undefined) {
-            throw new Exception(`getKey() failed. Did not find the name "${name}" in this.names.`);
+            throw new Error(`getKey() failed. Did not find the name "${name}" in this.names.`);
         }
-        return key 
+        return key;
     },
 
     /**
@@ -2561,15 +2532,13 @@ const treeMapPrototype = {
      * good. doesn't need unit tests
      */
     getParentKey(childKey) {
-        const tempObj = this.tree[childKey];
-        const parentName = tempObj.parent;
-        //const parentName = this.tree[childKey].parent;
+        const parentName = this.tree[childKey].parent;
         if (parentName === undefined) return;
         let parentKey;
         try {
             parentKey = this.getKey(parentName);
         } catch (e) {
-            console.error(`The child object named "${this.tree[childKey].name}" has a non-existant parent object named "${parentName}".`);
+            console.error(`The child object named "${this.tree[childKey].name}" has a nonexistent parent object named "${parentName}". The parent-child line was not drawn.`);
             return;
         }
         return parentKey;
@@ -2590,7 +2559,8 @@ const treeMapPrototype = {
                 sourceKey = this.getKey(sourceName);
                 targetKey = this.getKey(targetName);
             } catch(e) {
-                console.error(`The line object named "${this.tree[lineKey].name}" has non-existant 'to' and/or 'from' nodes.`);
+                //Commented out because this message is redundant and less helpful than other error messages
+                //console.error(`The line object named "${this.tree[lineKey].name}" has nonexistent 'to' and/or 'from' nodes.`);
                 return {};
             }
         } else {
@@ -2614,8 +2584,9 @@ const treeMapPrototype = {
     /**
      * good. doesn't need unit tests
      */
-    unmapName(name) {
-        if (this.names[name] == null) return;
+    unmapName(key) {
+        const name = this.tree[key].name;
+        if (name == null) return;
         delete this.names[name];
     },
 
@@ -2634,6 +2605,7 @@ const treeMapPrototype = {
 
     /**
      * good
+     * Problem. parentKey is undefined. Why? Because I already deleted the parent from the tree!
      */
     unmapChild(childKey) {
         const parentKey = this.getParentKey(childKey);
@@ -2731,7 +2703,7 @@ const treePrototype = {
 
     /**
      * good.
-     * This should throw an exception. If I provide what I believe is a valid key, I should always get an object.
+     * This should throw an Error. If I provide what I believe is a valid key, I should always get an object.
      */
     getObject(key) {
         const obj = this.tree[key];
@@ -2755,7 +2727,13 @@ const treePrototype = {
     getToNodeKey(lineKey) {
         const sourceName = this.tree[lineKey].to;
         if (sourceName == null) return;
-        return this.treeMap.getKey(sourceName);
+        let key;
+        try {
+            key = this.treeMap.getKey(sourceName);
+        } catch (e) {
+            console.error(`The line object named "${this.getObject(lineKey).name}" has a nonexistent source node named "${sourceName}". The line was not drawn.`);
+        }
+        return key;
     },
 
     /**
@@ -2774,7 +2752,13 @@ const treePrototype = {
     getFromNodeKey(lineKey) {
         const targetName = this.tree[lineKey].from;
         if (targetName == null) return;
-        return this.treeMap.getKey(targetName);
+        let key;
+        try {
+            key = this.treeMap.getKey(targetName);
+        } catch (e) {
+            console.error(`The line object named "${this.getObject(lineKey).name}" has a nonexistent target node named "${targetName}". The line was not drawn.`);
+        }
+        return key;
     },
 
     /**
@@ -2830,25 +2814,14 @@ const treePrototype = {
 
     /**
      * good. doesn't need unit tests
+     * @param {Array} keys
      */
-    delete(key) {
-        this.getObject(key);
-        //if (isDeletable(key)) {
-        this.treeMap.remove(key);
-        delete this.tree[key];
-        //} else {
-            // This should never be called on purpose
-            /*
-            const children = this.treeMap.getChildKeys(key);
-            if (children != null) {
-                throw new Error(`Delete operation failed. Tree object with key: "${key}" named "${obj.name}" has children named: "${children.map(childKey => this.getObject(childKey).name).join(", ")}".`);
-            }
-            const lines = this.treeMap.getLineKeys(key);
-            if (lines != null) {
-                throw new Error(`Delete operation failed. Tree object with key: "${key}" named "${obj.name}" has lines named: "${lines.map(lineKey => this.getObject(lineKey).name).join(", ")}".`);
-            }
-            */
-        //}
+    delete(keys) {
+        this.treeMap.remove(keys);
+        keys.forEach(key => {
+            this.getObject(key);
+            delete this.tree[key];
+        });
     },
 
     /** 
@@ -2875,29 +2848,7 @@ const treePrototype = {
         return Array.from(keySet);
     },
 
-    /** 
-     * Delete the tree object with the passed key argument from this TreeWrapper. Also recursively delete any connected
-     * lines and children. 
-     * @param {string} key - the key of the tree object which should be deleted, along with any associated tree objects.
-     * @return {TreeWrapper} - contains all of the tree objects that need to be removed from the svg
-     * as a result of the recursive delete operation.
-     */
-    /*
-    recursiveDelete(key) {
-        const keys = [];
-        //const tWrapper = createTreeWrapper();
-        //tWrapper.add(key, this);
-        tWrapper.merge(this.getSubtreeToDelete(key, []));
-        for (let key in tWrapper.tree) {
-            delete this.names[this.tree[key].name];
-            delete this.tree[key];
-        }
-        return tWrapper;
-    },
-    */
-
     /* Private methods */
-
 };
 
 /**
@@ -2974,21 +2925,22 @@ function isValidForMove(objects) {
  * This cannot be used directly for placing new components, because this function assumes that all objects
  * that are being moved already exist in the data. Its only acceptable for this function to be canceled
  * if the objects have already all been drawn.
+ * @param {Array} keys
  */
-function attachMoveListener(tWrapper, tBody=null, tObject=null) {
-    const objects = Object.values(tWrapper.tree);
+function attachMoveListener(keys, tBody=null, tObject=null) {
+//function attachMoveListener(tWrapper, tBody=null, tObject=null) {
+    const objects = [];
+    keys.forEach(key => {
+        objects.push(gTree.getObject(key));
+    });
+    //const objects = Object.values(tWrapper.tree);
     if (isValidForMove(objects)) {
         const element = document.getElementById("svgContainer");
         element.setAttribute("style", "cursor: crosshair");
         const moveNodes = getMoveNodesFunction(objects, tBody, tObject);
         element.onclick = function(event) {
             moveNodes(event);
-            createSvgData(Object.keys(tWrapper.tree)).draw(gViewport);
-            //Eventually I'll be able to get rid of this part too
-            //Object.keys(tWrapper.tree).forEach(key => {
-            //    tWrapper.merge(gTreeWrapper.getSubtreeToRedraw(key));
-            //});
-            //createAddableSvgData(tWrapper).drawTo(gViewport);
+            createSvgData(keys).draw(gViewport);
         }
     }
 }
@@ -3002,9 +2954,9 @@ function attachMoveListener(tWrapper, tBody=null, tObject=null) {
  * coordinates to be stored in the tree.
  * @param {number} x - an x coordinate relative to the viewport, usually created with a click on the screen.
  * @param {number} y - a y coordinate relative to the viewport, usually created with a click on the screen.
- * @param {number} offsetX - corresponds to gOffsetX, which is how much the gTreeWrapper is translated on 
+ * @param {number} offsetX - corresponds to gOffsetX, which is how much the gTree is translated on 
  * the x-axis to fit in the created viewport.
- * @param {number} offsetY - corresponds to gOffsetY, which is how much the gTreeWrapper is translated on 
+ * @param {number} offsetY - corresponds to gOffsetY, which is how much the gTree is translated on 
  * the y-axis to fit in the created viewport.
  */
 function move(objects, {x, y}, {offsetX, offsetY}) {
@@ -3066,7 +3018,8 @@ function getNamesOfTypes(objects, ...types) {
  * @param {Object} component
  * @return {boolean}
  */
-function selectionIsValidForAdd(selection, component) {
+function isValidForAdd(keys, component) {
+    const selection = keys.map(key => gTree.getObject(key));
     const type = getType(component);
     const configNames = getNamesOfTypes(selection, "configurationNode");
     const lineNames = getNamesOfTypes(selection, "line");
@@ -3085,10 +3038,6 @@ function selectionIsValidForAdd(selection, component) {
             if (configNames.length > 0) {
                 alert(errorMsgStart + "cannot be added as a child of a configuration node. " + errorMsgConfig);
                 return false;
-            //} else if (lineNames.length > 0 && component.object !== "recorder") {
-            } else if (lineNames.length > 0) {
-                alert(errorMsgStart + "cannot be added as a child of a lines. " + errorMsgLine);
-                return false;
             }
             break;
         case "line":
@@ -3103,14 +3052,12 @@ function selectionIsValidForAdd(selection, component) {
                 return false;
             } 
             /* If any nodes in the selection already have a line between them, fail. special case will require refactor of this method */
-            selection = gSelection.getWrapper();
-            const selectionKeys = Object.keys(selection.tree);
-            for (let i = 0; i < selectionKeys.length; i++) {
-                let pairedNodes = gTreeWrapper.getPairedNodesOf(selectionKeys[i]);
-                let keys = Object.keys(pairedNodes.tree);
-                for (let j = 0; j < keys.length; j++) {
-                    if (selectionKeys.includes(keys[j])) {
-                        alert(`Insertion failed. There is already a line between node "${gTreeWrapper.tree[selectionKeys[i]].name}" and node "${gTreeWrapper.tree[keys[j]].name}".`);
+            for (let i = 0; i < keys.length; i++) {
+                const pairedNodes = gTree.getPairedNodeKeys(keys[i]);
+                if (pairedNodes != null) {
+                    let previouslyConnectedNodes = pairedNodes.filter(key => keys.includes(key));
+                    if (previouslyConnectedNodes.length > 0) {
+                        alert(`Insertion failed. The node named "${gTree.getObject(keys[i]).name}" is already connected to nodes "${previouslyConnectedNodes.map(key => gTree.getObject(key).name).join(", ")}".`);
                         return false;
                     }
                 }
@@ -3140,7 +3087,7 @@ const treeWrapperPrototype = {
      * If the TreeObject.key does not exist in this TreeWrapper, the new TreeObject.key and new TreeObject.data are added to the
      * TreeWrapper. If the TreeObject.key does exist in this TreeWrapper, the data at the existing key is overwritten. This is a
      * public method, which means it should be used in event handlers and other places to do stuff. While this method will work
-     * for ANY TreeWrapper, it is intended to be used with the "gTreeWrapper" only. The gTreeWrapper encapsulates all the data of
+     * for ANY TreeWrapper, it is intended to be used with the "gTree" only. The gTree encapsulates all the data of
      * the model, which is what we want to work with.
      * @param {TreeObject} treeObject - contains a key and some data that will be used to add or overwite
      * data inside of this TreeWrapper.
@@ -3626,7 +3573,7 @@ const addableSvgDataPrototype = {
         this.circles.forEach(circle => {
             this.drawObject(circle, viewport);
         });
-        scaleTo(gScaleLevel);
+        //scaleTo(gScaleLevel);
     },
 
     /* "Private" helper methods */
@@ -3905,12 +3852,14 @@ const circlePrototype = {
  * good. doesn't need unit tests
  */
 function createCircle(nodeKey) {
-    const node = gTree.getObject(nodeKey);
     const circle = Object.create(circlePrototype);
+    let tree = gTree;
+    if (arguments[1] != null) tree = arguments[1]; // Need this for testing
+    const node = tree.getObject(nodeKey);
     circle.id = nodeKey;
     circle.class = node.object;
-    circle.r = 2;
-    circle["stroke-width"] = .5;
+    circle.r = 2 * gScaleLevel;
+    circle["stroke-width"] = .5 * gScaleLevel;
     const lon = node.longitude;
     if (typeof lon !== "number") throw new Error(`'longitude' must be a number.`);
     const lat = node.latitude;
@@ -3953,17 +3902,29 @@ const linePrototype = {
  */
 function createParentChildLineWithLine(lineKey, childKey) {
     const line = Object.create(linePrototype);
-    const toNode = gTree.getToNode(lineKey);
-    const fromNode = gTree.getFromNode(lineKey);
-    const child = gTree.getObject(childKey);
+    let tree = gTree;
+    if (arguments[2] != null) tree = arguments[2]; // Need this for testing
+    const toNode = tree.getToNode(lineKey);
+    const fromNode = tree.getFromNode(lineKey);
+    if (toNode == null || fromNode == null) return; // The parent line could itself have nonexistent 'to' or 'from' nodes.
+    const child = tree.getObject(childKey);
     line.x1 = (((toNode.longitude + fromNode.longitude)/2) - gOffsetX) * gDrawScaleFactor;
     line.y1 = (((toNode.latitude + fromNode.latitude)/2) - gOffsetY) * gDrawScaleFactor;
     line.x2 = (child.longitude - gOffsetX) * gDrawScaleFactor;
     line.y2 = (child.latitude - gOffsetY) * gDrawScaleFactor;
-    line.id = `${gTree.getObject(lineKey).name}_${child.name}`;
+    line.id = getParentChildLineId(lineKey, childKey);    
     line.class = "parentChild";
-    line["stroke-width"] = .025;
+    line["stroke-width"] = .5 * gScaleLevel;
     return line;
+}
+
+// TODO: allow inserting testing tree if needed
+function getParentChildLineId(parentKey, childKey) {
+    const parent = gTree.getObject(parentKey);
+    const parentName = parent.name != null ? parent.name : `undefined${parentKey}`;
+    const child = gTree.getObject(childKey);
+    const childName = child.name != null ? child.name : `undefined${childKey}`;
+    return `${parentName}_${childName}`; 
 }
 
 /**
@@ -3971,15 +3932,17 @@ function createParentChildLineWithLine(lineKey, childKey) {
  */
 function createParentChildLineWithNode(parentKey, childKey) {
     const line = Object.create(linePrototype);
-    const parent = gTree.getObject(parentKey);
-    const child = gTree.getObject(childKey);
+    let tree = gTree;
+    if (arguments[2] != null) tree = arguments[2]; // Need this for testing
+    const parent = tree.getObject(parentKey);
+    const child = tree.getObject(childKey); // Don't need to check for nonexistent parent because I already do that elsewhere
     line.x1 = (parent.longitude - gOffsetX) * gDrawScaleFactor;
     line.y1 = (parent.latitude - gOffsetY) * gDrawScaleFactor;
     line.x2 = (child.longitude - gOffsetX) * gDrawScaleFactor;
     line.y2 = (child.latitude - gOffsetY) * gDrawScaleFactor;
-    line.id = `${parent.name}_${child.name}`;
+    line.id = getParentChildLineId(parentKey, childKey);
     line.class = "parentChild";
-    line["stroke-width"] = .025;
+    line["stroke-width"] = .5 * gScaleLevel;
     return line;
 }
 
@@ -3988,17 +3951,29 @@ function createParentChildLineWithNode(parentKey, childKey) {
  */
 function createLine(lineKey) {
     const line = Object.create(linePrototype);
-    const toNode = gTree.getToNode(lineKey);
-    const fromNode = gTree.getFromNode(lineKey);
+    let tree = gTree;
+    if (arguments[1] != null) tree = arguments[1]; // Need this for testing
+    const toNode = tree.getToNode(lineKey);
+    const fromNode = tree.getFromNode(lineKey);
+    if (toNode == null || fromNode == null) return; // A line could have nonexistent 'to' or 'from' nodes
     line.x1 = (fromNode.longitude - gOffsetX) * gDrawScaleFactor;
     line.y1 = (fromNode.latitude - gOffsetY) * gDrawScaleFactor;
     line.x2 = (toNode.longitude - gOffsetX) * gDrawScaleFactor;
     line.y2 = (toNode.latitude - gOffsetY) * gDrawScaleFactor;
     line.id = lineKey;
-    const lineObject = gTree.getObject(lineKey);
-    const phaseCount = countPhases(lineObject.phases).toString();
+    const lineObject = tree.getObject(lineKey);
+    const phaseCount = countPhases(lineObject.phases);
     line.class =  `${lineObject.object} p${phaseCount}`;
-    line["stroke-width"] = phaseCount;
+    switch (phaseCount) {
+        case 2:
+            line["stroke-width"] = 2 * gScaleLevel;
+            break;
+        case 3:
+            line["stroke-width"] = 3 * gScaleLevel;
+            break;
+        default:
+            line["stroke-width"] = gScaleLevel;
+    }
     return line;
 }
 
@@ -4029,7 +4004,6 @@ const svgDataPrototype = {
         this.circles.forEach(circle => {
             this.appendSvg(circle, viewport);
         });
-        scaleTo(gScaleLevel);
     },
 
     /**
@@ -4040,13 +4014,23 @@ const svgDataPrototype = {
     /**
      * good. Doesn't need tests. Need to figure out delete strategy
      */
-    deleteFrom(viewport) {
+    delete(viewport) {
         this.primaryKeySet.forEach(key => {
-            const e = document.getElementById(key);
-            if (e != null) {
-                viewport.removeChild(e);
+            const obj = this.tree.getObject(key);
+            const type = getType(obj);
+            if (type === "childNode") {
+                const parentKey = this.tree.treeMap.getParentKey(key);
+                if (parentKey != null) { // child could have a nonexistent parent
+                    const id = getParentChildLineId(parentKey, key);
+                    const e = document.getElementById(id);
+                    viewport.removeChild(e);
+                }
             }
+            const e = document.getElementById(key);
+            if (gSelection.hasId(key)) gSelection.remove(e);
+            viewport.removeChild(e);
         });
+        this.tree.delete(Array.from(this.primaryKeySet));
     },
 
     /* Private methods */
@@ -4067,8 +4051,7 @@ const svgDataPrototype = {
     },
 
     /**
-     * good. don't need tests
-     * ONLY the subtreeKeySet keys get iterated over in this method.
+     * good.
      */
     createData() {
         this.parentChildLines = [];
@@ -4078,29 +4061,34 @@ const svgDataPrototype = {
             const type = getType(this.tree.getObject(key));
             switch (type) {
                 case "line":
-                    this.lines.push(createLine(key));
+                    const line = createLine(key, this.tree);
+                    if (line != null) this.lines.push(line);
                     break;
                 case "childNode":
-                    this.circles.push(createCircle(key));
+                    this.circles.push(createCircle(key, this.tree));
                     const parentKey = this.tree.treeMap.getParentKey(key);
-                    const parentType = getType(this.tree.getObject(parentKey));
-                    if (parentType === "line") {
-                        this.parentChildLines.push(createParentChildLineWithLine(parentKey, key));
-                    } else {
-                        this.parentChildLines.push(createParentChildLineWithNode(parentKey, key));
+                    // child could have nonexistent parent. Also, we only want parent-child lines for children of objects in the subtreeKeySet
+                    if (parentKey != null && this.subtreeKeySet.has(parentKey)) {
+                        const parentType = getType(this.tree.getObject(parentKey));
+                        if (parentType === "line") {
+                            const line = createParentChildLineWithLine(parentKey, key, this.tree);
+                            if (line != null) this.parentChildLines.push(line);
+                        } else {
+                            const line = createParentChildLineWithNode(parentKey, key, this.tree)
+                            if (line != null) this.parentChildLines.push(line);
+                        }
                     }
                     break;
                 case "independentNode":
                 case "configurationNode":
-                    this.circles.push(createCircle(key));
+                    this.circles.push(createCircle(key, this.tree));
                     break;
             };
         });
     },
 
     /**
-     * good. update unit tests
-     * ONLY the primarKeySet keys get iterated over with this method.
+     * good.
      * Get the parent, children, connected lines, children of connected lines, paired nodes, and node ends of the object being redrawn.
      */
     setSubtreeToRedraw() {
@@ -4109,7 +4097,7 @@ const svgDataPrototype = {
             if (parentKey != null) {
                 this.subtreeKeySet.add(parentKey);
                 if (getType(this.tree.getObject(parentKey)) === "line") {
-                    // If the parent line is redraw, it will cover it's connected nodes unless I do this
+                    // If the parent line is redrawn, it will cover it's connected nodes unless I do this
                     this.subtreeKeySet.add(this.tree.getToNodeKey(parentKey));
                     this.subtreeKeySet.add(this.tree.getFromNodeKey(parentKey));
                 }
@@ -4129,9 +4117,9 @@ const svgDataPrototype = {
             if (pairs != null) pairs.forEach(nodeKey => this.subtreeKeySet.add(nodeKey));
             // Don't forget to account for adding a line, even though lines cannot be moved!
             const toNodeKey = this.tree.getToNodeKey(key);
-            if (toNodeKey != null) this.subtreeKeySet.add(toNodeKey); 
+            if (toNodeKey != null) this.subtreeKeySet.add(toNodeKey);
             const fromNodeKey = this.tree.getFromNodeKey(key);
-            if (fromNodeKey != null) this.subtreeKeySet.add(fromNodeKey);
+            if (fromNodeKey != null) this.subtreeKeySet.add(fromNodeKey); 
         });
     },
 }
@@ -4238,47 +4226,38 @@ const treeObjectPrototype = {
     /* Public TreeObject methods.*/
 
     /**
+     * good. Doesn't need unit tests
      * Set the 'parent', 'longitude', and 'latitude' properties of this TreeObject.data based on the 'parent' argument.
      * @param {Object} parent - the object to set as the parent of this child.
      */
-    setupChildNode(parent) {
-        //if (this.data.object === "recorder") {
-        //    throw new Error("Not ready to handle recorder objects yet");
-        //}
-        if (getType(this.data) !== "childNode") {
-            throw new Error("This TreeObject should have a type of 'childNode'.");
-        }
-        if (getType(parent) !== "childNode" && getType(parent) !== "independentNode") {
-            throw new Error("The 'parent' argument should have a type of 'childNode' or 'independentNode'.");
-        }
-        if (parent.name == null || parent.longitude == null || parent.latitude == null) {
-            throw new Error("The 'parent' argument is missing properties.");
-        }
+    setupChildNode(parentKey) {
+        if (getType(this.data) !== "childNode") throw new Error("This TreeObject should have a type of 'childNode'.");
+        const parent = gTree.getObject(parentKey);
+        const type = getType(parent);
+        if (type === "configurationNode") throw new Error("The 'parent' argument cannot be a configuration node.");
         this.data.parent = parent.name;
-        const lonValue = ((Math.random() * 5) + 5)/gDrawScaleFactor; 
-        this.data.longitude = Math.random() < 0.5 ? parseFloat(parent.longitude) + lonValue : parseFloat(parent.longitude) - lonValue;
-        const latValue = ((Math.random() * 5) + 5)/gDrawScaleFactor;
-        this.data.latitude = Math.random() < 0.5 ? parseFloat(parent.latitude) + latValue : parseFloat(parent.latitude) - latValue;
+        if (type === "line") {
+            this.setupChildNodeWithLine(parentKey);
+        } else {
+            this.setupChildNodeWithNode(parentKey);
+        }
     },
 
     /**
+     * good. Doesn't need unit tests
      * Set the 'from', 'to', and 'phases' properties of this TreeObject.data based on the 'source' and 'target' arguments.
      * @param {Object} source - the starting node of the line.
      * @param {Object} target - the ending node of the line.
      */
-    setupLine(source, target) {
-        if (getType(this.data) !== "line") {
-            throw new Error("This TreeObject should have a type of 'line'.");
-        }
+    setupLine(sourceKey, targetKey) {
+        if (getType(this.data) !== "line") throw new Error("This TreeObject should have a type of 'line'.");
+        const source = gTree.getObject(sourceKey);
+        const target = gTree.getObject(targetKey);
         const sType = getType(source);
         const tType = getType(target);
         const types = ["childNode", "independentNode"];
-        if (!types.includes(sType) || !types.includes(tType)) {
-            throw new Error("The 'source' and 'target' arguments should have a type of 'childNode' or 'independentNode'.");
-        }
-        if (source.name === undefined || target.name === undefined) {
-            throw new Error("The 'source' and 'target' arguments should have a 'name' property.");
-        }
+        if (!types.includes(sType) || !types.includes(tType)) throw new Error("The 'source' and 'target' arguments should have a type of 'childNode' or 'independentNode'.");
+        if (source.name == null || target.name == null) throw new Error("The 'source' and 'target' arguments should have a 'name' property.");
         if (source.phases === undefined) {
             const name = source.name !== undefined ? source.name : Object.values(source)[0]; 
             alert(`The source node of this line, "${name}", does not have a 'phases' property.`);
@@ -4290,6 +4269,29 @@ const treeObjectPrototype = {
     },
 
     /* "Private" helper methods */
+
+    setupChildNodeWithLine(lineKey) {
+        const toNode = gTree.getToNode(lineKey);
+        const fromNode = gTree.getFromNode(lineKey);
+        const parentLongitude = (toNode.longitude + fromNode.longitude)/2;
+        const parentLatitude = (toNode.latitude + fromNode.latitude)/2;
+        const lonValue = getRandomOffset();
+        this.data.longitude = Math.random() < 0.5 ? parentLongitude + lonValue : parentLongitude - lonValue; 
+        const latValue = getRandomOffset();
+        this.data.latitude = Math.random() < 0.5 ? parentLatitude + latValue : parentLatitude - latValue;
+    },
+
+    setupChildNodeWithNode(nodeKey) {
+        const parent = gTree.getObject(nodeKey);
+        const lonValue = getRandomOffset();
+        this.data.longitude = Math.random() < 0.5 ? parent.longitude + lonValue : parent.longitude - lonValue;
+        const latValue = getRandomOffset();
+        this.data.latitude = Math.random() < 0.5 ? parent.latitude + latValue : parent.latitude - latValue;
+    },
+
+    getRandomOffset() {
+        return lonValue = ((Math.random() * 4) + 4)/gDrawScaleFactor; 
+    }
 };
 
 /**
@@ -4331,7 +4333,7 @@ function countPhases(str) {
  * inside of the treeWrapper argument.
  */
 function createTreeObject(input, tree) {
-    //if (Object.getPrototypeOf(tree) !== treePrototype) throw new Error("'tree' argument must be an instance of the Tree class.");
+    if (Object.getPrototypeOf(tree) !== treePrototype) throw new Error("'tree' argument must be an instance of the Tree class.");
     const tObject = Object.create(treeObjectPrototype);
     if (typeof(input) === "string") {
         if (isNumberString(input)) {
@@ -4341,8 +4343,7 @@ function createTreeObject(input, tree) {
             tObject.data = deepCopy(obj);
             ['longitude', 'latitude'].forEach(prop => {
                 if (tObject.data[prop] != null && typeof tObject.data[prop] === "string") {
-                    // uncommet this!
-                    //throw new Error(`TreeObject creation failed. The tree object with key: "${input}" has a string value for its "${prop}" property.`);
+                    throw new Error(`TreeObject creation failed. The tree object with key: "${input}" has a string value for its "${prop}" property.`);
                 }
             });
             return tObject;
@@ -4391,9 +4392,9 @@ const configurationTypes = ["regulator_configuration", "transformer_configuratio
 // delete this eventually
 function rebuildSelectionTable() {
     destroyTables(["selectionTable"]);
-    let ids = Object.keys(gSelection.getWrapper().tree);
+    const ids = gSelection.getKeys();
     if (ids.length > 0) {
-        const table = createSelectionTable(ids, gTreeWrapper);
+        const table = createSelectionTable(ids, gTree);
         document.getElementById("selectionTable").appendChild(table);
     } 
 }
@@ -4423,14 +4424,14 @@ function createSelectionTable(ids, tree) {
     buttonCell.setAttribute("colspan", "3");
     buttonCell.append(getTableButton("move", function() {
         destroyTables(["descriptionTables"]);
-        attachMoveListener(gSelection.getWrapper());
+        attachMoveListener(gSelection.getKeys());
     }));
     buttonRow.append(buttonCell);
     tBody.append(buttonRow);
     // duplicate
 
     ids.forEach(id => {
-        let obj = tree.tree[id];
+        let obj = tree.getObject(id);
         let name = obj.name != null ? obj.name : obj.object != null ? obj.object : Object.keys(obj)[0];
         const button = getTableButton("view", getDisplayTableFunction(id));
         let row = createRow({key: name, value: button, deletable: true}, document.getElementById(id));
@@ -4495,7 +4496,7 @@ function createDescriptionTable(id) {
     table.append(tHead);
     table.append(tBody);
     tBody.append(buttonRow);
-    const tObject = createTreeObject(id, gTreeWrapper);
+    const tObject = createTreeObject(id, gTree);
     if (getType(tObject.data) !== "line") {
         buttonCell.append(createButton({action: "move", tObject: tObject, tableBody: tBody}).self);
     }
@@ -4506,8 +4507,6 @@ function createDescriptionTable(id) {
         event.preventDefault();
         gTree.insert(tObject);
         createSvgData([tObject.key]).draw(gViewport);
-        //const svg = createAddableSvgData(gTreeWrapper.insert(tObject));
-        //svg.drawTo(gViewport);
         alert("Object saved");
     });
     Object.keys(tObject.data).forEach(key => {
@@ -4551,27 +4550,26 @@ const buttonPrototype = {
      * Delete the TreeObject of this button from the TreeWrapper of this button
      */
     deleteObject() {
-        let subWrapper;
         const key = this.tObject.key;
-        const svgContainer = document.getElementById("svgContainer");
-        try {
-            subWrapper = gTreeWrapper.delete(this.tObject.key);
-            detachListener();
-            gSelection.remove(document.getElementById(key));
-            rebuildSelectionTable();
-
-            createDeletableSvgData(subWrapper.tree).deleteFrom(gViewport);
-        } catch (e) {
-            if (confirm(e + " Alternatively, do you wish to delete this node and all of its immediately connected objects?")) {
-                subWrapper = gTreeWrapper.recursiveDelete(this.tObject.key);
-                Object.keys(subWrapper.tree).forEach(key => {
-                    if (gSelection.hasId(key)) {
-                        gSelection.remove(document.getElementById(key));
-                    }
-                });
-                detachListener();
+        if (gTree.isDeletable(key)) {
+            createSvgData([key]).delete(gViewport);
+        } else {
+            let msg = "";
+            const children = gTree.treeMap.getChildKeys(key);
+            if (children != null) {
+                msg += `Cannot delete object named "${gTree.getObject(key).name}" because it has children: "${children.join(", ")}". `;
+            }
+            const lines = gTree.treeMap.getLineKeys(key);
+            if (lines != null) {
+                msg += `Cannot delete object named "${gTree.getObject(key).name}" because it has connected lines: "${lines.join(", ")}". `;
+            }
+            msg += "Do you want to delete this object and all of its immediately connected objects?";
+            if (confirm(msg)) {
+                const keys = gTree.getSubtreeToDelete(key);
+                keys.push(key);
+                createSvgData(keys).delete(gViewport);
+                //console.log(document.getElementById("svgContainer").onclick);
                 rebuildSelectionTable();
-                createDeletableSvgData(subWrapper.tree).deleteFrom(gViewport);
             }
         }
     },
@@ -4613,9 +4611,7 @@ function createButton({action, tableBody=null, tObject=null}) {
     switch (action) {
         case "move":
             button.self.addEventListener("click", function() {
-                const newWrapper = createTreeWrapper();
-                newWrapper.add(tObject.key, gTreeWrapper);
-                attachMoveListener(newWrapper, tableBody, tObject);
+                attachMoveListener([tObject.key], tableBody, tObject);
             });
             break;
         case "delete":
@@ -4832,7 +4828,6 @@ const rowPrototype = {
             if (table != null) {
                 document.getElementById("descriptionTables").removeChild(table);
             }
-            //if (Object.keys(gSelection.getWrapper().tree).length === 0) {
             if (gSelection.getKeys().length === 0) {
                 destroyTables(["selectionTable"]);
             }
@@ -4888,12 +4883,6 @@ function getMoveNodesFunction(objects, tBody=null, tObject=null) {
         detachListener();
         const coords = clickLatLon(event);
         move(objects, coords, {offsetX: gOffsetX, offsetY: gOffsetY});
-        // redraw here because we ALWAYS want to redraw after moving. If there was callback, would we want to do something else after moving? No.
-        // this will not go on forever. Object.keys() returns an array. That array doesn't change even though the tWrapper changes.
-        //Object.keys(tWrapper.tree).forEach(key => {
-        //    tWrapper.merge(gTreeWrapper.getSubtreeToRedraw(key));
-        //});
-        //createAddableSvgData(tWrapper).drawTo(gViewport);
         if (tObject != null) {
             if (objects.length !== 1) {
                 throw new Error("Can only update the tObject of a description table when moving a single object!");
@@ -4905,10 +4894,8 @@ function getMoveNodesFunction(objects, tBody=null, tObject=null) {
             Array.from(tBody.getElementsByTagName("input")).forEach(input => {
                 if (input.dataset.coordinate === "latitude") {
                     input.value = coords.y/gDrawScaleFactor + gOffsetY;
-                    //input.value = coords.y + gOffsetY;
                 } else if (input.dataset.coordinate === "longitude") {
                     input.value = coords.x/gDrawScaleFactor + gOffsetX;
-                    //input.value = coords.x + gOffsetX;
                 }
             });
         }
@@ -4955,7 +4942,7 @@ function attachKeyListener() {
             switch (event.key) {
                 case "m":
                     destroyTables(["descriptionTables"]);
-                    attachMoveListener(gSelection.getWrapper());
+                    attachMoveListener(gSelection.getKeys());
                     break;
                 case "-":
                     panZoom.zoomOut();
@@ -4977,17 +4964,12 @@ function attachKeyListener() {
 
 function createInterface() {
     createViewport(writeFeeder.tree, document.getElementById("svgContainer"));
-    gTreeWrapper = createTreeWrapper(writeFeeder.tree);
     gTree = createTree(writeFeeder.tree);
-    const objects = Object.values(gTreeWrapper.tree);
+    const objects = Object.values(gTree.tree);
     insertCoordinates(objects, gOffsetX, gOffsetY, (1000/gDrawScaleFactor) * .005);
-    //insertCoordinates(objects, gOffsetX, gOffsetY, gLongitudeRange * .01);
-    //gTreeWrapper.insertCoordinates(0, 0, 5);
     gSelection = createSelection();
     gViewport = document.getElementsByClassName('svg-pan-zoom_viewport')[0];
-    const svgData = createSvgData(Object.keys(gTree.tree));
-    svgData.quickDraw(gViewport);
-    //svgData.draw(gViewport);
+    createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
 }
 
 function initializeJQuery() {
@@ -5019,7 +5001,7 @@ function initializeJQuery() {
     
     /*
     setTimeout(function() {
-        const deleteSvgData = createDeletableSvgData(gTreeWrapper.tree);
+        const deleteSvgData = createDeletableSvgData(gTree.tree);
         deleteSvgData.deleteFrom(viewport);
     }, 2000);
     */

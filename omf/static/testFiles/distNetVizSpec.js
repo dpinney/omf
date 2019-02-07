@@ -387,11 +387,11 @@ const rawTree = {
     // orphanLine1: has valid "from" and "to" values, but those nodes don't exist
     "33420": {
         "phases": "ACBN", 
-        "from": "node1778317643", 
+        "from": "nodeDoesntExist1", 
         "name": "17783", 
         "object": "overhead_line", 
         "longitude": 405.7790593997488, 
-        "to": "node1817717783", 
+        "to": "nodeDoesntExist2", 
         "length": "338.245", 
         "latitude": 614.664711377176, 
         "configuration": "16564line_configuration32701"
@@ -405,8 +405,7 @@ const rawTree = {
         "to": "house172260", 
         "configuration": "1807--T325_C-CONFIG"
     }, 
-    // funkyLine2: a line is never found between two houses like this
-    "343434": {
+    "343434": {// funkyLine2: a line is never found between two houses like this
         "phases": "CS", 
         "from": "house172260", 
         "name": "AutoBot", 
@@ -414,13 +413,19 @@ const rawTree = {
         "to": "house172264", 
         "configuration": "1807--T325_C-CONFIG"
     }, 
-    // childOfLine (node2Line1)
-    "00900": {
+    "00900": {// childOfLine (node2Line1)
         object: "waterheater",
         name: "waterheater00900",
         parent: "T62474182459",
         longitude: 408.17398807424905,
         latitude: 403.9973646798732
+    },
+    "113118": {// lineToLoad
+        object: "regulator",
+        name: "regulator88",
+        from: "node7055970558",
+        to: "S1707-03-015_A",
+        phases: "A"
     }
 };
 let rawTreeCopy = deepCopy(rawTree);
@@ -439,7 +444,7 @@ Hardcoding test data like this is bad because if the original data ever changes 
 these unit tests will still pass. However, it is necessary because the alternative would be to use the real rawTreeCopy from a .omd
 file and then these unit tests would be dependent on a particular .omd file which is even worse.
 
-38 keys for 36 objects.
+39 keys for 37 objects.
 The rawTreeCopy is fairly well-formed, aside from the orphan line and orphan node. It should stay well-formed. If I want to test for really malformed data, I should do it in a unit test.
 
 I should only be testing public functions and methods! 
@@ -486,13 +491,14 @@ describe("Unit tests", function() {
     const funkyLine1 = "121212";
     const funkyLine2 = "343434";
     const childOfLine = "00900";
+    const lineToLoad = "113118";
 
     const allKeys = [weirdNode1, weirdNode2, node1, node1Line1, node1Line1End, node1Line1EndChild1, node1Line2,
         node1Line2End, node1Line2EndChild1, node1Line3, node1Line3End, node1Line3EndChild1, node1Line4, node1Line4End,
         node2Line1, node2Line1End , node2Line2, node2Line2End, node2Line2EndChild1, node2Line3, node2Line3End,
         node2Line3EndLine, node2Line3EndLineEnd, node3Line1, node3Line1End, node3Line1EndChild1,
         node3Line1EndChild1Child1, node3Line1EndChild1Child2, node3Line1EndChild2, node3Line1EndChild2Child1,
-        node3Line1EndChild3, orphanNode1, orphanLine1, funkyLine1, funkyLine2, childOfLine
+        node3Line1EndChild3, orphanNode1, orphanLine1, funkyLine1, funkyLine2, childOfLine, lineToLoad
     ];
 
     let consoleErrorSpy;
@@ -1217,294 +1223,147 @@ describe("Unit tests", function() {
             });
         });
 
-        xdescribe("treeObjectPrototype methods", function() {
-            //bad
-            xdescribe("setupChildNode()", function() {
-
-                xdescribe("if this TreeObject has a type of 'childNode'", function() {
-
-                    /* recorders can be attached to lines. Look at ./omf/scratch/MPUPV */
-                    it("should throw an error if the 'parent' argument has a type of 'configurationNode'", function() {
-                        const childNode = {
-                            parent: null
-                        }
-                        const tObject = createTreeObject(childNode, testTreeWrapper);
-                        const configurationNode = {
-                            object: "climate"
-                        };
-                        expect(function() {
-                            tObject.setupChildNode(configurationNode);
-                        }).toThrowError("The 'parent' argument should have a type of 'childNode', 'independentNode', or 'line'.");
-                    });
-    
-                    it(`should throw an error if the 'parent' argument is missing the 'name', 'longitude',
-                    or 'latitude' property`, function() {
-                        const childNode = {
-                            parent: null
-                        };
-                        const parent = {
-                            object: "node"
-                        };
-                        const tObject = createTreeObject(childNode, testTreeWrapper);
-                        expect(function() {
-                            tObject.setupChildNode(parent)
-                        }).toThrowError("The 'parent' argument is missing properties.");
-                    });
-    
-                    it(`should set the 'parent' property of the child to equal the 'name' property of the 'parent' argument`,
-                    function() {
-                        const childNode = {
-                            parent: null
-                        };
-                        const tObject = createTreeObject(childNode, testTreeWrapper);
-                        const parent = {
-                            name: "Joe",
-                            object: "node",
-                            longitude: "0",
-                            latitude: "0"
-                        };
-                        tObject.setupChildNode(parent);
-                        expect(tObject.data.parent).toEqual(parent.name);
-                    });
-    
-                    it(`should set the 'longitude' and 'latitude' of this TreeObject to be within 5 to 10 of the 'longitude'
-                    and 'latitude' of the 'parent' argument`, function() {
-                        const child = {
-                            parent: null
-                        };
-                        const tObject = createTreeObject(child, testTreeWrapper);
-                        for (let i = 0; i < 100; i++) {
-                            const parent = {
-                                name: "Joe",
-                                object: "node",
-                                longitude: i,
-                                latitude: i
-                            };
-                            tObject.setupChildNode(parent);
-                            expect(Math.abs(tObject.data.longitude - parent.longitude)).toBeLessThanOrEqual(10);
-                            expect(Math.abs(tObject.data.longitude - parent.longitude)).toBeGreaterThanOrEqual(5);
-                            expect(Math.abs(tObject.data.latitude - parent.latitude)).toBeLessThanOrEqual(10);
-                            expect(Math.abs(tObject.data.latitude - parent.latitude)).toBeGreaterThanOrEqual(5);
-                        }
-                    });
-                });
-
-                xdescribe("if this TreeObject does not have a type of 'childNode'", function() {
-
-                    it("should throw an error", function() {
-                        const independentNode = {
-                            object: "node",
-                            latitude: 4,
-                            longitude: 5
-                        };
-                        const tObject = createTreeObject(independentNode, testTreeWrapper);
-                        expect(function() {
-                            tObject.setupChildNode({});
-                        }).toThrowError("This TreeObject should have a type of 'childNode'.");
-                    });
-                });
-            });
-            //bad
-            xdescribe("setupLine()", function() {
-
-                xdescribe("if this TreeObject does not have a type of 'line'", function() {
-
-                    it("should throw an error", function() {
-                        const tObject = createTreeObject({}, testTreeWrapper);
-                        expect(function() {
-                            tObject.setupLine({}, {});
-                        }).toThrowError("This TreeObject should have a type of 'line'.");
-                    });
-                });
-
-                xdescribe("if this TreeObject has a type of 'line'", function() {
-
-                    let line, source, target, tObject;
-
-                    beforeEach(function() {
-                        line = {
-                            to: null,
-                            from: null,
-                            phases: "BC"
-                        };
-                        source = {
-                            name: "Broly",
-                            object: "node",
-                            phases: "ABC"
-                        };
-                        target = {
-                            name: "James",
-                            object: "node",
-                            phases: "ABC"
-                        };
-                        tObject = createTreeObject(line, testTreeWrapper);
-                    });
-
-                    xdescribe("if the 'source' argument has a type of 'line'", function() {
-
-                        it("should throw an error", function() {
-                            source = {
-                                to: null,
-                                from: null
-                            };
-                            expect(function() {
-                                tObject.setupLine(source, target)
-                            }).toThrowError("The 'source' argument should have a type of 'childNode' or 'independentNode'.")
-                        });
-                    });
-
-                    xdescribe("if the 'source' argument has a type of 'configurationNode'", function() {
-
-                        it("should throw an error", function() {
-                            source = {};
-                            expect(function() {
-                                tObject.setupLine(source, target)
-                            }).toThrowError("The 'source' argument should have a type of 'childNode' or 'independentNode'.")
-                        });
-                    });
-
-                    xdescribe("if the 'target' argument has a type of 'line'", function() {
-
-                        it("should throw an error", function() {
-                            target = {
-                                to: null,
-                                from: null
-                            };
-                            expect(function() {
-                                tObject.setupLine(source, target)
-                            }).toThrowError("The 'target' argument should have a type of 'childNode' or 'independentNode'.")
-                        });
-                    });
-
-                    xdescribe("if the target argument has a type of 'configurationNode", function() {
-
-                        it("should throw an error", function() {
-                            target = {};
-                            expect(function() {
-                                tObject.setupLine(source, target)
-                            }).toThrowError("The 'target' argument should have a type of 'childNode' or 'independentNode'.")
-                        });
-                    });
-
-                    xdescribe("if the source argument has an undefined 'name' property", function() {
-
-                        it("should throw an error", function() {
-                            source.name = undefined;
-                            expect(function() {
-                                tObject.setupLine(source, target);
-                            }).toThrowError("The 'source' argument should have a 'name' property.");
-                        });
-                    
-                        //it("should add a 'name' property to the 'source' argument", function() {
-                        //    expect(true).toBe(false);
-                        //});
-                    });
-
-                    xdescribe("if the 'target' argument has an undefined 'name' property", function() {
-
-                        it("should throw an error", function() {
-                            target.name = undefined;
-                            expect(function() {
-                                tObject.setupLine(source, target);
-                            }).toThrowError("The 'target' argument should have a 'name' property.");
-                        });
-
-                        //it("should add a 'name' propert to the 'target' argument", function() {
-                        //    expect(true).toBe(false); 
-                        //});
-                    });
-
-                    it(`should set the 'from' property of this TreeObject.data to equal the 'name' property of the 'source'
-                    argument`, function() {
-                        tObject.setupLine(source, target);
-                        expect(tObject.data.from).toEqual(source.name);
-                    });
-
-                    it(`should set the 'to' property of this TreeObject.data to equal the 'name' property of the 'target'
-                    argument`, function() {
-                        tObject.setupLine(source, target);
-                        expect(tObject.data.to).toEqual(target.name);
-                    });
-
-                    //xdescribe("if the 'source' argument has an undefined 'phases' property", function() {
-
-                    //    let spy;
-
-                    //    beforeEach(function() {
-                    //        spy = spyOn(window, "alert");
-                    //        delete source.phases;
-                    //        tObject.setupLine(source, target);
-                    //    });
-
-                    //    it("should alert the user", function() {
-                    //        expect(spy.calls.mostRecent().args[0]).toEqual(`The source node of this line, "${source.name}", does not have a 'phases' property.`)
-                    //    });
-
-                    //    it("should not set the 'phases' property of this TreeObject.data", function() {
-                    //        expect(tObject.data.phases).toBeDefined();
-                    //    });
-                    //});
-
-                    //describe("if the 'source' argument has a defined 'phases' property", function() {
-
-                    //   it(`should set the 'phases' property of this TreeObject.data to equal the 'phases' property 
-                    //   of the 'source' argument`, function() {
-                    //       tObject.setupLine(source, target);
-                    //       expect(tObject.data.phases).toEqual(source.phases);
-                    //   });
-                    //});
-                });
-            });
-        });
-
         describe("svgDataPrototype", function() {
-            //good. I don't test for parent but it's okay
+            //good.
             describe("setSubtreetoRedraw()", function() {
 
-                it("should add the keys of the parent, children, connected lines, children of connected lines, paired nodes, and node ends of a tree object whose key is in the primaryKeySet", function() {
-                    const keys = [
-                        node3Line1End,//need to include the own object, because it is included in the subtreeKeySet
-                        node3,
-                        node3Line1,
-                        node3Line1EndChild1, 
-                        node3Line1EndChild2, 
-                        node3Line1EndChild3, 
-                        childOfLine
-                    ];
-                    const svg = createSvgData([node3Line1End], testTree);
-                    expect(Array.from(svg.primaryKeySet)).toEqual([node3Line1End]);
-                    expect(Array.from(svg.subtreeKeySet)).toEqual([node3Line1End]);
-                    svg.setSubtreeToRedraw();
-                    expect(Array.from(svg.primaryKeySet)).toEqual([node3Line1End]);
-                    const subtreeKeys = Array.from(svg.subtreeKeySet).sort();
-                    expect(subtreeKeys).toEqual(keys.sort());
+                describe("if the an object in the primaryKeySet has children", function() {
+
+                    it("should update the subtreeKeySet to include keys of children of nodes", function() {
+                        const keys = [
+                            node3Line1EndChild1,//parent
+                            node3Line1EndChild1Child1,//child
+                            node3Line1EndChild1Child2,//child
+                            node3Line1End,//grandparent
+                            node3Line1EndChild2,//sibling
+                            funkyLine1//line between parent and sibling
+                        ];
+                        const svg = createSvgData([node3Line1EndChild1], testTree);
+                        expect(Array.from(svg.primaryKeySet)).toEqual([node3Line1EndChild1]);
+                        expect(Array.from(svg.subtreeKeySet)).toEqual([node3Line1EndChild1]);
+                        svg.setSubtreeToRedraw();
+                        expect(Array.from(svg.primaryKeySet)).toEqual([node3Line1EndChild1]);
+                        const subtreeKeys = Array.from(svg.subtreeKeySet).sort();
+                        expect(subtreeKeys).toEqual(keys.sort());
+                    });
+
+                    it("should update the subtreeKeySet to include keys of children of lines", function() {
+                        const keys = [
+                            node3Line1,//line
+                            node3,//source
+                            node3Line1End,//target
+                            childOfLine//childOfLine
+                        ];
+                        const svg = createSvgData([node3Line1], testTree);
+                        expect(Array.from(svg.primaryKeySet)).toEqual([node3Line1]);
+                        expect(Array.from(svg.subtreeKeySet)).toEqual([node3Line1]);
+                        svg.setSubtreeToRedraw();
+                        expect(Array.from(svg.primaryKeySet)).toEqual([node3Line1]);
+                        const subtreeKeys = Array.from(svg.subtreeKeySet).sort();
+                        expect(subtreeKeys).toEqual(keys.sort());
+                    });
                 });
 
-                it("should add all of those keys for every tree object whose key is in the primaryKeySet", function() {
-                    const keys = [
-                        node2,
-                        node2Line1,
-                        node2Line1End,
-                        node2Line2,
-                        node2Line2End,
-                        node2Line3,
-                        node2Line3End,
-                        node1Line4,
-                        node1,
-                        node1Line1,
-                        node1Line1End,
-                        node1Line2,
-                        node1Line2End,
-                        node1Line3,
-                        node1Line3End
-                    ];
-                    const svg = createSvgData([node1, node2], testTree);
-                    expect(Array.from(svg.primaryKeySet)).toEqual([node1, node2]);
-                    expect(Array.from(svg.subtreeKeySet)).toEqual([node1, node2]);
+                describe("if an object in the primaryKeySet has a parent", function() {
+
+                    it("should update the subtreeKeySet to include the key of the parent node", function() {
+                        const keys = [
+                            node2Line2EndChild1,//child
+                            node2Line2End//parent
+                        ];
+                        const svg = createSvgData([node2Line2EndChild1], testTree);
+                        expect(Array.from(svg.primaryKeySet)).toEqual([node2Line2EndChild1]);
+                        expect(Array.from(svg.subtreeKeySet)).toEqual([node2Line2EndChild1]);
+                        svg.setSubtreeToRedraw();
+                        expect(Array.from(svg.primaryKeySet)).toEqual([node2Line2EndChild1]);
+                        const subtreeKeys = Array.from(svg.subtreeKeySet).sort();
+                        expect(subtreeKeys).toEqual(keys.sort());
+                    });
+
+                    it("should update the subtreeKeySet to include the key of a parent line, and nodes on either end of that line", function() {
+                        const keys = [
+                            childOfLine,//childOfLine
+                            node3Line1,//line
+                            node3,//source
+                            node3Line1End,//target
+                        ];
+                        const svg = createSvgData([childOfLine], testTree);
+                        expect(Array.from(svg.primaryKeySet)).toEqual([childOfLine]);
+                        expect(Array.from(svg.subtreeKeySet)).toEqual([childOfLine]);
+                        svg.setSubtreeToRedraw();
+                        expect(Array.from(svg.primaryKeySet)).toEqual([childOfLine]);
+                        const subtreeKeys = Array.from(svg.subtreeKeySet).sort();
+                        expect(subtreeKeys).toEqual(keys.sort());
+                    });
+                });
+
+                describe("if an object in the primaryKeySet is a line", function() {
+
+                    it("should update the subtreeKeySet to include the nodes on either end of the line", function() {
+                        const keys = [
+                            lineToLoad,//line
+                            node1Line2EndChild1,//source
+                            node2Line2End//target
+                        ];
+                        const svg = createSvgData([lineToLoad], testTree);
+                        expect(Array.from(svg.primaryKeySet)).toEqual([lineToLoad]);
+                        expect(Array.from(svg.subtreeKeySet)).toEqual([lineToLoad]);
+                        svg.setSubtreeToRedraw();
+                        expect(Array.from(svg.primaryKeySet)).toEqual([lineToLoad]);
+                        const subtreeKeys = Array.from(svg.subtreeKeySet).sort();
+                        expect(subtreeKeys).toEqual(keys.sort());
+                    });
+                });
+
+                describe("if an object in the primaryKeySet has connected lines", function() {
+
+                    it("should update the subtreeKeySet to include those lines, the nodes on the other ends of those lines, and children of those lines", function() {
+                        const keys = [
+                            node3Line1End,//need to include the own object, because it is included in the subtreeKeySet
+                            node3,
+                            node3Line1,
+                            childOfLine,
+                            node3Line1EndChild1, 
+                            node3Line1EndChild2, 
+                            node3Line1EndChild3 
+                        ];
+                        const svg = createSvgData([node3Line1End], testTree);
+                        expect(Array.from(svg.primaryKeySet)).toEqual([node3Line1End]);
+                        expect(Array.from(svg.subtreeKeySet)).toEqual([node3Line1End]);
+                        svg.setSubtreeToRedraw();
+                        expect(Array.from(svg.primaryKeySet)).toEqual([node3Line1End]);
+                        const subtreeKeys = Array.from(svg.subtreeKeySet).sort();
+                        expect(subtreeKeys).toEqual(keys.sort());
+                    });
+                });
+            });
+
+            describe("createData()", function() {
+
+                it("should only create parent-child lines for childNodes whose parent is in the subtreeKeySet", function() {
+                    // This will solve the problem of updating the parent-child lines of to/from ends of primaryKeySet lines objects, which I don't want
+                    const svg = createSvgData([lineToLoad], testTree);
                     svg.setSubtreeToRedraw();
-                    expect(Array.from(svg.primaryKeySet)).toEqual([node1, node2]);
-                    const subtreeKeys = Array.from(svg.subtreeKeySet).sort();
-                    expect(subtreeKeys).toEqual(keys.sort());
+                    svg.createData();
+                    const circleIds = svg.circles.map(circle => circle.id).sort();
+                    const lineIds = svg.lines.map(line => line.id).sort();
+                    const parentChildIds = svg.parentChildLines.map(line => line.id).sort();
+                    expect(circleIds).toEqual([node1Line2EndChild1, node2Line2End].sort());
+                    expect(lineIds).toEqual([lineToLoad]);
+                    expect(parentChildIds).toEqual([]);
+                });
+
+                it("should only create parent-child lines for childNodes whose parent is in the subtreeKeySet", function() {
+                    // This will solve the problem of updating the parent-child lines of parents of primaryKeySet node objects, which I don't want
+                    const svg = createSvgData([node3Line1EndChild2Child1], testTree);
+                    svg.setSubtreeToRedraw();
+                    svg.createData();
+                    const circleIds = svg.circles.map(circle => circle.id).sort();
+                    const lineIds = svg.lines.map(line => line.id).sort();
+                    const parentChildIds = svg.parentChildLines.map(line => line.id).sort();
+                    expect(circleIds).toEqual([node3Line1EndChild2Child1, node3Line1EndChild2].sort());
+                    expect(lineIds).toEqual([]);
+                    expect(parentChildIds).toEqual([`house172260_ZIPload172261`]); 
                 });
             });
         });
@@ -2931,13 +2790,6 @@ describe("Unit tests", function() {
             //});
         });
 
-            //xdescribe("treeObjectPrototype", function() {
-
-            //    it("should", function() {
-            //        expect(true).toBe(false);
-            //    });
-            //});
-
         xdescribe("Private rowPrototype methods", function() {
 
             let map;
@@ -3656,13 +3508,19 @@ setTimeout(
         jasmineDiv.style["z-index"] = 1;
         document.body.prepend(jasmineDiv);
         // Replace the real tree with the testing tree
-        let svg = createDeletableSvgData(gTreeWrapper.tree);
-        svg.deleteFrom(gViewport);
-        const tWrapper = createTreeWrapper(deepCopy(rawTree));
-        insertCoordinates(Object.values(tWrapper.tree), 0, 0, 5);
-        svg = createAddableSvgData(tWrapper);
-        svg.drawTo(gViewport);
+        createSvgData(Object.keys(gTree.tree), gTree).delete(gViewport);
+        insertCoordinates(Object.values(testTree.tree), 0, 0, 5);
+        const svg = createSvgData(Object.keys(testTree.tree), testTree);
+        svg.quickDraw(gViewport);
+        //let svg = createDeletableSvgData(gTreeWrapper.tree);
+        //svg.deleteFrom(gViewport);
+        //insertCoordinates(Object.values(tWrapper.tree), 0, 0, 5);
+        //svg = createAddableSvgData(tWrapper);
+        //svg.drawTo(gViewport);
         // Hack
+        gTree = testTree;
+        // Delete this eventually
+        const tWrapper = createTreeWrapper(deepCopy(rawTree));
         gTreeWrapper = tWrapper;
     },
     2000
