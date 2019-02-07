@@ -100,48 +100,6 @@
 		    evt.currentTarget.className += " active";
 		}
 
-		function updateTable(button, pageNumId, tableId, data) {
-				var content = '';
-				gebi(tableId).innerHTML = content
-				numPages = Math.ceil(data.length / 20)
-
-				pageString = gebi(pageNumId).innerHTML;
-				pageString = pageString.split('of');
-				pageNum = parseInt(pageString[0]);
-
-				console.log(button)
-				console.log(pageNum)
-				if (button == 'prev'){
-					if (pageNum > 1) {
-						pageNum--;
-					}
-				}
-				else {//button == 'next'
-					if (pageNum < numPages) {
-						pageNum++;
-					}
-				}
-
-				console.log(pageNum)
-				
-				var start = 21*(pageNum-1);
-
-				for (var i = start; i<start+20; i++) {
-					content = '<td>' + data[i][0] + '</td><td>' + 
-					data[i][1].toFixed(2) + '</td><td>' + 
-					data[i][2].toFixed(2) + '</td><td>' + 
-					data[i][3].toFixed(2) + '&percnt;</td><td>' + 
-					data[i][4] + '</td>';
-					if (data[i][5] == true)
-						content = '<tr style=\"color: red\">' + content + '</tr>';
-					else content = '<tr>' + content + '</tr>';
-					gebi(tableId).innerHTML += content
-				}
-				
-				gebi(pageNumId).innerHTML = pageNum + ' of ' + numPages;
-				
-		}
-
 		function insert_file_upload_block(fileName, dataVariableName) {
 			parentDiv = document.currentScript.parentElement;
 
@@ -581,23 +539,14 @@
 
 		<p class="reportTitle" style="page-break-before:always">Voltage Values</p>
 		<div class="content tableContainer">
-			<table>
+			<table id="voltageViolations">
 			<tr> <th>Location</th> <th>Nominal Voltage</th> <th>Voltage Value</th> <th>&percnt; Change</th> <th>DER Status</th> </tr>
 			</table>
-			<table id="voltageViolations"></table>
-			<div style="text-align: center;">
-				<span onclick="updateTable('prev','voltPage','voltageViolations',allOutputData['voltageViolations'])">prev </span>
-				<span id="voltPage"></span>
-				<span onclick="updateTable('next','voltPage','voltageViolations',allOutputData['voltageViolations'])"> next</span>
-			</div>
 			<script type="text/javascript">
 				var voltageViolations = allOutputData['voltageViolations'];
-				//debugger;
-				var content = '';
-				numPages = Math.ceil(voltageViolations.length / 20)
+				var content = ''; var totalContent = '';
 
-				//for (var i = 0; i<voltageViolations.length; i++) {
-				for (var i = 0; i<20; i++) {
+				for (var i = 0; i<voltageViolations.length; i++) {
 					content = '<td>' + voltageViolations[i][0] + '</td><td>' + 
 					voltageViolations[i][1].toFixed(2) + '</td><td>' + 
 					voltageViolations[i][2].toFixed(2) + '</td><td>' + 
@@ -606,9 +555,9 @@
 					if (voltageViolations[i][5] == true)
 						content = '<tr style=\"color: red\">' + content + '</tr>';
 					else content = '<tr>' + content + '</tr>';
-					gebi("voltageViolations").innerHTML += content
+					totalContent += content
 				}
-				gebi("voltPage").innerHTML = '1 of ' + numPages;
+				gebi("voltageViolations").innerHTML += totalContent;
 			</script> 
 			
 			<span style="color: red">Voltage values non-compliant with ANSI C84.1 Range A Service voltages are displayed in red</span>
@@ -621,15 +570,15 @@
 			</table>
 			<script type="text/javascript">
 				var flickerViolations = allOutputData['flickerViolations'];
-				var content = '';
-				//for (var i = 0; i<flickerViolations.length; i++) {
-				for (var i = 0; i<20; i++) {
+				var content = ''; var totalContent = '';
+				for (var i = 0; i<flickerViolations.length; i++) {
 					content = '<td>' + flickerViolations[i][0] + '</td><td>' + flickerViolations[i][1].toFixed(2) + '&percnt;</td><td>' + flickerViolations[i][2] + '</td>';
 					if (flickerViolations[i][3] == true)
 						content = '<tr style=\"color: red\">' + content + '</tr>';
 					else content = '<tr>' + content + '</tr>';
-					gebi("flickerViolations").innerHTML += content
+					totalContent += content
 				}
+				gebi("flickerViolations").innerHTML += totalContent
 			</script> 
 			<span style="color: red">Voltage flicker values greater or equal to the input flicker threshold are displayed in red</span>
 		</div>
@@ -641,15 +590,15 @@
 			</table>
 			<script type="text/javascript">
 				var thermalViolations = allOutputData['thermalViolations'];
-				var content = '';
-				//for (var i = 0; i<thermalViolations.length; i++) {
-				for (var i = 0; i<20; i++) {
+				var content = ''; var totalContent = '';
+				for (var i = 0; i<thermalViolations.length; i++) {
 					content = '<td>' + thermalViolations[i][0] + '</td><td>' + thermalViolations[i][1].toFixed(2) + '&percnt;</td><td>' + thermalViolations[i][2] + '</td>';
 					if (thermalViolations[i][3] == true)
 						content = '<tr style=\"color: red\">' + content + '</tr>';
 					else content = '<tr>' + content + '</tr>';
-					gebi("thermalViolations").innerHTML += content
+					totalContent += content
 				}
+				gebi("thermalViolations").innerHTML += totalContent;
 			</script> 
 			<span style="color: red">Thermal loading values greater or equal to the input thermal threshold are displayed in red</span>
 		</div>
@@ -661,17 +610,17 @@
 			</table>
 			<script type="text/javascript">
 				var reversePowerFlow = allOutputData['reversePowerFlow'];
-				var content = '';
-				//for (var i = 0; i<reversePowerFlow.length; i++) {
-				for (var i = 0; i<20; i++) {
+				var content = ''; var totalContent = '';
+				for (var i = 0; i<reversePowerFlow.length; i++) {
 					content = '<td>' + reversePowerFlow[i][0] + '</td><td>' + 
 						reversePowerFlow[i][1].toFixed(2) + '</td><td>' + 
 						reversePowerFlow[i][2] + '</td>';
 					if (reversePowerFlow[i][3] == true)
 						content = '<tr style=\"color: red\">' + content + '</tr>';
 					else content = '<tr>' + content + '</tr>';
-					gebi("reversePowerFlow").innerHTML += content
+					totalContent += content
 				}
+				gebi("reversePowerFlow").innerHTML += totalContent;
 			</script> 
 			<span style="color: red">Reverse power flow violations displayed in red</span>
 		</div>
@@ -683,17 +632,17 @@
 			</table>
 			<script type="text/javascript">
 				var tapViolations = allOutputData['tapViolations'];
-				var content = '';
-				//for (var i = 0; i<tapViolations.length; i++) {
-				for (var i = 0; i<20; i++) {
+				var content = ''; var totalContent = '';
+				for (var i = 0; i<tapViolations.length; i++) {
 					content = '<td>' + tapViolations[i][0] + '</td><td>' + tapViolations[i][1] + 
 					'</td><td>' + tapViolations[i][2] + '</td><td>' + tapViolations[i][3] + 
 					'</td><td>' + tapViolations[i][4] + '</td>';
 					if (tapViolations[i][5] == true)
 						content = '<tr style=\"color: red\">' + content + '</tr>';
 					else content = '<tr>' + content + '</tr>';
-					gebi("tapChanges").innerHTML += content;
+					totalContent += content;
 				}
+				gebi("tapChanges").innerHTML += totalContent;
 			</script> 
 			<span style="color: red">Tap change differences greater or equal to the input max tap change difference are displayed in red</span>
 		</div>
@@ -713,16 +662,16 @@
 			</table>
 			<script type="text/javascript">
 				var faultBreaker = allOutputData['faultBreaker'];
-				var content = '';
-				//for (var i = 0; i<faultBreaker.length; i++) {
-				for (var i = 0; i<20; i++) {
+				var content = ''; var totalContent = '';
+				for (var i = 0; i<faultBreaker.length; i++) {
 					content = '<td>' + faultBreaker[i][0] + '</td><td>' + 
 						faultBreaker[i][1] + '</td><td>' + faultBreaker[i][2] + 
 						'</td><td>' + faultBreaker[i][3] + '</td><td>' + 
 						faultBreaker[i][4] + '</td>';
 					content = '<tr>' + content + '</tr>';
-					gebi("faultBreaker").innerHTML += content;
+					totalContent += content;
 				}
+				gebi("faultBreaker").innerHTML += totalContent;
 			</script>
 		</div>
 		<div class="content tableContainer">
@@ -738,16 +687,16 @@
 			</table>
 			<script type="text/javascript">
 				var faultStepUp = allOutputData['faultStepUp'];
-				var content = '';
-				//for (var i = 0; i<faultStepUp.length; i++) {
-				for (var i = 0; i<20; i++) {
+				var content = ''; var totalContent = '';
+				for (var i = 0; i<faultStepUp.length; i++) {
 					content = '<td>' + faultStepUp[i][0] + '</td><td>' + 
 						faultStepUp[i][1] + '</td><td>' + faultStepUp[i][2] + 
 						'</td><td>' + faultStepUp[i][3] + '</td><td>' + 
 						faultStepUp[i][4] + '</td>';
 					content = '<tr>' + content + '</tr>';
-					gebi("faultStepUp").innerHTML += content;
+					totalContent += content;
 				}
+				gebi("faultStepUp").innerHTML += totalContent;
 			</script> 
 		</div>
 
@@ -758,9 +707,8 @@
 			</table>
 			<script type="text/javascript">
 				var faultCurrentViolations=allOutputData['faultCurrentViolations'];
-				var content = '';
-				//for (var i = 0; i<faultCurrentViolations.length; i++) {
-				for (var i = 0; i<20; i++) {
+				var content = ''; var totalContent = '';
+				for (var i = 0; i<faultCurrentViolations.length; i++) {
 					content = '<td>' + faultCurrentViolations[i][0] + '</td><td>' +
 						faultCurrentViolations[i][1] + '</td><td>' + 
 						faultCurrentViolations[i][2] + '</td><td>' + 
@@ -770,8 +718,9 @@
 					if (faultCurrentViolations[i][6] == true)
 						content = '<tr style=\"color: red\">' + content + '</tr>';
 					else content = '<tr>' + content + '</tr>';
-					gebi("faultCurrentViolations").innerHTML += content;
+					totalContent += content;
 				}
+				gebi("faultCurrentViolations").innerHTML += totalContent;
 			</script> 
 			<span style="color: red">Fault current differences as a percent of the pre-fault current that are greater than or equal to the input threshold are displayed in red</span>
 		</div>
@@ -784,9 +733,8 @@
 			</table>
 			<script type="text/javascript">
 				var faultPOIVolts=allOutputData['faultPOIVolts'];
-				var content = '';
-				//for (var i = 0; i<faultPOIVolts.length; i++) {
-				for (var i = 0; i<20; i++) {
+				var content = ''; var totalContent ='';
+				for (var i = 0; i<faultPOIVolts.length; i++) {
 					content = '<td>' + faultPOIVolts[i][0] + '</td><td>' +
 						faultPOIVolts[i][1] + '</td><td>' + 
 						faultPOIVolts[i][2] + '</td><td>' + 
@@ -796,8 +744,9 @@
 					if (faultPOIVolts[i][6] == true)
 						content = '<tr style=\"color: red\">' + content + '</tr>';
 					else content = '<tr>' + content + '</tr>';
-					gebi("faultPOIVolts").innerHTML += content;
+					totalContent += content;
 				}
+				gebi("faultPOIVolts").innerHTML += totalContent;
 			</script> 
 			<span style="color: red">Post-fault voltage  values as a percent of the pre-fault voltage that are greater than or equal to the input threshold are displayed in red</span>
 		</div>

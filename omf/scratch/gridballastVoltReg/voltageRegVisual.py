@@ -10,7 +10,7 @@ from voltageDropVoltageViz import drawPlot
 # FNAME = pJoin(volRegDir, 'UCS_Egan_Housed_Solar.omd')
 
 # FNAME='/Users/tuomastalvitie/omf/omf/scratch/voltageRegulation/outGLMtest.glm'
-FNAME = './outGLMtest.glm'
+FNAME = './outGLM.glm'
 
 # help(omf.feeder.parse)
 # feed = omf.feeder.parse(FNAME)
