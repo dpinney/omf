@@ -450,7 +450,6 @@
 		<!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder Largest.js'></script> -->
 		<!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder Norfork.js'></script> -->
 	</head>
-	<!--<body onkeypress='hotkeys()'>-->
     <body>
         <div id="interfaceContainer">
             <div id="loadingMessage">
@@ -1135,11 +1134,11 @@ function downloadTextFile() {
 
 function scaleGraphForVisualAppearance(objectCount) {
     if (objectCount < 100) {
-        gScaleLevel = 5;
+        gScaleLevel = 4;
     } else if (objectCount < 1000) {
-        gScaleLevel = 1;
+        gScaleLevel = .7;
     } else {
-        gScaleLevel = .6;
+        gScaleLevel = .5;
     }
 }
 
@@ -1150,7 +1149,7 @@ function scaleGraphForVisualAppearance(objectCount) {
  */
 function createViewport(tree, svgContainer) {
     const keys = Object.keys(tree);
-    scaleGraphForVisualAppearance(keys.length);
+    //scaleGraphForVisualAppearance(keys.length);
     // Set the longitude and latitude to be within the bounds of the provided data
     const firstKey = keys.find(key => {
         return tree[key].longitude !== undefined && tree[key].latitude !== undefined;
@@ -1162,7 +1161,8 @@ function createViewport(tree, svgContainer) {
     if (firstKey == null) {
         // There were no coordinates, so insert some!
         const objects = Object.values(tree);
-        insertCoordinates(objects, 0, 0, 5);
+        insertCoordinates(objects, 0, 0, 50);
+        scaleGraphForVisualAppearance(keys.length)
         minLon = 0;
         maxLon = 0;
         minLat = 0;
@@ -1983,17 +1983,22 @@ function massAdd() {
 	const componentName = document.getElementById('componentSelect').value;
 	const attachObject = document.getElementById('massAddTargetSelect').value;
     const newObjects = [];
-    Object.keys(gTree.tree).forEach(key => {
-        if (gTree.getObject(key).object === attachObject) {
-            const tObject = createTreeObject(gComponents[componentName], gTree);
-            tObject.setupChildNode(gTree.tree[key]);
-            gTree.insert(tObject);
-            newObjects.push(tObject.key);
-        }
-    });
-    createSvgData(newObjects).draw(gViewport);
-    alert(`${newObjects.length} "${componentName}" objects added to the feeder`);
-    toggleElementDisplay('massAddModal');
+    const pm = new ProgressModal(`Adding a "${componentName}" object to every "${attachObject}" object. This could take a few seconds.`);
+    pm.show();
+    setTimeout(() => {
+        Object.keys(gTree.tree).forEach(key => {
+            if (gTree.getObject(key).object === attachObject) {
+                const tObject = createTreeObject(gComponents[componentName], gTree);
+                tObject.setupChildNode(key);
+                gTree.insert(tObject);
+                newObjects.push(tObject.key);
+            }
+        });
+        createSvgData(newObjects).draw(gViewport);
+        pm.hide();
+        alert(`${newObjects.length} "${componentName}" objects added to the feeder`);
+        toggleElementDisplay('massAddModal');
+    }, 10);
 }
 
 /* Clearing each list so we dont get duplicates in the list. This must be done because the attachTarget list must be 
@@ -2005,7 +2010,7 @@ function updateAttachTargets(id, tree) {
 	for (let key in tree) {
         let isValidType = true;
         if (id === "massAddTargetSelect") {
-            isValidType = getType(tree[key]) !== "line" && getType(tree[key]) !== "configurationNode";
+            isValidType = getType(tree[key]) !== "configurationNode";
         }
         let isComponent = gComponents.hasOwnProperty(tree[key].object);
         let notAlreadyAdded = !attachList.includes(tree[key].object);
@@ -2043,22 +2048,21 @@ function massEdit() {
     }
     operation = operation.value;
     const objectType = document.getElementById("massEditTargetSelect").value;
-    const keys = Object.keys(gTree.tree).filter(key => gTree.tree[key].object === objectType)
+    const keys = Object.keys(gTree.tree).filter(key => gTree.getObject(key).object === objectType)
     if (operation === "addAttribute") {
     massAddAttribute(keys, objectType);
         return;
     }
-    const tree = gTree.tree;
     const attributeKey = document.getElementById("massEditAttribute").value.trim();
     //Make sure the attribute exists
     let invalidKeys = [];
     for (let key of keys) {
-        if (tree[key][attributeKey] === undefined) {
+        if (gTree.getObject(key)[attributeKey] === undefined) {
             invalidKeys.push(key);
         }
     }
     if (invalidKeys.length > 0) {
-        alert(`Mass edit failed. The attribute "${attributeKey}" is missing from one or more objects:\nObject names: "${invalidKeys.map(key => tree[key].name).join(", ")}".\nObject keys: "${invalidKeys.join(", ")}".`);
+        alert(`Mass edit failed. The attribute "${attributeKey}" is missing from one or more objects:\nObject names: "${invalidKeys.map(key => gTree.getObject(key).name).join(", ")}".\nObject keys: "${invalidKeys.join(", ")}".`);
         return;
     }
     //Make sure the attribute exists
@@ -2073,7 +2077,7 @@ function massEdit() {
             if (operation === "addTo" || operation === "multiplyBy") {
                 invalidKeys = getKeysOfObjectsWithoutNumericValues(keys, attributeKey);
                 if (invalidKeys.length > 0) {
-                    alert(`Mass edit failed. The attribute "${attributeKey}" does not have a numeric value in the following objects: \nObject names: "${invalidKeys.map(key => tree[key].name).join(", ")}".\nObject keys: "${invalidKeys.join(", ")}".`);
+                    alert(`Mass edit failed. The attribute "${attributeKey}" does not have a numeric value in the following objects: \nObject names: "${invalidKeys.map(key => gTree.getObject(key).name).join(", ")}".\nObject keys: "${invalidKeys.join(", ")}".`);
                     return;
                 }
                 if (operation === "addTo") {
@@ -2084,10 +2088,11 @@ function massEdit() {
             } else if (operation === "change") {
                 const newValue = document.getElementById("changeValue").value.trim();
                 for (let key of keys) {
-                    tree[key][attributeKey] = newValue;
+                    gTree.getObject(key)[attributeKey] = newValue;
                 }
                 alert(`${keys.length} ${objectType} objects had the "${attributeKey}" attribute changed.`);
                 toggleElementDisplay('massEditModal');
+                createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
             }
             break;
         case "delete":
@@ -2096,10 +2101,11 @@ function massEdit() {
                 return;
             }
             for (let key of keys) {
-                delete tree[key][attributeKey];
+                delete gTree.getObject(key)[attributeKey];
             }
             alert(`${keys.length} ${objectType} objects had the "${attributeKey}" attribute deleted.`);
             toggleElementDisplay('massEditModal');
+            createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
             break;
     }
 }
@@ -2112,10 +2118,11 @@ function massAddition(keys, attributeKey, objectType) {
     }
     operand = parseFloat(operand);
     for (let key of keys) {
-        gTree.tree[key][attributeKey] = (parseFloat(gTree.tree[key][attributeKey]) + operand).toString();
+        gTree.getObject(key)[attributeKey] = gTree.getObject(key)[attributeKey] + operand;
     }
     alert(`${keys.length} ${objectType} objects had their "${attributeKey}" attribute edited.`);
     toggleElementDisplay('massEditModal');
+    createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
 }
 
 function massMultiplication(keys, attributeKey, objectType) {
@@ -2128,10 +2135,11 @@ function massMultiplication(keys, attributeKey, objectType) {
     multiplyOperand = parseFloat(multiplyOperand);
     addOperand = parseFloat(addOperand);
     for (let key of keys) {
-        gTree.tree[key][attributeKey] = ((parseFloat(gTree.tree[key][attributeKey]) * multiplyOperand) + addOperand).toString();
+        gTree.getObject(key)[attributeKey] = gTree.getObject(key)[attributeKey] * multiplyOperand + addOperand;
     }
     alert(`${keys.length} ${objectType} objects had their "${attributeKey}" attribute edited.`);
     toggleElementDisplay('massEditModal');
+    createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
 }
 
 function massAddAttribute(keys, objectType) {
@@ -2146,10 +2154,11 @@ function massAddAttribute(keys, objectType) {
     }
     const newValue = document.getElementById("newAttributeValue").value;
     for (let key of keys) {
-        gTree.tree[key][newKey] = newValue;
+        gTree.getObject(key)[newKey] = newValue;
     }
     alert(`${keys.length} ${objectType} objects had the "${newKey}" attribute added.`);
     toggleElementDisplay('massEditModal');
+    createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
 }
 
 function loadAttachments() {
@@ -2881,8 +2890,8 @@ function move(objects, {x, y}, {offsetX, offsetY}) {
     objects.forEach(obj => {
         if (getType(obj) !== "line") {
             nodes.push(obj);
-            avgLon += parseFloat(obj.longitude);
-            avgLat += parseFloat(obj.latitude);
+            avgLon += obj.longitude;
+            avgLat += obj.latitude;
         }
     });
     if (nodes.length === 0) {
@@ -2891,10 +2900,8 @@ function move(objects, {x, y}, {offsetX, offsetY}) {
     avgLon /= nodes.length;
     avgLat /= nodes.length;
     nodes.forEach(node => {
-        node.longitude = parseFloat(node.longitude) - avgLon + offsetX + x/gDrawScaleFactor;
-        node.latitude = parseFloat(node.latitude) - avgLat + offsetY + y/gDrawScaleFactor;
-        //node.longitude = parseFloat(node.longitude) + offsetX + x - avgLon; 
-        //node.latitude = parseFloat(node.latitude) + offsetY + y - avgLat;
+        node.longitude = node.longitude - avgLon + offsetX + x/gDrawScaleFactor;
+        node.latitude = node.latitude - avgLat + offsetY + y/gDrawScaleFactor;
     });
 }
 
@@ -3024,10 +3031,10 @@ function isNumberString(str) {
 function getType(obj) {
     if (isLine(obj)) {
         return "line";
-    } else if (isChildNode(obj)) {
-        return "childNode";
     } else if (isConfigurationNode(obj)) {
         return "configurationNode";
+    } else if (isChildNode(obj)) {
+        return "childNode";
     }
     return "independentNode"
 }
@@ -3040,7 +3047,7 @@ function getType(obj) {
  */
  function deepCopy(oldObject) {
     if (Object.getPrototypeOf(oldObject) !== Object.prototype) {
-        throw new Error("This function cannot be used to copy objects created with a constructor function.");
+        throw new Error("This function cannot be used to copy objects that are not plain JavaScript objects.");
     }
     const properties = Object.getOwnPropertyNames(oldObject);
     const keys = Object.keys(oldObject);
@@ -3204,9 +3211,9 @@ const linePrototype = {
  * good. doesn't need tests
  */
 function createParentChildLineWithLine(lineKey, childKey) {
-    const line = Object.create(linePrototype);
     let tree = gTree;
     if (arguments[2] != null) tree = arguments[2]; // Need this for testing
+    const line = Object.create(linePrototype);
     const toNode = tree.getToNode(lineKey);
     const fromNode = tree.getFromNode(lineKey);
     if (toNode == null || fromNode == null) return; // The parent line could itself have nonexistent 'to' or 'from' nodes.
@@ -3215,7 +3222,7 @@ function createParentChildLineWithLine(lineKey, childKey) {
     line.y1 = (((toNode.latitude + fromNode.latitude)/2) - gOffsetY) * gDrawScaleFactor;
     line.x2 = (child.longitude - gOffsetX) * gDrawScaleFactor;
     line.y2 = (child.latitude - gOffsetY) * gDrawScaleFactor;
-    line.id = getParentChildLineId(lineKey, childKey);    
+    line.id = getParentChildLineId(lineKey, childKey, tree);    
     line.class = "parentChild";
     line["stroke-width"] = .5 * gScaleLevel;
     return line;
@@ -3223,9 +3230,11 @@ function createParentChildLineWithLine(lineKey, childKey) {
 
 // TODO: allow inserting testing tree if needed
 function getParentChildLineId(parentKey, childKey) {
-    const parent = gTree.getObject(parentKey);
+    let tree = gTree;
+    if (arguments[2] != null) tree = arguments[2]; // Need this for testing
+    const parent = tree.getObject(parentKey);
     const parentName = parent.name != null ? parent.name : `undefined${parentKey}`;
-    const child = gTree.getObject(childKey);
+    const child = tree.getObject(childKey);
     const childName = child.name != null ? child.name : `undefined${childKey}`;
     return `${parentName}_${childName}`; 
 }
@@ -3234,16 +3243,16 @@ function getParentChildLineId(parentKey, childKey) {
  * good. doesn't need tests
  */
 function createParentChildLineWithNode(parentKey, childKey) {
-    const line = Object.create(linePrototype);
     let tree = gTree;
     if (arguments[2] != null) tree = arguments[2]; // Need this for testing
+    const line = Object.create(linePrototype);
     const parent = tree.getObject(parentKey);
     const child = tree.getObject(childKey); // Don't need to check for nonexistent parent because I already do that elsewhere
     line.x1 = (parent.longitude - gOffsetX) * gDrawScaleFactor;
     line.y1 = (parent.latitude - gOffsetY) * gDrawScaleFactor;
     line.x2 = (child.longitude - gOffsetX) * gDrawScaleFactor;
     line.y2 = (child.latitude - gOffsetY) * gDrawScaleFactor;
-    line.id = getParentChildLineId(parentKey, childKey);
+    line.id = getParentChildLineId(parentKey, childKey, tree);
     line.class = "parentChild";
     line["stroke-width"] = .5 * gScaleLevel;
     return line;
@@ -3253,9 +3262,9 @@ function createParentChildLineWithNode(parentKey, childKey) {
  * good. doesn't need unit tests
  */
 function createLine(lineKey) {
-    const line = Object.create(linePrototype);
     let tree = gTree;
     if (arguments[1] != null) tree = arguments[1]; // Need this for testing
+    const line = Object.create(linePrototype);
     const toNode = tree.getToNode(lineKey);
     const fromNode = tree.getFromNode(lineKey);
     if (toNode == null || fromNode == null) return; // A line could have nonexistent 'to' or 'from' nodes
@@ -3539,6 +3548,7 @@ function getNewTreeKey(tree) {
 // Return the number of phases a line has.
 function countPhases(str) {
 	let total = 0
+    if (str == null) return total;
 	if (str.search('A') > -1) {total++}
 	if (str.search('B') > -1) {total++}
 	if (str.search('C') > -1) {total++}
@@ -3577,7 +3587,8 @@ function createTreeObject(input, tree) {
     } else if (typeof input === "object" && !Array.isArray(input)) {
         tObject.key = getNewTreeKey(tree.tree);
         tObject.data = deepCopy(input);
-        if (tObject.data.name != null && tObject.data.object != null) tObject.data.name = tObject.data.object + tObject.key;
+        //if (tObject.data.name != null && tObject.data.object != null) tObject.data.name = tObject.data.object + tObject.key;
+        if (tObject.data.object != null) tObject.data.name = tObject.data.object + tObject.key;
         ['longitude', 'latitude'].forEach(prop => {
             if (tObject.data[prop] != null && typeof tObject.data[prop] === "string") {
                 tObject.data[prop] = parseFloat(tObject.data[prop]);
@@ -3601,13 +3612,11 @@ const nonDeletableProperties = ["name", "object", "from", "to", "parent", "latit
 other objects.  These properties ARE technically modifiable, but allowing the user to change them would require more work 
 than I think is worth it. It is easier just to create a new node.
 */
-const nonModifiableProperties = ["name", "object", "from", "to", "parent"];
+const nonModifiableProperties = ["name", "object"];
 const titleProperties = ["object"];
 /* This array is used to determine if an object is a configuration node, based on the "object" property of that node. If a node
 lacks the "object" property entirely, then I know its a configuration node.
 Player is a configuration object. Recorder can have a parent, so it is NOT a configuration object.
-
-Apparently nodes can be children of lines.
 */
 const configurationTypes = ["regulator_configuration", "transformer_configuration", "triplex_line_configuration", "line_configuration",
 "volt_var_control", "line_spacing", "climate", "overhead_line_conductor", "underground_line_conductor", "triplex_line_conductor",
@@ -3729,20 +3738,23 @@ function createDescriptionTable(id) {
     buttonCell.append(createButton({action: "save"}).self);
     form.addEventListener("submit", function(event) {
         event.preventDefault();
-        gTree.insert(tObject);
-        createSvgData([tObject.key]).draw(gViewport);
+        // Delete the object entirely just in case parent/to/from/ was changed, in order to delete parent-child lines
+        const svg = createSvgData([tObject.key]);
+        svg.delete(gViewport);
+        gTree.insert(tObject);// overwrite the real object. It is remapped in the process.
+        svg.draw(gViewport);
         alert("Object saved");
     });
     Object.keys(tObject.data).forEach(key => {
         let row;
         if (titleProperties.includes(key)) {
-            row = createRow({key: key, map: tObject.data});
+            row = createRow({key: key, tObject: tObject});
             Array.from(row.self.children).forEach(td => {
                 td.classList.add("tableTitle");
             });
             tHead.append(row.self);
         } else {
-            row = createRow({key: key, deletable: true, map: tObject.data});
+            row = createRow({key: key, deletable: true, tObject: tObject});
             tBody.appendChild(row.self);
         }
     });
@@ -3847,7 +3859,7 @@ function createButton({action, tableBody=null, tObject=null}) {
             break;
         case "add":
             button.self.addEventListener("click", function() {
-                const row = createRow({key: "", deletable: true, map: tObject.data});
+                const row = createRow({key: "", deletable: true, tObject: tObject});
                 tableBody.append(row.self);
             });
             break;
@@ -3869,13 +3881,13 @@ const rowPrototype = {
      * @param {Object} args - an object containing the arguments that were passed to createRow().
      */
     validateArguments(args) {
-        if (args.key != null && args.value != null && args.map != null) {
-            throw new Error(`If there are key and map arguments, then the value of the row is determined by map[key] and passing a value
+        if (args.key != null && args.value != null && args.tObject != null) {
+            throw new Error(`If there are key and tObject arguments, then the value of the row is determined by map[key] and passing a value
             argument is invalid`);
-        } else if (args.map != null && args.map[args.key] === undefined && args.key !== "") {
-            throw new Error("If a map argument is passed, the key argument should exist in that map.");
-        } else if (args.key === "" && args.map == null) {
-            throw new Error("If the key is an empty string, a map argument should be passed to the function");
+        } else if (args.tObject != null && args.tObject.data[args.key] === undefined && args.key !== "") {
+            throw new Error("If a tObject argument is passed, the key argument should exist in that tObject.data.");
+        } else if (args.key === "" && args.tObject == null) {
+            throw new Error("If the key is an empty string, a tObject argument should be passed to the function");
         }
     },
 
@@ -3885,9 +3897,10 @@ const rowPrototype = {
      * @return {boolean}
      */
     validateNewKey(key) {
-        if (this.map[key] !== undefined || key === "" || key === "to" || key === "from" || key === "parent") {
-            return false;
-        }
+        // These keys cannot be added becasue they would turn the object into a different type. If a user wants such an object, they should add a new one and edit its attributes.
+        const invalidKeys = [undefined, "", "to", "from", "parent"];
+        if (invalidKeys.includes(key)) return false;
+        if (this.tObject.data[key] !== undefined) return false;
         return true;
     },
 
@@ -3906,11 +3919,11 @@ const rowPrototype = {
     updateMapKey(input) {
         const newKey = input.value.trim();;
         if (this.validateNewKey(newKey)) {
-            this.map[newKey] = this.map[this.key] != null ? this.map[this.key] : "";
-            delete this.map[this.key];
+            this.tObject.data[newKey] = this.tObject.data[this.key] != null ? this.tObject.data[this.key] : "";
+            delete this.tObject.data[this.key];
             this.key = newKey;
         } else {
-            alert(`Please enter a unique, valid key for this object.`);
+            alert(`A new attribute must not match an existing attribute. Additionally, the attributes "", "parent", "to", and "from" cannot be added.`);
             input.value = this.key;
         } 
     },
@@ -3926,14 +3939,10 @@ const rowPrototype = {
             td.appendChild(input);
             input.required = true;
             input.pattern = "[\\s]*[\\S]+.*";
-            //if (input.validity.valueMissing) {
-            //    input.setCustomValidity("Please fill out this field. Alternatively, delete this row.");
-            //}
-            //const that = this;
-            //input.addEventListener("change", function() {
-            //    that.updateMapKey(this);
-            //});
-            input.addEventListener("change", () => {this.updateMapKey(this)});
+            const that = this;
+            input.addEventListener("change", function() {
+                that.updateMapKey(this);
+            });
         } else {
             td.textContent = this.key;
         } 
@@ -3946,8 +3955,24 @@ const rowPrototype = {
      * @return {boolean}
      */
     validateNewValue(value) {
-        if (this.key === "longitude" || this.key === "latitude") {
-            return !isNaN(parseFloat(value));
+        if (this.key === "longitude" || this.key === "latitude") return isNumberString(value);
+        if (this.key === "parent") {
+            try {
+                if (getType(gTree.getObject(gTree.treeMap.getKey(value))) === "configurationNode") return false;
+            } catch (e) {
+                return false;
+            }
+        }
+        if (this.key === "to" || this.key === "from") {
+            const invalidTypes = ["configurationNode", "line"];
+            try {
+                const type = getType(gTree.getObject(gTree.treeMap.getKey(value)));
+                if (invalidTypes.includes(type)) return false;
+                if (this.key === "to" && this.tObject.data.from === value) return false;
+                if (this.key === "from" && this.tObject.data.to === value) return false;
+            } catch (e) {
+                return false;
+            } 
         }
         return true;
     },
@@ -3962,12 +3987,13 @@ const rowPrototype = {
             input.value = "";
             return;
         }
-        const newValue = input.value.trim();
+        let newValue = input.value.trim();
         if (this.validateNewValue(newValue)) {
-            this.map[this.key] = newValue;
+            if (this.key === "longitude" || this.key === "latitude") newValue = parseFloat(newValue);
+            this.tObject.data[this.key] = newValue;
         } else {
             alert(`The value "${newValue}" is invalid for for the key "${this.key}" in the table.`);
-            input.value = this.map[this.key];
+            input.value = this.tObject.data[this.key];
         }
     },
     /** 
@@ -3978,16 +4004,20 @@ const rowPrototype = {
     getValueElement(nonModifiableProperties) {
         const td = document.createElement("td");
         if (typeof(this.value) === "string") {
+            // Display a string with no regard to any TreeObject
             td.textContent = this.value;
             return td;
         } else if (this.value instanceof HTMLElement) {
+            // Display another HTMLElement instead of a string
             td.append(this.value);
             return td;
         } else if (this.value == null) {
-            if (this.map == null) {
+            if (this.tObject == null) {
+                // Don't display any value
                 return td;
             } else {
-                const value = this.key === "" ? "" : this.map[this.key];
+                // Display value within TreeObject.data
+                const value = this.key === "" ? "" : this.tObject.data[this.key];
                 if (nonModifiableProperties.includes(this.key)) {
                     td.textContent = value;
                 } else {
@@ -3999,11 +4029,10 @@ const rowPrototype = {
                     }
                     input.classList.add("modalInput");
                     td.appendChild(input);
-                    //const that = this;
-                    //input.addEventListener("change", function() {
-                    //    that.updateMapValue(this);
-                    //});
-                    input.addEventListener("change", () => { this.updateMapValue(this) });
+                    const that = this;
+                    input.addEventListener("change", function() {
+                        that.updateMapValue(this);
+                    });
                     input.value = value;
                 }
                 return td;
@@ -4027,10 +4056,6 @@ const rowPrototype = {
             btn.innerHTML = "&#9587;"
             btn.setAttribute("class", "modalButton deleteButton"); 
             td.appendChild(btn);
-            //const that = this;
-            //btn.addEventListener("click", function() {
-            //    that.delete();
-            //});
             btn.addEventListener("click", () => { this.delete() });
         } 
         return td;
@@ -4042,10 +4067,10 @@ const rowPrototype = {
      */
     delete() {
         this.self.parentElement.removeChild(this.self);
-        if (this.map != null) {
-            delete this.map[this.key];
+        if (this.tObject != null) {
+            delete this.tObject.data[this.key];
         } 
-        // This is only used in with the selection table rows (very confusing btw)
+        // This is only used with the selection table rows (very confusing btw)
         if (this.element != null) {
             gSelection.remove(this.element);
             const table = document.getElementById(`descriptionTable_${this.element.id}`);
@@ -4062,18 +4087,20 @@ const rowPrototype = {
 /** 
  * Return a Row that can be appended to a table.
  * 
- * @param {string} key - the key of the row, which must be a property of the map argument if the map argument is not null.
+ * @param {string} key - the key of the row, which must be a property of the tObject.data argument if the tObject argument is not null.
  * @param {string|HTMLElement} - an optional value of the row.
  * @param {Object} map - an optional object that contains the data being manipulated by all of the rows. 
+ * @param {?} value - either a string or an HTMLElement to be displayed outright, with no relationship to the tObject (which should be null if this argument is passed).
  * @param {boolean} deletable - whether or not the row should have a delete button.
  * @return {Row} - A wrapper object around the HTMLTableRowElement.
  */ 
-function createRow({key, value=null, map=null, deletable=false}) {
+function createRow({key, value=null, tObject=null, deletable=false}) {
     const obj = Object.create(rowPrototype);
     obj.validateArguments(arguments[0]);
     obj.key = key;
     obj.value = value;
-    obj.map = map;
+    obj.tObject = tObject;
+    //obj.map = map;
     obj.self = document.createElement("tr");
     obj.self.append(obj.getDeleteElement(deletable, nonDeletableProperties));
     obj.self.append(obj.getKeyElement());
@@ -4225,13 +4252,10 @@ function initializeJQuery() {
 
 //ADD PROMPT TO SAVE CHANGES BEFORE EXIT
 {% if showFileMenu %}
-	window.onbeforeunload = function(e) {
-        if (JSON.stringify(readFeeder) !== JSON.stringify(writeFeeder)) {
-            const confirmationMessage = `It looks like you have been editing something. 
-            If you leave before saving, your changes will be lost.`;
-            return confirmationMessage;
-        }
-	};
+    // Browsers don't show custom 'beforeunload' messages anymore due to spamming users, so don't bother setting it
+    window.onbeforeunload = function(event) {
+        return "";
+    }
 {% endif %}
 </script>
 <!--<script type='text/javascript' src='/static/distDataValidation.js'></script>-->
