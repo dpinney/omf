@@ -1215,8 +1215,6 @@ function createViewport(tree, svgContainer) {
     /* Uncomment above to make gScaleFactor go away */
 	window.panZoom = svgPanZoom('#svgContainer', {
         /* Override the default values set by 'optionsDefaults' in svg-pan-zoom.js */
-        //contain: false,
-        //fit: false,
         dblClickZoomEnabled: false,
         zoomScaleSensitivity: 0.2,
         minZoom: 0.1,
@@ -1333,10 +1331,8 @@ function dropPill(thisButton, name) { // eslint-disable-line
     document.getElementById("interfaceContainer").addEventListener('click', clickCloseEvent, true)
 }
 
+//Returns real Lat/Long of a click event, used in the moveBus function
 function clickLatLon(event) {
-	//Returns real Lat/Long of a click event, used in the moveBus function
-	//const sizes = window.panZoom.getSizes();
-    //const zoom = sizes.realZoom;
 	const pan = window.panZoom.getPan();
     const zoom = panZoom.getSizes().realZoom;
 	const svg = document.getElementById('svgContainer');
@@ -1649,31 +1645,6 @@ function attachAddComponentListeners() {
     });
 }
 
-/**
- * TODO: add unit tests
- * delete this
- */
-function getSelectionErrorMessage(type) {
-    let msg;
-    switch (type) {
-        case "line":
-            msg = "Please select exactly 2 circles to insert this object. These circles must not be configuration objects. "; 
-            break;
-        case "childNode":
-            msg = "Please select exactly 1 circle to act as the parent of this object. This circle must not be a configuration object. ";
-            break;
-        case "configurationNode":
-            msg = "Please?";
-            break;
-        case "independentNode":
-            msg = "what?";
-            break;
-    }
-    msg += "Select an object by holding the 'alt' key and left clicking the object. After selecting the correct objects, " +
-    "open the 'add' menu again and click on the object you want to add."
-    return msg;
-}
-
 /** 
  * TODO: add unit-tests
  * @param {Element} ul - An html element where the list will be attached
@@ -1697,21 +1668,10 @@ function attachFeederList (ul, feeders, owner) {
             ul.append(li);
         }
     });
-    //for (let writeFeeder of feeders) {
-    //    if (writeFeeder.name != thisFeederName) {
-    //        const li = document.createElement("li");
-    //        li.classList.add("feederItem");
-    //        li.innerHTML = `<strong>${writeFeeder.name}</strong> from <br>"${writeFeeder.model}"`;
-    //        li.addEventListener("click", function() {
-    //            loadFeeder(writeFeeder.name, writeFeeder.model, owner);
-    //        });
-    //        ul.append(li);
-    //    }
-    //}
 }
 
 /**
- * TODO: add unit tests
+ *
  */
 function addFileMenuHandlers() {
     const menu = document.getElementById("fileMenu");
@@ -1735,7 +1695,7 @@ function addFileMenuHandlers() {
 }
 
 /** 
- * TODO: add unit tests
+ * 
  */
 function addEditMenuHandlers() {
     const menu = document.getElementById("editMenu");
@@ -2216,17 +2176,6 @@ function saveAttachment() {
 	writeFeeder.attachments[name] = document.getElementById('editAttachmentBox').value;
 }
 
-//ADD PROMPT TO SAVE CHANGES BEFORE EXIT
-/*
-{% if is_admin or not public %}
-	window.onbeforeunload = function(e) {
-		let confirmationMessage = 'It looks like you have been editing something. ';
-		confirmationMessage += 'If you leave before saving, your changes will be lost.';
-		//if (unsavedChanges) return confirmationMessage;
-	};
-{% endif %}
-*/
-
 //**************************************************
 // File menu interface
 //**************************************************
@@ -2605,7 +2554,6 @@ const treeMapPrototype = {
 
     /**
      * good
-     * Problem. parentKey is undefined. Why? Because I already deleted the parent from the tree!
      */
     unmapChild(childKey) {
         const parentKey = this.getParentKey(childKey);
@@ -2682,28 +2630,13 @@ function createTreeMap(tree) {
 //**************************************************
 // Tree interface
 //**************************************************
-/**
- * How to write a console.error message:
- * 1) State what failed (console.error trace does this already)
- * 2) State why there was a failure in a USER FRIENDLY way
- * 3) State action taken (or NOT taken), if any.
- */
-
-/*
-I need to think about this. When I ask for children or connected lines, I expect that sometimes the result will be undefined
-because not all nodes/lines have children and/or connected lines. When I ask for a parent, do I expect the result to be undefined
-sometimes? Yes, I do. When I ask for an object, do I expect the result to be undefined sometimes? No. I don't
-*/
 
 const treePrototype = {
 
-    /* Public methods 
-    TODO: delete unused methods
-    */
+    /* Public methods */
 
     /**
      * good.
-     * This should throw an Error. If I provide what I believe is a valid key, I should always get an object.
      */
     getObject(key) {
         const obj = this.tree[key];
@@ -2713,7 +2646,6 @@ const treePrototype = {
 
     /**
      * good. doesn't need unit tests
-     * Convenience method
      */
     getParent(childKey) {
         const parentKey = this.treeMap.getParentKey(childKey);
@@ -2738,7 +2670,6 @@ const treePrototype = {
 
     /**
      * good. doesn't need unit tests
-     * Convenience method
      */
     getToNode(lineKey) {
         const sourceKey = this.getToNodeKey(lineKey);
@@ -2763,7 +2694,6 @@ const treePrototype = {
 
     /**
      * good. doesn't need unit tests
-     * Convenience method
      */
     getFromNode(lineKey) {
         const targetKey = this.getFromNodeKey(lineKey);
@@ -2773,7 +2703,6 @@ const treePrototype = {
 
     /**
      * good. doesn't need unit tests
-     * Get the keys of nodes that are on the other ends of lines connected to nodeKey.
      */
     getPairedNodeKeys(nodeKey) {
         const pairedNodes = [];
@@ -2799,9 +2728,6 @@ const treePrototype = {
 
     /** 
      * good
-     * When I delete an object, first it must be deleted from the svg before deleting it from the tree. So, I need to call
-     * this method BEFORE I create the SvgData to delete to make sure I don't delete some svg elements and discover that whoops
-     * it was actually illegal to do so.
      */
     isDeletable(key) {
         this.getObject(key);
@@ -2880,17 +2806,6 @@ function createTree(tree = {}) {
     treeWrapper.treeMap = createTreeMap(tree);
     return treeWrapper;
 }
-
-/**
- * TODO: this should go at the top of the file
- */
-//**************************************************
-// TreeWrapper interface
-//**************************************************
-
-/* FUNCTIONS TO PORT */
-
-// A function should take in as little as it needs to do its job.
 
 //not optimal, but it works
 function getMixedCaseKey(object, lowercaseKey) {
@@ -3068,606 +2983,6 @@ function isValidForAdd(keys, component) {
 }
 /* Functions to port */
 
-const treeWrapperPrototype = {
-
-    /* Public TreeWrapper methods */
-
-    dirtyInsert(treeObject) {
-        this.tree[treeObject.key] = treeObject.data;
-        const name = treeObject.data.name;
-        if (name != null) {
-            this.names[name] = treeObject.key;
-        } 
-    },
-
-    /** 
-     * Return a TreeWrapper that represents which tree objects need to be redrawn as a result of inserting 
-     * this TreeObject.
-     * 
-     * If the TreeObject.key does not exist in this TreeWrapper, the new TreeObject.key and new TreeObject.data are added to the
-     * TreeWrapper. If the TreeObject.key does exist in this TreeWrapper, the data at the existing key is overwritten. This is a
-     * public method, which means it should be used in event handlers and other places to do stuff. While this method will work
-     * for ANY TreeWrapper, it is intended to be used with the "gTree" only. The gTree encapsulates all the data of
-     * the model, which is what we want to work with.
-     * @param {TreeObject} treeObject - contains a key and some data that will be used to add or overwite
-     * data inside of this TreeWrapper.
-     * @return {TreeWrapper} - contains all of the tree objects that need to be redrawn as a result of modifying the data.
-     */
-     insert(treeObject) {
-        this.tree[treeObject.key] = treeObject.data;
-        const name = treeObject.data.name;
-        if (name != null) {
-            this.names[name] = treeObject.key;
-        } else {
-            //console.log(`Inserted TreeObject with key "${treeObject.key}" did not have a "name" property.`);
-        }
-        /*
-        const s = new Set();
-        s.add(treeObject.key);
-        this.getSubtreeToRedraw(treeObject.key).forEach(key => {
-            s.add(key);
-        });
-        return new Tree(this.tree, s);
-
-        const t = new Tree(this.tree, this.getSubtreeToRedraw(tObject.key));
-        */
-        /*
-        const tWrapper = createTreeWrapper();
-        tWrapper.add(treeObject.key, this);
-        tWrapper.merge(this.getSubtreeToRedraw(treeObject.key));
-        return tWrapper;
-        */
-    },
-
-    /** 
-     * Delete the tree object with the passed key argument from this TreeWrapper.
-     * @param {string} key - the key used to identify the tree object to delete.
-     * @return {TreeWrapper} tWrapper - contains 1 tree object that was affected by the delete operation.
-     */
-    delete(key) {
-        const tWrapper = createTreeWrapper();
-        if (!this.contains(key)) {
-            console.log(`Unable to perform delete operation. This TreeWrapper does not contain a tree object with key: "${key}".`);
-            return tWrapper;
-        }
-        const childKeys = Object.keys(this.getChildrenOf(key).tree);
-        if (childKeys.length > 0) {
-            throw new Error(`Cannot delete object named "${this.tree[key].name}" because it has existing children. Please delete the children first.`);
-            return tWrapper;
-        }
-        const lineKeys = Object.keys(this.getConnectedLinesOf(key).tree);
-        if (lineKeys.length > 0) {
-            throw new Error(`Cannot delete object named "${this.tree[key].name}" because it has connected lines. Please delete the connected lines first.`);
-            return tWrapper;
-        }
-        tWrapper.add(key, this);
-        delete this.names[this.tree[key].name];
-        delete this.tree[key];
-        return tWrapper;
-    },
-
-    //Need to keep this for now so stuff doesn't break
-    /** 
-     * Return a TreeWrapper that contains all tree objects that will be deleted as a result of deleting the
-     * tree object with the passed key argument.
-     * 
-     * @param {string} key - the key of the tree object for which to find its deletable subtree.
-     * @param {Array} visited - contains keys of tree objects that have already been visited so the method dosen't
-     * recurse infinitely in case of a cycle.
-     * @return {TreeWrapper}
-     */
-     getSubtreeToDelete(key, visited) {
-        if (!Array.isArray(visited)) {
-            throw new Error("Visited argument must be an array");
-        }
-        visited.push(key);
-        const tWrapper = createTreeWrapper();
-        const children = this.getChildrenOf(key);
-        tWrapper.merge(children);
-        tWrapper.merge(this.getConnectedLinesOf(key));
-        if (Object.keys(children.tree).length > 0) {
-            for (let childKey in children.tree) {
-                if (!visited.includes(childKey)) {
-                    tWrapper.merge(this.getSubtreeToDelete(childKey, visited));
-                }
-            }
-        }
-        return tWrapper;
-    },
-
-    /** 
-     * Delete the tree object with the passed key argument from this TreeWrapper. Also recursively delete any connected
-     * lines and children. 
-     * @param {string} key - the key of the tree object which should be deleted, along with any associated tree objects.
-     * @return {TreeWrapper} - contains all of the tree objects that need to be removed from the svg
-     * as a result of the recursive delete operation.
-     */
-    recursiveDelete(key) {
-        const tWrapper = createTreeWrapper();
-        if (!this.contains(key)) {
-            //console.log(`Unable to perform a recursive delete operation. The tree object with key "${key}" does not exist
-            //in this TreeWrapper`);
-            return tWrapper;
-        }
-        tWrapper.add(key, this);
-        tWrapper.merge(this.getSubtreeToDelete(key, []));
-        for (let key in tWrapper.tree) {
-            delete this.names[this.tree[key].name];
-            delete this.tree[key];
-        }
-        return tWrapper;
-    },
-
-    /* Private TreeWrapper methods */
-
-    /** 
-     * Add an object from the tWrapper argument into this TreeWrapper.
-     * @param {string} key - the key of the object to search for in the tWrapper argument.
-     * @param {TreeWrapper} tWrapper - the TreeWrapper from which we want to get data to insert into this TreeWrapper.
-     */
-    add(key, tWrapper) {
-        if (!tWrapper.contains(key)) {
-            // TODO: I've seen a case where this gets triggerred because somehow the viewport is added to the TreeWrapper
-            console.log(`Unable to add the desired tree object to this TreeWrapper. The tree object with the key: "${key}" does not exist in the source tWrapper argument.`);
-            throw new Error();
-            if (key.includes("viewport")) {
-                throw new Error();
-            }
-            return;
-        }
-        this.tree[key] = tWrapper.tree[key];
-        const name = this.tree[key].name;
-        if (name == null) {
-            return;
-        }
-        this.names[name] = key;
-    },
-
-    /** 
-     * Return a TreeWrapper that contains direct children of the tree object with the passed key argument.
-     * @param {string} key - the key of the tree object that is presumably a parent to some other tree objects.
-     * @return {TreeWrapper} childrenTreeWrapper - contains only children tree objects of the key tree object.
-     */
-    getChildrenOf(key) {
-        const tWrapper = createTreeWrapper();
-        if (!this.contains(key)) {
-            //console.log(`Unable to get the children of the tree object with key: "${key}". The key does not exist in this
-            //TreeWrapper.`);
-            return tWrapper;
-        }
-        const type = getType(this.tree[key]);
-        if (type === "childNode" || type === "independentNode") {
-            const thisName = this.tree[key].name;
-            if (thisName == null) {
-                /* Children reference their parent with the parent's name. If a node doesn't have a name, then it must not
-                have children. */
-                //console.log(`Unable to get the children of the tree object with key: "${key}". The tree object
-                //does not have a name.`);
-                return tWrapper;
-            } 
-            // TODO: Build an object in TreeWrapper that allows instant lookup of children for any TreeWrapper.tree object
-            Object.keys(this.tree).forEach(key => {
-                if (this.tree[key].parent === thisName) {
-                    tWrapper.add(key, this);
-                }
-            });
-        }
-        return tWrapper;
-    },
-
-    /** 
-     * Return a TreeWrapper that contains lines connected to the tree object with the passed key argument.
-     * @param {string} key - the key of the tree object that presumably has lines connected to it.
-     * @return {TreeWrapper} - contains only line tree objects that connect to the desired tree object.
-     */
-    getConnectedLinesOf(key) {
-        const tWrapper = createTreeWrapper();
-        if (!this.contains(key)) {
-            //console.log(`Unable to find lines that connect to this node with key: "${key}". The key does not exist in this
-            //TreeWrapper.`);
-            return tWrapper;
-        } 
-        const type = getType(this.tree[key]);
-        if (type === "childNode" || type === "independentNode") {
-            const thisName = this.tree[key].name;
-            if (thisName == null) {
-                /* Lines reference their connected nodes with the node's name. If a node doesn't have a name, then it must not
-                have lines. */
-                //console.log(`Unable to get the lines of the tree object with key: "${key}". The tree object
-                //does not have a name.`);
-                return tWrapper;
-            } 
-            // TODO: Build an object in TreeWrapper that allows instant lookup of connected lines for any TreeWrapper.tree object
-            Object.keys(this.tree).forEach(key => {
-                if (this.tree[key].to === thisName || this.tree[key].from === thisName) {
-                    tWrapper.add(key, this);
-                }
-            });
-        }
-        return tWrapper;
-    },
-
-    /** 
-     * Merge the treeWrapper argument into this TreeWrapper.
-     * 
-     * If no keys argument is passed, the entire treeWrapper argument is merged into this TreeWrapper.
-     * If a keys argument is passed, only those tree objects with matching keys inside of the treeWrapper argument are merged
-     * into this TreeWrapper.
-     * @param {TreeWrapper} treeWrapper - contains tree objects that will be merged into this TreeWrapper
-     * @param {Array} keys - an optional argument that limits which tree objects are merged into this TreeWrapper
-     */
-    merge(treeWrapper, keys) {
-        if (keys === undefined) {
-            Object.keys(treeWrapper.tree).forEach(key => {
-                this.add(key, treeWrapper);
-            });
-        } else if (Array.isArray(keys)) {
-            keys.forEach(key => {
-                this.add(key, treeWrapper);
-            });
-        } else {
-            throw new Error("If the keys argument is passed, it must be an array");
-        }
-    },
-
-    /**
-     * Return a TreeWrapper that contains only the parent tree object of the child tree object.
-     * 
-     * @param {string} childKey - the key of the child tree object.
-     * @return {TreeWrapper} subWrapper - contains only the parent tree object of the child tree object.
-     */
-    getParentOf(childKey) {
-        const tWrapper = createTreeWrapper();
-        if (!this.contains(childKey)) {
-            //console.log(`Unable to get the parent of the tree object with key: "${childKey}". The key does not exist in this
-            //TreeWrapper.`);
-            return tWrapper;
-        }  
-        const parentName = this.tree[childKey].parent;
-        if (parentName == null) {
-            // This tree object doesn't have a parent, which is fine.
-            return tWrapper
-        }
-        const parentKey = this.names[parentName];
-        if (parentKey == null) {
-            /* If parentKey is undefind, then either 1) the child node has a parent that doesn't exist in this graph or 
-            2) the names object of a TreeWrapper was built incorrectly */
-            //console.log(`Unable to get the parent of the child tree object with key: "${childKey}". The parent does not 
-            //exist in this TreeWrapper.`); //or the 'names' property is being built wrong.
-            return tWrapper;
-        }
-        tWrapper.add(parentKey, this);
-        return tWrapper;
-    },
-
-    /** 
-     * Return a TreeWrapper that contains only tree objects that are on the other ends of lines that connect
-     * to the tree object with the passed key argument.
-     * 
-     * @param {string} key - the tree object for which to search for its paired nodes. Nodes have a paired relationship
-     * if they are connected by a line.
-     * @return {TreeWrapper} - contains only tree objects that are paired nodes of the tree object for which
-     * we searched.
-     */
-    getPairedNodesOf(key) {
-        const tWrapper = createTreeWrapper();
-        if (!this.contains(key)) {
-            //console.log(`Unable to get the paired nodes of the tree object with the key: "${key}". The key does not exist
-            //in this TreeWrapper`);
-            return tWrapper;
-        }
-        const type = getType(this.tree[key]);
-        if (type === "childNode" || type == "independentNode") {
-            const linesTreeWrapper = this.getConnectedLinesOf(key);
-            for (let lineKey in linesTreeWrapper.tree) {
-                const fromKey = this.names[this.tree[lineKey].from];
-                const toKey = this.names[this.tree[lineKey].to];
-                if (key === fromKey) {
-                    // The 'from' node points to this tree object, so we want the other tree object
-                    tWrapper.add(toKey, this);
-                } else if (key === toKey) {
-                    // The 'to' node points to this tree object, so we want the other tree object
-                    tWrapper.add(fromKey, this);
-                } else {
-                    throw new Error(`There was a problem finding a "from" or "to" node for line with key: "${lineKey}"`);
-                }
-            }
-        }
-        return tWrapper;
-    },
-
-    /** 
-     * Return a TreeWrapper that contains nodes on either end of the line that is represented by the
-     * tree object with the passed key argument.
-     * @param {string} key - the key of the tree object that is a line. 
-     * @return {TreeWrapper} subWrapper - contains only 2 tree objects that are on either end of the line,
-     * or 0 tree objects if the tree object isn't a line!
-     */
-    getNodeEndsOf(key) {
-        const tWrapper = createTreeWrapper();
-        if (!this.contains(key)) {
-            //console.log(`Unable to get the node ends of the tree object with the key: "${key}". The key does not exist
-            //in this TreeWrapper`);
-            return tWrapper;
-        } 
-        if (getType(this.tree[key]) === "line") {
-            const fromKey = this.names[this.tree[key].from];
-            const toKey = this.names[this.tree[key].to];
-            if (fromKey == null) {
-                if (toKey == null) {
-                    console.error(`Tree object with key: "${key}" has nonexistent "from" and "to" nodes.`);
-                    return tWrapper;
-                } else {
-                    console.error(`Tree object line with key: "${key}" has nonexistent "from" node.`);
-                    //tWrapper.add(toKey, this);
-                    return tWrapper;
-                }
-            } else if (toKey == null) {
-                console.error(`Tree object line with key: "${key}" has nonexistent "to" node.`);
-                //tWrapper.add(fromKey, this);
-                return tWrapper;
-            } else {
-                tWrapper.add(fromKey, this);
-                tWrapper.add(toKey, this);
-            }
-        }
-        return tWrapper;
-    },
-
-    /**
-     * Return a treeWrapper that contains tree objects that will be affected by drawing the tree object with the key argument.
-     * @param {string} key
-     * @return {TreeWrapper}
-     */
-    getSubtreeToRedraw(key) {
-        const tWrapper = createTreeWrapper();
-        tWrapper.merge(this.getParentOf(key));
-        tWrapper.merge(this.getChildrenOf(key));
-        tWrapper.merge(this.getConnectedLinesOf(key));
-        tWrapper.merge(this.getPairedNodesOf(key));
-        tWrapper.merge(this.getNodeEndsOf(key));
-        return tWrapper;
-    },
-
-    /** 
-     * Return true if the tree of this TreeWrapper contains the 'key' argument as a property, otherwise return false;
-     * @param {string} key - the key to search for in the TreeWrapper.tree
-     * @return {boolean}
-     */
-    contains(key) {
-        if (this.tree[key] == null) {
-            // Methods that use this method have more specific error messages that make this one redundant
-            //console.log(`Unable to perform any operations with the 'key' argument.
-            //No tree object with key: "${key}" exists in this TreeWrapper.`);
-            return false;
-        }
-        //const name = this.tree[key].name;
-        //if (name == null) {
-        //    //console.log(`The tree object with the key: "${key}" does not have a 'name' property, therefore it isn't
-        //    //contained in the 'names' property of this TreeWrapper.`);
-        //} else if (this.names[this.tree[key].name] == null) {
-        //    console.log(`The 'names' property of this TreeWrapper is missing an entry for tree object with key: "${key}",
-        //    name: "${this.tree[key].name}".`); 
-        //}
-        return true;
-    },
-
-    /**
-     * Return an object that maps the name of every tree object to its key, if a tree object has a name.
-     * 
-     * This must run before I can build any other property. O(2n) is much better than O(n^2).
-     * @return {Object}
-     */
-    mapNames() {
-        const map = {};
-        const keys = Object.keys(this.tree);
-        for (let i = 0; i < keys.length; i++) {
-            let name = this.tree[keys[i]].name;
-            if (name == null) continue;
-            let stringName = String(name).toLowerCase();
-            if (stringName === "null" || stringName === "undefined") continue;
-            map[name] = keys[i];
-        }
-        return map;
-    },
-
-    /**
-     * Return the key of the object with a 'name' property value that matches the 'name' argument. If there is no such object,
-     * throw an error.
-     * @param {string} name - the name to search for.
-     * @return {string}
-     */
-    getKeyFromName(name) {
-        const key = this.names[name];
-        if (key === undefined) {
-            throw new Error(`The name "${name}" does not exist in this TreeWrapper.names.`);
-        }
-        return key
-    },
-};
-
-/** 
- * Return an object that has an 'tree' object and a 'names' map.
- * 
- * The 'tree' object is a reference to the tree that exists in writeFeeder, which is the original source of all data.
- * The 'names' object maps the name of a tree object to the key of the tree object in the tree. This allows faster
- * retrieval of to/from/parent nodes when building the svg data. Without this map, we would have to parse the tree to find
- * every to/from/parent node. This would be slow.
- * @param {Object} tree - contains all of the objects that will be used to generate the svg.
- * @return {TreeWrapper} treeWrapper - a wrapper around the tree argument. This wrapper also has the name-key map to speed up 
- * to/from/parent node retrieval.
- */
-function createTreeWrapper(tree = {}) {
-    Object.keys(tree).forEach(key => {
-        if (!isNumberString(key)) {
-            throw new Error(`The key "${key}" in the 'tree' argument cannot be parsed to a valid number.`);
-        }
-    });
-    const tWrapper = Object.create(treeWrapperPrototype);
-    tWrapper.tree = tree;
-    tWrapper.names = tWrapper.mapNames();
-    return tWrapper;
-}
-
-//**************************************************
-// TreeWrapper-to-SVG interface
-//**************************************************
-
-const deletableSvgDataPrototype = {
-
-    /* Public interface methods */
-
-    /**
-     * Use the ids inside of the deletableSvgData instance to remove elements from the document viewport.
-     */
-    deleteFrom(viewport) {
-        this.ids.forEach(id => {
-            let e = document.getElementById(id);
-            if (e != null) {
-                viewport.removeChild(document.getElementById(id));
-            }
-            // could log a console message if it would be helpful
-        });
-    }
-}
-
-/** 
- * TODO: should take a treeWrapper, add unit tests
- * 
- * @param {Object} tree - A tree of all tree objects that 1) were already deleted from the tree and 2) should also
- * be deleted from the svg.
- * @return {Object} DeletableSvgData - Has a method for deleting from a viewport.
- */
-function createDeletableSvgData(tree) {
-    const obj = Object.create(deletableSvgDataPrototype);
-    obj.ids = []
-    Object.keys(tree).forEach(key => {
-        if (getType(tree[key]) === "childNode") {
-            obj.ids.push(key);
-            const parentChildLineId = `${tree[key].parent}_${tree[key].name}`
-            obj.ids.push(parentChildLineId);
-        } else {
-            obj.ids.push(key);
-        }
-        //console.log(`Failed to delete type: "${tree[key].object}", name: "${tree[key].name}", key: ${key}"`);
-        //throw new Error(`tree key: ${key}, with data: ${tree[key]} is not a parent-child node, a parentless node, or a line.`); 
-    });
-    return obj;
-}
-
-const addableSvgDataPrototype = {
-
-    /* "Public" interface methods */
-
-    /**
-     * Deletes lines and circles from the viewport if they exist, then draws all lines and circles on the viewport.
-     * 
-     * I know why elements lose their selected status. I'm removing old circles and adding completely new ones each time!
-     * The old circles/lines have coordinates that are no good. Would it be smart to modify them instead of always replacing them?
-     * @param {HTMLElement} viewport - a viewport created by svg-pan-zoom.
-     */
-    drawTo(viewport) {
-        this.lines.forEach(line => {
-            this.drawObject(line, viewport);
-        });
-        this.circles.forEach(circle => {
-            this.drawObject(circle, viewport);
-        });
-        //scaleTo(gScaleLevel);
-    },
-
-    /* "Private" helper methods */
-
-    /**
-     * TODO: add unit tests
-     */
-    drawObject(obj, viewport) {
-        let e = document.getElementById(obj.id);
-        if (e != null) {
-            if (e.classList.contains("selected")) {
-                gSelection.remove(e);
-                gSelection.add(obj);
-            }
-            e.parentNode.removeChild(e);
-        } 
-        viewport.appendChild(obj);
-    },
-
-    /** 
-     * TOOD: add unit tests
-     */
-    addLine(key) {
-        const nodes = Object.values(this.treeWrapper.getNodeEndsOf(key).tree);
-        if (nodes.length < 2) {
-            console.error(`Could not find both of the nodes on either end of a line with key: "${key}". Line was not drawn`);
-            /* TODO: Draw the line anyway with some kind of default values so the user can see there's a broken line?
-            I could have a second viewport that is contained in a table with all the broken lines and circles! Neat!
-            */
-            return;
-        }
-        const tree = this.treeWrapper.tree;
-        let line;
-        if (tree[key].from === nodes[0].name) {
-            line = createSvgLine(nodes[0], nodes[1], key, tree[key]);
-        } else {
-            line = createSvgLine(nodes[1], nodes[0], key, tree[key]);
-        }
-        this.lines.push(line);
-    },
-
-    /** 
-     * TODO: add unit tests
-     */
-    addParentChildLine(key) {
-        const parent = Object.values(this.treeWrapper.getParentOf(key).tree)[0];
-        if (parent == null) {
-            //console.log(`Could not draw the parent-child line for child tree object with key: "${key}"`);
-            return;
-        }
-        const parentChildLine = createSvgLine(parent, this.treeWrapper.tree[key]);
-        this.lines.push(parentChildLine);
-    },
-};
-
-/** 
- * Return an AddableSvgData instance.
- * 
- * An AddableSvgData instance contains an array of circles and an array of lines that can be draw to the svg.
- * @param {TreeWrapper} treeWrapper - contains all tree objects that should be drawn to to the svg.
- * @return {AddableSvgData} - the svg data to add.
- */
-function createAddableSvgData(treeWrapper) {
-    if (Object.getPrototypeOf(treeWrapper) !== treeWrapperPrototype) {
-        throw new Error("treeWrapper argument must be an instance of TreeWrapper");
-    }
-    const obj = Object.create(addableSvgDataPrototype);
-    obj.treeWrapper = treeWrapper;
-    obj.lines = [];
-    obj.circles = [];
-    const tree = treeWrapper.tree;
-    Object.keys(tree).forEach(key => {
-        let type = getType(tree[key]);
-        switch (type) {
-            case "line":
-                obj.addLine(key);
-                break;
-            case "childNode":
-                obj.circles.push(createSvgCircle(key, tree[key]));
-                obj.addParentChildLine(key);
-                break;
-            case "configurationNode":
-                obj.circles.push(createSvgCircle(key, tree[key]));
-                break;
-            case "independentNode":
-                obj.circles.push(createSvgCircle(key, tree[key]));
-                break;
-            default:
-                console.log(`Failed to draw object type: "${tree[key].object}", name: "${tree[key].name}", key: "${key}"`);
-        }
-    });
-    return obj
-}
-
 //**************************************************
 // Utility methods
 //**************************************************
@@ -3737,18 +3052,6 @@ function getType(obj) {
         }
     }
     return JSON.parse(JSON.stringify(oldObject));
-}
-
-/**  
- * TODO: add unit tests
- */
-function keyIsStringAndValidNumber(key) {
-    if (typeof(key) !== "string") {
-        throw new Error("key argument must be a string.");
-    }
-    if (isNaN(parseFloat(key))) {
-        throw new Error(`key argument "${key}" must be a string that can be parsed to a valid number`);
-    }
 }
 
 /* Private utility methods */
@@ -4141,82 +3444,6 @@ function createSvgData(keys) {
     return svgData;
 }
 
-/** 
- * TODO: add unit tests
- * @return {Object} SvgCircle - A fully configured svg circle.
- */
- 
-function createSvgCircle(key, {longitude, latitude, object}, {r = 2, strokeWidth = 0.5} = {}) {
-    keyIsStringAndValidNumber(key);
-    if (longitude == null || latitude == null || object == null) {
-        //console.log(`For circle with tree key: "${key}", longitude was: "${longitude}",
-        //latitude was: "${latitude}", object was: "${object}"`)
-    }
-	const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-	circle.setAttribute('id', key);
-	circle.setAttribute('class', object);
-	circle.setAttribute('r', r);
-    circle.setAttribute('stroke-width', strokeWidth);
-    // Set coordinates and consider if they need to be translated
-    longitude = (parseFloat(longitude) - gOffsetX) * gDrawScaleFactor;
-    //longitude = parseFloat(longitude) - gOffsetX;
-    latitude = (parseFloat(latitude) - gOffsetY) * gDrawScaleFactor;
-    //latitude = parseFloat(latitude) - gOffsetY;
-    circle.setAttribute('cx', longitude);
-    circle.setAttribute('cy', latitude);
-    return circle;
-}
-
-
-/** 
- * TODO: add unit tests
- * @return {Object} SvgLine - A fully configured svg line.
- */
- 
-function createSvgLine(sourceNode, targetNode, key, thisObject) {
-    const svgLine = document.createElementNS('http://www.w3.org/2000/svg', 'line'); 
-    if (sourceNode.longitude == null || sourceNode.latitude == null || targetNode.longitude == null ||
-    targetNode.latitude == null) {
-        console.log(`For line with tree key: "${key}", sourceNode.name was: "${sourceNode.name}",
-        sourceNode.longitude was: "${sourceNode.longitude}", sourceNode.latitude was: "${sourceNode.latitude}",
-        targetNode.name was: "${targetNode.name}", targetNode.longitude was: "${targetNode.longitude}",
-        targetNode.latitude was: "${targetNode.latitude}"`)
-        //throw new Error(`For line with tree key: "${key}", sourceNode.longitude was: "${sourceNode.longitude}",
-        //sourceNode.latitude was: "${sourceNode.latitude}", targetNode.longitude was: "${targetNode.longitude}",
-        //targetNode.latitudw was: "${targetNode.latitude}"`)
-    }
-    // Set coordinates and consider if they need to be translated
-    let sourceLon = (parseFloat(sourceNode.longitude) - gOffsetX) * gDrawScaleFactor;
-    let sourceLat = (parseFloat(sourceNode.latitude) - gOffsetY) * gDrawScaleFactor;
-    let targetLon = (parseFloat(targetNode.longitude) - gOffsetX) * gDrawScaleFactor;
-    let targetLat = (parseFloat(targetNode.latitude) - gOffsetY) * gDrawScaleFactor;
-    //let sourceLon = parseFloat(sourceNode.longitude) - gOffsetX;
-    //let sourceLat = parseFloat(sourceNode.latitude) - gOffsetY;
-    //let targetLon = parseFloat(targetNode.longitude) - gOffsetX;
-    //let targetLat = parseFloat(targetNode.latitude) - gOffsetY; 
-    svgLine.setAttribute("x1", sourceLon); 
-    svgLine.setAttribute("x2", targetLon);
-    svgLine.setAttribute("y1", sourceLat); 
-    svgLine.setAttribute("y2", targetLat);
-    if (key == null && thisObject == null) {
-        // key and thisObject weren't included, so this line doesn't represent a real object in the tree, so it's a parent-child line.
-        svgLine.setAttribute("id", `${sourceNode.name}_${targetNode.name}`);
-        svgLine.setAttribute("class", "parentChild");
-        svgLine.setAttribute("stroke-width", 0.25);
-        return svgLine;
-    } else if (key != null && thisObject != null) {
-        keyIsStringAndValidNumber(key);
-        svgLine.setAttribute("id", key);
-        const phaseCount = countPhases(thisObject.phases).toString();
-        const domClass = `${thisObject.object} p${phaseCount}`;
-        svgLine.setAttribute("class", domClass);
-        svgLine.setAttribute("stroke-width", phaseCount);
-        return svgLine;
-    }
-    throw new Error("key and thisObject arguments must be passed together or not at all");
-}
-
-
 //**************************************************
 // TreeObject interface
 //**************************************************
@@ -4275,17 +3502,17 @@ const treeObjectPrototype = {
         const fromNode = gTree.getFromNode(lineKey);
         const parentLongitude = (toNode.longitude + fromNode.longitude)/2;
         const parentLatitude = (toNode.latitude + fromNode.latitude)/2;
-        const lonValue = getRandomOffset();
+        const lonValue = this.getRandomOffset();
         this.data.longitude = Math.random() < 0.5 ? parentLongitude + lonValue : parentLongitude - lonValue; 
-        const latValue = getRandomOffset();
+        const latValue = this.getRandomOffset();
         this.data.latitude = Math.random() < 0.5 ? parentLatitude + latValue : parentLatitude - latValue;
     },
 
     setupChildNodeWithNode(nodeKey) {
         const parent = gTree.getObject(nodeKey);
-        const lonValue = getRandomOffset();
+        const lonValue = this.getRandomOffset();
         this.data.longitude = Math.random() < 0.5 ? parent.longitude + lonValue : parent.longitude - lonValue;
-        const latValue = getRandomOffset();
+        const latValue = this.getRandomOffset();
         this.data.latitude = Math.random() < 0.5 ? parent.latitude + latValue : parent.latitude - latValue;
     },
 
@@ -4306,13 +3533,11 @@ function getNewTreeKey(tree) {
 	return nextKey.toString();
 }
 
-// Fix this function. Some lines have CLOSED instead of ABCN or something.
 /**
- * TODO: add unit tests. It actually needs them
+ * good
  */
+// Return the number of phases a line has.
 function countPhases(str) {
-	// Return the number of phases a line has.
-	//return p.length
 	let total = 0
 	if (str.search('A') > -1) {total++}
 	if (str.search('B') > -1) {total++}
@@ -4337,8 +3562,7 @@ function createTreeObject(input, tree) {
     const tObject = Object.create(treeObjectPrototype);
     if (typeof(input) === "string") {
         if (isNumberString(input)) {
-            const obj = tree.tree[input];
-            if (obj == null) throw new Error(`TreeObject creation failed. The key: "${input}" needed to create the TreeObject does not exist in this Tree.`);
+            const obj = tree.getObject(input);
             tObject.key = input;
             tObject.data = deepCopy(obj);
             ['longitude', 'latitude'].forEach(prop => {
@@ -4833,13 +4057,6 @@ const rowPrototype = {
             }
         }
     },
-
-    /**
-     * TODO: add unit tests
-     */
-    //updateInput() {
-    //    //need a direct reference to the input of the row for convenience.
-    //}
 }
 
 /** 
