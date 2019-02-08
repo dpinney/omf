@@ -519,6 +519,9 @@
             <!-- Svg container -->
             <div id="svgContainerWrapper" style="height: auto;">
                 <svg id='svgContainer' xmlns='http://www.w3.org/2000/svg'>
+                    <!--
+                        line.selected, circle.selected {stroke:lime;}
+                    -->
                     <style type="text/css">
                         <![CDATA[
                         .house {fill:blue;}
@@ -529,10 +532,8 @@
                         line {stroke:black;}
                         line.parentChild {stroke:LightGrey;}
                         circle {stroke:white; fill:gray;}
-                        line.selected, circle.selected {stroke:lime;}
                         .undefined, .regulator_configuration, .transformer_configuration, .triplex_line_configuration, .line_configuration, .volt_var_control, .line_spacing, .climate, .overhead_line_conductor, .underground_line_conductor, .triplex_line_conductor, .player, .schedule {fill: #bfbfbf;}
                         ]]>
-                        
                     </style>
                 </svg>
             </div>
@@ -1078,13 +1079,15 @@ const selectionPrototype = {
         return false;
     },
     remove(element) {
-        //const idx = this.selectedElements.findIndex(e => e === element);
         const elements = this.selectedElements.filter(e => e.id === element.id);
         if (elements.length === 0) {
             throw new Error("Remove operation failed. The element argument does not exist in this selection.");
         }
         elements.forEach(e => {
             e.classList.remove("selected");
+            Array.from(e.children).forEach(child => {
+                e.removeChild(child);
+            })
             this.selectedElements.splice(this.selectedElements.indexOf(e), 1);
         });
     },
@@ -1095,11 +1098,15 @@ const selectionPrototype = {
             throw new Error("Add operation failed. The element argument already has the 'selected' class.");
         }
         element.classList.add("selected");
+        this.addAnimation(element);
         this.selectedElements.push(element);
     },
     empty() {
         this.selectedElements.forEach(e => {
             e.classList.remove("selected");
+            Array.from(e.children).forEach(child => {
+                e.removeChild(child);
+            });
         });
         this.selectedElements = [];
     },
@@ -1107,6 +1114,16 @@ const selectionPrototype = {
         return this.selectedElements.map(element => {
             return element.id;
         });
+    },
+
+    /* Private methods */
+
+    /** 
+     * An <animate> element points to exactly one other element. If there is no 'href' attribute, then the element is the direct parent of the <animate> element. I cannot apply a single <animate> element to multiple elements.
+     * @param {HTMLElement} e
+     */
+    addAnimation(e) {
+        e.innerHTML = `<animate id="anim1${e.id}" attributeName="stroke" values="#FFFFFF;#00FF00;#FFFFFF" dur="0.6s" repeatCount="indefinite"/>`;
     },
 }
 
@@ -3789,6 +3806,7 @@ const buttonPrototype = {
         const key = this.tObject.key;
         if (gTree.isDeletable(key)) {
             createSvgData([key]).delete(gViewport);
+            rebuildSelectionTable();
         } else {
             let msg = "";
             const children = gTree.treeMap.getChildKeys(key);
