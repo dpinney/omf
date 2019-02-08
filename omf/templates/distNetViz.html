@@ -1742,7 +1742,7 @@ function addEditMenuHandlers() {
         toggleElementDisplay("massEditModal");
     });
     items[7].addEventListener("click", function() { toggleElementDisplay("scadaModal"); });
-    items[8].addEventListener("click", staticLoadsToHouses);
+    items[8].addEventListener("click", convertStaticLoadsIntoHouses);
 }
 
 /** 
@@ -1810,14 +1810,85 @@ function randomChoice(inList) {
 	return inList[Math.floor(Math.random() * inList.length)]
 }
 
+function convertStaticLoadsIntoHouses() {
+    const keys = Object.keys(gTree.tree).filter(key => {
+        const object = gTree.getObject(key).object;
+        return object === "triplex_load" || object === "triplex_node";
+    });
+    if (keys.length === 0) {
+        alert(`This data has no triplex_load or triplex_node objects.`);
+        return;
+    }
+    const houses = [];
+    const children = [];
+    keys.forEach(key => {
+        const tObject = getHouseToReplaceLoadOrNode(key);
+        houses.push(tObject);
+        const childCopies = getCopiedChildrenToUpdateParentChildLines(key, tObject.data.name);
+        if (childCopies.length > 0) {
+            childCopies.forEach(tObject => children.push(tObject));
+        }
+    });
+    //Must delete the children, then the old loads/nodes. Must insert the new houses first, then the children copies
+    createSvgData(children.map(tObject => tObject.key)).delete(gViewport);
+    createSvgData(houses.map(tObject => tObject.key)).delete(gViewport);
+    houses.forEach(tObject => gTree.insert(tObject));
+    children.forEach(tObject => gTree.insert(tObject));
+    createSvgData(houses.map(tObject => tObject.key)).draw(gViewport);
+}
 
-// TODO: for secondary system has 'load', replace it with triplex_meter and triplex_node
-// TODO: rename this function?
+/**
+ * Keep: longitude, latitude, parent (if it doesn't have it, set it to null)
+ * Change: name, object 
+ * Delete: all of the old properties, old name in treeMap.name
+ * Insert: all of the properties of house, new name in treeMap.name
+ * Edit: 'parent' attribute of children (if any), 'from/to' attribute of lines (if any)
+ * Don't touch: TreeMap is fine because it uses keys
+ */
+function getHouseToReplaceLoadOrNode(key) {
+    const tObject = createTreeObject(key, gTree);
+    const house = deepCopy(gComponents["house"]);
+    house.longitude = tObject.data.longitude;
+    house.latitude = tObject.data.latitude;
+    house.parent = tObject.data.parent == null ? "null" : tObject.data.parent;
+    house.name = "house" + key;
+    tObject.data = house;
+    return tObject;
+}
+
+function getCopiedChildrenToUpdateParentChildLines(key, houseName) {
+    const childrenCopies = [];
+    const children = gTree.treeMap.getChildKeys(key);
+    if (children != null) {
+        children.forEach(key => {
+            const tObject = createTreeObject(key, gTree);
+            tObject.data.parent = houseName;
+            childrenCopies.push(tObject);
+        });
+    }
+    const lines = gTree.treeMap.getLineKeys(key);
+    const loadName = gTree.getObject(key).name;
+    if (lines != null) {
+        lines.forEach(key => {
+            const line = gTree.getObject(key);
+            if (line.to === loadName) {
+                line.to = houseName;
+            } else if (line.from === loadName) {
+                line.from = houseName;
+            }
+        });
+    }
+    return childrenCopies;
+}
+
 /*
 Don't touch existing houses or their loads
 Don't ever replace regular load objects
 1) Delete triplex nodes (have NO parent) and replace them with houses that have randomly generated loads
 2) Replace triplex loads (have parent) with houses that have randomly generated loads
+
+triplex_loads AND triplex_nodes CAN have parents, but triplex_node usually won't
+triplex_load always has a parent
 
 -There are no files with both triplex loads and triplex nodes.
 -File with triplex loads: ./omf/data/Model/public/Demo gridlabMulti scadaCalibration/Calibrated Feeder.omd
@@ -2068,7 +2139,7 @@ function massEdit() {
     const objectType = document.getElementById("massEditTargetSelect").value;
     const keys = Object.keys(gTree.tree).filter(key => gTree.getObject(key).object === objectType)
     if (operation === "addAttribute") {
-    massAddAttribute(keys, objectType);
+        massAddAttribute(keys, objectType);
         return;
     }
     const attributeKey = document.getElementById("massEditAttribute").value.trim();
@@ -2236,6 +2307,10 @@ function massAddAttribute(keys, objectType) {
     }
     if (nonModifiableProperties.includes(newKey)) {
         alert(`Mass edit failed. The properties "${nonModifiableProperties.join(", ")}" cannot be overwritten.`);
+        return;
+    }
+    if (newKey === "to" || newKey === "from" || newKey === "parent") {
+        alert(`Mass edit failed. Cannot add the attributes 'to', 'from', or 'parent'.`);
         return;
     }
     const newValue = document.getElementById("newAttributeValue").value;
@@ -3827,7 +3902,7 @@ function createDescriptionTable(id) {
         // Delete the object entirely just in case parent/to/from/ was changed, in order to delete parent-child lines
         const svg = createSvgData([tObject.key]);
         svg.delete(gViewport);
-        gTree.insert(tObject);// overwrite the real object. It is remapped in the process.
+        gTree.insert(tObject);// re-insert the updated object. It is remapped in the process.
         svg.draw(gViewport);
         alert("Object saved");
     });
@@ -3844,6 +3919,13 @@ function createDescriptionTable(id) {
             tBody.appendChild(row.self);
         }
     });
+    //Display key
+    //row = createRow({key: "key", value: `${tObject.key}`});
+    //Array.from(row.self.children).forEach(td => {
+    //    td.classList.add("tableTitle");
+    //});
+    //tHead.append(row.self);
+    //Display key
     if (window.jQuery != null) {
         table.style.left = "50vw";
         $(table).draggable();
@@ -4048,10 +4130,9 @@ const rowPrototype = {
             return false;
         }
         if (this.key === "to" || this.key === "from") {
-            if (isValidToOrFromNode(value)) {
-                if (this.key === "to" && this.tObject.data.from === value) return false;
-                if (this.key === "from" && this.tObject.data.to === value) return false;
-            }
+            if (!isValidToOrFromNode(value)) return false;
+            if (this.key === "to" && this.tObject.data.from === value) return false;
+            if (this.key === "from" && this.tObject.data.to === value) return false;
         }
         return true;
     },
