@@ -35,7 +35,7 @@ FNAME = './outGLM.glm'
 
 def voltRegViz(FNAME):
 # chart = omf.models.voltageDrop.drawPlot(FNAME, neatoLayout=True, edgeCol=True, nodeLabs="VoltageImbalance", customColormap=True, perUnitScale=False)
-	chart = drawPlot(FNAME, neatoLayout=True, edgeCol=True, nodeLabs="Voltage", edgeLabs="Current", rezSqIn=400)
+	chart = drawPlot(FNAME, neatoLayout=True, edgeCol="PercentOfRating", nodeCol="perUnitVoltage", nodeLabs="Voltage", edgeLabs="Name", rezSqIn=400)
 	chart.savefig("./VOLTOUT.png")
 
 #testAllVarCombos()

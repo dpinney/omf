@@ -55,7 +55,7 @@ def ConvertAndwork(filePath, gb_on_off='on'):
 
 		collectorwat=("object collector {\n\tname collector_Waterheater;\n\tgroup class=waterheater;\n\tproperty sum(actual_load);\n\tinterval "+str(interval)+";\n\tfile out_load_waterheaters.csv;\n};\n")
 		collectorz=("object collector {\n\tname collector_ZIPloads;\n\tgroup class=ZIPload;\n\tproperty sum(base_power);\n\tinterval "+str(interval)+";\n\tfile out_load_ziploads.csv;\n};\n")
-		collectorh=("object collector {\n\tname collector_HVAC;\n\tgroup class=house;\n\tproperty sum(heating_demand), sum(cooling_demand);\n\tinterval "+str(interval)+";\n\tfile out_load_HVAC.csv;\n};\n")
+		collectorh=("object collector {\n\tname collector_HVAC;\n\tgroup class=house;\n\tproperty sum(heating_demand), sum(cooling_demand);\n\tinterval "+str(interval)+";\n\tfile out_HVAC.csv;\n};\n")
 		recordersub=("object recorder {\n\tinterval "+str(interval)+";\n\tproperty measured_real_power;\n\tfile out_substation_power.csv;\n\tparent "+str(substation)+";\n\t};\n")
 		recorders = []
 		recorderw=[]
@@ -130,43 +130,51 @@ def ListOffenders(name_volt_dict):
 def writeResults(offendersGen):
 	#Write powerflow results for generation and waterheater, zipload, and hvac (house) load objects
 	#need to fix up testing for if file exsists based upon name written
+	dir_path = os.path.dirname(os.path.realpath(__file__))
 	substation = pd.read_csv(('out_substation_power.csv'), comment='#', names=['timestamp', 'measured_real_power'])
 	substation_power = substation['measured_real_power'][0]
-	solar1 =  pd.read_csv(('out_solar_gen_0.csv'), comment='#', names=['timestamp', 'measured_real_power'])
-	solar1_power = solar1['measured_real_power'][0]
-	solar2 =  pd.read_csv(('out_solar_gen_1.csv'), comment='#', names=['timestamp', 'measured_real_power'])
-	solar2_power = solar2['measured_real_power'][0]
 	ziploads =  pd.read_csv(('out_load_ziploads.csv'), comment='#', names=['timestamp', 'measured_real_power'])
 	zipload_power = ziploads['measured_real_power'][0]
 	waterheaters = pd.read_csv(('out_load_waterheaters.csv'), comment='#', names=['timestamp', 'measured_real_power'])
 	waterheater_power = waterheaters['measured_real_power'][0]
-	HVAC = pd.read_csv(('out_load_HVAC.csv'), comment='#', names=['timestamp', 'heating_power', 'cooling_power'])
+	HVAC = pd.read_csv(('out_HVAC.csv'), comment='#', names=['timestamp', 'heating_power', 'cooling_power'])
 	HVAC_power = HVAC['heating_power'][0], HVAC['cooling_power'][0]
-	if os.path.isfile('measured_wind_0'):
-		wind = pd.read_csv(('measured_wind_0.csv'), comment='#', names=['timestamp', 'Pconv'])
-		wind_power = wind['Pconv'][0]
-
+	wind_power = []
+	solar_power = []
+	for file in os.listdir(dir_path):
+		if 'out_wind' in file:
+			wind = pd.read_csv((file), comment='#', names=['timestamp', 'Pconv'])['Pconv'][0]
+			wind_power.append(wind)
+	for file in os.listdir(dir_path):
+		if 'out_solar' in file:
+			solar = pd.read_csv((file), comment='#', names=['timestamp', 'measured_real_power'])['measured_real_power'][0]
+			solar_power.append(solar)
 	#Print Results
 	print "Substation power", substation_power
-	print "Solar1 Power", solar1_power
-	print "Solar2 Power", solar2_power
 	print "Zipload Power Use", zipload_power*1000
 	print "Waterheater Power Use", waterheater_power*1000
 	print "HVAC Power Use", (HVAC_power[0]+HVAC_power[1])*1000
 	#convert results to watts, write to dataframe
 	df=pd.DataFrame(columns=('result', 'value'))
-	df.loc[0]=["Number of offenders", len(offendersGen)]
-	df.loc[1]=["Substation Power", substation_power]
-	df.loc[2]=["Solar1 Power", solar1_power]
-	df.loc[3]=["Solar2 Power", solar2_power]
+	df.loc[1]=['current time', datetime.today()]
+	df.loc[2]=["Number of offenders", len(offendersGen)]
+	df.loc[3]=["Substation Power", substation_power]
 	df.loc[4]=["Zipload Power Use", zipload_power*1000]
 	df.loc[5]=["Waterheater Power Use", waterheater_power*1000]
 	df.loc[6]=["HVAC Power Use", (HVAC_power[0]+HVAC_power[1])*1000]
-	if os.path.isfile('measured_wind_0'):
-		#temporary test
-		df.loc[7]=['wind power', wind_power]
-	df.loc[8]=['current time', datetime.today()]
+	for i, j in enumerate(solar_power):
+		df.loc[len(df)+1]=["Solar Power" +str(i), j]
+		print ("Solar Power" +str(i), j)
+	for i, j in enumerate(wind_power):
+		df.loc[len(df)+1]=["Wind Power"+str(i), j]
+		print ("Wind Power"+str(i), j)
+	# if os.path.isfile('measured_wind_0'): 
+	# 	#temporary test
+	# 	df.loc[7]=['wind power', wind_power]
+	
 	#Write Dataframe to .csv
+
+
 	df.to_csv('Results.csv')
 
 

@@ -17,7 +17,7 @@ OOO Switch to superHouse.glm?
 os.system('gridlabd hvac_gridlabd_sim.glm')
 
 # Get the data
-fileOb = open('measured_house_power.csv')
+fileOb = open('out_house_power.csv')
 for x in range(8):
 	# Burn the headers.
 	fileOb.readline()
