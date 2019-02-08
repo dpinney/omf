@@ -1992,8 +1992,8 @@ function staticLoadsToHouses() {
 }
 
 function massAdd() {
-    const percent = document.getElementById('percent').value;
-    if (!isNumberString(percent)) {
+    let percent = document.getElementById('percent').value;
+    if (!isNumberString(percent) || parseFloat(percent) > 1.0 || parseFloat(percent) < 0) {
         alert("Please enter a valid number for attachment probability");
         return;
     }
@@ -2002,9 +2002,10 @@ function massAdd() {
     const newObjects = [];
     const pm = new ProgressModal(`Adding a "${componentName}" object to every "${attachObject}" object. This could take a few seconds.`);
     pm.show();
+    percent = parseFloat(percent);
     setTimeout(() => {
         Object.keys(gTree.tree).forEach(key => {
-            if (gTree.getObject(key).object === attachObject) {
+            if (gTree.getObject(key).object === attachObject && Math.random() < percent) {
                 const tObject = createTreeObject(gComponents[componentName], gTree);
                 tObject.setupChildNode(key);
                 gTree.insert(tObject);
@@ -2103,13 +2104,7 @@ function massEdit() {
                     massMultiplication(keys, attributeKey, objectType);
                 }
             } else if (operation === "change") {
-                const newValue = document.getElementById("changeValue").value.trim();
-                for (let key of keys) {
-                    gTree.getObject(key)[attributeKey] = newValue;
-                }
-                alert(`${keys.length} ${objectType} objects had the "${attributeKey}" attribute changed.`);
-                toggleElementDisplay('massEditModal');
-                createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
+                massChange(keys, attributeKey, objectType);
             }
             break;
         case "delete":
@@ -2125,6 +2120,80 @@ function massEdit() {
             createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
             break;
     }
+}
+
+function isValidParentName(name) {
+    try {
+        if (getType(gTree.getObject(gTree.treeMap.getKey(name))) === "configurationNode") return false;
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
+
+function isValidToOrFromNode(name) {
+    const invalidTypes = ["configurationNode", "line"];
+    try {
+        const type = getType(gTree.getObject(gTree.treeMap.getKey(name)));
+        if (invalidTypes.includes(type)) {
+            return false;
+        }
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
+
+/**
+ * Create an array of tree objects. Delete all the real objects. change all the tree objects, insert all the tree objects, redraw.
+ */
+function massChange(keys, attributeKey, objectType) {
+    const newValue = document.getElementById("changeValue").value.trim();
+    switch (attributeKey) {
+        case "parent":
+            if (!isValidParentName(newValue)) {
+                alert(`Mass change failed. The name "${newValue}" is not a valid parent name.`);
+                return;
+            }
+        case "to":
+        case "from":
+            if (!isValidToOrFromNode(newValue)) {
+                alert(`Mass change failed. The name "${newValue}" is not a valid name for a source or target of a line.`);
+                return;
+            }
+    }
+    const treeObjectCopies = [];
+    keys.forEach(key => {
+        treeObjectCopies.push(createTreeObject(key, gTree));
+    });
+    createSvgData(keys).delete(gViewport);
+    let count = keys.length;
+    const unedited = [];
+    treeObjectCopies.forEach(tObject => {
+        if (attributeKey === "to") {
+            if (tObject.data.from !== newValue) {
+                tObject.data[attributeKey] = newValue;
+            } else {
+                count--;
+                unedited.push(tObject.key);
+            }
+        } else if (attributeKey === "from") { 
+            if (tObject.data.to !== newValue) {
+                tObject.data[attributeKey] = newValue;
+            } else {
+                count--; 
+                unedited.push(tObject.key);
+            }
+        } else {
+            tObject.data[attributeKey] = newValue;
+        }
+        gTree.insert(tObject);
+    });
+    let msg = `${count} ${objectType} objects had the "${attributeKey}" attribute changed.`;
+    msg = unedited.length === 0 ? msg : msg + ` The following objects did not have their "${attributeKey}" attribute changed: "${unedited.map(key => gTree.getObject(key).name).join(", ")}".`
+    alert(msg);
+    toggleElementDisplay('massEditModal');
+    createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
 }
 
 function massAddition(keys, attributeKey, objectType) {
@@ -3975,22 +4044,14 @@ const rowPrototype = {
     validateNewValue(value) {
         if (this.key === "longitude" || this.key === "latitude") return isNumberString(value);
         if (this.key === "parent") {
-            try {
-                if (getType(gTree.getObject(gTree.treeMap.getKey(value))) === "configurationNode") return false;
-            } catch (e) {
-                return false;
-            }
+            if (isValidParentName(value)) return true;
+            return false;
         }
         if (this.key === "to" || this.key === "from") {
-            const invalidTypes = ["configurationNode", "line"];
-            try {
-                const type = getType(gTree.getObject(gTree.treeMap.getKey(value)));
-                if (invalidTypes.includes(type)) return false;
+            if (isValidToOrFromNode(value)) {
                 if (this.key === "to" && this.tObject.data.from === value) return false;
                 if (this.key === "from" && this.tObject.data.to === value) return false;
-            } catch (e) {
-                return false;
-            } 
+            }
         }
         return true;
     },
