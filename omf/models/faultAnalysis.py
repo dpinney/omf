@@ -69,7 +69,7 @@ def work(modelDir, inputDict):
 	if inputDict.get("faultType", "None") == "None":
 		faultTypeValue = None
 	else:
-		faultTypeValue = None
+		faultTypeValue = inputDict["faultType"]
 	# chart = voltPlot(omd, workDir=modelDir, neatoLayout=neato)
 	chart = drawPlotFault(
 		pJoin(modelDir,feederName + ".omd"),
@@ -326,6 +326,7 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 	#edgeTupleNames = dict with to-from tuples as keys and names as values for debugging
 	edgeTupleNames = {}
 	#edgeTupleNames = dict with to-from tuples as keys and names as values for debugging
+	edgeTupleFaultNames = {}
 	edgePower = {}
 	for edge in edgeCurrentSum:
 		for obj in tree.values():
@@ -345,6 +346,8 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 				edgeValsPU[edge] = edgePerUnitVal
 				edgeTupleValsPU[coord] = "{0:.2f}".format(edgePerUnitVal)
 				edgeTupleNames[coord] = edge
+				if faultLoc == edge:
+					edgeTupleFaultNames[coord] = "FAULT: " + edge
 	#define which dict will be used for edge line color
 	edgeColors = edgeValsPU
 	#define which dict will be used for edge label
@@ -411,6 +414,8 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 	if edgeLabs != None:
 		if edgeLabs == "Name":
 			edgeLabels = edgeTupleNames
+		elif edgeLabs == "Fault":
+			edgeLabels = edgeTupleFaultNames
 		elif edgeLabs == "Value":
 			if edgeCol == "Current":
 				edgeLabels = edgeTupleCurrents
