@@ -1770,117 +1770,6 @@ function toggleElementDisplay(id) {
 //**************************************************
 // Edit menu interface
 //**************************************************
-
-/**
- * Set the viewport to its initial state and center it
- */
-//function zoomReset() {
-//    panZoom.fit();
-//    panZoom.center();
-//}
-
-/**
- * Set the viewport value to its initial state.
- */
-//function zoomToFit() {
-//    panZoom.fit();
-//}
-
-function randomGaussian() {
-  // Get a Gaussian from a uniform(0,1) via the Box-Muller transform.
-  let rad;
-  let x1;
-  let x2;
-  let c;
-  do {
-	x1 = 2 * Math.random() - 1
-	x2 = 2 * Math.random() - 1
-	rad = x1 * x1 + x2 * x2
-  } while (rad >= 1 || rad == 0) {
-    c = Math.sqrt(-2 * Math.log(rad) / rad);
-  }
-  return x1 * c
-}
-
-function randomInt(min,max) {
-	return Math.floor(Math.random()*(max - min + 1) + min)
-}
-
-function randomChoice(inList) {
-	return inList[Math.floor(Math.random() * inList.length)]
-}
-
-function convertStaticLoadsIntoHouses() {
-    const keys = Object.keys(gTree.tree).filter(key => {
-        const object = gTree.getObject(key).object;
-        return object === "triplex_load" || object === "triplex_node";
-    });
-    if (keys.length === 0) {
-        alert(`This data has no triplex_load or triplex_node objects.`);
-        return;
-    }
-    const houses = [];
-    const children = [];
-    keys.forEach(key => {
-        const tObject = getHouseToReplaceLoadOrNode(key);
-        houses.push(tObject);
-        const childCopies = getCopiedChildrenToUpdateParentChildLines(key, tObject.data.name);
-        if (childCopies.length > 0) {
-            childCopies.forEach(tObject => children.push(tObject));
-        }
-    });
-    //Must delete the children, then the old loads/nodes. Must insert the new houses first, then the children copies
-    createSvgData(children.map(tObject => tObject.key)).delete(gViewport);
-    createSvgData(houses.map(tObject => tObject.key)).delete(gViewport);
-    houses.forEach(tObject => gTree.insert(tObject));
-    children.forEach(tObject => gTree.insert(tObject));
-    createSvgData(houses.map(tObject => tObject.key)).draw(gViewport);
-}
-
-/**
- * Keep: longitude, latitude, parent (if it doesn't have it, set it to null)
- * Change: name, object 
- * Delete: all of the old properties, old name in treeMap.name
- * Insert: all of the properties of house, new name in treeMap.name
- * Edit: 'parent' attribute of children (if any), 'from/to' attribute of lines (if any)
- * Don't touch: TreeMap is fine because it uses keys
- */
-function getHouseToReplaceLoadOrNode(key) {
-    const tObject = createTreeObject(key, gTree);
-    const house = deepCopy(gComponents["house"]);
-    house.longitude = tObject.data.longitude;
-    house.latitude = tObject.data.latitude;
-    house.parent = tObject.data.parent == null ? "null" : tObject.data.parent;
-    house.name = "house" + key;
-    tObject.data = house;
-    return tObject;
-}
-
-function getCopiedChildrenToUpdateParentChildLines(key, houseName) {
-    const childrenCopies = [];
-    const children = gTree.treeMap.getChildKeys(key);
-    if (children != null) {
-        children.forEach(key => {
-            const tObject = createTreeObject(key, gTree);
-            tObject.data.parent = houseName;
-            childrenCopies.push(tObject);
-        });
-    }
-    const lines = gTree.treeMap.getLineKeys(key);
-    const loadName = gTree.getObject(key).name;
-    if (lines != null) {
-        lines.forEach(key => {
-            const line = gTree.getObject(key);
-            if (line.to === loadName) {
-                line.to = houseName;
-            } else if (line.from === loadName) {
-                line.from = houseName;
-            }
-        });
-    }
-    return childrenCopies;
-}
-
 /*
 Don't touch existing houses or their loads
 Don't ever replace regular load objects
@@ -1895,171 +1784,81 @@ triplex_load always has a parent
 -File with triplex nodes: 
     ./omf/data/Model/public/Demo gridlabMulti scadaCalibration/Uncalibrated Feeder.omd
     ./omf/data/Model/public/Demo superModel/superModel Today.omd
-
 */
-function staticLoadsToHouses() {
-    const tree = gTree.tree;
-    const names = gTree.treeMap.names;
-	//if (!containsTriplexNodes(tree)) {
-	if (!containsTriplexNodeOrLoad(tree)) {
-        alert("There are no triplex nodes or triplex loads in this model.");
+function convertStaticLoadsIntoHouses() {
+    const keys = Object.keys(gTree.tree).filter(key => {
+        const object = gTree.getObject(key).object;
+        return object === "triplex_load" || object === "triplex_node";
+    });
+    if (keys.length === 0) {
+        alert(`This data has no triplex load or triplex node objects that can be converted into houses.`);
         return;
-	} else {
-        let modal = new ProgressModal("Please wait. Houses are being generated.", "", false);
-        modal.show();
-        // Replace 100 nodes at a time (maximum), to prevent the browser from hanging
-        const keys = Object.keys(tree);
-        let start = 0;
-        let end = 100;
-        const intervalId = setInterval(function() {
-            //console.log("start: " + start);
-            //console.log("end: " + end);
-            replaceAllHouses(start, end, keys);
-            if (end >= keys.length) {
-                clearInterval(intervalId);
-                modal.hide();
-            } else {
-                start = end + 1;
-                end += 100;
-            }
-        }, 10);
     }
+    const pm = new ProgressModal(`Converting every triplex load and/or triplex node into a house with children. This could take a few seconds.`);
+    pm.show();
+    setTimeout(function() {
+        keys.forEach(key => { replaceLoadOrNodeWithHouse(key); });
+        createSvgData(keys).draw(gViewport);
+        pm.hide();
+    }, 10);
+}
 
-    /* Triplex loads should have a "parent" property. Triplex nodes should NOT have a "parent" property usually.
-    Therefore, if the parent property DOES exist on either a node/load I should use it. However, it it DOESN'T exist,
-    then I should carry on as normal too.
-    */
-    function containsTriplexNodeOrLoad(tree) {
-        for (let key in tree) {
-            if (tree[key].object === "triplex_node" || tree[key].object === "triplex_load") {
-                return true;
-            } 
-        }   
-        return false;
+/**
+ * Keep: longitude, latitude, parent (if it doesn't have it, set it to null)
+ * Change: name, object 
+ * Delete: all of the old properties, old name in treeMap.name
+ * Insert: all of the properties of house, new name in treeMap.name
+ * Edit: 'parent' attribute of children (if any), 'from/to' attribute of lines (if any)
+ * Don't touch: TreeMap is fine because it uses keys
+ */
+function replaceLoadOrNodeWithHouse(key) {
+    const oldLoad = gTree.getObject(key);
+    const house = deepCopy(gComponents.house);
+    house.longitude = oldLoad.longitude;
+    house.latitude = oldLoad.latitude;
+    if (oldLoad.parent == null) {
+        delete house.parent;
+    } else {
+        house.parent = oldLoad.parent;
     }
-
-	function replaceAllHouses(start, end, keys) {
-        if (end >= keys.length) {
-            end = keys.length - 1;
-        }
-        for (let i = start; i <= end; i++) {
-            if (tree[keys[i]].object === "triplex_node" || tree[keys[i]].object === "triplex_load") {
-                let parentKey = names[tree[keys[i]].parent];
-                if (parentKey == null) {
-                    //There is no parent. No big deal
-
-                } else {
-                    //There is a parent. Use the parent to place the new house
-
-                }
+    house.name = "house" + key;
+    const children = gTree.treeMap.getChildKeys(key);
+    if (children != null) children.forEach(key => { gTree.getObject(key).parent = house.name; });
+    const lines = gTree.treeMap.getLineKeys(key);
+    if (lines != null) {
+        lines.forEach(key => {
+            const line = gTree.getObject(key);
+            if (line.to === oldLoad.name) {
+                line.to = house.name;
+            } else if (line.from === oldLoad.name) {
+                line.from = house.name;
             }
-            /*
-            TODO: delete this
-            if (tree[keys[i]].hasOwnProperty('parent') && tree[keys[i]].object === "triplex_node") {
-                // Get the key of the parent of this triplex node, which is a triplex meter (i.e. another node)
-                let parentKey = names[tree[keys[i]].parent];
-                // Delete the triplex_node itself
-                deleteObject(keys[i]);
-                // Create a new house object to replace the triplex node
-                let houseObj = randomHouse();
-                let lightsObj = randomLights();
-                let heaterObj = randomWaterHeater();
-                newChildAtLocation(houseObj.house, parentKey);
-                newChildAtLocation(lightsObj.lights, houseObj.key);
-                if (heaterObj != false) {
-                    newChildAtLocation(heaterObj.heater, houseObj.key);
-                }
-            }
-            */
-        }
+        });
     }
+    gTree.treeMap.remove([key]);
+    gTree.tree[key] = house;
+    gTree.treeMap.add(key);
+    addLoadsToHouse(key);
+}
 
-	function randomHouse() {
-		const newHouse = {}
-		newHouse['object'] = 'house'
-		newHouse['air_temperature'] = '70'
-		newHouse['cooling_COP'] = randomInt(25, 40) / 10.0 + ''
-		newHouse['cooling_setpoint'] = 'cooling' + randomInt(1, 8) + '*1'
-		newHouse['cooling_system_type'] = randomChoice(['ELECTRIC', 'HEAT_PUMP', 'NONE'])
-		// House sizing distribution from http://www.census.gov/housing/ahs/
-		// between 1100 and 3000. Probably needs a normal distribution.
-		let area = 1800 + 500 * randomGaussian()
-		if (area < 500) {
-			area = 500
-		}
-		area = area.toPrecision(2) * 1.0 + ''
-		newHouse['floor_area'] = area
-		newHouse['heating_COP'] = randomInt(20, 35) / 10.0 + ''
-		newHouse['heating_setpoint'] = 'heating' + randomInt(1, 8) + '*1'
-		newHouse['heating_system_type'] = randomChoice(['RESISTANCE', 'HEAT_PUMP', 'GAS'])
-		newHouse['mass_temperature'] = '70'
-		let skew = 1200 * randomGaussian()
-		skew = skew.toPrecision(3) * 1.0 + ''
-		newHouse['schedule_skew'] = skew
-		newHouse['thermal_integrity_level'] = randomChoice([1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6]) + ''
-		const newKey = getNewTreeKey(gTree.tree);
-		newHouse['name'] = 'synhouse' + newKey
-		return {
-            house: newHouse,
-            key: newKey
-        }
-	}
-
-	function randomLights() {
-		const newLights = {}
-		newLights['object'] = 'ZIPload'
-		newLights['power_fraction'] = '0.400000'
-		newLights['current_fraction'] = '0.300000'
-		newLights['impedance_pf'] = '1.000'
-		newLights['current_pf'] = '1.000'
-		newLights['power_pf'] = '1.000'
-		newLights['impedance_fraction'] = '0.300000'
-		newLights['heatgain_fraction'] = '0.9'
-		let power = 1.2 + randomGaussian()
-		if (power < 0) {
-			power = -1 * power
-		}
-		power = power.toPrecision(3) * 1.0 + ''
-		newLights['base_power'] = 'LIGHTS*' + 1.33
-		let skew = 2000 * randomGaussian()
-		skew = skew.toPrecision(3) * 1.0 + ''
-		newLights['schedule_skew'] = skew
-		const newKey = getNewTreeKey(gTree.tree);
-		newLights['name'] = 'synLights' + newKey
-		return {
-            lights: newLights,
-            key: newKey
-        }
-	}
-
-	function randomWaterHeater() {
-		const newHeater = {}
-		if (randomChoice([1, 2, 3]) == 3) {
-			return false
-		}
-		// Static properties.
-		newHeater['object'] = 'waterheater'
-		newHeater['temperature'] = '135'
-		newHeater['tank_volume'] = '50'
-		newHeater['location'] = 'INSIDE'
-		// Uniformly distributed properties.
-		newHeater['heating_element_capacity'] = randomInt(37, 53) / 10.0 + ''
-		newHeater['thermostat_deadband'] = randomInt(20, 60) / 10.0 + ''
-		newHeater['demand'] = 'water' + randomInt(1, 20) + '*1'
-		newHeater['tank_UA'] = randomInt(20, 40) / 10.0 + ''
-		// Gaussian properties.
-		let skew = 2000 * randomGaussian()
-		skew = skew.toPrecision(3) * 1.0 + ''
-		newHeater['schedule_skew'] = skew
-		newHeater['tank_setpoint'] = (randomGaussian() * 2 + 130).toPrecision(3) + ''
-		// between 1100 and 3000. Probably needs a normal distribution.
-		const newKey = getNewTreeKey(gTree.tree);
-		newHeater['name'] = 'synwaterheater' + newKey;
-		return {
-            heater: newHeater,
-            key: newKey
-        }
-	}
+function addLoadsToHouse(key) {
+    // Insert water heater
+    let tObject = createTreeObject(gComponents.waterheater, gTree);
+    tObject.setupChildNode(key)
+    gTree.insert(tObject);
+    // Insert responsive ZIPload
+    tObject = createTreeObject(gComponents.ZIPload, gTree);
+    tObject.setupChildNode(key);
+    let responsiveBasePower = Math.random();
+    responsiveBasePower = responsiveBasePower < .5 ? responsiveBasePower + .5 : responsiveBasePower;
+    tObject.data["base_power"] = `responsive_loads*${responsiveBasePower}`;
+    gTree.insert(tObject);
+    // Insert unresponsive ZIPload
+    tObject = createTreeObject(gComponents.ZIPload, gTree);
+    tObject.setupChildNode(key);
+    let unresponsiveBasePower = Math.random() + 1.5;
+    tObject.data["base_power"] = `unresponsive_loads*${unresponsiveBasePower}`;
+    gTree.insert(tObject);
 }
 
 function massAdd() {
@@ -3389,15 +3188,16 @@ function createParentChildLineWithLine(lineKey, childKey) {
     return line;
 }
 
-// TODO: allow inserting testing tree if needed
+// Use to name parent-child lines like: "node18_waterheater4", but now it's just "18_4"
 function getParentChildLineId(parentKey, childKey) {
     let tree = gTree;
     if (arguments[2] != null) tree = arguments[2]; // Need this for testing
-    const parent = tree.getObject(parentKey);
-    const parentName = parent.name != null ? parent.name : `undefined${parentKey}`;
-    const child = tree.getObject(childKey);
-    const childName = child.name != null ? child.name : `undefined${childKey}`;
-    return `${parentName}_${childName}`; 
+    //const parent = tree.getObject(parentKey);
+    //const parentName = parent.name != null ? parent.name : `undefined${parentKey}`;
+    //const child = tree.getObject(childKey);
+    //const childName = child.name != null ? child.name : `undefined${childKey}`;
+    //return `${parentName}_${childName}`; 
+    return `${parentKey}_${childKey}`;
 }
 
 /**
@@ -3485,7 +3285,7 @@ const svgDataPrototype = {
     update() {},
 
     /**
-     * good. Doesn't need tests. Need to figure out delete strategy
+     * good. Doesn't need tests.
      */
     delete(viewport) {
         this.primaryKeySet.forEach(key => {
@@ -3543,7 +3343,7 @@ const svgDataPrototype = {
                     // child could have nonexistent parent. Also, we only want parent-child lines for children of objects in the subtreeKeySet
                     if (parentKey != null && this.subtreeKeySet.has(parentKey)) {
                         const parentType = getType(this.tree.getObject(parentKey));
-                        if (parentType === "line") {
+                        if (parentType === "line") {// this is only for recorders
                             const line = createParentChildLineWithLine(parentKey, key, this.tree);
                             if (line != null) this.parentChildLines.push(line);
                         } else {
@@ -3581,7 +3381,7 @@ const svgDataPrototype = {
             if (lines != null) {
                 lines.forEach(lineKey => {
                     this.subtreeKeySet.add(lineKey);
-                    // Must also get the children of lines!
+                    // Must also get the children of lines! This means only recorders
                     const lineChildren = this.tree.treeMap.getChildKeys(lineKey);
                     if (lineChildren != null) lineChildren.forEach(childKey => this.subtreeKeySet.add(childKey));
                 });
@@ -3899,7 +3699,7 @@ function createDescriptionTable(id) {
     buttonCell.append(createButton({action: "save"}).self);
     form.addEventListener("submit", function(event) {
         event.preventDefault();
-        // Delete the object entirely just in case parent/to/from/ was changed, in order to delete parent-child lines
+        // Delete the object entirely just in case parent was changed, in order to delete the old parent-child line
         const svg = createSvgData([tObject.key]);
         svg.delete(gViewport);
         gTree.insert(tObject);// re-insert the updated object. It is remapped in the process.
