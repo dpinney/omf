@@ -1080,9 +1080,7 @@ const selectionPrototype = {
     },
     remove(element) {
         const elements = this.selectedElements.filter(e => e.id === element.id);
-        if (elements.length === 0) {
-            throw new Error("Remove operation failed. The element argument does not exist in this selection.");
-        }
+        if (elements.length === 0) throw new Error(`Remove operation failed. The element "${element.tagName}" does not exist in this selection.`);
         elements.forEach(e => {
             e.classList.remove("selected");
             Array.from(e.children).forEach(child => {
@@ -1537,7 +1535,7 @@ function insertIndependentComponent(component) {
 function insertChildComponent(keys, component) {
     const svgContainer = document.getElementById("svgContainer");
     if (keys.length === 0) {
-        alert("Please click on another circle/line object that is not a configuration node to add this component as a child.");
+        alert("Please click on another circle that is not a configuration node to add this component as a child.");
         svgContainer.setAttribute("style", "cursor: crosshair");
         svgContainer.onclick = function(event) {
             if (detectDrag(event)) return;
@@ -1547,10 +1545,14 @@ function insertChildComponent(keys, component) {
             try {
                 parent = gTree.getObject(event.target.id);
                 if (parent != null && getType(parent) !== "configurationNode") {
-                    const tObject = createTreeObject(component, gTree);
-                    tObject.setupChildNode(event.target.id);
-                    gTree.insert(tObject);
-                    createSvgData([tObject.key]).draw(gViewport);
+                    if (component.object === "recorder" || getType(parent) !== "line") {
+                        const tObject = createTreeObject(component, gTree);
+                        tObject.setupChildNode(event.target.id);
+                        gTree.insert(tObject);
+                        createSvgData([tObject.key]).draw(gViewport);
+                    } else {
+                        alert("Insertion failed. You clicked on a line. Only meter recorders can be children of lines.");
+                    }
                 } else {
                     alert("Insertion failed. You clicked on a configuration node.");
                 }
@@ -1649,6 +1651,7 @@ function attachAddComponentListeners() {
                         insertChildComponent(gSelection.getKeys(), component);
                     }
                 });
+                // We only add child nodes to the massAdd() selection
                 select.innerHTML += `<option value=${key}>${key}</option>`;
                 break;
             case "line":
@@ -1867,26 +1870,36 @@ function massAdd() {
         alert("Please enter a valid number for attachment probability");
         return;
     }
+    // Don't need to check if the component is a child node, since that is done elsewhere
 	const componentName = document.getElementById('componentSelect').value;
-	const attachObject = document.getElementById('massAddTargetSelect').value;
-    const newObjects = [];
-    const pm = new ProgressModal(`Adding a "${componentName}" object to every "${attachObject}" object. This could take a few seconds.`);
-    pm.show();
-    percent = parseFloat(percent);
-    setTimeout(() => {
-        Object.keys(gTree.tree).forEach(key => {
-            if (gTree.getObject(key).object === attachObject && Math.random() < percent) {
-                const tObject = createTreeObject(gComponents[componentName], gTree);
-                tObject.setupChildNode(key);
-                gTree.insert(tObject);
-                newObjects.push(tObject.key);
-            }
-        });
-        createSvgData(newObjects).draw(gViewport);
-        pm.hide();
-        alert(`${newObjects.length} "${componentName}" objects added to the feeder`);
-        toggleElementDisplay('massAddModal');
-    }, 10);
+    // Don't need to check if the attachObject is a configuration node, since that is done elsewhere.
+    const attachObject = document.getElementById('massAddTargetSelect').value;
+
+    if (gComponents[componentName].object === "recorder" || getType(gComponents[attachObject]) !== "line") {
+
+
+        const newObjects = [];
+        const pm = new ProgressModal(`Adding a "${componentName}" object to every "${attachObject}" object. This could take a few seconds.`);
+        pm.show();
+        percent = parseFloat(percent);
+        setTimeout(() => {
+            Object.keys(gTree.tree).forEach(key => {
+                if (gTree.getObject(key).object === attachObject && Math.random() < percent) {
+                    const tObject = createTreeObject(gComponents[componentName], gTree);
+                    tObject.setupChildNode(key);
+                    gTree.insert(tObject);
+                    newObjects.push(tObject.key);
+                }
+            });
+            createSvgData(newObjects).draw(gViewport);
+            pm.hide();
+            alert(`${newObjects.length} "${componentName}" objects added to the feeder`);
+            toggleElementDisplay('massAddModal');
+        }, 10);
+
+    } else {
+        alert("Mass add failed. Only meter recorder objects can be added as children of lines.");
+    }
 }
 
 /* Clearing each list so we dont get duplicates in the list. This must be done because the attachTarget list must be 
@@ -2014,6 +2027,29 @@ function isValidToOrFromNode(name) {
     return true;
 }
 
+function massAddAttribute(keys, objectType) {
+    const newKey = document.getElementById("newAttributeKey").value.trim();
+    if (newKey === "") {
+        alert(`Mass edit failed. Please enter a name for the attribute you want to add.`);
+        return;
+    }
+    if (nonModifiableProperties.includes(newKey)) {
+        alert(`Mass edit failed. The properties "${nonModifiableProperties.join(", ")}" cannot be overwritten.`);
+        return;
+    }
+    if (newKey === "to" || newKey === "from" || newKey === "parent") {
+        alert(`Mass edit failed. Cannot add the attributes 'to', 'from', or 'parent'.`);
+        return;
+    }
+    const newValue = document.getElementById("newAttributeValue").value;
+    for (let key of keys) {
+        gTree.getObject(key)[newKey] = newValue;
+    }
+    alert(`${keys.length} ${objectType} objects had the "${newKey}" attribute added.`);
+    toggleElementDisplay('massEditModal');
+    createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
+}
+
 /**
  * Create an array of tree objects. Delete all the real objects. change all the tree objects, insert all the tree objects, redraw.
  */
@@ -2094,29 +2130,6 @@ function massMultiplication(keys, attributeKey, objectType) {
         gTree.getObject(key)[attributeKey] = gTree.getObject(key)[attributeKey] * multiplyOperand + addOperand;
     }
     alert(`${keys.length} ${objectType} objects had their "${attributeKey}" attribute edited.`);
-    toggleElementDisplay('massEditModal');
-    createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
-}
-
-function massAddAttribute(keys, objectType) {
-    const newKey = document.getElementById("newAttributeKey").value.trim();
-    if (newKey === "") {
-        alert(`Mass edit failed. Please enter a name for the attribute you want to add.`);
-        return;
-    }
-    if (nonModifiableProperties.includes(newKey)) {
-        alert(`Mass edit failed. The properties "${nonModifiableProperties.join(", ")}" cannot be overwritten.`);
-        return;
-    }
-    if (newKey === "to" || newKey === "from" || newKey === "parent") {
-        alert(`Mass edit failed. Cannot add the attributes 'to', 'from', or 'parent'.`);
-        return;
-    }
-    const newValue = document.getElementById("newAttributeValue").value;
-    for (let key of keys) {
-        gTree.getObject(key)[newKey] = newValue;
-    }
-    alert(`${keys.length} ${objectType} objects had the "${newKey}" attribute added.`);
     toggleElementDisplay('massEditModal');
     createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
 }
@@ -2792,7 +2805,6 @@ function getMixedCaseKey(object, lowercaseKey) {
  * @return {boolean}
  */
 function isValidForMove(objects) {
-    //const objects = Object.values(this.tree);
     if (objects.length === 0) {
         alert(`Please select at least one circle to move.`);
         return false
@@ -2812,12 +2824,10 @@ function isValidForMove(objects) {
  * @param {Array} keys
  */
 function attachMoveListener(keys, tBody=null, tObject=null) {
-//function attachMoveListener(tWrapper, tBody=null, tObject=null) {
     const objects = [];
     keys.forEach(key => {
         objects.push(gTree.getObject(key));
     });
-    //const objects = Object.values(tWrapper.tree);
     if (isValidForMove(objects)) {
         const element = document.getElementById("svgContainer");
         element.setAttribute("style", "cursor: crosshair");
@@ -2838,12 +2848,14 @@ function attachMoveListener(keys, tBody=null, tObject=null) {
  * coordinates to be stored in the tree.
  * @param {number} x - an x coordinate relative to the viewport, usually created with a click on the screen.
  * @param {number} y - a y coordinate relative to the viewport, usually created with a click on the screen.
- * @param {number} offsetX - corresponds to gOffsetX, which is how much the gTree is translated on 
- * the x-axis to fit in the created viewport.
- * @param {number} offsetY - corresponds to gOffsetY, which is how much the gTree is translated on 
- * the y-axis to fit in the created viewport.
  */
-function move(objects, {x, y}, {offsetX, offsetY}) {
+function move(objects, {x, y}) {
+    let offsetX = gOffsetX, offsetY = gOffsetY, scaleFactor = gDrawScaleFactor;
+    if (arguments[2] != null) {// needed for testing
+        offsetX = arguments[2].offsetX;
+        offsetY = arguments[2].offsetY;
+        scaleFactor = arguments[2].scaleFactor;
+    }
     const nodes = [];
     let avgLon = 0;
     let avgLat = 0;
@@ -2854,14 +2866,12 @@ function move(objects, {x, y}, {offsetX, offsetY}) {
             avgLat += obj.latitude;
         }
     });
-    if (nodes.length === 0) {
-        return;
-    }
+    if (nodes.length === 0) return;
     avgLon /= nodes.length;
     avgLat /= nodes.length;
     nodes.forEach(node => {
-        node.longitude = node.longitude - avgLon + offsetX + x/gDrawScaleFactor;
-        node.latitude = node.latitude - avgLat + offsetY + y/gDrawScaleFactor;
+        node.longitude = node.longitude - avgLon + offsetX + x/scaleFactor;
+        node.latitude = node.latitude - avgLat + offsetY + y/scaleFactor;
     });
 }
 
@@ -2871,6 +2881,8 @@ function move(objects, {x, y}, {offsetX, offsetY}) {
  * @param {number} initX - the longitude of the top left corner of the square.
  * @param {number} initY - the latitude of the top left corner of the square.
  * @param {number} spacing - how far apart the nodes should be spaced from one another
+ * 
+ * @param {Array} objects - the objects that need coordinates
  */
 function insertCoordinates(objects, initX, initY, spacing) {
     let gen = getCoordinates(initX, initY, spacing);
@@ -2896,6 +2908,7 @@ function getNamesOfTypes(objects, ...types) {
 }
 
 /**
+ * good. No unit tests need.
  * @param {Object[]} selection
  * @param {Object} component
  * @return {boolean}
@@ -2919,6 +2932,10 @@ function isValidForAdd(keys, component) {
         case "childNode":
             if (configNames.length > 0) {
                 alert(errorMsgStart + "cannot be added as a child of a configuration node. " + errorMsgConfig);
+                return false;
+            }
+            if (lineNames.length > 0 && component.object !== "recorder") {
+                alert(errorMsgStart + "cannot be added as a child of a line. " + errorMsgLine);
                 return false;
             }
             break;
@@ -2948,7 +2965,6 @@ function isValidForAdd(keys, component) {
     }
     return true;
 }
-/* Functions to port */
 
 //**************************************************
 // Utility methods
@@ -4079,18 +4095,14 @@ function createRow({key, value=null, tObject=null, deletable=false}) {
  * TODO: add unit tests
  */
 function getMoveNodesFunction(objects, tBody=null, tObject=null) {
-    if (objects.length > 1 && tBody != null) {
-        throw new Error("Cannot update a description table when multiple nodes have been selected to be moved.");
-    }
+    if (objects.length > 1 && tBody != null) throw new Error("Cannot update a description table when multiple nodes have been selected to be moved.");
     const moveNodes = function(event) {
         event.stopPropagation();
         detachListener();
         const coords = clickLatLon(event);
-        move(objects, coords, {offsetX: gOffsetX, offsetY: gOffsetY});
+        move(objects, coords);
         if (tObject != null) {
-            if (objects.length !== 1) {
-                throw new Error("Can only update the tObject of a description table when moving a single object!");
-            }
+            if (objects.length !== 1) throw new Error("Can only update the tObject of a description table when moving a single object!");
             tObject.data.longitude = objects[0].longitude;
             tObject.data.latitude = objects[0].latitude;
         }
