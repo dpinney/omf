@@ -34,7 +34,7 @@ object climate {
 object recorder {
 	interval 60;
 	property heating_demand, cooling_demand, heating_setpoint, air_temperature, outdoor_temperature;
-	file measured_house_power_GAS.csv;
+	file out_house_power.csv;
 	parent R1_SingleFamilyHome_1960-1969_11543;
 };
 
