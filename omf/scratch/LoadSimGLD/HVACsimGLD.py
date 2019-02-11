@@ -71,7 +71,7 @@ if __name__ == '__main__':
 		#Parse Command Line
 		parser = argparse.ArgumentParser(description='Simulates heat/cool power use on a canonical .glm single house model')
 		parser.add_argument('model_type', metavar='base', type=str,
-		                    help='Please specify type of model, being gas, resistance, or heat pump')
+		                    help='Please specify type of model, being Gas, Resistance, or HeatPump')
 		args = parser.parse_args()
 		modelType = args.model_type
 		workAndGraph(modelType)
