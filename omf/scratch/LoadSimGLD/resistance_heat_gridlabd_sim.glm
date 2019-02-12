@@ -34,7 +34,7 @@ object climate {
 object recorder {
 	interval 60;
 	property heating_demand, cooling_demand, heating_setpoint, air_temperature, outdoor_temperature;
-	file measured_house_power.csv;
+	file out_house_power.csv;
 	parent R1_SingleFamilyHome_1960-1969_11543;
 };
 
@@ -50,7 +50,7 @@ object house {
 	Rfloor 19.0;
 	heating_COP 2.8;
 	motor_efficiency AVERAGE;
-	heating_system_type HEAT_PUMP;
+	heating_system_type RESISTANCE;
 	glazing_layers 2;
 	Rwall 17.0;
 	glazing_treatment 1;
