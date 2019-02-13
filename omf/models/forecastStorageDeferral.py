@@ -62,7 +62,7 @@ def work(modelDir, ind):
 
 	try:
 		with open(pJoin(modelDir, 'hist.csv'), 'w') as f:
-			f.write(ind['historicalData'].replace('\r', ''))
+			f.write(ind['historicalData'])#.replace('\r', ''))
 		df = pd.read_csv(pJoin(modelDir, 'hist.csv'), parse_dates=['dates'])
 		df['month'] = df['dates'].dt.month
 		df['dayOfYear'] = df['dates'].dt.dayofyear
@@ -197,7 +197,7 @@ def new(modelDir):
 		"electricityCost":"0.06",
 		"projectionLength":"15",
 		"discountRate":"2",
-		"historicalData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_17yr_TempAndLoad.csv")).read(),
+		"historicalData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_17yr_TempAndLoad.csv"), 'rU').read(),
 		"filename": "Texas_17yr_TempAndLoad.csv",
 		"transformerThreshold": "20",
 		"batteryEfficiency": "92",
