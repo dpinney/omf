@@ -27,7 +27,6 @@ SPP_DOWN_reg =    [0.07, 7.70, 294.09, 6.05, 0.0]
 CAISO_UP_reg =    [0.09, 5.41, 50.01, 5.50, 0.0]
 CAISO_DOWN_reg =  [0.00, 3.90, 59.55, 2.62, 4.4]
 
-
 #Spinning
 CAISO_EXP_spin = [0.09, 3.34, 46.29, 5.13, 0.0]
 ERCOT_spin = [2, 14.15, 1285.73, 31.82, 0.0]
@@ -88,7 +87,7 @@ for i in range(len(regulation_dist)):
 	d[regulation_dist_name[i]] = s
 df_reg = pd.DataFrame(data=d)
 
-df_reg.to_csv(index=False)
+df_reg.to_csv('Regulation_prices.csv', index=False)
 
 #Spinning
 spinning_dist = [CAISO_EXP_spin, ERCOT_spin, MISO_spin, ISONE_spin, NYISO_W_spin, NYISO_E_spin, PJM_synch, SPP_spin]
@@ -101,7 +100,7 @@ for i in range(len(spinning_dist)):
 	d[spinning_dist_names[i]] = s
 df_spin = pd.DataFrame(data=d)
 
-df_spin.to_csv(index=False)
+df_spin.to_csv('Spinning_prices.csv', index=False)
 
 #No spin
 nospin_dist = [CAISO_EXP_nospin, ERCOT_nospin, MISO_supplemental, ISONE_nospin, ISONE_operating, NYISO_E_nospin, NYISO_W_nospin, NYISO_E_reserve30, NYISO_W_reserve30, PJM_primary, SPP_supplemental]
@@ -114,7 +113,7 @@ for i in range(len(nospin_dist)):
 	d[nospin_dist_names[i]] = s
 df_nospin = pd.DataFrame(data=d)
 
-df_nospin.to_csv(index=False)
+df_nospin.to_csv('non-spinning_prices.csv', index=False)
 
 
 
