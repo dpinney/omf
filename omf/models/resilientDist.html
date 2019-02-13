@@ -257,6 +257,12 @@
 			</div>
 		</div>
 
+		<p class='reportTitle'><b>Damage Scenario Load Impacts</b></p>
+		<div class="content" style="margin-top:0px">
+			<div id="loadDisplay">
+			</div>
+		</div>
+
 		<p class='reportTitle'><b>Design Solution</b></p>
 		<div class="content" style="margin-top:0px">
 			<div id="designDisplay">
@@ -275,7 +281,7 @@
 					var dataDict = [];
 					var designHTML = "";
 					var tableBuilder = ""; 
-
+					var loadBuilder = "";
 					//DESIGN SOLUTION
 					tableBuilder = "<tr><th>Device ID</th><th>Type</th><th>Action</th><th>Cost</th></tr>";
 					for(var i = 0; i < rdtOutput.design_solution.generators.length; i++) {
@@ -308,28 +314,18 @@
 						}
 						
 					}
-					secondRunValid = ""
-					secondRunValidStyle = ""
-					if(allOutputData.secondGLD == "True") {
-						secondRunValidStyle =  "color: #54c465;" 
-						secondRunValid = "Powerflow Validated:  ";
-						designHTML = designHTML + '<table id="totalCostTable"><tr><th><div style="float: left;">Total Cost</div><div style="' + secondRunValidStyle + 'float: right;">' + secondRunValid + '</div></th></tr><tr><td>$' + totalCost.toFixed(2) + '</td></tr></table>';
-						designHTML = designHTML + '<table id="solutionComponents">' + tableBuilder + '</table>';
-					}
-					else {
-						secondRunValidStyle =  "color: red;" 
-						secondRunValid = "Powerflow Not Validated:  ";
-						designHTML = designHTML + '<table id="solutionComponents">' + tableBuilder + '</table>';
-						designHTML = designHTML + '<table id="totalCostTable"><tr><td valign="bottom"><div style="float: left;">Total Cost</div><div style="' + secondRunValidStyle + 'float: right;">' + secondRunValid + totalCost.toFixed(2) + '</div></td></tr></table>';
-					}
-					
-
-					//DAMAGE SCENARIOS
-					for(var j = 0; j < rdtOutput.scenario_solution.length; j++) {
-						scenario = rdtOutput.scenario_solution[j]; 
-						critLoadMetDict[scenario.id] = '<tr><td colspan="4"><b>Scenario ' + parseFloat(j + 1) + ' damage summary: </b>' + scenario.non_critical_load_met.toFixed(2) + ' non-critical load lost, '+ scenario.critical_load_met.toFixed(2) + ' critical load lost</td></tr>';
-					}
+					secondRunValidStyle =  "color: red;" 
+					secondRunValid = "Powerflow Not Validated:  ";
+					designHTML = designHTML + '<table id="solutionComponents">' + tableBuilder + '<tr><td>TOTAL</td><td colspan=2></td><td>' + totalCost.toFixed(2) + '</td></tr></table>';
+					// Load Lost scenarios.
 					tableHeader = "<tr><th>Scenario ID</th><th>Device ID</th><th>Type</th><th>Result</th></tr>";
+					critTableHeader = "<tr><th>Scenario ID</th><th>Non-crit Load Served (MW)</th><th>Crititical Load Served (MW) </th></tr>";
+					critTableBuilder = "";
+					for(var x = 0; x < rdtOutput.scenario_solution.length; x++) {
+						rdtScenario = rdtOutput.scenario_solution[x]; 
+						critTableBuilder = critTableBuilder + '<tr><td>' + parseFloat(x + 1) + '</td><td>' + rdtScenario.non_critical_load_met.toFixed(2) + '</td><td>'+ rdtScenario.critical_load_met.toFixed(2) + '</td></tr>';
+					}
+
 					for(var j = 0; j < gfmOutput.scenarios.length; j++) {
 						tableBuilder = "";
 						scenario = gfmOutput.scenarios[j]; 
@@ -340,25 +336,32 @@
 						for(k = 0; k < scenario.disable_lines.length; k++) {
 							dLine = scenario.disable_lines[k];
 							tableBuilder = tableBuilder + "<tr><td>" + String(parseFloat(scenario.id) + 1) + "</td><td>" + dLine + "</td><td>Line</td><td>Disabled</td></tr>";
+							//if (scenario.hardened_disabled_lines.length == 0 && scenario.disable_lines.length == 0) { This needs to be fixed!
+							//critTableBuilder = critTableBuilder + "<tr><td colspan='4'>No components affected.</td></tr>";
+							//}
 						}
-						if(scenario.hardened_disabled_lines.length == 0 && scenario.disable_lines.length == 0) {
-							tableBuilder = tableBuilder + "<tr><td colspan='4'>No components affected.</td></tr>";
-						}
-						scenarioDict[parseFloat(scenario.id) + 1] = tableBuilder + critLoadMetDict[parseFloat(scenario.id) + 1];
+
+						scenarioDict[parseFloat(scenario.id) + 1] = tableBuilder;
 					}
-					var scenarioHTML= tableHeader;
+					
+					var scenarioHTML = tableHeader;
+					var critHTML = critTableHeader;
+					
 					for (var scenarioID in scenarioDict) {
 						scenarioHTML = scenarioHTML + scenarioDict[scenarioID] + "";
 					}
+
 					scenarioHTML = "<table>" + scenarioHTML + "</table>";
+					critHTML = "<table>" + critHTML + critTableBuilder + "</table>";
 
 					gebi("scenarioDisplay").innerHTML = scenarioHTML + "";	
 					gebi("designDisplay").innerHTML = designHTML + "";
+					gebi("loadDisplay").innerHTML = critHTML + "";
 				</script>
 			</div>
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Download Output Data</p>	
-		<div style="text-align:left" class="content" style="margin-top:0px">
+		<p class='reportTitle postRun'><b>Download Output Data</b></p>
+		<div class="content" style="margin-top:0px;text-align:left">
 			<a style="padding:10px" onclick="downloadTextFile('gfmOutput.txt', allOutputData['gfmRawOut'])">General Fragility Model (GFM) Output</a><br>
 			<a style="padding:10px" onclick="downloadTextFile('rdtOutput.txt', allOutputData['rdtRawOut'])">Resilient Design Tool (RDT) Output</a><br>
 			<a style="padding:10px" onclick="downloadTextFile('gridlabdOutput.txt', JSON.stringify(allOutputData['gridlabdRawOut'], null, 2))">GridLAB-D (GLD) Output</a>

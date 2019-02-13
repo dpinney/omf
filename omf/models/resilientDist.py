@@ -85,12 +85,12 @@ class HazardField(object):
 		return newValues
 
 
-	def drawHeatMap(self, isDamageField=False):
+	def drawHeatMap(self, ax):
 		''' Draw heat map-color coded image map with user-defined boundaries and cell-size. '''
-		heatMap = plt.imshow(
+		heatMap = ax.imshow(
 			self.hazardObj['field'],
-			cmap = 'hot',
-			interpolation = 'nearest',
+			cmap = plt.cm.gray,
+			interpolation = 'bilinear',
 			extent = [
 				self.hazardObj["xllcorner"],
 				self.hazardObj["xllcorner"] + self.hazardObj["ncols"] * self.hazardObj["cellsize"],
@@ -100,7 +100,7 @@ class HazardField(object):
 			aspect='auto')
 		#plt.gca().invert_yaxis() This isn't needed anymore?
 		plt.title("Hazard Field")
-		plt.show()
+		return heatMap
 
 	def scaleField(self, scaleFactor):
 		''' Numerically scale the field with user defined scaling factor. ''' 
@@ -112,14 +112,14 @@ class HazardField(object):
 		for a in np.nditer(self.hazardObj["field"], op_flags=['readwrite']):
 			a[...] = random.uniform(lowerLimit, upperLimit) 
 
-def _testHazards():
+def _testHazards(ax):
 	hazard = HazardField(omf.omfDir + "/static/testFiles/wf_clip.asc")
-	hazard.scaleField(.5)
-	hazard.moveLocation(20, 100)
-	hazard.changeCellSize(0.5)
-	hazard.randomField()
+	hazard.scaleField(200)
+	hazard.moveLocation(0, 0)
+	hazard.changeCellSize(1)
+	#hazard.randomField()
 	# hazard.exportHazardObj("modWindFile.asc")
-	# hazard.drawHeatMap()
+	hazard.drawHeatMap(ax)
 
 def getNodePhases(obj, maxRealPhase):
 	''' Convert phase info in GridLAB-D obj (e.g. ABC) to GFM phase format (e.g. [True,True,True].'''
@@ -296,7 +296,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 	return gfmJson
 
 def genDiagram(outputDir, feederJson, damageDict, critLoads):
-	print damageDict
+	# print damageDict
 	warnings.filterwarnings("ignore")
 	# Load required data.
 	tree = feederJson.get("tree",{})
@@ -337,6 +337,10 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads):
 	plt.tight_layout()
 	plt.gca().invert_yaxis()
 	plt.gca().set_aspect('equal')
+
+	fig, ax = plt.subplots()
+	_testHazards(ax)
+
 	# Layout the graph via GraphViz neato. Handy if there's no lat/lon data.
 	if neatoLayout:
 		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
@@ -362,6 +366,7 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads):
 		standArgs = {'edgelist':[e],
 					 'edge_color':edgeColor,
 					 'width':2,
+					 'ax': ax,
 					 'style':{'parentChild':'dotted','underground_line':'dashed'}.get(eType,'solid') }
 		if ePhases==3:
 			standArgs.update({'width':5})
@@ -393,6 +398,7 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads):
 		pos, 
 		nodelist=green_list,
 		node_color='green',
+		ax=ax,
 		label='Swing Buses',
 		node_size=12
 	)
@@ -401,6 +407,7 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads):
 		pos,
 		nodelist=red_list,
 		node_color='red',
+		ax=ax,
 		label='Critical Loads',
 		node_size=12
 	)
@@ -409,6 +416,7 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads):
 		pos,
 		nodelist=blue_list,
 		node_color='blue',
+		ax=ax,
 		label='Regular Loads',
 		node_size=12
 	)
@@ -417,6 +425,7 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads):
 		pos,
 		nodelist=grey_list,
 		node_color='grey',
+		ax=ax,
 		label='Other',
 		node_size=12
 	)
@@ -426,6 +435,7 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads):
 			pos,
 			font_color='black',
 			font_weight='bold',
+			ax=ax,
 			font_size=0.25
 		)
 	plt.legend(loc='lower right') 
@@ -690,7 +700,6 @@ def new(modelDir):
 
 def _runModel():
 	# Testing the hazard class.
-	_testHazards()
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.

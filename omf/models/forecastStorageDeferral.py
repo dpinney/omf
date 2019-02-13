@@ -6,11 +6,7 @@ import pulp
 from os.path import isdir, join as pJoin
 import __neoMetaModel__
 from __neoMetaModel__ import *
-
-# TO DO
-# include depth of discharge
-# include inverter efficiency
-# 
+import forecast as fc
 
 
 # Model metadata:
@@ -18,54 +14,6 @@ modelName, template = metadata(__file__)
 tooltip = ('Calculate the virtual battery capacity for a collection of '
 	'thermostically controlled loads with day-ahead forecasting.')
 hidden = True
-
-def makeUsefulDf(df):
-	def _normalizeCol(l):
-		s = l.max() - l.min()
-		return l if s == 0 else (l - l.mean()) / s
-
-	def _chunks(l, n):
-		return [l[i:i+n] for i in range(0, len(l), n)]
-
-	r_df = pd.DataFrame()
-	r_df['load_n'] = _normalizeCol(df['load'])
-	r_df['years_n'] = _normalizeCol(df['dates'].dt.year - 2000)
-	
-	# fix outliers
-	m = df['tempc'].replace([-9999], np.nan)
-	m.ffill(inplace=True)
-	r_df['temp_n'] = _normalizeCol(m)
-
-	# add the value of the load 24hrs before
-	r_df['load_prev_n'] = r_df['load_n'].shift(24)
-	r_df['load_prev_n'].bfill(inplace=True)
-
-	# create day of week vector
-	r_df['day'] = df['dates'].dt.dayofweek # 0 is Monday.
-	w = ['S', 'M', 'T', 'W', 'R', 'F', 'A']
-	for i, d in enumerate(w):
-		r_df[d] = (r_df['day'] == i).astype(int)
-	
-	# create hour of day vector
-	r_df['hour'] = df['dates'].dt.hour
-	d = [('h' + str(i)) for i in range(24)]
-	for i, h in enumerate(d):
-		r_df[h] = (r_df['hour'] == i).astype(int)
-	
-	# create month vector
-	r_df['month'] = df['dates'].dt.month
-	y = [('m' + str(i)) for i in range(12)]
-	for i, m in enumerate(y):
-	    r_df[m] = (r_df['month'] == i).astype(int)
-
-	# create 'load day before' vector
-	n = np.array([val for val in _chunks(list(r_df['load_n']), 24) for _ in range(24)])
-	l = ['l' + str(i) for i in range(24)]
-	for i, s in enumerate(l):
-	    r_df[s] = n[:, i]
-
-	m = r_df.drop(['month', 'hour', 'day', 'load_n'], axis=1)
-	return m
 
 def shouldDispatch(peak, month, df, conf, goal, deferral):
 	if goal != 'deferral':
@@ -129,7 +77,7 @@ def work(modelDir, ind):
 	confidence = float(ind['confidence'])/100
 
 	# train model on previous data
-	all_X = makeUsefulDf(df)
+	all_X = fc.makeUsefulDf(df)
 	all_y = df['load']
 	X_train, y_train = all_X[:-8760], all_y[:-8760]
 	clf = linear_model.SGDRegressor(max_iter=10000, tol=1e-4)
@@ -150,9 +98,9 @@ def work(modelDir, ind):
 	VB_power, VB_energy = [], []
 	for i, (load24, temp24, m) in enumerate(zip(dailyLoadPredictions, dailyWeatherPredictions, month)):
 		peak = max(load24)
-		if shouldDispatch(peak, m, df, confidence, goal, threshold):
+		if fc.shouldDispatchDeferral(peak, df, confidence, threshold):
 			dispatched[i] = True
-			vbp, vbe = pulp24hr(load24, dischargeRate*cellQuantity, 
+			vbp, vbe = fc.pulp24hrBattery(load24, dischargeRate*cellQuantity, 
 				cellCapacity*cellQuantity, battEff)
 			VB_power.extend(vbp)
 			VB_energy.extend(vbe)
@@ -243,7 +191,7 @@ def new(modelDir):
 	defaultInputs = {
 		"modelType": modelName,
 		"user": "admin",
-		"goal": "peakShave",
+		"goal": "deferral",
 		"confidence": "80",
 		"demandChargeCost":"25",
 		"electricityCost":"0.06",

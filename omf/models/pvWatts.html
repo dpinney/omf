@@ -132,6 +132,18 @@
 				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
 				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
 				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
+				<!-- Function to send rendered html page to server proof of concept
+				<button id="save" class="stoppedInline postRunInline" type="button">Save Template</button>
+					<script>
+					$('#save').click(function() {
+						myhtml = $('html').html();
+						$.ajax({
+							type: "POST",
+							url: "{{pathPrefix}}/renderToFile",
+							data: {html:myhtml}
+						});
+					});
+				</script> -->
 			</div>
 		</form>
 	</div>
