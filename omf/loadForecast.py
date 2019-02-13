@@ -180,7 +180,9 @@ def prophetForecast(rawData, startDate, modelDir):
 	input_df["ds"] = dates.to_pydatetime()
 	input_df.to_csv(pJoin(modelDir, "prophetin.csv"))
 	prophet.fit(input_df)
-	out_df = cross_validation(prophet, initial="672 hours", horizon="672 hours", period="672 hours")
+	out_df = cross_validation(
+		prophet, initial="672 hours", horizon="672 hours", period="672 hours"
+	)
 	out_df.to_csv(pJoin(modelDir, "prophetout.csv"))
 	return (list(out_df.yhat), list(out_df.yhat_lower), list(out_df.yhat_upper))
 
@@ -305,8 +307,17 @@ class svmNextDayPeakTime:
 			)  # returns True if afternoon
 			x_morning = x_test[~classifier_predictions]
 			x_afternoon = x_test[classifier_predictions]
-			hour_predictions_morning = self.morning_regressor.predict(x_morning)
-			hour_predictions_afternoon = self.afternoon_regressor.predict(x_afternoon)
+
+			hour_predictions_morning = (
+				self.morning_regressor.predict(x_morning)
+				if len(x_morning) > 0
+				else np.array([])
+			)
+			hour_predictions_afternoon = (
+				self.afternoon_regressor.predict(x_afternoon)
+				if len(x_afternoon) > 0
+				else np.array([])
+			)
 
 			###APPENDING RESULTS & SKLEARN OBJECTS
 			for hpm_index, index_val in enumerate(

@@ -34,6 +34,8 @@ def work(modelDir, inputDict):
 	except:
 		errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href = 'https://github.com/dpinney/omf/wiki/Models-~-storagePeakShave#demand-file-csv-format'>\nOMF Wiki storagePeakShave - Demand File CSV Format</a>"
 		raise Exception(errorMessage)
+	for i in range(len(rawData)):
+		rawData[i] = [a if a else 0 for a in rawData[i]]
 	rawData = list(np.float_(rawData))  # converts all data from float to string
 	for x in range(len(rawData)):
 		actual.append(float(rawData[x][0]))
