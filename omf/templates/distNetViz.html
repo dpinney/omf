@@ -1040,19 +1040,19 @@
 </html>
 <script id='componentsInsert'>const gComponents = {% if components %}{{ components | safe }}{% else %}null{% endif %}; 
 </script>
-<script id='feederInsert'>const readFeeder = {% if thisFeederData %}{{ thisFeederData | safe }}{% else %}null{% endif %}; 
+<script id='feederInsert'>const gReadFeeder = {% if thisFeederData %}{{ thisFeederData | safe }}{% else %}null{% endif %}; 
 </script>
 <script id='panZoomInsert'>
 </script>
 <script type='text/javascript'>
 //"use strict";
-let thisFeederName = "{% if thisFeederName %}{{ thisFeederName | safe }}{% else %}null{% endif %}";
-const thisFeederNum = {% if thisFeederNum %}{{ thisFeederNum | safe }}{% else %}null{% endif %}; 
-const thisModelName = "{% if thisModelName %}{{ thisModelName | safe }}{% else %}null{% endif %}"; 
-const thisOwner = "{% if thisOwner %}{{ thisOwner | safe }}{% else %}null{% endif %}"; 
-const publicFeeders = {% if publicFeeders %}{{ publicFeeders | safe }}{% else %}null{% endif %};
-const userFeeders = {% if userFeeders %}{{ userFeeders | safe }}{% else %}null{% endif %}; 
-const writeFeeder = deepCopy(readFeeder);
+let gThisFeederName = "{% if thisFeederName %}{{ thisFeederName | safe }}{% else %}null{% endif %}";
+const gThisFeederNum = {% if thisFeederNum %}{{ thisFeederNum | safe }}{% else %}null{% endif %}; 
+const gThisModelName = "{% if thisModelName %}{{ thisModelName | safe }}{% else %}null{% endif %}"; 
+const gThisOwner = "{% if thisOwner %}{{ thisOwner | safe }}{% else %}null{% endif %}"; 
+const gPublicFeeders = {% if publicFeeders %}{{ publicFeeders | safe }}{% else %}null{% endif %};
+const gUserFeeders = {% if userFeeders %}{{ userFeeders | safe }}{% else %}null{% endif %}; 
+const gWriteFeeder = deepCopy(gReadFeeder);
 // The global gTree can only be created after the entire file has been parsed.
 let gTree;
 let gSelection;
@@ -1142,7 +1142,7 @@ function saveSvg() {
 function downloadTextFile() {
 	// WARNING! Performance is very bad because the JSON is enormous! This can hang your browser!
 	alert('We are opening a window with JSON in it that you can save as a .json file.')
-	var modJson = JSON.stringify(writeFeeder);
+	var modJson = JSON.stringify(gWriteFeeder);
 	var win = window.open();
 	win.document.write(modJson);
 }
@@ -1510,8 +1510,8 @@ function disableJQueryFunctionality() {
 // keep this
 function attachHandlers() {
     attachAddComponentListeners();
-    attachFeederList(document.getElementById("publicFeederList"), publicFeeders, "public");
-    attachFeederList(document.getElementById("userFeederList"), userFeeders, thisOwner);
+    attachFeederList(document.getElementById("publicFeederList"), gPublicFeeders, "public");
+    attachFeederList(document.getElementById("userFeederList"), gUserFeeders, gThisOwner);
     addFileMenuHandlers();
     addEditMenuHandlers();
 }
@@ -1669,20 +1669,21 @@ function attachAddComponentListeners() {
  * TODO: add unit-tests
  * @param {Element} ul - An html element where the list will be attached
  * @param {Array} feeders - An array of objects, where each object has properties "model" and "name", or null. 
- * @param {string} owner - Either "public" or the owner of the current writeFeeder.
+ * @param {string} owner - Either "public" or nothing, as the server determines the real owner.
  */
-function attachFeederList (ul, feeders, owner) {
+function attachFeederList(ul, feeders, owner=null) {
     if (!feeders) return;
     const sortedNames = feeders.map(feeder => feeder.name.toLowerCase()).sort();
     sortedNames.forEach(lowercaseName => {
         const feeder = feeders.find(feeder => {
             return feeder.name.toLowerCase() === lowercaseName;
         });
-        if (feeder.name != thisFeederName) {
+        if (feeder.name != gThisFeederName) {
             const li = document.createElement("li");
             li.classList.add("feederItem");
             li.innerHTML = `<strong>${feeder.name}</strong> from <br>"${feeder.model}"`;
             li.addEventListener("click", function() {
+                /* What is the feeder.model for a public feeder? It's "publicFeeders". Do feeders not have their own owner property? No they don't */
                 loadFeeder(feeder.name, feeder.model, owner);
             });
             ul.append(li);
@@ -1703,7 +1704,7 @@ function addFileMenuHandlers() {
         throw new Error("Please update this function to ensure the correct handlers are attached");
     }
     items[0].addEventListener("click", function() {
-        saveFeeder(writeFeeder);
+        saveFeeder(gWriteFeeder);
     });
     items[1].addEventListener("click", downloadTextFile);
     items[2].addEventListener("click", renameFeeder);
@@ -2005,9 +2006,15 @@ function massEdit() {
     }
 }
 
-function isValidParentName(name) {
+/* For the recorder special case, I need to know if the object under consideration is a recorder or not */
+/**
+ * @param {string} name - the name of the object that is being considered as a parent.
+ * @param {string} object - the type of the object that needs the parent. Only matters for the "recorder" special case
+ */
+function isValidParentName(name, object) {
     try {
-        if (getType(gTree.getObject(gTree.treeMap.getKey(name))) === "configurationNode") return false;
+        const type = getType(gTree.getObject(gTree.treeMap.getKey(name)));
+        if (type === "configurationNode"  || (type === "line" && object !== "recorder")) return false; 
     } catch (e) {
         return false;
     }
@@ -2051,13 +2058,15 @@ function massAddAttribute(keys, objectType) {
 }
 
 /**
- * Create an array of tree objects. Delete all the real objects. change all the tree objects, insert all the tree objects, redraw.
+ * @param {keys} - the keys of the objects to be changed
+ * @param {attributeKey} - the attribute that is being changed
+ * @param {objectType} - The "object" property of every object that is being changed
  */
 function massChange(keys, attributeKey, objectType) {
     const newValue = document.getElementById("changeValue").value.trim();
     switch (attributeKey) {
         case "parent":
-            if (!isValidParentName(newValue)) {
+            if (!isValidParentName(newValue, objectType)) {
                 alert(`Mass change failed. The name "${newValue}" is not a valid parent name.`);
                 return;
             }
@@ -2137,7 +2146,7 @@ function massMultiplication(keys, attributeKey, objectType) {
 function loadAttachments() {
     const selectElement = document.getElementById("attachmentSelect");
     selectElement.innerHTML = "";
-	for (let key in writeFeeder.attachments) {
+	for (let key in gWriteFeeder.attachments) {
         selectElement.innerHTML += `<option value=${key}>${key}</option>`;
     }
 }
@@ -2148,14 +2157,14 @@ function editAttachment() {
 		toggleElementDisplay('editAttachmentModal');
 		let name =  document.getElementById('attachmentSelect').value; //get the select. attachmentsList = attachmentSelect
 		document.getElementById('attachmentTd').innerHTML = name;  //get the td. attachmentSelect = attachmentTd
-		document.getElementById('editAttachmentBox').innerHTML = writeFeeder.attachments[name];
+		document.getElementById('editAttachmentBox').innerHTML = gWriteFeeder.attachments[name];
 		//document.body.style.cursor = 'auto'
 	//}, 100);
 }
 
 function saveAttachment() {
 	let name = document.getElementById('attachmentSelect').value;
-	writeFeeder.attachments[name] = document.getElementById('editAttachmentBox').value;
+	gWriteFeeder.attachments[name] = document.getElementById('editAttachmentBox').value;
 }
 
 //**************************************************
@@ -2171,20 +2180,20 @@ function saveFeeder(feeder) {
     formData.set("feederObjectJson", JSON.stringify(feeder));
     const postRequest = $.ajax({
         type: "POST",
-        url: `/saveFeeder/${thisOwner}/${thisModelName}/${thisFeederName}`,
+        url: `/saveFeeder/${gThisOwner}/${gThisModelName}/${gThisFeederName}`,
         data: formData,
         processData: false,
         contentType: false,
     });
     let cancelled = false;
     let progressModal;
-    if (feeder === readFeeder) {
+    if (feeder === gReadFeeder) {
         progressModal = new ProgressModal("Cancelling the previous operation...", "", false);
         postRequest.done(function() {
             progressModal.hide();
             alert("Success. Previous operation was canceled");
         });
-    } else if (feeder === writeFeeder) {
+    } else if (feeder === gWriteFeeder) {
         progressModal = new ProgressModal("Saving changes to your file...", "You have canceled the save.", true);
         progressModal.button.addEventListener("click", function() {
             cancelled = true;
@@ -2193,7 +2202,7 @@ function saveFeeder(feeder) {
         });
         postRequest.done(function() {
             if (cancelled) {
-                saveFeeder(readFeeder);
+                saveFeeder(gReadFeeder);
             } else {
                 progressModal.hide();
                 alert("Success. Your data was saved.");
@@ -2203,10 +2212,13 @@ function saveFeeder(feeder) {
     progressModal.show();
 }
 
+/**
+ * TODO: This function has a lot of problems because of how the web routes are written.
+ */
 async function loadFeeder(serverFeederName, serverModelName, owner) {
     let submitForm = false;
     await $.ajax({
-        url: `/uniqObjName/Feeder/${thisOwner}/${serverFeederName}/${serverModelName}`
+        url: `/uniqObjName/Feeder/${owner}/${serverFeederName}/${serverModelName}`
     }).done(function(data) {
         if (data.exists) {
             submitForm = true;
@@ -2229,13 +2241,15 @@ async function loadFeeder(serverFeederName, serverModelName, owner) {
     progressModal.show();
     $.ajax({
         type: "POST",
-        url: `/loadFeeder/${serverFeederName}/${serverModelName}/${thisModelName}/${thisFeederNum}/${owner}/${thisOwner}`,
+        /* If ${owner} is not set to "public", then the server ignores what was sent and sets it to User.cu()
+        */
+        url: `/loadFeeder/${serverFeederName}/${serverModelName}/${gThisModelName}/${gThisFeederNum}/${owner}/${gThisOwner}`,
         data: formData,
         processData: false,
         contentType: false,
     }).done(function() {
         if (cancelled) {
-            saveFeeder(readFeeder);
+            saveFeeder(gReadFeeder);
         } else {
             reloadWrapper();
         }
@@ -2253,7 +2267,7 @@ async function submitForm({formId, pollUrl, inputId}) {
         const fileName = document.getElementById(inputId).value;
         // Check if the file exists, using the user-provided fileName
         await $.ajax({
-            url: `/uniqObjName/Feeder/${thisOwner}/${fileName}/${thisModelName}`
+            url: `/uniqObjName/Feeder/${gThisOwner}/${fileName}/${gThisModelName}`
         }).done(function(data) {
             //console.log(data);
             if (data.exists === true) {
@@ -2297,14 +2311,13 @@ async function submitForm({formId, pollUrl, inputId}) {
             // Poll the server
             const intervalId = setInterval(function() {
                 $.ajax({
-                    //url: `/checkConversion/${thisModelName}/${thisOwner}`
                     url: pollUrl
                 }).done(function(data) {
                     if (cancelled) {
                         clearInterval(intervalId);
                         pollModal.hide();
                         alert("You cancelled the operation");
-                        saveFeeder(readFeeder);
+                        saveFeeder(gReadFeeder);
                     }
                     if (data.exists === true) {
                         //processing is ongoing 
@@ -2318,12 +2331,12 @@ async function submitForm({formId, pollUrl, inputId}) {
                         clearInterval(intervalId);
                         pollModal.hide()
                         alert('The .std and .seq files used are incorrectly formatted.');
-                        //TODO: submit the readFeeder
+                        //TODO: submit the gReadFeeder
                     } else if (data === "glmError") {
                         clearInterval(intervalId);
                         pollModal.hide()
                         alert('The .glm file used is incorrectly formatted.');
-                        //TODO: submit the readFeeder
+                        //TODO: submit the gReadFeeder
                     } else {
                         console.log(data);
                         clearInterval(intervalId);
@@ -2337,17 +2350,17 @@ async function submitForm({formId, pollUrl, inputId}) {
 }
 
 async function renameFeeder() {
-	if (JSON.stringify(readFeeder) !== JSON.stringify(writeFeeder)){
+	if (JSON.stringify(gReadFeeder) !== JSON.stringify(gWriteFeeder)){
 		alert('You have unsaved changes. Please save the feeder before proceeding.')
 	} else {
-		let newName = prompt("Rename the feeder to", `${thisFeederName}`);
+		let newName = prompt("Rename the feeder to", `${gThisFeederName}`);
 		while (! /^[\w\s]+$/.test(newName) || /^\s+$/.test(newName)) {
-			newName = prompt("Only letters, digits and underscore are allowed.\nPlease enter a different name", `${thisFeederName}`);
+			newName = prompt("Only letters, digits and underscore are allowed.\nPlease enter a different name", `${gThisFeederName}`);
 		}
 		if (newName){
             let submitRequest = false;
             await $.ajax({
-                url: `/uniqObjName/Feeder/${thisOwner}/${newName}/${thisModelName}`
+                url: `/uniqObjName/Feeder/${gThisOwner}/${newName}/${gThisModelName}`
             }).done(function(data) {
                 if (data.exists) {
                     alert(`You already have a feeder named "${newName}". Please choose a different name.`);
@@ -2359,9 +2372,9 @@ async function renameFeeder() {
                 return;
             }
             $.ajax({
-                url: `/renameFeeder/${thisOwner}/${thisModelName}/${thisFeederName}/${newName}/${thisFeederNum}`
+                url: `/renameFeeder/${gThisOwner}/${gThisModelName}/${gThisFeederName}/${newName}/${gThisFeederNum}`
             }).done(function() {
-                thisFeederName = newName;
+                gThisFeederName = newName;
                 alert("Feeder file was successfully renamed.");
             })
 		}
@@ -3581,11 +3594,11 @@ function createTreeObject(input, tree) {
 //**************************************************
 
 /*
-These are names of properties in most objects in writeFeeder.tree that should not be deleted from objects because
+These are names of properties in most objects in gWriteFeeder.tree that should not be deleted from objects because
 doing so might make that object hard to identify with reference to the rest of the data.
 */
 const nonDeletableProperties = ["name", "object", "from", "to", "parent", "latitude", "longitude", "configuration"];
-/* If these properties were to be modified for a given writeFeeder.tree object, it would require significantly modifying the 
+/* If these properties were to be modified for a given gWriteFeeder.tree object, it would require significantly modifying the 
 other objects.  These properties ARE technically modifiable, but allowing the user to change them would require more work 
 than I think is worth it. It is easier just to create a new node.
 */
@@ -3942,7 +3955,7 @@ const rowPrototype = {
     validateNewValue(value) {
         if (this.key === "longitude" || this.key === "latitude") return isNumberString(value);
         if (this.key === "parent") {
-            if (isValidParentName(value)) return true;
+            if (isValidParentName(value, this.tObject.object)) return true;
             return false;
         }
         if (this.key === "to" || this.key === "from") {
@@ -4179,8 +4192,8 @@ function attachKeyListener() {
 }
 
 function createInterface() {
-    createViewport(writeFeeder.tree, document.getElementById("svgContainer"));
-    gTree = createTree(writeFeeder.tree);
+    createViewport(gWriteFeeder.tree, document.getElementById("svgContainer"));
+    gTree = createTree(gWriteFeeder.tree);
     const objects = Object.values(gTree.tree);
     insertCoordinates(objects, gOffsetX, gOffsetY, (1000/gDrawScaleFactor) * .005);
     gSelection = createSelection();
