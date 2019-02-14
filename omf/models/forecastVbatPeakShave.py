@@ -7,7 +7,7 @@ from os.path import isdir, join as pJoin
 import __neoMetaModel__
 from __neoMetaModel__ import *
 from solvers import VB 
-import forecast as fc
+import loadForecast as fc
 
 # Model metadata:
 modelName, template = metadata(__file__)

@@ -6,7 +6,7 @@ import pulp
 from os.path import isdir, join as pJoin
 import __neoMetaModel__
 from __neoMetaModel__ import *
-import forecast as fc
+import loadForecast as fc
 
 
 # Model metadata:
@@ -55,7 +55,7 @@ def work(modelDir, ind):
 		[float(ind[x]) for x in ('cellCapacity', 'dischargeRate', 'chargeRate', 'cellQuantity', 'cellCost')]
 	battEff	= float(ind.get("batteryEfficiency")) / 100.0
 	dodFactor = float(ind.get('dodFactor')) / 100.0
-	projYears = int(ind.get('projYears'))
+	projYears = int(ind.get('projectionLength'))
 	batteryCycleLife = int(ind.get('batteryCycleLife'))
 
 	o = {}
@@ -68,7 +68,7 @@ def work(modelDir, ind):
 		df['dayOfYear'] = df['dates'].dt.dayofyear
 		assert df.shape[0] >= 26280 # must be longer than 3 years
 		assert df.shape[1] == 5
-	except:
+	except ZeroDivisionError:
 		raise Exception("CSV file is incorrect format.")
 
 	# retrieve goal
