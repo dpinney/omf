@@ -4,10 +4,11 @@
 		<meta charset="UTF-8">
 		<style >
             /* Define global css variables */
+            /* I have to subtract 4px or so from the svgContainer to prevent the scrollbar from appearing. Making the header height less does not appear to change anything. */
             :root {
-                --header-height: 25px;
-                --header-padding-top: 10px;
-                --header-padding-bottom: 10px;
+                --header-height: 35px;
+                --header-padding-top: 8px;
+                --header-padding-bottom: 8px;
             }
 			* { 
                 font-family: Helvetica, Arial, Sans-Serif;
@@ -55,12 +56,13 @@
             }
 
             /* This is the element that acts as a hook for svg-pan-zoom.js to attach a viewport, which it creates itself */
+            /* overflow: hidden is set by svg-pan-zoom.js itself. No need to change that here. */
 			#svgContainer {
                 /* width must be 100%, meaning 100% of the document */
 				width: 100%; 
                 /* height must be manually set to a hard value */
-				height: calc(100vh - var(--header-height) - var(--header-padding-bottom) - var(--header-padding-top));
-                /* overflow: hidden is set by svg-pan-zoom.js itself. No need to change that here. */
+				/*height: calc(100vh - var(--header-height) - var(--header-padding-bottom) - var(--header-padding-top));*/
+				height: calc(100vh - var(--header-height) - var(--header-padding-bottom) - var(--header-padding-top) - 4px);
 			}
 			#saveButton {
 				float:right;
@@ -129,21 +131,26 @@
 				padding-top: var(--header-padding-top);
 				padding-bottom: var(--header-padding-bottom);
 				background:black;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
                 /*position: absolute;*/
 				/*min-width:1000px;*/
 			}
             #helpDiv a {
                 color: white;
             }
-			/*#menuLeft{ height:40px; float:left; font-size:medium; color:white; margin-left:5px;}*/
-			#menuRight{ 
-				/*height:40px;
-				font-size:medium;
-				color:white;*/
-				float:right;
+			#menuLeft {
+                color:white;
+            }
+            #menuLeft h4 {
+                margin: 0px 0px 4px 20px;
+            }
+            #menuLeft p {
+                margin: 0px 0px 0px 20px;
+            }
+			#menuRight { 
 				display:flex;
-				/*justify-content: space-between;
-				width: 162px*/
 			}
 			/*#arrow { font-size:8pt; position:absolute; margin-top:2px; margin-left:4px; display:inline; }*/
             .headerDiv {
@@ -465,6 +472,10 @@
             <!-- <div style='background:navy; top:215px; left:5px' id='saveLink' class='divButton' onclick='saveSvg()' title='Save File' download>S</div> -->
             <!-- Menu Bar -->
             <div id='header'>
+                <div id="menuLeft">
+                    <h4>{{thisFeederName}}</h4>
+                    <p>from "{{thisModelName}}"</p>
+                </div>
                 <div id="menuRight">
                     <div id="helpDiv" class="headerDiv">
                         <div class="buttonGroup">
@@ -3577,7 +3588,6 @@ function createTreeObject(input, tree) {
     } else if (typeof input === "object" && !Array.isArray(input)) {
         tObject.key = getNewTreeKey(tree.tree);
         tObject.data = deepCopy(input);
-        //if (tObject.data.name != null && tObject.data.object != null) tObject.data.name = tObject.data.object + tObject.key;
         if (tObject.data.object != null) tObject.data.name = tObject.data.object + tObject.key;
         ['longitude', 'latitude'].forEach(prop => {
             if (tObject.data[prop] != null && typeof tObject.data[prop] === "string") {
