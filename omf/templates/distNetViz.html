@@ -1074,8 +1074,10 @@ const gWriteFeeder = deepCopy(gReadFeeder);
 let gTree;
 let gSelection;
 let gViewport; 
-let gOffsetX;
-let gOffsetY;
+//let gOffsetX; // replaced by gMinLon
+let gMinLon;
+//let gOffsetY; // replaced by gMaxLat
+let gMaxLat;
 let gLongitudeRange;
 let gLatitudeRange;
 let gDrawScaleFactor;
@@ -1228,10 +1230,13 @@ function createViewport(tree, svgContainer) {
             }
         }
     });
+    /* Longitude is not reversed, so I want the minimum longitude to use as the offset. Latitude IS reversed, so I want the maximum latitude to use as the offset. */
     gLongitudeRange = maxLon - minLon;
-    gOffsetX = minLon;
+    //gOffsetX = minLon;
+    gMinLon = minLon;
     gLatitudeRange = maxLat - minLat;
-    gOffsetY = minLat;
+    //gOffsetY = minLat;
+    gMaxLat = maxLat;
     /* Multiply by the gDrawScaleFactor when drawing. Divide by the gDrawScaleFactor when storing. 
     We use the larger of the range values to set the gDrawScaleFactor to make the graph fit in the viewport initially.
     */
@@ -2874,13 +2879,14 @@ function attachMoveListener(keys, tBody=null, tObject=null) {
  * to the arguments.
  * 
  * These x, y coordinate arguments are relative to the viewport, which means they have a minimum
- * value of 0 and that the gOffsetX and gOffsetY must be added to them before they are real 
+ * value of 0 and that the gMinLon and gOffsetY must be added to them before they are real 
  * coordinates to be stored in the tree.
  * @param {number} x - an x coordinate relative to the viewport, usually created with a click on the screen.
  * @param {number} y - a y coordinate relative to the viewport, usually created with a click on the screen.
  */
 function move(objects, {x, y}) {
-    let offsetX = gOffsetX, offsetY = gOffsetY, scaleFactor = gDrawScaleFactor;
+    let offsetX = gMinLon, offsetY = gMaxLat, scaleFactor = gDrawScaleFactor;
+    //let offsetX = gMinLon, offsetY = gOffsetY, scaleFactor = gDrawScaleFactor;
     if (arguments[2] != null) {// needed for testing
         offsetX = arguments[2].offsetX;
         offsetY = arguments[2].offsetY;
@@ -2901,7 +2907,8 @@ function move(objects, {x, y}) {
     avgLat /= nodes.length;
     nodes.forEach(node => {
         node.longitude = node.longitude - avgLon + offsetX + x/scaleFactor;
-        node.latitude = node.latitude - avgLat + offsetY + y/scaleFactor;
+        //node.latitude = node.latitude - avgLat + offsetY + y/scaleFactor;
+        node.latitude = node.latitude - avgLat + offsetY - y/gDrawScaleFactor;
     });
 }
 
@@ -3180,8 +3187,9 @@ function createCircle(nodeKey) {
     if (typeof lon !== "number") throw new Error(`'longitude' must be a number.`);
     const lat = node.latitude;
     if (typeof lat !== "number") throw new Error(`'latitude' must be a number.`);
-    circle.cx = (lon - gOffsetX) * gDrawScaleFactor;
-    circle.cy = (lat - gOffsetY) * gDrawScaleFactor;
+    circle.cx = (lon - gMinLon) * gDrawScaleFactor;// lon isn't reversed so it's fine
+    circle.cy = (gMaxLat - lat) * gDrawScaleFactor;
+    //circle.cy = (lat - gOffsetY) * gDrawScaleFactor;
     return circle;
 }
 
@@ -3224,10 +3232,12 @@ function createParentChildLineWithLine(lineKey, childKey) {
     const fromNode = tree.getFromNode(lineKey);
     if (toNode == null || fromNode == null) return; // The parent line could itself have nonexistent 'to' or 'from' nodes.
     const child = tree.getObject(childKey);
-    line.x1 = (((toNode.longitude + fromNode.longitude)/2) - gOffsetX) * gDrawScaleFactor;
-    line.y1 = (((toNode.latitude + fromNode.latitude)/2) - gOffsetY) * gDrawScaleFactor;
-    line.x2 = (child.longitude - gOffsetX) * gDrawScaleFactor;
-    line.y2 = (child.latitude - gOffsetY) * gDrawScaleFactor;
+    line.x1 = (((toNode.longitude + fromNode.longitude)/2) - gMinLon) * gDrawScaleFactor;
+    line.y1 = (gMaxLat - ((toNode.latitude + fromNode.latitude)/2)) * gDrawScaleFactor;
+    //line.y1 = (((toNode.latitude + fromNode.latitude)/2) - gOffsetY) * gDrawScaleFactor;
+    line.x2 = (child.longitude - gMinLon) * gDrawScaleFactor;
+    line.y2 = (gMaxLat - child.latitude) * gDrawScaleFactor;
+    //line.y2 = (child.latitude - gOffsetY) * gDrawScaleFactor;
     line.id = getParentChildLineId(lineKey, childKey, tree);    
     line.class = "parentChild";
     line["stroke-width"] = .5 * gScaleLevel;
@@ -3255,10 +3265,12 @@ function createParentChildLineWithNode(parentKey, childKey) {
     const line = Object.create(linePrototype);
     const parent = tree.getObject(parentKey);
     const child = tree.getObject(childKey); // Don't need to check for nonexistent parent because I already do that elsewhere
-    line.x1 = (parent.longitude - gOffsetX) * gDrawScaleFactor;
-    line.y1 = (parent.latitude - gOffsetY) * gDrawScaleFactor;
-    line.x2 = (child.longitude - gOffsetX) * gDrawScaleFactor;
-    line.y2 = (child.latitude - gOffsetY) * gDrawScaleFactor;
+    line.x1 = (parent.longitude - gMinLon) * gDrawScaleFactor;
+    line.y1 = (gMaxLat - parent.latitude) * gDrawScaleFactor;
+    //line.y1 = (parent.latitude - gOffsetY) * gDrawScaleFactor;
+    line.x2 = (child.longitude - gMinLon) * gDrawScaleFactor;
+    line.y2 = (gMaxLat - child.latitude) * gDrawScaleFactor;
+    //line.y2 = (child.latitude - gOffsetY) * gDrawScaleFactor;
     line.id = getParentChildLineId(parentKey, childKey, tree);
     line.class = "parentChild";
     line["stroke-width"] = .5 * gScaleLevel;
@@ -3275,10 +3287,12 @@ function createLine(lineKey) {
     const toNode = tree.getToNode(lineKey);
     const fromNode = tree.getFromNode(lineKey);
     if (toNode == null || fromNode == null) return; // A line could have nonexistent 'to' or 'from' nodes
-    line.x1 = (fromNode.longitude - gOffsetX) * gDrawScaleFactor;
-    line.y1 = (fromNode.latitude - gOffsetY) * gDrawScaleFactor;
-    line.x2 = (toNode.longitude - gOffsetX) * gDrawScaleFactor;
-    line.y2 = (toNode.latitude - gOffsetY) * gDrawScaleFactor;
+    line.x1 = (fromNode.longitude - gMinLon) * gDrawScaleFactor;
+    line.y1 = (gMaxLat - fromNode.latitude) * gDrawScaleFactor;
+    //line.y1 = (fromNode.latitude - gOffsetY) * gDrawScaleFactor;
+    line.x2 = (toNode.longitude - gMinLon) * gDrawScaleFactor;
+    line.y2 = (gMaxLat - toNode.latitude) * gDrawScaleFactor;
+    //line.y2 = (toNode.latitude - gOffsetY) * gDrawScaleFactor;
     line.id = lineKey;
     const lineObject = tree.getObject(lineKey);
     const phaseCount = countPhases(lineObject.phases);
@@ -4138,9 +4152,10 @@ function getMoveNodesFunction(objects, tBody=null, tObject=null) {
         if (tBody != null) {
             Array.from(tBody.getElementsByTagName("input")).forEach(input => {
                 if (input.dataset.coordinate === "latitude") {
-                    input.value = coords.y/gDrawScaleFactor + gOffsetY;
+                    input.value = gMaxLat - coords.y/gDrawScaleFactor;
+                    //input.value = coords.y/gDrawScaleFactor + gOffsetY;
                 } else if (input.dataset.coordinate === "longitude") {
-                    input.value = coords.x/gDrawScaleFactor + gOffsetX;
+                    input.value = coords.x/gDrawScaleFactor + gMinLon;
                 }
             });
         }
@@ -4211,7 +4226,8 @@ function createInterface() {
     createViewport(gWriteFeeder.tree, document.getElementById("svgContainer"));
     gTree = createTree(gWriteFeeder.tree);
     const objects = Object.values(gTree.tree);
-    insertCoordinates(objects, gOffsetX, gOffsetY, (1000/gDrawScaleFactor) * .005);
+    insertCoordinates(objects, gMinLon, gMaxLat, (1000/gDrawScaleFactor) * .005);
+    //insertCoordinates(objects, gMinLon, gOffsetY, (1000/gDrawScaleFactor) * .005);
     gSelection = createSelection();
     gViewport = document.getElementsByClassName('svg-pan-zoom_viewport')[0];
     createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
