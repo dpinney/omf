@@ -4,14 +4,15 @@
 Count the number of lines of code in this project. Ignores the data stores and libraries, etc.
 2.5 kLOC as of 2012-10-24.
 9.6 kLOC as of 2013-06-10.
-99.3 kLOC as of 2015-09-10.
+99. kLOC as of 2015-09-10.
+200 kLOC as of 2019-02-14.
 '''
 
 import os
 
 def cleanList(inList):
 	goodSuffixes = ['py','js','htm','html']
-	libraries = ['..\static\d3.v3.js','..\static\highcharts.src.js','..\static\jquery-1.9.1.js']
+	libraries = ['../static/d3.v3.js','../static/highcharts.src.js','../static/jquery-1.9.1.js']
 	return [x for x in inList if (x.split('.')[-1] in goodSuffixes and x not in libraries)]
 
 def lineCount(fileName):
