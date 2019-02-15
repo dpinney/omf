@@ -106,6 +106,9 @@ def hullOfOmd():
 	#simplexList.append(simplexList[0])
 	#List of points in order counterclockwise
 	polygon = points[hull.vertices].tolist()
+	#polygon.append(polygon[0])
+	for point in polygon:
+		point.reverse()
 	polygon.append(polygon[0])
 	geoJsonDict = {"type": "FeatureCollection",
 		"features": [{
@@ -172,7 +175,7 @@ def drawHtmlGraph():
 
 
 if __name__ == '__main__':
-	drawPngGraph()
-	drawLatLon()
-	drawHtmlGraph()
+	#drawPngGraph()
+	#drawLatLon()
+	#drawHtmlGraph()
 	hullOfOmd()
