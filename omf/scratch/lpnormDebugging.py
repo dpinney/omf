@@ -24,3 +24,5 @@ heatMap = plt.imshow(
 #plt.gca().invert_yaxis() This isn't needed anymore?
 plt.title("Hazard Field")
 plt.show()
+
+# Drawing networkX graph with lots of styles.
