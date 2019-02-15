@@ -20,7 +20,7 @@
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 	</script>
 </head>
-<body onload="init()">
+<body onload="init(); hideProphet()">
 	<div id="header">
 		<div id="headInnerBlock">
 			<div id="menuLeft">
@@ -114,7 +114,7 @@
 			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
 		</script>
 	</div>
-	<p class="reportTitle postRun" style="page-break-before:always">Data Forecasted Plot</p>	
+	<p class="reportTitle postRun" style="page-break-before:always">Hourly Day of Week Forecasted Plot</p>	
 	<div id="dylanPlot" class="tightContent postRun">
 		<div id="dylanChart"></div>
 		<script>
@@ -148,6 +148,7 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 		</script>
 	</div>
+	<p class="reportTitle postRun" style="page-break-before:always">Daily Peak Demand Forecasted Plot</p>	
 	<div id="katPlot" class="tightContent postRun">
 		<div id="katChart"></div>
 		<script>
@@ -193,11 +194,21 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 		</script>
 	</div>
-	<div id="zuccPlot" class="tightContent postRun">
-		<div id="zuccChart"></div>
+	<p class="reportTitle postRun prophetPlot" style="page-break-before:always">Prophet Forecasted Plot</p>
 		<script>
-			for (var i = allOutputData.zucc.length; i < allOutputData.actual.length; i++) {
-				allOutputData.zucc.unshift(null)
+			function hideProphet() {
+				if(!("prophet" in allOutputData)) {
+					$(".prophetPlot").css("display","none");
+				}
+			}
+		</script>
+	<div id="prophetPlot" class="prophetPlot tightContent postRun">
+		<div id="prophetChart"></div>
+		<script>
+			if("prophet" in allOutputData){
+				for (var i = allOutputData.prophet.length; i < allOutputData.actual.length; i++) {
+					allOutputData.prophet.unshift(null)
+				}
 			}
 			new Highcharts.Chart({"credits":{"enabled":false},
 					"plotOptions":{
