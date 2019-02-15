@@ -125,6 +125,72 @@ def hullOfOmd():
 	#	plt.plot(points[simplex, 0], points[simplex, 1], 'k-')
 	#plt.show()
 
+def omdGeoJson():
+	with open('../../static/publicFeeders/Olin Barre LatLon.omd') as inFile:
+		tree = json.load(inFile)['tree']
+	#networkx graph to work with
+	nxG = omf.feeder.treeToNxGraph(tree)
+	'''
+	print(nx.get_edge_attributes(nxG, 'type'))
+	edge attributes type, phases
+	geoJSON 
+		geometry
+			type: LineString
+			coordinates: tbd
+		properties:
+			edgeType: type
+			phases: phases
+			nodeNames: tbd
+
+	node attributes type, pos, latitude, longitude
+	geoJSON 
+		geometry
+			type: Point
+			coordinates: reverse pos aka lat/lon
+		properties:
+			name: this will be the node itself in node list
+			pointType: type
+
+	'''
+	geoJsonDict = {
+	"type": "FeatureCollection",
+	"features": []
+	}
+
+	node_positions = {node: nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')}
+	node_types = {node: nx.get_node_attributes(nxG, 'type')[node] for node in nx.get_node_attributes(nxG, 'type')}
+	for node in node_positions:
+		geoJsonDict['features'].append({
+			"type": "Feature", 
+			"geometry":{
+				"type": "Point",
+				"coordinates": [node_positions[node][1], node_positions[node][0]]
+			},
+			"properties":{
+				"name": node,
+				"pointType": node_types[node]
+			}
+		})
+	#print(geoJsonDict)
+
+	edge_types = {edge: nx.get_edge_attributes(nxG, 'type')[edge] for edge in nx.get_edge_attributes(nxG, 'type')}
+	edge_phases = {edge: nx.get_edge_attributes(nxG, 'phases')[edge] for edge in nx.get_edge_attributes(nxG, 'phases')}
+	for edge in nx.edges(nxG):
+		geoJsonDict['features'].append({
+			"type": "Feature", 
+			"geometry":{
+				"type": "LineString",
+				"coordinates": [[node_positions[edge[0]][1], node_positions[edge[0]][0]],[node_positions[edge[1]][1], node_positions[edge[1]][0]]]
+			},
+			"properties":{
+				"phase": edge_phases[edge],
+				"edgeType": edge_types[edge]
+			}
+		})
+
+	with open('geoPointsLines.json',"w") as outFile:
+		json.dump(geoJsonDict, outFile, indent=4)
+
 def drawLatLon():
 	from mpl_toolkits.basemap import Basemap
 	with open('../../static/publicFeeders/Olin Barre LatLon.omd') as inFile:
@@ -175,7 +241,8 @@ def drawHtmlGraph():
 
 
 if __name__ == '__main__':
-	#drawPngGraph()
-	#drawLatLon()
-	#drawHtmlGraph()
+	drawPngGraph()
+	drawLatLon()
+	drawHtmlGraph()
 	hullOfOmd()
+	omdGeoJson()
