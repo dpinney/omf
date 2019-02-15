@@ -1,8 +1,9 @@
 from pyproj import Proj, transform
 import webbrowser
-import omf, json, warnings, networkx as nx, matplotlib
+import omf, json, warnings, networkx as nx, matplotlib, numpy as np
 from matplotlib import pyplot as plt
 from omf.feeder import _obToCol
+from scipy.spatial import ConvexHull
 
 def latLonNxGraphMap(inGraph, labels=False, neatoLayout=False, showPlot=False):
 	''' Draw a networkx graph representing a feeder.'''
@@ -15,7 +16,7 @@ def latLonNxGraphMap(inGraph, labels=False, neatoLayout=False, showPlot=False):
 	plt.gca().invert_yaxis()
 	plt.gca().set_aspect('equal')
 	m = Basemap(llcrnrlon=-102.7662,llcrnrlat=32.983,urcrnrlon=-102.7576,urcrnrlat=32.997, epsg=3857)
-	m.arcgisimage(service='World_Street_Map', verbose= False)
+	m.arcgisimage(service='World_Street_Map', dpi=400, verbose= False)
 	# Layout the graph via GraphViz neato. Handy if there's no lat/lon data.
 	if neatoLayout:
 		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
@@ -38,14 +39,14 @@ def latLonNxGraphMap(inGraph, labels=False, neatoLayout=False, showPlot=False):
 					 'width':2,
 					 'style':{'parentChild':'dotted','underground_line':'dashed'}.get(eType,'solid') }
 		if ePhases==3:
-			standArgs.update({'width':5})
+			standArgs.update({'width':2})
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
-			standArgs.update({'width':3,'edge_color':'white'})
+			standArgs.update({'width':2,'edge_color':'white'})
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
 			standArgs.update({'width':1,'edge_color':_obToCol(eType)})
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
 		if ePhases==2:
-			standArgs.update({'width':3})
+			standArgs.update({'width':2})
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
 			standArgs.update({'width':1,'edge_color':'white'})
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
@@ -56,13 +57,13 @@ def latLonNxGraphMap(inGraph, labels=False, neatoLayout=False, showPlot=False):
 						   nodelist=pos.keys(),
 						   node_color=[_obToCol(inGraph.node[n].get('type','underground_line')) for n in inGraph],
 						   linewidths=0,
-						   node_size=40)
+						   node_size=2)
 	if labels:
 		nx.draw_networkx_labels(inGraph,pos,
 								font_color='black',
 								font_weight='bold',
 								font_size=0.25)
-	if showPlot: plt.savefig('latlon.png', dpi=1000)
+	if showPlot: plt.savefig('latlon.png', dpi=400, bbox_inches="tight")
 
 def drawPngGraph():
 	#Static reference file for testing now
@@ -80,16 +81,49 @@ def drawPngGraph():
 	#print(latitude_min, latitude_max, longitude_min, longitude_max)
 	#Create dict of lat/lon for only nodes that have lat/lon values in feeder
 	m = Basemap(llcrnrlon=-102.7662,llcrnrlat=32.983,urcrnrlon=-102.7576,urcrnrlat=32.997, epsg=3857)
-	m.arcgisimage(service='World_Street_Map', verbose= True)
+	m.arcgisimage(service='World_Street_Map', dpi=400, verbose=False)
 	node_positions = {}
 	node_positions = {node: nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')}
 	#print(node_positions)
 	for point in node_positions:
 		node_positions[point] = (m(node_positions[point][1], node_positions[point][0]))
-	nx.draw_networkx(nxG, pos=node_positions, nodelist=[node for node in nxG if node in nx.get_node_attributes(nxG, 'pos')], with_labels=False, node_size=5)
+	nx.draw_networkx(nxG, pos=node_positions, nodelist=[node for node in nxG if node in nx.get_node_attributes(nxG, 'pos')], with_labels=False, node_size=2, edge_size=1)
 	#m.plot(-102, 32, marker='D', color='m', latlon=True)
 	#plt.show()
-	plt.savefig('matplotlibmap.png', dpi=1000)
+	plt.savefig('matplotlibmap.png', dpi=400, bbox_inches="tight")
+
+def hullOfOmd():
+	with open('../../static/publicFeeders/Olin Barre LatLon.omd') as inFile:
+		tree = json.load(inFile)['tree']
+	#networkx graph to work with
+	nxG = omf.feeder.treeToNxGraph(tree)
+	#print([nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')])
+	points = np.array([nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')])
+	hull = ConvexHull(points)
+	#plt.switch_backend('TKAgg')
+	#plt.plot(points[:,0], points[:,1], 'o')
+	#simplexList = [points[simplex].tolist() for simplex in hull.simplices]
+	#simplexList.append(simplexList[0])
+	#List of points in order counterclockwise
+	polygon = points[hull.vertices].tolist()
+	#polygon.append(polygon[0])
+	for point in polygon:
+		point.reverse()
+	polygon.append(polygon[0])
+	geoJsonDict = {"type": "FeatureCollection",
+		"features": [{
+			"type": "Feature", 
+			"geometry":{
+				"type": "Polygon",
+				"coordinates": [polygon]
+			}
+		}]
+	}
+	with open('convexHull.json',"w") as outFile:
+		json.dump(geoJsonDict, outFile, indent=4)
+	#for simplex in hull.simplices:
+	#	plt.plot(points[simplex, 0], points[simplex, 1], 'k-')
+	#plt.show()
 
 def drawLatLon():
 	from mpl_toolkits.basemap import Basemap
@@ -133,16 +167,15 @@ def drawHtmlGraph():
 		lineDict['objects'].append({'line': {'coordinates':[[node_positions[edge[0]][0], node_positions[edge[0]][1]],
 			[node_positions[edge[1]][0], node_positions[edge[1]][1]]]}})
 	#print(lineDict)
-	with open('newnodes.json',"w") as outFile:
+	with open('nodes.json',"w") as outFile:
 		json.dump(circleDict, outFile, indent=4)
-	with open('newlines.json',"w") as outFile:
+	with open('lines.json',"w") as outFile:
 		json.dump(lineDict, outFile, indent=4)
 	m.save('leafletmap.html')
 
-def _tests():
-	drawPngGraph()
-	drawLatLon()
-	drawHtmlGraph()
 
 if __name__ == '__main__':
-	_tests()
+	#drawPngGraph()
+	#drawLatLon()
+	#drawHtmlGraph()
+	hullOfOmd()

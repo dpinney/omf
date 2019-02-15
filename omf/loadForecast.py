@@ -94,7 +94,7 @@ def rollingDylanForecast(rawData, upBound, lowBound):
 	"""
 
 
-def nextDayPeakKatrinaForecast(rawData, startDate, modelDir, params):
+def nextDayPeakKatrinaForecast(rawData, startDate, modelDir):
 	"""
 	This model takes the inputs rawData, a dataset that holds hourly values in two columns with no indexes
 	The first column rawData[:][0] holds the hourly demand
@@ -158,7 +158,7 @@ def nextDayPeakKatrinaForecast(rawData, startDate, modelDir, params):
 	else:
 		size_model = GridSearchCV(SVR(), param_grid=params["peakSize"])
 
-		# get cross-validated time predictions over the full interval
+	# get cross-validated time predictions over the full interval
 	forecasted_peak_time = list(time_model._cv_predict(df=df).hour_pred)
 
 	# convert these float hour values into ISO formatted dates and times
@@ -216,6 +216,7 @@ def prophetForecast(rawData, startDate, modelDir, partitions):
 	return (list(out_df.yhat), list(out_df.yhat_lower), list(out_df.yhat_upper))
 
 
+<<<<<<< HEAD
 def _cleanse_params(params):
 	"""Fills in default values for a single model's params"""
 	has_lists = False

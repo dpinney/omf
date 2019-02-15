@@ -1167,6 +1167,8 @@ def backgroundAnonymize(modelDir, omdPath):
 			anonymization.distTranslateLocations(inFeeder, translationRight, translationUp, rotation)
 		elif locOption == 'randomize':
 			anonymization.distRandomizeLocations(inFeeder)
+		elif locOption == 'forceLayout':
+			omf.distNetViz.insert_coordinates(inFeeder["tree"])
 		# Electrical Properties
 		if request.form.get('modifyLengthSize'):
 			anonymization.distModifyTriplexLengths(inFeeder)
