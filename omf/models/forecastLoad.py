@@ -42,21 +42,33 @@ def work(modelDir, inputDict):
 	(forecasted, MAE) = loadForecast.rollingDylanForecast(
 		rawData, float(inputDict["upBound"]), float(inputDict["lowBound"])
 	)
+
+	# parse json params
+	try:
+		params = json.loads(inputDict.get("katSpec", "{}"))
+	except ValueError:
+		params = {}
+
 	pred_demand = loadForecast.nextDayPeakKatrinaForecast(
-		rawData, inputDict["simStartDate"], modelDir
+		rawData, inputDict["simStartDate"], modelDir, params
 	)
 	pred_demand = np.transpose(np.array(pred_demand)).tolist()
-	zucc, zucc_low, zucc_high = loadForecast.prophetForecast(
-		rawData, inputDict["simStartDate"], modelDir
-	)
+
+	# zucc it up
+	prophet_partitions = int(inputDict.get("prophet", 0))
+	if prophet_partitions > 1:
+		prophet, prophet_low, prophet_high = loadForecast.prophetForecast(
+			rawData, inputDict["simStartDate"], modelDir, inputDict["prophet"]
+		)
 	outData["startDate"] = inputDict["simStartDate"]
 	outData["actual"] = actual
 	outData["forecasted"] = forecasted
 	outData["MAE"] = MAE
 	outData["peakDemand"] = pred_demand
-	outData["zucc"] = zucc
-	outData["zuccLow"] = zucc_low
-	outData["zuccHigh"] = zucc_high
+	if prophet_partitions > 1:
+		outData["prophet"] = prophet
+		outData["prophetLow"] = prophet_low
+		outData["prophetHigh"] = prophet_high
 	return outData
 
 

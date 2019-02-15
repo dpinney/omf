@@ -8,7 +8,6 @@ import __neoMetaModel__
 from __neoMetaModel__ import *
 from omf import loadForecast as fc
 
-
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = ('Calculate the virtual battery capacity for a collection of '
