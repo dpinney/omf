@@ -9,6 +9,7 @@ import pandas as pd
 from os.path import join as pJoin
 from datetime import datetime as dt
 from datetime import timedelta, date
+from sklearn.model_selection import GridSearchCV
 
 # source: https://www.energygps.com/HomeTools/PowerCalendar
 nercHolidays = {
@@ -30,6 +31,13 @@ nercHolidays = {
 	dt(2021, 9, 6): "Labor",
 	dt(2021, 11, 25): "Thanksgiving",
 	dt(2021, 12, 25): "Christmas",
+}
+
+_default_params = {
+	"peakSize": {"C": 10000, "epsilon": 0.25, "gamma": 0.0001},
+	"peakTimeClassifier": {"C": 10, "gamma": 0.001},
+	"peakTimeRegressorMorning": {"C": 10, "epsilon": 0.05, "gamma": 0.1},
+	"peakTimeRegressorAfternoon": {"C": 10, "epsilon": 0.25, "gamma": 0.1},
 }
 
 
@@ -86,7 +94,7 @@ def rollingDylanForecast(rawData, upBound, lowBound):
 	"""
 
 
-def nextDayPeakKatrinaForecast(rawData, startDate, modelDir):
+def nextDayPeakKatrinaForecast(rawData, startDate, modelDir, params):
 	"""
 	This model takes the inputs rawData, a dataset that holds hourly values in two columns with no indexes
 	The first column rawData[:][0] holds the hourly demand
@@ -143,10 +151,14 @@ def nextDayPeakKatrinaForecast(rawData, startDate, modelDir):
 	df.to_csv(pJoin(modelDir, "train_data.csv"))
 
 	# initiate my model bois
+	params, gridsearch = _cleanse_params(params)
 	time_model = svmNextDayPeakTime()
-	size_model = SVR(C=10000, epsilon=0.25, gamma=0.0001)
+	if not gridsearch:
+		size_model = SVR(**params["peakSize"])
+	else:
+		size_model = GridSearchCV(SVR(), param_grid=params["peakSize"])
 
-	# get cross-validated time predictions over the full interval
+		# get cross-validated time predictions over the full interval
 	forecasted_peak_time = list(time_model._cv_predict(df=df).hour_pred)
 
 	# convert these float hour values into ISO formatted dates and times
@@ -174,6 +186,7 @@ def prophetForecast(rawData, startDate, modelDir, partitions):
 	from fbprophet import Prophet
 	from fbprophet.diagnostics import cross_validation
 
+	partitions = int(partitions)
 	# initiate model
 	prophet = Prophet()
 
@@ -189,7 +202,10 @@ def prophetForecast(rawData, startDate, modelDir, partitions):
 	# determine partition length for the cross-validation
 	total_hours = len(input_df.ds)
 	hp = total_hours // partitions  # horizon and period
-	init = total_hours - hp * (partitions - 1)
+	init = total_hours % partitions  # total_hours - hp * (partitions - 1)
+
+	# train prophet w/ those partitions
+	# take a moment to appreciate this stupid way to pass the durations
 	out_df = cross_validation(
 		prophet,
 		initial="%d hours" % init,
@@ -200,13 +216,52 @@ def prophetForecast(rawData, startDate, modelDir, partitions):
 	return (list(out_df.yhat), list(out_df.yhat_lower), list(out_df.yhat_upper))
 
 
+def _cleanse_params(params):
+	"""Fills in default values for a single model's params"""
+	has_lists = False
+	ret = _default_params.copy()
+	for k, v in params.iteritems():
+		if k == "peakTimeRegressor":
+			# overwrite morning & afternoon
+			for kwarg, kwvalue in v.iteritems():
+				if type(kwvalue) is list:
+					has_lists = True
+				ret["peakTimeRegressorMorning"][kwarg] = kwvalue
+				ret["peakTimeRegressorAfternoon"][kwarg] = kwvalue
+		else:
+			for kwarg, kwvalue in v.iteritems():
+				if type(kwvalue) is list:
+					has_lists = True
+				ret[k][kwarg] = kwvalue
+
+	if has_lists:
+		for k, v in params.iteritems():
+			for l, w in v.iteritems():
+				if type(w) is not list:
+					ret[k][l] = [w]
+
+	return ret, has_lists
+
+
 class svmNextDayPeakTime:
-	def __init__(self):
+	def __init__(self, params=_default_params):
 		from sklearn.svm import SVC, SVR
 
-		self.classifier = SVC(C=10, gamma=0.001)
-		self.morning_regressor = SVR(C=10, epsilon=0.05, gamma=0.1)
-		self.afternoon_regressor = SVR(C=10, epsilon=0.25, gamma=0.1)
+		params, gridSearch = _cleanse_params(params)
+		if not gridSearch:
+			self.classifier = SVC(**params["peakTimeClassifier"])
+			self.morning_regressor = SVR(**params["peakTimeRegressorMorning"])
+			self.afternoon_regressor = SVR(**params["peakTimeRegressorAfternoon"])
+		else:
+			self.classifier = GridSearchCV(
+				SVC(), param_grid=params["peakTimeClassifier"]
+			)
+			self.morning_regressor = GridSearchCV(
+				SVR(), param_grid=params["peakTimeRegressorMorning"]
+			)
+			self.afternoon_regressor = GridSearchCV(
+				SVR(), param_grid=params["peakTimeRegressorAfternoon"]
+			)
 
 	def fit(self, csv):
 		"""Fits using all of the given data in csv"""
