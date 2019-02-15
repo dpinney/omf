@@ -101,8 +101,8 @@
 		</script>
 	</div>
 	<p class="reportTitle postRun" style="page-break-before:always">Data Forecasted Plot</p>	
-	<div id="dataPlot" class="tightContent postRun">
-		<div id="dataChart"></div>
+	<div id="dylanPlot" class="tightContent postRun">
+		<div id="dylanChart"></div>
 		<script>
 			new Highcharts.Chart({"credits":{"enabled":false},
 					"plotOptions":{
@@ -129,13 +129,13 @@
 						{"name":"Forecasted Data (kW)","marker":{"enabled":false},"color":"blue","data":allOutputData.forecasted},
 						{"name":"Actual Data (kW)","marker":{"enabled":false},"color":"red","data":allOutputData.actual}
 					],
-					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"dataChart","type":"line","marginRight":20, "height":500,"width":1000},
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"dylanChart","type":"line","marginRight":20, "height":500,"width":1000},
 					"tooltip":false,
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 		</script>
 	</div>
-	<div id="dataPlot2" class="tightContent postRun">
-		<div id="dataChart2"></div>
+	<div id="katPlot" class="tightContent postRun">
+		<div id="katChart"></div>
 		<script>
 			var peakDemandData = [];
 			for (var i = 0; i < allOutputData.peakDemand.length; i++) { //casting these to Highcharts-friendly formats
@@ -170,13 +170,50 @@
 							"pointStart": Date.parse(allOutputData.startDate),
 							"pointInterval": 1000*60*60},
 						{"name":"Predicted Peaks (kW)",
-							"color":"black",
+							"color":"blue",
 							"data":allOutputData.peakDemand,
 							"type": "scatter"}
 					],
-					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"dataChart2","type":"line","marginRight":20, "height":500,"width":1000},
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"katChart","type":"line","marginRight":20, "height":500,"width":1000},
 					"tooltip":false,
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 		</script>
 	</div>
+	<div id="zuccPlot" class="tightContent postRun">
+		<div id="zuccChart"></div>
+		<script>
+			for (var i = allOutputData.zucc.length; i < allOutputData.actual.length; i++) {
+				allOutputData.zucc.unshift(null)
+			}
+			new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{
+						"series":{
+							"animation":false,
+							"pointStart":Date.parse(allOutputData.startDate),
+							"shadow":false,
+							"pointInterval":3600000},
+						"line":{"marker":{"enabled":false}}},
+					"xAxis":{
+						"maxZoom":108000000,
+						"tickColor":"gray",
+						"dateTimeLabelFormats":{
+							"month": '%b %e'
+						},
+						"type":"datetime",
+						"lineColor":"gray"
+					},
+					"yAxis":{
+						"title":{"enabled":false},// "title":{"text":"Unit","style":{"color":"gray"}},
+					},
+					"title":{"text": undefined, "verticalAlign":"bottom", "align":"right", "y":-400, "x":-150, "style":{"color":"black", "fontSize":"18px"}},
+					"series":[
+						{"name":"Forecasted Data (kW)","marker":{"enabled":false},"color":"blue","data":allOutputData.zucc},
+						{"name":"Actual Data (kW)","marker":{"enabled":false},"color":"red","data":allOutputData.actual}
+					],
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"zuccChart","type":"line","marginRight":20, "height":500,"width":1000},
+					"tooltip":false,
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+		</script>
+	</div>
+
 </body>
