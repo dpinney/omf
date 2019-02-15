@@ -4,10 +4,11 @@
 		<meta charset="UTF-8">
 		<style >
             /* Define global css variables */
+            /* I have to subtract 4px or so from the svgContainer to prevent the scrollbar from appearing. Making the header height less does not appear to change anything. */
             :root {
-                --header-height: 25px;
-                --header-padding-top: 10px;
-                --header-padding-bottom: 10px;
+                --header-height: 35px;
+                --header-padding-top: 8px;
+                --header-padding-bottom: 8px;
             }
 			* { 
                 font-family: Helvetica, Arial, Sans-Serif;
@@ -55,12 +56,13 @@
             }
 
             /* This is the element that acts as a hook for svg-pan-zoom.js to attach a viewport, which it creates itself */
+            /* overflow: hidden is set by svg-pan-zoom.js itself. No need to change that here. */
 			#svgContainer {
                 /* width must be 100%, meaning 100% of the document */
 				width: 100%; 
                 /* height must be manually set to a hard value */
-				height: calc(100vh - var(--header-height) - var(--header-padding-bottom) - var(--header-padding-top));
-                /* overflow: hidden is set by svg-pan-zoom.js itself. No need to change that here. */
+				/*height: calc(100vh - var(--header-height) - var(--header-padding-bottom) - var(--header-padding-top));*/
+				height: calc(100vh - var(--header-height) - var(--header-padding-bottom) - var(--header-padding-top) - 4px);
 			}
 			#saveButton {
 				float:right;
@@ -129,21 +131,26 @@
 				padding-top: var(--header-padding-top);
 				padding-bottom: var(--header-padding-bottom);
 				background:black;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
                 /*position: absolute;*/
 				/*min-width:1000px;*/
 			}
             #helpDiv a {
                 color: white;
             }
-			/*#menuLeft{ height:40px; float:left; font-size:medium; color:white; margin-left:5px;}*/
-			#menuRight{ 
-				/*height:40px;
-				font-size:medium;
-				color:white;*/
-				float:right;
+			#menuLeft {
+                color:white;
+            }
+            #menuLeft h4 {
+                margin: 0px 0px 4px 20px;
+            }
+            #menuLeft p {
+                margin: 0px 0px 0px 20px;
+            }
+			#menuRight { 
 				display:flex;
-				/*justify-content: space-between;
-				width: 162px*/
 			}
 			/*#arrow { font-size:8pt; position:absolute; margin-top:2px; margin-left:4px; display:inline; }*/
             .headerDiv {
@@ -465,6 +472,10 @@
             <!-- <div style='background:navy; top:215px; left:5px' id='saveLink' class='divButton' onclick='saveSvg()' title='Save File' download>S</div> -->
             <!-- Menu Bar -->
             <div id='header'>
+                <div id="menuLeft">
+                    <h4>{{thisFeederName}}</h4>
+                    <p>from "{{thisModelName}}"</p>
+                </div>
                 <div id="menuRight">
                     <div id="helpDiv" class="headerDiv">
                         <div class="buttonGroup">
@@ -983,6 +994,18 @@
                                 </tr>
                                 <tr>
                                     <td>
+                                        <input type='radio' id='randomize' name='anonymizeLocationOption' value='randomize'>
+                                        <label for='randomize'>Randomize</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input type='radio' id='forceLayout' name='anonymizeLocationOption' value='forceLayout'>
+                                        <label for='forceLayout'>Force Layout</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
                                         <input type='radio' id='translation' name='anonymizeLocationOption' value='translation'>
                                         <label for='translation'>Translate</label>
                                     </td>
@@ -990,12 +1013,6 @@
                                 <tr><td><input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='translateRight' class="modalInputLine"> [ft] to the right and</td></tr>
                                 <tr><td><input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='translateUp' class="modalInputLine"> [ft] up with a</td></tr>
                                 <tr><td><input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='rotate' class="modalInputLine"> [degree] rotation.</td></tr>
-                                <tr>
-                                    <td>
-                                        <input type='radio' id='randomize' name='anonymizeLocationOption' value='randomize'>
-                                        <label for='randomize'>Random (Force Layout)</label>
-                                    </td>
-                                </tr>
                                 <tr><th class="modalTableHeader">Electrical properties:</th></tr>
                                 <tr>
                                     <td>
@@ -1040,25 +1057,27 @@
 </html>
 <script id='componentsInsert'>const gComponents = {% if components %}{{ components | safe }}{% else %}null{% endif %}; 
 </script>
-<script id='feederInsert'>const readFeeder = {% if thisFeederData %}{{ thisFeederData | safe }}{% else %}null{% endif %}; 
+<script id='feederInsert'>const gReadFeeder = {% if thisFeederData %}{{ thisFeederData | safe }}{% else %}null{% endif %}; 
 </script>
 <script id='panZoomInsert'>
 </script>
 <script type='text/javascript'>
 //"use strict";
-let thisFeederName = "{% if thisFeederName %}{{ thisFeederName | safe }}{% else %}null{% endif %}";
-const thisFeederNum = {% if thisFeederNum %}{{ thisFeederNum | safe }}{% else %}null{% endif %}; 
-const thisModelName = "{% if thisModelName %}{{ thisModelName | safe }}{% else %}null{% endif %}"; 
-const thisOwner = "{% if thisOwner %}{{ thisOwner | safe }}{% else %}null{% endif %}"; 
-const publicFeeders = {% if publicFeeders %}{{ publicFeeders | safe }}{% else %}null{% endif %};
-const userFeeders = {% if userFeeders %}{{ userFeeders | safe }}{% else %}null{% endif %}; 
-const writeFeeder = deepCopy(readFeeder);
+let gThisFeederName = "{% if thisFeederName %}{{ thisFeederName | safe }}{% else %}null{% endif %}";
+const gThisFeederNum = {% if thisFeederNum %}{{ thisFeederNum | safe }}{% else %}null{% endif %}; 
+const gThisModelName = "{% if thisModelName %}{{ thisModelName | safe }}{% else %}null{% endif %}"; 
+const gThisOwner = "{% if thisOwner %}{{ thisOwner | safe }}{% else %}null{% endif %}"; 
+const gPublicFeeders = {% if publicFeeders %}{{ publicFeeders | safe }}{% else %}null{% endif %};
+const gUserFeeders = {% if userFeeders %}{{ userFeeders | safe }}{% else %}null{% endif %}; 
+const gWriteFeeder = deepCopy(gReadFeeder);
 // The global gTree can only be created after the entire file has been parsed.
 let gTree;
 let gSelection;
 let gViewport; 
-let gOffsetX;
-let gOffsetY;
+//let gOffsetX; // replaced by gMinLon
+let gMinLon;
+//let gOffsetY; // replaced by gMaxLat
+let gMaxLat;
 let gLongitudeRange;
 let gLatitudeRange;
 let gDrawScaleFactor;
@@ -1080,9 +1099,7 @@ const selectionPrototype = {
     },
     remove(element) {
         const elements = this.selectedElements.filter(e => e.id === element.id);
-        if (elements.length === 0) {
-            throw new Error("Remove operation failed. The element argument does not exist in this selection.");
-        }
+        if (elements.length === 0) throw new Error(`Remove operation failed. The element "${element.tagName}" does not exist in this selection.`);
         elements.forEach(e => {
             e.classList.remove("selected");
             Array.from(e.children).forEach(child => {
@@ -1144,7 +1161,7 @@ function saveSvg() {
 function downloadTextFile() {
 	// WARNING! Performance is very bad because the JSON is enormous! This can hang your browser!
 	alert('We are opening a window with JSON in it that you can save as a .json file.')
-	var modJson = JSON.stringify(writeFeeder);
+	var modJson = JSON.stringify(gWriteFeeder);
 	var win = window.open();
 	win.document.write(modJson);
 }
@@ -1213,10 +1230,13 @@ function createViewport(tree, svgContainer) {
             }
         }
     });
+    /* Longitude is not reversed, so I want the minimum longitude to use as the offset. Latitude IS reversed, so I want the maximum latitude to use as the offset. */
     gLongitudeRange = maxLon - minLon;
-    gOffsetX = minLon;
+    //gOffsetX = minLon;
+    gMinLon = minLon;
     gLatitudeRange = maxLat - minLat;
-    gOffsetY = minLat;
+    //gOffsetY = minLat;
+    gMaxLat = maxLat;
     /* Multiply by the gDrawScaleFactor when drawing. Divide by the gDrawScaleFactor when storing. 
     We use the larger of the range values to set the gDrawScaleFactor to make the graph fit in the viewport initially.
     */
@@ -1512,8 +1532,8 @@ function disableJQueryFunctionality() {
 // keep this
 function attachHandlers() {
     attachAddComponentListeners();
-    attachFeederList(document.getElementById("publicFeederList"), publicFeeders, "public");
-    attachFeederList(document.getElementById("userFeederList"), userFeeders, thisOwner);
+    attachFeederList(document.getElementById("publicFeederList"), gPublicFeeders, "public");
+    attachFeederList(document.getElementById("userFeederList"), gUserFeeders, gThisOwner);
     addFileMenuHandlers();
     addEditMenuHandlers();
 }
@@ -1537,7 +1557,7 @@ function insertIndependentComponent(component) {
 function insertChildComponent(keys, component) {
     const svgContainer = document.getElementById("svgContainer");
     if (keys.length === 0) {
-        alert("Please click on another circle/line object that is not a configuration node to add this component as a child.");
+        alert("Please click on another circle that is not a configuration node to add this component as a child.");
         svgContainer.setAttribute("style", "cursor: crosshair");
         svgContainer.onclick = function(event) {
             if (detectDrag(event)) return;
@@ -1547,10 +1567,14 @@ function insertChildComponent(keys, component) {
             try {
                 parent = gTree.getObject(event.target.id);
                 if (parent != null && getType(parent) !== "configurationNode") {
-                    const tObject = createTreeObject(component, gTree);
-                    tObject.setupChildNode(event.target.id);
-                    gTree.insert(tObject);
-                    createSvgData([tObject.key]).draw(gViewport);
+                    if (component.object === "recorder" || getType(parent) !== "line") {
+                        const tObject = createTreeObject(component, gTree);
+                        tObject.setupChildNode(event.target.id);
+                        gTree.insert(tObject);
+                        createSvgData([tObject.key]).draw(gViewport);
+                    } else {
+                        alert("Insertion failed. You clicked on a line. Only meter recorders can be children of lines.");
+                    }
                 } else {
                     alert("Insertion failed. You clicked on a configuration node.");
                 }
@@ -1649,6 +1673,7 @@ function attachAddComponentListeners() {
                         insertChildComponent(gSelection.getKeys(), component);
                     }
                 });
+                // We only add child nodes to the massAdd() selection
                 select.innerHTML += `<option value=${key}>${key}</option>`;
                 break;
             case "line":
@@ -1666,20 +1691,21 @@ function attachAddComponentListeners() {
  * TODO: add unit-tests
  * @param {Element} ul - An html element where the list will be attached
  * @param {Array} feeders - An array of objects, where each object has properties "model" and "name", or null. 
- * @param {string} owner - Either "public" or the owner of the current writeFeeder.
+ * @param {string} owner - Either "public" or nothing, as the server determines the real owner.
  */
-function attachFeederList (ul, feeders, owner) {
+function attachFeederList(ul, feeders, owner=null) {
     if (!feeders) return;
     const sortedNames = feeders.map(feeder => feeder.name.toLowerCase()).sort();
     sortedNames.forEach(lowercaseName => {
         const feeder = feeders.find(feeder => {
             return feeder.name.toLowerCase() === lowercaseName;
         });
-        if (feeder.name != thisFeederName) {
+        if (feeder.name != gThisFeederName) {
             const li = document.createElement("li");
             li.classList.add("feederItem");
             li.innerHTML = `<strong>${feeder.name}</strong> from <br>"${feeder.model}"`;
             li.addEventListener("click", function() {
+                /* What is the feeder.model for a public feeder? It's "publicFeeders". Do feeders not have their own owner property? No they don't */
                 loadFeeder(feeder.name, feeder.model, owner);
             });
             ul.append(li);
@@ -1700,7 +1726,7 @@ function addFileMenuHandlers() {
         throw new Error("Please update this function to ensure the correct handlers are attached");
     }
     items[0].addEventListener("click", function() {
-        saveFeeder(writeFeeder);
+        saveFeeder(gWriteFeeder);
     });
     items[1].addEventListener("click", downloadTextFile);
     items[2].addEventListener("click", renameFeeder);
@@ -1770,117 +1796,6 @@ function toggleElementDisplay(id) {
 //**************************************************
 // Edit menu interface
 //**************************************************
-
-/**
- * Set the viewport to its initial state and center it
- */
-//function zoomReset() {
-//    panZoom.fit();
-//    panZoom.center();
-//}
-
-/**
- * Set the viewport value to its initial state.
- */
-//function zoomToFit() {
-//    panZoom.fit();
-//}
-
-function randomGaussian() {
-  // Get a Gaussian from a uniform(0,1) via the Box-Muller transform.
-  let rad;
-  let x1;
-  let x2;
-  let c;
-  do {
-	x1 = 2 * Math.random() - 1
-	x2 = 2 * Math.random() - 1
-	rad = x1 * x1 + x2 * x2
-  } while (rad >= 1 || rad == 0) {
-    c = Math.sqrt(-2 * Math.log(rad) / rad);
-  }
-  return x1 * c
-}
-
-function randomInt(min,max) {
-	return Math.floor(Math.random()*(max - min + 1) + min)
-}
-
-function randomChoice(inList) {
-	return inList[Math.floor(Math.random() * inList.length)]
-}
-
-function convertStaticLoadsIntoHouses() {
-    const keys = Object.keys(gTree.tree).filter(key => {
-        const object = gTree.getObject(key).object;
-        return object === "triplex_load" || object === "triplex_node";
-    });
-    if (keys.length === 0) {
-        alert(`This data has no triplex_load or triplex_node objects.`);
-        return;
-    }
-    const houses = [];
-    const children = [];
-    keys.forEach(key => {
-        const tObject = getHouseToReplaceLoadOrNode(key);
-        houses.push(tObject);
-        const childCopies = getCopiedChildrenToUpdateParentChildLines(key, tObject.data.name);
-        if (childCopies.length > 0) {
-            childCopies.forEach(tObject => children.push(tObject));
-        }
-    });
-    //Must delete the children, then the old loads/nodes. Must insert the new houses first, then the children copies
-    createSvgData(children.map(tObject => tObject.key)).delete(gViewport);
-    createSvgData(houses.map(tObject => tObject.key)).delete(gViewport);
-    houses.forEach(tObject => gTree.insert(tObject));
-    children.forEach(tObject => gTree.insert(tObject));
-    createSvgData(houses.map(tObject => tObject.key)).draw(gViewport);
-}
-
-/**
- * Keep: longitude, latitude, parent (if it doesn't have it, set it to null)
- * Change: name, object 
- * Delete: all of the old properties, old name in treeMap.name
- * Insert: all of the properties of house, new name in treeMap.name
- * Edit: 'parent' attribute of children (if any), 'from/to' attribute of lines (if any)
- * Don't touch: TreeMap is fine because it uses keys
- */
-function getHouseToReplaceLoadOrNode(key) {
-    const tObject = createTreeObject(key, gTree);
-    const house = deepCopy(gComponents["house"]);
-    house.longitude = tObject.data.longitude;
-    house.latitude = tObject.data.latitude;
-    house.parent = tObject.data.parent == null ? "null" : tObject.data.parent;
-    house.name = "house" + key;
-    tObject.data = house;
-    return tObject;
-}
-
-function getCopiedChildrenToUpdateParentChildLines(key, houseName) {
-    const childrenCopies = [];
-    const children = gTree.treeMap.getChildKeys(key);
-    if (children != null) {
-        children.forEach(key => {
-            const tObject = createTreeObject(key, gTree);
-            tObject.data.parent = houseName;
-            childrenCopies.push(tObject);
-        });
-    }
-    const lines = gTree.treeMap.getLineKeys(key);
-    const loadName = gTree.getObject(key).name;
-    if (lines != null) {
-        lines.forEach(key => {
-            const line = gTree.getObject(key);
-            if (line.to === loadName) {
-                line.to = houseName;
-            } else if (line.from === loadName) {
-                line.from = houseName;
-            }
-        });
-    }
-    return childrenCopies;
-}
-
 /*
 Don't touch existing houses or their loads
 Don't ever replace regular load objects
@@ -1895,171 +1810,81 @@ triplex_load always has a parent
 -File with triplex nodes: 
     ./omf/data/Model/public/Demo gridlabMulti scadaCalibration/Uncalibrated Feeder.omd
     ./omf/data/Model/public/Demo superModel/superModel Today.omd
-
 */
-function staticLoadsToHouses() {
-    const tree = gTree.tree;
-    const names = gTree.treeMap.names;
-	//if (!containsTriplexNodes(tree)) {
-	if (!containsTriplexNodeOrLoad(tree)) {
-        alert("There are no triplex nodes or triplex loads in this model.");
+function convertStaticLoadsIntoHouses() {
+    const keys = Object.keys(gTree.tree).filter(key => {
+        const object = gTree.getObject(key).object;
+        return object === "triplex_load" || object === "triplex_node";
+    });
+    if (keys.length === 0) {
+        alert(`This data has no triplex load or triplex node objects that can be converted into houses.`);
         return;
-	} else {
-        let modal = new ProgressModal("Please wait. Houses are being generated.", "", false);
-        modal.show();
-        // Replace 100 nodes at a time (maximum), to prevent the browser from hanging
-        const keys = Object.keys(tree);
-        let start = 0;
-        let end = 100;
-        const intervalId = setInterval(function() {
-            //console.log("start: " + start);
-            //console.log("end: " + end);
-            replaceAllHouses(start, end, keys);
-            if (end >= keys.length) {
-                clearInterval(intervalId);
-                modal.hide();
-            } else {
-                start = end + 1;
-                end += 100;
-            }
-        }, 10);
     }
+    const pm = new ProgressModal(`Converting every triplex load and/or triplex node into a house with children. This could take a few seconds.`);
+    pm.show();
+    setTimeout(function() {
+        keys.forEach(key => { replaceLoadOrNodeWithHouse(key); });
+        createSvgData(keys).draw(gViewport);
+        pm.hide();
+    }, 10);
+}
 
-    /* Triplex loads should have a "parent" property. Triplex nodes should NOT have a "parent" property usually.
-    Therefore, if the parent property DOES exist on either a node/load I should use it. However, it it DOESN'T exist,
-    then I should carry on as normal too.
-    */
-    function containsTriplexNodeOrLoad(tree) {
-        for (let key in tree) {
-            if (tree[key].object === "triplex_node" || tree[key].object === "triplex_load") {
-                return true;
-            } 
-        }   
-        return false;
+/**
+ * Keep: longitude, latitude, parent (if it doesn't have it, set it to null)
+ * Change: name, object 
+ * Delete: all of the old properties, old name in treeMap.name
+ * Insert: all of the properties of house, new name in treeMap.name
+ * Edit: 'parent' attribute of children (if any), 'from/to' attribute of lines (if any)
+ * Don't touch: TreeMap is fine because it uses keys
+ */
+function replaceLoadOrNodeWithHouse(key) {
+    const oldLoad = gTree.getObject(key);
+    const house = deepCopy(gComponents.house);
+    house.longitude = oldLoad.longitude;
+    house.latitude = oldLoad.latitude;
+    if (oldLoad.parent == null) {
+        delete house.parent;
+    } else {
+        house.parent = oldLoad.parent;
     }
-
-	function replaceAllHouses(start, end, keys) {
-        if (end >= keys.length) {
-            end = keys.length - 1;
-        }
-        for (let i = start; i <= end; i++) {
-            if (tree[keys[i]].object === "triplex_node" || tree[keys[i]].object === "triplex_load") {
-                let parentKey = names[tree[keys[i]].parent];
-                if (parentKey == null) {
-                    //There is no parent. No big deal
-
-                } else {
-                    //There is a parent. Use the parent to place the new house
-
-                }
+    house.name = "house" + key;
+    const children = gTree.treeMap.getChildKeys(key);
+    if (children != null) children.forEach(key => { gTree.getObject(key).parent = house.name; });
+    const lines = gTree.treeMap.getLineKeys(key);
+    if (lines != null) {
+        lines.forEach(key => {
+            const line = gTree.getObject(key);
+            if (line.to === oldLoad.name) {
+                line.to = house.name;
+            } else if (line.from === oldLoad.name) {
+                line.from = house.name;
             }
-            /*
-            TODO: delete this
-            if (tree[keys[i]].hasOwnProperty('parent') && tree[keys[i]].object === "triplex_node") {
-                // Get the key of the parent of this triplex node, which is a triplex meter (i.e. another node)
-                let parentKey = names[tree[keys[i]].parent];
-                // Delete the triplex_node itself
-                deleteObject(keys[i]);
-                // Create a new house object to replace the triplex node
-                let houseObj = randomHouse();
-                let lightsObj = randomLights();
-                let heaterObj = randomWaterHeater();
-                newChildAtLocation(houseObj.house, parentKey);
-                newChildAtLocation(lightsObj.lights, houseObj.key);
-                if (heaterObj != false) {
-                    newChildAtLocation(heaterObj.heater, houseObj.key);
-                }
-            }
-            */
-        }
+        });
     }
+    gTree.treeMap.remove([key]);
+    gTree.tree[key] = house;
+    gTree.treeMap.add(key);
+    addLoadsToHouse(key);
+}
 
-	function randomHouse() {
-		const newHouse = {}
-		newHouse['object'] = 'house'
-		newHouse['air_temperature'] = '70'
-		newHouse['cooling_COP'] = randomInt(25, 40) / 10.0 + ''
-		newHouse['cooling_setpoint'] = 'cooling' + randomInt(1, 8) + '*1'
-		newHouse['cooling_system_type'] = randomChoice(['ELECTRIC', 'HEAT_PUMP', 'NONE'])
-		// House sizing distribution from http://www.census.gov/housing/ahs/
-		// between 1100 and 3000. Probably needs a normal distribution.
-		let area = 1800 + 500 * randomGaussian()
-		if (area < 500) {
-			area = 500
-		}
-		area = area.toPrecision(2) * 1.0 + ''
-		newHouse['floor_area'] = area
-		newHouse['heating_COP'] = randomInt(20, 35) / 10.0 + ''
-		newHouse['heating_setpoint'] = 'heating' + randomInt(1, 8) + '*1'
-		newHouse['heating_system_type'] = randomChoice(['RESISTANCE', 'HEAT_PUMP', 'GAS'])
-		newHouse['mass_temperature'] = '70'
-		let skew = 1200 * randomGaussian()
-		skew = skew.toPrecision(3) * 1.0 + ''
-		newHouse['schedule_skew'] = skew
-		newHouse['thermal_integrity_level'] = randomChoice([1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6]) + ''
-		const newKey = getNewTreeKey(gTree.tree);
-		newHouse['name'] = 'synhouse' + newKey
-		return {
-            house: newHouse,
-            key: newKey
-        }
-	}
-
-	function randomLights() {
-		const newLights = {}
-		newLights['object'] = 'ZIPload'
-		newLights['power_fraction'] = '0.400000'
-		newLights['current_fraction'] = '0.300000'
-		newLights['impedance_pf'] = '1.000'
-		newLights['current_pf'] = '1.000'
-		newLights['power_pf'] = '1.000'
-		newLights['impedance_fraction'] = '0.300000'
-		newLights['heatgain_fraction'] = '0.9'
-		let power = 1.2 + randomGaussian()
-		if (power < 0) {
-			power = -1 * power
-		}
-		power = power.toPrecision(3) * 1.0 + ''
-		newLights['base_power'] = 'LIGHTS*' + 1.33
-		let skew = 2000 * randomGaussian()
-		skew = skew.toPrecision(3) * 1.0 + ''
-		newLights['schedule_skew'] = skew
-		const newKey = getNewTreeKey(gTree.tree);
-		newLights['name'] = 'synLights' + newKey
-		return {
-            lights: newLights,
-            key: newKey
-        }
-	}
-
-	function randomWaterHeater() {
-		const newHeater = {}
-		if (randomChoice([1, 2, 3]) == 3) {
-			return false
-		}
-		// Static properties.
-		newHeater['object'] = 'waterheater'
-		newHeater['temperature'] = '135'
-		newHeater['tank_volume'] = '50'
-		newHeater['location'] = 'INSIDE'
-		// Uniformly distributed properties.
-		newHeater['heating_element_capacity'] = randomInt(37, 53) / 10.0 + ''
-		newHeater['thermostat_deadband'] = randomInt(20, 60) / 10.0 + ''
-		newHeater['demand'] = 'water' + randomInt(1, 20) + '*1'
-		newHeater['tank_UA'] = randomInt(20, 40) / 10.0 + ''
-		// Gaussian properties.
-		let skew = 2000 * randomGaussian()
-		skew = skew.toPrecision(3) * 1.0 + ''
-		newHeater['schedule_skew'] = skew
-		newHeater['tank_setpoint'] = (randomGaussian() * 2 + 130).toPrecision(3) + ''
-		// between 1100 and 3000. Probably needs a normal distribution.
-		const newKey = getNewTreeKey(gTree.tree);
-		newHeater['name'] = 'synwaterheater' + newKey;
-		return {
-            heater: newHeater,
-            key: newKey
-        }
-	}
+function addLoadsToHouse(key) {
+    // Insert water heater
+    let tObject = createTreeObject(gComponents.waterheater, gTree);
+    tObject.setupChildNode(key)
+    gTree.insert(tObject);
+    // Insert responsive ZIPload
+    tObject = createTreeObject(gComponents.ZIPload, gTree);
+    tObject.setupChildNode(key);
+    let responsiveBasePower = Math.random();
+    responsiveBasePower = responsiveBasePower < .5 ? responsiveBasePower + .5 : responsiveBasePower;
+    tObject.data["base_power"] = `responsive_loads*${responsiveBasePower}`;
+    gTree.insert(tObject);
+    // Insert unresponsive ZIPload
+    tObject = createTreeObject(gComponents.ZIPload, gTree);
+    tObject.setupChildNode(key);
+    let unresponsiveBasePower = Math.random() + 1.5;
+    tObject.data["base_power"] = `unresponsive_loads*${unresponsiveBasePower}`;
+    gTree.insert(tObject);
 }
 
 function massAdd() {
@@ -2068,26 +1893,36 @@ function massAdd() {
         alert("Please enter a valid number for attachment probability");
         return;
     }
+    // Don't need to check if the component is a child node, since that is done elsewhere
 	const componentName = document.getElementById('componentSelect').value;
-	const attachObject = document.getElementById('massAddTargetSelect').value;
-    const newObjects = [];
-    const pm = new ProgressModal(`Adding a "${componentName}" object to every "${attachObject}" object. This could take a few seconds.`);
-    pm.show();
-    percent = parseFloat(percent);
-    setTimeout(() => {
-        Object.keys(gTree.tree).forEach(key => {
-            if (gTree.getObject(key).object === attachObject && Math.random() < percent) {
-                const tObject = createTreeObject(gComponents[componentName], gTree);
-                tObject.setupChildNode(key);
-                gTree.insert(tObject);
-                newObjects.push(tObject.key);
-            }
-        });
-        createSvgData(newObjects).draw(gViewport);
-        pm.hide();
-        alert(`${newObjects.length} "${componentName}" objects added to the feeder`);
-        toggleElementDisplay('massAddModal');
-    }, 10);
+    // Don't need to check if the attachObject is a configuration node, since that is done elsewhere.
+    const attachObject = document.getElementById('massAddTargetSelect').value;
+
+    if (gComponents[componentName].object === "recorder" || getType(gComponents[attachObject]) !== "line") {
+
+
+        const newObjects = [];
+        const pm = new ProgressModal(`Adding a "${componentName}" object to every "${attachObject}" object. This could take a few seconds.`);
+        pm.show();
+        percent = parseFloat(percent);
+        setTimeout(() => {
+            Object.keys(gTree.tree).forEach(key => {
+                if (gTree.getObject(key).object === attachObject && Math.random() < percent) {
+                    const tObject = createTreeObject(gComponents[componentName], gTree);
+                    tObject.setupChildNode(key);
+                    gTree.insert(tObject);
+                    newObjects.push(tObject.key);
+                }
+            });
+            createSvgData(newObjects).draw(gViewport);
+            pm.hide();
+            alert(`${newObjects.length} "${componentName}" objects added to the feeder`);
+            toggleElementDisplay('massAddModal');
+        }, 10);
+
+    } else {
+        alert("Mass add failed. Only meter recorder objects can be added as children of lines.");
+    }
 }
 
 /* Clearing each list so we dont get duplicates in the list. This must be done because the attachTarget list must be 
@@ -2193,9 +2028,15 @@ function massEdit() {
     }
 }
 
-function isValidParentName(name) {
+/* For the recorder special case, I need to know if the object under consideration is a recorder or not */
+/**
+ * @param {string} name - the name of the object that is being considered as a parent.
+ * @param {string} object - the type of the object that needs the parent. Only matters for the "recorder" special case
+ */
+function isValidParentName(name, object) {
     try {
-        if (getType(gTree.getObject(gTree.treeMap.getKey(name))) === "configurationNode") return false;
+        const type = getType(gTree.getObject(gTree.treeMap.getKey(name)));
+        if (type === "configurationNode"  || (type === "line" && object !== "recorder")) return false; 
     } catch (e) {
         return false;
     }
@@ -2215,14 +2056,39 @@ function isValidToOrFromNode(name) {
     return true;
 }
 
+function massAddAttribute(keys, objectType) {
+    const newKey = document.getElementById("newAttributeKey").value.trim();
+    if (newKey === "") {
+        alert(`Mass edit failed. Please enter a name for the attribute you want to add.`);
+        return;
+    }
+    if (nonModifiableProperties.includes(newKey)) {
+        alert(`Mass edit failed. The properties "${nonModifiableProperties.join(", ")}" cannot be overwritten.`);
+        return;
+    }
+    if (newKey === "to" || newKey === "from" || newKey === "parent") {
+        alert(`Mass edit failed. Cannot add the attributes 'to', 'from', or 'parent'.`);
+        return;
+    }
+    const newValue = document.getElementById("newAttributeValue").value;
+    for (let key of keys) {
+        gTree.getObject(key)[newKey] = newValue;
+    }
+    alert(`${keys.length} ${objectType} objects had the "${newKey}" attribute added.`);
+    toggleElementDisplay('massEditModal');
+    createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
+}
+
 /**
- * Create an array of tree objects. Delete all the real objects. change all the tree objects, insert all the tree objects, redraw.
+ * @param {keys} - the keys of the objects to be changed
+ * @param {attributeKey} - the attribute that is being changed
+ * @param {objectType} - The "object" property of every object that is being changed
  */
 function massChange(keys, attributeKey, objectType) {
     const newValue = document.getElementById("changeValue").value.trim();
     switch (attributeKey) {
         case "parent":
-            if (!isValidParentName(newValue)) {
+            if (!isValidParentName(newValue, objectType)) {
                 alert(`Mass change failed. The name "${newValue}" is not a valid parent name.`);
                 return;
             }
@@ -2299,33 +2165,10 @@ function massMultiplication(keys, attributeKey, objectType) {
     createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
 }
 
-function massAddAttribute(keys, objectType) {
-    const newKey = document.getElementById("newAttributeKey").value.trim();
-    if (newKey === "") {
-        alert(`Mass edit failed. Please enter a name for the attribute you want to add.`);
-        return;
-    }
-    if (nonModifiableProperties.includes(newKey)) {
-        alert(`Mass edit failed. The properties "${nonModifiableProperties.join(", ")}" cannot be overwritten.`);
-        return;
-    }
-    if (newKey === "to" || newKey === "from" || newKey === "parent") {
-        alert(`Mass edit failed. Cannot add the attributes 'to', 'from', or 'parent'.`);
-        return;
-    }
-    const newValue = document.getElementById("newAttributeValue").value;
-    for (let key of keys) {
-        gTree.getObject(key)[newKey] = newValue;
-    }
-    alert(`${keys.length} ${objectType} objects had the "${newKey}" attribute added.`);
-    toggleElementDisplay('massEditModal');
-    createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
-}
-
 function loadAttachments() {
     const selectElement = document.getElementById("attachmentSelect");
     selectElement.innerHTML = "";
-	for (let key in writeFeeder.attachments) {
+	for (let key in gWriteFeeder.attachments) {
         selectElement.innerHTML += `<option value=${key}>${key}</option>`;
     }
 }
@@ -2336,14 +2179,14 @@ function editAttachment() {
 		toggleElementDisplay('editAttachmentModal');
 		let name =  document.getElementById('attachmentSelect').value; //get the select. attachmentsList = attachmentSelect
 		document.getElementById('attachmentTd').innerHTML = name;  //get the td. attachmentSelect = attachmentTd
-		document.getElementById('editAttachmentBox').innerHTML = writeFeeder.attachments[name];
+		document.getElementById('editAttachmentBox').innerHTML = gWriteFeeder.attachments[name];
 		//document.body.style.cursor = 'auto'
 	//}, 100);
 }
 
 function saveAttachment() {
 	let name = document.getElementById('attachmentSelect').value;
-	writeFeeder.attachments[name] = document.getElementById('editAttachmentBox').value;
+	gWriteFeeder.attachments[name] = document.getElementById('editAttachmentBox').value;
 }
 
 //**************************************************
@@ -2359,20 +2202,20 @@ function saveFeeder(feeder) {
     formData.set("feederObjectJson", JSON.stringify(feeder));
     const postRequest = $.ajax({
         type: "POST",
-        url: `/saveFeeder/${thisOwner}/${thisModelName}/${thisFeederName}`,
+        url: `/saveFeeder/${gThisOwner}/${gThisModelName}/${gThisFeederName}`,
         data: formData,
         processData: false,
         contentType: false,
     });
     let cancelled = false;
     let progressModal;
-    if (feeder === readFeeder) {
+    if (feeder === gReadFeeder) {
         progressModal = new ProgressModal("Cancelling the previous operation...", "", false);
         postRequest.done(function() {
             progressModal.hide();
             alert("Success. Previous operation was canceled");
         });
-    } else if (feeder === writeFeeder) {
+    } else if (feeder === gWriteFeeder) {
         progressModal = new ProgressModal("Saving changes to your file...", "You have canceled the save.", true);
         progressModal.button.addEventListener("click", function() {
             cancelled = true;
@@ -2381,7 +2224,7 @@ function saveFeeder(feeder) {
         });
         postRequest.done(function() {
             if (cancelled) {
-                saveFeeder(readFeeder);
+                saveFeeder(gReadFeeder);
             } else {
                 progressModal.hide();
                 alert("Success. Your data was saved.");
@@ -2391,10 +2234,13 @@ function saveFeeder(feeder) {
     progressModal.show();
 }
 
+/**
+ * TODO: This function has a lot of problems because of how the web routes are written.
+ */
 async function loadFeeder(serverFeederName, serverModelName, owner) {
     let submitForm = false;
     await $.ajax({
-        url: `/uniqObjName/Feeder/${thisOwner}/${serverFeederName}/${serverModelName}`
+        url: `/uniqObjName/Feeder/${owner}/${serverFeederName}/${serverModelName}`
     }).done(function(data) {
         if (data.exists) {
             submitForm = true;
@@ -2417,13 +2263,15 @@ async function loadFeeder(serverFeederName, serverModelName, owner) {
     progressModal.show();
     $.ajax({
         type: "POST",
-        url: `/loadFeeder/${serverFeederName}/${serverModelName}/${thisModelName}/${thisFeederNum}/${owner}/${thisOwner}`,
+        /* If ${owner} is not set to "public", then the server ignores what was sent and sets it to User.cu()
+        */
+        url: `/loadFeeder/${serverFeederName}/${serverModelName}/${gThisModelName}/${gThisFeederNum}/${owner}/${gThisOwner}`,
         data: formData,
         processData: false,
         contentType: false,
     }).done(function() {
         if (cancelled) {
-            saveFeeder(readFeeder);
+            saveFeeder(gReadFeeder);
         } else {
             reloadWrapper();
         }
@@ -2441,7 +2289,7 @@ async function submitForm({formId, pollUrl, inputId}) {
         const fileName = document.getElementById(inputId).value;
         // Check if the file exists, using the user-provided fileName
         await $.ajax({
-            url: `/uniqObjName/Feeder/${thisOwner}/${fileName}/${thisModelName}`
+            url: `/uniqObjName/Feeder/${gThisOwner}/${fileName}/${gThisModelName}`
         }).done(function(data) {
             //console.log(data);
             if (data.exists === true) {
@@ -2485,14 +2333,13 @@ async function submitForm({formId, pollUrl, inputId}) {
             // Poll the server
             const intervalId = setInterval(function() {
                 $.ajax({
-                    //url: `/checkConversion/${thisModelName}/${thisOwner}`
                     url: pollUrl
                 }).done(function(data) {
                     if (cancelled) {
                         clearInterval(intervalId);
                         pollModal.hide();
                         alert("You cancelled the operation");
-                        saveFeeder(readFeeder);
+                        saveFeeder(gReadFeeder);
                     }
                     if (data.exists === true) {
                         //processing is ongoing 
@@ -2506,12 +2353,12 @@ async function submitForm({formId, pollUrl, inputId}) {
                         clearInterval(intervalId);
                         pollModal.hide()
                         alert('The .std and .seq files used are incorrectly formatted.');
-                        //TODO: submit the readFeeder
+                        //TODO: submit the gReadFeeder
                     } else if (data === "glmError") {
                         clearInterval(intervalId);
                         pollModal.hide()
                         alert('The .glm file used is incorrectly formatted.');
-                        //TODO: submit the readFeeder
+                        //TODO: submit the gReadFeeder
                     } else {
                         console.log(data);
                         clearInterval(intervalId);
@@ -2525,17 +2372,17 @@ async function submitForm({formId, pollUrl, inputId}) {
 }
 
 async function renameFeeder() {
-	if (JSON.stringify(readFeeder) !== JSON.stringify(writeFeeder)){
+	if (JSON.stringify(gReadFeeder) !== JSON.stringify(gWriteFeeder)){
 		alert('You have unsaved changes. Please save the feeder before proceeding.')
 	} else {
-		let newName = prompt("Rename the feeder to", `${thisFeederName}`);
+		let newName = prompt("Rename the feeder to", `${gThisFeederName}`);
 		while (! /^[\w\s]+$/.test(newName) || /^\s+$/.test(newName)) {
-			newName = prompt("Only letters, digits and underscore are allowed.\nPlease enter a different name", `${thisFeederName}`);
+			newName = prompt("Only letters, digits and underscore are allowed.\nPlease enter a different name", `${gThisFeederName}`);
 		}
 		if (newName){
             let submitRequest = false;
             await $.ajax({
-                url: `/uniqObjName/Feeder/${thisOwner}/${newName}/${thisModelName}`
+                url: `/uniqObjName/Feeder/${gThisOwner}/${newName}/${gThisModelName}`
             }).done(function(data) {
                 if (data.exists) {
                     alert(`You already have a feeder named "${newName}". Please choose a different name.`);
@@ -2547,9 +2394,9 @@ async function renameFeeder() {
                 return;
             }
             $.ajax({
-                url: `/renameFeeder/${thisOwner}/${thisModelName}/${thisFeederName}/${newName}/${thisFeederNum}`
+                url: `/renameFeeder/${gThisOwner}/${gThisModelName}/${gThisFeederName}/${newName}/${gThisFeederNum}`
             }).done(function() {
-                thisFeederName = newName;
+                gThisFeederName = newName;
                 alert("Feeder file was successfully renamed.");
             })
 		}
@@ -2993,7 +2840,6 @@ function getMixedCaseKey(object, lowercaseKey) {
  * @return {boolean}
  */
 function isValidForMove(objects) {
-    //const objects = Object.values(this.tree);
     if (objects.length === 0) {
         alert(`Please select at least one circle to move.`);
         return false
@@ -3013,12 +2859,10 @@ function isValidForMove(objects) {
  * @param {Array} keys
  */
 function attachMoveListener(keys, tBody=null, tObject=null) {
-//function attachMoveListener(tWrapper, tBody=null, tObject=null) {
     const objects = [];
     keys.forEach(key => {
         objects.push(gTree.getObject(key));
     });
-    //const objects = Object.values(tWrapper.tree);
     if (isValidForMove(objects)) {
         const element = document.getElementById("svgContainer");
         element.setAttribute("style", "cursor: crosshair");
@@ -3035,16 +2879,19 @@ function attachMoveListener(keys, tBody=null, tObject=null) {
  * to the arguments.
  * 
  * These x, y coordinate arguments are relative to the viewport, which means they have a minimum
- * value of 0 and that the gOffsetX and gOffsetY must be added to them before they are real 
+ * value of 0 and that the gMinLon and gOffsetY must be added to them before they are real 
  * coordinates to be stored in the tree.
  * @param {number} x - an x coordinate relative to the viewport, usually created with a click on the screen.
  * @param {number} y - a y coordinate relative to the viewport, usually created with a click on the screen.
- * @param {number} offsetX - corresponds to gOffsetX, which is how much the gTree is translated on 
- * the x-axis to fit in the created viewport.
- * @param {number} offsetY - corresponds to gOffsetY, which is how much the gTree is translated on 
- * the y-axis to fit in the created viewport.
  */
-function move(objects, {x, y}, {offsetX, offsetY}) {
+function move(objects, {x, y}) {
+    let offsetX = gMinLon, offsetY = gMaxLat, scaleFactor = gDrawScaleFactor;
+    //let offsetX = gMinLon, offsetY = gOffsetY, scaleFactor = gDrawScaleFactor;
+    if (arguments[2] != null) {// needed for testing
+        offsetX = arguments[2].offsetX;
+        offsetY = arguments[2].offsetY;
+        scaleFactor = arguments[2].scaleFactor;
+    }
     const nodes = [];
     let avgLon = 0;
     let avgLat = 0;
@@ -3055,14 +2902,13 @@ function move(objects, {x, y}, {offsetX, offsetY}) {
             avgLat += obj.latitude;
         }
     });
-    if (nodes.length === 0) {
-        return;
-    }
+    if (nodes.length === 0) return;
     avgLon /= nodes.length;
     avgLat /= nodes.length;
     nodes.forEach(node => {
-        node.longitude = node.longitude - avgLon + offsetX + x/gDrawScaleFactor;
-        node.latitude = node.latitude - avgLat + offsetY + y/gDrawScaleFactor;
+        node.longitude = node.longitude - avgLon + offsetX + x/scaleFactor;
+        //node.latitude = node.latitude - avgLat + offsetY + y/scaleFactor;
+        node.latitude = node.latitude - avgLat + offsetY - y/gDrawScaleFactor;
     });
 }
 
@@ -3072,6 +2918,8 @@ function move(objects, {x, y}, {offsetX, offsetY}) {
  * @param {number} initX - the longitude of the top left corner of the square.
  * @param {number} initY - the latitude of the top left corner of the square.
  * @param {number} spacing - how far apart the nodes should be spaced from one another
+ * 
+ * @param {Array} objects - the objects that need coordinates
  */
 function insertCoordinates(objects, initX, initY, spacing) {
     let gen = getCoordinates(initX, initY, spacing);
@@ -3097,6 +2945,7 @@ function getNamesOfTypes(objects, ...types) {
 }
 
 /**
+ * good. No unit tests need.
  * @param {Object[]} selection
  * @param {Object} component
  * @return {boolean}
@@ -3120,6 +2969,10 @@ function isValidForAdd(keys, component) {
         case "childNode":
             if (configNames.length > 0) {
                 alert(errorMsgStart + "cannot be added as a child of a configuration node. " + errorMsgConfig);
+                return false;
+            }
+            if (lineNames.length > 0 && component.object !== "recorder") {
+                alert(errorMsgStart + "cannot be added as a child of a line. " + errorMsgLine);
                 return false;
             }
             break;
@@ -3149,7 +3002,6 @@ function isValidForAdd(keys, component) {
     }
     return true;
 }
-/* Functions to port */
 
 //**************************************************
 // Utility methods
@@ -3335,8 +3187,9 @@ function createCircle(nodeKey) {
     if (typeof lon !== "number") throw new Error(`'longitude' must be a number.`);
     const lat = node.latitude;
     if (typeof lat !== "number") throw new Error(`'latitude' must be a number.`);
-    circle.cx = (lon - gOffsetX) * gDrawScaleFactor;
-    circle.cy = (lat - gOffsetY) * gDrawScaleFactor;
+    circle.cx = (lon - gMinLon) * gDrawScaleFactor;// lon isn't reversed so it's fine
+    circle.cy = (gMaxLat - lat) * gDrawScaleFactor;
+    //circle.cy = (lat - gOffsetY) * gDrawScaleFactor;
     return circle;
 }
 
@@ -3379,25 +3232,28 @@ function createParentChildLineWithLine(lineKey, childKey) {
     const fromNode = tree.getFromNode(lineKey);
     if (toNode == null || fromNode == null) return; // The parent line could itself have nonexistent 'to' or 'from' nodes.
     const child = tree.getObject(childKey);
-    line.x1 = (((toNode.longitude + fromNode.longitude)/2) - gOffsetX) * gDrawScaleFactor;
-    line.y1 = (((toNode.latitude + fromNode.latitude)/2) - gOffsetY) * gDrawScaleFactor;
-    line.x2 = (child.longitude - gOffsetX) * gDrawScaleFactor;
-    line.y2 = (child.latitude - gOffsetY) * gDrawScaleFactor;
+    line.x1 = (((toNode.longitude + fromNode.longitude)/2) - gMinLon) * gDrawScaleFactor;
+    line.y1 = (gMaxLat - ((toNode.latitude + fromNode.latitude)/2)) * gDrawScaleFactor;
+    //line.y1 = (((toNode.latitude + fromNode.latitude)/2) - gOffsetY) * gDrawScaleFactor;
+    line.x2 = (child.longitude - gMinLon) * gDrawScaleFactor;
+    line.y2 = (gMaxLat - child.latitude) * gDrawScaleFactor;
+    //line.y2 = (child.latitude - gOffsetY) * gDrawScaleFactor;
     line.id = getParentChildLineId(lineKey, childKey, tree);    
     line.class = "parentChild";
     line["stroke-width"] = .5 * gScaleLevel;
     return line;
 }
 
-// TODO: allow inserting testing tree if needed
+// Use to name parent-child lines like: "node18_waterheater4", but now it's just "18_4"
 function getParentChildLineId(parentKey, childKey) {
     let tree = gTree;
     if (arguments[2] != null) tree = arguments[2]; // Need this for testing
-    const parent = tree.getObject(parentKey);
-    const parentName = parent.name != null ? parent.name : `undefined${parentKey}`;
-    const child = tree.getObject(childKey);
-    const childName = child.name != null ? child.name : `undefined${childKey}`;
-    return `${parentName}_${childName}`; 
+    //const parent = tree.getObject(parentKey);
+    //const parentName = parent.name != null ? parent.name : `undefined${parentKey}`;
+    //const child = tree.getObject(childKey);
+    //const childName = child.name != null ? child.name : `undefined${childKey}`;
+    //return `${parentName}_${childName}`; 
+    return `${parentKey}_${childKey}`;
 }
 
 /**
@@ -3409,10 +3265,12 @@ function createParentChildLineWithNode(parentKey, childKey) {
     const line = Object.create(linePrototype);
     const parent = tree.getObject(parentKey);
     const child = tree.getObject(childKey); // Don't need to check for nonexistent parent because I already do that elsewhere
-    line.x1 = (parent.longitude - gOffsetX) * gDrawScaleFactor;
-    line.y1 = (parent.latitude - gOffsetY) * gDrawScaleFactor;
-    line.x2 = (child.longitude - gOffsetX) * gDrawScaleFactor;
-    line.y2 = (child.latitude - gOffsetY) * gDrawScaleFactor;
+    line.x1 = (parent.longitude - gMinLon) * gDrawScaleFactor;
+    line.y1 = (gMaxLat - parent.latitude) * gDrawScaleFactor;
+    //line.y1 = (parent.latitude - gOffsetY) * gDrawScaleFactor;
+    line.x2 = (child.longitude - gMinLon) * gDrawScaleFactor;
+    line.y2 = (gMaxLat - child.latitude) * gDrawScaleFactor;
+    //line.y2 = (child.latitude - gOffsetY) * gDrawScaleFactor;
     line.id = getParentChildLineId(parentKey, childKey, tree);
     line.class = "parentChild";
     line["stroke-width"] = .5 * gScaleLevel;
@@ -3429,10 +3287,12 @@ function createLine(lineKey) {
     const toNode = tree.getToNode(lineKey);
     const fromNode = tree.getFromNode(lineKey);
     if (toNode == null || fromNode == null) return; // A line could have nonexistent 'to' or 'from' nodes
-    line.x1 = (fromNode.longitude - gOffsetX) * gDrawScaleFactor;
-    line.y1 = (fromNode.latitude - gOffsetY) * gDrawScaleFactor;
-    line.x2 = (toNode.longitude - gOffsetX) * gDrawScaleFactor;
-    line.y2 = (toNode.latitude - gOffsetY) * gDrawScaleFactor;
+    line.x1 = (fromNode.longitude - gMinLon) * gDrawScaleFactor;
+    line.y1 = (gMaxLat - fromNode.latitude) * gDrawScaleFactor;
+    //line.y1 = (fromNode.latitude - gOffsetY) * gDrawScaleFactor;
+    line.x2 = (toNode.longitude - gMinLon) * gDrawScaleFactor;
+    line.y2 = (gMaxLat - toNode.latitude) * gDrawScaleFactor;
+    //line.y2 = (toNode.latitude - gOffsetY) * gDrawScaleFactor;
     line.id = lineKey;
     const lineObject = tree.getObject(lineKey);
     const phaseCount = countPhases(lineObject.phases);
@@ -3485,7 +3345,7 @@ const svgDataPrototype = {
     update() {},
 
     /**
-     * good. Doesn't need tests. Need to figure out delete strategy
+     * good. Doesn't need tests.
      */
     delete(viewport) {
         this.primaryKeySet.forEach(key => {
@@ -3543,7 +3403,7 @@ const svgDataPrototype = {
                     // child could have nonexistent parent. Also, we only want parent-child lines for children of objects in the subtreeKeySet
                     if (parentKey != null && this.subtreeKeySet.has(parentKey)) {
                         const parentType = getType(this.tree.getObject(parentKey));
-                        if (parentType === "line") {
+                        if (parentType === "line") {// this is only for recorders
                             const line = createParentChildLineWithLine(parentKey, key, this.tree);
                             if (line != null) this.parentChildLines.push(line);
                         } else {
@@ -3581,7 +3441,7 @@ const svgDataPrototype = {
             if (lines != null) {
                 lines.forEach(lineKey => {
                     this.subtreeKeySet.add(lineKey);
-                    // Must also get the children of lines!
+                    // Must also get the children of lines! This means only recorders
                     const lineChildren = this.tree.treeMap.getChildKeys(lineKey);
                     if (lineChildren != null) lineChildren.forEach(childKey => this.subtreeKeySet.add(childKey));
                 });
@@ -3748,7 +3608,6 @@ function createTreeObject(input, tree) {
     } else if (typeof input === "object" && !Array.isArray(input)) {
         tObject.key = getNewTreeKey(tree.tree);
         tObject.data = deepCopy(input);
-        //if (tObject.data.name != null && tObject.data.object != null) tObject.data.name = tObject.data.object + tObject.key;
         if (tObject.data.object != null) tObject.data.name = tObject.data.object + tObject.key;
         ['longitude', 'latitude'].forEach(prop => {
             if (tObject.data[prop] != null && typeof tObject.data[prop] === "string") {
@@ -3765,11 +3624,11 @@ function createTreeObject(input, tree) {
 //**************************************************
 
 /*
-These are names of properties in most objects in writeFeeder.tree that should not be deleted from objects because
+These are names of properties in most objects in gWriteFeeder.tree that should not be deleted from objects because
 doing so might make that object hard to identify with reference to the rest of the data.
 */
 const nonDeletableProperties = ["name", "object", "from", "to", "parent", "latitude", "longitude", "configuration"];
-/* If these properties were to be modified for a given writeFeeder.tree object, it would require significantly modifying the 
+/* If these properties were to be modified for a given gWriteFeeder.tree object, it would require significantly modifying the 
 other objects.  These properties ARE technically modifiable, but allowing the user to change them would require more work 
 than I think is worth it. It is easier just to create a new node.
 */
@@ -3899,7 +3758,7 @@ function createDescriptionTable(id) {
     buttonCell.append(createButton({action: "save"}).self);
     form.addEventListener("submit", function(event) {
         event.preventDefault();
-        // Delete the object entirely just in case parent/to/from/ was changed, in order to delete parent-child lines
+        // Delete the object entirely just in case parent was changed, in order to delete the old parent-child line
         const svg = createSvgData([tObject.key]);
         svg.delete(gViewport);
         gTree.insert(tObject);// re-insert the updated object. It is remapped in the process.
@@ -4126,7 +3985,7 @@ const rowPrototype = {
     validateNewValue(value) {
         if (this.key === "longitude" || this.key === "latitude") return isNumberString(value);
         if (this.key === "parent") {
-            if (isValidParentName(value)) return true;
+            if (isValidParentName(value, this.tObject.object)) return true;
             return false;
         }
         if (this.key === "to" || this.key === "from") {
@@ -4279,27 +4138,24 @@ function createRow({key, value=null, tObject=null, deletable=false}) {
  * TODO: add unit tests
  */
 function getMoveNodesFunction(objects, tBody=null, tObject=null) {
-    if (objects.length > 1 && tBody != null) {
-        throw new Error("Cannot update a description table when multiple nodes have been selected to be moved.");
-    }
+    if (objects.length > 1 && tBody != null) throw new Error("Cannot update a description table when multiple nodes have been selected to be moved.");
     const moveNodes = function(event) {
         event.stopPropagation();
         detachListener();
         const coords = clickLatLon(event);
-        move(objects, coords, {offsetX: gOffsetX, offsetY: gOffsetY});
+        move(objects, coords);
         if (tObject != null) {
-            if (objects.length !== 1) {
-                throw new Error("Can only update the tObject of a description table when moving a single object!");
-            }
+            if (objects.length !== 1) throw new Error("Can only update the tObject of a description table when moving a single object!");
             tObject.data.longitude = objects[0].longitude;
             tObject.data.latitude = objects[0].latitude;
         }
         if (tBody != null) {
             Array.from(tBody.getElementsByTagName("input")).forEach(input => {
                 if (input.dataset.coordinate === "latitude") {
-                    input.value = coords.y/gDrawScaleFactor + gOffsetY;
+                    input.value = gMaxLat - coords.y/gDrawScaleFactor;
+                    //input.value = coords.y/gDrawScaleFactor + gOffsetY;
                 } else if (input.dataset.coordinate === "longitude") {
-                    input.value = coords.x/gDrawScaleFactor + gOffsetX;
+                    input.value = coords.x/gDrawScaleFactor + gMinLon;
                 }
             });
         }
@@ -4367,10 +4223,11 @@ function attachKeyListener() {
 }
 
 function createInterface() {
-    createViewport(writeFeeder.tree, document.getElementById("svgContainer"));
-    gTree = createTree(writeFeeder.tree);
+    createViewport(gWriteFeeder.tree, document.getElementById("svgContainer"));
+    gTree = createTree(gWriteFeeder.tree);
     const objects = Object.values(gTree.tree);
-    insertCoordinates(objects, gOffsetX, gOffsetY, (1000/gDrawScaleFactor) * .005);
+    insertCoordinates(objects, gMinLon, gMaxLat, (1000/gDrawScaleFactor) * .005);
+    //insertCoordinates(objects, gMinLon, gOffsetY, (1000/gDrawScaleFactor) * .005);
     gSelection = createSelection();
     gViewport = document.getElementsByClassName('svg-pan-zoom_viewport')[0];
     createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);

@@ -143,6 +143,7 @@ def ListOffenders(name_volt_dict):
 	return offendersGen
 
 def writeResults(offendersGen):
+	dir_path = os.path.dirname(os.path.realpath(__file__))
 	#Write powerflow results for generation and waterheater, zipload, and hvac (house) load objects
 	#need to fix up testing for if file exsists based upon name written
 	substation = pd.read_csv(('out_substation_power.csv'), comment='#', names=['timestamp', 'measured_real_power'])
@@ -155,6 +156,8 @@ def writeResults(offendersGen):
 	HVAC_power = HVAC['heating_power'][0], HVAC['cooling_power'][0]
 	triplex_solar_use = pd.read_csv(('out_load_triplex.csv'), comment='#', names=['timestamp', 'measured_real_power'])
 	triplex_solar_use_power = triplex_solar_use['measured_real_power'][0]
+	wind_power = []
+	solar_power = []
 	for file in os.listdir(dir_path):
 		if 'out_wind' in file:
 			wind = pd.read_csv((file), comment='#', names=['timestamp', 'Pconv'])['Pconv'][0]
@@ -196,7 +199,7 @@ def _debugging(filePath, gb_on_off='on', area=500):
 	# Blow away old test results if necessary.
 	# fileNames = ['out_substation_power.csv', 'out_solar_0.csv', 'out_solar_1.csv', 'measured_load_ziploads.csv', 
 	# 				'measured_load_waterheaters.csv', 'measured_HVAC.csv', 'Results.csv']
-	# files = [f for f in os.listdir('.')]
+	# files = [f for f i n os.listdir('.')]
 	# for f in files:
 	# 	if f in fileNames:
 	# 		os.remove(f) 
