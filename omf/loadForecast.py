@@ -216,7 +216,6 @@ def prophetForecast(rawData, startDate, modelDir, partitions):
 	return (list(out_df.yhat), list(out_df.yhat_lower), list(out_df.yhat_upper))
 
 
-<<<<<<< HEAD
 def _cleanse_params(params):
 	"""Fills in default values for a single model's params"""
 	has_lists = False
