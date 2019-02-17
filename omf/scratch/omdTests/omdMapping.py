@@ -168,7 +168,8 @@ def omdGeoJson():
 			},
 			"properties":{
 				"name": node,
-				"pointType": node_types[node]
+				"pointType": node_types[node],
+				"pointColor": _obToCol(node_types[node])
 			}
 		})
 	#print(geoJsonDict)
@@ -176,6 +177,7 @@ def omdGeoJson():
 	edge_types = {edge: nx.get_edge_attributes(nxG, 'type')[edge] for edge in nx.get_edge_attributes(nxG, 'type')}
 	edge_phases = {edge: nx.get_edge_attributes(nxG, 'phases')[edge] for edge in nx.get_edge_attributes(nxG, 'phases')}
 	for edge in nx.edges(nxG):
+		print(_obToCol(edge_types[edge]))
 		geoJsonDict['features'].append({
 			"type": "Feature", 
 			"geometry":{
@@ -184,7 +186,8 @@ def omdGeoJson():
 			},
 			"properties":{
 				"phase": edge_phases[edge],
-				"edgeType": edge_types[edge]
+				"edgeType": edge_types[edge],
+				"edgeColor":_obToCol(edge_types[edge])
 			}
 		})
 
