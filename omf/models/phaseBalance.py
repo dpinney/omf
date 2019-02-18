@@ -21,10 +21,21 @@ modelName, template = metadata(__file__)
 tooltip = "Calculate phase unbalance and determine mitigation options."
 hidden = True
 
+def _addCollectors(tree, modelDir):
+	max_key = int(max(tree, key=int))
+	tree[str(max_key+1)] = {'property': 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)', 'object': 'collector', 'group': 'class=transformer', 'limit': '0', 'file': modelDir+'/ZlossesTransformer.csv'}
+	tree[str(max_key+2)] = {'property': 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)', 'object': 'collector', 'group': 'class=underground_line', 'limit': '0', 'file': modelDir+'/ZlossesUnderground.csv'}
+	tree[str(max_key+3)] = {'property': 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)', 'object': 'collector', 'group': 'class=overhead_line', 'limit': '0', 'file': modelDir+'/ZlossesOverhead.csv'}
+	tree[str(max_key+4)] = {'property': 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)', 'object': 'collector', 'group': 'class=triplex_line', 'limit': '0', 'file': modelDir+'/ZlossesTriplex.csv'}
+	tree[str(max_key+5)] = {'property': 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)', 'object': 'collector', 'group': 'class=inverter', 'limit': '0', 'file': modelDir+'/distributedGen.csv'}
+	tree[str(max_key+6)] = {'property': 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)', 'object': 'collector', 'group': 'class=load', 'limit': '0', 'file': modelDir+'/loads.csv'}
+	return tree
+
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	outData = {}
 	# feederName = inputDict["feederName1"]
+	print(os.listdir(modelDir))
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict["feederName1"] = feederName
 	# Create voltage drop plot.
@@ -32,6 +43,12 @@ def work(modelDir, inputDict):
 	omd = json.load(open(pJoin(modelDir,feederName + '.omd')))
 	tree = omd['tree']
 	# TODO: modify tree to add MPUPV collectors.
+	tree = _addCollectors(tree, modelDir)
+	f1 = open(modelDir + '/text.txt', 'w+')
+	json.dump(tree, f1)
+	f1.close()
+	omd['tree'] = tree
+	
 	if inputDict.get("layoutAlgorithm", "geospatial") == "geospatial":
 		neato = False
 	else:
@@ -461,7 +478,12 @@ def new(modelDir):
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
-		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
+		#shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
+		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, 'scratch', 'MPUPV', 'testResult.omd'), pJoin(modelDir, 'R1-12.47-1-solar_collectors.omd'))
+		#temp_omd = json.load(open(pJoin(modelDir, defaultInputs["feederName1"]+'.omd')))
+		#temp_omd['tree'] = _addCollectors(temp_omd['tree'])
+		#with open(pJoin(modelDir, defaultInputs["feederName1"]+'.omd', 'w+')) as outfile:
+		#	json.dump(temp_omd, outfile)
 	except:
 		return False
 	return creationCode
