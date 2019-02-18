@@ -16,9 +16,16 @@ import numpy as np
 import networkx as nx
 
 def generateHeatMap(ax):
+
+	cmap = plt.cm.Greys
+	cmap._init()
+	#alphas = np.linspace(.7, 1)
+	#cmap._lut[:, -1] = alphas
+
 	heatMap = ax.imshow(
 		np.random.rand(5, 5),
-		cmap = 'hot',
+		cmap = cmap,
+		alpha = .7,
 		interpolation = 'nearest',
 		extent = [0,1,0,1],
 		aspect='auto')
