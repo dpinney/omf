@@ -19,8 +19,8 @@ def generateHeatMap(ax):
 
 	cmap = plt.cm.Greys
 	cmap._init()
-	#alphas = np.linspace(.7, 1)
-	#cmap._lut[:, -1] = alphas
+	cmap._lut[:, -1] = np.linspace(0, 1, 259)
+
 
 	heatMap = ax.imshow(
 		np.random.rand(5, 5),
