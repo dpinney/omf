@@ -4,6 +4,7 @@ clock {
 	stoptime '2012-01-02 00:00:00';
 };
 
+#include "inc_super_schedules.glm";
 #set minimum_timestep=60;
 #set profiler=1;
 #set relax_naming_rules=1;
@@ -28,7 +29,7 @@ module residential;
 object climate {
 	name Climate;
 	interpolate QUADRATIC;
-	tmyfile climate.tmy2;
+	tmyfile inc_climate.tmy2;
 };
 
 object recorder {
@@ -43,14 +44,14 @@ object house {
 	auxiliary_system_type ELECTRIC;
 	cooling_COP 3.4;
 	hvac_breaker_rating 1000;
-	cooling_system_type ELECTRIC;
+	cooling_system_type HEAT_PUMP;
 	mass_temperature 68;
 	auxiliary_strategy DEADBAND;
 	air_temperature 68;
 	Rfloor 19.0;
 	heating_COP 2.8;
 	motor_efficiency AVERAGE;
-	heating_system_type RESISTANCE;
+	heating_system_type HEAT_PUMP;
 	glazing_layers 2;
 	Rwall 17.0;
 	glazing_treatment 1;

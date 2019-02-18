@@ -4,7 +4,7 @@ clock {
 	stoptime '2012-01-01 15:00:00';
 };
 
-#include "superSchedules.glm";
+#include "inc_super_schedules.glm";
 #set minimum_timestep=60;
 #set profiler=1;
 #set relax_naming_rules=1;
@@ -28,13 +28,13 @@ module residential;
 object climate {
 	name Climate;
 	interpolate QUADRATIC;
-	tmyfile climate.tmy2;
+	tmyfile inc_climate.tmy2;
 };
 
 object recorder {
 	interval 60;
 	property heating_demand, cooling_demand;
-	file superHouseHeatCool.csv;
+	file out_super_house_heat_cool.csv;
 	parent house0;
 };
 

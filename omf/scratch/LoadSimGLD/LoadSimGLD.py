@@ -16,11 +16,11 @@ OOO Switch to superHouse.glm?
 def workAndGraph(modelType):
 	# Run GridLAB-D on the GLM.
 	if modelType == 'Gas':
-		fileName = 'heat_gas_gridlabd_sim.glm'
+		fileName = 'in_heat_gas_gridlabd_sim.glm'
 	elif modelType == 'HeatPump':
-		fileName = 'heatPump_gridlabd_sim.glm'
+		fileName = 'in_heatPump_gridlabd_sim.glm'
 	elif modelType == 'Resistance':
-		fileName = 'resistance_heat_gridlabd_sim.glm'
+		fileName = 'in_resistance_heat_gridlabd_sim.glm'
 	print(fileName)
 	print type(fileName)
 	print ('gridlabd '
@@ -76,4 +76,4 @@ if __name__ == '__main__':
 		modelType = args.model_type
 		workAndGraph(modelType)
 	except:
-		workAndGraph('Resistance')
+		workAndGraph('Gas')
