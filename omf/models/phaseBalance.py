@@ -21,14 +21,14 @@ modelName, template = metadata(__file__)
 tooltip = "Calculate phase unbalance and determine mitigation options."
 hidden = True
 
-def _addCollectors(tree, modelDir):
+def _addCollectors(tree):
 	max_key = int(max(tree, key=int))
-	tree[str(max_key+1)] = {'property': 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)', 'object': 'collector', 'group': 'class=transformer', 'limit': '0', 'file': modelDir+'/ZlossesTransformer.csv'}
-	tree[str(max_key+2)] = {'property': 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)', 'object': 'collector', 'group': 'class=underground_line', 'limit': '0', 'file': modelDir+'/ZlossesUnderground.csv'}
-	tree[str(max_key+3)] = {'property': 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)', 'object': 'collector', 'group': 'class=overhead_line', 'limit': '0', 'file': modelDir+'/ZlossesOverhead.csv'}
-	tree[str(max_key+4)] = {'property': 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)', 'object': 'collector', 'group': 'class=triplex_line', 'limit': '0', 'file': modelDir+'/ZlossesTriplex.csv'}
-	tree[str(max_key+5)] = {'property': 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)', 'object': 'collector', 'group': 'class=inverter', 'limit': '0', 'file': modelDir+'/distributedGen.csv'}
-	tree[str(max_key+6)] = {'property': 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)', 'object': 'collector', 'group': 'class=load', 'limit': '0', 'file': modelDir+'/loads.csv'}
+	tree[str(max_key+1)] = {'property': 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)', 'object': 'collector', 'group': 'class=transformer', 'limit': '0', 'file': 'ZlossesTransformer.csv'}
+	tree[str(max_key+2)] = {'property': 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)', 'object': 'collector', 'group': 'class=underground_line', 'limit': '0', 'file': 'ZlossesUnderground.csv'}
+	tree[str(max_key+3)] = {'property': 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)', 'object': 'collector', 'group': 'class=overhead_line', 'limit': '0', 'file': 'ZlossesOverhead.csv'}
+	tree[str(max_key+4)] = {'property': 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)', 'object': 'collector', 'group': 'class=triplex_line', 'limit': '0', 'file': 'ZlossesTriplex.csv'}
+	tree[str(max_key+5)] = {'property': 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)', 'object': 'collector', 'group': 'class=inverter', 'limit': '0', 'file': 'distributedGen.csv'}
+	tree[str(max_key+6)] = {'property': 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)', 'object': 'collector', 'group': 'class=load', 'limit': '0', 'file': 'loads.csv'}
 	return tree
 
 def work(modelDir, inputDict):
@@ -43,7 +43,7 @@ def work(modelDir, inputDict):
 	omd = json.load(open(pJoin(modelDir,feederName + '.omd')))
 	tree = omd['tree']
 	# TODO: modify tree to add MPUPV collectors.
-	tree = _addCollectors(tree, modelDir)
+	tree = _addCollectors(tree)
 	with open(modelDir + '/withCollectors.glm', 'w') as collFile:
 		treeString = feeder.sortedWrite(tree)
 		collFile.write(treeString)
@@ -465,10 +465,10 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"feederName1": "Olin Barre Geo",
+		"feederName1": "Taxonomic Feeder Rooftop Solar",
 		"modelType": modelName,
 		"runTime": "",
-		"layoutAlgorithm": "geospatial",
+		"layoutAlgorithm": "forceDirected",
 		"edgeCol" : "None",
 		"nodeCol" : "Voltage",
 		"nodeLabs" : "None",
