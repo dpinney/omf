@@ -7,7 +7,7 @@ from os.path import isdir, join as pJoin
 import __neoMetaModel__
 from __neoMetaModel__ import *
 from solvers import VB 
-import forecast as fc
+from omf import loadForecast as fc
 
 # Model metadata:
 modelName, template = metadata(__file__)
@@ -52,7 +52,7 @@ def work(modelDir, ind):
 		df['dayOfYear'] = df['dates'].dt.dayofyear
 		assert df.shape[0] >= 26280 # must be longer than 3 years
 		assert df.shape[1] == 5
-	except:
+	except ZeroDivisionError:
 		raise Exception("CSV file is incorrect format.")
 
 	# train model on previous data
