@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta charset="UTF-8">
-		<style >
+		<style>
             /* Define global css variables */
             /* I have to subtract 4px or so from the svgContainer to prevent the scrollbar from appearing. Making the header height less does not appear to change anything. */
             :root {
@@ -266,14 +266,13 @@
 	 		.modalContent {
                 padding: 20px;
                 border-radius: 10px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: space-evenly;
 				background-color: #fefefe;
-                /*height: 380px;*/
-                overflow: hidden;
+                max-height: 75vh;
+                overflow: auto;
 			}
+            .right {
+                float: right;
+            }
             .modalInput {
                 font-size: medium;
                 border: 0px;
@@ -299,10 +298,7 @@
             #cancelButton {
                 background-color: crimson;
             }
-            .modalContent td:nth-of-type(2) {
-                text-align: right;
-            }
-            .modalTableHeader {
+            .leftText {
                 text-align: left;
             }
             .modalTableRow {
@@ -312,12 +308,13 @@
                 overflow: auto;
                 height: 240px;
                 list-style-type: none;
-                margin: 0px 0px 0px 20px;
+                /*margin: 0px 0px 0px 20px;*/
+                margin: 0px;
                 padding: 0;
                 cursor: pointer;
             }
             .feederItem {
-                padding: 5px 5px 5px 5px;
+                padding: 5px 0px 5px 0px;
                 margin: 10px 0px 10px 0px;
             }
             .feederItem:hover {
@@ -421,14 +418,20 @@
 			}
 			td {
 				background:white;
-				padding: 5px;
+				/*padding: 5px 0px 5px 0px;*/
 				border-collapse: collapse;
 			}
+            .verticalPadded {
+				padding: 5px 0px 5px 0px;
+            }
+            .fullPadded {
+				padding: 5px;
+            }
 			th {
 				/*font-weight: normal;*/
 				/*background:black;*/
 				/*color:white;*/
-				padding: 5px;
+				/*padding: 5px 0px 5px 0px;*/
 			}
 			/*
             #editButtonRow button {
@@ -447,6 +450,65 @@
 				background:mediumseagreen;
 			}
             */
+
+            /* SVG Styling */
+
+            line { stroke:black; }
+            line.parentChild { stroke:LightGrey; }
+            /*circle { stroke:white; fill:gray; }*/
+
+            /* Circles with stroke (border) */
+
+            circle { 
+                stroke:rgba(255, 255, 255, 1);
+                fill:rgba(128, 128, 128, 1); 
+            }
+            .undefined { fill: rgba(191, 191, 191, 1); }
+
+            .battery { 
+                /*stroke:rgba(255, 255, 255, 1);*/
+                fill:rgba(128, 128, 128, 1); 
+            }
+            .capacitor { 
+                /*stroke:rgba(255, 255, 255, 1);*/
+                fill:rgba(128, 128, 128, 1); 
+            }
+            .climate { fill: rgba(191, 191, 191, 1); }
+            .evcharger_det { fill:rgba(128, 128, 128, 1); }
+            .house { fill: rgba(0, 0, 255, 1); }
+            .inverter { fill:rgba(128, 128, 128, 1); } 
+            .line_configuration { fill: rgba(191, 191, 191, 1); }
+            .line_spacing { fill: rgba(191, 191, 191, 1); }
+            .load { fill:rgba(128, 128, 128, 1); }
+
+            /* Lines */
+
+            .fuse { stroke: rgba(0, 0, 0, 1); }
+            .meter
+            .meter_recorder
+            .node
+            .overhead_line { stroke: rgba(0, 0, 0, 1); }
+            .overhead_line_conductor { fill: rgba(191, 191, 191, 1); }
+            .player { fill: rgba(191, 191, 191, 1); }
+            .regulator { stroke:red; }
+            .regulator_configuration { fill: rgba(191, 191, 191, 1); }
+            .schedule { fill: rgba(191, 191, 191, 1); }
+            .solar
+            .switch
+            .transformer { stroke: orange; }
+            .transformer_configuration { fill: rgba(191, 191, 191, 1); }
+            .triplex_line
+            .triplex_line_conductor { fill: rgba(191, 191, 191, 1); }
+            .triplex_line_configuration { fill: rgba(191, 191, 191, 1); }
+            .triplex_load
+            .triplex_meter { fill: orange; }
+            .triplex_node
+            .underground_line { stroke:gray; }
+            .underground_line_conductor { fill: rgba(191, 191, 191, 1); }
+            .volt_var_control { fill: rgba(191, 191, 191, 1); }
+            .waterheater
+            .windturb_dg
+            .ZIPload {}
         </style>
         <link rel="stylesheet" href="/static/jquery-ui.min.css">
         <script type="text/javascript" src="/static/jquery.js"></script>
@@ -499,6 +561,7 @@
                                 <li>Mass Edit...</li>
                                 <li data-web>Scada Loadshapes...</li>
                                 <li>Static Loads to Houses</li>
+                                <li>Change opacity...</li>
                             </ul>
                         </div>
                     </div>
@@ -529,52 +592,38 @@
             </div>
             <!-- Svg container -->
             <div id="svgContainerWrapper" style="height: auto;">
-                <svg id='svgContainer' xmlns='http://www.w3.org/2000/svg'>
-                    <!--
-                        line.selected, circle.selected {stroke:lime;}
-                    -->
-                    <style type="text/css">
-                        <![CDATA[
-                        .house {fill:blue;}
-                        .triplex_meter {fill:orange;}
-                        .underground_line {stroke:gray;}
-                        .transformer {stroke:orange;}
-                        .regulator {stroke:red;}
-                        line {stroke:black;}
-                        line.parentChild {stroke:LightGrey;}
-                        circle {stroke:white; fill:gray;}
-                        .undefined, .regulator_configuration, .transformer_configuration, .triplex_line_configuration, .line_configuration, .volt_var_control, .line_spacing, .climate, .overhead_line_conductor, .underground_line_conductor, .triplex_line_conductor, .player, .schedule {fill: #bfbfbf;}
-                        ]]>
-                    </style>
-                </svg>
+                <svg id='svgContainer' xmlns='http://www.w3.org/2000/svg'></svg>
             </div>
             <!-- Modals -->
-            <div id='findModal' class="modal" style="display: none">
+            <div id="findModal" class="modal" style="display: none">
                 <div class='modalContent'>
                     <table>
                         <tr>
-                            <!--<td colspan="2">Term</td>-->
-                            <!--<td>Term</td>-->
-                            <td colspan="2"><input id='searchInput' type='text' value="Enter a search term" class="modalInput"></td>
-                            <td id="searchCount"></td>
+                            <td class="fullPadded"><input id="searchInput" type="text" value="Enter a term" class="modalInput"></td>
+                            <td id="searchCount" class="fullPadded"></td>
+                        </tr>
+                        <tr><td class="fullPadded"><input checked id="searchExactString" type="radio" name="searchMode" value="searchExactString">Exact match</td></tr>
+                        <tr><td class="fullPadded"><input id="searchSubstring" type="radio" name="searchMode" value="searchSubstring">Includes term</td></tr>
+
+                        <tr>
+                            <td class="fullPadded">Key of current object:</td>
+                            <td id="foundElementKey" class="fullPadded"></td>
                         </tr>
                         <tr>
-                            <td>Key of current object:</td>
-                            <td id="foundElementKey"></td>
+                            <td class="fullPadded"><input type="checkbox" id="showTableOnFind">Show table on view</td>
                         </tr>
                         <tr>
-                            <td><input type="checkbox" id="showTableOnFind">Show table on view</td>
-                        </tr>
-                        <tr>
-                            <td><button id="findPrevious" class="modalButton">Previous</button></td>
-                            <td><button id="findNext" class="modalButton">Next</button></td>
-                            <td><button class="modalButton" onclick='toggleElementDisplay("findModal")'>Close</button></td>
+                        <td class="fullPadded">
+                            <button id="findPrevious" class="modalButton">Previous</button>
+                            <button id="findNext" class="modalButton" style="margin-left:10px;">Next</button>
+                        </td>
+                            <td class="fullPadded"><button class="modalButton" onclick='toggleElementDisplay("findModal")'>Close</button></td>
                         </tr>
                     </table>
                 </div>
             </div>
             <div id="progressModal" class="modal" style="display: none">
-                <div class="modalContent">
+                <div class="modalContent" style="text-align: center;">
                     <img src="/static/spinner.gif">
                     <h2>text...</h2>
                     <button class="modalButton" id="progressModalCancel">Cancel</button>
@@ -585,20 +634,18 @@
                     <table id="loadModalTable">
                         <tbody>
                             <tr>
-                                <th class="modalTableHeader modalTableRow">Public Feeders</th>
-                                <th class="modalTableHeader modalTableRow">My Feeders</th>
+                                <th class="modalTableRow fullPadded">Public Feeders</th>
+                                <th class="modalTableRow fullPadded">My Feeders</th>
                             </tr>	
                             <tr>
-                                <td class="modalTableRow"> 
-                                    <ul id="publicFeederList" class="scrollableList"></ul>
-                                </td>
-                                <td class="modalTableRow"> 
-                                    <ul id="userFeederList" class="scrollableList"></ul>
-                                </td>
+                                <td class="modalTableRow fullPadded"><ul id="publicFeederList" class="scrollableList"></ul></td>
+                                <td class="modalTableRow fullPadded"><ul id="userFeederList" class="scrollableList"></ul></td>
                             </tr>
                         </tbody>
                     </table>
-                    <button onclick="toggleElementDisplay('loadModal')" class="modalButton">Cancel</button>
+                    <div class="fullPadded">
+                        <button onclick="toggleElementDisplay('loadModal')" class="modalButton fullPadded">Cancel</button>
+                    </div>
                 </div>
             </div>
             <div id="blankFeederModal" class="modal" style="display: none">
@@ -612,18 +659,18 @@
                         <table>
                             <tbody>
                                 <tr>
-                                    <th class="modalTableHeader modalTableRow">Blank Feeder</th>
+                                    <th colspan="2" class="fullPadded">New Blank Feeder</th>
                                 </tr>
                                 <tr>
-                                    <td><label for="blankFeederInput">Name</label></td>
-                                    <td>
+                                    <td class="fullPadded"><label for="blankFeederInput">Name</label></td>
+                                    <td class="fullPadded">
                                         <!-- TODO: add better validation than just the 'required' attribute-->
                                         <input type='text' required id="blankFeederInput" name='feederNameNew' class="modalInput"/>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><button type="button" onclick="toggleElementDisplay('blankFeederModal')" class="modalButton">Cancel</button></td>
-                                    <td><button type="submit" class="modalButton">Create</button></td>
+                                    <td class="fullPadded"><button type="button" onclick="toggleElementDisplay('blankFeederModal')" class="modalButton">Cancel</button></td>
+                                    <td class="fullPadded"><button type="submit" class="right modalButton">Create</button></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -640,27 +687,25 @@
                         <!--<input type='hidden' name='referrer' value='distribution'/>-->
                         <table>
                             <tbody>
+                                <tr><th colspan="2" class="fullPadded">Milsoft Conversion</th></tr>
                                 <tr>
-                                    <th class="modalTableHeader modalTableRow">Milsoft Conversion</th>
-                                </tr>
-                                <tr>
-                                    <td><label for="milsoftInput">Name</label></td>
-                                    <td>
+                                    <td class="fullPadded"><label for="milsoftInput">Name</label></td>
+                                    <td class="fullPadded">
                                         <!-- TODO: add better validation than just the 'required' attribute-->
                                         <input type='text' required id="milsoftInput" name='feederNameM' class="modalInput"/>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>Data File (.std)</td>
-                                    <td><input type='file' required id="stdFile" name='stdFile' accept='.std' class="modalInput"/></td>
+                                    <td class="fullPadded">Data File (.std)</td>
+                                    <td class="fullPadded"><input type='file' required id="stdFile" name='stdFile' accept='.std' class="modalInput"/></td>
                                 </tr>
                                 <tr>
-                                    <td>Equipment File (.seq)</td>
-                                    <td><input type='file' required id="seqFile" name='seqFile' accept='.seq' class="modalInput"/></td>
+                                    <td class="fullPadded">Equipment File (.seq)</td>
+                                    <td class="fullPadded"><input type='file' required id="seqFile" name='seqFile' accept='.seq' class="modalInput"/></td>
                                 </tr>
                                 <tr>
-                                    <td><button type="button" onclick="toggleElementDisplay('milsoftModal')" class="modalButton">Cancel</button></td>
-                                    <td><button type="submit" class="modalButton">Import</button></td>
+                                    <td class="fullPadded"><button type="button" onclick="toggleElementDisplay('milsoftModal')" class="modalButton">Cancel</button></td>
+                                    <td class="fullPadded"><button type="submit" class="modalButton right">Import</button></td>
                                 </tr>
                             </tbody>
                         </table> 
@@ -677,23 +722,21 @@
                         <!--<input type='hidden' name='referrer' value='distribution'/>-->
                         <table>
                             <tbody>
+                                <tr><th colspan="2" class="fullPadded">GridLab-D Conversion</th></tr>
                                 <tr>
-                                    <th class="modalTableHeader modalTableRow">GridLab-D Conversion</th>
-                                </tr>
-                                <tr>
-                                    <td><label for="gridlabdInput">Name</label></td>
-                                    <td>
+                                    <td class="fullPadded"><label for="gridlabdInput">Name</label></td>
+                                    <td class="fullPadded">
                                         <!-- TODO: add better validation than just the 'required' attribute-->
                                         <input type='text' required id="gridlabdInput" name='feederNameG' class="modalInput"/>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>Data File (.glm)</td>
-                                    <td><input type='file' required id="csvFile" name='glmFile' accept='.glm' class="modalInput"/></td>
+                                    <td class="fullPadded">Data File (.glm)</td>
+                                    <td class="fullPadded"><input type='file' required id="csvFile" name='glmFile' accept='.glm' class="modalInput"/></td>
                                 </tr>
                                 <tr>
-                                    <td><button type="button" onclick="toggleElementDisplay('gridlabdModal')" class="modalButton">Cancel</button></td>
-                                    <td><button type="submit" class="modalButton">Import</button></td>
+                                    <td class="fullPadded"><button type="button" onclick="toggleElementDisplay('gridlabdModal')" class="modalButton">Cancel</button></td>
+                                    <td class="fullPadded"><button type="submit" class="modalButton right">Import</button></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -710,23 +753,21 @@
                         <!--<input type='hidden' name='referrer' value='distribution'/>-->
                         <table>
                             <tbody>
+                                <tr><th colspan="2" class="fullPadded">Cyme Conversion</th></tr>
                                 <tr>
-                                    <th class="modalTableHeader modalTableRow">Cyme Conversion</th>
-                                </tr>
-                                <tr>
-                                    <td><label for="cymeInput">Name</label></td>
-                                    <td>
+                                    <td class="fullPadded"><label for="cymeInput">Name</label></td>
+                                    <td class="fullPadded">
                                         <!-- TODO: add better validation than just the 'required' attribute-->
                                         <input type='text' required id="cymeInput" name='feederNameC' class="modalInput"/>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>Network File (.mdb)</td>
-                                    <td><input type='file' required id="mdbNetFile" name='mdbNetFile' accept='.mdb' class="modalInput"/></td>
+                                    <td class="fullPadded">Network File (.mdb)</td>
+                                    <td class="fullPadded"><input type='file' required id="mdbNetFile" name='mdbNetFile' accept='.mdb' class="modalInput"/></td>
                                 </tr>
                                 <tr>
-                                    <td><button type="button" onclick="toggleElementDisplay('cymeModal')" class="modalButton">Cancel</button></td>
-                                    <td><button type="submit" class="modalButton">Import</button></td>
+                                    <td class="fullPadded"><button type="button" onclick="toggleElementDisplay('cymeModal')" class="modalButton">Cancel</button></td>
+                                    <td class="fullPadded"><button type="submit" class="modalButton right">Import</button></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -744,21 +785,17 @@
                         <table>
                             <tbody>
                                 <tr>
-                                    <th class="modalTableHeader modalTableRow">Scada Loadshapes</th>
-                                    <th style='float:right;'>
-                                        <a href='https://github.com/dpinney/omf/wiki/Tools-~-gridEdit#scada-loadshapes' target='_blank'>Format Help</a>
-                                    </th>
+                                    <th class="leftText fullPadded">Scada Loadshapes</th>
+                                    <th class="right fullPadded"><a href='https://github.com/dpinney/omf/wiki/Tools-~-gridEdit#scada-loadshapes' target='_blank'>Format Help</a></th>
                                 </tr>
                                 <tr>
-                                    <td>File containing Scada load data (.csv)</td>
-                                    <td><input type='file' required id="scadaFile" name='scadaFile' accept='.csv' class="modalInput"/></td>
+                                    <td class="fullPadded">File containing Scada load data (.csv)</td>
+                                    <td class="fullPadded"><input type='file' required id="scadaFile" name='scadaFile' accept='.csv' class="modalInput"/></td>
                                 </tr>
+                                <tr><td colspan='100%' class="fullPadded">Note: Model "Simulation Start Date" should lie within the Scada load's dates.</td></tr>
                                 <tr>
-                                    <td colspan='100%'>Note: Model "Simulation Start Date" should lie within the Scada load's dates.</td>
-                                </tr>
-                                <tr>
-                                    <td><button type="button" onclick="toggleElementDisplay('scadaModal')" class="modalButton">Cancel</button></td>
-                                    <td><button type="submit" class="modalButton">Import</button></td>
+                                    <td class="fullPadded"><button type="button" onclick="toggleElementDisplay('scadaModal')" class="modalButton">Cancel</button></td>
+                                    <td class="fullPadded"><button type="submit" class="right modalButton">Import</button></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -776,21 +813,19 @@
                         <table>
                             <tbody>
                                 <tr>
-                                    <th class="modalTableHeader modalTableRow">AMI Profiles</th>
-                                    <th style='float:right;'>
-                                        <a href='https://github.com/dpinney/omf/wiki/Tools-~-gridEdit' target='_blank'>Format Help</a>
-                                    </th>
+                                    <th class="leftText fullPadded">AMI Profiles</th>
+                                    <th class="right fullPadded"><a href='https://github.com/dpinney/omf/wiki/Tools-~-gridEdit' target='_blank'>Format Help</a></th>
                                 </tr>
                                 <tr>
-                                    <td>File containing AMI load data (.csv)</td>
-                                    <td><input type='file' required id="amiFile" name='amiFile' accept='.csv' class="modalInput"/></td>
+                                    <td class="fullPadded">File containing AMI load data (.csv)</td>
+                                    <td class="fullPadded"><input type='file' required id="amiFile" name='amiFile' accept='.csv' class="modalInput"/></td>
                                 </tr>
                                 <tr>
-                                    <td colspan='100%'>Note: Model "Simulation Start Date" should lie within the AMI profiles's dates.</td>
+                                    <td colspan='100%' class="fullPadded">Note: Model "Simulation Start Date" should lie within the AMI profiles's dates.</td>
                                 </tr>
                                 <tr>
-                                    <td><button type="button" onclick="toggleElementDisplay('amiModal')" class="modalButton">Cancel</button></td>
-                                    <td><button type="submit" class="modalButton">Import</button></td>
+                                    <td class="fullPadded"><button type="button" onclick="toggleElementDisplay('amiModal')" class="modalButton">Cancel</button></td>
+                                    <td class="fullPadded"><button type="submit" class="modalButton right">Import</button></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -802,25 +837,23 @@
                     <form onsubmit="massAdd(); return false;">
                         <table>
                             <tbody>
+                                <tr><th colspan="2" class="fullPadded">Mass Add</th></tr>
                                 <tr>
-                                    <th class="modalTableHeader modalTableRow">Mass Add</th>
+                                    <td class="fullPadded">Add component:</td>
+                                    <td class="fullPadded"><select id='componentSelect'></select></td>
                                 </tr>
                                 <tr>
-                                    <td>Add component:</td>
-                                    <td><select id='componentSelect'></select></td>
+                                    <td class="fullPadded">To each:</td>
+                                    <td class="fullPadded"><select id='massAddTargetSelect'></select></td>
                                 </tr>
                                 <tr>
-                                    <td>To each:</td>
-                                    <td><select id='massAddTargetSelect'></select></td>
-                                </tr>
-                                <tr>
-                                    <td>With probability for each attachment (float between 0.0 and 1.0):</td>
-                                    <td><input type='text' pattern="^(1.0)|(0?(\.\d+))$" required id='percent' value='1.0' class="modalInput"/></td>
+                                    <td class="fullPadded">With probability for each attachment (float between 0.0 and 1.0):</td>
+                                    <td class="fullPadded"><input type='text' pattern="^(1.0)|(0?(\.\d+))$" required id='percent' value='1.0' class="modalInput"/></td>
 
                                 </tr>
                                 <tr>
-                                    <td><button onclick="toggleElementDisplay('massAddModal')" class="modalButton">Cancel</button></td>
-                                    <td><button type="submit" class="modalButton">Apply</button></td>
+                                    <td class="fullPadded"><button onclick="toggleElementDisplay('massAddModal')" class="modalButton">Cancel</button></td>
+                                    <td class="fullPadded"><button type="submit" class="right modalButton">Apply</button></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -831,49 +864,41 @@
                 <div class='modalContent'>
                     <table>
                         <tbody>
+                            <tr><th colspan="4" class="fullPadded">Mass Edit</th></tr>
                             <tr>
-                                <th class="modalTableHeader">Mass Edit</th>
+                                <td class="fullPadded">For each object of type</td>
+                                <td class="fullPadded"><select id='massEditTargetSelect'></select></td>
+                                <td class="fullPadded">with attribute</td>
+                                <td class="fullPadded"><input type='text' id='massEditAttribute' class="modalInput"></td>
                             </tr>
                             <tr>
-                                <td>For each object of type</td>
-                                <td><select id='massEditTargetSelect'></select></td>
-                                <td>with attribute</td>
-                                <td><input type='text' id='massEditAttribute' class="modalInput"></td>
+                                <td class="fullPadded"><input type="radio" name="attributeOperation" value="addTo">Add value to attribute</td>
+                                <td class="fullPadded"><input type='text' id='addToValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
                             </tr>
                             <tr>
-                                <td><input type="radio" name="attributeOperation" value="addTo">Add value to attribute</td>
-                                <td><input type='text' id='addToValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
+                                <td class="fullPadded"><input type="radio" name="attributeOperation" value="delete">Delete Attribute</td>
                             </tr>
                             <tr>
-                                <td><input type="radio" name="attributeOperation" value="delete">Delete Attribute</td>
-                            </tr>
-                            <tr>
-                                <td><input type="radio" name="attributeOperation" value="change">Change attribute to</td>
-                                <td><input type='text' id='changeValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
+                                <td class="fullPadded"><input type="radio" name="attributeOperation" value="change">Change attribute to</td>
+                                <td class="fullPadded"><input type='text' id='changeValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
                             </tr>
                             </tr>
                             <tr>		
-                                <td><input type="radio" name="attributeOperation" value="multiplyBy">Multiply attribute by</td>
-                                <td><input type='text' id='multiplyValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
-                                <td style="text-align: center" >and add</td>
-                                <td><input type='text' id='andAddValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
+                                <td class="fullPadded"><input type="radio" name="attributeOperation" value="multiplyBy">Multiply attribute by</td>
+                                <td class="fullPadded"><input type='text' id='multiplyValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
+                                <td class="fullPadded" style="text-align: center" >and add</td>
+                                <td class="fullPadded"><input type='text' id='andAddValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
+                            </tr>
+                            <tr><td class="fullPadded">Or</td></tr>
+                            <tr>
+                                <td class="fullPadded"><input type="radio" name="attributeOperation" value="addAttribute"> Add new attribute</td>
+                                <td class="fullPadded"><input type='text' id='newAttributeKey' class="modalInput"></td>
+                                <td class="fullPadded" style="text-align: center">with value</td>
+                                <td class="fullPadded"><input type='text' id='newAttributeValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
                             </tr>
                             <tr>
-                                <td>Or</td>
-                            </tr>
-                            <tr>
-                                <td><input type="radio" name="attributeOperation" value="addAttribute"> Add new attribute</td>
-                                <td><input type='text' id='newAttributeKey' class="modalInput"></td>
-                                <td style="text-align: center">with value</td>
-                                <td><input type='text' id='newAttributeValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
-                            </tr>
-                            <tr>
-                                <td colspan="2">
-                                    <button onclick="toggleElementDisplay('massEditModal')" class="modalButton" style="float: right">Cancel</button>
-                                </td>
-                                <td>
-                                    <button onclick="massEdit();" class="modalButton" style="float: left">Apply</button>
-                                </td>
+                                <td class="fullPadded"><button onclick="toggleElementDisplay('massEditModal')" class="modalButton">Cancel</button></td>
+                                <td colspan="3" class="fullPadded"><button onclick="massEdit();" class="right modalButton">Apply</button></td>
                             </tr>
                         </tbody>
                     </table>
@@ -883,12 +908,13 @@
                 <div class='modalContent'>
                     <table>
                         <tbody>
+                            <tr><th colspan="2" class="fullPadded">Attachments</th></tr>
                             <tr>
-                                <td><select id='attachmentSelect'></select></td>
+                                <td class="fullPadded"><select id='attachmentSelect'></select></td>
                             </tr>
                             <tr>
-                                <td><button onclick="toggleElementDisplay('attachmentsModal')" class="modalButton">Cancel</button></td>
-                                <td><button onclick="toggleElementDisplay('attachmentsModal'); editAttachment()" class="modalButton">Select</button></td>
+                                <td class="fullPadded"><button onclick="toggleElementDisplay('attachmentsModal')" class="modalButton">Cancel</button></td>
+                                <td class="fullPadded"><button onclick="toggleElementDisplay('attachmentsModal'); editAttachment()" class="modalButton">Select</button></td>
                             </tr>
                         </tbody>
                     </table>
@@ -898,17 +924,11 @@
                 <div class='modalContent'>
                     <table>
                         <tbody>
+                            <tr><td id='attachmentTd' class="fullPadded"></td></tr>
+                            <tr><td class="fullPadded"><textarea rows='25' cols='80' id='editAttachmentBox'></textarea></td></tr>
                             <tr>
-                                <td id='attachmentTd'></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <textarea rows='25' cols='80' id='editAttachmentBox'></textarea>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><button onclick="toggleElementDisplay('editAttachmentModal')" class="modalButton">Cancel</button></td>
-                                <td><button onclick="saveAttachment(); toggleElementDisplay('editAttachmentModal');" class="modalButton">Save</button></td>
+                                <td class="fullPadded"><button onclick="toggleElementDisplay('editAttachmentModal')" class="modalButton">Cancel</button></td>
+                                <td class="fullPadded"><button onclick="saveAttachment(); toggleElementDisplay('editAttachmentModal');" class="modalButton">Save</button></td>
                             </tr>
                         </tbody>
                     </table>
@@ -924,40 +944,38 @@
                         <!--<input type='hidden' name='referrer' value='distribution'/>-->
                         <table>
                             <tbody>
+                                <tr><th colspan="2" class="fullPadded">Climate Change</th></tr>
                                 <tr>
-                                    <th class="modalTableHeader modalTableRow">Climate Change</th>
-                                </tr>
-                                <tr>
-                                    <td>
+                                    <td class="fullPadded">
                                         <input id='historicalImport' type='radio' name='climateImportOption' value='historicalImport'>
                                         <label for='historicalImport'>Historical Weather</label>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><label for='startDate'>Start Date (YYYY-MM-DD):</label></td>
-                                    <td><input id='startDate' type='text' name='startDate' pattern='^\d{4}-\d{2}-\d{2}$' class="modalInput"></td>
+                                    <td class="fullPadded"><label for='startDate'>Start Date (YYYY-MM-DD):</label></td>
+                                    <td class="fullPadded"><input id='startDate' type='text' name='startDate' pattern='^\d{4}-\d{2}-\d{2}$' class="modalInput"></td>
                                 </tr>
                                 <tr>
-                                    <td><label for='endDate'>End Date (YYYY-MM-DD):</label></td>
-                                    <td><input id='endDate' type='text' name='endDate' pattern='^\d{4}-\d{2}-\d{2}$' class="modalInput"></td>
+                                    <td class="fullPadded"><label for='endDate'>End Date (YYYY-MM-DD):</label></td>
+                                    <td class="fullPadded"><input id='endDate' type='text' name='endDate' pattern='^\d{4}-\d{2}-\d{2}$' class="modalInput"></td>
                                 </tr>
                                 <tr>
-                                    <td><label for='airport'>Airport Code:</label></td>
-                                    <td><input id='airport' type='text' name='airport' pattern='^[A-Z]{3}$' class="modalInput"></td>
+                                    <td class="fullPadded"><label for='airport'>Airport Code:</label></td>
+                                    <td class="fullPadded"><input id='airport' type='text' name='airport' pattern='^[A-Z]{3}$' class="modalInput"></td>
                                 </tr>
                                 <tr>
-                                    <td>
+                                    <td class="fullPadded">
                                         <input id='tmyImport' type='radio' name='climateImportOption' value='tmyImport'>
                                         <label for='tmyImport'>tmy Import</label>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><label for='zipCode'>Zip Code:</label></td>
-                                    <td><input id='zipCode' type="text" name="zipCode" pattern='^\d{5}$' class="modalInput"></td>
+                                    <td class="fullPadded"><label for='zipCode'>Zip Code:</label></td>
+                                    <td class="fullPadded"><input id='zipCode' type="text" name="zipCode" pattern='^\d{5}$' class="modalInput"></td>
                                 </tr>
                                 <tr>
-                                    <td><button type="button" onclick="toggleElementDisplay('climateModal')" class="modalButton">Cancel</button></td>
-                                    <td><button type="submit" class="modalButton">Apply</button></td>
+                                    <td class="fullPadded"><button type="button" onclick="toggleElementDisplay('climateModal')" class="modalButton">Cancel</button></td>
+                                    <td class="fullPadded"><button type="submit" class="right modalButton">Apply</button></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -974,10 +992,10 @@
                         <!--<input type='hidden' name='referrer' value='distribution'/>-->
                         <table>
                             <tbody>
-                                <tr><th>Anonymization</th></tr>
-                                <tr><th class="modalTableHeader">Names and labels:</th></tr>
+                                <tr><th class="fullPadded">Anonymization</th></tr>
+                                <tr><th class="leftText fullPadded">Names and labels:</th></tr>
                                 <tr>
-                                    <td>
+                                    <td class="fullPadded">
                                         <select name='anonymizeNameOption'>
                                             <option value="noChange">No change</option>
                                             <option value="pseudonymize">Pseudonymize</option>
@@ -985,65 +1003,65 @@
                                         </select>
                                     </td>
                                 </tr>
-                                <tr><th class="modalTableHeader">Locations:</th></tr>
+                                <tr><th class="leftText fullPadded">Locations:</th></tr>
                                 <tr>
-                                    <td>
+                                    <td class="fullPadded">
                                         <input type='radio' id='noChange' name='anonymizeLocationOption' value='noChange' checked>
                                         <label for='noChange'>No Change</label>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>
+                                    <td class="fullPadded">
                                         <input type='radio' id='randomize' name='anonymizeLocationOption' value='randomize'>
                                         <label for='randomize'>Randomize</label>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>
+                                    <td class="fullPadded">
                                         <input type='radio' id='forceLayout' name='anonymizeLocationOption' value='forceLayout'>
                                         <label for='forceLayout'>Force Layout</label>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>
+                                    <td class="fullPadded">
                                         <input type='radio' id='translation' name='anonymizeLocationOption' value='translation'>
                                         <label for='translation'>Translate</label>
                                     </td>
                                 </tr>
-                                <tr><td><input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='translateRight' class="modalInputLine"> [ft] to the right and</td></tr>
-                                <tr><td><input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='translateUp' class="modalInputLine"> [ft] up with a</td></tr>
-                                <tr><td><input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='rotate' class="modalInputLine"> [degree] rotation.</td></tr>
-                                <tr><th class="modalTableHeader">Electrical properties:</th></tr>
+                                <tr><td class="fullPadded"><input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='translateRight' class="modalInputLine"> [ft] to the right and</td></tr>
+                                <tr><td class="fullPadded"><input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='translateUp' class="modalInputLine"> [ft] up with a</td></tr>
+                                <tr><td class="fullPadded"><input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='rotate' class="modalInputLine"> [degree] rotation.</td></tr>
+                                <tr><th class="leftText fullPadded">Electrical properties:</th></tr>
                                 <tr>
-                                    <td>
+                                    <td class="fullPadded">
                                         <input type='checkbox' id='modifyLengthSize' name='modifyLengthSize' value='modifyLengthSize'>
                                         <label for='modifyLengthSize'>Modify conductor length and cable size</label>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>
+                                    <td class="fullPadded">
                                         <input type='checkbox' id='smoothLoadGen' name='smoothLoadGen' value='smoothLoadGen'>
                                         <label for='smoothLoadGen'>Smooth AMI Loadshapes</label>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>
+                                    <td class="fullPadded">
                                         <input type='checkbox' id='shuffleLoadGen' name='shuffleLoadGen' value='shuffleLoadGen'>
                                         <label for='shuffleLoadGen'>Shuffle loads and generators:</label>
                                         <input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='shufflePerc' class="modalInputLine"> [%]</label>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>
+                                    <td class="fullPadded">
                                         <input type='checkbox' id='addNoise' name='addNoise' value='addNoise'>
                                         <label for='addNoise'>Add noise:</label>
                                         <input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='noisePerc' class="modalInputLine"> [%]</label>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>
+                                    <td class="fullPadded">
                                         <button type="button" onclick="toggleElementDisplay('anonymizeModal')" class="modalButton">Cancel</button>
-                                        <button type="submit" class="modalButton" style="float: right">Apply</button>
+                                        <button type="submit" class="right modalButton">Apply</button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -1051,7 +1069,16 @@
                     </form>
                 </div>
             </div>
-            <!-- Modals-->
+            <div id="opacityModal" class="modal" style="display: none">
+                <div class='modalContent'>
+                    <div></div>
+                    <div class="fullPadded">
+                        <button type="button" onclick="toggleElementDisplay('opacityModal');" class="modalButton">Close</button>
+                        <button type="button" onclick="gOpacityManager.reset();" class="right modalButton">Reset</button>
+                    </div>
+                </div>
+            </div>
+            <!--Modals-->
         </div>
 	</body>
 </html>
@@ -1074,6 +1101,7 @@ const gWriteFeeder = deepCopy(gReadFeeder);
 let gTree;
 let gSelection;
 let gViewport; 
+let gOpacityManager;
 //let gOffsetX; // replaced by gMinLon
 let gMinLon;
 //let gOffsetY; // replaced by gMaxLat
@@ -1390,12 +1418,20 @@ function clickLatLon(event) {
 // Find modal interface
 //**************************************************
 
+function searchTerm() {
+    let keys;
+    let operation = document.querySelector("input[name=searchMode]:checked").value;
+    if (operation === "searchExactString") {
+        keys = findExactString(this.value.trim());
+    } else if (operation === "searchSubstring") {
+        keys = findSubstring(this.value.trim());
+    }
+    prepareFoundKeys.bind(this)(keys);
+}
 /**
- * TODO: add unit tests
+ * @param {Array} keys
  */
-function getSearchResults() {
-    const tree = gTree.tree;
-    const keys = getMatchingKeys(this.value.trim(), tree);
+function prepareFoundKeys(keys) {
     document.getElementById("searchCount").textContent = `hits: ${keys.length}`;
     const nextButton = document.getElementById("findNext");
     const previousButton = document.getElementById("findPrevious");
@@ -1406,6 +1442,7 @@ function getSearchResults() {
         }
         nextButton.onclick = feedback;
         previousButton.onclick = feedback;
+        document.getElementById("foundElementKey").textContent = "";
         return;
     }
     const upperIndex = keys.length - 1;
@@ -1413,39 +1450,53 @@ function getSearchResults() {
     viewElement(keys[idx]);
     nextButton.onclick = function() {
         idx++;
-        if (idx > upperIndex) {
-            idx = 0;
-        }
+        if (idx > upperIndex) idx = 0;
         viewElement(keys[idx]);
     }
     previousButton.onclick = function() {
         idx--;
-        if (idx < 0) {
-            idx = upperIndex;
-        }
+        if (idx < 0) idx = upperIndex;
         viewElement(keys[idx]);
     }
+}
+
+function findExactString(string) {
+    const keys = [];
+    if (string === "") return keys;
+    const tree = gTree.tree;
+    for (let key in tree) {
+        if (key === string) keys.push(key);
+        for (let propertyKey in tree[key]) {
+            let propertyVal = tree[key][propertyKey];
+            if (typeof(propertyVal) !== "string") propertyVal += "";
+            if (propertyKey.toLowerCase === string.toLowerCase()) {
+                keys.push(key);
+                break;
+            } else if (propertyVal.toLowerCase() === string.toLowerCase()) {
+                keys.push(key);
+                break;
+            }
+        }
+    }
+    return keys;
 }
 
 /**
  * TODO: add unit tests
  */
-function getMatchingKeys(term, tree) {
+function findSubstring(substring) {
     const keys = [];
-    if (term === "") {
-        return keys;
-    }
+    if (substring === "") return keys;
+    const tree = gTree.tree;
     for (let key in tree) {
-        if (term == key) keys.push(key);
+        if (key.includes(substring)) keys.push(key);
         for (let propertyKey in tree[key]) {
             let propertyVal = tree[key][propertyKey];
-            if (typeof(propertyVal) !== "string") {
-                propertyVal += "";
-            }
-            if (propertyKey.toLowerCase().includes(term.toLowerCase())) {
+            if (typeof(propertyVal) !== "string") propertyVal += "";
+            if (propertyKey.toLowerCase().includes(substring.toLowerCase())) {
                 keys.push(key);
                 break;
-            } else if (propertyVal.toLowerCase().includes(term.toLowerCase())) {
+            } else if (propertyVal.toLowerCase().includes(substring.toLowerCase())) {
                 keys.push(key);
                 break;
             }
@@ -1743,7 +1794,7 @@ function addFileMenuHandlers() {
 function addEditMenuHandlers() {
     const menu = document.getElementById("editMenu");
     const items = Array.from(menu.children);
-    if (items.length != 9) {
+    if (items.length != 10) {
         throw new Error("Please update this function to ensure the correct handlers are attached");
     }
     //items[0].addEventListener("click", zoomToFit);
@@ -1769,6 +1820,10 @@ function addEditMenuHandlers() {
     });
     items[7].addEventListener("click", function() { toggleElementDisplay("scadaModal"); });
     items[8].addEventListener("click", convertStaticLoadsIntoHouses);
+    items[9].addEventListener("click", function() {
+        gOpacityManager.buildOpacityModal();
+        //toggleElementDisplay("opacityModal")
+    });
 }
 
 /** 
@@ -1785,7 +1840,7 @@ function toggleElementDisplay(id) {
         if (id === "findModal") {
             return;
         }
-        // When we hide a modal, set any of the text fields to empty
+        // When we hide a modal, set any of the text fields to empty. Actually I don't always want this.
         const queryString = `#${id} input[type=text]`;
         document.querySelectorAll(queryString).forEach(input => {
             input.value = "";
@@ -2824,17 +2879,6 @@ function createTree(tree = {}) {
     return treeWrapper;
 }
 
-//not optimal, but it works
-function getMixedCaseKey(object, lowercaseKey) {
-    const keys = Object.keys(object);
-    for (let i = 0; i < keys.length; i++) {
-        if (keys[i].toLowerCase() === lowercaseKey) {
-            return keys[i];
-        }
-    }
-    throw new Error(`key "${lowercaseKey}" not found in object.`);
-}
-
 /**
  * Return true if this TreeWrapper can be moved, otherwise return false;
  * @return {boolean}
@@ -3074,6 +3118,36 @@ function getType(obj) {
     return JSON.parse(JSON.stringify(oldObject));
 }
 
+/**
+ * @return {Array} - contains all of the object types that exist in the graph.
+ */
+function getExistingObjectTypes() {
+    const objects = [];
+    Object.values(gTree.tree).forEach(obj => {
+        const objectType = obj.object;
+        if (objectType != null && !objects.includes(objectType)) objects.push(objectType);
+    });
+    return objects;
+}
+
+function makeTableDraggable(table) {
+    if (window.jQuery != null) {
+        table.style.left = "50vw";
+        $(table).draggable();
+    }
+}
+
+//not optimal, but it works
+function getMixedCaseKey(object, lowercaseKey) {
+    const keys = Object.keys(object);
+    for (let i = 0; i < keys.length; i++) {
+        if (keys[i].toLowerCase() === lowercaseKey) {
+            return keys[i];
+        }
+    }
+    throw new Error(`key "${lowercaseKey}" not found in object.`);
+}
+
 /* Private utility methods */
 
 /**
@@ -3105,7 +3179,6 @@ function isConfigurationNode(obj) {
 }
 
 /**
- * TODO: add unit tests
  * Return a generator that will provide the longitude and latitude for an object.
  * 
  * @param {number} initX - the longitude of the top left corner of the square.
@@ -3140,10 +3213,114 @@ function * getCoordinates(initX, initY, spacing) {
         }
     }
 }
+//**************************************************
+// Opacity interface
+//**************************************************
 
+const opacityManagerPrototype = {
+    
+    buildOpacityModal() {
+        const opacityModal = document.getElementById("opacityModal");
+        const tableDiv = opacityModal.children[0].children[0];
+        Array.from(tableDiv.children).forEach(child => {
+            child.parentElement.removeChild(child);
+        });
+        const table = document.createElement("table");
+        const titleRow = document.createElement("tr");
+        ["Object", "Opacity"].forEach(str => {
+            const td = document.createElement("td");
+            td.classList.add("fullPadded");
+            td.style = "text-align: center;";
+            td.textContent = str;
+            titleRow.append(td);
+        });
+        table.append(titleRow);
+        const keys = Object.keys(this).map(key => key.toLowerCase()).sort();
+        keys.forEach(key => {
+            const tr = document.createElement("tr");
+            let td = document.createElement("td");
+            td.classList.add("fullPadded");
+            const name = this[key] != null ? key : getMixedCaseKey(this, key);
+            td.textContent = name;
+            tr.append(td);
+            td = document.createElement("td");
+            td.classList.add("fullPadded");
+            const input = document.createElement("input");
+            input.classList.add("modalInput");
+            const that = this;
+            input.addEventListener("change", function() {
+                that.setOpacity({className: name, input: this});
+            });
+            input.value = this[name];
+            td.append(input);
+            tr.append(td);
+            table.append(tr);
+        });
+        tableDiv.append(table);
+        opacityModal.removeAttribute("style");
+        if (window.jQuery != null) {
+            $("#opacityModal .modalContent").draggable();
+        }
+    },
+
+    /**
+     * TODO: Some lines are styled based on the "line" tag, not a class. I can't search the selector text for a class name every time. Either I have to decide how to search for the cssRule depending on what element's opacity is being changed, or I have to change the svg styling to style every object based on its class to be consistent. Actually, I must change the svg styling. What if I only want to style one particular kind of circle? I can't do that if there is only one circle rule being applied. And I don't want to dynamically add rules, so I should just hard-code everything and then look everything up by class.
+     */
+    setOpacity({className, input, value=null}) {
+        let opacity;
+        if (input != null) {
+            opacity = input.value;
+        } else if (value != null) {
+            opacity = value;
+        }
+        if (isNumberString(opacity)) {
+            opacity = parseFloat(opacity);
+            if (opacity < 0 || opacity > 1) {
+                alert("The opacity value must be between 0 and 1, inclusive.");
+                input.value = this[className];
+                return;
+            }
+        } else {
+            alert("Please enter a valid number between 0 and 1, inclusive.");
+            input.value = this[className];
+            return;
+        }
+        this[className] = opacity; //record the opacity in the gOpacityManager for the case of adding new elements. Actually I don't need to record it since I'm modifying the actual stylesheet
+
+        const cssRules = document.styleSheets[0].cssRules;
+        const key = Object.keys(cssRules).find(key => {
+            cssRules[key].style.selectorText = `.${className}`;
+        });
+        //const oldRule = cssRules[key].style.?
+        //const elements = document.getElementsByClassName(className);
+        //Array.from(elements).forEach(e => {
+        //    e.style
+        //    e.style.opacity = opacity;
+        //});
+    },
+
+    reset() {
+        Object.keys(this).forEach(key => {
+            this[key] = 1.0;
+            this.setOpacity({className: key, value: "1.0"});
+        });
+        Array.from(document.getElementById("opacityModal").getElementsByTagName("INPUT")).forEach(input => {
+            input.value = 1.0;
+        });
+    }
+};
+
+function createOpacityManager() {
+    const om = Object.create(opacityManagerPrototype);
+    getExistingObjectTypes().forEach(objectType => {
+        om[objectType] = 1.0;
+    });
+    return om;
+}
 //**************************************************
 // SVG interface
 //**************************************************
+
 
 const circlePrototype = {
     /**
@@ -3187,9 +3364,8 @@ function createCircle(nodeKey) {
     if (typeof lon !== "number") throw new Error(`'longitude' must be a number.`);
     const lat = node.latitude;
     if (typeof lat !== "number") throw new Error(`'latitude' must be a number.`);
-    circle.cx = (lon - gMinLon) * gDrawScaleFactor;// lon isn't reversed so it's fine
+    circle.cx = (lon - gMinLon) * gDrawScaleFactor;
     circle.cy = (gMaxLat - lat) * gDrawScaleFactor;
-    //circle.cy = (lat - gOffsetY) * gDrawScaleFactor;
     return circle;
 }
 
@@ -3661,7 +3837,10 @@ function createSelectionTable(ids, tree) {
     const tBody = document.createElement("tbody"); 
 
     const titleRow = createRow({key: "Selected Elements"});
-    Array.from(titleRow.self.children).forEach(td => { td.classList.add("tableTitle") });
+    Array.from(titleRow.self.children).forEach(td => { 
+        td.classList.add("tableTitle");
+        td.classList.add("fullPadded");
+    });
     titleRow.self.children[1].setAttribute("colspan", "2");
     titleRow.self.children[2].remove();
 
@@ -3675,6 +3854,7 @@ function createSelectionTable(ids, tree) {
     buttonRow.classList.add("buttonRow");
     const buttonCell = document.createElement("td");
     buttonCell.setAttribute("colspan", "3");
+    buttonCell.classList.add("fullPadded");
     buttonCell.append(getTableButton("move", function() {
         destroyTables(["descriptionTables"]);
         attachMoveListener(gSelection.getKeys());
@@ -3688,12 +3868,12 @@ function createSelectionTable(ids, tree) {
         let name = obj.name != null ? obj.name : obj.object != null ? obj.object : Object.keys(obj)[0];
         const button = getTableButton("view", getDisplayTableFunction(id));
         let row = createRow({key: name, value: button, deletable: true}, document.getElementById(id));
+        Array.from(row.self.children).forEach(td => {
+            td.classList.add("fullPadded");
+        });
         tBody.append(row.self);
     });
-    if (window.jQuery != null) {
-        table.style.left = "50vw";
-        $(table).draggable();
-    }
+    makeTableDraggable(table);
     return table;
 }
 
@@ -3742,6 +3922,7 @@ function createDescriptionTable(id) {
     const buttonRow = document.createElement("tr");
     buttonRow.classList.add("buttonRow");
     const buttonCell = document.createElement("td");
+    buttonCell.classList.add("fullPadded");
     buttonCell.setAttribute("colspan", "3");
     buttonRow.append(buttonCell);
     // duplicate
@@ -3771,10 +3952,14 @@ function createDescriptionTable(id) {
             row = createRow({key: key, tObject: tObject});
             Array.from(row.self.children).forEach(td => {
                 td.classList.add("tableTitle");
+                td.classList.add("fullPadded");
             });
             tHead.append(row.self);
         } else {
             row = createRow({key: key, deletable: true, tObject: tObject});
+            Array.from(row.self.children).forEach(td => {
+                td.classList.add("fullPadded");
+            });
             tBody.appendChild(row.self);
         }
     });
@@ -3785,10 +3970,7 @@ function createDescriptionTable(id) {
     //});
     //tHead.append(row.self);
     //Display key
-    if (window.jQuery != null) {
-        table.style.left = "50vw";
-        $(table).draggable();
-    }
+    makeTableDraggable(table);
     return form;
 }
 
@@ -4229,6 +4411,7 @@ function createInterface() {
     insertCoordinates(objects, gMinLon, gMaxLat, (1000/gDrawScaleFactor) * .005);
     //insertCoordinates(objects, gMinLon, gOffsetY, (1000/gDrawScaleFactor) * .005);
     gSelection = createSelection();
+    gOpacityManager = createOpacityManager();
     gViewport = document.getElementsByClassName('svg-pan-zoom_viewport')[0];
     createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
 }
@@ -4241,13 +4424,24 @@ function initializeJQuery() {
     }
 }
 
+function initializeFindModal() {
+    const searchInput = document.getElementById("searchInput");
+    searchInput.addEventListener("change", searchTerm);
+    document.getElementById("searchExactString").addEventListener("change", function() {
+        searchTerm.call(searchInput);
+    });
+    document.getElementById("searchSubstring").addEventListener("change", function() {
+        searchTerm.call(searchInput);
+    });
+}
+
 (function initialize() {
     createInterface();
     attachHandlers();
     initializeJQuery();
     attachMouseListeners();
     attachKeyListener();
-    document.getElementById("searchInput").addEventListener("change", getSearchResults);
+    initializeFindModal();
     document.getElementById('loadingMessage').style.display = 'none'
 })();
 
