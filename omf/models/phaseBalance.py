@@ -21,10 +21,21 @@ modelName, template = metadata(__file__)
 tooltip = "Calculate phase unbalance and determine mitigation options."
 hidden = True
 
+def _addCollectors(tree, modelDir):
+	max_key = int(max(tree, key=int))
+	tree[str(max_key+1)] = {'property': 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)', 'object': 'collector', 'group': 'class=transformer', 'limit': '0', 'file': modelDir+'/ZlossesTransformer.csv'}
+	tree[str(max_key+2)] = {'property': 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)', 'object': 'collector', 'group': 'class=underground_line', 'limit': '0', 'file': modelDir+'/ZlossesUnderground.csv'}
+	tree[str(max_key+3)] = {'property': 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)', 'object': 'collector', 'group': 'class=overhead_line', 'limit': '0', 'file': modelDir+'/ZlossesOverhead.csv'}
+	tree[str(max_key+4)] = {'property': 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)', 'object': 'collector', 'group': 'class=triplex_line', 'limit': '0', 'file': modelDir+'/ZlossesTriplex.csv'}
+	tree[str(max_key+5)] = {'property': 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)', 'object': 'collector', 'group': 'class=inverter', 'limit': '0', 'file': modelDir+'/distributedGen.csv'}
+	tree[str(max_key+6)] = {'property': 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)', 'object': 'collector', 'group': 'class=load', 'limit': '0', 'file': modelDir+'/loads.csv'}
+	return tree
+
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	outData = {}
 	# feederName = inputDict["feederName1"]
+	print(os.listdir(modelDir))
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict["feederName1"] = feederName
 	# Create voltage drop plot.
@@ -32,6 +43,11 @@ def work(modelDir, inputDict):
 	omd = json.load(open(pJoin(modelDir,feederName + '.omd')))
 	tree = omd['tree']
 	# TODO: modify tree to add MPUPV collectors.
+	tree = _addCollectors(tree, modelDir)
+	with open(modelDir + '/withCollectors.glm', 'w') as collFile:
+		treeString = feeder.sortedWrite(tree)
+		collFile.write(treeString)
+		# json.dump(tree, f1, indent=4)
 	if inputDict.get("layoutAlgorithm", "geospatial") == "geospatial":
 		neato = False
 	else:
@@ -63,7 +79,8 @@ def work(modelDir, inputDict):
 		customColormapValue = False
 	# chart = voltPlot(omd, workDir=modelDir, neatoLayout=neato)
 	chart = drawPlot(
-		pJoin(modelDir,feederName + ".omd"),
+		pJoin(modelDir, "withCollectors.glm"),
+		workDir = modelDir,
 		neatoLayout = neato,
 		edgeCol = edgeColValue,
 		nodeCol = nodeColValue,
@@ -462,24 +479,29 @@ def new(modelDir):
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
 		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
+		# shutil.copyfile(pJoin(__neoMetaModel__._omfDir, 'scratch', 'MPUPV', 'testResult.omd'), pJoin(modelDir, 'R1-12.47-1-solar_collectors.omd'))
+		#temp_omd = json.load(open(pJoin(modelDir, defaultInputs["feederName1"]+'.omd')))
+		#temp_omd['tree'] = _addCollectors(temp_omd['tree'])
+		#with open(pJoin(modelDir, defaultInputs["feederName1"]+'.omd', 'w+')) as outfile:
+		#	json.dump(temp_omd, outfile)
 	except:
 		return False
 	return creationCode
 
-def _testingPlot():
-	PREFIX = omf.omfDir + '/scratch/CIGAR/'
-	# FNAME = 'test_base_R4-25.00-1.glm_CLEAN.glm'
-	FNAME = 'test_Exercise_4_2_1.glm'
-	# FNAME = 'test_ieee37node.glm'
-	# FNAME = 'test_ieee123nodeBetter.glm'
-	# FNAME = 'test_large-R5-35.00-1.glm_CLEAN.glm'
-	# FNAME = 'test_medium-R4-12.47-1.glm_CLEAN.glm'
-	# FNAME = 'test_smsSingle.glm'
-	# Hack: Agg backend doesn't work for interactivity. Switch to something we can use:
-	# plt.switch_backend('MacOSX')
-	chart = drawPlot(PREFIX + FNAME, neatoLayout=True, edgeCol="PercentOfRating", nodeCol="perUnitVoltage", nodeLabs="Value", edgeLabs="Name", customColormap=True, rezSqIn=225)
-	chart.savefig(PREFIX + "YO_WHATS_GOING_ON.png")
-	# plt.show()
+# def _testingPlot():
+# 	PREFIX = omf.omfDir + '/scratch/CIGAR/'
+# 	# FNAME = 'test_base_R4-25.00-1.glm_CLEAN.glm'
+# 	FNAME = 'test_Exercise_4_2_1.glm'
+# 	# FNAME = 'test_ieee37node.glm'
+# 	# FNAME = 'test_ieee123nodeBetter.glm'
+# 	# FNAME = 'test_large-R5-35.00-1.glm_CLEAN.glm'
+# 	# FNAME = 'test_medium-R4-12.47-1.glm_CLEAN.glm'
+# 	# FNAME = 'test_smsSingle.glm'
+# 	# Hack: Agg backend doesn't work for interactivity. Switch to something we can use:
+# 	# plt.switch_backend('MacOSX')
+# 	chart = drawPlot(PREFIX + FNAME, neatoLayout=True, edgeCol="PercentOfRating", nodeCol="perUnitVoltage", nodeLabs="Value", edgeLabs="Name", customColormap=True, rezSqIn=225)
+# 	chart.savefig(PREFIX + "YO_WHATS_GOING_ON.png")
+# 	# plt.show()
 
 def _debugging():
 	# Location
