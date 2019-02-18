@@ -1,4 +1,3 @@
-''' Graph the voltage drop on a feeder. '''
 
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math, warnings
 import traceback
@@ -144,7 +143,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 		workDir = tempfile.mkdtemp()
 		# print '@@@@@@', workDir
 		workDir='/Users/tuomastalvitie/omf/omf/scratch/gridballastVoltReg'
-	gridlabOut = omf.solvers.gridlabd_gridballast.runInFilesystem(tree, attachments=attachments, workDir='/Users/tuomastalvitie/omf/omf/scratch/gridballastVoltReg')
+	gridlabOut = omf.solvers.gridlabd_gridballast.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 	# read voltDump values into a dictionary.
 	try:
 		dumpFile = open(pJoin(workDir,'voltDump.csv'),'r')
