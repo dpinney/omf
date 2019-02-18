@@ -208,10 +208,10 @@ def _debugging(filePath, gb_on_off='on', area=500):
 	offendersGen = ListOffenders(name_volt_dict)
 	writeResults(offendersGen)
 	# Open Distnetviz on glm
-	omf.distNetViz.viz('outGLM_rooftop.glm') #or model.omd
+	# omf.distNetViz.viz('outGLM_rooftop.glm') #or model.omd
 
 	# Remove Feeder
-	os.remove('outGLM_rooftop.glm')
+	# os.remove('outGLM_rooftop.glm')
 
 	# Visualize Voltage Regulation
 	# chart = drawPlot('outGLMtest.glm', neatoLayout=True, edgeCol="PercentOfRating", nodeCol="perUnitVoltage", nodeLabs="Value", edgeLabs="Name", customColormap=True, rezSqIn=225, gldBinary=omf.omfDir + '/solvers/gridlabd_gridballast/local_gd/bin/gridlabd')
