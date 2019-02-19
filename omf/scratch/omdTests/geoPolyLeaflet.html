@@ -8,6 +8,7 @@
         crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js" integrity="sha512-A7vV8IFfih/D732iSSKi20u/ooOfj/AGehOKq0f4vLT1Zr2Y+RX7C+w8A1gaSasGtRUZpF/NZgzSAu4/Gc41Lg=="
         crossorigin=""></script>
+	<script src="http://d3js.org/d3.v3.min.js"></script>
 
 </head>
     <style>html, body {width: 100%;height: 100%;margin: 0;padding: 0;}</style>
@@ -32,85 +33,63 @@
     L.tileLayer(
         'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; ' + mapLink + ' Contributors',
-        maxZoom: 19,
+        maxZoom: 20,
         }).addTo(map);
 
-	var geojsonFeature =         {
-            "geometry": {
-                "type": "Polygon",
-                "coordinates": [
-                    [
-                        [
-                            -102.760604009, 
-                            32.9843809426
-                        ], 
-                        [
-                            -102.76609364, 
-                            32.9901693245
-                        ], 
-                        [
-                            -102.766121258, 
-                            32.9937840628
-                        ], 
-                        [
-                            -102.765309877, 
-                            32.994528831
-                        ], 
-                        [
-                            -102.764977824, 
-                            32.9947622297
-                        ], 
-                        [
-                            -102.764548289, 
-                            32.9949471776
-                        ], 
-                        [
-                            -102.764348971, 
-                            32.9949633275
-                        ], 
-                        [
-                            -102.763707165, 
-                            32.9949645992
-                        ], 
-                        [
-                            -102.758070897, 
-                            32.9920440787
-                        ], 
-                        [
-                            -102.75788664, 
-                            32.9915535774
-                        ], 
-                        [
-                            -102.757727066, 
-                            32.9910217219
-                        ], 
-                        [
-                            -102.75772352, 
-                            32.9885385608
-                        ], 
-                        [
-                            -102.757772351, 
-                            32.9878462876
-                        ], 
-                        [
-                            -102.757886333, 
-                            32.9872055448
-                        ], 
-                        [
-                            -102.757898195, 
-                            32.987184253
-                        ], 
-                        [
-                            -102.760604009, 
-                            32.9843809426
-                        ]
-                    ]
-                ]
-            }, 
-            "type": "Feature"
-        }
-    console.log(geojsonFeature);
-    L.geoJSON(geojsonFeature).addTo(map);
+	function onEachFeature(feature, layer) {
+		//console.log(feature);
+		var popupContent = '';
+		for (const key in feature.properties) {
+			if (feature.properties.hasOwnProperty(key)) {
+				popupContent += feature.properties[key];
+				layer.bindPopup(popupContent);
+			}
+		}
+	}
+	function pointToLayerNode(feature, latlng) {
+		return L.circleMarker(latlng, {
+			radius: 8,
+			fillColor: feature.properties['pointColor'],
+			color: "#000",
+			weight: 1,
+			opacity: 1,
+			fillOpacity: 0.8
+		});
+	}
+
+	function lineStyle(feature){
+		return {
+			"color": feature.properties.edgeColor
+		}
+	}
+
+	d3.json('geoPointsLines.json', function(d){
+		d.features.forEach(function(feature){
+			if (feature.geometry['type'] == 'Point'){
+				//L.geoJSON(feature.geometry).addTo(map);
+				L.geoJSON(feature, {
+					pointToLayer: pointToLayerNode,
+					onEachFeature: onEachFeature
+				}).addTo(map);
+			}
+
+			else if (feature.geometry['type'] == 'LineString'){
+				//console.log(feature.geometry);
+				L.geoJSON(feature, {
+					style: lineStyle,
+					onEachFeature: onEachFeature
+				}).addTo(map);
+			}
+		});
+	});
+	d3.json('convexHull.json', function(d){
+		d.features.forEach(function(feature){
+			if (feature.geometry['type'] == 'Polygon'){
+				//L.geoJSON(feature.geometry).addTo(map);
+				L.geoJSON(feature).addTo(map);
+			}
+		});
+	});
 
 </script>
 </body>

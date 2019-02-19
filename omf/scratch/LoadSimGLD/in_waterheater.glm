@@ -1,0 +1,47 @@
+clock {
+	timezone EST5;
+	starttime '2012-01-01 12:00:00';
+	stoptime '2012-01-01 15:00:00';
+};
+
+#include "inc_super_schedules.glm";
+#set minimum_timestep=60;
+#set relax_naming_rules=1;
+module generators;
+module tape;
+
+module residential {
+	implicit_enduses NONE;
+};
+
+module powerflow {
+	solver_method FBS;
+	NR_iteration_limit 50;
+};
+
+module climate;
+
+module residential;
+
+object climate {
+	name Climate;
+	interpolate QUADRATIC;
+	tmyfile inc_climate.tmy2;
+};
+
+
+object waterheater {
+	schedule_skew -1057.71751704;
+	tank_volume 50;
+	name waterHeater_house0;
+	parent house0;
+	heating_element_capacity 4.5 kW;
+	thermostat_deadband 7.8;
+	location INSIDE;
+	demand large_6*0.99;
+	tank_setpoint 132.7;
+	tank_UA 3.7;
+	temperature 132;
+};
+
+//TODO: insert recorder.
