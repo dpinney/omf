@@ -78,7 +78,8 @@
             }
 
 			/* Load Spinner */
-
+            /* What is this used for? Nothing is using the .loader class. Can I delete this? Comment it out for now. If no one complains, delete it later on */
+            /*
 			.loader {
 				margin: 60px auto;
 				font-size: 10px;
@@ -120,6 +121,7 @@
 					transform: rotate(360deg);
 				}
 			}
+            */
 
             /**************************************************
             // Header and menu links
@@ -272,6 +274,9 @@
 			}
             .right {
                 float: right;
+            }
+            .centered {
+                text-align: center;
             }
             .modalInput {
                 font-size: medium;
@@ -453,62 +458,18 @@
 
             /* SVG Styling */
 
-            line { stroke:black; }
-            line.parentChild { stroke:LightGrey; }
-            /*circle { stroke:white; fill:gray; }*/
-
-            /* Circles with stroke (border) */
-
-            circle { 
-                stroke:rgba(255, 255, 255, 1);
-                fill:rgba(128, 128, 128, 1); 
+            line { stroke: rgba(0,0,0,1); } /* black */
+            line.parentChild { stroke: rgba(211,211,211,1); } /* LightGray */
+            circle {
+                stroke: rgba(255,255,255,1); /* white */
+                fill: rgba(128,128,128,1); /* gray */
             }
-            .undefined { fill: rgba(191, 191, 191, 1); }
-
-            .battery { 
-                /*stroke:rgba(255, 255, 255, 1);*/
-                fill:rgba(128, 128, 128, 1); 
-            }
-            .capacitor { 
-                /*stroke:rgba(255, 255, 255, 1);*/
-                fill:rgba(128, 128, 128, 1); 
-            }
-            .climate { fill: rgba(191, 191, 191, 1); }
-            .evcharger_det { fill:rgba(128, 128, 128, 1); }
-            .house { fill: rgba(0, 0, 255, 1); }
-            .inverter { fill:rgba(128, 128, 128, 1); } 
-            .line_configuration { fill: rgba(191, 191, 191, 1); }
-            .line_spacing { fill: rgba(191, 191, 191, 1); }
-            .load { fill:rgba(128, 128, 128, 1); }
-
-            /* Lines */
-
-            .fuse { stroke: rgba(0, 0, 0, 1); }
-            .meter
-            .meter_recorder
-            .node
-            .overhead_line { stroke: rgba(0, 0, 0, 1); }
-            .overhead_line_conductor { fill: rgba(191, 191, 191, 1); }
-            .player { fill: rgba(191, 191, 191, 1); }
-            .regulator { stroke:red; }
-            .regulator_configuration { fill: rgba(191, 191, 191, 1); }
-            .schedule { fill: rgba(191, 191, 191, 1); }
-            .solar
-            .switch
-            .transformer { stroke: orange; }
-            .transformer_configuration { fill: rgba(191, 191, 191, 1); }
-            .triplex_line
-            .triplex_line_conductor { fill: rgba(191, 191, 191, 1); }
-            .triplex_line_configuration { fill: rgba(191, 191, 191, 1); }
-            .triplex_load
-            .triplex_meter { fill: orange; }
-            .triplex_node
-            .underground_line { stroke:gray; }
-            .underground_line_conductor { fill: rgba(191, 191, 191, 1); }
-            .volt_var_control { fill: rgba(191, 191, 191, 1); }
-            .waterheater
-            .windturb_dg
-            .ZIPload {}
+            .house { fill: rgba(0,0,255,1); } /* blue */
+            .triplex_meter { fill:rgba(255,165,0,1); } /* orange */
+            .underground_line { stroke: rgba(128,128,128,1);} 
+            .transformer { stroke:rgba(255,165,0,1); }
+            .regulator { stroke: rgba(255,0,0,1) ;} /* red */
+            .undefined,.regulator_configuration,.transformer_configuration,.triplex_line_configuration,.line_configuration,.volt_var_control,.line_spacing,.climate,.overhead_line_conductor,.underground_line_conductor,.triplex_line_conductor,.player,.schedule { fill: rgba(191,191,191,1); } /* 75% lightness gray */
         </style>
         <link rel="stylesheet" href="/static/jquery-ui.min.css">
         <script type="text/javascript" src="/static/jquery.js"></script>
@@ -1072,9 +1033,9 @@
             <div id="opacityModal" class="modal" style="display: none">
                 <div class='modalContent'>
                     <div></div>
-                    <div class="fullPadded">
+                    <div class="centered fullPadded">
                         <button type="button" onclick="toggleElementDisplay('opacityModal');" class="modalButton">Close</button>
-                        <button type="button" onclick="gOpacityManager.reset();" class="right modalButton">Reset</button>
+                        <button type="button" onclick="gOpacityManager.reset();" class="modalButton">Reset</button>
                     </div>
                 </div>
             </div>
@@ -1821,8 +1782,8 @@ function addEditMenuHandlers() {
     items[7].addEventListener("click", function() { toggleElementDisplay("scadaModal"); });
     items[8].addEventListener("click", convertStaticLoadsIntoHouses);
     items[9].addEventListener("click", function() {
+        gOpacityManager.update();
         gOpacityManager.buildOpacityModal();
-        //toggleElementDisplay("opacityModal")
     });
 }
 
@@ -3213,9 +3174,12 @@ function * getCoordinates(initX, initY, spacing) {
         }
     }
 }
+
 //**************************************************
 // Opacity interface
 //**************************************************
+
+/* Not mission critical or particularly complex. It's also easy to verify if it's working correctly. Therefore, doesn't need unit tests */
 
 const opacityManagerPrototype = {
     
@@ -3227,31 +3191,39 @@ const opacityManagerPrototype = {
         });
         const table = document.createElement("table");
         const titleRow = document.createElement("tr");
-        ["Object", "Opacity"].forEach(str => {
+        ["", "Object", "Opacity"].forEach(str => {
             const td = document.createElement("td");
+            td.classList.add("centered");
             td.classList.add("fullPadded");
-            td.style = "text-align: center;";
-            td.textContent = str;
+            const h = document.createElement("h3");
+            h.textContent = str;
+            td.append(h);
             titleRow.append(td);
         });
         table.append(titleRow);
         const keys = Object.keys(this).map(key => key.toLowerCase()).sort();
         keys.forEach(key => {
+            const objectType = this[key] != null ? key : getMixedCaseKey(this, key);
             const tr = document.createElement("tr");
             let td = document.createElement("td");
             td.classList.add("fullPadded");
-            const name = this[key] != null ? key : getMixedCaseKey(this, key);
-            td.textContent = name;
+            const btn = getTableButton("Highlight", () => this.highlight(objectType));
+            td.append(btn);
+            tr.append(td);
+            td = document.createElement("td");
+            td.classList.add("fullPadded");
+            td.textContent = objectType;
             tr.append(td);
             td = document.createElement("td");
             td.classList.add("fullPadded");
             const input = document.createElement("input");
             input.classList.add("modalInput");
+            input.dataset.objecttype = objectType;
             const that = this;
             input.addEventListener("change", function() {
-                that.setOpacity({className: name, input: this});
+                that.setOpacity({className: objectType, input: this});
             });
-            input.value = this[name];
+            input.value = this[objectType];
             td.append(input);
             tr.append(td);
             table.append(tr);
@@ -3263,9 +3235,6 @@ const opacityManagerPrototype = {
         }
     },
 
-    /**
-     * TODO: Some lines are styled based on the "line" tag, not a class. I can't search the selector text for a class name every time. Either I have to decide how to search for the cssRule depending on what element's opacity is being changed, or I have to change the svg styling to style every object based on its class to be consistent. Actually, I must change the svg styling. What if I only want to style one particular kind of circle? I can't do that if there is only one circle rule being applied. And I don't want to dynamically add rules, so I should just hard-code everything and then look everything up by class.
-     */
     setOpacity({className, input, value=null}) {
         let opacity;
         if (input != null) {
@@ -3285,18 +3254,40 @@ const opacityManagerPrototype = {
             input.value = this[className];
             return;
         }
-        this[className] = opacity; //record the opacity in the gOpacityManager for the case of adding new elements. Actually I don't need to record it since I'm modifying the actual stylesheet
+        this[className] = opacity; //record the opacity in the gOpacityManager for the case of adding new elements.
+        const cssStyle = this.getNewFillOrStroke(className, opacity);
+        //cssStyle.rgba = cssStyle.rgba.replace(")", `, ${opacity})`);
+        const elements = Array.from(document.getElementsByClassName(className));
+        if (opacity === 1) {
+            elements.forEach(e => {
+                e.removeAttribute("style");
+            });
+        } else {
+            elements.forEach(e => {
+                e.style[cssStyle.target] = cssStyle.rgba;
+            });
+        }
+    },
 
-        const cssRules = document.styleSheets[0].cssRules;
-        const key = Object.keys(cssRules).find(key => {
-            cssRules[key].style.selectorText = `.${className}`;
+    highlight(className) {
+        Object.keys(this).forEach(key => {
+            if (key !== className) {
+                this[key] = 0.1;
+                this.setOpacity({className: key, value: "0.1"});
+            } else {
+                this[key] = 1;
+                this.setOpacity({className: key, value: "1"});
+            }
         });
-        //const oldRule = cssRules[key].style.?
-        //const elements = document.getElementsByClassName(className);
-        //Array.from(elements).forEach(e => {
-        //    e.style
-        //    e.style.opacity = opacity;
-        //});
+        const opacityModal = document.getElementById("opacityModal");
+        const classInput = opacityModal.querySelector(`input[data-objecttype=${className}`);
+        Array.from(opacityModal.querySelectorAll("input[data-objecttype]")).forEach(input => {
+            if (input !== classInput) {
+                input.value = 0.1;
+            } else {
+                input.value = 1;
+            }
+        }); 
     },
 
     reset() {
@@ -3304,8 +3295,61 @@ const opacityManagerPrototype = {
             this[key] = 1.0;
             this.setOpacity({className: key, value: "1.0"});
         });
-        Array.from(document.getElementById("opacityModal").getElementsByTagName("INPUT")).forEach(input => {
+        Array.from(document.getElementById("opacityModal").querySelectorAll("input[data-objecttype]")).forEach(input => {
             input.value = 1.0;
+        });
+    },
+
+    /* Private methods */
+
+    getNewFillOrStroke(className, opacity) {
+        const cssRules = document.styleSheets[0].cssRules;
+        const keys = Object.keys(cssRules);
+        let key = keys.find(key => {
+            const selectorString = cssRules[key].selectorText;
+            if (selectorString == null) return false;
+            const ary = selectorString.split(",").map(string => string.trim());
+            return ary.includes(`.${className}`);
+        });
+        if (key == null) {
+            let type;
+            try {
+                type = getType(gComponents[className]);
+            } catch (e) {
+                type = "not a line";
+            }
+            if (type === "line") {
+                key = keys.find(key => cssRules[key].selectorText === "line");
+            } else {
+                key = keys.find(key => cssRules[key].selectorText === "circle");
+            }
+        }
+        let obj = {};
+        const fill = cssRules[key].style.fill;
+        if (fill !== "") {
+            obj.target = "fill";
+            obj.rgba = fill;
+        } else {
+            obj.target = "stroke";
+            obj.rgba = cssRules[key].style.stroke;
+        }
+        obj.rgba = obj.rgba.replace(")", `, ${opacity})`);
+        return obj;
+    },
+
+    update() {
+        const existingObjects = getExistingObjectTypes();
+        existingObjects.forEach(objectType => {
+            if (this[objectType] == null) {
+                // User added a new objectType, so add it
+                this[objectType] = 1.0;
+            }
+        });
+        Object.keys(this).forEach(key => {
+            if (!existingObjects.includes(key)) {
+                // User deleted all of a previously existing objectType, so delete it
+                delete this[key];
+            }
         });
     }
 };
@@ -3338,13 +3382,16 @@ const circlePrototype = {
         if (circle.classList.contains("selected")) {
             circle.setAttribute("class", `${this.class} selected`);
         } else {
-            circle.setAttribute('class', this.class);
+            circle.setAttribute("class", this.class);
         }
-        circle.setAttribute('id', this.id);
-        circle.setAttribute('r', this.r);
-        circle.setAttribute('stroke-width', this["stroke-width"]);
-        circle.setAttribute('cx', this.cx);
-        circle.setAttribute('cy', this.cy);
+        circle.setAttribute("id", this.id);
+        circle.setAttribute("r", this.r);
+        circle.setAttribute("stroke-width", this["stroke-width"]);
+        circle.setAttribute("cx", this.cx);
+        circle.setAttribute("cy", this.cy);
+        if (this.fill != null) {
+            circle.setAttribute("style", `fill: ${this.fill}`);
+        }
     }
 };
 
@@ -3366,6 +3413,12 @@ function createCircle(nodeKey) {
     if (typeof lat !== "number") throw new Error(`'latitude' must be a number.`);
     circle.cx = (lon - gMinLon) * gDrawScaleFactor;
     circle.cy = (gMaxLat - lat) * gDrawScaleFactor;
+
+    const opacity = gOpacityManager[node.object];
+    if (opacity != null && opacity !== 1) {
+        const cssStyle = gOpacityManager.getNewFillOrStroke(node.object, opacity);
+        circle.fill = cssStyle.rgba;
+    }
     return circle;
 }
 
@@ -3394,6 +3447,9 @@ const linePrototype = {
         line.setAttribute('x2', this.x2);
         line.setAttribute('y1', this.y1);
         line.setAttribute('y2', this.y2);
+        if (this.stroke != null) {
+            line.setAttribute("style", `stroke: ${this.stroke}`);
+        }
     }
 };
 
@@ -3482,6 +3538,11 @@ function createLine(lineKey) {
             break;
         default:
             line["stroke-width"] = gScaleLevel;
+    }
+    const opacity = gOpacityManager[lineObject.object];
+    if (opacity != null && opacity !== 1) {
+        const cssStyle = gOpacityManager.getNewFillOrStroke(lineObject.object, opacity);
+        line.stroke = cssStyle.rgba;
     }
     return line;
 }
@@ -4000,16 +4061,15 @@ const buttonPrototype = {
             createSvgData([key]).delete(gViewport);
             rebuildSelectionTable();
         } else {
-            let msg = "";
+            let msg = `If you click "ok", you will delete this object and all of its connected children and/or lines. `;
             const children = gTree.treeMap.getChildKeys(key);
             if (children != null) {
-                msg += `Cannot delete object named "${gTree.getObject(key).name}" because it has children: "${children.join(", ")}". `;
+                msg += `Do you want to delete "${gTree.getObject(key).name}" and its children: "${children.join(", ")}"? `;
             }
             const lines = gTree.treeMap.getLineKeys(key);
             if (lines != null) {
-                msg += `Cannot delete object named "${gTree.getObject(key).name}" because it has connected lines: "${lines.join(", ")}". `;
+                msg += `Do you want to delete "${gTree.getObject(key).name}" and its lines: "${lines.join(", ")}"?`;
             }
-            msg += "Do you want to delete this object and all of its immediately connected objects?";
             if (confirm(msg)) {
                 const keys = gTree.getSubtreeToDelete(key);
                 keys.push(key);
