@@ -94,7 +94,7 @@ def rollingDylanForecast(rawData, upBound, lowBound):
 	"""
 
 
-def nextDayPeakKatrinaForecast(rawData, startDate, modelDir):
+def nextDayPeakKatrinaForecast(rawData, startDate, modelDir, params):
 	"""
 	This model takes the inputs rawData, a dataset that holds hourly values in two columns with no indexes
 	The first column rawData[:][0] holds the hourly demand
