@@ -19,8 +19,8 @@ from omf.solvers import gridlabd
 
 # Model metadata:
 modelName, template = metadata(__file__)
-tooltip = ('The derInterconnection model runs the key modeling and analysis steps involved '
-	'in a DER Impact Study including Load Flow, Short Circuit, '
+tooltip = ('The derInterconnection model runs the key modelling and analysis steps involved '
+	'in a DER Impact Study including Load Flow computations, Short Circuit analysis, '
 	'and Effective Grounding screenings.')
 #hidden = True
 
@@ -168,7 +168,7 @@ def work(modelDir, inputDict):
 	faultStepUp = [[] for i in range(2*len(faults))]
 	faultCurrentViolations = []
 	faultCurrentThreshold = float(inputDict['faultCurrentThreshold'])
-	faultPOIVolts = [[] for i in range(2*len(faults))]
+	faultPOIVolts = []
 	faultVoltsThreshold = float(inputDict['faultVoltsThreshold'])
 
 	# run analysis for both load conditions
@@ -336,10 +336,10 @@ def work(modelDir, inputDict):
 						preFaultval = data['nodeVolts'][poi]
 						postFaultVal = faultVolts[poi]
 						percentChange = 100*(postFaultVal/preFaultval)
-						faultPOIVolts[faultIndex] = ['Der '+ der + ' ' + \
+						faultPOIVolts.append(['Der '+ der + ' ' + \
 							loadCondition + ' Load', poi, faultType, preFaultval,\
 								postFaultVal, percentChange, \
-								(percentChange>=faultVoltsThreshold)]
+								(percentChange>=faultVoltsThreshold)])
 
 					# get fault current values at the transformer when 
 					# the fault is at the transformer
@@ -368,8 +368,8 @@ def work(modelDir, inputDict):
 							else:
 								percentChange = 100*(difference/preFaultval)
 
-							content = [faultLocation, faultType, key, \
-								preFaultval, postFaultVal, difference, \
+							content = [loadCondition, faultLocation, faultType, key, \
+								preFaultval, postFaultVal, percentChange, \
 								(percentChange>=faultCurrentThreshold)]
 							faultCurrentViolations.append(content)
 

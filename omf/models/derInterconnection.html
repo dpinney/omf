@@ -194,12 +194,6 @@
 				<input type="text" id="newGeneration" name="newGeneration" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Added System Insolation (W/sf)
-					<span class="classic">Insolation of the added solar generation between 0 and 1000 W per sq ft</span>
-				</label>
-				<input type="text" id="newGenerationInsolation" name="newGenerationInsolation" required="required"/>
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">Generation Step-up Transformer Name
 					<span class="classic">Name of the step-up transformer at the added generation</span>
 				</label>
@@ -210,6 +204,12 @@
 					<span class="classic">Name of the breaker at the added generation</span>
 				</label>
 				<input type="text" id="newGenerationBreaker" name="newGenerationBreaker" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Added System Insolation (W/sf)
+					<span class="classic">Insolation of the added solar generation between 0 and 1000 W per sq ft</span>
+				</label>
+				<input type="text" id="newGenerationInsolation" name="newGenerationInsolation" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Max Thermal loading(&percnt;)
@@ -666,9 +666,9 @@
 				var content = ''; var totalContent = '';
 				for (var i = 0; i<faultBreaker.length; i++) {
 					content = '<td>' + faultBreaker[i][0] + '</td><td>' + 
-						faultBreaker[i][1] + '</td><td>' + faultBreaker[i][2] + 
-						'</td><td>' + faultBreaker[i][3] + '</td><td>' + 
-						faultBreaker[i][4] + '</td>';
+						faultBreaker[i][1] + '</td><td>' + faultBreaker[i][2].toFixed(2) + 
+						'</td><td>' + faultBreaker[i][3].toFixed(2) + '</td><td>' + 
+						faultBreaker[i][4].toFixed(2) + '</td>';
 					content = '<tr>' + content + '</tr>';
 					totalContent += content;
 				}
@@ -691,9 +691,9 @@
 				var content = ''; var totalContent = '';
 				for (var i = 0; i<faultStepUp.length; i++) {
 					content = '<td>' + faultStepUp[i][0] + '</td><td>' + 
-						faultStepUp[i][1] + '</td><td>' + faultStepUp[i][2] + 
-						'</td><td>' + faultStepUp[i][3] + '</td><td>' + 
-						faultStepUp[i][4] + '</td>';
+						faultStepUp[i][1] + '</td><td>' + faultStepUp[i][2].toFixed(2) + 
+						'</td><td>' + faultStepUp[i][3].toFixed(2) + '</td><td>' + 
+						faultStepUp[i][4].toFixed(2) + '</td>';
 					content = '<tr>' + content + '</tr>';
 					totalContent += content;
 				}
@@ -704,19 +704,20 @@
 		<p class="reportTitle" style="page-break-before:always">Fault Current Violations with DER On</p>
 		<div class="content tableContainer">
 			<table id="faultCurrentViolations">
-			<tr> <th>Fault Location</th> <th>Fault Type</th> <th>Measurement Location</th> <th>Pre-fault Current</th> <th>Post-fault Current</th> <th>Absolute Difference</th> </tr>
+			<tr> <th>Load Condition</th> <th>Fault Location</th> <th>Fault Type</th> <th>Measurement Location</th> <th>Pre-fault Current</th> <th>Post-fault Current</th> <th>&percnt; Change</th> </tr>
 			</table>
 			<script type="text/javascript">
 				var faultCurrentViolations=allOutputData['faultCurrentViolations'];
 				var content = ''; var totalContent = '';
 				for (var i = 0; i<faultCurrentViolations.length; i++) {
 					content = '<td>' + faultCurrentViolations[i][0] + '</td><td>' +
-						faultCurrentViolations[i][1] + '</td><td>' + 
+						faultCurrentViolations[i][1] + '</td><td>' +
 						faultCurrentViolations[i][2] + '</td><td>' + 
 						faultCurrentViolations[i][3] + '</td><td>' + 
-						faultCurrentViolations[i][4] + '</td><td>' + 
-						faultCurrentViolations[i][5] + '</td>';
-					if (faultCurrentViolations[i][6] == true)
+						faultCurrentViolations[i][4].toFixed(2) + '</td><td>' + 
+						faultCurrentViolations[i][5].toFixed(2) + '</td><td>' + 
+						faultCurrentViolations[i][6].toFixed(2) + '</td>';
+					if (faultCurrentViolations[i][7] == true)
 						content = '<tr style=\"color: red\">' + content + '</tr>';
 					else content = '<tr>' + content + '</tr>';
 					totalContent += content;
@@ -739,9 +740,9 @@
 					content = '<td>' + faultPOIVolts[i][0] + '</td><td>' +
 						faultPOIVolts[i][1] + '</td><td>' + 
 						faultPOIVolts[i][2] + '</td><td>' + 
-						faultPOIVolts[i][3] + '</td><td>' + 
-						faultPOIVolts[i][4] + '</td><td>' + 
-						faultPOIVolts[i][5] + '</td>';
+						faultPOIVolts[i][3].toFixed(2) + '</td><td>' + 
+						faultPOIVolts[i][4].toFixed(2) + '</td><td>' + 
+						faultPOIVolts[i][5].toFixed(2) + '</td>';
 					if (faultPOIVolts[i][6] == true)
 						content = '<tr style=\"color: red\">' + content + '</tr>';
 					else content = '<tr>' + content + '</tr>';
