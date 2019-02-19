@@ -81,12 +81,13 @@ def new(modelDir):
 				__neoMetaModel__._omfDir,
 				"static",
 				"testFiles",
-				"loadForecastDefault.csv",
+				"ERCOT_south_shortened.csv",
 			)
 		).read(),
+		"fileName": "ERCOT_south_shortened.csv",
 		"lowBound": 500,
 		"upBound": 3550,
-		"simStartDate": "2012-04-01",
+		"simStartDate": "2002-01-01",
 		"modelType": modelName,
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)

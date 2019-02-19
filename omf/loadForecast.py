@@ -94,7 +94,7 @@ def rollingDylanForecast(rawData, upBound, lowBound):
 	"""
 
 
-def nextDayPeakKatrinaForecast(rawData, startDate, modelDir):
+def nextDayPeakKatrinaForecast(rawData, startDate, modelDir, params):
 	"""
 	This model takes the inputs rawData, a dataset that holds hourly values in two columns with no indexes
 	The first column rawData[:][0] holds the hourly demand
@@ -733,10 +733,10 @@ def pulp24hrBattery(demand, power, energy, battEff):
 	model = pulp.LpProblem("Daily demand charge minimization problem", pulp.LpMinimize)
 	VBpower = pulp.LpVariable.dicts(
 		"ChargingPower", range(24)
-	)  # decision variable of VB charging power; dim: 8760 by 1
+	)  # decision variable of VB charging power; dim: 24 by 1
 	VBenergy = pulp.LpVariable.dicts(
 		"EnergyState", range(24)
-	)  # decision variable of VB energy state; dim: 8760 by 1
+	)  # decision variable of VB energy state; dim: 24 by 1
 
 	for i in range(24):
 		VBpower[i].lowBound = -power
