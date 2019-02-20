@@ -6,10 +6,42 @@ This contains the loadForecast algorithms
 import math, pulp
 import numpy as np
 import pandas as pd
+import os
 from os.path import join as pJoin
 from datetime import datetime as dt
 from datetime import timedelta, date
 from sklearn.model_selection import GridSearchCV
+
+
+class suppress_stdout_stderr(object):
+	"""
+	A context manager for doing a "deep suppression" of stdout and stderr in
+	Python, i.e. will suppress all print, even if the print originates in a
+	compiled C/Fortran sub-function.
+	   This will not suppress raised exceptions, since exceptions are printed
+	to stderr just before a script exits, and after the context manager has
+	exited (at least, I think that is why it lets exceptions through).
+	"""
+
+	def __init__(self):
+		# Open a pair of null files
+		self.null_fds = [os.open(os.devnull, os.O_RDWR) for x in range(2)]
+		# Save the actual stdout (1) and stderr (2) file descriptors.
+		self.save_fds = (os.dup(1), os.dup(2))
+
+	def __enter__(self):
+		# Assign the null pointers to stdout and stderr.
+		os.dup2(self.null_fds[0], 1)
+		os.dup2(self.null_fds[1], 2)
+
+	def __exit__(self, *_):
+		# Re-assign the real stdout/stderr back to (1) and (2)
+		os.dup2(self.save_fds[0], 1)
+		os.dup2(self.save_fds[1], 2)
+		# Close the null files
+		os.close(self.null_fds[0])
+		os.close(self.null_fds[1])
+
 
 # source: https://www.energygps.com/HomeTools/PowerCalendar
 nercHolidays = {
@@ -158,7 +190,7 @@ def nextDayPeakKatrinaForecast(rawData, startDate, modelDir, params):
 	else:
 		size_model = GridSearchCV(SVR(), param_grid=params["peakSize"])
 
-	# get cross-validated time predictions over the full interval
+		# get cross-validated time predictions over the full interval
 	forecasted_peak_time = list(time_model._cv_predict(df=df).hour_pred)
 
 	# convert these float hour values into ISO formatted dates and times
@@ -197,7 +229,8 @@ def prophetForecast(rawData, startDate, modelDir, partitions):
 	input_df.to_csv(pJoin(modelDir, "prophetin.csv"))
 
 	# give prophet the input data
-	prophet.fit(input_df)
+	with suppress_stdout_stderr():
+		prophet.fit(input_df)
 
 	# determine partition length for the cross-validation
 	total_hours = len(input_df.ds)
