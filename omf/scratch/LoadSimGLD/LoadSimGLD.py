@@ -55,13 +55,14 @@ def workAndGraph(modelType):
 		over_sizing_factor 0.1;
 	};""")
 
-	with open('in_super_house.glm', 'w') as outFile:
+	with open('temp_super_house.glm', 'w') as outFile:
 		outFile.write(data)
 
-	os.system('gridlabd '+'in_super_house.glm')
+	os.system('gridlabd '+'temp_super_house.glm')
+	os.remove('temp_super_house.glm')
 
 	# Get the data
-	fileOb = open('out_house_power.csv')
+	fileOb = open('out_super_house.csv')
 	for x in range(8):
 		# Burn the headers.
 		fileOb.readline()
