@@ -214,7 +214,9 @@ def _debugging(filePath, gb_on_off='on', area=500):
 	# Visualize Voltage Regulation
 	voltRegViz('outGLM_rooftop.glm')
 	# 	Remove Feeder
-	# os.remove('outGLM_rooftop.glm')
+	os.remove('outGLM_rooftop.glm')
+
+	
 def voltRegViz(FNAME):
 	chart = drawPlot(FNAME, neatoLayout=True, edgeCol=False, nodeLabs=None, edgeLabs=None, nodeCol = "perUnitVoltage", customColormap=True, rezSqIn=400)
 	chart.savefig("./VOLTOUT.png")
