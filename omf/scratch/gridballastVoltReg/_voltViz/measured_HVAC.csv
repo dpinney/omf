@@ -1,0 +1,10 @@
+# file...... measured_HVAC.csv
+# date...... Fri Feb 22 11:15:53 2019
+# user...... tuomastalvitie
+# host...... (null)
+# group..... class=house
+# trigger... (none)
+# interval.. 60
+# limit..... 0
+# property.. timestamp,sum(heating_demand), sum(cooling_demand)
+2012-01-01 12:00:00 EST,+22170.5,+10872.4

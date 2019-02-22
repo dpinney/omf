@@ -9,10 +9,16 @@ import omf
 import voltageRegVisual
 import re
 from datetime import datetime
+from voltageDropVoltageViz import drawPlot
+
 
 
 def ConvertAndwork(filePath, gb_on_off='on'):
-	#Converts omd to glm, adds in necessary recorder, collector, and attributes+parameters for gridballast gld to run on waterheaters and ziploads
+	"""
+	Converts omd to glm, adds in necessary recorder, collector, and
+	attributes+parameters for gridballast gld to run on waterheaters and
+	ziploads
+	"""
 	with open(filePath, 'r') as inFile:
 		if gb_on_off == 'on':
 			gb_status = 'true'
@@ -187,9 +193,13 @@ def _debugging(filePath, gb_on_off='on'):
 	# Open Distnetviz on glm
 	omf.distNetViz.viz('outGLM.glm') #or model.omd
 	# Visualize Voltage Regulation
-	chart = voltageRegVisual.voltRegViz('outGLM.glm')
+	voltRegViz('outGLM_rooftop.glm')
 	# Remove Feeder
 	os.remove('outGLM.glm')
+def voltRegViz(FNAME):
+	chart = drawPlot(FNAME, neatoLayout=True, edgeCol=False, nodeLabs=None, edgeLabs=None, nodeCol = "perUnitVoltage", customColormap=True, rezSqIn=400)
+	chart.savefig("./VOLTOUT.png")
+	
 if __name__ == '__main__':
 	try: 
 		#Parse Command Line

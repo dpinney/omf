@@ -1,0 +1,10 @@
+# file...... out_standard_solar_roof.csv
+# date...... Fri Feb 22 11:59:58 2019
+# user...... tuomastalvitie
+# host...... (null)
+# target.... triplex_meter 8892
+# trigger... (none)
+# interval.. 60
+# limit..... 0
+# timestamp,measured_real_power
+2012-01-01 12:00:00 EST,+1328.71

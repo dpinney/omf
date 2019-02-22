@@ -8,6 +8,8 @@ import omf
 from models.voltageDrop import drawPlot
 import re
 from datetime import datetime
+from voltageDropVoltageViz import drawPlot
+
 
 
 def ConvertAndwork(filePath, gb_on_off='on', area=500):
@@ -209,13 +211,14 @@ def _debugging(filePath, gb_on_off='on', area=500):
 	writeResults(offendersGen)
 	# Open Distnetviz on glm
 	# omf.distNetViz.viz('outGLM_rooftop.glm') #or model.omd
-
-	# Remove Feeder
-	# os.remove('outGLM_rooftop.glm')
-
 	# Visualize Voltage Regulation
-	# chart = drawPlot('outGLMtest.glm', neatoLayout=True, edgeCol="PercentOfRating", nodeCol="perUnitVoltage", nodeLabs="Value", edgeLabs="Name", customColormap=True, rezSqIn=225, gldBinary=omf.omfDir + '/solvers/gridlabd_gridballast/local_gd/bin/gridlabd')
-	# chart.savefig('outGLM.png')
+	voltRegViz('outGLM_rooftop.glm')
+	# 	Remove Feeder
+	# os.remove('outGLM_rooftop.glm')
+def voltRegViz(FNAME):
+	chart = drawPlot(FNAME, neatoLayout=True, edgeCol=False, nodeLabs=None, edgeLabs=None, nodeCol = "perUnitVoltage", customColormap=True, rezSqIn=400)
+	chart.savefig("./VOLTOUT.png")
+
 if __name__ == '__main__':
 	try: 
 		#Parse Command Line

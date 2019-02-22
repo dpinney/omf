@@ -19,8 +19,8 @@ from omf.solvers import gridlabd
 
 # Model metadata:
 modelName, template = metadata(__file__)
-tooltip = ('The derInterconnection model runs the key modeling and analysis steps involved '
-	'in a DER Impact Study including Load Flow, Short Circuit, '
+tooltip = ('The derInterconnection model runs the key modelling and analysis steps involved '
+	'in a DER Impact Study including Load Flow computations, Short Circuit analysis, '
 	'and Effective Grounding screenings.')
 #hidden = True
 
@@ -147,6 +147,9 @@ def work(modelDir, inputDict):
 		insolation = 1000
 	elif insolation < 0:
 		insolation = 0
+	# cant set insolation directly but without climate object it defaults to 1000
+	# whilch is about 10x max sun output and we can set shading factor between 0 and 1
+	# to effectively control insolation
 	tree[addedDerKey]['shading_factor'] = insolation/1000
 	
 	# initialize variables
@@ -159,11 +162,13 @@ def work(modelDir, inputDict):
 	reversePowerFlow = []
 	tapViolations = []
 	tapThreshold = float(inputDict['tapThreshold'])
-	faultBreaker = [[],[],[],[]]
-	faultStepUp = [[],[],[],[]]
+	faults = ['SLG-A','SLG-B','SLG-C','TLG']
+	faultLocs = [inputDict['newGenerationBreaker'], inputDict['newGenerationStepUp']]
+	faultBreaker = [[] for i in range(2*len(faults))] # the 2 is for the 2 load conditions
+	faultStepUp = [[] for i in range(2*len(faults))]
 	faultCurrentViolations = []
 	faultCurrentThreshold = float(inputDict['faultCurrentThreshold'])
-	faultPOIVolts = [[],[],[],[]]
+	faultPOIVolts = []
 	faultVoltsThreshold = float(inputDict['faultVoltsThreshold'])
 
 	# run analysis for both load conditions
@@ -299,10 +304,11 @@ def work(modelDir, inputDict):
 							tapViolations.append(content)
 
 			#induce faults and measure fault currents
-			for faultLocation in [inputDict['newGenerationBreaker'],\
-				inputDict['newGenerationStepUp']]:
-				for faultNum, faultType in enumerate(\
-					['SLG-A','SLG-B','SLG-C','TLG']):
+			for faultLocation in faultLocs:
+				for faultNum, faultType in enumerate(faults):
+					faultIndex = faultNum
+					if loadCondition == 'Min':
+						faultIndex = faultNum + len(faults)
 
 					treeCopy =  createTreeWithFault( tree, \
 						faultType, faultLocation, startTime, stopTime )
@@ -315,41 +321,41 @@ def work(modelDir, inputDict):
 					# the fault is at the breaker
 					if faultLocation == inputDict['newGenerationBreaker']:
 						if der == 'On':
-							faultBreaker[faultNum] = [loadCondition, faultType]
-							faultBreaker[faultNum].append(\
+							faultBreaker[faultIndex] = [loadCondition, faultType]
+							faultBreaker[faultIndex].append(\
 								float(faultCurrents[\
 									inputDict['newGenerationBreaker']]))
 						else: #der off
-							faultBreaker[faultNum].append(\
+							faultBreaker[faultIndex].append(\
 								float(faultCurrents[inputDict['newGenerationBreaker']]))
-							faultBreaker[faultNum].append(\
-								faultBreaker[faultNum][2] - \
-								faultBreaker[faultNum][3])
+							faultBreaker[faultIndex].append(\
+								faultBreaker[faultIndex][2] - \
+								faultBreaker[faultIndex][3])
 
 						# get fault voltage values at POI
 						preFaultval = data['nodeVolts'][poi]
 						postFaultVal = faultVolts[poi]
 						percentChange = 100*(postFaultVal/preFaultval)
-						faultPOIVolts[faultNum] = ['Der '+ der + \
+						faultPOIVolts.append(['Der '+ der + ' ' + \
 							loadCondition + ' Load', poi, faultType, preFaultval,\
 								postFaultVal, percentChange, \
-								(percentChange>=faultVoltsThreshold)]
+								(percentChange>=faultVoltsThreshold)])
 
 					# get fault current values at the transformer when 
 					# the fault is at the transformer
 					else: #faultLocation == newGenerationStepUp
 						if der == 'On':
-							faultStepUp[faultNum] = [loadCondition, faultType]
-							faultStepUp[faultNum].append(\
+							faultStepUp[faultIndex] = [loadCondition, faultType]
+							faultStepUp[faultIndex].append(\
 								float(faultCurrents[\
 									inputDict['newGenerationStepUp']]))
 						else: #der off
-							faultStepUp[faultNum].append(\
+							faultStepUp[faultIndex].append(\
 								float(faultCurrents[inputDict[\
 									'newGenerationStepUp']]))
-							faultStepUp[faultNum].append(\
-								faultStepUp[faultNum][2] - \
-								faultStepUp[faultNum][3])
+							faultStepUp[faultIndex].append(\
+								faultStepUp[faultIndex][2] - \
+								faultStepUp[faultIndex][3])
 
 					# get fault violations when der is on
 					if der == 'On':
@@ -362,8 +368,8 @@ def work(modelDir, inputDict):
 							else:
 								percentChange = 100*(difference/preFaultval)
 
-							content = [faultLocation, faultType, key, \
-								preFaultval, postFaultVal, difference, \
+							content = [loadCondition, faultLocation, faultType, key, \
+								preFaultval, postFaultVal, percentChange, \
 								(percentChange>=faultCurrentThreshold)]
 							faultCurrentViolations.append(content)
 
@@ -450,10 +456,8 @@ def createTreeWithFault( tree, faultType, faultLocation, startTime, stopTime ):
 
 	return treeCopy
 
-
 def readGroupRecorderCSV( filename ):
 
-	# read regulator tap position values values into a single dictionary
 	dataDictionary = {}
 	with open(filename,'r') as csvFile:
 		reader = csv.reader(csvFile)
@@ -508,12 +512,10 @@ def runGridlabAndProcessData(tree, attachments, edge_bools, workDir=False):
 
 	# read line rating values into a single dictionary
 	lineRatings = {}
-	rating_in_VA = []
 	for key1 in edge_bools.keys():
 		if edge_bools[key1]:		
 			with open(pJoin(workDir,key1+'_cont_rating.csv'),'r') as ratingFile:
 				reader = csv.reader(ratingFile)
-				# loop past the header, 
 				keys = []
 				vals = []
 				for row in reader:
@@ -526,17 +528,6 @@ def runGridlabAndProcessData(tree, attachments, edge_bools, workDir=False):
 				for pos,key2 in enumerate(keys):
 					lineRatings[key2] = abs(float(vals[pos]))				
 
-	#edgeTupleRatings = lineRatings copy with to-from tuple as keys for labeling
-	edgeTupleRatings = {}
-	for edge in lineRatings:
-		for obj in tree.values():
-			if obj.get('name','').replace('"','') == edge:
-				nodeFrom = obj.get('from')
-				nodeTo = obj.get('to')
-				coord = (nodeFrom, nodeTo)
-				ratingVal = lineRatings.get(edge)
-				edgeTupleRatings[coord] = ratingVal
-
 	# Calculate average node voltage deviation. First, helper functions.
 	def digits(x):
 		''' Returns number of digits before the decimal in the float x. '''
@@ -544,44 +535,23 @@ def runGridlabAndProcessData(tree, attachments, edge_bools, workDir=False):
 	def avg(l):
 		''' Average of a list of ints or floats. '''
 		return sum(l)/len(l)
-
-	# Detect the feeder nominal voltage:
-	for key in tree:
-		ob = tree[key]
-		if type(ob)==dict and ob.get('bustype','')=='SWING':
-			feedVoltage = float(ob.get('nominal_voltage',1))
+	
 	# Tot it all up.
 	nodeVolts = {}
-	voltImbalances = {}
 	for row in voltTable:
 		allVolts = []
-		allDiffs = []
 		for phase in ['A','B','C']:
 			realVolt = abs(float(row['volt'+phase+'_real']))
 			imagVolt = abs(float(row['volt'+phase+'_imag']))
 			phaseVolt = math.sqrt((realVolt ** 2) + (imagVolt ** 2))
 			if phaseVolt != 0.0:
-				## Normalize to 120 V standard
-				# phaseVolt = (phaseVolt/feedVoltage)
 				allVolts.append(phaseVolt)
 		avgVolts = avg(allVolts)
 		nodeVolts[row.get('node_name','')] = float("{0:.2f}".format(avgVolts))
-		if len(allVolts) == 3:
-			voltA = allVolts.pop()
-			voltB = allVolts.pop()
-			voltC = allVolts.pop()
-			allDiffs.append(abs(float(voltA-voltB)))
-			allDiffs.append(abs(float(voltA-voltC)))
-			allDiffs.append(abs(float(voltB-voltC)))
-			maxDiff = max(allDiffs)
-			voltImbal = maxDiff/avgVolts
-			voltImbalances[row.get('node_name','')] = float("{0:.2f}".format(voltImbal))
-		# Use float("{0:.2f}".format(avg(allVolts))) if displaying the node labels
+		
 	
-	nodeNames = {}
 	nominalVolts = {}
 	for key in nodeVolts.keys():
-		nodeNames[key] = key
 		for treeKey in tree:
 			ob = tree[treeKey]
 			obName = ob.get('name','')
@@ -605,15 +575,7 @@ def runGridlabAndProcessData(tree, attachments, edge_bools, workDir=False):
 
 	#edgeValsPU = current values normalized per unit by line ratings
 	edgeValsPU = {}
-	#edgeTupleCurrents = edgeCurrents copy with to-from tuple as keys for labeling
-	edgeTupleCurrents = {}
-	#edgeTupleValsPU = edgeValsPU copy with to-from tuple as keys for labeling
-	edgeTupleValsPU = {}
-	#edgeTuplePower = dict with to-from tuples as keys and sim power as values for debugging
-	edgeTuplePower = {}
 	edgePower = {}
-	#edgeTupleNames = dict with to-from tuples as keys and names as values for debugging
-	edgeTupleNames = {}
 
 	for edge in edgeCurrentSum:
 		for obj in tree.values():
@@ -621,18 +583,12 @@ def runGridlabAndProcessData(tree, attachments, edge_bools, workDir=False):
 			if obname == edge:
 				nodeFrom = obj.get('from')
 				nodeTo = obj.get('to')
-				coord = (nodeFrom, nodeTo)
 				currVal = edgeCurrentSum.get(edge)
 				voltVal = avg([nodeVolts.get(nodeFrom), nodeVolts.get(nodeTo)])
 				lineRatings[edge] = lineRatings.get(edge, 10.0**9)
 				edgePerUnitVal = (edgeCurrentMax.get(edge))/lineRatings[edge]
-				
 				edgeValsPU[edge] = edgePerUnitVal
-				edgeTupleValsPU[coord] = "{0:.2f}".format(edgePerUnitVal)
-				edgeTupleNames[coord] = edge
-				edgeTupleCurrents[coord] = "{0:.2f}".format(currVal)
 				edgePower[edge] = ((currVal * voltVal)/1000)
-				edgeTuplePower[coord] = "{0:.2f}".format(edgePower[edge])
 
 	# read regulator tap position values values into a single dictionary
 	tapPositions = {}
@@ -641,11 +597,8 @@ def runGridlabAndProcessData(tree, attachments, edge_bools, workDir=False):
 		tapPositions['tapB'] = readGroupRecorderCSV(pJoin(workDir,'tap_B.csv'))
 		tapPositions['tapC'] = readGroupRecorderCSV(pJoin(workDir,'tap_C.csv'))
 
-	return {'nodeNames':nodeNames, 'nominalVolts':nominalVolts, 'nodeVolts':nodeVolts, 'nodeVoltImbalances':voltImbalances, 
-	'edgeTupleNames':edgeTupleNames, 'edgeCurrentSum':edgeCurrentSum, 'edgeCurrentMax':edgeCurrentMax,
-	'edgeTupleCurrents':edgeTupleCurrents, 'edgePower':edgePower, 'edgeTuplePower':edgeTuplePower,
-	'edgeLineRatings':lineRatings, 'edgeTupleLineRatings':edgeTupleRatings, 'edgeValsPU':edgeValsPU, 
-	'edgeTupleValsPU':edgeTupleValsPU, 'tapPositions':tapPositions }
+	return {'nominalVolts':nominalVolts, 'nodeVolts':nodeVolts, 'edgeCurrentSum':edgeCurrentSum, 
+	'edgePower':edgePower, 'edgeValsPU':edgeValsPU, 'tapPositions':tapPositions }
 
 def drawPlot(tree, nodeDict=None, edgeDict=None, edgeLabsDict=None, displayLabs=False, customColormap=False, 
 	perUnitScale=False, rezSqIn=400, neatoLayout=False):
@@ -792,39 +745,6 @@ def new(modelDir):
 	except:
 		return False
 	return creationCode
-
-# Testing for variable combinations
-def _testAllVarCombos():
-	edgeLabsList = {None : "None", "Name" : "N", "Current" : "C", "Power" : "P", "Rating" : "R", "PercentOfRating" : "Per"}
-	nodeLabsList = {None : "None", "Name" : "N", "Voltage" : "V", "VoltageImbalance" : "VI"}
-	boolList = {True : "T", False : "F"}
-	testNum = 1
-	for edgeLabVal in edgeLabsList.keys():
-		for nodeLabVal in nodeLabsList.keys():
-			for edgeColVal in boolList.keys():
-				for nodeColVal in boolList.keys():
-					for customColormapVal in boolList.keys():
-						for perUnitScaleVal in boolList.keys():
-							testName = edgeLabsList.get(edgeLabVal) + "_" + nodeLabsList.get(nodeLabVal) + "_" + boolList.get(edgeColVal) + "_" + boolList.get(nodeColVal) + "_" + boolList.get(customColormapVal) + "_" + boolList.get(perUnitScaleVal)
-							#print testName
-							pngName = "./drawPlotTest/drawPlot_" + testName + ".png"
-							for i in range(10):
-								try:
-									chart = drawPlot(FNAME, neatoLayout=True, edgeLabs=edgeLabVal, nodeLabs=nodeLabVal, edgeCol=edgeColVal, nodeCol=nodeColVal, customColormap=customColormapVal, perUnitScale=perUnitScaleVal)
-								except IOError, e:
-									if e.errno == 2: #catch temporary IOError and retry until it passes
-										print "IOError [Errno 2] for drawPlot_" + testName + ". Retrying..."
-										continue #retry
-								except:
-									print "!!!!!!!!!!!!!!!!!! Error for drawPlot_" + testName + " !!!!!!!!!!!!!!!!!!"
-									pass
-								else:
-									chart.savefig(pngName)
-									break
-							else:
-								print "****************** Couldn't run drawPlot_" + testName + " ******************"
-							print "Test " + testNum + " of 384 completed." #384 total combinations based on current variable sets
-							testNum += 1
 
 def _testingPlot():
 	PREFIX = omf.omfDir + '/scratch/CIGAR/'
