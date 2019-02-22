@@ -35,20 +35,20 @@ def getDataNames():
 	climates = [x[:-5] for x in safeListdir("./data/Climate/")]
 	feeders = []
 	for (dirpath, dirnames, filenames) in os.walk(os.path.join(_omfDir, "data","Model", currUser)):
-		for file in filenames:
-			if file.endswith('.omd') and file != 'feeder.omd':
-				feeders.append({'name': file[:-4], 'model': dirpath.split('/')[-1]})
+		for fname in filenames:
+			if fname.endswith('.omd') and fname != 'feeder.omd':
+				feeders.append({'name': fname[:-4], 'model': dirpath.split('/')[-1]})
 	networks = []
 	for (dirpath, dirnames, filenames) in os.walk(os.path.join(_omfDir, "scratch","transmission", "outData")):
-		for file in filenames:
-			if file.endswith('.omt') and file != 'feeder.omt':
-				networks.append({'name': file[:-4], 'model': 'DRPOWER'})
+		for fname in filenames:
+			if fname.endswith('.omt') and fname != 'feeder.omt':
+				networks.append({'name': fname[:-4], 'model': 'DRPOWER'})
 	# Public feeders too.
 	publicFeeders = []
 	for (dirpath, dirnames, filenames) in os.walk(os.path.join(_omfDir, "static","publicFeeders")):
-		for file in filenames:
-			if file.endswith('.omd') and file != 'feeder.omd':
-				publicFeeders.append({'name': file[:-4], 'model': dirpath.split('/')[-1]})
+		for fname in filenames:
+			if fname.endswith('.omd') and fname != 'feeder.omd':
+				publicFeeders.append({'name': fname[:-4], 'model': dirpath.split('/')[-1]})
 	return {"climates":sorted(climates), "feeders":feeders, "networks":networks, "publicFeeders":publicFeeders, "currentUser":currUser}
 
 # @app.before_request
