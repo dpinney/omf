@@ -289,6 +289,29 @@
                 border: 0px;
                 background-color: gainsboro;
             }
+            .vertFlex {
+                display: flex;
+                flex-direction: column;
+            }
+            .legendFlex {
+                display: flex;
+                height: 40vh;
+            }
+            .legendGradiant {
+                height: 100%;
+                width: 5vw;
+            }
+            .legendAxis {
+                height: 100%;
+                margin: 0px 0px 0px 20px;
+                justify-content: space-between;
+            }
+            .legendAxis p {
+                margin: 0px;
+            }
+            .modalTableHeader {
+                margin: 20px 0px 0px 0px;
+            }
             .modalButton {
                 font-size: medium;
                 background-color: seagreen;
@@ -374,17 +397,15 @@
 
 			/* dataTable */
 
-            #descriptionTables {
+            .floatingTables {
                 position: absolute;
                 top: 0px;
-                height:0px;
+                height: 0px;
             }
 
-            #selectionTable {
-                position: absolute;
-                top: 0px;
-                height:0px;
-            }
+            #descriptionTables { }
+
+            #selectionTable { }
 
             .formContainer {
 				/*position: fixed;*/
@@ -487,8 +508,8 @@
             <div id="loadingMessage">
                 <p style="font-size:60pt; text-align:center; width:100%;">Feeder Loading...</p>
             </div>
-            <div id="descriptionTables"></div>
-            <div id="selectionTable"></div>
+            <div id="descriptionTables" class="floatingTables"></div>
+            <div id="selectionTable" class="floatingTables"></div>
             <!-- Controls -->
             <div style="top:55px;" class="divButton" onclick="window.panZoom.zoomIn()" title="Zoom In">+</div>
             <div style="top:95px;" class="divButton" onclick="window.panZoom.zoomOut()" title="Zoom Out">-</div>
@@ -547,7 +568,7 @@
                                 <li data-web>Windmil Conversion...</li>
                                 <li data-web>GridLAB-D Conversion...</li>
                                 <li data-web>CYMDIST Conversion...</li>
-                                <li>Color circuit...</li>
+                                <li>Color Circuit...</li>
                             </ul>
                         </div>
                     </div>
@@ -1051,12 +1072,15 @@
             <div id="colorModal" class="modal" style="display: none">
                 <div class="centered modalContent">
                     <h3>Color Circuit</h3>
-                    <div class="fullPadded"><input type="file" multiple class="modalInput"></div>
-                    <!--<div class="fullPadded"><input type="file" multiple accept=".csv" class="modalInput"></div>-->
-                    <div data-tableinsert></div>
-                    <div class="fullPadded"><button type="button" onclick="toggleElementDisplay('colorModal');" class="modalButton">Close</button></div>
+                    <div class="fullPadded"><input type="file" multiple accept=".csv" class="modalInput"></div>
+                    <div data-tableinsert class="leftText vertFlex fullPadded"></div>
+                    <div class="fullPadded">
+                        <button type="button" onclick="toggleElementDisplay('colorModal');" class="modalButton">Close</button>
+                        <button type="button" onclick="removeColors();"; class="modalButton">Reset</button>
+                    </div>
                 </div>
             </div>
+            <div id="colorLegends" class="floatingTables"></div>
             <!--Modals-->
         </div>
 	</body>
@@ -1064,6 +1088,12 @@
 <script id="componentsInsert">const gComponents = {% if components %}{{ components | safe }}{% else %}null{% endif %}; 
 </script>
 <script id="feederInsert">const gReadFeeder = {% if thisFeederData %}{{ thisFeederData | safe }}{% else %}null{% endif %}; 
+</script>
+<style id="jqueryCssInsert">
+</style>
+<script id="jqueryInsert">
+</script>
+<script id="jqueryUiInsert">
 </script>
 <script id="panZoomInsert">
 </script>
@@ -1093,6 +1123,7 @@ let gLatitudeRange;
 let gDrawScaleFactor;
 let gDownX;
 let gDownY;
+const gViridisColors = ["#440154FF", "#481567FF", "#482677FF", "#453781FF", "#404788FF", "#39568CFF", "#33638DFF", "#2D708EFF", "#287D8EFF", "#238A8DFF", "#1F968BFF", "#20A387FF", "#29AF7FFF", "#3CBB75FF", "#55C667FF", "#73D055FF", "#95D840FF", "#B8DE29FF", "#DCE319FF", "#FDE725FF"];
 // Scale that all SVG objects are drawn at
 let gScaleLevel = 1.0; 
 //**************************************************
@@ -1205,54 +1236,6 @@ function createViewport(tree, svgContainer) {
     let {latitude: {max: maxLat}} = minMax;
     let {longitude: {min: minLon}} = minMax;
     let {longitude: {max: maxLon}} = minMax;
-    /*
-    const keys = Object.keys(tree);
-    //scaleGraphForVisualAppearance(keys.length);
-    // Set the longitude and latitude to be within the bounds of the provided data
-    const firstKey = keys.find(key => {
-        return tree[key].longitude !== undefined && tree[key].latitude !== undefined;
-    });
-    let minLon;
-    let maxLon;
-    let minLat;
-    let maxLat;
-    if (firstKey == null) {
-        // There were no coordinates, so insert some!
-        const objects = Object.values(tree);
-        insertCoordinates(objects, 0, 0, 50);
-        scaleGraphForVisualAppearance(keys.length)
-        minLon = 0;
-        maxLon = 0;
-        minLat = 0;
-        maxLat = 0;
-    } else {
-        minLon = parseFloat(tree[firstKey].longitude);
-        maxLon = minLon;
-        minLat = parseFloat(tree[firstKey].latitude);
-        maxLat = minLat;
-    }
-    // Find the minimum and maximum longitudes and latitudes. That's not good enough. I need to find a RANGE of values for each and scale the viewport to the RANGE
-    keys.forEach(key => {
-        let lon = tree[key].longitude;
-        let lat = tree[key].latitude;
-        if (lon !== undefined && lat !== undefined) {
-            lon = parseFloat(lon);
-            lat = parseFloat(lat);
-            if (lon < minLon) {
-                minLon = lon;
-            }
-            if (lon > maxLon) {
-                maxLon = lon;
-            }
-            if (lat < minLat) {
-                minLat = lat;
-            }
-            if (lat > maxLat) {
-                maxLat = lat;
-            }
-        }
-    });
-    */ 
     /* Longitude is not reversed, so I want the minimum longitude to use as the offset. Latitude IS reversed, so I want the maximum latitude to use as the offset. */
     gLongitudeRange = maxLon - minLon;
     //gOffsetX = minLon;
@@ -1554,6 +1537,7 @@ function viewElement(key) {
     $("#massAddModal .modalContent").draggable();
     $("#massEditModal .modalContent").draggable();
     $("#attachmentsModal .modalContent").draggable();
+    $("#colorModal .modalContent").draggable();
     // Position the description table depending on whether or not it is draggable
     //document.getElementById("descriptionTable").removeAttribute("style");
     //document.getElementById("descriptionTable").style.left = "70vw";
@@ -3134,7 +3118,7 @@ function getExistingObjectTypes() {
     return objects;
 }
 
-function makeTableDraggable(table) {
+function enableDrag(table) {
     if (window.jQuery != null) {
         table.style.left = "50vw";
         $(table).draggable();
@@ -3460,28 +3444,110 @@ function createOpacityManager() {
 
 const colorMapPrototype = {
 
-    /* public methods */
+    /* Public methods */
 
     /* Doesn't need unit tests */
     color() {
-
+        const invalidNames = [];
+        Object.keys(this.colorMap).forEach(name => {
+            try {
+                const key = gTree.treeMap.getKey(name);
+                const obj = document.getElementById(key);
+                if (obj.tagName.toLowerCase() === "circle") {
+                    obj.style.fill = this.colorMap[name];
+                } else if (obj.tagName.toLowerCase() === "line") {
+                    obj.style.stroke = this.colorMap[name];
+                }
+            } catch (e) {
+                invalidNames.push(name);
+            }
+        });
+        if (invalidNames.length > 0) {
+            alert(`Unable to color the following objects because they weren't found in this graph: "${invalidNames.join(", ")}".`);
+        } else {
+            alert(`Successfully colored all objects according to the specified column "${this.title}" in the specified csv file "${this.colorFileTitle}".`);
+        }
     },
 
-    buildColorScale() {
+    appendLegend() {
+        const masterDiv = document.createElement("div");
+        masterDiv.classList.add("modalContent");
+        masterDiv.classList.add("centered");
+        masterDiv.style.border = "1px solid black";
+        masterDiv.style.alignContent = "center";
+        masterDiv.setAttribute("data-colorfile", this.colorFileTitle);
+        masterDiv.setAttribute("data-colormap", this.title);
 
-    }
+        let h = document.createElement("h2");
+        h.textContent = this.colorFileTitle;
+        masterDiv.append(h);
+
+        h = document.createElement("h3");
+        h.textContent = this.title;
+        masterDiv.append(h);
+
+        const flexbox = document.createElement("div");
+        flexbox.classList.add("legendFlex");
+        let div = document.createElement("div");
+        div.classList.add("legendGradiant");
+        div.style.background = `linear-gradient(0deg,${gViridisColors.join(",")})`;
+        flexbox.append(div);
+
+        div = document.createElement("div");
+        div.classList.add("vertFlex");
+        div.classList.add("legendAxis");
+        div.classList.add("leftText");
+        const increment = (this.max - this.min) / 7;
+        for (let i = 0; i < 8; i++) {
+            let p = document.createElement("p");
+            let val;
+            if (i === 0) {
+                val = this.min;
+            } else if (i === 7) {
+                val = this.max;
+            } else {
+                val = this.min + i * increment;
+            }
+            p.textContent = val;
+            div.prepend(p);
+        }
+        flexbox.append(div);
+        masterDiv.append(flexbox);
+
+        div = document.createElement("div");
+        div.style.margin = "20px 0px 0px 0px";
+        const button = getTableButton("Close", () => {
+            const legendDiv = document.getElementById("colorLegends");
+            const legend = legendDiv.querySelector(`div[data-colorfile='${this.colorFileTitle}'],[data-colormap='${this.title}']`);
+            legend.parentElement.removeChild(legend);
+        });
+        div.append(button);
+        masterDiv.append(div);
+        document.getElementById("colorLegends").append(masterDiv);
+        enableDrag(masterDiv);
+    },
 
     /* private methods */
-    //find min and max
+
+    /* Use the 'viridis' color map and map the min and max values to the darkest and lighest colors */
+    buildColorScale() {
+        const {min, max} = getMinMax({object: this.colorMap});
+        this.min = min;
+        this.max = max;
+        const f = chroma.scale(gViridisColors).domain([min, max]);
+        Object.keys(this.colorMap).forEach(key => {
+            this.colorMap[key] = f(this.colorMap[key]);
+        });
+        this.colorScale = f;
+    }
+
 }
 
-function createColorMap(title) {
+function createColorMap(title, colorFileName) {
     const obj = Object.create(colorMapPrototype);
+    obj.colorFileTitle = colorFileName;
     obj.title = title;
-    //obj.max;
-    //obj.min;
     obj.colorMap = {};
-    //obj.colorScale;
     return obj;
 }
 
@@ -3491,7 +3557,39 @@ const colorFilePrototype = {
 
     /* Doesn't need unit tests */
     getTable() {
-        //is this right or do I want to just build and append in one method?
+        const table = document.createElement("table");
+        let tr = document.createElement("tr");
+        let td = document.createElement("td");
+        let h = document.createElement("h4");
+        h.classList.add("modalTableHeader");
+        h.textContent = this.title;
+        td.append(h);
+        tr.append(td);
+        table.append(tr);
+        tr = document.createElement("tr");
+        td = document.createElement("td");
+        td.classList.add("fullPadded");
+        const select = document.createElement("select");
+        select.setAttribute("data-colorfile", this.title);
+        td.append(select);
+        tr.append(td);
+        table.append(tr);
+        this.colorMaps.forEach(cm => {
+            select.innerHTML += `<option value=${cm.title}>${cm.title}</option>`
+        });
+        tr = document.createElement("tr");
+        td = document.createElement("td");
+        td.classList.add("fullPadded");
+        const button = getTableButton("Color", () => {
+            const colorMapName = document.getElementById("colorModal").querySelector(`select[data-colorfile='${this.title}']`).value;//need quotes around the dataset value because of the '.' in the file name.
+            const colorMap = this.colorMaps.find(cm => cm.title === colorMapName);
+            colorMap.color();
+            colorMap.appendLegend();
+        });
+        td.append(button);
+        tr.append(td);
+        table.append(tr);
+        return table;
     },
 
     /* Private methods */
@@ -3502,41 +3600,61 @@ const colorFilePrototype = {
  * @return {ColorFile}
  */
 function createColorFile(file) {
-    const obj = Object.create(colorFilePrototype);
-    obj.colorMaps = [];
-    obj.title = file.name;
-    Papa.parse(file, {
-        dynamicTyping: true,
-        complete: function(results, file) {
-            try {
-                const headerRow = results.data[0];
-                for (let i = 1; i < headerRow.length; i++) {
-                    obj.colorMaps.push(createColorMap(headerRow[i]));
-                }
-                for (let i = 1; i < results.data.length; i++) {
-                    let row = results.data[i];
-                    for (let j = 1; j < row.length; j++) {
-                        obj.colorMaps[j - 1].colorMap[row[0]] = row[j];
+    return new Promise(function(resolve, reject) {
+        const obj = Object.create(colorFilePrototype);
+        obj.colorMaps = [];
+        obj.title = file.name;
+        Papa.parse(file, {
+            dynamicTyping: true,
+            complete: function(results, file) {
+                try {
+                    const headerRow = results.data[0];
+                    for (let i = 1; i < headerRow.length; i++) {
+                        obj.colorMaps.push(createColorMap(headerRow[i], obj.title));
                     }
+                    for (let i = 1; i < results.data.length; i++) {
+                        let row = results.data[i];
+                        for (let j = 1; j < row.length; j++) {
+                            obj.colorMaps[j - 1].colorMap[row[0]] = row[j];
+                        }
+                    }
+                    obj.colorMaps.forEach(cm => cm.buildColorScale());
+                    resolve(obj);
+                    //return obj;
+                    //console.log(obj.colorMaps[obj.colorMaps.length - 1].title);
+                    //console.log(obj.colorMaps[obj.colorMaps.length - 1].colorMap);
+                } catch (e) {
+                    reject();
+                    //return;
                 }
-                obj.colorMaps.forEach(cm => cm.buildColorScale());
-                //console.log(obj.colorMaps[obj.colorMaps.length - 1].title);
-                //console.log(obj.colorMaps[obj.colorMaps.length - 1].colorMap);
-            } catch (e) {
-                alert(`We could not parse the CSV file "${file.name}" that you provided.`);
-                return;
             }
-        }
+        });
     });
-    return obj;
 }
 
 function buildColorModal() {
-    const colorFiles = Array.from(this.files).map(file => createColorFile(file));
     const tableDiv = document.getElementById("colorModal").querySelector("div[data-tableinsert]");
-    //etc. watch out for undefined
+    while (tableDiv.firstChild) {
+        tableDiv.removeChild(tableDiv.firstChild);
+    }
+    const colorFiles = Array.from(this.files).map(async function(file) {
+        try {
+            const cf = await createColorFile(file);
+            const table = cf.getTable();
+            tableDiv.append(table);
+        } catch (e) {
+            alert(`We could not parse the CSV file "${file.name}" that you provided.`);
+        }
+    });
 }
 
+/* Doesn't need unit tests */
+function removeColors() {
+    Object.keys(gTree.tree).forEach(key => {
+        const e = document.getElementById(key);
+        e.removeAttribute("style");
+    });
+}
 
 //**************************************************
 // SVG classes
@@ -4104,7 +4222,7 @@ function createSelectionTable(ids, tree) {
         });
         tBody.append(row.self);
     });
-    makeTableDraggable(table);
+    enableDrag(table);
     return table;
 }
 
@@ -4201,7 +4319,7 @@ function createDescriptionTable(id) {
     //});
     //tHead.append(row.self);
     //Display key
-    makeTableDraggable(table);
+    enableDrag(table);
     return form;
 }
 
@@ -4646,10 +4764,12 @@ function createInterface() {
     createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
 }
 
+/* TODO: fix this since jquery is never null */
 function initializeJQuery() {
     if (window.jQuery != null) {
         applyJQueryStyles();
-    } else {
+    }
+    if (document.getElementById("panZoomInsert").textContent.trim() !== "") {
         disableJQueryFunctionality();
     }
 }
