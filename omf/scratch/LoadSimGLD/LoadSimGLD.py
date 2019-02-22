@@ -110,4 +110,4 @@ if __name__ == '__main__':
 		modelType = args.model_type
 		workAndGraph(modelType)
 	except:
-		workAndGraph('Resistance')
+		workAndGraph('HeatPump')
