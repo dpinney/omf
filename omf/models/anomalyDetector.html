@@ -61,6 +61,9 @@
 				<label>Run Time</label>
 				<input type="text" id="runTime" name="runTime" readonly/>
 			</div>
+			<div class="wideInput">
+				<p class="inputSectionHeader">Anomaly Detection Parameters</p>
+			</div>
 			<div class="shortInput">
 				<label class="tooltip">Data (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
 				<input id="inputFile" type="file" style="display:none" onchange="handle_files(this.files,'demandCurve','fileName')">
@@ -71,8 +74,16 @@
 				</div>
 			</div>
 			<div class="shortInput" >
+				<label>Dependent variable column name</label>
+				<input type="text"  id="yLabel" name="yLabel" />
+			</div>
+			<div class="shortInput" >
 				<label>Data Start Date (YYYY-MM-DD)</label>
 				<input type="text"  id="startDate" name="startDate" pattern="^\d\d\d\d-\d\d-\d\d$"/>
+			</div>
+			<div class="shortInput" >
+				<label>Confidence Level (must be &lt; 1)</label>
+				<input type="number"  id="confidence" name="confidence" min="0.5" max="1" step="any"/>
 			</div>
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
@@ -94,21 +105,18 @@
 			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
 		</script>
 	</div>
-	<p class="reportTitle postRun" style="page-break-before:always">Daily Peak Demand Forecasted Plot</p>	
-	<div id="katPlot" class="tightContent postRun">
-		<div id="katChart"></div>
+	<p class="reportTitle postRun" style="page-break-before:always">Prophet (Monovariate)</p>	
+	<div id="prophetPlot" class="tightContent postRun">
+		<div id="prophetChart"></div>
 		<script>
-			var outlierSeries = [];
-			var nonOutlierSeries = [];
+			var prophetOutliers = [];
 			var errorBars = [];
 			for (var i = 0; i < allOutputData.y.length; i++) { //casting these to Highcharts-friendly formats
-				if(allOutputData.outlier[i] == 1) {
-					outlierSeries.push(allOutputData.y[i]);
-					nonOutlierSeries.push(null);
+				if(allOutputData.prophet_outlier[i] == 1) {
+					prophetOutliers.push(allOutputData.y[i]);
 				}
 				else{
-					outlierSeries.push(null);
-					nonOutlierSeries.push(allOutputData.y[i]);
+					prophetOutliers.push(null);
 				}
 				errorBars.push({"low":allOutputData.yhat_lower[i], "high": allOutputData.yhat_upper[i]});
 			}
@@ -156,13 +164,74 @@
 						},
 						{"name":"Outliers",
 							"color":"red",
-							"data":outlierSeries,
+							"data":prophetOutliers,
 							"type": "scatter",
 						},
 					],
-					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"katChart","marginRight":20, "height":500,"width":1000},
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"prophetChart","marginRight":20, "height":500,"width":1000},
 					"tooltip":false,
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 		</script>
 	</div>
+	<p class="reportTitle postRun" style="page-break-before:always">Elliptic Envelope</p>	
+	<div id="ellipticPlot" class="tightContent postRun">
+		<div id="ellipticChart"></div>
+		<script>
+			var ellipticOutliers = [];
+			for (var i = 0; i < allOutputData.y.length; i++) { //casting these to Highcharts-friendly formats
+				if(allOutputData.elliptic_outlier[i] == 1) {
+					ellipticOutliers.push(allOutputData.y[i]);
+				}
+				else{
+					ellipticOutliers.push(null);
+				}
+			}
+			new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{
+						"series":{
+							"animation":false,
+							"shadow":false,
+							"pointStart": Date.parse(allOutputData.startDate),
+							"pointInterval": 1000*60*60,
+							"turboThreshold": 50000,
+						},
+						"scatter":{
+							"marker":{
+								"radius": 3,
+								"symbol": "circle",
+							}
+						},
+						"line":{"marker":{"enabled":false}}
+					},
+					"xAxis":{
+						"maxZoom":108000000,
+						"tickColor":"gray",
+						"dateTimeLabelFormats":{
+							"month": '%b %e'
+						},
+						"type":"datetime",
+						"lineColor":"gray"
+					},
+					"yAxis":{
+						"title":{"enabled":false},// "title":{"text":"Unit","style":{"color":"gray"}},
+					},
+					"title":{"text":undefined},
+					"series":[
+						{"name":"Input Data",
+							"color":"green",
+							"data":allOutputData.y,
+							"type": "line"
+						},
+						{"name":"Outliers",
+							"color":"red",
+							"data":ellipticOutliers,
+							"type": "scatter",
+						},
+					],
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"ellipticChart","marginRight":20, "height":500,"width":1000},
+					"tooltip":false,
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+		</script>
+	</div>
+</body>
 </body>
