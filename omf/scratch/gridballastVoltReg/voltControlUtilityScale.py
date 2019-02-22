@@ -12,7 +12,11 @@ from datetime import datetime
 
 
 def ConvertAndwork(filePath, gb_on_off='on'):
-	#Converts omd to glm, adds in necessary recorder, collector, and attributes+parameters for gridballast gld to run on waterheaters and ziploads
+	"""
+	Converts omd to glm, adds in necessary recorder, collector, and
+	attributes+parameters for gridballast gld to run on waterheaters and
+	ziploads
+	"""
 	with open(filePath, 'r') as inFile:
 		if gb_on_off == 'on':
 			gb_status = 'true'
