@@ -1,0 +1,5 @@
+ERROR    [INIT] : init_overhead_line(obj=1;OH3129228853001): error when setting parent
+ERROR    [INIT] : init_by_deferral(): object OH3129228853001 initialization failed
+ERROR    [INIT] : model initialization failed
+FATAL    [INIT] : shutdown after simulation stopped prematurely
+FATAL    [INIT] : environment startup failed: Invalid argument

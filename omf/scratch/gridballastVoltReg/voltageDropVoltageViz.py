@@ -142,7 +142,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	if not workDir:
 		workDir = tempfile.mkdtemp()
 		# print '@@@@@@', workDir
-		workDir='/Users/tuomastalvitie/omf/omf/scratch/gridballastVoltReg/voltViz'
+		workDir='/Users/tuomastalvitie/omf/omf/scratch/gridballastVoltReg/_voltViz'
 	gridlabOut = omf.solvers.gridlabd_gridballast.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 	# read voltDump values into a dictionary.
 	try:

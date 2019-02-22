@@ -1,0 +1,10 @@
+# file...... measured_solar_1.csv
+# date...... Fri Feb 22 11:15:53 2019
+# user...... tuomastalvitie
+# host...... (null)
+# target.... meter 20523
+# trigger... (none)
+# interval.. 60
+# limit..... 0
+# timestamp,measured_real_power
+2012-01-01 12:00:00 EST,-2.50085e+07
