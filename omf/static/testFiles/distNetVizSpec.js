@@ -1440,7 +1440,7 @@ describe("Unit tests", function() {
 
             describe("if handling an object that is a node", function() {
 
-                it(`should translate each node according to the x, y arguments by 1) finding the average x, y coordinates of all nodes in the tree, 2) calculating the difference between the x, y arguments and the average x, y coordinates 3) and adding that difference to all nodes`, function() {
+                it(`should translate each node`, function() {
                     const offsetX = -101.8876,
                         offsetY = -2.00033,
                         x = 117.8,
@@ -1479,13 +1479,13 @@ describe("Unit tests", function() {
                     */
                     move(Object.values(tree), {x: x, y: y}, {offsetX: offsetX, offsetY: offsetY, scaleFactor: scaleFactor});
                     expect(tree[0].longitude).toEqual(x/scaleFactor - avgLon + offsetX);
-                    expect(tree[0].latitude).toEqual(y/scaleFactor - avgLat + offsetY);
+                    expect(tree[0].latitude).toEqual(offsetY - avgLat - y/scaleFactor);
                     expect(tree[1].longitude).toEqual(5 + x/scaleFactor - avgLon + offsetX);
-                    expect(tree[1].latitude).toEqual(y/scaleFactor - avgLat + offsetY);
+                    expect(tree[1].latitude).toEqual(offsetY - avgLat - y/scaleFactor);
                     expect(tree[2].longitude).toEqual(x/scaleFactor - avgLon + offsetX);
-                    expect(tree[2].latitude).toEqual(5 + y/scaleFactor - avgLat + offsetY);
+                    expect(tree[2].latitude).toEqual(5 - avgLat + offsetY - y/scaleFactor);
                     expect(tree[3].longitude).toEqual(5 + x/scaleFactor - avgLon + offsetX);
-                    expect(tree[3].latitude).toEqual(5 + y/scaleFactor - avgLat + offsetY);
+                    expect(tree[3].latitude).toEqual(5 - avgLat + offsetY - y/scaleFactor);
                     expect(tree[4].longitude).toEqual(1000.333);
                     expect(tree[4].latitude).toEqual(NaN);
                 });
@@ -1689,6 +1689,61 @@ describe("Unit tests", function() {
                         expect(getType({})).toEqual("independentNode");
                     });
                 });
+            });
+            //good
+            describe("getMinMax()", function() {
+
+                it("should return the minimum and maximum numeric values of a single object", function() {
+                    const obj = {
+                        prop0: NaN,
+                        prop1: "100",
+                        prop2: "44",
+                        prop3: "100.0000001",
+                        prop4: "43.999999"
+                    };
+                    const {min, max} = getMinMax({object: obj});
+                    expect(min).toEqual(43.999999);
+                    expect(max).toEqual(100.0000001);
+                });
+
+                it("should return the minimum and maximum nuermic values across all objects inside of an object", function() {
+                    const objectContainer = {
+                        prop0: {
+                            longitude: NaN,
+                            latitude: NaN
+                        },
+                        prop1: {
+                            longitude: "100",
+                            latitude: "0"
+                        },
+                        prop2: {
+                           longitude: "27",
+                           latitude: "101"
+                        },
+                        prop3: {
+                            longitude: "-2",
+                            latitude: "500"
+                        },
+                        prop4: {
+                            longitude: "6",
+                            latitude: "-100"
+                        }
+                    };
+                    const minMax = getMinMax({objectContainer: objectContainer, properties: ["longitude", "latitude"]});
+                    expect(minMax.longitude.min).toEqual(-2);
+                    expect(minMax.longitude.max).toEqual(100);
+                    expect(minMax.latitude.min).toEqual(-100);
+                    expect(minMax.latitude.max).toEqual(500);
+                });
+            });
+        });
+
+        describe("createColorFile()", function() {
+
+            describe("if invoked with a string argument", function() {
+
+                it("should ")
+
             });
         });
     });

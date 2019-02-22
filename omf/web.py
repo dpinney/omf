@@ -464,11 +464,12 @@ def distribution_get(owner, model_name, feeder_num):
 		dictionary['name'] = str(dictionary['name'])
 	public_feeders = all_data["publicFeeders"]
 	show_file_menu = User.cu() == "admin" or owner != "public"
+	current_user = User.cu()
 	# omf.distNetViz.forceLayout()
 	return render_template(
 		"distNetViz.html", thisFeederData=passed_data, thisFeederName=feeder_name, thisFeederNum=feeder_num,
 		thisModelName=model_name, thisOwner=owner, components=component_json, jasmine=jasmine, spec=spec,
-		publicFeeders=public_feeders, userFeeders=user_feeders, showFileMenu=show_file_menu
+		publicFeeders=public_feeders, userFeeders=user_feeders, showFileMenu=show_file_menu, currentUser=current_user
 	)
 
 
@@ -1320,16 +1321,18 @@ def downloadModelData(owner, modelName, fullPath):
 @app.route("/uniqObjName/<objtype>/<owner>/<name>/<modelName>")
 @flask_login.login_required
 def uniqObjName(objtype, owner, name, modelName=False):
-	""" Checks if a given object type/owner/name is unique.
-	More like checks if a file exists on the server.
+	""" Checks if a given object type/owner/name is unique. More like checks if a file exists on the server.
 	"""
 	print "Entered uniqobjname", owner, name, modelName
 	if objtype == "Model":
 		path = "data/Model/" + owner + "/" + name
 	elif objtype == "Feeder":
-		path = "static/publicFeeders/" + name + ".omd"
 		if name == 'feeder':
 			return jsonify(exists=True)
+		if owner != "public":
+			path = "./data/Model/" + owner + "/" + modelName + "/" + name + ".omd"
+		else:
+			path = "static/publicFeeders/" + name + ".omd"
 	elif objtype == "Network":
 		path = "data/Model/" + owner + "/" + modelName + "/" + name + ".omt"
 		if name == 'feeder':

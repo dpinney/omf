@@ -114,15 +114,19 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.h
 	component_json = get_components()
 	rend = template.render(thisFeederData=json.dumps(thisFeed), thisFeederName="Simple Market System", thisFeederNum=1,
 		thisModelName="Not applicable", thisOwner="NONE", components=component_json, jasmine=None, spec=None,
-		publicFeeders=[], userFeeders=[], csrf_token=id, showFileMenu=True
+		publicFeeders=[], userFeeders=[], csrf_token=id, showFileMenu=True, currentUser=None
 	)
 	with open(tempDir + '/' + outputName, 'w') as outFile:
 		outFile.write(rend)
 	# Insert the panZoom library.
 	# Note: you can't juse open the file in r+ mode because, based on the way the file is mapped to memory, you can only overwrite a line with another of exactly the same length.
 	for line in fileinput.input(tempDir + '/' + outputName, inplace=1):
-		if line.lstrip().startswith("<script id='panZoomInsert'>"):
-			print "<script id='panZoomInsert'>\n" + pzData # load up the new feeder.
+		if line.lstrip().startswith('<script id="panZoomInsert">'):
+			print '<script id="panZoomInsert">\n' + pzData # load up the new feeder.
+		elif line.lstrip().startswith('<script id="chromaInsert">'):
+			pass
+		elif line.lstrip().startswith('<script id="papaParseInsert">'):
+			pass
 		else:
 			print line.rstrip()
 	# os.system('open -a "Google Chrome" ' + '"file://' + tempDir + '/' + outputName"')
