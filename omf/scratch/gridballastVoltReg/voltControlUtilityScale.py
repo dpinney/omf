@@ -197,10 +197,14 @@ def _debugging(filePath, gb_on_off='on'):
 	# Remove Feeder
 	os.remove('outGLM.glm')
 
-	
+
 def voltRegViz(FNAME):
 	chart = drawPlot(FNAME, neatoLayout=True, edgeCol=False, nodeLabs=None, edgeLabs=None, nodeCol = "perUnitVoltage", customColormap=True, rezSqIn=400)
 	chart.savefig("./VOLTOUT.png")
+	validFiles = ['_minutes.PLAYER', 'climate.tmy2', 'frequency.PLAYER1', "hot_water_demand1.glm", 'schedulesResponsiveLoads.glm']
+	for file in os.listdir(pJoin(dir_path, '_voltViz')):
+		if file not in validFiles : 
+			os.remove(pJoin('_voltViz', file))
 	
 if __name__ == '__main__':
 	try: 
