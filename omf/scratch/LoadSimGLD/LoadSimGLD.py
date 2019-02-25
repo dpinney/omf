@@ -4,15 +4,6 @@ from pprint import pprint as pp
 from dateutil.parser import parse as parse_dt
 import matplotlib.dates as mdates
 
-
-''' TODOS
-XXX A little bit of plotting.
-XXX Additional devices? See superHouse.glm.
-OOO Parse and display datetimes correctly. {'# timestamp': '2012-01-01 23:53:00 EST'}
-OOO Other variables to watch? Studies to do?
-OOO Switch to superHouse.glm?
-'''
-
 def workAndGraph(modelType):
 	# Run GridLAB-D on the GLM.
 	if modelType == 'Gas':
@@ -69,10 +60,6 @@ def workAndGraph(modelType):
 	data = list(csv.DictReader(fileOb))
 	# pp(data)
 
-	# Do something about datetimes.
-	# dt = parse_dt("Aug 28 1999 12:00AM")
-	# print dt
-
 	# Plot something.
 	plt.switch_backend('MacOSX')
 	plt.figure()
@@ -101,13 +88,15 @@ def workAndGraph(modelType):
 	plt.show()
 
 if __name__ == '__main__':
-	try: 
-		#Parse Command Line
-		parser = argparse.ArgumentParser(description='Simulates heat/cool power use on a canonical .glm single house model')
-		parser.add_argument('model_type', metavar='base', type=str,
-		                    help='Please specify type of model, being Gas, Resistance, or HeatPump')
-		args = parser.parse_args()
-		modelType = args.model_type
-		workAndGraph(modelType)
-	except:
-		workAndGraph('HeatPump')
+	#TODO: warning text 'Illegal input. Usage: "python LoadSimGLD <load_type>" where load_type is one of ...
+	#Parse Command Line
+	parser = argparse.ArgumentParser(description='Simulates heat/cool power use on a canonical .glm single house model')
+	parser.add_argument(
+		'model_type',
+		metavar = 'base',
+		type = str,
+		help = 'Please specify type of model, being Gas, Resistance, or HeatPump'
+	)
+	args = parser.parse_args()
+	modelType = args.model_type
+	workAndGraph(modelType)
