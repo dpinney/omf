@@ -1,5 +1,9 @@
 from pyproj import Proj, transform
 import webbrowser
+import omf, json, warnings, networkx as nx, matplotlib, numpy as np, os
+from matplotlib import pyplot as plt
+from omf.feeder import _obToCol
+from scipy.spatial import ConvexHull
 
 # Source: https://github.com/fitnr/stateplane/blob/master/stateplane/dicts.py
 # These are NAD83 EPSG identifiers.
@@ -76,6 +80,33 @@ def openInGoogleMaps(lat, lon):
 	loc = 'https://www.google.com/maps/place/{}+{}/'.format(lat,lon)
 	webbrowser.open_new(loc)
 
+def hullOfOmd(pathToOmdFile):
+	with open(pathToOmdFile) as inFile:
+		tree = json.load(inFile)['tree']
+	nxG = omf.feeder.treeToNxGraph(tree)
+	points = np.array([nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')])
+	hull = ConvexHull(points)
+	polygon = points[hull.vertices].tolist()
+	for point in polygon:
+		point.reverse()
+	#Add first node to beginning to comply with geoJSON standard
+	polygon.append(polygon[0])
+	#Create dict and bump to json file
+	geoJsonDict = {"type": "FeatureCollection",
+		"features": [{
+			"type": "Feature", 
+			"geometry":{
+				"type": "Polygon",
+				"coordinates": [polygon]
+			}
+		}]
+	}
+	with open('convexHull.json',"w") as outFile:
+		json.dump(geoJsonDict, outFile, indent=4)
+	#for simplex in hull.simplices:
+	#	plt.plot(points[simplex, 0], points[simplex, 1], 'k-')
+	#plt.show()
+
 def _tests():
 	e, n = 249.2419752733258, 1186.1488466689188
 	lat, lon = statePlaneToLatLon(e, n, 2205)
@@ -84,6 +115,7 @@ def _tests():
 	print (e2, n2) # (249.24197527189972, 1186.1488466408398)
 	letLat, letLon = decLatLonToLetter(lat, lon)
 	print (letLat, letLon) # ('37N22:21.6418049204', '89W53:41.3639252341')
+	#hullOfOmd('static/publicFeeders/Olin Barre LatLon.omd')
 	# openInGoogleMaps(lat, lon)
 
 if __name__ == '__main__':
