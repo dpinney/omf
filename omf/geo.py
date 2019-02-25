@@ -33,7 +33,7 @@ def latLonToStatePlane(lat, lon, epsg = None):
 	return (easting, northing)
 
 def dd2dms(dd):
-	'Decimal degress to Degrees/Minutes/Seconds'
+	'Decimal degrees to Degrees/Minutes/Seconds'
 	d = int(dd)
 	md = abs(dd - d) * 60
 	m = int(md)
@@ -46,35 +46,6 @@ def dms2dd(degrees, minutes, seconds, direction):
 	if direction == 'E' or direction == 'N':
 		dd *= -1
 	return dd;
-
-def decLatLonToLetter(lat, lon):
-	"Decimal lat lon to GridLAB-D's weird Degree/Minute/Second format."
-	latCode = 'N' if lat > 0 else 'S'
-	lonCode = 'E' if lon > 0 else 'W'
-	lat_d, lat_m, lat_s = dd2dms(lat)
-	lon_d, lon_m, lon_s = dd2dms(lon)
-	return (
-		str(abs(lat_d)) + latCode + str(lat_m) + ':' + str(lat_s), 
-		str(abs(lon_d)) + lonCode + str(lon_m) + ':' + str(lon_s)
-	)
-
-def weird2dms(val, sep1, sep2):
-	"Handle GridLAB-D's weird Degree/Minute/Second format"
-	val_h, val_s = letLat.split(':')
-	val_h_split = val_h.split(sep1)
-	if len(val_h_split) == 2:
-		val_d, val_m = val_h_split
-		key = sep1
-	else:
-		val_d, val_m = val_h.split(sep2)
-		key = sep2
-	return (val_d, val_m, val_s, key)
-
-def letterLatLonToDec(letLat, letLon):
-	"GridLAB-D's weird Degree/Minute/Second format to Decimal lat lon."
-	latDd = dms2dd(weird2dms(letLat, 'N', 'S')),
-	lonDd = dms2dd(weird2dms(letLon, 'E', 'W'))
-	return (latDms, lonDd)
 
 def openInGoogleMaps(lat, lon):
 	"Open a browser to the (lat, lon) in Google Maps"
@@ -102,8 +73,7 @@ def hullOfOmd(pathToOmdFile):
 			}
 		}]
 	}
-	with open('convexHull.json',"w") as outFile:
-		json.dump(geoJsonDict, outFile, indent=4)
+	return geoJsonDict
 	#for simplex in hull.simplices:
 	#	plt.plot(points[simplex, 0], points[simplex, 1], 'k-')
 	#plt.show()
@@ -269,9 +239,9 @@ def _tests():
 	print (e2, n2) # (249.24197527189972, 1186.1488466408398)
 	letLat, letLon = decLatLonToLetter(lat, lon)
 	print (letLat, letLon) # ('37N22:21.6418049204', '89W53:41.3639252341')
-	#mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png')
-	#mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html')
-	#hullOfOmd('static/publicFeeders/Olin Barre LatLon.omd')
+	# mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png')
+	# mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html')
+	# hullOfOmd('static/publicFeeders/Olin Barre LatLon.omd')
 	# openInGoogleMaps(lat, lon)
 
 if __name__ == '__main__':
