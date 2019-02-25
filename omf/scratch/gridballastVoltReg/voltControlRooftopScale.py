@@ -239,4 +239,7 @@ if __name__ == '__main__':
 		area=args.area_of_rooftop_solar
 		_debugging(filePath)
 	except:
+		# _myDir = os.path.dirname(os.path.realpath(__file__))
+		# _omfDir = os.path.dirname(os.path.dirname(_myDir))
+		# _feederDir = pJoin(_omfDir, 'static/publicFeeders/Olin Barre GH EOL Solar.omd')
 		_debugging('/Users/tuomastalvitie/Desktop/gridballast_gld_simulations/Feeders/UCS_Egan_Housed_Solar_rooftop.omd', gb_on_off='on', area=500)
