@@ -33,9 +33,38 @@ object climate {
 
 object recorder {
 	interval 60;
-	property heating_demand, cooling_demand;
-	file out_super_house_heat_cool.csv;
+	property heating_demand, cooling_demand, heating_setpoint, air_temperature, outdoor_temperature;
+	file out_super_house.csv;
 	parent house0;
+};
+
+object recorder {
+	interval 60;
+	property measured_real_energy;
+	file out_super_house_triplex_meter.csv;
+	parent R4-25-00-1_tm_1;
+};
+
+object recorder {
+	interval 60;
+	property measured_real_energy;
+	file out_super_house_triplex_meter.csv;
+	parent R4-25-00-1_tm_1;
+};
+
+object recorder {
+	interval 60;
+	property actual_load;
+	file out_super_house_waterheater.csv;
+	parent waterHeater_house0;
+};
+
+object collector {
+	name collector_ZIPloads;
+	group class=ZIPload;
+	property sum(base_power);
+	interval 60;
+	file out_load_ziploads.csv;
 };
 
 object triplex_meter {
@@ -50,36 +79,6 @@ object triplex_meter {
 	//bill_mode HOURLY;
 	bill_day 1;
 	voltage_N 0;
-};
-
-object house {
-	glass_type 2;
-	cooling_COP 3.8;
-	hvac_breaker_rating 1000;
-	cooling_system_type ELECTRIC;
-	total_thermal_mass_per_floor_area 3.504;
-	cooling_setpoint cooling6*2.89+69.19;
-	air_temperature 71.22;
-	ceiling_height 8;
-	Rdoors 10.51;
-	heating_system_type HEAT_PUMP;
-	glazing_layers 3;
-	glazing_treatment 2;
-	heating_setpoint heating6*0.19+59.01;
-	groupid Residential;
-	schedule_skew -57.2977315002;
-	window_frame 4;
-	parent R4-25-00-1_tm_1;
-	floor_area 8000.0;
-	number_of_stories 1;
-	mass_temperature 71.22;
-	name house0;
-	Rfloor 35.59;
-	airchange_per_hour 0.23;
-	Rroof 50.34;
-	Rwall 27.33;
-	breaker_amps 1000;
-	over_sizing_factor 0.1;
 };
 
 object ZIPload {
@@ -195,6 +194,8 @@ object battery {
 	battery_capacity 7 kWh;
 	use_internal_battery_model TRUE;
 };
+
+
 
 //object passive_controller {
 //	period 900;
