@@ -1,12 +1,18 @@
+from __future__ import division
 from pyproj import Proj, transform
 import webbrowser
-import omf, json, warnings, networkx as nx, matplotlib, numpy as np
+import omf, json, warnings, networkx as nx, matplotlib, numpy as np, os, shutil
 from matplotlib import pyplot as plt
 from omf.feeder import _obToCol
 from scipy.spatial import ConvexHull
+from math import pow, log, tan, sin, cos, radians, pi, degrees, atan, sinh
+from os.path import join as pJoin
 
-def latLonNxGraphMap(inGraph, labels=False, neatoLayout=False, showPlot=False):
+def latLonNxGraphMap(pathToOmdFile, outputPath):
 	''' Draw a networkx graph representing a feeder.'''
+	with open(pathToOmdFile) as inFile:
+		tree = json.load(inFile)['tree']
+	nxG = omf.feeder.treeToNxGraph(tree)
 	from mpl_toolkits.basemap import Basemap
 	# Be quiet Matplotlib.
 	warnings.filterwarnings("ignore",category=matplotlib.cbook.mplDeprecation)
@@ -15,55 +21,64 @@ def latLonNxGraphMap(inGraph, labels=False, neatoLayout=False, showPlot=False):
 	plt.tight_layout()
 	plt.gca().invert_yaxis()
 	plt.gca().set_aspect('equal')
-	m = Basemap(llcrnrlon=-102.7662,llcrnrlat=32.983,urcrnrlon=-102.7576,urcrnrlat=32.997, epsg=3857)
+	plt.switch_backend('TKAgg')
+
+	#Set up basemap for background image
+	latitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
+	longitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][1] for node in nx.get_node_attributes(nxG, 'pos')])
+	latitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
+	longitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][1] for node in nx.get_node_attributes(nxG, 'pos')])
+	m = Basemap(llcrnrlon=longitude_min,llcrnrlat=latitude_min,urcrnrlon=longitude_max,urcrnrlat=latitude_max, epsg=3857)
 	m.arcgisimage(service='World_Street_Map', dpi=400, verbose= False)
-	# Layout the graph via GraphViz neato. Handy if there's no lat/lon data.
-	if neatoLayout:
-		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
-		cleanG = nx.Graph(inGraph.edges())
-		# HACK2: might miss nodes without edges without the following.
-		cleanG.add_nodes_from(inGraph)
-		pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
-	else:
-		pos = {}
-		pos = {node: nx.get_node_attributes(inGraph, 'pos')[node] for node in nx.get_node_attributes(inGraph, 'pos')}
-		#print(node_positions)
-		for point in pos:
-			pos[point] = (m(pos[point][1], pos[point][0]))
+	#Get positions for graph
+	pos = {}
+	pos = {node: nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')}
+	for point in pos:
+		pos[point] = (m(pos[point][1], pos[point][0]))
 	# Draw all the edges.
-	for e in inGraph.edges():
-		eType = inGraph.edge[e[0]][e[1]].get('type','underground_line')
-		ePhases = inGraph.edge[e[0]][e[1]].get('phases',1)
+	for e in nxG.edges():
+		eType = nxG.edge[e[0]][e[1]].get('type','underground_line')
+		ePhases = nxG.edge[e[0]][e[1]].get('phases',1)
 		standArgs = {'edgelist':[e],
 					 'edge_color':_obToCol(eType),
 					 'width':2,
 					 'style':{'parentChild':'dotted','underground_line':'dashed'}.get(eType,'solid') }
 		if ePhases==3:
 			standArgs.update({'width':2})
-			nx.draw_networkx_edges(inGraph,pos,**standArgs)
+			nx.draw_networkx_edges(nxG,pos,**standArgs)
 			standArgs.update({'width':2,'edge_color':'white'})
-			nx.draw_networkx_edges(inGraph,pos,**standArgs)
+			nx.draw_networkx_edges(nxG,pos,**standArgs)
 			standArgs.update({'width':1,'edge_color':_obToCol(eType)})
-			nx.draw_networkx_edges(inGraph,pos,**standArgs)
+			nx.draw_networkx_edges(nxG,pos,**standArgs)
 		if ePhases==2:
 			standArgs.update({'width':2})
-			nx.draw_networkx_edges(inGraph,pos,**standArgs)
+			nx.draw_networkx_edges(nxG,pos,**standArgs)
 			standArgs.update({'width':1,'edge_color':'white'})
-			nx.draw_networkx_edges(inGraph,pos,**standArgs)
+			nx.draw_networkx_edges(nxG,pos,**standArgs)
 		else:
-			nx.draw_networkx_edges(inGraph,pos,**standArgs)
+			nx.draw_networkx_edges(nxG,pos,**standArgs)
 	# Draw nodes and optional labels.
-	nx.draw_networkx_nodes(inGraph,pos,
+	nx.draw_networkx_nodes(nxG,pos,
 						   nodelist=pos.keys(),
-						   node_color=[_obToCol(inGraph.node[n].get('type','underground_line')) for n in inGraph],
+						   node_color=[_obToCol(nxG.node[n].get('type','underground_line')) for n in nxG],
 						   linewidths=0,
 						   node_size=2)
-	if labels:
-		nx.draw_networkx_labels(inGraph,pos,
-								font_color='black',
-								font_weight='bold',
-								font_size=0.25)
-	if showPlot: plt.savefig('latlon.png', dpi=400, bbox_inches="tight")
+	#if labels:
+	#	nx.draw_networkx_labels(nxG,pos,
+	#							font_color='black',
+	#							font_weight='bold',
+	#							font_size=0.25)
+	if not os.path.exists(outputPath):
+		os.makedirs(outputPath)
+	plt.savefig(pJoin(outputPath,'latlon.png'), dpi=400, bbox_inches="tight")
+
+def drawLatLon():
+	from mpl_toolkits.basemap import Basemap
+	with open('../../static/publicFeeders/Olin Barre LatLon.omd') as inFile:
+		tree = json.load(inFile)['tree']
+	nxG = omf.feeder.treeToNxGraph(tree)
+	plt.switch_backend('TKAgg')
+	latLonNxGraphMap(nxG, labels=False, neatoLayout=False, showPlot=True)
 
 def drawPngGraph():
 	#Static reference file for testing now
@@ -92,24 +107,18 @@ def drawPngGraph():
 	#plt.show()
 	plt.savefig('matplotlibmap.png', dpi=400, bbox_inches="tight")
 
-def hullOfOmd():
-	with open('../../static/publicFeeders/Olin Barre LatLon.omd') as inFile:
+def hullOfOmd(pathToOmdFile):
+	with open(pathToOmdFile) as inFile:
 		tree = json.load(inFile)['tree']
-	#networkx graph to work with
 	nxG = omf.feeder.treeToNxGraph(tree)
-	#print([nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')])
 	points = np.array([nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')])
 	hull = ConvexHull(points)
-	#plt.switch_backend('TKAgg')
-	#plt.plot(points[:,0], points[:,1], 'o')
-	#simplexList = [points[simplex].tolist() for simplex in hull.simplices]
-	#simplexList.append(simplexList[0])
-	#List of points in order counterclockwise
 	polygon = points[hull.vertices].tolist()
-	#polygon.append(polygon[0])
 	for point in polygon:
 		point.reverse()
+	#Add first node to beginning to comply with geoJSON standard
 	polygon.append(polygon[0])
+	#Create dict and bump to json file
 	geoJsonDict = {"type": "FeatureCollection",
 		"features": [{
 			"type": "Feature", 
@@ -125,38 +134,16 @@ def hullOfOmd():
 	#	plt.plot(points[simplex, 0], points[simplex, 1], 'k-')
 	#plt.show()
 
-def omdGeoJson():
-	with open('../../static/publicFeeders/Olin Barre LatLon.omd') as inFile:
+def omdGeoJson(pathToOmdFile, outputPath):
+	with open(pathToOmdFile) as inFile:
 		tree = json.load(inFile)['tree']
 	#networkx graph to work with
 	nxG = omf.feeder.treeToNxGraph(tree)
-	'''
-	print(nx.get_edge_attributes(nxG, 'type'))
-	edge attributes type, phases
-	geoJSON 
-		geometry
-			type: LineString
-			coordinates: tbd
-		properties:
-			edgeType: type
-			phases: phases
-			nodeNames: tbd
-
-	node attributes type, pos, latitude, longitude
-	geoJSON 
-		geometry
-			type: Point
-			coordinates: reverse pos aka lat/lon
-		properties:
-			name: this will be the node itself in node list
-			pointType: type
-
-	'''
 	geoJsonDict = {
 	"type": "FeatureCollection",
 	"features": []
 	}
-
+	#Add nodes to geoJSON
 	node_positions = {node: nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')}
 	node_types = {node: nx.get_node_attributes(nxG, 'type')[node] for node in nx.get_node_attributes(nxG, 'type')}
 	for node in node_positions:
@@ -172,12 +159,10 @@ def omdGeoJson():
 				"pointColor": _obToCol(node_types[node])
 			}
 		})
-	#print(geoJsonDict)
-
+	#Add edges to geoJSON
 	edge_types = {edge: nx.get_edge_attributes(nxG, 'type')[edge] for edge in nx.get_edge_attributes(nxG, 'type')}
 	edge_phases = {edge: nx.get_edge_attributes(nxG, 'phases')[edge] for edge in nx.get_edge_attributes(nxG, 'phases')}
 	for edge in nx.edges(nxG):
-		print(_obToCol(edge_types[edge]))
 		geoJsonDict['features'].append({
 			"type": "Feature", 
 			"geometry":{
@@ -190,17 +175,11 @@ def omdGeoJson():
 				"edgeColor":_obToCol(edge_types[edge])
 			}
 		})
-
-	with open('geoPointsLines.json',"w") as outFile:
+	if not os.path.exists(outputPath):
+		os.makedirs(outputPath)
+	shutil.copy('static/geoPolyLeaflet.html', outputPath)
+	with open(pJoin(outputPath,'geoPointsLines.json'),"w") as outFile:
 		json.dump(geoJsonDict, outFile, indent=4)
-
-def drawLatLon():
-	from mpl_toolkits.basemap import Basemap
-	with open('../../static/publicFeeders/Olin Barre LatLon.omd') as inFile:
-		tree = json.load(inFile)['tree']
-	nxG = omf.feeder.treeToNxGraph(tree)
-	plt.switch_backend('TKAgg')
-	latLonNxGraphMap(nxG, labels=False, neatoLayout=False, showPlot=True)
 
 def drawHtmlGraph():
 	import folium
@@ -242,10 +221,272 @@ def drawHtmlGraph():
 		json.dump(lineDict, outFile, indent=4)
 	m.save('leafletmap.html')
 
+def crop(infile,height,width):
+    im = Image.open(infile)
+    imgwidth, imgheight = im.size
+    for i in range(imgheight//height):
+        for j in range(imgwidth//width):
+            box = (j*width, i*height, (j+1)*width, (i+1)*height)
+            yield im.crop(box)
+
+import math
+def num2deg(xtile, ytile, zoom):
+	n = 2.0 ** zoom
+	lon_deg = xtile / n * 360.0 - 180.0
+	lat_rad = math.atan(math.sinh(math.pi * (1 - 2 * ytile / n)))
+	lat_deg = math.degrees(lat_rad)
+	return (lat_deg, lon_deg)
+
+def deg2num(lat_deg, lon_deg, zoom):
+	lat_rad = math.radians(lat_deg)
+	n = 2.0 ** zoom
+	xtile = int((lon_deg + 180.0) / 360.0 * n)
+	ytile = int((1.0 - math.log(math.tan(lat_rad) + (1 / math.cos(lat_rad))) / math.pi) / 2.0 * n)
+	return (xtile, ytile)
+
+def numTiles(z):
+  return(pow(2,z))
+
+def sec(x):
+  return(1/cos(x))
+
+def latlon2relativeXY(lat,lon):
+  x = (lon + 180) / 360
+  y = (1 - log(tan(radians(lat)) + sec(radians(lat))) / pi) / 2
+  return(x,y)
+
+def latlon2xy(lat,lon,z):
+  n = numTiles(z)
+  x,y = latlon2relativeXY(lat,lon)
+  return(n*x, n*y)
+  
+def tileXY(lat, lon, z):
+  x,y = latlon2xy(lat,lon,z)
+  return(int(x),int(y))
+
+def xy2latlon(x,y,z):
+  n = numTiles(z)
+  relY = y / n
+  lat = mercatorToLat(pi * (1 - 2 * relY))
+  lon = -180.0 + 360.0 * x / n
+  return(lat,lon)
+
+def xy2lonlat(x,y,z):
+  n = numTiles(z)
+  relY = y / n
+  lat = mercatorToLat(pi * (1 - 2 * relY))
+  lon = -180.0 + 360.0 * x / n
+  return(lon,lat)
+  
+def latEdges(y,z):
+  n = numTiles(z)
+  unit = 1 / n
+  relY1 = y * unit
+  relY2 = relY1 + unit
+  lat1 = mercatorToLat(pi * (1 - 2 * relY1))
+  lat2 = mercatorToLat(pi * (1 - 2 * relY2))
+  return(lat1,lat2)
+
+def lonEdges(x,z):
+  n = numTiles(z)
+  unit = 360 / n
+  lon1 = -180 + x * unit
+  lon2 = lon1 + unit
+  return(lon1,lon2)
+  
+def tileEdges(x,y,z):
+  lat1,lat2 = latEdges(y,z)
+  lon1,lon2 = lonEdges(x,z)
+  return((lat2, lon1, lat1, lon2)) # S,W,N,E
+
+def mercatorToLat(mercatorY):
+  return(degrees(atan(sinh(mercatorY))))
+
+def tileSizePixels():
+  return(256)
+
+def tileLayerExt(layer):
+  if(layer in ('oam')):
+    return('jpg')
+  return('png')
+
+def tileLayerBase(layer):
+  layers = { \
+    "tah": "http://cassini.toolserver.org:8080/http://a.tile.openstreetmap.org/+http://toolserver.org/~cmarqu/hill/",
+    #"tah": "http://tah.openstreetmap.org/Tiles/tile/",
+    "oam": "http://oam1.hypercube.telascience.org/tiles/1.0.0/openaerialmap-900913/",
+    "mapnik": "http://tile.openstreetmap.org/mapnik/"
+    }
+  return(layers[layer])
+  
+def tileURL(x,y,z,layer):
+  return "%s%d/%d/%d.%s" % (tileLayerBase(layer),z,x,y,tileLayerExt(layer))
+
+def rasterTilesFromOmd(pathToOmdFile, outputPath):
+	#Static reference file for testing now
+	with open(pathToOmdFile) as inFile:
+		tree = json.load(inFile)['tree']
+	cwd = os.getcwd()
+	circuitName = 'Olin Barre LatLon'
+	plt.switch_backend('TKAgg')
+	#networkx graph to work with
+	nxG = omf.feeder.treeToNxGraph(tree)
+	#Might need later for setting axes value in draw_network
+	latitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
+	longitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][1] for node in nx.get_node_attributes(nxG, 'pos')])
+	latitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
+	longitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][1] for node in nx.get_node_attributes(nxG, 'pos')])
+	#print(latitude_min, latitude_max, longitude_min, longitude_max)
+	#set conversions
+	#Set the plot settings
+	plt.switch_backend('TKAgg')
+	fig = plt.figure(frameon=False, figsize=[2.56,2.56])
+	ax = fig.add_axes([0, 0, 1, 1])
+	ax.axis('off')
+	#map latlon to projection
+	import pyproj
+	epsg3857 = pyproj.Proj(init='epsg:3857')
+	wgs84 = pyproj.Proj(init='EPSG:4326')
+	node_positions = {node: nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')}
+	for point in node_positions:
+		node_positions[point] = pyproj.transform(wgs84,epsg3857,node_positions[point][1], node_positions[point][0])
+	for zoomLevel in range(0,19):
+		numberofTiles = numTiles(zoomLevel)
+		upperRightTile = tileXY(latitude_max, longitude_max, zoomLevel)
+		lowerLeftTile = tileXY(latitude_min, longitude_min, zoomLevel)
+		firstTileEdges = tileEdges(upperRightTile[0], upperRightTile[1], zoomLevel)
+		lastTileEdges = tileEdges(lowerLeftTile[0], lowerLeftTile[1], zoomLevel)
+		#go through the X coordins=ates
+		#print(range(lowerLeftTile[0], upperRightTile[0]+1))
+		#print(range(upperRightTile[1], lowerLeftTile[1]+1))
+		nx.draw_networkx(nxG, pos=node_positions, nodelist=[node for node in nxG if node in nx.get_node_attributes(nxG, 'pos')], with_labels=False, node_size=2, edge_size=1)
+		for tileX in range(lowerLeftTile[0], upperRightTile[0]+1):
+			for tileY in range(upperRightTile[1], lowerLeftTile[1]+1):
+				#print(tileX, tileY)
+				currentTileEdges = tileEdges(tileX, tileY, zoomLevel)
+				southWest = pyproj.transform(wgs84,epsg3857,currentTileEdges[1], currentTileEdges[0])
+				northEast = pyproj.transform(wgs84,epsg3857,currentTileEdges[3], currentTileEdges[2])
+				# S,W,N,E
+				plt.ylim(top=northEast[1], bottom=southWest[1])
+				plt.xlim(southWest[0], northEast[0])
+				#create directory for tiles
+				savePath=pJoin(cwd,outputPath,str(zoomLevel),str(tileX))
+				if not os.path.exists(savePath):
+					os.makedirs(savePath)
+				plt.savefig(pJoin(savePath,'%s.png' % str(tileY)),frameon=False, pad_inches=0, bbox='tight')
+
+def mapOmd(pathToOmdFile, outputPath, fileFormat):
+	with open(pathToOmdFile) as inFile:
+		tree = json.load(inFile)['tree']
+	nxG = omf.feeder.treeToNxGraph(tree)
+	if fileFormat == 'html':
+		geoJsonDict = {
+		"type": "FeatureCollection",
+		"features": []
+		}
+		#Add nodes to geoJSON
+		node_positions = {node: nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')}
+		node_types = {node: nx.get_node_attributes(nxG, 'type')[node] for node in nx.get_node_attributes(nxG, 'type')}
+		for node in node_positions:
+			geoJsonDict['features'].append({
+				"type": "Feature", 
+				"geometry":{
+					"type": "Point",
+					"coordinates": [node_positions[node][1], node_positions[node][0]]
+				},
+				"properties":{
+					"name": node,
+					"pointType": node_types[node],
+					"pointColor": _obToCol(node_types[node])
+				}
+			})
+		#Add edges to geoJSON
+		edge_types = {edge: nx.get_edge_attributes(nxG, 'type')[edge] for edge in nx.get_edge_attributes(nxG, 'type')}
+		edge_phases = {edge: nx.get_edge_attributes(nxG, 'phases')[edge] for edge in nx.get_edge_attributes(nxG, 'phases')}
+		for edge in nx.edges(nxG):
+			geoJsonDict['features'].append({
+				"type": "Feature", 
+				"geometry":{
+					"type": "LineString",
+					"coordinates": [[node_positions[edge[0]][1], node_positions[edge[0]][0]],[node_positions[edge[1]][1], node_positions[edge[1]][0]]]
+				},
+				"properties":{
+					"phase": edge_phases[edge],
+					"edgeType": edge_types[edge],
+					"edgeColor":_obToCol(edge_types[edge])
+				}
+			})
+		if not os.path.exists(outputPath):
+			os.makedirs(outputPath)
+		shutil.copy('geoPolyLeaflet.html', outputPath)
+		with open(pJoin(outputPath,'geoPointsLines.json'),"w") as outFile:
+			json.dump(geoJsonDict, outFile, indent=4)
+	elif fileFormat == 'png':
+		from mpl_toolkits.basemap import Basemap
+		# Be quiet Matplotlib.
+		warnings.filterwarnings("ignore",category=matplotlib.cbook.mplDeprecation)
+		# Set up figure.
+		plt.axis('off')
+		plt.tight_layout()
+		plt.gca().invert_yaxis()
+		plt.gca().set_aspect('equal')
+		plt.switch_backend('TKAgg')
+
+		#Set up basemap for background image
+		latitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
+		longitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][1] for node in nx.get_node_attributes(nxG, 'pos')])
+		latitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
+		longitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][1] for node in nx.get_node_attributes(nxG, 'pos')])
+		m = Basemap(llcrnrlon=longitude_min,llcrnrlat=latitude_min,urcrnrlon=longitude_max,urcrnrlat=latitude_max, epsg=3857)
+		m.arcgisimage(service='World_Street_Map', dpi=400, verbose= False)
+		#Get positions for graph
+		pos = {}
+		pos = {node: nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')}
+		for point in pos:
+			pos[point] = (m(pos[point][1], pos[point][0]))
+		# Draw all the edges.
+		for e in nxG.edges():
+			eType = nxG.edge[e[0]][e[1]].get('type','underground_line')
+			ePhases = nxG.edge[e[0]][e[1]].get('phases',1)
+			standArgs = {'edgelist':[e],
+						 'edge_color':_obToCol(eType),
+						 'width':2,
+						 'style':{'parentChild':'dotted','underground_line':'dashed'}.get(eType,'solid') }
+			if ePhases==3:
+				standArgs.update({'width':2})
+				nx.draw_networkx_edges(nxG,pos,**standArgs)
+				standArgs.update({'width':2,'edge_color':'white'})
+				nx.draw_networkx_edges(nxG,pos,**standArgs)
+				standArgs.update({'width':1,'edge_color':_obToCol(eType)})
+				nx.draw_networkx_edges(nxG,pos,**standArgs)
+			if ePhases==2:
+				standArgs.update({'width':2})
+				nx.draw_networkx_edges(nxG,pos,**standArgs)
+				standArgs.update({'width':1,'edge_color':'white'})
+				nx.draw_networkx_edges(nxG,pos,**standArgs)
+			else:
+				nx.draw_networkx_edges(nxG,pos,**standArgs)
+		# Draw nodes and optional labels.
+		nx.draw_networkx_nodes(nxG,pos,
+							   nodelist=pos.keys(),
+							   node_color=[_obToCol(nxG.node[n].get('type','underground_line')) for n in nxG],
+							   linewidths=0,
+							   node_size=2)
+		#if labels:
+		#	nx.draw_networkx_labels(nxG,pos,
+		#							font_color='black',
+		#							font_weight='bold',
+		#							font_size=0.25)
+		if not os.path.exists(outputPath):
+			os.makedirs(outputPath)
+		plt.savefig(pJoin(outputPath,'latlon.png'), dpi=400, bbox_inches="tight")
+				
 
 if __name__ == '__main__':
-	drawPngGraph()
-	drawLatLon()
-	drawHtmlGraph()
-	hullOfOmd()
-	omdGeoJson()
+	#drawPngGraph()
+	#drawLatLon()
+	#drawHtmlGraph()
+	#hullOfOmd('../../static/publicFeeders/Olin Barre LatLon.omd')
+	#omdGeoJson('../../static/publicFeeders/Olin Barre LatLon.omd', 'outTemp')
+	rasterTilesFromOmd('../../static/publicFeeders/Olin Barre LatLon.omd', 'tilesOutput')
+	#mapOmd('../../static/publicFeeders/Olin Barre LatLon.omd', 'newOutput', 'html')
