@@ -10,6 +10,8 @@
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+		<script src="{{pathPrefix}}/static/heatmap.src.js"></script>
+	<script src="{{pathPrefix}}/static/d3.v3.js"></script>
 	<!-- Data  Imports -->
 	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
 	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
@@ -67,6 +69,42 @@
 					<option value="forceDirected">Force Directed</option>
 				</select>
 			</div>
+			<div class="wideInput">
+				<p class="inputSectionHeader">Solar System Parameters</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
+				<input type="text" id="zipCode" name="zipCode" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">System Size (kWp-DC)<span class="classic">DC output rating of the solar panels in kilowatts.</span></label>
+				<input type="text" id="systemSize" name="systemSize" pattern="^\d+\.?\d*$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Inverter Size (kW-AC)<span class="classic">Size of the total inverters in kW-AC for the system. Used to determine energy clipping in the Hourly System Average Power Output graph.</span></label>
+				<input type="text" id="inverterSize" name="inverterSize" required="required" pattern="^\d+\.?\d*?$">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Inverter &amp; Transformer Efficiency (%)<span class="classic">Combined Inverter and Transformer Efficiency in converting DC power to AC power. The Inverter efficiency can be obtained from the Weighted Efficiency (CEC) Method.</span></label>
+				<input type="text" id="inverterEfficiency" name="inverterEfficiency" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
+			</div>
+			<div class="wideInput">
+				<p class="inputSectionHeader">Financial Variables</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Retail Energy Cost ($/kWh)<span class="classic">Residential rate.</span></label>
+				<input type="text" id="retailCost" name="retailCost" pattern="^\d+\.?\d*$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Discount Rate (%)<span class="classic">Discount rate used in discounted cashflow analysis output.</span></label>
+				<input type="text" id="discountRate" name="discountRate" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
+			</div>
+			<div class="wideInput">
+				<p class="inputSectionHeader">Display Options</p>
+			</div>
+			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Node Coloring By<span class="classic">Select the simulation output value that will be used to color the nodes in the circuit.</span></label>
 				<select id="nodeCol" name="nodeCol">
@@ -141,4 +179,41 @@
 			<script type="text/javascript">gebi("voltageDropChart").src = "data:image/png;base64," + allOutputData.voltageDrop</script>
 		</div>
 	</div>
+	<p class="reportTitle postRun">Simulation Location</p>
+		<div id="studyDetail" class="tightContent postRun detailsContainer" style="position: relative">
+			<div id="mapHere"></div>
+			<script type="text/javascript">
+				width = 1000, height = 350
+				projection = d3.geo.albersUsa().scale(600).translate([width/2, height/2])
+				path = d3.geo.path()
+					.projection(projection)
+				svg = d3.select("#mapHere").append("svg")
+					.attr("width", width)
+					.attr("height", height)
+				group = svg.append("g")
+				group.attr("transorm", "scale(.2, .2)")
+				d3.json('{{pathPrefix}}/static/state_boundaries.json', function(collection) {
+					group.selectAll('path')
+						.data(collection.features)
+						.enter().append('path')
+						.attr('d', d3.geo.path().projection(projection))
+						.attr('id', function(d){return d.properties.name.replace(/\s+/g, '')})
+						.style('fill', 'gray')
+						.style('stroke', 'white')
+						.style('stroke-width', 1)})
+				d3.json("{{pathPrefix}}/static/city_locations.json", function(new_us_places){
+					climate = allInputData.climateName
+					ST_NAME = climate.split("-")
+					ST = ST_NAME[0]
+					NAME = ST_NAME[1].replace("_"," ")
+					my_coords = projection(new_us_places[ST][NAME])
+					r = 5
+					circle = svg.append("circle")
+						.attr("cx", my_coords[0])
+						.attr("cy", my_coords[1])
+						.attr("r", 5)
+						.attr("class", "HighlightCircle")
+					circle.append("svg:title").text(climate)})
+			</script>
+		</div>
 </body>
