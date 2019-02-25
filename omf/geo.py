@@ -237,8 +237,6 @@ def _tests():
 	print (lat, lon) #(37.37267827914456, -89.89482331256504)
 	e2, n2 = latLonToStatePlane(lat, lon, epsg=2205)
 	print (e2, n2) # (249.24197527189972, 1186.1488466408398)
-	letLat, letLon = decLatLonToLetter(lat, lon)
-	print (letLat, letLon) # ('37N22:21.6418049204', '89W53:41.3639252341')
 	# mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png')
 	# mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html')
 	# hullOfOmd('static/publicFeeders/Olin Barre LatLon.omd')
