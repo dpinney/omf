@@ -4,17 +4,40 @@ from pprint import pprint as pp
 from dateutil.parser import parse as parse_dt
 import matplotlib.dates as mdates
 
-def workAndGraph(modelType):
+parameters = ['GasHeat', 'Resistance', 'HeatPump', 'AC_electric', 'AC_HeatPump', 'waterheater', 'def_load'
+					'non_def_load', 'EV']
+
+def runGld(modelType):
 	# Run GridLAB-D on the GLM.
-	if modelType == 'Gas':
+	# currently, Feb 2019, GLD only supports electric AC or heatmump
+	if modelType == 'GasHeat':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = 'GAS'
+		graphType = 'out_super_house'
 	elif modelType == 'HeatPump':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = 'HEAT_PUMP'
+		graphType = 'out_super_house'
 	elif modelType == 'Resistance':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = 'RESISTANCE'
+		graphType = 'out_super_house'
+	elif modelType == 'AC_electric':
+		cooling_system_type = "ELECTRIC"
+		heating_system_type = None 
+		graphType = 'out_super_house'
+	elif modelType == 'AC_HeatPump':
+		cooling_system_type = "HEAT_PUMP"
+		heating_system_type = None
+		graphType = 'out_super_house'
+	# elif modelType == 'waterheater':
+		# graphType == 'waterheater'
+	# elif modelType == 'def_load':
+		# graphType == 'def_load'
+	# elif modelType == 'non_def_load':
+		# graphType == 'non_def_load'
+	# elif modelType == 'EV':
+		# graphType == 'EV'
 
 	with open('in_super_house.glm', 'r') as myfile:
 	    data=myfile.read()
@@ -51,16 +74,28 @@ def workAndGraph(modelType):
 
 	os.system('gridlabd '+'temp_super_house.glm')
 	os.remove('temp_super_house.glm')
+	return graphWrapper(graphType)
 
+def graphWrapper(graphType):
+	if graphType == 'out_super_house':
+		plotLoadHouse()
+	elif graphType == 'waterheater':
+		plotLoadWaterheater()
+	elif graphType == 'def_load':
+		plotLoadDef_Load()
+	elif graphType == 'non_def_load':
+		plotLoadNonDef_Load()
+	elif graphType == 'EV':
+		plotLoadEV()
+
+def plotLoadHouse():
 	# Get the data
 	fileOb = open('out_super_house.csv')
 	for x in range(8):
-		# Burn the headers.
-		fileOb.readline()
+	# Burn the headers.
+	fileOb.readline()
 	data = list(csv.DictReader(fileOb))
-	# pp(data)
-
-	# Plot something.
+	# Plot Heat and AC load
 	plt.switch_backend('MacOSX')
 	plt.figure()
 	formatter = mdates.DateFormatter('%H-%m-%S')
@@ -75,6 +110,21 @@ def workAndGraph(modelType):
 	plt.xlabel('Time Stamp')
 	plt.ylabel('Demand (kW)')
 	plt.figure()
+
+def plotLoadWaterheater():
+def	plotLoadDef_Load():
+def plotLoadNonDef_Load():
+def plotLoadEV():
+
+
+
+def plotTemp():
+	# Get the data
+	fileOb = open('out_super_house.csv')
+	for x in range(8):
+	# Burn the headers.
+	fileOb.readline()
+	data = list(csv.DictReader(fileOb))
 	plt.title('New Years Day, Huntsville, AL, Temperatures')
 	plt.plot_date(dates, [float(x.get(' air_temperature', 0.0)) for x in data], '-', label="Indoor")
 	plt.plot_date(dates, [float(x.get(' outdoor_temperature', 0.0)) for x in data], '-', label="Outdoors")
@@ -90,13 +140,14 @@ def workAndGraph(modelType):
 if __name__ == '__main__':
 	#TODO: warning text 'Illegal input. Usage: "python LoadSimGLD <load_type>" where load_type is one of ...
 	#Parse Command Line
-	parser = argparse.ArgumentParser(description='Simulates heat/cool power use on a canonical .glm single house model')
-	parser.add_argument(
-		'model_type',
-		metavar = 'base',
-		type = str,
-		help = 'Please specify type of model, being Gas, Resistance, or HeatPump'
-	)
-	args = parser.parse_args()
-	modelType = args.model_type
-	workAndGraph(modelType)
+	# parser = argparse.ArgumentParser(description='Simulates heat/cool power use on a canonical .glm single house model')
+	# parser.add_argument(
+	# 	'model_type',
+	# 	metavar = 'base',
+	# 	type = str,
+	# 	help = 'Please specify type of model, being Gas, Resistance, or HeatPump'
+	# )
+	# args = parser.parse_args()
+	# modelType = args.model_type
+	modelType = 'Resistance'
+	runGld(modelType)

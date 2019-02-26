@@ -10,7 +10,7 @@ import re
 from datetime import datetime
 from voltageDropVoltageViz import drawPlot
 
-
+#TODO crank up sqfootage until voltage issues occur
 
 def ConvertAndwork(filePath, gb_on_off='on', area=500):
 	#Converts omd to glm, adds in necessary recorder, collector, and attributes+parameters for gridballast gld to run on waterheaters and ziploads

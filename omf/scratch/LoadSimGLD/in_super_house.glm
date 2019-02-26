@@ -54,7 +54,7 @@ object recorder {
 
 object recorder {
 	interval 60;
-	property actual_load;
+	property actual_load, waterheater_power;
 	file out_super_house_waterheater.csv;
 	parent waterHeater_house0;
 };

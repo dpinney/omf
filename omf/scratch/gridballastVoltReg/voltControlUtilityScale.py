@@ -11,7 +11,7 @@ import re
 from datetime import datetime
 from voltageDropVoltageViz import drawPlot
 
-
+#Run 11-1, stop results at noon, run at hour resolution
 
 def ConvertAndwork(filePath, gb_on_off='on'):
 	"""
@@ -207,6 +207,7 @@ def voltRegViz(FNAME):
 			os.remove(pJoin('_voltViz', file))
 	
 if __name__ == '__main__':
+	# no try except, instead do if argument missing, then 
 	try: 
 		#Parse Command Line
 		parser = argparse.ArgumentParser(description='Converts an OMD to GLM and runs it on gridlabd')
