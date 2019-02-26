@@ -30,14 +30,22 @@ def runGld(modelType):
 		cooling_system_type = "HEAT_PUMP"
 		heating_system_type = None
 		graphType = 'out_super_house'
-	# elif modelType == 'waterheater':
-		# graphType == 'waterheater'
-	# elif modelType == 'def_load':
-		# graphType == 'def_load'
-	# elif modelType == 'non_def_load':
-		# graphType == 'non_def_load'
-	# elif modelType == 'EV':
-		# graphType == 'EV'
+	elif modelType == 'waterheater':
+		cooling_system_type = "ELECTRIC"
+		heating_system_type = 'RESISTANCE'
+		graphType == 'waterheater'
+	elif modelType == 'def_load':
+		cooling_system_type = "ELECTRIC"
+		heating_system_type = 'RESISTANCE'
+		graphType == 'def_load'
+	elif modelType == 'non_def_load':
+		cooling_system_type = "ELECTRIC"
+		heating_system_type = 'RESISTANCE'
+		graphType == 'non_def_load'
+	elif modelType == 'EV':
+		cooling_system_type = "ELECTRIC"
+		heating_system_type = 'RESISTANCE'
+		graphType == 'EV'
 
 	with open('in_super_house.glm', 'r') as myfile:
 	    data=myfile.read()
@@ -112,6 +120,15 @@ def plotLoadHouse():
 	plt.figure()
 
 def plotLoadWaterheater():
+	fileOb = open('out_super_house_waterheater.csv')
+	for x in range(8):
+	# Burn the headers.
+	fileOb.readline()
+	data = list(csv.DictReader(fileOb))
+	# Plot Heat and AC load
+	plt.switch_backend('MacOSX')
+
+
 def	plotLoadDef_Load():
 def plotLoadNonDef_Load():
 def plotLoadEV():
