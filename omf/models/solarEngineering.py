@@ -22,6 +22,7 @@ from omf.weather import zipCodeToClimateName
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = "The solarEngineering model shows users the technical system impacts of solar on a feeder including DG power generated, regulator tap changes, capacitor activation, and meter voltages. "
+hidden = False
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. WARNING: GRIDLAB CAN TAKE HOURS TO COMPLETE. '''

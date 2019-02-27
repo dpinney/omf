@@ -11,6 +11,7 @@ from __neoMetaModel__ import *
 modelName, template = metadata(__file__)
 tooltip = ("The storagePeakShave model calculates the value of a distribution utility " 
 	"deploying energy storage based on three possible battery dispatch strategies.")
+hidden = False
 
 def work(modelDir, inputDict):
 	''' Model processing done here. '''
