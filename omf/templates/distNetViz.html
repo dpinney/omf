@@ -479,18 +479,18 @@
 
             /* SVG Styling */
 
-            line { stroke: rgba(0,0,0,1); } /* black */
-            line.parentChild { stroke: rgba(211,211,211,1); } /* LightGray */
+            line { stroke: rgb(0,0,0); } /* black */
+            line.parentChild { stroke: rgb(211,211,211); } /* LightGray */
             circle {
-                stroke: rgba(255,255,255,1); /* white */
-                fill: rgba(128,128,128,1); /* gray */
+                stroke: rgb(255,255,255); /* white */
+                fill: rgb(128,128,128); /* gray */
             }
-            .house { fill: rgba(0,0,255,1); } /* blue */
-            .triplex_meter { fill:rgba(255,165,0,1); } /* orange */
-            .underground_line { stroke: rgba(128,128,128,1);} 
-            .transformer { stroke:rgba(255,165,0,1); }
-            .regulator { stroke: rgba(255,0,0,1) ;} /* red */
-            .undefined,.regulator_configuration,.transformer_configuration,.triplex_line_configuration,.line_configuration,.volt_var_control,.line_spacing,.climate,.overhead_line_conductor,.underground_line_conductor,.triplex_line_conductor,.player,.schedule { fill: rgba(191,191,191,1); } /* 75% lightness gray */
+            .house { fill: rgb(0,0,255); } /* blue */
+            .triplex_meter { fill:rgb(255,165,0); } /* orange */
+            .underground_line { stroke: rgb(128,128,128);} 
+            .transformer { stroke:rgb(255,165,0); }
+            .regulator { stroke: rgb(255,0,0) ;} /* red */
+            .undefined,.regulator_configuration,.transformer_configuration,.triplex_line_configuration,.line_configuration,.volt_var_control,.line_spacing,.climate,.overhead_line_conductor,.underground_line_conductor,.triplex_line_conductor,.player,.schedule { fill: rgb(191,191,191); } /* 75% lightness gray */
         </style>
         <link rel="stylesheet" href="/static/jquery-ui.min.css">
         <script type="text/javascript" src="/static/jquery.js"></script>
@@ -1064,8 +1064,8 @@
                 <div class="modalContent">
                     <div data-tableinsert></div>
                     <div class="centered fullPadded">
-                        <button type="button" onclick="toggleElementDisplay('opacityModal');" class="modalButton">Close</button>
-                        <button type="button" onclick="gOpacityManager.reset();" class="modalButton">Reset</button>
+                        <button onclick="toggleElementDisplay('opacityModal');" class="modalButton">Close</button>
+                        <button onclick="gOpacityManager.reset();" class="modalButton">Reset</button>
                     </div>
                 </div>
             </div>
@@ -1075,8 +1075,8 @@
                     <div class="fullPadded"><input type="file" multiple accept=".csv" class="modalInput"></div>
                     <div data-tableinsert class="leftText vertFlex fullPadded"></div>
                     <div class="fullPadded">
-                        <button type="button" onclick="toggleElementDisplay('colorModal');" class="modalButton">Close</button>
-                        <button type="button" onclick="removeColors();"; class="modalButton">Reset</button>
+                        <button onclick="toggleElementDisplay('colorModal');" class="modalButton">Close</button>
+                        <button data-buttonfunction="reset" class="modalButton">Reset</button>
                     </div>
                 </div>
             </div>
@@ -1111,21 +1111,17 @@ const gCurrentUser = "{% if currentUser %}{{ currentUser | safe }}{% else %}null
 const gPublicFeeders = {% if publicFeeders %}{{ publicFeeders | safe }}{% else %}null{% endif %};
 const gUserFeeders = {% if userFeeders %}{{ userFeeders | safe }}{% else %}null{% endif %}; 
 const gWriteFeeder = deepCopy(gReadFeeder);
-// The global gTree can only be created after the entire file has been parsed.
-let gTree;
+let gTree; // A wrapper around the gWriteFeeder.tree data structure. Has methods for accessing and modifying the data.
 let gSelection;
 let gViewport; 
 let gOpacityManager;
-let gMinLon;
-let gMaxLat;
-let gLongitudeRange;
-let gLatitudeRange;
-let gDrawScaleFactor;
+let gMinLon; // The minimum longitude found among all the gWriteFeeder.tree objects. Used to transform and flip how the graph is drawn.
+let gMaxLat; // The maximum latitude found among all the gWriteFeeder.tree objects. Used to transform and flip how the graph is drawn.
+let gDrawScaleFactor; // A number that scales all graph data to fit within a 1000 x 1000 viewport size so the graph draws nicely.
 let gDownX;
 let gDownY;
 const gViridisColors = ["#440154FF", "#481567FF", "#482677FF", "#453781FF", "#404788FF", "#39568CFF", "#33638DFF", "#2D708EFF", "#287D8EFF", "#238A8DFF", "#1F968BFF", "#20A387FF", "#29AF7FFF", "#3CBB75FF", "#55C667FF", "#73D055FF", "#95D840FF", "#B8DE29FF", "#DCE319FF", "#FDE725FF"];
-// Scale that all SVG objects are drawn at
-let gScaleLevel = 1.0; 
+let gScaleLevel = 1.0; // Scale that all SVG objects are drawn at
 //**************************************************
 // Selection Interface
 //**************************************************
@@ -1237,24 +1233,22 @@ function createViewport(tree, svgContainer) {
     let {longitude: {min: minLon}} = minMax;
     let {longitude: {max: maxLon}} = minMax;
     /* Longitude is not reversed, so I want the minimum longitude to use as the offset. Latitude IS reversed, so I want the maximum latitude to use as the offset. */
-    gLongitudeRange = maxLon - minLon;
-    //gOffsetX = minLon;
+    const longitudeRange = maxLon - minLon;
+    const latitudeRange = maxLat - minLat;
     gMinLon = minLon;
-    gLatitudeRange = maxLat - minLat;
-    //gOffsetY = minLat;
     gMaxLat = maxLat;
     /* Multiply by the gDrawScaleFactor when drawing. Divide by the gDrawScaleFactor when storing. 
     We use the larger of the range values to set the gDrawScaleFactor to make the graph fit in the viewport initially.
     */
-    if (gLongitudeRange > gLatitudeRange) {
-        gDrawScaleFactor = 1000/gLongitudeRange;
+    if (longitudeRange > latitudeRange) {
+        gDrawScaleFactor = 1000/longitudeRange;
     } else {
-        gDrawScaleFactor = 1000/gLatitudeRange;
+        gDrawScaleFactor = 1000/latitudeRange;
     }
     svgContainer.setAttribute("viewBox",`0 0 ${1000} ${1000}`);
     /* Uncomment below to make gScaleFactor go away */
     //gDrawScaleFactor = 1;
-    //svgContainer.setAttribute("viewBox",`0 0 ${gLongitudeRange} ${gLatitudeRange}`);
+    //svgContainer.setAttribute("viewBox",`0 0 ${longitudeRange} ${latitudeRange}`);
     /* Uncomment above to make gScaleFactor go away */
 	window.panZoom = svgPanZoom("#svgContainer", {
         /* Override the default values set by "optionsDefaults" in svg-pan-zoom.js */
@@ -2918,7 +2912,6 @@ function attachMoveListener(keys, tBody=null, tObject=null) {
  */
 function move(objects, {x, y}) {
     let offsetX = gMinLon, offsetY = gMaxLat, scaleFactor = gDrawScaleFactor;
-    //let offsetX = gMinLon, offsetY = gOffsetY, scaleFactor = gDrawScaleFactor;
     if (arguments[2] != null) {// needed for testing
         offsetX = arguments[2].offsetX;
         offsetY = arguments[2].offsetY;
@@ -3036,7 +3029,7 @@ function isValidForAdd(keys, component) {
 }
 
 //**************************************************
-// Utility functions
+// Public utility functions
 //**************************************************
 
 /**
@@ -3044,8 +3037,6 @@ function isValidForAdd(keys, component) {
  * The line between a parent and child doesn't exist in the data itself, it's merely shown in the svg
  * to demonstrate the relationship between two nodes.
  */
-
-/* Public utility functions */
 
 /**
  * Return true if the string is a valid number, otherwise return false. Thanks stackoverflow.
@@ -3067,9 +3058,7 @@ function isNumberString(str) {
 /**
  * Return the type of the object with regard to this interface.
  * 
- * This function is important because the order in which an object is checked matters. For example, an object
- * could be both a 'line' type and a 'configurationNode' type, but the 'line' type should take precedence over the 
- * 'configurationNode' type, so 'line' should be returned.
+ * This function is important because the order in which an object is checked matters. For example, an object could be both a 'line' type and a 'configurationNode' type, but the 'line' type should take precedence over the 'configurationNode' type, so 'line' should be returned.
  * @param {Object} obj
  * @return {string}
  */
@@ -3086,9 +3075,9 @@ function getType(obj) {
 
 /** 
  * Return an object that is a copy of the argument object.
- * JSON.stringify will not copy a property of an object with an undefined value.
+ * 
  * @param {Object} oldObject - the object to copy.
- * @return {Object} - a copy of the object argument.
+ * @return {Object} - a copy of the oldObject.
  */
  function deepCopy(oldObject) {
     if (Object.getPrototypeOf(oldObject) !== Object.prototype) {
@@ -3100,6 +3089,7 @@ function getType(obj) {
         if (typeof(oldObject[key]) === "function") {
             throw new Error("This function cannot be used to copy objects with methods.");
         } else if (oldObject[key] === undefined) {
+            // JSON.stringify will not copy a property of an object with an undefined value.
             throw new Error("JSON.stringify silently ignores properties with undefined values, so this function cannot handle undefined values.");
         }
     }
@@ -3107,6 +3097,7 @@ function getType(obj) {
 }
 
 /**
+ * TODO: add unit tests
  * @return {Array} - contains all of the object types that exist in the graph.
  */
 function getExistingObjectTypes() {
@@ -3118,6 +3109,9 @@ function getExistingObjectTypes() {
     return objects;
 }
 
+/**
+ * Doesn't need unit tests.
+ */
 function enableDrag(table) {
     if (window.jQuery != null) {
         table.style.left = "50vw";
@@ -3137,6 +3131,8 @@ function getMixedCaseKey(object, lowercaseKey) {
 }
 
 /**
+ * Return the minimum and maximum values inside of an object or an object of objects.
+ * 
  * @param {Object} object - the object within which to find the minimum and maximum values.
  * @param {Object} objectContainer - an object which has other objects as properties.
  * @param {Array} properties - the properties to scan for min and max values across all objects in the objectContainer.
@@ -3185,7 +3181,145 @@ function getMinMax({object=null, objectContainer=null, properties=null}) {
     }
 }
 
-/* Private utility methods */
+/**
+ * Doesn't need unit tests.
+ * @param {HTMLElement} e
+ */
+ function getStyleAttribute(e) {
+    const tagName = e.tagName.toLowerCase();
+    return tagName === "circle" ? "fill" : "stroke";
+}
+
+/**
+ * TODO: add unit tests
+ * @param {string} rgba
+ * @return {string|undefined}
+ */
+function getAlpha(rgba) {
+    if (/rgba\(/.test(rgba)) {
+        return rgba.match(/\d[^,]*\d(?=\))/)[0];
+    }
+}
+
+/**
+ * Doesn't need unit tests
+ * @param {string} className
+ * @param {number} alpha
+ * @return {string}
+ */
+//function getDefaultFillWithAlpha(className, alpha) {
+//    const cssRule = this.getCSSRule(className);
+//    return cssRule.style.fill.replace(")", `, ${alpha})`);
+//}
+function getDefaultFill(className) {
+    const cssRule = this.getCSSRule(className);
+    return cssRule.style.fill;
+}
+
+/**
+ * Doesn't need unit tests.
+ * @param {string} className
+ * @param {number} alpha
+ * @return {string}
+ */ 
+//function getDefaultStrokeWithAlpha(className, alpha) {
+//    const cssRule = this.getCSSRule(className);
+//    return cssRule.style.stroke.replace(")", `, ${alpha})`);
+//}
+function getDefaultStroke(className) {
+    const cssRule = this.getCSSRule(className);
+    return cssRule.style.stroke;
+}
+
+/**
+ * Doesn't need unit tests. Tested via color().
+ * @param {HTMLElement} e - the HTMLElement to color.
+ * @param {string|Object} rgb - either an "rgb()" string or an instance of custom class from chroma.js
+ */
+function preserveAlphaWithNewColor(e, rgb) {
+    if (typeof rgb === "string") {
+        if (!/rgb\(/.test(rgb)) throw new Error("rgb argument must be an 'rgb' string, not an 'rgba' string");
+    } else {
+        rgb = rgb.css().replace(/,/g, ", ");
+    }
+    const firstThreeNumbers = /(\d+[^\d]+){2}\d+/;
+    const styleAttribute = getStyleAttribute(e);
+    const oldColor = e.style[styleAttribute];
+    const alpha = getAlpha(oldColor);
+    const defaultColorValues = (styleAttribute === "fill" ? getDefaultFill(e.classList[0]) : getDefaultStroke(e.classList[0])).match(firstThreeNumbers)[0];
+    if (alpha != null) {
+        e.style[styleAttribute] = rgb.replace(")", `, ${alpha})`).replace("b", "ba");
+        return;
+    }
+    if (rgb.match(firstThreeNumbers)[0] === defaultColorValues) {
+        e.removeAttribute("style");
+        return;
+    }
+    e.style[styleAttribute] = rgb;
+    return;
+    /*
+    if (oldColor === "") {
+
+        // If there was no alpha, just set the new color
+        e.style[styleAttribute] = rgb;
+        return;
+    }
+    const alpha = getAlpha(oldColor);
+    if (alpha != null) {
+        // If there was an inline alpha value, apply it to the new color
+        e.style[styleAttribute] = rgb.replace(")", `, ${alpha})`).replace("b", "ba");
+        return;
+    } 
+    const defaultColorValues = (styleAttribute === "fill" ? getDefaultFill(e.classList[0]) : getDefaultStroke(e.classList[0])).match(firstThreeNumbers)[0];
+    if (rgb.match(firstThreeNumbers)[0] === defaultColorValues) {
+        // If there was no inline alpha value, and the new color is equivalent to the default CSS color, then fallback to default CSS styling
+        e.removeAttribute("style");
+        return;
+    } else {
+        // If there was no inline alpha value, and the new color is unique, just apply the color
+        e.style[styleAttribute] = rgb;
+        return;
+    }
+    */
+}
+
+/**
+ * Doesn't need unit tests. Tested via setAlpha().
+ * Set the style of the HTMLElement to either its exisitng inline color with a new alpha value, or the default CSS coloring with the alpha value.
+ * @param {HTMLElement} e
+ * @param {number} alpha
+ */
+function preserveColorWithNewAlpha(e, alpha) {
+    if (typeof alpha !== "number") throw new Error("New alpha value must be a number");
+    if (alpha > 1 || alpha < 0) throw new Error("New alpha value must be between 0 and 1, inclusive.");
+    const firstThreeNumbers = /(\d+[^\d]+){2}\d+/;
+    const styleAttribute = getStyleAttribute(e);
+    let inlineColorValues = e.style[styleAttribute].match(firstThreeNumbers);
+    if (inlineColorValues == null) {
+        if (alpha === 1) {
+            e.removeAttribute("style");
+            return;
+        } else {
+            rgba = styleAttribute === "fill" ? getDefaultFill(e.classList[0]) : getDefaultStroke(e.classList[0]);
+            rgba = rgba.replace(")", `, ${alpha})`).replace("b", "ba");
+            e.style[styleAttribute] = rgba;
+            return;
+        }
+    } 
+    inlineColorValues = inlineColorValues[0];
+    const defaultColorValues = (styleAttribute === "fill" ? getDefaultFill(e.classList[0]) : getDefaultStroke(e.classList[0])).match(firstThreeNumbers)[0];
+    if (inlineColorValues === defaultColorValues && alpha === 1) {
+        e.removeAttribute("style");
+        return;
+    } else {
+        e.style[styleAttribute] = `rgba(${inlineColorValues}, ${alpha})`;
+        return;
+    }
+}
+
+//**************************************************
+// Private utility functions
+//**************************************************
 
 /**
  * Return true if the object has a 'parent' property, otherwise return false.
@@ -3213,6 +3347,38 @@ function isLine(obj) {
 function isConfigurationNode(obj) {
     if (obj.object == null || configurationTypes.includes(obj.object)) return true;
     return false;
+}
+
+/**
+ * TODO: add unit tests!
+ * Return the document CSSStyleRule that applies to the class name.
+ * @param {string} className
+ * @return {CSSStyleRule}
+ */
+function getCSSRule(className) {
+    const cssRules = document.styleSheets[0].cssRules;
+    const keys = Object.keys(cssRules);
+    let key = keys.find(key => {
+        const selectorString = cssRules[key].selectorText;
+        if (selectorString == null) return false;
+        const ary = selectorString.split(",").map(string => string.trim());
+        return ary.includes(`.${className}`);
+    });
+    if (key == null) {
+        let type;
+        try {
+            // Need try-catch because player objects have an "object" property but don't exist in components
+            type = getType(gComponents[className]);
+        } catch (e) {
+            type = "not a line";
+        }
+        if (type === "line") {
+            key = keys.find(key => cssRules[key].selectorText === "line");
+        } else {
+            key = keys.find(key => cssRules[key].selectorText === "circle");
+        }
+    }
+    return cssRules[key];
 }
 
 /**
@@ -3252,13 +3418,17 @@ function * getCoordinates(initX, initY, spacing) {
 }
 
 //**************************************************
-// Opacity interface
+// OpacityManager class
 //**************************************************
-
-/* Not mission critical or particularly complex. It's also easy to verify if it's working correctly. Therefore, doesn't need unit tests */
 
 const opacityManagerPrototype = {
 
+    /* Public methods */
+
+    /**
+     * Doesn't need unit tests.
+     * Fill the document opacity modal HTMLElement with content.
+     */
     buildOpacityModal() {
         const opacityModal = document.getElementById("opacityModal");
         const tableDiv = opacityModal.querySelector("[data-tableinsert");
@@ -3297,7 +3467,7 @@ const opacityManagerPrototype = {
             input.dataset.objecttype = objectType;
             const that = this;
             input.addEventListener("change", function() {
-                that.setOpacity({className: objectType, input: this});
+                that.setAlpha({className: objectType, input: this});
             });
             input.value = this[objectType];
             td.append(input);
@@ -3311,16 +3481,22 @@ const opacityManagerPrototype = {
         }
     },
 
-    setOpacity({className, input, value=null}) {
-        let opacity;
+    /**
+     * Set the alpha value on all HTMLElements with the specified class name.
+     * @param {string} className
+     * @param {HTMLInputElement} input
+     * @param {string} value
+     */
+    setAlpha({className, input, value=null}) {
+        let alpha;
         if (input != null) {
-            opacity = input.value;
+            alpha = input.value;
         } else if (value != null) {
-            opacity = value;
+            alpha = value;
         }
-        if (isNumberString(opacity)) {
-            opacity = parseFloat(opacity);
-            if (opacity < 0 || opacity > 1) {
+        if (isNumberString(alpha)) {
+            alpha = parseFloat(alpha);
+            if (alpha < 0 || alpha > 1) {
                 alert("The opacity value must be between 0 and 1, inclusive.");
                 input.value = this[className];
                 return;
@@ -3330,89 +3506,17 @@ const opacityManagerPrototype = {
             input.value = this[className];
             return;
         }
-        this[className] = opacity; //record the opacity in the gOpacityManager for the case of adding new elements.
-        const cssStyle = this.getNewFillOrStroke(className, opacity);
-        //cssStyle.rgba = cssStyle.rgba.replace(")", `, ${opacity})`);
+        this[className] = alpha; //record the alpha in the gOpacityManager for the case of adding new elements.
         const elements = Array.from(document.getElementsByClassName(className));
-        if (opacity === 1) {
-            elements.forEach(e => {
-                e.removeAttribute("style");
-            });
-        } else {
-            elements.forEach(e => {
-                e.style[cssStyle.target] = cssStyle.rgba;
-            });
-        }
-    },
-
-    highlight(className) {
-        Object.keys(this).forEach(key => {
-            if (key !== className) {
-                this[key] = 0.1;
-                this.setOpacity({className: key, value: "0.1"});
-            } else {
-                this[key] = 1;
-                this.setOpacity({className: key, value: "1"});
-            }
-        });
-        const opacityModal = document.getElementById("opacityModal");
-        const classInput = opacityModal.querySelector(`input[data-objecttype=${className}`);
-        Array.from(opacityModal.querySelectorAll("input[data-objecttype]")).forEach(input => {
-            if (input !== classInput) {
-                input.value = 0.1;
-            } else {
-                input.value = 1;
-            }
-        }); 
-    },
-
-    reset() {
-        Object.keys(this).forEach(key => {
-            this[key] = 1.0;
-            this.setOpacity({className: key, value: "1.0"});
-        });
-        Array.from(document.getElementById("opacityModal").querySelectorAll("input[data-objecttype]")).forEach(input => {
-            input.value = 1.0;
+        elements.forEach(e => {
+            preserveColorWithNewAlpha(e, alpha);
         });
     },
 
-    /* Private methods */
-
-    getNewFillOrStroke(className, opacity) {
-        const cssRules = document.styleSheets[0].cssRules;
-        const keys = Object.keys(cssRules);
-        let key = keys.find(key => {
-            const selectorString = cssRules[key].selectorText;
-            if (selectorString == null) return false;
-            const ary = selectorString.split(",").map(string => string.trim());
-            return ary.includes(`.${className}`);
-        });
-        if (key == null) {
-            let type;
-            try {
-                type = getType(gComponents[className]);
-            } catch (e) {
-                type = "not a line";
-            }
-            if (type === "line") {
-                key = keys.find(key => cssRules[key].selectorText === "line");
-            } else {
-                key = keys.find(key => cssRules[key].selectorText === "circle");
-            }
-        }
-        let obj = {};
-        const fill = cssRules[key].style.fill;
-        if (fill !== "") {
-            obj.target = "fill";
-            obj.rgba = fill;
-        } else {
-            obj.target = "stroke";
-            obj.rgba = cssRules[key].style.stroke;
-        }
-        obj.rgba = obj.rgba.replace(")", `, ${opacity})`);
-        return obj;
-    },
-
+    /**
+     * Doesn't need unit tests.
+     * Update the OpacityManager to always display existing object types.
+     */
     update() {
         const existingObjects = getExistingObjectTypes();
         existingObjects.forEach(objectType => {
@@ -3427,9 +3531,52 @@ const opacityManagerPrototype = {
                 delete this[key];
             }
         });
-    }
+    },
+
+    /* Private methods */
+
+    /**
+     * Set the alpha of every other object type to 0.1.
+     * @param {string} className
+     */
+    highlight(className) {
+        Object.keys(this).forEach(key => {
+            if (key !== className) {
+                this[key] = 0.1;
+                this.setAlpha({className: key, value: "0.1"});
+            } else {
+                this[key] = 1;
+                this.setAlpha({className: key, value: "1"});
+            }
+        });
+        const opacityModal = document.getElementById("opacityModal");
+        const classInput = opacityModal.querySelector(`input[data-objecttype=${className}`);
+        Array.from(opacityModal.querySelectorAll("input[data-objecttype]")).forEach(input => {
+            if (input !== classInput) {
+                input.value = 0.1;
+            } else {
+                input.value = 1;
+            }
+        }); 
+    },
+
+    /**
+     * Set the alpha of every object type to 1.
+     */
+    reset() {
+        Object.keys(this).forEach(key => {
+            this[key] = 1.0;
+            this.setAlpha({className: key, value: "1.0"});
+        });
+        Array.from(document.getElementById("opacityModal").querySelectorAll("input[data-objecttype]")).forEach(input => {
+            input.value = 1.0;
+        });
+    },
 };
 
+/**
+ * An OpacityManager is really setting alpha values on HTMLElements, but the term "opacity" is more straightforward.
+ */
 function createOpacityManager() {
     const om = Object.create(opacityManagerPrototype);
     getExistingObjectTypes().forEach(objectType => {
@@ -3446,18 +3593,16 @@ const colorMapPrototype = {
 
     /* Public methods */
 
-    /* Doesn't need unit tests */
+    /**
+     * Apply a color to each HTMLElement that maps to an object that exists in this ColorMap. If any element had an alpha value, preserve it.
+     */ 
     color() {
         const invalidNames = [];
         Object.keys(this.colorMap).forEach(name => {
             try {
                 const key = gTree.treeMap.getKey(name);
-                const obj = document.getElementById(key);
-                if (obj.tagName.toLowerCase() === "circle") {
-                    obj.style.fill = this.colorMap[name];
-                } else if (obj.tagName.toLowerCase() === "line") {
-                    obj.style.stroke = this.colorMap[name];
-                }
+                const e = document.getElementById(key);
+                preserveAlphaWithNewColor(e, this.colorMap[name]);
             } catch (e) {
                 invalidNames.push(name);
             }
@@ -3465,34 +3610,35 @@ const colorMapPrototype = {
         if (invalidNames.length > 0) {
             alert(`Unable to color the following objects because they weren't found in this graph: "${invalidNames.join(", ")}".`);
         } else {
-            alert(`Successfully colored all objects according to the specified column "${this.title}" in the specified csv file "${this.colorFileTitle}".`);
+            alert(`Successfully colored all objects according to the specified column "${this.title}" in the specified csv file "${this.parentTitle}".`);
         }
     },
 
+    /**
+     * TODO: break up into smaller methods?
+     * Doesn't need unit tests.
+     * Create a legend for the color map and append it to the "colorLegends" div.
+     */
     appendLegend() {
         const masterDiv = document.createElement("div");
         masterDiv.classList.add("modalContent");
         masterDiv.classList.add("centered");
         masterDiv.style.border = "1px solid black";
         masterDiv.style.alignContent = "center";
-        masterDiv.setAttribute("data-colorfile", this.colorFileTitle);
+        masterDiv.setAttribute("data-colorfile", this.parentTitle);
         masterDiv.setAttribute("data-colormap", this.title);
-
         let h = document.createElement("h2");
-        h.textContent = this.colorFileTitle;
+        h.textContent = this.parentTitle;
         masterDiv.append(h);
-
         h = document.createElement("h3");
         h.textContent = this.title;
         masterDiv.append(h);
-
         const flexbox = document.createElement("div");
         flexbox.classList.add("legendFlex");
         let div = document.createElement("div");
         div.classList.add("legendGradiant");
         div.style.background = `linear-gradient(0deg,${gViridisColors.join(",")})`;
         flexbox.append(div);
-
         div = document.createElement("div");
         div.classList.add("vertFlex");
         div.classList.add("legendAxis");
@@ -3508,17 +3654,21 @@ const colorMapPrototype = {
             } else {
                 val = this.min + i * increment;
             }
+            val = val.toString();
+            let decimalIdx = val.indexOf(".");
+            if (decimalIdx !== -1) {
+                val = val.slice(0, decimalIdx + 5);
+            }
             p.textContent = val;
             div.prepend(p);
         }
         flexbox.append(div);
         masterDiv.append(flexbox);
-
         div = document.createElement("div");
         div.style.margin = "20px 0px 0px 0px";
         const button = getTableButton("Close", () => {
             const legendDiv = document.getElementById("colorLegends");
-            const legend = legendDiv.querySelector(`div[data-colorfile='${this.colorFileTitle}'],[data-colormap='${this.title}']`);
+            const legend = legendDiv.querySelector(`div[data-colorfile='${this.parentTitle}'],[data-colormap='${this.title}']`);
             legend.parentElement.removeChild(legend);
         });
         div.append(button);
@@ -3529,7 +3679,9 @@ const colorMapPrototype = {
 
     /* private methods */
 
-    /* Use the 'viridis' color map and map the min and max values to the darkest and lighest colors */
+    /**
+     * Create a color map by mapping the 'viridis' color scale to the data inside of this.colorMap.
+     */
     buildColorScale() {
         const {min, max} = getMinMax({object: this.colorMap});
         this.min = min;
@@ -3540,13 +3692,19 @@ const colorMapPrototype = {
         });
         this.colorScale = f;
     }
-
 }
 
-function createColorMap(title, colorFileName) {
+/**
+ * Doesn't need unit tests.
+ * A ColorMap is a wrapper around an object that maps tree object names to colors.
+ * @param {string} title - the header of the column in the csv that this color map is representing.
+ * @param {ColorFile} parent - the ColorFile that contains this ColorMap. 
+ * @return {ColorMap}
+ */
+function createColorMap(title, parentTitle) {
     const obj = Object.create(colorMapPrototype);
-    obj.colorFileTitle = colorFileName;
     obj.title = title;
+    obj.parentTitle = parentTitle;
     obj.colorMap = {};
     return obj;
 }
@@ -3583,6 +3741,10 @@ const colorFilePrototype = {
         const button = getTableButton("Color", () => {
             const colorMapName = document.getElementById("colorModal").querySelector(`select[data-colorfile='${this.title}']`).value;//need quotes around the dataset value because of the '.' in the file name.
             const colorMap = this.colorMaps.find(cm => cm.title === colorMapName);
+            //If the graph hasn't been desaturated, then it needs to be. If is has been desaturated, then do nothing
+            if (this.parent.graphIsDesaturated === false) {
+                this.parent.desaturateGraph();
+            }
             colorMap.color();
             colorMap.appendLegend();
         });
@@ -3593,67 +3755,145 @@ const colorFilePrototype = {
     },
 
     /* Private methods */
+
+    /**
+     * TODO: add unit tests
+     * Build an array of ColorMaps by parsing the csv file and return the array.
+     * @param {File} file
+     * @return {Promise}
+     */
+    buildColorMaps(file) {
+        const that = this;
+        return new Promise(function(resolve, reject) {
+            Papa.parse(file, {
+                dynamicTyping: true,
+                complete: function(results, file) {
+                    const colorMaps = [];
+                    try {
+                        const headerRow = results.data[0];
+                        for (let i = 1; i < headerRow.length; i++) {
+                            colorMaps.push(createColorMap(headerRow[i], that.title));
+                        }
+                        for (let i = 1; i < results.data.length; i++) {
+                            let row = results.data[i];
+                            for (let j = 1; j < row.length; j++) {
+                                colorMaps[j - 1].colorMap[row[0]] = row[j];
+                            }
+                        }
+                        colorMaps.forEach(cm => cm.buildColorScale());
+                        resolve(colorMaps);
+                    } catch (e) {
+                        reject();
+                    }
+                }
+            });
+        });
+    }
 }
 
 /**
- * @param {File} file - a csv file that maps names of objects to voltage or current values.
+ * A ColorFile is a grouping of associated ColorMap objects.
+ * @param {File} file - a csv file that maps the name of an object in this tree data to other data.
  * @return {ColorFile}
  */
-function createColorFile(file) {
-    return new Promise(function(resolve, reject) {
-        const obj = Object.create(colorFilePrototype);
-        obj.colorMaps = [];
-        obj.title = file.name;
-        Papa.parse(file, {
-            dynamicTyping: true,
-            complete: function(results, file) {
-                try {
-                    const headerRow = results.data[0];
-                    for (let i = 1; i < headerRow.length; i++) {
-                        obj.colorMaps.push(createColorMap(headerRow[i], obj.title));
-                    }
-                    for (let i = 1; i < results.data.length; i++) {
-                        let row = results.data[i];
-                        for (let j = 1; j < row.length; j++) {
-                            obj.colorMaps[j - 1].colorMap[row[0]] = row[j];
-                        }
-                    }
-                    obj.colorMaps.forEach(cm => cm.buildColorScale());
-                    resolve(obj);
-                    //return obj;
-                    //console.log(obj.colorMaps[obj.colorMaps.length - 1].title);
-                    //console.log(obj.colorMaps[obj.colorMaps.length - 1].colorMap);
-                } catch (e) {
-                    reject();
-                    //return;
-                }
+async function createColorFile(file, parent) {
+    const obj = Object.create(colorFilePrototype);
+    obj.title = file.name;
+    obj.parent = parent;
+    obj.colorMaps = await obj.buildColorMaps(file);
+    return obj;
+}
+
+const colorManagerPrototype = {
+
+    /* Public methods */
+
+    /**
+     * Doesn't need unit tests.
+     * Load the CSV files into ColorFile objects and fill the color modal HTML with content.
+     * 
+     * @param {FileList} files - the CSV files to be used to color the graph.
+     */
+    async buildHTML(files) {
+        this.colorFiles = await this.buildColorFiles(Array.from(files));
+        const tableDiv = document.getElementById("colorModal").querySelector("div[data-tableinsert]");
+        while (tableDiv.firstChild) {
+            tableDiv.removeChild(tableDiv.firstChild);
+        }
+        this.colorFiles.forEach(cf => {
+            tableDiv.append(cf.getTable());
+        });
+    },
+
+    /**
+     * Remove all colors that were applied by all ColorMaps from all HTMLElements. If any element had an inline alpha value, preserve it.
+     */
+    removeColors() {
+        Object.keys(gTree.tree).forEach(key => {
+            const e = document.getElementById(key);
+            // Need to watch out for objects that weren't drawn, like lines with non-existent node ends
+            if (e != null) {
+                const color = e.tagName.toLowerCase() === "circle" ? getDefaultFill(e.classList[0]) : getDefaultStroke(e.classList[0]);
+                preserveAlphaWithNewColor(e, color);
             }
         });
-    });
-}
+        this.graphIsDesaturated = false;
+    },
 
-function buildColorModal() {
-    const tableDiv = document.getElementById("colorModal").querySelector("div[data-tableinsert]");
-    while (tableDiv.firstChild) {
-        tableDiv.removeChild(tableDiv.firstChild);
+    /**
+     * Prepare the graph to handle multiple overlapping ColorMap colorings by removing all special default colors from nodes and lines. For example, houses will go from blue to gray and transformers will go from yellow to gray.
+     */
+    desaturateGraph() {
+        const cssRules = document.styleSheets[0].cssRules;
+        const keys = Object.keys(cssRules);
+        const circleFill = cssRules[keys.find(key => cssRules[key].selectorText === "circle")].style.fill;
+        const lineStroke = cssRules[keys.find(key => cssRules[key].selectorText === "line")].style.stroke;
+        Object.keys(gTree.tree).forEach(key => {
+            const e = document.getElementById(key);
+            // Need to watch out for data objects that weren't drawn, like lines with non-existent nodes
+            if (e != null) {
+                const color = e.tagName.toLowerCase() === "circle" ? circleFill : lineStroke;
+                preserveAlphaWithNewColor(e, color)
+            }
+        });
+        this.graphIsDesaturated = true;
+    },
+
+    /* Private methods */
+
+    /**
+     * Doesn't need unit tests.
+     * Asynchronously create an array of ColorFiles and return it inside of a Promise.
+     * @param {Array} files
+     * @return {Promise}
+     */
+    buildColorFiles(files) {
+        const that = this;
+        return new Promise(async function(resolve, reject) {
+            const colorFiles = [];
+            for (let file of files) {
+                try {
+                    const cf = await createColorFile(file, that);
+                    colorFiles.push(cf);
+                } catch (e) {
+                    alert(`We could not parse the CSV file "${file.name}" that you provided.`);
+                }
+            }
+            resolve(colorFiles);
+        });
     }
-    const colorFiles = Array.from(this.files).map(async function(file) {
-        try {
-            const cf = await createColorFile(file);
-            const table = cf.getTable();
-            tableDiv.append(table);
-        } catch (e) {
-            alert(`We could not parse the CSV file "${file.name}" that you provided.`);
-        }
-    });
 }
 
-/* Doesn't need unit tests */
-function removeColors() {
-    Object.keys(gTree.tree).forEach(key => {
-        const e = document.getElementById(key);
-        e.removeAttribute("style");
-    });
+/**
+ * Doesn't need unit tests.
+ * A ColorManager object contains ColorFile objects.
+ * @return {ColorManager}
+ */
+function createColorManager() {
+    const obj = Object.create(colorManagerPrototype);
+    obj.graphIsDesaturated = false;
+    //obj.colorFiles = await obj.buildColorFiles(Array.from(files));
+    return obj;
 }
 
 //**************************************************
@@ -3709,8 +3949,8 @@ function createCircle(nodeKey) {
     circle.cy = (gMaxLat - lat) * gDrawScaleFactor;
     const opacity = gOpacityManager[node.object];
     if (opacity != null && opacity !== 1) {
-        const cssStyle = gOpacityManager.getNewFillOrStroke(node.object, opacity);
-        circle.fill = cssStyle.rgba;
+        const newFill = gOpacityManager.getDefaultFillWithAlpha(node.object, opacity);
+        circle.fill = newFill;
     }
     return circle;
 }
@@ -3759,10 +3999,8 @@ function createParentChildLineWithLine(lineKey, childKey) {
     const child = tree.getObject(childKey);
     line.x1 = (((toNode.longitude + fromNode.longitude)/2) - gMinLon) * gDrawScaleFactor;
     line.y1 = (gMaxLat - ((toNode.latitude + fromNode.latitude)/2)) * gDrawScaleFactor;
-    //line.y1 = (((toNode.latitude + fromNode.latitude)/2) - gOffsetY) * gDrawScaleFactor;
     line.x2 = (child.longitude - gMinLon) * gDrawScaleFactor;
     line.y2 = (gMaxLat - child.latitude) * gDrawScaleFactor;
-    //line.y2 = (child.latitude - gOffsetY) * gDrawScaleFactor;
     line.id = getParentChildLineId(lineKey, childKey, tree);    
     line.class = "parentChild";
     line["stroke-width"] = .5 * gScaleLevel;
@@ -3787,10 +4025,8 @@ function createParentChildLineWithNode(parentKey, childKey) {
     const child = tree.getObject(childKey); // Don't need to check for nonexistent parent because I already do that elsewhere
     line.x1 = (parent.longitude - gMinLon) * gDrawScaleFactor;
     line.y1 = (gMaxLat - parent.latitude) * gDrawScaleFactor;
-    //line.y1 = (parent.latitude - gOffsetY) * gDrawScaleFactor;
     line.x2 = (child.longitude - gMinLon) * gDrawScaleFactor;
     line.y2 = (gMaxLat - child.latitude) * gDrawScaleFactor;
-    //line.y2 = (child.latitude - gOffsetY) * gDrawScaleFactor;
     line.id = getParentChildLineId(parentKey, childKey, tree);
     line.class = "parentChild";
     line["stroke-width"] = .5 * gScaleLevel;
@@ -3809,10 +4045,8 @@ function createLine(lineKey) {
     if (toNode == null || fromNode == null) return; // A line could have nonexistent 'to' or 'from' nodes
     line.x1 = (fromNode.longitude - gMinLon) * gDrawScaleFactor;
     line.y1 = (gMaxLat - fromNode.latitude) * gDrawScaleFactor;
-    //line.y1 = (fromNode.latitude - gOffsetY) * gDrawScaleFactor;
     line.x2 = (toNode.longitude - gMinLon) * gDrawScaleFactor;
     line.y2 = (gMaxLat - toNode.latitude) * gDrawScaleFactor;
-    //line.y2 = (toNode.latitude - gOffsetY) * gDrawScaleFactor;
     line.id = lineKey;
     const lineObject = tree.getObject(lineKey);
     const phaseCount = countPhases(lineObject.phases);
@@ -3829,8 +4063,8 @@ function createLine(lineKey) {
     }
     const opacity = gOpacityManager[lineObject.object];
     if (opacity != null && opacity !== 1) {
-        const cssStyle = gOpacityManager.getNewFillOrStroke(lineObject.object, opacity);
-        line.stroke = cssStyle.rgba;
+        const newStroke = gOpacityManager.getDefaultStrokeWithAlpha(lineObject.object, opacity);
+        line.stroke = newStroke;
     }
     return line;
 }
@@ -4683,7 +4917,6 @@ function getMoveNodesFunction(objects, tBody=null, tObject=null) {
             Array.from(tBody.getElementsByTagName("input")).forEach(input => {
                 if (input.dataset.coordinate === "latitude") {
                     input.value = gMaxLat - coords.y/gDrawScaleFactor;
-                    //input.value = coords.y/gDrawScaleFactor + gOffsetY;
                 } else if (input.dataset.coordinate === "longitude") {
                     input.value = coords.x/gDrawScaleFactor + gMinLon;
                 }
@@ -4757,7 +4990,6 @@ function createInterface() {
     gTree = createTree(gWriteFeeder.tree);
     const objects = Object.values(gTree.tree);
     insertCoordinates(objects, gMinLon, gMaxLat, (1000/gDrawScaleFactor) * .005);
-    //insertCoordinates(objects, gMinLon, gOffsetY, (1000/gDrawScaleFactor) * .005);
     gSelection = createSelection();
     gOpacityManager = createOpacityManager();
     gViewport = document.getElementsByClassName("svg-pan-zoom_viewport")[0];
@@ -4785,6 +5017,17 @@ function initializeFindModal() {
     });
 }
 
+function initializeColorModal() {
+    const colorModal = document.getElementById("colorModal");
+    const colorManager = createColorManager();
+    colorModal.querySelector("input[type=file]").addEventListener("change", async function() {
+        await colorManager.buildHTML(this.files);
+    });
+    colorModal.querySelector("button[data-buttonfunction='reset']").addEventListener("click", () => {
+        colorManager.removeColors();
+    });
+}
+
 (function initialize() {
     createInterface();
     attachHandlers();
@@ -4792,7 +5035,7 @@ function initializeFindModal() {
     attachMouseListeners();
     attachKeyListener();
     initializeFindModal();
-    document.getElementById("colorModal").querySelector("input[type=file]").addEventListener("change", buildColorModal);
+    initializeColorModal();
     document.getElementById("loadingMessage").style.display = "none"
 })();
 
