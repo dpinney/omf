@@ -33,19 +33,19 @@ def runGld(modelType):
 	elif modelType == 'waterheater':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = 'RESISTANCE'
-		graphType == 'waterheater'
+		graphType = 'waterheater'
 	elif modelType == 'def_load':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = 'RESISTANCE'
-		graphType == 'def_load'
+		graphType = 'def_load'
 	elif modelType == 'non_def_load':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = 'RESISTANCE'
-		graphType == 'non_def_load'
+		graphType = 'non_def_load'
 	elif modelType == 'EV':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = 'RESISTANCE'
-		graphType == 'EV'
+		graphType = 'EV'
 
 	with open('in_super_house.glm', 'r') as myfile:
 	    data=myfile.read()
@@ -82,9 +82,9 @@ def runGld(modelType):
 
 	os.system('gridlabd '+'temp_super_house.glm')
 	os.remove('temp_super_house.glm')
-	return graphWrapper(graphType)
+	return graphHandler(graphType)
 
-def graphWrapper(graphType):
+def graphHandler(graphType):
 	if graphType == 'out_super_house':
 		plotLoadHouse()
 	elif graphType == 'waterheater':
@@ -101,40 +101,68 @@ def plotLoadHouse():
 	fileOb = open('out_super_house.csv')
 	for x in range(8):
 	# Burn the headers.
-	fileOb.readline()
+		fileOb.readline()
 	data = list(csv.DictReader(fileOb))
 	# Plot Heat and AC load
 	plt.switch_backend('MacOSX')
 	plt.figure()
-	formatter = mdates.DateFormatter('%H-%m-%S')
-	dates = mdates.datestr2num([x.get('# timestamp').split(' ')[1] for x in data])
+	formatter = mdates.DateFormatter('%Y-%m-%d')
+	dates = mdates.datestr2num([''.join(x.get('# timestamp')) for x in data])
 	plt.plot_date(dates, [float(x.get('heating_demand', 0.0)) for x in data], '-', label="Heating")
 	plt.plot_date(dates, [float(x.get(' cooling_demand', 0.0)) for x in data], '-', label="Cooling")
 	ax = plt.gcf().axes[0]
 	ax.xaxis.set_major_formatter(formatter)
 	plt.gcf().autofmt_xdate(rotation=45)
-	plt.title('New Years Day, Huntsville, AL, '+modelType+' Heating System')
+	plt.title('New Years Day, Huntsville, AL, Cooling, Heating System')
 	plt.legend()
 	plt.xlabel('Time Stamp')
 	plt.ylabel('Demand (kW)')
-	plt.figure()
+	plt.show()
 
 def plotLoadWaterheater():
 	fileOb = open('out_super_house_waterheater.csv')
 	for x in range(8):
-	# Burn the headers.
-	fileOb.readline()
+		# Burn the headers.
+		fileOb.readline()
 	data = list(csv.DictReader(fileOb))
-	# Plot Heat and AC load
 	plt.switch_backend('MacOSX')
 	plt.figure()
-	formatter = mdates.DateFormatter('%H-%m-%S')
-	dates = mdates.datestr2num([x.get('# timestamp').split(' ')[1] for x in data])
+	formatter = mdates.DateFormatter('%Y-%m-%d')
+	dates = mdates.datestr2num([''.join(x.get('# timestamp')) for x in data])
+	plt.plot_date(dates, [float(x.get('actual_load', 0.0)) for x in data], '-', label="Load")
+	ax = plt.gcf().axes[0]
+	ax.xaxis.set_major_formatter(formatter)
+	plt.gcf().autofmt_xdate(rotation=45)
+	plt.suptitle('New Years Day, Huntsville, AL, waterheater load in (kW)')
+	plt.title('Path to raw data is installation directory', fontsize =10 )
+	plt.legend()
+	plt.xlabel('Time Stamp')
+	plt.ylabel('Demand (kW)')
+	plt.show()
 
+# def	plotLoadDef_Load():
+# def plotLoadNonDef_Load():
 
-def	plotLoadDef_Load():
-def plotLoadNonDef_Load():
 def plotLoadEV():
+	fileOb = open('out_super_house_EV.csv')
+	for x in range(8):
+		# Burn the headers.
+		fileOb.readline()
+	data = list(csv.DictReader(fileOb))
+	plt.switch_backend('MacOSX')
+	plt.figure()
+	formatter = mdates.DateFormatter('%Y-%m-%d')
+	dates = mdates.datestr2num([''.join(x.get('# timestamp')) for x in data])
+	plt.plot_date(dates, [float(x.get('charge_rate', 0.0)) for x in data], '-', label="Load")
+	ax = plt.gcf().axes[0]
+	ax.xaxis.set_major_formatter(formatter)
+	plt.gcf().autofmt_xdate(rotation=45)
+	plt.suptitle('New Years Day, Huntsville, AL, EV load in (W)')
+	plt.title('Path to raw data is installation directory', fontsize =10 )
+	plt.legend()
+	plt.xlabel('Time Stamp')
+	plt.ylabel('Demand (W)')
+	plt.show()
 
 
 
@@ -142,8 +170,8 @@ def plotTemp():
 	# Get the data
 	fileOb = open('out_super_house.csv')
 	for x in range(8):
-	# Burn the headers.
-	fileOb.readline()
+		# Burn the headers.
+		fileOb.readline()
 	data = list(csv.DictReader(fileOb))
 	plt.title('New Years Day, Huntsville, AL, Temperatures')
 	plt.plot_date(dates, [float(x.get(' air_temperature', 0.0)) for x in data], '-', label="Indoor")
@@ -169,5 +197,5 @@ if __name__ == '__main__':
 	# )
 	# args = parser.parse_args()
 	# modelType = args.model_type
-	modelType = 'Resistance'
+	modelType = 'EV'
 	runGld(modelType)

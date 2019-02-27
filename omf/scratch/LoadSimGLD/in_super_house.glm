@@ -32,38 +32,39 @@ object climate {
 };
 
 object recorder {
-	interval 60;
+	interval 3600;
 	property heating_demand, cooling_demand, heating_setpoint, air_temperature, outdoor_temperature;
 	file out_super_house.csv;
 	parent house0;
 };
 
 object recorder {
-	interval 60;
+	interval 3600;
 	property measured_real_energy;
 	file out_super_house_triplex_meter.csv;
 	parent R4-25-00-1_tm_1;
 };
 
 object recorder {
-	interval 60;
-	property measured_real_energy;
-	file out_super_house_triplex_meter.csv;
-	parent R4-25-00-1_tm_1;
-};
-
-object recorder {
-	interval 60;
+	interval 3600;
 	property actual_load, waterheater_power;
 	file out_super_house_waterheater.csv;
 	parent waterHeater_house0;
 };
 
+object recorder {
+	interval 3600;
+	property charge_rate;
+	file out_super_house_EV.csv;
+	parent ev_house0;
+};
+
+
 object collector {
 	name collector_ZIPloads;
 	group class=ZIPload;
 	property sum(base_power);
-	interval 60;
+	interval 3600;
 	file out_load_ziploads.csv;
 };
 
