@@ -186,6 +186,12 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 				'property':'continuous_rating',
 				'file':key+'_cont_rating.csv'
 			}
+	#Record initial status readout of each fuse/recloser/switch/sectionalizer before running
+	protDeviceValues = {}
+	for key in tree:
+		if tree[key].get('object','') in ['fuse', 'recloser', 'switch', 'sectionalizer']:
+			protDeviceValues[tree[key].get('name','')] = [tree[key].get('status','')]
+	#print protDeviceValues
 	# Run Gridlab.
 	if not workDir:
 		workDir = tempfile.mkdtemp()
@@ -199,6 +205,12 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 	reader = csv.reader(dumpFile)
 	reader.next() # Burn the header.
 	keys = reader.next()
+	#Record final status readout of each fuse/recloser/switch/sectionalizer before running
+	for key in tree:
+		if tree[key].get('object','') in ['fuse', 'recloser', 'switch', 'sectionalizer']:
+			protDeviceValues[tree[key].get('name','')].append(tree[key].get('status',''))
+	print protDeviceValues
+
 	voltTable = []
 	for row in reader:
 		rowDict = {}
@@ -350,9 +362,7 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 				edgeTupleNames[coord] = edge
 				if faultLoc == edge:
 					edgeTupleFaultNames[coord] = "FAULT: " + edge
-				phaseStr = obj.get('phases','').replace('"','')
-				phaseStr.replace('N','')
-				phaseStr.replace('S','')
+				phaseStr = obj.get('phases','').replace('"','').replace('N','').replace('S','')
 				numPhases = len(phaseStr)
 				if (numPhases < 1) or (numPhases > 3):
 					numPhases = 1
