@@ -15,6 +15,7 @@ plt.switch_backend('Agg')
 # OMF imports 
 import omf.feeder as feeder
 from omf.solvers import gridlabd
+from omf.weather import zipCodeToClimateName
 
 # Model metadata:
 modelName, template = metadata(__file__)
@@ -22,6 +23,9 @@ tooltip = "Calculate phase unbalance and determine mitigation options."
 hidden = True
 
 def _addCollectors(tree):
+	for x in tree.values():
+		if 'object' in x and 'load' in x['object'] and 'A' in x['phases'] and 'B' in x['phases'] and 'C' in x['phases']:
+			x['groupid'] = 'threePhase'
 	max_key = int(max(tree, key=int))
 	tree[str(max_key+1)] = {'property': 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)', 'object': 'collector', 'group': 'class=transformer', 'limit': '0', 'file': 'ZlossesTransformer.csv'}
 	tree[str(max_key+2)] = {'property': 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)', 'object': 'collector', 'group': 'class=underground_line', 'limit': '0', 'file': 'ZlossesUnderground.csv'}
@@ -29,6 +33,7 @@ def _addCollectors(tree):
 	tree[str(max_key+4)] = {'property': 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)', 'object': 'collector', 'group': 'class=triplex_line', 'limit': '0', 'file': 'ZlossesTriplex.csv'}
 	tree[str(max_key+5)] = {'property': 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)', 'object': 'collector', 'group': 'class=inverter', 'limit': '0', 'file': 'distributedGen.csv'}
 	tree[str(max_key+6)] = {'property': 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)', 'object': 'collector', 'group': 'class=load', 'limit': '0', 'file': 'loads.csv'}
+	tree[str(max_key+6)] = {'property': 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)', 'object': 'collector', 'group': 'class=load AND groupid=threePhase', 'limit': '0', 'file': 'threephaseloads.csv'}
 	return tree
 
 def work(modelDir, inputDict):
@@ -36,6 +41,11 @@ def work(modelDir, inputDict):
 	outData = {}
 	# feederName = inputDict["feederName1"]
 	print(os.listdir(modelDir))
+	# Copy spcific climate data into model directory
+	inputDict["climateName"] = zipCodeToClimateName(inputDict["zipCode"])
+	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 
+	pJoin(modelDir, "climate.tmy2"))
+	
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict["feederName1"] = feederName
 	# Create voltage drop plot.
@@ -462,6 +472,23 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 		plt.colorbar()
 	return voltChart
 
+def readGroupRecorderCSV( filename ):
+	dataDictionary = {}
+	with open(filename,'r') as csvFile:
+		reader = csv.reader(csvFile)
+		# loop past the header, 
+		[keys,vals] = [[],[]]
+		for row in reader:
+			if '# timestamp' in row:
+				keys = row
+				i = keys.index('# timestamp')
+				keys.pop(i)
+				vals = reader.next()
+				vals.pop(i)
+		for pos,key in enumerate(keys):
+			dataDictionary[key] = vals[pos]
+	return dataDictionary
+
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
@@ -469,6 +496,12 @@ def new(modelDir):
 		"modelType": modelName,
 		"runTime": "",
 		"layoutAlgorithm": "forceDirected",
+		"zipCode": "64735",
+		"systemSize":"100",
+		"inverterSize": "75",
+		"inverterEfficiency": "92",
+		"retailCost": "0.05",
+		"discountRate": "7",
 		"edgeCol" : "None",
 		"nodeCol" : "Voltage",
 		"nodeLabs" : "None",

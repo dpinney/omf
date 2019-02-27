@@ -17,6 +17,7 @@ from omf.weather import zipCodeToClimateName
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = "The solarFinancial model gives users the expected financial output of a PV system based on its costs and the amount energy it will likely produce."
+hidden = False
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''

@@ -10,6 +10,7 @@ modelName, template = metadata(__file__)
 tooltip = ("The storageDeferral model calculates the amount of energy storage "
 	"capacity needed to reduce the load on a substation transformer or line "
 	"below a user-defined limit.")
+hidden = False
 
 def work(modelDir, inputDict):
 	''' Run the model in a separate process. web.py calls this to run the model.
