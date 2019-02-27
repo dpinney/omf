@@ -127,6 +127,9 @@ def plotLoadWaterheater():
 	data = list(csv.DictReader(fileOb))
 	# Plot Heat and AC load
 	plt.switch_backend('MacOSX')
+	plt.figure()
+	formatter = mdates.DateFormatter('%H-%m-%S')
+	dates = mdates.datestr2num([x.get('# timestamp').split(' ')[1] for x in data])
 
 
 def	plotLoadDef_Load():
