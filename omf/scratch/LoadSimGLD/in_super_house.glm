@@ -1,11 +1,11 @@
 clock {
 	timezone EST5;
 	starttime '2012-01-01 12:00:00';
-	stoptime '2012-01-01 15:00:00';
+	stoptime '2013-01-01 15:00:00';
 };
 
 #include "inc_super_schedules.glm";
-#set minimum_timestep=60;
+#set minimum_timestep=3600;
 #set profiler=1;
 #set relax_naming_rules=1;
 module generators;
@@ -54,7 +54,7 @@ object recorder {
 
 object recorder {
 	interval 60;
-	property actual_load;
+	property actual_load, waterheater_power;
 	file out_super_house_waterheater.csv;
 	parent waterHeater_house0;
 };
