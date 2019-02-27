@@ -3204,13 +3204,8 @@ function getAlpha(rgba) {
 /**
  * Doesn't need unit tests
  * @param {string} className
- * @param {number} alpha
  * @return {string}
  */
-//function getDefaultFillWithAlpha(className, alpha) {
-//    const cssRule = this.getCSSRule(className);
-//    return cssRule.style.fill.replace(")", `, ${alpha})`);
-//}
 function getDefaultFill(className) {
     const cssRule = this.getCSSRule(className);
     return cssRule.style.fill;
@@ -3219,16 +3214,21 @@ function getDefaultFill(className) {
 /**
  * Doesn't need unit tests.
  * @param {string} className
- * @param {number} alpha
  * @return {string}
  */ 
-//function getDefaultStrokeWithAlpha(className, alpha) {
-//    const cssRule = this.getCSSRule(className);
-//    return cssRule.style.stroke.replace(")", `, ${alpha})`);
-//}
 function getDefaultStroke(className) {
     const cssRule = this.getCSSRule(className);
     return cssRule.style.stroke;
+}
+
+/**
+ * @param {string} rgb
+ * @param {number} alpha
+ * @return {string}
+ */
+function insertAlpha(rgb, alpha) {
+    if (!/rgb\(/.test(rgb)) throw new Error("rgb argument must be an 'rgb' string, not an 'rgba' string");
+    return rgb.replace(")", `, ${alpha})`).replace("b", "ba");
 }
 
 /**
@@ -3248,7 +3248,8 @@ function preserveAlphaWithNewColor(e, rgb) {
     const alpha = getAlpha(oldColor);
     const defaultColorValues = (styleAttribute === "fill" ? getDefaultFill(e.classList[0]) : getDefaultStroke(e.classList[0])).match(firstThreeNumbers)[0];
     if (alpha != null) {
-        e.style[styleAttribute] = rgb.replace(")", `, ${alpha})`).replace("b", "ba");
+        e.style[styleAttribute] = insertAlpha(rgb, alpha);
+        //e.style[styleAttribute] = rgb.replace(")", `, ${alpha})`).replace("b", "ba");
         return;
     }
     if (rgb.match(firstThreeNumbers)[0] === defaultColorValues) {
@@ -3257,30 +3258,6 @@ function preserveAlphaWithNewColor(e, rgb) {
     }
     e.style[styleAttribute] = rgb;
     return;
-    /*
-    if (oldColor === "") {
-
-        // If there was no alpha, just set the new color
-        e.style[styleAttribute] = rgb;
-        return;
-    }
-    const alpha = getAlpha(oldColor);
-    if (alpha != null) {
-        // If there was an inline alpha value, apply it to the new color
-        e.style[styleAttribute] = rgb.replace(")", `, ${alpha})`).replace("b", "ba");
-        return;
-    } 
-    const defaultColorValues = (styleAttribute === "fill" ? getDefaultFill(e.classList[0]) : getDefaultStroke(e.classList[0])).match(firstThreeNumbers)[0];
-    if (rgb.match(firstThreeNumbers)[0] === defaultColorValues) {
-        // If there was no inline alpha value, and the new color is equivalent to the default CSS color, then fallback to default CSS styling
-        e.removeAttribute("style");
-        return;
-    } else {
-        // If there was no inline alpha value, and the new color is unique, just apply the color
-        e.style[styleAttribute] = rgb;
-        return;
-    }
-    */
 }
 
 /**
@@ -3301,7 +3278,8 @@ function preserveColorWithNewAlpha(e, alpha) {
             return;
         } else {
             rgba = styleAttribute === "fill" ? getDefaultFill(e.classList[0]) : getDefaultStroke(e.classList[0]);
-            rgba = rgba.replace(")", `, ${alpha})`).replace("b", "ba");
+            rgba = insertAlpha(rgba, alpha);
+            //rgba = rgba.replace(")", `, ${alpha})`).replace("b", "ba");
             e.style[styleAttribute] = rgba;
             return;
         }
@@ -3947,9 +3925,9 @@ function createCircle(nodeKey) {
     if (typeof lat !== "number") throw new Error(`'latitude' must be a number.`);
     circle.cx = (lon - gMinLon) * gDrawScaleFactor;
     circle.cy = (gMaxLat - lat) * gDrawScaleFactor;
-    const opacity = gOpacityManager[node.object];
-    if (opacity != null && opacity !== 1) {
-        const newFill = gOpacityManager.getDefaultFillWithAlpha(node.object, opacity);
+    const alpha = gOpacityManager[node.object];
+    if (alpha != null && alpha !== 1) {
+        const newFill = insertAlpha(getDefaultFill(node.object), alpha)
         circle.fill = newFill;
     }
     return circle;
@@ -4061,9 +4039,9 @@ function createLine(lineKey) {
         default:
             line["stroke-width"] = gScaleLevel;
     }
-    const opacity = gOpacityManager[lineObject.object];
-    if (opacity != null && opacity !== 1) {
-        const newStroke = gOpacityManager.getDefaultStrokeWithAlpha(lineObject.object, opacity);
+    const alpha = gOpacityManager[lineObject.object];
+    if (alpha != null && alpha !== 1) {
+        const newStroke = insertAlpha(getDefaultStroke(lineObject.object), alpha);
         line.stroke = newStroke;
     }
     return line;
