@@ -325,8 +325,10 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 	edgeTuplePower = {}
 	#edgeTupleNames = dict with to-from tuples as keys and names as values for debugging
 	edgeTupleNames = {}
-	#edgeTupleNames = dict with to-from tuples as keys and names as values for debugging
+	#edgeTupleFaultNames = dict with to-from tuples as keys and the name of the Fault as the only value
 	edgeTupleFaultNames = {}
+	#linePhases = dictionary containing the number of phases on each line for line-width purposes
+	linePhases = {}
 	edgePower = {}
 	for edge in edgeCurrentSum:
 		for obj in tree.values():
@@ -348,6 +350,13 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 				edgeTupleNames[coord] = edge
 				if faultLoc == edge:
 					edgeTupleFaultNames[coord] = "FAULT: " + edge
+				phaseStr = obj.get('phases','').replace('"','')
+				phaseStr.replace('N','')
+				phaseStr.replace('S','')
+				numPhases = len(phaseStr)
+				if (numPhases < 1) or (numPhases > 3):
+					numPhases = 1
+				linePhases[edge] = numPhases
 	#define which dict will be used for edge line color
 	edgeColors = edgeValsPU
 	#define which dict will be used for edge label
@@ -408,7 +417,7 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 	edgeIm = nx.draw_networkx_edges(fGraph,
 		pos = positions,
 		edge_color = edgeList,
-		width = 1,
+		width = [linePhases.get(n,1) for n in edgeNames],
 		edge_cmap = custom_cm)
 	#draw edge labels
 	if edgeLabs != None:
