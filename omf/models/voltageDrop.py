@@ -62,6 +62,7 @@ def work(modelDir, inputDict):
 	# chart = voltPlot(omd, workDir=modelDir, neatoLayout=neato)
 	chart = drawPlot(
 		pJoin(modelDir,feederName + ".omd"),
+		workDir = modelDir,
 		neatoLayout = neato,
 		edgeCol = edgeColValue,
 		nodeCol = nodeColValue,
@@ -73,7 +74,7 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir,"output.png"),"rb") as inFile:
 		outData["voltageDrop"] = inFile.read().encode("base64")
 	return outData
-#Optional gldBinary parameter added
+
 def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, customColormap=False, rezSqIn=400, gldBinary=None):
 	''' Draw a color-coded map of the voltage drop on a feeder.
 	path is the full path to the GridLAB-D .glm file or OMF .omd file.
@@ -442,99 +443,6 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 		plt.colorbar()
 	return voltChart
 
-def voltPlot(omd, workDir=None, neatoLayout=False):
-	''' Draw a color-coded map of the voltage drop on a feeder.
-	Returns a matplotlib object. '''
-	tree = omd.get('tree',{})
-	# # Get rid of schedules and climate:
-	for key in tree.keys():
-		if tree[key].get("argument","") == "\"schedules.glm\"" or tree[key].get("tmyfile","") != "":
-			del tree[key]
-	# Map to speed up name lookups.
-	nameToIndex = {tree[key].get('name',''):key for key in tree.keys()}
-	# Make sure we have a voltDump:
-	def safeInt(x):
-		try: return int(x)
-		except: return 0
-	biggestKey = max([safeInt(x) for x in tree.keys()])
-	tree[str(biggestKey*10)] = {"object":"voltdump","filename":"voltDump.csv"}
-	# Run Gridlab.
-	if not workDir:
-		workDir = tempfile.mkdtemp()
-	gridlabOut = gridlabd.runInFilesystem(tree, attachments=omd.get('attachments',{}), workDir=workDir)
-	with open(pJoin(workDir,'voltDump.csv'),'r') as dumpFile:
-		reader = csv.reader(dumpFile)
-		reader.next() # Burn the header.
-		keys = reader.next()
-		voltTable = []
-		for row in reader:
-			rowDict = {}
-			for pos,key in enumerate(keys):
-				rowDict[key] = row[pos]
-			voltTable.append(rowDict)
-	# Calculate average node voltage deviation. First, helper functions.
-	def digits(x):
-		''' Returns number of digits before the decimal in the float x. '''
-		return math.ceil(math.log10(x+1))
-	def avg(l):
-		''' Average of a list of ints or floats. '''
-		return sum(l)/len(l)
-	# Use the swing bus voltage as a reasonable default voltage.
-	for key in tree:
-		ob = tree[key]
-		if type(ob)==dict and ob.get('bustype','')=='SWING':
-			swingVoltage = float(ob.get('nominal_voltage',1))
-	# Tot it all up.
-	nodeVolts = {}
-	for row in voltTable:
-		allVolts = []
-		for phase in ['A','B','C']:
-			realV = float(row['volt'+phase+'_real'])
-			imagV = float(row['volt'+phase+'_imag'])
-			phaseVolt = math.hypot(realV, imagV)
-			if phaseVolt != 0.0:
-				if digits(phaseVolt)>3:
-					nodeName = row.get('node_name','')
-					treeKey = nameToIndex.get(nodeName, 0)
-					nodeObj = tree.get(treeKey, {})
-					try:
-						nominal_voltage = float(nodeObj['nominal_voltage'])
-					except:
-						nominal_voltage = swingVoltage
-					# Normalize to 120 V standard
-					phaseVolt = phaseVolt*(120/nominal_voltage)
-				allVolts.append(phaseVolt)
-		# Hack: average across phases.
-		nodeVolts[row.get('node_name','')] = avg(allVolts)
-	# Color nodes by VOLTAGE.
-	fGraph = feeder.treeToNxGraph(tree)
-	voltChart = plt.figure(figsize=(20,20))
-	plt.axes(frameon = 0)
-	plt.axis('off')
-	plt.tight_layout()
-	#set axes step equal
-	voltChart.gca().set_aspect('equal')
-	if neatoLayout:
-		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
-		cleanG = nx.Graph(fGraph.edges())
-		cleanG.add_nodes_from(fGraph)
-		positions = graphviz_layout(cleanG, prog='neato')
-	else:
-		positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
-	edgeIm = nx.draw_networkx_edges(fGraph, positions)
-	nodeIm = nx.draw_networkx_nodes(
-		fGraph,
-		pos = positions,
-		node_color = [nodeVolts.get(n,0) for n in fGraph.nodes()],
-		linewidths = 0,
-		node_size = 30,
-		cmap = plt.cm.viridis
-	)
-	plt.sci(nodeIm)
-	plt.clim(110,130)
-	plt.colorbar(orientation='horizontal', fraction=0.05)
-	return voltChart
-
 def glmToModel(glmPath, modelDir):
 	''' One shot model creation from glm. '''
 	tree = omf.feeder.parse(glmPath)
@@ -558,7 +466,7 @@ def new(modelDir):
 		"runTime": "",
 		"layoutAlgorithm": "geospatial",
 		"edgeCol" : "None",
-		"nodeCol" : "Voltage",
+		"nodeCol" : "perUnit120Voltage",
 		"nodeLabs" : "None",
 		"edgeLabs" : "None",
 		"customColormap" : "False",
@@ -570,39 +478,6 @@ def new(modelDir):
 	except:
 		return False
 	return creationCode
-
-# Testing for variable combinations
-def _testAllVarCombos():
-	edgeColsList = {None : "None", "Current" : "C", "Power" : "P", "Rating" : "R", "PercentOfRating" : "Per"}
-	nodeColsList = {None : "None", "Voltage" : "V", "VoltageImbalance" : "VI", "perUnitVoltage" : "PUV", "perUnit120Voltage" : "PUV120"}
-	labsList = {None : "None", "Name" : "N", "Value" : "Val"}
-	boolList = {True : "T", False : "F"}
-	testNum = 1
-	for edgeColVal in edgeColsList.keys():
-		for nodeColVal in nodeColsList.keys():
-			for edgeLabVal in labsList.keys():
-				for nodeLabVal in labsList.keys():
-					for customColormapVal in boolList.keys():
-						testName = edgeColsList.get(edgeColVal) + "_" + nodeColsList.get(nodeColVal) + "_" + labsList.get(edgelabVal) + "_" + labsList.get(nodelabVal) + "_" + boolList.get(customColormapVal)
-						#print testName
-						pngName = "./drawPlotTest/drawPlot_" + testName + ".png"
-						for i in range(10):
-							try:
-								chart = drawPlot(FNAME, neatoLayout=True, edgeLabs=edgeLabVal, nodeLabs=nodeLabVal, edgeCol=edgeColVal, nodeCol=nodeColVal, customColormap=customColormapVal)
-							except IOError, e:
-								if e.errno == 2: #catch temporary IOError and retry until it passes
-									print "IOError [Errno 2] for drawPlot_" + testName + ". Retrying..."
-									continue #retry
-							except:
-								print "!!!!!!!!!!!!!!!!!! Error for drawPlot_" + testName + " !!!!!!!!!!!!!!!!!!"
-								pass
-							else:
-								chart.savefig(pngName)
-								break
-						else:
-							print "****************** Couldn't run drawPlot_" + testName + " ******************"
-						print "Test " + testNum + " of 384 completed." #384 total combinations based on current variable sets
-						testNum += 1
 
 def _testingPlot():
 	PREFIX = omf.omfDir + '/scratch/CIGAR/'
@@ -638,5 +513,5 @@ def _debugging():
 	renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	# _debugging()
-	_testingPlot()
+	_debugging()
+	# _testingPlot()
