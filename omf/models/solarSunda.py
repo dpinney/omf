@@ -18,6 +18,7 @@ from omf.weather import zipCodeToClimateName
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = "The solarSunda model allows you to run multiple instances of the SUNDA Solar Costing Financing Screening Tool and compare their output visually."
+hidden = False
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''

@@ -13,6 +13,7 @@ from solvers import VB
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = "Calculate the energy storage capacity for a collection of thermostatically controlled loads."
+hidden = False
 
 def pyVbat(modelDir, i):
 	vbType = i['load_type']

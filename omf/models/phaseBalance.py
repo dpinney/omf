@@ -473,7 +473,6 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	return voltChart
 
 def readGroupRecorderCSV( filename ):
-
 	dataDictionary = {}
 	with open(filename,'r') as csvFile:
 		reader = csv.reader(csvFile)
@@ -488,8 +487,7 @@ def readGroupRecorderCSV( filename ):
 				vals.pop(i)
 		for pos,key in enumerate(keys):
 			dataDictionary[key] = vals[pos]
-			
-	return dataDictionary	
+	return dataDictionary
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''

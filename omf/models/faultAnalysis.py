@@ -21,8 +21,8 @@ from dateutil import parser
 from dateutil.relativedelta import *
 # Model metadata:
 modelName, template = metadata(__file__)
-tooltip = "The voltageDrop model runs loadflow to show system voltages at all nodes."
-#hidden = True
+tooltip = "Injects faults in to circuits and measures fault currents, voltages, and protective device response."
+hidden = False
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''

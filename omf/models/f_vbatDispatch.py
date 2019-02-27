@@ -16,6 +16,7 @@ from omf import loadForecast as fc
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = "Calculate the energy storage capacity for a collection of thermostatically controlled loads."
+hidden = True
 
 def pyVbat(modelDir, i):
 	vbType = i['load_type']

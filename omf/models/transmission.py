@@ -17,6 +17,7 @@ import omf.network as network
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = "The transmission model imports, runs and visualizes MATPOWER transmission and generation simulations."
+hidden = False
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory.'''
