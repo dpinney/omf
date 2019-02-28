@@ -4,23 +4,26 @@ import os, sys, shutil, csv
 from datetime import datetime as dt, timedelta
 from os.path import isdir, join as pJoin
 from numpy import npv
+import pandas as pd
 from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
+from omf import loadForecast as fc
 
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = ("The storagePeakShave model calculates the value of a distribution utility " 
 	"deploying energy storage based on three possible battery dispatch strategies.")
-hidden = False
 
 def work(modelDir, inputDict):
 	''' Model processing done here. '''
+	dispatchStrategy = str(inputDict.get('dispatchStrategy'))
+	if dispatchStrategy == 'prediction':
+		return forecastWork(modelDir, inputDict)
+
 	out = {}  # See bottom of file for out's structure
 	cellCapacity, dischargeRate, chargeRate, cellQuantity, demandCharge, cellCost, retailCost = \
 		[float(inputDict[x]) for x in ('cellCapacity', 'dischargeRate', 'chargeRate',
 			'cellQuantity', 'demandCharge', 'cellCost', 'retailCost')]
-	
-	dispatchStrategy = str(inputDict.get('dispatchStrategy'))
 
 	projYears, batteryCycleLife = [int(inputDict[x]) for x in ('projYears', 'batteryCycleLife')]
 	
@@ -115,8 +118,6 @@ def work(modelDir, inputDict):
 			r['netpower'] = r['power'] + charge
 			SoC += charge
 			r['battSoC'] = SoC
-	else:
-		raise Exception("Invalid dispatch input.")
 
 	# ------------------------- CALCULATIONS ------------------------- #
 	netByMonth = [[t['netpower'] for t in dc if t['month']==x] for x in range(12)]
@@ -128,11 +129,8 @@ def work(modelDir, inputDict):
 	out['monthlyDemand'] = [sum(lDemand)/1000 for lDemand in demandByMonth]
 	out['monthlyDemandRed'] = [t-p for t, p in zip(out['monthlyDemand'], ps)]
 	out['ps'] = ps
-	out['kWhtoRecharge'] = [abs(sum(d)) for d in dischargeByMonth]
 	out['benefitMonthly'] = [x*demandCharge for x in ps]
-	out['costtoRecharge'] = [x*retailCost for x in out['kWhtoRecharge']]
-	out['benefitNet'] = [b-c for b, c in zip(out['benefitMonthly'], out['costtoRecharge'])]
-
+	
 	# Demand Before and After Storage Graph
 	out['demand'] = [t['power']*1000.0 for t in dc] # kW -> W
 	out['demandAfterBattery'] = [t['netpower']*1000.0 for t in dc] # kW -> W
@@ -150,11 +148,10 @@ def work(modelDir, inputDict):
 	# Cash Flow Graph
 	# inserting battery efficiency only into the cashflow calculation
 	# cashFlowCurve is $ in from peak shaving minus the cost to recharge the battery every day of the year
-	totalYearlyCharge = sum(out['kWhtoRecharge'])/battEff
-	cashFlowCurve = [sum(ps)*demandCharge - totalYearlyCharge*retailCost for year in range(projYears)]
+	cashFlowCurve = [sum(ps)*demandCharge for year in range(projYears)]
 	cashFlowCurve.insert(0, -1 * cellCost * cellQuantity)  # insert initial investment
 	# simplePayback is also affected by the cost to recharge the battery every day of the year
-	out['SPP'] = (cellCost*cellQuantity)/(sum(ps)*demandCharge - totalYearlyCharge*retailCost)
+	out['SPP'] = (cellCost*cellQuantity)/(sum(ps)*demandCharge)
 	out['netCashflow'] = cashFlowCurve
 	out['cumulativeCashflow'] = [sum(cashFlowCurve[:i+1]) for i, d in enumerate(cashFlowCurve)]
 	out['NPV'] = npv(discountRate, cashFlowCurve)
@@ -172,6 +169,147 @@ def work(modelDir, inputDict):
 
 	return out
 
+def forecastWork(modelDir, ind):
+	''' Run the model in its directory.'''
+
+	(cellCapacity, dischargeRate, chargeRate, cellQuantity, cellCost) = \
+		[float(ind[x]) for x in ('cellCapacity', 'dischargeRate', 'chargeRate', 'cellQuantity', 'cellCost')]
+	demandCharge = float(ind['demandCharge'])
+	retailCost = float(ind['retailCost'])
+
+	battEff	= float(ind.get("batteryEfficiency")) / 100.0
+	dodFactor = float(ind.get('dodFactor')) / 100.0
+	projYears = int(ind.get('projYears'))
+	batteryCycleLife = int(ind.get('batteryCycleLife'))
+	battCapacity = cellQuantity * float(ind['cellCapacity']) * dodFactor
+
+	o = {}
+
+	try:
+		with open(pJoin(modelDir, 'hist.csv'), 'w') as f:
+			f.write(ind['histCurve'].replace('\r', ''))
+		df = pd.read_csv(pJoin(modelDir, 'hist.csv'), parse_dates=['dates'])
+		df['month'] = df['dates'].dt.month
+		df['dayOfYear'] = df['dates'].dt.dayofyear
+		assert df.shape[0] >= 26280 # must be longer than 3 years
+		assert df.shape[1] == 5
+	except:
+		raise Exception("CSV file is incorrect format.")
+
+	confidence = float(ind['confidence'])/100
+
+	# ---------------------- MAKE PREDICTIONS ------------------------------- #
+	# train model on previous data
+	all_X = fc.makeUsefulDf(df)
+	all_y = df['load']
+	predictions = fc.neural_net_predictions(all_X, all_y)
+
+	dailyLoadPredictions = [predictions[i:i+24] for i in range(0, len(predictions), 24)]	
+	weather = df['tempc'][-8760:]
+	dailyWeatherPredictions = [weather[i:i+24] for i in range(0, len(weather), 24)]
+	month = df['month'][-8760:]
+
+	dispatched = [False]*365
+	# decide to implement VBAT every day for a year
+	VB_power, VB_energy = [], []
+	for i, (load24, temp24, m) in enumerate(zip(dailyLoadPredictions, dailyWeatherPredictions, month)):
+		peak = max(load24)
+		if fc.shouldDispatchPS(peak, m, df, confidence):
+			dispatched[i] = True
+			vbp, vbe = fc.pulp24hrBattery(load24, dischargeRate*cellQuantity, 
+				cellCapacity*cellQuantity, battEff)
+			VB_power.extend(vbp)
+			VB_energy.extend(vbe)
+		else:
+			VB_power.extend([0]*24)
+			VB_energy.extend([0]*24)
+
+	# -------------------- MODEL ACCURACY ANALYSIS -------------------------- #
+	o['predictedLoad'] = predictions
+	o['trainAccuracy'] = 0#round(model.score(X_train, y_train) * 100, 2)
+	o['testAccuracy'] = 0#round(model.score(X_test, y_test) * 100, 2)
+
+	# PRECISION AND RECALL
+	maxDays = []
+	for month in range(1, 13):
+		test = df[df['month'] == month]
+		maxDays.append(test.loc[test['load'].idxmax()]['dayOfYear'])
+	
+	shouldHaveDispatched = [False]*365
+	for day in maxDays:
+		shouldHaveDispatched[day] = True
+
+	truePositive = len([b for b in [i and j for (i, j) in zip(dispatched, shouldHaveDispatched)] if b])
+	falsePositive = len([b for b in [i and (not j) for (i, j) in zip(dispatched, shouldHaveDispatched)] if b])
+	falseNegative = len([b for b in [(not i) and j for (i, j) in zip(dispatched, shouldHaveDispatched)] if b])
+	o['precision'] = round(truePositive / float(truePositive + falsePositive) * 100, 2)
+	o['recall'] = round(truePositive / float(truePositive + falseNegative) * 100, 2)
+	o['number_of_dispatches'] = len([i for i in dispatched if i])
+	o['MAE'] = round(sum([abs(l-m)/m*100 for l, m in zip(predictions, list(all_y[-8760:]))])/8760., 2)
+
+	# ---------------------- FINANCIAL ANALYSIS ----------------------------- #
+
+	# Calculate monthHours
+	year = df[-8760:].copy()
+	year.reset_index(inplace=True)
+	year['hour'] = list(year.index)
+	start = list(year.groupby('month').first()['hour'])
+	finish = list(year.groupby('month').last()['hour'])
+	monthHours = [(s, f+1) for (s, f) in zip(start, finish)]
+
+	demand = list(all_y[-8760:])
+	peakDemand = [max(demand[s:f]) for s, f in monthHours] 
+	demandAdj = [d+p for d, p in zip(demand, VB_power)]
+	peakDemandAdj = [max(demandAdj[s:f]) for s, f in monthHours]
+	discharges = [f if f < 0 else 0 for f in VB_power]
+
+	# Monthly Cost Comparison Table
+	o['monthlyDemand'] = peakDemand
+	o['monthlyDemandRed'] = peakDemandAdj
+	o['ps'] = [p-s for p, s in zip(peakDemand, peakDemandAdj)]
+	o['benefitMonthly'] = [x*demandCharge for x in o['ps']]
+	
+	# Demand Before and After Storage Graph
+	o['demand'] = demand
+	o['demandAfterBattery'] = demandAdj
+	o['batteryDischargekW'] = VB_power
+	o['batteryDischargekWMax'] = max(VB_power)
+
+	batteryCycleLife = float(ind['batteryCycleLife'])
+	# Battery State of Charge Graph
+	# Turn dc's SoC into a percentage, with dodFactor considered.
+
+	o['batterySoc'] = SoC = [100 - (e / battCapacity * 100) for e in VB_energy]
+
+	# Estimate number of cyles the battery went through. Sums the percent of SoC.
+	cycleEquivalents = sum([SoC[i]-SoC[i+1] for i, x in enumerate(SoC[:-1]) if SoC[i+1] < SoC[i]]) / 100.0
+	o['cycleEquivalents'] = cycleEquivalents
+	o['batteryLife'] = batteryCycleLife / cycleEquivalents
+
+	# Cash Flow Graph
+	# inserting battery efficiency only into the cashflow calculation
+	# cashFlowCurve is $ in from peak shaving minus the cost to recharge the battery every day of the year
+	cashFlowCurve = [sum(o['ps'])*demandCharge for year in range(projYears)]
+	cashFlowCurve.insert(0, -1 * cellCost * cellQuantity)  # insert initial investment
+	# simplePayback is also affected by the cost to recharge the battery every day of the year
+	o['SPP'] = (cellCost*cellQuantity)/(sum(o['ps'])*demandCharge)
+	o['netCashflow'] = cashFlowCurve
+	o['cumulativeCashflow'] = [sum(cashFlowCurve[:i+1]) for i, d in enumerate(cashFlowCurve)]
+	o['NPV'] = npv(float(ind['discountRate']), cashFlowCurve)
+
+	battCostPerCycle = cellQuantity * cellCost / batteryCycleLife
+	lcoeTotCost = cycleEquivalents*retailCost + battCostPerCycle*cycleEquivalents
+	o['LCOE'] = lcoeTotCost / (cycleEquivalents*battCapacity)
+
+	# Other
+	o['startDate'] = '2011-01-01'  # dc[0]['datetime'].isoformat()
+	o['stderr'] = ''
+	# Seemingly unimportant. Ask permission to delete.
+	o['stdout'] = 'Success' 
+	o['months'] = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+
+	return o
+
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
@@ -185,7 +323,7 @@ def new(modelDir):
 		'chargeRate': '5',
 		'demandCurve': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','FrankScadaValidCSV_Copy.csv')).read(),
 		'fileName': 'FrankScadaValidCSV_Copy.csv',
-		'dispatchStrategy': 'optimal',
+		'dispatchStrategy': 'optimal', #'prediction', 
 		'cellCost': '7140',
 		'cellQuantity': '100',
 		'runTime': '0:00:03',
@@ -198,6 +336,10 @@ def new(modelDir):
 		'batteryCycleLife': '5000',
 		# required if dispatch strategy is custom
 		'customDispatchStrategy': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','dispatchStrategy.csv')).read(),
+		# forecast
+		'confidence': '0',
+		'histFileName': 'Texas_17yr_TempAndLoad.csv',
+		"histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_17yr_TempAndLoad.csv"), 'rU').read(),
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
