@@ -430,6 +430,16 @@ const rawTree = {
 };
 let rawTreeCopy = deepCopy(rawTree);
 let testTree = createTree(rawTreeCopy);
+// Load the test data into the document before performing tests
+const loadTestData = (function() {
+    createSvgData(Object.keys(gTree.tree), gTree).delete(gViewport);
+    insertCoordinates(Object.values(testTree.tree), 128, 590, 5);
+    const svg = createSvgData(Object.keys(testTree.tree), testTree);
+    svg.quickDraw(gViewport);
+    // Hack
+    gTree = testTree;
+})()
+
 /* 
 TODO: If key === 0, longitude === 0, latitude === 0 (or some other property === 0), the code could 
 break in funny ways. I need to check for undefined explicitly instead of using !<property>
@@ -1440,7 +1450,7 @@ describe("Unit tests", function() {
 
             describe("if handling an object that is a node", function() {
 
-                it(`should translate each node according to the x, y arguments by 1) finding the average x, y coordinates of all nodes in the tree, 2) calculating the difference between the x, y arguments and the average x, y coordinates 3) and adding that difference to all nodes`, function() {
+                it(`should translate each node`, function() {
                     const offsetX = -101.8876,
                         offsetY = -2.00033,
                         x = 117.8,
@@ -1479,13 +1489,13 @@ describe("Unit tests", function() {
                     */
                     move(Object.values(tree), {x: x, y: y}, {offsetX: offsetX, offsetY: offsetY, scaleFactor: scaleFactor});
                     expect(tree[0].longitude).toEqual(x/scaleFactor - avgLon + offsetX);
-                    expect(tree[0].latitude).toEqual(y/scaleFactor - avgLat + offsetY);
+                    expect(tree[0].latitude).toEqual(offsetY - avgLat - y/scaleFactor);
                     expect(tree[1].longitude).toEqual(5 + x/scaleFactor - avgLon + offsetX);
-                    expect(tree[1].latitude).toEqual(y/scaleFactor - avgLat + offsetY);
+                    expect(tree[1].latitude).toEqual(offsetY - avgLat - y/scaleFactor);
                     expect(tree[2].longitude).toEqual(x/scaleFactor - avgLon + offsetX);
-                    expect(tree[2].latitude).toEqual(5 + y/scaleFactor - avgLat + offsetY);
+                    expect(tree[2].latitude).toEqual(5 - avgLat + offsetY - y/scaleFactor);
                     expect(tree[3].longitude).toEqual(5 + x/scaleFactor - avgLon + offsetX);
-                    expect(tree[3].latitude).toEqual(5 + y/scaleFactor - avgLat + offsetY);
+                    expect(tree[3].latitude).toEqual(5 - avgLat + offsetY - y/scaleFactor);
                     expect(tree[4].longitude).toEqual(1000.333);
                     expect(tree[4].latitude).toEqual(NaN);
                 });
@@ -1689,6 +1699,284 @@ describe("Unit tests", function() {
                         expect(getType({})).toEqual("independentNode");
                     });
                 });
+            });
+            //good
+            describe("getMinMax()", function() {
+
+                it("should return the minimum and maximum numeric values of a single object", function() {
+                    const obj = {
+                        prop0: NaN,
+                        prop1: "100",
+                        prop2: "44",
+                        prop3: "100.0000001",
+                        prop4: "43.999999"
+                    };
+                    const {min, max} = getMinMax({object: obj});
+                    expect(min).toEqual(43.999999);
+                    expect(max).toEqual(100.0000001);
+                });
+
+                it("should return the minimum and maximum nuermic values across all objects inside of an object", function() {
+                    const objectContainer = {
+                        prop0: {
+                            longitude: NaN,
+                            latitude: NaN
+                        },
+                        prop1: {
+                            longitude: "100",
+                            latitude: "0"
+                        },
+                        prop2: {
+                           longitude: "27",
+                           latitude: "101"
+                        },
+                        prop3: {
+                            longitude: "-2",
+                            latitude: "500"
+                        },
+                        prop4: {
+                            longitude: "6",
+                            latitude: "-100"
+                        }
+                    };
+                    const minMax = getMinMax({objectContainer: objectContainer, properties: ["longitude", "latitude"]});
+                    expect(minMax.longitude.min).toEqual(-2);
+                    expect(minMax.longitude.max).toEqual(100);
+                    expect(minMax.latitude.min).toEqual(-100);
+                    expect(minMax.latitude.max).toEqual(500);
+                });
+            });
+        });
+
+        describe("opacityManagerPrototype", function() {
+            //good
+            describe("setAlpha()", function() {
+
+                let nodeElement;
+
+                beforeEach(function() {
+                    nodeElement = document.getElementById(node1);
+                    nodeElement.removeAttribute("style");
+                });
+
+                describe("if the rgb values of the inline circle.style.fill attribute do not match the rgb values of the default CSS circle.style.fill attribute", function() {
+
+                    it("should preserve the inline circle.style.fill rgb values but apply the new alpha value", function() {
+                        const opacityManager = createOpacityManager();
+                        ["rgb(66, 66, 66)", "rgba(66, 66, 66, 0.055)"].forEach(str => {
+                            nodeElement.style.fill = str;
+                            expect(nodeElement.style.fill).toEqual(str);
+                            opacityManager.setAlpha({className:"node", value:"0.2"});
+                            expect(nodeElement.style.fill).toEqual("rgba(66, 66, 66, 0.2)");
+                            opacityManager.setAlpha({className:"node", value:"1"});
+                            expect(nodeElement.style.fill).toEqual("rgb(66, 66, 66)");
+                        });
+                    });
+                });
+
+                describe("if setting the alpha on a circle element to 1", function() {
+
+                    describe("if the circle lacks the style attribute", function() {
+
+                        it("should not add the style attribute to the circle", function() {
+                            const opacityManager = createOpacityManager();
+                            expect(nodeElement.style.fill).toEqual("");
+                            opacityManager.setAlpha({className:"node", value:"1"});
+                            expect(nodeElement.style.fill).toEqual("");
+                        });
+                    });
+
+                    describe("if the rgb values of the inline circle.style.fill attribute match the rgb values of the default CSS circle.style.fill attribute", function() {
+
+                        it("should remove the style attribute from the circle", function() {
+                            const opacityManager = createOpacityManager();
+                            ["rgb(128, 128, 128)", "rgba(128, 128, 128, 0.055)"].forEach(str => {
+                                nodeElement.style.fill = str;
+                                expect(nodeElement.style.fill).toEqual(str);
+                                opacityManager.setAlpha({className:"node", value:"1"});
+                                expect(nodeElement.style.fill).toEqual("");                            
+                            });
+                        });
+                    });
+                });
+
+                describe("if setting the alpha on a circle element to anything other than 1", function() {
+
+                    describe("if the circle lacks the style attribute", function() {
+
+                        it("should set the inline circle.style.fill value to equal the default CSS circle.style.fill value with the alpha", function() {
+                            const opacityManager = createOpacityManager();
+                            expect(nodeElement.style.fill).toEqual("");
+                            opacityManager.setAlpha({className:"node", value:"0.043"});
+                            expect(nodeElement.style.fill).toEqual("rgba(128, 128, 128, 0.043)");
+                        });
+                    });
+                });
+            });
+        });
+
+        describe("colorMapPrototype", function() {
+            // good
+            describe("color()", function() {
+
+                let nodeElement, nodeName;
+
+                beforeEach(function() {
+                    spyOn(window, "alert");
+                    nodeElement = document.getElementById(node1);
+                    nodeElement.removeAttribute("style");
+                    nodeName = "nodeT10263825298";
+                });
+
+                describe("if the circle element has an inline style.fill attribute with an alpha value", function() {
+
+                    it("should preserve the alpha value on the new color", function() {
+                        const color = "rgba(66, 66, 66, 0.05)"; 
+                        nodeElement.style.fill = color;
+                        expect(nodeElement.style.fill).toEqual(color);
+                        const colorMap = createColorMap("columnTitle", "colorFileTitle");
+                        colorMap.colorMap[nodeName] = "rgb(55, 107, 23)";
+                        colorMap.color();
+                        expect(nodeElement.style.fill).toEqual("rgba(55, 107, 23, 0.05)");
+                    });
+                });
+
+                describe("if the circle element has an inline style.fill attribute without an alpha value", function() {
+
+                    it("should apply the new color", function() {
+                        const color = "rgb(66, 66, 66)";
+                        nodeElement.style.fill = color;
+                        expect(nodeElement.style.fill).toEqual(color);
+                        const colorMap = createColorMap("columnTitle", "colorFileTitle");
+                        colorMap.colorMap[nodeName] = "rgb(55, 107, 23)";
+                        colorMap.color();
+                        expect(nodeElement.style.fill).toEqual("rgb(55, 107, 23)");
+                    });
+                });
+
+                describe("if the circle element does not have an inline style.fill attribute", function() {
+
+                    it("should apply the new color", function() {
+                        expect(nodeElement.style.fill).toEqual("");
+                        const colorMap = createColorMap("columnTitle", "colorFileTitle");
+                        colorMap.colorMap[nodeName] = "rgb(55, 107, 23)";
+                        colorMap.color();
+                        expect(nodeElement.style.fill).toEqual("rgb(55, 107, 23)"); 
+                    });
+                });
+            });
+        });
+
+        describe("colorManagerPrototype", function() {
+            //good
+            describe("removeColors()", function() {
+
+                let nodeElement;
+
+                beforeEach(function() {
+                    nodeElement = document.getElementById(node1);
+                    nodeElement.removeAttribute("style");
+                });
+
+                describe("if the circle element has an inline alpha value", function() {
+
+                    it("should apply the default CSS styling while preserving the inline alpha value", function() {
+                        const color = "rgba(66, 66, 66, 0.4)";
+                        nodeElement.style.fill = color;
+                        expect(nodeElement.style.fill).toEqual(color);
+                        const colorManager = createColorManager();
+                        colorManager.removeColors();
+                        expect(nodeElement.style.fill).toEqual("rgba(128, 128, 128, 0.4)");
+                    });
+                });
+
+                describe("if the circle element does not have an inline alpha value", function() {
+
+                    it("should apply the default CSS styling", function() {
+                        const color = "rgb(66, 66, 66)";
+                        nodeElement.style.fill = color;
+                        expect(nodeElement.style.fill).toEqual(color);
+                        const colorManager = createColorManager();
+                        colorManager.removeColors();
+                        expect(nodeElement.style.fill).toEqual("");
+                    });
+                });
+
+                describe("if the circle element does not have any inline style.fill value", function() {
+
+                    it("should not set the inline style.fill attribute", function() {
+                        expect(nodeElement.style.fill).toEqual("");
+                        const colorManager = createColorManager();
+                        colorManager.removeColors();
+                        expect(nodeElement.style.fill).toEqual("");
+                    });
+                });
+            });
+            // good
+            describe("desaturateGraph()", function() {
+
+                let nodeElement;
+
+                beforeEach(function() {
+                    nodeElement = document.getElementById(node1Line1End);
+                    nodeElement.removeAttribute("style");
+                });
+
+                describe("if the circle element has an inline style.fill value", function() {
+
+                    describe("if the inline style.fill value includes an alpha value", function() {
+
+                        it("should apply the default CSS circle.style.fill value and preserve the alpha value", function() {
+                            const color = "rgba(166, 0, 16, 0.5)";
+                            nodeElement.style.fill = color;
+                            expect(nodeElement.style.fill).toEqual(color);
+                            const colorManager = createColorManager();
+                            colorManager.desaturateGraph();
+                            expect(nodeElement.style.fill).toEqual("rgba(128, 128, 128, 0.5)");
+                        });
+                    });
+
+                    describe("if the inline style.fill value does not include an alpha value", function() {
+
+                        it("should apply the default CSS circle.style.fill value", function() {
+                            const color = "rgb(166, 0, 16)";
+                            nodeElement.style.fill = color;
+                            expect(nodeElement.style.fill).toEqual(color);
+                            const colorManager = createColorManager();
+                            colorManager.desaturateGraph();
+                            expect(nodeElement.style.fill).toEqual("rgb(128, 128, 128)");
+                        });
+                    });
+                });
+
+                describe("if the circle element does not have an inline style.fill value", function() {
+                        
+                    it("should apply the default CSS circle element styling", function() {
+                        expect(nodeElement.style.fill).toEqual("");
+                        const colorManager = createColorManager();
+                        colorManager.desaturateGraph();
+                        expect(nodeElement.style.fill).toEqual("rgb(128, 128, 128)");
+                    });
+                });
+
+                describe("if the circle element is already styled according to the default CSS circle.style.fill attribute", function() {
+
+                    it("should not set the inline style.fill attribute value", function() {
+                        nodeElement = document.getElementById(node1);
+                        nodeElement.removeAttribute("style");
+                        expect(nodeElement.style.fill).toEqual("");
+                        const colorManager = createColorManager();
+                        colorManager.desaturateGraph();
+                        expect(nodeElement.style.fill).toEqual("");
+                    });
+                });
+            });
+        });
+
+        describe("createColorFile()", function() {
+
+            describe("if invoked with a string argument", function() {
+
             });
         });
     });
@@ -2259,12 +2547,6 @@ setTimeout(
         jasmineDiv.style["z-index"] = 1;
         document.body.prepend(jasmineDiv);
         // Replace the real tree with the testing tree
-        createSvgData(Object.keys(gTree.tree), gTree).delete(gViewport);
-        insertCoordinates(Object.values(testTree.tree), 0, 0, 5);
-        const svg = createSvgData(Object.keys(testTree.tree), testTree);
-        svg.quickDraw(gViewport);
-        // Hack
-        gTree = testTree;
     },
     2000
 );

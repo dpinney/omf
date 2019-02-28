@@ -1,8 +1,3 @@
-# Hourly Day Of Week Forecasting
-# This code using an hourly day of week forecasting technique that linearizes the relationship between temperature and demand for the 4 previous
-# days same days of the week at the same hour. Take the 4 mondays at 14:00 to predict the next based on the forecasted temperature.
-
-# model specific imports
 import csv, math
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,10 +7,8 @@ from omf import loadForecast
 
 # Model metadata:
 modelName, template = metadata(__file__)
-tooltip = (
-	"Download historical weather data for a given location for use in other models."
-)
-hidden = True
+tooltip = ("Forecasts hourly load day-ahead using multiple methods")
+hidden = False
 
 
 def work(modelDir, inputDict):
@@ -81,12 +74,13 @@ def new(modelDir):
 				__neoMetaModel__._omfDir,
 				"static",
 				"testFiles",
-				"loadForecastDefault.csv",
+				"ERCOT_south_shortened.csv",
 			)
 		).read(),
+		"fileName": "ERCOT_south_shortened.csv",
 		"lowBound": 500,
 		"upBound": 3550,
-		"simStartDate": "2012-04-01",
+		"simStartDate": "2002-01-01",
 		"modelType": modelName,
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)

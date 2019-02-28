@@ -49,3 +49,4 @@ object evcharger_det {
 	mileage_efficiency 3.846;
 	name ev_house0;
 };
+

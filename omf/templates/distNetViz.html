@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta charset="UTF-8">
-		<style >
+		<style>
             /* Define global css variables */
             /* I have to subtract 4px or so from the svgContainer to prevent the scrollbar from appearing. Making the header height less does not appear to change anything. */
             :root {
@@ -78,7 +78,8 @@
             }
 
 			/* Load Spinner */
-
+            /* What is this used for? Nothing is using the .loader class. Can I delete this? Comment it out for now. If no one complains, delete it later on */
+            /*
 			.loader {
 				margin: 60px auto;
 				font-size: 10px;
@@ -120,6 +121,7 @@
 					transform: rotate(360deg);
 				}
 			}
+            */
 
             /**************************************************
             // Header and menu links
@@ -266,14 +268,16 @@
 	 		.modalContent {
                 padding: 20px;
                 border-radius: 10px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: space-evenly;
 				background-color: #fefefe;
-                /*height: 380px;*/
-                overflow: hidden;
+                max-height: 80vh;
+                overflow: auto;
 			}
+            .right {
+                float: right;
+            }
+            .centered {
+                text-align: center;
+            }
             .modalInput {
                 font-size: medium;
                 border: 0px;
@@ -284,6 +288,29 @@
                 font-size: medium;
                 border: 0px;
                 background-color: gainsboro;
+            }
+            .vertFlex {
+                display: flex;
+                flex-direction: column;
+            }
+            .legendFlex {
+                display: flex;
+                height: 40vh;
+            }
+            .legendGradiant {
+                height: 100%;
+                width: 5vw;
+            }
+            .legendAxis {
+                height: 100%;
+                margin: 0px 0px 0px 20px;
+                justify-content: space-between;
+            }
+            .legendAxis p {
+                margin: 0px;
+            }
+            .modalTableHeader {
+                margin: 20px 0px 0px 0px;
             }
             .modalButton {
                 font-size: medium;
@@ -299,10 +326,7 @@
             #cancelButton {
                 background-color: crimson;
             }
-            .modalContent td:nth-of-type(2) {
-                text-align: right;
-            }
-            .modalTableHeader {
+            .leftText {
                 text-align: left;
             }
             .modalTableRow {
@@ -312,12 +336,13 @@
                 overflow: auto;
                 height: 240px;
                 list-style-type: none;
-                margin: 0px 0px 0px 20px;
+                /*margin: 0px 0px 0px 20px;*/
+                margin: 0px;
                 padding: 0;
                 cursor: pointer;
             }
             .feederItem {
-                padding: 5px 5px 5px 5px;
+                padding: 5px 0px 5px 0px;
                 margin: 10px 0px 10px 0px;
             }
             .feederItem:hover {
@@ -372,17 +397,15 @@
 
 			/* dataTable */
 
-            #descriptionTables {
+            .floatingTables {
                 position: absolute;
                 top: 0px;
-                height:0px;
+                height: 0px;
             }
 
-            #selectionTable {
-                position: absolute;
-                top: 0px;
-                height:0px;
-            }
+            #descriptionTables { }
+
+            #selectionTable { }
 
             .formContainer {
 				/*position: fixed;*/
@@ -421,14 +444,20 @@
 			}
 			td {
 				background:white;
-				padding: 5px;
+				/*padding: 5px 0px 5px 0px;*/
 				border-collapse: collapse;
 			}
+            .verticalPadded {
+				padding: 5px 0px 5px 0px;
+            }
+            .fullPadded {
+				padding: 5px;
+            }
 			th {
 				/*font-weight: normal;*/
 				/*background:black;*/
 				/*color:white;*/
-				padding: 5px;
+				/*padding: 5px 0px 5px 0px;*/
 			}
 			/*
             #editButtonRow button {
@@ -447,11 +476,28 @@
 				background:mediumseagreen;
 			}
             */
+
+            /* SVG Styling */
+
+            line { stroke: rgb(0,0,0); } /* black */
+            line.parentChild { stroke: rgb(211,211,211); } /* LightGray */
+            circle {
+                stroke: rgb(255,255,255); /* white */
+                fill: rgb(128,128,128); /* gray */
+            }
+            .house { fill: rgb(0,0,255); } /* blue */
+            .triplex_meter { fill:rgb(255,165,0); } /* orange */
+            .underground_line { stroke: rgb(128,128,128);} 
+            .transformer { stroke:rgb(255,165,0); }
+            .regulator { stroke: rgb(255,0,0) ;} /* red */
+            .undefined,.regulator_configuration,.transformer_configuration,.triplex_line_configuration,.line_configuration,.volt_var_control,.line_spacing,.climate,.overhead_line_conductor,.underground_line_conductor,.triplex_line_conductor,.player,.schedule { fill: rgb(191,191,191); } /* 75% lightness gray */
         </style>
         <link rel="stylesheet" href="/static/jquery-ui.min.css">
         <script type="text/javascript" src="/static/jquery.js"></script>
         <script type="text/javascript" src="/static/jquery-ui.min.js"></script>
-		<script type='text/javascript' src='/static/svg-pan-zoom.js'></script>
+        <script type="text/javascript" src="/static/svg-pan-zoom.js"></script>
+        <script type="text/javascript" src="/static/chroma.min.js"></script>
+        <script type="text/javascript" src="/static/papaparse.min.js"></script>
 		{% if jasmine %}{{ jasmine | safe }}{% endif %}
 		<!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder.js'></script> -->
 		<!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder Largest.js'></script> -->
@@ -462,16 +508,16 @@
             <div id="loadingMessage">
                 <p style="font-size:60pt; text-align:center; width:100%;">Feeder Loading...</p>
             </div>
-            <div id="descriptionTables"></div>
-            <div id="selectionTable"></div>
+            <div id="descriptionTables" class="floatingTables"></div>
+            <div id="selectionTable" class="floatingTables"></div>
             <!-- Controls -->
-            <div style="top:55px;" class='divButton' onclick='window.panZoom.zoomIn()' title='Zoom In'>+</div>
-            <div style="top:95px;" class='divButton' onclick='window.panZoom.zoomOut()' title='Zoom Out'>-</div>
-            <div style="top:135px;" class='divButton' onclick='window.panZoom.reset()' title='Reset Zoom'>R</div>
-            <div id="scaleButton" class='divButton' title='Scale To'>S</div>
+            <div style="top:55px;" class="divButton" onclick="window.panZoom.zoomIn()" title="Zoom In">+</div>
+            <div style="top:95px;" class="divButton" onclick="window.panZoom.zoomOut()" title="Zoom Out">-</div>
+            <div style="top:135px;" class="divButton" onclick="window.panZoom.reset()" title="Reset Zoom">R</div>
+            <div id="scaleButton" class="divButton" title="Scale To">S</div>
             <!-- <div style='background:navy; top:215px; left:5px' id='saveLink' class='divButton' onclick='saveSvg()' title='Save File' download>S</div> -->
             <!-- Menu Bar -->
-            <div id='header'>
+            <div id="header">
                 <div id="menuLeft">
                     <h4>{{thisFeederName}}</h4>
                     <p>from "{{thisModelName}}"</p>
@@ -479,15 +525,15 @@
                 <div id="menuRight">
                     <div id="helpDiv" class="headerDiv">
                         <div class="buttonGroup">
-                            <button class='pill' type = 'submit'>
-                                <a id='helpButton' href='https://github.com/dpinney/omf/wiki/Tools-~-gridEdit' target='_blank'>Help</a>
+                            <button class="pill" type = "submit">
+                                <a id="helpButton" href="https://github.com/dpinney/omf/wiki/Tools-~-gridEdit" target="_blank">Help</a>
                             </button>
                         </div>
                     </div>
                     <div id="editDiv" class="headerDiv">
                         <div class="buttonGroup">
-                            <button id="addOps" class='pill' onclick='dropPill(this, "Edit")'>Edit &#x25BE;</button>
-                            <ul id="editMenu" class='menu right' style="display: none">
+                            <button id="addOps" class="pill" onclick="dropPill(this, 'Edit')">Edit &#x25BE;</button>
+                            <ul id="editMenu" class="menu right" style="display: none">
                                 <!--<li>Zoom To Fit</li>-->
                                 <!--<li>Zoom Reset</li>-->
                                 <li data-web>Add AMI Profiles...</li>
@@ -499,20 +545,21 @@
                                 <li>Mass Edit...</li>
                                 <li data-web>Scada Loadshapes...</li>
                                 <li>Static Loads to Houses</li>
+                                <li>Change opacity...</li>
                             </ul>
                         </div>
                     </div>
                     <div id="addDiv" class="headerDiv">
                         <div class="buttonGroup">
-                            <button id="addOps" class='pill' onclick='dropPill(this, "Add")'>Add &#x25BE;</button>
-                            <ul id='componentList' class='menu right' style="display: none">
+                            <button id="addOps" class="pill" onclick="dropPill(this, 'Add')">Add &#x25BE;</button>
+                            <ul id="componentList" class="menu right" style="display: none">
                         </div>
                     </div>
                     {% if showFileMenu %}
                     <div id="fileDiv" class="headerDiv">
-                        <div class='buttonGroup'>
-                            <button id="fileOps" class='pill' onclick='dropPill(this, "File")'>File &#x25BE;</button>
-                            <ul id='fileMenu' class='menu right' style="display: none">
+                        <div class="buttonGroup">
+                            <button id="fileOps" class="pill" onclick="dropPill(this, 'File')">File &#x25BE;</button>
+                            <ul id="fileMenu" class="menu right" style="display: none">
                                 <li data-web>Save</li>
                                 <li>View Raw Data</li>
                                 <li data-web>Rename</li>
@@ -521,6 +568,7 @@
                                 <li data-web>Windmil Conversion...</li>
                                 <li data-web>GridLAB-D Conversion...</li>
                                 <li data-web>CYMDIST Conversion...</li>
+                                <li>Color Circuit...</li>
                             </ul>
                         </div>
                     </div>
@@ -529,52 +577,38 @@
             </div>
             <!-- Svg container -->
             <div id="svgContainerWrapper" style="height: auto;">
-                <svg id='svgContainer' xmlns='http://www.w3.org/2000/svg'>
-                    <!--
-                        line.selected, circle.selected {stroke:lime;}
-                    -->
-                    <style type="text/css">
-                        <![CDATA[
-                        .house {fill:blue;}
-                        .triplex_meter {fill:orange;}
-                        .underground_line {stroke:gray;}
-                        .transformer {stroke:orange;}
-                        .regulator {stroke:red;}
-                        line {stroke:black;}
-                        line.parentChild {stroke:LightGrey;}
-                        circle {stroke:white; fill:gray;}
-                        .undefined, .regulator_configuration, .transformer_configuration, .triplex_line_configuration, .line_configuration, .volt_var_control, .line_spacing, .climate, .overhead_line_conductor, .underground_line_conductor, .triplex_line_conductor, .player, .schedule {fill: #bfbfbf;}
-                        ]]>
-                    </style>
-                </svg>
+                <svg id="svgContainer" xmlns="http://www.w3.org/2000/svg"></svg>
             </div>
             <!-- Modals -->
-            <div id='findModal' class="modal" style="display: none">
-                <div class='modalContent'>
+            <div id="findModal" class="modal" style="display: none">
+                <div class="modalContent">
                     <table>
                         <tr>
-                            <!--<td colspan="2">Term</td>-->
-                            <!--<td>Term</td>-->
-                            <td colspan="2"><input id='searchInput' type='text' value="Enter a search term" class="modalInput"></td>
-                            <td id="searchCount"></td>
+                            <td class="fullPadded"><input id="searchInput" type="text" value="Enter a term" class="modalInput"></td>
+                            <td id="searchCount" class="fullPadded"></td>
+                        </tr>
+                        <tr><td class="fullPadded"><input checked id="searchExactString" type="radio" name="searchMode" value="searchExactString">Exact match</td></tr>
+                        <tr><td class="fullPadded"><input id="searchSubstring" type="radio" name="searchMode" value="searchSubstring">Includes term</td></tr>
+
+                        <tr>
+                            <td class="fullPadded">Key of current object:</td>
+                            <td id="foundElementKey" class="fullPadded"></td>
                         </tr>
                         <tr>
-                            <td>Key of current object:</td>
-                            <td id="foundElementKey"></td>
+                            <td class="fullPadded"><input type="checkbox" id="showTableOnFind">Show table on view</td>
                         </tr>
                         <tr>
-                            <td><input type="checkbox" id="showTableOnFind">Show table on view</td>
-                        </tr>
-                        <tr>
-                            <td><button id="findPrevious" class="modalButton">Previous</button></td>
-                            <td><button id="findNext" class="modalButton">Next</button></td>
-                            <td><button class="modalButton" onclick='toggleElementDisplay("findModal")'>Close</button></td>
+                        <td class="fullPadded">
+                            <button id="findPrevious" class="modalButton">Previous</button>
+                            <button id="findNext" class="modalButton" style="margin-left:10px;">Next</button>
+                        </td>
+                            <td class="fullPadded"><button class="modalButton" onclick="toggleElementDisplay('findModal')">Close</button></td>
                         </tr>
                     </table>
                 </div>
             </div>
             <div id="progressModal" class="modal" style="display: none">
-                <div class="modalContent">
+                <div class="modalContent" style="text-align: center;">
                     <img src="/static/spinner.gif">
                     <h2>text...</h2>
                     <button class="modalButton" id="progressModalCancel">Cancel</button>
@@ -585,148 +619,143 @@
                     <table id="loadModalTable">
                         <tbody>
                             <tr>
-                                <th class="modalTableHeader modalTableRow">Public Feeders</th>
-                                <th class="modalTableHeader modalTableRow">My Feeders</th>
+                                <th class="modalTableRow fullPadded">Public Feeders</th>
+                                <th class="modalTableRow fullPadded">My Feeders</th>
                             </tr>	
                             <tr>
-                                <td class="modalTableRow"> 
-                                    <ul id="publicFeederList" class="scrollableList"></ul>
-                                </td>
-                                <td class="modalTableRow"> 
-                                    <ul id="userFeederList" class="scrollableList"></ul>
-                                </td>
+                                <td class="modalTableRow fullPadded"><ul id="publicFeederList" class="scrollableList"></ul></td>
+                                <td class="modalTableRow fullPadded"><ul id="userFeederList" class="scrollableList"></ul></td>
                             </tr>
                         </tbody>
                     </table>
-                    <button onclick="toggleElementDisplay('loadModal')" class="modalButton">Cancel</button>
+                    <div class="fullPadded">
+                        <button onclick="toggleElementDisplay('loadModal')" class="modalButton fullPadded">Cancel</button>
+                    </div>
                 </div>
             </div>
             <div id="blankFeederModal" class="modal" style="display: none">
-                <div class='modalContent'>
-                    <form onsubmit="submitForm({formId:'blankFeederForm'}); return false;"
-                    action="/newBlankFeeder/{{thisOwner}}" id="blankFeederForm">
-                        <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
-                        <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
-                        <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
-                        <input type='hidden' name='referrer' value='distribution'/>
+                <div class="modalContent">
+                    <!--{{thisOwner}} is correct because this form is supposed to replace THIS feeder with a new blank one-->
+                    <form onsubmit="submitForm({formId:'blankFeederForm'}); return false;" action="/newBlankFeeder/{{thisOwner}}" id="blankFeederForm">
+                        <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
+                        <input type="hidden" id="feederNum" name="feederNum" value="{{thisFeederNum}}"/>
+                        <input type="hidden" id="modelName" name="modelName" value="{{thisModelName}}"/>
+                        <input type="hidden" name="referrer" value="distribution"/>
                         <table>
                             <tbody>
                                 <tr>
-                                    <th class="modalTableHeader modalTableRow">Blank Feeder</th>
+                                    <th colspan="2" class="fullPadded">New Blank Feeder</th>
                                 </tr>
                                 <tr>
-                                    <td><label for="blankFeederInput">Name</label></td>
-                                    <td>
-                                        <!-- TODO: add better validation than just the 'required' attribute-->
-                                        <input type='text' required id="blankFeederInput" name='feederNameNew' class="modalInput"/>
+                                    <td class="fullPadded"><label for="blankFeederInput">Name</label></td>
+                                    <td class="fullPadded">
+                                        <!-- TODO: add better validation than just the "required" attribute-->
+                                        <input type="text" required id="blankFeederInput" name="feederNameNew" class="modalInput"/>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><button type="button" onclick="toggleElementDisplay('blankFeederModal')" class="modalButton">Cancel</button></td>
-                                    <td><button type="submit" class="modalButton">Create</button></td>
+                                    <td class="fullPadded"><button type="button" onclick="toggleElementDisplay('blankFeederModal')" class="modalButton">Cancel</button></td>
+                                    <td class="fullPadded"><button type="submit" class="right modalButton">Create</button></td>
                                 </tr>
                             </tbody>
                         </table>
                     </form>
                 </div>
             </div>
-            <div id='milsoftModal' class='modal' style="display: none">
-                <div class='modalContent'>
+            <div id="milsoftModal" class="modal" style="display: none">
+                <div class="modalContent">
+                    <!--I assume this is supposed to replace THIS feeder with the milsoft upload. Therefore, uniqObjName with {{thisOwner}} is correct.-->
                     <form onsubmit="submitForm({formId:'milsoftForm', pollUrl:'/checkConversion/{{thisModelName}}/{{thisOwner}}', inputId:'milsoftInput'}); return false;"
                     action="/milsoftImport/{{thisOwner}}" id="milsoftForm">
-                        <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
-                        <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
-                        <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
-                        <!--<input type='hidden' name='referrer' value='distribution'/>-->
+                        <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
+                        <input type="hidden" id="feederNum" name="feederNum" value="{{thisFeederNum}}"/>
+                        <input type="hidden" id="modelName" name="modelName" value="{{thisModelName}}"/>
+                        <!--<input type="hidden" name="referrer" value="distribution"/>-->
                         <table>
                             <tbody>
+                                <tr><th colspan="2" class="fullPadded">Milsoft Conversion</th></tr>
                                 <tr>
-                                    <th class="modalTableHeader modalTableRow">Milsoft Conversion</th>
-                                </tr>
-                                <tr>
-                                    <td><label for="milsoftInput">Name</label></td>
-                                    <td>
-                                        <!-- TODO: add better validation than just the 'required' attribute-->
-                                        <input type='text' required id="milsoftInput" name='feederNameM' class="modalInput"/>
+                                    <td class="fullPadded"><label for="milsoftInput">Name</label></td>
+                                    <td class="fullPadded">
+                                        <!-- TODO: add better validation than just the "required" attribute-->
+                                        <input type="text" required id="milsoftInput" name="feederNameM" class="modalInput"/>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>Data File (.std)</td>
-                                    <td><input type='file' required id="stdFile" name='stdFile' accept='.std' class="modalInput"/></td>
+                                    <td class="fullPadded">Data File (.std)</td>
+                                    <td class="fullPadded"><input type="file" required id="stdFile" name="stdFile" accept=".std" class="modalInput"/></td>
                                 </tr>
                                 <tr>
-                                    <td>Equipment File (.seq)</td>
-                                    <td><input type='file' required id="seqFile" name='seqFile' accept='.seq' class="modalInput"/></td>
+                                    <td class="fullPadded">Equipment File (.seq)</td>
+                                    <td class="fullPadded"><input type="file" required id="seqFile" name="seqFile" accept=".seq" class="modalInput"/></td>
                                 </tr>
                                 <tr>
-                                    <td><button type="button" onclick="toggleElementDisplay('milsoftModal')" class="modalButton">Cancel</button></td>
-                                    <td><button type="submit" class="modalButton">Import</button></td>
+                                    <td class="fullPadded"><button type="button" onclick="toggleElementDisplay('milsoftModal')" class="modalButton">Cancel</button></td>
+                                    <td class="fullPadded"><button type="submit" class="modalButton right">Import</button></td>
                                 </tr>
                             </tbody>
                         </table> 
                     </form>
-                </div>
+                </div> 
             </div>
-            <div id='gridlabdModal' class='modal' style="display: none">
-                <div class='modalContent'>
+            <div id="gridlabdModal" class="modal" style="display: none">
+                <div class="modalContent">
+                    <!--I assume this is supposed to replace THIS feeder with the gridlabd upload. Therefore, uniqObjName with {{thisOwner}} is correct.-->
                     <form onsubmit="submitForm({formId:'gridlabdForm', pollUrl:'/checkConversion/{{thisModelName}}/{{thisOwner}}', inputId:'gridlabdInput'}); return false;"
                     action="/gridlabdImport/{{thisOwner}}" id="gridlabdForm">
-                        <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
-                        <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
-                        <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
-                        <!--<input type='hidden' name='referrer' value='distribution'/>-->
+                        <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
+                        <input type="hidden" id="feederNum" name="feederNum" value="{{thisFeederNum}}"/>
+                        <input type="hidden" id="modelName" name="modelName" value="{{thisModelName}}"/>
+                        <!--<input type="hidden" name="referrer" value="distribution"/>-->
                         <table>
                             <tbody>
+                                <tr><th colspan="2" class="fullPadded">GridLab-D Conversion</th></tr>
                                 <tr>
-                                    <th class="modalTableHeader modalTableRow">GridLab-D Conversion</th>
-                                </tr>
-                                <tr>
-                                    <td><label for="gridlabdInput">Name</label></td>
-                                    <td>
-                                        <!-- TODO: add better validation than just the 'required' attribute-->
-                                        <input type='text' required id="gridlabdInput" name='feederNameG' class="modalInput"/>
+                                    <td class="fullPadded"><label for="gridlabdInput">Name</label></td>
+                                    <td class="fullPadded">
+                                        <!-- TODO: add better validation than just the "required" attribute-->
+                                        <input type="text" required id="gridlabdInput" name="feederNameG" class="modalInput"/>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>Data File (.glm)</td>
-                                    <td><input type='file' required id="csvFile" name='glmFile' accept='.glm' class="modalInput"/></td>
+                                    <td class="fullPadded">Data File (.glm)</td>
+                                    <td class="fullPadded"><input type="file" required id="csvFile" name="glmFile" accept=".glm" class="modalInput"/></td>
                                 </tr>
                                 <tr>
-                                    <td><button type="button" onclick="toggleElementDisplay('gridlabdModal')" class="modalButton">Cancel</button></td>
-                                    <td><button type="submit" class="modalButton">Import</button></td>
+                                    <td class="fullPadded"><button type="button" onclick="toggleElementDisplay('gridlabdModal')" class="modalButton">Cancel</button></td>
+                                    <td class="fullPadded"><button type="submit" class="modalButton right">Import</button></td>
                                 </tr>
                             </tbody>
                         </table>
                     </form>
                 </div>
             </div>
-            <div id='cymeModal' class='modal' style="display: none">
-                <div class='modalContent'>
+            <div id="cymeModal" class="modal" style="display: none">
+                <div class="modalContent">
+                    <!--I assume this is supposed to replace THIS feeder with the cyme upload. Therefore, uniqObjName with {{thisOwner}} is correct.-->
                     <form onsubmit="submitForm({formId:'cymeForm', pollUrl:'/checkConversion/{{thisModelName}}/{{thisOwner}}', inputId:'cymeInput'}); return false;"
                     action="/cymeImport/{{thisOwner}}" id="cymeForm">
-                        <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
-                        <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
-                        <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
-                        <!--<input type='hidden' name='referrer' value='distribution'/>-->
+                        <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
+                        <input type="hidden" id="feederNum" name="feederNum" value="{{thisFeederNum}}"/>
+                        <input type="hidden" id="modelName" name="modelName" value="{{thisModelName}}"/>
+                        <!--<input type="hidden" name="referrer" value="distribution"/>-->
                         <table>
                             <tbody>
+                                <tr><th colspan="2" class="fullPadded">Cyme Conversion</th></tr>
                                 <tr>
-                                    <th class="modalTableHeader modalTableRow">Cyme Conversion</th>
-                                </tr>
-                                <tr>
-                                    <td><label for="cymeInput">Name</label></td>
-                                    <td>
-                                        <!-- TODO: add better validation than just the 'required' attribute-->
-                                        <input type='text' required id="cymeInput" name='feederNameC' class="modalInput"/>
+                                    <td class="fullPadded"><label for="cymeInput">Name</label></td>
+                                    <td class="fullPadded">
+                                        <!-- TODO: add better validation than just the "required" attribute-->
+                                        <input type="text" required id="cymeInput" name="feederNameC" class="modalInput"/>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>Network File (.mdb)</td>
-                                    <td><input type='file' required id="mdbNetFile" name='mdbNetFile' accept='.mdb' class="modalInput"/></td>
+                                    <td class="fullPadded">Network File (.mdb)</td>
+                                    <td class="fullPadded"><input type="file" required id="mdbNetFile" name="mdbNetFile" accept=".mdb" class="modalInput"/></td>
                                 </tr>
                                 <tr>
-                                    <td><button type="button" onclick="toggleElementDisplay('cymeModal')" class="modalButton">Cancel</button></td>
-                                    <td><button type="submit" class="modalButton">Import</button></td>
+                                    <td class="fullPadded"><button type="button" onclick="toggleElementDisplay('cymeModal')" class="modalButton">Cancel</button></td>
+                                    <td class="fullPadded"><button type="submit" class="modalButton right">Import</button></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -734,316 +763,296 @@
                 </div>
             </div>
             <div id="scadaModal" class="modal" style="display: none">
-                <div class='modalContent'>
+                <div class="modalContent">
+                    <!--I assume this is supposed to update THIS feeder with the scada loadshape. Therefore, uniqObjName with {{thisOwner}} is correct.-->
                     <form onsubmit="submitForm({formId:'scadaForm', pollUrl:'/checkScadaLoadshape/{{thisModelName}}'}); return false;"
                     action="/scadaLoadshape/{{thisOwner}}/{{thisFeederName}}" id="scadaForm">
-                        <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
-                        <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
-                        <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
-                        <!--<input type='hidden' name='referrer' value='distribution'/>-->
+                        <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
+                        <input type="hidden" id="feederNum" name="feederNum" value="{{thisFeederNum}}"/>
+                        <input type="hidden" id="modelName" name="modelName" value="{{thisModelName}}"/>
+                        <!--<input type="hidden" name="referrer" value="distribution"/>-->
                         <table>
                             <tbody>
                                 <tr>
-                                    <th class="modalTableHeader modalTableRow">Scada Loadshapes</th>
-                                    <th style='float:right;'>
-                                        <a href='https://github.com/dpinney/omf/wiki/Tools-~-gridEdit#scada-loadshapes' target='_blank'>Format Help</a>
-                                    </th>
+                                    <th class="leftText fullPadded">Scada Loadshapes</th>
+                                    <th class="right fullPadded"><a href="https://github.com/dpinney/omf/wiki/Tools-~-gridEdit#scada-loadshapes" target="_blank">Format Help</a></th>
                                 </tr>
                                 <tr>
-                                    <td>File containing Scada load data (.csv)</td>
-                                    <td><input type='file' required id="scadaFile" name='scadaFile' accept='.csv' class="modalInput"/></td>
+                                    <td class="fullPadded">File containing Scada load data (.csv)</td>
+                                    <td class="fullPadded"><input type="file" required id="scadaFile" name="scadaFile" accept=".csv" class="modalInput"/></td>
                                 </tr>
+                                <tr><td colspan="100%" class="fullPadded">Note: Model "Simulation Start Date" should lie within the Scada load"s dates.</td></tr>
                                 <tr>
-                                    <td colspan='100%'>Note: Model "Simulation Start Date" should lie within the Scada load's dates.</td>
-                                </tr>
-                                <tr>
-                                    <td><button type="button" onclick="toggleElementDisplay('scadaModal')" class="modalButton">Cancel</button></td>
-                                    <td><button type="submit" class="modalButton">Import</button></td>
+                                    <td class="fullPadded"><button type="button" onclick="toggleElementDisplay('scadaModal')" class="modalButton">Cancel</button></td>
+                                    <td class="fullPadded"><button type="submit" class="right modalButton">Import</button></td>
                                 </tr>
                             </tbody>
                         </table>
                     </form>
                 </div>
             </div>
-            <div id='amiModal' class='modal' style="display: none">
-                <div class='modalContent'>
+            <div id="amiModal" class="modal" style="display: none">
+                <div class="modalContent">
+                    <!--I assume this is supposed to replace THIS feeder with the ami modeling. Therefore, uniqObjName with {{thisOwner}} is correct.-->
                     <form onsubmit="submitForm({formId:'amiForm', pollUrl:'/checkLoadModelingAmi/{{thisModelName}}'}); return false;"
                     action="/loadModelingAmi/{{thisOwner}}/{{thisFeederName}}" id="amiForm">
-                        <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
-                        <input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>
-                        <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
-                        <!--<input type='hidden' name='referrer' value='distribution'/>-->
+                        <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
+                        <input type="hidden" id="feederNum" name="feederNum" value="{{thisFeederNum}}"/>
+                        <input type="hidden" id="modelName" name="modelName" value="{{thisModelName}}"/>
+                        <!--<input type="hidden" name="referrer" value="distribution"/>-->
                         <table>
                             <tbody>
                                 <tr>
-                                    <th class="modalTableHeader modalTableRow">AMI Profiles</th>
-                                    <th style='float:right;'>
-                                        <a href='https://github.com/dpinney/omf/wiki/Tools-~-gridEdit' target='_blank'>Format Help</a>
-                                    </th>
+                                    <th class="leftText fullPadded">AMI Profiles</th>
+                                    <th class="right fullPadded"><a href="https://github.com/dpinney/omf/wiki/Tools-~-gridEdit" target="_blank">Format Help</a></th>
                                 </tr>
                                 <tr>
-                                    <td>File containing AMI load data (.csv)</td>
-                                    <td><input type='file' required id="amiFile" name='amiFile' accept='.csv' class="modalInput"/></td>
+                                    <td class="fullPadded">File containing AMI load data (.csv)</td>
+                                    <td class="fullPadded"><input type="file" required id="amiFile" name="amiFile" accept=".csv" class="modalInput"/></td>
                                 </tr>
                                 <tr>
-                                    <td colspan='100%'>Note: Model "Simulation Start Date" should lie within the AMI profiles's dates.</td>
+                                    <td colspan="100%" class="fullPadded">Note: Model "Simulation Start Date" should lie within the AMI profiles"s dates.</td>
                                 </tr>
                                 <tr>
-                                    <td><button type="button" onclick="toggleElementDisplay('amiModal')" class="modalButton">Cancel</button></td>
-                                    <td><button type="submit" class="modalButton">Import</button></td>
+                                    <td class="fullPadded"><button type="button" onclick="toggleElementDisplay('amiModal')" class="modalButton">Cancel</button></td>
+                                    <td class="fullPadded"><button type="submit" class="modalButton right">Import</button></td>
                                 </tr>
                             </tbody>
                         </table>
                     </form>
                 </div>
             </div>
-            <div id='massAddModal' class='modal' style="display: none">
-                <div class='modalContent'>
+            <div id="massAddModal" class="modal" style="display: none">
+                <div class="modalContent">
                     <form onsubmit="massAdd(); return false;">
                         <table>
                             <tbody>
+                                <tr><th colspan="2" class="fullPadded">Mass Add</th></tr>
                                 <tr>
-                                    <th class="modalTableHeader modalTableRow">Mass Add</th>
+                                    <td class="fullPadded">Add component:</td>
+                                    <td class="fullPadded"><select id="componentSelect"></select></td>
                                 </tr>
                                 <tr>
-                                    <td>Add component:</td>
-                                    <td><select id='componentSelect'></select></td>
+                                    <td class="fullPadded">To each:</td>
+                                    <td class="fullPadded"><select id="massAddTargetSelect"></select></td>
                                 </tr>
                                 <tr>
-                                    <td>To each:</td>
-                                    <td><select id='massAddTargetSelect'></select></td>
-                                </tr>
-                                <tr>
-                                    <td>With probability for each attachment (float between 0.0 and 1.0):</td>
-                                    <td><input type='text' pattern="^(1.0)|(0?(\.\d+))$" required id='percent' value='1.0' class="modalInput"/></td>
+                                    <td class="fullPadded">With probability for each attachment (float between 0.0 and 1.0):</td>
+                                    <td class="fullPadded"><input type="text" pattern="^(1.0)|(0?(\.\d+))$" required id="percent" value="1.0" class="modalInput"/></td>
 
                                 </tr>
                                 <tr>
-                                    <td><button onclick="toggleElementDisplay('massAddModal')" class="modalButton">Cancel</button></td>
-                                    <td><button type="submit" class="modalButton">Apply</button></td>
+                                    <td class="fullPadded"><button onclick="toggleElementDisplay('massAddModal')" class="modalButton">Cancel</button></td>
+                                    <td class="fullPadded"><button type="submit" class="right modalButton">Apply</button></td>
                                 </tr>
                             </tbody>
                         </table>
                     </form>
                 </div>
             </div>
-            <div id='massEditModal' class='modal' style="display: none">
-                <div class='modalContent'>
+            <div id="massEditModal" class="modal" style="display: none">
+                <div class="modalContent">
                     <table>
                         <tbody>
+                            <tr><th colspan="4" class="fullPadded">Mass Edit</th></tr>
                             <tr>
-                                <th class="modalTableHeader">Mass Edit</th>
+                                <td class="fullPadded">For each object of type</td>
+                                <td class="fullPadded"><select id="massEditTargetSelect"></select></td>
+                                <td class="fullPadded">with attribute</td>
+                                <td class="fullPadded"><input type="text" id="massEditAttribute" class="modalInput"></td>
                             </tr>
                             <tr>
-                                <td>For each object of type</td>
-                                <td><select id='massEditTargetSelect'></select></td>
-                                <td>with attribute</td>
-                                <td><input type='text' id='massEditAttribute' class="modalInput"></td>
+                                <td class="fullPadded"><input type="radio" name="attributeOperation" value="addTo">Add value to attribute</td>
+                                <td class="fullPadded"><input type="text" id="addToValue" pattern="^0\.\d+|1(\.0+)?$" class="modalInput"/></td>
                             </tr>
                             <tr>
-                                <td><input type="radio" name="attributeOperation" value="addTo">Add value to attribute</td>
-                                <td><input type='text' id='addToValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
+                                <td class="fullPadded"><input type="radio" name="attributeOperation" value="delete">Delete Attribute</td>
                             </tr>
                             <tr>
-                                <td><input type="radio" name="attributeOperation" value="delete">Delete Attribute</td>
-                            </tr>
-                            <tr>
-                                <td><input type="radio" name="attributeOperation" value="change">Change attribute to</td>
-                                <td><input type='text' id='changeValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
+                                <td class="fullPadded"><input type="radio" name="attributeOperation" value="change">Change attribute to</td>
+                                <td class="fullPadded"><input type="text" id="changeValue" pattern="^0\.\d+|1(\.0+)?$" class="modalInput"/></td>
                             </tr>
                             </tr>
                             <tr>		
-                                <td><input type="radio" name="attributeOperation" value="multiplyBy">Multiply attribute by</td>
-                                <td><input type='text' id='multiplyValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
-                                <td style="text-align: center" >and add</td>
-                                <td><input type='text' id='andAddValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
+                                <td class="fullPadded"><input type="radio" name="attributeOperation" value="multiplyBy">Multiply attribute by</td>
+                                <td class="fullPadded"><input type="text" id="multiplyValue" pattern="^0\.\d+|1(\.0+)?$" class="modalInput"/></td>
+                                <td class="fullPadded" style="text-align: center" >and add</td>
+                                <td class="fullPadded"><input type="text" id="andAddValue" pattern="^0\.\d+|1(\.0+)?$" class="modalInput"/></td>
+                            </tr>
+                            <tr><td class="fullPadded">Or</td></tr>
+                            <tr>
+                                <td class="fullPadded"><input type="radio" name="attributeOperation" value="addAttribute"> Add new attribute</td>
+                                <td class="fullPadded"><input type="text" id="newAttributeKey" class="modalInput"></td>
+                                <td class="fullPadded" style="text-align: center">with value</td>
+                                <td class="fullPadded"><input type="text" id="newAttributeValue" pattern="^0\.\d+|1(\.0+)?$" class="modalInput"/></td>
                             </tr>
                             <tr>
-                                <td>Or</td>
-                            </tr>
-                            <tr>
-                                <td><input type="radio" name="attributeOperation" value="addAttribute"> Add new attribute</td>
-                                <td><input type='text' id='newAttributeKey' class="modalInput"></td>
-                                <td style="text-align: center">with value</td>
-                                <td><input type='text' id='newAttributeValue' pattern='^0\.\d+|1(\.0+)?$' class="modalInput"/></td>
-                            </tr>
-                            <tr>
-                                <td colspan="2">
-                                    <button onclick="toggleElementDisplay('massEditModal')" class="modalButton" style="float: right">Cancel</button>
-                                </td>
-                                <td>
-                                    <button onclick="massEdit();" class="modalButton" style="float: left">Apply</button>
-                                </td>
+                                <td class="fullPadded"><button onclick="toggleElementDisplay('massEditModal')" class="modalButton">Cancel</button></td>
+                                <td colspan="3" class="fullPadded"><button onclick="massEdit();" class="right modalButton">Apply</button></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
-            <div id='attachmentsModal' class='modal' style="display: none">
-                <div class='modalContent'>
+            <div id="attachmentsModal" class="modal" style="display: none">
+                <div class="modalContent">
                     <table>
                         <tbody>
+                            <tr><th colspan="2" class="fullPadded">Attachments</th></tr>
                             <tr>
-                                <td><select id='attachmentSelect'></select></td>
+                                <td class="fullPadded"><select id="attachmentSelect"></select></td>
                             </tr>
                             <tr>
-                                <td><button onclick="toggleElementDisplay('attachmentsModal')" class="modalButton">Cancel</button></td>
-                                <td><button onclick="toggleElementDisplay('attachmentsModal'); editAttachment()" class="modalButton">Select</button></td>
+                                <td class="fullPadded"><button onclick="toggleElementDisplay('attachmentsModal')" class="modalButton">Cancel</button></td>
+                                <td class="fullPadded"><button onclick="toggleElementDisplay('attachmentsModal'); editAttachment()" class="modalButton">Select</button></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
-            <div id='editAttachmentModal' class='modal' style="display: none">
-                <div class='modalContent'>
+            <div id="editAttachmentModal" class="modal" style="display: none">
+                <div class="modalContent">
                     <table>
                         <tbody>
+                            <tr><td id="attachmentTd" class="fullPadded"></td></tr>
+                            <tr><td class="fullPadded"><textarea rows="25" cols="80" id="editAttachmentBox"></textarea></td></tr>
                             <tr>
-                                <td id='attachmentTd'></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <textarea rows='25' cols='80' id='editAttachmentBox'></textarea>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><button onclick="toggleElementDisplay('editAttachmentModal')" class="modalButton">Cancel</button></td>
-                                <td><button onclick="saveAttachment(); toggleElementDisplay('editAttachmentModal');" class="modalButton">Save</button></td>
+                                <td class="fullPadded"><button onclick="toggleElementDisplay('editAttachmentModal')" class="modalButton">Cancel</button></td>
+                                <td class="fullPadded"><button onclick="saveAttachment(); toggleElementDisplay('editAttachmentModal');" class="modalButton">Save</button></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
-            <div id='climateModal' class='modal' style="display: none">
-                <div class='modalContent'>
+            <div id="climateModal" class="modal" style="display: none">
+                <div class="modalContent">
+                    <!--I assume this is supposed to update THIS feeder with the climate data. Therefore, uniqObjName with {{thisOwner}} is correct.-->
                     <form onsubmit="submitForm({formId:'climateForm', pollUrl:'/checkClimateChange/{{thisOwner}}/{{thisModelName}}'}); return false;"
                     action="/climateChange/{{thisOwner}}/{{thisFeederName}}" id="climateForm">
-                        <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
-                        <!--<input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>-->
-                        <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
-                        <!--<input type='hidden' name='referrer' value='distribution'/>-->
+                        <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
+                        <!--<input type="hidden" id="feederNum" name="feederNum" value="{{thisFeederNum}}"/>-->
+                        <input type="hidden" id="modelName" name="modelName" value="{{thisModelName}}"/>
+                        <!--<input type="hidden" name="referrer" value="distribution"/>-->
                         <table>
                             <tbody>
+                                <tr><th colspan="2" class="fullPadded">Climate Change</th></tr>
                                 <tr>
-                                    <th class="modalTableHeader modalTableRow">Climate Change</th>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <input id='historicalImport' type='radio' name='climateImportOption' value='historicalImport'>
-                                        <label for='historicalImport'>Historical Weather</label>
+                                    <td class="fullPadded">
+                                        <input id="historicalImport" type="radio" name="climateImportOption" value="historicalImport">
+                                        <label for="historicalImport">Historical Weather</label>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><label for='startDate'>Start Date (YYYY-MM-DD):</label></td>
-                                    <td><input id='startDate' type='text' name='startDate' pattern='^\d{4}-\d{2}-\d{2}$' class="modalInput"></td>
+                                    <td class="fullPadded"><label for="startDate">Start Date (YYYY-MM-DD):</label></td>
+                                    <td class="fullPadded"><input id="startDate" type="text" name="startDate" pattern="^\d{4}-\d{2}-\d{2}$" class="modalInput"></td>
                                 </tr>
                                 <tr>
-                                    <td><label for='endDate'>End Date (YYYY-MM-DD):</label></td>
-                                    <td><input id='endDate' type='text' name='endDate' pattern='^\d{4}-\d{2}-\d{2}$' class="modalInput"></td>
+                                    <td class="fullPadded"><label for="endDate">End Date (YYYY-MM-DD):</label></td>
+                                    <td class="fullPadded"><input id="endDate" type="text" name="endDate" pattern="^\d{4}-\d{2}-\d{2}$" class="modalInput"></td>
                                 </tr>
                                 <tr>
-                                    <td><label for='airport'>Airport Code:</label></td>
-                                    <td><input id='airport' type='text' name='airport' pattern='^[A-Z]{3}$' class="modalInput"></td>
+                                    <td class="fullPadded"><label for="airport">Airport Code:</label></td>
+                                    <td class="fullPadded"><input id="airport" type="text" name="airport" pattern="^[A-Z]{3}$" class="modalInput"></td>
                                 </tr>
                                 <tr>
-                                    <td>
-                                        <input id='tmyImport' type='radio' name='climateImportOption' value='tmyImport'>
-                                        <label for='tmyImport'>tmy Import</label>
+                                    <td class="fullPadded">
+                                        <input id="tmyImport" type="radio" name="climateImportOption" value="tmyImport">
+                                        <label for="tmyImport">tmy Import</label>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><label for='zipCode'>Zip Code:</label></td>
-                                    <td><input id='zipCode' type="text" name="zipCode" pattern='^\d{5}$' class="modalInput"></td>
+                                    <td class="fullPadded"><label for="zipCode">Zip Code:</label></td>
+                                    <td class="fullPadded"><input id="zipCode" type="text" name="zipCode" pattern="^\d{5}$" class="modalInput"></td>
                                 </tr>
                                 <tr>
-                                    <td><button type="button" onclick="toggleElementDisplay('climateModal')" class="modalButton">Cancel</button></td>
-                                    <td><button type="submit" class="modalButton">Apply</button></td>
+                                    <td class="fullPadded"><button type="button" onclick="toggleElementDisplay('climateModal')" class="modalButton">Cancel</button></td>
+                                    <td class="fullPadded"><button type="submit" class="right modalButton">Apply</button></td>
                                 </tr>
                             </tbody>
                         </table>
                     </form>
                 </div>
             </div>
-            <div id='anonymizeModal' class='modal' style="display: none">
-                <div class='modalContent'>
-                    <form onsubmit="submitForm({formId:'anonymizeForm', pollUrl:'/checkAnonymize/{{thisOwner}}/{{thisModelName}}'}); return false;"
-                    action='/anonymize/{{thisOwner}}/{{thisFeederName}}' id="anonymizeForm">
-                        <input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
-                        <!--<input type='hidden' id='feederNum' name='feederNum' value='{{thisFeederNum}}'/>-->
-                        <input type='hidden' id='modelName' name='modelName' value='{{thisModelName}}'/>
-                        <!--<input type='hidden' name='referrer' value='distribution'/>-->
+            <div id="anonymizeModal" class="modal" style="display: none">
+                <div class="modalContent">
+                    <!--I assume this is supposed to anonymize THIS feeder. Therefore, uniqObjName with {{thisOwner}} is correct.-->
+                    <form onsubmit="submitForm({formId:'anonymizeForm', pollUrl:'/checkAnonymize/{{thisOwner}}/{{thisModelName}}'}); return false;" action="/anonymize/{{thisOwner}}/{{thisFeederName}}" id="anonymizeForm">
+                        <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
+                        <!--<input type="hidden" id="feederNum" name="feederNum" value="{{thisFeederNum}}"/>-->
+                        <input type="hidden" id="modelName" name="modelName" value="{{thisModelName}}"/>
+                        <!--<input type="hidden" name="referrer" value="distribution"/>-->
                         <table>
                             <tbody>
-                                <tr><th>Anonymization</th></tr>
-                                <tr><th class="modalTableHeader">Names and labels:</th></tr>
+                                <tr><th class="fullPadded">Anonymization</th></tr>
+                                <tr><th class="leftText fullPadded">Names and labels:</th></tr>
                                 <tr>
-                                    <td>
-                                        <select name='anonymizeNameOption'>
+                                    <td class="fullPadded">
+                                        <select name="anonymizeNameOption">
                                             <option value="noChange">No change</option>
                                             <option value="pseudonymize">Pseudonymize</option>
                                             <option value="randomize">Randomize</option>
                                         </select>
                                     </td>
                                 </tr>
-                                <tr><th class="modalTableHeader">Locations:</th></tr>
+                                <tr><th class="leftText fullPadded">Locations:</th></tr>
                                 <tr>
-                                    <td>
-                                        <input type='radio' id='noChange' name='anonymizeLocationOption' value='noChange' checked>
-                                        <label for='noChange'>No Change</label>
+                                    <td class="fullPadded">
+                                        <input type="radio" id="noChange" name="anonymizeLocationOption" value="noChange" checked>
+                                        <label for="noChange">No Change</label>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>
-                                        <input type='radio' id='randomize' name='anonymizeLocationOption' value='randomize'>
-                                        <label for='randomize'>Randomize</label>
+                                    <td class="fullPadded">
+                                        <input type="radio" id="randomize" name="anonymizeLocationOption" value="randomize">
+                                        <label for="randomize">Randomize</label>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>
-                                        <input type='radio' id='forceLayout' name='anonymizeLocationOption' value='forceLayout'>
-                                        <label for='forceLayout'>Force Layout</label>
+                                    <td class="fullPadded">
+                                        <input type="radio" id="forceLayout" name="anonymizeLocationOption" value="forceLayout">
+                                        <label for="forceLayout">Force Layout</label>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>
-                                        <input type='radio' id='translation' name='anonymizeLocationOption' value='translation'>
-                                        <label for='translation'>Translate</label>
+                                    <td class="fullPadded">
+                                        <input type="radio" id="translation" name="anonymizeLocationOption" value="translation">
+                                        <label for="translation">Translate</label>
                                     </td>
                                 </tr>
-                                <tr><td><input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='translateRight' class="modalInputLine"> [ft] to the right and</td></tr>
-                                <tr><td><input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='translateUp' class="modalInputLine"> [ft] up with a</td></tr>
-                                <tr><td><input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='rotate' class="modalInputLine"> [degree] rotation.</td></tr>
-                                <tr><th class="modalTableHeader">Electrical properties:</th></tr>
+                                <tr><td class="fullPadded"><input type="text" pattern="^[+-]?\d+(\.\d+)?$" name="translateRight" class="modalInputLine"> [ft] to the right and</td></tr>
+                                <tr><td class="fullPadded"><input type="text" pattern="^[+-]?\d+(\.\d+)?$" name="translateUp" class="modalInputLine"> [ft] up with a</td></tr>
+                                <tr><td class="fullPadded"><input type="text" pattern="^[+-]?\d+(\.\d+)?$" name="rotate" class="modalInputLine"> [degree] rotation.</td></tr>
+                                <tr><th class="leftText fullPadded">Electrical properties:</th></tr>
                                 <tr>
-                                    <td>
-                                        <input type='checkbox' id='modifyLengthSize' name='modifyLengthSize' value='modifyLengthSize'>
-                                        <label for='modifyLengthSize'>Modify conductor length and cable size</label>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <input type='checkbox' id='smoothLoadGen' name='smoothLoadGen' value='smoothLoadGen'>
-                                        <label for='smoothLoadGen'>Smooth AMI Loadshapes</label>
+                                    <td class="fullPadded">
+                                        <input type="checkbox" id="modifyLengthSize" name="modifyLengthSize" value="modifyLengthSize">
+                                        <label for="modifyLengthSize">Modify conductor length and cable size</label>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>
-                                        <input type='checkbox' id='shuffleLoadGen' name='shuffleLoadGen' value='shuffleLoadGen'>
-                                        <label for='shuffleLoadGen'>Shuffle loads and generators:</label>
-                                        <input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='shufflePerc' class="modalInputLine"> [%]</label>
+                                    <td class="fullPadded">
+                                        <input type="checkbox" id="smoothLoadGen" name="smoothLoadGen" value="smoothLoadGen">
+                                        <label for="smoothLoadGen">Smooth AMI Loadshapes</label>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>
-                                        <input type='checkbox' id='addNoise' name='addNoise' value='addNoise'>
-                                        <label for='addNoise'>Add noise:</label>
-                                        <input type='text' pattern="^[+-]?\d+(\.\d+)?$" name='noisePerc' class="modalInputLine"> [%]</label>
+                                    <td class="fullPadded">
+                                        <input type="checkbox" id="shuffleLoadGen" name="shuffleLoadGen" value="shuffleLoadGen">
+                                        <label for="shuffleLoadGen">Shuffle loads and generators:</label>
+                                        <input type="text" pattern="^[+-]?\d+(\.\d+)?$" name="shufflePerc" class="modalInputLine"> [%]</label>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>
+                                    <td class="fullPadded">
+                                        <input type="checkbox" id="addNoise" name="addNoise" value="addNoise">
+                                        <label for="addNoise">Add noise:</label>
+                                        <input type="text" pattern="^[+-]?\d+(\.\d+)?$" name="noisePerc" class="modalInputLine"> [%]</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fullPadded">
                                         <button type="button" onclick="toggleElementDisplay('anonymizeModal')" class="modalButton">Cancel</button>
-                                        <button type="submit" class="modalButton" style="float: right">Apply</button>
+                                        <button type="submit" class="right modalButton">Apply</button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -1051,40 +1060,68 @@
                     </form>
                 </div>
             </div>
-            <!-- Modals-->
+            <div id="opacityModal" class="modal" style="display: none">
+                <div class="modalContent">
+                    <div data-tableinsert></div>
+                    <div class="centered fullPadded">
+                        <button onclick="toggleElementDisplay('opacityModal');" class="modalButton">Close</button>
+                        <button onclick="gOpacityManager.reset();" class="modalButton">Reset</button>
+                    </div>
+                </div>
+            </div>
+            <div id="colorModal" class="modal" style="display: none">
+                <div class="centered modalContent">
+                    <h3>Color Circuit</h3>
+                    <div class="fullPadded"><input type="file" multiple accept=".csv" class="modalInput"></div>
+                    <div data-tableinsert class="leftText vertFlex fullPadded"></div>
+                    <div class="fullPadded">
+                        <button onclick="toggleElementDisplay('colorModal');" class="modalButton">Close</button>
+                        <button data-buttonfunction="reset" class="modalButton">Reset</button>
+                    </div>
+                </div>
+            </div>
+            <div id="colorLegends" class="floatingTables"></div>
+            <!--Modals-->
         </div>
 	</body>
 </html>
-<script id='componentsInsert'>const gComponents = {% if components %}{{ components | safe }}{% else %}null{% endif %}; 
+<script id="componentsInsert">const gComponents = {% if components %}{{ components | safe }}{% else %}null{% endif %}; 
 </script>
-<script id='feederInsert'>const gReadFeeder = {% if thisFeederData %}{{ thisFeederData | safe }}{% else %}null{% endif %}; 
+<script id="feederInsert">const gReadFeeder = {% if thisFeederData %}{{ thisFeederData | safe }}{% else %}null{% endif %}; 
 </script>
-<script id='panZoomInsert'>
+<style id="jqueryCssInsert">
+</style>
+<script id="jqueryInsert">
 </script>
-<script type='text/javascript'>
+<script id="jqueryUiInsert">
+</script>
+<script id="panZoomInsert">
+</script>
+<script id="chromaInsert">
+</script>
+<script id="papaParseInsert">
+</script>
+<script type="text/javascript">
 //"use strict";
 let gThisFeederName = "{% if thisFeederName %}{{ thisFeederName | safe }}{% else %}null{% endif %}";
 const gThisFeederNum = {% if thisFeederNum %}{{ thisFeederNum | safe }}{% else %}null{% endif %}; 
 const gThisModelName = "{% if thisModelName %}{{ thisModelName | safe }}{% else %}null{% endif %}"; 
 const gThisOwner = "{% if thisOwner %}{{ thisOwner | safe }}{% else %}null{% endif %}"; 
+const gCurrentUser = "{% if currentUser %}{{ currentUser | safe }}{% else %}null{% endif %}"
 const gPublicFeeders = {% if publicFeeders %}{{ publicFeeders | safe }}{% else %}null{% endif %};
 const gUserFeeders = {% if userFeeders %}{{ userFeeders | safe }}{% else %}null{% endif %}; 
 const gWriteFeeder = deepCopy(gReadFeeder);
-// The global gTree can only be created after the entire file has been parsed.
-let gTree;
+let gTree; // A wrapper around the gWriteFeeder.tree data structure. Has methods for accessing and modifying the data.
 let gSelection;
 let gViewport; 
-//let gOffsetX; // replaced by gMinLon
-let gMinLon;
-//let gOffsetY; // replaced by gMaxLat
-let gMaxLat;
-let gLongitudeRange;
-let gLatitudeRange;
-let gDrawScaleFactor;
+let gOpacityManager;
+let gMinLon; // The minimum longitude found among all the gWriteFeeder.tree objects. Used to transform and flip how the graph is drawn.
+let gMaxLat; // The maximum latitude found among all the gWriteFeeder.tree objects. Used to transform and flip how the graph is drawn.
+let gDrawScaleFactor; // A number that scales all graph data to fit within a 1000 x 1000 viewport size so the graph draws nicely.
 let gDownX;
 let gDownY;
-// Scale that all SVG objects are drawn at
-let gScaleLevel = 1.0; 
+const gViridisColors = ["#440154FF", "#481567FF", "#482677FF", "#453781FF", "#404788FF", "#39568CFF", "#33638DFF", "#2D708EFF", "#287D8EFF", "#238A8DFF", "#1F968BFF", "#20A387FF", "#29AF7FFF", "#3CBB75FF", "#55C667FF", "#73D055FF", "#95D840FF", "#B8DE29FF", "#DCE319FF", "#FDE725FF"];
+let gScaleLevel = 1.0; // Scale that all SVG objects are drawn at
 //**************************************************
 // Selection Interface
 //**************************************************
@@ -1152,15 +1189,15 @@ function createSelection() {
 
 function saveSvg() {
 	// Create an SVG that can be saved.
-	alert('We are redirecting you to a static version of the SVG that you can save as a .svg file.')
-	var svg = document.getElementById('svgContainer').outerHTML
+	alert("We are redirecting you to a static version of the SVG that you can save as a .svg file.")
+	var svg = document.getElementById("svgContainer").outerHTML
 	var win = window.open()
 	win.document.write(svg)
 }
 
 function downloadTextFile() {
 	// WARNING! Performance is very bad because the JSON is enormous! This can hang your browser!
-	alert('We are opening a window with JSON in it that you can save as a .json file.')
+	alert("We are opening a window with JSON in it that you can save as a .json file.")
 	var modJson = JSON.stringify(gWriteFeeder);
 	var win = window.open();
 	win.document.write(modJson);
@@ -1183,75 +1220,38 @@ function scaleGraphForVisualAppearance(objectCount) {
  */
 function createViewport(tree, svgContainer) {
     const keys = Object.keys(tree);
-    //scaleGraphForVisualAppearance(keys.length);
-    // Set the longitude and latitude to be within the bounds of the provided data
-    const firstKey = keys.find(key => {
-        return tree[key].longitude !== undefined && tree[key].latitude !== undefined;
-    });
-    let minLon;
-    let maxLon;
-    let minLat;
-    let maxLat;
+    const firstKey = keys.find(key => tree[key].longitude != null && tree[key].latitude != null);
     if (firstKey == null) {
         // There were no coordinates, so insert some!
         const objects = Object.values(tree);
         insertCoordinates(objects, 0, 0, 50);
         scaleGraphForVisualAppearance(keys.length)
-        minLon = 0;
-        maxLon = 0;
-        minLat = 0;
-        maxLat = 0;
-    } else {
-        minLon = parseFloat(tree[firstKey].longitude);
-        maxLon = minLon;
-        minLat = parseFloat(tree[firstKey].latitude);
-        maxLat = minLat;
     }
-    /* Find the minimum and maximum longitudes and latitudes. That's not good enough. I need to find a RANGE of values
-    for each and scale the viewport to the RANGE
-    */
-    keys.forEach(key => {
-        let lon = tree[key].longitude;
-        let lat = tree[key].latitude;
-        if (lon !== undefined && lat !== undefined) {
-            lon = parseFloat(lon);
-            lat = parseFloat(lat);
-            if (lon < minLon) {
-                minLon = lon;
-            }
-            if (lon > maxLon) {
-                maxLon = lon;
-            }
-            if (lat < minLat) {
-                minLat = lat;
-            }
-            if (lat > maxLat) {
-                maxLat = lat;
-            }
-        }
-    });
+    const minMax = getMinMax({objectContainer: tree, properties: ["longitude", "latitude"]});
+    let {latitude: {min: minLat}} = minMax;
+    let {latitude: {max: maxLat}} = minMax;
+    let {longitude: {min: minLon}} = minMax;
+    let {longitude: {max: maxLon}} = minMax;
     /* Longitude is not reversed, so I want the minimum longitude to use as the offset. Latitude IS reversed, so I want the maximum latitude to use as the offset. */
-    gLongitudeRange = maxLon - minLon;
-    //gOffsetX = minLon;
+    const longitudeRange = maxLon - minLon;
+    const latitudeRange = maxLat - minLat;
     gMinLon = minLon;
-    gLatitudeRange = maxLat - minLat;
-    //gOffsetY = minLat;
     gMaxLat = maxLat;
     /* Multiply by the gDrawScaleFactor when drawing. Divide by the gDrawScaleFactor when storing. 
     We use the larger of the range values to set the gDrawScaleFactor to make the graph fit in the viewport initially.
     */
-    if (gLongitudeRange > gLatitudeRange) {
-        gDrawScaleFactor = 1000/gLongitudeRange;
+    if (longitudeRange > latitudeRange) {
+        gDrawScaleFactor = 1000/longitudeRange;
     } else {
-        gDrawScaleFactor = 1000/gLatitudeRange;
+        gDrawScaleFactor = 1000/latitudeRange;
     }
-    svgContainer.setAttribute('viewBox',`0 0 ${1000} ${1000}`);
+    svgContainer.setAttribute("viewBox",`0 0 ${1000} ${1000}`);
     /* Uncomment below to make gScaleFactor go away */
     //gDrawScaleFactor = 1;
-    //svgContainer.setAttribute('viewBox',`0 0 ${gLongitudeRange} ${gLatitudeRange}`);
+    //svgContainer.setAttribute("viewBox",`0 0 ${longitudeRange} ${latitudeRange}`);
     /* Uncomment above to make gScaleFactor go away */
-	window.panZoom = svgPanZoom('#svgContainer', {
-        /* Override the default values set by 'optionsDefaults' in svg-pan-zoom.js */
+	window.panZoom = svgPanZoom("#svgContainer", {
+        /* Override the default values set by "optionsDefaults" in svg-pan-zoom.js */
         dblClickZoomEnabled: false,
         zoomScaleSensitivity: 0.2,
         minZoom: 0.1,
@@ -1325,54 +1325,54 @@ function handleSelection(event) {
  */
 function scaleTo(x) {
     gScaleLevel = x;
-	const circles = document.getElementsByTagName('circle')
-	const lines = document.getElementsByTagName('line')
+	const circles = document.getElementsByTagName("circle")
+	const lines = document.getElementsByTagName("line")
 	// Scale Circles
 	for (let i = 0; i < circles.length; i++) {
-		circles[i].setAttribute('r', 2*x)
-		circles[i].setAttribute('stroke-width', 0.5*x)
+		circles[i].setAttribute("r", 2*x)
+		circles[i].setAttribute("stroke-width", 0.5*x)
 	}
 	// Scale Lines
 	for (let i = 0; i < lines.length; i++) {
-		if (lines[i].getAttribute('class').indexOf('p2') !== -1) {
-			lines[i].setAttribute('stroke-width', 2*x)
+		if (lines[i].getAttribute("class").indexOf("p2") !== -1) {
+			lines[i].setAttribute("stroke-width", 2*x)
 		}
-		else if (lines[i].getAttribute('class').indexOf('p3') !== -1) {
-			lines[i].setAttribute('stroke-width', 3*x)
+		else if (lines[i].getAttribute("class").indexOf("p3") !== -1) {
+			lines[i].setAttribute("stroke-width", 3*x)
 		}
-		else if (lines[i].getAttribute('class').indexOf('parentChild') !== -1) {
-			lines[i].setAttribute('stroke-width', 0.5*x)
+		else if (lines[i].getAttribute("class").indexOf("parentChild") !== -1) {
+			lines[i].setAttribute("stroke-width", 0.5*x)
 		}
 		else {
-			lines[i].setAttribute('stroke-width', x)
+			lines[i].setAttribute("stroke-width", x)
 		}
 	}
 }
 
 function dropPill(thisButton, name) { // eslint-disable-line
 	// This function is used to make the dropdown menus work.
-	thisButton.style.color= 'black'
-	thisButton.style.background= '#F8F8F8'
-	thisButton.style.textAlign = 'left'
-	thisButton.nextSibling.nextSibling.style.display = 'inline-block'
-	thisButton.innerHTML = name + ' &#x25B4;'
+	thisButton.style.color= "black"
+	thisButton.style.background= "#F8F8F8"
+	thisButton.style.textAlign = "left"
+	thisButton.nextSibling.nextSibling.style.display = "inline-block"
+	thisButton.innerHTML = name + " &#x25B4;"
 	function clickCloseEvent() {
-		thisButton.nextSibling.nextSibling.style.display = 'none'
-		thisButton.innerHTML = name + ' &#x25BE;'
-		this.removeEventListener('click', arguments.callee, true)
-		thisButton.style.color= 'white'
-		thisButton.style.background= 'transparent'
+		thisButton.nextSibling.nextSibling.style.display = "none"
+		thisButton.innerHTML = name + " &#x25BE;"
+		this.removeEventListener("click", arguments.callee, true)
+		thisButton.style.color= "white"
+		thisButton.style.background= "transparent"
 		if (window.event.toElement==thisButton) {event.stopPropagation()}
 	}
-    //document.body.addEventListener('click', clickCloseEvent, true)
-    document.getElementById("interfaceContainer").addEventListener('click', clickCloseEvent, true)
+    //document.body.addEventListener("click", clickCloseEvent, true)
+    document.getElementById("interfaceContainer").addEventListener("click", clickCloseEvent, true)
 }
 
 //Returns real Lat/Long of a click event, used in the moveBus function
 function clickLatLon(event) {
 	const pan = window.panZoom.getPan();
     const zoom = panZoom.getSizes().realZoom;
-	const svg = document.getElementById('svgContainer');
+	const svg = document.getElementById("svgContainer");
 	let pt = svg.createSVGPoint();
 	pt.x = event.clientX;
 	pt.y = event.clientY;
@@ -1390,12 +1390,20 @@ function clickLatLon(event) {
 // Find modal interface
 //**************************************************
 
+function searchTerm() {
+    let keys;
+    let operation = document.querySelector("input[name=searchMode]:checked").value;
+    if (operation === "searchExactString") {
+        keys = findExactString(this.value.trim());
+    } else if (operation === "searchSubstring") {
+        keys = findSubstring(this.value.trim());
+    }
+    prepareFoundKeys.bind(this)(keys);
+}
 /**
- * TODO: add unit tests
+ * @param {Array} keys
  */
-function getSearchResults() {
-    const tree = gTree.tree;
-    const keys = getMatchingKeys(this.value.trim(), tree);
+function prepareFoundKeys(keys) {
     document.getElementById("searchCount").textContent = `hits: ${keys.length}`;
     const nextButton = document.getElementById("findNext");
     const previousButton = document.getElementById("findPrevious");
@@ -1406,6 +1414,7 @@ function getSearchResults() {
         }
         nextButton.onclick = feedback;
         previousButton.onclick = feedback;
+        document.getElementById("foundElementKey").textContent = "";
         return;
     }
     const upperIndex = keys.length - 1;
@@ -1413,39 +1422,53 @@ function getSearchResults() {
     viewElement(keys[idx]);
     nextButton.onclick = function() {
         idx++;
-        if (idx > upperIndex) {
-            idx = 0;
-        }
+        if (idx > upperIndex) idx = 0;
         viewElement(keys[idx]);
     }
     previousButton.onclick = function() {
         idx--;
-        if (idx < 0) {
-            idx = upperIndex;
-        }
+        if (idx < 0) idx = upperIndex;
         viewElement(keys[idx]);
     }
+}
+
+function findExactString(string) {
+    const keys = [];
+    if (string === "") return keys;
+    const tree = gTree.tree;
+    for (let key in tree) {
+        if (key === string) keys.push(key);
+        for (let propertyKey in tree[key]) {
+            let propertyVal = tree[key][propertyKey];
+            if (typeof(propertyVal) !== "string") propertyVal += "";
+            if (propertyKey.toLowerCase === string.toLowerCase()) {
+                keys.push(key);
+                break;
+            } else if (propertyVal.toLowerCase() === string.toLowerCase()) {
+                keys.push(key);
+                break;
+            }
+        }
+    }
+    return keys;
 }
 
 /**
  * TODO: add unit tests
  */
-function getMatchingKeys(term, tree) {
+function findSubstring(substring) {
     const keys = [];
-    if (term === "") {
-        return keys;
-    }
+    if (substring === "") return keys;
+    const tree = gTree.tree;
     for (let key in tree) {
-        if (term == key) keys.push(key);
+        if (key.includes(substring)) keys.push(key);
         for (let propertyKey in tree[key]) {
             let propertyVal = tree[key][propertyKey];
-            if (typeof(propertyVal) !== "string") {
-                propertyVal += "";
-            }
-            if (propertyKey.toLowerCase().includes(term.toLowerCase())) {
+            if (typeof(propertyVal) !== "string") propertyVal += "";
+            if (propertyKey.toLowerCase().includes(substring.toLowerCase())) {
                 keys.push(key);
                 break;
-            } else if (propertyVal.toLowerCase().includes(term.toLowerCase())) {
+            } else if (propertyVal.toLowerCase().includes(substring.toLowerCase())) {
                 keys.push(key);
                 break;
             }
@@ -1471,10 +1494,10 @@ function viewElement(key) {
         x = element.getAttribute("cx");
         y = element.getAttribute("cy");
     } else {
-		x = (parseFloat(element.getAttribute('x1')) + parseFloat(element.getAttribute('x2'))) / 2;
-		y = (parseFloat(element.getAttribute('y1')) + parseFloat(element.getAttribute('y2'))) / 2;
+		x = (parseFloat(element.getAttribute("x1")) + parseFloat(element.getAttribute("x2"))) / 2;
+		y = (parseFloat(element.getAttribute("y1")) + parseFloat(element.getAttribute("y2"))) / 2;
     }
-    // I can't make this work 
+    // I can"t make this work 
     //panZoom.zoomAtPoint(2, {x: x, y: y});
     // Do this instead 
 	panZoom.pan({x:0, y:0})
@@ -1508,6 +1531,7 @@ function viewElement(key) {
     $("#massAddModal .modalContent").draggable();
     $("#massEditModal .modalContent").draggable();
     $("#attachmentsModal .modalContent").draggable();
+    $("#colorModal .modalContent").draggable();
     // Position the description table depending on whether or not it is draggable
     //document.getElementById("descriptionTable").removeAttribute("style");
     //document.getElementById("descriptionTable").style.left = "70vw";
@@ -1533,7 +1557,8 @@ function disableJQueryFunctionality() {
 function attachHandlers() {
     attachAddComponentListeners();
     attachFeederList(document.getElementById("publicFeederList"), gPublicFeeders, "public");
-    attachFeederList(document.getElementById("userFeederList"), gUserFeeders, gThisOwner);
+    attachFeederList(document.getElementById("userFeederList"), gUserFeeders, gCurrentUser);
+    //attachFeederList(document.getElementById("userFeederList"), gUserFeeders, gThisOwner);
     addFileMenuHandlers();
     addEditMenuHandlers();
 }
@@ -1689,9 +1714,9 @@ function attachAddComponentListeners() {
 
 /** 
  * TODO: add unit-tests
- * @param {Element} ul - An html element where the list will be attached
+ * @param {Element} ul - An html element where the list will be attached.
  * @param {Array} feeders - An array of objects, where each object has properties "model" and "name", or null. 
- * @param {string} owner - Either "public" or nothing, as the server determines the real owner.
+ * @param {string} owner - Either "public" or the current user.
  */
 function attachFeederList(ul, feeders, owner=null) {
     if (!feeders) return;
@@ -1714,7 +1739,7 @@ function attachFeederList(ul, feeders, owner=null) {
 }
 
 /**
- *
+ * Doesn't need unit tests
  */
 function addFileMenuHandlers() {
     const menu = document.getElementById("fileMenu");
@@ -1722,7 +1747,7 @@ function addFileMenuHandlers() {
         return;
     }
     const items = Array.from(menu.children);
-    if (items.length !== 8) {
+    if (items.length !== 9) {
         throw new Error("Please update this function to ensure the correct handlers are attached");
     }
     items[0].addEventListener("click", function() {
@@ -1730,11 +1755,12 @@ function addFileMenuHandlers() {
     });
     items[1].addEventListener("click", downloadTextFile);
     items[2].addEventListener("click", renameFeeder);
-    items[3].addEventListener("click", function() { toggleElementDisplay("loadModal"); });
-    items[4].addEventListener("click", function() { toggleElementDisplay("blankFeederModal"); });
-    items[5].addEventListener("click", function() { toggleElementDisplay("milsoftModal"); });
-    items[6].addEventListener("click", function() { toggleElementDisplay("gridlabdModal"); });
-    items[7].addEventListener("click", function() { toggleElementDisplay("cymeModal"); });
+    items[3].addEventListener("click", () => { toggleElementDisplay("loadModal"); });
+    items[4].addEventListener("click", () => { toggleElementDisplay("blankFeederModal"); });
+    items[5].addEventListener("click", () => { toggleElementDisplay("milsoftModal"); });
+    items[6].addEventListener("click", () => { toggleElementDisplay("gridlabdModal"); });
+    items[7].addEventListener("click", () => { toggleElementDisplay("cymeModal"); });
+    items[8].addEventListener("click", () => { toggleElementDisplay("colorModal"); });
 }
 
 /** 
@@ -1743,7 +1769,7 @@ function addFileMenuHandlers() {
 function addEditMenuHandlers() {
     const menu = document.getElementById("editMenu");
     const items = Array.from(menu.children);
-    if (items.length != 9) {
+    if (items.length != 10) {
         throw new Error("Please update this function to ensure the correct handlers are attached");
     }
     //items[0].addEventListener("click", zoomToFit);
@@ -1769,6 +1795,10 @@ function addEditMenuHandlers() {
     });
     items[7].addEventListener("click", function() { toggleElementDisplay("scadaModal"); });
     items[8].addEventListener("click", convertStaticLoadsIntoHouses);
+    items[9].addEventListener("click", function() {
+        gOpacityManager.update();
+        gOpacityManager.buildOpacityModal();
+    });
 }
 
 /** 
@@ -1785,7 +1815,7 @@ function toggleElementDisplay(id) {
         if (id === "findModal") {
             return;
         }
-        // When we hide a modal, set any of the text fields to empty
+        // When we hide a modal, set any of the text fields to empty. Actually I don't always want this.
         const queryString = `#${id} input[type=text]`;
         document.querySelectorAll(queryString).forEach(input => {
             input.value = "";
@@ -1888,19 +1918,16 @@ function addLoadsToHouse(key) {
 }
 
 function massAdd() {
-    let percent = document.getElementById('percent').value;
+    let percent = document.getElementById("percent").value;
     if (!isNumberString(percent) || parseFloat(percent) > 1.0 || parseFloat(percent) < 0) {
         alert("Please enter a valid number for attachment probability");
         return;
     }
-    // Don't need to check if the component is a child node, since that is done elsewhere
-	const componentName = document.getElementById('componentSelect').value;
-    // Don't need to check if the attachObject is a configuration node, since that is done elsewhere.
-    const attachObject = document.getElementById('massAddTargetSelect').value;
-
+    // Don"t need to check if the component is a child node, since that is done elsewhere
+	const componentName = document.getElementById("componentSelect").value;
+    // Don"t need to check if the attachObject is a configuration node, since that is done elsewhere.
+    const attachObject = document.getElementById("massAddTargetSelect").value;
     if (gComponents[componentName].object === "recorder" || getType(gComponents[attachObject]) !== "line") {
-
-
         const newObjects = [];
         const pm = new ProgressModal(`Adding a "${componentName}" object to every "${attachObject}" object. This could take a few seconds.`);
         pm.show();
@@ -1917,7 +1944,7 @@ function massAdd() {
             createSvgData(newObjects).draw(gViewport);
             pm.hide();
             alert(`${newObjects.length} "${componentName}" objects added to the feeder`);
-            toggleElementDisplay('massAddModal');
+            toggleElementDisplay("massAddModal");
         }, 10);
 
     } else {
@@ -1936,6 +1963,7 @@ function updateAttachTargets(id, tree) {
         if (id === "massAddTargetSelect") {
             isValidType = getType(tree[key]) !== "configurationNode";
         }
+        // TODO: problem: meter recorder not found
         let isComponent = gComponents.hasOwnProperty(tree[key].object);
         let notAlreadyAdded = !attachList.includes(tree[key].object);
         if (isValidType && isComponent && notAlreadyAdded) {
@@ -2022,7 +2050,7 @@ function massEdit() {
                 delete gTree.getObject(key)[attributeKey];
             }
             alert(`${keys.length} ${objectType} objects had the "${attributeKey}" attribute deleted.`);
-            toggleElementDisplay('massEditModal');
+            toggleElementDisplay("massEditModal");
             createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
             break;
     }
@@ -2075,7 +2103,7 @@ function massAddAttribute(keys, objectType) {
         gTree.getObject(key)[newKey] = newValue;
     }
     alert(`${keys.length} ${objectType} objects had the "${newKey}" attribute added.`);
-    toggleElementDisplay('massEditModal');
+    toggleElementDisplay("massEditModal");
     createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
 }
 
@@ -2129,7 +2157,7 @@ function massChange(keys, attributeKey, objectType) {
     let msg = `${count} ${objectType} objects had the "${attributeKey}" attribute changed.`;
     msg = unedited.length === 0 ? msg : msg + ` The following objects did not have their "${attributeKey}" attribute changed: "${unedited.map(key => gTree.getObject(key).name).join(", ")}".`
     alert(msg);
-    toggleElementDisplay('massEditModal');
+    toggleElementDisplay("massEditModal");
     createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
 }
 
@@ -2144,7 +2172,7 @@ function massAddition(keys, attributeKey, objectType) {
         gTree.getObject(key)[attributeKey] = gTree.getObject(key)[attributeKey] + operand;
     }
     alert(`${keys.length} ${objectType} objects had their "${attributeKey}" attribute edited.`);
-    toggleElementDisplay('massEditModal');
+    toggleElementDisplay("massEditModal");
     createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
 }
 
@@ -2161,7 +2189,7 @@ function massMultiplication(keys, attributeKey, objectType) {
         gTree.getObject(key)[attributeKey] = gTree.getObject(key)[attributeKey] * multiplyOperand + addOperand;
     }
     alert(`${keys.length} ${objectType} objects had their "${attributeKey}" attribute edited.`);
-    toggleElementDisplay('massEditModal');
+    toggleElementDisplay("massEditModal");
     createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
 }
 
@@ -2174,19 +2202,19 @@ function loadAttachments() {
 }
 
 function editAttachment() {
-	//document.body.style.cursor = 'wait'
+	//document.body.style.cursor = "wait"
 	//setTimeout(function(){
-		toggleElementDisplay('editAttachmentModal');
-		let name =  document.getElementById('attachmentSelect').value; //get the select. attachmentsList = attachmentSelect
-		document.getElementById('attachmentTd').innerHTML = name;  //get the td. attachmentSelect = attachmentTd
-		document.getElementById('editAttachmentBox').innerHTML = gWriteFeeder.attachments[name];
-		//document.body.style.cursor = 'auto'
+		toggleElementDisplay("editAttachmentModal");
+		let name =  document.getElementById("attachmentSelect").value; //get the select. attachmentsList = attachmentSelect
+		document.getElementById("attachmentTd").innerHTML = name;  //get the td. attachmentSelect = attachmentTd
+		document.getElementById("editAttachmentBox").innerHTML = gWriteFeeder.attachments[name];
+		//document.body.style.cursor = "auto"
 	//}, 100);
 }
 
 function saveAttachment() {
-	let name = document.getElementById('attachmentSelect').value;
-	gWriteFeeder.attachments[name] = document.getElementById('editAttachmentBox').value;
+	let name = document.getElementById("attachmentSelect").value;
+	gWriteFeeder.attachments[name] = document.getElementById("editAttachmentBox").value;
 }
 
 //**************************************************
@@ -2237,15 +2265,22 @@ function saveFeeder(feeder) {
 /**
  * TODO: This function has a lot of problems because of how the web routes are written.
  */
+/**
+ * serverFeederName: The name of the feeder I want to load, e.g. "ABEC Columbia"
+ * serverModelName: Either "publicFeeders" or something like "Simple Market System Indy Solar"
+ * 
+ * @param {string} owner - either "public" or the current user.
+ */
 async function loadFeeder(serverFeederName, serverModelName, owner) {
     let submitForm = false;
     await $.ajax({
-        url: `/uniqObjName/Feeder/${owner}/${serverFeederName}/${serverModelName}`
+        // I need to check if a user's feeder still exists.
+        url: `/uniqObjName/Feeder/${owner}/${serverFeederName}/${serverModelName}`//good
     }).done(function(data) {
         if (data.exists) {
             submitForm = true;
         } else {
-            alert('This feeder no longer exists. Please refresh the page, or select another feeder.');
+            alert("This feeder no longer exists. Please refresh the page, or select another feeder.");
         }
     });
     if (submitForm === false) {
@@ -2263,8 +2298,7 @@ async function loadFeeder(serverFeederName, serverModelName, owner) {
     progressModal.show();
     $.ajax({
         type: "POST",
-        /* If ${owner} is not set to "public", then the server ignores what was sent and sets it to User.cu()
-        */
+        // {owner} is correct. {owner} is either "public" to load from public feeders or <current user> to load from the users feeders. {gThisOwner} is correct because I am overwriting THIS feeder file, which is either publicly owned or owned by the current user. {gThisOwner} cannot be {gCurrentUser} because then I can't overwrite public files as the admin.
         url: `/loadFeeder/${serverFeederName}/${serverModelName}/${gThisModelName}/${gThisFeederNum}/${owner}/${gThisOwner}`,
         data: formData,
         processData: false,
@@ -2289,7 +2323,7 @@ async function submitForm({formId, pollUrl, inputId}) {
         const fileName = document.getElementById(inputId).value;
         // Check if the file exists, using the user-provided fileName
         await $.ajax({
-            url: `/uniqObjName/Feeder/${gThisOwner}/${fileName}/${gThisModelName}`
+            url: `/uniqObjName/Feeder/${gThisOwner}/${fileName}/${gThisModelName}`//good
         }).done(function(data) {
             //console.log(data);
             if (data.exists === true) {
@@ -2344,7 +2378,7 @@ async function submitForm({formId, pollUrl, inputId}) {
                     if (data.exists === true) {
                         //processing is ongoing 
                     } else if (data.exists === false) {
-                        // The pollModal isn't hidden before the alert happens. This has nothing to do with the reload wrapper.
+                        // The pollModal isn"t hidden before the alert happens. This has nothing to do with the reload wrapper.
                         clearInterval(intervalId);
                         pollModal.hide();
                         alert("Conversion complete");
@@ -2352,18 +2386,18 @@ async function submitForm({formId, pollUrl, inputId}) {
                     } else if (data === "milError") {
                         clearInterval(intervalId);
                         pollModal.hide()
-                        alert('The .std and .seq files used are incorrectly formatted.');
+                        alert("The .std and .seq files used are incorrectly formatted.");
                         //TODO: submit the gReadFeeder
                     } else if (data === "glmError") {
                         clearInterval(intervalId);
                         pollModal.hide()
-                        alert('The .glm file used is incorrectly formatted.');
+                        alert("The .glm file used is incorrectly formatted.");
                         //TODO: submit the gReadFeeder
                     } else {
                         console.log(data);
                         clearInterval(intervalId);
                         pollModal.hide()
-                        alert('There was a problem. Operation was cancelled');
+                        alert("There was a problem. Operation was cancelled");
                     }
                 });
             }, 5000);
@@ -2373,7 +2407,7 @@ async function submitForm({formId, pollUrl, inputId}) {
 
 async function renameFeeder() {
 	if (JSON.stringify(gReadFeeder) !== JSON.stringify(gWriteFeeder)){
-		alert('You have unsaved changes. Please save the feeder before proceeding.')
+		alert("You have unsaved changes. Please save the feeder before proceeding.")
 	} else {
 		let newName = prompt("Rename the feeder to", `${gThisFeederName}`);
 		while (! /^[\w\s]+$/.test(newName) || /^\s+$/.test(newName)) {
@@ -2382,7 +2416,7 @@ async function renameFeeder() {
 		if (newName){
             let submitRequest = false;
             await $.ajax({
-                url: `/uniqObjName/Feeder/${gThisOwner}/${newName}/${gThisModelName}`
+                url: `/uniqObjName/Feeder/${gThisOwner}/${newName}/${gThisModelName}`//good because of course I am renaming THIS feeder file
             }).done(function(data) {
                 if (data.exists) {
                     alert(`You already have a feeder named "${newName}". Please choose a different name.`);
@@ -2824,17 +2858,6 @@ function createTree(tree = {}) {
     return treeWrapper;
 }
 
-//not optimal, but it works
-function getMixedCaseKey(object, lowercaseKey) {
-    const keys = Object.keys(object);
-    for (let i = 0; i < keys.length; i++) {
-        if (keys[i].toLowerCase() === lowercaseKey) {
-            return keys[i];
-        }
-    }
-    throw new Error(`key "${lowercaseKey}" not found in object.`);
-}
-
 /**
  * Return true if this TreeWrapper can be moved, otherwise return false;
  * @return {boolean}
@@ -2886,7 +2909,6 @@ function attachMoveListener(keys, tBody=null, tObject=null) {
  */
 function move(objects, {x, y}) {
     let offsetX = gMinLon, offsetY = gMaxLat, scaleFactor = gDrawScaleFactor;
-    //let offsetX = gMinLon, offsetY = gOffsetY, scaleFactor = gDrawScaleFactor;
     if (arguments[2] != null) {// needed for testing
         offsetX = arguments[2].offsetX;
         offsetY = arguments[2].offsetY;
@@ -2908,7 +2930,7 @@ function move(objects, {x, y}) {
     nodes.forEach(node => {
         node.longitude = node.longitude - avgLon + offsetX + x/scaleFactor;
         //node.latitude = node.latitude - avgLat + offsetY + y/scaleFactor;
-        node.latitude = node.latitude - avgLat + offsetY - y/gDrawScaleFactor;
+        node.latitude = node.latitude - avgLat + offsetY - y/scaleFactor;
     });
 }
 
@@ -3004,7 +3026,7 @@ function isValidForAdd(keys, component) {
 }
 
 //**************************************************
-// Utility methods
+// Public utility functions
 //**************************************************
 
 /**
@@ -3012,8 +3034,6 @@ function isValidForAdd(keys, component) {
  * The line between a parent and child doesn't exist in the data itself, it's merely shown in the svg
  * to demonstrate the relationship between two nodes.
  */
-
-/* Public utility methods */
 
 /**
  * Return true if the string is a valid number, otherwise return false. Thanks stackoverflow.
@@ -3035,9 +3055,7 @@ function isNumberString(str) {
 /**
  * Return the type of the object with regard to this interface.
  * 
- * This function is important because the order in which an object is checked matters. For example, an object
- * could be both a 'line' type and a 'configurationNode' type, but the 'line' type should take precedence over the 
- * 'configurationNode' type, so 'line' should be returned.
+ * This function is important because the order in which an object is checked matters. For example, an object could be both a 'line' type and a 'configurationNode' type, but the 'line' type should take precedence over the 'configurationNode' type, so 'line' should be returned.
  * @param {Object} obj
  * @return {string}
  */
@@ -3054,9 +3072,9 @@ function getType(obj) {
 
 /** 
  * Return an object that is a copy of the argument object.
- * JSON.stringify will not copy a property of an object with an undefined value.
+ * 
  * @param {Object} oldObject - the object to copy.
- * @return {Object} - a copy of the object argument.
+ * @return {Object} - a copy of the oldObject.
  */
  function deepCopy(oldObject) {
     if (Object.getPrototypeOf(oldObject) !== Object.prototype) {
@@ -3068,13 +3086,215 @@ function getType(obj) {
         if (typeof(oldObject[key]) === "function") {
             throw new Error("This function cannot be used to copy objects with methods.");
         } else if (oldObject[key] === undefined) {
+            // JSON.stringify will not copy a property of an object with an undefined value.
             throw new Error("JSON.stringify silently ignores properties with undefined values, so this function cannot handle undefined values.");
         }
     }
     return JSON.parse(JSON.stringify(oldObject));
 }
 
-/* Private utility methods */
+/**
+ * TODO: add unit tests
+ * @return {Array} - contains all of the object types that exist in the graph.
+ */
+function getExistingObjectTypes() {
+    const objects = [];
+    Object.values(gTree.tree).forEach(obj => {
+        const objectType = obj.object;
+        if (objectType != null && !objects.includes(objectType)) objects.push(objectType);
+    });
+    return objects;
+}
+
+/**
+ * Doesn't need unit tests.
+ */
+function enableDrag(table) {
+    if (window.jQuery != null) {
+        table.style.left = "50vw";
+        $(table).draggable();
+    }
+}
+
+//not optimal, but it works
+function getMixedCaseKey(object, lowercaseKey) {
+    const keys = Object.keys(object);
+    for (let i = 0; i < keys.length; i++) {
+        if (keys[i].toLowerCase() === lowercaseKey) {
+            return keys[i];
+        }
+    }
+    throw new Error(`key "${lowercaseKey}" not found in object.`);
+}
+
+/**
+ * Return the minimum and maximum values inside of an object or an object of objects.
+ * 
+ * @param {Object} object - the object within which to find the minimum and maximum values.
+ * @param {Object} objectContainer - an object which has other objects as properties.
+ * @param {Array} properties - the properties to scan for min and max values across all objects in the objectContainer.
+ * @return {Object}
+ */
+function getMinMax({object=null, objectContainer=null, properties=null}) {
+    if (object != null) {
+        let min, max;
+        const values = Object.values(object);
+        values.forEach(val => {
+            val = parseFloat(val);
+            if (!isNaN(val)) {
+                if (min == null) {
+                    min = val;
+                    max = val;
+                } else {
+                    if (val < min) min = val;
+                    if (val > max) max = val;
+                }
+            }
+        });
+        return {
+            min: min,
+            max: max
+        }
+    }
+    if (objectContainer != null && properties != null) {
+        const minMax = {};
+        const objects = Object.values(objectContainer);
+        properties.forEach(prop => minMax[prop] = {});
+        objects.forEach(obj => {
+            properties.forEach(prop => {
+                const propVal = parseFloat(obj[prop]);
+                if (!isNaN(propVal)) {
+                    if (minMax[prop].min == null) {
+                        minMax[prop].min = propVal;
+                        minMax[prop].max = propVal;
+                    } else {
+                        if (propVal < minMax[prop].min) minMax[prop].min = propVal;
+                        if (propVal > minMax[prop].max) minMax[prop].max = propVal;
+                    }
+                }
+            });
+        });
+        return minMax;
+    }
+}
+
+/**
+ * Doesn't need unit tests.
+ * @param {HTMLElement} e
+ */
+ function getStyleAttribute(e) {
+    const tagName = e.tagName.toLowerCase();
+    return tagName === "circle" ? "fill" : "stroke";
+}
+
+/**
+ * TODO: add unit tests
+ * @param {string} rgba
+ * @return {string|undefined}
+ */
+function getAlpha(rgba) {
+    if (/rgba\(/.test(rgba)) {
+        return rgba.match(/\d[^,]*\d(?=\))/)[0];
+    }
+}
+
+/**
+ * Doesn't need unit tests
+ * @param {string} className
+ * @return {string}
+ */
+function getDefaultFill(className) {
+    const cssRule = this.getCSSRule(className);
+    return cssRule.style.fill;
+}
+
+/**
+ * Doesn't need unit tests.
+ * @param {string} className
+ * @return {string}
+ */ 
+function getDefaultStroke(className) {
+    const cssRule = this.getCSSRule(className);
+    return cssRule.style.stroke;
+}
+
+/**
+ * @param {string} rgb
+ * @param {number} alpha
+ * @return {string}
+ */
+function insertAlpha(rgb, alpha) {
+    if (!/rgb\(/.test(rgb)) throw new Error("rgb argument must be an 'rgb' string, not an 'rgba' string");
+    return rgb.replace(")", `, ${alpha})`).replace("b", "ba");
+}
+
+/**
+ * Doesn't need unit tests. Tested via color().
+ * @param {HTMLElement} e - the HTMLElement to color.
+ * @param {string|Object} rgb - either an "rgb()" string or an instance of custom class from chroma.js
+ */
+function preserveAlphaWithNewColor(e, rgb) {
+    if (typeof rgb === "string") {
+        if (!/rgb\(/.test(rgb)) throw new Error("rgb argument must be an 'rgb' string, not an 'rgba' string");
+    } else {
+        rgb = rgb.css().replace(/,/g, ", ");
+    }
+    const firstThreeNumbers = /(\d+[^\d]+){2}\d+/;
+    const styleAttribute = getStyleAttribute(e);
+    const oldColor = e.style[styleAttribute];
+    const alpha = getAlpha(oldColor);
+    const defaultColorValues = (styleAttribute === "fill" ? getDefaultFill(e.classList[0]) : getDefaultStroke(e.classList[0])).match(firstThreeNumbers)[0];
+    if (alpha != null) {
+        e.style[styleAttribute] = insertAlpha(rgb, alpha);
+        //e.style[styleAttribute] = rgb.replace(")", `, ${alpha})`).replace("b", "ba");
+        return;
+    }
+    if (rgb.match(firstThreeNumbers)[0] === defaultColorValues) {
+        e.removeAttribute("style");
+        return;
+    }
+    e.style[styleAttribute] = rgb;
+    return;
+}
+
+/**
+ * Doesn't need unit tests. Tested via setAlpha().
+ * Set the style of the HTMLElement to either its exisitng inline color with a new alpha value, or the default CSS coloring with the alpha value.
+ * @param {HTMLElement} e
+ * @param {number} alpha
+ */
+function preserveColorWithNewAlpha(e, alpha) {
+    if (typeof alpha !== "number") throw new Error("New alpha value must be a number");
+    if (alpha > 1 || alpha < 0) throw new Error("New alpha value must be between 0 and 1, inclusive.");
+    const firstThreeNumbers = /(\d+[^\d]+){2}\d+/;
+    const styleAttribute = getStyleAttribute(e);
+    let inlineColorValues = e.style[styleAttribute].match(firstThreeNumbers);
+    if (inlineColorValues == null) {
+        if (alpha === 1) {
+            e.removeAttribute("style");
+            return;
+        } else {
+            rgba = styleAttribute === "fill" ? getDefaultFill(e.classList[0]) : getDefaultStroke(e.classList[0]);
+            rgba = insertAlpha(rgba, alpha);
+            //rgba = rgba.replace(")", `, ${alpha})`).replace("b", "ba");
+            e.style[styleAttribute] = rgba;
+            return;
+        }
+    } 
+    inlineColorValues = inlineColorValues[0];
+    const defaultColorValues = (styleAttribute === "fill" ? getDefaultFill(e.classList[0]) : getDefaultStroke(e.classList[0])).match(firstThreeNumbers)[0];
+    if (inlineColorValues === defaultColorValues && alpha === 1) {
+        e.removeAttribute("style");
+        return;
+    } else {
+        e.style[styleAttribute] = `rgba(${inlineColorValues}, ${alpha})`;
+        return;
+    }
+}
+
+//**************************************************
+// Private utility functions
+//**************************************************
 
 /**
  * Return true if the object has a 'parent' property, otherwise return false.
@@ -3105,7 +3325,38 @@ function isConfigurationNode(obj) {
 }
 
 /**
- * TODO: add unit tests
+ * TODO: add unit tests!
+ * Return the document CSSStyleRule that applies to the class name.
+ * @param {string} className
+ * @return {CSSStyleRule}
+ */
+function getCSSRule(className) {
+    const cssRules = document.styleSheets[0].cssRules;
+    const keys = Object.keys(cssRules);
+    let key = keys.find(key => {
+        const selectorString = cssRules[key].selectorText;
+        if (selectorString == null) return false;
+        const ary = selectorString.split(",").map(string => string.trim());
+        return ary.includes(`.${className}`);
+    });
+    if (key == null) {
+        let type;
+        try {
+            // Need try-catch because player objects have an "object" property but don't exist in components
+            type = getType(gComponents[className]);
+        } catch (e) {
+            type = "not a line";
+        }
+        if (type === "line") {
+            key = keys.find(key => cssRules[key].selectorText === "line");
+        } else {
+            key = keys.find(key => cssRules[key].selectorText === "circle");
+        }
+    }
+    return cssRules[key];
+}
+
+/**
  * Return a generator that will provide the longitude and latitude for an object.
  * 
  * @param {number} initX - the longitude of the top left corner of the square.
@@ -3142,7 +3393,486 @@ function * getCoordinates(initX, initY, spacing) {
 }
 
 //**************************************************
-// SVG interface
+// OpacityManager class
+//**************************************************
+
+const opacityManagerPrototype = {
+
+    /* Public methods */
+
+    /**
+     * Doesn't need unit tests.
+     * Fill the document opacity modal HTMLElement with content.
+     */
+    buildOpacityModal() {
+        const opacityModal = document.getElementById("opacityModal");
+        const tableDiv = opacityModal.querySelector("[data-tableinsert");
+        Array.from(tableDiv.children).forEach(child => {
+            child.parentElement.removeChild(child);
+        });
+        const table = document.createElement("table");
+        const titleRow = document.createElement("tr");
+        ["", "Object", "Opacity"].forEach(str => {
+            const td = document.createElement("td");
+            td.classList.add("centered");
+            td.classList.add("fullPadded");
+            const h = document.createElement("h3");
+            h.textContent = str;
+            td.append(h);
+            titleRow.append(td);
+        });
+        table.append(titleRow);
+        const keys = Object.keys(this).map(key => key.toLowerCase()).sort();
+        keys.forEach(key => {
+            const objectType = this[key] != null ? key : getMixedCaseKey(this, key);
+            const tr = document.createElement("tr");
+            let td = document.createElement("td");
+            td.classList.add("fullPadded");
+            const btn = getTableButton("Highlight", () => this.highlight(objectType));
+            td.append(btn);
+            tr.append(td);
+            td = document.createElement("td");
+            td.classList.add("fullPadded");
+            td.textContent = objectType;
+            tr.append(td);
+            td = document.createElement("td");
+            td.classList.add("fullPadded");
+            const input = document.createElement("input");
+            input.classList.add("modalInput");
+            input.dataset.objecttype = objectType;
+            const that = this;
+            input.addEventListener("change", function() {
+                that.setAlpha({className: objectType, input: this});
+            });
+            input.value = this[objectType];
+            td.append(input);
+            tr.append(td);
+            table.append(tr);
+        });
+        tableDiv.append(table);
+        opacityModal.removeAttribute("style");
+        if (window.jQuery != null) {
+            $("#opacityModal .modalContent").draggable();
+        }
+    },
+
+    /**
+     * Set the alpha value on all HTMLElements with the specified class name.
+     * @param {string} className
+     * @param {HTMLInputElement} input
+     * @param {string} value
+     */
+    setAlpha({className, input, value=null}) {
+        let alpha;
+        if (input != null) {
+            alpha = input.value;
+        } else if (value != null) {
+            alpha = value;
+        }
+        if (isNumberString(alpha)) {
+            alpha = parseFloat(alpha);
+            if (alpha < 0 || alpha > 1) {
+                alert("The opacity value must be between 0 and 1, inclusive.");
+                input.value = this[className];
+                return;
+            }
+        } else {
+            alert("Please enter a valid number between 0 and 1, inclusive.");
+            input.value = this[className];
+            return;
+        }
+        this[className] = alpha; //record the alpha in the gOpacityManager for the case of adding new elements.
+        const elements = Array.from(document.getElementsByClassName(className));
+        elements.forEach(e => {
+            preserveColorWithNewAlpha(e, alpha);
+        });
+    },
+
+    /**
+     * Doesn't need unit tests.
+     * Update the OpacityManager to always display existing object types.
+     */
+    update() {
+        const existingObjects = getExistingObjectTypes();
+        existingObjects.forEach(objectType => {
+            if (this[objectType] == null) {
+                // User added a new objectType, so add it
+                this[objectType] = 1.0;
+            }
+        });
+        Object.keys(this).forEach(key => {
+            if (!existingObjects.includes(key)) {
+                // User deleted all of a previously existing objectType, so delete it
+                delete this[key];
+            }
+        });
+    },
+
+    /* Private methods */
+
+    /**
+     * Set the alpha of every other object type to 0.1.
+     * @param {string} className
+     */
+    highlight(className) {
+        Object.keys(this).forEach(key => {
+            if (key !== className) {
+                this[key] = 0.1;
+                this.setAlpha({className: key, value: "0.1"});
+            } else {
+                this[key] = 1;
+                this.setAlpha({className: key, value: "1"});
+            }
+        });
+        const opacityModal = document.getElementById("opacityModal");
+        const classInput = opacityModal.querySelector(`input[data-objecttype=${className}`);
+        Array.from(opacityModal.querySelectorAll("input[data-objecttype]")).forEach(input => {
+            if (input !== classInput) {
+                input.value = 0.1;
+            } else {
+                input.value = 1;
+            }
+        }); 
+    },
+
+    /**
+     * Set the alpha of every object type to 1.
+     */
+    reset() {
+        Object.keys(this).forEach(key => {
+            this[key] = 1.0;
+            this.setAlpha({className: key, value: "1.0"});
+        });
+        Array.from(document.getElementById("opacityModal").querySelectorAll("input[data-objecttype]")).forEach(input => {
+            input.value = 1.0;
+        });
+    },
+};
+
+/**
+ * An OpacityManager is really setting alpha values on HTMLElements, but the term "opacity" is more straightforward.
+ */
+function createOpacityManager() {
+    const om = Object.create(opacityManagerPrototype);
+    getExistingObjectTypes().forEach(objectType => {
+        om[objectType] = 1.0;
+    });
+    return om;
+}
+
+//**************************************************
+// Coloring classes
+//**************************************************
+
+const colorMapPrototype = {
+
+    /* Public methods */
+
+    /**
+     * Apply a color to each HTMLElement that maps to an object that exists in this ColorMap. If any element had an alpha value, preserve it.
+     */ 
+    color() {
+        const invalidNames = [];
+        Object.keys(this.colorMap).forEach(name => {
+            try {
+                const key = gTree.treeMap.getKey(name);
+                const e = document.getElementById(key);
+                preserveAlphaWithNewColor(e, this.colorMap[name]);
+            } catch (e) {
+                invalidNames.push(name);
+            }
+        });
+        if (invalidNames.length > 0) {
+            alert(`Unable to color the following objects because they weren't found in this graph: "${invalidNames.join(", ")}".`);
+        } else {
+            alert(`Successfully colored all objects according to the specified column "${this.title}" in the specified csv file "${this.parentTitle}".`);
+        }
+    },
+
+    /**
+     * TODO: break up into smaller methods?
+     * Doesn't need unit tests.
+     * Create a legend for the color map and append it to the "colorLegends" div.
+     */
+    appendLegend() {
+        const masterDiv = document.createElement("div");
+        masterDiv.classList.add("modalContent");
+        masterDiv.classList.add("centered");
+        masterDiv.style.border = "1px solid black";
+        masterDiv.style.alignContent = "center";
+        masterDiv.setAttribute("data-colorfile", this.parentTitle);
+        masterDiv.setAttribute("data-colormap", this.title);
+        let h = document.createElement("h2");
+        h.textContent = this.parentTitle;
+        masterDiv.append(h);
+        h = document.createElement("h3");
+        h.textContent = this.title;
+        masterDiv.append(h);
+        const flexbox = document.createElement("div");
+        flexbox.classList.add("legendFlex");
+        let div = document.createElement("div");
+        div.classList.add("legendGradiant");
+        div.style.background = `linear-gradient(0deg,${gViridisColors.join(",")})`;
+        flexbox.append(div);
+        div = document.createElement("div");
+        div.classList.add("vertFlex");
+        div.classList.add("legendAxis");
+        div.classList.add("leftText");
+        const increment = (this.max - this.min) / 7;
+        for (let i = 0; i < 8; i++) {
+            let p = document.createElement("p");
+            let val;
+            if (i === 0) {
+                val = this.min;
+            } else if (i === 7) {
+                val = this.max;
+            } else {
+                val = this.min + i * increment;
+            }
+            val = val.toString();
+            let decimalIdx = val.indexOf(".");
+            if (decimalIdx !== -1) {
+                val = val.slice(0, decimalIdx + 5);
+            }
+            p.textContent = val;
+            div.prepend(p);
+        }
+        flexbox.append(div);
+        masterDiv.append(flexbox);
+        div = document.createElement("div");
+        div.style.margin = "20px 0px 0px 0px";
+        const button = getTableButton("Close", () => {
+            const legendDiv = document.getElementById("colorLegends");
+            const legend = legendDiv.querySelector(`div[data-colorfile='${this.parentTitle}'],[data-colormap='${this.title}']`);
+            legend.parentElement.removeChild(legend);
+        });
+        div.append(button);
+        masterDiv.append(div);
+        document.getElementById("colorLegends").append(masterDiv);
+        enableDrag(masterDiv);
+    },
+
+    /* private methods */
+
+    /**
+     * Create a color map by mapping the 'viridis' color scale to the data inside of this.colorMap.
+     */
+    buildColorScale() {
+        const {min, max} = getMinMax({object: this.colorMap});
+        this.min = min;
+        this.max = max;
+        const f = chroma.scale(gViridisColors).domain([min, max]);
+        Object.keys(this.colorMap).forEach(key => {
+            this.colorMap[key] = f(this.colorMap[key]);
+        });
+        this.colorScale = f;
+    }
+}
+
+/**
+ * Doesn't need unit tests.
+ * A ColorMap is a wrapper around an object that maps tree object names to colors.
+ * @param {string} title - the header of the column in the csv that this color map is representing.
+ * @param {ColorFile} parent - the ColorFile that contains this ColorMap. 
+ * @return {ColorMap}
+ */
+function createColorMap(title, parentTitle) {
+    const obj = Object.create(colorMapPrototype);
+    obj.title = title;
+    obj.parentTitle = parentTitle;
+    obj.colorMap = {};
+    return obj;
+}
+
+const colorFilePrototype = {
+    
+    /* Public methods */
+
+    /* Doesn't need unit tests */
+    getTable() {
+        const table = document.createElement("table");
+        let tr = document.createElement("tr");
+        let td = document.createElement("td");
+        let h = document.createElement("h4");
+        h.classList.add("modalTableHeader");
+        h.textContent = this.title;
+        td.append(h);
+        tr.append(td);
+        table.append(tr);
+        tr = document.createElement("tr");
+        td = document.createElement("td");
+        td.classList.add("fullPadded");
+        const select = document.createElement("select");
+        select.setAttribute("data-colorfile", this.title);
+        td.append(select);
+        tr.append(td);
+        table.append(tr);
+        this.colorMaps.forEach(cm => {
+            select.innerHTML += `<option value=${cm.title}>${cm.title}</option>`
+        });
+        tr = document.createElement("tr");
+        td = document.createElement("td");
+        td.classList.add("fullPadded");
+        const button = getTableButton("Color", () => {
+            const colorMapName = document.getElementById("colorModal").querySelector(`select[data-colorfile='${this.title}']`).value;//need quotes around the dataset value because of the '.' in the file name.
+            const colorMap = this.colorMaps.find(cm => cm.title === colorMapName);
+            //If the graph hasn't been desaturated, then it needs to be. If is has been desaturated, then do nothing
+            if (this.parent.graphIsDesaturated === false) {
+                this.parent.desaturateGraph();
+            }
+            colorMap.color();
+            colorMap.appendLegend();
+        });
+        td.append(button);
+        tr.append(td);
+        table.append(tr);
+        return table;
+    },
+
+    /* Private methods */
+
+    /**
+     * TODO: add unit tests
+     * Build an array of ColorMaps by parsing the csv file and return the array.
+     * @param {File} file
+     * @return {Promise}
+     */
+    buildColorMaps(file) {
+        const that = this;
+        return new Promise(function(resolve, reject) {
+            Papa.parse(file, {
+                dynamicTyping: true,
+                complete: function(results, file) {
+                    const colorMaps = [];
+                    try {
+                        const headerRow = results.data[0];
+                        for (let i = 1; i < headerRow.length; i++) {
+                            colorMaps.push(createColorMap(headerRow[i], that.title));
+                        }
+                        for (let i = 1; i < results.data.length; i++) {
+                            let row = results.data[i];
+                            for (let j = 1; j < row.length; j++) {
+                                colorMaps[j - 1].colorMap[row[0]] = row[j];
+                            }
+                        }
+                        colorMaps.forEach(cm => cm.buildColorScale());
+                        resolve(colorMaps);
+                    } catch (e) {
+                        reject();
+                    }
+                }
+            });
+        });
+    }
+}
+
+/**
+ * A ColorFile is a grouping of associated ColorMap objects.
+ * @param {File} file - a csv file that maps the name of an object in this tree data to other data.
+ * @return {ColorFile}
+ */
+async function createColorFile(file, parent) {
+    const obj = Object.create(colorFilePrototype);
+    obj.title = file.name;
+    obj.parent = parent;
+    obj.colorMaps = await obj.buildColorMaps(file);
+    return obj;
+}
+
+const colorManagerPrototype = {
+
+    /* Public methods */
+
+    /**
+     * Doesn't need unit tests.
+     * Load the CSV files into ColorFile objects and fill the color modal HTML with content.
+     * 
+     * @param {FileList} files - the CSV files to be used to color the graph.
+     */
+    async buildHTML(files) {
+        this.colorFiles = await this.buildColorFiles(Array.from(files));
+        const tableDiv = document.getElementById("colorModal").querySelector("div[data-tableinsert]");
+        while (tableDiv.firstChild) {
+            tableDiv.removeChild(tableDiv.firstChild);
+        }
+        this.colorFiles.forEach(cf => {
+            tableDiv.append(cf.getTable());
+        });
+    },
+
+    /**
+     * Remove all colors that were applied by all ColorMaps from all HTMLElements. If any element had an inline alpha value, preserve it.
+     */
+    removeColors() {
+        Object.keys(gTree.tree).forEach(key => {
+            const e = document.getElementById(key);
+            // Need to watch out for objects that weren't drawn, like lines with non-existent node ends
+            if (e != null) {
+                const color = e.tagName.toLowerCase() === "circle" ? getDefaultFill(e.classList[0]) : getDefaultStroke(e.classList[0]);
+                preserveAlphaWithNewColor(e, color);
+            }
+        });
+        this.graphIsDesaturated = false;
+    },
+
+    /**
+     * Prepare the graph to handle multiple overlapping ColorMap colorings by removing all special default colors from nodes and lines. For example, houses will go from blue to gray and transformers will go from yellow to gray.
+     */
+    desaturateGraph() {
+        const cssRules = document.styleSheets[0].cssRules;
+        const keys = Object.keys(cssRules);
+        const circleFill = cssRules[keys.find(key => cssRules[key].selectorText === "circle")].style.fill;
+        const lineStroke = cssRules[keys.find(key => cssRules[key].selectorText === "line")].style.stroke;
+        Object.keys(gTree.tree).forEach(key => {
+            const e = document.getElementById(key);
+            // Need to watch out for data objects that weren't drawn, like lines with non-existent nodes
+            if (e != null) {
+                const color = e.tagName.toLowerCase() === "circle" ? circleFill : lineStroke;
+                preserveAlphaWithNewColor(e, color)
+            }
+        });
+        this.graphIsDesaturated = true;
+    },
+
+    /* Private methods */
+
+    /**
+     * Doesn't need unit tests.
+     * Asynchronously create an array of ColorFiles and return it inside of a Promise.
+     * @param {Array} files
+     * @return {Promise}
+     */
+    buildColorFiles(files) {
+        const that = this;
+        return new Promise(async function(resolve, reject) {
+            const colorFiles = [];
+            for (let file of files) {
+                try {
+                    const cf = await createColorFile(file, that);
+                    colorFiles.push(cf);
+                } catch (e) {
+                    alert(`We could not parse the CSV file "${file.name}" that you provided.`);
+                }
+            }
+            resolve(colorFiles);
+        });
+    }
+}
+
+/**
+ * Doesn't need unit tests.
+ * A ColorManager object contains ColorFile objects.
+ * @return {ColorManager}
+ */
+function createColorManager() {
+    const obj = Object.create(colorManagerPrototype);
+    obj.graphIsDesaturated = false;
+    //obj.colorFiles = await obj.buildColorFiles(Array.from(files));
+    return obj;
+}
+
+//**************************************************
+// SVG classes
 //**************************************************
 
 const circlePrototype = {
@@ -3150,7 +3880,7 @@ const circlePrototype = {
      * good. doesn't need tests
      */
     getNewInstance() {
-        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         this.update(circle);
         return circle; 
     },
@@ -3161,13 +3891,16 @@ const circlePrototype = {
         if (circle.classList.contains("selected")) {
             circle.setAttribute("class", `${this.class} selected`);
         } else {
-            circle.setAttribute('class', this.class);
+            circle.setAttribute("class", this.class);
         }
-        circle.setAttribute('id', this.id);
-        circle.setAttribute('r', this.r);
-        circle.setAttribute('stroke-width', this["stroke-width"]);
-        circle.setAttribute('cx', this.cx);
-        circle.setAttribute('cy', this.cy);
+        circle.setAttribute("id", this.id);
+        circle.setAttribute("r", this.r);
+        circle.setAttribute("stroke-width", this["stroke-width"]);
+        circle.setAttribute("cx", this.cx);
+        circle.setAttribute("cy", this.cy);
+        if (this.fill != null) {
+            circle.setAttribute("style", `fill: ${this.fill}`);
+        }
     }
 };
 
@@ -3187,9 +3920,13 @@ function createCircle(nodeKey) {
     if (typeof lon !== "number") throw new Error(`'longitude' must be a number.`);
     const lat = node.latitude;
     if (typeof lat !== "number") throw new Error(`'latitude' must be a number.`);
-    circle.cx = (lon - gMinLon) * gDrawScaleFactor;// lon isn't reversed so it's fine
+    circle.cx = (lon - gMinLon) * gDrawScaleFactor;
     circle.cy = (gMaxLat - lat) * gDrawScaleFactor;
-    //circle.cy = (lat - gOffsetY) * gDrawScaleFactor;
+    const alpha = gOpacityManager[node.object];
+    if (alpha != null && alpha !== 1) {
+        const newFill = insertAlpha(getDefaultFill(node.object), alpha)
+        circle.fill = newFill;
+    }
     return circle;
 }
 
@@ -3198,7 +3935,7 @@ const linePrototype = {
      * good. doesn't need tests
      */
     getNewInstance() {
-        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
         this.update(line);
         return line; 
     },
@@ -3210,19 +3947,22 @@ const linePrototype = {
         if (line.classList.contains("selected")) {
             line.setAttribute("class", `${this.class} selected`);
         } else {
-            line.setAttribute('class', this.class);
+            line.setAttribute("class", this.class);
         }
-        line.setAttribute('id', this.id);
-        line.setAttribute('stroke-width', this["stroke-width"]);
-        line.setAttribute('x1', this.x1);
-        line.setAttribute('x2', this.x2);
-        line.setAttribute('y1', this.y1);
-        line.setAttribute('y2', this.y2);
+        line.setAttribute("id", this.id);
+        line.setAttribute("stroke-width", this["stroke-width"]);
+        line.setAttribute("x1", this.x1);
+        line.setAttribute("x2", this.x2);
+        line.setAttribute("y1", this.y1);
+        line.setAttribute("y2", this.y2);
+        if (this.stroke != null) {
+            line.setAttribute("style", `stroke: ${this.stroke}`);
+        }
     }
 };
 
 /**
- * good. doesn't need tests
+ * good. doesn"t need tests
  */
 function createParentChildLineWithLine(lineKey, childKey) {
     let tree = gTree;
@@ -3234,10 +3974,8 @@ function createParentChildLineWithLine(lineKey, childKey) {
     const child = tree.getObject(childKey);
     line.x1 = (((toNode.longitude + fromNode.longitude)/2) - gMinLon) * gDrawScaleFactor;
     line.y1 = (gMaxLat - ((toNode.latitude + fromNode.latitude)/2)) * gDrawScaleFactor;
-    //line.y1 = (((toNode.latitude + fromNode.latitude)/2) - gOffsetY) * gDrawScaleFactor;
     line.x2 = (child.longitude - gMinLon) * gDrawScaleFactor;
     line.y2 = (gMaxLat - child.latitude) * gDrawScaleFactor;
-    //line.y2 = (child.latitude - gOffsetY) * gDrawScaleFactor;
     line.id = getParentChildLineId(lineKey, childKey, tree);    
     line.class = "parentChild";
     line["stroke-width"] = .5 * gScaleLevel;
@@ -3248,11 +3986,6 @@ function createParentChildLineWithLine(lineKey, childKey) {
 function getParentChildLineId(parentKey, childKey) {
     let tree = gTree;
     if (arguments[2] != null) tree = arguments[2]; // Need this for testing
-    //const parent = tree.getObject(parentKey);
-    //const parentName = parent.name != null ? parent.name : `undefined${parentKey}`;
-    //const child = tree.getObject(childKey);
-    //const childName = child.name != null ? child.name : `undefined${childKey}`;
-    //return `${parentName}_${childName}`; 
     return `${parentKey}_${childKey}`;
 }
 
@@ -3267,10 +4000,8 @@ function createParentChildLineWithNode(parentKey, childKey) {
     const child = tree.getObject(childKey); // Don't need to check for nonexistent parent because I already do that elsewhere
     line.x1 = (parent.longitude - gMinLon) * gDrawScaleFactor;
     line.y1 = (gMaxLat - parent.latitude) * gDrawScaleFactor;
-    //line.y1 = (parent.latitude - gOffsetY) * gDrawScaleFactor;
     line.x2 = (child.longitude - gMinLon) * gDrawScaleFactor;
     line.y2 = (gMaxLat - child.latitude) * gDrawScaleFactor;
-    //line.y2 = (child.latitude - gOffsetY) * gDrawScaleFactor;
     line.id = getParentChildLineId(parentKey, childKey, tree);
     line.class = "parentChild";
     line["stroke-width"] = .5 * gScaleLevel;
@@ -3289,10 +4020,8 @@ function createLine(lineKey) {
     if (toNode == null || fromNode == null) return; // A line could have nonexistent 'to' or 'from' nodes
     line.x1 = (fromNode.longitude - gMinLon) * gDrawScaleFactor;
     line.y1 = (gMaxLat - fromNode.latitude) * gDrawScaleFactor;
-    //line.y1 = (fromNode.latitude - gOffsetY) * gDrawScaleFactor;
     line.x2 = (toNode.longitude - gMinLon) * gDrawScaleFactor;
     line.y2 = (gMaxLat - toNode.latitude) * gDrawScaleFactor;
-    //line.y2 = (toNode.latitude - gOffsetY) * gDrawScaleFactor;
     line.id = lineKey;
     const lineObject = tree.getObject(lineKey);
     const phaseCount = countPhases(lineObject.phases);
@@ -3306,6 +4035,11 @@ function createLine(lineKey) {
             break;
         default:
             line["stroke-width"] = gScaleLevel;
+    }
+    const alpha = gOpacityManager[lineObject.object];
+    if (alpha != null && alpha !== 1) {
+        const newStroke = insertAlpha(getDefaultStroke(lineObject.object), alpha);
+        line.stroke = newStroke;
     }
     return line;
 }
@@ -3570,9 +4304,9 @@ function getNewTreeKey(tree) {
 function countPhases(str) {
 	let total = 0
     if (str == null) return total;
-	if (str.search('A') > -1) {total++}
-	if (str.search('B') > -1) {total++}
-	if (str.search('C') > -1) {total++}
+	if (str.search("A") > -1) {total++}
+	if (str.search("B") > -1) {total++}
+	if (str.search("C") > -1) {total++}
 	return total;
 }
 
@@ -3596,7 +4330,7 @@ function createTreeObject(input, tree) {
             const obj = tree.getObject(input);
             tObject.key = input;
             tObject.data = deepCopy(obj);
-            ['longitude', 'latitude'].forEach(prop => {
+            ["longitude", "latitude"].forEach(prop => {
                 if (tObject.data[prop] != null && typeof tObject.data[prop] === "string") {
                     throw new Error(`TreeObject creation failed. The tree object with key: "${input}" has a string value for its "${prop}" property.`);
                 }
@@ -3609,7 +4343,7 @@ function createTreeObject(input, tree) {
         tObject.key = getNewTreeKey(tree.tree);
         tObject.data = deepCopy(input);
         if (tObject.data.object != null) tObject.data.name = tObject.data.object + tObject.key;
-        ['longitude', 'latitude'].forEach(prop => {
+        ["longitude", "latitude"].forEach(prop => {
             if (tObject.data[prop] != null && typeof tObject.data[prop] === "string") {
                 tObject.data[prop] = parseFloat(tObject.data[prop]);
             }
@@ -3661,7 +4395,10 @@ function createSelectionTable(ids, tree) {
     const tBody = document.createElement("tbody"); 
 
     const titleRow = createRow({key: "Selected Elements"});
-    Array.from(titleRow.self.children).forEach(td => { td.classList.add("tableTitle") });
+    Array.from(titleRow.self.children).forEach(td => { 
+        td.classList.add("tableTitle");
+        td.classList.add("fullPadded");
+    });
     titleRow.self.children[1].setAttribute("colspan", "2");
     titleRow.self.children[2].remove();
 
@@ -3675,6 +4412,7 @@ function createSelectionTable(ids, tree) {
     buttonRow.classList.add("buttonRow");
     const buttonCell = document.createElement("td");
     buttonCell.setAttribute("colspan", "3");
+    buttonCell.classList.add("fullPadded");
     buttonCell.append(getTableButton("move", function() {
         destroyTables(["descriptionTables"]);
         attachMoveListener(gSelection.getKeys());
@@ -3688,12 +4426,12 @@ function createSelectionTable(ids, tree) {
         let name = obj.name != null ? obj.name : obj.object != null ? obj.object : Object.keys(obj)[0];
         const button = getTableButton("view", getDisplayTableFunction(id));
         let row = createRow({key: name, value: button, deletable: true}, document.getElementById(id));
+        Array.from(row.self.children).forEach(td => {
+            td.classList.add("fullPadded");
+        });
         tBody.append(row.self);
     });
-    if (window.jQuery != null) {
-        table.style.left = "50vw";
-        $(table).draggable();
-    }
+    enableDrag(table);
     return table;
 }
 
@@ -3742,6 +4480,7 @@ function createDescriptionTable(id) {
     const buttonRow = document.createElement("tr");
     buttonRow.classList.add("buttonRow");
     const buttonCell = document.createElement("td");
+    buttonCell.classList.add("fullPadded");
     buttonCell.setAttribute("colspan", "3");
     buttonRow.append(buttonCell);
     // duplicate
@@ -3771,10 +4510,14 @@ function createDescriptionTable(id) {
             row = createRow({key: key, tObject: tObject});
             Array.from(row.self.children).forEach(td => {
                 td.classList.add("tableTitle");
+                td.classList.add("fullPadded");
             });
             tHead.append(row.self);
         } else {
             row = createRow({key: key, deletable: true, tObject: tObject});
+            Array.from(row.self.children).forEach(td => {
+                td.classList.add("fullPadded");
+            });
             tBody.appendChild(row.self);
         }
     });
@@ -3785,10 +4528,7 @@ function createDescriptionTable(id) {
     //});
     //tHead.append(row.self);
     //Display key
-    if (window.jQuery != null) {
-        table.style.left = "50vw";
-        $(table).draggable();
-    }
+    enableDrag(table);
     return form;
 }
 
@@ -3818,16 +4558,15 @@ const buttonPrototype = {
             createSvgData([key]).delete(gViewport);
             rebuildSelectionTable();
         } else {
-            let msg = "";
+            let msg = `If you click "ok", you will delete this object and all of its connected children and/or lines. `;
             const children = gTree.treeMap.getChildKeys(key);
             if (children != null) {
-                msg += `Cannot delete object named "${gTree.getObject(key).name}" because it has children: "${children.join(", ")}". `;
+                msg += `Do you want to delete "${gTree.getObject(key).name}" and its children: "${children.join(", ")}"? `;
             }
             const lines = gTree.treeMap.getLineKeys(key);
             if (lines != null) {
-                msg += `Cannot delete object named "${gTree.getObject(key).name}" because it has connected lines: "${lines.join(", ")}". `;
+                msg += `Do you want to delete "${gTree.getObject(key).name}" and its lines: "${lines.join(", ")}"?`;
             }
-            msg += "Do you want to delete this object and all of its immediately connected objects?";
             if (confirm(msg)) {
                 const keys = gTree.getSubtreeToDelete(key);
                 keys.push(key);
@@ -3888,6 +4627,9 @@ function createButton({action, tableBody=null, tObject=null}) {
         case "add":
             button.self.addEventListener("click", function() {
                 const row = createRow({key: "", deletable: true, tObject: tObject});
+                Array.from(row.self.children).forEach(td => {
+                    td.classList.add("fullPadded");
+                });
                 tableBody.append(row.self);
             });
             break;
@@ -4153,7 +4895,6 @@ function getMoveNodesFunction(objects, tBody=null, tObject=null) {
             Array.from(tBody.getElementsByTagName("input")).forEach(input => {
                 if (input.dataset.coordinate === "latitude") {
                     input.value = gMaxLat - coords.y/gDrawScaleFactor;
-                    //input.value = coords.y/gDrawScaleFactor + gOffsetY;
                 } else if (input.dataset.coordinate === "longitude") {
                     input.value = coords.x/gDrawScaleFactor + gMinLon;
                 }
@@ -4227,18 +4968,42 @@ function createInterface() {
     gTree = createTree(gWriteFeeder.tree);
     const objects = Object.values(gTree.tree);
     insertCoordinates(objects, gMinLon, gMaxLat, (1000/gDrawScaleFactor) * .005);
-    //insertCoordinates(objects, gMinLon, gOffsetY, (1000/gDrawScaleFactor) * .005);
     gSelection = createSelection();
-    gViewport = document.getElementsByClassName('svg-pan-zoom_viewport')[0];
+    gOpacityManager = createOpacityManager();
+    gViewport = document.getElementsByClassName("svg-pan-zoom_viewport")[0];
     createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
 }
 
+/* TODO: fix this since jquery is never null */
 function initializeJQuery() {
     if (window.jQuery != null) {
         applyJQueryStyles();
-    } else {
+    }
+    if (document.getElementById("panZoomInsert").textContent.trim() !== "") {
         disableJQueryFunctionality();
     }
+}
+
+function initializeFindModal() {
+    const searchInput = document.getElementById("searchInput");
+    searchInput.addEventListener("change", searchTerm);
+    document.getElementById("searchExactString").addEventListener("change", function() {
+        searchTerm.call(searchInput);
+    });
+    document.getElementById("searchSubstring").addEventListener("change", function() {
+        searchTerm.call(searchInput);
+    });
+}
+
+function initializeColorModal() {
+    const colorModal = document.getElementById("colorModal");
+    const colorManager = createColorManager();
+    colorModal.querySelector("input[type=file]").addEventListener("change", async function() {
+        await colorManager.buildHTML(this.files);
+    });
+    colorModal.querySelector("button[data-buttonfunction='reset']").addEventListener("click", () => {
+        colorManager.removeColors();
+    });
 }
 
 (function initialize() {
@@ -4247,8 +5012,9 @@ function initializeJQuery() {
     initializeJQuery();
     attachMouseListeners();
     attachKeyListener();
-    document.getElementById("searchInput").addEventListener("change", getSearchResults);
-    document.getElementById('loadingMessage').style.display = 'none'
+    initializeFindModal();
+    initializeColorModal();
+    document.getElementById("loadingMessage").style.display = "none"
 })();
 
     //buildFeeder();
