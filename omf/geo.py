@@ -1,5 +1,10 @@
 from pyproj import Proj, transform
 import webbrowser
+import omf, json, warnings, networkx as nx, matplotlib, numpy as np, os, shutil
+from matplotlib import pyplot as plt
+from omf.feeder import _obToCol
+from scipy.spatial import ConvexHull
+from os.path import join as pJoin
 
 # Source: https://github.com/fitnr/stateplane/blob/master/stateplane/dicts.py
 # These are NAD83 EPSG identifiers.
@@ -28,7 +33,7 @@ def latLonToStatePlane(lat, lon, epsg = None):
 	return (easting, northing)
 
 def dd2dms(dd):
-	'Decimal degress to Degrees/Minutes/Seconds'
+	'Decimal degrees to Degrees/Minutes/Seconds'
 	d = int(dd)
 	md = abs(dd - d) * 60
 	m = int(md)
@@ -42,39 +47,189 @@ def dms2dd(degrees, minutes, seconds, direction):
 		dd *= -1
 	return dd;
 
-def decLatLonToLetter(lat, lon):
-	"Decimal lat lon to GridLAB-D's weird Degree/Minute/Second format."
-	latCode = 'N' if lat > 0 else 'S'
-	lonCode = 'E' if lon > 0 else 'W'
-	lat_d, lat_m, lat_s = dd2dms(lat)
-	lon_d, lon_m, lon_s = dd2dms(lon)
-	return (
-		str(abs(lat_d)) + latCode + str(lat_m) + ':' + str(lat_s), 
-		str(abs(lon_d)) + lonCode + str(lon_m) + ':' + str(lon_s)
-	)
-
-def weird2dms(val, sep1, sep2):
-	"Handle GridLAB-D's weird Degree/Minute/Second format"
-	val_h, val_s = letLat.split(':')
-	val_h_split = val_h.split(sep1)
-	if len(val_h_split) == 2:
-		val_d, val_m = val_h_split
-		key = sep1
-	else:
-		val_d, val_m = val_h.split(sep2)
-		key = sep2
-	return (val_d, val_m, val_s, key)
-
-def letterLatLonToDec(letLat, letLon):
-	"GridLAB-D's weird Degree/Minute/Second format to Decimal lat lon."
-	latDd = dms2dd(weird2dms(letLat, 'N', 'S')),
-	lonDd = dms2dd(weird2dms(letLon, 'E', 'W'))
-	return (latDms, lonDd)
-
 def openInGoogleMaps(lat, lon):
 	"Open a browser to the (lat, lon) in Google Maps"
 	loc = 'https://www.google.com/maps/place/{}+{}/'.format(lat,lon)
 	webbrowser.open_new(loc)
+
+def hullOfOmd(pathToOmdFile):
+	with open(pathToOmdFile) as inFile:
+		tree = json.load(inFile)['tree']
+	nxG = omf.feeder.treeToNxGraph(tree)
+	points = np.array([nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')])
+	hull = ConvexHull(points)
+	polygon = points[hull.vertices].tolist()
+	for point in polygon:
+		point.reverse()
+	#Add first node to beginning to comply with geoJSON standard
+	polygon.append(polygon[0])
+	#Create dict and bump to json file
+	geoJsonDict = {"type": "FeatureCollection",
+		"features": [{
+			"type": "Feature", 
+			"geometry":{
+				"type": "Polygon",
+				"coordinates": [polygon]
+			}
+		}]
+	}
+	return geoJsonDict
+	#for simplex in hull.simplices:
+	#	plt.plot(points[simplex, 0], points[simplex, 1], 'k-')
+	#plt.show()
+
+def omdGeoJson(pathToOmdFile, outputPath):
+	with open(pathToOmdFile) as inFile:
+		tree = json.load(inFile)['tree']
+	#networkx graph to work with
+	nxG = omf.feeder.treeToNxGraph(tree)
+	geoJsonDict = {
+	"type": "FeatureCollection",
+	"features": []
+	}
+	#Add nodes to geoJSON
+	node_positions = {node: nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')}
+	node_types = {node: nx.get_node_attributes(nxG, 'type')[node] for node in nx.get_node_attributes(nxG, 'type')}
+	for node in node_positions:
+		geoJsonDict['features'].append({
+			"type": "Feature", 
+			"geometry":{
+				"type": "Point",
+				"coordinates": [node_positions[node][1], node_positions[node][0]]
+			},
+			"properties":{
+				"name": node,
+				"pointType": node_types[node],
+				"pointColor": _obToCol(node_types[node])
+			}
+		})
+	#Add edges to geoJSON
+	edge_types = {edge: nx.get_edge_attributes(nxG, 'type')[edge] for edge in nx.get_edge_attributes(nxG, 'type')}
+	edge_phases = {edge: nx.get_edge_attributes(nxG, 'phases')[edge] for edge in nx.get_edge_attributes(nxG, 'phases')}
+	for edge in nx.edges(nxG):
+		geoJsonDict['features'].append({
+			"type": "Feature", 
+			"geometry":{
+				"type": "LineString",
+				"coordinates": [[node_positions[edge[0]][1], node_positions[edge[0]][0]],[node_positions[edge[1]][1], node_positions[edge[1]][0]]]
+			},
+			"properties":{
+				"phase": edge_phases[edge],
+				"edgeType": edge_types[edge],
+				"edgeColor":_obToCol(edge_types[edge])
+			}
+		})
+	if not os.path.exists(outputPath):
+		os.makedirs(outputPath)
+	shutil.copy('static/geoPolyLeaflet.html', outputPath)
+	with open(pJoin(outputPath,'geoPointsLines.json'),"w") as outFile:
+		json.dump(geoJsonDict, outFile, indent=4)
+
+def mapOmd(pathToOmdFile, outputPath, fileFormat):
+	with open(pathToOmdFile) as inFile:
+		tree = json.load(inFile)['tree']
+	nxG = omf.feeder.treeToNxGraph(tree)
+	if fileFormat == 'html':
+		geoJsonDict = {
+		"type": "FeatureCollection",
+		"features": []
+		}
+		#Add nodes to geoJSON
+		node_positions = {node: nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')}
+		node_types = {node: nx.get_node_attributes(nxG, 'type')[node] for node in nx.get_node_attributes(nxG, 'type')}
+		for node in node_positions:
+			geoJsonDict['features'].append({
+				"type": "Feature", 
+				"geometry":{
+					"type": "Point",
+					"coordinates": [node_positions[node][1], node_positions[node][0]]
+				},
+				"properties":{
+					"name": node,
+					"pointType": node_types[node],
+					"pointColor": _obToCol(node_types[node])
+				}
+			})
+		#Add edges to geoJSON
+		edge_types = {edge: nx.get_edge_attributes(nxG, 'type')[edge] for edge in nx.get_edge_attributes(nxG, 'type')}
+		edge_phases = {edge: nx.get_edge_attributes(nxG, 'phases')[edge] for edge in nx.get_edge_attributes(nxG, 'phases')}
+		for edge in nx.edges(nxG):
+			geoJsonDict['features'].append({
+				"type": "Feature", 
+				"geometry":{
+					"type": "LineString",
+					"coordinates": [[node_positions[edge[0]][1], node_positions[edge[0]][0]],[node_positions[edge[1]][1], node_positions[edge[1]][0]]]
+				},
+				"properties":{
+					"phase": edge_phases[edge],
+					"edgeType": edge_types[edge],
+					"edgeColor":_obToCol(edge_types[edge])
+				}
+			})
+		if not os.path.exists(outputPath):
+			os.makedirs(outputPath)
+		shutil.copy('static/geoPolyLeaflet.html', outputPath)
+		with open(pJoin(outputPath,'geoPointsLines.json'),"w") as outFile:
+			json.dump(geoJsonDict, outFile, indent=4)
+	elif fileFormat == 'png':
+		from mpl_toolkits.basemap import Basemap
+		# Be quiet Matplotlib.
+		warnings.filterwarnings("ignore",category=matplotlib.cbook.mplDeprecation)
+		# Set up figure.
+		plt.axis('off')
+		plt.tight_layout()
+		plt.gca().invert_yaxis()
+		plt.gca().set_aspect('equal')
+		plt.switch_backend('TKAgg')
+
+		#Set up basemap for background image
+		latitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
+		longitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][1] for node in nx.get_node_attributes(nxG, 'pos')])
+		latitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
+		longitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][1] for node in nx.get_node_attributes(nxG, 'pos')])
+		m = Basemap(llcrnrlon=longitude_min,llcrnrlat=latitude_min,urcrnrlon=longitude_max,urcrnrlat=latitude_max, epsg=3857)
+		m.arcgisimage(service='World_Street_Map', dpi=400, verbose= False)
+		#Get positions for graph
+		pos = {}
+		pos = {node: nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')}
+		for point in pos:
+			pos[point] = (m(pos[point][1], pos[point][0]))
+		# Draw all the edges.
+		for e in nxG.edges():
+			eType = nxG.edge[e[0]][e[1]].get('type','underground_line')
+			ePhases = nxG.edge[e[0]][e[1]].get('phases',1)
+			standArgs = {'edgelist':[e],
+						 'edge_color':_obToCol(eType),
+						 'width':2,
+						 'style':{'parentChild':'dotted','underground_line':'dashed'}.get(eType,'solid') }
+			if ePhases==3:
+				standArgs.update({'width':2})
+				nx.draw_networkx_edges(nxG,pos,**standArgs)
+				standArgs.update({'width':2,'edge_color':'white'})
+				nx.draw_networkx_edges(nxG,pos,**standArgs)
+				standArgs.update({'width':1,'edge_color':_obToCol(eType)})
+				nx.draw_networkx_edges(nxG,pos,**standArgs)
+			if ePhases==2:
+				standArgs.update({'width':2})
+				nx.draw_networkx_edges(nxG,pos,**standArgs)
+				standArgs.update({'width':1,'edge_color':'white'})
+				nx.draw_networkx_edges(nxG,pos,**standArgs)
+			else:
+				nx.draw_networkx_edges(nxG,pos,**standArgs)
+		# Draw nodes and optional labels.
+		nx.draw_networkx_nodes(nxG,pos,
+							   nodelist=pos.keys(),
+							   node_color=[_obToCol(nxG.node[n].get('type','underground_line')) for n in nxG],
+							   linewidths=0,
+							   node_size=2)
+		#if labels:
+		#	nx.draw_networkx_labels(nxG,pos,
+		#							font_color='black',
+		#							font_weight='bold',
+		#							font_size=0.25)
+		if not os.path.exists(outputPath):
+			os.makedirs(outputPath)
+		plt.savefig(pJoin(outputPath,'latlon.png'), dpi=400, bbox_inches="tight")
 
 def _tests():
 	e, n = 249.2419752733258, 1186.1488466689188
@@ -82,8 +237,9 @@ def _tests():
 	print (lat, lon) #(37.37267827914456, -89.89482331256504)
 	e2, n2 = latLonToStatePlane(lat, lon, epsg=2205)
 	print (e2, n2) # (249.24197527189972, 1186.1488466408398)
-	letLat, letLon = decLatLonToLetter(lat, lon)
-	print (letLat, letLon) # ('37N22:21.6418049204', '89W53:41.3639252341')
+	# mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png')
+	# mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html')
+	# hullOfOmd('static/publicFeeders/Olin Barre LatLon.omd')
 	# openInGoogleMaps(lat, lon)
 
 if __name__ == '__main__':

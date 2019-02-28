@@ -24,7 +24,7 @@ from omf.weather import zipCodeToClimateName
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = "Model extreme weather and determine optimal investment for distribution resiliency."
-hidden = True
+hidden = False
 
 class HazardField(object):
 	''' Object to modify a hazard field from an .asc file. '''

@@ -114,11 +114,9 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 				outJson['oldVersion'] = False
 			#If the hashes do not match, mark the model as an old version
 			elif outJson['htmlHash'] != currentHtmlHash or outJson['pythonHash'] != currentPythonHash:
-				print('render and mismatch')
 				outJson['oldVersion'] = True
 			#If the hashes match, mark the model as up to date
 			else:	
-				print('render and maintained')
 				outJson['oldVersion'] = False
 		except (UnboundLocalError, KeyError), e:
 			print(traceback.print_exc())

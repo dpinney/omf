@@ -18,6 +18,7 @@ from omf.weather import zipCodeToClimateName
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = "The solarConsumer model calculates the expected costs for a consumer who buys solar in one of 3 different ways: through a PPA with a 3rd party, a community solar project, or buying a rooftop system."
+hidden = False
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''

@@ -10,7 +10,7 @@ import re
 from datetime import datetime
 from voltageDropVoltageViz import drawPlot
 
-
+#TODO crank up sqfootage until voltage issues occur
 
 def ConvertAndwork(filePath, gb_on_off='on', area=500):
 	#Converts omd to glm, adds in necessary recorder, collector, and attributes+parameters for gridballast gld to run on waterheaters and ziploads
@@ -216,10 +216,14 @@ def _debugging(filePath, gb_on_off='on', area=500):
 	# 	Remove Feeder
 	os.remove('outGLM_rooftop.glm')
 
-	
+
 def voltRegViz(FNAME):
 	chart = drawPlot(FNAME, neatoLayout=True, edgeCol=False, nodeLabs=None, edgeLabs=None, nodeCol = "perUnitVoltage", customColormap=True, rezSqIn=400)
 	chart.savefig("./VOLTOUT.png")
+	validFiles = ['_minutes.PLAYER', 'climate.tmy2', 'frequency.PLAYER1', "hot_water_demand1.glm", 'schedulesResponsiveLoads.glm']
+	for file in os.listdir(pJoin(dir_path, '_voltViz')):
+		if file not in validFiles : 
+			os.remove(pJoin('_voltViz', file))
 
 if __name__ == '__main__':
 	try: 
@@ -235,4 +239,7 @@ if __name__ == '__main__':
 		area=args.area_of_rooftop_solar
 		_debugging(filePath)
 	except:
+		# _myDir = os.path.dirname(os.path.realpath(__file__))
+		# _omfDir = os.path.dirname(os.path.dirname(_myDir))
+		# _feederDir = pJoin(_omfDir, 'static/publicFeeders/Olin Barre GH EOL Solar.omd')
 		_debugging('/Users/tuomastalvitie/Desktop/gridballast_gld_simulations/Feeders/UCS_Egan_Housed_Solar_rooftop.omd', gb_on_off='on', area=500)

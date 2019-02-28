@@ -11,7 +11,7 @@ import re
 from datetime import datetime
 from voltageDropVoltageViz import drawPlot
 
-
+#Run 11-1, stop results at noon, run at hour resolution
 
 def ConvertAndwork(filePath, gb_on_off='on'):
 	"""
@@ -197,12 +197,17 @@ def _debugging(filePath, gb_on_off='on'):
 	# Remove Feeder
 	os.remove('outGLM.glm')
 
-	
+
 def voltRegViz(FNAME):
 	chart = drawPlot(FNAME, neatoLayout=True, edgeCol=False, nodeLabs=None, edgeLabs=None, nodeCol = "perUnitVoltage", customColormap=True, rezSqIn=400)
 	chart.savefig("./VOLTOUT.png")
+	validFiles = ['_minutes.PLAYER', 'climate.tmy2', 'frequency.PLAYER1', "hot_water_demand1.glm", 'schedulesResponsiveLoads.glm']
+	for file in os.listdir(pJoin(dir_path, '_voltViz')):
+		if file not in validFiles : 
+			os.remove(pJoin('_voltViz', file))
 	
 if __name__ == '__main__':
+	# no try except, instead do if argument missing, then 
 	try: 
 		#Parse Command Line
 		parser = argparse.ArgumentParser(description='Converts an OMD to GLM and runs it on gridlabd')
@@ -214,6 +219,9 @@ if __name__ == '__main__':
 		gb_on_off = args.gridballast_on_off
 		_debugging(filePath, gb_on_off)
 	except:
+		# _myDir = os.path.dirname(os.path.realpath(__file__))
+		# _omfDir = os.path.dirname(os.path.dirname(_myDir))
+		# _feederDir = pJoin(_omfDir, 'static/publicFeeders/Olin Barre GH EOL Solar.omd')
 		_debugging('/Users/tuomastalvitie/Desktop/gridballast_gld_simulations/Feeders/UCS_Egan_Housed_Solar.omd', gb_on_off='off')
 
 
