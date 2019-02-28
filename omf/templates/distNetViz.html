@@ -4627,6 +4627,9 @@ function createButton({action, tableBody=null, tObject=null}) {
         case "add":
             button.self.addEventListener("click", function() {
                 const row = createRow({key: "", deletable: true, tObject: tObject});
+                Array.from(row.self.children).forEach(td => {
+                    td.classList.add("fullPadded");
+                });
                 tableBody.append(row.self);
             });
             break;
