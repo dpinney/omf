@@ -1927,10 +1927,7 @@ function massAdd() {
 	const componentName = document.getElementById("componentSelect").value;
     // Don"t need to check if the attachObject is a configuration node, since that is done elsewhere.
     const attachObject = document.getElementById("massAddTargetSelect").value;
-
     if (gComponents[componentName].object === "recorder" || getType(gComponents[attachObject]) !== "line") {
-
-
         const newObjects = [];
         const pm = new ProgressModal(`Adding a "${componentName}" object to every "${attachObject}" object. This could take a few seconds.`);
         pm.show();
@@ -1966,6 +1963,7 @@ function updateAttachTargets(id, tree) {
         if (id === "massAddTargetSelect") {
             isValidType = getType(tree[key]) !== "configurationNode";
         }
+        // TODO: problem: meter recorder not found
         let isComponent = gComponents.hasOwnProperty(tree[key].object);
         let notAlreadyAdded = !attachList.includes(tree[key].object);
         if (isValidType && isComponent && notAlreadyAdded) {
@@ -2300,9 +2298,8 @@ async function loadFeeder(serverFeederName, serverModelName, owner) {
     progressModal.show();
     $.ajax({
         type: "POST",
-        url: `/loadFeeder/${serverFeederName}/${serverModelName}/${gThisModelName}/${gThisFeederNum}/${owner}/${gCurrentUser}`,
-        //url: `/loadFeeder/${serverFeederName}/${serverModelName}/${gThisModelName}/${gThisFeederNum}/${gCurrentUser}/${gThisOwner}`,
-        //url: `/loadFeeder/${serverFeederName}/${serverModelName}/${gThisModelName}/${gThisFeederNum}/${owner}/${gThisOwner}`,
+        // {owner} is correct. {owner} is either "public" to load from public feeders or <current user> to load from the users feeders. {gThisOwner} is correct because I am overwriting THIS feeder file, which is either publicly owned or owned by the current user. {gThisOwner} cannot be {gCurrentUser} because then I can't overwrite public files as the admin.
+        url: `/loadFeeder/${serverFeederName}/${serverModelName}/${gThisModelName}/${gThisFeederNum}/${owner}/${gThisOwner}`,
         data: formData,
         processData: false,
         contentType: false,
