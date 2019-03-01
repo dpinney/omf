@@ -1,7 +1,7 @@
-from __future__ import division
+from __future__ import division, print_function
 from pyproj import Proj, transform
 import webbrowser
-import omf, json, warnings, networkx as nx, matplotlib, numpy as np, os, shutil
+import omf, json, warnings, networkx as nx, matplotlib, numpy as np, os, shutil, requests, tempfile
 from matplotlib import pyplot as plt
 from omf.feeder import _obToCol
 from scipy.spatial import ConvexHull
@@ -153,11 +153,7 @@ def omdGeoJson(pathToOmdFile, outputPath):
 				"type": "Point",
 				"coordinates": [node_positions[node][1], node_positions[node][0]]
 			},
-			"properties":{
-				"name": node,
-				"pointType": node_types[node],
-				"pointColor": _obToCol(node_types[node])
-			}
+			"properties":{}
 		})
 	#Add edges to geoJSON
 	edge_types = {edge: nx.get_edge_attributes(nxG, 'type')[edge] for edge in nx.get_edge_attributes(nxG, 'type')}
@@ -169,15 +165,11 @@ def omdGeoJson(pathToOmdFile, outputPath):
 				"type": "LineString",
 				"coordinates": [[node_positions[edge[0]][1], node_positions[edge[0]][0]],[node_positions[edge[1]][1], node_positions[edge[1]][0]]]
 			},
-			"properties":{
-				"phase": edge_phases[edge],
-				"edgeType": edge_types[edge],
-				"edgeColor":_obToCol(edge_types[edge])
-			}
+			"properties":{}
 		})
 	if not os.path.exists(outputPath):
 		os.makedirs(outputPath)
-	shutil.copy('static/geoPolyLeaflet.html', outputPath)
+	shutil.copy('geoPolyLeaflet.html', outputPath)
 	with open(pJoin(outputPath,'geoPointsLines.json'),"w") as outFile:
 		json.dump(geoJsonDict, outFile, indent=4)
 
@@ -480,13 +472,145 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat):
 		if not os.path.exists(outputPath):
 			os.makedirs(outputPath)
 		plt.savefig(pJoin(outputPath,'latlon.png'), dpi=400, bbox_inches="tight")
-				
+
+def groupTilesOmd(pathToOmdFile, outputPath):
+	from scipy.misc import imread
+	with open(pathToOmdFile) as inFile:
+		tree = json.load(inFile)['tree']
+	#networkx graph to work with
+	nxG = omf.feeder.treeToNxGraph(tree)
+	#Might need later for setting axes value in draw_network
+	latitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
+	longitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][1] for node in nx.get_node_attributes(nxG, 'pos')])
+	latitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
+	longitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][1] for node in nx.get_node_attributes(nxG, 'pos')])
+	#Set the plot settings
+	plt.switch_backend('TKAgg')
+	fig = plt.figure(frameon=False, figsize=[10,10])
+	ax = fig.add_axes([0, 0, 1, 1])
+	ax.axis('off')
+	#map latlon to projection
+	import pyproj
+	epsg3857 = pyproj.Proj(init='epsg:3857')
+	wgs84 = pyproj.Proj(init='EPSG:4326')
+	node_positions = {node: nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')}
+	for point in node_positions:
+		node_positions[point] = pyproj.transform(wgs84,epsg3857,node_positions[point][1], node_positions[point][0])
+	for zoomLevel in range(18,19):
+		numberofTiles = numTiles(zoomLevel)
+		upperRightTile = tileXY(latitude_max, longitude_max, zoomLevel)
+		lowerLeftTile = tileXY(latitude_min, longitude_min, zoomLevel)
+		firstTileEdges = tileEdges(upperRightTile[0], upperRightTile[1], zoomLevel)
+		lastTileEdges = tileEdges(lowerLeftTile[0], lowerLeftTile[1], zoomLevel)
+		mainsouthWest = pyproj.transform(wgs84,epsg3857,lastTileEdges[1], lastTileEdges[0])
+		mainnorthEast = pyproj.transform(wgs84,epsg3857,firstTileEdges[3], firstTileEdges[2])
+		for tileX in range(lowerLeftTile[0], upperRightTile[0]+1):
+			for tileY in range(upperRightTile[1], lowerLeftTile[1]+1):
+				#print(tileX, tileY)
+				currentTileEdges = tileEdges(tileX, tileY, zoomLevel)
+				southWest = pyproj.transform(wgs84,epsg3857,currentTileEdges[1], currentTileEdges[0])
+				northEast = pyproj.transform(wgs84,epsg3857,currentTileEdges[3], currentTileEdges[2])
+				nx.draw_networkx(nxG, pos=node_positions, nodelist=[node for node in nxG if node in nx.get_node_attributes(nxG, 'pos')], with_labels=False, node_size=2, edge_size=1)
+				url = 'https://a.tile.openstreetmap.org/%s/%s/%s.png' % (zoomLevel, tileX, tileY)
+				response = requests.get(url, stream=True)
+				imgFile = tempfile.TemporaryFile(suffix=".png")
+				shutil.copyfileobj(response.raw, imgFile)
+				del response
+				img = plt.imread(imgFile)
+				plt.imshow(img, extent=(southWest[0], northEast[0],southWest[1], northEast[1]))
+		plt.ylim(top=mainnorthEast[1], bottom=mainsouthWest[1])
+		plt.xlim(mainsouthWest[0], mainnorthEast[0])
+		if not os.path.exists(outputPath):
+			os.makedirs(outputPath)
+		plt.savefig(pJoin(outputPath,'graphOnMap.png'),frameon=False, pad_inches=0, bbox='tight')
+
+def mapboxPNG(pathToOmdFile, outputPath):
+	from scipy.misc import imread
+	#Static reference file for testing now
+	with open(pathToOmdFile) as inFile:
+		tree = json.load(inFile)['tree']
+	cwd = os.getcwd()
+	circuitName = 'Olin Barre LatLon'
+	plt.switch_backend('TKAgg')
+	#networkx graph to work with
+	nxG = omf.feeder.treeToNxGraph(tree)
+	#Might need later for setting axes value in draw_network
+	latitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
+	longitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][1] for node in nx.get_node_attributes(nxG, 'pos')])
+	latitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
+	longitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][1] for node in nx.get_node_attributes(nxG, 'pos')])
+	#print(latitude_min, latitude_max, longitude_min, longitude_max)
+	#set conversions
+	#Set the plot settings
+	#figuresize must match mapbox proportion
+	#img = plt.imread("img.png")
+	#plt.imshow(img)
+	#plt.show()
+	#map latlon to projection
+	import pyproj
+	epsg3857 = pyproj.Proj(init='epsg:3857')
+	wgs84 = pyproj.Proj(init='EPSG:4326')
+	node_positions = {node: nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')}
+	for point in node_positions:
+		node_positions[point] = pyproj.transform(wgs84,epsg3857,node_positions[point][1], node_positions[point][0])
+	for zoomLevel in range(13,18):
+		numberofTiles = numTiles(zoomLevel)
+		upperRightTile = tileXY(latitude_max, longitude_max, zoomLevel)
+		lowerLeftTile = tileXY(latitude_min, longitude_min, zoomLevel)
+		print(upperRightTile)
+		print(lowerLeftTile)
+		xTiles = upperRightTile[0] - lowerLeftTile[0] + 1
+		yTiles = lowerLeftTile[1] - upperRightTile[1] + 1
+		print(xTiles, yTiles)
+		tileRatio = xTiles/yTiles
+		print(tileRatio)
+		yPixels = 1024
+		xPixels = int(yPixels*tileRatio)
+		firstTileEdges = tileEdges(upperRightTile[0], upperRightTile[1], zoomLevel)
+		lastTileEdges = tileEdges(lowerLeftTile[0], lowerLeftTile[1], zoomLevel)
+		southWest = pyproj.transform(wgs84,epsg3857,lastTileEdges[1], lastTileEdges[0])
+		northEast = pyproj.transform(wgs84,epsg3857,firstTileEdges[3], firstTileEdges[2])
+		print(southWest)
+		print(northEast)
+		# S,W,N,E
+		#-102.761922389 32.9896727709
+		centerLat = (southWest[1] + northEast[1]) / 2
+		centerLon = (southWest[0] + northEast[0]) / 2
+		mapboxCenter = pyproj.transform(epsg3857,wgs84,centerLon, centerLat)
+		print(centerLat)
+		print(centerLon)
+		print(mapboxCenter)
+		plt.switch_backend('TKAgg')
+		fig = plt.figure(frameon=False, figsize=[int(xPixels/100),int(yPixels/100)])
+		ax = fig.add_axes([0, 0, 1, 1])
+		ax.axis('off')
+		#would convex hull help?
+		#key is the size of this image
+		url = "https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/"+str(mapboxCenter[0])+","+str(mapboxCenter[1])+","+str(zoomLevel)+"/"+str(xPixels)+"x"+str(yPixels)+"/?access_token=pk.eyJ1IjoiZWp0YWxib3QiLCJhIjoiY2ptMHBlOGdjMmZlaTNwb2dwMHE2Mm54NCJ9.xzceVNmAZy49SyFDb3UMaw"
+		print(url)
+		response = requests.get(url, stream=True)
+		print(response)
+		imgFile = tempfile.TemporaryFile(suffix=".png")
+		shutil.copyfileobj(response.raw, imgFile)
+		del response
+		#img = plt.imread(imgFile)
+		#plt.imshow(img, extent=(southWest[0], northEast[0],southWest[1], northEast[1]))
+		plt.ylim(top=northEast[1], bottom=southWest[1])
+		plt.xlim(southWest[0], northEast[0])
+		#create directory for tiles
+		nx.draw_networkx(nxG, pos=node_positions, nodelist=[node for node in nxG if node in nx.get_node_attributes(nxG, 'pos')], with_labels=False, node_size=2, edge_size=1)
+		savePath=pJoin(cwd,outputPath,str(zoomLevel),str('test'))
+		if not os.path.exists(savePath):
+			os.makedirs(savePath)
+		plt.savefig(pJoin(savePath,'%s.png' % str('noimg')),frameon=False, pad_inches=0, bbox='tight')
 
 if __name__ == '__main__':
 	#drawPngGraph()
 	#drawLatLon()
 	#drawHtmlGraph()
 	#hullOfOmd('../../static/publicFeeders/Olin Barre LatLon.omd')
-	#omdGeoJson('../../static/publicFeeders/Olin Barre LatLon.omd', 'outTemp')
-	rasterTilesFromOmd('../../static/publicFeeders/Olin Barre LatLon.omd', 'tilesOutput')
+	#omdGeoJson('../../static/publicFeeders/Olin Barre LatLon.omd', 'outGeo')
+	#rasterTilesFromOmd('../../static/publicFeeders/Olin Barre LatLon.omd', 'tiles')
+	groupTilesOmd('../../static/publicFeeders/Olin Barre LatLon.omd', 'overlaps')
 	#mapOmd('../../static/publicFeeders/Olin Barre LatLon.omd', 'newOutput', 'html')
+	#mapboxPNG('../../static/publicFeeders/Olin Barre LatLon.omd', 'staticMap')
