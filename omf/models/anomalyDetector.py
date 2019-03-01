@@ -1,4 +1,4 @@
-""" Calculate the costs and benefits of energy storage from a distribution utility perspective. """
+""" Anomaly detection. """
 
 import os, sys, shutil, csv, StringIO
 import omf.anomalyDetection
@@ -12,11 +12,8 @@ from __neoMetaModel__ import *
 
 # Model metadata:
 modelName, template = metadata(__file__)
-tooltip = (
-	"The storagePeakShave model calculates the value of a distribution utility "
-	"deploying energy storage based on three possible battery dispatch strategies."
-)
-
+tooltip = ('Detect anomalies in meter data.')
+hidden = True
 
 def work(modelDir, inputDict):
 	""" Model processing done here. """
@@ -55,7 +52,7 @@ def work(modelDir, inputDict):
 	df = pd.read_csv(f)
 
 	# try to use user input to remap column
-	df = df.rename(columns={inputDict["yLabel"]: "y"})
+	df = df.rename(columns={inputDict.get("yLabel",""): "y"})
 	if "y" not in df.columns:
 		df = df.rename(columns={df.columns[0]: "y"})
 
@@ -136,7 +133,7 @@ def _tests():
 	if isdir(modelLoc):
 		shutil.rmtree(modelLoc)
 	new(modelLoc)  # Create New.
-	renderAndShow(modelLoc)  # Pre-run.
+	# renderAndShow(modelLoc)  # Pre-run.
 	runForeground(modelLoc)  # Run the model.
 	renderAndShow(modelLoc)  # Show the output.
 
