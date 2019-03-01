@@ -2,6 +2,7 @@
 
 import os, sys, shutil, csv, StringIO
 import omf.anomalyDetection
+import numpy as np
 import pandas as pd
 from datetime import datetime as dt, timedelta
 from os.path import isdir, join as pJoin
@@ -19,6 +20,7 @@ tooltip = (
 
 def work(modelDir, inputDict):
 	""" Model processing done here. """
+	from scipy.stats import t
 
 	cached_file_name = "input_data_{}.csv".format(inputDict["confidence"])
 	cached_file_path = pJoin(modelDir, cached_file_name)
@@ -55,9 +57,9 @@ def work(modelDir, inputDict):
 	# try to use user input to remap column
 	df = df.rename(columns={inputDict["yLabel"]: "y"})
 	if "y" not in df.columns:
-		df = df.rename(columns = {df.columns[0]: "y"})
+		df = df.rename(columns={df.columns[0]: "y"})
 
-	# add our boy for prophet
+		# add our boy for prophet
 	df["ds"] = pd.date_range(
 		start=inputDict["startDate"], freq="H", periods=df.shape[0]
 	)
@@ -68,6 +70,24 @@ def work(modelDir, inputDict):
 
 	elliptic_df = omf.anomalyDetection.elliptic_envelope(df, modelDir)
 
+	peak_time, peak_demand, act_time, act_demand = omf.loadForecast.nextDayPeakKatrinaForecast(
+		df.values, inputDict["startDate"], modelDir, {}, returnActuals=True
+	)
+
+	diff = [p - a for p, a in zip(peak_demand, act_demand)]
+	diff = np.asarray(diff)
+	alpha = 1 - confidence
+	twosigma = t.ppf(alpha / 2, len(diff)) * np.std(diff)
+	diff = np.abs(diff)
+
+	diff = diff > twosigma
+
+	katrina_outliers = [
+		(time, demand) if out_bool else None
+		for time, out_bool, demand in zip(act_time, diff, act_demand)
+	]
+	katrina_outliers = [a for a in katrina_outliers if a]
+
 	out["y"] = list(prophet_df.y.values)
 	out["yhat"] = list(prophet_df.yhat.values)
 	out["yhat_upper"] = list(prophet_df.yhat_upper.values)
@@ -75,6 +95,11 @@ def work(modelDir, inputDict):
 	out["prophet_outlier"] = list(prophet_df.outlier.values.astype(int))
 	if elliptic_df:
 		out["elliptic_outlier"] = list(elliptic_df.outlier.astype(int))
+	if True:
+		out["pred_demand"] = peak_demand
+		out["peak_time"] = act_time
+		out["act_demand"] = act_demand
+		out["katrina_outlier"] = katrina_outliers
 	out["startDate"] = inputDict["startDate"]
 	return out
 

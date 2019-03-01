@@ -126,7 +126,9 @@ def rollingDylanForecast(rawData, upBound, lowBound):
 	"""
 
 
-def nextDayPeakKatrinaForecast(rawData, startDate, modelDir, params):
+def nextDayPeakKatrinaForecast(
+	rawData, startDate, modelDir, params, returnActuals=False
+):
 	"""
 	This model takes the inputs rawData, a dataset that holds hourly values in two columns with no indexes
 	The first column rawData[:][0] holds the hourly demand
@@ -191,11 +193,13 @@ def nextDayPeakKatrinaForecast(rawData, startDate, modelDir, params):
 		size_model = GridSearchCV(SVR(), param_grid=params["peakSize"])
 
 		# get cross-validated time predictions over the full interval
-	forecasted_peak_time = list(time_model._cv_predict(df=df).hour_pred)
+	forecasted_peak_time = list(time_model._cv_predict(df=df).hour_pred.shift(1))[
+		1:
+	]  # shift(1) shifts from tmr to tdy
 
 	# convert these float hour values into ISO formatted dates and times
-	dates = list(daily_dti.to_pydatetime())
-	dates = dates[: len(forecasted_peak_time)]
+	dates = list(df.index.to_pydatetime())
+	dates = dates[1:]
 	for i in range(len(dates)):
 		dates[i] += timedelta(hours=forecasted_peak_time[i])
 	forecasted_peak_time = [date.isoformat() for date in dates]
@@ -208,9 +212,24 @@ def nextDayPeakKatrinaForecast(rawData, startDate, modelDir, params):
 			y=df.tmr_peak_demand,
 			cv=3,
 		)
-	)
+	)[
+		1:
+	]  # shifting from tmr to tdy
 
-	return (forecasted_peak_time, forecasted_peak_demand)
+	if returnActuals:
+		dates = list(df.index.to_pydatetime())
+		dates = dates[: len(peak_time)]
+		for i in range(len(dates)):
+			dates[i] += timedelta(hours=peak_time[i])
+		actual_peak_time = [date.isoformat() for date in dates]
+		return (
+			forecasted_peak_time,
+			forecasted_peak_demand,
+			actual_peak_time[1:],
+			list(df.tdy_peak_demand)[1:],
+		)
+	else:
+		return (forecasted_peak_time, forecasted_peak_demand)
 
 
 def prophetForecast(rawData, startDate, modelDir, partitions):
@@ -232,7 +251,7 @@ def prophetForecast(rawData, startDate, modelDir, partitions):
 	with suppress_stdout_stderr():
 		prophet.fit(input_df)
 
-	# determine partition length for the cross-validation
+		# determine partition length for the cross-validation
 	total_hours = len(input_df.ds)
 	hp = total_hours // partitions  # horizon and period
 	init = total_hours % partitions  # total_hours - hp * (partitions - 1)
@@ -793,30 +812,43 @@ def pulp24hrBattery(demand, power, energy, battEff):
 		[VBenergy[i].varValue for i in range(24)],
 	)
 
+
 def neural_net_predictions(all_X, all_y):
 	import tensorflow as tf
 	from tensorflow.keras import layers
+
 	X_train, y_train = all_X[:-8760], all_y[:-8760]
 
-	model = tf.keras.Sequential([
-		layers.Dense(all_X.shape[1], activation=tf.nn.relu, input_shape=[len(X_train.keys())]),
-		layers.Dense(all_X.shape[1], activation=tf.nn.relu),
-		layers.Dense(all_X.shape[1], activation=tf.nn.relu),
-		layers.Dense(1)
-	  ])
+	model = tf.keras.Sequential(
+		[
+			layers.Dense(
+				all_X.shape[1], activation=tf.nn.relu, input_shape=[len(X_train.keys())]
+			),
+			layers.Dense(all_X.shape[1], activation=tf.nn.relu),
+			layers.Dense(all_X.shape[1], activation=tf.nn.relu),
+			layers.Dense(1),
+		]
+	)
 
 	optimizer = tf.keras.optimizers.RMSprop(0.001)
 
-	model.compile(loss='mean_squared_error',
-				optimizer=optimizer,
-				metrics=['mean_absolute_error', 'mean_squared_error'])
+	model.compile(
+		loss="mean_squared_error",
+		optimizer=optimizer,
+		metrics=["mean_absolute_error", "mean_squared_error"],
+	)
 
 	EPOCHS = 10
 
-	early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=10)
+	early_stop = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=10)
 
 	history = model.fit(
-		X_train, y_train,
-		epochs=EPOCHS, validation_split = 0.2, verbose=0, callbacks=[early_stop])
+		X_train,
+		y_train,
+		epochs=EPOCHS,
+		validation_split=0.2,
+		verbose=0,
+		callbacks=[early_stop],
+	)
 
 	return [float(f) for f in model.predict(all_X[-8760:])]
