@@ -152,7 +152,6 @@
 	<div id="katPlot" class="tightContent postRun">
 		<div id="katChart"></div>
 		<script>
-			var peakDemandData = [];
 			for (var i = 0; i < allOutputData.peakDemand.length; i++) { //casting these to Highcharts-friendly formats
 				allOutputData.peakDemand[i][0] = new Date(allOutputData.peakDemand[i][0]).getTime();
 				allOutputData.peakDemand[i][1] = parseFloat(allOutputData.peakDemand[i][1]);
