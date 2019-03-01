@@ -53,7 +53,6 @@ def work(modelDir, inputDict):
 	# print "*DEBUG: feederName:", feederName
 	omd = json.load(open(pJoin(modelDir,feederName + '.omd')))
 	tree = omd['tree']
-	# TODO: modify tree to add MPUPV collectors.
 	tree = _addCollectors(tree)
 	with open(modelDir + '/withCollectors.glm', 'w') as collFile:
 		treeString = feeder.sortedWrite(tree)
@@ -102,9 +101,11 @@ def work(modelDir, inputDict):
 	chart.savefig(pJoin(modelDir,"output.png"))
 	with open(pJoin(modelDir,"output.png"),"rb") as inFile:
 		outData["voltageDrop"] = inFile.read().encode("base64")
+	outData['threePhase'] = _readCollectorCSV(modelDir+'/threephaseloads.csv')
+	#outData['overheadLosses'] = _readCollectorCSV(modelDir+'/ZlossesOverhead.csv')
 	return outData
 
-def readGroupRecorderCSV( filename ):
+def _readGroupRecorderCSV( filename ):
 	dataDictionary = {}
 	with open(filename,'r') as csvFile:
 		reader = csv.reader(csvFile)
@@ -120,6 +121,21 @@ def readGroupRecorderCSV( filename ):
 		for pos,key in enumerate(keys):
 			dataDictionary[key] = vals[pos]
 	return dataDictionary
+
+def _readCollectorCSV(filename):
+	dataDictionary = {}
+	with open(filename, 'r') as csvFile:
+		reader = csv.reader(csvFile)
+		for row in reader:
+			if '# property.. timestamp' in row:
+				key_row = row
+				value_row = reader.next()
+				for pos, key in enumerate(key_row):
+					if key == '# property.. timestamp':
+						continue
+					dataDictionary[key] = value_row[pos]
+	return dataDictionary
+
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
