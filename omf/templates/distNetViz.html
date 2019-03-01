@@ -3406,7 +3406,7 @@ const opacityManagerPrototype = {
      */
     buildOpacityModal() {
         const opacityModal = document.getElementById("opacityModal");
-        const tableDiv = opacityModal.querySelector("[data-tableinsert");
+        const tableDiv = opacityModal.querySelector("[data-tableinsert]");
         Array.from(tableDiv.children).forEach(child => {
             child.parentElement.removeChild(child);
         });
