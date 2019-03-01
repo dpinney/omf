@@ -104,6 +104,16 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.h
 	# Grab the library we need.
 	with open(omf.omfDir + '/static/svg-pan-zoom.js','r') as pzFile:
 		pzData = pzFile.read()
+	with open(omf.omfDir + '/static/chroma.min.js','r') as chromaFile:
+		chromaData = chromaFile.read()
+	with open(omf.omfDir + '/static/papaparse.min.js','r') as papaFile:
+		papaData = papaFile.read()
+	with open(omf.omfDir + '/static/jquery.js', 'r') as jquery_file:
+		jquery_data = jquery_file.read()
+	with open(omf.omfDir + '/static/jquery-ui.min.js', 'r') as jquery_ui_file:
+		jquery_ui_data = jquery_ui_file.read()
+	with open(omf.omfDir + '/static/jquery-ui.min.css', 'r') as jquery_css_file:
+		jquery_css_data = jquery_css_file.read()
 	# TEMPLATE HACKING
 	from jinja2 import Template
 	templateCont = open(omf.omfDir + '/templates/distNetViz.html', 'r+').read()
@@ -114,15 +124,25 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.h
 	component_json = get_components()
 	rend = template.render(thisFeederData=json.dumps(thisFeed), thisFeederName="Simple Market System", thisFeederNum=1,
 		thisModelName="Not applicable", thisOwner="NONE", components=component_json, jasmine=None, spec=None,
-		publicFeeders=[], userFeeders=[], csrf_token=id, showFileMenu=True
+		publicFeeders=[], userFeeders=[], csrf_token=id, showFileMenu=True, currentUser=None
 	)
 	with open(tempDir + '/' + outputName, 'w') as outFile:
 		outFile.write(rend)
 	# Insert the panZoom library.
 	# Note: you can't juse open the file in r+ mode because, based on the way the file is mapped to memory, you can only overwrite a line with another of exactly the same length.
 	for line in fileinput.input(tempDir + '/' + outputName, inplace=1):
-		if line.lstrip().startswith("<script id='panZoomInsert'>"):
-			print "<script id='panZoomInsert'>\n" + pzData # load up the new feeder.
+		if line.lstrip().startswith('<script id="panZoomInsert">'):
+			print '<script id="panZoomInsert">\n' + pzData # load up the new feeder.
+		elif line.lstrip().startswith('<script id="chromaInsert">'):
+			print '<script id="chromaInsert">\n' + chromaData
+		elif line.lstrip().startswith('<script id="papaParseInsert">'):
+			print '<script id="papaParseInsert">\n' + papaData
+		elif line.lstrip().startswith('<script id="jqueryInsert">'):
+			print '<script id="jqueryInsert">\n' + jquery_data
+		elif line.lstrip().startswith('<script id="jqueryUiInsert">'):
+			print '<script id="jqueryUiInsert">\n' + jquery_ui_data
+		elif line.lstrip().startswith('<style id="jqueryCssInsert">'):
+			print '<style id="jqueryCssInsert">\n' + jquery_css_data
 		else:
 			print line.rstrip()
 	# os.system('open -a "Google Chrome" ' + '"file://' + tempDir + '/' + outputName"')

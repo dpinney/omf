@@ -792,3 +792,31 @@ def pulp24hrBattery(demand, power, energy, battEff):
 		[VBpower[i].varValue for i in range(24)],
 		[VBenergy[i].varValue for i in range(24)],
 	)
+
+def neural_net_predictions(all_X, all_y):
+	import tensorflow as tf
+	from tensorflow.keras import layers
+	X_train, y_train = all_X[:-8760], all_y[:-8760]
+
+	model = tf.keras.Sequential([
+		layers.Dense(all_X.shape[1], activation=tf.nn.relu, input_shape=[len(X_train.keys())]),
+		layers.Dense(all_X.shape[1], activation=tf.nn.relu),
+		layers.Dense(all_X.shape[1], activation=tf.nn.relu),
+		layers.Dense(1)
+	  ])
+
+	optimizer = tf.keras.optimizers.RMSprop(0.001)
+
+	model.compile(loss='mean_squared_error',
+				optimizer=optimizer,
+				metrics=['mean_absolute_error', 'mean_squared_error'])
+
+	EPOCHS = 10
+
+	early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=10)
+
+	history = model.fit(
+		X_train, y_train,
+		epochs=EPOCHS, validation_split = 0.2, verbose=0, callbacks=[early_stop])
+
+	return [float(f) for f in model.predict(all_X[-8760:])]

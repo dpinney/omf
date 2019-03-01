@@ -12,6 +12,7 @@ modelName, template = metadata(__file__)
 tooltip = ("The storageArbitrage model calculates the costs and benefits of "
 	"using energy storage to buy energy in times of low prices and sell that "
 	"energy at times of high prices.")
+hidden = False
 
 def work(modelDir, inputDict):
 	''' Run the model in a separate process. web.py calls this to run the model.

@@ -10,7 +10,7 @@ from omf.weather import pullAsos, pullUscrn
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = "Download historical weather data for a given location for use in other models."
-hidden = True
+hidden = False
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory.'''

@@ -17,6 +17,7 @@ from omf.weather import zipCodeToClimateName
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = "The solarCashflow model allows a utility to calculate what impact member owned solar systems will have on their costs."
+hidden = False
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
