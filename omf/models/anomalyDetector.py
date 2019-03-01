@@ -73,7 +73,8 @@ def work(modelDir, inputDict):
 	out["yhat_upper"] = list(prophet_df.yhat_upper.values)
 	out["yhat_lower"] = list(prophet_df.yhat_lower.values)
 	out["prophet_outlier"] = list(prophet_df.outlier.values.astype(int))
-	out["elliptic_outlier"] = list(elliptic_df.outlier.astype(int))
+	if elliptic_df:
+		out["elliptic_outlier"] = list(elliptic_df.outlier.astype(int))
 	out["startDate"] = inputDict["startDate"]
 	return out
 

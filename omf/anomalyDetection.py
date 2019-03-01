@@ -38,11 +38,17 @@ def prophet(df, modelDir, confidence=0.99, cached=""):
 	forecast['outlier'] = (forecast.y > forecast.yhat_upper) | (forecast.y < forecast.yhat_lower)
 	return forecast
 
-def elliptic_envelope(df, modelDir):
+def elliptic_envelope(df, modelDir, norm_confidence=0.95):
 	from sklearn.covariance import EllipticEnvelope
+	from scipy.stats import normaltest
 	if 'ds' in df.columns:
 		del df['ds']
 	model = EllipticEnvelope()
+	test_stats, p_vals = normaltest(df.values, axis=0)
+	normal_cols = p_vals >= (1-norm_confidence)
+	df = df.loc[:, normal_cols]
+	if df.shape[1] == 0:
+		return None
 	df.outlier = model.fit_predict(df.values)
 	df.outlier = df.outlier < 0 # 1 if inlier, -1 if outlier
 	return df
