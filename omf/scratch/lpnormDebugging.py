@@ -11,10 +11,29 @@ if __name__ == '__main__':
 '''
 
 # Getting two images to show up on the same matplotlib object and scaled appropriately.
+
+
+import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math
+import traceback
+import platform, re
+from os.path import join as pJoin
+from jinja2 import Template
+from numpy import interp
 from matplotlib import pyplot as plt
-import numpy as np
 import networkx as nx
-import re
+from omf.models import __neoMetaModel__
+from __neoMetaModel__ import *
+import subprocess, random, webbrowser, multiprocessing
+import pprint as pprint
+import copy
+import os.path
+import warnings
+import numpy as np
+
+# OMF imports
+import omf.feeder as feeder
+from omf.solvers import gridlabd
+from omf.weather import zipCodeToClimateName
 
 class HazardField(object):
 	''' Object to modify a hazard field from an .asc file. '''
@@ -54,13 +73,17 @@ class HazardField(object):
 			extent = [0,1,0,1],
 			aspect='auto')
 
+		return ax
+
 # Drawing networkX graph with lots of styles.
 
-def generateNetwork(ax):
-	G = nx.Graph()
-	G.add_nodes_from([1, 2, 3, 4])
-	G.add_edges_from([(1, 3), (1, 4), (2, 4)])
-	nx.draw(G, ax=ax)
+def transformShape(graph):
+	# If you want to change shape, use node_shape.
+	# Other ideas-change color/width according to edge attributes.
+	
+	colorOfNodes = nx.get_node_attributes(graph, 'color')
+
+	
 
 def genDiagram(outputDir, feederJson, damageDict, critLoads, ax):
 	# print damageDict
@@ -97,13 +120,8 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, ax):
 	# Create and save the graphic.
 	inGraph = feeder.treeToNxGraph(tree)
 	#feeder.latLonNxGraph(nxG) # This function creates a .plt reference which can be saved here.
-	labels=False
-	neatoLayout=False 
-	showPlot=False
-	plt.axis('off')
-	plt.tight_layout()
-	plt.gca().invert_yaxis()
-	plt.gca().set_aspect('equal')
+
+	neatoLayout = False
 	# Layout the graph via GraphViz neato. Handy if there's no lat/lon data.
 	if neatoLayout:
 		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
@@ -192,27 +210,51 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, ax):
 		label='Other',
 		node_size=12
 	)
-	if labels:
-		nx.draw_networkx_labels(
-			inGraph,
-			pos,
-			ax=ax,
-			font_color='black',
-			font_weight='bold',
-			font_size=0.25
-		)
+	
+def testRun():
+	''' Generate an example graph to test new features. ''' 
+
+	G=nx.cubical_graph()
+	pos=nx.spring_layout(G) 
+
+	nx.draw_networkx_nodes(G,pos,
+                       nodelist=[0,1,2,3],
+                       node_color='r',
+                       node_size=500,
+                   alpha=0.8)
+	nx.draw_networkx_nodes(G,pos,
+                       nodelist=[4,5,6,7],
+                       node_color='b',
+                       node_shape='d',
+                       node_size=500,
+                   alpha=0.8)
+
+	# edges
+	nx.draw_networkx_edges(G,pos,width=1.0,alpha=0.5)
+	nx.draw_networkx_edges(G,pos,
+                       edgelist=[(0,1),(1,2),(2,3),(3,0)],
+                       width=8,alpha=0.5,edge_color='r')
+	nx.draw_networkx_edges(G,pos,
+                       edgelist=[(4,5),(5,6),(6,7),(7,4)],
+                       width=8,alpha=0.5,edge_color='b')
+
+	plt.savefig('initial_result.png')
+
 
 if __name__ == "__main__":
+
+	testRun()
+	
+	'''
 	fig, ax = plt.subplots()
 	hazard = HazardField("../static/testFiles/wf_clip.asc")
-	hazard.generateHeatMap(ax)
+	curAx = hazard.generateHeatMap(ax)
 
 	with open('feederFile.txt', 'r') as feederFile, open('damageFile.txt', 'r') as damageFile, open('critLoads.txt', 'r') as critFile:
-		feederModel = json.loads(feederFile)
-		damageDict = json.loads(damageFile)
-		critLoads = json.loads(critLoads)
+		feederModel = json.load(feederFile)
+		damageDict = json.load(damageFile)
+		critLoads = json.load(critFile)
 
-	genDiagram('.', feederModel, damageDict, critLoads, ax)
-
-	plt.show()
-	fig.savefig('result.png')
+	genDiagram('.', feederModel, damageDict, critLoads, curAx)
+	plt.savefig('result.png')
+	'''
