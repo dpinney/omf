@@ -205,7 +205,7 @@ def plotFridge():
 	plt.figure()
 	formatter = mdates.DateFormatter('%Y-%m-%d')
 	dates = mdates.datestr2num([''.join(x.get('# timestamp')) for x in data])
-	plt.plot_date(dates, [float(x.get('power', 0.0)) for x in data], '-', label="Load")
+	plt.plot_date(dates, [complex(x.get('power', 0.0)) for x in data], '-', label="Load")
 	ax = plt.gcf().axes[0]
 	ax.xaxis.set_major_formatter(formatter)
 	plt.gcf().autofmt_xdate(rotation=45)
@@ -250,5 +250,5 @@ if __name__ == '__main__':
 	# )
 	# args = parser.parse_args()
 	# modelType = args.model_type
-	modelType = 'Refrigerator'
+	modelType = 'GasHeat'
 	runGld(modelType)
