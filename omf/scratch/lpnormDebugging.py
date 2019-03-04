@@ -20,6 +20,7 @@ from os.path import join as pJoin
 from jinja2 import Template
 from numpy import interp
 from matplotlib import pyplot as plt
+from matplotlib import animation
 import networkx as nx
 from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
@@ -76,14 +77,6 @@ class HazardField(object):
 		return ax
 
 # Drawing networkX graph with lots of styles.
-
-def transformShape(graph):
-	# If you want to change shape, use node_shape.
-	# Other ideas-change color/width according to edge attributes.
-	
-	colorOfNodes = nx.get_node_attributes(graph, 'color')
-
-	
 
 def genDiagram(outputDir, feederJson, damageDict, critLoads, ax):
 	# print damageDict
@@ -210,36 +203,36 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, ax):
 		label='Other',
 		node_size=12
 	)
-	
+
+
 def testRun():
 	''' Generate an example graph to test new features. ''' 
 
-	G=nx.cubical_graph()
-	pos=nx.spring_layout(G) 
+	G = nx.cubical_graph()
+	pos = nx.spring_layout(G)  
 
-	nx.draw_networkx_nodes(G,pos,
-                       nodelist=[0,1,2,3],
+	nx.draw_networkx_nodes(G, pos,
+                       nodelist=[0, 1, 2, 3],
                        node_color='r',
                        node_size=500,
-                   alpha=0.8)
-	nx.draw_networkx_nodes(G,pos,
-                       nodelist=[4,5,6,7],
+                       alpha=0.8)
+	nx.draw_networkx_nodes(G, pos,
+                       nodelist=[4, 5, 6, 7],
                        node_color='b',
                        node_shape='d',
                        node_size=500,
-                   alpha=0.8)
+                       alpha=0.8)
 
-	# edges
-	nx.draw_networkx_edges(G,pos,width=1.0,alpha=0.5)
-	nx.draw_networkx_edges(G,pos,
-                       edgelist=[(0,1),(1,2),(2,3),(3,0)],
-                       width=8,alpha=0.5,edge_color='r')
-	nx.draw_networkx_edges(G,pos,
-                       edgelist=[(4,5),(5,6),(6,7),(7,4)],
-                       width=8,alpha=0.5,edge_color='b')
+
+	nx.draw_networkx_edges(G, pos, width=1.0, alpha=0.5)
+	nx.draw_networkx_edges(G, pos,
+                       edgelist=[(0, 1), (1, 2), (2, 3), (3, 0)],
+                       width=8, style='dashed', alpha=0.5, edge_color='r')
+	nx.draw_networkx_edges(G, pos,
+                       edgelist=[(4, 5), (5, 6), (6, 7), (7, 4)],
+                       width=8, alpha=0.5, edge_color='b')
 
 	plt.savefig('initial_result.png')
-
 
 if __name__ == "__main__":
 
