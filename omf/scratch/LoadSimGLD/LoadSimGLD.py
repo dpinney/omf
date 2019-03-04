@@ -6,6 +6,8 @@ import matplotlib.dates as mdates
 
 parameters = ['GasHeat', 'Resistance', 'HeatPump', 'AC_electric', 'AC_HeatPump', 'waterheater', 'def_load'
 					'non_def_load', 'EV']
+#Maybe add in refrigerator///ADDED for non defferable.. Freezer?
+#For deffereble, clotheswasher, dishwasher, dryer, range
 
 def runGld(modelType):
 	# Run GridLAB-D on the GLM.
@@ -24,11 +26,11 @@ def runGld(modelType):
 		graphType = 'out_super_house'
 	elif modelType == 'AC_electric':
 		cooling_system_type = "ELECTRIC"
-		heating_system_type = None 
+		heating_system_type = '' 
 		graphType = 'out_super_house'
 	elif modelType == 'AC_HeatPump':
 		cooling_system_type = "HEAT_PUMP"
-		heating_system_type = None
+		heating_system_type = ''
 		graphType = 'out_super_house'
 	elif modelType == 'waterheater':
 		cooling_system_type = "ELECTRIC"
@@ -46,6 +48,12 @@ def runGld(modelType):
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = 'RESISTANCE'
 		graphType = 'EV'
+	elif modelType =='Refrigerator':
+		cooling_system_type = "ELECTRIC"
+		heating_system_type = 'RESISTANCE'
+		graphType = 'Refrigerator'
+
+
 
 	with open('in_super_house.glm', 'r') as myfile:
 	    data=myfile.read()
@@ -87,14 +95,18 @@ def runGld(modelType):
 def graphHandler(graphType):
 	if graphType == 'out_super_house':
 		plotLoadHouse()
+		plotTemp()
 	elif graphType == 'waterheater':
 		plotLoadWaterheater()
 	elif graphType == 'def_load':
-		plotLoadDef_Load()
+		plotLoad_Def_Load()
 	elif graphType == 'non_def_load':
-		plotLoadNonDef_Load()
+		plotLoad_NonDef_Load()
 	elif graphType == 'EV':
 		plotLoadEV()
+	elif graphType == 'Refrigerator':
+		plotFridge()
+
 
 def plotLoadHouse():
 	# Get the data
@@ -140,8 +152,27 @@ def plotLoadWaterheater():
 	plt.ylabel('Demand (kW)')
 	plt.show()
 
-# def	plotLoadDef_Load():
-# def plotLoadNonDef_Load():
+# def	plotLoad_Def_Load():
+# 	fileOb = open('out_super_house_waterheater.csv')
+# 	for x in range(8):
+# 		# Burn the headers.
+# 		fileOb.readline()
+# 	data = list(csv.DictReader(fileOb))
+# 	plt.switch_backend('MacOSX')
+# 	plt.figure()
+# 	formatter = mdates.DateFormatter('%Y-%m-%d')
+# 	dates = mdates.datestr2num([''.join(x.get('# timestamp')) for x in data])
+# 	plt.plot_date(dates, [float(x.get('actual_load', 0.0)) for x in data], '-', label="Load")
+# 	ax = plt.gcf().axes[0]
+# 	ax.xaxis.set_major_formatter(formatter)
+# 	plt.gcf().autofmt_xdate(rotation=45)
+# 	plt.suptitle('New Years Day, Huntsville, AL, waterheater load in (kW)')
+# 	plt.title('Path to raw data is installation directory', fontsize =10 )
+# 	plt.legend()
+# 	plt.xlabel('Time Stamp')
+# 	plt.ylabel('Demand (kW)')
+# 	plt.show()
+
 
 def plotLoadEV():
 	fileOb = open('out_super_house_EV.csv')
@@ -164,6 +195,26 @@ def plotLoadEV():
 	plt.ylabel('Demand (W)')
 	plt.show()
 
+def plotFridge():
+	fileOb = open('out_super_house_fridge.csv')
+	for x in range(8):
+		# Burn the headers.
+		fileOb.readline()
+	data = list(csv.DictReader(fileOb))
+	plt.switch_backend('MacOSX')
+	plt.figure()
+	formatter = mdates.DateFormatter('%Y-%m-%d')
+	dates = mdates.datestr2num([''.join(x.get('# timestamp')) for x in data])
+	plt.plot_date(dates, [float(x.get('power', 0.0)) for x in data], '-', label="Load")
+	ax = plt.gcf().axes[0]
+	ax.xaxis.set_major_formatter(formatter)
+	plt.gcf().autofmt_xdate(rotation=45)
+	plt.suptitle('New Years Day, Huntsville, AL, Fridge load in (kVA)')
+	plt.title('Path to raw data is installation directory', fontsize =10 )
+	plt.legend()
+	plt.xlabel('Time Stamp')
+	plt.ylabel('Demand (kVA)')
+	plt.show()
 
 
 def plotTemp():
@@ -174,6 +225,8 @@ def plotTemp():
 		fileOb.readline()
 	data = list(csv.DictReader(fileOb))
 	plt.title('New Years Day, Huntsville, AL, Temperatures')
+	formatter = mdates.DateFormatter('%Y-%m-%d')
+	dates = mdates.datestr2num([''.join(x.get('# timestamp')) for x in data])
 	plt.plot_date(dates, [float(x.get(' air_temperature', 0.0)) for x in data], '-', label="Indoor")
 	plt.plot_date(dates, [float(x.get(' outdoor_temperature', 0.0)) for x in data], '-', label="Outdoors")
 	plt.plot_date(dates, [float(x.get(' heating_setpoint', 0.0)) for x in data], '-', label="heating_setpoint")
@@ -197,5 +250,5 @@ if __name__ == '__main__':
 	# )
 	# args = parser.parse_args()
 	# modelType = args.model_type
-	modelType = 'EV'
+	modelType = 'Refrigerator'
 	runGld(modelType)

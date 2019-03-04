@@ -5,6 +5,7 @@ clock {
 };
 
 #include "inc_super_schedules.glm";
+#include "inc_hot_water_demand1.glm"
 #set minimum_timestep=3600;
 #set profiler=1;
 #set relax_naming_rules=1;
@@ -59,13 +60,26 @@ object recorder {
 	parent ev_house0;
 };
 
-
-object collector {
-	name collector_ZIPloads;
-	group class=ZIPload;
-	property sum(base_power);
+object recorder {
 	interval 3600;
-	file out_load_ziploads.csv;
+	property power;
+	file out_super_house_fridge.csv;
+	parent fridge0;
+};
+
+
+object recorder {
+	interval 3600;
+	property base_power;
+	file out_load_unresponsive.csv;
+	parent unresponsiveLoad_house0;
+};
+
+object recorder {
+	interval 3600;
+	property base_power;
+	file out_load_responsive.csv;
+	parent responsiveLoad_house0;
 };
 
 object triplex_meter {
@@ -119,7 +133,7 @@ object waterheater {
 	heating_element_capacity 4.5 kW;
 	thermostat_deadband 7.8;
 	location INSIDE;
-	demand large_6*0.99;
+	water_demand weekday_hotwater*1.00;
 	tank_setpoint 132.7;
 	tank_UA 3.7;
 	temperature 132;
@@ -195,6 +209,22 @@ object battery {
 	battery_capacity 7 kWh;
 	use_internal_battery_model TRUE;
 };
+
+object refrigerator{
+	parent house0;
+	name fridge0;
+	size +23.9374 cf;
+	rated_capacity +816.743 Btu/h;
+	temperature +38.1227 degF;
+	setpoint +38.3484 degF;
+	deadband +2.4032 degF;
+
+};
+
+//object clotheswasher{
+//	
+//};
+
 
 
 
