@@ -21,8 +21,8 @@ from dateutil import parser
 from dateutil.relativedelta import *
 # Model metadata:
 modelName, template = metadata(__file__)
-tooltip = "The voltageDrop model runs loadflow to show system voltages at all nodes."
-#hidden = True
+tooltip = "Injects faults in to circuits and measures fault currents, voltages, and protective device response."
+hidden = False
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
@@ -186,6 +186,12 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 				'property':'continuous_rating',
 				'file':key+'_cont_rating.csv'
 			}
+	#Record initial status readout of each fuse/recloser/switch/sectionalizer before running
+	protDeviceValues = {}
+	for key in tree:
+		if tree[key].get('object','') in ['fuse', 'recloser', 'switch', 'sectionalizer']:
+			protDeviceValues[tree[key].get('name','')] = [tree[key].get('status','')]
+	#print protDeviceValues
 	# Run Gridlab.
 	if not workDir:
 		workDir = tempfile.mkdtemp()
@@ -199,6 +205,12 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 	reader = csv.reader(dumpFile)
 	reader.next() # Burn the header.
 	keys = reader.next()
+	#Record final status readout of each fuse/recloser/switch/sectionalizer before running
+	for key in tree:
+		if tree[key].get('object','') in ['fuse', 'recloser', 'switch', 'sectionalizer']:
+			protDeviceValues[tree[key].get('name','')].append(tree[key].get('status',''))
+	print protDeviceValues
+
 	voltTable = []
 	for row in reader:
 		rowDict = {}
@@ -325,8 +337,10 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 	edgeTuplePower = {}
 	#edgeTupleNames = dict with to-from tuples as keys and names as values for debugging
 	edgeTupleNames = {}
-	#edgeTupleNames = dict with to-from tuples as keys and names as values for debugging
+	#edgeTupleFaultNames = dict with to-from tuples as keys and the name of the Fault as the only value
 	edgeTupleFaultNames = {}
+	#linePhases = dictionary containing the number of phases on each line for line-width purposes
+	linePhases = {}
 	edgePower = {}
 	for edge in edgeCurrentSum:
 		for obj in tree.values():
@@ -348,6 +362,11 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 				edgeTupleNames[coord] = edge
 				if faultLoc == edge:
 					edgeTupleFaultNames[coord] = "FAULT: " + edge
+				phaseStr = obj.get('phases','').replace('"','').replace('N','').replace('S','')
+				numPhases = len(phaseStr)
+				if (numPhases < 1) or (numPhases > 3):
+					numPhases = 1
+				linePhases[edge] = numPhases
 	#define which dict will be used for edge line color
 	edgeColors = edgeValsPU
 	#define which dict will be used for edge label
@@ -408,7 +427,7 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 	edgeIm = nx.draw_networkx_edges(fGraph,
 		pos = positions,
 		edge_color = edgeList,
-		width = 1,
+		width = [linePhases.get(n,1) for n in edgeNames],
 		edge_cmap = custom_cm)
 	#draw edge labels
 	if edgeLabs != None:

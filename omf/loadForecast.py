@@ -6,10 +6,42 @@ This contains the loadForecast algorithms
 import math, pulp
 import numpy as np
 import pandas as pd
+import os
 from os.path import join as pJoin
 from datetime import datetime as dt
 from datetime import timedelta, date
 from sklearn.model_selection import GridSearchCV
+
+
+class suppress_stdout_stderr(object):
+	"""
+	A context manager for doing a "deep suppression" of stdout and stderr in
+	Python, i.e. will suppress all print, even if the print originates in a
+	compiled C/Fortran sub-function.
+	   This will not suppress raised exceptions, since exceptions are printed
+	to stderr just before a script exits, and after the context manager has
+	exited (at least, I think that is why it lets exceptions through).
+	"""
+
+	def __init__(self):
+		# Open a pair of null files
+		self.null_fds = [os.open(os.devnull, os.O_RDWR) for x in range(2)]
+		# Save the actual stdout (1) and stderr (2) file descriptors.
+		self.save_fds = (os.dup(1), os.dup(2))
+
+	def __enter__(self):
+		# Assign the null pointers to stdout and stderr.
+		os.dup2(self.null_fds[0], 1)
+		os.dup2(self.null_fds[1], 2)
+
+	def __exit__(self, *_):
+		# Re-assign the real stdout/stderr back to (1) and (2)
+		os.dup2(self.save_fds[0], 1)
+		os.dup2(self.save_fds[1], 2)
+		# Close the null files
+		os.close(self.null_fds[0])
+		os.close(self.null_fds[1])
+
 
 # source: https://www.energygps.com/HomeTools/PowerCalendar
 nercHolidays = {
@@ -94,7 +126,9 @@ def rollingDylanForecast(rawData, upBound, lowBound):
 	"""
 
 
-def nextDayPeakKatrinaForecast(rawData, startDate, modelDir, params):
+def nextDayPeakKatrinaForecast(
+	rawData, startDate, modelDir, params, returnActuals=False
+):
 	"""
 	This model takes the inputs rawData, a dataset that holds hourly values in two columns with no indexes
 	The first column rawData[:][0] holds the hourly demand
@@ -158,12 +192,14 @@ def nextDayPeakKatrinaForecast(rawData, startDate, modelDir, params):
 	else:
 		size_model = GridSearchCV(SVR(), param_grid=params["peakSize"])
 
-	# get cross-validated time predictions over the full interval
-	forecasted_peak_time = list(time_model._cv_predict(df=df).hour_pred)
+		# get cross-validated time predictions over the full interval
+	forecasted_peak_time = list(time_model._cv_predict(df=df).hour_pred.shift(1))[
+		1:
+	]  # shift(1) shifts from tmr to tdy
 
 	# convert these float hour values into ISO formatted dates and times
-	dates = list(daily_dti.to_pydatetime())
-	dates = dates[: len(forecasted_peak_time)]
+	dates = list(df.index.to_pydatetime())
+	dates = dates[1:]
 	for i in range(len(dates)):
 		dates[i] += timedelta(hours=forecasted_peak_time[i])
 	forecasted_peak_time = [date.isoformat() for date in dates]
@@ -176,9 +212,24 @@ def nextDayPeakKatrinaForecast(rawData, startDate, modelDir, params):
 			y=df.tmr_peak_demand,
 			cv=3,
 		)
-	)
+	)[
+		1:
+	]  # shifting from tmr to tdy
 
-	return (forecasted_peak_time, forecasted_peak_demand)
+	if returnActuals:
+		dates = list(df.index.to_pydatetime())
+		dates = dates[: len(peak_time)]
+		for i in range(len(dates)):
+			dates[i] += timedelta(hours=peak_time[i])
+		actual_peak_time = [date.isoformat() for date in dates]
+		return (
+			forecasted_peak_time,
+			forecasted_peak_demand,
+			actual_peak_time[1:],
+			list(df.tdy_peak_demand)[1:],
+		)
+	else:
+		return (forecasted_peak_time, forecasted_peak_demand)
 
 
 def prophetForecast(rawData, startDate, modelDir, partitions):
@@ -197,9 +248,10 @@ def prophetForecast(rawData, startDate, modelDir, partitions):
 	input_df.to_csv(pJoin(modelDir, "prophetin.csv"))
 
 	# give prophet the input data
-	prophet.fit(input_df)
+	with suppress_stdout_stderr():
+		prophet.fit(input_df)
 
-	# determine partition length for the cross-validation
+		# determine partition length for the cross-validation
 	total_hours = len(input_df.ds)
 	hp = total_hours // partitions  # horizon and period
 	init = total_hours % partitions  # total_hours - hp * (partitions - 1)
@@ -570,6 +622,9 @@ def isHoliday(holiday, df):
 	m2 = df["dates"].dt.date.isin(nerc6.get(holiday + " (Observed)", []))
 	return m1 | m2
 
+def add_noise(m, std):
+	noise = np.random.normal(0, std, m.shape[0])
+	return m + noise
 
 def makeUsefulDf(df):
 	"""
@@ -618,7 +673,7 @@ def makeUsefulDf(df):
 
 	def _normalizeCol(l):
 		s = l.max() - l.min()
-		return l if s == 0 else (l - l.mean()) / s
+		return l if s == 0 else (l - l.mean()) / l.std()
 
 	def _chunks(l, n):
 		return [l[i : i + n] for i in range(0, len(l), n)]
@@ -630,7 +685,9 @@ def makeUsefulDf(df):
 	# fix outliers
 	m = df["tempc"].replace([-9999], np.nan)
 	m.ffill(inplace=True)
-	r_df["temp_n"] = _normalizeCol(m)
+	# 2.5 degrees average std error for the national weather service
+	temp_noise = add_noise(m, 2.5)
+	r_df["temp_n"] = _normalizeCol(temp_noise)
 
 	# add the value of the load 24hrs before
 	r_df["load_prev_n"] = r_df["load_n"].shift(24)
@@ -670,7 +727,6 @@ def makeUsefulDf(df):
 
 	m = r_df.drop(["month", "hour", "day", "load_n"], axis=1)
 	return m
-
 
 def shouldDispatchPS(peak, month, df, conf):
 	"""
@@ -759,3 +815,43 @@ def pulp24hrBattery(demand, power, energy, battEff):
 		[VBpower[i].varValue for i in range(24)],
 		[VBenergy[i].varValue for i in range(24)],
 	)
+
+
+def neural_net_predictions(all_X, all_y):
+	import tensorflow as tf
+	from tensorflow.keras import layers
+
+	X_train, y_train = all_X[:-8760], all_y[:-8760]
+
+	model = tf.keras.Sequential([
+		layers.Dense(all_X.shape[1], activation=tf.nn.relu, input_shape=[len(X_train.keys())]),
+		layers.Dense(all_X.shape[1], activation=tf.nn.relu),
+		layers.Dense(all_X.shape[1], activation=tf.nn.relu),
+		layers.Dense(all_X.shape[1], activation=tf.nn.relu),
+		layers.Dense(all_X.shape[1], activation=tf.nn.relu),
+		layers.Dense(1)
+	  ])
+
+	optimizer = tf.keras.optimizers.RMSprop(0.001)
+
+	model.compile(
+		loss="mean_squared_error",
+		optimizer=optimizer,
+		metrics=["mean_absolute_error", "mean_squared_error"],
+	)
+
+	EPOCHS = 10
+
+	early_stop = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=10)
+
+	history = model.fit(
+		X_train,
+		y_train,
+		epochs=EPOCHS,
+		validation_split=0.2,
+		verbose=0,
+		callbacks=[early_stop],
+	)
+
+	return [float(f) for f in model.predict(all_X[-8760:])]
+

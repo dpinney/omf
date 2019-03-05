@@ -251,12 +251,23 @@ class GridLabWorld(object):
 			warnings.warn("Failed to write " + value + " to " + propName + " of " + obName)
 			return "WRITE_FAILURE"
 
-	def start(self):
+	def start(self, timeout = 3):
 		#TODO: watch out for in-use port.
 		self.procObject = subprocess.Popen(['gridlabd', self.GLM_PATH, '--server', '-P', self.PORT, '-q','--define','pauseat="' + self.START_PAUSE + '"'], stderr=subprocess.PIPE, stdout=subprocess.PIPE)
 		# print 'MY START PID!', self.procObject.pid
-		# HACK: wait for the dang server to start up and simulate.
-		time.sleep(2) #TODO: instead of sleeping, wait 1 second, try to read clock, if it fails then wait 1 more second, loop, etc.
+		# Wait for the dang server to start up and simulate.
+		while timeout > 0:
+			try:
+				x = urllib2.urlopen(self.baseUrl + 'raw/clock').read()
+				# print 'clock', type(x), x
+				if x != 'ERROR':
+					return
+					# print 'Startup Success'
+			except:
+				pass
+				# print 'clock read failed'
+			time.sleep(1)
+			timeout = timeout - 1
 
 def _test1():
 	glw = GridLabWorld('6267', 'localhost', omf.omfDir + '/scratch/CIGAR/test_smsSingle.glm', '2000-01-02 00:00:00')

@@ -131,6 +131,7 @@
 			<div class="shortInput">
 				<label class="tooltip">Dispatch Strategy<span class="classic">Please see the documentation at the help link for an explanation of dispatch strategy.</span></label>
 				<select id="dispatchStrategy" name="dispatchStrategy" />
+					<option value="prediction">Prediction</option>
 					<option value="optimal">Optimal</option>
 					<option value="daily">Daily</option>
 					<option value="customDispatch">Custom Dispatch</option>
@@ -153,6 +154,20 @@
 					<input id="fileNameOther" name="fileNameOther" value='' readonly class="uploadFileName">
 				</div>
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Prediction - Historical Curve (.csv file)<span class="classic">Please see the documentation at the help link for the required format</span></label>
+				<input id="histCurveFile" type="file" style="display:none" onchange="handle_files(this.files,'histCurve','histFileName')">
+				<input id="histCurve" name="histCurve" type="hidden">
+				<div>
+					<label for="histCurveFile" class="fileButton">Choose File</label>
+					<input id="histFileName" name="histFileName" value='' readonly class="uploadFileName">
+				</div>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Prediction - Confidence<span class="classic">On a 0-100 scale, how conservative would you like to be when dispatching?</span></label>
+				<input type="text" id="confidence" name="confidence">
+			</div>
+			<!-- required buttons -->
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
@@ -200,7 +215,7 @@
 		</script>
 		<p class="reportTitle postRun">Monthly Cost Comparison</p>
 		<div id="levelizedCostReport" class="tightContent postRun">
-			<div id="levelizedCostTableDiv" style="display:inline-block; width:1000px; height:255px; overflow-y:hidden; overflow-x:auto;">
+			<div id="levelizedCostTableDiv" style="display:inline-block; width:1000px; height:150px; overflow-y:hidden; overflow-x:auto;">
 				<table id="monthlySummaryTable" style="margin:5px;margin: 5px;width: 990px;font-size: 14pt">
 					<style>td, th {padding:7 0 5 20;text-align: left;font-size:0.7em;}</style>
 					<div id="tableHead">
@@ -225,10 +240,7 @@
 					insertMetric("monthlySummaryTable","Existing Demand (kW)", allOutputData.monthlyDemand)
 					insertMetric("monthlySummaryTable","Demand with Battery (kW)", allOutputData.monthlyDemandRed)
 					insertMetric("monthlySummaryTable","Reduction Amount (kW)", allOutputData.ps)
-					insertMetric("monthlySummaryTable","Energy to Full-Battery (kWh)", allOutputData.kWhtoRecharge)
-					insertDollarMetric("monthlySummaryTable","Value of Reduction ($)", allOutputData.benefitMonthly)
-					insertDollarMetric("monthlySummaryTable","Cost to Recharge Battery ($)", allOutputData.costtoRecharge)
-					insertDollarMetric("monthlySummaryTable","Net Benefit ($)", allOutputData.benefitNet)
+					insertDollarMetric("monthlySummaryTable","Value of Reduction ($)", allOutputData.benefitMonthly)	
 				</script>
 			</div>
 		</div>
@@ -268,7 +280,8 @@
 					"series":[
 						{"name":"Historical","marker":{"enabled":false},"color":"red","data":allOutputData.demand,"enableMouseTracking":false},
 						{"name":"After Storage","marker":{"enabled":false},"color":"purple","data":allOutputData.demandAfterBattery,"enableMouseTracking":false},
-						{"name":"Storage Discharge","marker":{"enabled":false},"color":"lightgray","data":allOutputData.batteryDischargekW}],
+						{"name":"Storage Discharge","marker":{"enabled":false},"color":"lightgray","data":allOutputData.batteryDischargekW},
+						{"name":"Day-ahead Prediction","marker":{"enabled":false},"color":"orange","data":allOutputData.predictedLoad}],
 					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"demandBattChart","type":"line","marginRight":20, "height":750,"width":1000},
 					"tooltip":{"valueDecimals":1},
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
@@ -328,6 +341,27 @@
 					"tooltip":{"valueDecimals":1},
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
+		</div>
+		<p class="reportTitle postRun" style="page-break-before:always">Model accuracy and effectiveness</p>
+		<div id="reportTitle postRun" class="tightContent postRun detailsContainer" style="position: relative;">
+			Load prediction train accuracy:
+			<pre id="trainAccuracy" style="font-size:13px; text-align:left; padding-left: 10px;overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
+			<script>gebi("trainAccuracy").innerHTML = allOutputData.trainAccuracy + "%"</script><br>
+			Load prediction test accuracy:
+			<pre id="testAccuracy" style="font-size:13px; text-align:left; padding-left: 10px;overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
+			<script>gebi("testAccuracy").innerHTML = allOutputData.testAccuracy + "%"</script><br>
+			Peak identification precision:
+			<pre id="precision" style="font-size:13px; text-align:left; padding-left: 10px;overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
+			<script>gebi("precision").innerHTML = "True Positive / (True Positive + False Positive)\n" + allOutputData.precision + "%"</script><br>
+			Peak identification recall:
+			<pre id="recall" style="font-size:13px; text-align:left; padding-left: 10px;overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
+			<script>gebi("recall").innerHTML = "True Positive / (True Positive + False Negative)\n" + allOutputData.recall + "%"</script><br>
+			Number of dispatches:
+			<pre id="number_of_dispatches" style="font-size:13px; text-align:left; padding-left: 10px;overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
+			<script>gebi("number_of_dispatches").innerHTML = allOutputData.number_of_dispatches</script><br>
+			MAE:
+			<pre id="MAE" style="font-size:13px; text-align:left; padding-left: 10px;overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
+			<script>gebi("MAE").innerHTML = allOutputData.MAE + '%'</script>
 		</div>
 	</div>
 </body>

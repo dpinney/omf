@@ -4,12 +4,43 @@
 	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
 	<style>
-	/*Styles here*/
+		.tab {
+		    overflow: hidden;
+		    margin-left: auto;
+		    margin-right: auto;
+		    width: 1000px;
+		}
+
+		.tab button {
+			color: black;
+		    background-color: inherit;
+		    float: left;
+		    border: none;
+		    outline: none;
+		    cursor: pointer;
+		    padding: 14px 16px;
+		    border-radius: 5px 5px 0px 0px;
+		}
+
+		.tab button:hover {
+		    background-color: white;
+		}
+
+		.tab button.active {
+		    background-color: seagreen;
+		    color: white;
+		}
+
+		.tabcontent {
+		    display: none;
+		} 
 	</style>
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+		<script src="{{pathPrefix}}/static/heatmap.src.js"></script>
+	<script src="{{pathPrefix}}/static/d3.v3.js"></script>
 	<!-- Data  Imports -->
 	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
 	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
@@ -20,6 +51,20 @@
 			console.log("modelName:",modelName)
 			studyUser = allInputData.user
 			window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
+		}
+		function openTab(evt, tabName) {
+			var i, tabContent, tabLinks;
+			// Get all elements with class="tabContent" and hide them
+			$(".tabContent").hide();
+		    // Get all elements with class="tabLinks" and remove the class "active"
+		    tabLinks = document.getElementsByClassName("tabLinks");
+		    for (i = 0; i < tabLinks.length; i++) {
+		        tabLinks[i].className = tabLinks[i].className.replace(" active", "");
+		    }
+		    // Show the current tab, and add an "active" class to the button that opened the tab
+		    $("." + tabName).show();
+		    //gebi(tabName).style.display = "block";
+		    evt.currentTarget.className += " active";
 		}
 	</script>
 </head>
@@ -67,6 +112,54 @@
 					<option value="forceDirected">Force Directed</option>
 				</select>
 			</div>
+			<div class="wideInput">
+				<p class="inputSectionHeader">Solar System Parameters</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
+				<input type="text" id="zipCode" name="zipCode" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">System Size (kWp-DC)<span class="classic">DC output rating of the solar panels in kilowatts.</span></label>
+				<input type="text" id="systemSize" name="systemSize" pattern="^\d+\.?\d*$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Inverter Size (kW-AC)<span class="classic">Size of the total inverters in kW-AC for the system. Used to determine energy clipping in the Hourly System Average Power Output graph.</span></label>
+				<input type="text" id="inverterSize" name="inverterSize" required="required" pattern="^\d+\.?\d*?$">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Inverter &amp; Transformer Efficiency (%)<span class="classic">Combined Inverter and Transformer Efficiency in converting DC power to AC power. The Inverter efficiency can be obtained from the Weighted Efficiency (CEC) Method.</span></label>
+				<input type="text" id="inverterEfficiency" name="inverterEfficiency" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
+			</div>
+			<div class="wideInput">
+				<p class="inputSectionHeader">Financial Variables</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Retail Energy Cost ($/kWh)<span class="classic">Residential rate.</span></label>
+				<input type="text" id="retailCost" name="retailCost" pattern="^\d+\.?\d*$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Discount Rate (%)<span class="classic">Discount rate used in discounted cashflow analysis output.</span></label>
+				<input type="text" id="discountRate" name="discountRate" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
+			</div>
+			<div class="wideInput">
+				<p class="inputSectionHeader">Controller Parameters</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Parameter 1<span class="classic">TBD.</span></label>
+				<input type="text" id="parameterOne" name="parameterOne"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Parameter 2<span class="classic">TBD.</span></label>
+				<input type="text" id="parameterTwo" name="parameterTwo"/>
+			</div>
+			<div class="wideInput">
+				<p class="inputSectionHeader">Display Options</p>
+			</div>
+			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Node Coloring By<span class="classic">Select the simulation output value that will be used to color the nodes in the circuit.</span></label>
 				<select id="nodeCol" name="nodeCol">
@@ -136,9 +229,104 @@
 	</div>
 	<div id="output">
 		<p class="reportTitle postRun" style="page-break-before:always">Voltage Drop Diagram</p>
-		<div id="voltageDropDiagram" class="tightContent postRun">
-			<img id="voltageDropChart" style="width:1000px;height:1000px;" />
-			<script type="text/javascript">gebi("voltageDropChart").src = "data:image/png;base64," + allOutputData.voltageDrop</script>
+		<!-- Tab links -->
+		<div class="tab">
+		  <button class="tabLinks active" onclick="openTab(event, 'solarDiagram')">Solar</button>
+		  <button class="tabLinks" onclick="openTab(event, 'noSolarDiagram')">No Solar</button>
+		  <button class="tabLinks" onclick="openTab(event, 'parameterDiagram')">Solar with Parameters</button>
+		</div>
+
+		<!-- Tab content -->
+		<div id="phaseUnbalanceDiagrams" class="tabPlots" style="display: block;">
+			<div class="tightContent tabContent solarDiagram firstTab">
+				<img id="solarUnbalanceChart" style="width:1000px;height:1000px;" />
+				<script type="text/javascript">gebi("solarUnbalanceChart").src = "data:image/png;base64," + allOutputData.voltageDrop</script>
+			</div>
+			<div class="tightContent tabContent noSolarDiagram">
+				<img id="noSolarUnbalanceChart" style="width:1000px;height:1000px;" />
+				<script type="text/javascript">gebi("noSolarUnbalanceChart").src = "data:image/png;base64," + allOutputData.voltageDrop</script>
+			</div>
+			<div class="tightContent tabContent parameterDiagram">
+				<img id="parameterUnbalanceChart" style="width:1000px;height:1000px;" />
+				<!--
+				<script type="text/javascript">gebi("parameterUnbalanceChart").src = "data:image/png;base64," + allOutputData.voltageDrop</script>
+			-->
+			</div>			
+		</div>
+		<script type="text/javascript">
+			//show first tab 
+			$(".firstTab").css('display', 'block');
+		</script>
+		
+		<p class="reportTitle" style="page-break-before:always">Three Phase Loads Real and Imaginary Power</p>
+		<div class="content tableContainer">
+			<table id="realImgPower">
+			<tr> <th>Phase A Real</th> <th>Phase A Img;</th> <th>Phase B Real</th> <th>Phase B Img</th> <th>Phase C Real;</th> <th>Phase C Img</th></tr>
+			<tr> 
+				<td id = 'realA'></td>
+				<script type="text/javascript">
+					gebi('realA').innerHTML = allOutputData['threePhase']['sum(power_A.real)']
+				</script> 
+				<td id = 'imgA'></td>
+				<script type="text/javascript">
+					gebi('imgA').innerHTML = allOutputData['threePhase']['sum(power_A.imag)']
+				</script> 
+				<td id = 'realB'></td>
+				<script type="text/javascript">
+					gebi('realB').innerHTML = allOutputData['threePhase']['sum(power_B.real)']
+				</script> 
+				<td id = 'imgB'></td>
+				<script type="text/javascript">
+					gebi('imgB').innerHTML = allOutputData['threePhase']['sum(power_B.imag)']
+				</script>
+				<td id = 'realC'></td>
+				<script type="text/javascript">
+					gebi('realC').innerHTML = allOutputData['threePhase']['sum(power_C.real)']
+				</script> 
+				<td id = 'imgC'></td>
+				<script type="text/javascript">
+					gebi('imgC').innerHTML = allOutputData['threePhase']['sum(power_C.imag)']
+				</script> 
+			</tr>
+			</table>
+		</div>
+
+	<p class="reportTitle postRun">Simulation Location</p>
+		<div id="studyDetail" class="tightContent postRun detailsContainer" style="position: relative">
+			<div id="mapHere"></div>
+			<script type="text/javascript">
+				width = 1000, height = 350
+				projection = d3.geo.albersUsa().scale(600).translate([width/2, height/2])
+				path = d3.geo.path()
+					.projection(projection)
+				svg = d3.select("#mapHere").append("svg")
+					.attr("width", width)
+					.attr("height", height)
+				group = svg.append("g")
+				group.attr("transorm", "scale(.2, .2)")
+				d3.json('{{pathPrefix}}/static/state_boundaries.json', function(collection) {
+					group.selectAll('path')
+						.data(collection.features)
+						.enter().append('path')
+						.attr('d', d3.geo.path().projection(projection))
+						.attr('id', function(d){return d.properties.name.replace(/\s+/g, '')})
+						.style('fill', 'gray')
+						.style('stroke', 'white')
+						.style('stroke-width', 1)})
+				d3.json("{{pathPrefix}}/static/city_locations.json", function(new_us_places){
+					climate = allInputData.climateName
+					ST_NAME = climate.split("-")
+					ST = ST_NAME[0]
+					NAME = ST_NAME[1].replace("_"," ")
+					my_coords = projection(new_us_places[ST][NAME])
+					r = 5
+					circle = svg.append("circle")
+						.attr("cx", my_coords[0])
+						.attr("cy", my_coords[1])
+						.attr("r", 5)
+						.attr("class", "HighlightCircle")
+					circle.append("svg:title").text(climate)})
+			</script>
 		</div>
 	</div>
 </body>

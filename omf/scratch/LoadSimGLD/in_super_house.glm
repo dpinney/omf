@@ -1,11 +1,12 @@
 clock {
 	timezone EST5;
 	starttime '2012-01-01 12:00:00';
-	stoptime '2012-01-01 15:00:00';
+	stoptime '2013-01-01 15:00:00';
 };
 
 #include "inc_super_schedules.glm";
-#set minimum_timestep=60;
+#include "inc_hot_water_demand1.glm"
+#set minimum_timestep=3600;
 #set profiler=1;
 #set relax_naming_rules=1;
 module generators;
@@ -32,10 +33,53 @@ object climate {
 };
 
 object recorder {
-	interval 60;
-	property heating_demand, cooling_demand;
-	file out_super_house_heat_cool.csv;
+	interval 3600;
+	property heating_demand, cooling_demand, heating_setpoint, air_temperature, outdoor_temperature;
+	file out_super_house.csv;
 	parent house0;
+};
+
+object recorder {
+	interval 3600;
+	property measured_real_energy;
+	file out_super_house_triplex_meter.csv;
+	parent R4-25-00-1_tm_1;
+};
+
+object recorder {
+	interval 3600;
+	property actual_load, waterheater_power;
+	file out_super_house_waterheater.csv;
+	parent waterHeater_house0;
+};
+
+object recorder {
+	interval 3600;
+	property charge_rate;
+	file out_super_house_EV.csv;
+	parent ev_house0;
+};
+
+object recorder {
+	interval 3600;
+	property power;
+	file out_super_house_fridge.csv;
+	parent fridge0;
+};
+
+
+object recorder {
+	interval 3600;
+	property base_power;
+	file out_load_unresponsive.csv;
+	parent unresponsiveLoad_house0;
+};
+
+object recorder {
+	interval 3600;
+	property base_power;
+	file out_load_responsive.csv;
+	parent responsiveLoad_house0;
 };
 
 object triplex_meter {
@@ -50,36 +94,6 @@ object triplex_meter {
 	//bill_mode HOURLY;
 	bill_day 1;
 	voltage_N 0;
-};
-
-object house {
-	glass_type 2;
-	cooling_COP 3.8;
-	hvac_breaker_rating 1000;
-	cooling_system_type ELECTRIC;
-	total_thermal_mass_per_floor_area 3.504;
-	cooling_setpoint cooling6*2.89+69.19;
-	air_temperature 71.22;
-	ceiling_height 8;
-	Rdoors 10.51;
-	heating_system_type HEAT_PUMP;
-	glazing_layers 3;
-	glazing_treatment 2;
-	heating_setpoint heating6*0.19+59.01;
-	groupid Residential;
-	schedule_skew -57.2977315002;
-	window_frame 4;
-	parent R4-25-00-1_tm_1;
-	floor_area 8000.0;
-	number_of_stories 1;
-	mass_temperature 71.22;
-	name house0;
-	Rfloor 35.59;
-	airchange_per_hour 0.23;
-	Rroof 50.34;
-	Rwall 27.33;
-	breaker_amps 1000;
-	over_sizing_factor 0.1;
 };
 
 object ZIPload {
@@ -119,7 +133,7 @@ object waterheater {
 	heating_element_capacity 4.5 kW;
 	thermostat_deadband 7.8;
 	location INSIDE;
-	demand large_6*0.99;
+	water_demand weekday_hotwater*1.00;
 	tank_setpoint 132.7;
 	tank_UA 3.7;
 	temperature 132;
@@ -195,6 +209,24 @@ object battery {
 	battery_capacity 7 kWh;
 	use_internal_battery_model TRUE;
 };
+
+object refrigerator{
+	parent house0;
+	name fridge0;
+	size +23.9374 cf;
+	rated_capacity +816.743 Btu/h;
+	temperature +38.1227 degF;
+	setpoint +38.3484 degF;
+	deadband +2.4032 degF;
+
+};
+
+//object clotheswasher{
+//	
+//};
+
+
+
 
 //object passive_controller {
 //	period 900;
