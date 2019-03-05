@@ -546,6 +546,7 @@
                                 <li data-web>Scada Loadshapes...</li>
                                 <li>Static Loads to Houses</li>
                                 <li>Change opacity...</li>
+                                <li>Color Circuit...</li>
                             </ul>
                         </div>
                     </div>
@@ -568,7 +569,6 @@
                                 <li data-web>Windmil Conversion...</li>
                                 <li data-web>GridLAB-D Conversion...</li>
                                 <li data-web>CYMDIST Conversion...</li>
-                                <li>Color Circuit...</li>
                             </ul>
                         </div>
                     </div>
@@ -1087,7 +1087,7 @@
 </html>
 <script id="componentsInsert">const gComponents = {% if components %}{{ components | safe }}{% else %}null{% endif %}; 
 </script>
-<script id="feederInsert">const gReadFeeder = {% if thisFeederData %}{{ thisFeederData | safe }}{% else %}null{% endif %}; 
+<script id="feederInsert">let gReadFeeder = {% if thisFeederData %}{{ thisFeederData | safe }}{% else %}null{% endif %}; 
 </script>
 <style id="jqueryCssInsert">
 </style>
@@ -1558,9 +1558,8 @@ function attachHandlers() {
     attachAddComponentListeners();
     attachFeederList(document.getElementById("publicFeederList"), gPublicFeeders, "public");
     attachFeederList(document.getElementById("userFeederList"), gUserFeeders, gCurrentUser);
-    //attachFeederList(document.getElementById("userFeederList"), gUserFeeders, gThisOwner);
-    addFileMenuHandlers();
-    addEditMenuHandlers();
+    attachFileMenuHandlers();
+    attachEditMenuHandlers();
 }
 
 //delete this eventually
@@ -1741,13 +1740,13 @@ function attachFeederList(ul, feeders, owner=null) {
 /**
  * Doesn't need unit tests
  */
-function addFileMenuHandlers() {
+function attachFileMenuHandlers() {
     const menu = document.getElementById("fileMenu");
     if (menu == null) {
         return;
     }
     const items = Array.from(menu.children);
-    if (items.length !== 9) {
+    if (items.length !== 8) {
         throw new Error("Please update this function to ensure the correct handlers are attached");
     }
     items[0].addEventListener("click", function() {
@@ -1760,16 +1759,16 @@ function addFileMenuHandlers() {
     items[5].addEventListener("click", () => { toggleElementDisplay("milsoftModal"); });
     items[6].addEventListener("click", () => { toggleElementDisplay("gridlabdModal"); });
     items[7].addEventListener("click", () => { toggleElementDisplay("cymeModal"); });
-    items[8].addEventListener("click", () => { toggleElementDisplay("colorModal"); });
+    //items[8].addEventListener("click", () => { toggleElementDisplay("colorModal"); });
 }
 
 /** 
  * 
  */
-function addEditMenuHandlers() {
+function attachEditMenuHandlers() {
     const menu = document.getElementById("editMenu");
     const items = Array.from(menu.children);
-    if (items.length != 10) {
+    if (items.length != 11) {
         throw new Error("Please update this function to ensure the correct handlers are attached");
     }
     //items[0].addEventListener("click", zoomToFit);
@@ -1799,6 +1798,7 @@ function addEditMenuHandlers() {
         gOpacityManager.update();
         gOpacityManager.buildOpacityModal();
     });
+    items[10].addEventListener("click", () => { toggleElementDisplay("colorModal"); });
 }
 
 /** 
@@ -2256,6 +2256,8 @@ function saveFeeder(feeder) {
             } else {
                 progressModal.hide();
                 alert("Success. Your data was saved.");
+                // Need to do this to make sure rename doesn't break if the user saves and remains on the page.
+                gReadFeeder = gWriteFeeder;
             }
         });
     }
