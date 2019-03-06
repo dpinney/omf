@@ -221,6 +221,8 @@ def work(modelDir, inputDict):
 
 			# run gridlab solver
 			data = runGridlabAndProcessData(tree, attachments, edge_bools, workDir=modelDir)
+			print(tree[addedDerKey]);
+			print(tree[addedDerInverterKey]);
 
 			# generate voltage, current and thermal plots
 			filename = 'voltageDer' + der + loadCondition
@@ -734,10 +736,10 @@ def new(modelDir):
 		'thermalThreshold': '100',
 		'peakLoadData': '',
 		'minLoadData': '',
-		'tapThreshold': '6',
+		'tapThreshold': '2',
 		'faultCurrentThreshold': '10',
 		'faultVoltsThreshold': '138',
-		'newGenerationInsolation': '10'
+		'newGenerationInsolation': '30'
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
