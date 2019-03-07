@@ -30,11 +30,11 @@ def work(modelDir, inputDict):
 	outData = {}
 	''' Run CVR analysis. '''
 	# Reformate monthData and rates.
-	rates = {k:float(inputDict[k]) for k in ["capitalCost", "omCost", "wholesaleEnergyCostPerKwh",
-		"retailEnergyCostPerKwh", "peakDemandCostSpringPerKw", "peakDemandCostSummerPerKw",
-		"peakDemandCostFallPerKw", "peakDemandCostWinterPerKw"]}
-	monthNames = ["January", "February", "March", "April", "May", "June", "July", "August",
-		"September", "October", "November", "December"]
+	rates = {k:float(inputDict[k]) for k in ['capitalCost', 'omCost', 'wholesaleEnergyCostPerKwh',
+		'retailEnergyCostPerKwh', 'peakDemandCostSpringPerKw', 'peakDemandCostSummerPerKw',
+		'peakDemandCostFallPerKw', 'peakDemandCostWinterPerKw']}
+	monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
+		'September', 'October', 'November', 'December']
 	monthToSeason = {'January':'Winter','February':'Winter','March':'Spring','April':'Spring',
 		'May':'Spring','June':'Summer','July':'Summer','August':'Summer',
 		'September':'Fall','October':'Fall','November':'Fall','December':'Winter'}
