@@ -13,7 +13,7 @@ module generators;
 module tape;
 
 module residential {
-	implicit_enduses NONE;
+	implicit_enduses REFRIGERATOR;
 };
 
 module powerflow {
@@ -31,6 +31,7 @@ object climate {
 	interpolate QUADRATIC;
 	tmyfile inc_climate.tmy2;
 };
+
 
 object recorder {
 	interval 3600;
@@ -60,19 +61,33 @@ object recorder {
 	parent ev_house0;
 };
 
+
 object recorder {
 	interval 3600;
-	property power;
-	file out_super_house_fridge.csv;
-	parent fridge0;
+	property base_power W;
+	file out_load_fridge.csv;
+	parent fridge_house0;
 };
-
 
 object recorder {
 	interval 3600;
 	property base_power;
-	file out_load_unresponsive.csv;
-	parent unresponsiveLoad_house0;
+	file out_load_clotheswasher.csv;
+	parent clotheswasher_house0;
+};
+
+object recorder {
+	interval 3600;
+	property base_power;
+	file out_load_dryer.csv;
+	parent dryer_house0;
+};
+
+object recorder {
+	interval 3600;
+	property base_power;
+	file out_load_freezer.csv;
+	parent freezer_house0;
 };
 
 object recorder {
@@ -99,16 +114,57 @@ object triplex_meter {
 object ZIPload {
 	parent house0;
 	schedule_skew 261.011840107;
-	name unresponsiveLoad_house0;
+	name fridge_house0;
 	power_fraction 0.400000;
 	current_fraction 0.400000;
-	base_power unresponsive_loads*1.44523191813;
+	base_power fridge_power*1.00;
 	current_pf 1.000;
 	power_pf 1.000;
 	heatgain_fraction 0.900;
 	impedance_fraction 0.200000;
 	impedance_pf 1.000;
 };
+
+object ZIPload {
+	parent house0;
+	name clotheswasher_house0;
+	power_fraction 0.400000;
+	current_fraction 0.400000;
+	base_power clotheswasher*1.00;
+	current_pf 1.000;
+	power_pf 1.000;
+	heatgain_fraction 0.900;
+	impedance_fraction 0.200000;
+	impedance_pf 1.000;
+};
+
+object ZIPload {
+	parent house0;
+	name dryer_house0;
+	power_fraction 0.400000;
+	current_fraction 0.400000;
+	base_power dryer*1.00;
+	current_pf 1.000;
+	power_pf 1.000;
+	heatgain_fraction 0.900;
+	impedance_fraction 0.200000;
+	impedance_pf 1.000;
+};
+
+object ZIPload {
+	parent house0;
+	name freezer_house0;
+	power_fraction 0.400000;
+	current_fraction 0.400000;
+	base_power freezer*1.00;
+	current_pf 1.000;
+	power_pf 1.000;
+	heatgain_fraction 0.900;
+	impedance_fraction 0.200000;
+	impedance_pf 1.000;
+};
+
+
 
 object ZIPload {
 	parent house0;
@@ -210,16 +266,18 @@ object battery {
 	use_internal_battery_model TRUE;
 };
 
-object refrigerator{
-	parent house0;
-	name fridge0;
-	size +23.9374 cf;
-	rated_capacity +816.743 Btu/h;
-	temperature +38.1227 degF;
-	setpoint +38.3484 degF;
-	deadband +2.4032 degF;
-
-};
+//object refrigerator{
+//	parent house0;
+//	name fridge0;
+//	size +23.9374 cf;
+//	rated_capacity +816.743 Btu/h;
+//	temperature +38.1227 degF;
+//	setpoint +38.3484 degF;
+//	deadband +2.4032 degF;
+//	daily_door_opening 30;
+//	power fridge_power*1.00;
+//
+//};
 
 //object clotheswasher{
 //	
