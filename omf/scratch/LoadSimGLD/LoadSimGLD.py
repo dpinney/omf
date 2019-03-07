@@ -3,6 +3,8 @@ from matplotlib import pyplot as plt
 from pprint import pprint as pp
 from dateutil.parser import parse as parse_dt
 import matplotlib.dates as mdates
+import argparse
+import sys
 
 parameters = ['GasHeat', 'Resistance', 'HeatPump', 'AC_electric', 'AC_HeatPump', 'waterheater', 'def_load'
 					'non_def_load', 'EV']
@@ -323,14 +325,16 @@ def plotTemp():
 if __name__ == '__main__':
 	#TODO: warning text 'Illegal input. Usage: "python LoadSimGLD <load_type>" where load_type is one of ...
 	#Parse Command Line
-	# parser = argparse.ArgumentParser(description='Simulates heat/cool power use on a canonical .glm single house model')
-	# parser.add_argument(
-	# 	'model_type',
-	# 	metavar = 'base',
-	# 	type = str,
-	# 	help = 'Please specify type of model, being Gas, Resistance, or HeatPump'
-	# )
-	# args = parser.parse_args()
-	# modelType = args.model_type
-	modelType = 'EV'
+	if len(sys.argv) == 1:
+		modelType = 'EV'
+	else:
+		parser = argparse.ArgumentParser(description='Simulates heat/cool power use on a canonical .glm single house model')
+		parser.add_argument(
+		'model_type',
+		metavar = 'base',
+		type = str,
+		help = 'Please specify type of model, being Gas, Resistance, or HeatPump'
+			)
+		args = parser.parse_args()
+		modelType = args.model_type
 	runGld(modelType)

@@ -64,7 +64,7 @@ object recorder {
 
 object recorder {
 	interval 3600;
-	property base_power W;
+	property base_power;
 	file out_load_fridge.csv;
 	parent fridge_house0;
 };
