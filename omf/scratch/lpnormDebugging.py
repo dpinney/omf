@@ -1,5 +1,6 @@
 from matplotlib import pyplot as plt
 import networkx as nx
+import numpy as np
 import os
 import pandas as pd
 import random
@@ -35,6 +36,15 @@ def generateEdgeStyles(testDir, G):
 	plt.savefig(testDir + '/Colored example.png')
 	plt.clf()
 
+def generateNodeBorderWidths(testDir, G):
+	''' Alter values of border edges around the nodes. ''' 
+
+	borderValues = np.linspace(0, 2, 21)
+	for value in borderValues:
+		nx.draw(G, with_labels=True, linewidths=value)
+		plt.savefig(testDir + '/' + str(float(value)) + ' example.png')
+		plt.clf()
+
 def generateDependentGraph(testDir):
 	''' Demonstrate how you can change selected properties according to edge attributes. '''
 
@@ -53,20 +63,38 @@ def generateDependentGraph(testDir):
 	plt.savefig(testDir + '/Dependent Example.png')
 	plt.clf()
 
-def generateNodeColors(testDir, G):
+def generateNodeColors(testDir):
+	''' Generate a graph with varying colors depending on the node value. '''
 
-	nx.draw(G, with_labels=True, node_shape="s", style="solid") # Default.
-	plt.savefig(testDir + '/Solid example.png')
-	plt.clf()
-	nx.draw(G, with_labels=True, node_color = "skyblue", node_shape="s", style="dotted")
-	plt.savefig(testDir + '/Dotted example.png')
-	plt.clf()
-	nx.draw(G, with_labels=True, node_color = "skyblue", node_shape="s", style="dashed")
-	plt.savefig(testDir + '/Dash example.png')
-	plt.clf()
+	G = nx.Graph() # Just going to use this until I get the multigraph to work.
+	G.add_edges_from(
+    [('A', 'B'), ('A', 'C'), ('D', 'B'), ('E', 'C'), ('E', 'F'),
+     ('B', 'H'), ('B', 'G'), ('B', 'F'), ('C', 'G')])
 
-def alphaLevels(testDir, G):
-	pass
+	val_map = {'A': 1.0,
+           'D': 0.5714285714285714,
+           'H': 0.0}
+
+	values = [val_map.get(node, 0.25) for node in G.nodes()]
+
+	nx.draw(G, cmap=plt.get_cmap('viridis'), node_color=values, with_labels=True, font_color='white')
+	plt.savefig('Colorful Copied Example.png')
+	plt.clf() 
+
+	#G = nx.MultiDiGraph() # For added fun, we'll allow for multiple edges and self loops. Apparently, using OrderDict, you can track the order nodes and neighbors are added.
+	#G.add_edge(1, 2, key=5, attr_dict={'A': 'a', 'B': {'C': 'c', 'D': 'd'}}))
+
+
+
+
+def generateAlphaLevels(testDir, G):
+	''' Generate a graph with varying transparency values. '''
+
+	alphaValues = np.linspace(0, 1, 11)
+	for value in alphaValues:
+		nx.draw(G, with_labels=True, alpha=value)
+		plt.savefig(testDir + '/' + str(float(value)) + ' example.png')
+		plt.clf()
 
 def labelStyles(testDir, G):
 	pass
@@ -88,6 +116,9 @@ def generateGraphs(testDirs):
 	generateShapeGraphs(testDirs[0], G)
 	generateEdgeStyles(testDirs[1], G)
 	generateDependentGraph(testDirs[1])
+	generateNodeBorderWidths(testDirs[2], G)
+	generateNodeColors(testDirs[3])
+	generateAlphaLevels(testDirs[4], G)
 
 def cleanUp(testDirs):
 	for roots, dirs, files in os.walk("."):
@@ -96,7 +127,7 @@ def cleanUp(testDirs):
 				shutil.rmtree(directory)
 
 if __name__ == "__main__":
-	testDirs = ['shapeExamples', 'edgeExamples', 'colorExamples']
+	testDirs = ['shapeExamples', 'edgeExamples', 'nodeBorderExamples', 'colorExamples', 'alphaExamples']
 	testGraph = generateGraphs(testDirs)
 
 
