@@ -71,7 +71,7 @@ def work(modelDir, inputDict):
 		if tree[key].get('argument','') == '\"schedules.glm\"' or tree[key].get('tmyfile','') != '':
 			del tree[key]
 
-	print edge_bools
+	# print edge_bools
 			
 	# Make sure we have a voltDump:
 	def safeInt(x):

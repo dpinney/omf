@@ -1,5 +1,8 @@
 import pandas as pd
-from fbprophet import Prophet
+try:
+	from fbprophet import Prophet
+except:
+	pass # fbprophet is very badly behaved at runtime and also at install time.
 from omf.loadForecast import suppress_stdout_stderr
 from os.path import join as pJoin
 import os
