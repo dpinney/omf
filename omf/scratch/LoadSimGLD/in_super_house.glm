@@ -64,7 +64,7 @@ object recorder {
 
 object recorder {
 	interval 3600;
-	property base_power;
+	property base_power W;
 	file out_load_fridge.csv;
 	parent fridge_house0;
 };
@@ -74,6 +74,20 @@ object recorder {
 	property base_power;
 	file out_load_clotheswasher.csv;
 	parent clotheswasher_house0;
+};
+
+object recorder {
+	interval 3600;
+	property base_power;
+	file out_load_dryer.csv;
+	parent dryer_house0;
+};
+
+object recorder {
+	interval 3600;
+	property base_power;
+	file out_load_freezer.csv;
+	parent freezer_house0;
 };
 
 object recorder {
@@ -123,6 +137,33 @@ object ZIPload {
 	impedance_fraction 0.200000;
 	impedance_pf 1.000;
 };
+
+object ZIPload {
+	parent house0;
+	name dryer_house0;
+	power_fraction 0.400000;
+	current_fraction 0.400000;
+	base_power dryer*1.00;
+	current_pf 1.000;
+	power_pf 1.000;
+	heatgain_fraction 0.900;
+	impedance_fraction 0.200000;
+	impedance_pf 1.000;
+};
+
+object ZIPload {
+	parent house0;
+	name freezer_house0;
+	power_fraction 0.400000;
+	current_fraction 0.400000;
+	base_power freezer*1.00;
+	current_pf 1.000;
+	power_pf 1.000;
+	heatgain_fraction 0.900;
+	impedance_fraction 0.200000;
+	impedance_pf 1.000;
+};
+
 
 
 object ZIPload {

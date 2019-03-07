@@ -11,7 +11,6 @@ parameters = ['GasHeat', 'Resistance', 'HeatPump', 'AC_electric', 'AC_HeatPump',
 
 def runGld(modelType):
 	# Run GridLAB-D on the GLM.
-	# currently, Feb 2019, GLD only supports electric AC or heatmump
 	if modelType == 'GasHeat':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = 'GAS'
@@ -56,6 +55,15 @@ def runGld(modelType):
 		cooling_system_type= "ELECTRIC"
 		heating_system_type = "RESISTANCE"
 		graphType = 'clotheswasher'
+	elif modelType == 'dryer':
+		cooling_system_type = "ELECTRIC"
+		heating_system_type = "RESISTANCE"
+		graphType = 'dryer'
+	elif modelType == 'freezer':
+		cooling_system_type = "ELECTRIC"
+		heating_system_type = "RESISTANCE"
+		graphType = 'freezer'
+
 
 
 
@@ -112,6 +120,10 @@ def graphHandler(graphType):
 		plotFridge()
 	elif graphType == 'clotheswasher':
 		plotClotheswasher()
+	elif graphType =='dryer':
+		plotDryer()
+	elif graphType == 'freezer':
+		plotFreezer()
 
 
 def plotLoadHouse():
@@ -219,7 +231,28 @@ def plotFridge():
 	plt.title('Path to raw data is installation directory', fontsize =10 )
 	plt.legend()
 	plt.xlabel('Time Stamp')
-	plt.ylabel('Demand (kVA)')
+	plt.ylabel('Demand (kW)')
+	plt.show()
+
+def plotFreezer():
+	fileOb = open('out_load_freezer.csv')
+	for x in range(8):
+		# Burn the headers.
+		fileOb.readline()
+	data = list(csv.DictReader(fileOb))
+	plt.switch_backend('MacOSX')
+	plt.figure()
+	formatter = mdates.DateFormatter('%Y-%m-%d')
+	dates = mdates.datestr2num([''.join(x.get('# timestamp')) for x in data])
+	plt.plot_date(dates, [complex(x.get('base_power', 0.0)).real for x in data], '-', label="Load")
+	ax = plt.gcf().axes[0]
+	ax.xaxis.set_major_formatter(formatter)
+	plt.gcf().autofmt_xdate(rotation=45)
+	plt.suptitle('New Years Day, Huntsville, AL, Freezer load in (kW)')
+	plt.title('Path to raw data is installation directory', fontsize =10 )
+	plt.legend()
+	plt.xlabel('Time Stamp')
+	plt.ylabel('Demand (kW)')
 	plt.show()
 
 def plotClotheswasher():
@@ -240,8 +273,31 @@ def plotClotheswasher():
 	plt.title('Path to raw data is installation directory', fontsize =10 )
 	plt.legend()
 	plt.xlabel('Time Stamp')
-	plt.ylabel('Demand (kVA)')
+	plt.ylabel('Demand (kW)')
 	plt.show()
+
+def plotDryer():
+	fileOb = open('out_load_dryer.csv')
+	for x in range(8):
+		# Burn the headers.
+		fileOb.readline()
+	data = list(csv.DictReader(fileOb))
+	plt.switch_backend('MacOSX')
+	plt.figure()
+	formatter = mdates.DateFormatter('%Y-%m-%d')
+	dates = mdates.datestr2num([''.join(x.get('# timestamp')) for x in data])
+	plt.plot_date(dates, [complex(x.get('base_power', 0.0)).real for x in data], '-', label="Load")
+	ax = plt.gcf().axes[0]
+	ax.xaxis.set_major_formatter(formatter)
+	plt.gcf().autofmt_xdate(rotation=45)
+	plt.suptitle('New Years Day, Huntsville, AL, Dryer load in (kW)')
+	plt.title('Path to raw data is installation directory', fontsize =10 )
+	plt.legend()
+	plt.xlabel('Time Stamp')
+	plt.ylabel('Demand (kW)')
+	plt.show()
+
+
 
 def plotTemp():
 	# Get the data
@@ -276,5 +332,5 @@ if __name__ == '__main__':
 	# )
 	# args = parser.parse_args()
 	# modelType = args.model_type
-	modelType = 'clotheswasher'
+	modelType = 'EV'
 	runGld(modelType)
