@@ -38,12 +38,11 @@ def generateEdgeStyles(testDir, G):
 
 def generateNodeBorderWidths(testDir, G):
 	''' Alter values of border edges around the nodes. ''' 
-
-	borderValues = np.linspace(0, 2, 21)
-	for value in borderValues:
-		nx.draw(G, with_labels=True, linewidths=value)
-		plt.savefig(testDir + '/' + str(float(value)) + ' example.png')
-		plt.clf()
+	nx.draw_networkx(G)
+	ax= plt.gca()
+	ax.collections[0].set_edgecolor("#000000")
+	plt.savefig(testDir + '/Boundary.png')
+	plt.clf()
 
 def generateDependentGraph(testDir):
 	''' Demonstrate how you can change selected properties according to edge attributes. '''
