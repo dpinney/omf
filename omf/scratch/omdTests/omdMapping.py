@@ -604,6 +604,13 @@ def mapboxPNG(pathToOmdFile, outputPath):
 			os.makedirs(savePath)
 		plt.savefig(pJoin(savePath,'%s.png' % str('noimg')),frameon=False, pad_inches=0, bbox='tight')
 
+def componentToSubstation(pathToOmdFile, source, target):
+		with open(pathToOmdFile) as inFile:
+			tree = json.load(inFile)['tree']
+		nxG = omf.feeder.treeToNxGraph(tree)
+		tracePath = nx.bidirectional_shortest_path(nxG, source, target)
+		return tracePath
+
 if __name__ == '__main__':
 	#drawPngGraph()
 	#drawLatLon()
@@ -611,6 +618,7 @@ if __name__ == '__main__':
 	#hullOfOmd('../../static/publicFeeders/Olin Barre LatLon.omd')
 	#omdGeoJson('../../static/publicFeeders/Olin Barre LatLon.omd', 'outGeo')
 	#rasterTilesFromOmd('../../static/publicFeeders/Olin Barre LatLon.omd', 'tiles')
-	groupTilesOmd('../../static/publicFeeders/Olin Barre LatLon.omd', 'overlaps')
+	#groupTilesOmd('../../static/publicFeeders/Olin Barre LatLon.omd', 'overlaps')
 	#mapOmd('../../static/publicFeeders/Olin Barre LatLon.omd', 'newOutput', 'html')
 	#mapboxPNG('../../static/publicFeeders/Olin Barre LatLon.omd', 'staticMap')
+	componentToSubstation('../../static/publicFeeders/Olin Barre LatLon.omd', 'node62474203981T62474203987_B', 'node1667616792')
