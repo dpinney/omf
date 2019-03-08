@@ -6,35 +6,30 @@ import matplotlib.dates as mdates
 import argparse
 import sys
 
-parameters = ['GasHeat', 'Resistance', 'HeatPump', 'AC_electric', 'AC_HeatPump', 'waterheater', 'def_load'
-					'non_def_load', 'EV']
-#Maybe add in refrigerator///ADDED for non defferable.. Freezer?
-# For deffereble, clotheswasher, dishwasher, dryer, range
-
-
+parameters = ["GasHeat", "HeatPump", "Resistance", "AC_electric", "AC_HeatPump", "Waterheater", "EV", "Refrigerator",  "Clotheswasher", "Dryer", "Freezer"]
 
 def runGld(modelType):
 	# Run GridLAB-D on the GLM.
 	if modelType == 'GasHeat':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = 'GAS'
-		graphType = 'out_super_house'
+		graphType = 'out_super_house_heat'
 	elif modelType == 'HeatPump':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = 'HEAT_PUMP'
-		graphType = 'out_super_house'
+		graphType = 'out_super_house_heat'
 	elif modelType == 'Resistance':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = 'RESISTANCE'
-		graphType = 'out_super_house'
+		graphType = 'out_super_house_heat'
 	elif modelType == 'AC_electric':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = '' 
-		graphType = 'out_super_house'
+		graphType = 'out_super_house_cool'
 	elif modelType == 'AC_HeatPump':
 		cooling_system_type = "HEAT_PUMP"
 		heating_system_type = ''
-		graphType = 'out_super_house'
+		graphType = 'out_super_house_cool'
 	elif modelType == 'Waterheater':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = 'RESISTANCE'
@@ -98,11 +93,14 @@ def runGld(modelType):
 
 	os.system('gridlabd '+'temp_super_house.glm')
 	os.remove('temp_super_house.glm')
-	return graphHandler(graphType)
+	return graphHandler(graphType, heating_system_type, cooling_system_type)
 
-def graphHandler(graphType):
-	if graphType == 'out_super_house':
-		plotLoadHouse()
+def graphHandler(graphType, heating_system_type = None, cooling_system_type = None):
+	if graphType == 'out_super_house_heat':
+		plotLoadHouseHeat(heating_system_type)
+		plotTemp()
+	if graphType == 'out_super_house_cool':
+		plotLoadHouseCool(cooling_system_type)
 		plotTemp()
 	elif graphType == 'waterheater':
 		plotLoadWaterheater()
@@ -118,7 +116,7 @@ def graphHandler(graphType):
 		plotFreezer()
 
 
-def plotLoadHouse():
+def plotLoadHouseHeat(heating_system_type):
 	# Get the data
 	fileOb = open('out_super_house.csv')
 	for x in range(8):
@@ -131,11 +129,34 @@ def plotLoadHouse():
 	formatter = mdates.DateFormatter('%Y-%m-%d')
 	dates = mdates.datestr2num([''.join(x.get('# timestamp')) for x in data])
 	plt.plot_date(dates, [float(x.get('heating_demand', 0.0)) for x in data], '-', label="Heating")
+	ax = plt.gcf().axes[0]
+	ax.xaxis.set_major_formatter(formatter)
+	plt.gcf().autofmt_xdate(rotation=45)
+	plt.suptitle('New Years Day, Huntsville, AL, ' + heating_system_type +' Heating System')
+	plt.title('Path to raw data is installation directory', fontsize =10 )
+	plt.legend()
+	plt.xlabel('Time Stamp')
+	plt.ylabel('Demand (kW)')
+	plt.show()
+
+def plotLoadHouseCool(cooling_system_type):
+		# Get the data
+	fileOb = open('out_super_house.csv')
+	for x in range(8):
+	# Burn the headers.
+		fileOb.readline()
+	data = list(csv.DictReader(fileOb))
+	# Plot Heat and AC load
+	plt.switch_backend('MacOSX')
+	plt.figure()
+	formatter = mdates.DateFormatter('%Y-%m-%d')
+	dates = mdates.datestr2num([''.join(x.get('# timestamp')) for x in data])
 	plt.plot_date(dates, [float(x.get(' cooling_demand', 0.0)) for x in data], '-', label="Cooling")
 	ax = plt.gcf().axes[0]
 	ax.xaxis.set_major_formatter(formatter)
 	plt.gcf().autofmt_xdate(rotation=45)
-	plt.title('New Years Day, Huntsville, AL, Cooling, Heating System')
+	plt.suptitle('New Years Day, Huntsville, AL, ' + cooling_system_type+' Cooling System')
+	plt.title('Path to raw data is installation directory', fontsize =10 )
 	plt.legend()
 	plt.xlabel('Time Stamp')
 	plt.ylabel('Demand (kW)')
@@ -294,7 +315,7 @@ if __name__ == '__main__':
 	#TODO: warning text 'Illegal input. Usage: "python LoadSimGLD <load_type>" where load_type is one of ...
 	#Parse Command Line
 	if len(sys.argv) == 1:
-		modelType = 'EV'
+		modelType = 'AC_HeatPump'
 	else:
 		parser = argparse.ArgumentParser(description='Simulates heat/cool power use on a canonical .glm single house model')
 		parser.add_argument(
