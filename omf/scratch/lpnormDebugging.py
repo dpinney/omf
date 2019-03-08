@@ -43,6 +43,13 @@ def generateNodeBorderWidths(testDir, G):
 	ax.collections[0].set_edgecolor("#000000")
 	plt.savefig(testDir + '/Boundary.png')
 	plt.clf()
+	'''
+	boundaryValues = np.linspace(0, 2, 21)
+	for value in boundaryValues:
+		nx.draw(G, with_labels=True, linewidths=value)
+		plt.savefig(testDir + '/' + str(float(value)) + ' example.png')
+		plt.clf()
+	'''
 
 def generateDependentGraph(testDir):
 	''' Demonstrate how you can change selected properties according to edge attributes. '''
@@ -84,8 +91,6 @@ def generateNodeColors(testDir):
 	#G.add_edge(1, 2, key=5, attr_dict={'A': 'a', 'B': {'C': 'c', 'D': 'd'}}))
 
 
-
-
 def generateAlphaLevels(testDir, G):
 	''' Generate a graph with varying transparency values. '''
 
@@ -95,11 +100,6 @@ def generateAlphaLevels(testDir, G):
 		plt.savefig(testDir + '/' + str(float(value)) + ' example.png')
 		plt.clf()
 
-def labelStyles(testDir, G):
-	pass
-
-def positionalStyles(testDir, G):
-	pass
 
 def generateGraphs(testDirs):
 	''' Master function for networkx generation. ''' 
