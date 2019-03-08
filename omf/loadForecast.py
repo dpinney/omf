@@ -622,6 +622,9 @@ def isHoliday(holiday, df):
 	m2 = df["dates"].dt.date.isin(nerc6.get(holiday + " (Observed)", []))
 	return m1 | m2
 
+def add_noise(m, std):
+	noise = np.random.normal(0, std, m.shape[0])
+	return m + noise
 
 def makeUsefulDf(df):
 	"""
@@ -670,7 +673,7 @@ def makeUsefulDf(df):
 
 	def _normalizeCol(l):
 		s = l.max() - l.min()
-		return l if s == 0 else (l - l.mean()) / s
+		return l if s == 0 else (l - l.mean()) / l.std()
 
 	def _chunks(l, n):
 		return [l[i : i + n] for i in range(0, len(l), n)]
@@ -682,7 +685,9 @@ def makeUsefulDf(df):
 	# fix outliers
 	m = df["tempc"].replace([-9999], np.nan)
 	m.ffill(inplace=True)
-	r_df["temp_n"] = _normalizeCol(m)
+	# 2.5 degrees average std error for the national weather service
+	temp_noise = add_noise(m, 2.5)
+	r_df["temp_n"] = _normalizeCol(temp_noise)
 
 	# add the value of the load 24hrs before
 	r_df["load_prev_n"] = r_df["load_n"].shift(24)
@@ -722,7 +727,6 @@ def makeUsefulDf(df):
 
 	m = r_df.drop(["month", "hour", "day", "load_n"], axis=1)
 	return m
-
 
 def shouldDispatchPS(peak, month, df, conf):
 	"""
@@ -819,16 +823,14 @@ def neural_net_predictions(all_X, all_y):
 
 	X_train, y_train = all_X[:-8760], all_y[:-8760]
 
-	model = tf.keras.Sequential(
-		[
-			layers.Dense(
-				all_X.shape[1], activation=tf.nn.relu, input_shape=[len(X_train.keys())]
-			),
-			layers.Dense(all_X.shape[1], activation=tf.nn.relu),
-			layers.Dense(all_X.shape[1], activation=tf.nn.relu),
-			layers.Dense(1),
-		]
-	)
+	model = tf.keras.Sequential([
+		layers.Dense(all_X.shape[1], activation=tf.nn.relu, input_shape=[len(X_train.keys())]),
+		layers.Dense(all_X.shape[1], activation=tf.nn.relu),
+		layers.Dense(all_X.shape[1], activation=tf.nn.relu),
+		layers.Dense(all_X.shape[1], activation=tf.nn.relu),
+		layers.Dense(all_X.shape[1], activation=tf.nn.relu),
+		layers.Dense(1)
+	  ])
 
 	optimizer = tf.keras.optimizers.RMSprop(0.001)
 
@@ -852,3 +854,4 @@ def neural_net_predictions(all_X, all_y):
 	)
 
 	return [float(f) for f in model.predict(all_X[-8760:])]
+

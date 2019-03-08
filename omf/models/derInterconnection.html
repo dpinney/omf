@@ -3,6 +3,7 @@
 	<meta charset="utf-8">
 	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+
 	<style>
 		.tab {
 		    overflow: hidden;
@@ -44,18 +45,22 @@
 			vertical-align: center;
 			overflow-wrap: break-word
 		 }
+		 table.sortable th:not(.sorttable_sorted):not(.sorttable_sorted_reverse):not(.sorttable_nosort):after {
+		    content: " \25B4\25BE" 	
+		 }
 
 		 .tableContainer {max-height: 80%; overflow-y: auto;}
 		 @media print{
 		 	.tableContainer{max-height: none; overflow: visible;}
 		 	div#triangle-parent{visibility: hidden;}
 		 }
-
 	</style>
+
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	<script src="/static/sorttable.js"></script>
 	<!-- Data  Imports -->
 	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
 	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
@@ -161,7 +166,7 @@
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
-				<label>Model Type <a href="" target="blank">Help?</a></label>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-derInterconnection" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
@@ -207,12 +212,12 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Added System Insolation (W/sf)
-					<span class="classic">Insolation of the added solar generation between 0 and 1000 W per sq ft</span>
+					<span class="classic">Insolation of the added solar generation between 0 and 1000 W per sq ft; The default value is an approximation of the highest expected insolation in the US given an average year. See the green 'Help?' link above for more information</span>
 				</label>
 				<input type="text" id="newGenerationInsolation" name="newGenerationInsolation" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Max Thermal loading(&percnt;)
+				<label class="tooltip">Max Line loading(&percnt; rating)
 					<span class="classic">Higher line loadings will be considered violations</span>
 				</label>
 				<input type="text" id="thermalThreshold" name="thermalThreshold" required="required"/>
@@ -242,23 +247,23 @@
 				<input type="text" id="faultVoltsThreshold" name="faultVoltsThreshold" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Peak Load (.csv file)
-					<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span>
+				<label class="tooltip">Peak Load (.csv file) <i>optional</i>
+					<span class="classic">Please see the documentation at the green 'Help?' link above for more information including the expected file format</span>
 				</label>
 				<script type="text/javascript">
 					insert_file_upload_block('peakLoadFileName', 'peakLoadData');
 				</script>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Min Load (.csv file)
-					<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span>
+				<label class="tooltip">Min Load (.csv file) <i>optional</i>
+					<span class="classic">Please see the documentation at the green 'Help?' link above for more information including expected file format</span>
 				</label>
 				<script type="text/javascript">
 					insert_file_upload_block('minLoadFileName', 'minLoadData');
 				</script>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Layout Algorithm<span class="classic">Geospatial shows the circuit the same way it was defined in the feeder editor. Force Directed uses an algorithm to show the circuit elements evenly spaced (useful for circuits without location data).</span></label>
+				<label class="tooltip">Display Format<span class="classic">Geospatial shows the circuit the same way it was defined in the feeder editor. Force Directed uses an algorithm to show the circuit elements evenly spaced (useful for circuits without location data).</span></label>
 				<select id="layoutAlgorithm" name="layoutAlgorithm">
 					<option value="geospatial">Geospatial</option>
 					<option value="forceDirected">Force Directed</option>
@@ -313,7 +318,7 @@
 		<div class="tab">
 		  <button class="tabLinks active" onclick="openTab(event, 'voltageDiagram')">Voltage</button>
 		  <button class="tabLinks" onclick="openTab(event, 'currentDiagram')">Current</button>
-		  <button class="tabLinks" onclick="openTab(event, 'thermalDiagram')">Thermal</button>
+		  <button class="tabLinks" onclick="openTab(event, 'thermalDiagram')">Line Loading</button>
 		  <button class="tabLinks" onclick="openTab(event, 'flickerDiagram')">Flicker</button>
 		</div>
 
@@ -540,8 +545,8 @@
 
 		<p class="reportTitle" style="page-break-before:always">Voltage Values</p>
 		<div class="content tableContainer">
-			<table id="voltageViolations">
-			<tr> <th>Location</th> <th>Nominal Voltage</th> <th>Voltage Value</th> <th>&percnt; Change</th> <th>DER Status</th> </tr>
+			<table class="sortable" id="voltageViolations">
+			<thead><tr> <th>Location</th> <th>Nominal Voltage</th> <th>Voltage Value</th> <th>&percnt; Change</th> <th>DER Status</th> </tr></thead>
 			</table>
 			<script type="text/javascript">
 				var voltageViolations = allOutputData['voltageViolations'];
@@ -566,8 +571,8 @@
 
 		<p class="reportTitle" style="page-break-before:always">Voltage Flicker when DER is turned off</p>
 		<div class="content tableContainer">
-			<table id="flickerViolations">
-			<tr> <th>Location</th> <th>Voltage Flicker</th> <th>Load Condition</th> </tr>
+			<table class="sortable" id="flickerViolations">
+			<thead>	<tr> <th>Location</th> <th>Voltage Flicker</th> <th>Load Condition</th> </tr> </thead>
 			</table>
 			<script type="text/javascript">
 				var flickerViolations = allOutputData['flickerViolations'];
@@ -579,15 +584,15 @@
 					else content = '<tr>' + content + '</tr>';
 					totalContent += content
 				}
-				gebi("flickerViolations").innerHTML += totalContent
+				gebi("flickerViolations").innerHTML += totalContent;
 			</script> 
 			<span style="color: red">Voltage flicker values greater or equal to the input flicker threshold are displayed in red</span>
 		</div>
 
-		<p class="reportTitle" style="page-break-before:always">Thermal Loading</p>
+		<p class="reportTitle" style="page-break-before:always">Line Loading</p>
 		<div class="content tableContainer">
-			<table id="thermalViolations">
-			<tr> <th>Location</th> <th>Thermal Load</th> <th>DER Status</th> </tr>
+			<table class="sortable" id="thermalViolations">
+			<thead><tr> <th>Location</th> <th>Line Load (&percnt; rating)</th> <th>DER Status</th> </tr></thead>
 			</table>
 			<script type="text/javascript">
 				var thermalViolations = allOutputData['thermalViolations'];
@@ -601,13 +606,13 @@
 				}
 				gebi("thermalViolations").innerHTML += totalContent;
 			</script> 
-			<span style="color: red">Thermal loading values greater or equal to the input thermal threshold are displayed in red</span>
+			<span style="color: red">Line loading values greater or equal to the input threshold are displayed in red</span>
 		</div>
 		
 		<p class="reportTitle" style="page-break-before:always">Regulator Power Flow</p>
 		<div class="content tableContainer">
-			<table id="reversePowerFlow">
-			<tr> <th>Location</th> <th>Power</th> <th>DER Status</th> </tr>
+			<table class="sortable" id="reversePowerFlow">
+			<thead><tr> <th>Location</th> <th>Power</th> <th>DER Status</th> </tr></thead>
 			</table>
 			<script type="text/javascript">
 				var reversePowerFlow = allOutputData['reversePowerFlow'];
@@ -628,8 +633,8 @@
 
 		<p class="reportTitle" style="page-break-before:always">Tap Changes</p>
 		<div class="content tableContainer">
-			<table id="tapChanges">
-			<tr> <th>Load Condition</th> <th>Location</th> <th>Tap Position DER On</th> <th>Tap Position DER Off</th> <th>Difference</th> </tr>
+			<table class="sortable" id="tapChanges">
+			<thead><tr> <th>Load Condition</th> <th>Location</th> <th>Tap Position DER On</th> <th>Tap Position DER Off</th> <th>Difference</th> </tr></thead>
 			</table>
 			<script type="text/javascript">
 				var tapViolations = allOutputData['tapViolations'];
@@ -651,15 +656,15 @@
 		<p class="reportTitle" style="page-break-before:always">Short Circuit Analysis</p>
 		<div class="content tableContainer">
 			
-			<table id="faultBreaker">
-			<tr> <td style="border: none; text-align: left;" colspan="5">DER Breaker Fault Current</td> </tr>
-			<tr>
+			<p>DER Breaker Fault Current</p>
+			<table class="sortable" id="faultBreaker">
+			<thead><tr>
 				<th>Load Condition</th>
 				<th>Fault Type</th>
 				<th>DER On</th>
 				<th>DER Off</th>
 				<th>Difference</th>
-			</tr>
+			</tr></thead>
 			</table>
 			<script type="text/javascript">
 				var faultBreaker = allOutputData['faultBreaker'];
@@ -676,15 +681,15 @@
 			</script>
 		</div>
 		<div class="content tableContainer">
-			<table id="faultStepUp">
-			<tr> <td style="border: none; text-align: left;" colspan="5">DER Transformer Fault Current</td> </tr>
-			<tr>
+			<p>DER Transformer Fault Current</p>
+			<table class="sortable" id="faultStepUp">
+			<thead><tr>
 				<th>Load Condition</th>
 				<th>Fault Type</th>
 				<th>DER On</th>
 				<th>DER Off</th>
 				<th>Difference</th>
-			</tr>
+			</tr></thead>
 			</table>
 			<script type="text/javascript">
 				var faultStepUp = allOutputData['faultStepUp'];
@@ -703,8 +708,8 @@
 
 		<p class="reportTitle" style="page-break-before:always">Fault Current Violations with DER On</p>
 		<div class="content tableContainer">
-			<table id="faultCurrentViolations">
-			<tr> <th>Load Condition</th> <th>Fault Location</th> <th>Fault Type</th> <th>Measurement Location</th> <th>Pre-fault Current</th> <th>Post-fault Current</th> <th>&percnt; Change</th> </tr>
+			<table class="sortable" id="faultCurrentViolations">
+			<thead><tr> <th>Load Condition</th> <th>Fault Location</th> <th>Fault Type</th> <th>Measurement Location</th> <th>Pre-fault Current</th> <th>Post-fault Current</th> <th>&percnt; Change</th> </tr></thead>
 			</table>
 			<script type="text/javascript">
 				var faultCurrentViolations=allOutputData['faultCurrentViolations'];
@@ -729,9 +734,9 @@
 
 		<p class="reportTitle" style="page-break-before:always">Effective Grounding Screening</p>
 		<div class="content tableContainer">
-			<table id="faultPOIVolts">
-			<tr> <td style="border: none; text-align: left;" colspan="3">Line to Ground Fault at the POI</td> </tr>
-			<tr> <th>DER Status</th> <th>Fault Location</th> <th>Fault Type</th> <th>Pre-fault Voltage</th> <th>Post-fault Voltage</th> <th>Post-fault Percent</th> </tr>
+			<p>Line to Ground Fault at the POI</p>
+			<table class="sortable" id="faultPOIVolts">
+			<thead><tr> <th>DER Status</th> <th>Fault Location</th> <th>Fault Type</th> <th>Pre-fault Voltage</th> <th>Post-fault Voltage</th> <th>Post-fault Percent</th> </tr></thead>
 			</table>
 			<script type="text/javascript">
 				var faultPOIVolts=allOutputData['faultPOIVolts'];

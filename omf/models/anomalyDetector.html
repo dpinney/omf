@@ -174,6 +174,7 @@
 	</div>
 	<p class="reportTitle postRun" style="page-break-before:always">Elliptic Envelope</p>	
 	<div id="ellipticPlot" class="tightContent postRun">
+		{% if elliptic_outlier is not defined %}Warning: input data is not Gaussian, so elliptic envelope method is invalid.{% endif %}
 		<div id="ellipticChart"></div>
 		<script>
 			var ellipticOutliers = [];
@@ -232,6 +233,7 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 		</script>
 	</div>
+	<p class="reportTitle postRun" style="page-break-before:always">PK Peak Forecast T-Test Method</p>
 	<div id="katPlot" class="tightContent postRun">
 		<div id="katChart"></div>
 		<script>

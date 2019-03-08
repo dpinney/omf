@@ -1,218 +1,133 @@
-'''
-# Small little function to calculate scaling factor for a line.
-import math
-x1 = 586.094375282
-y1 = 445.866492772
-x2 = 589.462214662
-y2 = 442.843846618
-z = 57.339599609375
-if __name__ == '__main__':
-	print (math.sqrt(pow((x2-x1),2) + pow((y2-y1),2)))/z
-'''
-
-# Getting two images to show up on the same matplotlib object and scaled appropriately.
 from matplotlib import pyplot as plt
-import numpy as np
 import networkx as nx
-import re
+import numpy as np
+import os
+import pandas as pd
+import random
+import shutil
 
-class HazardField(object):
-	''' Object to modify a hazard field from an .asc file. '''
+def generateShapeGraphs(testDir, G):
+	''' Generate examples with different shapes. '''
 
-	def __init__(self, filePath):
-		''' Use parsing function to set up harzard data in dict format in constructor.'''
-		self.hazardObj = self.parseHazardFile(filePath)
-
-	def parseHazardFile(self, inPath):
-		''' Parse input .asc file. '''
-		with open(inPath, "r") as hazardFile: # Parse the file, strip away whitespaces.
-			content = hazardFile.readlines()
-		content = [x.strip() for x in content]
-		hazardObj = {}
-		field = []
-		for i in range(len(content)): 
-			if i <= 5: # First, get the the parameters for the export function below. Each gets their own entry in our object.
-				line = re.split(r"\s*",content[i])
-				hazardObj[line[0]] = float(line[1])
-			if i > 5: # Then, get the numerical data, mapping each number to its appropriate parameter.
-				field.insert((i-6),map(float,content[i].split(" "))) 
-		field = np.array(field)
-		hazardObj["field"] = field
-		return hazardObj
-
-	def generateHeatMap(self, ax):
-
-		cmap = plt.cm.Greys
-		cmap._init()
-		cmap._lut[:, -1] = np.linspace(.7, 1, 259)
+	nx.draw(G, with_labels=True, node_color = "skyblue") # Default.
+	plt.savefig(testDir + '/Round example.png')
+	plt.clf()
+	nx.draw(G, with_labels=True, node_color = "skyblue", node_shape="s")
+	plt.savefig(testDir + '/Square example.png')
+	plt.clf()
+	nx.draw(G, with_labels=True, node_color = "skyblue", node_shape="d")
+	plt.savefig(testDir + '/Diamond example.png')
+	plt.clf()
 
 
-		heatMap = ax.imshow(
-			self.hazardObj['field'],
-			cmap = cmap,
-			interpolation = 'nearest',
-			extent = [0,1,0,1],
-			aspect='auto')
+def generateEdgeStyles(testDir, G):
+	''' Generate different edge styles. '''
 
-# Drawing networkX graph with lots of styles.
+	nx.draw(G, with_labels=True, node_color = "skyblue", node_shape="s", style="solid") # Square.
+	plt.savefig(testDir + '/Solid example.png')
+	plt.clf()
+	nx.draw(G, with_labels=True, node_color = "skyblue", node_shape="s", style="dotted")
+	plt.savefig(testDir + '/Dotted example.png')
+	plt.clf()
+	nx.draw(G, with_labels=True, node_color = "skyblue", node_shape="s", style="dashed")
+	plt.savefig(testDir + '/Dash example.png')
+	plt.clf()
+	nx.draw(G, with_labels=True, node_color = "skyblue", node_shape="s", style="solid", edge_color="green") # Color edges.
+	plt.savefig(testDir + '/Colored example.png')
+	plt.clf()
 
-def generateNetwork(ax):
-	G = nx.Graph()
-	G.add_nodes_from([1, 2, 3, 4])
-	G.add_edges_from([(1, 3), (1, 4), (2, 4)])
-	nx.draw(G, ax=ax)
+def generateNodeBorderWidths(testDir, G):
+	''' Alter values of border edges around the nodes. ''' 
+	nx.draw_networkx(G)
+	ax= plt.gca()
+	ax.collections[0].set_edgecolor("#000000")
+	plt.savefig(testDir + '/Boundary.png')
+	plt.clf()
 
-def genDiagram(outputDir, feederJson, damageDict, critLoads, ax):
-	# print damageDict
-	warnings.filterwarnings("ignore")
-	# Load required data.
-	tree = feederJson.get("tree",{})
-	links = feederJson.get("links",{})
-	
-	# Get swing buses.
-	green_list = []
-	for node in tree:
-		if 'bustype' in tree[node] and tree[node]['bustype'] == 'SWING':
-			green_list.append(tree[node]['name'])
+def generateDependentGraph(testDir):
+	''' Demonstrate how you can change selected properties according to edge attributes. '''
 
-	# Generate lat/lons from nodes and links structures.
-	for link in links:
-		for typeLink in link.keys():
-			if typeLink in ['source', 'target']:
-				for key in link[typeLink].keys():
-					if key in ['x', 'y']:
-						objName = link[typeLink]['name']
-						for x in tree:
-							leaf = tree[x]
-							if leaf.get('name','')==objName:
-								if key=='x': leaf['latitude'] = link[typeLink][key]
-								else: leaf['longitude'] = link[typeLink][key]
-	# Remove even more things (no lat, lon or from = node without a position).
-	for key in tree.keys():
-		aLat = tree[key].get('latitude')
-		aLon = tree[key].get('longitude')
-		aFrom = tree[key].get('from')
-		if aLat is None and aLon is None and aFrom is None:
-			 tree.pop(key)
-	# Create and save the graphic.
-	inGraph = feeder.treeToNxGraph(tree)
-	#feeder.latLonNxGraph(nxG) # This function creates a .plt reference which can be saved here.
-	labels=False
-	neatoLayout=False 
-	showPlot=False
-	plt.axis('off')
-	plt.tight_layout()
-	plt.gca().invert_yaxis()
-	plt.gca().set_aspect('equal')
-	# Layout the graph via GraphViz neato. Handy if there's no lat/lon data.
-	if neatoLayout:
-		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
-		cleanG = nx.Graph(inGraph.edges())
-		# HACK2: might miss nodes without edges without the following.
-		cleanG.add_nodes_from(inGraph)
-		pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
-	else:
-		pos = {n:inGraph.node[n].get('pos',(0,0)) for n in inGraph}
-	# Draw all the edges
-	for e in inGraph.edges():
-		edgeName = inGraph.edge[e[0]][e[1]].get('name')
-		edgeColor = 'black'
-		if edgeName in damageDict:
-			if damageDict[edgeName] == 1:
-				edgeColor = 'yellow'
-			if damageDict[edgeName] == 2:
-				edgeColor = 'orange'
-			if damageDict[edgeName] >= 3:
-				edgeColor = 'red'
-		eType = inGraph.edge[e[0]][e[1]].get('type','underground_line')
-		ePhases = inGraph.edge[e[0]][e[1]].get('phases',1)
-		standArgs = {'edgelist':[e],
-					 'edge_color':edgeColor,
-					 'width':2,
-					 'ax':ax,
-					 'style':{'parentChild':'dotted','underground_line':'dashed'}.get(eType,'solid') }
-		if ePhases==3:
-			standArgs.update({'width':5})
-			nx.draw_networkx_edges(inGraph,pos,**standArgs)
-			standArgs.update({'width':3,'edge_color':'white'})
-			nx.draw_networkx_edges(inGraph,pos,**standArgs)
-			standArgs.update({'width':1,'edge_color':edgeColor})
-			nx.draw_networkx_edges(inGraph,pos,**standArgs)
-		if ePhases==2:
-			standArgs.update({'width':3})
-			nx.draw_networkx_edges(inGraph,pos,**standArgs)
-			standArgs.update({'width':1,'edge_color':'white'})
-			nx.draw_networkx_edges(inGraph,pos,**standArgs)
-		else:
-			nx.draw_networkx_edges(inGraph,pos,**standArgs)
-	# Draw nodes and optional labels.
-	red_list, blue_list, grey_list  = ([] for i in range(3))
-	for key in pos.keys(): # Sort keys into seperate lists. Is there a more elegant way of doing this.
-		if key not in green_list:
-			load = key[2:6]
-			if key in critLoads:
-				red_list.append(key)
-			elif load == 'load':
-				blue_list.append(key)
-			else:
-				grey_list.append(key)
-	nx.draw_networkx_nodes(
-		inGraph,
-		pos, 
-		nodelist=green_list,
-		ax=ax,
-		node_color='green',
-		label='Swing Buses',
-		node_size=12
-	)
-	nx.draw_networkx_nodes(
-		inGraph,
-		pos,
-		nodelist=red_list,
-		ax=ax,
-		node_color='red',
-		label='Critical Loads',
-		node_size=12
-	)
-	nx.draw_networkx_nodes(
-		inGraph,
-		pos,
-		nodelist=blue_list,
-		ax=ax,
-		node_color='blue',
-		label='Regular Loads',
-		node_size=12
-	)
-	nx.draw_networkx_nodes(
-		inGraph,
-		pos,
-		nodelist=grey_list,
-		ax=ax,
-		node_color='grey',
-		label='Other',
-		node_size=12
-	)
-	if labels:
-		nx.draw_networkx_labels(
-			inGraph,
-			pos,
-			ax=ax,
-			font_color='black',
-			font_weight='bold',
-			font_size=0.25
-		)
+	G = nx.Graph() # Easier to do a seperate example here.
+	G.add_edge('A', 'B', color='y', weight=2)
+	G.add_edge('B', 'C', color='r', weight=4)
+	G.add_edge('C', 'D', color='g', weight=6)
+
+	pos = nx.random_layout(G)
+
+
+	colors = [G[u][v]['color'] for u,v in G.edges()]
+	weights = [G[u][v]['weight'] for u,v in G.edges()]
+
+	nx.draw(G, pos, edges=G.edges(), edge_color=colors, width=weights)
+	plt.savefig(testDir + '/Dependent Example.png')
+	plt.clf()
+
+def generateNodeColors(testDir):
+	''' Generate a graph with varying colors depending on the node value. '''
+
+	G = nx.Graph() # Just going to use this until I get the multigraph to work.
+	G.add_edges_from(
+    [('A', 'B'), ('A', 'C'), ('D', 'B'), ('E', 'C'), ('E', 'F'),
+     ('B', 'H'), ('B', 'G'), ('B', 'F'), ('C', 'G')])
+
+	val_map = {'A': 1.0,
+           'D': 0.5714285714285714,
+           'H': 0.0}
+
+	values = [val_map.get(node, 0.25) for node in G.nodes()]
+
+	nx.draw(G, cmap=plt.get_cmap('viridis'), node_color=values, with_labels=True, font_color='white')
+	plt.savefig('Colorful Copied Example.png')
+	plt.clf() 
+
+	#G = nx.MultiDiGraph() # For added fun, we'll allow for multiple edges and self loops. Apparently, using OrderDict, you can track the order nodes and neighbors are added.
+	#G.add_edge(1, 2, key=5, attr_dict={'A': 'a', 'B': {'C': 'c', 'D': 'd'}}))
+
+
+
+
+def generateAlphaLevels(testDir, G):
+	''' Generate a graph with varying transparency values. '''
+
+	alphaValues = np.linspace(0, 1, 11)
+	for value in alphaValues:
+		nx.draw(G, with_labels=True, alpha=value)
+		plt.savefig(testDir + '/' + str(float(value)) + ' example.png')
+		plt.clf()
+
+def labelStyles(testDir, G):
+	pass
+
+def positionalStyles(testDir, G):
+	pass
+
+def generateGraphs(testDirs):
+	''' Master function for networkx generation. ''' 
+
+	df = pd.DataFrame({ 'from':['A', 'B', 'C','A'], 'to':['D', 'A', 'E','C']})
+	G = nx.from_pandas_dataframe(df, 'from', 'to')
+
+	for pathName in testDirs:
+		newPath = os.path.join('.', pathName)
+		if not os.path.exists(newPath):
+			os.makedirs(newPath)
+
+	generateShapeGraphs(testDirs[0], G)
+	generateEdgeStyles(testDirs[1], G)
+	generateDependentGraph(testDirs[1])
+	generateNodeBorderWidths(testDirs[2], G)
+	generateNodeColors(testDirs[3])
+	generateAlphaLevels(testDirs[4], G)
+
+def cleanUp(testDirs):
+	for roots, dirs, files in os.walk("."):
+		for directory in dirs:
+			if directory in testDirs:
+				shutil.rmtree(directory)
 
 if __name__ == "__main__":
-	fig, ax = plt.subplots()
-	hazard = HazardField("../static/testFiles/wf_clip.asc")
-	hazard.generateHeatMap(ax)
+	testDirs = ['shapeExamples', 'edgeExamples', 'nodeBorderExamples', 'colorExamples', 'alphaExamples']
+	testGraph = generateGraphs(testDirs)
 
-	with open('feederFile.txt', 'r') as feederFile, open('damageFile.txt', 'r') as damageFile, open('critLoads.txt', 'r') as critFile:
-		feederModel = json.loads(feederFile)
-		damageDict = json.loads(damageFile)
-		critLoads = json.loads(critLoads)
 
-	genDiagram('.', feederModel, damageDict, critLoads, ax)
 
-	plt.show()
-	fig.savefig('result.png')
