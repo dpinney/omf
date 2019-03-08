@@ -11,6 +11,8 @@ parameters = ['GasHeat', 'Resistance', 'HeatPump', 'AC_electric', 'AC_HeatPump',
 #Maybe add in refrigerator///ADDED for non defferable.. Freezer?
 # For deffereble, clotheswasher, dishwasher, dryer, range
 
+
+
 def runGld(modelType):
 	# Run GridLAB-D on the GLM.
 	if modelType == 'GasHeat':
@@ -33,18 +35,10 @@ def runGld(modelType):
 		cooling_system_type = "HEAT_PUMP"
 		heating_system_type = ''
 		graphType = 'out_super_house'
-	elif modelType == 'waterheater':
+	elif modelType == 'Waterheater':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = 'RESISTANCE'
 		graphType = 'waterheater'
-	elif modelType == 'def_load':
-		cooling_system_type = "ELECTRIC"
-		heating_system_type = 'RESISTANCE'
-		graphType = 'def_load'
-	elif modelType == 'non_def_load':
-		cooling_system_type = "ELECTRIC"
-		heating_system_type = 'RESISTANCE'
-		graphType = 'non_def_load'
 	elif modelType == 'EV':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = 'RESISTANCE'
@@ -53,15 +47,15 @@ def runGld(modelType):
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = 'RESISTANCE'
 		graphType = 'Refrigerator'
-	elif modelType == 'clotheswasher':
+	elif modelType == 'Clotheswasher':
 		cooling_system_type= "ELECTRIC"
 		heating_system_type = "RESISTANCE"
 		graphType = 'clotheswasher'
-	elif modelType == 'dryer':
+	elif modelType == 'Dryer':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = "RESISTANCE"
 		graphType = 'dryer'
-	elif modelType == 'freezer':
+	elif modelType == 'Freezer':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = "RESISTANCE"
 		graphType = 'freezer'
@@ -112,10 +106,6 @@ def graphHandler(graphType):
 		plotTemp()
 	elif graphType == 'waterheater':
 		plotLoadWaterheater()
-	elif graphType == 'def_load':
-		plotLoad_Def_Load()
-	elif graphType == 'non_def_load':
-		plotLoad_NonDef_Load()
 	elif graphType == 'EV':
 		plotLoadEV()
 	elif graphType == 'Refrigerator':
@@ -171,28 +161,6 @@ def plotLoadWaterheater():
 	plt.xlabel('Time Stamp')
 	plt.ylabel('Demand (kW)')
 	plt.show()
-
-# def	plotLoad_Def_Load():
-# 	fileOb = open('out_super_house_waterheater.csv')
-# 	for x in range(8):
-# 		# Burn the headers.
-# 		fileOb.readline()
-# 	data = list(csv.DictReader(fileOb))
-# 	plt.switch_backend('MacOSX')
-# 	plt.figure()
-# 	formatter = mdates.DateFormatter('%Y-%m-%d')
-# 	dates = mdates.datestr2num([''.join(x.get('# timestamp')) for x in data])
-# 	plt.plot_date(dates, [float(x.get('actual_load', 0.0)) for x in data], '-', label="Load")
-# 	ax = plt.gcf().axes[0]
-# 	ax.xaxis.set_major_formatter(formatter)
-# 	plt.gcf().autofmt_xdate(rotation=45)
-# 	plt.suptitle('New Years Day, Huntsville, AL, waterheater load in (kW)')
-# 	plt.title('Path to raw data is installation directory', fontsize =10 )
-# 	plt.legend()
-# 	plt.xlabel('Time Stamp')
-# 	plt.ylabel('Demand (kW)')
-# 	plt.show()
-
 
 def plotLoadEV():
 	fileOb = open('out_super_house_EV.csv')
@@ -333,8 +301,7 @@ if __name__ == '__main__':
 		'model_type',
 		metavar = 'base',
 		type = str,
-		help = 'Please specify type of model, being Gas, Resistance, or HeatPump'
-			)
+		help = 'Please specify type of model :"GasHeat", "HeatPump", "Resistance", "AC_electric", "AC_HeatPump", "Waterheater", "EV", "Refrigerator",  "Clotheswasher", "Dryer", "Freezer" ') 
 		args = parser.parse_args()
 		modelType = args.model_type
 	runGld(modelType)
