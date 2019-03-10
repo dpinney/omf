@@ -487,9 +487,15 @@ def load_test_files(file_names):
 @app.route("/getComponents/")
 @flask_login.login_required
 def get_components():
-	path = "data/Component/"
-	components = {name[0:-5]:json.load(open(path + name)) for name in safeListdir(path)}
-	return json.dumps(components)
+	directory = "data/Component/"
+	components = {}
+	for dirpath, dirnames, file_names in os.walk(directory):
+		for name in file_names:
+			if name.endswith(".json"):
+				path = os.path.join(dirpath, name)
+				with open(path) as f:
+					components[name[0:-5]] = json.load(f) # Load the file as a regular object into the dictionary
+	return json.dumps(components) # Turn the dictionary of objects into a string
 
 @app.route("/checkConversion/<modelName>/<owner>", methods=["POST","GET"])
 @app.route("/checkConversion/<modelName>", methods=["POST","GET"])
