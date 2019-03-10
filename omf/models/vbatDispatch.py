@@ -199,8 +199,8 @@ def workForecast(modelDir, ind):
 	all_X = fc.makeUsefulDf(df)
 	all_y = df['load']
 	X_train, y_train = all_X[:-8760], all_y[:-8760]
-	clf = linear_model.SGDRegressor(max_iter=10000, tol=1e-4)
-	clf.fit(X_train, y_train)
+	# clf = linear_model.SGDRegressor(max_iter=10000, tol=1e-4)
+	# clf.fit(X_train, y_train)
 
 	# ---------------------- MAKE PREDICTIONS ------------------------------- #
 	X_test, y_test = all_X[-8760:], all_y[-8760:]

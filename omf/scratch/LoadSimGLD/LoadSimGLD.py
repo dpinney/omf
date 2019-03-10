@@ -3,49 +3,60 @@ from matplotlib import pyplot as plt
 from pprint import pprint as pp
 from dateutil.parser import parse as parse_dt
 import matplotlib.dates as mdates
+import argparse
+import sys
 
-parameters = ['GasHeat', 'Resistance', 'HeatPump', 'AC_electric', 'AC_HeatPump', 'waterheater', 'def_load'
-					'non_def_load', 'EV']
+parameters = ["GasHeat", "HeatPump", "Resistance", "AC_electric", "AC_HeatPump", "Waterheater", "EV", "Refrigerator",  "Clotheswasher", "Dryer", "Freezer"]
 
 def runGld(modelType):
 	# Run GridLAB-D on the GLM.
-	# currently, Feb 2019, GLD only supports electric AC or heatmump
 	if modelType == 'GasHeat':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = 'GAS'
-		graphType = 'out_super_house'
+		graphType = 'out_super_house_heat'
 	elif modelType == 'HeatPump':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = 'HEAT_PUMP'
-		graphType = 'out_super_house'
+		graphType = 'out_super_house_heat'
 	elif modelType == 'Resistance':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = 'RESISTANCE'
-		graphType = 'out_super_house'
+		graphType = 'out_super_house_heat'
 	elif modelType == 'AC_electric':
 		cooling_system_type = "ELECTRIC"
-		heating_system_type = None 
-		graphType = 'out_super_house'
+		heating_system_type = '' 
+		graphType = 'out_super_house_cool'
 	elif modelType == 'AC_HeatPump':
 		cooling_system_type = "HEAT_PUMP"
-		heating_system_type = None
-		graphType = 'out_super_house'
-	elif modelType == 'waterheater':
+		heating_system_type = ''
+		graphType = 'out_super_house_cool'
+	elif modelType == 'Waterheater':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = 'RESISTANCE'
 		graphType = 'waterheater'
-	elif modelType == 'def_load':
-		cooling_system_type = "ELECTRIC"
-		heating_system_type = 'RESISTANCE'
-		graphType = 'def_load'
-	elif modelType == 'non_def_load':
-		cooling_system_type = "ELECTRIC"
-		heating_system_type = 'RESISTANCE'
-		graphType = 'non_def_load'
 	elif modelType == 'EV':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = 'RESISTANCE'
 		graphType = 'EV'
+	elif modelType =='Refrigerator':
+		cooling_system_type = "ELECTRIC"
+		heating_system_type = 'RESISTANCE'
+		graphType = 'Refrigerator'
+	elif modelType == 'Clotheswasher':
+		cooling_system_type= "ELECTRIC"
+		heating_system_type = "RESISTANCE"
+		graphType = 'clotheswasher'
+	elif modelType == 'Dryer':
+		cooling_system_type = "ELECTRIC"
+		heating_system_type = "RESISTANCE"
+		graphType = 'dryer'
+	elif modelType == 'Freezer':
+		cooling_system_type = "ELECTRIC"
+		heating_system_type = "RESISTANCE"
+		graphType = 'freezer'
+
+
+
 
 	with open('in_super_house.glm', 'r') as myfile:
 	    data=myfile.read()
@@ -82,21 +93,30 @@ def runGld(modelType):
 
 	os.system('gridlabd '+'temp_super_house.glm')
 	os.remove('temp_super_house.glm')
-	return graphHandler(graphType)
+	return graphHandler(graphType, heating_system_type, cooling_system_type)
 
-def graphHandler(graphType):
-	if graphType == 'out_super_house':
-		plotLoadHouse()
+def graphHandler(graphType, heating_system_type = None, cooling_system_type = None):
+	if graphType == 'out_super_house_heat':
+		plotLoadHouseHeat(heating_system_type)
+		plotTemp()
+	if graphType == 'out_super_house_cool':
+		plotLoadHouseCool(cooling_system_type)
+		plotTemp()
 	elif graphType == 'waterheater':
 		plotLoadWaterheater()
-	elif graphType == 'def_load':
-		plotLoadDef_Load()
-	elif graphType == 'non_def_load':
-		plotLoadNonDef_Load()
 	elif graphType == 'EV':
 		plotLoadEV()
+	elif graphType == 'Refrigerator':
+		plotFridge()
+	elif graphType == 'clotheswasher':
+		plotClotheswasher()
+	elif graphType =='dryer':
+		plotDryer()
+	elif graphType == 'freezer':
+		plotFreezer()
 
-def plotLoadHouse():
+
+def plotLoadHouseHeat(heating_system_type):
 	# Get the data
 	fileOb = open('out_super_house.csv')
 	for x in range(8):
@@ -109,11 +129,34 @@ def plotLoadHouse():
 	formatter = mdates.DateFormatter('%Y-%m-%d')
 	dates = mdates.datestr2num([''.join(x.get('# timestamp')) for x in data])
 	plt.plot_date(dates, [float(x.get('heating_demand', 0.0)) for x in data], '-', label="Heating")
+	ax = plt.gcf().axes[0]
+	ax.xaxis.set_major_formatter(formatter)
+	plt.gcf().autofmt_xdate(rotation=45)
+	plt.suptitle('New Years Day, Huntsville, AL, ' + heating_system_type +' Heating System')
+	plt.title('Path to raw data is installation directory', fontsize =10 )
+	plt.legend()
+	plt.xlabel('Time Stamp')
+	plt.ylabel('Demand (kW)')
+	plt.show()
+
+def plotLoadHouseCool(cooling_system_type):
+		# Get the data
+	fileOb = open('out_super_house.csv')
+	for x in range(8):
+	# Burn the headers.
+		fileOb.readline()
+	data = list(csv.DictReader(fileOb))
+	# Plot Heat and AC load
+	plt.switch_backend('MacOSX')
+	plt.figure()
+	formatter = mdates.DateFormatter('%Y-%m-%d')
+	dates = mdates.datestr2num([''.join(x.get('# timestamp')) for x in data])
 	plt.plot_date(dates, [float(x.get(' cooling_demand', 0.0)) for x in data], '-', label="Cooling")
 	ax = plt.gcf().axes[0]
 	ax.xaxis.set_major_formatter(formatter)
 	plt.gcf().autofmt_xdate(rotation=45)
-	plt.title('New Years Day, Huntsville, AL, Cooling, Heating System')
+	plt.suptitle('New Years Day, Huntsville, AL, ' + cooling_system_type+' Cooling System')
+	plt.title('Path to raw data is installation directory', fontsize =10 )
 	plt.legend()
 	plt.xlabel('Time Stamp')
 	plt.ylabel('Demand (kW)')
@@ -140,9 +183,6 @@ def plotLoadWaterheater():
 	plt.ylabel('Demand (kW)')
 	plt.show()
 
-# def	plotLoadDef_Load():
-# def plotLoadNonDef_Load():
-
 def plotLoadEV():
 	fileOb = open('out_super_house_EV.csv')
 	for x in range(8):
@@ -164,6 +204,90 @@ def plotLoadEV():
 	plt.ylabel('Demand (W)')
 	plt.show()
 
+def plotFridge():
+	fileOb = open('out_load_fridge.csv')
+	for x in range(8):
+		# Burn the headers.
+		fileOb.readline()
+	data = list(csv.DictReader(fileOb))
+	plt.switch_backend('MacOSX')
+	plt.figure()
+	formatter = mdates.DateFormatter('%Y-%m-%d')
+	dates = mdates.datestr2num([''.join(x.get('# timestamp')) for x in data])
+	plt.plot_date(dates, [complex(x.get('base_power', 0.0)).real for x in data], '-', label="Load")
+	ax = plt.gcf().axes[0]
+	ax.xaxis.set_major_formatter(formatter)
+	plt.gcf().autofmt_xdate(rotation=45)
+	plt.suptitle('New Years Day, Huntsville, AL, Fridge load in (kW)')
+	plt.title('Path to raw data is installation directory', fontsize =10 )
+	plt.legend()
+	plt.xlabel('Time Stamp')
+	plt.ylabel('Demand (kW)')
+	plt.show()
+
+def plotFreezer():
+	fileOb = open('out_load_freezer.csv')
+	for x in range(8):
+		# Burn the headers.
+		fileOb.readline()
+	data = list(csv.DictReader(fileOb))
+	plt.switch_backend('MacOSX')
+	plt.figure()
+	formatter = mdates.DateFormatter('%Y-%m-%d')
+	dates = mdates.datestr2num([''.join(x.get('# timestamp')) for x in data])
+	plt.plot_date(dates, [complex(x.get('base_power', 0.0)).real for x in data], '-', label="Load")
+	ax = plt.gcf().axes[0]
+	ax.xaxis.set_major_formatter(formatter)
+	plt.gcf().autofmt_xdate(rotation=45)
+	plt.suptitle('New Years Day, Huntsville, AL, Freezer load in (kW)')
+	plt.title('Path to raw data is installation directory', fontsize =10 )
+	plt.legend()
+	plt.xlabel('Time Stamp')
+	plt.ylabel('Demand (kW)')
+	plt.show()
+
+def plotClotheswasher():
+	fileOb = open('out_load_clotheswasher.csv')
+	for x in range(8):
+		# Burn the headers.
+		fileOb.readline()
+	data = list(csv.DictReader(fileOb))
+	plt.switch_backend('MacOSX')
+	plt.figure()
+	formatter = mdates.DateFormatter('%Y-%m-%d')
+	dates = mdates.datestr2num([''.join(x.get('# timestamp')) for x in data])
+	plt.plot_date(dates, [complex(x.get('base_power', 0.0)).real for x in data], '-', label="Load")
+	ax = plt.gcf().axes[0]
+	ax.xaxis.set_major_formatter(formatter)
+	plt.gcf().autofmt_xdate(rotation=45)
+	plt.suptitle('New Years Day, Huntsville, AL, Clotheswasher load in (kW)')
+	plt.title('Path to raw data is installation directory', fontsize =10 )
+	plt.legend()
+	plt.xlabel('Time Stamp')
+	plt.ylabel('Demand (kW)')
+	plt.show()
+
+def plotDryer():
+	fileOb = open('out_load_dryer.csv')
+	for x in range(8):
+		# Burn the headers.
+		fileOb.readline()
+	data = list(csv.DictReader(fileOb))
+	plt.switch_backend('MacOSX')
+	plt.figure()
+	formatter = mdates.DateFormatter('%Y-%m-%d')
+	dates = mdates.datestr2num([''.join(x.get('# timestamp')) for x in data])
+	plt.plot_date(dates, [complex(x.get('base_power', 0.0)).real for x in data], '-', label="Load")
+	ax = plt.gcf().axes[0]
+	ax.xaxis.set_major_formatter(formatter)
+	plt.gcf().autofmt_xdate(rotation=45)
+	plt.suptitle('New Years Day, Huntsville, AL, Dryer load in (kW)')
+	plt.title('Path to raw data is installation directory', fontsize =10 )
+	plt.legend()
+	plt.xlabel('Time Stamp')
+	plt.ylabel('Demand (kW)')
+	plt.show()
+
 
 
 def plotTemp():
@@ -174,6 +298,8 @@ def plotTemp():
 		fileOb.readline()
 	data = list(csv.DictReader(fileOb))
 	plt.title('New Years Day, Huntsville, AL, Temperatures')
+	formatter = mdates.DateFormatter('%Y-%m-%d')
+	dates = mdates.datestr2num([''.join(x.get('# timestamp')) for x in data])
 	plt.plot_date(dates, [float(x.get(' air_temperature', 0.0)) for x in data], '-', label="Indoor")
 	plt.plot_date(dates, [float(x.get(' outdoor_temperature', 0.0)) for x in data], '-', label="Outdoors")
 	plt.plot_date(dates, [float(x.get(' heating_setpoint', 0.0)) for x in data], '-', label="heating_setpoint")
@@ -188,14 +314,15 @@ def plotTemp():
 if __name__ == '__main__':
 	#TODO: warning text 'Illegal input. Usage: "python LoadSimGLD <load_type>" where load_type is one of ...
 	#Parse Command Line
-	# parser = argparse.ArgumentParser(description='Simulates heat/cool power use on a canonical .glm single house model')
-	# parser.add_argument(
-	# 	'model_type',
-	# 	metavar = 'base',
-	# 	type = str,
-	# 	help = 'Please specify type of model, being Gas, Resistance, or HeatPump'
-	# )
-	# args = parser.parse_args()
-	# modelType = args.model_type
-	modelType = 'EV'
+	if len(sys.argv) == 1:
+		modelType = 'AC_HeatPump'
+	else:
+		parser = argparse.ArgumentParser(description='Simulates heat/cool power use on a canonical .glm single house model')
+		parser.add_argument(
+		'model_type',
+		metavar = 'base',
+		type = str,
+		help = 'Please specify type of model :"GasHeat", "HeatPump", "Resistance", "AC_electric", "AC_HeatPump", "Waterheater", "EV", "Refrigerator",  "Clotheswasher", "Dryer", "Freezer" ') 
+		args = parser.parse_args()
+		modelType = args.model_type
 	runGld(modelType)

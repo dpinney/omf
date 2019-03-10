@@ -226,7 +226,9 @@ def voltRegViz(FNAME):
 			os.remove(pJoin('_voltViz', file))
 
 if __name__ == '__main__':
-	try: 
+	if len(sys.argv) == 1:
+		_debugging('/Users/tuomastalvitie/Desktop/gridballast_gld_simulations/Feeders/UCS_Egan_Housed_Solar_rooftop.omd', gb_on_off='on', area=500)
+	else:
 		#Parse Command Line
 		parser = argparse.ArgumentParser(description='Converts an OMD to GLM and runs it on gridlabd')
 		parser.add_argument('file_path', metavar='base', type=str,
@@ -238,8 +240,6 @@ if __name__ == '__main__':
 		gb_on_off = args.gridballast_on_off
 		area=args.area_of_rooftop_solar
 		_debugging(filePath)
-	except:
 		# _myDir = os.path.dirname(os.path.realpath(__file__))
 		# _omfDir = os.path.dirname(os.path.dirname(_myDir))
 		# _feederDir = pJoin(_omfDir, 'static/publicFeeders/Olin Barre GH EOL Solar.omd')
-		_debugging('/Users/tuomastalvitie/Desktop/gridballast_gld_simulations/Feeders/UCS_Egan_Housed_Solar_rooftop.omd', gb_on_off='on', area=500)
