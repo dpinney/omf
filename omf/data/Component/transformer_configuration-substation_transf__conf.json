@@ -1,0 +1,1 @@
+{"name": "substation_transf__conf", "primary_voltage": "57735.0 V", "install_type": "PADMOUNT", "object": "transformer_configuration", "secondary_voltage": "13800.0 V", "connect_type": "DELTA_GWYE", "impedance": "0.051+0.1230j", "power_rating": "20000 kVA"}

@@ -1,0 +1,1 @@
+{"name": "transformer_configuration_nonTP_7500", "primary_voltage": "7200 V", "install_type": "POLETOP", "object": "transformer_configuration", "secondary_voltage": "208 V", "resistance": "0.011 Ohm", "connect_type": "WYE_WYE", "reactance": "0.02 Ohm", "power_rating": "75 kVA"}

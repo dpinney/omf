@@ -1,0 +1,1 @@
+{"phases": "ABCN", "name": "windturb2", "parent": "three_phase_meter", "Gen_status": "ONLINE", "Turbine_Model": "GE_25MW", "object": "windturb_dg", "Gen_mode": "CONSTANTP", "Gen_type": "SYNCHRONOUS"}

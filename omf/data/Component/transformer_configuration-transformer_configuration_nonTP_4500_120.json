@@ -1,0 +1,1 @@
+{"name": "transformer_configuration_nonTP_4500_120", "primary_voltage": "7200 V", "install_type": "POLETOP", "object": "transformer_configuration", "secondary_voltage": "120 V", "resistance": "0.011 Ohm", "connect_type": "WYE_WYE", "reactance": "0.02 Ohm", "power_rating": "45 kVA"}

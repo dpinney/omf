@@ -1,0 +1,1 @@
+{"phases": "AS", "rated_power": "4.0 kW", "name": "solar_solpos", "parent": "pf_inv", "area": "29.6296 m^2", "orientation_azimuth": "180.0", "object": "solar", "efficiency": "0.135", "weather": "WA-Yakima", "SOLAR_TILT_MODEL": "SOLPOS", "SOLAR_POWER_MODEL": "FLATPLATE", "tilt_angle": "45.0", "orientation": "FIXED_AXIS"}

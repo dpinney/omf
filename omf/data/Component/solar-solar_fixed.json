@@ -1,0 +1,1 @@
+{"phases": "AS", "rated_power": "4.0 kW", "name": "solar_fixed", "parent": "pf_inv", "area": "29.6296 m^2", "orientation_azimuth": "25.0", "object": "solar", "efficiency": "0.135", "latitude_angle_fix": "true", "orientation": "FIXED_AXIS"}
