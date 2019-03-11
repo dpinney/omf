@@ -1,1 +1,1 @@
-{"phases": "ABC", "object": "meter", "nominal_voltage": "7200", "name": "three_phase_meter"}
+{"phases": "ABC", "object": "meter", "nominal_voltage": "7200", "name": "three_phase_meter", "parent": "null"}

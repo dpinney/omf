@@ -1,7 +1,7 @@
 import os, glob, json
 from omf import feeder
 
-output_dir = "/Users/austinchang/pycharm/omf/omf/data/Component/testDump"
+output_dir = "/Users/austinchang/pycharm/omf/omf/data/Component"
 created = []
 overwritten = []
 not_overwritten = []
@@ -28,10 +28,15 @@ def create_components(dictionary, overwrite):
 	for d in dictionary.values():
 		object_type = d.get("object")
 		if object_type is not None:
-			# I cannot have the "/" in a file name.
+			# Add 'parent' attribute to houses and meters if they don't contain it
+			if object_type in ["house", "meter"]:
+				if d.get("parent") is None:
+					d["parent"] = "null"
+			# Remove quotes from the name is they existed
 			name = d.get("name", "no_name").strip('"')
 			if name != "no_name":
 				d["name"] = name
+			# I cannot have the "/" in a file name.
 			name = name.replace("/", ",")
 			file_name = object_type + "-" + name + ".json"
 			if name == "no_name":

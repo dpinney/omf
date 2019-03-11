@@ -1,1 +1,1 @@
-{"phases": "A", "object": "meter", "nominal_voltage": "7200", "name": "single_phase_meter"}
+{"phases": "A", "object": "meter", "nominal_voltage": "7200", "name": "single_phase_meter", "parent": "null"}
