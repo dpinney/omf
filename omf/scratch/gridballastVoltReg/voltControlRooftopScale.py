@@ -9,7 +9,7 @@ from models.voltageDrop import drawPlot
 import re
 from datetime import datetime
 from voltageDropVoltageViz import drawPlot
-
+import sys
 #TODO crank up sqfootage until voltage issues occur
 
 def ConvertAndwork(filePath, gb_on_off='on', area=500):
@@ -44,6 +44,8 @@ def ConvertAndwork(filePath, gb_on_off='on', area=500):
 				inFeeder['tree'][key].update({'enable_volt_control':gb_status})
 				inFeeder['tree'][key].update({'volt_lowlimit':'113.99'})
 				inFeeder['tree'][key].update({'volt_uplimit':'126.99'}) 
+				inFeeder['tree'][key].pop('demand')
+				inFeeder['tree'][key].update({'water_demand':'weekday_hotwater*1.00'})
 			if'object' in value and (value['object']== 'ZIPload'):
 				inFeeder['tree'][key].update({'enable_volt_control':gb_status})
 				inFeeder['tree'][key].update({'volt_lowlimit':'113.99'})
@@ -215,6 +217,8 @@ def _debugging(filePath, gb_on_off='on', area=500):
 	voltRegViz('outGLM_rooftop.glm')
 	# 	Remove Feeder
 	os.remove('outGLM_rooftop.glm')
+	os.remove('voltDump.csv')
+
 
 
 def voltRegViz(FNAME):
