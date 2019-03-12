@@ -54,6 +54,7 @@ def openInGoogleMaps(lat, lon):
 	webbrowser.open_new(loc)
 
 def hullOfOmd(pathToOmdFile):
+	'''Convex hull of an omd in the form of a geojson dictionary with a single ploygon.'''
 	with open(pathToOmdFile) as inFile:
 		tree = json.load(inFile)['tree']
 	nxG = omf.feeder.treeToNxGraph(tree)
@@ -75,11 +76,9 @@ def hullOfOmd(pathToOmdFile):
 		}]
 	}
 	return geoJsonDict
-	#for simplex in hull.simplices:
-	#	plt.plot(points[simplex, 0], points[simplex, 1], 'k-')
-	#plt.show()
 
 def omdGeoJson(pathToOmdFile, outputPath):
+	'''Create a geojson standards compliant file (https://tools.ietf.org/html/rfc7946) from an omd.'''
 	with open(pathToOmdFile) as inFile:
 		tree = json.load(inFile)['tree']
 	#networkx graph to work with
@@ -127,6 +126,13 @@ def omdGeoJson(pathToOmdFile, outputPath):
 		json.dump(geoJsonDict, outFile, indent=4)
 
 def mapOmd(pathToOmdFile, outputPath, fileFormat):
+	'''
+	Draw an omd on a map.
+	
+	fileFormat options: html or png
+	Use html option to create a geojson file to be displayed with an interactive leaflet map.
+	Use the png file format to create a static png image.
+	'''
 	with open(pathToOmdFile) as inFile:
 		tree = json.load(inFile)['tree']
 	nxG = omf.feeder.treeToNxGraph(tree)
@@ -233,9 +239,7 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat):
 		plt.savefig(pJoin(outputPath,'latlon.png'), dpi=400, bbox_inches="tight")
 
 def simplifiedOmdShape(pathToOmdFile):
-	'''
-	Use kmeans clustering to create simplified geojson object with convex hull and connected clusters from an omd.
-	'''
+	'''Use kmeans clustering to create simplified geojson object with convex hull and connected clusters from an omd.'''
 	with open(pathToOmdFile) as inFile:
 		tree = json.load(inFile)['tree']
 	nxG = omf.feeder.treeToNxGraph(tree)
@@ -312,6 +316,14 @@ def simplifiedOmdShape(pathToOmdFile):
 		})
 	return simplifiedGeoDict
 
+def shortestPathOmd(pathToOmdFile, sourceObjectName, targetObjectName):
+	'''Get the shortest path between two points on a feeder'''
+	with open(pathToOmdFile) as inFile:
+		tree = json.load(inFile)['tree']
+	nxG = omf.feeder.treeToNxGraph(tree)
+	tracePath = nx.bidirectional_shortest_path(nxG, sourceObjectName, targetObjectName)
+	return tracePath
+
 def _tests():
 	e, n = 249.2419752733258, 1186.1488466689188
 	lat, lon = statePlaneToLatLon(e, n, 2205)
@@ -321,8 +333,9 @@ def _tests():
 	# mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png')
 	# mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html')
 	# hullOfOmd('static/publicFeeders/Olin Barre LatLon.omd')
-	simplifiedOmd = simplifiedOmdShape('static/publicFeeders/Olin Barre LatLon.omd')
-	print(simplifiedOmd)
+	#simplifiedOmd = simplifiedOmdShape('static/publicFeeders/Olin Barre LatLon.omd')
+	#print(simplifiedOmd)
+	#shortestPathOmd('static/publicFeeders/Olin Barre LatLon.omd', 'node62474203981T62474203987_B', 'node1667616792')
 	# openInGoogleMaps(lat, lon)
 
 if __name__ == '__main__':
