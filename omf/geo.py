@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 from omf.feeder import _obToCol
 from scipy.spatial import ConvexHull
 from os.path import join as pJoin
+from sklearn.cluster import KMeans
 
 # Source: https://github.com/fitnr/stateplane/blob/master/stateplane/dicts.py
 # These are NAD83 EPSG identifiers.
@@ -231,6 +232,86 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat):
 			os.makedirs(outputPath)
 		plt.savefig(pJoin(outputPath,'latlon.png'), dpi=400, bbox_inches="tight")
 
+def simplifiedOmdShape(pathToOmdFile):
+	'''
+	Use kmeans clustering to create simplified geojson object with convex hull and connected clusters from an omd.
+	'''
+	with open(pathToOmdFile) as inFile:
+		tree = json.load(inFile)['tree']
+	nxG = omf.feeder.treeToNxGraph(tree)
+
+	simplifiedGeoDict = hullOfOmd(pathToOmdFile)
+	
+	#Kmeans clustering function
+	numpyGraph = np.array([[node,
+		float(nx.get_node_attributes(nxG, 'pos')[node][0]), float(nx.get_node_attributes(nxG, 'pos')[node][1])]
+		for node in nx.get_node_attributes(nxG, 'pos')], dtype=object)
+	Kmean = KMeans(n_clusters=20)
+	Kmean.fit(numpyGraph[:,1:3])
+
+	#Set up new graph with cluster centers as nodes to use in output
+	centerNodes = Kmean.cluster_centers_
+	clusterDict = {i: numpyGraph[np.where(Kmean.labels_ == i)] for i in range(Kmean.n_clusters)}
+	simplifiedGraph = nx.Graph()
+	for centerNode in clusterDict:
+		currentClusterGroup = clusterDict[centerNode]
+		simplifiedGraph.add_node('centroid'+str(centerNode),attr_dict={'type':'centroid',
+			'pos': (centerNodes[centerNode][0], centerNodes[centerNode][1]),
+			'clusterSize': np.ma.size(currentClusterGroup,axis=0), 'lineCount': 0})
+
+	#Create edges between cluster centers
+	for centerNode in clusterDict:
+		currentClusterGroup = clusterDict[centerNode]
+		nxG.add_node('centroid'+str(centerNode),attr_dict={'type':'centroid', 'pos': (centerNodes[centerNode][0], centerNodes[centerNode][1])})
+		intraClusterLines = 0
+		for i in currentClusterGroup:
+			currentNode = i[0]
+			neighbors = nx.neighbors(nxG, currentNode)
+			for neighbor in neighbors:
+				#connect centroids
+				if nx.get_node_attributes(nxG, 'type')[neighbor] is 'centroid':
+					if ('centroid'+str(centerNode), neighbor) not in nx.edges(simplifiedGraph):
+						simplifiedGraph.add_edge('centroid'+str(centerNode), neighbor, attr_dict={'type': 'centroidConnector', 'lineCount': 1})
+					else:
+						simplifiedGraph['centroid'+str(centerNode)][neighbor]['lineCount'] += 1
+				#connect centroid to nodes in other clusters, which is replaced in subsequent loops
+				elif neighbor not in currentClusterGroup[:,0]:
+					nxG.add_edge('centroid'+str(centerNode), neighbor, attr_dict={'type': 'centroidConnector'})
+				else:
+					simplifiedGraph.node['centroid'+str(centerNode)]['lineCount'] +=1
+			if currentNode in simplifiedGraph:
+				simplifiedGraph.remove_node(currentNode)
+
+	#Add nodes and edges to dict with convex hull
+	for node in simplifiedGraph.node:
+		simplifiedGeoDict['features'].append({
+			"type": "Feature", 
+			"geometry":{
+				"type": "Point",
+				"coordinates": [simplifiedGraph.node[node]['pos'][1], simplifiedGraph.node[node]['pos'][0]]
+			},
+			"properties":{
+				"name": node,
+				"pointType": simplifiedGraph.node[node]['type'],
+				"lineCount": simplifiedGraph.node[node]['lineCount']
+			}
+		})
+	#Add edges to dict
+	for edge in nx.edges(simplifiedGraph):
+		simplifiedGeoDict['features'].append({
+			"type": "Feature", 
+			"geometry":{
+				"type": "LineString",
+				"coordinates": [[simplifiedGraph.node[edge[0]]['pos'][1], simplifiedGraph.node[edge[0]]['pos'][0]],
+				[simplifiedGraph.node[edge[1]]['pos'][1], simplifiedGraph.node[edge[1]]['pos'][0]]]
+			},
+			"properties":{
+				"lineCount": simplifiedGraph[edge[0]][edge[1]]['lineCount'],
+				"edgeType": simplifiedGraph[edge[0]][edge[1]]['type']
+			}
+		})
+	return simplifiedGeoDict
+
 def _tests():
 	e, n = 249.2419752733258, 1186.1488466689188
 	lat, lon = statePlaneToLatLon(e, n, 2205)
@@ -240,6 +321,8 @@ def _tests():
 	# mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png')
 	# mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html')
 	# hullOfOmd('static/publicFeeders/Olin Barre LatLon.omd')
+	simplifiedOmd = simplifiedOmdShape('static/publicFeeders/Olin Barre LatLon.omd')
+	print(simplifiedOmd)
 	# openInGoogleMaps(lat, lon)
 
 if __name__ == '__main__':
