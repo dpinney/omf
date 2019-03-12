@@ -1,6 +1,7 @@
+from __future__ import division
 from pyproj import Proj, transform
 import webbrowser
-import omf, json, warnings, networkx as nx, matplotlib, numpy as np, os, shutil
+import omf, json, warnings, networkx as nx, matplotlib, numpy as np, os, shutil, math
 from matplotlib import pyplot as plt
 from omf.feeder import _obToCol
 from scipy.spatial import ConvexHull
@@ -324,6 +325,109 @@ def shortestPathOmd(pathToOmdFile, sourceObjectName, targetObjectName):
 	tracePath = nx.bidirectional_shortest_path(nxG, sourceObjectName, targetObjectName)
 	return tracePath
 
+def numTiles(z):
+	''' Helper function to get number of tiles at a given zoom '''
+	return(math.pow(2,z))
+
+def sec(x):
+	''' Helper fucntion to get secant '''
+	return(1/math.cos(x))
+
+def latlon2relativeXY(lat,lon):
+	'''Helper function for latlon2xy'''
+	x = (lon + 180) / 360
+	y = (1 - math.log(math.tan(math.radians(lat)) + sec(math.radians(lat))) / math.pi) / 2
+	return(x,y)
+
+def latlon2xy(lat,lon,z):
+	'''Helper function to convert lat/lon coordinate to x/y coordinates'''
+	n = numTiles(z)
+	x,y = latlon2relativeXY(lat,lon)
+	return(n*x, n*y)
+
+def tileXY(lat, lon, z):
+	'''Helper function to get the tile that contains a lat/lon coordinate at a given zoom level'''
+	x,y = latlon2xy(lat,lon,z)
+	return(int(x),int(y))
+
+def latEdges(y,z):
+	'''Helper function in tileEdges for latitude'''
+	n = numTiles(z)
+	unit = 1 / n
+	relY1 = y * unit
+	relY2 = relY1 + unit
+	lat1 = mercatorToLat(math.pi * (1 - 2 * relY1))
+	lat2 = mercatorToLat(math.pi * (1 - 2 * relY2))
+	return(lat1,lat2)
+
+def lonEdges(x,z):
+	'''Helper function in tileEdges for longitude'''
+	n = numTiles(z)
+	unit = 360 / n
+	lon1 = -180 + x * unit
+	lon2 = lon1 + unit
+	return(lon1,lon2)
+
+def tileEdges(x,y,z):
+	'''Helper function to get lat/lon of a tile's edges at a given zoom'''
+	lat1,lat2 = latEdges(y,z)
+	lon1,lon2 = lonEdges(x,z)
+	return((lat2, lon1, lat1, lon2)) # S,W,N,E
+
+def mercatorToLat(mercatorY):
+	'''Helper function converting mercator to lat'''
+	return(math.degrees(math.atan(math.sinh(mercatorY))))
+
+def rasterTilesFromOmd(pathToOmdFile, outputPath):
+	'''Save raster tiles of omd to serve from zoom/x/y directory'''
+	with open(pathToOmdFile) as inFile:
+		tree = json.load(inFile)['tree']
+	plt.switch_backend('TKAgg')
+	#networkx graph to work with
+	nxG = omf.feeder.treeToNxGraph(tree)
+	#Lat/lon min/max for caluclating tile coverage later
+	latitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
+	longitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][1] for node in nx.get_node_attributes(nxG, 'pos')])
+	latitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
+	longitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][1] for node in nx.get_node_attributes(nxG, 'pos')])
+	#Set the plot settings
+	plt.switch_backend('TKAgg')
+	fig = plt.figure(frameon=False, figsize=[2.56,2.56])
+	ax = fig.add_axes([0, 0, 1, 1])
+	ax.axis('off')
+	#Create the default tile
+	if not os.path.exists(outputPath):
+		os.makedirs(outputPath)
+	plt.savefig(pJoin(outputPath,'default.png'),frameon=False, pad_inches=0, bbox='tight')
+	#map latlon to projection
+	epsg3857 = Proj(init='epsg:3857')
+	wgs84 = Proj(init='EPSG:4326')
+	node_positions = {node: nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')}
+	for point in node_positions:
+		node_positions[point] = transform(wgs84,epsg3857,node_positions[point][1], node_positions[point][0])
+	#Go through each zoom level and create tiles for each area covering the feeder
+	for zoomLevel in range(0,19):
+		#Boundaries covering the omd locations for the current zoom level
+		upperRightTile = tileXY(latitude_max, longitude_max, zoomLevel)
+		lowerLeftTile = tileXY(latitude_min, longitude_min, zoomLevel)
+		firstTileEdges = tileEdges(upperRightTile[0], upperRightTile[1], zoomLevel)
+		lastTileEdges = tileEdges(lowerLeftTile[0], lowerLeftTile[1], zoomLevel)
+		nx.draw_networkx(nxG, pos=node_positions, nodelist=[node for node in nxG if node in nx.get_node_attributes(nxG, 'pos')], with_labels=False, node_size=2, edge_size=1)
+		#Map omd for each x/y tile area
+		for tileX in range(lowerLeftTile[0], upperRightTile[0]+1):
+			for tileY in range(upperRightTile[1], lowerLeftTile[1]+1):
+				currentTileEdges = tileEdges(tileX, tileY, zoomLevel)
+				southWest = transform(wgs84,epsg3857,currentTileEdges[1], currentTileEdges[0])
+				northEast = transform(wgs84,epsg3857,currentTileEdges[3], currentTileEdges[2])
+				# S,W,N,E
+				plt.ylim(top=northEast[1], bottom=southWest[1])
+				plt.xlim(southWest[0], northEast[0])
+				#create directory for tile
+				savePath=pJoin(outputPath,str(zoomLevel),str(tileX))
+				if not os.path.exists(savePath):
+					os.makedirs(savePath)
+				plt.savefig(pJoin(savePath,'%s.png' % str(tileY)),frameon=False, pad_inches=0, bbox='tight')
+
 def _tests():
 	e, n = 249.2419752733258, 1186.1488466689188
 	lat, lon = statePlaneToLatLon(e, n, 2205)
@@ -332,10 +436,11 @@ def _tests():
 	print (e2, n2) # (249.24197527189972, 1186.1488466408398)
 	# mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png')
 	# mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html')
-	# hullOfOmd('static/publicFeeders/Olin Barre LatLon.omd')
+	#print(hullOfOmd('static/publicFeeders/Olin Barre LatLon.omd'))
 	#simplifiedOmd = simplifiedOmdShape('static/publicFeeders/Olin Barre LatLon.omd')
 	#print(simplifiedOmd)
 	#shortestPathOmd('static/publicFeeders/Olin Barre LatLon.omd', 'node62474203981T62474203987_B', 'node1667616792')
+	#rasterTilesFromOmd('static/publicFeeders/Olin Barre LatLon.omd', 'tilesOutput')
 	# openInGoogleMaps(lat, lon)
 
 if __name__ == '__main__':
