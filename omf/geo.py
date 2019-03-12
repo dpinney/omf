@@ -1,10 +1,11 @@
 from __future__ import division
 from pyproj import Proj, transform
 import webbrowser
-import omf, json, warnings, networkx as nx, matplotlib, numpy as np, os, shutil, math
+import omf, json, warnings, networkx as nx, matplotlib, numpy as np, os, shutil, math, requests, tempfile
 from matplotlib import pyplot as plt
 from omf.feeder import _obToCol
 from scipy.spatial import ConvexHull
+from scipy.misc import imread
 from os.path import join as pJoin
 from sklearn.cluster import KMeans
 
@@ -180,64 +181,51 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat):
 		with open(pJoin(outputPath,'geoPointsLines.json'),"w") as outFile:
 			json.dump(geoJsonDict, outFile, indent=4)
 	elif fileFormat == 'png':
-		from mpl_toolkits.basemap import Basemap
-		# Be quiet Matplotlib.
-		warnings.filterwarnings("ignore",category=matplotlib.cbook.mplDeprecation)
-		# Set up figure.
-		plt.axis('off')
-		plt.tight_layout()
-		plt.gca().invert_yaxis()
-		plt.gca().set_aspect('equal')
-		plt.switch_backend('TKAgg')
-
-		#Set up basemap for background image
 		latitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
 		longitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][1] for node in nx.get_node_attributes(nxG, 'pos')])
 		latitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
 		longitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][1] for node in nx.get_node_attributes(nxG, 'pos')])
-		m = Basemap(llcrnrlon=longitude_min,llcrnrlat=latitude_min,urcrnrlon=longitude_max,urcrnrlat=latitude_max, epsg=3857)
-		m.arcgisimage(service='World_Street_Map', dpi=400, verbose= False)
-		#Get positions for graph
-		pos = {}
-		pos = {node: nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')}
-		for point in pos:
-			pos[point] = (m(pos[point][1], pos[point][0]))
-		# Draw all the edges.
-		for e in nxG.edges():
-			eType = nxG.edge[e[0]][e[1]].get('type','underground_line')
-			ePhases = nxG.edge[e[0]][e[1]].get('phases',1)
-			standArgs = {'edgelist':[e],
-						 'edge_color':_obToCol(eType),
-						 'width':2,
-						 'style':{'parentChild':'dotted','underground_line':'dashed'}.get(eType,'solid') }
-			if ePhases==3:
-				standArgs.update({'width':2})
-				nx.draw_networkx_edges(nxG,pos,**standArgs)
-				standArgs.update({'width':2,'edge_color':'white'})
-				nx.draw_networkx_edges(nxG,pos,**standArgs)
-				standArgs.update({'width':1,'edge_color':_obToCol(eType)})
-				nx.draw_networkx_edges(nxG,pos,**standArgs)
-			if ePhases==2:
-				standArgs.update({'width':2})
-				nx.draw_networkx_edges(nxG,pos,**standArgs)
-				standArgs.update({'width':1,'edge_color':'white'})
-				nx.draw_networkx_edges(nxG,pos,**standArgs)
-			else:
-				nx.draw_networkx_edges(nxG,pos,**standArgs)
-		# Draw nodes and optional labels.
-		nx.draw_networkx_nodes(nxG,pos,
-							   nodelist=pos.keys(),
-							   node_color=[_obToCol(nxG.node[n].get('type','underground_line')) for n in nxG],
-							   linewidths=0,
-							   node_size=2)
-		#if labels:
-		#	nx.draw_networkx_labels(nxG,pos,
-		#							font_color='black',
-		#							font_weight='bold',
-		#							font_size=0.25)
-		if not os.path.exists(outputPath):
-			os.makedirs(outputPath)
-		plt.savefig(pJoin(outputPath,'latlon.png'), dpi=400, bbox_inches="tight")
+		#Set the plot settings
+		plt.switch_backend('TKAgg')
+		fig = plt.figure(frameon=False, figsize=[10,10])
+		ax = fig.add_axes([0, 0, 1, 1])
+		ax.axis('off')
+		#map latlon to projection
+		epsg3857 = Proj(init='epsg:3857')
+		wgs84 = Proj(init='EPSG:4326')
+		node_positions = {node: nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')}
+		for point in node_positions:
+			node_positions[point] = transform(wgs84,epsg3857,node_positions[point][1], node_positions[point][0])
+		for zoomLevel in range(18,19):
+			numberofTiles = numTiles(zoomLevel)
+			#Get bounding tiles and their lat/lon edges
+			upperRightTile = tileXY(latitude_max, longitude_max, zoomLevel)
+			lowerLeftTile = tileXY(latitude_min, longitude_min, zoomLevel)
+			firstTileEdges = tileEdges(upperRightTile[0], upperRightTile[1], zoomLevel)
+			lastTileEdges = tileEdges(lowerLeftTile[0], lowerLeftTile[1], zoomLevel)
+			#Get N S E W boundaries for outer tiles in mercator projection x/y
+			mainsouthWest = transform(wgs84,epsg3857,lastTileEdges[1], lastTileEdges[0])
+			mainnorthEast = transform(wgs84,epsg3857,firstTileEdges[3], firstTileEdges[2])
+			for tileX in range(lowerLeftTile[0], upperRightTile[0]+1):
+				for tileY in range(upperRightTile[1], lowerLeftTile[1]+1):
+					#Draw section of tree that covers this tile
+					currentTileEdges = tileEdges(tileX, tileY, zoomLevel)
+					southWest = transform(wgs84,epsg3857,currentTileEdges[1], currentTileEdges[0])
+					northEast = transform(wgs84,epsg3857,currentTileEdges[3], currentTileEdges[2])
+					nx.draw_networkx(nxG, pos=node_positions, nodelist=[node for node in nxG if node in nx.get_node_attributes(nxG, 'pos')], with_labels=False, node_size=2, edge_size=1)
+					#Get map background from tile
+					url = 'https://a.tile.openstreetmap.org/%s/%s/%s.png' % (zoomLevel, tileX, tileY)
+					response = requests.get(url, stream=True)
+					imgFile = tempfile.TemporaryFile(suffix=".png")
+					shutil.copyfileobj(response.raw, imgFile)
+					del response
+					img = plt.imread(imgFile)
+					plt.imshow(img, extent=(southWest[0], northEast[0],southWest[1], northEast[1]))
+			plt.ylim(top=mainnorthEast[1], bottom=mainsouthWest[1])
+			plt.xlim(mainsouthWest[0], mainnorthEast[0])
+			if not os.path.exists(outputPath):
+				os.makedirs(outputPath)
+			plt.savefig(pJoin(outputPath,'graphOnMap.png'),frameon=False, pad_inches=0, bbox='tight')
 
 def simplifiedOmdShape(pathToOmdFile):
 	'''Use kmeans clustering to create simplified geojson object with convex hull and connected clusters from an omd.'''
@@ -434,8 +422,8 @@ def _tests():
 	print (lat, lon) #(37.37267827914456, -89.89482331256504)
 	e2, n2 = latLonToStatePlane(lat, lon, epsg=2205)
 	print (e2, n2) # (249.24197527189972, 1186.1488466408398)
-	# mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png')
-	# mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html')
+	#mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png')
+	#mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html')
 	#print(hullOfOmd('static/publicFeeders/Olin Barre LatLon.omd'))
 	#simplifiedOmd = simplifiedOmdShape('static/publicFeeders/Olin Barre LatLon.omd')
 	#print(simplifiedOmd)
