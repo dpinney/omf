@@ -5,7 +5,6 @@ import omf, json, warnings, networkx as nx, matplotlib, numpy as np, os, shutil,
 from matplotlib import pyplot as plt
 from omf.feeder import _obToCol
 from scipy.spatial import ConvexHull
-#from scipy.misc import imread
 from os.path import join as pJoin
 from sklearn.cluster import KMeans
 
