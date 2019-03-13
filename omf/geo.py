@@ -7,6 +7,7 @@ from omf.feeder import _obToCol
 from scipy.spatial import ConvexHull
 from os.path import join as pJoin
 from sklearn.cluster import KMeans
+from flask import Flask, send_file
 
 # Source: https://github.com/fitnr/stateplane/blob/master/stateplane/dicts.py
 # These are NAD83 EPSG identifiers.
@@ -415,6 +416,19 @@ def rasterTilesFromOmd(pathToOmdFile, outputPath):
 					os.makedirs(savePath)
 				plt.savefig(pJoin(savePath,'%s.png' % str(tileY)),frameon=False, pad_inches=0, bbox='tight')
 
+def serveTiles(pathToTiles):
+	'''Flask server for raster tiles. Create the custom tileset with the rasterTilesFromOmd function'''
+	app = Flask('tileServer')
+	@app.route('/omfTiles/<zoom>/<x>/<y>', methods=['GET'])
+	def tiles(zoom, x, y):
+		filename = pJoin(pathToTiles, zoom, x, y + '.png')
+		default = pJoin(pathToTiles,'default.png')
+		if os.path.isfile(filename):
+			return send_file(filename)
+		else:
+			return send_file(default)
+	app.run()
+
 def _tests():
 	e, n = 249.2419752733258, 1186.1488466689188
 	lat, lon = statePlaneToLatLon(e, n, 2205)
@@ -427,7 +441,8 @@ def _tests():
 	#simplifiedOmd = simplifiedOmdShape('static/publicFeeders/Olin Barre LatLon.omd')
 	#print(simplifiedOmd)
 	#shortestPathOmd('static/publicFeeders/Olin Barre LatLon.omd', 'node62474203981T62474203987_B', 'node1667616792')
-	#rasterTilesFromOmd('static/publicFeeders/Olin Barre LatLon.omd', 'tilesOutput')
+	#rasterTilesFromOmd('static/publicFeeders/Olin Barre LatLon.omd', 'scratch/omdTests/tiles')
+	#serveTiles('scratch/omdTests/tiles')
 	# openInGoogleMaps(lat, lon)
 
 if __name__ == '__main__':
