@@ -167,6 +167,10 @@
 				<label class="tooltip">Prediction - Confidence<span class="classic">On a 0-100 scale, how conservative would you like to be when dispatching?</span></label>
 				<input type="text" id="confidence" name="confidence">
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Prediction - Epochs<span class="classic">How many times would you like the prediction software to iterate? Approximately 1 minute per 10 epochs. Program will stop early if no improvement is seen within 10 epochs.</span></label>
+				<input type="text" id="epochs" name="epochs">
+			</div>
 			<!-- required buttons -->
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
@@ -346,10 +350,10 @@
 		<div id="reportTitle postRun" class="tightContent postRun detailsContainer" style="position: relative;">
 			Load prediction train accuracy:
 			<pre id="trainAccuracy" style="font-size:13px; text-align:left; padding-left: 10px;overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
-			<script>gebi("trainAccuracy").innerHTML = allOutputData.trainAccuracy + "%"</script><br>
+			<script>gebi("trainAccuracy").innerHTML = allOutputData.trainAccuracy + "% (MAPE)"</script><br>
 			Load prediction test accuracy:
 			<pre id="testAccuracy" style="font-size:13px; text-align:left; padding-left: 10px;overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
-			<script>gebi("testAccuracy").innerHTML = allOutputData.testAccuracy + "%"</script><br>
+			<script>gebi("testAccuracy").innerHTML = allOutputData.testAccuracy + "% (MAPE)"</script><br>
 			Peak identification precision:
 			<pre id="precision" style="font-size:13px; text-align:left; padding-left: 10px;overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
 			<script>gebi("precision").innerHTML = "True Positive / (True Positive + False Positive)\n" + allOutputData.precision + "%"</script><br>
@@ -359,9 +363,6 @@
 			Number of dispatches:
 			<pre id="number_of_dispatches" style="font-size:13px; text-align:left; padding-left: 10px;overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
 			<script>gebi("number_of_dispatches").innerHTML = allOutputData.number_of_dispatches</script><br>
-			MAE:
-			<pre id="MAE" style="font-size:13px; text-align:left; padding-left: 10px;overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
-			<script>gebi("MAE").innerHTML = allOutputData.MAE + '%'</script>
 		</div>
 	</div>
 </body>
