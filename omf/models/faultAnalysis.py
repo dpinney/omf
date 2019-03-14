@@ -187,17 +187,84 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 				'file':key+'_cont_rating.csv'
 			}
 	#Record initial status readout of each fuse/recloser/switch/sectionalizer before running
-	protDeviceValues = {}
+	# Reminder: fuse objects have 'phase_X_status' instead of 'phase_X_state'
+	protDevices = dict.fromkeys(['fuse', 'recloser', 'switch', 'sectionalizer'], False)
+	#dictionary of protective device initial states for each phase
+	protDevInitStatus = {}
+	#dictionary of protective devices final states for each phase after running Gridlab-D
+	protDevFinalStatus = {}
+	protDevOpModes = {}
 	for key in tree:
-		if tree[key].get('object','') in ['fuse', 'recloser', 'switch', 'sectionalizer']:
-			protDeviceValues[tree[key].get('name','')] = [tree[key].get('status','')]
-	#print protDeviceValues
+		obj = tree[key]
+		obType = obj.get('object')
+		if obType in protDevices.keys():
+			obName = obj.get('name', '')
+			if obType != 'fuse':
+				protDevOpModes[obName] = obj.get('operating_mode', 'INDIVIDUAL')
+			protDevices[obType] = True
+			protDevInitStatus[obName] = {}
+			protDevFinalStatus[obName] = {}
+			for phase in ['A', 'B', 'C']:
+				if obType != 'fuse':
+					phaseState = obj.get('phase_' + phase + '_state','CLOSED')
+				else:
+					phaseState = obj.get('phase_' + phase + '_status','GOOD')
+				if phase in obj.get('phases', ''):
+					protDevInitStatus[obName][phase] = phaseState
+	#print protDevInitStatus
+
+	#Create a recorder for protective device states
+	for key in protDevices.keys():
+		if protDevices[key]:
+			for phase in ['A', 'B', 'C']:
+				if key != 'fuse':
+					tree[omf.feeder.getMaxKey(tree) + 1] = {
+						'object':'group_recorder', 
+						'group':'"class='+key+'"',
+						'property':'phase_' + phase + '_state',
+						'file':key + '_phase_' + phase + '_state.csv'
+					}
+				else:
+					tree[omf.feeder.getMaxKey(tree) + 1] = {
+						'object':'group_recorder', 
+						'group':'"class='+key+'"',
+						'property':'phase_' + phase + '_status',
+						'file':key + '_phase_' + phase + '_state.csv'
+					}
+
 	# Run Gridlab.
 	if not workDir:
 		workDir = tempfile.mkdtemp()
 		print '@@@@@@', workDir
 	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
-	# read voltDump values into a dictionary.
+	
+	#Record final status readout of each fuse/recloser/switch/sectionalizer after running
+	for key in protDevices.keys():
+		if protDevices[key]:
+			for phase in ['A', 'B', 'C']:
+				with open(pJoin(workDir,key+'_phase_'+phase+'_state.csv'),'r') as statusFile:
+					reader = csv.reader(statusFile)
+					# loop past the header, 
+					keys = []
+					vals = []
+					for row in reader:
+						if '# timestamp' in row:
+							keys = row
+							i = keys.index('# timestamp')
+							keys.pop(i)
+							vals = reader.next()
+							vals.pop(i)
+					for pos,key2 in enumerate(keys):
+						protDevFinalStatus[key2][phase] = vals[pos]
+	#print protDevFinalStatus
+
+	#compare initial and final states of protective devices
+	#quick compare to see if they are equal
+	print cmp(protDevInitStatus, protDevFinalStatus)
+	#find which values changed
+	changedStates = {}
+
+	#read voltDump values into a dictionary.
 	try:
 		dumpFile = open(pJoin(workDir,'voltDump.csv'),'r')
 	except:
@@ -205,11 +272,8 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 	reader = csv.reader(dumpFile)
 	reader.next() # Burn the header.
 	keys = reader.next()
-	#Record final status readout of each fuse/recloser/switch/sectionalizer before running
-	for key in tree:
-		if tree[key].get('object','') in ['fuse', 'recloser', 'switch', 'sectionalizer']:
-			protDeviceValues[tree[key].get('name','')].append(tree[key].get('status',''))
-	print protDeviceValues
+	
+	
 
 	voltTable = []
 	for row in reader:

@@ -5,7 +5,7 @@ clock {
 };
 
 #include "inc_super_schedules.glm";
-#set minimum_timestep=60;
+#set minimum_timestep=3600;
 #set profiler=1;
 #set relax_naming_rules=1;
 module generators;
@@ -29,6 +29,13 @@ object climate {
 	name Climate;
 	interpolate QUADRATIC;
 	tmyfile inc_climate.tmy2;
+};
+
+object recorder {
+	interval 3600;
+	property base_power;
+	file out_unresponsiveLoad_test.csv;
+	parent responsiveLoad_house0;
 };
 
 object ZIPload {

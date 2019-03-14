@@ -1,10 +1,13 @@
+from __future__ import division
 from pyproj import Proj, transform
 import webbrowser
-import omf, json, warnings, networkx as nx, matplotlib, numpy as np, os, shutil
+import omf, json, warnings, networkx as nx, matplotlib, numpy as np, os, shutil, math, requests, tempfile
 from matplotlib import pyplot as plt
 from omf.feeder import _obToCol
 from scipy.spatial import ConvexHull
 from os.path import join as pJoin
+from sklearn.cluster import KMeans
+from flask import Flask, send_file
 
 # Source: https://github.com/fitnr/stateplane/blob/master/stateplane/dicts.py
 # These are NAD83 EPSG identifiers.
@@ -53,6 +56,7 @@ def openInGoogleMaps(lat, lon):
 	webbrowser.open_new(loc)
 
 def hullOfOmd(pathToOmdFile):
+	'''Convex hull of an omd in the form of a geojson dictionary with a single ploygon.'''
 	with open(pathToOmdFile) as inFile:
 		tree = json.load(inFile)['tree']
 	nxG = omf.feeder.treeToNxGraph(tree)
@@ -74,11 +78,9 @@ def hullOfOmd(pathToOmdFile):
 		}]
 	}
 	return geoJsonDict
-	#for simplex in hull.simplices:
-	#	plt.plot(points[simplex, 0], points[simplex, 1], 'k-')
-	#plt.show()
 
 def omdGeoJson(pathToOmdFile, outputPath):
+	'''Create a geojson standards compliant file (https://tools.ietf.org/html/rfc7946) from an omd.'''
 	with open(pathToOmdFile) as inFile:
 		tree = json.load(inFile)['tree']
 	#networkx graph to work with
@@ -126,6 +128,13 @@ def omdGeoJson(pathToOmdFile, outputPath):
 		json.dump(geoJsonDict, outFile, indent=4)
 
 def mapOmd(pathToOmdFile, outputPath, fileFormat):
+	'''
+	Draw an omd on a map.
+	
+	fileFormat options: html or png
+	Use html option to create a geojson file to be displayed with an interactive leaflet map.
+	Use the png file format to create a static png image.
+	'''
 	with open(pathToOmdFile) as inFile:
 		tree = json.load(inFile)['tree']
 	nxG = omf.feeder.treeToNxGraph(tree)
@@ -172,64 +181,253 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat):
 		with open(pJoin(outputPath,'geoPointsLines.json'),"w") as outFile:
 			json.dump(geoJsonDict, outFile, indent=4)
 	elif fileFormat == 'png':
-		from mpl_toolkits.basemap import Basemap
-		# Be quiet Matplotlib.
-		warnings.filterwarnings("ignore",category=matplotlib.cbook.mplDeprecation)
-		# Set up figure.
-		plt.axis('off')
-		plt.tight_layout()
-		plt.gca().invert_yaxis()
-		plt.gca().set_aspect('equal')
-		plt.switch_backend('TKAgg')
-
-		#Set up basemap for background image
 		latitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
 		longitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][1] for node in nx.get_node_attributes(nxG, 'pos')])
 		latitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
 		longitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][1] for node in nx.get_node_attributes(nxG, 'pos')])
-		m = Basemap(llcrnrlon=longitude_min,llcrnrlat=latitude_min,urcrnrlon=longitude_max,urcrnrlat=latitude_max, epsg=3857)
-		m.arcgisimage(service='World_Street_Map', dpi=400, verbose= False)
-		#Get positions for graph
-		pos = {}
-		pos = {node: nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')}
-		for point in pos:
-			pos[point] = (m(pos[point][1], pos[point][0]))
-		# Draw all the edges.
-		for e in nxG.edges():
-			eType = nxG.edge[e[0]][e[1]].get('type','underground_line')
-			ePhases = nxG.edge[e[0]][e[1]].get('phases',1)
-			standArgs = {'edgelist':[e],
-						 'edge_color':_obToCol(eType),
-						 'width':2,
-						 'style':{'parentChild':'dotted','underground_line':'dashed'}.get(eType,'solid') }
-			if ePhases==3:
-				standArgs.update({'width':2})
-				nx.draw_networkx_edges(nxG,pos,**standArgs)
-				standArgs.update({'width':2,'edge_color':'white'})
-				nx.draw_networkx_edges(nxG,pos,**standArgs)
-				standArgs.update({'width':1,'edge_color':_obToCol(eType)})
-				nx.draw_networkx_edges(nxG,pos,**standArgs)
-			if ePhases==2:
-				standArgs.update({'width':2})
-				nx.draw_networkx_edges(nxG,pos,**standArgs)
-				standArgs.update({'width':1,'edge_color':'white'})
-				nx.draw_networkx_edges(nxG,pos,**standArgs)
-			else:
-				nx.draw_networkx_edges(nxG,pos,**standArgs)
-		# Draw nodes and optional labels.
-		nx.draw_networkx_nodes(nxG,pos,
-							   nodelist=pos.keys(),
-							   node_color=[_obToCol(nxG.node[n].get('type','underground_line')) for n in nxG],
-							   linewidths=0,
-							   node_size=2)
-		#if labels:
-		#	nx.draw_networkx_labels(nxG,pos,
-		#							font_color='black',
-		#							font_weight='bold',
-		#							font_size=0.25)
-		if not os.path.exists(outputPath):
-			os.makedirs(outputPath)
-		plt.savefig(pJoin(outputPath,'latlon.png'), dpi=400, bbox_inches="tight")
+		#Set the plot settings
+		plt.switch_backend('TKAgg')
+		fig = plt.figure(frameon=False, figsize=[10,10])
+		ax = fig.add_axes([0, 0, 1, 1])
+		ax.axis('off')
+		#map latlon to projection
+		epsg3857 = Proj(init='epsg:3857')
+		wgs84 = Proj(init='EPSG:4326')
+		node_positions = {node: nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')}
+		for point in node_positions:
+			node_positions[point] = transform(wgs84,epsg3857,node_positions[point][1], node_positions[point][0])
+		for zoomLevel in range(18,19):
+			numberofTiles = numTiles(zoomLevel)
+			#Get bounding tiles and their lat/lon edges
+			upperRightTile = tileXY(latitude_max, longitude_max, zoomLevel)
+			lowerLeftTile = tileXY(latitude_min, longitude_min, zoomLevel)
+			firstTileEdges = tileEdges(upperRightTile[0], upperRightTile[1], zoomLevel)
+			lastTileEdges = tileEdges(lowerLeftTile[0], lowerLeftTile[1], zoomLevel)
+			#Get N S E W boundaries for outer tiles in mercator projection x/y
+			mainsouthWest = transform(wgs84,epsg3857,lastTileEdges[1], lastTileEdges[0])
+			mainnorthEast = transform(wgs84,epsg3857,firstTileEdges[3], firstTileEdges[2])
+			for tileX in range(lowerLeftTile[0], upperRightTile[0]+1):
+				for tileY in range(upperRightTile[1], lowerLeftTile[1]+1):
+					#Draw section of tree that covers this tile
+					currentTileEdges = tileEdges(tileX, tileY, zoomLevel)
+					southWest = transform(wgs84,epsg3857,currentTileEdges[1], currentTileEdges[0])
+					northEast = transform(wgs84,epsg3857,currentTileEdges[3], currentTileEdges[2])
+					nx.draw_networkx(nxG, pos=node_positions, nodelist=[node for node in nxG if node in nx.get_node_attributes(nxG, 'pos')], with_labels=False, node_size=2, edge_size=1)
+					#Get map background from tile
+					url = 'https://a.tile.openstreetmap.org/%s/%s/%s.png' % (zoomLevel, tileX, tileY)
+					response = requests.get(url, stream=True)
+					imgFile = tempfile.TemporaryFile(suffix=".png")
+					shutil.copyfileobj(response.raw, imgFile)
+					del response
+					img = plt.imread(imgFile)
+					plt.imshow(img, extent=(southWest[0], northEast[0],southWest[1], northEast[1]))
+			plt.ylim(top=mainnorthEast[1], bottom=mainsouthWest[1])
+			plt.xlim(mainsouthWest[0], mainnorthEast[0])
+			if not os.path.exists(outputPath):
+				os.makedirs(outputPath)
+			plt.savefig(pJoin(outputPath,'graphOnMap.png'),frameon=False, pad_inches=0, bbox='tight')
+
+def simplifiedOmdShape(pathToOmdFile):
+	'''Use kmeans clustering to create simplified geojson object with convex hull and connected clusters from an omd.'''
+	with open(pathToOmdFile) as inFile:
+		tree = json.load(inFile)['tree']
+	nxG = omf.feeder.treeToNxGraph(tree)
+
+	simplifiedGeoDict = hullOfOmd(pathToOmdFile)
+	
+	#Kmeans clustering function
+	numpyGraph = np.array([[node,
+		float(nx.get_node_attributes(nxG, 'pos')[node][0]), float(nx.get_node_attributes(nxG, 'pos')[node][1])]
+		for node in nx.get_node_attributes(nxG, 'pos')], dtype=object)
+	Kmean = KMeans(n_clusters=20)
+	Kmean.fit(numpyGraph[:,1:3])
+
+	#Set up new graph with cluster centers as nodes to use in output
+	centerNodes = Kmean.cluster_centers_
+	clusterDict = {i: numpyGraph[np.where(Kmean.labels_ == i)] for i in range(Kmean.n_clusters)}
+	simplifiedGraph = nx.Graph()
+	for centerNode in clusterDict:
+		currentClusterGroup = clusterDict[centerNode]
+		simplifiedGraph.add_node('centroid'+str(centerNode),attr_dict={'type':'centroid',
+			'pos': (centerNodes[centerNode][0], centerNodes[centerNode][1]),
+			'clusterSize': np.ma.size(currentClusterGroup,axis=0), 'lineCount': 0})
+
+	#Create edges between cluster centers
+	for centerNode in clusterDict:
+		currentClusterGroup = clusterDict[centerNode]
+		nxG.add_node('centroid'+str(centerNode),attr_dict={'type':'centroid', 'pos': (centerNodes[centerNode][0], centerNodes[centerNode][1])})
+		intraClusterLines = 0
+		for i in currentClusterGroup:
+			currentNode = i[0]
+			neighbors = nx.neighbors(nxG, currentNode)
+			for neighbor in neighbors:
+				#connect centroids
+				if nx.get_node_attributes(nxG, 'type')[neighbor] is 'centroid':
+					if ('centroid'+str(centerNode), neighbor) not in nx.edges(simplifiedGraph):
+						simplifiedGraph.add_edge('centroid'+str(centerNode), neighbor, attr_dict={'type': 'centroidConnector', 'lineCount': 1})
+					else:
+						simplifiedGraph['centroid'+str(centerNode)][neighbor]['lineCount'] += 1
+				#connect centroid to nodes in other clusters, which is replaced in subsequent loops
+				elif neighbor not in currentClusterGroup[:,0]:
+					nxG.add_edge('centroid'+str(centerNode), neighbor, attr_dict={'type': 'centroidConnector'})
+				else:
+					simplifiedGraph.node['centroid'+str(centerNode)]['lineCount'] +=1
+			if currentNode in simplifiedGraph:
+				simplifiedGraph.remove_node(currentNode)
+
+	#Add nodes and edges to dict with convex hull
+	for node in simplifiedGraph.node:
+		simplifiedGeoDict['features'].append({
+			"type": "Feature", 
+			"geometry":{
+				"type": "Point",
+				"coordinates": [simplifiedGraph.node[node]['pos'][1], simplifiedGraph.node[node]['pos'][0]]
+			},
+			"properties":{
+				"name": node,
+				"pointType": simplifiedGraph.node[node]['type'],
+				"lineCount": simplifiedGraph.node[node]['lineCount']
+			}
+		})
+	#Add edges to dict
+	for edge in nx.edges(simplifiedGraph):
+		simplifiedGeoDict['features'].append({
+			"type": "Feature", 
+			"geometry":{
+				"type": "LineString",
+				"coordinates": [[simplifiedGraph.node[edge[0]]['pos'][1], simplifiedGraph.node[edge[0]]['pos'][0]],
+				[simplifiedGraph.node[edge[1]]['pos'][1], simplifiedGraph.node[edge[1]]['pos'][0]]]
+			},
+			"properties":{
+				"lineCount": simplifiedGraph[edge[0]][edge[1]]['lineCount'],
+				"edgeType": simplifiedGraph[edge[0]][edge[1]]['type']
+			}
+		})
+	return simplifiedGeoDict
+
+def shortestPathOmd(pathToOmdFile, sourceObjectName, targetObjectName):
+	'''Get the shortest path between two points on a feeder'''
+	with open(pathToOmdFile) as inFile:
+		tree = json.load(inFile)['tree']
+	nxG = omf.feeder.treeToNxGraph(tree)
+	tracePath = nx.bidirectional_shortest_path(nxG, sourceObjectName, targetObjectName)
+	return tracePath
+
+def numTiles(z):
+	''' Helper function to get number of tiles at a given zoom '''
+	return(math.pow(2,z))
+
+def sec(x):
+	''' Helper fucntion to get secant '''
+	return(1/math.cos(x))
+
+def latlon2relativeXY(lat,lon):
+	'''Helper function for latlon2xy'''
+	x = (lon + 180) / 360
+	y = (1 - math.log(math.tan(math.radians(lat)) + sec(math.radians(lat))) / math.pi) / 2
+	return(x,y)
+
+def latlon2xy(lat,lon,z):
+	'''Helper function to convert lat/lon coordinate to x/y coordinates'''
+	n = numTiles(z)
+	x,y = latlon2relativeXY(lat,lon)
+	return(n*x, n*y)
+
+def tileXY(lat, lon, z):
+	'''Helper function to get the tile that contains a lat/lon coordinate at a given zoom level'''
+	x,y = latlon2xy(lat,lon,z)
+	return(int(x),int(y))
+
+def latEdges(y,z):
+	'''Helper function in tileEdges for latitude'''
+	n = numTiles(z)
+	unit = 1 / n
+	relY1 = y * unit
+	relY2 = relY1 + unit
+	lat1 = mercatorToLat(math.pi * (1 - 2 * relY1))
+	lat2 = mercatorToLat(math.pi * (1 - 2 * relY2))
+	return(lat1,lat2)
+
+def lonEdges(x,z):
+	'''Helper function in tileEdges for longitude'''
+	n = numTiles(z)
+	unit = 360 / n
+	lon1 = -180 + x * unit
+	lon2 = lon1 + unit
+	return(lon1,lon2)
+
+def tileEdges(x,y,z):
+	'''Helper function to get lat/lon of a tile's edges at a given zoom'''
+	lat1,lat2 = latEdges(y,z)
+	lon1,lon2 = lonEdges(x,z)
+	return((lat2, lon1, lat1, lon2)) # S,W,N,E
+
+def mercatorToLat(mercatorY):
+	'''Helper function converting mercator to lat'''
+	return(math.degrees(math.atan(math.sinh(mercatorY))))
+
+def rasterTilesFromOmd(pathToOmdFile, outputPath):
+	'''Save raster tiles of omd to serve from zoom/x/y directory'''
+	with open(pathToOmdFile) as inFile:
+		tree = json.load(inFile)['tree']
+	plt.switch_backend('TKAgg')
+	#networkx graph to work with
+	nxG = omf.feeder.treeToNxGraph(tree)
+	#Lat/lon min/max for caluclating tile coverage later
+	latitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
+	longitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][1] for node in nx.get_node_attributes(nxG, 'pos')])
+	latitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
+	longitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][1] for node in nx.get_node_attributes(nxG, 'pos')])
+	#Set the plot settings
+	plt.switch_backend('TKAgg')
+	fig = plt.figure(frameon=False, figsize=[2.56,2.56])
+	ax = fig.add_axes([0, 0, 1, 1])
+	ax.axis('off')
+	#Create the default tile
+	if not os.path.exists(outputPath):
+		os.makedirs(outputPath)
+	plt.savefig(pJoin(outputPath,'default.png'),frameon=False, pad_inches=0, bbox='tight')
+	#map latlon to projection
+	epsg3857 = Proj(init='epsg:3857')
+	wgs84 = Proj(init='EPSG:4326')
+	node_positions = {node: nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')}
+	for point in node_positions:
+		node_positions[point] = transform(wgs84,epsg3857,node_positions[point][1], node_positions[point][0])
+	#Go through each zoom level and create tiles for each area covering the feeder
+	for zoomLevel in range(0,19):
+		#Boundaries covering the omd locations for the current zoom level
+		upperRightTile = tileXY(latitude_max, longitude_max, zoomLevel)
+		lowerLeftTile = tileXY(latitude_min, longitude_min, zoomLevel)
+		firstTileEdges = tileEdges(upperRightTile[0], upperRightTile[1], zoomLevel)
+		lastTileEdges = tileEdges(lowerLeftTile[0], lowerLeftTile[1], zoomLevel)
+		nx.draw_networkx(nxG, pos=node_positions, nodelist=[node for node in nxG if node in nx.get_node_attributes(nxG, 'pos')], with_labels=False, node_size=2, edge_size=1)
+		#Map omd for each x/y tile area
+		for tileX in range(lowerLeftTile[0], upperRightTile[0]+1):
+			for tileY in range(upperRightTile[1], lowerLeftTile[1]+1):
+				currentTileEdges = tileEdges(tileX, tileY, zoomLevel)
+				southWest = transform(wgs84,epsg3857,currentTileEdges[1], currentTileEdges[0])
+				northEast = transform(wgs84,epsg3857,currentTileEdges[3], currentTileEdges[2])
+				# S,W,N,E
+				plt.ylim(top=northEast[1], bottom=southWest[1])
+				plt.xlim(southWest[0], northEast[0])
+				#create directory for tile
+				savePath=pJoin(outputPath,str(zoomLevel),str(tileX))
+				if not os.path.exists(savePath):
+					os.makedirs(savePath)
+				plt.savefig(pJoin(savePath,'%s.png' % str(tileY)),frameon=False, pad_inches=0, bbox='tight')
+
+def serveTiles(pathToTiles):
+	'''Flask server for raster tiles. Create the custom tileset with the rasterTilesFromOmd function'''
+	app = Flask('tileServer')
+	@app.route('/omfTiles/<zoom>/<x>/<y>', methods=['GET'])
+	def tiles(zoom, x, y):
+		filename = pJoin(pathToTiles, zoom, x, y + '.png')
+		default = pJoin(pathToTiles,'default.png')
+		if os.path.isfile(filename):
+			return send_file(filename)
+		else:
+			return send_file(default)
+	app.run()
 
 def _tests():
 	e, n = 249.2419752733258, 1186.1488466689188
@@ -237,9 +435,14 @@ def _tests():
 	print (lat, lon) #(37.37267827914456, -89.89482331256504)
 	e2, n2 = latLonToStatePlane(lat, lon, epsg=2205)
 	print (e2, n2) # (249.24197527189972, 1186.1488466408398)
-	# mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png')
-	# mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html')
-	# hullOfOmd('static/publicFeeders/Olin Barre LatLon.omd')
+	#mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png')
+	#mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html')
+	#print(hullOfOmd('static/publicFeeders/Olin Barre LatLon.omd'))
+	#simplifiedOmd = simplifiedOmdShape('static/publicFeeders/Olin Barre LatLon.omd')
+	#print(simplifiedOmd)
+	#shortestPathOmd('static/publicFeeders/Olin Barre LatLon.omd', 'node62474203981T62474203987_B', 'node1667616792')
+	#rasterTilesFromOmd('static/publicFeeders/Olin Barre LatLon.omd', 'scratch/omdTests/tiles')
+	#serveTiles('scratch/omdTests/tiles')
 	# openInGoogleMaps(lat, lon)
 
 if __name__ == '__main__':
