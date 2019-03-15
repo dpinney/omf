@@ -73,7 +73,7 @@ _default_params = {
 }
 
 
-def rollingDylanForecast(rawData, upBound, lowBound):
+def rollingDylanForecast(rawData, upBound, lowBound, push_back = 672, rolling_window = 4):
 	"""
 	This model takes the inputs rawData, a dataset that holds 8760 values in two columns with no indexes
 	The first column rawData[:][0] holds the hourly demand for one year
@@ -82,46 +82,30 @@ def rollingDylanForecast(rawData, upBound, lowBound):
 	lowBound is the lower limit for forecasted data to not exceed as sometimes the forecasting is wonky
 	when values exceed upBound or go below lowBound they are set to None
 	"""
-	forecasted = []
-	actual = []
-	for w in range(len(rawData)):
+	forecasted = np.repeat(np.nan, push_back)
+	rawData = np.asarray(rawData)
+	actual = rawData[:,0]
+	temps = rawData[:,1]
+	for w in range(push_back, len(rawData)):
 		# need to start at 4 weeks+1 hour to get enough data to train so 4*7*24 = 672, the +1 is not necessary due to indexing starting at 0
-		actual.append((rawData[w][0]))
-		if w >= 672:
-			x = np.array(
-				[
-					rawData[w - 168][1],
-					rawData[w - 336][1],
-					rawData[w - 504][1],
-					rawData[w - 672][1],
-				]
-			)  # training temp
-			y = np.array(
-				[
-					rawData[w - 168][0],
-					rawData[w - 336][0],
-					rawData[w - 504][0],
-					rawData[w - 672][0],
-				]
-			)  # training demand
-			z = np.polyfit(x, y, 1)
-			p = np.poly1d(z)
-			forecasted.append(float((p(rawData[w][1]))))
-		else:
-			forecasted.append(None)
+		training_indices = [w - 168*(i+1) for i in range(rolling_window)]
+		x = temps[training_indices]
+		y = actual[training_indices]
+		z = np.polyfit(x, y, 1)
+		p = np.poly1d(z)
+		forecasted = np.append(forecasted, float(p(temps[w])))
+	# goodbye out of bounds
 	for i in range(len(forecasted)):
 		if forecasted[i] > float(upBound):
-			forecasted[i] = None
+			forecasted[i] = np.nan
 		elif forecasted[i] < float(lowBound):
-			forecasted[i] = None
-	MAE = 0  # Mean Average Error calculation
-	denom = 0
-	for i in range(len(forecasted)):
-		if forecasted[i] != None:
-			MAE += abs(forecasted[i] - actual[i])
-			denom += 1
-	MAE = math.trunc(MAE / denom)
-	return (forecasted, MAE)
+			forecasted[i] = np.nan
+	MAE = np.nanmean(np.abs(forecasted-actual))
+	nan_indices = np.where(np.isnan(forecasted))
+	forecasted = forecasted.tolist()
+	for i in nan_indices[0]:
+		forecasted[i] = None
+	return (forecasted, math.trunc(MAE))
 	"""
 	forecasted is an 8760 list of demand values
 	MAE is an int and is the mean average error of the forecasted/actual data correlation
@@ -161,10 +145,14 @@ def exponentiallySmoothedForecast(rawData, alpha, beta):
 					rawData[w - 672][0],
 				]
 			)  # training demand
-			old_smot = (smotted[w-24] if smotted[w-24] else np.mean(y))
-			old_trond = (tronds[w-24] if tronds[w-24] else (actual[w-24] - actual[w-2*24]))
-			lovel = alpha*actual[w-24] + (1-alpha)*old_smot
-			trond = beta*(lovel - old_smot + old_trond) + (1-beta)*old_trond
+			old_smot = smotted[w - 24] if smotted[w - 24] else np.mean(y)
+			old_trond = (
+				tronds[w - 24]
+				if tronds[w - 24]
+				else (actual[w - 24] - actual[w - 2 * 24])
+			)
+			lovel = alpha * actual[w - 24] + (1 - alpha) * old_smot
+			trond = beta * (lovel - old_smot + old_trond) + (1 - beta) * old_trond
 			smot = lovel + trond
 			tronds.append(trond)
 			smotted.append(smot)
@@ -918,4 +906,3 @@ def neural_net_predictions(all_X, all_y):
 	)
 
 	return [float(f) for f in model.predict(all_X[-8760:])]
-

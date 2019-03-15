@@ -33,7 +33,7 @@ def work(modelDir, inputDict):
 	for x in range(len(rawData)):
 		actual.append(float(rawData[x][0]))
 	(forecasted, MAE) = loadForecast.rollingDylanForecast(
-		rawData, 99999, 0 #float(inputDict["upBound"]), float(inputDict["lowBound"])
+		rawData, float(inputDict["upBound"]), float(inputDict["lowBound"])
 	)
 
 	(exp, exp_MAE) = loadForecast.exponentiallySmoothedForecast(rawData, 0.95, 0.05)
