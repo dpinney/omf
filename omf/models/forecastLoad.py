@@ -33,8 +33,10 @@ def work(modelDir, inputDict):
 	for x in range(len(rawData)):
 		actual.append(float(rawData[x][0]))
 	(forecasted, MAE) = loadForecast.rollingDylanForecast(
-		rawData, float(inputDict["upBound"]), float(inputDict["lowBound"])
+		rawData, 99999, 0 #float(inputDict["upBound"]), float(inputDict["lowBound"])
 	)
+
+	(exp, exp_MAE) = loadForecast.exponentiallySmoothedForecast(rawData, 0.95, 0.05)
 
 	# parse json params
 	try:
@@ -56,6 +58,7 @@ def work(modelDir, inputDict):
 	outData["startDate"] = inputDict["simStartDate"]
 	outData["actual"] = actual
 	outData["forecasted"] = forecasted
+	outData["doubleExp"] = exp
 	outData["MAE"] = MAE
 	outData["peakDemand"] = pred_demand
 	if prophet_partitions > 1:

@@ -115,10 +115,72 @@ def rollingDylanForecast(rawData, upBound, lowBound):
 		elif forecasted[i] < float(lowBound):
 			forecasted[i] = None
 	MAE = 0  # Mean Average Error calculation
+	denom = 0
 	for i in range(len(forecasted)):
 		if forecasted[i] != None:
-			MAE = MAE + abs(forecasted[i] - actual[i])
-	MAE = math.trunc(MAE / len(forecasted))
+			MAE += abs(forecasted[i] - actual[i])
+			denom += 1
+	MAE = math.trunc(MAE / denom)
+	return (forecasted, MAE)
+	"""
+	forecasted is an 8760 list of demand values
+	MAE is an int and is the mean average error of the forecasted/actual data correlation
+	"""
+
+
+def exponentiallySmoothedForecast(rawData, alpha, beta):
+	"""
+	This model takes the inputs rawData, a dataset that holds 8760 values in two columns with no indexes
+	The first column rawData[:][0] holds the hourly demand for one year
+	The second column rawData[:][1] holds the hourly temperature for one year
+	"""
+	forecasted = [None] * 672
+	actual = [rawData[i][0] for i in xrange(672)]
+	smotted = [None] * 672
+	tronds = [None] * 672
+
+	# initialize the boi
+
+	for w in range(672, len(rawData)):
+		# need to start at 4 weeks+1 hour to get enough data to train so 4*7*24 = 672, the +1 is not necessary due to indexing starting at 0
+		actual.append((rawData[w][0]))
+		if w >= 672:
+			x = np.array(
+				[
+					rawData[w - 168][1],
+					rawData[w - 336][1],
+					rawData[w - 504][1],
+					rawData[w - 672][1],
+				]
+			)  # training temp
+			y = np.array(
+				[
+					rawData[w - 168][0],
+					rawData[w - 336][0],
+					rawData[w - 504][0],
+					rawData[w - 672][0],
+				]
+			)  # training demand
+			old_smot = (smotted[w-24] if smotted[w-24] else np.mean(y))
+			old_trond = (tronds[w-24] if tronds[w-24] else (actual[w-24] - actual[w-2*24]))
+			lovel = alpha*actual[w-24] + (1-alpha)*old_smot
+			trond = beta*(lovel - old_smot + old_trond) + (1-beta)*old_trond
+			smot = lovel + trond
+			tronds.append(trond)
+			smotted.append(smot)
+			forecasted.append(smot)
+			# the further pred is from values in y, the more we lean on smot
+		else:
+			forecasted.append(None)
+			smotted.append(None)
+			tronds.append(None)
+	MAE = 0  # Mean Average Error calculation
+	denom = 0
+	for i in range(len(forecasted)):
+		if forecasted[i] != None:
+			MAE += abs(forecasted[i] - actual[i])
+			denom += 1
+	MAE = math.trunc(MAE / denom)
 	return (forecasted, MAE)
 	"""
 	forecasted is an 8760 list of demand values
@@ -455,6 +517,8 @@ class svmNextDayPeakTime:
 		df["hour_pred"] = hourpred
 		return df
 
+
+# fmt: off
 
 # NERC6 holidays with inconsistent dates. Created with python holidays package
 # years 1990 - 2024
