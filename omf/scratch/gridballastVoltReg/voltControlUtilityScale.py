@@ -10,6 +10,7 @@ import voltageRegVisual
 import re
 from datetime import datetime
 from voltageDropVoltageViz import drawPlot
+import sys
 
 #Run 11-1, stop results at noon, run at hour resolution
 
@@ -24,6 +25,7 @@ def ConvertAndwork(filePath, gb_on_off='on'):
 			gb_status = 'true'
 		else:
 			gb_status = 'false'
+		print("Gridballast is "+gb_status)
 		inFeeder = json.load(inFile)
 		inFeeder['tree'][u'01'] = {u'omftype': u'#include', u'argument': u'"hot_water_demand1.glm"'}
 		inFeeder['tree'][u'011'] = {u'class': u'player', u'double': u'value'}# add in manually for now
@@ -45,7 +47,9 @@ def ConvertAndwork(filePath, gb_on_off='on'):
 				inFeeder['tree'][key].update({'heat_mode':'ELECTRIC'})
 				inFeeder['tree'][key].update({'enable_volt_control':gb_status})
 				inFeeder['tree'][key].update({'volt_lowlimit':'113.99'})
-				inFeeder['tree'][key].update({'volt_uplimit':'126.99'}) 
+				inFeeder['tree'][key].update({'volt_uplimit':'126.99'})
+				inFeeder['tree'][key].pop('demand')
+				inFeeder['tree'][key].update({'water_demand':'weekday_hotwater*1.00'})
 			if'object' in value and (value['object']== 'ZIPload'):
 				inFeeder['tree'][key].update({'enable_volt_control':gb_status})
 				inFeeder['tree'][key].update({'volt_lowlimit':'113.99'})
@@ -193,22 +197,25 @@ def _debugging(filePath, gb_on_off='on'):
 	# Open Distnetviz on glm
 	omf.distNetViz.viz('outGLM.glm') #or model.omd
 	# Visualize Voltage Regulation
-	voltRegViz('outGLM_rooftop.glm')
+	voltRegViz('outGLM.glm')
 	# Remove Feeder
 	os.remove('outGLM.glm')
+	os.remove('voltDump.csv')
 
 
 def voltRegViz(FNAME):
 	chart = drawPlot(FNAME, neatoLayout=True, edgeCol=False, nodeLabs=None, edgeLabs=None, nodeCol = "perUnitVoltage", customColormap=True, rezSqIn=400)
 	chart.savefig("./VOLTOUT.png")
 	validFiles = ['_minutes.PLAYER', 'climate.tmy2', 'frequency.PLAYER1', "hot_water_demand1.glm", 'schedulesResponsiveLoads.glm']
+	dir_path = os.path.dirname(os.path.realpath(__file__))
+
 	for file in os.listdir(pJoin(dir_path, '_voltViz')):
 		if file not in validFiles : 
 			os.remove(pJoin('_voltViz', file))
 	
 if __name__ == '__main__':
 	if len(sys.argv) == 1:
-		_debugging('/Users/tuomastalvitie/Desktop/gridballast_gld_simulations/Feeders/UCS_Egan_Housed_Solar.omd', gb_on_off='off')
+		_debugging('/Users/tuomastalvitie/Desktop/gridballast_gld_simulations/Feeders/UCS_Egan_Housed_Solar.omd', gb_on_off='on')
 	else:
 		#Parse Command Line
 		parser = argparse.ArgumentParser(description='Converts an OMD to GLM and runs it on gridlabd')
