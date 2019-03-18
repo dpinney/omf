@@ -9,97 +9,126 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
+from omf.geo import hullOfOmd
 
-def kMean(pathToOmdFile):
+def kMean(pathToOmdFile, outputPath):
 	'''
-	Use kmeans algo for clustering points for omd representation.
+	Use kmeans algorithm for clustering points for omd representation.
 	'''
 	with open(pathToOmdFile) as inFile:
 		tree = json.load(inFile)['tree']
+
+	simplifiedGeoDict = hullOfOmd(pathToOmdFile)
 	nxG = feeder.treeToNxGraph(tree)
 	#Numpy array with nodeName, latitude, longitude
 	numpyGraph = np.array([[node,
 		float(nx.get_node_attributes(nxG, 'pos')[node][0]), float(nx.get_node_attributes(nxG, 'pos')[node][1])]
 		for node in nx.get_node_attributes(nxG, 'pos')], dtype=object)
-	print(numpyGraph[:,1:3])
 	plt.switch_backend('TKAgg')
 	#plt.scatter(numpyGraph[:,1], numpyGraph[:,2], s=20, c='b')
 	#plt.show()
-	print(numpyGraph.size)
-	Kmean = KMeans(n_clusters=25)
+	Kmean = KMeans(n_clusters=20)
 	Kmean.fit(numpyGraph[:,1:3])
 	#plt.scatter(Kmean.cluster_centers_[:,0], Kmean.cluster_centers_[:,1], s=50, c='r')
 	#plt.show()
 	centerNodes = Kmean.cluster_centers_
-	#print([i for i in Kmean.labels_])
-	#print(Kmean.cluster_centers_[0])
 	labelsArray = Kmean.labels_
-	#for i in labelsArray:
-		#print(i)
-	#	print(centerNodes[i])
-	#print(labelsArray)
+	#Group 
 	clusterDict = {i: numpyGraph[np.where(Kmean.labels_ == i)] for i in range(Kmean.n_clusters)}
-	#print(clusterDict)
-	#fish = (n for n,d in nxG.nodes(data=True) if d is not None)
-	#print(next(fish))
-	#print(next(fish))
 	#Go through each cluster in the cluster dict
 	#Get the lat lon
 	#Get the nodes edges
 	#If the edges are in the same cluster, remove it
-	#Else if the edge connects to another cluster, check if it exists, and if not add an edge from cluster to node that isn't in the cluster  
-	#Potetntially add the clustername to the original graph?
-	node_positions = {node: nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')}
-	newGraph = nx.Graph()
+	#Else if the edge connects to another cluster, check if it exists, and if not add an edge from cluster to node that isn't in the cluster 
+	simplifiedGraph = nx.Graph()
 	for centerNode in clusterDict:
 		currentClusterGroup = clusterDict[centerNode]
-		newGraph.add_node('centroid'+str(centerNode),attr_dict={'type':'centroid', 'pos': (centerNodes[centerNode][0], centerNodes[centerNode][1])})
+		simplifiedGraph.add_node('centroid'+str(centerNode),attr_dict={'type':'centroid',
+			'pos': (centerNodes[centerNode][0], centerNodes[centerNode][1]),
+			'clusterSize': np.ma.size(currentClusterGroup,axis=0), 'lineCount': 0})
 	#print(node_positions)
 	print(nx.number_of_edges(nxG))
 	for centerNode in clusterDict:
 		currentClusterGroup = clusterDict[centerNode]
-		#print(currentClusterGroup)
-		#print(centerNodes[centerNode][0])
+		print(np.ma.size(currentClusterGroup,axis=0))
 		nxG.add_node('centroid'+str(centerNode),attr_dict={'type':'centroid', 'pos': (centerNodes[centerNode][0], centerNodes[centerNode][1])})
+		intraClusterLines = 0
 		for i in currentClusterGroup:
-			#print('numpy in cluster group '+str(i[0]))
-			#print(nx.get_node_attributes(nxG, 'pos')[node])
-			#print(nxG)
 			currentNode = i[0]
 			neighbors = nx.neighbors(nxG, currentNode)
 			#check if nodes are in same cluster
 			for neighbor in neighbors:
-				if currentNode == 'node1764317720' and neighbor == 'node1772017699':
-					print('here')
 				#print(nx.get_node_attributes(nxG, 'type')[neighbor])
 				if nx.get_node_attributes(nxG, 'type')[neighbor] is 'centroid':
-					print(neighbor)
-					newGraph.add_edge('centroid'+str(centerNode), neighbor)
-					nxG.remove_edge(currentNode, neighbor)
+					#Add edge between centroids, updating value if neccessary
+					if ('centroid'+str(centerNode), neighbor) not in nx.edges(simplifiedGraph):
+						simplifiedGraph.add_edge('centroid'+str(centerNode), neighbor, attr_dict={'type': 'centroidConnector', 'lineCount': 1})
+					else:
+						#nx.edges(simplifiedGraph)[('centroid'+str(centerNode), neighbor)]
+						simplifiedGraph['centroid'+str(centerNode)][neighbor]['lineCount'] += 1
+						#nx.get_edge_attributes('centroid'+str(centerNode), neighbor)
+					#simplifiedGraph.remove_edge(currentNode, neighbor)
+					#nxG.remove_edge(currentNode, neighbor)
 				elif neighbor not in currentClusterGroup[:,0]:
-					nxG.add_edge('centroid'+str(centerNode), neighbor)
+					nxG.add_edge('centroid'+str(centerNode), neighbor, attr_dict={'type': 'centroidConnector'})
+					#simplifiedGraph.add_edge('centroid'+str(centerNode), neighbor)
 					#pass
 				else:
-					nxG.remove_edge(currentNode, neighbor)
-					#print('same')
-	print(nx.number_of_edges(nxG))
+					#nxG.remove_edge(currentNode, neighbor)
+					#intraClusterLines += 1
+					simplifiedGraph.node['centroid'+str(centerNode)]['lineCount'] +=1
+					#pass
+			if currentNode in simplifiedGraph:
+				simplifiedGraph.remove_node(currentNode)
 
-	#print(clusterDict[0][0][0])
-	print(nxG.edges())
-	nxG.add_node('test')
-	nx.set_node_attributes(nxG, 'test', 'test')
-	nx.get_node_attributes(nxG, 'test')
-	print(nxG.number_of_nodes())
-	node_positions = {node: nx.get_node_attributes(newGraph, 'pos')[node] for node in nx.get_node_attributes(newGraph, 'pos')}
-	nx.draw_networkx(newGraph, pos=node_positions, nodelist=[node for node in nxG if node in nx.get_node_attributes(newGraph, 'pos')], with_labels=False, node_size=2, edge_size=1)
-	plt.scatter(Kmean.cluster_centers_[:,0], Kmean.cluster_centers_[:,1], s=50, c='r')
-	plt.show()
+	#Add nodes and edges to dict with convex hull
+	for node in simplifiedGraph.node:
+		simplifiedGeoDict['features'].append({
+			"type": "Feature", 
+			"geometry":{
+				"type": "Point",
+				"coordinates": [simplifiedGraph.node[node]['pos'][1], simplifiedGraph.node[node]['pos'][0]]
+			},
+			"properties":{
+				"name": node,
+				"pointType": simplifiedGraph.node[node]['type'],
+				"lineCount": simplifiedGraph.node[node]['lineCount']
+			}
+		})
+	#Add edges to dict
+	for edge in nx.edges(simplifiedGraph):
+		simplifiedGeoDict['features'].append({
+			"type": "Feature", 
+			"geometry":{
+				"type": "LineString",
+				"coordinates": [[simplifiedGraph.node[edge[0]]['pos'][1], simplifiedGraph.node[edge[0]]['pos'][0]],
+				[simplifiedGraph.node[edge[1]]['pos'][1], simplifiedGraph.node[edge[1]]['pos'][0]]]
+			},
+			"properties":{
+				"lineCount": simplifiedGraph[edge[0]][edge[1]]['lineCount'],
+				"edgeType": simplifiedGraph[edge[0]][edge[1]]['type']
+			}
+		})
+	if not os.path.exists(outputPath):
+		os.makedirs(outputPath)
+	shutil.copy('../../static/geoPolyLeaflet.html', outputPath)
+	with open(pJoin(outputPath,'geoPointsLines.json'),"w") as outFile:
+		json.dump(simplifiedGeoDict, outFile, indent=4)
+	#print([edge for edge in nxG.edges.data() if edge in nx.get_edge_attributes(nxG, 'type')[edge] =='centroidConnector'])
+	#print(nx.get_edge_attributes(simplifiedGraph, 'lineCount'))
+	#print(nx.number_of_edges(simplifiedGraph))
+	#print(nx.edges(simplifiedGraph))
+	#print(nx.nodes(simplifiedGraph))
+	#print(nxG.number_of_nodes())
+	#node_positions = {node: nx.get_node_attributes(simplifiedGraph, 'pos')[node] for node in nx.get_node_attributes(simplifiedGraph, 'pos')}
+	#nx.draw_networkx(simplifiedGraph, pos=node_positions, nodelist=[node for node in nxG if node in nx.get_node_attributes(simplifiedGraph, 'pos')], with_labels=False, node_size=4, width=5, edge_color='blue')
+	#plt.scatter(Kmean.cluster_centers_[:,0], Kmean.cluster_centers_[:,1], s=50, c='r')
+	#plt.show()
 	#print(nxG.nodes())
 
 	#for i in centerNodes:
 		#nxG.add_node('center', attr_dict={'type':'center'})
 		#print(nx.get_node_attributes(nxG,'center'))
 		#print float(i[1])
-
 if __name__ == '__main__':
-	kMean('../../static/publicFeeders/Olin Barre LatLon.omd')
+	kMean('../../static/publicFeeders/Olin Barre LatLon.omd', 'kmeanOutput')

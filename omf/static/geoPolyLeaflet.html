@@ -37,7 +37,6 @@
         }).addTo(map);
     L.control.scale().addTo(map);
 	function onEachFeature(feature, layer) {
-		//console.log(feature);
 		var popupContent = '';
 		for (const key in feature.properties) {
 			if (feature.properties.hasOwnProperty(key)) {
@@ -47,9 +46,13 @@
 		}
 	}
 	function pointToLayerNode(feature, latlng) {
+		let fillColorValue = 'red';
+		if (feature.properties['pointColor']){
+			fillColorValue = feature.properties['pointColor'];
+		}
 		return L.circleMarker(latlng, {
 			radius: 8,
-			fillColor: feature.properties['pointColor'],
+			fillColor: fillColorValue,
 			color: "#000",
 			weight: 1,
 			opacity: 1,
@@ -58,15 +61,21 @@
 	}
 
 	function lineStyle(feature){
-		return {
-			"color": feature.properties.edgeColor
+		if (feature.properties.edgeColor){
+			return {
+				"color": feature.properties.edgeColor
+			}
+		}
+		else{
+			return {
+				"color": "black"
+			}
 		}
 	}
 
 	d3.json('geoPointsLines.json', function(d){
 		d.features.forEach(function(feature){
 			if (feature.geometry['type'] == 'Point'){
-				//L.geoJSON(feature.geometry).addTo(map);
 				L.geoJSON(feature, {
 					pointToLayer: pointToLayerNode,
 					onEachFeature: onEachFeature
@@ -74,23 +83,16 @@
 			}
 
 			else if (feature.geometry['type'] == 'LineString'){
-				//console.log(feature.geometry);
 				L.geoJSON(feature, {
 					style: lineStyle,
 					onEachFeature: onEachFeature
 				}).addTo(map);
 			}
-		});
-	});
-	d3.json('convexHull.json', function(d){
-		d.features.forEach(function(feature){
-			if (feature.geometry['type'] == 'Polygon'){
-				//L.geoJSON(feature.geometry).addTo(map);
+			else if (feature.geometry['type'] == 'Polygon'){
 				L.geoJSON(feature).addTo(map);
 			}
 		});
-	})	;
-
+	});
 </script>
 </body>
 </html>

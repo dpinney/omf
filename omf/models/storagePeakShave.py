@@ -186,13 +186,20 @@ def forecastWork(modelDir, ind):
 	o = {}
 
 	try:
-		with open(pJoin(modelDir, 'hist.csv'), 'w') as f:
-			f.write(ind['histCurve'].replace('\r', ''))
-		df = pd.read_csv(pJoin(modelDir, 'hist.csv'), parse_dates=['dates'])
-		df['month'] = df['dates'].dt.month
-		df['dayOfYear'] = df['dates'].dt.dayofyear
+	 	with open(pJoin(modelDir, 'hist.csv'), 'w') as f:
+	 		f.write(ind['histCurve'].replace('\r', ''))
+		df = pd.read_csv(pJoin(modelDir, 'hist.csv'))
 		assert df.shape[0] >= 26280 # must be longer than 3 years
-		assert df.shape[1] == 5
+	 	assert df.shape[1] == 6
+		df['dates'] = df.apply(
+			lambda x: dt(
+				int(x['year']), 
+				int(x['month']), 
+				int(x['day']), 
+				int(x['hour'])), 
+			axis=1
+		)
+		df['dayOfYear'] = df['dates'].dt.dayofyear
 	except:
 		raise Exception("CSV file is incorrect format.")
 
@@ -202,32 +209,37 @@ def forecastWork(modelDir, ind):
 	# train model on previous data
 	all_X = fc.makeUsefulDf(df)
 	all_y = df['load']
-	predictions = fc.neural_net_predictions(all_X, all_y)
+	predictions, accuracy = fc.neural_net_predictions(all_X, all_y, EPOCHS=int(ind['epochs']))
 
 	dailyLoadPredictions = [predictions[i:i+24] for i in range(0, len(predictions), 24)]	
 	weather = df['tempc'][-8760:]
 	dailyWeatherPredictions = [weather[i:i+24] for i in range(0, len(weather), 24)]
-	month = df['month'][-8760:]
+	
+	month_h = list(df['month'][-8760:])
+	month = [month_h[i:i+24] for i in range(0, len(month_h), 24)]
+	month = [m[0]-1 for m in month]
 
 	dispatched = [False]*365
+	last_peak = [-1*float('inf')]*12
 	# decide to implement VBAT every day for a year
 	VB_power, VB_energy = [], []
 	for i, (load24, temp24, m) in enumerate(zip(dailyLoadPredictions, dailyWeatherPredictions, month)):
 		peak = max(load24)
-		if fc.shouldDispatchPS(peak, m, df, confidence):
+		if peak > last_peak[m]:
 			dispatched[i] = True
 			vbp, vbe = fc.pulp24hrBattery(load24, dischargeRate*cellQuantity, 
 				cellCapacity*cellQuantity, battEff)
 			VB_power.extend(vbp)
 			VB_energy.extend(vbe)
+			last_peak[m] = peak + vbp[load24.index(peak)]
 		else:
 			VB_power.extend([0]*24)
 			VB_energy.extend([0]*24)
-
+	
 	# -------------------- MODEL ACCURACY ANALYSIS -------------------------- #
 	o['predictedLoad'] = predictions
-	o['trainAccuracy'] = 0#round(model.score(X_train, y_train) * 100, 2)
-	o['testAccuracy'] = 0#round(model.score(X_test, y_test) * 100, 2)
+	o['trainAccuracy'] = 100 - round(accuracy['train'], 1)
+	o['testAccuracy'] = 100 - round(accuracy['test'], 1)
 
 	# PRECISION AND RECALL
 	maxDays = []
@@ -245,8 +257,7 @@ def forecastWork(modelDir, ind):
 	o['precision'] = round(truePositive / float(truePositive + falsePositive) * 100, 2)
 	o['recall'] = round(truePositive / float(truePositive + falseNegative) * 100, 2)
 	o['number_of_dispatches'] = len([i for i in dispatched if i])
-	o['MAE'] = round(sum([abs(l-m)/m*100 for l, m in zip(predictions, list(all_y[-8760:]))])/8760., 2)
-
+	
 	# ---------------------- FINANCIAL ANALYSIS ----------------------------- #
 
 	# Calculate monthHours
@@ -321,7 +332,7 @@ def new(modelDir):
 		'dischargeRate': '5',
 		'modelType': modelName,
 		'chargeRate': '5',
-		'demandCurve': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','FrankScadaValidCSV_Copy.csv')).read(),
+		'demandCurve': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','Texas_1yr_Load.csv')).read(),
 		'fileName': 'FrankScadaValidCSV_Copy.csv',
 		'dispatchStrategy': 'optimal', #'prediction', 
 		'cellCost': '7140',
@@ -337,9 +348,10 @@ def new(modelDir):
 		# required if dispatch strategy is custom
 		'customDispatchStrategy': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','dispatchStrategy.csv')).read(),
 		# forecast
-		'confidence': '0',
-		'histFileName': 'Texas_17yr_TempAndLoad.csv',
-		"histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_17yr_TempAndLoad.csv"), 'rU').read(),
+		'confidence': '99',
+		'epochs': '100',
+		'histFileName': 'd_Texas_17yr_TempAndLoad.csv',
+		"histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","d_Texas_17yr_TempAndLoad.csv"), 'rU').read(),
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
