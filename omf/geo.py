@@ -186,7 +186,7 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat):
 		latitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
 		longitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][1] for node in nx.get_node_attributes(nxG, 'pos')])
 		#Set the plot settings
-		plt.switch_backend('TKAgg')
+		plt.switch_backend('Agg')
 		fig = plt.figure(frameon=False, figsize=[10,10])
 		ax = fig.add_axes([0, 0, 1, 1])
 		ax.axis('off')
@@ -370,7 +370,6 @@ def rasterTilesFromOmd(pathToOmdFile, outputPath):
 	'''Save raster tiles of omd to serve from zoom/x/y directory'''
 	with open(pathToOmdFile) as inFile:
 		tree = json.load(inFile)['tree']
-	plt.switch_backend('TKAgg')
 	#networkx graph to work with
 	nxG = omf.feeder.treeToNxGraph(tree)
 	#Lat/lon min/max for caluclating tile coverage later
@@ -379,7 +378,7 @@ def rasterTilesFromOmd(pathToOmdFile, outputPath):
 	latitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
 	longitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][1] for node in nx.get_node_attributes(nxG, 'pos')])
 	#Set the plot settings
-	plt.switch_backend('TKAgg')
+	plt.switch_backend('Agg')
 	fig = plt.figure(frameon=False, figsize=[2.56,2.56])
 	ax = fig.add_axes([0, 0, 1, 1])
 	ax.axis('off')
@@ -419,6 +418,9 @@ def rasterTilesFromOmd(pathToOmdFile, outputPath):
 def serveTiles(pathToTiles):
 	'''Flask server for raster tiles. Create the custom tileset with the rasterTilesFromOmd function'''
 	app = Flask('tileServer')
+	@app.route('/', methods=['GET'])
+	def home():
+		return 'Implementation Pending'
 	@app.route('/omfTiles/<zoom>/<x>/<y>', methods=['GET'])
 	def tiles(zoom, x, y):
 		filename = pJoin(pathToTiles, zoom, x, y + '.png')
@@ -435,14 +437,14 @@ def _tests():
 	print (lat, lon) #(37.37267827914456, -89.89482331256504)
 	e2, n2 = latLonToStatePlane(lat, lon, epsg=2205)
 	print (e2, n2) # (249.24197527189972, 1186.1488466408398)
-	#mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png')
-	#mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html')
-	#print(hullOfOmd('static/publicFeeders/Olin Barre LatLon.omd'))
-	#simplifiedOmd = simplifiedOmdShape('static/publicFeeders/Olin Barre LatLon.omd')
+	# mapOmd('./static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png')
+	# mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html')
+	# print(hullOfOmd('static/publicFeeders/Olin Barre LatLon.omd'))
+	# simplifiedOmd = simplifiedOmdShape('static/publicFeeders/Olin Barre LatLon.omd')
 	#print(simplifiedOmd)
-	#shortestPathOmd('static/publicFeeders/Olin Barre LatLon.omd', 'node62474203981T62474203987_B', 'node1667616792')
-	#rasterTilesFromOmd('static/publicFeeders/Olin Barre LatLon.omd', 'scratch/omdTests/tiles')
-	#serveTiles('scratch/omdTests/tiles')
+	# shortestPathOmd('static/publicFeeders/Olin Barre LatLon.omd', 'node62474203981T62474203987_B', 'node1667616792')
+	# rasterTilesFromOmd('static/publicFeeders/Olin Barre LatLon.omd', 'scratch/omdTests/tiles')
+	# serveTiles('scratch/omdTests/tiles')
 	# openInGoogleMaps(lat, lon)
 
 if __name__ == '__main__':
