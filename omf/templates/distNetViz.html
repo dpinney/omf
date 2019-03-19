@@ -184,6 +184,9 @@
             .centered {
                 text-align: center;
             }
+            .modalHeading {
+                text-align: center;
+            }
             .modalInput {
                 font-size: medium;
                 border: 0px;
@@ -743,6 +746,7 @@
             </div>
             <div id="massAddSecondaryModal" class="modal" style="display: none;">
                 <div class="modalContent">
+                    <h3></h3>
                     <div data-tableinsert></div>
                 </div>
             </div>
@@ -935,6 +939,8 @@
                                     <td class="fullPadded">
                                         <input type="checkbox" id="shuffleLoadGen" name="shuffleLoadGen" value="shuffleLoadGen">
                                         <label for="shuffleLoadGen">Shuffle loads and generators:</label>
+                                        <!--<input type="text" name="shufflePerc" class="modalInputLine"> [%]</label>-->
+                                        <!--Commented both of these out because I think the server expects a fractional decimal number-->
                                         <input type="text" pattern="^[+-]?\d+(\.\d+)?$" name="shufflePerc" class="modalInputLine"> [%]</label>
                                     </td>
                                 </tr>
@@ -942,6 +948,7 @@
                                     <td class="fullPadded">
                                         <input type="checkbox" id="addNoise" name="addNoise" value="addNoise">
                                         <label for="addNoise">Add noise:</label>
+                                        <!--<input type="text" name="noisePerc" class="modalInputLine"> [%]</label>-->
                                         <input type="text" pattern="^[+-]?\d+(\.\d+)?$" name="noisePerc" class="modalInputLine"> [%]</label>
                                     </td>
                                 </tr>
@@ -1555,11 +1562,12 @@ const addManagerPrototype = {
         Array.from(tableDiv.children).forEach(child => {
             child.parentElement.removeChild(child);
         });
+        modal.querySelector("h3").textContent = type;
         const table = document.createElement("table");
         const tBody = document.createElement("tbody");
         table.append(tBody);
+
         const names = gComponentManager.getNamesOfType(type);
-        const buttonText = massAdd === false ? "Add" : "Select";
         names.forEach(name => {
             const tr = document.createElement("tr");
             let td = document.createElement("td");
@@ -1583,6 +1591,8 @@ const addManagerPrototype = {
             tr.append(td);
             tBody.append(tr);
         });
+        formatModal(modal);
+        formatTable(table);
         tableDiv.append(table);
     },
 
@@ -3154,6 +3164,7 @@ async function renameFeeder() {
                 url: `/renameFeeder/${gThisOwner}/${gThisModelName}/${gThisFeederName}/${newName}/${gThisFeederNum}`
             }).done(function() {
                 gThisFeederName = newName;
+                document.getElementById("menuLeft").querySelector("h4").textContent = newName;
                 alert("Feeder file was successfully renamed.");
             })
 		}
@@ -4723,6 +4734,26 @@ Player is a configuration object. Recorder can have a parent, so it is NOT a con
 const configurationTypes = ["regulator_configuration", "transformer_configuration", "triplex_line_configuration", "line_configuration",
 "volt_var_control", "line_spacing", "climate", "overhead_line_conductor", "underground_line_conductor", "triplex_line_conductor",
 "player", "schedule"];
+
+/**
+ * @param {HTMLDivElement} - modal
+ */
+function formatModal(modal) {
+    ["h1", "h2", "h3", "h4", "h5", "h6"].forEach(h => {
+        const headings = Array.from(modal.querySelectorAll(`div.modalContent > ${h}`));
+        if (headings.length > 0) {
+            headings.forEach(h => {
+                h.classList.add("centered");
+            });
+        }
+    });
+}
+
+function formatTable(table) {
+    Array.from(table.querySelectorAll("td")).forEach(td => {
+        td.classList.add("fullPadded");
+    });
+}
 
 // delete this eventually
 function rebuildSelectionTable() {
