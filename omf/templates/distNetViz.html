@@ -97,17 +97,17 @@
             #menuLeft p {
                 margin: 0px 0px 0px 20px;
             }
-			#menuRight { 
-				display:flex;
-                align-items: center;
-			}
+            #menuRight { 
+              display:flex;
+                      align-items: center;
+            }
             .white {
                 color: #F8F8F8;
             }
             .menuHeading {
                 margin: 0px;
                 padding: 5px;
-				border-radius: 5px 5px 0px 0px;
+                border-radius: 5px 5px 0px 0px;
             }
             .expandedHeading {
                 color: black;
@@ -125,15 +125,16 @@
                 position: absolute; /* remove the menu from the document flow */
                 background-color: #F8F8F8;
                 right: 0px; /* align the menu to the left */
-				box-shadow: 0 11px 10px rgba(0, 0, 0, 0.2); /* add shadow to the menu */
-				border-radius: 5px 0 0 0; /* round the top left corner of the menu */
+                box-shadow: 0 11px 10px rgba(0, 0, 0, 0.2); /* add shadow to the menu */
+                border-radius: 5px 0 0 0; /* round the top left corner of the menu */
                 max-height: 550px; /* Limit the length of the component list */
                 overflow: auto;
+                white-space: nowrap;
             }
             ul.menu li { 
                 padding: 4px; 
             }
-			ul.menu li:hover {
+            ul.menu li:hover {
                 background:green; color:white; 
             }
             /**************************************************
@@ -2585,7 +2586,7 @@ function convertStaticLoadsIntoHouses() {
  */
 function replaceLoadOrNodeWithHouse(key) {
     const oldLoad = gTree.getObject(key);
-    const house = deepCopy(gComponentManager.get("house", "house"));
+    const house = deepCopy(gComponentManager.get("house", "R1_SingleFamilyHome_1990-2005"));
     house.longitude = oldLoad.longitude;
     house.latitude = oldLoad.latitude;
     if (oldLoad.parent == null) {
@@ -2620,7 +2621,6 @@ function addLoadsToHouse(key) {
     gTree.insert(tObject);
     // Insert responsive ZIPload
     tObject = createTreeObject(gComponentManager.get("ZIPload", "ZIPload"), gTree);
-    tObject = {}
     tObject.setupChildNode(key);
     let responsiveBasePower = Math.random();
     responsiveBasePower = responsiveBasePower < .5 ? responsiveBasePower + .5 : responsiveBasePower;
