@@ -3637,7 +3637,7 @@
             "geometric_mean_radius": "0.00813999958336353", 
             "diameter": "0.527999997138977", 
             "object": "overhead_line_conductor", 
-            "rating.summer.continuous": "300",
+            "rating.summer.continuous": "200",
             "resistance": "0.484200000762939"
         }, 
         "8": {
@@ -4160,7 +4160,7 @@
             "geometric_mean_radius": "0.00813999958336353", 
             "diameter": "0.527999997138977", 
             "object": "overhead_line_conductor", 
-            "rating.summer.continuous": "300",
+            "rating.summer.continuous": "200",
             "resistance": "0.484200000762939"
         }, 
         "177": {
@@ -4646,7 +4646,7 @@
             "geometric_mean_radius": "0.00813999958336353", 
             "diameter": "0.527999997138977", 
             "object": "overhead_line_conductor", 
-            "rating.summer.continuous": "300",
+            "rating.summer.continuous": "200",
             "resistance": "0.484200000762939"
         }, 
         "220": {
@@ -5257,7 +5257,7 @@
             "geometric_mean_radius": "0.00813999958336353", 
             "diameter": "0.527999997138977", 
             "object": "overhead_line_conductor", 
-            "rating.summer.continuous": "300",
+            "rating.summer.continuous": "200",
             "resistance": "0.484200000762939"
         }, 
         "9": {
