@@ -1,0 +1,1 @@
+{"state_of_charge": "0.5", "name": "batt_additional", "parent": "load_following_inv_pf", "round_trip_efficiency": "0.95", "object": "battery", "reserve_state_of_charge": "0.1", "battery_type": "LI_ION", "generator_mode": "SUPPLY_DRIVEN", "rated_power": "2 kW", "battery_capacity": "20 kWh", "use_internal_battery_model": "true"}

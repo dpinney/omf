@@ -45,9 +45,9 @@
                 color: mediumseagreen;
                 /*color: black;*/
 			}
-            a:visited {
+            /*a:visited {
                 color: seagreen;
-            }
+            }*/
 
             /* SVG */
 
@@ -77,52 +77,6 @@
                 top: 0px;
             }
 
-			/* Load Spinner */
-            /* What is this used for? Nothing is using the .loader class. Can I delete this? Comment it out for now. If no one complains, delete it later on */
-            /*
-			.loader {
-				margin: 60px auto;
-				font-size: 10px;
-				position: relative;
-				text-indent: -9999em;
-				border-top: 1.1em solid rgba(255, 255, 255, 0.2);
-				border-right: 1.1em solid rgba(255, 255, 255, 0.2);
-				border-bottom: 1.1em solid rgba(255, 255, 255, 0.2);
-				border-left: 1.1em solid #ffffff;
-				-webkit-transform: translateZ(0);
-				-ms-transform: translateZ(0);
-				transform: translateZ(0);
-				-webkit-animation: load8 1.1s infinite linear;
-				animation: load8 1.1s infinite linear;
-			}
-			.loader,
-			.loader:after {
-				border-radius: 50%;
-				width: 10em;
-				height: 10em;
-			}
-			@-webkit-keyframes load8 {
-				0% {
-					-webkit-transform: rotate(0deg);
-					transform: rotate(0deg);
-				}
-				100% {
-					-webkit-transform: rotate(360deg);
-					transform: rotate(360deg);
-				}
-			}
-			@keyframes load8 {
-				0% {
-					-webkit-transform: rotate(0deg);
-					transform: rotate(0deg);
-				}
-				100% {
-					-webkit-transform: rotate(360deg);
-					transform: rotate(360deg);
-				}
-			}
-            */
-
             /**************************************************
             // Header and menu links
             **************************************************/
@@ -136,100 +90,53 @@
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                /*position: absolute;*/
-				/*min-width:1000px;*/
 			}
-            #helpDiv a {
-                color: white;
-            }
-			#menuLeft {
-                color:white;
-            }
             #menuLeft h4 {
                 margin: 0px 0px 4px 20px;
             }
             #menuLeft p {
                 margin: 0px 0px 0px 20px;
             }
-			#menuRight { 
-				display:flex;
-			}
-			/*#arrow { font-size:8pt; position:absolute; margin-top:2px; margin-left:4px; display:inline; }*/
-            .headerDiv {
+            #menuRight { 
+              display:flex;
+                      align-items: center;
+            }
+            .white {
+                color: #F8F8F8;
+            }
+            .menuHeading {
+                margin: 0px;
+                padding: 5px;
+                border-radius: 5px 5px 0px 0px;
+            }
+            .expandedHeading {
+                color: black;
+                background: #F8F8F8;
+            }
+            .headerGroup {
+                position: relative; /* set to relative in order to correctly align the ul.menu */
                 margin-right: 15px;
                 cursor: pointer;
             }
-			ul.menu {
-				position: absolute;
-				top: 100%;
-				left: 0;
-				z-index: 1000;
-				min-width: 100px;
-				padding: 5px 0px 5px 0px;
-				margin: 0px;
-				list-style: none;
-				display: none;
-				text-align:left;
-				background-color:#F8F8F8;
-				padding:0;
-				/*border: 1px solid #CCC;*/
-				-webkit-border-radius: 5px;
-				-moz-border-radius: 5px;
-				border-radius: 5px 0px 5px 5px;
-				-webkit-box-shadow: 0 11px 10px rgba(0, 0, 0, 0.2);
-				-moz-box-shadow: 0 11px 10px rgba(0, 0, 0, 0.2);
-				box-shadow: 0 11px 10px rgba(0, 0, 0, 0.2);
-				-webkit-background-clip: padding-box;
-			}
-			ul.menu.right { 
-                right:0;
-                left:auto;
-                padding:5px 0px 5px 0px;
-                overflow-y:auto;
-                overflow-x:hidden;
-                max-height:550px; 
-                cursor: pointer;
+            ul.menu {
+                list-style: none; /* remove bullet points from menu */
+                margin: 0px;
+                padding: 0px;
+                position: absolute; /* remove the menu from the document flow */
+                background-color: #F8F8F8;
+                right: 0px; /* align the menu to the left */
+                box-shadow: 0 11px 10px rgba(0, 0, 0, 0.2); /* add shadow to the menu */
+                border-radius: 5px 0 0 0; /* round the top left corner of the menu */
+                max-height: 550px; /* Limit the length of the component list */
+                overflow: auto;
+                white-space: nowrap;
             }
-			ul.menu.left { right:auto; left:auto; padding:0 0 0 0; }
-			ul.menu.center { right:auto; left:-45%; }
-			ul.menu li { 
+            ul.menu li { 
                 padding: 4px; 
-                }
-			ul.menu li:hover { background:green; color:white; }
-			ul.menu li:hover a { color:white; }
-			ul.menu a { 
-                display:block;
-                color:black;
-                /*padding:4px;*/
-                }
-			ul.menu a:hover {color:white;}
-			ul.menu { display:block; color:black; padding:4px; }
-			ul.menu ul.menu:hover, ul.menu:visited:hover { color:white; }
-			div.buttonGroup { display:inline-block; position:relative; }
-			button.pill {
-				-webkit-touch-callout: none;
-				-webkit-user-select: none;
-				-khtml-user-select: none;
-				-moz-user-select: none;
-				-ms-user-select: none;
-				user-select: none;
-				color:white;
-				font-size:medium;
-				width: auto;
-				height:35px;
-				margin: 0px;
-				margin-top:-5px;
-				padding:0.3em;
-				border-radius: 5px 5px 0 0;
-				background-color:#E0E0E0;
-				display:inline-block;
-				border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;
-				white-space: nowrap;
-				display:inline-block;
-                cursor: pointer;
-			}
-			button.pill:hover{background:transparent;}
-
+            }
+            ul.menu li:hover {
+                background:green; color:white; 
+            }
             /**************************************************
             // Modal Dialogs
             **************************************************/
@@ -276,6 +183,9 @@
                 float: right;
             }
             .centered {
+                text-align: center;
+            }
+            .modalHeading {
                 text-align: center;
             }
             .modalInput {
@@ -518,59 +428,47 @@
             <!-- <div style='background:navy; top:215px; left:5px' id='saveLink' class='divButton' onclick='saveSvg()' title='Save File' download>S</div> -->
             <!-- Menu Bar -->
             <div id="header">
-                <div id="menuLeft">
+                <div id="menuLeft" class="white">
                     <h4>{{thisFeederName}}</h4>
                     <p>from "{{thisModelName}}"</p>
                 </div>
                 <div id="menuRight">
-                    <div id="helpDiv" class="headerDiv">
-                        <div class="buttonGroup">
-                            <button class="pill" type = "submit">
-                                <a id="helpButton" href="https://github.com/dpinney/omf/wiki/Tools-~-gridEdit" target="_blank">Help</a>
-                            </button>
-                        </div>
+                    <h4 style="padding: 5px; margin-right: 15px;"><a id="helpButton" class="white" href="https://github.com/dpinney/omf/wiki/Tools-~-gridEdit" target="_blank">Help</a></h4>
+                    <div class="headerGroup">
+                        <h4 class="menuHeading white">Edit &#x25BE</h4>
+                        <ul id="editMenu" class="menu" style="display: none;">
+                            <!--<li>Zoom To Fit</li>-->
+                            <!--<li>Zoom Reset</li>-->
+                            <li data-web>Add AMI Profiles...</li>
+                            <li data-web>Anonymization...</li>
+                            <li>Attachments...</li>
+                            <li data-web>Climate...</li>
+                            <li>Find...</li>
+                            <li>Mass Add...</li>
+                            <li>Mass Edit...</li>
+                            <li data-web>Scada Loadshapes...</li>
+                            <li>Static Loads to Houses</li>
+                            <li>Change opacity...</li>
+                            <li>Color Circuit...</li>
+                        </ul>
                     </div>
-                    <div id="editDiv" class="headerDiv">
-                        <div class="buttonGroup">
-                            <button id="addOps" class="pill" onclick="dropPill(this, 'Edit')">Edit &#x25BE;</button>
-                            <ul id="editMenu" class="menu right" style="display: none">
-                                <!--<li>Zoom To Fit</li>-->
-                                <!--<li>Zoom Reset</li>-->
-                                <li data-web>Add AMI Profiles...</li>
-                                <li data-web>Anonymization...</li>
-                                <li>Attachments...</li>
-                                <li data-web>Climate...</li>
-                                <li>Find...</li>
-                                <li>Mass Add...</li>
-                                <li>Mass Edit...</li>
-                                <li data-web>Scada Loadshapes...</li>
-                                <li>Static Loads to Houses</li>
-                                <li>Change opacity...</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div id="addDiv" class="headerDiv">
-                        <div class="buttonGroup">
-                            <button id="addOps" class="pill" onclick="dropPill(this, 'Add')">Add &#x25BE;</button>
-                            <ul id="componentList" class="menu right" style="display: none">
-                        </div>
+                    <div class="headerGroup">
+                        <h4 class="menuHeading white">Add &#x25BE;</h4>
+                        <ul id="componentList" class="menu" style="display: none"></ul>
                     </div>
                     {% if showFileMenu %}
-                    <div id="fileDiv" class="headerDiv">
-                        <div class="buttonGroup">
-                            <button id="fileOps" class="pill" onclick="dropPill(this, 'File')">File &#x25BE;</button>
-                            <ul id="fileMenu" class="menu right" style="display: none">
-                                <li data-web>Save</li>
-                                <li>View Raw Data</li>
-                                <li data-web>Rename</li>
-                                <li data-web>Load from Model...</li>
-                                <li data-web>New Blank Feeder...</li>
-                                <li data-web>Windmil Conversion...</li>
-                                <li data-web>GridLAB-D Conversion...</li>
-                                <li data-web>CYMDIST Conversion...</li>
-                                <li>Color Circuit...</li>
-                            </ul>
-                        </div>
+                    <div class="headerGroup">
+                        <h4 class="menuHeading white">File &#x25BE</h4>
+                        <ul id="fileMenu" class="menu" style="display: none">
+                            <li data-web>Save</li>
+                            <li>View Raw Data</li>
+                            <li data-web>Rename</li>
+                            <li data-web>Load from Model...</li>
+                            <li data-web>New Blank Feeder...</li>
+                            <li data-web>Windmil Conversion...</li>
+                            <li data-web>GridLAB-D Conversion...</li>
+                            <li data-web>CYMDIST Conversion...</li>
+                        </ul>
                     </div>
                     {% endif %}
                 </div>
@@ -824,30 +722,33 @@
             </div>
             <div id="massAddModal" class="modal" style="display: none">
                 <div class="modalContent">
-                    <form onsubmit="massAdd(); return false;">
-                        <table>
-                            <tbody>
-                                <tr><th colspan="2" class="fullPadded">Mass Add</th></tr>
-                                <tr>
-                                    <td class="fullPadded">Add component:</td>
-                                    <td class="fullPadded"><select id="componentSelect"></select></td>
-                                </tr>
-                                <tr>
-                                    <td class="fullPadded">To each:</td>
-                                    <td class="fullPadded"><select id="massAddTargetSelect"></select></td>
-                                </tr>
-                                <tr>
-                                    <td class="fullPadded">With probability for each attachment (float between 0.0 and 1.0):</td>
-                                    <td class="fullPadded"><input type="text" pattern="^(1.0)|(0?(\.\d+))$" required id="percent" value="1.0" class="modalInput"/></td>
-
-                                </tr>
-                                <tr>
-                                    <td class="fullPadded"><button onclick="toggleElementDisplay('massAddModal')" class="modalButton">Cancel</button></td>
-                                    <td class="fullPadded"><button type="submit" class="right modalButton">Apply</button></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </form>
+                    <table>
+                        <tbody>
+                            <tr><th colspan="2" class="fullPadded">Mass Add</th></tr>
+                            <tr>
+                                <td class="fullPadded">Add component:</td>
+                                <td class="fullPadded"><select id="massAddComponentSelect"></select></td>
+                            </tr>
+                            <tr>
+                                <td class="fullPadded">To each:</td>
+                                <td class="fullPadded"><select id="massAddTargetSelect"></select></td>
+                            </tr>
+                            <tr>
+                                <td class="fullPadded">With probability for each attachment (float between 0.0 and 1.0):</td>
+                                <td class="fullPadded"><input type="text" value="1.0" class="modalInput"/></td>
+                            </tr>
+                            <tr>
+                                <td class="fullPadded"><button onclick="toggleElementDisplay('massAddModal')" class="modalButton">Cancel</button></td>
+                                <td class="fullPadded"><button data-buttonfunction="submit" class="right modalButton">Apply</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div id="massAddSecondaryModal" class="modal" style="display: none;">
+                <div class="modalContent">
+                    <h3></h3>
+                    <div data-tableinsert></div>
                 </div>
             </div>
             <div id="massEditModal" class="modal" style="display: none">
@@ -1039,6 +940,8 @@
                                     <td class="fullPadded">
                                         <input type="checkbox" id="shuffleLoadGen" name="shuffleLoadGen" value="shuffleLoadGen">
                                         <label for="shuffleLoadGen">Shuffle loads and generators:</label>
+                                        <!--<input type="text" name="shufflePerc" class="modalInputLine"> [%]</label>-->
+                                        <!--Commented both of these out because I think the server expects a fractional decimal number-->
                                         <input type="text" pattern="^[+-]?\d+(\.\d+)?$" name="shufflePerc" class="modalInputLine"> [%]</label>
                                     </td>
                                 </tr>
@@ -1046,6 +949,7 @@
                                     <td class="fullPadded">
                                         <input type="checkbox" id="addNoise" name="addNoise" value="addNoise">
                                         <label for="addNoise">Add noise:</label>
+                                        <!--<input type="text" name="noisePerc" class="modalInputLine"> [%]</label>-->
                                         <input type="text" pattern="^[+-]?\d+(\.\d+)?$" name="noisePerc" class="modalInputLine"> [%]</label>
                                     </td>
                                 </tr>
@@ -1085,9 +989,7 @@
         </div>
 	</body>
 </html>
-<script id="componentsInsert">const gComponents = {% if components %}{{ components | safe }}{% else %}null{% endif %}; 
-</script>
-<script id="feederInsert">const gReadFeeder = {% if thisFeederData %}{{ thisFeederData | safe }}{% else %}null{% endif %}; 
+<script id="feederInsert">let gReadFeeder = {% if thisFeederData %}{{ thisFeederData | safe }}{% else %}null{% endif %}; 
 </script>
 <style id="jqueryCssInsert">
 </style>
@@ -1102,7 +1004,12 @@
 <script id="papaParseInsert">
 </script>
 <script type="text/javascript">
-//"use strict";
+
+//**************************************************
+// global variables
+//**************************************************
+
+"use strict";
 let gThisFeederName = "{% if thisFeederName %}{{ thisFeederName | safe }}{% else %}null{% endif %}";
 const gThisFeederNum = {% if thisFeederNum %}{{ thisFeederNum | safe }}{% else %}null{% endif %}; 
 const gThisModelName = "{% if thisModelName %}{{ thisModelName | safe }}{% else %}null{% endif %}"; 
@@ -1112,9 +1019,11 @@ const gPublicFeeders = {% if publicFeeders %}{{ publicFeeders | safe }}{% else %
 const gUserFeeders = {% if userFeeders %}{{ userFeeders | safe }}{% else %}null{% endif %}; 
 const gWriteFeeder = deepCopy(gReadFeeder);
 let gTree; // A wrapper around the gWriteFeeder.tree data structure. Has methods for accessing and modifying the data.
+let gComponentManager; // A wrapper around all component.json objects.
 let gSelection;
 let gViewport; 
 let gOpacityManager;
+let gAddManager;
 let gMinLon; // The minimum longitude found among all the gWriteFeeder.tree objects. Used to transform and flip how the graph is drawn.
 let gMaxLat; // The maximum latitude found among all the gWriteFeeder.tree objects. Used to transform and flip how the graph is drawn.
 let gDrawScaleFactor; // A number that scales all graph data to fit within a 1000 x 1000 viewport size so the graph draws nicely.
@@ -1122,6 +1031,701 @@ let gDownX;
 let gDownY;
 const gViridisColors = ["#440154FF", "#481567FF", "#482677FF", "#453781FF", "#404788FF", "#39568CFF", "#33638DFF", "#2D708EFF", "#287D8EFF", "#238A8DFF", "#1F968BFF", "#20A387FF", "#29AF7FFF", "#3CBB75FF", "#55C667FF", "#73D055FF", "#95D840FF", "#B8DE29FF", "#DCE319FF", "#FDE725FF"];
 let gScaleLevel = 1.0; // Scale that all SVG objects are drawn at
+
+//**************************************************
+// Tree class
+//**************************************************
+
+const treePrototype = {
+
+    /* Public methods */
+
+    /**
+     * tested.
+     */
+    getObject(key) {
+        const obj = this.tree[key];
+        if (obj == null) throw new Error(`getObject() failed. The object with the key "${key}" does not exist in the Tree.`);
+        return this.tree[key];
+    },
+
+    /**
+     * not tested. 
+     */
+    getParent(childKey) {
+        const parentKey = this.treeMap.getParentKey(childKey);
+        if (parentKey == null) return;
+        return this.getObject(parentKey);
+    },
+
+    /**
+     * not tested.
+     */
+    getToNodeKey(lineKey) {
+        const sourceName = this.tree[lineKey].to;
+        if (sourceName == null) return;
+        let key;
+        try {
+            key = this.treeMap.getKey(sourceName);
+        } catch (e) {
+            console.error(`The line object named "${this.getObject(lineKey).name}" has a nonexistent source node named "${sourceName}". The line was not drawn.`);
+        }
+        return key;
+    },
+
+    /**
+     * not tested.
+     */
+    getToNode(lineKey) {
+        const sourceKey = this.getToNodeKey(lineKey);
+        if (sourceKey == null) return;
+        return this.getObject(sourceKey);
+    },
+
+    /**
+     * not tested.
+     */
+    getFromNodeKey(lineKey) {
+        const targetName = this.tree[lineKey].from;
+        if (targetName == null) return;
+        let key;
+        try {
+            key = this.treeMap.getKey(targetName);
+        } catch (e) {
+            console.error(`The line object named "${this.getObject(lineKey).name}" has a nonexistent target node named "${targetName}". The line was not drawn.`);
+        }
+        return key;
+    },
+
+    /**
+     * not tested.
+     */
+    getFromNode(lineKey) {
+        const targetKey = this.getFromNodeKey(lineKey);
+        if (targetKey == null) return;
+        return this.getObject(targetKey);
+    },
+
+    /**
+     * not tested.
+     */
+    getPairedNodeKeys(nodeKey) {
+        const pairedNodes = [];
+        const lineKeys = this.treeMap.getLineKeys(nodeKey);
+        if (lineKeys == null) return;
+        lineKeys.forEach(key => {
+            if (this.getToNodeKey(key) === nodeKey) {
+                pairedNodes.push(this.getFromNodeKey(key));
+            } else {
+                pairedNodes.push(this.getToNodeKey(key));
+            }
+        });
+        return pairedNodes;
+    },
+
+    /**
+     * tested.
+     */
+    insert(treeObject) {
+        this.tree[treeObject.key] = treeObject.data;
+        this.treeMap.add(treeObject.key);
+    },
+
+    /** 
+     * tested.
+     */
+    isDeletable(key) {
+        this.getObject(key);
+        const children = this.treeMap.getChildKeys(key);
+        if (children != null) return false;
+        const lines = this.treeMap.getLineKeys(key);
+        if (lines != null) return false;
+        return true;
+    },
+
+    /**
+     * not tested.
+     * @param {Array} keys
+     */
+    delete(keys) {
+        this.treeMap.remove(keys);
+        keys.forEach(key => {
+            this.getObject(key);
+            delete this.tree[key];
+        });
+    },
+
+    /** 
+     * tested.
+     * Return an array of keys that need to be deleted as a result of deleting a tree object.
+     * 
+     * @param {string} key - the key of the tree object for which to find its deletable subtree.
+     * @param {Array} visited - contains keys of tree objects that have already been visited so the method dosen't * recurse infinitely in case of a cycle.
+     * @return {Array}
+     */
+    getSubtreeToDelete(key, visited = []) {
+        if (!Array.isArray(visited)) throw new Error("Visited argument must be an array");
+        visited.push(key);
+        const keySet = new Set();
+        const lines = this.treeMap.getLineKeys(key);
+        const children = this.treeMap.getChildKeys(key);
+        if (lines != null) lines.forEach(key => keySet.add(key));
+        if (children != null) children.forEach(key => keySet.add(key));
+        keySet.forEach(outerKey => {
+            if (!visited.includes(outerKey)) {
+                this.getSubtreeToDelete(outerKey, visited).forEach(innerKey => keySet.add(innerKey));
+            }
+        });
+        return Array.from(keySet);
+    },
+
+    /* Private methods */
+};
+
+/**
+* tested.
+*/
+function createTree(tree = {}) {
+    const invalidKeys = [];
+    const invalidCoordinateKeys = [];
+    Object.keys(tree).forEach(key => {
+        if (!isNumberString(key)) invalidKeys.push(key);
+        ["longitude", "latitude"].forEach(prop => {
+            if (tree[key][prop] != null) {
+                if (isNumberString(tree[key][prop])) {
+                    tree[key][prop] = parseFloat(tree[key][prop])
+                } else if (typeof tree[key][prop] !== "number") {
+                    invalidCoordinateKeys.push(key);
+                }
+            }
+        });
+    });
+    if (invalidKeys.length !== 0) {
+        throw new Error(`Interface could not be built. The following object keys aren't numbers: "${invalidKeys}".`);
+    }
+    if (invalidCoordinateKeys.length !== 0) {
+        throw new Error(`Interface could not be built. The following object keys have objects with non-numeric longitude or latitude values: "${invalidCoordinateKeys.join(", ")}".`);
+    }
+    const treeWrapper = Object.create(treePrototype);
+    treeWrapper.tree = tree;
+    treeWrapper.treeMap = createTreeMap(tree);
+    return treeWrapper;
+}
+
+//**************************************************
+// TreeMap class
+//**************************************************
+
+const treeMapPrototype = {
+
+    /* Public methods */
+
+   /**
+    * not tested.
+    */
+    add(key) {
+        this.mapName(key);
+        this.mapChild(key);
+        this.mapLine(key);
+    },
+
+   /**
+    * not tested.
+    * @param {Array} keys
+    */
+    remove(keys) {
+        keys.forEach(key => {
+            this.unmapLine(key);
+            this.unmapChild(key);
+        });
+        keys.forEach(key => {
+            this.unmapName(key);
+        });
+    },
+
+   /**
+    * not tested.
+    * This should throw an Error. If I provide what I believe is a valid name, I expect to get a key!
+    */
+    getKey(name) {
+        if (name == null) {
+            throw new Error(`getKey() failed. The name: "${name}" is invalid.`);
+        }
+        const key = this.names[name];
+        if (key === undefined) {
+            throw new Error(`getKey() failed. Did not find the name "${name}" in this.names.`);
+        }
+        return key;
+    },
+
+   /**
+    * not tested.
+    */
+    getChildKeys(key) {
+        return this.children[key];
+    },
+
+   /**
+    * not tested.
+    */
+    getLineKeys(key) {
+        return this.lines[key];
+    },
+
+   /**
+    * not tested.
+    */
+    getParentKey(childKey) {
+        const parentName = this.tree[childKey].parent;
+        if (parentName === undefined) return;
+        let parentKey;
+        try {
+            parentKey = this.getKey(parentName);
+        } catch (e) {
+            console.error(`The child object named "${this.tree[childKey].name}" has a nonexistent parent object named "${parentName}". The parent-child line was not drawn.`);
+            return;
+        }
+        return parentKey;
+    },
+
+    /* Private TreeMap methods */
+
+    /**
+    * not tested.
+    */
+    getNodeEndKeys(lineKey) {
+        const sourceName = this.tree[lineKey].to;
+        const targetName = this.tree[lineKey].from;
+        let sourceKey, targetKey;
+        if (sourceName === undefined && targetName === undefined) return {};
+        if (sourceName !== undefined && targetName !== undefined) {
+            try {
+                sourceKey = this.getKey(sourceName);
+                targetKey = this.getKey(targetName);
+            } catch(e) {
+                //Commented out because this message is redundant and less helpful than other error messages
+                //console.error(`The line object named "${this.tree[lineKey].name}" has nonexistent 'to' and/or 'from' nodes.`);
+                return {};
+            }
+        } else {
+            console.error(`The line object named "${this.tree[lineKey].name}" is missing a 'to' or 'from' property.`);
+            return {};
+        }
+        return {sourceKey: sourceKey, targetKey: targetKey};
+    },
+
+   /**
+    * not tested. 
+    */
+    mapName(key) {
+        const name = this.tree[key].name;
+        if (name == null) return; // TODO: Do I allow names to be null at all?
+        const lowercaseName = String(name).toLowerCase();
+        if (lowercaseName === "null" || lowercaseName === "undefined") return;
+        this.names[name] = key;
+    },
+
+   /**
+    * not tested.
+    */
+    unmapName(key) {
+        const name = this.tree[key].name;
+        if (name == null) return;
+        delete this.names[name];
+    },
+
+    /**
+    * not tested.
+    */
+    mapChild(childKey) {
+        const parentKey = this.getParentKey(childKey);
+        if (parentKey == null) return;
+        if (this.children[parentKey] == null) {
+            this.children[parentKey] = [childKey];
+        } else if (!this.children[parentKey].includes(childKey)) {
+            this.children[parentKey].push(childKey);
+        } 
+    },
+
+   /**
+    * not tested.
+    */
+    unmapChild(childKey) {
+        const parentKey = this.getParentKey(childKey);
+        if (parentKey == null) return;
+        const idx = this.children[parentKey].indexOf(childKey);
+        if (idx >= 0) {
+            this.children[parentKey].splice(idx, 1);
+            if (this.children[parentKey].length === 0) {
+                delete this.children[parentKey];
+            }
+        } else {
+            console.error(`Could not unmap child with key "${childKey}" from parent with key ${parentKey}.`);
+        }
+    },
+
+   /**
+    * not tested. 
+    */
+    mapLine(lineKey) {
+        let {sourceKey, targetKey} = this.getNodeEndKeys(lineKey);
+        if (sourceKey == null || targetKey == null) return;
+        if (this.lines[sourceKey] == null) {
+            this.lines[sourceKey] = [lineKey];
+        } else if (!this.lines[sourceKey].includes(lineKey)) {
+            this.lines[sourceKey].push(lineKey);
+        }
+        if (this.lines[targetKey] == null) {
+            this.lines[targetKey] = [lineKey];
+        } else if (!this.lines[targetKey].includes(lineKey)) {
+            this.lines[targetKey].push(lineKey);
+        }
+    },
+
+   /**
+    * not tested.
+    */
+    unmapLine(lineKey) {
+        let {sourceKey, targetKey} = this.getNodeEndKeys(lineKey);
+        if (sourceKey == null || targetKey == null) return;
+        [sourceKey, targetKey].forEach(key => {
+            const idx = this.lines[key].indexOf(lineKey);
+            if (idx >= 0) {
+                this.lines[key].splice(idx, 1);
+                if (this.lines[key].length === 0) {
+                    delete this.lines[key];
+                }
+            } else {
+                console.error(`Could not unmap line with key "${lineKey}" from node with key "${key}".`);
+            }
+        });
+    },
+};
+
+/**
+ * tested.
+ */
+function createTreeMap(tree) {
+    const map = Object.create(treeMapPrototype);
+    map.tree = tree;
+    map.names = {};
+    map.children = {};
+    map.lines = {};
+    //map.objectTypes = {};
+    const keys = Object.keys(tree);
+    keys.forEach(key => {
+        map.mapName(key);
+    });
+    keys.forEach(key => {
+        map.mapChild(key);
+        map.mapLine(key);
+    });
+    return map;
+}
+
+//**************************************************
+// ComponentManager class
+//**************************************************
+
+const componentManagerPrototype = {
+
+    /* Public methods */
+
+    /**
+     * tested.
+     */
+    insert(component) {
+        if (component.object == null) {
+            alert(`The component ${JSON.stringify(component)} was invalid.`);
+            return;
+        }
+        if (component.name == null) component.name = component.object;
+        let objectMap = this.components[component.object];
+        if (objectMap == null) {
+            this.components[component.object] = {};
+            objectMap = this.components[component.object];
+        }
+        if (objectMap[component.name] != null) {
+            component.name = this.getUniqueName(objectMap, component.name);
+        }
+        objectMap[component.name] = component;
+    },
+
+    /**
+     * @return {Array} - an array of component types.
+     */
+    getTypes() {
+        return Object.keys(this.components);
+    },
+
+    /**
+     * @return {Array|undefined} - an array of component names of the specified type, or undefined.
+     */
+    getNamesOfType(objectType) {
+        const objects = this.components[objectType];
+        return objects == null ? undefined : Object.keys(objects);
+    },
+
+    get(objectType, name) {
+        const objectMap = this.components[objectType];
+        return objectMap == null ? undefined : objectMap[name];
+    },
+
+    getAny(objectType) {
+        const names = this.getNamesOfType(objectType);
+        return names == null ? undefined : this.components[objectType][names[0]];
+    },
+
+    /* Private methods */
+
+    getUniqueName(objectMap, name) {
+        const originalName = name;
+        let count = 0;
+        while (objectMap[name] != null) {
+            count++;
+            name = `${originalName}_${count}`;
+        }
+        return name;
+    }
+}
+
+function createComponentManager() {
+    const cm = Object.create(componentManagerPrototype);
+    cm.components = {};
+    return cm;
+}
+
+// Insert the components into the gComponentManager
+(() => {
+    const components = {% if components %}{{ components | safe }}{% else %}null{% endif %};
+    gComponentManager = createComponentManager();
+    Object.values(components).forEach(c => {
+        gComponentManager.insert(c);
+    });
+})();
+
+//**************************************************
+// addManager class
+//**************************************************
+
+const addManagerPrototype = {
+
+    /* Public methods */
+
+    /**
+     * not tested.
+     */ 
+    massAdd() {
+        const component = this.component;
+        const targetObject = this.target;
+        const probability = this.probability;
+        if (component.object == null) {
+            alert("Please select a component to add.");
+            return;
+        }
+        else if (targetObject === "") {
+            alert("Please select an object to add to.");
+            return;
+        }
+        if (component.object === "recorder" || getRelationship(gComponentManager.getAny(targetObject)) !== "line") {
+            const newObjects = [];
+            const pm = new ProgressModal(`Adding a "${component.object}" object to every "${targetObject}" object. This could take a few seconds.`);
+            pm.show();
+            setTimeout(() => {
+                Object.keys(gTree.tree).forEach(key => {
+                    if (gTree.getObject(key).object === targetObject && Math.random() < probability) {
+                        const tObject = createTreeObject(component, gTree);
+                        tObject.setupChildNode(key);
+                        gTree.insert(tObject);
+                        newObjects.push(tObject.key);
+                    }
+                });
+                createSvgData(newObjects).draw(gViewport);
+                pm.hide();
+                alert(`${newObjects.length} "${component.name}" objects added to the feeder`);
+                toggleElementDisplay("massAddModal");
+            }, 10);
+        } else {
+            alert("Mass add failed. No object can be added as a child of a line, except for recorder objects.");
+        }
+    },
+
+    /**
+     * TODO: implement formatting function and test on this table.
+     * @param {string} type - The type of the object to view.
+     * @param {boolean} massAdd - Whether or not this is a mass add operation.
+     */ 
+    buildSecondaryModal(type, massAdd=false) {
+        const that = this;
+        const modal = document.getElementById("massAddSecondaryModal");     
+        modal.removeAttribute("style");
+        const tableDiv = modal.querySelector("[data-tableinsert]");
+        Array.from(tableDiv.children).forEach(child => {
+            child.parentElement.removeChild(child);
+        });
+        modal.querySelector("h3").textContent = type;
+        const table = document.createElement("table");
+        const tBody = document.createElement("tbody");
+        table.append(tBody);
+
+        const names = gComponentManager.getNamesOfType(type);
+        names.forEach(name => {
+            const tr = document.createElement("tr");
+            let td = document.createElement("td");
+            tr.append(td);
+            const component = gComponentManager.get(type, name);
+            let button;
+            if (massAdd === false) {
+                button = getTableButton("Add", () => {
+                    modal.style.display = "none";
+                    getAddComponentFunction(component)();
+                });
+            } else {
+                button = getTableButton("Select", () => {
+                    modal.style.display = "none";
+                    that.component = component;
+                });
+            }
+            td.append(button);
+            td = document.createElement("td");
+            td.textContent = name;
+            tr.append(td);
+            tBody.append(tr);
+        });
+        formatModal(modal);
+        formatTable(table);
+        tableDiv.append(table);
+    },
+
+    /**
+     * Not tested.
+     */
+    setupTargetSelect() {
+        const select = document.getElementById("massAddTargetSelect");
+        select.innerHTML = "";
+        select.innerHTML += `<option value=${""}>${""}</option>`;
+        const types = []
+        const relationships = getExistingRelationships();
+        Object.keys(relationships).forEach(key => {
+            if (key !== "configurationNode") {
+                relationships[key].forEach(type => {
+                    types.push(type);
+                });
+            }
+        });
+        const that = this;
+        types.map(type => type.toLowerCase()).sort().forEach(lowercaseType => {
+            const key = gComponentManager.getTypes().includes(lowercaseType) ? lowercaseType : getMixedCaseKey(gComponentManager.components, lowercaseType);
+            const option = document.createElement("option");
+            option.textContent = key;
+            option.value = key;
+            // Don't add event listeners to option elements, add them to the select element.
+            select.append(option);
+        });
+        select.onchange = function() {
+            that.target = this.value;
+        }
+    },
+
+    /* Private methods */
+
+    /**
+     * I don't need to build the primary modal, but I do need to set it up.
+     * When "close" is clicked, this instance of addManager never goes away (memory leak) because of the reference to the primary modal. Also because the document elements have event listeners that link to the addManager. Easy solution is just to have one global addManager. It would be interesting to test this memory leak hypothesis. Also I'm adding multiple event listeners to the same element right?
+     */
+    setupPrimaryModal() {
+        const primaryModal = document.getElementById("massAddModal");
+        const input = primaryModal.querySelector("input");
+        const that = this;
+        // Don't want to add an event listener every time this is set up.
+        input.onchange = function() {
+            that.setProbability(this);
+        }
+        const applyButton = primaryModal.querySelector("button[data-buttonfunction=submit]");
+        applyButton.onclick = function() {
+            that.massAdd();
+            that.reset();
+        }
+    },
+
+    /**
+     * The components never change, so don't bother updating. We can only add child components.
+     */
+    setupComponentSelect() {
+        const select = document.getElementById("massAddComponentSelect");
+        select.innerHTML += `<option value=${""}>${""}</option>`;// TODO: add blank item
+        const that = this;
+        gComponentManager.getTypes().forEach(type => {
+            //TODO: alphabetize
+            if (getRelationship(gComponentManager.getAny(type)) === "childNode") {
+                const names = gComponentManager.getNamesOfType(type);
+                const option = document.createElement("option");
+                select.append(option);
+                if (names.length === 1) {
+                    //TODO: show the name in the modal
+                    option.value = "finish";
+                    option.textContent = type;
+                } else {
+                    option.value = "continue";
+                    option.textContent = `${type}...`;
+                }
+            }
+        });
+        select.addEventListener("change", function() {
+            const value = this.options[this.selectedIndex].value;
+            if (value === "") {
+                that.component = {};
+            }
+            else {
+                let type = this.options[this.selectedIndex].textContent;
+                if (value === "finish") {
+                    const name = gComponentManager.getNamesOfType(type)[0];
+                    that.component = gComponentManager.get(type, name);
+                } else if (value === "continue"){
+                    type = type.replace(/[.]{3}/, "");
+                    that.buildSecondaryModal(type, true);
+                }
+            }
+        });
+    },
+
+    setComponent() {
+
+    },
+
+    //add on change anonymous listener to input
+    setProbability(input) {
+        let float = input.value;
+        if (!isNumberString(float) || parseFloat(float) > 1.0 || parseFloat(float) < 0) {
+            alert("Please enter a valid number for attachment probability.");
+            input.value = this.probability;
+        } else {
+            this.probability = parseFloat(float)
+        }
+    },
+
+    reset() {
+        const modal = document.getElementById("massAddModal");
+        modal.querySelectorAll("select").forEach(s => {
+            s.selectedIndex = 0;
+        });
+        modal.querySelector("input").value = 1.0;
+        this.target = "";
+        this.component = {};
+        this.probability = 1;
+    }
+}
+
+function createAddManager() {
+    const am = Object.create(addManagerPrototype);
+    am.probability = 1.0; //default so there's never an invalid value
+    am.target = "";
+    am.component = {}; //need to display component.name
+    am.setupComponentSelect();
+    am.setupPrimaryModal();
+    return am;
+}
+
 //**************************************************
 // Selection Interface
 //**************************************************
@@ -1349,25 +1953,6 @@ function scaleTo(x) {
 	}
 }
 
-function dropPill(thisButton, name) { // eslint-disable-line
-	// This function is used to make the dropdown menus work.
-	thisButton.style.color= "black"
-	thisButton.style.background= "#F8F8F8"
-	thisButton.style.textAlign = "left"
-	thisButton.nextSibling.nextSibling.style.display = "inline-block"
-	thisButton.innerHTML = name + " &#x25B4;"
-	function clickCloseEvent() {
-		thisButton.nextSibling.nextSibling.style.display = "none"
-		thisButton.innerHTML = name + " &#x25BE;"
-		this.removeEventListener("click", arguments.callee, true)
-		thisButton.style.color= "white"
-		thisButton.style.background= "transparent"
-		if (window.event.toElement==thisButton) {event.stopPropagation()}
-	}
-    //document.body.addEventListener("click", clickCloseEvent, true)
-    document.getElementById("interfaceContainer").addEventListener("click", clickCloseEvent, true)
-}
-
 //Returns real Lat/Long of a click event, used in the moveBus function
 function clickLatLon(event) {
 	const pan = window.panZoom.getPan();
@@ -1441,7 +2026,7 @@ function findExactString(string) {
         for (let propertyKey in tree[key]) {
             let propertyVal = tree[key][propertyKey];
             if (typeof(propertyVal) !== "string") propertyVal += "";
-            if (propertyKey.toLowerCase === string.toLowerCase()) {
+            if (propertyKey.toLowerCase() === string.toLowerCase()) {
                 keys.push(key);
                 break;
             } else if (propertyVal.toLowerCase() === string.toLowerCase()) {
@@ -1553,15 +2138,7 @@ function disableJQueryFunctionality() {
 // Header menu functions
 //**************************************************
 
-// keep this
-function attachHandlers() {
-    attachAddComponentListeners();
-    attachFeederList(document.getElementById("publicFeederList"), gPublicFeeders, "public");
-    attachFeederList(document.getElementById("userFeederList"), gUserFeeders, gCurrentUser);
-    //attachFeederList(document.getElementById("userFeederList"), gUserFeeders, gThisOwner);
-    addFileMenuHandlers();
-    addEditMenuHandlers();
-}
+
 
 //delete this eventually
 function insertIndependentComponent(component) {
@@ -1591,8 +2168,8 @@ function insertChildComponent(keys, component) {
             let parent;
             try {
                 parent = gTree.getObject(event.target.id);
-                if (parent != null && getType(parent) !== "configurationNode") {
-                    if (component.object === "recorder" || getType(parent) !== "line") {
+                if (parent != null && getRelationship(parent) !== "configurationNode") {
+                    if (component.object === "recorder" || getRelationship(parent) !== "line") {
                         const tObject = createTreeObject(component, gTree);
                         tObject.setupChildNode(event.target.id);
                         gTree.insert(tObject);
@@ -1631,14 +2208,14 @@ function insertLineComponent(keys, component) {
             event.stopPropagation();
             try {
                 const node = gTree.getObject(event.target.id);
-                const type = getType(node);
-                if (type === "childNode" || type === "independentNode") {
+                const relationship = getRelationship(node);
+                if (relationship === "childNode" || relationship === "independentNode") {
                     if (!gSelection.hasId(event.target.id)) {
                         gSelection.add(event.target);
                         nodes.push(event.target.id);
                     }
                 } else {
-                    alert(`You clicked on a "${type}" type object. Please click on a circle that is not a configuration node.`);
+                    alert(`You clicked on a "${relationship}" type object. Please click on a circle that is not a configuration node.`);
                     return;
                 }
             } catch (e) {
@@ -1665,51 +2242,140 @@ function insertLineComponent(keys, component) {
         createSvgData(newObjects).draw(gViewport);
     }
 }
+
+//**************************************************
+// Handler functions
+//**************************************************
+
+function attachHandlers() {
+    componentHandlers();
+    fillFeederList(document.getElementById("publicFeederList"), gPublicFeeders, "public");
+    fillFeederList(document.getElementById("userFeederList"), gUserFeeders, gCurrentUser);
+    fileMenuHandlers();
+    editMenuHandlers();
+    mouseHandler();
+    keyHandler();
+    headerHandlers();
+}
+
+function headerHandlers() {
+    Array.from(document.querySelectorAll("div.headerGroup")).forEach(h => {
+        h.addEventListener("click", toggleHeader);
+    });
+}
+
+function toggleHeader() {
+    const heading = this.querySelector(".menuHeading");
+    if (heading.classList.contains("expandedHeading")) {
+        // Close this header if it was open
+        closeHeader.call(this);
+    } else {
+        // Open this header and close all other headers
+        expandHeader.call(this);
+        const that = this;
+        Array.from(document.querySelectorAll("div.headerGroup")).forEach(div => {
+            if (div !== that) {
+                closeHeader.call(div);
+            }
+        });
+    }
+}
+
+function expandHeader() {
+    const heading = this.querySelector(".menuHeading");
+    const headingName = heading.textContent.split(" ")[0];
+    if (!heading.classList.contains("expandedHeading")) {
+        heading.classList.add("expandedHeading");
+        heading.innerHTML = headingName + " &#x25B4;";
+        this.querySelector("ul").removeAttribute("style");
+    }
+}
+
+function closeHeader() {
+    const heading = this.querySelector(".menuHeading");
+    const headingName = heading.textContent.split(" ")[0];
+    if (heading.classList.contains("expandedHeading")) {
+        heading.classList.remove("expandedHeading");
+        heading.innerHTML = headingName + " &#x25BE;";
+        this.querySelector("ul").style.display = "none";
+    }
+}
+
 /** 
  * TODO: add a click listener instead of doing it backwards!
  * Fill menu of "Add" button and add its handler functions.
  */
-function attachAddComponentListeners() {
+/* How do I handle component variations within the select? 
+*/
+function componentHandlers() {
 	const ul = document.getElementById("componentList");
-    const select = document.getElementById("componentSelect");
-    const keys = Object.keys(gComponents).map(key => key.toLowerCase()).sort();
+    const keys = gComponentManager.getTypes().map(type => type.toLowerCase()).sort();
     keys.forEach(key => {
 		const li = document.createElement("li");
         ul.appendChild(li);
-        let component = gComponents[key];
-        if (component == null) {
-            key = getMixedCaseKey(gComponents, key);
-            component = gComponents[key];
+        let names = gComponentManager.getNamesOfType(key);
+        if (names == null) {
+            key = getMixedCaseKey(gComponentManager.components, key);
+            names = gComponentManager.getNamesOfType(key);
         }
-        li.textContent = key;
-        const type = getType(component);
-        switch (type) {
-            case "independentNode":
-            case "configurationNode":
-                li.addEventListener("click", function() {
-                    if (isValidForAdd(gSelection.getKeys(), component)) {
-                        insertIndependentComponent(component);
-                    }
-                });
-                break;
-            case "childNode":
-                li.addEventListener("click", function() {
-                    if (isValidForAdd(gSelection.getKeys(), component)) {
-                        insertChildComponent(gSelection.getKeys(), component);
-                    }
-                });
-                // We only add child nodes to the massAdd() selection
-                select.innerHTML += `<option value=${key}>${key}</option>`;
-                break;
-            case "line":
-                li.addEventListener("click", function() {
-                    if (isValidForAdd(gSelection.getKeys(), component)) {
-                        insertLineComponent(gSelection.getKeys(), component);
-                    }
-                });
-                break;
+        if (names.length === 1) {
+            li.textContent = key;
+            const component = gComponentManager.get(key, names[0]);
+            const func = getAddComponentFunction(component);
+            li.addEventListener("click", func);
+        } else {
+            li.textContent = `${key}...`;
+            li.addEventListener("click", function() {
+                gAddManager.buildSecondaryModal(key);
+            });
         }
     });
+}
+
+//TODO: move to add manager
+function getAddComponentFunction(component) {
+    let func;
+    const relationship = getRelationship(component);
+    switch (relationship) {
+        case "independentNode":
+        case "configurationNode":
+            func = function() {
+                if (isValidForAdd(gSelection.getKeys(), component)) {
+                    insertIndependentComponent(component);
+                }
+            }
+            //li.addEventListener("click", function() {
+            //    if (isValidForAdd(gSelection.getKeys(), component)) {
+            //        insertIndependentComponent(component);
+            //    }
+            //});
+            break;
+        case "childNode":
+            func = function() {
+                if (isValidForAdd(gSelection.getKeys(), component)) {
+                    insertChildComponent(gSelection.getKeys(), component);
+                }
+            }
+            //li.addEventListener("click", function() {
+            //    if (isValidForAdd(gSelection.getKeys(), component)) {
+            //        insertChildComponent(gSelection.getKeys(), component);
+            //    }
+            //});
+            break;
+        case "line":
+            func = function() {
+                if (isValidForAdd(gSelection.getKeys(), component)) {
+                    insertLineComponent(gSelection.getKeys(), component);
+                }
+            }
+            //li.addEventListener("click", function() {
+            //    if (isValidForAdd(gSelection.getKeys(), component)) {
+            //        insertLineComponent(gSelection.getKeys(), component);
+            //    }
+            //});
+            break;
+    }
+    return func;
 }
 
 /** 
@@ -1718,7 +2384,7 @@ function attachAddComponentListeners() {
  * @param {Array} feeders - An array of objects, where each object has properties "model" and "name", or null. 
  * @param {string} owner - Either "public" or the current user.
  */
-function attachFeederList(ul, feeders, owner=null) {
+function fillFeederList(ul, feeders, owner=null) {
     if (!feeders) return;
     const sortedNames = feeders.map(feeder => feeder.name.toLowerCase()).sort();
     sortedNames.forEach(lowercaseName => {
@@ -1741,13 +2407,13 @@ function attachFeederList(ul, feeders, owner=null) {
 /**
  * Doesn't need unit tests
  */
-function addFileMenuHandlers() {
+function fileMenuHandlers() {
     const menu = document.getElementById("fileMenu");
     if (menu == null) {
         return;
     }
     const items = Array.from(menu.children);
-    if (items.length !== 9) {
+    if (items.length !== 8) {
         throw new Error("Please update this function to ensure the correct handlers are attached");
     }
     items[0].addEventListener("click", function() {
@@ -1760,16 +2426,16 @@ function addFileMenuHandlers() {
     items[5].addEventListener("click", () => { toggleElementDisplay("milsoftModal"); });
     items[6].addEventListener("click", () => { toggleElementDisplay("gridlabdModal"); });
     items[7].addEventListener("click", () => { toggleElementDisplay("cymeModal"); });
-    items[8].addEventListener("click", () => { toggleElementDisplay("colorModal"); });
+    //items[8].addEventListener("click", () => { toggleElementDisplay("colorModal"); });
 }
 
 /** 
  * 
  */
-function addEditMenuHandlers() {
+function editMenuHandlers() {
     const menu = document.getElementById("editMenu");
     const items = Array.from(menu.children);
-    if (items.length != 10) {
+    if (items.length != 11) {
         throw new Error("Please update this function to ensure the correct handlers are attached");
     }
     //items[0].addEventListener("click", zoomToFit);
@@ -1786,7 +2452,7 @@ function addEditMenuHandlers() {
         document.getElementById("searchInput").focus(); 
     });
     items[5].addEventListener("click", function() {
-        updateAttachTargets("massAddTargetSelect", gTree.tree);
+        gAddManager.setupTargetSelect();
         toggleElementDisplay("massAddModal");
     });
     items[6].addEventListener("click", function() {
@@ -1798,6 +2464,57 @@ function addEditMenuHandlers() {
     items[9].addEventListener("click", function() {
         gOpacityManager.update();
         gOpacityManager.buildOpacityModal();
+    });
+    items[10].addEventListener("click", () => { toggleElementDisplay("colorModal"); });
+}
+
+function mouseHandler() {
+    const svgContainerWrapper = document.getElementById("svgContainerWrapper");
+    svgContainerWrapper.addEventListener("click", function(event) {
+        handleSelection(event);
+    });
+    svgContainerWrapper.addEventListener("mousedown", function(event) {
+        gDownX = event.clientX;
+    });
+    svgContainerWrapper.addEventListener("mouseup", function(event) {
+        gDownY = event.clientY;
+    });
+    svgContainerWrapper.addEventListener("click", function() {
+        Array.from(document.querySelectorAll("div.headerGroup")).forEach(div => {
+            closeHeader.call(div);
+        });
+    });
+    document.getElementById("scaleButton").addEventListener("click", function() {
+        const userScale = prompt("Scale line thickness by this multiple:", gScaleLevel);
+        if (isNumberString(userScale)) {
+            scaleTo(parseFloat(userScale));
+        }
+    });
+}
+
+function keyHandler() {
+    document.body.addEventListener("keydown", function(event) {
+        if (event.target.tagName.toLowerCase() !== "input") {
+            switch (event.key) {
+                case "m":
+                    destroyTables(["descriptionTables"]);
+                    attachMoveListener(gSelection.getKeys());
+                    break;
+                case "-":
+                    panZoom.zoomOut();
+                    break;
+                case "=":
+                    panZoom.zoomIn();
+                    break;
+                case "Escape":
+                    const svgContainer = document.getElementById("svgContainer");
+                    if (svgContainer.onclick != null) {
+                        alert("Operation cancelled");
+                        detachListener();
+                    }
+                    break;
+            }
+        }
     });
 }
 
@@ -1869,7 +2586,7 @@ function convertStaticLoadsIntoHouses() {
  */
 function replaceLoadOrNodeWithHouse(key) {
     const oldLoad = gTree.getObject(key);
-    const house = deepCopy(gComponents.house);
+    const house = deepCopy(gComponentManager.get("house", "R1_SingleFamilyHome_1990-2005"));
     house.longitude = oldLoad.longitude;
     house.latitude = oldLoad.latitude;
     if (oldLoad.parent == null) {
@@ -1877,7 +2594,7 @@ function replaceLoadOrNodeWithHouse(key) {
     } else {
         house.parent = oldLoad.parent;
     }
-    house.name = "house" + key;
+    house.name = "house" + key; // might need to change this
     const children = gTree.treeMap.getChildKeys(key);
     if (children != null) children.forEach(key => { gTree.getObject(key).parent = house.name; });
     const lines = gTree.treeMap.getLineKeys(key);
@@ -1899,35 +2616,36 @@ function replaceLoadOrNodeWithHouse(key) {
 
 function addLoadsToHouse(key) {
     // Insert water heater
-    let tObject = createTreeObject(gComponents.waterheater, gTree);
+    let tObject = createTreeObject(gComponentManager.get("waterheater", "waterheater"), gTree);
     tObject.setupChildNode(key)
     gTree.insert(tObject);
     // Insert responsive ZIPload
-    tObject = createTreeObject(gComponents.ZIPload, gTree);
+    tObject = createTreeObject(gComponentManager.get("ZIPload", "ZIPload"), gTree);
     tObject.setupChildNode(key);
     let responsiveBasePower = Math.random();
     responsiveBasePower = responsiveBasePower < .5 ? responsiveBasePower + .5 : responsiveBasePower;
     tObject.data["base_power"] = `responsive_loads*${responsiveBasePower}`;
     gTree.insert(tObject);
     // Insert unresponsive ZIPload
-    tObject = createTreeObject(gComponents.ZIPload, gTree);
+    tObject = createTreeObject(gComponentManager.get("ZIPload", "ZIPload"), gTree);
     tObject.setupChildNode(key);
     let unresponsiveBasePower = Math.random() + 1.5;
     tObject.data["base_power"] = `unresponsive_loads*${unresponsiveBasePower}`;
     gTree.insert(tObject);
 }
 
+/*
 function massAdd() {
-    let percent = document.getElementById("percent").value;
-    if (!isNumberString(percent) || parseFloat(percent) > 1.0 || parseFloat(percent) < 0) {
-        alert("Please enter a valid number for attachment probability");
-        return;
-    }
-    // Don"t need to check if the component is a child node, since that is done elsewhere
+
+    // Don't need to check if the component is a child node, since that is done elsewhere
 	const componentName = document.getElementById("componentSelect").value;
-    // Don"t need to check if the attachObject is a configuration node, since that is done elsewhere.
+    // Don't need to check if the attachObject is a configuration node, since that is done elsewhere. This is built correctly
     const attachObject = document.getElementById("massAddTargetSelect").value;
-    if (gComponents[componentName].object === "recorder" || getType(gComponents[attachObject]) !== "line") {
+    
+    if ()
+
+    if ({} === "recorder" || {} !== "line") {
+    //if (gComponents[componentName].object === "recorder" || getRelationship(gComponents[attachObject]) !== "line") {
         const newObjects = [];
         const pm = new ProgressModal(`Adding a "${componentName}" object to every "${attachObject}" object. This could take a few seconds.`);
         pm.show();
@@ -1935,7 +2653,8 @@ function massAdd() {
         setTimeout(() => {
             Object.keys(gTree.tree).forEach(key => {
                 if (gTree.getObject(key).object === attachObject && Math.random() < percent) {
-                    const tObject = createTreeObject(gComponents[componentName], gTree);
+                    //const tObject = createTreeObject(gComponents[componentName], gTree);
+                    const tObject = {};
                     tObject.setupChildNode(key);
                     gTree.insert(tObject);
                     newObjects.push(tObject.key);
@@ -1951,27 +2670,31 @@ function massAdd() {
         alert("Mass add failed. Only meter recorder objects can be added as children of lines.");
     }
 }
-
-/* Clearing each list so we dont get duplicates in the list. This must be done because the attachTarget list must be 
-refreshed, since the user could have added a new object type to the data which they now want to attach to.
 */
+
+/**
+ * The user could have added a new component to the graph that they now wish to attach to. That's why I have to update the attach targets.
+ */
+/**
+ * Can you mass edit configuration nodes? Don't want to edit timezone objects. Disqualify all objects with no "object" property. Climate objects have "climate"
+ * as object, but there is no "climate" component. There is no reason why we can't mass edit configuration objects. I'm only editing existing objects, so it
+ * has nothing to with components.
+ */
 function updateAttachTargets(id, tree) {
     document.getElementById(id).innerHTML = "";
-	let attachList = [];
+	const attachList = [];
 	for (let key in tree) {
-        let isValidType = true;
-        if (id === "massAddTargetSelect") {
-            isValidType = getType(tree[key]) !== "configurationNode";
-        }
-        // TODO: problem: meter recorder not found
-        let isComponent = gComponents.hasOwnProperty(tree[key].object);
-        let notAlreadyAdded = !attachList.includes(tree[key].object);
-        if (isValidType && isComponent && notAlreadyAdded) {
+        if (tree[key].object != null && !attachList.includes(tree[key].object) ) {
             attachList.push(tree[key].object);
         }
     }
-    attachList.map(name => name.toLowerCase()).sort().forEach(lowercaseName => {
-        const key = gComponents.hasOwnProperty(lowercaseName) ? lowercaseName : getMixedCaseKey(gComponents, lowercaseName);
+    attachList.map(objectType => objectType.toLowerCase()).sort().forEach(lowercaseObject => {
+        let key;
+        try {
+            key = gComponentManager.hasOwnProperty(lowercaseObject) ? lowercaseObject : getMixedCaseKey(gComponentManager.components, lowercaseObject); 
+        } catch (e) {
+            key = lowercaseObject;
+        }
         document.getElementById(id).innerHTML += `<option value=${key}>${key}</option>`;
     });
 }
@@ -1979,7 +2702,7 @@ function updateAttachTargets(id, tree) {
 // keep this, rename it
 function getKeysOfObjectsWithoutNumericValues(keys, attributeKey) {
     const tree = gTree.tree;
-    invalidKeys = keys.filter(key => {
+    const invalidKeys = keys.filter(key => {
         let value = tree[key][attributeKey];
         if (typeof value !== "string") {
             value = String(tree[key][attributeKey]);
@@ -2063,8 +2786,8 @@ function massEdit() {
  */
 function isValidParentName(name, object) {
     try {
-        const type = getType(gTree.getObject(gTree.treeMap.getKey(name)));
-        if (type === "configurationNode"  || (type === "line" && object !== "recorder")) return false; 
+        const relationship = getRelationship(gTree.getObject(gTree.treeMap.getKey(name)));
+        if (relationship === "configurationNode"  || (relationship === "line" && object !== "recorder")) return false; 
     } catch (e) {
         return false;
     }
@@ -2074,8 +2797,8 @@ function isValidParentName(name, object) {
 function isValidToOrFromNode(name) {
     const invalidTypes = ["configurationNode", "line"];
     try {
-        const type = getType(gTree.getObject(gTree.treeMap.getKey(name)));
-        if (invalidTypes.includes(type)) {
+        const relationship = getRelationship(gTree.getObject(gTree.treeMap.getKey(name)));
+        if (invalidTypes.includes(relationship)) {
             return false;
         }
     } catch (e) {
@@ -2113,7 +2836,7 @@ function massAddAttribute(keys, objectType) {
  * @param {objectType} - The "object" property of every object that is being changed
  */
 function massChange(keys, attributeKey, objectType) {
-    const newValue = document.getElementById("changeValue").value.trim();
+    let newValue = document.getElementById("changeValue").value.trim();
     switch (attributeKey) {
         case "parent":
             if (!isValidParentName(newValue, objectType)) {
@@ -2126,6 +2849,14 @@ function massChange(keys, attributeKey, objectType) {
                 alert(`Mass change failed. The name "${newValue}" is not a valid name for a source or target of a line.`);
                 return;
             }
+    }
+    if (["longitude", "latitude"].includes(attributeKey)) {
+        if (!isNumberString(newValue)) {
+            alert(`Please enter a valid number to edit "latitude" or "longitude".`);
+            return;
+        } else {
+            newValue = parseFloat(newValue);
+        }
     }
     const treeObjectCopies = [];
     keys.forEach(key => {
@@ -2169,7 +2900,7 @@ function massAddition(keys, attributeKey, objectType) {
     }
     operand = parseFloat(operand);
     for (let key of keys) {
-        gTree.getObject(key)[attributeKey] = gTree.getObject(key)[attributeKey] + operand;
+        gTree.getObject(key)[attributeKey] = parseFloat(gTree.getObject(key)[attributeKey]) + operand;
     }
     alert(`${keys.length} ${objectType} objects had their "${attributeKey}" attribute edited.`);
     toggleElementDisplay("massEditModal");
@@ -2186,7 +2917,7 @@ function massMultiplication(keys, attributeKey, objectType) {
     multiplyOperand = parseFloat(multiplyOperand);
     addOperand = parseFloat(addOperand);
     for (let key of keys) {
-        gTree.getObject(key)[attributeKey] = gTree.getObject(key)[attributeKey] * multiplyOperand + addOperand;
+        gTree.getObject(key)[attributeKey] = parseFloat(gTree.getObject(key)[attributeKey]) * multiplyOperand + addOperand;
     }
     alert(`${keys.length} ${objectType} objects had their "${attributeKey}" attribute edited.`);
     toggleElementDisplay("massEditModal");
@@ -2256,6 +2987,8 @@ function saveFeeder(feeder) {
             } else {
                 progressModal.hide();
                 alert("Success. Your data was saved.");
+                // Need to do this to make sure rename doesn't break if the user saves and remains on the page.
+                gReadFeeder = deepCopy(gWriteFeeder);
             }
         });
     }
@@ -2431,6 +3164,7 @@ async function renameFeeder() {
                 url: `/renameFeeder/${gThisOwner}/${gThisModelName}/${gThisFeederName}/${newName}/${gThisFeederNum}`
             }).done(function() {
                 gThisFeederName = newName;
+                document.getElementById("menuLeft").querySelector("h4").textContent = newName;
                 alert("Feeder file was successfully renamed.");
             })
 		}
@@ -2468,395 +3202,7 @@ ProgressModal.prototype.show = function() {
 ProgressModal.prototype.hide = function() {
     this.self.style.display = "none";
 }
-//**************************************************
-// TreeMap interface
-//**************************************************
 
-const treeMapPrototype = {
-
-    /* Public methods */
-
-    /**
-     * good. doesn't need unit tests
-     */
-    add(key) {
-        this.mapName(key);
-        this.mapChild(key);
-        this.mapLine(key);
-    },
-
-    /**
-     * good. doesn't need unit tests
-     * @param {Array} keys
-     */
-    remove(keys) {
-        keys.forEach(key => {
-            this.unmapLine(key);
-            this.unmapChild(key);
-        });
-        keys.forEach(key => {
-            this.unmapName(key);
-        });
-    },
-
-    /**
-     * good. doesn't need unit tests
-     * This should throw an Error. If I provide what I believe is a valid name, I expect to get a key!
-     */
-    getKey(name) {
-        if (name == null) {
-            throw new Error(`getKey() failed. The name: "${name}" is invalid.`);
-        }
-        const key = this.names[name];
-        if (key === undefined) {
-            throw new Error(`getKey() failed. Did not find the name "${name}" in this.names.`);
-        }
-        return key;
-    },
-
-    /**
-     * good. doesn't need unit tests
-     */
-    getChildKeys(key) {
-        return this.children[key];
-    },
-
-    /**
-     * good. doesn't need unit tests
-     */
-    getLineKeys(key) {
-        return this.lines[key];
-    },
-
-    /**
-     * good. doesn't need unit tests
-     */
-    getParentKey(childKey) {
-        const parentName = this.tree[childKey].parent;
-        if (parentName === undefined) return;
-        let parentKey;
-        try {
-            parentKey = this.getKey(parentName);
-        } catch (e) {
-            console.error(`The child object named "${this.tree[childKey].name}" has a nonexistent parent object named "${parentName}". The parent-child line was not drawn.`);
-            return;
-        }
-        return parentKey;
-    },
-
-    /* Private TreeMap methods. Don't touch! */
-
-    /**
-     * good. not tested b/c private
-     */
-    getNodeEndKeys(lineKey) {
-        const sourceName = this.tree[lineKey].to;
-        const targetName = this.tree[lineKey].from;
-        let sourceKey, targetKey;
-        if (sourceName === undefined && targetName === undefined) return {};
-        if (sourceName !== undefined && targetName !== undefined) {
-            try {
-                sourceKey = this.getKey(sourceName);
-                targetKey = this.getKey(targetName);
-            } catch(e) {
-                //Commented out because this message is redundant and less helpful than other error messages
-                //console.error(`The line object named "${this.tree[lineKey].name}" has nonexistent 'to' and/or 'from' nodes.`);
-                return {};
-            }
-        } else {
-            console.error(`The line object named "${this.tree[lineKey].name}" is missing a 'to' or 'from' property.`);
-            return {};
-        }
-        return {sourceKey: sourceKey, targetKey: targetKey};
-    },
-
-    /**
-     * good. doesn't need unit tests
-     */
-    mapName(key) {
-        const name = this.tree[key].name;
-        if (name == null) return;
-        const lowercaseName = String(name).toLowerCase();
-        if (lowercaseName === "null" || lowercaseName === "undefined") return;
-        this.names[name] = key;
-    },
-
-    /**
-     * good. doesn't need unit tests
-     */
-    unmapName(key) {
-        const name = this.tree[key].name;
-        if (name == null) return;
-        delete this.names[name];
-    },
-
-    /**
-     * good
-     */
-    mapChild(childKey) {
-        const parentKey = this.getParentKey(childKey);
-        if (parentKey == null) return;
-        if (this.children[parentKey] == null) {
-            this.children[parentKey] = [childKey];
-        } else if (!this.children[parentKey].includes(childKey)) {
-            this.children[parentKey].push(childKey);
-        } 
-    },
-
-    /**
-     * good
-     */
-    unmapChild(childKey) {
-        const parentKey = this.getParentKey(childKey);
-        if (parentKey == null) return;
-        const idx = this.children[parentKey].indexOf(childKey);
-        if (idx >= 0) {
-            this.children[parentKey].splice(idx, 1);
-            if (this.children[parentKey].length === 0) {
-                delete this.children[parentKey];
-            }
-        } else {
-            console.error(`Could not unmap child with key "${childKey}" from parent with key ${parentKey}.`);
-        }
-    },
-
-    /**
-     * good
-     */
-    mapLine(lineKey) {
-        let {sourceKey, targetKey} = this.getNodeEndKeys(lineKey);
-        if (sourceKey == null || targetKey == null) return;
-        if (this.lines[sourceKey] == null) {
-            this.lines[sourceKey] = [lineKey];
-        } else if (!this.lines[sourceKey].includes(lineKey)) {
-            this.lines[sourceKey].push(lineKey);
-        }
-        if (this.lines[targetKey] == null) {
-            this.lines[targetKey] = [lineKey];
-        } else if (!this.lines[targetKey].includes(lineKey)) {
-            this.lines[targetKey].push(lineKey);
-        }
-    },
-
-    /**
-     * good
-     */
-    unmapLine(lineKey) {
-        let {sourceKey, targetKey} = this.getNodeEndKeys(lineKey);
-        if (sourceKey == null || targetKey == null) return;
-        [sourceKey, targetKey].forEach(key => {
-            const idx = this.lines[key].indexOf(lineKey);
-            if (idx >= 0) {
-                this.lines[key].splice(idx, 1);
-                if (this.lines[key].length === 0) {
-                    delete this.lines[key];
-                }
-            } else {
-                console.error(`Could not unmap line with key "${lineKey}" from node with key "${key}".`);
-            }
-        });
-    },
-};
-
-/**
- * good
- */
-function createTreeMap(tree) {
-    const map = Object.create(treeMapPrototype);
-    map.tree = tree;
-    map.names = {};
-    map.children = {};
-    map.lines = {};
-    const keys = Object.keys(tree);
-    keys.forEach(key => {
-        map.mapName(key);
-    });
-    keys.forEach(key => {
-        map.mapChild(key);
-        map.mapLine(key);
-    });
-    return map;
-}
-
-//**************************************************
-// Tree interface
-//**************************************************
-
-const treePrototype = {
-
-    /* Public methods */
-
-    /**
-     * good.
-     */
-    getObject(key) {
-        const obj = this.tree[key];
-        if (obj == null) throw new Error(`getObject() failed. The object with the key "${key}" does not exist in the Tree.`);
-        return this.tree[key];
-    },
-
-    /**
-     * good. doesn't need unit tests
-     */
-    getParent(childKey) {
-        const parentKey = this.treeMap.getParentKey(childKey);
-        if (parentKey == null) return;
-        return this.getObject(parentKey);
-    },
-
-    /**
-     * good. doesn't need unit tests
-     */
-    getToNodeKey(lineKey) {
-        const sourceName = this.tree[lineKey].to;
-        if (sourceName == null) return;
-        let key;
-        try {
-            key = this.treeMap.getKey(sourceName);
-        } catch (e) {
-            console.error(`The line object named "${this.getObject(lineKey).name}" has a nonexistent source node named "${sourceName}". The line was not drawn.`);
-        }
-        return key;
-    },
-
-    /**
-     * good. doesn't need unit tests
-     */
-    getToNode(lineKey) {
-        const sourceKey = this.getToNodeKey(lineKey);
-        if (sourceKey == null) return;
-        return this.getObject(sourceKey);
-    },
-
-    /**
-     * good. doesn't need unit tests
-     */
-    getFromNodeKey(lineKey) {
-        const targetName = this.tree[lineKey].from;
-        if (targetName == null) return;
-        let key;
-        try {
-            key = this.treeMap.getKey(targetName);
-        } catch (e) {
-            console.error(`The line object named "${this.getObject(lineKey).name}" has a nonexistent target node named "${targetName}". The line was not drawn.`);
-        }
-        return key;
-    },
-
-    /**
-     * good. doesn't need unit tests
-     */
-    getFromNode(lineKey) {
-        const targetKey = this.getFromNodeKey(lineKey);
-        if (targetKey == null) return;
-        return this.getObject(targetKey);
-    },
-
-    /**
-     * good. doesn't need unit tests
-     */
-    getPairedNodeKeys(nodeKey) {
-        const pairedNodes = [];
-        const lineKeys = this.treeMap.getLineKeys(nodeKey);
-        if (lineKeys == null) return;
-        lineKeys.forEach(key => {
-            if (this.getToNodeKey(key) === nodeKey) {
-                pairedNodes.push(this.getFromNodeKey(key));
-            } else {
-                pairedNodes.push(this.getToNodeKey(key));
-            }
-        });
-        return pairedNodes;
-    },
-
-    /**
-     * good
-     */
-    insert(treeObject) {
-        this.tree[treeObject.key] = treeObject.data;
-        this.treeMap.add(treeObject.key);
-    },
-
-    /** 
-     * good
-     */
-    isDeletable(key) {
-        this.getObject(key);
-        const children = this.treeMap.getChildKeys(key);
-        if (children != null) return false;
-        const lines = this.treeMap.getLineKeys(key);
-        if (lines != null) return false;
-        return true;
-    },
-
-    /**
-     * good. doesn't need unit tests
-     * @param {Array} keys
-     */
-    delete(keys) {
-        this.treeMap.remove(keys);
-        keys.forEach(key => {
-            this.getObject(key);
-            delete this.tree[key];
-        });
-    },
-
-    /** 
-     * Return an array of keys that need to be deleted as a result of deleting a tree object.
-     * 
-     * @param {string} key - the key of the tree object for which to find its deletable subtree.
-     * @param {Array} visited - contains keys of tree objects that have already been visited so the method dosen't
-     * recurse infinitely in case of a cycle.
-     * @return {Array}
-     */
-    getSubtreeToDelete(key, visited = []) {
-        if (!Array.isArray(visited)) throw new Error("Visited argument must be an array");
-        visited.push(key);
-        const keySet = new Set();
-        const lines = this.treeMap.getLineKeys(key);
-        const children = this.treeMap.getChildKeys(key);
-        if (lines != null) lines.forEach(key => keySet.add(key));
-        if (children != null) children.forEach(key => keySet.add(key));
-        keySet.forEach(outerKey => {
-            if (!visited.includes(outerKey)) {
-                this.getSubtreeToDelete(outerKey, visited).forEach(innerKey => keySet.add(innerKey));
-            }
-        });
-        return Array.from(keySet);
-    },
-
-    /* Private methods */
-};
-
-/**
- * good
- */
-function createTree(tree = {}) {
-    const invalidKeys = [];
-    const invalidCoordinateKeys = [];
-    Object.keys(tree).forEach(key => {
-        if (!isNumberString(key)) invalidKeys.push(key);
-        ["longitude", "latitude"].forEach(prop => {
-            if (tree[key][prop] != null) {
-                if (isNumberString(tree[key][prop])) {
-                    tree[key][prop] = parseFloat(tree[key][prop])
-                } else if (typeof tree[key][prop] !== "number") {
-                    invalidCoordinateKeys.push(key);
-                }
-            }
-        });
-    });
-    if (invalidKeys.length !== 0) {
-        throw new Error(`Interface could not be built. The following object keys aren't numbers: "${invalidKeys}".`);
-    }
-    if (invalidCoordinateKeys.length !== 0) {
-        throw new Error(`Interface could not be built. The following object keys have objects with non-numeric longitude or latitude values: "${invalidCoordinateKeys.join(", ")}".`);
-    }
-    const treeWrapper = Object.create(treePrototype);
-    treeWrapper.tree = tree;
-    treeWrapper.treeMap = createTreeMap(tree);
-    return treeWrapper;
-}
 
 /**
  * Return true if this TreeWrapper can be moved, otherwise return false;
@@ -2918,7 +3264,7 @@ function move(objects, {x, y}) {
     let avgLon = 0;
     let avgLat = 0;
     objects.forEach(obj => {
-        if (getType(obj) !== "line") {
+        if (getRelationship(obj) !== "line") {
             nodes.push(obj);
             avgLon += obj.longitude;
             avgLat += obj.latitude;
@@ -2946,7 +3292,7 @@ function move(objects, {x, y}) {
 function insertCoordinates(objects, initX, initY, spacing) {
     let gen = getCoordinates(initX, initY, spacing);
     objects.forEach(obj => {
-        if (getType(obj) !== "line" && (obj.longitude == null || obj.latitude == null)) {
+        if (getRelationship(obj) !== "line" && (obj.longitude == null || obj.latitude == null)) {
             let coords = gen.next().value;
             obj.longitude = coords.longitude;
             obj.latitude = coords.latitude;
@@ -2955,14 +3301,15 @@ function insertCoordinates(objects, initX, initY, spacing) {
 }
 
 /**
+ * TODO: rename this function or delete it
  * @param {Object[]} objects
  * @param {string[]} types
  * @return string[]
  */
 function getNamesOfTypes(objects, ...types) {
     return objects.filter(obj => {
-        const type = getType(obj);
-        return types.includes(type);
+        const relationship = getRelationship(obj);
+        return types.includes(relationship);
     }).map(obj => obj.name !== undefined ? obj.name : Object.values(obj)[0]);
 }
 
@@ -2974,13 +3321,13 @@ function getNamesOfTypes(objects, ...types) {
  */
 function isValidForAdd(keys, component) {
     const selection = keys.map(key => gTree.getObject(key));
-    const type = getType(component);
+    const relationship = getRelationship(component);
     const configNames = getNamesOfTypes(selection, "configurationNode");
     const lineNames = getNamesOfTypes(selection, "line");
     const errorMsgStart = `This component "${component.object}" `;
     const errorMsgConfig = `Please unselect the following configuration nodes: "${configNames.join(", ")}" before trying to add this component again.`;
     const errorMsgLine = `Please unselect the following lines: "${lineNames.join(", ")}" before trying to add this component again.`;
-    switch (type) {
+    switch (relationship) {
         case "independentNode":
         case "configurationNode":
             if (selection.length !== 0) {
@@ -3030,7 +3377,7 @@ function isValidForAdd(keys, component) {
 //**************************************************
 
 /**
- * There are 4 types of objects: lines, child nodes, independent nodes, and configuration nodes.
+ * There are 4 relationships of objects: lines, child nodes, independent nodes, and configuration nodes.
  * The line between a parent and child doesn't exist in the data itself, it's merely shown in the svg
  * to demonstrate the relationship between two nodes.
  */
@@ -3053,13 +3400,13 @@ function isNumberString(str) {
 }
 
 /**
- * Return the type of the object with regard to this interface.
+ * Return the relationship of the object with regard to this interface.
  * 
- * This function is important because the order in which an object is checked matters. For example, an object could be both a 'line' type and a 'configurationNode' type, but the 'line' type should take precedence over the 'configurationNode' type, so 'line' should be returned.
+ * This function is important because the order in which an object is checked matters. For example, an object could be both a 'line' relationship and a 'configurationNode' relationship, but the 'line' relationship should take precedence over the 'configurationNode' relationship, so 'line' should be returned.
  * @param {Object} obj
  * @return {string}
  */
-function getType(obj) {
+function getRelationship(obj) {
     if (isLine(obj)) {
         return "line";
     } else if (isConfigurationNode(obj)) {
@@ -3094,16 +3441,20 @@ function getType(obj) {
 }
 
 /**
- * TODO: add unit tests
+ * TODO: add unit tests, refactor to allow testing any tree
  * @return {Array} - contains all of the object types that exist in the graph.
  */
-function getExistingObjectTypes() {
-    const objects = [];
+function getExistingRelationships() {
+    const relationships = {};
     Object.values(gTree.tree).forEach(obj => {
-        const objectType = obj.object;
-        if (objectType != null && !objects.includes(objectType)) objects.push(objectType);
+        const type = obj.object;
+        const relationship = getRelationship(obj);
+        if (type != null) {
+            if (relationships[relationship] == null) relationships[relationship] = [];
+            if (!relationships[relationship].includes(type)) relationships[relationship].push(type);
+        }
     });
-    return objects;
+    return relationships;
 }
 
 /**
@@ -3204,7 +3555,7 @@ function getAlpha(rgba) {
  * @return {string}
  */
 function getDefaultFill(className) {
-    const cssRule = this.getCSSRule(className);
+    const cssRule = getCSSRule(className);
     return cssRule.style.fill;
 }
 
@@ -3214,7 +3565,7 @@ function getDefaultFill(className) {
  * @return {string}
  */ 
 function getDefaultStroke(className) {
-    const cssRule = this.getCSSRule(className);
+    const cssRule = getCSSRule(className);
     return cssRule.style.stroke;
 }
 
@@ -3274,7 +3625,7 @@ function preserveColorWithNewAlpha(e, alpha) {
             e.removeAttribute("style");
             return;
         } else {
-            rgba = styleAttribute === "fill" ? getDefaultFill(e.classList[0]) : getDefaultStroke(e.classList[0]);
+            let rgba = styleAttribute === "fill" ? getDefaultFill(e.classList[0]) : getDefaultStroke(e.classList[0]);
             rgba = insertAlpha(rgba, alpha);
             //rgba = rgba.replace(")", `, ${alpha})`).replace("b", "ba");
             e.style[styleAttribute] = rgba;
@@ -3340,14 +3691,14 @@ function getCSSRule(className) {
         return ary.includes(`.${className}`);
     });
     if (key == null) {
-        let type;
+        let relationship;
         try {
             // Need try-catch because player objects have an "object" property but don't exist in components
-            type = getType(gComponents[className]);
+            relationship = getRelationship(gComponentManager.getAny(className));
         } catch (e) {
-            type = "not a line";
+            relationship = "not a line";
         }
-        if (type === "line") {
+        if (relationship === "line") {
             key = keys.find(key => cssRules[key].selectorText === "line");
         } else {
             key = keys.find(key => cssRules[key].selectorText === "circle");
@@ -3422,9 +3773,9 @@ const opacityManagerPrototype = {
             titleRow.append(td);
         });
         table.append(titleRow);
-        const keys = Object.keys(this).map(key => key.toLowerCase()).sort();
+        const keys = Object.keys(this.types).map(key => key.toLowerCase()).sort();
         keys.forEach(key => {
-            const objectType = this[key] != null ? key : getMixedCaseKey(this, key);
+            const objectType = this.types[key] != null ? key : getMixedCaseKey(this.types, key);
             const tr = document.createElement("tr");
             let td = document.createElement("td");
             td.classList.add("fullPadded");
@@ -3444,7 +3795,7 @@ const opacityManagerPrototype = {
             input.addEventListener("change", function() {
                 that.setAlpha({className: objectType, input: this});
             });
-            input.value = this[objectType];
+            input.value = this.types[objectType];
             td.append(input);
             tr.append(td);
             table.append(tr);
@@ -3473,15 +3824,15 @@ const opacityManagerPrototype = {
             alpha = parseFloat(alpha);
             if (alpha < 0 || alpha > 1) {
                 alert("The opacity value must be between 0 and 1, inclusive.");
-                input.value = this[className];
+                input.value = this.types[className];
                 return;
             }
         } else {
             alert("Please enter a valid number between 0 and 1, inclusive.");
-            input.value = this[className];
+            input.value = this.types[className];
             return;
         }
-        this[className] = alpha; //record the alpha in the gOpacityManager for the case of adding new elements.
+        this.types[className] = alpha; //record the alpha in the gOpacityManager for the case of adding new elements.
         const elements = Array.from(document.getElementsByClassName(className));
         elements.forEach(e => {
             preserveColorWithNewAlpha(e, alpha);
@@ -3493,17 +3844,20 @@ const opacityManagerPrototype = {
      * Update the OpacityManager to always display existing object types.
      */
     update() {
-        const existingObjects = getExistingObjectTypes();
-        existingObjects.forEach(objectType => {
-            if (this[objectType] == null) {
+        const existingObjectTypes = [];
+        Object.values(getExistingRelationships()).forEach(ary => {
+            ary.forEach(type => existingObjectTypes.push(type));
+        });
+        existingObjectTypes.forEach(type => {
+            if (this.types[type] == null) {
                 // User added a new objectType, so add it
-                this[objectType] = 1.0;
+                this.types[type] = 1.0;
             }
         });
-        Object.keys(this).forEach(key => {
-            if (!existingObjects.includes(key)) {
+        Object.keys(this.types).forEach(type => {
+            if (!existingObjectTypes.includes(type)) {
                 // User deleted all of a previously existing objectType, so delete it
-                delete this[key];
+                delete this.types[type];
             }
         });
     },
@@ -3515,12 +3869,12 @@ const opacityManagerPrototype = {
      * @param {string} className
      */
     highlight(className) {
-        Object.keys(this).forEach(key => {
+        Object.keys(this.types).forEach(key => {
             if (key !== className) {
-                this[key] = 0.1;
+                this.types[key] = 0.1;
                 this.setAlpha({className: key, value: "0.1"});
             } else {
-                this[key] = 1;
+                this.types[key] = 1;
                 this.setAlpha({className: key, value: "1"});
             }
         });
@@ -3539,8 +3893,8 @@ const opacityManagerPrototype = {
      * Set the alpha of every object type to 1.
      */
     reset() {
-        Object.keys(this).forEach(key => {
-            this[key] = 1.0;
+        Object.keys(this.types).forEach(key => {
+            this.types[key] = 1.0;
             this.setAlpha({className: key, value: "1.0"});
         });
         Array.from(document.getElementById("opacityModal").querySelectorAll("input[data-objecttype]")).forEach(input => {
@@ -3554,8 +3908,13 @@ const opacityManagerPrototype = {
  */
 function createOpacityManager() {
     const om = Object.create(opacityManagerPrototype);
-    getExistingObjectTypes().forEach(objectType => {
-        om[objectType] = 1.0;
+    om.types = {};
+    const relationships = getExistingRelationships();
+    Object.keys(relationships).forEach(key => {
+        relationships[key].forEach(objectType => {
+            om.types[objectType] = 1.0;
+            //om[type] = 1.0;
+        });
     });
     return om;
 }
@@ -3922,7 +4281,7 @@ function createCircle(nodeKey) {
     if (typeof lat !== "number") throw new Error(`'latitude' must be a number.`);
     circle.cx = (lon - gMinLon) * gDrawScaleFactor;
     circle.cy = (gMaxLat - lat) * gDrawScaleFactor;
-    const alpha = gOpacityManager[node.object];
+    const alpha = gOpacityManager.types[node.object];
     if (alpha != null && alpha !== 1) {
         const newFill = insertAlpha(getDefaultFill(node.object), alpha)
         circle.fill = newFill;
@@ -4036,7 +4395,7 @@ function createLine(lineKey) {
         default:
             line["stroke-width"] = gScaleLevel;
     }
-    const alpha = gOpacityManager[lineObject.object];
+    const alpha = gOpacityManager.types[lineObject.object];
     if (alpha != null && alpha !== 1) {
         const newStroke = insertAlpha(getDefaultStroke(lineObject.object), alpha);
         line.stroke = newStroke;
@@ -4084,8 +4443,8 @@ const svgDataPrototype = {
     delete(viewport) {
         this.primaryKeySet.forEach(key => {
             const obj = this.tree.getObject(key);
-            const type = getType(obj);
-            if (type === "childNode") {
+            const relationship = getRelationship(obj);
+            if (relationship === "childNode") {
                 const parentKey = this.tree.treeMap.getParentKey(key);
                 if (parentKey != null) { // child could have a nonexistent parent
                     const id = getParentChildLineId(parentKey, key);
@@ -4125,8 +4484,8 @@ const svgDataPrototype = {
         this.lines = [];
         this.circles = [];
         this.subtreeKeySet.forEach(key => {
-            const type = getType(this.tree.getObject(key));
-            switch (type) {
+            const relationship = getRelationship(this.tree.getObject(key));
+            switch (relationship) {
                 case "line":
                     const line = createLine(key, this.tree);
                     if (line != null) this.lines.push(line);
@@ -4136,7 +4495,7 @@ const svgDataPrototype = {
                     const parentKey = this.tree.treeMap.getParentKey(key);
                     // child could have nonexistent parent. Also, we only want parent-child lines for children of objects in the subtreeKeySet
                     if (parentKey != null && this.subtreeKeySet.has(parentKey)) {
-                        const parentType = getType(this.tree.getObject(parentKey));
+                        const parentType = getRelationship(this.tree.getObject(parentKey));
                         if (parentType === "line") {// this is only for recorders
                             const line = createParentChildLineWithLine(parentKey, key, this.tree);
                             if (line != null) this.parentChildLines.push(line);
@@ -4163,7 +4522,7 @@ const svgDataPrototype = {
             const parentKey = this.tree.treeMap.getParentKey(key);
             if (parentKey != null) {
                 this.subtreeKeySet.add(parentKey);
-                if (getType(this.tree.getObject(parentKey)) === "line") {
+                if (getRelationship(this.tree.getObject(parentKey)) === "line") {
                     // If the parent line is redrawn, it will cover it's connected nodes unless I do this
                     this.subtreeKeySet.add(this.tree.getToNodeKey(parentKey));
                     this.subtreeKeySet.add(this.tree.getFromNodeKey(parentKey));
@@ -4222,12 +4581,12 @@ const treeObjectPrototype = {
      * @param {Object} parent - the object to set as the parent of this child.
      */
     setupChildNode(parentKey) {
-        if (getType(this.data) !== "childNode") throw new Error("This TreeObject should have a type of 'childNode'.");
+        if (getRelationship(this.data) !== "childNode") throw new Error("This TreeObject should have a relationship of 'childNode'.");
         const parent = gTree.getObject(parentKey);
-        const type = getType(parent);
-        if (type === "configurationNode") throw new Error("The 'parent' argument cannot be a configuration node.");
+        const relationship = getRelationship(parent);
+        if (relationship === "configurationNode") throw new Error("The 'parent' argument cannot be a configuration node.");
         this.data.parent = parent.name;
-        if (type === "line") {
+        if (relationship === "line") {
             this.setupChildNodeWithLine(parentKey);
         } else {
             this.setupChildNodeWithNode(parentKey);
@@ -4241,13 +4600,13 @@ const treeObjectPrototype = {
      * @param {Object} target - the ending node of the line.
      */
     setupLine(sourceKey, targetKey) {
-        if (getType(this.data) !== "line") throw new Error("This TreeObject should have a type of 'line'.");
+        if (getRelationship(this.data) !== "line") throw new Error("This TreeObject should have a relationship of 'line'.");
         const source = gTree.getObject(sourceKey);
         const target = gTree.getObject(targetKey);
-        const sType = getType(source);
-        const tType = getType(target);
+        const sType = getRelationship(source);
+        const tType = getRelationship(target);
         const types = ["childNode", "independentNode"];
-        if (!types.includes(sType) || !types.includes(tType)) throw new Error("The 'source' and 'target' arguments should have a type of 'childNode' or 'independentNode'.");
+        if (!types.includes(sType) || !types.includes(tType)) throw new Error("The 'source' and 'target' arguments should have a relationship of 'childNode' or 'independentNode'.");
         if (source.name == null || target.name == null) throw new Error("The 'source' and 'target' arguments should have a 'name' property.");
         if (source.phases === undefined) {
             const name = source.name !== undefined ? source.name : Object.values(source)[0]; 
@@ -4281,7 +4640,7 @@ const treeObjectPrototype = {
     },
 
     getRandomOffset() {
-        return lonValue = ((Math.random() * 4) + 4)/gDrawScaleFactor; 
+        return ((Math.random() * 4) + 4)/gDrawScaleFactor; 
     }
 };
 
@@ -4319,8 +4678,7 @@ function countPhases(str) {
  * 
  * @param {(string|Object)} input - either a key OR a map of properties to create this TreeObject.
  * @param {TreeWrapper} tree - the treeWrapper from which to create this TreeObject.
- * return {TreeObject} - Either a new component that does not exist in the tree, or a copy of an existing tree object 
- * inside of the treeWrapper argument.
+ * return {TreeObject} - Either a new component that does not exist in the tree, or a copy of an existing tree object inside of the treeWrapper argument.
  */
 function createTreeObject(input, tree) {
     if (Object.getPrototypeOf(tree) !== treePrototype) throw new Error("'tree' argument must be an instance of the Tree class.");
@@ -4342,7 +4700,8 @@ function createTreeObject(input, tree) {
     } else if (typeof input === "object" && !Array.isArray(input)) {
         tObject.key = getNewTreeKey(tree.tree);
         tObject.data = deepCopy(input);
-        if (tObject.data.object != null) tObject.data.name = tObject.data.object + tObject.key;
+        if (tObject.data.name == null) throw new Error("TreeObject creation failed. The component lacks the 'name' property");
+        tObject.data.name = `${tObject.data.name}_${tObject.key}`;
         ["longitude", "latitude"].forEach(prop => {
             if (tObject.data[prop] != null && typeof tObject.data[prop] === "string") {
                 tObject.data[prop] = parseFloat(tObject.data[prop]);
@@ -4375,6 +4734,26 @@ Player is a configuration object. Recorder can have a parent, so it is NOT a con
 const configurationTypes = ["regulator_configuration", "transformer_configuration", "triplex_line_configuration", "line_configuration",
 "volt_var_control", "line_spacing", "climate", "overhead_line_conductor", "underground_line_conductor", "triplex_line_conductor",
 "player", "schedule"];
+
+/**
+ * @param {HTMLDivElement} - modal
+ */
+function formatModal(modal) {
+    ["h1", "h2", "h3", "h4", "h5", "h6"].forEach(h => {
+        const headings = Array.from(modal.querySelectorAll(`div.modalContent > ${h}`));
+        if (headings.length > 0) {
+            headings.forEach(h => {
+                h.classList.add("centered");
+            });
+        }
+    });
+}
+
+function formatTable(table) {
+    Array.from(table.querySelectorAll("td")).forEach(td => {
+        td.classList.add("fullPadded");
+    });
+}
 
 // delete this eventually
 function rebuildSelectionTable() {
@@ -4489,7 +4868,7 @@ function createDescriptionTable(id) {
     table.append(tBody);
     tBody.append(buttonRow);
     const tObject = createTreeObject(id, gTree);
-    if (getType(tObject.data) !== "line") {
+    if (getRelationship(tObject.data) !== "line") {
         buttonCell.append(createButton({action: "move", tObject: tObject, tableBody: tBody}).self);
     }
     buttonCell.append(createButton({action: "delete", tObject: tObject, tableBody: tBody}).self);
@@ -4919,48 +5298,10 @@ function detectDrag(event) {
 // Initialization
 //**************************************************
 
-function attachMouseListeners() {
-    document.getElementById("svgContainerWrapper").addEventListener("click", function(event) {
-        handleSelection(event);
-    });
-    document.getElementById("svgContainerWrapper").addEventListener("mousedown", function(event) {
-        gDownX = event.clientX;
-    });
-    document.getElementById("svgContainerWrapper").addEventListener("mouseup", function(event) {
-        gDownY = event.clientY;
-    });
-    document.getElementById("scaleButton").addEventListener("click", function() {
-        const userScale = prompt("Scale line thickness by this multiple:", gScaleLevel);
-        if (isNumberString(userScale)) {
-            scaleTo(parseFloat(userScale));
-        }
-    });
-}
-
-function attachKeyListener() {
-    document.body.addEventListener("keydown", function(event) {
-        if (event.target.tagName.toLowerCase() !== "input") {
-            switch (event.key) {
-                case "m":
-                    destroyTables(["descriptionTables"]);
-                    attachMoveListener(gSelection.getKeys());
-                    break;
-                case "-":
-                    panZoom.zoomOut();
-                    break;
-                case "=":
-                    panZoom.zoomIn();
-                    break;
-                case "Escape":
-                    const svgContainer = document.getElementById("svgContainer");
-                    if (svgContainer.onclick != null) {
-                        alert("Operation cancelled");
-                        detachListener();
-                    }
-                    break;
-            }
-        }
-    });
+function createSingletons() {
+    gOpacityManager = createOpacityManager();
+    gAddManager = createAddManager();
+    gSelection = createSelection();
 }
 
 function createInterface() {
@@ -4968,9 +5309,8 @@ function createInterface() {
     gTree = createTree(gWriteFeeder.tree);
     const objects = Object.values(gTree.tree);
     insertCoordinates(objects, gMinLon, gMaxLat, (1000/gDrawScaleFactor) * .005);
-    gSelection = createSelection();
-    gOpacityManager = createOpacityManager();
     gViewport = document.getElementsByClassName("svg-pan-zoom_viewport")[0];
+    createSingletons();
     createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
 }
 
@@ -5007,11 +5347,10 @@ function initializeColorModal() {
 }
 
 (function initialize() {
+    //createSingletons();
     createInterface();
     attachHandlers();
     initializeJQuery();
-    attachMouseListeners();
-    attachKeyListener();
     initializeFindModal();
     initializeColorModal();
     document.getElementById("loadingMessage").style.display = "none"

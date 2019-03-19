@@ -1,0 +1,1 @@
+{"name": "DG_150_23_9_13_8_kV_YYT_120", "primary_voltage": "13800.0 V", "install_type": "PADMOUNT", "object": "transformer_configuration", "secondary_voltage": "120.0 V", "connect_type": "SINGLE_PHASE_CENTER_TAPPED", "impedance": "0.009+0.018j", "power_rating": "150 kVA"}

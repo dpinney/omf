@@ -1,0 +1,1 @@
+{"phases": "ABCN", "name": "windturb1", "parent": "rect1", "Gen_status": "ONLINE", "Turbine_Model": "BERGEY_10kW", "object": "windturb_dg", "Gen_mode": "CONSTANTP"}

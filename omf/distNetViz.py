@@ -66,14 +66,15 @@ def contains_coordinates(tree):
 	return True
 
 def get_components():
-	path = "data/Component/"
-	components = {name[0:-5]:json.load(open(path + name)) for name in safeListdir(path)}
-	return json.dumps(components)
-
-def safeListdir(path):
-	''' Helper function that returns [] for dirs that don't exist. Otherwise new users can cause exceptions. '''
-	try: return [x for x in os.listdir(path) if not x.startswith(".")]
-	except:	return []
+	directory = "data/Component/"
+	components = {}
+	for dirpath, dirnames, file_names in os.walk(directory):
+		for name in file_names:
+			if name.endswith(".json"):
+				path = os.path.join(dirpath, name)
+				with open(path) as f:
+					components[name[0:-5]] = json.load(f) # Load the file as a regular object into the dictionary
+	return json.dumps(components) # Turn the dictionary of objects into a string
 
 def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.html'):
 	''' Vizualize a distribution system.'''

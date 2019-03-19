@@ -438,7 +438,8 @@ def networkGet(owner, modelName, networkNum):
 @app.route("/distribution/<owner>/<model_name>/<feeder_num>")
 @flask_login.login_required
 def distribution_get(owner, model_name, feeder_num):
-	"""Render the editing interface for distribution networks."""
+	"""Render the editing interface for distribution networks.
+	"""
 	model_dir = os.path.join(_omfDir, "data","Model", owner, model_name)
 	with open(model_dir + "/allInputData.json", "r") as json_file:
 		feeder_dict = json.load(json_file)
@@ -446,7 +447,7 @@ def distribution_get(owner, model_name, feeder_num):
 	feeder_file = model_dir + "/" + feeder_name + ".omd"
 	with open(feeder_file, "r") as data_file:
 		data = json.load(data_file)
-	tree = data['tree']
+	#tree = data['tree']
 	#if not omf.distNetViz.contains_coordinates(tree):
 		#omf.distNetViz.insert_coordinates(tree)
 	passed_data = json.dumps(data)
@@ -487,9 +488,15 @@ def load_test_files(file_names):
 @app.route("/getComponents/")
 @flask_login.login_required
 def get_components():
-	path = "data/Component/"
-	components = {name[0:-5]:json.load(open(path + name)) for name in safeListdir(path)}
-	return json.dumps(components)
+	directory = "data/Component/"
+	components = {}
+	for dirpath, dirnames, file_names in os.walk(directory):
+		for name in file_names:
+			if name.endswith(".json"):
+				path = os.path.join(dirpath, name)
+				with open(path) as f:
+					components[name[0:-5]] = json.load(f) # Load the file as a regular object into the dictionary
+	return json.dumps(components) # Turn the dictionary of objects into a string
 
 @app.route("/checkConversion/<modelName>/<owner>", methods=["POST","GET"])
 @app.route("/checkConversion/<modelName>", methods=["POST","GET"])

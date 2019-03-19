@@ -1,0 +1,1 @@
+{"powerC_rating": "62.5 kVA", "name": "R1_12_47_1_3738", "primary_voltage": "12500.000 V", "install_type": "POLETOP", "object": "transformer_configuration", "secondary_voltage": "480 V", "connect_type": "SINGLE_PHASE", "resistance": "0.00160 Ohm", "shunt_impedance": "417.835+414.316j", "reactance": "0.00800 Ohm", "power_rating": "62.5 kVA"}

@@ -1,0 +1,1 @@
+{"name": "R1_12_47_2_1720", "primary_voltage": "12470.000 V", "install_type": "PADMOUNT", "object": "transformer_configuration", "secondary_voltage": "480 V", "connect_type": "SINGLE_PHASE", "resistance": "0.00080 Ohm", "shunt_impedance": "548.210+493.302j", "reactance": "0.00400 Ohm", "powerA_rating": "125.0 kVA", "power_rating": "125.0 kVA"}

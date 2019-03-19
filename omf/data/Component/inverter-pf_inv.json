@@ -1,0 +1,1 @@
+{"phases": "AS", "rated_power": "3000", "name": "pf_inv", "parent": "split_phase_meter", "inverter_type": "FOUR_QUADRANT", "power_factor": "0.95", "object": "inverter", "four_quadrant_control_mode": "CONSTANT_PF", "inverter_efficiency": "0.87"}

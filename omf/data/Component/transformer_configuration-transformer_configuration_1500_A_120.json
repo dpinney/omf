@@ -1,0 +1,1 @@
+{"name": "transformer_configuration_1500_A_120", "primary_voltage": "7200 V", "install_type": "POLETOP", "object": "transformer_configuration", "secondary_voltage": "120 V", "resistance": "0.00600 Ohm", "connect_type": "SINGLE_PHASE_CENTER_TAPPED", "reactance": "0.00400 Ohm", "powerA_rating": "15 kVA", "power_rating": "15 kVA"}

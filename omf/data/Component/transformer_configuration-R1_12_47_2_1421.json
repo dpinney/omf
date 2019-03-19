@@ -1,0 +1,1 @@
+{"name": "R1_12_47_2_1421", "primary_voltage": "7200 V", "install_type": "POLETOP", "object": "transformer_configuration", "secondary_voltage": "120 V", "connect_type": "SINGLE_PHASE_CENTER_TAPPED", "resistance": "0.00100 Ohm", "shunt_impedance": "600.360+543.819j", "reactance": "0.00067 Ohm", "powerA_rating": "150.0 kVA", "power_rating": "150.0 kVA"}
