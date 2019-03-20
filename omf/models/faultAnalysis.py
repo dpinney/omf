@@ -256,13 +256,14 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 							vals.pop(i)
 					for pos,key2 in enumerate(keys):
 						protDevFinalStatus[key2][phase] = vals[pos]
-	#print protDevFinalStatus
+	print protDevFinalStatus
 
 	#compare initial and final states of protective devices
 	#quick compare to see if they are equal
 	print cmp(protDevInitStatus, protDevFinalStatus)
 	#find which values changed
 	changedStates = {}
+
 
 	#read voltDump values into a dictionary.
 	try:
@@ -745,6 +746,71 @@ def _testingPlot():
 	chart.savefig(PREFIX + "YO_WHATS_GOING_ON.png")
 	# plt.show()
 
+def drawTable(initialStates=None, finalStates=None, outputPath=None):
+	#return self.log
+	html_str = """
+	<!DOCTYPE html>
+	<html>
+		<head>
+			<title>Protective Device Status Table</title>
+			<style>
+				table, th, td { border: 1px solid black; 
+				text-align: center;}
+			</style>
+			<link href="css/960.css" rel="stylesheet" media="screen" />
+			<link href="css/defaultTheme.css" rel="stylesheet" media="screen" />
+			<link href="css/myTheme.css" rel="stylesheet" media="screen" />
+			<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
+
+			<script src="jquery.fixedheadertable.js"></script>
+			<script src="prettyResults.js"></script>
+		</head>
+		<body>
+			<div class="container_whole">
+				<div class="grid_whole height_whole">
+					<table class="fancyTable" id="myTable" cellpadding="0" cellspacing="0">
+						<thead>
+							<tr>
+								<th>Protective Device Name</th>
+								<th>Initial States</th>
+								<th>Final States</th>
+								<th>Changes</th>
+							</tr>
+						</thead>
+						<tbody>"""
+			
+	for device in initialStates.keys():
+		row_str = "<tr><td>"+device+"</td><td>"
+		for phase in initialStates[device].keys():
+			row_str += "Phase " + phase + " = " + initialStates[device][phase] + "</br>"
+		row_str += "</td><td>"
+		for phase in finalStates[device].keys():
+			row_str += "Phase " + phase + " = " + finalStates[device][phase] + "</br>"
+		row_str += "</td><td>"
+		noChange = True
+		for phase in finalStates[device].keys():
+			if initialStates[device][phase] != finalStates[device][phase]:
+				row_str += "Phase " + phase + " : " + initialStates[device][phase] + " -> " + finalStates[device][phase] + "</br>"
+				noChange = False
+		if noChange:
+			row_str += "No Change"
+		row_str += "</td></tr>"
+		html_str += row_str
+	html_str += """
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</body>
+	</html>"""
+	#Not sure about the rest
+	if outputPath is None:
+		Html_file = open("AgentLog/output.html", "w")
+	else:
+		Html_file = open(outputPath, "w")
+	Html_file.write(html_str)
+	Html_file.close()
+
 def _debugging():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
@@ -762,6 +828,7 @@ def _debugging():
 	runForeground(modelLoc)
 	# Show the output.
 	renderAndShow(modelLoc)
+	drawTable(protDevInitStatus, protDevFinalStatus)
 
 if __name__ == '__main__':
 	_debugging()
