@@ -5,6 +5,9 @@
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
 	<style>
 	/*Styles here*/
+	tr {
+		border-bottom: 1px solid gray;
+	}
 	</style>
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->
@@ -184,6 +187,10 @@
 		<div id="voltageDropDiagram" class="tightContent postRun">
 			<img id="voltageDropChart" style="width:1000px;height:1000px;" />
 			<script type="text/javascript">gebi("voltageDropChart").src = "data:image/png;base64," + allOutputData.voltageDrop</script>
+		</div>
+		<p class="reportTitle postRun" style="page-break-before:always">Protective Device Status</p>
+		<div id="protDevStatus" class="tightContent postRun">
+			{{ allOutputDataDict['tableHtml'] }}
 		</div>
 	</div>
 </body>
