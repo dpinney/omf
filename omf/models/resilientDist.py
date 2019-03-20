@@ -565,7 +565,7 @@ def work(modelDir, inputDict):
 	for line in rdtJson["lines"]:
 		line['node1_id'] = line['node1_id'] + "_bus"
 		line['node2_id'] = line['node2_id'] + "_bus"
-		line['capacity'] = 10000
+		line['capacity'] = 10000#Todo: set this to summer.rating.continuous (of the conductor) * nominal_voltage / 10000 to get MVA rating.
 		line['construction_cost'] = float(inputDict['lineUnitCost'])
 		line['harden_cost'] = float(inputDict['hardeningUnitCost'])
 		line['switch_cost'] = float(inputDict['switchCost'])
