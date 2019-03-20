@@ -2117,6 +2117,7 @@ function viewElement(key) {
     $("#massEditModal .modalContent").draggable();
     $("#attachmentsModal .modalContent").draggable();
     $("#colorModal .modalContent").draggable();
+    $("#massAddSecondaryModal .modalContent").draggable();
     // Position the description table depending on whether or not it is draggable
     //document.getElementById("descriptionTable").removeAttribute("style");
     //document.getElementById("descriptionTable").style.left = "70vw";
@@ -3460,10 +3461,10 @@ function getExistingRelationships() {
 /**
  * Doesn't need unit tests.
  */
-function enableDrag(table) {
+function enableDrag(element) {
     if (window.jQuery != null) {
-        table.style.left = "50vw";
-        $(table).draggable();
+        element.style.left = "50vw";
+        $(element).draggable();
     }
 }
 
