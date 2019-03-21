@@ -99,8 +99,8 @@ def rollingDylanForecast(rawData, upBound, lowBound, rolling_window=5, hist_wind
 		hist_data = actual[hist_indices]
 		hist_min = np.min(hist_data)
 		hist_max = np.max(hist_data)
-		floor = lowBound / 100 * hist_min
-		ceiling = upBound / 100 * hist_max
+		floor = lowBound * hist_min
+		ceiling = upBound * hist_max
 		# make our prediction
 		pred = float(p(temps[w]))
 		pred = pred if pred > floor else floor

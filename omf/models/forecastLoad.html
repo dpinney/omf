@@ -99,11 +99,11 @@
 			</div>
 			<div class="shortInput   ">
 				<label>Lower Bound</label>
-				<input type="text" id="lowBound" name="lowBound" pattern="[1-9][0-9]{0,8}" required="required">
+				<input type="text" id="lowBound" name="lowBound" required="required">
 			</div>
 			<div class="shortInput   ">
 				<label>Upper Bound</label>
-				<input type="text" id="upBound" name="upBound" pattern="[1-9][0-9]{1,8}" required="required">
+				<input type="text" id="upBound" name="upBound" required="required">
 			</div>
 			<div class="shortInput   ">
 				<label>Rolling Window (number of weeks)</label>
@@ -165,6 +165,7 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 		</script>
 	</div>
+	<p class="reportTitle postRun" style="page-break-before:always">Hourly Day-of-Week Rolling Forecast</p>	
 	<div id="dylanPlot" class="tightContent postRun">
 		<div id="dylanChart"></div>
 		<script>
