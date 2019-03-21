@@ -1,5 +1,5 @@
 """ Anomaly detection. """
-
+# TODO: remove highcharts shading, replace with separate lines for min and max
 import os, sys, shutil, csv, StringIO
 import omf.anomalyDetection
 import numpy as np

@@ -73,7 +73,7 @@ _default_params = {
 }
 
 
-def rollingDylanForecast(rawData, upBound, lowBound, push_back = 672, rolling_window = 4):
+def rollingDylanForecast(rawData, upBound, lowBound, rolling_window=5, hist_window=8):
 	"""
 	This model takes the inputs rawData, a dataset that holds 8760 values in two columns with no indexes
 	The first column rawData[:][0] holds the hourly demand for one year
@@ -82,25 +82,30 @@ def rollingDylanForecast(rawData, upBound, lowBound, push_back = 672, rolling_wi
 	lowBound is the lower limit for forecasted data to not exceed as sometimes the forecasting is wonky
 	when values exceed upBound or go below lowBound they are set to None
 	"""
-	forecasted = np.repeat(np.nan, push_back)
+	forecasted = np.repeat(np.nan, 168 * rolling_window)
 	rawData = np.asarray(rawData)
-	actual = rawData[:,0]
-	temps = rawData[:,1]
-	for w in range(push_back, len(rawData)):
+	actual = rawData[:, 0]
+	temps = rawData[:, 1]
+	for w in range(168 * rolling_window, len(rawData)):
 		# need to start at 4 weeks+1 hour to get enough data to train so 4*7*24 = 672, the +1 is not necessary due to indexing starting at 0
-		training_indices = [w - 168*(i+1) for i in range(rolling_window)]
+		training_indices = [w - 168 * (i + 1) for i in range(rolling_window)]
 		x = temps[training_indices]
 		y = actual[training_indices]
 		z = np.polyfit(x, y, 1)
 		p = np.poly1d(z)
-		forecasted = np.append(forecasted, float(p(temps[w])))
-	# goodbye out of bounds
-	for i in range(len(forecasted)):
-		if forecasted[i] > float(upBound):
-			forecasted[i] = np.nan
-		elif forecasted[i] < float(lowBound):
-			forecasted[i] = np.nan
-	MAE = np.nanmean(np.abs(forecasted-actual))
+		# goodbye out of bounds
+		hist_indices = [w - 168 * (i + 1) for i in range(rolling_window)]
+		hist_data = actual[hist_indices]
+		hist_min = np.min(hist_data)
+		hist_max = np.max(hist_data)
+		floor = lowBound / 100 * hist_min
+		ceiling = upBound / 100 * hist_max
+		# make our prediction
+		pred = float(p(temps[w]))
+		pred = pred if pred > floor else floor
+		pred = pred if pred < ceiling else ceiling
+		forecasted = np.append(forecasted, pred)
+	MAE = np.nanmean(np.abs(forecasted - actual))
 	nan_indices = np.where(np.isnan(forecasted))
 	forecasted = forecasted.tolist()
 	for i in nan_indices[0]:
@@ -118,50 +123,30 @@ def exponentiallySmoothedForecast(rawData, alpha, beta):
 	The first column rawData[:][0] holds the hourly demand for one year
 	The second column rawData[:][1] holds the hourly temperature for one year
 	"""
-	forecasted = [None] * 672
-	actual = [rawData[i][0] for i in xrange(672)]
-	smotted = [None] * 672
-	tronds = [None] * 672
+	forecasted = [None] * 2 * 24
+	actual = [rawData[i][0] for i in xrange(2 * 24)]
+	smotted = [None] * 2 * 24
+	tronds = [None] * 2 * 24
 
 	# initialize the boi
 
-	for w in range(672, len(rawData)):
+	for w in range(2 * 24, len(rawData)):
 		# need to start at 4 weeks+1 hour to get enough data to train so 4*7*24 = 672, the +1 is not necessary due to indexing starting at 0
 		actual.append((rawData[w][0]))
-		if w >= 672:
-			x = np.array(
-				[
-					rawData[w - 168][1],
-					rawData[w - 336][1],
-					rawData[w - 504][1],
-					rawData[w - 672][1],
-				]
-			)  # training temp
-			y = np.array(
-				[
-					rawData[w - 168][0],
-					rawData[w - 336][0],
-					rawData[w - 504][0],
-					rawData[w - 672][0],
-				]
-			)  # training demand
-			old_smot = smotted[w - 24] if smotted[w - 24] else np.mean(y)
-			old_trond = (
-				tronds[w - 24]
-				if tronds[w - 24]
-				else (actual[w - 24] - actual[w - 2 * 24])
-			)
-			lovel = alpha * actual[w - 24] + (1 - alpha) * old_smot
-			trond = beta * (lovel - old_smot + old_trond) + (1 - beta) * old_trond
-			smot = lovel + trond
-			tronds.append(trond)
-			smotted.append(smot)
-			forecasted.append(smot)
-			# the further pred is from values in y, the more we lean on smot
-		else:
-			forecasted.append(None)
-			smotted.append(None)
-			tronds.append(None)
+		old_smot = (
+			smotted[w - 24]
+			if smotted[w - 24]
+			else np.mean([actual[w - 24], actual[w - 2 * 24]])
+		)
+		old_trond = (
+			tronds[w - 24] if tronds[w - 24] else (actual[w - 24] - actual[w - 2 * 24])
+		)
+		lovel = alpha * actual[w - 24] + (1 - alpha) * old_smot
+		trond = beta * (lovel - old_smot + old_trond) + (1 - beta) * old_trond
+		smot = lovel + trond
+		tronds.append(trond)
+		smotted.append(smot)
+		forecasted.append(smot)
 	MAE = 0  # Mean Average Error calculation
 	denom = 0
 	for i in range(len(forecasted)):

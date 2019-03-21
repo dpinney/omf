@@ -36,7 +36,8 @@ def work(modelDir, inputDict):
 		rawData, float(inputDict["upBound"]), float(inputDict["lowBound"])
 	)
 
-	(exp, exp_MAE) = loadForecast.exponentiallySmoothedForecast(rawData, 0.95, 0.05)
+	(exp, exp_MAE) = loadForecast.exponentiallySmoothedForecast(rawData, float(inputDict["alpha"]), float(inputDict["beta"]))
+	print exp_MAE
 
 	# parse json params
 	try:
@@ -60,6 +61,7 @@ def work(modelDir, inputDict):
 	outData["forecasted"] = forecasted
 	outData["doubleExp"] = exp
 	outData["MAE"] = MAE
+	outData["MAE_exp"] = exp_MAE
 	outData["peakDemand"] = pred_demand
 	if prophet_partitions > 1:
 		outData["prophet"] = prophet
@@ -83,6 +85,9 @@ def new(modelDir):
 		"fileName": "ERCOT_south_shortened.csv",
 		"lowBound": 500,
 		"upBound": 3550,
+		"rollingWindow": 4,
+		"alpha": 0.95,
+		"beta": 0.05,
 		"simStartDate": "2002-01-01",
 		"modelType": modelName,
 	}
