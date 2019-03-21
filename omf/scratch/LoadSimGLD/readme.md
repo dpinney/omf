@@ -1,14 +1,20 @@
 ### Description
 
-This software generates load shapes for a given device type. Types include gas heat pump heater, resistance heater, gas heat (with fan), waterheater, electric AC, heat pump AC, electric vehicle, non defferable loads Refrigerators and freezers, a defferable loads like dryers clotheswashers. 
+This software generates load shapes for a given device type. Device types include gas heaters, heat pump heaters, resistance heaters, waterheaters, electric AC units, heat pump AC units, electric vehicles, the non defferable loads refrigerators and freezers, and defferable loads like dryers and clotheswashers. 
 
 ### Usage
 
 Install by download (insert URL).
 
-You need some prerequirements. Install these from (insert list of software).
+You need some prerequirements:
+-pyplot from matplotlib
+-argparse
+-dates from matplotlib
+-pvlib
 
-Then run the simulation: `python LoadsimGLD <load_type>` where load_type is one of the following: "GasHeat", "HeatPump", "Resistance", "AC_electric", "AC_HeatPump", "Waterheater", "EV", "Refrigerator",  "Clotheswasher", "Dryer", "Freezer".
+You can install all of these with pip install <'package name'>
+
+Then run the simulation: `python LoadSimGLD.py <load_type>` where load_type is one of the following: "GasHeat", "HeatPump", "Resistance", "AC_electric", "AC_HeatPump", "Waterheater", "EV", "Refrigerator",  "Clotheswasher", "Dryer", "Freezer".
 
 Output should look like:
 
@@ -19,9 +25,7 @@ Output should look like:
 
 Change the climate data by replacing inc_climate.tmy2 with a TYM2 or TYM3 file (add link to where these are on the internet, probably NREL). 
 
-You will need to edit the titles of some charts in LoadSimGLD.py in order for the chart titles to match exactly the climate's location. 
-
-You can change the house energy efficiency metrics (square footage, insulation, glazing, etc.) by editing them in LoadSimGLD.py.
+You can change the house energy efficiency metrics (square footage, insulation, glazing, etc.) by editing them in LoadSimGLD.py in the text describing the super_house object. There is a docstring above the object with the label SUPER HOUSE OBJECT BELOW.
 
 To change attributes of loads, you will need to open the in_super_house.glm file to change the attributes of the loads. Only the house load is defined in LoadSimGLD.py. 
 

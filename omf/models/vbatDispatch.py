@@ -5,7 +5,7 @@ import os
 from os.path import join as pJoin
 from sklearn import linear_model
 import pandas as pd
-import datetime as dt
+from datetime import datetime as dt
 import numpy as np
 from numpy import array, npv, arctan as atan
 import __neoMetaModel__
@@ -184,27 +184,31 @@ def workForecast(modelDir, ind):
 	o = {}
 
 	# Grab data from CSV, 
-	try:
-		with open(pJoin(modelDir, 'hist.csv'), 'w') as f:
-			f.write(ind['histCurve'].replace('\r', ''))
-		df = pd.read_csv(pJoin(modelDir, 'hist.csv'), parse_dates=['dates'])
-		df['month'] = df['dates'].dt.month
-		df['dayOfYear'] = df['dates'].dt.dayofyear
-		assert df.shape[0] >= 26280 # must be longer than 3 years
-		assert df.shape[1] == 5
-	except:
-		raise Exception("CSV file is incorrect format.")
-
+	#try:
+ 	with open(pJoin(modelDir, 'hist.csv'), 'w') as f:
+ 		f.write(ind['histCurve'].replace('\r', ''))
+	df = pd.read_csv(pJoin(modelDir, 'hist.csv'))
+	assert df.shape[0] >= 26280 # must be longer than 3 years
+ 	assert df.shape[1] == 6
+	df['dates'] = df.apply(
+		lambda x: dt(
+			int(x['year']), 
+			int(x['month']), 
+			int(x['day']), 
+			int(x['hour'])), 
+		axis=1
+	)
+	df['dayOfYear'] = df['dates'].dt.dayofyear
+	# except:
+	# 	raise Exception("CSV file is incorrect format.")
 	# train model on previous data
 	all_X = fc.makeUsefulDf(df)
 	all_y = df['load']
 	X_train, y_train = all_X[:-8760], all_y[:-8760]
-	# clf = linear_model.SGDRegressor(max_iter=10000, tol=1e-4)
-	# clf.fit(X_train, y_train)
 
 	# ---------------------- MAKE PREDICTIONS ------------------------------- #
 	X_test, y_test = all_X[-8760:], all_y[-8760:]
-	predictions = fc.neural_net_predictions(all_X, all_y)
+	predictions, accuracy = fc.neural_net_predictions(all_X, all_y, EPOCHS=int(ind['epochs']))
 	dailyLoadPredictions = [predictions[i:i+24] for i in range(0, len(predictions), 24)]
 	
 	P_lower, P_upper, E_UL = vbat24hr(ind, df['tempc'][-8760:])
@@ -212,32 +216,34 @@ def workForecast(modelDir, ind):
 	dailyPu = [P_upper[i:i+24] for i in range(0, len(P_upper), 24)]
 	dailyEu = [E_UL[i:i+24] for i in range(0, len(E_UL), 24)]
 	
+	month_h = list(df['month'][-8760:])
+	month = [month_h[i:i+24] for i in range(0, len(month_h), 24)]
+	month = [m[0]-1 for m in month]
+
 	vbp, vbe = [], []
 	dispatched_d = [False]*365
+	last_peak = [-1*float('inf')]*12
 	# Decide what days to dispatch
-	zipped = zip(dailyLoadPredictions, df['month'][-8760:], dailyPl, dailyPu, dailyEu)
+	zipped = zip(dailyLoadPredictions, month, dailyPl, dailyPu, dailyEu)
 	for i, (load, m, pl, pu, eu) in enumerate(zipped):
 		peak = max(load)
-		if fc.shouldDispatchPS(peak, m, df, float(ind['confidence'])/100):
+		if peak > last_peak[m]:
 			dispatched_d[i] = True
 			p, e = fc.pulp24hrVbat(ind, load, pl, pu, eu)
 			vbp.extend(p)
 			vbe.extend(e)
+			last_peak[m] = peak + vbp[load.index(peak)]
 		else:
 			vbp.extend([0]*24)
 			vbe.extend([0]*24)
-
-	### TESTING FOR ACCURACY ###
-	assert len(dailyPl) == 365
-	assert all([len(i) == 24 for i in dailyPl])
 
 	VB_power, VB_energy = vbp, vbe
 
 	# -------------------- MODEL ACCURACY ANALYSIS -------------------------- #
 
-	o['predictedLoad'] = fc.neural_net_predictions(all_X, all_y)
-	o['trainAccuracy'] = 0 #round(clf.score(X_train, y_train) * 100, 2)
-	o['testAccuracy'] = 0 #round(clf.score(X_test, y_test) * 100, 2)
+	o['predictedLoad'] = predictions
+	o['trainAccuracy'] = 100 - round(accuracy['train'], 1)
+	o['testAccuracy'] = 100 - round(accuracy['test'], 1)
 
 	# PRECISION AND RECALL
 	maxDays = []
@@ -256,8 +262,7 @@ def workForecast(modelDir, ind):
 	o['precision'] = round(truePositive / float(truePositive + falsePositive) * 100, 2)
 	o['recall'] = round(truePositive / float(truePositive + falseNegative) * 100, 2)
 	o['number_of_dispatches'] = len([i for i in dispatched_d if i])
-	o['MAE'] = round(sum([abs(l-m)/m*100 for l, m in zip(predictions, list(y_test))])/8760., 2)
-
+	
 	# ---------------------- FINANCIAL ANALYSIS ----------------------------- #
 
 	o['VBpower'], o['VBenergy'] = list(VB_power), list(VB_energy)
@@ -327,17 +332,18 @@ def new(modelDir):
 		"discountRate":"2",
 		"unitDeviceCost":"150",
 		"unitUpkeepCost":"5",
-		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidVBAT.csv")).read(),
-		"tempCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","weatherNoaaTemp.csv")).read(),
-		"fileName": "FrankScadaValidVBAT.csv",
-		"tempFileName": "weatherNoaaTemp.csv",
-		'histFileName': 'Texas_17yr_TempAndLoad.csv',
+		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_1yr_Load.csv")).read(),
+		"tempCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_1yr_Temp.csv")).read(),
+		"fileName": "Texas_1yr_Load.csv",
+		"tempFileName": "Texas_1yr_Temp.csv",
 		"modelType": modelName,
 		## FORECAST ##
+		'histFileName': 'd_Texas_17yr_TempAndLoad.csv',
 		'dispatch_type': 'prediction', # 'optimal'
+		'epochs': '100',
 		'confidence': '90',
-		"histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_17yr_TempAndLoad.csv"), 'rU').read(),
-		}
+		"histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","d_Texas_17yr_TempAndLoad.csv"), 'rU').read(),
+	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
 def _simpleTest():

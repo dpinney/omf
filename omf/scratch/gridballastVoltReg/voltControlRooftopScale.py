@@ -19,6 +19,7 @@ def ConvertAndwork(filePath, gb_on_off='on', area=500):
 			gb_status = 'true'
 		else:
 			gb_status = 'false'
+		print ("gridballast is "+gb_on_off)
 		area = str(area)
 		inFeeder = json.load(inFile)
 		inFeeder['tree'][u'01'] = {u'omftype': u'#include', u'argument': u'"hot_water_demand1.glm"'}
@@ -216,8 +217,9 @@ def _debugging(filePath, gb_on_off='on', area=500):
 	# Visualize Voltage Regulation
 	voltRegViz('outGLM_rooftop.glm')
 	# 	Remove Feeder
-	os.remove('outGLM_rooftop.glm')
-	os.remove('voltDump.csv')
+	for file in os.listdir(dir_path):
+		if 'out' in file or file == 'voltDump.csv':
+			os.remove(file)
 
 
 
@@ -231,7 +233,7 @@ def voltRegViz(FNAME):
 
 if __name__ == '__main__':
 	if len(sys.argv) == 1:
-		_debugging('/Users/tuomastalvitie/Desktop/gridballast_gld_simulations/Feeders/UCS_Egan_Housed_Solar_rooftop.omd', gb_on_off='on', area=500)
+		_debugging('/Users/tuomastalvitie/Desktop/gridballast_gld_simulations/Feeders/UCS_Egan_Housed_Solar_rooftop.omd', gb_on_off='on', area=2000)
 	else:
 		#Parse Command Line
 		parser = argparse.ArgumentParser(description='Converts an OMD to GLM and runs it on gridlabd')

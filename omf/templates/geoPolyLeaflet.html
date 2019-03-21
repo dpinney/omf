@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Leaflet with SVG</title>
+<head>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" integrity="sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ=="
+        crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js" integrity="sha512-A7vV8IFfih/D732iSSKi20u/ooOfj/AGehOKq0f4vLT1Zr2Y+RX7C+w8A1gaSasGtRUZpF/NZgzSAu4/Gc41Lg=="
+        crossorigin=""></script>
+	<script>geojson={% if geojson %}{{geojson | tojson}}{% else %}null{% endif %}</script>
+
+</head>
+    <style>html, body {width: 100%;height: 100%;margin: 0;padding: 0;}</style>
+    <style>#map{
+        position: relative;
+        width: 100.0%;
+        height: 100.0%;
+        left: 0.0%;
+        top: 0.0%;
+        }
+    </style>
+    
+</head>
+<body>
+	<div id="map"></div>
+	<script type="text/javascript">
+	
+    var map = L.map('map').setView([32.9858360538, -102.760659987], 13);
+    mapLink = 
+        '<a href="http://openstreetmap.org">OpenStreetMap</a>';
+    L.tileLayer(
+        'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; ' + mapLink + ' Contributors',
+        maxZoom: 20,
+        }).addTo(map);
+    L.control.scale().addTo(map);
+	function onEachFeature(feature, layer) {
+		var popupContent = '';
+		for (const key in feature.properties) {
+			if (feature.properties.hasOwnProperty(key)) {
+				popupContent += feature.properties[key];
+				layer.bindPopup(popupContent);
+			}
+		}
+	}
+	function pointToLayerNode(feature, latlng) {
+		let fillColorValue = 'red';
+		if (feature.properties['pointColor']){
+			fillColorValue = feature.properties['pointColor'];
+		}
+		return L.circleMarker(latlng, {
+			radius: 8,
+			fillColor: fillColorValue,
+			color: "#000",
+			weight: 1,
+			opacity: 1,
+			fillOpacity: 0.8
+		});
+	}
+
+	function lineStyle(feature){
+		if (feature.properties.edgeColor){
+			return {
+				"color": feature.properties.edgeColor
+			}
+		}
+		else{
+			return {
+				"color": "black"
+			}
+		}
+	}
+	geojson.features.forEach(function(feature){
+		if (feature.geometry['type'] == 'Point'){
+			L.geoJSON(feature, {
+				pointToLayer: pointToLayerNode,
+				onEachFeature: onEachFeature
+			}).addTo(map);
+		}
+
+		else if (feature.geometry['type'] == 'LineString'){
+			L.geoJSON(feature, {
+				style: lineStyle,
+				onEachFeature: onEachFeature
+			}).addTo(map);
+		}
+		else if (feature.geometry['type'] == 'Polygon'){
+			L.geoJSON(feature).addTo(map);
+		}
+	});
+</script>
+</body>
+</html>

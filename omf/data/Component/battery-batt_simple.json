@@ -1,0 +1,1 @@
+{"name": "batt_simple", "parent": "load_following_inv_pf", "object": "battery", "battery_type": "LI_ION", "generator_mode": "SUPPLY_DRIVEN", "rfb_size": "HOUSEHOLD", "use_internal_battery_model": "true"}

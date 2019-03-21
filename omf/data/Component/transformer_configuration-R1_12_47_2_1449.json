@@ -1,0 +1,1 @@
+{"name": "R1_12_47_2_1449", "primary_voltage": "7200 V", "install_type": "PADMOUNT", "object": "transformer_configuration", "secondary_voltage": "120 V", "connect_type": "SINGLE_PHASE_CENTER_TAPPED", "resistance": "0.00075 Ohm", "shunt_impedance": "704.660+755.051j", "reactance": "0.00050 Ohm", "powerB_rating": "200.0 kVA", "power_rating": "200.0 kVA"}

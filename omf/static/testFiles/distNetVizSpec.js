@@ -950,9 +950,9 @@ describe("Unit tests", function() {
                 });
             });
         });
-
+        // good
         describe("treePrototype", function() {
-            //good
+            
             describe("getObject()", function() {
 
                 it("should throw an exception if the key doesn't exist in the tree", function() {
@@ -970,7 +970,7 @@ describe("Unit tests", function() {
                     expect(tree.getObject("0")).toBe(tree.tree["0"]);
                 });
             });
-            //good
+            
             describe("insert()", function() {
 
                 describe("if the TreeObject does not match a corresponding tree object in the tree", function() {
@@ -1013,7 +1013,7 @@ describe("Unit tests", function() {
                     });
                 });
             });
-            //good
+            
             describe("isDeletable()", function() {
 
                 let tree;
@@ -1073,7 +1073,7 @@ describe("Unit tests", function() {
                     expect(tree.isDeletable("6")).toBe(true);
                 });
             });
-            //good 
+            
             describe("getSubtreeToDelete()", function() {
 
                 describe("if the tree object has connected lines and/or children", function() {
@@ -1185,7 +1185,8 @@ describe("Unit tests", function() {
                         const map = {
                             object: "node",
                             longitude: "50",
-                            latitude: "50"
+                            latitude: "50",
+                            name: "Charlie"
                         };
                         const tObject = createTreeObject(map, createTree());
                         expect(tObject.data.longitude).toEqual(50);
@@ -1193,13 +1194,17 @@ describe("Unit tests", function() {
                     });
                 });
 
-                it("should return a TreeObject with data that is equivalent to the map, but not the same object", function() {
+                it("should return a TreeObject with data that is equivalent to the map (except for the name), but not the same object", function() {
                     const map = {
-                        prop: "cool value"
+                        object: "thing",
+                        name: "Jefferson"
                     }
                     const tObj = createTreeObject(map, createTree());
                     expect(tObj.data).not.toBe(map);
-                    expect(tObj.data).toEqual(map);
+                    expect(tObj.data).toEqual({
+                        object: "thing",
+                        name: "Jefferson_0"
+                    });
                 });
 
                 it("should return a TreeObject with a key that does not exist in the treeWrapper.tree", function() {
@@ -1207,7 +1212,11 @@ describe("Unit tests", function() {
                         0: {}
                     };
                     tree = createTree(tree);
-                    const tObj = createTreeObject({}, tree);
+                    const component = {
+                        object: "object",
+                        name: "name"
+                    }
+                    const tObj = createTreeObject(component, tree);
                     expect(tObj.key).toEqual("1");
                 });
 
@@ -1215,22 +1224,36 @@ describe("Unit tests", function() {
                     const spy = spyOn(window, "getNewTreeKey").and.callThrough();
                     const tree = createTree();
                     expect(spy).not.toHaveBeenCalled();
-                    createTreeObject({}, tree);
+                    const component = {
+                        object: "object",
+                        name: "name"
+                    }
+                    createTreeObject(component, tree);
                     expect(spy).toHaveBeenCalled();
                 });
 
-                it(`should set the 'name' property to be a concatenation of the 'object' property and the id, if the object has the 'object' property`, function() {
-                    const map = {
-                        object: "Austin",
+                /* This assumes all components have a name property, which they do */
+                it(`should set the 'name' property to be a concatenation of the components's 'name' property and the id (<name>_<id>)`, function() {
+                    const tree = createTree();
+                    let component = {
+                        object: "load",
+                        name: "x346R"
                     };
-                    const tObject = createTreeObject(map, createTree());
-                    expect(tObject.data.name).toEqual("Austin0");
+                    let tObject = createTreeObject(component, tree);
+                    tree.insert(tObject);
+                    expect(tObject.data.name).toEqual("x346R_0");
+                    component = {
+                        object: "meter",
+                        name: "meter"
+                    };
+                    tObject = createTreeObject(component, tree);
+                    expect(tObject.data.name).toEqual("meter_1");
                 });
             });
         });
-
+        // good
         describe("svgDataPrototype", function() {
-            //good.
+
             describe("setSubtreetoRedraw()", function() {
 
                 describe("if the an object in the primaryKeySet has children", function() {
@@ -1343,7 +1366,7 @@ describe("Unit tests", function() {
                     });
                 });
             });
-            //good
+            
             describe("createData()", function() {
 
                 it("should only create parent-child lines for childNodes whose parent is in the subtreeKeySet", function() {
@@ -1371,6 +1394,83 @@ describe("Unit tests", function() {
                     expect(lineIds).toEqual([]);
                     expect(parentChildIds).toEqual([`172260_172261`]); 
                 });
+            });
+        });
+        //bad
+        describe("componentManagerPrototype", function() {
+            //good
+            describe("insert()", function() {
+
+                describe("if a component has the 'object' and 'name' properties", function() {
+
+                    describe("if the component has a unique name", function() {
+
+                        it("should insert the component based on its 'object' and 'name' properties", function() {
+                            const component = {
+                                object: "Geothermal plant",
+                                name: "XX9922-114"
+                            };
+                            const cm = createComponentManager();
+                            cm.insert(component);
+                            expect(cm.components[component.object][component.name]).toEqual(component);
+                            expect(Object.keys(cm.components).length).toEqual(1);
+                            expect(Object.keys(cm.components[component.object]).length).toEqual(1);
+                        });
+                    });
+
+                    describe("if the component has a non-unique name", function() {
+                        
+                        /* Components themselves need to have unique names. A specific component is retrieved based on its object and name properties. If two components have the same name, which one is returned? Ideally, the .json files are written well enough so that this never becomes an issue. Now that components are guaranteed to have unique names, graph objects ALSO need unique names that are also descriptive. The naming convention for graph objects is "<name>_<tree key>". Two components COULD have the same name, and when added those components would be unique graph objects. However, this wouldn't solve the first problem of retreiving the correct component. Therefore, components themselves must have unique names.
+                        */
+                        it("should insert the component based on its 'object' property and its new assigned name", function() {
+                            const component = {
+                                object: "Geothermal plant",
+                                name: "XX9922-114"
+                            };
+                            const components = [];
+                            for (let i = 0; i < 5; i++) {
+                                let copy = deepCopy(component);
+                                components.push(copy);
+                            }
+                            const cm = createComponentManager();
+                            components.forEach(c => cm.insert(c));
+                            expect(Object.keys(cm.components).length).toEqual(1);
+                            expect(Object.keys(cm.components[component.object]).length).toEqual(5);
+                            for (let i = 1; i < 5; i++) {
+                                expect(cm.components[component.object][`${component.name}_${i}`]).toBeDefined();
+                            }
+                        });
+                    });
+                });
+
+                describe("if a component is missing the 'object' property", function() {
+
+                    it("should alert the user", function() {
+                        const spy = spyOn(window, "alert");
+                        const component = {name: "Joe"};
+                        const cm = createComponentManager();
+                        cm.insert(component);
+                        expect(spy).toHaveBeenCalled();
+                        expect(cm.components).toEqual({});
+                    });
+                });
+
+                describe("if a component is missing the 'name' property", function() {
+
+                    it("should assign the component a name based on its 'object' property and insert it", function() {
+                        const component = {object: "load"};
+                        const component2 = {object: "load"};
+                        const cm = createComponentManager();
+                        cm.insert(component);
+                        cm.insert(component2);
+                        expect(Object.keys(cm.components).length).toEqual(1)
+                        expect(Object.keys(cm.components[component.object]).length).toEqual(2);
+                        expect(cm.components["load"]["load"]).toBe(component);
+                        expect(component.name).toEqual("load");
+                        expect(cm.components["load"]["load_1"]).toBe(component2);
+                        expect(component2.name).toEqual("load_1");
+                    });
+                })
             });
         });
         //good
@@ -1668,7 +1768,7 @@ describe("Unit tests", function() {
                 });
             });
             //good
-            describe("getType()", function() {
+            describe("getRelationship()", function() {
                 // This should basically never happen, but you never know
                 describe("if the object argument is a line and a configuration node", function() {
     
@@ -1676,7 +1776,7 @@ describe("Unit tests", function() {
                         spyOn(window, "isLine").and.returnValue(true);
                         spyOn(window, "isChildNode").and.returnValue(false);
                         spyOn(window, "isConfigurationNode").and.returnValue(true);
-                        expect(getType({})).toEqual("line");
+                        expect(getRelationship({})).toEqual("line");
                     });
                 });
                 // This should also never happen
@@ -1686,7 +1786,7 @@ describe("Unit tests", function() {
                         spyOn(window, "isLine").and.returnValue(false);
                         spyOn(window, "isChildNode").and.returnValue(true);
                         spyOn(window, "isConfigurationNode").and.returnValue(true);
-                        expect(getType({})).toEqual("configurationNode");
+                        expect(getRelationship({})).toEqual("configurationNode");
                     });
                 });
     
@@ -1696,7 +1796,7 @@ describe("Unit tests", function() {
                         spyOn(window, "isLine").and.returnValue(false);
                         spyOn(window, "isChildNode").and.returnValue(false);
                         spyOn(window, "isConfigurationNode").and.returnValue(false);
-                        expect(getType({})).toEqual("independentNode");
+                        expect(getRelationship({})).toEqual("independentNode");
                     });
                 });
             });
@@ -1970,13 +2070,6 @@ describe("Unit tests", function() {
                         expect(nodeElement.style.fill).toEqual("");
                     });
                 });
-            });
-        });
-
-        describe("createColorFile()", function() {
-
-            describe("if invoked with a string argument", function() {
-
             });
         });
     });

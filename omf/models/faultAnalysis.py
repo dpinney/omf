@@ -70,8 +70,7 @@ def work(modelDir, inputDict):
 		faultTypeValue = None
 	else:
 		faultTypeValue = inputDict["faultType"]
-	# chart = voltPlot(omd, workDir=modelDir, neatoLayout=neato)
-	chart = drawPlotFault(
+	chart, table = drawPlotFault(
 		pJoin(modelDir,feederName + ".omd"),
 		neatoLayout = neato,
 		edgeCol = edgeColValue,
@@ -84,8 +83,11 @@ def work(modelDir, inputDict):
 		rezSqIn = int(inputDict["rezSqIn"]),
 		simTime = simTimeValue,
 		workDir = modelDir)
-	chart.savefig(pJoin(modelDir,"output.png"))
-	with open(pJoin(modelDir,"output.png"),"rb") as inFile:
+	chart.savefig(pJoin(modelDir, "output.png"))
+	with open(pJoin(modelDir, "statusTable.html"), "w") as tabFile:
+		tabFile.write(table)
+	outData['tableHtml'] = table
+	with open(pJoin(modelDir, "output.png"),"rb") as inFile:
 		outData["voltageDrop"] = inFile.read().encode("base64")
 	return outData
 
@@ -256,13 +258,14 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 							vals.pop(i)
 					for pos,key2 in enumerate(keys):
 						protDevFinalStatus[key2][phase] = vals[pos]
-	#print protDevFinalStatus
+	print protDevFinalStatus
 
 	#compare initial and final states of protective devices
 	#quick compare to see if they are equal
 	print cmp(protDevInitStatus, protDevFinalStatus)
 	#find which values changed
 	changedStates = {}
+
 
 	#read voltDump values into a dictionary.
 	try:
@@ -576,100 +579,10 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 	# plt.clim(110,130)
 	if drawColorbar:
 		plt.colorbar()
-	return voltChart
-
-def voltPlot(omd, workDir=None, neatoLayout=False):
-	''' Draw a color-coded map of the voltage drop on a feeder.
-	Returns a matplotlib object. '''
-	tree = omd.get('tree',{})
-	# # Get rid of schedules and climate:
-	for key in tree.keys():
-		if tree[key].get("argument","") == "\"schedules.glm\"" or tree[key].get("tmyfile","") != "":
-			del tree[key]
-	# Map to speed up name lookups.
-	nameToIndex = {tree[key].get('name',''):key for key in tree.keys()}
-	# Make sure we have a voltDump:
-	def safeInt(x):
-		try: return int(x)
-		except: return 0
-	biggestKey = max([safeInt(x) for x in tree.keys()])
-	tree[str(biggestKey*10)] = {"object":"voltdump","filename":"voltDump.csv"}
-	# Run Gridlab.
-	if not workDir:
-		workDir = tempfile.mkdtemp()
-	gridlabOut = gridlabd.runInFilesystem(tree, attachments=omd.get('attachments',{}), workDir=workDir)
-	with open(pJoin(workDir,'voltDump.csv'),'r') as dumpFile:
-		reader = csv.reader(dumpFile)
-		reader.next() # Burn the header.
-		keys = reader.next()
-		voltTable = []
-		for row in reader:
-			rowDict = {}
-			for pos,key in enumerate(keys):
-				rowDict[key] = row[pos]
-			voltTable.append(rowDict)
-	# Calculate average node voltage deviation. First, helper functions.
-	def digits(x):
-		''' Returns number of digits before the decimal in the float x. '''
-		return math.ceil(math.log10(x+1))
-	def avg(l):
-		''' Average of a list of ints or floats. '''
-		return sum(l)/len(l)
-	# Use the swing bus voltage as a reasonable default voltage.
-	for key in tree:
-		ob = tree[key]
-		if type(ob)==dict and ob.get('bustype','')=='SWING':
-			swingVoltage = float(ob.get('nominal_voltage',1))
-	# Tot it all up.
-	nodeVolts = {}
-	for row in voltTable:
-		allVolts = []
-		for phase in ['A','B','C']:
-			realV = float(row['volt'+phase+'_real'])
-			imagV = float(row['volt'+phase+'_imag'])
-			phaseVolt = math.hypot(realV, imagV)
-			if phaseVolt != 0.0:
-				if digits(phaseVolt)>3:
-					nodeName = row.get('node_name','')
-					treeKey = nameToIndex.get(nodeName, 0)
-					nodeObj = tree.get(treeKey, {})
-					try:
-						nominal_voltage = float(nodeObj['nominal_voltage'])
-					except:
-						nominal_voltage = swingVoltage
-					# Normalize to 120 V standard
-					phaseVolt = phaseVolt*(120/nominal_voltage)
-				allVolts.append(phaseVolt)
-		# Hack: average across phases.
-		nodeVolts[row.get('node_name','')] = avg(allVolts)
-	# Color nodes by VOLTAGE.
-	fGraph = feeder.treeToNxGraph(tree)
-	voltChart = plt.figure(figsize=(20,20))
-	plt.axes(frameon = 0)
-	plt.axis('off')
-	plt.tight_layout()
-	#set axes step equal
-	voltChart.gca().set_aspect('equal')
-	if neatoLayout:
-		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
-		cleanG = nx.Graph(fGraph.edges())
-		cleanG.add_nodes_from(fGraph)
-		positions = graphviz_layout(cleanG, prog='neato')
-	else:
-		positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
-	edgeIm = nx.draw_networkx_edges(fGraph, positions)
-	nodeIm = nx.draw_networkx_nodes(
-		fGraph,
-		pos = positions,
-		node_color = [nodeVolts.get(n,0) for n in fGraph.nodes()],
-		linewidths = 0,
-		node_size = 30,
-		cmap = plt.cm.viridis
-	)
-	plt.sci(nodeIm)
-	plt.clim(110,130)
-	plt.colorbar(orientation='horizontal', fraction=0.05)
-	return voltChart
+	# Also draw a table.
+	#TODO: factor this out and in to work().
+	table = drawTable(initialStates=protDevInitStatus, finalStates=protDevFinalStatus)
+	return voltChart, table
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
@@ -744,6 +657,42 @@ def _testingPlot():
 	chart = drawPlotFault(PREFIX + FNAME, neatoLayout=True, edgeCol="Current", nodeCol=None, nodeLabs="Name", edgeLabs=None, faultLoc="node713-704", faultType="TLG", customColormap=False, rezSqIn=225, simTime='2000-01-01 0:00:00')
 	chart.savefig(PREFIX + "YO_WHATS_GOING_ON.png")
 	# plt.show()
+
+def drawTable(initialStates=None, finalStates=None):
+	#return self.log
+	html_str = """
+		<table cellpadding="0" cellspacing="0" style="width:100%">
+			<thead>
+				<tr>
+					<th>Protective Device Name</th>
+					<th>Initial States</th>
+					<th>Final States</th>
+					<th>Changes</th>
+				</tr>
+			</thead>
+			<tbody>"""
+	for device in initialStates.keys():
+		row_str = "<tr><td>"+device+"</td><td>"
+		for phase in initialStates[device].keys():
+			row_str += "Phase " + phase + " = " + initialStates[device][phase] + "</br>"
+		row_str += "</td><td>"
+		for phase in finalStates[device].keys():
+			row_str += "Phase " + phase + " = " + finalStates[device][phase] + "</br>"
+		row_str += "</td><td>"
+		noChange = True
+		for phase in finalStates[device].keys():
+			try:
+				if initialStates[device][phase] != finalStates[device][phase]:
+					row_str += "Phase " + phase + " : " + initialStates[device][phase] + " -> " + finalStates[device][phase] + "</br>"
+					noChange = False
+			except:
+				pass #key error...
+		if noChange:
+			row_str += "No Change"
+		row_str += "</td></tr>"
+		html_str += row_str
+	html_str += """</tbody></table>"""
+	return html_str
 
 def _debugging():
 	# Location

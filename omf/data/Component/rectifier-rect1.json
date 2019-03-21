@@ -1,0 +1,1 @@
+{"phases": "ABCN", "name": "rect1", "parent": "simple_inverter", "object": "rectifier", "rectifier_type": "SIX_PULSE", "generator_mode": "SUPPLY_DRIVEN"}

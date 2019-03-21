@@ -11,6 +11,7 @@ from os.path import join as pJoin
 from datetime import datetime as dt
 from datetime import timedelta, date
 from sklearn.model_selection import GridSearchCV
+from scipy.stats import zscore
 
 
 class suppress_stdout_stderr(object):
@@ -663,7 +664,7 @@ def add_noise(m, std):
 	noise = np.random.normal(0, std, m.shape[0])
 	return m + noise
 
-def makeUsefulDf(df):
+def makeUsefulDf(df, noise=2.5):
 	"""
 	Turn a dataframe of datetime and load data into a dataframe useful for
 	machine learning. Normalize values and turn 
@@ -708,23 +709,29 @@ def makeUsefulDf(df):
 
 	"""
 
-	def _normalizeCol(l):
-		s = l.max() - l.min()
-		return l if s == 0 else (l - l.mean()) / l.std()
-
 	def _chunks(l, n):
 		return [l[i : i + n] for i in range(0, len(l), n)]
-
+	
+	df['dates'] = df.apply(
+		lambda x: dt(
+			int(x['year']), 
+			int(x['month']), 
+			int(x['day']), 
+			int(x['hour'])), 
+		axis=1
+	)
+    
 	r_df = pd.DataFrame()
-	r_df["load_n"] = _normalizeCol(df["load"])
-	r_df["years_n"] = _normalizeCol(df["dates"].dt.year - 2000)
+	r_df["load_n"] = zscore(df["load"])
+	r_df["years_n"] = zscore(df["dates"].dt.year)
 
 	# fix outliers
 	m = df["tempc"].replace([-9999], np.nan)
 	m.ffill(inplace=True)
-	# 2.5 degrees average std error for the national weather service
-	temp_noise = add_noise(m, 2.5)
-	r_df["temp_n"] = _normalizeCol(temp_noise)
+	# day-before predictions
+	temp_noise = add_noise(m, noise)
+	r_df["temp_n"] = zscore(temp_noise)
+	r_df['temp_n^2'] = r_df["temp_n"] ** 2
 
 	# add the value of the load 24hrs before
 	r_df["load_prev_n"] = r_df["load_n"].shift(24)
@@ -763,6 +770,8 @@ def makeUsefulDf(df):
 	r_df["isChristmas"] = isHoliday("Christmas Day", df)
 
 	m = r_df.drop(["month", "hour", "day", "load_n"], axis=1)
+	df = df.drop(['dates'], axis=1)
+
 	return m
 
 def shouldDispatchPS(peak, month, df, conf):
@@ -854,7 +863,7 @@ def pulp24hrBattery(demand, power, energy, battEff):
 	)
 
 
-def neural_net_predictions(all_X, all_y):
+def neural_net_predictions(all_X, all_y, EPOCHS=10):
 	import tensorflow as tf
 	from tensorflow.keras import layers
 
@@ -877,8 +886,6 @@ def neural_net_predictions(all_X, all_y):
 		metrics=["mean_absolute_error", "mean_squared_error"],
 	)
 
-	EPOCHS = 10
-
 	early_stop = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=10)
 
 	history = model.fit(
@@ -890,4 +897,16 @@ def neural_net_predictions(all_X, all_y):
 		callbacks=[early_stop],
 	)
 
-	return [float(f) for f in model.predict(all_X[-8760:])]
+	def MAPE(predictions, answers):
+		assert len(predictions) == len(answers)
+		return sum([abs(x-y)/(y+1e-5) for x, y in zip(predictions, answers)])/len(answers)*100   
+	
+	predictions = [float(f) for f in model.predict(all_X[-8760:])]
+	train = [float(f) for f in model.predict(all_X[:-8760])]
+	accuracy = {
+		'test': MAPE(predictions, all_y[-8760:]),
+		'train': MAPE(train, all_y[:-8760])
+	}
+	
+	return [float(f) for f in model.predict(all_X[-8760:])], accuracy
+

@@ -199,8 +199,10 @@ def _debugging(filePath, gb_on_off='on'):
 	# Visualize Voltage Regulation
 	voltRegViz('outGLM.glm')
 	# Remove Feeder
-	os.remove('outGLM.glm')
-	os.remove('voltDump.csv')
+	for file in os.listdir(dir_path):
+		if 'out' in file or file == 'voltDump.csv':
+			os.remove(file)
+
 
 
 def voltRegViz(FNAME):
@@ -215,7 +217,7 @@ def voltRegViz(FNAME):
 	
 if __name__ == '__main__':
 	if len(sys.argv) == 1:
-		_debugging('/Users/tuomastalvitie/Desktop/gridballast_gld_simulations/Feeders/UCS_Egan_Housed_Solar.omd', gb_on_off='on')
+		_debugging('/Users/tuomastalvitie/Desktop/gridballast_gld_simulations/Feeders/UCS_Egan_Housed_Solar.omd', gb_on_off='off')
 	else:
 		#Parse Command Line
 		parser = argparse.ArgumentParser(description='Converts an OMD to GLM and runs it on gridlabd')
