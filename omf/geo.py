@@ -79,7 +79,7 @@ def hullOfOmd(pathToOmdFile):
 	}
 	return geoJsonDict
 
-def omdGeoJson(pathToOmdFile, outputPath):
+def omdGeoJson(pathToOmdFile):
 	'''Create a geojson standards compliant file (https://tools.ietf.org/html/rfc7946) from an omd.'''
 	with open(pathToOmdFile) as inFile:
 		tree = json.load(inFile)['tree']
@@ -121,11 +121,12 @@ def omdGeoJson(pathToOmdFile, outputPath):
 				"edgeColor":_obToCol(edge_types[edge])
 			}
 		})
-	if not os.path.exists(outputPath):
-		os.makedirs(outputPath)
-	shutil.copy('static/geoPolyLeaflet.html', outputPath)
-	with open(pJoin(outputPath,'geoPointsLines.json'),"w") as outFile:
-		json.dump(geoJsonDict, outFile, indent=4)
+	return geoJsonDict
+	#if not os.path.exists(outputPath):
+	#	os.makedirs(outputPath)
+	#shutil.copy('static/geoPolyLeaflet.html', outputPath)
+	#with open(pJoin(outputPath,'geoPointsLines.json'),"w") as outFile:
+	#	json.dump(geoJsonDict, outFile, indent=4)
 
 def mapOmd(pathToOmdFile, outputPath, fileFormat):
 	'''
@@ -177,8 +178,9 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat):
 			})
 		if not os.path.exists(outputPath):
 			os.makedirs(outputPath)
-		shutil.copy('static/geoPolyLeaflet.html', outputPath)
-		with open(pJoin(outputPath,'geoPointsLines.json'),"w") as outFile:
+		shutil.copy('static/geoJsonMap.html', outputPath)
+		with open(pJoin(outputPath,'geoJsonFeatures.js'),"w") as outFile:
+			outFile.write("var geojson =")
 			json.dump(geoJsonDict, outFile, indent=4)
 	elif fileFormat == 'png':
 		latitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
@@ -227,7 +229,7 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat):
 				os.makedirs(outputPath)
 			plt.savefig(pJoin(outputPath,'graphOnMap.png'),frameon=False, pad_inches=0, bbox='tight')
 
-def simplifiedOmdShape(pathToOmdFile, outputPath):
+def simplifiedOmdShape(pathToOmdFile):
 	'''Use kmeans clustering to create simplified geojson object with convex hull and connected clusters from an omd.'''
 	with open(pathToOmdFile) as inFile:
 		tree = json.load(inFile)['tree']
@@ -303,12 +305,14 @@ def simplifiedOmdShape(pathToOmdFile, outputPath):
 				"edgeType": simplifiedGraph[edge[0]][edge[1]]['type']
 			}
 		})
-	#return simplifiedGeoDict
+	return simplifiedGeoDict
+	'''
 	if not os.path.exists(outputPath):
 		os.makedirs(outputPath)
 	shutil.copy('static/geoPolyLeaflet.html', outputPath)
-	with open(pJoin(outputPath,'geoPointsLines.json'),"w") as outFile:
+	with open(pJoin(outputPath,'geoJsonFeatures.json'),"w") as outFile:
 		json.dump(simplifiedGeoDict, outFile, indent=4)
+	'''
 
 def shortestPathOmd(pathToOmdFile, sourceObjectName, targetObjectName):
 	'''Get the shortest path between two points on a feeder'''
@@ -590,6 +594,15 @@ def convertMap(pathToOmdFile, outputPath, fileFormat):
 				os.makedirs(outputPath)
 			plt.savefig(pJoin(outputPath,'graphOnMap.png'),frameon=False, pad_inches=0, bbox='tight')
 
+def showOnMap(geoJson):
+	tempDir = tempfile.mkdtemp()
+	shutil.copy('templates/geoJsonMap.html', tempDir)
+	with open(pJoin(tempDir,'geoJsonFeatures.js'),"w") as outFile:
+		outFile.write("var geojson =")
+		json.dump(geoJson, outFile, indent=4)
+	webbrowser.open_new(pJoin(tempDir,'geoJsonMap.html'))
+
+
 def _tests():
 	e, n = 249.2419752733258, 1186.1488466689188
 	lat, lon = statePlaneToLatLon(e, n, 2205)
@@ -598,8 +611,9 @@ def _tests():
 	print (e2, n2) # (249.24197527189972, 1186.1488466408398)
 	# mapOmd('./static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png')
 	# mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html')
-	# print(hullOfOmd('static/publicFeeders/Olin Barre LatLon.omd'))
+	#hullOfOmd('static/publicFeeders/Olin Barre LatLon.omd')
 	# simplifiedOmd = simplifiedOmdShape('static/publicFeeders/Olin Barre LatLon.omd')
+	showOnMap(simplifiedOmdShape('static/publicFeeders/Olin Barre LatLon.omd'))
 	#print(simplifiedOmd)
 	# shortestPathOmd('static/publicFeeders/Olin Barre LatLon.omd', 'node62474203981T62474203987_B', 'node1667616792')
 	# rasterTilesFromOmd('static/publicFeeders/Olin Barre LatLon.omd', 'scratch/omdTests/tiles')
