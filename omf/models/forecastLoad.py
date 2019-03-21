@@ -1,5 +1,6 @@
 import csv, math
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import __neoMetaModel__, json
 from __neoMetaModel__ import *
@@ -7,7 +8,7 @@ from omf import loadForecast
 
 # Model metadata:
 modelName, template = metadata(__file__)
-tooltip = ("Forecasts hourly load day-ahead using multiple methods")
+tooltip = "Forecasts hourly load day-ahead using multiple methods"
 hidden = False
 
 
@@ -15,31 +16,56 @@ def work(modelDir, inputDict):
 	""" Run the model in its directory."""
 	outData = {}
 	rawData = []
-	forecasted = []
 	actual = []
+
+	# write input file to modelDir sans carriage returns
 	with open(pJoin(modelDir, "demandTemp.csv"), "w") as demandTempFile:
 		demandTempFile.write(inputDict["demandTemp"].replace("\r", ""))
+
+		# read it in as a list of lists
 	try:
 		with open(pJoin(modelDir, "demandTemp.csv")) as inFile:
-			reader = csv.reader(inFile)
-			for row in reader:
-				rawData.append(row)
-	except:
+			df = pd.read_csv(inFile, header=None)
+			df.columns = ["load", "tempc"]
+			df["dates"] = pd.date_range(
+				start=inputDict["simStartDate"], freq="H", periods=df.shape[0]
+			)
+			print df.shape[0]
+	except ZeroDivisionError:
 		errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href = 'https://github.com/dpinney/omf/wiki/Models-~-storagePeakShave#demand-file-csv-format'>\nOMF Wiki storagePeakShave - Demand File CSV Format</a>"
 		raise Exception(errorMessage)
+
+		# neural net time
+	all_X = loadForecast.makeUsefulDf(df)
+	all_y = df["load"]
+	all_X.to_csv(pJoin(modelDir, "usefulDf.csv"))
+	rawData = df[["load", "tempc"]].fillna(0).values.tolist()
+	del df
+
+	nn_pred, nn_accuracy = loadForecast.neural_net_predictions(all_X, all_y)
+	while len(nn_pred) < len(rawData):
+		nn_pred.insert(0, None)
+
+	"""
+	# None -> 0, float-> string
 	for i in range(len(rawData)):
 		rawData[i] = [a if a else 0 for a in rawData[i]]
-	rawData = list(np.float_(rawData))  # converts all data from float to string
+	rawData = list(np.float_(rawData))
+	"""
+
+	# populate actual list
 	for x in range(len(rawData)):
 		actual.append(float(rawData[x][0]))
+
 	(forecasted, MAE) = loadForecast.rollingDylanForecast(
 		rawData, float(inputDict["upBound"]), float(inputDict["lowBound"])
 	)
 
-	(exp, exp_MAE) = loadForecast.exponentiallySmoothedForecast(rawData, float(inputDict["alpha"]), float(inputDict["beta"]))
-	print exp_MAE
+	(exp, exp_MAE) = loadForecast.exponentiallySmoothedForecast(
+		rawData, float(inputDict["alpha"]), float(inputDict["beta"])
+	)
 
-	# parse json params
+	# parse json params for nextDayPeakKatrina
 	try:
 		params = json.loads(inputDict.get("katSpec", "{}"))
 	except ValueError:
@@ -56,12 +82,16 @@ def work(modelDir, inputDict):
 		prophet, prophet_low, prophet_high = loadForecast.prophetForecast(
 			rawData, inputDict["simStartDate"], modelDir, inputDict["prophet"]
 		)
+
+		# write our outData
 	outData["startDate"] = inputDict["simStartDate"]
 	outData["actual"] = actual
 	outData["forecasted"] = forecasted
 	outData["doubleExp"] = exp
+	outData["neuralNet"] = nn_pred
 	outData["MAE"] = MAE
 	outData["MAE_exp"] = exp_MAE
+	outData["MAPE_nn"] = "%0.2f" % nn_accuracy["test"]
 	outData["peakDemand"] = pred_demand
 	if prophet_partitions > 1:
 		outData["prophet"] = prophet

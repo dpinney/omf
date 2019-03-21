@@ -131,6 +131,40 @@
 			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
 		</script>
 	</div>
+	<p class="reportTitle postRun" style="page-break-before:always">Neural Network Predictions</p>	
+	<div id="kevinPlot" class="tightContent postRun">
+		<div id="kevinChart"></div>
+		<script>
+			new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{
+						"series":{
+							"animation":false,
+							"pointStart":Date.parse(allOutputData.startDate),
+							"shadow":false,
+							"pointInterval":3600000},
+						"line":{"marker":{"enabled":false}}},
+					"xAxis":{
+						"maxZoom":108000000,
+						"tickColor":"gray",
+						"dateTimeLabelFormats":{
+							"month": '%b %e'
+						},
+						"type":"datetime",
+						"lineColor":"gray"
+					},
+					"yAxis":{
+						"title":{"enabled":false},// "title":{"text":"Unit","style":{"color":"gray"}},
+					},
+					"title":{"text": "MAPE = " + allOutputData.MAPE_nn, "verticalAlign":"bottom", "align":"right", "y":-400, "x":-150, "style":{"color":"black", "fontSize":"18px"}},
+					"series":[
+						{"name":"Forecasted Data (kW)","marker":{"enabled":false},"color":"blue","data":allOutputData.neuralNet},
+						{"name":"Actual Data (kW)","marker":{"enabled":false},"color":"red","data":allOutputData.actual}
+					],
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"kevinChart","type":"line","marginRight":20, "height":500,"width":1000},
+					"tooltip":false,
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+		</script>
+	</div>
 	<p class="reportTitle postRun" style="page-break-before:always">Doubly Exponentially Smoothed Forecast Plot</p>	
 	<div id="holtPlot" class="tightContent postRun">
 		<div id="holtChart"></div>

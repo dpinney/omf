@@ -712,14 +712,15 @@ def makeUsefulDf(df, noise=2.5):
 	def _chunks(l, n):
 		return [l[i : i + n] for i in range(0, len(l), n)]
 	
-	df['dates'] = df.apply(
-		lambda x: dt(
-			int(x['year']), 
-			int(x['month']), 
-			int(x['day']), 
-			int(x['hour'])), 
-		axis=1
-	)
+	if 'dates' not in df.columns:
+		df['dates'] = df.apply(
+			lambda x: dt(
+				int(x['year']), 
+				int(x['month']), 
+				int(x['day']), 
+				int(x['hour'])), 
+			axis=1
+		)
     
 	r_df = pd.DataFrame()
 	r_df["load_n"] = zscore(df["load"])
@@ -756,7 +757,10 @@ def makeUsefulDf(df, noise=2.5):
 		r_df[m] = (r_df["month"] == i).astype(int)
 
 		# create 'load day before' vector
-	n = np.array([val for val in _chunks(list(r_df["load_n"]), 24) for _ in range(24)])
+	#n = np.array([val for val in _chunks(list(r_df["load_n"]), 24) for _ in range(24)])
+	n = np.repeat(np.asarray(_chunks(list(r_df["load_n"]), 24)), 24).reshape(-1,24)
+	print n.shape
+	print r_df.shape
 	l = ["l" + str(i) for i in range(24)]
 	for i, s in enumerate(l):
 		r_df[s] = n[:, i]
