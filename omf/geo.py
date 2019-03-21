@@ -7,7 +7,7 @@ from omf.feeder import _obToCol
 from scipy.spatial import ConvexHull
 from os.path import join as pJoin
 from sklearn.cluster import KMeans
-from flask import Flask, send_file
+from flask import Flask, send_file, render_template
 
 # Source: https://github.com/fitnr/stateplane/blob/master/stateplane/dicts.py
 # These are NAD83 EPSG identifiers.
@@ -227,7 +227,7 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat):
 				os.makedirs(outputPath)
 			plt.savefig(pJoin(outputPath,'graphOnMap.png'),frameon=False, pad_inches=0, bbox='tight')
 
-def simplifiedOmdShape(pathToOmdFile):
+def simplifiedOmdShape(pathToOmdFile, outputPath):
 	'''Use kmeans clustering to create simplified geojson object with convex hull and connected clusters from an omd.'''
 	with open(pathToOmdFile) as inFile:
 		tree = json.load(inFile)['tree']
@@ -303,7 +303,12 @@ def simplifiedOmdShape(pathToOmdFile):
 				"edgeType": simplifiedGraph[edge[0]][edge[1]]['type']
 			}
 		})
-	return simplifiedGeoDict
+	#return simplifiedGeoDict
+	if not os.path.exists(outputPath):
+		os.makedirs(outputPath)
+	shutil.copy('static/geoPolyLeaflet.html', outputPath)
+	with open(pJoin(outputPath,'geoPointsLines.json'),"w") as outFile:
+		json.dump(simplifiedGeoDict, outFile, indent=4)
 
 def shortestPathOmd(pathToOmdFile, sourceObjectName, targetObjectName):
 	'''Get the shortest path between two points on a feeder'''
@@ -415,12 +420,30 @@ def rasterTilesFromOmd(pathToOmdFile, outputPath):
 					os.makedirs(savePath)
 				plt.savefig(pJoin(savePath,'%s.png' % str(tileY)),frameon=False, pad_inches=0, bbox='tight')
 
+def getTileMapBounds(pathToTiles):
+	'''Helper function to pass custom tile lat/lon bounds for setting initial leaflet view for serveTiles'''
+	#Get the minimum and maximum x an y tiles from the dirs/files
+	xTiles = [dI for dI in os.listdir(pJoin(pathToTiles,'18')) if os.path.isdir(pJoin(pathToTiles,'18',dI))]
+	xTileMinimum, xTileMaximum = int(min(xTiles)), int(max(xTiles))
+	yTileMinimumFile = min([f for f in os.listdir(pJoin(pathToTiles,'18',min(xTiles))) if os.path.isfile(pJoin(pathToTiles,'18',min(xTiles),f))])
+	yTileMinimum = int(os.path.splitext(yTileMinimumFile)[0])
+	yTileMaximumFile = max([f for f in os.listdir(pJoin(pathToTiles,'18',max(xTiles))) if os.path.isfile(pJoin(pathToTiles,'18',max(xTiles),f))])
+	yTileMaximum = int(os.path.splitext(yTileMaximumFile)[0])
+
+	#Convert tiles to min/max lat lons
+	epsg3857 = Proj(init='epsg:3857')
+	wgs84 = Proj(init='EPSG:4326')
+	northEastTileEdges = tileEdges(xTileMaximum, yTileMinimum, 18)
+	southWestTileEdges = tileEdges(xTileMinimum, yTileMaximum, 18)
+	return [[northEastTileEdges[2], northEastTileEdges[3]], [southWestTileEdges[0], southWestTileEdges[1]]]
+
 def serveTiles(pathToTiles):
 	'''Flask server for raster tiles. Create the custom tileset with the rasterTilesFromOmd function'''
 	app = Flask('tileServer')
+	tileBounds = getTileMapBounds(pathToTiles)
 	@app.route('/', methods=['GET'])
 	def home():
-		return 'Implementation Pending'
+		return render_template('tiledMap.html', tileBounds = tileBounds)
 	@app.route('/omfTiles/<zoom>/<x>/<y>', methods=['GET'])
 	def tiles(zoom, x, y):
 		filename = pJoin(pathToTiles, zoom, x, y + '.png')
@@ -430,6 +453,142 @@ def serveTiles(pathToTiles):
 		else:
 			return send_file(default)
 	app.run()
+
+def convertMap(pathToOmdFile, outputPath, fileFormat):
+	'''
+	Draw an omd on a map.
+	
+	fileFormat options: html or png
+	Use html option to create a geojson file to be displayed with an interactive leaflet map.
+	Use the png file format to create a static png image.
+	'''
+	with open(pathToOmdFile) as inFile:
+		tree = json.load(inFile)['tree']
+	nxG = omf.feeder.treeToNxGraph(tree)
+	#latitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
+	#latitude comes first
+	if fileFormat == 'html':
+		latitude_min = min([nxG.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
+		longitude_min = min([nxG.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
+		latitude_max = max([nxG.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
+		longitude_max = max([nxG.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
+		#print(latitude_min, latitude_max, longitude_min, longitude_max)
+		latitudeCenter = -102
+		longitudeCenter = 32
+		
+		for nodeToChange in nx.get_node_attributes(nxG, 'pos'):
+			nxG.node[nodeToChange]['pos'] = (latitudeCenter + nxG.node[nodeToChange]['pos'][0]/latitude_max, longitudeCenter 
+											+ nxG.node[nodeToChange]['pos'][1]/longitude_max)
+
+		
+		geoJsonDict = {
+		"type": "FeatureCollection",
+		"features": []
+		}
+		#Add nodes to geoJSON
+		node_positions = {nodewithPosition: nxG.node[nodewithPosition]['pos'] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')}
+		node_types = {nodewithPosition: nxG.node[nodewithPosition]['type'] for nodewithPosition  in nx.get_node_attributes(nxG, 'type')}
+		for node in node_positions:
+			geoJsonDict['features'].append({
+				"type": "Feature", 
+				"geometry":{
+					"type": "Point",
+					"coordinates": [node_positions[node][1], node_positions[node][0]]
+				},
+				"properties":{
+					"name": node,
+					"pointType": node_types[node],
+					"pointColor": _obToCol(node_types[node])
+				}
+			})
+		#Add edges to geoJSON
+		for edge in nx.get_edge_attributes(nxG, 'type'):
+			#print(edge)
+			nxG[edge[0]][edge[1]]['type']
+		edge_types = {edge: nxG[edge[0]][edge[1]]['type'] for edge in nx.get_edge_attributes(nxG, 'type')}
+		edge_phases = {edge: nxG[edge[0]][edge[1]]['phases'] for edge in nx.get_edge_attributes(nxG, 'phases')}
+		for edge in nx.edges(nxG):
+			geoJsonDict['features'].append({
+				"type": "Feature", 
+				"geometry":{
+					"type": "LineString",
+					"coordinates": [[node_positions[edge[0]][0], node_positions[edge[0]][1]],[node_positions[edge[1]][0], node_positions[edge[1]][1]]]
+				},
+				"properties":{
+					"phase": edge_phases[edge],
+					"edgeType": edge_types[edge],
+					"edgeColor":_obToCol(edge_types[edge])
+				}
+			})
+		if not os.path.exists(outputPath):
+			os.makedirs(outputPath)
+		#shutil.copy('static/geoPolyLeaflet.html', outputPath)
+		with open(pJoin(outputPath,'geoPointsLines.json'),"w") as outFile:
+			json.dump(geoJsonDict, outFile, indent=4)
+	elif fileFormat == 'png':
+		latitude_min = min([nxG.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
+		longitude_min = min([nxG.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
+		latitude_max = max([nxG.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
+		longitude_max = max([nxG.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
+		#print(latitude_min, latitude_max, longitude_min, longitude_max)
+		latitudeCenter = -102
+		longitudeCenter = 32
+		
+		for nodeToChange in nx.get_node_attributes(nxG, 'pos'):
+			nxG.node[nodeToChange]['pos'] = (latitudeCenter + nxG.node[nodeToChange]['pos'][0]/latitude_max, longitudeCenter 
+											+ nxG.node[nodeToChange]['pos'][1]/longitude_max)
+		#Get new min and maxes
+		latitude_min = min([nxG.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
+		longitude_min = min([nxG.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
+		latitude_max = max([nxG.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
+		longitude_max = max([nxG.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
+		#Set the plot settings
+		plt.switch_backend('Agg')
+		fig = plt.figure(frameon=False, figsize=[10,10])
+		ax = fig.add_axes([0, 0, 1, 1])
+		ax.axis('off')
+		#map latlon to projection
+		epsg3857 = Proj(init='epsg:3857')
+		wgs84 = Proj(init='EPSG:4326')
+		node_positions = {nodewithPosition: nxG.node[nodewithPosition]['pos'] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')}
+		for point in node_positions:
+			#print(transform(wgs84,epsg3857,nxG.node[point]['pos'][0], nxG.node[point]['pos'][1]))
+			nxG.node[point]['pos'] = transform(wgs84,epsg3857,nxG.node[point]['pos'][0], nxG.node[point]['pos'][1])
+		for zoomLevel in range(10,11):
+			numberofTiles = numTiles(zoomLevel)
+			#Get bounding tiles and their lat/lon edges
+			#Get new lat lon compliant sizes
+			print(latitude_max)
+			print(longitude_max)
+			upperRightTile = tileXY(latitude_max, longitude_max, zoomLevel)
+			lowerLeftTile = tileXY(latitude_min, longitude_min, zoomLevel)
+			firstTileEdges = tileEdges(upperRightTile[0], upperRightTile[1], zoomLevel)
+			lastTileEdges = tileEdges(lowerLeftTile[0], lowerLeftTile[1], zoomLevel)
+			#Get N S E W boundaries for outer tiles in mercator projection x/y
+			mainsouthWest = transform(wgs84,epsg3857,lastTileEdges[1], lastTileEdges[0])
+			mainnorthEast = transform(wgs84,epsg3857,firstTileEdges[3], firstTileEdges[2])
+			for tileX in range(lowerLeftTile[0], upperRightTile[0]+1):
+				for tileY in range(upperRightTile[1], lowerLeftTile[1]+1):
+					#Draw section of tree that covers this tile
+					currentTileEdges = tileEdges(tileX, tileY, zoomLevel)
+					southWest = transform(wgs84,epsg3857,currentTileEdges[1], currentTileEdges[0])
+					northEast = transform(wgs84,epsg3857,currentTileEdges[3], currentTileEdges[2])
+					#print(tileX, tileY)
+					#print([nodewithPosition for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
+					nx.draw_networkx(nxG, pos={nodewithPosition: nxG.node[nodewithPosition]['pos'] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')}, nodelist=[nodewithPosition for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')], with_labels=False, node_size=2, edge_size=1)
+					#Get map background from tile
+					url = 'https://a.tile.openstreetmap.org/%s/%s/%s.png' % (zoomLevel, tileX, tileY)
+					response = requests.get(url, stream=True)
+					imgFile = tempfile.TemporaryFile(suffix=".png")
+					shutil.copyfileobj(response.raw, imgFile)
+					del response
+					img = plt.imread(imgFile)
+					plt.imshow(img, extent=(southWest[0], northEast[0],southWest[1], northEast[1]))
+			plt.ylim(top=mainnorthEast[1], bottom=mainsouthWest[1])
+			plt.xlim(mainsouthWest[0], mainnorthEast[0])
+			if not os.path.exists(outputPath):
+				os.makedirs(outputPath)
+			plt.savefig(pJoin(outputPath,'graphOnMap.png'),frameon=False, pad_inches=0, bbox='tight')
 
 def _tests():
 	e, n = 249.2419752733258, 1186.1488466689188
@@ -444,7 +603,9 @@ def _tests():
 	#print(simplifiedOmd)
 	# shortestPathOmd('static/publicFeeders/Olin Barre LatLon.omd', 'node62474203981T62474203987_B', 'node1667616792')
 	# rasterTilesFromOmd('static/publicFeeders/Olin Barre LatLon.omd', 'scratch/omdTests/tiles')
-	# serveTiles('scratch/omdTests/tiles')
+	#serveTiles('scratch/omdTests/tiles')
+	#convertMap('static/publicFeeders/Autocli Alberich Calibrated.omd','changedLoc', 'html')
+	#getTileMapBounds('scratch/omdTests/tiles')
 	# openInGoogleMaps(lat, lon)
 
 if __name__ == '__main__':
