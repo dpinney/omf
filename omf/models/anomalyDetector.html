@@ -109,7 +109,6 @@
 		<div id="prophetChart"></div>
 		<script>
 			var prophetOutliers = [];
-			var errorBars = [];
 			for (var i = 0; i < allOutputData.y.length; i++) { //casting these to Highcharts-friendly formats
 				if(allOutputData.prophet_outlier[i] == 1) {
 					prophetOutliers.push(allOutputData.y[i]);
@@ -117,7 +116,6 @@
 				else{
 					prophetOutliers.push(null);
 				}
-				errorBars.push({"low":allOutputData.yhat_lower[i], "high": allOutputData.yhat_upper[i]});
 			}
 			new Highcharts.Chart({"credits":{"enabled":false},
 					"plotOptions":{
@@ -146,7 +144,7 @@
 						"lineColor":"gray"
 					},
 					"yAxis":{
-						"title":{"enabled":false},// "title":{"text":"Unit","style":{"color":"gray"}},
+						"title":{"enabled":false},
 					},
 					"title":{"text":undefined},
 					"series":[
@@ -155,10 +153,16 @@
 							"data":allOutputData.y,
 							"type": "line"
 						},
-						{"name": "Predicted interval",
+						{"name": "Predicted interval (lower bound)",
 							"color": "rgba(89, 189, 244, 0.4)",
-							"data":errorBars,
-							"type": "arearange",
+							"data": allOutputData.yhat_lower,
+							"type": "line",
+							"marker": {"enabled": false},
+						},
+						{"name": "Predicted interval (upper bound)",
+							"color": "rgba(89, 189, 244, 0.4)",
+							"data": allOutputData.yhat_upper,
+							"type": "line",
 							"marker": {"enabled": false},
 						},
 						{"name":"Outliers",
