@@ -205,27 +205,18 @@ def writeResults(offendersGen):
 
 
 def _debugging(filePath, gb_on_off='on', area=500):
-	# Location
-	# modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
-	# Blow away old test results if necessary.
-	# fileNames = ['out_substation_power.csv', 'out_solar_0.csv', 'out_solar_1.csv', 'measured_load_ziploads.csv', 
-	# 				'measured_load_waterheaters.csv', 'measured_HVAC.csv', 'Results.csv']
-	# files = [f for f i n os.listdir('.')]
-	# for f in files:
-	# 	if f in fileNames:
-	# 		os.remove(f) 
 	#Begin Main Function
 	name_volt_dict = ConvertAndwork(filePath, gb_on_off, area)
 	offendersGen = ListOffenders(name_volt_dict)
 	writeResults(offendersGen)
 	# Open Distnetviz on glm
-	# omf.distNetViz.viz('outGLM_rooftop.glm') #or model.omd
+	omf.distNetViz.viz('outGLM_rooftop.glm') #or model.omd
 	# Visualize Voltage Regulation
 	voltRegViz('outGLM_rooftop.glm')
 	# 	Remove Feeder
-	# for file in os.listdir(dir_path):
-	# 	if 'out' in file or file == 'voltDump.csv':
-	# 		os.remove(file)
+	for file in os.listdir(dir_path):
+		if 'out' in file or file == 'voltDump.csv':
+			os.remove(file)
 
 
 
@@ -233,6 +224,7 @@ def voltRegViz(FNAME):
 	chart = drawPlot(FNAME, neatoLayout=True, edgeCol=False, nodeLabs=None, edgeLabs=None, nodeCol = "perUnitVoltage", customColormap=True, rezSqIn=400)
 	chart.savefig("./VOLTOUT.png")
 	validFiles = ['_minutes.PLAYER', 'climate.tmy2', 'frequency.PLAYER1', "hot_water_demand1.glm", 'schedulesResponsiveLoads.glm']
+	#remove uncessary files from visualization directory
 	for file in os.listdir(pJoin(dir_path, '_voltViz')):
 		if file not in validFiles : 
 			os.remove(pJoin('_voltViz', file))
@@ -252,6 +244,4 @@ if __name__ == '__main__':
 		gb_on_off = args.gridballast_on_off
 		area=args.area_of_rooftop_solar
 		_debugging(filePath)
-		# _myDir = os.path.dirname(os.path.realpath(__file__))
-		# _omfDir = os.path.dirname(os.path.dirname(_myDir))
-		# _feederDir = pJoin(_omfDir, 'static/publicFeeders/Olin Barre GH EOL Solar.omd')
+
