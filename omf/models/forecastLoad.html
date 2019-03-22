@@ -238,7 +238,8 @@
 		<div id="katChart"></div>
 		<script>
 			for (var i = 0; i < allOutputData.peakDemand.length; i++) { //casting these to Highcharts-friendly formats
-				allOutputData.peakDemand[i][0] = new Date(allOutputData.peakDemand[i][0]).getTime();
+				v = new Date(allOutputData.peakDemand[i][0]);
+				allOutputData.peakDemand[i][0] = Date.UTC(v.getFullYear(), v.getMonth(), v.getDate(), v.getHours() - 1, v.getMinutes()) 
 				allOutputData.peakDemand[i][1] = parseFloat(allOutputData.peakDemand[i][1]);
 			}
 			new Highcharts.Chart({"credits":{"enabled":false},

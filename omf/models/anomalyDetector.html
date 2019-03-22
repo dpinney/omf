@@ -85,7 +85,11 @@
 				<input type="text"  id="startDate" name="startDate" pattern="^\d\d\d\d-\d\d-\d\d$"/>
 			</div>
 			<div class="shortInput" >
-				<label>Confidence Level (must be &lt; 1)</label>
+				<label>Gaussian confidence check for elliptic envelope (must be &lt; 1)</label>
+				<input type="number"  id="norm_confidence" name="norm_confidence" min="0.01" max="1" step="any"/>
+			</div>
+			<div class="shortInput" >
+				<label>Anomalous confidence level (must be &lt; 1)</label>
 				<input type="number"  id="confidence" name="confidence" min="0.5" max="1" step="any"/>
 			</div>
 			<div class="wideInput" style="text-align:right">
@@ -106,78 +110,6 @@
 		if (typeof(allInputData.stderr) !== 'undefined') {
 			gebi('stopIndicator').style.visibility = 'visible'
 			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
-		</script>
-	</div>
-	<p class="reportTitle postRun" style="page-break-before:always">Neural Network</p>	
-	<div id="neuralNetPlot" class="tightContent postRun">
-		<div id="neuralNetChart"></div>
-		<script>
-			var neuralNetOutliers = [];
-			for (var i = 0; i < allOutputData.nn_actual.length; i++) { //casting these to Highcharts-friendly formats
-				if(allOutputData.nn_outlier[i] == 1) {
-					neuralNetOutliers.push(allOutputData.nn_actual[i]);
-				}
-				else{
-					neuralNetOutliers.push(null);
-				}
-			}
-			new Highcharts.Chart({"credits":{"enabled":false},
-					"plotOptions":{
-						"series":{
-							"animation":false,
-							"shadow":false,
-							"pointStart": Date.parse(allOutputData.startDate),
-							"pointInterval": 1000*60*60,
-							"turboThreshold": 50000,
-						},
-						"scatter":{
-							"marker":{
-								"radius": 3,
-								"symbol": "circle",
-							}
-						},
-						"line":{"marker":{"enabled":false}}
-					},
-					"xAxis":{
-						"maxZoom":108000000,
-						"tickColor":"gray",
-						"dateTimeLabelFormats":{
-							"month": '%b %e'
-						},
-						"type":"datetime",
-						"lineColor":"gray"
-					},
-					"yAxis":{
-						"title":{"enabled":false},
-					},
-					"title":{"text":undefined},
-					"series":[
-						{"name":"Input Data",
-							"color":"green",
-							"data":allOutputData.nn_actual,
-							"type": "line"
-						},
-						{"name": "Predicted interval (lower bound)",
-							"color": "rgba(89, 189, 244, 0.4)",
-							"data": allOutputData.nn_lower,
-							"type": "line",
-							"marker": {"enabled": false},
-						},
-						{"name": "Predicted interval (upper bound)",
-							"color": "rgba(89, 189, 244, 0.4)",
-							"data": allOutputData.nn_upper,
-							"type": "line",
-							"marker": {"enabled": false},
-						},
-						{"name":"Outliers",
-							"color":"red",
-							"data":neuralNetOutliers,
-							"type": "scatter",
-						},
-					],
-					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"neuralNetChart","marginRight":20, "height":500,"width":1000},
-					"tooltip":false,
-					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 		</script>
 	</div>
 	<p class="reportTitle postRun" style="page-break-before:always">Prophet (Monovariate)</p>	
@@ -315,10 +247,9 @@
 	</div>
 	<p class="reportTitle postRun" style="page-break-before:always">Peak Forecast T-Test Method</p>
 	<div id="katPlot" class="tightContent postRun">
+		{% if pk_bool is not defined %}Peak forecast t-test method was not run, as the checkbox indicating that the input data conforms to the forecastLoad data formatting requirements was not checked. {% endif %}
 		<div id="katChart"></div>
 		<script>
-			offset = new Date().getTimezoneOffset();
-			offset = offset*60*1000;
 			for (var i = 0; i < allOutputData.katrina_outlier.length; i++) { //casting these to Highcharts-friendly formats
 				v = new Date(allOutputData.katrina_outlier[i][0]);
 				allOutputData.katrina_outlier[i][0] = Date.UTC(v.getFullYear(), v.getMonth(), v.getDate(), v.getHours() - 1)
@@ -357,6 +288,79 @@
 							"type": "scatter"}
 					],
 					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"katChart","type":"line","marginRight":20, "height":500,"width":1000},
+					"tooltip":false,
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+		</script>
+	</div>
+	<p class="reportTitle postRun" style="page-break-before:always">Neural Network</p>	
+	<div id="neuralNetPlot" class="tightContent postRun">
+		{% if nn_pred is not defined %}Neural network anomaly detector was not run, as the checkbox indicating that the input data conforms to the forecastLoad data formatting requirements was not checked. {% endif %}
+		<div id="neuralNetChart"></div>
+		<script>
+			var neuralNetOutliers = [];
+			for (var i = 0; i < allOutputData.nn_actual.length; i++) { //casting these to Highcharts-friendly formats
+				if(allOutputData.nn_outlier[i] == 1) {
+					neuralNetOutliers.push(allOutputData.nn_actual[i]);
+				}
+				else{
+					neuralNetOutliers.push(null);
+				}
+			}
+			new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{
+						"series":{
+							"animation":false,
+							"shadow":false,
+							"pointStart": Date.parse(allOutputData.startDate),
+							"pointInterval": 1000*60*60,
+							"turboThreshold": 50000,
+						},
+						"scatter":{
+							"marker":{
+								"radius": 3,
+								"symbol": "circle",
+							}
+						},
+						"line":{"marker":{"enabled":false}}
+					},
+					"xAxis":{
+						"maxZoom":108000000,
+						"tickColor":"gray",
+						"dateTimeLabelFormats":{
+							"month": '%b %e'
+						},
+						"type":"datetime",
+						"lineColor":"gray"
+					},
+					"yAxis":{
+						"title":{"enabled":false},
+					},
+					"title":{"text":undefined},
+					"series":[
+						{"name":"Input Data",
+							"color":"green",
+							"data":allOutputData.nn_actual,
+							"type": "line"
+						},
+						{"name": "Predicted interval (lower bound)",
+							"color": "rgba(89, 189, 244, 0.4)",
+							"data": allOutputData.nn_lower,
+							"type": "line",
+							"marker": {"enabled": false},
+						},
+						{"name": "Predicted interval (upper bound)",
+							"color": "rgba(89, 189, 244, 0.4)",
+							"data": allOutputData.nn_upper,
+							"type": "line",
+							"marker": {"enabled": false},
+						},
+						{"name":"Outliers",
+							"color":"red",
+							"data":neuralNetOutliers,
+							"type": "scatter",
+						},
+					],
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"neuralNetChart","marginRight":20, "height":500,"width":1000},
 					"tooltip":false,
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 		</script>

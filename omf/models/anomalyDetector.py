@@ -75,7 +75,7 @@ def work(modelDir, inputDict):
 		df[["ds", "y"]], modelDir, confidence=confidence, cached=cached
 	)
 
-	elliptic_df = omf.anomalyDetection.elliptic_envelope(df, modelDir)
+	elliptic_df = omf.anomalyDetection.elliptic_envelope(df, modelDir, float(inputDict["norm_confidence"]))
 
 	out["y"] = list(prophet_df.y.values)
 	out["yhat"] = list(prophet_df.yhat.values)
@@ -110,6 +110,7 @@ def new(modelDir):
 		).read(),
 		"fileName": "ERCOT_south_shortened.csv",
 		"confidence": "0.99",
+		"norm_confidence": "0.90",
 		"startDate": "2002-01-01",
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
@@ -133,45 +134,3 @@ def _tests():
 
 if __name__ == "__main__":
 	_tests()
-
-"""
-outDic {
-	startdate: str
-	stdout: "Success"
-	batteryDischargekWMax: float
-	batteryDischargekw: [8760] float
-	monthlyDemandRed: [12] float
-	ps: [12] float
-	demandAfterBattery: [8760] float
-	SPP: float
-	kwhtoRecharge [12] float
-	LCOE: float
-	batteryLife: float
-	cumulativeCashflow: [12] float
-	batterySoc: [8760] float
-	demand: [8760] float
-	benefitMonthly: [12] float
-	netCashflow: [12] float
-	costtoRecharge: [12] float
-	months: [12] (strings)
-	monthlyDemand: [12] float
-	cycleEquivalents: float
-	stderr: ""
-	NPV: float
-	benefitNet: 12
-}
-
-# insert into work()
-	# ------------------------ DEBUGGING TOOLS ----------------------- #
-	# import matplotlib.pyplot as plt 
-	# dcThroughTheMonth = [[t for t in iter(dc) if t['month']<=x] for x in range(12)]
-	# hoursThroughTheMonth = [len(dcThroughTheMonth[month]) for month in range(12)]
-	# # Output some matplotlib results as well.
-	# plt.plot([t['power'] for t in dc])
-	# plt.plot([t['netpower'] for t in dc])
-	# plt.plot([t['battSoC'] for t in dc])
-	# for month in range(12):
-	#   plt.axvline(hoursThroughTheMonth[month])
-	# plt.savefig(pJoin(modelDir,"plot.png"))
-
-"""
