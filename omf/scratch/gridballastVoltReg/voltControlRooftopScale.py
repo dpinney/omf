@@ -10,7 +10,6 @@ import re
 from datetime import datetime
 from voltageDropVoltageViz import drawPlot
 import sys
-#TODO crank up sqfootage until voltage issues occur
 
 def ConvertAndwork(filePath, gb_on_off='on', area=500):
 	#Converts omd to glm, adds in necessary recorder, collector, and attributes+parameters for gridballast gld to run on waterheaters and ziploads
@@ -100,7 +99,8 @@ def ConvertAndwork(filePath, gb_on_off='on', area=500):
 	return name_volt_dict
 
 def ListOffenders(name_volt_dict):
-	#Finds objects that carry too much voltage, these are called 'Offenders', write to disk
+	#Go thorugh volt dump, and find out the voltage magnitude of all phases.
+	#Add to name_volt_dict dictionary which contains node names and their nominal voltage
 	data = pd.read_csv(('voltDump.csv'), skiprows=[0])
 	for i, row in data['voltA_real'].iteritems():
 		voltA_real = data.loc[i,'voltA_real']
@@ -129,19 +129,25 @@ def ListOffenders(name_volt_dict):
 				offenders.append(tuple([name, float(volt['Volt_C'])/float(volt['Nominal_Voltage'])]))
 				offendersGen.append(name)
 
+	#Run through name_volt_dict, compare nominal voltage with voltage magnitude of each phase. 
+	#IF greater than allowed range (1.05) append to offenders and offendersGen
+	#offenders is a tuple of the node name, and the ratio between measured voltage/nominal voltage
+	#offendersGen is just a list of the offender node names
 
 
-	#Print General information about offending nodes
+	#remove duplicates in list
 	offenders = list(set(offenders))
+	offendersGen = list(set(offendersGen))
+
+	#Calculate average overdose factor
 	isum = 0
 	offendersNames = []
 	for i in range(len(offenders)):
 		isum = isum + offenders[i][1]
-		offendersNames.append(offenders[i][0])
-	offendersGen = list(set(offendersGen))
-	# print ("average voltage overdose is by a factor of", isum/(len(offenders)))
+	overdose_factor = isum/(len(offendersGen))
+	print ("average voltage overdose is by a factor of", overdose_factor) 
 	print ("Number of offenders is", len(offendersGen))
-	# Write out file
+	# Write out file, list of offenders and their voltage overdose 
 	with open('offenders.csv', 'w') as f:
 		wr = csv.writer(f, quoting=csv.QUOTE_ALL)
 		wr.writerow(offenders)
@@ -217,9 +223,9 @@ def _debugging(filePath, gb_on_off='on', area=500):
 	# Visualize Voltage Regulation
 	voltRegViz('outGLM_rooftop.glm')
 	# 	Remove Feeder
-	for file in os.listdir(dir_path):
-		if 'out' in file or file == 'voltDump.csv':
-			os.remove(file)
+	# for file in os.listdir(dir_path):
+	# 	if 'out' in file or file == 'voltDump.csv':
+	# 		os.remove(file)
 
 
 
@@ -233,7 +239,7 @@ def voltRegViz(FNAME):
 
 if __name__ == '__main__':
 	if len(sys.argv) == 1:
-		_debugging('/Users/tuomastalvitie/Desktop/gridballast_gld_simulations/Feeders/UCS_Egan_Housed_Solar_rooftop.omd', gb_on_off='on', area=2000)
+		_debugging('/Users/tuomastalvitie/Desktop/gridballast_gld_simulations/Feeders/UCS_Egan_Housed_Solar_rooftop.omd', gb_on_off='off', area=2043)
 	else:
 		#Parse Command Line
 		parser = argparse.ArgumentParser(description='Converts an OMD to GLM and runs it on gridlabd')
