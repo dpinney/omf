@@ -25,6 +25,7 @@
 </head>
 <body>
 	<div id="map"></div>
+	<script>var geojson={% if geojson %}{{geojson | tojson}}{% else %}null{% endif %}</script>
 	<script type="text/javascript" src="geoJsonFeatures.js"></script>
 	<script type="text/javascript">
 	function onEachFeature(feature, layer) {

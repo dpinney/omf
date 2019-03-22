@@ -613,7 +613,7 @@ def _tests():
 	# mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html')
 	#hullOfOmd('static/publicFeeders/Olin Barre LatLon.omd')
 	# simplifiedOmd = simplifiedOmdShape('static/publicFeeders/Olin Barre LatLon.omd')
-	showOnMap(simplifiedOmdShape('static/publicFeeders/Olin Barre LatLon.omd'))
+	#showOnMap(omdGeoJson('static/publicFeeders/Olin Barre LatLon.omd'))
 	#print(simplifiedOmd)
 	# shortestPathOmd('static/publicFeeders/Olin Barre LatLon.omd', 'node62474203981T62474203987_B', 'node1667616792')
 	# rasterTilesFromOmd('static/publicFeeders/Olin Barre LatLon.omd', 'scratch/omdTests/tiles')
