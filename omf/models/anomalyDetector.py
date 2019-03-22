@@ -1,5 +1,4 @@
 """ Anomaly detection. """
-
 import os, sys, shutil, csv, StringIO
 import omf.anomalyDetection
 import numpy as np
@@ -17,7 +16,6 @@ hidden = True
 
 def work(modelDir, inputDict):
 	""" Model processing done here. """
-	from scipy.stats import t
 
 	cached_file_name = "input_data_{}.csv".format(inputDict["confidence"])
 	cached_file_path = pJoin(modelDir, cached_file_name)
@@ -49,9 +47,21 @@ def work(modelDir, inputDict):
 
 	# load our csv to df
 	f = StringIO.StringIO(inputDict["file"])
-	df = pd.read_csv(f)
+	header = csv.Sniffer().has_header(f.read(1024))
+	header = 0 if header else None
+	f.seek(0)
+	df = pd.read_csv(f, header = header)
 
-	# try to use user input to remap column
+	if inputDict.get("demandTempBool"):
+		nn_bool, nn_actual, nn_pred, nn_lower, nn_upper = omf.anomalyDetection.t_test(df, modelDir, inputDict["startDate"], confidence)
+		pk_bool, pk_actual, pk_time = omf.anomalyDetection.t_test(df, modelDir, inputDict["startDate"], confidence, model="nextDayPeakKatrina")
+		katrina_outliers = [
+			(time, demand) if out_bool else None
+			for time, out_bool, demand in zip(pk_time, pk_bool, pk_actual)
+		]
+		katrina_outliers = [a for a in katrina_outliers if a]
+
+	# try to use user input to remap columns for prophet
 	df = df.rename(columns={inputDict.get("yLabel",""): "y"})
 	if "y" not in df.columns:
 		df = df.rename(columns={df.columns[0]: "y"})
@@ -65,25 +75,7 @@ def work(modelDir, inputDict):
 		df[["ds", "y"]], modelDir, confidence=confidence, cached=cached
 	)
 
-	elliptic_df = omf.anomalyDetection.elliptic_envelope(df, modelDir)
-
-	peak_time, peak_demand, act_time, act_demand = omf.loadForecast.nextDayPeakKatrinaForecast(
-		df.values, inputDict["startDate"], modelDir, {}, returnActuals=True
-	)
-
-	diff = [p - a for p, a in zip(peak_demand, act_demand)]
-	diff = np.asarray(diff)
-	alpha = 1 - confidence
-	twosigma = t.ppf(alpha / 2, len(diff)) * np.std(diff)
-	diff = np.abs(diff)
-
-	diff = diff > twosigma
-
-	katrina_outliers = [
-		(time, demand) if out_bool else None
-		for time, out_bool, demand in zip(act_time, diff, act_demand)
-	]
-	katrina_outliers = [a for a in katrina_outliers if a]
+	elliptic_df = omf.anomalyDetection.elliptic_envelope(df, modelDir, float(inputDict["norm_confidence"]))
 
 	out["y"] = list(prophet_df.y.values)
 	out["yhat"] = list(prophet_df.yhat.values)
@@ -92,10 +84,12 @@ def work(modelDir, inputDict):
 	out["prophet_outlier"] = list(prophet_df.outlier.values.astype(int))
 	if elliptic_df:
 		out["elliptic_outlier"] = list(elliptic_df.outlier.astype(int))
-	if True:
-		out["pred_demand"] = peak_demand
-		out["peak_time"] = act_time
-		out["act_demand"] = act_demand
+	if inputDict.get("demandTempBool"):
+		out["nn_outlier"] = list(nn_bool.astype(int))
+		out["nn_actual"] = list(nn_actual)
+		out["nn_pred"] = list(nn_pred)
+		out["nn_lower"] = list(nn_lower)
+		out["nn_upper"] = list(nn_upper)
 		out["katrina_outlier"] = katrina_outliers
 	out["startDate"] = inputDict["startDate"]
 	return out
@@ -116,6 +110,7 @@ def new(modelDir):
 		).read(),
 		"fileName": "ERCOT_south_shortened.csv",
 		"confidence": "0.99",
+		"norm_confidence": "0.90",
 		"startDate": "2002-01-01",
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
@@ -133,52 +128,9 @@ def _tests():
 	if isdir(modelLoc):
 		shutil.rmtree(modelLoc)
 	new(modelLoc)  # Create New.
-	# renderAndShow(modelLoc)  # Pre-run.
 	runForeground(modelLoc)  # Run the model.
 	renderAndShow(modelLoc)  # Show the output.
 
 
 if __name__ == "__main__":
 	_tests()
-
-"""
-outDic {
-	startdate: str
-	stdout: "Success"
-	batteryDischargekWMax: float
-	batteryDischargekw: [8760] float
-	monthlyDemandRed: [12] float
-	ps: [12] float
-	demandAfterBattery: [8760] float
-	SPP: float
-	kwhtoRecharge [12] float
-	LCOE: float
-	batteryLife: float
-	cumulativeCashflow: [12] float
-	batterySoc: [8760] float
-	demand: [8760] float
-	benefitMonthly: [12] float
-	netCashflow: [12] float
-	costtoRecharge: [12] float
-	months: [12] (strings)
-	monthlyDemand: [12] float
-	cycleEquivalents: float
-	stderr: ""
-	NPV: float
-	benefitNet: 12
-}
-
-# insert into work()
-	# ------------------------ DEBUGGING TOOLS ----------------------- #
-	# import matplotlib.pyplot as plt 
-	# dcThroughTheMonth = [[t for t in iter(dc) if t['month']<=x] for x in range(12)]
-	# hoursThroughTheMonth = [len(dcThroughTheMonth[month]) for month in range(12)]
-	# # Output some matplotlib results as well.
-	# plt.plot([t['power'] for t in dc])
-	# plt.plot([t['netpower'] for t in dc])
-	# plt.plot([t['battSoC'] for t in dc])
-	# for month in range(12):
-	#   plt.axvline(hoursThroughTheMonth[month])
-	# plt.savefig(pJoin(modelDir,"plot.png"))
-
-"""
