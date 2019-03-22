@@ -131,7 +131,7 @@
 			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
 		</script>
 	</div>
-	<p class="reportTitle postRun" style="page-break-before:always">Neural Network Predictions</p>	
+	<p class="reportTitle postRun" style="page-break-before:always">Neural Network Forecast</p>	
 	<div id="kevinPlot" class="tightContent postRun">
 		<div id="kevinChart"></div>
 		<script>
@@ -189,7 +189,7 @@
 					"yAxis":{
 						"title":{"enabled":false},// "title":{"text":"Unit","style":{"color":"gray"}},
 					},
-					"title":{"text": "MAE = " + allOutputData.MAE_exp, "verticalAlign":"bottom", "align":"right", "y":-400, "x":-150, "style":{"color":"black", "fontSize":"18px"}},
+					"title":{"text": "MAPE = " + allOutputData.MAPE_exp, "verticalAlign":"bottom", "align":"right", "y":-400, "x":-150, "style":{"color":"black", "fontSize":"18px"}},
 					"series":[
 						{"name":"Forecasted Data (kW)","marker":{"enabled":false},"color":"blue","data":allOutputData.doubleExp},
 						{"name":"Actual Data (kW)","marker":{"enabled":false},"color":"red","data":allOutputData.actual}
@@ -223,7 +223,7 @@
 					"yAxis":{
 						"title":{"enabled":false},// "title":{"text":"Unit","style":{"color":"gray"}},
 					},
-					"title":{"text": "MAE = " + allOutputData.MAE, "verticalAlign":"bottom", "align":"right", "y":-400, "x":-150, "style":{"color":"black", "fontSize":"18px"}},
+					"title":{"text": "MAPE = " + allOutputData.MAPE, "verticalAlign":"bottom", "align":"right", "y":-400, "x":-150, "style":{"color":"black", "fontSize":"18px"}},
 					"series":[
 						{"name":"Forecasted Data (kW)","marker":{"enabled":false},"color":"blue","data":allOutputData.forecasted},
 						{"name":"Actual Data (kW)","marker":{"enabled":false},"color":"red","data":allOutputData.actual}

@@ -106,16 +106,12 @@ def rollingDylanForecast(rawData, upBound, lowBound, rolling_window=5, hist_wind
 		pred = pred if pred > floor else floor
 		pred = pred if pred < ceiling else ceiling
 		forecasted = np.append(forecasted, pred)
-	MAE = np.nanmean(np.abs(forecasted - actual))
+	MAPE = np.nanmean(np.abs(forecasted - actual)/actual)
 	nan_indices = np.where(np.isnan(forecasted))
 	forecasted = forecasted.tolist()
 	for i in nan_indices[0]:
 		forecasted[i] = None
-	return (forecasted, math.trunc(MAE))
-	"""
-	forecasted is an 8760 list of demand values
-	MAE is an int and is the mean average error of the forecasted/actual data correlation
-	"""
+	return (forecasted, MAPE)
 
 
 def exponentiallySmoothedForecast(rawData, alpha, beta):
@@ -148,17 +144,17 @@ def exponentiallySmoothedForecast(rawData, alpha, beta):
 		tronds.append(trond)
 		smotted.append(smot)
 		forecasted.append(smot)
-	MAE = 0  # Mean Average Error calculation
+	MAPE = 0  # Mean Average Error calculation
 	denom = 0
 	for i in range(len(forecasted)):
 		if forecasted[i] != None:
-			MAE += abs(forecasted[i] - actual[i])
+			MAPE += abs(forecasted[i] - actual[i])/actual[i]
 			denom += 1
-	MAE = math.trunc(MAE / denom)
-	return (forecasted, MAE)
+	MAPE = MAPE / denom
+	return (forecasted, MAPE)
 	"""
 	forecasted is an 8760 list of demand values
-	MAE is an int and is the mean average error of the forecasted/actual data correlation
+	MAPE is an int and is the mean average error of the forecasted/actual data correlation
 	"""
 
 
@@ -744,28 +740,25 @@ def makeUsefulDf(df, noise=2.5):
 	for i, d in enumerate(w):
 		r_df[d] = (r_df["day"] == i).astype(int)
 
-		# create hour of day vector
+	# create hour of day vector
 	r_df["hour"] = df["dates"].dt.hour
 	d = [("h" + str(i)) for i in range(24)]
 	for i, h in enumerate(d):
 		r_df[h] = (r_df["hour"] == i).astype(int)
 
-		# create month vector
+	# create month vector
 	r_df["month"] = df["dates"].dt.month
 	y = [("m" + str(i)) for i in range(12)]
 	for i, m in enumerate(y):
 		r_df[m] = (r_df["month"] == i).astype(int)
 
-		# create 'load day before' vector
-	#n = np.array([val for val in _chunks(list(r_df["load_n"]), 24) for _ in range(24)])
+	# create 'load day before' vector
 	n = np.repeat(np.asarray(_chunks(list(r_df["load_n"]), 24)), 24).reshape(-1,24)
-	print n.shape
-	print r_df.shape
 	l = ["l" + str(i) for i in range(24)]
 	for i, s in enumerate(l):
 		r_df[s] = n[:, i]
 
-		# create holiday booleans
+	# create holiday booleans
 	r_df["isNewYears"] = isHoliday("New Year's Day", df)
 	r_df["isMemorialDay"] = isHoliday("Memorial Day", df)
 	r_df["isIndependenceDay"] = isHoliday("Independence Day", df)

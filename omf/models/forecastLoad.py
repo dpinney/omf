@@ -57,11 +57,11 @@ def work(modelDir, inputDict):
 	for x in range(len(rawData)):
 		actual.append(float(rawData[x][0]))
 
-	(forecasted, MAE) = loadForecast.rollingDylanForecast(
+	(forecasted, MAPE) = loadForecast.rollingDylanForecast(
 		rawData, float(inputDict["upBound"]), float(inputDict["lowBound"])
 	)
 
-	(exp, exp_MAE) = loadForecast.exponentiallySmoothedForecast(
+	(exp, exp_MAPE) = loadForecast.exponentiallySmoothedForecast(
 		rawData, float(inputDict["alpha"]), float(inputDict["beta"])
 	)
 
@@ -89,9 +89,9 @@ def work(modelDir, inputDict):
 	outData["forecasted"] = forecasted
 	outData["doubleExp"] = exp
 	outData["neuralNet"] = nn_pred
-	outData["MAE"] = MAE
-	outData["MAE_exp"] = exp_MAE
-	outData["MAPE_nn"] = "%0.2f" % nn_accuracy["test"]
+	outData["MAPE"] = "%0.2f%%" % (MAPE*100)
+	outData["MAPE_exp"] = "%0.2f%%" % (exp_MAPE*100)
+	outData["MAPE_nn"] = "%0.2f%%" % nn_accuracy["test"]
 	outData["peakDemand"] = pred_demand
 	if prophet_partitions > 1:
 		outData["prophet"] = prophet
