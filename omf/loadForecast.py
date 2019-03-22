@@ -753,7 +753,9 @@ def makeUsefulDf(df, noise=2.5):
 		r_df[m] = (r_df["month"] == i).astype(int)
 
 	# create 'load day before' vector
-	n = np.repeat(np.asarray(_chunks(list(r_df["load_n"]), 24)), 24).reshape(-1,24)
+	ch = np.asarray(_chunks(list(r_df["load_n"]), 24))
+	assert len(ch.shape) == 2, "Error splitting data into 24-hour chunks. Check that the number of rows is divisible by 24."
+	n = np.repeat(ch, 24).reshape(-1,24)
 	l = ["l" + str(i) for i in range(24)]
 	for i, s in enumerate(l):
 		r_df[s] = n[:, i]

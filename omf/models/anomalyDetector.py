@@ -1,5 +1,4 @@
 """ Anomaly detection. """
-# TODO: remove highcharts shading, replace with separate lines for min and max
 import os, sys, shutil, csv, StringIO
 import omf.anomalyDetection
 import numpy as np
@@ -17,7 +16,6 @@ hidden = True
 
 def work(modelDir, inputDict):
 	""" Model processing done here. """
-	from scipy.stats import t
 
 	cached_file_name = "input_data_{}.csv".format(inputDict["confidence"])
 	cached_file_path = pJoin(modelDir, cached_file_name)
@@ -49,9 +47,21 @@ def work(modelDir, inputDict):
 
 	# load our csv to df
 	f = StringIO.StringIO(inputDict["file"])
-	df = pd.read_csv(f)
+	header = csv.Sniffer().has_header(f.read(1024))
+	header = 0 if header else None
+	f.seek(0)
+	df = pd.read_csv(f, header = header)
 
-	# try to use user input to remap column
+	if inputDict.get("demandTempBool"):
+		nn_bool, nn_actual, nn_pred, nn_lower, nn_upper = omf.anomalyDetection.t_test(df, modelDir, inputDict["startDate"], confidence)
+		pk_bool, pk_actual, pk_time = omf.anomalyDetection.t_test(df, modelDir, inputDict["startDate"], confidence, model="nextDayPeakKatrina")
+		katrina_outliers = [
+			(time, demand) if out_bool else None
+			for time, out_bool, demand in zip(pk_time, pk_bool, pk_actual)
+		]
+		katrina_outliers = [a for a in katrina_outliers if a]
+
+	# try to use user input to remap columns for prophet
 	df = df.rename(columns={inputDict.get("yLabel",""): "y"})
 	if "y" not in df.columns:
 		df = df.rename(columns={df.columns[0]: "y"})
@@ -67,24 +77,6 @@ def work(modelDir, inputDict):
 
 	elliptic_df = omf.anomalyDetection.elliptic_envelope(df, modelDir)
 
-	peak_time, peak_demand, act_time, act_demand = omf.loadForecast.nextDayPeakKatrinaForecast(
-		df.values, inputDict["startDate"], modelDir, {}, returnActuals=True
-	)
-
-	diff = [p - a for p, a in zip(peak_demand, act_demand)]
-	diff = np.asarray(diff)
-	alpha = 1 - confidence
-	twosigma = t.ppf(alpha / 2, len(diff)) * np.std(diff)
-	diff = np.abs(diff)
-
-	diff = diff > twosigma
-
-	katrina_outliers = [
-		(time, demand) if out_bool else None
-		for time, out_bool, demand in zip(act_time, diff, act_demand)
-	]
-	katrina_outliers = [a for a in katrina_outliers if a]
-
 	out["y"] = list(prophet_df.y.values)
 	out["yhat"] = list(prophet_df.yhat.values)
 	out["yhat_upper"] = list(prophet_df.yhat_upper.values)
@@ -92,10 +84,12 @@ def work(modelDir, inputDict):
 	out["prophet_outlier"] = list(prophet_df.outlier.values.astype(int))
 	if elliptic_df:
 		out["elliptic_outlier"] = list(elliptic_df.outlier.astype(int))
-	if True:
-		out["pred_demand"] = peak_demand
-		out["peak_time"] = act_time
-		out["act_demand"] = act_demand
+	if inputDict.get("demandTempBool"):
+		out["nn_outlier"] = list(nn_bool.astype(int))
+		out["nn_actual"] = list(nn_actual)
+		out["nn_pred"] = list(nn_pred)
+		out["nn_lower"] = list(nn_lower)
+		out["nn_upper"] = list(nn_upper)
 		out["katrina_outlier"] = katrina_outliers
 	out["startDate"] = inputDict["startDate"]
 	return out
