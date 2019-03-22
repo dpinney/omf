@@ -1253,6 +1253,17 @@ def checkAnonymizeTran(owner, modelName):
 	# checks to see if PID file exists, if theres no PID file process is done.
 	return jsonify(exists=os.path.exists(pidPath))
 
+@app.route('/displayMap/<owner>/<modelName>/<feederNum>', methods=["GET"])
+def displayOmdMap(owner, modelName, feederNum):
+	'''Function to render omd on a leaflet map using a new template '''
+	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
+	with open(os.path.join(modelDir, "allInputData.json"), "r") as jsonFile:
+		feederDict = json.load(jsonFile)
+		feederName = feederDict.get('feederName' + str(feederNum))
+	feederFile = os.path.join(modelDir, feederName + ".omd")
+	geojson = omf.geo.omdGeoJson(feederFile)
+	return render_template('geoJsonMap.html', geojson=geojson)
+
 ###################################################
 # OTHER FUNCTIONS
 ###################################################

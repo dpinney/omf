@@ -1,5 +1,4 @@
-
-import json, math, os, argparse
+import json, os, argparse
 from omf import feeder
 from os.path import join as pJoin
 import pandas as pd
@@ -17,7 +16,7 @@ import sys
 def ConvertAndwork(filePath, gb_on_off='on'):
 	"""
 	Converts omd to glm, adds in necessary recorder, collector, and
-	attributes+parameters for gridballast gld to run on waterheaters and
+	attributes+parameters for gridballast gridlabD to run on waterheaters and
 	ziploads
 	"""
 	with open(filePath, 'r') as inFile:
@@ -86,8 +85,11 @@ def ConvertAndwork(filePath, gb_on_off='on'):
 
 	return name_volt_dict
 
+
+#Finds objects that carry too much voltage, these are called 'Offenders', write to disk
 def ListOffenders(name_volt_dict):
-	#Finds objects that carry too much voltage, these are called 'Offenders', write to disk
+	#Go thorugh volt dump, and find out the voltage magnitude of all phases.
+	#Add to name_volt_dict dictionary which contains node names and their nominal voltage
 	data = pd.read_csv(('voltDump.csv'), skiprows=[0])
 	for i, row in data['voltA_real'].iteritems():
 		voltA_real = data.loc[i,'voltA_real']
@@ -103,6 +105,11 @@ def ListOffenders(name_volt_dict):
 		voltC_mag = np.sqrt(np.add((voltC_real*voltC_real), (voltC_imag*voltC_imag)))
 		name_volt_dict[data.loc[i, 'node_name']].update({'Volt_C':voltC_mag})
 
+	#Run through name_volt_dict, compare nominal voltage with voltage magnitude of each phase. 
+	#IF greater than allowed range (1.05) append to offenders and offendersGen
+	#offenders is a tuple of the node name, and the ratio between measured voltage/nominal voltage
+	#offendersGen is just a list of the offender node names
+
 	offenders = []
 	offendersGen = []
 	for name, volt in name_volt_dict.iteritems():
@@ -116,22 +123,19 @@ def ListOffenders(name_volt_dict):
 			offenders.append(tuple([name, float(volt['Volt_C'])/float(volt['Nominal_Voltage'])]))
 			offendersGen.append(name)
 
-
-
-	#Print General information about offending nodes
+	#remove duplicates in list
 	offenders = list(set(offenders))
-	# print len(offenders)
+	offendersGen = list(set(offendersGen))
+
+	#Calculate average overdose factor
 	isum = 0
 	offendersNames = []
 	for i in range(len(offenders)):
 		isum = isum + offenders[i][1]
-		offendersNames.append(offenders[i][0])
-	offendersGen = list(set(offendersGen))
-	#print ("average voltage overdose is by a factor of", isum/(len(offenders)))
+	overdose_factor = isum/(len(offendersGen))
+	print ("average voltage overdose is by a factor of", overdose_factor) 
 	print ("Number of offenders is", len(offendersGen))
-	# Write out file
-	voltSum = data['voltA_real'].sum() + data['voltB_real'].sum() + data['voltC_real'].sum()
-	print "volt total", voltSum
+	# Write out file, list of offenders and their voltage overdose 
 	with open('offenders.csv', 'w') as f:
 		wr = csv.writer(f, quoting=csv.QUOTE_ALL)
 		wr.writerow(offenders)
