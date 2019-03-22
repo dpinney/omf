@@ -41,7 +41,7 @@
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-storagePeakShave" target="blank">Help?</a></label>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-anomalyDetector" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
@@ -282,7 +282,7 @@
 							"type": "line",
 							"pointStart": Date.parse(allOutputData.startDate),
 							"pointInterval": 1000*60*60},
-						{"name":"Predicted Peaks (kW)",
+						{"name":"Anomalous Peaks (kW)",
 							"color":"blue",
 							"data":allOutputData.katrina_outlier,
 							"type": "scatter"}
@@ -294,7 +294,7 @@
 	</div>
 	<p class="reportTitle postRun" style="page-break-before:always">Neural Network</p>	
 	<div id="neuralNetPlot" class="tightContent postRun">
-		{% if nn_pred is not defined %}Neural network anomaly detector was not run, as the checkbox indicating that the input data conforms to the forecastLoad data formatting requirements was not checked. {% endif %}
+		{% if allOutputDataDict['nn_pred'] %}Neural network anomaly detector was not run, as the checkbox indicating that the input data conforms to the forecastLoad data formatting requirements was not checked.<br>{% endif %}
 		<div id="neuralNetChart"></div>
 		<script>
 			var neuralNetOutliers = [];
