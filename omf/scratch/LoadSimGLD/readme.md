@@ -4,9 +4,10 @@ This software generates load shapes for a given device type. Device types includ
 
 ### Usage
 
-Install by download (insert URL).
+Install by downloading from  (insert URL).
 
-You need some prerequirements:
+You need some requirements:
+-python 2.7
 -pyplot from matplotlib
 -argparse
 -dates from matplotlib
