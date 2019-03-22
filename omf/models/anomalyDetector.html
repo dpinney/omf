@@ -63,6 +63,7 @@
 			<div class="wideInput">
 				<p class="inputSectionHeader">Anomaly Detection Parameters</p>
 			</div>
+			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Data (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
 				<input id="inputFile" type="file" style="display:none" onchange="handle_files(this.files,'demandCurve','fileName')">
@@ -85,11 +86,11 @@
 				<input type="text"  id="startDate" name="startDate" pattern="^\d\d\d\d-\d\d-\d\d$"/>
 			</div>
 			<div class="shortInput" >
-				<label>Gaussian confidence check for elliptic envelope (must be &lt; 1)</label>
+				<label>Gaussian level for Elliptic Envelope (&lt; 1)</label>
 				<input type="number"  id="norm_confidence" name="norm_confidence" min="0.01" max="1" step="any"/>
 			</div>
 			<div class="shortInput" >
-				<label>Anomalous confidence level (must be &lt; 1)</label>
+				<label>Anomalous confidence level (&lt; 1)</label>
 				<input type="number"  id="confidence" name="confidence" min="0.5" max="1" step="any"/>
 			</div>
 			<div class="wideInput" style="text-align:right">
