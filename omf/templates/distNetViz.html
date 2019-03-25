@@ -468,6 +468,7 @@
                             <li data-web>Windmil Conversion...</li>
                             <li data-web>GridLAB-D Conversion...</li>
                             <li data-web>CYMDIST Conversion...</li>
+                            <li data-web>View on Map</li>
                         </ul>
                     </div>
                     {% endif %}
@@ -2414,7 +2415,7 @@ function fileMenuHandlers() {
         return;
     }
     const items = Array.from(menu.children);
-    if (items.length !== 8) {
+    if (items.length !== 9) {
         throw new Error("Please update this function to ensure the correct handlers are attached");
     }
     items[0].addEventListener("click", function() {
@@ -2427,7 +2428,7 @@ function fileMenuHandlers() {
     items[5].addEventListener("click", () => { toggleElementDisplay("milsoftModal"); });
     items[6].addEventListener("click", () => { toggleElementDisplay("gridlabdModal"); });
     items[7].addEventListener("click", () => { toggleElementDisplay("cymeModal"); });
-    //items[8].addEventListener("click", () => { toggleElementDisplay("colorModal"); });
+    items[8].addEventListener("click", displayMap);
 }
 
 /** 
@@ -3171,6 +3172,11 @@ async function renameFeeder() {
 		}
 	} 
 }
+
+function displayMap(){
+    window.open(`/displayMap/${gThisOwner}/${gThisModelName}/${gThisFeederNum}`, '_blank');
+}
+
 {% endif %}
 
 /** This is done for testing reasons.

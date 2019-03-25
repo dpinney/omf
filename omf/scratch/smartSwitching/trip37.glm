@@ -1,8 +1,10 @@
 clock {
 	timezone EST+5EDT;
 	starttime '2000-01-01 0:00:00';
-	stoptime '2000-01-01 0:00:20';
+	stoptime '2000-01-01 0:01:00';
 };
+
+#set minimum_timestep=3600;
 
 module powerflow {
 	solver_method NR;
@@ -17,7 +19,7 @@ object overhead_line_conductor {
 	name ug_lc_7210;
 	geometric_mean_radius 0.00813999958336353;
 	resistance 0.484200000762939;
-	rating.summer.continuous 300;
+	rating.summer.continuous 3000;
 };
 
 object overhead_line_conductor {
@@ -25,7 +27,7 @@ object overhead_line_conductor {
 	name ug_lc_7220;
 	geometric_mean_radius 0.00813999958336353;
 	resistance 0.484200000762939;
-	rating.summer.continuous 300;
+	rating.summer.continuous 3000;
 };
 
 object overhead_line_conductor {
@@ -33,7 +35,7 @@ object overhead_line_conductor {
 	name ug_lc_7230;
 	geometric_mean_radius 0.00813999958336353;
 	resistance 0.484200000762939;
-	rating.summer.continuous 300;
+	rating.summer.continuous 3000;
 };
 
 object overhead_line_conductor {
@@ -41,7 +43,7 @@ object overhead_line_conductor {
 	name ug_lc_7240;
 	geometric_mean_radius 0.00813999958336353;
 	resistance 0.484200000762939;
-	rating.summer.continuous 300;
+	rating.summer.continuous 3000;
 };
 
 object line_spacing {
@@ -1122,7 +1124,7 @@ object overhead_line {
 object node {
 	phases ABC;
 	name B_node781;
-	//bustype SWING;
+	bustype SWING;
 	voltage_B -2504.88-1446.19314229j;
 	voltage_C -44.88+2814.65184433j;
 	voltage_A 2504.88-1446.19314229j;

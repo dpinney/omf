@@ -1,23 +1,20 @@
-
-import json, math, os, argparse
+import json, os, argparse
 from omf import feeder
 from os.path import join as pJoin
 import pandas as pd
 import numpy as np
 import csv
 import omf
-import voltageRegVisual
 import re
 from datetime import datetime
 from voltageDropVoltageViz import drawPlot
 import sys
 
-#Run 11-1, stop results at noon, run at hour resolution
 
 def ConvertAndwork(filePath, gb_on_off='on'):
 	"""
 	Converts omd to glm, adds in necessary recorder, collector, and
-	attributes+parameters for gridballast gld to run on waterheaters and
+	attributes+parameters for gridballast gridlabD to run on waterheaters and
 	ziploads
 	"""
 	with open(filePath, 'r') as inFile:
@@ -25,7 +22,7 @@ def ConvertAndwork(filePath, gb_on_off='on'):
 			gb_status = 'true'
 		else:
 			gb_status = 'false'
-		print("Gridballast is "+gb_status)
+		print("Gridballast is "+gb_on_off)
 		inFeeder = json.load(inFile)
 		inFeeder['tree'][u'01'] = {u'omftype': u'#include', u'argument': u'"hot_water_demand1.glm"'}
 		inFeeder['tree'][u'011'] = {u'class': u'player', u'double': u'value'}# add in manually for now
@@ -86,8 +83,11 @@ def ConvertAndwork(filePath, gb_on_off='on'):
 
 	return name_volt_dict
 
+
+#Finds objects that carry too much voltage, these are called 'Offenders', write to disk
 def ListOffenders(name_volt_dict):
-	#Finds objects that carry too much voltage, these are called 'Offenders', write to disk
+	#Go thorugh volt dump, and find out the voltage magnitude of all phases.
+	#Add to name_volt_dict dictionary which contains node names and their nominal voltage
 	data = pd.read_csv(('voltDump.csv'), skiprows=[0])
 	for i, row in data['voltA_real'].iteritems():
 		voltA_real = data.loc[i,'voltA_real']
@@ -103,6 +103,11 @@ def ListOffenders(name_volt_dict):
 		voltC_mag = np.sqrt(np.add((voltC_real*voltC_real), (voltC_imag*voltC_imag)))
 		name_volt_dict[data.loc[i, 'node_name']].update({'Volt_C':voltC_mag})
 
+	#Run through name_volt_dict, compare nominal voltage with voltage magnitude of each phase. 
+	#IF greater than allowed range (1.05) append to offenders and offendersGen
+	#offenders is a tuple of the node name, and the ratio between measured voltage/nominal voltage
+	#offendersGen is just a list of the offender node names
+
 	offenders = []
 	offendersGen = []
 	for name, volt in name_volt_dict.iteritems():
@@ -116,22 +121,19 @@ def ListOffenders(name_volt_dict):
 			offenders.append(tuple([name, float(volt['Volt_C'])/float(volt['Nominal_Voltage'])]))
 			offendersGen.append(name)
 
-
-
-	#Print General information about offending nodes
+	#remove duplicates in list
 	offenders = list(set(offenders))
-	# print len(offenders)
+	offendersGen = list(set(offendersGen))
+
+	#Calculate average overdose factor
 	isum = 0
 	offendersNames = []
 	for i in range(len(offenders)):
 		isum = isum + offenders[i][1]
-		offendersNames.append(offenders[i][0])
-	offendersGen = list(set(offendersGen))
-	#print ("average voltage overdose is by a factor of", isum/(len(offenders)))
+	overdose_factor = isum/(len(offendersGen))
+	print ("average voltage overdose is by a factor of", overdose_factor) 
 	print ("Number of offenders is", len(offendersGen))
-	# Write out file
-	voltSum = data['voltA_real'].sum() + data['voltB_real'].sum() + data['voltC_real'].sum()
-	print "volt total", voltSum
+	# Write out file, list of offenders and their voltage overdose 
 	with open('offenders.csv', 'w') as f:
 		wr = csv.writer(f, quoting=csv.QUOTE_ALL)
 		wr.writerow(offenders)
@@ -166,28 +168,21 @@ def writeResults(offendersGen):
 	print "HVAC Power Use", (HVAC_power[0]+HVAC_power[1])*1000
 	#convert results to watts, write to dataframe
 	df=pd.DataFrame(columns=('result', 'value'))
-	df.loc[1]=['current time', datetime.today()]
-	df.loc[2]=["Number of offenders", len(offendersGen)]
-	df.loc[3]=["Substation Power", substation_power]
-	df.loc[4]=["Zipload Power Use", zipload_power*1000]
-	df.loc[5]=["Waterheater Power Use", waterheater_power*1000]
-	df.loc[6]=["HVAC Power Use", (HVAC_power[0]+HVAC_power[1])*1000]
+	df.loc[1]=['Time of Simulation ', datetime.today()]
+	df.loc[2]=["Number of offenders ", len(offendersGen)]
+	df.loc[3]=["Substation Power ", substation_power]
+	df.loc[4]=["Zipload Power Use ", zipload_power*1000]
+	df.loc[5]=["Waterheater Power Use ", waterheater_power*1000]
+	df.loc[6]=["HVAC Power Use ", (HVAC_power[0]+HVAC_power[1])*1000]
 	for i, j in enumerate(solar_power):
-		df.loc[len(df)+1]=["Solar Power" +str(i), j]
-		print ("Solar Power" +str(i), j)
+		df.loc[len(df)+1]=["Solar Power " +str(i), j]
+		print ("Solar Power " +str(i), j)
 	for i, j in enumerate(wind_power):
-		df.loc[len(df)+1]=["Wind Power"+str(i), j]
-		print ("Wind Power"+str(i), j)
-	# if os.path.isfile('measured_wind_0'): 
-	# 	#temporary test
-	# 	df.loc[7]=['wind power', wind_power]
+		df.loc[len(df)+1]=["Wind Power "+str(i), j]
+		print ("Wind Power "+str(i), j)
 	
 	#Write Dataframe to .csv
-
-
 	df.to_csv('Results.csv')
-
-
 
 def _debugging(filePath, gb_on_off='on'):
 	#Begin Main Function
@@ -198,7 +193,8 @@ def _debugging(filePath, gb_on_off='on'):
 	omf.distNetViz.viz('outGLM.glm') #or model.omd
 	# Visualize Voltage Regulation
 	voltRegViz('outGLM.glm')
-	# Remove Feeder
+	# Remove Feeder and out files
+	dir_path = os.path.dirname(os.path.realpath(__file__))
 	for file in os.listdir(dir_path):
 		if 'out' in file or file == 'voltDump.csv':
 			os.remove(file)
@@ -211,6 +207,7 @@ def voltRegViz(FNAME):
 	validFiles = ['_minutes.PLAYER', 'climate.tmy2', 'frequency.PLAYER1', "hot_water_demand1.glm", 'schedulesResponsiveLoads.glm']
 	dir_path = os.path.dirname(os.path.realpath(__file__))
 
+	#remove unecessary files from visualization directory
 	for file in os.listdir(pJoin(dir_path, '_voltViz')):
 		if file not in validFiles : 
 			os.remove(pJoin('_voltViz', file))
@@ -228,9 +225,7 @@ if __name__ == '__main__':
 		filePath = args.file_path
 		gb_on_off = args.gridballast_on_off
 		_debugging(filePath, gb_on_off)
-		# _myDir = os.path.dirname(os.path.realpath(__file__))
-		# _omfDir = os.path.dirname(os.path.dirname(_myDir))
-		# _feederDir = pJoin(_omfDir, 'static/publicFeeders/Olin Barre GH EOL Solar.omd')
+
 
 
 

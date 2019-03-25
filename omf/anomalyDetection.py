@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 try:
 	from fbprophet import Prophet
@@ -5,7 +6,7 @@ except:
 	pass # fbprophet is very badly behaved at runtime and also at install time.
 from omf.loadForecast import suppress_stdout_stderr
 from os.path import join as pJoin
-import os
+import os, omf
 
 
 def train_prophet(df, modelDir, confidence=0.99):
@@ -59,3 +60,63 @@ def elliptic_envelope(df, modelDir, norm_confidence=0.95):
 	df.outlier = model.fit_predict(df.values)
 	df.outlier = df.outlier < 0  # 1 if inlier, -1 if outlier
 	return df
+
+
+def t_test(df, modelDir, start_date, confidence=0.99, model="neuralNet"):
+	"""Is given a dataframe of demand, temp, and dates (in that order)"""
+	from scipy.stats import t
+	df = df.copy()
+
+	if model == "neuralNet":
+		df["dates"] = pd.date_range(start_date, freq="H", periods = df.shape[0])
+		df.columns = ["load", "tempc", "dates"]
+		all_X = omf.loadForecast.makeUsefulDf(df)
+		actual = df["load"].values
+		pred, acc = omf.loadForecast.neural_net_predictions(all_X, actual)
+
+	if model == "nextDayPeakKatrina":
+		ppt, pred, act_time, actual = omf.loadForecast.nextDayPeakKatrinaForecast(
+			df.values, start_date, modelDir, {}, returnActuals=True
+		)
+
+	diff = [p - a for p, a in zip(pred, actual[-8760:])]
+	diff = np.asarray(diff)
+	alpha = 1 - confidence
+	twosigma = -1 * t.ppf(alpha / 2, len(diff)) * np.std(diff)
+	diff = np.abs(diff)
+	diff = diff > twosigma
+
+	if model == "neuralNet":
+		return diff, actual[-8760:], pred, pred - twosigma, pred + twosigma
+	if model == "nextDayPeakKatrina":
+		return diff, actual, act_time
+
+def percent_error(df, modelDir, start_date, p_error=0.05, model="neuralNet"):
+	"""Is given a dataframe of demand, temp, and dates (in that order)"""
+	df = df.copy()
+
+	if model == "neuralNet":
+		df["dates"] = pd.date_range(start_date, freq="H", periods = df.shape[0])
+		df.columns = ["load", "tempc", "dates"]
+		all_X = omf.loadForecast.makeUsefulDf(df)
+		actual = df["load"].values
+		pred, acc = omf.loadForecast.neural_net_predictions(all_X, actual)
+
+	if model == "nextDayPeakKatrina":
+		ppt, pred, act_time, actual = omf.loadForecast.nextDayPeakKatrinaForecast(
+			df.values, start_date, modelDir, {}, returnActuals=True
+		)
+
+	diff = [(p - a)/a for p, a in zip(pred, actual[-8760:])]
+	diff = np.asarray(diff)
+	diff = np.abs(diff)
+	diff = diff > p_error
+
+	if model == "neuralNet":
+		lower = (1/p_error) / (1/p_error + 1)
+		lower = [lower * p for p in pred]
+		upper = (1/p_error) / (1/p_error - 1)
+		upper = [upper * p for p in pred]
+		return diff, actual[-8760:], pred, lower, upper
+	if model == "nextDayPeakKatrina":
+		return diff, actual, act_time
