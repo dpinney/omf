@@ -28,12 +28,32 @@ To install gridballastVoltReg, please download from .......
 To run, simply navigate to the gridballastVoltReg directory and type in your terminal `python voltControlUtilityScale.py <path_to_omd> <gridballast status, ('on' or 'off')>` for utility scale simulation. For the distributed solar case `python voltControlUtilityScale.py <path_to_omd> <gridballast status, ('on' or 'off')> <(rooftop solar size in square feet)>`
 
 
-Screenshot ???
+You wiill know the simulation is working correctly when you see the GridLAB-D outputs for each timestep.
+
+![](gridlabd_sim.png)
+
+The simulation should yield an output similair to what is below. These are the results of the GridLAB-D simulation, but the overall module is far from finished. 
+
+![](gld_results.png)
+
+
+Eventually a window will pop up in your web browswer which will look similair to what is below. This is a visual model of your circuit. 
+
+![](circuit_viz.png)
+
+To view the results of the simulation, simply navigate to the directory of the module and open as a .csv in excel, or which ever text editor you like.
+
+![](sample_result.png)
+
+
+If you want to see which nodes are offenders. simple open offenders.csv in a text editor to view them. 
+
 
 ### Advanced Usage
 
 The binary of GridLAB-D can be found at (.......######........)
 
-Is there any?
+One common error is GridLAB-D returning an error that a 'parent could not be set.' Below is a screenshot. This is a common error, all you have to do is simply run the simulation again!!
 
-Demo file!?!
+![](parent_error.png)
+

@@ -113,8 +113,8 @@ def new(modelDir):
 			)
 		).read(),
 		"fileName": "ERCOT_south_shortened.csv",
-		"lowBound": 500,
-		"upBound": 3550,
+		"lowBound": 0.95,
+		"upBound": 1.05,
 		"rollingWindow": 4,
 		"alpha": 0.95,
 		"beta": 0.05,
