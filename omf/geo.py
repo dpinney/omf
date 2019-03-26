@@ -382,10 +382,10 @@ def rasterTilesFromOmd(pathToOmdFile, outputPath):
 	#networkx graph to work with
 	nxG = omf.feeder.treeToNxGraph(tree)
 	#Lat/lon min/max for caluclating tile coverage later
-	latitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
-	longitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][1] for node in nx.get_node_attributes(nxG, 'pos')])
-	latitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
-	longitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][1] for node in nx.get_node_attributes(nxG, 'pos')])
+	latitude_min = min([nxG.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
+	longitude_min = min([nxG.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
+	latitude_max = max([nxG.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
+	longitude_max = max([nxG.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
 	#Set the plot settings
 	plt.switch_backend('Agg')
 	fig = plt.figure(frameon=False, figsize=[2.56,2.56])
@@ -398,17 +398,17 @@ def rasterTilesFromOmd(pathToOmdFile, outputPath):
 	#map latlon to projection
 	epsg3857 = Proj(init='epsg:3857')
 	wgs84 = Proj(init='EPSG:4326')
-	node_positions = {node: nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')}
+	node_positions = {nodewithPosition: nxG.node[nodewithPosition]['pos'] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')}
 	for point in node_positions:
 		node_positions[point] = transform(wgs84,epsg3857,node_positions[point][1], node_positions[point][0])
 	#Go through each zoom level and create tiles for each area covering the feeder
+	nx.draw_networkx(nxG, pos=node_positions, nodelist=list(node_positions.keys()), with_labels=False, node_size=2, edge_size=1)
 	for zoomLevel in range(0,19):
 		#Boundaries covering the omd locations for the current zoom level
 		upperRightTile = tileXY(latitude_max, longitude_max, zoomLevel)
 		lowerLeftTile = tileXY(latitude_min, longitude_min, zoomLevel)
 		firstTileEdges = tileEdges(upperRightTile[0], upperRightTile[1], zoomLevel)
 		lastTileEdges = tileEdges(lowerLeftTile[0], lowerLeftTile[1], zoomLevel)
-		nx.draw_networkx(nxG, pos=node_positions, nodelist=[node for node in nxG if node in nx.get_node_attributes(nxG, 'pos')], with_labels=False, node_size=2, edge_size=1)
 		#Map omd for each x/y tile area
 		for tileX in range(lowerLeftTile[0], upperRightTile[0]+1):
 			for tileY in range(upperRightTile[1], lowerLeftTile[1]+1):
@@ -625,15 +625,15 @@ def _tests():
 	e2, n2 = latLonToStatePlane(lat, lon, epsg=2205)
 	print (e2, n2) # (249.24197527189972, 1186.1488466408398)
 	#mapOmd('./static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png')
-	# mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html')
+	#mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html')
 	#hullOfOmd('static/publicFeeders/Olin Barre LatLon.omd')
-	# simplifiedOmd = simplifiedOmdShape('static/publicFeeders/Olin Barre LatLon.omd')
+	#simplifiedOmd = simplifiedOmdShape('static/publicFeeders/Olin Barre LatLon.omd')
 	#showOnMap(hullOfOmd('static/publicFeeders/Olin Barre LatLon.omd'))
 	#showOnMap(simplifiedOmdShape('static/publicFeeders/Olin Barre LatLon.omd'))
 	#showOnMap(omdGeoJson('static/publicFeeders/Olin Barre LatLon.omd'))
 	#print(simplifiedOmd)
-	# shortestPathOmd('static/publicFeeders/Olin Barre LatLon.omd', 'node62474203981T62474203987_B', 'node1667616792')
-	# rasterTilesFromOmd('static/publicFeeders/Olin Barre LatLon.omd', 'scratch/omdTests/tiles')
+	#shortestPathOmd('static/publicFeeders/Olin Barre LatLon.omd', 'node62474203981T62474203987_B', 'node1667616792')
+	#rasterTilesFromOmd('static/publicFeeders/Olin Barre LatLon.omd', 'scratch/omdTests/tiles')
 	#serveTiles('scratch/omdTests/tiles')
 	#convertMap('static/publicFeeders/Autocli Alberich Calibrated.omd','autocli', 'html')
 	#convertMap('static/publicFeeders/ABEC Frank LO Houses.omd','autocli', 'html')
