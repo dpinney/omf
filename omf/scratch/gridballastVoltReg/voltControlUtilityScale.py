@@ -128,10 +128,11 @@ def ListOffenders(name_volt_dict):
 	#Calculate average overdose factor
 	isum = 0
 	offendersNames = []
-	for i in range(len(offenders)):
-		isum = isum + offenders[i][1]
-	overdose_factor = isum/(len(offendersGen))
-	print ("average voltage overdose is by a factor of", overdose_factor) 
+	if len(offendersGen) > 0:
+		for i in range(len(offenders)):
+			isum = isum + offenders[i][1]
+		overdose_factor = isum/(len(offendersGen))
+		print ("average voltage overdose is by a factor of", overdose_factor) 
 	print ("Number of offenders is", len(offendersGen))
 	# Write out file, list of offenders and their voltage overdose 
 	with open('offenders.csv', 'w') as f:
@@ -202,7 +203,7 @@ def _debugging(filePath, gb_on_off='on'):
 
 
 def voltRegViz(FNAME):
-	chart = drawPlot(FNAME, neatoLayout=True, edgeCol=False, nodeLabs=None, edgeLabs=None, nodeCol = "perUnitVoltage", customColormap=True, rezSqIn=400)
+	chart = drawPlot(FNAME, neatoLayout=True, edgeCol=None, nodeLabs=None, edgeLabs=None, nodeCol = "perUnitVoltage", customColormap=True, rezSqIn=400)
 	chart.savefig("./VOLTOUT.png")
 	validFiles = ['_minutes.PLAYER', 'climate.tmy2', 'frequency.PLAYER1', "hot_water_demand1.glm", 'schedulesResponsiveLoads.glm']
 	dir_path = os.path.dirname(os.path.realpath(__file__))
