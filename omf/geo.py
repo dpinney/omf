@@ -183,10 +183,10 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat):
 			outFile.write("var geojson =")
 			json.dump(geoJsonDict, outFile, indent=4)
 	elif fileFormat == 'png':
-		latitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
-		longitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][1] for node in nx.get_node_attributes(nxG, 'pos')])
-		latitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
-		longitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][1] for node in nx.get_node_attributes(nxG, 'pos')])
+		latitude_min = min([nxG.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
+		longitude_min = min([nxG.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
+		latitude_max = max([nxG.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
+		longitude_max = max([nxG.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
 		#Set the plot settings
 		plt.switch_backend('Agg')
 		fig = plt.figure(frameon=False, figsize=[10,10])
@@ -195,7 +195,7 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat):
 		#map latlon to projection
 		epsg3857 = Proj(init='epsg:3857')
 		wgs84 = Proj(init='EPSG:4326')
-		node_positions = {node: nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')}
+		node_positions = {nodewithPosition: nxG.node[nodewithPosition]['pos'] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')}
 		for point in node_positions:
 			node_positions[point] = transform(wgs84,epsg3857,node_positions[point][1], node_positions[point][0])
 		for zoomLevel in range(18,19):
@@ -208,13 +208,13 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat):
 			#Get N S E W boundaries for outer tiles in mercator projection x/y
 			mainsouthWest = transform(wgs84,epsg3857,lastTileEdges[1], lastTileEdges[0])
 			mainnorthEast = transform(wgs84,epsg3857,firstTileEdges[3], firstTileEdges[2])
+			nx.draw_networkx(nxG, pos=node_positions, nodelist=list(node_positions.keys()), with_labels=False, node_size=2, edge_size=1)
 			for tileX in range(lowerLeftTile[0], upperRightTile[0]+1):
 				for tileY in range(upperRightTile[1], lowerLeftTile[1]+1):
-					#Draw section of tree that covers this tile
+					#Get section of tree that covers this tile
 					currentTileEdges = tileEdges(tileX, tileY, zoomLevel)
 					southWest = transform(wgs84,epsg3857,currentTileEdges[1], currentTileEdges[0])
 					northEast = transform(wgs84,epsg3857,currentTileEdges[3], currentTileEdges[2])
-					nx.draw_networkx(nxG, pos=node_positions, nodelist=[node for node in nxG if node in nx.get_node_attributes(nxG, 'pos')], with_labels=False, node_size=2, edge_size=1)
 					#Get map background from tile
 					url = 'https://a.tile.openstreetmap.org/%s/%s/%s.png' % (zoomLevel, tileX, tileY)
 					response = requests.get(url, stream=True)
@@ -382,10 +382,10 @@ def rasterTilesFromOmd(pathToOmdFile, outputPath):
 	#networkx graph to work with
 	nxG = omf.feeder.treeToNxGraph(tree)
 	#Lat/lon min/max for caluclating tile coverage later
-	latitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
-	longitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][1] for node in nx.get_node_attributes(nxG, 'pos')])
-	latitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
-	longitude_max = max([nx.get_node_attributes(nxG, 'pos')[node][1] for node in nx.get_node_attributes(nxG, 'pos')])
+	latitude_min = min([nxG.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
+	longitude_min = min([nxG.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
+	latitude_max = max([nxG.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
+	longitude_max = max([nxG.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
 	#Set the plot settings
 	plt.switch_backend('Agg')
 	fig = plt.figure(frameon=False, figsize=[2.56,2.56])
@@ -398,17 +398,17 @@ def rasterTilesFromOmd(pathToOmdFile, outputPath):
 	#map latlon to projection
 	epsg3857 = Proj(init='epsg:3857')
 	wgs84 = Proj(init='EPSG:4326')
-	node_positions = {node: nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')}
+	node_positions = {nodewithPosition: nxG.node[nodewithPosition]['pos'] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')}
 	for point in node_positions:
 		node_positions[point] = transform(wgs84,epsg3857,node_positions[point][1], node_positions[point][0])
 	#Go through each zoom level and create tiles for each area covering the feeder
+	nx.draw_networkx(nxG, pos=node_positions, nodelist=list(node_positions.keys()), with_labels=False, node_size=2, edge_size=1)
 	for zoomLevel in range(0,19):
 		#Boundaries covering the omd locations for the current zoom level
 		upperRightTile = tileXY(latitude_max, longitude_max, zoomLevel)
 		lowerLeftTile = tileXY(latitude_min, longitude_min, zoomLevel)
 		firstTileEdges = tileEdges(upperRightTile[0], upperRightTile[1], zoomLevel)
 		lastTileEdges = tileEdges(lowerLeftTile[0], lowerLeftTile[1], zoomLevel)
-		nx.draw_networkx(nxG, pos=node_positions, nodelist=[node for node in nxG if node in nx.get_node_attributes(nxG, 'pos')], with_labels=False, node_size=2, edge_size=1)
 		#Map omd for each x/y tile area
 		for tileX in range(lowerLeftTile[0], upperRightTile[0]+1):
 			for tileY in range(upperRightTile[1], lowerLeftTile[1]+1):
@@ -458,6 +458,15 @@ def serveTiles(pathToTiles):
 			return send_file(default)
 	app.run()
 
+def convertSources(inSources):
+	''' Convert sources to networkx graph. Some omds do not have the position information in the tree '''
+	outGraph = nx.Graph()
+	for key in inSources:
+		outGraph.add_edge(key['source']['name'], key['target']['name'])
+		outGraph.node[key['source']['name']]['pos'] = (float(key['source']['y']), float(key['source']['x']))
+		outGraph.node[key['target']['name']]['pos'] = (float(key['target']['y']), float(key['target']['x']))
+	return outGraph
+
 def convertMap(pathToOmdFile, outputPath, fileFormat):
 	'''
 	Draw an omd on a map.
@@ -466,9 +475,12 @@ def convertMap(pathToOmdFile, outputPath, fileFormat):
 	Use html option to create a geojson file to be displayed with an interactive leaflet map.
 	Use the png file format to create a static png image.
 	'''
+	#with open(pathToOmdFile) as inFile:
+	#	tree = json.load(inFile)['tree']
+	#nxG = omf.feeder.treeToNxGraph(tree)
 	with open(pathToOmdFile) as inFile:
-		tree = json.load(inFile)['tree']
-	nxG = omf.feeder.treeToNxGraph(tree)
+		tree = json.load(inFile)['links']
+	nxG = convertSources(tree)
 	#latitude_min = min([nx.get_node_attributes(nxG, 'pos')[node][0] for node in nx.get_node_attributes(nxG, 'pos')])
 	#latitude comes first
 	if fileFormat == 'html':
@@ -477,9 +489,9 @@ def convertMap(pathToOmdFile, outputPath, fileFormat):
 		latitude_max = max([nxG.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
 		longitude_max = max([nxG.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
 		#print(latitude_min, latitude_max, longitude_min, longitude_max)
-		latitudeCenter = -102
-		longitudeCenter = 32
-		
+		latitudeCenter = 32
+		longitudeCenter = -102
+		#print(latitude_min, longitude_min, latitude_max, longitude_max)
 		for nodeToChange in nx.get_node_attributes(nxG, 'pos'):
 			nxG.node[nodeToChange]['pos'] = (latitudeCenter + nxG.node[nodeToChange]['pos'][0]/latitude_max, longitudeCenter 
 											+ nxG.node[nodeToChange]['pos'][1]/longitude_max)
@@ -500,43 +512,46 @@ def convertMap(pathToOmdFile, outputPath, fileFormat):
 					"coordinates": [node_positions[node][1], node_positions[node][0]]
 				},
 				"properties":{
-					"name": node,
-					"pointType": node_types[node],
-					"pointColor": _obToCol(node_types[node])
+					"name": node
+					#"pointType": node_types[node],
+					#"pointColor": _obToCol(node_types[node])
 				}
 			})
 		#Add edges to geoJSON
-		for edge in nx.get_edge_attributes(nxG, 'type'):
+		#for edge in nx.get_edge_attributes(nxG, 'type'):
 			#print(edge)
-			nxG[edge[0]][edge[1]]['type']
+			#nxG[edge[0]][edge[1]]['type']
 		edge_types = {edge: nxG[edge[0]][edge[1]]['type'] for edge in nx.get_edge_attributes(nxG, 'type')}
+		#print('edge_types')
 		edge_phases = {edge: nxG[edge[0]][edge[1]]['phases'] for edge in nx.get_edge_attributes(nxG, 'phases')}
+		#print('edge_phases')
 		for edge in nx.edges(nxG):
 			geoJsonDict['features'].append({
 				"type": "Feature", 
 				"geometry":{
 					"type": "LineString",
-					"coordinates": [[node_positions[edge[0]][0], node_positions[edge[0]][1]],[node_positions[edge[1]][0], node_positions[edge[1]][1]]]
+					"coordinates": [[node_positions[edge[0]][1], node_positions[edge[0]][0]],[node_positions[edge[1]][1], node_positions[edge[1]][0]]]
 				},
 				"properties":{
-					"phase": edge_phases[edge],
-					"edgeType": edge_types[edge],
-					"edgeColor":_obToCol(edge_types[edge])
+					#"phase": edge_phases[edge],
+					#"edgeType": edge_types[edge],
+					#"edgeColor":_obToCol(edge_types[edge])
 				}
 			})
-		if not os.path.exists(outputPath):
-			os.makedirs(outputPath)
+		showOnMap(geoJsonDict)
+		#if not os.path.exists(outputPath):
+		#	os.makedirs(outputPath)
 		#shutil.copy('static/geoPolyLeaflet.html', outputPath)
-		with open(pJoin(outputPath,'geoPointsLines.json'),"w") as outFile:
-			json.dump(geoJsonDict, outFile, indent=4)
+		#with open(pJoin(outputPath,'geoPointsLines.json'),"w") as outFile:
+		#	json.dump(geoJsonDict, outFile, indent=4)
 	elif fileFormat == 'png':
 		latitude_min = min([nxG.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
 		longitude_min = min([nxG.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
 		latitude_max = max([nxG.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
 		longitude_max = max([nxG.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
 		#print(latitude_min, latitude_max, longitude_min, longitude_max)
-		latitudeCenter = -102
-		longitudeCenter = 32
+		latitudeCenter = 32
+		longitudeCenter = -102
 		
 		for nodeToChange in nx.get_node_attributes(nxG, 'pos'):
 			nxG.node[nodeToChange]['pos'] = (latitudeCenter + nxG.node[nodeToChange]['pos'][0]/latitude_max, longitudeCenter 
@@ -609,16 +624,19 @@ def _tests():
 	print (lat, lon) #(37.37267827914456, -89.89482331256504)
 	e2, n2 = latLonToStatePlane(lat, lon, epsg=2205)
 	print (e2, n2) # (249.24197527189972, 1186.1488466408398)
-	# mapOmd('./static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png')
-	# mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html')
+	#mapOmd('./static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png')
+	#mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html')
 	#hullOfOmd('static/publicFeeders/Olin Barre LatLon.omd')
-	# simplifiedOmd = simplifiedOmdShape('static/publicFeeders/Olin Barre LatLon.omd')
+	#simplifiedOmd = simplifiedOmdShape('static/publicFeeders/Olin Barre LatLon.omd')
+	#showOnMap(hullOfOmd('static/publicFeeders/Olin Barre LatLon.omd'))
+	#showOnMap(simplifiedOmdShape('static/publicFeeders/Olin Barre LatLon.omd'))
 	#showOnMap(omdGeoJson('static/publicFeeders/Olin Barre LatLon.omd'))
 	#print(simplifiedOmd)
-	# shortestPathOmd('static/publicFeeders/Olin Barre LatLon.omd', 'node62474203981T62474203987_B', 'node1667616792')
-	# rasterTilesFromOmd('static/publicFeeders/Olin Barre LatLon.omd', 'scratch/omdTests/tiles')
+	#shortestPathOmd('static/publicFeeders/Olin Barre LatLon.omd', 'node62474203981T62474203987_B', 'node1667616792')
+	#rasterTilesFromOmd('static/publicFeeders/Olin Barre LatLon.omd', 'scratch/omdTests/tiles')
 	#serveTiles('scratch/omdTests/tiles')
-	#convertMap('static/publicFeeders/Autocli Alberich Calibrated.omd','changedLoc', 'html')
+	#convertMap('static/publicFeeders/Autocli Alberich Calibrated.omd','autocli', 'html')
+	#convertMap('static/publicFeeders/ABEC Frank LO Houses.omd','autocli', 'html')
 	#getTileMapBounds('scratch/omdTests/tiles')
 	# openInGoogleMaps(lat, lon)
 
