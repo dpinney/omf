@@ -128,7 +128,7 @@ def omdGeoJson(pathToOmdFile):
 	#with open(pJoin(outputPath,'geoPointsLines.json'),"w") as outFile:
 	#	json.dump(geoJsonDict, outFile, indent=4)
 
-def mapOmd(pathToOmdFile, outputPath, fileFormat):
+def mapOmd(pathToOmdFile, outputPath, fileFormat, openBrowser=False):
 	'''
 	Draw an omd on a map.
 	
@@ -178,10 +178,12 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat):
 			})
 		if not os.path.exists(outputPath):
 			os.makedirs(outputPath)
-		shutil.copy('static/geoJsonMap.html', outputPath)
+		shutil.copy('templates/geoJsonMap.html', outputPath)
 		with open(pJoin(outputPath,'geoJsonFeatures.js'),"w") as outFile:
 			outFile.write("var geojson =")
 			json.dump(geoJsonDict, outFile, indent=4)
+		if openBrowser:
+			openInBrowser(pJoin(outputPath,'geoJsonMap.html'))
 	elif fileFormat == 'png':
 		latitude_min = min([nxG.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
 		longitude_min = min([nxG.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
@@ -228,6 +230,8 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat):
 			if not os.path.exists(outputPath):
 				os.makedirs(outputPath)
 			plt.savefig(pJoin(outputPath,'graphOnMap.png'),frameon=False, pad_inches=0, bbox='tight')
+			if openBrowser:
+				openInBrowser(pJoin(outputPath,'graphOnMap.png'))
 
 def simplifiedOmdShape(pathToOmdFile):
 	'''Use kmeans clustering to create simplified geojson object with convex hull and connected clusters from an omd.'''
@@ -609,7 +613,17 @@ def convertMap(pathToOmdFile, outputPath, fileFormat):
 				os.makedirs(outputPath)
 			plt.savefig(pJoin(outputPath,'graphOnMap.png'),frameon=False, pad_inches=0, bbox='tight')
 
+def openInBrowser(pathToFile):
+	'''Helper function for mapOmd. Try popular web browsers first because png might open in native application. Othwerwise use default program as fallback'''
+	popularBrowsers = ['google-chrome', 'chrome', 'firefox', 'safari', 'windows-default']
+	for browser in webbrowser._tryorder:
+		if browser in popularBrowsers:
+			webbrowser.get(browser).open_new(pathToFile)
+			return
+	webbrowser.open_new(pathToFile)
+
 def showOnMap(geoJson):
+	'''Open a browser to display a geoJSON object on a map.'''
 	tempDir = tempfile.mkdtemp()
 	shutil.copy('templates/geoJsonMap.html', tempDir)
 	with open(pJoin(tempDir,'geoJsonFeatures.js'),"w") as outFile:
@@ -624,8 +638,10 @@ def _tests():
 	print (lat, lon) #(37.37267827914456, -89.89482331256504)
 	e2, n2 = latLonToStatePlane(lat, lon, epsg=2205)
 	print (e2, n2) # (249.24197527189972, 1186.1488466408398)
-	#mapOmd('./static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png')
-	#mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html')
+	#mapOmd('./static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png', openBrowser=True)
+	#openInBrowser('testOutput/graphOnMap.png')
+	#mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html', openBrowser=True)
+	#openInBrowser('testOutput/geoJsonMap.html')
 	#hullOfOmd('static/publicFeeders/Olin Barre LatLon.omd')
 	#simplifiedOmd = simplifiedOmdShape('static/publicFeeders/Olin Barre LatLon.omd')
 	#showOnMap(hullOfOmd('static/publicFeeders/Olin Barre LatLon.omd'))
