@@ -90,8 +90,8 @@ def omdGeoJson(pathToOmdFile):
 	"features": []
 	}
 	#Add nodes to geoJSON
-	node_positions = {node: nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')}
-	node_types = {node: nx.get_node_attributes(nxG, 'type')[node] for node in nx.get_node_attributes(nxG, 'type')}
+	node_positions = {nodewithPosition: nxG.node[nodewithPosition]['pos'] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')}
+	node_types = {nodewithType: nxG.node[nodewithType]['type'] for nodewithType in nx.get_node_attributes(nxG, 'type')}
 	for node in node_positions:
 		geoJsonDict['features'].append({
 			"type": "Feature", 
@@ -106,8 +106,8 @@ def omdGeoJson(pathToOmdFile):
 			}
 		})
 	#Add edges to geoJSON
-	edge_types = {edge: nx.get_edge_attributes(nxG, 'type')[edge] for edge in nx.get_edge_attributes(nxG, 'type')}
-	edge_phases = {edge: nx.get_edge_attributes(nxG, 'phases')[edge] for edge in nx.get_edge_attributes(nxG, 'phases')}
+	edge_types = {edge: nxG[edge[0]][edge[1]]['type'] for edge in nx.get_edge_attributes(nxG, 'type')}
+	edge_phases = {edge: nxG[edge[0]][edge[1]]['phases'] for edge in nx.get_edge_attributes(nxG, 'phases')}
 	for edge in nx.edges(nxG):
 		geoJsonDict['features'].append({
 			"type": "Feature", 
@@ -135,47 +135,10 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat, openBrowser=False):
 	fileFormat options: html or png
 	Use html option to create a geojson file to be displayed with an interactive leaflet map.
 	Use the png file format to create a static png image.
+	By default the file(s) is saved to the outputPath, but setting openBrowser to True with open in a new browser window.
 	'''
-	with open(pathToOmdFile) as inFile:
-		tree = json.load(inFile)['tree']
-	nxG = omf.feeder.treeToNxGraph(tree)
 	if fileFormat == 'html':
-		geoJsonDict = {
-		"type": "FeatureCollection",
-		"features": []
-		}
-		#Add nodes to geoJSON
-		node_positions = {node: nx.get_node_attributes(nxG, 'pos')[node] for node in nx.get_node_attributes(nxG, 'pos')}
-		node_types = {node: nx.get_node_attributes(nxG, 'type')[node] for node in nx.get_node_attributes(nxG, 'type')}
-		for node in node_positions:
-			geoJsonDict['features'].append({
-				"type": "Feature", 
-				"geometry":{
-					"type": "Point",
-					"coordinates": [node_positions[node][1], node_positions[node][0]]
-				},
-				"properties":{
-					"name": node,
-					"pointType": node_types[node],
-					"pointColor": _obToCol(node_types[node])
-				}
-			})
-		#Add edges to geoJSON
-		edge_types = {edge: nx.get_edge_attributes(nxG, 'type')[edge] for edge in nx.get_edge_attributes(nxG, 'type')}
-		edge_phases = {edge: nx.get_edge_attributes(nxG, 'phases')[edge] for edge in nx.get_edge_attributes(nxG, 'phases')}
-		for edge in nx.edges(nxG):
-			geoJsonDict['features'].append({
-				"type": "Feature", 
-				"geometry":{
-					"type": "LineString",
-					"coordinates": [[node_positions[edge[0]][1], node_positions[edge[0]][0]],[node_positions[edge[1]][1], node_positions[edge[1]][0]]]
-				},
-				"properties":{
-					"phase": edge_phases[edge],
-					"edgeType": edge_types[edge],
-					"edgeColor":_obToCol(edge_types[edge])
-				}
-			})
+		geoJsonDict = omdGeoJson(pathToOmdFile)
 		if not os.path.exists(outputPath):
 			os.makedirs(outputPath)
 		shutil.copy('templates/geoJsonMap.html', outputPath)
@@ -185,6 +148,9 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat, openBrowser=False):
 		if openBrowser:
 			openInBrowser(pJoin(outputPath,'geoJsonMap.html'))
 	elif fileFormat == 'png':
+		with open(pathToOmdFile) as inFile:
+			tree = json.load(inFile)['tree']
+		nxG = omf.feeder.treeToNxGraph(tree)
 		latitude_min = min([nxG.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
 		longitude_min = min([nxG.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
 		latitude_max = max([nxG.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
