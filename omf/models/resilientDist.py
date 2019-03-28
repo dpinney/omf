@@ -608,10 +608,11 @@ def work(modelDir, inputDict):
 		line['node1_id'] = line['node1_id'] + "_bus"
 		line['node2_id'] = line['node2_id'] + "_bus"
 		line['capacity'] = 10000#Todo: set this to summer.rating.continuous (of the conductor) * nominal_voltage / 10000 to get MVA rating.
+		#NOTE: need to use id to get object in OMD, then use its config to get its conductors, then set capacity to avg of capacity attributes on each of the conductors.
 		line['construction_cost'] = float(inputDict['lineUnitCost'])
 		line['harden_cost'] = float(inputDict['hardeningUnitCost'])
 		line['switch_cost'] = float(inputDict['switchCost'])
-		line_id = line.get('id','')
+		line_id = line.get('id','') # this is equal to name in the OMD objects.
 		object_type = line.get('object','')
 		if line_id in hardCands:
 			line['can_harden'] = True
