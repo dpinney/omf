@@ -1,11 +1,10 @@
-import json, math, os, argparse
+import json, os, argparse
 from omf import feeder
 from os.path import join as pJoin
 import pandas as pd
 import numpy as np
 import csv
 import omf
-from models.voltageDrop import drawPlot
 import re
 from datetime import datetime
 from voltageDropVoltageViz import drawPlot
@@ -72,7 +71,7 @@ def ConvertAndwork(filePath, gb_on_off='on', area=500):
 		#Create recorder for substation powerflow
 		recordersub=("object recorder {\n\tinterval "+str(interval)+";\n\tproperty measured_real_power;\n\tfile out_substation_power.csv;\n\tparent "+str(substation)+";\n\t};\n")
 		# Create Create a recorder for a solar roof object, just to record powerflow over that unit
-		recorderSolarRoof = ("object recorder {\n\tinterval "+str(interval)+";\n\tproperty measured_real_power;\n\tfile out_standard_solar_roof.csv;\n\tparent nreca_synthetic_meter_11922;\n\t};\n")
+		recorderSolarRoof = ("object recorder {\n\tinterval "+str(interval)+";\n\tproperty measured_real_power;\n\tfile out_standard_solar_roof.csv;\n\tparent nreca_synthetic_meter_11283;\n\t};\n")
 		# Create arrays of solar objects and wind objects to attach recorders to. 
 		recorders = []
 		recorderw=[]
@@ -142,10 +141,11 @@ def ListOffenders(name_volt_dict):
 	#Calculate average overdose factor
 	isum = 0
 	offendersNames = []
-	for i in range(len(offenders)):
-		isum = isum + offenders[i][1]
-	overdose_factor = isum/(len(offendersGen))
-	print ("average voltage overdose is by a factor of", overdose_factor) 
+	if len(offendersGen) > 0:
+		for i in range(len(offenders)):
+			isum = isum + offenders[i][1]
+		overdose_factor = isum/(len(offendersGen))
+		print ("average voltage overdose is by a factor of", overdose_factor) 
 	print ("Number of offenders is", len(offendersGen))
 	# Write out file, list of offenders and their voltage overdose 
 	with open('offenders.csv', 'w') as f:
@@ -221,17 +221,18 @@ def _debugging(filePath, gb_on_off='on', area=500):
 
 
 def voltRegViz(FNAME):
-	chart = drawPlot(FNAME, neatoLayout=True, edgeCol=False, nodeLabs=None, edgeLabs=None, nodeCol = "perUnitVoltage", customColormap=True, rezSqIn=400)
+	chart = drawPlot(FNAME, neatoLayout=True, edgeCol=None, nodeLabs=None, edgeLabs=None, nodeCol = "perUnitVoltage", customColormap=True, rezSqIn=400)
 	chart.savefig("./VOLTOUT.png")
 	validFiles = ['_minutes.PLAYER', 'climate.tmy2', 'frequency.PLAYER1', "hot_water_demand1.glm", 'schedulesResponsiveLoads.glm']
 	#remove uncessary files from visualization directory
+	dir_path = os.path.dirname(os.path.realpath(__file__))
 	for file in os.listdir(pJoin(dir_path, '_voltViz')):
 		if file not in validFiles : 
 			os.remove(pJoin('_voltViz', file))
 
 if __name__ == '__main__':
 	if len(sys.argv) == 1:
-		_debugging('/Users/tuomastalvitie/Desktop/gridballast_gld_simulations/Feeders/UCS_Egan_Housed_Solar_rooftop.omd', gb_on_off='off', area=2043)
+		_debugging('/Users/tuomastalvitie/Desktop/gridballast_gld_simulations/Feeders/UCS_Egan_Housed_Solar_rooftop.omd', gb_on_off='on', area=2045)
 	else:
 		#Parse Command Line
 		parser = argparse.ArgumentParser(description='Converts an OMD to GLM and runs it on gridlabd')

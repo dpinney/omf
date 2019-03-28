@@ -79,7 +79,7 @@
 	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-			<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-voltageDrop" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
@@ -150,11 +150,11 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Parameter 1<span class="classic">TBD.</span></label>
-				<input type="text" id="parameterOne" name="parameterOne"/>
+				<input type="text" id="parameterOne" name="parameterOne" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Parameter 2<span class="classic">TBD.</span></label>
-				<input type="text" id="parameterTwo" name="parameterTwo"/>
+				<input type="text" id="parameterTwo" name="parameterTwo" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Display Options</p>
@@ -230,14 +230,13 @@
 	<div id="output">
 		<p class="reportTitle postRun" style="page-break-before:always">Voltage Drop Diagram</p>
 		<!-- Tab links -->
-		<div class="tab">
+		<div class="tab postRun">
 		  <button class="tabLinks active" onclick="openTab(event, 'solarDiagram')">Solar</button>
 		  <button class="tabLinks" onclick="openTab(event, 'noSolarDiagram')">No Solar</button>
 		  <button class="tabLinks" onclick="openTab(event, 'parameterDiagram')">Solar with Parameters</button>
 		</div>
-
 		<!-- Tab content -->
-		<div id="phaseUnbalanceDiagrams" class="tabPlots" style="display: block;">
+		<div id="phaseUnbalanceDiagrams" class="tabPlots postRun" style="display: block;">
 			<div class="tightContent tabContent solarDiagram firstTab">
 				<img id="solarUnbalanceChart" style="width:1000px;height:1000px;" />
 				<script type="text/javascript">gebi("solarUnbalanceChart").src = "data:image/png;base64," + allOutputData.voltageDrop</script>
@@ -251,15 +250,10 @@
 				<!--
 				<script type="text/javascript">gebi("parameterUnbalanceChart").src = "data:image/png;base64," + allOutputData.voltageDrop</script>
 			-->
-			</div>			
+			</div>		
 		</div>
-		<script type="text/javascript">
-			//show first tab 
-			$(".firstTab").css('display', 'block');
-		</script>
-		
-		<p class="reportTitle" style="page-break-before:always">Three Phase Loads Real and Imaginary Power</p>
-		<div class="content tableContainer">
+		<p class="reportTitle postRun" style="page-break-before:always">Three Phase Loads Real and Imaginary Power</p>
+		<div class="content tableContainer postRun">
 			<table id="realImgPower">
 			<tr> <th>Phase A Real</th> <th>Phase A Img;</th> <th>Phase B Real</th> <th>Phase B Img</th> <th>Phase C Real;</th> <th>Phase C Img</th></tr>
 			<tr> 

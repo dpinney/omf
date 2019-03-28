@@ -155,7 +155,9 @@ def new(modelDir):
 		"nodeLabs" : "None",
 		"edgeLabs" : "None",
 		"customColormap" : "False",
-		"rezSqIn" : "225"
+		"rezSqIn" : "225",
+		"parameterOne": "42",
+		"parameterTwo": "42"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:

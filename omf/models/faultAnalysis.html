@@ -5,9 +5,22 @@
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
 	<style>
 	/*Styles here*/
-	tr {
-		border-bottom: 1px solid gray;
-	}
+		table {
+			border-collapse: collapse;
+			width: 100%;
+		}
+		table, th, td {
+			border: 1px solid black;
+			text-align: center;
+			padding-top: 10px;
+			padding-bottom: 10px;
+		}
+		th {
+			background-color: #8c8c8c;
+		}
+		tr:nth-child(even) {
+			background-color: #e6e6e6;
+		}
 	</style>
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->

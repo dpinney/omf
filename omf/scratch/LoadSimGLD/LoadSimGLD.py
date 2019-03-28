@@ -1,12 +1,13 @@
 import os, omf, csv
 from matplotlib import pyplot as plt
-from pprint import pprint as pp
-from dateutil.parser import parse as parse_dt
 import matplotlib.dates as mdates
 import argparse
 import sys
+import pvlib
 
-parameters = ["GasHeat", "HeatPump", "Resistance", "AC_electric", "AC_HeatPump", "Waterheater", "EV", "Refrigerator",  "Clotheswasher", "Dryer", "Freezer"]
+
+_parameters = ["GasHeat", "HeatPump", "Resistance", "AC_electric", "AC_HeatPump", "Waterheater", "EV", "Refrigerator",  "Clotheswasher", "Dryer", "Freezer"]
+_myDir = os.path.dirname(os.path.realpath(__file__))
 
 def runGld(modelType):
 	# Run GridLAB-D on the GLM.
@@ -14,22 +15,27 @@ def runGld(modelType):
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = 'GAS'
 		graphType = 'out_super_house_heat'
+		system_type_name = 'Gas Heating'
 	elif modelType == 'HeatPump':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = 'HEAT_PUMP'
 		graphType = 'out_super_house_heat'
+		system_type_name = 'Heat Pump'
 	elif modelType == 'Resistance':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = 'RESISTANCE'
 		graphType = 'out_super_house_heat'
+		system_type_name = 'Resistance'
 	elif modelType == 'AC_electric':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = '' 
 		graphType = 'out_super_house_cool'
+		system_type_name = 'Electric'
 	elif modelType == 'AC_HeatPump':
 		cooling_system_type = "HEAT_PUMP"
 		heating_system_type = ''
 		graphType = 'out_super_house_cool'
+		system_type_name = 'Heat Pump'
 	elif modelType == 'Waterheater':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = 'RESISTANCE'
@@ -60,7 +66,14 @@ def runGld(modelType):
 
 	with open('in_super_house.glm', 'r') as myfile:
 	    data=myfile.read()
-	    # .replace('\n', '')
+
+
+	    """ 
+	    SUPER HOUSE OBJECT BELOW
+	    The following is the house model, it is inserted into the .glm that is run in any situation. 
+	    If you would like to edit the properties of the house, please edit the text below.
+	    	
+	    """
 	    data = data + ("""\nobject house {\n\tglass_type 2;\n\tcooling_COP 3.8;\n\thvac_breaker_rating 1000;\t
 		cooling_system_type """+cooling_system_type+""";\t
 		total_thermal_mass_per_floor_area 3.504;\t
@@ -93,30 +106,31 @@ def runGld(modelType):
 
 	os.system('gridlabd '+'temp_super_house.glm')
 	os.remove('temp_super_house.glm')
-	return graphHandler(graphType, heating_system_type, cooling_system_type)
+	return graphHandler(graphType, heating_system_type, cooling_system_type, system_type_name)
 
-def graphHandler(graphType, heating_system_type = None, cooling_system_type = None):
+def graphHandler(graphType, heating_system_type = None, cooling_system_type = None, system_type_name = None):
+	location = getCity()
 	if graphType == 'out_super_house_heat':
-		plotLoadHouseHeat(heating_system_type)
+		plotLoadHouseHeat(heating_system_type, system_type_name, location)
 		plotTemp()
 	if graphType == 'out_super_house_cool':
-		plotLoadHouseCool(cooling_system_type)
+		plotLoadHouseCool(cooling_system_type, system_type_name, location)
 		plotTemp()
 	elif graphType == 'waterheater':
-		plotLoadWaterheater()
+		plotLoadWaterheater(location)
 	elif graphType == 'EV':
-		plotLoadEV()
+		plotLoadEV(location)
 	elif graphType == 'Refrigerator':
-		plotFridge()
+		plotFridge(location)
 	elif graphType == 'clotheswasher':
-		plotClotheswasher()
+		plotClotheswasher(location)
 	elif graphType =='dryer':
-		plotDryer()
+		plotDryer(location)
 	elif graphType == 'freezer':
-		plotFreezer()
+		plotFreezer(location)
 
 
-def plotLoadHouseHeat(heating_system_type):
+def plotLoadHouseHeat(heating_system_type, system_type_name, location):
 	# Get the data
 	fileOb = open('out_super_house.csv')
 	for x in range(8):
@@ -132,14 +146,14 @@ def plotLoadHouseHeat(heating_system_type):
 	ax = plt.gcf().axes[0]
 	ax.xaxis.set_major_formatter(formatter)
 	plt.gcf().autofmt_xdate(rotation=45)
-	plt.suptitle('New Years Day, Huntsville, AL, ' + heating_system_type +' Heating System')
-	plt.title('Path to raw data is installation directory', fontsize =10 )
+	plt.suptitle(location +' ' + system_type_name +' Heating System')
+	plt.title('Path to raw data is in '+ _myDir, fontsize =10 )
 	plt.legend()
 	plt.xlabel('Time Stamp')
 	plt.ylabel('Demand (kW)')
 	plt.show()
 
-def plotLoadHouseCool(cooling_system_type):
+def plotLoadHouseCool(cooling_system_type, system_type_name, location):
 		# Get the data
 	fileOb = open('out_super_house.csv')
 	for x in range(8):
@@ -155,14 +169,14 @@ def plotLoadHouseCool(cooling_system_type):
 	ax = plt.gcf().axes[0]
 	ax.xaxis.set_major_formatter(formatter)
 	plt.gcf().autofmt_xdate(rotation=45)
-	plt.suptitle('New Years Day, Huntsville, AL, ' + cooling_system_type+' Cooling System')
-	plt.title('Path to raw data is installation directory', fontsize =10 )
+	plt.suptitle(location +' ' + system_type_name +' Cooling System')
+	plt.title('Path to raw data is in '+ _myDir, fontsize =10 )
 	plt.legend()
 	plt.xlabel('Time Stamp')
 	plt.ylabel('Demand (kW)')
 	plt.show()
 
-def plotLoadWaterheater():
+def plotLoadWaterheater(location):
 	fileOb = open('out_super_house_waterheater.csv')
 	for x in range(8):
 		# Burn the headers.
@@ -176,14 +190,14 @@ def plotLoadWaterheater():
 	ax = plt.gcf().axes[0]
 	ax.xaxis.set_major_formatter(formatter)
 	plt.gcf().autofmt_xdate(rotation=45)
-	plt.suptitle('New Years Day, Huntsville, AL, waterheater load in (kW)')
-	plt.title('Path to raw data is installation directory', fontsize =10 )
+	plt.suptitle(location +' waterheater load in (kW)')
+	plt.title('Path to raw data is in '+ _myDir, fontsize =10 )
 	plt.legend()
 	plt.xlabel('Time Stamp')
 	plt.ylabel('Demand (kW)')
 	plt.show()
 
-def plotLoadEV():
+def plotLoadEV(location):
 	fileOb = open('out_super_house_EV.csv')
 	for x in range(8):
 		# Burn the headers.
@@ -197,14 +211,14 @@ def plotLoadEV():
 	ax = plt.gcf().axes[0]
 	ax.xaxis.set_major_formatter(formatter)
 	plt.gcf().autofmt_xdate(rotation=45)
-	plt.suptitle('New Years Day, Huntsville, AL, EV load in (W)')
-	plt.title('Path to raw data is installation directory', fontsize =10 )
+	plt.suptitle(location +' EV load in (W)')
+	plt.title('Path to raw data is in '+ _myDir, fontsize =10 )
 	plt.legend()
 	plt.xlabel('Time Stamp')
 	plt.ylabel('Demand (W)')
 	plt.show()
 
-def plotFridge():
+def plotFridge(location):
 	fileOb = open('out_load_fridge.csv')
 	for x in range(8):
 		# Burn the headers.
@@ -218,14 +232,14 @@ def plotFridge():
 	ax = plt.gcf().axes[0]
 	ax.xaxis.set_major_formatter(formatter)
 	plt.gcf().autofmt_xdate(rotation=45)
-	plt.suptitle('New Years Day, Huntsville, AL, Fridge load in (kW)')
-	plt.title('Path to raw data is installation directory', fontsize =10 )
+	plt.suptitle(location + ' Fridge load in (kW)')
+	plt.title('Path to raw data is in '+ _myDir, fontsize =10 )
 	plt.legend()
 	plt.xlabel('Time Stamp')
 	plt.ylabel('Demand (kW)')
 	plt.show()
 
-def plotFreezer():
+def plotFreezer(location):
 	fileOb = open('out_load_freezer.csv')
 	for x in range(8):
 		# Burn the headers.
@@ -239,14 +253,14 @@ def plotFreezer():
 	ax = plt.gcf().axes[0]
 	ax.xaxis.set_major_formatter(formatter)
 	plt.gcf().autofmt_xdate(rotation=45)
-	plt.suptitle('New Years Day, Huntsville, AL, Freezer load in (kW)')
-	plt.title('Path to raw data is installation directory', fontsize =10 )
+	plt.suptitle(location + ' Freezer load in (kW)')
+	plt.title('Path to raw data is in '+ _myDir, fontsize =10 )
 	plt.legend()
 	plt.xlabel('Time Stamp')
 	plt.ylabel('Demand (kW)')
 	plt.show()
 
-def plotClotheswasher():
+def plotClotheswasher(location):
 	fileOb = open('out_load_clotheswasher.csv')
 	for x in range(8):
 		# Burn the headers.
@@ -260,14 +274,14 @@ def plotClotheswasher():
 	ax = plt.gcf().axes[0]
 	ax.xaxis.set_major_formatter(formatter)
 	plt.gcf().autofmt_xdate(rotation=45)
-	plt.suptitle('New Years Day, Huntsville, AL, Clotheswasher load in (kW)')
-	plt.title('Path to raw data is installation directory', fontsize =10 )
+	plt.suptitle(location + ' Clotheswasher load in (kW)')
+	plt.title('Path to raw data is in '+ _myDir, fontsize =10 )
 	plt.legend()
 	plt.xlabel('Time Stamp')
 	plt.ylabel('Demand (kW)')
 	plt.show()
 
-def plotDryer():
+def plotDryer(location):
 	fileOb = open('out_load_dryer.csv')
 	for x in range(8):
 		# Burn the headers.
@@ -281,8 +295,8 @@ def plotDryer():
 	ax = plt.gcf().axes[0]
 	ax.xaxis.set_major_formatter(formatter)
 	plt.gcf().autofmt_xdate(rotation=45)
-	plt.suptitle('New Years Day, Huntsville, AL, Dryer load in (kW)')
-	plt.title('Path to raw data is installation directory', fontsize =10 )
+	plt.suptitle(location + ' Dryer load in (kW)')
+	plt.title('Path to raw data is in '+ _myDir, fontsize =10 )
 	plt.legend()
 	plt.xlabel('Time Stamp')
 	plt.ylabel('Demand (kW)')
@@ -310,6 +324,15 @@ def plotTemp():
 	plt.xlabel('Time Stamp')
 	plt.ylabel('Temperature (degF)')
 	plt.show()
+
+
+def getCity():
+	df = pvlib.tmy.readtmy2('inc_climate.tmy2')
+	city = df[1]['City']
+	state = df[1]['State']
+	return (city + ", " + state)
+
+
 
 if __name__ == '__main__':
 	#TODO: warning text 'Illegal input. Usage: "python LoadSimGLD <load_type>" where load_type is one of ...
