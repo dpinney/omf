@@ -9,6 +9,7 @@ import re
 from datetime import datetime
 from voltageDropVoltageViz import drawPlot
 import sys
+from shutil import copyfile
 
 
 def ConvertAndwork(filePath, gb_on_off='on'):
@@ -24,8 +25,21 @@ def ConvertAndwork(filePath, gb_on_off='on'):
 			gb_status = 'false'
 		print("Gridballast is "+gb_on_off)
 		inFeeder = json.load(inFile)
+		attachments = inFeeder.get('attachments',[])
+		include_files = attachments.keys()
+		if 'schedules.glm' in include_files:
+			with open('schedules.glm', 'w') as outFile:
+				outFile.write(attachments['schedules.glm'].encode('utf8'))
+			with open('_voltViz/schedules.glm', 'w') as outFile:
+				outFile.write(attachments['schedules.glm'].encode('utf8'))
+		if 'schedulesResponsiveLoads.glm' in include_files:
+			with open('schedulesResponsiveLoads.glm', 'w') as outFile:
+				outFile.write(attachments['schedulesResponsiveLoads.glm'].encode('utf8'))
+			with open('_voltViz/schedulesResponsiveLoads.glm', 'w') as outFile:
+				outFile.write(attachments['schedulesResponsiveLoads.glm'].encode('utf8'))
 		inFeeder['tree'][u'01'] = {u'omftype': u'#include', u'argument': u'"hot_water_demand1.glm"'}
 		inFeeder['tree'][u'011'] = {u'class': u'player', u'double': u'value'}# add in manually for now
+		inFeeder['tree'][u'0111'] = {u'object': u'voltdump', u'filename': u'voltDump.csv'}
 		name_volt_dict ={}
 		solar_meters=[]
 		wind_obs=[]
@@ -78,6 +92,8 @@ def ConvertAndwork(filePath, gb_on_off='on'):
 		for i in recorderw:
 			addedString = addedString + i
 		outFile.write(feeder.sortedWrite(inFeeder['tree'])+addedString)
+
+	copyfile('outGLM.glm', '_voltViz/outGLM.glm')
 
 	os.system(omf.omfDir +'/solvers/gridlabd_gridballast/local_gd/bin/gridlabd outGLM.glm')
 
@@ -185,7 +201,7 @@ def writeResults(offendersGen):
 	#Write Dataframe to .csv
 	df.to_csv('Results.csv')
 
-def _debugging(filePath, gb_on_off='on'):
+def _debugging(filePath, gb_on_off='on', keepFiles=True):
 	#Begin Main Function
 	name_volt_dict = ConvertAndwork(filePath, gb_on_off)
 	offendersGen = ListOffenders(name_volt_dict)
@@ -193,35 +209,38 @@ def _debugging(filePath, gb_on_off='on'):
 	# Open Distnetviz on glm
 	omf.distNetViz.viz('outGLM.glm') #or model.omd
 	# Visualize Voltage Regulation
-	voltRegViz('outGLM.glm')
+	# voltRegViz('outGLM.glm')
 	# Remove Feeder and out files
 	dir_path = os.path.dirname(os.path.realpath(__file__))
-	for file in os.listdir(dir_path):
-		if 'out' in file or file == 'voltDump.csv':
-			os.remove(file)
+	if keepFiles == False:
+		for file in os.listdir(dir_path):
+			if 'out' in file or file == 'voltDump.csv':
+				os.remove(file)
 
 
 
-def voltRegViz(FNAME):
-	chart = drawPlot(FNAME, neatoLayout=True, edgeCol=None, nodeLabs=None, edgeLabs=None, nodeCol = "perUnitVoltage", customColormap=True, rezSqIn=400)
-	chart.savefig("./VOLTOUT.png")
-	validFiles = ['_minutes.PLAYER', 'climate.tmy2', 'frequency.PLAYER1', "hot_water_demand1.glm", 'schedulesResponsiveLoads.glm']
-	dir_path = os.path.dirname(os.path.realpath(__file__))
-
-	#remove unecessary files from visualization directory
-	for file in os.listdir(pJoin(dir_path, '_voltViz')):
-		if file not in validFiles : 
-			os.remove(pJoin('_voltViz', file))
+# def voltRegViz(FNAME):
+# 	chart = drawPlot(FNAME, neatoLayout=True, edgeCol=None, nodeLabs=None, edgeLabs=None, nodeCol = "perUnitVoltage", customColormap=True, rezSqIn=400)
+# 	chart.savefig("./VOLTOUT.png")
+# 	validFiles = ['_minutes.PLAYER', 'climate.tmy2', 'frequency.PLAYER1', "hot_water_demand1.glm", 'schedulesResponsiveLoads.glm']
+# 	dir_path = os.path.dirname(os.path.realpath(__file__))
+# 	#remove unecessary files from visualization directory
+# 	for file in os.listdir(pJoin(dir_path, '_voltViz')):
+# 		if file not in validFiles : 
+# 			os.remove(pJoin('_voltViz', file))
 	
 if __name__ == '__main__':
+	dir_path = os.path.dirname(os.path.realpath(__file__))
+
 	if len(sys.argv) == 1:
-		_debugging('/Users/tuomastalvitie/Desktop/gridballast_gld_simulations/Feeders/UCS_Egan_Housed_Solar.omd', gb_on_off='off')
+		_debugging(pJoin(dir_path, 'Olin Barre GH 20Perc Solar.omd copy'), gb_on_off='off', keepFiles=True)
 	else:
 		#Parse Command Line
 		parser = argparse.ArgumentParser(description='Converts an OMD to GLM and runs it on gridlabd')
 		parser.add_argument('file_path', metavar='base', type=str,
 		                    help='Path to OMD. Put in quotes.')
 		parser.add_argument('gridballast_on_off', metavar='gb', type=str, help='turn gb on or off, type on or off')
+			parse.add_argument('keepFiles', metavar='files', type=bool, help='to keep output files enter true, otherwise false')
 		args = parser.parse_args()
 		filePath = args.file_path
 		gb_on_off = args.gridballast_on_off
