@@ -1,7 +1,7 @@
 # A Dockerfile for running the Open Modeling Framework
 # Tested on 2018-11-08 with Docker Version 18.06.1-ce-mac73 (26764)
 FROM ubuntu:16.04
-MAINTAINER <david.pinney@nreca.coop>
+LABEL maintainer="<david.pinney@nreca.coop>"
 
 # Install and setup OMF reqs
 RUN apt-get -y update && apt-get install -y python sudo vim
