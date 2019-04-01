@@ -211,6 +211,30 @@ def samRun():
 	outData["Consumption"]["DG"] = ssc.ssc_data_get_array(dat, "ac")
 	return json.dumps(outData)
 
+@web.app.route('/transmissionMatToOmt', methods=['POST'])
+def transmissionMatToOmt():
+	'''Data Params: {mat: [file], other_inputs: see source}
+	OMF function: omf.models.transmission.* or omf.network.*
+	Runtime: maybe a couple minutes.
+	Result: Convert the .m matpower model to an OMT (JSON-based) model. Return the model.'''
+	return 'Not Implemented Yet'
+
+@web.app.route('/transmissionPowerflow', methods=['POST'])
+def transmissionPowerflow():
+	'''Data Params: {omt: [file], other_inputs: see source}
+	OMF function: omf.models.transmission.* or omf.network.*
+	Runtime: a couple seconds.
+	Result: TBD. '''
+	return 'Not Implemented Yet'
+
+@web.app.route('/transmissionViz', methods=['POST'])
+def transmissionPowerflow():
+	'''Data Params: {omt: [file], other_inputs: see source}
+	OMF function: omf.models.transmission.* or omf.network.*
+	Runtime: a couple seconds.
+	Result: HTML interface visualizing the .omt file. '''
+	return 'Not Implemented Yet'
+
 def serve():
 	server = WSGIServer(('0.0.0.0', 5100), web.app)
 	server.serve_forever()
