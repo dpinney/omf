@@ -214,7 +214,7 @@ def samRun():
 @web.app.route('/transmissionMatToOmt', methods=['POST'])
 def transmissionMatToOmt():
 	'''Data Params: {mat: [file], other_inputs: see source}
-	OMF function: omf.models.transmission.* or omf.network.*
+	OMF function: omf.network.parse()
 	Runtime: maybe a couple minutes.
 	Result: Convert the .m matpower model to an OMT (JSON-based) model. Return the model.'''
 	return 'Not Implemented Yet'
@@ -222,15 +222,15 @@ def transmissionMatToOmt():
 @web.app.route('/transmissionPowerflow', methods=['POST'])
 def transmissionPowerflow():
 	'''Data Params: {omt: [file], other_inputs: see source}
-	OMF function: omf.models.transmission.* or omf.network.*
-	Runtime: a couple seconds.
+	OMF function: omf.models.transmission.new and omf.models.transmission.work
+	Runtime: tens of seconds.
 	Result: TBD. '''
 	return 'Not Implemented Yet'
 
 @web.app.route('/transmissionViz', methods=['POST'])
 def transmissionPowerflow():
 	'''Data Params: {omt: [file], other_inputs: see source}
-	OMF function: omf.models.transmission.* or omf.network.*
+	OMF function: omf.network.viz()
 	Runtime: a couple seconds.
 	Result: HTML interface visualizing the .omt file. '''
 	return 'Not Implemented Yet'
