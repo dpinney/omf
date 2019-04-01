@@ -244,7 +244,7 @@ def voltRegViz(FNAME):
 if __name__ == '__main__':
 	dir_path = os.path.dirname(os.path.realpath(__file__))
 	if len(sys.argv) == 1:
-		_debugging(pJoin(dir_path, 'Olin Barre GH.omd copy'), gb_on_off='on', area=2045, keepFiles=True)
+		_debugging(pJoin(dir_path, 'Olin Barre GH.omd'), gb_on_off='on', area=2000, keepFiles=True)
 	else:
 		#Parse Command Line
 		parser = argparse.ArgumentParser(description='Converts an OMD to GLM and runs it on gridlabd')
@@ -252,10 +252,11 @@ if __name__ == '__main__':
 		                    help='Path to OMD. Put in quotes.')
 		parser.add_argument('gridballast_on_off', metavar='gb', type=str, help='turn gb on or off, type on or off')
 		parser.add_argument('area_of_rooftop_solar', metavar='roof', type=int, help='enter integer size in sqft of rooftop solar')
-		parse.add_argument('keepFiles', metavar='files', type=bool, help='to keep output files enter true, otherwise false')
+		parser.add_argument('keepFiles', metavar='files', type=bool, help='to keep output files enter true, otherwise false')
 		args = parser.parse_args()
 		filePath = args.file_path
 		gb_on_off = args.gridballast_on_off
 		area=args.area_of_rooftop_solar
-		_debugging(filePath)
+		keepFiles = args.keepFiles
+		_debugging(filePath, gb_on_off, area, keepFiles)
 
