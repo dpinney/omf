@@ -112,10 +112,10 @@ def graphHandler(graphType, heating_system_type = None, cooling_system_type = No
 	location = getCity()
 	if graphType == 'out_super_house_heat':
 		plotLoadHouseHeat(heating_system_type, system_type_name, location)
-		plotTemp()
+		plotTemp(location)
 	if graphType == 'out_super_house_cool':
 		plotLoadHouseCool(cooling_system_type, system_type_name, location)
-		plotTemp()
+		plotTemp(location)
 	elif graphType == 'waterheater':
 		plotLoadWaterheater(location)
 	elif graphType == 'EV':
@@ -304,14 +304,14 @@ def plotDryer(location):
 
 
 
-def plotTemp():
+def plotTemp(location):
 	# Get the data
 	fileOb = open('out_super_house.csv')
 	for x in range(8):
 		# Burn the headers.
 		fileOb.readline()
 	data = list(csv.DictReader(fileOb))
-	plt.title('New Years Day, Huntsville, AL, Temperatures')
+	plt.title(location + ' Temperatures')
 	formatter = mdates.DateFormatter('%Y-%m-%d')
 	dates = mdates.datestr2num([''.join(x.get('# timestamp')) for x in data])
 	plt.plot_date(dates, [float(x.get(' air_temperature', 0.0)) for x in data], '-', label="Indoor")

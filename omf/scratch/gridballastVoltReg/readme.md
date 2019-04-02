@@ -27,7 +27,7 @@ gridballastVoltReg requires the following:<br />
 
 To install gridballastVoltReg, please download from .......
 
-To run, simply open a terminal in the gridballastVoltReg directory and type in your terminal `python voltControlUtilityScale.py <path_to_omd> <gridballast status, ('on' or 'off')>` for utility scale simulation. For the distributed solar case `python voltControlUtilityScale.py <path_to_omd> <gridballast status, ('on' or 'off')> <(rooftop solar size in square feet)>`
+To run, simply open a terminal in the gridballastVoltReg directory and type in your terminal `python voltControlUtilityScale.py <path_to_omd> <gridballast status ('on' or 'off')> <keep files (True/False)>` for utility scale simulation. For the distributed solar case `python voltControlUtilityScale.py <path_to_omd> <gridballast status, ('on' or 'off')> <(rooftop solar size in square feet)> <keep files (True/False)>`
 
 
 You will know the simulation is working correctly when you see the GridLAB-D outputs for each timestep.

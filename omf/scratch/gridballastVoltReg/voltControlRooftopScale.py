@@ -20,8 +20,17 @@ def ConvertAndwork(filePath, gb_on_off='on', area=500):
 		print ("gridballast is "+gb_on_off)
 		area = str(area)
 		inFeeder = json.load(inFile)
+		attachments = inFeeder.get('attachments',[])
+		include_files = attachments.keys()
+		if 'schedules.glm' in include_files:
+			with open('schedules.glm', 'w') as outFile:
+				outFile.write(attachments['schedules.glm'].encode('utf8'))
+		if 'schedulesResponsiveLoads.glm' in include_files:
+			with open('schedulesResponsiveLoads.glm', 'w') as outFile:
+				outFile.write(attachments['schedulesResponsiveLoads.glm'].encode('utf8'))
 		inFeeder['tree'][u'01'] = {u'omftype': u'#include', u'argument': u'"hot_water_demand1.glm"'}
 		inFeeder['tree'][u'011'] = {u'class': u'player', u'double': u'value'}# add in manually for now
+		inFeeder['tree'][u'0111'] = {u'object': u'voltdump', u'filename': u'voltDump.csv'}
 		name_volt_dict ={}
 		solar_meters=[]
 		wind_obs=[]
@@ -52,8 +61,8 @@ def ConvertAndwork(filePath, gb_on_off='on', area=500):
 			if 'object' in value and (value['object']== 'house'):
 				houseMeter = value['parent']
 				houseName = value['name']
-				houseLon = value['longitude']
-				houseLat = value['latitude']
+				houseLon = str(value['longitude'])
+				houseLat = str(value['latitude'])
 				rooftopSolar_inverter = houseName+"_rooftop_inverter;"
 				rooftopSolars.append("object solar {\n\tname "+houseName+"_rooftopSolar;\n\tparent "+rooftopSolar_inverter+"\n\tgenerator_status ONLINE;\n\tefficiency 0.2;\n\tlongitude "+houseLon+";\n\tgenerator_mode SUPPLY_DRIVEN;\n\tpanel_type SINGLE_CRYSTAL_SILICON;\n\tlatitude "+houseLat+";\n\tarea "+area+";\n\t};\n")
 				rooftopInverters.append("object inverter {\n\tphases ABCN;\n\tpower_factor 1.0;\n\tname "+rooftopSolar_inverter+"\n\tparent "+houseMeter+";\n\tinverter_type PWM;\n\tlongitude "+houseLon+";\n\tgenerator_mode CONSTANT_PF;\n\tlatitude "+houseLat+";\n\t};\n")
@@ -71,7 +80,7 @@ def ConvertAndwork(filePath, gb_on_off='on', area=500):
 		#Create recorder for substation powerflow
 		recordersub=("object recorder {\n\tinterval "+str(interval)+";\n\tproperty measured_real_power;\n\tfile out_substation_power.csv;\n\tparent "+str(substation)+";\n\t};\n")
 		# Create Create a recorder for a solar roof object, just to record powerflow over that unit
-		recorderSolarRoof = ("object recorder {\n\tinterval "+str(interval)+";\n\tproperty measured_real_power;\n\tfile out_standard_solar_roof.csv;\n\tparent nreca_synthetic_meter_11283;\n\t};\n")
+		# recorderSolarRoof = ("object recorder {\n\tinterval "+str(interval)+";\n\tproperty measured_real_power;\n\tfile out_standard_solar_roof.csv;\n\tparent nreca_synthetic_meter_11283;\n\t};\n")
 		# Create arrays of solar objects and wind objects to attach recorders to. 
 		recorders = []
 		recorderw=[]
@@ -82,7 +91,8 @@ def ConvertAndwork(filePath, gb_on_off='on', area=500):
 
 	with open('outGLM_rooftop.glm', "w") as outFile:
 		# Write collectors and recorders to end
-		addedString = collectorwat+collectorz+collectorh+recordersub+collectorRoof+recorderSolarRoof
+		# addedString = collectorwat+collectorz+collectorh+recordersub+collectorRoof+recorderSolarRoof
+		addedString = collectorwat+collectorz+collectorh+recordersub+collectorRoof
 		for i in recorders:
 			addedString = addedString+i
 		for i in recorderw:
@@ -204,7 +214,7 @@ def writeResults(offendersGen):
 
 
 
-def _debugging(filePath, gb_on_off='on', area=500):
+def _debugging(filePath, gb_on_off='on', area=500, keepFiles=True):
 	#Begin Main Function
 	name_volt_dict = ConvertAndwork(filePath, gb_on_off, area)
 	offendersGen = ListOffenders(name_volt_dict)
@@ -212,11 +222,12 @@ def _debugging(filePath, gb_on_off='on', area=500):
 	# Open Distnetviz on glm
 	omf.distNetViz.viz('outGLM_rooftop.glm') #or model.omd
 	# Visualize Voltage Regulation
-	voltRegViz('outGLM_rooftop.glm')
+	# voltRegViz('outGLM_rooftop.glm')
 	# 	Remove Feeder
-	for file in os.listdir(dir_path):
-		if 'out' in file or file == 'voltDump.csv':
-			os.remove(file)
+	if keepFiles == False:
+		for file in os.listdir(dir_path):
+			if 'out' in file or file == 'voltDump.csv':
+				os.remove(file)
 
 
 
@@ -231,8 +242,9 @@ def voltRegViz(FNAME):
 			os.remove(pJoin('_voltViz', file))
 
 if __name__ == '__main__':
+	dir_path = os.path.dirname(os.path.realpath(__file__))
 	if len(sys.argv) == 1:
-		_debugging('/Users/tuomastalvitie/Desktop/gridballast_gld_simulations/Feeders/UCS_Egan_Housed_Solar_rooftop.omd', gb_on_off='on', area=2045)
+		_debugging(pJoin(dir_path, 'Olin Barre GH.omd'), gb_on_off='on', area=2000, keepFiles=True)
 	else:
 		#Parse Command Line
 		parser = argparse.ArgumentParser(description='Converts an OMD to GLM and runs it on gridlabd')
@@ -240,9 +252,11 @@ if __name__ == '__main__':
 		                    help='Path to OMD. Put in quotes.')
 		parser.add_argument('gridballast_on_off', metavar='gb', type=str, help='turn gb on or off, type on or off')
 		parser.add_argument('area_of_rooftop_solar', metavar='roof', type=int, help='enter integer size in sqft of rooftop solar')
+		parser.add_argument('keepFiles', metavar='files', type=bool, help='to keep output files enter true, otherwise false')
 		args = parser.parse_args()
 		filePath = args.file_path
 		gb_on_off = args.gridballast_on_off
 		area=args.area_of_rooftop_solar
-		_debugging(filePath)
+		keepFiles = args.keepFiles
+		_debugging(filePath, gb_on_off, area, keepFiles)
 
