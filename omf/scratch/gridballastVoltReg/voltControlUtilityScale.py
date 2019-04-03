@@ -201,7 +201,7 @@ def writeResults(offendersGen):
 	#Write Dataframe to .csv
 	df.to_csv('Results.csv')
 
-def _debugging(filePath, gb_on_off='on', keepFiles=True):
+def _debugging(filePath, gb_on_off='on', keepFiles='False'):
 	#Begin Main Function
 	name_volt_dict = ConvertAndwork(filePath, gb_on_off)
 	offendersGen = ListOffenders(name_volt_dict)
@@ -209,10 +209,10 @@ def _debugging(filePath, gb_on_off='on', keepFiles=True):
 	# Open Distnetviz on glm
 	omf.distNetViz.viz('outGLM.glm') #or model.omd
 	# Visualize Voltage Regulation
-	voltRegViz('outGLM.glm')
+	# voltRegViz('outGLM.glm')
 	# Remove Feeder and out files
 	dir_path = os.path.dirname(os.path.realpath(__file__))
-	if keepFiles == False:
+	if keepFiles == 'False':
 		for file in os.listdir(dir_path):
 			if 'out' in file or file == 'voltDump.csv':
 				os.remove(file)
@@ -225,6 +225,7 @@ def voltRegViz(FNAME):
 	validFiles = ['_minutes.PLAYER', 'climate.tmy2', 'frequency.PLAYER1', "hot_water_demand1.glm", 'schedulesResponsiveLoads.glm']
 	dir_path = os.path.dirname(os.path.realpath(__file__))
 	#remove unecessary files from visualization directory
+
 	for file in os.listdir(pJoin(dir_path, '_voltViz')):
 		if file not in validFiles : 
 			os.remove(pJoin('_voltViz', file))
@@ -233,18 +234,20 @@ if __name__ == '__main__':
 	dir_path = os.path.dirname(os.path.realpath(__file__))
 
 	if len(sys.argv) == 1:
-		_debugging(pJoin(dir_path, 'Olin Barre GH 20Perc Solar.omd'), gb_on_off='off', keepFiles=True)
+		_debugging(pJoin(dir_path, 'Olin Barre GH 20Perc Solar.omd'), gb_on_off='off', keepFiles='True')
 	else:
+		print len(sys.argv)
 		#Parse Command Line
 		parser = argparse.ArgumentParser(description='Converts an OMD to GLM and runs it on gridlabd')
 		parser.add_argument('file_path', metavar='base', type=str,
 		                    help='Path to OMD. Put in quotes.')
 		parser.add_argument('gridballast_on_off', metavar='gb', type=str, help='turn gb on or off, type on or off')
-		parser.add_argument('keepFiles', metavar='files', type=bool, help='to keep output files enter true, otherwise false')
+		parser.add_argument('keepFiles', metavar='files', type=str, help='to keep output files enter true, otherwise false')
 		args = parser.parse_args()
 		filePath = args.file_path
 		gb_on_off = args.gridballast_on_off
 		keepFiles = args.keepFiles
+		print filePath, gb_on_off, keepFiles
 		_debugging(filePath, gb_on_off, keepFiles)
 
 

@@ -88,6 +88,8 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	warnings.filterwarnings("ignore")
 	if path.endswith('.glm'):
 		tree = omf.feeder.parse(path)
+		print tree
+		print type(tree)
 		attachments = []
 	elif path.endswith('.omd'):
 		omd = json.load(open(path))

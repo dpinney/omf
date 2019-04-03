@@ -214,7 +214,7 @@ def writeResults(offendersGen):
 
 
 
-def _debugging(filePath, gb_on_off='on', area=500, keepFiles=True):
+def _debugging(filePath, gb_on_off='on', area=500, keepFiles='True'):
 	#Begin Main Function
 	name_volt_dict = ConvertAndwork(filePath, gb_on_off, area)
 	offendersGen = ListOffenders(name_volt_dict)
@@ -244,15 +244,21 @@ def voltRegViz(FNAME):
 if __name__ == '__main__':
 	dir_path = os.path.dirname(os.path.realpath(__file__))
 	if len(sys.argv) == 1:
-		_debugging(pJoin(dir_path, 'Olin Barre GH.omd'), gb_on_off='on', area=2000, keepFiles=True)
+		for file in os.listdir(dir_path):
+			if 'out' in file or file == 'voltDump.csv':
+				os.remove(file)
+		_debugging(pJoin(dir_path, 'Olin Barre GH.omd'), gb_on_off='on', area=2000, keepFiles='True')
 	else:
 		#Parse Command Line
+		for file in os.listdir(dir_path):
+			if 'out' in file or file == 'voltDump.csv':
+				os.remove(file)
 		parser = argparse.ArgumentParser(description='Converts an OMD to GLM and runs it on gridlabd')
 		parser.add_argument('file_path', metavar='base', type=str,
 		                    help='Path to OMD. Put in quotes.')
 		parser.add_argument('gridballast_on_off', metavar='gb', type=str, help='turn gb on or off, type on or off')
 		parser.add_argument('area_of_rooftop_solar', metavar='roof', type=int, help='enter integer size in sqft of rooftop solar')
-		parser.add_argument('keepFiles', metavar='files', type=bool, help='to keep output files enter true, otherwise false')
+		parser.add_argument('keepFiles', metavar='files', type=str, help='to keep output files enter true, otherwise false')
 		args = parser.parse_args()
 		filePath = args.file_path
 		gb_on_off = args.gridballast_on_off
