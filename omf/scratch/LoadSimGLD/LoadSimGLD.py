@@ -40,26 +40,32 @@ def runGld(modelType):
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = 'RESISTANCE'
 		graphType = 'waterheater'
+		system_type_name = None
 	elif modelType == 'EV':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = 'RESISTANCE'
 		graphType = 'EV'
+		system_type_name = None
 	elif modelType =='Refrigerator':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = 'RESISTANCE'
 		graphType = 'Refrigerator'
+		system_type_name = None
 	elif modelType == 'Clotheswasher':
 		cooling_system_type= "ELECTRIC"
 		heating_system_type = "RESISTANCE"
 		graphType = 'clotheswasher'
+		system_type_name = None
 	elif modelType == 'Dryer':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = "RESISTANCE"
 		graphType = 'dryer'
+		system_type_name = None
 	elif modelType == 'Freezer':
 		cooling_system_type = "ELECTRIC"
 		heating_system_type = "RESISTANCE"
 		graphType = 'freezer'
+		system_type_name = None
 
 
 
@@ -338,7 +344,7 @@ if __name__ == '__main__':
 	#TODO: warning text 'Illegal input. Usage: "python LoadSimGLD <load_type>" where load_type is one of ...
 	#Parse Command Line
 	if len(sys.argv) == 1:
-		modelType = 'AC_HeatPump'
+		modelType = 'Waterheater'
 	else:
 		parser = argparse.ArgumentParser(description='Simulates heat/cool power use on a canonical .glm single house model')
 		parser.add_argument(
