@@ -258,7 +258,7 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 							vals.pop(i)
 					for pos,key2 in enumerate(keys):
 						protDevFinalStatus[key2][phase] = vals[pos]
-	print protDevFinalStatus
+	#print protDevFinalStatus
 
 	#compare initial and final states of protective devices
 	#quick compare to see if they are equal
@@ -661,7 +661,7 @@ def _testingPlot():
 def drawTable(initialStates=None, finalStates=None):
 	#return self.log
 	html_str = """
-		<table cellpadding="0" cellspacing="0" style="width:100%">
+		<table cellpadding="0" cellspacing="0">
 			<thead>
 				<tr>
 					<th>Protective Device Name</th>
@@ -678,17 +678,21 @@ def drawTable(initialStates=None, finalStates=None):
 		row_str += "</td><td>"
 		for phase in finalStates[device].keys():
 			row_str += "Phase " + phase + " = " + finalStates[device][phase] + "</br>"
-		row_str += "</td><td>"
+		row_str += "</td>"
 		noChange = True
+		change_str = ""
 		for phase in finalStates[device].keys():
 			try:
 				if initialStates[device][phase] != finalStates[device][phase]:
-					row_str += "Phase " + phase + " : " + initialStates[device][phase] + " -> " + finalStates[device][phase] + "</br>"
+					change_str += "Phase " + phase + " : " + initialStates[device][phase] + " -> " + finalStates[device][phase] + "</br>"
 					noChange = False
 			except:
 				pass #key error...
 		if noChange:
-			row_str += "No Change"
+			row_str += "<td>No Change"
+		else:
+			row_str += "<td style=\"color: red;\">"
+			row_str += change_str
 		row_str += "</td></tr>"
 		html_str += row_str
 	html_str += """</tbody></table>"""

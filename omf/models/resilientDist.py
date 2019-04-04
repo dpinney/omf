@@ -121,6 +121,19 @@ def _testHazards():
 	# hazard.exportHazardObj("modWindFile.asc")
 	# hazard.drawHeatMap()
 
+def gen_dict_extract(key, var):
+    if hasattr(var,'iteritems'):
+        for k, v in var.iteritems():
+            if k == key:
+                yield v
+            if isinstance(v, dict):
+                for result in gen_dict_extract(key, v):
+                    yield result
+            elif isinstance(v, list):
+                for d in v:
+                    for result in gen_dict_extract(key, d):
+                        yield result
+
 def getNodePhases(obj, maxRealPhase):
 	''' Convert phase info in GridLAB-D obj (e.g. ABC) to GFM phase format (e.g. [True,True,True].'''
 	numPhases = 0
@@ -295,7 +308,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			gfmJson['generators'].append(genObj)
 	return gfmJson
 
-def genDiagram(outputDir, feederJson, damageDict, critLoads):
+def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeLabelsToAdd, generatorList):
 	# print damageDict
 	warnings.filterwarnings("ignore")
 	# Load required data.
@@ -330,7 +343,7 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads):
 	# Create and save the graphic.
 	inGraph = feeder.treeToNxGraph(tree)
 	#feeder.latLonNxGraph(nxG) # This function creates a .plt reference which can be saved here.
-	labels=False
+	labels=True
 	neatoLayout=False 
 	showPlot=False
 	plt.axis('off')
@@ -347,8 +360,13 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads):
 	else:
 		pos = {n:inGraph.node[n].get('pos',(0,0)) for n in inGraph}
 	# Draw all the edges
+
+	selected_labels = {}
 	for e in inGraph.edges():
 		edgeName = inGraph.edge[e[0]][e[1]].get('name')
+		if edgeName in edgeLabelsToAdd.keys():
+			selected_labels[e] = edgeLabelsToAdd[edgeName]
+
 		edgeColor = 'black'
 		if edgeName in damageDict:
 			if damageDict[edgeName] == 1:
@@ -377,10 +395,15 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads):
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
 		else:
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
+		
 	# Draw nodes and optional labels.
-	red_list, blue_list, grey_list  = ([] for i in range(3))
+	red_list, blue_list, grey_list, purple_list  = ([] for i in range(4))
+	for gen in generatorList:
+		name = gen[0:9]
+		purple_list.append(name)
+
 	for key in pos.keys(): # Sort keys into seperate lists. Is there a more elegant way of doing this.
-		if key not in green_list:
+		if key not in green_list and key not in purple_list:
 			load = key[2:6]
 			if key in critLoads:
 				red_list.append(key)
@@ -388,12 +411,21 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads):
 				blue_list.append(key)
 			else:
 				grey_list.append(key)
+
 	nx.draw_networkx_nodes(
 		inGraph,
 		pos, 
 		nodelist=green_list,
 		node_color='green',
 		label='Swing Buses',
+		node_size=12
+	)
+	nx.draw_networkx_nodes(
+		inGraph,
+		pos, 
+		nodelist=purple_list,
+		node_color='purple',
+		label='Generators',
 		node_size=12
 	)
 	nx.draw_networkx_nodes(
@@ -424,10 +456,20 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads):
 		nx.draw_networkx_labels(
 			inGraph,
 			pos,
-			font_color='black',
+			labels=damagedLoads,
+			font_color='white',
 			font_weight='bold',
-			font_size=0.25
+			font_size=3
 		)
+		nx.draw_networkx_edge_labels(
+			inGraph,
+			pos,
+			edge_labels=selected_labels,
+			font_color='red',
+			font_size=4
+		)
+
+	print selected_labels
 	plt.legend(loc='lower right') 
 	if showPlot: plt.show()
 	plt.savefig(pJoin(outputDir,"feederChart.png"), dpi=800, pad_inches=0.0)
@@ -566,10 +608,11 @@ def work(modelDir, inputDict):
 		line['node1_id'] = line['node1_id'] + "_bus"
 		line['node2_id'] = line['node2_id'] + "_bus"
 		line['capacity'] = 10000#Todo: set this to summer.rating.continuous (of the conductor) * nominal_voltage / 10000 to get MVA rating.
+		#NOTE: need to use id to get object in OMD, then use its config to get its conductors, then set capacity to avg of capacity attributes on each of the conductors.
 		line['construction_cost'] = float(inputDict['lineUnitCost'])
 		line['harden_cost'] = float(inputDict['hardeningUnitCost'])
 		line['switch_cost'] = float(inputDict['switchCost'])
-		line_id = line.get('id','')
+		line_id = line.get('id','') # this is equal to name in the OMD objects.
 		object_type = line.get('object','')
 		if line_id in hardCands:
 			line['can_harden'] = True
@@ -603,9 +646,38 @@ def work(modelDir, inputDict):
 	print "RUNNING 2ND GLD RUN FOR", modelDir
 	feederCopy = copy.deepcopy(feederModel)
 	lineSwitchList = []
+
+
+	edgeLabels = {}
+
+	#for gen in rdtOut['design_solution']['generators']:
+		#print gen['id'][:-4]
+
+	damagedLoads = {}
+	for scenario in rdtOut['scenario_solution']:
+		for load in scenario['loads']:
+			if load['id'] in damagedLoads.keys():
+				damagedLoads[load['id'][:-4]] += 1
+			else:
+				damagedLoads[load['id'][:-4]] = 1
+
 	for line in rdtOut['design_solution']['lines']:
-		if('switch_built' in line):
+		if('switch_built' in line and 'hardened' in line):
 			lineSwitchList.append(line['id'])
+			if (line['switch_built'] == True and line['hardened'] == True):
+				edgeLabels[line['id']] = "SH"
+			elif(line['switch_built'] == True):
+				edgeLabels[line['id']] = "S"
+			elif (line['hardened'] == True):
+				edgeLabels[line['id']] = "H"
+		elif('switch_built' in line):
+			lineSwitchList.append(line['id'])
+			if (line['switch_built'] == True):
+				edgeLabels[line['id']] = "S"
+		elif('hardened' in line):
+			if (line['hardened'] == True):
+				edgeLabels[line['id']] = "H"
+	
 	# Remove nonessential lines in second model as indicated by RDT output.
 	for key in feederCopy['tree'].keys():
 		value = feederCopy['tree'][key]
@@ -631,13 +703,19 @@ def work(modelDir, inputDict):
 		outData["secondGLD"] = str(False)
 	# Draw the feeder.
 	damageDict = {}
+	generatorList = []
+
+
+	for gen in rdtJson["generators"]:
+		generatorList.append(gen["id"][:-4])
+
 	for scenario in rdtJson["scenarios"]:
 		for line in scenario["disable_lines"]:
 			if line in damageDict:
 				damageDict[line] = damageDict[line] + 1
 			else:
 				damageDict[line] = 1
-	genDiagram(modelDir, feederModel, damageDict, critLoads)
+	genDiagram(modelDir, feederModel, damageDict, critLoads, damagedLoads, edgeLabels, generatorList)
 	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
 		outData["oneLineDiagram"] = inFile.read().encode("base64")
 	
