@@ -173,7 +173,6 @@ def convertToGFM(gfmInputTemplate, feederModel):
 		'line_codes' : [],
 		'lines' : [],
 		'lineLikeObjs' : [],
-		'ratings' : {},
 		'critical_load_met' : gfmInputTemplate.get('critical_load_met',0.98),
 		'total_load_met' : gfmInputTemplate.get('total_load_met',0.9),
 		'chance_constraint' : gfmInputTemplate.get('chance_constraint', 1.0),
@@ -187,8 +186,6 @@ def convertToGFM(gfmInputTemplate, feederModel):
 	objToFind = ['transformer', 'regulator', 'underground_line', 'overhead_line', 'fuse', 'switch']
 	lineCount = 0
 	for key, line in jsonTree.iteritems():
-		if 'rating.summer.continuous' in line.keys():
-			gfmJson['ratings'][line['name'][3:]] = line['rating.summer.continuous']
 		if 'from' in line.keys() and 'to' in line.keys():
 			gfmJson['lineLikeObjs'].append(line['name'])
 		if line.get('object','') in objToFind:
@@ -591,16 +588,34 @@ def work(modelDir, inputDict):
 	newLineCands = inputDict['newLineCandidates'].strip().replace(' ', '').split(',')
 	switchCands = inputDict['switchCandidates'].strip().replace(' ', '').split(',')
 	for line in rdtJson["lines"]:
+		line_id = line.get('id','') # this is equal to name in the OMD objects.
+		object_type = line.get('object','')
 		line['node1_id'] = line['node1_id'] + "_bus"
 		line['node2_id'] = line['node2_id'] + "_bus"
 		line_code = line["line_code"]
-		line['capacity'] = 10000#Todo: set this to summer.rating.continuous (of the conductor) * nominal_voltage / 10000 to get MVA rating.
-		#NOTE: need to use id to get object in OMD, then use its config to get its conductors, then set capacity to avg of capacity attributes on each of the conductors.
+		# Getting ratings from OMD
+		tree = omd['tree']
+		nameToIndex = {tree[key].get('name',''):key for key in tree}
+		treeOb = tree[nameToIndex[line_id]]
+		config_name = treeOb.get('configuration','')
+		config_ob = tree.get(nameToIndex[config_name], {})
+		full_rating = 0
+		for phase in ['A','B','C']:
+			cond_name = config_ob.get('conductor_' + phase, '')
+			cond_ob = tree.get(nameToIndex.get(cond_name, ''), '')
+			rating = cond_ob.get('rating.summer.continuous','')
+			try:
+				full_rating = int(rating) #TODO: replace with avg of 3 phases.
+			except:
+				pass
+		if full_rating != 0:
+			line['capacity'] = full_rating
+		else:
+			line['capacity'] = 10000
+		# Setting other line parameters.
 		line['construction_cost'] = float(inputDict['lineUnitCost'])
 		line['harden_cost'] = float(inputDict['hardeningUnitCost'])
 		line['switch_cost'] = float(inputDict['switchCost'])
-		line_id = line.get('id','') # this is equal to name in the OMD objects.
-		object_type = line.get('object','')
 		if line_id in hardCands:
 			line['can_harden'] = True
 		if line_id in switchCands:
