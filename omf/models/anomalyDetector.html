@@ -66,16 +66,16 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Data (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
-				<input id="inputFile" type="file" style="display:none" onchange="handle_files(this.files,'demandCurve','fileName')">
+				<input id="inputFile" type="file" style="display:none" onchange="handle_files(this.files,'file','fileName')">
 				<input id="file" name="file" type="hidden">
 				<div>
-					<label for="file" class="fileButton">Choose File</label>
+					<label for="inputFile" class="fileButton">Choose File</label>
 					<input id="fileName" name="fileName" value='' readonly class="uploadFileName">
 				</div>
 			</div>
 			<div class="shortInput" >
 				<label>Is the format of this file forecastLoad compliant?</label>
-				<input type="checkbox"  id="demandTempBool" name="demandTempBool" />
+				<input type="checkbox"  id="demandTempBool" name="demandTempBool" checked/>
 			</div>
 			<div class="shortInput" >
 				<label>Dependent variable column name</label>
@@ -293,6 +293,7 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 		</script>
 	</div>
+	<!--
 	<p class="reportTitle postRun" style="page-break-before:always">Neural Network</p>	
 	<div id="neuralNetPlot" class="tightContent postRun">
 		{% if allOutputDataDict['nn_pred'] %}Neural network anomaly detector was not run, as the checkbox indicating that the input data conforms to the forecastLoad data formatting requirements was not checked.<br>{% endif %}
@@ -365,6 +366,6 @@
 					"tooltip":false,
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 		</script>
-	</div>
+	</div> -->
 </body>
 </body>
