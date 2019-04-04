@@ -425,17 +425,19 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 		kwargs = {
 			'nodelist': [key],
 			'node_color': nodeColor,
-			'node_size': 12
+			'node_size': 16,
+			'linewidths': 1.0
 		}
 			
 		if not isFirst[nodeColor]:
 			kwargs['label'] = nodeLabels[nodeColor]
 			isFirst[nodeColor] = True
 
+
 		node = nx.draw_networkx_nodes(inGraph, pos, **kwargs)
-		
+
 		if key in generatorList:
-			node.set_edgecolor('purple')	
+			node.set_edgecolor('violet')	
 
 	if labels:
 		nx.draw_networkx_labels(
@@ -585,7 +587,7 @@ def work(modelDir, inputDict):
 	# Add GridLAB-D line objects and line codes in to the RDT model.
 	rdtJson["line_codes"] = gld_json_line_dump["properties"]["line_codes"]
 	rdtJson["lines"] = gld_json_line_dump["properties"]["lines"]
-	hardCands = list(set(gfmJson['lineLikeObjs']) - set(inputDict['excludeFromHardening']))
+	hardCands = list(set(gfmJson['lineLikeObjs']) - set(inputDict['hardeningCandidates']))
 	newLineCands = inputDict['newLineCandidates'].strip().replace(' ', '').split(',')
 	switchCands = inputDict['switchCandidates'].strip().replace(' ', '').split(',')
 	for line in rdtJson["lines"]:
@@ -721,8 +723,7 @@ def new(modelDir):
 		"dgUnitCost": "1000000.0",
 		"hardeningUnitCost": "10.0",
 		"maxDGPerGenerator": "1.0",
-		#"hardeningCandidates": "A_node701-702,A_node702-705,A_node702-713,A_node702-703,A_node703-727,A_node703-730,A_node704-714,A_node704-720,A_node705-742,A_node705-712,A_node706-725,A_node707-724,A_node707-722,A_node708-733,A_node708-732,A_node709-731,A_node709-708,A_node710-735,A_node710-736,A_node711-741,A_node711-740,A_node713-704,A_node714-718,A_node720-707,A_node720-706,A_node727-744,A_node730-709,A_node733-734,A_node734-737,A_node734-710,A_node737-738,A_node744-728,A_node781-701,A_node744-729,B_node701-702,B_node702-705,B_node702-713,B_node702-703,B_node703-727,B_node703-730,B_node704-714,B_node704-720,B_node705-742,B_node705-712,B_node706-725,B_node707-724,B_node707-722,B_node708-733,B_node708-732,B_node709-731,B_node709-708,B_node710-735,B_node710-736,B_node711-741,B_node711-740,B_node713-704,B_node714-718,B_node720-707,B_node720-706,B_node727-744,B_node730-709,B_node733-734,B_node734-737,B_node734-710,B_node737-738,B_node738-711,B_node744-728,B_node781-701,B_node744-729,C_node701-702,C_node702-705,C_node702-713,C_node702-703,C_node703-727,C_node703-730,C_node704-714,C_node704-720,C_node705-742,C_node705-712,C_node706-725,C_node707-724,C_node707-722,C_node708-733,C_node708-732,C_node709-731,C_node709-708,C_node710-735,C_node710-736,C_node711-741,C_node711-740,C_node713-704,C_node714-718,C_node720-707,C_node720-706,C_node727-744,C_node730-709,C_node733-734,C_node734-737,C_node734-710,C_node737-738,C_node738-711,C_node744-728,C_node781-701,C_node744-729",
-		"excludeFromHardening": "A_node701-702",
+		"hardeningCandidates": "A_node701-702",
 		"newLineCandidates": "TIE_A_to_C,TIE_C_to_B,TIE_B_to_A",
 		"generatorCandidates": "A_node706,A_node707,A_node708,B_node704,B_node705,B_node703",
 		"switchCandidates" : "A_node705-742,A_node705-712",
