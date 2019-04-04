@@ -55,7 +55,7 @@ def work(modelDir, inputDict):
 	df = pd.read_csv(f, header = header)
 
 	if inputDict.get("demandTempBool"):
-		nn_bool, nn_actual, nn_pred, nn_lower, nn_upper = omf.anomalyDetection.t_test(df, modelDir, inputDict["startDate"], confidence)
+		# nn_bool, nn_actual, nn_pred, nn_lower, nn_upper = omf.anomalyDetection.t_test(df, modelDir, inputDict["startDate"], confidence)
 		pk_bool, pk_actual, pk_time = omf.anomalyDetection.t_test(df, modelDir, inputDict["startDate"], confidence, model="nextDayPeakKatrina")
 		katrina_outliers = [
 			(time, demand) if out_bool else None
@@ -87,11 +87,13 @@ def work(modelDir, inputDict):
 	if elliptic_df is not None:
 		out["elliptic_outlier"] = list(elliptic_df.outlier.astype(int))
 	if inputDict.get("demandTempBool"):
+		"""
 		out["nn_outlier"] = list(nn_bool.astype(int))
 		out["nn_actual"] = list(nn_actual)
 		out["nn_pred"] = list(nn_pred)
 		out["nn_lower"] = list(nn_lower)
 		out["nn_upper"] = list(nn_upper)
+		"""
 		out["katrina_outlier"] = katrina_outliers
 	out["startDate"] = inputDict["startDate"]
 	return out
