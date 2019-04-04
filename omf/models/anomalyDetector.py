@@ -1,5 +1,5 @@
 """ Anomaly detection. """
-import os, sys, shutil, csv, StringIO
+import os, sys, shutil, csv, StringIO, hashlib
 import omf.anomalyDetection
 import numpy as np
 import pandas as pd
@@ -23,9 +23,9 @@ def work(modelDir, inputDict):
 	# try to get our cached input
 	try:
 		with open(cached_file_path, "r") as f:
-			cached_str = f.read()
+			cached_hash = f.read()
 	except IOError:
-		cached_str = ""
+		cached_hash = ""
 
 	confidence = float(inputDict["confidence"]) if inputDict.get("confidence") else 0.99
 	if confidence >= 1:
@@ -34,14 +34,16 @@ def work(modelDir, inputDict):
 		)
 
 		# do we have a cached forecast?
+	input_hasher = hashlib.md5()
+	input_hasher.update(inputDict["file"].encode())
 	cached = (
 		"forecasted_{}.csv".format(confidence)
-		if cached_str == inputDict["file"]
+		if cached_hash == input_hasher.hexdigest()
 		else None
 	)
 
 	with open(cached_file_path, "w") as f:
-		f.write(inputDict["file"])
+		f.write(input_hasher.hexdigest())
 
 	out = {}
 
@@ -82,7 +84,7 @@ def work(modelDir, inputDict):
 	out["yhat_upper"] = list(prophet_df.yhat_upper.values)
 	out["yhat_lower"] = list(prophet_df.yhat_lower.values)
 	out["prophet_outlier"] = list(prophet_df.outlier.values.astype(int))
-	if elliptic_df:
+	if elliptic_df is not None:
 		out["elliptic_outlier"] = list(elliptic_df.outlier.astype(int))
 	if inputDict.get("demandTempBool"):
 		out["nn_outlier"] = list(nn_bool.astype(int))
