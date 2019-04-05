@@ -421,7 +421,7 @@
 			</script>
 		</div>
 		<p class="reportTitle postRun" style="page-break-before:always">Model accuracy and effectiveness</p>
-		<div id="reportTitle postRun" class="tightContent postRun detailsContainer" style="position: relative;">
+		<div id="reportTitle postRun" class="content postRun detailsContainer" style="margin-top:0px;">
 			Load prediction train accuracy:
 			<pre id="trainAccuracy" style="font-size:13px; text-align:left; padding-left: 10px;overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
 			<script>gebi("trainAccuracy").innerHTML = allOutputData.trainAccuracy + "% (MAPE)"</script><br>
@@ -438,5 +438,22 @@
 			<pre id="number_of_dispatches" style="font-size:13px; text-align:left; padding-left: 10px;overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
 			<script>gebi("number_of_dispatches").innerHTML = allOutputData.number_of_dispatches</script><br>
 		</div>
+<!-- 		<p class="reportTitle postRun" style="page-break-before:always">Forecast Dispatch Accuracy and Effectiveness</p>
+		<div id="effectiveness" class="content postRun detailsContainer" style="margin-top:0px">
+<pre>Load prediction training accuracy (MAPE):
+{{allOutputData.trainAccuracy or 'N/A'}}%
+
+Load prediction test accuracy (MAPE):
+{{allOutputData['testAccuracy'] or 'N/A'}}%
+
+Peak ID precision [True Positive / (True Positive + False Positive)]:
+{{allOutputData['precision'] or 'N/A'}}%
+
+Peak ID recall [True Positive / (True Positive + False Negative)]:
+{{allOutputData['recall'] or 'N/A'}}%
+
+Number of dispatches:
+{{allOutputData['number_of_dispatches'] or 'N/A'}}</pre>
+		</div> -->
 	</div>
 </body>
