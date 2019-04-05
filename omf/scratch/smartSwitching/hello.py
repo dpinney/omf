@@ -42,7 +42,7 @@ dt_end = dt_start + relativedelta(seconds=+20)
 CLOCK_END = str(dt_end)
 CLOCK_RANGE = CLOCK_START + ',' + CLOCK_END
 if faultType != None:
-    # Add eventgen object (the fault)
+	# Add eventgen object (the fault)
 	tree[str(biggestKey*10 + 1)] = {'object':'eventgen','name':'ManualEventGen','parent':'RelMetrics', 'fault_type':faultType, 'manual_outages':faultLoc + ',' + CLOCK_RANGE}
 	# Add fault_check object
 	tree[str(biggestKey*10 + 2)] = {'object':'fault_check','name':'test_fault','check_mode':'ONCHANGE', 'eventgen_object':'ManualEventGen', 'output_filename':'Fault_check_out.txt'}
@@ -52,8 +52,8 @@ if faultType != None:
 	tree[str(biggestKey*10 + 4)] = {'object':'power_metrics','name':'PwrMetrics','base_time_value':'1 h'}
 	
 	#add meters to the tree
+	index = 5
 	for key in tree2:
-		index = 5
 		if tree2[key].get('object','') in ['load']:
 			tree[str(biggestKey*10 + index)] = {'object':'meter','groupid':'METERTEST','phases':tree2[key]['phases'],'name':tree2[key]['name'] + ' meter' ,'nominal_voltage':tree2[key]['nominal_voltage'],'parent':tree2[key]['name']}
 			index = index + 1
