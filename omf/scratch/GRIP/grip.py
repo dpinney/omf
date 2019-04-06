@@ -2,14 +2,19 @@
 import os, omf
 if not omf.omfDir == os.getcwd():
 	os.chdir(omf.omfDir)
-import web, json, tempfile
+#import web, json, tempfile
+import json, tempfile
 from gevent.pywsgi import WSGIServer
-from flask import request, send_from_directory
+from flask import Flask, request, send_from_directory
 from matplotlib import pyplot as plt
 import platform
 import subprocess
 
-@web.app.route('/eatfile', methods=['GET', 'POST'])
+# TODO: reorganize imports
+
+app = Flask(__name__)
+
+@app.route('/eatfile', methods=['GET', 'POST'])
 def eatfile():
 	if request.method == 'POST':
 		# print 'HEY I GOT A', request.files
@@ -17,7 +22,7 @@ def eatfile():
 	else:
 		return 'CHOMPED'
 
-@web.app.route('/oneLineGridlab', methods=['POST'])
+@app.route('/oneLineGridlab', methods=['POST'])
 def oneLineGridlab():
 	'''Data Params: {glm: [file], useLatLons: Boolean}
 	OMF fuction: omf.feeder.latLonNxGraph()
@@ -45,7 +50,7 @@ def oneLineGridlab():
 	plt.savefig(outImgPath)
 	return send_from_directory(workDir, outImgName)
 
-@web.app.route('/milsoftToGridlab', methods=['POST'])
+@app.route('/milsoftToGridlab', methods=['POST'])
 def milsoftToGridlab():
 	'''Data Params: {std: [file], seq: [file]}
 	Runtime: could take a couple minutes.
@@ -68,7 +73,7 @@ def milsoftToGridlab():
 	# TODO: delete the tempDir.
 	return send_from_directory(workDir, glmName)
 
-@web.app.route('/cymeToGridlab', methods=['POST'])
+@app.route('/cymeToGridlab', methods=['POST'])
 def cymeToGridlab():
 	'''Data Params: {mdb: [file]}
 	OMF function: omf.cymeToGridlab.convertCymeModel()
@@ -88,7 +93,7 @@ def cymeToGridlab():
 	# TODO: delete the tempDir.
 	return send_from_directory(workDir, glmName)
 
-@web.app.route('/gridlabRun', methods=['POST'])
+@app.route('/gridlabRun', methods=['POST'])
 def gridlabRun():
 	'''Data Params: {glm: [file]}
 	Runtime: could take hours. Jeepers.
@@ -105,7 +110,7 @@ def gridlabRun():
 	#TODO: delete the tempDir.
 	return json.dumps(outDict)
 
-@web.app.route('/gridlabdToGfm', methods=['POST'])
+@app.route('/gridlabdToGfm', methods=['POST'])
 def gridlabdToGfm():
 	'''Data Params: {glm: [file], other_inputs: see source}
 	OMF function: omf.models.resilientDist.convertToGFM()
@@ -134,7 +139,7 @@ def gridlabdToGfm():
 	# TODO: delete the tempDir.
 	return json.dumps(gfmDict)
 
-@web.app.route('/runGfm', methods=['POST'])
+@app.route('/runGfm', methods=['POST'])
 def runGfm():
 	'''Data Params: {gfm: [file], asc: [file]}
 	OMF function: omf.solvers.gfm.run()
@@ -171,7 +176,7 @@ def runGfm():
 		out = stdout
 	return out
 
-@web.app.route('/samRun', methods=['POST'])
+@app.route('/samRun', methods=['POST'])
 def samRun():
 	'''Data Params: {[system advisor model inputs, approximately 30 floats]}
 	OMF function: omf.solvers.sam.run()
@@ -211,7 +216,7 @@ def samRun():
 	outData["Consumption"]["DG"] = ssc.ssc_data_get_array(dat, "ac")
 	return json.dumps(outData)
 
-@web.app.route('/transmissionMatToOmt', methods=['POST'])
+@app.route('/transmissionMatToOmt', methods=['POST'])
 def transmissionMatToOmt():
 	'''Data Params: {mat: [file], other_inputs: see source}
 	OMF function: omf.network.parse()
@@ -219,7 +224,7 @@ def transmissionMatToOmt():
 	Result: Convert the .m matpower model to an OMT (JSON-based) model. Return the model.'''
 	return 'Not Implemented Yet'
 
-@web.app.route('/transmissionPowerflow', methods=['POST'])
+@app.route('/transmissionPowerflow', methods=['POST'])
 def transmissionPowerflow():
 	'''Data Params: {omt: [file], other_inputs: see source}
 	OMF function: omf.models.transmission.new and omf.models.transmission.work
@@ -227,8 +232,8 @@ def transmissionPowerflow():
 	Result: TBD. '''
 	return 'Not Implemented Yet'
 
-@web.app.route('/transmissionViz', methods=['POST'])
-def transmissionPowerflow():
+@app.route('/transmissionViz', methods=['POST'])
+def transmissionViz():
 	'''Data Params: {omt: [file], other_inputs: see source}
 	OMF function: omf.network.viz()
 	Runtime: a couple seconds.
@@ -236,7 +241,7 @@ def transmissionPowerflow():
 	return 'Not Implemented Yet'
 
 def serve():
-	server = WSGIServer(('0.0.0.0', 5100), web.app)
+	server = WSGIServer(('0.0.0.0', 5100), app)
 	server.serve_forever()
 
 if __name__ == '__main__':
