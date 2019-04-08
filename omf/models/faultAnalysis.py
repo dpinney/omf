@@ -62,6 +62,16 @@ def work(modelDir, inputDict):
 		customColormapValue = True
 	else:
 		customColormapValue = False
+	# None check for scaleMin
+	if inputDict.get("scaleMin", "None") == "None":
+		scaleMinValue = None
+	else:
+		scaleMinValue = inputDict["scaleMin"]
+	# None check for scaleMax
+	if inputDict.get("scaleMax", "None") == "None":
+		scaleMaxValue = None
+	else:
+		scaleMaxValue = inputDict["scaleMax"]
 	if inputDict.get("simTime", "") == "":
 		simTimeValue = '2000-01-01 0:00:00'
 	else:
@@ -78,6 +88,8 @@ def work(modelDir, inputDict):
 		nodeLabs = nodeLabsValue,
 		edgeLabs = edgeLabsValue,
 		customColormap = customColormapValue,
+		scaleMin = scaleMinValue,
+		scaleMax = scaleMaxValue,
 		faultLoc = inputDict["faultLoc"],
 		faultType = faultTypeValue,
 		rezSqIn = int(inputDict["rezSqIn"]),
@@ -91,7 +103,7 @@ def work(modelDir, inputDict):
 		outData["voltageDrop"] = inFile.read().encode("base64")
 	return outData
 
-def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, faultLoc=None, faultType=None, customColormap=False, rezSqIn=400, simTime='2000-01-01 0:00:00'):
+def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, faultLoc=None, faultType=None, customColormap=False, scaleMin=None, scaleMax=None, rezSqIn=400, simTime='2000-01-01 0:00:00'):
 	''' Draw a color-coded map of the voltage drop on a feeder.
 	path is the full path to the GridLAB-D .glm file or OMF .omd file.
 	workDir is where GridLAB-D will run, if it's None then a temp dir is used.
@@ -461,14 +473,24 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 		positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
 	#create custom colormap
 	if customColormap:
-		custom_cm = matplotlib.colors.LinearSegmentedColormap.from_list('custColMap',[(0.0,'blue'),(0.15,'darkgray'),(0.7,'darkgray'),(1.0,'red')])
+		if scaleMin != None and scaleMax != None:
+			scaleDif = scaleMax - scaleMin
+			custom_cm = matplotlib.colors.LinearSegmentedColormap.from_list('custColMap',[(scaleMin,'blue'),(scaleMin+(0.12*scaleDif),'darkgray'),(scaleMin+(0.56*scaleDif),'darkgray'),(scaleMin+(0.8*scaleDif),'red')])
+			vmin = scaleMin
+			vmax = scaleMax
+		else:
+			custom_cm = matplotlib.colors.LinearSegmentedColormap.from_list('custColMap',[(0.0,'blue'),(0.15,'darkgray'),(0.7,'darkgray'),(1.0,'red')])
+			vmin = 0
+			vmax = 1.25
 		custom_cm.set_under(color='black')
-		vmin = 0
-		vmax = 1.25
 	else:
 		custom_cm = plt.cm.get_cmap('viridis')
-		vmin = None
-		vmax = None
+		if scaleMin != None and scaleMax != None:
+			vmin = scaleMin
+			vmax = scaleMax
+		else:
+			vmin = None
+			vmax = None
 	drawColorbar = False
 	emptyColors = {}
 	#draw edges with or without colors
@@ -598,6 +620,8 @@ def new(modelDir):
 		"faultLoc" : "17720",
 		"faultType" : "SLG-A",
 		"customColormap" : "False",
+		"scaleMin" : "None",
+		"scaleMax" : "None",
 		"rezSqIn" : "400",
 		"simTime" : '2000-01-01 0:00:00'
 	}
@@ -654,7 +678,7 @@ def _testingPlot():
 	# FNAME = 'test_smsSingle.glm'
 	# Hack: Agg backend doesn't work for interactivity. Switch to something we can use:
 	# plt.switch_backend('MacOSX')
-	chart = drawPlotFault(PREFIX + FNAME, neatoLayout=True, edgeCol="Current", nodeCol=None, nodeLabs="Name", edgeLabs=None, faultLoc="node713-704", faultType="TLG", customColormap=False, rezSqIn=225, simTime='2000-01-01 0:00:00')
+	chart = drawPlotFault(PREFIX + FNAME, neatoLayout=True, edgeCol="Current", nodeCol=None, nodeLabs="Name", edgeLabs=None, faultLoc="node713-704", faultType="TLG", customColormap=False, scaleMin=None, scaleMax=None, rezSqIn=225, simTime='2000-01-01 0:00:00')
 	chart.savefig(PREFIX + "YO_WHATS_GOING_ON.png")
 	# plt.show()
 
