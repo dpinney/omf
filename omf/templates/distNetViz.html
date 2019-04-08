@@ -363,6 +363,7 @@
             .fullPadded {
 				padding: 5px;
             }
+            #componentList {width:250px;} /* Hack to prevent horizontal scrolling. */
 			th {
 				/*font-weight: normal;*/
 				/*background:black;*/
@@ -454,7 +455,7 @@
                     </div>
                     <div class="headerGroup">
                         <h4 class="menuHeading white">Add &#x25BE;</h4>
-                        <ul id="componentList" class="menu" style="display: none"></ul>
+                        <ul id="componentList" class="menu" style="display:none;"></ul>
                     </div>
                     {% if showFileMenu %}
                     <div class="headerGroup">
