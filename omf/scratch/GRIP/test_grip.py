@@ -11,12 +11,66 @@ XXX Implement the rest of the routes.
 OOO Add an option to test against the container.
 '''
 
-import os, webbrowser, omf, grip, requests
+#import webbrowser
+import io, os, omf, grip, requests, pytest
 from multiprocessing import Process
 
 # Start the server.
-p = Process(target=grip.serve, args=())
-p.start()
+#p = Process(target=grip.serve, args=())
+#p.start()
+# Shouldn't I join() here? Block the execution of the testing code until the server process finishes. Well, the server process never finishes.
+# Can I send some kind of signal? I'll worry about that later. Just do something.
+
+"""
+Test format:
+1) Expect a certain HTTP code
+2) Exepct certain HTTP response
+"""
+
+@pytest.fixture
+def client():
+    # testing must be set to true on the Flask application
+    grip.app.config['TESTING'] = True
+    # create a test client with built-in Flask code
+    client = grip.app.test_client()
+    # 'yield' instead of 'return' due to how fixtures work in pytest
+    yield client
+    # Could put teardown code below if needed
+
+class TestOneLineGridLab(object):
+
+    def test_postRequest_returns_png(self, client):
+        filename = "test_ieee123nodeBetter.glm" 
+        test_file_path = os.path.join(os.path.dirname(__file__), filename)
+        with open(test_file_path) as f:
+            b_io = io.BytesIO(f.read())
+        data = {
+            "glm": (b_io, filename),
+            "useLatLons": False # big
+            #"useLatLons": True
+        }
+        response = client.post("/oneLineGridlab", data=data)
+        # Assert that it returned the correct code
+        assert response.status_code == 200
+        # Assert that it returned the correct type of file!!!
+        assert response.mimetype == "image/png"
+        assert response.content_length == 2579
+        #response = requests.post(
+        #    'http://localhost:5100/oneLineGridlab',
+        #    files={
+        #        'glm':open(test_glm_file).read()
+        #    },
+        #    data={
+        #        'useLatLons':False
+        #    }
+        #)
+    
+    def test_bad_request(self, client):
+        response = client.get("/oneLineGridlab")
+        assert response.status_code == 400
+
+
+"""
 # Make sure it's up.
 # webbrowser.open_new('http://localhost:5100/eatfile')
 # Test a simple route.
@@ -85,3 +139,4 @@ response8 = requests.post(
 p.terminate()
 # Or just join and serve forever. I don't care.
 # p.join()
+"""

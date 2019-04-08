@@ -1,16 +1,13 @@
 ''' Web server exposing HTTP API for GRIP. '''
-import os, omf
-if not omf.omfDir == os.getcwd():
-	os.chdir(omf.omfDir)
-#import web, json, tempfile
-import json, tempfile
+import omf
+#if not omf.omfDir == os.getcwd():
+#	os.chdir(omf.omfDir)
+import json, tempfile, platform, subprocess, os
 from gevent.pywsgi import WSGIServer
 from flask import Flask, request, send_from_directory
-from matplotlib import pyplot as plt
-import platform
-import subprocess
+import matplotlib.pyplot as plt
 
-# TODO: reorganize imports
+# TODO: note how I commented out the directory change, but it still appears to work (at least on my machine)
 
 app = Flask(__name__)
 
@@ -23,18 +20,21 @@ def eatfile():
 		return 'CHOMPED'
 
 @app.route('/oneLineGridlab', methods=['POST'])
-def oneLineGridlab():
-	'''Data Params: {glm: [file], useLatLons: Boolean}
+def one_line_gridlab():
+	''' Data Params: {glm: [file], useLatLons: Boolean}
 	OMF fuction: omf.feeder.latLonNxGraph()
 	Runtime: should be around 1 to 30 seconds.
-	Result: Create a one line diagram of the input glm. Return a .png of it. If useLatLons is True then draw using the lat/lons, otherwise force layout the graph.'''
-	workDir = tempfile.mkdtemp()
-	print workDir
-	fName = 'in.glm'
+    Result: Create a one line diagram of the input glm. Return a .png of it. If useLatLons is True then draw using the lat/lons, otherwise force
+    layout the graph.
+    '''
+    # this is critical, need to delete though (I think)
+	temp_dir = tempfile.mkdtemp() 
+	print temp_dir
+    # ask David before I decide how to delete directory
 	f = request.files['glm']
-	glmOnDisk = os.path.join(workDir, fName)
-	f.save(glmOnDisk)
-	feed = omf.feeder.parse(glmOnDisk)
+	glm_file_path = os.path.join(temp_dir, "in.glm")
+	f.save(glm_file_path)
+	feed = omf.feeder.parse(glm_file_path)
 	graph = omf.feeder.treeToNxGraph(feed)
 	if request.form.get('useLatLons') == 'False':
 		neatoLayout = True
@@ -44,11 +44,12 @@ def oneLineGridlab():
 	plt.clf()
 	plt.close()
 	# Plot new plot.
-	matplotObj = omf.feeder.latLonNxGraph(graph, labels=False, neatoLayout=neatoLayout, showPlot=False)
-	outImgName = 'out.png'
-	outImgPath = os.path.join(workDir, outImgName)
-	plt.savefig(outImgPath)
-	return send_from_directory(workDir, outImgName)
+	omf.feeder.latLonNxGraph(graph, labels=False, neatoLayout=neatoLayout, showPlot=False)
+    # plt is imported in omf.feeder as well. Since plt operations layer on top of each other, I can only assume that the imported plt is the same plt
+    # as here
+	out_img_name = 'out.png'
+	plt.savefig(os.path.join(temp_dir, out_img_name))
+	return send_from_directory(temp_dir, out_img_name)
 
 @app.route('/milsoftToGridlab', methods=['POST'])
 def milsoftToGridlab():
