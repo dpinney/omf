@@ -402,7 +402,7 @@ def writeToInput(workDir, entry, key):
 	except:
 		return "Failed"
 
-@app.route("/feeder/<owner>/<modelName>/<feederNum>")
+@app.route("/gridEdit/<owner>/<modelName>/<feederNum>")
 @flask_login.login_required
 def feederGet(owner, modelName, feederNum):
 	''' Editing interface for feeders. '''
@@ -434,8 +434,8 @@ def networkGet(owner, modelName, networkNum):
 		currUser = User.cu(), owner = owner)
 
 
-@app.route("/distribution/<owner>/<model_name>/<feeder_num>/test")
-@app.route("/distribution/<owner>/<model_name>/<feeder_num>")
+@app.route("/feeder/<owner>/<model_name>/<feeder_num>/test")
+@app.route("/feeder/<owner>/<model_name>/<feeder_num>")
 @flask_login.login_required
 def distribution_get(owner, model_name, feeder_num):
 	"""Render the editing interface for distribution networks.

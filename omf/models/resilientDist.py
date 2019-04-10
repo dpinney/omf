@@ -74,18 +74,22 @@ class HazardField(object):
 		''' Scale the cell size in image plot. '''
 		self.hazardObj["cellsize"] = cellSize
 
-	def mapValue(value, fromMin, fromMax, toMin=.7, toMax=1):
+	def mapValue(self, value, fromMin, fromMax, toMin=.7, toMax=1):
 		newValue = float(value - fromMind) / float(fromMax-fromMin)
 		return toMin + (newValue * (toMax-toMin))
 
-	def mapRanges(values, fromMin, fromMax):
+	def mapRanges(self, values, fromMin, fromMax):
 		newValues = []
 		for value in values:
 			newValues.append(mapValue(value, fromMin, fromMax))
 		return newValues
 
+	def drawDamageField(self, damageData):
+		''' Draw damage field, assuming a numpy input. '''
+		pass
 
-	def drawHeatMap(self, isDamageField=False):
+
+	def drawHeatMap(self):
 		''' Draw heat map-color coded image map with user-defined boundaries and cell-size. '''
 		heatMap = plt.imshow(
 			self.hazardObj['field'],
@@ -168,6 +172,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 		'generators' : [],
 		'line_codes' : [],
 		'lines' : [],
+		'lineLikeObjs' : [],
 		'critical_load_met' : gfmInputTemplate.get('critical_load_met',0.98),
 		'total_load_met' : gfmInputTemplate.get('total_load_met',0.9),
 		'chance_constraint' : gfmInputTemplate.get('chance_constraint', 1.0),
@@ -181,6 +186,8 @@ def convertToGFM(gfmInputTemplate, feederModel):
 	objToFind = ['transformer', 'regulator', 'underground_line', 'overhead_line', 'fuse', 'switch']
 	lineCount = 0
 	for key, line in jsonTree.iteritems():
+		if 'from' in line.keys() and 'to' in line.keys():
+			gfmJson['lineLikeObjs'].append(line['name'])
 		if line.get('object','') in objToFind:
 			phases = line.get('phases')
 			if 'S' in phases:
@@ -245,6 +252,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			else: #no parent, i.e. we created a bus for the load.
 				newLoad['node_id'] = load['name'] + '_bus'
 			voltage = float(load.get('nominal_voltage','4800'))
+			newLoad['nominal_voltage'] = voltage
 			for phaseName, index in phaseNames.iteritems():
 				impedance = 'constant_impedance_' + phaseName
 				power = 'constant_power_' + phaseName
@@ -315,12 +323,6 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 	tree = feederJson.get("tree",{})
 	links = feederJson.get("links",{})
 	
-	# Get swing buses.
-	green_list = []
-	for node in tree:
-		if 'bustype' in tree[node] and tree[node]['bustype'] == 'SWING':
-			green_list.append(tree[node]['name'])
-
 	# Generate lat/lons from nodes and links structures.
 	for link in links:
 		for typeLink in link.keys():
@@ -396,62 +398,44 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 		else:
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
 		
+	# Get swing buses.
+	green_list = []
+	for node in tree:
+		if 'bustype' in tree[node] and tree[node]['bustype'] == 'SWING':
+			green_list.append(tree[node]['name'])
+
+	isFirst = {'green': False, 'red': False, 'blue': False, 'grey': False}
+	nodeLabels = {'green': 'Swing Buses', 'red': 'Critical Loads', 'blue': 'Regular Loads', 'grey': 'Other'}
+
 	# Draw nodes and optional labels.
-	red_list, blue_list, grey_list, purple_list  = ([] for i in range(4))
-	for gen in generatorList:
-		name = gen[0:9]
-		purple_list.append(name)
+	for key in pos.keys():
+		isLoad = key[2:6]
+		nodeColor = 'grey'
+		nodeLabel = 'Other'
+		if key in green_list:
+			nodeColor = 'green'
+		elif key in critLoads:
+			nodeColor = 'red'			
+		elif isLoad == 'load':
+			nodeColor = 'blue'
 
-	for key in pos.keys(): # Sort keys into seperate lists. Is there a more elegant way of doing this.
-		if key not in green_list and key not in purple_list:
-			load = key[2:6]
-			if key in critLoads:
-				red_list.append(key)
-			elif load == 'load':
-				blue_list.append(key)
-			else:
-				grey_list.append(key)
+		kwargs = {
+			'nodelist': [key],
+			'node_color': nodeColor,
+			'node_size': 16,
+			'linewidths': 1.0
+		}
+			
+		if not isFirst[nodeColor]:
+			kwargs['label'] = nodeLabels[nodeColor]
+			isFirst[nodeColor] = True
 
-	nx.draw_networkx_nodes(
-		inGraph,
-		pos, 
-		nodelist=green_list,
-		node_color='green',
-		label='Swing Buses',
-		node_size=12
-	)
-	nx.draw_networkx_nodes(
-		inGraph,
-		pos, 
-		nodelist=purple_list,
-		node_color='purple',
-		label='Generators',
-		node_size=12
-	)
-	nx.draw_networkx_nodes(
-		inGraph,
-		pos,
-		nodelist=red_list,
-		node_color='red',
-		label='Critical Loads',
-		node_size=12
-	)
-	nx.draw_networkx_nodes(
-		inGraph,
-		pos,
-		nodelist=blue_list,
-		node_color='blue',
-		label='Regular Loads',
-		node_size=12
-	)
-	nx.draw_networkx_nodes(
-		inGraph,
-		pos,
-		nodelist=grey_list,
-		node_color='grey',
-		label='Other',
-		node_size=12
-	)
+
+		node = nx.draw_networkx_nodes(inGraph, pos, **kwargs)
+
+		if key in generatorList:
+			node.set_edgecolor('violet')	
+
 	if labels:
 		nx.draw_networkx_labels(
 			inGraph,
@@ -469,7 +453,6 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 			font_size=4
 		)
 
-	print selected_labels
 	plt.legend(loc='lower right') 
 	if showPlot: plt.show()
 	plt.savefig(pJoin(outputDir,"feederChart.png"), dpi=800, pad_inches=0.0)
@@ -601,19 +584,38 @@ def work(modelDir, inputDict):
 	# Add GridLAB-D line objects and line codes in to the RDT model.
 	rdtJson["line_codes"] = gld_json_line_dump["properties"]["line_codes"]
 	rdtJson["lines"] = gld_json_line_dump["properties"]["lines"]
-	hardCands = inputDict['hardeningCandidates'].strip().replace(' ', '').split(',')
+	hardCands = list(set(gfmJson['lineLikeObjs']) - set(inputDict['hardeningCandidates']))
 	newLineCands = inputDict['newLineCandidates'].strip().replace(' ', '').split(',')
 	switchCands = inputDict['switchCandidates'].strip().replace(' ', '').split(',')
 	for line in rdtJson["lines"]:
+		line_id = line.get('id','') # this is equal to name in the OMD objects.
+		object_type = line.get('object','')
 		line['node1_id'] = line['node1_id'] + "_bus"
 		line['node2_id'] = line['node2_id'] + "_bus"
-		line['capacity'] = 10000#Todo: set this to summer.rating.continuous (of the conductor) * nominal_voltage / 10000 to get MVA rating.
-		#NOTE: need to use id to get object in OMD, then use its config to get its conductors, then set capacity to avg of capacity attributes on each of the conductors.
+		line_code = line["line_code"]
+		# Getting ratings from OMD
+		tree = omd['tree']
+		nameToIndex = {tree[key].get('name',''):key for key in tree}
+		treeOb = tree[nameToIndex[line_id]]
+		config_name = treeOb.get('configuration','')
+		config_ob = tree.get(nameToIndex[config_name], {})
+		full_rating = 0
+		for phase in ['A','B','C']:
+			cond_name = config_ob.get('conductor_' + phase, '')
+			cond_ob = tree.get(nameToIndex.get(cond_name, ''), '')
+			rating = cond_ob.get('rating.summer.continuous','')
+			try:
+				full_rating = int(rating) #TODO: replace with avg of 3 phases.
+			except:
+				pass
+		if full_rating != 0:
+			line['capacity'] = full_rating
+		else:
+			line['capacity'] = 10000
+		# Setting other line parameters.
 		line['construction_cost'] = float(inputDict['lineUnitCost'])
 		line['harden_cost'] = float(inputDict['hardeningUnitCost'])
 		line['switch_cost'] = float(inputDict['switchCost'])
-		line_id = line.get('id','') # this is equal to name in the OMD objects.
-		object_type = line.get('object','')
 		if line_id in hardCands:
 			line['can_harden'] = True
 		if line_id in switchCands:
@@ -649,9 +651,10 @@ def work(modelDir, inputDict):
 
 
 	edgeLabels = {}
+	generatorList = []
 
-	#for gen in rdtOut['design_solution']['generators']:
-		#print gen['id'][:-4]
+	for gen in rdtOut['design_solution']['generators']:
+		generatorList.append(gen['id'][:-4])
 
 	damagedLoads = {}
 	for scenario in rdtOut['scenario_solution']:
@@ -703,11 +706,6 @@ def work(modelDir, inputDict):
 		outData["secondGLD"] = str(False)
 	# Draw the feeder.
 	damageDict = {}
-	generatorList = []
-
-
-	for gen in rdtJson["generators"]:
-		generatorList.append(gen["id"][:-4])
 
 	for scenario in rdtJson["scenarios"]:
 		for line in scenario["disable_lines"]:
@@ -740,7 +738,7 @@ def new(modelDir):
 		"dgUnitCost": "1000000.0",
 		"hardeningUnitCost": "10.0",
 		"maxDGPerGenerator": "1.0",
-		"hardeningCandidates": "A_node701-702,A_node702-705,A_node702-713,A_node702-703,A_node703-727,A_node703-730,A_node704-714,A_node704-720,A_node705-742,A_node705-712,A_node706-725,A_node707-724,A_node707-722,A_node708-733,A_node708-732,A_node709-731,A_node709-708,A_node710-735,A_node710-736,A_node711-741,A_node711-740,A_node713-704,A_node714-718,A_node720-707,A_node720-706,A_node727-744,A_node730-709,A_node733-734,A_node734-737,A_node734-710,A_node737-738,A_node744-728,A_node781-701,A_node744-729,B_node701-702,B_node702-705,B_node702-713,B_node702-703,B_node703-727,B_node703-730,B_node704-714,B_node704-720,B_node705-742,B_node705-712,B_node706-725,B_node707-724,B_node707-722,B_node708-733,B_node708-732,B_node709-731,B_node709-708,B_node710-735,B_node710-736,B_node711-741,B_node711-740,B_node713-704,B_node714-718,B_node720-707,B_node720-706,B_node727-744,B_node730-709,B_node733-734,B_node734-737,B_node734-710,B_node737-738,B_node738-711,B_node744-728,B_node781-701,B_node744-729,C_node701-702,C_node702-705,C_node702-713,C_node702-703,C_node703-727,C_node703-730,C_node704-714,C_node704-720,C_node705-742,C_node705-712,C_node706-725,C_node707-724,C_node707-722,C_node708-733,C_node708-732,C_node709-731,C_node709-708,C_node710-735,C_node710-736,C_node711-741,C_node711-740,C_node713-704,C_node714-718,C_node720-707,C_node720-706,C_node727-744,C_node730-709,C_node733-734,C_node734-737,C_node734-710,C_node737-738,C_node738-711,C_node744-728,C_node781-701,C_node744-729",
+		"hardeningCandidates": "A_node701-702",
 		"newLineCandidates": "TIE_A_to_C,TIE_C_to_B,TIE_B_to_A",
 		"generatorCandidates": "A_node706,A_node707,A_node708,B_node704,B_node705,B_node703",
 		"switchCandidates" : "A_node705-742,A_node705-712",
