@@ -19,18 +19,24 @@ def eatfile():
 	else:
 		return 'CHOMPED'
 
+#@app.route("/checkConversion")
+def check_conversion():
+    """ A process starts in a temporary directory. There is no process file created in the temporary directory.
+    1) We don't create a process file. Then we just check for the existence of the final product.
+    2) We do create a process file. We still check for the existence of the final product.
+    """
+    pass
+
 @app.route('/oneLineGridlab', methods=['POST'])
-def one_line_gridlab():
+def oneLineGridLab():
 	''' Data Params: {glm: [file], useLatLons: Boolean}
 	OMF fuction: omf.feeder.latLonNxGraph()
 	Runtime: should be around 1 to 30 seconds.
     Result: Create a one line diagram of the input glm. Return a .png of it. If useLatLons is True then draw using the lat/lons, otherwise force
     layout the graph.
     '''
-    # this is critical, need to delete though (I think)
 	temp_dir = tempfile.mkdtemp() 
 	print temp_dir
-    # ask David before I decide how to delete directory
 	f = request.files['glm']
 	glm_file_path = os.path.join(temp_dir, "in.glm")
 	f.save(glm_file_path)
@@ -45,8 +51,6 @@ def one_line_gridlab():
 	plt.close()
 	# Plot new plot.
 	omf.feeder.latLonNxGraph(graph, labels=False, neatoLayout=neatoLayout, showPlot=False)
-    # plt is imported in omf.feeder as well. Since plt operations layer on top of each other, I can only assume that the imported plt is the same plt
-    # as here
 	out_img_name = 'out.png'
 	plt.savefig(os.path.join(temp_dir, out_img_name))
 	return send_from_directory(temp_dir, out_img_name)
@@ -183,6 +187,7 @@ def samRun():
 	OMF function: omf.solvers.sam.run()
 	Runtime: should only be a couple seconds.
 	Result: Run NREL's system advisor model with the specified parameters. Return the output vectors and floats in JSON'''
+    #
 	# Set up SAM data structures.
 	ssc = omf.solvers.nrelsam2013.SSCAPI()
 	dat = ssc.ssc_data_create()

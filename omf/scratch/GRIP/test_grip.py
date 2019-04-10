@@ -14,6 +14,7 @@ OOO Add an option to test against the container.
 #import webbrowser
 import io, os, omf, grip, requests, pytest
 from multiprocessing import Process
+import omf
 
 # Start the server.
 #p = Process(target=grip.serve, args=())
@@ -21,77 +22,135 @@ from multiprocessing import Process
 # Shouldn't I join() here? Block the execution of the testing code until the server process finishes. Well, the server process never finishes.
 # Can I send some kind of signal? I'll worry about that later. Just do something.
 
-"""
-Test format:
-1) Expect a certain HTTP code
-2) Exepct certain HTTP response
-"""
-
-@pytest.fixture
+@pytest.fixture(scope="module")
 def client():
     # testing must be set to true on the Flask application
     grip.app.config['TESTING'] = True
     # create a test client with built-in Flask code
     client = grip.app.test_client()
+    # The client should only be created once
+    print("Client created")
     # 'yield' instead of 'return' due to how fixtures work in pytest
     yield client
     # Could put teardown code below if needed
 
+all_routes = [
+    ("/oneLineGridlab"),
+    ("/milsoftToGridlab"),
+    ("/cymeToGridlab"),
+    ("/gridlabRun"),
+    ("/gridlabdToGfm"),
+    ("/runGfm"),
+    ("/samRun"),
+    #("/transmissionMatToOmt"),
+    #("/transmissionPowerflow"),
+    #("/transmissionViz")
+]
+
+@pytest.mark.parametrize("url_route", all_routes)
+def test_getRequest_returns405(url_route, client):
+    response = client.get(url_route)
+    assert response.status_code == 405
+
+@pytest.mark.parametrize("url_route", all_routes)
+def test_postMissingFile_returns400(url_route, client):
+    response = client.post(url_route)
+    assert response.status_code == 400
+
+
 class TestOneLineGridLab(object):
 
-    def test_postRequest_returns_png(self, client):
+    # Should return a 202
+    def test_useLatLonsIsTrue_returnsSmallerPng(self, client):
         filename = "test_ieee123nodeBetter.glm" 
         test_file_path = os.path.join(os.path.dirname(__file__), filename)
         with open(test_file_path) as f:
             b_io = io.BytesIO(f.read())
         data = {
             "glm": (b_io, filename),
-            "useLatLons": False # big
-            #"useLatLons": True
+            "useLatLons": True
         }
         response = client.post("/oneLineGridlab", data=data)
-        # Assert that it returned the correct code
         assert response.status_code == 200
-        # Assert that it returned the correct type of file!!!
         assert response.mimetype == "image/png"
         assert response.content_length == 2579
-        #response = requests.post(
-        #    'http://localhost:5100/oneLineGridlab',
-        #    files={
-        #        'glm':open(test_glm_file).read()
-        #    },
-        #    data={
-        #        'useLatLons':False
-        #    }
-        #)
+
+    # Should return a 202
+    def test_useLatLonsIsFalse_returnsLargerPng(self, client):
+        filename = "test_ieee123nodeBetter.glm" 
+        test_file_path = os.path.join(os.path.dirname(__file__), filename)
+        with open(test_file_path) as f:
+            b_io = io.BytesIO(f.read())
+        data = {
+            "glm": (b_io, filename),
+            "useLatLons": False
+        }
+        response = client.post("/oneLineGridlab", data=data)
+        assert response.status_code == 200
+        assert response.mimetype == "image/png"
+        assert response.content_length == 50394
+
+    # Should return a 415
+    def test_postWrongFileType_returns415(self, client):
+        filename = "test_grip.py" 
+        test_file_path = os.path.join(os.path.dirname(__file__), filename)
+        with open(test_file_path) as f:
+            b_io = io.BytesIO(f.read())
+        data = {
+            "glm": (b_io, filename),
+        }
+        response = client.post("/oneLineGridlab", data=data)
+        assert response.status_code == 500
+
+class TestMilsoftToGridlab(object):
+
+    # Should return a 202
+    def test_postRequest_returnsGlm(self, client):
+        std_path = os.path.join(omf.omfDir, "static/testFiles/IEEE13.std")
+        seq_path = os.path.join(omf.omfDir, "static/testFiles/IEEE13.seq") 
+        with open(std_path) as f:
+            b_io_std = io.BytesIO(f.read())
+        with open(seq_path) as f:
+            b_io_seq = io.BytesIO(f.read())
+        data = {
+            "std": (b_io_std, "IEEE13.std"),
+            "seq": (b_io_seq, "IEEE13.seq"),
+        }
+        response = client.post("/milsoftToGridlab", data=data)
+        assert response.status_code == 200
+        assert response.mimetype == "text/plain"
+        assert response.content_length == 1
+
+    def test_postWrongFileType_returns415(self, client):
+        pass
+
     
-    def test_bad_request(self, client):
-        response = client.get("/oneLineGridlab")
-        assert response.status_code == 400
 
 
-"""
+
 # Make sure it's up.
 # webbrowser.open_new('http://localhost:5100/eatfile')
 # Test a simple route.
-response1 = requests.post('http://localhost:5100/eatfile', files={'test.txt':'NOTHING_TO_SEE_HERE\nMY_DUDE'})
-print '##### RESPONSE STATUS CODE', response1.status_code
-print '##### RESPONSE CONTENT', response1.content
+#response1 = requests.post('http://localhost:5100/eatfile', files={'test.txt':'NOTHING_TO_SEE_HERE\nMY_DUDE'})
+#print '##### RESPONSE STATUS CODE', response1.status_code
+#print '##### RESPONSE CONTENT', response1.content
 # print '##### Rep1', dir(response1)
 # print '##### Rep1', response1.text
 # print '##### Rep1', dir(response1.raw)
 # Test the image drawing route.
-testGlmPath = omf.omfDir + '/scratch/GRIP/test_ieee123nodeBetter.glm'
-response2 = requests.post('http://localhost:5100/oneLineGridlab', files={'glm':open(testGlmPath).read()}, data={'useLatLons':False})
+#testGlmPath = omf.omfDir + '/scratch/GRIP/test_ieee123nodeBetter.glm'
+#response2 = requests.post('http://localhost:5100/oneLineGridlab', files={'glm':open(testGlmPath).read()}, data={'useLatLons':False})
 # print response2.content # it's a png yo. don't actually print it. duh.
 # Test the file conversion code.
-testStdPath = omf.omfDir + '/static/testFiles/IEEE13.std'
-testSeqPath = omf.omfDir + '/static/testFiles/IEEE13.seq'
-response3 = requests.post('http://localhost:5100/milsoftToGridlab', files={'std':open(testStdPath).read(),'seq':open(testSeqPath).read()})
+#testStdPath = omf.omfDir + '/static/testFiles/IEEE13.std'
+#testSeqPath = omf.omfDir + '/static/testFiles/IEEE13.seq'
+#response3 = requests.post('http://localhost:5100/milsoftToGridlab', files={'std':open(testStdPath).read(),'seq':open(testSeqPath).read()})
 # print response3.content # it's a glm.
 # Block until the process terminates.
+"""
 mdbTestPath = omf.omfDir + '/static/testFiles/IEEE13.mdb'
 response4 = requests.post('http://localhost:5100/cymeToGridlab', files={'mdb':open(mdbTestPath).read()})
+
 # print response4.content # it's a glm.
 response5 = requests.post(
 	'http://localhost:5100/gridlabdToGfm',
