@@ -34,7 +34,7 @@ def _addCollectors(tree):
 	tree[str(max_key+4)] = {'property': 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)', 'object': 'collector', 'group': 'class=triplex_line', 'limit': '0', 'file': 'ZlossesTriplex.csv'}
 	tree[str(max_key+5)] = {'property': 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)', 'object': 'collector', 'group': 'class=inverter', 'limit': '0', 'file': 'distributedGen.csv'}
 	tree[str(max_key+6)] = {'property': 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)', 'object': 'collector', 'group': 'class=load', 'limit': '0', 'file': 'loads.csv'}
-	tree[str(max_key+6)] = {'property': 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)', 'object': 'collector', 'group': 'class=load AND groupid=threePhase', 'limit': '0', 'file': 'threephaseloads.csv'}
+	tree[str(max_key+7)] = {'property': 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)', 'object': 'collector', 'group': 'class=load AND groupid=threePhase', 'limit': '0', 'file': 'threephaseloads.csv'}
 	return tree
 
 def work(modelDir, inputDict):
