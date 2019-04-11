@@ -45,8 +45,7 @@ def work(modelDir, inputDict):
 	# Copy spcific climate data into model directory
 	inputDict["climateName"] = zipCodeToClimateName(inputDict["zipCode"])
 	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 
-	pJoin(modelDir, "climate.tmy2"))
-	
+		pJoin(modelDir, "climate.tmy2"))
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict["feederName1"] = feederName
 	# Create voltage drop plot.
@@ -91,7 +90,7 @@ def work(modelDir, inputDict):
 	chart = drawPlot(
 		pJoin(modelDir, "withCollectors.glm"),
 		workDir = modelDir,
-		neatoLayout = neato,
+		neatoLayout = False, #neato,
 		edgeCol = edgeColValue,
 		nodeCol = nodeColValue,
 		nodeLabs = nodeLabsValue,
@@ -136,7 +135,6 @@ def _readCollectorCSV(filename):
 					dataDictionary[key] = value_row[pos]
 	return dataDictionary
 
-
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
@@ -145,13 +143,10 @@ def new(modelDir):
 		"runTime": "",
 		"layoutAlgorithm": "forceDirected",
 		"zipCode": "64735",
-		"systemSize":"100",
-		"inverterSize": "75",
-		"inverterEfficiency": "92",
 		"retailCost": "0.05",
 		"discountRate": "7",
 		"edgeCol" : "None",
-		"nodeCol" : "Voltage",
+		"nodeCol" : "VoltageImbalance",
 		"nodeLabs" : "None",
 		"edgeLabs" : "None",
 		"customColormap" : "False",

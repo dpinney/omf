@@ -6,6 +6,9 @@ from omf import feeder, weather
 from omf.solvers.gridlabd import runInFilesystem
 from datetime import datetime, timedelta
 
+def historicalWeatherAttach(omd):
+	return None
+
 # Globals
 INIT_TIME = datetime(2017,1,1,0,0,0)
 CSV_NAME = 'weatherNewKy.csv'
