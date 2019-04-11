@@ -1006,7 +1006,23 @@
 <script id="papaParseInsert">
 </script>
 <script type="text/javascript">
-
+    /**
+     * Need to do browser detection in a separate script because IE won't do anything inside of a <script><\/script> if there are syntax errors. If
+     * the user agent contains "Trident" or "MSIE", it is very likely that the browser is Internet Explorer. Warn the user to switch browsers if they
+     * are using internet explorer.
+     */
+    function couldBeInternetExplorer() {
+        var keys = ["trident", "msie"],
+            idx = keys.length - 1,
+            userAgent = navigator.userAgent.toLowerCase();
+        for (idx; idx > -1 && userAgent.indexOf(keys[idx]) === -1; idx--);
+        return idx === -1 ? false : true;
+    }
+    if (couldBeInternetExplorer()) {
+        alert("This interface is not supported in any version of Internet Explorer. Please switch to a supported browser, such as an updated version of Firefox or Chrome.")
+    }
+</script>
+<script type="text/javascript">
 //**************************************************
 // global variables
 //**************************************************
@@ -2119,6 +2135,7 @@ function viewElement(key) {
     $("#massEditModal .modalContent").draggable();
     $("#attachmentsModal .modalContent").draggable();
     $("#colorModal .modalContent").draggable();
+    $("#massAddSecondaryModal .modalContent").draggable();
     // Position the description table depending on whether or not it is draggable
     //document.getElementById("descriptionTable").removeAttribute("style");
     //document.getElementById("descriptionTable").style.left = "70vw";
@@ -3467,10 +3484,10 @@ function getExistingRelationships() {
 /**
  * Doesn't need unit tests.
  */
-function enableDrag(table) {
+function enableDrag(element) {
     if (window.jQuery != null) {
-        table.style.left = "50vw";
-        $(table).draggable();
+        element.style.left = "50vw";
+        $(element).draggable();
     }
 }
 
@@ -4986,7 +5003,7 @@ const buttonPrototype = {
 }
 
 /**
- * TODO: add unit tests, DON'T remove tObject argument, remove tWrapper argument
+ * TODO: ad unit tests, DON'T remove tObject argument, remove tWrapper argument
  */
 function createButton({action, tableBody=null, tObject=null}) {
     const button = Object.create(buttonPrototype);
@@ -5354,7 +5371,6 @@ function initializeColorModal() {
 }
 
 (function initialize() {
-    //createSingletons();
     createInterface();
     attachHandlers();
     initializeJQuery();
