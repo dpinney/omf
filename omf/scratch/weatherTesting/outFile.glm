@@ -1301,7 +1301,8 @@ object csv_reader {
 };
 
 object climate {
-	name MyClimate;
 	reader weatherReader;
+	name MyClimate;
+	tmyfile weatherNewKy.csv;
 };
 

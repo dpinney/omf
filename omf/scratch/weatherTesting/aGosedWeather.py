@@ -9,12 +9,13 @@ from datetime import datetime, timedelta
 # Globals
 INIT_TIME = datetime(2017,1,1,0,0,0)
 CSV_NAME = 'weatherNewKy.csv'
+LOCATION = 'KY_Versailles_3_NNW'
+GLM_PATH = 'IEEE_quickhouse.glm'
 
 # Make a weather file.
-data_temp = weather.pullUscrn('2017', 'KY_Versailles_3_NNW', 'T_CALC')
-data_hum = weather.pullUscrn('2017', 'KY_Versailles_3_NNW', 'RH_HR_AVG')
-data_solar = weather.pullUscrn('2017', 'KY_Versailles_3_NNW', 'SOLARAD')
-init_time = datetime(2017,1,1,0,0,0)
+data_temp = weather.pullUscrn(str(INIT_TIME.year), LOCATION, 'T_CALC')
+data_hum = weather.pullUscrn(str(INIT_TIME.year), LOCATION, 'RH_HR_AVG')
+data_solar = weather.pullUscrn(str(INIT_TIME.year), LOCATION, 'SOLARAD')
 data_full = []
 for i in range(8760):
 	step_time = INIT_TIME + timedelta(hours=i)
@@ -37,56 +38,31 @@ with open(CSV_NAME,'w') as wFile:
 		weather_writer.writerow(row)
 
 # Add stuff to the feeder.
-myTree = feeder.parse('IEEE_quickhouse.glm')
+myTree = feeder.parse(GLM_PATH)
 
-# HACK: delete all climate then reinsert.
+# Delete all climate then reinsert.
 reader_name = 'weatherReader'
 climate_name = 'MyClimate'
 for key in myTree.keys():
-	if myTree[key].get('name','') in [reader_name, climate_name]:
+	obName = myTree[key].get('name','')
+	obType = myTree[key].get('object','')
+	if obName in [reader_name, climate_name] or obType is 'climate':
 		del myTree[key]
 oldMax = feeder.getMaxKey(myTree)
 myTree[oldMax + 1] = {'omftype':'module', 'argument':'tape'}
 myTree[oldMax + 2] = {'omftype':'module', 'argument':'climate'}
 myTree[oldMax + 3] = {'object':'csv_reader', 'name':reader_name, 'filename':CSV_NAME}
-myTree[oldMax + 4] = {'object':'climate', 'name':climate_name, 'reader': reader_name}
-
-# Add a few panels too to test.
-# myTree[oldMax + 5] = {'name':'solEngInverter', 
-# 	'parent':'node19 23CC 01001447022_A', 
-# 	'generator_status':'ONLINE', 
-# 	'inverter_type':'PWM',
-# 	'object':'inverter',
-# 	'generator_mode':'CONSTANT_PF' }
-# myTree[oldMax + 6] = {'generator_mode':'SUPPLY_DRIVEN', 
-# 	'name':'solar172879', 
-# 	'parent':'solEngInverter', 
-# 	'area':'30000 sf', 
-# 	'generator_status':'ONLINE', 
-# 	'object':'solar', 
-# 	'efficiency':'0.14', 
-# 	'panel_type':'SINGLE_CRYSTAL_SILICON' }
-# myTree[oldMax + 7] = { 'interval':'3600',
-# 	'parent':'solEngInverter',
-# 	'limit':'0',
-# 	'file':'Inverter_solEngInverter.csv',
-# 	'property':'power_A,power_B,power_C',
-# 	'object': 'recorder'}
+myTree[oldMax + 4] = {'object':'climate', 'name':climate_name, 'reader': reader_name, 'tmyfile':CSV_NAME}
 
 # Set the time correctly.
-feeder.adjustTime(myTree, 240, 'hours', '2017-01-01')
+feeder.adjustTime(myTree, 240, 'hours', '{}-{}-{}'.format(INIT_TIME.year, INIT_TIME.month, INIT_TIME.day))
 
 # Run here to test.
 rawOut = runInFilesystem(myTree, attachments=[], keepFiles=True, workDir='.', glmName='./outFile.glm')
 
-# # Show some output.
-print 'Output Keys:', rawOut.keys()
-# plt.plot([abs(complex(x)) for x in rawOut['Inverter_solEngInverter.csv']['power_A']])
-# plt.show()
-
 # Write back the full feeder.
 # outJson = dict(myFeed)
-# with open('weatheryearDCA.csv','r') as weatherFile:
+# with open(CSV_NAME,'r') as weatherFile:
 # 	weatherString = weatherFile.read()
 # outJson['attachments']['weatheryearDCA.csv'] = weatherString
 # outJson['tree'] = myTree
