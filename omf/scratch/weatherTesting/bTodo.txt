@@ -2,5 +2,8 @@ TODO
 XXX Move scapeAsos.py in to weather.py.
 XXX Get aGosedWeather.py running its tests.
 XXX Pull the weather data from the new weather.py, ASOS, instead of oldWeather.py.
-OOO Figure out how to map new data from ASOS or USCRN to insolation. Or use NSRDB.
+XXX Figure out how to map new data from ASOS or USCRN to insolation. Decent USCRN done.
+OOO Why isn't the weather playing in to the simulation correctly?
 OOO Update climateChange function in web.py.
+OOO Use NSRDB for something.
+OOO Do something like this? "An equation for separating daily solar irradiation into direct and diffuse components" https://www.sciencedirect.com/science/article/pii/0168192385900796
