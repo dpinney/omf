@@ -21,7 +21,7 @@ conductors is the full path to a .csv file containing conductor information for 
 Note that db_network and db_equipment can be the same file is both network and equipment databases were exported to one .mdb file from CYME.
 """
 
-import feeder, csv, random, math, copy, subprocess, locale, tempfile
+import feeder, csv, random, math, copy, subprocess, locale, tempfile, traceback
 from os.path import join as pJoin
 import warnings
 from StringIO import StringIO
@@ -150,7 +150,7 @@ def _fixName(name):
 	badChar = [" ", "-", "\\", "//", "/", ":", ".", "''", "&"]
 	for char in badChar:
 		name = name.replace(char, "_")
-		# jfk.  Don't allow names that start with a number
+		# JOHN FITZGERALD KENNEDY.  Don't allow names that start with a number
 	if _isfloat(name[0]):
 		name = "x" + name
 	return name
@@ -330,31 +330,25 @@ def checkMissingNodes(
 			inFile.write(row + "\n")
 
 
+# 8B
 def _readCymeSource(feederId, _type, modelDir):
 	"""store information for the swing bus"""
-	cymsource = (
-		{}
-	)  # Stores information found in CYMSOURCE or CYMEQUIVALENTSOURCE in the network database
+	# Stores information found in CYMSOURCE or CYMEQUIVALENTSOURCE in the network database
+	cymsource = {}
+	struct = {
+		"name": None,  # information structure for each object found in struct
+		"bustype": "SWING",
+		"nominal_voltage": None,
+		"phases": None,
+	}
+
 	if _type == 1:
-		CYMSOURCE = {
-			"name": None,  # information structure for each object found in CYMSOURCE
-			"bustype": "SWING",
-			"nominal_voltage": None,
-			"phases": None,
-		}
 		# Check to see if the network database contains models for more than one database and if we chose a valid feeder_id to convert
 		feeder_db = _csvToDictList(
 			pJoin(modelDir, "cymeCsvDump", "CYMSOURCE.csv"), feederId
 		)
 	elif _type == 2:
-		CYMEQUIVALENTSOURCE = {
-			"name": None,  # information structure for each object found in CYMEQUIVALENTSOURCE
-			"bustype": "SWING",
-			"nominal_voltage": None,
-			"phases": None,
-		}
 		# Check to see if the network database contains models for more than one database and if we chose a valid feeder_id to convert
-		# feeder_db = networkDatabase.execute("SELECT NodeId, OperatingVoltage1 FROM CYMEQUIVALENTSOURCE").fetchall()
 		feeder_db = _csvToDictList(
 			pJoin(modelDir, "cymeCsvDump", "CYMEQUIVALENTSOURCE.csv"), feederId
 		)
@@ -364,8 +358,9 @@ def _readCymeSource(feederId, _type, modelDir):
 		)
 		if feeder_db_net == None:
 			raise RuntimeError(
-				"No source node was found in CYMSOURCE: {:s}.\n".format(feederId)
+				"No source node was found in struct: {:s}.\n".format(feederId)
 			)
+
 	if feeder_db == None:
 		raise RuntimeError(
 			"No source node was found in CYMSOURCE: {:s}.\n".format(feederId)
@@ -375,91 +370,83 @@ def _readCymeSource(feederId, _type, modelDir):
 			print "NetworkId", feeder_db_net
 		except:
 			pass
-	"""mj debug"""
+	"""MICHAEL JACKSON debug"""
+	# if feederId arg is none (from findNetworkId call on CYMNETWORK.csv)
 	if feederId == None:
-		"""mj debug"""
 		print "NO FEEDER ID\n"
-		if len(feeder_db) >= 1:
-			if len(feeder_db) == 1:
-				try:
-					for row in feeder_db:
-						feeder_id = row.NetworkId
-						cymsource[_fixName(row.NodeId)] = copy.deepcopy(CYMSOURCE)
-						cymsource[_fixName(row.NodeId)]["name"] = _fixName(row.NodeId)
-						cymsource[_fixName(row.NodeId)]["nominal_voltage"] = str(
-							float(row.DesiredVoltage) * 1000.0 / math.sqrt(3)
-						)
-				except:
-					for row in feeder_db_net:
-						feeder_id = row.NetworkId
-						cymsource[_fixName(row.NodeId)] = copy.deepcopy(
-							CYMEQUIVALENTOURCE
-						)
-						cymsource[_fixName(row.NodeId)]["name"] = _fixName(row.NodeId)
-						cymsource[_fixName(row.NodeId)]["nominal_voltage"] = str(
-							float(row.OperatingVoltage1) * 1000.0 / math.sqrt(3)
-						)
-			else:
-				raise RuntimeError(
-					"The was no feeder id given and the network database contians more than one feeder. Please specify a feeder id to extract."
+		if len(feeder_db) == 1:
+			try:
+				row = feeder_db[0]
+				feederId = row.NetworkId
+				node_id = _fixName(row.NodeId)
+				cymsource[node_id] = copy.deepcopy(struct)
+				cymsource[node_id]["name"] = node_id
+				cymsource[node_id]["nominal_voltage"] = str(
+					float(row.DesiredVoltage) * 1000.0 / math.sqrt(3)
 				)
-	else:
-		"""mj debug"""
-		print "FEEDER ID", feederId
-		feederIds = []
-		if _type == 1:
-			for row in feeder_db:
-				feederIds.append(row.NetworkId)
-			if feederId not in feederIds:
-				raise RuntimeError(
-					"The feeder id provided is not in the network database. Please specify a valid feeder id to extract."
-				)
-			for row in feeder_db:
-				if row.NetworkId == feederId:
-					feeder_id = feederId
-					cymsource[_fixName(row.NodeId)] = copy.deepcopy(CYMSOURCE)
-					cymsource[_fixName(row.NodeId)]["name"] = _fixName(row.NodeId)
-					cymsource[_fixName(row.NodeId)]["nominal_voltage"] = str(
-						float(row.DesiredVoltage) * 1000.0 / math.sqrt(3)
+			except:
+				for row in feeder_db_net:
+					feederId = row.NetworkId
+					node_id = _fixName(row.NodeId)
+					cymsource[node_id] = copy.deepcopy(struct)
+					cymsource[node_id]["name"] = node_id
+					cymsource[node_id]["nominal_voltage"] = str(
+						float(row.OperatingVoltage1) * 1000.0 / math.sqrt(3)
 					)
-					swingBus = _fixName(row.NodeId)
+		elif len(feeder_db) > 1:
+			raise RuntimeError(
+				"The was no feeder id given and the network database contians more than one feeder. Please specify a feeder id to extract."
+			)
+	else:
+		print "FEEDER ID", feederId
+		try:
+			feeder_index = [
+				row.NetworkId for row in (feeder_db if _type == 1 else feeder_db_net)
+			].index(feederId)
+		except ValueError:
+			raise RuntimeError(
+				"The feeder id provided is not in the network database. Please specify a valid feeder id to extract."
+			)
+
+		if _type == 1:
+			row = feeder_db[feeder_index]
+			feeder_id = feederId
+			node_id = _fixName(row.NodeId)
+			cymsource[node_id] = copy.deepcopy(struct)
+			cymsource[node_id]["name"] = node_id
+			cymsource[node_id]["nominal_voltage"] = str(
+				float(row.DesiredVoltage) * 1000.0 / math.sqrt(3)
+			)
+			swingBus = node_id
 		elif _type == 2:
-			for row in feeder_db_net:
-				feederIds.append(row.NetworkId)
-			if feederId not in feederIds:
-				raise RuntimeError(
-					"The feeder id provided is not in the network database. Please specify a valid feeder id to extract."
-				)
-			for row in feeder_db_net:
-				if row.NetworkId == feederId:
-					feeder_id = feederId
-			feederId_equivalent = "SOURCE_" + feeder_id
+			feederId_equivalent = "SOURCE_" + feederId
 			for row in feeder_db:
-				if row.NodeId in feederId_equivalent:  # jfk.  logic was backwards.
+				if row.NodeId in feederId_equivalent:
+					# JOHN FITZGERALD KENNEDY.  logic was backwards.
 					feeder_id = feederId
-					cymsource[_fixName(row.NodeId)] = copy.deepcopy(CYMEQUIVALENTSOURCE)
-					cymsource[_fixName(row.NodeId)]["name"] = _fixName(row.NodeId)
-					# jfk. Differentiating between nominal voltage and voltage setpoint at the source.  Otherwise, per unit calcs get messy later.  Also, more accurate for capacitors.
-					cymsource[_fixName(row.NodeId)]["nominal_voltage"] = str(
+					node_id = _fixName(row.NodeId)
+					cymsource[node_id] = copy.deepcopy(struct)
+					cymsource[node_id]["name"] = node_id
+					# JOHN FITZGERALD KENNEDY. Differentiating between nominal voltage and voltage setpoint at the source.  Otherwise, per unit calcs get messy later.  Also, more accurate for capacitors.
+					cymsource[node_id]["nominal_voltage"] = str(
 						float(row.KVLL) * 1000.0 / math.sqrt(3)
-					)  # jfk.
-					cymsource[_fixName(row.NodeId)]["source_voltage"] = str(
+					)  # JOHN FITZGERALD KENNEDY.
+					cymsource[node_id]["source_voltage"] = str(
 						float(row.OperatingVoltage1) * 1000.0
-					)  # jfk
-					swingBus = _fixName(row.NodeId)
+					)  # JOHN FITZGERALD KENNEDY
+					swingBus = node_id
 	return cymsource, feeder_id, swingBus
 
 
+# 8B
 def _readCymeNode(feederId, modelDir):
 	"""store lat/lon information on nodes"""
 	# Helper for lat/lon conversion.
-	x_list = []
-	y_list = []
 	x_pixel_range = 1200
 	y_pixel_range = 800
 	cymnode = {}
-	CYMNODE = {"name": None, "latitude": None, "longitude": None}
-	# node_db = networkDatabase.execute("SELECT NodeId, X, Y FROM CYMNODE WHERE NetworkId = '{:s}'".format(feederId)).fetchall()
+	struct = {"name": None, "latitude": None, "longitude": None}
+
 	node_db = _csvToDictList(pJoin(modelDir, "cymeCsvDump", "CYMNODE.csv"), feederId)
 	if len(node_db) == 0:
 		warnings.warn(
@@ -469,47 +456,41 @@ def _readCymeNode(feederId, modelDir):
 			RuntimeWarning,
 		)
 	else:
-		for row in node_db:
-			x_list.append(row.X)
-			y_list.append(row.Y)
-		xmax = float(max(x_list))
-		xmin = float(min(x_list))
-		ymax = float(max(y_list))
-		ymin = float(min(y_list))
+		x = [float(row.X) for row in node_db]
+		y = [float(row.Y) for row in node_db]
 		try:
-			x_scale = x_pixel_range / (xmax - xmin)
-			x_b = -x_scale * xmin
-			y_scale = y_pixel_range / (ymax - ymin)
-			y_b = -y_scale * ymin
+			x_scale = x_pixel_range / (max(x) - min(x))
+			x_b = -x_scale * min(x)
+			y_scale = y_pixel_range / (max(x) - min(y))
+			y_b = -y_scale * min(y)
 		except:
 			x_scale, x_b, y_scale, y_b = (0, 0, 0, 0)
 		for row in node_db:
 			row.NodeId = _fixName(row.NodeId)
-			if row.NodeId not in cymnode.keys():
-				cymnode[row.NodeId] = copy.deepcopy(CYMNODE)
+			if row.NodeId not in cymnode:
+				cymnode[row.NodeId] = copy.deepcopy(struct)
 				cymnode[row.NodeId]["name"] = row.NodeId
 				cymnode[row.NodeId]["latitude"] = str(x_scale * float(row.X) + x_b)
 				cymnode[row.NodeId]["longitude"] = str(
-					800 - (y_scale * float(row.Y) + y_b)
+					y_pixel_range - (y_scale * float(row.Y) + y_b)
 				)
 	return cymnode, x_scale, y_scale
 
 
+# 8B
 def _readCymeOverheadByPhase(feederId, modelDir):
 	"""store information from CYMOVERHEADBYPHASE"""
-	cymoverheadbyphase = (
-		{}
-	)  # Stores information found in CYMOVERHEADBYPHASE in the network database
-	overheadLineConfiguration = {}
+	data_dict = {}
+	# Stores information found in CYMOVERHEADBYPHASE in the network database
 	olc = {}
 	uniqueSpacing = []
 	overheadConductors = []  # Stores the unique conductor equipment Ids
-	CYMOVERHEADBYPHASE = {
+	struct = {
 		"name": None,  # Information structure for each object found in CYMOVERHEADBYPHASE
 		"length": None,
 		"configuration": None,
 	}
-	# overheadbyphase_db = networkDatabase.execute("SELECT DeviceNumber, PhaseConductorIdA, PhaseConductorIdB, PhaseConductorIdC, NeutralConductorId, ConductorSpacingId, Length FROM CYMOVERHEADBYPHASE WHERE NetworkId = '{:s}'".format(feederId)).fetchall()
+
 	overheadbyphase_db = _csvToDictList(
 		pJoin(modelDir, "cymeCsvDump", "CYMOVERHEADBYPHASE.csv"), feederId
 	)
@@ -523,187 +504,116 @@ def _readCymeOverheadByPhase(feederId, modelDir):
 	else:
 		# Add all phase conductors to the line configuration dictionary.
 		for row in overheadbyphase_db:
-			row.DeviceNumber = _fixName(row.DeviceNumber)
-			if row.DeviceNumber not in cymoverheadbyphase.keys():
-				cymoverheadbyphase[row.DeviceNumber] = copy.deepcopy(CYMOVERHEADBYPHASE)
-				cymoverheadbyphase[row.DeviceNumber]["name"] = row.DeviceNumber
-				if row.PhaseConductorIdA != "NONE":
-					overheadLineConfiguration["conductor_A"] = _fixName(
-						row.PhaseConductorIdA
-					)
-					if _fixName(row.PhaseConductorIdA) not in overheadConductors:
-						overheadConductors.append(_fixName(row.PhaseConductorIdA))
-				if row.PhaseConductorIdB != "NONE":
-					overheadLineConfiguration["conductor_B"] = _fixName(
-						row.PhaseConductorIdB
-					)
-					if _fixName(row.PhaseConductorIdB) not in overheadConductors:
-						overheadConductors.append(_fixName(row.PhaseConductorIdB))
-				if row.PhaseConductorIdC != "NONE":
-					overheadLineConfiguration["conductor_C"] = _fixName(
-						row.PhaseConductorIdC
-					)
-					if _fixName(row.PhaseConductorIdC) not in overheadConductors:
-						overheadConductors.append(_fixName(row.PhaseConductorIdC))
+			device_no = _fixName(row.DeviceNumber)
+			if row.DeviceNumber not in data_dict.keys():
+				data_dict[device_no] = copy.deepcopy(struct)
+				data_dict[device_no]["name"] = device_no
+				overheadLineConfiguration = {}
+
+				for P in "ABC":
+					if row["PhaseConductorId" + P] != "NONE":
+						c_name = _fixName(row["PhaseConductorId" + P])
+						overheadLineConfiguration["conductor_" + P] = c_name
+						if c_name not in overheadConductors:
+							overheadConductors.append(c_name)
+
 				if row.NeutralConductorId != "NONE":
-					overheadLineConfiguration["conductor_N"] = _fixName(
-						row.NeutralConductorId
-					)
-					if (
-						row.NeutralConductorId != "NONE"
-						and _fixName(row.NeutralConductorId) not in overheadConductors
-					):
-						overheadConductors.append(_fixName(row.NeutralConductorId))
-				overheadLineConfiguration["spacing"] = _fixName(row.ConductorSpacingId)
-				if _fixName(row.ConductorSpacingId) not in uniqueSpacing:
-					uniqueSpacing.append(_fixName(row.ConductorSpacingId))
-				cymoverheadbyphase[row.DeviceNumber]["length"] = (
-					float(row.Length) * m2ft
-				)
-				if cymoverheadbyphase[row.DeviceNumber]["length"] == 0.0:
-					cymoverheadbyphase[row.DeviceNumber]["length"] = 1.0
-				if len(olc) == 0:
-					olc["olc0"] = copy.deepcopy(overheadLineConfiguration)
-					cymoverheadbyphase[row.DeviceNumber]["configuration"] = "olc0"
-				else:
-					for key in olc.keys():
-						if overheadLineConfiguration == olc[key]:
-							cymoverheadbyphase[row.DeviceNumber]["configuration"] = key
-					if cymoverheadbyphase[row.DeviceNumber]["configuration"] == None:
-						key = "olc" + str(len(olc))
-						olc[key] = copy.deepcopy(overheadLineConfiguration)
-						cymoverheadbyphase[row.DeviceNumber]["configuration"] = key
-	return overheadConductors, cymoverheadbyphase, olc, uniqueSpacing
+					c_name = _fixName(row.NeutralConductorId)
+					overheadLineConfiguration["conductor_N"] = c_name
+					if c_name not in overheadConductors:
+						overheadConductors.append(c_name)
+
+				tmp = _fixName(row.ConductorSpacingId)
+				overheadLineConfiguration["spacing"] = tmp
+				if tmp not in uniqueSpacing:
+					uniqueSpacing.append(tmp)
+
+				tmp = float(row.Length) * m2ft
+				data_dict[device_no]["length"] = tmp if tmp != 0 else 1.0
+
+				for key, config in olc.iteritems():
+					if overheadLineConfiguration == config:
+						data_dict[device_no]["configuration"] = key
+				if data_dict[device_no]["configuration"] is None:
+					key = "olc" + str(len(olc))
+					olc[key] = copy.deepcopy(overheadLineConfiguration)
+					data_dict[device_no]["configuration"] = key
+	return overheadConductors, data_dict, olc, uniqueSpacing
 
 
-def _readCymeUndergroundLine(feederId, modelDir):
-	"""store information from CYMUNDERGROUNDLINE"""
-	cymundergroundline = (
-		{}
-	)  # Stores information found in CYMUNDERGOUNDLINE in the network database
-	undergroundConductors = []  # Stores the unique underground conductor equipment Ids
-	CYMUNDERGROUNDLINE = {
-		"name": None,  # Information structure for each object found in CYMUNDERGROUNDLINE
-		"length": None,
-		"cable_id": None,
-	}
-	# ug_line_db = networkDatabase.execute("SELECT DeviceNumber, CableId, Length FROM CYMUNDERGROUNDLINE WHERE NetworkId = '{:s}'".format(feederId)).fetchall()
-	ug_line_db = _csvToDictList(
-		pJoin(modelDir, "cymeCsvDump", "CYMUNDERGROUNDLINE.csv"), feederId
-	)
-	if len(ug_line_db) == 0:
-		warnings.warn(
-			"No underground_line objects were found in CYMUNDERGROUNDLINE for feeder_id: {:s}.".format(
-				feederId
-			),
-			RuntimeWarning,
-		)
-	else:
-		for row in ug_line_db:
-			row.DeviceNumber = _fixName(row.DeviceNumber)
-			if row.DeviceNumber not in cymundergroundline.keys():
-				cymundergroundline[row.DeviceNumber] = copy.deepcopy(CYMUNDERGROUNDLINE)
-				cymundergroundline[row.DeviceNumber]["name"] = _fixName(
-					row.DeviceNumber
-				)
-				cymundergroundline[row.DeviceNumber]["cable_id"] = _fixName(row.CableId)
-				cymundergroundline[row.DeviceNumber]["length"] = (
-					float(row.Length) * m2ft
-				)
-				if cymundergroundline[row.DeviceNumber]["length"] == 0.0:
-					cymundergroundline[row.DeviceNumber]["length"] = 1.0
-				if _fixName(row.CableId) not in undergroundConductors:
-					undergroundConductors.append(_fixName(row.CableId))
-	return undergroundConductors, cymundergroundline
-
-
-def _readCymeOverheadLineUnbalanced(feederId, modelDir):
-	"""store information from CYMOVERHEADLINEUNBALANCED"""
-	cymoverheadlineunbalanced = (
-		{}
-	)  # Stores information found in CYMOVERHEADLINEUNBALANCED in the network database
-	OhUbConductors = []  # Stores the unique underground conductor equipment Ids
-	CYMOVERHEADLINEUNBALANCED = {
+# 8B
+def _readGenericLine(csvName, feederId, modelDir, underground=False):
+	"""store information from csvName"""
+	data_dict = {}
+	# Stores information found in CYMOVERHEADLINEUNBALANCED in the network database
+	conductors = []  # Stores the unique underground conductor equipment Ids
+	struct = {
 		"name": None,  # Information structure for each object found in CYMOVERHEADLINEUNBALANCED
 		"length": None,
-		"configuration": None,
 	}
-	# ug_line_db = networkDatabase.execute("SELECT DeviceNumber, LineId, Length FROM CYMOVERHEADLINEUNBALANCED WHERE NetworkId = '{:s}'".format(feederId)).fetchall()
-	ug_line_db = _csvToDictList(
-		pJoin(modelDir, "cymeCsvDump", "CYMOVERHEADLINEUNBALANCED.csv"), feederId
-	)
-	if len(ug_line_db) == 0:
+
+	struct["cable_id" if underground else "configuration"] = None
+
+	db = _csvToDictList(pJoin(modelDir, "cymeCsvDump", csvName), feederId)
+	if len(db) == 0:
 		warnings.warn(
-			"No underground_line objects were found in CYMOVERHEADLINEUNBALANCED for feeder_id: {:s}.".format(
-				feederId
+			"No line objects were found in {} for feeder_id: {}.".format(
+				csvName, feederId
 			),
 			RuntimeWarning,
 		)
 	else:
-		for row in ug_line_db:
-			row.DeviceNumber = _fixName(row.DeviceNumber)
-			if row.DeviceNumber not in cymoverheadlineunbalanced.keys():
-				cymoverheadlineunbalanced[row.DeviceNumber] = copy.deepcopy(
-					CYMOVERHEADLINEUNBALANCED
-				)
-				cymoverheadlineunbalanced[row.DeviceNumber]["name"] = _fixName(
-					row.DeviceNumber
-				)
-				cymoverheadlineunbalanced[row.DeviceNumber]["configuration"] = _fixName(
-					row.LineId
-				)
-				cymoverheadlineunbalanced[row.DeviceNumber]["length"] = (
-					float(row.Length) * m2ft
-				)
-				if cymoverheadlineunbalanced[row.DeviceNumber]["length"] == 0.0:
-					cymoverheadlineunbalanced[row.DeviceNumber]["length"] = 1.0
-				if _fixName(row.LineId) not in OhUbConductors:
-					OhUbConductors.append(_fixName(row.LineId))
-	return cymoverheadlineunbalanced, OhUbConductors
+		for row in db:
+			device_no = _fixName(row.DeviceNumber)
+			if device_no not in data_dict.keys():
+				data_dict[device_no] = copy.deepcopy(struct)
+				data_dict[device_no]["name"] = device_no
+
+				if underground:
+					tmp = _fixName(row.CableId)
+					data_dict[device_no]["cable_id"] = tmp
+				else:
+					tmp = _fixName(row.LineId)
+					data_dict[device_no]["configuration"] = tmp
+
+				if tmp not in conductors:
+					conductors.append(tmp)
+
+				tmp = float(row.Length) * m2ft
+				data_dict[device_no]["length"] = tmp if tmp != 0 else 1.0
+	return conductors, data_dict
 
 
+# 8B
+def _readCymeOverheadLineUnbalanced(feederId, modelDir):
+	"""store information from CYMOVERHEADLINEUNBALANCED"""
+	return _readGenericLine("CYMOVERHEADLINEUNBALANCED.csv", feederId, modelDir)
+
+
+# 8B
 def _readCymeOverheadLine(feederId, modelDir):
-	cymoverheadline = {}
-	CYMOVERHEADLINE = {"name": None, "length": None, "configuration": None}
-	lineIds = []
-	overhead_line_db = _csvToDictList(
-		pJoin(modelDir, "cymeCsvDump", "CYMOVERHEADLINE.csv"), feederId
+	return _readGenericLine("CYMOVERHEADLINE.csv", feederId, modelDir)
+
+
+# 8B
+def _readCymeUndergroundLine(feederId, modelDir):
+	return _readGenericLine(
+		"CYMUNDERGROUNDLINE.csv", feederId, modelDir, underground=True
 	)
-	if len(overhead_line_db) == 0:
-		warnings.warn(
-			"No overhead_line objects were found in CYMOVERHEADLINE for feeder_id: {:s}.".format(
-				feederId
-			),
-			RuntimeWarning,
-		)
-	else:
-		for row in overhead_line_db:
-			row.DeviceNumber = _fixName(row.DeviceNumber)
-			if _fixName(row.LineId) not in lineIds:
-				lineIds.append(_fixName(row.LineId))
-			if row.DeviceNumber not in cymoverheadline.keys():
-				cymoverheadline[row.DeviceNumber] = copy.deepcopy(CYMOVERHEADLINE)
-				cymoverheadline[row.DeviceNumber]["name"] = _fixName(row.DeviceNumber)
-				cymoverheadline[row.DeviceNumber]["configuration"] = _fixName(
-					row.LineId
-				)
-				cymoverheadline[row.DeviceNumber]["length"] = float(row.Length) * m2ft
-				if cymoverheadline[row.DeviceNumber]["length"] == 0.0:
-					cymoverheadline[row.DeviceNumber]["length"] = 1.0
-	return cymoverheadline, lineIds
 
 
+# 8B
 def _readCymeQOverheadLine(feederId, modelDir):
-	cymeqoverheadline = {}
-	CYMEQOVERHEADLINE = {
+	data_dict = {}
+	struct = {
 		"name": None,  # Information structure for each object found in CYMOVERHEADBYPHASE
 		"configuration": None,
 	}
 	spacingIds = []
-	cymeqoverheadline_db = _csvToDictList(
+	data_dict_db = _csvToDictList(
 		pJoin(modelDir, "cymeCsvDump", "CYMEQOVERHEADLINE.csv"), feederId
 	)
-	if len(cymeqoverheadline_db) == 0:
+	if len(data_dict_db) == 0:
 		warnings.warn(
 			"No overheadline objects were found in CYMEQCONDUCTOR for feeder_id: {:s}.".format(
 				feederId
@@ -711,27 +621,22 @@ def _readCymeQOverheadLine(feederId, modelDir):
 			RuntimeWarning,
 		)
 	else:
-		for row in cymeqoverheadline_db:
-			row.EquipmentId = _fixName(row.EquipmentId)
+		for row in data_dict_db:
+			eq_id = _fixName(row.EquipmentId)
 			spacingIds.append(_fixName(row.ConductorSpacingId))
-			if row.EquipmentId not in cymeqoverheadline.keys():
-				cymeqoverheadline[row.EquipmentId] = copy.deepcopy(CYMEQOVERHEADLINE)
-				cymeqoverheadline[row.EquipmentId]["name"] = row.EquipmentId
-				cymeqoverheadline[row.EquipmentId]["configuration"] = _fixName(
-					row.PhaseConductorId
-				)
-				cymeqoverheadline[row.EquipmentId]["spacing"] = _fixName(
-					row.ConductorSpacingId
-				)
-				cymeqoverheadline[row.EquipmentId]["conductor_N"] = _fixName(
-					row.NeutralConductorId
-				)
-	return cymeqoverheadline, spacingIds
+			if eq_id not in data_dict:
+				data_dict[eq_id] = copy.deepcopy(struct)
+				data_dict[eq_id]["name"] = eq_id
+				data_dict[eq_id]["configuration"] = _fixName(row.PhaseConductorId)
+				data_dict[eq_id]["spacing"] = _fixName(row.ConductorSpacingId)
+				data_dict[eq_id]["conductor_N"] = _fixName(row.NeutralConductorId)
+	return data_dict, spacingIds
 
 
+# 8B
 def _readCymeReactors(feederId, modelDir):
-	cymseriesreactor = {}
-	CYMSERIESREACTOR = {"name": None, "configuration": None}
+	data_dict = {}
+	struct = {"name": None, "configuration": None}
 	reactorIds = []
 	seriesreactor_db = _csvToDictList(
 		pJoin(modelDir, "cymeCsvDump", "CYMSERIESREACTOR.csv"), feederId
@@ -745,26 +650,25 @@ def _readCymeReactors(feederId, modelDir):
 		)
 	else:
 		for row in seriesreactor_db:
-			row.DeviceNumber = _fixName(row.DeviceNumber)
-			if _fixName(row.EquipmentId) not in reactorIds:
-				reactorIds.append(_fixName(row.EquipmentId))
-			if row.DeviceNumber not in cymseriesreactor.keys():
-				cymseriesreactor[row.DeviceNumber] = copy.deepcopy(CYMSERIESREACTOR)
-				cymseriesreactor[row.DeviceNumber]["name"] = _fixName(row.DeviceNumber)
-				cymseriesreactor[row.DeviceNumber]["configuration"] = _fixName(
-					row.EquipmentId
-				)
-
-	return cymseriesreactor, reactorIds
+			device_no = _fixName(row.DeviceNumber)
+			eq_id = _fixName(row.EquipmentId)
+			if eq_id not in reactorIds:
+				reactorIds.append(eq_id)
+			if device_no not in data_dict:
+				data_dict[device_no] = copy.deepcopy(struct)
+				data_dict[device_no]["name"] = device_no
+				data_dict[device_no]["configuration"] = eq_id
+	return data_dict, reactorIds
 
 
+# 8B
 def _readEqReactors(feederId, modelDir):
-	cymeqreactor = {}
-	CYMEQREACTOR = {"name": None, "reactance": None}
-	cymeqreactor_db = _csvToDictList(
+	data_dict = {}
+	struct = {"name": None, "reactance": None}
+	data_dict_db = _csvToDictList(
 		pJoin(modelDir, "cymeCsvDump", "CYMEQSERIESREACTOR.csv"), feederId
 	)
-	if len(cymeqreactor_db) == 0:
+	if len(data_dict_db) == 0:
 		warnings.warn(
 			"No reactor equipment was found in CYMEQREACTOR for feeder_id: {:s}.".format(
 				feederId
@@ -772,19 +676,20 @@ def _readEqReactors(feederId, modelDir):
 			RuntimeWarning,
 		)
 	else:
-		for row in cymeqreactor_db:
-			row.EquipmentId = _fixName(row.EquipmentId)
-			if row.EquipmentId not in cymeqreactor.keys():
-				cymeqreactor[row.EquipmentId] = copy.deepcopy(CYMEQREACTOR)
-				cymeqreactor[row.EquipmentId]["name"] = row.EquipmentId
-				cymeqreactor[row.EquipmentId]["reactance"] = row.ReactanceOhms
-	return cymeqreactor
+		for row in data_dict_db:
+			eq_id = _fixName(row.EquipmentId)
+			if eq_id not in data_dict:
+				data_dict[eq_id] = copy.deepcopy(struct)
+				data_dict[eq_id]["name"] = eq_id
+				data_dict[eq_id]["reactance"] = row.ReactanceOhms
+	return data_dict
 
 
+# 8B
 def _readCymeSection(feederId, modelDir):
 	"""store information from CYMSECTION"""
-	cymsection = {}  # Stores information found in CYMSECTION in the network database
-	CYMSECTION = {
+	data_dict = {}  # Stores information found in CYMSECTION in the network database
+	struct = {
 		"name": None,  # Information structure for each object found in CYMSECTION
 		"from": None,
 		"to": None,
@@ -803,22 +708,23 @@ def _readCymeSection(feederId, modelDir):
 		)
 	else:
 		for row in section_db:
-			row.SectionId = _fixName(row.SectionId)
-			if row.SectionId not in cymsection.keys():
-				cymsection[row.SectionId] = copy.deepcopy(CYMSECTION)
-				cymsection[row.SectionId]["name"] = row.SectionId
-				cymsection[row.SectionId]["from"] = _fixName(row.FromNodeId)
-				cymsection[row.SectionId]["to"] = _fixName(row.ToNodeId)
-				cymsection[row.SectionId]["phases"] = _convertPhase(int(row.Phase))
-	return cymsection
+			sect_id = _fixName(row.SectionId)
+			if sect_id not in data_dict.keys():
+				data_dict[sect_id] = copy.deepcopy(struct)
+				data_dict[sect_id]["name"] = sect_id
+				data_dict[sect_id]["from"] = _fixName(row.FromNodeId)
+				data_dict[sect_id]["to"] = _fixName(row.ToNodeId)
+				data_dict[sect_id]["phases"] = _convertPhase(int(row.Phase))
+	return data_dict
 
 
+# 8B
 def _readCymeSectionDevice(feederId, modelDir):
 	"""store information from CYMSECTIONDEVICE"""
-	cymsectiondevice = (
+	data_dict = (
 		{}
 	)  # Stores information found in CYMSECTIONDEVICE in the network database
-	CYMSECTIONDEVICE = {
+	struct = {
 		"name": None,  # Information structure for each object found in CYMSECTIONDEVICE
 		"device_type": None,
 		"section_name": None,
@@ -837,63 +743,58 @@ def _readCymeSectionDevice(feederId, modelDir):
 		)
 	else:
 		for row in section_device_db:
-			row.SectionId = _fixName(row.SectionId)
-			row.DeviceNumber = _fixName(row.DeviceNumber)
-			if row.DeviceNumber not in cymsectiondevice.keys():
-				cymsectiondevice[row.DeviceNumber] = copy.deepcopy(CYMSECTIONDEVICE)
-				cymsectiondevice[row.DeviceNumber]["name"] = row.DeviceNumber
-				cymsectiondevice[row.DeviceNumber]["device_type"] = int(row.DeviceType)
-				cymsectiondevice[row.DeviceNumber]["section_name"] = row.SectionId
-				cymsectiondevice[row.DeviceNumber]["location"] = int(row.Location)
+			sect_id = _fixName(row.SectionId)
+			device_no = _fixName(row.DeviceNumber)
+			if device_no not in data_dict.keys():
+				data_dict[device_no] = copy.deepcopy(struct)
+				data_dict[device_no]["name"] = device_no
+				data_dict[device_no]["device_type"] = int(row.DeviceType)
+				data_dict[device_no]["section_name"] = row.SectionId
+				data_dict[device_no]["location"] = int(row.Location)
 			else:
-				# jfk. A better fix is needed.
-				print "Found duplicate device ID: " + row.DeviceNumber + ".  Rename device in Cyme or the device will be overwritten."
-	return cymsectiondevice
+				# JOHN FITZGERALD KENNEDY. A better fix is needed.
+				print "Found duplicate device ID: " + device_no + ".  Rename device in Cyme or the device will be overwritten."
+	return data_dict
 
 
+# 8B
 def _splitLinkObjects(sectionDict, deviceDict, linkDict, overheadDict, undergroundDict):
 	"""Split multiple link objects from the line that they are folded into"""
-	# jfk.  Several changes in here related to the following problem.  Old code assume that each section (linkDict) would
+	# JOHN FITZGERALD KENNEDY.  Several changes in here related to the following problem.  Old code assume that each section (linkDict) would
 	# only have one device or link object per section.  I found that this wasn't true for solar PV and switches.
 	# Later in the code, linkDicts for these objects have lists as their values.
 	# This code now reflects this possiblity.  But it makes it kind of inconsistent and hacky.
-	for link in linkDict.keys():
-		if (
-			link in overheadDict.keys() or link in undergroundDict.keys()
-		):  # if true the link is embedded in a line object and must be separated
+	for link in linkDict:
+		if link in overheadDict or link in undergroundDict:
+			# if true the link is embedded in a line object and must be separated
 			lineId = link
-			newLinkIds = linkDict[link]  # jfk
-			if type(newLinkIds) != list:  # jfk
-				newLinkIds = [newLinkIds]
-			for newLinkId in newLinkIds:  # jfk
-				if (
-					deviceDict[newLinkId]["location"] == 1
-				):  # device is at the from side of a section
-					sectionDict[newLinkId] = copy.deepcopy(sectionDict[lineId])
-					sectionDict[newLinkId]["name"] = newLinkId
-					sectionDict[newLinkId]["to"] = "node" + newLinkId
-					sectionDict[newLinkId]["toX"] = str(
-						float(sectionDict[lineId]["fromX"]) + random.uniform(-10, 10)
-					)
-					sectionDict[newLinkId]["toY"] = str(
-						float(sectionDict[lineId]["fromY"]) + random.uniform(-10, 10)
-					)
-					sectionDict[lineId]["from"] = "node" + newLinkId
-					sectionDict[lineId]["fromX"] = sectionDict[newLinkId]["toX"]
-					sectionDict[lineId]["fromY"] = sectionDict[newLinkId]["toY"]
-				else:  # device is at the to side of a section
-					sectionDict[newLinkId] = copy.deepcopy(sectionDict[lineId])
-					sectionDict[newLinkId]["name"] = newLinkId
-					sectionDict[newLinkId]["from"] = "node" + newLinkId
-					sectionDict[newLinkId]["fromX"] = str(
-						float(sectionDict[lineId]["toX"]) + random.uniform(-10, 10)
-					)
-					sectionDict[newLinkId]["fromY"] = str(
-						float(sectionDict[lineId]["toY"]) + random.uniform(-10, 10)
-					)
-					sectionDict[lineId]["to"] = "node" + newLinkId
-					sectionDict[lineId]["toX"] = sectionDict[newLinkId]["fromX"]
-					sectionDict[lineId]["toY"] = sectionDict[newLinkId]["fromY"]
+
+			tmp = linkDict[link]
+			newLinkIds = tmp if type(tmp) == list else [tmp]
+
+			for newLinkId in newLinkIds:  # JOHN FITZGERALD KENNEDY
+				at_from = deviceDict[newLinkId]["location"] == 1
+				to_of = newLinkId if at_from else lineId
+				from_of = lineId if at_from else newLinkId
+
+				sectionDict[newLinkId] = copy.deepcopy(sectionDict[lineId])
+				sectionDict[newLinkId]["name"] = newLinkId
+
+				sectionDict[to_of]["to"] = "node" + newLinkId
+				sectionDict[from_of]["from"] = "node" + newLinkId
+
+				a = "to" if at_from else "from"
+				b = "from" if at_from else "to"
+
+				sectionDict[newLinkId][a + "X"] = str(
+					float(sectionDict[lineId][b + "X"]) + random.uniform(-10, 10)
+				)
+				sectionDict[newLinkId][a + "Y"] = str(
+					float(sectionDict[lineId][b + "Y"]) + random.uniform(-10, 10)
+				)
+				sectionDict[lineId][b + "X"] = sectionDict[newLinkId][a + "X"]
+				sectionDict[lineId][b + "Y"] = sectionDict[newLinkId][a + "Y"]
+
 				for phase in ["N", "D"]:
 					sectionDict[newLinkId]["phases"] = sectionDict[newLinkId][
 						"phases"
@@ -904,18 +805,13 @@ def _splitLinkObjects(sectionDict, deviceDict, linkDict, overheadDict, undergrou
 
 def _findParents(sectionDict, deviceDict, loadDict):
 	"""store parent information for load type objects"""
-	for loadsection in loadDict.keys():
-		lineId = loadsection
-		if type(loadDict[lineId]) != list:
-			loaddevices = [loadDict[lineId]]
-		else:
-			loaddevices = loadDict[lineId]
+	for lineId, loaddevices in loadDict.iteritems():
+		loaddevices = loaddevices if type(loaddevices) == list else [loaddevices]
 		for loaddevice in loaddevices:
-			if deviceDict[loaddevice]["location"] == 2:
-				deviceDict[loaddevice]["parent"] = sectionDict[lineId]["to"]
-			else:
-				deviceDict[loaddevice]["parent"] = sectionDict[lineId]["from"]
+			tmp = "to" if deviceDict[loaddevice]["location"] == 2 else "from"
+			deviceDict[loaddevice]["parent"] = sectionDict[lineId][tmp]
 			deviceDict[loaddevice]["phases"] = sectionDict[lineId]["phases"]
+
 
 
 def _readCymeSwitch(feederId, modelDir):
@@ -1087,7 +983,7 @@ def _readCymeShuntCapacitor(feederId, modelDir):
 	cymshuntcapacitor = (
 		{}
 	)  # Stores information found in CYMSHUNTCAPACITOR in the network database
-	CYMSHUNTCAPACITOR = {
+	cymshuntcapacitor_default = {
 		"name": None,  # Information structure for each object found in CYMSHUNTCAPACITOR
 		"equipment_name": None,
 		"status": None,
@@ -1127,9 +1023,9 @@ def _readCymeShuntCapacitor(feederId, modelDir):
 				if row.EquipmentId is None:
 					row.EquipmentId = "DEFAULT"
 				row.EquipmentId = _fixName(row.EquipmentId)
-				if row.DeviceNumber not in cymshuntcapacitor.keys():
+				if row.DeviceNumber not in cymshuntcapacitor:
 					cymshuntcapacitor[row.DeviceNumber] = copy.deepcopy(
-						CYMSHUNTCAPACITOR
+						cymshuntcapacitor_default
 					)
 					cymshuntcapacitor[row.DeviceNumber]["name"] = row.DeviceNumber
 					cymshuntcapacitor[row.DeviceNumber][
@@ -1139,7 +1035,7 @@ def _readCymeShuntCapacitor(feederId, modelDir):
 						"phases"
 					] = (
 						"ABC"
-					)  # _convertPhase(int(row.Phase)) #jfk. Painful change.  Phase doesn't exist in my capacitor tables.
+					)  # _convertPhase(int(row.Phase)) #JOHN FITZGERALD KENNEDY. Painful change.  Phase doesn't exist in my capacitor tables.
 					cymshuntcapacitor[row.DeviceNumber]["status"] = row.Status
 					if (
 						float(row.KVARA) == 0.0
@@ -1224,68 +1120,59 @@ def _readCymeShuntCapacitor(feederId, modelDir):
 							float(row.KVLN) * 1000
 						)
 			else:
-				row.DeviceNumber = _fixName(row.DeviceNumber)
+				device_no = _fixName(row.DeviceNumber)
+				row.DeviceNumber = device_no
 				if row.EquipmentId is None:
 					row.EquipmentId = "DEFAULT"
 				row.EquipmentId = _fixName(row.EquipmentId)
-				if row.DeviceNumber not in cymshuntcapacitor.keys():
-					cymshuntcapacitor[row.DeviceNumber] = copy.deepcopy(
-						CYMSHUNTCAPACITOR
+				if device_no not in cymshuntcapacitor.keys():
+					cymshuntcapacitor[device_no] = copy.deepcopy(
+						cymshuntcapacitor_default
 					)
-					cymshuntcapacitor[row.DeviceNumber]["name"] = row.DeviceNumber
-					cymshuntcapacitor[row.DeviceNumber][
-						"equipment_name"
-					] = row.EquipmentId
-					cymshuntcapacitor[row.DeviceNumber]["phases"] = "ABCN"
-					cymshuntcapacitor[row.DeviceNumber]["status"] = row.Status
+					cymshuntcapacitor[device_no]["name"] = device_no
+					cymshuntcapacitor[device_no]["equipment_name"] = row.EquipmentId
+					cymshuntcapacitor[device_no]["phases"] = "ABCN"
+					cymshuntcapacitor[device_no]["status"] = row.Status
 					if row.SwitchingMode == "2":
-						cymshuntcapacitor[row.DeviceNumber]["control_level"] = "BANK"
+						cymshuntcapacitor[device_no]["control_level"] = "BANK"
 					elif row.SwitchingMode == "1":
-						cymshuntcapacitor[row.DeviceNumber][
-							"control_level"
-						] = "INDIVIDUAL"
+						cymshuntcapacitor[device_no]["control_level"] = "INDIVIDUAL"
 					else:
 						print "could not find capacitor switching mode.  defaulting to INDIVIDUAL"
-						cymshuntcapacitor[row.DeviceNumber][
-							"control_level"
-						] = "INDIVIDUAL"
+						cymshuntcapacitor[device_no]["control_level"] = "INDIVIDUAL"
 					if float(row.SwitchedKVARA) > 0.0:
-						cymshuntcapacitor[row.DeviceNumber]["capacitor_A"] = (
+						cymshuntcapacitor[device_no]["capacitor_A"] = (
 							float(row.SwitchedKVARA) * 1000
 						)
 					if float(row.SwitchedKVARB) > 0.0:
-						cymshuntcapacitor[row.DeviceNumber]["capacitor_B"] = (
+						cymshuntcapacitor[device_no]["capacitor_B"] = (
 							float(row.SwitchedKVARB) * 1000
 						)
 					if float(row.SwitchedKVARC) > 0.0:
-						cymshuntcapacitor[row.DeviceNumber]["capacitor_C"] = (
+						cymshuntcapacitor[device_no]["capacitor_C"] = (
 							float(row.SwitchedKVARC) * 1000
 						)
 					if float(row.KVLN) > 0.0:
-						cymshuntcapacitor[row.DeviceNumber]["kV_line_neutral"] = (
+						cymshuntcapacitor[device_no]["kV_line_neutral"] = (
 							float(row.KVLN) * 1000
 						)
 					if int(row.CapacitorControlType) == 2:
-						cymshuntcapacitor[row.DeviceNumber]["control"] = "VAR"
-						cymshuntcapacitor[row.DeviceNumber]["VAr_set_high"] = (
+						cymshuntcapacitor[device_no]["control"] = "VAR"
+						cymshuntcapacitor[device_no]["VAr_set_high"] = (
 							float(row.OnValue) * 1000
 						)
-						cymshuntcapacitor[row.DeviceNumber]["VAr_set_low"] = (
+						cymshuntcapacitor[device_no]["VAr_set_low"] = (
 							float(row.OffValueA) * 1000
 						)
-						cymshuntcapacitor[row.DeviceNumber]["pt_phase"] = "ABCN"
+						cymshuntcapacitor[device_no]["pt_phase"] = "ABCN"
 					elif int(row.CapacitorControlType) == 3:
-						cymshuntcapacitor[row.DeviceNumber]["control"] = "CURRENT"
-						cymshuntcapacitor[row.DeviceNumber][
-							"current_set_high"
-						] = row.OnValue
-						cymshuntcapacitor[row.DeviceNumber][
-							"current_set_low"
-						] = row.OffValueA
-						cymshuntcapacitor[row.DeviceNumber]["pt_phase"] = "ABCN"
+						cymshuntcapacitor[device_no]["control"] = "CURRENT"
+						cymshuntcapacitor[device_no]["current_set_high"] = row.OnValue
+						cymshuntcapacitor[device_no]["current_set_low"] = row.OffValueA
+						cymshuntcapacitor[device_no]["pt_phase"] = "ABCN"
 					elif int(row.CapacitorControlType) == 7:
-						cymshuntcapacitor[row.DeviceNumber]["control"] = "VOLT"
-						# print cymshuntcapacitor[row.DeviceNumber]['voltage_set_low']
+						cymshuntcapacitor[device_no]["control"] = "VOLT"
+						# print cymshuntcapacitor[device_no]['voltage_set_low']
 						controlledphase = _convertPhase(
 							int(row.ControlledPhase)
 						).replace("N", "")
@@ -1293,27 +1180,27 @@ def _readCymeShuntCapacitor(feederId, modelDir):
 							row["OnValue" + controlledphase] = 0
 						if row.get("OffValue" + controlledphase) is None:
 							row["OffValue" + controlledphase] = 0
-						cymshuntcapacitor[row.DeviceNumber]["voltage_set_low"] = float(
+						cymshuntcapacitor[device_no]["voltage_set_low"] = float(
 							row["OnValue" + controlledphase]
 						)
-						cymshuntcapacitor[row.DeviceNumber]["voltage_set_high"] = float(
+						cymshuntcapacitor[device_no]["voltage_set_high"] = float(
 							row["OffValue" + controlledphase]
 						)
-						cymshuntcapacitor[row.DeviceNumber][
+						cymshuntcapacitor[device_no][
 							"pt_phase"
 						] = controlledphase  # row.Phase doesn't exist
 						if row.ControlledNodeId:
-							cymshuntcapacitor[row.DeviceNumber][
-								"remote_sense"
-							] = _fixName(row.ControlledNodeId)
+							cymshuntcapacitor[device_no]["remote_sense"] = _fixName(
+								row.ControlledNodeId
+							)
 
 					else:
-						cymshuntcapacitor[row.DeviceNumber]["control"] = "MANUAL"
-						cymshuntcapacitor[row.DeviceNumber]["pt_phase"] = "ABCN"
-						cymshuntcapacitor[row.DeviceNumber]["voltage_set_high"] = (
+						cymshuntcapacitor[device_no]["control"] = "MANUAL"
+						cymshuntcapacitor[device_no]["pt_phase"] = "ABCN"
+						cymshuntcapacitor[device_no]["voltage_set_high"] = (
 							float(row.KVLN) * 1000
 						)
-						cymshuntcapacitor[row.DeviceNumber]["voltage_set_low"] = (
+						cymshuntcapacitor[device_no]["voltage_set_low"] = (
 							float(row.KVLN) * 1000
 						)
 	return cymshuntcapacitor
@@ -1404,7 +1291,9 @@ def _readCymeCustomerLoad(feederId, modelDir):
 					float(row.LoadValue2),
 					row.ConnectedKVA,
 				)
-				if row.Status == "1":  # jfk.  Set disconnected loads to zero.
+				if (
+					row.Status == "1"
+				):  # JOHN FITZGERALD KENNEDY.  Set disconnected loads to zero.
 					load_real = 0
 					load_imag = 0
 
@@ -1931,7 +1820,7 @@ def _readUgConfiguration(feederId, modelDir):
 					row.ArmorOuterDiameter is not None
 					and row.ArmorOuterDiameter != ""
 					and float(row.ArmorOuterDiameter) != 0.0
-				):  # jfk
+				):  # JOHN FITZGERALD KENNEDY
 					cymcsvundergroundcable[row.EquipmentId][
 						"conductor_diameter"
 					] = row.ArmorOuterDiameter
@@ -2008,7 +1897,9 @@ def _readUgConfiguration(feederId, modelDir):
 				# cymcsvundergroundcable[row.EquipmentId]['distance_BC'] = row.OverallDiameter
 				# cymcsvundergroundcable[row.EquipmentId]['distance_CN'] = row.OverallDiameter
 	for row in undergroundcableconductor:
-		row.EquipmentId = _fixName(row.EquipmentId)  # jfk.  was missing _fixName
+		row.EquipmentId = _fixName(
+			row.EquipmentId
+		)  # JOHN FITZGERALD KENNEDY.  was missing _fixName
 		if row.EquipmentId in cymcsvundergroundcable.keys():
 			cymcsvundergroundcable[row.EquipmentId]["neutral_diameter"] = row.Diameter
 			cymcsvundergroundcable[row.EquipmentId][
@@ -2423,7 +2314,7 @@ def _readCymeGenerator(feederId, modelDir):
 def _find_SPCT_rating(load_str):
 	spot_load = (
 		abs(complex(load_str)) / 1000.0
-	)  # jfk.  needs to be in kVA for transformer rating estimation
+	)  # JOHN FITZGERALD KENNEDY.  needs to be in kVA for transformer rating estimation
 	spct_rating = [
 		5,
 		10,
@@ -2525,7 +2416,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 	UG_conductors, cymundergroundline = _readCymeUndergroundLine(feeder_id, modelDir)
 
 	# -5-CYME CYMOVERHEADLINEBALANCED ***
-	cymUnbalancedOverheadLine, UOLConfigNames = _readCymeOverheadLineUnbalanced(
+	UOLConfigNames, cymUnbalancedOverheadLine = _readCymeOverheadLineUnbalanced(
 		feeder_id, modelDir
 	)
 
@@ -2667,55 +2558,55 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 		"""
 
 	# Group each type of device.
-	for device, value in cymsectiondevice.keys():
+	for device, value in cymsectiondevice.iteritems():
 		dType = value["device_type"]
 		sName = value["section_name"]
 
 		if dType == 1:
-			undergroundline_sections[sName] = key
+			undergroundline_sections[sName] = device
 		elif dType == 3 or dType == 2:
-			overheadline_sections[sName] = key
+			overheadline_sections[sName] = device
 		elif dType == 4:
-			regulator_sections[sName] = key
+			regulator_sections[sName] = device
 		elif dType == 10:
-			recloser_sections[sName] = key
+			recloser_sections[sName] = device
 		elif dType == 12:
-			sectionalizer_sections[sName] = key
+			sectionalizer_sections[sName] = device
 		elif dType == 13:
 			if sName not in switch_sections.keys():
 				switch_sections[sName] = [
-					key
-				]  # jfk. could use default dict to make this cleaner
+					device
+				]  # JOHN FITZGERALD KENNEDY. could use default dict to make this cleaner
 			else:
-				switch_sections[sName].append(key)
+				switch_sections[sName].append(device)
 				# switch_sections[value['section_name']] = key #sometimes have two switches on a section!  this overwrite the first!
 		elif dType == 14:
-			fuse_sections[sName] = key
+			fuse_sections[sName] = device
 		elif dType == 16:
 			# sx_section.append(value['section_name']) #this was not needed for PECO files
-			reactor_sections[sName] = key
+			reactor_sections[sName] = device
 		elif dType == 17:
-			capacitor_sections[sName] = key
+			capacitor_sections[sName] = device
 		elif dType == 20:
-			load_sections[sName] = key
+			load_sections[sName] = device
 		elif dType == 37:
-			syncgen_sections[sName] = key
+			syncgen_sections[sName] = device
 		elif dType == 45:
-			if sName not in pv_sections.keys():
-				pv_sections[sName] = [key]  # jfk
+			if sName not in pv_sections.devices():
+				pv_sections[sName] = [device]  # JOHN FITZGERALD KENNEDY
 			else:
-				pv_sections[sName].append(key)
+				pv_sections[sName].append(device)
 		elif (
 			dType == 47 or dType == 5
-		):  # jfk.  added check for 5, another transformer device
-			transformer_sections[sName] = key
+		):  # JOHN FITZGERALD KENNEDY.  added check for 5, another transformer device
+			transformer_sections[sName] = device
 		elif dType == 48:
 			if dbflag == 0:
-				threewautoxfmr_sections[sName] = key
+				threewautoxfmr_sections[sName] = device
 			elif dbflag == 1:
-				threewxfmr_sections[sName] = key
+				threewxfmr_sections[sName] = device
 		elif dType == 80:
-			battery_sections[sName] = key
+			battery_sections[sName] = device
 
 			# find the parent of capacitors, loads, and pv
 	for x in [
@@ -2729,7 +2620,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 			_findParents(cymsection, cymsectiondevice, x)
 
 			# split out fuses, regulators, transformers, switches, reclosers, and sectionalizers from the lines.
-			# mj debug: check these phases
+			# MICHAEL JACKSON debug: check these phases
 	for x in [
 		fuse_sections,
 		regulator_sections,
@@ -3191,7 +3082,8 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 					ugl_cfgs[config_name] = {
 						"object": "line_configuration",
 						"name": config_name,
-						"spacing": cymundergroundline[ugl]["cable_id"] + "sps",  # jfk
+						"spacing": cymundergroundline[ugl]["cable_id"]
+						+ "sps",  # JOHN FITZGERALD KENNEDY
 						"z11": cymcsvundergroundcable[cableid]["z11"],
 						"z12": cymcsvundergroundcable[cableid]["z12"],
 						"z13": cymcsvundergroundcable[cableid]["z13"],
@@ -3280,7 +3172,9 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 					"operating_mode": "BANKED",
 				}
 				if cymswitch[swObj]["status"] == 0:
-					status = "OPEN"  # jfk.  This was CLOSED.  Must have been a typo?
+					status = (
+						"OPEN"
+					)  # JOHN FITZGERALD KENNEDY.  This was CLOSED.  Must have been a typo?
 				else:
 					status = "CLOSED"
 				for phase in swObjs[swObj]["phases"]:
@@ -3303,7 +3197,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 				if cymrecloser[rcl]["status"] == 0:
 					status = (
 						"OPEN"
-					)  # was 'CLOSED'  #jfk.  Mistake seemed intentional. Maybe it was just a typo?
+					)  # was 'CLOSED'  #JOHN FITZGERALD KENNEDY.  Mistake seemed intentional. Maybe it was just a typo?
 				else:
 					status = "CLOSED"
 				for phase in rcls[rcl]["phases"]:
@@ -3324,7 +3218,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 					"operating_mode": "BANKED",
 				}
 				if cymsectionalizer[sxnlr]["status"] == 0:
-					status = "OPEN"  # 'CLOSED' #jfk
+					status = "OPEN"  # 'CLOSED' #JOHN FITZGERALD KENNEDY
 				else:
 					status = "CLOSED"
 				for phase in sxnlrs[sxnlr]["phases"]:
@@ -3353,7 +3247,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 				for phase in fuses[fuse]["phases"]:
 					fuses[fuse]["phase_{:s}_status".format(phase)] = status
 
-					# jfk.  added all this reactor code
+					# JOHN FITZGERALD KENNEDY.  added all this reactor code
 	reactors = {}
 	for reactor in cymsectiondevice.keys():
 		if cymsectiondevice[reactor]["device_type"] == 16:
@@ -3385,9 +3279,11 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 					"object": "capacitor",
 					"name": cap,
 					"phases": cymsectiondevice[cap]["phases"],
-					"phases_connected": cymsectiondevice[cap]["phases"],  # jfk
+					"phases_connected": cymsectiondevice[cap][
+						"phases"
+					],  # JOHN FITZGERALD KENNEDY
 					"parent": cymsectiondevice[cap]["parent"],
-					# 'control_level' : 'INDIVIDUAL', #jfk
+					# 'control_level' : 'INDIVIDUAL', #JOHN FITZGERALD KENNEDY
 					"control": cymshuntcapacitor[cap]["control"],  #'MANUAL',
 					# 'cap_nominal_voltage' : str(feeder_VLN),
 					"nominal_voltage": cymshuntcapacitor[cap]["kV_line_neutral"],
@@ -3407,7 +3303,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 				if caps[cap]["control"] == "VOLT":
 					caps[cap]["remote_sense"] = "n" + str(
 						cymshuntcapacitor[cap]["remote_sense"]
-					)  # jfk.  hacky.  have to add 'n' because it's added later to nodes.
+					)  # JOHN FITZGERALD KENNEDY.  hacky.  have to add 'n' because it's added later to nodes.
 					caps[cap]["voltage_set_high"] = str(
 						cymshuntcapacitor[cap]["voltage_set_high"]
 						* (1 / 120.0)
@@ -3467,8 +3363,10 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 			elif load not in tpns.keys():
 				if cymsectiondevice[load]["name"] not in loadNames:
 					loadNames.append(cymsectiondevice[load]["name"])
-					# for phase in cymsectiondevice[load]['phases']: #jfk.  was looking for phases that don't correspond to loads
-					for phase in cymcustomerload[load]["phases"]:  # jfk
+					# for phase in cymsectiondevice[load]['phases']: #JOHN FITZGERALD KENNEDY.  was looking for phases that don't correspond to loads
+					for phase in cymcustomerload[load][
+						"phases"
+					]:  # JOHN FITZGERALD KENNEDY
 						if phase not in ["N", "D"]:
 							try:
 								spctRating = _find_SPCT_rating(
@@ -3554,7 +3452,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 									+ random.uniform(-5, 5)
 								),
 							}
-							# jfk.  I can't find the band_center anywhere in the cyme databaes files.
+							# JOHN FITZGERALD KENNEDY.  I can't find the band_center anywhere in the cyme databaes files.
 							# Unfortunately, the only way to deal with this is by looking at the cyme user interfrace.
 							# Create regulator and regulator configuration dictionaries
 							# Now, I just have the values hardcoded in.  For example...
@@ -3602,7 +3500,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 				else:
 					safeRegBand = float(cymeqregulator[regEq]["bandwidth"])
 				reg_bandwidth = str(safeRegBand * reg_nominalvoltage / 120.0)
-				# jfk. Need to have separate regulator configurations for each regulator
+				# JOHN FITZGERALD KENNEDY. Need to have separate regulator configurations for each regulator
 				# Cyme holds tap position in regulator, but Gridlabd holds tap position in configuration
 				regEq = regEq + "_" + reg
 				if reg in regulator_bandcenters.keys():
@@ -3617,7 +3515,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 				if regEq not in reg_cfgs.keys():
 					reg_cfgs[regEq] = {
 						"object": "regulator_configuration",
-						"name": regEq,  # jfk
+						"name": regEq,  # JOHN FITZGERALD KENNEDY
 						"connect_type": "WYE_WYE",
 						"band_center": str(
 							float(reg_nominalvoltage) * (band_center120 / 120.0)
@@ -3643,7 +3541,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 						"from": cymsectiondevice[reg]["from"],
 						"to": cymsectiondevice[reg]["to"],
 						"configuration": regEq,
-					}  # jfk
+					}  # JOHN FITZGERALD KENNEDY
 
 					# Create photovoltaic, inverter, and meter dictionaries
 	pv_sec = {}
@@ -3792,10 +3690,10 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 							"connect_type": "WYE_WYE",
 							"primary_voltage": "{:0.6f}".format(
 								cymeqautoxfmr[xfmrEq]["PrimaryVoltage"] * math.sqrt(3)
-							),  # jfk
+							),  # JOHN FITZGERALD KENNEDY
 							"secondary_voltage": "{:0.6f}".format(
 								cymeqautoxfmr[xfmrEq]["SecondaryVoltage"] * math.sqrt(3)
-							),  # jfk
+							),  # JOHN FITZGERALD KENNEDY
 							"impedance": cymeqautoxfmr[xfmrEq]["impedance"],
 							"power_rating": "{:0.0f}".format(
 								cymeqautoxfmr[xfmrEq]["PrimaryRatedCapacity"]
@@ -3818,7 +3716,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 						"to": cymsectiondevice[xfmr]["to"],
 						"configuration": xfmrEq + suffix,
 					}
-					# jfk.  this block is nearly identical to the above.
+					# JOHN FITZGERALD KENNEDY.  this block is nearly identical to the above.
 		elif cymsectiondevice[xfmr]["device_type"] == 5:
 			if xfmr not in cymxfmr.keys():
 				print "There is no xmfr spec for ", xfmr, " in the network database provided.\n"
@@ -3846,10 +3744,10 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 							"connect_type": "WYE_WYE",
 							"primary_voltage": "{:0.6f}".format(
 								cymeqxfmr[xfmrEq]["PrimaryVoltage"] * math.sqrt(3)
-							),  # jfk
+							),  # JOHN FITZGERALD KENNEDY
 							"secondary_voltage": "{:0.6f}".format(
 								cymeqxfmr[xfmrEq]["SecondaryVoltage"] * math.sqrt(3)
-							),  # jfk
+							),  # JOHN FITZGERALD KENNEDY
 							# 'resistance': '0.000000001',
 							# 'reactance': '0.0000000006',
 							"impedance": cymeqxfmr[xfmrEq]["impedance"],
@@ -3927,7 +3825,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 						"configuration": xfmrEq + suffix,
 					}
 					# Add dictionaries to feeder tree object
-					# jfk.  giving an hour for everything to settle down.  needed for regulators and verification
+					# JOHN FITZGERALD KENNEDY.  giving an hour for everything to settle down.  needed for regulators and verification
 	genericHeaders = [
 		{
 			"timezone": "PST+8PDT",
@@ -4021,7 +3919,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 	toNodes = []
 	fromNodes = []
 	for key in glmTree.keys():
-		# jfk.  dont want phase information to be passed on by open switches
+		# JOHN FITZGERALD KENNEDY.  dont want phase information to be passed on by open switches
 		# I have scenarios like:  phaseC -/ - phaseB
 		if glmTree[key].get("object", "") == "switch":
 			if "OPEN" in glmTree[key].values():
@@ -4092,7 +3990,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 				for y in glmTree.keys():
 					if (
 						glmTree[y].get("name", "") == glmTree[x]["to"]
-					):  # jfk was glmTree[y].get['name', '']  #typo with the brackets
+					):  # JOHN FITZGERALD KENNEDY was glmTree[y].get['name', '']  #typo with the brackets
 						deleteKeys.append(y)
 	for key in deleteKeys:
 		del glmTree[key]
@@ -4197,7 +4095,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 				pass
 				# TODO: have this missing nodes report not put files all over the place.
 				# checkMissingNodes(nodes, cymsectiondevice, objectList, feeder_id, modelDir, cymsection)
-				# jfk.  add regulator to source
+				# JOHN FITZGERALD KENNEDY.  add regulator to source
 	biggestkey = max(glmTree.keys())
 	glmTree[biggestkey + 1] = {
 		"object": "node",
@@ -4234,7 +4132,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 		"control_level": "INDIVIDUAL",
 	}
 	# Clean up the csvDump.
-	shutil.rmtree(pJoin(modelDir, "cymeCsvDump"))
+	# shutil.rmtree(pJoin(modelDir, "cymeCsvDump"))
 	return glmTree
 
 
@@ -4286,6 +4184,20 @@ def _tests(keepFiles=True):
 			traceback.print_exc()
 			exceptionCount += 3
 			continue  # No use trying to draw or run if conversion fails.
+		try:
+			from omf.milToGridlab import (
+				phasingMismatchFix,
+				missingConductorsFix,
+				fixOrphanedLoads,
+			)
+
+			treeObj = phasingMismatchFix(treeObj)
+			treeObj = missingConductorsFix(treeObj)
+			treeObj = fixOrphanedLoads(treeObj)
+			# run milToGridlab fixes
+		except:
+			print "THE DARK LORD'S BEHAVIOR IS OUTRAGEOUS"
+			traceback.print_exc()
 		try:
 			# Draw the GLM.
 			myGraph = feeder.treeToNxGraph(cyme_base)
