@@ -4,7 +4,7 @@ import omf
 #	os.chdir(omf.omfDir)
 import json, tempfile, platform, subprocess, os
 from gevent.pywsgi import WSGIServer
-from flask import Flask, request, send_from_directory
+from flask import Flask, request, send_from_directory, make_response
 import matplotlib.pyplot as plt
 
 # TODO: note how I commented out the directory change, but it still appears to work (at least on my machine)
@@ -76,7 +76,7 @@ def milsoftToGridlab():
 	with open(glmPath, 'w') as outFile:
 		outFile.write(omf.feeder.sortedWrite(tree))
 	# TODO: delete the tempDir.
-	return send_from_directory(workDir, glmName)
+	return send_from_directory(workDir, glmName, mimetype="text/plain")
 
 @app.route('/cymeToGridlab', methods=['POST'])
 def cymeToGridlab():
@@ -96,7 +96,7 @@ def cymeToGridlab():
 	with open(glmPath, 'w') as outFile:
 		outFile.write(omf.feeder.sortedWrite(tree))
 	# TODO: delete the tempDir.
-	return send_from_directory(workDir, glmName)
+	return send_from_directory(workDir, glmName, mimetype="text/plain")
 
 @app.route('/gridlabRun', methods=['POST'])
 def gridlabRun():
@@ -113,7 +113,9 @@ def gridlabRun():
 	feed = omf.feeder.parse(glmOnDisk)
 	outDict = omf.solvers.gridlabd.runInFilesystem(feed, attachments=[], keepFiles=True, workDir=workDir, glmName='out.glm')
 	#TODO: delete the tempDir.
-	return json.dumps(outDict)
+	resp = make_response(json.dumps(outDict))
+	resp.mimetype = "application/json"
+	return resp
 
 @app.route('/gridlabdToGfm', methods=['POST'])
 def gridlabdToGfm():
@@ -141,8 +143,10 @@ def gridlabdToGfm():
 		'criticalLoads': request.form.get('criticalLoads')
 	}
 	gfmDict = omf.models.resilientDist.convertToGFM(gfmInputTemplate, feederModel)
+	resp = make_response(json.dumps(gfmDict))
+	resp.mimetype = "application/json"
 	# TODO: delete the tempDir.
-	return json.dumps(gfmDict)
+	return resp
 
 @app.route('/runGfm', methods=['POST'])
 def runGfm():
@@ -152,18 +156,20 @@ def runGfm():
 	Result: Return the results dictionary/JSON from running LANL's General Fragility Model (GFM) on the input model and .asc hazard field. Note that this is not the main fragility model for GRIP.'''
 	workDir = tempfile.mkdtemp()
 	fName = 'gfm.json'
-	f = request.files['gfm']
 	gfmPath = os.path.join(workDir, fName)
+	f = request.files['gfm']
 	f.save(gfmPath)
 	hName = 'hazard.asc'
-	h = request.files['asc']
 	hazardPath = os.path.join(workDir, hName)
+	h = request.files['asc']
 	h.save(hazardPath)
 	# Run GFM
-	gfmBinaryPath = omf.omfDir + '/solvers/gfm/Fragility.jar'
+	gfmBinaryPath = os.path.join(omf.omfDir, "solvers/gfm/Fragility.jar")
 	if platform.system() == 'Darwin':
 		#HACK: force use of Java8 on MacOS.
-		javaCmd = '/Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/bin/java'
+		#javaCmd = '/Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/bin/java'
+		#HACK HACK: use my version of Java 8 for now
+		javaCmd = "/Library/Java/JavaVirtualMachines/jdk1.8.0_202.jdk/Contents/Home/bin/java"
 	else:
 		javaCmd = 'java'
 	outName = 'gfm_out.json'
@@ -187,16 +193,20 @@ def samRun():
 	OMF function: omf.solvers.sam.run()
 	Runtime: should only be a couple seconds.
 	Result: Run NREL's system advisor model with the specified parameters. Return the output vectors and floats in JSON'''
-    #
 	# Set up SAM data structures.
 	ssc = omf.solvers.nrelsam2013.SSCAPI()
 	dat = ssc.ssc_data_create()
+
 	# Set the inputs.
+	# I edited this. Need to save the file?
+	#ssc.ssc_data_set_string(dat, key, request.form.get(key))
 	for key in request.form.keys():
+		# I edited this
 		if key == 'file_name':
 			ssc.ssc_data_set_string(dat, key, request.form.get(key))
 		else:
 			ssc.ssc_data_set_number(dat, key, float(request.form.get(key)))
+
 	# Run PV system simulation.
 	mod = ssc.ssc_module_create("pvwattsv1")
 	ssc.ssc_module_exec(mod, dat)
@@ -220,7 +230,9 @@ def samRun():
 	outData["Consumption"]["Power"] = ssc.ssc_data_get_array(dat, "ac")
 	outData["Consumption"]["Losses"] = ssc.ssc_data_get_array(dat, "ac")
 	outData["Consumption"]["DG"] = ssc.ssc_data_get_array(dat, "ac")
-	return json.dumps(outData)
+	response = make_response(json.dumps(outData))
+	response.mimetype = "application/json"
+	return response
 
 @app.route('/transmissionMatToOmt', methods=['POST'])
 def transmissionMatToOmt():
@@ -228,7 +240,15 @@ def transmissionMatToOmt():
 	OMF function: omf.network.parse()
 	Runtime: maybe a couple minutes.
 	Result: Convert the .m matpower model to an OMT (JSON-based) model. Return the model.'''
-	return 'Not Implemented Yet'
+	f = request.files["matpower"]
+	mat_filename = "input.m"
+	temp_dir = tempfile.mkdtemp() 
+	mat_path = os.path.join(temp_dir, mat_filename)
+	f.save(mat_path)
+	mat_dict = omf.network.parse(mat_path, filePath=True)
+	response = make_response(json.dumps(mat_dict))
+	response.mimetype = "application/json"
+	return response
 
 @app.route('/transmissionPowerflow', methods=['POST'])
 def transmissionPowerflow():
@@ -236,6 +256,8 @@ def transmissionPowerflow():
 	OMF function: omf.models.transmission.new and omf.models.transmission.work
 	Runtime: tens of seconds.
 	Result: TBD. '''
+	# I don't really understand this route. An .omt file does not appear to contain any keys like "algorithm" that would be useful in the work()
+	# function
 	return 'Not Implemented Yet'
 
 @app.route('/transmissionViz', methods=['POST'])
@@ -244,6 +266,7 @@ def transmissionViz():
 	OMF function: omf.network.viz()
 	Runtime: a couple seconds.
 	Result: HTML interface visualizing the .omt file. '''
+	#omf.network.viz()
 	return 'Not Implemented Yet'
 
 def serve():
