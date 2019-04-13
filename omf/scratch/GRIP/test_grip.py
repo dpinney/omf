@@ -53,18 +53,17 @@ def test_getRequest_returns405(url_route, client):
     assert response.status_code == 405
 
 @pytest.mark.parametrize("url_route", all_routes)
-def test_postMissingFile_returns400(url_route, client):
+def test_postMissingFiles_returns400(url_route, client):
     response = client.post(url_route)
     assert response.status_code == 400
-
 
 class TestOneLineGridLab(object):
 
     # Should return a 202
     def test_useLatLonsIsTrue_returnsSmallerPng(self, client):
         filename = "test_ieee123nodeBetter.glm" 
-        test_file_path = os.path.join(os.path.dirname(__file__), filename)
-        with open(test_file_path) as f:
+        glm_path = os.path.join(os.path.dirname(__file__), filename)
+        with open(glm_path) as f:
             b_io = io.BytesIO(f.read())
         data = {
             "glm": (b_io, filename),
@@ -90,8 +89,7 @@ class TestOneLineGridLab(object):
         assert response.mimetype == "image/png"
         assert response.content_length == 50394
 
-    # Should return a 415
-    def test_postWrongFileType_returns415(self, client):
+    def xtest_postWrongFileType_returns415(self, client):
         filename = "test_grip.py" 
         test_file_path = os.path.join(os.path.dirname(__file__), filename)
         with open(test_file_path) as f:
@@ -100,7 +98,7 @@ class TestOneLineGridLab(object):
             "glm": (b_io, filename),
         }
         response = client.post("/oneLineGridlab", data=data)
-        assert response.status_code == 500
+        assert response.status_code == 415
 
 class TestMilsoftToGridlab(object):
 
@@ -119,13 +117,220 @@ class TestMilsoftToGridlab(object):
         response = client.post("/milsoftToGridlab", data=data)
         assert response.status_code == 200
         assert response.mimetype == "text/plain"
-        assert response.content_length == 1
+        assert response.content_length >= 13650 and response.content_length <= 13750
+
+    def xtest_postWrongFileType_returns415(self, client):
+        std_path = __file__
+        seq_path = __file__
+        with open(std_path) as f:
+            b_io_std = io.BytesIO(f.read())
+        with open(seq_path) as f:
+            b_io_seq = io.BytesIO(f.read())
+        data = {
+            "std": (b_io_std, "test_grip.py"),
+            "seq": (b_io_seq, "test_grip.py"),
+        }
+        response = client.post("/milsoftToGridlab", data=data)
+        assert response.status_code == 415
+
+class TestCymeToGridlab(object):
+
+    def test_postRequest_returnsGlm(self, client):
+        mdb_path = os.path.join(omf.omfDir, "static/testFiles/IEEE13.mdb")
+        with open(mdb_path) as f:
+            b_io = io.BytesIO(f.read())
+        data = {
+            "mdb": (b_io, "IEEE13.mdb"),
+        }
+        response = client.post("/cymeToGridlab", data=data)
+        assert response.status_code == 200
+        assert response.mimetype == "text/plain"
+        assert response.content_length >= 25400 and response.content_length <= 25500
+
+    def xtest_postWrongFileType_returns415(self, client):
+        mdb_path = __file__
+        with open(mdb_path) as f:
+            b_io = io.BytesIO(f.read())
+        data = {
+            "mdb": (b_io, "test_grip.py")
+        }
+        response = client.post("/cymeToGridlab", data=data)
+        assert response.status_code == 415
+
+class TestGridlabRun(object):
+
+    def test_postRequest_returnsJSON(self, client):
+        filename = "test_ieee123nodeBetter.glm" 
+        glm_path = os.path.join(os.path.dirname(__file__), filename)
+        with open(glm_path) as f:
+            b_io = io.BytesIO(f.read())
+        data = {
+            "glm": (b_io, filename),
+        }
+        response = client.post("/gridlabRun", data=data)
+        assert response.status_code == 200
+        assert response.mimetype == "application/json"
+        assert response.content_length >= 1450 and response.content_length <= 1550 #1588, 641
+
+    def xtest_postWrongFileType_returns415(self, client):
+        glm_path = __file__
+        with open(glm_path) as f:
+            b_io = io.BytesIO(f.read())
+        data = {
+            "glm": (b_io, "test_grip.py"),
+        }
+        response = client.post("/gridlabRun", data=data)
+        assert response.status_code == 415
+
+class TestGridlabdToGfm(object):
+
+    def test_postRequest_returnsJSON(self, client):
+        filename = "test_ieee123nodeBetter.glm" 
+        glm_path = os.path.join(os.path.dirname(__file__), filename)
+        with open(glm_path) as f:
+            b_io = io.BytesIO(f.read())
+        data = {
+            "glm": (b_io, filename),
+            "phase_variation": "0.15",
+            "chance_constraint": "1.0",
+            "critical_load_met": "0.98",
+            "total_load_met": "0.5",
+            "maxDGPerGenerator": "0.5",
+            "dgUnitCost": "1000000.0",
+            "generatorCandidates": "",
+            "criticalLoads": ""
+        }
+        response = client.post("/gridlabdToGfm", data=data)
+        assert response.status_code == 200
+        assert response.mimetype == "application/json"
+        assert response.content_length >= 41300 and response.content_length <= 41400
+
+    def xtest_postWrongFileType_returns415(self, client):
+        glm_path = __file__
+        with open(glm_path) as f:
+            b_io = io.BytesIO(f.read())
+        data = {
+            "glm": (b_io, "test_grip.py"),
+            "phase_variation": "0.15",
+            "chance_constraint": "1.0",
+            "critical_load_met": "0.98",
+            "total_load_met": "0.5",
+            "maxDGPerGenerator": "0.5",
+            "dgUnitCost": "1000000.0",
+            "generatorCandidates": "",
+            "criticalLoads": ""
+        }
+        response = client.post("/gridlabdToGfm", data=data)
+        assert response.status_code == 415
+
+    def xtest_missingFormParameters_returns400(self, client):
+        filename = "test_ieee123nodeBetter.glm" 
+        glm_path = os.path.join(os.path.dirname(__file__), filename)
+        with open(glm_path) as f:
+            b_io = io.BytesIO(f.read())
+        data = {
+            "glm": (b_io, filename),
+        }
+        response = client.post("/gridlabdToGfm", data=data)
+        assert response.status_code == 400
+
+class TestRunGfm(object):
+
+    def xtest_postRequest_returnsJSON(self, client):
+        asc_path = os.path.join(omf.omfDir, "static/testFiles/wf_clip.asc")
+        gfm_path = os.path.join(omf.omfDir, "static/testFiles/test_ieee123nodeBetter.gfm")
+        with open(gfm_path) as f:
+            b_io_gfm = io.BytesIO(f.read())
+        with open(asc_path) as f:
+            b_io_asc = io.BytesIO(f.read())
+        data = {
+            "gfm": (b_io_gfm, "test_ieee123nodeBetter.gfm"),
+            "asc": (b_io_asc, "wf_clip.asc")
+        }
+        response = client.post("/runGfm", data=data)
+        assert response.status_code == 200
+        #assert response.mimetype == "application/json"
+        #assert response.content_length >= 41300 and response.content_length <= 4140
 
     def test_postWrongFileType_returns415(self, client):
-        pass
+        asc_path = __file__
+        gfm_path = __file__
+        with open(gfm_path) as f:
+            b_io_gfm = io.BytesIO(f.read())
+        with open(asc_path) as f:
+            b_io_asc = io.BytesIO(f.read())
+        data = {
+            "gfm": (b_io_gfm, "test_grip.py"),
+            "asc": (b_io_asc, "test_grip.py")
+        }
+        response = client.post("/runGfm", data=data)
+        # this is 200!?
+        assert response.status_code == 415
 
-    
+class TestSamRun(object):
 
+    def test_postRequest_returnsJSON(self, client):
+        tmy2_path = os.path.join(omf.omfDir, "data/Climate/CA-SAN_FRANCISCO.tmy2")
+        with open(tmy2_path) as f:
+            b_io = io.BytesIO(f.read())
+        data = {
+            "file_name": (b_io, "CA-SAN_FRANCISCO.tmy2"),
+            "system_size": 10.0,
+            "derate": 0.77,
+            "track_mode": 0.0,
+            "azimuth": 180.0,
+            "tilt_eq_lat": 1.0,
+            "tilt": 45.0,
+            "rotlim": 45.0,
+            "gamma": -0.45,
+            "inv_eff": 0.95,
+            "w_stow": 100
+        }
+        response = client.post("/samRun", data=data)
+        assert response.status_code == 200
+        assert response.mimetype == "application/json"
+        assert response.content_length >= 300 and response.content_length <= 400
+
+    def test_postWrongFileType_returns415(self, client):
+        tmy2_path = __file__
+        with open(tmy2_path) as f:
+            b_io = io.BytesIO(f.read())
+        data = {
+            "file_name": (b_io, "CA-SAN_FRANCISCO.tmy2"),
+            "system_size": 10.0,
+            "derate": 0.77,
+            "track_mode": 0.0,
+            "azimuth": 180.0,
+            "tilt_eq_lat": 1.0,
+            "tilt": 45.0,
+            "rotlim": 45.0,
+            "gamma": -0.45,
+            "inv_eff": 0.95,
+            "w_stow": 100
+        }
+        response = client.post("/samRun", data=data)
+        # this is 200!?
+        assert response.status_code == 415
+
+class TestTransmissionMatToOmt(object):
+
+    def test_postRequest_returnsJSON(self, client):
+        mat_path = os.path.join(omf.omfDir, "solvers/matpower5.1", "case9.m")
+        with open(mat_path) as f:
+            b_io = io.BytesIO(f.read())
+        data = {
+            "matpower": (b_io, "case9.m")
+        }
+        response = client.post("/transmissionMatToOmt", data=data)
+        assert response.status_code == 200
+        assert response.mimetype == "application/json"
+        assert response.content_length >= 0 and response.content_length <= 0
+
+class TestTransmissionPowerflow(object):
+    pass
+
+class TestTransmissionViz(object):
+    pass
 
 
 # Make sure it's up.
@@ -147,55 +352,54 @@ class TestMilsoftToGridlab(object):
 #response3 = requests.post('http://localhost:5100/milsoftToGridlab', files={'std':open(testStdPath).read(),'seq':open(testSeqPath).read()})
 # print response3.content # it's a glm.
 # Block until the process terminates.
-"""
-mdbTestPath = omf.omfDir + '/static/testFiles/IEEE13.mdb'
-response4 = requests.post('http://localhost:5100/cymeToGridlab', files={'mdb':open(mdbTestPath).read()})
-
+#mdbTestPath = omf.omfDir + '/static/testFiles/IEEE13.mdb'
+#response4 = requests.post('http://localhost:5100/cymeToGridlab', files={'mdb':open(mdbTestPath).read()})
 # print response4.content # it's a glm.
-response5 = requests.post(
-	'http://localhost:5100/gridlabdToGfm',
-	files = {'glm': open(testGlmPath).read()},
-	data = {
-		'phase_variation': '0.15',
-		'chance_constraint': '1.0',
-		'critical_load_met': '0.98',
-		'total_load_met': '0.5',
-		'maxDGPerGenerator': '0.5',
-		'dgUnitCost': '1000000.0',
-		'generatorCandidates': '',
-		'criticalLoads': ''
-	}
-)
+#response5 = requests.post(
+#	'http://localhost:5100/gridlabdToGfm',
+#	files = {'glm': open(testGlmPath).read()},
+#	data = {
+#		'phase_variation': '0.15',
+#		'chance_constraint': '1.0',
+#		'critical_load_met': '0.98',
+#		'total_load_met': '0.5',
+#		'maxDGPerGenerator': '0.5',
+#		'dgUnitCost': '1000000.0',
+#		'generatorCandidates': '',
+#		'criticalLoads': ''
+#	}
+#)
 # print response5.content # it's a gfm model json.
-response6 = requests.post('http://localhost:5100/gridlabRun', files={'glm':open(testGlmPath).read()})
+#response6 = requests.post('http://localhost:5100/gridlabRun', files={'glm':open(testGlmPath).read()})
 # print response6.content # it's a big json.
-response7 = requests.post(
-	'http://localhost:5100/samRun',
-	data = {
-		'file_name': omf.omfDir + '/data/Climate/CA-SAN_FRANCISCO.tmy2',
-		'system_size': 10.0,
-		'derate': 0.77,
-		'track_mode': 0.0,
-		'azimuth': 180.0,
-		'tilt_eq_lat': 1.0,
-		'tilt': 45.0,
-		'rotlim': 45.0,
-		'gamma': -0.45,
-		'inv_eff': 0.95,
-		'w_stow': 100
-	}
-)
+
+#response7 = requests.post(
+#	'http://localhost:5100/samRun',
+#	data = {
+#		'file_name': omf.omfDir + '/data/Climate/CA-SAN_FRANCISCO.tmy2',
+#		'system_size': 10.0,
+#		'derate': 0.77,
+#		'track_mode': 0.0,
+#		'azimuth': 180.0,
+#		'tilt_eq_lat': 1.0,
+#		'tilt': 45.0,
+#		'rotlim': 45.0,
+#		'gamma': -0.45,
+#		'inv_eff': 0.95,
+#		'w_stow': 100
+#	}
+#)
 # print response7.content
-response8 = requests.post(
-	'http://localhost:5100/runGfm',
-	files = {
-		'gfm': response5.content,
-		'asc': open(omf.omfDir + '/static/testFiles/wf_clip.asc').read()
-	}
-)
+
+#response8 = requests.post(
+#	'http://localhost:5100/runGfm',
+#	files = {
+#		'gfm': response5.content,
+#		'asc': open(omf.omfDir + '/static/testFiles/wf_clip.asc').read()
+#	}
+#)
 # print response8.content # it's a json.
 # I SUFFER. KILL ME.
-p.terminate()
+#p.terminate()
 # Or just join and serve forever. I don't care.
 # p.join()
-"""
