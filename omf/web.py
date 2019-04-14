@@ -430,8 +430,9 @@ def networkGet(owner, modelName, networkNum):
 	networkPath = modelDir + "/" + networkName + ".omt"
 	with open(modelDir + "/" + networkName + ".omt", "r") as netFile:
 		networkData = json.dumps(json.load(netFile))
+	#Currently unused template variables: networks, publicNetworks, currUser, 
 	return render_template("transEdit.html", networks=yourNetworks, publicNetworks=publicNetworks, modelName=modelName, networkData=networkData, networkName=networkName, networkNum=networkNum, ref=request.referrer, is_admin=User.cu()=="admin", public=owner=="public",
-		currUser = User.cu(), owner = owner)
+		currUser=User.cu(), owner=owner)
 
 
 @app.route("/distribution/<owner>/<model_name>/<feeder_num>/test")
