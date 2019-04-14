@@ -171,33 +171,52 @@ def viz(pathToOmt, outputPath=None):
 		net = json.load(netFile)
 	# Set up temp directory and copy the network and viewer in to it.
 	if outputPath == None:
-		tempDir = tempfile.mkdtemp()
-	else:
-		tempDir = outputPath
+		##tempDir = tempfile.mkdtemp()
+		outputPath = tempfile.mkdtemp()
+	##else:
+		##tempDir = outputPath
 	#HACK: make sure we get the required files from the right place.
-	SOURCE_DIR = os.path.dirname(__file__) + '/'
-	shutil.copy(SOURCE_DIR + 'templates/transEdit.html', tempDir + '/viewer.html')
+	template_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates/transEdit.html")
+	new_template_path = os.path.join(outputPath, "viewer.html")
+	shutil.copy(template_path, new_template_path)
+	##SOURCE_DIR = os.path.dirname(__file__) + '/'
+	##shutil.copy(SOURCE_DIR + 'templates/transEdit.html', tempDir + '/viewer.html')
 	# Rewrite the load lines in viewer.html
 	# Note: you can't juse open the file in r+ mode because, based on the way the file is mapped to memory, you can only overwrite a line with another of exactly the same length.
-	for line in fileinput.input(tempDir + '/viewer.html', inplace=1):
+	for line in fileinput.input(new_template_path, inplace=1):
+	##for line in fileinput.input(tempDir + '/viewer.html', inplace=1):
 		if line.lstrip().startswith("<script>networkData="):
 			print "<script>networkData=" + json.dumps(net) + "</script>"
 		elif line.lstrip().startswith('<script type="text/javascript" src="/static/svg-pan-zoom.js">'):
-			print '<script type="text/javascript" src="' + SOURCE_DIR + 'static/svg-pan-zoom.js"></script>'
+			file_path = get_abs_path("static/svg-pan-zoom.js")
+			print('<script type="text/javascript" src="{}"></script>'.format(file_path))
+			##print '<script type="text/javascript" src="' + SOURCE_DIR + 'static/svg-pan-zoom.js"></script>'
 		elif line.lstrip().startswith('<script type="text/javascript" src="/static/omf.js">'):
-			print '<script type="text/javascript" src="' + SOURCE_DIR + 'static/omf.js"></script>'
+			file_path = get_abs_path("static/omf.js")
+			print('<script type="text/javascript" src="{}"></script>'.format(file_path))
+			##print '<script type="text/javascript" src="' + SOURCE_DIR + 'static/omf.js"></script>'
 		elif line.lstrip().startswith('<script type="text/javascript" src="/static/jquery-1.9.1.js">'):
-			print '<script type="text/javascript" src="' + SOURCE_DIR + 'static/jquery-1.9.1.js"></script>'
+			file_path = get_abs_path("static/jquery-1.9.1.js")
+			print('<script type="text/javascript" src="{}"></script>'.format(file_path))
+			##print '<script type="text/javascript" src="' + SOURCE_DIR + 'static/jquery-1.9.1.js"></script>'
 		elif line.lstrip().startswith('<link rel="stylesheet" href="/static/omf.css"/>'):
-			print '<link rel="stylesheet" href="' + SOURCE_DIR + 'static/omf.css"/>'
+			file_path = get_abs_path("static/omf.css")
+			print('<link rel="stylesheet" href="{}"/>'.format(file_path))
+			##print '<link rel="stylesheet" href="' + SOURCE_DIR + 'static/omf.css"/>'
 		elif line.lstrip().startswith('<link rel="shortcut icon" href="/static/favicon.ico"/>'):
-			print '<link rel="shortcut icon" href="' + SOURCE_DIR + '/static/favicon.ico"/>'
+			file_path = get_abs_path("static/favicon.ico")
+			print('<link rel="shortcut icon" href="{}"/>'.format(file_path))
+			##print '<link rel="shortcut icon" href="' + SOURCE_DIR + '/static/favicon.ico"/>'
 		elif line.lstrip().startswith('{%'):
 			print '' # Remove the is_admin check for saving changes.
 		else:
 			print line.rstrip()
 	# os.system('open -a "Google Chrome" ' + '"file://' + tempDir + '/viewer.html"')
-	webbrowser.open_new("file://" + tempDir + '/viewer.html')
+	webbrowser.open_new("file://" + new_template_path)
+	##webbrowser.open_new("file://" + tempDir + '/viewer.html')
+
+def get_abs_path(relative_path):
+	return os.path.join(os.path.dirname(os.path.abspath(__file__)), relative_path)
 
 def _tests():
 	# Parse mat to dictionary.
@@ -224,8 +243,8 @@ def _tests():
 	# 	"genLimits" : 0,
 	# 	}
 	# matpower.runSim(pJoin(os.getcwd(),'scratch','transmission',"outData",networkName), inputDict, debug=False)
-	# viz('./static/SimpleNetwork.json')
+	#viz(os.path.join(os.path.dirname(__file__), "static/SimpleNetwork.json")
 
 if __name__ == '__main__':
-	# viz('./static/SimpleNetwork.json')
-	_tests()
+	viz(os.path.join(os.path.dirname(__file__), "static/SimpleNetwork.json"))
+	#_tests()
