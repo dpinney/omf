@@ -167,46 +167,68 @@ def viz(pathToOmt, outputPath=None):
 	# HACK: make sure we have our homebrew binaries available.
 	# os.environ['PATH'] += os.pathsep + '/usr/local/bin'
 	# Load in the network.
-	with open(pathToOmt,'r') as netFile:
-		net = json.load(netFile)
 	# Set up temp directory and copy the network and viewer in to it.
 	if outputPath == None:
 		outputPath = tempfile.mkdtemp()
-	#HACK: make sure we get the required files from the right place.
-	template_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates/transEdit.html")
-	new_template_path = os.path.join(outputPath, "viewer.html")
-	shutil.copy(template_path, new_template_path)
+	template_path = get_abs_path("templates/transEdit.html")
+	viewer_path = os.path.join(outputPath, "viewer.html")
+	shutil.copy(template_path, viewer_path)
 	# Rewrite the load lines in viewer.html
-	# Note: you can't juse open the file in r+ mode because, based on the way the file is mapped to memory, you can only overwrite a line with another of exactly the same length.
-	for line in fileinput.input(new_template_path, inplace=1):
-	##for line in fileinput.input(tempDir + '/viewer.html', inplace=1):
+	# Note: you can't just open the file in r+ mode because, based on the way the file is mapped to memory, you can only overwrite a line with another of exactly the same length.
+	for line in fileinput.input(viewer_path, inplace=1):
 		if line.lstrip().startswith("<script>networkData="):
-			print "<script>networkData=" + json.dumps(net) + "</script>"
+			print "<script>networkData={}</script>".format(get_file_contents(pathToOmt))
 		elif line.lstrip().startswith('<script type="text/javascript" src="/static/svg-pan-zoom.js">'):
-			file_path = get_abs_path("static/svg-pan-zoom.js")
-			print('<script type="text/javascript" src="{}"></script>'.format(file_path))
+			print('<script type="text/javascript" src="{}"></script>'.format(get_abs_path("static/svg-pan-zoom.js")))
 		elif line.lstrip().startswith('<script type="text/javascript" src="/static/omf.js">'):
-			file_path = get_abs_path("static/omf.js")
-			print('<script type="text/javascript" src="{}"></script>'.format(file_path))
+			print('<script type="text/javascript" src="{}"></script>'.format(get_abs_path("static/omf.js")))
 		elif line.lstrip().startswith('<script type="text/javascript" src="/static/jquery-1.9.1.js">'):
-			file_path = get_abs_path("static/jquery-1.9.1.js")
-			print('<script type="text/javascript" src="{}"></script>'.format(file_path))
+			print('<script type="text/javascript" src="{}"></script>'.format(get_abs_path("static/jquery-1.9.1.js")))
 		elif line.lstrip().startswith('<link rel="stylesheet" href="/static/omf.css"/>'):
-			file_path = get_abs_path("static/omf.css")
-			print('<link rel="stylesheet" href="{}"/>'.format(file_path))
+			print('<link rel="stylesheet" href="{}"/>'.format(get_abs_path("static/omf.css")))
 		elif line.lstrip().startswith('<link rel="shortcut icon" href="/static/favicon.ico"/>'):
-			file_path = get_abs_path("static/favicon.ico")
-			print('<link rel="shortcut icon" href="{}"/>'.format(file_path))
+			print('<link rel="shortcut icon" href="{}"/>'.format(get_abs_path("static/favicon.ico")))
 		elif line.lstrip().startswith('{%'):
 			print '' # Remove the is_admin check for saving changes.
 		else:
 			print line.rstrip()
 	# os.system('open -a "Google Chrome" ' + '"file://' + tempDir + '/viewer.html"')
-	webbrowser.open_new("file://" + new_template_path)
+	webbrowser.open_new("file://" + viewer_path)
 	##webbrowser.open_new("file://" + tempDir + '/viewer.html')
+
+def get_file_contents(filepath):
+	with open(filepath) as f: return f.read()
 
 def get_abs_path(relative_path):
 	return os.path.join(os.path.dirname(os.path.abspath(__file__)), relative_path)
+
+def get_HTML_interface_path(omt_filepath):
+	"""
+	Get a path to an .omt file that was saved on the server after a grip API consumer POSTed their desired .omt file.
+	Render the .omt file using the transEdit.html template and injected library code, then return the HTML file.
+	"""
+	filename = "viewer.html"
+	temp_dir = os.path.dirname(omt_filepath)
+	viewer_path = os.path.join(temp_dir, filename)
+	shutil.copy(os.path.join(os.path.dirname(__file__), "templates/transEdit.html"), viewer_path)
+	for line in fileinput.input(viewer_path, inplace=1):
+		if line.lstrip().startswith("<script>networkData="):
+			print("<script>networkData={}</script>".format(get_file_contents(omt_filepath)))
+		elif line.lstrip().startswith('<script type="text/javascript" src="/static/svg-pan-zoom.js">'):
+			print('<script type="text/javascript">{}</script>'.format(get_file_contents(os.path.join(os.path.dirname(__file__), "static/svg-pan-zoom.js"))))
+		elif line.lstrip().startswith('<script type="text/javascript" src="/static/omf.js">'):
+			print('<script type="text/javascript">{}</script>'.format(get_file_contents(os.path.join(os.path.dirname(__file__), "static/omf.js"))))
+		elif line.lstrip().startswith('<script type="text/javascript" src="/static/jquery-1.9.1.js">'):
+			print('<script type="text/javascript">{}</script>'.format(get_file_contents(os.path.join(os.path.dirname(__file__), "static/jquery-1.9.1.js"))))
+		elif line.lstrip().startswith('<link rel="stylesheet" href="/static/omf.css"/>'):
+			print('<style>{}</style>'.format(get_file_contents(os.path.join(os.path.dirname(__file__), "static/omf.css"))))
+		elif line.lstrip().startswith('<link rel="shortcut icon" href="/static/favicon.ico"/>'):
+			print('<link rel="shortcut icon" href="data:image/x-icon;base64,AAABAAEAEBAQAAAAAAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAioqKAGlpaQDU1NQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIiIiIiIiIAAgACAAIAAgACAzIzMjMyMwIDAgMCAwIDAiIiIiIiIgMCAwEDAgMCAwIDMTMyMzIzAgMBAwIDAgMCIiIiIiIiAwIDAQMCAwIDAgMxMzIzMjMCAwEDAgMCAwIiIiIiIiIDAAMAAwADAAMAAzMzMzMzMwAAAAAAAAAAAABwAAd3cAAEABAABVVQAAAAUAAFVVAABAAQAAVVUAAAAFAABVVQAAQAEAAFVVAAAABQAA3d0AAMABAAD//wAA"/>')
+		elif line.lstrip().startswith('{%'):
+			print ""
+		else:
+			print line.rstrip()
+	return filename
 
 def _tests():
 	# Parse mat to dictionary.
