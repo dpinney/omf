@@ -42,9 +42,9 @@ all_routes = [
     ("/gridlabdToGfm"),
     ("/runGfm"),
     ("/samRun"),
-    #("/transmissionMatToOmt"),
+    ("/transmissionMatToOmt"),
     #("/transmissionPowerflow"),
-    #("/transmissionViz")
+    ("/transmissionViz")
 ]
 
 @pytest.mark.parametrize("url_route", all_routes)
@@ -89,13 +89,11 @@ class TestOneLineGridLab(object):
         assert response.mimetype == "image/png"
         assert response.content_length == 50394
 
-    def xtest_postWrongFileType_returns415(self, client):
-        filename = "test_grip.py" 
-        test_file_path = os.path.join(os.path.dirname(__file__), filename)
-        with open(test_file_path) as f:
+    def test_postWrongFileType_returns415(self, client):
+        with open(__file__) as f:
             b_io = io.BytesIO(f.read())
         data = {
-            "glm": (b_io, filename),
+            "glm": (b_io, "test_grip.py"),
         }
         response = client.post("/oneLineGridlab", data=data)
         assert response.status_code == 415
@@ -119,7 +117,7 @@ class TestMilsoftToGridlab(object):
         assert response.mimetype == "text/plain"
         assert response.content_length >= 13650 and response.content_length <= 13750
 
-    def xtest_postWrongFileType_returns415(self, client):
+    def test_postWrongFileType_returns415(self, client):
         std_path = __file__
         seq_path = __file__
         with open(std_path) as f:
@@ -147,7 +145,7 @@ class TestCymeToGridlab(object):
         assert response.mimetype == "text/plain"
         assert response.content_length >= 25400 and response.content_length <= 25500
 
-    def xtest_postWrongFileType_returns415(self, client):
+    def test_postWrongFileType_returns415(self, client):
         mdb_path = __file__
         with open(mdb_path) as f:
             b_io = io.BytesIO(f.read())
@@ -159,6 +157,7 @@ class TestCymeToGridlab(object):
 
 class TestGridlabRun(object):
 
+    # This test fails because the simulation seems to randomly succeed or fail
     def test_postRequest_returnsJSON(self, client):
         filename = "test_ieee123nodeBetter.glm" 
         glm_path = os.path.join(os.path.dirname(__file__), filename)
@@ -170,9 +169,9 @@ class TestGridlabRun(object):
         response = client.post("/gridlabRun", data=data)
         assert response.status_code == 200
         assert response.mimetype == "application/json"
-        assert response.content_length >= 1450 and response.content_length <= 1550 #1588, 641
+        assert response.content_length >= 1450 and response.content_length <= 1550 #1588 (successful simulation), 1535, 1453 (success), 641 (failed), 596 (failed)
 
-    def xtest_postWrongFileType_returns415(self, client):
+    def test_postWrongFileType_returns415(self, client):
         glm_path = __file__
         with open(glm_path) as f:
             b_io = io.BytesIO(f.read())
@@ -205,9 +204,8 @@ class TestGridlabdToGfm(object):
         assert response.mimetype == "application/json"
         assert response.content_length >= 41300 and response.content_length <= 41400
 
-    def xtest_postWrongFileType_returns415(self, client):
-        glm_path = __file__
-        with open(glm_path) as f:
+    def test_postWrongFileType_returns415(self, client):
+        with open(__file__) as f:
             b_io = io.BytesIO(f.read())
         data = {
             "glm": (b_io, "test_grip.py"),
@@ -223,7 +221,7 @@ class TestGridlabdToGfm(object):
         response = client.post("/gridlabdToGfm", data=data)
         assert response.status_code == 415
 
-    def xtest_missingFormParameters_returns400(self, client):
+    def test_missingFormParameters_returns400(self, client):
         filename = "test_ieee123nodeBetter.glm" 
         glm_path = os.path.join(os.path.dirname(__file__), filename)
         with open(glm_path) as f:
@@ -234,9 +232,10 @@ class TestGridlabdToGfm(object):
         response = client.post("/gridlabdToGfm", data=data)
         assert response.status_code == 400
 
-class TestRunGfm(object):
+# Don't touch this for now
+class xTestRunGfm(object):
 
-    def xtest_postRequest_returnsJSON(self, client):
+    def test_postRequest_returnsJSON(self, client):
         asc_path = os.path.join(omf.omfDir, "static/testFiles/wf_clip.asc")
         gfm_path = os.path.join(omf.omfDir, "static/testFiles/test_ieee123nodeBetter.gfm")
         with open(gfm_path) as f:
@@ -267,7 +266,8 @@ class TestRunGfm(object):
         # this is 200!?
         assert response.status_code == 415
 
-class TestSamRun(object):
+# Don't touch this for now
+class xTestSamRun(object):
 
     def test_postRequest_returnsJSON(self, client):
         tmy2_path = os.path.join(omf.omfDir, "data/Climate/CA-SAN_FRANCISCO.tmy2")
@@ -324,13 +324,44 @@ class TestTransmissionMatToOmt(object):
         response = client.post("/transmissionMatToOmt", data=data)
         assert response.status_code == 200
         assert response.mimetype == "application/json"
-        assert response.content_length >= 0 and response.content_length <= 0
+        assert response.content_length >= 4300 and response.content_length <= 4400 #4335
 
+    def test_postWrongFileType_returns415(self, client):
+        with open(__file__) as f:
+            b_io = io.BytesIO(f.read())
+        data = {
+            "matpower": (b_io, "test_grip.py")
+        }
+        response = client.post("/transmissionMatToOmt", data=data)
+        assert response.status_code == 415
+
+# Finish this, then create 202 strategy
 class TestTransmissionPowerflow(object):
     pass
 
 class TestTransmissionViz(object):
-    pass
+    
+    def test_postRequest_returnsHTML(self, client):
+        with open(os.path.join(omf.omfDir, "static/testFiles/case9.omt")) as f:
+            b_io = io.BytesIO(f.read())
+        data = {
+            "omt": (b_io, "case9.omt")
+        }
+        response = client.post("/transmissionViz", data=data)
+        assert response.status_code == 200
+        assert response.mimetype == "text/html"
+        assert response.content_length >= 406500 and response.content_length <= 407500 #406949
+
+    # There is nothing to throw an error so we can't do this unless we inspect the file
+    def test_postWrongFileType_returns415(self, client):
+        with open(__file__) as f:
+            b_io = io.BytesIO(f.read())
+        data = {
+            "omt": (b_io, "test_grip.py")
+        }
+        response = client.post("/transmissionViz", data=data)
+        assert response.status_code == 415
+
 
 
 # Make sure it's up.
