@@ -40,20 +40,25 @@ def oneLineGridLab():
 	f = request.files['glm']
 	glm_file_path = os.path.join(temp_dir, "in.glm")
 	f.save(glm_file_path)
-	feed = omf.feeder.parse(glm_file_path)
-	graph = omf.feeder.treeToNxGraph(feed)
-	if request.form.get('useLatLons') == 'False':
-		neatoLayout = True
-	else:
-		neatoLayout = False
-	# Clear old plots.
-	plt.clf()
-	plt.close()
-	# Plot new plot.
-	omf.feeder.latLonNxGraph(graph, labels=False, neatoLayout=neatoLayout, showPlot=False)
-	out_img_name = 'out.png'
-	plt.savefig(os.path.join(temp_dir, out_img_name))
-	return send_from_directory(temp_dir, out_img_name)
+	try:
+		feed = omf.feeder.parse(glm_file_path)
+		graph = omf.feeder.treeToNxGraph(feed)
+		if request.form.get('useLatLons') == 'False':
+			neatoLayout = True
+		else:
+			neatoLayout = False
+		# Clear old plots.
+		plt.clf()
+		plt.close()
+		# Plot new plot.
+		omf.feeder.latLonNxGraph(graph, labels=False, neatoLayout=neatoLayout, showPlot=False)
+		out_img_name = 'out.png'
+		plt.savefig(os.path.join(temp_dir, out_img_name))
+		return send_from_directory(temp_dir, out_img_name)
+	except:
+		return ("", 415, {})
+
+
 
 @app.route('/milsoftToGridlab', methods=['POST'])
 def milsoftToGridlab():
@@ -70,13 +75,18 @@ def milsoftToGridlab():
 	seqFile = request.files['seq']
 	seqPath = os.path.join(workDir, seqFileName)
 	seqFile.save(seqPath)
-	tree = omf.milToGridlab.convert(open(stdPath).read(), open(seqPath).read(), rescale=True)
-	glmName = 'out.glm'
-	glmPath = os.path.join(workDir, glmName)
-	with open(glmPath, 'w') as outFile:
-		outFile.write(omf.feeder.sortedWrite(tree))
-	# TODO: delete the tempDir.
-	return send_from_directory(workDir, glmName, mimetype="text/plain")
+	try:
+		with open(stdPath) as f: stdFile = f.read()
+		with open(seqPath) as f: seqFile = f.read()
+		tree = omf.milToGridlab.convert(stdFile, seqFile, rescale=True)
+		glmName = 'out.glm'
+		glmPath = os.path.join(workDir, glmName)
+		with open(glmPath, 'w') as outFile: outFile.write(omf.feeder.sortedWrite(tree))
+		# TODO: delete the tempDir.
+		return send_from_directory(workDir, glmName, mimetype="text/plain")
+	except:
+		return ("", 415, {})
+
 
 @app.route('/cymeToGridlab', methods=['POST'])
 def cymeToGridlab():
@@ -90,13 +100,16 @@ def cymeToGridlab():
 	mdbFile.save(mdbPath)
 	import locale
 	locale.setlocale(locale.LC_ALL, 'en_US')
-	tree = omf.cymeToGridlab.convertCymeModel(mdbPath, workDir)
-	glmName = 'out.glm'
-	glmPath = os.path.join(workDir, glmName)
-	with open(glmPath, 'w') as outFile:
-		outFile.write(omf.feeder.sortedWrite(tree))
-	# TODO: delete the tempDir.
-	return send_from_directory(workDir, glmName, mimetype="text/plain")
+	try:
+		tree = omf.cymeToGridlab.convertCymeModel(mdbPath, workDir)
+		glmName = 'out.glm'
+		glmPath = os.path.join(workDir, glmName)
+		with open(glmPath, 'w') as outFile:
+			outFile.write(omf.feeder.sortedWrite(tree))
+		# TODO: delete the tempDir.
+		return send_from_directory(workDir, glmName, mimetype="text/plain")
+	except:
+		return ("", 415, {})
 
 @app.route('/gridlabRun', methods=['POST'])
 def gridlabRun():
@@ -110,12 +123,15 @@ def gridlabRun():
 	f = request.files['glm']
 	glmOnDisk = os.path.join(workDir, fName)
 	f.save(glmOnDisk)
-	feed = omf.feeder.parse(glmOnDisk)
-	outDict = omf.solvers.gridlabd.runInFilesystem(feed, attachments=[], keepFiles=True, workDir=workDir, glmName='out.glm')
-	#TODO: delete the tempDir.
-	resp = make_response(json.dumps(outDict))
-	resp.mimetype = "application/json"
-	return resp
+	try:
+		feed = omf.feeder.parse(glmOnDisk)
+		outDict = omf.solvers.gridlabd.runInFilesystem(feed, attachments=[], keepFiles=True, workDir=workDir, glmName='out.glm')
+		#TODO: delete the tempDir.
+		response = make_response(json.dumps(outDict))
+		response.mimetype = "application/json"
+		return response
+	except:
+		return ("", 415, {})
 
 @app.route('/gridlabdToGfm', methods=['POST'])
 def gridlabdToGfm():
@@ -128,26 +144,36 @@ def gridlabdToGfm():
 	f = request.files['glm']
 	glmPath = os.path.join(workDir, fName)
 	f.save(glmPath)
-	feederModel = {
-		'nodes': [], # Don't need these.
-		'tree': omf.feeder.parse(glmPath)
-	}
-	gfmInputTemplate = {
-		'phase_variation': float(request.form.get('phase_variation')),
-		'chance_constraint': float(request.form.get('chance_constraint')),
-		'critical_load_met': float(request.form.get('critical_load_met')),
-		'total_load_met': float(request.form.get('total_load_met')),
-		'maxDGPerGenerator': float(request.form.get('maxDGPerGenerator')),
-		'dgUnitCost': float(request.form.get('dgUnitCost')),
-		'generatorCandidates': request.form.get('generatorCandidates'),
-		'criticalLoads': request.form.get('criticalLoads')
-	}
-	gfmDict = omf.models.resilientDist.convertToGFM(gfmInputTemplate, feederModel)
-	resp = make_response(json.dumps(gfmDict))
-	resp.mimetype = "application/json"
-	# TODO: delete the tempDir.
-	return resp
+	try:
+		gfmInputTemplate = {
+			'phase_variation': float(request.form.get('phase_variation')),
+			'chance_constraint': float(request.form.get('chance_constraint')),
+			'critical_load_met': float(request.form.get('critical_load_met')),
+			'total_load_met': float(request.form.get('total_load_met')),
+			'maxDGPerGenerator': float(request.form.get('maxDGPerGenerator')),
+			'dgUnitCost': float(request.form.get('dgUnitCost')),
+			'generatorCandidates': request.form.get('generatorCandidates'),
+			'criticalLoads': request.form.get('criticalLoads')
+		}
+		for key, val in gfmInputTemplate.items():
+			if val is None:
+				return ("", 400, {})
+	except:
+		return ("", 400, {})
+	try:
+		feederModel = {
+			'nodes': [], # Don't need these.
+			'tree': omf.feeder.parse(glmPath)
+		}
+		gfmDict = omf.models.resilientDist.convertToGFM(gfmInputTemplate, feederModel)
+		response = make_response(json.dumps(gfmDict))
+		response.mimetype = "application/json"
+		# TODO: delete the tempDir.
+		return response
+	except:
+		return ("", 415, {})
 
+# Don't touch this for now
 @app.route('/runGfm', methods=['POST'])
 def runGfm():
 	'''Data Params: {gfm: [file], asc: [file]}
@@ -181,10 +207,14 @@ def runGfm():
 	)
 	(stdout,stderr) = proc.communicate()
 	gfmOutPath = os.path.join(workDir, outName)
-	try:
-		out = json.load(open(gfmOutPath))
-	except:
-		out = stdout
+
+	with open(gfmOutPath) as f:
+		out = json.load(f)
+
+	#try:
+	#	out = json.load(open(gfmOutPath))
+	#except:
+	#	out = stdout
 	return out
 
 @app.route('/samRun', methods=['POST'])
@@ -196,14 +226,10 @@ def samRun():
 	# Set up SAM data structures.
 	ssc = omf.solvers.nrelsam2013.SSCAPI()
 	dat = ssc.ssc_data_create()
-
 	# Set the inputs.
-	# I edited this. Need to save the file?
-	#ssc.ssc_data_set_string(dat, key, request.form.get(key))
 	for key in request.form.keys():
-		# I edited this
 		if key == 'file_name':
-			ssc.ssc_data_set_string(dat, key, request.form.get(key))
+			ssc.ssc_data_set_string(dat, key, request.form.get(key)) # file_name is expected to be a path on the server!
 		else:
 			ssc.ssc_data_set_number(dat, key, float(request.form.get(key)))
 
@@ -256,8 +282,6 @@ def transmissionPowerflow():
 	OMF function: omf.models.transmission.new and omf.models.transmission.work
 	Runtime: tens of seconds.
 	Result: TBD. '''
-	# I don't really understand this route. An .omt file does not appear to contain any keys like "algorithm" that would be useful in the work()
-	# function
 	return 'Not Implemented Yet'
 
 @app.route('/transmissionViz', methods=['POST'])
@@ -266,8 +290,12 @@ def transmissionViz():
 	OMF function: omf.network.viz()
 	Runtime: a couple seconds.
 	Result: HTML interface visualizing the .omt file. '''
-	#omf.network.viz()
-	return 'Not Implemented Yet'
+	f = request.files["omt"]
+	temp_dir = tempfile.mkdtemp()
+	omt_path = os.path.join(temp_dir, "in.omt")
+	f.save(omt_path)
+	html_filename = omf.network.get_HTML_interface_path(omt_path)
+	return send_from_directory(temp_dir, html_filename)
 
 def serve():
 	server = WSGIServer(('0.0.0.0', 5100), app)
