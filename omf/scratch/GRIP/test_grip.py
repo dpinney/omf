@@ -326,6 +326,7 @@ class TestTransmissionMatToOmt(object):
         assert response.mimetype == "application/json"
         assert response.content_length >= 4300 and response.content_length <= 4400 #4335
 
+    # Must check if parse() result is equivalent to the default newNetworkWireframe because I don't know how to validate a .m file.
     def test_postWrongFileType_returns415(self, client):
         with open(__file__) as f:
             b_io = io.BytesIO(f.read())
