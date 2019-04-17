@@ -33,7 +33,10 @@
 
 		.tabcontent {
 		    display: none;
-		} 
+		}
+		table {
+			width: 100%;
+		}
 	</style>
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->
@@ -113,26 +116,6 @@
 				</select>
 			</div>
 			<div class="wideInput">
-				<p class="inputSectionHeader">Solar System Parameters</p>
-			</div>
-			<hr>
-			<div class="shortInput">
-				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
-				<input type="text" id="zipCode" name="zipCode" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">System Size (kWp-DC)<span class="classic">DC output rating of the solar panels in kilowatts.</span></label>
-				<input type="text" id="systemSize" name="systemSize" pattern="^\d+\.?\d*$" required="required">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Inverter Size (kW-AC)<span class="classic">Size of the total inverters in kW-AC for the system. Used to determine energy clipping in the Hourly System Average Power Output graph.</span></label>
-				<input type="text" id="inverterSize" name="inverterSize" required="required" pattern="^\d+\.?\d*?$">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Inverter &amp; Transformer Efficiency (%)<span class="classic">Combined Inverter and Transformer Efficiency in converting DC power to AC power. The Inverter efficiency can be obtained from the Weighted Efficiency (CEC) Method.</span></label>
-				<input type="text" id="inverterEfficiency" name="inverterEfficiency" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
-			</div>
-			<div class="wideInput">
 				<p class="inputSectionHeader">Financial Variables</p>
 			</div>
 			<hr>
@@ -148,6 +131,10 @@
 				<p class="inputSectionHeader">Controller Parameters</p>
 			</div>
 			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
+				<input type="text" id="zipCode" name="zipCode" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
+			</div>
 			<div class="shortInput">
 				<label class="tooltip">Parameter 1<span class="classic">TBD.</span></label>
 				<input type="text" id="parameterOne" name="parameterOne" pattern="^\d+\.?\d*$" required="required"/>
@@ -250,42 +237,78 @@
 				<!--
 				<script type="text/javascript">gebi("parameterUnbalanceChart").src = "data:image/png;base64," + allOutputData.voltageDrop</script>
 			-->
-			</div>		
+			</div>	
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Three Phase Loads Real and Imaginary Power</p>
+		<p class="reportTitle postRun" style="page-break-before:always">Three Phase (Motor) Loads Power and Imbalance</p>
 		<div class="content tableContainer postRun">
 			<table id="realImgPower">
-			<tr> <th>Phase A Real</th> <th>Phase A Img;</th> <th>Phase B Real</th> <th>Phase B Img</th> <th>Phase C Real;</th> <th>Phase C Img</th></tr>
-			<tr> 
-				<td id = 'realA'></td>
-				<script type="text/javascript">
-					gebi('realA').innerHTML = allOutputData['threePhase']['sum(power_A.real)']
-				</script> 
-				<td id = 'imgA'></td>
-				<script type="text/javascript">
-					gebi('imgA').innerHTML = allOutputData['threePhase']['sum(power_A.imag)']
-				</script> 
-				<td id = 'realB'></td>
-				<script type="text/javascript">
-					gebi('realB').innerHTML = allOutputData['threePhase']['sum(power_B.real)']
-				</script> 
-				<td id = 'imgB'></td>
-				<script type="text/javascript">
-					gebi('imgB').innerHTML = allOutputData['threePhase']['sum(power_B.imag)']
-				</script>
-				<td id = 'realC'></td>
-				<script type="text/javascript">
-					gebi('realC').innerHTML = allOutputData['threePhase']['sum(power_C.real)']
-				</script> 
-				<td id = 'imgC'></td>
-				<script type="text/javascript">
-					gebi('imgC').innerHTML = allOutputData['threePhase']['sum(power_C.imag)']
-				</script> 
-			</tr>
+				<tr>
+					<th>Phase A Real</th>
+					<th>Phase A Img</th>
+					<th>Phase B Real</th>
+					<th>Phase B Img</th>
+					<th>Phase C Real</th>
+					<th>Phase C Img</th>
+				</tr>
+				<tr> 
+					<td id='realA'>{{allOutputDataDict['threePhase']['sum(power_A.real)']}}</td>
+					<td id='imgA'>{{allOutputDataDict['threePhase']['sum(power_A.imag)']}}</td>
+					<td id='realB'>{{allOutputDataDict['threePhase']['sum(power_B.real)']}}</td>
+					<td id='imgB'>{{allOutputDataDict['threePhase']['sum(power_B.imag)']}}</td>
+					<td id='realC'>{{allOutputDataDict['threePhase']['sum(power_C.real)']}}</td>
+					<td id='imgC'>{{allOutputDataDict['threePhase']['sum(power_C.imag)']}}</td>
+				</tr>
 			</table>
 		</div>
-
-	<p class="reportTitle postRun">Simulation Location</p>
+		<p class="reportTitle postRun" style="page-break-before:always">Cost of Service</p>
+		<div class="content tableContainer postRun">
+			<table id="costService">
+				<tr>
+					<th></th>
+					<th>Base Case</th>
+					<th>With Solar</th>
+					<th>Controlled Solar</th>
+				</tr>
+				<tr>
+					<td>Load</td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>Distributed Generation</td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>Losses</td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+			</table>
+		</div>
+		<p class="reportTitle postRun" style="page-break-before:always">Inverter Power Outputs</p>
+		<div class="content tableContainer postRun">
+			<table id="costService" style="max-height:500px">
+				<tr>
+					<th>Name</th>
+					<th>Uncontrolled P</th>
+					<th>Uncontrolled Q</th>
+					<th>Controlled P</th>
+					<th>Controlled Q</th>
+				</tr>
+				<tr>
+					<td>Blah</td>
+					<td>3</td>
+					<td>5</td>
+					<td>7</td>
+					<td>0</td>
+				</tr>
+			</table>
+		</div>
+		<p class="reportTitle postRun">Simulation Location</p>
 		<div id="studyDetail" class="tightContent postRun detailsContainer" style="position: relative">
 			<div id="mapHere"></div>
 			<script type="text/javascript">

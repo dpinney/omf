@@ -2073,6 +2073,7 @@ describe("Unit tests", function() {
             });
         });
     });
+    /*
     //I shouldn't be testing these, except in cases where I should
     describe("Private functions and methods", function() {
 
@@ -2479,8 +2480,10 @@ describe("Unit tests", function() {
             });
         });
     });
+    */
 });// Unit tests
 
+/*
 //Run each test inside this block one at a time, i.e. uncomment one it() function at a time and only run one describe block at a time
 xdescribe("Integration tests that require the environment to be prepared correctly and that should be run one at a time", function() {
 
@@ -2544,12 +2547,11 @@ xdescribe("Integration tests that require the environment to be prepared correct
                 expect(spy).toHaveBeenCalled();
             });
 
-            /** Send the writeFeeder because we overwrite the server's .omd file with the new writes that the user has made.
-             */
+            // Send the writeFeeder because we overwrite the server's .omd file with the new writes that the user has made.
             xit("should send writeFeeder to the server in the first ajax request", async function() {
                 spyOn(window, "reloadWrapper");
                 const spy = spyOn(XMLHttpRequest.prototype, "send").and.callThrough();
-                /** Modify the writeFeeder, but not the readFeeder. */
+                //Modify the writeFeeder, but not the readFeeder.
                 writeFeeder["TestingKey"] = { prop: "testing object"};
                 await saveFeeder();
                 const feeder = JSON.parse(spy.calls.first().args[0].get("feederObjectJson"));
@@ -2587,7 +2589,7 @@ xdescribe("Integration tests that require the environment to be prepared correct
                 //    }
                 //    return expect(requests).toEqual(2);
 
-                //    /*for (let i = 0; i <= 2; i++) {
+                //    for (let i = 0; i <= 2; i++) {
                 //        if (i == 0 || i == 2) {
                 //            spy.calls.all()[i].object.then(function(xhr) {
                 //                console.log(xhr);
@@ -2596,7 +2598,7 @@ xdescribe("Integration tests that require the environment to be prepared correct
                 //                expect(xhr.responseURL).not.toEqual("");
                 //            });
                 //        } 
-                //    }*/
+                //    }
                 //});
 
                 xit("should refresh the browser", async function() {
@@ -2630,6 +2632,7 @@ xdescribe("Integration tests that require the environment to be prepared correct
         });
     });
 });
+*/
 /* This is used to display the jasmine reporter.
  */
 setTimeout(
