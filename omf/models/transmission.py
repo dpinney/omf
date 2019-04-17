@@ -213,4 +213,9 @@ def _tests():
 	renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	_tests()
+	#temp_dir = tempfile.mkdtemp()
+	if new("/var/folders/h2/hmm8l_b53k59k0_l5q0sjypm0000gn/T/tmpui16v5"):
+		print(work("/var/folders/h2/hmm8l_b53k59k0_l5q0sjypm0000gn/T/tmpui16v5", {}))
+	else:
+		print("failed")
+	#_tests()
