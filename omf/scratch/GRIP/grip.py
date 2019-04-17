@@ -294,6 +294,11 @@ def transmissionViz():
 	temp_dir = tempfile.mkdtemp()
 	omt_path = os.path.join(temp_dir, "in.omt")
 	f.save(omt_path)
+	try:
+		with open(omt_path) as f:
+			json.load(f)
+	except:
+		return ("", 415, {})
 	html_filename = omf.network.get_HTML_interface_path(omt_path)
 	return send_from_directory(temp_dir, html_filename)
 
