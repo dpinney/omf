@@ -58,8 +58,6 @@ def oneLineGridLab():
 	except:
 		return ("", 415, {})
 
-
-
 @app.route('/milsoftToGridlab', methods=['POST'])
 def milsoftToGridlab():
 	'''Data Params: {std: [file], seq: [file]}
@@ -86,7 +84,6 @@ def milsoftToGridlab():
 		return send_from_directory(workDir, glmName, mimetype="text/plain")
 	except:
 		return ("", 415, {})
-
 
 @app.route('/cymeToGridlab', methods=['POST'])
 def cymeToGridlab():

@@ -205,7 +205,7 @@ def get_abs_path(relative_path):
 def get_HTML_interface_path(omt_filepath):
 	"""
 	Get a path to an .omt file that was saved on the server after a grip API consumer POSTed their desired .omt file.
-	Render the .omt file using the transEdit.html template and injected library code, then return the HTML file.
+	Render the .omt file data using the transEdit.html template and injected library code, then return HTML filename.
 	"""
 	filename = "viewer.html"
 	temp_dir = os.path.dirname(omt_filepath)
