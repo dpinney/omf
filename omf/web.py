@@ -430,8 +430,9 @@ def networkGet(owner, modelName, networkNum):
 	networkPath = modelDir + "/" + networkName + ".omt"
 	with open(modelDir + "/" + networkName + ".omt", "r") as netFile:
 		networkData = json.dumps(json.load(netFile))
+	#Currently unused template variables: networks, publicNetworks, currUser, 
 	return render_template("transEdit.html", networks=yourNetworks, publicNetworks=publicNetworks, modelName=modelName, networkData=networkData, networkName=networkName, networkNum=networkNum, ref=request.referrer, is_admin=User.cu()=="admin", public=owner=="public",
-		currUser = User.cu(), owner = owner)
+		currUser=User.cu(), owner=owner)
 
 
 @app.route("/feeder/<owner>/<model_name>/<feeder_num>/test")
@@ -504,7 +505,7 @@ def checkConversion(modelName, owner=None):
 	"""If the path exists, then the conversion is ongoing and the client can't reload their browser yet.
 	If the path does not exist, then either 1) the conversion hasn't started yet or 2) the conversion is
 	finished because the ZPID.txt file is gone.
-	If an error file exists, the the conversion failed and the client should be notified.`
+	If an error file exists, the the conversion failed and the client should be notified.
 	"""
 	print modelName
 	if User.cu() == "admin":
