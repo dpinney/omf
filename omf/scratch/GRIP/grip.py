@@ -51,6 +51,28 @@ def get_download(func):
 		return response
 	return wrapper
 
+def get_status(func):
+	""" Use the function argument to see if the task is finished """
+	@wraps(func)
+	def wrapper(*args, **kwargs):
+		temp_dir = get_abs_path(kwargs["temp_dir"])
+		if not os.path.isdir(temp_dir):
+			abort(404)
+		return func(temp_dir)
+	return wrapper
+
+def run_process(func):
+	""" Use the function argument to run a file conversion process that is protected with try-except """
+	@wraps(func)
+	def wrapper(*args, **kwargs):
+		temp_dir = args[0]
+		try:
+			func(temp_dir)
+		except:
+			with open(os.path.join(temp_dir, "error.txt"), 'w') as f:
+				f.write(str(sys.exc_info()[1]))	
+	return wrapper
+
 @app.route("/oneLineGridlab", methods=["POST"])
 def oneLineGridlab_start():
 	''' Data Params: {glm: [file], useLatLons: Boolean}
@@ -64,38 +86,28 @@ def oneLineGridlab_start():
 	p.start()
 	return ("SEE OTHER", 303, {"Location": "oneLineGridlab" + temp_dir})
 
+@run_process
 def oneLineGridlab(temp_dir):
-	"""
-	Create a png file from a glm file
-
-	:param str temp_dir: the temporary directory where the input and output files are saved
-	"""
-	try:
-		f = request.files['glm']
-		glm_path = os.path.join(temp_dir, "in.glm")
-		f.save(glm_path)
-		feed = omf.feeder.parse(glm_path)
-		graph = omf.feeder.treeToNxGraph(feed)
-		if request.form.get('useLatLons') == 'False':
-			neatoLayout = True
-		else:
-			neatoLayout = False
-		# Clear old plots.
-		plt.clf()
-		plt.close()
-		# Plot new plot.
-		omf.feeder.latLonNxGraph(graph, labels=False, neatoLayout=neatoLayout, showPlot=False)
-		out_img_name = 'out.png'
-		plt.savefig(os.path.join(temp_dir, out_img_name))
-	except:
-		with open(os.path.join(temp_dir, "error.txt"), 'w') as f:
-			f.write(str(sys.exc_info()[1]))	
+	f = request.files['glm']
+	glm_path = os.path.join(temp_dir, "in.glm")
+	f.save(glm_path)
+	feed = omf.feeder.parse(glm_path)
+	graph = omf.feeder.treeToNxGraph(feed)
+	if request.form.get('useLatLons') == 'False':
+		neatoLayout = True
+	else:
+		neatoLayout = False
+	# Clear old plots.
+	plt.clf()
+	plt.close()
+	# Plot new plot.
+	omf.feeder.latLonNxGraph(graph, labels=False, neatoLayout=neatoLayout, showPlot=False)
+	out_img_name = 'out.png'
+	plt.savefig(os.path.join(temp_dir, out_img_name))
 
 @app.route("/oneLineGridlab/<path:temp_dir>")
+@get_status
 def oneLineGridlab_status(temp_dir):
-	temp_dir = get_abs_path(temp_dir)
-	if not os.path.isdir(temp_dir):
-		abort(404)
 	if os.path.isfile(os.path.join(temp_dir, "out.png")):
 		return redirect(url_for("oneLineGridlab_download", temp_dir=get_rel_path(temp_dir)), code=303)
 	else:
@@ -130,35 +142,30 @@ def milsoftToGridlab_start():
 	p.start()
 	return ("SEE OTHER", 303, {"Location": "milsoftToGridlab" + temp_dir})
 
+@run_process
 def milsoftToGridlab(temp_dir):
 	'''Data Params: {std: [file], seq: [file]}
 	Runtime: could take a couple minutes.
 	OMF function: omf.milToGridlab.convert()
 	Result: a .glm file converted from the two input files.'''
-	try:
-		stdFileName = 'in.std'
-		stdFile = request.files['std']
-		stdPath = os.path.join(temp_dir, stdFileName)
-		stdFile.save(stdPath)
-		seqFileName = 'in.seq'
-		seqFile = request.files['seq']
-		seqPath = os.path.join(temp_dir, seqFileName)
-		seqFile.save(seqPath)
-		with open(stdPath) as f: stdFile = f.read()
-		with open(seqPath) as f: seqFile = f.read()
-		tree = omf.milToGridlab.convert(stdFile, seqFile, rescale=True)
-		glmName = 'out.glm'
-		glmPath = os.path.join(temp_dir, glmName)
-		with open(glmPath, 'w') as outFile: outFile.write(omf.feeder.sortedWrite(tree))
-	except:
-		with open(os.path.join(temp_dir, "error.txt"), 'w') as f:
-			f.write(str(sys.exc_info()[1]))	
+	stdFileName = 'in.std'
+	stdFile = request.files['std']
+	stdPath = os.path.join(temp_dir, stdFileName)
+	stdFile.save(stdPath)
+	seqFileName = 'in.seq'
+	seqFile = request.files['seq']
+	seqPath = os.path.join(temp_dir, seqFileName)
+	seqFile.save(seqPath)
+	with open(stdPath) as f: stdFile = f.read()
+	with open(seqPath) as f: seqFile = f.read()
+	tree = omf.milToGridlab.convert(stdFile, seqFile, rescale=True)
+	glmName = 'out.glm'
+	glmPath = os.path.join(temp_dir, glmName)
+	with open(glmPath, 'w') as outFile: outFile.write(omf.feeder.sortedWrite(tree))
 
 @app.route("/milsoftToGridlab/<path:temp_dir>")
+@get_status
 def milsoftToGridlab_status(temp_dir):
-	temp_dir = get_abs_path(temp_dir)
-	if not os.path.isdir(temp_dir):
-		abort(404)
 	if os.path.isfile(os.path.join(temp_dir, "out.glm")):
 		return redirect(url_for("milsoftToGridlab_download", temp_dir=get_rel_path(temp_dir)), code=303)
 	else:
