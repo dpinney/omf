@@ -102,6 +102,7 @@ def oneLineGridlab_status(temp_dir):
 		return json.jsonify(get_task_metadata(temp_dir))
 
 # Insert all other routes here!
+@app.route("/milsoftToGridlab/<path:temp_dir>", methods=["DELETE"])
 @app.route("/oneLineGridlab/<path:temp_dir>", methods=["DELETE"])
 def delete(temp_dir):
 	temp_dir = get_abs_path(temp_dir)
@@ -123,31 +124,62 @@ def oneLineGridlab_download(temp_dir):
 	return send_from_directory(temp_dir, "out.png")
 
 @app.route('/milsoftToGridlab', methods=['POST'])
-def milsoftToGridlab():
+def milsoftToGridlab_start():
+	temp_dir = tempfile.mkdtemp()
+	p = Process(target=milsoftToGridlab, args=(temp_dir,))
+	p.start()
+	return ("SEE OTHER", 303, {"Location": "milsoftToGridlab" + temp_dir})
+
+def milsoftToGridlab(temp_dir):
 	'''Data Params: {std: [file], seq: [file]}
 	Runtime: could take a couple minutes.
 	OMF function: omf.milToGridlab.convert()
 	Result: a .glm file converted from the two input files.'''
-	workDir = tempfile.mkdtemp()
-	stdFileName = 'in.std'
-	stdFile = request.files['std']
-	stdPath = os.path.join(workDir, stdFileName)
-	stdFile.save(stdPath)
-	seqFileName = 'in.seq'
-	seqFile = request.files['seq']
-	seqPath = os.path.join(workDir, seqFileName)
-	seqFile.save(seqPath)
 	try:
+		stdFileName = 'in.std'
+		stdFile = request.files['std']
+		stdPath = os.path.join(temp_dir, stdFileName)
+		stdFile.save(stdPath)
+		seqFileName = 'in.seq'
+		seqFile = request.files['seq']
+		seqPath = os.path.join(temp_dir, seqFileName)
+		seqFile.save(seqPath)
 		with open(stdPath) as f: stdFile = f.read()
 		with open(seqPath) as f: seqFile = f.read()
 		tree = omf.milToGridlab.convert(stdFile, seqFile, rescale=True)
 		glmName = 'out.glm'
-		glmPath = os.path.join(workDir, glmName)
+		glmPath = os.path.join(temp_dir, glmName)
 		with open(glmPath, 'w') as outFile: outFile.write(omf.feeder.sortedWrite(tree))
-		# TODO: delete the tempDir.
-		return send_from_directory(workDir, glmName, mimetype="text/plain")
 	except:
-		abort(415)
+		with open(os.path.join(temp_dir, "error.txt"), 'w') as f:
+			f.write(str(sys.exc_info()[1]))	
+
+@app.route("/milsoftToGridlab/<path:temp_dir>")
+def milsoftToGridlab_status(temp_dir):
+	temp_dir = get_abs_path(temp_dir)
+	if not os.path.isdir(temp_dir):
+		abort(404)
+	if os.path.isfile(os.path.join(temp_dir, "out.glm")):
+		return redirect(url_for("milsoftToGridlab_download", temp_dir=get_rel_path(temp_dir)), code=303)
+	else:
+		return json.jsonify(get_task_metadata(temp_dir))
+
+@app.route("/milsoftToGridlab/<path:temp_dir>/download")
+@get_download
+def milsoftToGridlab_download(temp_dir):
+	if not os.path.isfile(os.path.join(temp_dir, "out.glm")):
+		abort(404)
+	return send_from_directory(temp_dir, "out.glm", mimetype="text/plain")
+
+
+
+
+
+
+
+
+
+
 
 @app.route('/cymeToGridlab', methods=['POST'])
 def cymeToGridlab():
