@@ -7,6 +7,7 @@ from multiprocessing import Process
 from flask import Flask, request, send_from_directory, make_response, abort, redirect, url_for, json
 from gevent.pywsgi import WSGIServer
 import matplotlib.pyplot as plt
+from functools import wraps
 
 # TODO: note how I commented out the directory change, but it still appears to work (at least on my machine)
 
@@ -40,25 +41,14 @@ def get_task_metadata(temp_dir):
 		metadata["Status"] = "In-progress"
 	return metadata
 
-def check_status(func): 
-	"""
-	One tricky thing about using the @check_status decorator is that it expects a "temp_dir" argument to exist in kwargs. So, make sure that the URL
-	parameter for a route is explicitly "temp_dir"
-	"""
+def get_download(func):
+	""" Use the function argument to see if the process output exists in the filesystem """
+	@wraps(func)
 	def wrapper(*args, **kwargs):
 		temp_dir = get_abs_path(kwargs["temp_dir"])
-		if not os.path.isdir(temp_dir):
-			abort(404)
-		if request.method == "GET":
-			return func(temp_dir)
-		elif request.method == "DELETE":
-			metadata = get_task_metadata(temp_dir)
-			if "Failure message" in metadata:
-				del metadata["Failure message"]
-			metadata["Status"] = "Stopped"
-			metadata["Stopped at"] = time.ctime(time.time())
-			shutil.rmtree(temp_dir)
-			return json.jsonify(metadata)
+		response = func(temp_dir)
+		shutil.rmtree(temp_dir)
+		return response
 	return wrapper
 
 @app.route("/oneLineGridlab", methods=["POST"])
@@ -101,50 +91,36 @@ def oneLineGridlab(temp_dir):
 		with open(os.path.join(temp_dir, "error.txt"), 'w') as f:
 			f.write(str(sys.exc_info()[1]))	
 
-@app.route("/oneLineGridlab/<path:temp_dir>", methods=["GET", "DELETE"])
-@check_status
-def get_state_oneLineGridlab(temp_dir):
+@app.route("/oneLineGridlab/<path:temp_dir>")
+def oneLineGridlab_status(temp_dir):
+	temp_dir = get_abs_path(temp_dir)
+	if not os.path.isdir(temp_dir):
+		abort(404)
 	if os.path.isfile(os.path.join(temp_dir, "out.png")):
 		return redirect(url_for("oneLineGridlab_download", temp_dir=get_rel_path(temp_dir)), code=303)
 	else:
 		return json.jsonify(get_task_metadata(temp_dir))
 
-"""
-@app.route("/oneLineGridlab/<path:temp_dir>", methods=["GET", "DELETE"])
-def oneLineGridlab_status(temp_dir):
+# Insert all other routes here!
+@app.route("/oneLineGridlab/<path:temp_dir>", methods=["DELETE"])
+def delete(temp_dir):
 	temp_dir = get_abs_path(temp_dir)
 	if not os.path.isdir(temp_dir):
 		abort(404)
-	if request.method == "GET":
-		# finshed wrapped function
-		if os.path.isfile(os.path.join(temp_dir, "out.png")):
-			return redirect(url_for("oneLineGridlab_download", temp_dir=get_rel_path(temp_dir)), code=303)
-		else:
-			return json.jsonify(get_task_metadata(temp_dir))
-		# finished wrapped function
-	elif request.method == "DELETE":
-		# Delete the temp_dir AND stop the process...How do we know which process corresponds to which client? And how would we track the mapping
-		# between procces ids and clients even if we did know? We would need more state on the server, which seems to go against what we're trying to
-		# do
-		metadata = get_task_metadata(temp_dir)
-		if "Failure message" in metadata:
-			del metadata["Failure message"]
-		metadata["Status"] = "Stopped"
-		metadata["Stopped at"] = time.ctime(time.time())
-		shutil.rmtree(temp_dir)
-		return json.jsonify(metadata)
-"""
+	metadata = get_task_metadata(temp_dir)
+	if "Failure message" in metadata:
+		del metadata["Failure message"]
+	metadata["Status"] = "Stopped"
+	metadata["Stopped at"] = time.ctime(time.time())
+	shutil.rmtree(temp_dir)
+	return json.jsonify(metadata)
 
 @app.route("/oneLineGridlab/<path:temp_dir>/download")
+@get_download
 def oneLineGridlab_download(temp_dir):
-	temp_dir = get_abs_path(temp_dir)
-	# wrap this too?
 	if not os.path.isfile(os.path.join(temp_dir, "out.png")):
 		abort(404)
-	response = send_from_directory(temp_dir, "out.png")
-	# wrap this too?
-	shutil.rmtree(temp_dir)
-	return response
+	return send_from_directory(temp_dir, "out.png")
 
 @app.route('/milsoftToGridlab', methods=['POST'])
 def milsoftToGridlab():
