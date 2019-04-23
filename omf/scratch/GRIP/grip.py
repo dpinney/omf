@@ -2,33 +2,67 @@
 import omf
 #if not omf.omfDir == os.getcwd():
 #	os.chdir(omf.omfDir)
-import json, tempfile, platform, subprocess, os
+import tempfile, platform, subprocess, os, shutil, time, sys
+from multiprocessing import Process
+from flask import Flask, request, send_from_directory, make_response, abort, redirect, url_for, json
 from gevent.pywsgi import WSGIServer
-from flask import Flask, request, send_from_directory, make_response
 import matplotlib.pyplot as plt
 
 # TODO: note how I commented out the directory change, but it still appears to work (at least on my machine)
 
 app = Flask(__name__)
 
-@app.route('/eatfile', methods=['GET', 'POST'])
-def eatfile():
-	if request.method == 'POST':
-		# print 'HEY I GOT A', request.files
-		return 'POSTER_CHOMPED'
+def get_abs_path(path):
+	""" Return the absolute variant of the path argument. """
+	if not os.path.isabs(path):
+		path = "/" + path
+	return path
+
+def get_rel_path(path):
+	""" Return the relative variant of the path argument. """
+	return path.lstrip("/")
+
+def get_task_metadata(temp_dir):
+	""" Return metadata about the client's long-running task """
+	elapsed_time = int(time.time() - os.path.getmtime(temp_dir))
+	elapsed_time = ("{:02}:{:02}:{:02}".format(elapsed_time // 3600, ((elapsed_time % 3600) // 60), elapsed_time % 60))
+	metadata = {
+		"Created at": time.ctime(os.path.getmtime(temp_dir)),
+		"Elapsed time": elapsed_time,
+	}
+	error_path = os.path.join(temp_dir, "error.txt")
+	if os.path.isfile(error_path):
+		with open(error_path, 'r') as f:
+			msg = f.readlines()
+		metadata["Status"] = "Failed"
+		metadata["Failure message"] = msg
 	else:
-		return 'CHOMPED'
+		metadata["Status"] = "In-progress"
+	return metadata
 
-#@app.route("/checkConversion")
-def check_conversion():
-    """ A process starts in a temporary directory. There is no process file created in the temporary directory.
-    1) We don't create a process file. Then we just check for the existence of the final product.
-    2) We do create a process file. We still check for the existence of the final product.
-    """
-    pass
+def check_status(func): 
+	"""
+	One tricky thing about using the @check_status decorator is that it expects a "temp_dir" argument to exist in kwargs. So, make sure that the URL
+	parameter for a route is explicitly "temp_dir"
+	"""
+	def wrapper(*args, **kwargs):
+		temp_dir = get_abs_path(kwargs["temp_dir"])
+		if not os.path.isdir(temp_dir):
+			abort(404)
+		if request.method == "GET":
+			return func(temp_dir)
+		elif request.method == "DELETE":
+			metadata = get_task_metadata(temp_dir)
+			if "Failure message" in metadata:
+				del metadata["Failure message"]
+			metadata["Status"] = "Stopped"
+			metadata["Stopped at"] = time.ctime(time.time())
+			shutil.rmtree(temp_dir)
+			return json.jsonify(metadata)
+	return wrapper
 
-@app.route('/oneLineGridlab', methods=['POST'])
-def oneLineGridLab():
+@app.route("/oneLineGridlab", methods=["POST"])
+def oneLineGridlab_start():
 	''' Data Params: {glm: [file], useLatLons: Boolean}
 	OMF fuction: omf.feeder.latLonNxGraph()
 	Runtime: should be around 1 to 30 seconds.
@@ -36,12 +70,21 @@ def oneLineGridLab():
     layout the graph.
     '''
 	temp_dir = tempfile.mkdtemp() 
-	print temp_dir
-	f = request.files['glm']
-	glm_file_path = os.path.join(temp_dir, "in.glm")
-	f.save(glm_file_path)
+	p = Process(target=oneLineGridlab, args=(temp_dir,))
+	p.start()
+	return ("SEE OTHER", 303, {"Location": "oneLineGridlab" + temp_dir})
+
+def oneLineGridlab(temp_dir):
+	"""
+	Create a png file from a glm file
+
+	:param str temp_dir: the temporary directory where the input and output files are saved
+	"""
 	try:
-		feed = omf.feeder.parse(glm_file_path)
+		f = request.files['glm']
+		glm_path = os.path.join(temp_dir, "in.glm")
+		f.save(glm_path)
+		feed = omf.feeder.parse(glm_path)
 		graph = omf.feeder.treeToNxGraph(feed)
 		if request.form.get('useLatLons') == 'False':
 			neatoLayout = True
@@ -54,9 +97,54 @@ def oneLineGridLab():
 		omf.feeder.latLonNxGraph(graph, labels=False, neatoLayout=neatoLayout, showPlot=False)
 		out_img_name = 'out.png'
 		plt.savefig(os.path.join(temp_dir, out_img_name))
-		return send_from_directory(temp_dir, out_img_name)
 	except:
-		return ("", 415, {})
+		with open(os.path.join(temp_dir, "error.txt"), 'w') as f:
+			f.write(str(sys.exc_info()[1]))	
+
+@app.route("/oneLineGridlab/<path:temp_dir>", methods=["GET", "DELETE"])
+@check_status
+def get_state_oneLineGridlab(temp_dir):
+	if os.path.isfile(os.path.join(temp_dir, "out.png")):
+		return redirect(url_for("oneLineGridlab_download", temp_dir=get_rel_path(temp_dir)), code=303)
+	else:
+		return json.jsonify(get_task_metadata(temp_dir))
+
+"""
+@app.route("/oneLineGridlab/<path:temp_dir>", methods=["GET", "DELETE"])
+def oneLineGridlab_status(temp_dir):
+	temp_dir = get_abs_path(temp_dir)
+	if not os.path.isdir(temp_dir):
+		abort(404)
+	if request.method == "GET":
+		# finshed wrapped function
+		if os.path.isfile(os.path.join(temp_dir, "out.png")):
+			return redirect(url_for("oneLineGridlab_download", temp_dir=get_rel_path(temp_dir)), code=303)
+		else:
+			return json.jsonify(get_task_metadata(temp_dir))
+		# finished wrapped function
+	elif request.method == "DELETE":
+		# Delete the temp_dir AND stop the process...How do we know which process corresponds to which client? And how would we track the mapping
+		# between procces ids and clients even if we did know? We would need more state on the server, which seems to go against what we're trying to
+		# do
+		metadata = get_task_metadata(temp_dir)
+		if "Failure message" in metadata:
+			del metadata["Failure message"]
+		metadata["Status"] = "Stopped"
+		metadata["Stopped at"] = time.ctime(time.time())
+		shutil.rmtree(temp_dir)
+		return json.jsonify(metadata)
+"""
+
+@app.route("/oneLineGridlab/<path:temp_dir>/download")
+def oneLineGridlab_download(temp_dir):
+	temp_dir = get_abs_path(temp_dir)
+	# wrap this too?
+	if not os.path.isfile(os.path.join(temp_dir, "out.png")):
+		abort(404)
+	response = send_from_directory(temp_dir, "out.png")
+	# wrap this too?
+	shutil.rmtree(temp_dir)
+	return response
 
 @app.route('/milsoftToGridlab', methods=['POST'])
 def milsoftToGridlab():
@@ -83,7 +171,7 @@ def milsoftToGridlab():
 		# TODO: delete the tempDir.
 		return send_from_directory(workDir, glmName, mimetype="text/plain")
 	except:
-		return ("", 415, {})
+		abort(415)
 
 @app.route('/cymeToGridlab', methods=['POST'])
 def cymeToGridlab():
@@ -106,7 +194,7 @@ def cymeToGridlab():
 		# TODO: delete the tempDir.
 		return send_from_directory(workDir, glmName, mimetype="text/plain")
 	except:
-		return ("", 415, {})
+		abort(415)
 
 @app.route('/gridlabRun', methods=['POST'])
 def gridlabRun():
@@ -124,11 +212,9 @@ def gridlabRun():
 		feed = omf.feeder.parse(glmOnDisk)
 		outDict = omf.solvers.gridlabd.runInFilesystem(feed, attachments=[], keepFiles=True, workDir=workDir, glmName='out.glm')
 		#TODO: delete the tempDir.
-		response = make_response(json.dumps(outDict))
-		response.mimetype = "application/json"
-		return response
+		return json.jsonify(outDict)
 	except:
-		return ("", 415, {})
+		abort(415)
 
 @app.route('/gridlabdToGfm', methods=['POST'])
 def gridlabdToGfm():
@@ -154,21 +240,19 @@ def gridlabdToGfm():
 		}
 		for key, val in gfmInputTemplate.items():
 			if val is None:
-				return ("", 400, {})
+				abort(400)
 	except:
-		return ("", 400, {})
+		abort(400)
 	try:
 		feederModel = {
 			'nodes': [], # Don't need these.
 			'tree': omf.feeder.parse(glmPath)
 		}
 		gfmDict = omf.models.resilientDist.convertToGFM(gfmInputTemplate, feederModel)
-		response = make_response(json.dumps(gfmDict))
-		response.mimetype = "application/json"
 		# TODO: delete the tempDir.
-		return response
+		return json.jsonify(gfmDict)
 	except:
-		return ("", 415, {})
+		abort(415)
 
 # Don't touch this for now
 @app.route('/runGfm', methods=['POST'])
@@ -253,9 +337,7 @@ def samRun():
 	outData["Consumption"]["Power"] = ssc.ssc_data_get_array(dat, "ac")
 	outData["Consumption"]["Losses"] = ssc.ssc_data_get_array(dat, "ac")
 	outData["Consumption"]["DG"] = ssc.ssc_data_get_array(dat, "ac")
-	response = make_response(json.dumps(outData))
-	response.mimetype = "application/json"
-	return response
+	return json.jsonify(outData)
 
 @app.route('/transmissionMatToOmt', methods=['POST'])
 def transmissionMatToOmt():
@@ -269,9 +351,7 @@ def transmissionMatToOmt():
 	mat_path = os.path.join(temp_dir, mat_filename)
 	f.save(mat_path)
 	mat_dict = omf.network.parse(mat_path, filePath=True)
-	response = make_response(json.dumps(mat_dict))
-	response.mimetype = "application/json"
-	return response
+	return json.jsonify(mat_dict)
 
 @app.route('/transmissionPowerflow', methods=['POST'])
 def transmissionPowerflow():
@@ -295,7 +375,7 @@ def transmissionViz():
 		with open(omt_path) as f:
 			json.load(f)
 	except:
-		return ("", 415, {})
+		abort(415)
 	html_filename = omf.network.get_HTML_interface_path(omt_path)
 	return send_from_directory(temp_dir, html_filename)
 
