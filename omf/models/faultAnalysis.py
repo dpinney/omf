@@ -207,12 +207,15 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 	protDevInitStatus = {}
 	#dictionary of protective devices final states for each phase after running Gridlab-D
 	protDevFinalStatus = {}
+	#dictionary of protective device types to help the testing and debugging process
+	protDevTypes = {}
 	protDevOpModes = {}
 	for key in tree:
 		obj = tree[key]
 		obType = obj.get('object')
 		if obType in protDevices.keys():
 			obName = obj.get('name', '')
+			protDevTypes[obName] = obType
 			if obType != 'fuse':
 				protDevOpModes[obName] = obj.get('operating_mode', 'INDIVIDUAL')
 			protDevices[obType] = True
@@ -616,7 +619,7 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 		plt.colorbar()
 	# Also draw a table.
 	#TODO: factor this out and in to work().
-	table = drawTable(initialStates=protDevInitStatus, finalStates=protDevFinalStatus)
+	table = drawTable(initialStates=protDevInitStatus, finalStates=protDevFinalStatus, deviceTypes=protDevTypes)
 	return voltChart, table
 
 def new(modelDir):
@@ -695,13 +698,14 @@ def _testingPlot():
 	chart.savefig(PREFIX + "YO_WHATS_GOING_ON.png")
 	# plt.show()
 
-def drawTable(initialStates=None, finalStates=None):
+def drawTable(initialStates=None, finalStates=None, deviceTypes=None):
 	#return self.log
 	html_str = """
 		<table cellpadding="0" cellspacing="0">
 			<thead>
 				<tr>
 					<th>Protective Device Name</th>
+					<th>Device Type</th>
 					<th>Initial States</th>
 					<th>Final States</th>
 					<th>Changes</th>
@@ -710,6 +714,17 @@ def drawTable(initialStates=None, finalStates=None):
 			<tbody>"""
 	for device in initialStates.keys():
 		row_str = "<tr><td>"+device+"</td><td>"
+		devType = deviceTypes[device]
+		if devType == 'fuse':
+			row_str += "Fuse (F)</td><td>"
+		elif devType == 'switch':
+			row_str += "Switch (S)</td><td>"
+		elif devType == 'recloser':
+			row_str += "Recloser (R)</td><td>"
+		elif devType == 'sectionalizer':
+			row_str += "Sectionalizer (X)</td><td>"
+		else:
+			row_str += "Unknown</td><td>"
 		for phase in initialStates[device].keys():
 			row_str += "Phase " + phase + " = " + initialStates[device][phase] + "</br>"
 		row_str += "</td><td>"
