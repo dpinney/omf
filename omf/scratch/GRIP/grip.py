@@ -204,14 +204,10 @@ def runGfm():
 	)
 	(stdout,stderr) = proc.communicate()
 	gfmOutPath = os.path.join(workDir, outName)
-
-	with open(gfmOutPath) as f:
-		out = json.load(f)
-
-	#try:
-	#	out = json.load(open(gfmOutPath))
-	#except:
-	#	out = stdout
+	try:
+		out = json.load(open(gfmOutPath))
+	except:
+		out = stdout
 	return out
 
 @app.route('/samRun', methods=['POST'])
@@ -220,16 +216,17 @@ def samRun():
 	OMF function: omf.solvers.sam.run()
 	Runtime: should only be a couple seconds.
 	Result: Run NREL's system advisor model with the specified parameters. Return the output vectors and floats in JSON'''
+
+	temp_dir = tempfile.mkdtemp()
+	tmy2_path = os.path.join(temp_dir, "in.tmy2")
+	request.files["tmy2"].save(tmy2_path)
 	# Set up SAM data structures.
 	ssc = omf.solvers.nrelsam2013.SSCAPI()
 	dat = ssc.ssc_data_create()
 	# Set the inputs.
+	ssc.ssc_data_set_string(dat, "file_name", tmy2_path)
 	for key in request.form.keys():
-		if key == 'file_name':
-			ssc.ssc_data_set_string(dat, key, request.form.get(key)) # file_name is expected to be a path on the server!
-		else:
-			ssc.ssc_data_set_number(dat, key, float(request.form.get(key)))
-
+		ssc.ssc_data_set_number(dat, key, float(request.form.get(key)))
 	# Run PV system simulation.
 	mod = ssc.ssc_module_create("pvwattsv1")
 	ssc.ssc_module_exec(mod, dat)
@@ -253,6 +250,7 @@ def samRun():
 	outData["Consumption"]["Power"] = ssc.ssc_data_get_array(dat, "ac")
 	outData["Consumption"]["Losses"] = ssc.ssc_data_get_array(dat, "ac")
 	outData["Consumption"]["DG"] = ssc.ssc_data_get_array(dat, "ac")
+	
 	response = make_response(json.dumps(outData))
 	response.mimetype = "application/json"
 	return response
