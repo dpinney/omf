@@ -418,6 +418,8 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 	edgeTupleNames = {}
 	#edgeTupleFaultNames = dict with to-from tuples as keys and the name of the Fault as the only value
 	edgeTupleFaultNames = {}
+	#edgeTupleProtDevs = dict with to-from tuples as keys and the initial of the type of protective device as the value
+	edgeTupleProtDevs = {}
 	#linePhases = dictionary containing the number of phases on each line for line-width purposes
 	linePhases = {}
 	edgePower = {}
@@ -425,6 +427,7 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 		for obj in tree.values():
 			obname = obj.get('name','').replace('"','')
 			if obname == edge:
+				objType = obj.get('object')
 				nodeFrom = obj.get('from')
 				nodeTo = obj.get('to')
 				coord = (nodeFrom, nodeTo)
@@ -446,6 +449,14 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 				if (numPhases < 1) or (numPhases > 3):
 					numPhases = 1
 				linePhases[edge] = numPhases
+				if objType == 'fuse':
+					edgeTupleProtDevs[coord] = 'F'
+				elif objType == 'switch':
+					edgeTupleProtDevs[coord] = 'S'
+				elif objType == 'recloser':
+					edgeTupleProtDevs[coord] = 'R'
+				elif objType == 'sectionalizer':
+					edgeTupleProtDevs[coord] = 'X'
 	#define which dict will be used for edge line color
 	edgeColors = edgeValsPU
 	#define which dict will be used for edge label
@@ -536,6 +547,8 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 			else:
 				edgeLabels = None
 				print "WARNING: edgeCol property cannot be set to None when edgeLabs property is set to 'Value'"
+		elif edgeLabs == "ProtDevs":
+			edgeLabels = edgeTupleProtDevs
 		else:
 			edgeLabs = None
 			print "WARNING: edgeLabs property must be either 'Name', 'Value', or None"
