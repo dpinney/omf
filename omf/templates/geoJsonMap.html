@@ -3,25 +3,25 @@
 <head>
 	<title>GeoJSON Map</title>
 <head>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" integrity="sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ=="
-        crossorigin="" />
-    <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js" integrity="sha512-A7vV8IFfih/D732iSSKi20u/ooOfj/AGehOKq0f4vLT1Zr2Y+RX7C+w8A1gaSasGtRUZpF/NZgzSAu4/Gc41Lg=="
-        crossorigin=""></script>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" integrity="sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ=="
+		crossorigin="" />
+	<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js" integrity="sha512-A7vV8IFfih/D732iSSKi20u/ooOfj/AGehOKq0f4vLT1Zr2Y+RX7C+w8A1gaSasGtRUZpF/NZgzSAu4/Gc41Lg=="
+		crossorigin=""></script>
 </head>
-    <style>html, body {
-    	width: 100%;
-    	height: 100%;
-    	margin: 0;
-    	padding: 0;}
-    </style>
-    <style>#map{
-        position: relative;
-        width: 100.0%;
-        height: 100.0%;
-        left: 0.0%;
-        top: 0.0%;
-        }
-    </style>
+	<style>html, body {
+		width: 100%;
+		height: 100%;
+		margin: 0;
+		padding: 0;}
+	</style>
+	<style>#map{
+		position: relative;
+		width: 100.0%;
+		height: 100.0%;
+		left: 0.0%;
+		top: 0.0%;
+		}
+	</style>
 </head>
 <body>
 	<div id="map"></div>
@@ -88,15 +88,17 @@
 		}
 	});
 	var bounds = geojsonLayer.getBounds();
-    var map = L.map('map').fitBounds(bounds);
-    mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
-    L.tileLayer(
-        'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; ' + mapLink + ' Contributors',
-        maxZoom: 18,
-        }).addTo(map);
-    L.control.scale().addTo(map);
-    geojsonLayer.addTo(map);
+	// Optional forcing of canvas renderer:
+	// var map = L.map('map', {renderer: L.canvas()}).fitBounds(bounds);
+	var map = L.map('map').fitBounds(bounds);
+	mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
+	L.tileLayer(
+		'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		attribution: '&copy; ' + mapLink + ' Contributors',
+		maxZoom: 18,
+		}).addTo(map);
+	L.control.scale().addTo(map);
+	geojsonLayer.addTo(map);
 </script>
 </body>
 </html>

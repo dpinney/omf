@@ -545,8 +545,7 @@ def showOnMap(geoJson):
 	with open(pJoin(tempDir,'geoJsonFeatures.js'),"w") as outFile:
 		outFile.write("var geojson =")
 		json.dump(geoJson, outFile, indent=4)
-	webbrowser.open_new(pJoin(tempDir,'geoJsonMap.html'))
-
+	webbrowser.open('file://' + pJoin(tempDir,'geoJsonMap.html'))
 
 def _tests():
 	e, n = 249.2419752733258, 1186.1488466689188
@@ -558,11 +557,10 @@ def _tests():
 	#mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html', openBrowser=True, conversion=False)
 	#showOnMap(hullOfOmd('static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
 	#showOnMap(simplifiedOmdShape('static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
-	#showOnMap(omdGeoJson('static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
+	# showOnMap(omdGeoJson('static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
 	#shortestPathOmd('static/publicFeeders/Olin Barre LatLon.omd', 'node62474203981T62474203987_B', 'node1667616792')
 	#rasterTilesFromOmd('static/publicFeeders/Olin Barre LatLon.omd', 'scratch/omdTests/tiles', conversion=False)
 	#serveTiles('scratch/omdTests/tiles')
-
 	#Testing larger feeder using temporary conversion method for valid lat/lons from sources/targets
 	#mapOmd('static/publicFeeders/Autocli Alberich Calibrated.omd', 'testOutput', 'png', openBrowser=True, conversion=True)
 	#ABEC Frank LO Houses works with conversion on or off
@@ -570,10 +568,9 @@ def _tests():
 	#mapOmd('static/publicFeeders/ABEC Frank LO Houses.omd', 'testOutput', 'html', openBrowser=True, conversion=False)
 	#showOnMap(hullOfOmd('static/publicFeeders/Autocli Alberich Calibrated.omd', conversion=True))
 	#showOnMap(simplifiedOmdShape('static/publicFeeders/ABEC Frank LO Houses.omd', conversion=False))
-	#showOnMap(omdGeoJson('static/publicFeeders/ABEC Frank LO Houses.omd', conversion=False))
+	# showOnMap(omdGeoJson('static/publicFeeders/ABEC Frank LO Houses.omd', conversion=False))
 	#rasterTilesFromOmd('static/publicFeeders/Autocli Alberich Calibrated.omd', 'scratch/omdTests/autoclitiles', conversion=True)
 	#print(convertOmd('static/publicFeeders/Autocli Alberich Calibrated.omd'))
-
 	# openInGoogleMaps(lat, lon)
 
 if __name__ == '__main__':
