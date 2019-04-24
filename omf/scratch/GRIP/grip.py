@@ -123,10 +123,8 @@ def gridlabRun():
 	try:
 		feed = omf.feeder.parse(glmOnDisk)
 		outDict = omf.solvers.gridlabd.runInFilesystem(feed, attachments=[], keepFiles=True, workDir=workDir, glmName='out.glm')
+		return json.jsonify(outDict)
 		#TODO: delete the tempDir.
-		response = make_response(json.dumps(outDict))
-		response.mimetype = "application/json"
-		return response
 	except:
 		return ("", 415, {})
 
@@ -163,10 +161,7 @@ def gridlabdToGfm():
 			'tree': omf.feeder.parse(glmPath)
 		}
 		gfmDict = omf.models.resilientDist.convertToGFM(gfmInputTemplate, feederModel)
-		response = make_response(json.dumps(gfmDict))
-		response.mimetype = "application/json"
-		# TODO: delete the tempDir.
-		return response
+		return json.jsonify(gfmDict)
 	except:
 		return ("", 415, {})
 
@@ -251,21 +246,22 @@ def samRun():
 	outData["Consumption"]["DG"] = ssc.ssc_data_get_array(dat, "ac")
 	return json.jsonify(outData)
 
+# Currently broken
 @app.route('/transmissionMatToOmt', methods=['POST'])
 def transmissionMatToOmt():
 	'''Data Params: {mat: [file], other_inputs: see source}
 	OMF function: omf.network.parse()
 	Runtime: maybe a couple minutes.
 	Result: Convert the .m matpower model to an OMT (JSON-based) model. Return the model.'''
-	f = request.files["matpower"]
-	mat_filename = "input.m"
 	temp_dir = tempfile.mkdtemp() 
-	mat_path = os.path.join(temp_dir, mat_filename)
-	f.save(mat_path)
-	mat_dict = omf.network.parse(mat_path, filePath=True)
-	response = make_response(json.dumps(mat_dict))
-	response.mimetype = "application/json"
-	return response
+	mat_path = os.path.join(temp_dir, "input.m")
+	request.files["matpower"].save(mat_path)
+	omt_json = omf.network.parse(mat_path, filePath=True)
+	if omt_json == {"baseMVA":"100.0","mpcVersion":"2.0","bus":{},"gen":{}, "branch":{}}:
+		raise Exception("The submitted .m file was invalid or could not be parsed correctly.")
+	#nxG = omf.network.netToNxGraph(omt_json)
+	#omt_json = omf.network.latlonToNet(nxG, omt_json)
+	return json.jsonify(omt_json)
 
 @app.route('/transmissionPowerflow', methods=['POST'])
 def transmissionPowerflow():
@@ -273,7 +269,21 @@ def transmissionPowerflow():
 	OMF function: omf.models.transmission.new and omf.models.transmission.work
 	Runtime: tens of seconds.
 	Result: TBD. '''
-	return 'Not Implemented Yet'
+	temp_dir = tempfile.mkdtemp()
+	omt_path = os.path.join(temp_dir, "in.omt")
+	config_path = os.path.join(temp_dir, "omtConfig.json")
+	request.files["omt"].save(omt_path)
+	request.files["omtConfig"].save(config_path)
+	sim_path = os.path.join(temp_dir, "transmission")
+	omf.models.transmission.new(sim_path)
+	with open(config_path) as f:
+		inputDict = json.load(f)
+	outputDict = omf.models.transmission.work(sim_path, inputDict)
+	output_path = os.path.join(sim_path, "allOutputData.json")
+	with open(output_path) as f:
+		json.dump(outputDict, f)
+	# Return output.png and allOutputData.json. Looks like I need a .zip
+			
 
 @app.route('/transmissionViz', methods=['POST'])
 def transmissionViz():
