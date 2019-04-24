@@ -2,9 +2,9 @@
 import omf
 #if not omf.omfDir == os.getcwd():
 #	os.chdir(omf.omfDir)
-import json, tempfile, platform, subprocess, os
+import tempfile, platform, subprocess, os
 from gevent.pywsgi import WSGIServer
-from flask import Flask, request, send_from_directory, make_response
+from flask import Flask, request, send_from_directory, make_response, json
 import matplotlib.pyplot as plt
 
 # TODO: note how I commented out the directory change, but it still appears to work (at least on my machine)
@@ -226,7 +226,14 @@ def samRun():
 	# Set the inputs.
 	ssc.ssc_data_set_string(dat, "file_name", tmy2_path)
 	for key in request.form.keys():
+<<<<<<< HEAD
 		ssc.ssc_data_set_number(dat, key, float(request.form.get(key)))
+=======
+		if key == 'file_name':
+			ssc.ssc_data_set_string(dat, key, request.form.get(key)) # file_name is expected to be a path on the server!
+		else:
+			ssc.ssc_data_set_number(dat, key, float(request.form.get(key)))
+>>>>>>> temp-old-api
 	# Run PV system simulation.
 	mod = ssc.ssc_module_create("pvwattsv1")
 	ssc.ssc_module_exec(mod, dat)
@@ -250,10 +257,14 @@ def samRun():
 	outData["Consumption"]["Power"] = ssc.ssc_data_get_array(dat, "ac")
 	outData["Consumption"]["Losses"] = ssc.ssc_data_get_array(dat, "ac")
 	outData["Consumption"]["DG"] = ssc.ssc_data_get_array(dat, "ac")
+<<<<<<< HEAD
 	
 	response = make_response(json.dumps(outData))
 	response.mimetype = "application/json"
 	return response
+=======
+	return json.jsonify(outData)
+>>>>>>> temp-old-api
 
 @app.route('/transmissionMatToOmt', methods=['POST'])
 def transmissionMatToOmt():
