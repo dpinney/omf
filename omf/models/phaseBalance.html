@@ -271,27 +271,27 @@
 				</tr>
 				<tr>
 					<td>Load</td>
-					<td></td>
-					<td></td>
-					<td></td>
+					<td>{{allOutputDataDict['service_cost']['load']['base']}}</td>
+					<td>{{allOutputDataDict['service_cost']['load']['solar']}}</td>
+					<td>{{allOutputDataDict['service_cost']['load']['controlled_solar']}}</td>
 				</tr>
 				<tr>
 					<td>Distributed Generation</td>
-					<td></td>
-					<td></td>
-					<td></td>
+					<td>{{allOutputDataDict['service_cost']['distributed_gen']['base']}}</td>
+					<td>{{allOutputDataDict['service_cost']['distributed_gen']['solar']}}</td>
+					<td>{{allOutputDataDict['service_cost']['distributed_gen']['controlled_solar']}}</td>
 				</tr>
 				<tr>
 					<td>Losses</td>
-					<td></td>
-					<td></td>
-					<td></td>
+					<td>{{allOutputDataDict['service_cost']['losses']['base']}}</td>
+					<td>{{allOutputDataDict['service_cost']['losses']['solar']}}</td>
+					<td>{{allOutputDataDict['service_cost']['losses']['controlled_solar']}}</td>
 				</tr>
 			</table>
 		</div>
 		<p class="reportTitle postRun" style="page-break-before:always">Inverter Power Outputs</p>
-		<div class="content tableContainer postRun">
-			<table id="costService" style="max-height:500px">
+		<div class="content tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
+			<table id="costService">
 				<tr>
 					<th>Name</th>
 					<th>Uncontrolled P</th>
@@ -299,13 +299,7 @@
 					<th>Controlled P</th>
 					<th>Controlled Q</th>
 				</tr>
-				<tr>
-					<td>Blah</td>
-					<td>3</td>
-					<td>5</td>
-					<td>7</td>
-					<td>0</td>
-				</tr>
+				{{allOutputDataDict['inverter_table']}}
 			</table>
 		</div>
 		<p class="reportTitle postRun">Simulation Location</p>

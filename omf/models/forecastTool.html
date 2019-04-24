@@ -73,10 +73,6 @@
 				<label class="tooltip">Epochs<span class="classic">How many times would you like the prediction software to iterate? Approximately 1 minute per 10 epochs. Program will stop early if no improvement is seen within 10 epochs.</span></label>
 				<input type="text" id="epochs" name="epochs">
 			</div>
-			<div class="shortInput">
-				<label class="tooltip">Max confidence<span class="classic">What's the largest confidence interval you'd like to test?</span></label>
-				<input type="text" id="max_c" name="max_c">
-			</div>
 			<!-- required buttons -->
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
@@ -99,7 +95,7 @@
 		</script>
 	</div>
 	<div id="output">
-		<p class="reportTitle postRun" style="page-break-before:always">Peak Predictions</p>
+		<p class="reportTitle postRun" style="page-break-before:always">Showing predictions for {{ allOutputDataDict['startDate'] }}</p>
 		<div id="peakPredictions1" class="tightContent postRun">
 			<div id="peakPredictions"></div>
 			<script>
@@ -110,7 +106,7 @@
 							"animation":false,
 							"pointStart":Date.parse(allOutputData.startDate),
 							"shadow":false,
-							"pointInterval":24 * 3600 * 1000},
+							"pointInterval": 3600000},
 						"line":{"marker":{"enabled":false}}},
 					"xAxis":{"maxZoom":108000000,
 						"tickColor":"#D3D3D3",
@@ -122,78 +118,22 @@
 					"yAxis":{
 						"title":{"text":"Power (kW)","style":{"color":"gray"}},
 						"minorTickColor":"gray", "minorTickInterval":"auto",
-						"min":-1},
+						"min":0},
 					"title":{"text":null},
-					"series":[
-						{"name":"Demand","color":"black","data":allOutputData.demand},
-						{"name":"1-day forecast","color":"#3F3D3D","data":allOutputData.one_day},
-						{"name":"2-day forecast","color":"#817F7F","data":allOutputData.two_day},
-						
-						{"name":"Correctly dispatch","color":"green","data":allOutputData.true_positive,"type": "scatter"}
-						// {"name":"Unnecessary dispatch","color":"yellow","data":allOutputData.false_positive,"type": "scatter"}
-						// {"name":"Missed dispatch","color":"red","data":allOutputData.false_negative,"type": "scatter"}
+					"series":[				
+						{"name":"load forecast","color":"green","data":allOutputData.predictions,"type": "line"}
 					],
-					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"peakPredictions","type":"line","marginRight":20, "height":750,"width":1000},
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"peakPredictions","type":"line","marginRight":20, "height":500,"width":1000},
 					"tooltip":{"valueDecimals":1},
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}
 				})
 			</script>
 		</div>
-
-		<!-- DROPPING FOR NOW
-		<p class="reportTitle postRun" style="page-break-before:always">Confidence</p>
-		<div id="confidenceReport1" class="tightContent postRun">
-			<div id="confidenceReport"></div>
-			<script>
-				new Highcharts.Chart({"credits":{"enabled":false},
-					"plotOptions":{
-					 	"line":{"marker":{"enabled":false}}},
-					"xAxis":{
-						range: allOutputData.max_c,
-						"tickColor":"#D3D3D3",
-						"type":"linear",
-						"lineColor":"gray",
-					},
-					"yAxis":{
-						"title":{"text":"index","style":{"color":"gray"}},
-						"minorTickColor":"gray", "minorTickInterval":"auto",
-						"min":-1},
-					"title":{"text":null},
-					rangeSelector: {
-						enabled: false
-					},
-					"series":[
-						{"name":"Recall","color":"black","data":allOutputData.recall_g},
-						{"name":"Peaks missed","color":"#3F3D3D","data":allOutputData.peaks_missed_g},
-						{"name":"Unnecessary dispatches","color":"#817F7F","data":allOutputData.unnecessary_dispatches_g},
-					],
-					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"confidenceReport","type":"line","marginRight":20, "height":250,"width":1000},
-					"tooltip":{"valueDecimals":1},
-					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			<p class="reportTitle postRun" style="page-break-before:always">Download Output Data</p>	
+		<div style="text-align:left" class="tightContent postRun">
+			<a id="dTest" download>Download model for future use</a><br>
+			<script>gebi('dTest').href = "/downloadModelData/" + allInputData.user + "/" + allInputData.modelName + "/model"</script>
 			</script>
-		</div> -->
-
-		<p class="reportTitle postRun" style="page-break-before:always">Confidence Recommendation</p>
-		<div id="effectiveness" class="content postRun detailsContainer" style="margin-top:0px">
-<pre>RECOMMENDED CONFIDENCE
-Lowest confidence to capture all peaks:
-{{allOutputData['lowest_confidence']}}
-
-Minimum number of unnecessary dispatches to capture all peaks:
-{{allOutputData['lowest_dispatch']}}%
-
-FORECAST PREDICTION ACCURACY
-1-day load prediction training accuracy (MAPE):
-{{allOutputData['one_day_train']}}%
-
-1-day load prediction test accuracy (MAPE):
-{{allOutputData['one_day_test']}}%
-
-2-day load prediction training accuracy (MAPE):
-{{allOutputData['two_day_train']}}%
-
-2-day load prediction test accuracy (MAPE):
-{{allOutputData['two_day_test']}}%</pre>
 		</div>
 	</div>
 </body>
