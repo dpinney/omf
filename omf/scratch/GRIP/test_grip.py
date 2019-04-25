@@ -57,7 +57,7 @@ def test_postMissingFiles_returns400(url_route, client):
     response = client.post(url_route)
     assert response.status_code == 400
 
-class TestOneLineGridLab(object):
+class TestOneLineGridlab(object):
 
     # Should return a 202
     def test_useLatLonsIsTrue_returnsSmallerPng(self, client):
@@ -202,7 +202,7 @@ class TestGridlabdToGfm(object):
         response = client.post("/gridlabdToGfm", data=data)
         assert response.status_code == 200
         assert response.mimetype == "application/json"
-        assert response.content_length >= 41300 and response.content_length <= 41400
+        assert response.content_length >= 37000 and response.content_length <= 38000 # 37228
 
     def test_postWrongFileType_returns415(self, client):
         with open(__file__) as f:
@@ -324,7 +324,7 @@ class TestTransmissionMatToOmt(object):
         response = client.post("/transmissionMatToOmt", data=data)
         assert response.status_code == 200
         assert response.mimetype == "application/json"
-        assert response.content_length >= 4300 and response.content_length <= 4400 #4335
+        assert response.content_length >= 3700 and response.content_length <= 3800 # 3715
 
     # Must check if parse() result is equivalent to the default newNetworkWireframe because I don't know how to validate a .m file.
     def test_postWrongFileType_returns415(self, client):
@@ -353,7 +353,6 @@ class TestTransmissionViz(object):
         assert response.mimetype == "text/html"
         assert response.content_length >= 406500 and response.content_length <= 407500 #406949
 
-    # There is nothing to throw an error so we can't do this unless we inspect the file
     def test_postWrongFileType_returns415(self, client):
         with open(__file__) as f:
             b_io = io.BytesIO(f.read())

@@ -2,33 +2,57 @@
 import omf
 #if not omf.omfDir == os.getcwd():
 #	os.chdir(omf.omfDir)
-import tempfile, platform, subprocess, os
+import tempfile, platform, subprocess, os, shutil, time, sys
+from multiprocessing import Process
+from flask import Flask, request, send_from_directory, make_response, abort, redirect, url_for, json
 from gevent.pywsgi import WSGIServer
-from flask import Flask, request, send_from_directory, make_response, json
 import matplotlib.pyplot as plt
+from functools import wraps
 
 # TODO: note how I commented out the directory change, but it still appears to work (at least on my machine)
 
 app = Flask(__name__)
 
-@app.route('/eatfile', methods=['GET', 'POST'])
-def eatfile():
-	if request.method == 'POST':
-		# print 'HEY I GOT A', request.files
-		return 'POSTER_CHOMPED'
+def get_abs_path(path):
+	""" Return the absolute variant of the path argument. """
+	if not os.path.isabs(path):
+		path = "/" + path
+	return path
+
+def get_rel_path(path):
+	""" Return the relative variant of the path argument. """
+	return path.lstrip("/")
+
+def get_task_metadata(temp_dir):
+	""" Return metadata about the client's long-running task """
+	elapsed_time = int(time.time() - os.path.getmtime(temp_dir))
+	elapsed_time = ("{:02}:{:02}:{:02}".format(elapsed_time // 3600, ((elapsed_time % 3600) // 60), elapsed_time % 60))
+	metadata = {
+		"Created at": time.ctime(os.path.getmtime(temp_dir)),
+		"Elapsed time": elapsed_time,
+	}
+	error_path = os.path.join(temp_dir, "error.txt")
+	if os.path.isfile(error_path):
+		with open(error_path, 'r') as f:
+			msg = f.readlines()
+		metadata["Status"] = "Failed"
+		metadata["Failure message"] = msg
 	else:
-		return 'CHOMPED'
+		metadata["Status"] = "In-progress"
+	return metadata
 
-#@app.route("/checkConversion")
-def check_conversion():
-    """ A process starts in a temporary directory. There is no process file created in the temporary directory.
-    1) We don't create a process file. Then we just check for the existence of the final product.
-    2) We do create a process file. We still check for the existence of the final product.
-    """
-    pass
+def get_download(func):
+	""" Use the function argument to see if the process output exists in the filesystem """
+	@wraps(func)
+	def wrapper(*args, **kwargs):
+		temp_dir = get_abs_path(kwargs["temp_dir"])
+		response = func(temp_dir)
+		shutil.rmtree(temp_dir)
+		return response
+	return wrapper
 
-@app.route('/oneLineGridlab', methods=['POST'])
-def oneLineGridLab():
+@app.route("/oneLineGridlab", methods=["POST"])
+def oneLineGridlab_start():
 	''' Data Params: {glm: [file], useLatLons: Boolean}
 	OMF fuction: omf.feeder.latLonNxGraph()
 	Runtime: should be around 1 to 30 seconds.
@@ -36,12 +60,21 @@ def oneLineGridLab():
     layout the graph.
     '''
 	temp_dir = tempfile.mkdtemp() 
-	print temp_dir
-	f = request.files['glm']
-	glm_file_path = os.path.join(temp_dir, "in.glm")
-	f.save(glm_file_path)
+	p = Process(target=oneLineGridlab, args=(temp_dir,))
+	p.start()
+	return ("SEE OTHER", 303, {"Location": "oneLineGridlab" + temp_dir})
+
+def oneLineGridlab(temp_dir):
+	"""
+	Create a png file from a glm file
+
+	:param str temp_dir: the temporary directory where the input and output files are saved
+	"""
 	try:
-		feed = omf.feeder.parse(glm_file_path)
+		f = request.files['glm']
+		glm_path = os.path.join(temp_dir, "in.glm")
+		f.save(glm_path)
+		feed = omf.feeder.parse(glm_path)
 		graph = omf.feeder.treeToNxGraph(feed)
 		if request.form.get('useLatLons') == 'False':
 			neatoLayout = True
@@ -54,36 +87,99 @@ def oneLineGridLab():
 		omf.feeder.latLonNxGraph(graph, labels=False, neatoLayout=neatoLayout, showPlot=False)
 		out_img_name = 'out.png'
 		plt.savefig(os.path.join(temp_dir, out_img_name))
-		return send_from_directory(temp_dir, out_img_name)
 	except:
-		return ("", 415, {})
+		with open(os.path.join(temp_dir, "error.txt"), 'w') as f:
+			f.write(str(sys.exc_info()[1]))	
+
+@app.route("/oneLineGridlab/<path:temp_dir>")
+def oneLineGridlab_status(temp_dir):
+	temp_dir = get_abs_path(temp_dir)
+	if not os.path.isdir(temp_dir):
+		abort(404)
+	if os.path.isfile(os.path.join(temp_dir, "out.png")):
+		return redirect(url_for("oneLineGridlab_download", temp_dir=get_rel_path(temp_dir)), code=303)
+	else:
+		return json.jsonify(get_task_metadata(temp_dir))
+
+# Insert all other routes here!
+@app.route("/milsoftToGridlab/<path:temp_dir>", methods=["DELETE"])
+@app.route("/oneLineGridlab/<path:temp_dir>", methods=["DELETE"])
+def delete(temp_dir):
+	temp_dir = get_abs_path(temp_dir)
+	if not os.path.isdir(temp_dir):
+		abort(404)
+	metadata = get_task_metadata(temp_dir)
+	if "Failure message" in metadata:
+		del metadata["Failure message"]
+	metadata["Status"] = "Stopped"
+	metadata["Stopped at"] = time.ctime(time.time())
+	shutil.rmtree(temp_dir)
+	return json.jsonify(metadata)
+
+@app.route("/oneLineGridlab/<path:temp_dir>/download")
+@get_download
+def oneLineGridlab_download(temp_dir):
+	if not os.path.isfile(os.path.join(temp_dir, "out.png")):
+		abort(404)
+	return send_from_directory(temp_dir, "out.png")
 
 @app.route('/milsoftToGridlab', methods=['POST'])
-def milsoftToGridlab():
+def milsoftToGridlab_start():
+	temp_dir = tempfile.mkdtemp()
+	p = Process(target=milsoftToGridlab, args=(temp_dir,))
+	p.start()
+	return ("SEE OTHER", 303, {"Location": "milsoftToGridlab" + temp_dir})
+
+def milsoftToGridlab(temp_dir):
 	'''Data Params: {std: [file], seq: [file]}
 	Runtime: could take a couple minutes.
 	OMF function: omf.milToGridlab.convert()
 	Result: a .glm file converted from the two input files.'''
-	workDir = tempfile.mkdtemp()
-	stdFileName = 'in.std'
-	stdFile = request.files['std']
-	stdPath = os.path.join(workDir, stdFileName)
-	stdFile.save(stdPath)
-	seqFileName = 'in.seq'
-	seqFile = request.files['seq']
-	seqPath = os.path.join(workDir, seqFileName)
-	seqFile.save(seqPath)
 	try:
+		stdFileName = 'in.std'
+		stdFile = request.files['std']
+		stdPath = os.path.join(temp_dir, stdFileName)
+		stdFile.save(stdPath)
+		seqFileName = 'in.seq'
+		seqFile = request.files['seq']
+		seqPath = os.path.join(temp_dir, seqFileName)
+		seqFile.save(seqPath)
 		with open(stdPath) as f: stdFile = f.read()
 		with open(seqPath) as f: seqFile = f.read()
 		tree = omf.milToGridlab.convert(stdFile, seqFile, rescale=True)
 		glmName = 'out.glm'
-		glmPath = os.path.join(workDir, glmName)
+		glmPath = os.path.join(temp_dir, glmName)
 		with open(glmPath, 'w') as outFile: outFile.write(omf.feeder.sortedWrite(tree))
-		# TODO: delete the tempDir.
-		return send_from_directory(workDir, glmName, mimetype="text/plain")
 	except:
-		return ("", 415, {})
+		with open(os.path.join(temp_dir, "error.txt"), 'w') as f:
+			f.write(str(sys.exc_info()[1]))	
+
+@app.route("/milsoftToGridlab/<path:temp_dir>")
+def milsoftToGridlab_status(temp_dir):
+	temp_dir = get_abs_path(temp_dir)
+	if not os.path.isdir(temp_dir):
+		abort(404)
+	if os.path.isfile(os.path.join(temp_dir, "out.glm")):
+		return redirect(url_for("milsoftToGridlab_download", temp_dir=get_rel_path(temp_dir)), code=303)
+	else:
+		return json.jsonify(get_task_metadata(temp_dir))
+
+@app.route("/milsoftToGridlab/<path:temp_dir>/download")
+@get_download
+def milsoftToGridlab_download(temp_dir):
+	if not os.path.isfile(os.path.join(temp_dir, "out.glm")):
+		abort(404)
+	return send_from_directory(temp_dir, "out.glm", mimetype="text/plain")
+
+
+
+
+
+
+
+
+
+
 
 @app.route('/cymeToGridlab', methods=['POST'])
 def cymeToGridlab():
@@ -106,7 +202,7 @@ def cymeToGridlab():
 		# TODO: delete the tempDir.
 		return send_from_directory(workDir, glmName, mimetype="text/plain")
 	except:
-		return ("", 415, {})
+		abort(415)
 
 @app.route('/gridlabRun', methods=['POST'])
 def gridlabRun():
@@ -124,9 +220,8 @@ def gridlabRun():
 		feed = omf.feeder.parse(glmOnDisk)
 		outDict = omf.solvers.gridlabd.runInFilesystem(feed, attachments=[], keepFiles=True, workDir=workDir, glmName='out.glm')
 		return json.jsonify(outDict)
-		#TODO: delete the tempDir.
 	except:
-		return ("", 415, {})
+		abort(415)
 
 @app.route('/gridlabdToGfm', methods=['POST'])
 def gridlabdToGfm():
@@ -152,9 +247,9 @@ def gridlabdToGfm():
 		}
 		for key, val in gfmInputTemplate.items():
 			if val is None:
-				return ("", 400, {})
+				abort(400)
 	except:
-		return ("", 400, {})
+		abort(400)
 	try:
 		feederModel = {
 			'nodes': [], # Don't need these.
@@ -163,7 +258,7 @@ def gridlabdToGfm():
 		gfmDict = omf.models.resilientDist.convertToGFM(gfmInputTemplate, feederModel)
 		return json.jsonify(gfmDict)
 	except:
-		return ("", 415, {})
+		abort(415)
 
 # Don't touch this for now
 @app.route('/runGfm', methods=['POST'])
@@ -299,7 +394,7 @@ def transmissionViz():
 		with open(omt_path) as f:
 			json.load(f)
 	except:
-		return ("", 415, {})
+		abort(415)
 	html_filename = omf.network.get_HTML_interface_path(omt_path)
 	return send_from_directory(temp_dir, html_filename)
 
