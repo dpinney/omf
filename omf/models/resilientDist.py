@@ -89,7 +89,7 @@ class HazardField(object):
 		pass
 
 
-	def drawHeatMap(self):
+	def drawHeatMap(self, show=True):
 		''' Draw heat map-color coded image map with user-defined boundaries and cell-size. '''
 		heatMap = plt.imshow(
 			self.hazardObj['field'],
@@ -104,7 +104,8 @@ class HazardField(object):
 			aspect='auto')
 		#plt.gca().invert_yaxis() This isn't needed anymore?
 		plt.title("Hazard Field")
-		plt.show()
+		if show:
+			plt.show()
 
 	def scaleField(self, scaleFactor):
 		''' Numerically scale the field with user defined scaling factor. ''' 
@@ -322,7 +323,6 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 	# Load required data.
 	tree = feederJson.get("tree",{})
 	links = feederJson.get("links",{})
-	
 	# Generate lat/lons from nodes and links structures.
 	for link in links:
 		for typeLink in link.keys():
@@ -362,13 +362,11 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 	else:
 		pos = {n:inGraph.node[n].get('pos',(0,0)) for n in inGraph}
 	# Draw all the edges
-
 	selected_labels = {}
 	for e in inGraph.edges():
 		edgeName = inGraph.edge[e[0]][e[1]].get('name')
 		if edgeName in edgeLabelsToAdd.keys():
 			selected_labels[e] = edgeLabelsToAdd[edgeName]
-
 		edgeColor = 'black'
 		if edgeName in damageDict:
 			if damageDict[edgeName] == 1:
@@ -397,16 +395,13 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
 		else:
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
-		
 	# Get swing buses.
 	green_list = []
 	for node in tree:
 		if 'bustype' in tree[node] and tree[node]['bustype'] == 'SWING':
 			green_list.append(tree[node]['name'])
-
 	isFirst = {'green': False, 'red': False, 'blue': False, 'grey': False}
 	nodeLabels = {'green': 'Swing Buses', 'red': 'Critical Loads', 'blue': 'Regular Loads', 'grey': 'Other'}
-
 	# Draw nodes and optional labels.
 	for key in pos.keys():
 		isLoad = key[2:6]
@@ -418,24 +413,18 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 			nodeColor = 'red'			
 		elif isLoad == 'load':
 			nodeColor = 'blue'
-
 		kwargs = {
 			'nodelist': [key],
 			'node_color': nodeColor,
 			'node_size': 16,
 			'linewidths': 1.0
 		}
-			
 		if not isFirst[nodeColor]:
 			kwargs['label'] = nodeLabels[nodeColor]
 			isFirst[nodeColor] = True
-
-
 		node = nx.draw_networkx_nodes(inGraph, pos, **kwargs)
-
 		if key in generatorList:
-			node.set_edgecolor('violet')	
-
+			node.set_edgecolor('black')
 	if labels:
 		nx.draw_networkx_labels(
 			inGraph,
@@ -452,7 +441,6 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 			font_color='red',
 			font_size=4
 		)
-
 	plt.legend(loc='lower right') 
 	if showPlot: plt.show()
 	plt.savefig(pJoin(outputDir,"feederChart.png"), dpi=800, pad_inches=0.0)
@@ -648,14 +636,10 @@ def work(modelDir, inputDict):
 	print "RUNNING 2ND GLD RUN FOR", modelDir
 	feederCopy = copy.deepcopy(feederModel)
 	lineSwitchList = []
-
-
 	edgeLabels = {}
 	generatorList = []
-
 	for gen in rdtOut['design_solution']['generators']:
 		generatorList.append(gen['id'][:-4])
-
 	damagedLoads = {}
 	for scenario in rdtOut['scenario_solution']:
 		for load in scenario['loads']:
@@ -663,7 +647,6 @@ def work(modelDir, inputDict):
 				damagedLoads[load['id'][:-4]] += 1
 			else:
 				damagedLoads[load['id'][:-4]] = 1
-
 	for line in rdtOut['design_solution']['lines']:
 		if('switch_built' in line and 'hardened' in line):
 			lineSwitchList.append(line['id'])
@@ -680,7 +663,6 @@ def work(modelDir, inputDict):
 		elif('hardened' in line):
 			if (line['hardened'] == True):
 				edgeLabels[line['id']] = "H"
-	
 	# Remove nonessential lines in second model as indicated by RDT output.
 	for key in feederCopy['tree'].keys():
 		value = feederCopy['tree'][key]
@@ -706,7 +688,6 @@ def work(modelDir, inputDict):
 		outData["secondGLD"] = str(False)
 	# Draw the feeder.
 	damageDict = {}
-
 	for scenario in rdtJson["scenarios"]:
 		for line in scenario["disable_lines"]:
 			if line in damageDict:
@@ -716,11 +697,6 @@ def work(modelDir, inputDict):
 	genDiagram(modelDir, feederModel, damageDict, critLoads, damagedLoads, edgeLabels, generatorList)
 	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
 		outData["oneLineDiagram"] = inFile.read().encode("base64")
-	
-
-	#damageData = np.loadtxt(omf.omfDir + "/static/testFiles/wf_clip.asc")
-	# Generate damage field.
-
 	# And we're done.
 	return outData
 
