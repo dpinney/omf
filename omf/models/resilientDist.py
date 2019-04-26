@@ -384,14 +384,14 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 		if ePhases==3:
 			standArgs.update({'width':5})
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
-			standArgs.update({'width':3,'edge_color':'white'})
+			standArgs.update({'width':3,'edge_color':'gainsboro'})
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
 			standArgs.update({'width':1,'edge_color':edgeColor})
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
 		if ePhases==2:
 			standArgs.update({'width':3})
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
-			standArgs.update({'width':1,'edge_color':'white'})
+			standArgs.update({'width':1,'edge_color':'gainsboro'})
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
 		else:
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
@@ -438,10 +438,17 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 			inGraph,
 			pos,
 			edge_labels=selected_labels,
+			bbox={'alpha':0},
 			font_color='red',
 			font_size=4
 		)
-	plt.legend(loc='lower right') 
+	# Hazard field.
+	# xlim = plt.xlim(); ylim = plt.ylim() # capture network limits.
+	# a = np.random.random((600, 600))
+	# plt.imshow(a, cmap='Greys', interpolation='nearest', alpha=0.3)
+	# plt.xlim(*xlim); plt.ylim(*ylim) # reset limits to be tight on network
+	# Final showing or saving.
+	plt.legend(loc='lower right')
 	if showPlot: plt.show()
 	plt.savefig(pJoin(outputDir,"feederChart.png"), dpi=800, pad_inches=0.0)
 
