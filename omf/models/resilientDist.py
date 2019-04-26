@@ -26,6 +26,9 @@ modelName, template = metadata(__file__)
 tooltip = "Model extreme weather and determine optimal investment for distribution resiliency."
 hidden = False
 
+# Constant for converting map-feet to lat-lon for GFM:
+HACK_SCALING_CONSTANT = 5000.0
+
 class HazardField(object):
 	''' Object to modify a hazard field from an .asc file. '''
 
@@ -93,7 +96,8 @@ class HazardField(object):
 		''' Draw heat map-color coded image map with user-defined boundaries and cell-size. '''
 		heatMap = plt.imshow(
 			self.hazardObj['field'],
-			cmap = 'hot',
+			cmap = 'gray',
+			alpha = 0.2,
 			interpolation = 'nearest',
 			extent = [
 				self.hazardObj["xllcorner"],
@@ -199,8 +203,8 @@ def convertToGFM(gfmInputTemplate, feederModel):
 				'id': '', #*
 				# 'min_voltage': 0.8, # in p.u.
 				# 'max_voltage': 1.2, # in p.u.
-				'y': float(bus.get('latitude',0.0))/5000.0,
-				'x': float(bus.get('longitude',0.0))/5000.0,
+				'y': float(bus.get('latitude',0.0))/HACK_SCALING_CONSTANT,
+				'x': float(bus.get('longitude',0.0))/HACK_SCALING_CONSTANT,
 				# 'has_phase': [True, True, True],
 				# 'ref_voltage': [1.0, 1.0, 1.0]
 				# 'ref_voltage': 1.0 # From github.
@@ -214,8 +218,8 @@ def convertToGFM(gfmInputTemplate, feederModel):
 					# HACK: sometimes keys are strings. Sometimes not.
 					if int(key) == busNode.get('treeIndex',0):
 						# HACK: nice coords for GFM which wants lat/lon.
-						newBus['y'] = busNode.get('y')/5000.0
-						newBus['x'] = busNode.get('x')/5000.0
+						newBus['y'] = busNode.get('y')/HACK_SCALING_CONSTANT
+						newBus['x'] = busNode.get('x')/HACK_SCALING_CONSTANT
 	# Load creation:
 	objToFind = ['load']
 	phaseNames = {'A':0, 'B':1, 'C':2}
@@ -348,6 +352,10 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 		pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
 	else:
 		pos = {n:inGraph.node[n].get('pos',(0,0)) for n in inGraph}
+	# Rescale using the magic number.
+	for k in pos:
+		newPos = (pos[k][0]/HACK_SCALING_CONSTANT, pos[k][1]/HACK_SCALING_CONSTANT)
+		pos[k] = newPos
 	# Draw all the edges
 	selected_labels = {}
 	for e in inGraph.edges():
@@ -387,8 +395,8 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 	for node in tree:
 		if 'bustype' in tree[node] and tree[node]['bustype'] == 'SWING':
 			green_list.append(tree[node]['name'])
-	isFirst = {'green': False, 'red': False, 'blue': False, 'grey': False}
-	nodeLabels = {'green': 'Swing Buses', 'red': 'Critical Loads', 'blue': 'Regular Loads', 'grey': 'Other'}
+	isFirst = {'green': False, 'red': False, 'blue': False, 'grey': False, 'dimgrey': False}
+	nodeLabels = {'green': 'Swing Bus', 'red': 'Critical Load', 'blue': 'Load', 'dimgrey':'New Generator', 'grey': 'Other'}
 	# Draw nodes and optional labels.
 	for key in pos.keys():
 		isLoad = key[2:6]
@@ -400,6 +408,8 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 			nodeColor = 'red'			
 		elif isLoad == 'load':
 			nodeColor = 'blue'
+		elif key in generatorList and key not in green_list:
+			nodeColor = 'dimgrey'
 		kwargs = {
 			'nodelist': [key],
 			'node_color': nodeColor,
@@ -483,6 +493,10 @@ def work(modelDir, inputDict):
 	hazard = HazardField(hazardPath)
 	if circuitOutsideOfHazard(hazard, gfmJson):
 		outData['warning'] = 'Warning: the hazard field does not overlap with the circuit.'
+	# Draw hazard field if needed.
+	if inputDict['showHazardField'] == 'Yes':
+		hazard.drawHeatMap(show=False)
+		plt.title('') #Hack: remove plot title.
 	# Run GFM
 	gfmBinaryPath = pJoin(__neoMetaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
 	rdtInputName = 'rdtInput.json'
@@ -723,7 +737,8 @@ def new(modelDir):
 		"scenariosFileName": "",
 		"simulationDate": "2012-01-01",
 		"simulationZipCode": "64735",
-		"power_flow": "network_flow"
+		"power_flow": "network_flow",
+		"showHazardField": "No"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
