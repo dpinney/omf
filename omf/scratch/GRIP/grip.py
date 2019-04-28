@@ -2,30 +2,14 @@
 import omf
 #if not omf.omfDir == os.getcwd():
 #	os.chdir(omf.omfDir)
-import tempfile, platform, subprocess, os
+import tempfile, platform, subprocess, os, zipfile
 from gevent.pywsgi import WSGIServer
-from flask import Flask, request, send_from_directory, make_response, json
+from flask import Flask, request, send_from_directory, make_response, json, abort
 import matplotlib.pyplot as plt
 
 # TODO: note how I commented out the directory change, but it still appears to work (at least on my machine)
 
 app = Flask(__name__)
-
-@app.route('/eatfile', methods=['GET', 'POST'])
-def eatfile():
-	if request.method == 'POST':
-		# print 'HEY I GOT A', request.files
-		return 'POSTER_CHOMPED'
-	else:
-		return 'CHOMPED'
-
-#@app.route("/checkConversion")
-def check_conversion():
-    """ A process starts in a temporary directory. There is no process file created in the temporary directory.
-    1) We don't create a process file. Then we just check for the existence of the final product.
-    2) We do create a process file. We still check for the existence of the final product.
-    """
-    pass
 
 @app.route('/oneLineGridlab', methods=['POST'])
 def oneLineGridLab():
@@ -80,7 +64,6 @@ def milsoftToGridlab():
 		glmName = 'out.glm'
 		glmPath = os.path.join(workDir, glmName)
 		with open(glmPath, 'w') as outFile: outFile.write(omf.feeder.sortedWrite(tree))
-		# TODO: delete the tempDir.
 		return send_from_directory(workDir, glmName, mimetype="text/plain")
 	except:
 		return ("", 415, {})
@@ -103,7 +86,6 @@ def cymeToGridlab():
 		glmPath = os.path.join(workDir, glmName)
 		with open(glmPath, 'w') as outFile:
 			outFile.write(omf.feeder.sortedWrite(tree))
-		# TODO: delete the tempDir.
 		return send_from_directory(workDir, glmName, mimetype="text/plain")
 	except:
 		return ("", 415, {})
@@ -124,7 +106,6 @@ def gridlabRun():
 		feed = omf.feeder.parse(glmOnDisk)
 		outDict = omf.solvers.gridlabd.runInFilesystem(feed, attachments=[], keepFiles=True, workDir=workDir, glmName='out.glm')
 		return json.jsonify(outDict)
-		#TODO: delete the tempDir.
 	except:
 		return ("", 415, {})
 
@@ -246,7 +227,6 @@ def samRun():
 	outData["Consumption"]["DG"] = ssc.ssc_data_get_array(dat, "ac")
 	return json.jsonify(outData)
 
-# Currently broken
 @app.route('/transmissionMatToOmt', methods=['POST'])
 def transmissionMatToOmt():
 	'''Data Params: {mat: [file], other_inputs: see source}
@@ -259,8 +239,8 @@ def transmissionMatToOmt():
 	omt_json = omf.network.parse(mat_path, filePath=True)
 	if omt_json == {"baseMVA":"100.0","mpcVersion":"2.0","bus":{},"gen":{}, "branch":{}}:
 		raise Exception("The submitted .m file was invalid or could not be parsed correctly.")
-	#nxG = omf.network.netToNxGraph(omt_json)
-	#omt_json = omf.network.latlonToNet(nxG, omt_json)
+	nxG = omf.network.netToNxGraph(omt_json)
+	omt_json = omf.network.latlonToNet(nxG, omt_json)
 	return json.jsonify(omt_json)
 
 @app.route('/transmissionPowerflow', methods=['POST'])
@@ -269,21 +249,51 @@ def transmissionPowerflow():
 	OMF function: omf.models.transmission.new and omf.models.transmission.work
 	Runtime: tens of seconds.
 	Result: TBD. '''
-	temp_dir = tempfile.mkdtemp()
-	omt_path = os.path.join(temp_dir, "in.omt")
-	config_path = os.path.join(temp_dir, "omtConfig.json")
-	request.files["omt"].save(omt_path)
-	request.files["omtConfig"].save(config_path)
-	sim_path = os.path.join(temp_dir, "transmission")
-	omf.models.transmission.new(sim_path)
-	with open(config_path) as f:
-		inputDict = json.load(f)
-	outputDict = omf.models.transmission.work(sim_path, inputDict)
-	output_path = os.path.join(sim_path, "allOutputData.json")
-	with open(output_path) as f:
-		json.dump(outputDict, f)
-	# Return output.png and allOutputData.json. Looks like I need a .zip
-			
+	try:
+		try:
+			tolerance = float(request.form.get("tolerance"))
+		except:
+			tolerance = None
+		try:
+			iteration = int(request.form.get("iteration"))
+		except:
+			iteration = None
+		try: 
+			genLimits = int(request.form.get("genLimits"))
+		except:
+			genLimits = None
+		inputDict = {
+			"user": request.form.get("user") if request.form.get("user") != "" else None,
+			"networkName1": request.form.get("networkName1") if request.form.get("networkName1") != "" else None,
+			"algorithm": request.form.get("algorithm") if request.form.get("algorithm") != "" else None,
+			"model": request.form.get("model") if request.form.get("model") != "" else None,
+			"tolerance": tolerance,
+			"iteration": iteration,
+			"genLimits": genLimits
+			#"modelType": request.form.get("modelType")
+		}
+		temp_dir = tempfile.mkdtemp()
+		model_dir = os.path.join(temp_dir, "transmission")
+		if omf.models.transmission.new(model_dir):
+			omt_path = os.path.join(model_dir, "case9.omt")
+			request.files["omt"].save(omt_path)
+			with open(os.path.join(model_dir, "allInputData.json")) as f:
+				defaults = json.load(f)
+			merged = {key: inputDict.get(key) if inputDict.get(key) is not None else defaults[key] for key in defaults}
+			with open(os.path.join(model_dir, "allInputData.json"), 'w') as f:
+				json.dump(merged, f)
+			outputDict = omf.models.transmission.work(model_dir, merged)
+			with open(os.path.join(model_dir, "allOutputData.json"), 'w') as f:
+				json.dump(outputDict, f)
+			with zipfile.ZipFile(os.path.join(model_dir, "transmission-powerflow.zip"), 'w', zipfile.ZIP_DEFLATED) as z:
+				z.write(os.path.join(model_dir, "output.png"), "output.png")
+				z.write(os.path.join(model_dir, "allOutputData.json"), "allOutputData.json")
+			return send_from_directory(model_dir, "transmission-powerflow.zip", as_attachment=True)
+		else:
+			return("Couldn't create model directory", 400, {})
+	except:
+		abort(400)
+
 
 @app.route('/transmissionViz', methods=['POST'])
 def transmissionViz():

@@ -6,8 +6,6 @@ from matplotlib import pyplot as plt
 import omf
 # import matpower
 
-
-
 def parse(inputStr, filePath=True):
 	''' Parse a MAT into an omf.network json. This is so we can walk the json, change things in bulk, etc.
 	Input can be a filepath or MAT string.
