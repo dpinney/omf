@@ -217,7 +217,13 @@
 				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
 				<input type="text" id="simulationZipCode" name="simulationZipCode" pattern="^\d{5}(?:[-\s]\d{4})?$">
 			</div>
-
+			<div class="shortInput">
+				<label>Draw Hazard Field</label>
+				<select id="showHazardField" name="showHazardField">
+					<option value="No">No</option>
+					<option value="Yes">Yes</option>
+				</select>
+			</div>
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
