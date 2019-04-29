@@ -313,9 +313,30 @@ def transmissionViz():
 	html_filename = omf.network.get_HTML_interface_path(omt_path)
 	return send_from_directory(temp_dir, html_filename)
 
+
+@app.route("/distributionViz", methods=["POST"])
+def distributionViz():
+	'''Data Params: {omd: [file]} 
+	OMF function: omf.distNetViz.viz()
+	Runtime: a couple seconds.
+	Result: HTML interface visualizing the .omd file. '''
+	f = request.files["omd"]
+	temp_dir = tempfile.mkdtemp()
+	omd_path = os.path.join(temp_dir, "in.omd")
+	f.save(omd_path)
+	try:
+		with open(omd_path) as f:
+			json.load(f)
+	except:
+		return ("", 415, {})
+	omf.distNetViz.viz(omd_path, outputPath=temp_dir, outputName="viewer.html", open_file=False)
+	return send_from_directory(temp_dir, "viewer.html")	
+
+
 def serve():
 	server = WSGIServer(('0.0.0.0', 5100), app)
 	server.serve_forever()
+
 
 if __name__ == '__main__':
 	serve()
