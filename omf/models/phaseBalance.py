@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 import matplotlib
 from networkx.drawing.nx_agraph import graphviz_layout
 import networkx as nx
+import numpy as np
 from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
 plt.switch_backend('Agg')
@@ -35,57 +36,45 @@ def _addCollectors(tree):
 	tree[str(max_key+5)] = {'property': 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)', 'object': 'collector', 'group': 'class=inverter', 'limit': '0', 'file': 'distributedGen.csv'}
 	tree[str(max_key+6)] = {'property': 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)', 'object': 'collector', 'group': 'class=load', 'limit': '0', 'file': 'loads.csv'}
 	tree[str(max_key+7)] = {'property': 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)', 'object': 'collector', 'group': 'class=load AND groupid=threePhase', 'limit': '0', 'file': 'threephaseloads.csv'}
+	tree[str(max_key+8)] = {'property': 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)', 'object': 'collector', 'group': 'class=inverter', 'limit': '0', 'file': 'inverter.csv'}
 	return tree
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	outData = {}
-	# feederName = inputDict["feederName1"]
-	print(os.listdir(modelDir))
-	# Copy spcific climate data into model directory
-	inputDict["climateName"] = zipCodeToClimateName(inputDict["zipCode"])
-	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 
-		pJoin(modelDir, "climate.tmy2"))
+	
+	# Copy spcific climate data into model directory (I think this is unnecessary?)
+	# inputDict["climateName"] = zipCodeToClimateName(inputDict["zipCode"])
+	# shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 
+	# 	pJoin(modelDir, "climate.tmy2"))
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict["feederName1"] = feederName
+	
 	# Create voltage drop plot.
 	# print "*DEBUG: feederName:", feederName
 	omd = json.load(open(pJoin(modelDir,feederName + '.omd')))
 	tree = omd['tree']
+	
+	# COLLECT ALL INVERTER OUTPUTS
+	all_inverters = [tree[k]['name'] for k, v in tree.iteritems() if tree.get(k, {}).get('object') == 'inverter']
+	m = [i for i, m in enumerate(all_inverters)]
+	html_out = ["<tr><td>{0}</td><td>{1}</td><td>{1}</td><td>{1}</td><td>{1}</td></tr>".format(inverter, np.nan) 
+				for inverter, i in zip(all_inverters, m)]
+	outData['inverter_table'] = ''.join(html_out)
+
 	tree = _addCollectors(tree)
 	with open(modelDir + '/withCollectors.glm', 'w') as collFile:
 		treeString = feeder.sortedWrite(tree)
 		collFile.write(treeString)
 		# json.dump(tree, f1, indent=4)
-	if inputDict.get("layoutAlgorithm", "geospatial") == "geospatial":
-		neato = False
-	else:
-		neato = True
-	# None cheack for edgeCol
-	if inputDict.get("edgeCol", "None") == "None":
-		edgeColValue = None
-	else:
-		edgeColValue = inputDict["edgeCol"]
-	# None check for nodeCol
-	if inputDict.get("nodeCol", "None") == "None":
-		nodeColValue = None
-	else:
-		nodeColValue = inputDict["nodeCol"]
-	# None check for edgeLabs
-	if inputDict.get("edgeLabs", "None") == "None":
-		edgeLabsValue = None
-	else:
-		edgeLabsValue = inputDict["edgeLabs"]
-	# None check for nodeLabs
-	if inputDict.get("nodeLabs", "None") == "None":
-		nodeLabsValue = None
-	else:
-		nodeLabsValue = inputDict["nodeLabs"]
-	# Type correction for colormap input
-	if inputDict.get("customColormap", "True") == "True":
-		customColormapValue = True
-	else:
-		customColormapValue = False
+
+	neato = False if inputDict.get("layoutAlgorithm", "geospatial") == "geospatial" else True
+	edgeColValue = inputDict.get("edgeCol", "None")
+	nodeColValue = inputDict.get("nodeCol", "None")
+	edgeLabsValue = inputDict.get("edgeLabs", "None")
+	nodeLabsValue = inputDict.get("nodeLabs", "None")
+	customColormapValue = True if inputDict.get("customColormap", "True") == "True" else False
+
 	# chart = voltPlot(omd, workDir=modelDir, neatoLayout=neato)
 	chart = drawPlot(
 		pJoin(modelDir, "withCollectors.glm"),
@@ -98,28 +87,23 @@ def work(modelDir, inputDict):
 		customColormap = customColormapValue,
 		rezSqIn = int(inputDict["rezSqIn"]))
 	chart.savefig(pJoin(modelDir,"output.png"))
-	with open(pJoin(modelDir,"output.png"),"rb") as inFile:
-		outData["voltageDrop"] = inFile.read().encode("base64")
+	with open(pJoin(modelDir,"output.png"),"rb") as f:
+		outData["voltageDrop"] = f.read().encode("base64")
+	
 	outData['threePhase'] = _readCollectorCSV(modelDir+'/threephaseloads.csv')
+	sub_d = {
+		'base': np.nan,
+		'solar': np.nan,
+		'controlled_solar': np.nan,
+	}
+	outData['service_cost'] = {
+		'load': sub_d,
+		'distributed_gen': sub_d,
+		'losses': sub_d,
+	}
 	#outData['overheadLosses'] = _readCollectorCSV(modelDir+'/ZlossesOverhead.csv')
-	return outData
 
-def _readGroupRecorderCSV( filename ):
-	dataDictionary = {}
-	with open(filename,'r') as csvFile:
-		reader = csv.reader(csvFile)
-		# loop past the header, 
-		[keys,vals] = [[],[]]
-		for row in reader:
-			if '# timestamp' in row:
-				keys = row
-				i = keys.index('# timestamp')
-				keys.pop(i)
-				vals = reader.next()
-				vals.pop(i)
-		for pos,key in enumerate(keys):
-			dataDictionary[key] = vals[pos]
-	return dataDictionary
+	return outData
 
 def _readCollectorCSV(filename):
 	dataDictionary = {}
@@ -166,6 +150,7 @@ def new(modelDir):
 		return False
 	return creationCode
 
+
 def _debugging():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
@@ -187,3 +172,20 @@ def _debugging():
 if __name__ == '__main__':
 	_debugging()
 	# _testingPlot()
+
+# def _readGroupRecorderCSV( filename ):
+# 	dataDictionary = {}
+# 	with open(filename,'r') as csvFile:
+# 		reader = csv.reader(csvFile)
+# 		# loop past the header, 
+# 		[keys,vals] = [[],[]]
+# 		for row in reader:
+# 			if '# timestamp' in row:
+# 				keys = row
+# 				i = keys.index('# timestamp')
+# 				keys.pop(i)
+# 				vals = reader.next()
+# 				vals.pop(i)
+# 		for pos,key in enumerate(keys):
+# 			dataDictionary[key] = vals[pos]
+# 	return dataDictionary

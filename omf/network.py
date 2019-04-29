@@ -6,10 +6,6 @@ from matplotlib import pyplot as plt
 import omf
 # import matpower
 
-# Wireframe for new netork objects:
-newNetworkWireframe = {"baseMVA":"100.0","mpcVersion":"2.0","bus":{},"gen":{},
-	"branch":{}}
-
 def parse(inputStr, filePath=True):
 	''' Parse a MAT into an omf.network json. This is so we can walk the json, change things in bulk, etc.
 	Input can be a filepath or MAT string.
@@ -42,6 +38,8 @@ def _dictConversion(inputStr, filePath=True):
 	{"baseMVA":"100.0","mpcVersion":"2.0","bus":[{"1": {"bus_i": 1,"type": 3,"Pd": 0,"Qd": 0,"Gs": 0,"Bs": 0,"area": 1,"Vm": 1,"Va": 0,"baseKV": 135,"zone": 1,"Vmax": 1.05,"Vmin": 0.95}}],"gen":[],
 	"branch":[]}
 	'''
+	# Wireframe for new network objects:
+	newNetworkWireframe = {"baseMVA":"100.0","mpcVersion":"2.0","bus":{},"gen":{}, "branch":{}}
 	if filePath:
 		with open(inputStr,'r') as matFile:
 			data = matFile.readlines()

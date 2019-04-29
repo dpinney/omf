@@ -2,16 +2,14 @@
 import omf
 #if not omf.omfDir == os.getcwd():
 #	os.chdir(omf.omfDir)
-import tempfile, platform, subprocess, os, shutil, time, sys
-from multiprocessing import Process
-from flask import Flask, request, send_from_directory, make_response, abort, redirect, url_for, json
-from gevent.pywsgi import WSGIServer
+import tempfile, platform, subprocess, os, zipfile, subprocess
+from flask import Flask, request, send_from_directory, make_response, json, abort
 import matplotlib.pyplot as plt
-from functools import wraps
 
 # TODO: note how I commented out the directory change, but it still appears to work (at least on my machine)
 
 app = Flask(__name__)
+
 
 def get_abs_path(path):
 	""" Return the absolute variant of the path argument. """
@@ -19,9 +17,11 @@ def get_abs_path(path):
 		path = "/" + path
 	return path
 
+
 def get_rel_path(path):
 	""" Return the relative variant of the path argument. """
 	return path.lstrip("/")
+
 
 def get_task_metadata(temp_dir):
 	""" Return metadata about the client's long-running task """
@@ -41,6 +41,7 @@ def get_task_metadata(temp_dir):
 		metadata["Status"] = "In-progress"
 	return metadata
 
+
 def get_download(func):
 	""" Use the function argument to see if the process output exists in the filesystem """
 	@wraps(func)
@@ -50,6 +51,7 @@ def get_download(func):
 		shutil.rmtree(temp_dir)
 		return response
 	return wrapper
+
 
 def get_status(func):
 	""" Use the function argument to see if the task is finished """
@@ -62,6 +64,7 @@ def get_status(func):
 		return json.jsonify(get_task_metadata(temp_dir)) if response is None else response
 	return wrapper
 
+
 def run_process(func):
 	""" Use the function argument to run a file conversion process that is protected with try-except """
 	@wraps(func)
@@ -73,6 +76,7 @@ def run_process(func):
 			with open(os.path.join(temp_dir, "error.txt"), 'w') as f:
 				f.write(str(sys.exc_info()[1]))	
 	return wrapper
+
 
 # Insert all other routes here!
 @app.route("/milsoftToGridlab/<path:temp_dir>", methods=["DELETE"])
@@ -89,12 +93,14 @@ def delete(temp_dir):
 	shutil.rmtree(temp_dir)
 	return json.jsonify(metadata)
 
+
 @app.route("/oneLineGridlab", methods=["POST"])
 def oneLineGridlab_start():
 	temp_dir = tempfile.mkdtemp() 
 	p = Process(target=oneLineGridlab, args=(temp_dir,))
 	p.start()
 	return ("SEE OTHER", 303, {"Location": "oneLineGridlab" + temp_dir})
+
 
 @run_process
 def oneLineGridlab(temp_dir):
@@ -120,11 +126,13 @@ def oneLineGridlab(temp_dir):
 	out_img_name = 'out.png'
 	plt.savefig(os.path.join(temp_dir, out_img_name))
 
+
 @app.route("/oneLineGridlab/<path:temp_dir>")
 @get_status
 def oneLineGridlab_status(temp_dir):
 	if os.path.isfile(os.path.join(temp_dir, "out.png")):
 		return redirect(url_for("oneLineGridlab_download", temp_dir=get_rel_path(temp_dir)), code=303)
+
 
 @app.route("/oneLineGridlab/<path:temp_dir>/download")
 @get_download
@@ -133,12 +141,14 @@ def oneLineGridlab_download(temp_dir):
 		abort(404)
 	return send_from_directory(temp_dir, "out.png")
 
+
 @app.route('/milsoftToGridlab', methods=['POST'])
 def milsoftToGridlab_start():
 	temp_dir = tempfile.mkdtemp()
 	p = Process(target=milsoftToGridlab, args=(temp_dir,))
 	p.start()
 	return ("SEE OTHER", 303, {"Location": "milsoftToGridlab" + temp_dir})
+
 
 @run_process
 def milsoftToGridlab(temp_dir):
@@ -162,11 +172,13 @@ def milsoftToGridlab(temp_dir):
 	with open(glmPath, 'w') as outFile:
 		outFile.write(omf.feeder.sortedWrite(tree))
 
+
 @app.route("/milsoftToGridlab/<path:temp_dir>")
 @get_status
 def milsoftToGridlab_status(temp_dir):
 	if os.path.isfile(os.path.join(temp_dir, "out.glm")):
 		return redirect(url_for("milsoftToGridlab_download", temp_dir=get_rel_path(temp_dir)), code=303)
+
 
 @app.route("/milsoftToGridlab/<path:temp_dir>/download")
 @get_download
@@ -174,6 +186,7 @@ def milsoftToGridlab_download(temp_dir):
 	if not os.path.isfile(os.path.join(temp_dir, "out.glm")):
 		abort(404)
 	return send_from_directory(temp_dir, "out.glm", mimetype="text/plain")
+
 
 @app.route("/cymeToGridlab", methods=["POST"])
 def cymeToGridlab_start():
@@ -184,6 +197,7 @@ def cymeToGridlab_start():
 	p = Process(target=cymeToGridlab, args=(temp_dir,))
 	p.start()
 	return ("SEE OTHER", 303, {"Location": "cymeToGridlab" + temp_dir})
+
 
 @run_process
 def cymeToGridlab(temp_dir):
@@ -199,11 +213,13 @@ def cymeToGridlab(temp_dir):
 	with open(glmPath, 'w') as outFile:
 		outFile.write(omf.feeder.sortedWrite(tree))
 
+
 @app.route("/cymeToGridlab/<path:temp_dir>")
 @get_status
 def cymeToGridlab_status(temp_dir):
 	if os.path.isfile(os.path.join(temp_dir, "out.glm")):
 		return redirect(url_for("cymeToGridlab_download", temp_dir=get_rel_path(temp_dir)), code=303)
+
 
 @app.route("/cymeToGridlab/<path:temp_dir>/download")
 @get_download
@@ -212,12 +228,14 @@ def cymeToGridlab_download(temp_dir):
 		abort(404)
 	return send_from_directory(temp_dir, "out.glm", mimetype="text/plain")
 	
+
 @app.route("/gridlabRun", methods=["POST"])
 def gridlabRun_start():
 	temp_dir = tempfile.mkdtemp()
 	p = Process(target=gridlabRun, args=(temp_dir,))
 	p.start()
 	return ("SEE OTHER", 303, {"Location": "gridlabRun" + temp_dir})
+
 
 @run_process
 def gridlabRun(temp_dir):
@@ -235,11 +253,13 @@ def gridlabRun(temp_dir):
 	with open(os.path.join(temp_dir, "gridlab-output.json"), 'w') as f:
 		json.dump(outDict, f)
 
+
 @app.route("/gridlabRun/<path:temp_dir>")
 @get_status
 def gridlabRun_status(temp_dir):
 	if os.path.isfile(os.path.join(temp_dir, "gridlab-output.json")):
 		return redirect(url_for("gridlabRun_download", temp_dir=get_rel_path(temp_dir)), code=303)
+
 
 @app.route("/gridlabRun/<path:temp_dir>/download")
 @get_download
@@ -248,12 +268,14 @@ def gridlabRun_download(temp_dir):
 		abort(404)
 	return send_from_directory(temp_dir, "gridlab-output.json", mimetype="application/json")
 
+
 @app.route('/gridlabdToGfm', methods=['POST'])
 def gridlabdToGfm_start():
 	temp_dir = tempfile.mkdtemp()
 	p = Process(target=gridlabdToGfm, args=(temp_dir,))
 	p.start()
 	return ("SEE OTHER", 303, {"Location": "gridlabdToGfm" + temp_dir})
+
 
 @run_process
 def gridlabdToGfm(temp_dir):
@@ -288,11 +310,13 @@ def gridlabdToGfm(temp_dir):
 	with open(os.path.join(temp_dir, "out.gfm"), 'w') as f:
 		json.dump(gfmDict, f)
 
+
 @app.route("/gridlabdToGfm/<path:temp_dir>")
 @get_status
 def gridlabdToGfm_status(temp_dir):
 	if os.path.isfile(os.path.join(temp_dir, "out.gfm")):
 		return redirect(url_for("gridlabdToGfm_download", temp_dir=get_rel_path(temp_dir)), code=303)
+
 
 @app.route("/gridlabdToGfm/<path:temp_dir>/download")
 @get_download
@@ -301,12 +325,14 @@ def gridlabdToGfm_download(temp_dir):
 		abort(404)
 	return send_from_directory(temp_dir, "out.gfm", mimetype="application/json")
 
+
 @app.route('/runGfm', methods=['POST'])
 def runGfm_start():
 	temp_dir = tempfile.mkdtemp() 
 	p = Process(target=runGfm, args=(temp_dir,))
 	p.start()
 	return ("SEE OTHER", 303, {"Location": "runGfm" + temp_dir})
+
 
 @run_process
 def runGfm(temp_dir):
@@ -349,11 +375,13 @@ def runGfm(temp_dir):
 	with open(os.path.join(temp_dir, "rungfm-output.txt"), 'w') as f:
 		f.write(out)
 
+
 @app.route("/runGfm/<path:temp_dir>")
 @get_status
 def runGfm_status(temp_dir):
 	if os.path.isfile(os.path.join(temp_dir, "rungfm-output.txt")):
 		return redirect(url_for("runGfm_download", temp_dir=get_rel_path(temp_dir)), code=303)
+
 
 @app.route("/runGfm/<path:temp_dir>/download")
 @get_download
@@ -362,22 +390,23 @@ def runGfm_download(temp_dir):
 		abort(404)
 	return send_from_directory(temp_dir, "rungfm-output.txt")
 
+
 @app.route('/samRun', methods=['POST'])
 def samRun():
 	'''Data Params: {[system advisor model inputs, approximately 30 floats]}
 	OMF function: omf.solvers.sam.run()
 	Runtime: should only be a couple seconds.
 	Result: Run NREL's system advisor model with the specified parameters. Return the output vectors and floats in JSON'''
+	temp_dir = tempfile.mkdtemp()
+	tmy2_path = os.path.join(temp_dir, "in.tmy2")
+	request.files["tmy2"].save(tmy2_path)
 	# Set up SAM data structures.
 	ssc = omf.solvers.nrelsam2013.SSCAPI()
 	dat = ssc.ssc_data_create()
 	# Set the inputs.
+	ssc.ssc_data_set_string(dat, "file_name", tmy2_path)
 	for key in request.form.keys():
-		if key == 'file_name':
-			ssc.ssc_data_set_string(dat, key, request.form.get(key)) # file_name is expected to be a path on the server!
-		else:
-			ssc.ssc_data_set_number(dat, key, float(request.form.get(key)))
-
+		ssc.ssc_data_set_number(dat, key, float(request.form.get(key)))
 	# Run PV system simulation.
 	mod = ssc.ssc_module_create("pvwattsv1")
 	ssc.ssc_module_exec(mod, dat)
@@ -409,13 +438,15 @@ def transmissionMatToOmt():
 	OMF function: omf.network.parse()
 	Runtime: maybe a couple minutes.
 	Result: Convert the .m matpower model to an OMT (JSON-based) model. Return the model.'''
-	f = request.files["matpower"]
-	mat_filename = "input.m"
 	temp_dir = tempfile.mkdtemp() 
-	mat_path = os.path.join(temp_dir, mat_filename)
-	f.save(mat_path)
-	mat_dict = omf.network.parse(mat_path, filePath=True)
-	return json.jsonify(mat_dict)
+	mat_path = os.path.join(temp_dir, "input.m")
+	request.files["matpower"].save(mat_path)
+	omt_json = omf.network.parse(mat_path, filePath=True)
+	if omt_json == {"baseMVA":"100.0","mpcVersion":"2.0","bus":{},"gen":{}, "branch":{}}:
+		raise Exception("The submitted .m file was invalid or could not be parsed correctly.")
+	nxG = omf.network.netToNxGraph(omt_json)
+	omt_json = omf.network.latlonToNet(nxG, omt_json)
+	return json.jsonify(omt_json)
 
 @app.route('/transmissionPowerflow', methods=['POST'])
 def transmissionPowerflow():
@@ -423,7 +454,51 @@ def transmissionPowerflow():
 	OMF function: omf.models.transmission.new and omf.models.transmission.work
 	Runtime: tens of seconds.
 	Result: TBD. '''
-	return 'Not Implemented Yet'
+	try:
+		try:
+			tolerance = float(request.form.get("tolerance"))
+		except:
+			tolerance = None
+		try:
+			iteration = int(request.form.get("iteration"))
+		except:
+			iteration = None
+		try: 
+			genLimits = int(request.form.get("genLimits"))
+		except:
+			genLimits = None
+		inputDict = {
+			"user": request.form.get("user") if request.form.get("user") != "" else None,
+			"networkName1": request.form.get("networkName1") if request.form.get("networkName1") != "" else None,
+			"algorithm": request.form.get("algorithm") if request.form.get("algorithm") != "" else None,
+			"model": request.form.get("model") if request.form.get("model") != "" else None,
+			"tolerance": tolerance,
+			"iteration": iteration,
+			"genLimits": genLimits
+			#"modelType": request.form.get("modelType")
+		}
+		temp_dir = tempfile.mkdtemp()
+		model_dir = os.path.join(temp_dir, "transmission")
+		if omf.models.transmission.new(model_dir):
+			omt_path = os.path.join(model_dir, "case9.omt")
+			request.files["omt"].save(omt_path)
+			with open(os.path.join(model_dir, "allInputData.json")) as f:
+				defaults = json.load(f)
+			merged = {key: inputDict.get(key) if inputDict.get(key) is not None else defaults[key] for key in defaults}
+			with open(os.path.join(model_dir, "allInputData.json"), 'w') as f:
+				json.dump(merged, f)
+			outputDict = omf.models.transmission.work(model_dir, merged)
+			with open(os.path.join(model_dir, "allOutputData.json"), 'w') as f:
+				json.dump(outputDict, f)
+			with zipfile.ZipFile(os.path.join(model_dir, "transmission-powerflow.zip"), 'w', zipfile.ZIP_DEFLATED) as z:
+				z.write(os.path.join(model_dir, "output.png"), "output.png")
+				z.write(os.path.join(model_dir, "allOutputData.json"), "allOutputData.json")
+			return send_from_directory(model_dir, "transmission-powerflow.zip", as_attachment=True)
+		else:
+			return("Couldn't create model directory", 400, {})
+	except:
+		abort(400)
+
 
 @app.route('/transmissionViz', methods=['POST'])
 def transmissionViz():
@@ -439,13 +514,42 @@ def transmissionViz():
 		with open(omt_path) as f:
 			json.load(f)
 	except:
-		abort(415)
+		return ("", 415, {})
 	html_filename = omf.network.get_HTML_interface_path(omt_path)
 	return send_from_directory(temp_dir, html_filename)
 
-def serve():
+
+@app.route("/distributionViz", methods=["POST"])
+def distributionViz():
+	'''Data Params: {omd: [file]} 
+	OMF function: omf.distNetViz.viz()
+	Runtime: a couple seconds.
+	Result: HTML interface visualizing the .omd file. '''
+	f = request.files["omd"]
+	temp_dir = tempfile.mkdtemp()
+	omd_path = os.path.join(temp_dir, "in.omd")
+	f.save(omd_path)
+	try:
+		with open(omd_path) as f:
+			json.load(f)
+	except:
+		return ("", 415, {})
+	omf.distNetViz.viz(omd_path, outputPath=temp_dir, outputName="viewer.html", open_file=False)
+	return send_from_directory(temp_dir, "viewer.html")	
+
+
+def serve_production():
+	""" One way to kill gunicorn is with $ ps -ef | awk '/gunicorn/ {print $2}' | xargs kill -9 """
+	os.chdir(os.path.dirname(__file__))
+	subprocess.Popen(["gunicorn", "-w", "4", "-b", "0.0.0.0:5100", "--preload", "-k gevent", "grip:app"])
+
+
+def serve_development():
+	from gevent.pywsgi import WSGIServer
 	server = WSGIServer(('0.0.0.0', 5100), app)
 	server.serve_forever()
 
+
 if __name__ == '__main__':
-	serve()
+	serve_production()
+	#serve_development()

@@ -66,7 +66,7 @@ def contains_coordinates(tree):
 	return True
 
 def get_components():
-	directory = "data/Component/"
+	directory = os.path.join(omf.omfDir, "data/Component")
 	components = {}
 	for dirpath, dirnames, file_names in os.walk(directory):
 		for name in file_names:
@@ -76,7 +76,7 @@ def get_components():
 					components[name[0:-5]] = json.load(f) # Load the file as a regular object into the dictionary
 	return json.dumps(components) # Turn the dictionary of objects into a string
 
-def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.html'):
+def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.html', open_file=True):
 	''' Vizualize a distribution system.'''
 	# HACK: make sure we have our homebrew binaries available.
 	os.environ['PATH'] += os.pathsep + '/usr/local/bin'
@@ -132,7 +132,21 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.h
 	# Insert the panZoom library.
 	# Note: you can't juse open the file in r+ mode because, based on the way the file is mapped to memory, you can only overwrite a line with another of exactly the same length.
 	for line in fileinput.input(tempDir + '/' + outputName, inplace=1):
-		if line.lstrip().startswith('<script id="panZoomInsert">'):
+		if line.lstrip().startswith('<link rel="stylesheet" href="/static/jquery-ui.min.css">'):
+			print ""
+		elif line.lstrip().startswith('<script type="text/javascript" src="/static/jquery.js"></script>'):
+			print ""
+		elif line.lstrip().startswith('<script type="text/javascript" src="/static/jquery-ui.min.js"></script>'):
+			print ""
+		elif line.lstrip().startswith('<script type="text/javascript" src="/static/svg-pan-zoom.js"></script>'):
+			print ""
+		elif line.lstrip().startswith('<script type="text/javascript" src="/static/chroma.min.js"></script>'):
+			print ""
+		elif line.lstrip().startswith('<script type="text/javascript" src="/static/papaparse.min.js"></script>'):
+			print ""
+		elif line.lstrip().startswith('<link rel="shortcut icon" href="/static/favicon.ico"/>'):
+			print('<link rel="shortcut icon" href="data:image/x-icon;base64,AAABAAEAEBAQAAAAAAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAioqKAGlpaQDU1NQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIiIiIiIiIAAgACAAIAAgACAzIzMjMyMwIDAgMCAwIDAiIiIiIiIgMCAwEDAgMCAwIDMTMyMzIzAgMBAwIDAgMCIiIiIiIiAwIDAQMCAwIDAgMxMzIzMjMCAwEDAgMCAwIiIiIiIiIDAAMAAwADAAMAAzMzMzMzMwAAAAAAAAAAAABwAAd3cAAEABAABVVQAAAAUAAFVVAABAAQAAVVUAAAAFAABVVQAAQAEAAFVVAAAABQAA3d0AAMABAAD//wAA"/>')
+		elif line.lstrip().startswith('<script id="panZoomInsert">'):
 			print '<script id="panZoomInsert">\n' + pzData # load up the new feeder.
 		elif line.lstrip().startswith('<script id="chromaInsert">'):
 			print '<script id="chromaInsert">\n' + chromaData
@@ -147,6 +161,11 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.h
 		else:
 			print line.rstrip()
 	# os.system('open -a "Google Chrome" ' + '"file://' + tempDir + '/' + outputName"')
+	# webbrowser.open_new("file://" + tempDir + '/' + outputName)
+	if open_file:
+		open_browser(tempDir, outputName)
+
+def open_browser(tempDir, outputName):
 	webbrowser.open_new("file://" + tempDir + '/' + outputName)
 
 if __name__ == '__main__':

@@ -1,0 +1,14 @@
+Actual behavior: Program prints correct values if a fault is not added, 
+but if a fault is added, it prints only zeros in dump files.
+Steps to reproduce: Run hello.py.
+Expected behavior: Non-zero values like when the fault is not added.
+Workaround/fix: Setting fault to show up after 10 second simulation warm-up.
+Discussion:
+	Why does this fix the problem? I assume it has something to do with when the dump files actually measure the values on the different nodes? 
+
+Actual behavior: crash with grandparent warning when running trip37 with meter parented to load parented to node.
+Steps to reproduce: Run hello.py.
+Expected behavior: no crash.
+Workaround/fix: don't parent meters to nodes parented to other things. GridLAB-D doesn't support this, per error message.
+Dicussion:
+	What does it mean if a load is attached to a node by parenting it to a node?  This is the cause of the grandchildren error when we  try to add meters using python code. [Parenting is a way to reduce the number of components in a model. It's a convenience feature for modelers.]
