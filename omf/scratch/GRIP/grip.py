@@ -2,8 +2,7 @@
 import omf
 #if not omf.omfDir == os.getcwd():
 #	os.chdir(omf.omfDir)
-import tempfile, platform, subprocess, os, zipfile
-from gevent.pywsgi import WSGIServer
+import tempfile, platform, subprocess, os, zipfile, subprocess
 from flask import Flask, request, send_from_directory, make_response, json, abort
 import matplotlib.pyplot as plt
 
@@ -20,7 +19,7 @@ def oneLineGridLab():
     layout the graph.
     '''
 	temp_dir = tempfile.mkdtemp() 
-	print temp_dir
+	#print temp_dir
 	f = request.files['glm']
 	glm_file_path = os.path.join(temp_dir, "in.glm")
 	f.save(glm_file_path)
@@ -333,10 +332,18 @@ def distributionViz():
 	return send_from_directory(temp_dir, "viewer.html")	
 
 
-def serve():
+def serve_production():
+	""" One way to kill gunicorn is with $ ps -ef | awk '/gunicorn/ {print $2}' | xargs kill -9 """
+	os.chdir(os.path.dirname(__file__))
+	subprocess.Popen(["gunicorn", "-w", "4", "-b", "0.0.0.0:5100", "--preload", "-k gevent", "grip:app"])
+
+
+def serve_development():
+	from gevent.pywsgi import WSGIServer
 	server = WSGIServer(('0.0.0.0', 5100), app)
 	server.serve_forever()
 
 
 if __name__ == '__main__':
-	serve()
+	serve_production()
+	#serve_development()
