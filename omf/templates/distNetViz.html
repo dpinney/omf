@@ -5323,6 +5323,44 @@ function detectDrag(event) {
 // Initialization
 //**************************************************
 
+function checkServerConversion() {
+    const modal = new ProgressModal("Checking for an in-progress server file conversion...", "", false);
+    modal.show();
+    let reload = false;
+    return new Promise(function(resolve, reject) {
+        const intervalId = setInterval(function pollServer() {
+            $.ajax({
+                type: "POST",
+                url: "/checkConversion/{{thisModelName}}/{{thisOwner}}",
+            }).done((data) => {
+                if (data.exists === true) {
+                    // There is an in-progress file conversion. Need to reload the page when it's done.
+                    reload = true
+                    modal.message = "Waiting for an in-progress server file conversion to complete..."
+                    modal.show()
+                } else if (data.exists === false) {
+                    if (reload) {
+                        // There was a previous in-progress conversion that just completed, so reload the page
+                        reloadWrapper()
+                    } else {
+                        // There was never an in-progress file conversion, so don't bother to reload the page
+                        clearInterval(intervalId)
+                        modal.hide()
+                        resolve()
+                    }
+                } else {
+                    // there was an error? Notify the user, proceed as normal.
+                    clearInterval(intervalId)
+                    modal.hide()
+                    reject()
+                }
+            })
+            return pollServer;
+        // Execute pollServer immediately once, then return it to setInterval so that it continues to execute every 5 seconds
+        }(), 5000)
+    });
+}
+
 function createSingletons() {
     gOpacityManager = createOpacityManager();
     gAddManager = createAddManager();
@@ -5371,7 +5409,12 @@ function initializeColorModal() {
     });
 }
 
-(function initialize() {
+(async function initialize() {
+    try {
+        await checkServerConversion();        
+    } catch(e) {
+        alert("There appears to have been an error with the file conversion on the server") 
+    } 
     createInterface();
     attachHandlers();
     initializeJQuery();
