@@ -661,5 +661,4 @@ def serve_development():
 
 
 if __name__ == '__main__':
-	#serve_production()
-	serve_development()
+	serve_production()
