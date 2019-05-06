@@ -66,7 +66,7 @@ def get_download(func):
 	def wrapper(*args, **kwargs):
 		temp_dir = get_abs_path(kwargs["temp_dir"])
 		response = func(temp_dir) # 404 is automatically raised
-		threading.Timer(6.0, lambda: shutil.rmtree(temp_dir)).start()
+		threading.Timer(60.0, lambda: shutil.rmtree(temp_dir)).start()
 		return response
 	return wrapper
 
@@ -649,7 +649,7 @@ def distributionViz_download(temp_dir):
 
 
 def serve_production():
-	""" One way to kill gunicorn is with $ ps -ef | awk '/gunicorn/ {print $2}' | xargs kill -9 """
+	""" One way to kill gunicorn is with $ ps -ef | awk '/gunicorn/ {print $2}' | xargs kill """
 	os.chdir(os.path.dirname(__file__))
 	subprocess.Popen(["gunicorn", "-w", "4", "-b", "0.0.0.0:5100", "--preload", "-k gevent", "grip:app"])
 
