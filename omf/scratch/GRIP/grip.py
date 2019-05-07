@@ -651,7 +651,7 @@ def distributionViz_download(temp_dir):
 def serve_production():
 	""" One way to kill gunicorn is with $ ps -ef | awk '/gunicorn/ {print $2}' | xargs kill """
 	os.chdir(os.path.dirname(__file__))
-	subprocess.Popen(["gunicorn", "-w", "4", "-b", "0.0.0.0:5100", "--preload", "-k gevent", "grip:app"])
+	subprocess.Popen(["gunicorn", "-w", "4", "-b", "0.0.0.0:5100", "--preload", "-k sync", "grip:app"])
 
 
 def serve_development():
