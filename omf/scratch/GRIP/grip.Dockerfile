@@ -18,4 +18,4 @@ COPY omf /home/omf/omf
 # Run the OMF
 WORKDIR /home/omf/omf
 ENTRYPOINT ["python"]
-CMD ["grip.py"]
+CMD ["-m", "grip"]

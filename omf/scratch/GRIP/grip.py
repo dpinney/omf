@@ -1,14 +1,14 @@
 ''' Web server exposing HTTP API for GRIP. '''
 import omf
+import os
+# TODO: note how I commented out the directory change, but it still appears to work (at least on my machine)
 #if not omf.omfDir == os.getcwd():
-#	os.chdir(omf.omfDir)
-import tempfile, platform, subprocess, os, zipfile, subprocess, time, shutil, sys, threading
+	#os.chdir(omf.omfDir)
+import tempfile, platform, subprocess, zipfile, subprocess, time, shutil, sys, threading
 from functools import wraps
 from multiprocessing import Process
 import matplotlib.pyplot as plt
 from flask import Flask, request, send_from_directory, make_response, json, abort, redirect, url_for
-
-# TODO: note how I commented out the directory change, but it still appears to work (at least on my machine)
 
 app = Flask(__name__)
 
@@ -649,7 +649,9 @@ def distributionViz_download(temp_dir):
 
 
 def serve_production():
-	""" One way to kill gunicorn is with $ ps -ef | awk '/gunicorn/ {print $2}' | xargs kill """
+	""" Make sure to run this file with the -m (module) flag.
+	One way to kill gunicorn is with $ ps -ef | awk '/gunicorn/ {print $2}' | xargs kill
+	"""
 	os.chdir(os.path.dirname(__file__))
 	subprocess.Popen(["gunicorn", "-w", "4", "-b", "0.0.0.0:5100", "--preload", "-k sync", "grip:app"])
 
