@@ -14,6 +14,8 @@ COPY omf/scratch/GRIP/grip.py /home/omf/omf/
 RUN cd /home/omf/; python install.py
 # Put the rest of the source in there.
 COPY omf /home/omf/omf
+# Install dependencies that are missing for some reason
+RUN pip install backports.functools_lru_cache && pip install cycler && pip install kiwisolver && pip install subprocess32
 
 # Run the OMF
 WORKDIR /home/omf/omf
