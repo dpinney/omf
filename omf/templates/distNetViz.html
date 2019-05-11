@@ -5411,7 +5411,7 @@ function initializeColorModal() {
 
 (async function initialize() {
     try {
-        await checkServerConversion();        
+        {%if thisOwner != 'NONE'%}await checkServerConversion();{% endif %}
     } catch(e) {
         alert("There appears to have been an error with the file conversion on the server") 
     } 
