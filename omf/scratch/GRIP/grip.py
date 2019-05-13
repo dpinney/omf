@@ -42,8 +42,21 @@ def get_rel_path(path):
 
 
 def get_task_metadata(temp_dir):
-	""" Return metadata about the client's long-running task """
-	elapsed_time = int(time.time() - os.path.getmtime(temp_dir))
+	"""
+	Return metadata about the client's long-running task.
+
+	Using start-time.txt will provide an accruate start time, but increases the response time of an HTTP request. Using getmtime() is faster than
+	using start-time.txt, but isn't always accurate because mtime changes whenever a file is written/changed/deleted, so a file conversion task that
+	writes multiple files can appear to have an elapsed time that resets. Inter-proces communication and tracking process communication times would be
+	fastest, but difficult to implement.
+	"""
+	start_time_path = os.path.join(temp_dir, "start-time.txt")
+	if os.path.isfile(start_time_path):
+		with open(start_time_path) as f:
+			start_time = float(f.read())
+	else:
+		start_time = os.path.getmtime(temp_dir) # Fallback in case start-time.txt doesn't exist for some reason
+	elapsed_time = int(time.time() - start_time)
 	elapsed_time = ("{:02}:{:02}:{:02}".format(elapsed_time // 3600, ((elapsed_time % 3600) // 60), elapsed_time % 60))
 	metadata = {
 		"Created at": time.ctime(os.path.getmtime(temp_dir)),
@@ -89,6 +102,8 @@ def run_process(func):
 	def wrapper(*args, **kwargs):
 		temp_dir = args[0]
 		try:
+			with open(os.path.join(temp_dir, "start-time.txt"), 'w') as f:
+				f.write(str(time.time()))
 			func(temp_dir)
 		except:
 			with open(os.path.join(temp_dir, "error.txt"), 'w') as f:
@@ -649,17 +664,16 @@ def distributionViz_download(temp_dir):
 
 
 def serve_production():
-	""" Make sure to run this file with the -m (module) flag.
-	One way to kill gunicorn is with $ ps -ef | awk '/gunicorn/ {print $2}' | xargs kill
-	"""
+	""" Make sure to run this file with the -m (module) flag. One way to kill gunicorn is with $ ps -ef | awk '/gunicorn/ {print $2}' | xargs kill """
 	os.chdir(os.path.dirname(__file__))
-	subprocess.Popen(["gunicorn", "-w", "4", "-b", "0.0.0.0:5100", "--preload", "-k sync", "grip:app"])
+	subprocess.call(["gunicorn", "-w", "4", "-b", "0.0.0.0:5100", "--preload", "-k sync", "grip:app"])
 
 
 def serve_development():
-	from gevent.pywsgi import WSGIServer
-	server = WSGIServer(('0.0.0.0', 5100), app)
-	server.serve_forever()
+	"""
+	gevent does NOT work with multiprocessing. Don't use gevent or gunicorn with gevent in this version of the API.
+	"""
+	app.run(debug=True, port=5100)
 
 
 if __name__ == '__main__':
