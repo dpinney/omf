@@ -248,7 +248,7 @@ def cymeToGridlab(temp_dir):
 	mdbPath = os.path.join(temp_dir, "in.mdb")
 	request.files["mdb"].save(mdbPath)
 	import locale
-	locale.setlocale(locale.LC_ALL, 'en_US')
+	locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 	tree = omf.cymeToGridlab.convertCymeModel(mdbPath, temp_dir)
 	with open(os.path.join(temp_dir, filenames["cygl"]), 'w') as outFile:
 		outFile.write(omf.feeder.sortedWrite(tree))
