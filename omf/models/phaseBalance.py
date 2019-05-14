@@ -1,20 +1,16 @@
 ''' Calculate phase unbalance and determine mitigation options. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math, warnings
-import traceback
-from os.path import join as pJoin
-from jinja2 import Template
-from matplotlib import pyplot as plt
-import matplotlib
-from networkx.drawing.nx_agraph import graphviz_layout
-import networkx as nx
+import json, os, shutil, csv
 import numpy as np
-from omf.models import __neoMetaModel__
-from __neoMetaModel__ import *
-plt.switch_backend('Agg')
-from omf.models.voltageDrop import drawPlot
+import pandas as pd
+
+from os.path import join as pJoin
+from matplotlib import pyplot as plt
 
 # OMF imports 
+from omf.models import __neoMetaModel__
+from __neoMetaModel__ import *
+from omf.models.voltageDrop import drawPlot as voltagePlot
 import omf.feeder as feeder
 from omf.solvers import gridlabd
 from omf.weather import zipCodeToClimateName
@@ -24,100 +20,128 @@ modelName, template = metadata(__file__)
 tooltip = "Calculate phase unbalance and determine mitigation options."
 hidden = True
 
-def _addCollectors(tree):
-	for x in tree.values():
-		if 'object' in x and 'load' in x['object'] and 'A' in x['phases'] and 'B' in x['phases'] and 'C' in x['phases']:
-			x['groupid'] = 'threePhase'
-	max_key = int(max(tree, key=int))
-	tree[str(max_key+1)] = {'property': 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)', 'object': 'collector', 'group': 'class=transformer', 'limit': '0', 'file': 'ZlossesTransformer.csv'}
-	tree[str(max_key+2)] = {'property': 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)', 'object': 'collector', 'group': 'class=underground_line', 'limit': '0', 'file': 'ZlossesUnderground.csv'}
-	tree[str(max_key+3)] = {'property': 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)', 'object': 'collector', 'group': 'class=overhead_line', 'limit': '0', 'file': 'ZlossesOverhead.csv'}
-	tree[str(max_key+4)] = {'property': 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)', 'object': 'collector', 'group': 'class=triplex_line', 'limit': '0', 'file': 'ZlossesTriplex.csv'}
-	tree[str(max_key+5)] = {'property': 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)', 'object': 'collector', 'group': 'class=inverter', 'limit': '0', 'file': 'distributedGen.csv'}
-	tree[str(max_key+6)] = {'property': 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)', 'object': 'collector', 'group': 'class=load', 'limit': '0', 'file': 'loads.csv'}
-	tree[str(max_key+7)] = {'property': 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)', 'object': 'collector', 'group': 'class=load AND groupid=threePhase', 'limit': '0', 'file': 'threephaseloads.csv'}
-	tree[str(max_key+8)] = {'property': 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)', 'object': 'collector', 'group': 'class=inverter', 'limit': '0', 'file': 'inverter.csv'}
-	return tree
-
-def work(modelDir, inputDict):
+def work(modelDir, ind):
 	''' Run the model in its directory. '''
-	outData = {}
+	o = {}
 	
-	# Copy spcific climate data into model directory (I think this is unnecessary?)
-	# inputDict["climateName"] = zipCodeToClimateName(inputDict["zipCode"])
-	# shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 
-	# 	pJoin(modelDir, "climate.tmy2"))
-	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
-	inputDict["feederName1"] = feederName
-	
-	# Create voltage drop plot.
-	# print "*DEBUG: feederName:", feederName
-	omd = json.load(open(pJoin(modelDir,feederName + '.omd')))
-	tree = omd['tree']
-	
-	# COLLECT ALL INVERTER OUTPUTS
-	all_inverters = [tree[k]['name'] for k, v in tree.iteritems() if tree.get(k, {}).get('object') == 'inverter']
-	m = [i for i, m in enumerate(all_inverters)]
-	html_out = ["<tr><td>{0}</td><td>{1}</td><td>{1}</td><td>{1}</td><td>{1}</td></tr>".format(inverter, np.nan) 
-				for inverter, i in zip(all_inverters, m)]
-	outData['inverter_table'] = ''.join(html_out)
+	with open(pJoin(modelDir, [x for x in os.listdir(modelDir) if x.endswith('.omd')][0])) as f:
+		tree = json.load(f)['tree']
 
 	tree = _addCollectors(tree)
-	with open(modelDir + '/withCollectors.glm', 'w') as collFile:
+	with open(modelDir + '/withCollectors.glm', 'w') as f:
 		treeString = feeder.sortedWrite(tree)
-		collFile.write(treeString)
-		# json.dump(tree, f1, indent=4)
+		f.write(treeString)
 
-	neato = False if inputDict.get("layoutAlgorithm", "geospatial") == "geospatial" else True
-	edgeColValue = inputDict.get("edgeCol", "None")
-	nodeColValue = inputDict.get("nodeCol", "None")
-	edgeLabsValue = inputDict.get("edgeLabs", "None")
-	nodeLabsValue = inputDict.get("nodeLabs", "None")
-	customColormapValue = True if inputDict.get("customColormap", "True") == "True" else False
-
-	# chart = voltPlot(omd, workDir=modelDir, neatoLayout=neato)
-	chart = drawPlot(
-		pJoin(modelDir, "withCollectors.glm"),
-		workDir = modelDir,
-		neatoLayout = False, #neato,
-		edgeCol = edgeColValue,
-		nodeCol = nodeColValue,
-		nodeLabs = nodeLabsValue,
-		edgeLabs = edgeLabsValue,
-		customColormap = customColormapValue,
-		rezSqIn = int(inputDict["rezSqIn"]))
-	chart.savefig(pJoin(modelDir,"output.png"))
-	with open(pJoin(modelDir,"output.png"),"rb") as f:
-		outData["voltageDrop"] = f.read().encode("base64")
+	# ---------------------------- BUILD CHART ----------------------------- #
+	neato = False if ind.get("layoutAlgorithm", "geospatial") == "geospatial" else True
+	edgeColValue = ind.get("edgeCol", None) if ind.get("edgeCol") != "None" else None
+	nodeColValue = ind.get("nodeCol", None) if ind.get("nodeCol") != "None" else None
+	edgeLabsValue = ind.get("edgeLabs", None) if ind.get("edgeLabs") != "None" else None
+	nodeLabsValue = ind.get("nodeLabs", None) if ind.get("nodeLabs") != "None" else None
+	customColormapValue = True if ind.get("customColormap", "True") == "True" else False
 	
-	outData['threePhase'] = _readCollectorCSV(modelDir+'/threephaseloads.csv')
+	voltagePlot(
+		pJoin(modelDir, "withCollectors.glm"), workDir=modelDir, neatoLayout=False, 
+		edgeCol=edgeColValue, nodeCol=nodeColValue, nodeLabs=nodeLabsValue, 
+		edgeLabs=edgeLabsValue, customColormap=customColormapValue, rezSqIn=int(ind["rezSqIn"])
+	).savefig(pJoin(modelDir,"output.png"))
+	with open(pJoin(modelDir,"output.png"),"rb") as f:
+		o["voltageDrop"] = f.read().encode("base64")
+	# ----------------------------------------------------------------------- #
+	
 	sub_d = {
 		'base': np.nan,
 		'solar': np.nan,
 		'controlled_solar': np.nan,
 	}
-	outData['service_cost'] = {
+	o['service_cost'] = {
 		'load': sub_d,
 		'distributed_gen': sub_d,
 		'losses': sub_d,
 	}
-	#outData['overheadLosses'] = _readCollectorCSV(modelDir+'/ZlossesOverhead.csv')
 
-	return outData
+	# --------------------------- SERVICE TABLE ----------------------------- #
+	# o['service_table'] = ''.join([(
+	# 	"<tr>"
+	# 		"<td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{3}</td>"
+	# 	"</tr>"
+	# ).format(inverter, row['real'], row['imag'], np.nan) for inverter, row in df_inv.iterrows()])
+	# ----------------------------------------------------------------------- #
 
-def _readCollectorCSV(filename):
-	dataDictionary = {}
-	with open(filename, 'r') as csvFile:
-		reader = csv.reader(csvFile)
-		for row in reader:
-			if '# property.. timestamp' in row:
-				key_row = row
-				value_row = reader.next()
-				for pos, key in enumerate(key_row):
-					if key == '# property.. timestamp':
-						continue
-					dataDictionary[key] = value_row[pos]
-	return dataDictionary
+	
+	# -------------------------- INVERTER TABLE ----------------------------- #
+	df_inv = _readCSV(pJoin(modelDir, 'all_inverters_VA_Out_AC.csv'))
+	o['inverter_table'] = ''.join([(
+		"<tr>"
+			"<td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{3}</td>"
+		"</tr>"
+	).format(inverter, row['real'], row['imag'], np.nan) for inverter, row in df_inv.iterrows()])
+	# ----------------------------------------------------------------------- #
+
+
+	# ---------------------------- MOTOR TABLE ------------------------------ #
+	df_all_motors = pd.DataFrame()
+	for phase in ['A', 'B', 'C']:
+		df_phase = _readCSV(pJoin(modelDir, 'threephase_VA_'+ phase +'.csv'))
+		df_phase.columns = [phase + '_' + c for c in df_phase.columns]
+		if df_all_motors.shape[0] == 0:
+			df_all_motors = df_phase
+		else:
+			df_all_motors = df_all_motors.join(df_phase)
+
+	o['motor_table'] = ''.join([(
+		"<tr>"
+			"<td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td><td>{5}</td><td>{6}</td>"
+		"</tr>"
+	).format(motor, r['A_real'], r['A_imag'], r['B_real'], r['B_imag'], r['C_real'], r['C_imag']) 
+		for motor, r in df_all_motors.iterrows()])
+	# ----------------------------------------------------------------------- #
+
+
+	print _totals(pJoin(modelDir, 'load.csv'))
+	print _totals(pJoin(modelDir, 'distributedGen.csv'))
+	for loss in ['transformer', 'underground_line', 'overhead_line', 'triplex_line']:
+		print _totals(pJoin(modelDir, 'Zlosses_'+loss+'.csv'))
+
+	return o
+
+def _addCollectors(tree):
+	for x in tree.values():
+		if 'object' in x and 'load' in x['object'] and all([phase in x['phases'] for phase in 'ABC']):
+			x['groupid'] = 'threePhase'
+
+	# load on system and inverters
+	all_power = 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)'
+	tree[len(tree)] = {'property': all_power, 'object': 'collector', 'group': 'class=inverter', 'limit': '0', 'file': 'distributedGen.csv'}
+	tree[len(tree)] = {'property': all_power, 'object': 'collector', 'group': 'class=load', 'limit': '0', 'file': 'load.csv'}
+	# Load on motor phases
+	for phase in ['A', 'B', 'C']:
+		tree[len(tree)] = {'property':'power_' + phase, 'object':'group_recorder', 'group':'class=load AND groupid=threePhase', 'limit': '1', 'file':'threephase_VA_'+ phase +'.csv'}
+	# Loss across system
+	all_losses = 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)'
+	for loss in ['transformer', 'underground_line', 'overhead_line', 'triplex_line']:
+		tree[len(tree)] = {'property': all_losses, 'object': 'collector', 'group': 'class='+loss, 'limit': '0', 'file': 'Zlosses_'+loss+'.csv'}
+	# Individual inverters
+	tree[len(tree)] = {'property':'VA_Out', 'object':'group_recorder', 'group':'class=inverter', 'limit':'1', 'file':'all_inverters_VA_Out_AC.csv'}
+	
+	return tree
+
+def _readCSV(filename):
+	df = pd.read_csv(filename, skiprows=8)
+	df = df.T
+	df = df[df.columns[:-2]]
+	df = df[~df.index.str.startswith('#')]
+	df[0] = [complex(i) for i in df[0]]
+	df['imag'] = df[0].imag.astype(float)
+	df['real'] = df[0].real.astype(float)
+	df = df.drop([0], axis=1)
+	return df
+
+def _totals(filename):
+	df = pd.read_csv(filename, skiprows=8)
+	df = df.T
+	df = df[~df.index.str.startswith('#')]
+	return sum(df[0])
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
@@ -141,37 +165,50 @@ def new(modelDir):
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
 		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
-		# shutil.copyfile(pJoin(__neoMetaModel__._omfDir, 'scratch', 'MPUPV', 'testResult.omd'), pJoin(modelDir, 'R1-12.47-1-solar_collectors.omd'))
-		#temp_omd = json.load(open(pJoin(modelDir, defaultInputs["feederName1"]+'.omd')))
-		#temp_omd['tree'] = _addCollectors(temp_omd['tree'])
-		#with open(pJoin(modelDir, defaultInputs["feederName1"]+'.omd', 'w+')) as outfile:
-		#	json.dump(temp_omd, outfile)
 	except:
 		return False
 	return creationCode
 
-
 def _debugging():
-	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
-	# Blow away old test results if necessary.
-	try:
+	if os.path.isdir(modelLoc):
 		shutil.rmtree(modelLoc)
-	except:
-		# No previous test results.
-		pass 
-	# Create New.
 	new(modelLoc)
-	# Pre-run.
-	# renderAndShow(modelLoc)
-	# Run the model.
 	runForeground(modelLoc)
-	# Show the output.
 	renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_debugging()
-	# _testingPlot()
+
+# Copy spcific climate data into model directory (I think this is unnecessary?)
+# ind["climateName"] = zipCodeToClimateName(ind["zipCode"])
+# shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", ind["climateName"] + ".tmy2"), 
+# 	pJoin(modelDir, "climate.tmy2"))
+
+# def _readCollectorCSV(filename):
+# 	dataDictionary = {}
+# 	with open(filename, 'r') as csvFile:
+# 		reader = csv.reader(csvFile)
+# 		for row in reader:
+# 			if '# property.. timestamp' in row:
+# 				key_row = row
+# 				value_row = reader.next()
+# 				for pos, key in enumerate(key_row):
+# 					if key == '# property.. timestamp':
+# 						continue
+# 					dataDictionary[key] = value_row[pos]
+# 	return dataDictionary
+
+	# # Three phase motor loads.
+	# tree[len(tree)] = {
+	# 	'property': all_power,
+	# 	'object': 'collector',
+	# 	'group': 'class=load AND groupid=threePhase', 
+	# 	'limit': '0', 
+	# 	'file': 'threephaseload.csv'
+	# } #TODO: delete me
+
+# chart = voltPlot(omd, workDir=modelDir, neatoLayout=neato)
 
 # def _readGroupRecorderCSV( filename ):
 # 	dataDictionary = {}
