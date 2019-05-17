@@ -13,7 +13,7 @@ if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu
 	os.system("sudo apt-get -y install language-pack-en") # Install English locale 
 	os.system("sudo apt-get -y install python-pip git unixodbc-dev libfreetype6-dev \
 	pkg-config python-dev python-numpy alien graphviz python-pygraphviz libgraphviz-dev \
-	python-pydot mdbtools python-tk octave libblas-dev liblapack-dev libatlas-base-dev gfortran wget")
+	python-pydot mdbtools python-tk octave libblas-dev liblapack-dev libatlas-base-dev gfortran wget splat")
 	try:
 		os.system("sudo apt-get -y install ffmpeg python-cairocffi")
 	except:
