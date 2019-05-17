@@ -158,7 +158,7 @@ def new(modelDir):
 		"frequency":"900.000",
 		"polarization":"0",
 		"analysisType": "recievedPower",
-		"elevation": "digitalElevationModel",
+		"elevation": "seaLevel",
 		"erp": "30000",
 		"created":str(datetime.datetime.now())
 	}
