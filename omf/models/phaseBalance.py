@@ -20,10 +20,15 @@ modelName, template = metadata(__file__)
 tooltip = "Calculate phase unbalance and determine mitigation options."
 hidden = True
 
+def n(num):
+	return "${:,.2f}".format(num)
+
 def work(modelDir, ind):
 	''' Run the model in its directory. '''
 	o = {}
 	
+	price = float(ind['retailCost'])
+
 	with open(pJoin(modelDir, [x for x in os.listdir(modelDir) if x.endswith('.omd')][0])) as f:
 		tree = json.load(f)['tree']
 
@@ -49,23 +54,27 @@ def work(modelDir, ind):
 		o["voltageDrop"] = f.read().encode("base64")
 	# ----------------------------------------------------------------------- #
 	
-	sub_d = {
-		'base': np.nan,
-		'solar': np.nan,
-		'controlled_solar': np.nan,
-	}
-	o['service_cost'] = {
-		'load': sub_d,
-		'distributed_gen': sub_d,
-		'losses': sub_d,
-	}
-
 	# --------------------------- SERVICE TABLE ----------------------------- #
-	# o['service_table'] = ''.join([(
-	# 	"<tr>"
-	# 		"<td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{3}</td>"
-	# 	"</tr>"
-	# ).format(inverter, row['real'], row['imag'], np.nan) for inverter, row in df_inv.iterrows()])
+	price = float(ind['retailCost'])
+	sub_d = {'base': np.nan,'solar': np.nan,'controlled_solar': np.nan,}
+	o['service_cost'] = {
+		'load': {
+			'base': np.nan, 
+			'solar': n(_totals(pJoin(modelDir, 'load.csv')) * price),
+			'controlled_solar': np.nan
+		},
+		'distributed_gen': {
+			'base': '$0.00',
+			'solar': n(_totals(pJoin(modelDir, 'distributedGen.csv')) * price),
+			'controlled_solar': np.nan
+		},
+		'losses': {
+			'base': np.nan,
+			'solar': n(sum([_totals(pJoin(modelDir, 'Zlosses_'+loss+'.csv')) for loss in 
+				['transformer', 'underground_line', 'overhead_line', 'triplex_line']]) * -price),
+			'controlled_solar': np.nan
+		},
+	}
 	# ----------------------------------------------------------------------- #
 
 	
@@ -97,12 +106,6 @@ def work(modelDir, ind):
 		for motor, r in df_all_motors.iterrows()])
 	# ----------------------------------------------------------------------- #
 
-
-	print _totals(pJoin(modelDir, 'load.csv'))
-	print _totals(pJoin(modelDir, 'distributedGen.csv'))
-	for loss in ['transformer', 'underground_line', 'overhead_line', 'triplex_line']:
-		print _totals(pJoin(modelDir, 'Zlosses_'+loss+'.csv'))
-
 	return o
 
 def _addCollectors(tree):
@@ -114,9 +117,11 @@ def _addCollectors(tree):
 	all_power = 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)'
 	tree[len(tree)] = {'property': all_power, 'object': 'collector', 'group': 'class=inverter', 'limit': '0', 'file': 'distributedGen.csv'}
 	tree[len(tree)] = {'property': all_power, 'object': 'collector', 'group': 'class=load', 'limit': '0', 'file': 'load.csv'}
+	
 	# Load on motor phases
 	for phase in ['A', 'B', 'C']:
 		tree[len(tree)] = {'property':'power_' + phase, 'object':'group_recorder', 'group':'class=load AND groupid=threePhase', 'limit': '1', 'file':'threephase_VA_'+ phase +'.csv'}
+	
 	# Loss across system
 	all_losses = 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)'
 	for loss in ['transformer', 'underground_line', 'overhead_line', 'triplex_line']:
