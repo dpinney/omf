@@ -9,9 +9,11 @@ def pipInstallInOrder(pipCommandString):
 
 # Note: all installations require git to clone the omf first.
 if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu","debian"]:
+	os.system("sudo apt-get -y update") # Make sure apt-get is updated to prevent any weird package installation issues
+	os.system("sudo apt-get -y install language-pack-en") # Install English locale 
 	os.system("sudo apt-get -y install python-pip git unixodbc-dev libfreetype6-dev \
 	pkg-config python-dev python-numpy alien graphviz python-pygraphviz libgraphviz-dev \
-	python-pydot mdbtools python-tk octave libblas-dev liblapack-dev libatlas-base-dev gfortran wget")
+	python-pydot mdbtools python-tk octave libblas-dev liblapack-dev libatlas-base-dev gfortran wget splat")
 	try:
 		os.system("sudo apt-get -y install ffmpeg python-cairocffi")
 	except:
@@ -24,6 +26,9 @@ if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu
 	pipInstallInOrder("pip")
 	os.system("python setup.py develop")
 elif platform.system() == "Linux" and platform.linux_distribution()[0]=="CentOS Linux":
+	# CentOS Docker image appears to come with en_US.UTF-8 locale built-in, but we might need to install that locale in the future. That currently is
+	# not done here.
+	os.system("yum -y update") # Make sure yum is updated to prevent any weird package installation issues
 	os.system("sudo yum -y install wget git graphviz gcc xerces-c python-devel tkinter octave 'graphviz-devel.x86_64'")
 	os.system("yum --enablerepo=extras install epel-release")
 	os.system("sudo yum -y install mdbtools")
@@ -74,6 +79,7 @@ elif platform.system()=='Windows':
 	pipInstallInOrder("C:\\Python27\\python.exe -m pip")
 	os.system("C:\\Python27\\python.exe -m setup.py develop")
 elif platform.system()=="Darwin": # MacOS
+	# Might need to install en_US.UTF-8 locale, like for Ubuntu? That currently is not done in this script. macOS might already come with this locale anyway.
 	# Install homebrew
 	os.system('/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
 	os.system("brew install wget python@2 ffmpeg git graphviz octave mdbtools")

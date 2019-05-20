@@ -5,13 +5,14 @@
 
 clock {
 	starttime '2000-01-01 0:00:00';
-	stoptime '2000-01-01 0:00:20';
+	stoptime '2000-04-01 0:00:00';
 	timezone EST+5EDT;
 }
 
 module powerflow {
 	solver_method NR;
 };
+
 
 // Phase Conductor for 721: 1,000,000 AA,CN
 object underground_line_conductor { 
@@ -262,14 +263,14 @@ object underground_line {
 	 configuration lc_7231;
 }
 
-object underground_line {
-	 phases "ABC";
-	 name node709-708;
-	 from node709;
-	 to node708;
-	 length 320;
-	 configuration lc_7231;
-}
+//object underground_line {
+//	 phases "ABC";
+//	 name node709-708;
+//	 from node709;
+//	 to node708;
+//	 length 320;
+//	 configuration lc_7231;
+//}
 
 object underground_line {
 	 phases "ABC";
@@ -543,14 +544,6 @@ object node {
 }
 
 //Create loads
-object meter {
-	groupid METERTEST;
-	phases ABCD;
-	name dummy_meter1;
-	nominal_voltage 2800;
-	parent load701;
-}
-
 object load {
 	 phases "ABCD";
 	 name load701;
@@ -563,13 +556,6 @@ object load {
 	 nominal_voltage 2800;
 }
 
-object meter {
-	groupid METERTEST;
-	phases ABCD;
-	name dummy_meter2;
-	nominal_voltage 2800;
-	parent load712;
-}
 
 object load {
 	 phases "ABCD";
@@ -581,13 +567,6 @@ object load {
 	 nominal_voltage 2800;
 }
 
-object meter {
-	groupid METERTEST;
-	phases ABCD;
-	name dummy_meter3;
-	nominal_voltage 2800;
-	parent load713;
-}
 
 object load {
 	 phases "ABCD";
@@ -597,14 +576,6 @@ object load {
 	 voltage_C 0.000000+2771.281292j;
 	 constant_power_C 85000.000000+40000.000000j;
 	 nominal_voltage 2800;
-}
-
-object meter {
-	groupid METERTEST;
-	phases ABCD;
-	name dummy_meter4;
-	nominal_voltage 2800;
-	parent load714;
 }
 
 object load {
@@ -618,14 +589,6 @@ object load {
 	 nominal_voltage 2800;
 }
 
-object meter {
-	groupid METERTEST;
-	phases ABCD;
-	name dummy_meter5;
-	nominal_voltage 2800;
-	parent load718;
-}
-
 object load {
 	 phases "ABCD";
 	 name load718;
@@ -636,14 +599,6 @@ object load {
 	 nominal_voltage 2800;
 }
 
-object meter {
-	groupid METERTEST;
-	phases ABCD;
-	name dummy_meter6;
-	nominal_voltage 2800;
-	parent load720;
-}
-
 object load {
 	 phases "ABCD";
 	 name load720;
@@ -652,14 +607,6 @@ object load {
 	 voltage_C 0.000000+2771.281292j;
 	 constant_power_C 85000.000000+40000.000000j;
 	 nominal_voltage 2800;
-}
-
-object meter {
-	groupid METERTEST;
-	phases ABCD;
-	name dummy_meter7;
-	nominal_voltage 2800;
-	parent load722;
 }
 
 object load {
@@ -673,14 +620,6 @@ object load {
 	 nominal_voltage 2800;
 }
 
-object meter {
-	groupid METERTEST;
-	phases ABCD;
-	name dummy_meter8;
-	nominal_voltage 2800;
-	parent load724;
-}
-
 object load {
 	 phases "ABCD";
 	 name load724;
@@ -689,14 +628,6 @@ object load {
 	 voltage_C 0.000000+2771.281292j;
 	 constant_impedance_B 438.857143+219.428571j;
 	 nominal_voltage 2800;
-}
-
-object meter {
-	groupid METERTEST;
-	phases ABCD;
-	name dummy_meter9;
-	nominal_voltage 2800;
-	parent load725;
 }
 
 object load {
@@ -709,14 +640,6 @@ object load {
 	 nominal_voltage 2800;
 }
 
-object meter {
-	groupid METERTEST;
-	phases ABCD;
-	name dummy_meter10;
-	nominal_voltage 2800;
-	parent load727;
-}
-
 object load {
 	 phases "ABCD";
 	 name load727;
@@ -725,14 +648,6 @@ object load {
 	 voltage_C 0.000000+2771.281292j;
 	 constant_power_C 42000.000000+21000.000000j;
 	 nominal_voltage 2800;
-}
-
-object meter {
-	groupid METERTEST;
-	phases ABCD;
-	name dummy_meter11;
-	nominal_voltage 2800;
-	parent load728;
 }
 
 object load {
@@ -747,14 +662,6 @@ object load {
 	 nominal_voltage 2800;
 }
 
-object meter {
-	groupid METERTEST;
-	phases ABCD;
-	name dummy_meter12;
-	nominal_voltage 2800;
-	parent load729;
-}
-
 object load {
 	 phases "ABCD";
 	 name load729;
@@ -763,14 +670,6 @@ object load {
 	 voltage_C 0.000000+2771.281292j;
 	 constant_current_A 8.750000 -4.375000j;
 	 nominal_voltage 2800;
-}
-
-object meter {
-	groupid METERTEST;
-	phases ABCD;
-	name dummy_meter13;
-	nominal_voltage 2800;
-	parent load730;
 }
 
 object load {
@@ -783,14 +682,6 @@ object load {
 	 nominal_voltage 2800;
 }
 
-object meter {
-	groupid METERTEST;
-	phases ABCD;
-	name dummy_meter14;
-	nominal_voltage 2800;
-	parent load731;
-}
-
 object load {
 	 phases "ABCD";
 	 name load731;
@@ -799,14 +690,6 @@ object load {
 	 voltage_C 0.000000+2771.281292j;
 	 constant_impedance_B 221.915014+104.430595j;
 	 nominal_voltage 2800;
-}
-
-object meter {
-	groupid METERTEST;
-	phases ABCD;
-	name dummy_meter15;
-	nominal_voltage 2800;
-	parent load732;
 }
 
 object load {
@@ -819,14 +702,6 @@ object load {
 	 nominal_voltage 2800;
 }
 
-object meter {
-	groupid METERTEST;
-	phases ABCD;
-	name dummy_meter16;
-	nominal_voltage 2800;
-	parent load733;
-}
-
 object load {
 	 phases "ABCD";
 	 name load733;
@@ -835,14 +710,6 @@ object load {
 	 voltage_C 0.000000+2771.281292j;
 	 constant_current_A 17.708333 -8.333333j;
 	 nominal_voltage 2800;
-}
-
-object meter {
-	groupid METERTEST;
-	phases ABCD;
-	name dummy_meter17;
-	nominal_voltage 2800;
-	parent load734;
 }
 
 object load {
@@ -855,14 +722,6 @@ object load {
 	 nominal_voltage 2800;
 }
 
-object meter {
-	groupid METERTEST;
-	phases ABCD;
-	name dummy_meter18;
-	nominal_voltage 2800;
-	parent load735;
-}
-
 object load {
 	 phases "ABCD";
 	 name load735;
@@ -871,14 +730,6 @@ object load {
 	 voltage_C 0.000000+2771.281292j;
 	 constant_power_C 85000.000000+40000.000000j;
 	 nominal_voltage 2800;
-}
-
-object meter {
-	groupid METERTEST;
-	phases ABCD;
-	name dummy_meter19;
-	nominal_voltage 2800;
-	parent load736;
 }
 
 object load {
@@ -891,14 +742,6 @@ object load {
 	 nominal_voltage 2800;
 }
 
-object meter {
-	groupid METERTEST;
-	phases ABCD;
-	name dummy_meter20;
-	nominal_voltage 2800;
-	parent load737;
-}
-
 object load {
 	 phases "ABCD";
 	 name load737;
@@ -907,14 +750,6 @@ object load {
 	 voltage_C 0.000000+2771.281292j;
 	 constant_current_A 29.166667 -14.583333j;
 	 nominal_voltage 2800;
-}
-
-object meter {
-	groupid METERTEST;
-	phases ABCD;
-	name dummy_meter21;
-	nominal_voltage 2800;
-	parent load738;
 }
 
 object load {
@@ -927,14 +762,6 @@ object load {
 	 nominal_voltage 2800;
 }
 
-object meter {
-	groupid METERTEST;
-	phases ABCD;
-	name dummy_meter22;
-	nominal_voltage 2800;
-	parent load740;
-}
-
 object load {
 	 phases "ABCD";
 	 name load740;
@@ -943,14 +770,6 @@ object load {
 	 voltage_C 0.000000+2771.281292j;
 	 constant_power_C 85000.000000+40000.000000j;
 	 nominal_voltage 2800;
-}
-
-object meter {
-	groupid METERTEST;
-	phases ABCD;
-	name dummy_meter23;
-	nominal_voltage 2800;
-	parent load741;
 }
 
 object load {
@@ -963,15 +782,6 @@ object load {
 	 nominal_voltage 2800;
 }
 
-
-object meter {
-	groupid METERTEST;
-	phases ABCD;
-	name dummy_meter24;
-	nominal_voltage 2800;
-	parent load742;
-}
-
 object load {
 	 phases "ABCD";
 	 name load742;
@@ -981,14 +791,6 @@ object load {
 	 constant_impedance_A 2304.000000+1152.000000j;
 	 constant_impedance_B 221.915014+104.430595j;
 	 nominal_voltage 2800;
-}
-
-object meter {
-	groupid METERTEST;
-	phases ABCD;
-	name dummy_meter25;
-	nominal_voltage 2800;
-	parent load744;
 }
 
 object load {
@@ -1042,4 +844,13 @@ object node {
 
 object voltdump {
 	filename 37nodeVoltdump.csv;
+}
+
+object recloser {
+    name recloser_1;
+    phases "ABCN";
+    from node709;
+    to node708;
+    retry_time 1s;
+    max_number_of_tries 10000;
 }

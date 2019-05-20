@@ -11,9 +11,11 @@ COPY install.py /home/omf/
 COPY requirements.txt /home/omf/
 COPY setup.py /home/omf/
 COPY omf/scratch/GRIP/grip.py /home/omf/omf/
-RUN cd /home/omf/; python install.py
+RUN cd /home/omf/ && python install.py
 # Put the rest of the source in there.
 COPY omf /home/omf/omf
+# Install requirements with pip again because install.py doesn't do everything for some reason
+RUN cd /home/omf/ && pip install -r requirements.txt
 
 # Run the OMF
 WORKDIR /home/omf/omf

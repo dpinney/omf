@@ -24,17 +24,12 @@ from dateutil.relativedelta import *
 # Read it in.
 tree = omf.feeder.parse('test_ieee37nodeFaultTester.glm')
 tree2 = tree.copy()
-
 # Modify all line lengths.
 #for key in tree:
 #	if tree[key].get('object','') == 'overhead_line':
 #		print tree[key]['name']
 #		tree[key]['length'] = '5'
 
-# Write new output.
-#with open('trip37tinyLines.glm','w') as outFile:
-#	myStr = omf.feeder.sortedWrite(tree)
-#	outFile.write(myStr)
 
 # add fault object to tree
 simTime='2000-01-01 0:00:00'
@@ -53,14 +48,14 @@ tree[str(biggestKey*10)] = {'module':'reliability','maximum_event_length':'18000
 
 CLOCK_START = simTime
 dt_start = parser.parse(CLOCK_START)
-dt_end = dt_start + relativedelta(seconds=+20)
+dt_end = dt_start + relativedelta(months=+3)
 CLOCK_END = str(dt_end)
 CLOCK_RANGE = CLOCK_START + ',' + CLOCK_END
 if faultType != None:
 	# Add eventgen object (the fault)
-	tree[str(biggestKey*10 + 1)] = {'object':'eventgen','name':'ManualEventGen','parent':'RelMetrics', 'fault_type':faultType, 'manual_outages':faultLoc + ',' + '2000-01-01 0:00:10,2000-01-01 0:00:20'}
+	tree[str(biggestKey*10 + 1)] = {'object':'eventgen','name':'RandEvent','parent':'RelMetrics', 'target_group':'class=underground_line','fault_type':faultType}
 	# Add fault_check object
-	tree[str(biggestKey*10 + 2)] = {'object':'fault_check','name':'test_fault','check_mode':'ONCHANGE', 'eventgen_object':'ManualEventGen', 'output_filename':'Fault_check_out.txt'}
+	tree[str(biggestKey*10 + 2)] = {'object':'fault_check','name':'test_fault','check_mode':'ONCHANGE', 'eventgen_object':'RandEvent', 'output_filename':'Fault_check_out.txt'}
 	# Add reliabilty metrics object
 	tree[str(biggestKey*10 + 3)] = {'object':'metrics', 'name':'RelMetrics', 'report_file':'Metrics_Output.csv', 'module_metrics_object':'PwrMetrics', 'metrics_of_interest':'"SAIFI,SAIDI,CAIDI,ASAI,MAIFI"', 'customer_group':'"groupid=METERTEST"', 'metric_interval':'5 h', 'report_interval':'5 h'}
 	# Add power_metrics object
@@ -100,11 +95,12 @@ tree[str(biggestKey*10 + 5)] = {"object":"voltdump","filename":"voltDump.csv"}
 tree[str(biggestKey*10 + 6)] = {"object":"currdump","filename":"currDump.csv"}
 
 #add meters to the tree
-#index = 7
-#for key in tree2:
-#	if tree2[key].get('object','') in ['load']:
-#		tree[str(biggestKey*10 + index)] = {'object':'meter','groupid':'METERTEST','phases':tree2[key]['phases'],'name':tree2[key]['name'] + ' meter' ,'nominal_voltage':tree2[key]['nominal_voltage'],'parent':tree2[key]['name']}
-#		index = index + 1
+index = 7
+for key in tree2:
+	if tree2[key].get('object','') in ['load']:
+		if 'parent' not in tree2[key]:
+			tree[str(biggestKey*10 + index)] = {'object':'meter','groupid':'METERTEST','phases':tree2[key]['phases'],'name':tree2[key]['name'] + '_meter' ,'nominal_voltage':tree2[key]['nominal_voltage'],'parent':tree2[key]['name']}
+			index = index + 1
 
 # HACK: set groupid for all meters so outage stats are collected.
 noMeters = True
@@ -134,12 +130,15 @@ protDevices = dict.fromkeys(['fuse', 'recloser', 'switch', 'sectionalizer'], Fal
 protDevInitStatus = {}
 #dictionary of protective devices final states for each phase after running Gridlab-D
 protDevFinalStatus = {}
+#dictionary of protective device types to help the testing and debugging process
+protDevTypes = {}
 protDevOpModes = {}
 for key in tree:
 	obj = tree[key]
 	obType = obj.get('object')
 	if obType in protDevices.keys():
 		obName = obj.get('name', '')
+		protDevTypes[obName] = obType
 		if obType != 'fuse':
 			protDevOpModes[obName] = obj.get('operating_mode', 'INDIVIDUAL')
 		protDevices[obType] = True
@@ -175,6 +174,11 @@ for key in protDevices.keys():
 
 attachments = []
 
+# Write new output.
+with open('testgrid.glm','w') as outFile:
+	myStr = omf.feeder.sortedWrite(tree)
+	outFile.write(myStr)
+
 # Run Gridlab.
 if not workDir:
 	workDir = tempfile.mkdtemp()
@@ -200,7 +204,8 @@ for key in protDevices.keys():
 				for pos,key2 in enumerate(keys):
 					protDevFinalStatus[key2][phase] = vals[pos]
 #print protDevFinalStatus
-	#compare initial and final states of protective devices
+
+#compare initial and final states of protective devices
 #quick compare to see if they are equal
 print cmp(protDevInitStatus, protDevFinalStatus)
 #find which values changed
