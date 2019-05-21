@@ -15,6 +15,16 @@ RUN cd /home/omf/; python install.py
 # for mybinder.org
 RUN pip install --no-cache notebook
 ENV HOME=/home/omf/omf
+ARG NB_USER
+ARG NB_UID
+ENV USER ${NB_USER}
+ENV HOME /home/omf/omf
+RUN adduser --disabled-password \
+    --gecos "Default user" \
+    --uid ${NB_UID} \
+    ${NB_USER}
+WORKDIR ${HOME}
+USER ${USER}
 
 # Run the OMF
 VOLUME ["/home/omf/omf/"]
