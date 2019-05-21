@@ -49,7 +49,7 @@ def work(modelDir, ind):
 		f.write(treeString)
 	
 	voltagePlot(
-		pJoin(modelDir, "withCollectors_solarOffline.glm"), workDir=modelDir, neatoLayout=False, 
+		pJoin(modelDir, "withCollectors_solarOffline.glm"), workDir=modelDir, neatoLayout=neato, 
 		edgeCol=edgeColValue, nodeCol=nodeColValue, nodeLabs=nodeLabsValue, 
 		edgeLabs=edgeLabsValue, customColormap=customColormapValue, rezSqIn=int(ind["rezSqIn"])
 	).savefig(pJoin(modelDir,"output" + base_suffix + ".png"))
@@ -67,7 +67,7 @@ def work(modelDir, ind):
 		f.write(treeString)
 	
 	voltagePlot(
-		pJoin(modelDir, "withCollectors.glm"), workDir=modelDir, neatoLayout=False, 
+		pJoin(modelDir, "withCollectors.glm"), workDir=modelDir, neatoLayout=neato, 
 		edgeCol=edgeColValue, nodeCol=nodeColValue, nodeLabs=nodeLabsValue, 
 		edgeLabs=edgeLabsValue, customColormap=customColormapValue, rezSqIn=int(ind["rezSqIn"])
 	).savefig(pJoin(modelDir,"output" + solar_suffix + ".png"))
@@ -193,12 +193,12 @@ def new(modelDir):
 		"feederName1": "Taxonomic Feeder Rooftop Solar",
 		"modelType": modelName,
 		"runTime": "",
-		"layoutAlgorithm": "forceDirected",
+		"layoutAlgorithm": "geospatial",
 		"zipCode": "64735",
 		"retailCost": "0.05",
 		"discountRate": "7",
 		"edgeCol" : "None",
-		"nodeCol" : "VoltageImbalance",
+		"nodeCol" : "Voltage", #"VoltageImbalance",
 		"nodeLabs" : "None",
 		"edgeLabs" : "None",
 		"customColormap" : "False",
