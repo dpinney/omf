@@ -217,19 +217,19 @@
 		<p class="reportTitle postRun" style="page-break-before:always">Voltage Drop Diagram</p>
 		<!-- Tab links -->
 		<div class="tab postRun">
-		  <button class="tabLinks active" onclick="openTab(event, 'solarDiagram')">Solar</button>
-		  <button class="tabLinks" onclick="openTab(event, 'noSolarDiagram')">No Solar</button>
+		  <button class="tabLinks active" onclick="openTab(event, 'solarDiagram')">Base</button>
+		  <button class="tabLinks" onclick="openTab(event, 'noSolarDiagram')">Solar</button>
 		  <button class="tabLinks" onclick="openTab(event, 'parameterDiagram')">Solar with Parameters</button>
 		</div>
 		<!-- Tab content -->
 		<div id="phaseUnbalanceDiagrams" class="tabPlots postRun" style="display: block;">
 			<div class="tightContent tabContent solarDiagram firstTab">
-				<img id="solarUnbalanceChart" style="width:1000px;height:1000px;" />
-				<script type="text/javascript">gebi("solarUnbalanceChart").src = "data:image/png;base64," + allOutputData.voltageDrop</script>
+				<img id="base_image" style="width:1000px;height:1000px;" />
+				<script type="text/javascript">gebi("base_image").src = "data:image/png;base64," + allOutputData.base_image</script>
 			</div>
 			<div class="tightContent tabContent noSolarDiagram">
-				<img id="noSolarUnbalanceChart" style="width:1000px;height:1000px;" />
-				<script type="text/javascript">gebi("noSolarUnbalanceChart").src = "data:image/png;base64," + allOutputData.voltageDrop</script>
+				<img id="solar_image" style="width:1000px;height:1000px;" />
+				<script type="text/javascript">gebi("solar_image").src = "data:image/png;base64," + allOutputData.solar_image</script>
 			</div>
 			<div class="tightContent tabContent parameterDiagram">
 				<img id="parameterUnbalanceChart" style="width:1000px;height:1000px;" />
@@ -238,7 +238,7 @@
 			-->
 			</div>	
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Three Phase (Motor) Loads Power and Imbalance</p>
+		<p class="reportTitle postRun" style="page-break-before:always">Three Phase (Motor) Loads Power and Imbalance with Solar</p>
 		<div class="content tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
 			<table id="realImgPower">
 				<tr>
@@ -279,6 +279,12 @@
 					<td>{{allOutputDataDict['service_cost']['losses']['base']}}</td>
 					<td>{{allOutputDataDict['service_cost']['losses']['solar']}}</td>
 					<td>{{allOutputDataDict['service_cost']['losses']['controlled_solar']}}</td>
+				</tr>
+				<tr>
+					<td>VARs</td>
+					<td>{{allOutputDataDict['service_cost']['VARs']['base']}}</td>
+					<td>{{allOutputDataDict['service_cost']['VARs']['solar']}}</td>
+					<td>{{allOutputDataDict['service_cost']['VARs']['controlled_solar']}}</td>
 				</tr>
 			</table>
 		</div>

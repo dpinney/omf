@@ -1395,9 +1395,9 @@
             "voltage_B": "-3608.44-6250j", 
             "voltage_C": "-3608.44+6250j", 
             "voltage_A": "7216.88+0.0j", 
-            "constant_power_C": "0+0j", 
+            "constant_power_C": "8339.1026+3255.4855j", 
             "constant_power_B": "8339.1026+3255.4855j", 
-            "constant_power_A": "0+0j", 
+            "constant_power_A": "8339.1026+3255.4855j", 
             "nominal_voltage": "480"
         }, 
         "159": {
@@ -1409,9 +1409,9 @@
             "voltage_B": "-3608.44-6250j", 
             "voltage_C": "-3608.44+6250j", 
             "voltage_A": "7216.88+0.0j", 
-            "constant_power_C": "0+0j", 
+            "constant_power_C": "20326.5626+7935.246j", 
             "constant_power_B": "20326.5626+7935.246j", 
-            "constant_power_A": "0+0j", 
+            "constant_power_A": "20326.5626+7935.246j", 
             "nominal_voltage": "480"
         }, 
         "160": {
@@ -1423,9 +1423,9 @@
             "voltage_B": "-3608.44-6250j", 
             "voltage_C": "-3608.44+6250j", 
             "voltage_A": "7216.88+0.0j", 
-            "constant_power_C": "0+0j", 
+            "constant_power_C": "15784.7299+6162.1691j", 
             "constant_power_B": "15784.7299+6162.1691j", 
-            "constant_power_A": "0+0j", 
+            "constant_power_A": "15784.7299+6162.1691j", 
             "nominal_voltage": "480"
         }, 
         "161": {
@@ -1481,9 +1481,9 @@
             "voltage_B": "-3608.44-6250j", 
             "voltage_C": "-3608.44+6250j", 
             "voltage_A": "7216.88+0.0j", 
-            "constant_power_C": "0+0j", 
+            "constant_power_C": "9083.6653+3546.1539j", 
             "constant_power_B": "9083.6653+3546.1539j", 
-            "constant_power_A": "0+0j", 
+            "constant_power_A": "9083.6653+3546.1539j", 
             "nominal_voltage": "480"
         }, 
         "166": {
@@ -1565,9 +1565,9 @@
             "voltage_B": "-3608.44-6250j", 
             "voltage_C": "-3608.44+6250j", 
             "voltage_A": "7216.88+0.0j", 
-            "constant_power_C": "0+0j", 
+            "constant_power_C": "14370.0607+5609.8992j", 
             "constant_power_B": "14370.0607+5609.8992j", 
-            "constant_power_A": "0+0j", 
+            "constant_power_A": "14370.0607+5609.8992j", 
             "nominal_voltage": "480"
         }, 
         "174": {
@@ -1579,9 +1579,9 @@
             "voltage_B": "-3608.44-6250j", 
             "voltage_C": "-3608.44+6250j", 
             "voltage_A": "7216.88+0.0j", 
-            "constant_power_C": "0+0j", 
+            "constant_power_C": "10721.7033+4185.6243j", 
             "constant_power_B": "10721.7033+4185.6243j", 
-            "constant_power_A": "0+0j", 
+            "constant_power_A": "10721.7033+4185.6243j", 
             "nominal_voltage": "480"
         }, 
         "175": {
