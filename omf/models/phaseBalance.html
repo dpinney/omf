@@ -37,6 +37,9 @@
 		table {
 			width: 100%;
 		}
+		content {
+			margin-top: 0px;
+		}
 	</style>
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->
@@ -217,29 +220,30 @@
 		<p class="reportTitle postRun" style="page-break-before:always">Voltage Drop Diagram</p>
 		<!-- Tab links -->
 		<div class="tab postRun">
-		  <button class="tabLinks active" onclick="openTab(event, 'solarDiagram')">Base</button>
-		  <button class="tabLinks" onclick="openTab(event, 'noSolarDiagram')">Solar</button>
-		  <button class="tabLinks" onclick="openTab(event, 'parameterDiagram')">Solar with Parameters</button>
+		  <button id='firstTabButton' class="tabLinks active" onclick="openTab(event, 'baseDiagram')">Base</button>
+		  <button class="tabLinks" onclick="openTab(event, 'solarDiagram')">Solar</button>
+		  <button class="tabLinks" onclick="openTab(event, 'controlledDiagram')">Controlled</button>
 		</div>
 		<!-- Tab content -->
 		<div id="phaseUnbalanceDiagrams" class="tabPlots postRun" style="display: block;">
-			<div class="tightContent tabContent solarDiagram firstTab">
+			<div class="tightContent tabContent baseDiagram firstTab">
 				<img id="base_image" style="width:1000px;height:1000px;" />
 				<script type="text/javascript">gebi("base_image").src = "data:image/png;base64," + allOutputData.base_image</script>
 			</div>
-			<div class="tightContent tabContent noSolarDiagram">
+			<div class="tightContent tabContent solarDiagram">
 				<img id="solar_image" style="width:1000px;height:1000px;" />
 				<script type="text/javascript">gebi("solar_image").src = "data:image/png;base64," + allOutputData.solar_image</script>
 			</div>
-			<div class="tightContent tabContent parameterDiagram">
+			<div class="tightContent tabContent controlledDiagram">
 				<img id="parameterUnbalanceChart" style="width:1000px;height:1000px;" />
 				<!--
 				<script type="text/javascript">gebi("parameterUnbalanceChart").src = "data:image/png;base64," + allOutputData.voltageDrop</script>
 			-->
 			</div>	
 		</div>
+		<script>document.getElementById('firstTabButton').click();//Hack, get first tab to show.</script>
 		<p class="reportTitle postRun" style="page-break-before:always">Three Phase (Motor) Loads Power and Imbalance with Solar</p>
-		<div class="content tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
+		<div class="tightContent tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
 			<table id="realImgPower">
 				<tr>
 					<th>Name</th>
@@ -254,7 +258,7 @@
 			</table>
 		</div>
 		<p class="reportTitle postRun" style="page-break-before:always">Feeder Power Summary</p>
-		<div class="content tableContainer postRun">
+		<div class="tightContent tableContainer postRun">
 			<table id="costService">
 				<tr>
 					<th></th>
@@ -289,7 +293,7 @@
 			</table>
 		</div>
 		<p class="reportTitle postRun" style="page-break-before:always">Inverter Power Outputs</p>
-		<div class="content tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
+		<div class="tightContent tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
 			<table id="costService">
 				<tr>
 					<th>Name</th>
