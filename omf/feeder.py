@@ -48,6 +48,17 @@ def glmToOmd(glmPath, omdPath, attachFilePaths=[]):
 	with open(omdPath, 'w') as outFile:
 		json.dump(omd, outFile, indent=4)
 
+def chart(inTree, labels=False, neatoLayout=False, showPlot=False):
+	''' Return a matplotlib chart of a feeder.'''
+	nxG = treeToNxGraph(inTree)
+	return latLonNxGraph(nxG, labels=labels, neatoLayout=neatoLayout, showPlot=showPlot)
+
+def nameIndex(inTree):
+	''' Return a dictionary mapping object names to keys in the tree.
+	Massively speeds up searches if you need to do them more than once.
+	'''
+	return {inTree[key].get('name',''):key for key in inTree}
+
 def getMaxKey(inTree):
 	''' Find the largest key value in the tree. We need this because de-embedding causes noncontiguous keys. '''
 	keys = [int(x) for x in inTree.keys()]
