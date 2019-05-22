@@ -137,12 +137,17 @@
             ul.menu li:hover {
                 background:green; color:white; 
             }
+
             /**************************************************
             // Modal Dialogs
             **************************************************/
 
             #loadModalTable {
                 width: 890px;
+            }
+            #componentTable {
+                max-height: 65vh;
+                overflow: auto;
             }
             /*#milsoftInput {
                 width: 100%;
@@ -241,7 +246,8 @@
             }
             .scrollableList {
                 overflow: auto;
-                height: 240px;
+                /*height: 240px;*/
+                max-height: 65vh;
                 list-style-type: none;
                 /*margin: 0px 0px 0px 20px;*/
                 margin: 0px;
@@ -711,9 +717,12 @@
             </div>
             <div id="massAddSecondaryModal" class="modal" style="display: none;">
                 <div class="modalContent">
-                    <button data-buttonfunction="cancel" class="modalButton deleteButton" style="margin-left:5px;">&#9587;</button>
+                    <!--<button data-buttonfunction="cancel" class="modalButton deleteButton" style="margin-left:5px;">&#9587;</button>-->
                     <h3></h3>
-                    <div data-tableinsert></div>
+                    <div id="componentTable" data-tableinsert></div>
+                    <div style="text-align:center; padding: 10px;">
+                        <button data-buttonfunction="cancel" class="modalButton">Cancel</button>
+                    </div>
                 </div>
             </div>
             <div id="massEditModal" class="modal" style="display: none">
@@ -2929,9 +2938,6 @@ function saveFeeder(feeder) {
 }
 
 /**
- * TODO: This function has a lot of problems because of how the web routes are written.
- */
-/**
  * serverFeederName: The name of the feeder I want to load, e.g. "ABEC Columbia"
  * serverModelName: Either "publicFeeders" or something like "Simple Market System Indy Solar"
  * 
@@ -2964,7 +2970,9 @@ async function loadFeeder(serverFeederName, serverModelName, owner) {
     progressModal.show();
     $.ajax({
         type: "POST",
-        // {owner} is correct. {owner} is either "public" to load from public feeders or <current user> to load from the users feeders. {gThisOwner} is correct because I am overwriting THIS feeder file, which is either publicly owned or owned by the current user. {gThisOwner} cannot be {gCurrentUser} because then I can't overwrite public files as the admin.
+        // {owner} is correct. {owner} is either "public" to load from public feeders or <current user> to load from the users feeders. {gThisOwner}
+        // is correct because I am overwriting THIS feeder file, which is either publicly owned or owned by the current user. {gThisOwner} cannot be
+        // {gCurrentUser} because then I can't overwrite public files as the admin.
         url: `/loadFeeder/${serverFeederName}/${serverModelName}/${gThisModelName}/${gThisFeederNum}/${owner}/${gThisOwner}`,
         data: formData,
         processData: false,
