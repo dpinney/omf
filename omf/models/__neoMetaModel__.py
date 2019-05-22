@@ -53,7 +53,10 @@ def heavyProcessing(modelDir):
 		outData['htmlHash'] = currentHtmlHash
 		outData['pythonHash'] = currentPythonHash
 		outData['oldVersion'] = False
-		with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
+		# Raw input/output file names.
+		outData['fileNames'] = os.listdir(modelDir)
+		outData['fileNames'].append('allOutputData.json')
+		with open(pJoin(modelDir, "allOutputData.json"),"w") as outFile:
 			json.dump(outData, outFile, indent=4)
 	finally:
 		# Clean up by updating input data.
@@ -94,7 +97,7 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 		modelType = inJson["modelType"]
 		template = getattr(omf.models, modelType).template
 		allInputData = json.dumps(inJson)
-		#Get hashes for model python and html files 
+		# Get hashes for model python and html files 
 		htmlFile = open(pJoin(_myDir, modelType+".html"),"r").read()
 		currentHtmlHash = hashlib.sha256(htmlFile).hexdigest()
 		pythonFile = open(pJoin(_myDir, modelType+".py"),"r").read()
@@ -129,7 +132,7 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 		pathPrefix = _omfDir
 	else:
 		pathPrefix = ""
-
+	# Raw input output include.
 	return template.render(allInputData=allInputData, allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
 		datastoreNames=datastoreNames, modelName=modelType, allInputDataDict=inJson, allOutputDataDict=outJson)
 
