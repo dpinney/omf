@@ -114,6 +114,45 @@ def fullyDeEmbed(glmTree):
 		_deEmbedOnce(glmTree)
 		lenDiff = len(glmTree) - currLen
 
+def _mergeContigLinesOnce(tree):
+  ''' helper function for mergeContigLines.'''
+  obs = tree.values()
+  n2k = nameIndex(tree)
+  for o in obs:
+	if 'to' in o:
+		top = o
+		node = tree[n2k[o['to']]]
+		allBottoms = []
+		for o2 in obs:
+			if o2.get('from', None) == node['name']:
+				allBottoms.append(o2)
+		# print 'TOPLINE', o['name'], 'NODE', node['name'], len(allBottoms)
+		if len(allBottoms) == 1:
+			bottom = allBottoms[0]
+			if top.get('configuration','NTC') == bottom.get('configuration','NBC'):
+				# print 'MATCH!', top['name'], top['length'], bottom['name'], bottom['length'], 'TOTAL', float(top['length']) + float(bottom['length'])
+				# delete node and bottom line, make top line length = sum of both lines and connect to bottom to.
+				if ('length' in top) and ('length' in bottom):
+					newLen = float(top['length']) + float(bottom['length'])
+					try:
+						topTree = tree[n2k[o['name']]]
+						topTree['length'] = str(newLen)
+						topTree['to'] = bottom['to']
+						del tree[n2k[node['name']]]
+						del tree[n2k[bottom['name']]]
+					except:
+						continue #key weirdness
+
+def mergeContigLines(tree):
+	''' merge all lines that are across nodes and have the same config
+	topline --to-> node <-from-- bottomline'''
+	removedKeys = 1
+	while removedKeys != 0:
+		treeKeys = len(tree.keys())
+		_mergeContigLinesOnce(tree)
+		removedKeys = treeKeys - len(tree.keys())
+		# print 'Objects merged: ', 2*removedKeys
+
 def attachRecorders(tree, recorderType, keyToJoin, valueToJoin):
 	''' Walk through a tree an and attach Gridlab recorders to the indicated type of node.'''
 	# HACK: the biggestKey assumption only works for a flat tree or one that has a flat node for the last item...
@@ -556,6 +595,8 @@ def _tests():
 		tree = json.load(inFile)['tree']
 	nxG = treeToNxGraph(tree)
 	x = latLonNxGraph(nxG)
+	# Contig line merging test
+	mergeContigLines(tree)
 
 if __name__ == '__main__':
 	_tests()
