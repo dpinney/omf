@@ -1,0 +1,28 @@
+Actual behavior: Program prints correct values if a fault is not added, 
+but if a fault is added, it prints only zeros in dump files.
+Steps to reproduce: Run hello.py.
+Expected behavior: Non-zero values like when the fault is not added.
+Workaround/fix: Setting fault to show up after 10 second simulation warm-up.
+Discussion:
+	Why does this fix the problem? I assume it has something to do with when the dump files actually measure the values on the different nodes? 
+
+Actual behavior: crash with grandparent warning when running trip37 with meter parented to load parented to node.
+Steps to reproduce: Run hello.py.
+Expected behavior: no crash.
+Workaround/fix: don't parent meters to nodes parented to other things. GridLAB-D doesn't support this, per error message.
+Dicussion:
+	What does it mean if a load is attached to a node by parenting it to a node?  This is the cause of the grandchildren error when we  try to add meters using python code. [Parenting is a way to reduce the number of components in a model. It's a convenience feature for modelers.]
+
+Actual behavior: Metrics_Output states that all meters are affected by the manually generated fault from 0:0:10-0:0:20 TLG on node713-704.
+Similarly, generating random faults affects the entire system.
+Steps to reproduce: run hello.py with manual fault generator set to the desired fault or with random fault generator and the system set to run for a while (maybe 3 months?)
+Expected behavior: other faults don't necessarily affect every meter.
+Workaround/fix: add a recloser or a fuse manually to the glm file.
+Discussion:
+	Why is the entire system tripped when any fault is generated and not just things downstream from the fault? Note: the system is assumed to have substation level breakers or feeder protection.
+
+Actual behavior: Metrics_output is not generating any data and Fault_check_out is empty when the system is run from 01/01/2001 0:0:00 to 01/01/2001 0:0:20.
+Expected behavior: some data is generated.
+Workaround/fix: Allow the system to run for longer, so there is more of a chance that any random faults can occur. For instance, running it for 3 months is a fairly useful way of generating data.
+Discussion:
+	Random fault generation on Gridlab-D occurs separate from the amount of time the system runs. If they do not overlap, there may be very few or no faults generated.

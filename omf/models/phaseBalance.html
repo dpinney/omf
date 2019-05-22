@@ -33,13 +33,18 @@
 
 		.tabcontent {
 		    display: none;
-		} 
+		}
+		table {
+			width: 100%;
+		}
+		content {
+			margin-top: 0px;
+		}
 	</style>
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
-		<script src="{{pathPrefix}}/static/heatmap.src.js"></script>
 	<script src="{{pathPrefix}}/static/d3.v3.js"></script>
 	<!-- Data  Imports -->
 	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
@@ -113,26 +118,6 @@
 				</select>
 			</div>
 			<div class="wideInput">
-				<p class="inputSectionHeader">Solar System Parameters</p>
-			</div>
-			<hr>
-			<div class="shortInput">
-				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
-				<input type="text" id="zipCode" name="zipCode" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">System Size (kWp-DC)<span class="classic">DC output rating of the solar panels in kilowatts.</span></label>
-				<input type="text" id="systemSize" name="systemSize" pattern="^\d+\.?\d*$" required="required">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Inverter Size (kW-AC)<span class="classic">Size of the total inverters in kW-AC for the system. Used to determine energy clipping in the Hourly System Average Power Output graph.</span></label>
-				<input type="text" id="inverterSize" name="inverterSize" required="required" pattern="^\d+\.?\d*?$">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Inverter &amp; Transformer Efficiency (%)<span class="classic">Combined Inverter and Transformer Efficiency in converting DC power to AC power. The Inverter efficiency can be obtained from the Weighted Efficiency (CEC) Method.</span></label>
-				<input type="text" id="inverterEfficiency" name="inverterEfficiency" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
-			</div>
-			<div class="wideInput">
 				<p class="inputSectionHeader">Financial Variables</p>
 			</div>
 			<hr>
@@ -148,6 +133,10 @@
 				<p class="inputSectionHeader">Controller Parameters</p>
 			</div>
 			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
+				<input type="text" id="zipCode" name="zipCode" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
+			</div>
 			<div class="shortInput">
 				<label class="tooltip">Parameter 1<span class="classic">TBD.</span></label>
 				<input type="text" id="parameterOne" name="parameterOne" pattern="^\d+\.?\d*$" required="required"/>
@@ -231,61 +220,92 @@
 		<p class="reportTitle postRun" style="page-break-before:always">Voltage Drop Diagram</p>
 		<!-- Tab links -->
 		<div class="tab postRun">
-		  <button class="tabLinks active" onclick="openTab(event, 'solarDiagram')">Solar</button>
-		  <button class="tabLinks" onclick="openTab(event, 'noSolarDiagram')">No Solar</button>
-		  <button class="tabLinks" onclick="openTab(event, 'parameterDiagram')">Solar with Parameters</button>
+		  <button id='firstTabButton' class="tabLinks active" onclick="openTab(event, 'baseDiagram')">Base</button>
+		  <button class="tabLinks" onclick="openTab(event, 'solarDiagram')">Solar</button>
+		  <button class="tabLinks" onclick="openTab(event, 'controlledDiagram')">Controlled</button>
 		</div>
 		<!-- Tab content -->
 		<div id="phaseUnbalanceDiagrams" class="tabPlots postRun" style="display: block;">
-			<div class="tightContent tabContent solarDiagram firstTab">
-				<img id="solarUnbalanceChart" style="width:1000px;height:1000px;" />
-				<script type="text/javascript">gebi("solarUnbalanceChart").src = "data:image/png;base64," + allOutputData.voltageDrop</script>
+			<div class="tightContent tabContent baseDiagram firstTab">
+				<img id="base_image" style="width:1000px;height:1000px;" />
+				<script type="text/javascript">gebi("base_image").src = "data:image/png;base64," + allOutputData.base_image</script>
 			</div>
-			<div class="tightContent tabContent noSolarDiagram">
-				<img id="noSolarUnbalanceChart" style="width:1000px;height:1000px;" />
-				<script type="text/javascript">gebi("noSolarUnbalanceChart").src = "data:image/png;base64," + allOutputData.voltageDrop</script>
+			<div class="tightContent tabContent solarDiagram">
+				<img id="solar_image" style="width:1000px;height:1000px;" />
+				<script type="text/javascript">gebi("solar_image").src = "data:image/png;base64," + allOutputData.solar_image</script>
 			</div>
-			<div class="tightContent tabContent parameterDiagram">
+			<div class="tightContent tabContent controlledDiagram">
 				<img id="parameterUnbalanceChart" style="width:1000px;height:1000px;" />
 				<!--
 				<script type="text/javascript">gebi("parameterUnbalanceChart").src = "data:image/png;base64," + allOutputData.voltageDrop</script>
 			-->
-			</div>		
+			</div>	
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Three Phase Loads Real and Imaginary Power</p>
-		<div class="content tableContainer postRun">
+		<script>document.getElementById('firstTabButton').click();//Hack, get first tab to show.</script>
+		<p class="reportTitle postRun" style="page-break-before:always">Three Phase (Motor) Loads Power and Imbalance with Solar</p>
+		<div class="tightContent tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
 			<table id="realImgPower">
-			<tr> <th>Phase A Real</th> <th>Phase A Img;</th> <th>Phase B Real</th> <th>Phase B Img</th> <th>Phase C Real;</th> <th>Phase C Img</th></tr>
-			<tr> 
-				<td id = 'realA'></td>
-				<script type="text/javascript">
-					gebi('realA').innerHTML = allOutputData['threePhase']['sum(power_A.real)']
-				</script> 
-				<td id = 'imgA'></td>
-				<script type="text/javascript">
-					gebi('imgA').innerHTML = allOutputData['threePhase']['sum(power_A.imag)']
-				</script> 
-				<td id = 'realB'></td>
-				<script type="text/javascript">
-					gebi('realB').innerHTML = allOutputData['threePhase']['sum(power_B.real)']
-				</script> 
-				<td id = 'imgB'></td>
-				<script type="text/javascript">
-					gebi('imgB').innerHTML = allOutputData['threePhase']['sum(power_B.imag)']
-				</script>
-				<td id = 'realC'></td>
-				<script type="text/javascript">
-					gebi('realC').innerHTML = allOutputData['threePhase']['sum(power_C.real)']
-				</script> 
-				<td id = 'imgC'></td>
-				<script type="text/javascript">
-					gebi('imgC').innerHTML = allOutputData['threePhase']['sum(power_C.imag)']
-				</script> 
-			</tr>
+				<tr>
+					<th>Name</th>
+					<th>A Pow</th>
+					<th>A VAR</th>
+					<th>B Pow</th>
+					<th>B VAR</th>
+					<th>C Pow</th>
+					<th>C VAR</th>
+				</tr>
+				{{allOutputDataDict['motor_table']}}
 			</table>
 		</div>
-
-	<p class="reportTitle postRun">Simulation Location</p>
+		<p class="reportTitle postRun" style="page-break-before:always">Feeder Power Summary</p>
+		<div class="tightContent tableContainer postRun">
+			<table id="costService">
+				<tr>
+					<th></th>
+					<th>Base Case</th>
+					<th>With Solar</th>
+					<th>Controlled Solar</th>
+				</tr>
+				<tr>
+					<td>Load</td>
+					<td>{{allOutputDataDict['service_cost']['load']['base']}}</td>
+					<td>{{allOutputDataDict['service_cost']['load']['solar']}}</td>
+					<td>{{allOutputDataDict['service_cost']['load']['controlled_solar']}}</td>
+				</tr>
+				<tr>
+					<td>Distributed Generation</td>
+					<td>{{allOutputDataDict['service_cost']['distributed_gen']['base']}}</td>
+					<td>{{allOutputDataDict['service_cost']['distributed_gen']['solar']}}</td>
+					<td>{{allOutputDataDict['service_cost']['distributed_gen']['controlled_solar']}}</td>
+				</tr>
+				<tr>
+					<td>Losses</td>
+					<td>{{allOutputDataDict['service_cost']['losses']['base']}}</td>
+					<td>{{allOutputDataDict['service_cost']['losses']['solar']}}</td>
+					<td>{{allOutputDataDict['service_cost']['losses']['controlled_solar']}}</td>
+				</tr>
+				<tr>
+					<td>VARs</td>
+					<td>{{allOutputDataDict['service_cost']['VARs']['base']}}</td>
+					<td>{{allOutputDataDict['service_cost']['VARs']['solar']}}</td>
+					<td>{{allOutputDataDict['service_cost']['VARs']['controlled_solar']}}</td>
+				</tr>
+			</table>
+		</div>
+		<p class="reportTitle postRun" style="page-break-before:always">Inverter Power Outputs</p>
+		<div class="tightContent tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
+			<table id="costService">
+				<tr>
+					<th>Name</th>
+					<th>Uncontrolled P</th>
+					<th>Uncontrolled Q</th>
+					<th>Controlled P</th>
+					<th>Controlled Q</th>
+				</tr>
+				{{allOutputDataDict['inverter_table']}}
+			</table>
+		</div>
+		<p class="reportTitle postRun">Simulation Location</p>
 		<div id="studyDetail" class="tightContent postRun detailsContainer" style="position: relative">
 			<div id="mapHere"></div>
 			<script type="text/javascript">

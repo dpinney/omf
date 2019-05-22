@@ -1,7 +1,7 @@
 from __future__ import division
 from pyproj import Proj, transform
 import webbrowser
-import omf, json, warnings, networkx as nx, matplotlib, numpy as np, os, shutil, math, requests, tempfile
+import omf, json, warnings, networkx as nx, matplotlib, numpy as np, os, shutil, math, requests, tempfile, random
 from matplotlib import pyplot as plt
 from omf.feeder import _obToCol
 from scipy.spatial import ConvexHull
@@ -61,6 +61,7 @@ def hullOfOmd(pathToOmdFile, conversion=False):
 		with open(pathToOmdFile) as inFile:
 			tree = json.load(inFile)['tree']
 		nxG = omf.feeder.treeToNxGraph(tree)
+		nxG = graphValidator(pathToOmdFile, nxG)
 	#use conversion for testing other feeders
 	if conversion:
 		nxG = convertOmd(pathToOmdFile)
@@ -89,6 +90,7 @@ def omdGeoJson(pathToOmdFile, conversion=False):
 		tree = json.load(inFile)['tree']
 	nxG = omf.feeder.treeToNxGraph(tree)
 	#use conversion for testing other feeders
+	nxG = graphValidator(pathToOmdFile, nxG)
 	if conversion:
 		nxG = convertOmd(pathToOmdFile)
 	geoJsonDict = {
@@ -162,6 +164,7 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat, openBrowser=False, conversion=
 			with open(pathToOmdFile) as inFile:
 				tree = json.load(inFile)['tree']
 			nxG = omf.feeder.treeToNxGraph(tree)
+			nxG = graphValidator(pathToOmdFile, nxG)
 		#use conversion for testing other feeders
 		if conversion:
 			nxG = convertOmd(pathToOmdFile)
@@ -219,6 +222,7 @@ def simplifiedOmdShape(pathToOmdFile, conversion=False):
 		with open(pathToOmdFile) as inFile:
 			tree = json.load(inFile)['tree']
 		nxG = omf.feeder.treeToNxGraph(tree)
+		nxG = graphValidator(pathToOmdFile, nxG)
 		simplifiedGeoDict = hullOfOmd(pathToOmdFile)
 	#use conversion for testing other feeders
 	if conversion:
@@ -307,6 +311,7 @@ def shortestPathOmd(pathToOmdFile, sourceObjectName, targetObjectName):
 	with open(pathToOmdFile) as inFile:
 		tree = json.load(inFile)['tree']
 	nxG = omf.feeder.treeToNxGraph(tree)
+	nxG = graphValidator(pathToOmdFile, nxG)
 	tracePath = nx.bidirectional_shortest_path(nxG, sourceObjectName, targetObjectName)
 	return tracePath
 
@@ -370,6 +375,7 @@ def rasterTilesFromOmd(pathToOmdFile, outputPath, conversion=False):
 			tree = json.load(inFile)['tree']
 		#networkx graph to work with
 		nxG = omf.feeder.treeToNxGraph(tree)
+		nxG = graphValidator(pathToOmdFile, nxG)
 	#use conversion for testing other feeders
 	if conversion:
 		nxG = convertOmd(pathToOmdFile)
@@ -456,24 +462,72 @@ def convertOmd(pathToOmdFile):
 		tree = json.load(inFile)['links']
 	nxG = nx.Graph()
 	for key in tree:
-		nxG.add_edge(key['source']['name'], key['target']['name'])
-		nxG.node[key['source']['name']]['pos'] = (float(key['source']['y']), float(key['source']['x']))
-		nxG.node[key['target']['name']]['pos'] = (float(key['target']['y']), float(key['target']['x']))
-		nxG.node[key['source']['name']]['type'] = key['source']['objectType']
-		nxG.node[key['target']['name']]['type'] = key['target']['objectType']
-		
-	latitude_min = min([nxG.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
-	longitude_min = min([nxG.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
-	latitude_max = max([nxG.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
-	longitude_max = max([nxG.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
-	#Sample new centers
-	latitudeCenter = 32
-	longitudeCenter = -102
-	#change the 
+		#Account for nodes that are missing names when creating edges
+		try:
+			sourceEdge = key['source']['name']
+		except KeyError:
+			try:
+				sourceEdge = str(key['target']['name']) + ' Source'
+			except KeyError:
+				sourceEdge = str(key['source']) + ' Missing Name'
+		try:
+			targetEdge = key['target']['name']
+		except KeyError:
+			try:
+				targetEdge = key['target']['name'] + ' Target'
+			except KeyError:
+				targetEdge = str(key['target']) + ' Missing Name'
+
+		#nxG.add_edge(key['source']['name'], key['target']['name'])
+		nxG.add_edge(sourceEdge, targetEdge)
+		nxG.node[sourceEdge]['pos'] = (float(key['source']['y']), float(key['source']['x']))
+		nxG.node[targetEdge]['pos'] = (float(key['target']['y']), float(key['target']['x']))
+		try:
+			nxG.node[sourceEdge]['type'] = key['source']['objectType']
+		except KeyError:
+			nxG.node[sourceEdge]['type'] = 'Undefined'
+		try:
+			nxG.node[targetEdge]['type'] = key['target']['objectType']
+		except KeyError:
+			nxG.node[targetEdge]['type'] = 'Undefined'
 	for nodeToChange in nx.get_node_attributes(nxG, 'pos'):
-		nxG.node[nodeToChange]['pos'] = (latitudeCenter + nxG.node[nodeToChange]['pos'][1]/latitude_max, longitudeCenter 
-										+ nxG.node[nodeToChange]['pos'][0]/longitude_max)
+		#nxG.node[nodeToChange]['pos'] = (latitudeCenter + nxG.node[nodeToChange]['pos'][1]/latitude_max, longitudeCenter 
+		#								+ nxG.node[nodeToChange]['pos'][0]/longitude_max)
+		#print(nxG.node[nodeToChange]['pos'][1], nxG.node[nodeToChange]['pos'][0])
+		#print(statePlaneToLatLon(nxG.node[nodeToChange]['pos'][1], nxG.node[nodeToChange]['pos'][0]))
+		nxG.node[nodeToChange]['pos'] = statePlaneToLatLon(nxG.node[nodeToChange]['pos'][1], nxG.node[nodeToChange]['pos'][0])
 	return nxG
+
+def graphValidator(pathToOmdFile, inGraph):
+	'''If the nodes/edges positions are not in the tree, the spurces and targets in the links key of the omd.json are used. '''
+	try:
+		node_positions = {nodewithPosition: inGraph.node[nodewithPosition]['pos'] for nodewithPosition  in nx.get_node_attributes(inGraph, 'pos')}
+		for edge in nx.edges(inGraph):
+			validator = (node_positions[edge[0]] or nxG.node[edge[1]])
+	except KeyError:
+		try:
+			nxG = latLonValidation(convertOmd(pathToOmdFile))
+		except ValueError:
+			#No nodes have positions, so create random ones
+			nxG = inGraph
+			for nodeToChange in nxG.node:
+				nxG.node[nodeToChange]['pos'] = (random.uniform(36.9900, 38.8700), random.uniform(-102.0500,-94.5900))
+		return nxG
+	nxG = latLonValidation(inGraph)
+	return nxG
+
+def latLonValidation(inGraph):
+	'''Checks if an omd has invalid latlons, and if so, converts to stateplane coordinates or generates random values '''
+	#try:
+	latitude_min = min([inGraph.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(inGraph, 'pos')])
+	longitude_min = min([inGraph.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(inGraph, 'pos')])
+	latitude_max = max([inGraph.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(inGraph, 'pos')])
+	longitude_max = max([inGraph.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(inGraph, 'pos')])
+	if latitude_min < -180 or latitude_max > 180 or longitude_min < -90 or longitude_max > 90:
+		for nodeToChange in nx.get_node_attributes(inGraph, 'pos'):
+			inGraph.node[nodeToChange]['pos'] = statePlaneToLatLon(inGraph.node[nodeToChange]['pos'][1], inGraph.node[nodeToChange]['pos'][0])
+	return inGraph
+
 
 def openInBrowser(pathToFile):
 	'''Helper function for mapOmd. Try popular web browsers first because png might open in native application. Othwerwise use default program as fallback'''
@@ -491,8 +545,7 @@ def showOnMap(geoJson):
 	with open(pJoin(tempDir,'geoJsonFeatures.js'),"w") as outFile:
 		outFile.write("var geojson =")
 		json.dump(geoJson, outFile, indent=4)
-	webbrowser.open_new(pJoin(tempDir,'geoJsonMap.html'))
-
+	webbrowser.open('file://' + pJoin(tempDir,'geoJsonMap.html'))
 
 def _tests():
 	e, n = 249.2419752733258, 1186.1488466689188
@@ -504,19 +557,20 @@ def _tests():
 	#mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html', openBrowser=True, conversion=False)
 	#showOnMap(hullOfOmd('static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
 	#showOnMap(simplifiedOmdShape('static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
-	#showOnMap(omdGeoJson('static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
+	# showOnMap(omdGeoJson('static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
 	#shortestPathOmd('static/publicFeeders/Olin Barre LatLon.omd', 'node62474203981T62474203987_B', 'node1667616792')
 	#rasterTilesFromOmd('static/publicFeeders/Olin Barre LatLon.omd', 'scratch/omdTests/tiles', conversion=False)
 	#serveTiles('scratch/omdTests/tiles')
-
 	#Testing larger feeder using temporary conversion method for valid lat/lons from sources/targets
 	#mapOmd('static/publicFeeders/Autocli Alberich Calibrated.omd', 'testOutput', 'png', openBrowser=True, conversion=True)
-	#mapOmd('static/publicFeeders/Autocli Alberich Calibrated.omd', 'testOutput', 'html', openBrowser=True, conversion=True)
+	#ABEC Frank LO Houses works with conversion on or off
+	#mapOmd('static/publicFeeders/Autocli Alberich Calibrated.omd', 'testOutput', 'html', openBrowser=True, conversion=False)
+	#mapOmd('static/publicFeeders/ABEC Frank LO Houses.omd', 'testOutput', 'html', openBrowser=True, conversion=False)
 	#showOnMap(hullOfOmd('static/publicFeeders/Autocli Alberich Calibrated.omd', conversion=True))
-	#showOnMap(simplifiedOmdShape('static/publicFeeders/Autocli Alberich Calibrated.omd', conversion=True))
-	#showOnMap(omdGeoJson('static/publicFeeders/Autocli Alberich Calibrated.omd', conversion=True))
+	#showOnMap(simplifiedOmdShape('static/publicFeeders/ABEC Frank LO Houses.omd', conversion=False))
+	# showOnMap(omdGeoJson('static/publicFeeders/ABEC Frank LO Houses.omd', conversion=False))
 	#rasterTilesFromOmd('static/publicFeeders/Autocli Alberich Calibrated.omd', 'scratch/omdTests/autoclitiles', conversion=True)
-
+	#print(convertOmd('static/publicFeeders/Autocli Alberich Calibrated.omd'))
 	# openInGoogleMaps(lat, lon)
 
 if __name__ == '__main__':

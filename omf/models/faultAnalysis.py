@@ -207,12 +207,15 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 	protDevInitStatus = {}
 	#dictionary of protective devices final states for each phase after running Gridlab-D
 	protDevFinalStatus = {}
+	#dictionary of protective device types to help the testing and debugging process
+	protDevTypes = {}
 	protDevOpModes = {}
 	for key in tree:
 		obj = tree[key]
 		obType = obj.get('object')
 		if obType in protDevices.keys():
 			obName = obj.get('name', '')
+			protDevTypes[obName] = obType
 			if obType != 'fuse':
 				protDevOpModes[obName] = obj.get('operating_mode', 'INDIVIDUAL')
 			protDevices[obType] = True
@@ -418,6 +421,8 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 	edgeTupleNames = {}
 	#edgeTupleFaultNames = dict with to-from tuples as keys and the name of the Fault as the only value
 	edgeTupleFaultNames = {}
+	#edgeTupleProtDevs = dict with to-from tuples as keys and the initial of the type of protective device as the value
+	edgeTupleProtDevs = {}
 	#linePhases = dictionary containing the number of phases on each line for line-width purposes
 	linePhases = {}
 	edgePower = {}
@@ -425,6 +430,7 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 		for obj in tree.values():
 			obname = obj.get('name','').replace('"','')
 			if obname == edge:
+				objType = obj.get('object')
 				nodeFrom = obj.get('from')
 				nodeTo = obj.get('to')
 				coord = (nodeFrom, nodeTo)
@@ -446,6 +452,25 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 				if (numPhases < 1) or (numPhases > 3):
 					numPhases = 1
 				linePhases[edge] = numPhases
+				protDevLabel = ""
+				protDevBlownStr = ""
+				if objType in protDevices.keys():
+					for phase in protDevFinalStatus[obname].keys():
+						if objType == 'fuse':
+							if protDevFinalStatus[obname][phase] == "BLOWN":
+								protDevBlownStr = "!"
+						else:
+							if protDevFinalStatus[obname][phase] == "OPEN":
+								protDevBlownStr = "!"
+				if objType == 'fuse':
+					protDevLabel = 'F'
+				elif objType == 'switch':
+					protDevLabel = 'S'
+				elif objType == 'recloser':
+					protDevLabel = 'R'
+				elif objType == 'sectionalizer':
+					protDevLabel = 'X'
+				edgeTupleProtDevs[coord] = protDevLabel + protDevBlownStr
 	#define which dict will be used for edge line color
 	edgeColors = edgeValsPU
 	#define which dict will be used for edge label
@@ -536,6 +561,8 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 			else:
 				edgeLabels = None
 				print "WARNING: edgeCol property cannot be set to None when edgeLabs property is set to 'Value'"
+		elif edgeLabs == "ProtDevs":
+			edgeLabels = edgeTupleProtDevs
 		else:
 			edgeLabs = None
 			print "WARNING: edgeLabs property must be either 'Name', 'Value', or None"
@@ -603,7 +630,7 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 		plt.colorbar()
 	# Also draw a table.
 	#TODO: factor this out and in to work().
-	table = drawTable(initialStates=protDevInitStatus, finalStates=protDevFinalStatus)
+	table = drawTable(initialStates=protDevInitStatus, finalStates=protDevFinalStatus, deviceTypes=protDevTypes)
 	return voltChart, table
 
 def new(modelDir):
@@ -682,13 +709,14 @@ def _testingPlot():
 	chart.savefig(PREFIX + "YO_WHATS_GOING_ON.png")
 	# plt.show()
 
-def drawTable(initialStates=None, finalStates=None):
+def drawTable(initialStates=None, finalStates=None, deviceTypes=None):
 	#return self.log
 	html_str = """
 		<table cellpadding="0" cellspacing="0">
 			<thead>
 				<tr>
 					<th>Protective Device Name</th>
+					<th>Device Type</th>
 					<th>Initial States</th>
 					<th>Final States</th>
 					<th>Changes</th>
@@ -697,6 +725,17 @@ def drawTable(initialStates=None, finalStates=None):
 			<tbody>"""
 	for device in initialStates.keys():
 		row_str = "<tr><td>"+device+"</td><td>"
+		devType = deviceTypes[device]
+		if devType == 'fuse':
+			row_str += "Fuse (F)</td><td>"
+		elif devType == 'switch':
+			row_str += "Switch (S)</td><td>"
+		elif devType == 'recloser':
+			row_str += "Recloser (R)</td><td>"
+		elif devType == 'sectionalizer':
+			row_str += "Sectionalizer (X)</td><td>"
+		else:
+			row_str += "Unknown</td><td>"
 		for phase in initialStates[device].keys():
 			row_str += "Phase " + phase + " = " + initialStates[device][phase] + "</br>"
 		row_str += "</td><td>"

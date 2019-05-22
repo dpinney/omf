@@ -26,6 +26,9 @@ modelName, template = metadata(__file__)
 tooltip = "Model extreme weather and determine optimal investment for distribution resiliency."
 hidden = False
 
+# Constant for converting map-feet to lat-lon for GFM:
+HACK_SCALING_CONSTANT = 5000.0
+
 class HazardField(object):
 	''' Object to modify a hazard field from an .asc file. '''
 
@@ -89,11 +92,12 @@ class HazardField(object):
 		pass
 
 
-	def drawHeatMap(self):
+	def drawHeatMap(self, show=True):
 		''' Draw heat map-color coded image map with user-defined boundaries and cell-size. '''
 		heatMap = plt.imshow(
 			self.hazardObj['field'],
-			cmap = 'hot',
+			cmap = 'gray',
+			alpha = 0.2,
 			interpolation = 'nearest',
 			extent = [
 				self.hazardObj["xllcorner"],
@@ -104,7 +108,8 @@ class HazardField(object):
 			aspect='auto')
 		#plt.gca().invert_yaxis() This isn't needed anymore?
 		plt.title("Hazard Field")
-		plt.show()
+		if show:
+			plt.show()
 
 	def scaleField(self, scaleFactor):
 		''' Numerically scale the field with user defined scaling factor. ''' 
@@ -124,19 +129,6 @@ def _testHazards():
 	hazard.randomField()
 	# hazard.exportHazardObj("modWindFile.asc")
 	# hazard.drawHeatMap()
-
-def gen_dict_extract(key, var):
-    if hasattr(var,'iteritems'):
-        for k, v in var.iteritems():
-            if k == key:
-                yield v
-            if isinstance(v, dict):
-                for result in gen_dict_extract(key, v):
-                    yield result
-            elif isinstance(v, list):
-                for d in v:
-                    for result in gen_dict_extract(key, d):
-                        yield result
 
 def getNodePhases(obj, maxRealPhase):
 	''' Convert phase info in GridLAB-D obj (e.g. ABC) to GFM phase format (e.g. [True,True,True].'''
@@ -211,8 +203,8 @@ def convertToGFM(gfmInputTemplate, feederModel):
 				'id': '', #*
 				# 'min_voltage': 0.8, # in p.u.
 				# 'max_voltage': 1.2, # in p.u.
-				'y': float(bus.get('latitude',0.0))/5000.0,
-				'x': float(bus.get('longitude',0.0))/5000.0,
+				'y': float(bus.get('latitude',0.0))/HACK_SCALING_CONSTANT,
+				'x': float(bus.get('longitude',0.0))/HACK_SCALING_CONSTANT,
 				# 'has_phase': [True, True, True],
 				# 'ref_voltage': [1.0, 1.0, 1.0]
 				# 'ref_voltage': 1.0 # From github.
@@ -226,8 +218,8 @@ def convertToGFM(gfmInputTemplate, feederModel):
 					# HACK: sometimes keys are strings. Sometimes not.
 					if int(key) == busNode.get('treeIndex',0):
 						# HACK: nice coords for GFM which wants lat/lon.
-						newBus['y'] = busNode.get('y')/5000.0
-						newBus['x'] = busNode.get('x')/5000.0
+						newBus['y'] = busNode.get('y')/HACK_SCALING_CONSTANT
+						newBus['x'] = busNode.get('x')/HACK_SCALING_CONSTANT
 	# Load creation:
 	objToFind = ['load']
 	phaseNames = {'A':0, 'B':1, 'C':2}
@@ -322,7 +314,6 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 	# Load required data.
 	tree = feederJson.get("tree",{})
 	links = feederJson.get("links",{})
-	
 	# Generate lat/lons from nodes and links structures.
 	for link in links:
 		for typeLink in link.keys():
@@ -361,14 +352,16 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 		pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
 	else:
 		pos = {n:inGraph.node[n].get('pos',(0,0)) for n in inGraph}
+	# Rescale using the magic number.
+	for k in pos:
+		newPos = (pos[k][0]/HACK_SCALING_CONSTANT, pos[k][1]/HACK_SCALING_CONSTANT)
+		pos[k] = newPos
 	# Draw all the edges
-
 	selected_labels = {}
 	for e in inGraph.edges():
 		edgeName = inGraph.edge[e[0]][e[1]].get('name')
 		if edgeName in edgeLabelsToAdd.keys():
 			selected_labels[e] = edgeLabelsToAdd[edgeName]
-
 		edgeColor = 'black'
 		if edgeName in damageDict:
 			if damageDict[edgeName] == 1:
@@ -386,27 +379,24 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 		if ePhases==3:
 			standArgs.update({'width':5})
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
-			standArgs.update({'width':3,'edge_color':'white'})
+			standArgs.update({'width':3,'edge_color':'gainsboro'})
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
 			standArgs.update({'width':1,'edge_color':edgeColor})
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
 		if ePhases==2:
 			standArgs.update({'width':3})
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
-			standArgs.update({'width':1,'edge_color':'white'})
+			standArgs.update({'width':1,'edge_color':'gainsboro'})
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
 		else:
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
-		
 	# Get swing buses.
 	green_list = []
 	for node in tree:
 		if 'bustype' in tree[node] and tree[node]['bustype'] == 'SWING':
 			green_list.append(tree[node]['name'])
-
-	isFirst = {'green': False, 'red': False, 'blue': False, 'grey': False}
-	nodeLabels = {'green': 'Swing Buses', 'red': 'Critical Loads', 'blue': 'Regular Loads', 'grey': 'Other'}
-
+	isFirst = {'green': False, 'red': False, 'blue': False, 'grey': False, 'dimgrey': False}
+	nodeLabels = {'green': 'Swing Bus', 'red': 'Critical Load', 'blue': 'Load', 'dimgrey':'New Generator', 'grey': 'Other'}
 	# Draw nodes and optional labels.
 	for key in pos.keys():
 		isLoad = key[2:6]
@@ -418,24 +408,20 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 			nodeColor = 'red'			
 		elif isLoad == 'load':
 			nodeColor = 'blue'
-
+		elif key in generatorList and key not in green_list:
+			nodeColor = 'dimgrey'
 		kwargs = {
 			'nodelist': [key],
 			'node_color': nodeColor,
 			'node_size': 16,
 			'linewidths': 1.0
 		}
-			
 		if not isFirst[nodeColor]:
 			kwargs['label'] = nodeLabels[nodeColor]
 			isFirst[nodeColor] = True
-
-
 		node = nx.draw_networkx_nodes(inGraph, pos, **kwargs)
-
 		if key in generatorList:
-			node.set_edgecolor('violet')	
-
+			node.set_edgecolor('black')
 	if labels:
 		nx.draw_networkx_labels(
 			inGraph,
@@ -449,11 +435,17 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 			inGraph,
 			pos,
 			edge_labels=selected_labels,
+			bbox={'alpha':0},
 			font_color='red',
 			font_size=4
 		)
-
-	plt.legend(loc='lower right') 
+	# Hazard field.
+	# xlim = plt.xlim(); ylim = plt.ylim() # capture network limits.
+	# a = np.random.random((600, 600))
+	# plt.imshow(a, cmap='Greys', interpolation='nearest', alpha=0.3)
+	# plt.xlim(*xlim); plt.ylim(*ylim) # reset limits to be tight on network
+	# Final showing or saving.
+	plt.legend(loc='lower right')
 	if showPlot: plt.show()
 	plt.savefig(pJoin(outputDir,"feederChart.png"), dpi=800, pad_inches=0.0)
 
@@ -501,6 +493,10 @@ def work(modelDir, inputDict):
 	hazard = HazardField(hazardPath)
 	if circuitOutsideOfHazard(hazard, gfmJson):
 		outData['warning'] = 'Warning: the hazard field does not overlap with the circuit.'
+	# Draw hazard field if needed.
+	if inputDict['showHazardField'] == 'Yes':
+		hazard.drawHeatMap(show=False)
+		plt.title('') #Hack: remove plot title.
 	# Run GFM
 	gfmBinaryPath = pJoin(__neoMetaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
 	rdtInputName = 'rdtInput.json'
@@ -648,14 +644,10 @@ def work(modelDir, inputDict):
 	print "RUNNING 2ND GLD RUN FOR", modelDir
 	feederCopy = copy.deepcopy(feederModel)
 	lineSwitchList = []
-
-
 	edgeLabels = {}
 	generatorList = []
-
 	for gen in rdtOut['design_solution']['generators']:
 		generatorList.append(gen['id'][:-4])
-
 	damagedLoads = {}
 	for scenario in rdtOut['scenario_solution']:
 		for load in scenario['loads']:
@@ -663,7 +655,6 @@ def work(modelDir, inputDict):
 				damagedLoads[load['id'][:-4]] += 1
 			else:
 				damagedLoads[load['id'][:-4]] = 1
-
 	for line in rdtOut['design_solution']['lines']:
 		if('switch_built' in line and 'hardened' in line):
 			lineSwitchList.append(line['id'])
@@ -680,7 +671,6 @@ def work(modelDir, inputDict):
 		elif('hardened' in line):
 			if (line['hardened'] == True):
 				edgeLabels[line['id']] = "H"
-	
 	# Remove nonessential lines in second model as indicated by RDT output.
 	for key in feederCopy['tree'].keys():
 		value = feederCopy['tree'][key]
@@ -706,7 +696,6 @@ def work(modelDir, inputDict):
 		outData["secondGLD"] = str(False)
 	# Draw the feeder.
 	damageDict = {}
-
 	for scenario in rdtJson["scenarios"]:
 		for line in scenario["disable_lines"]:
 			if line in damageDict:
@@ -716,11 +705,6 @@ def work(modelDir, inputDict):
 	genDiagram(modelDir, feederModel, damageDict, critLoads, damagedLoads, edgeLabels, generatorList)
 	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
 		outData["oneLineDiagram"] = inFile.read().encode("base64")
-	
-
-	#damageData = np.loadtxt(omf.omfDir + "/static/testFiles/wf_clip.asc")
-	# Generate damage field.
-
 	# And we're done.
 	return outData
 
@@ -753,7 +737,8 @@ def new(modelDir):
 		"scenariosFileName": "",
 		"simulationDate": "2012-01-01",
 		"simulationZipCode": "64735",
-		"power_flow": "network_flow"
+		"power_flow": "network_flow",
+		"showHazardField": "No"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:

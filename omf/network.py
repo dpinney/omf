@@ -6,10 +6,6 @@ from matplotlib import pyplot as plt
 import omf
 # import matpower
 
-# Wireframe for new netork objects:
-newNetworkWireframe = {"baseMVA":"100.0","mpcVersion":"2.0","bus":{},"gen":{},
-	"branch":{}}
-
 def parse(inputStr, filePath=True):
 	''' Parse a MAT into an omf.network json. This is so we can walk the json, change things in bulk, etc.
 	Input can be a filepath or MAT string.
@@ -42,6 +38,8 @@ def _dictConversion(inputStr, filePath=True):
 	{"baseMVA":"100.0","mpcVersion":"2.0","bus":[{"1": {"bus_i": 1,"type": 3,"Pd": 0,"Qd": 0,"Gs": 0,"Bs": 0,"area": 1,"Vm": 1,"Va": 0,"baseKV": 135,"zone": 1,"Vmax": 1.05,"Vmin": 0.95}}],"gen":[],
 	"branch":[]}
 	'''
+	# Wireframe for new network objects:
+	newNetworkWireframe = {"baseMVA":"100.0","mpcVersion":"2.0","bus":{},"gen":{}, "branch":{}}
 	if filePath:
 		with open(inputStr,'r') as matFile:
 			data = matFile.readlines()
@@ -167,37 +165,68 @@ def viz(pathToOmt, outputPath=None):
 	# HACK: make sure we have our homebrew binaries available.
 	# os.environ['PATH'] += os.pathsep + '/usr/local/bin'
 	# Load in the network.
-	with open(pathToOmt,'r') as netFile:
-		net = json.load(netFile)
 	# Set up temp directory and copy the network and viewer in to it.
 	if outputPath == None:
-		tempDir = tempfile.mkdtemp()
-	else:
-		tempDir = outputPath
-	#HACK: make sure we get the required files from the right place.
-	SOURCE_DIR = os.path.dirname(__file__) + '/'
-	shutil.copy(SOURCE_DIR + 'templates/transEdit.html', tempDir + '/viewer.html')
+		outputPath = tempfile.mkdtemp()
+	template_path = get_abs_path("templates/transEdit.html")
+	viewer_path = os.path.join(outputPath, "viewer.html")
+	shutil.copy(template_path, viewer_path)
 	# Rewrite the load lines in viewer.html
-	# Note: you can't juse open the file in r+ mode because, based on the way the file is mapped to memory, you can only overwrite a line with another of exactly the same length.
-	for line in fileinput.input(tempDir + '/viewer.html', inplace=1):
+	# Note: you can't just open the file in r+ mode because, based on the way the file is mapped to memory, you can only overwrite a line with another of exactly the same length.
+	for line in fileinput.input(viewer_path, inplace=1):
 		if line.lstrip().startswith("<script>networkData="):
-			print "<script>networkData=" + json.dumps(net) + "</script>"
+			print "<script>networkData={}</script>".format(get_file_contents(pathToOmt))
 		elif line.lstrip().startswith('<script type="text/javascript" src="/static/svg-pan-zoom.js">'):
-			print '<script type="text/javascript" src="' + SOURCE_DIR + 'static/svg-pan-zoom.js"></script>'
+			print('<script type="text/javascript" src="{}"></script>'.format(get_abs_path("static/svg-pan-zoom.js")))
 		elif line.lstrip().startswith('<script type="text/javascript" src="/static/omf.js">'):
-			print '<script type="text/javascript" src="' + SOURCE_DIR + 'static/omf.js"></script>'
+			print('<script type="text/javascript" src="{}"></script>'.format(get_abs_path("static/omf.js")))
 		elif line.lstrip().startswith('<script type="text/javascript" src="/static/jquery-1.9.1.js">'):
-			print '<script type="text/javascript" src="' + SOURCE_DIR + 'static/jquery-1.9.1.js"></script>'
+			print('<script type="text/javascript" src="{}"></script>'.format(get_abs_path("static/jquery-1.9.1.js")))
 		elif line.lstrip().startswith('<link rel="stylesheet" href="/static/omf.css"/>'):
-			print '<link rel="stylesheet" href="' + SOURCE_DIR + 'static/omf.css"/>'
+			print('<link rel="stylesheet" href="{}"/>'.format(get_abs_path("static/omf.css")))
 		elif line.lstrip().startswith('<link rel="shortcut icon" href="/static/favicon.ico"/>'):
-			print '<link rel="shortcut icon" href="' + SOURCE_DIR + '/static/favicon.ico"/>'
+			print('<link rel="shortcut icon" href="{}"/>'.format(get_abs_path("static/favicon.ico")))
 		elif line.lstrip().startswith('{%'):
 			print '' # Remove the is_admin check for saving changes.
 		else:
 			print line.rstrip()
 	# os.system('open -a "Google Chrome" ' + '"file://' + tempDir + '/viewer.html"')
-	webbrowser.open_new("file://" + tempDir + '/viewer.html')
+	webbrowser.open_new("file://" + viewer_path)
+	##webbrowser.open_new("file://" + tempDir + '/viewer.html')
+
+def get_file_contents(filepath):
+	with open(filepath) as f: return f.read()
+
+def get_abs_path(relative_path):
+	return os.path.join(os.path.dirname(os.path.abspath(__file__)), relative_path)
+
+def get_HTML_interface_name(omt_filepath):
+	"""
+	Get a path to an .omt file that was saved on the server after a grip API consumer POSTed their desired .omt file.
+	Render the .omt file data using the transEdit.html template and injected library code, then return HTML filename.
+	"""
+	filename = "viewer.html"
+	temp_dir = os.path.dirname(omt_filepath)
+	viewer_path = os.path.join(temp_dir, filename)
+	shutil.copy(os.path.join(os.path.dirname(__file__), "templates/transEdit.html"), viewer_path)
+	for line in fileinput.input(viewer_path, inplace=1):
+		if line.lstrip().startswith("<script>networkData="):
+			print("<script>networkData={}</script>".format(get_file_contents(omt_filepath)))
+		elif line.lstrip().startswith('<script type="text/javascript" src="/static/svg-pan-zoom.js">'):
+			print('<script type="text/javascript">{}</script>'.format(get_file_contents(os.path.join(os.path.dirname(__file__), "static/svg-pan-zoom.js"))))
+		elif line.lstrip().startswith('<script type="text/javascript" src="/static/omf.js">'):
+			print('<script type="text/javascript">{}</script>'.format(get_file_contents(os.path.join(os.path.dirname(__file__), "static/omf.js"))))
+		elif line.lstrip().startswith('<script type="text/javascript" src="/static/jquery-1.9.1.js">'):
+			print('<script type="text/javascript">{}</script>'.format(get_file_contents(os.path.join(os.path.dirname(__file__), "static/jquery-1.9.1.js"))))
+		elif line.lstrip().startswith('<link rel="stylesheet" href="/static/omf.css"/>'):
+			print('<style>{}</style>'.format(get_file_contents(os.path.join(os.path.dirname(__file__), "static/omf.css"))))
+		elif line.lstrip().startswith('<link rel="shortcut icon" href="/static/favicon.ico"/>'):
+			print('<link rel="shortcut icon" href="data:image/x-icon;base64,AAABAAEAEBAQAAAAAAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAioqKAGlpaQDU1NQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIiIiIiIiIAAgACAAIAAgACAzIzMjMyMwIDAgMCAwIDAiIiIiIiIgMCAwEDAgMCAwIDMTMyMzIzAgMBAwIDAgMCIiIiIiIiAwIDAQMCAwIDAgMxMzIzMjMCAwEDAgMCAwIiIiIiIiIDAAMAAwADAAMAAzMzMzMzMwAAAAAAAAAAAABwAAd3cAAEABAABVVQAAAAUAAFVVAABAAQAAVVUAAAAFAABVVQAAQAEAAFVVAAAABQAA3d0AAMABAAD//wAA"/>')
+		elif line.lstrip().startswith('{%'):
+			print ""
+		else:
+			print line.rstrip()
+	return filename
 
 def _tests():
 	# Parse mat to dictionary.
@@ -224,8 +253,8 @@ def _tests():
 	# 	"genLimits" : 0,
 	# 	}
 	# matpower.runSim(pJoin(os.getcwd(),'scratch','transmission',"outData",networkName), inputDict, debug=False)
-	# viz('./static/SimpleNetwork.json')
+	#viz(os.path.join(os.path.dirname(__file__), "static/SimpleNetwork.json")
 
 if __name__ == '__main__':
-	# viz('./static/SimpleNetwork.json')
-	_tests()
+	viz(os.path.join(os.path.dirname(__file__), "static/SimpleNetwork.json"))
+	#_tests()

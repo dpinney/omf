@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import os
 from os.path import join as pJoin
+import datetime
 from datetime import datetime as dt
 from datetime import timedelta, date
 from sklearn.model_selection import GridSearchCV
@@ -717,7 +718,7 @@ def makeUsefulDf(df, noise=2.5, hours_prior=24):
 				int(x['hour'])), 
 			axis=1
 		)
-    
+	
 	r_df = pd.DataFrame()
 	r_df["load_n"] = zscore(df["load"])
 	r_df["years_n"] = zscore(df["dates"].dt.year)
@@ -907,3 +908,235 @@ def neural_net_predictions(all_X, all_y, EPOCHS=10):
 	
 	return [float(f) for f in model.predict(all_X[-8760:])], accuracy
 
+
+
+# LOAD FORECAST MODELS
+def dispatch_strategy(df, EPOCHS=10):
+	if 'dates' not in df.columns:
+		df['dates'] = df.apply(
+			lambda x: dt(
+				int(x['year']), 
+				int(x['month']), 
+				int(x['day']), 
+				int(x['hour'])), 
+			axis=1
+		) 
+	df['date'] = df.dates.dt.date
+	
+	# find max load for each day in d_df (day dataframe)
+	d_df = pd.DataFrame()
+	d_df['max_load'] = df.groupby('date')['load'].max()
+	d_df['date'] = df['date'].unique().astype('datetime64')
+	d_df['year'] = d_df['date'].dt.year
+	d_df['month'] = d_df['date'].dt.month
+	d_df['day'] = d_df['date'].dt.day
+
+	# get the correct answers for every month
+	l = []
+	for y in d_df['year'].unique():
+		d = d_df[d_df['year'] == y]
+		l.extend(d.groupby('month')['max_load'].idxmax())
+	d_df['should_dispatch'] = [(i in l) for i in d_df.index]
+
+	# forecast
+	all_X_1 = makeUsefulDf(df, noise=2.5, hours_prior=24)
+	all_X_2 = makeUsefulDf(df, noise=4, hours_prior=48)
+	all_y = df['load']
+
+	p1, a1 = neural_net_predictions(all_X_1, all_y, EPOCHS=EPOCHS)
+	p2, a2 = neural_net_predictions(all_X_2, all_y, EPOCHS=EPOCHS)
+	p1_max = [max(p1[i:i+24]) for i in range(0, len(p1), 24)]
+	p2_max = [max(p2[i:i+24]) for i in range(0, len(p2), 24)]
+
+	# create threshold
+	max_vals = {}
+	for y in d_df['year'].unique()[:-1]:
+		d = d_df[d_df['year'] == y]
+		max_vals[y] = list(d.groupby('month')['max_load'].max())
+
+	df_thresh = pd.DataFrame(max_vals).T
+	thresholds = [None]*12
+	for i in range(12):
+		thresholds[i] = df_thresh[i].min()
+
+	# make dispatch decisions
+	df_dispatch = pd.DataFrame()
+	this_year = d_df['year'].unique()[-1]
+	df_dispatch['load'] = d_df[d_df['year'] == this_year]['max_load']
+	df_dispatch['should_dispatch'] = d_df[d_df['year'] == this_year]['should_dispatch']
+	df_dispatch['1-day'] = p1_max
+	df_dispatch['2-day'] = p2_max
+	df_dispatch['month'] = d_df['month']
+	df_dispatch['threshold'] = df_dispatch['month'].apply(lambda x: thresholds[x-1])
+	
+	# is tomorrow above the monthly threshold?
+	df_dispatch['above_threshold'] = df_dispatch['1-day'] >= df_dispatch['threshold']
+	# is tomorrow higher than the prediction in two days?
+	df_dispatch['2-day_lower'] = df_dispatch['2-day'] <= df_dispatch['1-day']
+	# is tomorrow the highest of the month?
+	highest = [-1*float('inf')]*12
+	dispatch_highest = [False]*365
+	zipped = zip(df_dispatch['1-day'], df_dispatch['month'], df_dispatch['load'])
+	for i, (predicted_load, m, load) in enumerate(zipped):
+		if predicted_load >= highest[m-1]:
+			dispatch_highest[i] = True
+		if load >= highest[m-1]:
+			highest[m-1] = load
+	df_dispatch['highest_so_far'] = dispatch_highest
+	
+	# dispatch if all three conditions are met
+	df_dispatch['dispatch'] = (df_dispatch['highest_so_far'] & 
+							   df_dispatch['2-day_lower'] & df_dispatch['above_threshold'])
+
+	# compare correct answers
+	pre = np.array(df_dispatch['dispatch'])
+	ans = np.array(df_dispatch['should_dispatch'])
+
+	return {
+		'dispatch': pre,
+		'should_dispatch': ans,
+		'df_dispatch': df_dispatch,
+		'1-day_accuracy': a1,
+		'2-day_accuracy': a2,
+	}
+
+def analyze_predictions(ans, pre):
+	def recall(ans, pre):
+		true_positive = sum(ans & pre)
+		false_negative = sum(ans & (~ pre))
+		return true_positive / (true_positive + false_negative + 1e-7)
+	def precision(ans, pre):
+		true_positive = sum(ans & pre)
+		false_positive = sum((~ ans) & pre)
+		return (true_positive)/(true_positive + false_positive + 1e-7)
+	def peaks_missed(ans, pre):
+		return sum(ans & (~ pre))
+	def unnecessary_dispatches(ans, pre):
+		return sum((~ ans) & pre)
+
+	return {
+		'recall': recall(ans, pre), 
+		'precision': precision(ans, pre), 
+		'peaks_missed': peaks_missed(ans, pre), 
+		'unnecessary_dispatches': unnecessary_dispatches(ans, pre)
+	}
+
+def confidence_dispatch(df_d, max_c=.1):
+# return dispatch for given df and confidence
+	confidence_dict = {}
+	for c in np.linspace(0, max_c, 100):
+		# we want to increase the likelihood of dispatching tomorrow
+		df = df_d.copy()
+		df['1-day'] *= (1+c)
+		df['2-day'] *=(1-c)
+		df['threshold'] *= (1-c)
+
+		df['above_threshold'] = df['1-day'] >= df['threshold']
+		df['2-day_lower'] = df['2-day'] <= df['1-day']
+
+		highest = [-1*float('inf')]*12
+		dispatch_highest = [False]*365
+		zipped = zip(df['1-day'], df['month'], df['load'])
+		for i, (predicted_load, m, load) in enumerate(zipped):
+			if predicted_load >= highest[m-1]:
+				dispatch_highest[i] = True
+			if load >= highest[m-1]:
+				highest[m-1] = predicted_load
+
+		df['highest_so_far'] = dispatch_highest
+		df['dispatch'] = (df['highest_so_far'] & 
+								   df['2-day_lower'] & df['above_threshold'])
+
+		m = np.array(df['dispatch'])
+		confidence_dict[c] = analyze_predictions(df_d['should_dispatch'], m)
+	df_conf = pd.DataFrame(confidence_dict).T
+
+	return df_conf
+
+def find_lowest_confidence(df_conf):
+	# what is the lowest amount of confidence that captures all peaks?
+	df = df_conf.copy()
+	df = df[df['peaks_missed'] == 0]
+	if df.shape[0] != 0:
+		return {
+			'confidence': df['unnecessary_dispatches'].idxmin(), 
+			'unnecessary_dispatches': df['unnecessary_dispatches'].min()
+		}
+	else:
+		return {
+			'confidence': "larger than given max interval",
+			'unnecessary_dispatches': "greater than {}".format(
+				df_conf['unnecessary_dispatches'].min())
+		}
+
+
+# forecast tool
+
+def neural_net_next_day(all_X, all_y, EPOCHS=10):
+	import tensorflow as tf
+	from tensorflow.keras import layers
+
+	X_train, y_train = all_X[:-24], all_y[:-24]
+
+	model = tf.keras.Sequential([
+		layers.Dense(all_X.shape[1], activation=tf.nn.relu, input_shape=[len(X_train.keys())]),
+		layers.Dense(all_X.shape[1], activation=tf.nn.relu),
+		layers.Dense(all_X.shape[1], activation=tf.nn.relu),
+		layers.Dense(all_X.shape[1], activation=tf.nn.relu),
+		layers.Dense(all_X.shape[1], activation=tf.nn.relu),
+		layers.Dense(1)
+	])
+
+	optimizer = tf.keras.optimizers.RMSprop(0.001)
+
+	model.compile(
+		loss="mean_squared_error",
+		optimizer=optimizer,
+		metrics=["mean_absolute_error", "mean_squared_error"],
+	)
+
+	early_stop = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=10)
+
+	history = model.fit(
+		X_train,
+		y_train,
+		epochs=EPOCHS,
+		validation_split=0.2,
+		verbose=0,
+		callbacks=[early_stop],
+	)
+
+	predictions = [float(f) for f in model.predict(all_X[-8760:])]
+	train = [float(f) for f in model.predict(all_X[:-8760])]
+	accuracy = {
+		'test': MAPE(predictions, all_y[-8760:]),
+		'train': MAPE(train, all_y[:-8760])
+	}
+
+	def MAPE(predictions, answers):
+		assert len(predictions) == len(answers)
+		return sum([abs(x-y)/(y+1e-5) for x, y in zip(predictions, answers)])/len(answers)*100  
+
+	predictions = [float(f) for f in model.predict(all_X[-24:])]
+	return predictions, model
+
+def add_day(df, weather):
+	lr = df.iloc[-1]
+	if 'dates' in df.columns:
+		last_day = lr.dates
+		df.drop(['dates'], axis=1, inplace=True)
+	else:
+		last_day = date(int(lr.year), int(lr.month), int(lr.day))
+	predicted_day = last_day + datetime.timedelta(days=1)
+
+	d_24 = [{
+		'load': np.nan,
+		'tempc': w,
+		'year': predicted_day.year,
+		'month': predicted_day.month,
+		'day': predicted_day.day,
+		'hour': i } for i, w in enumerate(weather)]
+	
+	df = df.append(d_24, ignore_index=True)
+
+	return df, predicted_day

@@ -11,13 +11,23 @@ COPY install.py /home/omf/
 COPY requirements.txt /home/omf/
 COPY setup.py /home/omf/
 RUN cd /home/omf/; python install.py
-# Put the rest of the source in there.
-COPY omf /home/omf/omf
 
-# Make sure the docker instance listens externally
-RUN sed -i -e 's/host="127.0.0.1"/host="0.0.0.0"/g' /home/omf/omf/web.py
+# for mybinder.org
+RUN pip install --no-cache notebook
+ENV HOME=/home/omf/omf
+ARG NB_USER
+ARG NB_UID
+ENV USER ${NB_USER}
+ENV HOME /home/omf/omf
+RUN adduser --disabled-password \
+    --gecos "Default user" \
+    --uid ${NB_UID} \
+    ${NB_USER}
+WORKDIR ${HOME}
+USER ${USER}
 
 # Run the OMF
+VOLUME ["/home/omf/omf/"]
 WORKDIR /home/omf/omf/
 ENTRYPOINT ["python"]
 CMD ["web.py"]
@@ -25,8 +35,13 @@ CMD ["web.py"]
 # INSTRUCTIONS
 # ============
 # - Navigate to this directory
-# - Build image with command `docker build . -t <IMAGE_NAME>`
-# - Run image in background with `docker run -d -p 5000:5000 --name <CONT_NAME> <IMAGE_NAME>`
+# - Build image with command `docker build . -f dev.Dockerfile -t <IMAGE_NAME>`
+# - Note that 
+# - Run image in background with `docker run -d -p 5000:5000 -v "`pwd`/omf":/home/omf/omf/ --name omfdevc omfdev`
 # - View at http://127.0.0.1:5000
 # - Stop it with `docker stop <CONT_NAME>` and remove it with `docker rm <CONT_NAME>`.
 # - Delete the images with `docker rmi <IMAGE_NAME>`
+# 
+# FEATURE IDEAS
+# =============
+# - Python "build" script to create, start and exit the image

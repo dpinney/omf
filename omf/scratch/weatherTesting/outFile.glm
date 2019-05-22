@@ -4,8 +4,8 @@
 #set minimum_timestep=3600;
 clock {
 	timezone EST+5EDT;
-	starttime '2014-01-01 00:00:00';
-	stoptime '2014-01-02 00:00:00';
+	starttime '2017-01-01 00:00:00';
+	stoptime '2017-01-11 00:00:00';
 };
 
 module tape;
@@ -17,6 +17,12 @@ module powerflow {
 
 module residential {
 	implicit_enduses NONE;
+};
+
+module climate;
+object csv_reader {
+	name CsvReader;
+	filename weatherNewKy.csv;
 };
 
 schedule waterdemand1 {
@@ -57,7 +63,7 @@ schedule ZIP1base_power {
 
 object triplex_line_configuration {
 	diameter 0.368;
-	name triplex_line_configuration_1;
+	insulation_thickness 0.08;
 conductor_1 object triplex_line_conductor {
 	resistance 0.97;
 	geometric_mean_radius 0.0111;
@@ -70,7 +76,7 @@ conductor_N object triplex_line_conductor {
 	resistance 0.97;
 	geometric_mean_radius 0.0111;
 };
-	insulation_thickness 0.08;
+	name triplex_line_configuration_1;
 };
 
 object overhead_line_conductor:6010 {
@@ -360,11 +366,6 @@ object meter {
 	voltage_C -1200.8886+2080.000j;
 	voltage_A 2401.7771;
 	nominal_voltage 2401.7771;
-object recorder {
-	property measured_real_energy;
-	file "xout_regulator_meter_energy.csv";
-	interval 900;
-};
 };
 
 object node:671 {
@@ -1033,14 +1034,15 @@ object waterheater {
 	location INSIDE;
 	water_demand waterdemand1*random.normal(1,.2);
 };
-	cooling_setpoint random.normal (80,2);
 	heating_setpoint heatingsetpoint4+random.normal(0,4);
 	thermostat_deadband random.normal (2,.5);
+	cooling_setpoint random.normal (80,2);
 };
 
 object house:..20 {
 	parent trip_meter2;
 	floor_area random.normal(1750,400);
+	heating_setpoint heatingsetpoint2+random.normal(0,4);
 object ZIPload {
 	power_fraction 0.2;
 	current_fraction 0.5;
@@ -1050,19 +1052,18 @@ object ZIPload {
 	impedance_fraction 0.3;
 	impedance_pf 0.8;
 };
-	heating_setpoint heatingsetpoint2+random.normal(0,4);
-	cooling_setpoint random.normal (80,2);
 object waterheater {
 	location INSIDE;
 	water_demand waterdemand3*random.normal(1,.2);
 };
+	cooling_setpoint random.normal (80,2);
 };
 
 object house:..20 {
 	parent trip_meter3;
 	floor_area random.normal(1750,400);
-	cooling_setpoint random.normal (80,2);
 	heating_setpoint heatingsetpoint2+random.normal(0,4);
+	cooling_setpoint random.normal (80,2);
 object ZIPload {
 	power_fraction 0.2;
 	current_fraction 0.5;
@@ -1139,6 +1140,10 @@ object waterheater {
 };
 
 object house:..20 {
+object waterheater {
+	location INSIDE;
+	water_demand waterdemand2*random.normal(1,.2);
+};
 	parent trip_meter7;
 	floor_area random.normal(1750,400);
 	heating_setpoint heatingsetpoint5+random.normal(0,4);
@@ -1151,10 +1156,6 @@ object ZIPload {
 	power_pf 0.9;
 	impedance_fraction 0.3;
 	impedance_pf 0.8;
-};
-object waterheater {
-	location INSIDE;
-	water_demand waterdemand2*random.normal(1,.2);
 };
 };
 
@@ -1188,18 +1189,24 @@ object ZIPload {
 	impedance_fraction 0.3;
 	impedance_pf 0.8;
 };
-object waterheater {
-	location INSIDE;
-	water_demand waterdemand3*random.normal(1,.2);
-};
 	parent trip_meter9;
 	floor_area random.normal(1750,400);
 	heating_setpoint heatingsetpoint5+random.normal(0,4);
 	cooling_setpoint random.normal (80,2);
+object waterheater {
+	location INSIDE;
+	water_demand waterdemand3*random.normal(1,.2);
+};
 };
 
 object house:..20 {
 	parent trip_meter10;
+	floor_area random.normal(1750,400);
+object waterheater {
+	location INSIDE;
+	water_demand waterdemand3*random.normal(1,.2);
+};
+	heating_setpoint heatingsetpoint4+random.normal(0,4);
 object ZIPload {
 	power_fraction 0.2;
 	current_fraction 0.5;
@@ -1209,12 +1216,6 @@ object ZIPload {
 	impedance_fraction 0.3;
 	impedance_pf 0.8;
 };
-object waterheater {
-	location INSIDE;
-	water_demand waterdemand3*random.normal(1,.2);
-};
-	floor_area random.normal(1750,400);
-	heating_setpoint heatingsetpoint4+random.normal(0,4);
 	cooling_setpoint random.normal (80,2);
 };
 
@@ -1250,17 +1251,19 @@ object ZIPload {
 	impedance_fraction 0.3;
 	impedance_pf 0.8;
 };
+	heating_setpoint heatingsetpoint1+random.normal(0,4);
+	cooling_setpoint random.normal (80,2);
 object waterheater {
 	location INSIDE;
 	water_demand waterdemand3*random.normal(1,.2);
 };
-	heating_setpoint heatingsetpoint1+random.normal(0,4);
-	cooling_setpoint random.normal (80,2);
 };
 
 object house:..20 {
 	parent trip_meter13;
 	floor_area random.normal(1750,400);
+	cooling_setpoint random.normal (80,2);
+	heating_setpoint heatingsetpoint3+random.normal(0,4);
 object ZIPload {
 	power_fraction 0.2;
 	current_fraction 0.5;
@@ -1274,8 +1277,6 @@ object waterheater {
 	location INSIDE;
 	water_demand waterdemand2*random.normal(1,.2);
 };
-	cooling_setpoint random.normal (80,2);
-	heating_setpoint heatingsetpoint3+random.normal(0,4);
 };
 
 object collector {
@@ -1296,12 +1297,12 @@ module tape;
 module climate;
 object csv_reader {
 	name weatherReader;
-	filename weatheryearDCA.csv;
+	filename weatherNewKy.csv;
 };
 
 object climate {
-	tmyfile weatheryearDCA.csv;
-	name MyClimate;
 	reader weatherReader;
+	name MyClimate;
+	tmyfile weatherNewKy.csv;
 };
 

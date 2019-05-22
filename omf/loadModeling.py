@@ -2,24 +2,30 @@ import json, urllib, xml.etree.ElementTree as ET, omf, random, os
 
 def houseSpecs(lat, lon, addressOverride=None):
 	''' Get square footage, year built and a few more stats for a house at lat, lon or addressOverride. '''
-	# Geo lookup via https://developers.google.com/maps/documentation/geocoding/#ReverseGeocoding
-	googleAPI_KEY = ''  # Optional.
-	url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' + \
-		str(lat) + ',' + str(lon) + '&key=' + googleAPI_KEY
+	# open street map reverse geocoding.
+	url = 'https://nominatim.openstreetmap.org/reverse?format=json&lat={}&lon={}&zoom=18&addressdetails=1'.format(lat, lon)
 	fnameGoog, headers = urllib.urlretrieve(url)
 	with open(fnameGoog, 'r') as jsonInput:
 		response_data = json.load(jsonInput)
-	try:
-		firstAdd = response_data['results'][0]['formatted_address']
-	except:
-		if addressOverride: firstAdd = addressOverride
-		else: return None
-	addr_ptrn = firstAdd.split(', ')
-	street_number = addr_ptrn[0]
-	city_name = addr_ptrn[1]
-	state_name = addr_ptrn[2].split(' ')[0]
-	zip_code = addr_ptrn[2].split(' ')[1]
-	country_name = addr_ptrn[3]
+	# Get address components.
+	if addressOverride:
+		address = addressOverride
+		addr_ptrn = address.split(', ')
+		street_number = addr_ptrn[0]
+		city_name = addr_ptrn[1]
+		state_name = addr_ptrn[2].split(' ')[0]
+		zip_code = addr_ptrn[2].split(' ')[1]
+		country_name = addr_ptrn[3]
+	else:
+		try:
+			address = response_data['display_name']
+			street_number = response_data['address']['house_number']
+			city_name = response_data['address']['city']
+			state_name = response_data['address']['state']
+			zip_code = response_data['address']['postcode']
+			country_name = response_data['address']['country']
+		except:
+			return None
 	# House details lookup via http://www.zillow.com/howto/api/GetDeepSearchResults.htm
 	zwsID = 'X1-ZWz1dvjlzatudn_5m9vn'  # TODO: change to a new one
 	url = 'http://www.zillow.com/webservice/GetDeepSearchResults.htm?zws-id=' + \
@@ -38,7 +44,11 @@ def houseSpecs(lat, lon, addressOverride=None):
 	def safeText(key):
 		try: return result.find(key).text
 		except: return ''
-	house_info = {'lat': lat, 'lon': lon, 'object': 'house', 'address': firstAdd,
+	house_info = {
+		'lat': lat,
+		'lon': lon,
+		'object': 'house',
+		'address': address,
 		'matches':matches,
 		'sqft':safeText('finishedSqFt'),
 		'lotSize':safeText('lotSizeSqFt'),
@@ -142,6 +152,7 @@ def _tests():
 	print 'Arlington test:', houseSpecs(38.88358, -77.10193), '\n'
 	print 'Override apartment test:', houseSpecs(38.883557,-77.102175), '\n'
 	print 'Override house test:', houseSpecs(0,0,addressOverride='1629 North Stafford Street, Arlington, VA 22207, USA'), '\n'
+	print 'Yet another test:', houseSpecs(38.9126022,-77.0097919), '\n'
 	print 'Full gldHouse test:', gldHouse(0,0,addressOverride='1629 North Stafford Street, Arlington, VA 22207, USA'), '\n'
 	# print 'Apt test:', gldHouse(0,0,addressOverride='3444 N Fairfax Dr, Arlington, VA 22201, USA')
 	os.remove(outFilePath)
