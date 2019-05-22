@@ -168,6 +168,15 @@
 		</script>
 	</div>
 	<div id="output">
+		<p class="reportTitle postRun" style="page-break-before:always">EV Charging Demand</p>
+		<div id="evChargingDemand" class="tightContent postRun">
+			<img id="evChargingDemandChart" style="width:1000px;height:auto;" />
+			<script type="text/javascript">gebi("evChargingDemandChart").src = "data:image/png;base64," + allOutputData.evChargingDemand</script>
+		</div>
+		<p class="reportTitle postRun" style="page-break-before:always">Fuel Cost Comparison</p>
+		<div id="fuelCostCalc" class="tightContent postRun">
+			{{ allOutputDataDict['fuelCostCalcHtml'] }}
+		</div>
 		<p class="reportTitle postRun" style="page-break-before:always">Voltage Drop Diagram</p>
 		<div id="voltageDropDiagram" class="tightContent postRun">
 			<img id="voltageDropChart" style="width:1000px;height:1000px;" />
@@ -175,7 +184,7 @@
 		</div>
 		<p class="reportTitle postRun" style="page-break-before:always">Protective Device Status</p>
 		<div id="protDevStatus" class="tightContent postRun">
-			{{ allOutputDataDict['tableHtml'] }}
+			{{ allOutputDataDict['protDevTableHtml'] }}
 		</div>
 	</div>
 </body>
