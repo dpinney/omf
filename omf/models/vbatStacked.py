@@ -253,6 +253,7 @@ def work(modelDir, ind):
 	out["VBpower"] = output_df['VB power (kW)'].tolist()
 	out["VBenergy"] = output_df['VB energy (kWh)'].tolist()
 	out["demandAdjusted"] = output_df['Net load (kW)'].tolist()
+	out["regulation"] = output_df['Regulation (kW)'].tolist()
 	out["stdout"] = "Success"
 	return out
 
@@ -276,7 +277,7 @@ def new(modelDir):
 		"unitDeviceCost":"150",
 		"unitUpkeepCost":"5",
 		# By dispatch
-		"payment_structure": "fhec",
+		"payment_structure": "okec",
 		# okec
 		"annual_peak_charge": "100",
 		"avg_demand_charge": "120",
