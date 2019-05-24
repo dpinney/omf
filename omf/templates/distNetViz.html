@@ -1973,7 +1973,7 @@ function clickLatLon(event) {
 
 function searchTerm() {
     let keys;
-    let operation = document.querySelector("input[name=searchMode]:checked").value;
+    let operation = document.querySelector("input[name='searchMode']:checked").value;
     if (operation === "searchExactString") {
         keys = findExactString(this.value.trim());
     } else if (operation === "searchSubstring") {
@@ -3832,7 +3832,7 @@ const opacityManagerPrototype = {
             }
         });
         const opacityModal = document.getElementById("opacityModal");
-        const classInput = opacityModal.querySelector(`input[data-objecttype='${className}'`);
+        const classInput = opacityModal.querySelector(`input[data-objecttype='${className}']`);
         Array.from(opacityModal.querySelectorAll("input[data-objecttype]")).forEach(input => {
             if (input !== classInput) {
                 input.value = 0.1;
