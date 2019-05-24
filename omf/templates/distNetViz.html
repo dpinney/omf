@@ -148,6 +148,7 @@
             #componentTable {
                 max-height: 65vh;
                 overflow: auto;
+                min-width: 450px;
             }
             /*#milsoftInput {
                 width: 100%;
@@ -353,7 +354,9 @@
             .fullPadded {
 				padding: 5px;
             }
-            #componentList {width:250px;} /* Hack to prevent horizontal scrolling. */
+            #componentList {
+                min-width:250px;
+            } /* Hack to prevent horizontal scrolling. */
 
             /* SVG Styling */
 
@@ -717,7 +720,6 @@
             </div>
             <div id="massAddSecondaryModal" class="modal" style="display: none;">
                 <div class="modalContent">
-                    <!--<button data-buttonfunction="cancel" class="modalButton deleteButton" style="margin-left:5px;">&#9587;</button>-->
                     <h3></h3>
                     <div id="componentTable" data-tableinsert></div>
                     <div style="text-align:center; padding: 10px;">
@@ -1555,7 +1557,7 @@ const addManagerPrototype = {
         const tBody = document.createElement("tbody");
         table.append(tBody);
         const that = this;
-        modal.querySelector("button[data-buttonfunction=cancel").onclick = () => {
+        modal.querySelector("button[data-buttonfunction='cancel']").onclick = () => {
             modal.style.display = "none";
             that.component = {};
             document.getElementById("massAddModal").querySelector("select#massAddComponentSelect").selectedIndex = 0;
@@ -1629,7 +1631,7 @@ const addManagerPrototype = {
         input.onchange = function() {
             that.setProbability(this);
         }
-        modal.querySelector("button[data-buttonfunction=submit]").onclick = () => {
+        modal.querySelector("button[data-buttonfunction='submit']").onclick = () => {
             if (that.component.object == null) {
                 alert("Please select a component to add.")
             } else if (that.target === "") {
@@ -1640,7 +1642,7 @@ const addManagerPrototype = {
                 that.reset();
             }
         }
-        const cancelButton = modal.querySelector("button[data-buttonfunction=cancel]").onclick = () => {
+        const cancelButton = modal.querySelector("button[data-buttonfunction='cancel']").onclick = () => {
             toggleElementDisplay("massAddModal");
             that.reset();
         }
@@ -2519,7 +2521,7 @@ function toggleElementDisplay(id) {
             return;
         }
         // When we hide a modal, set any of the text fields to empty. Actually I don't always want this.
-        const queryString = `#${id} input[type=text]`;
+        const queryString = `#${id} input[type='text']`;
         document.querySelectorAll(queryString).forEach(input => {
             input.value = "";
         });
@@ -2658,7 +2660,7 @@ function getKeysOfObjectsWithoutNumericValues(keys, attributeKey) {
 
 //only toggle upon successful completion of operation
 function massEdit() {
-    let operation = document.querySelector("input[name=attributeOperation]:checked");
+    let operation = document.querySelector("input[name='attributeOperation']:checked");
     if (operation == null) {
         alert("Please select an operation with radio buttons on the 'Mass Edit' menu.");
         return;
@@ -3830,7 +3832,7 @@ const opacityManagerPrototype = {
             }
         });
         const opacityModal = document.getElementById("opacityModal");
-        const classInput = opacityModal.querySelector(`input[data-objecttype=${className}`);
+        const classInput = opacityModal.querySelector(`input[data-objecttype='${className}'`);
         Array.from(opacityModal.querySelectorAll("input[data-objecttype]")).forEach(input => {
             if (input !== classInput) {
                 input.value = 0.1;
@@ -5327,7 +5329,7 @@ function initializeFindModal() {
 function initializeColorModal() {
     const colorModal = document.getElementById("colorModal");
     const colorManager = createColorManager();
-    colorModal.querySelector("input[type=file]").addEventListener("change", async function() {
+    colorModal.querySelector("input[type='file']").addEventListener("change", async function() {
         await colorManager.buildHTML(this.files);
     });
     colorModal.querySelector("button[data-buttonfunction='reset']").addEventListener("click", () => {
