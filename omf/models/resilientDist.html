@@ -104,13 +104,7 @@
 			<div class="postRunInline shortInput">
 				<label>Run Time</label>
 				<input type="text" id="runTime" name="runTime" readonly/>
-			</div>
-			<div class="shortInput">
-				<label>Feeder</label>
-				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
-				<input type="hidden" id="feederName1" name="feederName1"> <!--HACK:pass feeder name back and forth to backend.-->
-			</div>
-	
+			</div>	
 			<div class="wideInput">
 				<p class="inputSectionHeader">Financial Specs</p>
 			</div>
@@ -167,6 +161,11 @@
 			</div>
 			<hr>
 			<div class="shortInput">
+				<label>Feeder</label>
+				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
+				<input type="hidden" id="feederName1" name="feederName1"> <!--HACK:pass feeder name back and forth to backend.-->
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Weather Impacts (.asc file)<span class="classic">Please see the documentation at the help link for the required format. If this field is blank the OMF will re-use the file from the previous run.</span></label>
 				<input id="weatherImpactsFile" type="file" style="display:none" onchange="handle_files(this.files,'weatherImpacts','weatherImpactsFileName')">
 				<input id="weatherImpacts" name="weatherImpacts" type="hidden">
@@ -192,6 +191,10 @@
 					<label for="scenariosDataFile" class="fileButton">Choose File</label>
 					<input id="scenariosFileName" name="scenariosFileName" value='' readonly class="uploadFileName">
 				</div>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Scenario Count<span class="classic">Number of damage scenarios that will be generated.</span></label>
+				<input type="text" id="scenarioCount" name="scenarioCount" pattern="^\d+$">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Critical Load Met (%)<span class="classic">Indicates the percent of critical load that must be met in each damage scenario.  Insert an integer or decimal value representing a percentage.</span></label>
@@ -366,11 +369,11 @@
 				</script>
 			</div>
 		</div>
-		<p class='reportTitle postRun'><b>Download Output Data</b></p>
-		<div class="content" style="margin-top:0px;text-align:left">
-			<a style="padding:10px" onclick="downloadTextFile('gfmOutput.txt', allOutputData['gfmRawOut'])">General Fragility Model (GFM) Output</a><br>
-			<a style="padding:10px" onclick="downloadTextFile('rdtOutput.txt', allOutputData['rdtRawOut'])">Resilient Design Tool (RDT) Output</a><br>
-			<a style="padding:10px" onclick="downloadTextFile('gridlabdOutput.txt', JSON.stringify(allOutputData['gridlabdRawOut'], null, 2))">GridLAB-D (GLD) Output</a>
+		<p class="reportTitle postRun"><b>Raw Input and Output Files</b></p>
+		<div id="rawOutput" class="content postRun" style="margin-top:0px">
+			{% for name in allOutputDataDict['fileNames'] %}
+				{% if loop.index > 1 %}&mdash; {% endif %}<a href="/downloadModelData/{{allInputDataDict['user']}}/{{allInputDataDict['modelName']}}/{{name}}">{{name}}</a>
+			{% endfor %}
 		</div>
 	</div>
 </body>

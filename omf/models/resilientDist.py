@@ -6,6 +6,7 @@ from os.path import join as pJoin
 from jinja2 import Template
 from numpy import interp
 from matplotlib import pyplot as plt
+import matplotlib
 import networkx as nx
 from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
@@ -335,7 +336,6 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 			 tree.pop(key)
 	# Create and save the graphic.
 	inGraph = feeder.treeToNxGraph(tree)
-	#feeder.latLonNxGraph(nxG) # This function creates a .plt reference which can be saved here.
 	labels=True
 	neatoLayout=False 
 	showPlot=False
@@ -439,12 +439,9 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 			font_color='red',
 			font_size=4
 		)
-	# Hazard field.
-	# xlim = plt.xlim(); ylim = plt.ylim() # capture network limits.
-	# a = np.random.random((600, 600))
-	# plt.imshow(a, cmap='Greys', interpolation='nearest', alpha=0.3)
-	# plt.xlim(*xlim); plt.ylim(*ylim) # reset limits to be tight on network
 	# Final showing or saving.
+	fig = matplotlib.pyplot.gcf()
+	fig.set_size_inches(9, 6)
 	plt.legend(loc='lower right')
 	if showPlot: plt.show()
 	plt.savefig(pJoin(outputDir,"feederChart.png"), dpi=800, pad_inches=0.0)
@@ -505,7 +502,7 @@ def work(modelDir, inputDict):
 		javaCmd = '/Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/bin/java'
 	else:
 		javaCmd = 'java'
-	proc = subprocess.Popen([javaCmd,'-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],'-num','3','-ro',rdtInputName], stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=modelDir)
+	proc = subprocess.Popen([javaCmd,'-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],'-num',inputDict['scenarioCount'],'-ro',rdtInputName], stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=modelDir)
 	(stdout,stderr) = proc.communicate()
 	with open(pJoin(modelDir, "gfmConsoleOut.txt"), "w") as gfmConsoleOut:
 		gfmConsoleOut.write(stdout)
@@ -735,6 +732,7 @@ def new(modelDir):
 		"weatherImpactsFileName": "wf_clip.asc", # "wf_clip.asc" "wind_grid_1UCS.asc" "wf_clipSVEC.asc"
 		"scenarios": "",
 		"scenariosFileName": "",
+		"scenarioCount":"3",
 		"simulationDate": "2012-01-01",
 		"simulationZipCode": "64735",
 		"power_flow": "network_flow",
