@@ -137,12 +137,18 @@
             ul.menu li:hover {
                 background:green; color:white; 
             }
+
             /**************************************************
             // Modal Dialogs
             **************************************************/
 
             #loadModalTable {
                 width: 890px;
+            }
+            #componentTable {
+                max-height: 65vh;
+                overflow: auto;
+                min-width: 450px;
             }
             /*#milsoftInput {
                 width: 100%;
@@ -241,7 +247,8 @@
             }
             .scrollableList {
                 overflow: auto;
-                height: 240px;
+                /*height: 240px;*/
+                max-height: 65vh;
                 list-style-type: none;
                 /*margin: 0px 0px 0px 20px;*/
                 margin: 0px;
@@ -347,7 +354,9 @@
             .fullPadded {
 				padding: 5px;
             }
-            #componentList {width:250px;} /* Hack to prevent horizontal scrolling. */
+            #componentList {
+                min-width:250px;
+            } /* Hack to prevent horizontal scrolling. */
 
             /* SVG Styling */
 
@@ -711,9 +720,11 @@
             </div>
             <div id="massAddSecondaryModal" class="modal" style="display: none;">
                 <div class="modalContent">
-                    <button data-buttonfunction="cancel" class="modalButton deleteButton" style="margin-left:5px;">&#9587;</button>
                     <h3></h3>
-                    <div data-tableinsert></div>
+                    <div id="componentTable" data-tableinsert></div>
+                    <div style="text-align:center; padding: 10px;">
+                        <button data-buttonfunction="cancel" class="modalButton">Cancel</button>
+                    </div>
                 </div>
             </div>
             <div id="massEditModal" class="modal" style="display: none">
@@ -1546,7 +1557,7 @@ const addManagerPrototype = {
         const tBody = document.createElement("tbody");
         table.append(tBody);
         const that = this;
-        modal.querySelector("button[data-buttonfunction=cancel").onclick = () => {
+        modal.querySelector("button[data-buttonfunction='cancel']").onclick = () => {
             modal.style.display = "none";
             that.component = {};
             document.getElementById("massAddModal").querySelector("select#massAddComponentSelect").selectedIndex = 0;
@@ -1620,7 +1631,7 @@ const addManagerPrototype = {
         input.onchange = function() {
             that.setProbability(this);
         }
-        modal.querySelector("button[data-buttonfunction=submit]").onclick = () => {
+        modal.querySelector("button[data-buttonfunction='submit']").onclick = () => {
             if (that.component.object == null) {
                 alert("Please select a component to add.")
             } else if (that.target === "") {
@@ -1631,7 +1642,7 @@ const addManagerPrototype = {
                 that.reset();
             }
         }
-        const cancelButton = modal.querySelector("button[data-buttonfunction=cancel]").onclick = () => {
+        const cancelButton = modal.querySelector("button[data-buttonfunction='cancel']").onclick = () => {
             toggleElementDisplay("massAddModal");
             that.reset();
         }
@@ -1962,7 +1973,7 @@ function clickLatLon(event) {
 
 function searchTerm() {
     let keys;
-    let operation = document.querySelector("input[name=searchMode]:checked").value;
+    let operation = document.querySelector("input[name='searchMode']:checked").value;
     if (operation === "searchExactString") {
         keys = findExactString(this.value.trim());
     } else if (operation === "searchSubstring") {
@@ -2510,7 +2521,7 @@ function toggleElementDisplay(id) {
             return;
         }
         // When we hide a modal, set any of the text fields to empty. Actually I don't always want this.
-        const queryString = `#${id} input[type=text]`;
+        const queryString = `#${id} input[type='text']`;
         document.querySelectorAll(queryString).forEach(input => {
             input.value = "";
         });
@@ -2649,7 +2660,7 @@ function getKeysOfObjectsWithoutNumericValues(keys, attributeKey) {
 
 //only toggle upon successful completion of operation
 function massEdit() {
-    let operation = document.querySelector("input[name=attributeOperation]:checked");
+    let operation = document.querySelector("input[name='attributeOperation']:checked");
     if (operation == null) {
         alert("Please select an operation with radio buttons on the 'Mass Edit' menu.");
         return;
@@ -2929,9 +2940,6 @@ function saveFeeder(feeder) {
 }
 
 /**
- * TODO: This function has a lot of problems because of how the web routes are written.
- */
-/**
  * serverFeederName: The name of the feeder I want to load, e.g. "ABEC Columbia"
  * serverModelName: Either "publicFeeders" or something like "Simple Market System Indy Solar"
  * 
@@ -2964,7 +2972,9 @@ async function loadFeeder(serverFeederName, serverModelName, owner) {
     progressModal.show();
     $.ajax({
         type: "POST",
-        // {owner} is correct. {owner} is either "public" to load from public feeders or <current user> to load from the users feeders. {gThisOwner} is correct because I am overwriting THIS feeder file, which is either publicly owned or owned by the current user. {gThisOwner} cannot be {gCurrentUser} because then I can't overwrite public files as the admin.
+        // {owner} is correct. {owner} is either "public" to load from public feeders or <current user> to load from the users feeders. {gThisOwner}
+        // is correct because I am overwriting THIS feeder file, which is either publicly owned or owned by the current user. {gThisOwner} cannot be
+        // {gCurrentUser} because then I can't overwrite public files as the admin.
         url: `/loadFeeder/${serverFeederName}/${serverModelName}/${gThisModelName}/${gThisFeederNum}/${owner}/${gThisOwner}`,
         data: formData,
         processData: false,
@@ -3822,7 +3832,7 @@ const opacityManagerPrototype = {
             }
         });
         const opacityModal = document.getElementById("opacityModal");
-        const classInput = opacityModal.querySelector(`input[data-objecttype=${className}`);
+        const classInput = opacityModal.querySelector(`input[data-objecttype='${className}']`);
         Array.from(opacityModal.querySelectorAll("input[data-objecttype]")).forEach(input => {
             if (input !== classInput) {
                 input.value = 0.1;
@@ -5319,7 +5329,7 @@ function initializeFindModal() {
 function initializeColorModal() {
     const colorModal = document.getElementById("colorModal");
     const colorManager = createColorManager();
-    colorModal.querySelector("input[type=file]").addEventListener("change", async function() {
+    colorModal.querySelector("input[type='file']").addEventListener("change", async function() {
         await colorManager.buildHTML(this.files);
     });
     colorModal.querySelector("button[data-buttonfunction='reset']").addEventListener("click", () => {
