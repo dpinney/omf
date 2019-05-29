@@ -479,10 +479,13 @@
                 </div>
             </div>
             <div id="progressModal" class="modal" style="display: none">
-                <div class="modalContent" style="text-align: center;">
+                <div class="modalContent centered">
                     <img src="/static/spinner.gif">
                     <h2>text...</h2>
-                    <button class="modalButton" id="progressModalCancel">Cancel</button>
+                    <div>
+                        <button class="modalButton deleteButton" data-buttonfunction="cancel" style="margin-right:300px;">Cancel</button>
+                        <button class="modalButton" data-buttonfunction="submit">OK</button>
+                    </div>
                 </div>
             </div>
             <div id="loadModal" class="modal" style="display: none">
@@ -1519,8 +1522,11 @@ const addManagerPrototype = {
         const probability = this.probability;
         if (component.object === "recorder" || getRelationship(gComponentManager.getFirst(targetObject)) !== "line") {
             const newObjects = [];
-            const pm = new ProgressModal(`Adding a "${component.object}" object to every "${targetObject}" object. This could take a few seconds.`);
-            pm.show();
+            let modal;
+            modal = createProgressModal({
+                startMessage: `Adding a "${component.object}" object to every "${targetObject}" object. This could take a few seconds.`,
+                finishFunc: () => modal.hide(),
+            });
             const that = this;
             setTimeout(() => {
                 Object.keys(gTree.tree).forEach(key => {
@@ -1532,8 +1538,8 @@ const addManagerPrototype = {
                     }
                 });
                 createSvgData(newObjects).draw(gViewport);
-                pm.hide();
-                alert(`${newObjects.length} "${component.name}" objects added to the feeder`);
+                modal.endMessage = `${newObjects.length} "${component.name}" objects were added to the feeder.`,
+                modal.finish();
             }, 10);
         } else {
             alert("Mass add failed. No object can be added as a child of a line, except for recorder objects.");
@@ -2555,12 +2561,16 @@ function convertStaticLoadsIntoHouses() {
         alert(`This data has no triplex load or triplex node objects that can be converted into houses.`);
         return;
     }
-    const pm = new ProgressModal(`Converting every triplex load and/or triplex node into a house with children. This could take a few seconds.`);
-    pm.show();
+    let modal;
+    modal = createProgressModal({
+        startMessage: `Converting every triplex load and/or triplex node into a house with children. This could take a few seconds.`,
+        endMessage: `${keys.length} objects were converted into houses with children.`,
+        finishFunc: () => modal.hide()    
+    });
     setTimeout(function() {
         keys.forEach(key => { replaceLoadOrNodeWithHouse(key); });
         createSvgData(keys).draw(gViewport);
-        pm.hide();
+        modal.finish();
     }, 10);
 }
 
@@ -2910,33 +2920,41 @@ function saveFeeder(feeder) {
         processData: false,
         contentType: false,
     });
-    let cancelled = false;
-    let progressModal;
+    let modal;
     if (feeder === gReadFeeder) {
-        progressModal = new ProgressModal("Cancelling the previous operation...", "", false);
+        modal = createProgressModal({
+            startMessage: "Undoing the previous operation...",
+            endMessage: "Success. The previous operation was undone.",
+            finishFunc: () => modal.hide()
+        });
         postRequest.done(function() {
-            progressModal.hide();
-            alert("Success. Previous operation was canceled");
+            modal.finish();
+        }).fail(function() {
+            alert("The AJAX request failed to get a successful response from the server.")
         });
     } else if (feeder === gWriteFeeder) {
-        progressModal = new ProgressModal("Saving changes to your file...", "You have canceled the save.", true);
-        progressModal.button.addEventListener("click", function() {
-            cancelled = true;
-            progressModal.header.textContent = progressModal.cancelMessage;
-            progressModal.button.style.display = "none";
-        });
-        postRequest.done(function() {
-            if (cancelled) {
-                saveFeeder(gReadFeeder);
-            } else {
-                progressModal.hide();
-                alert("Success. Your data was saved.");
+        let cancelled = false;
+        modal = createProgressModal({
+            startMessage: "Saving changes to your file...",
+            endMessage: "Success. Your recent changes were saved.",
+            finishFunc: () => {
+                modal.hide();
                 // Need to do this to make sure rename doesn't break if the user saves and remains on the page.
                 gReadFeeder = deepCopy(gWriteFeeder);
+            },
+            cancelFunc: () => {
+                cancelled = true;
+                saveFeeder(gReadFeeder);
             }
         });
+        postRequest.done(function() {
+            if (!cancelled) {
+                modal.finish();
+            }
+        }).fail(function() {
+            alert("The AJAX request failed to get a successful response from the server.")
+        });
     }
-    progressModal.show();
 }
 
 /**
@@ -2962,14 +2980,16 @@ async function loadFeeder(serverFeederName, serverModelName, owner) {
     }
     let formData = new FormData();
     formData.set("referrer", "distribution");
-    const progressModal = new ProgressModal("Loading feeder from server...", "You have canceled loading the feeder.", true);
+    //const progressModal = new ProgressModal("Loading feeder from server...", "You have canceled loading the feeder.", true);
     let cancelled = false;
-    progressModal.button.addEventListener("click", function() {
-        cancelled = true;
-        progressModal.header.textContent = progressModal.cancelMessage;
-        progressModal.button.style.display = "none";
-    });
-    progressModal.show();
+    //progressModal.button.addEventListener("click", function() {
+    //    //saveFeeder(gReadFeeder)
+    //    //cancel the current request
+    //    //cancelled = true;
+    //    //progressModal.header.textContent = progressModal.cancelMessage;
+    //    //progressModal.button.style.display = "none";
+    //});
+    //progressModal.show();
     $.ajax({
         type: "POST",
         // {owner} is correct. {owner} is either "public" to load from public feeders or <current user> to load from the users feeders. {gThisOwner}
@@ -2989,7 +3009,13 @@ async function loadFeeder(serverFeederName, serverModelName, owner) {
 }
 
 /** 
- * TODO: add back ability to cancel these operations
+ * Submit a from to do one of the following:
+ * 1) Import a Milsoft, GridLAB-D, or CYME file into this .omd file.
+ * 2) Load a new blank feeder into this .omd file
+ * 3) Modify this .omd file with SCADA calibration
+ * 4) Modify this .omd file with AMI 
+ * 5) Modify this .omd file with climate
+ * 6) Modify this .omd file with anonymization
  */
 async function submitForm({formId, pollUrl, inputId}) {
     let submitForm = true;
@@ -3008,16 +3034,17 @@ async function submitForm({formId, pollUrl, inputId}) {
                 // The file does not exist. Submit the form.
                 submitForm = true;
             }
+        }).fail(function() {
+            alert("The AJAX request failed to get a successful response from the server");
         });
     }
     if (submitForm === false) {
         return;
     }
+    //showProgressModal("Submitting your file...", true);
+    // Submit the form to the server with an ajax request
     const form = document.getElementById(formId);
     const formData = new FormData(form);
-    const submitModal = new ProgressModal("Submitting your file...", "", false);
-    submitModal.show();
-    // Submit the form to the server with an ajax request
     const formRequest = $.ajax({
         type: "POST",
         url: form.action,
@@ -3029,54 +3056,47 @@ async function submitForm({formId, pollUrl, inputId}) {
         // We don't want to poll the server. Just reload the page.
         formRequest.done(function() {
             reloadWrapper();
+        }).fail(function() {
+            alert("The AJAX request failed to get a successful response from the server");
         });
     } else {
         formRequest.done(function(data) {
             let cancelled = false;
-            const pollModal = new ProgressModal("Converting your file...", "You canceled the file conversion.", true);
-            pollModal.button.addEventListener("click", function() {
-                cancelled = true;
-                pollModal.header.textContent = pollModal.cancelMessage;
-                pollModal.button.style.display = "none";
-            });
-            pollModal.show();
             // Poll the server
             const intervalId = setInterval(function() {
                 $.ajax({
                     url: pollUrl
                 }).done(function(data) {
-                    if (cancelled) {
-                        clearInterval(intervalId);
-                        pollModal.hide();
-                        alert("You cancelled the operation");
-                        saveFeeder(gReadFeeder);
+                    if (!cancelled) {
+                        if (data.exists === true) {
+                            //processing is ongoing 
+                        } else {
+                            clearInterval(intervalId);
+                            if (data.exists === false) {
+                                // The modal isn"t hidden before the alert happens. This has nothing to do with the reload wrapper.
+                                alert("Conversion complete");
+                                reloadWrapper();                             
+                            } else if (data === "milError") {
+                                alert("The .std and .seq files used are incorrectly formatted.");
+                                //TODO: submit the gReadFeeder
+                            } else if (data === "glmError") {
+                                alert("The .glm file used is incorrectly formatted.");
+                                //TODO: submit the gReadFeeder
+                            } else {
+                                console.log(data);
+                                alert("There was a problem on the server.");
+                            }
+                        }
                     }
-                    if (data.exists === true) {
-                        //processing is ongoing 
-                    } else if (data.exists === false) {
-                        // The pollModal isn"t hidden before the alert happens. This has nothing to do with the reload wrapper.
-                        clearInterval(intervalId);
-                        pollModal.hide();
-                        alert("Conversion complete");
-                        reloadWrapper();
-                    } else if (data === "milError") {
-                        clearInterval(intervalId);
-                        pollModal.hide()
-                        alert("The .std and .seq files used are incorrectly formatted.");
-                        //TODO: submit the gReadFeeder
-                    } else if (data === "glmError") {
-                        clearInterval(intervalId);
-                        pollModal.hide()
-                        alert("The .glm file used is incorrectly formatted.");
-                        //TODO: submit the gReadFeeder
-                    } else {
-                        console.log(data);
-                        clearInterval(intervalId);
-                        pollModal.hide()
-                        alert("There was a problem. Operation was cancelled");
-                    }
+                }).fail(function() {
+                    clearInterval(intervalId);
+                    alert("The AJAX request failed to get a successful response from the server.")
                 });
             }, 5000);
+            //showProgressModal("Converting your file...", true, () => {
+            //    cancelled = true;
+            //    clearInterval(intervalId);
+            //});
         });
     }
 }
@@ -3128,29 +3148,48 @@ function reloadWrapper() {
     window.location.reload(true);
 }
 
-function ProgressModal(message, cancelMessage, showButton) {
-    this.self = document.getElementById("progressModal");
-    this.button = this.self.getElementsByTagName("button")[0];
-    this.header = this.self.getElementsByTagName("h2")[0];
-    this.message = message;
-    this.cancelMessage = cancelMessage;
-    this.showButton = showButton;
-}
+const progressModalPrototype = {
 
-ProgressModal.prototype.show = function() {
-    this.header.textContent = this.message;
-    this.self.removeAttribute("style");
-    if (this.showButton) {
-        this.button.removeAttribute("style");
-    } else {
-        this.button.style.display = "none";
+    finish() {
+        this.self.querySelector("h2").textContent = this.endMessage;
+        this.spinner.style.display = "none";
+        this.finishButton.removeAttribute("style");
+    },
+
+    hide() {
+        this.self.style.display = "none";
     }
 }
 
-ProgressModal.prototype.hide = function() {
-    this.self.style.display = "none";
+/**
+ * Create a progress modal in 1 of 2 modes: First mode will show a cancel button which if clicked allows the operation to be undone. Second mode will
+ * not show a cancel button. startMessage, endMessage, and finishFunc are required parameters. Sometimes you have to set with endMessage after the
+ * progress modal has been constructed.
+ */
+function createProgressModal({startMessage, endMessage, cancelFunc, finishFunc}) {
+    const obj = Object.create(progressModalPrototype);
+    obj.self = document.getElementById("progressModal");
+    obj.spinner = obj.self.querySelector("img");
+    obj.startMessage = startMessage;
+    obj.endMessage = endMessage;
+    obj.cancelButton = obj.self.querySelector("button[data-buttonfunction='cancel']");
+    obj.cancelFunc = cancelFunc;
+    obj.finishFunc = finishFunc;
+    obj.finishButton = obj.self.querySelector("button[data-buttonfunction='submit']");
+    obj.self.querySelector("h2").textContent = startMessage;
+    obj.cancelButton.style.display = "none";
+    obj.finishButton.style.display = "none";
+    obj.finishButton.onclick = obj.finishFunc;
+    if (cancelFunc == null) {
+        obj.cancelButton.onclick = null;
+    } else {
+        obj.cancelButton.removeAttribute("style");
+        obj.cancelButton.onclick = obj.cancelFunc;
+    }
+    obj.spinner.removeAttribute("style");
+    obj.self.removeAttribute("style");
+    return obj;
 }
-
 
 /**
  * Return true if this TreeWrapper can be moved, otherwise return false;
@@ -5251,8 +5290,8 @@ function detectDrag(event) {
 //**************************************************
 
 function checkServerConversion() {
-    const modal = new ProgressModal("Checking for an in-progress server file conversion...", "", false);
-    modal.show();
+    //const modal = new ProgressModal("Checking for an in-progress server file conversion...", "", false);
+    //modal.show();
     let reload = false;
     return new Promise(function(resolve, reject) {
         const intervalId = setInterval(function pollServer() {
@@ -5263,8 +5302,8 @@ function checkServerConversion() {
                 if (data.exists === true) {
                     // There is an in-progress file conversion. Need to reload the page when it's done.
                     reload = true
-                    modal.message = "Waiting for an in-progress server file conversion to complete..."
-                    modal.show()
+                    //modal.message = "Waiting for an in-progress server file conversion to complete..."
+                    //modal.show()
                 } else if (data.exists === false) {
                     if (reload) {
                         // There was a previous in-progress conversion that just completed, so reload the page
@@ -5272,18 +5311,18 @@ function checkServerConversion() {
                     } else {
                         // There was never an in-progress file conversion, so don't bother to reload the page
                         clearInterval(intervalId)
-                        modal.hide()
+                        //modal.hide()
                         resolve()
                     }
                 } else {
                     // there was an error? Notify the user, proceed as normal.
                     clearInterval(intervalId)
-                    modal.hide()
+                    //modal.hide()
                     reject("An error occurred on the server during the file conversion process.");
                 }
             }).fail(() => {
                 clearInterval(intervalId);
-                modal.hide();
+                //modal.hide();
                 reject("The AJAX request failed to get a successful response from the server.");
             });
             return pollServer;

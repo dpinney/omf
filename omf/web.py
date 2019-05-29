@@ -932,10 +932,36 @@ def networkData(owner, modelName, networkName):
 @app.route("/saveFeeder/<owner>/<modelName>/<feederName>", methods=["POST"])
 @flask_login.login_required
 def saveFeeder(owner, modelName, feederName):
-	''' Save feeder data. '''
+	''' Save feeder data. Also used for cancelling a file import, file conversion, or feeder-load overwrite. '''
 	print "Saving feeder for:%s, with model: %s, and feeder: %s"%(owner, modelName, feederName)
 	if owner == User.cu() or "admin" == User.cu() or owner=="public":
-		with open("data/Model/" + owner + "/" + modelName + "/" + feederName + ".omd", "w") as outFile:
+		model_dir = os.path.join(_omfDir, "data/Model", owner, modelName)
+		for filename in ["ZPID.txt", "APID.txt", "WPID.txt", "CPID.txt", "PPID.txt"]:
+			pid_file = os.path.join(model_dir, filename)
+			if os.path.isfile(pid_file):
+				try:
+					with open(pid_file) as f:
+						pid = f.read()
+					os.remove(pid_file)
+					os.kill(pid, signal.SIGTERM)
+				except IOError as e:
+					if e.errno == 2:
+						# Tried to open a nonexistent file. Presumably, some other process opened the used the pid file and deleted it before this process
+						# could use it
+						pass
+					else:
+						raise
+				except OSError as e:
+					if e.errno == 2:
+						# Tried to remove a nonexistent file
+						pass
+					elif e.errno == 3:
+						# Tried to kill a process with a pid that doesn't map to an existing process.
+						pass
+					else:
+						raise
+		feeder_file = os.path.join(model_dir, feederName + ".omd")
+        with open(feeder_file, "w") as outFile:
 			payload = json.loads(request.form.to_dict().get("feederObjectJson","{}"))
 			json.dump(payload, outFile, indent=4)
 	return 'Success'
