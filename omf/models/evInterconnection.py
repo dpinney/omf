@@ -90,12 +90,12 @@ def work(modelDir, inputDict):
 	if inputDict.get("minCharge", "None") == "None":
 		minChargeValue = None
 	else:
-		minChargeValue = float(inputDict["minCharge"])
+		minChargeValue = float(inputDict["minCharge"])/100
 	# None check for maxCharge
 	if inputDict.get("maxCharge", "None") == "None":
 		maxChargeValue = None
 	else:
-		maxChargeValue = float(inputDict["maxCharge"])
+		maxChargeValue = float(inputDict["maxCharge"])/100
 	# None check for gasCost
 	if inputDict.get("gasCost", "None") == "None":
 		gasCostValue = None
@@ -106,16 +106,19 @@ def work(modelDir, inputDict):
 		workloadValue = None
 	else:
 		workloadValue = float(inputDict["workload"])
-	# None check for loadShape
-	if inputDict.get("loadShape", "None") == "None":
-		loadShapeValue = None
-	else:
-		loadShapeValue = inputDict["loadShape"]
 	# None check for loadName
 	if inputDict.get("loadName", "None") == "None":
 		loadNameValue = None
 	else:
 		loadNameValue = inputDict["loadName"]
+	# None check for loadShape
+	if inputDict.get("loadShape", "None") == "None":
+		loadShapeList = None
+	else:
+		loadShapeList = []
+		strList = inputDict["loadShape"].strip().split(',')
+		for n in strList:
+			loadShapeList.append(float(n))
 	#calculate and display EV Charging Demand image
 	demandImg = plotEVShape(
 		numVehicles = numVehiclesValue,
@@ -126,7 +129,7 @@ def work(modelDir, inputDict):
 		chargeLimit = chargeLimitValue, 
 		minCharge = minChargeValue, 
 		maxCharge = maxChargeValue, 
-		loadShape = loadShapeValue)
+		loadShape = loadShapeList)
 	demandImg.savefig(pJoin(modelDir, "evChargingDemand.png"))
 	with open(pJoin(modelDir, "evChargingDemand.png"),"rb") as evFile:
 		outData["evChargingDemand"] = evFile.read().encode("base64")
@@ -694,18 +697,18 @@ def new(modelDir):
 		"layoutAlgorithm": "geospatial",
 		"batterySize" : "50",
 		"chargeRate" : "40",
-		"efficiency" : ".5",
+		"efficiency" : "0.5",
 		"gasEfficiency" : "8",
 		"numVehicles" : "50",
 		"energyCost" : "0.12",
 		"startHour" : "8",
 		"endHour" : "10",
 		"chargeLimit" : "150",
-		"minCharge" : ".1",
-		"maxCharge" : ".5",
+		"minCharge" : "10",
+		"maxCharge" : "50",
 		"gasCost" : "2.70",
 		"workload" : "40",
-		"loadShape" : "input - 200 Employee Office, Springfield Illinois, 2001.csv",
+		"loadShape" : "76.6992804, 79.62543428, 81.65211788, 82.29854024, 89.48049964, 106.19776388, 117.92078284, 118.95137788, 117.13633436, 115.83428788, 114.2170818, 112.12138512, 111.27712532, 109.23663908, 104.7760948, 102.0224736, 101.63600044, 100.00499172, 94.49544888, 90.06020936, 89.79795972, 89.87387408, 88.20375796, 81.22733684",
 		"loadName" : "None",
 		"rezSqIn" : "400",
 		"simTime" : '2000-01-01 0:00:00'
