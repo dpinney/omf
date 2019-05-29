@@ -936,6 +936,7 @@ def saveFeeder(owner, modelName, feederName):
 	print "Saving feeder for:%s, with model: %s, and feeder: %s"%(owner, modelName, feederName)
 	if owner == User.cu() or "admin" == User.cu() or owner=="public":
 		model_dir = os.path.join(_omfDir, "data/Model", owner, modelName)
+		# Do NOT cancel any PPID.txt or PID.txt processes
 		for filename in ["ZPID.txt", "APID.txt", "WPID.txt", "CPID.txt", "PPID.txt"]:
 			pid_file = os.path.join(model_dir, filename)
 			if os.path.isfile(pid_file):
@@ -1179,7 +1180,7 @@ def anonymize(owner, feederName):
 	importProc = Process(target=backgroundAnonymize, args =[modelDir, omdPath])
 	importProc.start()
 	pid = str(importProc.pid)
-	with open(modelDir + '/PPID.txt', 'w+') as outFile:
+	with open(modelDir + '/NPID.txt', 'w+') as outFile:
 		outFile.write(pid)
 	return 'Success'
 
@@ -1218,13 +1219,13 @@ def backgroundAnonymize(modelDir, omdPath):
 			anonymization.distAddNoise(inFeeder, noisePerc)
 	with open(omdPath, 'w') as outFile:
 		json.dump(inFeeder, outFile, indent=4)
-	os.remove(modelDir + '/PPID.txt')
+	os.remove(modelDir + '/NPID.txt')
 	if newNameKey:
 		return newNameKey
 
 @app.route("/checkAnonymize/<owner>/<modelName>", methods=["POST","GET"])
 def checkAnonymize(owner, modelName):
-	pidPath = ('data/Model/' + owner + '/' + modelName + '/PPID.txt')
+	pidPath = ('data/Model/' + owner + '/' + modelName + '/NPID.txt')
 	# print 'Check conversion status:', os.path.exists(pidPath), 'for path', pidPath
 	# checks to see if PID file exists, if theres no PID file process is done.
 	return jsonify(exists=os.path.exists(pidPath))
