@@ -6,6 +6,7 @@ from os.path import join as pJoin
 import pandas as pd
 import numpy as np
 from datetime import datetime as dt
+from numpy import npv
 
 import __neoMetaModel__
 from __neoMetaModel__ import *
@@ -15,6 +16,9 @@ from solvers import VB
 modelName, template = metadata(__file__)
 tooltip = "Calculate the energy storage capacity for a collection of thermostatically controlled loads."
 hidden = True
+
+def n(num):
+	return "${:,.2f}".format(num)
 
 def pyVbat(tempCurve, modelDir, i):
 	vbType = i['load_type']
@@ -43,6 +47,8 @@ def pyVbat(tempCurve, modelDir, i):
 
 
 def run_fhec(ind, gt_demand, Input):
+	# Input.to_csv('fhec_input.csv', index=False)
+
 	fhec_kwh_rate = float(ind["electricityCost"]) # $/kW
 	fhec_peak_mult = float(ind["peakMultiplier"])
 
@@ -126,7 +132,7 @@ def run_fhec(ind, gt_demand, Input):
 	output = []
 	for hour in VBpower:
 		var_output = {
-			'Date/Time': Input.loc[hour, "Date/Time"],
+			# 'Date/Time': Input.loc[hour, "Date/Time"],
 			'Hour': hour,
 			'VB energy (kWh)': int(100*VBenergy[hour].varValue)/100,
 			'VB power (kW)': int(100*VBpower[hour].varValue)/100,
@@ -136,9 +142,15 @@ def run_fhec(ind, gt_demand, Input):
 		}
 		output.append(var_output)
 	output_df = pd.DataFrame.from_records(output)
+
+	# output_df.to_csv('fhec_output.csv', index=False)
+
 	return output_df
 
 def run_okec(ind, Input):
+
+	# Input.to_csv('okec_input.csv', index=False)
+
 	okec_peak_charge = float(ind["annual_peak_charge"]) # annual peak demand charge $100/kW
 	okec_avg_demand_charge = float(ind["avg_demand_charge"]) # $120/kW
 	okec_fuel_charge = float(ind["fuel_charge"]) # total energy $/kWh
@@ -215,8 +227,11 @@ def run_okec(ind, Input):
 			'Regulation (kW)': int(100*reg_up[hour].varValue)/100
 		}
 		output.append(var_output)
+
 	output_df = pd.DataFrame.from_records(output)
 	
+	# output_df.to_csv('okec_output.csv', index=False)
+
 	return output_df
 
 def work(modelDir, ind):
@@ -224,7 +239,7 @@ def work(modelDir, ind):
 	
 	try:
 		tempCurve = [float(x) for x in ind["tempCurve"].split('\n')]
-		gt_demand = [float(x) for x in ind["gt_demandCurve"].split('\n')] if ind["payment_structure"] == "fhec" else []
+		gt_demand = [float(x) for x in ind["gt_demandCurve"].split('\n')] if ind["payment_structure"] == "gt" else []
 		with open(pJoin(modelDir, 'inputCsv.csv'), 'w') as f:
 			f.write(ind["inputCsv"].replace('\r', ''))
 	except:
@@ -241,12 +256,64 @@ def work(modelDir, ind):
 	input_df['VB Energy upper (kWh)'] = E_UL
 	input_df['VB Energy lower (kWh)'] = [-x for x in E_UL]
 	
-	if ind["payment_structure"] == "fhec":
+	if ind["payment_structure"] == "gt":
 		output_df = run_fhec(ind, gt_demand, input_df)
+
 	else:
 		output_df = run_okec(ind, input_df)
-
+		
 	out["show_gt"] = "none" if len(gt_demand) == 0 else "";
+		
+	# ------------------------------- CASH FLOW --------------------------- #
+	number_devices = float(ind["number_devices"])
+	upkeep_cost = float(ind["unitUpkeepCost"])
+	device_cost = float(ind["unitDeviceCost"])
+	projYears = int(ind["projectionLength"])
+
+	if ind["payment_structure"] == "gt":
+		np_gt_demand = gt_demand #np.array(gt_demand)
+		threshold = np.percentile(np_gt_demand, float(ind["peakPercentile"])*100)
+		indexes = [i for i, l in enumerate(gt_demand) if l >= threshold]
+		
+		mult = float(ind["peakMultiplier"])
+		rate = float(ind["electricityCost"])
+		
+		price_structure_before = sum([l*rate*mult if i in indexes else l*rate for i, l in enumerate(output_df["Load (kW)"])])
+		price_structure_after = sum([l*rate*mult if i in indexes else l*rate for i, l in enumerate(output_df["Net load (kW)"])])
+	if ind["payment_structure"] == "ppm":
+		price_structure_before = (output_df['Load (kW)'].max()*float(ind["annual_peak_charge"]) + 
+			output_df['Load (kW)'].mean()*float(ind["avg_demand_charge"]))
+		price_structure_after = (output_df['Net load (kW)'].max()*float(ind["annual_peak_charge"]) + 
+			output_df['Net load (kW)'].mean()*float(ind["avg_demand_charge"]))
+	
+	regulation_after = (output_df['Regulation (kW)']*input_df['Reg-up Price ($/kWh)']).sum()
+
+	total_upkeep_costs = upkeep_cost*number_devices
+	cost_before = price_structure_before
+	cost_after = price_structure_after - regulation_after
+	
+	gross_savings = cost_before - cost_after
+	money_saved = gross_savings - total_upkeep_costs
+
+	styling = "style='border-bottom: 3px solid black;'"
+
+	out['cost_table'] = (
+			"<tr><td style='font-weight: bold;'>Price Structure</td><td>{0}</td><td>{1}</td><td>{2}</td></tr>"
+			"<tr {6}><td style='font-weight: bold; border-bottom: 3px solid black;'>Regulation</td><td {6}>{3}</td><td {6}>{4}</td><td {6}>{5}</td></tr>"
+		).format(n(price_structure_before), n(price_structure_after), n(price_structure_before - price_structure_after),
+				n(0), n(regulation_after), n(regulation_after), 
+				styling) + (
+				"<tr><td colspan='2'>&nbsp;</td><td style='font-weight: bold;'>Gross Savings</td><td>{0}</td></tr>"
+			"<tr><td colspan='2'>&nbsp;</td><td style='font-weight: bold;'>Upkeep Cost</td><td>-{1}</td></tr>"
+			"<tr><td colspan='2'>&nbsp;</td><td style='font-weight: bold;'>Total Savings</td><td>{2}</td></tr>"
+		).format(n(gross_savings), n(total_upkeep_costs), n(money_saved))
+
+	cashFlowCurve = [money_saved for year in range(projYears)]
+	cashFlowCurve.insert(0, -1 * number_devices * device_cost)  # insert initial investment
+	out['SPP'] = (number_devices*device_cost)/(money_saved)
+	out['netCashflow'] = cashFlowCurve
+	out['cumulativeCashflow'] = [sum(cashFlowCurve[:i+1]) for i, d in enumerate(cashFlowCurve)]
+	out['NPV'] = npv(float(ind["discountRate"])/100, cashFlowCurve)
 
 	out["gt_demand"] = gt_demand
 	out["demand"] = output_df['Load (kW)'].tolist()
@@ -254,6 +321,12 @@ def work(modelDir, ind):
 	out["VBenergy"] = output_df['VB energy (kWh)'].tolist()
 	out["demandAdjusted"] = output_df['Net load (kW)'].tolist()
 	out["regulation"] = output_df['Regulation (kW)'].tolist()
+
+	out['vbpu'] = input_df['VB Power upper (kW)'].tolist()
+	out['vbpl'] = input_df['VB Power lower (kW)'].tolist()
+	out['vbeu'] = input_df['VB Energy upper (kWh)'].tolist()
+	out['vbel'] = input_df['VB Energy lower (kWh)'].tolist()
+
 	out["stdout"] = "Success"
 	return out
 
@@ -262,6 +335,10 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		"user": "admin",
+		# options for dispatch
+		"use_deferral": "use_deferral",
+		# "use_price_structure": True,
+		# "use_regulation": True,
 		# VB inputs
 		"number_devices": "2000",
 		"load_type": "1",
@@ -271,18 +348,19 @@ def new(modelDir):
 		"cop": "2.5",
 		"setpoint": "22.5",
 		"deadband": "0.625",
-		"electricityCost":"0.041",
 		"projectionLength":"15",
 		"discountRate":"2",
 		"unitDeviceCost":"150",
 		"unitUpkeepCost":"5",
+		"dispatchLimit": "None",
 		# By dispatch
-		"payment_structure": "okec",
-		# okec
+		"payment_structure": "ppm", # "ppm"
+		# ppm
 		"annual_peak_charge": "100",
 		"avg_demand_charge": "120",
 		"fuel_charge": "0.002",
-		# fhec
+		# gt
+		"electricityCost":"0.041",
 		"peakMultiplier": "2.5",
 		"peakPercentile": "0.99",
 		"gt_demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","fhec_2017_gt.csv")).read(),

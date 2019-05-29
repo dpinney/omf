@@ -4,9 +4,7 @@
 import json, os, shutil, csv
 import numpy as np
 import pandas as pd
-
 from os.path import join as pJoin
-from matplotlib import pyplot as plt
 
 # OMF imports 
 from omf.models import __neoMetaModel__
@@ -118,22 +116,23 @@ def work(modelDir, ind):
 	# ----------------------------------------------------------------------- #
 
 
-	# ---------------------------- MOTOR TABLE ------------------------------ #
-	df_all_motors = pd.DataFrame()
-	for phase in ['A', 'B', 'C']:
-		df_phase = _readCSV(pJoin(modelDir, 'threephase_VA_'+ phase + solar_suffix + '.csv'))
-		df_phase.columns = [phase + '_' + c for c in df_phase.columns]
-		if df_all_motors.shape[0] == 0:
-			df_all_motors = df_phase
-		else:
-			df_all_motors = df_all_motors.join(df_phase)
+	# --------------------------- MOTOR TABLES ------------------------------ #
+	for suffix in [base_suffix, solar_suffix]:
+		df_all_motors = pd.DataFrame()
+		for phase in ['A', 'B', 'C']:
+			df_phase = _readCSV(pJoin(modelDir, 'threephase_VA_'+ phase + suffix + '.csv'))
+			df_phase.columns = [phase + '_' + c for c in df_phase.columns]
+			if df_all_motors.shape[0] == 0:
+				df_all_motors = df_phase
+			else:
+				df_all_motors = df_all_motors.join(df_phase)
 
-	o['motor_table'] = ''.join([(
-		"<tr>"
-			"<td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td><td>{5}</td><td>{6}</td>"
-		"</tr>"
-	).format(motor, n(r['A_real']), n(r['A_imag']), n(r['B_real']), n(r['B_imag']), n(r['C_real']), n(r['C_imag'])) 
-		for motor, r in df_all_motors.iterrows()])
+		o['motor_table' + suffix] = ''.join([(
+			"<tr>"
+				"<td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td><td>{5}</td><td>{6}</td>"
+			"</tr>"
+		).format(motor, n(r['A_real']), n(r['A_imag']), n(r['B_real']), n(r['B_imag']), n(r['C_real']), n(r['C_imag'])) 
+			for motor, r in df_all_motors.iterrows()])
 	# ----------------------------------------------------------------------- #
 
 	return o

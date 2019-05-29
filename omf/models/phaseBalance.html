@@ -46,6 +46,9 @@
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/d3.v3.js"></script>
+	<!-- DataTables -->
+	<link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+	<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
 	<!-- Data  Imports -->
 	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
 	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
@@ -71,6 +74,10 @@
 		    //gebi(tabName).style.display = "block";
 		    evt.currentTarget.className += " active";
 		}
+		$(document).ready(function() {
+			console.log($('#inverterOutputs'));
+    	$('.dt').DataTable({ 'paging': false});
+		});
 	</script>
 </head>
 <body onload="init()">
@@ -242,24 +249,10 @@
 			</div>	
 		</div>
 		<script>document.getElementById('firstTabButton').click();//Hack, get first tab to show.</script>
-		<p class="reportTitle postRun" style="page-break-before:always">Three Phase (Motor) Loads Power and Imbalance with Solar</p>
-		<div class="tightContent tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
-			<table id="realImgPower">
-				<tr>
-					<th>Name</th>
-					<th>A Pow</th>
-					<th>A VAR</th>
-					<th>B Pow</th>
-					<th>B VAR</th>
-					<th>C Pow</th>
-					<th>C VAR</th>
-				</tr>
-				{{allOutputDataDict['motor_table']}}
-			</table>
-		</div>
+
 		<p class="reportTitle postRun" style="page-break-before:always">Feeder Power Summary</p>
 		<div class="tightContent tableContainer postRun">
-			<table id="costService">
+			<table id="feederSummary">
 				<tr>
 					<th></th>
 					<th>Base Case</th>
@@ -294,18 +287,22 @@
 		</div>
 		<p class="reportTitle postRun" style="page-break-before:always">Inverter Power Outputs</p>
 		<div class="tightContent tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
-			<table id="costService">
-				<tr>
-					<th>Name</th>
-					<th>Uncontrolled P</th>
-					<th>Uncontrolled Q</th>
-					<th>Controlled P</th>
-					<th>Controlled Q</th>
-				</tr>
-				{{allOutputDataDict['inverter_table']}}
+			<table class="dt" id="inverterOutputs" style="padding: 10px;">
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Uncontrolled Pow</th>
+						<th>Uncontrolled VAR</th>
+						<th>Controlled Pow</th>
+						<th>Controlled VAR</th>
+					</tr>
+				</thead>	
+				<tbody>
+					{{allOutputDataDict['inverter_table']}}
+				</tbody>
 			</table>
 		</div>
-		<p class="reportTitle postRun">Simulation Location</p>
+		<!-- <p class="reportTitle postRun">Simulation Location</p>
 		<div id="studyDetail" class="tightContent postRun detailsContainer" style="position: relative">
 			<div id="mapHere"></div>
 			<script type="text/javascript">
@@ -341,6 +338,53 @@
 						.attr("class", "HighlightCircle")
 					circle.append("svg:title").text(climate)})
 			</script>
+		</div> -->
+		<p class="reportTitle postRun" style="page-break-before:always; text-align:center; font-weight: bold;">Three Phase (Motor) Loads Power and Imbalance</p>
+		<p class="reportTitle postRun" style="page-break-before:always">Base</p>
+		<div class="tightContent tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
+			<table id="realImgPower">
+				<tr>
+					<th>Name</th>
+					<th>A Pow</th>
+					<th>A VAR</th>
+					<th>B Pow</th>
+					<th>B VAR</th>
+					<th>C Pow</th>
+					<th>C VAR</th>
+				</tr>
+				{{allOutputDataDict['motor_table_base']}}
+			</table>
+		</div>
+		<p class="reportTitle postRun" style="page-break-before:always">Solar</p>
+		<div class="tightContent tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
+			<table id="realImgPower">
+				<tr>
+					<th>Name</th>
+					<th>A Pow</th>
+					<th>A VAR</th>
+					<th>B Pow</th>
+					<th>B VAR</th>
+					<th>C Pow</th>
+					<th>C VAR</th>
+				</tr>
+				{{allOutputDataDict['motor_table_solar']}}
+			</table>
+		</div>
+	</div>
+	<p class="reportTitle postRun" style="page-break-before:always">Controlled</p>
+		<div class="tightContent tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
+			<table id="realImgPower">
+				<tr>
+					<th>Name</th>
+					<th>A Pow</th>
+					<th>A VAR</th>
+					<th>B Pow</th>
+					<th>B VAR</th>
+					<th>C Pow</th>
+					<th>C VAR</th>
+				</tr>
+				<!-- {{allOutputDataDict['motor_table_solar']}} -->
+			</table>
 		</div>
 	</div>
 </body>

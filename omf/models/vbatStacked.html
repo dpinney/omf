@@ -37,7 +37,7 @@
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<!-- Required Inputs -->
 			<div class="shortInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-vbatDispatch" target="blank" style="font-weight:bold">Help?</a></label>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-vbatStacked" target="blank" style="font-weight:bold">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
@@ -105,6 +105,14 @@
 				</select>
 			</div>
 			<div class="shortInput">
+				<label class="tooltip"><span class="classic">What revenue strategies would you like stacked?</span>
+					<input type="checkbox" name="use_deferral" value="use_deferral">Deferral &nbsp; &nbsp;
+					<input type="checkbox" name="use_payment_structure" value="use_payment_structure" checked>Payment Structure <br>
+					<input type="checkbox" name="use_regulation" value="use_regulation" checked>Regulation 
+				</label>
+				
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Number of Devices<span class="classic">Total number of devices to simulate. Must be greater than 99</span></label>
 				<input type="text" id="number_devices" name="number_devices" pattern="[1-9][0-9]{2,8}" required="required">
 			</div>
@@ -141,16 +149,16 @@
 				<input type="text" id="unitUpkeepCost" name="unitUpkeepCost" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Energy Cost ($/kWh)<span class="classic">Cost of energy bought by the utility. I.e. wholesale (not retail) cost.</span></label>
-				<input type="text" id="electricityCost" name="electricityCost" pattern="^\d+\.?\d*?$" required="required">
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">Financial Projection Length (years)<span class="classic">Number of years to project out estimated savings.</span></label>
 				<input type="text" id="projectionLength" name="projectionLength" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Discount Rate (%)<span class="classic">Discount rate used in financial analysis.</span></label>
 				<input type="text" id="discountRate" name="discountRate" pattern="[1-9][0-9]{0,2}" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Dispatch Limit<span class="classic">Maximum number of days per year that Direct Load Control can be implemented. Enter "None" if no limit necessary.</span></label>
+				<input type="text" id="dispatchLimit" name="dispatchLimit" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Input CSV (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
@@ -170,20 +178,19 @@
 					<input id="tempCurveFileName" name="tempCurveFileName" value='' readonly class="uploadFileName">
 				</div>
 			</div>
-
 			<div class="shortInput">
-				<label class="tooltip">FHEC or OKEC<span class="classic"></span></label>
+				<label>Choose payment payment structure</label>
 				<select id="payment_structure" onchange="loadDefaultParameters()" name="payment_structure">
-					<option value="fhec">FHEC</option>
-					<option value="okec">OKEC</option>
+					<option value="gt">G&T Peak Charge</option>
+					<option value="ppm">Peak Percentile Multiplier</option>
 				</select>
 			</div>
 			<div class="wideInput">
-				<p class="inputSectionHeader">FHEC</p>
+				<p class="inputSectionHeader">G&T Peak Charge</p>
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">G&T Curve (.csv file) (FHEC)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
+				<label class="tooltip">G&T Curve (.csv file) (G&T Peak Charge)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
 				<input id="gt_demandCurveFile" type="file" style="display:none" onchange="handle_files(this.files,'gt_demandCurve','gt_demandCurveFileName')">
 				<input id="gt_demandCurve" name="gt_demandCurve" type="hidden">
 				<div>
@@ -192,27 +199,31 @@
 				</div>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Peak Multiplier<span class="classic"></span></label>
+				<label class="tooltip">Peak Multiplier<span class="classic">Cost multiplies when above yearly percentile</span></label>
 				<input type="text" id="peakMultiplier" name="peakMultiplier" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Peak Percentile<span class="classic"></span></label>
+				<label class="tooltip">Peak Percentile<span class="classic">Threshold for peak multiplier (Between 0 and 1)</span></label>
 				<input type="text" id="peakPercentile" name="peakPercentile" pattern="^\d+\.?\d*?$" required="required">
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Energy Cost ($/kWh)<span class="classic">Cost of energy bought by the utility. I.e. wholesale (not retail) cost.</span></label>
+				<input type="text" id="electricityCost" name="electricityCost" pattern="^\d+\.?\d*?$" required="required">
+			</div>
 			<div class="wideInput">
-				<p class="inputSectionHeader">OKEC</p>
+				<p class="inputSectionHeader">Peak Percentile Multiplier</p>
 			</div> 
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Annual Peak Charge<span class="classic"></span></label>
+				<label class="tooltip">Annual Peak Charge<span class="classic">Demand charge applied to annual peak ($/kW)</span></label>
 				<input type="text" id="annual_peak_charge" name="annual_peak_charge" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Avg Demand Charge<span class="classic"></span></label>
+				<label class="tooltip">Avg Demand Charge<span class="classic">Annual charge applied to the year's average demand ($/kW)</span></label>
 				<input type="text" id="avg_demand_charge" name="avg_demand_charge" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Fuel Charge <span class="classic"></span></label>
+				<label>Fuel Charge</label>
 				<input type="text" id="fuel_charge" name="fuel_charge" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			
@@ -240,45 +251,7 @@
 	</div>
 	<!-- Output tables, graphs, etc. -->
 	<div id="output" class="postRun">
-		<!-- Removed to avoid confusion -->
-		<!-- <p class="reportTitle postRun" style="page-break-before:always">Participation Heuristic</p>
-		<div id="tempReport" class="tightContent postRun">
-			<div id="participationChart"></div>
-			<script>
-				new Highcharts.Chart({"credits":{"enabled":false},
-					"plotOptions":{
-						"series":{
-							"animation":false,
-							// "pointStart":Date.parse(allOutputData.startDate),
-							"shadow":false,
-							"pointInterval":3600000},
-						"line":{"marker":{"enabled":false}}},
-					"xAxis":{
-						"maxZoom":108000000,
-						"tickColor":"gray",
-						"dateTimeLabelFormats":{
-							"month": '%b %e'
-						},
-						"type":"datetime",
-						"lineColor":"gray"
-					},
-					"yAxis":{
-						"title":{"text":"Power (kW)","style":{"color":"gray"}},
-					},
-					"title":{"text": allOutputData.dataCheck, "verticalAlign":"bottom", "align":"right", "y":-400, "x":-150, "style":{"color":"gray", "fontSize":"36px"}},
-					"series":[
-						{"name":"Minimum Power (kW)","marker":{"enabled":false},"color":"black","data":allOutputData.minPowerSeries},
-						{"name":"Maximum Power (kW)","marker":{"enabled":false},"color":"gray","data":allOutputData.maxPowerSeries},
-						{"name":"Minimum Energy (kWh)","marker":{"enabled":false},"color":"purple","data":allOutputData.minEnergySeries},
-						{"name":"Maximum Energy (kWh)","marker":{"enabled":false},"color":"blue","data":allOutputData.maxEnergySeries},
-					],
-					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"participationChart","type":"line","marginRight":20, "height":500,"width":1000},
-					"tooltip":{"valueDecimals":1},
-					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
-			</script>
-		</div> -->
-		<!--  -->
-		<p class="reportTitle postRun" style="page-break-before:always">VBAT Energy Available & Demand Impact</p>
+		<p class="reportTitle postRun" style="page-break-before:always">Demand before and after VBAT</p>
 		<div id="powerReport" class="tightContent postRun">
 			<div id="powerChart"></div>
 			<script>
@@ -300,23 +273,90 @@
 						"lineColor":"gray"
 					},
 					"yAxis":{
-						"title":{"text":"Unit","style":{"color":"gray"}},
+						"title":{"text":"kW","style":{"color":"gray"}},
 					},
 					"title":{"text": allOutputData.dataCheck, "verticalAlign":"bottom", "align":"right", "y":-400, "x":-150, "style":{"color":"gray", "fontSize":"36px"}},
 					"series":[
-						{"name":"Optimal dispatch (kW)","marker":{"enabled":false},"color":"red","data":allOutputData.VBpower,"pointPlacement": +0.1},
-						{"name":"VBAT state of charge (kWh)","marker":{"enabled":false},"color":"purple","data":allOutputData.VBenergy,"pointPlacement": -0.2},
-						{"name":"Demand (kW)","marker":{"enabled":false},"color":"gray","data":allOutputData.demand},
-						{"name":"Demand after VBAT (kW)","marker":{"enabled":false},"color":"blue","data":allOutputData.demandAdjusted},
-						{"name":"Regulation","marker":{"enabled":false},"color":"orange","data":allOutputData.regulation}
-						// {"name":"Day-ahead Prediction","marker":{"enabled":false},"color":"orange","data":allOutputData.predictedLoad},
+						{"name":"Demand","marker":{"enabled":false},"color":"gray","data":allOutputData.demand},
+						{"name":"Demand after VBAT","marker":{"enabled":false},"color":"blue","data":allOutputData.demandAdjusted},
 					],
 					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"powerChart","type":"line","marginRight":20, "height":500,"width":1000},
 					"tooltip":{"valueDecimals":1},
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-		<!-- {{ allOutputDataDict['show_gt'] }} -->
+		<p class="reportTitle postRun" style="page-break-before:always">VBAT Energy and Power limits</p>
+		<div id="vbatLimits" class="tightContent postRun"></div>
+			<script>
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{
+						"series":{
+							"animation":false,
+							// "pointStart":Date.parse(allOutputData.startDate),
+							"shadow":false,
+							"pointInterval":3600000},
+						"line":{"marker":{"enabled":false}}},
+					"xAxis":{
+						"maxZoom":108000000,
+						"tickColor":"gray",
+						"dateTimeLabelFormats":{
+							"month": '%b %e'
+						},
+						"type":"datetime",
+						"lineColor":"gray"
+					},
+					"yAxis":{
+						"title":{"text":"(kW)","style":{"color":"gray"}},
+					},
+					"title":{"text": allOutputData.dataCheck, "verticalAlign":"bottom", "align":"right", "y":-400, "x":-150, "style":{"color":"gray", "fontSize":"36px"}},
+					"series":[
+						{"name":"Optimal dispatch","marker":{"enabled":false},"color":"red","data":allOutputData.VBpower,"pointPlacement": +0.1},
+						{"name":"VBAT state of charge","marker":{"enabled":false},"color":"purple","data":allOutputData.VBenergy,"pointPlacement": -0.2},
+						{"name":"VB Power upper","marker":{"enabled":false},"color":"black","data":allOutputData.vbpu,"pointPlacement": -0.2},
+						{"name":"VB Power lower","marker":{"enabled":false},"color":"black","data":allOutputData.vbpl,"pointPlacement": -0.2},
+						{"name":"VB Energy upper","marker":{"enabled":false},"color":"orange","data":allOutputData.vbeu,"pointPlacement": -0.2},
+						{"name":"VB Energy lower","marker":{"enabled":false},"color":"orange","data":allOutputData.vbel,"pointPlacement": -0.2},
+					],
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"vbatLimits","type":"line","marginRight":20, "height":500,"width":1000},
+					"tooltip":{"valueDecimals":1},
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
+		</div>
+		<div id="regulationChart" class="tightContent postRun"></div>
+			<script>
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{
+						"series":{
+							"animation":false,
+							// "pointStart":Date.parse(allOutputData.startDate),
+							"shadow":false,
+							"pointInterval":3600000},
+						"line":{"marker":{"enabled":false}}},
+					"xAxis":{
+						"maxZoom":108000000,
+						"tickColor":"gray",
+						"dateTimeLabelFormats":{
+							"month": '%b %e'
+						},
+						"type":"datetime",
+						"lineColor":"gray"
+					},
+					"yAxis":{
+						"title":{"text":"(kW)","style":{"color":"gray"}},
+					},
+					"title":{"text": allOutputData.dataCheck, "verticalAlign":"bottom", "align":"right", "y":-400, "x":-150, "style":{"color":"gray", "fontSize":"36px"}},
+					"series":[
+						{"name":"Regulation","marker":{"enabled":false},"color":"purple","data":allOutputData.regulation,"pointPlacement": -0.2},
+						{"name":"VB Power upper","marker":{"enabled":false},"color":"black","data":allOutputData.vbpu,"pointPlacement": -0.2},
+						{"name":"VB Power lower","marker":{"enabled":false},"color":"black","data":allOutputData.vbpl,"pointPlacement": -0.2},
+						{"name":"VB Energy upper","marker":{"enabled":false},"color":"orange","data":allOutputData.vbeu,"pointPlacement": -0.2},
+						{"name":"VB Energy lower","marker":{"enabled":false},"color":"orange","data":allOutputData.vbel,"pointPlacement": -0.2},
+					],
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"regulationChart","type":"line","marginRight":20, "height":500,"width":1000},
+					"tooltip":{"valueDecimals":1},
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
+		</div>
 		<div class="conditional_show" style="display: {{ allOutputDataDict['show_gt'] }};">
 			<p class="reportTitle postRun" style="page-break-before:always;">G&T demand</p>
 			<div id="demandReport" class="tightContent postRun">
@@ -339,7 +379,7 @@
 							"lineColor":"gray"
 						},
 						"yAxis":{
-							"title":{"text":"Demand (kWh)","style":{"color":"gray"}},
+							"title":{"text":"kW","style":{"color":"gray"}},
 						},
 						"title":{"text":null},
 						"series":[
@@ -350,6 +390,40 @@
 						"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":0,"y":0,"layout":"horizontal"}})
 				</script>
 			</div>
+		</div>
+		<p class="reportTitle postRun" style="page-break-before:always">Annual Savings Breakdown</p>
+		<div class="tightContent tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
+			<table id="costTable" style="padding: 10px;">
+				<thead>
+					<tr>
+						<th>&nbsp;</th>
+						<th>Before</th>
+						<th>After</th>
+						<th>Savings</th>
+					</tr>
+				</thead>	
+				<tbody>
+					{{allOutputDataDict['cost_table']}}
+				</tbody>
+			</table>
+		</div>
+		
+		<p class="reportTitle postRun" style="page-break-before:always">Cash Flow</p>
+		<div id="cashFlowReport" class="tightContent postRun">
+			<div id="cashFlowChartDiv"></div>
+			<script>
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{"column":{"stacking":'normal'},"series":{"animation":false,"shadow":false},"spline":{"animation":false,"shadow":false}},
+					"xAxis":{"title":{"text":"Year After Installation","style":{"color":"gray"}},"type":"linear","tickColor":"gray","tickInterval":1,"lineColor":"gray","minorTickColor":"gray", "minorTickInterval":5},
+					"title":{"text":"NPV:$" + delimitNumbers(allOutputData.NPV.toFixed(0)) + "; SPP:" + allOutputData.SPP.toFixed(3), "verticalAlign":"bottom", "align":"right", "y":-50, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
+					"series":[{"name":"Net Benefits", "data":allOutputData.netCashflow},
+						{"name":"Cumulative Return", "type":"spline", "data":allOutputData.cumulativeCashflow}
+					],
+					"yAxis":{"title":{"text":"Income ($)","style":{"color":"gray"}}},
+					"chart":{"marginBottom":55,"zoomType":"x","renderTo":"cashFlowChartDiv","type":"column","marginRight":20, "height":250,"width":1000},
+					"tooltip":{"valueDecimals":1},
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
 		</div>
 	</div>
 </body>
