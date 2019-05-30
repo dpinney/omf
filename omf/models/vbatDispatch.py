@@ -310,7 +310,7 @@ def workForecast(modelDir, ind):
 	o['SPP'] = cellCost / annualEarnings
 	o['netCashflow'] = cashFlowList
 	o['cumulativeCashflow'] = [sum(cashFlowList[:i+1]) for i, d in enumerate(cashFlowList)]
-	
+
 	o['stdout'] = 'Success'
 	return o
 
@@ -339,7 +339,7 @@ def new(modelDir):
 		"modelType": modelName,
 		## FORECAST ##
 		'histFileName': 'd_Texas_17yr_TempAndLoad.csv',
-		'dispatch_type': 'prediction', # 'optimal'
+		'dispatch_type': 'optimal', #'prediction', # 'optimal'
 		'epochs': '100',
 		'confidence': '90',
 		"histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","d_Texas_17yr_TempAndLoad.csv"), 'rU').read(),

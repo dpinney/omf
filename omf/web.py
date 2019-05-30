@@ -1277,12 +1277,12 @@ def root():
 	publicModels = [{"owner":"public","name":x} for x in safeListdir("data/Model/public/")]
 	userModels = [{"owner":User.cu(), "name":x} for x in safeListdir("data/Model/" + User.cu())]
 	allModels = publicModels + userModels
-	# Allow admin to see all models.
+	# Allow admin to see all model instances.
 	isAdmin = User.cu() == "admin"
 	if isAdmin:
 		allModels = [{"owner":owner,"name":mod} for owner in safeListdir("data/Model/")
 			for mod in safeListdir("data/Model/" + owner)]
-	# Grab metadata for models.
+	# Grab metadata for model instances.
 	for mod in allModels:
 		try:
 			modPath = "data/Model/" + mod["owner"] + "/" + mod["name"]
@@ -1299,13 +1299,15 @@ def root():
 				mod["editDate"] = "N/A"
 		except:
 			continue
+	allModels.sort(key=lambda x:x.get('created',''), reverse=True)
+	# Get tooltips for model types.
 	modelTips = {}
 	for name in models.__all__:
 		try:
 			modelTips[name] = getattr(omf.models,name).tooltip
 		except:
 			pass
-	# Generate list of models:
+	# Generate list of model types.
 	modelNames = []
 	for modelName in models.__all__:
 		thisModel = getattr(models, modelName)

@@ -12,10 +12,6 @@ COPY requirements.txt /home/omf/
 COPY setup.py /home/omf/
 RUN cd /home/omf/; python install.py
 
-# for mybinder.org
-RUN pip install --no-cache notebook
-ENV HOME=/home/omf/omf
-
 # Run the OMF
 VOLUME ["/home/omf/omf/"]
 WORKDIR /home/omf/omf/

@@ -4,6 +4,8 @@ import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime a
 import traceback
 from os.path import join as pJoin
 from jinja2 import Template
+from random import randint, uniform
+import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib
 from networkx.drawing.nx_agraph import graphviz_layout
@@ -11,6 +13,8 @@ import networkx as nx
 from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
 plt.switch_backend('Agg')
+plt.style.use('seaborn')
+import csv
 
 # OMF imports 
 import omf.feeder as feeder
@@ -41,82 +45,112 @@ def work(modelDir, inputDict):
 	if inputDict.get("batterySize", "None") == "None":
 		batterySizeValue = None
 	else:
-		batterySizeValue = inputDict["batterySize"]
+		batterySizeValue = float(inputDict["batterySize"])
 	# None check for chargeRate
 	if inputDict.get("chargeRate", "None") == "None":
 		chargeRateValue = None
 	else:
-		chargeRateValue = inputDict["chargeRate"]
+		chargeRateValue = float(inputDict["chargeRate"])
 	# None check for efficiency
 	if inputDict.get("efficiency", "None") == "None":
 		efficiencyValue = None
 	else:
-		efficiencyValue = inputDict["efficiency"]
+		efficiencyValue = float(inputDict["efficiency"])
 	# None check for gasEfficiency
 	if inputDict.get("gasEfficiency", "None") == "None":
 		gasEfficiencyValue = None
 	else:
-		gasEfficiencyValue = inputDict["gasEfficiency"]
+		gasEfficiencyValue = float(inputDict["gasEfficiency"])
 	# None check for numVehicles
 	if inputDict.get("numVehicles", "None") == "None":
 		numVehiclesValue = None
 	else:
-		numVehiclesValue = inputDict["numVehicles"]
+		numVehiclesValue = int(inputDict["numVehicles"])
 	# None check for energyCost
 	if inputDict.get("energyCost", "None") == "None":
 		energyCostValue = None
 	else:
-		energyCostValue = inputDict["energyCost"]
+		energyCostValue = float(inputDict["energyCost"])
 	# None check for startHour
 	if inputDict.get("startHour", "None") == "None":
 		startHourValue = None
 	else:
-		startHourValue = inputDict["startHour"]
+		startHourValue = int(inputDict["startHour"])
 	# None check for endHour
 	if inputDict.get("endHour", "None") == "None":
 		endHourValue = None
 	else:
-		endHourValue = inputDict["endHour"]
+		endHourValue = int(inputDict["endHour"])
 	# None check for chargeLimit
 	if inputDict.get("chargeLimit", "None") == "None":
 		chargeLimitValue = None
 	else:
-		chargeLimitValue = inputDict["chargeLimit"]
+		chargeLimitValue = float(inputDict["chargeLimit"])
 	# None check for minCharge
 	if inputDict.get("minCharge", "None") == "None":
 		minChargeValue = None
 	else:
-		minChargeValue = inputDict["minCharge"]
+		minChargeValue = float(inputDict["minCharge"])/100
 	# None check for maxCharge
 	if inputDict.get("maxCharge", "None") == "None":
 		maxChargeValue = None
 	else:
-		maxChargeValue = inputDict["maxCharge"]
+		maxChargeValue = float(inputDict["maxCharge"])/100
 	# None check for gasCost
 	if inputDict.get("gasCost", "None") == "None":
 		gasCostValue = None
 	else:
-		gasCostValue = inputDict["gasCost"]
+		gasCostValue = float(inputDict["gasCost"])
 	# None check for workload
 	if inputDict.get("workload", "None") == "None":
 		workloadValue = None
 	else:
-		workloadValue = inputDict["workload"]
-	# None check for loadShape
-	if inputDict.get("loadShape", "None") == "None":
-		loadShapeValue = None
-	else:
-		loadShapeValue = inputDict["loadShape"]
+		workloadValue = float(inputDict["workload"])
 	# None check for loadName
 	if inputDict.get("loadName", "None") == "None":
 		loadNameValue = None
 	else:
 		loadNameValue = inputDict["loadName"]
-	chart, table = drawPlotFault(
+	# None check for loadShape
+	if inputDict.get("loadShape", "None") == "None":
+		loadShapeList = None
+	else:
+		loadShapeList = []
+		strList = inputDict["loadShape"].strip().split(',')
+		for n in strList:
+			loadShapeList.append(float(n))
+	#calculate and display EV Charging Demand image
+	demandImg = plotEVShape(
+		numVehicles = numVehiclesValue,
+		chargeRate = chargeRateValue, 
+		batterySize = batterySizeValue, 
+		startHour = startHourValue, 
+		endHour = endHourValue, 
+		chargeLimit = chargeLimitValue, 
+		minCharge = minChargeValue, 
+		maxCharge = maxChargeValue, 
+		loadShape = loadShapeList)
+	demandImg.savefig(pJoin(modelDir, "evChargingDemand.png"))
+	with open(pJoin(modelDir, "evChargingDemand.png"),"rb") as evFile:
+		outData["evChargingDemand"] = evFile.read().encode("base64")
+	#run and display fuel cost calculation
+	fuelCostHtml = fuelCostCalc(
+		numVehicles = numVehiclesValue,
+		batterySize = batterySizeValue,
+		efficiency = efficiencyValue,
+		energyCost = energyCostValue,
+		gasEfficiency = gasEfficiencyValue,
+		gasCost = gasCostValue,
+		workload = workloadValue)
+	with open(pJoin(modelDir, "fuelCostCalc.html"), "w") as fuelFile:
+		fuelFile.write(fuelCostHtml)
+	outData["fuelCostCalcHtml"] = fuelCostHtml
+	#run and display voltage drop image and protective device status table
+	voltPlotChart, protDevTable = drawPlotFault(
 		pJoin(modelDir,feederName + ".omd"),
 		neatoLayout = neato,
-		edgeCol = "Current",
-		nodeCol = "Voltage",
+		edgeCol = "PercentOfRating",
+		nodeCol = "perUnitVoltage",
 		nodeLabs = None,
 		edgeLabs = None,
 		customColormap = False,
@@ -127,10 +161,10 @@ def work(modelDir, inputDict):
 		rezSqIn = 225,
 		simTime = "2000-01-01 0:00:00",
 		workDir = modelDir)
-	chart.savefig(pJoin(modelDir, "output.png"))
+	voltPlotChart.savefig(pJoin(modelDir, "output.png"))
 	with open(pJoin(modelDir, "statusTable.html"), "w") as tabFile:
-		tabFile.write(table)
-	outData['tableHtml'] = table
+		tabFile.write(protDevTable)
+	outData['protDevTableHtml'] = protDevTable
 	with open(pJoin(modelDir, "output.png"),"rb") as inFile:
 		outData["voltageDrop"] = inFile.read().encode("base64")
 	return outData
@@ -661,15 +695,21 @@ def new(modelDir):
 		"modelType": modelName,
 		"runTime": "",
 		"layoutAlgorithm": "geospatial",
-		"edgeCol" : "Current",
-		"nodeCol" : "Voltage",
-		"nodeLabs" : "None",
-		"edgeLabs" : "None",
-		"faultLoc" : "17720",
-		"faultType" : "SLG-A",
-		"customColormap" : "False",
-		"scaleMin" : "None",
-		"scaleMax" : "None",
+		"batterySize" : "50",
+		"chargeRate" : "40",
+		"efficiency" : "0.5",
+		"gasEfficiency" : "8",
+		"numVehicles" : "50",
+		"energyCost" : "0.12",
+		"startHour" : "8",
+		"endHour" : "10",
+		"chargeLimit" : "150",
+		"minCharge" : "10",
+		"maxCharge" : "50",
+		"gasCost" : "2.70",
+		"workload" : "40",
+		"loadShape" : "76.6992804, 79.62543428, 81.65211788, 82.29854024, 89.48049964, 106.19776388, 117.92078284, 118.95137788, 117.13633436, 115.83428788, 114.2170818, 112.12138512, 111.27712532, 109.23663908, 104.7760948, 102.0224736, 101.63600044, 100.00499172, 94.49544888, 90.06020936, 89.79795972, 89.87387408, 88.20375796, 81.22733684",
+		"loadName" : "None",
 		"rezSqIn" : "400",
 		"simTime" : '2000-01-01 0:00:00'
 	}
@@ -679,40 +719,6 @@ def new(modelDir):
 	except:
 		return False
 	return creationCode
-
-# Testing for variable combinations
-# TODO: Add additional values for drawPlotFault (currently testing drawPlot)
-def _testAllVarCombos():
-	edgeColsList = {None : "None", "Current" : "C", "Power" : "P", "Rating" : "R", "PercentOfRating" : "Per"}
-	nodeColsList = {None : "None", "Voltage" : "V", "VoltageImbalance" : "VI", "perUnitVoltage" : "PUV", "perUnit120Voltage" : "PUV120"}
-	labsList = {None : "None", "Name" : "N", "Value" : "Val"}
-	boolList = {True : "T", False : "F"}
-	testNum = 1
-	for edgeColVal in edgeColsList.keys():
-		for nodeColVal in nodeColsList.keys():
-			for edgeLabVal in labsList.keys():
-				for nodeLabVal in labsList.keys():
-					for customColormapVal in boolList.keys():
-						testName = edgeColsList.get(edgeColVal) + "_" + nodeColsList.get(nodeColVal) + "_" + labsList.get(edgelabVal) + "_" + labsList.get(nodelabVal) + "_" + boolList.get(customColormapVal)
-						#print testName
-						pngName = "./drawPlotTest/drawPlot_" + testName + ".png"
-						for i in range(10):
-							try:
-								chart = drawPlot(FNAME, neatoLayout=True, edgeLabs=edgeLabVal, nodeLabs=nodeLabVal, edgeCol=edgeColVal, nodeCol=nodeColVal, customColormap=customColormapVal)
-							except IOError, e:
-								if e.errno == 2: #catch temporary IOError and retry until it passes
-									print "IOError [Errno 2] for drawPlot_" + testName + ". Retrying..."
-									continue #retry
-							except:
-								print "!!!!!!!!!!!!!!!!!! Error for drawPlot_" + testName + " !!!!!!!!!!!!!!!!!!"
-								pass
-							else:
-								chart.savefig(pngName)
-								break
-						else:
-							print "****************** Couldn't run drawPlot_" + testName + " ******************"
-						print "Test " + testNum + " of 384 completed." #384 total combinations based on current variable sets
-						testNum += 1
 
 def _testingPlot():
 	PREFIX = omf.omfDir + '/scratch/CIGAR/'
@@ -780,6 +786,75 @@ def drawTable(initialStates=None, finalStates=None, deviceTypes=None):
 		row_str += "</td></tr>"
 		html_str += row_str
 	html_str += """</tbody></table>"""
+	return html_str
+
+def plotEVShape(numVehicles=None, chargeRate=None, batterySize=None, startHour=None, endHour=None, chargeLimit=None, minCharge=None, maxCharge=None, loadShape=None, rezSqIn=None):
+	shapes = []
+	for i in range(numVehicles):
+		# Random arrival
+		charge_start = randint(startHour * 60, endHour * 60)
+		# Random charge needed
+		charge_needed = (1 - uniform(minCharge, maxCharge)) * batterySize
+		# Make an array of charging powers and set them.
+		shape = np.zeros(30*60)	# minute resolution, day + 6 hours.
+		charging_minutes = int(60 * charge_needed/chargeRate)
+		shape[charge_start: charge_start + charging_minutes] = 1.0 * chargeRate
+		shapes.append(shape)
+	def first_free_minute(shape, start_minute):
+		'Find the earliest minute a load is not charging.'
+		for m in range(start_minute, len(shape)):
+			if shape[m] == 0:
+				return m
+		# If it's never free:
+		return -1
+
+	# Peak limit a collection of load shapes.
+	shapes2 = np.copy(shapes)
+	max_minutes = len(shapes2[0])
+	for minute in range(max_minutes):	
+		tot_load = sum([x[minute] for x in shapes2])
+		if tot_load > chargeLimit:
+			reduce_perc = chargeLimit / tot_load
+			for shape in shapes2:
+				# Stick the additional charging needed at the first free time.
+				free_min = first_free_minute(shape, minute)
+				shape[free_min] = (1 - reduce_perc) * shape[minute]
+				# Reduce current load in proportion to how high the total is.
+				shape[minute] = reduce_perc * shape[minute]
+	# Plot the EV shape.
+	evShape = plt.figure()
+	plt.title('EV Charging Demand')
+	plt.stackplot(range(max_minutes), shapes2)
+	plt.ylabel('Demand (KW)')
+	plt.xlabel('Time of Day (Hour)')
+	plt.plot(sum(shapes), color='black', label='Total (Uncontrolled)')
+	plt.plot(sum(shapes2), color='black', linestyle='dotted', label='Total (Controlled)')
+	plt.xticks([x*60 for x in range(max_minutes/60)], range(max_minutes/60))
+	plt.legend()
+	#plt.show()
+	return evShape
+
+def fuelCostCalc(numVehicles=None, batterySize=None, efficiency=None, energyCost=None, gasEfficiency=None, gasCost=None, workload=None):
+	dailyGasAmount = workload/gasEfficiency #amount(gal) of gas used per vehicle, daily
+	dailyGasCost = dailyGasAmount*gasCost #amount($) spent on gas per vehicle, daily
+	totalGasCost = numVehicles*dailyGasCost #amount($) spent on gas daily for all vehicles
+	dailyEnergyAmount = workload/efficiency #amount(KWh) of energy used per vehicle, daily
+	dailyEnergyCost = dailyEnergyAmount*energyCost #amount($) spent on energy per vehicle, daily
+	totalEnergyCost = numVehicles*dailyEnergyCost #amount($) spent on energy daily for all vehicles
+	dailySavings = dailyGasCost-dailyEnergyCost #amount($) saved per vehicle, daily
+	totalSavings = totalGasCost-totalEnergyCost #amount($) saved daily
+	html_str = """
+		<div style="text-align:center">
+			<p style="padding-top:10px; padding-bottom:10px;">Driving <b>""" + str(numVehicles) +"""</b> vehicles <b>"""+ str(workload) +""" miles</b> daily, at <b>"""+ str(gasEfficiency) +""" mpg</b> and <b>$""" + str(gasCost) + """/gal</b>:</p>
+			<p>Total gas used daily:<span style="padding-left:2em">"""+str(dailyGasAmount)+""" gal</span></p>
+			<p>Daily Cost per vehicle:<span style="padding-left:2em">$"""+str(dailyGasCost)+"""</span></p>
+			<p>Total daily cost:<span style="padding-left:2em">$"""+str(totalGasCost)+"""</span></p>
+			<p style="padding-top:10px; padding-bottom:10px;">Driving <b>""" + str(numVehicles) +"""</b> vehicles <b>"""+ str(workload) +""" miles</b> daily, at <b>"""+ str(efficiency) +""" mpkwh</b> and <b>$""" + str(energyCost) + """/kwh:</b></p>
+			<p>Total energy used daily:<span style="padding-left:2em">"""+str(dailyEnergyAmount)+""" kwh</span></p>
+			<p>Daily cost per vehicle:<span style="padding-left:2em">$"""+str(dailyEnergyCost)+"""</span></p>
+			<p>Total daily cost:<span style="padding-left:2em">$"""+str(totalEnergyCost)+"""</span></p>
+			<p style="padding-top:10px; padding-bottom:10px;">Daily savings per vehicle:<span style="padding-left:1em">$"""+str(dailySavings)+"""</span><span style="padding-left:4em">Total daily savings:<span style="padding-left:1em">$"""+str(totalSavings)+"""</span></span></p>
+		</div>"""
 	return html_str
 
 def _debugging():

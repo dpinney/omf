@@ -89,63 +89,63 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Battery Size (kWh)<span class="classic">Specify the size of the Vehicle's battery in kWh.</span></label>
-				<input type="text" id="batterySize" name="batterySize"/>
+				<input type="text" id="batterySize" name="batterySize" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Charge Rate (kW)<span class="classic">Specify the charge rate of the vehicle in kW.</span></label>
-				<input type="text" id="chargeRate" name="chargeRate"/>
+				<input type="text" id="chargeRate" name="chargeRate" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Efficiency (mpk)<span class="classic">Specify the efficiency of the vehicle in mpk.</span></label>
-				<input type="text" id="efficiency" name="efficiency"/>
+				<input type="text" id="efficiency" name="efficiency" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Gas Efficiency (mpg)<span class="classic">Specify the gas efficiency of the vehicle in mpg.</span></label>
-				<input type="text" id="gasEfficiency" name="gasEfficiency"/>
+				<input type="text" id="gasEfficiency" name="gasEfficiency" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Number of Vehicles<span class="classic">Specify the number of vehicles.</span></label>
-				<input type="text" id="numVehicles" name="numVehicles"/>
+				<input type="text" id="numVehicles" name="numVehicles" pattern="^\d+$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Cost of Energy ($/kWh)<span class="classic">Specify the energy cost in $/kWh.</span></label>
-				<input type="text" id="energyCost" name="energyCost"/>
+				<input type="text" id="energyCost" name="energyCost" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Arrival Start Hour<span class="classic">Specify the hour in the day in which the charging should start (0-23).</span></label>
-				<input type="text" id="startHour" name="startHour"/>
+				<input type="text" id="startHour" name="startHour" pattern="^([0-9]|1[0-9]|2[0-3])$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Arrival End Hour<span class="classic">Specify the hour in the day in which the charging should end (0-23).</span></label>
-				<input type="text" id="endHour" name="endHour"/>
+				<input type="text" id="endHour" name="endHour" pattern="^([0-9]|1[0-9]|2[0-3])$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Charge Limit (kW)<span class="classic">Specify the charge limit in kW.</span></label>
-				<input type="text" id="chargeLimit" name="chargeLimit"/>
+				<input type="text" id="chargeLimit" name="chargeLimit" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Minimum Necessary Charge (%)<span class="classic">Specify the minimum charge needed for a vehicle in percent of the battery (0-100%).</span></label>
-				<input type="text" id="minCharge" name="minCharge"/>
+				<input type="text" id="minCharge" name="minCharge" pattern="^\d{1,3}\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Maximum Necessary Charge (%)<span class="classic">Specify the maximum charge needed for a vehicle in percent of the battery (0-100%).</span></label>
-				<input type="text" id="maxCharge" name="maxCharge"/>
+				<input type="text" id="maxCharge" name="maxCharge" pattern="^\d{1,3}\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Fuel Cost ($/gal)<span class="classic">Specify the cost of gas in $/gallon.</span></label>
-				<input type="text" id="gasCost" name="gasCost"/>
+				<input type="text" id="gasCost" name="gasCost" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Vehicle Workload<span class="classic">Specify the workload of each vehicle in miles/vehicle/day.</span></label>
-				<input type="text" id="workload" name="workload"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Hourly Load Shape (.csv)<span class="classic">Upload a .csv file representing the hourly load shape.</span></label>
-				<input type="text" id="loadShape" name="loadShape"/>
+				<input type="text" id="workload" name="workload" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Load Name<span class="classic">Specify the load name in the circuit.</span></label>
-				<input type="text" id="loadName" name="loadName"/>
+				<input type="text" id="loadName" name="loadName" required="required"/>
+			</div>
+			<div class="shortInput" style="width:100%">
+				<label class="tooltip">Hourly Load Shape<span class="classic">Please enter a list of 24 values separated by commas to represent a "peak day" load shape by hour.</span></label>
+				<input type="text" id="loadShape" name="loadShape" pattern="^(\d*\.?\d*)(,\s*\d*\.?\d*){23}$" required="required"/>
 			</div>
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
@@ -168,6 +168,15 @@
 		</script>
 	</div>
 	<div id="output">
+		<p class="reportTitle postRun" style="page-break-before:always">EV Charging Demand</p>
+		<div id="evChargingDemand" class="tightContent postRun">
+			<img id="evChargingDemandChart" style="width:1000px;height:auto;" />
+			<script type="text/javascript">gebi("evChargingDemandChart").src = "data:image/png;base64," + allOutputData.evChargingDemand</script>
+		</div>
+		<p class="reportTitle postRun" style="page-break-before:always">Fuel Cost Comparison</p>
+		<div id="fuelCostCalc" class="tightContent postRun">
+			{{ allOutputDataDict['fuelCostCalcHtml'] }}
+		</div>
 		<p class="reportTitle postRun" style="page-break-before:always">Voltage Drop Diagram</p>
 		<div id="voltageDropDiagram" class="tightContent postRun">
 			<img id="voltageDropChart" style="width:1000px;height:1000px;" />
@@ -175,7 +184,7 @@
 		</div>
 		<p class="reportTitle postRun" style="page-break-before:always">Protective Device Status</p>
 		<div id="protDevStatus" class="tightContent postRun">
-			{{ allOutputDataDict['tableHtml'] }}
+			{{ allOutputDataDict['protDevTableHtml'] }}
 		</div>
 	</div>
 </body>

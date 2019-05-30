@@ -137,12 +137,18 @@
             ul.menu li:hover {
                 background:green; color:white; 
             }
+
             /**************************************************
             // Modal Dialogs
             **************************************************/
 
             #loadModalTable {
                 width: 890px;
+            }
+            #componentTable {
+                max-height: 65vh;
+                overflow: auto;
+                min-width: 450px;
             }
             /*#milsoftInput {
                 width: 100%;
@@ -233,9 +239,6 @@
                 cursor: pointer;
                 padding: 4px 6px 4px;
             }
-            #cancelButton {
-                background-color: crimson;
-            }
             .leftText {
                 text-align: left;
             }
@@ -244,7 +247,8 @@
             }
             .scrollableList {
                 overflow: auto;
-                height: 240px;
+                /*height: 240px;*/
+                max-height: 65vh;
                 list-style-type: none;
                 /*margin: 0px 0px 0px 20px;*/
                 margin: 0px;
@@ -275,19 +279,6 @@
             }
             .buttonRow button {
                 margin-right: 5px;
-            }
-            /*
-            .treeTable {
-                background-color: white; 
-            }
-            .treeTable tr {
-            }
-            .treeTable tr:last-child {
-                border: 0px;
-            }
-            */
-            thead td {
-                
             }
             .tableInput {
                 font-size: small;
@@ -363,30 +354,9 @@
             .fullPadded {
 				padding: 5px;
             }
-            #componentList {width:250px;} /* Hack to prevent horizontal scrolling. */
-			th {
-				/*font-weight: normal;*/
-				/*background:black;*/
-				/*color:white;*/
-				/*padding: 5px 0px 5px 0px;*/
-			}
-			/*
-            #editButtonRow button {
-				font-size: small;
-				color: white;
-				background: seagreen;
-				padding: 5px;
-				border-radius: 5px;
-				width: 100%;
-			}
-            */
-            /*
-			#editButtonRow button:hover {
-				outline:0;
-				outline: none; 
-				background:mediumseagreen;
-			}
-            */
+            #componentList {
+                min-width:250px;
+            } /* Hack to prevent horizontal scrolling. */
 
             /* SVG Styling */
 
@@ -741,7 +711,7 @@
                                 <td class="fullPadded"><input type="text" value="1.0" class="modalInput"/></td>
                             </tr>
                             <tr>
-                                <td class="fullPadded"><button onclick="toggleElementDisplay('massAddModal')" class="modalButton">Cancel</button></td>
+                                <td class="fullPadded"><button data-buttonfunction="cancel" class="modalButton">Cancel</button></td>
                                 <td class="fullPadded"><button data-buttonfunction="submit" class="right modalButton">Apply</button></td>
                             </tr>
                         </tbody>
@@ -751,7 +721,10 @@
             <div id="massAddSecondaryModal" class="modal" style="display: none;">
                 <div class="modalContent">
                     <h3></h3>
-                    <div data-tableinsert></div>
+                    <div id="componentTable" data-tableinsert></div>
+                    <div style="text-align:center; padding: 10px;">
+                        <button data-buttonfunction="cancel" class="modalButton">Cancel</button>
+                    </div>
                 </div>
             </div>
             <div id="massEditModal" class="modal" style="display: none">
@@ -1471,26 +1444,32 @@ const componentManagerPrototype = {
     },
 
     /**
-     * @return {Array} - an array of component types.
+     * @return {Array} - an array of component object type strings.
      */
     getTypes() {
         return Object.keys(this.components);
     },
 
     /**
-     * @return {Array|undefined} - an array of component names of the specified type, or undefined.
+     * @return {Array|undefined} - an array of component names of the specified object type, or undefined.
      */
     getNamesOfType(objectType) {
         const objects = this.components[objectType];
         return objects == null ? undefined : Object.keys(objects);
     },
 
+    /**
+     * @return {Object} - a component object.
+     */
     get(objectType, name) {
         const objectMap = this.components[objectType];
         return objectMap == null ? undefined : objectMap[name];
     },
 
-    getAny(objectType) {
+    /**
+     * @return {Object} - whichever component object happens to be stored first in the object map for that object type.
+     */
+    getFirst(objectType) {
         const names = this.getNamesOfType(objectType);
         return names == null ? undefined : this.components[objectType][names[0]];
     },
@@ -1538,18 +1517,11 @@ const addManagerPrototype = {
         const component = this.component;
         const targetObject = this.target;
         const probability = this.probability;
-        if (component.object == null) {
-            alert("Please select a component to add.");
-            return;
-        }
-        else if (targetObject === "") {
-            alert("Please select an object to add to.");
-            return;
-        }
-        if (component.object === "recorder" || getRelationship(gComponentManager.getAny(targetObject)) !== "line") {
+        if (component.object === "recorder" || getRelationship(gComponentManager.getFirst(targetObject)) !== "line") {
             const newObjects = [];
             const pm = new ProgressModal(`Adding a "${component.object}" object to every "${targetObject}" object. This could take a few seconds.`);
             pm.show();
+            const that = this;
             setTimeout(() => {
                 Object.keys(gTree.tree).forEach(key => {
                     if (gTree.getObject(key).object === targetObject && Math.random() < probability) {
@@ -1562,7 +1534,6 @@ const addManagerPrototype = {
                 createSvgData(newObjects).draw(gViewport);
                 pm.hide();
                 alert(`${newObjects.length} "${component.name}" objects added to the feeder`);
-                toggleElementDisplay("massAddModal");
             }, 10);
         } else {
             alert("Mass add failed. No object can be added as a child of a line, except for recorder objects.");
@@ -1575,7 +1546,6 @@ const addManagerPrototype = {
      * @param {boolean} massAdd - Whether or not this is a mass add operation.
      */ 
     buildSecondaryModal(type, massAdd=false) {
-        const that = this;
         const modal = document.getElementById("massAddSecondaryModal");     
         modal.removeAttribute("style");
         const tableDiv = modal.querySelector("[data-tableinsert]");
@@ -1586,9 +1556,13 @@ const addManagerPrototype = {
         const table = document.createElement("table");
         const tBody = document.createElement("tbody");
         table.append(tBody);
-
-        const names = gComponentManager.getNamesOfType(type);
-        names.forEach(name => {
+        const that = this;
+        modal.querySelector("button[data-buttonfunction='cancel']").onclick = () => {
+            modal.style.display = "none";
+            that.component = {};
+            document.getElementById("massAddModal").querySelector("select#massAddComponentSelect").selectedIndex = 0;
+        }
+        alphabeticalForEach.bind(gComponentManager.getNamesOfType(type))(name => {
             const tr = document.createElement("tr");
             let td = document.createElement("td");
             tr.append(td);
@@ -1623,24 +1597,19 @@ const addManagerPrototype = {
         const select = document.getElementById("massAddTargetSelect");
         select.innerHTML = "";
         select.innerHTML += `<option value=${""}>${""}</option>`;
-        const types = []
-        const relationships = getExistingRelationships();
-        Object.keys(relationships).forEach(key => {
-            if (key !== "configurationNode") {
-                relationships[key].forEach(type => {
-                    types.push(type);
-                });
-            }
+        const relationships = getRelationshipsWithTypes();
+        const types = []; // I need a "types" array because I want to sort all of the types together
+        Object.keys(relationships).filter(r => r !== "configurationNode").forEach(relationship => {
+            relationships[relationship].forEach(type => types.push(type));
         });
-        const that = this;
-        types.map(type => type.toLowerCase()).sort().forEach(lowercaseType => {
-            const key = gComponentManager.getTypes().includes(lowercaseType) ? lowercaseType : getMixedCaseKey(gComponentManager.components, lowercaseType);
+        alphabeticalForEach.bind(types)(type => {
             const option = document.createElement("option");
-            option.textContent = key;
-            option.value = key;
+            option.textContent = type;
+            option.value = type;
             // Don't add event listeners to option elements, add them to the select element.
             select.append(option);
         });
+        const that = this;
         select.onchange = function() {
             that.target = this.value;
         }
@@ -1649,20 +1618,32 @@ const addManagerPrototype = {
     /* Private methods */
 
     /**
-     * I don't need to build the primary modal, but I do need to set it up.
-     * When "close" is clicked, this instance of addManager never goes away (memory leak) because of the reference to the primary modal. Also because the document elements have event listeners that link to the addManager. Easy solution is just to have one global addManager. It would be interesting to test this memory leak hypothesis. Also I'm adding multiple event listeners to the same element right?
+     * I don't need to build the primary modal, but I do need to set it up. When "close" is clicked, this instance of addManager never goes away
+     * (memory leak) because of the reference to the primary modal. Also because the document elements have event listeners that link to the
+     * addManager. Easy solution is just to have one global addManager. It would be interesting to test this memory leak hypothesis. Also I'm adding
+     * multiple event listeners to the same element right?
      */
     setupPrimaryModal() {
-        const primaryModal = document.getElementById("massAddModal");
-        const input = primaryModal.querySelector("input");
+        const modal = document.getElementById("massAddModal");
+        const input = modal.querySelector("input");
         const that = this;
         // Don't want to add an event listener every time this is set up.
         input.onchange = function() {
             that.setProbability(this);
         }
-        const applyButton = primaryModal.querySelector("button[data-buttonfunction=submit]");
-        applyButton.onclick = function() {
-            that.massAdd();
+        modal.querySelector("button[data-buttonfunction='submit']").onclick = () => {
+            if (that.component.object == null) {
+                alert("Please select a component to add.")
+            } else if (that.target === "") {
+                alert("Please select an object type to add to.")
+            } else {
+                that.massAdd();
+                toggleElementDisplay("massAddModal");
+                that.reset();
+            }
+        }
+        const cancelButton = modal.querySelector("button[data-buttonfunction='cancel']").onclick = () => {
+            toggleElementDisplay("massAddModal");
             that.reset();
         }
     },
@@ -1673,10 +1654,9 @@ const addManagerPrototype = {
     setupComponentSelect() {
         const select = document.getElementById("massAddComponentSelect");
         select.innerHTML += `<option value=${""}>${""}</option>`;// TODO: add blank item
-        const that = this;
-        gComponentManager.getTypes().forEach(type => {
-            //TODO: alphabetize
-            if (getRelationship(gComponentManager.getAny(type)) === "childNode") {
+        // Create the options in the select
+        alphabeticalForEach.bind(gComponentManager.getTypes())(type => {
+            if (getRelationship(gComponentManager.getFirst(type)) === "childNode") {
                 const names = gComponentManager.getNamesOfType(type);
                 const option = document.createElement("option");
                 select.append(option);
@@ -1690,12 +1670,13 @@ const addManagerPrototype = {
                 }
             }
         });
+        // Determine what happens when an option in the select is clicked
+        const that = this;
         select.addEventListener("change", function() {
             const value = this.options[this.selectedIndex].value;
             if (value === "") {
                 that.component = {};
-            }
-            else {
+            } else {
                 let type = this.options[this.selectedIndex].textContent;
                 if (value === "finish") {
                     const name = gComponentManager.getNamesOfType(type)[0];
@@ -1706,10 +1687,6 @@ const addManagerPrototype = {
                 }
             }
         });
-    },
-
-    setComponent() {
-
     },
 
     //add on change anonymous listener to input
@@ -1728,7 +1705,7 @@ const addManagerPrototype = {
         modal.querySelectorAll("select").forEach(s => {
             s.selectedIndex = 0;
         });
-        modal.querySelector("input").value = 1.0;
+        modal.querySelector("input").value = "1.0";
         this.target = "";
         this.component = {};
         this.probability = 1;
@@ -1996,7 +1973,7 @@ function clickLatLon(event) {
 
 function searchTerm() {
     let keys;
-    let operation = document.querySelector("input[name=searchMode]:checked").value;
+    let operation = document.querySelector("input[name='searchMode']:checked").value;
     if (operation === "searchExactString") {
         keys = findExactString(this.value.trim());
     } else if (operation === "searchSubstring") {
@@ -2118,8 +2095,6 @@ function viewElement(key) {
 
 /** 
  * TODO: add unit tests?
- * If this interface is being used as a file, we can't import jQuery with <script> so we can't use jQuery
- * styling. This function is only called when jQuery is available.
  */
  function applyJQueryStyles() {
     // Make stuff draggable
@@ -2142,12 +2117,10 @@ function viewElement(key) {
     //document.getElementById("descriptionTable").style.left = "70vw";
 }
 
-/** 
- * Ajax requests depend on jQuery, so any function that uses $.ajax() cannot be used if this interface
- * is loaded as a file. This function is called when jQuery isn't available.
+/**
+ * If this interface was rendered as a static file, and is not connected to the web server, restrict the functionality of the interface.
  */
-function disableJQueryFunctionality() {
-    //Hide stuff that doesn't work in distNetViz.py
+function disableWebFeatures() {
     Array.from(document.querySelectorAll("[data-web]")).forEach(li => {
         li.remove();
     });
@@ -2328,25 +2301,20 @@ function closeHeader() {
 /* How do I handle component variations within the select? 
 */
 function componentHandlers() {
-	const ul = document.getElementById("componentList");
-    const keys = gComponentManager.getTypes().map(type => type.toLowerCase()).sort();
-    keys.forEach(key => {
+    const ul = document.getElementById("componentList");
+    alphabeticalForEach.bind(gComponentManager.getTypes())(type => {
 		const li = document.createElement("li");
         ul.appendChild(li);
-        let names = gComponentManager.getNamesOfType(key);
-        if (names == null) {
-            key = getMixedCaseKey(gComponentManager.components, key);
-            names = gComponentManager.getNamesOfType(key);
-        }
+        let names = gComponentManager.getNamesOfType(type);
         if (names.length === 1) {
-            li.textContent = key;
-            const component = gComponentManager.get(key, names[0]);
+            li.textContent = type;
+            const component = gComponentManager.get(type, names[0]);
             const func = getAddComponentFunction(component);
             li.addEventListener("click", func);
         } else {
-            li.textContent = `${key}...`;
+            li.textContent = `${type}...`;
             li.addEventListener("click", function() {
-                gAddManager.buildSecondaryModal(key);
+                gAddManager.buildSecondaryModal(type);
             });
         }
     });
@@ -2553,7 +2521,7 @@ function toggleElementDisplay(id) {
             return;
         }
         // When we hide a modal, set any of the text fields to empty. Actually I don't always want this.
-        const queryString = `#${id} input[type=text]`;
+        const queryString = `#${id} input[type='text']`;
         document.querySelectorAll(queryString).forEach(input => {
             input.value = "";
         });
@@ -2654,44 +2622,6 @@ function addLoadsToHouse(key) {
     gTree.insert(tObject);
 }
 
-/*
-function massAdd() {
-
-    // Don't need to check if the component is a child node, since that is done elsewhere
-	const componentName = document.getElementById("componentSelect").value;
-    // Don't need to check if the attachObject is a configuration node, since that is done elsewhere. This is built correctly
-    const attachObject = document.getElementById("massAddTargetSelect").value;
-    
-    if ()
-
-    if ({} === "recorder" || {} !== "line") {
-    //if (gComponents[componentName].object === "recorder" || getRelationship(gComponents[attachObject]) !== "line") {
-        const newObjects = [];
-        const pm = new ProgressModal(`Adding a "${componentName}" object to every "${attachObject}" object. This could take a few seconds.`);
-        pm.show();
-        percent = parseFloat(percent);
-        setTimeout(() => {
-            Object.keys(gTree.tree).forEach(key => {
-                if (gTree.getObject(key).object === attachObject && Math.random() < percent) {
-                    //const tObject = createTreeObject(gComponents[componentName], gTree);
-                    const tObject = {};
-                    tObject.setupChildNode(key);
-                    gTree.insert(tObject);
-                    newObjects.push(tObject.key);
-                }
-            });
-            createSvgData(newObjects).draw(gViewport);
-            pm.hide();
-            alert(`${newObjects.length} "${componentName}" objects added to the feeder`);
-            toggleElementDisplay("massAddModal");
-        }, 10);
-
-    } else {
-        alert("Mass add failed. Only meter recorder objects can be added as children of lines.");
-    }
-}
-*/
-
 /**
  * The user could have added a new component to the graph that they now wish to attach to. That's why I have to update the attach targets.
  */
@@ -2708,14 +2638,8 @@ function updateAttachTargets(id, tree) {
             attachList.push(tree[key].object);
         }
     }
-    attachList.map(objectType => objectType.toLowerCase()).sort().forEach(lowercaseObject => {
-        let key;
-        try {
-            key = gComponentManager.hasOwnProperty(lowercaseObject) ? lowercaseObject : getMixedCaseKey(gComponentManager.components, lowercaseObject); 
-        } catch (e) {
-            key = lowercaseObject;
-        }
-        document.getElementById(id).innerHTML += `<option value=${key}>${key}</option>`;
+    alphabeticalForEach.bind(attachList)(object => {
+        document.getElementById(id).innerHTML += `<option value=${object}>${object}</option>`;
     });
 }
 
@@ -2736,7 +2660,7 @@ function getKeysOfObjectsWithoutNumericValues(keys, attributeKey) {
 
 //only toggle upon successful completion of operation
 function massEdit() {
-    let operation = document.querySelector("input[name=attributeOperation]:checked");
+    let operation = document.querySelector("input[name='attributeOperation']:checked");
     if (operation == null) {
         alert("Please select an operation with radio buttons on the 'Mass Edit' menu.");
         return;
@@ -3016,9 +2940,6 @@ function saveFeeder(feeder) {
 }
 
 /**
- * TODO: This function has a lot of problems because of how the web routes are written.
- */
-/**
  * serverFeederName: The name of the feeder I want to load, e.g. "ABEC Columbia"
  * serverModelName: Either "publicFeeders" or something like "Simple Market System Indy Solar"
  * 
@@ -3051,7 +2972,9 @@ async function loadFeeder(serverFeederName, serverModelName, owner) {
     progressModal.show();
     $.ajax({
         type: "POST",
-        // {owner} is correct. {owner} is either "public" to load from public feeders or <current user> to load from the users feeders. {gThisOwner} is correct because I am overwriting THIS feeder file, which is either publicly owned or owned by the current user. {gThisOwner} cannot be {gCurrentUser} because then I can't overwrite public files as the admin.
+        // {owner} is correct. {owner} is either "public" to load from public feeders or <current user> to load from the users feeders. {gThisOwner}
+        // is correct because I am overwriting THIS feeder file, which is either publicly owned or owned by the current user. {gThisOwner} cannot be
+        // {gCurrentUser} because then I can't overwrite public files as the admin.
         url: `/loadFeeder/${serverFeederName}/${serverModelName}/${gThisModelName}/${gThisFeederNum}/${owner}/${gThisOwner}`,
         data: formData,
         processData: false,
@@ -3426,8 +3349,10 @@ function isNumberString(str) {
 
 /**
  * Return the relationship of the object with regard to this interface.
- * 
- * This function is important because the order in which an object is checked matters. For example, an object could be both a 'line' relationship and a 'configurationNode' relationship, but the 'line' relationship should take precedence over the 'configurationNode' relationship, so 'line' should be returned.
+ *
+ * This function is important because the order in which an object is checked matters. For example, an object could be both a 'line' relationship and
+ * a 'configurationNode' relationship, but the 'line' relationship should take precedence over the 'configurationNode' relationship, so 'line' should
+ * be returned.
  * @param {Object} obj
  * @return {string}
  */
@@ -3467,9 +3392,10 @@ function getRelationship(obj) {
 
 /**
  * TODO: add unit tests, refactor to allow testing any tree
- * @return {Array} - contains all of the object types that exist in the graph.
+ * @return {Array} - an object with keys "childNode", "line", "independentNode", "configurationNode", with each key referencing an array of object
+ * types.
  */
-function getExistingRelationships() {
+function getRelationshipsWithTypes() {
     const relationships = {};
     Object.values(gTree.tree).forEach(obj => {
         const type = obj.object;
@@ -3492,15 +3418,19 @@ function enableDrag(element) {
     }
 }
 
-//not optimal, but it works
-function getMixedCaseKey(object, lowercaseKey) {
-    const keys = Object.keys(object);
-    for (let i = 0; i < keys.length; i++) {
-        if (keys[i].toLowerCase() === lowercaseKey) {
-            return keys[i];
-        }
-    }
-    throw new Error(`key "${lowercaseKey}" not found in object.`);
+/**
+ * @param {Function} - the function to call on each element of the array of strings.
+ *
+ * This function is like <Array>.forEach(), but 1) it assumes the <Array> contains only strings 2) it iterates over the array in caseless sorted order
+ * 3) it must be used with bind()
+ */
+ function alphabeticalForEach(func) {
+    const sorted = this.map(casedWord => casedWord.toLowerCase()).sort().map(lowercaseWord => {
+        return this.find(casedWord => casedWord.toLowerCase() === lowercaseWord);
+    });
+    sorted.forEach((casedWord, idx, ary) => {
+        func(casedWord, idx, ary);
+    });
 }
 
 /**
@@ -3719,7 +3649,7 @@ function getCSSRule(className) {
         let relationship;
         try {
             // Need try-catch because player objects have an "object" property but don't exist in components
-            relationship = getRelationship(gComponentManager.getAny(className));
+            relationship = getRelationship(gComponentManager.getFirst(className));
         } catch (e) {
             relationship = "not a line";
         }
@@ -3781,8 +3711,8 @@ const opacityManagerPrototype = {
      * Fill the document opacity modal HTMLElement with content.
      */
     buildOpacityModal() {
-        const opacityModal = document.getElementById("opacityModal");
-        const tableDiv = opacityModal.querySelector("[data-tableinsert]");
+        const modal = document.getElementById("opacityModal");
+        const tableDiv = modal.querySelector("[data-tableinsert]");
         Array.from(tableDiv.children).forEach(child => {
             child.parentElement.removeChild(child);
         });
@@ -3798,35 +3728,33 @@ const opacityManagerPrototype = {
             titleRow.append(td);
         });
         table.append(titleRow);
-        const keys = Object.keys(this.types).map(key => key.toLowerCase()).sort();
-        keys.forEach(key => {
-            const objectType = this.types[key] != null ? key : getMixedCaseKey(this.types, key);
+        const that = this;
+        alphabeticalForEach.bind(Object.keys(that.types))(type => {
             const tr = document.createElement("tr");
             let td = document.createElement("td");
             td.classList.add("fullPadded");
-            const btn = getTableButton("Highlight", () => this.highlight(objectType));
+            const btn = getTableButton("Highlight", () => this.highlight(type));
             td.append(btn);
             tr.append(td);
             td = document.createElement("td");
             td.classList.add("fullPadded");
-            td.textContent = objectType;
+            td.textContent = type;
             tr.append(td);
             td = document.createElement("td");
             td.classList.add("fullPadded");
             const input = document.createElement("input");
             input.classList.add("modalInput");
-            input.dataset.objecttype = objectType;
-            const that = this;
+            input.dataset.objecttype = type;
             input.addEventListener("change", function() {
-                that.setAlpha({className: objectType, input: this});
+                that.setAlpha({className: type, input: this});
             });
-            input.value = this.types[objectType];
+            input.value = this.types[type];
             td.append(input);
             tr.append(td);
             table.append(tr);
         });
         tableDiv.append(table);
-        opacityModal.removeAttribute("style");
+        modal.removeAttribute("style");
         if (window.jQuery != null) {
             $("#opacityModal .modalContent").draggable();
         }
@@ -3870,7 +3798,7 @@ const opacityManagerPrototype = {
      */
     update() {
         const existingObjectTypes = [];
-        Object.values(getExistingRelationships()).forEach(ary => {
+        Object.values(getRelationshipsWithTypes()).forEach(ary => {
             ary.forEach(type => existingObjectTypes.push(type));
         });
         existingObjectTypes.forEach(type => {
@@ -3904,7 +3832,7 @@ const opacityManagerPrototype = {
             }
         });
         const opacityModal = document.getElementById("opacityModal");
-        const classInput = opacityModal.querySelector(`input[data-objecttype=${className}`);
+        const classInput = opacityModal.querySelector(`input[data-objecttype='${className}']`);
         Array.from(opacityModal.querySelectorAll("input[data-objecttype]")).forEach(input => {
             if (input !== classInput) {
                 input.value = 0.1;
@@ -3934,11 +3862,9 @@ const opacityManagerPrototype = {
 function createOpacityManager() {
     const om = Object.create(opacityManagerPrototype);
     om.types = {};
-    const relationships = getExistingRelationships();
-    Object.keys(relationships).forEach(key => {
-        relationships[key].forEach(objectType => {
-            om.types[objectType] = 1.0;
-            //om[type] = 1.0;
+    Object.values(getRelationshipsWithTypes()).forEach(ary => {
+        ary.forEach(type => {
+            om.types[type] = 1.0;
         });
     });
     return om;
@@ -4778,6 +4704,7 @@ function formatTable(table) {
     Array.from(table.querySelectorAll("td")).forEach(td => {
         td.classList.add("fullPadded");
     });
+    //table.style.textalign = "left";
 }
 
 // delete this eventually
@@ -5352,9 +5279,13 @@ function checkServerConversion() {
                     // there was an error? Notify the user, proceed as normal.
                     clearInterval(intervalId)
                     modal.hide()
-                    reject()
+                    reject("An error occurred on the server during the file conversion process.");
                 }
-            })
+            }).fail(() => {
+                clearInterval(intervalId);
+                modal.hide();
+                reject("The AJAX request failed to get a successful response from the server.");
+            });
             return pollServer;
         // Execute pollServer immediately once, then return it to setInterval so that it continues to execute every 5 seconds
         }(), 5000)
@@ -5377,14 +5308,11 @@ function createInterface() {
     createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
 }
 
-/* TODO: fix this since jquery is never null */
-function initializeJQuery() {
-    if (window.jQuery != null) {
-        applyJQueryStyles();
-    }
-    if (document.getElementById("panZoomInsert").textContent.trim() !== "") {
-        disableJQueryFunctionality();
-    }
+/**
+ * Determine whether or not this interface was loaded as a static file or as part of a web server request.
+ */
+function interfaceIsStatic() {
+    return document.getElementById("panZoomInsert").textContent.trim() !== ""
 }
 
 function initializeFindModal() {
@@ -5401,7 +5329,7 @@ function initializeFindModal() {
 function initializeColorModal() {
     const colorModal = document.getElementById("colorModal");
     const colorManager = createColorManager();
-    colorModal.querySelector("input[type=file]").addEventListener("change", async function() {
+    colorModal.querySelector("input[type='file']").addEventListener("change", async function() {
         await colorManager.buildHTML(this.files);
     });
     colorModal.querySelector("button[data-buttonfunction='reset']").addEventListener("click", () => {
@@ -5409,15 +5337,21 @@ function initializeColorModal() {
     });
 }
 
+/**
+ * Initialize the interface. The order of the initialization functions matters. 
+ */
 (async function initialize() {
-    try {
-        {%if thisOwner != 'NONE'%}await checkServerConversion();{% endif %}
-    } catch(e) {
-        alert("There appears to have been an error with the file conversion on the server") 
-    } 
+    if (!interfaceIsStatic()) {
+        try {
+            await checkServerConversion();
+        } catch (e) {
+            alert(e)
+        }
+    }
     createInterface();
     attachHandlers();
-    initializeJQuery();
+    applyJQueryStyles();
+    if (interfaceIsStatic()) disableWebFeatures();
     initializeFindModal();
     initializeColorModal();
     document.getElementById("loadingMessage").style.display = "none"
