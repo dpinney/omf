@@ -18,6 +18,19 @@ from omf.solvers import gridlabd
 from dateutil import parser
 from dateutil.relativedelta import *
 
+def recloserAnalysis(pathToGlm, lineNameForRecloser, outageGenerationStats={}):
+	#TODO: implement
+	return {
+		'noRecl-SAIDI':0.0,
+		'noRecl-SAIFI':0.0,
+		'recl-SAIDI':0.0,
+		'recl-SAIFI':0.0
+	}
+
+def optimalRecloserAnalysis(pathToGlm):
+	#TODO: implement, if there's time
+	return {}
+
 # Visualize the circuit.
 #omf.distNetViz.viz('trip37.glm')
 
@@ -133,7 +146,7 @@ for key in tree2:
 	if tree2[key].get('object','') in ['underground_line', 'overhead_line', 'triplex_line']:
 		if 'parent' not in tree2[key]:
 			tree = tree2.copy()
-			tree[str(biggestKey*10 + index)] = {'object':'recloser','phases':tree2[key]['phases'],'name':tree2[key]['name'] + '_recloser' , 'from':tree2[key]['from'], 'to':tree2[key]['to'], 'retry_time': '1 s', 'max_number_of_tries': '10000'}
+			tree[str(biggestKey*10 + index)] = {'object':'recloser','phases':tree2[key]['phases'],'name':tree2[key]['name'] + '_recloser' , 'from':tree2[key]['from'], 'to':tree2[key]['to'], 'retry_time': '1 s', 'max_number_of_tries': '3'}
 			del tree[key]
 			index = index + 1
 
