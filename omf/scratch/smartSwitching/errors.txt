@@ -26,3 +26,9 @@ Expected behavior: some data is generated.
 Workaround/fix: Allow the system to run for longer, so there is more of a chance that any random faults can occur. For instance, running it for 3 months is a fairly useful way of generating data.
 Discussion:
 	Random fault generation on Gridlab-D occurs separate from the amount of time the system runs. If they do not overlap, there may be very few or no faults generated.
+
+Actual behavior: SAIDI/SAIFI values are 0 with every run of the program. Although faults are generated, the values do not increase.
+Expected behavior: SAIDI/SAIFI values are not 0, but some number between 0.8 and 1.6 or so...
+Workaround/fix: Allow system to run for an entire year, not generating stats until the whole period of the year is up.
+Discussion:
+	SAIDI/SAIFI values are still a bit lower than expected for a given system that is run. This can be adjusted by playing with the rate at which faults occur.
