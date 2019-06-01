@@ -185,6 +185,10 @@
                 max-height: 80vh;
                 overflow: auto;
 			}
+            .modalButtonSplit {
+                display: flex;
+                justify-content: space-around;
+            }
             .right {
                 float: right;
             }
@@ -482,7 +486,7 @@
                 <div class="modalContent centered">
                     <img src="/static/spinner.gif">
                     <h2>text...</h2>
-                    <div>
+                    <div class="modalButtonSplit">
                         <button class="modalButton deleteButton" data-buttonfunction="cancel" style="margin-right:300px;">Cancel</button>
                         <button class="modalButton" data-buttonfunction="submit">OK</button>
                     </div>
@@ -2414,7 +2418,7 @@ function fileMenuHandlers() {
         saveFeeder(gWriteFeeder);
     });
     items[1].addEventListener("click", downloadTextFile);
-    items[2].addEventListener("click", renameFeeder);
+    items[2].addEventListener("click", getNewFeederName);
     items[3].addEventListener("click", () => { toggleElementDisplay("loadModal"); });
     items[4].addEventListener("click", () => { toggleElementDisplay("blankFeederModal"); });
     items[5].addEventListener("click", () => { toggleElementDisplay("milsoftModal"); });
@@ -2915,7 +2919,7 @@ function saveFeeder(feeder) {
     formData.set("feederObjectJson", JSON.stringify(feeder));
     const postRequest = $.ajax({
         type: "POST",
-        url: `/saveFeeder/${gThisOwner}/${gThisModelName}/${gThisFeederName}`,
+        url: `/saveFeeder/${gThisOwner}/${gThisModelName}/${gThisFeederName}/${gThisFeederNum}`,
         data: formData,
         processData: false,
         contentType: false,
@@ -2974,22 +2978,28 @@ async function loadFeeder(serverFeederName, serverModelName, owner) {
         } else {
             alert("This feeder no longer exists. Please refresh the page, or select another feeder.");
         }
-    });
+    }).fail(function() {
+        alert("The AJAX request failed to get a successful response from the server.");
+    })
     if (submitForm === false) {
         return;
     }
     let formData = new FormData();
     formData.set("referrer", "distribution");
-    //const progressModal = new ProgressModal("Loading feeder from server...", "You have canceled loading the feeder.", true);
+    let modal;
     let cancelled = false;
-    //progressModal.button.addEventListener("click", function() {
-    //    //saveFeeder(gReadFeeder)
-    //    //cancel the current request
-    //    //cancelled = true;
-    //    //progressModal.header.textContent = progressModal.cancelMessage;
-    //    //progressModal.button.style.display = "none";
-    //});
-    //progressModal.show();
+    modal = createProgressModal({
+        startMessage: "Loading feeder from the server...",
+        endMessage: "Success. This feeder has been overwritten with the selected feeder.",
+        cancelFunc: () => {
+            cancelled = true;
+            saveFeeder(gReadFeeder);
+        },
+        finishFunc: () => {
+            reloadWrapper();
+            modal.hide();
+        } 
+    });
     $.ajax({
         type: "POST",
         // {owner} is correct. {owner} is either "public" to load from public feeders or <current user> to load from the users feeders. {gThisOwner}
@@ -3000,11 +3010,11 @@ async function loadFeeder(serverFeederName, serverModelName, owner) {
         processData: false,
         contentType: false,
     }).done(function() {
-        if (cancelled) {
-            saveFeeder(gReadFeeder);
-        } else {
-            reloadWrapper();
+        if (!cancelled) {
+            modal.finish();
         }
+    }).fail(function() {
+        alert("The AJAX request failed to get a successful response from the server.");
     });
 }
 
@@ -3041,7 +3051,20 @@ async function submitForm({formId, pollUrl, inputId}) {
     if (submitForm === false) {
         return;
     }
-    //showProgressModal("Submitting your file...", true);
+    let cancelled = false;
+    let modal;
+    modal = createProgressModal({
+        startMessage: "Submitting your file...",
+        endMessage: "Success. Your file was loaded into this feeder.",
+        cancelFunc: () => {
+            cancelled = true;
+            saveFeeder(gReadFeeder);
+        },
+        finishFunc: () => {
+            modal.hide();
+            reloadWrapper();
+        }
+    });
     // Submit the form to the server with an ajax request
     const form = document.getElementById(formId);
     const formData = new FormData(form);
@@ -3055,36 +3078,40 @@ async function submitForm({formId, pollUrl, inputId}) {
     if (pollUrl === undefined) {
         // We don't want to poll the server. Just reload the page.
         formRequest.done(function() {
-            reloadWrapper();
+            if (!cancelled) {
+                modal.finish();
+            }
         }).fail(function() {
             alert("The AJAX request failed to get a successful response from the server");
         });
     } else {
         formRequest.done(function(data) {
-            let cancelled = false;
             // Poll the server
             const intervalId = setInterval(function() {
                 $.ajax({
                     url: pollUrl
                 }).done(function(data) {
                     if (!cancelled) {
+                        console.log(data);
                         if (data.exists === true) {
                             //processing is ongoing 
                         } else {
+                            // None of these error messages get shown because the server operation just throws an exception and fails to complete.
                             clearInterval(intervalId);
                             if (data.exists === false) {
-                                // The modal isn"t hidden before the alert happens. This has nothing to do with the reload wrapper.
-                                alert("Conversion complete");
-                                reloadWrapper();                             
+                                modal.finish();                          
                             } else if (data === "milError") {
-                                alert("The .std and .seq files used are incorrectly formatted.");
-                                //TODO: submit the gReadFeeder
+                                modal.endMessage = "The .std and .seq files used were incorrectly formatted. Please click \"Cancel\" to undo the operation.";
+                                modal.finish();
                             } else if (data === "glmError") {
-                                alert("The .glm file used is incorrectly formatted.");
-                                //TODO: submit the gReadFeeder
+                                modal.endMessage = "The .glm file used was incorrectly formatted. Please click \"Cancel\" to undo the operation.";
+                                modal.finish();
                             } else {
-                                console.log(data);
-                                alert("There was a problem on the server.");
+                                // have to do this for scadaloadshapes
+                                modal.endMessage = data;
+                                //console.log(data);
+                                //modal.endMessage = "There was a problem on the server. Check the console for more information. Please click \"Cancel\" to undo the operation.";
+                                modal.finish();
                             }
                         }
                     }
@@ -3093,45 +3120,72 @@ async function submitForm({formId, pollUrl, inputId}) {
                     alert("The AJAX request failed to get a successful response from the server.")
                 });
             }, 5000);
-            //showProgressModal("Converting your file...", true, () => {
-            //    cancelled = true;
-            //    clearInterval(intervalId);
-            //});
         });
     }
 }
 
-async function renameFeeder() {
+async function getNewFeederName() {
 	if (JSON.stringify(gReadFeeder) !== JSON.stringify(gWriteFeeder)){
 		alert("You have unsaved changes. Please save the feeder before proceeding.")
 	} else {
 		let newName = prompt("Rename the feeder to", `${gThisFeederName}`);
-		while (! /^[\w\s]+$/.test(newName) || /^\s+$/.test(newName)) {
-			newName = prompt("Only letters, digits and underscore are allowed.\nPlease enter a different name", `${gThisFeederName}`);
-		}
-		if (newName){
-            let submitRequest = false;
+        while (/\W/.test(newName)) {
+            newName = prompt("Only letters, digits and underscore are allowed.\nPlease enter a different name", `${gThisFeederName}`);
+        }
+		if (newName != null) {
             await $.ajax({
                 url: `/uniqObjName/Feeder/${gThisOwner}/${newName}/${gThisModelName}`//good because of course I am renaming THIS feeder file
             }).done(function(data) {
                 if (data.exists) {
                     alert(`You already have a feeder named "${newName}". Please choose a different name.`);
                 } else {
-                    submitRequest = true;
+                    renameFeeder(gThisFeederName, newName);
                 }
             });
-            if (submitRequest === false) {
-                return;
-            }
-            $.ajax({
-                url: `/renameFeeder/${gThisOwner}/${gThisModelName}/${gThisFeederName}/${newName}/${gThisFeederNum}`
-            }).done(function() {
-                gThisFeederName = newName;
-                document.getElementById("menuLeft").querySelector("h4").textContent = newName;
-                alert("Feeder file was successfully renamed.");
-            })
 		}
 	} 
+}
+
+async function renameFeeder(oldServerName, newName) {
+    let modal;
+    let cancelled = false;
+    if (newName === gThisFeederName) {
+        // We are undoing a previous rename operation
+        modal = createProgressModal({
+            startMessage: "Undoing the previous rename...",
+            endMessage: "Success. The previous rename operation was undone.",
+            finishFunc: () => {
+                modal.hide();
+            }
+         });
+    } else {
+        // We are using a new name
+        modal = createProgressModal({
+            startMessage:  "Renaming this feeder file...",
+            endMessage: "Success. This feeder file was renamed.",
+            cancelFunc: () => {
+                cancelled = true;
+                renameFeeder(newName, oldServerName);
+            },
+            finishFunc: () => {
+                // good
+                gThisFeederName = newName;
+                document.getElementById("menuLeft").querySelector("h4").textContent = newName;
+                modal.hide();
+            }
+        });
+    }
+    await $.ajax({
+        url: `/renameFeeder/${gThisOwner}/${gThisModelName}/${oldServerName}/${newName}/${gThisFeederNum}`
+    }).done(function(data) {
+        if (data === "Failure") {
+            alert("Rename operation failed.");
+        } else if (!cancelled) {
+            modal.finish();
+        }
+    }).fail(function() {
+        alert("The AJAX request failed to get a successful response from the server.");
+    });
 }
 
 function displayMap(){
@@ -3149,8 +3203,11 @@ function reloadWrapper() {
 }
 
 const progressModalPrototype = {
-
-    finish() {
+    /**
+     * @param {Function} func - An additional function to execute when the modal finishes
+     */
+    finish(func) {
+        if (func != null) func;
         this.self.querySelector("h2").textContent = this.endMessage;
         this.spinner.style.display = "none";
         this.finishButton.removeAttribute("style");
@@ -3163,8 +3220,9 @@ const progressModalPrototype = {
 
 /**
  * Create a progress modal in 1 of 2 modes: First mode will show a cancel button which if clicked allows the operation to be undone. Second mode will
- * not show a cancel button. startMessage, endMessage, and finishFunc are required parameters. Sometimes you have to set with endMessage after the
+ * not show a cancel button. startMessage and finishFunc are required parameters. Sometimes you have to set with endMessage after the
  * progress modal has been constructed.
+ * @param {Function} finishFunc - will be executed when the user clicks the "OK" button after an operation has completed
  */
 function createProgressModal({startMessage, endMessage, cancelFunc, finishFunc}) {
     const obj = Object.create(progressModalPrototype);
@@ -5290,8 +5348,12 @@ function detectDrag(event) {
 //**************************************************
 
 function checkServerConversion() {
-    //const modal = new ProgressModal("Checking for an in-progress server file conversion...", "", false);
-    //modal.show();
+    let modal;
+    modal = createProgressModal({
+        startMessage: "Checking for an in-progress server file conversion...",
+        endMessage: "Server file conversion has completed. Click \"OK\" to reload the page.",
+        finishFunc: () => reloadWrapper()
+    });
     let reload = false;
     return new Promise(function(resolve, reject) {
         const intervalId = setInterval(function pollServer() {
@@ -5302,27 +5364,26 @@ function checkServerConversion() {
                 if (data.exists === true) {
                     // There is an in-progress file conversion. Need to reload the page when it's done.
                     reload = true
-                    //modal.message = "Waiting for an in-progress server file conversion to complete..."
-                    //modal.show()
+                    modal.self.querySelector("h2").textContent = "Waiting for an in-progress server file conversion to complete...";
                 } else if (data.exists === false) {
                     if (reload) {
                         // There was a previous in-progress conversion that just completed, so reload the page
-                        reloadWrapper()
+                        modal.finish()
                     } else {
                         // There was never an in-progress file conversion, so don't bother to reload the page
                         clearInterval(intervalId)
-                        //modal.hide()
+                        modal.hide()
                         resolve()
                     }
                 } else {
                     // there was an error? Notify the user, proceed as normal.
                     clearInterval(intervalId)
-                    //modal.hide()
+                    modal.hide()
                     reject("An error occurred on the server during the file conversion process.");
                 }
             }).fail(() => {
                 clearInterval(intervalId);
-                //modal.hide();
+                modal.hide();
                 reject("The AJAX request failed to get a successful response from the server.");
             });
             return pollServer;
