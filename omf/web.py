@@ -4,7 +4,7 @@ from flask import Flask, send_from_directory, request, redirect, render_template
 from jinja2 import Template
 from multiprocessing import Process
 from passlib.hash import pbkdf2_sha512
-import json, os, flask_login, hashlib, random, time, datetime as dt, shutil, boto.ses, csv
+import json, os, flask_login, hashlib, random, time, datetime as dt, shutil, boto.ses, csv, fcntl
 import models, feeder, network, milToGridlab, cymeToGridlab, signal, weather, anonymization
 import omf
 from omf.calibrate import omfCalibrate
@@ -502,18 +502,18 @@ def get_components():
 @app.route("/checkConversion/<modelName>/<owner>", methods=["POST","GET"])
 @app.route("/checkConversion/<modelName>", methods=["POST","GET"])
 def checkConversion(modelName, owner=None):
-	"""If the path exists, then the conversion is ongoing and the client can't reload their browser yet.
-	If the path does not exist, then either 1) the conversion hasn't started yet or 2) the conversion is
-	finished because the ZPID.txt file is gone.
-	If an error file exists, the the conversion failed and the client should be notified.
+	"""
+	If the path exists, then the conversion is ongoing and the client can't reload their browser yet. If the path does not exist, then either 1) the
+	conversion hasn't started yet or 2) the conversion is finished because the ZPID.txt file is gone. If an error file exists, the the conversion
+	failed and the client should be notified.
 	"""
 	print modelName
 	if User.cu() == "admin":
 		if owner is None:
 			owner = User.cu()
 	else:
+		# owner is not always the current user, sometimes it's "public"
 		owner = User.cu()
-	path = ("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
 	errorPath = "data/Model/"+owner+"/"+modelName+"/gridError.txt"
 	#print "Check conversion status:", os.path.exists(path), "for path", path
 	if os.path.isfile(errorPath):
@@ -521,8 +521,12 @@ def checkConversion(modelName, owner=None):
 			errorString = errorFile.read()
 			os.remove(errorPath)
 		return errorString
-	else:
-		return jsonify(exists=os.path.exists(path))
+	# Don't check for CPID.txt yet because the file just stays around if an error occurs
+	for filename in ["ZPID.txt", "APID.txt", "WPID.txt", "NPID.txt"]:
+		filepath = os.path.join(_omfDir, "data/Model", owner, modelName, filename)
+		if os.path.isfile(filepath):
+			return jsonify(exists=True)
+	return jsonify(exists=False)		
 
 @app.route("/milsoftImport/<owner>", methods=["POST"])
 @flask_login.login_required
@@ -549,14 +553,15 @@ def milsoftImport(owner):
 		stdString = stdInput.read()
 	with open("data/Model/"+owner+"/"+modelName+'/'+feederName+'.seq') as seqInput:
 		seqString = seqInput.read()
-	with open("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt", "w+") as conFile:
-		conFile.write("WORKING")
 	importProc = Process(target=milImportBackground, args=[owner, modelName, feederName, feederNum, stdString, seqString])
 	importProc.start()
 	return 'Success'
 
 def milImportBackground(owner, modelName, feederName, feederNum, stdString, seqString):
 	''' Function to run in the background for Milsoft import. '''
+	pid_filepath = os.path.join(_omfDir, "data/Model", owner, modelName, "ZPID.txt")
+	with open(pid_filepath, "w") as pid_file:
+		pid_file.write(str(os.getpid()))
 	modelDir = "data/Model/"+owner+"/"+modelName
 	feederDir = modelDir+"/"+feederName+".omd"
 	newFeeder = dict(**feeder.newFeederWireframe)
@@ -572,7 +577,7 @@ def milImportBackground(owner, modelName, feederName, feederNum, stdString, seqS
 	if len(feederTree['tree']) < 12:
 		with open("data/Model/"+owner+"/"+modelName+"/gridError.txt", "w+") as errorFile:
 			errorFile.write('milError')
-	os.remove("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
+	os.remove(pid_filepath)
 	removeFeeder(owner, modelName, feederNum)
 	writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
 
@@ -634,8 +639,6 @@ def gridlabdImport(owner):
 		glmString = glmFile.read()
 	if os.path.isfile("data/Model/"+owner+"/"+modelName+"/gridError.txt"):
 		os.remove("data/Model/"+owner+"/"+modelName+"/gridError.txt")
-	with open("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt", "w+") as conFile:
-		conFile.write("WORKING")
 	importProc = Process(target=gridlabImportBackground, args=[owner, modelName, feederName, feederNum, glmString])
 	importProc.start()
 	return 'Success'
@@ -643,6 +646,9 @@ def gridlabdImport(owner):
 def gridlabImportBackground(owner, modelName, feederName, feederNum, glmString):
 	''' Function to run in the background for Milsoft import. '''
 	try:
+		pid_filepath = os.path.join(_omfDir, "data/Model", owner, modelName, "ZPID.txt")
+		with open(pid_filepath, 'w') as pid_file:
+			pid_file.write(str(os.getpid()))
 		modelDir = "data/Model/"+owner+"/"+modelName
 		feederDir = modelDir+"/"+feederName+".omd"
 		newFeeder = dict(**feeder.newFeederWireframe)
@@ -655,7 +661,7 @@ def gridlabImportBackground(owner, modelName, feederName, feederNum, glmString):
 		except: pass
 		with open(feederDir, "w") as outFile:
 			json.dump(newFeeder, outFile, indent=4)
-		os.remove("data/Model/"+owner+"/"+modelName+"/ZPID.txt")
+		os.remove(pid_filepath)
 		removeFeeder(owner, modelName, feederNum)
 		writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
 	except Exception as error:
@@ -698,16 +704,15 @@ def scadaLoadshape(owner,feederName):
 	simLength = csvLength
 	# Run omf calibrate in background
 	importProc = Process(target=backgroundScadaLoadshape, args =[owner, modelName, workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, "FBS", (0.05,5), 5])
-	# write PID to txt file in model folder here
 	importProc.start()
-	pid = str(importProc.pid)
-	with open(modelDir+"/CPID.txt", "w+") as outFile:
-		outFile.write(pid)
 	return 'Success'
 
 def backgroundScadaLoadshape(owner, modelName, workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, solver, calibrateError, trim):
 	# heavy lifting background process/omfCalibrate and then deletes PID file
 	try:
+		pid_filepath = os.path.join(_omfDir, "data/Model", owner, modelName, "CPID.txt")
+		with open(pid_filepath, 'w') as pid_file:
+			pid_file.write(str(os.getpid()))
 		omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, solver, calibrateError, trim)
 		modelDirec="data/Model/" + owner + "/" +  modelName
 		# move calibrated file to model folder, old omd files are backedup
@@ -715,30 +720,31 @@ def backgroundScadaLoadshape(owner, modelName, workDir, feederPath, scadaPath, s
 			os.rename(feederPath, feederPath+".backup")
 		os.rename(workDir+'/calibratedFeeder.omd',feederPath)
 		# shutil.move(workDir+"/"+feederFileName, modelDirec)
-		os.remove("data/Model/" + owner + "/" +  modelName + "/CPID.txt")
+		os.remove(pid_filepath)
 	except Exception as error:
 		modelDirec="data/Model/" + owner + "/" +  modelName
 		errorString = ''.join(error)
 		with open(modelDirec+'/error.txt',"w+") as errorFile:
 		 	errorFile.write("The CSV used is incorrectly formatted. Please refer to the OMF Wiki for CSV formatting information. The Wiki can be access by clicking the Help button on the toolbar.")
 
+# distNetViz.html and gridEdit.html use this route.
 @app.route("/checkScadaLoadshape/<modelName>", methods=["POST","GET"])
 def checkScadaLoadshape(modelName):
 	try:
 		owner = User.cu()
 	except:
 		return 'Server crashed during calibration. Please attempt calibration again.'
-	pidPath = ('data/Model/' + owner + '/' + modelName + '/CPID.txt')
-	errorPath = ('data/Model/' + owner + '/' + modelName + '/error.txt')
-	print 'Check conversion status:', os.path.exists(pidPath), 'for path', pidPath
+	pid_path = os.path.join(_omfDir, "data/Model", owner, modelName, "CPID.txt")
+	error_path = os.path.join(_omfDir, "data/Model", owner, modelName, "error.txt")
+	print 'Check conversion status:', os.path.exists(pid_path), 'for path', pid_path
 	# return error message if one exists
-	if os.path.exists(errorPath):
-		with open(errorPath) as errorFile:
+	if os.path.exists(error_path):
+		with open(error_path) as errorFile:
 			errorMsg = errorFile.read()
 		return errorMsg
 	else:
-	# checks to see if PID file exists, if theres no PID file process is done.
-		return jsonify(exists=os.path.exists(pidPath))
+		# checks to see if PID file exists, if theres no PID file process is done.
+		return jsonify(exists=os.path.exists(pid_path))
 
 @app.route("/cancelScadaLoadshape/<modelName>", methods = ["POST","GET"])
 def cancelScadaLoadshape(modelName):
@@ -772,16 +778,16 @@ def loadModelingAmi(owner,feederName):
 	amiPath = modelDir+"/"+loadName+".csv"
 	importProc = Process(target=backgroundLoadModelingAmi, args =[owner, modelName, modelDir, omdPath, amiPath])
 	importProc.start()
-	pid = str(importProc.pid)
-	with open(modelDir+"/APID.txt", "w+") as outFile:
-		outFile.write(pid)
-	return ''
+	return 'Success'
 
 def backgroundLoadModelingAmi(owner, modelName, workDir, omdPath, amiPath):
+	pid_filepath = os.path.join(_omfDir, "data/Model", owner, modelName, "APID.txt")
+	with open(pid_filepath, 'w') as pid_file:
+		pid_file.write(str(os.getpid()))
 	outDir = workDir + '/amiOutput/'
 	writeNewGlmAndPlayers(omdPath, amiPath, outDir)
 	modelDirec="data/Model/" + owner + "/" +  modelName
-	os.remove("data/Model/" + owner + "/" +  modelName + "/APID.txt")
+	os.remove(pid_filepath)
 
 @app.route("/checkLoadModelingAmi/<modelName>", methods=["POST","GET"])
 def checkLoadModelingAmi(modelName):
@@ -817,13 +823,13 @@ def cymeImport(owner):
 		os.remove("data/Model/"+owner+"/"+modelName+"/gridError.txt")
 	importProc = Process(target=cymeImportBackground, args=[owner, modelName, feederName, feederNum, mdbFileObject.filename])
 	importProc.start()
-	pid = str(importProc.pid)
-	with open(modelFolder+"/ZPID.txt", "w+") as outFile:
-		outFile.write(pid)
-	return ''
+	return 'Success'
 
 def cymeImportBackground(owner, modelName, feederName, feederNum, mdbFileName):
 	''' Function to run in the background for Milsoft import. '''
+	pid_filepath = os.path.join(_omfDir, "data/Model", owner, modelName, "ZPID.txt")
+	with open(pid_filepath, 'w') as pid_file:
+		pid_file.write(str(os.getpid()))
 	modelDir = "data/Model/"+owner+"/"+modelName+"/"
 	feederDir = modelDir+"/"+feederName+".omd"
 	newFeeder = dict(**feeder.newFeederWireframe)
@@ -835,7 +841,7 @@ def cymeImportBackground(owner, modelName, feederName, feederNum, mdbFileName):
 	except: pass
 	with open(feederDir, "w") as outFile:
 		json.dump(newFeeder, outFile, indent=4)
-	os.remove("data/Model/" + owner + "/" +  modelName + "/ZPID.txt")
+	os.remove(pid_filepath)
 	removeFeeder(owner, modelName, feederNum)
 	writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
 
@@ -929,22 +935,28 @@ def networkData(owner, modelName, networkName):
 		return json.dumps(thisNet)
 		# return jsonify(netFile.read())
 
-@app.route("/saveFeeder/<owner>/<modelName>/<feederName>", methods=["POST"])
+@app.route("/saveFeeder/<owner>/<modelName>/<feederName>/<int:feederNum>", methods=["POST"])
 @flask_login.login_required
-def saveFeeder(owner, modelName, feederName):
+def saveFeeder(owner, modelName, feederName, feederNum):
 	''' Save feeder data. Also used for cancelling a file import, file conversion, or feeder-load overwrite. '''
 	print "Saving feeder for:%s, with model: %s, and feeder: %s"%(owner, modelName, feederName)
 	if owner == User.cu() or "admin" == User.cu() or owner=="public":
 		model_dir = os.path.join(_omfDir, "data/Model", owner, modelName)
-		# Do NOT cancel any PPID.txt or PID.txt processes
-		for filename in ["ZPID.txt", "APID.txt", "WPID.txt", "CPID.txt", "PPID.txt"]:
+		# Do NOT cancel any PPID.txt or PID.txt processes.
+		for filename in ["ZPID.txt", "APID.txt", "WPID.txt", "NPID.txt", "CPID.txt"]:
 			pid_file = os.path.join(model_dir, filename)
 			if os.path.isfile(pid_file):
 				try:
-					with open(pid_file) as f:
-						pid = f.read()
-					os.remove(pid_file)
-					os.kill(pid, signal.SIGTERM)
+					if filename == "CPID.txt":
+						# Special case for some reason
+						cancelScadaLoadshape(modelName)
+					else:
+						with open(pid_file) as f:
+							fcntl.flock(f, fcntl.LOCK_SH) # Get a shared lock
+							pid = f.read()
+							fcntl.flock(f, fcntl.LOCK_UN) # Release the shared lock
+						os.remove(pid_file)
+						os.kill(int(pid), signal.SIGTERM)
 				except IOError as e:
 					if e.errno == 2:
 						# Tried to open a nonexistent file. Presumably, some other process opened the used the pid file and deleted it before this process
@@ -961,10 +973,14 @@ def saveFeeder(owner, modelName, feederName):
 						pass
 					else:
 						raise
+		# It would be nice to file lock allInputData.json too...
+		writeToInput(model_dir, feederName, 'feederName' + str(feederNum))
+		payload = json.loads(request.form.to_dict().get("feederObjectJson","{}"))
 		feeder_file = os.path.join(model_dir, feederName + ".omd")
         with open(feeder_file, "w") as outFile:
-			payload = json.loads(request.form.to_dict().get("feederObjectJson","{}"))
+			fcntl.flock(outFile, fcntl.LOCK_EX) # Get an exclusive lock
 			json.dump(payload, outFile, indent=4)
+			fcntl.flock(outFile, fcntl.LOCK_UN) # Release the exclusive lock
 	return 'Success'
 
 @app.route("/saveNetwork/<owner>/<modelName>/<networkName>", methods=["POST"])
@@ -988,7 +1004,11 @@ def renameFeeder(owner, modelName, oldName, feederName, feederNum):
 	if not os.path.isfile(newFile) and os.path.isfile(oldFile):
 		with open(oldFile, "r") as feederIn:
 			with open(newFile, "w") as outFile:
+				fcntl.flock(feederIn, fcntl.LOCK_SH) # Get shared lock
+				fcntl.flock(outFile, fcntl.LOCK_EX) # Get exclusive lock
 				outFile.write(feederIn.read())
+				fcntl.flock(feederIn, fcntl.LOCK_UN) # Release shared lock
+				fcntl.flock(outFile, fcntl.LOCK_UN) # Release exclusive lock
 	elif os.path.isfile(newFile):
 		return 'Failure'
 	elif not os.path.isfile(oldFile):
@@ -1051,10 +1071,16 @@ def loadFeeder(frfeederName, frmodelName, modelName, feederNum, frUser, owner):
 	#print "Entered loadFeeder with info: frfeederName %s, frmodelName: %s, modelName: %s, feederNum: %s"%(frfeederName, frmodelName, str(modelName), str(feederNum))
 	modelDir = "./data/Model/" + owner + "/" + modelName
 	with open(modelDir + "/allInputData.json") as inJson:
-		feederName = json.load(inJson).get('feederName'+str(feederNum))
+		fcntl.flock(inJson, fcntl.LOCK_SH) # Get a shared lock
+		feederName = json.load(inJson).get('feederName' + str(feederNum))
+		fcntl.flock(inJson, fcntl.LOCK_UN) # Release the shared lock
 	with open(os.path.join(frmodelDir, frfeederName+'.omd'), "r") as inFeeder:
 		with open(os.path.join(modelDir, feederName+".omd"), "w") as outFile:
+			fcntl.flock(inFeeder, fcntl.LOCK_SH) # Get a shared lock
+			fcntl.flock(outFile, fcntl.LOCK_EX) # Get an exclusive lock
 			outFile.write(inFeeder.read())
+			fcntl.flock(outFile, fcntl.LOCK_UN) # Release the exclusive lock
+			fcntl.flock(inFeeder, fcntl.LOCK_UN) # Release the shared lock
 	if request.form.get("referrer") == "distribution":
 		return redirect(url_for("distribution_get", owner=owner, model_name=modelName, feeder_num=feederNum))
 	return redirect(url_for('feederGet', owner=owner, modelName=modelName, feederNum=feederNum))
@@ -1115,14 +1141,14 @@ def climateChange(owner, feederName):
 	outFilePath = modelDir + '/weatherAirport.csv'
 	if os.path.isfile(outFilePath):
 		os.remove(outFilePath)
-	importProc = Process(target=backgroundClimateChange, args =[modelDir, omdPath, outFilePath])
+	importProc = Process(target=backgroundClimateChange, args=[modelDir, omdPath, outFilePath, owner, modelName])
 	importProc.start()
-	pid = str(importProc.pid)
-	with open(modelDir + '/WPID.txt', 'w+') as outFile:
-		outFile.write(pid)
 	return 'Success'
 
-def backgroundClimateChange(modelDir, omdPath, outFilePath):
+def backgroundClimateChange(modelDir, omdPath, outFilePath, owner, modelName):
+	pid_filepath = os.path.join(_omfDir, "data/Model", owner, modelName, "WPID.txt")
+	with open(pid_filepath, 'w') as pid_file:
+		pid_file.write(str(os.getpid()))
 	with open(omdPath, 'r') as inFile:
 		feederJson = json.load(inFile)
 		for key in feederJson['tree'].keys():
@@ -1155,7 +1181,7 @@ def backgroundClimateChange(modelDir, omdPath, outFilePath):
 				feederJson['attachments']['climate.tmy2'] = tmyFile.read()
 	with open(omdPath, 'w') as outFile:
 		json.dump(feederJson, outFile, indent=4)
-	os.remove(modelDir + '/WPID.txt')
+	os.remove(pid_filepath)
 
 @app.route("/checkClimateChange/<owner>/<modelName>", methods=["POST","GET"])
 def checkClimateChange(owner, modelName):
@@ -1177,14 +1203,14 @@ def anonymize(owner, feederName):
 	modelName = request.form.get('modelName')
 	modelDir = 'data/Model/' + owner + '/' + modelName
 	omdPath = modelDir + '/' + feederName + '.omd'
-	importProc = Process(target=backgroundAnonymize, args =[modelDir, omdPath])
+	importProc = Process(target=backgroundAnonymize, args=[modelDir, omdPath, owner, modelName])
 	importProc.start()
-	pid = str(importProc.pid)
-	with open(modelDir + '/NPID.txt', 'w+') as outFile:
-		outFile.write(pid)
 	return 'Success'
 
-def backgroundAnonymize(modelDir, omdPath):
+def backgroundAnonymize(modelDir, omdPath, owner, modelName):
+	pid_filepath = os.path.join(_omfDir, "data/Model", owner, modelName, "NPID.txt")
+	with open(pid_filepath, 'w') as pid_file:
+		pid_file.write(str(os.getpid()))
 	with open(omdPath, 'r') as inFile:
 		inFeeder = json.load(inFile)
 		# Name Option
@@ -1219,7 +1245,7 @@ def backgroundAnonymize(modelDir, omdPath):
 			anonymization.distAddNoise(inFeeder, noisePerc)
 	with open(omdPath, 'w') as outFile:
 		json.dump(inFeeder, outFile, indent=4)
-	os.remove(modelDir + '/NPID.txt')
+	os.remove(pid_filepath)
 	if newNameKey:
 		return newNameKey
 
@@ -1390,4 +1416,5 @@ def uniqObjName(objtype, owner, name, modelName=False):
 if __name__ == "__main__":
 	template_files = ["templates/"+ x  for x in safeListdir("templates")]
 	model_files = ["models/" + x for x in safeListdir("models")]
-	app.run(debug=True, host="0.0.0.0", extra_files=template_files + model_files)
+	#app.run(debug=True, host="0.0.0.0", extra_files=template_files + model_files)
+	app.run(debug=True, host="0.0.0.0", extra_files=model_files)
