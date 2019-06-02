@@ -500,7 +500,7 @@ def get_components():
 	return json.dumps(components) # Turn the dictionary of objects into a string
 
 @app.route("/checkConversion/<modelName>/<owner>", methods=["POST","GET"])
-@app.route("/checkConversion/<modelName>", methods=["POST","GET"])
+@app.route("/checkConversion/<modelName>", methods=["POST","GET"]) # Don't get rid of this route because transEdit.html uses it
 def checkConversion(modelName, owner=None):
 	"""
 	If the path exists, then the conversion is ongoing and the client can't reload their browser yet. If the path does not exist, then either 1) the
@@ -514,15 +514,17 @@ def checkConversion(modelName, owner=None):
 	else:
 		# owner is not always the current user, sometimes it's "public"
 		owner = User.cu()
-	errorPath = "data/Model/"+owner+"/"+modelName+"/gridError.txt"
-	#print "Check conversion status:", os.path.exists(path), "for path", path
-	if os.path.isfile(errorPath):
-		with open(errorPath) as errorFile:
-			errorString = errorFile.read()
-			os.remove(errorPath)
-		return errorString
-	# Don't check for CPID.txt yet because the file just stays around if an error occurs
-	for filename in ["ZPID.txt", "APID.txt", "WPID.txt", "NPID.txt"]:
+	# First check for error files
+	for filename in ["gridError.txt", "error.txt"]:
+		filepath = os.path.join(_omfDir, "data/Model", owner, modelName, filename)
+		if os.path.isfile(filepath):
+			with open(filepath) as f:
+				errorString = f.read()
+			# We should remove the error file because an error file indicates that the process terminated, so no conversion is ongoing
+			os.remove(filepath)
+			return errorString
+	# Check for process ID files AFTER checking for error files
+	for filename in ["ZPID.txt", "APID.txt", "WPID.txt", "NPID.txt", "CPID.txt"]:
 		filepath = os.path.join(_omfDir, "data/Model", owner, modelName, filename)
 		if os.path.isfile(filepath):
 			return jsonify(exists=True)
@@ -938,7 +940,8 @@ def networkData(owner, modelName, networkName):
 @app.route("/saveFeeder/<owner>/<modelName>/<feederName>/<int:feederNum>", methods=["POST"])
 @flask_login.login_required
 def saveFeeder(owner, modelName, feederName, feederNum):
-	''' Save feeder data. Also used for cancelling a file import, file conversion, or feeder-load overwrite. '''
+	""" Save feeder data. Also used for cancelling a file import, file conversion, or feeder-load overwrite.
+	"""
 	print "Saving feeder for:%s, with model: %s, and feeder: %s"%(owner, modelName, feederName)
 	if owner == User.cu() or "admin" == User.cu() or owner=="public":
 		model_dir = os.path.join(_omfDir, "data/Model", owner, modelName)

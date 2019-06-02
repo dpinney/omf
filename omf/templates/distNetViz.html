@@ -1855,6 +1855,13 @@ function createViewport(tree, svgContainer) {
     } else {
         gDrawScaleFactor = 1000/latitudeRange;
     }
+    /*
+    Special case: minimum and maximum longitude and latitude are all the same (e.g. 0)! gDrawScale factor won't space things further apart, it just
+    makes various scales fit in the viewport
+    */
+    if (gDrawScaleFactor === Infinity) {
+        gDrawScaleFactor = 1;
+    }
     svgContainer.setAttribute("viewBox",`0 0 ${1000} ${1000}`);
     /* Uncomment below to make gScaleFactor go away */
     //gDrawScaleFactor = 1;
