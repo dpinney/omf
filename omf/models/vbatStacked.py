@@ -108,9 +108,9 @@ def run_fhec(ind, gt_demand, Input):
 
 	# objective function: sum of monthly demand charge
 	model += pulp.lpSum([fhec_peak_mult*fhec_kwh_rate*(Input.loc[hour, "Load (kW)"]+VBpower[hour]) for hour in fhec_peak_hours]
-						+ [fhec_kwh_rate*(Input.loc[hour, "Load (kW)"]+VBpower[hour]) for hour in fhec_off_peak_hours]
-						+ [Input.loc[hour, "Reg-up Price ($/kWh)"]*reg_up[hour] for hour in Input.index]
-						+ [Input.loc[hour, "Reg-dn Price ($/kWh)"]*reg_dn[hour] for hour in Input.index])
+		+ [fhec_kwh_rate*(Input.loc[hour, "Load (kW)"]+VBpower[hour]) for hour in fhec_off_peak_hours]
+		+ [-Input.loc[hour, "Reg-up Price ($/MW)"]/1000*reg_up[hour] for hour in Input.index]
+		+ [-Input.loc[hour, "Reg-dn Price ($/MW)"]/1000*reg_dn[hour] for hour in Input.index])
 
 	# VB energy state as a function of VB power
 	for hour in Input.index:
@@ -192,11 +192,11 @@ def run_okec(ind, Input):
 
 	# objective function: sum of monthly demand charge
 	model += pulp.lpSum(okec_peak_charge*PeakDemand
-			+ [okec_avg_demand_charge*(Input.loc[hour, "Load (kW)"]+VBpower[hour])/len(Input.index) for hour in Input.index]
-			+ [okec_fuel_charge*(Input.loc[hour, "Load (kW)"]+VBpower[hour])*deltaT for hour in Input.index]
-			+ [Input.loc[hour, "Reg-up Price ($/kWh)"]*reg_up[hour] for hour in Input.index]
-			+ [Input.loc[hour, "Reg-dn Price ($/kWh)"]*reg_dn[hour] for hour in Input.index])
-
+		+ [okec_avg_demand_charge*(Input.loc[hour, "Load (kW)"]+VBpower[hour])/len(Input.index) for hour in Input.index]
+		+ [okec_fuel_charge*(Input.loc[hour, "Load (kW)"]+VBpower[hour])*deltaT for hour in Input.index]
+		+ [-Input.loc[hour, "Reg-up Price ($/MW)"]/1000*reg_up[hour] for hour in Input.index]
+		+ [-Input.loc[hour, "Reg-dn Price ($/MW)"]/1000*reg_dn[hour] for hour in Input.index])
+	
 	# VB energy state as a function of VB power
 	for hour in Input.index:
 		if hour==1:
@@ -286,7 +286,7 @@ def work(modelDir, ind):
 		price_structure_after = (output_df['Net load (kW)'].max()*float(ind["annual_peak_charge"]) + 
 			output_df['Net load (kW)'].mean()*float(ind["avg_demand_charge"]))
 	
-	regulation_after = (output_df['Regulation (kW)']*input_df['Reg-up Price ($/kWh)']).sum()
+	regulation_after = (output_df['Regulation (kW)']*input_df['Reg-up Price ($/MW)']/1000).sum()
 
 	total_upkeep_costs = upkeep_cost*number_devices
 	cost_before = price_structure_before
