@@ -121,7 +121,8 @@ def work(modelDir, inputDict):
 	# 		loadShapeList.append(float(n))
 	else:
 		loadShapeValue = inputDict["loadShape"]
-	#calculate and display EV Charging Demand image
+	
+	#calculate and display EV Charging Demand image, carpet plot image of 8760 load shapes
 	demandImg, carpetPlotImg = plotEVShape(
 		numVehicles = numVehiclesValue,
 		chargeRate = chargeRateValue, 
@@ -138,6 +139,7 @@ def work(modelDir, inputDict):
 	carpetPlotImg.savefig(pJoin(modelDir, "carpetPlot.png"))
 	with open(pJoin(modelDir, "carpetPlot.png"),"rb") as cpFile:
 		outData["carpetPlot"] = cpFile.read().encode("base64")
+	
 	#run and display fuel cost calculation
 	fuelCostHtml = fuelCostCalc(
 		numVehicles = numVehiclesValue,
@@ -150,8 +152,10 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir, "fuelCostCalc.html"), "w") as fuelFile:
 		fuelFile.write(fuelCostHtml)
 	outData["fuelCostCalcHtml"] = fuelCostHtml
+	
 	#run and display max combined load shape
-	#run and display carpet plot of 8760 load shapes
+
+
 	#run and display voltage drop image and protective device status table
 	voltPlotChart, protDevTable = drawPlotFault(
 		pJoin(modelDir,feederName + ".omd"),
@@ -856,7 +860,7 @@ def plotEVShape(numVehicles=None, chargeRate=None, batterySize=None, startHour=N
 	for i in range(8760):
 		com_load = base_shape[i] + hourly_con[i % 24]
 		combined.append(com_load)
-	with open('output - school plus buses.csv', 'w') as outFile:
+	with open('output - evInterconnection combined load shapes.csv', 'w') as outFile:
 		for row in combined:
 			outFile.write(str(row) + '\n')
 
