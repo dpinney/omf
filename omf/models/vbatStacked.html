@@ -107,7 +107,7 @@
 			<div class="shortInput">
 				<label class="tooltip"><span class="classic">What revenue strategies would you like stacked?</span>
 					<input type="checkbox" name="use_deferral" value="use_deferral">Deferral &nbsp; &nbsp;
-					<input type="checkbox" name="use_payment_structure" value="use_payment_structure" checked>Payment Structure <br>
+					<input type="checkbox" name="use_payment_structure" value="use_payment_structure" checked>Power Cost<br>
 					<input type="checkbox" name="use_regulation" value="use_regulation" checked>Regulation 
 				</label>
 				
@@ -179,7 +179,7 @@
 				</div>
 			</div>
 			<div class="shortInput">
-				<label>Choose payment payment structure</label>
+				<label>Power Cost</label>
 				<select id="payment_structure" onchange="loadDefaultParameters()" name="payment_structure">
 					<option value="gt">G&T Peak Charge</option>
 					<option value="ppm">Peak Percentile Multiplier</option>
@@ -223,7 +223,7 @@
 				<input type="text" id="avg_demand_charge" name="avg_demand_charge" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label>Fuel Charge</label>
+				<label>Fuel Charge ($/kWh)</label>
 				<input type="text" id="fuel_charge" name="fuel_charge" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			
@@ -285,7 +285,7 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">VBAT Energy and Power limits</p>
+		<p class="reportTitle postRun" style="page-break-before:always">VBAT Energy and Power Limits and Breakdown</p>
 		<div id="vbatLimits" class="tightContent postRun"></div>
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
@@ -310,49 +310,15 @@
 					},
 					"title":{"text": allOutputData.dataCheck, "verticalAlign":"bottom", "align":"right", "y":-400, "x":-150, "style":{"color":"gray", "fontSize":"36px"}},
 					"series":[
-						{"name":"Optimal dispatch","marker":{"enabled":false},"color":"red","data":allOutputData.VBpower,"pointPlacement": +0.1},
-						{"name":"VBAT state of charge","marker":{"enabled":false},"color":"purple","data":allOutputData.VBenergy,"pointPlacement": -0.2},
-						{"name":"VB Power upper","marker":{"enabled":false},"color":"black","data":allOutputData.vbpu,"pointPlacement": -0.2},
-						{"name":"VB Power lower","marker":{"enabled":false},"color":"black","data":allOutputData.vbpl,"pointPlacement": -0.2},
-						{"name":"VB Energy upper","marker":{"enabled":false},"color":"orange","data":allOutputData.vbeu,"pointPlacement": -0.2},
-						{"name":"VB Energy lower","marker":{"enabled":false},"color":"orange","data":allOutputData.vbel,"pointPlacement": -0.2},
+						{"name":"VBAT energy","marker":{"enabled":false},"color":"purple","data":allOutputData.VBenergy,"pointPlacement": -0.2},
+						{"name":"VB Power upper","visible":false,"marker":{"enabled":false},"color":"blue","data":allOutputData.vbpu,"pointPlacement": -0.2},
+						{"name":"VB Power lower","visible":false,"marker":{"enabled":false},"color":"blue","data":allOutputData.vbpl,"pointPlacement": -0.2},
+						{"name":"VB Energy upper","visible":false,"marker":{"enabled":false},"color":"orange","data":allOutputData.vbeu,"pointPlacement": -0.2},
+						{"name":"VB Energy lower","visible":false,"marker":{"enabled":false},"color":"orange","data":allOutputData.vbel,"pointPlacement": -0.2},
+						{"name":"Regulation","marker":{"enabled":false},"color":"grey","data":allOutputData.regulation,"pointPlacement": -0.2},
+						{"name":"VBAT power","marker":{"enabled":false},"color":"red","data":allOutputData.VBpower,"pointPlacement": +0.1}
 					],
 					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"vbatLimits","type":"line","marginRight":20, "height":500,"width":1000},
-					"tooltip":{"valueDecimals":1},
-					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
-			</script>
-		</div>
-		<div id="regulationChart" class="tightContent postRun"></div>
-			<script>
-				new Highcharts.Chart({"credits":{"enabled":false},
-					"plotOptions":{
-						"series":{
-							"animation":false,
-							// "pointStart":Date.parse(allOutputData.startDate),
-							"shadow":false,
-							"pointInterval":3600000},
-						"line":{"marker":{"enabled":false}}},
-					"xAxis":{
-						"maxZoom":108000000,
-						"tickColor":"gray",
-						"dateTimeLabelFormats":{
-							"month": '%b %e'
-						},
-						"type":"datetime",
-						"lineColor":"gray"
-					},
-					"yAxis":{
-						"title":{"text":"(kW)","style":{"color":"gray"}},
-					},
-					"title":{"text": allOutputData.dataCheck, "verticalAlign":"bottom", "align":"right", "y":-400, "x":-150, "style":{"color":"gray", "fontSize":"36px"}},
-					"series":[
-						{"name":"Regulation","marker":{"enabled":false},"color":"purple","data":allOutputData.regulation,"pointPlacement": -0.2},
-						{"name":"VB Power upper","marker":{"enabled":false},"color":"black","data":allOutputData.vbpu,"pointPlacement": -0.2},
-						{"name":"VB Power lower","marker":{"enabled":false},"color":"black","data":allOutputData.vbpl,"pointPlacement": -0.2},
-						{"name":"VB Energy upper","marker":{"enabled":false},"color":"orange","data":allOutputData.vbeu,"pointPlacement": -0.2},
-						{"name":"VB Energy lower","marker":{"enabled":false},"color":"orange","data":allOutputData.vbel,"pointPlacement": -0.2},
-					],
-					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"regulationChart","type":"line","marginRight":20, "height":500,"width":1000},
 					"tooltip":{"valueDecimals":1},
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>

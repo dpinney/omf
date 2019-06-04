@@ -1,4 +1,4 @@
-"Date/Time","Hour","Load (kW)","Reg-dn Price ($/kWh)","Reg-up Price ($/kWh)","VB Power upper (kW)","VB Power lower (kW)","VB Energy upper (kWh)","VB Energy lower (kWh)"
+"Date/Time","Hour","Load (kW)","Reg-dn Price ($/MW)","Reg-up Price ($/MW)","VB Power upper (kW)","VB Power lower (kW)","VB Energy upper (kWh)","VB Energy lower (kWh)"
 "1/1/17 0:00","1","2296","8.60049714","7.48143256","0","0","0","0"
 "1/1/17 1:00","2","2215","1.33660512","9.01151629","0","0","0","0"
 "1/1/17 2:00","3","2183","2.82526335","2.79906204","0","0","0","0"

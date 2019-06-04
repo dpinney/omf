@@ -143,9 +143,13 @@
 				<label class="tooltip">Load Name<span class="classic">Specify the load name in the circuit.</span></label>
 				<input type="text" id="loadName" name="loadName" required="required"/>
 			</div>
-			<div class="shortInput" style="width:100%">
+			<!-- <div class="shortInput" style="width:100%">
 				<label class="tooltip">Hourly Load Shape<span class="classic">Please enter a list of 24 values separated by commas to represent a "peak day" load shape by hour.</span></label>
 				<input type="text" id="loadShape" name="loadShape" pattern="^(\d*\.?\d*)(,\s*\d*\.?\d*){23}$" required="required"/>
+			</div> -->
+			<div class="shortInput" style="width:50%">
+				<label class="tooltip">Hourly Load Shape<span class="classic">Please enter the name of a .csv file representing the hourly load shape</span></label>
+				<input type="text" id="loadShape" name="loadShape" pattern="^([a-zA-Z0-9\s_\\.,\-\(\):])+(.csv)$" required="required"/>
 			</div>
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
@@ -177,14 +181,19 @@
 		<div id="fuelCostCalc" class="tightContent postRun">
 			{{ allOutputDataDict['fuelCostCalcHtml'] }}
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Voltage Drop Diagram</p>
+		<p class="reportTitle postRun" style="page-break-before:always">Voltage Drop Diagram without Charging Load</p>
 		<div id="voltageDropDiagram" class="tightContent postRun">
 			<img id="voltageDropChart" style="width:1000px;height:1000px;" />
 			<script type="text/javascript">gebi("voltageDropChart").src = "data:image/png;base64," + allOutputData.voltageDrop</script>
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Protective Device Status</p>
+		<p class="reportTitle postRun" style="page-break-before:always">Protective Device Status without Charging Load</p>
 		<div id="protDevStatus" class="tightContent postRun">
 			{{ allOutputDataDict['protDevTableHtml'] }}
+		</div>
+		<p class="reportTitle postRun" style="page-break-before:always">Combined Load Shape Carpet Plot</p>
+		<div id="carpetPlot" class="tightContent postRun">
+			<img id="carpetPlotChart" style="width:1000px;height:auto;" />
+			<script type="text/javascript">gebi("carpetPlotChart").src = "data:image/png;base64," + allOutputData.carpetPlot</script>
 		</div>
 	</div>
 </body>

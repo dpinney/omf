@@ -113,14 +113,17 @@ def work(modelDir, inputDict):
 		loadNameValue = inputDict["loadName"]
 	# None check for loadShape
 	if inputDict.get("loadShape", "None") == "None":
-		loadShapeList = None
+		loadShapeValue = None
+	# else:
+	# 	loadShapeList = []
+	# 	strList = inputDict["loadShape"].strip().split(',')
+	# 	for n in strList:
+	# 		loadShapeList.append(float(n))
 	else:
-		loadShapeList = []
-		strList = inputDict["loadShape"].strip().split(',')
-		for n in strList:
-			loadShapeList.append(float(n))
-	#calculate and display EV Charging Demand image
-	demandImg = plotEVShape(
+		loadShapeValue = inputDict["loadShape"]
+	
+	#calculate and display EV Charging Demand image, carpet plot image of 8760 load shapes
+	demandImg, carpetPlotImg = plotEVShape(
 		numVehicles = numVehiclesValue,
 		chargeRate = chargeRateValue, 
 		batterySize = batterySizeValue, 
@@ -129,10 +132,14 @@ def work(modelDir, inputDict):
 		chargeLimit = chargeLimitValue, 
 		minCharge = minChargeValue, 
 		maxCharge = maxChargeValue, 
-		loadShape = loadShapeList)
+		loadShape = pJoin(modelDir,loadShapeValue))
 	demandImg.savefig(pJoin(modelDir, "evChargingDemand.png"))
 	with open(pJoin(modelDir, "evChargingDemand.png"),"rb") as evFile:
 		outData["evChargingDemand"] = evFile.read().encode("base64")
+	carpetPlotImg.savefig(pJoin(modelDir, "carpetPlot.png"))
+	with open(pJoin(modelDir, "carpetPlot.png"),"rb") as cpFile:
+		outData["carpetPlot"] = cpFile.read().encode("base64")
+	
 	#run and display fuel cost calculation
 	fuelCostHtml = fuelCostCalc(
 		numVehicles = numVehiclesValue,
@@ -145,6 +152,10 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir, "fuelCostCalc.html"), "w") as fuelFile:
 		fuelFile.write(fuelCostHtml)
 	outData["fuelCostCalcHtml"] = fuelCostHtml
+	
+	#run and display max combined load shape
+
+
 	#run and display voltage drop image and protective device status table
 	voltPlotChart, protDevTable = drawPlotFault(
 		pJoin(modelDir,feederName + ".omd"),
@@ -708,7 +719,7 @@ def new(modelDir):
 		"maxCharge" : "50",
 		"gasCost" : "2.70",
 		"workload" : "40",
-		"loadShape" : "76.6992804, 79.62543428, 81.65211788, 82.29854024, 89.48049964, 106.19776388, 117.92078284, 118.95137788, 117.13633436, 115.83428788, 114.2170818, 112.12138512, 111.27712532, 109.23663908, 104.7760948, 102.0224736, 101.63600044, 100.00499172, 94.49544888, 90.06020936, 89.79795972, 89.87387408, 88.20375796, 81.22733684",
+		"loadShape" : "input - 200 Employee Office, Springfield Illinois, 2001.csv",
 		"loadName" : "None",
 		"rezSqIn" : "400",
 		"simTime" : '2000-01-01 0:00:00'
@@ -831,8 +842,48 @@ def plotEVShape(numVehicles=None, chargeRate=None, batterySize=None, startHour=N
 	plt.plot(sum(shapes2), color='black', linestyle='dotted', label='Total (Controlled)')
 	plt.xticks([x*60 for x in range(max_minutes/60)], range(max_minutes/60))
 	plt.legend()
+	plt.close()
 	#plt.show()
-	return evShape
+
+	# Make a charging shape.
+	con_charge = sum(shapes2)
+	hourly_con = range(24)
+	for i in range(24):
+		hourly_con[i] = float(sum(con_charge[i * 60:i * 60 + 60])/60.0)
+
+	# Make an annual building load base shape.
+	ann_shape = open(loadShape).readlines()
+	base_shape = [float(x) for x in ann_shape]
+
+	# Make an output csv.
+	combined = []
+	for i in range(8760):
+		com_load = base_shape[i] + hourly_con[i % 24]
+		combined.append(com_load)
+	with open('output - evInterconnection combined load shapes.csv', 'w') as outFile:
+		for row in combined:
+			outFile.write(str(row) + '\n')
+
+	def carpet_plot(load_vec, daily_vec):
+		'Plot an 8760 load shape plus a daily augmentation in a nice grid.'
+		carpetPlotImg = plt.figure()
+		plt.style.use('seaborn')
+		for i in range(1,371):
+			# x = np.random.rand(24)
+			x = list(load_vec[i*24:i*24 + 24])
+			plt.subplot(31, 12, i)
+			plt.axis('off')
+			plt.ylim(0.0, max(combined))
+			if len(x) != 0:
+				plt.stackplot(range(len(x)), x, daily_vec)
+			if i <= 12:
+				plt.title(i)
+			if i % 12 == 1:
+				plt.text(-5.0, 0.1, str(1 + i / 12), horizontalalignment='left',verticalalignment='center')
+		#plt.show()
+		return carpetPlotImg
+
+	return evShape, carpet_plot(base_shape, hourly_con)
 
 def fuelCostCalc(numVehicles=None, batterySize=None, efficiency=None, energyCost=None, gasEfficiency=None, gasCost=None, workload=None):
 	dailyGasAmount = workload/gasEfficiency #amount(gal) of gas used per vehicle, daily
