@@ -1177,6 +1177,7 @@ def backgroundClimateChange(modelDir, omdPath, outFilePath, owner, modelName):
 				if (key.endswith('.tmy2')) or (key == 'weatherAirport.csv'):
 					del feederJson['attachments'][key]
 			importOption = request.form.get('climateImportOption')
+
 			if importOption == 'historicalImport':
 				start = request.form.get('startDate')
 				end = request.form.get('endDate')
@@ -1198,6 +1199,7 @@ def backgroundClimateChange(modelDir, omdPath, outFilePath, owner, modelName):
 				feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'climate','name':'Climate','interpolate':'QUADRATIC', 'tmyfile':'climate.tmy2'}
 				with open(tmyFilePath) as tmyFile:
 					feederJson['attachments']['climate.tmy2'] = tmyFile.read()
+					
 		with open(omdPath, 'w') as outFile:
 			fcntl.flock(outFile, fcntl.LOCK_EX)
 			json.dump(feederJson, outFile, indent=4)
