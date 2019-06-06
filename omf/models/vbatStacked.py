@@ -352,7 +352,7 @@ def new(modelDir):
 		"discountRate":"2",
 		"unitDeviceCost":"150",
 		"unitUpkeepCost":"5",
-		"dispatchLimit": "None",
+		"dispatchLimit": "365",
 		# By dispatch
 		"payment_structure": "ppm", # "ppm"
 		# ppm

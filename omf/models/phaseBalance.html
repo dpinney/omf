@@ -200,6 +200,14 @@
 				</select>
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Color Min<span class="classic">What kW outliers would you like observed</span></label>
+				<input type="text" id="colorMin" name="colorMin"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Color Max<span class="classic">What kW outliers would you like observed</span></label>
+				<input type="text" id="colorMax" name="colorMax"/>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Image Resolution (sq. in.)<span class="classic">Please select a value lower than 10,000</span></label>
 				<input type="text" id="rezSqIn" name="rezSqIn" pattern="^\d{1,4}$"/>
 			</div>
@@ -255,9 +263,9 @@
 			<table id="feederSummary">
 				<tr>
 					<th></th>
-					<th>Base Case</th>
-					<th>With Solar</th>
-					<th>Controlled Solar</th>
+					<th>Base Case (kW)</th>
+					<th>With Solar (kW)</th>
+					<th>Controlled Solar (kW)</th>
 				</tr>
 				<tr>
 					<td>Load</td>
@@ -339,7 +347,7 @@
 					circle.append("svg:title").text(climate)})
 			</script>
 		</div> -->
-		<p class="reportTitle postRun" style="page-break-before:always; text-align:center; font-weight: bold;">Three Phase (Motor) Loads Power and Imbalance</p>
+		<p class="reportTitle postRun" style="page-break-before:always; text-align:center; font-weight: bold;">Three Phase Motor Loads Power and VARS</p>
 		<p class="reportTitle postRun" style="page-break-before:always">Base</p>
 		<div class="tightContent tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
 			<table id="realImgPower">
@@ -382,6 +390,47 @@
 					<th>B VAR</th>
 					<th>C Pow</th>
 					<th>C VAR</th>
+				</tr>
+				<!-- {{allOutputDataDict['motor_table_solar']}} -->
+			</table>
+		</div>
+	<p class="reportTitle postRun" style="page-break-before:always; text-align:center; font-weight: bold;">Three Phase Motor Loads Voltage and Imbalance</p>
+	<p class="reportTitle postRun" style="page-break-before:always">Base</p>
+		<div class="tightContent tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
+			<table id="realImgPower">
+				<tr>
+					<th>Name</th>
+					<th>A (kW)</th>
+					<th>B (kW)</th>
+					<th>C (kW)</th>
+					<th>Unbalance</th>
+				</tr>
+				{{allOutputDataDict['motor_table_base_v']}}
+			</table>
+		</div>
+		<p class="reportTitle postRun" style="page-break-before:always">Solar</p>
+		<div class="tightContent tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
+			<table id="realImgPower">
+				<tr>
+					<th>Name</th>
+					<th>A (kW)</th>
+					<th>B (kW)</th>
+					<th>C (kW)</th>
+					<th>Unbalance</th>
+				</tr>
+				{{allOutputDataDict['motor_table_solar_v']}}
+			</table>
+		</div>
+	</div>
+	<p class="reportTitle postRun" style="page-break-before:always">Controlled</p>
+		<div class="tightContent tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
+			<table id="realImgPower">
+				<tr>
+					<th>Name</th>
+					<th>A (kW)</th>
+					<th>B (kW)</th>
+					<th>C (kW)</th>
+					<th>Unbalance</th>
 				</tr>
 				<!-- {{allOutputDataDict['motor_table_solar']}} -->
 			</table>

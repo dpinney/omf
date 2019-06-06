@@ -1,4 +1,3 @@
-
 ''' Calculate phase unbalance and determine mitigation options. '''
 
 import json, os, shutil, csv
@@ -53,6 +52,7 @@ def work(modelDir, ind):
 	).savefig(pJoin(modelDir,"output" + base_suffix + ".png"))
 	with open(pJoin(modelDir,"output" + base_suffix + ".png"),"rb") as f:
 		o["base_image"] = f.read().encode("base64")
+	os.rename(pJoin(modelDir, "voltDump.csv"), pJoin(modelDir, "voltDump_base.csv"))
 
 	# ---------------------------- SOLAR CHART ----------------------------- #
 	with open(pJoin(modelDir, [x for x in os.listdir(modelDir) if x.endswith('.omd')][0])) as f:
@@ -71,6 +71,8 @@ def work(modelDir, ind):
 	).savefig(pJoin(modelDir,"output" + solar_suffix + ".png"))
 	with open(pJoin(modelDir,"output" + solar_suffix + ".png"),"rb") as f:
 		o["solar_image"] = f.read().encode("base64")
+	os.rename(pJoin(modelDir, "voltDump.csv"), pJoin(modelDir, "voltDump_solar.csv"))
+
 	# ----------------------------------------------------------------------- #
 
 
@@ -135,6 +137,22 @@ def work(modelDir, ind):
 			for motor, r in df_all_motors.iterrows()])
 	# ----------------------------------------------------------------------- #
 
+	motor_names = [motor for motor, r in df_all_motors.iterrows()]
+
+	# ----------------- MOTOR VOLTAGE and IMBALANCE TABLES ------------------ #
+	for suffix in [base_suffix, solar_suffix]:
+		df_all_motors = pd.DataFrame()
+
+		df_all_motors = _readVoltage(pJoin(modelDir, 'voltDump' + suffix + '.csv'), motor_names)
+		
+		o['motor_table' + suffix + '_v'] = ''.join([(
+			"<tr>"
+				"<td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td>"
+			"</tr>"
+		).format(r['node_name'], n(r['voltA']), n(r['voltB']), n(r['voltC']), n(r['unbalance'])) 
+			for i, r in df_all_motors.iterrows()])
+	# ----------------------------------------------------------------------- #
+
 	return o
 
 def _addCollectors(tree, suffix=None):
@@ -165,6 +183,24 @@ def _turnOffSolar(tree):
 		if v.get("object", "") in ["solar", "inverter"]:
 			tree[k]["generator_status"] = "OFFLINE"
 	return tree
+
+def _readVoltage(filename, motor_names):
+	return_df = pd.DataFrame()
+	df = pd.read_csv(filename, skiprows=1)
+	df_motors = df[df['node_name'].isin(motor_names)]
+	for phase in ['voltA', 'voltB', 'voltC']:
+		return_df[phase] = np.sqrt(df_motors[phase + '_imag']**2 + df_motors[phase + '_real']**2)
+	return_df['unbalance'] = return_df.apply(unbalance, axis=1)
+	return_df['node_name'] = df_motors['node_name']
+	return return_df
+
+def unbalance(r):
+	a = float(r['voltA'])
+	b = float(r['voltB'])
+	c = float(r['voltC'])
+	avgVolts = (a + b + c)/3
+	maxDiff = max([abs(a-b), abs(a-c), abs(b-c)])
+	return maxDiff/avgVolts
 
 def _readCSV(filename):
 	df = pd.read_csv(filename, skiprows=8)
@@ -197,13 +233,15 @@ def new(modelDir):
 		"retailCost": "0.05",
 		"discountRate": "7",
 		"edgeCol" : "None",
-		"nodeCol" : "Voltage", #"VoltageImbalance",
+		"nodeCol" : "VoltageImbalance",
 		"nodeLabs" : "None",
 		"edgeLabs" : "None",
 		"customColormap" : "False",
 		"rezSqIn" : "225",
 		"parameterOne": "42",
-		"parameterTwo": "42"
+		"parameterTwo": "42",
+		"colorMin": "0",
+		"colorMax": "1000"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
