@@ -142,9 +142,6 @@
             // Modal Dialogs
             **************************************************/
 
-            #loadModalTable {
-                width: 890px;
-            }
             #componentTable {
                 max-height: 65vh;
                 overflow: auto;
@@ -184,7 +181,22 @@
 				background-color: #fefefe;
                 max-height: 80vh;
                 overflow: auto;
+                max-width: 80vw;
 			}
+            .modalButtonSplit {
+                display: flex;
+                justify-content: space-around;
+            }
+            #feederListFlex {
+                display: flex;
+                min-width: 50vw;
+            }
+            #feederListFlex h3 {
+                text-align: center;
+            }
+            #feederListFlex div {
+                width: 50%;
+            }
             .right {
                 float: right;
             }
@@ -247,10 +259,8 @@
             }
             .scrollableList {
                 overflow: auto;
-                /*height: 240px;*/
                 max-height: 65vh;
                 list-style-type: none;
-                /*margin: 0px 0px 0px 20px;*/
                 margin: 0px;
                 padding: 0;
                 cursor: pointer;
@@ -409,16 +419,20 @@
                     <div class="headerGroup">
                         <h4 class="menuHeading white">Edit &#x25BE</h4>
                         <ul id="editMenu" class="menu" style="display: none;">
-                            <!--<li>Zoom To Fit</li>-->
-                            <!--<li>Zoom Reset</li>-->
-                            <li data-web>Add AMI Profiles...</li>
-                            <li data-web>Anonymization...</li>
+                            {% if showFileMenu %}
+                            <li data-web="ami">Add AMI Profiles...</li>
+                            <li data-web="anonymize">Anonymization...</li>
+                            {% endif %}
                             <li>Attachments...</li>
-                            <li data-web>Climate...</li>
+                            {% if showFileMenu %}
+                            <li data-web="climate">Climate...</li>
+                            {% endif %}
                             <li>Find...</li>
                             <li>Mass Add...</li>
                             <li>Mass Edit...</li>
-                            <li data-web>Scada Loadshapes...</li>
+                            {% if showFileMenu %}
+                            <li data-web="scada">Scada Loadshapes...</li>
+                            {% endif %}
                             <li>Static Loads to Houses</li>
                             <li>Change opacity...</li>
                             <li>Color Circuit...</li>
@@ -428,22 +442,24 @@
                         <h4 class="menuHeading white">Add &#x25BE;</h4>
                         <ul id="componentList" class="menu" style="display:none;"></ul>
                     </div>
-                    {% if showFileMenu %}
                     <div class="headerGroup">
                         <h4 class="menuHeading white">File &#x25BE</h4>
                         <ul id="fileMenu" class="menu" style="display: none">
-                            <li data-web>Save</li>
+                            {% if showFileMenu %}
+                            <li data-web="save">Save</li>
+                            {% endif %}
                             <li>View Raw Data</li>
-                            <li data-web>Rename</li>
-                            <li data-web>Load from Model...</li>
-                            <li data-web>New Blank Feeder...</li>
-                            <li data-web>Windmil Conversion...</li>
-                            <li data-web>GridLAB-D Conversion...</li>
-                            <li data-web>CYMDIST Conversion...</li>
-                            <li data-web>View on Map</li>
+                            {% if showFileMenu %}
+                            <li data-web="rename">Rename</li>
+                            <li data-web="load">Load from Model...</li>
+                            <li data-web="new">New Blank Feeder...</li>
+                            <li data-web="windmil">Windmil Conversion...</li>
+                            <li data-web="gridlabd">GridLAB-D Conversion...</li>
+                            <li data-web="cyme">CYMDIST Conversion...</li>
+                            <li data-web="map">View on Map</li>
+                            {% endif %}
                         </ul>
                     </div>
-                    {% endif %}
                 </div>
             </div>
             <!-- Svg container -->
@@ -455,53 +471,50 @@
                 <div class="modalContent">
                     <table>
                         <tr>
-                            <td class="fullPadded"><input id="searchInput" type="text" value="Enter a term" class="modalInput"></td>
-                            <td id="searchCount" class="fullPadded"></td>
+                            <td><input id="searchInput" type="text" value="Enter a term" class="modalInput"></td>
+                            <td id="searchCount"></td>
                         </tr>
-                        <tr><td class="fullPadded"><input checked id="searchExactString" type="radio" name="searchMode" value="searchExactString">Exact match</td></tr>
-                        <tr><td class="fullPadded"><input id="searchSubstring" type="radio" name="searchMode" value="searchSubstring">Includes term</td></tr>
-
+                        <tr><td><input checked id="searchExactString" type="radio" name="searchMode" value="searchExactString">Exact match</td></tr>
+                        <tr><td><input id="searchSubstring" type="radio" name="searchMode" value="searchSubstring">Includes term</td></tr>
                         <tr>
-                            <td class="fullPadded">Key of current object:</td>
-                            <td id="foundElementKey" class="fullPadded"></td>
+                            <td>Key of current object:</td>
+                            <td id="foundElementKey"></td>
                         </tr>
+                        <tr><td><input type="checkbox" id="showTableOnFind">Show table on view</td></tr>
                         <tr>
-                            <td class="fullPadded"><input type="checkbox" id="showTableOnFind">Show table on view</td>
-                        </tr>
-                        <tr>
-                        <td class="fullPadded">
-                            <button id="findPrevious" class="modalButton">Previous</button>
-                            <button id="findNext" class="modalButton" style="margin-left:10px;">Next</button>
-                        </td>
-                            <td class="fullPadded"><button class="modalButton" onclick="toggleElementDisplay('findModal')">Close</button></td>
+                            <td>
+                                <button id="findPrevious">Previous</button>
+                                <button id="findNext" style="margin-left:10px;">Next</button>
+                            </td>
+                            <td><button data-buttonfunction="toggle">Close</button></td>
                         </tr>
                     </table>
                 </div>
             </div>
             <div id="progressModal" class="modal" style="display: none">
-                <div class="modalContent" style="text-align: center;">
+                <div class="modalContent centered">
                     <img src="/static/spinner.gif">
                     <h2>text...</h2>
-                    <button class="modalButton" id="progressModalCancel">Cancel</button>
+                    <div class="modalButtonSplit">
+                        <button class="deleteButton" data-buttonfunction="cancel" style="margin-right:300px;">Cancel</button>
+                        <button data-buttonfunction="submit">OK</button>
+                    </div>
                 </div>
             </div>
+            {% if showFileMenu %}
             <div id="loadModal" class="modal" style="display: none">
                 <div class="modalContent">
-                    <table id="loadModalTable">
-                        <tbody>
-                            <tr>
-                                <th class="modalTableRow fullPadded">Public Feeders</th>
-                                <th class="modalTableRow fullPadded">My Feeders</th>
-                            </tr>	
-                            <tr>
-                                <td class="modalTableRow fullPadded"><ul id="publicFeederList" class="scrollableList"></ul></td>
-                                <td class="modalTableRow fullPadded"><ul id="userFeederList" class="scrollableList"></ul></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div class="fullPadded">
-                        <button onclick="toggleElementDisplay('loadModal')" class="modalButton fullPadded">Cancel</button>
+                    <div id="feederListFlex">
+                        <div>
+                            <h3>Public Feeders</h3>
+                            <ul id="publicFeederList" class="scrollableList"></ul>
+                        </div>
+                        <div>
+                            <h3>My Feeders</h3>
+                            <ul id="userFeederList" class="scrollableList"></ul>
+                        </div>
                     </div>
+                    <button data-buttonfunction="toggle" style="margin-top: 15px;">Cancel</button>
                 </div>
             </div>
             <div id="blankFeederModal" class="modal" style="display: none">
@@ -514,19 +527,17 @@
                         <input type="hidden" name="referrer" value="distribution"/>
                         <table>
                             <tbody>
+                                <tr><th colspan="2">New Blank Feeder</th></tr>
                                 <tr>
-                                    <th colspan="2" class="fullPadded">New Blank Feeder</th>
-                                </tr>
-                                <tr>
-                                    <td class="fullPadded"><label for="blankFeederInput">Name</label></td>
-                                    <td class="fullPadded">
+                                    <td><label for="blankFeederInput">Name</label></td>
+                                    <td>
                                         <!-- TODO: add better validation than just the "required" attribute-->
                                         <input type="text" required id="blankFeederInput" name="feederNameNew" class="modalInput"/>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="fullPadded"><button type="button" onclick="toggleElementDisplay('blankFeederModal')" class="modalButton">Cancel</button></td>
-                                    <td class="fullPadded"><button type="submit" class="right modalButton">Create</button></td>
+                                    <td><button type="button" data-buttonfunction="toggle">Cancel</button></td>
+                                    <td><button type="submit" class="right">Create</button></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -544,25 +555,25 @@
                         <!--<input type="hidden" name="referrer" value="distribution"/>-->
                         <table>
                             <tbody>
-                                <tr><th colspan="2" class="fullPadded">Milsoft Conversion</th></tr>
+                                <tr><th colspan="2">Milsoft Conversion</th></tr>
                                 <tr>
-                                    <td class="fullPadded"><label for="milsoftInput">Name</label></td>
-                                    <td class="fullPadded">
+                                    <td><label for="milsoftInput">Name</label></td>
+                                    <td>
                                         <!-- TODO: add better validation than just the "required" attribute-->
                                         <input type="text" required id="milsoftInput" name="feederNameM" class="modalInput"/>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="fullPadded">Data File (.std)</td>
-                                    <td class="fullPadded"><input type="file" required id="stdFile" name="stdFile" accept=".std" class="modalInput"/></td>
+                                    <td>Data File (.std)</td>
+                                    <td><input type="file" required id="stdFile" name="stdFile" accept=".std" class="modalInput"/></td>
                                 </tr>
                                 <tr>
-                                    <td class="fullPadded">Equipment File (.seq)</td>
-                                    <td class="fullPadded"><input type="file" required id="seqFile" name="seqFile" accept=".seq" class="modalInput"/></td>
+                                    <td>Equipment File (.seq)</td>
+                                    <td><input type="file" required id="seqFile" name="seqFile" accept=".seq" class="modalInput"/></td>
                                 </tr>
                                 <tr>
-                                    <td class="fullPadded"><button type="button" onclick="toggleElementDisplay('milsoftModal')" class="modalButton">Cancel</button></td>
-                                    <td class="fullPadded"><button type="submit" class="modalButton right">Import</button></td>
+                                    <td><button type="button" data-buttonfunction="toggle">Cancel</button></td>
+                                    <td><button type="submit" class="right">Import</button></td>
                                 </tr>
                             </tbody>
                         </table> 
@@ -580,21 +591,21 @@
                         <!--<input type="hidden" name="referrer" value="distribution"/>-->
                         <table>
                             <tbody>
-                                <tr><th colspan="2" class="fullPadded">GridLab-D Conversion</th></tr>
+                                <tr><th colspan="2">GridLab-D Conversion</th></tr>
                                 <tr>
-                                    <td class="fullPadded"><label for="gridlabdInput">Name</label></td>
-                                    <td class="fullPadded">
+                                    <td><label for="gridlabdInput">Name</label></td>
+                                    <td>
                                         <!-- TODO: add better validation than just the "required" attribute-->
                                         <input type="text" required id="gridlabdInput" name="feederNameG" class="modalInput"/>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="fullPadded">Data File (.glm)</td>
-                                    <td class="fullPadded"><input type="file" required id="csvFile" name="glmFile" accept=".glm" class="modalInput"/></td>
+                                    <td>Data File (.glm)</td>
+                                    <td><input type="file" required id="csvFile" name="glmFile" accept=".glm" class="modalInput"/></td>
                                 </tr>
                                 <tr>
-                                    <td class="fullPadded"><button type="button" onclick="toggleElementDisplay('gridlabdModal')" class="modalButton">Cancel</button></td>
-                                    <td class="fullPadded"><button type="submit" class="modalButton right">Import</button></td>
+                                    <td><button type="button" data-buttonfunction="toggle">Cancel</button></td>
+                                    <td><button type="submit" class="right">Import</button></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -612,21 +623,21 @@
                         <!--<input type="hidden" name="referrer" value="distribution"/>-->
                         <table>
                             <tbody>
-                                <tr><th colspan="2" class="fullPadded">Cyme Conversion</th></tr>
+                                <tr><th colspan="2">Cyme Conversion</th></tr>
                                 <tr>
-                                    <td class="fullPadded"><label for="cymeInput">Name</label></td>
-                                    <td class="fullPadded">
+                                    <td><label for="cymeInput">Name</label></td>
+                                    <td>
                                         <!-- TODO: add better validation than just the "required" attribute-->
                                         <input type="text" required id="cymeInput" name="feederNameC" class="modalInput"/>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="fullPadded">Network File (.mdb)</td>
-                                    <td class="fullPadded"><input type="file" required id="mdbNetFile" name="mdbNetFile" accept=".mdb" class="modalInput"/></td>
+                                    <td>Network File (.mdb)</td>
+                                    <td><input type="file" required id="mdbNetFile" name="mdbNetFile" accept=".mdb" class="modalInput"/></td>
                                 </tr>
                                 <tr>
-                                    <td class="fullPadded"><button type="button" onclick="toggleElementDisplay('cymeModal')" class="modalButton">Cancel</button></td>
-                                    <td class="fullPadded"><button type="submit" class="modalButton right">Import</button></td>
+                                    <td><button type="button" data-buttonfunction="toggle">Cancel</button></td>
+                                    <td><button type="submit" class="right">Import</button></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -636,7 +647,7 @@
             <div id="scadaModal" class="modal" style="display: none">
                 <div class="modalContent">
                     <!--I assume this is supposed to update THIS feeder with the scada loadshape. Therefore, uniqObjName with {{thisOwner}} is correct.-->
-                    <form onsubmit="submitForm({formId:'scadaForm', pollUrl:'/checkScadaLoadshape/{{thisModelName}}'}); return false;"
+                    <form onsubmit="submitForm({formId:'scadaForm', pollUrl:'/checkConversion/{{thisModelName}}/{{thisOwner}}'}); return false;"
                     action="/scadaLoadshape/{{thisOwner}}/{{thisFeederName}}" id="scadaForm">
                         <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
                         <input type="hidden" id="feederNum" name="feederNum" value="{{thisFeederNum}}"/>
@@ -645,17 +656,17 @@
                         <table>
                             <tbody>
                                 <tr>
-                                    <th class="leftText fullPadded">Scada Loadshapes</th>
-                                    <th class="right fullPadded"><a href="https://github.com/dpinney/omf/wiki/Tools-~-gridEdit#scada-loadshapes" target="_blank">Format Help</a></th>
+                                    <th class="leftText">Scada Loadshapes</th>
+                                    <th class="right"><a href="https://github.com/dpinney/omf/wiki/Tools-~-gridEdit#scada-loadshapes" target="_blank">Format Help</a></th>
                                 </tr>
                                 <tr>
-                                    <td class="fullPadded">File containing Scada load data (.csv)</td>
-                                    <td class="fullPadded"><input type="file" required id="scadaFile" name="scadaFile" accept=".csv" class="modalInput"/></td>
+                                    <td>File containing Scada load data (.csv)</td>
+                                    <td><input type="file" required id="scadaFile" name="scadaFile" accept=".csv" class="modalInput"/></td>
                                 </tr>
-                                <tr><td colspan="100%" class="fullPadded">Note: Model "Simulation Start Date" should lie within the Scada load"s dates.</td></tr>
+                                <tr><td colspan="100%">Note: Model "Simulation Start Date" should lie within the Scada load"s dates.</td></tr>
                                 <tr>
-                                    <td class="fullPadded"><button type="button" onclick="toggleElementDisplay('scadaModal')" class="modalButton">Cancel</button></td>
-                                    <td class="fullPadded"><button type="submit" class="right modalButton">Import</button></td>
+                                    <td><button type="button" data-buttonfunction="toggle">Cancel</button></td>
+                                    <td><button type="submit" class="right">Import</button></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -665,7 +676,7 @@
             <div id="amiModal" class="modal" style="display: none">
                 <div class="modalContent">
                     <!--I assume this is supposed to replace THIS feeder with the ami modeling. Therefore, uniqObjName with {{thisOwner}} is correct.-->
-                    <form onsubmit="submitForm({formId:'amiForm', pollUrl:'/checkLoadModelingAmi/{{thisModelName}}'}); return false;"
+                    <form onsubmit="submitForm({formId:'amiForm', pollUrl:'/checkConversion/{{thisModelName}}/{{thisOwner}}'}); return false;"
                     action="/loadModelingAmi/{{thisOwner}}/{{thisFeederName}}" id="amiForm">
                         <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
                         <input type="hidden" id="feederNum" name="feederNum" value="{{thisFeederNum}}"/>
@@ -674,45 +685,185 @@
                         <table>
                             <tbody>
                                 <tr>
-                                    <th class="leftText fullPadded">AMI Profiles</th>
-                                    <th class="right fullPadded"><a href="https://github.com/dpinney/omf/wiki/Tools-~-gridEdit" target="_blank">Format Help</a></th>
+                                    <th class="leftText">AMI Profiles</th>
+                                    <th class="right"><a href="https://github.com/dpinney/omf/wiki/Tools-~-gridEdit" target="_blank">Format Help</a></th>
                                 </tr>
                                 <tr>
-                                    <td class="fullPadded">File containing AMI load data (.csv)</td>
-                                    <td class="fullPadded"><input type="file" required id="amiFile" name="amiFile" accept=".csv" class="modalInput"/></td>
+                                    <td>File containing AMI load data (.csv)</td>
+                                    <td><input type="file" required id="amiFile" name="amiFile" accept=".csv" class="modalInput"/></td>
                                 </tr>
                                 <tr>
-                                    <td colspan="100%" class="fullPadded">Note: Model "Simulation Start Date" should lie within the AMI profiles"s dates.</td>
+                                    <td colspan="100%">Note: Model "Simulation Start Date" should lie within the AMI profiles"s dates.</td>
                                 </tr>
                                 <tr>
-                                    <td class="fullPadded"><button type="button" onclick="toggleElementDisplay('amiModal')" class="modalButton">Cancel</button></td>
-                                    <td class="fullPadded"><button type="submit" class="modalButton right">Import</button></td>
+                                    <td><button type="button" data-buttonfunction="toggle">Cancel</button></td>
+                                    <td><button type="submit" class="right">Import</button></td>
                                 </tr>
                             </tbody>
                         </table>
                     </form>
                 </div>
             </div>
+            <div id="climateModal" class="modal" style="display: none">
+                <div class="modalContent">
+                    <!--I assume this is supposed to update THIS feeder with the climate data. Therefore, uniqObjName with {{thisOwner}} is correct.-->
+                    <form onsubmit="submitForm({formId:'climateForm', pollUrl:'/checkConversion/{{thisModelName}}/{{thisOwner}}'}); return false;"
+                    action="/climateChange/{{thisOwner}}/{{thisFeederName}}" id="climateForm">
+                        <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
+                        <!--<input type="hidden" id="feederNum" name="feederNum" value="{{thisFeederNum}}"/>-->
+                        <input type="hidden" id="modelName" name="modelName" value="{{thisModelName}}"/>
+                        <!--<input type="hidden" name="referrer" value="distribution"/>-->
+                        <table>
+                            <tbody>
+                                <tr><th colspan="2">Climate Change</th></tr>
+                                <tr>
+                                    <td>
+                                        <input id="historicalImport" type="radio" name="climateImportOption" value="historicalImport">
+                                        <label for="historicalImport">Historical Weather</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><label for="startDate">Start Date (YYYY-MM-DD):</label></td>
+                                    <td><input id="startDate" type="text" name="startDate" pattern="^\d{4}-\d{2}-\d{2}$" class="modalInput"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="endDate">End Date (YYYY-MM-DD):</label></td>
+                                    <td><input id="endDate" type="text" name="endDate" pattern="^\d{4}-\d{2}-\d{2}$" class="modalInput"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="airport">Airport Code:</label></td>
+                                    <td><input id="airport" type="text" name="airport" pattern="^[A-Z]{3}$" class="modalInput"></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input id="tmyImport" type="radio" name="climateImportOption" value="tmyImport">
+                                        <label for="tmyImport">tmy Import</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><label for="zipCode">Zip Code:</label></td>
+                                    <td><input id="zipCode" type="text" name="zipCode" pattern="^\d{5}$" class="modalInput"></td>
+                                </tr>
+                                <tr>
+                                    <td><button type="button" data-buttonfunction="toggle">Cancel</button></td>
+                                    <td><button type="submit" class="right">Apply</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+            </div>
+            <div id="anonymizeModal" class="modal" style="display: none">
+                <div class="modalContent">
+                    <!--I assume this is supposed to anonymize THIS feeder. Therefore, uniqObjName with {{thisOwner}} is correct.-->
+                    <form onsubmit="submitForm({formId:'anonymizeForm', pollUrl:'/checkConversion/{{thisModelName}}/{{thisOwner}}'}); return false;" action="/anonymize/{{thisOwner}}/{{thisFeederName}}" id="anonymizeForm">
+                        <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
+                        <!--<input type="hidden" id="feederNum" name="feederNum" value="{{thisFeederNum}}"/>-->
+                        <input type="hidden" id="modelName" name="modelName" value="{{thisModelName}}"/>
+                        <!--<input type="hidden" name="referrer" value="distribution"/>-->
+                        <table>
+                            <tbody>
+                                <tr><th>Anonymization</th></tr>
+                                <tr><th class="leftText">Names and labels:</th></tr>
+                                <tr>
+                                    <td>
+                                        <select name="anonymizeNameOption">
+                                            <option value="noChange">No change</option>
+                                            <option value="pseudonymize">Pseudonymize</option>
+                                            <option value="randomize">Randomize</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr><th class="leftText">Locations:</th></tr>
+                                <tr>
+                                    <td>
+                                        <input type="radio" id="noChange" name="anonymizeLocationOption" value="noChange" checked>
+                                        <label for="noChange">No Change</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input type="radio" id="randomize" name="anonymizeLocationOption" value="randomize">
+                                        <label for="randomize">Randomize</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input type="radio" id="forceLayout" name="anonymizeLocationOption" value="forceLayout">
+                                        <label for="forceLayout">Force Layout</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input type="radio" id="translation" name="anonymizeLocationOption" value="translation">
+                                        <label for="translation">Translate</label>
+                                    </td>
+                                </tr>
+                                <tr><td><input type="text" pattern="^[+-]?\d+(\.\d+)?$" name="translateRight" class="modalInputLine"> [ft] to the right and</td></tr>
+                                <tr><td><input type="text" pattern="^[+-]?\d+(\.\d+)?$" name="translateUp" class="modalInputLine"> [ft] up with a</td></tr>
+                                <tr><td><input type="text" pattern="^[+-]?\d+(\.\d+)?$" name="rotate" class="modalInputLine"> [degree] rotation.</td></tr>
+                                <tr><th class="leftText">Electrical properties:</th></tr>
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" id="modifyLengthSize" name="modifyLengthSize" value="modifyLengthSize">
+                                        <label for="modifyLengthSize">Modify conductor length and cable size</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" id="smoothLoadGen" name="smoothLoadGen" value="smoothLoadGen">
+                                        <label for="smoothLoadGen">Smooth AMI Loadshapes</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" id="shuffleLoadGen" name="shuffleLoadGen" value="shuffleLoadGen">
+                                        <label for="shuffleLoadGen">Shuffle loads and generators:</label>
+                                        <!--<input type="text" name="shufflePerc" class="modalInputLine"> [%]</label>-->
+                                        <!--Commented both of these out because I think the server expects a fractional decimal number-->
+                                        <input type="text" pattern="^[+-]?\d+(\.\d+)?$" name="shufflePerc" class="modalInputLine"> [%]</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" id="addNoise" name="addNoise" value="addNoise">
+                                        <label for="addNoise">Add noise:</label>
+                                        <!--<input type="text" name="noisePerc" class="modalInputLine"> [%]</label>-->
+                                        <input type="text" pattern="^[+-]?\d+(\.\d+)?$" name="noisePerc" class="modalInputLine"> [%]</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <button type="button" data-buttonfunction="toggle">Cancel</button>
+                                        <button type="submit" class="right">Apply</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
             <div id="massAddModal" class="modal" style="display: none">
                 <div class="modalContent">
                     <table>
                         <tbody>
-                            <tr><th colspan="2" class="fullPadded">Mass Add</th></tr>
+                            <tr><th colspan="2">Mass Add</th></tr>
                             <tr>
-                                <td class="fullPadded">Add component:</td>
-                                <td class="fullPadded"><select id="massAddComponentSelect"></select></td>
+                                <td>Add component:</td>
+                                <td><select id="massAddComponentSelect"></select></td>
                             </tr>
                             <tr>
-                                <td class="fullPadded">To each:</td>
-                                <td class="fullPadded"><select id="massAddTargetSelect"></select></td>
+                                <td>To each:</td>
+                                <td><select id="massAddTargetSelect"></select></td>
                             </tr>
                             <tr>
-                                <td class="fullPadded">With probability for each attachment (float between 0.0 and 1.0):</td>
-                                <td class="fullPadded"><input type="text" value="1.0" class="modalInput"/></td>
+                                <td>With probability for each attachment (float between 0.0 and 1.0):</td>
+                                <td><input type="text" value="1.0" class="modalInput"/></td>
                             </tr>
                             <tr>
-                                <td class="fullPadded"><button data-buttonfunction="cancel" class="modalButton">Cancel</button></td>
-                                <td class="fullPadded"><button data-buttonfunction="submit" class="right modalButton">Apply</button></td>
+                                <td><button data-buttonfunction="cancel">Cancel</button></td>
+                                <td><button data-buttonfunction="submit" class="right">Apply</button></td>
                             </tr>
                         </tbody>
                     </table>
@@ -723,7 +874,7 @@
                     <h3></h3>
                     <div id="componentTable" data-tableinsert></div>
                     <div style="text-align:center; padding: 10px;">
-                        <button data-buttonfunction="cancel" class="modalButton">Cancel</button>
+                        <button data-buttonfunction="cancel">Cancel</button>
                     </div>
                 </div>
             </div>
@@ -731,41 +882,41 @@
                 <div class="modalContent">
                     <table>
                         <tbody>
-                            <tr><th colspan="4" class="fullPadded">Mass Edit</th></tr>
+                            <tr><th colspan="4">Mass Edit</th></tr>
                             <tr>
-                                <td class="fullPadded">For each object of type</td>
-                                <td class="fullPadded"><select id="massEditTargetSelect"></select></td>
-                                <td class="fullPadded">with attribute</td>
-                                <td class="fullPadded"><input type="text" id="massEditAttribute" class="modalInput"></td>
+                                <td>For each object of type</td>
+                                <td><select id="massEditTargetSelect"></select></td>
+                                <td>with attribute</td>
+                                <td><input type="text" id="massEditAttribute" class="modalInput"></td>
                             </tr>
                             <tr>
-                                <td class="fullPadded"><input type="radio" name="attributeOperation" value="addTo">Add value to attribute</td>
-                                <td class="fullPadded"><input type="text" id="addToValue" pattern="^0\.\d+|1(\.0+)?$" class="modalInput"/></td>
+                                <td><input type="radio" name="attributeOperation" value="addTo">Add value to attribute</td>
+                                <td><input type="text" id="addToValue" pattern="^0\.\d+|1(\.0+)?$" class="modalInput"/></td>
                             </tr>
                             <tr>
-                                <td class="fullPadded"><input type="radio" name="attributeOperation" value="delete">Delete Attribute</td>
+                                <td><input type="radio" name="attributeOperation" value="delete">Delete Attribute</td>
                             </tr>
                             <tr>
-                                <td class="fullPadded"><input type="radio" name="attributeOperation" value="change">Change attribute to</td>
-                                <td class="fullPadded"><input type="text" id="changeValue" pattern="^0\.\d+|1(\.0+)?$" class="modalInput"/></td>
+                                <td><input type="radio" name="attributeOperation" value="change">Change attribute to</td>
+                                <td><input type="text" id="changeValue" pattern="^0\.\d+|1(\.0+)?$" class="modalInput"/></td>
                             </tr>
                             </tr>
                             <tr>		
-                                <td class="fullPadded"><input type="radio" name="attributeOperation" value="multiplyBy">Multiply attribute by</td>
-                                <td class="fullPadded"><input type="text" id="multiplyValue" pattern="^0\.\d+|1(\.0+)?$" class="modalInput"/></td>
-                                <td class="fullPadded" style="text-align: center" >and add</td>
-                                <td class="fullPadded"><input type="text" id="andAddValue" pattern="^0\.\d+|1(\.0+)?$" class="modalInput"/></td>
+                                <td><input type="radio" name="attributeOperation" value="multiplyBy">Multiply attribute by</td>
+                                <td><input type="text" id="multiplyValue" pattern="^0\.\d+|1(\.0+)?$" class="modalInput"/></td>
+                                <td style="text-align: center" >and add</td>
+                                <td><input type="text" id="andAddValue" pattern="^0\.\d+|1(\.0+)?$" class="modalInput"/></td>
                             </tr>
-                            <tr><td class="fullPadded">Or</td></tr>
+                            <tr><td>Or</td></tr>
                             <tr>
-                                <td class="fullPadded"><input type="radio" name="attributeOperation" value="addAttribute"> Add new attribute</td>
-                                <td class="fullPadded"><input type="text" id="newAttributeKey" class="modalInput"></td>
-                                <td class="fullPadded" style="text-align: center">with value</td>
-                                <td class="fullPadded"><input type="text" id="newAttributeValue" pattern="^0\.\d+|1(\.0+)?$" class="modalInput"/></td>
+                                <td><input type="radio" name="attributeOperation" value="addAttribute"> Add new attribute</td>
+                                <td><input type="text" id="newAttributeKey" class="modalInput"></td>
+                                <td style="text-align: center">with value</td>
+                                <td><input type="text" id="newAttributeValue" pattern="^0\.\d+|1(\.0+)?$" class="modalInput"/></td>
                             </tr>
                             <tr>
-                                <td class="fullPadded"><button onclick="toggleElementDisplay('massEditModal')" class="modalButton">Cancel</button></td>
-                                <td colspan="3" class="fullPadded"><button onclick="massEdit();" class="right modalButton">Apply</button></td>
+                                <td><button data-buttonfunction="toggle">Cancel</button></td>
+                                <td colspan="3"><button onclick="massEdit();" class="right">Apply</button></td>
                             </tr>
                         </tbody>
                     </table>
@@ -775,13 +926,11 @@
                 <div class="modalContent">
                     <table>
                         <tbody>
-                            <tr><th colspan="2" class="fullPadded">Attachments</th></tr>
+                            <tr><th colspan="2">Attachments</th></tr>
+                            <tr><td><select id="attachmentSelect"></select></td></tr>
                             <tr>
-                                <td class="fullPadded"><select id="attachmentSelect"></select></td>
-                            </tr>
-                            <tr>
-                                <td class="fullPadded"><button onclick="toggleElementDisplay('attachmentsModal')" class="modalButton">Cancel</button></td>
-                                <td class="fullPadded"><button onclick="toggleElementDisplay('attachmentsModal'); editAttachment()" class="modalButton">Select</button></td>
+                                <td><button data-buttonfunction="toggle">Cancel</button></td>
+                                <td><button data-buttonfunction="toggle" onclick="editAttachment()">Select</button></td>
                             </tr>
                         </tbody>
                     </table>
@@ -791,161 +940,22 @@
                 <div class="modalContent">
                     <table>
                         <tbody>
-                            <tr><td id="attachmentTd" class="fullPadded"></td></tr>
-                            <tr><td class="fullPadded"><textarea rows="25" cols="80" id="editAttachmentBox"></textarea></td></tr>
+                            <tr><td id="attachmentTd"></td></tr>
+                            <tr><td><textarea rows="25" cols="80" id="editAttachmentBox"></textarea></td></tr>
                             <tr>
-                                <td class="fullPadded"><button onclick="toggleElementDisplay('editAttachmentModal')" class="modalButton">Cancel</button></td>
-                                <td class="fullPadded"><button onclick="saveAttachment(); toggleElementDisplay('editAttachmentModal');" class="modalButton">Save</button></td>
+                                <td><button data-buttonfunction="toggle">Cancel</button></td>
+                                <td><button data-buttonfunction="toggle" onclick="saveAttachment();">Save</button></td>
                             </tr>
                         </tbody>
                     </table>
-                </div>
-            </div>
-            <div id="climateModal" class="modal" style="display: none">
-                <div class="modalContent">
-                    <!--I assume this is supposed to update THIS feeder with the climate data. Therefore, uniqObjName with {{thisOwner}} is correct.-->
-                    <form onsubmit="submitForm({formId:'climateForm', pollUrl:'/checkClimateChange/{{thisOwner}}/{{thisModelName}}'}); return false;"
-                    action="/climateChange/{{thisOwner}}/{{thisFeederName}}" id="climateForm">
-                        <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
-                        <!--<input type="hidden" id="feederNum" name="feederNum" value="{{thisFeederNum}}"/>-->
-                        <input type="hidden" id="modelName" name="modelName" value="{{thisModelName}}"/>
-                        <!--<input type="hidden" name="referrer" value="distribution"/>-->
-                        <table>
-                            <tbody>
-                                <tr><th colspan="2" class="fullPadded">Climate Change</th></tr>
-                                <tr>
-                                    <td class="fullPadded">
-                                        <input id="historicalImport" type="radio" name="climateImportOption" value="historicalImport">
-                                        <label for="historicalImport">Historical Weather</label>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="fullPadded"><label for="startDate">Start Date (YYYY-MM-DD):</label></td>
-                                    <td class="fullPadded"><input id="startDate" type="text" name="startDate" pattern="^\d{4}-\d{2}-\d{2}$" class="modalInput"></td>
-                                </tr>
-                                <tr>
-                                    <td class="fullPadded"><label for="endDate">End Date (YYYY-MM-DD):</label></td>
-                                    <td class="fullPadded"><input id="endDate" type="text" name="endDate" pattern="^\d{4}-\d{2}-\d{2}$" class="modalInput"></td>
-                                </tr>
-                                <tr>
-                                    <td class="fullPadded"><label for="airport">Airport Code:</label></td>
-                                    <td class="fullPadded"><input id="airport" type="text" name="airport" pattern="^[A-Z]{3}$" class="modalInput"></td>
-                                </tr>
-                                <tr>
-                                    <td class="fullPadded">
-                                        <input id="tmyImport" type="radio" name="climateImportOption" value="tmyImport">
-                                        <label for="tmyImport">tmy Import</label>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="fullPadded"><label for="zipCode">Zip Code:</label></td>
-                                    <td class="fullPadded"><input id="zipCode" type="text" name="zipCode" pattern="^\d{5}$" class="modalInput"></td>
-                                </tr>
-                                <tr>
-                                    <td class="fullPadded"><button type="button" onclick="toggleElementDisplay('climateModal')" class="modalButton">Cancel</button></td>
-                                    <td class="fullPadded"><button type="submit" class="right modalButton">Apply</button></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </form>
-                </div>
-            </div>
-            <div id="anonymizeModal" class="modal" style="display: none">
-                <div class="modalContent">
-                    <!--I assume this is supposed to anonymize THIS feeder. Therefore, uniqObjName with {{thisOwner}} is correct.-->
-                    <form onsubmit="submitForm({formId:'anonymizeForm', pollUrl:'/checkAnonymize/{{thisOwner}}/{{thisModelName}}'}); return false;" action="/anonymize/{{thisOwner}}/{{thisFeederName}}" id="anonymizeForm">
-                        <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
-                        <!--<input type="hidden" id="feederNum" name="feederNum" value="{{thisFeederNum}}"/>-->
-                        <input type="hidden" id="modelName" name="modelName" value="{{thisModelName}}"/>
-                        <!--<input type="hidden" name="referrer" value="distribution"/>-->
-                        <table>
-                            <tbody>
-                                <tr><th class="fullPadded">Anonymization</th></tr>
-                                <tr><th class="leftText fullPadded">Names and labels:</th></tr>
-                                <tr>
-                                    <td class="fullPadded">
-                                        <select name="anonymizeNameOption">
-                                            <option value="noChange">No change</option>
-                                            <option value="pseudonymize">Pseudonymize</option>
-                                            <option value="randomize">Randomize</option>
-                                        </select>
-                                    </td>
-                                </tr>
-                                <tr><th class="leftText fullPadded">Locations:</th></tr>
-                                <tr>
-                                    <td class="fullPadded">
-                                        <input type="radio" id="noChange" name="anonymizeLocationOption" value="noChange" checked>
-                                        <label for="noChange">No Change</label>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="fullPadded">
-                                        <input type="radio" id="randomize" name="anonymizeLocationOption" value="randomize">
-                                        <label for="randomize">Randomize</label>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="fullPadded">
-                                        <input type="radio" id="forceLayout" name="anonymizeLocationOption" value="forceLayout">
-                                        <label for="forceLayout">Force Layout</label>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="fullPadded">
-                                        <input type="radio" id="translation" name="anonymizeLocationOption" value="translation">
-                                        <label for="translation">Translate</label>
-                                    </td>
-                                </tr>
-                                <tr><td class="fullPadded"><input type="text" pattern="^[+-]?\d+(\.\d+)?$" name="translateRight" class="modalInputLine"> [ft] to the right and</td></tr>
-                                <tr><td class="fullPadded"><input type="text" pattern="^[+-]?\d+(\.\d+)?$" name="translateUp" class="modalInputLine"> [ft] up with a</td></tr>
-                                <tr><td class="fullPadded"><input type="text" pattern="^[+-]?\d+(\.\d+)?$" name="rotate" class="modalInputLine"> [degree] rotation.</td></tr>
-                                <tr><th class="leftText fullPadded">Electrical properties:</th></tr>
-                                <tr>
-                                    <td class="fullPadded">
-                                        <input type="checkbox" id="modifyLengthSize" name="modifyLengthSize" value="modifyLengthSize">
-                                        <label for="modifyLengthSize">Modify conductor length and cable size</label>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="fullPadded">
-                                        <input type="checkbox" id="smoothLoadGen" name="smoothLoadGen" value="smoothLoadGen">
-                                        <label for="smoothLoadGen">Smooth AMI Loadshapes</label>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="fullPadded">
-                                        <input type="checkbox" id="shuffleLoadGen" name="shuffleLoadGen" value="shuffleLoadGen">
-                                        <label for="shuffleLoadGen">Shuffle loads and generators:</label>
-                                        <!--<input type="text" name="shufflePerc" class="modalInputLine"> [%]</label>-->
-                                        <!--Commented both of these out because I think the server expects a fractional decimal number-->
-                                        <input type="text" pattern="^[+-]?\d+(\.\d+)?$" name="shufflePerc" class="modalInputLine"> [%]</label>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="fullPadded">
-                                        <input type="checkbox" id="addNoise" name="addNoise" value="addNoise">
-                                        <label for="addNoise">Add noise:</label>
-                                        <!--<input type="text" name="noisePerc" class="modalInputLine"> [%]</label>-->
-                                        <input type="text" pattern="^[+-]?\d+(\.\d+)?$" name="noisePerc" class="modalInputLine"> [%]</label>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="fullPadded">
-                                        <button type="button" onclick="toggleElementDisplay('anonymizeModal')" class="modalButton">Cancel</button>
-                                        <button type="submit" class="right modalButton">Apply</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </form>
                 </div>
             </div>
             <div id="opacityModal" class="modal" style="display: none">
                 <div class="modalContent">
                     <div data-tableinsert></div>
                     <div class="centered fullPadded">
-                        <button onclick="toggleElementDisplay('opacityModal');" class="modalButton">Close</button>
-                        <button onclick="gOpacityManager.reset();" class="modalButton">Reset</button>
+                        <button data-buttonfunction="toggle">Close</button>
+                        <button onclick="gOpacityManager.reset();">Reset</button>
                     </div>
                 </div>
             </div>
@@ -955,8 +965,8 @@
                     <div class="fullPadded"><input type="file" multiple accept=".csv" class="modalInput"></div>
                     <div data-tableinsert class="leftText vertFlex fullPadded"></div>
                     <div class="fullPadded">
-                        <button onclick="toggleElementDisplay('colorModal');" class="modalButton">Close</button>
-                        <button data-buttonfunction="reset" class="modalButton">Reset</button>
+                        <button data-buttonfunction="toggle">Close</button>
+                        <button data-buttonfunction="reset">Reset</button>
                     </div>
                 </div>
             </div>
@@ -1519,8 +1529,11 @@ const addManagerPrototype = {
         const probability = this.probability;
         if (component.object === "recorder" || getRelationship(gComponentManager.getFirst(targetObject)) !== "line") {
             const newObjects = [];
-            const pm = new ProgressModal(`Adding a "${component.object}" object to every "${targetObject}" object. This could take a few seconds.`);
-            pm.show();
+            let modal;
+            modal = createProgressModal({
+                startMessage: `Adding a "${component.object}" object to every "${targetObject}" object. This could take a few seconds.`,
+                finishFunc: () => modal.hide(),
+            });
             const that = this;
             setTimeout(() => {
                 Object.keys(gTree.tree).forEach(key => {
@@ -1532,8 +1545,8 @@ const addManagerPrototype = {
                     }
                 });
                 createSvgData(newObjects).draw(gViewport);
-                pm.hide();
-                alert(`${newObjects.length} "${component.name}" objects added to the feeder`);
+                modal.endMessage = `${newObjects.length} "${component.name}" objects were added to the feeder.`,
+                modal.finish();
             }, 10);
         } else {
             alert("Mass add failed. No object can be added as a child of a line, except for recorder objects.");
@@ -1585,7 +1598,14 @@ const addManagerPrototype = {
             tr.append(td);
             tBody.append(tr);
         });
-        formatModal(modal);
+        ["h1", "h2", "h3", "h4", "h5", "h6"].forEach(h => {
+            const headings = Array.from(modal.querySelectorAll(`div.modalContent > ${h}`));
+            if (headings.length > 0) {
+                headings.forEach(h => {
+                    h.classList.add("centered");
+                });
+            }
+        });
         formatTable(table);
         tableDiv.append(table);
     },
@@ -1638,12 +1658,12 @@ const addManagerPrototype = {
                 alert("Please select an object type to add to.")
             } else {
                 that.massAdd();
-                toggleElementDisplay("massAddModal");
+                toggleDisplay(modal);
                 that.reset();
             }
         }
         const cancelButton = modal.querySelector("button[data-buttonfunction='cancel']").onclick = () => {
-            toggleElementDisplay("massAddModal");
+            toggleDisplay(modal);
             that.reset();
         }
     },
@@ -1702,7 +1722,7 @@ const addManagerPrototype = {
 
     reset() {
         const modal = document.getElementById("massAddModal");
-        modal.querySelectorAll("select").forEach(s => {
+        Array.from(modal.querySelectorAll("select")).forEach(s => {
             s.selectedIndex = 0;
         });
         modal.querySelector("input").value = "1.0";
@@ -1844,6 +1864,13 @@ function createViewport(tree, svgContainer) {
         gDrawScaleFactor = 1000/longitudeRange;
     } else {
         gDrawScaleFactor = 1000/latitudeRange;
+    }
+    /*
+    Special case: minimum and maximum longitude and latitude are all the same (e.g. 0)! gDrawScale factor won't space things further apart, it just
+    makes various scales fit in the viewport
+    */
+    if (gDrawScaleFactor === Infinity) {
+        gDrawScaleFactor = 1;
     }
     svgContainer.setAttribute("viewBox",`0 0 ${1000} ${1000}`);
     /* Uncomment below to make gScaleFactor go away */
@@ -2131,8 +2158,6 @@ function disableWebFeatures() {
 // Header menu functions
 //**************************************************
 
-
-
 //delete this eventually
 function insertIndependentComponent(component) {
     alert("Please click a location on the graph to insert this component.");
@@ -2244,8 +2269,8 @@ function attachHandlers() {
     componentHandlers();
     fillFeederList(document.getElementById("publicFeederList"), gPublicFeeders, "public");
     fillFeederList(document.getElementById("userFeederList"), gUserFeeders, gCurrentUser);
-    fileMenuHandlers();
-    editMenuHandlers();
+    addFileMenuHandlers();
+    addEditMenuHandlers();
     mouseHandler();
     keyHandler();
     headerHandlers();
@@ -2373,7 +2398,8 @@ function getAddComponentFunction(component) {
  * @param {string} owner - Either "public" or the current user.
  */
 function fillFeederList(ul, feeders, owner=null) {
-    if (!feeders) return;
+    if (feeders == null) return; // sometimes the user has no feeders
+    if (ul == null) return; // there is no ul if we don't show the file menu
     const sortedNames = feeders.map(feeder => feeder.name.toLowerCase()).sort();
     sortedNames.forEach(lowercaseName => {
         const feeder = feeders.find(feeder => {
@@ -2395,65 +2421,83 @@ function fillFeederList(ul, feeders, owner=null) {
 /**
  * Doesn't need unit tests
  */
-function fileMenuHandlers() {
+function addFileMenuHandlers() {
     const menu = document.getElementById("fileMenu");
-    if (menu == null) {
-        return;
-    }
-    const items = Array.from(menu.children);
-    if (items.length !== 9) {
-        throw new Error("Please update this function to ensure the correct handlers are attached");
-    }
-    items[0].addEventListener("click", function() {
-        saveFeeder(gWriteFeeder);
-    });
-    items[1].addEventListener("click", downloadTextFile);
-    items[2].addEventListener("click", renameFeeder);
-    items[3].addEventListener("click", () => { toggleElementDisplay("loadModal"); });
-    items[4].addEventListener("click", () => { toggleElementDisplay("blankFeederModal"); });
-    items[5].addEventListener("click", () => { toggleElementDisplay("milsoftModal"); });
-    items[6].addEventListener("click", () => { toggleElementDisplay("gridlabdModal"); });
-    items[7].addEventListener("click", () => { toggleElementDisplay("cymeModal"); });
-    items[8].addEventListener("click", displayMap);
+    if (menu == null) return;
+    const save = menu.querySelector("li[data-web='save']");
+    if (save != null) save.addEventListener("click", () => saveFeeder(gWriteFeeder));
+    const rawData = Array.from(menu.querySelectorAll("li")).find(li => li.textContent.toLowerCase() === "view raw data");
+    if (rawData != null) rawData.addEventListener("click", downloadTextFile);
+    const rename = menu.querySelector("li[data-web='rename']");
+    if (rename != null) rename.addEventListener("click", getNewFeederName);
+    const load = menu.querySelector("li[data-web='load']");
+    if (load != null) load.addEventListener("click", () => toggleDisplay(document.getElementById("loadModal")));
+    const blank = menu.querySelector("li[data-web='new']");
+    if (blank != null) blank.addEventListener("click", () => toggleDisplay(document.getElementById("blankFeederModal")));
+    const windmil = menu.querySelector("li[data-web='windmil']");
+    if (windmil != null) windmil.addEventListener("click", () => toggleDisplay(document.getElementById("milsoftModal")));
+    const gridlabd = menu.querySelector("li[data-web='gridlabd']");
+    if (gridlabd != null) gridlabd.addEventListener("click", () => toggleDisplay(document.getElementById("gridlabdModal")));
+    const cyme = menu.querySelector("li[data-web='cyme']");
+    if (cyme != null) cyme.addEventListener("click", () => toggleDisplay(document.getElementById("cymeModal")));
+    const map = menu.querySelector("li[data-web='map']");
+    if (map != null) map.addEventListener("click", displayMap);
 }
 
 /** 
- * 
+ * Need to refactor this based on data attributes!
  */
-function editMenuHandlers() {
+function addEditMenuHandlers() {
     const menu = document.getElementById("editMenu");
-    const items = Array.from(menu.children);
-    if (items.length != 11) {
-        throw new Error("Please update this function to ensure the correct handlers are attached");
+    if (menu == null) return;
+    const liArray = Array.from(menu.querySelectorAll("li"));
+    const ami = menu.querySelector("li[data-web='ami']");
+    if (ami != null) ami.addEventListener("click", () => toggleDisplay(document.getElementById("amiModal")));
+    const anonymize = menu.querySelector("li[data-web='anonymize']");
+    if (anonymize != null) anonymize.addEventListener("click", () => toggleDisplay(document.getElementById("anonymizeModal")));
+    const attachments = liArray.find(li => li.textContent.toLowerCase() === "attachments...");
+    if (attachments != null) {
+        attachments.addEventListener("click", () => {
+            loadAttachments();
+            toggleDisplay(document.getElementById("attachmentsModal"));
+        });
     }
-    //items[0].addEventListener("click", zoomToFit);
-    //items[1].addEventListener("click", zoomReset);
-    items[0].addEventListener("click", function() { toggleElementDisplay("amiModal"); });
-    items[1].addEventListener("click", function() { toggleElementDisplay("anonymizeModal"); });
-    items[2].addEventListener("click", function() {
-        loadAttachments(); 
-        toggleElementDisplay("attachmentsModal");
-    });
-    items[3].addEventListener("click", function() { toggleElementDisplay("climateModal"); });
-    items[4].addEventListener("click", function() {
-        toggleElementDisplay("findModal"); 
-        document.getElementById("searchInput").focus(); 
-    });
-    items[5].addEventListener("click", function() {
-        gAddManager.setupTargetSelect();
-        toggleElementDisplay("massAddModal");
-    });
-    items[6].addEventListener("click", function() {
-        updateAttachTargets("massEditTargetSelect", gTree.tree);
-        toggleElementDisplay("massEditModal");
-    });
-    items[7].addEventListener("click", function() { toggleElementDisplay("scadaModal"); });
-    items[8].addEventListener("click", convertStaticLoadsIntoHouses);
-    items[9].addEventListener("click", function() {
-        gOpacityManager.update();
-        gOpacityManager.buildOpacityModal();
-    });
-    items[10].addEventListener("click", () => { toggleElementDisplay("colorModal"); });
+    const climate = menu.querySelector("li[data-web='climate']");
+    if (climate != null) climate.addEventListener("click", () => toggleDisplay(document.getElementById("climateModal")));
+    const find = liArray.find(li => li.textContent.toLowerCase() === "find...");
+    if (find != null) {
+        find.addEventListener("click", () => {
+            toggleDisplay(document.getElementById("findModal"));
+            document.getElementById("searchInput").focus(); 
+        });
+    }
+    const massAdd = liArray.find(li => li.textContent.toLowerCase() === "mass add...");
+    if (massAdd != null) {
+        massAdd.addEventListener("click", () => {
+            gAddManager.setupTargetSelect();
+            toggleDisplay(document.getElementById("massAddModal"));
+        });
+    }
+    const massEdit = liArray.find(li => li.textContent.toLowerCase() === "mass edit...");
+    if (massEdit != null) {
+        massEdit.addEventListener("click", () => {
+            updateAttachTargets("massEditTargetSelect", gTree.tree);
+            toggleDisplay(document.getElementById("massEditModal"));
+        });
+    }
+    const scada = menu.querySelector("li[data-web='scada']");
+    if (scada != null) scada.addEventListener("click", () => toggleDisplay(document.getElementById("scadaModal")));
+    const staticLoads = liArray.find(li => li.textContent.toLowerCase() === "static loads to houses");
+    if (staticLoads != null) staticLoads.addEventListener("click", convertStaticLoadsIntoHouses);
+    const opacity = liArray.find(li => li.textContent.toLowerCase() === "change opacity...");
+    if (opacity != null) {
+        opacity.addEventListener("click", () => {
+            gOpacityManager.update();
+            gOpacityManager.buildOpacityModal();
+        });
+    }
+    const color = liArray.find(li => li.textContent.toLowerCase() === "color circuit...");
+    if (color != null) color.addEventListener("click", () => toggleDisplay(document.getElementById("colorModal")));
 }
 
 function mouseHandler() {
@@ -2507,24 +2551,18 @@ function keyHandler() {
 }
 
 /** 
- * TODO: add unit tests
- * If an element isn't displayed, set it's inline display value to the default browser value.
- * If the element is displayed, then hide it.
+ * TODO: add unit tests If an element isn't displayed, set it's inline display value to the default browser value. If the element is displayed, then
+ * hide it.
+ * @param {HTMLElement} element
  */
-function toggleElementDisplay(id) {
-    const element = document.getElementById(id);
+function toggleDisplay(element) {
     if (element.style.display === "none") {
         element.removeAttribute("style");
     } else {
         element.style.display = "none";
-        if (id === "findModal") {
-            return;
-        }
-        // When we hide a modal, set any of the text fields to empty. Actually I don't always want this.
-        const queryString = `#${id} input[type='text']`;
-        document.querySelectorAll(queryString).forEach(input => {
-            input.value = "";
-        });
+        if (element.id === "findModal") return;
+        // When we hide a modal (except the findModal), set any of the text fields to empty.
+        Array.from(element.querySelectorAll("input[type='text']")).forEach(input => input.value = "");
     }
 }
 
@@ -2555,12 +2593,16 @@ function convertStaticLoadsIntoHouses() {
         alert(`This data has no triplex load or triplex node objects that can be converted into houses.`);
         return;
     }
-    const pm = new ProgressModal(`Converting every triplex load and/or triplex node into a house with children. This could take a few seconds.`);
-    pm.show();
+    let modal;
+    modal = createProgressModal({
+        startMessage: `Converting every triplex load and/or triplex node into a house with children. This could take a few seconds.`,
+        endMessage: `${keys.length} objects were converted into houses with children.`,
+        finishFunc: () => modal.hide()    
+    });
     setTimeout(function() {
         keys.forEach(key => { replaceLoadOrNodeWithHouse(key); });
         createSvgData(keys).draw(gViewport);
-        pm.hide();
+        modal.finish();
     }, 10);
 }
 
@@ -2717,7 +2759,7 @@ function massEdit() {
                 delete gTree.getObject(key)[attributeKey];
             }
             alert(`${keys.length} ${objectType} objects had the "${attributeKey}" attribute deleted.`);
-            toggleElementDisplay("massEditModal");
+            toggleDisplay(document.getElementById("massEditModal"));
             createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
             break;
     }
@@ -2770,7 +2812,7 @@ function massAddAttribute(keys, objectType) {
         gTree.getObject(key)[newKey] = newValue;
     }
     alert(`${keys.length} ${objectType} objects had the "${newKey}" attribute added.`);
-    toggleElementDisplay("massEditModal");
+    toggleDisplay(document.getElementById("massEditModal"));
     createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
 }
 
@@ -2832,7 +2874,7 @@ function massChange(keys, attributeKey, objectType) {
     let msg = `${count} ${objectType} objects had the "${attributeKey}" attribute changed.`;
     msg = unedited.length === 0 ? msg : msg + ` The following objects did not have their "${attributeKey}" attribute changed: "${unedited.map(key => gTree.getObject(key).name).join(", ")}".`
     alert(msg);
-    toggleElementDisplay("massEditModal");
+    toggleDisplay(document.getElementById("massEditModal"));
     createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
 }
 
@@ -2847,9 +2889,10 @@ function massAddition(keys, attributeKey, objectType) {
         gTree.getObject(key)[attributeKey] = parseFloat(gTree.getObject(key)[attributeKey]) + operand;
     }
     alert(`${keys.length} ${objectType} objects had their "${attributeKey}" attribute edited.`);
-    toggleElementDisplay("massEditModal");
+    toggleDisplay(document.getElementById("massEditModal"));
     createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
 }
+
 
 function massMultiplication(keys, attributeKey, objectType) {
     let multiplyOperand = document.getElementById("multiplyValue").value.trim();
@@ -2864,7 +2907,7 @@ function massMultiplication(keys, attributeKey, objectType) {
         gTree.getObject(key)[attributeKey] = parseFloat(gTree.getObject(key)[attributeKey]) * multiplyOperand + addOperand;
     }
     alert(`${keys.length} ${objectType} objects had their "${attributeKey}" attribute edited.`);
-    toggleElementDisplay("massEditModal");
+    toggleDisplay(document.getElementById("massEditModal"));
     createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
 }
 
@@ -2877,14 +2920,10 @@ function loadAttachments() {
 }
 
 function editAttachment() {
-	//document.body.style.cursor = "wait"
-	//setTimeout(function(){
-		toggleElementDisplay("editAttachmentModal");
-		let name =  document.getElementById("attachmentSelect").value; //get the select. attachmentsList = attachmentSelect
-		document.getElementById("attachmentTd").innerHTML = name;  //get the td. attachmentSelect = attachmentTd
-		document.getElementById("editAttachmentBox").innerHTML = gWriteFeeder.attachments[name];
-		//document.body.style.cursor = "auto"
-	//}, 100);
+	toggleDisplay(document.getElementById("editAttachmentModal"));
+	let name =  document.getElementById("attachmentSelect").value; // Get the name of the attachment
+	document.getElementById("attachmentTd").innerHTML = name;  // Set the name of the attachment in the window
+	document.getElementById("editAttachmentBox").value = gWriteFeeder.attachments[name];
 }
 
 function saveAttachment() {
@@ -2905,38 +2944,46 @@ function saveFeeder(feeder) {
     formData.set("feederObjectJson", JSON.stringify(feeder));
     const postRequest = $.ajax({
         type: "POST",
-        url: `/saveFeeder/${gThisOwner}/${gThisModelName}/${gThisFeederName}`,
+        url: `/saveFeeder/${gThisOwner}/${gThisModelName}/${gThisFeederName}/${gThisFeederNum}`,
         data: formData,
         processData: false,
         contentType: false,
     });
-    let cancelled = false;
-    let progressModal;
+    let modal;
     if (feeder === gReadFeeder) {
-        progressModal = new ProgressModal("Cancelling the previous operation...", "", false);
+        modal = createProgressModal({
+            startMessage: "Undoing the previous operation...",
+            endMessage: "Success. The previous operation was undone.",
+            finishFunc: () => modal.hide()
+        });
         postRequest.done(function() {
-            progressModal.hide();
-            alert("Success. Previous operation was canceled");
+            modal.finish();
+        }).fail(function() {
+            alert("The AJAX request failed to get a successful response from the server.")
         });
     } else if (feeder === gWriteFeeder) {
-        progressModal = new ProgressModal("Saving changes to your file...", "You have canceled the save.", true);
-        progressModal.button.addEventListener("click", function() {
-            cancelled = true;
-            progressModal.header.textContent = progressModal.cancelMessage;
-            progressModal.button.style.display = "none";
-        });
-        postRequest.done(function() {
-            if (cancelled) {
-                saveFeeder(gReadFeeder);
-            } else {
-                progressModal.hide();
-                alert("Success. Your data was saved.");
+        let cancelled = false;
+        modal = createProgressModal({
+            startMessage: "Saving changes to your file...",
+            endMessage: "Success. Your recent changes were saved.",
+            finishFunc: () => {
+                modal.hide();
                 // Need to do this to make sure rename doesn't break if the user saves and remains on the page.
                 gReadFeeder = deepCopy(gWriteFeeder);
+            },
+            cancelFunc: () => {
+                cancelled = true;
+                saveFeeder(gReadFeeder);
             }
         });
+        postRequest.done(function() {
+            if (!cancelled) {
+                modal.finish();
+            }
+        }).fail(function() {
+            alert("The AJAX request failed to get a successful response from the server.")
+        });
     }
-    progressModal.show();
 }
 
 /**
@@ -2956,20 +3003,28 @@ async function loadFeeder(serverFeederName, serverModelName, owner) {
         } else {
             alert("This feeder no longer exists. Please refresh the page, or select another feeder.");
         }
-    });
+    }).fail(function() {
+        alert("The AJAX request failed to get a successful response from the server.");
+    })
     if (submitForm === false) {
         return;
     }
     let formData = new FormData();
     formData.set("referrer", "distribution");
-    const progressModal = new ProgressModal("Loading feeder from server...", "You have canceled loading the feeder.", true);
+    let modal;
     let cancelled = false;
-    progressModal.button.addEventListener("click", function() {
-        cancelled = true;
-        progressModal.header.textContent = progressModal.cancelMessage;
-        progressModal.button.style.display = "none";
+    modal = createProgressModal({
+        startMessage: "Loading feeder from the server...",
+        endMessage: "Success. This feeder has been overwritten with the selected feeder.",
+        cancelFunc: () => {
+            cancelled = true;
+            saveFeeder(gReadFeeder);
+        },
+        finishFunc: () => {
+            reloadWrapper();
+            modal.hide();
+        } 
     });
-    progressModal.show();
     $.ajax({
         type: "POST",
         // {owner} is correct. {owner} is either "public" to load from public feeders or <current user> to load from the users feeders. {gThisOwner}
@@ -2980,16 +3035,22 @@ async function loadFeeder(serverFeederName, serverModelName, owner) {
         processData: false,
         contentType: false,
     }).done(function() {
-        if (cancelled) {
-            saveFeeder(gReadFeeder);
-        } else {
-            reloadWrapper();
+        if (!cancelled) {
+            modal.finish();
         }
+    }).fail(function() {
+        alert("The AJAX request failed to get a successful response from the server.");
     });
 }
 
 /** 
- * TODO: add back ability to cancel these operations
+ * Submit a from to do one of the following:
+ * 1) Import a Milsoft, GridLAB-D, or CYME file into this .omd file.
+ * 2) Load a new blank feeder into this .omd file
+ * 3) Modify this .omd file with SCADA calibration
+ * 4) Modify this .omd file with AMI 
+ * 5) Modify this .omd file with climate
+ * 6) Modify this .omd file with anonymization
  */
 async function submitForm({formId, pollUrl, inputId}) {
     let submitForm = true;
@@ -3008,16 +3069,30 @@ async function submitForm({formId, pollUrl, inputId}) {
                 // The file does not exist. Submit the form.
                 submitForm = true;
             }
+        }).fail(function() {
+            alert("The AJAX request failed to get a successful response from the server");
         });
     }
     if (submitForm === false) {
         return;
     }
+    let cancelled = false;
+    let modal;
+    modal = createProgressModal({
+        startMessage: "Submitting your file...",
+        endMessage: "Success. Your file was loaded into this feeder.",
+        cancelFunc: () => {
+            cancelled = true;
+            saveFeeder(gReadFeeder);
+        },
+        finishFunc: () => {
+            modal.hide();
+            reloadWrapper();
+        }
+    });
+    // Submit the form to the server with an ajax request
     const form = document.getElementById(formId);
     const formData = new FormData(form);
-    const submitModal = new ProgressModal("Submitting your file...", "", false);
-    submitModal.show();
-    // Submit the form to the server with an ajax request
     const formRequest = $.ajax({
         type: "POST",
         url: form.action,
@@ -3028,90 +3103,116 @@ async function submitForm({formId, pollUrl, inputId}) {
     if (pollUrl === undefined) {
         // We don't want to poll the server. Just reload the page.
         formRequest.done(function() {
-            reloadWrapper();
+            if (!cancelled) {
+                modal.finish();
+            }
+        }).fail(function() {
+            alert("The AJAX request failed to get a successful response from the server");
         });
     } else {
         formRequest.done(function(data) {
-            let cancelled = false;
-            const pollModal = new ProgressModal("Converting your file...", "You canceled the file conversion.", true);
-            pollModal.button.addEventListener("click", function() {
-                cancelled = true;
-                pollModal.header.textContent = pollModal.cancelMessage;
-                pollModal.button.style.display = "none";
-            });
-            pollModal.show();
             // Poll the server
             const intervalId = setInterval(function() {
+                // This is supposed to be a GET request
                 $.ajax({
                     url: pollUrl
                 }).done(function(data) {
-                    if (cancelled) {
-                        clearInterval(intervalId);
-                        pollModal.hide();
-                        alert("You cancelled the operation");
-                        saveFeeder(gReadFeeder);
+                    if (!cancelled) {
+                        if (data.exists === true) {
+                            //processing is ongoing 
+                        } else {
+                            // None of these error messages get shown because the server operation just throws an exception and fails to complete.
+                            clearInterval(intervalId);
+                            if (data.exists === false) {
+                                modal.finish();                          
+                            } else if (data === "milError") {
+                                modal.endMessage = "The .std and .seq files used were incorrectly formatted. Please click \"Cancel\" to undo the operation.";
+                                modal.finish();
+                            } else if (data === "glmError") {
+                                modal.endMessage = "The .glm file used was incorrectly formatted. Please click \"Cancel\" to undo the operation.";
+                                modal.finish();
+                            } else {
+                                if (!data.endsWith(".")) {
+                                    data += ".";
+                                }
+                                modal.endMessage = data + " Please click \"Cancel\" to undo the operation.";
+                                //console.log(data);
+                                //modal.endMessage = "There was a problem on the server. Check the console for more information. Please click \"Cancel\" to undo the operation.";
+                                modal.finish();
+                            }
+                        }
                     }
-                    if (data.exists === true) {
-                        //processing is ongoing 
-                    } else if (data.exists === false) {
-                        // The pollModal isn"t hidden before the alert happens. This has nothing to do with the reload wrapper.
-                        clearInterval(intervalId);
-                        pollModal.hide();
-                        alert("Conversion complete");
-                        reloadWrapper();
-                    } else if (data === "milError") {
-                        clearInterval(intervalId);
-                        pollModal.hide()
-                        alert("The .std and .seq files used are incorrectly formatted.");
-                        //TODO: submit the gReadFeeder
-                    } else if (data === "glmError") {
-                        clearInterval(intervalId);
-                        pollModal.hide()
-                        alert("The .glm file used is incorrectly formatted.");
-                        //TODO: submit the gReadFeeder
-                    } else {
-                        console.log(data);
-                        clearInterval(intervalId);
-                        pollModal.hide()
-                        alert("There was a problem. Operation was cancelled");
-                    }
+                }).fail(function() {
+                    clearInterval(intervalId);
+                    alert("The AJAX request failed to get a successful response from the server.")
                 });
             }, 5000);
         });
     }
 }
 
-async function renameFeeder() {
+async function getNewFeederName() {
 	if (JSON.stringify(gReadFeeder) !== JSON.stringify(gWriteFeeder)){
 		alert("You have unsaved changes. Please save the feeder before proceeding.")
 	} else {
 		let newName = prompt("Rename the feeder to", `${gThisFeederName}`);
-		while (! /^[\w\s]+$/.test(newName) || /^\s+$/.test(newName)) {
-			newName = prompt("Only letters, digits and underscore are allowed.\nPlease enter a different name", `${gThisFeederName}`);
-		}
-		if (newName){
-            let submitRequest = false;
+        while (/\W/.test(newName)) {
+            newName = prompt("Only letters, digits and underscore are allowed.\nPlease enter a different name", `${gThisFeederName}`);
+        }
+		if (newName != null) {
             await $.ajax({
                 url: `/uniqObjName/Feeder/${gThisOwner}/${newName}/${gThisModelName}`//good because of course I am renaming THIS feeder file
             }).done(function(data) {
                 if (data.exists) {
                     alert(`You already have a feeder named "${newName}". Please choose a different name.`);
                 } else {
-                    submitRequest = true;
+                    renameFeeder(gThisFeederName, newName);
                 }
             });
-            if (submitRequest === false) {
-                return;
-            }
-            $.ajax({
-                url: `/renameFeeder/${gThisOwner}/${gThisModelName}/${gThisFeederName}/${newName}/${gThisFeederNum}`
-            }).done(function() {
-                gThisFeederName = newName;
-                document.getElementById("menuLeft").querySelector("h4").textContent = newName;
-                alert("Feeder file was successfully renamed.");
-            })
 		}
 	} 
+}
+
+async function renameFeeder(oldServerName, newName) {
+    let modal;
+    let cancelled = false;
+    if (newName === gThisFeederName) {
+        // We are undoing a previous rename operation
+        modal = createProgressModal({
+            startMessage: "Undoing the previous rename...",
+            endMessage: "Success. The previous rename operation was undone.",
+            finishFunc: () => {
+                modal.hide();
+            }
+         });
+    } else {
+        // We are using a new name
+        modal = createProgressModal({
+            startMessage:  "Renaming this feeder file...",
+            endMessage: "Success. This feeder file was renamed.",
+            cancelFunc: () => {
+                cancelled = true;
+                renameFeeder(newName, oldServerName);
+            },
+            finishFunc: () => {
+                // good
+                gThisFeederName = newName;
+                document.getElementById("menuLeft").querySelector("h4").textContent = newName;
+                modal.hide();
+            }
+        });
+    }
+    await $.ajax({
+        url: `/renameFeeder/${gThisOwner}/${gThisModelName}/${oldServerName}/${newName}/${gThisFeederNum}`
+    }).done(function(data) {
+        if (data === "Failure") {
+            alert("Rename operation failed.");
+        } else if (!cancelled) {
+            modal.finish();
+        }
+    }).fail(function() {
+        alert("The AJAX request failed to get a successful response from the server.");
+    });
 }
 
 function displayMap(){
@@ -3128,29 +3229,52 @@ function reloadWrapper() {
     window.location.reload(true);
 }
 
-function ProgressModal(message, cancelMessage, showButton) {
-    this.self = document.getElementById("progressModal");
-    this.button = this.self.getElementsByTagName("button")[0];
-    this.header = this.self.getElementsByTagName("h2")[0];
-    this.message = message;
-    this.cancelMessage = cancelMessage;
-    this.showButton = showButton;
-}
+const progressModalPrototype = {
+    /**
+     * @param {Function} func - An additional function to execute when the modal finishes
+     */
+    finish(func) {
+        if (func != null) func;
+        this.self.querySelector("h2").textContent = this.endMessage;
+        this.spinner.style.display = "none";
+        this.finishButton.removeAttribute("style");
+    },
 
-ProgressModal.prototype.show = function() {
-    this.header.textContent = this.message;
-    this.self.removeAttribute("style");
-    if (this.showButton) {
-        this.button.removeAttribute("style");
-    } else {
-        this.button.style.display = "none";
+    hide() {
+        this.self.style.display = "none";
     }
 }
 
-ProgressModal.prototype.hide = function() {
-    this.self.style.display = "none";
+/**
+ * Create a progress modal in 1 of 2 modes: First mode will show a cancel button which if clicked allows the operation to be undone. Second mode will
+ * not show a cancel button. startMessage and finishFunc are required parameters. Sometimes you have to set with endMessage after the
+ * progress modal has been constructed.
+ * @param {Function} finishFunc - will be executed when the user clicks the "OK" button after an operation has completed
+ */
+function createProgressModal({startMessage, endMessage, cancelFunc, finishFunc}) {
+    const obj = Object.create(progressModalPrototype);
+    obj.self = document.getElementById("progressModal");
+    obj.spinner = obj.self.querySelector("img");
+    obj.startMessage = startMessage;
+    obj.endMessage = endMessage;
+    obj.cancelButton = obj.self.querySelector("button[data-buttonfunction='cancel']");
+    obj.cancelFunc = cancelFunc;
+    obj.finishFunc = finishFunc;
+    obj.finishButton = obj.self.querySelector("button[data-buttonfunction='submit']");
+    obj.self.querySelector("h2").textContent = startMessage;
+    obj.cancelButton.style.display = "none";
+    obj.finishButton.style.display = "none";
+    obj.finishButton.onclick = obj.finishFunc;
+    if (cancelFunc == null) {
+        obj.cancelButton.onclick = null;
+    } else {
+        obj.cancelButton.removeAttribute("style");
+        obj.cancelButton.onclick = obj.cancelFunc;
+    }
+    obj.spinner.removeAttribute("style");
+    obj.self.removeAttribute("style");
+    return obj;
 }
-
 
 /**
  * Return true if this TreeWrapper can be moved, otherwise return false;
@@ -4664,13 +4788,42 @@ function createTreeObject(input, tree) {
 }
 
 //**************************************************
+// Modal interface 
+//**************************************************
+
+/**
+ * @param {HTMLElement} modal
+ */
+function formatModal(modal) {
+    Array.from(modal.querySelectorAll("td")).forEach(td => td.classList.add("fullPadded"));
+    Array.from(modal.querySelectorAll("th")).forEach(th => th.classList.add("fullPadded"));
+    Array.from(modal.querySelectorAll("button")).forEach(btn => btn.classList.add("modalButton"));
+}
+
+/**
+ * @param {HTMLElement} modal
+ */
+function addModalHandlers(modal) {
+    Array.from(modal.querySelectorAll("button[data-buttonfunction='toggle']")).forEach(btn => {
+        btn.addEventListener("click", () => toggleDisplay(modal));
+    });
+}
+
+(function setupModals() {
+    Array.from(document.querySelectorAll("div.modal")).forEach(div => {
+        formatModal(div);
+        addModalHandlers(div);
+    });
+})();
+
+//**************************************************
 // Table interface 
 //**************************************************
 
-/*
-These are names of properties in most objects in gWriteFeeder.tree that should not be deleted from objects because
-doing so might make that object hard to identify with reference to the rest of the data.
-*/
+/**
+ * These are names of properties in most objects in gWriteFeeder.tree that should not be deleted from objects because doing so might make that object
+ * hard to identify with reference to the rest of the data.
+ */
 const nonDeletableProperties = ["name", "object", "from", "to", "parent", "latitude", "longitude", "configuration"];
 /* If these properties were to be modified for a given gWriteFeeder.tree object, it would require significantly modifying the 
 other objects.  These properties ARE technically modifiable, but allowing the user to change them would require more work 
@@ -4686,19 +4839,6 @@ const configurationTypes = ["regulator_configuration", "transformer_configuratio
 "volt_var_control", "line_spacing", "climate", "overhead_line_conductor", "underground_line_conductor", "triplex_line_conductor",
 "player", "schedule"];
 
-/**
- * @param {HTMLDivElement} - modal
- */
-function formatModal(modal) {
-    ["h1", "h2", "h3", "h4", "h5", "h6"].forEach(h => {
-        const headings = Array.from(modal.querySelectorAll(`div.modalContent > ${h}`));
-        if (headings.length > 0) {
-            headings.forEach(h => {
-                h.classList.add("centered");
-            });
-        }
-    });
-}
 
 function formatTable(table) {
     Array.from(table.querySelectorAll("td")).forEach(td => {
@@ -5251,8 +5391,12 @@ function detectDrag(event) {
 //**************************************************
 
 function checkServerConversion() {
-    const modal = new ProgressModal("Checking for an in-progress server file conversion...", "", false);
-    modal.show();
+    let modal;
+    modal = createProgressModal({
+        startMessage: "Checking for an in-progress server file conversion...",
+        endMessage: "Server file conversion has completed. Click \"OK\" to reload the page.",
+        finishFunc: () => reloadWrapper()
+    });
     let reload = false;
     return new Promise(function(resolve, reject) {
         const intervalId = setInterval(function pollServer() {
@@ -5263,12 +5407,11 @@ function checkServerConversion() {
                 if (data.exists === true) {
                     // There is an in-progress file conversion. Need to reload the page when it's done.
                     reload = true
-                    modal.message = "Waiting for an in-progress server file conversion to complete..."
-                    modal.show()
+                    modal.self.querySelector("h2").textContent = "Waiting for an in-progress server file conversion to complete...";
                 } else if (data.exists === false) {
                     if (reload) {
                         // There was a previous in-progress conversion that just completed, so reload the page
-                        reloadWrapper()
+                        modal.finish()
                     } else {
                         // There was never an in-progress file conversion, so don't bother to reload the page
                         clearInterval(intervalId)
@@ -5279,7 +5422,7 @@ function checkServerConversion() {
                     // there was an error? Notify the user, proceed as normal.
                     clearInterval(intervalId)
                     modal.hide()
-                    reject("An error occurred on the server during the file conversion process.");
+                    reject("An error occurred on the server during the file conversion process. You may save your feeder to prevent this message from appearing.");
                 }
             }).fail(() => {
                 clearInterval(intervalId);

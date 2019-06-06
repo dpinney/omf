@@ -113,7 +113,7 @@ def run_process(func):
 def start_process(func):
 	""" Use the function argument to start a file conversion process """
 	@wraps(func)
-	# TODO: implement PID system to terminate processes (maybe never do this)
+	# TODO: implement PID system to terminate processes (maybe never do this). We do it for web.py
     # Figure out a way to see how many processes are running on the server for testing?
 	def wrapper(*args, **kwargs):
 		temp_dir = tempfile.mkdtemp()
