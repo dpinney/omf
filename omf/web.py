@@ -4,7 +4,16 @@ from flask import Flask, send_from_directory, request, redirect, render_template
 from jinja2 import Template
 from multiprocessing import Process
 from passlib.hash import pbkdf2_sha512
-import json, os, flask_login, hashlib, random, time, datetime as dt, shutil, boto.ses, csv, fcntl
+import json, os, flask_login, hashlib, random, time, datetime as dt, shutil, boto.ses, csv
+try:
+	import fcntl
+except:
+	#We're on windows, where we don't support file locking.
+	fcntl = type('', (), {})()
+	def flock(fd, op):
+		return
+	fcntl.flock = flock
+	(fcntl.LOCK_EX, fcntl.LOCK_SH, fcntl.LOCK_UN) = (None, None, None)
 import models, feeder, network, milToGridlab, cymeToGridlab, signal, weather, anonymization
 import omf
 from omf.calibrate import omfCalibrate
