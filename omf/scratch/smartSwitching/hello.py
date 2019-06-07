@@ -282,14 +282,14 @@ def recloserAnalysis(pathToGlm, lineNameForRecloser, outageGenerationStats={}):
 	data = list(csv.DictReader(lines))
 	for row in data:
 		for k in row:
-			if row[k].startswith('SAIFI = '):
+			if row[k].startswith('SAIFI'):
 				for i in row[k].split():
 					try:
 						reclSAIFI = float(i)
 						break
 					except:
 						continue
-			if row[k].startswith('SAIDI = '):
+			if row[k].startswith('SAIDI'):
 				for i in row[k].split():
 					try:
 						reclSAIDI = float(i)
@@ -580,7 +580,7 @@ def optimalRecloserAnalysis(pathToGlm):
 									break
 								except:
 									continue
-						if row[k].startswith('SAIDI = '):
+						if row[k].startswith('SAIDI'):
 							for i in row[k].split():
 								try:
 									reclSAIDI = float(i)
@@ -592,5 +592,4 @@ def optimalRecloserAnalysis(pathToGlm):
 					bestRecloser = tree[key]['name']
 	return{
 		'bestSAIDI': bestSAIDI
-
 	}
