@@ -118,39 +118,36 @@ def work(modelDir, ind):
 	# ----------------------------------------------------------------------- #
 
 
-	# --------------------------- MOTOR TABLES ------------------------------ #
+	# ----------------- MOTOR VOLTAGE and IMBALANCE TABLES ------------------ #
+	df_vs = {}
 	for suffix in [base_suffix, solar_suffix]:
-		df_all_motors = pd.DataFrame()
+		df_v = pd.DataFrame()
 		for phase in ['A', 'B', 'C']:
 			df_phase = _readCSV(pJoin(modelDir, 'threephase_VA_'+ phase + suffix + '.csv'))
 			df_phase.columns = [phase + '_' + c for c in df_phase.columns]
-			if df_all_motors.shape[0] == 0:
-				df_all_motors = df_phase
+			if df_v.shape[0] == 0:
+				df_v = df_phase
 			else:
-				df_all_motors = df_all_motors.join(df_phase)
+				df_v = df_v.join(df_phase)
+		df_vs[suffix] = df_v
 
-		o['motor_table' + suffix] = ''.join([(
-			"<tr>"
-				"<td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td><td>{5}</td><td>{6}</td>"
-			"</tr>"
-		).format(motor, n(r['A_real']), n(r['A_imag']), n(r['B_real']), n(r['B_imag']), n(r['C_real']), n(r['C_imag'])) 
-			for motor, r in df_all_motors.iterrows()])
-	# ----------------------------------------------------------------------- #
+	motor_names = [motor for motor, r in df_v.iterrows()]
 
-	motor_names = [motor for motor, r in df_all_motors.iterrows()]
-
-	# ----------------- MOTOR VOLTAGE and IMBALANCE TABLES ------------------ #
 	for suffix in [base_suffix, solar_suffix]:
 		df_all_motors = pd.DataFrame()
 
 		df_all_motors = _readVoltage(pJoin(modelDir, 'voltDump' + suffix + '.csv'), motor_names)
 		
-		o['motor_table' + suffix + '_v'] = ''.join([(
+		o['motor_table' + suffix] = ''.join([(
 			"<tr>"
-				"<td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td>"
+				"<td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td><td>{5}</td><td>{6}</td>"
 			"</tr>"
-		).format(r['node_name'], n(r['voltA']), n(r['voltB']), n(r['voltC']), n(r['unbalance'])) 
-			for i, r in df_all_motors.iterrows()])
+		).format(r['node_name'], 
+					n(r2['A_real'] + r2['B_real'] + r2['C_real']),
+					n(r2['A_imag'] + r2['B_imag'] + r2['C_imag']),
+					n(r['voltA']), n(r['voltB']), n(r['voltC']), 
+					n(r['unbalance'])) 
+				for (i, r), (j, r2) in zip(df_all_motors.iterrows(), df_vs[suffix].iterrows())])
 	# ----------------------------------------------------------------------- #
 
 	return o

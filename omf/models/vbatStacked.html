@@ -105,12 +105,13 @@
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip"><span class="classic">What revenue strategies would you like stacked?</span>
-					<input type="checkbox" name="use_deferral" value="use_deferral">Deferral &nbsp; &nbsp;
-					<input type="checkbox" name="use_payment_structure" value="use_payment_structure" checked>Power Cost<br>
+				<label class="tooltip">Stack Selection
+				<span class="classic">What revenue strategies would you like stacked?</span></label>
+				<div style="text-align: center;">
+					<input type="checkbox" name="use_deferral" value="use_deferral">Deferral &nbsp; 
+					<input type="checkbox" name="use_arbitrage" value="use_arbitrage">Arbitrage &nbsp;
 					<input type="checkbox" name="use_regulation" value="use_regulation" checked>Regulation 
-				</label>
-				
+				</div>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Number of Devices<span class="classic">Total number of devices to simulate. Must be greater than 99</span></label>
@@ -277,6 +278,7 @@
 					},
 					"title":{"text": allOutputData.dataCheck, "verticalAlign":"bottom", "align":"right", "y":-400, "x":-150, "style":{"color":"gray", "fontSize":"36px"}},
 					"series":[
+						
 						{"name":"Demand","marker":{"enabled":false},"color":"gray","data":allOutputData.demand},
 						{"name":"Demand after VBAT","marker":{"enabled":false},"color":"blue","data":allOutputData.demandAdjusted},
 					],
