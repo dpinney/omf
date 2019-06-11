@@ -1,5 +1,6 @@
 #!/bin/sh
-cd ../../..
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cd $SCRIPT_DIR/../../..
 cp omf/scratch/GRIP/grip.Dockerfile .
 cp omf/scratch/GRIP/grip.py omf/
 # Build and restart container.
