@@ -897,7 +897,7 @@ def plotEVShape(numVehicles=None, chargeRate=None, batterySize=None, startHour=N
 	def maxLoadShape(load_vec, daily_vec):
 		maxLoadShapeImg = plt.figure()
 		plt.style.use('seaborn')
-		plt.ylim(0.0, max_val)
+		plt.ylim(0.0, 1.15*max_val)
 		if len(load_vec) != 0:
 			plt.stackplot(range(len(load_vec)), load_vec, daily_vec)
 		plt.title('Maximum Daily Load Shape')
