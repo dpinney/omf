@@ -7,11 +7,26 @@ import pandas as pd
 from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
 from omf import loadForecast as lf
+import numpy as np
+from scipy.stats import norm
 
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = "This model predicts whether the following day will be a monthly peak."
 hidden = True
+
+def peak_likelihood(hist=None, tomorrow=None, tomorrow_std=None, two_day=None, two_day_std=None, three_day=None, three_day_std=None):
+    A = norm(tomorrow, tomorrow_std).cdf(hist)
+    B = norm(0, 1).cdf(-(tomorrow - two_day) / ((tomorrow_std**2 + two_day_std**2)**.5))
+    C = norm(0, 1).cdf(-(tomorrow - three_day) / ((tomorrow_std**2 + three_day_std**2)**.5))
+    return round((1 - A)*(1 - B)*(1 - C)*100, 2)
+
+def highest_peak_this_month(df, predicted_day):
+	y = predicted_day.year
+	m = predicted_day.month
+	d = predicted_day.day
+	return_v = df[(df['year'] == y) & (df['month'] == m) & (df['day'] != d)]['load'].max()
+	return 0 if np.isnan(return_v) else return_v
 
 def work(modelDir, ind):
 	''' Model processing done here. '''
@@ -52,18 +67,81 @@ def work(modelDir, ind):
 				axis=1
 			)
 	except:
-		raise Exception("CSV file is incorrect format.")
+		raise Exception("Load CSV file is incorrect format.")
+
+	try:
+		weather = [float(i.strip(',')) for i in ind['tempCurve'].split('\n')]
+		assert len(weather) == 24, "weather csv in wrong format"
+	except:
+		raise Exception("Weather CSV file is incorrect format.")
 
 	# ---------------------- MAKE PREDICTIONS ------------------------------- #
-	weather = [2.5]*24
-	df, predicted_day = lf.add_day(df, weather)
+	df, tomorrow = lf.add_day(df, weather)
 	all_X = lf.makeUsefulDf(df)
 	all_y = df['load']
-	# predictions, model = lf.neural_net_next_day(all_X, all_y, EPOCHS=1)
-	predictions = [13044.3369140625, 12692.4453125, 11894.0712890625, 13391.0185546875, 13378.373046875, 14098.5048828125, 14984.5, 15746.6845703125, 14677.6064453125, 14869.6953125, 14324.302734375, 13727.908203125, 13537.51171875, 12671.90234375, 13390.9970703125, 12111.166015625, 13539.05078125, 15298.7939453125, 14620.8369140625, 15381.9404296875, 15116.42578125, 13652.3974609375, 13599.5986328125, 12882.5185546875]
-	o['predictions'] = predictions
-	o['startDate'] = "{}-{}-{}".format(predicted_day.year, predicted_day.month, predicted_day.day)
-	print o['startDate']
+
+	#load prediction
+	tomorrow_load, model, tomorrow_accuracy = lf.neural_net_next_day(all_X, all_y, EPOCHS=epochs)
+	# tomorrow_load = [13044.3369140625, 12692.4453125, 11894.0712890625, 13391.0185546875, 13378.373046875, 14098.5048828125, 14984.5, 15746.6845703125, 14677.6064453125, 14869.6953125, 14324.302734375, 13727.908203125, 13537.51171875, 12671.90234375, 13390.9970703125, 12111.166015625, 13539.05078125, 15298.7939453125, 14620.8369140625, 15381.9404296875, 15116.42578125, 13652.3974609375, 13599.5986328125, 12882.5185546875]
+	# tomorrow_accuracy = {'test': 4, 'train': 3}
+	o['tomorrow_load'] = tomorrow_load
+	o['startDate'] = "{}-{}-{}".format(tomorrow.year, tomorrow.month, tomorrow.day)
+	o['startDate_s'] = tomorrow.strftime("%A, %B %-m, %Y")
+	
+	# second day
+	df, second_day = lf.add_day(df, weather)
+	if second_day.month == tomorrow.month:
+		all_X = lf.makeUsefulDf(df, hours_prior=48, noise=5)
+		all_y = df['load']
+		two_day_predicted_load, two_day_model, two_day_load_accuracy = lf.neural_net_next_day(all_X, all_y, EPOCHS=epochs, hours_prior=48)
+		two_day_peak = max(two_day_predicted_load)
+
+		# third day
+		df, third_day = lf.add_day(df, weather)
+		if third_day.month == tomorrow.month:
+			all_X = lf.makeUsefulDf(df, hours_prior=72, noise=15)
+			all_y = df['load']
+			three_day_predicted_load, three_day_model, three_day_load_accuracy = lf.neural_net_next_day(all_X, all_y, EPOCHS=epochs, hours_prior=72)
+			three_day_peak = max(three_day_predicted_load)
+		else:
+			three_day_peak = 0
+			three_day_load_accuracy = {'test': np.nan, 'train': np.nan}
+			
+	else:
+		two_day_peak = 0
+		two_day_load_accuracy = {'test': np.nan, 'train': np.nan}
+		three_day_peak = 0
+		three_day_load_accuracy = {'test': np.nan, 'train': np.nan}
+
+	tomorrow_peak = max(tomorrow_load)
+	o['predicted_peak'] = [highest_peak_this_month(df, tomorrow), tomorrow_peak, two_day_peak, three_day_peak]
+	o['predicted_peak_limits'] = [
+		[0, 0],
+		[tomorrow_peak*(1 + tomorrow_accuracy['test']*.01), tomorrow_peak*(1 - tomorrow_accuracy['test']*.01)],
+		[two_day_peak*(1 + two_day_load_accuracy['test']*.01), two_day_peak*(1 - two_day_load_accuracy['test']*.01)],
+		[three_day_peak*(1 + three_day_load_accuracy['test']*.01), three_day_peak*(1 - three_day_load_accuracy['test']*.01)]
+	]
+
+	o['load_test_accuracy'] = round(tomorrow_accuracy['test'], 2)
+	o['load_train_accuracy'] = round(tomorrow_accuracy['train'], 2)
+	o['tomorrow_test_accuracy'] = round(tomorrow_accuracy['test'], 2)
+	o['tomorrow_train_accuracy'] = round(tomorrow_accuracy['train'], 2)
+	o['two_day_peak_train_accuracy'] = round(two_day_load_accuracy['train'], 2)
+	o['two_day_peak_test_accuracy'] = round(two_day_load_accuracy['test'], 2)
+	o['three_day_peak_train_accuracy'] = round(three_day_load_accuracy['train'], 2)
+	o['three_day_peak_test_accuracy'] = round(three_day_load_accuracy['test'], 2)
+
+
+	o['peak_percent_chance'] = peak_likelihood(
+		hist=highest_peak_this_month(df[:-48], tomorrow), 
+		tomorrow=tomorrow_peak,
+		tomorrow_std=tomorrow_peak*tomorrow_accuracy['test']*.01,
+		two_day=two_day_peak,
+		two_day_std=two_day_peak*two_day_load_accuracy['test']*.01,
+		three_day=three_day_peak,
+		three_day_std=three_day_peak*three_day_load_accuracy['test']*.01
+	)
+
 	o['stderr'] = ''
 
 	return o
@@ -75,9 +153,11 @@ def new(modelDir):
 		'modelType': modelName,
 		'runTime': '0:01:03',
 		'epochs': '1',
-		'max_c': '0.1',
+		'autoFill': "off",
 		'histFileName': 'd_Texas_17yr_TempAndLoad.csv',
 		"histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","d_Texas_17yr_TempAndLoad.csv"), 'rU').read(),
+		'tempFileName': '24hr_TexasTemp.csv',
+		'tempCurve': open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","24hr_TexasTemp.csv"), 'rU').read()
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
