@@ -79,9 +79,12 @@ def recloserAnalysis(pathToGlm, lineNameForRecloser, outageGenerationStats={}):
 		if tree[key].get("argument","") == "\"schedules.glm\"" or tree[key].get("tmyfile","") != "":
 			del tree[key]
 	
+	tree[str(biggestKey*10 + 5)] = {"object":"voltdump","filename":"voltDump.csv"}
+	tree[str(biggestKey*10 + 6)] = {"object":"currdump","filename":"currDump.csv"}
+	
 	tree2 = tree.copy()
 	#add meters to the tree
-	index = 5
+	index = 7
 	for key in tree2:
 		if tree2[key].get('object','') in ['load']:
 			if 'parent' not in tree2[key]:
@@ -97,6 +100,19 @@ def recloserAnalysis(pathToGlm, lineNameForRecloser, outageGenerationStats={}):
 	if noMeters:
 		raise Exception('No meters detected on the circuit. Please add at least one meter to allow for collection of outage statistics.')
 	
+	# Line rating dumps
+	tree[omf.feeder.getMaxKey(tree) + 1] = {
+		'module': 'tape'
+	}
+	for key in edge_bools.keys():
+		if edge_bools[key]:
+			tree[omf.feeder.getMaxKey(tree) + 1] = {
+				'object':'group_recorder', 
+				'group':'"class='+key+'"',
+				'property':'continuous_rating',
+				'file':key+'_cont_rating.csv'
+			}
+
 	attachments = []
 	
 	# Run Gridlab.
@@ -438,4 +454,4 @@ def optimalRecloserAnalysis(pathToGlm):
 		'bestSAIFI_name': bestSAIFI_name
 	}
 
-print(recloserAnalysis(omf.omfDir + '/scratch/CIGAR/' + 'test_ieee37nodeFaultTester.glm', None, None))
+print(recloserAnalysis(omf.omfDir + '/scratch/CIGAR/' + 'test_ieee37nodeFaultTester.glm', 'node709-708', None))
