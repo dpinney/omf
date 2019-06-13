@@ -299,10 +299,10 @@
 				<thead>
 					<tr>
 						<th>Name</th>
-						<th>Uncontrolled Pow</th>
-						<th>Uncontrolled VAR</th>
-						<th>Controlled Pow</th>
-						<th>Controlled VAR</th>
+						<th>Uncontrolled Solar Pow</th>
+						<th>Uncontrolled Solar VAR</th>
+						<th>Controlled Solar Pow</th>
+						<th>Controlled Solar VAR</th>
 					</tr>
 				</thead>	
 				<tbody>
@@ -347,18 +347,18 @@
 					circle.append("svg:title").text(climate)})
 			</script>
 		</div> -->
-		<p class="reportTitle postRun" style="page-break-before:always; text-align:center; font-weight: bold;">Three Phase Motor Loads Power and VARS</p>
-		<p class="reportTitle postRun" style="page-break-before:always">Base</p>
+	<p class="reportTitle postRun" style="page-break-before:always; text-align:center; font-weight: bold;">Three Phase Motor Loads Voltage and Imbalance</p>
+	<p class="reportTitle postRun" style="page-break-before:always">Base</p>
 		<div class="tightContent tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
 			<table id="realImgPower">
 				<tr>
 					<th>Name</th>
-					<th>A Pow</th>
-					<th>A VAR</th>
-					<th>B Pow</th>
-					<th>B VAR</th>
-					<th>C Pow</th>
-					<th>C VAR</th>
+					<th>Total kW</th>
+					<th>Total VARs</th>
+					<th>A (V)</th>
+					<th>B (V)</th>
+					<th>C (V)</th>
+					<th>Unbalance</th>
 				</tr>
 				{{allOutputDataDict['motor_table_base']}}
 			</table>
@@ -368,12 +368,12 @@
 			<table id="realImgPower">
 				<tr>
 					<th>Name</th>
-					<th>A Pow</th>
-					<th>A VAR</th>
-					<th>B Pow</th>
-					<th>B VAR</th>
-					<th>C Pow</th>
-					<th>C VAR</th>
+					<th>Total kW</th>
+					<th>Total VARs</th>
+					<th>A (V)</th>
+					<th>B (V)</th>
+					<th>C (V)</th>
+					<th>Unbalance</th>
 				</tr>
 				{{allOutputDataDict['motor_table_solar']}}
 			</table>
@@ -384,52 +384,11 @@
 			<table id="realImgPower">
 				<tr>
 					<th>Name</th>
-					<th>A Pow</th>
-					<th>A VAR</th>
-					<th>B Pow</th>
-					<th>B VAR</th>
-					<th>C Pow</th>
-					<th>C VAR</th>
-				</tr>
-				<!-- {{allOutputDataDict['motor_table_solar']}} -->
-			</table>
-		</div>
-	<p class="reportTitle postRun" style="page-break-before:always; text-align:center; font-weight: bold;">Three Phase Motor Loads Voltage and Imbalance</p>
-	<p class="reportTitle postRun" style="page-break-before:always">Base</p>
-		<div class="tightContent tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
-			<table id="realImgPower">
-				<tr>
-					<th>Name</th>
-					<th>A (kW)</th>
-					<th>B (kW)</th>
-					<th>C (kW)</th>
-					<th>Unbalance</th>
-				</tr>
-				{{allOutputDataDict['motor_table_base_v']}}
-			</table>
-		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Solar</p>
-		<div class="tightContent tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
-			<table id="realImgPower">
-				<tr>
-					<th>Name</th>
-					<th>A (kW)</th>
-					<th>B (kW)</th>
-					<th>C (kW)</th>
-					<th>Unbalance</th>
-				</tr>
-				{{allOutputDataDict['motor_table_solar_v']}}
-			</table>
-		</div>
-	</div>
-	<p class="reportTitle postRun" style="page-break-before:always">Controlled</p>
-		<div class="tightContent tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
-			<table id="realImgPower">
-				<tr>
-					<th>Name</th>
-					<th>A (kW)</th>
-					<th>B (kW)</th>
-					<th>C (kW)</th>
+					<th>Total kW</th>
+					<th>Total VARs</th>
+					<th>A (V)</th>
+					<th>B (V)</th>
+					<th>C (V)</th>
 					<th>Unbalance</th>
 				</tr>
 				<!-- {{allOutputDataDict['motor_table_solar']}} -->

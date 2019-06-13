@@ -123,7 +123,7 @@ def work(modelDir, inputDict):
 		loadShapeValue = inputDict["loadShape"]
 	
 	#calculate and display EV Charging Demand image, carpet plot image of 8760 load shapes
-	demandImg, carpetPlotImg = plotEVShape(
+	demandImg, carpetPlotImg, maxLoadShapeImg = plotEVShape(
 		numVehicles = numVehiclesValue,
 		chargeRate = chargeRateValue, 
 		batterySize = batterySizeValue, 
@@ -139,6 +139,9 @@ def work(modelDir, inputDict):
 	carpetPlotImg.savefig(pJoin(modelDir, "carpetPlot.png"))
 	with open(pJoin(modelDir, "carpetPlot.png"),"rb") as cpFile:
 		outData["carpetPlot"] = cpFile.read().encode("base64")
+	maxLoadShapeImg.savefig(pJoin(modelDir, "maxLoadShape.png"))
+	with open(pJoin(modelDir, "maxLoadShape.png"),"rb") as evFile:
+		outData["maxLoadShape"] = evFile.read().encode("base64")
 	
 	#run and display fuel cost calculation
 	fuelCostHtml = fuelCostCalc(
@@ -152,9 +155,6 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir, "fuelCostCalc.html"), "w") as fuelFile:
 		fuelFile.write(fuelCostHtml)
 	outData["fuelCostCalcHtml"] = fuelCostHtml
-	
-	#run and display max combined load shape
-
 
 	#run and display voltage drop image and protective device status table
 	voltPlotChart, protDevTable = drawPlotFault(
@@ -881,9 +881,32 @@ def plotEVShape(numVehicles=None, chargeRate=None, batterySize=None, startHour=N
 			if i % 12 == 1:
 				plt.text(-5.0, 0.1, str(1 + i / 12), horizontalalignment='left',verticalalignment='center')
 		#plt.show()
+		plt.close()
 		return carpetPlotImg
 
-	return evShape, carpet_plot(base_shape, hourly_con)
+	#find the maximum combined load value
+	max_val = max(combined)
+	#find that value's index
+	max_index = combined.index(max_val)
+
+	#find the day that the max load value occurs
+	max_day_val = (max_index)/24
+	max_hour_val = (max_index)%24
+	day_shape = base_shape[max_day_val*24:max_day_val*24+24]
+
+	def maxLoadShape(load_vec, daily_vec):
+		maxLoadShapeImg = plt.figure()
+		plt.style.use('seaborn')
+		plt.ylim(0.0, 1.15*max_val)
+		if len(load_vec) != 0:
+			plt.stackplot(range(len(load_vec)), load_vec, daily_vec)
+		plt.title('Maximum Daily Load Shape')
+		plt.ylabel('Demand (KW)')
+		plt.xlabel('Time of Day (Hour)')
+		plt.close()
+		return maxLoadShapeImg
+		
+	return evShape, carpet_plot(base_shape, hourly_con), maxLoadShape(day_shape, hourly_con)
 
 def fuelCostCalc(numVehicles=None, batterySize=None, efficiency=None, energyCost=None, gasEfficiency=None, gasCost=None, workload=None):
 	dailyGasAmount = workload/gasEfficiency #amount(gal) of gas used per vehicle, daily
