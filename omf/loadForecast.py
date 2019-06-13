@@ -1072,12 +1072,18 @@ def find_lowest_confidence(df_conf):
 
 # forecast tool
 
-def neural_net_next_day(all_X, all_y, EPOCHS=10):
+def neural_net_next_day(all_X, all_y, EPOCHS=10, hours_prior=24):
+	def MAPE(predictions, answers):
+		assert len(predictions) == len(answers)
+		return sum([abs(x-y)/(y+1e-5) for x, y in zip(predictions, answers)])/len(answers)*100  
+
 	import tensorflow as tf
 	from tensorflow.keras import layers
 
-	X_train, y_train = all_X[:-24], all_y[:-24]
-
+	all_X_n, all_y_n = all_X[:-hours_prior], all_y[:-hours_prior]
+	X_train = all_X_n[:-8760]
+	y_train = all_y_n[:-8760]
+	
 	model = tf.keras.Sequential([
 		layers.Dense(all_X.shape[1], activation=tf.nn.relu, input_shape=[len(X_train.keys())]),
 		layers.Dense(all_X.shape[1], activation=tf.nn.relu),
@@ -1086,39 +1092,25 @@ def neural_net_next_day(all_X, all_y, EPOCHS=10):
 		layers.Dense(all_X.shape[1], activation=tf.nn.relu),
 		layers.Dense(1)
 	])
-
 	optimizer = tf.keras.optimizers.RMSprop(0.001)
-
 	model.compile(
 		loss="mean_squared_error",
 		optimizer=optimizer,
 		metrics=["mean_absolute_error", "mean_squared_error"],
 	)
-
 	early_stop = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=10)
 
-	history = model.fit(
-		X_train,
-		y_train,
-		epochs=EPOCHS,
-		validation_split=0.2,
-		verbose=0,
-		callbacks=[early_stop],
-	)
+	history = model.fit(X_train, y_train, epochs=EPOCHS, validation_split=0.2, verbose=0, callbacks=[early_stop])
 
-	predictions = [float(f) for f in model.predict(all_X[-8760:])]
-	train = [float(f) for f in model.predict(all_X[:-8760])]
+	predictions_test = [float(f) for f in model.predict(all_X_n[-8760:])]
+	train = [float(f) for f in model.predict(all_X_n[:-8760])]
 	accuracy = {
-		'test': MAPE(predictions, all_y[-8760:]),
-		'train': MAPE(train, all_y[:-8760])
+		'test': MAPE(predictions_test, all_y_n[-8760:]),
+		'train': MAPE(train, all_y_n[:-8760])
 	}
 
-	def MAPE(predictions, answers):
-		assert len(predictions) == len(answers)
-		return sum([abs(x-y)/(y+1e-5) for x, y in zip(predictions, answers)])/len(answers)*100  
-
-	predictions = [float(f) for f in model.predict(all_X[-24:])]
-	return predictions, model
+	predictions = [float(f) for f in model.predict(all_X[-hours_prior:])]
+	return predictions, model, accuracy
 
 def add_day(df, weather):
 	lr = df.iloc[-1]
@@ -1130,7 +1122,7 @@ def add_day(df, weather):
 	predicted_day = last_day + datetime.timedelta(days=1)
 
 	d_24 = [{
-		'load': np.nan,
+		'load': 0,
 		'tempc': w,
 		'year': predicted_day.year,
 		'month': predicted_day.month,

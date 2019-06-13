@@ -78,10 +78,11 @@ def recloserAnalysis(pathToGlm, lineNameForRecloser, outageGenerationStats={}):
 			edge_bools['switch'] = True
 		if tree[key].get("argument","") == "\"schedules.glm\"" or tree[key].get("tmyfile","") != "":
 			del tree[key]
-	# Make sure we have a voltage dump and current dump:
+	
 	tree[str(biggestKey*10 + 5)] = {"object":"voltdump","filename":"voltDump.csv"}
 	tree[str(biggestKey*10 + 6)] = {"object":"currdump","filename":"currDump.csv"}
 	
+	tree2 = tree.copy()
 	#add meters to the tree
 	index = 7
 	for key in tree2:
@@ -111,9 +112,40 @@ def recloserAnalysis(pathToGlm, lineNameForRecloser, outageGenerationStats={}):
 				'property':'continuous_rating',
 				'file':key+'_cont_rating.csv'
 			}
+
+	attachments = []
 	
+	# Run Gridlab.
+	if not workDir:
+		workDir = tempfile.mkdtemp()
+		print '@@@@@@', workDir
+	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
+
+	#Pull out SAIDI/SAIFI values
+	with open(workDir + '\Metrics_Output.csv', 'rb') as csvfile:
+		file = csv.reader(csvfile)
+		for line in file:
+			k = 0
+			while k < len(line):
+				if 'SAIFI' in line[k]:
+					for i in line[k].split():
+						try:
+							noReclSAIFI = float(i)
+							break
+						except:
+							continue
+				if 'SAIDI' in line[k]:
+					for i in line[k].split():
+						try:
+							noReclSAIDI = float(i)
+							break
+						except:
+							continue
+				k += 1
+
+	#add a recloser
 	for key in tree:
-		if tree[key]['name'] == lineNameForRecloser:
+		if tree[key].get('name', '') == lineNameForRecloser:
 			tree[str(biggestKey*10 + index)] = {'object':'recloser','phases':tree[key]['phases'],'name':tree[key]['name'] + '_recloser' , 'from':tree[key]['from'], 'to':tree[key]['to'], 'retry_time': '1 s', 'max_number_of_tries': '3'}
 			del tree[key]
 			index = index + 1
@@ -180,125 +212,31 @@ def recloserAnalysis(pathToGlm, lineNameForRecloser, outageGenerationStats={}):
 		workDir = tempfile.mkdtemp()
 		print '@@@@@@', workDir
 	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
-	
-	#Record final status readout of each fuse/recloser/switch/sectionalizer after running
-	for key in protDevices.keys():
-		if protDevices[key]:
-			for phase in ['A', 'B', 'C']:
-				with open(pJoin(workDir,key+'_phase_'+phase+'_state.csv'),'r') as statusFile:
-					reader = csv.reader(statusFile)
-					# loop past the header, 
-					keys = []
-					vals = []
-					for row in reader:
-						if '# timestamp' in row:
-							keys = row
-							i = keys.index('# timestamp')
-							keys.pop(i)
-							vals = reader.next()
-							vals.pop(i)
-					for pos,key2 in enumerate(keys):
-						protDevFinalStatus[key2][phase] = vals[pos]
-	#print protDevFinalStatus
-	
-	#compare initial and final states of protective devices
-	#quick compare to see if they are equal
-	print cmp(protDevInitStatus, protDevFinalStatus)
-	#find which values changed
-	changedStates = {}
-	
-	
-	#read voltDump values into a dictionary.
-	try:
-		dumpFile = open(pJoin(workDir,'voltDump.csv'),'r')
-	except:
-		raise Exception('GridLAB-D failed to run with the following errors:\n' + gridlabOut['stderr'])
-	reader = csv.reader(dumpFile)
-	reader.next() # Burn the header.
-	keys = reader.next()
-	
-	voltTable = []
-	for row in reader:
-		rowDict = {}
-		for pos,key in enumerate(keys):
-			rowDict[key] = row[pos]
-		voltTable.append(rowDict)
-	# read currDump values into a dictionary
-	with open(pJoin(workDir,'currDump.csv'),'r') as currDumpFile:
-		reader = csv.reader(currDumpFile)
-		reader.next() # Burn the header.
-		keys = reader.next()
-		currTable = []
-		for row in reader:
-			rowDict = {}
-			for pos,key in enumerate(keys):
-				rowDict[key] = row[pos]
-			currTable.append(rowDict)
-	# read line rating values into a single dictionary
-	lineRatings = {}
-	rating_in_VA = []
-	for key1 in edge_bools.keys():
-		if edge_bools[key1]:		
-			with open(pJoin(workDir,key1+'_cont_rating.csv'),'r') as ratingFile:
-				reader = csv.reader(ratingFile)
-				# loop past the header, 
-				keys = []
-				vals = []
-				for row in reader:
-					if '# timestamp' in row:
-						keys = row
-						i = keys.index('# timestamp')
-						keys.pop(i)
-						vals = reader.next()
-						vals.pop(i)
-				for pos,key2 in enumerate(keys):
-					lineRatings[key2] = abs(float(vals[pos]))
-	#edgeTupleRatings = lineRatings copy with to-from tuple as keys for labeling
-	edgeTupleRatings = {}
-	for edge in lineRatings:
-		for obj in tree.values():
-			if obj.get('name','').replace('"','') == edge:
-				nodeFrom = obj.get('from')
-				nodeTo = obj.get('to')
-				coord = (nodeFrom, nodeTo)
-				ratingVal = lineRatings.get(edge)
-				edgeTupleRatings[coord] = ratingVal
-				# Calculate average node voltage deviation. First, helper functions.
-	def digits(x):
-		''' Returns number of digits before the decimal in the float x. '''
-		return math.ceil(math.log10(x+1))
-	def avg(l):
-		''' Average of a list of ints or floats. '''
-		# HACK: add a small value to the denominator to avoid divide by zero for out of service locations (i.e. zero voltage).
-		return sum(l)/(len(l) + 0.00000000000000001)
-	# Detect the feeder nominal voltage:
-	for key in tree:
-		ob = tree[key]
-		if type(ob)==dict and ob.get('bustype','')=='SWING':
-			feedVoltage = float(ob.get('nominal_voltage',1))
-	
+
 	#Pull out SAIDI/SAIFI values
-	lines = open('Metrics_Output.csv').readlines()
-	data = list(csv.DictReader(lines))
-	for row in data:
-		for k in row:
-			if row[k].startswith('SAIFI = '):
-				for i in row[k].split():
-					try:
-						reclSAIFI = float(i)
-						break
-					except:
-						continue
-			if row[k].startswith('SAIDI = '):
-				for i in row[k].split():
-					try:
-						reclSAIDI = float(i)
-						break
-					except:
-						continue
+	with open(workDir + '\Metrics_Output.csv', 'rb') as csvfile:
+		file = csv.reader(csvfile)
+		for line in file:
+			k = 0
+			while k < len(line):
+				if 'SAIFI' in line[k]:
+					for i in line[k].split():
+						try:
+							reclSAIFI = float(i)
+							break
+						except:
+							continue
+				if 'SAIDI' in line[k]:
+					for i in line[k].split():
+						try:
+							reclSAIDI = float(i)
+							break
+						except:
+							continue
+				k += 1
 	return {
-		'noRecl-SAIDI':1.0,
-		'noRecl-SAIFI':1.0,
+		'noRecl-SAIDI':noReclSAIDI,
+		'noRecl-SAIFI':noReclSAIFI,
 		'recl-SAIDI':reclSAIDI,
 		'recl-SAIFI':reclSAIFI
 	}
@@ -368,6 +306,7 @@ def optimalRecloserAnalysis(pathToGlm):
 	tree[str(biggestKey*10 + 5)] = {"object":"voltdump","filename":"voltDump.csv"}
 	tree[str(biggestKey*10 + 6)] = {"object":"currdump","filename":"currDump.csv"}
 	
+	tree2 = tree.copy()
 	#add meters to the tree
 	index = 7
 	for key in tree2:
@@ -398,15 +337,20 @@ def optimalRecloserAnalysis(pathToGlm):
 				'file':key+'_cont_rating.csv'
 			}
 
-	bestRecloser = ''
 	bestSAIDI = 5.0
+	bestSAIFI = 5.0
+	bestSAIDI_name = ''
+	bestSAIFI_name = ''
 
+	tree2 = tree.copy()
 	# Find the optimal recloser placement based on SAIDI values
 	for key in tree2:
 		if tree2[key].get('object','') in ['underground_line', 'overhead_line', 'triplex_line']:
 			if 'parent' not in tree2[key]:
 				tree = tree2.copy()
 				tree[str(biggestKey*10 + index)] = {'object':'recloser','phases':tree2[key]['phases'],'name':tree2[key]['name'] + '_recloser' , 'from':tree2[key]['from'], 'to':tree2[key]['to'], 'retry_time': '1 s', 'max_number_of_tries': '3'}
+				SAIDI_name = tree2[key]['name']
+				SAIFI_name = tree2[key]['name']
 				del tree[key]
 				index = index + 1
 	
@@ -472,125 +416,42 @@ def optimalRecloserAnalysis(pathToGlm):
 					print '@@@@@@', workDir
 				gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 	
-				#Record final status readout of each fuse/recloser/switch/sectionalizer after running
-				for key in protDevices.keys():
-					if protDevices[key]:
-						for phase in ['A', 'B', 'C']:
-							with open(pJoin(workDir,key+'_phase_'+phase+'_state.csv'),'r') as statusFile:
-								reader = csv.reader(statusFile)
-								# loop past the header, 
-								keys = []
-								vals = []
-								for row in reader:
-									if '# timestamp' in row:
-										keys = row
-										i = keys.index('# timestamp')
-										keys.pop(i)
-										vals = reader.next()
-										vals.pop(i)
-								for pos,key2 in enumerate(keys):
-									protDevFinalStatus[key2][phase] = vals[pos]
-				#print protDevFinalStatus
-	
-				#compare initial and final states of protective devices
-				#quick compare to see if they are equal
-				print cmp(protDevInitStatus, protDevFinalStatus)
-				#find which values changed
-				changedStates = {}
-	
-
-					#read voltDump values into a dictionary.
-				try:
-					dumpFile = open(pJoin(workDir,'voltDump.csv'),'r')
-				except:
-					raise Exception('GridLAB-D failed to run with the following errors:\n' + gridlabOut['stderr'])
-				reader = csv.reader(dumpFile)
-				reader.next() # Burn the header.
-				keys = reader.next()
-	
-				voltTable = []
-				for row in reader:
-					rowDict = {}
-					for pos,key in enumerate(keys):
-						rowDict[key] = row[pos]
-					voltTable.append(rowDict)
-				# read currDump values into a dictionary
-				with open(pJoin(workDir,'currDump.csv'),'r') as currDumpFile:
-					reader = csv.reader(currDumpFile)
-					reader.next() # Burn the header.
-					keys = reader.next()
-					currTable = []
-					for row in reader:
-						rowDict = {}
-						for pos,key in enumerate(keys):
-							rowDict[key] = row[pos]
-						currTable.append(rowDict)
-				# read line rating values into a single dictionary
-				lineRatings = {}
-				rating_in_VA = []
-				for key1 in edge_bools.keys():
-					if edge_bools[key1]:		
-						with open(pJoin(workDir,key1+'_cont_rating.csv'),'r') as ratingFile:
-							reader = csv.reader(ratingFile)
-							# loop past the header, 
-							keys = []
-							vals = []
-							for row in reader:
-								if '# timestamp' in row:
-									keys = row
-									i = keys.index('# timestamp')
-									keys.pop(i)
-									vals = reader.next()
-									vals.pop(i)
-							for pos,key2 in enumerate(keys):
-								lineRatings[key2] = abs(float(vals[pos]))
-				#edgeTupleRatings = lineRatings copy with to-from tuple as keys for labeling
-				edgeTupleRatings = {}
-				for edge in lineRatings:
-					for obj in tree.values():
-						if obj.get('name','').replace('"','') == edge:
-							nodeFrom = obj.get('from')
-							nodeTo = obj.get('to')
-							coord = (nodeFrom, nodeTo)
-							ratingVal = lineRatings.get(edge)
-							edgeTupleRatings[coord] = ratingVal
-				# Calculate average node voltage deviation. First, helper functions.
-				def digits(x):
-					''' Returns number of digits before the decimal in the float x. '''
-					return math.ceil(math.log10(x+1))
-				def avg(l):
-					''' Average of a list of ints or floats. '''
-					# HACK: add a small value to the denominator to avoid divide by zero for out of service locations (i.e. zero voltage).
-					return sum(l)/(len(l) + 0.00000000000000001)
-				# Detect the feeder nominal voltage:
-				for key in tree:
-					ob = tree[key]
-					if type(ob)==dict and ob.get('bustype','')=='SWING':
-						feedVoltage = float(ob.get('nominal_voltage',1))
-	
-				#Pull out SAIDI value
-				lines = open('Metrics_Output.csv').readlines()
-				data = list(csv.DictReader(lines))
-				for row in data:
-					for k in row:
-						if row[k].startswith('SAIFI = '):
-							for i in row[k].split():
-								try:
-									reclSAIFI = float(i)
-									break
-								except:
-									continue
-						if row[k].startswith('SAIDI = '):
-							for i in row[k].split():
-								try:
-									reclSAIDI = float(i)
-									break
-								except:
-									continue
+				#Pull out SAIDI/SAIFI values
+				with open(workDir + '\Metrics_Output.csv', 'rb') as csvfile:
+					file = csv.reader(csvfile)
+					for line in file:
+						k = 0
+						while k < len(line):
+							if 'SAIFI' in line[k]:
+								for i in line[k].split():
+									try:
+										reclSAIFI = float(i)
+										break
+									except:
+										continue
+							if 'SAIDI' in line[k]:
+								for i in line[k].split():
+									try:
+										reclSAIDI = float(i)
+										break
+									except:
+										continue
+							k += 1
 				if bestSAIDI > reclSAIDI:
 					bestSAIDI = reclSAIDI
-					bestRecloser = tree[key]['name']
-	return{
-		'bestSAIDI': bestSAIDI
-
+					for key in tree:
+						if tree[key].get('object','') in 'recloser':
+							bestSAIDI_name = SAIDI_name
+				if bestSAIFI > reclSAIFI:
+					bestSAIFI = reclSAIFI
+					for key in tree:
+						if tree[key].get('object', '') in 'recloser':
+							bestSAIFI_name = SAIFI_name
+	return {
+		'bestSAIDI': bestSAIDI,
+		'bestSAIDI_name': bestSAIDI_name,
+		'bestSAIFI': bestSAIFI,
+		'bestSAIFI_name': bestSAIFI_name
 	}
+
+print(recloserAnalysis(omf.omfDir + '/scratch/CIGAR/' + 'test_ieee37nodeFaultTester.glm', 'node709-708', None))

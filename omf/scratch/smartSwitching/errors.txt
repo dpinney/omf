@@ -32,3 +32,10 @@ Expected behavior: SAIDI/SAIFI values are not 0, but some number between 0.8 and
 Workaround/fix: Allow system to run for an entire year, not generating stats until the whole period of the year is up.
 Discussion:
 	SAIDI/SAIFI values are still a bit lower than expected for a given system that is run. This can be adjusted by playing with the rate at which faults occur.
+
+Actual behavior: When trying to run any .py file in the omf, get an error:
+"ImportError: No module named fcntl". Doing some research, it seems to be related to __init__.py and a Windows specific problem. It appears that fcntl does not work with windows.
+Expected behavior: Python files in the omf can be run and generate expected results.
+Workaround/fix:?
+Discussion:
+	This appears to be a Windows specific error. Is there a way to make this import optional? I think it was a recent update to the omf that broke it for me.
