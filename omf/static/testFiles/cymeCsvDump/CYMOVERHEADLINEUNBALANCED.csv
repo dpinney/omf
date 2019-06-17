@@ -1,3 +1,0 @@
-DeviceNumber,NetworkId,LineId,Length,X,Y,Status,HarmonicModel,FlowConstraintActive,FlowConstraintUnit,MaximumFlow
-"L684_652","650","LINE607",2.4384000000000000e+02,,,0,2,0,,
-"L692_675","650","LINE606",1.5240000000000001e+02,,,0,2,0,,

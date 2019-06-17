@@ -54,7 +54,7 @@ def historicalWeatherAttach(inputOmdPath, omdOutputPath, initDateTime, location)
 		obType = myTree[key].get('object','')
 		# print obName, obType
 		if obName in [reader_name, climate_name] or obType == 'climate':
-			print 'DELETED', obName, obType
+			# print 'DELETED', obName, obType
 			del myTree[key]
 	oldMax = feeder.getMaxKey(myTree)
 	myTree[oldMax + 1] = {'omftype':'module', 'argument':'tape'}

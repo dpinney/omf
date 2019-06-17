@@ -1,2 +1,0 @@
-EquipmentId,ComponentMask,GeneratorCostCurveType,IntegrationConstant,LinearCoefficientPerKW,QuadraticCoefficientPerKW2,ExponentialCoefficient,ExponentialScaleFactorPerKW,Favorite,Comments
-"DEFAULT",0,0,0.0000000000000000e+00,1.0000000000000000e-02,0.0000000000000000e+00,0.0000000000000000e+00,0.0000000000000000e+00,0,

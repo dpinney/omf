@@ -1,2 +1,0 @@
-EquipmentId,ComponentMask,RatedKVA,RatedKVLL,ActiveGeneration,PFPercent,FaultContribution_Percent,ANSIMotorGroup,Converter,Favorite,Comments
-"DEFAULT",0,1.5000000000000000e+02,1.3800000000000001e+01,1.0000000000000000e+02,-8.5000000000000000e+01,1.0000000000000000e+02,1,0,0,

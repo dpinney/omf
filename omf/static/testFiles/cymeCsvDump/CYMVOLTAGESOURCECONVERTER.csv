@@ -1,1 +1,0 @@
-DeviceNumber,DeviceType,VscRating_kva,DCCapacitor_uf,RatedDCVoltage,CouplingResistance_ohms,CouplingInductance_h,ModelControl,ReactivePowerRef_kvar,DCVoltageRef_kv,CurrentRef_amps,KPQ,KIQ,KPD,KID,KPI,KII

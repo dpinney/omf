@@ -1,1 +1,0 @@
-DeviceNumber,NetworkId,PhaseConductorIdA,PhaseConductorIdB,PhaseConductorIdC,NeutralConductorId,DoubleCircuitId,CircuitIndex,Length,X,Y,Status,ConductorPosition,HarmonicModel,FlowConstraintActive,FlowConstraintUnit,MaximumFlow

@@ -1,1 +1,0 @@
-DeviceNumber,DeviceType,Slip1,Slip2,Slip3,Slip4,Slip5,Torque1_nm,Torque2_nm,Torque3_nm,Torque4_nm,Torque5_nm,TorqueCurveT0,TorqueCurveT1,TorqueCurveT2,TorqueCurveT3,InertiaUnit,LoadInertia,SlipUnit,TorqueUnit,CurveModel,GearRatioOfOne,LoadSynchronousSpeed

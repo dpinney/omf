@@ -1,1 +1,0 @@
-DeviceNumber,DeviceType,LTCIndex,NetworkId,CTPrimaryRating,PTRatio,Boost,Buck,SetPoint,RSetting,XSetting,TapSetting,MasterId,LoadCenterId,ControlStatus,UpperBandwidth,LowerBandwidth,TapLocation,SettingOption,InitialTapPosition,InitialTapPositionMode,FirstHouseHigh,FirstHouseLow,ControlType

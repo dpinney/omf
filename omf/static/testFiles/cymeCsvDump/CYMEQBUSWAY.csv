@@ -1,2 +1,0 @@
-EquipmentId,ComponentMask,RatedVoltage,NominalRating,FirstRating,SecondRating,ThirdRating,FourthRating,WithstandRating,Material,BuswayType,PositiveSequenceResistance,PositiveSequenceReactance,ZeroSequenceResistance,ZeroSequenceReactance,Favorite,Comments
-"DEFAULT",0,5.9999999999999998e-01,1.0000000000000000e+02,1.0000000000000000e+02,1.0000000000000000e+02,1.0000000000000000e+02,1.0000000000000000e+02,1.4000000000000000e+04,0,0,4.0000000000000002e-01,1.3999999999999999e+00,4.0000000000000002e-01,1.3999999999999999e+00,0,
