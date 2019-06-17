@@ -13,7 +13,7 @@ from networkx.drawing.nx_agraph import graphviz_layout
 import networkx as nx
 from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
-plt.switch_backend('Agg')
+# plt.switch_backend('Agg')
 
 # OMF imports 
 import omf.feeder as feeder
@@ -82,7 +82,7 @@ def recloserAnalysis(pathToGlm, lineNameForRecloser, failureDistribution, restor
 			edge_bools['fuse'] = True
 		elif obtype == 'switch':
 			edge_bools['switch'] = True
-		if tree[key].get("argument","") == "\"schedules.glm\"" or tree[key].get("tmyfile","") != "":
+		if tree[key].get("argument","") == '"schedules.glm"' or tree[key].get("tmyfile","") != "":
 			del tree[key]
 	
 	tree[str(biggestKey*10 + 5)] = {"object":"voltdump","filename":"voltDump.csv"}
@@ -128,7 +128,7 @@ def recloserAnalysis(pathToGlm, lineNameForRecloser, failureDistribution, restor
 	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 
 	#Pull out SAIDI/SAIFI values
-	with open(workDir + '\Metrics_Output.csv', 'rb') as csvfile:
+	with open(workDir + '/Metrics_Output.csv', 'rb') as csvfile:
 		file = csv.reader(csvfile)
 		for line in file:
 			k = 0
@@ -220,8 +220,9 @@ def recloserAnalysis(pathToGlm, lineNameForRecloser, failureDistribution, restor
 	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 
 	#Pull out SAIDI/SAIFI values
-	with open(workDir + '\Metrics_Output.csv', 'rb') as csvfile:
+	with open(workDir + '/Metrics_Output.csv', 'rb') as csvfile:
 		file = csv.reader(csvfile)
+		print list(file)
 		for line in file:
 			k = 0
 			while k < len(line):
@@ -306,7 +307,7 @@ def optimalRecloserAnalysis(pathToGlm):
 			edge_bools['fuse'] = True
 		elif obtype == 'switch':
 			edge_bools['switch'] = True
-		if tree[key].get("argument","") == "\"schedules.glm\"" or tree[key].get("tmyfile","") != "":
+		if tree[key].get("argument","") == '"schedules.glm"' or tree[key].get("tmyfile","") != "":
 			del tree[key]
 	# Make sure we have a voltage dump and current dump:
 	tree[str(biggestKey*10 + 5)] = {"object":"voltdump","filename":"voltDump.csv"}
@@ -353,7 +354,7 @@ def optimalRecloserAnalysis(pathToGlm):
 	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 
 	#Pull out SAIDI/SAIFI values
-	with open(workDir + '\Metrics_Output.csv', 'rb') as csvfile:
+	with open(workDir + '/Metrics_Output.csv', 'rb') as csvfile:
 		file = csv.reader(csvfile)
 		for line in file:
 			k = 0
@@ -454,7 +455,7 @@ def optimalRecloserAnalysis(pathToGlm):
 				gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 	
 				#Pull out SAIDI/SAIFI values
-				with open(workDir + '\Metrics_Output.csv', 'rb') as csvfile:
+				with open(workDir + '/Metrics_Output.csv', 'rb') as csvfile:
 					file = csv.reader(csvfile)
 					for line in file:
 						k = 0

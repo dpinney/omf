@@ -52,9 +52,7 @@ def historicalWeatherAttach(inputOmdPath, omdOutputPath, initDateTime, location)
 	for key in myTree.keys():
 		obName = myTree[key].get('name','')
 		obType = myTree[key].get('object','')
-		# print obName, obType
 		if obName in [reader_name, climate_name] or obType == 'climate':
-			# print 'DELETED', obName, obType
 			del myTree[key]
 	oldMax = feeder.getMaxKey(myTree)
 	myTree[oldMax + 1] = {'omftype':'module', 'argument':'tape'}
@@ -63,9 +61,7 @@ def historicalWeatherAttach(inputOmdPath, omdOutputPath, initDateTime, location)
 	myTree[oldMax + 4] = {'object':'climate', 'name':climate_name, 'reader': reader_name, 'tmyfile':csvName}
 	# Set the time correctly.
 	feeder.adjustTime(myTree, 240, 'hours', '{}-{}-{}'.format(initDateTime.year, initDateTime.month, initDateTime.day))
-	# Run here to test.
 	# Write back the full feeder.
-	# outJson = dict(feeder.newFeederWireframe)
 	with open(csvName,'r') as weatherFile:
 		weatherString = weatherFile.read()
 	myOmd['attachments'][csvName] = weatherString
