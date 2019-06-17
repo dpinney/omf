@@ -1,6 +1,6 @@
-import re
-import aGosedWeather
-from aGosedWeather import WeatherDataType
+import re, pytest
+import weather_data_type
+from weather_data_type import WeatherDataType
 
 
 class Test_GetPrecision(object):
@@ -8,37 +8,37 @@ class Test_GetPrecision(object):
 
     def test_3DigitPrecision_returns3(self):
         data = "-99.000"
-        assert aGosedWeather.get_precision(data) == 3
+        assert weather_data_type.get_precision(data) == 3
 
 
     def test_1DigitPrecision_returns1(self):
         data = "25.2"
-        assert aGosedWeather.get_precision(data) == 1
+        assert weather_data_type.get_precision(data) == 1
 
 
     def test_0DigitPrecision_returns0(self):
         data = "100"
-        assert aGosedWeather.get_precision(data) == 0
+        assert weather_data_type.get_precision(data) == 0
 
 
 class Test_StrToNum(object):
 
     def test_stringFloat_returnsFloat(self):
         f = "-1.00"
-        assert aGosedWeather.str_to_num(f) == -1.00
+        assert weather_data_type.str_to_num(f) == -1.00
 
     
     def test_stringInt_returnsInt(self):
         i = "1001"
-        assert aGosedWeather.str_to_num(i) == 1001
+        assert weather_data_type.str_to_num(i) == 1001
 
     
     def test_float_returnsFloat(self):
-        assert aGosedWeather.str_to_num(2.32) == 2.32
+        assert weather_data_type.str_to_num(2.32) == 2.32
 
 
     def test_int_returnsInt(self):
-        assert aGosedWeather.str_to_num(5) == 5
+        assert weather_data_type.str_to_num(5) == 5
 
 
 class Test_WattsPerMeterSqToWattsPerFtSq(object):
@@ -46,7 +46,7 @@ class Test_WattsPerMeterSqToWattsPerFtSq(object):
 
     def test_returnsFloat(self):
         w_m_sq = 889
-        w_ft_sq = aGosedWeather.watts_per_meter_sq_to_watts_per_ft_sq(w_m_sq)
+        w_ft_sq = weather_data_type.watts_per_meter_sq_to_watts_per_ft_sq(w_m_sq)
         assert round(w_ft_sq, 0) == 83.0
 
 
@@ -55,7 +55,7 @@ class Test_CelsiusToFahrenheit(object):
 
     def test_returnsFloat(self):
         c = 25.3
-        f = aGosedWeather.celsius_to_fahrenheit(c)
+        f = weather_data_type.celsius_to_fahrenheit(c)
         assert round(f, 1) == 77.5
 
 
@@ -249,7 +249,7 @@ class Test_GetFirstValidRow(object):
         t_calc = WeatherDataType(8, -9999.0)
         dts = [solarad, t_calc]
         first_valid_row = re.split("\s+", "63838 20170515 1700 20170515 1200  2.422  -84.75   38.09    25.3    24.4    25.2    23.6     0.0    889 0    929 0    853 0 C    38.9 0    39.7 0    37.2 0    54 0   0.337   0.335   0.349   0.293   0.396    20.2    19.8    18.3    17.0    15.2")
-        assert aGosedWeather.get_first_valid_row(rows, dts) == first_valid_row
+        assert weather_data_type.get_first_valid_row(rows, dts) == first_valid_row
 
 
     def test_reverseChronologicalOrder_returnsLatestValidRow(self):
@@ -264,7 +264,7 @@ class Test_GetFirstValidRow(object):
         t_calc = WeatherDataType(8, -9999.0)
         dts = [solarad, t_calc]
         last_valid_row = re.split("\s+", "63838 20170515 1800 20170515 1300  2.422  -84.75   38.09    25.1    25.2    25.6    24.8     0.0    934 0    978 0     79 0 C    38.9 0    40.2 0    37.6 0    52 0   0.334   0.328   0.340   0.297   0.414    21.1    20.7    18.5    16.9    15.2")
-        assert aGosedWeather.get_first_valid_row(rows, dts, reverse=True) == last_valid_row
+        assert weather_data_type.get_first_valid_row(rows, dts, reverse=True) == last_valid_row
 
 
 class Test_GetProcessedRow(object):
@@ -274,14 +274,14 @@ class Test_GetProcessedRow(object):
         line = "63838 20170515 1700 20170515 1200  2.422  -84.75   38.09    25.3    24.4    25.2    23.6     0.0    889 0    929 0    853 0 C    38.9 0    39.7 0    37.2 0    54 0   0.337   0.335   0.349   0.293   0.396    20.2    19.8    18.3    17.0    15.2"
         row = re.split("\s+", line)
         #datetime
-        temperature = WeatherDataType(8, -9999.0, transformation_function=lambda x: round(aGosedWeather.celsius_to_fahrenheit(x), 1))
+        temperature = WeatherDataType(8, -9999.0, transformation_function=lambda x: round(weather_data_type.celsius_to_fahrenheit(x), 1))
         #wind_speed
         humidity = WeatherDataType(26, -9999, 27, lambda x: x / float(100)) # int to float
-        solar_dir = WeatherDataType(13, -99999, 14, lambda x: round(aGosedWeather.watts_per_meter_sq_to_watts_per_ft_sq(x) * 0.75, 0)) # m^2 to ft^2, then percentage of that
-        solar_diff = WeatherDataType(13, -99999, 14, lambda x: round(aGosedWeather.watts_per_meter_sq_to_watts_per_ft_sq(x) * 0.25, 0)) # m^2 to ft^2, then percentage of that
-        solar_global = WeatherDataType(13, -99999, 14, lambda x: round(aGosedWeather.watts_per_meter_sq_to_watts_per_ft_sq(x), 0))
+        solar_dir = WeatherDataType(13, -99999, 14, lambda x: round(weather_data_type.watts_per_meter_sq_to_watts_per_ft_sq(x) * 0.75, 0)) # m^2 to ft^2, then percentage of that
+        solar_diff = WeatherDataType(13, -99999, 14, lambda x: round(weather_data_type.watts_per_meter_sq_to_watts_per_ft_sq(x) * 0.25, 0)) # m^2 to ft^2, then percentage of that
+        solar_global = WeatherDataType(13, -99999, 14, lambda x: round(weather_data_type.watts_per_meter_sq_to_watts_per_ft_sq(x), 0))
         data_types = [temperature, humidity, solar_dir, solar_diff, solar_global]
-        assert aGosedWeather.get_processed_row(data_types, row) == [77.5, .54, 62.0, 21.0, 83.0]
+        assert weather_data_type.get_processed_row(data_types, row) == [77.5, .54, 62.0, 21.0, 83.0]
 
 
 class Test_ExtactData(object):
@@ -309,7 +309,7 @@ class Test_ExtactData(object):
             humidity = WeatherDataType(26, -9999, 27)
             solar_global = WeatherDataType(13, -99999, 14)
             data_types = [temperature, humidity, solar_global]
-            assert aGosedWeather.extract_data(first_valid_row, last_valid_row, rows, data_types) == [
+            assert weather_data_type.extract_data(first_valid_row, last_valid_row, rows, data_types) == [
                 [16.9, 94, 116],
                 [18.2, 89, 312],
                 [18.9, 83, 382],
@@ -340,7 +340,7 @@ class Test_ExtactData(object):
             humidity = WeatherDataType(26, -9999, 27)
             solar_global = WeatherDataType(13, -99999, 14)
             data_types = [temperature, humidity, solar_global]
-            assert aGosedWeather.extract_data(first_valid_row, last_valid_row, rows, data_types) == [
+            assert weather_data_type.extract_data(first_valid_row, last_valid_row, rows, data_types) == [
                 [10.0, 89, 68],
                 [10.6, 84, 118],
                 [11.4, 80, 216],
@@ -372,7 +372,7 @@ class Test_ExtactData(object):
             humidity = WeatherDataType(26, -9999, 27)
             solar_global = WeatherDataType(13, -99999, 14)
             data_types = [temperature, solar_global, humidity]
-            assert aGosedWeather.extract_data(first_valid_row, last_valid_row, rows, data_types) == [
+            assert weather_data_type.extract_data(first_valid_row, last_valid_row, rows, data_types) == [
                 [17.3, 488, 46],
                 [16.2, 388, 44],
                 [15.0, 100, 47],
@@ -421,7 +421,7 @@ class Test_ExtactData(object):
             last_valid_row = rows[len(rows) - 1]
             wind_speed = WeatherDataType(21, -99.00, 22, lambda x: round(x, 2))
             data_types = [wind_speed]
-            assert aGosedWeather.extract_data(first_valid_row, last_valid_row, rows, data_types, is_subhourly_data=True) == [
+            assert weather_data_type.extract_data(first_valid_row, last_valid_row, rows, data_types, is_subhourly_data=True) == [
                 [2.17],
                 [2.31]
             ]
@@ -457,10 +457,51 @@ class Test_ExtactData(object):
             last_valid_row = rows[len(rows) - 1]
             wind_speed = WeatherDataType(21, -99.00, 22, lambda x: round(x, 2))
             data_types = [wind_speed]
-            assert aGosedWeather.extract_data(first_valid_row, last_valid_row, rows, data_types, is_subhourly_data=True) == [
+            assert weather_data_type.extract_data(first_valid_row, last_valid_row, rows, data_types, is_subhourly_data=True) == [
                 [1.86],
                 [2.06]
             ]
+
+
+class Test_MergeHourlySubhourly(object):
+
+
+    def test_multipleElementLists_returnMergedRowsWithCombinedLengthPlusDatetime(self):
+        hourly = [
+            [1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1]
+        ]
+        subhourly = [
+            [2, 2, 2],
+            [2, 2, 2],
+            [2, 2, 2]
+        ]
+        merged = weather_data_type.merge_hourly_subhourly(hourly, subhourly, 1)
+        assert merged == [
+            ["1:1:0:0:0", 1, 2, 2, 2, 1, 1, 1, 1],
+            ["1:1:1:0:0", 1, 2, 2, 2, 1, 1, 1, 1],
+            ["1:1:2:0:0", 1, 2, 2, 2, 1, 1, 1, 1]
+        ]
+
+
+    def test_singleElementList_returnsMergedRowsWithCombinedLengthPlusDatetime(self):
+        hourly = [
+            [1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1]
+        ]
+        subhourly = [
+            [2],
+            [2],
+            [2]
+        ]
+        merged = weather_data_type.merge_hourly_subhourly(hourly, subhourly, 0)
+        assert merged == [
+            ["1:1:0:0:0", 2, 1, 1, 1, 1, 1],
+            ["1:1:1:0:0", 2, 1, 1, 1, 1, 1],
+            ["1:1:2:0:0", 2, 1, 1, 1, 1, 1]
+        ]
 
 
 if __name__ == "__main__":
