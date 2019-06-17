@@ -1,0 +1,1 @@
+DeviceNumber,NetworkId,EquipmentId,Reversible,ConnectionStatus,SymbolSize,X,Y,NormalFeedingNodeId,FaultIndicator,SettingOption,DesiredPowerFlow,PowerTolerance,MaximumPhaseShift,MinimumPhaseShift,InitialTapPosition,TapPosition

@@ -1,0 +1,2 @@
+DeviceNumber,DeviceType,LTCIndex,TapChangingAlgo,ActivationDelayFirstTap_s,ActivationDelaySubTaps_s,MechanismDelay_s,ControlOnTapSide,WantIntegration,UseInverseTimeDelayChar
+"650REG",4,0,0,4.0000000000000000e+00,0.0000000000000000e+00,5.0000000000000000e-01,0,1,0

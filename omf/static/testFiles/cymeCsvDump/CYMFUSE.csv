@@ -1,0 +1,1 @@
+DeviceNumber,NetworkId,EquipmentId,ClosedPhase,GroundTripRating,PhaseTripRating,AlternateGroundTripRating,AlternatePhaseTripRating,TCCSettingId,NormalFeedingNodeId,NormalStatus,RemoteControlled,Locked,UseAlternate,SymbolSize,FaultIndicator,Status,X,Y,Strategic,RestorationMode,ByPassOnRestoration,Reversible

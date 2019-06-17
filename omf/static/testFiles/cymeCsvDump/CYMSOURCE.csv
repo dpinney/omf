@@ -1,0 +1,2 @@
+DeviceNumber,NodeId,ConnectorIndex,NetworkId,EquipmentId,DesiredVoltage,ComponentMask
+"SUB650WYE-S2","650",0,"650","SUB650WYE",4.1600000000000001e+00,1

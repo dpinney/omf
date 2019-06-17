@@ -1,0 +1,1 @@
+DeviceNumber,NetworkId,EquipmentId,Phase,Status,KW,KVAFault,SymbolSize,Vp_kv,Vs_kv,S_kva,X_pu,FiringAngle_deg,OverlapAngle_deg,XcTotal_ohms,PowerFactor_percent

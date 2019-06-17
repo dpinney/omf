@@ -1,0 +1,1 @@
+DeviceNumber,NetworkId,EquipmentId,Phase,KVSet,KWSet,Rg,Xg,PowerFactor,VoltageControlType,Status,QMax,QMin,SymbolSize,InitialAngle,StabilityModel,ApplySkinEffect,VoltageControlNodeId,ModelAsAPowerSystemUnit,MaxDispatchablePower,MinDispatchablePower,GovernorDroop,OPFActive,GeneratorCostModelID

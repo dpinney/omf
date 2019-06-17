@@ -1,0 +1,1 @@
+DeviceNumber,NetworkId,EquipmentId,ConnectionStatus,SymbolSize,X,Y,OperatingMode,ControlOutputSpeed,OutputFrequency,OutputSpeed,ForwardContribution,ReverseContribution,RegenerativeCapability,RatedCurrentMultiplier,LockedRotorCurrentMultiplier,UseRatedCurrent,FreqSourceId

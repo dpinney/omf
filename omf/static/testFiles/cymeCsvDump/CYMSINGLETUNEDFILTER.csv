@@ -1,0 +1,1 @@
+DeviceNumber,NetworkId,EquipmentId,Phase,Status,ConnectionConfiguration,RGround,XGround,Balanced,UnbalancedRFactorA,UnbalancedRFactorB,UnbalancedRFactorC,UnbalancedLFactorA,UnbalancedLFactorB,UnbalancedLFactorC,UnbalancedCFactorA,UnbalancedCFactorB,UnbalancedCFactorC,SymbolSize

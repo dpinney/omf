@@ -1,0 +1,2 @@
+EquipmentId,ComponentMask,RatedKVA,RatedKVLL,ActiveGenerationKW,PFPercent,SubTransientResistance,SubTransientReactance,Efficiency,RatedSpeed,ANSIMotorGroup,Favorite,Comments,AutoComputeFromEqCircuit,ImpedanceUnit
+"DEFAULT",0,1.5000000000000000e+02,1.3800000000000001e+01,1.0000000000000000e+02,-8.5000000000000000e+01,1.7000000000000001e-02,1.7000000000000001e-01,9.0000000000000000e+01,1.8000000000000000e+03,0,0,,0,1

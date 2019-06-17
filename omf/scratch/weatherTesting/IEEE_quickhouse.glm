@@ -1209,7 +1209,7 @@ object regulator {
 object house:..20 {
 	parent trip_meter1;
 	floor_area random.normal(1750,400);
-	heating_setpoint heatingsetpoint4+random.normal(0,4);
+	heating_setpoint heatingsetpoint4;
 	cooling_setpoint random.normal (80,2);
 	thermostat_deadband random.normal (2,.5);
 	object ZIPload {
@@ -1231,7 +1231,7 @@ object house:..20 {
 object house:..20 {
 	parent trip_meter2;
 	floor_area random.normal(1750,400);
-	heating_setpoint heatingsetpoint2+random.normal(0,4);
+	heating_setpoint heatingsetpoint2;
 	cooling_setpoint random.normal (80,2);
 	object ZIPload {
 		base_power ZIP1base_power*random.normal(1,.25);
@@ -1252,7 +1252,7 @@ object house:..20 {
 object house:..20 {
 	parent trip_meter3;
 	floor_area random.normal(1750,400);
-	heating_setpoint heatingsetpoint2+random.normal(0,4);
+	heating_setpoint heatingsetpoint2;
 	cooling_setpoint random.normal (80,2);
 	object ZIPload {
 		base_power ZIP1base_power*random.normal(1,.25);
@@ -1273,7 +1273,7 @@ object house:..20 {
 object house:..20 {
 	parent trip_meter4;
 	floor_area random.normal(1750,400);
-	heating_setpoint heatingsetpoint5+random.normal(0,4);
+	heating_setpoint heatingsetpoint5;
 	cooling_setpoint random.normal (80,2);
 	object ZIPload {
 		base_power ZIP1base_power*random.normal(1,.25);
@@ -1294,7 +1294,7 @@ object house:..20 {
 object house:..20 {
 	parent trip_meter5;
 	floor_area random.normal(1750,400);
-	heating_setpoint heatingsetpoint2+random.normal(0,4);
+	heating_setpoint heatingsetpoint2;
 	cooling_setpoint random.normal (80,2);
 	object ZIPload {
 		base_power ZIP1base_power*random.normal(1,.25);
@@ -1315,7 +1315,7 @@ object house:..20 {
 object house:..20 {
 	parent trip_meter6;
 	floor_area random.normal(1750,400);
-	heating_setpoint heatingsetpoint3+random.normal(0,4);
+	heating_setpoint heatingsetpoint3;
 	cooling_setpoint random.normal (80,2);
 	object ZIPload {
 		base_power ZIP1base_power*random.normal(1,.25);
@@ -1336,7 +1336,7 @@ object house:..20 {
 object house:..20 {
 	parent trip_meter7;
 	floor_area random.normal(1750,400);
-	heating_setpoint heatingsetpoint5+random.normal(0,4);
+	heating_setpoint heatingsetpoint5;
 	cooling_setpoint random.normal (80,2);
 	object ZIPload {
 		base_power ZIP1base_power*random.normal(1,.25);
@@ -1357,7 +1357,7 @@ object house:..20 {
 object house:..20 {
 	parent trip_meter8;
 	floor_area random.normal(1750,400);
-	heating_setpoint heatingsetpoint2+random.normal(0,4);
+	heating_setpoint heatingsetpoint2;
 	cooling_setpoint random.normal (80,2);
 	object ZIPload {
 		base_power ZIP1base_power*random.normal(1,.25);
@@ -1378,7 +1378,7 @@ object house:..20 {
 object house:..20 {
 	parent trip_meter9;
 	floor_area random.normal(1750,400);
-	heating_setpoint heatingsetpoint5+random.normal(0,4);
+	heating_setpoint heatingsetpoint5;
 	cooling_setpoint random.normal (80,2);
 	object ZIPload {
 		base_power ZIP1base_power*random.normal(1,.25);
@@ -1399,7 +1399,7 @@ object house:..20 {
 object house:..20 {
 	parent trip_meter10;
 	floor_area random.normal(1750,400);
-	heating_setpoint heatingsetpoint4+random.normal(0,4);
+	heating_setpoint heatingsetpoint4;
 	cooling_setpoint random.normal (80,2);
 	object ZIPload {
 		base_power ZIP1base_power*random.normal(1,.25);
@@ -1420,7 +1420,7 @@ object house:..20 {
 object house:..20 {
 	parent trip_meter11;
 	floor_area random.normal(1750,400);
-	heating_setpoint heatingsetpoint2+random.normal(0,4);
+	heating_setpoint heatingsetpoint2;
 	cooling_setpoint random.normal (80,2);
 	object ZIPload {
 		base_power ZIP1base_power*random.normal(1,.25);
@@ -1441,7 +1441,7 @@ object house:..20 {
 object house:..20 {
 	parent trip_meter12;
 	floor_area random.normal(1750,400);
-	heating_setpoint heatingsetpoint1+random.normal(0,4);
+	heating_setpoint heatingsetpoint1;
 	cooling_setpoint random.normal (80,2);
 	object ZIPload {
 		base_power ZIP1base_power*random.normal(1,.25);
@@ -1462,7 +1462,7 @@ object house:..20 {
 object house:..20 {
 	parent trip_meter13;
 	floor_area random.normal(1750,400);
-	heating_setpoint heatingsetpoint3+random.normal(0,4);
+	heating_setpoint heatingsetpoint3;
 	cooling_setpoint random.normal (80,2);
 	object ZIPload {
 		base_power ZIP1base_power*random.normal(1,.25);

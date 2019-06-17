@@ -1,0 +1,1 @@
+DeviceNumber,NetworkId,Status,SymbolSize,PhaseTransformerID1,PhaseTransformerID2,PhaseTransformerID3,CenterTapPhase,PrimaryRg,PrimaryXg,SecondaryRg,SecondaryXg,FeedingNode,TransformerConnection,SystemBaseVoltage_Primary,SystemBaseVoltage_Secondary,X,Y,PhaseShift,GammaPhaseShift
