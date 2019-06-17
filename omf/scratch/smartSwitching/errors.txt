@@ -36,6 +36,18 @@ Discussion:
 Actual behavior: When trying to run any .py file in the omf, get an error:
 "ImportError: No module named fcntl". Doing some research, it seems to be related to __init__.py and a Windows specific problem. It appears that fcntl does not work with windows.
 Expected behavior: Python files in the omf can be run and generate expected results.
-Workaround/fix:?
+Workaround/fix: David implemented a hack allowing us to 
 Discussion:
 	This appears to be a Windows specific error. Is there a way to make this import optional? I think it was a recent update to the omf that broke it for me.
+
+Actual behavior: plt.bar() and plt.show() produce no output when run in smartSwitching. This is not the case when I create a python file to test plt operations. In this case, everything works as expected, even given the same set of data.
+Expected behavior: plt.bar() and plt.show() produce a bar graph when given the output from the recloserAnalysis() function.
+Workaround/fix: Save the figure rather to the smartSwitching folder instead.
+Dicussion:
+	Why does it still not appear automatically?
+
+Actual behavior: plot.py does not generate any output, althought the program finishes running.
+Expected behavior: plot.py produces a graph.
+Workaround/fix: Use matplotlib instead.
+Discussion:
+	Why does it not work? Tried looking online but no answers yet. Maybe something with jupyter notebook? I tried running both online and offline versions.
