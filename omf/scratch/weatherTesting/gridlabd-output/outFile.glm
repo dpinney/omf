@@ -1297,11 +1297,11 @@ module tape;
 module climate;
 object csv_reader {
 	name weatherReader;
-	filename monday.csv;
+	filename uscrn-weather-data.csv;
 };
 
 object climate {
-	tmyfile monday.csv;
+	tmyfile uscrn-weather-data.csv;
 	name MyClimate;
 	reader weatherReader;
 };

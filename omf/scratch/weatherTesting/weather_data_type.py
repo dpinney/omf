@@ -109,7 +109,12 @@ def merge_hourly_subhourly(hourly, subhourly, insert_idx):
 	assert len(hourly) == 8760
 	assert len(hourly) == len(subhourly)
 	assert len(hourly[0]) > 0 and len(subhourly[0]) > 0
-	merged_rows = []
+	#merged_rows = []
+	# Add headers???
+	merged_rows = [
+		#["#weather file"],
+		["temperature", "wind_speed", "humidity", "solar_dir", "solar_diff", "solar_global"]
+	]
 	start_date = datetime.datetime(2000, 1, 1, 0, 0, 0) # arbitrary datetime, this could be any year
 	hour = datetime.timedelta(hours=1)
 	for i in range(len(hourly)):

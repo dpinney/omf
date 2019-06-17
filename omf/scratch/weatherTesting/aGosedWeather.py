@@ -10,13 +10,6 @@ from weather_data_type import WeatherDataType, get_first_valid_row, extract_data
 
 
 """
-12 measurements per hour * 24 hours per day * 365 days per year = 105120 sub-hourly measurements per year per station. 
-I should take the mean of 12 wind speed measurements, so 0005 - 0100.
-
-24 hours per daty * 365 days per year = 8760 hourly measurements per year per station
-"""
-
-"""
 Get data from a USCRN station in a given year, where data consists of air temperature, relative humidity, solar radiation, and windspeed.
 We derive 'solar direct' and 'solar diffuse' from the solar radiation data. Hourly windspeed is not given in the hourly dataset, so it must be
 calculated from the 5-minute dataset.
@@ -37,43 +30,6 @@ calculated from the 5-minute dataset.
 """
 
 
-def attachHistoricalWeather(omd_path, year, station):
-	# type: (str, str, str) -> None
-	# Get temperature, humidity, solar_global for the year + station
-	hourly_rows = get_USCRN_data(year, station, "hourly")
-	temperature = WeatherDataType(8, -9999.0, flag_index=None, transformation_function=lambda x: round(celsius_to_fahrenheit(x), 1))
-	humidity = WeatherDataType(26, -9999, flag_index=27, transformation_function=lambda x: round((x / float(100)), 2))
-	solar_dir = WeatherDataType(13, -99999, flag_index=14, transformation_function=lambda x: int(round(watts_per_meter_sq_to_watts_per_ft_sq(x) * 0.75, 0)))
-	solar_diff = WeatherDataType(13, -99999, flag_index=14, transformation_function=lambda x: int(round(watts_per_meter_sq_to_watts_per_ft_sq(x) * 0.25, 0)))
-	solar_global = WeatherDataType(13, -99999, flag_index=14, transformation_function=lambda x: int(round(watts_per_meter_sq_to_watts_per_ft_sq(x), 0)))
-	data_types = [temperature, humidity, solar_dir, solar_diff, solar_global]
-	first_valid_row = get_first_valid_row(hourly_rows, data_types)
-	last_valid_row = get_first_valid_row(hourly_rows, data_types, reverse=True)
-	hourly_processed_data = extract_data(first_valid_row, last_valid_row, hourly_rows, data_types, is_subhourly_data=False)
-	###
-	#write_rows_to_csv(hourly_processed_data, "{}-{}-hourly.csv".format(year, station))
-	###	
-	# Get wind speed for the year + station
-	subhourly_rows = get_USCRN_data(year, station, "subhourly")
-	wind_speed = WeatherDataType(21, -99.00, flag_index=22, transformation_function=lambda x: round(x, 2))
-	data_types = [wind_speed]
-	first_valid_row = get_first_valid_row(subhourly_rows, data_types)
-	last_valid_row = get_first_valid_row(subhourly_rows, data_types, reverse=True)
-	subhourly_processed_data = extract_data(first_valid_row, last_valid_row, subhourly_rows, data_types, is_subhourly_data=True)
-	###
-	#write_rows_to_csv(subhourly_processed_data, "{}-{}-subhourly.csv".format(year, station))
-	###
-	merged = merge_hourly_subhourly(hourly_processed_data, subhourly_processed_data, 1)
-	csv_filepath = os.path.join(os.path.dirname(omd_path), "uscrn-weather-data.csv")
-
-
-def write_rows_to_csv(data, filename):
-	filepath = os.path.join(os.path.dirname(__file__), filename)
-	with open(filepath, 'w') as f:
-		writer = csv.writer(f)
-		writer.writerows(data)
-
-
 def get_USCRN_data(year, station, frequency):
 	# type: (int, str, str) -> list
 	""" Get a .txt file from the USCRN server and return the data as a list of lists. """
@@ -90,64 +46,51 @@ def get_USCRN_data(year, station, frequency):
 	return [re.split("\s+", line) for line in r.text.splitlines()]
 
 
-def _write_USCRN_csv(csv_filepath, data):
-	# type: (str, list) -> None
-	""" Write the data, which is a list of dicts, to the csv filepath. """
-	with open(csv_filepath, 'w') as f:
+def attachHistoricalWeather(omd_path, year, station):
+	# type: (str, str, str) -> None
+	"""
+	- Write a csv with columns: datetime, temperature, wind speed, humidity, solar_dir, solar_diff, solar_global
+	- Calibrate the omd file with the weather data
+	"""
+	assert type(year) is int
+	assert type(omd_path) is str or type(omd_path) is unicode
+	assert type(station) is str or type(omd_path) is unicode
+	# Get temperature, humidity, solar_global for the year and station
+	hourly_rows = get_USCRN_data(year, station, "hourly")
+	if hourly_rows is None:
+		raise Exception("Failed to get USCRN data")
+	temperature = WeatherDataType(8, -9999.0, flag_index=None, transformation_function=lambda x: round(celsius_to_fahrenheit(x), 1))
+	humidity = WeatherDataType(26, -9999, flag_index=27, transformation_function=lambda x: round((x / float(100)), 2))
+	solar_dir = WeatherDataType(13, -99999, flag_index=14, transformation_function=lambda x: int(round(watts_per_meter_sq_to_watts_per_ft_sq(x) * 0.75, 0)))
+	solar_diff = WeatherDataType(13, -99999, flag_index=14, transformation_function=lambda x: int(round(watts_per_meter_sq_to_watts_per_ft_sq(x) * 0.25, 0)))
+	solar_global = WeatherDataType(13, -99999, flag_index=14, transformation_function=lambda x: int(round(watts_per_meter_sq_to_watts_per_ft_sq(x), 0)))
+	data_types = [temperature, humidity, solar_dir, solar_diff, solar_global]
+	first_valid_row = get_first_valid_row(hourly_rows, data_types)
+	last_valid_row = get_first_valid_row(hourly_rows, data_types, reverse=True)
+	hourly_processed_data = extract_data(first_valid_row, last_valid_row, hourly_rows, data_types, is_subhourly_data=False)
+	# Get wind speed for the year and station
+	subhourly_rows = get_USCRN_data(year, station, "subhourly")
+	if subhourly_rows is None:
+		raise Exception("Failed to get USCRN data")
+	wind_speed = WeatherDataType(21, -99.00, flag_index=22, transformation_function=lambda x: round(x, 2))
+	data_types = [wind_speed]
+	first_valid_row = get_first_valid_row(subhourly_rows, data_types)
+	last_valid_row = get_first_valid_row(subhourly_rows, data_types, reverse=True)
+	subhourly_processed_data = extract_data(first_valid_row, last_valid_row, subhourly_rows, data_types, is_subhourly_data=True)
+	# Merge the two datasets
+	merged = merge_hourly_subhourly(hourly_processed_data, subhourly_processed_data, 1)
+	#csv_path = os.path.join(os.path.dirname(omd_path), "uscrn-weather-data.csv")
+	csv_path = os.path.join(os.path.dirname(omd_path), "monday.csv")
+	write_csv(merged, csv_path)
+	# Calibrate the feeder
+	start_date = datetime(year, 1, 1)
+	calibrate_omd(start_date, omd_path, csv_path)
+
+
+def write_csv(data, filepath):
+	with open(filepath, 'w') as f:
 		writer = csv.writer(f)
-		writer.writerow("datetime", "temperature", "wind_speed", "humidity", "solar_dir", "solar_diff", "solar_global")
 		writer.writerows(data)
-
-
-
-def write_weather_csv(INIT_TIME, LOCATION, CSV_NAME):
-	""" Make a weather file. """
-	data_temp = weather.pullUscrn(str(INIT_TIME.year), LOCATION, 'T_CALC')
-	data_hum = weather.pullUscrn(str(INIT_TIME.year), LOCATION, 'RH_HR_AVG')
-	data_solar = weather.pullUscrn(str(INIT_TIME.year), LOCATION, 'SOLARAD')
-	data_full = []
-	for i in range(8760): # 24 hours per day * 365 days per year = 8760 measurements for a USCRN station
-		step_time = INIT_TIME + timedelta(hours=i)
-		row = [
-			'{}:{}:{}:{}:{}'.format(step_time.month, step_time.day, step_time.hour, step_time.minute, step_time.second),
-			# str(step_time), 
-			data_temp[i],
-			0.0, # TODO: get a windspeed
-			data_hum[i],
-			data_solar[i] * 0.75, # TODO: better solar direct
-			data_solar[i] * 0.25, # TODO: better solar diffuse
-			data_solar[i]
-		]
-		data_full.append(row)
-	# Write USCRN data to CSV
-	with open(CSV_NAME,'w') as wFile:
-		weather_writer = csv.writer(wFile)
-		weather_writer.writerow(['temperature','wind_speed','humidity','solar_dir','solar_diff','solar_global'])
-		for row in data_full:
-			weather_writer.writerow(row)
-
-
-def write_tree_to_file(tree, filename):
-	filepath = os.path.join(os.path.dirname(__file__), filename)
-	with open(filepath, 'w') as f:
-		json.dump(tree, f, indent=4)
-
-
-def write_omd(tree, csv_filename):
-	# type: (dict, str) -> None
-	""" An .omd is more than just a tree. It has attachments """
-	omd = {}
-	omd["tree"] = tree
-	with open(csv_filename, 'r') as weather_csv:
-		weatherString = weather_csv.read()
-	omd['attachments']['weatheryearDCA.csv'] = weatherString
-	filepath = os.path.join(os.path.dirname(__file__), "new-calibrated-feeder.omd")
-	with open(filepath, 'w') as f:
-		f.write(str(omd))
-	#try: os.remove('./Orville Tree Pond Calibrated With Weather.json')
-	#except: pass
-	#with open('./Orville Tree Pond Calibrated With Weather.json', 'w') as outFile:
-	#	json.dump(outJson, outFile, indent=4)
 
 
 def calibrate_omd(start_date, omd_path, csv_path):
@@ -175,47 +118,33 @@ def calibrate_omd(start_date, omd_path, csv_path):
 	# Add the weather attachment
 	with open(csv_path, 'r') as f:
 		weatherString = f.read()
+	if omd.get("attachments") is None:
+		omd["attachments"] = {}
 	omd['attachments']['weatheryearDCA.csv'] = weatherString
 	with open(omd_path, 'w') as f:
-		f.write(str(omd))
+		json.dump(omd, f, indent=4)
 
 
-def test_gridlabd_weather_sim():
-	# Globals
-	INIT_TIME = datetime(2017, 1, 1, 0, 0, 0)
-	CSV_PATH = os.path.join(os.path.dirname(__file__), )
-	CSV_NAME = 'weatherNewKy.csv'
-	LOCATION = 'KY_Versailles_3_NNW'
-	GLM_PATH = 'IEEE_quickhouse.glm'
-
-	#write_weather_csv(INIT_TIME, LOCATION, CSV_NAME)
-
-	# Get an uncalibrated feeder from a .glm file
-	myTree = feeder.parse(GLM_PATH) 
-	write_tree_to_file(myTree, "uncalibrated-tree.json")
-	# Delete all climate objects from the feeder, then reinsert new climate objects
-	reader_name = 'weatherReader'
-	climate_name = 'MyClimate'
-	for key in myTree.keys():
-		obName = myTree[key].get('name','')
-		obType = myTree[key].get('object','')
-		if obName in [reader_name, climate_name] or obType is 'climate':
-			del myTree[key]
-	oldMax = feeder.getMaxKey(myTree)
-	myTree[oldMax + 1] = {'omftype':'module', 'argument':'tape'}
-	myTree[oldMax + 2] = {'omftype':'module', 'argument':'climate'}
-	myTree[oldMax + 3] = {'object':'csv_reader', 'name':reader_name, 'filename':CSV_NAME}
-	myTree[oldMax + 4] = {'object':'climate', 'name':climate_name, 'reader': reader_name, 'tmyfile':CSV_NAME}
-	# Set the time correctly. Modify certain objects in the feeder (e.g. recorder and clock)
-	feeder.adjustTime(myTree, 240, 'hours', '{}-{}-{}'.format(INIT_TIME.year, INIT_TIME.month, INIT_TIME.day)) 
-	write_tree_to_file(myTree, "calibrated-tree.json")
+def test_gridlabd_weather_sim(year, station):
+	""" GridLAB-D intermitently fails """
+	glm_path = os.path.join(os.path.dirname(__file__), "IEEE_quickhouse.glm")
+	tree = feeder.parse(glm_path)
+	omd = {}
+	omd["tree"] = tree
+	omd_path = os.path.join(os.path.dirname(__file__), "IEEE_quickhouse.omd")
+	with open(omd_path, 'w') as f:
+		json.dump(omd, f, indent=4)
+	attachHistoricalWeather(omd_path, year, station)
+	with open(omd_path) as f:
+		calibrated_tree = json.load(f)["tree"]
 	# Run here to test GridLAB_D
 	# The output is NOT a feeder. It's some data in JSON format. This function call does NOT modify myTree.
-	rawOut = runInFilesystem(myTree, attachments=[], keepFiles=True, workDir='.', glmName='./outFile.glm') # Use the modified tree to run a simulation in gridlabd
+	rawOut = runInFilesystem(calibrated_tree, attachments=[], keepFiles=True, workDir=os.path.dirname(__file__), glmName='outFile.glm')
 	print(rawOut)
 
+
 """
-def create_omd(tree, CSV_NAME):
+def other_test(tree, CSV_NAME):
 	omd = {}
 	omd["tree"] = tree
 	with open(CSV_NAME,'r') as weatherFile:
@@ -232,4 +161,8 @@ def create_omd(tree, CSV_NAME):
 
 
 if __name__ == "__main__":
-	attachHistoricalWeather("", 2018, "AK_Kenai_29_ENE")
+	year = 2018
+	station = "AK_Kenai_29_ENE"
+	#start_date = datetime(year, 1, 1)
+	#calibrate_omd(start_date, "/Users/austinchang/pycharm/omf/omf/scratch/weatherTesting/IEEE_quickhouse.omd", "/Users/austinchang/pycharm/omf/omf/scratch/weatherTesting/uscrn-weather-data.csv")
+	test_gridlabd_weather_sim(year, station)
