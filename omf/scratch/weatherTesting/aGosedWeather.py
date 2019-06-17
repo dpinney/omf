@@ -99,8 +99,10 @@ def calibrate_omd(start_date, omd_path, csv_path):
 		omd = json.load(f)
 	tree = omd["tree"]
 	# Delete all climate objects from the feeder, then reinsert new climate objects
-	reader_name = 'weatherReader'
+	reader_name = 'WeatherReader'
 	climate_name = 'MyClimate'
+	# csv_reader has reference to old filename but is not deleted
+	#csv_reader_name = "CsvReader"
 	for key in tree.keys():
 		obName = tree[key].get('name','')
 		obType = tree[key].get('object','')
@@ -120,7 +122,7 @@ def calibrate_omd(start_date, omd_path, csv_path):
 		weatherString = f.read()
 	if omd.get("attachments") is None:
 		omd["attachments"] = {}
-	omd['attachments']['weatheryearDCA.csv'] = weatherString
+	omd['attachments'][csv_name] = weatherString
 	with open(omd_path, 'w') as f:
 		json.dump(omd, f, indent=4)
 
