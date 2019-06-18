@@ -1,5 +1,5 @@
 from __future__ import division
-from pyproj import Proj, transform
+from pyproj import Proj, transform, Geod
 import webbrowser
 import omf, json, warnings, networkx as nx, matplotlib, numpy as np, os, shutil, math, requests, tempfile, random
 from matplotlib import pyplot as plt
@@ -94,113 +94,7 @@ def createGraph(pathToOmdFile):
 	nxG = omf.feeder.treeToDiNxGraph(tree)
 	#use conversion for testing other feeders
 	nxG = graphValidator(pathToOmdFile, nxG)
-	#if conversion:
-	#	nxG = convertOmd(pathToOmdFile)
-	#print([sub for sub in nx.get_node_attributes(nxG, 'substation')][0])
 	return nxG
-
-def oldGeo(inGraph):
-	nxG = inGraph
-	geoJsonDict = {
-	"type": "FeatureCollection",
-	"features": []
-	}
-	#from pyproj import Geod
-	#G = Geod(ellps='WGS84')
-	#print(G.inv(30, 50, 30.0001, 50.000001)[2])
-	#Add nodes to geoJSON
-	node_positions = {nodewithPosition: nxG.node[nodewithPosition]['pos'] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')}
-	node_types = {nodewithType: nxG.node[nodewithType]['type'] for nodewithType in nx.get_node_attributes(nxG, 'type')}
-	#print(set(node_types.values()))
-	edge_types = {edge: nxG[edge[0]][edge[1]]['type'] for edge in nx.get_edge_attributes(nxG, 'type')}
-	for node in node_positions:
-		for edge in nxG.out_edges(node):
-
-			if edge_types.get(edge,'') == 'switch':
-				#print(nxG[edge[0]][edge[1]])
-				nxG.node[node]['isHub'] = True
-				shortestPath = nx.bidirectional_shortest_path(nxG, 'COLOMA SUB', node)
-				for i in range(len(shortestPath)-1):
-					#print(nxG[shortestPath[i]][shortestPath[i+1]])
-					nxG[shortestPath[i]][shortestPath[i+1]]['fiber'] = True
-				#print(edge)
-				#print(nxG.node[node])
-				#print(nxG[edge[0]][edge[1]].get('type',''))
-	for node in node_positions:
-		if nxG.out_degree(node) == 0:
-			#print(node)
-			found = False
-			current = node
-			while not found and current != 'COLOMA SUB':
-				for pred in nxG.predecessors(current):
-					#print(pred)
-					if nxG.node[pred].get('isHub','') == True:
-						nxG.add_edge(pred, node,attr_dict={'rf': True})
-						print(nxG[pred][node])
-						found = True
-				current = pred
-	#print(nx.edges(nxG))
-	for node in node_positions:
-			#print(nxG.node[i].get('type',''))
-		#print(nxG.node[node])
-		#print(nxG.neighbors(node))
-		#print(nxG.succ[node].items())
-		#print(nxG.in_degree(node), nxG.out_degree(node))
-		geoJsonDict['features'].append({
-			"type": "Feature", 
-			"geometry":{
-				"type": "Point",
-				"coordinates": [node_positions[node][1], node_positions[node][0]]
-			},
-			"properties":{
-				"name": node,
-				"pointType": node_types.get(node,''),
-				"substation": nxG.node[node].get('substation',''),
-				"isLeaf": nxG.out_degree(node) == 0,
-				"isHub": nxG.node[node].get('isHub','')
-				#"pointColor": _obToCol(node_types[node])
-			}
-		})
-	#Add edges to geoJSON
-	edge_types = {edge: nxG[edge[0]][edge[1]]['type'] for edge in nx.get_edge_attributes(nxG, 'type')}
-	edge_phases = {edge: nxG[edge[0]][edge[1]]['phases'] for edge in nx.get_edge_attributes(nxG, 'phases')}
-	#print(set(edge_types.values()))
-	edge_phases = {edge: nxG[edge[0]][edge[1]]['rf'] for edge in nx.get_edge_attributes(nxG, 'rf')}
-	#print(edge_phases)
-	for edge in nx.edges(nxG):
-		#print(nxG[edge[0]][edge[1]])
-		if nxG[edge[0]][edge[1]].get('rf',''):
-			print(True) 
-		geoJsonDict['features'].append({
-			"type": "Feature", 
-			"geometry":{
-				"type": "LineString",
-				"coordinates": [[node_positions[edge[0]][1], node_positions[edge[0]][0]],[node_positions[edge[1]][1], node_positions[edge[1]][0]]]
-			},
-			"properties":{
-				#"phase": edge_phases[edge],
-				"edgeType": edge_types.get(edge,''),
-				"to": nxG[edge[0]][edge[1]].get('to',''),
-				"fiber": nxG[edge[0]][edge[1]].get('fiber',''),
-				"rf": nxG[edge[0]][edge[1]].get('rf','')
-				#"edgeColor":_obToCol(edge_types[edge])
-			}
-		})
-	#print(geoJsonDict)
-	#out degree is zero if end
-	#node_subs = {nodewithType: nxG.node[nodewithType]['substation'] for nodewithType in nx.get_node_attributes(nxG, 'substation')}
-	#for i in node_subs:
-	#	print(nxG.node[i])
-	#	print(nxG.pred[i].items())
-	#	print(nxG.in_degree(i), nxG.out_degree(i))
-	#print(node_subs)
-
-	return geoJsonDict
-	#if not os.path.exists(outputPath):
-	#	os.makedirs(outputPath)
-	#shutil.copy('static/geoPolyLeaflet.html', outputPath)
-	#with open(pJoin(outputPath,'geoPointsLines.json'),"w") as outFile:
-	#	json.dump(geoJsonDict, outFile, indent=4)
 
 def getSubstation(nxG):
 	'''Get the substation node from a feeder'''
@@ -208,17 +102,40 @@ def getSubstation(nxG):
 
 def setFiber(nxG, edgeType='switch'):
 	'''Set fiber on path between certain edgeType (switch is the defualt for now) and the substation'''
-	node_positions = {nodewithPosition: nxG.node[nodewithPosition]['pos'] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')}
+	node_positions = {nodewithPosition: nxG.node[nodewithPosition]['pos'] for nodewithPosition in nx.get_node_attributes(nxG, 'pos')}
 	edge_types = {edge: nxG[edge[0]][edge[1]]['type'] for edge in nx.get_edge_attributes(nxG, 'type')}
 	substation = getSubstation(nxG)
 	for node in node_positions:
 		for edge in nxG.out_edges(node):
 			if edge_types.get(edge,'') == edgeType:
-				nxG.node[node]['isHub'] = True
+				nxG.node[node]['transmitter'] = True
+				nxG.node[node]['bandwidthCapacity'] = 10**4
 				shortestPath = nx.bidirectional_shortest_path(nxG, substation, node)
 				for i in range(len(shortestPath)-1):
 					nxG[shortestPath[i]][shortestPath[i+1]]['fiber'] = True
+					nxG[shortestPath[i]][shortestPath[i+1]]['bandwidthUse'] = 0
+					nxG[shortestPath[i]][shortestPath[i+1]]['bandwidthCapacity'] = 10**6
 
+def getDistance(nxG, start, end):
+	'''Get the distance between two points in a graph'''
+	dist = math.sqrt( (nxG.node[end]['pos'][1] - nxG.node[start]['pos'][1])**2 + (nxG.node[end]['pos'][0] - nxG.node[start]['pos'][0])**2 )
+	return dist
+
+def findNearestPoint(nxG, reciever, transmitters):
+	'''Find the nearest point for a reciever based on a list of transmitters'''
+	nearest = min(transmitters, key = lambda transmitter: getDistance(nxG, reciever, transmitter))
+	return nearest
+
+def setRF2(nxG):
+	'''Add rf edges between recievers and the nearest transmitter'''
+	recievers = [reciever for reciever in nx.get_node_attributes(nxG, 'type') if nxG.node[reciever]['type'] in ['meter', 'triplex_meter']]
+	transmitters = [transmitter for transmitter  in nx.get_node_attributes(nxG, 'transmitter')]
+	for reciever in recievers:
+		transmitter = findNearestPoint(nxG, reciever, transmitters)
+		nxG.add_edge(transmitter, reciever,attr_dict={'rf': True, 'bandwidthCapacity': (10**3 * 5)})
+		nxG.node[reciever]['bandwidthUse'] = 1
+	
+#change this to be nearest
 def setRF(nxG):
 	'''Add RF lines to  '''
 	node_positions = {nodewithPosition: nxG.node[nodewithPosition]['pos'] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')}
@@ -229,10 +146,56 @@ def setRF(nxG):
 			current = node
 			while not found and current != substation:
 				for pred in nxG.predecessors(current):
-					if nxG.node[pred].get('isHub','') == True:
+					if nxG.node[pred].get('transmitter','') == True:
 						nxG.add_edge(pred, node,attr_dict={'rf': True})
 						found = True
 				current = pred
+
+def calcEdgeLengths(nxG):
+	'''Calculate the lengths of edges based on lat/lon position'''
+	G = Geod(ellps='WGS84')
+	for edge in nx.edges(nxG):
+		nxG[edge[0]][edge[1]]['length'] = G.inv(nxG.node[edge[0]]['pos'][1], nxG.node[edge[0]]['pos'][0], nxG.node[edge[1]]['pos'][1], nxG.node[edge[1]]['pos'][0])[2]
+
+def getFiberCost(nxG, fiberCostPerMeter):
+	'''Calculate the cost of fiber'''
+	fiber_cost = sum((nxG[edge[0]][edge[1]]['length'])*fiberCostPerMeter for edge in nx.get_edge_attributes(nxG, 'fiber'))
+	return fiber_cost
+
+def getTransmittersCost(nxG, transmitterCost):
+	'''Calculate the cost of RF transmitter equipment'''
+	transmitter_cost = len([transmitter for transmitter  in nx.get_node_attributes(nxG, 'transmitter')])*transmitterCost
+	return fiber_cost
+
+def getRecieverCost(nxG, recieverCost):
+	'''Calculate the cost of RF reciever equipment'''
+	reciever_cost = len([reciever for reciever in nx.get_node_attributes(nxG, 'type') if nxG.node[reciever]['type'] in ['meter', 'triplex_meter']])*recieverCost
+	return reciever_cost
+
+def calcBandwidth(nxG):
+	#go through transmitters and recievers
+	#adust later to accept different lengh of transmitters
+	substation = getSubstation(nxG)
+	nxG.node[substation]['bandwidthUse'] = 0
+	transmitters = [transmitter for transmitter  in nx.get_node_attributes(nxG, 'transmitter')]
+	print(len(transmitters))
+	for transmitter in transmitters:
+		nxG.node[transmitter]['bandwidthUse'] = 0
+		#print(nxG.successors(transmitter))
+		if transmitter == 'node10310x2-Bx1960605':
+			print(nxG.successors(transmitter))
+			#print('node')
+		for reciever in nxG.successors(transmitter):
+			if reciever == 'nodeS1807-34-0121807-0303_B':
+				print(transmitter, nxG.node[transmitter]['pos'])
+			if nxG[transmitter][reciever].get('rf',False):
+				nxG[transmitter][reciever]['bandwidthUse'] = nxG.node[reciever]['bandwidthUse']
+				nxG.node[transmitter]['bandwidthUse'] += nxG.node[reciever]['bandwidthUse']
+		shortestPath = nx.bidirectional_shortest_path(nxG, substation, transmitter)
+		for i in range(len(shortestPath)-1):
+			nxG[shortestPath[i]][shortestPath[i+1]]['bandwidthUse'] += nxG.node[transmitter]['bandwidthUse']
+		nxG.node[substation]['bandwidthUse'] += nxG.node[transmitter]['bandwidthUse']
+
 
 def graphGeoJson(nxG):
 	geoJsonDict = {
@@ -251,9 +214,11 @@ def graphGeoJson(nxG):
 			"properties":{
 				"name": node,
 				"pointType": node_types.get(node,''),
-				"substation": nxG.node[node].get('substation',''),
-				"isLeaf": nxG.out_degree(node) == 0,
-				"isHub": nxG.node[node].get('isHub','')
+				"substation": nxG.node[node].get('substation',False),
+				"transmitter": nxG.node[node].get('transmitter',False),
+				"bandwidthUse": nxG.node[node].get('bandwidthUse',''),
+				"bandwidthCapacity": nxG.node[node].get('bandwidthCapacity','')
+
 			}
 		})
 	#Add edges to geoJSON
@@ -267,9 +232,11 @@ def graphGeoJson(nxG):
 			},
 			"properties":{
 				"edgeType": edge_types.get(edge,''),
-				"to": nxG[edge[0]][edge[1]].get('to',''),
-				"fiber": nxG[edge[0]][edge[1]].get('fiber',''),
-				"rf": nxG[edge[0]][edge[1]].get('rf','')
+				#"to": nxG[edge[0]][edge[1]].get('to',''),
+				"fiber": nxG[edge[0]][edge[1]].get('fiber',False),
+				"rf": nxG[edge[0]][edge[1]].get('rf',False),
+				"bandwidthUse": nxG[edge[0]][edge[1]].get('bandwidthUse',''),
+				"bandwidthCapacity": nxG[edge[0]][edge[1]].get('bandwidthCapacity','')
 			}
 		})
 	return geoJsonDict
@@ -403,8 +370,9 @@ pointCosts = {
 	'recloser': 0
 }
 
-feeder = createGraph('../../static/publicFeeders/Olin Barre LatLon.omd')
+feeder = createGraph('../../static/publicFeeders/ABEC Columbia.omd')
 setFiber(feeder, edgeType='switch')
-setRF(feeder)
+setRF2(feeder)
+calcBandwidth(feeder)
 showOnMap(graphGeoJson(feeder))
-#showOnMap(omdGeoJson('../../static/publicFeeders/Olin Barre LatLon.omd'))
+#print(calcFiberCost(feeder, 2))

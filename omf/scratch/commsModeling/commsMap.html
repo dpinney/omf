@@ -31,14 +31,13 @@
 		let popupContent = '';
 		for (let key in feature.properties) {
 			if (feature.properties.hasOwnProperty(key)) {
-				popupContent += feature.properties[key];
+				popupContent += (key + ': ' + feature.properties[key]);
 				layer.bindPopup(popupContent);
 			}
 		}
 	}
 	function pointToLayerNode(feature, latlng) {
 		let fillColorValue = 'black';
-		console.log(feature.properties['substation']);
 		if (feature.properties['substation']){
 			fillColorValue = 'red';
 		return L.circleMarker(latlng, {
@@ -50,7 +49,7 @@
 			fillOpacity: 0.8
 		});
 		}
-		else if (feature.properties['isLeaf']){
+		else if (feature.properties.pointType == 'meter' || feature.properties.pointType == 'triplex_meter'){
 			fillColorValue = 'blue';
 		return L.circleMarker(latlng, {
 			radius: 8,
@@ -61,7 +60,7 @@
 			fillOpacity: 0.8
 		});
 		}
-		else if (feature.properties['isHub']){
+		else if (feature.properties['transmitter']){
 			fillColorValue = 'green';
 		return L.circleMarker(latlng, {
 			radius: 8,
@@ -77,7 +76,6 @@
 	function lineStyle(feature){
 		if (feature.geometry['type'] == 'LineString'){
 			if (feature.properties['rf']){
-				console.log('test');
 				return {
 					"color": "red",
 					"dashArray": "6"
@@ -110,14 +108,14 @@
 	});
 	var bounds = geojsonLayer.getBounds();
 	// Optional forcing of canvas renderer:
-	var map = L.map('map', {renderer: L.canvas()}).fitBounds(bounds);
+	var map = L.map('map', {renderer: L.svg()}).fitBounds(bounds);
 	// LayerGroup might be a good option here
 	//var map = L.map('map').fitBounds(bounds);
 	mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
 	L.tileLayer(
 		'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 		attribution: '&copy; ' + mapLink + ' Contributors',
-		maxZoom: 18,
+		maxZoom: 20,
 		}).addTo(map);
 	L.control.scale().addTo(map);
 	geojsonLayer.addTo(map);
