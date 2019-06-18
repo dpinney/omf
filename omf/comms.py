@@ -91,7 +91,7 @@ def createGraph(pathToOmdFile):
 	'''Create networkxgraph from omd'''
 	with open(pathToOmdFile) as inFile:
 		tree = json.load(inFile)['tree']
-	nxG = omf.feeder.treeToDiNxGraph(tree)
+	nxG = treeToDiNxGraph(tree)
 	#use conversion for testing other feeders
 	nxG = graphValidator(pathToOmdFile, nxG)
 	return nxG
@@ -270,7 +270,6 @@ def saveOmc(geoJson, outputPath):
 		os.makedirs(outputPath)
 	with open(pJoin(outputPath,'commsGeoJson.omc'),"w") as outFile:
 		json.dump(geoJson, outFile, indent=4)
-
 
 def convertOmd(pathToOmdFile):
 	''' Convert sources to networkx graph. Some larger omd files do not have the position information in the tree'''
