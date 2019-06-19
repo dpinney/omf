@@ -12674,7 +12674,7 @@
         "74620": {
             "phases": "CS", 
             "power_12": "5319.17", 
-            "name": "62462231414", 
+            "name": "evOfficeLoad", 
             "parent": "node62462231414T62462230473", 
             "object": "triplex_node", 
             "longitude": 768.8138899860201, 
