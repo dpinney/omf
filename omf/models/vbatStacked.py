@@ -77,9 +77,9 @@ def run_fhec(ind, gt_demand, Input):
 
 	E_0 = 0 # VB initial energy state
 
-	arbitrage_option = "use_arbitrage" == "on"
-	regulation_option = "use_regulation" == "on"
-	deferral_option = "use_deferral" == "on"
+	arbitrage_option = ind["use_arbitrage"] == "on"
+	regulation_option = ind["use_regulation"] == "on"
+	deferral_option = ind["use_deferral"] == "on"
 
 	###############################################################################
 
@@ -210,9 +210,9 @@ def run_okec(ind, Input):
 
 	E_0 = 0 # VB initial energy state
 
-	arbitrage_option = "use_arbitrage" == "on"
-	regulation_option = "use_regulation" == "on"
-	deferral_option = "use_deferral" == "on"
+	arbitrage_option = ind["use_arbitrage"] == "on"
+	regulation_option = ind["use_regulation"] == "on"
+	deferral_option = ind["use_deferral"] == "on"
 
 ###############################################################################
 
