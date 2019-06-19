@@ -132,7 +132,8 @@ def work(modelDir, inputDict):
 		chargeLimit = chargeLimitValue, 
 		minCharge = minChargeValue, 
 		maxCharge = maxChargeValue, 
-		loadShape = pJoin(modelDir,loadShapeValue))
+		loadShape = pJoin(modelDir,loadShapeValue),
+		modelDir = modelDir)
 	demandImg.savefig(pJoin(modelDir, "evChargingDemand.png"))
 	with open(pJoin(modelDir, "evChargingDemand.png"),"rb") as evFile:
 		outData["evChargingDemand"] = evFile.read().encode("base64")
@@ -823,7 +824,7 @@ def drawTable(initialStates=None, finalStates=None, deviceTypes=None):
 	html_str += """</tbody></table>"""
 	return html_str
 
-def plotEVShape(numVehicles=None, chargeRate=None, batterySize=None, startHour=None, endHour=None, chargeLimit=None, minCharge=None, maxCharge=None, loadShape=None, rezSqIn=None):
+def plotEVShape(numVehicles=None, chargeRate=None, batterySize=None, startHour=None, endHour=None, chargeLimit=None, minCharge=None, maxCharge=None, loadShape=None, rezSqIn=None, modelDir=None):
 	shapes = []
 	for i in range(numVehicles):
 		# Random arrival
@@ -884,7 +885,7 @@ def plotEVShape(numVehicles=None, chargeRate=None, batterySize=None, startHour=N
 	for i in range(8760):
 		com_load = base_shape[i] + hourly_con[i % 24]
 		combined.append(com_load)
-	with open('output - evInterconnection combined load shapes.csv', 'w') as outFile:
+	with open(pJoin(modelDir,'output - evInterconnection combined load shapes.csv'), 'w') as outFile:
 		for row in combined:
 			outFile.write(str(row) + '\n')
 
@@ -983,14 +984,12 @@ def drawPlotLoad(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=
 			if loadName in nameToIndex:
 				key = nameToIndex[loadName]
 				obtype = tree[key].get("object","")
-				if obtype in ['triplex_node', 'triplex_load']:	#could also be triplex_meter, since it's a child object of triplex node? But the meter isn't the object requiring the load, just measuring it - correct?
-					tree[key]['power_12_real'] = maxValueWatts
-					#tree[key]['power_12'] = maxValueWatts
+				if obtype in ['triplex_node', 'triplex_load']:
+					tree[key]['power_12'] = maxValueWatts
 				elif obtype in ['load', 'pqload']:
-					tree[key]['constant_power_A_real'] = maxValueWatts
-					#tree[key]['constant_power_A_real'] = maxValueWatts/3
-					#tree[key]['constant_power_B_real'] = maxValueWatts/3
-					#tree[key]['constant_power_C_real'] = maxValueWatts/3
+					tree[key]['constant_power_A_real'] = maxValueWatts/3.0
+					tree[key]['constant_power_B_real'] = maxValueWatts/3.0
+					tree[key]['constant_power_C_real'] = maxValueWatts/3.0
 				elif obtype == 'triplex_meter':
 					tree[key]['measured_real_power'] = maxValueWatts
 				else:
