@@ -165,8 +165,8 @@ def work(modelDir, inputDict):
 		nodeLabs = None,
 		edgeLabs = None,
 		customColormap = False,
-		scaleMin = None,
-		scaleMax = None,
+		scaleMin = 0.9,
+		scaleMax = 1.1,
 		faultLoc = None,
 		faultType = None,
 		rezSqIn = 225,
@@ -187,8 +187,8 @@ def work(modelDir, inputDict):
 		nodeLabs = None,
 		edgeLabs = None,
 		customColormap = False,
-		scaleMin = None,
-		scaleMax = None,
+		scaleMin = 0.9,
+		scaleMax = 1.1,
 		faultLoc = None,
 		faultType = None,
 		rezSqIn = 225,
@@ -734,17 +734,17 @@ def new(modelDir):
 		"chargeRate" : "40",
 		"efficiency" : "0.5",
 		"gasEfficiency" : "8",
-		"numVehicles" : "50",
+		"numVehicles" : "200",
 		"energyCost" : "0.12",
 		"startHour" : "8",
 		"endHour" : "10",
-		"chargeLimit" : "150",
+		"chargeLimit" : "1500",
 		"minCharge" : "10",
 		"maxCharge" : "50",
 		"gasCost" : "2.70",
 		"workload" : "40",
 		"loadShape" : "input - 200 Employee Office, Springfield Illinois, 2001.csv",
-		"loadName" : "62474211556",
+		"loadName" : "evOfficeLoad",
 		"rezSqIn" : "400",
 		"simTime" : '2000-01-01 0:00:00'
 	}
@@ -1040,6 +1040,9 @@ def _debugging():
 		pass 
 	# Create New.
 	new(modelLoc)
+	# HACK: move in the load data.
+	lfName = "input - 200 Employee Office, Springfield Illinois, 2001.csv"
+	shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "testFiles", lfName), pJoin(modelLoc, "input - 200 Employee Office, Springfield Illinois, 2001.csv"))
 	# Pre-run.
 	# renderAndShow(modelLoc)
 	# Run the model.
