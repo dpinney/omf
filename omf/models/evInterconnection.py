@@ -123,7 +123,7 @@ def work(modelDir, inputDict):
 		loadShapeValue = inputDict["loadShape"]
 	
 	#calculate and display EV Charging Demand image, carpet plot image of 8760 load shapes
-	demandImg, carpetPlotImg, maxLoadShapeImg = plotEVShape(
+	maxLoadValue, demandImg, carpetPlotImg, maxLoadShapeImg = plotEVShape(
 		numVehicles = numVehiclesValue,
 		chargeRate = chargeRateValue, 
 		batterySize = batterySizeValue, 
@@ -178,6 +178,30 @@ def work(modelDir, inputDict):
 	outData['protDevTableHtml'] = protDevTable
 	with open(pJoin(modelDir, "output.png"),"rb") as inFile:
 		outData["voltageDrop"] = inFile.read().encode("base64")
+
+	loadVoltPlotChart, loadProtDevTable = drawPlotLoad(
+		pJoin(modelDir,feederName + ".omd"),
+		neatoLayout = neato,
+		edgeCol = "PercentOfRating",
+		nodeCol = "perUnitVoltage",
+		nodeLabs = None,
+		edgeLabs = None,
+		customColormap = False,
+		scaleMin = None,
+		scaleMax = None,
+		faultLoc = None,
+		faultType = None,
+		rezSqIn = 225,
+		simTime = "2000-01-01 0:00:00",
+		workDir = modelDir,
+		loadName = loadNameValue,
+		maxValue = maxLoadValue)
+	loadVoltPlotChart.savefig(pJoin(modelDir, "loadVoltPlot.png"))
+	with open(pJoin(modelDir, "loadStatusTable.html"), "w") as tabFile:
+		tabFile.write(loadProtDevTable)
+	outData['loadProtDevTableHtml'] = loadProtDevTable
+	with open(pJoin(modelDir, "loadVoltPlot.png"),"rb") as inFile:
+		outData["loadVoltageDrop"] = inFile.read().encode("base64")
 	return outData
 
 def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, faultLoc=None, faultType=None, customColormap=False, scaleMin=None, scaleMax=None, rezSqIn=400, simTime='2000-01-01 0:00:00'):
@@ -203,7 +227,7 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 		attachments = omd.get('attachments',[])
 	else:
 		raise Exception('Invalid input file type. We require a .glm or .omd.')
-
+	#print path
 	# add fault object to tree
 	def safeInt(x):
 		try: return int(x)
@@ -354,7 +378,7 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 
 	#compare initial and final states of protective devices
 	#quick compare to see if they are equal
-	print cmp(protDevInitStatus, protDevFinalStatus)
+	#print cmp(protDevInitStatus, protDevFinalStatus)
 	#find which values changed
 	changedStates = {}
 
@@ -720,7 +744,7 @@ def new(modelDir):
 		"gasCost" : "2.70",
 		"workload" : "40",
 		"loadShape" : "input - 200 Employee Office, Springfield Illinois, 2001.csv",
-		"loadName" : "None",
+		"loadName" : "62474211556",
 		"rezSqIn" : "400",
 		"simTime" : '2000-01-01 0:00:00'
 	}
@@ -906,7 +930,7 @@ def plotEVShape(numVehicles=None, chargeRate=None, batterySize=None, startHour=N
 		plt.close()
 		return maxLoadShapeImg
 		
-	return evShape, carpet_plot(base_shape, hourly_con), maxLoadShape(day_shape, hourly_con)
+	return max_val, evShape, carpet_plot(base_shape, hourly_con), maxLoadShape(day_shape, hourly_con)
 
 def fuelCostCalc(numVehicles=None, batterySize=None, efficiency=None, energyCost=None, gasEfficiency=None, gasCost=None, workload=None):
 	dailyGasAmount = workload/gasEfficiency #amount(gal) of gas used per vehicle, daily
@@ -930,6 +954,80 @@ def fuelCostCalc(numVehicles=None, batterySize=None, efficiency=None, energyCost
 			<p style="padding-top:10px; padding-bottom:10px;">Daily savings per vehicle:<span style="padding-left:1em">$"""+str(dailySavings)+"""</span><span style="padding-left:4em">Total daily savings:<span style="padding-left:1em">$"""+str(totalSavings)+"""</span></span></p>
 		</div>"""
 	return html_str
+
+def drawPlotLoad(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, faultLoc=None, faultType=None, customColormap=False, scaleMin=None, scaleMax=None, rezSqIn=400, simTime='2000-01-01 0:00:00', loadName=None, maxValue=None):
+
+	#print "Reached drawPlotLoad function."
+	warnings.filterwarnings("ignore")
+	if path.endswith('.glm'):
+		tree = omf.feeder.parse(path)
+		attachments = []
+	elif path.endswith('.omd'):
+		omd = json.load(open(path))
+		tree = omd.get('tree', {})
+		attachments = omd.get('attachments',[])
+	else:
+		raise Exception('Invalid input file type. We require a .glm or .omd.')
+
+	#check to see that maximum load value is passed in
+	if maxValue != None:
+		maxValue = float(maxValue)
+		maxValueWatts = maxValue * 1000
+		print "maxValue = " + str(maxValue)
+		print "maxValueWatts = " + str(maxValueWatts)
+		#check to see that loadName is specified
+		if loadName != None:
+			# Map to speed up name lookups.
+			nameToIndex = {tree[key].get('name',''):key for key in tree.keys()}
+			#check if the specified load name is in the tree
+			if loadName in nameToIndex:
+				key = nameToIndex[loadName]
+				obtype = tree[key].get("object","")
+				if obtype in ['triplex_node', 'triplex_load']:	#could also be triplex_meter, since it's a child object of triplex node? But the meter isn't the object requiring the load, just measuring it - correct?
+					tree[key]['power_12_real'] = maxValueWatts
+					#tree[key]['power_12'] = maxValueWatts
+				elif obtype in ['load', 'pqload']:
+					tree[key]['constant_power_A_real'] = maxValueWatts
+					#tree[key]['constant_power_A_real'] = maxValueWatts/3
+					#tree[key]['constant_power_B_real'] = maxValueWatts/3
+					#tree[key]['constant_power_C_real'] = maxValueWatts/3
+				elif obtype == 'triplex_meter':
+					tree[key]['measured_real_power'] = maxValueWatts
+				else:
+					raise Exception('Specified load name does not correspond to a load object. Make sure the object is of the following types: load, pqload, triplex_node, triplex_meter.')
+				#run gridlab-d simulation with specified load set to max value
+				omd['tree'] = tree
+				feederName2 = "Olin Barre Fault - evInterconnection.omd"
+				with open(workDir + '/' + feederName2, "w+") as write_file:
+					json.dump(omd, write_file)
+				return drawPlotFault(
+					pJoin(workDir,feederName2),
+					neatoLayout = neatoLayout,
+					edgeCol = edgeCol,
+					nodeCol = nodeCol,
+					nodeLabs = nodeLabs,
+					edgeLabs = edgeLabs,
+					customColormap = customColormap,
+					scaleMin = scaleMin,
+					scaleMax = scaleMax,
+					faultLoc = faultLoc,
+					faultType = faultType,
+					rezSqIn = rezSqIn,
+					simTime = simTime,
+					workDir = workDir)
+				#print "This is it: \n" + str(tree[key])
+			else:
+				print "Didn't find the gridlab object named " + loadName
+				#raise an exception if loadName isn't in the tree
+				raise Exception('Specified load name does not correspond to an object in the tree.')
+		else:
+			print "loadName is None"
+			#raise an exception if loadName isn't specified
+			raise Exception('Invalid request. Load Name must be specified.')
+	else:
+		print "maxValue is None"
+		#raise an exception if maximum load value is not being passed in
+		raise Exception('Error retrieving maximum load value from load shape.')
 
 def _debugging():
 	# Location
