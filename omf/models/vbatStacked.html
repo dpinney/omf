@@ -104,15 +104,38 @@
 					<option value="4">Water Heater</option>
 				</select>
 			</div>
+			<!--  -->
 			<div class="shortInput">
+				<label>Deferral</label>
+				<select id="use_deferral" name="use_deferral">
+					<option value="on">On</option>
+					<option value="off">Off</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label>Arbitrage</label>
+				<select id="use_arbitrage" name="use_arbitrage">
+					<option value="on">On</option>
+					<option value="off">Off</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label>Regulation</label>
+				<select id="use_regulation" name="use_regulation">
+					<option value="on">On</option>
+					<option value="off">Off</option>
+				</select>
+			</div>
+			<!--  -->
+			<!-- <div class="shortInput">
 				<label class="tooltip">Stack Selection
 				<span class="classic">What revenue strategies would you like stacked?</span></label>
 				<div style="text-align: center;">
 					<input type="checkbox" name="use_deferral" value="use_deferral">Deferral &nbsp; 
-					<input type="checkbox" name="use_arbitrage" value="use_arbitrage">Arbitrage &nbsp;
+					<input type="checkbox" name="use_arbitrage" value="use_arbitrage" >Arbitrage &nbsp;
 					<input type="checkbox" name="use_regulation" value="use_regulation" checked>Regulation 
 				</div>
-			</div>
+			</div> -->
 			<div class="shortInput">
 				<label class="tooltip">Number of Devices<span class="classic">Total number of devices to simulate. Must be greater than 99</span></label>
 				<input type="text" id="number_devices" name="number_devices" pattern="[1-9][0-9]{2,8}" required="required">
