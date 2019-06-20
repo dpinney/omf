@@ -153,7 +153,7 @@ def new(modelDir):
 		'created': '2015-06-12 17:20:39.308239',
 		'modelType': modelName,
 		'runTime': '0:01:03',
-		'epochs': '1',
+		'epochs': '100',
 		'autoFill': "off",
 		'histFileName': 'd_Texas_17yr_TempAndLoad.csv',
 		"histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","d_Texas_17yr_TempAndLoad.csv"), 'rU').read(),
