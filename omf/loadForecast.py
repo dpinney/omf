@@ -820,17 +820,21 @@ def neural_net_next_day(all_X, all_y, epochs=100, hours_prior=24):
 	all_X_n, all_y_n = all_X[:-hours_prior], all_y[:-hours_prior]
 	X_train = all_X_n[:-8760]
 	y_train = all_y_n[:-8760]
-	
+	X_test = all_X_n[-8760:]
+	y_test = all_y_n[-8760:]
+
 	model = train_neural_net(X_train, y_train, epochs)
 
-	predictions_test = [float(f) for f in model.predict(all_X_n[-8760:])]
-	train = [float(f) for f in model.predict(all_X_n[:-8760])]
+	predictions_test = [float(f) for f in model.predict(X_test)]
+	train = [float(f) for f in model.predict(X_train)]
 	accuracy = {
-		'test': MAPE(predictions_test, all_y_n[-8760:]),
-		'train': MAPE(train, all_y_n[:-8760])
+		'test': MAPE(predictions_test, y_test),
+		'train': MAPE(train, y_train)
 	}
 
-	predictions = [float(f) for f in model.predict(all_X[-hours_prior:])]
+	model.fit(X_test, y_test, epochs=epochs, validation_split=0.2, verbose=0)
+
+	predictions = [float(f) for f in model.predict(all_X[-24:])]
 	return predictions, model, accuracy
 
 def add_day(df, weather):
@@ -843,7 +847,7 @@ def add_day(df, weather):
 	predicted_day = last_day + datetime.timedelta(days=1)
 
 	d_24 = [{
-		'load': 0,
+		'load': -999999,
 		'tempc': w,
 		'year': predicted_day.year,
 		'month': predicted_day.month,

@@ -82,7 +82,7 @@ def work(modelDir, ind):
 	all_y = df['load']
 
 	#load prediction
-	tomorrow_load, model, tomorrow_accuracy = lf.neural_net_next_day(all_X, all_y, EPOCHS=epochs)
+	tomorrow_load, model, tomorrow_accuracy = lf.neural_net_next_day(all_X, all_y, epochs=epochs)
 	# tomorrow_load = [13044.3369140625, 12692.4453125, 11894.0712890625, 13391.0185546875, 13378.373046875, 14098.5048828125, 14984.5, 15746.6845703125, 14677.6064453125, 14869.6953125, 14324.302734375, 13727.908203125, 13537.51171875, 12671.90234375, 13390.9970703125, 12111.166015625, 13539.05078125, 15298.7939453125, 14620.8369140625, 15381.9404296875, 15116.42578125, 13652.3974609375, 13599.5986328125, 12882.5185546875]
 	# tomorrow_accuracy = {'test': 4, 'train': 3}
 	o['tomorrow_load'] = tomorrow_load
@@ -94,7 +94,7 @@ def work(modelDir, ind):
 	if second_day.month == tomorrow.month:
 		all_X = lf.makeUsefulDf(df, hours_prior=48, noise=5)
 		all_y = df['load']
-		two_day_predicted_load, two_day_model, two_day_load_accuracy = lf.neural_net_next_day(all_X, all_y, EPOCHS=epochs, hours_prior=48)
+		two_day_predicted_load, two_day_model, two_day_load_accuracy = lf.neural_net_next_day(all_X, all_y, epochs=epochs, hours_prior=48)
 		two_day_peak = max(two_day_predicted_load)
 
 		# third day
@@ -102,7 +102,7 @@ def work(modelDir, ind):
 		if third_day.month == tomorrow.month:
 			all_X = lf.makeUsefulDf(df, hours_prior=72, noise=15)
 			all_y = df['load']
-			three_day_predicted_load, three_day_model, three_day_load_accuracy = lf.neural_net_next_day(all_X, all_y, EPOCHS=epochs, hours_prior=72)
+			three_day_predicted_load, three_day_model, three_day_load_accuracy = lf.neural_net_next_day(all_X, all_y, epochs=epochs, hours_prior=72)
 			three_day_peak = max(three_day_predicted_load)
 		else:
 			three_day_peak = 0
