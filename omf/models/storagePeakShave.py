@@ -14,6 +14,38 @@ modelName, template = metadata(__file__)
 tooltip = ("The storagePeakShave model calculates the value of a distribution utility " 
 	"deploying energy storage based on three possible battery dispatch strategies.")
 
+def pulp24hrBattery(demand, power, energy, battEff):
+	# LP Variables
+	model = pulp.LpProblem("Daily demand charge minimization problem", pulp.LpMinimize)
+	VBpower = pulp.LpVariable.dicts(
+		"ChargingPower", range(24)
+	)  # decision variable of VB charging power; dim: 24 by 1
+	VBenergy = pulp.LpVariable.dicts(
+		"EnergyState", range(24)
+	)  # decision variable of VB energy state; dim: 24 by 1
+
+	for i in range(24):
+		VBpower[i].lowBound = -power
+		VBpower[i].upBound = power
+		VBenergy[i].lowBound = 0
+		VBenergy[i].upBound = energy
+	pDemand = pulp.LpVariable("Peak Demand", lowBound=0)
+
+	# Objective function: Minimize peak demand
+	model += pDemand
+
+	# VB energy state as a function of VB power
+	model += VBenergy[0] == 0
+	for i in range(1, 24):
+		model += VBenergy[i] == battEff * VBenergy[i - 1] + VBpower[i]
+	for i in range(24):
+		model += pDemand >= demand[i] + VBpower[i]
+	model.solve()
+	return (
+		[VBpower[i].varValue for i in range(24)],
+		[VBenergy[i].varValue for i in range(24)],
+	)
+
 def work(modelDir, inputDict):
 	''' Model processing done here. '''
 	dispatchStrategy = str(inputDict.get('dispatchStrategy'))

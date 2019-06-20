@@ -9,6 +9,7 @@ from __neoMetaModel__ import *
 from omf import loadForecast as lf
 import numpy as np
 from scipy.stats import norm
+import re
 
 # Model metadata:
 modelName, template = metadata(__file__)
@@ -70,13 +71,13 @@ def work(modelDir, ind):
 		raise Exception("Load CSV file is incorrect format.")
 
 	try:
-		weather = [float(i.strip(',')) for i in ind['tempCurve'].split('\n')]
-		assert len(weather) == 24, "weather csv in wrong format"
+		weather = [float(i) for i in ind['tempCurve'].split('\n')]
+		assert len(weather) == 72, "weather csv in wrong format"
 	except:
-		raise Exception("Weather CSV file is incorrect format.")
+		raise Exception(ind['tempCurve'])
 
 	# ---------------------- MAKE PREDICTIONS ------------------------------- #
-	df, tomorrow = lf.add_day(df, weather)
+	df, tomorrow = lf.add_day(df, weather[:24])
 	all_X = lf.makeUsefulDf(df)
 	all_y = df['load']
 
@@ -89,7 +90,7 @@ def work(modelDir, ind):
 	o['startDate_s'] = tomorrow.strftime("%A, %B %-m, %Y")
 	
 	# second day
-	df, second_day = lf.add_day(df, weather)
+	df, second_day = lf.add_day(df, weather[24:48])
 	if second_day.month == tomorrow.month:
 		all_X = lf.makeUsefulDf(df, hours_prior=48, noise=5)
 		all_y = df['load']
@@ -97,7 +98,7 @@ def work(modelDir, ind):
 		two_day_peak = max(two_day_predicted_load)
 
 		# third day
-		df, third_day = lf.add_day(df, weather)
+		df, third_day = lf.add_day(df, weather[48:72])
 		if third_day.month == tomorrow.month:
 			all_X = lf.makeUsefulDf(df, hours_prior=72, noise=15)
 			all_y = df['load']
@@ -156,8 +157,8 @@ def new(modelDir):
 		'autoFill': "off",
 		'histFileName': 'd_Texas_17yr_TempAndLoad.csv',
 		"histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","d_Texas_17yr_TempAndLoad.csv"), 'rU').read(),
-		'tempFileName': '24hr_TexasTemp.csv',
-		'tempCurve': open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","24hr_TexasTemp.csv"), 'rU').read()
+		'tempFileName': '72hr_TexasTemp.csv',
+		'tempCurve': open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","72hr_TexasTemp.csv"), 'rU').read()
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 

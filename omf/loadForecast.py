@@ -12,6 +12,7 @@ import datetime
 from datetime import datetime as dt
 from datetime import timedelta, date
 from sklearn.model_selection import GridSearchCV
+import pickle
 from scipy.stats import zscore
 
 
@@ -643,24 +644,6 @@ nerc6 = {
 	],
 }
 
-
-def isHoliday(holiday, df):
-	# New years, memorial, independence, labor day, Thanksgiving, Christmas
-	m1 = None
-	if holiday == "New Year's Day":
-		m1 = (df["dates"].dt.month == 1) & (df["dates"].dt.day == 1)
-	if holiday == "Independence Day":
-		m1 = (df["dates"].dt.month == 7) & (df["dates"].dt.day == 4)
-	if holiday == "Christmas Day":
-		m1 = (df["dates"].dt.month == 12) & (df["dates"].dt.day == 25)
-	m1 = df["dates"].dt.date.isin(nerc6[holiday]) if m1 is None else m1
-	m2 = df["dates"].dt.date.isin(nerc6.get(holiday + " (Observed)", []))
-	return m1 | m2
-
-def add_noise(m, std):
-	noise = np.random.normal(0, std, m.shape[0])
-	return m + noise
-
 def makeUsefulDf(df, noise=2.5, hours_prior=24):
 	"""
 	Turn a dataframe of datetime and load data into a dataframe useful for
@@ -705,6 +688,22 @@ def makeUsefulDf(df, noise=2.5, hours_prior=24):
 		- is Christmas (0, 1)
 
 	"""
+	
+	def _isHoliday(holiday, df):
+	# New years, memorial, independence, labor day, Thanksgiving, Christmas
+		m1 = None
+		if holiday == "New Year's Day":
+			m1 = (df["dates"].dt.month == 1) & (df["dates"].dt.day == 1)
+		if holiday == "Independence Day":
+			m1 = (df["dates"].dt.month == 7) & (df["dates"].dt.day == 4)
+		if holiday == "Christmas Day":
+			m1 = (df["dates"].dt.month == 12) & (df["dates"].dt.day == 25)
+		m1 = df["dates"].dt.date.isin(nerc6[holiday]) if m1 is None else m1
+		m2 = df["dates"].dt.date.isin(nerc6.get(holiday + " (Observed)", []))
+		return m1 | m2
+
+	def _add_noise(m, std):
+		return m + np.random.normal(0, std, m.shape[0])
 
 	def _chunks(l, n):
 		return [l[i : i + n] for i in range(0, len(l), n)]
@@ -718,18 +717,19 @@ def makeUsefulDf(df, noise=2.5, hours_prior=24):
 				int(x['hour'])), 
 			axis=1
 		)
-	
+    
 	r_df = pd.DataFrame()
 	r_df["load_n"] = zscore(df["load"])
 	r_df["years_n"] = zscore(df["dates"].dt.year)
 
 	# fix outliers
-	m = df["tempc"].replace([-9999], np.nan)
-	m.ffill(inplace=True)
+	temp = df["tempc"].replace([-9999], np.nan)
+	temp.ffill(inplace=True)
 	# day-before predictions
-	temp_noise = add_noise(m, noise)
+	temp_noise = temp + np.random.normal(0, noise, temp.shape[0])
+	# temp_noise = _add_noise(temp, noise)
 	r_df["temp_n"] = zscore(temp_noise)
-	r_df['temp_n^2'] = r_df["temp_n"] ** 2
+	r_df['temp_n^2'] = zscore([x*x for x in temp_noise])
 
 	# add the value of the load 24hrs before
 	r_df["load_prev_n"] = r_df["load_n"].shift(hours_prior)
@@ -749,130 +749,42 @@ def makeUsefulDf(df, noise=2.5, hours_prior=24):
 
 	# create month vector
 	r_df["month"] = df["dates"].dt.month
-	y = [("m" + str(i)) for i in range(1, 13)]
+	y = [("m" + str(i)) for i in range(12)]
 	for i, m in enumerate(y):
-		r_df[m] = (r_df["month"] == i).astype(int)
+		r_df[m] = (r_df["month"] == i + 1).astype(int)
 
 	# create 'load day before' vector
-	n = np.array([val for val in _chunks(list(r_df["load_prev_n"]), 24) for _ in range(24)])
+	n = np.array([val for val in _chunks(list(r_df["load_n"]), 24) for _ in range(24)])
 	l = ["l" + str(i) for i in range(24)]
 	for i, s in enumerate(l):
 		r_df[s] = n[:, i]
 
-		# create holiday booleans
-	r_df["isNewYears"] = isHoliday("New Year's Day", df)
-	r_df["isMemorialDay"] = isHoliday("Memorial Day", df)
-	r_df["isIndependenceDay"] = isHoliday("Independence Day", df)
-	r_df["isLaborDay"] = isHoliday("Labor Day", df)
-	r_df["isThanksgiving"] = isHoliday("Thanksgiving", df)
-	r_df["isChristmas"] = isHoliday("Christmas Day", df)
+	# create holiday booleans
+	r_df["isNewYears"] = _isHoliday("New Year's Day", df)
+	r_df["isMemorialDay"] = _isHoliday("Memorial Day", df)
+	r_df["isIndependenceDay"] = _isHoliday("Independence Day", df)
+	r_df["isLaborDay"] = _isHoliday("Labor Day", df)
+	r_df["isThanksgiving"] = _isHoliday("Thanksgiving", df)
+	r_df["isChristmas"] = _isHoliday("Christmas Day", df)
 
 	m = r_df.drop(["month", "hour", "day", "load_n"], axis=1)
-	df = df.drop(['dates'], axis=1)
 
 	return m
 
-def shouldDispatchPS(peak, month, df, conf):
-	"""
-	Heuristic to determine whether or not a day's peak is worth dispatching 
-	when the goal is to shave monthly peaks.
-	"""
-	return peak > df[:-8760].groupby("month")["load"].quantile(conf)[month]
+def MAPE(predictions, answers):
+		assert len(predictions) == len(answers)
+		return sum([abs(x-y)/(y+1e-5) for x, y in zip(predictions, answers)])/len(answers)*100
 
-
-def shouldDispatchDeferral(peak, df, conf, threshold):
-	"""
-	Heuristic to determine whether or not a day's peak is worth dispatching 
-	when the goal is not to surpass a given threshold.
-	"""
-	return peak > threshold * conf
-
-
-def pulp24hrVbat(ind, demand, P_lower, P_upper, E_UL):
-	"""
-	Given input dictionary, the limits on the battery, and the demand curve, 
-	minimize the peaks for a day.
-	"""
-	alpha = 1 - (
-		1 / (float(ind["capacitance"]) * float(ind["resistance"]))
-	)  # 1-(deltaT/(C*R)) hourly self discharge rate
-	# LP Variables
-	model = pulp.LpProblem("Daily demand charge minimization problem", pulp.LpMinimize)
-	VBpower = pulp.LpVariable.dicts(
-		"ChargingPower", range(24)
-	)  # decision variable of VB charging power; dim: 8760 by 1
-	VBenergy = pulp.LpVariable.dicts(
-		"EnergyState", range(24)
-	)  # decision variable of VB energy state; dim: 8760 by 1
-
-	for i in range(24):
-		VBpower[i].lowBound = -1 * P_lower[i]
-		VBpower[i].upBound = P_upper[i]
-		VBenergy[i].lowBound = -1 * E_UL[i]
-		VBenergy[i].upBound = E_UL[i]
-	pDemand = pulp.LpVariable("Peak Demand", lowBound=0)
-
-	# Objective function: Minimize peak demand
-	model += pDemand
-
-	# VB energy state as a function of VB power
-	model += VBenergy[0] == VBpower[0]
-	for i in range(1, 24):
-		model += VBenergy[i] == alpha * VBenergy[i - 1] + VBpower[i]
-	for i in range(24):
-		model += pDemand >= demand[i] + VBpower[i]
-	model.solve()
-	return (
-		[VBpower[i].varValue for i in range(24)],
-		[VBenergy[i].varValue for i in range(24)],
-	)
-
-
-def pulp24hrBattery(demand, power, energy, battEff):
-	# LP Variables
-	model = pulp.LpProblem("Daily demand charge minimization problem", pulp.LpMinimize)
-	VBpower = pulp.LpVariable.dicts(
-		"ChargingPower", range(24)
-	)  # decision variable of VB charging power; dim: 24 by 1
-	VBenergy = pulp.LpVariable.dicts(
-		"EnergyState", range(24)
-	)  # decision variable of VB energy state; dim: 24 by 1
-
-	for i in range(24):
-		VBpower[i].lowBound = -power
-		VBpower[i].upBound = power
-		VBenergy[i].lowBound = 0
-		VBenergy[i].upBound = energy
-	pDemand = pulp.LpVariable("Peak Demand", lowBound=0)
-
-	# Objective function: Minimize peak demand
-	model += pDemand
-
-	# VB energy state as a function of VB power
-	model += VBenergy[0] == 0
-	for i in range(1, 24):
-		model += VBenergy[i] == battEff * VBenergy[i - 1] + VBpower[i]
-	for i in range(24):
-		model += pDemand >= demand[i] + VBpower[i]
-	model.solve()
-	return (
-		[VBpower[i].varValue for i in range(24)],
-		[VBenergy[i].varValue for i in range(24)],
-	)
-
-
-def neural_net_predictions(all_X, all_y, EPOCHS=10):
+def train_neural_net(X_train, y_train, epochs):
 	import tensorflow as tf
 	from tensorflow.keras import layers
 
-	X_train, y_train = all_X[:-8760], all_y[:-8760]
-
 	model = tf.keras.Sequential([
-		layers.Dense(all_X.shape[1], activation=tf.nn.relu, input_shape=[len(X_train.keys())]),
-		layers.Dense(all_X.shape[1], activation=tf.nn.relu),
-		layers.Dense(all_X.shape[1], activation=tf.nn.relu),
-		layers.Dense(all_X.shape[1], activation=tf.nn.relu),
-		layers.Dense(all_X.shape[1], activation=tf.nn.relu),
+		layers.Dense(X_train.shape[1], activation=tf.nn.relu, input_shape=[len(X_train.keys())]),
+		layers.Dense(X_train.shape[1], activation=tf.nn.relu),
+		layers.Dense(X_train.shape[1], activation=tf.nn.relu),
+		layers.Dense(X_train.shape[1], activation=tf.nn.relu),
+		layers.Dense(X_train.shape[1], activation=tf.nn.relu),
 		layers.Dense(1)
 	  ])
 
@@ -886,18 +798,14 @@ def neural_net_predictions(all_X, all_y, EPOCHS=10):
 
 	early_stop = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=10)
 
-	history = model.fit(
-		X_train,
-		y_train,
-		epochs=EPOCHS,
-		validation_split=0.2,
-		verbose=0,
-		callbacks=[early_stop],
-	)
+	history = model.fit( X_train, y_train, epochs=epochs, validation_split=0.2, verbose=0, callbacks=[early_stop])
 
-	def MAPE(predictions, answers):
-		assert len(predictions) == len(answers)
-		return sum([abs(x-y)/(y+1e-5) for x, y in zip(predictions, answers)])/len(answers)*100   
+	return model
+
+def neural_net_predictions(all_X, all_y, epochs=100):
+	X_train, y_train = all_X[:-8760], all_y[:-8760]
+
+	model = train_neural_net(X_train, y_train, epochs)
 	
 	predictions = [float(f) for f in model.predict(all_X[-8760:])]
 	train = [float(f) for f in model.predict(all_X[:-8760])]
@@ -908,199 +816,12 @@ def neural_net_predictions(all_X, all_y, EPOCHS=10):
 	
 	return [float(f) for f in model.predict(all_X[-8760:])], accuracy
 
-
-
-# LOAD FORECAST MODELS
-def dispatch_strategy(df, EPOCHS=10):
-	if 'dates' not in df.columns:
-		df['dates'] = df.apply(
-			lambda x: dt(
-				int(x['year']), 
-				int(x['month']), 
-				int(x['day']), 
-				int(x['hour'])), 
-			axis=1
-		) 
-	df['date'] = df.dates.dt.date
-	
-	# find max load for each day in d_df (day dataframe)
-	d_df = pd.DataFrame()
-	d_df['max_load'] = df.groupby('date')['load'].max()
-	d_df['date'] = df['date'].unique().astype('datetime64')
-	d_df['year'] = d_df['date'].dt.year
-	d_df['month'] = d_df['date'].dt.month
-	d_df['day'] = d_df['date'].dt.day
-
-	# get the correct answers for every month
-	l = []
-	for y in d_df['year'].unique():
-		d = d_df[d_df['year'] == y]
-		l.extend(d.groupby('month')['max_load'].idxmax())
-	d_df['should_dispatch'] = [(i in l) for i in d_df.index]
-
-	# forecast
-	all_X_1 = makeUsefulDf(df, noise=2.5, hours_prior=24)
-	all_X_2 = makeUsefulDf(df, noise=4, hours_prior=48)
-	all_y = df['load']
-
-	p1, a1 = neural_net_predictions(all_X_1, all_y, EPOCHS=EPOCHS)
-	p2, a2 = neural_net_predictions(all_X_2, all_y, EPOCHS=EPOCHS)
-	p1_max = [max(p1[i:i+24]) for i in range(0, len(p1), 24)]
-	p2_max = [max(p2[i:i+24]) for i in range(0, len(p2), 24)]
-
-	# create threshold
-	max_vals = {}
-	for y in d_df['year'].unique()[:-1]:
-		d = d_df[d_df['year'] == y]
-		max_vals[y] = list(d.groupby('month')['max_load'].max())
-
-	df_thresh = pd.DataFrame(max_vals).T
-	thresholds = [None]*12
-	for i in range(12):
-		thresholds[i] = df_thresh[i].min()
-
-	# make dispatch decisions
-	df_dispatch = pd.DataFrame()
-	this_year = d_df['year'].unique()[-1]
-	df_dispatch['load'] = d_df[d_df['year'] == this_year]['max_load']
-	df_dispatch['should_dispatch'] = d_df[d_df['year'] == this_year]['should_dispatch']
-	df_dispatch['1-day'] = p1_max
-	df_dispatch['2-day'] = p2_max
-	df_dispatch['month'] = d_df['month']
-	df_dispatch['threshold'] = df_dispatch['month'].apply(lambda x: thresholds[x-1])
-	
-	# is tomorrow above the monthly threshold?
-	df_dispatch['above_threshold'] = df_dispatch['1-day'] >= df_dispatch['threshold']
-	# is tomorrow higher than the prediction in two days?
-	df_dispatch['2-day_lower'] = df_dispatch['2-day'] <= df_dispatch['1-day']
-	# is tomorrow the highest of the month?
-	highest = [-1*float('inf')]*12
-	dispatch_highest = [False]*365
-	zipped = zip(df_dispatch['1-day'], df_dispatch['month'], df_dispatch['load'])
-	for i, (predicted_load, m, load) in enumerate(zipped):
-		if predicted_load >= highest[m-1]:
-			dispatch_highest[i] = True
-		if load >= highest[m-1]:
-			highest[m-1] = load
-	df_dispatch['highest_so_far'] = dispatch_highest
-	
-	# dispatch if all three conditions are met
-	df_dispatch['dispatch'] = (df_dispatch['highest_so_far'] & 
-							   df_dispatch['2-day_lower'] & df_dispatch['above_threshold'])
-
-	# compare correct answers
-	pre = np.array(df_dispatch['dispatch'])
-	ans = np.array(df_dispatch['should_dispatch'])
-
-	return {
-		'dispatch': pre,
-		'should_dispatch': ans,
-		'df_dispatch': df_dispatch,
-		'1-day_accuracy': a1,
-		'2-day_accuracy': a2,
-	}
-
-def analyze_predictions(ans, pre):
-	def recall(ans, pre):
-		true_positive = sum(ans & pre)
-		false_negative = sum(ans & (~ pre))
-		return true_positive / (true_positive + false_negative + 1e-7)
-	def precision(ans, pre):
-		true_positive = sum(ans & pre)
-		false_positive = sum((~ ans) & pre)
-		return (true_positive)/(true_positive + false_positive + 1e-7)
-	def peaks_missed(ans, pre):
-		return sum(ans & (~ pre))
-	def unnecessary_dispatches(ans, pre):
-		return sum((~ ans) & pre)
-
-	return {
-		'recall': recall(ans, pre), 
-		'precision': precision(ans, pre), 
-		'peaks_missed': peaks_missed(ans, pre), 
-		'unnecessary_dispatches': unnecessary_dispatches(ans, pre)
-	}
-
-def confidence_dispatch(df_d, max_c=.1):
-# return dispatch for given df and confidence
-	confidence_dict = {}
-	for c in np.linspace(0, max_c, 100):
-		# we want to increase the likelihood of dispatching tomorrow
-		df = df_d.copy()
-		df['1-day'] *= (1+c)
-		df['2-day'] *=(1-c)
-		df['threshold'] *= (1-c)
-
-		df['above_threshold'] = df['1-day'] >= df['threshold']
-		df['2-day_lower'] = df['2-day'] <= df['1-day']
-
-		highest = [-1*float('inf')]*12
-		dispatch_highest = [False]*365
-		zipped = zip(df['1-day'], df['month'], df['load'])
-		for i, (predicted_load, m, load) in enumerate(zipped):
-			if predicted_load >= highest[m-1]:
-				dispatch_highest[i] = True
-			if load >= highest[m-1]:
-				highest[m-1] = predicted_load
-
-		df['highest_so_far'] = dispatch_highest
-		df['dispatch'] = (df['highest_so_far'] & 
-								   df['2-day_lower'] & df['above_threshold'])
-
-		m = np.array(df['dispatch'])
-		confidence_dict[c] = analyze_predictions(df_d['should_dispatch'], m)
-	df_conf = pd.DataFrame(confidence_dict).T
-
-	return df_conf
-
-def find_lowest_confidence(df_conf):
-	# what is the lowest amount of confidence that captures all peaks?
-	df = df_conf.copy()
-	df = df[df['peaks_missed'] == 0]
-	if df.shape[0] != 0:
-		return {
-			'confidence': df['unnecessary_dispatches'].idxmin(), 
-			'unnecessary_dispatches': df['unnecessary_dispatches'].min()
-		}
-	else:
-		return {
-			'confidence': "larger than given max interval",
-			'unnecessary_dispatches': "greater than {}".format(
-				df_conf['unnecessary_dispatches'].min())
-		}
-
-
-# forecast tool
-
-def neural_net_next_day(all_X, all_y, EPOCHS=10, hours_prior=24):
-	def MAPE(predictions, answers):
-		assert len(predictions) == len(answers)
-		return sum([abs(x-y)/(y+1e-5) for x, y in zip(predictions, answers)])/len(answers)*100  
-
-	import tensorflow as tf
-	from tensorflow.keras import layers
-
+def neural_net_next_day(all_X, all_y, epochs=100, hours_prior=24):
 	all_X_n, all_y_n = all_X[:-hours_prior], all_y[:-hours_prior]
 	X_train = all_X_n[:-8760]
 	y_train = all_y_n[:-8760]
 	
-	model = tf.keras.Sequential([
-		layers.Dense(all_X.shape[1], activation=tf.nn.relu, input_shape=[len(X_train.keys())]),
-		layers.Dense(all_X.shape[1], activation=tf.nn.relu),
-		layers.Dense(all_X.shape[1], activation=tf.nn.relu),
-		layers.Dense(all_X.shape[1], activation=tf.nn.relu),
-		layers.Dense(all_X.shape[1], activation=tf.nn.relu),
-		layers.Dense(1)
-	])
-	optimizer = tf.keras.optimizers.RMSprop(0.001)
-	model.compile(
-		loss="mean_squared_error",
-		optimizer=optimizer,
-		metrics=["mean_absolute_error", "mean_squared_error"],
-	)
-	early_stop = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=10)
-
-	history = model.fit(X_train, y_train, epochs=EPOCHS, validation_split=0.2, verbose=0, callbacks=[early_stop])
+	model = train_neural_net(X_train, y_train, epochs)
 
 	predictions_test = [float(f) for f in model.predict(all_X_n[-8760:])]
 	train = [float(f) for f in model.predict(all_X_n[:-8760])]
