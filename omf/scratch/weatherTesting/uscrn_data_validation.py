@@ -1,7 +1,13 @@
 import aGosedWeather
-from aGosedWeather import WeatherDataType
+from aGosedWeather import USCRNDataType
 import requests
 import csv, os
+
+
+"""
+This script has some functions for assessing how much data for a given year and station is invalid. We currently are not interested in this
+functionality however.
+"""
 
 
 # There are 156 stations
@@ -176,12 +182,12 @@ def get_all_uscrn_data(year, stations, frequency, filter_data=False):
 	assert type(frequency) is str
 	metadata = {}
 	if frequency == "hourly":
-		temperature = WeatherDataType(8, -9999.0) 
-		humidity = WeatherDataType(26, -9999, 27)
-		solar_global = WeatherDataType(13, -99999, 14)
+		temperature = USCRNDataType(8, -9999.0) 
+		humidity = USCRNDataType(26, -9999, 27)
+		solar_global = USCRNDataType(13, -99999, 14)
 		data_types = [temperature, humidity, solar_global]
 	if frequency == "subhourly":
-		wind_speed = WeatherDataType(21, -99.00, 22)
+		wind_speed = USCRNDataType(21, -99.00, 22)
 		data_types = [wind_speed]
 	for s in stations:
 		rows = aGosedWeather.get_USCRN_data(year, s, frequency)

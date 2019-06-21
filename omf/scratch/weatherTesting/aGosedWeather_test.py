@@ -1,6 +1,6 @@
 import re, pytest
-import weather_data_type
-from weather_data_type import WeatherDataType
+import aGosedWeather
+from aGosedWeather import USCRNDataType
 
 
 class Test_GetPrecision(object):
@@ -8,37 +8,37 @@ class Test_GetPrecision(object):
 
     def test_3DigitPrecision_returns3(self):
         data = "-99.000"
-        assert weather_data_type.get_precision(data) == 3
+        assert aGosedWeather.get_precision(data) == 3
 
 
     def test_1DigitPrecision_returns1(self):
         data = "25.2"
-        assert weather_data_type.get_precision(data) == 1
+        assert aGosedWeather.get_precision(data) == 1
 
 
     def test_0DigitPrecision_returns0(self):
         data = "100"
-        assert weather_data_type.get_precision(data) == 0
+        assert aGosedWeather.get_precision(data) == 0
 
 
 class Test_StrToNum(object):
 
     def test_stringFloat_returnsFloat(self):
         f = "-1.00"
-        assert weather_data_type.str_to_num(f) == -1.00
+        assert aGosedWeather.str_to_num(f) == -1.00
 
     
     def test_stringInt_returnsInt(self):
         i = "1001"
-        assert weather_data_type.str_to_num(i) == 1001
+        assert aGosedWeather.str_to_num(i) == 1001
 
     
     def test_float_returnsFloat(self):
-        assert weather_data_type.str_to_num(2.32) == 2.32
+        assert aGosedWeather.str_to_num(2.32) == 2.32
 
 
     def test_int_returnsInt(self):
-        assert weather_data_type.str_to_num(5) == 5
+        assert aGosedWeather.str_to_num(5) == 5
 
 
 class Test_WattsPerMeterSqToWattsPerFtSq(object):
@@ -46,7 +46,7 @@ class Test_WattsPerMeterSqToWattsPerFtSq(object):
 
     def test_returnsFloat(self):
         w_m_sq = 889
-        w_ft_sq = weather_data_type.watts_per_meter_sq_to_watts_per_ft_sq(w_m_sq)
+        w_ft_sq = aGosedWeather.watts_per_meter_sq_to_watts_per_ft_sq(w_m_sq)
         assert round(w_ft_sq, 0) == 83.0
 
 
@@ -55,42 +55,42 @@ class Test_CelsiusToFahrenheit(object):
 
     def test_returnsFloat(self):
         c = 25.3
-        f = weather_data_type.celsius_to_fahrenheit(c)
+        f = aGosedWeather.celsius_to_fahrenheit(c)
         assert round(f, 1) == 77.5
 
 
-class Test_WeatherDataType(object):
+class Test_USCRNDataType(object):
 
 
-    class Test_Validate(object):
+    class Test_IsValid(object):
 
 
         def test_missingDataAndValidFlag_returnsFalse(self):
             line = "0 1 2 3 4 5  6   7 8 9 10 11 12 -99999 0 15 0 -99999 0 U -9999.0 0 -9999.0 0 -9999.0 0 -9999 0 -99.000 -99.000 -99.000 -99.000 -99.000 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0"
             row = re.split("\s+", line)
-            solarad = WeatherDataType(13, -99999, 14)
-            assert solarad.validate(row) is False
+            solarad = USCRNDataType(13, -99999, 14)
+            assert solarad.is_valid(row) is False
 
     
         def test_missingDataAndInvalidFlag_returnsFalse(self):
             line = "0 1 2 3 4 5  6   7 8 9 10 11 12 -99999 3 15 0 -99999 0 U -9999.0 0 -9999.0 0 -9999.0 0 -9999 0 -99.000 -99.000 -99.000 -99.000 -99.000 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0"
             row = re.split("\s+", line)
-            solarad = WeatherDataType(13, -99999, 14)
-            assert solarad.validate(row) is False
+            solarad = USCRNDataType(13, -99999, 14)
+            assert solarad.is_valid(row) is False
 
 
         def test_validDataAndValidFlag_returnsTrue(self):
             line = "0 1 2 3 4 5  6   7 8 9 10 11 12 700 0 15 0 -99999 0 U -9999.0 0 -9999.0 0 -9999.0 0 -9999 0 -99.000 -99.000 -99.000 -99.000 -99.000 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0"
             row = re.split("\s+", line)
-            solarad = WeatherDataType(13, -99999, 14)
-            assert solarad.validate(row) is True
+            solarad = USCRNDataType(13, -99999, 14)
+            assert solarad.is_valid(row) is True
 
 
         def test_validDataAndInvalidFlag_returnsFalse(self):
             line = "0 1 2 3 4 5  6   7 8 9 10 11 12 700 3 15 0 -99999 0 U -9999.0 0 -9999.0 0 -9999.0 0 -9999 0 -99.000 -99.000 -99.000 -99.000 -99.000 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0"
             row = re.split("\s+", line)
-            solarad = WeatherDataType(13, -99999, 14)
-            assert solarad.validate(row) is False
+            solarad = USCRNDataType(13, -99999, 14)
+            assert solarad.is_valid(row) is False
 
     
     class Test_GetNextValidValue(object):
@@ -107,7 +107,7 @@ class Test_WeatherDataType(object):
 63838 20170515 1800 20170515 1300  2.422  -84.75   38.09    25.1    25.2    25.6    24.8     0.0    934 0    978 0     79 0 C    38.9 0    40.2 0    37.6 0    52 0   0.334   0.328   0.340   0.297   0.414    21.1    20.7    18.5    16.9    15.2
 63838 20170515 1900 20170515 1400  2.422  -84.75   38.09    26.1    25.7    26.1    25.1     0.0    856 0    994 0    226 0 C    38.7 0    40.9 0    34.7 0    51 0   0.333   0.328   0.347   0.291   0.396    22.1    21.6    18.6    16.9    15.2"""
             rows = [re.split("\s+", line) for line in lines.splitlines()]
-            solarad = WeatherDataType(13, -99999, 14)
+            solarad = USCRNDataType(13, -99999, 14)
             end_index, end_val = solarad.get_next_valid_value(rows, 0)
             assert end_index == 6
             assert end_val == 889
@@ -124,7 +124,7 @@ class Test_WeatherDataType(object):
 63838 20170515 1800 20170515 1300  2.422  -84.75   38.09    25.1    25.2    25.6    24.8     0.0    934 0    978 0     79 0 C    38.9 0    40.2 0    37.6 0    52 0   0.334   0.328   0.340   0.297   0.414    21.1    20.7    18.5    16.9    15.2
 63838 20170515 1900 20170515 1400  2.422  -84.75   38.09    26.1    25.7    26.1    25.1     0.0    856 0    994 0    226 0 C    38.7 0    40.9 0    34.7 0    51 0   0.333   0.328   0.347   0.291   0.396    22.1    21.6    18.6    16.9    15.2"""
             rows = [re.split("\s+", line) for line in lines.splitlines()]
-            solarad = WeatherDataType(13, -99999, 14)
+            solarad = USCRNDataType(13, -99999, 14)
             end_index, end_val = solarad.get_next_valid_value(rows, 7)
             assert end_index == 7
             assert end_val == 934     
@@ -141,7 +141,7 @@ class Test_WeatherDataType(object):
 63838 20170515 1800 20170515 1300  2.422  -84.75   38.09    25.1    25.2    25.6    24.8     0.0    934 3    978 0     79 0 C    38.9 0    40.2 0    37.6 0    52 0   0.334   0.328   0.340   0.297   0.414    21.1    20.7    18.5    16.9    15.2
 63838 20170515 1900 20170515 1400  2.422  -84.75   38.09    26.1    25.7    26.1    25.1     0.0    856 3    994 0    226 0 C    38.7 0    40.9 0    34.7 0    51 0   0.333   0.328   0.347   0.291   0.396    22.1    21.6    18.6    16.9    15.2"""
             rows = [re.split("\s+", line) for line in lines.splitlines()]
-            solarad = WeatherDataType(13, -99999, 14)
+            solarad = USCRNDataType(13, -99999, 14)
             end_index, end_val = solarad.get_next_valid_value(rows, 0)
             assert end_index == None
             assert end_val == None
@@ -150,7 +150,7 @@ class Test_WeatherDataType(object):
     class Test_CorrectColumn(object):
 
 
-        def test_weatherDataTypeHasNoFlagIndex_performsLinearInterpolation(self):
+        def test_USCRNDataTypeHasNoFlagIndex_performsLinearInterpolation(self):
             lines = """63838 20170515 1100 20170515 0600 -9.000  -84.75   38.09 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0 100 0 -99999 0 -99999 0 U -9999.0 0 -9999.0 0 -9999.0 0 -9999 0 -99.000 -99.000 -99.000 -99.000 -99.000 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0
 63838 20170515 1200 20170515 0700 -9.000  -84.75   38.09 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0 -99999 0 -99999 0 -99999 0 U -9999.0 0 -9999.0 0 -9999.0 0 -9999 0 -99.000 -99.000 -99.000 -99.000 -99.000 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0
 63838 20170515 1300 20170515 0800 -9.000  -84.75   38.09 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0 -99999 0 -99999 0 -99999 0 U -9999.0 0 -9999.0 0 -9999.0 0 -9999 0 -99.000 -99.000 -99.000 -99.000 -99.000 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0
@@ -161,8 +161,8 @@ class Test_WeatherDataType(object):
 63838 20170515 1800 20170515 1300  2.422  -84.75   38.09    25.1    25.2    25.6    24.8     0.0    934 0    978 0     79 0 C    38.9 0    40.2 0    37.6 0    52 0   0.334   0.328   0.340   0.297   0.414    21.1    20.7    18.5    16.9    15.2
 63838 20170515 1900 20170515 1400  2.422  -84.75   38.09    26.1    25.7    26.1    25.1     0.0    856 0    994 0    226 0 C    38.7 0    40.9 0    34.7 0    51 0   0.333   0.328   0.347   0.291   0.396    22.1    21.6    18.6    16.9    15.2"""
             rows = [re.split("\s+", line) for line in lines.splitlines()]
-            t_calc = WeatherDataType(8, -9999.0)
-            t_calc.correct_column(rows, 0, 5, 0.1, 25.1) # 0.1 is made up. Pretend it comes from the previous year
+            t_calc = USCRNDataType(8, -9999.0)
+            t_calc.correct_data(rows, 0, 5, 0.1, 25.1) # 0.1 is made up. Pretend it comes from the previous year
             assert float(rows[0][8]) == 3.7
             assert float(rows[1][8]) == 7.2
             assert float(rows[2][8]) == 10.8
@@ -172,7 +172,7 @@ class Test_WeatherDataType(object):
             assert float(rows[6][8]) == 25.1
 
 
-        def test_weatherDataTypeHasFlagIndex_performsLinearInterpolation(self):
+        def test_USCRNDataTypeHasFlagIndex_performsLinearInterpolation(self):
             lines = """63838 20170515 1100 20170515 0600 -9.000  -84.75   38.09 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0 100 0 -99999 0 -99999 0 U -9999.0 0 -9999.0 0 -9999.0 0 -9999 0 -99.000 -99.000 -99.000 -99.000 -99.000 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0
 63838 20170515 1200 20170515 0700 -9.000  -84.75   38.09 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0 -99999 0 -99999 0 -99999 0 U -9999.0 0 -9999.0 0 -9999.0 0 -9999 0 -99.000 -99.000 -99.000 -99.000 -99.000 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0
 63838 20170515 1300 20170515 0800 -9.000  -84.75   38.09 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0 -99999 0 -99999 0 -99999 0 U -9999.0 0 -9999.0 0 -9999.0 0 -9999 0 -99.000 -99.000 -99.000 -99.000 -99.000 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0
@@ -183,8 +183,8 @@ class Test_WeatherDataType(object):
 63838 20170515 1800 20170515 1300  2.422  -84.75   38.09    25.1    25.2    25.6    24.8     0.0    934 0    978 0     79 0 C    38.9 0    40.2 0    37.6 0    52 0   0.334   0.328   0.340   0.297   0.414    21.1    20.7    18.5    16.9    15.2
 63838 20170515 1900 20170515 1400  2.422  -84.75   38.09    26.1    25.7    26.1    25.1     0.0    856 0    994 0    226 0 C    38.7 0    40.9 0    34.7 0    51 0   0.333   0.328   0.347   0.291   0.396    22.1    21.6    18.6    16.9    15.2"""
             rows = [re.split("\s+", line) for line in lines.splitlines()]
-            solarad = WeatherDataType(13, -99999, 14)
-            solarad.correct_column(rows, 1, 5, 100, 889)
+            solarad = USCRNDataType(13, -99999, 14)
+            solarad.correct_data(rows, 1, 5, 100, 889)
             assert int(rows[0][13]) == 100
             assert int(rows[1][13]) == 232
             assert int(rows[2][13]) == 363
@@ -195,7 +195,7 @@ class Test_WeatherDataType(object):
 
 
 
-        def test_weatherDataTypeHasFlagIndex_performsFlagCorrection(self):
+        def test_USCRNDataTypeHasFlagIndex_performsFlagCorrection(self):
             lines = """63838 20170515 1100 20170515 0600 -9.000  -84.75   38.09 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0 100 0 -99999 0 -99999 0 U -9999.0 0 -9999.0 0 -9999.0 0 -9999 0 -99.000 -99.000 -99.000 -99.000 -99.000 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0
 63838 20170515 1200 20170515 0700 -9.000  -84.75   38.09 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0 -99999 0 -99999 0 -99999 0 U -9999.0 0 -9999.0 0 -9999.0 0 -9999 0 -99.000 -99.000 -99.000 -99.000 -99.000 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0
 63838 20170515 1300 20170515 0800 -9.000  -84.75   38.09 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0 -99999 0 -99999 0 -99999 0 U -9999.0 0 -9999.0 0 -9999.0 0 -9999 0 -99.000 -99.000 -99.000 -99.000 -99.000 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0
@@ -206,8 +206,8 @@ class Test_WeatherDataType(object):
 63838 20170515 1800 20170515 1300  2.422  -84.75   38.09    25.1    25.2    25.6    24.8     0.0    934 0    978 0     79 0 C    38.9 0    40.2 0    37.6 0    52 0   0.334   0.328   0.340   0.297   0.414    21.1    20.7    18.5    16.9    15.2
 63838 20170515 1900 20170515 1400  2.422  -84.75   38.09    26.1    25.7    26.1    25.1     0.0    856 0    994 0    226 0 C    38.7 0    40.9 0    34.7 0    51 0   0.333   0.328   0.347   0.291   0.396    22.1    21.6    18.6    16.9    15.2"""
             rows = [re.split("\s+", line) for line in lines.splitlines()]
-            solarad = WeatherDataType(13, -99999, 14)
-            solarad.correct_column(rows, 1, 5, 100, 889)
+            solarad = USCRNDataType(13, -99999, 14)
+            solarad.correct_data(rows, 1, 5, 100, 889)
             assert float(rows[0][14]) == 0
             assert float(rows[1][14]) == 0
             assert float(rows[2][14]) == 0
@@ -223,14 +223,14 @@ class Test_WeatherDataType(object):
         def test_hasNoTransformationFunction_returnsData(self):
             line = "63838 20170515 1800 20170515 1300  2.422  -84.75   38.09    25.1    25.2    25.6    24.8     0.0    934 0    978 0     79 0 C    38.9 0    40.2 0    37.6 0    52 0   0.334   0.328   0.340   0.297   0.414    21.1    20.7    18.5    16.9    15.2"
             row = re.split("\s+", line)
-            solarad = WeatherDataType(13, -99999, 14)
+            solarad = USCRNDataType(13, -99999, 14)
             assert solarad.get_value(row) == 934
 
 
         def test_hasTransformationFunction_returnsTransformedData(self):
             line = "63838 20170515 1800 20170515 1300  2.422  -84.75   38.09    25.1    25.2    25.6    24.8     0.0    934 0    978 0     79 0 C    38.9 0    40.2 0    37.6 0    52 0   0.334   0.328   0.340   0.297   0.414    21.1    20.7    18.5    16.9    15.2"
             row = re.split("\s+", line)
-            solar_diff = WeatherDataType(13, -99999, 14, lambda x: x * 0.25)
+            solar_diff = USCRNDataType(13, -99999, 14, lambda x: x * 0.25)
             assert solar_diff.get_value(row) == (934 * 0.25)
 
 
@@ -245,11 +245,11 @@ class Test_GetFirstValidRow(object):
 63838 20170515 1700 20170515 1200  2.422  -84.75   38.09    25.3    24.4    25.2    23.6     0.0    889 0    929 0    853 0 C    38.9 0    39.7 0    37.2 0    54 0   0.337   0.335   0.349   0.293   0.396    20.2    19.8    18.3    17.0    15.2
 63838 20170515 1800 20170515 1300  2.422  -84.75   38.09    25.1    25.2    25.6    24.8     0.0    934 0    978 0     79 0 C    38.9 0    40.2 0    37.6 0    52 0   0.334   0.328   0.340   0.297   0.414    21.1    20.7    18.5    16.9    15.2"""
         rows = [re.split("\s+", line) for line in lines.splitlines()]
-        solarad = WeatherDataType(13, -99999, 14)
-        t_calc = WeatherDataType(8, -9999.0)
+        solarad = USCRNDataType(13, -99999, 14)
+        t_calc = USCRNDataType(8, -9999.0)
         dts = [solarad, t_calc]
         first_valid_row = re.split("\s+", "63838 20170515 1700 20170515 1200  2.422  -84.75   38.09    25.3    24.4    25.2    23.6     0.0    889 0    929 0    853 0 C    38.9 0    39.7 0    37.2 0    54 0   0.337   0.335   0.349   0.293   0.396    20.2    19.8    18.3    17.0    15.2")
-        assert weather_data_type.get_first_valid_row(rows, dts) == first_valid_row
+        assert aGosedWeather.get_first_valid_row(rows, dts) == first_valid_row
 
 
     def test_reverseChronologicalOrder_returnsLatestValidRow(self):
@@ -260,11 +260,11 @@ class Test_GetFirstValidRow(object):
 63838 20170515 1700 20170515 1200  2.422  -84.75   38.09    25.3    24.4    25.2    23.6     0.0    889 0    929 0    853 0 C    38.9 0    39.7 0    37.2 0    54 0   0.337   0.335   0.349   0.293   0.396    20.2    19.8    18.3    17.0    15.2
 63838 20170515 1800 20170515 1300  2.422  -84.75   38.09    25.1    25.2    25.6    24.8     0.0    934 0    978 0     79 0 C    38.9 0    40.2 0    37.6 0    52 0   0.334   0.328   0.340   0.297   0.414    21.1    20.7    18.5    16.9    15.2"""
         rows = [re.split("\s+", line) for line in lines.splitlines()]
-        solarad = WeatherDataType(13, -99999, 14)
-        t_calc = WeatherDataType(8, -9999.0)
+        solarad = USCRNDataType(13, -99999, 14)
+        t_calc = USCRNDataType(8, -9999.0)
         dts = [solarad, t_calc]
         last_valid_row = re.split("\s+", "63838 20170515 1800 20170515 1300  2.422  -84.75   38.09    25.1    25.2    25.6    24.8     0.0    934 0    978 0     79 0 C    38.9 0    40.2 0    37.6 0    52 0   0.334   0.328   0.340   0.297   0.414    21.1    20.7    18.5    16.9    15.2")
-        assert weather_data_type.get_first_valid_row(rows, dts, reverse=True) == last_valid_row
+        assert aGosedWeather.get_first_valid_row(rows, dts, reverse=True) == last_valid_row
 
 
 class Test_GetProcessedRow(object):
@@ -274,14 +274,14 @@ class Test_GetProcessedRow(object):
         line = "63838 20170515 1700 20170515 1200  2.422  -84.75   38.09    25.3    24.4    25.2    23.6     0.0    889 0    929 0    853 0 C    38.9 0    39.7 0    37.2 0    54 0   0.337   0.335   0.349   0.293   0.396    20.2    19.8    18.3    17.0    15.2"
         row = re.split("\s+", line)
         #datetime
-        temperature = WeatherDataType(8, -9999.0, transformation_function=lambda x: round(weather_data_type.celsius_to_fahrenheit(x), 1))
+        temperature = USCRNDataType(8, -9999.0, transformation_function=lambda x: round(aGosedWeather.celsius_to_fahrenheit(x), 1))
         #wind_speed
-        humidity = WeatherDataType(26, -9999, 27, lambda x: x / float(100)) # int to float
-        solar_dir = WeatherDataType(13, -99999, 14, lambda x: round(weather_data_type.watts_per_meter_sq_to_watts_per_ft_sq(x) * 0.75, 0)) # m^2 to ft^2, then percentage of that
-        solar_diff = WeatherDataType(13, -99999, 14, lambda x: round(weather_data_type.watts_per_meter_sq_to_watts_per_ft_sq(x) * 0.25, 0)) # m^2 to ft^2, then percentage of that
-        solar_global = WeatherDataType(13, -99999, 14, lambda x: round(weather_data_type.watts_per_meter_sq_to_watts_per_ft_sq(x), 0))
+        humidity = USCRNDataType(26, -9999, 27, lambda x: x / float(100)) # int to float
+        solar_dir = USCRNDataType(13, -99999, 14, lambda x: round(aGosedWeather.watts_per_meter_sq_to_watts_per_ft_sq(x) * 0.75, 0)) # m^2 to ft^2, then percentage of that
+        solar_diff = USCRNDataType(13, -99999, 14, lambda x: round(aGosedWeather.watts_per_meter_sq_to_watts_per_ft_sq(x) * 0.25, 0)) # m^2 to ft^2, then percentage of that
+        solar_global = USCRNDataType(13, -99999, 14, lambda x: round(aGosedWeather.watts_per_meter_sq_to_watts_per_ft_sq(x), 0))
         data_types = [temperature, humidity, solar_dir, solar_diff, solar_global]
-        assert weather_data_type.get_processed_row(data_types, row) == [77.5, .54, 62.0, 21.0, 83.0]
+        assert aGosedWeather.get_processed_row(data_types, row) == [77.5, .54, 62.0, 21.0, 83.0]
 
 
 class Test_ExtactData(object):
@@ -305,11 +305,11 @@ class Test_ExtactData(object):
             rows = [re.split("\s+", line) for line in lines.splitlines()]
             first_valid_row = rows[0]
             last_valid_row = rows[len(rows) - 1]
-            temperature = WeatherDataType(8, -9999.0)
-            humidity = WeatherDataType(26, -9999, 27)
-            solar_global = WeatherDataType(13, -99999, 14)
+            temperature = USCRNDataType(8, -9999.0)
+            humidity = USCRNDataType(26, -9999, 27)
+            solar_global = USCRNDataType(13, -99999, 14)
             data_types = [temperature, humidity, solar_global]
-            assert weather_data_type.extract_data(first_valid_row, last_valid_row, rows, data_types) == [
+            assert aGosedWeather.extract_data(first_valid_row, last_valid_row, rows, data_types) == [
                 [16.9, 94, 116],
                 [18.2, 89, 312],
                 [18.9, 83, 382],
@@ -336,11 +336,11 @@ class Test_ExtactData(object):
             rows = [re.split("\s+", line) for line in lines.splitlines()]
             first_valid_row = rows[0]
             last_valid_row = rows[7]
-            temperature = WeatherDataType(8, -9999.0)
-            humidity = WeatherDataType(26, -9999, 27)
-            solar_global = WeatherDataType(13, -99999, 14)
+            temperature = USCRNDataType(8, -9999.0)
+            humidity = USCRNDataType(26, -9999, 27)
+            solar_global = USCRNDataType(13, -99999, 14)
             data_types = [temperature, humidity, solar_global]
-            assert weather_data_type.extract_data(first_valid_row, last_valid_row, rows, data_types) == [
+            assert aGosedWeather.extract_data(first_valid_row, last_valid_row, rows, data_types) == [
                 [10.0, 89, 68],
                 [10.6, 84, 118],
                 [11.4, 80, 216],
@@ -368,11 +368,11 @@ class Test_ExtactData(object):
             rows = [re.split("\s+", line) for line in lines.splitlines()]
             first_valid_row = rows[0]
             last_valid_row = rows[len(rows) - 1]
-            temperature = WeatherDataType(8, -9999.0)
-            humidity = WeatherDataType(26, -9999, 27)
-            solar_global = WeatherDataType(13, -99999, 14)
+            temperature = USCRNDataType(8, -9999.0)
+            humidity = USCRNDataType(26, -9999, 27)
+            solar_global = USCRNDataType(13, -99999, 14)
             data_types = [temperature, solar_global, humidity]
-            assert weather_data_type.extract_data(first_valid_row, last_valid_row, rows, data_types) == [
+            assert aGosedWeather.extract_data(first_valid_row, last_valid_row, rows, data_types) == [
                 [17.3, 488, 46],
                 [16.2, 388, 44],
                 [15.0, 100, 47],
@@ -419,9 +419,9 @@ class Test_ExtactData(object):
             rows = [re.split("\s+", line) for line in lines.splitlines()]
             first_valid_row = rows[0]
             last_valid_row = rows[len(rows) - 1]
-            wind_speed = WeatherDataType(21, -99.00, 22, lambda x: round(x, 2))
+            wind_speed = USCRNDataType(21, -99.00, 22, lambda x: round(x, 2))
             data_types = [wind_speed]
-            assert weather_data_type.extract_data(first_valid_row, last_valid_row, rows, data_types, is_subhourly_data=True) == [
+            assert aGosedWeather.extract_data(first_valid_row, last_valid_row, rows, data_types, is_subhourly_data=True) == [
                 [2.17],
                 [2.31]
             ]
@@ -455,9 +455,9 @@ class Test_ExtactData(object):
             rows = [re.split("\s+", line) for line in lines.splitlines()]
             first_valid_row = rows[0]
             last_valid_row = rows[len(rows) - 1]
-            wind_speed = WeatherDataType(21, -99.00, 22, lambda x: round(x, 2))
+            wind_speed = USCRNDataType(21, -99.00, 22, lambda x: round(x, 2))
             data_types = [wind_speed]
-            assert weather_data_type.extract_data(first_valid_row, last_valid_row, rows, data_types, is_subhourly_data=True) == [
+            assert aGosedWeather.extract_data(first_valid_row, last_valid_row, rows, data_types, is_subhourly_data=True) == [
                 [1.86],
                 [2.06]
             ]
@@ -477,8 +477,9 @@ class Test_MergeHourlySubhourly(object):
             [2, 2, 2],
             [2, 2, 2]
         ]
-        merged = weather_data_type.merge_hourly_subhourly(hourly, subhourly, 1)
+        merged = aGosedWeather.merge_hourly_subhourly(hourly, subhourly, 1)
         assert merged == [
+            ["temperature", "wind_speed", "humidity", "solar_dir", "solar_diff", "solar_global"],
             ["1:1:0:0:0", 1, 2, 2, 2, 1, 1, 1, 1],
             ["1:1:1:0:0", 1, 2, 2, 2, 1, 1, 1, 1],
             ["1:1:2:0:0", 1, 2, 2, 2, 1, 1, 1, 1]
@@ -496,8 +497,9 @@ class Test_MergeHourlySubhourly(object):
             [2],
             [2]
         ]
-        merged = weather_data_type.merge_hourly_subhourly(hourly, subhourly, 0)
+        merged = aGosedWeather.merge_hourly_subhourly(hourly, subhourly, 0)
         assert merged == [
+            ["temperature", "wind_speed", "humidity", "solar_dir", "solar_diff", "solar_global"],
             ["1:1:0:0:0", 2, 1, 1, 1, 1, 1],
             ["1:1:1:0:0", 2, 1, 1, 1, 1, 1],
             ["1:1:2:0:0", 2, 1, 1, 1, 1, 1]
