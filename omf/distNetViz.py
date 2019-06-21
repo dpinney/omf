@@ -123,8 +123,8 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.h
 	def id():
 		return ""
 	component_json = get_components()
-	rend = template.render(thisFeederData=json.dumps(thisFeed), thisFeederName="Simple Market System", thisFeederNum=1,
-		thisModelName="Not applicable", thisOwner="NONE", components=component_json, jasmine=None, spec=None,
+	rend = template.render(thisFeederData=json.dumps(thisFeed), thisFeederName=pathToOmdOrGlm, thisFeederNum=1,
+		thisModelName="Local Filesystem", thisOwner="NONE", components=component_json, jasmine=None, spec=None,
 		publicFeeders=[], userFeeders=[], csrf_token=id, showFileMenu=True, currentUser=None
 	)
 	with open(tempDir + '/' + outputName, 'w') as outFile:

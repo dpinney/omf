@@ -222,7 +222,7 @@ def _totals(filename, component=None):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"feederName1": "Taxonomic Feeder Rooftop Solar",
+		"feederName1": "tax_a",
 		"modelType": modelName,
 		"runTime": "",
 		"layoutAlgorithm": "geospatial",

@@ -200,5 +200,14 @@
 			<img id="maxLoadShapeImg" style="width:1000px;height:auto;" />
 			<script type="text/javascript">gebi("maxLoadShapeImg").src = "data:image/png;base64," + allOutputData.maxLoadShape</script>
 		</div>
+		<p class="reportTitle postRun" style="page-break-before:always">Voltage Drop Diagram with Charging Load</p>
+		<div id="loadVoltageDropDiagram" class="tightContent postRun">
+			<img id="loadVoltageDropChart" style="width:1000px;height:1000px;" />
+			<script type="text/javascript">gebi("loadVoltageDropChart").src = "data:image/png;base64," + allOutputData.loadVoltageDrop</script>
+		</div>
+		<p class="reportTitle postRun" style="page-break-before:always">Protective Device Status with Charging Load</p>
+		<div id="loadProtDevStatus" class="tightContent postRun">
+			{{ allOutputDataDict['loadProtDevTableHtml'] }}
+		</div>
 	</div>
 </body>

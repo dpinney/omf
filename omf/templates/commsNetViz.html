@@ -39,7 +39,7 @@
 	function pointToLayerNode(feature, latlng) {
 		let fillColorValue = 'black';
 		if (feature.properties['substation']){
-			fillColorValue = 'red';
+			fillColorValue = 'orange';
 		return L.circleMarker(latlng, {
 			radius: 8,
 			fillColor: fillColorValue,
@@ -71,6 +71,17 @@
 			fillOpacity: 0.8
 		});
 		}
+		else {
+			fillColorValue = 'white';
+		return L.circleMarker(latlng, {
+			radius: 8,
+			fillColor: fillColorValue,
+			color: "#000",
+			weight: 1,
+			opacity: 1,
+			fillOpacity: 0.2
+		});
+		}
 	}
 
 	function lineStyle(feature){
@@ -78,12 +89,18 @@
 			if (feature.properties['rf']){
 				return {
 					"color": "red",
-					"dashArray": "6"
+					"dashArray": "10"
 				}
 			}
 			else if (feature.properties['fiber']){
 				return {
-					"color": "black"
+					"color": "yellow",
+				}
+			}
+			else {
+				return {
+					"color": "black",
+					"opacity": "0.2"
 				}
 			}
 		}
@@ -98,9 +115,7 @@
 			geojsonLayer.addData(feature);
 		}
 		else if (feature.geometry['type'] == 'LineString'){
-			if (feature.properties['rf'] || feature.properties['fiber'] ){
-				geojsonLayer.addData(feature);
-			}
+			geojsonLayer.addData(feature);
 		}
 		else if (feature.geometry['type'] == 'Polygon'){
 			geojsonLayer.addData(feature);

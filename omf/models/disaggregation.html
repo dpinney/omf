@@ -1,0 +1,239 @@
+<head>
+	<title>Open Modeling Framework</title>
+	<meta charset="utf-8">
+	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
+	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	<style>
+	/*Styles here*/
+	</style>
+	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
+	<!-- Library Imports -->
+	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
+	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	<!-- Data  Imports -->
+	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
+	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
+	<script>modelStatus="{{modelStatus}}"</script>
+	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
+	<script type="text/javascript">
+		function insert_file_upload_block(fileName, dataVariableName) {
+			parentDiv = document.currentScript.parentElement;
+
+			let inputNode1 = document.createElement("input");
+			inputNode1.setAttribute("id", fileName + "Handler");
+			inputNode1.setAttribute("type", "file");
+			inputNode1.style.display = "none";
+			//inputNode1.addEventListener("change", handle_files(this.files,dataVariableName,fileName));
+			parentDiv.appendChild(inputNode1);
+
+			let inputNode2 = document.createElement("input");
+			inputNode2.setAttribute("id", dataVariableName);
+			inputNode2.setAttribute("name", dataVariableName);
+			inputNode2.type = "hidden";
+			parentDiv.appendChild(inputNode2);
+
+			let innerDiv = document.createElement("div");
+			parentDiv.appendChild(innerDiv);
+
+			let labelNode = document.createElement("label");
+			labelNode.setAttribute("for", fileName + "Handler");
+			labelNode.className = "fileButton";
+			labelNode.innerHTML = "Choose File";
+			innerDiv.appendChild(labelNode);
+
+			let inputNode3 = document.createElement("input");
+			inputNode3.setAttribute("id", fileName);
+			inputNode3.setAttribute("name", fileName);
+			inputNode3.value = '';
+			inputNode3.readOnly = true;
+			inputNode3.className = "uploadFileName";
+			innerDiv.appendChild(inputNode3)
+
+			//inputNode1.addEventListener("change", handle_files(this.files,dataVariableName,fileName));
+			inputNode1.addEventListener("change", function (){
+				handle_files(this.files,dataVariableName,fileName);
+			});
+		}
+
+		function showHideUpload(callingElementID) {
+		
+			optionName = "#" + callingElementID;
+			divName = optionName.replace("Set","File");
+			buildingName = optionName.replace("Set","Build");
+
+			console.log($(optionName).val())
+			if ($(optionName).val() == "CSV") {
+				$(divName).show();
+				$(buildingName).hide();
+				document.getElementById(callingElementID).selectedIndex = 1;
+			}
+			else {
+				$(divName).hide();
+				populateBuildings(optionName);
+				$(buildingName).show();
+				document.getElementById(callingElementID).selectedIndex = 0;
+			}
+		}
+
+		function populateBuildings(datasetDropdownId) {
+			buildingDropdownId = datasetDropdownId.replace("Set","Building");
+			dataSet = $(datasetDropdownId).val()
+			
+			numBuildings = 1;
+			if (dataSet == "REDD") { numBuildings = 6; }
+
+			content = ""
+			for (var i = 1; i <= numBuildings; i++) {
+				content += "<option value=" + i + ">" + 
+					"building " + i + "</option>";
+			}
+
+			$(buildingDropdownId).html(content);
+		}
+
+	</script>
+</head>
+
+<body onload="init()">
+	
+	<div id="header">
+		<div id="headInnerBlock">
+			<div id="menuLeft">
+				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
+				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
+			</div>
+		</div>
+	</div>
+	<div id="triangle-parent">
+		<div id="triangle-message">New Version<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
+		<div id="triangle-topright"></div>
+	</div>
+	
+	<p class="reportTitle">Model Input</p>
+	<div id="input" class="content">
+		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+			<div class="shortInput">
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-disaggregation" target="blank">Help?</a></label>
+				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Model Name</label>
+				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+			</div>
+			<div class="shortInput runningInline postRunInline">
+				<label>User</label>
+				<input type="text" id="user" name="user" readonly/>
+			</div>
+			<div class="runningInline postRunInline shortInput">
+				<label>Created</label>
+				<input type="text" id="created" name="created" readonly/>
+			</div>
+			<div class="postRunInline shortInput">
+				<label>Run Time</label>
+				<input type="text" id="runTime" name="runTime" readonly/>
+			</div>
+
+			
+			<div class="wideInput">
+				<p class="inputSectionHeader">Disaggregation Parameters</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Training Dataset<span class="classic">Select the dataset that will be used to train the model.</span></label>
+				<select id="trainSet" name="trainSet" onchange="showHideUpload('trainSet')">
+					<option value="REDD">REDD Low Freq</option>
+					<option value="CSV">Upload CSV</option>
+				</select>
+			</div>
+			
+			<div class="shortInput">
+				<label class="tooltip">Testing Dataset<span class="classic">Select the dataset that will be used to test the model.</span></label>
+				<select id="testSet" name="testSet" onchange="showHideUpload('testSet')">
+					<option value="REDD">REDD Low Freq</option>
+					<option value="CSV">Upload CSV</option>
+				</select>
+			</div>
+			
+			<div class="shortInput">
+				<label class="tooltip">Dissagregation Algorithm<span class="classic">Select the algorithm that will be used to perform the disaggregation. For more information on the algrothims click on the help link above to visit the wiki.</span></label>
+				<select id="disaggAlgo" name="disaggAlgo">
+					<option value="combOpt">Combinatorial Optimization</option>
+					<option value="fhmm">Hidden Markov Model</option>
+				</select>
+			</div>
+			<div class="shortInput" id="trainFile" style="display: none;">
+				<label class="tooltip">Training Data (.csv file) 
+					<span class="classic">Please see the documentation at the green 'Help?' link above for more information including the expected file format</span>
+				</label>
+				<script type="text/javascript">
+					insert_file_upload_block('trainFileName', 'trainingData');
+				</script>
+			</div>
+			<div class="shortInput" id="testFile" style="display: none;">
+				<label class="tooltip">Testing Data (.csv file) 
+					<span class="classic">Please see the documentation at the green 'Help?' link above for more information including the expected file format</span>
+				</label>
+				<script type="text/javascript">
+					insert_file_upload_block('testFileName', 'testingData');
+				</script>
+			</div>			
+			<div class="shortInput" id="trainBuild">
+				<label class="tooltip">Training Building<span class="classic">Select the building to use for training</span></label>
+				<select id="trainBuilding" name="trainBuilding"> </select>
+				<script type="text/javascript">
+					populateBuildings("#trainSet");
+				</script>
+			</div>
+			<div class="shortInput" id="testBuild">
+				<label class="tooltip">Testing Building<span class="classic">Select the building to use for testing</span></label>
+				<select id="testBuilding" name="testBuilding"> </select>
+				<script type="text/javascript">
+					populateBuildings("#testSet");
+				</script>
+			</div>
+			<div class="wideInput" style="text-align:right">
+				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
+				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
+				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
+				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
+				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
+			</div>
+		</form>
+	</div>
+
+	<div id ="runIndicator" class="content running">
+		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
+	</div>
+	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
+		<pre id='errorText' style='overflow-x:scroll'></pre>
+		<script type="text/javascript">
+		if (typeof(allInputData.stderr) !== 'undefined') {
+			gebi('stopIndicator').style.visibility = 'visible'
+			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
+		</script>
+	</div>
+
+	<div id="output">
+		<p class="reportTitle postRun" style="page-break-before:always">Dissaggregation Overview</p>
+		<div id="disaggPieDiagram" class="tightContent postRun">
+			<img id="disaggPie" style="width:1000px;" />
+			<script type="text/javascript">gebi("disaggPie").src = "data:image/png;base64," + allOutputData.disaggPie</script>
+		</div>
+		<p class="reportTitle postRun" style="page-break-before:always">Training Data, top 5 appliances</p>
+		<div id="trainPlotDiagram" class="tightContent postRun">
+			<img id="trainPlot" style="width:1000px;" />
+			<script type="text/javascript">gebi("trainPlot").src = "data:image/png;base64," + allOutputData.trainPlot</script>
+		</div>
+		<p class="reportTitle postRun" style="page-break-before:always">Test Data</p>
+		<div id="testPlotDiagram" class="tightContent postRun">
+			<img id="testPlot" style="width:1000px;" />
+			<script type="text/javascript">gebi("testPlot").src = "data:image/png;base64," + allOutputData.testPlot</script>
+		</div>
+		<p class="reportTitle postRun" style="page-break-before:always">Disaggregation</p>
+		<div id="disaggPlotDiagram" class="tightContent postRun">
+			<img id="disaggPlot" style="width:1000px;" />
+			<script type="text/javascript">gebi("disaggPlot").src = "data:image/png;base64," + allOutputData.disaggPlot</script>
+		</div>
+	</div>
+
+</body>

@@ -2,13 +2,18 @@ import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime a
 import traceback
 from os.path import join as pJoin
 from jinja2 import Template
+import pandas as pd
+import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib
+import plotly.plotly as py
+import plotly.graph_objs as go
+import plotly.offline as pyo
 from networkx.drawing.nx_agraph import graphviz_layout
 import networkx as nx
 from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
-plt.switch_backend('Agg')
+# plt.switch_backend('Agg')
 
 # OMF imports 
 import omf.feeder as feeder
@@ -18,7 +23,8 @@ from omf.solvers import gridlabd
 from dateutil import parser
 from dateutil.relativedelta import *
 
-def recloserAnalysis(pathToGlm, lineNameForRecloser, outageGenerationStats={}):
+
+def recloserAnalysis(pathToGlm, lineNameForRecloser, failureDistribution, restorationDistribution):
 	tree = omf.feeder.parse(pathToGlm)
 	#add fault object to tree
 	simTime='2000-01-01 0:00:00'
@@ -41,7 +47,7 @@ def recloserAnalysis(pathToGlm, lineNameForRecloser, outageGenerationStats={}):
 	CLOCK_RANGE = CLOCK_START + ',' + CLOCK_END
 	if faultType != None:
 		# Add eventgen object (the fault)
-		tree[str(biggestKey*10 + 1)] = {'object':'eventgen','name':'RandEvent','parent':'RelMetrics', 'target_group':'class=underground_line','fault_type':faultType}
+		tree[str(biggestKey*10 + 1)] = {'object':'eventgen','name':'RandEvent','parent':'RelMetrics', 'target_group':'class=underground_line','fault_type':faultType, 'failure_dist':failureDistribution, 'restoration_dist':restorationDistribution}
 		# Add fault_check object
 		tree[str(biggestKey*10 + 2)] = {'object':'fault_check','name':'test_fault','check_mode':'ONCHANGE', 'eventgen_object':'RandEvent', 'output_filename':'Fault_check_out.txt'}
 		# Add reliabilty metrics object
@@ -76,7 +82,7 @@ def recloserAnalysis(pathToGlm, lineNameForRecloser, outageGenerationStats={}):
 			edge_bools['fuse'] = True
 		elif obtype == 'switch':
 			edge_bools['switch'] = True
-		if tree[key].get("argument","") == "\"schedules.glm\"" or tree[key].get("tmyfile","") != "":
+		if tree[key].get("argument","") == '"schedules.glm"' or tree[key].get("tmyfile","") != "":
 			del tree[key]
 	
 	tree[str(biggestKey*10 + 5)] = {"object":"voltdump","filename":"voltDump.csv"}
@@ -122,7 +128,7 @@ def recloserAnalysis(pathToGlm, lineNameForRecloser, outageGenerationStats={}):
 	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 
 	#Pull out SAIDI/SAIFI values
-	with open(workDir + '\Metrics_Output.csv', 'rb') as csvfile:
+	with open(workDir + '/Metrics_Output.csv', 'rb') as csvfile:
 		file = csv.reader(csvfile)
 		for line in file:
 			k = 0
@@ -214,8 +220,9 @@ def recloserAnalysis(pathToGlm, lineNameForRecloser, outageGenerationStats={}):
 	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 
 	#Pull out SAIDI/SAIFI values
-	with open(workDir + '\Metrics_Output.csv', 'rb') as csvfile:
+	with open(workDir + '/Metrics_Output.csv', 'rb') as csvfile:
 		file = csv.reader(csvfile)
+		print list(file)
 		for line in file:
 			k = 0
 			while k < len(line):
@@ -300,7 +307,7 @@ def optimalRecloserAnalysis(pathToGlm):
 			edge_bools['fuse'] = True
 		elif obtype == 'switch':
 			edge_bools['switch'] = True
-		if tree[key].get("argument","") == "\"schedules.glm\"" or tree[key].get("tmyfile","") != "":
+		if tree[key].get("argument","") == '"schedules.glm"' or tree[key].get("tmyfile","") != "":
 			del tree[key]
 	# Make sure we have a voltage dump and current dump:
 	tree[str(biggestKey*10 + 5)] = {"object":"voltdump","filename":"voltDump.csv"}
@@ -336,6 +343,37 @@ def optimalRecloserAnalysis(pathToGlm):
 				'property':'continuous_rating',
 				'file':key+'_cont_rating.csv'
 			}
+
+
+	attachments = []
+	
+	# Run Gridlab.
+	if not workDir:
+		workDir = tempfile.mkdtemp()
+		print '@@@@@@', workDir
+	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
+
+	#Pull out SAIDI/SAIFI values
+	with open(workDir + '/Metrics_Output.csv', 'rb') as csvfile:
+		file = csv.reader(csvfile)
+		for line in file:
+			k = 0
+			while k < len(line):
+				if 'SAIFI' in line[k]:
+					for i in line[k].split():
+						try:
+							noReclSAIFI = float(i)
+							break
+						except:
+							continue
+				if 'SAIDI' in line[k]:
+					for i in line[k].split():
+						try:
+							noReclSAIDI = float(i)
+							break
+						except:
+							continue
+				k += 1
 
 	bestSAIDI = 5.0
 	bestSAIFI = 5.0
@@ -417,7 +455,7 @@ def optimalRecloserAnalysis(pathToGlm):
 				gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 	
 				#Pull out SAIDI/SAIFI values
-				with open(workDir + '\Metrics_Output.csv', 'rb') as csvfile:
+				with open(workDir + '/Metrics_Output.csv', 'rb') as csvfile:
 					file = csv.reader(csvfile)
 					for line in file:
 						k = 0
@@ -448,10 +486,21 @@ def optimalRecloserAnalysis(pathToGlm):
 						if tree[key].get('object', '') in 'recloser':
 							bestSAIFI_name = SAIFI_name
 	return {
+		'noRecl-SAIDI': noReclSAIDI,
 		'bestSAIDI': bestSAIDI,
 		'bestSAIDI_name': bestSAIDI_name,
+		'noRecl-SAIFI': noReclSAIFI,
 		'bestSAIFI': bestSAIFI,
 		'bestSAIFI_name': bestSAIFI_name
 	}
 
-print(recloserAnalysis(omf.omfDir + '/scratch/CIGAR/' + 'test_ieee37nodeFaultTester.glm', 'node709-708', None))
+test1 = recloserAnalysis(omf.omfDir + '/scratch/CIGAR/' + 'test_ieee37nodeFaultTester.glm', 'node709-708', 'EXPONENTIAL', 'PARETO')
+print(test1)
+row = test1.keys()
+col = test1.values()
+#data = [go.Bar(x = row, y = col)]
+#py.iplot(data, filename='metrics_of_interest')
+plt.bar(row, col)
+plt.show()
+plt.savefig('metrics.png')
+

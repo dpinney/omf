@@ -1,0 +1,33 @@
+nilmtk requires python 3 so make sure you have it installed; also i ran my code in a python3 virtualenv so all my commands are python and pip but if youre default python is python2, make sure you use python3 and pip3 instead of python and pip
+
+	sudo apt-get install python3-tk
+
+install other necessary system packages
+
+	sudo apt-get install git libhdf5-serial-dev python-dev postgresql postgresql-contrib postgresql-server-dev-all
+
+install all neccessary python packages using pip 
+
+	yes | pip install pip numpy scipy six scikit-learn pandas numexpr tables matplotlib networkx future psycopg2 nose coveralls coverage git+https://github.com/hmmlearn/hmmlearn.git@ae1a41e4d03ea61b7a25cba68698e8e2e52880ad#egg=hmmlearn
+
+install nilm_metadata
+
+	git clone https://github.com/nilmtk/nilm_metadata/; cd nilm_metadata; python setup.py develop
+
+install nilmtk
+
+	cd ..; git clone https://github.com/nilmtk/nilmtk.git; cd nilmtk; python setup.py develop
+
+run unit tests to make sure installation has succeeded
+
+	nosetests
+
+if you get the following error:
+	ImportError: cannot import name 'distribute_covar_matrix_to_match_covariance_type'
+replace the installed scikit learn with version 0.19.2
+
+	pip install scikit-learn==0.19.2 
+
+you should now pass the unit tests but it might complain that the installed networkx and pandas is incompatible; if it does, go ahead and install the compatible versions
+
+	pip install networkx==2.1 pandas==0.22.0

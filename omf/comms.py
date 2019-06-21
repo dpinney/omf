@@ -91,7 +91,7 @@ def createGraph(pathToOmdFile):
 	'''Create networkxgraph from omd'''
 	with open(pathToOmdFile) as inFile:
 		tree = json.load(inFile)['tree']
-	nxG = omf.feeder.treeToDiNxGraph(tree)
+	nxG = treeToDiNxGraph(tree)
 	#use conversion for testing other feeders
 	nxG = graphValidator(pathToOmdFile, nxG)
 	return nxG
@@ -165,12 +165,27 @@ def getFiberCost(nxG, fiberCostPerMeter):
 def getTransmittersCost(nxG, transmitterCost):
 	'''Calculate the cost of RF transmitter equipment'''
 	transmitter_cost = len([transmitter for transmitter  in nx.get_node_attributes(nxG, 'transmitter')])*transmitterCost
-	return fiber_cost
+	return transmitter_cost
 
-def getRecieverCost(nxG, recieverCost):
+def getRecieversCost(nxG, recieverCost):
 	'''Calculate the cost of RF reciever equipment'''
 	reciever_cost = len([reciever for reciever in nx.get_node_attributes(nxG, 'type') if nxG.node[reciever]['type'] in ['meter', 'triplex_meter']])*recieverCost
 	return reciever_cost
+
+'''
+node10310x2-Ax110310x2-Bx1
+(32.98452635678161, -102.75866843482896)
+node10310x2-Bx1960605
+(32.98452635678161, -102.75866843482896)
+node7875x1-Ax17875x1-Bx1
+(32.99212825739565, -102.75846672260337)
+node533x1-Bx1824834
+(32.989693741841, -102.76565214046761)
+node7875x1-Bx1824971
+(32.99212825739565, -102.75846672260337)
+node533x1-Ax1533x1-Bx1
+(32.989693741841, -102.76565214046761)
+'''
 
 def calcBandwidth(nxG):
 	#go through transmitters and recievers
@@ -178,16 +193,16 @@ def calcBandwidth(nxG):
 	substation = getSubstation(nxG)
 	nxG.node[substation]['bandwidthUse'] = 0
 	transmitters = [transmitter for transmitter  in nx.get_node_attributes(nxG, 'transmitter')]
-	print(len(transmitters))
+	#print(len(transmitters))
 	for transmitter in transmitters:
 		nxG.node[transmitter]['bandwidthUse'] = 0
+		#print(transmitter)
+		#print(nxG.node[transmitter]['pos'])
 		#print(nxG.successors(transmitter))
-		if transmitter == 'node10310x2-Bx1960605':
-			print(nxG.successors(transmitter))
+		#if transmitter == 'node10310x2-Bx1960605':
+			#print(nxG.successors(transmitter))
 			#print('node')
 		for reciever in nxG.successors(transmitter):
-			if reciever == 'nodeS1807-34-0121807-0303_B':
-				print(transmitter, nxG.node[transmitter]['pos'])
 			if nxG[transmitter][reciever].get('rf',False):
 				nxG[transmitter][reciever]['bandwidthUse'] = nxG.node[reciever]['bandwidthUse']
 				nxG.node[transmitter]['bandwidthUse'] += nxG.node[reciever]['bandwidthUse']
@@ -244,11 +259,17 @@ def graphGeoJson(nxG):
 def showOnMap(geoJson):
 	'''Open a browser to display a geoJSON object on a map.'''
 	tempDir = tempfile.mkdtemp()
-	shutil.copy('commsMap.html', tempDir)
+	shutil.copy('templates/commsNetViz.html', tempDir)
 	with open(pJoin(tempDir,'commsGeoJson.js'),"w") as outFile:
 		outFile.write("var geojson =")
 		json.dump(geoJson, outFile, indent=4)
-	webbrowser.open('file://' + pJoin(tempDir,'commsMap.html'))
+	webbrowser.open('file://' + pJoin(tempDir,'commsNetViz.html'))
+
+def saveOmc(geoJson, outputPath):
+	if not os.path.exists(outputPath):
+		os.makedirs(outputPath)
+	with open(pJoin(outputPath,'commsGeoJson.omc'),"w") as outFile:
+		json.dump(geoJson, outFile, indent=4)
 
 def convertOmd(pathToOmdFile):
 	''' Convert sources to networkx graph. Some larger omd files do not have the position information in the tree'''
@@ -370,9 +391,16 @@ pointCosts = {
 	'recloser': 0
 }
 
-feeder = createGraph('../../static/publicFeeders/ABEC Columbia.omd')
-setFiber(feeder, edgeType='switch')
-setRF2(feeder)
-calcBandwidth(feeder)
-showOnMap(graphGeoJson(feeder))
-#print(calcFiberCost(feeder, 2))
+def _tests():
+	feeder = createGraph('static/publicFeeders/Olin Barre LatLon.omd')
+	setFiber(feeder, edgeType='switch')
+	setRF2(feeder)
+	calcBandwidth(feeder)
+	print('cost of rf transmitter equipment: ' + str(getTransmittersCost(feeder, 10000)))
+	print('cost of rf reciever equipment: ' + str(getRecieversCost(feeder, 100)))
+	print('cost of fiber: ' + str(getFiberCost(feeder, 4)))
+	saveOmc(graphGeoJson(feeder), 'output')
+	showOnMap(graphGeoJson(feeder))
+
+if __name__ == '__main__':
+	_tests()

@@ -17,6 +17,45 @@ from omf import loadForecast as fc
 modelName, template = metadata(__file__)
 tooltip = "Calculate the energy storage capacity for a collection of thermostatically controlled loads."
 
+def pulp24hrVbat(ind, demand, P_lower, P_upper, E_UL):
+	"""
+	Given input dictionary, the limits on the battery, and the demand curve, 
+	minimize the peaks for a day.
+	"""
+	alpha = 1 - (
+		1 / (float(ind["capacitance"]) * float(ind["resistance"]))
+	)  # 1-(deltaT/(C*R)) hourly self discharge rate
+	# LP Variables
+	model = pulp.LpProblem("Daily demand charge minimization problem", pulp.LpMinimize)
+	VBpower = pulp.LpVariable.dicts(
+		"ChargingPower", range(24)
+	)  # decision variable of VB charging power; dim: 8760 by 1
+	VBenergy = pulp.LpVariable.dicts(
+		"EnergyState", range(24)
+	)  # decision variable of VB energy state; dim: 8760 by 1
+
+	for i in range(24):
+		VBpower[i].lowBound = -1 * P_lower[i]
+		VBpower[i].upBound = P_upper[i]
+		VBenergy[i].lowBound = -1 * E_UL[i]
+		VBenergy[i].upBound = E_UL[i]
+	pDemand = pulp.LpVariable("Peak Demand", lowBound=0)
+
+	# Objective function: Minimize peak demand
+	model += pDemand
+
+	# VB energy state as a function of VB power
+	model += VBenergy[0] == VBpower[0]
+	for i in range(1, 24):
+		model += VBenergy[i] == alpha * VBenergy[i - 1] + VBpower[i]
+	for i in range(24):
+		model += pDemand >= demand[i] + VBpower[i]
+	model.solve()
+	return (
+		[VBpower[i].varValue for i in range(24)],
+		[VBenergy[i].varValue for i in range(24)],
+	)
+
 def pyVbat(modelDir, i):
 	vbType = i['load_type']
 	with open(pJoin(modelDir, 'temp.csv')) as f:
