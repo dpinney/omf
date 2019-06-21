@@ -304,7 +304,6 @@ def merge_hourly_subhourly(hourly, subhourly, insert_idx):
 	:return: a single merged list of lists
 	:rtype: list
 	"""
-	assert len(hourly) == 8760 # disable this assertion for testing
 	assert len(hourly) == len(subhourly)
 	assert len(hourly[0]) > 0 and len(subhourly[0]) > 0
 	# Add headers
@@ -443,27 +442,54 @@ class USCRNDataType(object):
 		return value
 
 
-def test_gridlabd_weather_sim(year, station):
-	""" GridLAB-D intermitently fails """
-	glm_path = os.path.join(os.path.dirname(__file__), "IEEE_quickhouse.glm")
+def get_omd_path(glm_path):
+	"""Get a .omd from a .glm and return the path."""
 	tree = feeder.parse(glm_path)
 	omd = {}
 	omd["tree"] = tree
-	omd_path = os.path.join(os.path.dirname(__file__), "IEEE_quickhouse.omd")
+	omd_name = os.path.basename(glm_path).split(".")[0] + ".omd"
+	omd_path = os.path.join(os.path.dirname(__file__), omd_name)
 	with open(omd_path, 'w') as f:
 		json.dump(omd, f, indent=4)
+	return omd_path
+
+
+def test_gridlabd_weather_sim(year, station, omd_path):
+	"""
+	runInFileSystem(
+		feederTree: The value stored at the "tree" key of the .omd file.
+	    attachments: The value stored at the "attachments" key of the .omd file. Each attachment will be rewritten as a file inside of the working
+			directory of the GridLAB-D operation. I do want to specify this.
+	    keepFiles: whether or not to preserve all of the files in the workDir. Only has an effect if an explicit workDir was not set.
+		workDir: the working directory to run the GridLAB-D operation. If not specified, a temporary directory will be used.
+	    glmName: the basename of the .glm file (e.g. "something.glm") where the glmString (which is the result of omf.feeder.sortedWrite(<feederTree>) will
+			be written in the workDir. If not specified a .glm file is created with a timestamp as the filename. GridLAB-D operates on the .glm
+			corresponding to the glmName, NOT directly on the feederTree.
+	)
+	"""
 	attachHistoricalWeather(omd_path, year, station)
 	with open(omd_path) as f:
-		calibrated_tree = json.load(f)["tree"]
+		omd = json.load(f)
+	calibrated_tree = omd["tree"]
+	attachments = omd["attachments"]
 	# Run here to test GridLAB_D
 	# The output is NOT a feeder. It's some data in JSON format. This function call does NOT modify myTree.
-	rawOut = runInFilesystem(calibrated_tree, attachments=[], keepFiles=True, workDir=os.path.join(os.path.dirname(__file__), "gridlabd-work-dir"), glmName='outFile.glm')
+	rawOut = runInFilesystem(feederTree=calibrated_tree, attachments=attachments, keepFiles=True, workDir=os.path.join(os.path.dirname(__file__), "gridlabd-work-dir"), glmName='outFile.glm')
 	print(rawOut)
 
 
 if __name__ == "__main__":
+	"""
+	Some times you just have to run GridLAB-D a few times before it works.
+	- Running gridlabd on a newly generated .omd file will use the new USCRN CSV data
+		- Actually, this isn't always true! It has to be a newly generated .omd file AND new USCRN data!
+	- Running gridlabd on an old .omd file will NOT use the new USCRN CSV data, even though the .omd file attachment section is being updated with the
+	  new CSV data. Heck, even the first run on an old .omd file doesn't use the new data. It uses the data from the most recent run for the newly
+	  generated .omd file
+	- Does this have anything to do with gridlabd.xml changing or not changing?
+	"""
 	year = 2018
-	station = "AK_Kenai_29_ENE"
-	#start_date = datetime(year, 1, 1)
-	#calibrate_omd(start_date, "/Users/austinchang/pycharm/omf/omf/scratch/weatherTesting/IEEE_quickhouse.omd", "/Users/austinchang/pycharm/omf/omf/scratch/weatherTesting/uscrn-weather-data.csv")
-	test_gridlabd_weather_sim(year, station)
+	station = "CO_Dinosaur_2_E"
+	#omd_path = get_omd_path(os.path.join(os.path.dirname(__file__), "IEEE_quickhouse.glm"))
+	omd_path = os.path.join(os.path.dirname(__file__), "OlinBarreGHW.omd")
+	test_gridlabd_weather_sim(year, station, omd_path)

@@ -4,7 +4,7 @@ from flask import Flask, send_from_directory, request, redirect, render_template
 from jinja2 import Template
 from multiprocessing import Process
 from passlib.hash import pbkdf2_sha512
-import json, os, flask_login, hashlib, random, time, datetime as dt, shutil, boto.ses, csv
+import json, os, flask_login, hashlib, random, time, datetime as dt, shutil, boto.ses, csv, sys
 try:
 	import fcntl
 except:
@@ -1177,46 +1177,50 @@ def backgroundClimateChange(modelDir, omdPath, outFilePath, owner, modelName):
 		pid_filepath = os.path.join(_omfDir, "data/Model", owner, modelName, "WPID.txt")
 		with open(pid_filepath, 'w') as pid_file:
 			pid_file.write(str(os.getpid()))
-		with open(omdPath, 'r') as inFile:
-			feederJson = json.load(inFile)
-			for key in feederJson['tree'].keys():
-				if (feederJson['tree'][key].get('object') == 'climate') or (feederJson['tree'][key].get('name') == 'weatherReader'):
-					del feederJson['tree'][key]
-			for key in feederJson['attachments'].keys():
-				if (key.endswith('.tmy2')) or (key == 'weatherAirport.csv'):
-					del feederJson['attachments'][key]
-			importOption = request.form.get('climateImportOption')
-
-			if importOption == 'historicalImport':
-				start = request.form.get('startDate')
-				end = request.form.get('endDate')
-				airport = request.form.get('airport')
-				try:
-					weather.makeClimateCsv(start, end, airport, outFilePath)
-				except Exception as error:
-					errorString = ''.join(error)
-					with open(modelDir + '/weatherError.txt', 'w+') as errorFile:
-						errorFile.write('Climate data does not exist for given parameters. Choose different parameters.')
-				feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'csv_reader', 'name':'weatherReader', 'filename':'weatherAirport.csv'}
-				feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'climate', 'name':'Climate', 'tmyfile':'weatherAirport.csv', 'reader':'weatherReader'}
-				with open(outFilePath) as csvFile:
-					feederJson['attachments']['weatherAirport.csv'] = csvFile.read()
-			elif importOption == 'tmyImport':
-				zipCode = request.form.get('zipCode')
-				climateName = weather.zipCodeToClimateName(zipCode)
-				tmyFilePath = 'data/Climate/' + climateName + '.tmy2'
-				feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'climate','name':'Climate','interpolate':'QUADRATIC', 'tmyfile':'climate.tmy2'}
-				with open(tmyFilePath) as tmyFile:
-					feederJson['attachments']['climate.tmy2'] = tmyFile.read()
-					
-		with open(omdPath, 'w') as outFile:
-			fcntl.flock(outFile, fcntl.LOCK_EX)
-			json.dump(feederJson, outFile, indent=4)
-			fcntl.flock(outFile, fcntl.LOCK_UN)
+		importOption = request.form.get('climateImportOption')
+		if importOption == "USCRNImport":
+			year = int(request.form.get("year"))
+			station = request.form.get("station")
+			attachHistoricalWeather(omdPath, year, station)
+			#if importOption == 'historicalImport':
+			#	start = request.form.get('startDate')
+			#	end = request.form.get('endDate')
+			#	airport = request.form.get('airport')
+			#	try:
+			#		weather.makeClimateCsv(start, end, airport, outFilePath)
+			#	except Exception as error:
+			#		errorString = ''.join(error)
+			#		with open(modelDir + '/weatherError.txt', 'w+') as errorFile:
+			#			errorFile.write('Climate data does not exist for given parameters. Choose different parameters.')
+			#	feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'csv_reader', 'name':'weatherReader', 'filename':'weatherAirport.csv'}
+			#	feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'climate', 'name':'Climate', 'tmyfile':'weatherAirport.csv', 'reader':'weatherReader'}
+			#	with open(outFilePath) as csvFile:
+			#		feederJson['attachments']['weatherAirport.csv'] = csvFile.read()
+		elif importOption == 'tmyImport':
+			# Old calibration logic. Preserve for the sake of the 'tmyImport' option
+			with open(omdPath, 'r') as inFile:
+				feederJson = json.load(inFile)
+				for key in feederJson['tree'].keys():
+					if (feederJson['tree'][key].get('object') == 'climate') or (feederJson['tree'][key].get('name') == 'weatherReader'):
+						del feederJson['tree'][key]
+				for key in feederJson['attachments'].keys():
+					if (key.endswith('.tmy2')) or (key == 'weatherAirport.csv'):
+						del feederJson['attachments'][key]
+			# Old tmy2 weather operation
+			zipCode = request.form.get('zipCode')
+			climateName = weather.zipCodeToClimateName(zipCode)
+			tmyFilePath = 'data/Climate/' + climateName + '.tmy2'
+			feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'climate','name':'Climate','interpolate':'QUADRATIC', 'tmyfile':'climate.tmy2'}
+			with open(tmyFilePath) as tmyFile:
+				feederJson['attachments']['climate.tmy2'] = tmyFile.read()
+			with open(omdPath, 'w') as outFile:
+				fcntl.flock(outFile, fcntl.LOCK_EX)
+				json.dump(feederJson, outFile, indent=4)
+				fcntl.flock(outFile, fcntl.LOCK_UN)
 		os.remove(pid_filepath)
-	except Exception as error:
-		with open("data/Model/"+owner+"/"+modelName+"/error.txt", "w+") as errorFile:
-			errorFile.write('weatherError')
+	except:
+		with open("data/Model/"+owner+"/"+modelName+"/error.txt", "w") as errorFile:
+			errorFile.write(str(sys.exc_info()[1]))
 
 
 @app.route("/anonymize/<owner>/<feederName>", methods=["POST"])

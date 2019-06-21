@@ -1,6 +1,0 @@
-ERROR    [INIT] : csv_reader::read_header ~ unable to find column property '1:1:0:0:0''
-ERROR    [INIT] : csv_reader::open ~ column header read failure on line 1
-ERROR    [INIT] : init_by_deferral(): object MyClimate initialization failed
-ERROR    [INIT] : model initialization failed
-FATAL    [INIT] : shutdown after simulation stopped prematurely
-FATAL    [INIT] : environment startup failed: Invalid argument

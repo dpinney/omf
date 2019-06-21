@@ -171,7 +171,7 @@ stations = [
 ]
 
 
-def get_all_uscrn_data(year, stations, frequency, filter_data=False):
+def write_uscrn_metadata(year, stations, frequency, csv_path, filter_data=False):
 	# type: (int, list, str, bool) -> dict
 	"""
 	{
@@ -180,7 +180,9 @@ def get_all_uscrn_data(year, stations, frequency, filter_data=False):
 	"""
 	year = int(year)
 	assert type(frequency) is str
-	metadata = {}
+	with open(csv_path, 'w') as f:
+		writer = csv.writer(f)
+		writer.writerow(["Frequency", "Year", "Station Name", "Total Lines", "Valid Lines", "Invalid Lines"])
 	if frequency == "hourly":
 		temperature = USCRNDataType(8, -9999.0) 
 		humidity = USCRNDataType(26, -9999, 27)
@@ -206,7 +208,7 @@ def get_all_uscrn_data(year, stations, frequency, filter_data=False):
 		for row in rows:
 			valid = True
 			for dt in data_types:
-				if not dt.validate(row):
+				if not dt.is_valid(row):
 					invalid_lines += 1
 					valid = False
 					break
@@ -227,8 +229,9 @@ def get_all_uscrn_data(year, stations, frequency, filter_data=False):
 		metadata_row.append(valid_lines) # int
 		metadata_row.append(invalid_lines) # int
 		#TODO: write each row with csv instead of putting everything in dictionary
-		metadata[s] = metadata_row
-	return metadata
+		with open(csv_path, 'a') as f:
+			writer = csv.writer(f)
+			writer.writerow(metadata_row)
 
 
 def sort_metadata(data):
@@ -266,26 +269,42 @@ def merge_dictionaries(d1, d2):
 	return merged
 
 
-def write_metadata(data, year, filtered, frequency=None):
-	if frequency is None:
-		frequency = "hourlyAndSubhourly"
-	quality = "raw"
-	if filtered:
-		quality = "filtered"
-	filepath = os.path.join(os.path.dirname(__file__), "uscrn_{}_{}_{}_metadata.csv".format(frequency, year, quality))
-	with open(filepath, 'w') as f:
-		writer = csv.writer(f)
-		writer.writerows(data)
+def get_uscrn_dictionary(csv_path):
+	data = {}
+	with open(csv_path) as f:
+		reader = csv.reader(f)
+		for line in f:
+			row = reader.next()
+			station_name = row[2]
+			data[station_name] = row
+	return data
 
 
 if __name__ == "__main__":
-	""" Just do one year at a time. 2010 - 2018 are done """
-	year = 2017
+	# 2018 subhourly data is incomplete. look at csv
+	"""Just do one year at a time."""
+	year = 2018
 	filter_data = False
-	hourly_metadata = get_all_uscrn_data(year=year, stations=stations, frequency="hourly", filter_data=filter_data)
-	#write_metadata(hourly_metadata.values(), year, "hourly")
-	subhourly_metadata = get_all_uscrn_data(year=year, stations=stations, frequency="subhourly", filter_data=filter_data)
-	#write_metadata(subhourly_metadata.values(), year, "subhourly")
-	metadata = merge_dictionaries(hourly_metadata, subhourly_metadata)
-	metadata = sort_metadata(metadata.values())
-	write_metadata(metadata, year, filter_data)
+	if filter_data:
+		h_filename = "{}-hourly-filtered.csv".format(year)
+		sh_filename = "{}-subhourly-filtered.csv".format(year)
+		merged_filename = "{}-merged-filtered.csv".format(year)
+	else:
+		h_filename = "{}-hourly-raw.csv".format(year)
+		sh_filename = "{}-subhourly-raw.csv".format(year)
+		merged_filename = "{}-merged-raw.csv".format(year)
+	hourly_csv_path = os.path.join(os.path.dirname(__file__), h_filename)
+	subhourly_csv_path = os.path.join(os.path.dirname(__file__), sh_filename)
+	merged_csv_path = os.path.join(os.path.dirname(__file__), merged_filename)
+	### Get data or not
+	write_uscrn_metadata(year, stations, "hourly", hourly_csv_path, filter_data)
+	write_uscrn_metadata(year, stations, "subhourly", subhourly_csv_path, filter_data)
+	### Get data or not
+	d1 = get_uscrn_dictionary(hourly_csv_path)
+	d2 = get_uscrn_dictionary(subhourly_csv_path)
+	merged = merge_dictionaries(d1, d2)
+	metadata = sort_metadata(merged.values())
+	with open(merged_csv_path, 'w') as f:
+		writer = csv.writer(f)
+		writer.writerow(["Frequency", "Year", "Station Name", "Total Lines", "Valid Lines", "Invalid Lines", "Frequency", "Year", "Station Name", "Total Lines", "Valid Lines", "Invalid Lines"])
+		writer.writerows(metadata)

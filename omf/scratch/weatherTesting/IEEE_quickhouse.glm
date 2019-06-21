@@ -26,8 +26,7 @@ module residential {
 module climate;
 
 object csv_reader {
-	//name CsvReader;
-	name WeatherReader;
+	name CsvReader;
 	//filename weatheryearDCA.csv;
 	filename weatherNewKy.csv;
 };
@@ -35,8 +34,7 @@ object csv_reader {
 object climate {
 	name MyClimate;
 	//tmyfile weatheryearDCA.csv;
-	//reader CsvReader;
-	reader WeatherReader;
+	reader CsvReader;
 };
 
 schedule waterdemand1 {
