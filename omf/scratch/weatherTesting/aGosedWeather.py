@@ -29,25 +29,11 @@ calculated from the 5-minute dataset.
 """
 
 
-CSV_FILENAME = "uscrn-weather-data.csv"
-
-
 def attachHistoricalWeather(omd_path, year, station):
-	csv_path = os.path.join(os.path.dirname(omd_path), CSV_FILENAME)
+	csv_path = os.path.join(os.path.dirname(omd_path), "uscrn-weather-data.csv")
 	write_USCRN_csv(csv_path, year, station)
 	start_date = datetime(year, 1, 1)
 	calibrate_omd(start_date, omd_path, csv_path)
-
-
-def calibrate_omd(start_date, omd_path, csv_path):
-	with open(omd_path, 'r') as f:
-		omd = json.load(f)
-	tree = omd["tree"]
-	# Delete all climate objects from the feeder, then reinsert new climate objects
-	reader_name = "WeatherReader"
-	climate_name = "MyClimate"
-
-
 
 
 def calibrate_omd(start_date, omd_path, csv_path):
@@ -64,24 +50,21 @@ def calibrate_omd(start_date, omd_path, csv_path):
 	with open(omd_path, 'r') as f:
 		omd = json.load(f)
 	tree = omd["tree"]
-	# Delete all climate objects from the feeder, then reinsert new climate objects
-	reader_name = 'WeatherReader'
-	climate_name = 'MyClimate'
-	# csv_reader has reference to old filename but is not deleted
-
-	csv_reader_name = "CsvReader"
-
+	# Delete all climate objects from the feeder. Also delete any csv_reader objects that are also named "WeatherReader"
+	weather_reader_name = "WeatherReader"
 	for key in tree.keys():
-		obName = tree[key].get('name','')
-		obType = tree[key].get('object','')
-		if obName in [reader_name, climate_name] or obType == 'climate':
+		object_type = tree[key].get("object")	
+		object_name = tree[key].get("name")
+		if object_type == "climate" or (object_type == "csv_reader" and object_name == weather_reader_name):
 			del tree[key]
+	# Reinsert a new climate object and an associated csv_reader object
 	oldMax = feeder.getMaxKey(tree)
 	tree[oldMax + 1] = {'omftype':'module', 'argument':'tape'}
 	tree[oldMax + 2] = {'omftype':'module', 'argument':'climate'}
 	csv_name = os.path.basename(csv_path)
-	tree[oldMax + 3] = {'object':'csv_reader', 'name':reader_name, 'filename':csv_name}
-	tree[oldMax + 4] = {'object':'climate', 'name':climate_name, 'reader': reader_name, 'tmyfile':csv_name}
+	tree[oldMax + 3] = {'object':'csv_reader', 'name': weather_reader_name, 'filename': csv_name}
+	climate_name = "MyClimate"
+	tree[oldMax + 4] = {'object':'climate', 'name':climate_name, 'reader': weather_reader_name, 'tmyfile': csv_name}
 	# Set the time correctly. Modify certain objects in the feeder (e.g. recorder and clock)
 	feeder.adjustTime(tree, 240, 'hours', '{}-{}-{}'.format(start_date.year, start_date.month, start_date.day)) 
 	omd["tree"] = tree
@@ -135,7 +118,6 @@ def write_USCRN_csv(csv_path, year, station):
 
 
 def get_USCRN_data(year, station, frequency):
-	# type: (int, str, str) -> list
 	"""Get a .txt file from the USCRN server and return the data as a list of lists."""
 	url = "https://www1.ncdc.noaa.gov/pub/data/uscrn/products/"
 	if frequency == "hourly":
@@ -151,6 +133,7 @@ def get_USCRN_data(year, station, frequency):
 
 
 def get_hourly_USCRNDataTypes():
+	"""Return a list of the USCRNDataTypes that we want to extract from a USCRN .txt file of hourly data."""
 	temperature = USCRNDataType(8, -9999.0, flag_index=None, transformation_function=lambda x: round(celsius_to_fahrenheit(x), 1))
 	humidity = USCRNDataType(26, -9999, flag_index=27, transformation_function=lambda x: round((x / float(100)), 2))
 	solar_dir = USCRNDataType(13, -99999, flag_index=14, transformation_function=lambda x: int(round(watts_per_meter_sq_to_watts_per_ft_sq(x) * 0.75, 0)))
@@ -160,43 +143,9 @@ def get_hourly_USCRNDataTypes():
 
 
 def get_subhourly_USCRNDataTypes():
+	"""Return the USCRNDataTypes that we want to extract from a USCRN .txt file of subhourly data."""
 	wind_speed = USCRNDataType(21, -99.00, flag_index=22, transformation_function=lambda x: round(x, 2))
 	return [wind_speed]
-
-
-def test_gridlabd_weather_sim(year, station):
-	""" GridLAB-D intermitently fails """
-	glm_path = os.path.join(os.path.dirname(__file__), "IEEE_quickhouse.glm")
-	tree = feeder.parse(glm_path)
-	omd = {}
-	omd["tree"] = tree
-	omd_path = os.path.join(os.path.dirname(__file__), "IEEE_quickhouse.omd")
-	with open(omd_path, 'w') as f:
-		json.dump(omd, f, indent=4)
-	attachHistoricalWeather(omd_path, year, station)
-	with open(omd_path) as f:
-		calibrated_tree = json.load(f)["tree"]
-	# Run here to test GridLAB_D
-	# The output is NOT a feeder. It's some data in JSON format. This function call does NOT modify myTree.
-	rawOut = runInFilesystem(calibrated_tree, attachments=[], keepFiles=True, workDir=os.path.join(os.path.dirname(__file__), "gridlabd-work-dir"), glmName='outFile.glm')
-	print(rawOut)
-
-
-"""
-def other_test(tree, CSV_NAME):
-	omd = {}
-	omd["tree"] = tree
-	with open(CSV_NAME,'r') as weatherFile:
-		weatherString = weatherFile.read()
-	omd['attachments']['weatheryearDCA.csv'] = weatherString
-	filepath = os.path.join(os.path.dirname(__file__), "new-calibrated-feeder.omd")
-	with open(filepath, 'w') as f:
-		f.write(str(omd))
-	#try: os.remove('./Orville Tree Pond Calibrated With Weather.json')
-	#except: pass
-	#with open('./Orville Tree Pond Calibrated With Weather.json', 'w') as outFile:
-	#	json.dump(outJson, outFile, indent=4)
-"""
 
 
 def str_to_num(data):
@@ -492,6 +441,24 @@ class USCRNDataType(object):
 		if self.transformation_function is not None:
 			return self.transformation_function(value)
 		return value
+
+
+def test_gridlabd_weather_sim(year, station):
+	""" GridLAB-D intermitently fails """
+	glm_path = os.path.join(os.path.dirname(__file__), "IEEE_quickhouse.glm")
+	tree = feeder.parse(glm_path)
+	omd = {}
+	omd["tree"] = tree
+	omd_path = os.path.join(os.path.dirname(__file__), "IEEE_quickhouse.omd")
+	with open(omd_path, 'w') as f:
+		json.dump(omd, f, indent=4)
+	attachHistoricalWeather(omd_path, year, station)
+	with open(omd_path) as f:
+		calibrated_tree = json.load(f)["tree"]
+	# Run here to test GridLAB_D
+	# The output is NOT a feeder. It's some data in JSON format. This function call does NOT modify myTree.
+	rawOut = runInFilesystem(calibrated_tree, attachments=[], keepFiles=True, workDir=os.path.join(os.path.dirname(__file__), "gridlabd-work-dir"), glmName='outFile.glm')
+	print(rawOut)
 
 
 if __name__ == "__main__":
