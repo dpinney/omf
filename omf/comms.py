@@ -8,6 +8,7 @@ from scipy.spatial import ConvexHull
 from os.path import join as pJoin
 from sklearn.cluster import KMeans
 from flask import Flask, send_file, render_template
+from collections import defaultdict
 
 def treeToNxGraph(inTree):
 	''' Convert feeder tree to networkx graph. '''
@@ -105,10 +106,14 @@ def setFiber(nxG, edgeType='switch'):
 	node_positions = {nodewithPosition: nxG.node[nodewithPosition]['pos'] for nodewithPosition in nx.get_node_attributes(nxG, 'pos')}
 	edge_types = {edge: nxG[edge[0]][edge[1]]['type'] for edge in nx.get_edge_attributes(nxG, 'type')}
 	substation = getSubstation(nxG)
+	#collector position will validate that only one collector is added at each position
+	collector_positions = []
 	for node in node_positions:
 		for edge in nxG.out_edges(node):
 			if edge_types.get(edge,'') == edgeType:
-				nxG.node[node]['transmitter'] = True
+				if nxG.node[node]['pos'] not in collector_positions:
+					collector_positions.append(nxG.node[node]['pos']) 
+					nxG.node[node]['rfCollector'] = True
 				nxG.node[node]['bandwidthCapacity'] = 10**4
 				shortestPath = nx.bidirectional_shortest_path(nxG, substation, node)
 				for i in range(len(shortestPath)-1):
@@ -121,35 +126,20 @@ def getDistance(nxG, start, end):
 	dist = math.sqrt( (nxG.node[end]['pos'][1] - nxG.node[start]['pos'][1])**2 + (nxG.node[end]['pos'][0] - nxG.node[start]['pos'][0])**2 )
 	return dist
 
-def findNearestPoint(nxG, reciever, transmitters):
-	'''Find the nearest point for a reciever based on a list of transmitters'''
-	nearest = min(transmitters, key = lambda transmitter: getDistance(nxG, reciever, transmitter))
+def findNearestPoint(nxG, smartMeter, rfCollectors):
+	'''Find the nearest point for a smartMeter based on a list of rfCollectors'''
+	nearest = min(rfCollectors, key = lambda rfCollector: getDistance(nxG, smartMeter, rfCollector))
 	return nearest
 
-def setRF2(nxG):
-	'''Add rf edges between recievers and the nearest transmitter'''
-	recievers = [reciever for reciever in nx.get_node_attributes(nxG, 'type') if nxG.node[reciever]['type'] in ['meter', 'triplex_meter']]
-	transmitters = [transmitter for transmitter  in nx.get_node_attributes(nxG, 'transmitter')]
-	for reciever in recievers:
-		transmitter = findNearestPoint(nxG, reciever, transmitters)
-		nxG.add_edge(transmitter, reciever,attr_dict={'rf': True, 'bandwidthCapacity': (10**3 * 5)})
-		nxG.node[reciever]['bandwidthUse'] = 1
-	
-#change this to be nearest
-def setRF(nxG):
-	'''Add RF lines to  '''
-	node_positions = {nodewithPosition: nxG.node[nodewithPosition]['pos'] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')}
-	substation = getSubstation(nxG)
-	for node in node_positions:
-		if nxG.out_degree(node) == 0:
-			found = False
-			current = node
-			while not found and current != substation:
-				for pred in nxG.predecessors(current):
-					if nxG.node[pred].get('transmitter','') == True:
-						nxG.add_edge(pred, node,attr_dict={'rf': True})
-						found = True
-				current = pred
+def setRf(nxG):
+	'''Add rf edges between smartMeters and the nearest rfCollector'''
+	smartMeters = [smartMeter for smartMeter in nx.get_node_attributes(nxG, 'type') if nxG.node[smartMeter]['type'] in ['meter', 'triplex_meter']]
+	rfCollectors = [rfCollector for rfCollector  in nx.get_node_attributes(nxG, 'rfCollector')]
+	for smartMeter in smartMeters:
+		rfCollector = findNearestPoint(nxG, smartMeter, rfCollectors)
+		nxG.add_edge(rfCollector, smartMeter,attr_dict={'rf': True, 'type': 'rf', 'bandwidthCapacity': (10**3 * 5)})
+		nxG.node[smartMeter]['bandwidthUse'] = 1
+		nxG.node[smartMeter]['smartMeter'] = True
 
 def calcEdgeLengths(nxG):
 	'''Calculate the lengths of edges based on lat/lon position'''
@@ -162,57 +152,35 @@ def getFiberCost(nxG, fiberCostPerMeter):
 	fiber_cost = sum((nxG[edge[0]][edge[1]]['length'])*fiberCostPerMeter for edge in nx.get_edge_attributes(nxG, 'fiber'))
 	return fiber_cost
 
-def getTransmittersCost(nxG, transmitterCost):
-	'''Calculate the cost of RF transmitter equipment'''
-	transmitter_cost = len([transmitter for transmitter  in nx.get_node_attributes(nxG, 'transmitter')])*transmitterCost
-	return transmitter_cost
+def getrfCollectorsCost(nxG, rfCollectorCost):
+	'''Calculate the cost of RF rfCollector equipment'''
+	rfCollector_cost = len([rfCollector for rfCollector  in nx.get_node_attributes(nxG, 'rfCollector')])*rfCollectorCost
+	return rfCollector_cost
 
-def getRecieversCost(nxG, recieverCost):
-	'''Calculate the cost of RF reciever equipment'''
-	reciever_cost = len([reciever for reciever in nx.get_node_attributes(nxG, 'type') if nxG.node[reciever]['type'] in ['meter', 'triplex_meter']])*recieverCost
-	return reciever_cost
-
-'''
-node10310x2-Ax110310x2-Bx1
-(32.98452635678161, -102.75866843482896)
-node10310x2-Bx1960605
-(32.98452635678161, -102.75866843482896)
-node7875x1-Ax17875x1-Bx1
-(32.99212825739565, -102.75846672260337)
-node533x1-Bx1824834
-(32.989693741841, -102.76565214046761)
-node7875x1-Bx1824971
-(32.99212825739565, -102.75846672260337)
-node533x1-Ax1533x1-Bx1
-(32.989693741841, -102.76565214046761)
-'''
+def getsmartMetersCost(nxG, smartMeterCost):
+	'''Calculate the cost of RF smartMeter equipment'''
+	smartMeter_cost = len([smartMeter for smartMeter in nx.get_node_attributes(nxG, 'type') if nxG.node[smartMeter]['type'] in ['meter', 'triplex_meter']])*smartMeterCost
+	return smartMeter_cost
 
 def calcBandwidth(nxG):
-	#go through transmitters and recievers
-	#adust later to accept different lengh of transmitters
+	#go through rfCollectors and smartMeters
+	#adust later to accept different lengh of rfCollectors
 	substation = getSubstation(nxG)
 	nxG.node[substation]['bandwidthUse'] = 0
-	transmitters = [transmitter for transmitter  in nx.get_node_attributes(nxG, 'transmitter')]
-	#print(len(transmitters))
-	for transmitter in transmitters:
-		nxG.node[transmitter]['bandwidthUse'] = 0
-		#print(transmitter)
-		#print(nxG.node[transmitter]['pos'])
-		#print(nxG.successors(transmitter))
-		#if transmitter == 'node10310x2-Bx1960605':
-			#print(nxG.successors(transmitter))
-			#print('node')
-		for reciever in nxG.successors(transmitter):
-			if nxG[transmitter][reciever].get('rf',False):
-				nxG[transmitter][reciever]['bandwidthUse'] = nxG.node[reciever]['bandwidthUse']
-				nxG.node[transmitter]['bandwidthUse'] += nxG.node[reciever]['bandwidthUse']
-		shortestPath = nx.bidirectional_shortest_path(nxG, substation, transmitter)
+	rfCollectors = [rfCollector for rfCollector  in nx.get_node_attributes(nxG, 'rfCollector')]
+	for rfCollector in rfCollectors:
+		nxG.node[rfCollector]['bandwidthUse'] = 0
+		for smartMeter in nxG.successors(rfCollector):
+			if nxG[rfCollector][smartMeter].get('rf',False):
+				nxG[rfCollector][smartMeter]['bandwidthUse'] = nxG.node[smartMeter]['bandwidthUse']
+				nxG.node[rfCollector]['bandwidthUse'] += nxG.node[smartMeter]['bandwidthUse']
+		shortestPath = nx.bidirectional_shortest_path(nxG, substation, rfCollector)
 		for i in range(len(shortestPath)-1):
-			nxG[shortestPath[i]][shortestPath[i+1]]['bandwidthUse'] += nxG.node[transmitter]['bandwidthUse']
-		nxG.node[substation]['bandwidthUse'] += nxG.node[transmitter]['bandwidthUse']
-
+			nxG[shortestPath[i]][shortestPath[i+1]]['bandwidthUse'] += nxG.node[rfCollector]['bandwidthUse']
+		nxG.node[substation]['bandwidthUse'] += nxG.node[rfCollector]['bandwidthUse']
 
 def graphGeoJson(nxG):
+	'''Create geojson dict for omc file type for communications network'''
 	geoJsonDict = {
 	"type": "FeatureCollection",
 	"features": []
@@ -230,7 +198,8 @@ def graphGeoJson(nxG):
 				"name": node,
 				"pointType": node_types.get(node,''),
 				"substation": nxG.node[node].get('substation',False),
-				"transmitter": nxG.node[node].get('transmitter',False),
+				"rfCollector": nxG.node[node].get('rfCollector',False),
+				"smartMeter": nxG.node[node].get('smartMeter',False),
 				"bandwidthUse": nxG.node[node].get('bandwidthUse',''),
 				"bandwidthCapacity": nxG.node[node].get('bandwidthCapacity','')
 
@@ -247,7 +216,6 @@ def graphGeoJson(nxG):
 			},
 			"properties":{
 				"edgeType": edge_types.get(edge,''),
-				#"to": nxG[edge[0]][edge[1]].get('to',''),
 				"fiber": nxG[edge[0]][edge[1]].get('fiber',False),
 				"rf": nxG[edge[0]][edge[1]].get('rf',False),
 				"bandwidthUse": nxG[edge[0]][edge[1]].get('bandwidthUse',''),
@@ -266,6 +234,7 @@ def showOnMap(geoJson):
 	webbrowser.open('file://' + pJoin(tempDir,'commsNetViz.html'))
 
 def saveOmc(geoJson, outputPath):
+	'''Save comms geojson dict as .omc proprietary format (it is a geojson)'''
 	if not os.path.exists(outputPath):
 		os.makedirs(outputPath)
 	with open(pJoin(outputPath,'commsGeoJson.omc'),"w") as outFile:
@@ -381,8 +350,8 @@ edgeCosts = {
 	'rf':0
 }
 
-#transmitter/tower are associated with the gateway - right now adding tower to all gateways
-#meter is for each reciever, added reciever to each meter
+#rfCollector/tower are associated with the gateway - right now adding tower to all gateways
+#meter is for each smartMeter, added smartMeter to each meter
 
 pointCosts = {
 	'meter': 1000,
@@ -394,12 +363,15 @@ pointCosts = {
 def _tests():
 	feeder = createGraph('static/publicFeeders/Olin Barre LatLon.omd')
 	setFiber(feeder, edgeType='switch')
-	setRF2(feeder)
+	#collectorOverlap(feeder)
+	setRf(feeder)
 	calcBandwidth(feeder)
-	print('cost of rf transmitter equipment: ' + str(getTransmittersCost(feeder, 10000)))
-	print('cost of rf reciever equipment: ' + str(getRecieversCost(feeder, 100)))
+	print('cost of rf rfCollector equipment: ' + str(getrfCollectorsCost(feeder, 10000)))
+	print('cost of rf smartMeter equipment: ' + str(getsmartMetersCost(feeder, 100)))
 	print('cost of fiber: ' + str(getFiberCost(feeder, 4)))
-	saveOmc(graphGeoJson(feeder), 'output')
+	#rfCollectors = sum([(feeder.node[rfCollector]['bandwidthUse']) for rfCollector  in nx.get_node_attributes(feeder, 'rfCollector')])
+	sub = getSubstation(feeder)
+	#saveOmc(graphGeoJson(feeder), 'output')
 	showOnMap(graphGeoJson(feeder))
 
 if __name__ == '__main__':
