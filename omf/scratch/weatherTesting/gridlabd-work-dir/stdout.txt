@@ -1,47 +1,9 @@
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
-Core profiler results
-======================
-
-Total objects               2271 objects
-Parallelism                    1 thread
-Total time                  16.0 seconds
-  Core time                  1.6 seconds (10.1%)
-    Compiler                 4.2 seconds (26.1%)
-    Instances                0.0 seconds (0.0%)
-    Random variables         0.0 seconds (0.0%)
-    Schedules                0.0 seconds (0.0%)
-    Loadshapes               0.0 seconds (0.1%)
-    Enduses                  0.0 seconds (0.2%)
-    Transforms               0.1 seconds (0.8%)
-  Model time                14.4 seconds/thread (89.9%)
-Simulation time               10 days
-Simulation speed              34k object.hours/second
-Passes completed             242 passes
-Time steps completed         241 timesteps
-Convergence efficiency      1.00 passes/timestep
-Read lock contention        0.0%
-Write lock contention       0.0%
-Average timestep           3585 seconds/timestep
-Simulation rate           54000 x realtime
-
-
 Model profiler results
 ======================
 
 Class            Time (s) Time (%) msec/obj
 ---------------- -------- -------- --------
-node              10.603     73.7%     21.9
-house              0.967      6.7%      2.9
-overhead_line      0.705      4.9%      2.1
-waterheater        0.545      3.8%      2.3
-triplex_meter      0.488      3.4%      2.5
-transformer        0.449      3.1%      2.3
-ZIPload            0.253      1.8%      0.8
-underground_line   0.205      1.4%      2.2
-fuse               0.111      0.8%      2.5
-climate            0.034      0.2%     34.0
-switch             0.026      0.2%      2.2
-capacitor          0.004      0.0%      4.0
+overhead_line      0.002    100.0%      0.2
 ================ ======== ======== ========
-Total             14.390    100.0%      6.3
+Total              0.002    100.0%      0.0
 

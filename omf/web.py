@@ -1179,23 +1179,14 @@ def backgroundClimateChange(modelDir, omdPath, outFilePath, owner, modelName):
 			pid_file.write(str(os.getpid()))
 		importOption = request.form.get('climateImportOption')
 		if importOption == "USCRNImport":
-			year = int(request.form.get("year"))
-			station = request.form.get("station")
-			attachHistoricalWeather(omdPath, year, station)
-			#if importOption == 'historicalImport':
-			#	start = request.form.get('startDate')
-			#	end = request.form.get('endDate')
-			#	airport = request.form.get('airport')
-			#	try:
-			#		weather.makeClimateCsv(start, end, airport, outFilePath)
-			#	except Exception as error:
-			#		errorString = ''.join(error)
-			#		with open(modelDir + '/weatherError.txt', 'w+') as errorFile:
-			#			errorFile.write('Climate data does not exist for given parameters. Choose different parameters.')
-			#	feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'csv_reader', 'name':'weatherReader', 'filename':'weatherAirport.csv'}
-			#	feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'climate', 'name':'Climate', 'tmyfile':'weatherAirport.csv', 'reader':'weatherReader'}
-			#	with open(outFilePath) as csvFile:
-			#		feederJson['attachments']['weatherAirport.csv'] = csvFile.read()
+			try:
+				year = int(request.form.get("uscrnYear"))
+			except:
+				raise Exception("Invalid year was submitted.")
+			station = request.form.get("uscrnStation")
+			if station is None or len(station) == 0:
+				raise Exception("Invalid station was submitted.")
+			weather.attachHistoricalWeather(omdPath, year, station)
 		elif importOption == 'tmyImport':
 			# Old calibration logic. Preserve for the sake of the 'tmyImport' option
 			with open(omdPath, 'r') as inFile:

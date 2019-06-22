@@ -4,7 +4,7 @@
 import json, csv, os, re
 from datetime import datetime, timedelta
 import requests
-from omf import feeder, weather
+from omf import feeder 
 from omf.solvers.gridlabd import runInFilesystem
 
 
@@ -30,6 +30,16 @@ calculated from the 5-minute dataset.
 
 
 def attachHistoricalWeather(omd_path, year, station):
+	"""
+	Get USCRN data for a year and station, write it to a CSV, then calibrate the .omd to use the CSV.
+
+	:param omd_path: the path to the .omd file to calibrate
+	:type omd_path: str
+	:param year: the year to get USCRN data for
+	:type year: int
+	:param station: the name of the USCRN station
+	:type station: str
+	"""
 	csv_path = os.path.join(os.path.dirname(omd_path), "uscrn-weather-data.csv")
 	write_USCRN_csv(csv_path, year, station)
 	start_date = datetime(year, 1, 1)
@@ -92,7 +102,7 @@ def write_USCRN_csv(csv_path, year, station):
 	# Get hourly data and process it
 	hourly_rows = get_USCRN_data(year, station, "hourly")
 	if hourly_rows is None:
-		raise Exception("Failed to get USCRN data")
+		raise Exception("Failed to get USCRN data for year \"{}\" and station \"{}\"".format(year, station))
 	data_types = get_hourly_USCRNDataTypes()
 	first_valid_row = get_first_valid_row(hourly_rows, data_types)
 	last_valid_row = get_first_valid_row(hourly_rows, data_types, reverse=True)
@@ -102,7 +112,7 @@ def write_USCRN_csv(csv_path, year, station):
 	# Get subhourly data and process it
 	subhourly_rows = get_USCRN_data(year, station, "subhourly")
 	if subhourly_rows is None:
-		raise Exception("Failed to get USCRN data")
+		raise Exception("Failed to get USCRN data for year \"{}\" and station \"{}\"".format(year, station))
 	data_types = get_subhourly_USCRNDataTypes()
 	first_valid_row = get_first_valid_row(subhourly_rows, data_types)
 	last_valid_row = get_first_valid_row(subhourly_rows, data_types, reverse=True)
@@ -478,18 +488,34 @@ def test_gridlabd_weather_sim(year, station, omd_path):
 	print(rawOut)
 
 
-if __name__ == "__main__":
+def _test_USCRN_with_gridlabd():
 	"""
-	Some times you just have to run GridLAB-D a few times before it works.
-	- Running gridlabd on a newly generated .omd file will use the new USCRN CSV data
-		- Actually, this isn't always true! It has to be a newly generated .omd file AND new USCRN data!
-	- Running gridlabd on an old .omd file will NOT use the new USCRN CSV data, even though the .omd file attachment section is being updated with the
-	  new CSV data. Heck, even the first run on an old .omd file doesn't use the new data. It uses the data from the most recent run for the newly
-	  generated .omd file
-	- Does this have anything to do with gridlabd.xml changing or not changing?
+	I cannot tell whether or not GridLAB-D is using the most recently written USCRN data when it runs the simulation. It seems very inconsistent.
+	- Running the same existing .omd file with new data 5 times:
+		- Did not change gridlabd.xml at all
+		- Did not change any of the xout files at all
+	- Running the same existing .omd file with the same data 5 times:
+		- Did not change gridlabd.xml at all
+		- Did not change any of the xout files at all 
+	- Running the newly created .omd file with new data 5 times ...
+		- 1 run did not change gridlabd.xml but DID change the xout files
+		- 1 run did not change gridlabd.xml but DID change the xout files (again)
+		- 1 run did change gridlabd.xml but did not change the xout files
+		- 1 run did change gridlabd.xml but did not change the xout files (again)
+		- 1 run did change gridlabd.xml but did not change the xout files (again)
+	- Running the newly created .omd file with the same data 5 times ...
+		- 1 run changed gridlabd.xml but not not change any xout files
+		- 1 run changed gridlabd.xml AND changed all of the xout files
+		- 1 run changed gridlabd.xml but not not change any xout files (again)
+		- 1 run changed gridlabd.xml but not not change any xout files (again)
+		- 1 run changed gridlabd.xml AND changed all of the xout files (again)
 	"""
-	year = 2018
+	year = 2000
 	station = "CO_Dinosaur_2_E"
-	#omd_path = get_omd_path(os.path.join(os.path.dirname(__file__), "IEEE_quickhouse.glm"))
-	omd_path = os.path.join(os.path.dirname(__file__), "OlinBarreGHW.omd")
+	omd_path = get_omd_path(os.path.join(os.path.dirname(__file__), "IEEE_quickhouse.glm"))
+	#omd_path = os.path.join(os.path.dirname(__file__), "OlinBarreGHW.omd")
 	test_gridlabd_weather_sim(year, station, omd_path)
+
+
+if __name__ == "__main__":
+	_test_USCRN_with_gridlabd()

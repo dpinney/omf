@@ -273,15 +273,14 @@ def get_uscrn_dictionary(csv_path):
 	data = {}
 	with open(csv_path) as f:
 		reader = csv.reader(f)
-		for line in f:
-			row = reader.next()
-			station_name = row[2]
-			data[station_name] = row
+		reader.next() # skip the header row
+		for line in reader:
+			station_name = line[2]
+			data[station_name] = line
 	return data
 
 
 if __name__ == "__main__":
-	# 2018 subhourly data is incomplete. look at csv
 	"""Just do one year at a time."""
 	year = 2018
 	filter_data = False
@@ -297,8 +296,8 @@ if __name__ == "__main__":
 	subhourly_csv_path = os.path.join(os.path.dirname(__file__), sh_filename)
 	merged_csv_path = os.path.join(os.path.dirname(__file__), merged_filename)
 	### Get data or not
-	write_uscrn_metadata(year, stations, "hourly", hourly_csv_path, filter_data)
-	write_uscrn_metadata(year, stations, "subhourly", subhourly_csv_path, filter_data)
+	#write_uscrn_metadata(year, stations, "hourly", hourly_csv_path, filter_data)
+	#write_uscrn_metadata(year, stations, "subhourly", subhourly_csv_path, filter_data)
 	### Get data or not
 	d1 = get_uscrn_dictionary(hourly_csv_path)
 	d2 = get_uscrn_dictionary(subhourly_csv_path)
