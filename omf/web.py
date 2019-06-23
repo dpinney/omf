@@ -968,15 +968,16 @@ def saveFeeder(owner, modelName, feederName, feederNum):
 						# Tried to remove a nonexistant file
 						pass
 		# Do NOT cancel any PPID.txt or PID.txt processes.
-		for filename in ["ZPID.txt", "APID.txt", "WPID.txt", "NPID.txt", "CPID.txt"]:
-			pid_file = os.path.join(model_dir, filename)
-			if os.path.isfile(pid_file):
+		# Do NOT cancel any WPID.txt because it's running as a thread on the web server not as a separate process
+		for filename in ["ZPID.txt", "APID.txt", "NPID.txt", "CPID.txt"]:
+			pid_filepath = os.path.join(model_dir, filename)
+			if os.path.isfile(pid_filepath):
 				try:
-					with open(pid_file) as f:
+					with open(pid_filepath) as f:
 						fcntl.flock(f, fcntl.LOCK_SH) # Get a shared lock
 						pid = f.read()
 						fcntl.flock(f, fcntl.LOCK_UN) # Release the shared lock
-					os.remove(pid_file)
+					os.remove(pid_filepath)
 					os.kill(int(pid), signal.SIGTERM)
 				except IOError as e:
 					if e.errno == 2:
@@ -994,6 +995,11 @@ def saveFeeder(owner, modelName, feederName, feederNum):
 						pass
 					else:
 						raise
+		### Hotfix for WPID.txt
+		w_pid_filepath = os.path.join(model_dir, "WPID.txt")
+		if os.path.isfile(w_pid_filepath):
+			os.remove(w_pid_filepath)
+		### Hotfix for WPID.txt
 		# It would be nice to file lock allInputData.json too...
 		writeToInput(model_dir, feederName, 'feederName' + str(feederNum))
 		payload = json.loads(request.form.to_dict().get("feederObjectJson","{}"))

@@ -513,8 +513,8 @@ def _test_USCRN_with_gridlabd():
 	"""
 	year = 2017
 	station = "CO_Dinosaur_2_E"
-	#omd_path = get_omd_path(os.path.join(os.path.dirname(__file__), "IEEE_quickhouse.glm"))
-	omd_path = os.path.join(os.path.dirname(__file__), "OlinBarreGHW.omd")
+	omd_path = get_omd_path(os.path.join(os.path.dirname(__file__), "IEEE_quickhouse.glm"))
+	#omd_path = os.path.join(os.path.dirname(__file__), "OlinBarreGHW.omd")
 	test_gridlabd_weather_sim(year, station, omd_path)
 
 
@@ -545,5 +545,5 @@ def _test_get_USCRN_data_with_multiprocessing():
 
 
 if __name__ == "__main__":
-	#_test_USCRN_with_gridlabd()
-	_test_get_USCRN_data_with_multiprocessing()
+	_test_USCRN_with_gridlabd()
+	#_test_get_USCRN_data_with_multiprocessing()
