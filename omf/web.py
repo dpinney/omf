@@ -1,6 +1,7 @@
 ''' Web server for model-oriented OMF interface. '''
 
-from flask import Flask, send_from_directory, request, redirect, render_template, session, abort, jsonify, Response, url_for
+from flask import (Flask, send_from_directory, request, redirect, render_template, session, abort, jsonify,
+	Response, url_for, copy_current_request_context)
 from jinja2 import Template
 from multiprocessing import Process
 from threading import Thread
@@ -1168,7 +1169,11 @@ def climateChange(owner, feederName):
 	outFilePath = modelDir + '/weatherAirport.csv'
 	if os.path.isfile(outFilePath):
 		os.remove(outFilePath)
-	importThread = Thread(target=backgroundClimateChange, args=[modelDir, omdPath, outFilePath, owner, modelName])
+	# Retain access to the request context once this view function has returned
+	@copy_current_request_context
+	def invoke_backgroundClimateChange():
+		backgroundClimateChange(modelDir, omdPath, outFilePath, owner, modelName)
+	importThread = Thread(target=invoke_backgroundClimateChange)
 	importThread.start()
 	return 'Success'
 

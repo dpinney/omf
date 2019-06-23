@@ -6,9 +6,8 @@ Source options include NOAA's USCRN, Iowa State University's METAR, and Weather 
 
 import os, urllib, urllib2, requests, csv, re, json
 from os.path import join as pJoin
-from datetime import timedelta
+from datetime import timedelta, datetime
 from dateutil.parser import parse as parse_dt
-from datetime import datetime as dt
 from urllib2 import urlopen
 from omf import feeder
 
@@ -31,7 +30,7 @@ def pullAsos(year, station, datatype):
 	assert r.status_code != 404, "Dataset URL does not exist. " + url
 	data = [x.split(',') for x in r.text.splitlines()[1:]]
 	verifiedData = [-9999.0] * 8760
-	firstDT = dt(int(year), 1, 1)
+	firstDT = datetime(int(year), 1, 1)
 	for r in data:
 		if 'M' not in r:
 			deltatime = parse_dt(r[1]) - firstDT
@@ -461,8 +460,8 @@ def get_processed_row(data_types, row):
 	:rtype: list
 	"""
 	processed_row = []
-	for dt in data_types:
-		processed_row.append(dt.get_value(row))
+	for d_type in data_types:
+		processed_row.append(d_type.get_value(row))
 	return processed_row
 
 
@@ -505,8 +504,8 @@ def get_first_valid_row(rows, data_types, reverse=False):
 		rows = reversed(rows)
 	for row in rows:
 		valid = True
-		for dt in data_types:
-			if not dt.is_valid(row):
+		for d_type in data_types:
+			if not d_type.is_valid(row):
 				valid = False	
 		if valid:
 			return row
@@ -535,13 +534,13 @@ def extract_data(first_valid_row, last_valid_row, rows, data_types, is_subhourly
 		hourly_avg = [0] * len(rows[0])
 	for i in range(len(rows)):
 		row = rows[i]
-		for dt in data_types:
-			if not dt.is_valid(row):
-				end_row_index, next_valid_value = dt.get_next_valid_value(rows, i)
+		for d_type in data_types:
+			if not d_type.is_valid(row):
+				end_row_index, next_valid_value = d_type.get_next_valid_value(rows, i)
 				if end_row_index is None:
 					end_row_index = len(rows) - 1
-					next_valid_value = str_to_num(last_valid_row[dt.data_index])
-				dt.correct_data(rows, i, end_row_index - 1, str_to_num(most_recent_valid_row[dt.data_index]), next_valid_value)
+					next_valid_value = str_to_num(last_valid_row[d_type.data_index])
+				d_type.correct_data(rows, i, end_row_index - 1, str_to_num(most_recent_valid_row[d_type.data_index]), next_valid_value)
 		most_recent_valid_row = row
 		if is_subhourly_data:
 			add_row_to_hourly_avg(row, hourly_avg)
