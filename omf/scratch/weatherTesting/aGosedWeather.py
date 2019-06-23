@@ -4,8 +4,10 @@
 import json, csv, os, re
 from datetime import datetime, timedelta
 import requests
+import urllib
 from omf import feeder 
 from omf.solvers.gridlabd import runInFilesystem
+import threading, time
 
 
 """
@@ -510,12 +512,39 @@ def _test_USCRN_with_gridlabd():
 		- 1 run changed gridlabd.xml but not not change any xout files (again)
 		- 1 run changed gridlabd.xml AND changed all of the xout files (again)
 	"""
-	year = 2000
+	year = 2017
 	station = "CO_Dinosaur_2_E"
-	omd_path = get_omd_path(os.path.join(os.path.dirname(__file__), "IEEE_quickhouse.glm"))
-	#omd_path = os.path.join(os.path.dirname(__file__), "OlinBarreGHW.omd")
+	#omd_path = get_omd_path(os.path.join(os.path.dirname(__file__), "IEEE_quickhouse.glm"))
+	omd_path = os.path.join(os.path.dirname(__file__), "OlinBarreGHW.omd")
 	test_gridlabd_weather_sim(year, station, omd_path)
 
 
+def _test_get_USCRN_data_with_multiprocessing():
+	"""
+	The child process crashes at some point. Thus, using the requests module with Flask is fine, but using the requests module INSIDE of a forked
+	child process that was created with the multiprocessing module causes problems. To solve this, we have to use threads instead of processes. See
+	https://bugs.python.org/issue31818
+	"""
+	filepath = os.path.join(os.path.dirname(__file__), "test-uscrn-output.csv")
+	def write_USCRN_output():
+		"""Write the USCRN data to a CSV to prove the process completed successfully."""
+		data = get_USCRN_data(2017, "CO_Dinosaur_2_E", "hourly")
+		with open(filepath, 'w') as f:
+			writer = csv.writer(f)
+			writer.writerows(data)
+	t = threading.Thread(target=write_USCRN_output)
+	t.start()
+	t.join()
+	#p = multiprocessing.Process(target=write_USCRN_output)
+	#p.start()
+	#p.join()
+	#write_USCRN_output()
+	if os.path.isfile(filepath):
+		print("Test ended successfully")
+	else:
+		print("Background process crashed")
+
+
 if __name__ == "__main__":
-	_test_USCRN_with_gridlabd()
+	#_test_USCRN_with_gridlabd()
+	_test_get_USCRN_data_with_multiprocessing()

@@ -3,6 +3,7 @@
 from flask import Flask, send_from_directory, request, redirect, render_template, session, abort, jsonify, Response, url_for
 from jinja2 import Template
 from multiprocessing import Process
+from threading import Thread
 from passlib.hash import pbkdf2_sha512
 import json, os, flask_login, hashlib, random, time, datetime as dt, shutil, boto.ses, csv, sys
 try:
@@ -1167,8 +1168,8 @@ def climateChange(owner, feederName):
 	outFilePath = modelDir + '/weatherAirport.csv'
 	if os.path.isfile(outFilePath):
 		os.remove(outFilePath)
-	importProc = Process(target=backgroundClimateChange, args=[modelDir, omdPath, outFilePath, owner, modelName])
-	importProc.start()
+	importThread = Thread(target=backgroundClimateChange, args=[modelDir, omdPath, outFilePath, owner, modelName])
+	importThread.start()
 	return 'Success'
 
 
@@ -1178,6 +1179,8 @@ def backgroundClimateChange(modelDir, omdPath, outFilePath, owner, modelName):
 		with open(pid_filepath, 'w') as pid_file:
 			pid_file.write(str(os.getpid()))
 		importOption = request.form.get('climateImportOption')
+		if importOption is None:
+			raise Exception("Invalid weather import option selected.")
 		if importOption == "USCRNImport":
 			try:
 				year = int(request.form.get("uscrnYear"))
@@ -1441,5 +1444,4 @@ def uniqObjName(objtype, owner, name, modelName=False):
 if __name__ == "__main__":
 	template_files = ["templates/"+ x  for x in safeListdir("templates")]
 	model_files = ["models/" + x for x in safeListdir("models")]
-	#app.run(debug=True, host="0.0.0.0", extra_files=template_files + model_files)
-	app.run(debug=True, host="0.0.0.0", extra_files=model_files)
+	app.run(debug=True, host="0.0.0.0", extra_files=template_files + model_files)

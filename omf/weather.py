@@ -313,7 +313,7 @@ def attachHistoricalWeather(omd_path, year, station):
 	"""
 	csv_path = os.path.join(os.path.dirname(omd_path), "uscrn-weather-data.csv")
 	write_USCRN_csv(csv_path, year, station)
-	start_date = dt(year, 1, 1)
+	start_date = datetime(year, 1, 1)
 	calibrate_omd(start_date, omd_path, csv_path)
 
 
@@ -591,7 +591,7 @@ def merge_hourly_subhourly(hourly, subhourly, insert_idx):
 	merged_rows = [
 		["temperature", "wind_speed", "humidity", "solar_dir", "solar_diff", "solar_global"]
 	]
-	start_date = dt(2000, 1, 1, 0, 0, 0) # arbitrary datetime, this could be any year
+	start_date = datetime(2000, 1, 1, 0, 0, 0) # arbitrary datetime, this could be any year
 	hour = timedelta(hours=1)
 	for i in range(len(hourly)):
 		dt = start_date + hour * i
