@@ -23,6 +23,7 @@ from omf.solvers import gridlabd
 from dateutil import parser
 from dateutil.relativedelta import *
 
+# helper function to pull out reliability metric data (SAIDI/SAIFI) 
 def pullOutValues(tree, workDir):
 	SAIFI_returned = 0.0
 	SAIDI_returned = 0.0
@@ -58,6 +59,7 @@ def pullOutValues(tree, workDir):
 	mc = mc.rename(columns={'Metric Interval Event #': 'Task', 'Starting DateTime (YYYY-MM-DD hh:mm:ss)': 'Start', 'Ending DateTime (YYYY-MM-DD hh:mm:ss)': 'Finish'})
 	return SAIFI_returned, SAIDI_returned, mc
 
+# helper function to set-up reliability module on a glm given its parth
 def setupSystem(pathToGlm, lineFaultType, failureDistribution, restorationDistribution, maxOutageLength):
 	tree = omf.feeder.parse(pathToGlm)
 	#add fault object to tree
@@ -119,10 +121,12 @@ def setupSystem(pathToGlm, lineFaultType, failureDistribution, restorationDistri
 		if tree[key].get("argument","") == '"schedules.glm"' or tree[key].get("tmyfile","") != "":
 			del tree[key]
 	
+	# create volt and current line dumps for debugging purposes
 	tree[str(biggestKey*10 + 5)] = {"object":"voltdump","filename":"voltDump.csv"}
 	tree[str(biggestKey*10 + 6)] = {"object":"currdump","filename":"currDump.csv"}
 	
 	tree2 = tree.copy()
+
 	#add meters to the tree
 	index = 7
 	for key in tree2:
@@ -154,6 +158,7 @@ def setupSystem(pathToGlm, lineFaultType, failureDistribution, restorationDistri
 			}
 	return tree, workDir, biggestKey, index
 
+# create dictionary of protective devices
 def protection(tree):
 	# Record initial status readout of each fuse/recloser/switch/sectionalizer before running
 	# Reminder: fuse objects have 'phase_X_status' instead of 'phase_X_state'
@@ -206,6 +211,7 @@ def protection(tree):
 								}
 	return tree
 
+# function that returns a .csv of the random faults generated and the SAIDI/SAIFI values for a given glm, line for recloser, and distribution data
 def recloserAnalysis(pathToGlm, lineFaultType, lineNameForRecloser, failureDistribution, restorationDistribution, maxOutageLength):
 	
 	tree, workDir, biggestKey, index = setupSystem(pathToGlm, lineFaultType, failureDistribution, restorationDistribution, maxOutageLength)
@@ -230,6 +236,8 @@ def recloserAnalysis(pathToGlm, lineFaultType, lineNameForRecloser, failureDistr
 		'recl-SAIFI':reclSAIFI
 	}
 
+# function that finds the optimal placement for an additional recloser
+#WARNING: time-intensive
 def optimalRecloserAnalysis(pathToGlm, lineFaultType, failureDistribution, restorationDistribution, maxOutageLength):
 
 	tree, workDir, biggestKey, index = setupSystem(pathToGlm, lineFaultType, failureDistribution, restorationDistribution, maxOutageLength)
