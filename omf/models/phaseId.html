@@ -1,0 +1,131 @@
+<head>
+	<title>Open Modeling Framework</title>
+	<meta charset="utf-8">
+	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
+	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	<style>
+		table {width: 80%;margin-left:auto; margin-right:auto;}
+		td {padding:2px; text-align: center;border-top: 1px solid #ccc;}
+		th {padding:2px; text-align: center}
+	</style>
+	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
+	<!-- Library Imports -->
+	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
+	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
+	<!-- Plotly  Import -->
+	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+	<!-- Data  Imports -->
+	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
+	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
+	<script>modelStatus="{{modelStatus}}"</script>
+	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
+	</script>
+</head>
+<body onload="init()">
+	<div id="header">
+		<div id="headInnerBlock">
+			<div id="menuLeft">
+				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
+				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
+			</div>
+		</div>
+	</div>
+	<p class="reportTitle"><b>Model Input</b></p>
+	<div id="input" class="content">
+		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+			<!-- Required Inputs -->
+			<div class="shortInput">
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-phaseId" target="blank">Help?</a></label>
+				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Model Name</label>
+				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+			</div>
+			<div class="shortInput runningInline postRunInline">
+				<label>User</label>
+				<input type="text" id="user" name="user" readonly/>
+			</div>
+			<div class="shortInput runningInline postRunInline ">
+				<label>Created</label>
+				<input type="text" id="created" name="created" readonly/>
+			</div>
+			<div class="shortInput postRunInline">
+				<label>Run Time</label>
+				<input type="text" id="runTime" name="runTime" readonly/>
+			</div>
+			<!-- Model Specific Inputs -->
+			<div class="wideInput">
+				<p class="inputSectionHeader">Simulation Specs</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Substation Meter Data (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
+				<input id="subMeterFile" type="file" style="display:none" onchange="handle_files(this.files,'subMeterData','subMeterFileName')">
+				<input id="subMeterData" name="subMeterData" type="hidden">
+				<div>
+					<label for="subMeterFile" class="fileButton">Choose File</label>
+					<input id="subMeterFileName" name="subMeterFileName" value='' readonly class="uploadFileName">
+				</div>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">AMI Meter Data (.zip file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
+				<input id="meterZip" type="file" style="display:none" onchange="handle_files(this.files,'nn','meterZipName')">
+				<input id="nn" name="nn" type="hidden">
+				<div>
+					<label for="meterZip" class="fileButton">Choose File</label>
+					<input id="meterZipName" name="meterZipName" value='' readonly class="uploadFileName">
+				</div>
+			</div>
+			<div class="shortInput postRunInline">
+				<label class="tooltip">AMI Check Meter<span class="classic">Filename for one of the AMI meters to display versus SCADA as a sanity check.</span></label>
+				<input type="text" id="checkMeter" name="checkMeter"/>
+			</div>
+
+			<!-- Required Buttons -->
+			<div class="wideInput" style="text-align:right">
+				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
+				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
+				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
+				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
+				<button id="runButton" type="submit" class="stoppedInline postRunInline">Run Model</button>
+			</div>
+		</form>
+	</div>
+	<div id ="runIndicator" class="content running">
+		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.<br>
+		{{allInputData[allInputData.find('"runTimeEstimate"') + 20:allInputData.find('minutes.", ') + 8]}}
+	</div>
+	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
+		<pre id='errorText' style='overflow-x:scroll'></pre>
+		<script type="text/javascript">
+		if (typeof(allInputData.stderr) !== 'undefined') {
+			gebi('stopIndicator').style.visibility = 'visible'
+			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
+		</script>
+	</div>
+	<p class="reportTitle postRun" style="page-break-before:always"><b>Confusion Matrix</b></p>	
+	<div id="confusionMatrix" class="tightContent postRun">
+		<img id="confusionMatrixImg"/>
+		<script type="text/javascript">gebi("confusionMatrixImg").src = "data:image/png;base64," + allOutputData.confusionMatrixImg</script>
+	</div>
+	<p class="reportTitle postRun" style="page-break-before:always"><b>Predicted Phases</b></p>
+	<div id="predictedPhases" class="tightContent postRun">
+		<pre>{{allOutputDataDict['regressionResult']}}</pre>
+	</div>
+	<p class="reportTitle postRun" style="page-break-before:always"><b>Check Meter Detail</b></p>	
+	<div id="meterDetail" class="tightContent postRun">
+		<div id="meterDetail">
+		</div>
+		<script type="text/javascript">
+			Plotly.newPlot("meterDetail", JSON.parse(allOutputData["meterDetailData"]), JSON.parse(allOutputData["meterDetailLayout"]) || {})
+		</script>
+	</div>
+	<p class="reportTitle postRun"><b>Raw Input and Output Files</b></p>
+	<div id="rawOutput" class="content postRun" style="margin-top:0px">
+		{% for name in allOutputDataDict['fileNames'] %}
+			{% if loop.index > 1 %}&mdash; {% endif %}<a href="/downloadModelData/{{allInputDataDict['user']}}/{{allInputDataDict['modelName']}}/{{name}}">{{name}}</a>
+		{% endfor %}
+	</div>
+</body>

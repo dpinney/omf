@@ -1,10 +1,12 @@
 ''' Web server for model-oriented OMF interface. '''
 
-from flask import Flask, send_from_directory, request, redirect, render_template, session, abort, jsonify, Response, url_for
+from flask import (Flask, send_from_directory, request, redirect, render_template, session, abort, jsonify,
+	Response, url_for, copy_current_request_context)
 from jinja2 import Template
 from multiprocessing import Process
+from threading import Thread
 from passlib.hash import pbkdf2_sha512
-import json, os, flask_login, hashlib, random, time, datetime as dt, shutil, boto.ses, csv
+import json, os, flask_login, hashlib, random, time, datetime as dt, shutil, boto.ses, csv, sys
 try:
 	import fcntl
 except:
@@ -966,15 +968,16 @@ def saveFeeder(owner, modelName, feederName, feederNum):
 						# Tried to remove a nonexistant file
 						pass
 		# Do NOT cancel any PPID.txt or PID.txt processes.
-		for filename in ["ZPID.txt", "APID.txt", "WPID.txt", "NPID.txt", "CPID.txt"]:
-			pid_file = os.path.join(model_dir, filename)
-			if os.path.isfile(pid_file):
+		# Do NOT cancel any WPID.txt because it's running as a thread on the web server not as a separate process
+		for filename in ["ZPID.txt", "APID.txt", "NPID.txt", "CPID.txt"]:
+			pid_filepath = os.path.join(model_dir, filename)
+			if os.path.isfile(pid_filepath):
 				try:
-					with open(pid_file) as f:
+					with open(pid_filepath) as f:
 						fcntl.flock(f, fcntl.LOCK_SH) # Get a shared lock
 						pid = f.read()
 						fcntl.flock(f, fcntl.LOCK_UN) # Release the shared lock
-					os.remove(pid_file)
+					os.remove(pid_filepath)
 					os.kill(int(pid), signal.SIGTERM)
 				except IOError as e:
 					if e.errno == 2:
@@ -992,6 +995,11 @@ def saveFeeder(owner, modelName, feederName, feederNum):
 						pass
 					else:
 						raise
+		### Hotfix for WPID.txt
+		w_pid_filepath = os.path.join(model_dir, "WPID.txt")
+		if os.path.isfile(w_pid_filepath):
+			os.remove(w_pid_filepath)
+		### Hotfix for WPID.txt
 		# It would be nice to file lock allInputData.json too...
 		writeToInput(model_dir, feederName, 'feederName' + str(feederNum))
 		payload = json.loads(request.form.to_dict().get("feederObjectJson","{}"))
@@ -1167,8 +1175,12 @@ def climateChange(owner, feederName):
 	outFilePath = modelDir + '/weatherAirport.csv'
 	if os.path.isfile(outFilePath):
 		os.remove(outFilePath)
-	importProc = Process(target=backgroundClimateChange, args=[modelDir, omdPath, outFilePath, owner, modelName])
-	importProc.start()
+	# Retain access to the request context once this view function has returned
+	@copy_current_request_context
+	def invoke_backgroundClimateChange():
+		backgroundClimateChange(modelDir, omdPath, outFilePath, owner, modelName)
+	importThread = Thread(target=invoke_backgroundClimateChange)
+	importThread.start()
 	return 'Success'
 
 
@@ -1177,44 +1189,43 @@ def backgroundClimateChange(modelDir, omdPath, outFilePath, owner, modelName):
 		pid_filepath = os.path.join(_omfDir, "data/Model", owner, modelName, "WPID.txt")
 		with open(pid_filepath, 'w') as pid_file:
 			pid_file.write(str(os.getpid()))
-		with open(omdPath, 'r') as inFile:
-			feederJson = json.load(inFile)
-			for key in feederJson['tree'].keys():
-				if (feederJson['tree'][key].get('object') == 'climate') or (feederJson['tree'][key].get('name') == 'weatherReader'):
-					del feederJson['tree'][key]
-			for key in feederJson['attachments'].keys():
-				if (key.endswith('.tmy2')) or (key == 'weatherAirport.csv'):
-					del feederJson['attachments'][key]
-			importOption = request.form.get('climateImportOption')
-			if importOption == 'historicalImport':
-				start = request.form.get('startDate')
-				end = request.form.get('endDate')
-				airport = request.form.get('airport')
-				try:
-					weather.makeClimateCsv(start, end, airport, outFilePath)
-				except Exception as error:
-					errorString = ''.join(error)
-					with open(modelDir + '/weatherError.txt', 'w+') as errorFile:
-						errorFile.write('Climate data does not exist for given parameters. Choose different parameters.')
-				feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'csv_reader', 'name':'weatherReader', 'filename':'weatherAirport.csv'}
-				feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'climate', 'name':'Climate', 'tmyfile':'weatherAirport.csv', 'reader':'weatherReader'}
-				with open(outFilePath) as csvFile:
-					feederJson['attachments']['weatherAirport.csv'] = csvFile.read()
-			elif importOption == 'tmyImport':
-				zipCode = request.form.get('zipCode')
-				climateName = weather.zipCodeToClimateName(zipCode)
-				tmyFilePath = 'data/Climate/' + climateName + '.tmy2'
-				feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'climate','name':'Climate','interpolate':'QUADRATIC', 'tmyfile':'climate.tmy2'}
-				with open(tmyFilePath) as tmyFile:
-					feederJson['attachments']['climate.tmy2'] = tmyFile.read()
-		with open(omdPath, 'w') as outFile:
-			fcntl.flock(outFile, fcntl.LOCK_EX)
-			json.dump(feederJson, outFile, indent=4)
-			fcntl.flock(outFile, fcntl.LOCK_UN)
+		importOption = request.form.get('climateImportOption')
+		if importOption is None:
+			raise Exception("Invalid weather import option selected.")
+		if importOption == "USCRNImport":
+			try:
+				year = int(request.form.get("uscrnYear"))
+			except:
+				raise Exception("Invalid year was submitted.")
+			station = request.form.get("uscrnStation")
+			if station is None or len(station) == 0:
+				raise Exception("Invalid station was submitted.")
+			weather.attachHistoricalWeather(omdPath, year, station)
+		elif importOption == 'tmyImport':
+			# Old calibration logic. Preserve for the sake of the 'tmyImport' option
+			with open(omdPath, 'r') as inFile:
+				feederJson = json.load(inFile)
+				for key in feederJson['tree'].keys():
+					if (feederJson['tree'][key].get('object') == 'climate') or (feederJson['tree'][key].get('name') == 'weatherReader'):
+						del feederJson['tree'][key]
+				for key in feederJson['attachments'].keys():
+					if (key.endswith('.tmy2')) or (key == 'weatherAirport.csv'):
+						del feederJson['attachments'][key]
+			# Old tmy2 weather operation
+			zipCode = request.form.get('zipCode')
+			climateName = weather.zipCodeToClimateName(zipCode)
+			tmyFilePath = 'data/Climate/' + climateName + '.tmy2'
+			feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'climate','name':'Climate','interpolate':'QUADRATIC', 'tmyfile':'climate.tmy2'}
+			with open(tmyFilePath) as tmyFile:
+				feederJson['attachments']['climate.tmy2'] = tmyFile.read()
+			with open(omdPath, 'w') as outFile:
+				fcntl.flock(outFile, fcntl.LOCK_EX)
+				json.dump(feederJson, outFile, indent=4)
+				fcntl.flock(outFile, fcntl.LOCK_UN)
 		os.remove(pid_filepath)
-	except Exception as error:
-		with open("data/Model/"+owner+"/"+modelName+"/error.txt", "w+") as errorFile:
-			errorFile.write('weatherError')
+	except:
+		with open("data/Model/"+owner+"/"+modelName+"/error.txt", "w") as errorFile:
+			errorFile.write(str(sys.exc_info()[1]))
 
 
 @app.route("/anonymize/<owner>/<feederName>", methods=["POST"])
@@ -1444,5 +1455,4 @@ def uniqObjName(objtype, owner, name, modelName=False):
 if __name__ == "__main__":
 	template_files = ["templates/"+ x  for x in safeListdir("templates")]
 	model_files = ["models/" + x for x in safeListdir("models")]
-	#app.run(debug=True, host="0.0.0.0", extra_files=template_files + model_files)
-	app.run(debug=True, host="0.0.0.0", extra_files=model_files)
+	app.run(debug=True, host="0.0.0.0", extra_files=template_files + model_files)

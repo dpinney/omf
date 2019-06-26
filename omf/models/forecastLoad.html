@@ -68,6 +68,15 @@
 				</div>
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Neural Net Long-Term Curve (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
+				<input id="nnFile" type="file" style="display:none" onchange="handle_files(this.files,'nn','fileName')">
+				<input id="nn" name="nn" type="hidden">
+				<div>
+					<label for="nnFile" class="fileButton">Choose File</label>
+					<input id="nnFileName" name="nnFileName" value='' readonly class="uploadFileName">
+				</div>
+			</div>
+			<div class="shortInput">
 				<label>Number of partitions for Prophet training</label>
 				<input type="number" id="prophet" name="prophet" min=0 max=20 value=0 required="required">
 			</div>
@@ -161,7 +170,7 @@
 					"title":{"text": "MAPE = " + allOutputData.MAPE_nn, "verticalAlign":"bottom", "align":"right", "y":-400, "x":-150, "style":{"color":"black", "fontSize":"18px"}},
 					"series":[
 						{"name":"Forecasted Data (kW)","marker":{"enabled":false},"color":"blue","data":allOutputData.neuralNet},
-						{"name":"Actual Data (kW)","marker":{"enabled":false},"color":"red","data":allOutputData.actual}
+						{"name":"Actual Data (kW)","marker":{"enabled":false},"color":"red","data":allOutputData.actual_nn}
 					],
 					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"kevinChart","type":"line","marginRight":20, "height":500,"width":1000},
 					"tooltip":false,

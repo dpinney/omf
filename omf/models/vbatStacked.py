@@ -77,9 +77,9 @@ def run_fhec(ind, gt_demand, Input):
 
 	E_0 = 0 # VB initial energy state
 
-	arbitrage_option = "use_arbitrage" in ind
-	regulation_option = "use_regulation" in ind
-	deferral_option = "use_deferral" in ind
+	arbitrage_option = ind["use_arbitrage"] == "on"
+	regulation_option = ind["use_regulation"] == "on"
+	deferral_option = ind["use_deferral"] == "on"
 
 	###############################################################################
 
@@ -210,9 +210,9 @@ def run_okec(ind, Input):
 
 	E_0 = 0 # VB initial energy state
 
-	arbitrage_option = "use_arbitrage" in ind
-	regulation_option = "use_regulation" in ind
-	deferral_option = "use_deferral" in ind
+	arbitrage_option = ind["use_arbitrage"] == "on"
+	regulation_option = ind["use_regulation"] == "on"
+	deferral_option = ind["use_deferral"] == "on"
 
 ###############################################################################
 
@@ -411,7 +411,7 @@ def work(modelDir, ind):
 	out["gt_demand"] = gt_demand
 	out["demand"] = output_df['Load (kW)'].tolist()
 	out["VBpower"] = output_df['VB power (kW)'].tolist()
-	out["VBenergy"] = output_df['VB energy (kWh)'].tolist()
+	out["VBenergy"] = [-x for x in output_df['VB energy (kWh)'].tolist()]
 	out["demandAdjusted"] = output_df['Net load (kW)'].tolist()
 	out["regulation"] = output_df['Regulation (kW)'].tolist()
 
@@ -429,12 +429,12 @@ def new(modelDir):
 	defaultInputs = {
 		"user": "admin",
 		# options for dispatch
-		"use_deferral": "use_deferral",
-		"use_arbitrage": "use_arbitrage",
-		"use_regulation": "use_regulation",
+		"use_deferral": "off",
+		"use_arbitrage": "on",
+		"use_regulation": "off",
 		# VB inputs
 		"number_devices": "2000",
-		"load_type": "1",
+		"load_type": "2",
 		"power": "5.6",
 		"capacitance": "2",
 		"resistance": "2",
@@ -443,8 +443,8 @@ def new(modelDir):
 		"deadband": "0.625",
 		"projectionLength":"15",
 		"discountRate":"2",
-		"unitDeviceCost":"150",
-		"unitUpkeepCost":"5",
+		"unitDeviceCost":"20",
+		"unitUpkeepCost":"2",
 		"dispatchLimit": "365",
 		# By dispatch
 		"payment_structure": "gt", # "ppm"
@@ -454,7 +454,7 @@ def new(modelDir):
 		"fuel_charge": "0.002",
 		# gt
 		"electricityCost":"0.041",
-		"peakMultiplier": "2.5",
+		"peakMultiplier": "5",
 		"peakPercentile": "0.99",
 		"gt_demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","fhec_2017_gt.csv")).read(),
 		"gt_demandCurveFileName": "fhec_2017_gt.csv",

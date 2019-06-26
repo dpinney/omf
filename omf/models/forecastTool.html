@@ -41,7 +41,7 @@
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/" target="blank">Help?</a></label>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Other-~-Forecast-Based-Dispatch" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
@@ -72,10 +72,10 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Tomorrow's weather (.csv file)<span class="classic">Please see the documentation at the help link for the required format</span></label>
-				<input id="tempCurve" type="file" style="display:none" onchange="handle_files(this.files,'tempCurve','tempFileName')">
+				<input id="tempCurveFile" type="file" style="display:none" onchange="handle_files(this.files,'tempCurve','tempFileName')">
 				<input id="tempCurve" name="tempCurve" type="hidden">
 				<div>
-					<label for="tempCurve" class="fileButton">Choose File</label>
+					<label for="tempCurveFile" class="fileButton">Choose File</label>
 					<input id="tempFileName" name="tempFileName" value='' readonly class="uploadFileName">
 				</div>
 			</div>
@@ -199,32 +199,11 @@
 					<td>{{allOutputDataDict['three_day_peak_test_accuracy']}}%</td>
 				</tr>
 			</table>
-			<!-- <pre>
-Percent chance monthly peak is tomorrow:
-{{allOutputDataDict['peak_percent_chance']}}%
-
-Load prediction training accuracy (MAPE):
-{{allOutputDataDict['load_train_accuracy']}}%
-
-Load prediction test accuracy (MAPE):
-{{allOutputDataDict['load_test_accuracy']}}%
-
-Peak prediction training accuracy (MAPE):
-{{allOutputDataDict['peak_train_accuracy']}}%
-
-Peak prediction test accuracy (MAPE):
-{{allOutputDataDict['peak_test_accuracy']}}%
-
-2-day Peak prediction training accuracy (MAPE):
-{{allOutputDataDict['two_day_peak_train_accuracy']}}%
-
-2-day Peak prediction test accuracy (MAPE):
-{{allOutputDataDict['two_day_peak_test_accuracy']}}%</pre> -->
 		</div>
 		<p class="reportTitle postRun" style="page-break-before:always">Note</p>
 		<div id="effectiveness" class="content postRun detailsContainer" style="margin-top:0px">
 			<p>
-				To see the model's effectiveness over the course of an entire year, consider viewing <a href="">loadForecast.py</a> or <a href="">peakForecast.py</a>
+				To see the model's effectiveness over the course of an entire year, consider viewing <a href="omf.coop/loadForecast">loadForecast.py</a>.
 			</p>
 		</div>
 		<!-- <p class="reportTitle postRun" style="page-break-before:always">Download Output Data</p>	

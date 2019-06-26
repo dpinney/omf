@@ -9,6 +9,7 @@ from __neoMetaModel__ import *
 from omf import loadForecast as lf
 import numpy as np
 from scipy.stats import norm
+import re
 
 # Model metadata:
 modelName, template = metadata(__file__)
@@ -70,18 +71,18 @@ def work(modelDir, ind):
 		raise Exception("Load CSV file is incorrect format.")
 
 	try:
-		weather = [float(i.strip(',')) for i in ind['tempCurve'].split('\n')]
-		assert len(weather) == 24, "weather csv in wrong format"
+		weather = [float(i) for i in ind['tempCurve'].split('\n')]
+		assert len(weather) == 72, "weather csv in wrong format"
 	except:
-		raise Exception("Weather CSV file is incorrect format.")
+		raise Exception(ind['tempCurve'])
 
 	# ---------------------- MAKE PREDICTIONS ------------------------------- #
-	df, tomorrow = lf.add_day(df, weather)
+	df, tomorrow = lf.add_day(df, weather[:24])
 	all_X = lf.makeUsefulDf(df)
 	all_y = df['load']
 
 	#load prediction
-	tomorrow_load, model, tomorrow_accuracy = lf.neural_net_next_day(all_X, all_y, EPOCHS=epochs)
+	tomorrow_load, model, tomorrow_accuracy = lf.neural_net_next_day(all_X, all_y, epochs=epochs)
 	# tomorrow_load = [13044.3369140625, 12692.4453125, 11894.0712890625, 13391.0185546875, 13378.373046875, 14098.5048828125, 14984.5, 15746.6845703125, 14677.6064453125, 14869.6953125, 14324.302734375, 13727.908203125, 13537.51171875, 12671.90234375, 13390.9970703125, 12111.166015625, 13539.05078125, 15298.7939453125, 14620.8369140625, 15381.9404296875, 15116.42578125, 13652.3974609375, 13599.5986328125, 12882.5185546875]
 	# tomorrow_accuracy = {'test': 4, 'train': 3}
 	o['tomorrow_load'] = tomorrow_load
@@ -89,19 +90,19 @@ def work(modelDir, ind):
 	o['startDate_s'] = tomorrow.strftime("%A, %B %-m, %Y")
 	
 	# second day
-	df, second_day = lf.add_day(df, weather)
+	df, second_day = lf.add_day(df, weather[24:48])
 	if second_day.month == tomorrow.month:
 		all_X = lf.makeUsefulDf(df, hours_prior=48, noise=5)
 		all_y = df['load']
-		two_day_predicted_load, two_day_model, two_day_load_accuracy = lf.neural_net_next_day(all_X, all_y, EPOCHS=epochs, hours_prior=48)
+		two_day_predicted_load, two_day_model, two_day_load_accuracy = lf.neural_net_next_day(all_X, all_y, epochs=epochs, hours_prior=48)
 		two_day_peak = max(two_day_predicted_load)
 
 		# third day
-		df, third_day = lf.add_day(df, weather)
+		df, third_day = lf.add_day(df, weather[48:72])
 		if third_day.month == tomorrow.month:
 			all_X = lf.makeUsefulDf(df, hours_prior=72, noise=15)
 			all_y = df['load']
-			three_day_predicted_load, three_day_model, three_day_load_accuracy = lf.neural_net_next_day(all_X, all_y, EPOCHS=epochs, hours_prior=72)
+			three_day_predicted_load, three_day_model, three_day_load_accuracy = lf.neural_net_next_day(all_X, all_y, epochs=epochs, hours_prior=72)
 			three_day_peak = max(three_day_predicted_load)
 		else:
 			three_day_peak = 0
@@ -152,12 +153,12 @@ def new(modelDir):
 		'created': '2015-06-12 17:20:39.308239',
 		'modelType': modelName,
 		'runTime': '0:01:03',
-		'epochs': '1',
+		'epochs': '100',
 		'autoFill': "off",
 		'histFileName': 'd_Texas_17yr_TempAndLoad.csv',
 		"histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","d_Texas_17yr_TempAndLoad.csv"), 'rU').read(),
-		'tempFileName': '24hr_TexasTemp.csv',
-		'tempCurve': open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","24hr_TexasTemp.csv"), 'rU').read()
+		'tempFileName': '72hr_TexasTemp.csv',
+		'tempCurve': open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","72hr_TexasTemp.csv"), 'rU').read()
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 

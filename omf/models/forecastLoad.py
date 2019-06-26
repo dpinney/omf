@@ -1,6 +1,7 @@
 import csv, math
 import numpy as np
 import pandas as pd
+from datetime import datetime as dt
 import matplotlib.pyplot as plt
 import __neoMetaModel__, json
 from __neoMetaModel__ import *
@@ -22,7 +23,30 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir, "demandTemp.csv"), "w") as demandTempFile:
 		demandTempFile.write(inputDict["demandTemp"].replace("\r", ""))
 
-		# read it in as a list of lists
+	try:
+	 	with open(pJoin(modelDir, 'hist.csv'), 'w') as f:
+	 		f.write(inputDict['nn'].replace('\r', ''))
+		df = pd.read_csv(pJoin(modelDir, 'hist.csv'))
+		assert df.shape[0] >= 26280 # must be longer than 3 years
+	 	if 'dates' not in df.columns:
+		 	df['dates'] = df.apply(
+				lambda x: dt(
+					int(x['year']), 
+					int(x['month']), 
+					int(x['day']), 
+					int(x['hour'])), 
+				axis=1
+			)
+	except:
+		raise Exception("Neural Net CSV file is incorrect format.")
+
+	# neural net time
+	all_X = loadForecast.makeUsefulDf(df)
+	all_y = df["load"]
+	nn_pred, nn_accuracy = loadForecast.neural_net_predictions(all_X, all_y)
+	outData["actual_nn"] = df['load'][-8760:].tolist()
+
+	# read it in as a list of lists
 	try:
 		with open(pJoin(modelDir, "demandTemp.csv")) as inFile:
 			df = pd.read_csv(inFile, header=None)
@@ -35,16 +59,9 @@ def work(modelDir, inputDict):
 		errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href = 'https://github.com/dpinney/omf/wiki/Models-~-storagePeakShave#demand-file-csv-format'>\nOMF Wiki storagePeakShave - Demand File CSV Format</a>"
 		raise Exception(errorMessage)
 
-		# neural net time
-	all_X = loadForecast.makeUsefulDf(df)
-	all_y = df["load"]
-	all_X.to_csv(pJoin(modelDir, "usefulDf.csv"))
+
 	rawData = df[["load", "tempc"]].fillna(0).values.tolist()
 	del df
-
-	nn_pred, nn_accuracy = loadForecast.neural_net_predictions(all_X, all_y)
-	while len(nn_pred) < len(rawData):
-		nn_pred.insert(0, None)
 
 	"""
 	# None -> 0, float-> string
@@ -113,6 +130,8 @@ def new(modelDir):
 			)
 		).read(),
 		"fileName": "ERCOT_south_shortened.csv",
+		"nn": open(pJoin(__neoMetaModel__._omfDir, "static", "testFiles", "d_Texas_17yr_TempAndLoad.csv")).read(),
+		"nnFileName": "d_Texas_17yr_TempAndLoad.csv",
 		"lowBound": 0.95,
 		"upBound": 1.05,
 		"rollingWindow": 4,
