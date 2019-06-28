@@ -252,6 +252,7 @@ def _debugging():
 	if os.path.isdir(modelLoc):
 		shutil.rmtree(modelLoc)
 	new(modelLoc)
+	renderAndShow(modelLoc)
 	runForeground(modelLoc)
 	renderAndShow(modelLoc)
 

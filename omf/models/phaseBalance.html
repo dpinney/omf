@@ -240,9 +240,9 @@
 		  <button class="tabLinks" onclick="openTab(event, 'controlledDiagram')">Controlled</button>
 		</div>
 		<!-- Tab content -->
-		<div id="phaseUnbalanceDiagrams" class="tabPlots postRun" style="display: block;">
+		<div id="phaseUnbalanceDiagrams" class="postRun tabPlots">
 			<div class="tightContent tabContent baseDiagram firstTab">
-				<img id="base_image" style="width:1000px;height:1000px;" />
+				<img id="base_image" style="width:1000px;height:1000px;"/>
 				<script type="text/javascript">gebi("base_image").src = "data:image/png;base64," + allOutputData.base_image</script>
 			</div>
 			<div class="tightContent tabContent solarDiagram">
@@ -257,9 +257,9 @@
 			</div>	
 		</div>
 		<script>document.getElementById('firstTabButton').click();//Hack, get first tab to show.</script>
-
 		<p class="reportTitle postRun" style="page-break-before:always">Feeder Power Summary</p>
 		<div class="tightContent tableContainer postRun">
+			{% if allOutputDataDict %}
 			<table id="feederSummary">
 				<tr>
 					<th></th>
@@ -292,6 +292,7 @@
 					<td>{{allOutputDataDict['service_cost']['VARs']['controlled_solar']}}</td>
 				</tr>
 			</table>
+			{% endif %}
 		</div>
 		<p class="reportTitle postRun" style="page-break-before:always">Inverter Power Outputs</p>
 		<div class="tightContent tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
