@@ -1,0 +1,7 @@
+TODO
+XXX Move scapeAsos.py in to weather.py.
+XXX Get aGosedWeather.py running its tests.
+XXX Pull the weather data from the new weather.py, ASOS, instead of oldWeather.py.
+XXX Figure out how to map new data from ASOS or USCRN to insolation. Decent USCRN done.
+XXX Why isn't the weather playing in to the simulation correctly? It needs a tymfile argument. Pure insanity.
+OOO Update climateChange function in web.py.
