@@ -25,17 +25,22 @@
 </head>
 <body>
 	<div id="map"></div>
+	<script>var geojson={% if geojson %}{{geojson | tojson}}{% else %}null{% endif %}</script>
 	<script type="text/javascript" src="commsGeoJson.js"></script>
 	<script type="text/javascript">
+
+	//Add popup to each node/edge with the properties
 	function onEachFeature(feature, layer) {
 		let popupContent = '';
 		for (let key in feature.properties) {
 			if (feature.properties.hasOwnProperty(key)) {
-				popupContent += (key + ': ' + feature.properties[key]);
+				popupContent += (key + ': ' + feature.properties[key] + '<br>');
 				layer.bindPopup(popupContent);
 			}
 		}
 	}
+
+	//Set how comms nodes are displayed
 	function pointToLayerNode(feature, latlng) {
 		let fillColorValue = 'black';
 		if (feature.properties['substation']){
@@ -60,7 +65,7 @@
 			fillOpacity: 0.8
 		});
 		}
-		else if (feature.properties['transmitter']){
+		else if (feature.properties['rfCollector']){
 			fillColorValue = 'green';
 		return L.circleMarker(latlng, {
 			radius: 8,
@@ -84,6 +89,7 @@
 		}
 	}
 
+	//Set the line style for edges
 	function lineStyle(feature){
 		if (feature.geometry['type'] == 'LineString'){
 			if (feature.properties['rf']){
@@ -117,15 +123,11 @@
 		else if (feature.geometry['type'] == 'LineString'){
 			geojsonLayer.addData(feature);
 		}
-		else if (feature.geometry['type'] == 'Polygon'){
-			geojsonLayer.addData(feature);
-		}
 	});
 	var bounds = geojsonLayer.getBounds();
 	// Optional forcing of canvas renderer:
-	var map = L.map('map', {renderer: L.svg()}).fitBounds(bounds);
+	var map = L.map('map', {renderer: L.canvas()}).fitBounds(bounds);
 	// LayerGroup might be a good option here
-	//var map = L.map('map').fitBounds(bounds);
 	mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
 	L.tileLayer(
 		'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -134,6 +136,93 @@
 		}).addTo(map);
 	L.control.scale().addTo(map);
 	geojsonLayer.addTo(map);
+	//get non rf and fiber lines to hid them
+	/*
+	geojsonLayer.eachLayer(function (layer) {
+		if (layer.feature.geometry['type'] == 'LineString'){
+			if (!(layer.feature.properties.rf) & !(layer.feature.properties.fiber)){
+				layer.setStyle({"opacity": 0, "interactive": false});
+			}
+		}
+		else if (layer.feature.geometry['type'] == 'Point'){
+			if (!(layer.feature.properties.rfCollector) && !(layer.feature.properties.substation) && !(layer.feature.properties.smartMeter)){
+				layer.setStyle({"fillOpacity": 0,"opacity": 0, "interactive": false});
+			}
+		};
+	});
+	*/
+	//Get all comms objects in the network
+	function selectCommsObjects(){
+		let commsObjects = [];
+		geojsonLayer.eachLayer(function (layer) {
+			if (layer.feature.geometry['type'] == 'LineString'){
+				if ((layer.feature.properties.rf) || (layer.feature.properties.fiber)){
+					commsObjects.push(layer);
+				}
+			}
+			else if (layer.feature.geometry['type'] == 'Point'){
+				if ((layer.feature.properties.rfCollector) || (layer.feature.properties.substation) || (layer.feature.properties.smartMeter)){
+					commsObjects.push(layer);
+				}
+			};
+		});
+		return commsObjects;
+	}
+
+	//get all non communications objects in the grid
+	function selectNonCommsObjects(){
+		let nonCommsObjects = [];
+		geojsonLayer.eachLayer(function (layer) {
+			if (layer.feature.geometry['type'] == 'LineString'){
+				if (!(layer.feature.properties.rf) & !(layer.feature.properties.fiber)){
+					nonCommsObjects.push(layer);
+				}
+			}
+			else if (layer.feature.geometry['type'] == 'Point'){
+				if (!(layer.feature.properties.rfCollector) && !(layer.feature.properties.substation) && !(layer.feature.properties.smartMeter)){
+					nonCommsObjects.push(layer);
+				}
+			};
+		});
+		return nonCommsObjects;
+	}
+
+	//Hide non objects on the grid from an input array of layers
+	function hideGridObjects(gridObject){
+		gridObject.forEach(function (layer) {
+			if (layer.feature.geometry['type'] == 'LineString'){
+				layer.setStyle({"opacity": 0, "interactive": false});
+			}
+			else if (layer.feature.geometry['type'] == 'Point'){
+				layer.setStyle({"fillOpacity": 0,"opacity": 0, "interactive": false});
+			};
+		});
+	}
+
+	//Resets hidden grid objects
+	function showGridObjects(gridObject){
+		gridObject.forEach(function (layer) {
+			if (layer.feature.geometry['type'] == 'LineString'){
+				geojsonLayer.resetStyle(layer);
+			}
+			else if (layer.feature.geometry['type'] == 'Point'){
+				geojsonLayer.resetStyle(layer);
+			};
+		});
+	}
+
+	//Add new object to map
+	function addGeoObject(feature){
+		if (feature.geometry['type'] == 'Point'){
+			geojsonLayer.addData(feature);
+		}
+		else if (feature.geometry['type'] == 'LineString'){
+			geojsonLayer.addData(feature);
+		}
+	}
+
+	//Saving object option (grid editing) - would need tag in geoobjects
+
 </script>
 </body>
 </html>
