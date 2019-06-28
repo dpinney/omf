@@ -107,12 +107,20 @@
 	</div>
 	<p class="reportTitle postRun" style="page-break-before:always"><b>Confusion Matrix</b></p>	
 	<div id="confusionMatrix" class="tightContent postRun">
-		<img id="confusionMatrixImg"/>
+		<img id="confusionMatrixImg" style="width:100%"/>
 		<script type="text/javascript">gebi("confusionMatrixImg").src = "data:image/png;base64," + allOutputData.confusionMatrixImg</script>
 	</div>
 	<p class="reportTitle postRun" style="page-break-before:always"><b>Predicted Phases</b></p>
 	<div id="predictedPhases" class="tightContent postRun">
-		<pre>{{allOutputDataDict['regressionResult']}}</pre>
+		<table style="width:100%">
+		{% for row in allOutputDataDict['regressionResult'] %}
+			<tr>
+			{% for td in row %}
+				<td>{{td}}</td>
+			{% endfor %}		
+			</tr>
+		{% endfor %}
+		</table>
 	</div>
 	<p class="reportTitle postRun" style="page-break-before:always"><b>Check Meter Detail</b></p>	
 	<div id="meterDetail" class="tightContent postRun">

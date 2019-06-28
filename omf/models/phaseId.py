@@ -1,15 +1,7 @@
-import csv, math
-import numpy as np
-import pandas as pd
-from datetime import datetime as dt
 import matplotlib.pyplot as plt
-import __neoMetaModel__, json
+import __neoMetaModel__
+import json
 from __neoMetaModel__ import *
-
-# Model metadata:
-modelName, template = metadata(__file__)
-tooltip = "Identifies true meter phases by comparing AMI and SCADA data."
-hidden = True
 import numpy as np
 import datetime
 import csv
@@ -19,15 +11,20 @@ import os
 import shutil
 import re
 import warnings
-import matplotlib.pyplot as plt
 import itertools
 import plotly.graph_objs as go
-import plotly.offline  
+from plotly import tools
+import plotly.offline
 from scipy.stats import linregress
 from sklearn import preprocessing
 from sklearn.metrics import confusion_matrix
 from zipfile import ZipFile
 from base64 import b64encode, b64decode
+
+# Model metadata:
+modelName, template = metadata(__file__)
+tooltip = "Identifies true meter phases by comparing AMI and SCADA data."
+hidden = True
 
 def unzip(zipdir, target):
 	with ZipFile(zipdir, 'r') as zip:
@@ -133,7 +130,7 @@ def work(modelDir, inputDict):
 	result_path = pJoin(modelDir, 'output-regression-result.csv')
 	# write the header of the output csv file
 	with open(result_path, 'w') as f:   
-		f.write('Meter Name,M_A ~ SS_A,M_A ~ SS_B,M_A ~ SS_C, M_B ~ SS_A,M_B ~ SS_B,M_B ~ SS_C,'                +'M_C ~ SS_A,M_C ~ SS_B,M_C ~ SS_C,True Phase,Predicted Phase\n')
+		f.write('Meter Name,M_A ~ SS_A,M_A ~ SS_B,M_A ~ SS_C, M_B ~ SS_A,M_B ~ SS_B,M_B ~ SS_C,'                +'M_C ~ SS_A,M_C ~ SS_B,M_C ~ SS_C,Input Phase,Predicted Phase\n')
 	# read and scale the transformed meter files
 	for meter in meters:
 		meterdir = os.path.join(newdir, meter)
@@ -199,13 +196,26 @@ def work(modelDir, inputDict):
 		with open(result_path, 'a') as f:
 			# write the header of the outfile
 			f.write('%s,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%s,%s\n'%(meter,rr_list[0][0], rr_list[0][1], rr_list[0][2], rr_list[1][0], rr_list[1][1], rr_list[1][2],rr_list[2][0], rr_list[2][1],rr_list[2][2],actual_ph,ph_out))
-	# Confusion Matrix Generation
-	def plot_confusion_matrix(cm,
+	# basic confusion matrix form sklearn
+	result_path = pJoin(modelDir, 'output-regression-result.csv')
+	df_final = pd.read_csv(result_path)
+	y_true = df_final['Input Phase']
+	y_pred = df_final['Predicted Phase']
+	classes=['A', 'B','C', 'ABC']
+	confusion_matrix(y_true, y_pred, labels=['A', 'B', 'C','ABC'])
+	# modified confusion matrix from self-defined function
+	cnf_matrix = confusion_matrix(y_true, y_pred, labels=['A', 'B','C', 'ABC'])
+	np.set_printoptions(precision=2)
+	plt.figure(dpi=200, figsize=(10,5))
+	plt.grid(b=False)
+		# Confusion Matrix Generation
+	def plot_confusion_matrix(
+			cm,
 			classes,
 			cmap=plt.cm.Blues
 		):
 		'''Self-defined function for better illustrating confusion matrix.'''
-		plt.imshow(cm, interpolation='nearest', cmap=cmap)
+		plt.imshow(cm, interpolation='nearest', cmap=cmap, aspect='auto')
 		plt.colorbar()
 		tick_marks = np.arange(len(classes))
 		plt.xticks(tick_marks, classes, rotation=45)
@@ -216,22 +226,11 @@ def work(modelDir, inputDict):
 			plt.text(j, i, format(cm[i, j], fmt),
 					horizontalalignment="center",
 					color="white" if cm[i, j] > thresh else "black")
-		plt.ylabel('True label')
-		plt.xlabel('Predicted label')
+		plt.ylabel('Input Label')
+		plt.xlabel('Predicted Label')
 		plt.tight_layout()
-	# basic confusion matrix form sklearn
-	result_path = pJoin(modelDir, 'output-regression-result.csv')
-	df_final = pd.read_csv(result_path)
-	y_true = df_final['True Phase']
-	y_pred = df_final['Predicted Phase']
-	classes=['A', 'B','C', 'ABC']
-	confusion_matrix(y_true, y_pred, labels=['A', 'B', 'C','ABC'])
-	# modified confusion matrix from self-defined function
-	cnf_matrix = confusion_matrix(y_true, y_pred, labels=['A', 'B','C', 'ABC'])
-	np.set_printoptions(precision=2)
-	plt.figure()
 	plot_confusion_matrix(cnf_matrix, classes=['A', 'B', 'C','ABC'])
-	plt.savefig(pJoin(modelDir,'output-conf-matrix.png'), dpi=120)
+	plt.savefig(pJoin(modelDir,'output-conf-matrix.png'))
 	# Offline Plotly plot
 	testdir = os.path.join(modelDir, 'Revised Meter Voltage Files', inputDict['checkMeter'])
 	df_test = pd.read_csv(testdir)
@@ -243,46 +242,70 @@ def work(modelDir, inputDict):
 	y3 = df_test['V_B']
 	new_x = range(len(y0))
 	# Create traces
-	meterDetailLayout = go.Layout(
-		width=1000,
-		height=500,
-		xaxis=dict(
-			showgrid=False,
-		),
-		yaxis=dict(
-			title="Volts (PU)",
-		),
-		legend=dict(
-			x=0,
-			y=1.25,
-			orientation="h"
-		)
-	)
 	trace0 = go.Scatter(
 		x = new_x,
 		y = y0,
+		# xaxis='x4',
+		# yaxis='y1',
 		mode = 'lines',
 		name = 'SS_PH_A'
 	)
 	trace1 = go.Scatter(
 		x = new_x,
 		y = y1,
+		# xaxis='x4',
+		# yaxis='y2',
 		mode = 'lines',
 		name = 'SS_PH_B'
 	)
 	trace2 = go.Scatter(
 		x = new_x,
 		y = y2,
+		# xaxis='x4',
+		# yaxis='y3',
 		mode = 'lines',
 		name = 'SS_PH_C'
 	)
 	trace3 = go.Scatter(
 		x = new_x,
 		y = y3,
+		# xaxis='x4',
+		# yaxis='y4',
 		mode = 'lines',
 		name = 'Meter_15_PH_B'
 	)
 	data = [trace0, trace1, trace2, trace3]
+	# Create layout
+	meterDetailLayout = go.Layout(
+		width=1000,
+		height=500,
+		xaxis=dict(
+			showgrid=False,
+			title="Time Step"
+		),
+		yaxis=dict(
+			title="Volts (PU)",
+		),
+		legend=dict(
+			x=0,
+			y=1.1,
+			orientation="h"
+		),
+		margin=go.layout.Margin(
+			l=60,
+			r=20,
+			b=70,
+			t=0,
+			pad=4
+	    ),
+	)
+	# fig = tools.make_subplots(rows=4, cols=1, subplot_titles=('SS','SSS','SSSS','SSSSSS'))
+	# fig.append_trace(trace0, 1, 1)
+	# fig.append_trace(trace1, 2, 1)
+	# fig.append_trace(trace2, 3, 1)
+	# fig.append_trace(trace3, 4, 1)
+	# fig['layout'].update(height=800, width=1000, showlegend=False)
+	# meterDetailLayout = fig['layout']
 	# For non-jupyter plotting.
 	plotly.offline.plot(data, filename=pJoin(modelDir, 'output-chart.html'), auto_open=False)
 	# Clean up temp files (optional)
@@ -293,7 +316,7 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir,"output-conf-matrix.png"),"rb") as inFile:
 		outData["confusionMatrixImg"] = inFile.read().encode("base64")
 	with open(pJoin(modelDir,"output-regression-result.csv"), "r") as inFile:
-		outData["regressionResult"] = inFile.read()
+		outData["regressionResult"] = list(csv.reader(inFile))
 	outData["meterDetailData"] = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
 	outData["meterDetailLayout"] = json.dumps(meterDetailLayout, cls=plotly.utils.PlotlyJSONEncoder)
 	return outData
