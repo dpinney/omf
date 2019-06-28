@@ -1353,6 +1353,19 @@ def displayOmdMap(owner, modelName, feederNum):
 	geojson = omf.geo.omdGeoJson(feederFile)
 	return render_template('geoJsonMap.html', geojson=geojson)
 
+@app.route('/commsMap/<owner>/<modelName>/<feederNum>', methods=["GET"])
+def commsMap(owner, modelName, feederNum):
+
+	'''Function to render omc on a leaflet map using a new template '''
+	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
+	with open(os.path.join(modelDir, "allInputData.json"), "r") as jsonFile:
+		feederDict = json.load(jsonFile)
+		feederName = feederDict.get('feederName' + str(feederNum))
+	feederFile = os.path.join(modelDir, feederName + ".omc")
+	with open(feederFile) as commsGeoJson:
+		geojson = json.load(commsGeoJson)
+	return render_template('commsNetViz.html', geojson=geojson)
+
 ###################################################
 # OTHER FUNCTIONS
 ###################################################

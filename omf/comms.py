@@ -17,7 +17,7 @@ def treeToNxGraph(inTree):
 		item = inTree[key]
 		if 'name' in item.keys():
 			if 'parent' in item.keys():
-				outGraph.add_edge(item['name'],item['parent'], attr_dict={'type':'parentChild','phases':1})
+				outGraph.add_edge(item['name'],item['parent'], attr_dict={'type':'parentChild'})
 				outGraph.node[item['name']]['type']=item['object']
 				if 'bustype' in item.keys():
 					outGraph.node[item['name']]['substation'] = True
@@ -25,8 +25,7 @@ def treeToNxGraph(inTree):
 				try: outGraph.node[item['name']]['pos']=(float(item.get('latitude',0)),float(item.get('longitude',0)))
 				except: outGraph.node[item['name']]['pos']=(0.0,0.0)
 			elif 'from' in item.keys():
-				myPhase = _phaseCount(item.get('phases','AN'))
-				outGraph.add_edge(item['from'],item['to'],attr_dict={'name':item.get('name',''),'type':item['object'],'phases':myPhase})
+				outGraph.add_edge(item['from'],item['to'],attr_dict={'name':item.get('name',''),'type':item['object']})
 			elif item['name'] in outGraph:
 				# Edge already led to node's addition, so just set the attributes:
 				outGraph.node[item['name']]['type']=item['object']
@@ -41,7 +40,7 @@ def treeToNxGraph(inTree):
 				except: outGraph.node.get(item['name'],{})['pos']=(0.0,0.0)
 	return outGraph
 
-def treeToDiNxGraph(inTree):
+def treeToCommsDiNxGraph(inTree):
 	''' Convert feeder tree to a DIRECTED networkx graph. '''
 	outGraph = nx.DiGraph()
 	network_objects = ['regulator', 'overhead_line', 'underground_line', 'transformer', 'fuse', 'switch', 'triplex_line', 'node', 'triplex_node', 'meter', 'triplex_meter', 'load', 'triplex_load', 'series_reactor']
@@ -53,14 +52,13 @@ def treeToDiNxGraph(inTree):
 					continue
 		if 'name' in item.keys():#sometimes network objects aren't named!
 			if 'parent' in item.keys():
-				outGraph.add_edge(item['parent'], item['name'], attr_dict={'type':'parentChild','phases':1, 'length': 0})#jfk. swapped from,to
+				outGraph.add_edge(item['parent'], item['name'], attr_dict={'type':'parentChild', 'length': 0})#jfk. swapped from,to
 				outGraph.node[item['name']]['type']=item['object']
 				outGraph.node[item['name']]['pos']=(float(item.get('latitude',0)),float(item.get('longitude',0)))
 				if 'bustype' in item.keys():
 					outGraph.node[item['name']]['substation'] = True
 			elif 'from' in item.keys():
-				myPhase = _phaseCount(item.get('phases','AN'))
-				outGraph.add_edge(item['from'],item['to'],attr_dict={'type':item['object'],'phases':myPhase, 'length': float(item.get('length',0))})
+				outGraph.add_edge(item['from'],item['to'],attr_dict={'type':item['object'], 'length': float(item.get('length',0))})
 				if 'bustype' in item.keys():
 					outGraph.node[item['name']]['substation'] = True
 			elif item['name'] in outGraph:
@@ -76,23 +74,18 @@ def treeToDiNxGraph(inTree):
 					outGraph.node[item['name']]['substation'] = True
 		elif 'object' in item.keys() and item['object'] in network_objects:#when name doesn't exist
 			if 'from' in item.keys():
-				myPhase = _phaseCount(item.get('phases','AN'))
-				outGraph.add_edge(item['from'],item['to'],attr_dict={'type':item['object'],'phases':myPhase, 'length': float(item.get('length',0))})
+				outGraph.add_edge(item['from'],item['to'],attr_dict={'type':item['object'], 'length': float(item.get('length',0))})
 			if 'latitude' in item.keys() and 'longitude' in item.keys():
 				outGraph.node.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
 			if 'bustype' in item.keys():
 					outGraph.node[item['name']]['substation'] = True
 	return outGraph
 
-def _phaseCount(phaseString):
-	''' Return number of phases not including neutrals. '''
-	return sum([phaseString.lower().count(x) for x in ['a','b','c']])
-
 def createGraph(pathToOmdFile):
 	'''Create networkxgraph from omd'''
 	with open(pathToOmdFile) as inFile:
 		tree = json.load(inFile)['tree']
-	nxG = treeToDiNxGraph(tree)
+	nxG = treeToCommsDiNxGraph(tree)
 	#use conversion for testing other feeders
 	nxG = graphValidator(pathToOmdFile, nxG)
 	return nxG
@@ -101,7 +94,7 @@ def getSubstation(nxG):
 	'''Get the substation node from a feeder'''
 	return [sub for sub in nx.get_node_attributes(nxG, 'substation')][0]
 
-def setFiber(nxG, edgeType='switch'):
+def setFiber(nxG, edgeType='switch', rfBandwidthCap=1000, fiberBandwidthCap=1000000):
 	'''Set fiber on path between certain edgeType (switch is the defualt for now) and the substation'''
 	node_positions = {nodewithPosition: nxG.node[nodewithPosition]['pos'] for nodewithPosition in nx.get_node_attributes(nxG, 'pos')}
 	edge_types = {edge: nxG[edge[0]][edge[1]]['type'] for edge in nx.get_edge_attributes(nxG, 'type')}
@@ -114,12 +107,13 @@ def setFiber(nxG, edgeType='switch'):
 				if nxG.node[node]['pos'] not in collector_positions:
 					collector_positions.append(nxG.node[node]['pos']) 
 					nxG.node[node]['rfCollector'] = True
-				nxG.node[node]['bandwidthCapacity'] = 10**4
+				#move into setRf later
+				nxG.node[node]['bandwidthCapacity'] = rfBandwidthCap 
 				shortestPath = nx.bidirectional_shortest_path(nxG, substation, node)
 				for i in range(len(shortestPath)-1):
 					nxG[shortestPath[i]][shortestPath[i+1]]['fiber'] = True
 					nxG[shortestPath[i]][shortestPath[i+1]]['bandwidthUse'] = 0
-					nxG[shortestPath[i]][shortestPath[i+1]]['bandwidthCapacity'] = 10**6
+					nxG[shortestPath[i]][shortestPath[i+1]]['bandwidthCapacity'] = fiberBandwidthCap
 
 def getDistance(nxG, start, end):
 	'''Get the distance between two points in a graph'''
@@ -131,14 +125,14 @@ def findNearestPoint(nxG, smartMeter, rfCollectors):
 	nearest = min(rfCollectors, key = lambda rfCollector: getDistance(nxG, smartMeter, rfCollector))
 	return nearest
 
-def setRf(nxG):
+def setRf(nxG, packetSize=10):
 	'''Add rf edges between smartMeters and the nearest rfCollector'''
 	smartMeters = [smartMeter for smartMeter in nx.get_node_attributes(nxG, 'type') if nxG.node[smartMeter]['type'] in ['meter', 'triplex_meter']]
 	rfCollectors = [rfCollector for rfCollector  in nx.get_node_attributes(nxG, 'rfCollector')]
 	for smartMeter in smartMeters:
 		rfCollector = findNearestPoint(nxG, smartMeter, rfCollectors)
 		nxG.add_edge(rfCollector, smartMeter,attr_dict={'rf': True, 'type': 'rf', 'bandwidthCapacity': (10**3 * 5)})
-		nxG.node[smartMeter]['bandwidthUse'] = 1
+		nxG.node[smartMeter]['bandwidthUse'] = packetSize
 		nxG.node[smartMeter]['smartMeter'] = True
 
 def calcEdgeLengths(nxG):
@@ -233,18 +227,20 @@ def showOnMap(geoJson):
 		json.dump(geoJson, outFile, indent=4)
 	webbrowser.open('file://' + pJoin(tempDir,'commsNetViz.html'))
 
-def saveOmc(geoJson, outputPath):
+def saveOmc(geoJson, outputPath, fileName=None):
 	'''Save comms geojson dict as .omc proprietary format (it is a geojson)'''
+	if fileName is None:
+		fileName = 'commsGeoJson'
 	if not os.path.exists(outputPath):
 		os.makedirs(outputPath)
-	with open(pJoin(outputPath,'commsGeoJson.omc'),"w") as outFile:
+	with open(pJoin(outputPath, fileName + '.omc'),"w") as outFile:
 		json.dump(geoJson, outFile, indent=4)
 
 def convertOmd(pathToOmdFile):
 	''' Convert sources to networkx graph. Some larger omd files do not have the position information in the tree'''
 	with open(pathToOmdFile) as inFile:
 		tree = json.load(inFile)['links']
-	nxG = nx.Graph()
+	nxG = nx.DiGraph()
 	for key in tree:
 		#Account for nodes that are missing names when creating edges
 		try:
@@ -269,6 +265,9 @@ def convertOmd(pathToOmdFile):
 		try:
 			nxG.node[sourceEdge]['type'] = key['source']['objectType']
 			nxG.node[sourceEdge]['name'] = key['source']['name']
+			#Get substation - fix later because this seems a little hacky
+			if key['source']['objectType'] == 'gridNode swingNode':
+				nxG.node[sourceEdge]['substation'] = True
 		except KeyError:
 			nxG.node[sourceEdge]['type'] = 'Undefined'
 		try:
@@ -282,6 +281,7 @@ def convertOmd(pathToOmdFile):
 		#print(nxG.node[nodeToChange]['pos'][1], nxG.node[nodeToChange]['pos'][0])
 		#print(statePlaneToLatLon(nxG.node[nodeToChange]['pos'][1], nxG.node[nodeToChange]['pos'][0]))
 		nxG.node[nodeToChange]['pos'] = statePlaneToLatLon(nxG.node[nodeToChange]['pos'][1], nxG.node[nodeToChange]['pos'][0])
+	#print(nxG.node)
 	return nxG
 
 def graphValidator(pathToOmdFile, inGraph):
