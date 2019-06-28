@@ -1,8 +1,6 @@
-"""
-https://stackoverflow.com/questions/32525718/assign-line-colors-in-pandas
-https://matplotlib.org/3.1.0/api/colors_api.html#module-matplotlib.colors - acceptable color values
-https://scikit-learn.org/stable/modules/preprocessing.html#scaling-features-to-a-range
-"""
+# https://stackoverflow.com/questions/32525718/assign-line-colors-in-pandas
+# https://matplotlib.org/3.1.0/api/colors_api.html#module-matplotlib.colors - acceptable color values
+# https://scikit-learn.org/stable/modules/preprocessing.html#scaling-features-to-a-range
 
 
 import os, datetime, csv
@@ -16,8 +14,119 @@ from sklearn.preprocessing import MinMaxScaler
 
 
 """
-matplotlib allows hex color strings to specify color, which seems to be the easiest way to specify a color and an alpha at the same time.
+- This clustering code assumes a very specific input: pandas DataFrames that have row labels that are pandas.Timestamps and columns labels that are
+  tuples with meter ids.
+- Need Python 3 to run this code
 """
+
+
+#######################
+### Main operations ###
+#######################
+
+
+def main():
+    """
+    8, 6, 5 is too many look how a couple of centroids are very close. 4 clusters is a little more interesting.
+    """
+    ### Set parameters ###
+    cluster_num = 4
+    normalize = False
+    standardize = True
+    daily_avg = False
+    weekly_avg = False
+    meter_ids = None
+    #meter_ids = ["14-2C2-47.3", "14-2C2-50.2A"]
+
+    filename = "ALGIERS_kWh_2017-06-01 00:00:00-05:00_15min_sum.pkl.gz"
+    #filename = "ALGIERS_kWh_2017-08-01 00:00:00-05:00_15min_sum.pkl.gz"
+    #filename = "BRUCEVILLE_kWh_2017-06-01 00:00:00-05:00_15min_sum.pkl.gz"
+    #filename = "FARMERSBURG_kWh_2017-08-01 00:00:00-05:00_15min_sum.pkl.gz"
+    filepath = os.path.join("/Users/austinchang/Desktop/confidential_data/ami_output", filename)
+
+    ### Create an operation ###
+    #examine_data(filepath)
+    view_meters_time_series(filepath, cluster_num, meter_ids=meter_ids, normalize=normalize, standardize=standardize, daily_avg=daily_avg,
+        weekly_avg=weekly_avg, color_clusters=True, show_centroids=True)
+    #create_tseries_to_cluster_fit_csv(filepath, cluster_num, normalize=normalize, daily_avg=daily_avg)
+
+
+def create_tseries_to_cluster_fit_csv(filepath, cluster_num, standardize=False, normalize=False, daily_avg=False):
+    #assert not (daily_avg and weekday_weekend_avg)
+    assert not (normalize and standardize)
+    df = get_dataframe(filepath)
+    df = df.transpose()
+    if daily_avg:
+        df = get_daily_averaged_dataframe(df)
+    ary = df.to_numpy()
+    if standardize is True:
+        ary = standardize_data(ary)
+    if normalize is True:
+        ary = normalize_data(ary)
+    km = run_k_means(ary, cluster_num)
+    rows = calculate_absolute_deviation_and_zscore(df.index.tolist(), ary, km)
+    rows = sorted(rows, key=lambda e: e[2], reverse=True) # Sort by absolute deviation
+    rows.insert(0, ["Meter ID", "Cluster", "Absolute deviation", "Within-Cluster z-score"])
+    write_tseries_to_cluster_fit_csv(rows, os.path.basename(filepath), cluster_num, standardize, normalize, daily_avg)
+
+
+def view_meters_time_series(filepath, cluster_num, meter_ids=None, normalize=False, standardize=False, daily_avg=False,
+        weekday_weekend_avg=False, weekly_avg=False, color_clusters=False, show_centroids=False):
+    assert [daily_avg, weekday_weekend_avg, weekly_avg].count(True) <= 1
+    assert not (normalize and standardize)
+    # df starts as 2880 * 736
+    original_df = get_dataframe(filepath)
+    # df is now 736 * 2880
+    df = original_df.transpose()
+    all_meter_ids = [tup[2] for tup in df.index.tolist()]
+
+    #print(df_T.iloc[0:3, 0:10])
+    # meter_ids are in the same order as the rows in df_T
+    #meter_ids = [tup[2] for tup in df_T.index.tolist()]
+    #print(meter_ids)
+
+    if daily_avg:
+        times = [dt.to_pydatetime().replace(tzinfo=None) for dt in df.columns.tolist()[:96]] # Get 1 days worth of datetimes
+        # df is now 736 * 96
+        df = get_daily_averaged_dataframe(df)
+        title = "Daily Averaged kWh Consumption Over Time"
+        x_label = "Hours in 1 Day"
+    elif weekly_avg:
+        times = [dt.to_pydatetime().replace(tzinfo=None) for dt in df.columns.tolist()[:672]] # Get 7 days worth of datetimes
+        df = get_weekly_averaged_dataframe(df)
+        title = "Weekday Averaged kWh Consumption Over Time"
+        x_label = "Days in a week"
+    elif weekday_weekend_avg:
+        times = [dt.to_pydatetime().replace(tzinfo=None) for dt in df.columns.tolist()[:192]] # Get 2 days worth of datetimes
+        # df is now 736 * 192
+        df = get_weekday_weekend_averaged_dataframe(df)
+        title = "Weekday-Weekend Averaged kWh Consumption Over Time"
+        x_label = "Hours in 2 Pseudodays"
+    else:
+        title = "Daily kWh Consumption over time"
+        x_label = "Days in the Month of June 2017"
+        times = [dt.to_pydatetime().replace(tzinfo=None) for dt in df.columns.tolist()]
+    ary = df.to_numpy()
+    y_label = "Absolute kWh Consumption"
+    if standardize:
+        ary = standardize_data(ary)
+        y_label = "Standardized kWh Consumption"
+    if normalize:
+        ary = normalize_data(ary)
+        y_label = "Normalized kWh Consumption"
+    km = run_k_means(ary, cluster_num)
+    if meter_ids is not None:
+        meter_indexes = []
+        for m_id in meter_ids:
+            meter_indexes.append(all_meter_ids.index(m_id))
+        plot_specific_meters(times, ary, km, meter_indexes, title=title, x_label=x_label, y_label=y_label)
+    else:
+        plot_all_meters(times, ary, km, color_clusters=color_clusters, show_centroids=show_centroids, title=title, x_label=x_label, y_label=y_label)
+
+
+def examine_data(filepath):
+    output_path = os.path.join(os.path.dirname(__file__), "dataframe.csv")
+    get_dataframe(filepath).to_csv(output_path)
 
 
 #############################
@@ -39,7 +148,7 @@ def run_k_means(ary, clusters):
       - labels start at 0, not 1
     """
     # df arrives as 736 * 2880 or 736 * 96 or 736 * 192. rows = meters and columns = datetimes
-    assert len(ary) == 736 and (len(ary[0]) == 2880 or len(ary[0]) == 96 or len(ary[0]) == 192)
+    #assert len(ary) == 736 and (len(ary[0]) == 2880 or len(ary[0]) == 96 or len(ary[0]) == 192)
     km = KMeans(n_clusters=clusters)
     km.fit(ary)
     #print(len(km.labels_)) # 736
@@ -47,40 +156,26 @@ def run_k_means(ary, clusters):
     return km
 
 
-def calculate_absolute_deviation(t_series, cluster):
-    # Data arrives in row = meter and column = datetime
+def calculate_absolute_deviation_and_zscore(meter_ids, meter_data, km):
     """
-    Calculate the absolute deviation of a time series from its cluster.
+    Calculate the absolute deviation of a meter time series from its assigned cluster and the a within-cluster standard score that expresses how much
+    the meter varies from its cluster compared to other meters in the same cluster.
 
-    :param t_series: a sequence of y values from a time series
-    :type t_series: ndarray
-    :param cluster: a sequence of y values from a time series cluster
-    :type cluster: ndarray
-    :return: the absolute deviation of the time series from the cluster
-    :rtype: float
-    """
-    assert isinstance(t_series, np.ndarray) and isinstance(cluster, np.ndarray)
-    assert len(t_series) == len(cluster)
-    return np.sum(np.absolute(t_series - cluster))
-
-
-# Need to test this
-def calculate_absolute_deviations(meter_ids, meters, cluster_centers, labels):
-    """
+    :param meter_ids: the unique identifiers for the meters
     :type meter_ids: list
-    :type meters: ndarray
-    :type cluster_centers: ndarray
-    :type labels: ndarray
-    :rtype: list
+    :param meter_data: kWh readings for meters over time
+    :type meter_data: list of lists
+    :param km: the KMeans object
+    :type km: KMeans
+    :return: a list of rows, where each row displays the absolute deviation and standard score for a meter
+    :rtype: list of lists
     """
-    # Also calclate within-cluster z-score?
-    assert len(meter_ids) == 736 and len(meters) == 736 and len(labels) == 736
-    assert len(meters[0]) == 2880 or len(meters[0]) == 96
+
     csv_data = []
-    abs_dev_by_cluster = {key:[] for key in range(len(cluster_centers))}
-    for m_idx in range(len(meters)):
-        cluster_idx = labels[m_idx]
-        abs_dev = calculate_absolute_deviation(meters[m_idx], cluster_centers[cluster_idx])
+    abs_dev_by_cluster = {key:[] for key in range(len(km.cluster_centers_))}
+    for m_idx in range(len(meter_data)):
+        cluster_idx = km.labels_[m_idx]
+        abs_dev = np.sum(np.absolute(meter_data[m_idx] - km.cluster_centers_[cluster_idx]))
         abs_dev_by_cluster[cluster_idx].append(abs_dev)
         csv_data.append([meter_ids[m_idx], cluster_idx, abs_dev])
     # Iterate over each list that contains the absolute deviation of each time series from its cluster, and calculate the standard deviation
@@ -93,9 +188,6 @@ def calculate_absolute_deviations(meter_ids, meters, cluster_centers, labels):
     return csv_data
 
 
-#def calculate_standard_score()
-
-
 def get_daily_averaged_dataframe(df):
     """Data arrives in row = meter and column = Timestamp format."""
     def grouping_function(dt):
@@ -105,6 +197,20 @@ def get_daily_averaged_dataframe(df):
     return gb.mean()
 
 
+def get_weekly_averaged_dataframe(df):
+    """
+    For an entire month, group every same day of the week into a single day. For each pseudoday in the group of 7 pseudodays, create a new meter
+    reading for every 15-minute measurement in the pseudoday, where each new reading is the mean of all meter readings in the month for that weekday
+    at that specific time.
+    """
+    def grouping_function(dt):
+        dt = dt.to_pydatetime().replace(tzinfo=None)
+        return dt.strftime("%a") + "-" + str(dt.hour) + ":" + str(dt.minute)
+    gb = df.groupby(grouping_function, axis=1, sort=False)
+    return gb.mean()
+
+
+# TODO: This function does NOT work with date ranges outside of June 2017!!!
 def get_weekday_weekend_averaged_dataframe(df):
     """
     Data arrives in row = meter and column = Timestamp format. If you look at a calendar for June 2017, you will see that the weekends fall on days
@@ -141,34 +247,37 @@ def get_weekday_weekend_averaged_dataframe(df):
 #########################
 
 
-def get_dataframe(filename):
+def get_dataframe(filepath):
     """ The pickled files are implicitly already pandas dataframes """
-    filepath = os.path.join(os.path.abspath(os.path.dirname(__file__)), "../ami_output", filename)
+    #filepath = os.path.join(os.path.abspath(os.path.dirname(__file__)), "../ami_output", filename)
     return pd.read_pickle(filepath)
 
 
 def standardize_data(ary):
     """ Data arrives in row = meter and column = datetime """
-    assert isinstance(ary, np.ndarray) and len(ary) == 736
+    #assert isinstance(ary, np.ndarray) and len(ary) == 736
     standardized_ndarray = scale(ary, axis=1)
     return standardized_ndarray
 
 
 def normalize_data(ary):
     """ Data arrives in row = meter and column = datetime """
-    assert isinstance(ary, np.ndarray) and len(ary) == 736
+    #assert isinstance(ary, np.ndarray) and len(ary) == 736
     ary = ary.T # get data back into row = datetime and column = meter
     norm_ary = MinMaxScaler().fit_transform(ary)
     return norm_ary.T # get data back into row = meter and column = datetime
 
 
-def write_tseries_to_cluster_fit_csv(rows, filename, cluster_num, standardize=False, normalize=False, daily_avg=False):
+def write_tseries_to_cluster_fit_csv(rows, filename, cluster_num, standardize=False, normalize=False, daily_avg=False,
+    weekday_weekend_avg=False):
     if standardize:
         filename += "-standardized"
     if normalize:
         filename += "-normalized"
     if daily_avg:
         filename += "-dailyaveraged"
+    if weekday_weekend_avg:
+        filename += "-weekdayweekendaveraged"
     filename += "-{}cluster-fit.csv".format(cluster_num)
     filepath = os.path.join(os.path.dirname(__file__), filename)
     with open(filepath, 'w') as f:
@@ -177,9 +286,7 @@ def write_tseries_to_cluster_fit_csv(rows, filename, cluster_num, standardize=Fa
 
 
 def plot_specific_meters(times, rows, km, meter_indexes, title=None, x_label=None, y_label=None):
-    """
-    Get rows of all meter data and highlight specific meters.
-    """
+    """ Get rows of all meter data and highlight specific meters. """
     color_floats = get_colormap_line_color_floats(km)
     cmap = matplotlib.cm.get_cmap('viridis')
     fig = plt.figure()
@@ -219,7 +326,8 @@ def plot_all_meters(times, rows, km, color_clusters=False, show_centroids=False,
             else:
                 ax.plot(times, ts, color=cmap(color_floats[idx]))
         else:
-            ax.plot(times, ts, color="#d9d9d9")
+            #ax.plot(times, ts, color="#d9d9d9")
+            ax.plot(times, ts)
         idx += 1
     if show_centroids is True:
         idx = 0
@@ -240,13 +348,16 @@ def get_colormap_line_color_floats(km):
     return [cluster_id / (cluster_count - 1) for cluster_id in km.labels_]
 
 
+# TODO: set minor locator for days to be hours
 def set_axes_labels_and_show_graph(times, ax, title=None, x_label=None, y_label=None):
     # type: (list, Axes, str, str, str) -> None
     if len(times) <= 192:
+        # If we are showing a daily average or weekday-weekend average, show hours
         locator = matplotlib.dates.HourLocator()
         #fmt = matplotlib.dates.DateFormatter("%H:%M")
         fmt = matplotlib.dates.DateFormatter("%H")
     else:
+        # If we are showing all data or a week's worth of data, show days
         locator = matplotlib.dates.DayLocator()
         fmt = matplotlib.dates.DateFormatter("%a")
     ax.get_xaxis().set_major_locator(locator)
@@ -263,95 +374,5 @@ def set_axes_labels_and_show_graph(times, ax, title=None, x_label=None, y_label=
     plt.show()
 
 
-######################
-### Main functions ###
-######################
-
-
-def create_tseries_to_cluster_fit_csv(filename, cluster_num, standardize=False, normalize=False, daily_avg=False):
-    #assert not (daily_avg and weekday_weekend_avg)
-    assert not (normalize and standardize)
-    df = get_dataframe(filename)
-    df = df.transpose()
-    if daily_avg:
-        df = get_daily_averaged_dataframe(df)
-    ary = df.to_numpy()
-    if standardize is True:
-        ary = standardize_data(ary)
-    if normalize is True:
-        ary = normalize_data(ary)
-    km = run_k_means(ary, cluster_num)
-    rows = calculate_absolute_deviations(df.index.tolist(), ary, km.cluster_centers_, km.labels_)
-    rows = sorted(rows, key=lambda e: e[2], reverse=True) # Sort by absolute deviation
-    rows.insert(0, ["Meter ID", "Cluster", "Absolute deviation", "Within-Cluster z-score"])
-    write_tseries_to_cluster_fit_csv(rows, filename, cluster_num, standardize, normalize, daily_avg)
-
-
-def view_meters_time_series(filename, cluster_num, meter_ids=None, normalize=False, standardize=False, daily_avg=False, weekday_weekend_avg=False):
-    assert not (daily_avg and weekday_weekend_avg)
-    assert not (normalize and standardize)
-    # df starts as 2880 * 736
-    original_df = get_dataframe(filename)
-    # df is now 736 * 2880
-    df = original_df.transpose()
-    all_meter_ids = [tup[2] for tup in df.index.tolist()]
-
-    #print(df_T.iloc[0:3, 0:10])
-    # meter_ids are in the same order as the rows in df_T
-    #meter_ids = [tup[2] for tup in df_T.index.tolist()]
-    #print(meter_ids)
-
-    if daily_avg:
-        times = [dt.to_pydatetime().replace(tzinfo=None) for dt in df.columns.tolist()[:96]] # Get 1 days worth of datetimes
-        # df is now 736 * 96
-        df = get_daily_averaged_dataframe(df)
-        title = "Daily Averaged kWh Consumption Over Time"
-        x_label = "Hours in 1 Day"
-    elif weekday_weekend_avg:
-        times = [dt.to_pydatetime().replace(tzinfo=None) for dt in df.columns.tolist()[:192]] # Get 2 days worth of datetimes
-        # df is now 736 * 192
-        df = get_weekday_weekend_averaged_dataframe(df)
-        title = "Weekday-Weekend Averaged kWh Consumption Over Time"
-        x_label = "Hours in 2 Pseudodays"
-    else:
-        title = "Daily kWh Consumption over time"
-        x_label = "Days in the Month of June 2017"
-        times = [dt.to_pydatetime().replace(tzinfo=None) for dt in df.columns.tolist()]
-    ary = df.to_numpy()
-    y_label = "Absolute kWh Consumption"
-    if standardize:
-        ary = standardize_data(ary)
-        y_label = "Standardized kWh Consumption"
-    if normalize:
-        ary = normalize_data(ary)
-        y_label = "Normalized kWh Consumption"
-    km = run_k_means(ary, cluster_num)
-    if meter_ids is not None:
-        meter_indexes = []
-        for m_id in meter_ids:
-            meter_indexes.append(all_meter_ids.index(m_id))
-        plot_specific_meters(times, ary, km, meter_indexes, title=title, x_label=x_label, y_label=y_label)
-    else:
-        plot_all_meters(times, ary, km, color_clusters=True, show_centroids=True, title=title, x_label=x_label, y_label=y_label)
-
-
 if __name__ == "__main__":
-    """
-    8, 6, 5 is too many look how a couple of centroids are very close. 4 clusters is a little more interesting.
-    """
-    filename = "ALGIERS_kVARhDel_2017-06-01 00:00:00-05:00_15min_sum.pkl.gz"
-    #filename = "ALGIERS_kWh_2017-06-01 00:00:00-05:00_15min_sum.pkl.gz"
-    cluster_num = 4
-    normalize = True
-
-    #daily_avg = False
-    #meter_ids = ["14-3H-22", "14-1A-110.10B"]
-
-    daily_avg = True
-    #meter_ids = ["14-2-87.1A", "14-2C2-47.3"]
-    #meter_ids = ["14-2C2-47.3"]
-
-    view_meters_time_series(filename, cluster_num, normalize=normalize, daily_avg=daily_avg)
-    #view_meters_time_series(filename, cluster_num, meter_ids=meter_ids, normalize=normalize, daily_avg=daily_avg)
-    #create_tseries_to_cluster_fit_csv(filename, cluster_num, normalize=normalize, daily_avg=daily_avg)
-    #view_meters_time_series(filename, cluster_num, normalize=True, weekday_weekend_avg=True)
+    main()
