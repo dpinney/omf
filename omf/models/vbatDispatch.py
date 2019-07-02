@@ -127,10 +127,10 @@ def work(modelDir, inputDict):
 		
 		with open(pJoin(modelDir, 'temp.csv'), 'w') as f:
 			lines = inputDict['tempCurve'].split('\n')
-			out["tempData"] = [float(x) if x != '999.0' else float(inputDict['setpoint']) for x in lines[:-1]]
-			correctData = [x+'\n' if x != '999.0' else inputDict['setpoint']+'\n' for x in lines][:-1]
+			out["tempData"] = [float(x) if x != '999.0' else float(inputDict['setpoint']) for x in lines]
+			correctData = [x+'\n' if x != '999.0' else inputDict['setpoint']+'\n' for x in lines]
 			f.write(''.join(correctData))
-			assert len(correctData) == 8760
+		assert len(correctData) == 8760
 	except:
 		raise Exception("CSV file is incorrect format. Please see valid format "
 			"definition at <a target='_blank' href = 'https://github.com/dpinney/"
@@ -247,7 +247,7 @@ def workForecast(modelDir, ind):
 
 	# ---------------------- MAKE PREDICTIONS ------------------------------- #
 	X_test, y_test = all_X[-8760:], all_y[-8760:]
-	predictions, accuracy = fc.neural_net_predictions(all_X, all_y, EPOCHS=int(ind['epochs']))
+	predictions, accuracy = fc.neural_net_predictions(all_X, all_y, epochs=int(ind['epochs']))
 	dailyLoadPredictions = [predictions[i:i+24] for i in range(0, len(predictions), 24)]
 	
 	P_lower, P_upper, E_UL = vbat24hr(ind, df['tempc'][-8760:])
@@ -268,7 +268,7 @@ def workForecast(modelDir, ind):
 		peak = max(load)
 		if peak > last_peak[m]:
 			dispatched_d[i] = True
-			p, e = fc.pulp24hrVbat(ind, load, pl, pu, eu)
+			p, e = pulp24hrVbat(ind, load, pl, pu, eu)
 			vbp.extend(p)
 			vbe.extend(e)
 			last_peak[m] = peak + vbp[load.index(peak)]
@@ -378,7 +378,7 @@ def new(modelDir):
 		"modelType": modelName,
 		## FORECAST ##
 		'histFileName': 'd_Texas_17yr_TempAndLoad.csv',
-		'dispatch_type': 'optimal', #'prediction', # 'optimal'
+		'dispatch_type': 'prediction', #'prediction', # 'optimal'
 		'epochs': '100',
 		'confidence': '90',
 		"histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","d_Texas_17yr_TempAndLoad.csv"), 'rU').read(),
