@@ -378,7 +378,7 @@ def new(modelDir):
 		"modelType": modelName,
 		## FORECAST ##
 		'histFileName': 'd_Texas_17yr_TempAndLoad.csv',
-		'dispatch_type': 'prediction', #'prediction', # 'optimal'
+		'dispatch_type': 'optimal',
 		'epochs': '100',
 		'confidence': '90',
 		"histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","d_Texas_17yr_TempAndLoad.csv"), 'rU').read(),
