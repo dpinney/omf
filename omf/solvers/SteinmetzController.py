@@ -1,19 +1,18 @@
-# after Kevin's edits
-
 # imports
 import os
 import random as rand
 import math
 import numpy
 from shutil import copyfile
-import glob, shutil
-from os.path import join as pJoin
-import time
+import glob,shutil
+def moveAndCreateDir(sourcePath, dstDir):
+    if os.path.isdir(dstDir) == False:
+        os.makedirs(dstDir)
+    else:
+		shutil.rmtree(dstDir)
+		os.makedirs(dstDir)
 
-# def moveAndCreateDir(sourcePath, dstDir):
-#     if os.path.isdir(dstDir) == False:
-#         os.makedirs(dstDir) 
-#     shutil.move(sourcePath, dstDir)
+    shutil.copy(sourcePath, dstDir)
 
 class PV_information:
 	Parent = ""
@@ -297,7 +296,6 @@ def GetCloestUpstreamNode(inputItem, nPhaseQualifierList, streamInfo):
 			return root
 		leafNode = root
 	return leafNode
-
 def GetDeltaPVdata(sourceFileName,streamInfo):
 	PV = []
 	PV_index = {}
@@ -346,6 +344,7 @@ def GetDeltaPVdata(sourceFileName,streamInfo):
 
 
 def CreateDeltaPVfile(sourceFileName,PV):
+
 	outputFilename = sourceFileName.strip('.glm')+'DeltaPV.glm'
 	with open(sourceFileName, 'r') as inputFile, open(outputFilename, 'w+') as outputFile:
 		isPV = 0
@@ -409,6 +408,7 @@ def SteinmetzDeltaQ_VUF(voltage,current,Q_pre):
     Q['BC'] = 1.0/3*(power_AB.imag -2*power_BC.imag + power_AC.imag + math.sqrt(3)*power_AC.real - math.sqrt(3)*power_AB.real)
     Q['AC'] = 1.0/3*(power_AB.imag + power_BC.imag -2* power_AC.imag + math.sqrt(3)*power_AB.real - math.sqrt(3)*power_BC.real)
 
+    
     return Q
 
 # Steinmetz circuit design (Wye) to decrease VUF
@@ -436,6 +436,7 @@ def SteinmetzWyeQ_VUF(voltage,current,Q_pre):
 	
 	return Q
 
+
 # Steinmetz circuit design to decrease V0
 def SteinmetzWyeQ_V0(voltage,current,Q_pre):
 	Q = {}
@@ -452,14 +453,16 @@ def SteinmetzWyeQ_V0(voltage,current,Q_pre):
 
 	# compute steinmetz reactive power
 	X_A = numpy.array([[(complex(0,1)/voltage_A.conjugate()).real,(complex(0,1)/voltage_B.conjugate()).real,(complex(0,1)/voltage_C.conjugate()).real],[(complex(0,1)/ voltage_A.conjugate()).imag,(complex(0,1)/voltage_B.conjugate()).imag,(complex(0,1)/voltage_C.conjugate()).imag],[1.0, 1.0, 1.0]])
+
 	X_B = numpy.array([((power_A/voltage_A).conjugate()+(power_B/voltage_B).conjugate()+(power_C/voltage_C).conjugate()).real,((power_A/voltage_A).conjugate()+(power_B/voltage_B).conjugate()+(power_C/voltage_C).conjugate()).imag,0.0])
 
-	X = numpy.linalg.solve(X_A, X_B)
+	X = numpy.linalg.solve(X_A,X_B)
 	Q['A'] = X[0]
 	Q['B'] = X[1]
 	Q['C'] = X[2]
 
 	return Q
+
 
 def ReadVoltage(voltageFileName):
 	with open(voltageFileName, 'r') as fp1:
@@ -484,50 +487,41 @@ def ReadCurrent(currentFileName):
 
 		return current
 
-def AddRecorder(sourceFileName,criticalNode,line_name, destDir):
-	destDir += '/'
+def AddRecorder(sourceFileName,criticalNode,line_name):
 	with open(sourceFileName,'a+') as fp:
-		fp.writelines(['object recorder {\n','    parent '+ criticalNode+ ';\n','    interval 1;\n','    limit 1440;\n', '    file  "'+destDir+'Node_voltage.csv";\n','    property "voltage_A,voltage_B,voltage_C";\n};\n\n'])
-		fp.writelines(['object recorder {\n','    parent '+ line_name+ ';\n','    interval 1;\n','    limit 1440;\n', '    file  "'+destDir+'Node_current.csv";\n','    property "current_out_A,current_out_B,current_out_C";\n};\n\n'])
-		#capacitors?
-		fp.writelines(['object recorder {\n','    parent R1-12-47-1_cap_1;\n','    interval 60;\n','     limit 1440;','    file '+destDir+'R1-12.47-1_capacitor1.csv;\n','    property "switchA,switchB,switchC,voltage_A.real,voltage_A.imag,voltage_B.real,voltage_B.imag,voltage_C.real,voltage_C.imag";\n};\n\n'])
-		fp.writelines(['object recorder {\n','    parent R1-12-47-1_cap_2;\n','    interval 60;\n','     limit 1440;','    file '+destDir+'R1-12.47-1_capacitor2.csv;\n','    property "switchA,switchB,switchC,voltage_A.real,voltage_A.imag,voltage_B.real,voltage_B.imag,voltage_C.real,voltage_C.imag";\n};\n\n'])
-		fp.writelines(['object recorder {\n','    parent R1-12-47-1_cap_3;\n','    interval 60;\n','     limit 1440;','    file '+destDir+'R1-12.47-1_capacitor3.csv;\n','    property "switchA,switchB,switchC,voltage_A.real,voltage_A.imag,voltage_B.real,voltage_B.imag,voltage_C.real,voltage_C.imag";\n};\n\n'])
-		#reg1?
-		fp.writelines(['object recorder {\n','     parent R1-12-47-1_reg_1;\n','    interval 60;\n','    limit 1440;','    file '+destDir+'R1-12.47-1_reg1_output.csv;\n','    property tap_A,tap_B,tap_C,power_in_A.real,power_in_A.imag,power_in_B.real,power_in_B.imag,power_in_C.real,power_in_C.imag,power_in.real,power_in.imag;\n};\n\n'])
+		fp.writelines(['object recorder {\n','    parent '+ criticalNode+ ';\n','    interval 1;\n','    limit 1440;\n', '    file  "Node_voltage.csv";\n','    property "voltage_A,voltage_B,voltage_C";\n};\n\n'])
+		fp.writelines(['object recorder {\n','    parent '+ line_name+ ';\n','    interval 1;\n','    limit 1440;\n', '    file  "Node_current.csv";\n','    property "current_out_A,current_out_B,current_out_C";\n};\n\n'])
 
-def AddPVWyeRecorder(sourceFileName,suffix, destDir):
-	destDir += '/'
+
+def AddPVWyeRecorder(sourceFileName,suffix):
 	with open(sourceFileName,'a+') as fp:
-		fp.writelines(['object group_recorder {\n','    group class=inverter;\n','    interval 1;\n','    limit 1440;\n', '    file  "'+destDir+'all_inverters_VA_Out_AC'+suffix+'.csv";\n','    property VA_Out;\n};\n\n'])
-		
-def AddPVDeltaRecorder(sourceFileName,suffix, destDir):
-	destDir += '/'
-	with open(sourceFileName,'a+') as fp:
-		# fp.writelines(['object group_recorder {\n','    group class=inverter;\n','    interval 1;\n','    limit 1440;\n', '    file  "'+destDir+'all_inverters_VA_Out_AC'+suffix+'.csv";\n','    property VA_Out;\n};\n\n']) 
-		fp.writelines(['object group_recorder {\n','    group class=load AND groupid=deltaPVAB;\n','    interval 1;\n','    limit 1440;\n', '    file  "'+destDir+'all_inverters_VA_Out_AC_A'+suffix+'.csv";\n','    property power_A;\n};\n\n'])
-		fp.writelines(['object group_recorder {\n','    group class=load AND groupid=deltaPVBC;\n','    interval 1;\n','    limit 1440;\n', '    file  "'+destDir+'all_inverters_VA_Out_AC_B'+suffix+'.csv";\n','    property power_B;\n};\n\n'])
-		fp.writelines(['object group_recorder {\n','    group class=load AND groupid=deltaPVCA;\n','    interval 1;\n','    limit 1440;\n', '    file  "'+destDir+'all_inverters_VA_Out_AC_C'+suffix+'.csv";\n','    property power_C;\n};\n\n'])
+		fp.writelines(['object group_recorder {\n','    group class=inverter;\n','    interval 1;\n','    limit 1440;\n', '    file  "all_inverters_VA_Out_AC'+suffix+'.csv";\n','    property VA_Out;\n};\n\n'])
 		
 
-def addOutputCSV(sourceFileName,suffix, destDir):
-	destDir += '/'
+
+def AddPVDeltaRecorder(sourceFileName,suffix):
 	with open(sourceFileName,'a+') as fp:
-		# fp.writelines(['object group_recorder {\n','    group class=load AND groupid=threePhase;\n','    interval 1;\n','    limit 1440;\n', '    file  "'+destDir+'threephaseMotor_Voltage_A'+suffix+'.csv";\n','    property voltage_A;\n};\n\n'])
-		# fp.writelines(['object group_recorder {\n','    group class=load AND groupid=threePhase;\n','    interval 1;\n','    limit 1440;\n', '    file  "'+destDir+'threephaseMotor_Voltage_B'+suffix+'.csv";\n','    property voltage_B;\n};\n\n'])
-		# fp.writelines(['object group_recorder {\n','    group class=load AND groupid=threePhase;\n','    interval 1;\n','    limit 1440;\n', '    file  "'+destDir+'threephaseMotor_Voltage_C'+suffix+'.csv";\n','    property voltage_C;\n};\n\n'])
-		fp.writelines(['object group_recorder {\n','    group class=load AND groupid=threePhase;\n','    interval 1;\n','    limit 1440;\n', '    file  "'+destDir+'threephaseMotor_Voltage_C'+suffix+'.csv";\n','    property voltage_C;\n};\n\n'])
+		fp.writelines(['object group_recorder {\n','    group class=load AND groupid=deltaPVAB;\n','    interval 1;\n','    limit 1440;\n', '    file  "all_inverters_VA_Out_AC_A'+suffix+'.csv";\n','    property power_A;\n};\n\n'])
+		fp.writelines(['object group_recorder {\n','    group class=load AND groupid=deltaPVBC;\n','    interval 1;\n','    limit 1440;\n', '    file  "all_inverters_VA_Out_AC_B'+suffix+'.csv";\n','    property power_B;\n};\n\n'])
+		fp.writelines(['object group_recorder {\n','    group class=load AND groupid=deltaPVCA;\n','    interval 1;\n','    limit 1440;\n', '    file  "all_inverters_VA_Out_AC_C'+suffix+'.csv";\n','    property power_C;\n};\n\n'])
 		
-		fp.writelines(['object group_recorder {\n','    group class=load AND groupid=threePhase;\n','    interval 1;\n','    limit 1440;\n', '    file  "'+destDir+'threephase_VA_A'+suffix+'.csv";\n','    property power_A;\n};\n\n'])
-		fp.writelines(['object group_recorder {\n','    group class=load AND groupid=threePhase;\n','    interval 1;\n','    limit 1440;\n', '    file  "'+destDir+'threephase_VA_B'+suffix+'.csv";\n','    property power_B;\n};\n\n'])
-		fp.writelines(['object group_recorder {\n','    group class=load AND groupid=threePhase;\n','    interval 1;\n','    limit 1440;\n', '    file  "'+destDir+'threephase_VA_C'+suffix+'.csv";\n','    property power_C;\n};\n\n'])
+
+def addOutputCSV(sourceFileName,suffix):
+	with open(sourceFileName,'a+') as fp:
+		fp.writelines(['object group_recorder {\n','    group class=load AND groupid=threePhase;\n','    interval 1;\n','    limit 1440;\n', '    file  "threephaseMotor_Voltage_A'+suffix+'.csv";\n','    property voltage_A;\n};\n\n'])
+		fp.writelines(['object group_recorder {\n','    group class=load AND groupid=threePhase;\n','    interval 1;\n','    limit 1440;\n', '    file  "threephaseMotor_Voltage_B'+suffix+'.csv";\n','    property voltage_B;\n};\n\n'])
+		fp.writelines(['object group_recorder {\n','    group class=load AND groupid=threePhase;\n','    interval 1;\n','    limit 1440;\n', '    file  "threephaseMotor_Voltage_C'+suffix+'.csv";\n','    property voltage_C;\n};\n\n'])
+
+		fp.writelines(['object group_recorder {\n','    group class=load AND groupid=threePhase;\n','    interval 1;\n','    limit 1440;\n', '    file  "threephase_VA_A'+suffix+'.csv";\n','    property power_A;\n};\n\n'])
+		fp.writelines(['object group_recorder {\n','    group class=load AND groupid=threePhase;\n','    interval 1;\n','    limit 1440;\n', '    file  "threephase_VA_B'+suffix+'.csv";\n','    property power_B;\n};\n\n'])
+		fp.writelines(['object group_recorder {\n','    group class=load AND groupid=threePhase;\n','    interval 1;\n','    limit 1440;\n', '    file  "threephase_VA_C'+suffix+'.csv";\n','    property power_C;\n};\n\n'])
 		
-		fp.writelines(['object collector {\n','    group class=transformer;\n','    interval 1;\n','    limit 1440;\n', '    file  "'+destDir+'Zlosses_transformer'+suffix+'.csv";\n','    property sum(power_losses_A.real),sum(power_losses_B.real),sum(power_losses_C.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag);\n};\n\n'])
-		fp.writelines(['object collector {\n','    group class=underground_line;\n','    interval 1;\n','    limit 1440;\n', '    file  "'+destDir+'Zlosses_underground_line'+suffix+'.csv";\n','    property sum(power_losses_A.real),sum(power_losses_B.real),sum(power_losses_C.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag);\n};\n\n'])
-		fp.writelines(['object collector {\n','    group class=overhead_line;\n','    interval 1;\n','    limit 1440;\n', '    file  "'+destDir+'Zlosses_overhead_line'+suffix+'.csv";\n','    property sum(power_losses_A.real),sum(power_losses_B.real),sum(power_losses_C.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag);\n};\n\n'])
-		fp.writelines(['object collector {\n','    group class=triplex_line;\n','    interval 1;\n','    limit 1440;\n', '    file  "'+destDir+'Zlosses_triplex_line'+suffix+'.csv";\n','    property sum(power_losses_A.real),sum(power_losses_B.real),sum(power_losses_C.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag);\n};\n\n'])
-		fp.writelines(['object collector {\n','    group class=load;\n','    interval 1;\n','    limit 1440;\n', '    file  "'+destDir+'load'+suffix+'.csv";\n','    property sum(power_A.real),sum(power_B.real),sum(power_C.real),sum(power_A.imag),sum(power_B.imag),sum(power_C.imag);\n};\n\n'])
-		fp.writelines(['object collector {\n','    group class=triplex_node;\n','    interval 1;\n','    limit 1440;\n', '    file  "'+destDir+'triplexload'+suffix+'.csv";\n','    property sum(power_12.real),sum(power_12.imag);\n};\n\n'])
+		fp.writelines(['object collector {\n','    group class=transformer;\n','    interval 1;\n','    limit 1440;\n', '    file  "Zlosses_transformer'+suffix+'.csv";\n','    property sum(power_losses_A.real),sum(power_losses_B.real),sum(power_losses_C.real);\n};\n\n'])
+		fp.writelines(['object collector {\n','    group class=underground_line;\n','    interval 1;\n','    limit 1440;\n', '    file  "Zlosses_underground_line'+suffix+'.csv";\n','    property sum(power_losses_A.real),sum(power_losses_B.real),sum(power_losses_C.real);\n};\n\n'])
+		fp.writelines(['object collector {\n','    group class=overhead_line;\n','    interval 1;\n','    limit 1440;\n', '    file  "Zlosses_overhead_line'+suffix+'.csv";\n','    property sum(power_losses_A.real),sum(power_losses_B.real),sum(power_losses_C.real);\n};\n\n'])
+		fp.writelines(['object collector {\n','    group class=triplex_line;\n','    interval 1;\n','    limit 1440;\n', '    file  "Zlosses_triplex_line'+suffix+'.csv";\n','    property sum(power_losses_A.real),sum(power_losses_B.real),sum(power_losses_C.real);\n};\n\n'])
+		fp.writelines(['object collector {\n','    group class=load;\n','    interval 1;\n','    limit 1440;\n', '    file  "load'+suffix+'.csv";\n','    property sum(power_A.real),sum(power_B.real),sum(power_C.real),sum(power_A.imag),sum(power_B.imag),sum(power_C.imag);\n};\n\n'])
+		fp.writelines(['object collector {\n','    group class=triplex_node;\n','    interval 1;\n','    limit 1440;\n', '    file  "triplexload'+suffix+'.csv";\n','    property sum(power_12.real),sum(power_12.imag);\n};\n\n'])
 
 def FindSlack(sourceFileName):
 	temp_Name = ''
@@ -558,6 +552,9 @@ def FindSlack(sourceFileName):
 				break
 				
 	return sourceNode
+
+
+
 
 def GetWyePVdata(sourceFileName):
 	PV = []
@@ -662,7 +659,8 @@ def ChangeGlmFileDelta(inputFileName,outputFileName,PV,PV_index):
 
 		outputFile.write(tempString)
 
-def addIdtoThreephaseload(inputFileName, outputFileName):
+def addIdtoThreephaseload(inputFileName,outputFileName):
+
 	with open(inputFileName, 'r') as inputFile, open(outputFileName, 'w+') as outputFile:
 		isLoad = 0
 		isThreephase = 0
@@ -698,39 +696,49 @@ def addIdtoThreephaseload(inputFileName, outputFileName):
 
 		outputFile.write(tempString)
 
-def SteinmetzController(sourceFileName,connectionPV,criticalNode,iterNum,objective, destDir):
+def SteinmetzController(sourceFileName,connectionPV,criticalNode,iterNum,objective,destDir):
+	
+
 	#Find the swing bus of the feeder
 	sourceNode = FindSlack(sourceFileName)
 	# establish streaminfo first
 	streamInformation = CreateStreamInfo(sourceFileName, sourceNode)
+	#
 	# find the upstream nodes of the critical node and the upstream line connect to the critical node
+
 	criticalNodeRoot = streamInformation.RootDic[criticalNode]
 	criticalLine = FindLine(criticalNode, criticalNodeRoot, streamInformation)
 
 	#get the downstream node information
-	downstreamNodes = GetDownStreamNodes(criticalNode, [], streamInformation)
+	downstreamNodes = GetDownStreamNodes(criticalNode,[],streamInformation)
 
 	# file names
-	outputFileName = pJoin(destDir, sourceFileName.strip('.glm') + '_Step_0.glm')
+	# moveAndCreateDir(sourceFileName, destDir)
+	os.chdir(destDir)
+	outputFileName = sourceFileName.strip('.glm') + '_Step_0.glm'
 	#set the running time only to be 1s and add groupid to threephase load
-	addIdtoThreephaseload(sourceFileName, outputFileName)
+	addIdtoThreephaseload(sourceFileName,outputFileName)
 	#add recorders to the end of the file
-	AddRecorder(outputFileName,criticalNode, criticalLine, destDir)
+	AddRecorder(outputFileName,criticalNode,criticalLine)
 	#compute VUF
 	a = complex(-0.5, math.sqrt(3)/2)
 
 	VUF = numpy.zeros(30)
 	I0  = numpy.zeros(30)
-	voltageFileName = pJoin(destDir, 'Node_voltage.csv')
-	currentFileName = pJoin(destDir, 'Node_current.csv')
+	voltageFileName = 'Node_voltage.csv'
+	currentFileName = 'Node_current.csv'
+
+
+
 
 
 	if connectionPV == 'Wye':
 		inputStartFileName = sourceFileName.strip('.glm') + '_Wye_Start.glm'
 		copyfile(outputFileName,inputStartFileName)		
-		AddPVWyeRecorder(inputStartFileName, '_base', destDir)
-		PV, PV_index = GetWyePVdata(outputFileName)
+		AddPVWyeRecorder(inputStartFileName,'_base')
+		PV,PV_index = GetWyePVdata(outputFileName)
 		
+	
 		PV_A_total_rating = 0
 		PV_B_total_rating = 0
 		PV_C_total_rating = 0
@@ -748,24 +756,24 @@ def SteinmetzController(sourceFileName,connectionPV,criticalNode,iterNum,objecti
 		os.system(cmdString)
 
 		# Read .csv from gridlabd to get voltage and current information at node 17
-		voltage = ReadVoltage(voltageFileName)
-		current = ReadCurrent(currentFileName)
+		voltage  = ReadVoltage(voltageFileName)
+		current  = ReadCurrent(currentFileName)
 		VUF[0] = abs(voltage['A'] + a**2 * voltage['B'] + a * voltage['C'])/abs(voltage['A'] + a * voltage['B'] + a**2 * voltage['C']) *100
 		I0[0] = abs(current['A']/3 + current['B']/3 + current['C']/3)
 	
-		print 'Initial VUF at', criticalNode, '{:.4E}'.format(VUF[0]), '%'
-		print 'Initial |I0| at', criticalNode, '{:.4E}'.format(I0[0]), 'A'
+		#print 'Initial VUF at', criticalNode, '{:.4E}'.format(VUF[0]), '%'
+		#print 'Initial |I0| at', criticalNode, '{:.4E}'.format(I0[0]), 'A'
 	
 		Q_pre = {}
 		Q_pre['A'] = 0
 		Q_pre['B'] = 0
 		Q_pre['C'] = 0
 		max_delta = 100.0
-		for it in range(0,iterNum,1):
+		for iter in range(0,iterNum,1):
 			if max_delta > 1E-5:
 				PV_at_QMAX = 0
-				inputFileName = pJoin(destDir, sourceFileName.strip('.glm') + '_Step_' + str(it) + '.glm')
-				outputFileName = pJoin(destDir, sourceFileName.strip('.glm') + '_Step_' + str(it + 1) + '.glm')
+				inputFileName = sourceFileName.strip('.glm') + '_Step_' + str(iter) + '.glm'
+				outputFileName = sourceFileName.strip('.glm') + '_Step_' + str(iter + 1) + '.glm'
 			
 				if objective == 'VUF':
 
@@ -773,14 +781,17 @@ def SteinmetzController(sourceFileName,connectionPV,criticalNode,iterNum,objecti
 
 				elif objective == 'I0':
 					Q_steinmetz = SteinmetzWyeQ_V0(voltage,current,Q_pre)
+
 			
 				Q_pre = Q_steinmetz
-					
-				PV_at_QMAX = 0
-				for m in range(len(PV)):
 		
-					if 'A' in PV[m].Phase:
-						if PV[m].Parent in downstreamNodes:
+			
+				PV_at_QMAX = 0
+				for m in range(0,len(PV)):
+		
+					if 'A' in PV[m].Phase :
+						
+						if PV[m].Parent in downstreamNodes	:
 							Q_A_each = Q_steinmetz['A'] * PV[m].Rating / PV_A_total_rating
 							if (Q_A_each > 0.0) and (Q_A_each > PV[m].Q_Max):
 								PV_at_QMAX = PV_at_QMAX +1
@@ -823,37 +834,38 @@ def SteinmetzController(sourceFileName,connectionPV,criticalNode,iterNum,objecti
 				#update voltage and current information from gridlabd				   
 				voltage = ReadVoltage(voltageFileName)
 				current = ReadCurrent(currentFileName)						
-				VUF[it+1] = abs(voltage['A'] + a ** 2 * voltage['B'] + a * voltage['C'])/abs(voltage['A'] + a * voltage['B'] + a**2 * voltage['C']) *100
-				I0[it+1] = abs(current['A']/3 + current['B']/3 + current['C']/3)
+				VUF[iter+1] = abs(voltage['A'] + a ** 2 * voltage['B'] + a * voltage['C'])/abs(voltage['A'] + a * voltage['B'] + a**2 * voltage['C']) *100
+				I0[iter+1] = abs(current['A']/3 + current['B']/3 + current['C']/3)
 				if objective == 2:
-					max_delta = abs(VUF[it+1]-VUF[it])
+					max_delta = abs(VUF[iter+1]-VUF[iter])
 				elif objective ==0:
-					max_delta = abs(I0[it+1]-I0[it])
+					max_delta = abs(I0[iter+1]-I0[iter])
 			else:
 				break
 		
-		finalOutputfile = pJoin(destDir, sourceFileName.strip('.glm') + '_Final.glm')
+		finalOutputfile = sourceFileName.strip('.glm') + '_Final.glm'
 		copyfile(outputFileName,finalOutputfile)
-		AddPVWyeRecorder(finalOutputfile,'_csolar')
+		#AddPVWyeRecorder(finalOutputfile,'_csolar')
 
 	if connectionPV == 'Delta':
 		#get wye PV information
-		renameFilename = pJoin(destDir, sourceFileName.strip('.glm') + '_New.glm')
+		renameFilename = sourceFileName.strip('.glm') + '_New.glm'
 		copyfile(outputFileName,renameFilename)
 		PV,PV_index = GetDeltaPVdata(renameFilename,streamInformation)
 		#transform wye PV to delta negative load
 		deltaPVfile = CreateDeltaPVfile(renameFilename,PV)
-		inputStartFileName = pJoin(destDir, deltaPVfile.strip('.glm') + '_Start.glm')
+		inputStartFileName = deltaPVfile.strip('.glm') + '_Start.glm'
 		copyfile(deltaPVfile,inputStartFileName)
-		AddPVDeltaRecorder(inputStartFileName, '_base', destDir)
-		outputFileName = pJoin(destDir, deltaPVfile.strip('.glm') + '_Step_0.glm')
-		copyfile(deltaPVfile, outputFileName)
+		AddPVDeltaRecorder(inputStartFileName,'_base')
+		outputFileName = deltaPVfile.strip('.glm') + '_Step_0.glm'
+		copyfile(deltaPVfile,outputFileName)
+
 
 		PV_A_total_rating = 0
 		PV_B_total_rating = 0
 		PV_C_total_rating = 0
 
-		for m in range(len(PV)):
+		for m in range(0,len(PV)):
 			if PV[m].Parent in downstreamNodes	:
 				if 'AB' in PV[m].Phase:
 					PV_A_total_rating = PV_A_total_rating + PV[m].Rating
@@ -862,13 +874,12 @@ def SteinmetzController(sourceFileName,connectionPV,criticalNode,iterNum,objecti
 				if 'AC' in PV[m].Phase:
 					PV_C_total_rating = PV_C_total_rating + PV[m].Rating
 
-		print outputFileName
 		cmdString = 'gridlabd ' + '"' + outputFileName + '"'
 		os.system(cmdString)
 
 		# Read .csv from gridlabd to get voltage and current information at node 17
-		voltage = ReadVoltage(voltageFileName)
-		current = ReadCurrent(currentFileName)
+		voltage  = ReadVoltage(voltageFileName)
+		current  = ReadCurrent(currentFileName)
 		VUF[0] = abs(voltage['A'] + a**2 * voltage['B'] + a * voltage['C'])/abs(voltage['A'] + a * voltage['B'] + a**2 * voltage['C']) *100
 		I0[0] = abs(current['A']/3 + current['B']/3 + current['C']/3)
 	
@@ -880,11 +891,11 @@ def SteinmetzController(sourceFileName,connectionPV,criticalNode,iterNum,objecti
 		Q_pre['BC'] = 0
 		Q_pre['AC'] = 0
 		max_delta = 100.0
-		for it in range(0,iterNum,1):
+		for iter in range(0,iterNum,1):
 			if max_delta > 1E-5:
 				PV_at_QMAX = 0
-				inputFileName = pJoin(destDir, deltaPVfile.strip('.glm') + '_Step_' + str(it) + '.glm')
-				outputFileName = pJoin(destDir, deltaPVfile.strip('.glm') + '_Step_' + str(it + 1) + '.glm')
+				inputFileName = deltaPVfile.strip('.glm') + '_Step_' + str(iter) + '.glm'
+				outputFileName = deltaPVfile.strip('.glm') + '_Step_' + str(iter + 1) + '.glm'
 			
 				if objective == 'VUF':
 
@@ -894,12 +905,14 @@ def SteinmetzController(sourceFileName,connectionPV,criticalNode,iterNum,objecti
 					print 'Not support'
 					break
 
+			
 				Q_pre = Q_steinmetz
+				
 			
 				PV_at_QMAX = 0
 				for m in range(0,len(PV)):
-					if 'AB' in PV[m].Phase:
-
+					if 'AB' in PV[m].Phase :
+						
 						if PV[m].Parent in downstreamNodes	:
 							Q_A_each = Q_steinmetz['AB'] * PV[m].Rating / PV_A_total_rating
 							if (Q_A_each > 0.0) and (Q_A_each > PV[m].Q_Max):
@@ -924,7 +937,7 @@ def SteinmetzController(sourceFileName,connectionPV,criticalNode,iterNum,objecti
 							else:
 								PV[m].Q_Out = -Q_B_each
 						
-					elif 'AC' in PV[m].Phase:
+					elif  'AC' in PV[m].Phase:
 						Q_C_each = Q_steinmetz['AC'] * PV[m].Rating / PV_C_total_rating
 						if PV[m].Parent in downstreamNodes	:
 							if (Q_C_each > 0.0) and (Q_C_each > PV[m].Q_Max):
@@ -935,49 +948,54 @@ def SteinmetzController(sourceFileName,connectionPV,criticalNode,iterNum,objecti
 								PV[m].Q_Out = PV[m].Q_Max
 							else:
 								PV[m].Q_Out = -Q_C_each
-				ChangeGlmFileDelta(inputFileName, outputFileName, PV, PV_index)
+				ChangeGlmFileDelta(inputFileName,outputFileName,PV,PV_index)
 				cmdString = 'gridlabd ' + '"' + outputFileName + '"'
 				os.system(cmdString)
 			
 				#update voltage and current information from gridlabd				   
 				voltage = ReadVoltage(voltageFileName)
 				current = ReadCurrent(currentFileName)						
-				VUF[it+1] = abs(voltage['A'] + a ** 2 * voltage['B'] + a * voltage['C'])/abs(voltage['A'] + a * voltage['B'] + a**2 * voltage['C']) *100
-				I0[it+1] = abs(current['A']/3 + current['B']/3 + current['C']/3)
+				VUF[iter+1] = abs(voltage['A'] + a ** 2 * voltage['B'] + a * voltage['C'])/abs(voltage['A'] + a * voltage['B'] + a**2 * voltage['C']) *100
+				I0[iter+1] = abs(current['A']/3 + current['B']/3 + current['C']/3)
 				if objective == 2:
-					max_delta = abs(VUF[it+1]-VUF[it])
+					max_delta = abs(VUF[iter+1]-VUF[iter])
 				elif objective ==0:
-					max_delta = abs(I0[it+1]-I0[it])
+					max_delta = abs(I0[iter+1]-I0[iter])
 			else:
 				break
 		
-		finalOutputfile = pJoin(destDir, deltaPVfile.strip('.glm') + '_Final.glm')
+		finalOutputfile = deltaPVfile.strip('.glm') + '_Final.glm'
 		copyfile(outputFileName,finalOutputfile)
-		AddPVDeltaRecorder(finalOutputfile,'_csolar', destDir)
+		#AddPVDeltaRecorder(finalOutputfile,'_csolar')
+
+
 
 	#output the required csv file
-	addOutputCSV(inputStartFileName, '_base', destDir)
-	addOutputCSV(finalOutputfile, '_csolar', destDir)
+	#addOutputCSV(inputStartFileName,'_base')
+	#addOutputCSV(finalOutputfile,'_csolar')
 
-	# moveAndCreateDir(inputStartFileName, destDir)
-	# moveAndCreateDir(finalOutputfile, destDir)
-	# os.chdir(destDir)
-
-	cmdString_start = 'gridlabd ' + '"' + inputStartFileName + '"'
-	os.system(cmdString_start)
-	cmdString_out = 'gridlabd ' + '"' + finalOutputfile + '"'
-	os.system(cmdString_out)
+	#moveAndCreateDir(inputStartFileName, destDir)
+	
+	#os.chdir(destDir)
+	#cmdString_start = 'gridlabd ' + inputStartFileName
+	#os.system(cmdString_start)
+	#cmdString_out = 'gridlabd ' + finalOutputfile
+	#os.system(cmdString_out)
 
 def testing():
+	#example 1
 	sourceFileName = 'R1-12.47-1-AddSolar-Wye.glm'
 	criticalNode = 'R1-12-47-1_node_17'
+
+	#example 2
 	#sourceFileName = 'R1-12.47-2-AddSolar-Wye.glm'
 	#criticalNode= 'R1-12-47-2_node_28'
-	
-	shutil.rmtree(pJoin(os.getcwd(), 'MPUPV output file'))
-	os.makedirs('MPUPV output file')
-	destDir = pJoin(os.getcwd(), 'MPUPV output file')
-	SteinmetzController(sourceFileName, 'Delta', criticalNode, 5, 'VUF', destDir)
+
+	curDir = os.getcwd()
+	destDir = curDir+'/MPUPV output file'
+	SteinmetzController(sourceFileName,'Delta',criticalNode,5,'VUF',destDir)
 
 if __name__ == '__main__':
 	testing()
+
+

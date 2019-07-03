@@ -145,12 +145,26 @@
 				<input type="text" id="zipCode" name="zipCode" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Parameter 1<span class="classic">TBD.</span></label>
-				<input type="text" id="parameterOne" name="parameterOne" pattern="^\d+\.?\d*$" required="required"/>
+				<label class="tooltip">PV Connection<span class="classic">How is the PV system connected?</span></label>
+				<select id="pvConnection" name="pvConnection">
+					<option value="Wye">Wye</option>
+					<option value="Delta">Delta</option>
+				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Parameter 2<span class="classic">TBD.</span></label>
-				<input type="text" id="parameterTwo" name="parameterTwo" pattern="^\d+\.?\d*$" required="required"/>
+				<label class="tooltip">Objective Function<span class="classic">'VUF' minimizes negative sequence. 'I0' minimizes zero sequence</span></label>
+				<select id="objectiveFunction" name="objectiveFunction">
+					<option value="VUF">VUF</option>
+					<option value="I0">I0</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Critical Node<span class="classic">What node should we minimize?</span></label>
+				<input type="text" id="criticalNode" name="criticalNode" pattern="^\d+\.?\d*$" required="required"/>
+			</div>
+						<div class="shortInput">
+				<label class="tooltip">Iterations<span class="classic">How many iterations should be run</span></label>
+				<input type="text" id="iterations" name="iterations" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Display Options</p>
@@ -250,10 +264,8 @@
 				<script type="text/javascript">gebi("solar_image").src = "data:image/png;base64," + allOutputData.solar_image</script>
 			</div>
 			<div class="tightContent tabContent controlledDiagram">
-				<img id="parameterUnbalanceChart" style="width:1000px;height:1000px;" />
-				<!--
-				<script type="text/javascript">gebi("parameterUnbalanceChart").src = "data:image/png;base64," + allOutputData.voltageDrop</script>
-			-->
+				<img id="controlled_image" style="width:1000px;height:1000px;" />
+				<script type="text/javascript">gebi("controlled_image").src = "data:image/png;base64," + allOutputData.controlled_image</script>
 			</div>	
 		</div>
 		<script>document.getElementById('firstTabButton').click();//Hack, get first tab to show.</script>
@@ -271,31 +283,31 @@
 					<td>Load</td>
 					<td>{{allOutputDataDict['service_cost']['load']['base']}}</td>
 					<td>{{allOutputDataDict['service_cost']['load']['solar']}}</td>
-					<td>{{allOutputDataDict['service_cost']['load']['controlled_solar']}}</td>
+					<td>{{allOutputDataDict['service_cost']['load']['controlled']}}</td>
 				</tr>
 				<tr>
 					<td>Distributed Generation</td>
 					<td>{{allOutputDataDict['service_cost']['distributed_gen']['base']}}</td>
 					<td>{{allOutputDataDict['service_cost']['distributed_gen']['solar']}}</td>
-					<td>{{allOutputDataDict['service_cost']['distributed_gen']['controlled_solar']}}</td>
+					<td>{{allOutputDataDict['service_cost']['distributed_gen']['controlled']}}</td>
 				</tr>
 				<tr>
 					<td>Losses</td>
 					<td>{{allOutputDataDict['service_cost']['losses']['base']}}</td>
 					<td>{{allOutputDataDict['service_cost']['losses']['solar']}}</td>
-					<td>{{allOutputDataDict['service_cost']['losses']['controlled_solar']}}</td>
+					<td>{{allOutputDataDict['service_cost']['losses']['controlled']}}</td>
 				</tr>
 				<tr>
 					<td>VARs</td>
 					<td>{{allOutputDataDict['service_cost']['VARs']['base']}}</td>
 					<td>{{allOutputDataDict['service_cost']['VARs']['solar']}}</td>
-					<td>{{allOutputDataDict['service_cost']['VARs']['controlled_solar']}}</td>
+					<td>{{allOutputDataDict['service_cost']['VARs']['controlled']}}</td>
 				</tr>
 			</table>
 			{% endif %}
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Inverter Power Outputs</p>
-		<div class="tightContent tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
+		<!-- <p class="reportTitle postRun" style="page-break-before:always">Inverter Power Outputs</p> -->
+		<!-- <div class="tightContent tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
 			<table class="dt" id="inverterOutputs" style="padding: 10px;">
 				<thead>
 					<tr>
@@ -310,7 +322,7 @@
 					{{allOutputDataDict['inverter_table']}}
 				</tbody>
 			</table>
-		</div>
+		</div> -->
 		<!-- <p class="reportTitle postRun">Simulation Location</p>
 		<div id="studyDetail" class="tightContent postRun detailsContainer" style="position: relative">
 			<div id="mapHere"></div>
@@ -392,7 +404,7 @@
 					<th>C (V)</th>
 					<th>Unbalance</th>
 				</tr>
-				<!-- {{allOutputDataDict['motor_table_solar']}} -->
+				{{allOutputDataDict['motor_table_controlled']}}
 			</table>
 		</div>
 	</div>

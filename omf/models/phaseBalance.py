@@ -4,6 +4,7 @@ import json, os, shutil, csv
 import numpy as np
 import pandas as pd
 from os.path import join as pJoin
+from shutil import copyfile
 
 # OMF imports 
 from omf.models import __neoMetaModel__
@@ -12,6 +13,7 @@ from omf.models.voltageDrop import drawPlot as voltagePlot
 import omf.feeder as feeder
 from omf.solvers import gridlabd
 from omf.weather import zipCodeToClimateName
+from omf.solvers.SteinmetzController import SteinmetzController
 
 # Model metadata:
 modelName, template = metadata(__file__)
@@ -34,19 +36,23 @@ def work(modelDir, ind):
 	nodeLabsValue = ind.get("nodeLabs", None) if ind.get("nodeLabs") != "None" else None
 	customColormapValue = True if ind.get("customColormap", "True") == "True" else False
 
+
 	# -------------------------- BASE CHART --------------------------- #
 	with open(pJoin(modelDir, [x for x in os.listdir(modelDir) if x.endswith('.omd')][0])) as f:
 		tree_base = json.load(f)['tree']
+	with open(pJoin(modelDir, 'input.glm'), 'w') as f:
+		treeString = feeder.sortedWrite(tree_base)
+		f.write(treeString)
 
 	base_suffix = "_base"
 	tree_base = _turnOffSolar(tree_base)
 	tree_base = _addCollectors(tree_base, suffix=base_suffix)
-	with open(modelDir + '/withCollectors_solarOffline.glm', 'w') as f:
+	with open(pJoin(modelDir, '_base.glm'), 'w') as f:
 		treeString = feeder.sortedWrite(tree_base)
 		f.write(treeString)
 	
 	voltagePlot(
-		pJoin(modelDir, "withCollectors_solarOffline.glm"), workDir=modelDir, neatoLayout=neato, 
+		pJoin(modelDir, "_base.glm"), workDir=modelDir, neatoLayout=neato, 
 		edgeCol=edgeColValue, nodeCol=nodeColValue, nodeLabs=nodeLabsValue, 
 		edgeLabs=edgeLabsValue, customColormap=customColormapValue, rezSqIn=int(ind["rezSqIn"])
 	).savefig(pJoin(modelDir,"output" + base_suffix + ".png"))
@@ -60,22 +66,51 @@ def work(modelDir, ind):
 
 	solar_suffix = "_solar"
 	tree_solar = _addCollectors(tree_solar, suffix=solar_suffix)
-	with open(modelDir + '/withCollectors.glm', 'w') as f:
+	with open(modelDir + '/_solar.glm', 'w') as f:
 		treeString = feeder.sortedWrite(tree_solar)
 		f.write(treeString)
 	
 	voltagePlot(
-		pJoin(modelDir, "withCollectors.glm"), workDir=modelDir, neatoLayout=neato, 
+		pJoin(modelDir, "_solar.glm"), workDir=modelDir, neatoLayout=neato, 
 		edgeCol=edgeColValue, nodeCol=nodeColValue, nodeLabs=nodeLabsValue, 
 		edgeLabs=edgeLabsValue, customColormap=customColormapValue, rezSqIn=int(ind["rezSqIn"])
 	).savefig(pJoin(modelDir,"output" + solar_suffix + ".png"))
 	with open(pJoin(modelDir,"output" + solar_suffix + ".png"),"rb") as f:
 		o["solar_image"] = f.read().encode("base64")
 	os.rename(pJoin(modelDir, "voltDump.csv"), pJoin(modelDir, "voltDump_solar.csv"))
+	
+	# ---------------------------- CONTROLLED CHART ----------------------------- #
+	
+	controlled_suffix = '_controlled'
+	SteinmetzController(pJoin(modelDir, 'input.glm'), 
+		ind['pvConnection'], ind['criticalNode'], 
+		int(ind['iterations']), ind['objectiveFunction'], modelDir)
 
-	# ----------------------------------------------------------------------- #
+	glmPath = pJoin(modelDir, 'input_NewDeltaPV_Final.glm') 
+	omdPath = pJoin(modelDir, '_controlled.omd')
+	feeder.glmToOmd(glmPath, omdPath)
+	
+	with open(omdPath) as f:
+		tree_controlled = json.load(f)['tree']
+	
+	for k, v in tree_controlled.iteritems():
+		if ('PV' in v.get('groupid', '')) and v.get('object', '') == 'load':
+			v['groupid'] = 'PV'
 
-
+	tree_controlled = _addCollectors(tree_controlled, suffix=controlled_suffix)
+	with open(pJoin(modelDir, '_controlled.glm'), 'w') as f:
+		treeString = feeder.sortedWrite(tree_controlled)
+		f.write(treeString)
+	
+	voltagePlot(
+		pJoin(modelDir, "_controlled.glm"), workDir=modelDir, neatoLayout=neato, 
+		edgeCol=edgeColValue, nodeCol=nodeColValue, nodeLabs=nodeLabsValue, 
+		edgeLabs=edgeLabsValue, customColormap=customColormapValue, rezSqIn=int(ind["rezSqIn"])
+	).savefig(pJoin(modelDir,"output" + controlled_suffix + ".png"))
+	with open(pJoin(modelDir,"output" + controlled_suffix + ".png"),"rb") as f:
+		o["controlled_image"] = f.read().encode("base64")
+	os.rename(pJoin(modelDir, "voltDump.csv"), pJoin(modelDir, "voltDump_controlled.csv"))
+	
 	# --------------------------- SERVICE TABLE ----------------------------- #
 	price = float(ind['retailCost'])
 	
@@ -83,33 +118,40 @@ def work(modelDir, ind):
 		'load': {
 			'base': n(_totals(pJoin(modelDir, 'load' + base_suffix + '.csv'), 'real')),
 			'solar': n(_totals(pJoin(modelDir, 'load' + solar_suffix + '.csv'), 'real')),
-			'controlled_solar': np.nan
+			'controlled': n(_totals(pJoin(modelDir, 'load' + controlled_suffix + '.csv'), 'real'))
 		},
 		'distributed_gen': {
 			'base': n(_totals(pJoin(modelDir, 'distributedGen' + base_suffix + '.csv'), 'real')),
 			'solar': n(_totals(pJoin(modelDir, 'distributedGen' + solar_suffix + '.csv'), 'real')),
-			'controlled_solar': np.nan
+			'controlled': n(_totals(pJoin(modelDir, 'distributedGen' + controlled_suffix + '.csv'), 'real'))
 		},
 		'losses': {
 			'base': n(sum([_totals(pJoin(modelDir, 'Zlosses_' + loss + base_suffix + '.csv'), 'real') for loss in 
 				['transformer', 'underground_line', 'overhead_line', 'triplex_line']])),
 			'solar': n(sum([_totals(pJoin(modelDir, 'Zlosses_' + loss + solar_suffix + '.csv'), 'real') for loss in 
 				['transformer', 'underground_line', 'overhead_line', 'triplex_line']])),
-			'controlled_solar': np.nan
+			'controlled':n(sum([_totals(pJoin(modelDir, 'Zlosses_' + loss + controlled_suffix + '.csv'), 'real') for loss in 
+				['transformer', 'underground_line', 'overhead_line', 'triplex_line']])),
 		},
 		'VARs': {
 			'base': n(sum([_totals(pJoin(modelDir, 'Zlosses_' + loss + base_suffix + '.csv'), 'imag') for loss in 
 				['transformer', 'underground_line', 'overhead_line', 'triplex_line']])),
 			'solar': n(sum([_totals(pJoin(modelDir, 'Zlosses_' + loss + solar_suffix + '.csv'), 'imag') for loss in 
 				['transformer', 'underground_line', 'overhead_line', 'triplex_line']])),
-			'controlled_solar': np.nan
+			'controlled': n(sum([_totals(pJoin(modelDir, 'Zlosses_' + loss + controlled_suffix + '.csv'), 'imag') for loss in 
+				['transformer', 'underground_line', 'overhead_line', 'triplex_line']]))
 		}
 	}
+
+	# hack correction
+	o['service_cost']['load']['controlled'] = n(float(o['service_cost']['load']['controlled'].replace(',', '')) - float(o['service_cost']['distributed_gen']['controlled'].replace(',', '')))
+	
+	df_inv = _readCSV(pJoin(modelDir, 'all_inverters_VA_Out_AC' + solar_suffix + '.csv'))
+	o['service_cost']['distributed_gen']['solar'] = n(-sum([x['real'] for i, x in df_inv.iterrows()]))
 	# ----------------------------------------------------------------------- #
 
 	
 	# -------------------------- INVERTER TABLE ----------------------------- #
-	df_inv = _readCSV(pJoin(modelDir, 'all_inverters_VA_Out_AC' + solar_suffix + '.csv'))
 	o['inverter_table'] = ''.join([(
 		"<tr>"
 			"<td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{3}</td>"
@@ -120,7 +162,7 @@ def work(modelDir, ind):
 
 	# ----------------- MOTOR VOLTAGE and IMBALANCE TABLES ------------------ #
 	df_vs = {}
-	for suffix in [base_suffix, solar_suffix]:
+	for suffix in [base_suffix, solar_suffix, controlled_suffix]:
 		df_v = pd.DataFrame()
 		for phase in ['A', 'B', 'C']:
 			df_phase = _readCSV(pJoin(modelDir, 'threephase_VA_'+ phase + suffix + '.csv'))
@@ -133,7 +175,7 @@ def work(modelDir, ind):
 
 	motor_names = [motor for motor, r in df_v.iterrows()]
 
-	for suffix in [base_suffix, solar_suffix]:
+	for suffix in [base_suffix, solar_suffix, controlled_suffix]:
 		df_all_motors = pd.DataFrame()
 
 		df_all_motors = _readVoltage(pJoin(modelDir, 'voltDump' + suffix + '.csv'), motor_names)
@@ -141,12 +183,16 @@ def work(modelDir, ind):
 		o['motor_table' + suffix] = ''.join([(
 			"<tr>"
 				"<td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td><td>{5}</td><td>{6}</td>"
+			"</tr>" 
+				if r['node_name'] != ind['criticalNode'] else 
+			"<tr>"
+				"<td {7}>{0}</td><td {7}>{1}</td><td {7}>{2}</td><td {7}>{3}</td><td {7}>{4}</td><td {7}>{5}</td><td {7}>{6}</td>"
 			"</tr>"
 		).format(r['node_name'], 
 					n(r2['A_real'] + r2['B_real'] + r2['C_real']),
 					n(r2['A_imag'] + r2['B_imag'] + r2['C_imag']),
 					n(r['voltA']), n(r['voltB']), n(r['voltC']), 
-					n(r['unbalance'])) 
+					n(r['unbalance']), "style='background:yellow'") 
 				for (i, r), (j, r2) in zip(df_all_motors.iterrows(), df_vs[suffix].iterrows())])
 	# ----------------------------------------------------------------------- #
 
@@ -154,25 +200,32 @@ def work(modelDir, ind):
 
 def _addCollectors(tree, suffix=None):
 	for x in tree.values():
-		if 'object' in x and 'load' in x['object'] and all([phase in x['phases'] for phase in 'ABC']):
+		# if 'object' in x and 'load' in x['object'] and all([phase in x['phases'] for phase in 'ABC']):
+		if 'object' in x and ('load' in x['object'] or 'node' in x['object']) and all([phase in x['phases'] for phase in 'ABC']):
 			x['groupid'] = 'threePhase'
 
 	# load on system and inverters
 	all_power = 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)'
-	tree[len(tree)] = {'property': all_power, 'object': 'collector', 'group': 'class=inverter', 'limit': '0', 'file': 'distributedGen' + suffix + '.csv'}
 	tree[len(tree)] = {'property': all_power, 'object': 'collector', 'group': 'class=load', 'limit': '0', 'file': 'load' + suffix + '.csv'}
 	
 	# Load on motor phases
 	for phase in ['A', 'B', 'C']:
-		tree[len(tree)] = {'property':'power_' + phase, 'object':'group_recorder', 'group':'class=load AND groupid=threePhase', 'limit': '1', 'file':'threephase_VA_'+ phase + suffix + '.csv'}
+		# tree[len(tree)] = {'property':'power_' + phase, 'object':'group_recorder', 'group':'class=load AND groupid=threePhase', 'limit': '1', 'file':'threephase_VA_'+ phase + suffix + '.csv'}
+		tree[len(tree)] = {'property':'power_' + phase, 'object':'group_recorder', 'group':'groupid=threePhase', 'limit': '1', 'file':'threephase_VA_'+ phase + suffix + '.csv'}
 	
 	# Loss across system
 	all_losses = 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)'
 	for loss in ['transformer', 'underground_line', 'overhead_line', 'triplex_line']:
 		tree[len(tree)] = {'property': all_losses, 'object': 'collector', 'group': 'class='+loss, 'limit': '0', 'file': 'Zlosses_'+loss + suffix +'.csv'}
 	# Individual inverters
-	tree[len(tree)] = {'property':'VA_Out', 'object':'group_recorder', 'group':'class=inverter', 'limit':'1', 'file':'all_inverters_VA_Out_AC' + suffix + '.csv'}
-	
+
+	if suffix != '_controlled':
+		tree[len(tree)] = {'property': all_power, 'object': 'collector', 'group': 'class=inverter', 'limit': '0', 'file': 'distributedGen' + suffix + '.csv'}
+		tree[len(tree)] = {'property':'VA_Out', 'object':'group_recorder', 'group':'class=inverter', 'limit':'1', 'file':'all_inverters_VA_Out_AC' + suffix + '.csv'}
+	else:
+		tree[len(tree)] = {'property': all_power, 'object': 'collector', 'group': 'class=load AND groupid=PV', 'limit': '0', 'file': 'distributedGen' + suffix + '.csv'}
+		# tree[len(tree)] = {'property':'VA_Out', 'object':'group_recorder', 'group':'class=load AND groupid=PV', 'limit':'1', 'file':'all_inverters_VA_Out_AC' + suffix + '.csv'}
+
 	return tree
 
 def _turnOffSolar(tree):
@@ -204,7 +257,7 @@ def _readCSV(filename):
 	df = df.T
 	df = df[df.columns[:-2]]
 	df = df[~df.index.str.startswith('#')]
-	df[0] = [complex(i) for i in df[0]]
+	df[0] = [complex(i) if i != '+0+0i' else complex(0) for i in df[0]]
 	df['imag'] = df[0].imag.astype(float)
 	df['real'] = df[0].real.astype(float)
 	df = df.drop([0], axis=1)
@@ -222,10 +275,10 @@ def _totals(filename, component=None):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"feederName1": "tax_a",
+		"feederName1": "phase_balance_test",
 		"modelType": modelName,
 		"runTime": "",
-		"layoutAlgorithm": "geospatial",
+		"layoutAlgorithm": "forceDirected", #geospatial
 		"zipCode": "64735",
 		"retailCost": "0.05",
 		"discountRate": "7",
@@ -238,11 +291,15 @@ def new(modelDir):
 		"parameterOne": "42",
 		"parameterTwo": "42",
 		"colorMin": "0",
-		"colorMax": "1000"
+		"colorMax": "1000",
+		"criticalNode": 'R1-12-47-1_node_1',
+		"objectiveFunction": 'VUF', #'I0'
+		"pvConnection": 'Delta',
+		"iterations": "5"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
-		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
+		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "testFiles", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
 	except:
 		return False
 	return creationCode
@@ -258,6 +315,12 @@ def _debugging():
 
 if __name__ == '__main__':
 	_debugging()
+
+# sourceFileName = pJoin(modelDir, '_controlled.glm')
+# copyfile(pJoin(__neoMetaModel__._omfDir, "static", "testFiles", 'R1-12.47-1-AddSolar-Wye.glm'), sourceFileName)
+# glmPath = pJoin(modelDir, '_controlled.glm') 
+# omdPath = pJoin(modelDir, 'phase_balance_test.omd')
+# feeder.glmToOmd(glmPath, omdPath)
 
 # Copy spcific climate data into model directory (I think this is unnecessary?)
 # ind["climateName"] = zipCodeToClimateName(ind["zipCode"])
