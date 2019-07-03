@@ -75,7 +75,7 @@ def work(modelDir, inputDict):
 		outData["voltageDrop"] = inFile.read().encode("base64")
 	return outData
 
-def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, customColormap=False, rezSqIn=400, gldBinary=None):
+def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, customColormap=False, rezSqIn=400, gldBinary=None, colorMin=None, colorMax=None):
 	''' Draw a color-coded map of the voltage drop on a feeder.
 	path is the full path to the GridLAB-D .glm file or OMF .omd file.
 	workDir is where GridLAB-D will run, if it's None then a temp dir is used.
@@ -327,12 +327,12 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	if customColormap:
 		custom_cm = matplotlib.colors.LinearSegmentedColormap.from_list('custColMap',[(0.0,'blue'),(0.15,'darkgray'),(0.7,'darkgray'),(1.0,'red')])
 		custom_cm.set_under(color='black')
-		vmin = 0
-		vmax = 1.25
+		vmin = 0 if colorMin is not None else colorMin
+		vmax = 1.25 if colorMax is not None else colorMax
 	else:
 		custom_cm = plt.cm.get_cmap('viridis')
-		vmin = None
-		vmax = None
+		vmin = None if colorMin is not None else colorMin
+		vmax = None if colorMax is not None else colorMax
 	drawColorbar = False
 	emptyColors = {}
 	#draw edges with or without colors

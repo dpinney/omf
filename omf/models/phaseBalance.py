@@ -54,7 +54,9 @@ def work(modelDir, ind):
 	voltagePlot(
 		pJoin(modelDir, "_base.glm"), workDir=modelDir, neatoLayout=neato, 
 		edgeCol=edgeColValue, nodeCol=nodeColValue, nodeLabs=nodeLabsValue, 
-		edgeLabs=edgeLabsValue, customColormap=customColormapValue, rezSqIn=int(ind["rezSqIn"])
+		edgeLabs=edgeLabsValue, customColormap=customColormapValue, rezSqIn=int(ind["rezSqIn"]), 
+			colorMin=float(ind['colorMin']) if ind['colorMin'] != 'auto' else None, 
+			colorMax=float(ind['colorMax']) if ind['colorMax'] != 'auto' else None
 	).savefig(pJoin(modelDir,"output" + base_suffix + ".png"))
 	with open(pJoin(modelDir,"output" + base_suffix + ".png"),"rb") as f:
 		o["base_image"] = f.read().encode("base64")
@@ -73,7 +75,9 @@ def work(modelDir, ind):
 	voltagePlot(
 		pJoin(modelDir, "_solar.glm"), workDir=modelDir, neatoLayout=neato, 
 		edgeCol=edgeColValue, nodeCol=nodeColValue, nodeLabs=nodeLabsValue, 
-		edgeLabs=edgeLabsValue, customColormap=customColormapValue, rezSqIn=int(ind["rezSqIn"])
+		edgeLabs=edgeLabsValue, customColormap=customColormapValue, rezSqIn=int(ind["rezSqIn"]), 
+			colorMin=float(ind['colorMin']) if ind['colorMin'] != 'auto' else None,
+			colorMax=float(ind['colorMax']) if ind['colorMax'] != 'auto' else None
 	).savefig(pJoin(modelDir,"output" + solar_suffix + ".png"))
 	with open(pJoin(modelDir,"output" + solar_suffix + ".png"),"rb") as f:
 		o["solar_image"] = f.read().encode("base64")
@@ -105,7 +109,9 @@ def work(modelDir, ind):
 	voltagePlot(
 		pJoin(modelDir, "_controlled.glm"), workDir=modelDir, neatoLayout=neato, 
 		edgeCol=edgeColValue, nodeCol=nodeColValue, nodeLabs=nodeLabsValue, 
-		edgeLabs=edgeLabsValue, customColormap=customColormapValue, rezSqIn=int(ind["rezSqIn"])
+		edgeLabs=edgeLabsValue, customColormap=customColormapValue, rezSqIn=int(ind["rezSqIn"]), 
+			colorMin=float(ind['colorMin']) if ind['colorMin'] != 'auto' else None,
+			colorMax=float(ind['colorMax']) if ind['colorMax'] != 'auto' else None
 	).savefig(pJoin(modelDir,"output" + controlled_suffix + ".png"))
 	with open(pJoin(modelDir,"output" + controlled_suffix + ".png"),"rb") as f:
 		o["controlled_image"] = f.read().encode("base64")
@@ -250,7 +256,7 @@ def unbalance(r):
 	c = float(r['voltC'])
 	avgVolts = (a + b + c)/3
 	maxDiff = max([abs(a-b), abs(a-c), abs(b-c)])
-	return maxDiff/avgVolts
+	return maxDiff/avgVolts*100
 
 def _readCSV(filename):
 	df = pd.read_csv(filename, skiprows=8)
@@ -290,8 +296,8 @@ def new(modelDir):
 		"rezSqIn" : "225",
 		"parameterOne": "42",
 		"parameterTwo": "42",
-		"colorMin": "0",
-		"colorMax": "1000",
+		"colorMin": "auto",
+		"colorMax": "auto",
 		"criticalNode": 'R1-12-47-1_node_1',
 		"objectiveFunction": 'VUF', #'I0'
 		"pvConnection": 'Delta',
