@@ -117,13 +117,6 @@
 				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
 				<input type="text" id="feederName1" name="feederName1" style="display:none">
 			</div>
-			<div class="shortInput">
-				<label class="tooltip">Layout Algorithm<span class="classic">Geospatial shows the circuit the same way it was defined in the feeder editor. Force Directed uses an algorithm to show the circuit elements evenly spaced (useful for circuits without location data).</span></label>
-				<select id="layoutAlgorithm" name="layoutAlgorithm">
-					<option value="geospatial">Geospatial</option>
-					<option value="forceDirected">Force Directed</option>
-				</select>
-			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Financial Variables</p>
 			</div>
@@ -160,7 +153,7 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Critical Node<span class="classic">What node should we minimize?</span></label>
-				<input type="text" id="criticalNode" name="criticalNode" pattern="^\d+\.?\d*$" required="required"/>
+				<input type="text" id="criticalNode" name="criticalNode" required="required"/>
 			</div>
 						<div class="shortInput">
 				<label class="tooltip">Iterations<span class="classic">How many iterations should be run</span></label>
@@ -178,6 +171,13 @@
 					<option value="perUnitVoltage">Per-Unit Voltage (unitless)</option>
 					<option value="perUnit120Voltage">120 V Scaled Per-Unit Voltage (V)</option>
 					<option value="None">No Node Coloring</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Layout Algorithm<span class="classic">Geospatial shows the circuit the same way it was defined in the feeder editor. Force Directed uses an algorithm to show the circuit elements evenly spaced (useful for circuits without location data).</span></label>
+				<select id="layoutAlgorithm" name="layoutAlgorithm">
+					<option value="geospatial">Geospatial</option>
+					<option value="forceDirected">Force Directed</option>
 				</select>
 			</div>
 			<div class="shortInput">
@@ -214,11 +214,11 @@
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Color Min<span class="classic">What kW outliers would you like observed</span></label>
+				<label class="tooltip">Color Min<span class="classic">What kW outliers would you like observed? Otherwise, submit "auto".</span></label>
 				<input type="text" id="colorMin" name="colorMin"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Color Max<span class="classic">What kW outliers would you like observed</span></label>
+				<label class="tooltip">Color Max<span class="classic">What kW outliers would you like observed? Otherwise, submit "auto".</span></label>
 				<input type="text" id="colorMax" name="colorMax"/>
 			</div>
 			<div class="shortInput">
@@ -275,9 +275,9 @@
 			<table id="feederSummary">
 				<tr>
 					<th></th>
-					<th>Base Case (kW)</th>
-					<th>With Solar (kW)</th>
-					<th>Controlled Solar (kW)</th>
+					<th>Base Case (kWh)</th>
+					<th>With Solar (kWh)</th>
+					<th>Controlled Solar (kWh)</th>
 				</tr>
 				<tr>
 					<td>Load</td>
@@ -306,8 +306,8 @@
 			</table>
 			{% endif %}
 		</div>
-		<!-- <p class="reportTitle postRun" style="page-break-before:always">Inverter Power Outputs</p> -->
-		<!-- <div class="tightContent tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
+		<p class="reportTitle postRun" style="page-break-before:always">Inverter Power Outputs</p>
+		<div class="tightContent tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
 			<table class="dt" id="inverterOutputs" style="padding: 10px;">
 				<thead>
 					<tr>
@@ -322,7 +322,7 @@
 					{{allOutputDataDict['inverter_table']}}
 				</tbody>
 			</table>
-		</div> -->
+		</div>
 		<!-- <p class="reportTitle postRun">Simulation Location</p>
 		<div id="studyDetail" class="tightContent postRun detailsContainer" style="position: relative">
 			<div id="mapHere"></div>
