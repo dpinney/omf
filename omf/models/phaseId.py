@@ -232,14 +232,18 @@ def work(modelDir, inputDict):
 	plot_confusion_matrix(cnf_matrix, classes=['A', 'B', 'C','ABC'])
 	plt.savefig(pJoin(modelDir,'output-conf-matrix.png'))
 	# Offline Plotly plot
-	testdir = os.path.join(modelDir, 'Revised Meter Voltage Files', inputDict['checkMeter'])
-	df_test = pd.read_csv(testdir)
+	df_test = pd.read_csv(os.path.join(modelDir, 'Revised Meter Voltage Files', inputDict['checkMeter']))
 	min_max_scaler = preprocessing.MinMaxScaler()
-	df_test[['V_B']] = min_max_scaler.fit_transform(df_test[['V_B']])
+	selectedPhase = 'V_A'
+	for phase in ['V_A','V_B','V_C']:
+		df_test[[phase]] = min_max_scaler.fit_transform(df_test[[phase]])
+		# Check for non-zero data.
+		if max(df_test[[phase]]) > 0.0:
+			selectedPhase = phase
 	y0 = df_ss['V_A']
 	y1 = df_ss['V_B']
 	y2 = df_ss['V_C']
-	y3 = df_test['V_B']
+	y3 = df_test[selectedPhase]
 	new_x = range(len(y0))
 	# Create traces
 	trace0 = go.Scatter(
@@ -272,7 +276,7 @@ def work(modelDir, inputDict):
 		# xaxis='x4',
 		# yaxis='y4',
 		mode = 'lines',
-		name = 'Meter_15_PH_B'
+		name = inputDict['checkMeter'] + ' ' + selectedPhase
 	)
 	data = [trace0, trace1, trace2, trace3]
 	# Create layout
@@ -345,7 +349,7 @@ def new(modelDir):
 			).read()
 		),
 		"meterZipName": "meters_transformed.zip",
-		"checkMeter": 'Meter_15.csv',
+		"checkMeter": 'Meter_13.csv',
 		"modelType": modelName
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
