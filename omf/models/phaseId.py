@@ -45,6 +45,7 @@ def file_transform_gld(METER_DIR, SUB_METER_FILE):
 		''' Helper to calculate hour count. '''
 		hour = (endTime - datetime.datetime(startyear, 1,1)).days*24
 		return hour
+	#TODO: handle arbitrary start/end dates.
 	startTime = datetime.datetime(2014, 1, 1)
 	endTime = datetime.datetime(2015, 1, 1)
 	startHour = get_hour(startTime.year, startTime)
