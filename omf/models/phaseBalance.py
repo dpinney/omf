@@ -55,8 +55,8 @@ def work(modelDir, ind):
 		pJoin(modelDir, "_base.glm"), workDir=modelDir, neatoLayout=neato, 
 		edgeCol=edgeColValue, nodeCol=nodeColValue, nodeLabs=nodeLabsValue, 
 		edgeLabs=edgeLabsValue, customColormap=customColormapValue, rezSqIn=int(ind["rezSqIn"]), 
-			colorMin=float(ind['colorMin']) if ind['colorMin'] != 'auto' else None, 
-			colorMax=float(ind['colorMax']) if ind['colorMax'] != 'auto' else None
+			colorMin=float(ind['colorMin']) if ind['colorMin'].lower() != 'auto' else None, 
+			colorMax=float(ind['colorMax']) if ind['colorMax'].lower() != 'auto' else None
 	).savefig(pJoin(modelDir,"output" + base_suffix + ".png"))
 	with open(pJoin(modelDir,"output" + base_suffix + ".png"),"rb") as f:
 		o["base_image"] = f.read().encode("base64")
@@ -120,6 +120,10 @@ def work(modelDir, ind):
 	# --------------------------- SERVICE TABLE ----------------------------- #
 	price = float(ind['retailCost'])
 	
+	df_inv_base = _readCSV(pJoin(modelDir, 'all_inverters_VA_Out_AC' + base_suffix + '.csv'))
+	df_inv_solar = _readCSV(pJoin(modelDir, 'all_inverters_VA_Out_AC' + solar_suffix + '.csv'))
+	df_inv_controlled = _readCSV(pJoin(modelDir, 'all_inverters_VA_Out_AC' + controlled_suffix + '.csv'))
+
 	o['service_cost'] = {
 		'load': {
 			'base': n(_totals(pJoin(modelDir, 'load' + base_suffix + '.csv'), 'real')),
@@ -127,9 +131,9 @@ def work(modelDir, ind):
 			'controlled': n(_totals(pJoin(modelDir, 'load' + controlled_suffix + '.csv'), 'real'))
 		},
 		'distributed_gen': {
-			'base': n(_totals(pJoin(modelDir, 'distributedGen' + base_suffix + '.csv'), 'real')),
-			'solar': n(_totals(pJoin(modelDir, 'distributedGen' + solar_suffix + '.csv'), 'real')),
-			'controlled': n(_totals(pJoin(modelDir, 'distributedGen' + controlled_suffix + '.csv'), 'real'))
+			'base': n(sum([x['real'] for i, x in df_inv_base.iterrows()])),
+			'solar': n(-sum([x['real'] for i, x in df_inv_solar.iterrows()])),
+			'controlled': n(sum([x['real'] for i, x in df_inv_controlled.iterrows()]))
 		},
 		'losses': {
 			'base': n(sum([_totals(pJoin(modelDir, 'Zlosses_' + loss + base_suffix + '.csv'), 'real') for loss in 
@@ -150,19 +154,16 @@ def work(modelDir, ind):
 	}
 
 	# hack correction
-	o['service_cost']['load']['controlled'] = n(float(o['service_cost']['load']['controlled'].replace(',', '')) - float(o['service_cost']['distributed_gen']['controlled'].replace(',', '')))
-	
-	df_inv = _readCSV(pJoin(modelDir, 'all_inverters_VA_Out_AC' + solar_suffix + '.csv'))
-	o['service_cost']['distributed_gen']['solar'] = n(-sum([x['real'] for i, x in df_inv.iterrows()]))
+	# o['service_cost']['load']['controlled'] = n(float(o['service_cost']['load']['controlled'].replace(',', '')) + float(o['service_cost']['distributed_gen']['controlled'].replace(',', '')))
 	# ----------------------------------------------------------------------- #
-
 	
 	# -------------------------- INVERTER TABLE ----------------------------- #
 	o['inverter_table'] = ''.join([(
 		"<tr>"
-			"<td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{3}</td>"
+			"<td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td>"
 		"</tr>"
-	).format(inverter, n(row['real']), n(row['imag']), np.nan) for inverter, row in df_inv.iterrows()])
+	).format(inverter, n(row['real']), n(row['imag']), n(abs(row2['real'])), n(row2['imag'])) 
+		for (inverter, row), (inverter2, row2) in zip(df_inv_solar.iterrows(), df_inv_controlled.iterrows())])
 	# ----------------------------------------------------------------------- #
 
 
@@ -226,11 +227,9 @@ def _addCollectors(tree, suffix=None):
 	# Individual inverters
 
 	if suffix != '_controlled':
-		tree[len(tree)] = {'property': all_power, 'object': 'collector', 'group': 'class=inverter', 'limit': '0', 'file': 'distributedGen' + suffix + '.csv'}
 		tree[len(tree)] = {'property':'VA_Out', 'object':'group_recorder', 'group':'class=inverter', 'limit':'1', 'file':'all_inverters_VA_Out_AC' + suffix + '.csv'}
 	else:
-		tree[len(tree)] = {'property': all_power, 'object': 'collector', 'group': 'class=load AND groupid=PV', 'limit': '0', 'file': 'distributedGen' + suffix + '.csv'}
-		# tree[len(tree)] = {'property':'VA_Out', 'object':'group_recorder', 'group':'class=load AND groupid=PV', 'limit':'1', 'file':'all_inverters_VA_Out_AC' + suffix + '.csv'}
+		tree[len(tree)] = {'property':'constant_power_A', 'object':'group_recorder', 'group':'class=load AND groupid=PV', 'limit':'1', 'file':'all_inverters_VA_Out_AC' + suffix + '.csv'}
 
 	return tree
 
