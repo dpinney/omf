@@ -27,6 +27,13 @@ def work(modelDir, ind):
 	''' Run the model in its directory. '''
 	o = {}
 	
+	assert not (ind['pvConnection'] == 'Delta' and ind['objectiveFunction'] == 'I0'), (
+		'Delta function does not currently support I0 minimization function.'
+	)
+
+	SIGN_CORRECTION = -1 if ind['pvConnection'] == 'Delta' else 1
+
+
 	price = float(ind['retailCost'])
 	
 	neato = False if ind.get("layoutAlgorithm", "geospatial") == "geospatial" else True
@@ -35,14 +42,6 @@ def work(modelDir, ind):
 	edgeLabsValue = ind.get("edgeLabs", None) if ind.get("edgeLabs") != "None" else None
 	nodeLabsValue = ind.get("nodeLabs", None) if ind.get("nodeLabs") != "None" else None
 	customColormapValue = True if ind.get("customColormap", "True") == "True" else False
-
-	SIGN_CORRECTION = -1 if ind['pvConnection'] == 'Delta' else 1
-
-	# sourceFileName = pJoin(modelDir, '_controlled.glm')
-	# copyfile(pJoin(__neoMetaModel__._omfDir, "static", "testFiles", 'phase_balance_test_2.glm'), sourceFileName)
-	# glmPath = pJoin(modelDir, '_controlled.glm') 
-	# omdPath = pJoin(modelDir, 'phase_balance_test_2.omd')
-	# feeder.glmToOmd(glmPath, omdPath)
 
 	# -------------------------- BASE CHART --------------------------- #
 	with open(pJoin(modelDir, [x for x in os.listdir(modelDir) if x.endswith('.omd')][0])) as f:
@@ -262,15 +261,13 @@ def _addCollectors(tree, suffix=None, pvConnection=None):
 	tree[len(tree)] = {'property': all_power, 'object': 'collector', 'group': 'class=load', 'limit': '0', 'file': 'load' + suffix + '.csv'}
 
 	# Load on motor phases
-	for phase in ['A', 'B', 'C']:
-		# tree[len(tree)] = {'property':'power_' + phase, 'object':'group_recorder', 'group':'class=load AND groupid=threePhase', 'limit': '1', 'file':'threephase_VA_'+ phase + suffix + '.csv'}
+	for phase in 'ABC':
 		tree[len(tree)] = {'property':'power_' + phase, 'object':'group_recorder', 'group':'groupid=threePhase', 'limit': '1', 'file':'threephase_VA_'+ phase + suffix + '.csv'}
 	
-	# # Loss across system
+	# Loss across system
 	all_losses = 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)'
 	for loss in ['transformer', 'underground_line', 'overhead_line', 'triplex_line']:
 		tree[len(tree)] = {'property': all_losses, 'object': 'collector', 'group': 'class='+loss, 'limit': '0', 'file': 'Zlosses_'+loss + suffix +'.csv'}
-	# # Individual inverters
 
 	if suffix != '_controlled' or pvConnection == 'Wye':
 		for x in tree.values():
@@ -290,13 +287,6 @@ def _addCollectors(tree, suffix=None, pvConnection=None):
 		tree[len(tree)] = {'property':'constant_power_A', 'object':'group_recorder', 'group':'class=load AND groupid=PV', 'limit':'1', 'file':'all_inverters_VA_Out_AC_A' + suffix + '.csv'}
 		tree[len(tree)] = {'property':'constant_power_B', 'object':'group_recorder', 'group':'class=load AND groupid=PV', 'limit':'1', 'file':'all_inverters_VA_Out_AC_B' + suffix + '.csv'}
 		tree[len(tree)] = {'property':'constant_power_C', 'object':'group_recorder', 'group':'class=load AND groupid=PV', 'limit':'1', 'file':'all_inverters_VA_Out_AC_C' + suffix + '.csv'}
-
-		# for x in tree.values():
-		# 	if x.get('object', '') == 'load': 
-		# 		if 'groupid' not in x:
-		# 			x['groupid'] = 'notSolar'
-
-		# tree[len(tree)] = {'property': all_power, 'object': 'group_recorder', 'group': 'class=load AND groupid=notSolar', 'limit': '0', 'file': 'load' + suffix + '.csv'}		
 
 	return tree
 
@@ -360,10 +350,10 @@ def _totals(filename, component=None):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"feederName1": "phase_balance_test",
-		"criticalNode": 'R1-12-47-1_node_17',
-		# "feederName1": "phase_balance_test_2",
-		# "criticalNode": 'R1-12-47-2_node_28',
+		# "feederName1": "phase_balance_test",
+		# "criticalNode": 'R1-12-47-1_node_17',
+		"feederName1": "phase_balance_test_2",
+		"criticalNode": 'R1-12-47-2_node_28',
 		"modelType": modelName,
 		"runTime": "",
 		"layoutAlgorithm": "forceDirected", #forceDirected
@@ -407,6 +397,12 @@ if __name__ == '__main__':
 # copyfile(pJoin(__neoMetaModel__._omfDir, "static", "testFiles", 'R1-12.47-1-AddSolar-Wye.glm'), sourceFileName)
 # glmPath = pJoin(modelDir, '_controlled.glm') 
 # omdPath = pJoin(modelDir, 'phase_balance_test.omd')
+# feeder.glmToOmd(glmPath, omdPath)
+
+# sourceFileName = pJoin(modelDir, '_controlled.glm')
+# copyfile(pJoin(__neoMetaModel__._omfDir, "static", "testFiles", 'phase_balance_test_2.glm'), sourceFileName)
+# glmPath = pJoin(modelDir, '_controlled.glm') 
+# omdPath = pJoin(modelDir, 'phase_balance_test_2.omd')
 # feeder.glmToOmd(glmPath, omdPath)
 
 # Copy spcific climate data into model directory (I think this is unnecessary?)
