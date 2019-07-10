@@ -27,6 +27,13 @@ def work(modelDir, ind):
 	''' Run the model in its directory. '''
 	o = {}
 	
+	assert not (ind['pvConnection'] == 'Delta' and ind['objectiveFunction'] == 'I0'), (
+		'Delta function does not currently support I0 minimization function.'
+	)
+
+	SIGN_CORRECTION = -1 if ind['pvConnection'] == 'Delta' else 1
+
+
 	price = float(ind['retailCost'])
 	
 	neato = False if ind.get("layoutAlgorithm", "geospatial") == "geospatial" else True
@@ -36,17 +43,17 @@ def work(modelDir, ind):
 	nodeLabsValue = ind.get("nodeLabs", None) if ind.get("nodeLabs") != "None" else None
 	customColormapValue = True if ind.get("customColormap", "True") == "True" else False
 
-
 	# -------------------------- BASE CHART --------------------------- #
 	with open(pJoin(modelDir, [x for x in os.listdir(modelDir) if x.endswith('.omd')][0])) as f:
 		tree_base = json.load(f)['tree']
+	
 	with open(pJoin(modelDir, 'input.glm'), 'w') as f:
 		treeString = feeder.sortedWrite(tree_base)
 		f.write(treeString)
 
 	base_suffix = "_base"
 	tree_base = _turnOffSolar(tree_base)
-	tree_base = _addCollectors(tree_base, suffix=base_suffix)
+	tree_base = _addCollectors(tree_base, suffix=base_suffix, pvConnection=ind['pvConnection'])
 	with open(pJoin(modelDir, '_base.glm'), 'w') as f:
 		treeString = feeder.sortedWrite(tree_base)
 		f.write(treeString)
@@ -67,7 +74,7 @@ def work(modelDir, ind):
 		tree_solar = json.load(f)['tree']
 
 	solar_suffix = "_solar"
-	tree_solar = _addCollectors(tree_solar, suffix=solar_suffix)
+	tree_solar = _addCollectors(tree_solar, suffix=solar_suffix, pvConnection=ind['pvConnection'])
 	with open(modelDir + '/_solar.glm', 'w') as f:
 		treeString = feeder.sortedWrite(tree_solar)
 		f.write(treeString)
@@ -86,11 +93,15 @@ def work(modelDir, ind):
 	# ---------------------------- CONTROLLED CHART ----------------------------- #
 	
 	controlled_suffix = '_controlled'
+	
 	SteinmetzController(pJoin(modelDir, 'input.glm'), 
 		ind['pvConnection'], ind['criticalNode'], 
 		int(ind['iterations']), ind['objectiveFunction'], modelDir)
 
-	glmPath = pJoin(modelDir, 'input_NewDeltaPV_Final.glm') 
+	if ind["pvConnection"] == 'Delta':
+		glmPath = pJoin(modelDir, 'input_NewDeltaPV_Final.glm')
+	else:
+		glmPath = pJoin(modelDir, 'input_Final.glm')
 	omdPath = pJoin(modelDir, '_controlled.omd')
 	feeder.glmToOmd(glmPath, omdPath)
 	
@@ -101,7 +112,8 @@ def work(modelDir, ind):
 		if ('PV' in v.get('groupid', '')) and v.get('object', '') == 'load':
 			v['groupid'] = 'PV'
 
-	tree_controlled = _addCollectors(tree_controlled, suffix=controlled_suffix)
+	tree_controlled = _addCollectors(tree_controlled, suffix=controlled_suffix, pvConnection=ind['pvConnection'])
+	
 	with open(pJoin(modelDir, '_controlled.glm'), 'w') as f:
 		treeString = feeder.sortedWrite(tree_controlled)
 		f.write(treeString)
@@ -120,9 +132,18 @@ def work(modelDir, ind):
 	# --------------------------- SERVICE TABLE ----------------------------- #
 	price = float(ind['retailCost'])
 	
-	df_inv_base = _readCSV(pJoin(modelDir, 'all_inverters_VA_Out_AC' + base_suffix + '.csv'))
-	df_inv_solar = _readCSV(pJoin(modelDir, 'all_inverters_VA_Out_AC' + solar_suffix + '.csv'))
-	df_inv_controlled = _readCSV(pJoin(modelDir, 'all_inverters_VA_Out_AC' + controlled_suffix + '.csv'))
+	df_invs = {}
+	sums = {}
+	for suffix in [base_suffix, solar_suffix, controlled_suffix]:
+		df_invs[suffix] = { phase: _readCSV(pJoin(modelDir, 'all_inverters_VA_Out_AC_' + phase + suffix + '.csv')) for phase in 'ABC' }
+
+	for suffix in [base_suffix, solar_suffix, controlled_suffix]:
+		df_invs[suffix] = {}
+		sums[suffix] = 0
+		for phase in 'ABC':
+			df = _readCSV(pJoin(modelDir, 'all_inverters_VA_Out_AC_' + phase + suffix + '.csv'))
+			df_invs[suffix][phase] = df
+			sums[suffix] += df['real'].sum()
 
 	o['service_cost'] = {
 		'load': {
@@ -131,9 +152,9 @@ def work(modelDir, ind):
 			'controlled': n(_totals(pJoin(modelDir, 'load' + controlled_suffix + '.csv'), 'real'))
 		},
 		'distributed_gen': {
-			'base': n(sum([x['real'] for i, x in df_inv_base.iterrows()])),
-			'solar': n(-sum([x['real'] for i, x in df_inv_solar.iterrows()])),
-			'controlled': n(sum([x['real'] for i, x in df_inv_controlled.iterrows()]))
+			'base': n(sums[base_suffix]),
+			'solar': n(sums[solar_suffix]),
+			'controlled': n(SIGN_CORRECTION*sums[controlled_suffix])
 		},
 		'losses': {
 			'base': n(sum([_totals(pJoin(modelDir, 'Zlosses_' + loss + base_suffix + '.csv'), 'real') for loss in 
@@ -154,16 +175,40 @@ def work(modelDir, ind):
 	}
 
 	# hack correction
-	# o['service_cost']['load']['controlled'] = n(float(o['service_cost']['load']['controlled'].replace(',', '')) + float(o['service_cost']['distributed_gen']['controlled'].replace(',', '')))
+	if ind['pvConnection'] == 'Delta':
+		o['service_cost']['load']['controlled'] = n(float(o['service_cost']['load']['controlled'].replace(',', '')) + float(o['service_cost']['distributed_gen']['controlled'].replace(',', '')))
 	# ----------------------------------------------------------------------- #
 	
 	# -------------------------- INVERTER TABLE ----------------------------- #
+	if ind['pvConnection'] == 'Wye':
+		inverter_list = set(
+			list(df_invs[controlled_suffix]['A'].index) + list(df_invs[controlled_suffix]['B'].index) + list(df_invs[controlled_suffix]['C'].index)
+		)
+	else:
+		inverter_list = df_invs[controlled_suffix]['A'].index
+	inverter_rows = {
+		inverter: {
+			'_solarA': '0j',
+			'_solarB': '0j',
+			'_solarC': '0j',
+			'_controlledA': '0j',
+			'_controlledB': '0j',
+			'_controlledC': '0j',
+		} for inverter in inverter_list
+	}
+
+	for suffix in [solar_suffix, controlled_suffix]:
+		for phase in 'ABC':
+			for inverter, row in df_invs[suffix][phase].iterrows():
+				inverter_rows[inverter][suffix + phase] = str(
+					SIGN_CORRECTION*complex(row['real'], row['imag']) if suffix == controlled_suffix else complex(row['real'], row['imag'])
+				).strip('()')
+
 	o['inverter_table'] = ''.join([(
 		"<tr>"
-			"<td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td>"
+			"<td>{}</td><td style='border-left: solid black 1px;'>{}</td><td>{}</td><td>{}</td><td style='border-left: solid black 1px;'>{}</td><td>{}</td><td>{}</td>"
 		"</tr>"
-	).format(inverter, n(row['real']), n(row['imag']), n(abs(row2['real'])), n(row2['imag'])) 
-		for (inverter, row), (inverter2, row2) in zip(df_inv_solar.iterrows(), df_inv_controlled.iterrows())])
+	).format(inverter, v['_solarA'], v['_solarB'], v['_solarC'], v['_controlledA'], v['_controlledB'], v['_controlledC']) for (inverter, v) in inverter_rows.items()])
 	# ----------------------------------------------------------------------- #
 
 
@@ -185,7 +230,7 @@ def work(modelDir, ind):
 	for suffix in [base_suffix, solar_suffix, controlled_suffix]:
 		df_all_motors = pd.DataFrame()
 
-		df_all_motors = _readVoltage(pJoin(modelDir, 'voltDump' + suffix + '.csv'), motor_names)
+		df_all_motors = _readVoltage(pJoin(modelDir, 'voltDump' + suffix + '.csv'), motor_names, ind['objectiveFunction'])
 		
 		o['motor_table' + suffix] = ''.join([(
 			"<tr>"
@@ -205,31 +250,43 @@ def work(modelDir, ind):
 
 	return o
 
-def _addCollectors(tree, suffix=None):
+def _addCollectors(tree, suffix=None, pvConnection=None):
 	for x in tree.values():
-		# if 'object' in x and 'load' in x['object'] and all([phase in x['phases'] for phase in 'ABC']):
-		if 'object' in x and ('load' in x['object'] or 'node' in x['object']) and all([phase in x['phases'] for phase in 'ABC']):
+		if 'object' in x and ('load' in x['object'].lower() or 'node' in x['object'].lower()) and all([phase in x['phases'] for phase in 'ABC']):
 			x['groupid'] = 'threePhase'
 
 	# load on system and inverters
 	all_power = 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)'
-	tree[len(tree)] = {'property': all_power, 'object': 'collector', 'group': 'class=load', 'limit': '0', 'file': 'load' + suffix + '.csv'}
 	
+	tree[len(tree)] = {'property': all_power, 'object': 'collector', 'group': 'class=load', 'limit': '0', 'file': 'load' + suffix + '.csv'}
+
 	# Load on motor phases
-	for phase in ['A', 'B', 'C']:
-		# tree[len(tree)] = {'property':'power_' + phase, 'object':'group_recorder', 'group':'class=load AND groupid=threePhase', 'limit': '1', 'file':'threephase_VA_'+ phase + suffix + '.csv'}
+	for phase in 'ABC':
 		tree[len(tree)] = {'property':'power_' + phase, 'object':'group_recorder', 'group':'groupid=threePhase', 'limit': '1', 'file':'threephase_VA_'+ phase + suffix + '.csv'}
 	
 	# Loss across system
 	all_losses = 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)'
 	for loss in ['transformer', 'underground_line', 'overhead_line', 'triplex_line']:
 		tree[len(tree)] = {'property': all_losses, 'object': 'collector', 'group': 'class='+loss, 'limit': '0', 'file': 'Zlosses_'+loss + suffix +'.csv'}
-	# Individual inverters
 
-	if suffix != '_controlled':
-		tree[len(tree)] = {'property':'VA_Out', 'object':'group_recorder', 'group':'class=inverter', 'limit':'1', 'file':'all_inverters_VA_Out_AC' + suffix + '.csv'}
+	if suffix != '_controlled' or pvConnection == 'Wye':
+		for x in tree.values():
+			if x.get('object', '') == 'inverter':
+				if 'A' in x['phases']:
+					x['groupid'] = 'PVA'
+				elif 'B' in x['phases']:
+					x['groupid'] = 'PVB'
+				elif 'C' in x['phases']:
+					x['groupid'] = 'PVC'
+
+		tree[len(tree)] = {'property':'VA_Out', 'object':'group_recorder', 'group':'class=inverter AND groupid=PVA', 'limit':'1', 'file':'all_inverters_VA_Out_AC_A' + suffix + '.csv'}
+		tree[len(tree)] = {'property':'VA_Out', 'object':'group_recorder', 'group':'class=inverter AND groupid=PVB', 'limit':'1', 'file':'all_inverters_VA_Out_AC_B' + suffix + '.csv'}
+		tree[len(tree)] = {'property':'VA_Out', 'object':'group_recorder', 'group':'class=inverter AND groupid=PVC', 'limit':'1', 'file':'all_inverters_VA_Out_AC_C' + suffix + '.csv'}
+		
 	else:
-		tree[len(tree)] = {'property':'constant_power_A', 'object':'group_recorder', 'group':'class=load AND groupid=PV', 'limit':'1', 'file':'all_inverters_VA_Out_AC' + suffix + '.csv'}
+		tree[len(tree)] = {'property':'constant_power_A', 'object':'group_recorder', 'group':'class=load AND groupid=PV', 'limit':'1', 'file':'all_inverters_VA_Out_AC_A' + suffix + '.csv'}
+		tree[len(tree)] = {'property':'constant_power_B', 'object':'group_recorder', 'group':'class=load AND groupid=PV', 'limit':'1', 'file':'all_inverters_VA_Out_AC_B' + suffix + '.csv'}
+		tree[len(tree)] = {'property':'constant_power_C', 'object':'group_recorder', 'group':'class=load AND groupid=PV', 'limit':'1', 'file':'all_inverters_VA_Out_AC_C' + suffix + '.csv'}
 
 	return tree
 
@@ -239,17 +296,30 @@ def _turnOffSolar(tree):
 			tree[k]["generator_status"] = "OFFLINE"
 	return tree
 
-def _readVoltage(filename, motor_names):
+def _readVoltage(filename, motor_names, objectiveFunction):
 	return_df = pd.DataFrame()
 	df = pd.read_csv(filename, skiprows=1)
 	df_motors = df[df['node_name'].isin(motor_names)]
+	return_df['node_name'] = df_motors['node_name']
 	for phase in ['voltA', 'voltB', 'voltC']:
 		return_df[phase] = np.sqrt(df_motors[phase + '_imag']**2 + df_motors[phase + '_real']**2)
-	return_df['unbalance'] = return_df.apply(unbalance, axis=1)
-	return_df['node_name'] = df_motors['node_name']
+
+	if objectiveFunction == 'VUF':
+		return_df['unbalance'] = df_motors.apply(unbalanceVUF, axis=1)
+	else:
+		return_df['unbalance'] = return_df.apply(unbalanceI, axis=1)
 	return return_df
 
-def unbalance(r):
+def unbalanceVUF(r):
+	a = complex(r['voltA_real'], r['voltA_imag'])
+	b = complex(r['voltB_real'], r['voltB_imag'])
+	c = complex(r['voltC_real'], r['voltC_imag'])
+	j = complex(-0.5, math.sqrt(3)/2)
+	V_p = (a + j*b + j*j*c)/3
+	V_n = (a + j*j*b + j*c)/3
+	return abs(V_n)/abs(V_p)*100
+
+def unbalanceI(r):
 	a = float(r['voltA'])
 	b = float(r['voltB'])
 	c = float(r['voltC'])
@@ -280,10 +350,13 @@ def _totals(filename, component=None):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"feederName1": "phase_balance_test",
+		# "feederName1": "phase_balance_test",
+		# "criticalNode": 'R1-12-47-1_node_17',
+		"feederName1": "phase_balance_test_2",
+		"criticalNode": 'R1-12-47-2_node_28',
 		"modelType": modelName,
 		"runTime": "",
-		"layoutAlgorithm": "forceDirected", #geospatial
+		"layoutAlgorithm": "forceDirected", #forceDirected
 		"zipCode": "64735",
 		"retailCost": "0.05",
 		"discountRate": "7",
@@ -297,9 +370,8 @@ def new(modelDir):
 		"parameterTwo": "42",
 		"colorMin": "auto",
 		"colorMax": "auto",
-		"criticalNode": 'R1-12-47-1_node_1',
 		"objectiveFunction": 'VUF', #'I0'
-		"pvConnection": 'Delta',
+		"pvConnection": 'Wye',
 		"iterations": "5"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
@@ -325,6 +397,12 @@ if __name__ == '__main__':
 # copyfile(pJoin(__neoMetaModel__._omfDir, "static", "testFiles", 'R1-12.47-1-AddSolar-Wye.glm'), sourceFileName)
 # glmPath = pJoin(modelDir, '_controlled.glm') 
 # omdPath = pJoin(modelDir, 'phase_balance_test.omd')
+# feeder.glmToOmd(glmPath, omdPath)
+
+# sourceFileName = pJoin(modelDir, '_controlled.glm')
+# copyfile(pJoin(__neoMetaModel__._omfDir, "static", "testFiles", 'phase_balance_test_2.glm'), sourceFileName)
+# glmPath = pJoin(modelDir, '_controlled.glm') 
+# omdPath = pJoin(modelDir, 'phase_balance_test_2.omd')
 # feeder.glmToOmd(glmPath, omdPath)
 
 # Copy spcific climate data into model directory (I think this is unnecessary?)
