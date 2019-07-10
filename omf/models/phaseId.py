@@ -371,7 +371,7 @@ def new(modelDir):
 			)
 		).read(),
 		"amiMeterDataName": "combined.csv",
-		"checkMeter": 'Meter_13.csv',
+		"checkMeter": 'Meter_17.csv',
 		"modelType": modelName
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
