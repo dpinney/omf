@@ -143,13 +143,14 @@
 				<label class="tooltip">Load Name<span class="classic">Specify the load name in the circuit.</span></label>
 				<input type="text" id="loadName" name="loadName" required="required"/>
 			</div>
-			<!-- <div class="shortInput" style="width:100%">
-				<label class="tooltip">Hourly Load Shape<span class="classic">Please enter a list of 24 values separated by commas to represent a "peak day" load shape by hour.</span></label>
-				<input type="text" id="loadShape" name="loadShape" pattern="^(\d*\.?\d*)(,\s*\d*\.?\d*){23}$" required="required"/>
-			</div> -->
-			<div class="shortInput" style="width:50%">
-				<label class="tooltip">Hourly Load Shape<span class="classic">Please enter the name of a .csv file representing the hourly load shape</span></label>
-				<input type="text" id="loadShape" name="loadShape" pattern="^([a-zA-Z0-9\s_\\.,\-\(\):])+(.csv)$" required="required"/>
+			<div class="shortInput">
+				<label class="tooltip">Hourly Load Shape (.csv file)<span class="classic">Please enter the name of a .csv file representing the hourly load shape</span></label>
+				<input id="loadShapeFile" type="file" style="display:none" onchange="handle_files(this.files,'loadShape','fileName')">
+				<input id="loadShape" name="loadShape" type="hidden">
+				<div>
+					<label for="loadShapeFile" class="fileButton">Choose File</label>
+					<input id="fileName" name="fileName" value='' readonly class="uploadFileName">	
+				</div>
 			</div>
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>

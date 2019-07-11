@@ -111,16 +111,21 @@ def work(modelDir, inputDict):
 		loadNameValue = None
 	else:
 		loadNameValue = inputDict["loadName"]
-	# None check for loadShape
-	if inputDict.get("loadShape", "None") == "None":
-		loadShapeValue = None
-	# else:
-	# 	loadShapeList = []
-	# 	strList = inputDict["loadShape"].strip().split(',')
-	# 	for n in strList:
-	# 		loadShapeList.append(float(n))
-	else:
-		loadShapeValue = inputDict["loadShape"]
+	# Setting up the loadShape file.
+	with open(pJoin(modelDir,"loadShape.csv"),"w") as loadShapeFile:
+		loadShapeFile.write(inputDict['loadShape'])
+	try:
+		loadShapeList = []
+		with open(pJoin(modelDir,"loadShape.csv")) as inFile:
+			reader = csv.reader(inFile)
+			for row in reader:
+				loadShapeList.append(row) 
+			if len(loadShapeList)!=8760: raise Exception
+	except:
+		errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>"
+		raise Exception(errorMessage)
+
+	loadShapeValue = [float(x[0]) for x in loadShapeList]
 	
 	#calculate and display EV Charging Demand image, carpet plot image of 8760 load shapes
 	maxLoadValue, demandImg, carpetPlotImg, maxLoadShapeImg = plotEVShape(
@@ -132,8 +137,8 @@ def work(modelDir, inputDict):
 		chargeLimit = chargeLimitValue, 
 		minCharge = minChargeValue, 
 		maxCharge = maxChargeValue, 
-		loadShape = pJoin(modelDir,loadShapeValue),
-		modelDir = modelDir)
+		loadShape = loadShapeValue)
+		# loadShape = pJoin(modelDir,loadShapeValue))
 	demandImg.savefig(pJoin(modelDir, "evChargingDemand.png"))
 	with open(pJoin(modelDir, "evChargingDemand.png"),"rb") as evFile:
 		outData["evChargingDemand"] = evFile.read().encode("base64")
@@ -166,7 +171,7 @@ def work(modelDir, inputDict):
 		nodeLabs = None,
 		edgeLabs = None,
 		customColormap = False,
-		scaleMin = 0.9,
+		scaleMin = .9,
 		scaleMax = 1.1,
 		faultLoc = None,
 		faultType = None,
@@ -180,6 +185,7 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir, "output.png"),"rb") as inFile:
 		outData["voltageDrop"] = inFile.read().encode("base64")
 
+
 	loadVoltPlotChart, loadProtDevTable = drawPlotLoad(
 		pJoin(modelDir,feederName + ".omd"),
 		neatoLayout = neato,
@@ -188,7 +194,7 @@ def work(modelDir, inputDict):
 		nodeLabs = None,
 		edgeLabs = None,
 		customColormap = False,
-		scaleMin = 0.9,
+		scaleMin = .9,
 		scaleMax = 1.1,
 		faultLoc = None,
 		faultType = None,
@@ -735,17 +741,17 @@ def new(modelDir):
 		"chargeRate" : "40",
 		"efficiency" : "0.5",
 		"gasEfficiency" : "8",
-		"numVehicles" : "200",
+		"numVehicles" : "50",
 		"energyCost" : "0.12",
 		"startHour" : "8",
 		"endHour" : "10",
-		"chargeLimit" : "1500",
+		"chargeLimit" : "150",
 		"minCharge" : "10",
 		"maxCharge" : "50",
 		"gasCost" : "2.70",
 		"workload" : "40",
 		"loadShape" : "input - 200 Employee Office, Springfield Illinois, 2001.csv",
-		"loadName" : "evOfficeLoad",
+		"loadName" : "62474211556",
 		"rezSqIn" : "400",
 		"simTime" : '2000-01-01 0:00:00'
 	}
@@ -824,7 +830,7 @@ def drawTable(initialStates=None, finalStates=None, deviceTypes=None):
 	html_str += """</tbody></table>"""
 	return html_str
 
-def plotEVShape(numVehicles=None, chargeRate=None, batterySize=None, startHour=None, endHour=None, chargeLimit=None, minCharge=None, maxCharge=None, loadShape=None, rezSqIn=None, modelDir=None):
+def plotEVShape(numVehicles=None, chargeRate=None, batterySize=None, startHour=None, endHour=None, chargeLimit=None, minCharge=None, maxCharge=None, loadShape=None, rezSqIn=None):
 	shapes = []
 	for i in range(numVehicles):
 		# Random arrival
@@ -877,15 +883,16 @@ def plotEVShape(numVehicles=None, chargeRate=None, batterySize=None, startHour=N
 		hourly_con[i] = float(sum(con_charge[i * 60:i * 60 + 60])/60.0)
 
 	# Make an annual building load base shape.
-	ann_shape = open(loadShape).readlines()
-	base_shape = [float(x) for x in ann_shape]
+	#ann_shape = open(loadShape).readlines()
+	#base_shape = [float(x) for x in ann_shape]
+	base_shape = loadShape
 
 	# Make an output csv.
 	combined = []
 	for i in range(8760):
 		com_load = base_shape[i] + hourly_con[i % 24]
 		combined.append(com_load)
-	with open(pJoin(modelDir,'output - evInterconnection combined load shapes.csv'), 'w') as outFile:
+	with open('output - evInterconnection combined load shapes.csv', 'w') as outFile:
 		for row in combined:
 			outFile.write(str(row) + '\n')
 
@@ -985,13 +992,13 @@ def drawPlotLoad(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=
 				key = nameToIndex[loadName]
 				obtype = tree[key].get("object","")
 				if obtype in ['triplex_node', 'triplex_load']:
-					tree[key]['power_12'] = maxValueWatts
+					tree[key]['power_12_real'] = maxValueWatts
+					#tree[key]['power_12'] = maxValueWatts
 				elif obtype in ['load', 'pqload']:
-					tree[key]['constant_power_A_real'] = maxValueWatts/3.0
-					tree[key]['constant_power_B_real'] = maxValueWatts/3.0
-					tree[key]['constant_power_C_real'] = maxValueWatts/3.0
-				elif obtype == 'triplex_meter':
-					tree[key]['measured_real_power'] = maxValueWatts
+					#tree[key]['constant_power_A_real'] = maxValueWatts
+					tree[key]['constant_power_A_real'] = maxValueWatts/3
+					tree[key]['constant_power_B_real'] = maxValueWatts/3
+					tree[key]['constant_power_C_real'] = maxValueWatts/3
 				else:
 					raise Exception('Specified load name does not correspond to a load object. Make sure the object is of the following types: load, pqload, triplex_node, triplex_meter.')
 				#run gridlab-d simulation with specified load set to max value
@@ -1039,9 +1046,6 @@ def _debugging():
 		pass 
 	# Create New.
 	new(modelLoc)
-	# HACK: move in the load data.
-	lfName = "input - 200 Employee Office, Springfield Illinois, 2001.csv"
-	shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "testFiles", lfName), pJoin(modelLoc, "input - 200 Employee Office, Springfield Illinois, 2001.csv"))
 	# Pre-run.
 	# renderAndShow(modelLoc)
 	# Run the model.
