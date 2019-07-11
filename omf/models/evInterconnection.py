@@ -111,16 +111,21 @@ def work(modelDir, inputDict):
 		loadNameValue = None
 	else:
 		loadNameValue = inputDict["loadName"]
-	# None check for loadShape
-	if inputDict.get("loadShape", "None") == "None":
-		loadShapeValue = None
-	# else:
-	# 	loadShapeList = []
-	# 	strList = inputDict["loadShape"].strip().split(',')
-	# 	for n in strList:
-	# 		loadShapeList.append(float(n))
-	else:
-		loadShapeValue = inputDict["loadShape"]
+	# Setting up the loadShape file.
+	with open(pJoin(modelDir,"loadShape.csv"),"w") as loadShapeFile:
+		loadShapeFile.write(inputDict['loadShape'])
+	try:
+		loadShapeList = []
+		with open(pJoin(modelDir,"loadShape.csv")) as inFile:
+			reader = csv.reader(inFile)
+			for row in reader:
+				loadShapeList.append(row) 
+			if len(loadShapeList)!=8760: raise Exception
+	except:
+		errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>"
+		raise Exception(errorMessage)
+
+	loadShapeValue = [float(x[0]) for x in loadShapeList]
 	
 	#calculate and display EV Charging Demand image, carpet plot image of 8760 load shapes
 	maxLoadValue, demandImg, carpetPlotImg, maxLoadShapeImg = plotEVShape(
@@ -132,8 +137,7 @@ def work(modelDir, inputDict):
 		chargeLimit = chargeLimitValue, 
 		minCharge = minChargeValue, 
 		maxCharge = maxChargeValue, 
-		loadShape = pJoin(modelDir,loadShapeValue),
-		modelDir = modelDir)
+		loadShape = loadShapeValue)
 	demandImg.savefig(pJoin(modelDir, "evChargingDemand.png"))
 	with open(pJoin(modelDir, "evChargingDemand.png"),"rb") as evFile:
 		outData["evChargingDemand"] = evFile.read().encode("base64")
@@ -166,7 +170,7 @@ def work(modelDir, inputDict):
 		nodeLabs = None,
 		edgeLabs = None,
 		customColormap = False,
-		scaleMin = 0.9,
+		scaleMin = .9,
 		scaleMax = 1.1,
 		faultLoc = None,
 		faultType = None,
@@ -180,32 +184,81 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir, "output.png"),"rb") as inFile:
 		outData["voltageDrop"] = inFile.read().encode("base64")
 
-	loadVoltPlotChart, loadProtDevTable = drawPlotLoad(
-		pJoin(modelDir,feederName + ".omd"),
-		neatoLayout = neato,
-		edgeCol = "PercentOfRating",
-		nodeCol = "perUnitVoltage",
-		nodeLabs = None,
-		edgeLabs = None,
-		customColormap = False,
-		scaleMin = 0.9,
-		scaleMax = 1.1,
-		faultLoc = None,
-		faultType = None,
-		rezSqIn = 225,
-		simTime = "2000-01-01 0:00:00",
-		workDir = modelDir,
-		loadName = loadNameValue,
-		maxValue = maxLoadValue)
-	loadVoltPlotChart.savefig(pJoin(modelDir, "loadVoltPlot.png"))
-	with open(pJoin(modelDir, "loadStatusTable.html"), "w") as tabFile:
-		tabFile.write(loadProtDevTable)
-	outData['loadProtDevTableHtml'] = loadProtDevTable
-	with open(pJoin(modelDir, "loadVoltPlot.png"),"rb") as inFile:
-		outData["loadVoltageDrop"] = inFile.read().encode("base64")
+	#run and display voltage drop image and protective device status table with updated glm where the node with the specified load name is changed to the max value
+	warnings.filterwarnings("ignore")
+	omd = json.load(open(pJoin(modelDir,feederName + ".omd")))
+	tree = omd.get('tree', {})
+	attachments = omd.get('attachments',[])
+
+	#check to see that maximum load value is passed in
+	maxValue = maxLoadValue
+	loadName = loadNameValue
+	if maxValue != None:
+		maxValue = float(maxValue)
+		maxValueWatts = maxValue * 1000
+		# print "maxValue = " + str(maxValue)
+		# print "maxValueWatts = " + str(maxValueWatts)
+		#check to see that loadName is specified
+		if loadName != None:
+			# Map to speed up name lookups.
+			nameToIndex = {tree[key].get('name',''):key for key in tree.keys()}
+			#check if the specified load name is in the tree
+			if loadName in nameToIndex:
+				key = nameToIndex[loadName]
+				obtype = tree[key].get("object","")
+				if obtype in ['triplex_node', 'triplex_load']:
+					tree[key]['power_12_real'] = maxValueWatts
+					#tree[key]['power_12'] = maxValueWatts
+				elif obtype in ['load', 'pqload']:
+					#tree[key]['constant_power_A_real'] = maxValueWatts
+					tree[key]['constant_power_A_real'] = maxValueWatts/3
+					tree[key]['constant_power_B_real'] = maxValueWatts/3
+					tree[key]['constant_power_C_real'] = maxValueWatts/3
+				else:
+					raise Exception('Specified load name does not correspond to a load object. Make sure the object is of the following types: load, pqload, triplex_node, triplex_meter.')
+				#run gridlab-d simulation with specified load set to max value
+				omd['tree'] = tree
+				feederName2 = "Olin Barre Fault - evInterconnection.omd"
+				with open(modelDir + '/' + feederName2, "w+") as write_file:
+					json.dump(omd, write_file)
+
+				loadVoltPlotChart, loadProtDevTable = drawPlotFault(
+					pJoin(modelDir,feederName2),
+					neatoLayout = neato,
+					edgeCol = "PercentOfRating",
+					nodeCol = "perUnitVoltage",
+					nodeLabs = "Load",
+					edgeLabs = None,
+					customColormap = False,
+					scaleMin = .9,
+					scaleMax = 1.1,
+					faultLoc = None,
+					faultType = None,
+					rezSqIn = 225,
+					simTime = "2000-01-01 0:00:00",
+					workDir = modelDir,
+					loadLoc = loadName)
+				loadVoltPlotChart.savefig(pJoin(modelDir, "loadVoltPlot.png"))
+				with open(pJoin(modelDir, "loadStatusTable.html"), "w") as tabFile:
+					tabFile.write(loadProtDevTable)
+				outData['loadProtDevTableHtml'] = loadProtDevTable
+				with open(pJoin(modelDir, "loadVoltPlot.png"),"rb") as inFile:
+					outData["loadVoltageDrop"] = inFile.read().encode("base64")
+			else:
+				print "Didn't find the gridlab object named " + loadName
+				#raise an exception if loadName isn't in the tree
+				raise Exception('Specified load name does not correspond to an object in the tree.')
+		else:
+			print "loadName is None"
+			#raise an exception if loadName isn't specified
+			raise Exception('Invalid request. Load Name must be specified.')
+	else:
+		print "maxValue is None"
+		#raise an exception if maximum load value is not being passed in
+		raise Exception('Error retrieving maximum load value from load shape.')
 	return outData
 
-def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, faultLoc=None, faultType=None, customColormap=False, scaleMin=None, scaleMax=None, rezSqIn=400, simTime='2000-01-01 0:00:00'):
+def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, faultLoc=None, faultType=None, customColormap=False, scaleMin=None, scaleMax=None, rezSqIn=400, simTime='2000-01-01 0:00:00', loadLoc=None):
 	''' Draw a color-coded map of the voltage drop on a feeder.
 	path is the full path to the GridLAB-D .glm file or OMF .omd file.
 	workDir is where GridLAB-D will run, if it's None then a temp dir is used.
@@ -495,9 +548,12 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 			voltImbal = maxDiff/avgVolts
 			voltImbalances[nodeName] = float("{0:.2f}".format(voltImbal))
 		# Use float("{0:.2f}".format(avg(allVolts))) if displaying the node labels
+	nodeLoadNames = {}
 	nodeNames = {}
 	for key in nodeVolts.keys():
 		nodeNames[key] = key
+		if key == loadLoc:
+			nodeLoadNames[key] = "LOAD: " + key
 	# find edge currents by parsing currdump
 	edgeCurrentSum = {}
 	edgeCurrentMax = {}
@@ -707,6 +763,9 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 			else:
 				nodeLabels = None
 				print "WARNING: nodeCol property cannot be set to None when nodeLabs property is set to 'Value'"
+		#HACK: add hidden node label option for displaying specified load name
+		elif nodeLabs == "Load":
+			nodeLabels = nodeLoadNames
 		else:
 			nodeLabs = None
 			print "WARNING: nodeLabs property must be either 'Name', 'Value', or None"
@@ -735,17 +794,17 @@ def new(modelDir):
 		"chargeRate" : "40",
 		"efficiency" : "0.5",
 		"gasEfficiency" : "8",
-		"numVehicles" : "200",
+		"numVehicles" : "50",
 		"energyCost" : "0.12",
 		"startHour" : "8",
 		"endHour" : "10",
-		"chargeLimit" : "1500",
+		"chargeLimit" : "150",
 		"minCharge" : "10",
 		"maxCharge" : "50",
 		"gasCost" : "2.70",
 		"workload" : "40",
 		"loadShape" : "input - 200 Employee Office, Springfield Illinois, 2001.csv",
-		"loadName" : "evOfficeLoad",
+		"loadName" : "62474211556",
 		"rezSqIn" : "400",
 		"simTime" : '2000-01-01 0:00:00'
 	}
@@ -824,7 +883,7 @@ def drawTable(initialStates=None, finalStates=None, deviceTypes=None):
 	html_str += """</tbody></table>"""
 	return html_str
 
-def plotEVShape(numVehicles=None, chargeRate=None, batterySize=None, startHour=None, endHour=None, chargeLimit=None, minCharge=None, maxCharge=None, loadShape=None, rezSqIn=None, modelDir=None):
+def plotEVShape(numVehicles=None, chargeRate=None, batterySize=None, startHour=None, endHour=None, chargeLimit=None, minCharge=None, maxCharge=None, loadShape=None, rezSqIn=None):
 	shapes = []
 	for i in range(numVehicles):
 		# Random arrival
@@ -877,15 +936,16 @@ def plotEVShape(numVehicles=None, chargeRate=None, batterySize=None, startHour=N
 		hourly_con[i] = float(sum(con_charge[i * 60:i * 60 + 60])/60.0)
 
 	# Make an annual building load base shape.
-	ann_shape = open(loadShape).readlines()
-	base_shape = [float(x) for x in ann_shape]
+	#ann_shape = open(loadShape).readlines()
+	#base_shape = [float(x) for x in ann_shape]
+	base_shape = loadShape
 
 	# Make an output csv.
 	combined = []
 	for i in range(8760):
 		com_load = base_shape[i] + hourly_con[i % 24]
 		combined.append(com_load)
-	with open(pJoin(modelDir,'output - evInterconnection combined load shapes.csv'), 'w') as outFile:
+	with open('output - evInterconnection combined load shapes.csv', 'w') as outFile:
 		for row in combined:
 			outFile.write(str(row) + '\n')
 
@@ -956,78 +1016,6 @@ def fuelCostCalc(numVehicles=None, batterySize=None, efficiency=None, energyCost
 		</div>"""
 	return html_str
 
-def drawPlotLoad(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, faultLoc=None, faultType=None, customColormap=False, scaleMin=None, scaleMax=None, rezSqIn=400, simTime='2000-01-01 0:00:00', loadName=None, maxValue=None):
-
-	#print "Reached drawPlotLoad function."
-	warnings.filterwarnings("ignore")
-	if path.endswith('.glm'):
-		tree = omf.feeder.parse(path)
-		attachments = []
-	elif path.endswith('.omd'):
-		omd = json.load(open(path))
-		tree = omd.get('tree', {})
-		attachments = omd.get('attachments',[])
-	else:
-		raise Exception('Invalid input file type. We require a .glm or .omd.')
-
-	#check to see that maximum load value is passed in
-	if maxValue != None:
-		maxValue = float(maxValue)
-		maxValueWatts = maxValue * 1000
-		print "maxValue = " + str(maxValue)
-		print "maxValueWatts = " + str(maxValueWatts)
-		#check to see that loadName is specified
-		if loadName != None:
-			# Map to speed up name lookups.
-			nameToIndex = {tree[key].get('name',''):key for key in tree.keys()}
-			#check if the specified load name is in the tree
-			if loadName in nameToIndex:
-				key = nameToIndex[loadName]
-				obtype = tree[key].get("object","")
-				if obtype in ['triplex_node', 'triplex_load']:
-					tree[key]['power_12'] = maxValueWatts
-				elif obtype in ['load', 'pqload']:
-					tree[key]['constant_power_A_real'] = maxValueWatts/3.0
-					tree[key]['constant_power_B_real'] = maxValueWatts/3.0
-					tree[key]['constant_power_C_real'] = maxValueWatts/3.0
-				elif obtype == 'triplex_meter':
-					tree[key]['measured_real_power'] = maxValueWatts
-				else:
-					raise Exception('Specified load name does not correspond to a load object. Make sure the object is of the following types: load, pqload, triplex_node, triplex_meter.')
-				#run gridlab-d simulation with specified load set to max value
-				omd['tree'] = tree
-				feederName2 = "Olin Barre Fault - evInterconnection.omd"
-				with open(workDir + '/' + feederName2, "w+") as write_file:
-					json.dump(omd, write_file)
-				return drawPlotFault(
-					pJoin(workDir,feederName2),
-					neatoLayout = neatoLayout,
-					edgeCol = edgeCol,
-					nodeCol = nodeCol,
-					nodeLabs = nodeLabs,
-					edgeLabs = edgeLabs,
-					customColormap = customColormap,
-					scaleMin = scaleMin,
-					scaleMax = scaleMax,
-					faultLoc = faultLoc,
-					faultType = faultType,
-					rezSqIn = rezSqIn,
-					simTime = simTime,
-					workDir = workDir)
-				#print "This is it: \n" + str(tree[key])
-			else:
-				print "Didn't find the gridlab object named " + loadName
-				#raise an exception if loadName isn't in the tree
-				raise Exception('Specified load name does not correspond to an object in the tree.')
-		else:
-			print "loadName is None"
-			#raise an exception if loadName isn't specified
-			raise Exception('Invalid request. Load Name must be specified.')
-	else:
-		print "maxValue is None"
-		#raise an exception if maximum load value is not being passed in
-		raise Exception('Error retrieving maximum load value from load shape.')
-
 def _debugging():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
@@ -1039,9 +1027,6 @@ def _debugging():
 		pass 
 	# Create New.
 	new(modelLoc)
-	# HACK: move in the load data.
-	lfName = "input - 200 Employee Office, Springfield Illinois, 2001.csv"
-	shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "testFiles", lfName), pJoin(modelLoc, "input - 200 Employee Office, Springfield Illinois, 2001.csv"))
 	# Pre-run.
 	# renderAndShow(modelLoc)
 	# Run the model.

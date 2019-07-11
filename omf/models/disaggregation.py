@@ -3,6 +3,7 @@ from os.path import join as pJoin
 from matplotlib import pyplot as plt
 from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
+import os
 
 warnings.filterwarnings('ignore')
 
@@ -34,8 +35,12 @@ def work(modelDir, inputDict):
 	else:
 		testPath = getPath(inputDict['testSet'])
 
+	# if nilmtk is not installed, install it
+	if not(os.path.isdir('./solvers/nilmtk/nilmtk')):
+		installNilm()
+
 	# run the dissag script using python 3 because nilmtk requires it
-	dissagScript = '../nilmtk/dissagScript.py'
+	dissagScript = './solvers/nilmtk/nilmtk/dissagScript.py'
 	python3Script = 'python3 ' + dissagScript + ' ' + algorithm + ' ' + \
 		trainPath + ' ' + testPath   + ' ' + \
 		trainBuilding  + ' ' + testBuilding + ' ' +\
@@ -64,7 +69,7 @@ def getPath(dataSet):
 	'''logic for returning the data file associated with the specified dataset'''
 	path = ''
 	if (dataSet == 'REDD'):
-		path = '../nilmtk/data/REDD/redd.h5'
+		path = './solvers/nilmtk/nilmtk/data/REDD/redd.h5'
 	return path
 
 def convertTestData(modelDir, data):
@@ -92,9 +97,13 @@ def convertTestData(modelDir, data):
 	timeStampsFile = pJoin(modelDir, 'timeStamps.pkl')  
 	pickle.dump(timeStamps, open(timeStampsFile, 'wb'))
 	
+	# if nilmtk is not installed, install it
+	if not(os.path.isdir('./solvers/nilmtk/nilmtk')):
+		installNilm()
+
 	# run the python 3 scripts to convert the csv data to nilmtks format
 	outputFilename = pJoin(modelDir,'testData.h5')
-	convScript = '../nilmtk/convTestPython3.py'
+	convScript = './solvers/nilmtk/nilmtk/convTestPython3.py'
 	python3Script = 'python3 ' + convScript + ' ' + samplePeriod + ' ' + \
 		wattsFile + ' ' + timeStampsFile + ' ' + \
 		outputFilename + ' ' + modelDir
@@ -133,9 +142,13 @@ def convertTrainData(modelDir, data):
 	appliancesFile = pJoin(modelDir, 'appliances.pkl')  
 	pickle.dump(appliances, open(appliancesFile, 'wb'))
 
+	# if nilmtk is not installed, install it
+	if not(os.path.isdir('./solvers/nilmtk/nilmtk')):
+		installNilm()
+
 	# run the python 3 scripts to convert the csv data to nilmtks format
 	outputFilename = pJoin(modelDir,'trainData.h5')
-	convScript = '../nilmtk/convTrainPython3.py'
+	convScript = './solvers/nilmtk/nilmtk/convTrainPython3.py'
 	python3Script = 'python3 ' + convScript + ' ' + samplePeriod + ' ' + \
 		wattsFile + ' ' + timeStampsFile + ' ' + \
 		appliancesFile + ' ' + outputFilename + ' ' + modelDir
@@ -144,6 +157,37 @@ def convertTrainData(modelDir, data):
 	output, error = process.communicate()
 	
 	return outputFilename
+
+def installNilm():
+	print('------------------------------------------------------------------')
+	print('------------------------------------------------------------------')
+	print('------------------------------------------------------------------')
+	print('------------------------------------------------------------------')
+
+
+	# install nilmtk
+	os.chdir("./solvers/nilmtk/")
+	os.system("apt-get install python3-tk")
+	os.system("apt-get install git libhdf5-serial-dev python-dev postgresql postgresql-contrib postgresql-server-dev-all")
+	os.system("yes | pip3 install pip numpy scipy six numexpr tables matplotlib future psycopg2 nose coveralls coverage git+https://github.com/hmmlearn/hmmlearn.git@ae1a41e4d03ea61b7a25cba68698e8e2e52880ad#egg=hmmlearn --user")
+	os.system("pip3 install scikit-learn==0.19.2 --user")
+	os.system("pip3 install networkx==2.1 pandas==0.22.0 --user")
+	os.system("git clone https://github.com/nilmtk/nilm_metadata/;")
+	os.chdir("nilm_metadata")
+	os.system("yes | rm -r .git*");
+	os.system("sudo python3 setup.py develop")
+	os.chdir("..")
+	os.system("git clone https://github.com/nilmtk/nilmtk.git;")
+	os.chdir("nilmtk")
+	os.system("yes | rm -r .git*")
+	os.system("sudo python3 setup.py develop")
+	print('------------------------------------------------------------------')
+	print(os.getcwd())
+	print('------------------------------------------------------------------')
+	os.rename('../convTrainPython3.py','./convTrainPython3.py')
+	os.rename('../convTestPython3.py','./convTestPython3.py')
+	os.rename('../dissagScript.py','./dissagScript.py')
+	os.chdir('../../../')
 
 
 def new(modelDir):

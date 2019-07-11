@@ -492,6 +492,8 @@ class svmNextDayPeakTime:
 
 # fmt: off
 
+
+# --------------------------- Kevin's neural net code ----------------------- #
 # NERC6 holidays with inconsistent dates. Created with python holidays package
 # years 1990 - 2024
 nerc6 = {

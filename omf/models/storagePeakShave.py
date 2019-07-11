@@ -241,7 +241,7 @@ def forecastWork(modelDir, ind):
 	# train model on previous data
 	all_X = fc.makeUsefulDf(df)
 	all_y = df['load']
-	predictions, accuracy = fc.neural_net_predictions(all_X, all_y, EPOCHS=int(ind['epochs']))
+	predictions, accuracy = fc.neural_net_predictions(all_X, all_y, epochs=int(ind['epochs']))
 
 	dailyLoadPredictions = [predictions[i:i+24] for i in range(0, len(predictions), 24)]	
 	weather = df['tempc'][-8760:]
@@ -259,7 +259,7 @@ def forecastWork(modelDir, ind):
 		peak = max(load24)
 		if peak > last_peak[m]:
 			dispatched[i] = True
-			vbp, vbe = fc.pulp24hrBattery(load24, dischargeRate*cellQuantity, 
+			vbp, vbe = pulp24hrBattery(load24, dischargeRate*cellQuantity, 
 				cellCapacity*cellQuantity, battEff)
 			VB_power.extend(vbp)
 			VB_energy.extend(vbe)
