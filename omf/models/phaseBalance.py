@@ -70,25 +70,25 @@ def work(modelDir, ind):
 	os.rename(pJoin(modelDir, "voltDump.csv"), pJoin(modelDir, "voltDump_base.csv"))
 
 	# ---------------------------- SOLAR CHART ----------------------------- #
-	with open(pJoin(modelDir, [x for x in os.listdir(modelDir) if x.endswith('.omd')][0])) as f:
-		tree_solar = json.load(f)['tree']
+	# with open(pJoin(modelDir, [x for x in os.listdir(modelDir) if x.endswith('.omd')][0])) as f:
+	# 	tree_solar = json.load(f)['tree']
 
-	solar_suffix = "_solar"
-	tree_solar = _addCollectors(tree_solar, suffix=solar_suffix, pvConnection=ind['pvConnection'])
-	with open(modelDir + '/_solar.glm', 'w') as f:
-		treeString = feeder.sortedWrite(tree_solar)
-		f.write(treeString)
+	# solar_suffix = "_solar"
+	# tree_solar = _addCollectors(tree_solar, suffix=solar_suffix, pvConnection=ind['pvConnection'])
+	# with open(modelDir + '/_solar.glm', 'w') as f:
+	# 	treeString = feeder.sortedWrite(tree_solar)
+	# 	f.write(treeString)
 	
-	voltagePlot(
-		pJoin(modelDir, "_solar.glm"), workDir=modelDir, neatoLayout=neato, 
-		edgeCol=edgeColValue, nodeCol=nodeColValue, nodeLabs=nodeLabsValue, 
-		edgeLabs=edgeLabsValue, customColormap=customColormapValue, rezSqIn=int(ind["rezSqIn"]), 
-			colorMin=float(ind['colorMin']) if ind['colorMin'] != 'auto' else None,
-			colorMax=float(ind['colorMax']) if ind['colorMax'] != 'auto' else None
-	).savefig(pJoin(modelDir,"output" + solar_suffix + ".png"))
-	with open(pJoin(modelDir,"output" + solar_suffix + ".png"),"rb") as f:
-		o["solar_image"] = f.read().encode("base64")
-	os.rename(pJoin(modelDir, "voltDump.csv"), pJoin(modelDir, "voltDump_solar.csv"))
+	# voltagePlot(
+	# 	pJoin(modelDir, "_solar.glm"), workDir=modelDir, neatoLayout=neato, 
+	# 	edgeCol=edgeColValue, nodeCol=nodeColValue, nodeLabs=nodeLabsValue, 
+	# 	edgeLabs=edgeLabsValue, customColormap=customColormapValue, rezSqIn=int(ind["rezSqIn"]), 
+	# 		colorMin=float(ind['colorMin']) if ind['colorMin'] != 'auto' else None,
+	# 		colorMax=float(ind['colorMax']) if ind['colorMax'] != 'auto' else None
+	# ).savefig(pJoin(modelDir,"output" + solar_suffix + ".png"))
+	# with open(pJoin(modelDir,"output" + solar_suffix + ".png"),"rb") as f:
+	# 	o["solar_image"] = f.read().encode("base64")
+	# os.rename(pJoin(modelDir, "voltDump.csv"), pJoin(modelDir, "voltDump_solar.csv"))
 	
 	# ---------------------------- CONTROLLED CHART ----------------------------- #
 	
@@ -129,6 +129,39 @@ def work(modelDir, ind):
 		o["controlled_image"] = f.read().encode("base64")
 	os.rename(pJoin(modelDir, "voltDump.csv"), pJoin(modelDir, "voltDump_controlled.csv"))
 	
+	# ------ SOLAR TAKE 2
+
+	if ind["pvConnection"] == 'Delta':
+		glmPath = pJoin(modelDir, 'input_NewDeltaPV_Start.glm')
+	else:
+		glmPath = pJoin(modelDir, 'input_Wye_Start.glm')
+	omdPath = pJoin(modelDir, '_solar.omd')
+	feeder.glmToOmd(glmPath, omdPath)
+	
+	with open(omdPath) as f:
+		tree_solar = json.load(f)['tree']
+
+	for k, v in tree_solar.iteritems():
+		if ('PV' in v.get('groupid', '')) and v.get('object', '') == 'load':
+			v['groupid'] = 'PV'
+
+	solar_suffix = "_solar"
+	tree_solar = _addCollectors(tree_solar, suffix=solar_suffix, pvConnection=ind['pvConnection'])
+	with open(modelDir + '/_solar.glm', 'w') as f:
+		treeString = feeder.sortedWrite(tree_solar)
+		f.write(treeString)
+	
+	voltagePlot(
+		pJoin(modelDir, "_solar.glm"), workDir=modelDir, neatoLayout=neato, 
+		edgeCol=edgeColValue, nodeCol=nodeColValue, nodeLabs=nodeLabsValue, 
+		edgeLabs=edgeLabsValue, customColormap=customColormapValue, rezSqIn=int(ind["rezSqIn"]), 
+			colorMin=float(ind['colorMin']) if ind['colorMin'] != 'auto' else None,
+			colorMax=float(ind['colorMax']) if ind['colorMax'] != 'auto' else None
+	).savefig(pJoin(modelDir,"output" + solar_suffix + ".png"))
+	with open(pJoin(modelDir,"output" + solar_suffix + ".png"),"rb") as f:
+		o["solar_image"] = f.read().encode("base64")
+	os.rename(pJoin(modelDir, "voltDump.csv"), pJoin(modelDir, "voltDump_solar.csv"))
+
 	# --------------------------- SERVICE TABLE ----------------------------- #
 	price = float(ind['retailCost'])
 	
@@ -153,7 +186,7 @@ def work(modelDir, ind):
 		},
 		'distributed_gen': {
 			'base': n(sums[base_suffix]),
-			'solar': n(sums[solar_suffix]),
+			'solar': n(SIGN_CORRECTION*sums[solar_suffix]),
 			'controlled': n(SIGN_CORRECTION*sums[controlled_suffix])
 		},
 		'losses': {
@@ -177,6 +210,7 @@ def work(modelDir, ind):
 	# hack correction
 	if ind['pvConnection'] == 'Delta':
 		o['service_cost']['load']['controlled'] = n(float(o['service_cost']['load']['controlled'].replace(',', '')) + float(o['service_cost']['distributed_gen']['controlled'].replace(',', '')))
+		o['service_cost']['load']['solar'] = n(float(o['service_cost']['load']['solar'].replace(',', '')) + float(o['service_cost']['distributed_gen']['solar'].replace(',', '')))
 	# ----------------------------------------------------------------------- #
 	
 	# -------------------------- INVERTER TABLE ----------------------------- #
@@ -201,7 +235,7 @@ def work(modelDir, ind):
 		for phase in 'ABC':
 			for inverter, row in df_invs[suffix][phase].iterrows():
 				inverter_rows[inverter][suffix + phase] = str(
-					SIGN_CORRECTION*complex(row['real'], row['imag']) if suffix == controlled_suffix else complex(row['real'], row['imag'])
+					SIGN_CORRECTION*complex(row['real'], row['imag'])
 				).strip('()')
 
 	o['inverter_table'] = ''.join([(
@@ -248,6 +282,10 @@ def work(modelDir, ind):
 				for (i, r), (j, r2) in zip(df_all_motors.iterrows(), df_vs[suffix].iterrows())])
 	# ----------------------------------------------------------------------- #
 
+	if ind['pvConnection'] == 'Delta':
+		o['inverter_header'] = "<tr><th>Name</th><th>AB (VA)</th><th>BC (VA)</th><th>AC (VA)</th><th>AB (VA)</th><th>BC (VA)</th><th>AC (VA)</th></tr>"
+	else:
+		o['inverter_header'] = "<tr><th>Name</th><th>A (VA)</th><th>B (VA)</th><th>C (VA)</th><th>A (VA)</th><th>B (VA)</th><th>C (VA)</th></tr>"
 	return o
 
 def _addCollectors(tree, suffix=None, pvConnection=None):
@@ -259,6 +297,7 @@ def _addCollectors(tree, suffix=None, pvConnection=None):
 	all_power = 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)'
 	
 	tree[len(tree)] = {'property': all_power, 'object': 'collector', 'group': 'class=load', 'limit': '0', 'file': 'load' + suffix + '.csv'}
+	# tree[len(tree)] = {'property': all_power, 'object': 'group_recorder', 'group': 'groupid=threePhase', 'limit': '1', 'file': 'load' + suffix + '.csv'}
 
 	# Load on motor phases
 	for phase in 'ABC':
@@ -269,7 +308,7 @@ def _addCollectors(tree, suffix=None, pvConnection=None):
 	for loss in ['transformer', 'underground_line', 'overhead_line', 'triplex_line']:
 		tree[len(tree)] = {'property': all_losses, 'object': 'collector', 'group': 'class='+loss, 'limit': '0', 'file': 'Zlosses_'+loss + suffix +'.csv'}
 
-	if suffix != '_controlled' or pvConnection == 'Wye':
+	if suffix not in ['_controlled', '_solar'] or pvConnection == 'Wye':
 		for x in tree.values():
 			if x.get('object', '') == 'inverter':
 				if 'A' in x['phases']:
