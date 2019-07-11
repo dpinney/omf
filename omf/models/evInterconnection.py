@@ -227,7 +227,7 @@ def work(modelDir, inputDict):
 					neatoLayout = neato,
 					edgeCol = "PercentOfRating",
 					nodeCol = "perUnitVoltage",
-					nodeLabs = None,
+					nodeLabs = "Load",
 					edgeLabs = None,
 					customColormap = False,
 					scaleMin = .9,
@@ -236,7 +236,8 @@ def work(modelDir, inputDict):
 					faultType = None,
 					rezSqIn = 225,
 					simTime = "2000-01-01 0:00:00",
-					workDir = modelDir)
+					workDir = modelDir,
+					loadLoc = loadName)
 				loadVoltPlotChart.savefig(pJoin(modelDir, "loadVoltPlot.png"))
 				with open(pJoin(modelDir, "loadStatusTable.html"), "w") as tabFile:
 					tabFile.write(loadProtDevTable)
@@ -257,7 +258,7 @@ def work(modelDir, inputDict):
 		raise Exception('Error retrieving maximum load value from load shape.')
 	return outData
 
-def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, faultLoc=None, faultType=None, customColormap=False, scaleMin=None, scaleMax=None, rezSqIn=400, simTime='2000-01-01 0:00:00'):
+def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, faultLoc=None, faultType=None, customColormap=False, scaleMin=None, scaleMax=None, rezSqIn=400, simTime='2000-01-01 0:00:00', loadLoc=None):
 	''' Draw a color-coded map of the voltage drop on a feeder.
 	path is the full path to the GridLAB-D .glm file or OMF .omd file.
 	workDir is where GridLAB-D will run, if it's None then a temp dir is used.
@@ -547,9 +548,12 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 			voltImbal = maxDiff/avgVolts
 			voltImbalances[nodeName] = float("{0:.2f}".format(voltImbal))
 		# Use float("{0:.2f}".format(avg(allVolts))) if displaying the node labels
+	nodeLoadNames = {}
 	nodeNames = {}
 	for key in nodeVolts.keys():
 		nodeNames[key] = key
+		if key == loadLoc:
+			nodeLoadNames[key] = "LOAD: " + key
 	# find edge currents by parsing currdump
 	edgeCurrentSum = {}
 	edgeCurrentMax = {}
@@ -759,6 +763,9 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 			else:
 				nodeLabels = None
 				print "WARNING: nodeCol property cannot be set to None when nodeLabs property is set to 'Value'"
+		#HACK: add hidden node label option for displaying specified load name
+		elif nodeLabs == "Load":
+			nodeLabels = nodeLoadNames
 		else:
 			nodeLabs = None
 			print "WARNING: nodeLabs property must be either 'Name', 'Value', or None"
