@@ -5,6 +5,37 @@
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
 	<style>
 	/*Styles here*/
+		.tab {
+		    overflow: hidden;
+		    margin-left: auto;
+		    margin-right: auto;
+		    width: 1000px;
+		}
+
+		.tab button {
+			color: black;
+		    background-color: inherit;
+		    float: left;
+		    border: none;
+		    outline: none;
+		    cursor: pointer;
+		    padding: 14px 16px;
+		    border-radius: 5px 5px 0px 0px;
+		}
+
+		.tab button:hover {
+		    background-color: white;
+		}
+
+		.tab button.active {
+		    background-color: seagreen;
+		    color: white;
+		}
+
+		.tabcontent {
+		    display: none;
+		}
+
 		table {
 			border-collapse: collapse;
 			width: 100%;
@@ -26,6 +57,10 @@
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	<script src="{{pathPrefix}}/static/d3.v3.js"></script>
+	<!-- DataTables -->
+	<link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+	<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
 	<!-- Data  Imports -->
 	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
 	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
@@ -37,6 +72,26 @@
 			studyUser = allInputData.user
 			window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
 		}
+		function openTab(evt, tabName, tabSet) {
+			var i, tabContent, tabLinks;
+
+			// Get all elements with class="tabContent" for the given table and hide them
+
+			$(".tabContent" + tabSet).hide();
+		    // Get all elements with class="tabLinks" and remove the class "active"
+		    tabLinks = document.getElementsByClassName("tabLinks" + tabSet);
+		    for (i = 0; i < tabLinks.length; i++) {
+		        tabLinks[i].className = tabLinks[i].className.replace(" active", "");
+		    }
+		    // Show the current tab, and add an "active" class to the button that opened the tab
+		    $("." + tabName).show();
+		    //gebi(tabName).style.display = "block";
+		    evt.currentTarget.className += " active";
+		}
+		$(document).ready(function() {
+			console.log($('#inverterOutputs'));
+    	$('.dt').DataTable({ 'paging': false});
+		});
 	</script>
 </head>
 <body onload="init()">
@@ -143,13 +198,14 @@
 				<label class="tooltip">Load Name<span class="classic">Specify the load name in the circuit.</span></label>
 				<input type="text" id="loadName" name="loadName" required="required"/>
 			</div>
-			<!-- <div class="shortInput" style="width:100%">
-				<label class="tooltip">Hourly Load Shape<span class="classic">Please enter a list of 24 values separated by commas to represent a "peak day" load shape by hour.</span></label>
-				<input type="text" id="loadShape" name="loadShape" pattern="^(\d*\.?\d*)(,\s*\d*\.?\d*){23}$" required="required"/>
-			</div> -->
-			<div class="shortInput" style="width:50%">
-				<label class="tooltip">Hourly Load Shape<span class="classic">Please enter the name of a .csv file representing the hourly load shape</span></label>
-				<input type="text" id="loadShape" name="loadShape" pattern="^([a-zA-Z0-9\s_\\.,\-\(\):])+(.csv)$" required="required"/>
+			<div class="shortInput">
+				<label class="tooltip">Hourly Load Shape (.csv file)<span class="classic">Please enter the name of a .csv file representing the hourly load shape</span></label>
+				<input id="loadShapeFile" type="file" style="display:none" onchange="handle_files(this.files,'loadShape','fileName')">
+				<input id="loadShape" name="loadShape" type="hidden">
+				<div>
+					<label for="loadShapeFile" class="fileButton">Choose File</label>
+					<input id="fileName" name="fileName" value='' readonly class="uploadFileName">	
+				</div>
 			</div>
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
@@ -181,33 +237,77 @@
 		<div id="fuelCostCalc" class="tightContent postRun">
 			{{ allOutputDataDict['fuelCostCalcHtml'] }}
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Voltage Drop Diagram without Charging Load</p>
-		<div id="voltageDropDiagram" class="tightContent postRun">
-			<img id="voltageDropChart" style="width:1000px;height:1000px;" />
-			<script type="text/javascript">gebi("voltageDropChart").src = "data:image/png;base64," + allOutputData.voltageDrop</script>
+		<!-- Voltage Drop Diagram Images -->
+		<p class="reportTitle postRun" style="page-break-before:always">Voltage Drop Diagram</p>
+		<!-- Tab links -->
+		<div class="tab postRun">
+			<button id='firstTabButton1' class="tabLinks1 active" onclick="openTab(event, 'baseVoltageDrop', '1')">Base</button>
+			<button class="tabLinks1" onclick="openTab(event, 'loadVoltageDrop', '1')">With Load</button>
+			<!-- <button class="tabLinks1" onclick="openTab(event, 'controlledDiagram')">Controlled</button> -->
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Protective Device Status without Charging Load</p>
-		<div id="protDevStatus" class="tightContent postRun">
-			{{ allOutputDataDict['protDevTableHtml'] }}
+		<!-- Tab content -->
+		<div id="phaseUnbalanceDiagrams" class="postRun tabPlots">
+			<div class="tightContent tabContent1 baseVoltageDrop firstTab">
+				<img id="voltageDropChart" style="width:1000px;height:1000px;"/>
+				<script type="text/javascript">gebi("voltageDropChart").src = "data:image/png;base64," + allOutputData.voltageDrop</script>
+			</div>
+
+			<div class="tightContent tabContent1 loadVoltageDrop">
+				<img id="loadVoltageDropChart" style="width:1000px;height:1000px;" />
+				<script type="text/javascript">gebi("loadVoltageDropChart").src = "data:image/png;base64," + allOutputData.loadVoltageDrop</script>
+			</div>
+			<!-- <div class="tightContent tabContent1 controlledDiagram">
+				<img id="controlled_image" style="width:1000px;height:1000px;" />
+				<script type="text/javascript">gebi("controlled_image").src = "data:image/png;base64," + allOutputData.controlled_image</script>
+			</div>	 -->
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Combined Load Shape Carpet Plot</p>
-		<div id="carpetPlot" class="tightContent postRun">
-			<img id="carpetPlotChart" style="width:1000px;height:auto;" />
-			<script type="text/javascript">gebi("carpetPlotChart").src = "data:image/png;base64," + allOutputData.carpetPlot</script>
+		<script>document.getElementById('firstTabButton1').click();//Hack, get first tab to show.</script>
+		<!-- Protective Device Status Tables -->
+		<p class="reportTitle postRun" style="page-break-before:always">Protective Device Status</p>
+		<!-- Tab links -->
+		<div class="tab postRun">
+			<button id='firstTabButton2' class="tabLinks2 active" onclick="openTab(event, 'baseProtDevTable', '2')">Base</button>
+			<button class="tabLinks2" onclick="openTab(event, 'loadProtDevTable', '2')">With Load</button>
+			<!-- <button class="tabLinks" onclick="openTab(event, 'controlledDiagram')">Controlled</button> -->
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Max Combined Load Shape</p>
-		<div id="maxLoadShape" class="tightContent postRun">
-			<img id="maxLoadShapeImg" style="width:1000px;height:auto;" />
-			<script type="text/javascript">gebi("maxLoadShapeImg").src = "data:image/png;base64," + allOutputData.maxLoadShape</script>
+		<!-- Tab content -->
+		<div id="protDevStatusDiagrams" class="postRun tabPlots">
+			<div class="tightContent tabContent2 baseProtDevTable firstTab">
+				<div id="protDevStatus" class="tightContent tableContainer postRun" style="max-height:300px; overflow-y: scroll;">
+					{{ allOutputDataDict['protDevTableHtml'] }}
+				</div>
+			</div>
+
+			<div class="tightContent tabContent2 loadProtDevTable">
+				<div id="loadProtDevStatus" class="tightContent tableContainer postRun" style="max-height:300px; overflow-y: scroll;">
+					{{ allOutputDataDict['loadProtDevTableHtml'] }}
+				</div>
+			</div>
+			<!-- <div class="tightContent tabContent controlledDiagram">
+				<img id="controlled_image" style="width:1000px;height:1000px;" />
+				<script type="text/javascript">gebi("controlled_image").src = "data:image/png;base64," + allOutputData.controlled_image</script>
+			</div>	 -->
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Voltage Drop Diagram with Charging Load</p>
-		<div id="loadVoltageDropDiagram" class="tightContent postRun">
-			<img id="loadVoltageDropChart" style="width:1000px;height:1000px;" />
-			<script type="text/javascript">gebi("loadVoltageDropChart").src = "data:image/png;base64," + allOutputData.loadVoltageDrop</script>
+		<script>document.getElementById('firstTabButton2').click();//Hack, get first tab to show.</script>
+		<!-- Load Shape Images -->
+		<p class="reportTitle postRun" style="page-break-before:always">Load Shape Visualization</p>
+		<!-- Tab links -->
+		<div class="tab postRun">
+			<button id='firstTabButton3' class="tabLinks3 active" onclick="openTab(event, 'loadShapeCarpetPlot', '3')">Combined Load Shape Carpet Plot</button>
+			<button class="tabLinks3" onclick="openTab(event, 'maxDailyLoadShape', '3')">Maximum Daily Combined Load Shape</button>
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Protective Device Status with Charging Load</p>
-		<div id="loadProtDevStatus" class="tightContent postRun">
-			{{ allOutputDataDict['loadProtDevTableHtml'] }}
+		<!-- Tab content -->
+		<div id="loadShapeDiagrams" class="postRun tabPlots">
+			<div class="tightContent tabContent3 loadShapeCarpetPlot firstTab">
+				<img id="carpetPlotChart" style="width:1000px;height:auto;" />
+				<script type="text/javascript">gebi("carpetPlotChart").src = "data:image/png;base64," + allOutputData.carpetPlot</script>
+			</div>
+
+			<div class="tightContent tabContent3 maxDailyLoadShape">
+				<img id="maxLoadShapeImg" style="width:1000px;height:auto;" />
+				<script type="text/javascript">gebi("maxLoadShapeImg").src = "data:image/png;base64," + allOutputData.maxLoadShape</script>
+			</div>
 		</div>
+		<script>document.getElementById('firstTabButton3').click();//Hack, get first tab to show.</script>
 	</div>
 </body>
