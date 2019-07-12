@@ -431,8 +431,11 @@ const rawTree = {
 let rawTreeCopy = deepCopy(rawTree);
 let testTree = createTree(rawTreeCopy);
 // Load the test data into the document before performing tests
-const loadTestData = (function() {
-    createSvgData(Object.keys(gTree.tree), gTree).delete(gViewport);
+const loadTestData = (async function() {
+    // Interface initialization is asynchronous and happens automatically. In order to run these tests, initializeInterface() should be temporarily
+    // commented-out in distNetViz.html
+    await initializeInterface();
+    createSvgData(Object.keys(gTree.tree)).delete(gViewport);
     insertCoordinates(Object.values(testTree.tree), 128, 590, 5);
     const svg = createSvgData(Object.keys(testTree.tree), testTree);
     svg.quickDraw(gViewport);
@@ -2068,6 +2071,147 @@ describe("Unit tests", function() {
                         const colorManager = createColorManager();
                         colorManager.desaturateGraph();
                         expect(nodeElement.style.fill).toEqual("");
+                    });
+                });
+            });
+        });
+
+        describe("find modal functions", function() {
+
+            const tree = {
+                111: {
+                    name: "Joe",
+                    age: 1,
+                    longitude: 70,
+                    latitude: 700,
+                },
+                222: {
+                    age: 11,
+                    longitude: 74,
+                    latitude: 700,
+                },
+                333: {
+                    age: 2,
+                    count: 333,
+                    longitude: 76,
+                    latitude: 700,
+                }
+            };
+
+            for (let key in tree) {
+                testTree.tree[key] = tree[key];
+            }
+
+            describe("findExactMatchingObjects()", function() {
+
+                describe("if there were no matches", function() {
+
+                    it("should return an empty array", function() {
+                        expect(findExactMatchingObjects(testTree.tree, "7qzzz")).toEqual([]);
+                    });
+                });
+
+                describe("if the search term was an empty string", function() {
+
+                    it("should return an empty array", function() {
+                        expect(findExactMatchingObjects(testTree.tree, "")).toEqual([]);
+                    });
+                });
+
+                describe("if the search term contained only whitespace", function() {
+
+                    it("should return an empty array", function() {
+                        expect(findExactMatchingObjects(testTree.tree, "     ")).toEqual([]);
+                    });
+                });
+
+                describe("if a matching object wasn't drawn in the svg", function() {
+
+                    it("should not return the key of the object", function() {
+                        expect(testTree.tree["33420"]).toBeDefined();
+                        expect(findExactMatchingObjects(testTree.tree, "33420")).toEqual([]);
+                    });
+                });
+
+                it("should not return multiple instances of the same key for a matching object", function() {
+                    expect(findExactMatchingObjects(tree, "333")).toEqual(["333"])
+                });
+
+                describe("if an object's key matches the search term", function() {
+
+                    it("should return the object's key", function() {
+                        expect(findExactMatchingObjects(tree, "222")).toEqual(["222"]);
+                    });
+                });
+
+                describe("if an object's property key matches the search term", function() {
+
+                    it("should return the object's key", function() {
+                        expect(findExactMatchingObjects(tree, "age")).toEqual(["111", "222", "333"]);
+                    });
+                });
+
+                describe("if an object's property value matches the search term", function() {
+
+                    it("should return the object's key", function() {
+                        expect(findExactMatchingObjects(tree, "1")).toEqual(["111"]);
+                    });
+                });
+            });
+
+            describe("findSubstringMatchingObjects()", function() {
+
+                describe("if there were no matches", function() {
+
+                    it("should return an empty array", function() {
+                        expect(findSubstringMatchingObjects(testTree.tree, "7qzzz")).toEqual([]);
+                    });
+                });
+
+                describe("if the search term was an empty string", function() {
+
+                    it("should return an empty array", function() {
+                        expect(findSubstringMatchingObjects(testTree.tree, "")).toEqual([]);
+                    });
+                });
+
+                describe("if the search term contained only whitespace", function() {
+
+                    it("should return an empty array", function() {
+                        expect(findSubstringMatchingObjects(testTree.tree, "     ")).toEqual([]);
+                    });
+                });
+
+                describe("if a matching object wasn't drawn in the svg", function() {
+
+                    it("should not return the key of the object", function() {
+                        expect(testTree.tree["33420"]).toBeDefined();
+                        expect(findSubstringMatchingObjects(testTree.tree, "33420")).toEqual([]);
+                    });
+                });
+
+                it("should not return multiple instances of the same key for a matching object", function() {
+                    expect(findSubstringMatchingObjects(tree, "1", true)).toEqual(["111", "222"]);
+                });
+
+                describe("if an object's key contains the search term as a substring", function() {
+
+                    it("should return the object's key", function() {
+                        expect(findSubstringMatchingObjects(tree, "3", true)).toEqual(["333"]);
+                    });
+                });
+
+                describe("if an object's property key contains the search term as a substring", function() {
+
+                    it("should return the object's key", function() {
+                        expect(findSubstringMatchingObjects(tree, "o", true)).toEqual(["111", "222", "333"]);
+                    });
+                });
+
+                describe("if an object's property value contains the search term as a substring", function() {
+
+                    it("should return the object's key", function() {
+                        expect(findSubstringMatchingObjects(tree, "Joe", true)).toEqual(["111"]);
                     });
                 });
             });
