@@ -395,20 +395,18 @@ def new(modelDir):
 		# "criticalNode": 'R1-12-47-2_node_28',
 		"modelType": modelName,
 		"runTime": "",
-		"layoutAlgorithm": "forceDirected", #forceDirected
+		"layoutAlgorithm": "geospatial", #forceDirected
 		"zipCode": "64735",
 		"retailCost": "0.05",
 		"discountRate": "7",
 		"edgeCol" : "None",
-		"nodeCol" : "VoltageImbalance",
+		"nodeCol" : "perUnitVoltage",
 		"nodeLabs" : "None",
 		"edgeLabs" : "None",
 		"customColormap" : "False",
 		"rezSqIn" : "225",
-		"parameterOne": "42",
-		"parameterTwo": "42",
-		"colorMin": "auto",
-		"colorMax": "auto",
+		"colorMin": "0.92",
+		"colorMax": "1.08",
 		"objectiveFunction": 'VUF', #'I0'
 		"pvConnection": 'Delta',
 		"iterations": "5"
