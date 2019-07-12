@@ -1,66 +1,78 @@
 import json, urllib, xml.etree.ElementTree as ET, omf, random, os
 
+
 def houseSpecs(lat, lon, addressOverride=None):
 	''' Get square footage, year built and a few more stats for a house at lat, lon or addressOverride. '''
 	# open street map reverse geocoding.
 	url = 'https://nominatim.openstreetmap.org/reverse?format=json&lat={}&lon={}&zoom=18&addressdetails=1'.format(lat, lon)
-	fnameGoog, headers = urllib.urlretrieve(url)
+	fnameGoog = urllib.urlretrieve(url)[0]
 	with open(fnameGoog, 'r') as jsonInput:
 		response_data = json.load(jsonInput)
-	# Get address components.
+	# Get address components. Not all components are currently used, so unused components are commented out
 	if addressOverride:
 		address = addressOverride
 		addr_ptrn = address.split(', ')
 		street_number = addr_ptrn[0]
-		city_name = addr_ptrn[1]
-		state_name = addr_ptrn[2].split(' ')[0]
+		#city_name = addr_ptrn[1]
+		#state_name = addr_ptrn[2].split(' ')[0]
 		zip_code = addr_ptrn[2].split(' ')[1]
-		country_name = addr_ptrn[3]
+		#country_name = addr_ptrn[3]
 	else:
 		try:
-			address = response_data['display_name']
-			street_number = response_data['address']['house_number']
-			city_name = response_data['address']['city']
-			state_name = response_data['address']['state']
-			zip_code = response_data['address']['postcode']
-			country_name = response_data['address']['country']
+			address = response_data['display_name'] # Always present
+			street_number = response_data['address']['house_number'] # Always present
+			#city_name = response_data['address']['city'] # Not always present. We don't use it currently anyway
+			#state_name = response_data['address']['state'] # Always present. We don't use it currently
+			zip_code = response_data['address']['postcode'] # Always present
+			#country_name = response_data['address']['country'] # Always present. We don't use it currently
 		except:
 			return None
 	# House details lookup via http://www.zillow.com/howto/api/GetDeepSearchResults.htm
 	zwsID = 'X1-ZWz1dvjlzatudn_5m9vn'  # TODO: change to a new one
-	url = 'http://www.zillow.com/webservice/GetDeepSearchResults.htm?zws-id=' + \
-		zwsID + '&address=' + \
-		street_number.replace(' ', '+') + '&citystatezip=' + zip_code
-	fnameZill, headers = urllib.urlretrieve(url)
+	url = ("http://www.zillow.com/webservice/GetDeepSearchResults.htm?zws-id="
+		"{zwsID}&address={st_num}&citystatezip={zip}").format(zwsID=zwsID, st_num=street_number, zip=zip_code)
+	#+ \ zwsID + '&address=' + \ street_number.replace(' ', '+') + '&citystatezip=' + zip_code)
+	fnameZill = urllib.urlretrieve(url)[0]
 	# XML parsing.
 	xRoot = ET.parse(fnameZill).getroot()
 	try:
+		# Depending on the address that was passed to Zillow, a single result or multiple results can be returned
 		results = xRoot.find('response').find('results').findall('result')
 		matches = len(results) # We warn user by putting # of matches in the output.
-		if matches <1: return None
+		if matches < 1:
+			return None
 		result = results[0]
 	except:
 		return None
 	def safeText(key):
 		try: return result.find(key).text
 		except: return ''
+	try: 
+		# Try to get the address used by Zillow instead of the one used by Nominatim
+		element = xRoot.find("response").find("results").find("result").find("address")
+		address = (element.find("street").text + ", " + element.find("city").text + ", " +
+			element.find("state").text + " " + element.find("zipcode").text)
+	except:
+		pass
+	# At the moment, we only seem to be interested in lotSizeSqFt, yearBuilt, and finishedSqFt
 	house_info = {
 		'lat': lat,
 		'lon': lon,
 		'object': 'house',
 		'address': address,
 		'matches':matches,
-		'sqft':safeText('finishedSqFt'),
+		'sqft':safeText('finishedSqFt'), # Not always present
 		'lotSize':safeText('lotSizeSqFt'),
-		'bathrooms':safeText('bathrooms'),
-		'bedrooms': safeText('bedrooms'),
-		'yearBuilt': safeText('yearBuilt')}
+		'bathrooms':safeText('bathrooms'), # Not always present
+		'bedrooms': safeText('bedrooms'), # Not always present
+		'yearBuilt': safeText('yearBuilt')} # Not always present
 	return house_info
+
 
 def gldHouse(lat, lon, addressOverride=None, pureRandom=False):
 	''' Given a lat/lon, address, return a GLD house object modeling that location.
 	Or just return a totally random GLD house. '''
-	houseArchetypes = omf.feeder.parse('./static/testFiles/houseArchetypes.glm')
+	houseArchetypes = omf.feeder.parse(os.path.join(omf.omfDir, "static/testFiles/houseArchetypes.glm"))
 	if pureRandom:
 		newHouse = dict(random.choice(houseArchetypes.values()))
 		newHouse['name'] = 'REPLACE_ME'
@@ -142,20 +154,24 @@ def addScaledRandomHouses(inFeed):
 		del inFeed[tripKey]
 
 def _tests():
-	testFeedPath = os.path.join(omf.omfDir, 'static', 'testFiles', 'inTest_R4-25.00-1_CLEAN.glm')
-	testFeed = omf.feeder.parse(testFeedPath)
-	addScaledRandomHouses(testFeed)
-	outFilePath = os.path.join(omf.omfDir, 'static', 'testFiles', 'inTest_R4_modified.glm')
-	with open(outFilePath,'w+') as outFile:
-		outFile.write(omf.feeder.sortedWrite(testFeed))
-	print 'Brooklyn test:', houseSpecs(40.71418, -73.96125), '\n'
-	print 'Arlington test:', houseSpecs(38.88358, -77.10193), '\n'
-	print 'Override apartment test:', houseSpecs(38.883557,-77.102175), '\n'
-	print 'Override house test:', houseSpecs(0,0,addressOverride='1629 North Stafford Street, Arlington, VA 22207, USA'), '\n'
-	print 'Yet another test:', houseSpecs(38.9126022,-77.0097919), '\n'
-	print 'Full gldHouse test:', gldHouse(0,0,addressOverride='1629 North Stafford Street, Arlington, VA 22207, USA'), '\n'
+	#testFeedPath = os.path.join(omf.omfDir, 'static', 'testFiles', 'inTest_R4-25.00-1_CLEAN.glm')
+	#testFeed = omf.feeder.parse(testFeedPath)
+	#addScaledRandomHouses(testFeed)
+	#outFilePath = os.path.join(omf.omfDir, 'static', 'testFiles', 'inTest_R4_modified.glm')
+	#with open(outFilePath,'w+') as outFile:
+	#	outFile.write(omf.feeder.sortedWrite(testFeed))
+
+	#print 'Brooklyn test:', houseSpecs(40.71418, -73.96125), '\n'
+	#print 'Arlington test:', houseSpecs(38.88358, -77.10193), '\n'
+	#print 'Override apartment test:', houseSpecs(38.883557,-77.102175), '\n'
+	#print 'Override house test:', houseSpecs(0,0,addressOverride='1629 North Stafford Street, Arlington, VA 22207, USA'), '\n'
+	#print 'Yet another test:', houseSpecs(38.9126022,-77.0097919), '\n'
+
+	#print 'gldHouse test with override:', gldHouse(0,0,addressOverride='1629 North Stafford Street, Arlington, VA 22207, USA'), '\n'
+	print 'gldHouse test with lat lon:', gldHouse(38.748608, -77.263395), '\n'
 	# print 'Apt test:', gldHouse(0,0,addressOverride='3444 N Fairfax Dr, Arlington, VA 22201, USA')
-	os.remove(outFilePath)
+
+	#os.remove(outFilePath)
 
 if __name__ == '__main__':
 	_tests()
