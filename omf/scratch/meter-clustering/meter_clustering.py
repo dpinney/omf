@@ -14,9 +14,10 @@ from sklearn.preprocessing import MinMaxScaler
 
 
 """
-- This clustering code assumes a very specific input: pandas DataFrames that have row labels that are pandas.Timestamps and columns labels that are
+- This clustering code assumes a very specific input: pandas DataFrames that have row labels that are pandas. Timestamps and columns labels that are
   tuples with meter ids.
-- Need Python 3 to run this code
+- Need Python 3 to run this code. Need pandas 0.24.2 or later. Moot point right now since we don't run Python 3 right now. Need to create a separate
+  Python virtual environment to run this code
 """
 
 
@@ -31,9 +32,9 @@ def main():
     """
     ### Set parameters ###
     cluster_num = 4
-    normalize = False
-    standardize = True
-    daily_avg = False
+    normalize = True
+    standardize = False
+    daily_avg = True
     weekly_avg = False
     meter_ids = None
     #meter_ids = ["14-2C2-47.3", "14-2C2-50.2A"]
