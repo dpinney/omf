@@ -1998,12 +1998,13 @@ function searchTerm() {
     let keys;
     let operation = document.querySelector("input[name='searchMode']:checked").value;
     if (operation === "searchExactString") {
-        keys = findExactString(this.value.trim());
+        keys = findExactMatchingObjects(gTree.tree, this.value.trim());
     } else if (operation === "searchSubstring") {
-        keys = findSubstring(this.value.trim());
+        keys = findSubstringMatchingObjects(gTree.tree, this.value.trim());
     }
     prepareFoundKeys.bind(this)(keys);
 }
+
 /**
  * @param {Array} keys
  */
@@ -2036,19 +2037,28 @@ function prepareFoundKeys(keys) {
     }
 }
 
-function findExactString(string) {
+/**
+ * Return the key of the object whose own key, property value, or property key exactly matched the search term. 
+ * 
+ * Don't return the key if the matching object wasn't drawn due to bad JSON data.
+ * @param {Object} tree
+ * @param {string} string
+ */
+function findSubstringMatchingObjects(tree, string) {
     const keys = [];
     if (string === "") return keys;
-    const tree = gTree.tree;
-    for (let key in tree) {
-        if (key === string) keys.push(key);
+    for (let key in tree) {            
+        if (key.includes(string) && document.getElementById(key) != null) {
+            keys.push(key);
+            continue;
+        }
         for (let propertyKey in tree[key]) {
             let propertyVal = tree[key][propertyKey];
             if (typeof(propertyVal) !== "string") propertyVal += "";
-            if (propertyKey.toLowerCase() === string.toLowerCase()) {
+            if (propertyKey.toLowerCase().includes(string.toLowerCase()) && document.getElementById(key) != null) {
                 keys.push(key);
                 break;
-            } else if (propertyVal.toLowerCase() === string.toLowerCase()) {
+            } else if (propertyVal.toLowerCase().includes(string.toLowerCase()) && document.getElementById(key) != null) {
                 keys.push(key);
                 break;
             }
@@ -2058,21 +2068,27 @@ function findExactString(string) {
 }
 
 /**
- * TODO: add unit tests
- */
-function findSubstring(substring) {
+ * Return the key of the object whose own key, property value, or property key contained the search term as a substring.
+ * 
+ * Don't return the key if the matching object wasn't drawn due to bad JSON data.
+ * @param {Object} tree
+ * @param {string} string
+ */   
+function findExactMatchingObjects(tree, string) {
     const keys = [];
-    if (substring === "") return keys;
-    const tree = gTree.tree;
+    if (string === "") return keys;
     for (let key in tree) {
-        if (key.includes(substring)) keys.push(key);
+        if (key === string && document.getElementById(key) != null) {
+            keys.push(key);
+            continue;
+        } 
         for (let propertyKey in tree[key]) {
             let propertyVal = tree[key][propertyKey];
             if (typeof(propertyVal) !== "string") propertyVal += "";
-            if (propertyKey.toLowerCase().includes(substring.toLowerCase())) {
+            if (propertyKey.toLowerCase() === string.toLowerCase() && document.getElementById(key) != null) {
                 keys.push(key);
                 break;
-            } else if (propertyVal.toLowerCase().includes(substring.toLowerCase())) {
+            } else if (propertyVal.toLowerCase() === string.toLowerCase() && document.getElementById(key) != null) {
                 keys.push(key);
                 break;
             }
@@ -2983,7 +2999,7 @@ function fillClimateModalOptions() {
 
 /** 
  * Used to save the new changes or undo an operation by resaving the old changes.
- */ 
+ */
 function saveFeeder(feeder) {
     const formData = new FormData();
     formData.set("feederObjectJson", JSON.stringify(feeder));
@@ -5503,7 +5519,7 @@ function interfaceIsStatic() {
     return document.getElementById("panZoomInsert").textContent.trim() !== ""
 }
 
-function initializeFindModal() {
+function prepareFindModal() {
     const searchInput = document.getElementById("searchInput");
     searchInput.addEventListener("change", searchTerm);
     document.getElementById("searchExactString").addEventListener("change", function() {
@@ -5514,7 +5530,7 @@ function initializeFindModal() {
     });
 }
 
-function initializeColorModal() {
+function prepareColorModal() {
     const colorModal = document.getElementById("colorModal");
     const colorManager = createColorManager();
     colorModal.querySelector("input[type='file']").addEventListener("change", async function() {
@@ -5526,9 +5542,10 @@ function initializeColorModal() {
 }
 
 /**
- * Initialize the interface. The order of the initialization functions matters. 
+ * Initialize the interface. The order of the initialization functions matters. This is a function declaration instead of an automatically invoked
+ * function expression because the testing code needs to call this function.
  */
-(async function initialize() {
+async function initializeInterface() {
     if (!interfaceIsStatic()) {
         try {
             await checkServerConversion();
@@ -5540,10 +5557,11 @@ function initializeColorModal() {
     attachHandlers();
     applyJQueryStyles();
     if (interfaceIsStatic()) disableWebFeatures();
-    initializeFindModal();
-    initializeColorModal();
+    prepareFindModal();
+    prepareColorModal();
     document.getElementById("loadingMessage").style.display = "none"
-})();
+}
+initializeInterface();
 
     //buildFeeder();
     //const t0 = performance.now();
@@ -5569,5 +5587,4 @@ function initializeColorModal() {
     }
 {% endif %}
 </script>
-<!--<script type='text/javascript' src='/static/distDataValidation.js'></script>-->
 {% if spec %}{{ spec | safe }}{% endif %}
