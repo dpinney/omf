@@ -659,6 +659,7 @@ def ChangeGlmFileDelta(inputFileName,outputFileName,PV,PV_index):
 
 		outputFile.write(tempString)
 
+
 def addIdtoThreephaseload(inputFileName,outputFileName):
 
 	with open(inputFileName, 'r') as inputFile, open(outputFileName, 'w+') as outputFile:
@@ -687,8 +688,10 @@ def addIdtoThreephaseload(inputFileName,outputFileName):
 					hasGroupid = 1
 					if isThreephase == 1:
 						line = '    groupid threePhase;\n'
-			if '}' in line.strip() and isThreephase == 1 and hasGroupid == 0 :
-				line = '    groupid threePhase;\n};\n'
+			if '}' in line.strip():
+				if isThreephase == 1 and hasGroupid == 0 :
+					line = '    groupid threePhase;\n};\n'
+				hasGroupid = 0
 				isThreephase = 0
 				isLoad = 0
 
@@ -836,9 +839,9 @@ def SteinmetzController(sourceFileName,connectionPV,criticalNode,iterNum,objecti
 				current = ReadCurrent(currentFileName)						
 				VUF[iter+1] = abs(voltage['A'] + a ** 2 * voltage['B'] + a * voltage['C'])/abs(voltage['A'] + a * voltage['B'] + a**2 * voltage['C']) *100
 				I0[iter+1] = abs(current['A']/3 + current['B']/3 + current['C']/3)
-				if objective == 2:
+				if objective == 'VUF':
 					max_delta = abs(VUF[iter+1]-VUF[iter])
-				elif objective ==0:
+				elif objective == 'I0':
 					max_delta = abs(I0[iter+1]-I0[iter])
 			else:
 				break
@@ -902,7 +905,7 @@ def SteinmetzController(sourceFileName,connectionPV,criticalNode,iterNum,objecti
 					Q_steinmetz = SteinmetzDeltaQ_VUF(voltage,current,Q_pre)
 
 				elif objective == 'I0':
-					print 'Not support'
+					print('Mitigate phase-to-ground unbalance is not supported using delta-connected PV')
 					break
 
 			
@@ -957,9 +960,9 @@ def SteinmetzController(sourceFileName,connectionPV,criticalNode,iterNum,objecti
 				current = ReadCurrent(currentFileName)						
 				VUF[iter+1] = abs(voltage['A'] + a ** 2 * voltage['B'] + a * voltage['C'])/abs(voltage['A'] + a * voltage['B'] + a**2 * voltage['C']) *100
 				I0[iter+1] = abs(current['A']/3 + current['B']/3 + current['C']/3)
-				if objective == 2:
+				if objective == 'VUF':
 					max_delta = abs(VUF[iter+1]-VUF[iter])
-				elif objective ==0:
+				elif objective == 'I0':
 					max_delta = abs(I0[iter+1]-I0[iter])
 			else:
 				break
@@ -984,12 +987,12 @@ def SteinmetzController(sourceFileName,connectionPV,criticalNode,iterNum,objecti
 
 def testing():
 	#example 1
-	sourceFileName = 'R1-12.47-1-AddSolar-Wye.glm'
-	criticalNode = 'R1-12-47-1_node_17'
+	# sourceFileName = 'R1-12.47-1-AddSolar-Wye.glm'
+	# criticalNode = 'R1-12-47-1_node_17'
 
 	#example 2
-	#sourceFileName = 'R1-12.47-2-AddSolar-Wye.glm'
-	#criticalNode= 'R1-12-47-2_node_28'
+	sourceFileName = 'R1-12.47-2-AddSolar-Wye.glm'
+	criticalNode= 'R1-12-47-2_node_28'
 
 	curDir = os.getcwd()
 	destDir = curDir+'/MPUPV output file'
@@ -997,5 +1000,3 @@ def testing():
 
 if __name__ == '__main__':
 	testing()
-
-

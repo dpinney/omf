@@ -37,6 +37,22 @@ def unzip(zipdir, target):
 	if os.path.exists(MAC_OSX_path):
 		os.rmdir(MAC_OSX_path)
 
+def _split(csvPath, newDir):
+	''' Split the combined AMI meter data file in to individual ones. '''
+	# Make directory
+	shutil.rmtree(newDir, ignore_errors=True)
+	os.mkdir(newDir)
+	# Read data.
+	data = pd.read_csv(csvPath)
+	# Get filenames.
+	fcols = set(data.columns.values) - set(['Timestamp'])
+	fnames = list(set([x.split('.')[0] for x in fcols]))
+	# Write out subsets with filenames.
+	for name in fnames:
+		subset = data.filter(items=['Timestamp', name + '.csv-V_A', name + '.csv-V_B', name + '.csv-V_C'])
+		clean = subset.rename(index=str, columns={name + '.csv-V_A':'V_A', name + '.csv-V_B':'V_B', name + '.csv-V_C':'V_C'})
+		clean.to_csv(newDir + '/' + name + '.csv', index=False)
+
 def file_transform_gld(METER_DIR, SUB_METER_FILE):
 	''' This function transform the original Meter and substation voltage files from GridLAB-D to
 	... more neat form. More specifically, change all polar or rectangular
@@ -96,23 +112,30 @@ def work(modelDir, inputDict):
 	# write input file to modelDir sans carriage returns
 	with open(pJoin(modelDir, "rec_sub_meter.csv"), "w") as subFile:
 		subFile.write(inputDict["subMeterData"].replace("\r", ""))
-	with open(pJoin(modelDir, "meters_transformed.zip"), "w") as meterZip:
-		meterZip.write(b64decode(inputDict["meterZip"]))
 	# Voltage data transformation and preparation 
-	# This chunk take about 10 sec to run
-	GLD = False
+	# TODO: drop support for Zip INPUT_TYPE
+	INPUT_TYPE = 'Single' # 'Zip', 'GLD' 
 	METER_DIR = 'Temp Unzipped Data'
-	if GLD:
+	if INPUT_TYPE == 'GLD':
+		with open(pJoin(modelDir, "meters_transformed.zip"), "w") as meterZip:
+			meterZip.write(b64decode(inputDict["meterZip"]))
 		ZIP_FILE = 'meters_gld.zip'
 		SUB_METER_FILE = 'rec_R1-12-47-3_node_53.csv'
 		unzip(ZIP_FILE, 'Temp Unzipped Data')
 		file_transform_gld(pJoin(modelDir, METER_DIR), pJoin(modelDir, SUB_METER_FILE))
 		ssdir = os.path.join(modelDir, 'Revised Substation Voltage Files', SUB_METER_FILE)
-	else:
+	elif INPUT_TYPE == 'Zip':
 		ZIP_FILE = 'meters_transformed.zip'
 		SUB_METER_FILE = 'rec_sub_meter.csv'
 		unzip(pJoin(modelDir, ZIP_FILE), pJoin(modelDir, 'Revised Meter Voltage Files'))
 		ssdir = os.path.join(modelDir, SUB_METER_FILE)
+	elif INPUT_TYPE == 'Single':
+		# write. 
+		ami_contents = inputDict['amiMeterData']
+		with open(pJoin(modelDir, "combined.csv"), "w") as amiFile:
+			amiFile.write(ami_contents)
+		_split(pJoin(modelDir, 'combined.csv'), pJoin(modelDir, 'Revised Meter Voltage Files'))
+		ssdir = os.path.join(modelDir, 'rec_sub_meter.csv')
 	# Perform linear regression and make output csv file.
 	# Read transformed files and perform regression
 	# Ignore scipy warnings.
@@ -339,18 +362,16 @@ def new(modelDir):
 			)
 		).read(),
 		"subMeterFileName": "rec_sub_meter.csv",
-		"meterZip": b64encode(
-			open(
-				pJoin(
-					__neoMetaModel__._omfDir,
-					"static",
-					"testFiles",
-					"meters_transformed.zip"
-				)
-			).read()
-		),
-		"meterZipName": "meters_transformed.zip",
-		"checkMeter": 'Meter_13.csv',
+		"amiMeterData": open(
+			pJoin(
+				__neoMetaModel__._omfDir,
+				"static",
+				"testFiles",
+				"combined.csv"
+			)
+		).read(),
+		"amiMeterDataName": "combined.csv",
+		"checkMeter": 'Meter_17.csv',
 		"modelType": modelName
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
