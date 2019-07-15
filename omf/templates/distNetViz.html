@@ -1041,9 +1041,109 @@ const treePrototype = {
     /**
      * tested.
      */
+    insert(treeObject) {
+        this.tree[treeObject.key] = treeObject.data;
+        this.treeMap.add(treeObject.key);
+    },
+
+    /**
+     * Replace an existing node in the tree with a copy of the component argument.
+     * 
+     * @param {string} key - the key of the existing object to replace.
+     * @param {Object} component - the component from which to make a copy to insert into the tree.
+     */
+    replaceNode(key, component) {
+        if (!isNumberString(key)) throw new Error("The key was not a string with a number value.");
+        component = deepCopy(component);
+        const component_relationship = getRelationship(component);
+        const oldObject = this.getObject(key);
+        const oldObject_relationship = getRelationship(oldObject);
+        if (component_relationship === "line") throw new Error("The replacement component is not a node.");
+        if (oldObject_relationship === "line") throw new Error(`The object with the key \"${key}\" is not a node.`);
+        if (component_relationship === "configurationNode" && oldObject_relationship !== "configurationNode") {
+            throw new Error("Configuration nodes cannot be used to replace non-configuration nodes.");
+        } 
+        component.latitude = oldObject.latitude;
+        component.longitude = oldObject.longitude;
+        if (oldObject.parent == null) {
+            delete component.parent;
+        } else {
+            component.parent = oldObject.parent;
+        }
+        component.name = component.object + key;
+        const children = this.treeMap.getChildKeys(key);
+        if (children != null) children.forEach(key => { this.getObject(key).parent = component.name; });
+        const lines = this.treeMap.getLineKeys(key);
+        if (lines != null) {
+            lines.forEach(key => {
+                const line = this.getObject(key);
+                if (line.to === oldObject.name) {
+                    line.to = component.name;
+                }
+                if (line.from === oldObject.name) {
+                    line.from = component.name;
+                }
+            });
+        }
+        this.treeMap.remove([key]);
+        this.tree[key] = component;
+        this.treeMap.add(key);
+    },
+
+    /** 
+     * tested.
+     */
+    isRemovable(key) {
+        this.getObject(key);
+        const children = this.treeMap.getChildKeys(key);
+        if (children != null) return false;
+        const lines = this.treeMap.getLineKeys(key);
+        if (lines != null) return false;
+        return true;
+    },
+
+    /**
+     * not tested.
+     * @param {Array} keys
+     */
+    remove(keys) {
+        this.treeMap.remove(keys);
+        keys.forEach(key => {
+            this.getObject(key);
+            delete this.tree[key];
+        });
+    },
+
+    /** 
+     * tested.
+     * Return an array of keys that need to be deleted as a result of deleting a tree object.
+     * 
+     * @param {string} key - the key of the tree object for which to find its deletable subtree.
+     * @param {Array} visited - contains keys of tree objects that have already been visited so the method dosen't * recurse infinitely in case of a cycle.
+     * @return {Array}
+     */
+    getSubtreeToRemove(key, visited = []) {
+        if (!Array.isArray(visited)) throw new Error("Visited argument must be an array");
+        visited.push(key);
+        const keySet = new Set();
+        const lines = this.treeMap.getLineKeys(key);
+        const children = this.treeMap.getChildKeys(key);
+        if (lines != null) lines.forEach(key => keySet.add(key));
+        if (children != null) children.forEach(key => keySet.add(key));
+        keySet.forEach(outerKey => {
+            if (!visited.includes(outerKey)) {
+                this.getSubtreeToRemove(outerKey, visited).forEach(innerKey => keySet.add(innerKey));
+            }
+        });
+        return Array.from(keySet);
+    },
+
+    /**
+     * tested.
+     */
     getObject(key) {
         const obj = this.tree[key];
-        if (obj == null) throw new Error(`getObject() failed. The object with the key "${key}" does not exist in the Tree.`);
+        if (obj == null) throw new Error(`The object with the key "${key}" does not exist in the tree.`);
         return this.tree[key];
     },
 
@@ -1119,64 +1219,7 @@ const treePrototype = {
             }
         });
         return pairedNodes;
-    },
-
-    /**
-     * tested.
-     */
-    insert(treeObject) {
-        this.tree[treeObject.key] = treeObject.data;
-        this.treeMap.add(treeObject.key);
-    },
-
-    /** 
-     * tested.
-     */
-    isDeletable(key) {
-        this.getObject(key);
-        const children = this.treeMap.getChildKeys(key);
-        if (children != null) return false;
-        const lines = this.treeMap.getLineKeys(key);
-        if (lines != null) return false;
-        return true;
-    },
-
-    /**
-     * not tested.
-     * @param {Array} keys
-     */
-    delete(keys) {
-        this.treeMap.remove(keys);
-        keys.forEach(key => {
-            this.getObject(key);
-            delete this.tree[key];
-        });
-    },
-
-    /** 
-     * tested.
-     * Return an array of keys that need to be deleted as a result of deleting a tree object.
-     * 
-     * @param {string} key - the key of the tree object for which to find its deletable subtree.
-     * @param {Array} visited - contains keys of tree objects that have already been visited so the method dosen't * recurse infinitely in case of a cycle.
-     * @return {Array}
-     */
-    getSubtreeToDelete(key, visited = []) {
-        if (!Array.isArray(visited)) throw new Error("Visited argument must be an array");
-        visited.push(key);
-        const keySet = new Set();
-        const lines = this.treeMap.getLineKeys(key);
-        const children = this.treeMap.getChildKeys(key);
-        if (lines != null) lines.forEach(key => keySet.add(key));
-        if (children != null) children.forEach(key => keySet.add(key));
-        keySet.forEach(outerKey => {
-            if (!visited.includes(outerKey)) {
-                this.getSubtreeToDelete(outerKey, visited).forEach(innerKey => keySet.add(innerKey));
-            }
-        });
-        return Array.from(keySet);
-    },
-
+    }
     /* Private methods */
 };
 
@@ -1877,8 +1920,8 @@ function createViewport(tree, svgContainer) {
         /* Override the default values set by "optionsDefaults" in svg-pan-zoom.js */
         dblClickZoomEnabled: false,
         zoomScaleSensitivity: 0.2,
-        minZoom: 0.1,
-		maxZoom: 500
+        minZoom: 0.01,
+		maxZoom: 800
     });
 }
 
@@ -2590,15 +2633,9 @@ Don't touch existing houses or their loads
 Don't ever replace regular load objects
 1) Delete triplex nodes (have NO parent) and replace them with houses that have randomly generated loads
 2) Replace triplex loads (have parent) with houses that have randomly generated loads
-
-triplex_loads AND triplex_nodes CAN have parents, but triplex_node usually won't
-triplex_load always has a parent
-
+- triplex_loads AND triplex_nodes CAN have parents, but triplex_nodes usually won't
+- triplex_load always has a parent
 -There are no files with both triplex loads and triplex nodes.
--File with triplex loads: ./omf/data/Model/public/Demo gridlabMulti scadaCalibration/Calibrated Feeder.omd
--File with triplex nodes: 
-    ./omf/data/Model/public/Demo gridlabMulti scadaCalibration/Uncalibrated Feeder.omd
-    ./omf/data/Model/public/Demo superModel/superModel Today.omd
 */
 function convertStaticLoadsIntoHouses() {
     const keys = Object.keys(gTree.tree).filter(key => {
@@ -2864,7 +2901,7 @@ function massChange(keys, attributeKey, objectType) {
     keys.forEach(key => {
         treeObjectCopies.push(createTreeObject(key, gTree));
     });
-    createSvgData(keys).delete(gViewport);
+    createSvgData(keys).remove(gViewport);
     let count = keys.length;
     const unedited = [];
     treeObjectCopies.forEach(tObject => {
@@ -4583,7 +4620,7 @@ const svgDataPrototype = {
     /**
      * good. Doesn't need tests.
      */
-    delete(viewport) {
+    remove(viewport) {
         this.primaryKeySet.forEach(key => {
             const obj = this.tree.getObject(key);
             const relationship = getRelationship(obj);
@@ -4599,7 +4636,7 @@ const svgDataPrototype = {
             if (gSelection.hasId(key)) gSelection.remove(e);
             viewport.removeChild(e);
         });
-        this.tree.delete(Array.from(this.primaryKeySet));
+        this.tree.remove(Array.from(this.primaryKeySet));
     },
 
     /* Private methods */
@@ -5038,7 +5075,7 @@ function createDescriptionTable(id) {
         event.preventDefault();
         // Delete the object entirely just in case parent was changed, in order to delete the old parent-child line
         const svg = createSvgData([tObject.key]);
-        svg.delete(gViewport);
+        svg.remove(gViewport);
         gTree.insert(tObject);// re-insert the updated object. It is remapped in the process.
         svg.draw(gViewport);
         alert("Object saved");
@@ -5093,8 +5130,8 @@ const buttonPrototype = {
      */
     deleteObject() {
         const key = this.tObject.key;
-        if (gTree.isDeletable(key)) {
-            createSvgData([key]).delete(gViewport);
+        if (gTree.isRemovable(key)) {
+            createSvgData([key]).remove(gViewport);
             rebuildSelectionTable();
         } else {
             let msg = `If you click "ok", you will delete this object and all of its connected children and/or lines. `;
@@ -5107,9 +5144,9 @@ const buttonPrototype = {
                 msg += `Do you want to delete "${gTree.getObject(key).name}" and its lines: "${lines.join(", ")}"?`;
             }
             if (confirm(msg)) {
-                const keys = gTree.getSubtreeToDelete(key);
+                const keys = gTree.getSubtreeToRemove(key);
                 keys.push(key);
-                createSvgData(keys).delete(gViewport);
+                createSvgData(keys).remove(gViewport);
                 //console.log(document.getElementById("svgContainer").onclick);
                 rebuildSelectionTable();
             }
@@ -5356,7 +5393,7 @@ const rowPrototype = {
             btn.innerHTML = "&#9587;"
             btn.setAttribute("class", "modalButton deleteButton"); 
             td.appendChild(btn);
-            btn.addEventListener("click", () => { this.delete() });
+            btn.addEventListener("click", () => { this.remove() });
         } 
         return td;
     },
@@ -5365,7 +5402,7 @@ const rowPrototype = {
      * TODO: update unit tests
      * Delete the row from the table. Delete the key from the map, if there was a map.
      */
-    delete() {
+    remove() {
         this.self.parentElement.removeChild(this.self);
         if (this.tObject != null) {
             delete this.tObject.data[this.key];
