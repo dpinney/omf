@@ -428,14 +428,15 @@
                             <li data-web="climate">Climate...</li>
                             {% endif %}
                             <li>Find...</li>
-                            <li>Mass Add...</li>
-                            <li>Mass Edit...</li>
+                            <li>Mass add...</li>
+                            <li>Mass edit...</li>
                             {% if showFileMenu %}
                             <li data-web="scada">Scada Loadshapes...</li>
                             {% endif %}
-                            <li>Static Loads to Houses</li>
+                            <li>Static loads to houses</li>
+                            <li data-web="gldHouse">Static loads to GLD houses</li>
                             <li>Change opacity...</li>
-                            <li>Color Circuit...</li>
+                            <li>Color circuit...</li>
                         </ul>
                     </div>
                     <div class="headerGroup">
@@ -448,15 +449,15 @@
                             {% if showFileMenu %}
                             <li data-web="save">Save</li>
                             {% endif %}
-                            <li>View Raw Data</li>
+                            <li>View raw data</li>
                             {% if showFileMenu %}
                             <li data-web="rename">Rename</li>
-                            <li data-web="load">Load from Model...</li>
-                            <li data-web="new">New Blank Feeder...</li>
-                            <li data-web="windmil">Windmil Conversion...</li>
-                            <li data-web="gridlabd">GridLAB-D Conversion...</li>
-                            <li data-web="cyme">CYMDIST Conversion...</li>
-                            <li data-web="map">View on Map</li>
+                            <li data-web="load">Load from model...</li>
+                            <li data-web="new">New blank feeder...</li>
+                            <li data-web="windmil">Windmil conversion...</li>
+                            <li data-web="gridlabd">GridLAB-D conversion...</li>
+                            <li data-web="cyme">CYMDIST conversion...</li>
+                            <li data-web="map">View on map</li>
                             {% endif %}
                         </ul>
                     </div>
@@ -2503,7 +2504,9 @@ function addFileMenuHandlers() {
 }
 
 /** 
- * Need to refactor this based on data attributes!
+ * Add handlers to the edit menu dropdown.
+ * 
+ * Not tested.
  */
 function addEditMenuHandlers() {
     const menu = document.getElementById("editMenu");
@@ -2556,6 +2559,8 @@ function addEditMenuHandlers() {
     }
     const color = liArray.find(li => li.textContent.toLowerCase() === "color circuit...");
     if (color != null) color.addEventListener("click", () => toggleDisplay(document.getElementById("colorModal")));
+    const gldHouse = liArray.find(li => li.textContent.toLowerCase() === "static loads to gld houses");
+    //if (gldHouse != null) gldHouse.addEventListener("click", () => ?);
 }
 
 function mouseHandler() {
@@ -2653,48 +2658,13 @@ function convertStaticLoadsIntoHouses() {
         finishFunc: () => modal.hide()    
     });
     setTimeout(function() {
-        keys.forEach(key => { replaceLoadOrNodeWithHouse(key); });
+        keys.forEach(key => { 
+            gTree.replaceNode(key, gComponentManager.get("house", "R1_SingleFamilyHome_1990-2005"));
+            addLoadsToHouse(key);
+        });
         createSvgData(keys).draw(gViewport);
         modal.finish();
     }, 10);
-}
-
-/**
- * Keep: longitude, latitude, parent (if it doesn't have it, set it to null)
- * Change: name, object 
- * Delete: all of the old properties, old name in treeMap.name
- * Insert: all of the properties of house, new name in treeMap.name
- * Edit: 'parent' attribute of children (if any), 'from/to' attribute of lines (if any)
- * Don't touch: TreeMap is fine because it uses keys
- */
-function replaceLoadOrNodeWithHouse(key) {
-    const oldLoad = gTree.getObject(key);
-    const house = deepCopy(gComponentManager.get("house", "R1_SingleFamilyHome_1990-2005"));
-    house.longitude = oldLoad.longitude;
-    house.latitude = oldLoad.latitude;
-    if (oldLoad.parent == null) {
-        delete house.parent;
-    } else {
-        house.parent = oldLoad.parent;
-    }
-    house.name = "house" + key; // might need to change this
-    const children = gTree.treeMap.getChildKeys(key);
-    if (children != null) children.forEach(key => { gTree.getObject(key).parent = house.name; });
-    const lines = gTree.treeMap.getLineKeys(key);
-    if (lines != null) {
-        lines.forEach(key => {
-            const line = gTree.getObject(key);
-            if (line.to === oldLoad.name) {
-                line.to = house.name;
-            } else if (line.from === oldLoad.name) {
-                line.from = house.name;
-            }
-        });
-    }
-    gTree.treeMap.remove([key]);
-    gTree.tree[key] = house;
-    gTree.treeMap.add(key);
-    addLoadsToHouse(key);
 }
 
 function addLoadsToHouse(key) {
@@ -3029,11 +2999,20 @@ function fillClimateModalOptions() {
     });
 }
 
-/**
- * What am I doing exactly?
- */
-function convertLoadsIntoHouses() {
+function getGLDHouses() {
+    const formData = new FormData();
+    formData.set(?, ?);
+    $.ajax({
+        type: "POST",
+        url: ?
+        data: formData,
+        processData: false,
+        contentType: false
+    }).done(function(data, text, jqXHR) {
 
+    }).fail(function(jqXHR, text, error) {
+
+    });
 }
 
 //**************************************************

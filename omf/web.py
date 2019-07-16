@@ -1288,6 +1288,16 @@ def backgroundAnonymize(modelDir, omdPath, owner, modelName):
 			errorFile.write('anonymizeError')
 
 
+@app.route("/gldHouses", methods=["POST"])
+@flask_login.login_required
+def gldHouses():
+	"""???"""
+	importProc = Process(target=?, args=[modelDir, omdPath, owner, modelName])
+	importProc.start()
+	return 'Success'
+	omf.loadModeling.
+
+
 @app.route("/anonymizeTran/<owner>/<networkName>", methods=["POST"])
 @flask_login.login_required
 def anonymizeTran(owner, networkName):

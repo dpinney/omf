@@ -60,7 +60,7 @@ def houseSpecs(lat, lon, addressOverride=None):
 		'lon': lon,
 		'object': 'house',
 		'address': address,
-		'matches':matches,
+		'matching_properties_count': matches,
 		'sqft':safeText('finishedSqFt'), # Not always present
 		'lotSize':safeText('lotSizeSqFt'),
 		'bathrooms':safeText('bathrooms'), # Not always present
@@ -160,18 +160,22 @@ def _tests():
 	#outFilePath = os.path.join(omf.omfDir, 'static', 'testFiles', 'inTest_R4_modified.glm')
 	#with open(outFilePath,'w+') as outFile:
 	#	outFile.write(omf.feeder.sortedWrite(testFeed))
-
 	#print 'Brooklyn test:', houseSpecs(40.71418, -73.96125), '\n'
 	#print 'Arlington test:', houseSpecs(38.88358, -77.10193), '\n'
 	#print 'Override apartment test:', houseSpecs(38.883557,-77.102175), '\n'
 	#print 'Override house test:', houseSpecs(0,0,addressOverride='1629 North Stafford Street, Arlington, VA 22207, USA'), '\n'
 	#print 'Yet another test:', houseSpecs(38.9126022,-77.0097919), '\n'
-
 	#print 'gldHouse test with override:', gldHouse(0,0,addressOverride='1629 North Stafford Street, Arlington, VA 22207, USA'), '\n'
-	print 'gldHouse test with lat lon:', gldHouse(38.748608, -77.263395), '\n'
+	#print 'gldHouse test with lat lon:', gldHouse(38.748608, -77.263395), '\n'
 	# print 'Apt test:', gldHouse(0,0,addressOverride='3444 N Fairfax Dr, Arlington, VA 22201, USA')
-
 	#os.remove(outFilePath)
+	print("houseSpecs() Arlington test 1:" + str(houseSpecs(38.883611, -77.088899))) # 916 N Cleveland St
+	print("houseSpecs() Arlington test 2:" + str(houseSpecs(38.883565, -77.090033))) # 914 N Danville St
+	print("houseSpecs() Arlington test 3:" + str(houseSpecs(38.88315759, -77.0879))) # 2507 9th St N
+	print("gldHouse() Arlington test 1:" + str(gldHouse(38.883611, -77.088899))) # 916 N Cleveland St
+	print("gldHouse() Arlington test 2:" + str(gldHouse(38.883565, -77.090033))) # 914 N Danville St
+	print("gldHouse() Arlington test 3:" + str(gldHouse(38.88315759, -77.0879))) # 2507 9th St N
+
 
 if __name__ == '__main__':
 	_tests()
