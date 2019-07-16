@@ -2952,6 +2952,9 @@ function saveAttachment() {
  * few stations have really poor data quality.
  */
 function fillClimateModalOptions() {
+    const yearSelect = document.getElementById("uscrnYear");
+    const stationSelect = document.getElementById("uscrnStation");
+    if (yearSelect == null || stationSelect == null) return;
     const allUSCRNYears = [2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019];
     const allUSCRNStations = ["AK_Bethel_87_WNW", "AK_Cordova_14_ESE", "AK_Deadhorse_3_S", "AK_Denali_27_N", "AK_Fairbanks_11_NE", "AK_Glennallen_64_N", "AK_Gustavus_2_NE",
 	"AK_Ivotuk_1_NNE", "AK_Kenai_29_ENE", "AK_King_Salmon_42_SE", "AK_Metlakatla_6_S", "AK_Port_Alsworth_1_SW", "AK_Red_Dog_Mine_3_SSW", "AK_Ruby_44_ESE",
@@ -2974,21 +2977,19 @@ function fillClimateModalOptions() {
 	"TX_Panther_Junction_2_N", "TX_Port_Aransas_32_NNE", "UT_Brigham_City_28_WNW", "UT_Torrey_7_E", "VA_Cape_Charles_5_ENE", "VA_Charlottesville_2_SSE", "WA_Darrington_21_NNE",
     "WA_Quinault_4_NE", "WA_Spokane_17_SSW", "WI_Necedah_5_WNW", "WV_Elkins_21_ENE", "WY_Lander_11_SSE", "WY_Moose_1_NNE", "WY_Sundance_8_NNW"
     ];
-    let select = document.getElementById("uscrnYear");
-    select.innerHTML += `<option value=${""}>${""}</option>`;
+    yearSelect.innerHTML += `<option value=${""}>${""}</option>`;
     allUSCRNYears.forEach(e => {
         const option = document.createElement("option");
         option.textContent = e;
         option.value = e;
-        select.append(option);
+        yearSelect.append(option);
     });
-    select = document.getElementById("uscrnStation");
-    select.innerHTML += `<option value=${""}>${""}</option>`;
+    stationSelect.innerHTML += `<option value=${""}>${""}</option>`;
     allUSCRNStations.forEach(e => {
         const option = document.createElement("option");
         option.textContent = e;
         option.value = e;
-        select.append(option);
+        stationSelect.append(option);
     });
 }
 
