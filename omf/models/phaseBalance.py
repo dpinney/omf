@@ -180,9 +180,9 @@ def work(modelDir, ind):
 
 	o['service_cost'] = {
 		'load': {
-			'base': n(_totals(pJoin(modelDir, 'load' + base_suffix + '.csv'), 'real')),
-			'solar': n(_totals(pJoin(modelDir, 'load' + solar_suffix + '.csv'), 'real')),
-			'controlled': n(_totals(pJoin(modelDir, 'load' + controlled_suffix + '.csv'), 'real'))
+			'base': n(_totals(pJoin(modelDir, 'load' + base_suffix + '.csv'), 'real') + _totals(pJoin(modelDir, 'load_node' + base_suffix + '.csv'), 'real')),
+			'solar': n(_totals(pJoin(modelDir, 'load' + solar_suffix + '.csv'), 'real') + _totals(pJoin(modelDir, 'load_node' + solar_suffix + '.csv'), 'real')),
+			'controlled': n(_totals(pJoin(modelDir, 'load' + controlled_suffix + '.csv'), 'real') + _totals(pJoin(modelDir, 'load_node' + controlled_suffix + '.csv'), 'real'))
 		},
 		'distributed_gen': {
 			'base': n(sums[base_suffix]),
@@ -297,7 +297,7 @@ def _addCollectors(tree, suffix=None, pvConnection=None):
 	all_power = 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)'
 	
 	tree[len(tree)] = {'property': all_power, 'object': 'collector', 'group': 'class=load', 'limit': '0', 'file': 'load' + suffix + '.csv'}
-	# tree[len(tree)] = {'property': all_power, 'object': 'group_recorder', 'group': 'groupid=threePhase', 'limit': '1', 'file': 'load' + suffix + '.csv'}
+	tree[len(tree)] = {'property': 'sum(power_12.real),sum(power_12.imag)', 'object': 'collector', 'group': 'class=triplex_node', 'limit': '0', 'file': 'load_node' + suffix + '.csv'}
 
 	# Load on motor phases
 	for phase in 'ABC':
@@ -389,28 +389,26 @@ def _totals(filename, component=None):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		# "feederName1": "phase_balance_test",
-		# "criticalNode": 'R1-12-47-1_node_17',
-		"feederName1": "phase_balance_test_2",
-		"criticalNode": 'R1-12-47-2_node_28',
+		"feederName1": "phase_balance_test",
+		"criticalNode": 'R1-12-47-1_node_17',
+		# "feederName1": "phase_balance_test_2",
+		# "criticalNode": 'R1-12-47-2_node_28',
 		"modelType": modelName,
 		"runTime": "",
-		"layoutAlgorithm": "forceDirected", #forceDirected
+		"layoutAlgorithm": "geospatial", #forceDirected
 		"zipCode": "64735",
 		"retailCost": "0.05",
 		"discountRate": "7",
 		"edgeCol" : "None",
-		"nodeCol" : "VoltageImbalance",
+		"nodeCol" : "perUnitVoltage",
 		"nodeLabs" : "None",
 		"edgeLabs" : "None",
 		"customColormap" : "False",
 		"rezSqIn" : "225",
-		"parameterOne": "42",
-		"parameterTwo": "42",
-		"colorMin": "auto",
-		"colorMax": "auto",
+		"colorMin": "0.92",
+		"colorMax": "1.08",
 		"objectiveFunction": 'VUF', #'I0'
-		"pvConnection": 'Wye',
+		"pvConnection": 'Delta',
 		"iterations": "5"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)

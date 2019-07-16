@@ -145,10 +145,10 @@
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Objective Function<span class="classic">'VUF' minimizes negative sequence. 'I0' minimizes zero sequence</span></label>
+				<label class="tooltip">Objective Function<span class="classic">'Phase to Ground' or 'VUF' minimizes negative sequence. 'Phase to Phase' or 'I0' minimizes zero sequence</span></label>
 				<select id="objectiveFunction" name="objectiveFunction">
-					<option value="VUF">VUF</option>
-					<option value="I0">I0</option>
+					<option value="VUF">Phase to Ground</option>
+					<option value="I0">Phase to Phase</option>
 				</select>
 			</div>
 			<div class="shortInput">
@@ -246,7 +246,7 @@
 		</script>
 	</div>
 	<div id="output">
-		<p class="reportTitle postRun" style="page-break-before:always">Voltage Drop Diagram</p>
+		<p class="reportTitle postRun" style="page-break-before:always">Circuit Locational Metrics</p>
 		<!-- Tab links -->
 		<div class="tab postRun">
 		  <button id='firstTabButton' class="tabLinks active" onclick="openTab(event, 'baseDiagram')">Base</button>

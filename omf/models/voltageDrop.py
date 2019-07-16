@@ -327,12 +327,12 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	if customColormap:
 		custom_cm = matplotlib.colors.LinearSegmentedColormap.from_list('custColMap',[(0.0,'blue'),(0.15,'darkgray'),(0.7,'darkgray'),(1.0,'red')])
 		custom_cm.set_under(color='black')
-		vmin = 0 if colorMin is not None else colorMin
-		vmax = 1.25 if colorMax is not None else colorMax
+		vmin = 0 if colorMin is None else colorMin
+		vmax = 1.25 if colorMax is None else colorMax
 	else:
 		custom_cm = plt.cm.get_cmap('viridis')
-		vmin = None if colorMin is not None else colorMin
-		vmax = None if colorMax is not None else colorMax
+		vmin = None if colorMin is None else colorMin
+		vmax = None if colorMax is None else colorMax
 	drawColorbar = False
 	emptyColors = {}
 	#draw edges with or without colors
@@ -391,6 +391,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 			drawColorbar = True
 		elif nodeCol == "VoltageImbalance":
 			nodeList = [voltImbalances.get(n,1) for n in fGraph.nodes()]
+			print nodeList
 			drawColorbar = True
 		elif nodeCol == "perUnitVoltage":
 			nodeList = [nodeVoltsPU.get(n,.5) for n in fGraph.nodes()]

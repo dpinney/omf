@@ -239,9 +239,13 @@ def saveOmc(geoJson, outputPath, fileName=None):
 def convertOmd(pathToOmdFile):
 	''' Convert sources to networkx graph. Some larger omd files do not have the position information in the tree'''
 	with open(pathToOmdFile) as inFile:
-		tree = json.load(inFile)['links']
+		omdFile = json.load(inFile)
+		links = omdFile['links']
+		tree = omdFile['tree']
 	nxG = nx.DiGraph()
-	for key in tree:
+	objectNodes = set()
+	for key in links:
+		objectNodes.add(key['objectType'])
 		#Account for nodes that are missing names when creating edges
 		try:
 			sourceEdge = key['source']['name']
@@ -262,16 +266,18 @@ def convertOmd(pathToOmdFile):
 		nxG.add_edge(sourceEdge, targetEdge)
 		nxG.node[sourceEdge]['pos'] = (float(key['source']['y']), float(key['source']['x']))
 		nxG.node[targetEdge]['pos'] = (float(key['target']['y']), float(key['target']['x']))
+		sourceTreeIndex = str(key['source']['treeIndex'])
+		targetTreeIndex = str(key['target']['treeIndex'])
 		try:
-			nxG.node[sourceEdge]['type'] = key['source']['objectType']
+			nxG.node[sourceEdge]['type'] = tree[sourceTreeIndex]['object']
 			nxG.node[sourceEdge]['name'] = key['source']['name']
 			#Get substation - fix later because this seems a little hacky
-			if key['source']['objectType'] == 'gridNode swingNode':
+			if tree[sourceTreeIndex]['bustype'] == 'SWING':
 				nxG.node[sourceEdge]['substation'] = True
 		except KeyError:
 			nxG.node[sourceEdge]['type'] = 'Undefined'
 		try:
-			nxG.node[targetEdge]['type'] = key['target']['objectType']
+			nxG.node[targetEdge]['type'] = tree[targetTreeIndex]['object']
 			nxG.node[targetEdge]['name'] = key['target']['name']
 		except KeyError:
 			nxG.node[targetEdge]['type'] = 'Undefined'
