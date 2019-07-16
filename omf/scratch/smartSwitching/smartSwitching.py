@@ -400,7 +400,7 @@ def valueOfAdditionalRecloser(pathToGlm, lineFaultType, lineNameForRecloser, fai
 			obType = item.get('object')
 			reclDevices = dict.fromkeys(['recloser'], False)
 			if obType in reclDevices.keys():
-				outGraph.add_edge(item['from'],item['to'], color='g')
+				outGraph.add_edge(item['from'],item['to'], edge_color='g')
 			elif 'parent' in item.keys() and obType not in reclDevices:
 				outGraph.add_edge(item['name'],item['parent'], attr_dict={'type':'parentChild','phases':1})
 				outGraph.node[item['name']]['type']=item['object']
