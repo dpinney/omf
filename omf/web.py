@@ -760,22 +760,6 @@ def backgroundScadaLoadshape(owner, modelName, workDir, feederPath, scadaPath, s
 		with open(modelDirec+'/error.txt',"w+") as errorFile:
 		 	errorFile.write("The CSV used is incorrectly formatted. Please refer to the OMF Wiki for CSV formatting information. The Wiki can be access by clicking the Help button on the toolbar.")
 
-#@app.route("/cancelScadaLoadshape/<modelName>", methods = ["POST","GET"])
-#def cancelScadaLoadshape(modelName):
-#	owner = User.cu()
-#	path = "data/Model/" + owner + "/" + modelName
-#	if os.path.isfile("data/Model/" + owner + "/" +  modelName + "/error.txt"):
-#		os.remove("data/Model/" + owner + "/" +  modelName + "/error.txt")
-#	if os.path.isfile("data/Model/" + owner + "/" +  modelName + "/calibration.csv"):
-#		os.remove("data/Model/" + owner + "/" +  modelName + "/calibration.csv")
-#	#Read PID file, kill process with that PID number, delete calibration file, delete PID.txt
-#	with open(path+"/CPID.txt") as pidFile:
-#		pidNum = int(pidFile.read())
-#	os.kill(pidNum, signal.SIGTERM)
-#	os.remove("data/Model/" + owner + "/" +  modelName + "/CPID.txt")
-#	shutil.rmtree("data/Model/" + owner + "/" +  modelName + "/calibration")
-#	return 'cancel'
-
 
 @app.route("/loadModelingAmi/<owner>/<feederName>", methods=["POST"])
 def loadModelingAmi(owner,feederName):
@@ -1290,12 +1274,73 @@ def backgroundAnonymize(modelDir, omdPath, owner, modelName):
 
 @app.route("/gldHouses", methods=["POST"])
 @flask_login.login_required
-def gldHouses():
-	"""???"""
-	importProc = Process(target=?, args=[modelDir, omdPath, owner, modelName])
+def gld_houses():
+	owner = request.form.get("owner")
+	model_name = request.form.get("modelName")
+	model_dir = os.path.join(_omfDir, "data/Model", owner, model_name)
+	error_filepath = os.path.join(model_dir, "error.txt")
+	if os.path.isfile(error_filepath):
+		os.remove(error_filepath)
+	payload_filepath = os.path.join(model_dir, "gld_houses.json")
+	if os.path.isfile(payload_filepath):
+		os.remove(payload_filepath)
+	importProc = Process(target=background_gld_houses, args=[model_dir])
 	importProc.start()
-	return 'Success'
-	omf.loadModeling.
+	return ""
+
+
+def background_gld_houses(model_dir):
+	try:
+		pid_filepath = os.path.join(model_dir, "ZPID.txt")
+		with open(pid_filepath, 'w') as pid_file:
+			pid_file.write(str(os.getpid()))
+		triplex_objects = json.loads(request.form.get("triplexObjects"))
+		#triplex_objects = request.form.get("triplexObjects") # error test
+		gld_houses = {}
+		for obj in triplex_objects:
+			try:
+				# Try to get real house data
+				house = omf.loadModeling.gldHouse(obj["latitude"], obj["longitude"])
+				gld_houses[obj["key"]] = house
+			except:
+				# If a request for some house fails, get a random house
+				house = omf.loadModeling.gldHouse(0, 0, pureRandom=True)
+				gld_houses[obj["key"]] = house
+			# The APIs we use require us to limit our requests to a maximum of 1 per second. Exceeding that throughput will get us IP banned faster.
+			time.sleep(1)
+			#house = omf.loadModeling.gldHouse(0, 0, pureRandom=True)
+			#gld_houses[obj["key"]] = house
+		payload_filepath = os.path.join(model_dir, "gld_houses.json")
+		with open(payload_filepath, 'w') as f:
+			json.dump(gld_houses, f)
+		os.remove(pid_filepath)
+	except:
+		with open(os.path.join(model_dir, "error.txt"), 'w') as error_file:
+			error_file.write(str(sys.exc_info()[1]))
+
+
+@app.route("/checkGldHouses", methods=["POST"])
+@flask_login.login_required
+def check_gld_houses():
+	"""This route is not used to cancel the operation. /saveFeeder does that. This route only informs the user about the status of the operation"""
+	owner = request.form.get("owner")
+	model_name = request.form.get("modelName")
+	model_dir = os.path.join(_omfDir, "data/Model", owner, model_name)
+	if owner == User.cu() or "admin" == User.cu():
+		error_filepath = os.path.join(model_dir, "error.txt")
+		if os.path.isfile(error_filepath):
+			with open(error_filepath) as f:
+				error_message = f.read()
+			return (error_message, 500)
+		pid_filepath = os.path.join(model_dir, "ZPID.txt")
+		if os.path.isfile(pid_filepath):
+			return ("", 202)
+		payload_filepath = os.path.join(model_dir, "gld_houses.json")
+		if os.path.isfile(payload_filepath):
+			with open(payload_filepath) as f:
+				data = json.load(f)
+			return jsonify(data)
+	raise(404)
 
 
 @app.route("/anonymizeTran/<owner>/<networkName>", methods=["POST"])
@@ -1479,4 +1524,5 @@ if __name__ == "__main__":
 	os.environ['no_proxy'] = '*' # Workaround for macOS fork behavior with multiprocessing and urllib.
 	template_files = ["templates/"+ x  for x in safeListdir("templates")]
 	model_files = ["models/" + x for x in safeListdir("models")]
-	app.run(debug=True, host="0.0.0.0", extra_files=template_files + model_files)
+	#app.run(debug=True, host="0.0.0.0", extra_files=template_files + model_files)
+	app.run(debug=True, host="0.0.0.0", extra_files=model_files)

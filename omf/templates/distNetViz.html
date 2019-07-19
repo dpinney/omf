@@ -419,24 +419,28 @@
                     <div class="headerGroup">
                         <h4 class="menuHeading white">Edit &#x25BE</h4>
                         <ul id="editMenu" class="menu" style="display: none;">
-                            {% if showFileMenu %}
+                        {% if showFileMenu %}
                             <li data-web="ami">Add AMI Profiles...</li>
                             <li data-web="anonymize">Anonymization...</li>
-                            {% endif %}
                             <li>Attachments...</li>
-                            {% if showFileMenu %}
                             <li data-web="climate">Climate...</li>
-                            {% endif %}
                             <li>Find...</li>
                             <li>Mass add...</li>
                             <li>Mass edit...</li>
-                            {% if showFileMenu %}
                             <li data-web="scada">Scada Loadshapes...</li>
-                            {% endif %}
                             <li>Static loads to houses</li>
                             <li data-web="gldHouse">Static loads to GLD houses</li>
                             <li>Change opacity...</li>
                             <li>Color circuit...</li>
+                        {% else %}
+                            <li>Attachments...</li>
+                            <li>Find...</li>
+                            <li>Mass add...</li>
+                            <li>Mass edit...</li>
+                            <li>Static loads to houses</li>
+                            <li>Change opacity...</li>
+                            <li>Color circuit...</li>
+                        {% endif %}
                         </ul>
                     </div>
                     <div class="headerGroup">
@@ -448,9 +452,7 @@
                         <ul id="fileMenu" class="menu" style="display: none">
                             {% if showFileMenu %}
                             <li data-web="save">Save</li>
-                            {% endif %}
                             <li>View raw data</li>
-                            {% if showFileMenu %}
                             <li data-web="rename">Rename</li>
                             <li data-web="load">Load from model...</li>
                             <li data-web="new">New blank feeder...</li>
@@ -458,6 +460,8 @@
                             <li data-web="gridlabd">GridLAB-D conversion...</li>
                             <li data-web="cyme">CYMDIST conversion...</li>
                             <li data-web="map">View on map</li>
+                            {% else %}
+                            <li>View raw data</li>
                             {% endif %}
                         </ul>
                     </div>
@@ -1963,29 +1967,6 @@ function handleSelection(event) {
     }
 }
 
-//function hotkeys() {
-//	// Handle hotkey presses.
-//	let x;
-//	if (window.event) {
-//		// IE8 and earlier
-//		x = event.keyCode
-//	} else if (event.which) {
-//		// IE9/Firefox/Chrome/Opera/Safari
-//		x = event.which
-//	}
-//	var keychar = String.fromCharCode(x);
-//	if (event.target.type !== 'text') {
-//		// Dispatch the key:
-//		if (keychar == '-') {
-//			window.panZoom.zoomOut()
-//		} else if (keychar == '=') {
-//			window.panZoom.zoomIn()
-//		} else if (keychar =='m') {
-//            attachMoveSelectionListener();
-//		}
-//	}
-//}
-
 /**
  * Scale the thickness of all lines and size of all circles. This helps user see details.
  * @param {number} x
@@ -2173,46 +2154,6 @@ function viewElement(key) {
 }
 
 //**************************************************
-// jQuery handling for distNetViz.py
-//**************************************************
-
-/** 
- * TODO: add unit tests?
- */
- function applyJQueryStyles() {
-    // Make stuff draggable
-    $("#findModal .modalContent").draggable();
-    $("#progressModal .modalContent").draggable();
-    $("#loadModal .modalContent").draggable();
-    $("#blankFeederModal .modalContent").draggable();
-    $("#milsoftModal .modalContent").draggable();
-    $("#gridlabdModal .modalContent").draggable();
-    $("#cymeModal .modalContent").draggable();
-    $("#scadaModal .modalContent").draggable();
-    $("#amiModal .modalContent").draggable();
-    $("#massAddModal .modalContent").draggable();
-    $("#massEditModal .modalContent").draggable();
-    $("#attachmentsModal .modalContent").draggable();
-    $("#editAttachmentModal .modalContent").draggable();
-    $("#colorModal .modalContent").draggable();
-    $("#massAddSecondaryModal .modalContent").draggable();
-    $("#climateModal .modalContent").draggable();
-    // Position the description table depending on whether or not it is draggable
-    //document.getElementById("descriptionTable").removeAttribute("style");
-    //document.getElementById("descriptionTable").style.left = "70vw";
-}
-
-/**
- * If this interface was rendered as a static file, and is not connected to the web server, restrict the functionality of the interface.
- */
-function disableWebFeatures() {
-    Array.from(document.querySelectorAll("[data-web]")).forEach(li => {
-        li.remove();
-    });
-    //document.getElementById("findModal").style.justifyContent = "left";
-}
-
-//**************************************************
 // Header menu functions
 //**************************************************
 
@@ -2324,20 +2265,41 @@ function insertLineComponent(keys, component) {
 //**************************************************
 
 function attachHandlers() {
-    componentHandlers();
-    fillFeederList(document.getElementById("publicFeederList"), gPublicFeeders, "public");
-    fillFeederList(document.getElementById("userFeederList"), gUserFeeders, gCurrentUser);
-    addFileMenuHandlers();
-    addEditMenuHandlers();
-    mouseHandler();
-    keyHandler();
-    headerHandlers();
-    fillClimateModalOptions();
-}
-
-function headerHandlers() {
+    addComponentHandlers();
+    addMouseHandlers();
+    addKeyHandlers();
     Array.from(document.querySelectorAll("div.headerGroup")).forEach(h => {
         h.addEventListener("click", toggleHeader);
+    });
+    const isStatic = interfaceIsStatic();
+    addModelViewerHandlers(isStatic);
+    {% if showFileMenu %}
+    addModelOwnerHandlers(isStatic);
+    {% endif %}
+    makeModalsDraggable();
+    prepareFindModal();
+    prepareColorModal();
+}
+
+function prepareFindModal() {
+    const searchInput = document.getElementById("searchInput");
+    searchInput.addEventListener("change", searchTerm);
+    document.getElementById("searchExactString").addEventListener("change", function() {
+        searchTerm.call(searchInput);
+    });
+    document.getElementById("searchSubstring").addEventListener("change", function() {
+        searchTerm.call(searchInput);
+    });
+}
+
+function prepareColorModal() {
+    const colorModal = document.getElementById("colorModal");
+    const colorManager = createColorManager();
+    colorModal.querySelector("input[type='file']").addEventListener("change", async function() {
+        await colorManager.buildHTML(this.files);
+    });
+    colorModal.querySelector("button[data-buttonfunction='reset']").addEventListener("click", () => {
+        colorManager.removeColors();
     });
 }
 
@@ -2384,7 +2346,7 @@ function closeHeader() {
  */
 /* How do I handle component variations within the select? 
 */
-function componentHandlers() {
+function addComponentHandlers() {
     const ul = document.getElementById("componentList");
     alphabeticalForEach.bind(gComponentManager.getTypes())(type => {
 		const li = document.createElement("li");
@@ -2478,92 +2440,82 @@ function fillFeederList(ul, feeders, owner=null) {
 }
 
 /**
- * Doesn't need unit tests
+ * These features should be enabled for every user who views this model, whether they are an owner or not.
+ * @param {boolean} interfaceIsStatic - true if this interface was rendered outside of a web server context.
  */
-function addFileMenuHandlers() {
-    const menu = document.getElementById("fileMenu");
-    if (menu == null) return;
-    const save = menu.querySelector("li[data-web='save']");
-    if (save != null) save.addEventListener("click", () => saveFeeder(gWriteFeeder));
-    const rawData = Array.from(menu.querySelectorAll("li")).find(li => li.textContent.toLowerCase() === "view raw data");
-    if (rawData != null) rawData.addEventListener("click", downloadTextFile);
-    const rename = menu.querySelector("li[data-web='rename']");
-    if (rename != null) rename.addEventListener("click", getNewFeederName);
-    const load = menu.querySelector("li[data-web='load']");
-    if (load != null) load.addEventListener("click", () => toggleDisplay(document.getElementById("loadModal")));
-    const blank = menu.querySelector("li[data-web='new']");
-    if (blank != null) blank.addEventListener("click", () => toggleDisplay(document.getElementById("blankFeederModal")));
-    const windmil = menu.querySelector("li[data-web='windmil']");
-    if (windmil != null) windmil.addEventListener("click", () => toggleDisplay(document.getElementById("milsoftModal")));
-    const gridlabd = menu.querySelector("li[data-web='gridlabd']");
-    if (gridlabd != null) gridlabd.addEventListener("click", () => toggleDisplay(document.getElementById("gridlabdModal")));
-    const cyme = menu.querySelector("li[data-web='cyme']");
-    if (cyme != null) cyme.addEventListener("click", () => toggleDisplay(document.getElementById("cymeModal")));
-    const map = menu.querySelector("li[data-web='map']");
-    if (map != null) map.addEventListener("click", displayMap);
+function addModelViewerHandlers(interfaceIsStatic=true) {
+    const fileMenu = document.getElementById("fileMenu");
+    const fileMenuNodes = Array.from(fileMenu.querySelectorAll("li"));
+    const editMenu = document.getElementById("editMenu");
+    const editMenuNodes = Array.from(editMenu.querySelectorAll("li"));
+    // Add handlers to file menu
+    fileMenuNodes.find(li => li.textContent.toLowerCase() === "view raw data").addEventListener("click", downloadTextFile);
+    // Add handlers to edit menu
+    editMenuNodes.find(li => li.textContent.toLowerCase() === "attachments...").addEventListener("click", () => {
+        loadAttachments();
+        toggleDisplay(document.getElementById("attachmentsModal"));
+    });
+    editMenuNodes.find(li => li.textContent.toLowerCase() === "find...").addEventListener("click", () => {
+        toggleDisplay(document.getElementById("findModal"));
+        document.getElementById("searchInput").focus(); 
+    });
+    editMenuNodes.find(li => li.textContent.toLowerCase() === "mass add...").addEventListener("click", () => {
+        gAddManager.setupTargetSelect();
+        toggleDisplay(document.getElementById("massAddModal"));
+    });
+    editMenuNodes.find(li => li.textContent.toLowerCase() === "mass edit...").addEventListener("click", () => {
+        updateAttachTargets("massEditTargetSelect", gTree.tree);
+        toggleDisplay(document.getElementById("massEditModal"));
+    });
+    editMenuNodes.find(li => li.textContent.toLowerCase() === "change opacity...").addEventListener("click", () => {
+        gOpacityManager.update();
+        gOpacityManager.buildOpacityModal();
+    });
+    editMenuNodes.find(li => li.textContent.toLowerCase() === "color circuit...").addEventListener("click", () => {
+        toggleDisplay(document.getElementById("colorModal"));
+    });
+    editMenuNodes.find(li => li.textContent.toLowerCase() === "static loads to houses").addEventListener("click", convertStaticLoadsIntoHouses);
+    if (!interfaceIsStatic) {
+        //There are no features that require web requests that viewers can use
+    }
 }
 
-/** 
- * Add handlers to the edit menu dropdown.
- * 
- * Not tested.
+{% if showFileMenu %}
+/**
+ * These features should only be enabled for the owner of a model.
+ * @param {boolean} interfaceIsStatic - true if this interface was rendered outside of a web server context.
  */
-function addEditMenuHandlers() {
-    const menu = document.getElementById("editMenu");
-    if (menu == null) return;
-    const liArray = Array.from(menu.querySelectorAll("li"));
-    const ami = menu.querySelector("li[data-web='ami']");
-    if (ami != null) ami.addEventListener("click", () => toggleDisplay(document.getElementById("amiModal")));
-    const anonymize = menu.querySelector("li[data-web='anonymize']");
-    if (anonymize != null) anonymize.addEventListener("click", () => toggleDisplay(document.getElementById("anonymizeModal")));
-    const attachments = liArray.find(li => li.textContent.toLowerCase() === "attachments...");
-    if (attachments != null) {
-        attachments.addEventListener("click", () => {
-            loadAttachments();
-            toggleDisplay(document.getElementById("attachmentsModal"));
+function addModelOwnerHandlers(interfaceIsStatic=true) {
+    const fileMenu = document.getElementById("fileMenu");
+    const editMenu = document.getElementById("editMenu");
+    if (!interfaceIsStatic) {
+        // Add handlers to file menu
+        fileMenu.querySelector("li[data-web='save']").addEventListener("click", () => saveFeeder(gWriteFeeder));
+        fileMenu.querySelector("li[data-web='rename']").addEventListener("click", getNewFeederName);
+        fileMenu.querySelector("li[data-web='load']").addEventListener("click", () => toggleDisplay(document.getElementById("loadModal")));
+        fileMenu.querySelector("li[data-web='new']").addEventListener("click", () => toggleDisplay(document.getElementById("blankFeederModal")));
+        fileMenu.querySelector("li[data-web='windmil']").addEventListener("click", () => toggleDisplay(document.getElementById("milsoftModal")));
+        fileMenu.querySelector("li[data-web='gridlabd']").addEventListener("click", () => toggleDisplay(document.getElementById("gridlabdModal")));
+        fileMenu.querySelector("li[data-web='cyme']").addEventListener("click", () => toggleDisplay(document.getElementById("cymeModal")));
+        fileMenu.querySelector("li[data-web='map']").addEventListener("click", () => {
+            window.open(`/displayMap/${gThisOwner}/${gThisModelName}/${gThisFeederNum}`, '_blank');
         });
+        // Fill feeder lists
+        fillFeederList(document.getElementById("publicFeederList"), gPublicFeeders, "public");
+        fillFeederList(document.getElementById("userFeederList"), gUserFeeders, gCurrentUser);
+        // Prepare the climate modal
+        fillClimateModalOptions();
+        // Add handlers to edit menu
+        editMenu.querySelector("li[data-web='ami']").addEventListener("click", () => toggleDisplay(document.getElementById("amiModal")));
+        editMenu.querySelector("li[data-web='anonymize']").addEventListener("click", () => toggleDisplay(document.getElementById("anonymizeModal")));
+        editMenu.querySelector("li[data-web='climate']").addEventListener("click", () => toggleDisplay(document.getElementById("climateModal")));
+        editMenu.querySelector("li[data-web='scada']").addEventListener("click", () => toggleDisplay(document.getElementById("scadaModal")));
+        editMenu.querySelector("li[data-web='gldHouse']").addEventListener("click", startGldHouses);
     }
-    const climate = menu.querySelector("li[data-web='climate']");
-    if (climate != null) climate.addEventListener("click", () => toggleDisplay(document.getElementById("climateModal")));
-    const find = liArray.find(li => li.textContent.toLowerCase() === "find...");
-    if (find != null) {
-        find.addEventListener("click", () => {
-            toggleDisplay(document.getElementById("findModal"));
-            document.getElementById("searchInput").focus(); 
-        });
-    }
-    const massAdd = liArray.find(li => li.textContent.toLowerCase() === "mass add...");
-    if (massAdd != null) {
-        massAdd.addEventListener("click", () => {
-            gAddManager.setupTargetSelect();
-            toggleDisplay(document.getElementById("massAddModal"));
-        });
-    }
-    const massEdit = liArray.find(li => li.textContent.toLowerCase() === "mass edit...");
-    if (massEdit != null) {
-        massEdit.addEventListener("click", () => {
-            updateAttachTargets("massEditTargetSelect", gTree.tree);
-            toggleDisplay(document.getElementById("massEditModal"));
-        });
-    }
-    const scada = menu.querySelector("li[data-web='scada']");
-    if (scada != null) scada.addEventListener("click", () => toggleDisplay(document.getElementById("scadaModal")));
-    const staticLoads = liArray.find(li => li.textContent.toLowerCase() === "static loads to houses");
-    if (staticLoads != null) staticLoads.addEventListener("click", convertStaticLoadsIntoHouses);
-    const opacity = liArray.find(li => li.textContent.toLowerCase() === "change opacity...");
-    if (opacity != null) {
-        opacity.addEventListener("click", () => {
-            gOpacityManager.update();
-            gOpacityManager.buildOpacityModal();
-        });
-    }
-    const color = liArray.find(li => li.textContent.toLowerCase() === "color circuit...");
-    if (color != null) color.addEventListener("click", () => toggleDisplay(document.getElementById("colorModal")));
-    const gldHouse = liArray.find(li => li.textContent.toLowerCase() === "static loads to gld houses");
-    //if (gldHouse != null) gldHouse.addEventListener("click", () => ?);
 }
+{% endif %}
 
-function mouseHandler() {
+function addMouseHandlers() {
     const svgContainerWrapper = document.getElementById("svgContainerWrapper");
     svgContainerWrapper.addEventListener("click", function(event) {
         handleSelection(event);
@@ -2587,7 +2539,7 @@ function mouseHandler() {
     });
 }
 
-function keyHandler() {
+function addKeyHandlers() {
     document.body.addEventListener("keydown", function(event) {
         if (event.target.tagName.toLowerCase() !== "input") {
             switch (event.key) {
@@ -2629,6 +2581,67 @@ function toggleDisplay(element) {
     }
 }
 
+function makeModalsDraggable() {
+    $("#findModal .modalContent").draggable();
+    $("#progressModal .modalContent").draggable();
+    $("#loadModal .modalContent").draggable();
+    $("#blankFeederModal .modalContent").draggable();
+    $("#milsoftModal .modalContent").draggable();
+    $("#gridlabdModal .modalContent").draggable();
+    $("#cymeModal .modalContent").draggable();
+    $("#scadaModal .modalContent").draggable();
+    $("#amiModal .modalContent").draggable();
+    $("#massAddModal .modalContent").draggable();
+    $("#massEditModal .modalContent").draggable();
+    $("#attachmentsModal .modalContent").draggable();
+    $("#editAttachmentModal .modalContent").draggable();
+    $("#colorModal .modalContent").draggable();
+    $("#massAddSecondaryModal .modalContent").draggable();
+    $("#climateModal .modalContent").draggable();
+    // Position the description table depending on whether or not it is draggable
+    //document.getElementById("descriptionTable").removeAttribute("style");
+    //document.getElementById("descriptionTable").style.left = "70vw";
+}
+
+/**
+ * TODO: add unit tests
+ */
+ function getMoveNodesFunction(objects, tBody=null, tObject=null) {
+    if (objects.length > 1 && tBody != null) throw new Error("Cannot update a description table when multiple nodes have been selected to be moved.");
+    const moveNodes = function(event) {
+        event.stopPropagation();
+        detachListener();
+        const coords = clickLatLon(event);
+        move(objects, coords);
+        if (tObject != null) {
+            if (objects.length !== 1) throw new Error("Can only update the tObject of a description table when moving a single object!");
+            tObject.data.longitude = objects[0].longitude;
+            tObject.data.latitude = objects[0].latitude;
+        }
+        if (tBody != null) {
+            Array.from(tBody.getElementsByTagName("input")).forEach(input => {
+                if (input.dataset.coordinate === "latitude") {
+                    input.value = gMaxLat - coords.y/gDrawScaleFactor;
+                } else if (input.dataset.coordinate === "longitude") {
+                    input.value = coords.x/gDrawScaleFactor + gMinLon;
+                }
+            });
+        }
+    };
+    return moveNodes
+}
+
+function detachListener() {
+    const element = document.getElementById("svgContainer");
+    element.setAttribute("style", "cursor: default");
+    element.onclick = null;
+}
+
+// Ignore drags, those should be handled by svg-panzoom.
+function detectDrag(event) {
+    return (gDownX !== event.clientX || gDownY !== event.clientY) ? true : false;
+}
+
 //**************************************************
 // Edit menu interface
 //**************************************************
@@ -2654,7 +2667,7 @@ function convertStaticLoadsIntoHouses() {
     let modal;
     modal = createProgressModal({
         startMessage: `Converting every triplex load and/or triplex node into a house with children. This could take a few seconds.`,
-        endMessage: `${keys.length} objects were converted into houses with children.`,
+        endMessage: `${keys.length} triplex objects were converted into houses with children.`,
         finishFunc: () => modal.hide()    
     });
     setTimeout(function() {
@@ -2954,6 +2967,8 @@ function saveAttachment() {
 	gWriteFeeder.attachments[name] = document.getElementById("editAttachmentBox").value;
 }
 
+{% if showFileMenu %}
+
 /**
  * Subhourly data starts in 2006, although there are only 97 out of the 156 stations in 2006. We need subhourly data to get a wind speed measurement. A
  * few stations have really poor data quality.
@@ -3000,26 +3015,107 @@ function fillClimateModalOptions() {
     });
 }
 
-function getGLDHouses() {
+/**
+ * Start the server process to convert every triplex load and/or triplex node into a gld house.
+ */
+function startGldHouses() {
+    const triplexObjects = Object.entries(gTree.tree).filter(([key, obj]) => 
+        obj.object === "triplex_load" || obj.object === "triplex_node"
+        ).map(([key, obj]) => 
+            ({ key: key, latitude: obj.latitude, longitude: obj.longitude })
+        );
+    if (triplexObjects.length === 0) {
+        alert("This data has no triplex load or triplex node objects that can be converted into GLD houses.");
+        return;
+    }
     const formData = new FormData();
-    formData.set(?, ?);
-    $.ajax({
+    formData.set("triplexObjects", JSON.stringify(triplexObjects));
+    formData.set("owner", gThisOwner);
+    formData.set("modelName", gThisModelName);
+    let cancelled = false
+    let modal;
+    modal = createProgressModal({
+        startMessage: "Submitting your triplex objects for conversion...",
+        endMessage: "",
+        finishFunc: () => modal.hide(),
+        cancelFunc: () => {
+            cancelled = true;
+            saveFeeder(gReadFeeder);
+        }
+    });
+    const request = $.ajax({
         type: "POST",
-        url: ?
+        url: "/gldHouses",
         data: formData,
         processData: false,
         contentType: false
     }).done(function(data, text, jqXHR) {
-
-    }).fail(function(jqXHR, text, error) {
-
+        if (!cancelled) {
+            pollGldHouses();
+        }
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+        modal.endMessage = "Operation failed. We were unable to submit your triplex objects. Check the console for more information.";
+        modal.finish();
+        console.log(jqXHR.status); // 500
+        console.log(jqXHR.responseText); // Error message
     });
+}
+
+/**
+ * Poll the server until the gld house information is ready for download.
+ */
+function pollGldHouses() {
+    let cancelled = false;
+    let modal;
+    modal = createProgressModal({
+        startMessage: "Convert triplex objects into real-world gld houses. This could take many minutes...",
+        endMessage: "",
+        cancelFunc: () => {
+            cancelled = true;
+            saveFeeder(gReadFeeder)
+        },
+        finishFunc: () => {
+            modal.hide();
+            // don't reload. No need to.
+        }
+    });
+    const formData = new FormData();
+    formData.set("owner", gThisOwner);
+    formData.set("modelName", gThisModelName);
+    const intervalId = setInterval(function() {
+        $.ajax({
+            type: "POST",
+            url: "/checkGldHouses",
+            data: formData,
+            processData: false,
+            contentType: false
+        }).done(function(data, textStatus, jqXHR) { // textStatus is useless
+            if (!cancelled) {
+                if (jqXHR.status === 200) {
+                    clearInterval(intervalId);
+                    const keys = Object.keys(data);
+                    keys.forEach(key => gTree.replaceNode(key, data[key]))
+                    createSvgData(keys).draw(gViewport); // redraw so nodes are proper color
+                    modal.endMessage = `Success. ${keys.length} triplex objects were converted into gld houses.`;
+                    modal.finish();
+                }
+            } else {
+                clearInterval(intervalId);
+                // No need to do anything else. A new progress modal replaces this one.
+            }
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+            clearInterval(intervalId);
+            modal.endMessage = "We were unable to get the house data to convert triplex objects into gld houses. Operation failed. Check the console for more information.";
+            modal.finish();
+            console.log(jqXHR.status); // 500
+            console.log(jqXHR.responseText); // Error message
+        });
+    }, 5000);
 }
 
 //**************************************************
 // File menu interface
 //**************************************************
-{% if showFileMenu %}
 
 /** 
  * Used to save the new changes or undo an operation by resaving the old changes.
@@ -3298,10 +3394,6 @@ async function renameFeeder(oldServerName, newName) {
     }).fail(function() {
         alert("The AJAX request failed to get a successful response from the server.");
     });
-}
-
-function displayMap(){
-    window.open(`/displayMap/${gThisOwner}/${gThisModelName}/${gThisFeederNum}`, '_blank');
 }
 
 {% endif %}
@@ -3805,6 +3897,13 @@ function preserveColorWithNewAlpha(e, alpha) {
         e.style[styleAttribute] = `rgba(${inlineColorValues}, ${alpha})`;
         return;
     }
+}
+
+/**
+ * Determine whether or not this interface was loaded as a static file or as part of a web server request.
+ */
+function interfaceIsStatic() {
+    return document.getElementById("panZoomInsert").textContent.trim() !== ""
 }
 
 //**************************************************
@@ -4873,7 +4972,7 @@ function createTreeObject(input, tree) {
 }
 
 //**************************************************
-// Modal interface 
+// Modal functions 
 //**************************************************
 
 /**
@@ -4902,7 +5001,7 @@ function addModalHandlers(modal) {
 })();
 
 //**************************************************
-// Table interface 
+// Table classes 
 //**************************************************
 
 /**
@@ -5156,7 +5255,7 @@ const buttonPrototype = {
 }
 
 /**
- * TODO: ad unit tests, DON'T remove tObject argument, remove tWrapper argument
+ * TODO: add unit tests, DON'T remove tObject argument, remove tWrapper argument
  */
 function createButton({action, tableBody=null, tObject=null}) {
     const button = Object.create(buttonPrototype);
@@ -5429,51 +5528,42 @@ function createRow({key, value=null, tObject=null, deletable=false}) {
 }
 
 //**************************************************
-// Event listeners
+// Initialization
 //**************************************************
 
 /**
- * TODO: add unit tests
+ * Initialize the interface. The order of the initialization functions matters. This is a function declaration instead of an automatically invoked
+ * function expression because the testing code needs to call this function.
  */
-function getMoveNodesFunction(objects, tBody=null, tObject=null) {
-    if (objects.length > 1 && tBody != null) throw new Error("Cannot update a description table when multiple nodes have been selected to be moved.");
-    const moveNodes = function(event) {
-        event.stopPropagation();
-        detachListener();
-        const coords = clickLatLon(event);
-        move(objects, coords);
-        if (tObject != null) {
-            if (objects.length !== 1) throw new Error("Can only update the tObject of a description table when moving a single object!");
-            tObject.data.longitude = objects[0].longitude;
-            tObject.data.latitude = objects[0].latitude;
+async function initializeInterface() {
+    if (!interfaceIsStatic()) {
+        try {
+            await checkServerConversion();
+        } catch (e) {
+            alert(e)
         }
-        if (tBody != null) {
-            Array.from(tBody.getElementsByTagName("input")).forEach(input => {
-                if (input.dataset.coordinate === "latitude") {
-                    input.value = gMaxLat - coords.y/gDrawScaleFactor;
-                } else if (input.dataset.coordinate === "longitude") {
-                    input.value = coords.x/gDrawScaleFactor + gMinLon;
-                }
-            });
-        }
-    };
-    return moveNodes
+    }
+    createInterface();
+    attachHandlers();
+    document.getElementById("loadingMessage").style.display = "none"
+}
+initializeInterface();
+
+function createSingletons() {
+    gOpacityManager = createOpacityManager();
+    gAddManager = createAddManager();
+    gSelection = createSelection();
 }
 
-function detachListener() {
-    const element = document.getElementById("svgContainer");
-    element.setAttribute("style", "cursor: default");
-    element.onclick = null;
+function createInterface() {
+    createViewport(gWriteFeeder.tree, document.getElementById("svgContainer"));
+    gTree = createTree(gWriteFeeder.tree);
+    const objects = Object.values(gTree.tree);
+    insertCoordinates(objects, gMinLon, gMaxLat, (1000/gDrawScaleFactor) * .005);
+    gViewport = document.getElementsByClassName("svg-pan-zoom_viewport")[0];
+    createSingletons();
+    createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
 }
-
-// Ignore drags, those should be handled by svg-panzoom.
-function detectDrag(event) {
-    return (gDownX !== event.clientX || gDownY !== event.clientY) ? true : false;
-}
-
-//**************************************************
-// Initialization
-//**************************************************
 
 function checkServerConversion() {
     let modal;
@@ -5519,73 +5609,6 @@ function checkServerConversion() {
         }(), 5000)
     });
 }
-
-function createSingletons() {
-    gOpacityManager = createOpacityManager();
-    gAddManager = createAddManager();
-    gSelection = createSelection();
-}
-
-function createInterface() {
-    createViewport(gWriteFeeder.tree, document.getElementById("svgContainer"));
-    gTree = createTree(gWriteFeeder.tree);
-    const objects = Object.values(gTree.tree);
-    insertCoordinates(objects, gMinLon, gMaxLat, (1000/gDrawScaleFactor) * .005);
-    gViewport = document.getElementsByClassName("svg-pan-zoom_viewport")[0];
-    createSingletons();
-    createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
-}
-
-/**
- * Determine whether or not this interface was loaded as a static file or as part of a web server request.
- */
-function interfaceIsStatic() {
-    return document.getElementById("panZoomInsert").textContent.trim() !== ""
-}
-
-function prepareFindModal() {
-    const searchInput = document.getElementById("searchInput");
-    searchInput.addEventListener("change", searchTerm);
-    document.getElementById("searchExactString").addEventListener("change", function() {
-        searchTerm.call(searchInput);
-    });
-    document.getElementById("searchSubstring").addEventListener("change", function() {
-        searchTerm.call(searchInput);
-    });
-}
-
-function prepareColorModal() {
-    const colorModal = document.getElementById("colorModal");
-    const colorManager = createColorManager();
-    colorModal.querySelector("input[type='file']").addEventListener("change", async function() {
-        await colorManager.buildHTML(this.files);
-    });
-    colorModal.querySelector("button[data-buttonfunction='reset']").addEventListener("click", () => {
-        colorManager.removeColors();
-    });
-}
-
-/**
- * Initialize the interface. The order of the initialization functions matters. This is a function declaration instead of an automatically invoked
- * function expression because the testing code needs to call this function.
- */
-async function initializeInterface() {
-    if (!interfaceIsStatic()) {
-        try {
-            await checkServerConversion();
-        } catch (e) {
-            alert(e)
-        }
-    }
-    createInterface();
-    attachHandlers();
-    applyJQueryStyles();
-    if (interfaceIsStatic()) disableWebFeatures();
-    prepareFindModal();
-    prepareColorModal();
-    document.getElementById("loadingMessage").style.display = "none"
-}
-initializeInterface();
 
     //buildFeeder();
     //const t0 = performance.now();
