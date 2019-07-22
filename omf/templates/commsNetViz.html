@@ -144,7 +144,18 @@
 
 	//Add marker to map at click location; add popup window
 	function addMarker(e){
-		L.circleMarker(e.latlng).addTo(map);
+		let sampleFeature = {
+		    "type": "Feature",
+		    "properties": {
+		        "name": "New feature",
+		        "popupContent": "A new node was added!"
+		    },
+		    "geometry": {
+		        "type": "Point",
+		        "coordinates": [e.latlng.lng, e.latlng.lat] 
+		    }
+		};
+		addGeoObject(sampleFeature);
 	}
 
 	function changeColor(e){
@@ -291,7 +302,19 @@
 	document.getElementById('toolDiv').appendChild(hideNonComms);
 	hideNonComms.addEventListener('click', function(){hideGridObjects(selectNonCommsObjects())});
 
-	//Add new object to map
+	//Add new object to map example
+
+	var sampleFeature = {
+	    "type": "Feature",
+	    "properties": {
+	        "name": "New feature",
+	        "popupContent": "A new node was added!"
+	    },
+	    "geometry": {
+	        "type": "Point",
+	        "coordinates": [-104.99404, 39.75621]
+	    }
+	};
 	function addGeoObject(feature){
 		if (feature.geometry['type'] == 'Point'){
 			geojsonLayer.addData(feature);
@@ -300,6 +323,7 @@
 			geojsonLayer.addData(feature);
 		}
 	}
+	addGeoObject(sampleFeature);
 
 	//Saving object option (grid editing) - would need tag in geoobjects
 
