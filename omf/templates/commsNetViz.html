@@ -21,6 +21,11 @@
 		left: 0.0%;
 		top: 0.0%;
 		}
+
+		.selectedControl{
+		background-color: yellow;
+		}
+
 	</style>
 </head>
 <body>
@@ -136,6 +141,63 @@
 		}).addTo(map);
 	L.control.scale().addTo(map);
 	geojsonLayer.addTo(map);
+
+	//Add marker to map at click location; add popup window
+	function addMarker(e){
+		L.circleMarker(e.latlng).addTo(map);
+	}
+
+	function changeColor(e){
+		//console.log(e.target._popup._content);
+		e.target._path.style.fill = '#dd55ff';
+		e.target._path.style.stroke = '#dd55ff';
+		//e.target._popup._content = 'has been selected'
+		//e.target._radius = 's40';
+		//console.log(e.target._path.style.fill);
+	}
+
+	//Control box
+	L.Control.Toolbox = L.Control.extend({
+	    onAdd: function(map) {
+	        var toolDiv = L.DomUtil.create('div');
+	        toolDiv.id = 'toolDiv';
+	        toolDiv.style.height = '100px';
+	        toolDiv.style.width = '200px';
+	        //toolDiv.style.background = 'white';
+	        return toolDiv;
+	    },
+	    onRemove: function(map) {
+	    }
+	});
+
+	L.control.toolbox = function(opts) {
+	    return new L.Control.Toolbox(opts);
+	}
+
+	L.control.toolbox({ position: 'topright'}).addTo(map);
+
+
+	function newMarkerToggle(e){
+		//how to check if there is event listener
+		if (e.target.classList.contains('selectedControl')) {
+			e.target.classList.remove("class","selectedControl");
+			map.off('click', addMarker);	
+		}
+		else {
+			document.getElementById(e.target.id).setAttribute("class","selectedControl");
+			map.on('click', addMarker);
+		}
+		//console.log(e.target.class);
+	}
+	//how do you set the status of a button
+	var newMarker = L.DomUtil.create('button');
+	L.DomEvent.disableClickPropagation(newMarker);
+	newMarker.id = 'newMarker';
+	newMarker.classList.add('mapControl');
+	newMarker.innerHTML = 'New Marker';
+	document.getElementById('toolDiv').appendChild(newMarker);
+	newMarker.addEventListener('click', newMarkerToggle);
+
 	//get non rf and fiber lines to hid them
 	/*
 	geojsonLayer.eachLayer(function (layer) {
@@ -210,6 +272,24 @@
 			};
 		});
 	}
+
+	//to do create a loop to automate process for additonal controls
+	var displayNonComms = L.DomUtil.create('button');
+	L.DomEvent.disableClickPropagation(displayNonComms);
+	displayNonComms.id = 'displayNonComms';
+	displayNonComms.classList.add('mapControl');
+	displayNonComms.innerHTML = 'Show full grid';
+	document.getElementById('toolDiv').appendChild(displayNonComms);
+	displayNonComms.addEventListener('click', function(){showGridObjects(selectNonCommsObjects())});
+
+	
+	var hideNonComms = L.DomUtil.create('button');
+	L.DomEvent.disableClickPropagation(hideNonComms);
+	hideNonComms.id = 'hideNonComms';
+	hideNonComms.classList.add('mapControl');
+	hideNonComms.innerHTML = 'Show comms grid';
+	document.getElementById('toolDiv').appendChild(hideNonComms);
+	hideNonComms.addEventListener('click', function(){hideGridObjects(selectNonCommsObjects())});
 
 	//Add new object to map
 	function addGeoObject(feature){
