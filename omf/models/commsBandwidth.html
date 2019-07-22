@@ -67,6 +67,18 @@
 				<input type="text" id="meterPacket" name="meterPacket" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Fiber Cost<span class="classic">Cost of fiber per meter</span></label>
+				<input type="text" id="fiber_cost" name="fiber_cost" pattern="^\d+\.?\d*$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">RF Collector Cost<span class="classic">Cost of each RF collector</span></label>
+				<input type="text" id="rf_collector_cost" name="rf_collector_cost" pattern="^\d+\.?\d*$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Smart Meter Cost<span class="classic">Cost of smart meter installation (based on nodes labeled meter or triplex meter)</span></label>
+				<input type="text" id="smart_meter_cost" name="smart_meter_cost" pattern="^\d+\.?\d*$" required="required"/>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Feeder<span class="classic">Select a feeder to model a communications network on top of.</span></label>
 				<select id="feederName1" name="feederName1">
 					<script type="text/javascript">
@@ -106,6 +118,16 @@
 			<p>Overloaded Fiber: {{allOutputDataDict.overloadedFiber}}</p>
 			<p>RF status: {{allOutputDataDict.collectorStatus}}</p>
 			<p>Overloaded Collectors: {{allOutputDataDict.overloadedCollectors}}</p>
+		</div>
+		<p class="reportTitle postRun">Cost Analysis</p>
+		<div id="costAnalysis" class="tightContent postRun">
+			<p>Fiber Cost: $<span class="currency">{{allOutputDataDict.fiber_cost}}</span></p>
+			<p>RF Collector Cost: $<span class="currency">{{allOutputDataDict.rf_collector_cost}}</span></p>
+			<p>Smart Meter Cost: $<span class="currency">{{allOutputDataDict.smart_meter_cost}}</span></p>
+			<p>Total Equipment Cost: $<span class="currency">{{allOutputDataDict.total_cost}}</span></p>
+		</div>
+		<p class="reportTitle postRun">Visualization</p>
+		<div id="visualization" class="tightContent postRun">
 			<button id="tester" type="button" onclick="javascript:commsMap(allInputData.modelName,1);" style="display:block;width:125px;">Communications Map</button>
 			<input type="text" id="feederName1" name="feederName1" style="display:none">
 		</div>

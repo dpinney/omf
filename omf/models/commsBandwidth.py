@@ -12,6 +12,7 @@ modelName, template = metadata(__file__)
 hidden = True
 
 def work(modelDir, inputDict):
+	outData = {}
 	#feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	#inputDict['feederName1'] = feederName
 	feederName = inputDict['feederName1']
@@ -23,6 +24,7 @@ def work(modelDir, inputDict):
 	comms.calcBandwidth(feeder)
 	comms.saveOmc(comms.graphGeoJson(feeder), modelDir, feederName)
 
+	#bandwidth capacity
 	overloadedFiber = []
 	for edge in nx.get_edge_attributes(feeder, 'fiber'):
 		if feeder[edge[0]][edge[1]]['bandwidthUse'] > feeder[edge[0]][edge[1]]['bandwidthCapacity']:
@@ -33,7 +35,6 @@ def work(modelDir, inputDict):
 		if feeder.node[rfCollector]['bandwidthUse'] > feeder.node[rfCollector]['bandwidthCapacity']:
 			overloadedCollectors.append(rfCollector)
 
-	outData = {}
 	outData['overloadedFiber'] = overloadedFiber
 	outData['overloadedCollectors'] = overloadedCollectors
 	if len(overloadedFiber) == 0:
@@ -44,6 +45,15 @@ def work(modelDir, inputDict):
 		outData['collectorStatus'] = 'passed'
 	else:
 		outData['collectorStatus'] = 'insufficient'
+
+	#cost calculations
+
+	outData['fiber_cost'] = comms.getFiberCost(feeder, float(inputDict.get('fiber_cost', 0)))
+	outData['rf_collector_cost'] = comms.getrfCollectorsCost(feeder, float(inputDict.get('rf_collector_cost', 0)))
+	outData['smart_meter_cost'] = comms.getsmartMetersCost(feeder, float(inputDict.get('smart_meter_cost', 0)))
+
+	outData['total_cost'] = outData['fiber_cost'] + outData['rf_collector_cost'] + outData['smart_meter_cost']
+
 	outData["stdout"] = "Success"
 	outData["stderr"] = ""
 	return outData
@@ -56,6 +66,9 @@ def new(modelDir):
 		"rfCapacity": 10**3*5,
 		"meterPacket": 10,
 		"feederName1":"Olin Barre LatLon",
+		"fiber_cost": 3,
+		"rf_collector_cost": 30000,
+		"smart_meter_cost": 1000,
 		"created":str(datetime.datetime.now())
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
