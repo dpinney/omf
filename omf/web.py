@@ -6,6 +6,7 @@ from jinja2 import Template
 from multiprocessing import Process
 from threading import Thread
 from passlib.hash import pbkdf2_sha512
+from functools import wraps
 import json, os, flask_login, hashlib, random, time, datetime as dt, shutil, boto.ses, csv, sys
 try:
 	import fcntl
@@ -307,22 +308,90 @@ def myaccount():
 def static_from_root():
 	return send_from_directory(app.static_folder, request.path[1:])
 
+
+def read_permission_function(func):
+	"""
+	Run the route if the user has read permission for the model, otherwise redirect to home page.
+	The "owner" and "modelName" route parameters are required to use this decorator.
+	"""
+	@wraps(func)
+	def wrapper(*args, **kwargs):
+		owner = kwargs["owner"]
+		model_name = kwargs["modelName"]
+		model_metadata_path = os.path.join(_omfDir, "data/Model", owner, model_name, "allInputData.json")
+		if not os.path.isfile(model_metadata_path):
+			redirect("/")
+		if owner == "public":
+			# Any user can view a public model
+			return func(*args, **kwargs)
+		else:
+			if owner == User.cu() or _is_authorized_model_viewer(model_metadata_path) or "admin" == User.cu():
+				# Only owners, authorized viewers, and the admin can view a user-owned model
+				return func(*args, **kwargs)
+		return redirect("/")
+	return wrapper
+
+
+def _is_authorized_model_viewer(model_metadata_filepath):
+	"""Return True if the current user is authorized to view the specified model, else False."""
+	with open(model_metadata_filepath) as f:
+		fcntl.flock(f, fcntl.LOCK_SH)
+		data = json.load(f)
+		fcntl.flock(f, fcntl.LOCK_UN)
+	authorized_viewers = data.get("viewers")
+	if authorized_viewers is not None and User.cu() in authorized_viewers:
+		return True
+	return False
+
+def write_permission_function(func):
+	"""
+	Run the route if the user has write permission for the model, otherwise redirect to the home page.
+
+	Values for "owner" and "model_name" must be supplied through route parameters or through a form values.
+	"""
+	@wraps(func)
+	def wrapper(*args, **kwargs):
+		owner = kwargs.get("owner")
+		if owner is None:
+			owner = request.form.get("user")
+		model_name = kwargs.get("modelName")
+		if model_name is None:
+			model_name = request.form.get("modelName")
+		model_metadata_path = os.path.join(_omfDir, "data/Model", owner, model_name, "allInputData.json")
+		if not os.path.isfile(model_metadata_path):
+			redirect("/")
+
+		if owner == "public":
+			if "admin" == User.cu():
+				# Only the admin can run and edit public models
+				return func(*args, **kwargs)
+		else:
+			if owner == User.cu() or "admin" == User.cu():
+				# Only the model owner and admin can run and edit a user-owned model
+				return func(*args, **kwargs)
+		return redirect("/")
+	return wrapper
+
+
+
 ###################################################
 # MODEL FUNCTIONS
 ###################################################
 
 @app.route("/model/<owner>/<modelName>")
 @flask_login.login_required
+@read_permission_function
 def showModel(owner, modelName):
 	''' Render a model template with saved data. '''
-	if owner==User.cu() or "admin"==User.cu() or owner=="public":
-		modelDir = "./data/Model/" + owner + "/" + modelName
-		with open(modelDir + "/allInputData.json") as inJson:
-			modelType = json.load(inJson).get("modelType","")
-		thisModel = getattr(models, modelType)
-		return thisModel.renderTemplate(modelDir, absolutePaths=False, datastoreNames=getDataNames())
-	else:
-		return redirect("/")
+	#if owner==User.cu() or "admin"==User.cu() or owner=="public":
+	modelDir = "./data/Model/" + owner + "/" + modelName
+	with open(modelDir + "/allInputData.json") as inJson:
+		modelType = json.load(inJson).get("modelType","")
+	thisModel = getattr(models, modelType)
+	return thisModel.renderTemplate(modelDir, absolutePaths=False, datastoreNames=getDataNames())
+	#else:
+		#return redirect("/")
+
 
 @app.route("/newModel/<modelType>/<modelName>", methods=["POST","GET"])
 @flask_login.login_required
@@ -335,6 +404,7 @@ def newModel(modelType, modelName):
 
 @app.route("/runModel/", methods=["POST"])
 @flask_login.login_required
+@write_permission_function
 def runModel():
 	''' Start a model running and redirect to its running screen. '''
 	pData = request.form.to_dict()
