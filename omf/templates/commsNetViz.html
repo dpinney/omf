@@ -152,7 +152,7 @@
 		    },
 		    "geometry": {
 		        "type": "Point",
-		        "coordinates": [e.latlng.lng, e.latlng.lat] 
+		        "coordinates": [-101, 34] 
 		    }
 		};
 		addGeoObject(sampleFeature);
@@ -303,18 +303,6 @@
 	hideNonComms.addEventListener('click', function(){hideGridObjects(selectNonCommsObjects())});
 
 	//Add new object to map example
-
-	var sampleFeature = {
-	    "type": "Feature",
-	    "properties": {
-	        "name": "New feature",
-	        "popupContent": "A new node was added!"
-	    },
-	    "geometry": {
-	        "type": "Point",
-	        "coordinates": [-104.99404, 39.75621]
-	    }
-	};
 	function addGeoObject(feature){
 		if (feature.geometry['type'] == 'Point'){
 			geojsonLayer.addData(feature);
@@ -323,9 +311,138 @@
 			geojsonLayer.addData(feature);
 		}
 	}
-	addGeoObject(sampleFeature);
 
-	//Saving object option (grid editing) - would need tag in geoobjects
+	//Form div for updating geojson
+	L.Control.Form = L.Control.extend({
+	    onAdd: function(map) {
+	        var formDiv = L.DomUtil.create('div');
+	        formDiv.id = 'formDiv';
+	        formDiv.style.height = 'auto';
+	        formDiv.style.width = '200px';
+	        formDiv.style.background = 'white';
+	        return formDiv;
+	    },
+	    onRemove: function(map) {
+	    }
+	});
+
+	L.control.form = function(opts) {
+	    return new L.Control.Form(opts);
+	}
+
+	L.control.form({ position: 'topright'}).addTo(map);
+
+	//Create form container
+	var geoForm = L.DomUtil.create('form');
+	L.DomEvent.disableClickPropagation(geoForm);
+	geoForm.id = 'geoForm';
+	geoForm.name = 'geoForm';
+	geoForm.classList.add('mapControl');
+	document.getElementById('formDiv').appendChild(geoForm);
+
+	var geoName = L.DomUtil.create('input');
+	geoName.id = 'geoName';
+	geoName.type = 'text';
+	geoName.name = 'geoName';
+	geoName.placeholder = 'Name';
+	document.getElementById('geoForm').appendChild(geoName);
+
+	var geoLat = L.DomUtil.create('input');
+	geoLat.id = 'geoLat';
+	geoLat.type = 'text';
+	geoLat.name = 'geoLat';
+	geoLat.placeholder = 'Latitude';
+	document.getElementById('geoForm').appendChild(geoLat);
+
+	var geoLng = L.DomUtil.create('input');
+	geoLng.id = 'geoLng';
+	geoLng.type = 'text';
+	geoLng.name = 'geoLng';
+	geoLng.placeholder = 'Longitude';
+	document.getElementById('geoForm').appendChild(geoLng);
+
+	var geoSubstationLabel = L.DomUtil.create('label');
+	geoSubstationLabel.id = 'geoSubstationLabel';
+	geoSubstationLabel.name = 'geoSubstationLabel';
+	geoSubstationLabel.innerHTML = 'Is substation?';
+	document.getElementById('geoForm').appendChild(geoSubstationLabel);
+
+	var geoSubstation = L.DomUtil.create('input');
+	geoSubstation.id = 'geoSubstation';
+	geoSubstation.type = 'checkbox';
+	geoSubstation.name = 'geoSubstation';
+	document.getElementById('geoForm').appendChild(geoSubstation);
+
+	var geoRfCollectorLabel = L.DomUtil.create('label');
+	geoRfCollectorLabel.id = 'geoRfCollectorLabel';
+	geoRfCollectorLabel.name = 'geoRfCollectorLabel';
+	geoRfCollectorLabel.innerHTML = 'Is RF Collector?';
+	document.getElementById('geoForm').appendChild(geoRfCollectorLabel);
+
+	var geoRfCollector = L.DomUtil.create('input');
+	geoRfCollector.id = 'geoRfCollector';
+	geoRfCollector.type = 'checkbox';
+	geoRfCollector.name = 'geoRfCollector';
+	document.getElementById('geoForm').appendChild(geoRfCollector);
+
+	var geoSmartMeterLabel = L.DomUtil.create('label');
+	geoSmartMeterLabel.id = 'geoSmartMeterLabel';
+	geoSmartMeterLabel.name = 'geoSmartMeterLabel';
+	geoSmartMeterLabel.innerHTML = 'Is Smart Meter?';
+	document.getElementById('geoForm').appendChild(geoSmartMeterLabel);
+
+	var geoSmartMeter = L.DomUtil.create('input');
+	geoSmartMeter.id = 'geoSmartMeter';
+	geoSmartMeter.type = 'checkbox';
+	geoSmartMeter.name = 'geoSmartMeter';
+	document.getElementById('geoForm').appendChild(geoSmartMeter);
+
+	var geoBandwidthCapacity = L.DomUtil.create('input');
+	geoBandwidthCapacity.id = 'geoBandwidthCapacity';
+	geoBandwidthCapacity.type = 'text';
+	geoBandwidthCapacity.name = 'geoBandwidthCapacity';
+	geoBandwidthCapacity.placeholder = 'Bandwidth Capacity';
+	document.getElementById('geoForm').appendChild(geoBandwidthCapacity);
+
+	var geoPointType = L.DomUtil.create('input');
+	geoPointType.id = 'geoPointType';
+	geoPointType.type = 'text';
+	geoPointType.name = 'geoPointType';
+	geoPointType.placeholder = 'Point Type';
+	document.getElementById('geoForm').appendChild(geoPointType);
+
+	var geoSubmit = L.DomUtil.create('input');
+	L.DomEvent.disableClickPropagation(geoSubmit);
+	geoSubmit.id = 'geoSubmit';
+	geoSubmit.type = 'submit';
+	geoSubmit.value = 'Submit Geo Form';
+	geoSubmit.classList.add('mapControl');
+	document.getElementById('geoForm').appendChild(geoSubmit);
+	geoSubmit.addEventListener('click', geoUpdate)
+
+	function geoUpdate(e){
+		e.preventDefault();
+		//console.log(e);
+		//console.log(document.geoForm);
+		//console.log(document.getElementById('geoBandwidthCapacity'));
+		let feature = {
+		    "type": "Feature",
+		    "properties": {
+		        "name": document.getElementById('geoName').value,
+		        "substation": document.getElementById('geoSubstation').checked,
+		        "rfCollector": document.getElementById('geoRfCollector').checked,
+		        "smartMeter": document.getElementById('geoSmartMeter').checked,
+		        "bandwidthCapacity": document.getElementById('geoBandwidthCapacity').value,
+		        "pointType": document.getElementById('geoPointType').value,
+		    },
+		    "geometry": {
+		        "type": "Point",
+		        "coordinates": [document.getElementById('geoLng').value, document.getElementById('geoLat').value] 
+		    }
+		};
+		//console.log(feature);
+		geojsonLayer.addData(feature);
+	}
 
 </script>
 </body>
