@@ -1,3 +1,5 @@
+import pulp
+import pandas as pd
 import argparse
 import cProfile
 import matplotlib.pyplot as plt
@@ -467,4 +469,367 @@ class WH24(VirtualBattery):
         # extract hourly data from minute output for energy
         e_ul_wh = e_ul_wh1[59:len(e_ul_wh1):60]*float(self.N)/float(self.N_wh)
         return p_lower_wh, p_upper_wh, e_ul_wh
+
+  
+# --------------------------------------------------------------------------- #
+# STACKED CODE FROM PNNL
+
+def run_fhec(ind, gt_demand, Input):
+    
+    use_hour = int(ind["userHourLimit"]) # number of VB use hours specified by the user
+    epsilon  = 1 #float(ind["energyReserve"]) # energy reserve parameter, range: 0 - 1
+
+    fhec_kwh_rate = float(ind["electricityCost"]) # $/kW
+    fhec_peak_mult = float(ind["peakMultiplier"])
+
+    s = sorted(gt_demand)
+
+    # peak hours calculation
+    perc = float(ind["peakPercentile"])
+    fhec_gt98 = s[int(perc*len(s))]
+
+    fhec_peak_hours = []
+    for idx, val in enumerate(gt_demand):
+        if  val > fhec_gt98:
+            fhec_peak_hours.extend([idx+1])
+            
+    fhec_off_peak_hours = []
+    for i in range(len(gt_demand)):
+        if  i not in fhec_peak_hours:
+            fhec_off_peak_hours.extend([i+1])
+
+    # read the input data, including load profile, VB profile, and regulation price
+    # Input = pd.read_csv(input_csv, index_col=['Hour'])
+
+    # VB model parameters
+    C = float(ind["capacitance"]) # thermal capacitance
+    R = float(ind["resistance"]) # thermal resistance
+    deltaT = 1
+    alpha = math.exp(-deltaT/(C*R)) # hourly self discharge rate
+
+    E_0 = 0 # VB initial energy state
+
+    arbitrage_option = ind["use_arbitrage"] == "on"
+    regulation_option = ind["use_regulation"] == "on"
+    deferral_option = ind["use_deferral"] == "on"
+    
+    # calculate the predicted profits for all 8760 hours
+    use_prft = []
+    for hour in Input.index:
+        temp = 0
+        if arbitrage_option or deferral_option:
+            if hour in fhec_peak_hours:
+                temp += fhec_peak_mult*fhec_kwh_rate*(Input.loc[hour, "VB Energy upper (kWh)"]-Input.loc[hour, "VB Energy lower (kWh)"])
+            if hour in fhec_off_peak_hours:
+                temp += fhec_kwh_rate*(Input.loc[hour, "VB Energy upper (kWh)"]-Input.loc[hour, "VB Energy lower (kWh)"])
+        if regulation_option:
+            temp += (Input.loc[hour, "Reg-up Price ($/MW)"]+Input.loc[hour, "Reg-dn Price ($/MW)"])/1000*(Input.loc[hour, "VB Energy upper (kWh)"]-Input.loc[hour, "VB Energy lower (kWh)"])
+        use_prft.append({'Hour': hour, 'Profit': temp})
+    
+    # sort the predicted profits from the highest to the lowest
+    use_prft = sorted(use_prft, reverse = True, key = lambda i : i['Profit'])
+    
+    # get the indices of the first use_hour hours, and the optimization will be scheduled only for those hours
+    use_list = []
+    for index in range(use_hour):
+        use_list.append(use_prft[index]['Hour'])
+    
+    ###############################################################################
+
+    # start demand charge reduction LP problem
+    model = pulp.LpProblem("Demand charge minimization problem FHEC-Knievel", pulp.LpMinimize)
+
+    # decision variable of VB charging power; dim: 8760 by 1
+    VBpower = pulp.LpVariable.dicts("ChargingPower", ((hour) for hour in Input.index))
+    # set bound
+    for hour in Input.index:
+        if hour in use_list:
+            VBpower[hour].lowBound = Input.loc[hour, "VB Power lower (kW)"]
+            VBpower[hour].upBound  = Input.loc[hour, "VB Power upper (kW)"]
+        if hour not in use_list:
+            VBpower[hour].lowBound = 0
+            VBpower[hour].upBound  = 0
+    
+    # decision variable of VB energy state; dim: 8760 by 1
+    VBenergy = pulp.LpVariable.dicts("EnergyState", ((hour) for hour in Input.index))
+    # set bound
+    for hour in Input.index:
+        VBenergy[hour].lowBound = Input.loc[hour, "VB Energy lower (kWh)"]
+        VBenergy[hour].upBound  = Input.loc[hour, "VB Energy upper (kWh)"]
+    
+    # decision variable of annual peak demand
+    PeakDemand = pulp.LpVariable("annual peak demand", lowBound=0)
+    
+    # decision variable: hourly regulation up capacity; dim: 8760 by 1
+    reg_up = pulp.LpVariable.dicts("hour reg up", ((hour) for hour in Input.index), lowBound=0)
+    # decision variable: hourly regulation dn capacity; dim: 8760 by 1
+    reg_dn = pulp.LpVariable.dicts("hour reg dn", ((hour) for hour in Input.index), lowBound=0)
+    for hour in Input.index:
+        if hour not in use_list:
+            reg_up[hour].upBound = 0
+            reg_dn[hour].upBound = 0
+
+    # objective functions
+    if (arbitrage_option == False and regulation_option == False and deferral_option == False):
+        model += 0, "an arbitrary objective function"
+
+    if (arbitrage_option == True and regulation_option == False and deferral_option == False):
+        model += pulp.lpSum([fhec_peak_mult*fhec_kwh_rate*(Input.loc[hour, "Load (kW)"]+VBpower[hour]) for hour in fhec_peak_hours]
+                            + [fhec_kwh_rate*(Input.loc[hour, "Load (kW)"]+VBpower[hour]) for hour in fhec_off_peak_hours])
+
+    if (arbitrage_option == False and regulation_option == True and deferral_option == False):
+        model += pulp.lpSum([-Input.loc[hour, "Reg-up Price ($/MW)"]/1000*reg_up[hour] for hour in Input.index]
+                            + [-Input.loc[hour, "Reg-dn Price ($/MW)"]/1000*reg_dn[hour] for hour in Input.index])
+
+    if (arbitrage_option == False and regulation_option == False and deferral_option == True):
+        model += pulp.lpSum(1E03*PeakDemand)
+
+    if (arbitrage_option == True and regulation_option == True and deferral_option == False):
+        model += pulp.lpSum([fhec_peak_mult*fhec_kwh_rate*(Input.loc[hour, "Load (kW)"]+VBpower[hour]) for hour in fhec_peak_hours]
+                            + [fhec_kwh_rate*(Input.loc[hour, "Load (kW)"]+VBpower[hour]) for hour in fhec_off_peak_hours]
+                            + [-Input.loc[hour, "Reg-up Price ($/MW)"]/1000*reg_up[hour] for hour in Input.index]
+                            + [-Input.loc[hour, "Reg-dn Price ($/MW)"]/1000*reg_dn[hour] for hour in Input.index])
+
+    if (arbitrage_option == True and regulation_option == False and deferral_option == True):
+        model += pulp.lpSum([fhec_peak_mult*fhec_kwh_rate*(Input.loc[hour, "Load (kW)"]+VBpower[hour]) for hour in fhec_peak_hours]
+                            + [fhec_kwh_rate*(Input.loc[hour, "Load (kW)"]+VBpower[hour]) for hour in fhec_off_peak_hours]
+                            + 1E03*PeakDemand)
+
+    if (arbitrage_option == False and regulation_option == True and deferral_option == True):
+        model += pulp.lpSum([-Input.loc[hour, "Reg-up Price ($/MW)"]/1000*reg_up[hour] for hour in Input.index]
+                            + [-Input.loc[hour, "Reg-dn Price ($/MW)"]/1000*reg_dn[hour] for hour in Input.index]
+                            + 1E03*PeakDemand)
+        
+    if (arbitrage_option == True and regulation_option == True and deferral_option == True):
+        model += pulp.lpSum([fhec_peak_mult*fhec_kwh_rate*(Input.loc[hour, "Load (kW)"]+VBpower[hour]) for hour in fhec_peak_hours]
+                            + [fhec_kwh_rate*(Input.loc[hour, "Load (kW)"]+VBpower[hour]) for hour in fhec_off_peak_hours]
+                            + [-Input.loc[hour, "Reg-up Price ($/MW)"]/1000*reg_up[hour] for hour in Input.index]
+                            + [-Input.loc[hour, "Reg-dn Price ($/MW)"]/1000*reg_dn[hour] for hour in Input.index]
+                            + 1E03*PeakDemand)
+    
+    # VB energy state as a function of VB power
+    for hour in Input.index:
+        if hour==1:
+            model += VBenergy[hour] == alpha*E_0 + VBpower[hour]*deltaT
+        else:
+            model += VBenergy[hour] == alpha*VBenergy[hour-1] + VBpower[hour]*deltaT
+    
+    # hourly regulation constraints
+    for hour in Input.index:
+        if regulation_option:
+            model += reg_up[hour] == reg_dn[hour] # regulation balance
+            model += VBenergy[hour] - epsilon*reg_up[hour]*deltaT >= VBenergy[hour].lowBound
+            model += VBenergy[hour] + epsilon*reg_dn[hour]*deltaT <= VBenergy[hour].upBound
+        else:
+            model += reg_up[hour] == 0
+            model += reg_dn[hour] == 0
+    
+    # extra constraints
+    for hour in Input.index:
+        model += PeakDemand >= Input.loc[hour, "Load (kW)"] + VBpower[hour]
+    
+    model.solve()
+
+    ###############################################################################
+    
+    use_hour_indicator = []
+    for hour in Input.index:
+        if VBpower[hour].varValue != 0 or reg_up[hour].varValue != 0:
+            use_hour_indicator.append({'Hour': hour, 'Use': 1})
+        else:
+            use_hour_indicator.append({'Hour': hour, 'Use': 0})
+    
+    output = []
+    for hour in Input.index:
+        var_output = {
+            'Date/Time': Input.loc[hour, "Date/Time"],
+            'Hour': hour,
+            'VB energy (kWh)': int(100*VBenergy[hour].varValue)/100,
+            'VB power (kW)': int(100*VBpower[hour].varValue)/100,
+            'Load (kW)': int(100*Input.loc[hour, "Load (kW)"])/100,
+            'Net load (kW)': int(100*(VBpower[hour].varValue+Input.loc[hour, "Load (kW)"]))/100,
+            'Hour used': use_hour_indicator[hour-1]['Use']
+        }
+        if regulation_option:
+            var_regulation = {'Regulation (kW)': int(100*reg_up[hour].varValue)/100}
+            var_output.update(var_regulation)
+        output.append(var_output)
+    
+    output_df = pd.DataFrame.from_records(output)
+    
+    # output_df.to_csv('fhec_output.csv', index=False)
+    
+    return output_df
+
+###############################################################################
+
+def run_okec(ind, Input):
+
+    # Input.to_csv('okec_input.csv', index=False)
+    
+    use_hour = int(ind["userHourLimit"]) # number of VB use hours specified by the user
+    epsilon  = 1 #float(ind["energyReserve"]) # energy reserve parameter, range: 0 - 1
+
+    okec_peak_charge = float(ind["annual_peak_charge"]) # annual peak demand charge $100/kW
+    okec_avg_demand_charge = float(ind["avg_demand_charge"]) # $120/kW
+    okec_fuel_charge = float(ind["fuel_charge"]) # total energy $/kWh
+
+    # VB model parameters
+    C = float(ind["capacitance"]) # thermal capacitance
+    R = float(ind["resistance"]) # thermal resistance
+    deltaT = 1
+    alpha = math.exp(-deltaT/(C*R)) # hourly self discharge rate
+
+    E_0 = 0 # VB initial energy state
+
+    arbitrage_option = ind["use_arbitrage"] == "on"
+    regulation_option = ind["use_regulation"] == "on"
+    deferral_option = ind["use_deferral"] == "on"
+    
+    # calculate the predicted profits for all 8760 hours
+    use_prft = []
+    for hour in Input.index:
+        temp = 0
+        if arbitrage_option or deferral_option:
+            temp += okec_avg_demand_charge/len(Input.index)*(Input.loc[hour, "VB Energy upper (kWh)"]-Input.loc[hour, "VB Energy lower (kWh)"])
+        if regulation_option:
+            temp += (Input.loc[hour, "Reg-up Price ($/MW)"]+Input.loc[hour, "Reg-dn Price ($/MW)"])/1000*(Input.loc[hour, "VB Energy upper (kWh)"]-Input.loc[hour, "VB Energy lower (kWh)"])
+        use_prft.append({'Hour': hour, 'Profit': temp})
+    
+    # sort the predicted profits from the highest to the lowest
+    use_prft = sorted(use_prft, reverse = True, key = lambda i : i['Profit'])
+    
+    # get the indices of the first use_hour hours, and the optimization will be scheduled only for those hours
+    use_list = []
+    for index in range(use_hour):
+        use_list.append(use_prft[index]['Hour'])
+    
+###############################################################################
+
+    # start demand charge reduction LP problem
+    model = pulp.LpProblem("Demand charge minimization problem OKEC-Buffett", pulp.LpMinimize)
+
+    # decision variable of VB charging power; dim: 8760 by 1
+    VBpower = pulp.LpVariable.dicts("ChargingPower", ((hour) for hour in Input.index))
+    # set bound
+    for hour in Input.index:
+        if hour in use_list:
+            VBpower[hour].lowBound = Input.loc[hour, "VB Power lower (kW)"]
+            VBpower[hour].upBound  = Input.loc[hour, "VB Power upper (kW)"]
+        if hour not in use_list:
+            VBpower[hour].lowBound = 0
+            VBpower[hour].upBound  = 0
+    
+    # decision variable of VB energy state; dim: 8760 by 1
+    VBenergy = pulp.LpVariable.dicts("EnergyState", ((hour) for hour in Input.index))
+    # set bound
+    for hour in Input.index:
+        VBenergy[hour].lowBound = Input.loc[hour, "VB Energy lower (kWh)"]
+        VBenergy[hour].upBound  = Input.loc[hour, "VB Energy upper (kWh)"]
+    
+    # decision variable of annual peak demand
+    PeakDemand = pulp.LpVariable("annual peak demand", lowBound=0)
+    
+    # decision variable: hourly regulation up capacity; dim: 8760 by 1
+    reg_up = pulp.LpVariable.dicts("hour reg up", ((hour) for hour in Input.index), lowBound=0)
+    # decision variable: hourly regulation dn capacity; dim: 8760 by 1
+    reg_dn = pulp.LpVariable.dicts("hour reg dn", ((hour) for hour in Input.index), lowBound=0)
+    for hour in Input.index:
+        if hour not in use_list:
+            reg_up[hour].upBound = 0
+            reg_dn[hour].upBound = 0
+
+    # objective function: sum of monthly demand charge
+    if (arbitrage_option == False and regulation_option == False and deferral_option == False):
+        model += 0, "an arbitrary objective function"
+
+    if (arbitrage_option == True and regulation_option == False and deferral_option == False):
+        model += pulp.lpSum(okec_peak_charge*PeakDemand
+                            + [okec_avg_demand_charge*(Input.loc[hour, "Load (kW)"]+VBpower[hour])/len(Input.index) for hour in Input.index]
+                            + [okec_fuel_charge*(Input.loc[hour, "Load (kW)"]+VBpower[hour])*deltaT for hour in Input.index])
+
+    if (arbitrage_option == False and regulation_option == True and deferral_option == False):
+        model += pulp.lpSum([-Input.loc[hour, "Reg-up Price ($/MW)"]/1000*reg_up[hour] for hour in Input.index]
+                            + [-Input.loc[hour, "Reg-dn Price ($/MW)"]/1000*reg_dn[hour] for hour in Input.index])
+
+    if (arbitrage_option == False and regulation_option == False and deferral_option == True):
+        model += pulp.lpSum(1E03*PeakDemand)
+
+    if (arbitrage_option == True and regulation_option == True and deferral_option == False):
+        model += pulp.lpSum(okec_peak_charge*PeakDemand
+                            + [okec_avg_demand_charge*(Input.loc[hour, "Load (kW)"]+VBpower[hour])/len(Input.index) for hour in Input.index]
+                            + [okec_fuel_charge*(Input.loc[hour, "Load (kW)"]+VBpower[hour])*deltaT for hour in Input.index]
+                            + [-Input.loc[hour, "Reg-up Price ($/MW)"]/1000*reg_up[hour] for hour in Input.index]
+                            + [-Input.loc[hour, "Reg-dn Price ($/MW)"]/1000*reg_dn[hour] for hour in Input.index])
+
+    if (arbitrage_option == True and regulation_option == False and deferral_option == True):
+        model += pulp.lpSum(okec_peak_charge*PeakDemand
+                            + [okec_avg_demand_charge*(Input.loc[hour, "Load (kW)"]+VBpower[hour])/len(Input.index) for hour in Input.index]
+                            + [okec_fuel_charge*(Input.loc[hour, "Load (kW)"]+VBpower[hour])*deltaT for hour in Input.index]
+                            + 1E03*PeakDemand)
+
+    if (arbitrage_option == False and regulation_option == True and deferral_option == True):
+        model += pulp.lpSum([-Input.loc[hour, "Reg-up Price ($/MW)"]/1000*reg_up[hour] for hour in Input.index]
+                            + [-Input.loc[hour, "Reg-dn Price ($/MW)"]/1000*reg_dn[hour] for hour in Input.index]
+                            + 1E03*PeakDemand)
+        
+    if (arbitrage_option == True and regulation_option == True and deferral_option == True):
+        model += pulp.lpSum(okec_peak_charge*PeakDemand
+                            + [okec_avg_demand_charge*(Input.loc[hour, "Load (kW)"]+VBpower[hour])/len(Input.index) for hour in Input.index]
+                            + [okec_fuel_charge*(Input.loc[hour, "Load (kW)"]+VBpower[hour])*deltaT for hour in Input.index]
+                            + [-Input.loc[hour, "Reg-up Price ($/MW)"]/1000*reg_up[hour] for hour in Input.index]
+                            + [-Input.loc[hour, "Reg-dn Price ($/MW)"]/1000*reg_dn[hour] for hour in Input.index]
+                            + 1E03*PeakDemand)
+    
+    # VB energy state as a function of VB power
+    for hour in Input.index:
+        if hour==1:
+            model += VBenergy[hour] == alpha*E_0 + VBpower[hour]*deltaT
+        else:
+            model += VBenergy[hour] == alpha*VBenergy[hour-1] + VBpower[hour]*deltaT
+    
+    # hourly regulation constraints
+    for hour in Input.index:
+        if regulation_option:
+            model += reg_up[hour] == reg_dn[hour] # regulation balance
+            model += VBenergy[hour] - epsilon*reg_up[hour]*deltaT >= VBenergy[hour].lowBound
+            model += VBenergy[hour] + epsilon*reg_dn[hour]*deltaT <= VBenergy[hour].upBound
+        else:
+            model += reg_up[hour] == 0
+            model += reg_dn[hour] == 0
+    
+    # extra constraints
+    for hour in Input.index:
+        model += PeakDemand >= Input.loc[hour, "Load (kW)"] + VBpower[hour]
+    
+    model.solve()
+
+    ###############################################################################
+    
+    use_hour_indicator = []
+    for hour in Input.index:
+        if VBpower[hour].varValue != 0 or reg_up[hour].varValue != 0:
+            use_hour_indicator.append({'Hour': hour, 'Use': 1})
+        else:
+            use_hour_indicator.append({'Hour': hour, 'Use': 0})
+    
+    output = []
+    for hour in Input.index:
+        var_output = {
+            'Date/Time': Input.loc[hour, "Date/Time"],
+            'Hour': hour,
+            'VB energy (kWh)': int(100*VBenergy[hour].varValue)/100,
+            'VB power (kW)': int(100*VBpower[hour].varValue)/100,
+            'Load (kW)': int(100*Input.loc[hour, "Load (kW)"])/100,
+            'Net load (kW)': int(100*(VBpower[hour].varValue+Input.loc[hour, "Load (kW)"]))/100,
+            'Hour used': use_hour_indicator[hour-1]['Use']
+        }
+        if regulation_option:
+            var_regulation = {'Regulation (kW)': int(100*reg_up[hour].varValue)/100}
+            var_output.update(var_regulation)
+        output.append(var_output)
+    
+    output_df = pd.DataFrame.from_records(output)
+    return output_df
+
 
