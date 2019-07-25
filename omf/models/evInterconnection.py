@@ -24,7 +24,7 @@ from omf.solvers import gridlabd
 from dateutil import parser
 from dateutil.relativedelta import *
 
-from omf.solvers.REopt import run
+from omf.solvers.REopt import run as runREopt
 
 # Model metadata:
 modelName, template = metadata(__file__)
@@ -854,7 +854,8 @@ def new(modelDir):
 		"maxCharge" : "50",
 		"gasCost" : "2.70",
 		"workload" : "40",
-		"loadShape" : "input - 200 Employee Office, Springfield Illinois, 2001.csv",
+		"loadShape" : open(pJoin(omf.omfDir, "static", "testFiles", "input - 200 Employee Office, Springfield Illinois, 2001.csv")).read(),
+		"fileName" : "input - 200 Employee Office, Springfield Illinois, 2001.csv",
 		"loadName" : "62474211556",
 		"rezSqIn" : "400",
 		"simTime" : '2000-01-01 0:00:00',
