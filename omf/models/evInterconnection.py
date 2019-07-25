@@ -151,7 +151,7 @@ def work(modelDir, inputDict):
 
 	loadShapeValue = [float(x[0]) for x in loadShapeList]
 
-	print loadShapeValue
+	# print loadShapeValue
 	
 	#calculate and display EV Charging Demand image, carpet plot image of 8760 load shapes
 	maxLoadValue, demandImg, carpetPlotImg, maxLoadShapeImg = plotEVShape(
@@ -283,8 +283,7 @@ def work(modelDir, inputDict):
 		#raise an exception if maximum load value is not being passed in
 		raise Exception('Error retrieving maximum load value from load shape.')
 
-	# Run REopt API script
-	# Create the input JSON file
+	# Create the input JSON file for REopt
 	scenario = {
 		"Scenario": {
 			"Site": {
@@ -305,6 +304,7 @@ def work(modelDir, inputDict):
 	}
 	with open(pJoin(modelDir, "Scenario_test_POST.json"), "w") as jsonFile:
 		json.dump(scenario, jsonFile)
+	# Run REopt API script
 	runREopt(pJoin(modelDir, 'Scenario_test_POST.json'), pJoin(modelDir, 'results.json'))
 
 	return outData
