@@ -23,6 +23,9 @@ from omf.solvers import gridlabd
 # dateutil imports
 from dateutil import parser
 from dateutil.relativedelta import *
+
+from omf.solvers.REopt import run
+
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = "Injects faults in to circuits and measures fault currents, voltages, and protective device response."
@@ -71,6 +74,11 @@ def work(modelDir, inputDict):
 		energyCostValue = None
 	else:
 		energyCostValue = float(inputDict["energyCost"])
+	# None check for demandCost
+	if inputDict.get("demandCost", "None") == "None":
+		demandCostValue = None
+	else:
+		demandCostValue = float(inputDict["demandCost"])
 	# None check for startHour
 	if inputDict.get("startHour", "None") == "None":
 		startHourValue = None
@@ -111,6 +119,22 @@ def work(modelDir, inputDict):
 		loadNameValue = None
 	else:
 		loadNameValue = inputDict["loadName"]
+	# None check for latitude
+	if inputDict.get("latitude", "None") == "None":
+		latitudeValue = None
+	else:
+		latitudeValue = float(inputDict["latitude"])
+	# None check for longitude
+	if inputDict.get("longitude", "None") == "None":
+		longitudeValue = None
+	else:
+		longitudeValue = float(inputDict["longitude"])
+	# None check for year
+	if inputDict.get("year", "None") == "None":
+		yearValue = None
+	else:
+		yearValue = int(inputDict["year"])
+
 	# Setting up the loadShape file.
 	with open(pJoin(modelDir,"loadShape.csv"),"w") as loadShapeFile:
 		loadShapeFile.write(inputDict['loadShape'])
@@ -126,6 +150,8 @@ def work(modelDir, inputDict):
 		raise Exception(errorMessage)
 
 	loadShapeValue = [float(x[0]) for x in loadShapeList]
+
+	print loadShapeValue
 	
 	#calculate and display EV Charging Demand image, carpet plot image of 8760 load shapes
 	maxLoadValue, demandImg, carpetPlotImg, maxLoadShapeImg = plotEVShape(
@@ -256,6 +282,31 @@ def work(modelDir, inputDict):
 		print "maxValue is None"
 		#raise an exception if maximum load value is not being passed in
 		raise Exception('Error retrieving maximum load value from load shape.')
+
+	# Run REopt API script
+	# Create the input JSON file
+	scenario = {
+		"Scenario": {
+			"Site": {
+				"latitude": latitudeValue,				#LATITUDE VALUE OF SITE LOCATION
+				"longitude": longitudeValue,			#LONGITUDE VALUE OF SITE LOCATION
+				"address": "Springfield, Illinois",		#OPTIONAL FIELD
+				"LoadProfile": {
+					"loads_kw": loadShapeValue,			#8760 value list
+					"year": yearValue 					#MUST BE THE CORRECT YEAR CORRELATING TO loads_kw!!
+				},
+				"ElectricTarrif": {
+					"urdb_rate_name": "custom",
+					"blended_annual_rates_us_dollars_per_kwh": energyCostValue,
+					"blended_annual_demand_charges_us_dollars_per_kw": demandCostValue
+				}
+			}
+		}
+	}
+	with open(pJoin(modelDir, "Scenario_test_POST.json"), "w") as jsonFile:
+		json.dump(scenario, jsonFile)
+	runREopt(pJoin(modelDir, 'Scenario_test_POST.json'), pJoin(modelDir, 'results.json'))
+
 	return outData
 
 def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, faultLoc=None, faultType=None, customColormap=False, scaleMin=None, scaleMax=None, rezSqIn=400, simTime='2000-01-01 0:00:00', loadLoc=None):
@@ -806,7 +857,11 @@ def new(modelDir):
 		"loadShape" : "input - 200 Employee Office, Springfield Illinois, 2001.csv",
 		"loadName" : "62474211556",
 		"rezSqIn" : "400",
-		"simTime" : '2000-01-01 0:00:00'
+		"simTime" : '2000-01-01 0:00:00',
+		"latitude" : '39.7817',
+		"longitude" : '89.6501',
+		"year" : '2001',
+		"demandCost" : '0.1'
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
