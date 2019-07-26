@@ -95,7 +95,7 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.h
 		print('Warning: no lat/lon coordinates detected, so force layout required.')
 		insert_coordinates(tree)
 	# Set up temp directory and copy the feeder and viewer in to it.
-	if outputPath == None:
+	if outputPath is None:
 		tempDir = tempfile.mkdtemp()
 	else:
 		tempDir = os.path.abspath(outputPath)
