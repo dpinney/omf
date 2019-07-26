@@ -3021,7 +3021,8 @@ function saveFeeder(feeder) {
         postRequest.done(function() {
             modal.finish();
         }).fail(function() {
-            alert("The AJAX request failed to get a successful response from the server.")
+            modal.endMessage = "The server raised an internal exception during the save operation."
+            modal.finish();
         });
     } else if (feeder === gWriteFeeder) {
         let cancelled = false;
@@ -3043,7 +3044,8 @@ function saveFeeder(feeder) {
                 modal.finish();
             }
         }).fail(function() {
-            alert("The AJAX request failed to get a successful response from the server.")
+            modal.endMessage = "The server raised an internal exception during the save operation."
+            modal.finish();
         });
     }
 }
@@ -3101,7 +3103,8 @@ async function loadFeeder(serverFeederName, serverModelName, owner) {
             modal.finish();
         }
     }).fail(function() {
-        alert("The AJAX request failed to get a successful response from the server.");
+        modal.endMessage = "The server raised an internal exception while loading the feeder."
+        modal.finish();
     });
 }
 
@@ -3169,7 +3172,8 @@ async function submitForm({formId, pollUrl, inputId}) {
                 modal.finish();
             }
         }).fail(function() {
-            alert("The AJAX request failed to get a successful response from the server");
+            modal.endMessage = "The server raised an internal exception during form submission."
+            modal.finish();
         });
     } else {
         formRequest.done(function(data) {
@@ -3198,15 +3202,14 @@ async function submitForm({formId, pollUrl, inputId}) {
                                     data += ".";
                                 }
                                 modal.endMessage = data + " Please click \"Cancel\" to undo the operation.";
-                                //console.log(data);
-                                //modal.endMessage = "There was a problem on the server. Check the console for more information. Please click \"Cancel\" to undo the operation.";
                                 modal.finish();
                             }
                         }
                     }
                 }).fail(function() {
                     clearInterval(intervalId);
-                    alert("The AJAX request failed to get a successful response from the server.")
+                    modal.endMessage = "The server raised an internal exception during the file operation."
+                    modal.finish();
                 });
             }, 5000);
         });
@@ -3267,13 +3270,15 @@ async function renameFeeder(oldServerName, newName) {
     await $.ajax({
         url: `/renameFeeder/${gThisOwner}/${gThisModelName}/${oldServerName}/${newName}/${gThisFeederNum}`
     }).done(function(data) {
-        if (data === "Failure") {
-            alert("Rename operation failed.");
-        } else if (!cancelled) {
+        if (!cancelled) {
+            if (data === "Failure") {
+                modal.endMessage = "Rename operation failed."
+            }
             modal.finish();
         }
     }).fail(function() {
-        alert("The AJAX request failed to get a successful response from the server.");
+        modal.endMessage = "The server raised an internal exception during the rename operation."
+        modal.finish();
     });
 }
 
@@ -5489,7 +5494,7 @@ function checkServerConversion() {
             }).fail(() => {
                 clearInterval(intervalId);
                 modal.hide();
-                reject("The AJAX request failed to get a successful response from the server.");
+                reject("The server raised an internal exception while checking for an ongoing file operation.");
             });
             return pollServer;
         // Execute pollServer immediately once, then return it to setInterval so that it continues to execute every 5 seconds
