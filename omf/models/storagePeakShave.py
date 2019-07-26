@@ -2,9 +2,11 @@
 
 import os, sys, shutil, csv
 from datetime import datetime as dt, timedelta
+import pulp
 from os.path import isdir, join as pJoin
 from numpy import npv
 import pandas as pd
+
 from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
 from omf import loadForecast as fc
@@ -203,7 +205,6 @@ def work(modelDir, inputDict):
 
 def forecastWork(modelDir, ind):
 	''' Run the model in its directory.'''
-
 	(cellCapacity, dischargeRate, chargeRate, cellQuantity, cellCost) = \
 		[float(ind[x]) for x in ('cellCapacity', 'dischargeRate', 'chargeRate', 'cellQuantity', 'cellCost')]
 	demandCharge = float(ind['demandCharge'])
@@ -235,8 +236,6 @@ def forecastWork(modelDir, ind):
 	except:
 		raise Exception("CSV file is incorrect format.")
 
-	confidence = float(ind['confidence'])/100
-
 	# ---------------------- MAKE PREDICTIONS ------------------------------- #
 	# train model on previous data
 	all_X = fc.makeUsefulDf(df)
@@ -251,44 +250,38 @@ def forecastWork(modelDir, ind):
 	month = [month_h[i:i+24] for i in range(0, len(month_h), 24)]
 	month = [m[0]-1 for m in month]
 
-	dispatched = [False]*365
-	last_peak = [-1*float('inf')]*12
 	# decide to implement VBAT every day for a year
 	VB_power, VB_energy = [], []
 	for i, (load24, temp24, m) in enumerate(zip(dailyLoadPredictions, dailyWeatherPredictions, month)):
 		peak = max(load24)
-		if peak > last_peak[m]:
-			dispatched[i] = True
-			vbp, vbe = pulp24hrBattery(load24, dischargeRate*cellQuantity, 
-				cellCapacity*cellQuantity, battEff)
-			VB_power.extend(vbp)
-			VB_energy.extend(vbe)
-			last_peak[m] = peak + vbp[load24.index(peak)]
-		else:
-			VB_power.extend([0]*24)
-			VB_energy.extend([0]*24)
+		vbp, vbe = pulp24hrBattery(load24, dischargeRate*cellQuantity, 
+			cellCapacity*cellQuantity, battEff)
+		VB_power.extend(vbp)
+		VB_energy.extend(vbe)
 	
 	# -------------------- MODEL ACCURACY ANALYSIS -------------------------- #
 	o['predictedLoad'] = predictions
 	o['trainAccuracy'] = 100 - round(accuracy['train'], 1)
 	o['testAccuracy'] = 100 - round(accuracy['test'], 1)
+	print 100 - round(accuracy['train'], 1)
+	print accuracy['train']
 
 	# PRECISION AND RECALL
-	maxDays = []
-	for month in range(1, 13):
-		test = df[df['month'] == month]
-		maxDays.append(test.loc[test['load'].idxmax()]['dayOfYear'])
+	# maxDays = []
+	# for month in range(1, 13):
+	# 	test = df[df['month'] == month]
+	# 	maxDays.append(test.loc[test['load'].idxmax()]['dayOfYear'])
 	
-	shouldHaveDispatched = [False]*365
-	for day in maxDays:
-		shouldHaveDispatched[day] = True
+	# shouldHaveDispatched = [False]*365
+	# for day in maxDays:
+	# 	shouldHaveDispatched[day] = True
 
-	truePositive = len([b for b in [i and j for (i, j) in zip(dispatched, shouldHaveDispatched)] if b])
-	falsePositive = len([b for b in [i and (not j) for (i, j) in zip(dispatched, shouldHaveDispatched)] if b])
-	falseNegative = len([b for b in [(not i) and j for (i, j) in zip(dispatched, shouldHaveDispatched)] if b])
-	o['precision'] = round(truePositive / float(truePositive + falsePositive) * 100, 2)
-	o['recall'] = round(truePositive / float(truePositive + falseNegative) * 100, 2)
-	o['number_of_dispatches'] = len([i for i in dispatched if i])
+	# truePositive = len([b for b in [i and j for (i, j) in zip(dispatched, shouldHaveDispatched)] if b])
+	# falsePositive = len([b for b in [i and (not j) for (i, j) in zip(dispatched, shouldHaveDispatched)] if b])
+	# falseNegative = len([b for b in [(not i) and j for (i, j) in zip(dispatched, shouldHaveDispatched)] if b])
+	# o['precision'] = round(truePositive / float(truePositive + falsePositive) * 100, 2)
+	# o['recall'] = round(truePositive / float(truePositive + falseNegative) * 100, 2)
+	# o['number_of_dispatches'] = len([i for i in dispatched if i])
 	
 	# ---------------------- FINANCIAL ANALYSIS ----------------------------- #
 
@@ -319,22 +312,14 @@ def forecastWork(modelDir, ind):
 	o['batteryDischargekWMax'] = max(VB_power)
 
 	batteryCycleLife = float(ind['batteryCycleLife'])
-	# Battery State of Charge Graph
-	# Turn dc's SoC into a percentage, with dodFactor considered.
-
 	o['batterySoc'] = SoC = [100 - (e / battCapacity * 100) for e in VB_energy]
-
-	# Estimate number of cyles the battery went through. Sums the percent of SoC.
 	cycleEquivalents = sum([SoC[i]-SoC[i+1] for i, x in enumerate(SoC[:-1]) if SoC[i+1] < SoC[i]]) / 100.0
 	o['cycleEquivalents'] = cycleEquivalents
 	o['batteryLife'] = batteryCycleLife / cycleEquivalents
 
 	# Cash Flow Graph
-	# inserting battery efficiency only into the cashflow calculation
-	# cashFlowCurve is $ in from peak shaving minus the cost to recharge the battery every day of the year
 	cashFlowCurve = [sum(o['ps'])*demandCharge for year in range(projYears)]
 	cashFlowCurve.insert(0, -1 * cellCost * cellQuantity)  # insert initial investment
-	# simplePayback is also affected by the cost to recharge the battery every day of the year
 	o['SPP'] = (cellCost*cellQuantity)/(sum(o['ps'])*demandCharge)
 	o['netCashflow'] = cashFlowCurve
 	o['cumulativeCashflow'] = [sum(cashFlowCurve[:i+1]) for i, d in enumerate(cashFlowCurve)]
@@ -345,12 +330,10 @@ def forecastWork(modelDir, ind):
 	o['LCOE'] = lcoeTotCost / (cycleEquivalents*battCapacity)
 
 	# Other
-	o['startDate'] = '2011-01-01'  # dc[0]['datetime'].isoformat()
+	o['startDate'] = '2011-01-01'
 	o['stderr'] = ''
-	# Seemingly unimportant. Ask permission to delete.
 	o['stdout'] = 'Success' 
-	o['months'] = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
-
+	
 	return o
 
 def new(modelDir):
@@ -366,7 +349,7 @@ def new(modelDir):
 		'chargeRate': '5',
 		'demandCurve': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','Texas_1yr_Load.csv')).read(),
 		'fileName': 'FrankScadaValidCSV_Copy.csv',
-		'dispatchStrategy': 'optimal', #'prediction', 
+		'dispatchStrategy': 'prediction', #'prediction', 
 		'cellCost': '7140',
 		'cellQuantity': '100',
 		'runTime': '0:00:03',
@@ -380,7 +363,6 @@ def new(modelDir):
 		# required if dispatch strategy is custom
 		'customDispatchStrategy': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','dispatchStrategy.csv')).read(),
 		# forecast
-		'confidence': '99',
 		'epochs': '100',
 		'histFileName': 'd_Texas_17yr_TempAndLoad.csv',
 		"histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","d_Texas_17yr_TempAndLoad.csv"), 'rU').read(),

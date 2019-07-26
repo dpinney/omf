@@ -51,7 +51,7 @@
 				<input type="text" id="runTime" name="runTime" readonly/>
 			</div>
 			<div class="wideInput">
-				<p class="inputSectionHeader">Communications Network Bandwidth Specifications</p>
+				<p class="inputSectionHeader">Communications Network Inputs</p>
 			</div>
 			<hr>
 			<div class="shortInput">
@@ -65,6 +65,18 @@
 			<div class="shortInput">
 				<label class="tooltip">Meter Packet Size<span class="classic">Size of the data packet from each meter (kbps)</span></label>
 				<input type="text" id="meterPacket" name="meterPacket" pattern="^\d+\.?\d*$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Fiber Cost<span class="classic">Cost of fiber per meter</span></label>
+				<input type="text" id="fiber_cost" name="fiber_cost" pattern="^\d+\.?\d*$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">RF Collector Cost<span class="classic">Cost of each RF collector</span></label>
+				<input type="text" id="rf_collector_cost" name="rf_collector_cost" pattern="^\d+\.?\d*$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Smart Meter Cost<span class="classic">Cost of smart meter installation (based on nodes labeled meter or triplex meter)</span></label>
+				<input type="text" id="smart_meter_cost" name="smart_meter_cost" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Feeder<span class="classic">Select a feeder to model a communications network on top of.</span></label>
@@ -100,12 +112,16 @@
 		</script>
 	</div>
 	<div id="output">
-		<p class="reportTitle postRun">Bandwidth Analysis</p>
+		<p class="reportTitle postRun">Communications Network Analysis</p>
 		<div id="bandwidthAnalysis" class="tightContent postRun">
 			<p>Fiber status: {{allOutputDataDict.fiberStatus}}</p>
 			<p>Overloaded Fiber: {{allOutputDataDict.overloadedFiber}}</p>
 			<p>RF status: {{allOutputDataDict.collectorStatus}}</p>
 			<p>Overloaded Collectors: {{allOutputDataDict.overloadedCollectors}}</p>
+			<p>Fiber Cost: <span class="currency">{{allOutputDataDict.fiber_cost}}</span></p>
+			<p>RF Collector Cost: <span class="currency">{{allOutputDataDict.rf_collector_cost}}</span></p>
+			<p>Smart Meter Cost: <span class="currency">{{allOutputDataDict.smart_meter_cost}}</span></p>
+			<p>Total Equipment Cost: <span class="currency">{{allOutputDataDict.total_cost}}</span></p>
 			<button id="tester" type="button" onclick="javascript:commsMap(allInputData.modelName,1);" style="display:block;width:125px;">Communications Map</button>
 			<input type="text" id="feederName1" name="feederName1" style="display:none">
 		</div>
@@ -114,6 +130,13 @@
 			studyUser = allInputData.user;
 			window.open("/commsMap/" + studyUser + "/" + modelName + "/" + feederNum);
 		}
+
+		//function to convert value to currency with dollar sign, commas and 2 decimal places
+		$('.currency').each( function (){
+			$(this).text(parseFloat($(this)
+				.text())
+				.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits:2, maximumFractionDigits:2 }));
+		});
 		</script>
 	</div>
 </body>
