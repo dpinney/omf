@@ -167,17 +167,14 @@ def installNilm():
 
 	# install nilmtk
 	os.chdir("./solvers/nilmtk/")
-	os.system("apt-get install python3-tk")
-	os.system("apt-get install git libhdf5-serial-dev python-dev postgresql postgresql-contrib postgresql-server-dev-all")
-	os.system("yes | pip3 install pip numpy scipy six numexpr tables matplotlib future psycopg2 nose coveralls coverage git+https://github.com/hmmlearn/hmmlearn.git@ae1a41e4d03ea61b7a25cba68698e8e2e52880ad#egg=hmmlearn --user")
-	os.system("pip3 install scikit-learn==0.19.2 --user")
-	os.system("pip3 install networkx==2.1 pandas==0.22.0 --user")
-	os.system("git clone https://github.com/nilmtk/nilm_metadata/;")
+	os.system("yes | sudo apt-get install python3-tk git libhdf5-serial-dev python-dev postgresql postgresql-contrib postgresql-server-dev-all python3-pip")
+	os.system("sudo pip3 install numpy scipy==0.19.1 six scikit-learn==0.19.2 pandas numexpr tables matplotlib networkx future psycopg2 nose coveralls coverage git+https://github.com/hmmlearn/hmmlearn.git@ae1a41e4d03ea61b7a25cba68698e8e2e52880ad#egg=hmmlearn")
+	os.system("git clone https://github.com/nilmtk/nilm_metadata/")
 	os.chdir("nilm_metadata")
 	os.system("yes | rm -r .git*");
 	os.system("sudo python3 setup.py develop")
 	os.chdir("..")
-	os.system("git clone https://github.com/nilmtk/nilmtk.git;")
+	os.system("git clone https://github.com/nilmtk/nilmtk.git")
 	os.chdir("nilmtk")
 	os.system("yes | rm -r .git*")
 	os.system("sudo python3 setup.py develop")

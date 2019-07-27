@@ -1007,27 +1007,20 @@ def saveNetwork(owner, modelName, networkName):
 	return 'Success'
 
 
-@app.route("/renameFeeder/<owner>/<modelName>/<oldName>/<feederName>/<feederNum>", methods=["GET", "POST"])
+@app.route("/renameFeeder/<owner>/<modelName>/<oldName>/<newName>/<feederNum>", methods=["GET", "POST"])
 @flask_login.login_required
-def renameFeeder(owner, modelName, oldName, feederName, feederNum):
+def renameFeeder(owner, modelName, oldName, newName, feederNum):
 	''' rename a feeder. '''
-	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
-	newFile = os.path.join(modelDir, feederName+'.omd')
-	oldFile = os.path.join(modelDir, oldName+'.omd')
-	if not os.path.isfile(newFile) and os.path.isfile(oldFile):
-		with open(oldFile, "r") as feederIn:
-			with open(newFile, "w") as outFile:
-				fcntl.flock(feederIn, fcntl.LOCK_SH) # Get shared lock
-				fcntl.flock(outFile, fcntl.LOCK_EX) # Get exclusive lock
-				outFile.write(feederIn.read())
-				fcntl.flock(feederIn, fcntl.LOCK_UN) # Release shared lock
-				fcntl.flock(outFile, fcntl.LOCK_UN) # Release exclusive lock
-	elif os.path.isfile(newFile):
-		return 'Failure'
-	elif not os.path.isfile(oldFile):
-		return 'Failure'
-	os.remove(oldFile)
-	writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
+	model_dir_path = os.path.join(_omfDir, "data/Model", owner, modelName)
+	new_feeder_filepath = os.path.join(model_dir_path, newName + ".omd")
+	old_feeder_filepath = os.path.join(model_dir_path, oldName + ".omd")
+	if os.path.isfile(new_feeder_filepath) or not os.path.isfile(old_feeder_filepath):
+		return "Failure"
+	with open(old_feeder_filepath) as f:
+		fcntl.flock(f, fcntl.LOCK_EX)
+		os.rename(old_feeder_filepath, new_feeder_filepath)
+		fcntl.flock(f, fcntl.LOCK_UN)
+	writeToInput(model_dir_path, newName, 'feederName' + str(feederNum))
 	return 'Success'
 
 

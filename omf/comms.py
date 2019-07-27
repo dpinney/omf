@@ -297,6 +297,9 @@ def graphValidator(pathToOmdFile, inGraph):
 		for edge in nx.edges(inGraph):
 			validator = (node_positions[edge[0]] or nxG.node[edge[1]])
 	except KeyError:
+		raise Exception('Network coordinates are not in the .omd tree. Use the anonymize menu in the circuit editor to generate a circuit with valid coordinates.')
+		'''
+		This code creates random positional information
 		try:
 			nxG = latLonValidation(convertOmd(pathToOmdFile))
 		except ValueError:
@@ -304,7 +307,8 @@ def graphValidator(pathToOmdFile, inGraph):
 			nxG = inGraph
 			for nodeToChange in nxG.node:
 				nxG.node[nodeToChange]['pos'] = (random.uniform(36.9900, 38.8700), random.uniform(-102.0500,-94.5900))
-		return nxG
+		return nxG'''
+	#should invalid lat/lons be included
 	nxG = latLonValidation(inGraph)
 	return nxG
 
