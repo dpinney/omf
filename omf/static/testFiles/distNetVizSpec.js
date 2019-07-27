@@ -957,7 +957,7 @@ describe("Unit tests", function() {
         });
         // good
         describe("treePrototype", function() {
-            // ???
+            
             describe("replaceNode()", function() {
 
                 describe("if the key is not a number string", function() {
@@ -1101,7 +1101,7 @@ describe("Unit tests", function() {
                 describe("if the object being replaced has a 'parent' attribute", function() {
 
                     describe("if the replacement component does not have a 'parent' attribute", function() {
-                        // Ask David
+                        
                         it("should add and update the 'parent' attribute on the replacement component", function() {
                             const tree = createTree({
                                 0: {
@@ -1289,6 +1289,28 @@ describe("Unit tests", function() {
                     };
                     tree.replaceNode("11", component);
                     expect(tree.tree[11]).not.toBe(component);
+                });
+
+                describe("if a configuration node is replacing another configuration node", function() {
+
+                    it("should not add the 'name' attribute to the incoming component object", function() {
+                        const tree = createTree({
+                            0: {
+                                omftype: "module",
+                                longitude: 4,
+                                latitude: .701
+                            }
+                        })
+                        const component = {
+                            omftype: "#include"
+                        }
+                        tree.replaceNode("0", component);
+                        expect(tree.tree[0]).toEqual({
+                            omftype: "#include",
+                            longitude: 4,
+                            latitude: .701
+                        });
+                    });
                 });
             });
             

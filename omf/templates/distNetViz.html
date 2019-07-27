@@ -429,7 +429,7 @@
                             <li>Mass edit...</li>
                             <li data-web="scada">Scada Loadshapes...</li>
                             <li>Static loads to houses</li>
-                            <li data-web="gldHouse">Static loads to GLD houses</li>
+                            <li data-web="zillowHouse">Static loads to Zillow houses</li>
                             <li>Change opacity...</li>
                             <li>Color circuit...</li>
                         {% else %}
@@ -1065,9 +1065,13 @@ const treePrototype = {
         const oldObject_relationship = getRelationship(oldObject);
         if (component_relationship === "line") throw new Error("The replacement component is not a node.");
         if (oldObject_relationship === "line") throw new Error(`The object with the key \"${key}\" is not a node.`);
-        if (component_relationship === "configurationNode" && oldObject_relationship !== "configurationNode") {
-            throw new Error("Configuration nodes cannot be used to replace non-configuration nodes.");
-        } 
+        if (component_relationship === "configurationNode") {
+            if (oldObject_relationship !== "configurationNode") {
+                throw new Error("Configuration nodes cannot be used to replace non-configuration nodes.");
+            }
+        } else {
+            component.name = component.object + key;
+        }
         component.latitude = oldObject.latitude;
         component.longitude = oldObject.longitude;
         if (oldObject.parent == null) {
@@ -1075,7 +1079,6 @@ const treePrototype = {
         } else {
             component.parent = oldObject.parent;
         }
-        component.name = component.object + key;
         const children = this.treeMap.getChildKeys(key);
         if (children != null) children.forEach(key => { this.getObject(key).parent = component.name; });
         const lines = this.treeMap.getLineKeys(key);
@@ -2510,7 +2513,7 @@ function addModelOwnerHandlers(interfaceIsStatic=true) {
         editMenu.querySelector("li[data-web='anonymize']").addEventListener("click", () => toggleDisplay(document.getElementById("anonymizeModal")));
         editMenu.querySelector("li[data-web='climate']").addEventListener("click", () => toggleDisplay(document.getElementById("climateModal")));
         editMenu.querySelector("li[data-web='scada']").addEventListener("click", () => toggleDisplay(document.getElementById("scadaModal")));
-        editMenu.querySelector("li[data-web='gldHouse']").addEventListener("click", startGldHouses);
+        editMenu.querySelector("li[data-web='zillowHouse']").addEventListener("click", startZillowHouses);
     }
 }
 {% endif %}
@@ -3016,16 +3019,16 @@ function fillClimateModalOptions() {
 }
 
 /**
- * Start the server process to convert every triplex load and/or triplex node into a gld house.
+ * Start the server process to convert every triplex load and/or triplex node into a Zillow house.
  */
-function startGldHouses() {
+function startZillowHouses() {
     const triplexObjects = Object.entries(gTree.tree).filter(([key, obj]) => 
         obj.object === "triplex_load" || obj.object === "triplex_node"
         ).map(([key, obj]) => 
             ({ key: key, latitude: obj.latitude, longitude: obj.longitude })
         );
     if (triplexObjects.length === 0) {
-        alert("This data has no triplex load or triplex node objects that can be converted into GLD houses.");
+        alert("This data has no triplex load or triplex node objects that can be converted into Zillow houses.");
         return;
     }
     const formData = new FormData();
@@ -3045,13 +3048,13 @@ function startGldHouses() {
     });
     const request = $.ajax({
         type: "POST",
-        url: "/gldHouses",
+        url: "/zillowHouses",
         data: formData,
         processData: false,
         contentType: false
     }).done(function(data, text, jqXHR) {
         if (!cancelled) {
-            pollGldHouses();
+            pollZillowHouses();
         }
     }).fail(function(jqXHR, textStatus, errorThrown) {
         modal.endMessage = "Operation failed. We were unable to submit your triplex objects. Check the console for more information.";
@@ -3062,13 +3065,13 @@ function startGldHouses() {
 }
 
 /**
- * Poll the server until the gld house information is ready for download.
+ * Poll the server until the Zillow house information is ready for download.
  */
-function pollGldHouses() {
+function pollZillowHouses() {
     let cancelled = false;
     let modal;
     modal = createProgressModal({
-        startMessage: "Convert triplex objects into real-world gld houses. This could take many minutes...",
+        startMessage: "Convert triplex objects into real-world Zillow houses. This could take many minutes...",
         endMessage: "",
         cancelFunc: () => {
             cancelled = true;
@@ -3085,7 +3088,7 @@ function pollGldHouses() {
     const intervalId = setInterval(function() {
         $.ajax({
             type: "POST",
-            url: "/checkGldHouses",
+            url: "/checkZillowHouses",
             data: formData,
             processData: false,
             contentType: false
@@ -3094,9 +3097,12 @@ function pollGldHouses() {
                 if (jqXHR.status === 200) {
                     clearInterval(intervalId);
                     const keys = Object.keys(data);
-                    keys.forEach(key => gTree.replaceNode(key, data[key]))
+                    keys.forEach(key => {
+                        gTree.replaceNode(key, data[key]);
+                        gTree.tree[key].name = "zillow_house" + key;
+                    });
                     createSvgData(keys).draw(gViewport); // redraw so nodes are proper color
-                    modal.endMessage = `Success. ${keys.length} triplex objects were converted into gld houses.`;
+                    modal.endMessage = `Success. ${keys.length} triplex objects were converted into Zillow houses.`;
                     modal.finish();
                 }
             } else {
@@ -3105,10 +3111,10 @@ function pollGldHouses() {
             }
         }).fail(function(jqXHR, textStatus, errorThrown) {
             clearInterval(intervalId);
-            modal.endMessage = "We were unable to get the house data to convert triplex objects into gld houses. Operation failed. Check the console for more information.";
+            modal.endMessage = "We were unable to get the house data to convert triplex objects into Zillow houses. Operation failed. Check the console for more information.";
             modal.finish();
-            console.log(jqXHR.status); // 500
-            console.log(jqXHR.responseText); // Error message
+            //console.log(jqXHR.status); // 500
+            //console.log(jqXHR.responseText); // server response
         });
     }, 5000);
 }
