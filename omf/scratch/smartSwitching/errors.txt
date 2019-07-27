@@ -46,8 +46,11 @@ Workaround/fix: Save the figure rather to the smartSwitching folder instead.
 Dicussion:
 	Why does it still not appear automatically?
 
-Actual behavior: plot.py does not generate any output, althought the program finishes running.
-Expected behavior: plot.py produces a graph.
-Workaround/fix: Use matplotlib instead.
-Discussion:
-	Why does it not work? Tried looking online but no answers yet. Maybe something with jupyter notebook? I tried running both online and offline versions.
+
+Actual behavior: VirtualBox starts, but with a black screen and without any other output
+Expected behavior: VirtualBox starts with Ubuntu
+Workaround/fix: Needed to enable Virtual Technology in Windows BIOS settings. Once this was enabled, VirtualBox worked as expected.
+
+Actual behavior: smartSwitching.py produces different results on a Mac and Windows machine.
+Expected behavior: the same results are produced no matter which system is used.
+Workaround/fix: Frank says that adding the line #set randomseed=5 near the top of the glm file produces similar results for both machines. 

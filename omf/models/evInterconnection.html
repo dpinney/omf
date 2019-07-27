@@ -143,6 +143,14 @@
 				</select>
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Latitude<span class="classic">Specify the latitude of the load/grid.</span></label>
+				<input type="text" id="latitude" name="latitude" pattern="^\-?\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Longitude<span class="classic">Specify the longitude of the load/grid.</span></label>
+				<input type="text" id="longitude" name="longitude" pattern="^\-?\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Battery Size (kWh)<span class="classic">Specify the size of the Vehicle's battery in kWh.</span></label>
 				<input type="text" id="batterySize" name="batterySize" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
@@ -165,6 +173,10 @@
 			<div class="shortInput">
 				<label class="tooltip">Cost of Energy ($/kWh)<span class="classic">Specify the energy cost in $/kWh.</span></label>
 				<input type="text" id="energyCost" name="energyCost" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Cost of Demand ($/kW)<span class="classic">Specify the demand cost in $/kW.</span></label>
+				<input type="text" id="demandCost" name="demandCost" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Arrival Start Hour<span class="classic">Specify the hour in the day in which the charging should start (0-23).</span></label>
@@ -206,6 +218,10 @@
 					<label for="loadShapeFile" class="fileButton">Choose File</label>
 					<input id="fileName" name="fileName" value='' readonly class="uploadFileName">	
 				</div>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Year<span class="classic">Specify the year to which the load shape values corresond.</span></label>
+				<input type="text" id="year" name="year" pattern="^\d{4}$" required="required"/>
 			</div>
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
