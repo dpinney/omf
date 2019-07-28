@@ -310,17 +310,24 @@ def static_from_root():
 
 
 def read_permission_function(func):
-	"""
-	Run the route if the user has read permission for the model, otherwise redirect to home page.
-	The "owner" and "modelName" route parameters are required to use this decorator.
-	"""
+	"""Run the route if the user has read permission for the model, otherwise redirect to home page."""
 	@wraps(func)
 	def wrapper(*args, **kwargs):
 		owner = kwargs["owner"]
+		if owner is None:
+			owner = request.form.get("user")
+		if owner is None:
+			# The "owner" could not be determined which means someone is attemping unauthorized access or the front end isn't formatting its request properly
+			return redirect("/")
 		model_name = kwargs["modelName"]
+		if model_name is None:
+			model_name = request.form.get("modelName")
+		if model_name is None:
+			# Unable to determine the model
+			return redirect("/")
 		model_metadata_path = os.path.join(_omfDir, "data/Model", owner, model_name, "allInputData.json")
 		if not os.path.isfile(model_metadata_path):
-			redirect("/")
+			return redirect("/")
 		if owner == "public":
 			# Any user can view a public model
 			return func(*args, **kwargs)
@@ -343,24 +350,17 @@ def _is_authorized_model_viewer(model_metadata_filepath):
 		return True
 	return False
 
-def write_permission_function(func):
-	"""
-	Run the route if the user has write permission for the model, otherwise redirect to the home page.
 
-	Values for "owner" and "model_name" must be supplied through route parameters or through a form values.
-	"""
+def write_permission_function(func):
+	"""Run the route if the user has write permission for the model, otherwise redirect to the home page."""
 	@wraps(func)
 	def wrapper(*args, **kwargs):
 		owner = kwargs.get("owner")
 		if owner is None:
 			owner = request.form.get("user")
-		model_name = kwargs.get("modelName")
-		if model_name is None:
-			model_name = request.form.get("modelName")
-		model_metadata_path = os.path.join(_omfDir, "data/Model", owner, model_name, "allInputData.json")
-		if not os.path.isfile(model_metadata_path):
-			redirect("/")
-
+		if owner is None:
+			# The "owner" could not be determined which means someone is attemping unauthorized access or the front end isn't formatting its request properly
+			return redirect("/")
 		if owner == "public":
 			if "admin" == User.cu():
 				# Only the admin can run and edit public models
@@ -373,34 +373,33 @@ def write_permission_function(func):
 	return wrapper
 
 
-
 ###################################################
 # MODEL FUNCTIONS
 ###################################################
+
 
 @app.route("/model/<owner>/<modelName>")
 @flask_login.login_required
 @read_permission_function
 def showModel(owner, modelName):
 	''' Render a model template with saved data. '''
-	#if owner==User.cu() or "admin"==User.cu() or owner=="public":
 	modelDir = "./data/Model/" + owner + "/" + modelName
 	with open(modelDir + "/allInputData.json") as inJson:
 		modelType = json.load(inJson).get("modelType","")
 	thisModel = getattr(models, modelType)
 	return thisModel.renderTemplate(modelDir, absolutePaths=False, datastoreNames=getDataNames())
-	#else:
-		#return redirect("/")
 
 
 @app.route("/newModel/<modelType>/<modelName>", methods=["POST","GET"])
 @flask_login.login_required
+@write_permission_function
 def newModel(modelType, modelName):
 	''' Create a new model with given name. '''
 	modelDir = os.path.join(_omfDir, "data", "Model", User.cu(), modelName)
 	thisModel = getattr(models, modelType)
 	thisModel.new(modelDir)
 	return redirect("/model/" + User.cu() + "/" + modelName)
+
 
 @app.route("/runModel/", methods=["POST"])
 @flask_login.login_required
@@ -428,8 +427,10 @@ def runModel():
 	modelModule.run(modelDir)
 	return redirect("/model/" + user + "/" + modelName)
 
+
 @app.route("/cancelModel/", methods=["POST"])
 @flask_login.login_required
+@write_permission_function
 def cancelModel():
 	''' Cancel an already running model. '''
 	pData = request.form.to_dict()
@@ -437,37 +438,47 @@ def cancelModel():
 	modelModule.cancel(os.path.join(_omfDir,"data","Model",pData["user"],pData["modelName"]))
 	return redirect("/model/" + pData["user"] + "/" + pData["modelName"])
 
+
 @app.route("/duplicateModel/<owner>/<modelName>/", methods=["POST"])
 @flask_login.login_required
+@read_permission_function
 def duplicateModel(owner, modelName):
 	newName = request.form.get("newName","")
-	if owner==User.cu() or "admin"==User.cu() or "public"==owner:
-		destinationPath = "./data/Model/" + User.cu() + "/" + newName
-		shutil.copytree("./data/Model/" + owner + "/" + modelName, destinationPath)
-		with open(destinationPath + "/allInputData.json","r") as inFile:
-			inData = json.load(inFile)
-		inData["created"] = str(dt.datetime.now())
-		with open(destinationPath + "/allInputData.json","w") as outFile:
-			json.dump(inData, outFile, indent=4)
-		return redirect("/model/" + User.cu() + "/" + newName)
-	else:
-		return False
+	destinationPath = "./data/Model/" + User.cu() + "/" + newName
+	shutil.copytree("./data/Model/" + owner + "/" + modelName, destinationPath)
+	with open(destinationPath + "/allInputData.json","r") as inFile:
+		inData = json.load(inFile)
+	inData["created"] = str(dt.datetime.now())
+	with open(destinationPath + "/allInputData.json","w") as outFile:
+		json.dump(inData, outFile, indent=4)
+	return redirect("/model/" + User.cu() + "/" + newName)
 
-@app.route("/publishModel/<owner>/<modelName>/", methods=["POST"])
+
+#@app.route("/publishModel/<owner>/<modelName>/", methods=["POST"])
+#@flask_login.login_required
+#def publishModel(owner, modelName):
+#	newName = request.form.get("newName","")
+#	if owner==User.cu() or "admin"==User.cu():
+#		destinationPath = "./data/Model/public/" + newName
+#		shutil.copytree("./data/Model/" + owner + "/" + modelName, destinationPath)
+#		with open(destinationPath + "/allInputData.json","r+") as inFile:
+#			inData = json.load(inFile)
+#			inData["created"] = str(dt.datetime.now())
+#			inFile.seek(0)
+#			json.dump(inData, inFile, indent=4)
+#		return redirect("/model/public/" + newName)
+#	else:
+#		return False
+
+
+@app.route("/shareModel", methods=["POST"])
 @flask_login.login_required
-def publishModel(owner, modelName):
-	newName = request.form.get("newName","")
-	if owner==User.cu() or "admin"==User.cu():
-		destinationPath = "./data/Model/public/" + newName
-		shutil.copytree("./data/Model/" + owner + "/" + modelName, destinationPath)
-		with open(destinationPath + "/allInputData.json","r+") as inFile:
-			inData = json.load(inFile)
-			inData["created"] = str(dt.datetime.now())
-			inFile.seek(0)
-			json.dump(inData, inFile, indent=4)
-		return redirect("/model/public/" + newName)
-	else:
-		return False
+def shareModel():
+	pass
+	#owner = request.form.get("user")
+	#model_name = request.form.get("modelName")
+	#model_metadata_path = os.path.join(_omfDir, "data/Model", owner, model_name, "allInputData.json")
+
 
 ###################################################
 # FEEDER FUNCTIONS

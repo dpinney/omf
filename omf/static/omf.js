@@ -310,7 +310,14 @@ function deleteModel() {
 	}
 }
 
+/**
+ * Using an alert box to handle username entry will be a miserable experience for the user.
+ */
 function publishModel() {
+	let viewers = prompt("Share this model in read-only mode with the following users:", allInputData.viewers);
+
+
+	/*
 	newName = prompt("Publish a copy with name", allInputData.modelName)
 	while (! /^[\w\s]+$/.test(newName)){
 		newName = prompt("Public a copy with new name, only letters, digits and underscore are allowed in the model name.\nPlease rename your new model", allInputData.modelName)
@@ -325,6 +332,7 @@ function publishModel() {
 			}
 		})
 	}
+	*/
 }
 
 function duplicateModel() {
