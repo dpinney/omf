@@ -1,7 +1,7 @@
 import re, pytest
 #TODO: rewire this to pull in functions that are now in omf.weather
-import aGosedWeather
-from aGosedWeather import USCRNDataType
+import omf.weather as aGosedWeather
+from omf.weather import USCRNDataType
 
 
 class Test_GetPrecision(object):
