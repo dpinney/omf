@@ -4,7 +4,6 @@ from flask import (Flask, send_from_directory, request, redirect, render_templat
 	Response, url_for, copy_current_request_context)
 from jinja2 import Template
 from multiprocessing import Process
-from threading import Thread
 from passlib.hash import pbkdf2_sha512
 import json, os, flask_login, hashlib, random, time, datetime as dt, shutil, boto.ses, csv, sys
 try:
@@ -937,10 +936,9 @@ def networkData(owner, modelName, networkName):
 @app.route("/saveFeeder/<owner>/<modelName>/<feederName>/<int:feederNum>", methods=["POST"])
 @flask_login.login_required
 def saveFeeder(owner, modelName, feederName, feederNum):
-	""" Save feeder data. Also used for cancelling a file import, file conversion, or feeder-load overwrite.
-	"""
+	"""Save feeder data. Also used for cancelling a file import, file conversion, or feeder-load overwrite."""
 	print "Saving feeder for:%s, with model: %s, and feeder: %s"%(owner, modelName, feederName)
-	if owner == User.cu() or "admin" == User.cu() or owner=="public":
+	if owner == User.cu() or "admin" == User.cu() or owner == "public":
 		model_dir = os.path.join(_omfDir, "data/Model", owner, modelName)
 		for filename in ["gridError.txt", "error.txt", "weatherError.txt"]:
 			error_file = os.path.join(model_dir, filename)
@@ -952,8 +950,7 @@ def saveFeeder(owner, modelName, feederName, feederNum):
 						# Tried to remove a nonexistant file
 						pass
 		# Do NOT cancel any PPID.txt or PID.txt processes.
-		# Do NOT cancel any WPID.txt because it's running as a thread on the web server not as a separate process
-		for filename in ["ZPID.txt", "APID.txt", "NPID.txt", "CPID.txt"]:
+		for filename in ["ZPID.txt", "APID.txt", "NPID.txt", "CPID.txt", "WPID.txt"]:
 			pid_filepath = os.path.join(model_dir, filename)
 			if os.path.isfile(pid_filepath):
 				try:
@@ -979,11 +976,6 @@ def saveFeeder(owner, modelName, feederName, feederNum):
 						pass
 					else:
 						raise
-		### Hotfix for WPID.txt
-		w_pid_filepath = os.path.join(model_dir, "WPID.txt")
-		if os.path.isfile(w_pid_filepath):
-			os.remove(w_pid_filepath)
-		### Hotfix for WPID.txt
 		# It would be nice to file lock allInputData.json too...
 		writeToInput(model_dir, feederName, 'feederName' + str(feederNum))
 		payload = json.loads(request.form.to_dict().get("feederObjectJson","{}"))
@@ -1146,22 +1138,25 @@ def removeNetwork(owner, modelName, networkNum, networkName=None):
 @app.route("/climateChange/<owner>/<feederName>", methods=["POST"])
 @flask_login.login_required
 def climateChange(owner, feederName):
-	modelName = request.form.get('modelName')
-	modelDir = 'data/Model/' + owner + '/' + modelName
-	omdPath = modelDir + '/' + feederName + '.omd'
-	outFilePath = modelDir + '/weatherAirport.csv'
-	if os.path.isfile(outFilePath):
-		os.remove(outFilePath)
-	# Retain access to the request context once this view function has returned
-	@copy_current_request_context
-	def invoke_backgroundClimateChange():
-		backgroundClimateChange(modelDir, omdPath, outFilePath, owner, modelName)
-	importThread = Thread(target=invoke_backgroundClimateChange)
-	importThread.start()
-	return 'Success'
+	model_name = request.form.get('modelName')
+	model_dir = 'data/Model/' + owner + '/' + model_name
+	omdPath = model_dir + '/' + feederName + '.omd'
+	# Remove files that could be left over from a previous run
+	filepaths = [
+		os.path.join(model_dir, "error.txt"),
+		os.path.join(model_dir, "weatherAirport.csv"), # Old deleted historical weather option
+		os.path.join(model_dir, "uscrn-weather-data.csv")
+	]
+	for fp in filepaths:
+		if os.path.isfile(fp):
+			os.remove(fp)
+	# Don't bother writing WPID.txt here because /checkConversion doesn't distinguish between non-started processes and non-existant processes
+	importProc = Process(target=backgroundClimateChange, args=[omdPath, owner, model_name])
+	importProc.start()
+	return "Success"
 
 
-def backgroundClimateChange(modelDir, omdPath, outFilePath, owner, modelName):
+def backgroundClimateChange(omdPath, owner, modelName):
 	try:
 		pid_filepath = os.path.join(_omfDir, "data/Model", owner, modelName, "WPID.txt")
 		with open(pid_filepath, 'w') as pid_file:
@@ -1199,10 +1194,14 @@ def backgroundClimateChange(modelDir, omdPath, outFilePath, owner, modelName):
 				fcntl.flock(outFile, fcntl.LOCK_EX)
 				json.dump(feederJson, outFile, indent=4)
 				fcntl.flock(outFile, fcntl.LOCK_UN)
-		os.remove(pid_filepath)
-	except:
+		try:
+			os.remove(pid_filepath)
+		except:
+			# If this process was killed, then /saveFeeder would have deleted WPID.txt already
+			pass
+	except Exception as e:
 		with open("data/Model/"+owner+"/"+modelName+"/error.txt", "w") as errorFile:
-			errorFile.write(str(sys.exc_info()[1]))
+			errorFile.write(e.message)
 
 
 @app.route("/anonymize/<owner>/<feederName>", methods=["POST"])
@@ -1316,7 +1315,7 @@ def background_zillow_houses(model_dir):
 
 @app.route("/checkZillowHouses", methods=["POST"])
 @flask_login.login_required
-def check_Zillow_houses():
+def check_zillow_houses():
 	"""This route is not used to cancel the operation. /saveFeeder does that. This route only informs the user about the status of the operation"""
 	owner = request.form.get("owner")
 	model_name = request.form.get("modelName")
