@@ -1,11 +1,10 @@
 ''' Web server for model-oriented OMF interface. '''
 
-from flask import (Flask, send_from_directory, request, redirect, render_template, session, abort, jsonify,
-	Response, url_for, copy_current_request_context)
+from flask import (Flask, send_from_directory, request, redirect, render_template, session, abort, jsonify, url_for)
 from jinja2 import Template
 from multiprocessing import Process
 from passlib.hash import pbkdf2_sha512
-import json, os, flask_login, hashlib, random, time, datetime as dt, shutil, boto.ses, csv, sys
+import json, os, flask_login, hashlib, random, time, datetime as dt, shutil, boto.ses, csv, sys, platform
 try:
 	import fcntl
 except:
@@ -1515,7 +1514,8 @@ def uniqObjName(objtype, owner, name, modelName=False):
 
 
 if __name__ == "__main__":
-	os.environ['no_proxy'] = '*' # Workaround for macOS fork behavior with multiprocessing and urllib.
+	if platform.system() == "Darwin":  # MacOS
+		os.environ['no_proxy'] = '*' # Workaround for macOS fork behavior with multiprocessing and urllib.
 	template_files = ["templates/"+ x  for x in safeListdir("templates")]
 	model_files = ["models/" + x for x in safeListdir("models")]
 	#app.run(debug=True, host="0.0.0.0", extra_files=template_files + model_files)
