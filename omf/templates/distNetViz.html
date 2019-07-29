@@ -462,6 +462,7 @@
                             <li data-web="map">View on map</li>
                             {% else %}
                             <li>View raw data</li>
+                            <li data-web="map">View on map</li>
                             {% endif %}
                         </ul>
                     </div>
@@ -2479,7 +2480,9 @@ function addModelViewerHandlers(interfaceIsStatic=true) {
     });
     editMenuNodes.find(li => li.textContent.toLowerCase() === "static loads to houses").addEventListener("click", convertStaticLoadsIntoHouses);
     if (!interfaceIsStatic) {
-        //There are no features that require web requests that viewers can use
+        fileMenu.querySelector("li[data-web='map']").addEventListener("click", () => {
+            window.open(`/displayMap/${gThisOwner}/${gThisModelName}/${gThisFeederNum}`, '_blank');
+        });
     }
 }
 
@@ -2500,9 +2503,6 @@ function addModelOwnerHandlers(interfaceIsStatic=true) {
         fileMenu.querySelector("li[data-web='windmil']").addEventListener("click", () => toggleDisplay(document.getElementById("milsoftModal")));
         fileMenu.querySelector("li[data-web='gridlabd']").addEventListener("click", () => toggleDisplay(document.getElementById("gridlabdModal")));
         fileMenu.querySelector("li[data-web='cyme']").addEventListener("click", () => toggleDisplay(document.getElementById("cymeModal")));
-        fileMenu.querySelector("li[data-web='map']").addEventListener("click", () => {
-            window.open(`/displayMap/${gThisOwner}/${gThisModelName}/${gThisFeederNum}`, '_blank');
-        });
         // Fill feeder lists
         fillFeederList(document.getElementById("publicFeederList"), gPublicFeeders, "public");
         fillFeederList(document.getElementById("userFeederList"), gUserFeeders, gCurrentUser);
