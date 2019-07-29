@@ -456,12 +456,9 @@ def distribution_get(owner, model_name, feeder_num):
 		feeder_name = feeder_dict.get('feederName' + str(feeder_num))
 	feeder_file = model_dir + "/" + feeder_name + ".omd"
 	with open(feeder_file, "r") as data_file:
-		fcntl.flock(data_file, fcntl.LOCK_SH) # Get a shared lock
+		fcntl.flock(data_file, fcntl.LOCK_SH)
 		data = json.load(data_file)
-		fcntl.flock(data_file, fcntl.LOCK_UN) # Release the shared lock
-	#tree = data['tree']
-	#if not omf.distNetViz.contains_coordinates(tree):
-		#omf.distNetViz.insert_coordinates(tree)
+		fcntl.flock(data_file, fcntl.LOCK_UN)
 	passed_data = json.dumps(data)
 	component_json = get_components()
 	jasmine = spec = None
@@ -478,7 +475,6 @@ def distribution_get(owner, model_name, feeder_num):
 	public_feeders = all_data["publicFeeders"]
 	show_file_menu = User.cu() == "admin" or owner != "public"
 	current_user = User.cu()
-	# omf.distNetViz.forceLayout()
 	return render_template(
 		"distNetViz.html", thisFeederData=passed_data, thisFeederName=feeder_name, thisFeederNum=feeder_num,
 		thisModelName=model_name, thisOwner=owner, components=component_json, jasmine=jasmine, spec=spec,
@@ -556,7 +552,6 @@ def milsoftImport(owner):
 	for file in fileList:
 		if file.endswith(".glm") or file.endswith(".std") or file.endswith(".seq"):
 			os.remove(path+"/"+file)
-	#stdFile, seqFile = map(lambda x: request.files[x], ["stdFile", "seqFile"])
 	stdFile = request.files.get("stdFile")
 	seqFile = request.files.get("seqFile")
 	stdFile.save(os.path.join(modelFolder,feederName+'.std'))
@@ -598,7 +593,7 @@ def milImportBackground(owner, modelName, feederName, feederNum, stdString, seqS
 		writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
 	except Exception as error:
 		with open("data/Model/"+owner+"/"+modelName+"/gridError.txt", "w+") as errorFile:
-			errorFile.write('milError')
+			errorFile.write("milError")
 
 
 @app.route("/matpowerImport/<owner>", methods=["POST"])
@@ -699,7 +694,6 @@ def scadaLoadshape(owner,feederName):
 	#feederNum = request.form.get("feederNum",1)
 	modelName = request.form.get("modelName","")
 	modelDir = os.path.join(os.path.dirname(__file__), "data/Model", owner, modelName)
-
 	# delete calibration csv, calibration folder, and error file if they exist
 	if os.path.isfile(modelDir + "/error.txt"):
 		os.remove(modelDir + "/error.txt")
@@ -709,7 +703,6 @@ def scadaLoadshape(owner,feederName):
 	if os.path.isdir(workDir):
 		shutil.rmtree(workDir)
 		#shutil.rmtree("data/Model/" + owner + "/" +  modelName + "/calibration")
-
 	file = request.files['scadaFile']
 	file.save(os.path.join("data/Model/"+owner+"/"+modelName,loadName+".csv"))
 	if not os.path.isdir(modelDir+'/calibration/gridlabD'):
@@ -737,6 +730,7 @@ def scadaLoadshape(owner,feederName):
 	importProc = Process(target=backgroundScadaLoadshape, args =[owner, modelName, workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, "FBS", (0.05,5), 5])
 	importProc.start()
 	return 'Success'
+
 
 def backgroundScadaLoadshape(owner, modelName, workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, solver, calibrateError, trim):
 	# heavy lifting background process/omfCalibrate and then deletes PID file
@@ -1200,7 +1194,8 @@ def backgroundClimateChange(omdPath, owner, modelName):
 			pass
 	except Exception as e:
 		with open("data/Model/"+owner+"/"+modelName+"/error.txt", "w") as errorFile:
-			errorFile.write(e.message)
+			message = "climateError" if e.message is None else e.message
+			errorFile.write(message)
 
 
 @app.route("/anonymize/<owner>/<feederName>", methods=["POST"])
@@ -1307,9 +1302,10 @@ def background_zillow_houses(model_dir):
 		with open(payload_filepath, 'w') as f:
 			json.dump(zillow_houses, f)
 		os.remove(pid_filepath)
-	except:
+	except Exception as e:
 		with open(os.path.join(model_dir, "error.txt"), 'w') as error_file:
-			error_file.write(str(sys.exc_info()[1]))
+			message = "zillow_error" if e.message is None else e.message
+			error_file.write(message)
 
 
 @app.route("/checkZillowHouses", methods=["POST"])
@@ -1401,9 +1397,9 @@ def displayOmdMap(owner, modelName, feederNum):
 	geojson = omf.geo.omdGeoJson(feederFile)
 	return render_template('geoJsonMap.html', geojson=geojson)
 
+
 @app.route('/commsMap/<owner>/<modelName>/<feederNum>', methods=["GET"])
 def commsMap(owner, modelName, feederNum):
-
 	'''Function to render omc on a leaflet map using a new template '''
 	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
 	with open(os.path.join(modelDir, "allInputData.json"), "r") as jsonFile:
