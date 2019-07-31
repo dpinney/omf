@@ -1,0 +1,36 @@
+{"Scenario": {
+            "time_steps_per_hour": 1,
+            "Site": {
+                "latitude": 35.2468,
+                "longitude": -91.7337,
+
+                "LoadProfile": {
+                    "doe_reference_name": "MidriseApartment",
+                    "annual_kwh": 259525,
+                    "year": 2017
+                },
+
+                "ElectricTariff": {
+                    "urdb_rate_name": "custom",
+                    "blended_monthly_rates_us_dollars_per_kwh": [0.15, 0.2, 0.21, 0.23, 0.27, 0.19, 0.22, 0.17, 0.24, 0.26, 0.18,0.2],
+                    "blended_monthly_demand_charges_us_dollars_per_kw": [0.08, 0.11, 0, 0, 0.15, 0.14, 0.09, 0.06, 0, 0, 0.05, 0]
+                },
+
+                "PV": {
+                    "max_kw": "200",
+                    "existing_kw" : "0"
+
+                },
+
+                "Storage": {
+                    "max_kw": 0,
+                    "max_kwh": 0
+                },
+
+                "Wind": {
+                    "max_kw": 0,
+                    "max_kwh": 0
+                }
+            }
+        }
+        }

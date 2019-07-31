@@ -1,0 +1,3 @@
+2019-07-25 11:22:47,868 my_log_file  INFO     Response OK from https://developer.nrel.gov/api/reopt/v1/job/?api_key=WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9.
+2019-07-25 11:22:47,869 my_log_file  INFO     Polling https://developer.nrel.gov/api/reopt/v1/job/f938aa09-a3d5-42e8-a8ab-1d12c393e7ce/results/?api_key=WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9 for results with interval of 2s...
+2019-07-25 11:23:05,929 my_log_file  INFO     Saved results to results.json

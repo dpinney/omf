@@ -1,5 +1,5 @@
-import aGosedWeather
-from aGosedWeather import USCRNDataType
+import gridlabd_weather_validation as aGosedWeather
+from gridlabd_weather_validation import USCRNDataType
 import requests
 import csv, os
 

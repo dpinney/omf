@@ -24,7 +24,7 @@ filenames = {
 	"samrun": "samrun.json",
 	"tmomt": "transmissionmattoomt.json",
 	"tmpf": "transmissionpowerflow.zip",
-	"tv": "viewer.html",
+	"tv": "network-viewer.html",
 	"dv": "distnetviz-viewer.html"
 }
 
@@ -610,7 +610,7 @@ def transmissionViz(temp_dir):
 			json.load(f)
 	except:
 		raise Exception("Could not parse the omt file as json")
-	omf.network.get_HTML_interface_name(omt_path)
+	omf.network.viz(omt_path, output_path=temp_dir, output_name=filenames["tv"], open_file=False)
 
 
 @app.route("/transmissionViz/<path:temp_dir>")

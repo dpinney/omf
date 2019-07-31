@@ -349,19 +349,11 @@
 		<p class="reportTitle postRun" style="page-break-before:always">Forecast Dispatch Accuracy and Effectiveness</p>
 		<div id="effectiveness" class="content postRun detailsContainer" style="margin-top:0px">
 <pre>Load prediction training accuracy (MAPE):
-{{allOutputData['trainAccuracy'] or 'N/A'}}%
+{{allOutputDataDict['trainAccuracy'] or 'N/A'}}%
 
 Load prediction test accuracy (MAPE):
-{{allOutputData['testAccuracy'] or 'N/A'}}%
-
-Peak ID precision [True Positive / (True Positive + False Positive)]:
-{{allOutputData['precision'] or 'N/A'}}%
-
-Peak ID recall [True Positive / (True Positive + False Negative)]:
-{{allOutputData['recall'] or 'N/A'}}%
-
-Number of dispatches:
-{{allOutputData['number_of_dispatches'] or 'N/A'}}</pre>
+{{allOutputDataDict['testAccuracy'] or 'N/A'}}%
+</pre>
 		</div>
 		<p class="reportTitle postRun">Raw Input and Output Files</p>
 		<div id="rawOutput" class="content postRun" style="margin-top:0px">
@@ -369,5 +361,14 @@ Number of dispatches:
 				{% if loop.index > 1 %}&mdash; {% endif %}<a href="/downloadModelData/{{allInputDataDict['user']}}/{{allInputDataDict['modelName']}}/{{name}}">{{name}}</a>
 			{% endfor %}
 		</div>
+		<!-- 
+Peak ID precision [True Positive / (True Positive + False Positive)]:
+{{allOutputData['precision'] or 'N/A'}}%
+
+Peak ID recall [True Positive / (True Positive + False Negative)]:
+{{allOutputData['recall'] or 'N/A'}}%
+
+Number of dispatches:
+{{allOutputData['number_of_dispatches'] or 'N/A'}} -->
 	</div>
 </body>

@@ -435,7 +435,7 @@ const loadTestData = (async function() {
     // Interface initialization is asynchronous and happens automatically. In order to run these tests, initializeInterface() should be temporarily
     // commented-out in distNetViz.html
     await initializeInterface();
-    createSvgData(Object.keys(gTree.tree)).delete(gViewport);
+    createSvgData(Object.keys(gTree.tree)).remove(gViewport);
     insertCoordinates(Object.values(testTree.tree), 128, 590, 5);
     const svg = createSvgData(Object.keys(testTree.tree), testTree);
     svg.quickDraw(gViewport);
@@ -564,7 +564,9 @@ describe("Unit tests", function() {
                 expect(treeMap.names).toEqual(names);
             });
 
-            describe("if a tree object has any of the following values for its 'name' property: null, 'null' (in any letter case), undefined, or 'undefined' (in any letter case), and a child node has any of those values for its 'parent' property",  function() {
+
+            describe("if a tree object has any of the following values for its 'name' property: null, 'null' (in any letter case), undefined, or 'undefined'" +
+            "(in any letter case), and a child node has any of those values for its 'parent' property", function() {
 
                 it("should not map that child node to that tree object", function() {
                     const tree = {
@@ -956,13 +958,369 @@ describe("Unit tests", function() {
         // good
         describe("treePrototype", function() {
             
+            describe("replaceNode()", function() {
+
+                describe("if the key is not a number string", function() {
+
+                    it("should throw an Error", function() {
+                        const tree = createTree({
+                            0: {
+                                object: "node",
+                                name: "node0"
+                            }
+                        });
+                        expect(function() {
+                            tree.replaceNode(0, {});
+                        }).toThrowError("The key was not a string with a number value.");                      
+                    });
+                });
+
+                describe("if the key does not exist in the tree", function() {
+
+                    it("should throw an Error", function() {
+                        const tree = createTree();
+                        expect(function() {
+                            tree.replaceNode("999", {});
+                        }).toThrowError("The object with the key \"999\" does not exist in the tree.");
+                    });
+                });
+
+                describe("if the object being replaced is not a node", function() {
+
+                    it("should throw an Error", function() {
+                        const tree = createTree({
+                            0: {
+                                to: "somewhere",
+                                from: "nowhere"
+                            }
+                        });
+                        const component = {object: "node"}
+                        expect(function() {
+                            tree.replaceNode("0", component);
+                        }).toThrowError("The object with the key \"0\" is not a node.");
+                    });
+                });
+
+                describe("if the replacement component is not a node", function() {
+
+                    it("should throw an Error", function() {
+                        const tree = createTree({
+                            0: {
+                                object: "node"
+                            }
+                        });
+                        const component = {
+                            to: "somewhere",
+                            from: "everywhere"
+                        };
+                        expect(function() {
+                            tree.replaceNode("0", component);
+                        }).toThrowError("The replacement component is not a node.");
+                    });
+                });
+
+                describe("if the replacement component is a configuration node", function() {
+
+                    describe("if the object being replaced is not a configuration node", function() {
+
+                        it("should throw an error", function() {
+                            const tree = createTree({
+                                0: {
+                                    object: "node"
+                                }
+                            });
+                            const component = {
+                                module: "omf"
+                            };
+                            expect(function() {
+                                tree.replaceNode("0", component);
+                            }).toThrowError("Configuration nodes cannot be used to replace non-configuration nodes.");
+                        });
+                    });
+                });
+
+                describe("if the replacement component has a 'parent' attribute", function() {
+
+                    describe("if the object being replaced has a 'parent' attribute", function() {
+
+                        it("should set the 'parent' attribute of the replacement component to be the same as the 'parent' attribute of the object being replaced", function() {
+                            const tree = createTree({
+                                0: {
+                                    object: "triplex_load",
+                                    name: "triplex_load0",
+                                    parent: "node1",
+                                    latitude: 99,
+                                    longitude: 101
+                                },
+                                1: {
+                                    object: "node",
+                                    name: "node1"
+                                }
+                            });
+                            const component = {
+                                object: "house",
+                                parent: null,
+                            };
+                            tree.replaceNode("0", component);
+                            expect(tree.tree[0]).toEqual({
+                                object: "house",
+                                name: "house0",
+                                parent: "node1",
+                                latitude: 99,
+                                longitude: 101
+                            });
+                        });
+                    });
+
+                    describe("if the object being replaced does not have a 'parent' attribute", function() {
+
+                        it("should remove the 'parent' attribute from the replacement component", function() {
+                            const tree = createTree({
+                                0: {
+                                    object: "node",
+                                    name: "node0",
+                                    latitude: "55",
+                                    longitude: "0"
+                                }
+                            });
+                            const component = {
+                                object: "house",
+                                parent: "NULL"
+                            };
+                            tree.replaceNode("0", component);
+                            expect(tree.tree[0]).toEqual({
+                                object: "house",
+                                name: "house0",
+                                latitude: 55,
+                                longitude: 0
+                            });
+                        });
+                    });
+                });
+
+                describe("if the object being replaced has a 'parent' attribute", function() {
+
+                    describe("if the replacement component does not have a 'parent' attribute", function() {
+                        
+                        it("should add and update the 'parent' attribute on the replacement component", function() {
+                            const tree = createTree({
+                                0: {
+                                    object: "ZIPload",
+                                    name: "ZIPload0",
+                                    parent: "node1",
+                                    latitude: "7",
+                                    longitude: "9.001"
+                                },
+                                1: {
+                                    object: "node",
+                                    name: "node1"
+                                }
+                            });
+                            const component = {
+                                object: "triplex_node"
+                            };
+                            tree.replaceNode("0", component);
+                            expect(tree.tree[0]).toEqual({
+                                object: "triplex_node",
+                                name: "triplex_node0",
+                                parent: "node1",
+                                latitude: 7,
+                                longitude: 9.001
+                            });
+                        });
+                    });
+                });
+
+                it("should update the 'to' and 'from' properties of all lines that connect to the object being replaced", function() {
+                    const tree = createTree({
+                        0: {
+                            object: "triplex_node",
+                            name: "triplex_node0"
+                        },
+                        1: {
+                            object: "overhead_line",
+                            name: "overhead_line1",
+                            to: "triplex_node0",
+                            from: "triplex_node2"
+                        },
+                        2: {
+                            object: "triplex_node",
+                            name: "triplex_node2",
+                        },
+                        3: {
+                            object: "overhead_line",
+                            name: "overhead_line3",
+                            to: "triplex_node2",
+                            from: "triplex_node0"
+                        }
+                    });
+                    const component = {
+                        object: "house"
+                    };
+                    tree.replaceNode("0", component);
+                    expect(tree.tree[1]).toEqual({
+                        object: "overhead_line",
+                        name: "overhead_line1",
+                        to: "house0",
+                        from: "triplex_node2"
+                    });
+                    expect(tree.tree[3]).toEqual({
+                        object: "overhead_line",
+                        name: "overhead_line3",
+                        to: "triplex_node2",
+                        from: "house0"
+                    });
+                });
+
+                it("should update the 'parent' attribute of all children of the object being replaced", function() {
+                    const tree = createTree({
+                        0: {
+                            object: "triplex_node",
+                            name: "triplex_node0"
+                        },
+                        1: {
+                            object: "ZIPload",
+                            name: "ZIPload1",
+                            parent: "triplex_node0"
+                        }
+                    });
+                    const component = {
+                        object: "house"
+                    }
+                    tree.replaceNode("0", component);
+                    expect(tree.tree[1]).toEqual({
+                        object: "ZIPload",
+                        name: "ZIPload1",
+                        parent: "house0"
+                    });
+                });
+
+                it("should call TreeMap.remove() and TreeMap.add()", function() {
+                    const tree = createTree({
+                        0: {
+                            object: "node",
+                            name: "node0"
+                        }
+                    });
+                    const component = {
+                        object: "load"
+                    };
+                    const spy1 = spyOn(treeMapPrototype, "remove").and.callThrough();
+                    const spy2 = spyOn(treeMapPrototype, "add").and.callThrough();
+                    tree.replaceNode("0", component);
+                    expect(spy1).toHaveBeenCalledWith(["0"]);
+                    expect(spy2).toHaveBeenCalledWith("0");
+                });
+
+                it("should copy the latitude and longitude of the object being replaced to the replacement component", function() {
+                    const tree = createTree({
+                        0: {
+                            object: "node",
+                            name: "node0",
+                            latitude: 100,
+                            longitude: 100
+                        }
+                    });
+                    const component = {
+                        object: "load"
+                    };
+                    tree.replaceNode("0", component);
+                    expect(tree.tree[0]).toEqual({
+                        object: "load",
+                        name: "load0",
+                        latitude: 100,
+                        longitude: 100
+                    });
+                });
+
+                it("should set the name of the replacement component to include the key of the object being replaced", function() {
+                    const tree = createTree({
+                        1077: {
+                            object: "node",
+                            name: "node1077",
+                            latitude: 0,
+                            longitude: 18
+                        }
+                    });
+                    const component = {
+                        object: "house"
+                    };
+                    tree.replaceNode("1077", component);
+                    expect(tree.tree[1077]).toEqual({
+                        object: "house",
+                        name: "house1077",
+                        latitude: 0,
+                        longitude: 18
+                    });
+                });
+
+                it("should set the key of the replacement component to be the same as the key of the object being replaced", function() {
+                    const tree = createTree({
+                        779977: {
+                            object: "windmill",
+                            name: "windmill779977",
+                            latitude: 56,
+                            longitude: 10
+                        }
+                    });
+                    const component = {
+                        object: "volcano"
+                    };
+                    tree.replaceNode("779977", component);
+                    expect(tree.tree).toEqual({
+                        779977: {
+                            object: "volcano",
+                            name: "volcano779977",
+                            latitude: 56,
+                            longitude: 10
+                        }
+                    });
+                });
+
+                it("should insert a copy of the replacement component into the tree instead of the original replacement component", function() {
+                    const tree = createTree({
+                        11: {
+                            object: "node",
+                            name: "node11"
+                        }
+                    });
+                    const component = {
+                        object: "nuclear power plant"
+                    };
+                    tree.replaceNode("11", component);
+                    expect(tree.tree[11]).not.toBe(component);
+                });
+
+                describe("if a configuration node is replacing another configuration node", function() {
+
+                    it("should not add the 'name' attribute to the incoming component object", function() {
+                        const tree = createTree({
+                            0: {
+                                omftype: "module",
+                                longitude: 4,
+                                latitude: .701
+                            }
+                        })
+                        const component = {
+                            omftype: "#include"
+                        }
+                        tree.replaceNode("0", component);
+                        expect(tree.tree[0]).toEqual({
+                            omftype: "#include",
+                            longitude: 4,
+                            latitude: .701
+                        });
+                    });
+                });
+            });
+            
             describe("getObject()", function() {
 
                 it("should throw an exception if the key doesn't exist in the tree", function() {
                     const tree = createTree();
                     expect(function() {
                         tree.getObject("100");
-                    }).toThrowError(`getObject() failed. The object with the key "100" does not exist in the Tree.`)
+                    }).toThrowError(`The object with the key "100" does not exist in the tree.`)
                 });
 
                 it("should return an object in the tree", function() {
@@ -1017,7 +1375,7 @@ describe("Unit tests", function() {
                 });
             });
             
-            describe("isDeletable()", function() {
+            describe("isRemovable()", function() {
 
                 let tree;
 
@@ -1062,22 +1420,22 @@ describe("Unit tests", function() {
                 });
 
                 it("should return false if the tree object has children", function() {
-                    expect(tree.isDeletable("0")).toBe(false);
-                    expect(tree.isDeletable("4")).toBe(false);
+                    expect(tree.isRemovable("0")).toBe(false);
+                    expect(tree.isRemovable("4")).toBe(false);
                 });
 
                 it("should return false if the tree object has connected lines", function() {
-                    expect(tree.isDeletable("2")).toBe(false);
-                    expect(tree.isDeletable("3")).toBe(false);
+                    expect(tree.isRemovable("2")).toBe(false);
+                    expect(tree.isRemovable("3")).toBe(false);
                 });
 
                 it("should return true if the tree object has neither connected lines nor children", function() {
-                    expect(tree.isDeletable("1")).toBe(true);
-                    expect(tree.isDeletable("6")).toBe(true);
+                    expect(tree.isRemovable("1")).toBe(true);
+                    expect(tree.isRemovable("6")).toBe(true);
                 });
             });
             
-            describe("getSubtreeToDelete()", function() {
+            describe("getSubtreeToRemove()", function() {
 
                 describe("if the tree object has connected lines and/or children", function() {
 
@@ -1094,7 +1452,7 @@ describe("Unit tests", function() {
                             node3Line1EndChild2Child1,
                             childOfLine,
                         ];
-                        const keys = testTree.getSubtreeToDelete(node3Line1End).sort();
+                        const keys = testTree.getSubtreeToRemove(node3Line1End).sort();
                         expect(keys).toEqual(keysToDelete.sort());
                     });
 
@@ -1119,7 +1477,7 @@ describe("Unit tests", function() {
                             }
                         };
                         tree = createTree(tree);
-                        expect(tree.getSubtreeToDelete("1")).toEqual(["2", "1"]);
+                        expect(tree.getSubtreeToRemove("1")).toEqual(["2", "1"]);
                     });
                 });
             });
@@ -1157,7 +1515,7 @@ describe("Unit tests", function() {
                 it("should throw an error if the key argument doesn't exist in the treeWrapper argument", function() {
                     expect(function() {
                         createTreeObject("10", createTree());
-                    }).toThrowError(`getObject() failed. The object with the key "10" does not exist in the Tree.`);
+                    }).toThrowError(`The object with the key "10" does not exist in the tree.`);
                 });
 
                 it("should throw an error if the key argument is not a string", function() {
@@ -1751,8 +2109,12 @@ describe("Unit tests", function() {
                             }
                         }
                     };
-                    expect(deepCopy(obj1)).toEqual(obj1);
-                    expect(deepCopy(obj1)).not.toBe(obj1);
+                    const copy = deepCopy(obj1)
+                    expect(copy).toEqual(obj1);
+                    expect(copy).not.toBe(obj1);
+                    expect(copy.prop2.prop2.prop2).toEqual(["10", 11, false]);
+                    expect(copy.prop2.prop2.prop2).toEqual(obj1.prop2.prop2.prop2);
+                    expect(copy.prop2.prop2.prop2).not.toBe(obj1.prop2.prop2.prop2);
                 });
             });
             //good
