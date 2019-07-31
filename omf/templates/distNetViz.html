@@ -3073,11 +3073,14 @@ function pollZillowHouses() {
     let cancelled = false;
     let modal;
     modal = createProgressModal({
-        startMessage: "Convert triplex objects into real-world Zillow houses. This could take many minutes...",
+        startMessage: "Converting triplex objects into real-world Zillow houses. This could take many minutes...",
         endMessage: "",
         cancelFunc: () => {
             cancelled = true;
-            saveFeeder(gReadFeeder)
+            modal.endMessage = "You cancelled the operation.";
+            modal.cancelButton.style.display = "none";
+            modal.finish();
+            // Don't re-save. No need to.
         },
         finishFunc: () => {
             modal.hide();
@@ -3109,15 +3112,15 @@ function pollZillowHouses() {
                 }
             } else {
                 clearInterval(intervalId);
-                // No need to do anything else. A new progress modal replaces this one.
+                // No need to do anything else.
             }
         }).fail(function(jqXHR, textStatus, errorThrown) {
             clearInterval(intervalId);
             if (!cancelled) {
                 modal.endMessage = "We were unable to get the house data to convert triplex objects into Zillow houses. Operation failed. Check the console for more information.";
                 modal.finish();
-                //console.log(jqXHR.status); // 500
-                //console.log(jqXHR.responseText); // server response
+                console.log(jqXHR.status); // 500
+                console.log(jqXHR.responseText); // server response
             }
         });
     }, 5000);
@@ -3188,6 +3191,10 @@ function saveFeeder(feeder) {
  * @param {string} owner - either "public" or the current user.
  */
 async function loadFeeder(serverFeederName, serverModelName, owner) {
+    if (feederNeedsSave()) {
+        alert("You have unsaved changes. Please save this feeder before loading a new feeder.");
+        return;
+    }
     let submitForm = false;
     await $.ajax({
         // I need to check if a user's feeder still exists.
@@ -3266,6 +3273,7 @@ function validateClimateModal() {
     return true;
 }
 
+//TODO: check that gReadFeeder.equals(gWriteFeeder) are prompt user to save before initiating a file operation.
 /** 
  * Submit a from to do one of the following:
  * 1) Import a Milsoft, GridLAB-D, or CYME file into this .omd file.
@@ -3276,6 +3284,10 @@ function validateClimateModal() {
  * 6) Modify this .omd file with anonymization
  */
 async function submitForm({formId, pollUrl, inputId}) {
+    if (feederNeedsSave()) {
+        alert("You have unsaved changes. Please save your feeder before modifying it.");
+        return;
+    }
     let submitForm = true;
     if (inputId !== undefined) {
         // inputId was defined, therefore we need to check the file name on the server before submitting the form
@@ -3296,9 +3308,7 @@ async function submitForm({formId, pollUrl, inputId}) {
             alert("The AJAX request failed to get a successful response from the server");
         });
     }
-    if (submitForm === false) {
-        return;
-    }
+    if (submitForm === false) return;
     let cancelled = false;
     let modal;
     modal = createProgressModal({
@@ -3381,25 +3391,25 @@ async function submitForm({formId, pollUrl, inputId}) {
 }
 
 async function getNewFeederName() {
-	if (JSON.stringify(gReadFeeder) !== JSON.stringify(gWriteFeeder)){
-		alert("You have unsaved changes. Please save the feeder before proceeding.")
-	} else {
-		let newName = prompt("Rename the feeder to", `${gThisFeederName}`);
-        while (/\W/.test(newName)) {
-            newName = prompt("Only letters, digits and underscore are allowed.\nPlease enter a different name", `${gThisFeederName}`);
-        }
-		if (newName != null) {
-            await $.ajax({
-                url: `/uniqObjName/Feeder/${gThisOwner}/${newName}/${gThisModelName}`//good because of course I am renaming THIS feeder file
-            }).done(function(data) {
-                if (data.exists) {
-                    alert(`You already have a feeder named "${newName}". Please choose a different name.`);
-                } else {
-                    renameFeeder(gThisFeederName, newName);
-                }
-            });
-		}
-	} 
+    if (feederNeedsSave()) {
+		alert("You have unsaved changes. Please save the feeder before renaming.");
+        return;
+    }
+    let newName = prompt("Rename the feeder to", `${gThisFeederName}`);
+    while (/\W/.test(newName)) {
+        newName = prompt("Only letters, digits and underscore are allowed.\nPlease enter a different name", `${gThisFeederName}`);
+    }
+    if (newName != null) {
+        await $.ajax({
+            url: `/uniqObjName/Feeder/${gThisOwner}/${newName}/${gThisModelName}`//good because of course I am renaming THIS feeder file
+        }).done(function(data) {
+            if (data.exists) {
+                alert(`You already have a feeder named "${newName}". Please choose a different name.`);
+            } else {
+                renameFeeder(gThisFeederName, newName);
+            }
+        });
+    }
 }
 
 async function renameFeeder(oldServerName, newName) {
@@ -3721,7 +3731,7 @@ function getRelationship(obj) {
 }
 
 /** 
- * Return an object that is a copy of the argument object.
+ * Return an object that is a copy of the argument object. JSON.stringify() has many limitations so be careful!.
  * 
  * @param {Object} oldObject - the object to copy.
  * @return {Object} - a copy of the oldObject.
@@ -3956,6 +3966,13 @@ function preserveColorWithNewAlpha(e, alpha) {
  */
 function interfaceIsStatic() {
     return document.getElementById("panZoomInsert").textContent.trim() !== ""
+}
+
+/**
+ * Determine whether or not to force the user to save their feeder. This might not always be sufficient, due to the many limitations of using JSON.stringify().
+ */
+function feederNeedsSave() {
+    return JSON.stringify(gReadFeeder) !== JSON.stringify(gWriteFeeder);
 }
 
 //**************************************************
