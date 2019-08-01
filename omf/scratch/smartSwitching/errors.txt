@@ -42,10 +42,9 @@ Discussion:
 
 Actual behavior: plt.bar() and plt.show() produce no output when run in smartSwitching. This is not the case when I create a python file to test plt operations. In this case, everything works as expected, even given the same set of data.
 Expected behavior: plt.bar() and plt.show() produce a bar graph when given the output from the recloserAnalysis() function.
-Workaround/fix: Save the figure rather to the smartSwitching folder instead.
+Workaround/fix: Save the figure rather to the smartSwitching folder instead. Can also change the directory...
 Dicussion:
-	Why does it still not appear automatically?
-
+	Easy fix.
 
 Actual behavior: VirtualBox starts, but with a black screen and without any other output
 Expected behavior: VirtualBox starts with Ubuntu
@@ -53,4 +52,8 @@ Workaround/fix: Needed to enable Virtual Technology in Windows BIOS settings. On
 
 Actual behavior: smartSwitching.py produces different results on a Mac and Windows machine.
 Expected behavior: the same results are produced no matter which system is used.
-Workaround/fix: Frank says that adding the line #set randomseed=5 near the top of the glm file produces similar results for both machines. 
+Workaround/fix: Frank says that adding the line #set randomseed=5 near the top of the glm file produces similar results for both machines. This is successful!
+Discussion:
+	Different seeds can cause high variance in SAIDI/SAIFI measures, mostly due to how a sustained outage is defined in GridLAB-D (over 5 minutes).
+	Included a MAIFI measure as well, and the ability to change the threshold for a sustained outage in the input.
+

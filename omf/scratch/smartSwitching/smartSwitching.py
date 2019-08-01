@@ -15,6 +15,7 @@ import plotly.figure_factory as ff
 from networkx.drawing.nx_agraph import graphviz_layout
 import networkx as nx
 import time
+import itertools as it
 from shutil import copyfile
 from omf.models import __neoMetaModel__
 from omf.models import voltageDrop as vd
@@ -29,10 +30,7 @@ from dateutil import parser
 from dateutil.relativedelta import *
 
 # helper function to pull out reliability metric data (SAIDI/SAIFI) 
-def pullOutValues(tree, workDir):
-	numberOfCustomers = 0.0
-	SAIFI_returned = 0.0
-	SAIDI_returned = 0.0
+def pullOutValues(tree, workDir, sustainedOutageThreshold):
 	attachments = []
 	# Run Gridlab.
 	if not workDir:
@@ -40,7 +38,8 @@ def pullOutValues(tree, workDir):
 		print '@@@@@@', workDir
 	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 
-	#Pull out SAIDI/SAIFI values and number of customers
+	#Pull out number of customers
+	numberOfCustomers = 0.0
 	with open(workDir + '/Metrics_Output.csv', 'rb') as csvfile:
 		file = csv.reader(csvfile)
 		for line in file:
@@ -53,24 +52,85 @@ def pullOutValues(tree, workDir):
 							break
 						except:
 							continue
-				if 'SAIFI' in line[k]:
-					for i in line[k].split():
-						try:
-							SAIFI_returned = float(i)
-							break
-						except:
-							continue
-				if 'SAIDI' in line[k]:
-					for i in line[k].split():
-						try:
-							SAIDI_returned = float(i)
-							break
-						except:
-							continue
+		# old way of finding SAIDI/SAIFI... manual calculation is better as it allows an input of threshold for sustained outage 
+				#if 'SAIFI' in line[k]:
+				#	for i in line[k].split():
+				#		try:
+				#			SAIFI_returned = float(i)
+				#			break
+				#		except:
+				#			continue
+				#if 'SAIDI' in line[k]:
+				#	for i in line[k].split():
+				#		try:
+				#			SAIDI_returned = float(i)
+				#			break
+				#		except:
+				#			continue
 				k += 1
-	mc = pd.read_csv(workDir + '/Metrics_Output.csv', skiprows=6, nrows=400)
+
+	# helper function returning the length of a variable footer
+	def get_footer(file_):
+		with open(file_) as f:
+			g = it.dropwhile(lambda x: 'SAIFI' not in x, f)
+			footer_len = len([i for i, _ in enumerate(g)])
+		return footer_len
+
+	# return the Metrics_Output fault data for a year, without any extra data in a cvs format
+	footer_len = get_footer(workDir + '/Metrics_Output.csv')
+	row_count = sum(1 for row in csv.reader(open(workDir + '/Metrics_Output.csv'))) - footer_len - 8
+	mc = pd.read_csv(workDir + '/Metrics_Output.csv', skiprows=6, nrows=row_count)
 	mc = mc.rename(columns={'Metric Interval Event #': 'Task', 'Starting DateTime (YYYY-MM-DD hh:mm:ss)': 'Start', 'Ending DateTime (YYYY-MM-DD hh:mm:ss)': 'Finish'})
-	return numberOfCustomers, SAIFI_returned, SAIDI_returned, mc
+
+	# find SAIDI/SAIFI/MAIFI measures by calculating manually based on a given sustained outage threshold
+	SAIDI_returned, SAIFI_returned, MAIFI_returned = manualOutageStats(numberOfCustomers, mc, sustainedOutageThreshold)
+
+	return numberOfCustomers, SAIFI_returned, SAIDI_returned, MAIFI_returned, mc
+
+# function which manually computes outage stats given a threshold for a sustained outage
+def manualOutageStats(numberOfCustomers, mc_orig, sustainedOutageThreshold):
+	
+	# copy DataFrame so original object remains unchanged
+	mc = pd.DataFrame.copy(mc_orig, deep=True)
+
+	# calculate SAIDI
+	customerInterruptionDurations = 0.0
+	row = 0
+	row_count_mc = mc.shape[0]
+	while row < row_count_mc:
+		if (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) > int(sustainedOutageThreshold):
+			customerInterruptionDurations += (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) * int(mc.loc[row, 'Number customers affected']) / 3600
+		row += 1
+
+	SAIDI = customerInterruptionDurations / numberOfCustomers
+
+	# calculate SAIFI
+	row = 0
+	totalInterruptions = 0.0
+	customersAffected = 0
+	while row < row_count_mc:
+		if (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) > int(sustainedOutageThreshold):
+			customersAffected += int(mc.loc[row, 'Number customers affected'])
+		row += 1
+	SAIFI = customersAffected / numberOfCustomers
+
+	# calculate CAIDI
+	CAIDI = SAIDI / SAIFI
+
+	# calculate ASAI
+	ASAI = (numberOfCustomers * 8760 - customerInterruptionDurations) / (numberOfCustomers * 8760)
+
+	# calculate MAIFI
+	sumCustomersAffected = 0.0
+	row = 0
+	while row < row_count_mc:
+		if (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) <= int(sustainedOutageThreshold):
+			sumCustomersAffected += int(mc.loc[row, 'Number customers affected'])
+		row += 1
+
+	MAIFI = sumCustomersAffected / numberOfCustomers
+
+	return SAIDI, SAIFI, MAIFI
 
 # helper function to set-up reliability module on a glm given its path
 def setupSystem(pathToGlm, workDir, lineFaultType, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType):
@@ -83,29 +143,49 @@ def setupSystem(pathToGlm, workDir, lineFaultType, failureDistribution, failure_
 		try: return int(x)
 		except: return 0
 
-	#seedKey = max([safeInt(x) for x in tree.keys()])
-	#tree[str(seedKey*10)] = {'omftype': '#set', 'argument': 'randomseed=5'}
-
 	biggestKey = max([safeInt(x) for x in tree.keys()])
+	smallestKey = min(tree, key=tree.get)
+	currentKey = smallestKey
+	while tree.get(str(currentKey)) != None:
+		currentKey += 1
+	tree[str(currentKey)] = {'omftype': '#set', 'argument': 'randomseed=5'}
+
 	# Add Reliability module
 	tree[str(biggestKey*10)] = {'module':'reliability','maximum_event_length':'18000','report_event_log':'true'}
 	
 	CLOCK_START = simTime
 	dt_start = parser.parse(CLOCK_START)
-	dt_end = dt_start + relativedelta(months=+12, weeks=+0, day=0, hour=0, minute=0, second=0)
+	dt_end = dt_start + relativedelta(months=+12, weeks=+1, day=0, hour=0, minute=0, second=0)
 	CLOCK_END = str(dt_end)
 	CLOCK_RANGE = CLOCK_START + ',' + CLOCK_END
 	if faultType != None:
 		# Add eventgen object (the fault)
 		tree[str(biggestKey*10 + 1)] = {'object':'eventgen','name':'RandEvent','parent':'RelMetrics', 'target_group':'class=' + lineFaultType,'fault_type':faultType, 'failure_dist':failureDistribution, 'restoration_dist':restorationDistribution, 'failure_dist_param_1':failure_1, 'failure_dist_param_2':failure_2, 'restoration_dist_param_1':rest_1, 'restoration_dist_param_2':rest_2, 'max_outage_length':maxOutageLength}
 		# Add fault_check object
-		tree[str(biggestKey*10 + 2)] = {'object':'fault_check','name':'test_fault','check_mode':'ONCHANGE', 'eventgen_object':'RandEvent', 'output_filename':'Fault_check_out.txt'}
+		tree[str(biggestKey*10 + 2)] = {'object':'fault_check','name':'test_fault','check_mode':'ONCHANGE', 'eventgen_object':'RandEvent', 'output_filename':'Fault_check_out.txt', 'strictly_radial': 'false'}
 		# Add reliabilty metrics object
 		tree[str(biggestKey*10 + 3)] = {'object':'metrics', 'name':'RelMetrics', 'report_file':'Metrics_Output.csv', 'module_metrics_object':'PwrMetrics', 'metrics_of_interest':'"SAIFI,SAIDI,CAIDI,ASAI,MAIFI"', 'customer_group':'"groupid=METERTEST"', 'metric_interval':'0 s', 'report_interval':'1 yr'}
 		# Add power_metrics object
 		tree[str(biggestKey*10 + 4)] = {'object':'power_metrics','name':'PwrMetrics','base_time_value':'1 h'}
 		
-	
+		tree2 = tree.copy()
+
+		#add meters to the tree
+		index = 7
+		for key in tree2:
+			if tree2[key].get('object','') in ['load']:
+				if 'parent' not in tree2[key]:
+					tree[str(biggestKey*10 + index)] = {'object':'meter','groupid':'METERTEST','phases':tree2[key]['phases'],'name':tree2[key]['name'] + '_meter' ,'nominal_voltage':tree2[key]['nominal_voltage'],'parent':tree2[key]['name']}
+					index = index + 1
+
+		# HACK: set groupid for all meters so outage stats are collected.
+		noMeters = True
+		for key in tree:
+			if tree[key].get('object','') in ['meter', 'triplex_meter']:
+				tree[key]['groupid'] = "METERTEST"
+				noMeters = False
+		if noMeters:
+			raise Exception("No meters detected on the circuit. Please add at least one meter to allow for collection of outage statistics.")
 	for key in tree:
 		if 'clock' in tree[key]:
 			tree[key]['starttime'] = "'" + CLOCK_START + "'"
@@ -138,8 +218,6 @@ def setupSystem(pathToGlm, workDir, lineFaultType, failureDistribution, failure_
 	# create volt and current line dumps for debugging purposes
 	tree[str(biggestKey*10 + 5)] = {"object":"voltdump","filename":"voltDump.csv"}
 	tree[str(biggestKey*10 + 6)] = {"object":"currdump","filename":"currDump.csv"}
-
-	tree[str(biggestKey*10 + 7)] = {'#set randomseed=5':''}
 	
 	# Line rating dumps
 	tree[omf.feeder.getMaxKey(tree) + 1] = {
@@ -203,25 +281,6 @@ def setupSystem(pathToGlm, workDir, lineFaultType, failureDistribution, failure_
 						'file':key + '_phase_' + phase + '_state.csv'
 					}
 
-
-	tree2 = tree.copy()
-
-	#add meters to the tree
-	index = 7
-	for key in tree2:
-		if tree2[key].get('object','') in ['load']:
-			if 'parent' not in tree2[key]:
-				tree[str(biggestKey*10 + index)] = {'object':'meter','groupid':'METERTEST','phases':tree2[key]['phases'],'name':tree2[key]['name'] + '_meter' ,'nominal_voltage':tree2[key]['nominal_voltage'],'parent':tree2[key]['name']}
-				index = index + 1
-	
-	# HACK: set groupid for all meters so outage stats are collected.
-	noMeters = True
-	for key in tree:
-		if tree[key].get('object','') in ['meter', 'triplex_meter']:
-			tree[key]['groupid'] = "METERTEST"
-			noMeters = False
-	if noMeters:
-		raise Exception('No meters detected on the circuit. Please add at least one meter to allow for collection of outage statistics.')
 	
 	return tree, workDir, biggestKey, index
 
@@ -279,11 +338,11 @@ def protection(tree):
 	return tree
 
 # function that returns a .csv of the random faults generated and the SAIDI/SAIFI values for a given glm, line for recloser, and distribution data
-def recloserAnalysis(pathToGlm, workDir, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType):
+def recloserAnalysis(pathToGlm, workDir, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType, sustainedOutageThreshold):
 	
 	tree, workDir, biggestKey, index = setupSystem(pathToGlm, workDir, lineFaultType, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType)
 
-	numberOfCustomers, noReclSAIFI, noReclSAIDI, mc1 = pullOutValues(tree, workDir)
+	numberOfCustomers, noReclSAIFI, noReclSAIDI, noReclMAIFI, mc1 = pullOutValues(tree, workDir, sustainedOutageThreshold)
 	
 	#add a recloser
 	for key in tree:
@@ -294,26 +353,30 @@ def recloserAnalysis(pathToGlm, workDir, lineFaultType, lineNameForRecloser, fai
 	
 	tree = protection(tree)
 	
-	numberOfCustomers, reclSAIFI, reclSAIDI, mc2 = pullOutValues(tree, workDir)
+	numberOfCustomers, reclSAIFI, reclSAIDI, reclMAIFI, mc2 = pullOutValues(tree, workDir, sustainedOutageThreshold)
 
 	return numberOfCustomers, mc1, mc2, tree, {
 		'noRecl-SAIDI':noReclSAIDI,
 		'noRecl-SAIFI':noReclSAIFI,
 		'recl-SAIDI':reclSAIDI,
 		'recl-SAIFI':reclSAIFI
+		
+	}, {
+		'noRecl-MAIFI':noReclMAIFI,
+		'recl-MAIFI':reclMAIFI
 	}
-	distributiongraph(failureDistribution, failure_1, failure_2, 'failure distribution')
 
 # function that finds the optimal placement for an additional recloser
 #WARNING: time-intensive
-def optimalRecloserAnalysis(pathToGlm, workDir, lineFaultType, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType):
+def optimalRecloserAnalysis(pathToGlm, workDir, lineFaultType, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType, sustainedOutageThreshold):
 
 	tree, workDir, biggestKey, index = setupSystem(pathToGlm, workDir, lineFaultType, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType)
 
-	numberOfCustomers, noReclSAIFI, noReclSAIDI, mc = pullOutValues(tree, workDir)
+	numberOfCustomers, noReclSAIFI, noReclSAIDI, noReclMAIFI, mc = pullOutValues(tree, workDir, sustainedOutageThreshold)
 
-	bestSAIDI = 5.0
-	bestSAIFI = 5.0
+	bestSAIDI = 10e19
+	bestSAIFI = 10e19
+	bestMAIFI = 10e19
 	bestSAIDI_name = ''
 	bestSAIFI_name = ''
 
@@ -326,12 +389,13 @@ def optimalRecloserAnalysis(pathToGlm, workDir, lineFaultType, failureDistributi
 				tree[str(biggestKey*10 + index)] = {'object':'recloser','phases':tree2[key]['phases'],'name':tree2[key]['name'] + '_recloser' , 'from':tree2[key]['from'], 'to':tree2[key]['to'], 'retry_time': '1 s', 'max_number_of_tries': '3'}
 				SAIDI_name = tree2[key]['name']
 				SAIFI_name = tree2[key]['name']
+				MAIFI_name = tree2[key]['name']
 				del tree[key]
 				index = index + 1
 	
 				tree = protection(tree)
 	
-				numberOfCustomers, reclSAIFI, reclSAIDI, mc = pullOutValues(tree, workDir)
+				numberOfCustomers, reclSAIFI, reclSAIDI, reclMAIFI, mc = pullOutValues(tree, workDir, sustainedOutageThreshold)
 
 				if bestSAIDI > reclSAIDI:
 					bestSAIDI = reclSAIDI
@@ -343,33 +407,67 @@ def optimalRecloserAnalysis(pathToGlm, workDir, lineFaultType, failureDistributi
 					for key in tree:
 						if tree[key].get('object', '') in 'recloser':
 							bestSAIFI_name = SAIFI_name
-	return bestSAIDI_name, bestSAIFI_name, tree, {
+				if bestMAIFI > reclMAIFI:
+					bestMAIFI = reclMAIFI
+					for key in tree:
+						if tree[key].get('object', '') in 'recloser':
+							bestMAIFI_name = MAIFI_name
+	return bestSAIDI_name, bestSAIFI_name, bestMAIFI_name, tree, {
 		'noRecl-SAIDI': noReclSAIDI,
 		'noRecl-SAIFI': noReclSAIFI,
 		'recl-SAIDI': bestSAIDI,
-		'recl-SAIFI': bestSAIFI
+		'recl-SAIFI': bestSAIFI,
+	}, {
+		'noRecl-MAIFI': noReclMAIFI,
+		'recl-MAIFI':bestMAIFI
 	}
 
 # finds the best location for a new recloser in a feeder system
 # WARNING: takes a lot of time to run
-def bestLocationForRecloser(pathToGlm, workDir, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType):
-	numberOfCustomers, mc1, mc2, tree1, test1 = recloserAnalysis(pathToGlm, workDir, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType)
-	row1 = sorted(test1)
-	col1 = [value for (key, value) in sorted(test1.items())]
-	trace1 = go.Bar(x = row1, y = col1, name = 'Recloser Analysis')
+def bestLocationForRecloser(pathToGlm, workDir, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType, sustainedOutageThreshold):
+	
+	# check to see if work directory is specified; otherwise, create a temporary directory
+	if not workDir:
+		workDir = tempfile.mkdtemp()
+		print '@@@@@@', workDir
 
-	bestSAIDI, bestSAIFI, tree2, test2 = optimalRecloserAnalysis(pathToGlm, workDir, lineFaultType, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType)
-	row2 = sorted(test2)
-	col2 = [value for (key, value) in sorted(test2.items())]
-	trace2 = go.Bar(x = row2, y = col2, name= 'Optimal Recloser Analysis')
+	# pull out data from recloser and optimal recloser analyses
+	numberOfCustomers, mc1, mc2, tree1, test11, test12 = recloserAnalysis(pathToGlm, workDir, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType, sustainedOutageThreshold)
+	
+	# create bar plots of data
+	row11 = sorted(test11)
+	col11 = [value for (key, value) in sorted(test11.items())]
+	trace11 = go.Bar(x = row11, y = col11, name = 'SAIDI SAIFI Recloser Analysis')
 
+	row12 = sorted(test12)
+	col12 = [value for (key, value) in sorted(test12.items())]
+	trace12 = go.Bar(x = row12, y = col12, name = 'MAIFI Recloser Analysis')
+
+	bestSAIDI, bestSAIFI, bestMAIFI, tree2, test21, test22 = optimalRecloserAnalysis(pathToGlm, workDir, lineFaultType, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType, sustainedOutageThreshold)
+	
+	row21 = sorted(test21)
+	col21 = [value for (key, value) in sorted(test21.items())]
+	trace21 = go.Bar(x = row21, y = col21, name= 'SAIDI SAIFI Optimal Recloser Analysis')
+
+	row22 = sorted(test22)
+	col22 = [value for (key, value) in sorted(test22.items())]
+	trace22 = go.Bar(x = row22, y = col22, name= 'MAIFI Optimal Recloser Analysis')
+
+	# print best locations based on each value calculated
 	print('Best location based on SAIDI = ' + str(bestSAIDI))
 	print('Best location based on SAIFI = ' + str(bestSAIFI))
+	print('Best location based on MAIFI = ' + str(bestMAIFI))
 
-	data = [trace1, trace2]
-	layout = go.Layout(barmode='group', title='SAIDI/SAIFI Analysis')
-	figure = go.Figure(data=data, layout=layout)
-	py.offline.plot(figure, filename='best_location_for_recloser', auto_open=False)
+	# save plots
+	data1 = [trace11, trace21]
+	layout1 = go.Layout(barmode='group', title='SAIDI/SAIFI Analysis')
+	figure1 = go.Figure(data=data1, layout=layout1)
+	py.offline.plot(figure1, filename= workDir + '/best_location_for_recloser_SAIDI_SAIFI', auto_open=False)
+	
+	data2 = [trace12, trace22]
+	layout2 = go.Layout(barmode='group', title='MAIFI Analysis')
+	figure2 = go.Figure(data=data2, layout=layout2)
+	py.offline.plot(figure2, filename= workDir + '/best_location_for_recloser_MAIFI', auto_open=False)
 
 # helper function to convert a datetime object to a float
 def datetime_to_float(d):
@@ -378,56 +476,108 @@ def datetime_to_float(d):
 	return total_seconds
 
 # analyzes the value of adding an additional recloser to a feeder system
-def valueOfAdditionalRecloser(pathToGlm, workDir, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, average_consumption, kwh_cost, restoration_cost, average_hardware_cost, simTime, faultType):
-	numberOfCustomers, mc1, mc2, tree1, test1 = recloserAnalysis(pathToGlm, workDir, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType)
+def valueOfAdditionalRecloser(pathToGlm, workDir, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, kwh_cost, restoration_cost, average_hardware_cost, simTime, faultType, sustainedOutageThreshold):
 	
+	# perform analyses on the glm
+	numberOfCustomers, mc1, mc2, tree1, test1, test2 = recloserAnalysis(pathToGlm, workDir, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType, sustainedOutageThreshold)
+
+	# check to see if work directory is specified
+	if not workDir:
+		workDir = tempfile.mkdtemp()
+		print '@@@@@@', workDir
+
+	# Find SAIDI/SAIFI/MAIFI manually from Metrics_Output
+	manualNoReclSAIDI, manualNoReclSAIFI, manualNoReclMAIFI = manualOutageStats(numberOfCustomers, mc1, sustainedOutageThreshold)
+	manualReclSAIDI, manualReclSAIFI, manualReclMAIFI = manualOutageStats(numberOfCustomers, mc2, sustainedOutageThreshold)
+
+	# calculate average consumption over the feeder system given meter data
+	numberOfMeters = 0
+	sumOfVoltages = 0.0
+	for key in tree1:
+		if tree1[key].get('object','') in ['meter', 'triplex_meter']:
+			numberOfMeters += 1
+			sumOfVoltages += float(tree1[key]['nominal_voltage'])
+	average_consumption = sumOfVoltages/numberOfMeters
+
+	# print SAIDI/SAIFI/MAIFI values
+	print('Manually Calculated No Recloser SAIDI = ' + str(manualNoReclSAIDI))
+	print('Manually Calculated Recloser SAIDI = ' + str(manualReclSAIDI))
+	print('Manually Calculated No Recloser SAIFI = ' + str(manualNoReclSAIFI))
+	print('Manually Calculated Recloser SAIFI = ' + str(manualReclSAIFI))
+	print('Manually Calculated No Recloser MAIFI = ' + str(manualNoReclMAIFI))
+	print('Manually Calculated Recloser MAIFI = ' + str(manualReclMAIFI))
+
 	# Calculate initial and final outage costs
+	# calculate customer costs
 	initialCustomerCost = test1.get('noRecl-SAIDI')*numberOfCustomers*float(average_consumption)
 	finalCustomerCost = test1.get('recl-SAIDI')*numberOfCustomers*float(average_consumption)
 
+	# calculate restoration costs
 	initialDuration = 0.0
 	finalDuration = 0.0
 	row = 0
-	while row < 400:
+	row_count_mc1 = mc1.shape[0]
+	row_count_mc2 = mc2.shape[0]
+	while row < row_count_mc1:
 		initialDuration +=  datetime_to_float(datetime.datetime.strptime(mc1.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc1.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))
+		row = row + 1
+	row = 0
+	while row < row_count_mc2:
 		finalDuration +=  datetime_to_float(datetime.datetime.strptime(mc2.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc2.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))
 		row = row + 1
 
 	initialRestorationCost = initialDuration*float(restoration_cost)
 	finalRestorationCost = finalDuration*float(restoration_cost)
 
-	hardwareCost = 400 * float(average_hardware_cost)
+	# calculate hardware costs
+	initialHardwareCost = row_count_mc1 * float(average_hardware_cost)
+	finalHardwareCost = row_count_mc2 * float(average_hardware_cost)
 
-	initialOutageCost = initialCustomerCost + initialRestorationCost + hardwareCost
-	finalOutageCost = finalCustomerCost + finalRestorationCost + hardwareCost
+	# put it all together and calculate outage costs
+	initialOutageCost = initialCustomerCost + initialRestorationCost + initialHardwareCost
+	finalOutageCost = finalCustomerCost + finalRestorationCost + finalHardwareCost
 
+	# print all intermediate and final costs
 	print('Initial Customer Cost = ' + str(initialCustomerCost))
 	print('Final Customer Cost = ' + str(finalCustomerCost))
 	print('Initial Restoration Cost = ' + str(initialRestorationCost))
 	print('Final Restoration Cost = ' + str(finalRestorationCost))
-	print('Hardware Cost = ' + str(hardwareCost))
+	print('Initial Hardware Cost = ' + str(initialHardwareCost))
+	print('Final Hardware Cost = ' + str(finalHardwareCost))
 	print('Initial Outage Cost = ' + str(initialOutageCost))
 	print('Final Outage Cost = ' + str(finalOutageCost))
 
 	# bar chart to show change in SAIDI/SAIFI values
 	row1 = sorted(test1)
 	col1 = [value for (key, value) in sorted(test1.items())]
-	data = [go.Bar(x = row1, y = col1, name = 'Recloser Analysis')]
-	py.offline.plot(data, filename='recloser_analysis', auto_open=False)
+	data = [go.Bar(x = row1, y = col1, name = 'SAIDI SAIFI Recloser Analysis')]
+	py.offline.plot(data, filename= workDir + '/recloser_analysis_SAIDI_SAIFI', auto_open=False)
 
-	# gantt plot
+	# bar chart to show change in MAIFI values
+	row2 = sorted(test2)
+	col2 = [value for (key, value) in sorted(test2.items())]
+	data = [go.Bar(x = row2, y = col2, name = 'MAIFI Recloser Analysis')]
+	py.offline.plot(data, filename= workDir + '/recloser_analysis_MAIFI', auto_open=False)
+
+	# gantt plots
+	fig = ff.create_gantt(mc1, colors=['#333F44', '#93e4c1'], index_col='Task', show_colorbar=True,
+                      bar_width=0.3, showgrid_x=True, showgrid_y=True, title='Fault Timeline')
+	py.offline.plot(fig, filename=workDir + '/gantt_timeline_without_recloser', auto_open=False)
+
 	fig = ff.create_gantt(mc2, colors=['#333F44', '#93e4c1'], index_col='Task', show_colorbar=True,
                       bar_width=0.3, showgrid_x=True, showgrid_y=True, title='Fault Timeline')
-	py.offline.plot(fig, filename='gantt_timeline', auto_open=False)
+	py.offline.plot(fig, filename=workDir + '/gantt_timeline_with_recloser', auto_open=False)
 	
 	# graph failure distribution	
-	distributiongraph(failureDistribution, failure_1, failure_2, 'failure distribution')
+	distributiongraph(failureDistribution, failure_1, failure_2, workDir + '/failure_distribution')
 	
 	plt.close('all')
 
 	# graph restoration distribution
-	distributiongraph(restorationDistribution, rest_1, rest_2, 'restoration distribution')
+	distributiongraph(restorationDistribution, rest_1, rest_2, workDir + '/restoration_distribution')
 	
+	plt.close('all')
+
 	# feeder chart with recloser
 	outGraph = nx.Graph()
 	for key in tree1:
@@ -455,7 +605,7 @@ def valueOfAdditionalRecloser(pathToGlm, workDir, lineFaultType, lineNameForRecl
 				try: outGraph.node.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
 				except: outGraph.node.get(item['name'],{})['pos']=(0.0,0.0)
 	feeder.latLonNxGraph(outGraph, labels=True, neatoLayout=True, showPlot=True)
-	plt.savefig('feeder chart')
+	plt.savefig(workDir + '/feeder_chart')
 
 # function that graphs the dsitribution data
 def distributiongraph(dist, param_1, param_2, nameOfGraph):
@@ -480,8 +630,8 @@ def distributiongraph(dist, param_1, param_2, nameOfGraph):
 		dist = stats.lognorm(mean, std)
 		plt.plot(x, dist.pdf(x))
 	elif 'PARETO' == dist:
-		xm = float(param_2) # scale 
-		alphas = [float(param_1)] # shape parameters
+		xm = float(param_2) 
+		alphas = [float(param_1)]
 		x = np.linspace(0, 15, 1000)
 		output = np.array([stats.pareto.pdf(x, scale = xm, b = a) for a in alphas])
 		plt.plot(x, output.T)
@@ -514,9 +664,8 @@ def distributiongraph(dist, param_1, param_2, nameOfGraph):
 		plt.plot(x, dist.pdf(x))
 	plt.xlabel('Time until event occurs (seconds)')
 	plt.ylabel('Probability distribution function')
-	plt.show()
 	plt.savefig(nameOfGraph)
 
 #test the main functions of the program
-valueOfAdditionalRecloser(omf.omfDir + '/scratch/CIGAR/' + 'test_ieee37nodeFaultTester.glm', None, 'underground_line', 'node709-708', 'EXPONENTIAL', '3.858e-7', '0.0', 'PARETO', '1.0', '1.0002778', '432000 s', '1', '1', '1', '1', '2000-01-01 0:00:00', 'TLG')
-#bestLocationForRecloser(omf.omfDir + '/scratch/CIGAR/' + 'test_ieee37nodeFaultTester.glm', None, 'underground_line', 'node709-708', 'EXPONENTIAL', '3.858e-7', '0.0', 'PARETO', '1.0', '1.0002778', '432000 s', '2000-01-01 0:00:00', 'TLG' )
+valueOfAdditionalRecloser(omf.omfDir + '/scratch/CIGAR/test_ieee37nodeFaultTester.glm', None, 'underground_line', 'node709-708', 'EXPONENTIAL', '3.858e-7', '0.0', 'PARETO', '1.0', '1.0002778', '432000 s', '1', '1', '1', '2000-01-01 0:00:00', 'TLG', '300')
+#bestLocationForRecloser(omf.omfDir + '/scratch/CIGAR/test_ieee37nodeFaultTester.glm', None, 'underground_line', 'node709-708', 'EXPONENTIAL', '3.858e-7', '0.0', 'PARETO', '1.0', '1.0002778', '432000 s', '2000-01-01 0:00:00', 'TLG', '300')
