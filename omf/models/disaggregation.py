@@ -10,7 +10,7 @@ warnings.filterwarnings('ignore')
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = "The Disaggregation model performs analysis to appliance level power consumption given a site meter."
-hidden = True
+hidden = False
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
