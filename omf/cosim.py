@@ -230,16 +230,18 @@ class GridLabWorld(object):
 
 	def shutdown(self):
 		'Stop simulation.'
-		# Final output
-		print '===GRIDLAB-D STDOUT==='
-		print self.procObject.stdout.read()
-		print '===GRIDLAB-D STDERR==='
-		print self.procObject.stderr.read()
 		try:
 			urllib2.urlopen(self.baseUrl + 'control/shutdown').read()
 		except:
 			# For those hard-to-stop servers.
 			self.procObject.kill()
+		# Final output
+		print '===GRIDLAB-D STDOUT==='
+		# self.procObject.stdout.flush()
+		print self.procObject.stdout.read().strip()
+		print '===GRIDLAB-D STDERR==='
+		# self.procObject.stderr.flush()
+		print self.procObject.stderr.read()
 
 	def resume(self):
 		try:
