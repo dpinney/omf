@@ -1,3 +1,6 @@
+''' Calculate solar photovoltaic system output using PVWatts. '''
+
+#TODO: remove all duplicated imports.
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math, warnings
 import traceback
 from os.path import join as pJoin
@@ -20,8 +23,10 @@ from shutil import copyfile
 from omf.models import __neoMetaModel__
 from omf.models import voltageDrop as vd
 from __neoMetaModel__ import *
+from os.path import join as pJoin
+from omf.models import __neoMetaModel__
 
-# OMF imports 
+# OMF imports
 import omf.feeder as feeder
 from omf.solvers import gridlabd
 
@@ -29,8 +34,13 @@ from omf.solvers import gridlabd
 from dateutil import parser
 from dateutil.relativedelta import *
 
-# helper function to pull out reliability metric data (SAIDI/SAIFI) 
+# Model metadata:
+tooltip = "smartSwitching gives the expected reliability improvement from adding reclosers to a circuit."
+modelName, template = metadata(__file__)
+hidden = True
+
 def pullOutValues(tree, workDir, sustainedOutageThreshold):
+	'helper function to pull out reliability metric data (SAIDI/SAIFI).'
 	attachments = []
 	# Run Gridlab.
 	if not workDir:
@@ -666,6 +676,74 @@ def distributiongraph(dist, param_1, param_2, nameOfGraph):
 	plt.ylabel('Probability distribution function')
 	plt.savefig(nameOfGraph)
 
-#test the main functions of the program
-valueOfAdditionalRecloser(omf.omfDir + '/scratch/CIGAR/test_ieee37nodeFaultTester.glm', None, 'underground_line', 'node709-708', 'EXPONENTIAL', '3.858e-7', '0.0', 'PARETO', '1.0', '1.0002778', '432000 s', '1', '1', '1', '2000-01-01 0:00:00', 'TLG', '300')
-#bestLocationForRecloser(omf.omfDir + '/scratch/CIGAR/test_ieee37nodeFaultTester.glm', None, 'underground_line', 'node709-708', 'EXPONENTIAL', '3.858e-7', '0.0', 'PARETO', '1.0', '1.0002778', '432000 s', '2000-01-01 0:00:00', 'TLG', '300')
+def work(modelDir, inputDict):
+	# Copy specific climate data into model directory
+	outData = {}
+	#test the main functions of the program
+	valueOfAdditionalRecloser(
+		inputDict['PATH_TO_GLM'],
+		modelDir, #Work directory.
+		inputDict['lineTypeForFaults'],
+		inputDict['recloserLocation'],
+		inputDict['failureDistribution'], #'EXPONENTIAL',
+		inputDict['failureDistParam1'], #'3.858e-7',
+		inputDict['failureDistParam2'],#'0.0'
+		inputDict['restorationDistribution'], #'PARETO',
+		inputDict['restorationDistParam1'], #'1.0',
+		inputDict['restorationDistParam2'], #'1.0002778',
+		inputDict['maxFaultLength'], #'432000 s',
+		inputDict['kwh_cost'], #'1'
+		inputDict['restoration_cost'], #'1',
+		inputDict['average_hardware_cost'], #'1',
+		inputDict['simTime'], #'2000-01-01 0:00:00',
+		inputDict['faultType'], #'TLG',
+		inputDict['sustainedOutageThreshold']) #'300')
+	#bestLocationForRecloser(omf.omfDir + '/scratch/CIGAR/test_ieee37nodeFaultTester.glm', None, 'underground_line', 'node709-708', 'EXPONENTIAL', '3.858e-7', '0.0', 'PARETO', '1.0', '1.0002778', '432000 s', '2000-01-01 0:00:00', 'TLG', '300')
+	# Stdout/stderr.
+	outData["stdout"] = "Success"
+	outData["stderr"] = ""
+	return outData
+
+def new(modelDir):
+	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	defaultInputs = {
+		"modelType": modelName,
+		"PATH_TO_GLM": omf.omfDir + '/scratch/CIGAR/test_ieee37nodeFaultTester.glm',
+		"lineTypeForFaults": 'underground_line',
+		"recloserLocation": "node709-708",
+		'failureDistribution': 'EXPONENTIAL',
+		'failureDistParam1': '3.858e-7',
+		'failureDistParam2':'0.0',
+		'restorationDistribution': 'PARETO',
+		'restorationDistParam1': '1.0',
+		'restorationDistParam2': '1.0002778',
+		'maxFaultLength': '432000 s',
+		'kwh_cost': '1',
+		'restoration_cost': '1',
+		'average_hardware_cost': '1',
+		'simTime': '2000-01-01 0:00:00',
+		'faultType': 'TLG',
+		'sustainedOutageThreshold': '300'
+	}
+	return __neoMetaModel__.new(modelDir, defaultInputs)
+
+def _tests():
+	# Location
+	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
+	# Blow away old test results if necessary.
+	try:
+		shutil.rmtree(modelLoc)
+	except:
+		# No previous test results.
+		pass
+	# Create New.
+	new(modelLoc)
+	# Pre-run.
+	# renderAndShow(modelLoc)
+	# Run the model.
+	runForeground(modelLoc)
+	# Show the output.
+	renderAndShow(modelLoc)
+
+if __name__ == '__main__':
+	_tests()

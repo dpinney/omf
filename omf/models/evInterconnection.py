@@ -855,6 +855,7 @@ def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	fName = "input - 200 Employee Office, Springfield Illinois, 2001.csv"
 	defaultInputs = {
 		"feederName1": "Olin Barre Fault",
 		"modelType": modelName,
@@ -873,8 +874,8 @@ def new(modelDir):
 		"maxCharge" : "50",
 		"gasCost" : "2.70",
 		"workload" : "40",
-		"loadShape" : open(pJoin(omf.omfDir, "static", "testFiles", "input - 200 Employee Office, Springfield Illinois, 2001.csv")).read(),
-		"fileName" : "input - 200 Employee Office, Springfield Illinois, 2001.csv",
+		"loadShape" : open(pJoin(omf.omfDir, "static", "testFiles", fName)).read(),
+		"fileName" : fName,
 		"loadName" : "62474211556",
 		"rezSqIn" : "400",
 		"simTime" : '2000-01-01 0:00:00',
