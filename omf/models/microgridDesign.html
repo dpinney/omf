@@ -1,0 +1,318 @@
+<head>
+	
+	<title>Open Modeling Framework</title>
+	<meta charset="utf-8">
+	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
+	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	
+	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
+	
+	<!-- Library Imports -->
+	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
+	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	
+	<!-- Data  Imports -->
+	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
+	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
+	<script>modelStatus="{{modelStatus}}"</script>
+	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
+
+	<script type="text/javascript">
+		function toggleCheckboxDisplay(checkboxName) {
+			$('.' + checkboxName + 'Display').toggle();
+		}
+		function populateTables() {
+			var list = document.getElementsByTagName("td");
+			for (var i = 0; i < list.length; i++) {
+				list[i].innerHTML = allOutputData[list[i].id]
+			}
+		}
+	</script>
+	
+</head>
+
+<body onload="init()">
+	
+	<div id="header">
+		<div id="headInnerBlock">
+			<div id="menuLeft">
+				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
+				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
+			</div>
+		</div>
+	</div>
+
+	<div id="triangle-parent">
+		<div id="triangle-message">New Version<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
+		<div id="triangle-topright"></div>
+	</div>
+	
+	<p class="reportTitle">Model Input</p>
+	<div id="input" class="content">
+		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+			
+			<div class="shortInput">
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-disaggregation" target="blank">Help?</a></label>
+				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Model Name</label>
+				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+			</div>
+			<div class="shortInput runningInline postRunInline">
+				<label>User</label>
+				<input type="text" id="user" name="user" readonly/>
+			</div>
+			<div class="runningInline postRunInline shortInput">
+				<label>Created</label>
+				<input type="text" id="created" name="created" readonly/>
+			</div>
+			<div class="postRunInline shortInput">
+				<label>Run Time</label>
+				<input type="text" id="runTime" name="runTime" readonly/>
+			</div>
+
+			
+			<div class="wideInput">
+				<p class="inputSectionHeader">Microgrid Design Parameters</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Hourly Load Shape (.csv file)<span class="classic">Please enter the name of a .csv file representing the hourly load shape</span></label>
+				<input id="loadShapeFile" type="file" style="display:none" onchange="handle_files(this.files,'loadShape','fileName')">
+				<input id="loadShape" name="loadShape" type="hidden">
+				<div>
+					<label for="loadShapeFile" class="fileButton">Choose File</label>
+					<input id="fileName" name="fileName" value="input - 200 Employee Office, Springfield Illinois, 2001.csv" readonly class="uploadFileName">	
+				</div>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Latitude<span class="classic">Specify the latitude of the load/grid.</span></label>
+				<input type="text" id="latitude" name="latitude" pattern="^\-?\d+\.?\d*?$" required="required" value="39.7817" />
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Longitude<span class="classic">Specify the longitude of the load/grid.</span></label>
+				<input type="text" id="longitude" name="longitude" pattern="^\-?\d+\.?\d*?$" required="required" value="89.6501"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Year<span class="classic">Specify the year to which the load shape values corresond.</span></label>
+				<input type="text" id="year" name="year" pattern="^\d{4}$" required="required" value="2001" />
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Cost of Energy ($/kWh)<span class="classic">Specify the energy cost in $/kWh.</span></label>
+				<input type="text" id="energyCost" name="energyCost" pattern="^\d+\.?\d*?$" required="required" value="0.08"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Cost of Demand ($/kW)<span class="classic">Specify the demand cost in $/kW.</span></label>
+				<input type="text" id="demandCost" name="demandCost" pattern="^\d+\.?\d*?$" required="required" value="20" />
+			</div>
+			
+			<div class="wideInput">
+				<p class="inputSectionHeader">Select your Technologies</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<input type="checkbox" name="solar" id="solar" value="on" checked onchange="toggleCheckboxDisplay('solar')">
+				<label class="tooltip">Solar <span class="classic">Check the box if you want to include Solar generation in your microgrid.</span>
+				</label>
+			</div>
+			<div class="shortInput">
+				<input type="checkbox" name="wind" id="wind" value="on" checked onchange="toggleCheckboxDisplay('wind')">
+				<label class="tooltip">Wind <span class="classic">Check the box if you want to include wind generation in your microgrid.</span>
+				</label>
+			</div>
+			<div class="shortInput">
+				<input type="checkbox" name="battery" id="battery" value="on" checked onchange="toggleCheckboxDisplay('battery')">
+				<label class="tooltip">Battery <span class="classic">Check the box if you want to include battery storage in your microgrid.</span>
+				</label>
+			</div>
+			<div class="shortInput solarDisplay">
+				<label class="tooltip">Solar Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
+				<input type="text" id="solarCost" name="solarCost" pattern="^\d+\.?\d*?$" required="required" value="2000" />
+			</div>
+			<div class="shortInput windDisplay">
+				<label class="tooltip">Wind Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
+				<input type="text" id="windCost" name="windCost" pattern="^\d+\.?\d*?$" required="required" value="4989" />
+			</div>
+			<div class="shortInput batteryDisplay">
+				<label class="tooltip">Energy capacity cost ($/kWh)<span class="classic">Specify the cost in $/kWh.</span></label>
+				<input type="text" id="batteryEnergyCost" name="batteryEnergyCost" pattern="^\d+\.?\d*?$" required="required" value="500" />
+			</div>
+			<div class="shortInput batteryDisplay">
+				<label class="tooltip">Power capacity cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
+				<input type="text" id="batteryPowerCost" name="batteryPowerCost" pattern="^\d+\.?\d*?$" required="required" value="1000" />
+			</div>
+
+			<div class="wideInput">
+				<p class="inputSectionHeader">Resilence</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Outage Start Hour<span class="classic">Specify the hour at which the outage starts (0-8759).</span></label>
+				<input type="number" id="outageStart" name="outageStart" min="0" max="8759" required="required" value="0" />
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Outage Duration<span class="classic">Specify the number of hours for which the outage should last (0-8759).</span></label>
+				<input type="number" id="outageDuration" name="outageDuration" min="0" max="8759" required="required" value="1" />
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Critical Load Factor<span class="classic">The percent of typical load that must be met during a grid outage.</span></label>
+				<input type="number" id="criticalLoadFactor" name="criticalLoadFactor" min="0" max="100" required="required" value="100" />
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Outage type<span class="classic">Select the type of outage desired</span></label>
+				<select id="outageType" name="outageType">
+					<option selected="selected" value="once">Occurs once in the project lifetime</option>
+					<option value="annual">Occurs Annualy</option>
+				</select>
+			</div>
+
+			<div class="wideInput" style="text-align:right">
+				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
+				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
+				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
+				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
+				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
+			</div>
+		</form>
+	</div>
+
+	<div id ="runIndicator" class="content running">
+		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
+	</div>
+	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
+		<pre id='errorText' style='overflow-x:scroll'></pre>
+		<script type="text/javascript">
+		if (typeof(allInputData.stderr) !== 'undefined') {
+			gebi('stopIndicator').style.visibility = 'visible'
+			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
+		</script>
+	</div>
+
+	<div id="output">
+		<p class="reportTitle postRun" style="page-break-before:always">Microgrid Overview</p>
+		<div id="" class="tightContent postRun">
+			<table>
+				<tr>
+					<th>Total Savings (20 years)</th>
+					<td id='savings'></td>
+				</tr>
+				<tr class="solarDisplay">
+					<th>Recommended Solar (kW)</th>
+					<td id='sizePV'></td>
+				</tr>
+				<tr class="windDisplay">
+					<th>Recommended Wind (kW)</th>
+					<td id='sizeWind'></td>
+				</tr>
+				<tr class="batteryDisplay">
+					<th>Recommended Battery Power (kW)</th>
+					<td id='powerBattery'></td>
+				</tr>
+				<tr class="batteryDisplay">
+					<th>Recommended Battery Capacity (kWh)</th>
+					<td id='capacityBattery'></td>
+				</tr>
+				<tr>
+					<th>Average length of survived Outage (hours)</th>
+					<td id='avgOutage'></td>
+				</tr>
+				<tr>
+					<th>Minimum length of survived Outage (hours)</th>
+					<td id='minOutage'></td>
+				</tr>
+				<tr>
+					<th>Maximum length of survived Outage (hours)</th>
+					<td id='maxOutage'></td>
+				</tr>
+			</table>
+		</div>
+		<p class="reportTitle postRun" style="page-break-before:always">Microgrid Financial Overview 
+			<a id='performa'>(Click here to download detailed Performa analysis)</a>
+		</p>
+		<div id="" class="tightContent postRun">
+			<table>
+				<tr>
+					<th></th>
+					<th>Business as Usual</th>
+					<th>Microgrid</th>
+					<th>Difference</th>
+				</tr>
+				<tr>
+					<th>Demand Cost</th>
+					<td id='demandCostBAU'></td>
+					<td id='demandCost'></td>
+					<td id='demandCostDiff'></td>
+				</tr>
+				<tr>
+					<th>Energy Cost</th>
+					<td id='energyCostBAU'></td>
+					<td id='energyCost'></td>
+					<td id='energyCostDiff'></td>
+				</tr>
+				<tr>
+					<th>Fixed Cost</th>
+					<td id='fixedCostBAU'></td>
+					<td id='fixedCost'></td>
+					<td id='fixedCostDiff'></td>
+				</tr>
+				<tr>
+					<th>Total Cost</th>	
+					<td id='totalCostBAU'></td>
+					<td id='totalCost'></td>
+					<td id='totalCostDiff'></td>
+				</tr>
+			</table>
+		</div>
+		
+		<script type="text/javascript"> 
+			populateTables(); 
+			var link = 'https://developer.nrel.gov/api/reopt/v1/job/' + allOutputData['runID'] + '/proforma?api_key=' + allOutputData['apiKey'];
+			a = gebi('performa');
+			a.href = link;
+		</script>
+
+		<p class="reportTitle postRun" style="page-break-before:always">Load Overview</p>
+		<div id="loadPlotDiagram" class="tightContent postRun">
+			<img id="loadPlot" style="width:1000px;" />
+			<script type="text/javascript">gebi("loadPlot").src = "data:image/png;base64," + allOutputData.loadPlot</script>
+		</div>
+
+		<p class="solarDisplay reportTitle postRun" style="page-break-before:always">Solar Generation</p>
+		<div id="solarPlotDiagram" class="solarDisplay tightContent postRun">
+			<img id="solarPlot" style="width:1000px;" />
+			<script type="text/javascript">gebi("solarPlot").src = "data:image/png;base64," + allOutputData.solarPlot</script>
+		</div>
+
+		<p class="windDisplay reportTitle postRun" style="page-break-before:always">Wind Generation</p>
+		<div id="windPlotDiagram" class="windDisplay tightContent postRun">
+			<img id="windPlot" style="width:1000px;" />
+			<script type="text/javascript">gebi("windPlot").src = "data:image/png;base64," + allOutputData.windPlot</script>
+		</div>
+
+		<p class="batteryDisplay reportTitle postRun" style="page-break-before:always">Battery Charge Source</p>
+		<div id="batteryPlotDiagram" class="batteryDisplay tightContent postRun">
+			<img id="batteryPlot" style="width:1000px;" />
+			<script type="text/javascript">gebi("batteryPlot").src = "data:image/png;base64," + allOutputData.batteryPlot</script>
+		</div>
+
+		<p class="batteryDisplay reportTitle postRun" style="page-break-before:always">Battery Charge Percentage</p>
+		<div id="batteryChargePlotDiagram" class="batteryDisplay tightContent postRun">
+			<img id="batteryChargePlot" style="width:1000px;" />
+			<script type="text/javascript">gebi("batteryChargePlot").src = "data:image/png;base64," + allOutputData.batteryChargePlot</script>
+		</div>
+
+		<p class="reportTitle postRun" style="page-break-before:always">Resilience Overview</p>
+		<div id="resiliencePlotDiagram" class="tightContent postRun">
+			<img id="resiliencePlot" style="width:1000px;" />
+			<script type="text/javascript">gebi("resiliencePlot").src = "data:image/png;base64," + allOutputData.resiliencePlot</script>
+		</div>
+
+		<p class="reportTitle postRun" style="page-break-before:always">Outage Survival Probability</p>
+		<div id="resilienceProbPlotDiagram" class="tightContent postRun">
+			<img id="resilienceProbPlot" style="width:1000px;" />
+			<script type="text/javascript">gebi("resilienceProbPlot").src = "data:image/png;base64," + allOutputData.resilienceProbPlot</script>
+		</div>		
+	</div>
+
+</body>
