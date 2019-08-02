@@ -230,6 +230,11 @@ class GridLabWorld(object):
 
 	def shutdown(self):
 		'Stop simulation.'
+		# Final output
+		print '===GRIDLAB-D STDOUT==='
+		print self.procObject.stdout.read()
+		print '===GRIDLAB-D STDERR==='
+		print self.procObject.stderr.read()
 		try:
 			urllib2.urlopen(self.baseUrl + 'control/shutdown').read()
 		except:
@@ -268,6 +273,7 @@ class GridLabWorld(object):
 				# print 'clock read failed'
 			time.sleep(1)
 			timeout = timeout - 1
+		self.shutdown()
 		raise Exception('GridLAB-D startup failed. Please check GLM.')
 
 def _test1():
