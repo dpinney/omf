@@ -268,6 +268,7 @@ class GridLabWorld(object):
 				# print 'clock read failed'
 			time.sleep(1)
 			timeout = timeout - 1
+		raise Exception('GridLAB-D startup failed. Please check GLM.')
 
 def _test1():
 	glw = GridLabWorld('6267', 'localhost', omf.omfDir + '/scratch/CIGAR/test_smsSingle.glm', '2000-01-02 00:00:00')
