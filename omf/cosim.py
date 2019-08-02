@@ -230,6 +230,11 @@ class GridLabWorld(object):
 
 	def shutdown(self):
 		'Stop simulation.'
+		# Final output
+		print '===GRIDLAB-D STDOUT==='
+		print self.procObject.stdout.read()
+		print '===GRIDLAB-D STDERR==='
+		print self.procObject.stderr.read()
 		try:
 			urllib2.urlopen(self.baseUrl + 'control/shutdown').read()
 		except:
@@ -251,7 +256,7 @@ class GridLabWorld(object):
 			warnings.warn("Failed to write " + value + " to " + propName + " of " + obName)
 			return "WRITE_FAILURE"
 
-	def start(self, timeout = 3):
+	def start(self, timeout = 30):
 		#TODO: watch out for in-use port.
 		self.procObject = subprocess.Popen(['gridlabd', self.GLM_PATH, '--server', '-P', self.PORT, '-q','--define','pauseat="' + self.START_PAUSE + '"'], stderr=subprocess.PIPE, stdout=subprocess.PIPE)
 		# print 'MY START PID!', self.procObject.pid
@@ -268,6 +273,8 @@ class GridLabWorld(object):
 				# print 'clock read failed'
 			time.sleep(1)
 			timeout = timeout - 1
+		self.shutdown()
+		raise Exception('GridLAB-D startup failed. Please check GLM.')
 
 def _test1():
 	glw = GridLabWorld('6267', 'localhost', omf.omfDir + '/scratch/CIGAR/test_smsSingle.glm', '2000-01-02 00:00:00')
