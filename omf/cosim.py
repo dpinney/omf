@@ -251,7 +251,7 @@ class GridLabWorld(object):
 			warnings.warn("Failed to write " + value + " to " + propName + " of " + obName)
 			return "WRITE_FAILURE"
 
-	def start(self, timeout = 3):
+	def start(self, timeout = 30):
 		#TODO: watch out for in-use port.
 		self.procObject = subprocess.Popen(['gridlabd', self.GLM_PATH, '--server', '-P', self.PORT, '-q','--define','pauseat="' + self.START_PAUSE + '"'], stderr=subprocess.PIPE, stdout=subprocess.PIPE)
 		# print 'MY START PID!', self.procObject.pid
