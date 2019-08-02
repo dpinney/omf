@@ -287,17 +287,20 @@ def work(modelDir, inputDict):
 	scenario = {
 		"Scenario": {
 			"Site": {
-				"latitude": latitudeValue,					#LATITUDE VALUE OF SITE LOCATION
-				"longitude": longitudeValue,				#LONGITUDE VALUE OF SITE LOCATION
-				"address": "Springfield, Illinois",			#OPTIONAL FIELD
+				"latitude": latitudeValue,
+				"longitude": longitudeValue,
 				"LoadProfile": {
 					"loads_kw": combinedLoadShapeValue,		#8760 value list
 					"year": yearValue 						#MUST BE THE CORRECT YEAR CORRELATING TO loads_kw!!
 				},
-				"ElectricTarrif": {
+				"ElectricTariff": {
 					"urdb_rate_name": "custom",
 					"blended_annual_rates_us_dollars_per_kwh": energyCostValue,
 					"blended_annual_demand_charges_us_dollars_per_kw": demandCostValue
+				},
+				"Wind": {
+					"max_kw": 0,
+					"max_kwh": 0
 				}
 			}
 		}
@@ -312,8 +315,8 @@ def work(modelDir, inputDict):
 		REopt_output = json.load(REoptFile)
 		#print REopt_output
 	#find the values for energy cost with and without microgrid
-	REopt_ev_energy_cost = REopt_output["outputs"]["Scenario"]["Site"]["ElectricTarrif"]["year_one_bill_bau_us_dollars"]
-	REopt_opt_energy_cost =	REopt_output["outputs"]["Scenario"]["Site"]["ElectricTarrif"]["year_one_bill_us_dollars"]
+	REopt_ev_energy_cost = REopt_output["outputs"]["Scenario"]["Site"]["ElectricTariff"]["year_one_bill_bau_us_dollars"]
+	REopt_opt_energy_cost =	REopt_output["outputs"]["Scenario"]["Site"]["ElectricTariff"]["year_one_bill_us_dollars"]
 	# REopt_ev_energy_cost = 100000
 	# REopt_opt_energy_cost =	90000
 
@@ -328,6 +331,10 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir, "energyCostCalc.html"), "w") as energyFile:
 		energyFile.write(energyCostHtml)
 	outData["energyCostCalcHtml"] = energyCostHtml
+
+	# #Create carpet plot from REopt output
+	# REoptCarpetPlotImg, REoptMaxLoadShapeImg = plotEVShape_REopt( 
+	# 	loadShape = loadShapeValue)
 
 	return outData
 
