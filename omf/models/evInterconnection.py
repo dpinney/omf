@@ -154,7 +154,7 @@ def work(modelDir, inputDict):
 	# print loadShapeValue
 	
 	#calculate and display EV Charging Demand image, carpet plot image of 8760 load shapes
-	maxLoadValue, demandImg, carpetPlotImg, maxLoadShapeImg = plotEVShape(
+	maxLoadValue, demandImg, carpetPlotImg, maxLoadShapeImg, combinedLoadShapeValue = plotEVShape(
 		numVehicles = numVehiclesValue,
 		chargeRate = chargeRateValue, 
 		batterySize = batterySizeValue, 
@@ -287,12 +287,12 @@ def work(modelDir, inputDict):
 	scenario = {
 		"Scenario": {
 			"Site": {
-				"latitude": latitudeValue,				#LATITUDE VALUE OF SITE LOCATION
-				"longitude": longitudeValue,			#LONGITUDE VALUE OF SITE LOCATION
-				"address": "Springfield, Illinois",		#OPTIONAL FIELD
+				"latitude": latitudeValue,					#LATITUDE VALUE OF SITE LOCATION
+				"longitude": longitudeValue,				#LONGITUDE VALUE OF SITE LOCATION
+				"address": "Springfield, Illinois",			#OPTIONAL FIELD
 				"LoadProfile": {
-					"loads_kw": loadShapeValue,			#8760 value list
-					"year": yearValue 					#MUST BE THE CORRECT YEAR CORRELATING TO loads_kw!!
+					"loads_kw": combinedLoadShapeValue,		#8760 value list
+					"year": yearValue 						#MUST BE THE CORRECT YEAR CORRELATING TO loads_kw!!
 				},
 				"ElectricTarrif": {
 					"urdb_rate_name": "custom",
@@ -1047,7 +1047,7 @@ def plotEVShape(numVehicles=None, chargeRate=None, batterySize=None, startHour=N
 		plt.close()
 		return maxLoadShapeImg
 		
-	return max_val, evShape, carpet_plot(base_shape, hourly_con), maxLoadShape(day_shape, hourly_con)
+	return max_val, evShape, carpet_plot(base_shape, hourly_con), maxLoadShape(day_shape, hourly_con), combined
 
 def fuelCostCalc(numVehicles=None, batterySize=None, efficiency=None, energyCost=None, gasEfficiency=None, gasCost=None, workload=None):
 	dailyGasAmount = workload/gasEfficiency #amount(gal) of gas used per vehicle, daily
