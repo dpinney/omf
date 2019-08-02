@@ -307,14 +307,17 @@ def work(modelDir, inputDict):
 	# Run REopt API script
 	runREopt(pJoin(modelDir, 'Scenario_test_POST.json'), pJoin(modelDir, 'results.json'))
 
-	#Create the building energy cost table
-	with open(pJoin(modelDir, "Scenario_test_POST.json"), "r") as REoptFile:
-		#find the values for energy cost with and without microgrid
+	#read results from json generated from REopt
+	with open(pJoin(modelDir, "results.json"), "r") as REoptFile:
 		REopt_output = json.load(REoptFile)
 		#print REopt_output
+	#find the values for energy cost with and without microgrid
 	REopt_ev_energy_cost = REopt_output["outputs"]["Scenario"]["Site"]["ElectricTarrif"]["year_one_bill_bau_us_dollars"]
 	REopt_opt_energy_cost =	REopt_output["outputs"]["Scenario"]["Site"]["ElectricTarrif"]["year_one_bill_us_dollars"]
+	# REopt_ev_energy_cost = 100000
+	# REopt_opt_energy_cost =	90000
 
+	#Create the building energy cost table
 	energyCostHtml = energyCostCalc(
 		max_bau_load_shape = max(loadShapeValue),
 		sum_bau_load_shape = sum(loadShapeValue),
