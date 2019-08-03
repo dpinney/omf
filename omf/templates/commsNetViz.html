@@ -441,7 +441,11 @@
 		    }
 		};
 		//console.log(feature);
+		geojson.features.push(feature);
+		map.removeLayer(L.geoJson);
+		geojsonLayer.addTo(map);
 		geojsonLayer.addData(feature);
+		//console.log(geojson);
 	}
 
 </script>
