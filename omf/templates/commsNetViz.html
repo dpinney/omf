@@ -448,6 +448,59 @@
 		//console.log(geojson);
 	}
 
+	//Form div for searching for geojson object by name
+	L.Control.Search = L.Control.extend({
+	    onAdd: function(map) {
+	        var searchDiv = L.DomUtil.create('div');
+	        searchDiv.id = 'searchDiv';
+	        searchDiv.style.height = 'auto';
+	        searchDiv.style.width = '200px';
+	        searchDiv.style.background = 'white';
+	        return searchDiv;
+	    },
+	    onRemove: function(map) {
+	    }
+	});
+
+	L.control.search = function(opts) {
+	    return new L.Control.Search(opts);
+	}
+
+	L.control.search({ position: 'topright'}).addTo(map);
+
+	var searchForm = L.DomUtil.create('form');
+	L.DomEvent.disableClickPropagation(searchForm);
+	searchForm.id = 'searchForm';
+	searchForm.name = 'searchForm';
+	searchForm.classList.add('mapControl');
+	document.getElementById('searchDiv').appendChild(searchForm);
+
+	var featureName = L.DomUtil.create('input');
+	featureName.id = 'featureName';
+	featureName.type = 'text';
+	featureName.name = 'featureName';
+	featureName.placeholder = 'Point Type';
+	document.getElementById('searchForm').appendChild(featureName);
+
+	var searchSubmit = L.DomUtil.create('input');
+	L.DomEvent.disableClickPropagation(searchSubmit);
+	searchSubmit.id = 'searchSubmit';
+	searchSubmit.type = 'submit';
+	searchSubmit.value = 'Find object';
+	searchSubmit.classList.add('mapControl');
+	document.getElementById('searchForm').appendChild(searchSubmit);
+	searchSubmit.addEventListener('click', featureSearch);
+
+	//opens popup for name entered in search field
+	function featureSearch(e){
+		e.preventDefault();
+		geojsonLayer.eachLayer(function(feature){
+			if (feature.feature.properties.name == document.getElementById('featureName').value){
+				feature.openPopup();
+			}
+		})
+	}
+
 </script>
 </body>
 </html>
