@@ -142,33 +142,11 @@
 	L.control.scale().addTo(map);
 	geojsonLayer.addTo(map);
 
-	//Add marker to map at click location; add popup window
-	function addMarker(e){
-		let sampleFeature = {
-		    "type": "Feature",
-		    "properties": {
-		        "name": "New feature",
-		        "popupContent": "A new node was added!"
-		    },
-		    "geometry": {
-		        "type": "Point",
-		        "coordinates": [-101, 34] 
-		    }
-		};
-		addGeoObject(sampleFeature);
-	}
-
-	function changeColor(e){
-		e.target._path.style.fill = '#dd55ff';
-		e.target._path.style.stroke = '#dd55ff';
-	}
-
 	//Control box
 	L.Control.Toolbox = L.Control.extend({
 	    onAdd: function(map) {
 	        var toolDiv = L.DomUtil.create('div');
 	        toolDiv.id = 'toolDiv';
-	        toolDiv.style.height = '100px';
 	        toolDiv.style.width = '200px';
 	        toolDiv.style.background = 'white';
 	        return toolDiv;
@@ -183,42 +161,6 @@
 
 	L.control.toolbox({ position: 'topright'}).addTo(map);
 
-
-	function newMarkerToggle(e){
-		//how to check if there is event listener
-		if (e.target.classList.contains('selectedControl')) {
-			e.target.classList.remove("class","selectedControl");
-			map.off('click', addMarker);	
-		}
-		else {
-			document.getElementById(e.target.id).setAttribute("class","selectedControl");
-			map.on('click', addMarker);
-		}
-	}
-	//how do you set the status of a button
-	var newMarker = L.DomUtil.create('button');
-	L.DomEvent.disableClickPropagation(newMarker);
-	newMarker.id = 'newMarker';
-	newMarker.classList.add('mapControl');
-	newMarker.innerHTML = 'New Marker';
-	document.getElementById('toolDiv').appendChild(newMarker);
-	newMarker.addEventListener('click', newMarkerToggle);
-
-	//get non rf and fiber lines to hid them
-	/*
-	geojsonLayer.eachLayer(function (layer) {
-		if (layer.feature.geometry['type'] == 'LineString'){
-			if (!(layer.feature.properties.rf) & !(layer.feature.properties.fiber)){
-				layer.setStyle({"opacity": 0, "interactive": false});
-			}
-		}
-		else if (layer.feature.geometry['type'] == 'Point'){
-			if (!(layer.feature.properties.rfCollector) && !(layer.feature.properties.substation) && !(layer.feature.properties.smartMeter)){
-				layer.setStyle({"fillOpacity": 0,"opacity": 0, "interactive": false});
-			}
-		};
-	});
-	*/
 	//Get all comms objects in the network
 	function selectCommsObjects(){
 		let commsObjects = [];
