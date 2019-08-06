@@ -142,39 +142,13 @@
 	L.control.scale().addTo(map);
 	geojsonLayer.addTo(map);
 
-	//Add marker to map at click location; add popup window
-	function addMarker(e){
-		let sampleFeature = {
-		    "type": "Feature",
-		    "properties": {
-		        "name": "New feature",
-		        "popupContent": "A new node was added!"
-		    },
-		    "geometry": {
-		        "type": "Point",
-		        "coordinates": [-101, 34] 
-		    }
-		};
-		addGeoObject(sampleFeature);
-	}
-
-	function changeColor(e){
-		//console.log(e.target._popup._content);
-		e.target._path.style.fill = '#dd55ff';
-		e.target._path.style.stroke = '#dd55ff';
-		//e.target._popup._content = 'has been selected'
-		//e.target._radius = 's40';
-		//console.log(e.target._path.style.fill);
-	}
-
 	//Control box
 	L.Control.Toolbox = L.Control.extend({
 	    onAdd: function(map) {
 	        var toolDiv = L.DomUtil.create('div');
 	        toolDiv.id = 'toolDiv';
-	        toolDiv.style.height = '100px';
 	        toolDiv.style.width = '200px';
-	        //toolDiv.style.background = 'white';
+	        toolDiv.style.background = 'white';
 	        return toolDiv;
 	    },
 	    onRemove: function(map) {
@@ -187,43 +161,6 @@
 
 	L.control.toolbox({ position: 'topright'}).addTo(map);
 
-
-	function newMarkerToggle(e){
-		//how to check if there is event listener
-		if (e.target.classList.contains('selectedControl')) {
-			e.target.classList.remove("class","selectedControl");
-			map.off('click', addMarker);	
-		}
-		else {
-			document.getElementById(e.target.id).setAttribute("class","selectedControl");
-			map.on('click', addMarker);
-		}
-		//console.log(e.target.class);
-	}
-	//how do you set the status of a button
-	var newMarker = L.DomUtil.create('button');
-	L.DomEvent.disableClickPropagation(newMarker);
-	newMarker.id = 'newMarker';
-	newMarker.classList.add('mapControl');
-	newMarker.innerHTML = 'New Marker';
-	document.getElementById('toolDiv').appendChild(newMarker);
-	newMarker.addEventListener('click', newMarkerToggle);
-
-	//get non rf and fiber lines to hid them
-	/*
-	geojsonLayer.eachLayer(function (layer) {
-		if (layer.feature.geometry['type'] == 'LineString'){
-			if (!(layer.feature.properties.rf) & !(layer.feature.properties.fiber)){
-				layer.setStyle({"opacity": 0, "interactive": false});
-			}
-		}
-		else if (layer.feature.geometry['type'] == 'Point'){
-			if (!(layer.feature.properties.rfCollector) && !(layer.feature.properties.substation) && !(layer.feature.properties.smartMeter)){
-				layer.setStyle({"fillOpacity": 0,"opacity": 0, "interactive": false});
-			}
-		};
-	});
-	*/
 	//Get all comms objects in the network
 	function selectCommsObjects(){
 		let commsObjects = [];
@@ -420,29 +357,106 @@
 	document.getElementById('geoForm').appendChild(geoSubmit);
 	geoSubmit.addEventListener('click', geoUpdate)
 
+	function existingFeature(feature){
+		return feature.properties.name == document.getElementById('geoName').value;
+	}
+
 	function geoUpdate(e){
 		e.preventDefault();
-		//console.log(e);
-		//console.log(document.geoForm);
-		//console.log(document.getElementById('geoBandwidthCapacity'));
-		let feature = {
-		    "type": "Feature",
-		    "properties": {
-		        "name": document.getElementById('geoName').value,
-		        "substation": document.getElementById('geoSubstation').checked,
-		        "rfCollector": document.getElementById('geoRfCollector').checked,
-		        "smartMeter": document.getElementById('geoSmartMeter').checked,
-		        "bandwidthCapacity": document.getElementById('geoBandwidthCapacity').value,
-		        "pointType": document.getElementById('geoPointType').value,
-		    },
-		    "geometry": {
-		        "type": "Point",
-		        "coordinates": [document.getElementById('geoLng').value, document.getElementById('geoLat').value] 
-		    }
-		};
-		//console.log(feature);
-		geojsonLayer.addData(feature);
+		let currentElement = geojson.features.findIndex(existingFeature); 
+		//create a new point
+		if (currentElement === -1) {
+			let feature = {
+			    "type": "Feature",
+			    "properties": {
+			        "name": document.getElementById('geoName').value,
+			        "substation": document.getElementById('geoSubstation').checked,
+			        "rfCollector": document.getElementById('geoRfCollector').checked,
+			        "smartMeter": document.getElementById('geoSmartMeter').checked,
+			        "bandwidthCapacity": document.getElementById('geoBandwidthCapacity').value,
+			        "pointType": document.getElementById('geoPointType').value,
+			    },
+			    "geometry": {
+			        "type": "Point",
+			        "coordinates": [document.getElementById('geoLng').value, document.getElementById('geoLat').value] 
+			    }
+			};
+			geojson.features.push(feature);
+			geojsonLayer.addData(feature);
+		}
+		//edit an existing point
+		else{
+			geojson.features[currentElement].properties.substation = document.getElementById('geoSubstation').checked;
+			geojson.features[currentElement].properties.rfCollector = document.getElementById('geoRfCollector').checked;
+			geojson.features[currentElement].properties.smartMeter = document.getElementById('geoSmartMeter').checked;
+			geojson.features[currentElement].properties.bandwidthCapacity = document.getElementById('geoBandwidthCapacity').value;
+			geojson.features[currentElement].properties.pointType = document.getElementById('geoPointType').value;
+			geojson.features[currentElement].geometry.coordinates = [document.getElementById('geoLng').value, document.getElementById('geoLat').value];
+
+			//remove and old layer
+			geojsonLayer.eachLayer(function(feature){
+				if (feature.feature.properties.name == document.getElementById('geoName').value){
+					feature.remove();
+				}
+			});
+			//add layer with new data
+			geojsonLayer.addData(geojson.features[currentElement]);
+		}
 	}
+
+	//Form div for searching for geojson object by name
+	L.Control.Search = L.Control.extend({
+	    onAdd: function(map) {
+	        var searchDiv = L.DomUtil.create('div');
+	        searchDiv.id = 'searchDiv';
+	        searchDiv.style.height = 'auto';
+	        searchDiv.style.width = '200px';
+	        searchDiv.style.background = 'white';
+	        return searchDiv;
+	    },
+	    onRemove: function(map) {
+	    }
+	});
+
+	L.control.search = function(opts) {
+	    return new L.Control.Search(opts);
+	}
+
+	L.control.search({ position: 'topright'}).addTo(map);
+
+	var searchForm = L.DomUtil.create('form');
+	L.DomEvent.disableClickPropagation(searchForm);
+	searchForm.id = 'searchForm';
+	searchForm.name = 'searchForm';
+	searchForm.classList.add('mapControl');
+	document.getElementById('searchDiv').appendChild(searchForm);
+
+	var featureName = L.DomUtil.create('input');
+	featureName.id = 'featureName';
+	featureName.type = 'text';
+	featureName.name = 'featureName';
+	featureName.placeholder = 'Name';
+	document.getElementById('searchForm').appendChild(featureName);
+
+	var searchSubmit = L.DomUtil.create('input');
+	L.DomEvent.disableClickPropagation(searchSubmit);
+	searchSubmit.id = 'searchSubmit';
+	searchSubmit.type = 'submit';
+	searchSubmit.value = 'Find object';
+	searchSubmit.classList.add('mapControl');
+	document.getElementById('searchForm').appendChild(searchSubmit);
+	searchSubmit.addEventListener('click', featureSearch);
+
+	//opens popup for name entered in search field
+	function featureSearch(e){
+		e.preventDefault();
+		geojsonLayer.eachLayer(function(feature){
+			if (feature.feature.properties.name == document.getElementById('featureName').value){
+				feature.openPopup();
+			}
+		})
+	}
+
 
 </script>
 </body>

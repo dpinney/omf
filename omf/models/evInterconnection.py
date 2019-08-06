@@ -154,7 +154,7 @@ def work(modelDir, inputDict):
 	# print loadShapeValue
 	
 	#calculate and display EV Charging Demand image, carpet plot image of 8760 load shapes
-	maxLoadValue, demandImg, carpetPlotImg, maxLoadShapeImg = plotEVShape(
+	maxLoadValue, demandImg, carpetPlotImg, maxLoadShapeImg, combinedLoadShapeValue = plotEVShape(
 		numVehicles = numVehiclesValue,
 		chargeRate = chargeRateValue, 
 		batterySize = batterySizeValue, 
@@ -287,17 +287,20 @@ def work(modelDir, inputDict):
 	scenario = {
 		"Scenario": {
 			"Site": {
-				"latitude": latitudeValue,				#LATITUDE VALUE OF SITE LOCATION
-				"longitude": longitudeValue,			#LONGITUDE VALUE OF SITE LOCATION
-				"address": "Springfield, Illinois",		#OPTIONAL FIELD
+				"latitude": latitudeValue,
+				"longitude": longitudeValue,
 				"LoadProfile": {
-					"loads_kw": loadShapeValue,			#8760 value list
-					"year": yearValue 					#MUST BE THE CORRECT YEAR CORRELATING TO loads_kw!!
+					"loads_kw": combinedLoadShapeValue,		#8760 value list
+					"year": yearValue 						#MUST BE THE CORRECT YEAR CORRELATING TO loads_kw!!
 				},
-				"ElectricTarrif": {
+				"ElectricTariff": {
 					"urdb_rate_name": "custom",
 					"blended_annual_rates_us_dollars_per_kwh": energyCostValue,
 					"blended_annual_demand_charges_us_dollars_per_kw": demandCostValue
+				},
+				"Wind": {
+					"max_kw": 0,
+					"max_kwh": 0
 				}
 			}
 		}
@@ -306,6 +309,32 @@ def work(modelDir, inputDict):
 		json.dump(scenario, jsonFile)
 	# Run REopt API script
 	runREopt(pJoin(modelDir, 'Scenario_test_POST.json'), pJoin(modelDir, 'results.json'))
+
+	#read results from json generated from REopt
+	with open(pJoin(modelDir, "results.json"), "r") as REoptFile:
+		REopt_output = json.load(REoptFile)
+		#print REopt_output
+	#find the values for energy cost with and without microgrid
+	REopt_ev_energy_cost = REopt_output["outputs"]["Scenario"]["Site"]["ElectricTariff"]["year_one_bill_bau_us_dollars"]
+	REopt_opt_energy_cost =	REopt_output["outputs"]["Scenario"]["Site"]["ElectricTariff"]["year_one_bill_us_dollars"]
+	# REopt_ev_energy_cost = 100000
+	# REopt_opt_energy_cost =	90000
+
+	#Create the building energy cost table
+	energyCostHtml = energyCostCalc(
+		max_bau_load_shape = max(loadShapeValue),
+		sum_bau_load_shape = sum(loadShapeValue),
+		demand_charge = demandCostValue,
+		energy_charge = energyCostValue,
+		REopt_EV_output = REopt_ev_energy_cost,
+		REopt_opt_output = REopt_opt_energy_cost)
+	with open(pJoin(modelDir, "energyCostCalc.html"), "w") as energyFile:
+		energyFile.write(energyCostHtml)
+	outData["energyCostCalcHtml"] = energyCostHtml
+
+	# #Create carpet plot from REopt output
+	# REoptCarpetPlotImg, REoptMaxLoadShapeImg = plotEVShape_REopt( 
+	# 	loadShape = loadShapeValue)
 
 	return outData
 
@@ -1048,7 +1077,7 @@ def plotEVShape(numVehicles=None, chargeRate=None, batterySize=None, startHour=N
 		plt.close()
 		return maxLoadShapeImg
 		
-	return max_val, evShape, carpet_plot(base_shape, hourly_con), maxLoadShape(day_shape, hourly_con)
+	return max_val, evShape, carpet_plot(base_shape, hourly_con), maxLoadShape(day_shape, hourly_con), combined
 
 def fuelCostCalc(numVehicles=None, batterySize=None, efficiency=None, energyCost=None, gasEfficiency=None, gasCost=None, workload=None):
 	dailyGasAmount = workload/gasEfficiency #amount(gal) of gas used per vehicle, daily
@@ -1070,6 +1099,19 @@ def fuelCostCalc(numVehicles=None, batterySize=None, efficiency=None, energyCost
 			<p>Daily cost per vehicle:<span style="padding-left:2em">$"""+str(dailyEnergyCost)+"""</span></p>
 			<p>Total daily cost:<span style="padding-left:2em">$"""+str(totalEnergyCost)+"""</span></p>
 			<p style="padding-top:10px; padding-bottom:10px;">Daily savings per vehicle:<span style="padding-left:1em">$"""+str(dailySavings)+"""</span><span style="padding-left:4em">Total daily savings:<span style="padding-left:1em">$"""+str(totalSavings)+"""</span></span></p>
+		</div>"""
+	return html_str
+
+def energyCostCalc(max_bau_load_shape = None, sum_bau_load_shape = None, demand_charge = None, energy_charge = None, REopt_EV_output=None, REopt_opt_output=None):
+	bau_energy_cost = max_bau_load_shape*demand_charge + sum_bau_load_shape*energy_charge
+	ev_energy_cost = REopt_EV_output
+	opt_energy_cost = REopt_opt_output
+	html_str = """
+		<div style="text-align:center">
+			<p style="padding-top:30px; padding-bottom:15px;">Yearly Energy Costs:</p>
+			<p style="padding-top:10px; padding-bottom:10px;">Business as usual (no EVs): <b>$""" + '{:20,.2f}'.format(bau_energy_cost) +"""</b> </p>
+			<p style="padding-top:10px; padding-bottom:10px;">with EVs: <b>$""" + '{:20,.2f}'.format(ev_energy_cost) +"""</b> </p>
+			<p style="padding-top:10px; padding-bottom:30px;">with EVs and microgrid: <b>$""" + '{:20,.2f}'.format(opt_energy_cost) +"""</b> </p>
 		</div>"""
 	return html_str
 

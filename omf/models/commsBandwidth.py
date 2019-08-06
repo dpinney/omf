@@ -13,8 +13,10 @@ hidden = True
 
 def work(modelDir, inputDict):
 	outData = {}
-	#feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
-	#inputDict['feederName1'] = feederName
+	#delete previous saved omd/omc files so sotrage doesn't blow up - may need to adjust in future for editing
+	for file in os.listdir(modelDir):
+		if file.endswith(".omc") or file.endswith(".omd"):
+			os.remove(pJoin(modelDir, file))
 	feederName = inputDict['feederName1']
 	shutil.copyfile(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', feederName+'.omd'), pJoin(modelDir, feederName+'.omd'))
 	feederPath = pJoin(modelDir,feederName+'.omd')

@@ -1,4 +1,4 @@
-import logging
+import logging, tempfile
 
 """
 Custom logging set up, with handlers for writing to .log file and console.
@@ -15,11 +15,11 @@ DEBUG	    10
 NOTSET	    0
 """
 
-
 log = logging.getLogger('my_log_file')
 log.setLevel(logging.DEBUG)
 
-file_handler = logging.FileHandler(filename='test_scenario.log', mode='w')
+path = tempfile.mkdtemp() + '/test_scenario.log'
+file_handler = logging.FileHandler(filename=path, mode='w')
 file_formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
 file_handler.setFormatter(file_formatter)
 file_handler.setLevel(logging.INFO)

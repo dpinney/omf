@@ -88,6 +88,7 @@ def createGraph(pathToOmdFile):
 	nxG = treeToCommsDiNxGraph(tree)
 	#use conversion for testing other feeders
 	nxG = graphValidator(pathToOmdFile, nxG)
+	print(nxG.node)
 	return nxG
 
 def getSubstation(nxG):
@@ -213,10 +214,42 @@ def graphGeoJson(nxG):
 				"fiber": nxG[edge[0]][edge[1]].get('fiber',False),
 				"rf": nxG[edge[0]][edge[1]].get('rf',False),
 				"bandwidthUse": nxG[edge[0]][edge[1]].get('bandwidthUse',''),
-				"bandwidthCapacity": nxG[edge[0]][edge[1]].get('bandwidthCapacity','')
+				"bandwidthCapacity": nxG[edge[0]][edge[1]].get('bandwidthCapacity',''),
+				"source": edge[0],
+				"target": edge[1]
 			}
 		})
 	return geoJsonDict
+
+def omcToNxg(pathToOmc):
+	'''Convert omc to networkx graph to run calculations. Used when graph is edited in the commsNetViz.html template'''
+	outGraph = nx.DiGraph()
+	with open(pathToOmc) as omc:
+		geoJsonDict = json.load(omc)
+	geoNodes = list(filter(lambda x: x['geometry']['type'] == 'Point', geoJsonDict['features']))
+	geoEdges = list(filter(lambda x: x['geometry']['type'] == 'LineString', geoJsonDict['features']))
+	for node in geoNodes:
+		node_attrs = {
+			'substation': node['properties']['substation'],
+			'smartMeter': node['properties']['smartMeter'],
+			'rfCollector': node['properties']['rfCollector'],
+			'type': node['properties']['pointType'],
+			'bandwidthCapacity': node['properties']['bandwidthCapacity'],
+			'pos': tuple(reversed(node['geometry']['coordinates']))
+		}
+		outGraph.add_node(node['properties']['name'],attr_dict=node_attrs)
+	for edge in geoEdges:
+		#may need to take away bandwidth use? what about fiber and rf?
+		edge_attrs = {
+			'type': edge['properties']['edgeType'],
+			'fiber': edge['properties']['fiber'],
+			'rf': edge['properties']['rf'],
+			'bandwidthUse': edge['properties']['bandwidthUse'],
+			'bandwidthCapacity': edge['properties']['bandwidthCapacity']
+		}
+		outGraph.add_edge(edge['properties']['source'],edge['properties']['target'],attr_dict=edge_attrs)
+
+	return outGraph
 
 def showOnMap(geoJson):
 	'''Open a browser to display a geoJSON object on a map.'''
@@ -381,7 +414,8 @@ def _tests():
 	print('cost of fiber: ' + str(getFiberCost(feeder, 4)))
 	#rfCollectors = sum([(feeder.node[rfCollector]['bandwidthUse']) for rfCollector  in nx.get_node_attributes(feeder, 'rfCollector')])
 	sub = getSubstation(feeder)
-	#saveOmc(graphGeoJson(feeder), 'output')
+	saveOmc(graphGeoJson(feeder), 'output')
+	omcToNxg('output/commsGeoJson.omc')
 	showOnMap(graphGeoJson(feeder))
 
 if __name__ == '__main__':

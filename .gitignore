@@ -35,3 +35,4 @@ omf/scratch/CIGAR/scratchwindow.py
 gridlabd.dmg
 omf/omf.error.log
 *.pem
+omf/solvers/nilmtk/*
