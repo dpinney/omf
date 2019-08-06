@@ -388,11 +388,9 @@ def showModel(owner, modelName):
 	return thisModel.renderTemplate(modelDir, absolutePaths=False, datastoreNames=getDataNames())
 
 
-#@app.route("/newModel/<modelType>/<modelName>", methods=["POST", "GET"])
 @app.route("/newModel", methods=["POST"])
 @flask_login.login_required
 @write_permission_function
-#def newModel(modelType, modelName):
 def newModel():
 	''' Create a new model with given name. '''
 	owner = request.form.get("user")
@@ -402,10 +400,6 @@ def newModel():
 	this_model = getattr(models, model_type)
 	this_model.new(model_dir)
 	return redirect(os.path.join("/model", owner, model_name))
-	#modelDir = os.path.join(_omfDir, "data", "Model", User.cu(), modelName)
-	#thisModel = getattr(models, modelType)
-	#thisModel.new(modelDir)
-	#return redirect("/model/" + User.cu() + "/" + modelName)
 
 
 @app.route("/runModel/", methods=["POST"])
@@ -459,23 +453,6 @@ def duplicateModel(owner, modelName):
 	with open(destinationPath + "/allInputData.json","w") as outFile:
 		json.dump(inData, outFile, indent=4)
 	return redirect("/model/" + User.cu() + "/" + newName)
-
-
-#@app.route("/publishModel/<owner>/<modelName>/", methods=["POST"])
-#@flask_login.login_required
-#def publishModel(owner, modelName):
-#	newName = request.form.get("newName","")
-#	if owner==User.cu() or "admin"==User.cu():
-#		destinationPath = "./data/Model/public/" + newName
-#		shutil.copytree("./data/Model/" + owner + "/" + modelName, destinationPath)
-#		with open(destinationPath + "/allInputData.json","r+") as inFile:
-#			inData = json.load(inFile)
-#			inData["created"] = str(dt.datetime.now())
-#			inFile.seek(0)
-#			json.dump(inData, inFile, indent=4)
-#		return redirect("/model/public/" + newName)
-#	else:
-#		return False
 
 
 @app.route("/shareModel", methods=["POST"])
