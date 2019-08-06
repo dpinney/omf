@@ -311,13 +311,13 @@ def read_permission_function(func):
 	"""Run the route if the user has read permission for the model, otherwise redirect to home page."""
 	@wraps(func)
 	def wrapper(*args, **kwargs):
-		owner = kwargs["owner"]
+		owner = kwargs.get("owner")
 		if owner is None:
 			owner = request.form.get("user")
 		if owner is None:
 			# The "owner" could not be determined which means someone is attemping unauthorized access or the front end isn't formatting its request properly
 			return redirect("/")
-		model_name = kwargs["modelName"]
+		model_name = kwargs.get("modelName")
 		if model_name is None:
 			model_name = request.form.get("modelName")
 		if model_name is None:
@@ -388,15 +388,24 @@ def showModel(owner, modelName):
 	return thisModel.renderTemplate(modelDir, absolutePaths=False, datastoreNames=getDataNames())
 
 
-@app.route("/newModel/<modelType>/<modelName>", methods=["POST","GET"])
+#@app.route("/newModel/<modelType>/<modelName>", methods=["POST", "GET"])
+@app.route("/newModel", methods=["POST"])
 @flask_login.login_required
 @write_permission_function
-def newModel(modelType, modelName):
+#def newModel(modelType, modelName):
+def newModel():
 	''' Create a new model with given name. '''
-	modelDir = os.path.join(_omfDir, "data", "Model", User.cu(), modelName)
-	thisModel = getattr(models, modelType)
-	thisModel.new(modelDir)
-	return redirect("/model/" + User.cu() + "/" + modelName)
+	owner = request.form.get("user")
+	model_type = request.form.get("modelType")
+	model_name = request.form.get("modelName")
+	model_dir = os.path.join(_omfDir, "data/Model", owner, model_name)
+	this_model = getattr(models, model_type)
+	this_model.new(model_dir)
+	return redirect(os.path.join("/model", owner, model_name))
+	#modelDir = os.path.join(_omfDir, "data", "Model", User.cu(), modelName)
+	#thisModel = getattr(models, modelType)
+	#thisModel.new(modelDir)
+	#return redirect("/model/" + User.cu() + "/" + modelName)
 
 
 @app.route("/runModel/", methods=["POST"])
@@ -471,16 +480,90 @@ def duplicateModel(owner, modelName):
 
 @app.route("/shareModel", methods=["POST"])
 @flask_login.login_required
+@write_permission_function
 def shareModel():
-	pass
-	#owner = request.form.get("user")
-	#model_name = request.form.get("modelName")
-	#model_metadata_path = os.path.join(_omfDir, "data/Model", owner, model_name, "allInputData.json")
+	"""Never trust input from the user. I am writing user strings directly into sensitive model files and user JSON files without sanitizing them!"""
+	# Check for nonexistant users
+	emails = list(set(request.form.getlist("email"))) if len(request.form.getlist("email")) != 0 else None
+	if emails is not None:
+		invalid_emails = filter(lambda e: e == User.cu() or not os.path.isfile(os.path.join(_omfDir, "data/User", e + ".json")), emails)
+		if len(invalid_emails) != 0:
+			response = jsonify(invalid_emails)
+			response.status_code = 400
+			return response
+	# Load the list of old viewers
+	owner = request.form.get("user")
+	model_name = request.form.get("modelName")
+	filepath = os.path.join(_omfDir, "data/Model", owner, model_name, "allInputData.json")
+	with open(filepath) as f:
+		fcntl.flock(f, fcntl.LOCK_SH)
+		model_metadata = json.load(f)
+		fcntl.flock(f, fcntl.LOCK_UN)
+	old_viewers = model_metadata.get("viewers")
+	# If there are no new emails to add, and there are no old emails to remove, don't do anything
+	if emails is not None or old_viewers is not None:
+		if emails is not None:
+			model_metadata["viewers"] = emails
+		elif old_viewers is not None:
+			del model_metadata["viewers"]
+		with open(filepath, 'w') as f:
+			fcntl.flock(f, fcntl.LOCK_EX)
+			json.dump(model_metadata, f, indent=4) # Could an email be a malicious string of code?
+			fcntl.flock(f, fcntl.LOCK_UN)
+		# All viewers who previously had access to this model, but had that access revoked, must have their JSON file updated
+		if old_viewers is not None:
+			for v in old_viewers:
+				if emails is None or v not in emails:
+					filepath = os.path.join(_omfDir, "data/User", v + ".json")
+					if os.path.isfile(filepath):
+						with open(filepath) as f:
+							fcntl.flock(f, fcntl.LOCK_SH)
+							viewer_metadata = json.load(f)
+							fcntl.flock(f, fcntl.LOCK_UN)
+						sharing_users = viewer_metadata.get("readonly_models")
+						if sharing_users is not None:
+							shared_models = sharing_users.get(owner)
+							if shared_models is not None and model_name in shared_models:
+								shared_models.remove(model_name)
+								if len(shared_models) == 0:
+									del sharing_users[owner]
+								if len(sharing_users.keys()) == 0:
+									del viewer_metadata["readonly_models"]
+								with open(filepath, 'w') as f:
+									fcntl.flock(f, fcntl.LOCK_EX)
+									json.dump(viewer_metadata, f)
+									fcntl.flock(f, fcntl.LOCK_SH)
+		# All viewers who were newly granted access to this model must have their JSON file updated
+		if emails is not None:
+			for e in emails:
+				filepath = os.path.join(_omfDir, "data/User", e + ".json")
+				if os.path.isfile(filepath):
+					with open(filepath) as f:
+						fcntl.flock(f, fcntl.LOCK_SH)
+						viewer_metadata = json.load(f)
+						fcntl.flock(f, fcntl.LOCK_UN)
+					if viewer_metadata.get("readonly_models") is None:
+						viewer_metadata["readonly_models"] = {}
+					sharing_users = viewer_metadata.get("readonly_models")
+					if sharing_users.get(owner) is None:
+						sharing_users[owner] = []
+					shared_models = sharing_users.get(owner)
+					if model_name not in shared_models:
+						shared_models.append(model_name) # Could model_name be a malicious string of code?
+						with open(filepath, 'w') as f:
+							fcntl.flock(f, fcntl.LOCK_EX)
+							json.dump(viewer_metadata, f, indent=4)
+							fcntl.flock(f, fcntl.LOCK_UN)
+	response = jsonify(emails)
+	response.status_code = 200
+	return response
+	#return ("", 204)
 
 
 ###################################################
 # FEEDER FUNCTIONS
 ###################################################
+
 
 def writeToInput(workDir, entry, key):
 	try:
@@ -492,8 +575,10 @@ def writeToInput(workDir, entry, key):
 	except:
 		return "Failed"
 
+
 @app.route("/gridEdit/<owner>/<modelName>/<feederNum>")
 @flask_login.login_required
+@read_permission_function
 def feederGet(owner, modelName, feederNum):
 	''' Editing interface for feeders. '''
 	allData = getDataNames()
@@ -508,8 +593,10 @@ def feederGet(owner, modelName, feederNum):
 		public=owner=="public", currUser=User.cu(), owner=owner
 	)
 
+
 @app.route("/network/<owner>/<modelName>/<networkNum>")
 @flask_login.login_required
+@read_permission_function
 def networkGet(owner, modelName, networkNum):
 	''' Editing interface for networks. '''
 	allData = getDataNames()
@@ -528,18 +615,20 @@ def networkGet(owner, modelName, networkNum):
 @app.route("/feeder/<owner>/<model_name>/<feeder_num>/test")
 @app.route("/feeder/<owner>/<model_name>/<feeder_num>")
 @flask_login.login_required
+@read_permission_function
 def distribution_get(owner, model_name, feeder_num):
-	"""Render the editing interface for distribution networks.
-	"""
-	model_dir = os.path.join(_omfDir, "data","Model", owner, model_name)
-	with open(model_dir + "/allInputData.json", "r") as json_file:
-		feeder_dict = json.load(json_file)
-		feeder_name = feeder_dict.get('feederName' + str(feeder_num))
-	feeder_file = model_dir + "/" + feeder_name + ".omd"
-	with open(feeder_file, "r") as data_file:
-		fcntl.flock(data_file, fcntl.LOCK_SH)
-		data = json.load(data_file)
-		fcntl.flock(data_file, fcntl.LOCK_UN)
+	"""Render the editing interface for distribution networks."""
+	model_dir = os.path.join(_omfDir, "data/Model", owner, model_name)
+	with open(model_dir + "/allInputData.json") as f:
+		fcntl.flock(f, fcntl.LOCK_SH)
+		feeder_dict = json.load(f)
+		fcntl.flock(f, fcntl.LOCK_UN)
+	feeder_name = feeder_dict.get('feederName' + str(feeder_num))
+	feeder_filepath = os.path.join(model_dir, feeder_name + ".omd")
+	with open(feeder_filepath) as f:
+		fcntl.flock(f, fcntl.LOCK_SH)
+		data = json.load(f)
+		fcntl.flock(f, fcntl.LOCK_UN)
 	passed_data = json.dumps(data)
 	component_json = get_components()
 	jasmine = spec = None
@@ -554,12 +643,12 @@ def distribution_get(owner, model_name, feeder_num):
 		dictionary['model'] = str(dictionary['model'])
 		dictionary['name'] = str(dictionary['name'])
 	public_feeders = all_data["publicFeeders"]
-	show_file_menu = User.cu() == "admin" or owner != "public"
-	current_user = User.cu()
+	#show_file_menu = User.cu() == "admin" or owner != "public"
+	show_file_menu = User.cu() == owner or User.cu() == "admin"
 	return render_template(
 		"distNetViz.html", thisFeederData=passed_data, thisFeederName=feeder_name, thisFeederNum=feeder_num,
 		thisModelName=model_name, thisOwner=owner, components=component_json, jasmine=jasmine, spec=spec,
-		publicFeeders=public_feeders, userFeeders=user_feeders, showFileMenu=show_file_menu, currentUser=current_user
+		publicFeeders=public_feeders, userFeeders=user_feeders, showFileMenu=show_file_menu, currentUser=User.cu()
 	)
 
 
@@ -590,6 +679,8 @@ def get_components():
 
 @app.route("/checkConversion/<modelName>/<owner>", methods=["POST","GET"])
 @app.route("/checkConversion/<modelName>", methods=["POST","GET"]) # Don't get rid of this route because transEdit.html uses it
+@flask_login.login_required
+@read_permission_function # Viewers can load a feeder, and all feeders check for ongoing conversions, so this route must have read permissions
 def checkConversion(modelName, owner=None):
 	"""
 	If the path exists, then the conversion is ongoing and the client can't reload their browser yet. If the path does not exist, then either 1) the
@@ -597,12 +688,12 @@ def checkConversion(modelName, owner=None):
 	failed and the client should be notified.
 	"""
 	print modelName
-	if User.cu() == "admin":
-		if owner is None:
-			owner = User.cu()
-	else:
-		# owner is not always the current user, sometimes it's "public"
-		owner = User.cu()
+	#if User.cu() == "admin":
+	#	if owner is None:
+	#		owner = User.cu()
+	#else:
+	#	# owner is not always the current user, sometimes it's "public"
+	#	owner = User.cu()
 	# First check for error files
 	for filename in ["gridError.txt", "error.txt", "weatherError.txt"]:
 		filepath = os.path.join(_omfDir, "data/Model", owner, modelName, filename)
@@ -621,6 +712,7 @@ def checkConversion(modelName, owner=None):
 
 @app.route("/milsoftImport/<owner>", methods=["POST"])
 @flask_login.login_required
+@write_permission_function
 def milsoftImport(owner):
 	''' API for importing a milsoft feeder. '''
 	modelName = request.form.get("modelName","")
@@ -679,6 +771,7 @@ def milImportBackground(owner, modelName, feederName, feederNum, stdString, seqS
 
 @app.route("/matpowerImport/<owner>", methods=["POST"])
 @flask_login.login_required
+@write_permission_function
 def matpowerImport(owner):
 	''' API for importing a MATPOWER network. '''
 	modelName = request.form.get("modelName","")
@@ -719,6 +812,7 @@ def matImportBackground(owner, modelName, networkName, networkNum):
 
 @app.route("/gridlabdImport/<owner>", methods=["POST"])
 @flask_login.login_required
+@write_permission_function
 def gridlabdImport(owner):
 	'''This function is used for gridlabdImporting'''
 	modelName = request.form.get("modelName","")
@@ -770,7 +864,8 @@ def gridlabImportBackground(owner, modelName, feederName, feederNum, glmString):
 
 @app.route("/scadaLoadshape/<owner>/<feederName>", methods=["POST"])
 @flask_login.login_required
-def scadaLoadshape(owner,feederName):
+@write_permission_function
+def scadaLoadshape(owner, feederName):
 	loadName = 'calibration'
 	#feederNum = request.form.get("feederNum",1)
 	modelName = request.form.get("modelName","")
@@ -835,7 +930,9 @@ def backgroundScadaLoadshape(owner, modelName, workDir, feederPath, scadaPath, s
 
 
 @app.route("/loadModelingAmi/<owner>/<feederName>", methods=["POST"])
-def loadModelingAmi(owner,feederName):
+@flask_login.login_required
+@write_permission_function
+def loadModelingAmi(owner, feederName):
 	loadName = 'ami'
 	feederNum = request.form.get("feederNum",1)
 	modelName = request.form.get("modelName","")
@@ -870,6 +967,7 @@ def backgroundLoadModelingAmi(owner, modelName, workDir, omdPath, amiPath):
 # TODO: Check if rename mdb files worked
 @app.route("/cymeImport/<owner>", methods=["POST"])
 @flask_login.login_required
+@write_permission_function
 def cymeImport(owner):
 	''' API for importing a cyme feeder. '''
 	modelName = request.form.get("modelName","")
@@ -912,43 +1010,42 @@ def cymeImportBackground(owner, modelName, feederName, feederNum, mdbFileName):
 
 
 @app.route("/newSimpleFeeder/<owner>/<modelName>/<feederNum>/<writeInput>", methods=["POST", "GET"])
+@flask_login.login_required
+@write_permission_function
 def newSimpleFeeder(owner, modelName, feederNum=1, writeInput=False, feederName='feeder1'):
-	if User.cu() == "admin" or owner == User.cu():
-		modelDir = os.path.join(_omfDir, "data", "Model", owner, modelName)
-		for i in range(2,6):
-			if not os.path.isfile(os.path.join(modelDir,feederName+'.omd')):
-				with open("./static/SimpleFeeder.json", "r") as simpleFeederFile:
-					with open(os.path.join(modelDir, feederName+".omd"), "w") as outFile:
-						outFile.write(simpleFeederFile.read())
-				break
-			else:
-				feederName = 'feeder'+str(i)
-		if writeInput:
-			writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
-		return 'Success'
-	else:
-		return 'Invalid Login'
+	modelDir = os.path.join(_omfDir, "data", "Model", owner, modelName)
+	for i in range(2,6):
+		if not os.path.isfile(os.path.join(modelDir,feederName+'.omd')):
+			with open("./static/SimpleFeeder.json", "r") as simpleFeederFile:
+				with open(os.path.join(modelDir, feederName+".omd"), "w") as outFile:
+					outFile.write(simpleFeederFile.read())
+			break
+		else:
+			feederName = 'feeder'+str(i)
+	if writeInput:
+		writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
+	return 'Success'
 
 
 @app.route("/newSimpleNetwork/<owner>/<modelName>/<networkNum>/<writeInput>", methods=["POST", "GET"])
+@flask_login.login_required
+@write_permission_function
 def newSimpleNetwork(owner, modelName, networkNum=1, writeInput=False, networkName='network1'):
-	if User.cu() == "admin" or owner == User.cu():
-		modelDir = os.path.join(_omfDir, "data", "Model", owner, modelName)
-		for i in range(2,6):
-			if not os.path.isfile(os.path.join(modelDir,networkName+'.omt')):
-				with open("./static/SimpleNetwork.json", "r") as simpleNetworkFile:
-					with open(os.path.join(modelDir, networkName+".omt"), "w") as outFile:
-						outFile.write(simpleNetworkFile.read())
-				break
-			else: networkName = 'network'+str(i)
-		if writeInput: writeToInput(modelDir, networkName, 'networkName'+str(networkNum))
-		return 'Success'
-	else:
-		return 'Invalid Login'
+	modelDir = os.path.join(_omfDir, "data", "Model", owner, modelName)
+	for i in range(2,6):
+		if not os.path.isfile(os.path.join(modelDir,networkName+'.omt')):
+			with open("./static/SimpleNetwork.json", "r") as simpleNetworkFile:
+				with open(os.path.join(modelDir, networkName+".omt"), "w") as outFile:
+					outFile.write(simpleNetworkFile.read())
+			break
+		else: networkName = 'network'+str(i)
+	if writeInput: writeToInput(modelDir, networkName, 'networkName'+str(networkNum))
+	return 'Success'
 
 
 @app.route("/newBlankFeeder/<owner>", methods=["POST"])
 @flask_login.login_required
+@write_permission_function
 def newBlankFeeder(owner):
 	'''This function is used for creating a new blank feeder.'''
 	modelName = request.form.get("modelName","")
@@ -970,6 +1067,7 @@ def newBlankFeeder(owner):
 
 @app.route("/newBlankNetwork/<owner>", methods=["POST"])
 @flask_login.login_required
+@write_permission_function
 def newBlankNetwork(owner):
 	'''This function is used for creating a new blank network.'''
 	modelName = request.form.get("modelName","")
@@ -990,91 +1088,92 @@ def newBlankNetwork(owner):
 @app.route("/feederData/<owner>/<modelName>/<feederName>/")
 @app.route("/feederData/<owner>/<modelName>/<feederName>/<modelFeeder>")
 @flask_login.login_required
+@read_permission_function
 def feederData(owner, modelName, feederName, modelFeeder=False):
 	#MAYBEFIX: fix modelFeeder capability.
-	if User.cu()=="admin" or owner==User.cu() or owner=="public":
-		with open("data/Model/" + owner + "/" + modelName + "/" + feederName + ".omd", "r") as feedFile:
-			return feedFile.read()
+	with open("data/Model/" + owner + "/" + modelName + "/" + feederName + ".omd", "r") as feedFile:
+		return feedFile.read()
 
 
 @app.route("/networkData/<owner>/<modelName>/<networkName>/")
 @flask_login.login_required
+@read_permission_function
 def networkData(owner, modelName, networkName):
-	if User.cu()=="admin" or owner==User.cu() or owner=="public":
-		with open("data/Model/" + owner + "/" + modelName + "/" + networkName + ".omt", "r") as netFile:
-			thisNet = json.load(netFile)
-		return json.dumps(thisNet)
-		# return jsonify(netFile.read())
+	with open("data/Model/" + owner + "/" + modelName + "/" + networkName + ".omt", "r") as netFile:
+		thisNet = json.load(netFile)
+	return json.dumps(thisNet)
+	# return jsonify(netFile.read())
 
 
 @app.route("/saveFeeder/<owner>/<modelName>/<feederName>/<int:feederNum>", methods=["POST"])
 @flask_login.login_required
+@write_permission_function
 def saveFeeder(owner, modelName, feederName, feederNum):
 	"""Save feeder data. Also used for cancelling a file import, file conversion, or feeder-load overwrite."""
 	print "Saving feeder for:%s, with model: %s, and feeder: %s"%(owner, modelName, feederName)
-	if owner == User.cu() or "admin" == User.cu() or owner == "public":
-		model_dir = os.path.join(_omfDir, "data/Model", owner, modelName)
-		for filename in ["gridError.txt", "error.txt", "weatherError.txt"]:
-			error_file = os.path.join(model_dir, filename)
-			if os.path.isfile(error_file):
-				try:
-					os.remove(error_file)
-				except OSError as e:
-					if e.errno ==2:
-						# Tried to remove a nonexistant file
-						pass
-		# Do NOT cancel any PPID.txt or PID.txt processes.
-		for filename in ["ZPID.txt", "APID.txt", "NPID.txt", "CPID.txt", "WPID.txt"]:
-			pid_filepath = os.path.join(model_dir, filename)
-			if os.path.isfile(pid_filepath):
-				try:
-					with open(pid_filepath) as f:
-						fcntl.flock(f, fcntl.LOCK_SH) # Get a shared lock
-						pid = f.read()
-						fcntl.flock(f, fcntl.LOCK_UN) # Release the shared lock
-					os.remove(pid_filepath)
-					os.kill(int(pid), signal.SIGTERM)
-				except IOError as e:
-					if e.errno == 2:
-						# Tried to open a nonexistent file. Presumably, some other process opened the used the pid file and deleted it before this process
-						# could use it
-						pass
-					else:
-						raise
-				except OSError as e:
-					if e.errno == 2:
-						# Tried to remove a nonexistent file
-						pass
-					elif e.errno == 3:
-						# Tried to kill a process with a pid that doesn't map to an existing process.
-						pass
-					else:
-						raise
-		# It would be nice to file lock allInputData.json too...
-		writeToInput(model_dir, feederName, 'feederName' + str(feederNum))
-		payload = json.loads(request.form.to_dict().get("feederObjectJson","{}"))
-		feeder_file = os.path.join(model_dir, feederName + ".omd")
-        with open(feeder_file, "w") as outFile:
-			fcntl.flock(outFile, fcntl.LOCK_EX) # Get an exclusive lock
-			json.dump(payload, outFile, indent=4) # This route is slow only because this line takes forever. We want the indentation so we keep this line
-			fcntl.flock(outFile, fcntl.LOCK_UN) # Release the exclusive lock
+	model_dir = os.path.join(_omfDir, "data/Model", owner, modelName)
+	for filename in ["gridError.txt", "error.txt", "weatherError.txt"]:
+		error_file = os.path.join(model_dir, filename)
+		if os.path.isfile(error_file):
+			try:
+				os.remove(error_file)
+			except OSError as e:
+				if e.errno ==2:
+					# Tried to remove a nonexistant file
+					pass
+	# Do NOT cancel any PPID.txt or PID.txt processes.
+	for filename in ["ZPID.txt", "APID.txt", "NPID.txt", "CPID.txt", "WPID.txt"]:
+		pid_filepath = os.path.join(model_dir, filename)
+		if os.path.isfile(pid_filepath):
+			try:
+				with open(pid_filepath) as f:
+					fcntl.flock(f, fcntl.LOCK_SH) # Get a shared lock
+					pid = f.read()
+					fcntl.flock(f, fcntl.LOCK_UN) # Release the shared lock
+				os.remove(pid_filepath)
+				os.kill(int(pid), signal.SIGTERM)
+			except IOError as e:
+				if e.errno == 2:
+					# Tried to open a nonexistent file. Presumably, some other process opened the used the pid file and deleted it before this process
+					# could use it
+					pass
+				else:
+					raise
+			except OSError as e:
+				if e.errno == 2:
+					# Tried to remove a nonexistent file
+					pass
+				elif e.errno == 3:
+					# Tried to kill a process with a pid that doesn't map to an existing process.
+					pass
+				else:
+					raise
+	# It would be nice to file lock allInputData.json too...
+	writeToInput(model_dir, feederName, 'feederName' + str(feederNum))
+	payload = json.loads(request.form.to_dict().get("feederObjectJson","{}"))
+	feeder_file = os.path.join(model_dir, feederName + ".omd")
+	with open(feeder_file, "w") as outFile:
+		fcntl.flock(outFile, fcntl.LOCK_EX) # Get an exclusive lock
+		json.dump(payload, outFile, indent=4) # This route is slow only because this line takes forever. We want the indentation so we keep this line
+		fcntl.flock(outFile, fcntl.LOCK_UN) # Release the exclusive lock
 	return 'Success'
 
 
 @app.route("/saveNetwork/<owner>/<modelName>/<networkName>", methods=["POST"])
 @flask_login.login_required
+@write_permission_function
 def saveNetwork(owner, modelName, networkName):
 	''' Save network data. '''
 	print "Saving network for:%s, with model: %s, and network: %s"%(owner, modelName, networkName)
-	if owner == User.cu() or "admin" == User.cu() or owner=="public":
-		with open("data/Model/" + owner + "/" + modelName + "/" + networkName + ".omt", "w") as outFile:
-			payload = json.loads(request.form.to_dict().get("networkObjectJson","{}"))
-			json.dump(payload, outFile, indent=4)
+	with open("data/Model/" + owner + "/" + modelName + "/" + networkName + ".omt", "w") as outFile:
+		payload = json.loads(request.form.to_dict().get("networkObjectJson","{}"))
+		json.dump(payload, outFile, indent=4)
 	return 'Success'
 
 
 @app.route("/renameFeeder/<owner>/<modelName>/<oldName>/<newName>/<feederNum>", methods=["GET", "POST"])
 @flask_login.login_required
+@write_permission_function
 def renameFeeder(owner, modelName, oldName, newName, feederNum):
 	''' rename a feeder. '''
 	model_dir_path = os.path.join(_omfDir, "data/Model", owner, modelName)
@@ -1092,6 +1191,7 @@ def renameFeeder(owner, modelName, oldName, newName, feederNum):
 
 @app.route("/renameNetwork/<owner>/<modelName>/<oldName>/<networkName>/<networkNum>", methods=["POST"])
 @flask_login.login_required
+@write_permission_function
 def renameNetwork(owner, modelName, oldName, networkName, networkNum):
 	''' rename a feeder. '''
 	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
@@ -1113,29 +1213,28 @@ def renameNetwork(owner, modelName, oldName, networkName, networkNum):
 @app.route("/removeFeeder/<owner>/<modelName>/<feederNum>", methods=["GET", "POST"])
 @app.route("/removeFeeder/<owner>/<modelName>/<feederNum>/<feederName>", methods=["GET", "POST"])
 @flask_login.login_required
+@write_permission_function
 def removeFeeder(owner, modelName, feederNum, feederName=None):
 	'''Remove a feeder from input data.'''
-	if User.cu() == "admin" or owner == User.cu():
+	try:
+		modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
+		with open(modelDir + "/allInputData.json") as inJson:
+			allInput = json.load(inJson)
 		try:
-			modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
-			with open(modelDir + "/allInputData.json") as inJson:
-				allInput = json.load(inJson)
-			try:
-				feederName = str(allInput.get('feederName'+str(feederNum)))
-				os.remove(os.path.join(modelDir, feederName +'.omd'))
-			except: print "Couldn't remove feeder file in web.removeFeeder()."
-			allInput.pop("feederName"+str(feederNum))
-			with open(modelDir+"/allInputData.json","w") as inputFile:
-				json.dump(allInput, inputFile, indent=4)
-			return 'Success'
-		except:
-			return 'Failed'
-	else:
-		return 'Invalid Login'
+			feederName = str(allInput.get('feederName'+str(feederNum)))
+			os.remove(os.path.join(modelDir, feederName +'.omd'))
+		except: print "Couldn't remove feeder file in web.removeFeeder()."
+		allInput.pop("feederName"+str(feederNum))
+		with open(modelDir+"/allInputData.json","w") as inputFile:
+			json.dump(allInput, inputFile, indent=4)
+		return 'Success'
+	except:
+		return 'Failed'
 
 
 @app.route("/loadFeeder/<frfeederName>/<frmodelName>/<modelName>/<feederNum>/<frUser>/<owner>", methods=["GET", "POST"])
 @flask_login.login_required
+@write_permission_function
 def loadFeeder(frfeederName, frmodelName, modelName, feederNum, frUser, owner):
 	'''Load a feeder from one model to another.'''
 	if frUser != "public":
@@ -1163,6 +1262,7 @@ def loadFeeder(frfeederName, frmodelName, modelName, feederNum, frUser, owner):
 
 @app.route("/cleanUpFeeders/<owner>/<modelName>", methods=["GET", "POST"])
 @flask_login.login_required
+@write_permission_function
 def cleanUpFeeders(owner, modelName):
 	'''Go through allInputData and fix feeder Name keys'''
 	modelDir = "./data/Model/" + owner + "/" + modelName
@@ -1188,29 +1288,28 @@ def cleanUpFeeders(owner, modelName):
 @app.route("/removeNetwork/<owner>/<modelName>/<networkNum>", methods=["GET","POST"])
 @app.route("/removeNetwork/<owner>/<modelName>/<networkNum>/<networkName>", methods=["GET","POST"])
 @flask_login.login_required
+@write_permission_function
 def removeNetwork(owner, modelName, networkNum, networkName=None):
 	'''Remove a network from input data.'''
-	if User.cu() == "admin" or owner == User.cu():
+	try:
+		modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
+		with open(modelDir + "/allInputData.json") as inJson:
+			allInput = json.load(inJson)
 		try:
-			modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
-			with open(modelDir + "/allInputData.json") as inJson:
-				allInput = json.load(inJson)
-			try:
-				networkName = str(allInput.get('networkName'+str(networkNum)))
-				os.remove(os.path.join(modelDir, networkName +'.omt'))
-			except: print "Couldn't remove network file in web.removeNetwork()."
-			allInput.pop("networkName"+str(networkNum))
-			with open(modelDir+"/allInputData.json","w") as inputFile:
-				json.dump(allInput, inputFile, indent = 4)
-			return 'Success'
-		except:
-			return 'Failed'
-	else:
-		return 'Invalid Login'
+			networkName = str(allInput.get('networkName'+str(networkNum)))
+			os.remove(os.path.join(modelDir, networkName +'.omt'))
+		except: print "Couldn't remove network file in web.removeNetwork()."
+		allInput.pop("networkName"+str(networkNum))
+		with open(modelDir+"/allInputData.json","w") as inputFile:
+			json.dump(allInput, inputFile, indent = 4)
+		return 'Success'
+	except:
+		return 'Failed'
 
 
 @app.route("/climateChange/<owner>/<feederName>", methods=["POST"])
 @flask_login.login_required
+@write_permission_function
 def climateChange(owner, feederName):
 	model_name = request.form.get('modelName')
 	model_dir = 'data/Model/' + owner + '/' + model_name
@@ -1281,6 +1380,7 @@ def backgroundClimateChange(omdPath, owner, modelName):
 
 @app.route("/anonymize/<owner>/<feederName>", methods=["POST"])
 @flask_login.login_required
+@write_permission_function
 def anonymize(owner, feederName):
 	modelName = request.form.get('modelName')
 	modelDir = 'data/Model/' + owner + '/' + modelName
@@ -1341,6 +1441,7 @@ def backgroundAnonymize(modelDir, omdPath, owner, modelName):
 
 @app.route("/zillowHouses", methods=["POST"])
 @flask_login.login_required
+@write_permission_function
 def zillow_houses():
 	owner = request.form.get("owner")
 	model_name = request.form.get("modelName")
@@ -1391,6 +1492,7 @@ def background_zillow_houses(model_dir):
 
 @app.route("/checkZillowHouses", methods=["POST"])
 @flask_login.login_required
+@write_permission_function
 def check_zillow_houses():
 	"""This route is not used to cancel the operation. /saveFeeder does that. This route only informs the user about the status of the operation"""
 	owner = request.form.get("owner")
@@ -1415,6 +1517,7 @@ def check_zillow_houses():
 
 @app.route("/anonymizeTran/<owner>/<networkName>", methods=["POST"])
 @flask_login.login_required
+@write_permission_function
 def anonymizeTran(owner, networkName):
 	modelName = request.form.get('modelName')
 	modelDir = 'data/Model/' + owner + '/' + modelName
@@ -1460,6 +1563,8 @@ def backgroundAnonymizeTran(modelDir, omtPath):
 
 
 @app.route("/checkAnonymizeTran/<owner>/<modelName>", methods=["POST","GET"])
+@flask_login.login_required
+@write_permission_function
 def checkAnonymizeTran(owner, modelName):
 	pidPath = ('data/Model/' + owner + '/' + modelName + '/TPPID.txt')
 	# print 'Check conversion status:', os.path.exists(pidPath), 'for path', pidPath
@@ -1468,6 +1573,8 @@ def checkAnonymizeTran(owner, modelName):
 
 
 @app.route('/displayMap/<owner>/<modelName>/<feederNum>', methods=["GET"])
+@flask_login.login_required
+@read_permission_function
 def displayOmdMap(owner, modelName, feederNum):
 	'''Function to render omd on a leaflet map using a new template '''
 	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
@@ -1480,6 +1587,8 @@ def displayOmdMap(owner, modelName, feederNum):
 
 
 @app.route('/commsMap/<owner>/<modelName>/<feederNum>', methods=["GET"])
+@flask_login.login_required
+@read_permission_function
 def commsMap(owner, modelName, feederNum):
 	'''Function to render omc on a leaflet map using a new template '''
 	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
@@ -1491,9 +1600,11 @@ def commsMap(owner, modelName, feederNum):
 		geojson = json.load(commsGeoJson)
 	return render_template('commsNetViz.html', geojson=geojson)
 
+
 ###################################################
 # OTHER FUNCTIONS
 ###################################################
+
 
 @app.route("/")
 @flask_login.login_required
@@ -1503,6 +1614,18 @@ def root():
 	publicModels = [{"owner":"public","name":x} for x in safeListdir("data/Model/public/")]
 	userModels = [{"owner":User.cu(), "name":x} for x in safeListdir("data/Model/" + User.cu())]
 	allModels = publicModels + userModels
+	# Get models that have been shared with this user
+	filepath = os.path.join(_omfDir, "data/User", User.cu() + ".json")
+	with open(filepath) as f:
+		fcntl.flock(f, fcntl.LOCK_SH)
+		user_metadata = json.load(f)
+		fcntl.flock(f, fcntl.LOCK_UN)
+	sharing_users = user_metadata.get("readonly_models")
+	if sharing_users is not None:
+		shared_models = []
+		for email, model_list in sharing_users.items():
+			shared_models.extend([{"owner": email, "name": model_name} for model_name in model_list])
+		allModels.extend(shared_models)
 	# Allow admin to see all model instances.
 	isAdmin = User.cu() == "admin"
 	if isAdmin:
@@ -1548,10 +1671,9 @@ def root():
 
 @app.route("/delete/<objectType>/<owner>/<objectName>", methods=["POST"])
 @flask_login.login_required
+@write_permission_function
 def delete(objectType, objectName, owner):
 	''' Delete models or feeders. '''
-	if owner != User.cu() and User.cu() != "admin":
-		return False
 	if objectType == "Feeder":
 		os.remove("data/Model/" + owner + "/" + objectName + "/" + "feeder.omd")
 		return redirect("/#feeders")
@@ -1562,6 +1684,7 @@ def delete(objectType, objectName, owner):
 
 @app.route("/downloadModelData/<owner>/<modelName>/<path:fullPath>")
 @flask_login.login_required
+@read_permission_function
 def downloadModelData(owner, modelName, fullPath):
 	pathPieces = fullPath.split('/')
 	return send_from_directory("data/Model/"+owner+"/"+modelName+"/"+"/".join(pathPieces[0:-1]), pathPieces[-1])
@@ -1570,9 +1693,9 @@ def downloadModelData(owner, modelName, fullPath):
 @app.route("/uniqObjName/<objtype>/<owner>/<name>")
 @app.route("/uniqObjName/<objtype>/<owner>/<name>/<modelName>")
 @flask_login.login_required
+@read_permission_function # This route needs read permissions be duplicate model uses it
 def uniqObjName(objtype, owner, name, modelName=False):
-	""" Checks if a given object type/owner/name is unique. More like checks if a file exists on the server.
-	"""
+	"""Checks if a given object type/owner/name is unique. More like checks if a file exists on the server"""
 	print "Entered uniqobjname", owner, name, modelName
 	if objtype == "Model":
 		path = "data/Model/" + owner + "/" + name

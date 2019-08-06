@@ -311,28 +311,154 @@ function deleteModel() {
 }
 
 /**
- * Using an alert box to handle username entry will be a miserable experience for the user.
+ *
  */
 function publishModel() {
-	let viewers = prompt("Share this model in read-only mode with the following users:", allInputData.viewers);
-
-
-	/*
-	newName = prompt("Publish a copy with name", allInputData.modelName)
-	while (! /^[\w\s]+$/.test(newName)){
-		newName = prompt("Public a copy with new name, only letters, digits and underscore are allowed in the model name.\nPlease rename your new model", allInputData.modelName)
+	const viewers = allInputData.viewers == null ? [] : allInputData.viewers;
+	const modal = document.createElement("div");
+	modal.id = "emailModal";
+	const modalContent = document.createElement("div");
+	modalContent.id = "emailModalContent";
+	modal.append(modalContent);
+	// Add title and instructions
+	const h = document.createElement("h1");
+	h.textContent = "Share";
+	modalContent.append(h);
+	const p = document.createElement("p");
+	p.textContent = "As the model owner, you may view, duplicate, run, share, and delete this model. " + 
+		"Users that you choose to share with may only view and duplicate this model.";
+	modalContent.append(p);
+	// Add add button
+	let row = getAddButton();
+	modalContent.append(row);
+	// Create form and table
+	const form = document.createElement("form");
+	modalContent.append(form);
+	const div = document.createElement("div");
+	div.classList.add("tableContainer");
+	form.append(div);
+	const privacyIndicator = document.createElement("p");
+	if (viewers.length === 0) {
+		privacyIndicator.textContent = "The model is currently private."
+	} else {
+		privacyIndicator.textContent = "The model is currently shared."
 	}
-	if (newName) {
-		$.ajax({url:"/uniqObjName/Model/public/" + newName}).done(function(data) {
-			if (data.exists) {
-				alert("There is already a public Model named " + newName)
-				publishModel()
-			} else {
-				post_to_url("/publishModel/" + allInputData.user + "/" + allInputData.modelName+"/", {"newName":newName})
-			}
-		})
+	div.append(privacyIndicator);
+	const table = document.createElement("table");
+	div.append(table);
+	const tbody = document.createElement("tbody");
+	table.append(tbody);
+	for (const email of viewers) {
+		const row = getEmailRow()
+		row.querySelector("input[name='email']").value = email;
+		tbody.append(row);
 	}
-	*/
+	// Add buttons
+	const buttonDiv = document.createElement("div");
+	buttonDiv.classList.add("buttonDiv");
+	form.append(buttonDiv);
+	const submitButton = getSubmitButton();
+	buttonDiv.append(submitButton);
+	const cancelButton = getCancelButton();
+	buttonDiv.append(cancelButton);
+	form.addEventListener("submit", e => {
+		e.preventDefault();
+		submitButton.disabled = true;
+		const formData = new FormData(form);
+		formData.set("user", allInputData.user);
+		formData.set("modelName", allInputData.modelName);
+		$.ajax({
+			type: "POST",
+			url: "/shareModel",
+			data: formData,
+			processData: false,
+			contentType: false
+		}).done(function(data, text, jqXHR) {
+			const emails = JSON.parse(jqXHR.responseText);
+			allInputData.viewers = emails;
+			cancelButton.click();
+			publishModel();
+			alert("Successfully updated your selection of shared users.");
+		}).fail(function(jqXHR, textStatus, errorThrown) {
+			resetInvalidFlags();
+			// Mark invalid usernames
+			const invalidEmails = JSON.parse(jqXHR.responseText)
+			Array.from(tbody.getElementsByTagName("input")).forEach(input => {
+				if (invalidEmails.includes(input.value)) {
+					const td = input.parentElement.nextElementSibling;
+					td.removeAttribute("style");
+				}
+			});
+		}).always(function() {
+			submitButton.disabled = false;
+		});
+	});
+	document.body.prepend(modal);
+
+	function resetInvalidFlags() {
+		Array.from(tbody.querySelectorAll("td[data-isinvalid='true']")).forEach(td => {
+			td.style.display = "none";
+		});
+	}
+
+	function getSubmitButton() {
+		const submitButton = document.createElement("button");
+		submitButton.type = "submit";
+		submitButton.style.marginRight = "14px";
+		submitButton.textContent = "Share";
+		return submitButton;
+	}
+
+	function getCancelButton() {
+		const cancelButton = document.createElement("button");
+		cancelButton.textContent = "Cancel";
+		cancelButton.type = "button";
+		cancelButton.addEventListener("click", function() {
+			document.getElementById("emailModal").remove();
+		});
+		return cancelButton;
+	}
+
+	function getEmailRow() {
+		const row = document.createElement("tr");
+		let cell = document.createElement("td");
+		row.append(cell);
+		const deleteButton = document.createElement("button");
+		deleteButton.type = "button";
+		deleteButton.innerHTML = "&#9587;"
+		deleteButton.addEventListener("click", function() {
+			row.remove();
+			//if (tbody.children.length === 0) {
+			//	privateIndicator.removeAttribute("style");
+			//}
+		});
+		cell.append(deleteButton);
+		cell = document.createElement("td");
+		row.append(cell);
+		const input = document.createElement("input");
+		input.type = "text";
+		input.name = "email";
+		input.required = true; // don't let the user submit an empty string as an email
+		cell.append(input);
+		cell = document.createElement("td");
+		cell.textContent = "Invalid username";
+		cell.dataset.isinvalid = "true";
+		cell.style.display = "none";
+		row.append(cell);
+		return row;
+	}
+
+	function getAddButton() {
+		const addButton = document.createElement("button");
+		addButton.type = "button";
+		addButton.textContent = "Add user";
+		addButton.addEventListener("click", function() {
+			//privateIndicator.style.display = "none";
+			const emailRow = getEmailRow();
+			tbody.prepend(emailRow);
+		});
+		return addButton;
+	}
 }
 
 function duplicateModel() {
@@ -384,14 +510,26 @@ function createModelName(modelType, modelName) {
 		modelName = prompt("Only letters, digits and underscore are allowed in the model name.\nPlease rename your new model")
 	}
 	if (modelName) {
-		$.ajax({url:"/uniqObjName/Model/" + username + "/" + modelName}).done(function(data) {
+		$.ajax({
+			url:"/uniqObjName/Model/" + username + "/" + modelName
+		}).done(function(data) {
 			if (data.exists) {
 				alert("There is already a model named " + modelName)
 				createModelName(modelType, modelName)
 			} else {
-				post_to_url("/newModel" + "/"+ modelType + "/" + modelName)
+				post_to_url(
+					"/newModel",
+					{
+						user: username,
+						modelName: modelName,
+						modelType: modelType
+					}
+				);
+				//post_to_url("/newModel" + "/"+ modelType + "/" + modelName)
 			}
-		})
+		}).fail(function(jqXHR, textStatus, errorThrown) {
+			alert("AJAX request failed to get a successful response from the server.");
+		});
 	}
 }
 	

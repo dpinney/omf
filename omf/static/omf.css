@@ -362,6 +362,77 @@ MODAL DIALOGS
 	width: 300px;
 }
 
+#emailModal {
+	position: fixed;
+	top: 0px;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: rgba(0,0,0,0.4);
+	z-index: 1;
+}
+
+#emailModalContent {
+	padding: 20px;
+	border-radius: 10px;
+	background-color: #fefefe;
+	max-height: 80vh;
+	overflow: auto;
+	/*max-width: 80vw;*/
+	max-width: 650px;
+	text-align: center;
+}
+
+#emailModalContent table {
+	/* The width of the table is throwing the width of the td's out of whack */
+	width: 80%;
+	margin: 16px auto;
+}
+
+#emailModal .tableContainer {
+	height: 30vh;
+	overflow: auto;
+	margin: 20px auto;
+}
+
+#emailModalContent .buttonDiv {
+	display: flex;
+	margin-top: 70px;
+}
+
+#emailModalContent td {
+	text-align: center;
+	padding: 7px 0px;
+}
+
+#emailModalContent input {
+	text-align: left;
+	max-width: 400px;
+}
+
+#emailModalContent td[data-isinvalid="true"] {
+	color: red;
+}
+
+#emailModalContent button {
+	font-size: medium;
+	margin: 0px;
+}
+
+#emailModalContent h1 {
+	all: revert;
+}
+
+#emailModalContent p {
+	all: revert;
+	text-align: left;
+	line-height: 2rem;
+	max-width: 35.3rem;
+	margin: 20px auto;
+}
+
 /**********************************************
 VERSION FLAGS
 **********************************************/
