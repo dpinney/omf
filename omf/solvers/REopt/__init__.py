@@ -33,9 +33,30 @@ def run(inJSONPath, outputPath):
 
 		log.info("Saved results to {}".format(outputPath))
 
+def runResilience(runID, outputPath):
+	API_KEY = 'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9'  # REPLACE WITH YOUR API KEY
+
+	root_url = 'https://developer.nrel.gov/api/reopt'
+	results_url = root_url + '/v1/job/' + runID +'/resilience_stats/?api_key=' + API_KEY
+
+	resp = requests.get(results_url)
+
+	if not resp.ok:
+		log.error("Status code {}. {}".format(resp.status_code, resp.content))
+	else:
+		log.info("Response OK from {}.".format(results_url))
+        respDict = json.loads(resp.text)
+
+	with open(outputPath, 'w') as fp:
+		json.dump(obj=respDict, fp=fp, indent=4)
+
+	log.info("Saved results to {}".format(outputPath))
+
 
 def _test():
 	run('Scenario_test_POST.json', 'results.json')
 
 if __name__ == '__main__':
 	_test()
+
+
