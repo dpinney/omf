@@ -265,17 +265,22 @@ function init() {
 	} else {
 		modelUser = "none"
 	}
-	if (modelUser == "public" && currentUser != "admin") {
-		$("button#deleteButton").hide();
-		$("button#shareButton").hide();
-		$("button#duplicateButton").show();
-		$("button#runButton").hide();
-	}
-	if (modelUser != "public" && modelUser != currentUser) {
-		$("button#deleteButton").hide();
-		$("button#shareButton").hide();
-		$("button#duplicateButton").show();
-		$("button#runButton").hide();
+	$("button#deleteButton").hide();
+	$("button#shareButton").hide();
+	$("button#duplicateButton").show();
+	$("button#runButton").hide();
+	if (modelUser == "public") {
+		if (currentUser == "admin") {
+			$("button#deleteButton").show();
+			$("button#shareButton").show();
+			$("button#runButton").show();
+		}
+	} else {
+		if (modelUser == currentUser || currentUser == "admin") {
+			$("button#deleteButton").show();
+			$("button#shareButton").show();
+			$("button#runButton").show();
+		}
 	}
 }
 
