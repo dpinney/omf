@@ -446,6 +446,8 @@ def duplicateModel(owner, modelName):
 	shutil.copytree("./data/Model/" + owner + "/" + modelName, destinationPath)
 	with open(destinationPath + "/allInputData.json","r") as inFile:
 		inData = json.load(inFile)
+	if inData.get("viewers") is not None:
+		del inData["viewers"]
 	inData["created"] = str(dt.datetime.now())
 	with open(destinationPath + "/allInputData.json","w") as outFile:
 		json.dump(inData, outFile, indent=4)
