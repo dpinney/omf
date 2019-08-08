@@ -357,14 +357,14 @@ def write_permission_function(func):
 		if owner is None:
 			owner = request.form.get("user")
 		if owner is None:
-			# The "owner" could not be determined which means someone is attemping unauthorized access or the front end isn't formatting its request properly
-			return redirect("/")
+			# The owner could not be determined, so set it to be the current user. I don't think this is an authentication vulnerability.
+			owner = User.cu()
 		if owner == "public":
-			if "admin" == User.cu():
+			if User.cu() == "admin":
 				# Only the admin can run and edit public models
 				return func(*args, **kwargs)
 		else:
-			if owner == User.cu() or "admin" == User.cu():
+			if owner == User.cu() or User.cu() == "admin":
 				# Only the model owner and admin can run and edit a user-owned model
 				return func(*args, **kwargs)
 		return redirect("/")
@@ -388,18 +388,15 @@ def showModel(owner, modelName):
 	return thisModel.renderTemplate(modelDir, absolutePaths=False, datastoreNames=getDataNames())
 
 
-@app.route("/newModel", methods=["POST"])
+@app.route("/newModel/<modelType>/<modelName>", methods=["POST","GET"])
 @flask_login.login_required
 @write_permission_function
-def newModel():
+def newModel(modelType, modelName):
 	''' Create a new model with given name. '''
-	owner = request.form.get("user")
-	model_type = request.form.get("modelType")
-	model_name = request.form.get("modelName")
-	model_dir = os.path.join(_omfDir, "data/Model", owner, model_name)
-	this_model = getattr(models, model_type)
-	this_model.new(model_dir)
-	return redirect(os.path.join("/model", owner, model_name))
+	modelDir = os.path.join(_omfDir, "data", "Model", User.cu(), modelName)
+	thisModel = getattr(models, modelType)
+	thisModel.new(modelDir)
+	return redirect("/model/" + User.cu() + "/" + modelName)
 
 
 @app.route("/runModel/", methods=["POST"])
@@ -589,13 +586,13 @@ def networkGet(owner, modelName, networkNum):
 		currUser=User.cu(), owner=owner)
 
 
-@app.route("/feeder/<owner>/<model_name>/<feeder_num>/test")
-@app.route("/feeder/<owner>/<model_name>/<feeder_num>")
+@app.route("/feeder/<owner>/<modelName>/<feeder_num>/test")
+@app.route("/feeder/<owner>/<modelName>/<feeder_num>")
 @flask_login.login_required
 @read_permission_function
-def distribution_get(owner, model_name, feeder_num):
+def distribution_get(owner, modelName, feeder_num):
 	"""Render the editing interface for distribution networks."""
-	model_dir = os.path.join(_omfDir, "data/Model", owner, model_name)
+	model_dir = os.path.join(_omfDir, "data/Model", owner, modelName)
 	with open(model_dir + "/allInputData.json") as f:
 		fcntl.flock(f, fcntl.LOCK_SH)
 		feeder_dict = json.load(f)
@@ -624,7 +621,7 @@ def distribution_get(owner, model_name, feeder_num):
 	show_file_menu = User.cu() == owner or User.cu() == "admin"
 	return render_template(
 		"distNetViz.html", thisFeederData=passed_data, thisFeederName=feeder_name, thisFeederNum=feeder_num,
-		thisModelName=model_name, thisOwner=owner, components=component_json, jasmine=jasmine, spec=spec,
+		thisModelName=modelName, thisOwner=owner, components=component_json, jasmine=jasmine, spec=spec,
 		publicFeeders=public_feeders, userFeeders=user_feeders, showFileMenu=show_file_menu, currentUser=User.cu()
 	)
 
@@ -1038,7 +1035,7 @@ def newBlankFeeder(owner):
 	newSimpleFeeder(owner, modelName, feederNum, False, feederName)
 	writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
 	if request.form.get("referrer") == "distribution":
-		return redirect(url_for("distribution_get", owner=owner, model_name=modelName, feeder_num=feederNum))
+		return redirect(url_for("distribution_get", owner=owner, modelName=modelName, feeder_num=feederNum))
 	return redirect(url_for('feederGet', owner=owner, modelName=modelName, feederNum=feederNum))
 
 
@@ -1233,7 +1230,7 @@ def loadFeeder(frfeederName, frmodelName, modelName, feederNum, frUser, owner):
 			fcntl.flock(outFile, fcntl.LOCK_UN) # Release the exclusive lock
 			fcntl.flock(inFeeder, fcntl.LOCK_UN) # Release the shared lock
 	if request.form.get("referrer") == "distribution":
-		return redirect(url_for("distribution_get", owner=owner, model_name=modelName, feeder_num=feederNum))
+		return redirect(url_for("distribution_get", owner=owner, modelName=modelName, feeder_num=feederNum))
 	return redirect(url_for('feederGet', owner=owner, modelName=modelName, feederNum=feederNum))
 
 
