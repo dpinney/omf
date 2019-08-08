@@ -1,3 +1,4 @@
+import pandas as pd
 
 def manualOutageStats(numberOfCustomers, pathToCSV, sustainedOutageThreshold):
 	'function which computes outage stats given the number of total customers, an input csv file, and threshold for a sustained outage'

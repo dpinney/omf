@@ -545,35 +545,35 @@ def valueOfAdditionalRecloser(pathToGlm, workDir, lineFaultType, lineNameForRecl
 	finalOutageCost = finalCustomerCost + finalRestorationCost + finalHardwareCost
 
 	# print all intermediate and final costs
-	print('Initial Customer Cost = ' + str(initialCustomerCost))
-	print('Final Customer Cost = ' + str(finalCustomerCost))
-	print('Initial Restoration Cost = ' + str(initialRestorationCost))
-	print('Final Restoration Cost = ' + str(finalRestorationCost))
-	print('Initial Hardware Cost = ' + str(initialHardwareCost))
-	print('Final Hardware Cost = ' + str(finalHardwareCost))
-	print('Initial Outage Cost = ' + str(initialOutageCost))
-	print('Final Outage Cost = ' + str(finalOutageCost))
-
+	costStats = \
+		'Initial Customer Cost = ' + str(initialCustomerCost) + '\n' + \
+		'Final Customer Cost = ' + str(finalCustomerCost) + '\n' + \
+		'Initial Restoration Cost = ' + str(initialRestorationCost) + '\n' + \
+		'Final Restoration Cost = ' + str(finalRestorationCost) + '\n' + \
+		'Initial Hardware Cost = ' + str(initialHardwareCost) + '\n' + \
+		'Final Hardware Cost = ' + str(finalHardwareCost) + '\n' + \
+		'Initial Outage Cost = ' + str(initialOutageCost) + '\n' + \
+		'Final Outage Cost = ' + str(finalOutageCost)
 	# bar chart to show change in SAIDI/SAIFI values
 	row1 = sorted(test1)
 	col1 = [value for (key, value) in sorted(test1.items())]
-	data = [go.Bar(x = row1, y = col1, name = 'SAIDI SAIFI Recloser Analysis')]
-	py.offline.plot(data, filename= workDir + '/recloser_analysis_SAIDI_SAIFI', auto_open=False)
+	dataSaidi = [go.Bar(x = row1, y = col1, name = 'SAIDI SAIFI Recloser Analysis')]
+	py.offline.plot(dataSaidi, filename= workDir + '/recloser_analysis_SAIDI_SAIFI', auto_open=False)
 
 	# bar chart to show change in MAIFI values
 	row2 = sorted(test2)
 	col2 = [value for (key, value) in sorted(test2.items())]
-	data = [go.Bar(x = row2, y = col2, name = 'MAIFI Recloser Analysis')]
-	py.offline.plot(data, filename= workDir + '/recloser_analysis_MAIFI', auto_open=False)
+	dataMaidi = [go.Bar(x = row2, y = col2, name = 'MAIFI Recloser Analysis')]
+	py.offline.plot(dataMaidi, filename= workDir + '/recloser_analysis_MAIFI', auto_open=False)
 
 	# gantt plots
-	fig = ff.create_gantt(mc1, colors=['#333F44', '#93e4c1'], index_col='Task', show_colorbar=True,
+	gantt_without_recloser = ff.create_gantt(mc1, colors=['#333F44', '#93e4c1'], index_col='Task', show_colorbar=True,
                       bar_width=0.3, showgrid_x=True, showgrid_y=True, title='Fault Timeline')
-	py.offline.plot(fig, filename=workDir + '/gantt_timeline_without_recloser', auto_open=False)
+	py.offline.plot(gantt_without_recloser, filename=workDir + '/gantt_timeline_without_recloser', auto_open=False)
 
-	fig = ff.create_gantt(mc2, colors=['#333F44', '#93e4c1'], index_col='Task', show_colorbar=True,
+	gantt_with_recloser = ff.create_gantt(mc2, colors=['#333F44', '#93e4c1'], index_col='Task', show_colorbar=True,
                       bar_width=0.3, showgrid_x=True, showgrid_y=True, title='Fault Timeline')
-	py.offline.plot(fig, filename=workDir + '/gantt_timeline_with_recloser', auto_open=False)
+	py.offline.plot(gantt_with_recloser, filename=workDir + '/gantt_timeline_with_recloser', auto_open=False)
 	
 	# graph failure distribution	
 	distributiongraph(failureDistribution, failure_1, failure_2, workDir + '/failure_distribution')
@@ -613,6 +613,8 @@ def valueOfAdditionalRecloser(pathToGlm, workDir, lineFaultType, lineNameForRecl
 				except: outGraph.node.get(item['name'],{})['pos']=(0.0,0.0)
 	feeder.latLonNxGraph(outGraph, labels=True, neatoLayout=True, showPlot=True)
 	plt.savefig(workDir + '/feeder_chart')
+	return {'dataMaidi': dataMaidi, 'dataGanttWith':gantt_with_recloser, 'costStats':costStats}
+
 
 def distributiongraph(dist, param_1, param_2, nameOfGraph):
 	'function that graphs the dsitribution data'
@@ -677,7 +679,7 @@ def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
 	outData = {}
 	#test the main functions of the program
-	valueOfAdditionalRecloser(
+	plotOuts = valueOfAdditionalRecloser(
 		inputDict['PATH_TO_GLM'],
 		modelDir, #Work directory.
 		inputDict['lineTypeForFaults'],
@@ -696,6 +698,17 @@ def work(modelDir, inputDict):
 		inputDict['faultType'], #'TLG',
 		inputDict['sustainedOutageThreshold']) #'300')
 	#bestLocationForRecloser(omf.omfDir + '/scratch/CIGAR/test_ieee37nodeFaultTester.glm', None, 'underground_line', 'node709-708', 'EXPONENTIAL', '3.858e-7', '0.0', 'PARETO', '1.0', '1.0002778', '432000 s', '2000-01-01 0:00:00', 'TLG', '300')
+	# Image outputs.
+	with open(pJoin(modelDir,"feeder_chart.png"),"rb") as inFile:
+		outData["feeder_chart.png"] = inFile.read().encode("base64")
+	# Plotly outputs.
+	outData["maifiData"] = json.dumps(plotOuts.get('dataMaidi',{}), cls=py.utils.PlotlyJSONEncoder)
+	outData["maifiLayout"] = json.dumps(None, cls=py.utils.PlotlyJSONEncoder)
+	outData["dataGanttWith"] = json.dumps(plotOuts.get('dataGanttWith',{}), cls=py.utils.PlotlyJSONEncoder)
+	outData["ganttWithLayout"] = json.dumps(None, cls=py.utils.PlotlyJSONEncoder)
+	# Textual Outputs
+	outData["costStats"] = plotOuts.get('costStats', '')
+	# outData["costStats"] = '<table>' + ''.join(['<tr><td>' + str(x) + '</td></tr>' for x in range(10)]) + '</table>'
 	# Stdout/stderr.
 	outData["stdout"] = "Success"
 	outData["stderr"] = ""
