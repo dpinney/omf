@@ -1,13 +1,11 @@
-import subprocess, matplotlib, pickle, warnings
+import matplotlib, warnings, csv, json
 from os.path import join as pJoin
 from matplotlib import pyplot as plt
 from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
-import os 
-import csv, json
 from omf.solvers.REopt import run as runREopt
 from omf.solvers.REopt import runResilience as runResilienceREopt
-
+import numpy as np
 
 warnings.filterwarnings('ignore')
 
@@ -55,17 +53,21 @@ def work(modelDir, inputDict):
 	loadShape = [float(x[0]) for x in loadShape]
 	year = int(inputDict['year'])
 	criticalLoadFactor = float(inputDict['criticalLoadFactor'])/100
-	outageStart = int(inputDict['outageStart'])
-	outageEnd = outageStart + int(inputDict['outageDuration'])
-	if outageEnd > 8759:
-		outageEnd = 8759
-	singleOutage = True
-	if str(inputDict['outageType']) == 'annual':
-		singleOutage = False
+	#outageStart = int(inputDict['outageStart'])
+	#outageEnd = outageStart + int(inputDict['outageDuration'])
+	#if outageEnd > 8759:
+		#outageEnd = 8759
+	#singleOutage = True
+	#if str(inputDict['outageType']) == 'annual':
+		#singleOutage = False
 	solarCost = float(inputDict['solarCost'])
 	windCost = float(inputDict['windCost'])
 	batteryPowerCost = float(inputDict['batteryPowerCost'])
 	batteryEnergyCost = float(inputDict['batteryEnergyCost'])
+	solarMin = float(inputDict['solarMin'])
+	windMin = float(inputDict['windMin'])
+	batteryPowerMin = float(inputDict['batteryPowerMin'])
+	batteryEnergyMin = float(inputDict['batteryEnergyMin'])
 	
 	# Create the input JSON file for REopt
 	scenario = {
@@ -81,20 +83,23 @@ def work(modelDir, inputDict):
 				"LoadProfile": {
 					"loads_kw": loadShape,
 					"year": year,
-					"critical_load_pct": criticalLoadFactor,
-					"outage_start_hour": outageStart,
-					"outage_end_hour": outageEnd,
-					"outage_is_major_event": singleOutage
+					"critical_load_pct": criticalLoadFactor
 				},
 				"PV": {
-					"installed_cost_us_dollars_per_kw": solarCost
+					"installed_cost_us_dollars_per_kw": solarCost,
+					"min_kw": solarMin
 				},
 				"Storage": {
 					"installed_cost_us_dollars_per_kw": batteryPowerCost,
-					"installed_cost_us_dollars_per_kwh": batteryEnergyCost
+					"installed_cost_us_dollars_per_kwh": batteryEnergyCost,
+					"min_kw": batteryPowerMin,
+					"min_kwh": batteryEnergyMin
+
 				},
 				"Wind": {
-					"installed_cost_us_dollars_per_kw": windCost
+					"installed_cost_us_dollars_per_kw": windCost,
+					"min_kw": windMin
+
 				}
 			}
 		}
@@ -114,7 +119,7 @@ def work(modelDir, inputDict):
 	runREopt(pJoin(modelDir, 'Scenario_test_POST.json'), pJoin(modelDir, 'results.json'))
 	with open(pJoin(modelDir, 'results.json')) as jsonFile:
 		results = json.load(jsonFile)
-
+	
 	runID = results['outputs']['Scenario']['run_uuid']
 	runResilienceREopt(runID, pJoin(modelDir, 'resultsResilience.json'))
 	with open(pJoin(modelDir, 'resultsResilience.json')) as jsonFile:
@@ -172,20 +177,34 @@ def work(modelDir, inputDict):
 	outData['runID'] = runID
 	outData['apiKey'] = 'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9'
 
+	if outData['powerWindToLoad'] is None:
+		wind = 'off'
+
+	outData['solar'] = solar
+	outData['wind'] = wind
+	outData['battery'] = battery
+
 	plt.clf()
 	plotLabels = []
-	plt.plot(outData['load'])
-	plotLabels.append('Total Load')
-	plt.plot(outData['powerGridToLoad'])
+	#plt.plot(outData['load'])
+	#plotLabels.append('Total Load')
+
+	x = range(len(outData['powerGridToLoad']))
+
+	plt.bar(x, outData['powerGridToLoad'], width=1)
+	bottom = np.array(outData['powerGridToLoad'])
 	plotLabels.append('Load met by Grid')
 	if solar == 'on':
-		plt.plot(outData['powerPVToLoad'])
+		plt.bar(x, outData['powerPVToLoad'],bottom=bottom, width=1)
+		bottom += np.array(outData['powerPVToLoad'])
 		plotLabels.append('Load met by Solar')
 	if battery == 'on':
-		plt.plot(outData['powerBatteryToLoad'])
+		plt.bar(x, outData['powerBatteryToLoad'],bottom=bottom, width=1)
+		bottom += np.array(outData['powerBatteryToLoad'])
 		plotLabels.append('Load met by Battery')
 	if wind == 'on':
-		plt.plot(outData['powerWindToLoad'])
+		plt.bar(x, outData['powerWindToLoad'],bottom=bottom, width=1)
+		bottom += np.array(outData['powerWindToLoad'])
 		plotLabels.append('Load met by Wind')
 	plt.ylabel('Power (kW)')
 	plt.xlabel('Hour')
@@ -195,13 +214,17 @@ def work(modelDir, inputDict):
 
 	plt.clf()
 	plotLabels = []
+	bottom = 0*np.array(x,dtype='float64')
 	if solar == 'on':
-		plt.plot(outData['powerPV'])
+		plt.bar(x, outData['powerPV'],width=1)
+		bottom += np.array(outData['powerPV'])
 		plotLabels.append('Solar Generation')
-		plt.plot(outData['powerPVToLoad'])
+		plt.bar(x, outData['powerPVToLoad'],bottom=bottom, width=1)
+		bottom += np.array(outData['powerPVToLoad'])
 		plotLabels.append('Solar used to meet Load')
 		if battery == 'on':
-			plt.plot(outData['powerPVToBattery'])
+			plt.bar(x, outData['powerPVToBattery'],bottom=bottom, width=1)
+			bottom += np.array(outData['powerPVToBattery'])
 			plotLabels.append('Solar used to charge Battery')
 		plt.ylabel('Power (kW)')
 		plt.xlabel('Hour')
@@ -211,13 +234,17 @@ def work(modelDir, inputDict):
 
 	plt.clf()
 	plotLabels = []
+	bottom = 0*np.array(x,dtype='float64')
 	if wind == 'on':
-		plt.plot(outData['powerWind'])
+		plt.bar(x, outData['powerWind'],width=1)
+		bottom += np.array(outData['powerWind'])
 		plotLabels.append('Wind Generation')
-		plt.plot(outData['powerWindToLoad'])
+		plt.bar(x, outData['powerWindToLoad'],bottom=bottom, width=1)
+		bottom += np.array(outData['powerWindToLoad'])
 		plotLabels.append('Wind used to meet Load')
 		if battery == 'on':
-			plt.plot(outData['powerWindToBattery'])
+			plt.bar(x, outData['powerWindToBattery'],bottom=bottom, width=1)
+			bottom += np.array(outData['powerWindToBattery'])
 			plotLabels.append('Wind used to charge Battery')
 		plt.ylabel('Power (kW)')
 		plt.xlabel('Hour')
@@ -227,14 +254,18 @@ def work(modelDir, inputDict):
 	
 	plt.clf()
 	plotLabels = []
+	bottom = 0*np.array(x,dtype='float64')
 	if battery == 'on':
-		plt.plot(outData['powerGridToBattery'])
+		plt.bar(x, outData['powerGridToBattery'], width=1)
+		bottom += np.array(outData['powerGridToBattery'])
 		plotLabels.append('Grid')
 		if solar == 'on':
-			plt.plot(outData['powerPVToBattery'])
+			plt.bar(x, outData['powerPVToBattery'],bottom=bottom, width=1)
+			bottom += np.array(outData['powerPVToBattery'])
 			plotLabels.append('Solar')
 		if wind == 'on':
-			plt.plot(outData['powerWindToBattery'])
+			plt.bar(x, outData['powerWindToBattery'],bottom=bottom, width=1)
+			bottom += np.array(outData['powerWindToBattery'])
 			plotLabels.append('Wind')
 		plt.ylabel('Power (kW)')
 		plt.xlabel('Hour')
@@ -244,19 +275,19 @@ def work(modelDir, inputDict):
 
 	plt.clf()
 	if battery == 'on':
-		plt.plot(outData['chargeLevelBattery'])
+		plt.bar(x, outData['chargeLevelBattery'], width=1)
 		plt.ylabel('Charge (%)')
 		plt.xlabel('Hour')
 	plt.savefig(modelDir + '/batteryChargePlot.png', dpi=600)
 
 	plt.clf()
-	plt.plot(outData['resilience'])
+	plt.bar(x, outData['resilience'], width=1)
 	plt.ylabel('Longest Outage survived')
 	plt.xlabel('Start Hour')
 	plt.savefig(modelDir + '/resiliencePlot.png', dpi=600)
 
 	plt.clf()
-	plt.plot(outData['survivalProbX'],outData['survivalProbY'])
+	plt.bar(outData['survivalProbX'],outData['survivalProbY'], width=1)
 	plt.ylabel('Probability of meeting critical Load')
 	plt.xlabel('Outage Length')
 	plt.savefig(modelDir + '/resilienceProbPlot.png', dpi=600)
@@ -292,8 +323,8 @@ def new(modelDir):
 		"wind" : "on",
 		"battery" : "on",
 		"fileName" : fName,
-		"latitude" : '34.5851',
-		"longitude" : '-118.3822',
+		"latitude" : '39.7817',
+		"longitude" : '-89.6501',
 		"year" : '2001',
 		"energyCost" : "0.08",
 		"demandCost" : '20',
@@ -301,6 +332,10 @@ def new(modelDir):
 		"windCost" : "4989",
 		"batteryEnergyCost" : "500",
 		"batteryPowerCost" : "1000",
+		"solarMin": 0,
+		"windMin": 0,
+		"batteryPowerMin": 0,
+		"batteryEnergyMin": 0,
 		"outageDate" : "2001-01-01",
 		"outageHour" : "0",
 		"outageDuration" : "1",

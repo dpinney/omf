@@ -11,6 +11,7 @@
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
+	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 	<!-- Data  Imports -->
 	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
 	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
@@ -62,8 +63,12 @@
 				<input type="text" id="PATH_TO_GLM" name="PATH_TO_GLM">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Line Type for Faults<span class="classic">Indicate whether underground or overhead lines are valid fault locations.</span></label>
-				<input type="text" id="lineTypeForFaults" name="lineTypeForFaults">
+				<label class="tooltip">Line for Faults<span class="classic">The type of line on which the random faults can occur.</span></label>
+				<select id="lineTypeForFaults" name="lineTypeForFaults" />
+					<option value="underground_line">Underground Lines</option>
+					<option value="overhead_line">Overhead Lines</option>
+					<option value="triplex_line">Triplex Lines</option>
+				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Recloser Location<span class="classic">Location where recloser is added.</span></label>
@@ -71,25 +76,78 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Failure Distribution<span class="classic">Distribution for the failure generation function.</span></label>
-				<input type="text" id="failureDistribution" name="failureDistribution">
+				<select id="failureDistribution" name="failureDistribution" />
+					<option value="UNIFORM">Uniform</option>
+					<option value="NORMAL">Normal</option>
+					<option value="BERNOULLI">Bernoulli</option>
+					<option value="LOGNORMAL">Lognormal</option>
+					<option value="PARETO">Pareto</option>
+					<option value="EXPONENTIAL">Exponential</option>
+					<option value="WEIBULL">Weibull</option>
+					<option value="GAMMA">Gamma</option>
+					<option value="BETA">Beta</option>
+					<option value="TRIANGLE">Triangle</option>
+				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Failure Dist. Param. 1<span class="classic">First parameter for failure distribution.</span></label>
-				<input type="text" id="lineTypeForFaults" name="lineTypeForFaults" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="failureDistParam1" name="failureDistParam1" pattern="^\d+\.?\d*$" required="required">
 			</div>
-<!-- 	TODO: Provide input fields for the following.
-		'failureDistParam2':'0.0',
-		'restorationDistribution': 'PARETO',
-		'restorationDistParam1': '1.0',
-		'restorationDistParam2': '1.0002778',
-		'maxFaultLength': '432000 s',
-		'kwh_cost': '1',
-		'restoration_cost': '1',
-		'average_hardware_cost': '1',
-		'simTime': '2000-01-01 0:00:00',
-		'faultType': 'TLG',
-		'sustainedOutageThreshold': '300'
- -->
+			<div class="shortInput">
+				<label class="tooltip">Failure Dist. Param. 2<span class="classic">Second parameter for failure distribution.</span></label>
+				<input type="text" id="failureDistParam2" name="failureDistParam2" pattern="^\d+\.?\d*$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Restoration Distribution<span class="classic">Distribution for the restoration generation function.</span></label>
+				<select id="restorationDistribution" name="restorationDistribution" />
+					<option value="UNIFORM">Uniform</option>
+					<option value="NORMAL">Normal</option>
+					<option value="BERNOULLI">Bernoulli</option>
+					<option value="LOGNORMAL">Lognormal</option>
+					<option value="PARETO">Pareto</option>
+					<option value="EXPONENTIAL">Exponential</option>
+					<option value="WEIBULL">Weibull</option>
+					<option value="GAMMA">Gamma</option>
+					<option value="BETA">Beta</option>
+					<option value="TRIANGLE">Triangle</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Restoration Dist. Param. 1<span class="classic">First parameter for restoration distribution.</span></label>
+				<input type="text" id="restorationDistParam1" name="restorationDistParam1" pattern="^\d+\.?\d*$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Restoration Dist. Param. 2<span class="classic">Second parameter for restoration distribution.</span></label>
+				<input type="text" id="restorationDistParam2" name="restorationDistParam2" pattern="^\d+\.?\d*$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Maximum Fault Length<span class="classic">A global maximum (in seconds) on the amount of time for which any fault can occur.</span></label>
+				<input type="text" id="maxFaultLength" name="maxFaultLength">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">KWH Cost<span class="classic">KWH cost parameter for calculating outage costs.</span></label>
+				<input type="text" id="kwh_cost" name="kwh_cost" pattern="^\d+\.?\d*$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Restoration Cost<span class="classic">Restoration cost parameter for calculating outage costs.</span></label>
+				<input type="text" id="restoration_cost" name="restoration_cost" pattern="^\d+\.?\d*$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Average Hardware Cost<span class="classic">Average hardware cost parameter for calculating outage costs.</span></label>
+				<input type="text" id="average_hardware_cost" name="average_hardware_cost" pattern="^\d+\.?\d*$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Simulation Start Time<span class="classic">The date and time that the simulation begins.</span></label>
+				<input type="text" id="simTime" name="simTime">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Fault type<span class="classic">The type of fault that occurs on the lines.</span></label>
+				<input type="text" id="faultType" name="faultType">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Sustained Outage Threshold<span class="classic">The threshold for how many seconds an outage lasts before it is considered a sustained outage.</span></label>
+				<input type="text" id="sustainedOutageThreshold" name="sustainedOutageThreshold" pattern="^\d+\.?\d*$" required="required">
+			</div>
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
@@ -123,19 +181,36 @@
 		</script>
 	</div>
 	<div id="output">
-		<script type="text/javascript">
+		<p class="reportTitle postRun">Feeder Diagram and Recloser Location</p>
+		<div id="feederChart" class="content postRun" style="margin-top:0px">
+			<img id="feederChartImage" style="width:1000px" />
+			<script>gebi("feederChartImage").src = "data:image/png;base64," + allOutputData["feeder_chart.png"]</script>
+		</div>
+		<p class="reportTitle postRun">Cost Statistics</p>
+		<div id="costStatsReport" class="content postRun" style="margin-top:0px">
+			<pre>{{allOutputDataDict['costStats']}}</pre>
+		</div>
+		<!-- TODO: Remove? -->
+		<!-- <script type="text/javascript">
 			// Global Highcharts settings.
 			Highcharts.setOptions({global:{useUTC:true}})
 			// Clean up the non-ISO date strings we get.
 			function dateOb(inStr) {return Date.parse(inStr.replace(/-/g,"/"))}
 			pointStart = dateOb(allOutputData.timeStamps[0])
 			pointInterval = dateOb(allOutputData.timeStamps[1]) - pointStart
-		</script>
-		<p class="reportTitle postRun">Output 1</p>
-		<div id="powerGenerationReport" class="tightContent postRun">
-			<div id="powerTimeSeries"></div>
-			<script>
-				// Pass.
+		</script> -->
+		<p class="reportTitle postRun">Change in MAIDI</p>
+		<div id="maidiReport" class="tightContent postRun">
+			<div id="maidiChart"></div>
+			<script type="text/javascript">
+				Plotly.newPlot("maidiChart", JSON.parse(allOutputData["maifiData"]), JSON.parse(allOutputData["maifiLayout"]) || {})
+			</script>
+		</div>
+		<p class="reportTitle postRun">Outage Timeline With Recloser</p>
+		<div id="outageRecloser" class="tightContent postRun">
+			<div id="outageReploserChart" style="width:100%"></div>
+			<script type="text/javascript">
+				Plotly.newPlot("outageReploserChart", JSON.parse(allOutputData["dataGanttWith"]), JSON.parse(allOutputData["ganttWithLayout"]) || {})
 			</script>
 		</div>
 		<p class="reportTitle postRun">Raw Input and Output Files</p>

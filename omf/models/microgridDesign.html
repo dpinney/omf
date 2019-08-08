@@ -27,7 +27,33 @@
 				list[i].innerHTML = allOutputData[list[i].id]
 			}
 		}
+
+		$(window).on('pageshow',function(){
+		    if (allOutputData['solar'] == 'off'){
+				$('.solarDisplay').hide();
+			}
+			if (allOutputData['wind'] == 'off'){
+				$('.windDisplay').hide();
+			}
+			if (allOutputData['battery'] == 'off'){
+				$('.batteryDisplay').hide();
+			}
+		});
+
+
 	</script>
+
+	<style type="text/css">
+		table { width: 100%; border-spacing: 2px; table-layout: fixed;  }
+		td,th { 
+			border: 1px;
+			border-style: solid;
+			border-color: black;
+			text-align: center;
+			vertical-align: center;
+			overflow-wrap: break-word
+		 }
+	</style>
 	
 </head>
 
@@ -130,9 +156,17 @@
 				<label class="tooltip">Solar Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
 				<input type="text" id="solarCost" name="solarCost" pattern="^\d+\.?\d*?$" required="required" value="2000" />
 			</div>
+			<div class="shortInput solarDisplay">
+				<label class="tooltip">Minimum Solar Generation (kW)<span class="classic">Specify the minimum desired generation in kW.</span></label>
+				<input type="text" id="solarMin" name="solarMin" required="required"/>
+			</div>
 			<div class="shortInput windDisplay">
 				<label class="tooltip">Wind Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
 				<input type="text" id="windCost" name="windCost" pattern="^\d+\.?\d*?$" required="required" value="4989" />
+			</div>
+			<div class="shortInput windDisplay">
+				<label class="tooltip">Minimum Wind Generation (kW)<span class="classic">Specify the minimum desired generation in kW.</span></label>
+				<input type="text" id="windMin" name="windMin" required="required"/>
 			</div>
 			<div class="shortInput batteryDisplay">
 				<label class="tooltip">Energy capacity cost ($/kWh)<span class="classic">Specify the cost in $/kWh.</span></label>
@@ -142,29 +176,22 @@
 				<label class="tooltip">Power capacity cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
 				<input type="text" id="batteryPowerCost" name="batteryPowerCost" pattern="^\d+\.?\d*?$" required="required" value="1000" />
 			</div>
+			<div class="shortInput BatteryDisplay">
+				<label class="tooltip">Minimum Power Cpacity (kW)<span class="classic">Specify the minimum desired battery capacity in kW.</span></label>
+				<input type="text" id="batteryPowerMin" name="batteryPowerMin" required="required"/>
+			</div>
+			<div class="shortInput BatteryDisplay">
+				<label class="tooltip">Minimum Energy Cpacity (kWh)<span class="classic">Specify the minimum desired battery capacity in kWh.</span></label>
+				<input type="text" id="batteryEnergyMin" name="batteryEnergyMin" required="required"/>
+			</div>
 
 			<div class="wideInput">
 				<p class="inputSectionHeader">Resilence</p>
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Outage Start Hour<span class="classic">Specify the hour at which the outage starts (0-8759).</span></label>
-				<input type="number" id="outageStart" name="outageStart" min="0" max="8759" required="required" value="0" />
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Outage Duration<span class="classic">Specify the number of hours for which the outage should last (0-8759).</span></label>
-				<input type="number" id="outageDuration" name="outageDuration" min="0" max="8759" required="required" value="1" />
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">Critical Load Factor<span class="classic">The percent of typical load that must be met during a grid outage.</span></label>
 				<input type="number" id="criticalLoadFactor" name="criticalLoadFactor" min="0" max="100" required="required" value="100" />
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Outage type<span class="classic">Select the type of outage desired</span></label>
-				<select id="outageType" name="outageType">
-					<option selected="selected" value="once">Occurs once in the project lifetime</option>
-					<option value="annual">Occurs Annualy</option>
-				</select>
 			</div>
 
 			<div class="wideInput" style="text-align:right">
@@ -228,7 +255,7 @@
 			</table>
 		</div>
 		<p class="reportTitle postRun" style="page-break-before:always">Microgrid Financial Overview 
-			<a id='performa'>(Click here to download detailed Performa analysis)</a>
+			<a id='performa'>(Click here to download detailed ProForma analysis)</a>
 		</p>
 		<div id="" class="tightContent postRun">
 			<table>
@@ -287,7 +314,11 @@
 		<p class="windDisplay reportTitle postRun" style="page-break-before:always">Wind Generation</p>
 		<div id="windPlotDiagram" class="windDisplay tightContent postRun">
 			<img id="windPlot" style="width:1000px;" />
-			<script type="text/javascript">gebi("windPlot").src = "data:image/png;base64," + allOutputData.windPlot</script>
+			<script type="text/javascript">gebi("windPlot").src = "data:image/png;base64," + allOutputData.windPlot;
+				if (allOutputData['wind'] == 'off'){
+					$('.windDisplay').attr('style','');
+				}
+			</script>
 		</div>
 
 		<p class="batteryDisplay reportTitle postRun" style="page-break-before:always">Battery Charge Source</p>
@@ -312,7 +343,8 @@
 		<div id="resilienceProbPlotDiagram" class="tightContent postRun">
 			<img id="resilienceProbPlot" style="width:1000px;" />
 			<script type="text/javascript">gebi("resilienceProbPlot").src = "data:image/png;base64," + allOutputData.resilienceProbPlot</script>
-		</div>		
+		</div>	
+
 	</div>
 
 </body>
