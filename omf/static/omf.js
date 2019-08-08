@@ -267,7 +267,13 @@ function init() {
 	}
 	if (modelUser == "public" && currentUser != "admin") {
 		$("button#deleteButton").hide();
-		$("button#publishButton").hide();
+		$("button#shareButton").hide();
+		$("button#duplicateButton").show();
+		$("button#runButton").hide();
+	}
+	if (modelUser != "public" && modelUser != currentUser) {
+		$("button#deleteButton").hide();
+		$("button#shareButton").hide();
 		$("button#duplicateButton").show();
 		$("button#runButton").hide();
 	}
@@ -313,7 +319,7 @@ function deleteModel() {
 /**
  *
  */
-function publishModel() {
+function shareModel() {
 	const viewers = allInputData.viewers == null ? [] : allInputData.viewers;
 	const modal = document.createElement("div");
 	modal.id = "emailModal";
@@ -328,22 +334,20 @@ function publishModel() {
 	p.textContent = "As the model owner, you may view, duplicate, run, share, and delete this model. " + 
 		"Users that you choose to share with may only view and duplicate this model.";
 	modalContent.append(p);
-	// Add add button
-	let row = getAddButton();
-	modalContent.append(row);
-	// Create form and table
-	const form = document.createElement("form");
-	modalContent.append(form);
-	const div = document.createElement("div");
-	div.classList.add("tableContainer");
-	form.append(div);
 	const privacyIndicator = document.createElement("p");
 	if (viewers.length === 0) {
 		privacyIndicator.textContent = "The model is currently private."
 	} else {
 		privacyIndicator.textContent = "The model is currently shared."
 	}
-	div.append(privacyIndicator);
+	modalContent.append(privacyIndicator);
+	// Create form and table
+	const form = document.createElement("form");
+	modalContent.append(form);
+	const div = document.createElement("div");
+	div.classList.add("tableContainer");
+	form.append(div);
+	
 	const table = document.createElement("table");
 	div.append(table);
 	const tbody = document.createElement("tbody");
@@ -353,6 +357,9 @@ function publishModel() {
 		row.querySelector("input[name='email']").value = email;
 		tbody.append(row);
 	}
+	// Add add button
+	const addButton = getAddButton();
+	form.append(addButton);
 	// Add buttons
 	const buttonDiv = document.createElement("div");
 	buttonDiv.classList.add("buttonDiv");
@@ -377,7 +384,7 @@ function publishModel() {
 			const emails = JSON.parse(jqXHR.responseText);
 			allInputData.viewers = emails;
 			cancelButton.click();
-			publishModel();
+			shareModel();
 			alert("Successfully updated your selection of shared users.");
 		}).fail(function(jqXHR, textStatus, errorThrown) {
 			resetInvalidFlags();
@@ -412,6 +419,7 @@ function publishModel() {
 	function getCancelButton() {
 		const cancelButton = document.createElement("button");
 		cancelButton.textContent = "Cancel";
+		cancelButton.classList.add("deleteButton");
 		cancelButton.type = "button";
 		cancelButton.addEventListener("click", function() {
 			document.getElementById("emailModal").remove();
@@ -425,12 +433,10 @@ function publishModel() {
 		row.append(cell);
 		const deleteButton = document.createElement("button");
 		deleteButton.type = "button";
+		deleteButton.classList.add("deleteButton");
 		deleteButton.innerHTML = "&#9587;"
 		deleteButton.addEventListener("click", function() {
 			row.remove();
-			//if (tbody.children.length === 0) {
-			//	privateIndicator.removeAttribute("style");
-			//}
 		});
 		cell.append(deleteButton);
 		cell = document.createElement("td");
@@ -445,6 +451,7 @@ function publishModel() {
 		cell.dataset.isinvalid = "true";
 		cell.style.display = "none";
 		row.append(cell);
+		input.addEventListener("change", () => { cell.style.display = "none"; })
 		return row;
 	}
 
@@ -453,7 +460,6 @@ function publishModel() {
 		addButton.type = "button";
 		addButton.textContent = "Add user";
 		addButton.addEventListener("click", function() {
-			//privateIndicator.style.display = "none";
 			const emailRow = getEmailRow();
 			tbody.prepend(emailRow);
 		});
@@ -517,15 +523,7 @@ function createModelName(modelType, modelName) {
 				alert("There is already a model named " + modelName)
 				createModelName(modelType, modelName)
 			} else {
-				post_to_url(
-					"/newModel",
-					{
-						user: username,
-						modelName: modelName,
-						modelType: modelType
-					}
-				);
-				//post_to_url("/newModel" + "/"+ modelType + "/" + modelName)
+				post_to_url("/newModel" + "/"+ modelType + "/" + modelName)
 			}
 		}).fail(function(jqXHR, textStatus, errorThrown) {
 			alert("AJAX request failed to get a successful response from the server.");

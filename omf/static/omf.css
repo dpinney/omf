@@ -380,7 +380,6 @@ MODAL DIALOGS
 	background-color: #fefefe;
 	max-height: 80vh;
 	overflow: auto;
-	/*max-width: 80vw;*/
 	max-width: 650px;
 	text-align: center;
 }
@@ -391,17 +390,6 @@ MODAL DIALOGS
 	margin: 16px auto;
 }
 
-#emailModal .tableContainer {
-	height: 30vh;
-	overflow: auto;
-	margin: 20px auto;
-}
-
-#emailModalContent .buttonDiv {
-	display: flex;
-	margin-top: 70px;
-}
-
 #emailModalContent td {
 	text-align: center;
 	padding: 7px 0px;
@@ -410,10 +398,6 @@ MODAL DIALOGS
 #emailModalContent input {
 	text-align: left;
 	max-width: 400px;
-}
-
-#emailModalContent td[data-isinvalid="true"] {
-	color: red;
 }
 
 #emailModalContent button {
@@ -432,6 +416,28 @@ MODAL DIALOGS
 	max-width: 35.3rem;
 	margin: 20px auto;
 }
+
+#emailModalContent td[data-isinvalid="true"] {
+	color: red;
+}
+
+#emailModal .tableContainer {
+	height: 30vh;
+	overflow: auto;
+	margin: 20px auto;
+}
+
+#emailModalContent .buttonDiv {
+	display: flex;
+	margin-top: 70px;
+}
+
+#emailModalContent .deleteButton {
+	background-color: red;
+}
+
+
+
 
 /**********************************************
 VERSION FLAGS
