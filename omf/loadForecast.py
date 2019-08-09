@@ -604,7 +604,7 @@ def neural_net_predictions(all_X, all_y, epochs=100, model=None, save_file=None)
 
 	return [float(f) for f in model.predict(all_X[-8760:])], accuracy
 
-def neural_net_next_day(all_X, all_y, epochs=100, hours_prior=24):
+def neural_net_next_day(all_X, all_y, epochs=100, hours_prior=24, save_file=None):
 	all_X_n, all_y_n = all_X[:-hours_prior], all_y[:-hours_prior]
 	X_train = all_X_n[:-8760]
 	y_train = all_y_n[:-8760]
@@ -623,6 +623,10 @@ def neural_net_next_day(all_X, all_y, epochs=100, hours_prior=24):
 	model.fit(X_test, y_test, epochs=epochs, validation_split=0.2, verbose=0)
 
 	predictions = [float(f) for f in model.predict(all_X[-24:])]
+
+	if save_file != None:
+		model.save(save_file)
+	
 	return predictions, model, accuracy
 
 def add_day(df, weather):
