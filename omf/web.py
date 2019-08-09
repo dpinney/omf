@@ -1366,6 +1366,22 @@ def commsMap(owner, modelName, feederNum):
 		geojson = json.load(commsGeoJson)
 	return render_template('commsNetViz.html', geojson=geojson)
 
+@app.route('/redisplayGrid', methods=["POST"])
+def redisplayGrid():
+	'''Redisplay comms grid on edits'''
+	geoDict = request.get_json()
+	nxG = omf.comms.omcToNxg(geoDict)
+	omf.comms.clearFiber(nxG)
+	omf.comms.clearRFEdges(nxG)
+	omf.comms.setFiber(nxG)
+	omf.comms.setRF(nxG)
+	omf.comms.setFiberCapacity(nxG)
+	omf.comms.setRFEdgeCapacity(nxG)
+	omf.comms.calcBandwidth(nxG)
+	#need to runs comms updates here
+	geoJson = omf.comms.graphGeoJson(nxG)
+	return jsonify(newgeojson=geoJson)
+
 ###################################################
 # OTHER FUNCTIONS
 ###################################################

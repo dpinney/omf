@@ -21,21 +21,36 @@ def work(modelDir, inputDict):
 	shutil.copyfile(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', feederName+'.omd'), pJoin(modelDir, feederName+'.omd'))
 	feederPath = pJoin(modelDir,feederName+'.omd')
 	feeder = comms.createGraph(feederPath)
-	comms.setFiber(feeder, edgeType='switch', rfBandwidthCap=int(inputDict['rfCapacity']), fiberBandwidthCap=int(inputDict['fiberCapacity']))
-	comms.setRf(feeder, packetSize=int(inputDict['meterPacket']))
+
+	#set the omc objects
+	comms.setSmartMeters(feeder)
+	comms.setRFCollectors(feeder)
+	comms.setFiber(feeder)
+	comms.setRF(feeder)
+
+	#Calculate the bandwidth capacities
+	comms.setSmartMeterBandwidth(feeder, packetSize=int(inputDict['meterPacket']))
+	comms.setRFCollectorCapacity(feeder, rfBandwidthCap=int(inputDict['rfCapacity']))
+	comms.setFiberCapacity(feeder, fiberBandwidthCap=int(inputDict['fiberCapacity']), setSubstationBandwidth=True)
+	comms.setRFEdgeCapacity(feeder)
+
+	#calculate the bandwidth use
 	comms.calcBandwidth(feeder)
+
 	comms.saveOmc(comms.graphGeoJson(feeder), modelDir, feederName)
 
-	#bandwidth capacity
+	#bandwidth capacity vs bandwidth use
 	overloadedFiber = []
 	for edge in nx.get_edge_attributes(feeder, 'fiber'):
-		if feeder[edge[0]][edge[1]]['bandwidthUse'] > feeder[edge[0]][edge[1]]['bandwidthCapacity']:
-			overloadedFiber.append(edge)
+		if feeder[edge[0]][edge[1]].get('fiber',False):
+			if feeder[edge[0]][edge[1]]['bandwidthUse'] > feeder[edge[0]][edge[1]]['bandwidthCapacity']:
+				overloadedFiber.append(edge)
 
 	overloadedCollectors = []
 	for rfCollector in nx.get_node_attributes(feeder, 'rfCollector'):
-		if feeder.node[rfCollector]['bandwidthUse'] > feeder.node[rfCollector]['bandwidthCapacity']:
-			overloadedCollectors.append(rfCollector)
+		if feeder.node[rfCollector].get('rfCollector',False):
+			if feeder.node[rfCollector]['bandwidthUse'] > feeder.node[rfCollector]['bandwidthCapacity']:
+				overloadedCollectors.append(rfCollector)
 
 	outData['overloadedFiber'] = overloadedFiber
 	outData['overloadedCollectors'] = overloadedCollectors

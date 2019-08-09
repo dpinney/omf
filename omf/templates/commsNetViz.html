@@ -7,6 +7,7 @@
 		crossorigin="" />
 	<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js" integrity="sha512-A7vV8IFfih/D732iSSKi20u/ooOfj/AGehOKq0f4vLT1Zr2Y+RX7C+w8A1gaSasGtRUZpF/NZgzSAu4/Gc41Lg=="
 		crossorigin=""></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 </head>
 	<style>html, body {
 		width: 100%;
@@ -116,7 +117,7 @@
 			}
 		}
 	}
-	geojsonLayer = L.geoJSON(false, {
+	var geojsonLayer = L.geoJSON(false, {
 				pointToLayer: pointToLayerNode,
 				onEachFeature: onEachFeature,
 				style: lineStyle,
@@ -341,6 +342,13 @@
 	geoBandwidthCapacity.placeholder = 'Bandwidth Capacity';
 	document.getElementById('geoForm').appendChild(geoBandwidthCapacity);
 
+	var geoBandwidthUse = L.DomUtil.create('input');
+	geoBandwidthUse.id = 'geoBandwidthUse';
+	geoBandwidthUse.type = 'text';
+	geoBandwidthUse.name = 'geoBandwidthUse';
+	geoBandwidthUse.placeholder = 'Bandwidth Use';
+	document.getElementById('geoForm').appendChild(geoBandwidthUse);
+
 	var geoPointType = L.DomUtil.create('input');
 	geoPointType.id = 'geoPointType';
 	geoPointType.type = 'text';
@@ -373,12 +381,13 @@
 			        "substation": document.getElementById('geoSubstation').checked,
 			        "rfCollector": document.getElementById('geoRfCollector').checked,
 			        "smartMeter": document.getElementById('geoSmartMeter').checked,
-			        "bandwidthCapacity": document.getElementById('geoBandwidthCapacity').value,
+			        "bandwidthCapacity": parseFloat(document.getElementById('geoBandwidthCapacity').value),
+			        "bandwidthUse": parseFloat(document.getElementById('geoBandwidthUse').value),
 			        "pointType": document.getElementById('geoPointType').value,
 			    },
 			    "geometry": {
 			        "type": "Point",
-			        "coordinates": [document.getElementById('geoLng').value, document.getElementById('geoLat').value] 
+			        "coordinates": [parseFloat(document.getElementById('geoLng').value), parseFloat(document.getElementById('geoLat').value)] 
 			    }
 			};
 			geojson.features.push(feature);
@@ -389,9 +398,10 @@
 			geojson.features[currentElement].properties.substation = document.getElementById('geoSubstation').checked;
 			geojson.features[currentElement].properties.rfCollector = document.getElementById('geoRfCollector').checked;
 			geojson.features[currentElement].properties.smartMeter = document.getElementById('geoSmartMeter').checked;
-			geojson.features[currentElement].properties.bandwidthCapacity = document.getElementById('geoBandwidthCapacity').value;
+			geojson.features[currentElement].properties.bandwidthCapacity = parseFloat(document.getElementById('geoBandwidthCapacity').value);
+			geojson.features[currentElement].properties.bandwidthUse = parseFloat(document.getElementById('geoBandwidthUse').value);
 			geojson.features[currentElement].properties.pointType = document.getElementById('geoPointType').value;
-			geojson.features[currentElement].geometry.coordinates = [document.getElementById('geoLng').value, document.getElementById('geoLat').value];
+			geojson.features[currentElement].geometry.coordinates = [parseFloat(document.getElementById('geoLng').value), parseFloat(document.getElementById('geoLat').value)];
 
 			//remove and old layer
 			geojsonLayer.eachLayer(function(feature){
@@ -454,8 +464,45 @@
 			if (feature.feature.properties.name == document.getElementById('featureName').value){
 				feature.openPopup();
 			}
-		})
+		});
 	}
+	
+	//redisplay grid with edits
+	function redisplayGrid(){
+		$.ajax({
+		    type: 'POST',
+		    url: '/redisplayGrid',
+		    dataType: 'json',
+		    contentType: 'application/json; charset=utf-8',
+		    data: JSON.stringify(geojson),
+		    success: function(callback) {
+		    	console.log('success');
+		    	geojson = callback.newgeojson;
+		    	geojsonLayer.eachLayer(function(layer){
+		    		layer.remove();
+		    	});
+		    	geojsonLayer.clearLayers();
+				geojson.features.forEach(function(feature){
+					if (feature.geometry['type'] == 'Point'){
+						geojsonLayer.addData(feature);
+					}
+					else if (feature.geometry['type'] == 'LineString'){
+						geojsonLayer.addData(feature);
+					}
+				});
+		    },
+		    error: function() {
+		        $(this).html("error!");
+		    }
+		});
+	}
+	var gridRedisplay = L.DomUtil.create('button');
+	L.DomEvent.disableClickPropagation(gridRedisplay);
+	gridRedisplay.id = 'gridRedisplay';
+	gridRedisplay.classList.add('mapControl');
+	gridRedisplay.innerHTML = 'Redisplay grid';
+	document.getElementById('toolDiv').appendChild(gridRedisplay);
+	gridRedisplay.addEventListener('click', function(){redisplayGrid()});
 
 
 </script>
