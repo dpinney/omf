@@ -496,164 +496,13 @@ class svmNextDayPeakTime:
 # --------------------------- Kevin's neural net code ----------------------- #
 # NERC6 holidays with inconsistent dates. Created with python holidays package
 # years 1990 - 2024
-nerc6 = {
-	"Memorial Day": [
-		date(1990, 5, 28),
-		date(1991, 5, 27),
-		date(1992, 5, 25),
-		date(1993, 5, 31),
-		date(1994, 5, 30),
-		date(1995, 5, 29),
-		date(1996, 5, 27),
-		date(1997, 5, 26),
-		date(1998, 5, 25),
-		date(1999, 5, 31),
-		date(2000, 5, 29),
-		date(2001, 5, 28),
-		date(2002, 5, 27),
-		date(2003, 5, 26),
-		date(2004, 5, 31),
-		date(2005, 5, 30),
-		date(2006, 5, 29),
-		date(2007, 5, 28),
-		date(2008, 5, 26),
-		date(2009, 5, 25),
-		date(2010, 5, 31),
-		date(2011, 5, 30),
-		date(2012, 5, 28),
-		date(2013, 5, 27),
-		date(2014, 5, 26),
-		date(2015, 5, 25),
-		date(2016, 5, 30),
-		date(2017, 5, 29),
-		date(2018, 5, 28),
-		date(2019, 5, 27),
-		date(2020, 5, 25),
-		date(2021, 5, 31),
-		date(2022, 5, 30),
-		date(2023, 5, 29),
-		date(2024, 5, 27),
-	],
-	"Labor Day": [
-		date(1990, 9, 3),
-		date(1991, 9, 2),
-		date(1992, 9, 7),
-		date(1993, 9, 6),
-		date(1994, 9, 5),
-		date(1995, 9, 4),
-		date(1996, 9, 2),
-		date(1997, 9, 1),
-		date(1998, 9, 7),
-		date(1999, 9, 6),
-		date(2000, 9, 4),
-		date(2001, 9, 3),
-		date(2002, 9, 2),
-		date(2003, 9, 1),
-		date(2004, 9, 6),
-		date(2005, 9, 5),
-		date(2006, 9, 4),
-		date(2007, 9, 3),
-		date(2008, 9, 1),
-		date(2009, 9, 7),
-		date(2010, 9, 6),
-		date(2011, 9, 5),
-		date(2012, 9, 3),
-		date(2013, 9, 2),
-		date(2014, 9, 1),
-		date(2015, 9, 7),
-		date(2016, 9, 5),
-		date(2017, 9, 4),
-		date(2018, 9, 3),
-		date(2019, 9, 2),
-		date(2020, 9, 7),
-		date(2021, 9, 6),
-		date(2022, 9, 5),
-		date(2023, 9, 4),
-		date(2024, 9, 2),
-	],
-	"Thanksgiving": [
-		date(1990, 11, 22),
-		date(1991, 11, 28),
-		date(1992, 11, 26),
-		date(1993, 11, 25),
-		date(1994, 11, 24),
-		date(1995, 11, 23),
-		date(1996, 11, 28),
-		date(1997, 11, 27),
-		date(1998, 11, 26),
-		date(1999, 11, 25),
-		date(2000, 11, 23),
-		date(2001, 11, 22),
-		date(2002, 11, 28),
-		date(2003, 11, 27),
-		date(2004, 11, 25),
-		date(2005, 11, 24),
-		date(2006, 11, 23),
-		date(2007, 11, 22),
-		date(2008, 11, 27),
-		date(2009, 11, 26),
-		date(2010, 11, 25),
-		date(2011, 11, 24),
-		date(2012, 11, 22),
-		date(2013, 11, 28),
-		date(2014, 11, 27),
-		date(2015, 11, 26),
-		date(2016, 11, 24),
-		date(2017, 11, 23),
-		date(2018, 11, 22),
-		date(2019, 11, 28),
-		date(2020, 11, 26),
-		date(2021, 11, 25),
-		date(2022, 11, 24),
-		date(2023, 11, 23),
-		date(2024, 11, 28),
-	],
-	"Independence Day (Observed)": [
-		date(1992, 7, 3),
-		date(1993, 7, 5),
-		date(1998, 7, 3),
-		date(1999, 7, 5),
-		date(2004, 7, 5),
-		date(2009, 7, 3),
-		date(2010, 7, 5),
-		date(2015, 7, 3),
-		date(2020, 7, 3),
-		date(2021, 7, 5),
-	],
-	"New Year's Day (Observed)": [
-		date(1993, 12, 31),
-		date(1995, 1, 2),
-		date(1999, 12, 31),
-		date(2004, 12, 31),
-		date(2006, 1, 2),
-		date(2010, 12, 31),
-		date(2012, 1, 2),
-		date(2017, 1, 2),
-		date(2021, 12, 31),
-		date(2023, 1, 2),
-	],
-	"Christmas Day (Observed)": [
-		date(1993, 12, 24),
-		date(1994, 12, 26),
-		date(1999, 12, 24),
-		date(2004, 12, 24),
-		date(2005, 12, 26),
-		date(2010, 12, 24),
-		date(2011, 12, 26),
-		date(2016, 12, 26),
-		date(2021, 12, 24),
-		date(2022, 12, 26),
-	],
-}
 
 def makeUsefulDf(df, noise=2.5, hours_prior=24):
 	"""
 	Turn a dataframe of datetime and load data into a dataframe useful for
 	machine learning. Normalize values.
 	"""
-	
 	def _isHoliday(holiday, df):
-	# New years, memorial, independence, labor day, Thanksgiving, Christmas
 		m1 = None
 		if holiday == "New Year's Day":
 			m1 = (df["dates"].dt.month == 1) & (df["dates"].dt.day == 1)
@@ -665,81 +514,50 @@ def makeUsefulDf(df, noise=2.5, hours_prior=24):
 		m2 = df["dates"].dt.date.isin(nerc6.get(holiday + " (Observed)", []))
 		return m1 | m2
 
-	def _add_noise(m, std):
-		return m + np.random.normal(0, std, m.shape[0])
+	this_directory = os.path.dirname(os.path.realpath(__file__))
+	with open(pJoin(this_directory, 'static', 'testFiles', 'holidays.pickle')) as f:
+		nerc6 = pickle.load(f)
 
-	def _chunks(l, n):
-		return [l[i : i + n] for i in range(0, len(l), n)]
 	
 	if 'dates' not in df.columns:
-		df['dates'] = df.apply(
-			lambda x: dt(
-				int(x['year']), 
-				int(x['month']), 
-				int(x['day']), 
-				int(x['hour'])), 
-			axis=1
-		)
-    
+		df['dates'] = df.apply(lambda x: dt(int(x['year']), int(x['month']), int(x['day']), int(x['hour'])), axis=1)
+
 	r_df = pd.DataFrame()
+	
+	# LOAD
 	r_df["load_n"] = zscore(df["load"])
-	r_df["years_n"] = zscore(df["dates"].dt.year)
-
-	# fix outliers
-	temp = df["tempc"].replace([-9999], np.nan)
-	temp.ffill(inplace=True)
-	# day-before predictions
-	temp_noise = temp + np.random.normal(0, noise, temp.shape[0])
-	# temp_noise = _add_noise(temp, noise)
-	r_df["temp_n"] = zscore(temp_noise)
-	r_df['temp_n^2'] = zscore([x*x for x in temp_noise])
-
-	# add the value of the load 24hrs before
 	r_df["load_prev_n"] = r_df["load_n"].shift(hours_prior)
 	r_df["load_prev_n"].bfill(inplace=True)
-
-	# create day of week vector
-	r_df["day"] = df["dates"].dt.dayofweek  # 0 is Monday.
-	w = ["M", "T", "W", "R", "F", "A", "S"]
-	for i, d in enumerate(w):
-		r_df[d] = (r_df["day"] == i).astype(int)
-
-	# create hour of day vector
-	r_df["hour"] = df["dates"].dt.hour
-	d = [("h" + str(i)) for i in range(24)]
-	for i, h in enumerate(d):
-		r_df[h] = (r_df["hour"] == i).astype(int)
-
-	# create month vector
-	r_df["month"] = df["dates"].dt.month
-	y = [("m" + str(i)) for i in range(12)]
-	for i, m in enumerate(y):
-		r_df[m] = (r_df["month"] == i + 1).astype(int)
-
-	# THIS IS FEEDING THE CORRECT ANSWERS INTO THE FUNCTION
-	# create 'load day before' vector
+	
+	# LOAD PREV
+	def _chunks(l, n):
+		return [l[i : i + n] for i in range(0, len(l), n)]
 	n = np.array([val for val in _chunks(list(r_df["load_n"]), 24) for _ in range(24)])
 	l = ["l" + str(i) for i in range(24)]
 	for i, s in enumerate(l):
 		r_df[s] = n[:, i]
 		r_df[s] = r_df[s].shift(hours_prior)
 		r_df[s] = r_df[s].bfill()
+	r_df.drop(['load_n'], axis=1, inplace=True)
 	
-	# create holiday booleans
-	r_df["isNewYears"] = _isHoliday("New Year's Day", df)
-	r_df["isMemorialDay"] = _isHoliday("Memorial Day", df)
-	r_df["isIndependenceDay"] = _isHoliday("Independence Day", df)
-	r_df["isLaborDay"] = _isHoliday("Labor Day", df)
-	r_df["isThanksgiving"] = _isHoliday("Thanksgiving", df)
-	r_df["isChristmas"] = _isHoliday("Christmas Day", df)
+	# DATE
+	r_df["years_n"] = zscore(df["dates"].dt.year)
+	r_df = pd.concat([r_df, pd.get_dummies(df.dates.dt.hour, prefix='hour')], axis=1)
+	r_df = pd.concat([r_df, pd.get_dummies(df.dates.dt.dayofweek, prefix='day')], axis=1)
+	r_df = pd.concat([r_df, pd.get_dummies(df.dates.dt.month, prefix='month')], axis=1)
+	for holiday in ["New Year's Day", "Memorial Day", "Independence Day", "Labor Day", "Thanksgiving", "Christmas Day"]:
+		r_df[holiday] = _isHoliday(holiday, df)
 
-	m = r_df.drop(["month", "hour", "day", "load_n"], axis=1)
+	# TEMP
+	temp_noise = df['tempc'] + np.random.normal(0, noise, df.shape[0])
+	r_df["temp_n"] = zscore(temp_noise)
+	r_df['temp_n^2'] = zscore([x*x for x in temp_noise])
 
-	return m
+	return r_df
 
 def MAPE(predictions, answers):
-		assert len(predictions) == len(answers)
-		return sum([abs(x-y)/(y+1e-5) for x, y in zip(predictions, answers)])/len(answers)*100
+	assert len(predictions) == len(answers)
+	return sum([abs(x-y)/(y+1e-5) for x, y in zip(predictions, answers)])/len(answers)*100
 
 def train_neural_net(X_train, y_train, epochs):
 	import tensorflow as tf
@@ -754,7 +572,7 @@ def train_neural_net(X_train, y_train, epochs):
 		layers.Dense(1)
 	  ])
 
-	optimizer = tf.keras.optimizers.RMSprop(0.001)
+	optimizer = tf.keras.optimizers.RMSprop(0.0001)
 
 	model.compile(
 		loss="mean_squared_error",
@@ -762,16 +580,17 @@ def train_neural_net(X_train, y_train, epochs):
 		metrics=["mean_absolute_error", "mean_squared_error"],
 	)
 
-	early_stop = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=10)
+	early_stop = tf.keras.callbacks.EarlyStopping(monitor="mean_absolute_error", patience=20)
 
-	history = model.fit( X_train, y_train, epochs=epochs, validation_split=0.2, verbose=0, callbacks=[early_stop])
+	history = model.fit( X_train, y_train, epochs=epochs, verbose=0, callbacks=[early_stop])
 
 	return model
 
-def neural_net_predictions(all_X, all_y, epochs=100):
+def neural_net_predictions(all_X, all_y, epochs=100, model=None, save_file=None):
 	X_train, y_train = all_X[:-8760], all_y[:-8760]
 
-	model = train_neural_net(X_train, y_train, epochs)
+	if model == None:
+		model = train_neural_net(X_train, y_train, epochs)
 	
 	predictions = [float(f) for f in model.predict(all_X[-8760:])]
 	train = [float(f) for f in model.predict(all_X[:-8760])]
@@ -780,6 +599,9 @@ def neural_net_predictions(all_X, all_y, epochs=100):
 		'train': MAPE(train, all_y[:-8760])
 	}
 	
+	if save_file != None:
+		model.save(save_file)
+
 	return [float(f) for f in model.predict(all_X[-8760:])], accuracy
 
 def neural_net_next_day(all_X, all_y, epochs=100, hours_prior=24):
