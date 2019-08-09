@@ -13,13 +13,14 @@ hidden = True
 
 def work(modelDir, inputDict):
 	outData = {}
-	#delete previous saved omd/omc files so sotrage doesn't blow up - may need to adjust in future for editing
-	for file in os.listdir(modelDir):
-		if file.endswith(".omc") or file.endswith(".omd"):
-			os.remove(pJoin(modelDir, file))
-	feederName = inputDict['feederName1']
-	shutil.copyfile(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', feederName+'.omd'), pJoin(modelDir, feederName+'.omd'))
+	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
+	inputDict['feederName1'] = feederName
 	feederPath = pJoin(modelDir,feederName+'.omd')
+	#delete previous saved omd/omc files so sotrage doesn't blow up - may need to adjust in future for editing
+	#for file in os.listdir(modelDir):
+	#	if file.endswith(".omc") or file.endswith(".omd"):
+	#		os.remove(pJoin(modelDir, file))
+	#shutil.copyfile(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', feederName+'.omd'), pJoin(modelDir, feederName+'.omd'))
 	feeder = comms.createGraph(feederPath)
 
 	#set the omc objects
