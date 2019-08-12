@@ -129,6 +129,9 @@
 		else if (feature.geometry['type'] == 'LineString'){
 			geojsonLayer.addData(feature);
 		}
+		else if (feature.geometry['type'] == 'Polygon'){
+			geojsonLayer.addData(feature);
+		}
 	});
 	var bounds = geojsonLayer.getBounds();
 	// Optional forcing of canvas renderer:

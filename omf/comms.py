@@ -230,6 +230,125 @@ def clearFiber(nxG):
 		if nxG[edge[0]][edge[1]].get('fiber',False):
 			nxG[edge[0]][edge[1]]['fiber'] = False
 
+'''Mesh network calculations'''
+
+#add a mesh level - check if it can reach the point
+#if count mesh level == 0, then end
+#if count in mesh level == 1, draw a line, 
+#if count > 1, create convex hull
+#do you need to interconnect within convex hull?
+#create a queue add the substation
+#go into loop
+	#while the queue is not empty
+	#pop the 0 index
+	#add mesh level
+	#add convex hull that includes the previous mesh (add from start)
+
+#keep track if node on convex hull attaches to another node (basicaly extending outward)
+
+def setMeshLevel(nxG):
+	'''Setting mesh level of substation to 0 to start'''
+	substation = getSubstation(nxG)
+	nxG.node[substation]['meshLevel'] = 0
+
+def addMeshLevel(nxG, hull, radius):
+	rfRange = radius * 2
+	#go through all smart meters
+	for start in hull:
+		for smartMeter in nx.get_node_attributes(nxG, 'smartMeter'):
+			if nxG.node[smartMeter]['smartMeter']:
+				if nxG.node[smartMeter].get('meshLevel', float('inf')) > nxG.node[start]['meshLevel']:
+					if getDistance(nxG,start,smartMeter) <= rfRange:
+						addedLevel = True
+						#nxG.add_edge(start, smartMeter, attr_dict={'rf': True, 'type': 'rf'})
+						nxG.node[smartMeter]['meshLevel'] = nxG.node[start]['meshLevel'] + 1
+						nxG.node[smartMeter]['meshOrigin'] = start
+
+def convexMesh(nxG, meshLevel, geoJsonDict=dict()):
+	'''marks nodes that make up the edges of the convex hull'''
+	#meshPoints = [nxG.node[node]['pos'] for node in nx.get_node_attributes(nxG, 'meshLevel') if nxG.node[node].get('meshLevel',-1) == meshLevel]
+	#mesh hull is list of points on outer hull
+	meshHull = []
+	#all points in the same mesh level 
+	meshPoints = [(node, node[1]['pos']) for node in nxG.nodes(data=True) if node[1].get('meshLevel',float('inf')) <= meshLevel]
+	points = np.array([pos[1] for pos in meshPoints])
+	hull = ConvexHull(points)
+	polygon = points[hull.vertices].tolist()
+	for node in nxG.nodes(data=True):
+		if node[1].get('meshLevel',float('inf')) <= meshLevel:
+			if list(node[1]['pos']) in polygon:
+				nxG.node[node[0]]['hullEdge'] = True
+				meshHull.append(node[0])
+	for point in polygon:
+		point.reverse()
+	#Add first node to beginning to comply with geoJSON standard
+	polygon.append(polygon[0])
+	#Create dict and bump to json file
+	convexHullFeature = {
+			"type": "Feature", 
+			"geometry":{
+				"type": "Polygon",
+				"coordinates": [polygon]
+			}
+		}
+	geoJsonDict['features'].append(convexHullFeature)
+	return meshHull
+
+def convexHullMesh(nxG, meshLevel):
+	'''marks nodes that make up the edges of the convex hull'''
+	#meshPoints = [nxG.node[node]['pos'] for node in nx.get_node_attributes(nxG, 'meshLevel') if nxG.node[node].get('meshLevel',-1) == meshLevel]
+	#mesh hull is list of points on outer hull
+	meshHull = []
+	#all points in the same mesh level 
+	meshPoints = [(node, node[1]['pos']) for node in nxG.nodes(data=True) if node[1].get('meshLevel',float('inf')) <= meshLevel]
+	points = np.array([pos[1] for pos in meshPoints])
+	hull = ConvexHull(points)
+	polygon = points[hull.vertices].tolist()
+	for point in polygon:
+		point.reverse()
+	#Add first node to beginning to comply with geoJSON standard
+	polygon.append(polygon[0])
+	#Create dict and bump to json file
+	geoJsonDict = {"type": "FeatureCollection",
+		"features": [{
+			"type": "Feature", 
+			"geometry":{
+				"type": "Polygon",
+				"coordinates": [polygon]
+			},
+			"properties": {
+				"meshLevel": meshLevel
+			}
+		}]
+	}
+	return geoJsonDict
+
+def levelCount(nxG, meshLevel):
+	'''return number of nodes at a certain mesh level'''
+	return len([node for node in nxG.nodes(data=True) if node[1].get('meshLevel',float('inf')) == meshLevel])
+
+def caclulateMeshNetwork(nxG, geoJsonMesh):
+	meshLevel = 1
+	setMeshLevel(nxG)
+	radius = .0009
+	hulls = [getSubstation(nxG)]
+	addMeshLevel(nxG, hulls, radius)
+	while(levelCount(nxG, meshLevel)>0):
+		hulls = convexMesh(nxG, meshLevel, geoJsonMesh)
+		addMeshLevel(nxG, hulls, radius)
+		meshLevel += 1
+
+def meshMap(nxG):
+	'''Display a comms network with a mesh map showing minimum jumps'''
+	setSmartMeters(nxG)
+	geoJsonMesh = {"type": "FeatureCollection",
+		"features": []
+	}
+	caclulateMeshNetwork(nxG, geoJsonMesh)
+	commsGeoJson = graphGeoJson(nxG)
+	commsGeoJson['features'].extend(geoJsonMesh['features'])
+	showOnMap(commsGeoJson)
+
 def graphGeoJson(nxG):
 	'''Create geojson dict for omc file type for communications network'''
 	geoJsonDict = {
@@ -253,7 +372,6 @@ def graphGeoJson(nxG):
 				"smartMeter": nxG.node[node].get('smartMeter',False),
 				"bandwidthUse": nxG.node[node].get('bandwidthUse',''),
 				"bandwidthCapacity": nxG.node[node].get('bandwidthCapacity','')
-
 			}
 		})
 	#Add edges to geoJSON
@@ -426,6 +544,8 @@ def statePlaneToLatLon(easting, northing, epsg = None):
 def _tests():
 	#setup a comms network, run calculations and display
 	nxG = createGraph('static/publicFeeders/Olin Barre LatLon.omd')
+	
+	#Create a comms network
 	setSmartMeters(nxG)
 	setRFCollectors(nxG)
 	setFiber(nxG)
@@ -451,6 +571,10 @@ def _tests():
 	setRFEdgeCapacity(newNxg)
 	calcBandwidth(newNxg)
 	showOnMap(graphGeoJson(newNxg))
+
+	#Display mesh network levels on a leaflet map
+	
+	meshMap(nxG)
 
 if __name__ == '__main__':
 	_tests()
