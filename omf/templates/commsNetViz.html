@@ -37,13 +37,77 @@
 
 	//Add popup to each node/edge with the properties
 	function onEachFeature(feature, layer) {
-		let popupContent = '';
-		for (let key in feature.properties) {
-			if (feature.properties.hasOwnProperty(key)) {
-				popupContent += (key + ': ' + feature.properties[key] + '<br>');
-				layer.bindPopup(popupContent);
+		if (feature.geometry['type'] == 'LineString' || feature.geometry['type'] == 'LineString'){
+			let popupContent = '';
+			let popupContainer = L.DomUtil.create('div');
+			popupContainer.id = feature.properties['name'];
+			for (let key in feature.properties) {
+				if (feature.properties.hasOwnProperty(key)) {
+					let geoPair = L.DomUtil.create('div');
+					let geoKey = L.DomUtil.create('div');
+					geoKey.classList.add('geoKey');
+					//geoKey.classList.add(key);
+					geoKey.style.display = 'inline-block';
+					geoKey.innerHTML = '<b>'+key +': </b>';
+					let geoValue = L.DomUtil.create('div');
+					geoValue.classList.add('geoValue');
+					geoValue.classList.add(key);
+					geoValue.style.display = 'inline-block';
+					geoValue.innerHTML = feature.properties[key];
+					geoValue.contentEditable = "true";
+					geoPair.appendChild(geoKey);
+					geoPair.appendChild(geoValue);
+					popupContainer.appendChild(geoPair);
+				};
+			};
+			let geoUpdateButton = L.DomUtil.create('input');
+			L.DomEvent.disableClickPropagation(geoUpdateButton);
+			geoUpdateButton.type = 'submit';
+			geoUpdateButton.value = 'Save Updates';
+			geoUpdateButton.addEventListener('click', geoEdit);
+			popupContainer.appendChild(geoUpdateButton);
+			layer.bindPopup(popupContainer);
+		};
+	}
+
+	//Update geojson object on edit inline
+	function geoEdit(e){
+		e.preventDefault();
+		let currentElementDiv = e.target.parentNode;
+		let nodeId = currentElementDiv.id;
+		let currentFeature = geojson.features.findIndex(getFeature, currentElementDiv);
+		currentElementDiv.getElementsByClassName("geoValue");
+		for (let key in geojson.features[currentFeature].properties) {
+			if (geojson.features[currentFeature].properties.hasOwnProperty(key)){
+				let newValue;
+				if (key == 'substation' || key =='smartMeter' || key == 'rfCollector'){
+					newValue = (currentElementDiv.getElementsByClassName(key)[0].textContent === 'true');
+				}
+				else if (key == 'bandwidthUse' || key == 'bandwidthCapacity'){
+					newValue = parseFloat(currentElementDiv.getElementsByClassName(key)[0].textContent);
+				}
+				else{
+					newValue = currentElementDiv.getElementsByClassName(key)[0].textContent;
+				}
+				//console.log(typeof(newValue));
+				geojson.features[currentFeature].properties[key] = newValue;
+				//console.log(geojson.features[currentFeature].properties[key]);
 			}
 		}
+		console.log(geojson.features[currentFeature]);
+		geojsonLayer.eachLayer(function(layer){
+			if (layer.feature.properties.name == nodeId){
+				layer.remove();
+			}
+		});
+		//add layer with new data
+		console.log(geojson.features[currentFeature]);
+		geojsonLayer.addData(geojson.features[currentFeature]);
+	}
+
+	//how to get 
+	function getFeature(feature){
+		return feature.properties.name == this.id;
 	}
 
 	//Set how comms nodes are displayed
@@ -60,7 +124,7 @@
 			fillOpacity: 0.8
 		});
 		}
-		else if (feature.properties.pointType == 'meter' || feature.properties.pointType == 'triplex_meter'){
+		else if (feature.properties['smartMeter']){
 			fillColorValue = 'blue';
 		return L.circleMarker(latlng, {
 			radius: 8,
@@ -366,7 +430,7 @@
 	geoSubmit.value = 'Submit Geo Form';
 	geoSubmit.classList.add('mapControl');
 	document.getElementById('geoForm').appendChild(geoSubmit);
-	geoSubmit.addEventListener('click', geoUpdate)
+	geoSubmit.addEventListener('click', geoUpdate);
 
 	function existingFeature(feature){
 		return feature.properties.name == document.getElementById('geoName').value;
