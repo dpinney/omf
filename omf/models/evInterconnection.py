@@ -890,7 +890,7 @@ def new(modelDir):
 		"rezSqIn" : "400",
 		"simTime" : '2000-01-01 0:00:00',
 		"latitude" : '39.7817',
-		"longitude" : '89.6501',
+		"longitude" : '-89.6501',
 		"year" : '2001',
 		"demandCost" : '0.1'
 	}
