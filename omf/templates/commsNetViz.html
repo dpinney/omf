@@ -7,6 +7,7 @@
 		crossorigin="" />
 	<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js" integrity="sha512-A7vV8IFfih/D732iSSKi20u/ooOfj/AGehOKq0f4vLT1Zr2Y+RX7C+w8A1gaSasGtRUZpF/NZgzSAu4/Gc41Lg=="
 		crossorigin=""></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 </head>
 	<style>html, body {
 		width: 100%;
@@ -36,13 +37,111 @@
 
 	//Add popup to each node/edge with the properties
 	function onEachFeature(feature, layer) {
-		let popupContent = '';
-		for (let key in feature.properties) {
-			if (feature.properties.hasOwnProperty(key)) {
-				popupContent += (key + ': ' + feature.properties[key] + '<br>');
-				layer.bindPopup(popupContent);
+		if (feature.geometry['type'] == 'Point' || feature.geometry['type'] == 'LineString'){
+			let popupContent = '';
+			let popupContainer = L.DomUtil.create('div');
+			popupContainer.id = feature.properties['name'];
+			//CReate the popup html with keys and values of proprties
+			for (let key in feature.properties) {
+				if (feature.properties.hasOwnProperty(key)) {
+					let geoPair = L.DomUtil.create('div');
+					let geoKey = L.DomUtil.create('div');
+					geoKey.classList.add('geoKey');
+					//geoKey.classList.add(key);
+					geoKey.style.display = 'inline-block';
+					geoKey.innerHTML = '<b>'+key +': </b>';
+					let geoValue = L.DomUtil.create('div');
+					geoValue.classList.add('geoValue');
+					geoValue.classList.add(key);
+					geoValue.style.display = 'inline-block';
+					geoValue.innerHTML = feature.properties[key];
+					geoValue.contentEditable = "true";
+					geoPair.appendChild(geoKey);
+					geoPair.appendChild(geoValue);
+					popupContainer.appendChild(geoPair);
+				};
+			};
+			//Adding longitude/latitude to editable options
+			if (feature.geometry['type'] == 'Point'){
+					let geoPair = L.DomUtil.create('div');
+					let geoKey = L.DomUtil.create('div');
+					geoKey.classList.add('geoKey');
+					geoKey.style.display = 'inline-block';
+					geoKey.innerHTML = '<b>Longitude: </b>';
+					let geoValue = L.DomUtil.create('div');
+					geoValue.classList.add('geoValue');
+					geoValue.classList.add('geoLongitude');
+					geoValue.style.display = 'inline-block';
+					geoValue.innerHTML = feature.geometry.coordinates[0];
+					geoValue.contentEditable = "true";
+					geoPair.appendChild(geoKey);
+					geoPair.appendChild(geoValue);
+					popupContainer.appendChild(geoPair);
+					geoPair = L.DomUtil.create('div');
+					geoKey = L.DomUtil.create('div');
+					geoKey.classList.add('geoKey');
+					geoKey.style.display = 'inline-block';
+					geoKey.innerHTML = '<b>Latitude: </b>';
+					geoValue = L.DomUtil.create('div');
+					geoValue.classList.add('geoValue');
+					geoValue.classList.add('geoLatitude');
+					geoValue.style.display = 'inline-block';
+					geoValue.innerHTML = feature.geometry.coordinates[1];
+					geoValue.contentEditable = "true";
+					geoPair.appendChild(geoKey);
+					geoPair.appendChild(geoValue);
+					popupContainer.appendChild(geoPair);
+			};
+			let geoUpdateButton = L.DomUtil.create('input');
+			L.DomEvent.disableClickPropagation(geoUpdateButton);
+			geoUpdateButton.type = 'submit';
+			geoUpdateButton.value = 'Save Updates';
+			geoUpdateButton.addEventListener('click', geoEdit);
+			popupContainer.appendChild(geoUpdateButton);
+			layer.bindPopup(popupContainer);
+		};
+	}
+
+	//Update geojson object on edit inline
+	function geoEdit(e){
+		e.preventDefault();
+		let currentElementDiv = e.target.parentNode;
+		let nodeId = currentElementDiv.id;
+		let currentFeature = geojson.features.findIndex(getFeature, currentElementDiv);
+		currentElementDiv.getElementsByClassName("geoValue");
+		//Update the properties in the geojson to the current text values
+		for (let key in geojson.features[currentFeature].properties) {
+			if (geojson.features[currentFeature].properties.hasOwnProperty(key)){
+				let newValue;
+				if (key == 'substation' || key =='smartMeter' || key == 'rfCollector'){
+					newValue = (currentElementDiv.getElementsByClassName(key)[0].textContent === 'true');
+				}
+				else if (key == 'bandwidthUse' || key == 'bandwidthCapacity'){
+					newValue = parseFloat(currentElementDiv.getElementsByClassName(key)[0].textContent);
+				}
+				else{
+					newValue = currentElementDiv.getElementsByClassName(key)[0].textContent;
+				}
+				//console.log(typeof(newValue));
+				geojson.features[currentFeature].properties[key] = newValue;
+				//console.log(geojson.features[currentFeature].properties[key]);
 			}
 		}
+		//Update the coordinates
+		geojson.features[currentFeature].geometry.coordinates = [parseFloat(currentElementDiv.getElementsByClassName('geoLongitude')[0].textContent),
+		parseFloat(currentElementDiv.getElementsByClassName('geoLatitude')[0].textContent)];
+		geojsonLayer.eachLayer(function(layer){
+			if (layer.feature.properties.name == nodeId){
+				layer.remove();
+			}
+		});
+		//add layer with new data
+		geojsonLayer.addData(geojson.features[currentFeature]);
+	}
+
+	//how to get feature index
+	function getFeature(feature){
+		return feature.properties.name == this.id;
 	}
 
 	//Set how comms nodes are displayed
@@ -59,7 +158,7 @@
 			fillOpacity: 0.8
 		});
 		}
-		else if (feature.properties.pointType == 'meter' || feature.properties.pointType == 'triplex_meter'){
+		else if (feature.properties['smartMeter']){
 			fillColorValue = 'blue';
 		return L.circleMarker(latlng, {
 			radius: 8,
@@ -116,7 +215,7 @@
 			}
 		}
 	}
-	geojsonLayer = L.geoJSON(false, {
+	var geojsonLayer = L.geoJSON(false, {
 				pointToLayer: pointToLayerNode,
 				onEachFeature: onEachFeature,
 				style: lineStyle,
@@ -126,6 +225,9 @@
 			geojsonLayer.addData(feature);
 		}
 		else if (feature.geometry['type'] == 'LineString'){
+			geojsonLayer.addData(feature);
+		}
+		else if (feature.geometry['type'] == 'Polygon'){
 			geojsonLayer.addData(feature);
 		}
 	});
@@ -239,16 +341,6 @@
 	document.getElementById('toolDiv').appendChild(hideNonComms);
 	hideNonComms.addEventListener('click', function(){hideGridObjects(selectNonCommsObjects())});
 
-	//Add new object to map example
-	function addGeoObject(feature){
-		if (feature.geometry['type'] == 'Point'){
-			geojsonLayer.addData(feature);
-		}
-		else if (feature.geometry['type'] == 'LineString'){
-			geojsonLayer.addData(feature);
-		}
-	}
-
 	//Form div for updating geojson
 	L.Control.Form = L.Control.extend({
 	    onAdd: function(map) {
@@ -268,141 +360,6 @@
 	}
 
 	L.control.form({ position: 'topright'}).addTo(map);
-
-	//Create form container
-	var geoForm = L.DomUtil.create('form');
-	L.DomEvent.disableClickPropagation(geoForm);
-	geoForm.id = 'geoForm';
-	geoForm.name = 'geoForm';
-	geoForm.classList.add('mapControl');
-	document.getElementById('formDiv').appendChild(geoForm);
-
-	var geoName = L.DomUtil.create('input');
-	geoName.id = 'geoName';
-	geoName.type = 'text';
-	geoName.name = 'geoName';
-	geoName.placeholder = 'Name';
-	document.getElementById('geoForm').appendChild(geoName);
-
-	var geoLat = L.DomUtil.create('input');
-	geoLat.id = 'geoLat';
-	geoLat.type = 'text';
-	geoLat.name = 'geoLat';
-	geoLat.placeholder = 'Latitude';
-	document.getElementById('geoForm').appendChild(geoLat);
-
-	var geoLng = L.DomUtil.create('input');
-	geoLng.id = 'geoLng';
-	geoLng.type = 'text';
-	geoLng.name = 'geoLng';
-	geoLng.placeholder = 'Longitude';
-	document.getElementById('geoForm').appendChild(geoLng);
-
-	var geoSubstationLabel = L.DomUtil.create('label');
-	geoSubstationLabel.id = 'geoSubstationLabel';
-	geoSubstationLabel.name = 'geoSubstationLabel';
-	geoSubstationLabel.innerHTML = 'Is substation?';
-	document.getElementById('geoForm').appendChild(geoSubstationLabel);
-
-	var geoSubstation = L.DomUtil.create('input');
-	geoSubstation.id = 'geoSubstation';
-	geoSubstation.type = 'checkbox';
-	geoSubstation.name = 'geoSubstation';
-	document.getElementById('geoForm').appendChild(geoSubstation);
-
-	var geoRfCollectorLabel = L.DomUtil.create('label');
-	geoRfCollectorLabel.id = 'geoRfCollectorLabel';
-	geoRfCollectorLabel.name = 'geoRfCollectorLabel';
-	geoRfCollectorLabel.innerHTML = 'Is RF Collector?';
-	document.getElementById('geoForm').appendChild(geoRfCollectorLabel);
-
-	var geoRfCollector = L.DomUtil.create('input');
-	geoRfCollector.id = 'geoRfCollector';
-	geoRfCollector.type = 'checkbox';
-	geoRfCollector.name = 'geoRfCollector';
-	document.getElementById('geoForm').appendChild(geoRfCollector);
-
-	var geoSmartMeterLabel = L.DomUtil.create('label');
-	geoSmartMeterLabel.id = 'geoSmartMeterLabel';
-	geoSmartMeterLabel.name = 'geoSmartMeterLabel';
-	geoSmartMeterLabel.innerHTML = 'Is Smart Meter?';
-	document.getElementById('geoForm').appendChild(geoSmartMeterLabel);
-
-	var geoSmartMeter = L.DomUtil.create('input');
-	geoSmartMeter.id = 'geoSmartMeter';
-	geoSmartMeter.type = 'checkbox';
-	geoSmartMeter.name = 'geoSmartMeter';
-	document.getElementById('geoForm').appendChild(geoSmartMeter);
-
-	var geoBandwidthCapacity = L.DomUtil.create('input');
-	geoBandwidthCapacity.id = 'geoBandwidthCapacity';
-	geoBandwidthCapacity.type = 'text';
-	geoBandwidthCapacity.name = 'geoBandwidthCapacity';
-	geoBandwidthCapacity.placeholder = 'Bandwidth Capacity';
-	document.getElementById('geoForm').appendChild(geoBandwidthCapacity);
-
-	var geoPointType = L.DomUtil.create('input');
-	geoPointType.id = 'geoPointType';
-	geoPointType.type = 'text';
-	geoPointType.name = 'geoPointType';
-	geoPointType.placeholder = 'Point Type';
-	document.getElementById('geoForm').appendChild(geoPointType);
-
-	var geoSubmit = L.DomUtil.create('input');
-	L.DomEvent.disableClickPropagation(geoSubmit);
-	geoSubmit.id = 'geoSubmit';
-	geoSubmit.type = 'submit';
-	geoSubmit.value = 'Submit Geo Form';
-	geoSubmit.classList.add('mapControl');
-	document.getElementById('geoForm').appendChild(geoSubmit);
-	geoSubmit.addEventListener('click', geoUpdate)
-
-	function existingFeature(feature){
-		return feature.properties.name == document.getElementById('geoName').value;
-	}
-
-	function geoUpdate(e){
-		e.preventDefault();
-		let currentElement = geojson.features.findIndex(existingFeature); 
-		//create a new point
-		if (currentElement === -1) {
-			let feature = {
-			    "type": "Feature",
-			    "properties": {
-			        "name": document.getElementById('geoName').value,
-			        "substation": document.getElementById('geoSubstation').checked,
-			        "rfCollector": document.getElementById('geoRfCollector').checked,
-			        "smartMeter": document.getElementById('geoSmartMeter').checked,
-			        "bandwidthCapacity": document.getElementById('geoBandwidthCapacity').value,
-			        "pointType": document.getElementById('geoPointType').value,
-			    },
-			    "geometry": {
-			        "type": "Point",
-			        "coordinates": [document.getElementById('geoLng').value, document.getElementById('geoLat').value] 
-			    }
-			};
-			geojson.features.push(feature);
-			geojsonLayer.addData(feature);
-		}
-		//edit an existing point
-		else{
-			geojson.features[currentElement].properties.substation = document.getElementById('geoSubstation').checked;
-			geojson.features[currentElement].properties.rfCollector = document.getElementById('geoRfCollector').checked;
-			geojson.features[currentElement].properties.smartMeter = document.getElementById('geoSmartMeter').checked;
-			geojson.features[currentElement].properties.bandwidthCapacity = document.getElementById('geoBandwidthCapacity').value;
-			geojson.features[currentElement].properties.pointType = document.getElementById('geoPointType').value;
-			geojson.features[currentElement].geometry.coordinates = [document.getElementById('geoLng').value, document.getElementById('geoLat').value];
-
-			//remove and old layer
-			geojsonLayer.eachLayer(function(feature){
-				if (feature.feature.properties.name == document.getElementById('geoName').value){
-					feature.remove();
-				}
-			});
-			//add layer with new data
-			geojsonLayer.addData(geojson.features[currentElement]);
-		}
-	}
 
 	//Form div for searching for geojson object by name
 	L.Control.Search = L.Control.extend({
@@ -454,9 +411,45 @@
 			if (feature.feature.properties.name == document.getElementById('featureName').value){
 				feature.openPopup();
 			}
-		})
+		});
 	}
-
+	
+	//redisplay grid with edits
+	function redisplayGrid(){
+		$.ajax({
+		    type: 'POST',
+		    url: '/redisplayGrid',
+		    dataType: 'json',
+		    contentType: 'application/json; charset=utf-8',
+		    data: JSON.stringify(geojson),
+		    success: function(callback) {
+		    	console.log('success');
+		    	geojson = callback.newgeojson;
+		    	geojsonLayer.eachLayer(function(layer){
+		    		layer.remove();
+		    	});
+		    	geojsonLayer.clearLayers();
+				geojson.features.forEach(function(feature){
+					if (feature.geometry['type'] == 'Point'){
+						geojsonLayer.addData(feature);
+					}
+					else if (feature.geometry['type'] == 'LineString'){
+						geojsonLayer.addData(feature);
+					}
+				});
+		    },
+		    error: function() {
+		        $(this).html("error!");
+		    }
+		});
+	}
+	var gridRedisplay = L.DomUtil.create('button');
+	L.DomEvent.disableClickPropagation(gridRedisplay);
+	gridRedisplay.id = 'gridRedisplay';
+	gridRedisplay.classList.add('mapControl');
+	gridRedisplay.innerHTML = 'Redisplay grid';
+	document.getElementById('toolDiv').appendChild(gridRedisplay);
+	gridRedisplay.addEventListener('click', function(){redisplayGrid()});
 
 </script>
 </body>
