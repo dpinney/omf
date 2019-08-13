@@ -37,10 +37,11 @@
 
 	//Add popup to each node/edge with the properties
 	function onEachFeature(feature, layer) {
-		if (feature.geometry['type'] == 'LineString' || feature.geometry['type'] == 'LineString'){
+		if (feature.geometry['type'] == 'Point' || feature.geometry['type'] == 'LineString'){
 			let popupContent = '';
 			let popupContainer = L.DomUtil.create('div');
 			popupContainer.id = feature.properties['name'];
+			//CReate the popup html with keys and values of proprties
 			for (let key in feature.properties) {
 				if (feature.properties.hasOwnProperty(key)) {
 					let geoPair = L.DomUtil.create('div');
@@ -60,6 +61,37 @@
 					popupContainer.appendChild(geoPair);
 				};
 			};
+			//Adding longitude/latitude to editable options
+			if (feature.geometry['type'] == 'Point'){
+					let geoPair = L.DomUtil.create('div');
+					let geoKey = L.DomUtil.create('div');
+					geoKey.classList.add('geoKey');
+					geoKey.style.display = 'inline-block';
+					geoKey.innerHTML = '<b>Longitude: </b>';
+					let geoValue = L.DomUtil.create('div');
+					geoValue.classList.add('geoValue');
+					geoValue.classList.add('geoLongitude');
+					geoValue.style.display = 'inline-block';
+					geoValue.innerHTML = feature.geometry.coordinates[0];
+					geoValue.contentEditable = "true";
+					geoPair.appendChild(geoKey);
+					geoPair.appendChild(geoValue);
+					popupContainer.appendChild(geoPair);
+					geoPair = L.DomUtil.create('div');
+					geoKey = L.DomUtil.create('div');
+					geoKey.classList.add('geoKey');
+					geoKey.style.display = 'inline-block';
+					geoKey.innerHTML = '<b>Latitude: </b>';
+					geoValue = L.DomUtil.create('div');
+					geoValue.classList.add('geoValue');
+					geoValue.classList.add('geoLatitude');
+					geoValue.style.display = 'inline-block';
+					geoValue.innerHTML = feature.geometry.coordinates[1];
+					geoValue.contentEditable = "true";
+					geoPair.appendChild(geoKey);
+					geoPair.appendChild(geoValue);
+					popupContainer.appendChild(geoPair);
+			};
 			let geoUpdateButton = L.DomUtil.create('input');
 			L.DomEvent.disableClickPropagation(geoUpdateButton);
 			geoUpdateButton.type = 'submit';
@@ -77,6 +109,7 @@
 		let nodeId = currentElementDiv.id;
 		let currentFeature = geojson.features.findIndex(getFeature, currentElementDiv);
 		currentElementDiv.getElementsByClassName("geoValue");
+		//Update the properties in the geojson to the current text values
 		for (let key in geojson.features[currentFeature].properties) {
 			if (geojson.features[currentFeature].properties.hasOwnProperty(key)){
 				let newValue;
@@ -94,18 +127,19 @@
 				//console.log(geojson.features[currentFeature].properties[key]);
 			}
 		}
-		console.log(geojson.features[currentFeature]);
+		//Update the coordinates
+		geojson.features[currentFeature].geometry.coordinates = [parseFloat(currentElementDiv.getElementsByClassName('geoLongitude')[0].textContent),
+		parseFloat(currentElementDiv.getElementsByClassName('geoLatitude')[0].textContent)];
 		geojsonLayer.eachLayer(function(layer){
 			if (layer.feature.properties.name == nodeId){
 				layer.remove();
 			}
 		});
 		//add layer with new data
-		console.log(geojson.features[currentFeature]);
 		geojsonLayer.addData(geojson.features[currentFeature]);
 	}
 
-	//how to get 
+	//how to get feature index
 	function getFeature(feature){
 		return feature.properties.name == this.id;
 	}
@@ -307,16 +341,6 @@
 	document.getElementById('toolDiv').appendChild(hideNonComms);
 	hideNonComms.addEventListener('click', function(){hideGridObjects(selectNonCommsObjects())});
 
-	//Add new object to map example
-	function addGeoObject(feature){
-		if (feature.geometry['type'] == 'Point'){
-			geojsonLayer.addData(feature);
-		}
-		else if (feature.geometry['type'] == 'LineString'){
-			geojsonLayer.addData(feature);
-		}
-	}
-
 	//Form div for updating geojson
 	L.Control.Form = L.Control.extend({
 	    onAdd: function(map) {
@@ -336,150 +360,6 @@
 	}
 
 	L.control.form({ position: 'topright'}).addTo(map);
-
-	//Create form container
-	var geoForm = L.DomUtil.create('form');
-	L.DomEvent.disableClickPropagation(geoForm);
-	geoForm.id = 'geoForm';
-	geoForm.name = 'geoForm';
-	geoForm.classList.add('mapControl');
-	document.getElementById('formDiv').appendChild(geoForm);
-
-	var geoName = L.DomUtil.create('input');
-	geoName.id = 'geoName';
-	geoName.type = 'text';
-	geoName.name = 'geoName';
-	geoName.placeholder = 'Name';
-	document.getElementById('geoForm').appendChild(geoName);
-
-	var geoLat = L.DomUtil.create('input');
-	geoLat.id = 'geoLat';
-	geoLat.type = 'text';
-	geoLat.name = 'geoLat';
-	geoLat.placeholder = 'Latitude';
-	document.getElementById('geoForm').appendChild(geoLat);
-
-	var geoLng = L.DomUtil.create('input');
-	geoLng.id = 'geoLng';
-	geoLng.type = 'text';
-	geoLng.name = 'geoLng';
-	geoLng.placeholder = 'Longitude';
-	document.getElementById('geoForm').appendChild(geoLng);
-
-	var geoSubstationLabel = L.DomUtil.create('label');
-	geoSubstationLabel.id = 'geoSubstationLabel';
-	geoSubstationLabel.name = 'geoSubstationLabel';
-	geoSubstationLabel.innerHTML = 'Is substation?';
-	document.getElementById('geoForm').appendChild(geoSubstationLabel);
-
-	var geoSubstation = L.DomUtil.create('input');
-	geoSubstation.id = 'geoSubstation';
-	geoSubstation.type = 'checkbox';
-	geoSubstation.name = 'geoSubstation';
-	document.getElementById('geoForm').appendChild(geoSubstation);
-
-	var geoRfCollectorLabel = L.DomUtil.create('label');
-	geoRfCollectorLabel.id = 'geoRfCollectorLabel';
-	geoRfCollectorLabel.name = 'geoRfCollectorLabel';
-	geoRfCollectorLabel.innerHTML = 'Is RF Collector?';
-	document.getElementById('geoForm').appendChild(geoRfCollectorLabel);
-
-	var geoRfCollector = L.DomUtil.create('input');
-	geoRfCollector.id = 'geoRfCollector';
-	geoRfCollector.type = 'checkbox';
-	geoRfCollector.name = 'geoRfCollector';
-	document.getElementById('geoForm').appendChild(geoRfCollector);
-
-	var geoSmartMeterLabel = L.DomUtil.create('label');
-	geoSmartMeterLabel.id = 'geoSmartMeterLabel';
-	geoSmartMeterLabel.name = 'geoSmartMeterLabel';
-	geoSmartMeterLabel.innerHTML = 'Is Smart Meter?';
-	document.getElementById('geoForm').appendChild(geoSmartMeterLabel);
-
-	var geoSmartMeter = L.DomUtil.create('input');
-	geoSmartMeter.id = 'geoSmartMeter';
-	geoSmartMeter.type = 'checkbox';
-	geoSmartMeter.name = 'geoSmartMeter';
-	document.getElementById('geoForm').appendChild(geoSmartMeter);
-
-	var geoBandwidthCapacity = L.DomUtil.create('input');
-	geoBandwidthCapacity.id = 'geoBandwidthCapacity';
-	geoBandwidthCapacity.type = 'text';
-	geoBandwidthCapacity.name = 'geoBandwidthCapacity';
-	geoBandwidthCapacity.placeholder = 'Bandwidth Capacity';
-	document.getElementById('geoForm').appendChild(geoBandwidthCapacity);
-
-	var geoBandwidthUse = L.DomUtil.create('input');
-	geoBandwidthUse.id = 'geoBandwidthUse';
-	geoBandwidthUse.type = 'text';
-	geoBandwidthUse.name = 'geoBandwidthUse';
-	geoBandwidthUse.placeholder = 'Bandwidth Use';
-	document.getElementById('geoForm').appendChild(geoBandwidthUse);
-
-	var geoPointType = L.DomUtil.create('input');
-	geoPointType.id = 'geoPointType';
-	geoPointType.type = 'text';
-	geoPointType.name = 'geoPointType';
-	geoPointType.placeholder = 'Point Type';
-	document.getElementById('geoForm').appendChild(geoPointType);
-
-	var geoSubmit = L.DomUtil.create('input');
-	L.DomEvent.disableClickPropagation(geoSubmit);
-	geoSubmit.id = 'geoSubmit';
-	geoSubmit.type = 'submit';
-	geoSubmit.value = 'Submit Geo Form';
-	geoSubmit.classList.add('mapControl');
-	document.getElementById('geoForm').appendChild(geoSubmit);
-	geoSubmit.addEventListener('click', geoUpdate);
-
-	function existingFeature(feature){
-		return feature.properties.name == document.getElementById('geoName').value;
-	}
-
-	function geoUpdate(e){
-		e.preventDefault();
-		let currentElement = geojson.features.findIndex(existingFeature); 
-		//create a new point
-		if (currentElement === -1) {
-			let feature = {
-			    "type": "Feature",
-			    "properties": {
-			        "name": document.getElementById('geoName').value,
-			        "substation": document.getElementById('geoSubstation').checked,
-			        "rfCollector": document.getElementById('geoRfCollector').checked,
-			        "smartMeter": document.getElementById('geoSmartMeter').checked,
-			        "bandwidthCapacity": parseFloat(document.getElementById('geoBandwidthCapacity').value),
-			        "bandwidthUse": parseFloat(document.getElementById('geoBandwidthUse').value),
-			        "pointType": document.getElementById('geoPointType').value,
-			    },
-			    "geometry": {
-			        "type": "Point",
-			        "coordinates": [parseFloat(document.getElementById('geoLng').value), parseFloat(document.getElementById('geoLat').value)] 
-			    }
-			};
-			geojson.features.push(feature);
-			geojsonLayer.addData(feature);
-		}
-		//edit an existing point
-		else{
-			geojson.features[currentElement].properties.substation = document.getElementById('geoSubstation').checked;
-			geojson.features[currentElement].properties.rfCollector = document.getElementById('geoRfCollector').checked;
-			geojson.features[currentElement].properties.smartMeter = document.getElementById('geoSmartMeter').checked;
-			geojson.features[currentElement].properties.bandwidthCapacity = parseFloat(document.getElementById('geoBandwidthCapacity').value);
-			geojson.features[currentElement].properties.bandwidthUse = parseFloat(document.getElementById('geoBandwidthUse').value);
-			geojson.features[currentElement].properties.pointType = document.getElementById('geoPointType').value;
-			geojson.features[currentElement].geometry.coordinates = [parseFloat(document.getElementById('geoLng').value), parseFloat(document.getElementById('geoLat').value)];
-
-			//remove and old layer
-			geojsonLayer.eachLayer(function(feature){
-				if (feature.feature.properties.name == document.getElementById('geoName').value){
-					feature.remove();
-				}
-			});
-			//add layer with new data
-			geojsonLayer.addData(geojson.features[currentElement]);
-		}
-	}
 
 	//Form div for searching for geojson object by name
 	L.Control.Search = L.Control.extend({
@@ -570,7 +450,6 @@
 	gridRedisplay.innerHTML = 'Redisplay grid';
 	document.getElementById('toolDiv').appendChild(gridRedisplay);
 	gridRedisplay.addEventListener('click', function(){redisplayGrid()});
-
 
 </script>
 </body>
