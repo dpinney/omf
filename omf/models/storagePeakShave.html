@@ -164,12 +164,19 @@
 				</div>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Prediction - Confidence<span class="classic">On a 0-100 scale, how conservative would you like to be when dispatching?</span></label>
-				<input type="text" id="confidence" name="confidence">
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">Prediction - Epochs<span class="classic">How many times would you like the prediction software to iterate? Approximately 1 minute per 10 epochs. Program will stop early if no improvement is seen within 10 epochs.</span></label>
 				<input type="text" id="epochs" name="epochs">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Prediction - New Model<span class="classic">Would you like to run a new neural net (True) or use the model loaded?</span></label>
+				<select id="newModel" name="newModel" />
+					<option value="True">True</option>
+					<option value="False">False</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Prediction - Model<span class="classic">.h5 file of neural network</span></label>
+				<input type="text" id="model" name="model">
 			</div>
 			<!-- required buttons -->
 			<div class="wideInput" style="text-align:right">
