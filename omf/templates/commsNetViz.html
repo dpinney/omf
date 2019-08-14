@@ -423,7 +423,6 @@
 		    contentType: 'application/json; charset=utf-8',
 		    data: JSON.stringify(geojson),
 		    success: function(callback) {
-		    	console.log('success');
 		    	geojson = callback.newgeojson;
 		    	geojsonLayer.eachLayer(function(layer){
 		    		layer.remove();
@@ -450,6 +449,30 @@
 	gridRedisplay.innerHTML = 'Redisplay grid';
 	document.getElementById('toolDiv').appendChild(gridRedisplay);
 	gridRedisplay.addEventListener('click', function(){redisplayGrid()});
+
+	//redisplay grid with edits
+	function saveCommsMap(){
+		$.ajax({
+		    type: 'POST',
+		    url: `/saveCommsMap/{{owner}}/{{modelName}}/{{feederName}}/{{feederNum}}`,
+		    dataType: 'json',
+		    contentType: 'application/json; charset=utf-8',
+		    data: JSON.stringify(geojson),
+		    success: function(callback) {
+		    	console.log(callback.savemessage);
+		    },
+		    error: function() {
+		        $(this).html("error!");
+		    }
+		});
+	}
+	var saveOmcFile = L.DomUtil.create('button');
+	L.DomEvent.disableClickPropagation(saveOmcFile);
+	saveOmcFile.id = 'gridRedisplay';
+	saveOmcFile.classList.add('mapControl');
+	saveOmcFile.innerHTML = 'Save omc file';
+	document.getElementById('toolDiv').appendChild(saveOmcFile);
+	saveOmcFile.addEventListener('click', function(){saveCommsMap()});
 
 </script>
 </body>
