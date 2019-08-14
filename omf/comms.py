@@ -562,6 +562,7 @@ def _tests():
 	showOnMap(graphGeoJson(nxG))
 
 	#load an omc, recalculate (as if refresh), redisplay
+	
 	newNxg = omcToNxg('output/commsGeoJson.omc', fromFile=True)
 	clearFiber(newNxg)
 	clearRFEdges(newNxg)
@@ -573,7 +574,8 @@ def _tests():
 	showOnMap(graphGeoJson(newNxg))
 
 	#Display mesh network levels on a leaflet map
-	
+	nxG = createGraph('static/publicFeeders/Olin Barre LatLon.omd')
+	setSmartMeters(nxG)
 	meshMap(nxG)
 
 if __name__ == '__main__':
