@@ -116,12 +116,12 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustain
 		Dict['properties'] = {'event': 'fault', 'popupContent': '\nThis fault started at ' + str(mc.loc[row, 'Start']) + ' and ended at ' + str(mc.loc[row, 'Finish']) + '.\nIt occurred at the following location: ' + str(coords) + ' and affected these meters: ' + str(mc.loc[row, 'Meters Affected']) + '.'}
 		outageMap['features'].append(Dict)
 		row += 1
-	shutil.copy('templates/geoJsonMap.html', workDir)
+	shutil.copy(omf.omfDir + '/templates/geoJsonMap.html', workDir)
 	with open(pJoin(workDir,'geoJsonFeatures.js'),"w") as outFile:
 		outFile.write('function onEachFeature(feature, layer) {if (feature.properties && feature.properties.popupContent) {layer.bindPopup(feature.properties.popupContent);}}\n')
 		outFile.write("var geojson =")
 		json.dump(outageMap, outFile, indent=4)
-#		outFile.write('\nL.geoJSON(geojson, {style: function(feature) {if (feature.properties.event) {case "fault": return {color: "#ff0000"};}}).addTo(map);')
+		# outFile.write('\nL.geoJSON(geojson, {style: function(feature) {if (feature.properties.event) {case "fault": return {color: "#ff0000"};}}).addTo(map);')
 		outFile.write('\nL.geoJSON(geojson, {onEachFeature: onEachFeature}).addTo(map);')
 	with open('outageMap.html', 'w') as outageMap:
 		outageMap.write('file://' + pJoin(workDir,'geoJsonMap.html'))
