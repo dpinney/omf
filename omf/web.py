@@ -1364,7 +1364,7 @@ def commsMap(owner, modelName, feederNum):
 	feederFile = os.path.join(modelDir, feederName + ".omc")
 	with open(feederFile) as commsGeoJson:
 		geojson = json.load(commsGeoJson)
-	return render_template('commsNetViz.html', geojson=geojson)
+	return render_template('commsNetViz.html', geojson=geojson, owner=owner, modelName=modelName, feederNum=feederNum, feederName=feederName)
 
 @app.route('/redisplayGrid', methods=["POST"])
 def redisplayGrid():
@@ -1381,6 +1381,16 @@ def redisplayGrid():
 	#need to runs comms updates here
 	geoJson = omf.comms.graphGeoJson(nxG)
 	return jsonify(newgeojson=geoJson)
+
+@app.route('/saveCommsMap/<owner>/<modelName>/<feederName>/<feederNum>', methods=["POST"])
+def saveCommsMap(owner, modelName, feederName, feederNum):
+	try:
+		geoDict = request.get_json()
+		model_dir = os.path.join(_omfDir, "data/Model", owner, modelName)
+		omf.comms.saveOmc(geoDict, model_dir, feederName)
+		return jsonify(savemessage='Communications network saved')
+	except:
+		return jsonify(savemessage='Error saving communications network')
 
 ###################################################
 # OTHER FUNCTIONS

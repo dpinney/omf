@@ -154,7 +154,7 @@ def work(modelDir, inputDict):
 	# print loadShapeValue
 	
 	#calculate and display EV Charging Demand image, carpet plot image of 8760 load shapes
-	maxLoadValue, demandImg, carpetPlotImg, maxLoadShapeImg, combinedLoadShapeValue = plotEVShape(
+	maxLoadValue, demandImg, carpetPlotImg, hourlyConValue, combinedLoadShapeValue = plotEVShape(
 		numVehicles = numVehiclesValue,
 		chargeRate = chargeRateValue, 
 		batterySize = batterySizeValue, 
@@ -170,9 +170,6 @@ def work(modelDir, inputDict):
 	carpetPlotImg.savefig(pJoin(modelDir, "carpetPlot.png"))
 	with open(pJoin(modelDir, "carpetPlot.png"),"rb") as cpFile:
 		outData["carpetPlot"] = cpFile.read().encode("base64")
-	maxLoadShapeImg.savefig(pJoin(modelDir, "maxLoadShape.png"))
-	with open(pJoin(modelDir, "maxLoadShape.png"),"rb") as evFile:
-		outData["maxLoadShape"] = evFile.read().encode("base64")
 	
 	#run and display fuel cost calculation
 	fuelCostHtml = fuelCostCalc(
@@ -332,9 +329,18 @@ def work(modelDir, inputDict):
 		energyFile.write(energyCostHtml)
 	outData["energyCostCalcHtml"] = energyCostHtml
 
-	# #Create carpet plot from REopt output
-	# REoptCarpetPlotImg, REoptMaxLoadShapeImg = plotEVShape_REopt( 
-	# 	loadShape = loadShapeValue)
+	#get REopt's optimized load shape value list
+	REoptLoadShape = REopt_output["outputs"]["Scenario"]["Site"]["LoadProfile"]["year_one_electric_load_series_kw"]
+
+	#Create the maxLoadShape image
+	maxLoadShapeImg = plotMaxLoadShape(
+		loadShape = loadShapeValue,
+		combined_load = combinedLoadShapeValue,
+		hourly_con = hourlyConValue,
+		REopt_load = REoptLoadShape)
+	maxLoadShapeImg.savefig(pJoin(modelDir, "maxLoadShape.png"))
+	with open(pJoin(modelDir, "maxLoadShape.png"),"rb") as evFile:
+		outData["maxLoadShape"] = evFile.read().encode("base64")
 
 	return outData
 
@@ -890,7 +896,7 @@ def new(modelDir):
 		"rezSqIn" : "400",
 		"simTime" : '2000-01-01 0:00:00',
 		"latitude" : '39.7817',
-		"longitude" : '89.6501',
+		"longitude" : '-89.6501',
 		"year" : '2001',
 		"demandCost" : '0.1'
 	}
@@ -968,6 +974,47 @@ def drawTable(initialStates=None, finalStates=None, deviceTypes=None):
 		html_str += row_str
 	html_str += """</tbody></table>"""
 	return html_str
+
+def plotMaxLoadShape(loadShape=None, combined_load=None, hourly_con=None, REopt_load=None):
+	base_shape = loadShape
+	base_shape_REopt = REopt_load
+
+	#find the maximum combined load value
+	max_val = max(combined_load)
+	#find that value's index
+	max_index = combined_load.index(max_val)
+
+	#find the day that the max load value occurs
+	max_day_val = (max_index)/24
+	max_hour_val = (max_index)%24
+	day_shape = base_shape[max_day_val*24:max_day_val*24+24]
+
+	#find the maximum REopt load value
+	max_val_REopt = max(base_shape_REopt)
+	#find that value's index
+	max_index_REopt = base_shape_REopt.index(max_val)
+
+	#find the day that the max REopt load value occurs
+	max_day_val_REopt = (max_index_REopt)/24
+	max_hour_val_REopt = (max_index_REopt)%24
+	day_shape_REopt = base_shape_REopt[max_day_val_REopt*24:max_day_val_REopt*24+24]
+
+	def maxLoadShape(load_vec, daily_vec, REopt_vec):
+		maxLoadShapeImg = plt.figure()
+		plt.style.use('seaborn')
+		plt.ylim(0.0, 1.15*max_val)
+		if len(load_vec) != 0:
+			plt.stackplot(range(len(load_vec)), load_vec, daily_vec)
+		if len(REopt_vec) != 0:
+			plt.plot(day_shape_REopt, color='black', linestyle='dotted', label='with REopt Optimization')
+		plt.title('Maximum Daily Load Shape')
+		plt.ylabel('Demand (KW)')
+		plt.xlabel('Time of Day (Hour)')
+		plt.close()
+		return maxLoadShapeImg
+
+	return maxLoadShape(day_shape, hourly_con, day_shape_REopt)
+
 
 def plotEVShape(numVehicles=None, chargeRate=None, batterySize=None, startHour=None, endHour=None, chargeLimit=None, minCharge=None, maxCharge=None, loadShape=None, rezSqIn=None):
 	shapes = []
@@ -1057,27 +1104,28 @@ def plotEVShape(numVehicles=None, chargeRate=None, batterySize=None, startHour=N
 
 	#find the maximum combined load value
 	max_val = max(combined)
-	#find that value's index
-	max_index = combined.index(max_val)
+	# #find that value's index
+	# max_index = combined.index(max_val)
 
-	#find the day that the max load value occurs
-	max_day_val = (max_index)/24
-	max_hour_val = (max_index)%24
-	day_shape = base_shape[max_day_val*24:max_day_val*24+24]
+	# #find the day that the max load value occurs
+	# max_day_val = (max_index)/24
+	# max_hour_val = (max_index)%24
+	# day_shape = base_shape[max_day_val*24:max_day_val*24+24]
 
-	def maxLoadShape(load_vec, daily_vec):
-		maxLoadShapeImg = plt.figure()
-		plt.style.use('seaborn')
-		plt.ylim(0.0, 1.15*max_val)
-		if len(load_vec) != 0:
-			plt.stackplot(range(len(load_vec)), load_vec, daily_vec)
-		plt.title('Maximum Daily Load Shape')
-		plt.ylabel('Demand (KW)')
-		plt.xlabel('Time of Day (Hour)')
-		plt.close()
-		return maxLoadShapeImg
+	# def maxLoadShape(load_vec, daily_vec):
+	# 	maxLoadShapeImg = plt.figure()
+	# 	plt.style.use('seaborn')
+	# 	plt.ylim(0.0, 1.15*max_val)
+	# 	if len(load_vec) != 0:
+	# 		plt.stackplot(range(len(load_vec)), load_vec, daily_vec)
+	# 	plt.title('Maximum Daily Load Shape')
+	# 	plt.ylabel('Demand (KW)')
+	# 	plt.xlabel('Time of Day (Hour)')
+	# 	plt.close()
+	# 	return maxLoadShapeImg
 		
-	return max_val, evShape, carpet_plot(base_shape, hourly_con), maxLoadShape(day_shape, hourly_con), combined
+	#return max_val, evShape, carpet_plot(base_shape, hourly_con), maxLoadShape(day_shape, hourly_con), combined
+	return max_val, evShape, carpet_plot(base_shape, hourly_con), hourly_con, combined
 
 def fuelCostCalc(numVehicles=None, batterySize=None, efficiency=None, energyCost=None, gasEfficiency=None, gasCost=None, workload=None):
 	dailyGasAmount = workload/gasEfficiency #amount(gal) of gas used per vehicle, daily

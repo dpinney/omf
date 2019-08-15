@@ -64,6 +64,9 @@ elif platform.system()=='Windows':
 	# Install GridLAB-D.
 	os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0_RC1.exe")
 	os.system("gridlabd-4.0_RC1.exe/silent")
+	#Install splat
+	#os.system(wget https://www.qsl.net/kd2bd/Splat-1.3.0.zip)
+	#os.system(Splat-1.3.0/Splat-1-3-1-SD-mx64.exe)
 	# Install pygraphviz.
 	if platform.architecture()[0] == '32bit':
 		os.system("C:\\Python27\\python.exe -m pip install omf\\static\\pygraphviz-1.3.1-cp27-none-win32.whl")
@@ -88,6 +91,10 @@ elif platform.system()=="Darwin": # MacOS
 	os.system("sudo hdiutil attach gridlabd.dmg")
 	os.system('sudo installer -package "/Volumes/GridLAB-D 4.0.0/gridlabd.mpkg" -target /')
 	os.system('sudo hdiutil detach "/Volumes/GridLAB-D 4.0.0"')
+	#splat install
+	#os.system("wget https://www.qsl.net/kd2bd/splat-1.4.2-osx.tgz")
+	#os.system("sudo tar -xvzf splat-1.4.2-osx.tgz")
+	#os.system("sudo exec splat-1.4.2/configure")
 	os.system("cd omf")
 	pipInstallInOrder("pip2")
 	os.system("python2 setup.py develop")
