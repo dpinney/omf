@@ -19,6 +19,7 @@ from shutil import copyfile
 from omf.models import voltageDrop as vd
 from __neoMetaModel__ import *
 from omf.models import __neoMetaModel__
+import random
 
 # OMF imports
 import omf.feeder as feeder
@@ -31,7 +32,7 @@ from dateutil.relativedelta import *
 # Model metadata:
 tooltip = "smartSwitching gives the expected reliability improvement from adding reclosers to a circuit."
 modelName, template = metadata(__file__)
-hidden = True
+hidden = False
 
 def pullOutValues(tree, workDir, sustainedOutageThreshold):
 	'helper function to pull out reliability metric data (SAIDI/SAIFI).'
@@ -152,7 +153,8 @@ def setupSystem(pathToGlm, workDir, lineFaultType, failureDistribution, failure_
 	currentKey = smallestKey
 	while tree.get(str(currentKey)) != None:
 		currentKey += 1
-	tree[str(currentKey)] = {'omftype': '#set', 'argument': 'randomseed=5'}
+	seed = random.randint(1,1000)
+	tree[str(currentKey)] = {'omftype': '#set', 'argument': 'randomseed={}'.format(seed)}
 
 	# Add Reliability module
 	tree[str(biggestKey*10)] = {'module':'reliability','maximum_event_length':'18000','report_event_log':'true'}
@@ -535,10 +537,10 @@ def valueOfAdditionalRecloser(pathToGlm, workDir, lineFaultType, lineNameForRecl
 	def costStatsCalc(initCustCost=None, finCustCost=None, initRestCost=None, finRestCost=None, initHardCost=None, finHardCost=None, initOutCost=None, finOutCost=None):
 		html_str = """
 			<div style="text-align:center">
-				<p style="padding-top:10px; padding-bottom:10px;">Initial Customer Cost:<span style="padding-left:1em">$"""+str(initCustCost)+"""</span><span style="padding-left:4em">Final Customer Cost:<span style="padding-left:1em">$"""+str(finCustCost)+"""</span></span></p>
-				<p style="padding-top:10px; padding-bottom:10px;">Initial Restoration Cost:<span style="padding-left:1em">$"""+str(initRestCost)+"""</span><span style="padding-left:4em">Final Restoration Cost:<span style="padding-left:1em">$"""+str(finRestCost)+"""</span></span></p>
-				<p style="padding-top:10px; padding-bottom:10px;">Initial Hardware Cost:<span style="padding-left:1em">$"""+str(initHardCost)+"""</span><span style="padding-left:4em">Final Hardware Cost:<span style="padding-left:1em">$"""+str(finHardCost)+"""</span></span></p>
-				<p style="padding-top:10px; padding-bottom:10px;"><b>Initial Outage Cost:<span style="padding-left:1em">$"""+str(initOutCost)+"""</span><span style="padding-left:4em">Final Outage Cost:<span style="padding-left:1em">$"""+str(finOutCost)+"""</span></span></b></p>
+				<p style="padding-top:10px; padding-bottom:10px;">No-Recloser Lost kWh Sales:<span style="padding-left:1em">$"""+str(initCustCost)+"""</span><span style="padding-left:4em">With-Recloser Lost kWh Sales:<span style="padding-left:1em">$"""+str(finCustCost)+"""</span></span></p>
+				<p style="padding-top:10px; padding-bottom:10px;">No-Recloser Restoration Labor Cost:<span style="padding-left:1em">$"""+str(initRestCost)+"""</span><span style="padding-left:4em">With-Recloser Restoration Labor Cost:<span style="padding-left:1em">$"""+str(finRestCost)+"""</span></span></p>
+				<p style="padding-top:10px; padding-bottom:10px;">No-Recloser Restoration Hardware Cost:<span style="padding-left:1em">$"""+str(initHardCost)+"""</span><span style="padding-left:4em">With-Recloser Restoration Hardware Cost:<span style="padding-left:1em">$"""+str(finHardCost)+"""</span></span></p>
+				<p style="padding-top:10px; padding-bottom:10px;"><b>No-Recloser Outage Cost:<span style="padding-left:1em">$"""+str(initOutCost)+"""</span><span style="padding-left:4em">With-Recloser Outage Cost:<span style="padding-left:1em">$"""+str(finOutCost)+"""</span></span></b></p>
 			</div>"""
 		return html_str
 
@@ -620,7 +622,6 @@ def valueOfAdditionalRecloser(pathToGlm, workDir, lineFaultType, lineNameForRecl
 			if 'latitude' in item.keys() and 'longitude' in item.keys():
 				try: outGraph.node.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
 				except: outGraph.node.get(item['name'],{})['pos']=(0.0,0.0)
-
 	feeder.latLonNxGraph(outGraph, labels=True, neatoLayout=True, showPlot=True)
 	plt.savefig(workDir + '/feeder_chart')
 	return {'costStatsHtml': costStatsHtml, 'fig1': fig1, 'fig2': fig2, 'dataGanttWithout': gantt_without_recloser, 'dataGanttWith':gantt_with_recloser}
@@ -685,9 +686,13 @@ def distributiongraph(dist, param_1, param_2, nameOfGraph):
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
 	outData = {}
+	# Write the feeder
+	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
+	inputDict["feederName1"] = feederName
+	omf.feeder.omdToGlm(modelDir + '/' + feederName + '.omd', modelDir)
 	#test the main functions of the program
 	plotOuts = valueOfAdditionalRecloser(
-		inputDict['PATH_TO_GLM'],
+		modelDir + '/' + feederName + '.glm', #GLM Path
 		modelDir, #Work directory.
 		inputDict['lineTypeForFaults'],
 		inputDict['recloserLocation'],
@@ -715,10 +720,11 @@ def work(modelDir, inputDict):
 		outData["feeder_chart.png"] = inFile.read().encode("base64")
 	
 	# Plotly outputs.
+	layoutOb = go.Layout()
 	outData["fig1Data"] = json.dumps(plotOuts.get('fig1',{}), cls=py.utils.PlotlyJSONEncoder)
-	outData["fig1Layout"] = json.dumps(None, cls=py.utils.PlotlyJSONEncoder)
+	outData["fig1Layout"] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
 	outData["fig2Data"] = json.dumps(plotOuts.get('fig2',{}), cls=py.utils.PlotlyJSONEncoder)
-	outData["fig2Layout"] = json.dumps(None, cls=py.utils.PlotlyJSONEncoder)
+	outData["fig2Layout"] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
 	outData["dataGanttWithout"] = json.dumps(plotOuts.get('dataGanttWithout',{}), cls=py.utils.PlotlyJSONEncoder)
 	outData["ganttWithoutLayout"] = json.dumps(None, cls=py.utils.PlotlyJSONEncoder)
 	outData["dataGanttWith"] = json.dumps(plotOuts.get('dataGanttWith',{}), cls=py.utils.PlotlyJSONEncoder)
@@ -733,7 +739,7 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		"modelType": modelName,
-		"PATH_TO_GLM": omf.omfDir + '/scratch/CIGAR/test_ieee37nodeFaultTester.glm',
+		"feederName1": "ieee37nodeFaultTester",
 		"lineTypeForFaults": 'underground_line',
 		"recloserLocation": "node709-708",
 		'failureDistribution': 'EXPONENTIAL',
@@ -750,6 +756,11 @@ def new(modelDir):
 		'faultType': 'TLG',
 		'sustainedOutageThreshold': '60'
 	}
+	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
+	try:
+		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
+	except:
+		return False
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
 def _tests():
