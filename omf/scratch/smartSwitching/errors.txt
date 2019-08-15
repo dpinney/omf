@@ -70,3 +70,27 @@ Discussion:
 	It seems like the entire system is going off line and staying off line.
 	I think the problem is related to the swing nodes, but I'm not sure of
 	exactly how as of right now.
+
+Actual behavior: Cannot figure out how to label axes in subplots of plotly
+graphs. What says it should work online gives the error:
+"AttributeError: 'Figure' object has no attribute 'update_xaxes'."
+Expected behavior: We can label our axes.
+Workaround/fix:
+	Discussion:
+
+Actual behavior: When running outageCost.py, I get the error:
+[Errno 2] No such file or directory: 'templates/geoJsonMap.html', which relates
+to the import of geo.py. I noticed that putting the folder 'templates' in
+smartSwitching is a workaround. However, it is likely best to not have to put
+the folder inside the models folder as well...
+Expected behavior: Some import statement makes it possible to import the folder
+'templates' straight from the omf.
+Workaround/fix: For now, adding the templates folder in models works, but not ideal
+Discussion:
+	Importing folders rather than modules...?
+
+Actual behavior: I want to make the outages on the leaflet map a different color
+than the nodes (maybe green?). Right now they are red.
+Expected behavior: The outages are green, or some other different color!
+Workaround/fix:
+	Discussion:
