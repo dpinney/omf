@@ -97,7 +97,7 @@ def work(modelDir, ind):
 
 	tomorrow_peak = max(tomorrow_load)
 	m = df[df['month'] == tomorrow.month]
-	o['quantile'] = round(m[m['load'] < tomorrow_peak].shape[0]/m.shape[0]*100, 2)
+	o['quantile'] = round(m[m['load'] < tomorrow_peak].shape[0]/float(m.shape[0])*100, 2)
 	o['predicted_peak'] = [highest_peak_this_month(df, tomorrow), tomorrow_peak, two_day_peak, three_day_peak]
 	o['predicted_peak_limits'] = [
 		[0, 0],
@@ -136,7 +136,7 @@ def new(modelDir):
 		'created': '2015-06-12 17:20:39.308239',
 		'modelType': modelName,
 		'runTime': '0:01:03',
-		'epochs': '1',
+		'epochs': '50',
 		'autoFill': "off",
 		'histFileName': 'd_Texas_17yr_TempAndLoad.csv',
 		"histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","d_Texas_17yr_TempAndLoad.csv"), 'rU').read(),

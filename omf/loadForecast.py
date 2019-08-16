@@ -582,7 +582,7 @@ def train_neural_net(X_train, y_train, epochs):
 
 	early_stop = tf.keras.callbacks.EarlyStopping(monitor="mean_absolute_error", patience=20)
 
-	history = model.fit( X_train, y_train, epochs=epochs, verbose=0, callbacks=[early_stop])
+	history = model.fit(X_train, y_train, epochs=epochs, verbose=0, callbacks=[early_stop])
 
 	return model
 
@@ -620,7 +620,7 @@ def neural_net_next_day(all_X, all_y, epochs=100, hours_prior=24, save_file=None
 		'train': MAPE(train, y_train)
 	}
 
-	model.fit(X_test, y_test, epochs=epochs, validation_split=0.2, verbose=0)
+	model.fit(X_test, y_test, epochs=epochs, verbose=0)
 
 	predictions = [float(f) for f in model.predict(all_X[-24:])]
 
