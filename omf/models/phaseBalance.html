@@ -298,7 +298,7 @@
 					<td>{{allOutputDataDict['service_cost']['losses']['controlled']}}</td>
 				</tr>
 				<tr>
-					<td>VARs of Losses</td>
+					<td>VARs</td>
 					<td>{{allOutputDataDict['service_cost']['VARs']['base']}}</td>
 					<td>{{allOutputDataDict['service_cost']['VARs']['solar']}}</td>
 					<td>{{allOutputDataDict['service_cost']['VARs']['controlled']}}</td>
@@ -335,6 +335,7 @@
 						<th>B (V)</th>
 						<th>C (V)</th>
 						<th>Unbalance</th>
+						<th>Motor Efficiency</th>
 					</tr>
 				</thead>
 				{{allOutputDataDict['motor_table_base']}}
@@ -352,6 +353,7 @@
 						<th>B (V)</th>
 						<th>C (V)</th>
 						<th>Unbalance</th>
+						<th>Motor Efficiency</th>
 					</tr>
 				</thead>
 				{{allOutputDataDict['motor_table_solar']}}
@@ -370,6 +372,7 @@
 						<th>B (V)</th>
 						<th>C (V)</th>
 						<th>Unbalance</th>
+						<th>Motor Efficiency</th>
 					</tr>
 				</thead>
 				{{allOutputDataDict['motor_table_controlled']}}

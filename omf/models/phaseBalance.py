@@ -20,6 +20,10 @@ modelName, template = metadata(__file__)
 tooltip = "Calculate phase unbalance and determine mitigation options."
 hidden = True
 
+
+def motor_efficiency(x):
+	return 100 - (.0179 + .402*x + .134*x**2) # curve fit from data from NREL analysis
+
 def n(num):
 	return "{:,.2f}".format(num)
 
@@ -176,7 +180,7 @@ def work(modelDir, ind):
 		for phase in 'ABC':
 			df = _readCSV(pJoin(modelDir, 'all_inverters_VA_Out_AC_' + phase + suffix + '.csv'))
 			df_invs[suffix][phase] = df
-			sums[suffix] += df['real'].sum()
+			sums[suffix] += complex(df['real'].sum(), df['imag'].sum())
 
 	o['service_cost'] = {
 		'load': {
@@ -185,9 +189,9 @@ def work(modelDir, ind):
 			'controlled': n(_totals(pJoin(modelDir, 'load' + controlled_suffix + '.csv'), 'real') + _totals(pJoin(modelDir, 'load_node' + controlled_suffix + '.csv'), 'real'))
 		},
 		'distributed_gen': {
-			'base': n(sums[base_suffix]),
-			'solar': n(SIGN_CORRECTION*sums[solar_suffix]),
-			'controlled': n(SIGN_CORRECTION*sums[controlled_suffix])
+			'base': n(sums[base_suffix].real),
+			'solar': n(SIGN_CORRECTION*sums[solar_suffix].real),
+			'controlled': n(SIGN_CORRECTION*sums[controlled_suffix].real)
 		},
 		'losses': {
 			'base': n(sum([_totals(pJoin(modelDir, 'Zlosses_' + loss + base_suffix + '.csv'), 'real') for loss in 
@@ -199,11 +203,17 @@ def work(modelDir, ind):
 		},
 		'VARs': {
 			'base': n(sum([_totals(pJoin(modelDir, 'Zlosses_' + loss + base_suffix + '.csv'), 'imag') for loss in 
-				['transformer', 'underground_line', 'overhead_line', 'triplex_line']])),
+				['transformer', 'underground_line', 'overhead_line', 'triplex_line']]) + sums[base_suffix].imag +
+				_totals(pJoin(modelDir, 'load' + base_suffix + '.csv'), 'imag') + _totals(pJoin(modelDir, 'load_node' + base_suffix + '.csv'), 'imag')
+			),
 			'solar': n(sum([_totals(pJoin(modelDir, 'Zlosses_' + loss + solar_suffix + '.csv'), 'imag') for loss in 
-				['transformer', 'underground_line', 'overhead_line', 'triplex_line']])),
+				['transformer', 'underground_line', 'overhead_line', 'triplex_line']]) + sums[solar_suffix].imag +
+				_totals(pJoin(modelDir, 'load' + solar_suffix + '.csv'), 'imag') + _totals(pJoin(modelDir, 'load_node' + solar_suffix + '.csv'), 'imag')
+			),
 			'controlled': n(sum([_totals(pJoin(modelDir, 'Zlosses_' + loss + controlled_suffix + '.csv'), 'imag') for loss in 
-				['transformer', 'underground_line', 'overhead_line', 'triplex_line']]))
+				['transformer', 'underground_line', 'overhead_line', 'triplex_line']]) + sums[controlled_suffix].imag +
+				_totals(pJoin(modelDir, 'load' + controlled_suffix + '.csv'), 'imag') + _totals(pJoin(modelDir, 'load_node' + controlled_suffix + '.csv'), 'imag')
+			)
 		}
 	}
 
@@ -268,17 +278,17 @@ def work(modelDir, ind):
 		
 		o['motor_table' + suffix] = ''.join([(
 			"<tr>"
-				"<td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td><td>{5}</td><td>{6}</td>"
+				"<td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td><td>{5}</td><td>{6}</td><td>{7}</td>"
 			"</tr>" 
 				if r['node_name'] != ind['criticalNode'] else 
 			"<tr>"
-				"<td {7}>{0}</td><td {7}>{1}</td><td {7}>{2}</td><td {7}>{3}</td><td {7}>{4}</td><td {7}>{5}</td><td {7}>{6}</td>"
+				"<td {8}>{0}</td><td {8}>{1}</td><td {8}>{2}</td><td {8}>{3}</td><td {8}>{4}</td><td {8}>{5}</td><td {8}>{6}</td><td {8}>{7}</td>"
 			"</tr>"
 		).format(r['node_name'], 
 					n(r2['A_real'] + r2['B_real'] + r2['C_real']),
 					n(r2['A_imag'] + r2['B_imag'] + r2['C_imag']),
 					n(r['voltA']), n(r['voltB']), n(r['voltC']), 
-					n(r['unbalance']), "style='background:yellow'") 
+					n(r['unbalance']), n(motor_efficiency(r['unbalance'])), "style='background:yellow'") 
 				for (i, r), (j, r2) in zip(df_all_motors.iterrows(), df_vs[suffix].iterrows())])
 	# ----------------------------------------------------------------------- #
 

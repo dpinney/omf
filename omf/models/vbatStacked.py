@@ -4,7 +4,7 @@ import shutil, csv, os, math
 from os.path import join as pJoin
 import pandas as pd
 import numpy as np
-from datetime import datetime as dt
+from datetime import datetime as dt, timedelta
 from numpy import npv
 
 import __neoMetaModel__
@@ -101,9 +101,17 @@ def work(modelDir, ind):
 	else:
 		regulation_after = 0
 
+	if ind['use_deferral'] == "on":
+		not_surpassed = all([x <= float(ind['transformerThreshold']) for x in output_df['Net load (kW)'].tolist()])
+		deferral_before = -1*(float(ind['carryingCost'])/100)*float(ind['yearsToReplace'])*float(ind['avoidedCost'])
+		deferral_after = 0 if not_surpassed else deferral_before
+	else:
+		deferral_before = 0
+		deferral_after = 0
+
 	total_upkeep_costs = upkeep_cost*number_devices
-	cost_before = price_structure_before
-	cost_after = price_structure_after - regulation_after
+	cost_before = price_structure_before - deferral_before
+	cost_after = price_structure_after - regulation_after - deferral_after
 	
 	gross_savings = cost_before - cost_after
 	money_saved = gross_savings - total_upkeep_costs
@@ -112,9 +120,10 @@ def work(modelDir, ind):
 
 	out['cost_table'] = (
 			"<tr><td style='font-weight: bold;'>Price Structure</td><td>{0}</td><td>{1}</td><td>{2}</td></tr>"
-			# "<tr><td style='font-weight: bold;'>Deferral</td><td>$0.00</td><td>$0.00</td><td>$0.00</td></tr>"
-			"<tr {6}><td style='font-weight: bold; border-bottom: 3px solid black;'>Regulation</td><td {6}>{3}</td><td {6}>{4}</td><td {6}>{5}</td></tr>"
+			"<tr><td style='font-weight: bold;'>Deferral</td><td>{3}</td><td>{4}</td><td>{5}</td></tr>"
+			"<tr {6}><td style='font-weight: bold; border-bottom: 3px solid black;'>Regulation</td><td {9}>{6}</td><td {9}>{7}</td><td {9}>{8}</td></tr>"
 		).format(n(price_structure_before), n(price_structure_after), n(price_structure_before - price_structure_after),
+				n(deferral_before), n(deferral_after), n(deferral_after - deferral_before),
 				n(0), n(regulation_after), n(regulation_after), 
 				styling) + (
 				"<tr><td colspan='2'>&nbsp;</td><td style='font-weight: bold;'>Gross Savings</td><td>{0}</td></tr>"
@@ -135,23 +144,30 @@ def work(modelDir, ind):
 	out["VBenergy"] = [-x for x in output_df['VB energy (kWh)'].tolist()]
 	out["demandAdjusted"] = output_df['Net load (kW)'].tolist()
 	out["regulation"] = output_df['Regulation (kW)'].tolist() if 'Regulation (kW)' in output_df else 0
-	# [0]*output_df.shape[0]
 
 	out['vbpu'] = input_df['VB Power upper (kW)'].tolist()
 	out['vbpl'] = input_df['VB Power lower (kW)'].tolist()
 	out['vbeu'] = input_df['VB Energy upper (kWh)'].tolist()
 	out['vbel'] = input_df['VB Energy lower (kWh)'].tolist()
 
+	out['startDate'] = str(dt(2001, 1, 1))
+	days_dispatched_arbitrage = [not all([x == 0 for x in out["VBpower"][i:i+24]]) for i in range(0, len(out["VBpower"]), 24)]
+	days_dispatched_regulation = [not all([x == 0 for x in out["regulation"][i:i+24]]) for i in range(0, len(out["regulation"]), 24)]
+	days_dispatched = [a or b for a, b in zip(days_dispatched_regulation, days_dispatched_arbitrage)]
+	out['dispatchDates'] = [[str(dt(2001, 1, 1, 12, 0, 0) + timedelta(days=i)), 0] for i in range(365) if days_dispatched[i]]
+	out['totalDispatches'] = len(out['dispatchDates'])
+
+	out['transformerThreshold'] = float(ind['transformerThreshold']) if ind['use_deferral'] == 'on' else None;
+
 	out["stdout"] = "Success"
 	return out
-
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		"user": "admin",
 		# options for dispatch
-		"use_deferral": "off",
+		"use_deferral": "on",
 		"use_arbitrage": "on",
 		"use_regulation": "on",
 		"userHourLimit": "8760",
@@ -181,7 +197,11 @@ def new(modelDir):
 		"peakPercentile": "0.99",
 		"gt_demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","fhec_2017_gt.csv")).read(),
 		"gt_demandCurveFileName": "fhec_2017_gt.csv",
-		
+		# Deferral
+		"transformerThreshold": "3500",
+		"avoidedCost": "2000000",
+		"yearsToReplace": "2",
+		"carryingCost": "7",
 		"tempCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_1yr_Temp.csv")).read(),
 		"tempCurveFileName": "Texas_1yr_Temp.csv",
 		"inputCsv": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","fhec_knievel_demand_reduction_input.csv")).read(),
