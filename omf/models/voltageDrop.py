@@ -323,6 +323,15 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 		positions = graphviz_layout(cleanG, prog='neato')
 	else:
 		positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
+		
+		remove_nodes = [n for n in fGraph if fGraph.node[n].get('pos', (0, 0)) == (0, 0)]
+		positions = {k: v for k, v in positions.iteritems() if k not in remove_nodes}
+		
+		remove_edges = [e for e in fGraph.edges(remove_nodes)]
+		edgeNames = [e for e in edgeNames if e != remove_edges]
+		
+		fGraph.remove_nodes_from(remove_nodes)
+
 	#create custom colormap
 	if customColormap:
 		custom_cm = matplotlib.colors.LinearSegmentedColormap.from_list('custColMap',[(0.0,'blue'),(0.15,'darkgray'),(0.7,'darkgray'),(1.0,'red')])
@@ -355,11 +364,14 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 			print "WARNING: edgeCol property must be 'Current', 'Power', 'Rating', 'PercentOfRating', or None"
 	else:
 		edgeList = [emptyColors.get(n,.6) for n in edgeNames]
+	
 	edgeIm = nx.draw_networkx_edges(fGraph,
 		pos = positions,
-		edge_color = edgeList,
+		# edge_color = edgeList,
 		width = 1,
-		edge_cmap = custom_cm)
+		# edge_cmap = custom_cm
+	)
+
 	#draw edge labels
 	if edgeLabs != None:
 		if edgeLabs == "Name":
@@ -438,6 +450,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 			pos = positions,
 			labels = nodeLabels,
 			font_size = 8)
+
 	plt.sci(nodeIm)
 	# plt.clim(110,130)
 	if drawColorbar:
