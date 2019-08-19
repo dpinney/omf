@@ -5,7 +5,7 @@ from datetime import datetime as dt
 import matplotlib.pyplot as plt
 import __neoMetaModel__, json
 from __neoMetaModel__ import *
-from omf import loadForecast
+from omf import forecast as loadForecast
 
 # Model metadata:
 modelName, template = metadata(__file__)

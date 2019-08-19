@@ -11,7 +11,7 @@ from numpy import array, npv, arctan as atan
 import __neoMetaModel__
 from __neoMetaModel__ import *
 from solvers import VB
-from omf import loadForecast as fc
+from omf import forecast as fc
 
 # Model metadata:
 modelName, template = metadata(__file__)

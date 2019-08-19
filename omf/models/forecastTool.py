@@ -6,7 +6,7 @@ from os.path import isdir, join as pJoin
 import pandas as pd
 from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
-from omf import loadForecast as lf
+from omf import forecast as lf
 import numpy as np
 from scipy.stats import norm
 import re
