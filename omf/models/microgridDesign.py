@@ -369,7 +369,7 @@ def new(modelDir):
 		"runTime": "",
 		"loadShape" : open(pJoin(omf.omfDir, "static", "testFiles", fName)).read(),
 		"solar" : "on",
-		"wind" : "on",
+		"wind" : "None",
 		"battery" : "on",
 		"fileName" : fName,
 		"latitude" : '39.7817',
@@ -399,7 +399,22 @@ def new(modelDir):
 	return creationCode
 
 def _debugging():
-	pass
+		# Location
+	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
+	# Blow away old test results if necessary.
+	try:
+		shutil.rmtree(modelLoc)
+	except:
+		# No previous test results.
+		pass 
+	# Create New.
+	new(modelLoc)
+	# Pre-run.
+	# renderAndShow(modelLoc)
+	# Run the model.
+	runForeground(modelLoc)
+	# Show the output.
+	renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_debugging()
