@@ -214,6 +214,11 @@
 				}
 			}
 		}
+		else if (feature.geometry['type'] == 'Polygon'){
+			return {
+				"opacity": "0.5",
+			}
+		}
 	}
 	var geojsonLayer = L.geoJSON(false, {
 				pointToLayer: pointToLayerNode,
