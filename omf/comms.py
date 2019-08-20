@@ -275,7 +275,7 @@ def convexMesh(nxG, meshLevel, geoJsonDict=dict()):
 	meshPoints = [(node, node[1]['pos']) for node in nxG.nodes(data=True) if node[1].get('meshLevel',float('inf')) <= meshLevel]
 	points = np.array([pos[1] for pos in meshPoints])
 	hull = ConvexHull(points)
-	concaveBoundary = stitch_boundaries(alpha_shape(points, .0015))[0]
+	concaveBoundary = stitch_boundaries(alpha_shape(points, .0019))[0]
 	concaveHull = [points.tolist()[i[0]] for i in concaveBoundary]
 	polygon = points[hull.vertices].tolist()
 	for node in nxG.nodes(data=True):
@@ -293,13 +293,16 @@ def convexMesh(nxG, meshLevel, geoJsonDict=dict()):
 			"geometry":{
 				"type": "Polygon",
 				"coordinates": [concaveHull]
+			},
+			"properties": {
+				"meshLevel": meshLevel
 			}
 		}
 	geoJsonDict['features'].append(concaveHullFeature)
 	return meshHull
 
+'''
 def convexHullMesh(nxG, meshLevel, previousMeshHull):
-	'''marks nodes that make up the edges of the convex hull'''
 	#meshPoints = [nxG.node[node]['pos'] for node in nx.get_node_attributes(nxG, 'meshLevel') if nxG.node[node].get('meshLevel',-1) == meshLevel]
 	#mesh hull is list of points on outer hull
 	if len(previousMeshHull) > 1:
@@ -328,7 +331,7 @@ def convexHullMesh(nxG, meshLevel, previousMeshHull):
 			}
 		}]
 	}
-	return geoJsonDict
+	return geoJsonDict'''
 
 def levelCount(nxG, meshLevel):
 	'''return number of nodes at a certain mesh level'''
