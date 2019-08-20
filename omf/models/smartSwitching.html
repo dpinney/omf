@@ -4,7 +4,23 @@
 	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
 	<style>
-	/*Styles will go here*/
+	/*Styles here*/
+		table {
+			border-collapse: collapse;
+			width: 100%;
+		}
+		table, th, td {
+			border: 1px solid black;
+			text-align: center;
+			padding-top: 10px;
+			padding-bottom: 10px;
+		}
+		th {
+			background-color: #8c8c8c;
+		}
+		tr:nth-child(even) {
+			background-color: #e6e6e6;
+		}
 	</style>
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->
@@ -189,7 +205,7 @@
 		</script>
 	</div>
 	<div id="output">
-		<p class="reportTitle postRun">Recloser Diagram (Recloser Show in Pink)</p>
+		<p class="reportTitle postRun">Feeder Diagram (Added Recloser Shown in Pink, Other Reclosers Shown as Black Dotted Lines)</p>
 		<div id="feederChart" class="content postRun" style="margin-top:0px">
 			<img id="feederChartImage" style="width:980px" />
 			<script>gebi("feederChartImage").src = "data:image/png;base64," + allOutputData["feeder_chart.png"]</script>
@@ -222,18 +238,17 @@
 			</script>
 		</div>
 		<p class="reportTitle postRun">Outage Timeline Without Recloser</p>
-		<div id="outageNoRecloser" class="tightContent postRun">
-			<div id="outageNoReploserChart" style="width:100%"></div>
+		<div id="fig3" class="tightContent postRun">
+			<div id="fig3Chart" style="width:1000px"></div>
 			<script type="text/javascript">
-				Plotly.newPlot("outageNoReploserChart", JSON.parse(allOutputData["dataGanttWithout"]), JSON.parse(allOutputData["ganttWithoutLayout"]) || {})
+				Plotly.newPlot("fig3Chart", JSON.parse(allOutputData["fig3Data"]), JSON.parse(allOutputData["fig3Layout"]) || {})
 			</script>
 		</div>
-		</div>
 		<p class="reportTitle postRun">Outage Timeline With Recloser</p>
-		<div id="outageRecloser" class="tightContent postRun">
-			<div id="outageReploserChart" style="width:100%"></div>
+		<div id="fig4" class="tightContent postRun">
+			<div id="fig4Chart" style="width:1000px"></div>
 			<script type="text/javascript">
-				Plotly.newPlot("outageReploserChart", JSON.parse(allOutputData["dataGanttWith"]), JSON.parse(allOutputData["ganttWithLayout"]) || {})
+				Plotly.newPlot("fig4Chart", JSON.parse(allOutputData["fig4Data"]), JSON.parse(allOutputData["fig4Layout"]) || {})
 			</script>
 		</div>
 		<p class="reportTitle postRun">Raw Input and Output Files</p>

@@ -153,8 +153,8 @@ def setupSystem(pathToGlm, workDir, lineFaultType, failureDistribution, failure_
 	currentKey = smallestKey
 	while tree.get(str(currentKey)) != None:
 		currentKey += 1
-	seed = random.randint(1,1000)
-	tree[str(currentKey)] = {'omftype': '#set', 'argument': 'randomseed={}'.format(seed)}
+	seed = np.random.randint(1,1000)
+	tree[str(currentKey)] = {'omftype': '#set', 'argument': 'randomseed=' + str(seed)}
 
 	# Add Reliability module
 	tree[str(biggestKey*10)] = {'module':'reliability','maximum_event_length':'18000','report_event_log':'true'}
@@ -266,7 +266,6 @@ def setupSystem(pathToGlm, workDir, lineFaultType, failureDistribution, failure_
 					phaseState = obj.get('phase_' + phase + '_status','GOOD')
 				if phase in obj.get('phases', ''):
 					protDevInitStatus[obName][phase] = phaseState
-	#print protDevInitStatus
 
 	#Create a recorder for protective device states
 	for key in protDevices.keys():
@@ -321,7 +320,6 @@ def protection(tree):
 					phaseState = obj.get('phase_' + phase + '_status','GOOD')
 				if phase in obj.get('phases', ''):
 					protDevInitStatus[obName][phase] = phaseState
-				#print protDevInitStatus
 	
 	#Create a recorder for protective device states
 	for key in protDevices.keys():
@@ -350,18 +348,16 @@ def recloserAnalysis(pathToGlm, workDir, lineFaultType, lineNameForRecloser, fai
 	tree, workDir, biggestKey, index = setupSystem(pathToGlm, workDir, lineFaultType, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType)
 
 	numberOfCustomers, noReclSAIFI, noReclSAIDI, noReclMAIFI, mc1 = pullOutValues(tree, workDir, sustainedOutageThreshold)
-	
 	#add a recloser
 	for key in tree:
 		if tree[key].get('name', '') == lineNameForRecloser:
-			tree[str(biggestKey*10 + index)] = {'object':'recloser','phases':tree[key]['phases'],'name':tree[key]['name'] + '_recloser' , 'from':tree[key]['from'], 'to':tree[key]['to'], 'retry_time': '1 s', 'max_number_of_tries': '3'}
+			tree[str(biggestKey*10 + index)] = {'object':'recloser','phases':tree[key]['phases'],'name':tree[key]['name'] + '_addedRecloser' , 'from':tree[key]['from'], 'to':tree[key]['to'], 'retry_time': '1 s', 'max_number_of_tries': '3'}
 			del tree[key]
 			index = index + 1
 	
 	tree = protection(tree)
 	
 	numberOfCustomers, reclSAIFI, reclSAIDI, reclMAIFI, mc2 = pullOutValues(tree, workDir, sustainedOutageThreshold)
-
 	return numberOfCustomers, mc1, mc2, tree, {
 		'noRecl-SAIDI':noReclSAIDI,
 		'noRecl-SAIFI':noReclSAIFI,
@@ -535,6 +531,22 @@ def valueOfAdditionalRecloser(pathToGlm, workDir, lineFaultType, lineNameForRecl
 	finalOutageCost = finalCustomerCost + finalRestorationCost + finalHardwareCost
 
 	def costStatsCalc(initCustCost=None, finCustCost=None, initRestCost=None, finRestCost=None, initHardCost=None, finHardCost=None, initOutCost=None, finOutCost=None):
+		new_html_str = """
+			<table cellpadding="0" cellspacing="0">
+				<thead>
+					<tr>
+						<th></th>
+						<th>No-Recloser</th>
+						<th>Recloser</th>
+					</tr>
+				</thead>
+				<tbody>"""
+		new_html_str += "<tr><td><b>Lost kWh Sales</b></td><td>"+str(initCustCost)+"</td><td>"+str(finCustCost)+"</td></tr>"
+		new_html_str += "<tr><td><b>Restoration Labor Cost</b></td><td>"+str(initRestCost)+"</td><td>"+str(finRestCost)+"</td></tr>"
+		new_html_str += "<tr><td><b>Restoration Hardware Cost</b></td><td>"+str(initHardCost)+"</td><td>"+str(finHardCost)+"</td></tr>"
+		new_html_str += "<tr><td><b>Outage Cost</b></td><td>"+str(initOutCost)+"</td><td>"+str(finOutCost)+"</td></tr>"
+		new_html_str +="""</tbody></table>"""
+
 		html_str = """
 			<div style="text-align:center">
 				<p style="padding-top:10px; padding-bottom:10px;">No-Recloser Lost kWh Sales:<span style="padding-left:1em">$"""+str(initCustCost)+"""</span><span style="padding-left:4em">With-Recloser Lost kWh Sales:<span style="padding-left:1em">$"""+str(finCustCost)+"""</span></span></p>
@@ -542,7 +554,9 @@ def valueOfAdditionalRecloser(pathToGlm, workDir, lineFaultType, lineNameForRecl
 				<p style="padding-top:10px; padding-bottom:10px;">No-Recloser Restoration Hardware Cost:<span style="padding-left:1em">$"""+str(initHardCost)+"""</span><span style="padding-left:4em">With-Recloser Restoration Hardware Cost:<span style="padding-left:1em">$"""+str(finHardCost)+"""</span></span></p>
 				<p style="padding-top:10px; padding-bottom:10px;"><b>No-Recloser Outage Cost:<span style="padding-left:1em">$"""+str(initOutCost)+"""</span><span style="padding-left:4em">With-Recloser Outage Cost:<span style="padding-left:1em">$"""+str(finOutCost)+"""</span></span></b></p>
 			</div>"""
-		return html_str
+
+		return new_html_str
+
 
 	# print all intermediate and final costs
 	costStatsHtml = costStatsCalc(
@@ -572,17 +586,62 @@ def valueOfAdditionalRecloser(pathToGlm, workDir, lineFaultType, lineNameForRecl
 	fig1.add_trace(dataSaidi, row=1, col=1)
 	fig1.add_trace(dataMaifi, row=1, col=2)
 
-	# gantt plots
-	gantt_without_recloser = ff.create_gantt(mc1, colors=['#333F44', '#93e4c1'], index_col='Task', show_colorbar=True,
-                      bar_width=0.3, showgrid_x=True, showgrid_y=True, title=None)
-	py.offline.plot(gantt_without_recloser, filename=workDir + '/gantt_timeline_without_recloser', auto_open=False)
+	# stacked bar chart to show outage timeline without the recloser
+	row = 0
+	date = [[] for _ in range(365)]
+	row_count_mc1 = mc1.shape[0]
+	while row < row_count_mc1:
+		dt = datetime.datetime.strptime(mc1.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')
+		day = int(dt.strftime('%j')) - 1
+		date[day].append(datetime_to_float(datetime.datetime.strptime(mc1.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc1.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S')))
+		row += 1
+	# convert array of durations into jagged numpy object
+	jaggedData = np.array(date)
+	# get lengths of each row of data
+	lens = np.array([len(i) for i in jaggedData])
+	# mask of valid places in each row to fill with zeros
+	mask = np.arange(lens.max()) < lens[:,None]
+	# setup output array and put elements from jaggedData into masked positions
+	data = np.zeros(mask.shape, dtype=jaggedData.dtype)
+	data[mask] = np.concatenate(jaggedData)
+	numCols = data.shape[1]
+	graphData = []
+	currCol = 0
+	while currCol < numCols:
+		graphData.append(go.Bar(name='Fault ' + str(currCol+1), x = list(range(365)), y = data[:,currCol]))
+		currCol += 1
+	fig3 = go.Figure(data = graphData)
+	fig3.layout.update(barmode='stack', xaxis=go.layout.XAxis(title=go.layout.xaxis.Title(text='Day of the year')), yaxis=go.layout.YAxis(title=go.layout.yaxis.Title(text='Outage time (seconds)')))
 
-	gantt_with_recloser = ff.create_gantt(mc2, colors=['#333F44', '#93e4c1'], index_col='Task', show_colorbar=True,
-                      bar_width=0.3, showgrid_x=True, showgrid_y=True, title=None)
-	py.offline.plot(gantt_with_recloser, filename=workDir + '/gantt_timeline_with_recloser', auto_open=False)
-	
+	# stacked bar chart to show outage timeline with recloser
+	row = 0
+	date = [[] for _ in range(365)]
+	row_count_mc2 = mc2.shape[0]
+	while row < row_count_mc2:
+		dt = datetime.datetime.strptime(mc2.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')
+		day = int(dt.strftime('%j')) - 1
+		date[day].append(datetime_to_float(datetime.datetime.strptime(mc2.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc2.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S')))
+		row += 1
+	# convert array of durations into jagged numpy object
+	jaggedData = np.array(date)
+	# get lengths of each row of data
+	lens = np.array([len(i) for i in jaggedData])
+	# mask of valid places in each row to fill with zeros
+	mask = np.arange(lens.max()) < lens[:,None]
+	# setup output array and put elements from jaggedData into masked positions
+	data = np.zeros(mask.shape, dtype=jaggedData.dtype)
+	data[mask] = np.concatenate(jaggedData)
+	numCols = data.shape[1]
+	graphData = []
+	currCol = 0
+	while currCol < numCols:
+		graphData.append(go.Bar(name='Fault ' + str(currCol+1), x = list(range(365)), y = data[:,currCol]))
+		currCol += 1
+	fig4 = go.Figure(data = graphData)
+	fig4.layout.update(barmode='stack', xaxis=go.layout.XAxis(title=go.layout.xaxis.Title(text='Day of the year')), yaxis=go.layout.YAxis(title=go.layout.yaxis.Title(text='Outage time (seconds)')))
+
 	# graph distribution data
-	fig2 = make_subplots(rows=1, cols=2)
+	fig2 = make_subplots(rows=1, cols=2, shared_yaxes=True)
 	
 	# graph failure distribution	
 	dataFail = distributiongraph(failureDistribution, failure_1, failure_2, 'Failure Distribution')
@@ -590,11 +649,9 @@ def valueOfAdditionalRecloser(pathToGlm, workDir, lineFaultType, lineNameForRecl
 	# graph restoration distribution
 	dataRest = distributiongraph(restorationDistribution, rest_1, rest_2, 'Restoration Distribution')
 	fig2.add_trace(dataRest,row=1, col=2)
-#	fig2.update_xaxes(title_text='Time to failure (seconds)', row=1, col=1)
-#	fig2.update_xaxes(title_text='Time to restoration (seconds)', row=1, col=2)
-#	fig2.update_yaxes(title_text='Probability distribution function', row=1, col=1)
-#	fig2.update_yaxes(title_text='Probability distribution function', row=1, col=2)
-
+	fig2['layout']['xaxis1'].update(title='Time to failure (seconds)')
+	fig2['layout']['xaxis2'].update(title='Time to restoration (seconds)')
+	fig2['layout']['yaxis1'].update(title='Probability distribution function')
 	# feeder chart with recloser
 	outGraph = nx.Graph()
 	for key in tree1:
@@ -602,9 +659,11 @@ def valueOfAdditionalRecloser(pathToGlm, workDir, lineFaultType, lineNameForRecl
 		if 'name' in item.keys():
 			obType = item.get('object')
 			reclDevices = dict.fromkeys(['recloser'], False)
-			if obType in reclDevices.keys():
+			if (obType in reclDevices.keys() and 'addedRecloser' in item.get('name', '')):
 				# HACK: set the recloser as a swingNode in order to make it hot pink
 				outGraph.add_edge(item['from'],item['to'], attr_dict={'type':'swingNode'})
+			elif (obType in reclDevices.keys() and 'addedRecloser' not in item.get('name','')):
+				outGraph.add_edge(item['from'],item['to'])
 			elif 'parent' in item.keys() and obType not in reclDevices:
 				outGraph.add_edge(item['name'],item['parent'], attr_dict={'type':'parentChild','phases':1})
 				outGraph.node[item['name']]['type']=item['object']
@@ -624,7 +683,7 @@ def valueOfAdditionalRecloser(pathToGlm, workDir, lineFaultType, lineNameForRecl
 				except: outGraph.node.get(item['name'],{})['pos']=(0.0,0.0)
 	feeder.latLonNxGraph(outGraph, labels=True, neatoLayout=True, showPlot=True)
 	plt.savefig(workDir + '/feeder_chart')
-	return {'costStatsHtml': costStatsHtml, 'fig1': fig1, 'fig2': fig2, 'dataGanttWithout': gantt_without_recloser, 'dataGanttWith':gantt_with_recloser}
+	return {'costStatsHtml': costStatsHtml, 'fig1': fig1, 'fig2': fig2, 'fig3': fig3, 'fig4': fig4}
 
 def distributiongraph(dist, param_1, param_2, nameOfGraph):
 	'function that graphs the distribution data'
@@ -725,10 +784,10 @@ def work(modelDir, inputDict):
 	outData["fig1Layout"] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
 	outData["fig2Data"] = json.dumps(plotOuts.get('fig2',{}), cls=py.utils.PlotlyJSONEncoder)
 	outData["fig2Layout"] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
-	outData["dataGanttWithout"] = json.dumps(plotOuts.get('dataGanttWithout',{}), cls=py.utils.PlotlyJSONEncoder)
-	outData["ganttWithoutLayout"] = json.dumps(None, cls=py.utils.PlotlyJSONEncoder)
-	outData["dataGanttWith"] = json.dumps(plotOuts.get('dataGanttWith',{}), cls=py.utils.PlotlyJSONEncoder)
-	outData["ganttWithLayout"] = json.dumps(None, cls=py.utils.PlotlyJSONEncoder)
+	outData["fig3Data"] = json.dumps(plotOuts.get('fig3',{}), cls=py.utils.PlotlyJSONEncoder)
+	outData["fig3Layout"] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
+	outData["fig4Data"] = json.dumps(plotOuts.get('fig4',{}), cls=py.utils.PlotlyJSONEncoder)
+	outData["fig4Layout"] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
 
 	# Stdout/stderr.
 	outData["stdout"] = "Success"
@@ -741,14 +800,14 @@ def new(modelDir):
 		"modelType": modelName,
 		"feederName1": "ieee37nodeFaultTester",
 		"lineTypeForFaults": 'underground_line',
-		"recloserLocation": "node709-708",
+		"recloserLocation": "node730-709",
 		'failureDistribution': 'EXPONENTIAL',
 		'failureDistParam1': '3.858e-7',
 		'failureDistParam2':'0.0',
 		'restorationDistribution': 'PARETO',
 		'restorationDistParam1': '1.0',
 		'restorationDistParam2': '1.0002778',
-		'maxFaultLength': '432000',
+		'maxFaultLength': '300',
 		'kwh_cost': '1',
 		'restoration_cost': '1',
 		'average_hardware_cost': '1',
