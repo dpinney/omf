@@ -1,4 +1,4 @@
-import matplotlib, warnings, csv, json
+import matplotlib, warnings, csv, json, plotly
 from os.path import join as pJoin
 from matplotlib import pyplot as plt
 from omf.models import __neoMetaModel__
@@ -6,12 +6,13 @@ from __neoMetaModel__ import *
 from omf.solvers.REopt import run as runREopt
 from omf.solvers.REopt import runResilience as runResilienceREopt
 import numpy as np
+import plotly.graph_objs as go
 
 warnings.filterwarnings('ignore')
 
 # Model metadata:
 modelName, template = metadata(__file__)
-tooltip = "The microGridDesign model ..."
+tooltip = "The microGridDesign model uses a 1yr load profile to determine the most economical combination of solar, wind, and storage technologies to use in a microgrid. The model also provides basic resiliency analysis."
 hidden = False
 
 def work(modelDir, inputDict):
@@ -127,6 +128,9 @@ def work(modelDir, inputDict):
 
 	resultsSubset = results['outputs']['Scenario']['Site']
 	outData['demandCostBAU'] = resultsSubset['ElectricTariff']['total_demand_cost_bau_us_dollars']
+	if outData['demandCostBAU'] is None:
+		errMsg = results['messages'].get('error','API currently unavailable please try again later')
+		raise Exception('The reOpt data analysis API by NREL had the following error: ' + errMsg) 
 	outData['demandCost'] = resultsSubset['ElectricTariff']['total_demand_cost_us_dollars']
 	outData['demandCostDiff'] = outData['demandCostBAU'] - outData['demandCost']
 	outData['energyCostBAU'] = resultsSubset['ElectricTariff']['total_energy_cost_bau_us_dollars']
@@ -165,6 +169,8 @@ def work(modelDir, inputDict):
 		outData['powerWind'] = resultsSubset['Wind']['year_one_power_production_series_kw']
 		outData['powerWindToBattery'] = resultsSubset['Wind']['year_one_to_battery_series_kw']
 		outData['powerWindToLoad'] = resultsSubset['Wind']['year_one_to_load_series_kw']
+		if outData['powerWindToLoad'] is None:
+			wind = 'off'
 	else:
 		outData['sizeWind'] = 0
 	
@@ -177,136 +183,179 @@ def work(modelDir, inputDict):
 	outData['runID'] = runID
 	outData['apiKey'] = 'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9'
 
-	if outData['powerWindToLoad'] is None:
-		wind = 'off'
-
 	outData['solar'] = solar
 	outData['wind'] = wind
 	outData['battery'] = battery
 
-	plt.clf()
-	plotLabels = []
-	#plt.plot(outData['load'])
-	#plotLabels.append('Total Load')
-
+	#Set plotly layout
+	plotlyLayout = go.Layout(
+		width=1000,
+		height=375,
+		legend=dict(
+			x=0,
+			y=1.25,
+			orientation="h")
+		)
+	
 	x = range(len(outData['powerGridToLoad']))
 
-	plt.bar(x, outData['powerGridToLoad'], width=1)
-	bottom = np.array(outData['powerGridToLoad'])
-	plotLabels.append('Load met by Grid')
-	if solar == 'on':
-		plt.bar(x, outData['powerPVToLoad'],bottom=bottom, width=1)
-		bottom += np.array(outData['powerPVToLoad'])
-		plotLabels.append('Load met by Solar')
-	if battery == 'on':
-		plt.bar(x, outData['powerBatteryToLoad'],bottom=bottom, width=1)
-		bottom += np.array(outData['powerBatteryToLoad'])
-		plotLabels.append('Load met by Battery')
-	if wind == 'on':
-		plt.bar(x, outData['powerWindToLoad'],bottom=bottom, width=1)
-		bottom += np.array(outData['powerWindToLoad'])
-		plotLabels.append('Load met by Wind')
-	plt.ylabel('Power (kW)')
-	plt.xlabel('Hour')
-	lgd = plt.legend(labels=plotLabels, bbox_to_anchor=(0,1.02,1,0.2), loc="lower left", 
-	mode="expand", borderaxespad=0, ncol=3)
-	plt.savefig(modelDir + '/loadPlot.png', dpi=600)
+	plotData = []
+	powerGridToLoad = go.Scatter(
+		x=x,
+		y=outData['powerGridToLoad'],
+		line=dict( color=('red') ),
+		name="Load met by Grid",
+		showlegend=True)
+	plotData.append(powerGridToLoad)
 
-	plt.clf()
-	plotLabels = []
-	bottom = 0*np.array(x,dtype='float64')
 	if solar == 'on':
-		plt.bar(x, outData['powerPV'],width=1)
-		bottom += np.array(outData['powerPV'])
-		plotLabels.append('Solar Generation')
-		plt.bar(x, outData['powerPVToLoad'],bottom=bottom, width=1)
-		bottom += np.array(outData['powerPVToLoad'])
-		plotLabels.append('Solar used to meet Load')
-		if battery == 'on':
-			plt.bar(x, outData['powerPVToBattery'],bottom=bottom, width=1)
-			bottom += np.array(outData['powerPVToBattery'])
-			plotLabels.append('Solar used to charge Battery')
-		plt.ylabel('Power (kW)')
-		plt.xlabel('Hour')
-		lgd = plt.legend(labels=plotLabels, bbox_to_anchor=(0,1.02,1,0.2), loc="lower left", 
-		mode="expand", borderaxespad=0, ncol=3)
-	plt.savefig(modelDir + '/solarPlot.png', dpi=600)
+		powerPVToLoad = go.Scatter(
+			x=x,
+			y=outData['powerPVToLoad'],
+			line=dict( color=('green') ),
+			name="Load met by Solar")
+		plotData.append(powerPVToLoad)
 
-	plt.clf()
-	plotLabels = []
-	bottom = 0*np.array(x,dtype='float64')
-	if wind == 'on':
-		plt.bar(x, outData['powerWind'],width=1)
-		bottom += np.array(outData['powerWind'])
-		plotLabels.append('Wind Generation')
-		plt.bar(x, outData['powerWindToLoad'],bottom=bottom, width=1)
-		bottom += np.array(outData['powerWindToLoad'])
-		plotLabels.append('Wind used to meet Load')
-		if battery == 'on':
-			plt.bar(x, outData['powerWindToBattery'],bottom=bottom, width=1)
-			bottom += np.array(outData['powerWindToBattery'])
-			plotLabels.append('Wind used to charge Battery')
-		plt.ylabel('Power (kW)')
-		plt.xlabel('Hour')
-		lgd = plt.legend(labels=plotLabels, bbox_to_anchor=(0,1.02,1,0.2), loc="lower left", 
-		mode="expand", borderaxespad=0, ncol=3)
-	plt.savefig(modelDir + '/windPlot.png', dpi=600)
-	
-	plt.clf()
-	plotLabels = []
-	bottom = 0*np.array(x,dtype='float64')
 	if battery == 'on':
-		plt.bar(x, outData['powerGridToBattery'], width=1)
-		bottom += np.array(outData['powerGridToBattery'])
-		plotLabels.append('Grid')
+		powerBatteryToLoad = go.Scatter(
+			x=x,
+			y=outData['powerBatteryToLoad'],
+			line=dict( color=('blue') ),
+			name="Load met by Battery")
+		plotData.append(powerBatteryToLoad)
+
+	if wind == 'on':
+		powerWindToLoad = go.Scatter(
+			x=x,
+			y=outData['powerWindToLoad'],
+			line=dict( color=('yellow') ),
+			name="Load met by Wind")
+		plotData.append(powerWindToLoad)
+
+	plotlyLayout['yaxis'].update(title='Power (kW)')
+	plotlyLayout['xaxis'].update(title='Hour')
+	outData["powerGenerationData"] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
+	outData["plotlyLayout"] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
+
+	plotData = []
+	if solar == 'on':
+		
+		powerPV = go.Scatter(
+			x=x,
+			y=outData['powerPV'],
+			line=dict( color=('red') ),
+			name="Solar Generation")
+		plotData.append(powerPV)
+
+		powerPVToLoad = go.Scatter(
+			x=x,
+			y=outData['powerPVToLoad'],
+			line=dict( color=('green') ),
+			name="olar used to meet Load")
+		plotData.append(powerPVToLoad)
+
+		if battery == 'on':
+			powerPVToBattery = go.Scatter(
+				x=x,
+				y=outData['powerPVToBattery'],
+				line=dict( color=('yellow') ),
+				name="Solar used to charge Battery")
+			plotData.append(powerPVToBattery)
+
+	outData["solarData"] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
+
+		
+	plotData = []
+	if wind == 'on':
+		powerWind = go.Scatter(
+			x=x,
+			y=outData['powerWind'],
+			line=dict( color=('red') ),
+			name="Wind Generation")
+		plotData.append(powerWind)
+
+		powerWindToLoad = go.Scatter(
+			x=x,
+			y=outData['powerWindToLoad'],
+			line=dict( color=('green') ),
+			name="'Wind used to meet Load'")
+		plotData.append(powerWindToLoad)
+
+		if battery == 'on':
+			powerWindToBattery = go.Scatter(
+				x=x,
+				y=outData['powerWindToBattery'],
+				line=dict( color=('yellow') ),
+				name="Wind used to charge Battery")
+			plotData.append(powerWindToBattery)
+
+	outData["windData"] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
+
+
+	plotData = []
+	if battery == 'on':
+		powerGridToBattery = go.Scatter(
+			x=x,
+			y=outData['powerGridToBattery'],
+			line=dict( color=('red') ),
+			name="Grid")
+		plotData.append(powerGridToBattery)
+
 		if solar == 'on':
-			plt.bar(x, outData['powerPVToBattery'],bottom=bottom, width=1)
-			bottom += np.array(outData['powerPVToBattery'])
-			plotLabels.append('Solar')
+			powerPVToBattery = go.Scatter(
+				x=x,
+				y=outData['powerPVToBattery'],
+				line=dict( color=('green') ),
+				name="Solar")
+			plotData.append(powerPVToBattery)
+
 		if wind == 'on':
-			plt.bar(x, outData['powerWindToBattery'],bottom=bottom, width=1)
-			bottom += np.array(outData['powerWindToBattery'])
-			plotLabels.append('Wind')
-		plt.ylabel('Power (kW)')
-		plt.xlabel('Hour')
-		lgd = plt.legend(labels=plotLabels, bbox_to_anchor=(0,1.02,1,0.2), loc="lower left", 
-		mode="expand", borderaxespad=0, ncol=3)
-	plt.savefig(modelDir + '/batteryPlot.png', dpi=600)
+			powerWindToBattery = go.Scatter(
+				x=x,
+				y=outData['powerWindToBattery'],
+				line=dict( color=('yellow') ),
+				name="Wind")
+			plotData.append(powerWindToBattery)
 
-	plt.clf()
+	outData["batteryData"] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
+		
+	plotData = []
 	if battery == 'on':
-		plt.bar(x, outData['chargeLevelBattery'], width=1)
-		plt.ylabel('Charge (%)')
-		plt.xlabel('Hour')
-	plt.savefig(modelDir + '/batteryChargePlot.png', dpi=600)
+		chargeLevelBattery = go.Scatter(
+			x=x,
+			y=outData['chargeLevelBattery'],
+			line=dict( color=('red') )
+		)
+		plotData.append(chargeLevelBattery)
+		plotlyLayout['yaxis'].update(title='Charge (%)')
+		plotlyLayout['xaxis'].update(title='Hour')
+		outData["batteryChargeData"] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
+		outData["batteryChargeLayout"] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
+	
+	plotData = []
+	resilience = go.Scatter(
+		x=x,
+		y=outData['resilience'],
+		line=dict( color=('red') ),
+	)
+	plotData.append(resilience)
+	plotlyLayout['yaxis'].update(title='Longest Outage survived (Hours)')
+	plotlyLayout['xaxis'].update(title='Start Hour')
+	outData["resilienceData"] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
+	outData["resilienceLayout"] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
+	
+	plotData = []
+	survivalProb = go.Scatter(
+		x=outData['survivalProbX'],
+		y=outData['survivalProbY'],
+		line=dict( color=('red') ),
+		name="Load met by Battery")
+	plotData.append(survivalProb)
+	plotlyLayout['yaxis'].update(title='Probability of meeting critical Load')
+	plotlyLayout['xaxis'].update(title='Outage Length (Hours)')
+	outData["resilienceProbData"] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
+	outData["resilienceProbLayout"] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
 
-	plt.clf()
-	plt.bar(x, outData['resilience'], width=1)
-	plt.ylabel('Longest Outage survived')
-	plt.xlabel('Start Hour')
-	plt.savefig(modelDir + '/resiliencePlot.png', dpi=600)
-
-	plt.clf()
-	plt.bar(outData['survivalProbX'],outData['survivalProbY'], width=1)
-	plt.ylabel('Probability of meeting critical Load')
-	plt.xlabel('Outage Length')
-	plt.savefig(modelDir + '/resilienceProbPlot.png', dpi=600)
-	plt.clf()
-
-	with open(pJoin(modelDir,"loadPlot.png"),"rb") as inFile:
-		outData["loadPlot"] = inFile.read().encode("base64")
-	with open(pJoin(modelDir,"solarPlot.png"),"rb") as inFile:
-		outData["solarPlot"] = inFile.read().encode("base64")
-	with open(pJoin(modelDir,"windPlot.png"),"rb") as inFile:
-		outData["windPlot"] = inFile.read().encode("base64")
-	with open(pJoin(modelDir,"batteryPlot.png"),"rb") as inFile:
-		outData["batteryPlot"] = inFile.read().encode("base64")
-	with open(pJoin(modelDir,"batteryChargePlot.png"),"rb") as inFile:
-		outData["batteryChargePlot"] = inFile.read().encode("base64")
-	with open(pJoin(modelDir,"resiliencePlot.png"),"rb") as inFile:
-		outData["resiliencePlot"] = inFile.read().encode("base64")
-	with open(pJoin(modelDir,"resilienceProbPlot.png"),"rb") as inFile:
-		outData["resilienceProbPlot"] = inFile.read().encode("base64")
 
 	return outData
 
@@ -339,7 +388,7 @@ def new(modelDir):
 		"outageDate" : "2001-01-01",
 		"outageHour" : "0",
 		"outageDuration" : "1",
-		"criticalLoadFactor" : "100",
+		"criticalLoadFactor" : "50",
 		"outageType" : "once"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
