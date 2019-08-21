@@ -67,8 +67,8 @@ def work(modelDir, ind):
 	# tomorrow_load = [13044.3369140625, 12692.4453125, 11894.0712890625, 13391.0185546875, 13378.373046875, 14098.5048828125, 14984.5, 15746.6845703125, 14677.6064453125, 14869.6953125, 14324.302734375, 13727.908203125, 13537.51171875, 12671.90234375, 13390.9970703125, 12111.166015625, 13539.05078125, 15298.7939453125, 14620.8369140625, 15381.9404296875, 15116.42578125, 13652.3974609375, 13599.5986328125, 12882.5185546875]
 	# tomorrow_accuracy = {'test': 4, 'train': 3}
 	o['tomorrow_load'] = tomorrow_load
-	o['startDate'] = "{}-{}-{}".format(tomorrow.year, tomorrow.month, 1)
-	o['startDate_s'] = tomorrow.strftime("%A, %B %-d, %Y")
+	o['month_start'] = dt(tomorrow.year, tomorrow.month, 1).strftime("%A, %B %-d, %Y")
+	o['forecast_start'] = tomorrow.strftime("%A, %B %-d, %Y")
 	
 	# second day
 	df, second_day = lf.add_day(df, weather[24:48])
@@ -125,8 +125,6 @@ def work(modelDir, ind):
 			'opacity': .05,
 			'enableMouseTracking': False
 		})
-		if len(d['load']) != 744:
-			print 'not kosher', len(d['load'])
 
 	load_leading_up = df[(df['month'] == tomorrow.month) & (df['year'] == tomorrow.year)]['load'].tolist()
 	l.append({'name': tomorrow.year, 'color': 'black', 'data': load_leading_up[:-72], 'type': 'line'})
@@ -164,7 +162,7 @@ def new(modelDir):
 		'created': '2015-06-12 17:20:39.308239',
 		'modelType': modelName,
 		'runTime': '0:01:03',
-		'epochs': '10',
+		'epochs': '1',
 		'autoFill': "off",
 		'histFileName': 'd_Texas_17yr_TempAndLoad.csv',
 		"histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","d_Texas_17yr_TempAndLoad_Dec.csv"), 'rU').read(),

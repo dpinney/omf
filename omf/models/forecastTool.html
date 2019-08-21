@@ -112,7 +112,7 @@
 		</script>
 	</div>
 	<div id="output">
-		<p class="reportTitle postRun" style="page-break-before:always; font-weight: bold; text-align: center;">Showing predictions for {{ allOutputDataDict['startDate_s'] }}</p>
+		<p class="reportTitle postRun" style="page-break-before:always; font-weight: bold; text-align: center;">Showing predictions for {{ allOutputDataDict['forecast_start'] }}</p>
 		<p class="reportTitle postRun" style="page-break-before:always;">Load forecast</p>
 		<div id="peakPredictions1" class="tightContent postRun">
 			<div id="loadPredictions"></div>
@@ -127,7 +127,7 @@
 						"series":{
 							"animation": false,
 							"shadow": false,
-							"pointStart": Date.parse(allOutputData.startDate_s),
+							"pointStart": Date.parse(allOutputData.month_start),
 							"pointInterval": 3600000
 						},
 						"line":{"marker":{"enabled":false}}},
