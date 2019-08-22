@@ -10,12 +10,14 @@
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 	
 	<!-- Data  Imports -->
 	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
 	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
+
 
 	<script type="text/javascript">
 		function toggleCheckboxDisplay(checkboxName) {
@@ -109,28 +111,28 @@
 				<input id="loadShape" name="loadShape" type="hidden">
 				<div>
 					<label for="loadShapeFile" class="fileButton">Choose File</label>
-					<input id="fileName" name="fileName" value="input - 200 Employee Office, Springfield Illinois, 2001.csv" readonly class="uploadFileName">	
+					<input id="fileName" name="fileName" readonly class="uploadFileName">	
 				</div>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Latitude<span class="classic">Specify the latitude of the load/grid.</span></label>
-				<input type="text" id="latitude" name="latitude" pattern="^\-?\d+\.?\d*?$" required="required" value="39.7817" />
+				<input type="text" id="latitude" name="latitude" pattern="^\-?\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Longitude<span class="classic">Specify the longitude of the load/grid.</span></label>
-				<input type="text" id="longitude" name="longitude" pattern="^\-?\d+\.?\d*?$" required="required" value="89.6501"/>
+				<input type="text" id="longitude" name="longitude" pattern="^\-?\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Year<span class="classic">Specify the year to which the load shape values corresond.</span></label>
-				<input type="text" id="year" name="year" pattern="^\d{4}$" required="required" value="2001" />
+				<input type="text" id="year" name="year" pattern="^\d{4}$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Cost of Energy ($/kWh)<span class="classic">Specify the energy cost in $/kWh.</span></label>
-				<input type="text" id="energyCost" name="energyCost" pattern="^\d+\.?\d*?$" required="required" value="0.08"/>
+				<input type="text" id="energyCost" name="energyCost" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Cost of Demand ($/kW)<span class="classic">Specify the demand cost in $/kW.</span></label>
-				<input type="text" id="demandCost" name="demandCost" pattern="^\d+\.?\d*?$" required="required" value="20" />
+				<input type="text" id="demandCost" name="demandCost" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			
 			<div class="wideInput">
@@ -162,7 +164,7 @@
 			</div>
 			<div class="shortInput windDisplay">
 				<label class="tooltip">Wind Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
-				<input type="text" id="windCost" name="windCost" pattern="^\d+\.?\d*?$" required="required" value="4989" />
+				<input type="text" id="windCost" name="windCost" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput windDisplay">
 				<label class="tooltip">Minimum Wind Generation (kW)<span class="classic">Specify the minimum desired generation in kW.</span></label>
@@ -170,11 +172,11 @@
 			</div>
 			<div class="shortInput batteryDisplay">
 				<label class="tooltip">Energy capacity cost ($/kWh)<span class="classic">Specify the cost in $/kWh.</span></label>
-				<input type="text" id="batteryEnergyCost" name="batteryEnergyCost" pattern="^\d+\.?\d*?$" required="required" value="500" />
+				<input type="text" id="batteryEnergyCost" name="batteryEnergyCost" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput batteryDisplay">
 				<label class="tooltip">Power capacity cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
-				<input type="text" id="batteryPowerCost" name="batteryPowerCost" pattern="^\d+\.?\d*?$" required="required" value="1000" />
+				<input type="text" id="batteryPowerCost" name="batteryPowerCost" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput BatteryDisplay">
 				<label class="tooltip">Minimum Power Cpacity (kW)<span class="classic">Specify the minimum desired battery capacity in kW.</span></label>
@@ -191,7 +193,7 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Critical Load Factor<span class="classic">The percent of typical load that must be met during a grid outage.</span></label>
-				<input type="number" id="criticalLoadFactor" name="criticalLoadFactor" min="0" max="100" required="required" value="100" />
+				<input type="number" id="criticalLoadFactor" name="criticalLoadFactor" min="0" max="100" required="required"/>
 			</div>
 
 			<div class="wideInput" style="text-align:right">
@@ -277,12 +279,14 @@
 					<td id='energyCost'></td>
 					<td id='energyCostDiff'></td>
 				</tr>
+				<!--
 				<tr>
 					<th>Fixed Cost</th>
 					<td id='fixedCostBAU'></td>
 					<td id='fixedCost'></td>
 					<td id='fixedCostDiff'></td>
 				</tr>
+				-->
 				<tr>
 					<th>Total Cost</th>	
 					<td id='totalCostBAU'></td>
@@ -299,51 +303,48 @@
 			a.href = link;
 		</script>
 
+
 		<p class="reportTitle postRun" style="page-break-before:always">Load Overview</p>
-		<div id="loadPlotDiagram" class="tightContent postRun">
-			<img id="loadPlot" style="width:1000px;" />
-			<script type="text/javascript">gebi("loadPlot").src = "data:image/png;base64," + allOutputData.loadPlot</script>
-		</div>
+		<div id="powerGenerationPlotly" class="tightContent postRun"></div>
+		<script type="text/javascript">
+			Plotly.newPlot("powerGenerationPlotly", JSON.parse(allOutputData["powerGenerationData"]), JSON.parse(allOutputData["plotlyLayout"]) || {})
+		</script>
 
 		<p class="solarDisplay reportTitle postRun" style="page-break-before:always">Solar Generation</p>
-		<div id="solarPlotDiagram" class="solarDisplay tightContent postRun">
-			<img id="solarPlot" style="width:1000px;" />
-			<script type="text/javascript">gebi("solarPlot").src = "data:image/png;base64," + allOutputData.solarPlot</script>
-		</div>
+		<div id="solarPlotly" class="solarDisplay tightContent postRun"></div>
+		<script type="text/javascript">
+			Plotly.newPlot("solarPlotly", JSON.parse(allOutputData["solarData"]), JSON.parse(allOutputData["plotlyLayout"]) || {})
+		</script>
 
 		<p class="windDisplay reportTitle postRun" style="page-break-before:always">Wind Generation</p>
-		<div id="windPlotDiagram" class="windDisplay tightContent postRun">
-			<img id="windPlot" style="width:1000px;" />
-			<script type="text/javascript">gebi("windPlot").src = "data:image/png;base64," + allOutputData.windPlot;
-				if (allOutputData['wind'] == 'off'){
-					$('.windDisplay').attr('style','');
-				}
-			</script>
-		</div>
+		<div id="windPlotly" class="windDisplay tightContent postRun"></div>
+		<script type="text/javascript">
+			Plotly.newPlot("windPlotly", JSON.parse(allOutputData["windData"]), JSON.parse(allOutputData["plotlyLayout"]) || {})
+		</script>
 
 		<p class="batteryDisplay reportTitle postRun" style="page-break-before:always">Battery Charge Source</p>
-		<div id="batteryPlotDiagram" class="batteryDisplay tightContent postRun">
-			<img id="batteryPlot" style="width:1000px;" />
-			<script type="text/javascript">gebi("batteryPlot").src = "data:image/png;base64," + allOutputData.batteryPlot</script>
-		</div>
+		<div id="batteryPlotly" class="batteryDisplay tightContent postRun"></div>
+		<script type="text/javascript">
+			Plotly.newPlot("batteryPlotly", JSON.parse(allOutputData["batteryData"]), JSON.parse(allOutputData["plotlyLayout"]) || {})
+		</script>
 
 		<p class="batteryDisplay reportTitle postRun" style="page-break-before:always">Battery Charge Percentage</p>
-		<div id="batteryChargePlotDiagram" class="batteryDisplay tightContent postRun">
-			<img id="batteryChargePlot" style="width:1000px;" />
-			<script type="text/javascript">gebi("batteryChargePlot").src = "data:image/png;base64," + allOutputData.batteryChargePlot</script>
-		</div>
+		<div id="batteryChargePlotly" class="batteryDisplay tightContent postRun"></div>
+		<script type="text/javascript">
+			Plotly.newPlot("batteryChargePlotly", JSON.parse(allOutputData["batteryChargeData"]), JSON.parse(allOutputData["batteryChargeLayout"]) || {})
+		</script>
 
 		<p class="reportTitle postRun" style="page-break-before:always">Resilience Overview</p>
-		<div id="resiliencePlotDiagram" class="tightContent postRun">
-			<img id="resiliencePlot" style="width:1000px;" />
-			<script type="text/javascript">gebi("resiliencePlot").src = "data:image/png;base64," + allOutputData.resiliencePlot</script>
-		</div>
+		<div id="resiliencePlotly" class="tightContent postRun"></div>
+		<script type="text/javascript">
+			Plotly.newPlot("resiliencePlotly", JSON.parse(allOutputData["resilienceData"]), JSON.parse(allOutputData["resilienceLayout"]) || {})
+		</script>
 
 		<p class="reportTitle postRun" style="page-break-before:always">Outage Survival Probability</p>
-		<div id="resilienceProbPlotDiagram" class="tightContent postRun">
-			<img id="resilienceProbPlot" style="width:1000px;" />
-			<script type="text/javascript">gebi("resilienceProbPlot").src = "data:image/png;base64," + allOutputData.resilienceProbPlot</script>
-		</div>	
+		<div id="resilienceProbPlotly" class="tightContent postRun"></div>	
+		<script type="text/javascript">
+			Plotly.newPlot("resilienceProbPlotly", JSON.parse(allOutputData["resilienceProbData"]), JSON.parse(allOutputData["resilienceProbLayout"]) || {})
+		</script>
 
 	</div>
 

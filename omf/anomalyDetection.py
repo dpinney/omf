@@ -4,7 +4,7 @@ try:
 	from fbprophet import Prophet
 except:
 	pass # fbprophet is very badly behaved at runtime and also at install time.
-from omf.loadForecast import suppress_stdout_stderr
+from omf.forecast import suppress_stdout_stderr
 from os.path import join as pJoin
 import os, omf
 
@@ -70,12 +70,12 @@ def t_test(df, modelDir, start_date, confidence=0.99, model="neuralNet"):
 	if model == "neuralNet":
 		df["dates"] = pd.date_range(start_date, freq="H", periods = df.shape[0])
 		df.columns = ["load", "tempc", "dates"]
-		all_X = omf.loadForecast.makeUsefulDf(df)
+		all_X = omf.forecast.makeUsefulDf(df)
 		actual = df["load"].values
-		pred, acc = omf.loadForecast.neural_net_predictions(all_X, actual)
+		pred, acc = omf.forecast.neural_net_predictions(all_X, actual)
 
 	if model == "nextDayPeakKatrina":
-		ppt, pred, act_time, actual = omf.loadForecast.nextDayPeakKatrinaForecast(
+		ppt, pred, act_time, actual = omf.forecast.nextDayPeakKatrinaForecast(
 			df.values, start_date, modelDir, {}, returnActuals=True
 		)
 
@@ -98,12 +98,12 @@ def percent_error(df, modelDir, start_date, p_error=0.05, model="neuralNet"):
 	if model == "neuralNet":
 		df["dates"] = pd.date_range(start_date, freq="H", periods = df.shape[0])
 		df.columns = ["load", "tempc", "dates"]
-		all_X = omf.loadForecast.makeUsefulDf(df)
+		all_X = omf.forecast.makeUsefulDf(df)
 		actual = df["load"].values
-		pred, acc = omf.loadForecast.neural_net_predictions(all_X, actual)
+		pred, acc = omf.forecast.neural_net_predictions(all_X, actual)
 
 	if model == "nextDayPeakKatrina":
-		ppt, pred, act_time, actual = omf.loadForecast.nextDayPeakKatrinaForecast(
+		ppt, pred, act_time, actual = omf.forecast.nextDayPeakKatrinaForecast(
 			df.values, start_date, modelDir, {}, returnActuals=True
 		)
 

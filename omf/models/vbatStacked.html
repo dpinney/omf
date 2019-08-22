@@ -250,7 +250,26 @@
 				<label>Fuel Charge ($/kWh)</label>
 				<input type="text" id="fuel_charge" name="fuel_charge" pattern="^\d+\.?\d*?$" required="required">
 			</div>
-			
+			<div class="wideInput">
+				<p class="inputSectionHeader">Transformer Deferral</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label>Capacity Threshold</label>
+				<input type="text" id="transformerThreshold" name="transformerThreshold" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div class="shortInput">
+				<label>Hardware Replacement Cost ($)</label>
+				<input type="text" id="avoidedCost" name="avoidedCost" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div class="shortInput">
+				<label>Time to Replacement (yrs)</label>
+				<input type="text" id="yearsToReplace" name="yearsToReplace" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div class="shortInput">
+				<label>Carrying Cost Per Year (%)</label>
+				<input type="text" id="carryingCost" name="carryingCost" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
 			<!-- Required Buttons -->
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
@@ -279,11 +298,16 @@
 		<div id="powerReport" class="tightContent postRun">
 			<div id="powerChart"></div>
 			<script>
+				for (var i = 0; i < allOutputData.dispatchDates.length; i++) { //casting these to Highcharts-friendly formats
+					v = new Date(allOutputData.dispatchDates[i][0]);
+					allOutputData.dispatchDates[i][0] = Date.UTC(v.getFullYear(), v.getMonth(), v.getDate(), v.getHours() - 1, v.getMinutes()) 
+					allOutputData.dispatchDates[i][1] = 0.0;
+				}
 				new Highcharts.Chart({"credits":{"enabled":false},
 					"plotOptions":{
 						"series":{
 							"animation":false,
-							// "pointStart":Date.parse(allOutputData.startDate),
+							"pointStart":Date.parse(allOutputData.startDate),
 							"shadow":false,
 							"pointInterval":3600000},
 						"line":{"marker":{"enabled":false}}},
@@ -298,12 +322,14 @@
 					},
 					"yAxis":{
 						"title":{"text":"kW","style":{"color":"gray"}},
+						"min": 0,
+						"plotLines":[{color: 'green', width: 2, value: allOutputData.transformerThreshold, dashStyle: 'longdashdot'},]
 					},
 					"title":{"text": allOutputData.dataCheck, "verticalAlign":"bottom", "align":"right", "y":-400, "x":-150, "style":{"color":"gray", "fontSize":"36px"}},
 					"series":[
-						
 						{"name":"Demand","marker":{"enabled":false},"color":"gray","data":allOutputData.demand},
 						{"name":"Demand after VBAT","marker":{"enabled":false},"color":"blue","data":allOutputData.demandAdjusted},
+						{"name":"Days dispatched","color":"black", "data":allOutputData.dispatchDates, "type": "scatter", "marker": {"radius": 1}}
 					],
 					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"powerChart","type":"line","marginRight":20, "height":500,"width":1000},
 					"tooltip":{"valueDecimals":1},
@@ -371,6 +397,7 @@
 						},
 						"yAxis":{
 							"title":{"text":"kW","style":{"color":"gray"}},
+							"min": 0
 						},
 						"title":{"text":null},
 						"series":[
@@ -398,7 +425,9 @@
 				</tbody>
 			</table>
 		</div>
-		
+		<div id="dispatches" class="content postRun detailsContainer" style="margin-top:0px">
+			<p class="reportTitle postRun" style="page-break-before:always; margin-top: 0px; text-align: center;">There were {{allOutputDataDict['totalDispatches']}} daily dispatches.</p>
+		</div>
 		<p class="reportTitle postRun" style="page-break-before:always">Cash Flow</p>
 		<div id="cashFlowReport" class="tightContent postRun">
 			<div id="cashFlowChartDiv"></div>

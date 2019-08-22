@@ -214,6 +214,11 @@
 				}
 			}
 		}
+		else if (feature.geometry['type'] == 'Polygon'){
+			return {
+				"stroke": "#4f0154",
+			}
+		}
 	}
 	var geojsonLayer = L.geoJSON(false, {
 				pointToLayer: pointToLayerNode,
@@ -341,25 +346,61 @@
 	document.getElementById('toolDiv').appendChild(hideNonComms);
 	hideNonComms.addEventListener('click', function(){hideGridObjects(selectNonCommsObjects())});
 
-	//Form div for updating geojson
-	L.Control.Form = L.Control.extend({
-	    onAdd: function(map) {
-	        var formDiv = L.DomUtil.create('div');
-	        formDiv.id = 'formDiv';
-	        formDiv.style.height = 'auto';
-	        formDiv.style.width = '200px';
-	        formDiv.style.background = 'white';
-	        return formDiv;
-	    },
-	    onRemove: function(map) {
-	    }
-	});
-
-	L.control.form = function(opts) {
-	    return new L.Control.Form(opts);
+	//get max meshlayer
+	function selectMeshLevels(){
+		let meshLayers = [];
+		geojsonLayer.eachLayer(function (layer) {
+			if (layer.feature.geometry['type'] == 'Polygon'){
+				if (layer.options.opacity != 0){
+					meshLayers.push(layer);
+				}
+			}
+		});
+		let currentMaxMesh = Math.max(Math.max.apply(Math, meshLayers.map(function(layer) { return layer.feature.properties.meshLevel; })),0);
+		return currentMaxMesh;
 	}
 
-	L.control.form({ position: 'topright'}).addTo(map);
+	function increaseMesh(meshMax){
+		geojsonLayer.eachLayer(function (layer) {
+			if (layer.feature.geometry['type'] == 'Polygon'){
+				if (layer.feature.properties.meshLevel <= (meshMax + 1)){
+					geojsonLayer.resetStyle(layer);
+				}
+				else{
+					layer.setStyle({"fillOpacity": 0,"opacity": 0, "interactive": false});
+				}
+			}
+		});
+	}
+
+	function decreaseMesh(meshMax){
+		geojsonLayer.eachLayer(function (layer) {
+			if (layer.feature.geometry['type'] == 'Polygon'){
+				if (layer.feature.properties.meshLevel < meshMax){
+					geojsonLayer.resetStyle(layer);
+				}
+				else {
+					layer.setStyle({"fillOpacity": 0,"opacity": 0, "interactive": false});
+				}
+			}
+		});
+	}
+
+	var incrementMesh = L.DomUtil.create('button');
+	L.DomEvent.disableClickPropagation(incrementMesh);
+	incrementMesh.id = 'incrementMesh';
+	incrementMesh.classList.add('mapControl');
+	incrementMesh.innerHTML = 'Extend Mesh';
+	document.getElementById('toolDiv').appendChild(incrementMesh);
+	incrementMesh.addEventListener('click', function(){increaseMesh(selectMeshLevels())});
+
+	var decrementMesh = L.DomUtil.create('button');
+	L.DomEvent.disableClickPropagation(decrementMesh);
+	decrementMesh.id = 'decrementMesh';
+	decrementMesh.classList.add('mapControl');
+	decrementMesh.innerHTML = 'Decrease Mesh';
+	document.getElementById('toolDiv').appendChild(decrementMesh);
+	decrementMesh.addEventListener('click', function(){decreaseMesh(selectMeshLevels())});
 
 	//Form div for searching for geojson object by name
 	L.Control.Search = L.Control.extend({
@@ -423,7 +464,6 @@
 		    contentType: 'application/json; charset=utf-8',
 		    data: JSON.stringify(geojson),
 		    success: function(callback) {
-		    	console.log('success');
 		    	geojson = callback.newgeojson;
 		    	geojsonLayer.eachLayer(function(layer){
 		    		layer.remove();
@@ -450,6 +490,30 @@
 	gridRedisplay.innerHTML = 'Redisplay grid';
 	document.getElementById('toolDiv').appendChild(gridRedisplay);
 	gridRedisplay.addEventListener('click', function(){redisplayGrid()});
+
+	//redisplay grid with edits
+	function saveCommsMap(){
+		$.ajax({
+		    type: 'POST',
+		    url: `/saveCommsMap/{{owner}}/{{modelName}}/{{feederName}}/{{feederNum}}`,
+		    dataType: 'json',
+		    contentType: 'application/json; charset=utf-8',
+		    data: JSON.stringify(geojson),
+		    success: function(callback) {
+		    	console.log(callback.savemessage);
+		    },
+		    error: function() {
+		        $(this).html("error!");
+		    }
+		});
+	}
+	var saveOmcFile = L.DomUtil.create('button');
+	L.DomEvent.disableClickPropagation(saveOmcFile);
+	saveOmcFile.id = 'gridRedisplay';
+	saveOmcFile.classList.add('mapControl');
+	saveOmcFile.innerHTML = 'Save omc file';
+	document.getElementById('toolDiv').appendChild(saveOmcFile);
+	saveOmcFile.addEventListener('click', function(){saveCommsMap()});
 
 </script>
 </body>

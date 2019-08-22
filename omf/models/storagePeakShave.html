@@ -167,6 +167,7 @@
 				<label class="tooltip">Prediction - Epochs<span class="classic">How many times would you like the prediction software to iterate? Approximately 1 minute per 10 epochs. Program will stop early if no improvement is seen within 10 epochs.</span></label>
 				<input type="text" id="epochs" name="epochs">
 			</div>
+			
 			<div class="shortInput">
 				<label class="tooltip">Prediction - New Model<span class="classic">Would you like to run a new neural net (True) or use the model loaded?</span></label>
 				<select id="newModel" name="newModel" />
@@ -175,8 +176,13 @@
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Prediction - Model<span class="classic">.h5 file of neural network</span></label>
-				<input type="text" id="model" name="model">
+				<label class="tooltip">Prediction - New Model<span class="classic">.h5 file of neural network</span></label>
+				<input id="modelFile" type="file" style="display:none" onchange="handle_files(this.files,'model','modelFileName')">
+				<input id="model" name="model" type="hidden">
+				<div>
+					<label for="modelFile" class="fileButton">Choose File</label>
+					<input id="modelFileName" name="modelFileName" value='' readonly class="uploadFileName">
+				</div>
 			</div>
 			<!-- required buttons -->
 			<div class="wideInput" style="text-align:right">
