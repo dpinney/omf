@@ -12,6 +12,9 @@
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+	<!-- Leaflet -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"	integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="	crossorigin=""/>
+	<script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
 	<!-- Data  Imports -->
 	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
 	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
@@ -35,7 +38,7 @@
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-smartSwitching" target="blank">Help?</a></label>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-outageCost" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
@@ -60,7 +63,7 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Path to GLM<span class="classic">Please ignore. Will be deleted in future iterations.</span></label>
-				<input type="text" id="PATH_TO_GLM" name="PATH_TO_GLM">
+				<input type="text" id="PATH_TO_OMD" name="PATH_TO_OMD">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Path to CSV<span class="classic">Please ignore. Will be deleted in future iterations.</span></label>
@@ -107,14 +110,14 @@
 		</script>
 	</div>
 	<div id="output">
-		<p class="reportTitle postRun" style="page-break-before:always">Leaflet Map</p>
-		<div id="outageMap" class="tightContent postRun">
-			{{ allOutputDataDict['outageMap'] }}
-		</div>
 		<p class="reportTitle postRun" style="page-break-before:always">Reliability Metrics</p>
 		<div id="statsCalc" class="tightContent postRun">
 			{{ allOutputDataDict['statsHtml'] }}
 		</div>
+		<p class="reportTitle postRun" style="page-break-before:always">Outage Map</p>
+		<div id="map" class="tightContent postRun"> <iframe src=allOutputData.outageMap width="1000" height="540"></iframe>
+		</div>
+
 		<!-- TODO: Remove? -->
 		<!-- <script type="text/javascript">
 			// Global Highcharts settings.

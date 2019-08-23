@@ -3,6 +3,7 @@ from omf import geo, feeder
 import re
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math, warnings
 import datetime
+import plotly as py
 from os.path import join as pJoin
 from jinja2 import Template
 from __neoMetaModel__ import *
@@ -113,18 +114,16 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustain
 		Dict = {}
 		Dict['geometry'] = {'type': 'Point', 'coordinates': [coord1, coord2]}
 		Dict['type'] = 'Feature'
-		Dict['properties'] = {'event': 'fault', 'popupContent': '\nThis fault started at ' + str(mc.loc[row, 'Start']) + ' and ended at ' + str(mc.loc[row, 'Finish']) + '.\nIt occurred at the following location: ' + str(coords) + ' and affected these meters: ' + str(mc.loc[row, 'Meters Affected']) + '.'}
+		Dict['properties'] = {'name': '<b>_Fault_' + str(row+1) + '</b><br>', 'pointColor': 'blue', 'popupContent': '<br>Fault start time: <b>' + str(mc.loc[row, 'Start']) + '</b><br> Fault end time: <b>' + str(mc.loc[row, 'Finish']) + '</b><br>Location: <b>' + str(coords) + '</b><br>Meters affected: <b>' + str(mc.loc[row, 'Meters Affected']) + '</b>.'}
 		outageMap['features'].append(Dict)
 		row += 1
+	if not os.path.exists(workDir):
+		os.makedirs(workDir)
 	shutil.copy(omf.omfDir + '/templates/geoJsonMap.html', workDir)
 	with open(pJoin(workDir,'geoJsonFeatures.js'),"w") as outFile:
-		outFile.write('function onEachFeature(feature, layer) {if (feature.properties && feature.properties.popupContent) {layer.bindPopup(feature.properties.popupContent);}}\n')
 		outFile.write("var geojson =")
 		json.dump(outageMap, outFile, indent=4)
-		# outFile.write('\nL.geoJSON(geojson, {style: function(feature) {if (feature.properties.event) {case "fault": return {color: "#ff0000"};}}).addTo(map);')
-		outFile.write('\nL.geoJSON(geojson, {onEachFeature: onEachFeature}).addTo(map);')
-	with open('outageMap.html', 'w') as outageMap:
-		outageMap.write('file://' + pJoin(workDir,'geoJsonMap.html'))
+
 
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
@@ -141,7 +140,6 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir,"statsCalc.html"),"rb") as inFile:
 		outData["statsHtml"] = inFile.read()
 
-	# Leaflet map
 	with open(pJoin(modelDir,"geoJsonMap.html"),"rb") as inFile:
 		outData["outageMap"] = inFile.read()
 
@@ -183,4 +181,5 @@ def _tests():
 if __name__ == '__main__':
 	_tests()
 
+#outageCostAnalysis('C:/Users/granb/omf/omf/static/publicFeeders/Olin Barre LatLon.omd', 'C:/Users/granb/omf/omf/scratch/smartSwitching/Outages.csv', None, '60', '1')
 #drawOutageMap('C:/Users/granb/omf/omf/static/publicFeeders/Olin Barre LatLon.omd', 'C:/Users/granb/omf/omf/scratch/smartSwitching/Outages.csv', None, '60', '1')
