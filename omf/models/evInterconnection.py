@@ -326,10 +326,10 @@ def work(modelDir, inputDict):
 	print pJoin(modelDir, "results.json")
 	#check to see if REopt worked correctly. If not, use a cached results file for testing
 	if REopt_output["outputs"]["Scenario"]["status"] != "optimal":
-		print "Error: REopt results generated are invalid"
-		print "Continuing simulation with cached results in dummyResults.json..."
-		with open(pJoin(omf.omfDir, "static", "testFiles", "REoptDummyResults.json"), "r") as dummyResults:
-			REopt_output = json.load(dummyResults)
+		raise Exception("Error: REopt results generated are invalid")
+		# print "Continuing simulation with cached results in dummyResults.json..."
+		# with open(pJoin(omf.omfDir, "static", "testFiles", "REoptDummyResults.json"), "r") as dummyResults:
+		# 	REopt_output = json.load(dummyResults)
 
 	#find the values for energy cost with and without microgrid
 	REopt_ev_energy_cost = REopt_output["outputs"]["Scenario"]["Site"]["ElectricTariff"]["year_one_bill_bau_us_dollars"]
@@ -1064,7 +1064,7 @@ def plotMaxLoadShape(loadShape=None, combined_load=None, hourly_con=None, REopt_
 			x = list(load_vec[i*24:i*24 + 24])
 			plt.subplot(31, 12, i)
 			plt.axis('off')
-			plt.ylim(0.0, max_val_REopt) # Should this be the same max value as the original combined carpet plot for better side-by-side comparison? It would only be an issue if for some reason REopt load values were higher than the originals, which shouldn't ever happen
+			plt.ylim(0.0, max_val) # Should this be the same max value as the original combined carpet plot for better side-by-side comparison? It would only be an issue if for some reason REopt load values were higher than the originals, which shouldn't ever happen
 			if len(x) != 0:
 				plt.stackplot(range(len(x)), x, daily_vec)
 			if i <= 12:
