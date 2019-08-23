@@ -326,10 +326,10 @@ def work(modelDir, inputDict):
 	print pJoin(modelDir, "results.json")
 	#check to see if REopt worked correctly. If not, use a cached results file for testing
 	if REopt_output["outputs"]["Scenario"]["status"] != "optimal":
-		print "Error: REopt results generated are invalid"
-		print "Continuing simulation with cached results in dummyResults.json..."
-		with open(pJoin(omf.omfDir, "static", "testFiles", "REoptDummyResults.json"), "r") as dummyResults:
-			REopt_output = json.load(dummyResults)
+		raise Exception("Error: REopt results generated are invalid")
+		# print "Continuing simulation with cached results in dummyResults.json..."
+		# with open(pJoin(omf.omfDir, "static", "testFiles", "REoptDummyResults.json"), "r") as dummyResults:
+		# 	REopt_output = json.load(dummyResults)
 
 	#find the values for energy cost with and without microgrid
 	REopt_ev_energy_cost = REopt_output["outputs"]["Scenario"]["Site"]["ElectricTariff"]["year_one_bill_bau_us_dollars"]
