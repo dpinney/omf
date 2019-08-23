@@ -611,8 +611,15 @@ def valueOfAdditionalRecloser(pathToGlm, workDir, lineFaultType, lineNameForRecl
 		graphData.append(go.Bar(name='Fault ' + str(currCol+1), x = list(range(365)), y = data[:,currCol]))
 		currCol += 1
 	fig3 = go.Figure(data = graphData)
-	fig3.layout.update(barmode='stack', xaxis=go.layout.XAxis(title=go.layout.xaxis.Title(text='Day of the year')), yaxis=go.layout.YAxis(title=go.layout.yaxis.Title(text='Outage time (seconds)')))
-
+	fig3.layout.update(
+		barmode='stack',
+		xaxis=go.layout.XAxis(
+			title=go.layout.xaxis.Title(text='Day of the year')
+		),
+		yaxis=go.layout.YAxis(
+			title=go.layout.yaxis.Title(text='Outage time (seconds)')
+		)
+	)
 	# stacked bar chart to show outage timeline with recloser
 	row = 0
 	date = [[] for _ in range(365)]
