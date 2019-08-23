@@ -198,7 +198,7 @@ def new(modelDir):
 		"gt_demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","fhec_2017_gt.csv")).read(),
 		"gt_demandCurveFileName": "fhec_2017_gt.csv",
 		# Deferral
-		"transformerThreshold": "3500",
+		"transformerThreshold": "2500",
 		"avoidedCost": "2000000",
 		"yearsToReplace": "2",
 		"carryingCost": "7",
