@@ -315,6 +315,7 @@
 		<!-- Tab links -->
 		<div class="tab postRun">
 			<button id='firstTabButton3' class="tabLinks3 active" onclick="openTab(event, 'loadShapeCarpetPlot', '3')">Combined Load Shape Carpet Plot</button>
+			<button class="tabLinks3" onclick="openTab(event, 'REoptCarpetPlot', '3')">Combined Load Shape Carpet Plot with REopt</button>
 			<button class="tabLinks3" onclick="openTab(event, 'maxDailyLoadShape', '3')">Maximum Daily Combined Load Shape</button>
 		</div>
 		<!-- Tab content -->
@@ -322,6 +323,10 @@
 			<div class="tightContent tabContent3 loadShapeCarpetPlot firstTab">
 				<img id="carpetPlotChart" style="width:1000px;height:auto;" />
 				<script type="text/javascript">gebi("carpetPlotChart").src = "data:image/png;base64," + allOutputData.carpetPlot</script>
+			</div>
+			<div class="tightContent tabContent3 REoptCarpetPlot">
+				<img id="REoptCarpetPlotChart" style="width:1000px;height:auto;" />
+				<script type="text/javascript">gebi("REoptCarpetPlotChart").src = "data:image/png;base64," + allOutputData.REoptCarpetPlot</script>
 			</div>
 			<div class="tightContent tabContent3 maxDailyLoadShape">
 				<img id="maxLoadShapeImg" style="width:1000px;height:auto;" />

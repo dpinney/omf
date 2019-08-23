@@ -344,8 +344,8 @@ def work(modelDir, inputDict):
 	#get REopt's optimized load shape value list
 	REoptLoadShape = REopt_output["outputs"]["Scenario"]["Site"]["LoadProfile"]["year_one_electric_load_series_kw"]
 
-	#Create the maxLoadShape image
-	maxLoadShapeImg = plotMaxLoadShape(
+	#Create the maxLoadShape image and REopt carpet plot
+	maxLoadShapeImg, REoptCarpetPlotImg = plotMaxLoadShape(
 		loadShape = loadShapeValue,
 		combined_load = combinedLoadShapeValue,
 		hourly_con = hourlyConValue,
@@ -353,6 +353,9 @@ def work(modelDir, inputDict):
 	maxLoadShapeImg.savefig(pJoin(modelDir, "maxLoadShape.png"))
 	with open(pJoin(modelDir, "maxLoadShape.png"),"rb") as evFile:
 		outData["maxLoadShape"] = evFile.read().encode("base64")
+	REoptCarpetPlotImg.savefig(pJoin(modelDir, "REoptCarpetPlot.png"))
+	with open(pJoin(modelDir, "REoptCarpetPlot.png"),"rb") as cpFile:
+		outData["REoptCarpetPlot"] = cpFile.read().encode("base64")
 
 	#Create 3rd powerflow run with maximum load from new ReOpt output load shape
 	REoptVoltPlotChart, REoptProtDevTable = voltplot_protdev(max_value=max(REoptLoadShape), load_name=loadNameValue)
@@ -997,7 +1000,7 @@ def drawTable(initialStates=None, finalStates=None, deviceTypes=None):
 
 def plotMaxLoadShape(loadShape=None, combined_load=None, hourly_con=None, REopt_load=None):
 	base_shape = loadShape
-	base_shape_REopt = REopt_load
+	com_shape_REopt = REopt_load
 
 	#find the maximum combined load value
 	max_val = max(combined_load)
@@ -1010,14 +1013,14 @@ def plotMaxLoadShape(loadShape=None, combined_load=None, hourly_con=None, REopt_
 	day_shape = base_shape[max_day_val*24:max_day_val*24+24]
 
 	#find the maximum REopt load value
-	max_val_REopt = max(base_shape_REopt)
+	max_val_REopt = max(com_shape_REopt)
 	#find that value's index
-	max_index_REopt = base_shape_REopt.index(max_val_REopt)
+	max_index_REopt = com_shape_REopt.index(max_val_REopt)
 
 	#find the day that the max REopt load value occurs
 	max_day_val_REopt = (max_index_REopt)/24
 	max_hour_val_REopt = (max_index_REopt)%24
-	day_shape_REopt = base_shape_REopt[max_day_val_REopt*24:max_day_val_REopt*24+24]
+	day_shape_REopt = com_shape_REopt[max_day_val_REopt*24:max_day_val_REopt*24+24]
 
 	print "max_val: " + str(max_val)
 	print "max_val_REopt: " + str(max_val_REopt)
@@ -1037,7 +1040,34 @@ def plotMaxLoadShape(loadShape=None, combined_load=None, hourly_con=None, REopt_
 		plt.close()
 		return maxLoadShapeImg
 
-	return maxLoadShape(day_shape, hourly_con, day_shape_REopt)
+	#find the base shape of the REopt loads by subtracting the values of hourly_con
+	base_shape_REopt = []
+	for i in range(8760):
+		base_load = com_shape_REopt[i] - hourly_con[i % 24]
+		base_shape_REopt.append(base_load)
+
+	def carpet_plot(load_vec, daily_vec):
+		'Plot an 8760 load shape plus a daily augmentation in a nice grid.'
+		carpetPlotImg = plt.figure()
+		plt.style.use('seaborn')
+		for i in range(1,371):
+			# x = np.random.rand(24)
+			x = list(load_vec[i*24:i*24 + 24])
+			plt.subplot(31, 12, i)
+			plt.axis('off')
+			plt.ylim(0.0, max_val_REopt)
+			if len(x) != 0:
+				plt.stackplot(range(len(x)), x, daily_vec)
+			if i <= 12:
+				plt.title(i)
+			if i % 12 == 1:
+				plt.text(-5.0, 0.1, str(1 + i / 12), horizontalalignment='left',verticalalignment='center')
+		#plt.show()
+		plt.close()
+		return carpetPlotImg
+
+
+	return maxLoadShape(day_shape, hourly_con, day_shape_REopt), carpet_plot(base_shape_REopt, hourly_con)
 
 
 def plotEVShape(numVehicles=None, chargeRate=None, batterySize=None, startHour=None, endHour=None, chargeLimit=None, minCharge=None, maxCharge=None, loadShape=None, rezSqIn=None):
