@@ -9,7 +9,7 @@ import pandas as pd
 
 from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
-from omf import loadForecast as fc
+from omf import forecast as fc
 
 # Model metadata:
 modelName, template = metadata(__file__)
@@ -264,10 +264,10 @@ def forecastWork(modelDir, ind):
 	if ind['newModel'] == 'True':
 		model = None 
 	else:
-		# with open(pJoin(modelDir, 'test.h5'), 'w') as f:
-		# 	f.write(ind['model'])
-		# model = tf.keras.models.load_model(pJoin(modelDir, 'test.h5'))
-		model = tf.keras.models.load_model(ind['model'])
+		with open(pJoin(modelDir, 'neural_net.h5'), 'wb') as f:
+			f.write(ind['model'].decode('base64'))
+		model = tf.keras.models.load_model(pJoin(modelDir, 'neural_net.h5'))
+		# model = tf.keras.models.load_model(ind['model'])
 	predictions, accuracy = fc.neural_net_predictions(all_X, all_y, epochs=int(ind['epochs']), model=model, 
 		save_file=pJoin(modelDir, 'neural_net_model.h5'))
 
@@ -354,7 +354,7 @@ def new(modelDir):
 		'chargeRate': '5',
 		'demandCurve': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','Texas_1yr_Load.csv')).read(),
 		'fileName': 'FrankScadaValidCSV_Copy.csv',
-		'dispatchStrategy': 'prediction', #'prediction', 
+		'dispatchStrategy': 'optimal', #'prediction', 
 		'cellCost': '7140',
 		'cellQuantity': '100',
 		'runTime': '0:00:03',
@@ -368,12 +368,11 @@ def new(modelDir):
 		# required if dispatch strategy is custom
 		'customDispatchStrategy': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','dispatchStrategy.csv')).read(),
 		# forecast
-		'epochs': '50',
+		'epochs': '1',
+		'newModel': "False",
+		'model': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','NCENT.h5')).read().encode("base64"),
+		'modelFileName': 'NCENT.h5',
 		'histFileName': 'd_Texas_17yr_TempAndLoad.csv',
-		'newModel': "True",
-		# 'model': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','NCENT.h5')).read(),
-		'model': pJoin(__neoMetaModel__._omfDir,'static','testFiles','NCENT.h5'),
-		# "histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","NCENT_rank.csv"), 'rU').read(),
 		"histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_17yr_TempAndLoad.csv"), 'rU').read(),
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)

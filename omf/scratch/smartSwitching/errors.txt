@@ -61,12 +61,29 @@ Actual behavior: trip37.glm is still misbehaving a lot; generates many
 nodes that do not have the right phase at a timestamp very early on
 and crashes.
 Expected behavior: trip37.glm runs like other test cases.
-Workaround/fix: So far, can get rid of unsupported timestamps in
-fault_check_out, but cannot get trip37.glm working. To get rid of 
-unsupported timestamps, can add a strictly_radial false line to object_fault_check. However, another error is then produced:
-newton raphson method unable to converge... perhaps this is progress.
-Setting iteration limit did not help.
-Discussion:
-	It seems like the entire system is going off line and staying off line.
-	I think the problem is related to the swing nodes, but I'm not sure of
-	exactly how as of right now.
+Workaround/fix: Frank has confirmed that GridLAB-D was never tested on such systems, so we are a bit limited on this model...
+	Discussion: It's a shame that GridLAB-D doesn't work with a general feeder system. We can hopefully get useful results with outageCost for some of these systems.
+
+Actual behavior: Cannot figure out how to label axes in subplots of plotly
+graphs. What says it should work online gives the error:
+"AttributeError: 'Figure' object has no attribute 'update_xaxes'."
+Expected behavior: We can label our axes.
+Workaround/fix: Proper way to do this was by treating each subplot as an element in a double array. So... fig2['layout']['xaxis1'].update(title="label") works!
+	Discussion: This is different than a normal figure.
+
+Actual behavior: When running outageCost.py, I get the error:
+[Errno 2] No such file or directory: 'templates/geoJsonMap.html', which relates
+to the import of geo.py. I noticed that putting the folder 'templates' in
+smartSwitching is a workaround. However, it is likely best to not have to put
+the folder inside the models folder as well...
+Expected behavior: Some import statement makes it possible to import the folder
+'templates' straight from the omf.
+Workaround/fix: For now, adding the templates folder in models works, but not ideal
+Discussion: Just use omf.omfDir...
+	Importing folders rather than modules...?
+
+Actual behavior: I want to make the outages on the leaflet map a different color
+than the nodes (maybe green?). Right now they are red.
+Expected behavior: The outages are green, or some other different color!
+Workaround/fix:Turns out that geoJsonMap.html includes a template that tells exactly which property one must include to change the color!
+	Discussion: Thanks Erik!

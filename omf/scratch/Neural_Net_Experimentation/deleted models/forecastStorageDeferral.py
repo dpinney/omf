@@ -6,7 +6,7 @@ import pulp
 from os.path import isdir, join as pJoin
 import __neoMetaModel__
 from __neoMetaModel__ import *
-from omf import loadForecast as fc
+from omf import forecast as fc
 
 # Model metadata:
 modelName, template = metadata(__file__)
