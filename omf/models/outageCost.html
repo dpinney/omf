@@ -115,9 +115,8 @@
 			{{ allOutputDataDict['statsHtml'] }}
 		</div>
 		<p class="reportTitle postRun" style="page-break-before:always">Outage Map</p>
-		<div id="map" class="tightContent postRun"> <iframe src=allOutputData.outageMap width="1000" height="540"></iframe>
+		<div id="map" class="tightContent postRun"> <iframe srcdoc="{{ allOutputDataDict['outageMap'] }}" width="1000" height="540"></iframe>
 		</div>
-
 		<!-- TODO: Remove? -->
 		<!-- <script type="text/javascript">
 			// Global Highcharts settings.

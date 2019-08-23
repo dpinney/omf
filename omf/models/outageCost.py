@@ -124,7 +124,6 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustain
 		outFile.write("var geojson =")
 		json.dump(outageMap, outFile, indent=4)
 
-
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
 	outData = {}
