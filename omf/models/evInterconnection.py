@@ -323,6 +323,14 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir, "results.json"), "r") as REoptFile:
 		REopt_output = json.load(REoptFile)
 		#print REopt_output
+	print pJoin(modelDir, "results.json")
+	#check to see if REopt worked correctly. If not, use a cached results file for testing
+	if REopt_output["outputs"]["Scenario"]["status"] != "optimal":
+		print "Error: REopt results generated are invalid"
+		print "Continuing simulation with cached results in dummyResults.json..."
+		with open(pJoin(omf.omfDir, "static", "testFiles", "REoptDummyResults.json"), "r") as dummyResults:
+			REopt_output = json.load(dummyResults)
+
 	#find the values for energy cost with and without microgrid
 	REopt_ev_energy_cost = REopt_output["outputs"]["Scenario"]["Site"]["ElectricTariff"]["year_one_bill_bau_us_dollars"]
 	REopt_opt_energy_cost =	REopt_output["outputs"]["Scenario"]["Site"]["ElectricTariff"]["year_one_bill_us_dollars"]
@@ -342,7 +350,8 @@ def work(modelDir, inputDict):
 	outData["energyCostCalcHtml"] = energyCostHtml
 
 	#get REopt's optimized load shape value list
-	REoptLoadShape = REopt_output["outputs"]["Scenario"]["Site"]["LoadProfile"]["year_one_electric_load_series_kw"]
+	# REoptLoadShape = REopt_output["outputs"]["Scenario"]["Site"]["LoadProfile"]["year_one_electric_load_series_kw"]
+	REoptLoadShape = REopt_output["outputs"]["Scenario"]["Site"]["ElectricTariff"]["year_one_to_load_series_kw"]
 
 	#Create the maxLoadShape image and REopt carpet plot
 	maxLoadShapeImg, REoptCarpetPlotImg = plotMaxLoadShape(
@@ -1022,8 +1031,8 @@ def plotMaxLoadShape(loadShape=None, combined_load=None, hourly_con=None, REopt_
 	max_hour_val_REopt = (max_index_REopt)%24
 	day_shape_REopt = com_shape_REopt[max_day_val_REopt*24:max_day_val_REopt*24+24]
 
-	print "max_val: " + str(max_val)
-	print "max_val_REopt: " + str(max_val_REopt)
+	# print "max_val: " + str(max_val)
+	# print "max_val_REopt: " + str(max_val_REopt)
 
 	def maxLoadShape(load_vec, daily_vec, REopt_vec):
 		maxLoadShapeImg = plt.figure()
@@ -1055,7 +1064,7 @@ def plotMaxLoadShape(loadShape=None, combined_load=None, hourly_con=None, REopt_
 			x = list(load_vec[i*24:i*24 + 24])
 			plt.subplot(31, 12, i)
 			plt.axis('off')
-			plt.ylim(0.0, max_val_REopt)
+			plt.ylim(0.0, max_val_REopt) # Should this be the same max value as the original combined carpet plot for better side-by-side comparison? It would only be an issue if for some reason REopt load values were higher than the originals, which shouldn't ever happen
 			if len(x) != 0:
 				plt.stackplot(range(len(x)), x, daily_vec)
 			if i <= 12:
