@@ -207,78 +207,90 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir, "output.png"),"rb") as inFile:
 		outData["voltageDrop"] = inFile.read().encode("base64")
 
-	#run and display voltage drop image and protective device status table with updated glm where the node with the specified load name is changed to the max value
-	warnings.filterwarnings("ignore")
-	omd = json.load(open(pJoin(modelDir,feederName + ".omd")))
-	tree = omd.get('tree', {})
-	attachments = omd.get('attachments',[])
+	def voltplot_protdev(max_value=None, load_name=None):
+		warnings.filterwarnings("ignore")
+		omd = json.load(open(pJoin(modelDir,feederName + ".omd")))
+		tree = omd.get('tree', {})
+		attachments = omd.get('attachments',[])
 
-	#check to see that maximum load value is passed in
-	maxValue = maxLoadValue
-	loadName = loadNameValue
-	if maxValue != None:
-		maxValue = float(maxValue)
-		maxValueWatts = maxValue * 1000
-		# print "maxValue = " + str(maxValue)
-		# print "maxValueWatts = " + str(maxValueWatts)
-		#check to see that loadName is specified
-		if loadName != None:
-			# Map to speed up name lookups.
-			nameToIndex = {tree[key].get('name',''):key for key in tree.keys()}
-			#check if the specified load name is in the tree
-			if loadName in nameToIndex:
-				key = nameToIndex[loadName]
-				obtype = tree[key].get("object","")
-				if obtype in ['triplex_node', 'triplex_load']:
-					tree[key]['power_12_real'] = maxValueWatts
-					#tree[key]['power_12'] = maxValueWatts
-				elif obtype in ['load', 'pqload']:
-					#tree[key]['constant_power_A_real'] = maxValueWatts
-					tree[key]['constant_power_A_real'] = maxValueWatts/3
-					tree[key]['constant_power_B_real'] = maxValueWatts/3
-					tree[key]['constant_power_C_real'] = maxValueWatts/3
+		#check to see that maximum load value is passed in
+		maxValue = max_value
+		loadName = load_name
+		# maxValue = maxLoadValue
+		# loadName = loadNameValue
+		if maxValue != None:
+			maxValue = float(maxValue)
+			maxValueWatts = maxValue * 1000
+			# print "maxValue = " + str(maxValue)
+			# print "maxValueWatts = " + str(maxValueWatts)
+			#check to see that loadName is specified
+			if loadName != None:
+				# Map to speed up name lookups.
+				nameToIndex = {tree[key].get('name',''):key for key in tree.keys()}
+				#check if the specified load name is in the tree
+				if loadName in nameToIndex:
+					key = nameToIndex[loadName]
+					obtype = tree[key].get("object","")
+					if obtype in ['triplex_node', 'triplex_load']:
+						tree[key]['power_12_real'] = maxValueWatts
+						#tree[key]['power_12'] = maxValueWatts
+					elif obtype in ['load', 'pqload']:
+						#tree[key]['constant_power_A_real'] = maxValueWatts
+						tree[key]['constant_power_A_real'] = maxValueWatts/3
+						tree[key]['constant_power_B_real'] = maxValueWatts/3
+						tree[key]['constant_power_C_real'] = maxValueWatts/3
+					else:
+						raise Exception('Specified load name does not correspond to a load object. Make sure the object is of the following types: load, pqload, triplex_node, triplex_meter.')
+					#run gridlab-d simulation with specified load set to max value
+					omd['tree'] = tree
+					feederName2 = "Olin Barre Fault - evInterconnection.omd"
+					with open(modelDir + '/' + feederName2, "w+") as write_file:
+						json.dump(omd, write_file)
+
+					tempVoltPlotChart, tempProtDevTable = drawPlotFault(
+						pJoin(modelDir,feederName2),
+						neatoLayout = neato,
+						edgeCol = "PercentOfRating",
+						nodeCol = "perUnitVoltage",
+						nodeLabs = "Load",
+						edgeLabs = None,
+						customColormap = False,
+						scaleMin = .9,
+						scaleMax = 1.1,
+						faultLoc = None,
+						faultType = None,
+						rezSqIn = 225,
+						simTime = "2000-01-01 0:00:00",
+						workDir = modelDir,
+						loadLoc = loadName)
+					# loadVoltPlotChart.savefig(pJoin(modelDir, "loadVoltPlot.png"))
+					# with open(pJoin(modelDir, "loadStatusTable.html"), "w") as tabFile:
+					# 	tabFile.write(loadProtDevTable)
+					# outData['loadProtDevTableHtml'] = loadProtDevTable
+					# with open(pJoin(modelDir, "loadVoltPlot.png"),"rb") as inFile:
+					# 	outData["loadVoltageDrop"] = inFile.read().encode("base64")
+					return tempVoltPlotChart, tempProtDevTable
 				else:
-					raise Exception('Specified load name does not correspond to a load object. Make sure the object is of the following types: load, pqload, triplex_node, triplex_meter.')
-				#run gridlab-d simulation with specified load set to max value
-				omd['tree'] = tree
-				feederName2 = "Olin Barre Fault - evInterconnection.omd"
-				with open(modelDir + '/' + feederName2, "w+") as write_file:
-					json.dump(omd, write_file)
-
-				loadVoltPlotChart, loadProtDevTable = drawPlotFault(
-					pJoin(modelDir,feederName2),
-					neatoLayout = neato,
-					edgeCol = "PercentOfRating",
-					nodeCol = "perUnitVoltage",
-					nodeLabs = "Load",
-					edgeLabs = None,
-					customColormap = False,
-					scaleMin = .9,
-					scaleMax = 1.1,
-					faultLoc = None,
-					faultType = None,
-					rezSqIn = 225,
-					simTime = "2000-01-01 0:00:00",
-					workDir = modelDir,
-					loadLoc = loadName)
-				loadVoltPlotChart.savefig(pJoin(modelDir, "loadVoltPlot.png"))
-				with open(pJoin(modelDir, "loadStatusTable.html"), "w") as tabFile:
-					tabFile.write(loadProtDevTable)
-				outData['loadProtDevTableHtml'] = loadProtDevTable
-				with open(pJoin(modelDir, "loadVoltPlot.png"),"rb") as inFile:
-					outData["loadVoltageDrop"] = inFile.read().encode("base64")
+					print "Didn't find the gridlab object named " + loadName
+					#raise an exception if loadName isn't in the tree
+					raise Exception('Specified load name does not correspond to an object in the tree.')
 			else:
-				print "Didn't find the gridlab object named " + loadName
-				#raise an exception if loadName isn't in the tree
-				raise Exception('Specified load name does not correspond to an object in the tree.')
+				print "loadName is None"
+				#raise an exception if loadName isn't specified
+				raise Exception('Invalid request. Load Name must be specified.')
 		else:
-			print "loadName is None"
-			#raise an exception if loadName isn't specified
-			raise Exception('Invalid request. Load Name must be specified.')
-	else:
-		print "maxValue is None"
-		#raise an exception if maximum load value is not being passed in
-		raise Exception('Error retrieving maximum load value from load shape.')
+			print "maxValue is None"
+			#raise an exception if maximum load value is not being passed in
+			raise Exception('Error retrieving maximum load value from load shape.')
+
+	#run and display voltage drop image and protective device status table with updated glm where the node with the specified load name is changed to the max value
+	loadVoltPlotChart, loadProtDevTable = voltplot_protdev(max_value=maxLoadValue, load_name=loadNameValue)
+	loadVoltPlotChart.savefig(pJoin(modelDir, "loadVoltPlot.png"))
+	with open(pJoin(modelDir, "loadStatusTable.html"), "w") as tabFile:
+		tabFile.write(loadProtDevTable)
+	outData['loadProtDevTableHtml'] = loadProtDevTable
+	with open(pJoin(modelDir, "loadVoltPlot.png"),"rb") as inFile:
+		outData["loadVoltageDrop"] = inFile.read().encode("base64")
 
 	# Create the input JSON file for REopt
 	scenario = {
@@ -343,79 +355,13 @@ def work(modelDir, inputDict):
 		outData["maxLoadShape"] = evFile.read().encode("base64")
 
 	#Create 3rd powerflow run with maximum load from new ReOpt output load shape
-	#run and display voltage drop image and protective device status table with updated glm where the node with the specified load name is changed to the max value
-	warnings.filterwarnings("ignore")
-	omd = json.load(open(pJoin(modelDir,feederName + ".omd")))
-	tree = omd.get('tree', {})
-	attachments = omd.get('attachments',[])
-
-	#check to see that maximum load value is passed in
-	maxValue = max(REoptLoadShape)
-	loadName = loadNameValue
-	if maxValue != None:
-		maxValue = float(maxValue)
-		maxValueWatts = maxValue * 1000
-		# print "maxValue = " + str(maxValue)
-		# print "maxValueWatts = " + str(maxValueWatts)
-		#check to see that loadName is specified
-		if loadName != None:
-			# Map to speed up name lookups.
-			nameToIndex = {tree[key].get('name',''):key for key in tree.keys()}
-			#check if the specified load name is in the tree
-			if loadName in nameToIndex:
-				key = nameToIndex[loadName]
-				obtype = tree[key].get("object","")
-				if obtype in ['triplex_node', 'triplex_load']:
-					tree[key]['power_12_real'] = maxValueWatts
-					#tree[key]['power_12'] = maxValueWatts
-				elif obtype in ['load', 'pqload']:
-					#tree[key]['constant_power_A_real'] = maxValueWatts
-					tree[key]['constant_power_A_real'] = maxValueWatts/3
-					tree[key]['constant_power_B_real'] = maxValueWatts/3
-					tree[key]['constant_power_C_real'] = maxValueWatts/3
-				else:
-					raise Exception('Specified load name does not correspond to a load object. Make sure the object is of the following types: load, pqload, triplex_node, triplex_meter.')
-				#run gridlab-d simulation with specified load set to max value
-				omd['tree'] = tree
-				feederName2 = "Olin Barre Fault - evInterconnection.omd"
-				with open(modelDir + '/' + feederName2, "w+") as write_file:
-					json.dump(omd, write_file)
-
-				REoptVoltPlotChart, REoptProtDevTable = drawPlotFault(
-					pJoin(modelDir,feederName2),
-					neatoLayout = neato,
-					edgeCol = "PercentOfRating",
-					nodeCol = "perUnitVoltage",
-					nodeLabs = "Load",
-					edgeLabs = None,
-					customColormap = False,
-					scaleMin = .9,
-					scaleMax = 1.1,
-					faultLoc = None,
-					faultType = None,
-					rezSqIn = 225,
-					simTime = "2000-01-01 0:00:00",
-					workDir = modelDir,
-					loadLoc = loadName)
-				REoptVoltPlotChart.savefig(pJoin(modelDir, "REoptVoltPlot.png"))
-				with open(pJoin(modelDir, "REoptStatusTable.html"), "w") as tabFile:
-					tabFile.write(REoptProtDevTable)
-				outData['REoptProtDevTableHtml'] = REoptProtDevTable
-				with open(pJoin(modelDir, "REoptVoltPlot.png"),"rb") as inFile:
-					outData["REoptVoltageDrop"] = inFile.read().encode("base64")
-			else:
-				print "Didn't find the gridlab object named " + loadName
-				#raise an exception if loadName isn't in the tree
-				raise Exception('Specified load name does not correspond to an object in the tree.')
-		else:
-			print "loadName is None"
-			#raise an exception if loadName isn't specified
-			raise Exception('Invalid request. Load Name must be specified.')
-	else:
-		print "maxValue is None"
-		#raise an exception if maximum load value is not being passed in
-		raise Exception('Error retrieving maximum load value from load shape.')
-
+	REoptVoltPlotChart, REoptProtDevTable = voltplot_protdev(max_value=max(REoptLoadShape), load_name=loadNameValue)
+	REoptVoltPlotChart.savefig(pJoin(modelDir, "REoptVoltPlot.png"))
+	with open(pJoin(modelDir, "REoptStatusTable.html"), "w") as tabFile:
+		tabFile.write(REoptProtDevTable)
+	outData['REoptProtDevTableHtml'] = REoptProtDevTable
+	with open(pJoin(modelDir, "REoptVoltPlot.png"),"rb") as inFile:
+		outData["REoptVoltageDrop"] = inFile.read().encode("base64")
 	return outData
 
 def drawPlotFault(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, faultLoc=None, faultType=None, customColormap=False, scaleMin=None, scaleMax=None, rezSqIn=400, simTime='2000-01-01 0:00:00', loadLoc=None):
@@ -1066,12 +1012,15 @@ def plotMaxLoadShape(loadShape=None, combined_load=None, hourly_con=None, REopt_
 	#find the maximum REopt load value
 	max_val_REopt = max(base_shape_REopt)
 	#find that value's index
-	max_index_REopt = base_shape_REopt.index(max_val)
+	max_index_REopt = base_shape_REopt.index(max_val_REopt)
 
 	#find the day that the max REopt load value occurs
 	max_day_val_REopt = (max_index_REopt)/24
 	max_hour_val_REopt = (max_index_REopt)%24
 	day_shape_REopt = base_shape_REopt[max_day_val_REopt*24:max_day_val_REopt*24+24]
+
+	print "max_val: " + str(max_val)
+	print "max_val_REopt: " + str(max_val_REopt)
 
 	def maxLoadShape(load_vec, daily_vec, REopt_vec):
 		maxLoadShapeImg = plt.figure()
@@ -1084,6 +1033,7 @@ def plotMaxLoadShape(loadShape=None, combined_load=None, hourly_con=None, REopt_
 		plt.title('Maximum Daily Load Shape')
 		plt.ylabel('Demand (KW)')
 		plt.xlabel('Time of Day (Hour)')
+		plt.legend()
 		plt.close()
 		return maxLoadShapeImg
 
