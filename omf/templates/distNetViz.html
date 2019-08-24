@@ -3171,8 +3171,10 @@ function saveFeeder(feeder) {
                 saveFeeder(gReadFeeder);
             }
         });
+        //modal.cancelButton.setAttribute("style", "display:none"); // make the cancel button invisible
         postRequest.done(function() {
             if (!cancelled) {
+                //modal.cancelButton.removeAttribute("style"); // make the cancel button visible
                 modal.finish();
             }
         }).fail(function() {
@@ -3316,6 +3318,11 @@ async function submitForm({formId, pollUrl, inputId}) {
         endMessage: "Success. Your file was loaded into this feeder.",
         cancelFunc: () => {
             cancelled = true;
+            // Special case for cancelling the newBlankFeeder operation
+            if (formId === "blankFeederForm") {
+                const oldName = document.getElementById("blankFeederInput").value;
+                renameFeeder(oldName, gThisFeederName, false);
+            }
             saveFeeder(gReadFeeder);
         },
         finishFunc: () => {
@@ -3412,46 +3419,51 @@ async function getNewFeederName() {
     }
 }
 
-async function renameFeeder(oldServerName, newName) {
-    let modal;
+/**
+ * The modal shouldn't be shown when the rename operation is being used to undo a newBlankFeeder operation
+ */
+async function renameFeeder(oldServerName, newName, showModal=true) {
+    let modal = null;
     let cancelled = false;
-    if (newName === gThisFeederName) {
-        // We are undoing a previous rename operation
-        modal = createProgressModal({
-            startMessage: "Undoing the previous rename...",
-            endMessage: "Success. The previous rename operation was undone.",
-            finishFunc: () => {
-                modal.hide();
-            }
-         });
-    } else {
-        // We are using a new name
-        modal = createProgressModal({
-            startMessage:  "Renaming this feeder file...",
-            endMessage: "Success. This feeder file was renamed.",
-            cancelFunc: () => {
-                cancelled = true;
-                renameFeeder(newName, oldServerName);
-            },
-            finishFunc: () => {
-                // good
-                gThisFeederName = newName;
-                document.getElementById("menuLeft").querySelector("h4").textContent = newName;
-                modal.hide();
-            }
-        });
+    if (showModal === true) {
+        if (newName === gThisFeederName) {
+            // We are undoing a previous rename operation
+            modal = createProgressModal({
+                startMessage: "Undoing the previous rename...",
+                endMessage: "Success. The previous rename operation was undone.",
+                finishFunc: () => {
+                    modal.hide();
+                }
+            });
+        } else {
+            // We are using a new name
+            modal = createProgressModal({
+                startMessage:  "Renaming this feeder file...",
+                endMessage: "Success. This feeder file was renamed.",
+                cancelFunc: () => {
+                    cancelled = true;
+                    renameFeeder(newName, oldServerName);
+                },
+                finishFunc: () => {
+                    // good
+                    gThisFeederName = newName;
+                    document.getElementById("menuLeft").querySelector("h4").textContent = newName;
+                    modal.hide();
+                }
+            });
+        }
     }
     await $.ajax({
         url: `/renameFeeder/${gThisOwner}/${gThisModelName}/${oldServerName}/${newName}/${gThisFeederNum}`
     }).done(function(data) {
-        if (!cancelled) {
+        if (!cancelled && modal != null) {
             if (data === "Failure") {
                 modal.endMessage = "Rename operation failed."
             }
             modal.finish();
         }
     }).fail(function() {
-        if (!cancelled) {
+        if (!cancelled && modal != null) {
             modal.endMessage = "The server raised an internal exception during the rename operation."
             modal.finish();
         }
@@ -3486,8 +3498,8 @@ const progressModalPrototype = {
 
 /**
  * Create a progress modal in 1 of 2 modes: First mode will show a cancel button which if clicked allows the operation to be undone. Second mode will
- * not show a cancel button. startMessage and finishFunc are required parameters. Sometimes you have to set with endMessage after the
- * progress modal has been constructed.
+ * not show a cancel button. startMessage and finishFunc are required parameters. Sometimes you have to set with endMessage after the progress modal
+ * has been constructed.
  * @param {Function} finishFunc - will be executed when the user clicks the "OK" button after an operation has completed
  */
 function createProgressModal({startMessage, endMessage, cancelFunc, finishFunc}) {
@@ -5051,6 +5063,8 @@ function formatModal(modal) {
     Array.from(modal.querySelectorAll("td")).forEach(td => td.classList.add("fullPadded"));
     Array.from(modal.querySelectorAll("th")).forEach(th => th.classList.add("fullPadded"));
     Array.from(modal.querySelectorAll("button")).forEach(btn => btn.classList.add("modalButton"));
+    Array.from(modal.querySelectorAll("button[data-buttonfunction='toggle']")).forEach(btn => btn.classList.add("deleteButton"));
+    Array.from(modal.querySelectorAll("button[data-buttonfunction='cancel']")).forEach(btn => btn.classList.add("deleteButton"));
 }
 
 /**
