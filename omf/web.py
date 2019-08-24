@@ -404,10 +404,15 @@ def publishModel(owner, modelName):
 def writeToInput(workDir, entry, key):
 	try:
 		with open(workDir + "/allInputData.json") as inJson:
+			fcntl.flock(inJson, fcntl.LOCK_SH)
 			allInput = json.load(inJson)
+			fcntl.flock(inJson, fcntl.LOCK_UN)
 		allInput[key] = entry
-		with open(workDir+"/allInputData.json","w") as inputFile:
-			json.dump(allInput, inputFile, indent = 4)
+		with open(workDir+"/allInputData.json","r+") as inputFile:
+			fcntl.flock(inputFile, fcntl.LOCK_EX)
+			inputFile.truncate()
+			json.dump(allInput, inputFile, indent=4)
+			fcntl.flock(inputFile, fcntl.LOCK_UN)
 	except:
 		return "Failed"
 
@@ -452,8 +457,10 @@ def distribution_get(owner, model_name, feeder_num):
 	"""
 	model_dir = os.path.join(_omfDir, "data","Model", owner, model_name)
 	with open(model_dir + "/allInputData.json", "r") as json_file:
+		fcntl.flock(json_file, fcntl.LOCK_SH)
 		feeder_dict = json.load(json_file)
-		feeder_name = feeder_dict.get('feederName' + str(feeder_num))
+		fcntl.flock(json_file, fcntl.LOCK_UN)
+	feeder_name = feeder_dict.get('feederName' + str(feeder_num))
 	feeder_file = model_dir + "/" + feeder_name + ".omd"
 	with open(feeder_file, "r") as data_file:
 		fcntl.flock(data_file, fcntl.LOCK_SH)
@@ -969,12 +976,12 @@ def saveFeeder(owner, modelName, feederName, feederNum):
 						pass
 					else:
 						raise
-		# It would be nice to file lock allInputData.json too...
 		writeToInput(model_dir, feederName, 'feederName' + str(feederNum))
 		payload = json.loads(request.form.to_dict().get("feederObjectJson","{}"))
 		feeder_file = os.path.join(model_dir, feederName + ".omd")
-        with open(feeder_file, "w") as outFile:
+        with open(feeder_file, "r+") as outFile:
 			fcntl.flock(outFile, fcntl.LOCK_EX) # Get an exclusive lock
+			outFile.truncate()
 			json.dump(payload, outFile, indent=4) # This route is slow only because this line takes forever. We want the indentation so we keep this line
 			fcntl.flock(outFile, fcntl.LOCK_UN) # Release the exclusive lock
 	return 'Success'
@@ -1194,7 +1201,7 @@ def backgroundClimateChange(omdPath, owner, modelName):
 			pass
 	except Exception as e:
 		with open("data/Model/"+owner+"/"+modelName+"/error.txt", "w") as errorFile:
-			message = "climateError" if e.message is None else e.message
+			message = "climateError" if (e.message is None or e.message is "") else e.message
 			errorFile.write(message)
 
 
