@@ -38,12 +38,12 @@
 		}
 	}
 	function pointToLayerNode(feature, latlng) {
-		let fillColorValue = 'red';
+		let fillColorValue = 'gray';
 		if (feature.properties['pointColor']){
 			fillColorValue = feature.properties['pointColor'];
 		}
 		return L.circleMarker(latlng, {
-			radius: 8,
+			radius: 2,
 			fillColor: fillColorValue,
 			color: "#000",
 			weight: 1,
