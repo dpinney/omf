@@ -147,9 +147,6 @@
                 overflow: auto;
                 min-width: 450px;
             }
-            /*#milsoftInput {
-                width: 100%;
-            }*/
             #progressModalCancel {
                 background-color: crimson;
             }
@@ -179,13 +176,15 @@
                 padding: 20px;
                 border-radius: 10px;
 				background-color: #fefefe;
-                max-height: 80vh;
-                overflow: auto;
+                /*max-height: 80vh;*/
+                /*overflow: auto;*/
+                overflow: hidden;
                 max-width: 80vw;
+
 			}
-            .modalButtonSplit {
-                display: flex;
-                justify-content: space-around;
+            .modalContentButtons {
+                padding: 50px 0px 0px 0px;
+                text-align: center;
             }
             #feederListFlex {
                 display: flex;
@@ -259,10 +258,10 @@
             }
             .scrollableList {
                 overflow: auto;
-                max-height: 65vh;
+                max-height: 70vh;
                 list-style-type: none;
                 margin: 0px;
-                padding: 0;
+                padding: 0px 20px 0px 20px;
                 cursor: pointer;
             }
             .feederItem {
@@ -490,18 +489,20 @@
                         <tr>
                             <td>
                                 <button id="findPrevious">Previous</button>
-                                <button id="findNext" style="margin-left:10px;">Next</button>
+                                <button id="findNext">Next</button>
                             </td>
-                            <td><button data-buttonfunction="toggle">Close</button></td>
                         </tr>
                     </table>
+                    <div class="modalContentButtons">
+                        <button data-buttonfunction="toggle">Close</button>
+                    </div>
                 </div>
             </div>
             <div id="progressModal" class="modal" style="display: none">
                 <div class="modalContent centered">
                     <img src="/static/spinner.gif">
                     <h2>text...</h2>
-                    <div class="modalButtonSplit">
+                    <div class="modalContentButtons">
                         <button class="deleteButton" data-buttonfunction="cancel" style="margin-right:300px;">Cancel</button>
                         <button data-buttonfunction="submit">OK</button>
                     </div>
@@ -520,7 +521,9 @@
                             <ul id="userFeederList" class="scrollableList"></ul>
                         </div>
                     </div>
-                    <button data-buttonfunction="toggle" style="margin-top: 15px;">Cancel</button>
+                    <div class="modalContentButtons">
+                        <button data-buttonfunction="toggle">Cancel</button>
+                    </div>
                 </div>
             </div>
             <div id="blankFeederModal" class="modal" style="display: none">
@@ -541,12 +544,12 @@
                                         <input type="text" required id="blankFeederInput" name="feederNameNew" class="modalInput"/>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td><button type="button" data-buttonfunction="toggle">Cancel</button></td>
-                                    <td><button type="submit" class="right">Create</button></td>
-                                </tr>
                             </tbody>
                         </table>
+                        <div class="modalContentButtons">
+                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="submit">Create</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -558,7 +561,6 @@
                         <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
                         <input type="hidden" id="feederNum" name="feederNum" value="{{thisFeederNum}}"/>
                         <input type="hidden" id="modelName" name="modelName" value="{{thisModelName}}"/>
-                        <!--<input type="hidden" name="referrer" value="distribution"/>-->
                         <table>
                             <tbody>
                                 <tr><th colspan="2">Milsoft Conversion</th></tr>
@@ -577,12 +579,12 @@
                                     <td>Equipment File (.seq)</td>
                                     <td><input type="file" required id="seqFile" name="seqFile" accept=".seq" class="modalInput"/></td>
                                 </tr>
-                                <tr>
-                                    <td><button type="button" data-buttonfunction="toggle">Cancel</button></td>
-                                    <td><button type="submit" class="right">Import</button></td>
-                                </tr>
                             </tbody>
                         </table> 
+                        <div class="modalContentButtons">
+                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="submit">Import</button>
+                        </div>
                     </form>
                 </div> 
             </div>
@@ -594,7 +596,6 @@
                         <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
                         <input type="hidden" id="feederNum" name="feederNum" value="{{thisFeederNum}}"/>
                         <input type="hidden" id="modelName" name="modelName" value="{{thisModelName}}"/>
-                        <!--<input type="hidden" name="referrer" value="distribution"/>-->
                         <table>
                             <tbody>
                                 <tr><th colspan="2">GridLab-D Conversion</th></tr>
@@ -609,12 +610,12 @@
                                     <td>Data File (.glm)</td>
                                     <td><input type="file" required id="csvFile" name="glmFile" accept=".glm" class="modalInput"/></td>
                                 </tr>
-                                <tr>
-                                    <td><button type="button" data-buttonfunction="toggle">Cancel</button></td>
-                                    <td><button type="submit" class="right">Import</button></td>
-                                </tr>
                             </tbody>
                         </table>
+                        <div class="modalContentButtons">
+                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="submit">Import</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -626,7 +627,6 @@
                         <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
                         <input type="hidden" id="feederNum" name="feederNum" value="{{thisFeederNum}}"/>
                         <input type="hidden" id="modelName" name="modelName" value="{{thisModelName}}"/>
-                        <!--<input type="hidden" name="referrer" value="distribution"/>-->
                         <table>
                             <tbody>
                                 <tr><th colspan="2">Cyme Conversion</th></tr>
@@ -641,12 +641,12 @@
                                     <td>Network File (.mdb)</td>
                                     <td><input type="file" required id="mdbNetFile" name="mdbNetFile" accept=".mdb" class="modalInput"/></td>
                                 </tr>
-                                <tr>
-                                    <td><button type="button" data-buttonfunction="toggle">Cancel</button></td>
-                                    <td><button type="submit" class="right">Import</button></td>
-                                </tr>
                             </tbody>
                         </table>
+                        <div class="modalContentButtons">
+                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="submit">Import</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -658,7 +658,6 @@
                         <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
                         <input type="hidden" id="feederNum" name="feederNum" value="{{thisFeederNum}}"/>
                         <input type="hidden" id="modelName" name="modelName" value="{{thisModelName}}"/>
-                        <!--<input type="hidden" name="referrer" value="distribution"/>-->
                         <table>
                             <tbody>
                                 <tr>
@@ -670,12 +669,12 @@
                                     <td><input type="file" required id="scadaFile" name="scadaFile" accept=".csv" class="modalInput"/></td>
                                 </tr>
                                 <tr><td colspan="100%">Note: Model "Simulation Start Date" should lie within the Scada load"s dates.</td></tr>
-                                <tr>
-                                    <td><button type="button" data-buttonfunction="toggle">Cancel</button></td>
-                                    <td><button type="submit" class="right">Import</button></td>
-                                </tr>
                             </tbody>
                         </table>
+                        <div class="modalContentButtons">
+                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="submit">Import</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -701,12 +700,13 @@
                                 <tr>
                                     <td colspan="100%">Note: Model "Simulation Start Date" should lie within the AMI profiles"s dates.</td>
                                 </tr>
-                                <tr>
-                                    <td><button type="button" data-buttonfunction="toggle">Cancel</button></td>
-                                    <td><button type="submit" class="right">Import</button></td>
-                                </tr>
+
                             </tbody>
                         </table>
+                        <div class="modalContentButtons">
+                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="submit">Import</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -718,7 +718,6 @@
                         <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
                         <!--<input type="hidden" id="feederNum" name="feederNum" value="{{thisFeederNum}}"/>-->
                         <input type="hidden" id="modelName" name="modelName" value="{{thisModelName}}"/>
-                        <!--<input type="hidden" name="referrer" value="distribution"/>-->
                         <table>
                             <tbody>
                                 <tr><th colspan="2">Climate Change</th></tr>
@@ -746,12 +745,12 @@
                                     <td><label for="zipCode">ZIP Code:</label></td>
                                     <td><input id="zipCode" type="text" name="zipCode" pattern="\d+" minlength=5 maxlength=5 class="modalInput"></td>
                                 </tr>
-                                <tr>
-                                    <td><button type="button" data-buttonfunction="toggle">Cancel</button></td>
-                                    <td><button type="submit" class="right">Apply</button></td>
-                                </tr>
                             </tbody>
                         </table>
+                        <div class="modalContentButtons">
+                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="submit">Apply</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -762,7 +761,6 @@
                         <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
                         <!--<input type="hidden" id="feederNum" name="feederNum" value="{{thisFeederNum}}"/>-->
                         <input type="hidden" id="modelName" name="modelName" value="{{thisModelName}}"/>
-                        <!--<input type="hidden" name="referrer" value="distribution"/>-->
                         <table>
                             <tbody>
                                 <tr><th>Anonymization</th></tr>
@@ -834,14 +832,12 @@
                                         <input type="text" pattern="^[+-]?\d+(\.\d+)?$" name="noisePerc" class="modalInputLine"> [%]</label>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td>
-                                        <button type="button" data-buttonfunction="toggle">Cancel</button>
-                                        <button type="submit" class="right">Apply</button>
-                                    </td>
-                                </tr>
                             </tbody>
                         </table>
+                        <div class="modalContentButtons">
+                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="submit">Apply</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -863,19 +859,22 @@
                                 <td>With probability for each attachment (float between 0.0 and 1.0):</td>
                                 <td><input type="text" value="1.0" class="modalInput"/></td>
                             </tr>
-                            <tr>
-                                <td><button data-buttonfunction="cancel">Cancel</button></td>
-                                <td><button data-buttonfunction="submit" class="right">Apply</button></td>
-                            </tr>
+
                         </tbody>
                     </table>
+                    <div class="modalContentButtons">
+                        <button data-buttonfunction="cancel">Cancel</button>
+                        <button data-buttonfunction="submit">Apply</button>
+                    </div>
                 </div>
             </div>
             <div id="massAddSecondaryModal" class="modal" style="display: none;">
                 <div class="modalContent">
                     <h3></h3>
-                    <div id="componentTable" data-tableinsert></div>
-                    <div style="text-align:center; padding: 10px;">
+                    <!--<div id="componentTable" data-tableinsert></div>-->
+                    <div class="scrollableList" data-tableinsert></div>
+                    <!--<div style="text-align:center; padding: 10px;">-->
+                    <div class="modalContentButtons">
                         <button data-buttonfunction="cancel">Cancel</button>
                     </div>
                 </div>
@@ -916,12 +915,12 @@
                                 <td style="text-align: center">with value</td>
                                 <td><input type="text" id="newAttributeValue" pattern="^0\.\d+|1(\.0+)?$" class="modalInput"/></td>
                             </tr>
-                            <tr>
-                                <td><button data-buttonfunction="toggle">Cancel</button></td>
-                                <td colspan="3"><button onclick="massEdit();" class="right">Apply</button></td>
-                            </tr>
                         </tbody>
                     </table>
+                    <div class="modalContentButtons">
+                        <button data-buttonfunction="toggle">Cancel</button>
+                        <button onclick="massEdit();">Apply</button>
+                    </div>
                 </div>
             </div>
             <div id="attachmentsModal" class="modal" style="display: none">
@@ -930,12 +929,12 @@
                         <tbody>
                             <tr><th colspan="2">Attachments</th></tr>
                             <tr><td><select id="attachmentSelect"></select></td></tr>
-                            <tr>
-                                <td><button data-buttonfunction="toggle">Cancel</button></td>
-                                <td><button data-buttonfunction="toggle" onclick="editAttachment()">Select</button></td>
-                            </tr>
                         </tbody>
                     </table>
+                    <div class="modalContentButtons">
+                        <button data-buttonfunction="toggle">Cancel</button>
+                        <button data-buttonfunction="toggle" onclick="editAttachment()">Select</button>
+                    </div>
                 </div>
             </div>
             <div id="editAttachmentModal" class="modal" style="display: none">
@@ -944,18 +943,18 @@
                         <tbody>
                             <tr><td id="attachmentTd"></td></tr>
                             <tr><td><textarea rows="25" cols="80" id="editAttachmentBox"></textarea></td></tr>
-                            <tr>
-                                <td><button data-buttonfunction="toggle">Cancel</button></td>
-                                <td><button data-buttonfunction="toggle" onclick="saveAttachment();">Save</button></td>
-                            </tr>
                         </tbody>
                     </table>
+                    <div class="modalContentButtons">
+                        <button data-buttonfunction="toggle">Cancel</button>
+                        <button data-buttonfunction="toggle" onclick="saveAttachment();">Save</button>
+                    </div>
                 </div>
             </div>
             <div id="opacityModal" class="modal" style="display: none">
                 <div class="modalContent">
-                    <div data-tableinsert></div>
-                    <div class="centered fullPadded">
+                    <div class="scrollableList" data-tableinsert></div>
+                    <div class="modalContentButtons">
                         <button data-buttonfunction="toggle">Close</button>
                         <button onclick="gOpacityManager.reset();">Reset</button>
                     </div>
@@ -965,8 +964,8 @@
                 <div class="centered modalContent">
                     <h3>Color Circuit</h3>
                     <div class="fullPadded"><input type="file" multiple accept=".csv" class="modalInput"></div>
-                    <div data-tableinsert class="leftText vertFlex fullPadded"></div>
-                    <div class="fullPadded">
+                    <div class="scrollableList leftText fullPadded" data-tableinsert></div>
+                    <div class="modalContentButtons">
                         <button data-buttonfunction="toggle">Close</button>
                         <button data-buttonfunction="reset">Reset</button>
                     </div>
@@ -2294,6 +2293,7 @@ function prepareFindModal() {
     document.getElementById("searchSubstring").addEventListener("change", function() {
         searchTerm.call(searchInput);
     });
+    formatTable(document.getElementById("findModal").querySelector("table"));
 }
 
 function prepareColorModal() {
@@ -2967,7 +2967,8 @@ function editAttachment() {
 
 function saveAttachment() {
 	let name = document.getElementById("attachmentSelect").value;
-	gWriteFeeder.attachments[name] = document.getElementById("editAttachmentBox").value;
+    gWriteFeeder.attachments[name] = document.getElementById("editAttachmentBox").value;
+    alert("Attachment saved");
 }
 
 {% if showFileMenu %}
@@ -3318,10 +3319,22 @@ async function submitForm({formId, pollUrl, inputId}) {
         endMessage: "Success. Your file was loaded into this feeder.",
         cancelFunc: () => {
             cancelled = true;
-            // Special case for cancelling the newBlankFeeder operation
-            if (formId === "blankFeederForm") {
-                const oldName = document.getElementById("blankFeederInput").value;
-                renameFeeder(oldName, gThisFeederName, false);
+            /* In cases where the initial operation changed the name of the .omd file on the server, we must rename the .omd file to its previous name
+            in order to completely undo the operation */
+            // scadaForm??? amiForm???
+            // no climateForm, no anonymizeForm
+            if (["blankFeederForm", "milsoftForm", "gridlabdForm", "cymeForm"].includes(formId)) {
+                let oldServerName;
+                if (formId === "blankFeederForm") {
+                    oldServerName = document.getElementById("blankFeederInput").value;
+                } else if (formId === "milsoftForm") {
+                    oldServerName = document.getElementById("milsoftInput").value;
+                } else if (formId === "gridlabdForm") {
+                    oldServerName = document.getElementById("gridlabdInput").value;
+                } else if (formId === "cymeForm") {
+                    oldServerName = document.getElementById("cymeInput").value;
+                }
+                renameFeeder(oldServerName, gThisFeederName, false);
             }
             saveFeeder(gReadFeeder);
         },
@@ -5063,7 +5076,11 @@ function formatModal(modal) {
     Array.from(modal.querySelectorAll("td")).forEach(td => td.classList.add("fullPadded"));
     Array.from(modal.querySelectorAll("th")).forEach(th => th.classList.add("fullPadded"));
     Array.from(modal.querySelectorAll("button")).forEach(btn => btn.classList.add("modalButton"));
-    Array.from(modal.querySelectorAll("button[data-buttonfunction='toggle']")).forEach(btn => btn.classList.add("deleteButton"));
+    Array.from(modal.querySelectorAll("button[data-buttonfunction='toggle']")).forEach(btn => {
+        if (btn.textContent.toLowerCase() !== "select" && btn.textContent.toLowerCase() !== "save") {
+            btn.classList.add("deleteButton")
+        }
+    });
     Array.from(modal.querySelectorAll("button[data-buttonfunction='cancel']")).forEach(btn => btn.classList.add("deleteButton"));
 }
 

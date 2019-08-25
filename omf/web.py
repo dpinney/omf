@@ -979,11 +979,19 @@ def saveFeeder(owner, modelName, feederName, feederNum):
 		writeToInput(model_dir, feederName, 'feederName' + str(feederNum))
 		payload = json.loads(request.form.to_dict().get("feederObjectJson","{}"))
 		feeder_file = os.path.join(model_dir, feederName + ".omd")
-        with open(feeder_file, "r+") as outFile:
-			fcntl.flock(outFile, fcntl.LOCK_EX) # Get an exclusive lock
-			outFile.truncate()
-			json.dump(payload, outFile, indent=4) # This route is slow only because this line takes forever. We want the indentation so we keep this line
-			fcntl.flock(outFile, fcntl.LOCK_UN) # Release the exclusive lock
+		if os.path.isfile(feeder_file):
+			with open(feeder_file, "r+") as outFile:
+				fcntl.flock(outFile, fcntl.LOCK_EX) # Get an exclusive lock
+				outFile.truncate()
+				json.dump(payload, outFile, indent=4) # This route is slow only because this line takes forever. We want the indentation so we keep this line
+				fcntl.flock(outFile, fcntl.LOCK_UN) # Release the exclusive lock
+		else:
+			# The feeder_file should always exist, but just in case there was an error, we allow the recreation of the file
+			with open(feeder_file, "w") as outFile:
+				fcntl.flock(outFile, fcntl.LOCK_EX) # Get an exclusive lock
+				outFile.truncate()
+				json.dump(payload, outFile, indent=4) # This route is slow only because this line takes forever. We want the indentation so we keep this line
+				fcntl.flock(outFile, fcntl.LOCK_UN) # Release the exclusive lock
 	return 'Success'
 
 
