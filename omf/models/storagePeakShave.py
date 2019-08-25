@@ -9,43 +9,62 @@ import pandas as pd
 
 from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
-from omf import loadForecast as fc
+from omf import forecast as fc
 
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = ("The storagePeakShave model calculates the value of a distribution utility " 
 	"deploying energy storage based on three possible battery dispatch strategies.")
 
-def pulp24hrBattery(demand, power, energy, battEff):
-	# LP Variables
+def heat(l, alpha=.10):
+	r = []
+	for i, x in enumerate(l):
+		if i == 0:
+			diff = (0 - l[i]) - (l[i] - l[i+1])
+			r.append(l[i] + alpha*diff)
+		elif i == len(l) - 1:
+			diff = (l[i-1] - l[i]) - (l[i] - 0)
+			r.append(l[i] + alpha*diff)
+		else:
+			diff = (l[i-1] - l[i]) - (l[i] - l[i+1])
+			r.append(l[i] + alpha*diff)
+	
+	sum_r = sum(r)
+	sum_l = sum(l)
+	if sum_l != sum_r:
+		p = []
+		prop = sum_l / sum_r
+		return [round(prop*x, 4) for x in r]
+	else:
+		return r
+
+def pulp24hrBattery(day_load, RATING, CAPACITY, battEff):
 	model = pulp.LpProblem("Daily demand charge minimization problem", pulp.LpMinimize)
-	VBpower = pulp.LpVariable.dicts(
-		"ChargingPower", range(24)
-	)  # decision variable of VB charging power; dim: 24 by 1
-	VBenergy = pulp.LpVariable.dicts(
-		"EnergyState", range(24)
-	)  # decision variable of VB energy state; dim: 24 by 1
+	power = pulp.LpVariable.dicts("ChargingPower", range(24))
+	energy = pulp.LpVariable.dicts("EnergyState", range(24))
 
 	for i in range(24):
-		VBpower[i].lowBound = -power
-		VBpower[i].upBound = power
-		VBenergy[i].lowBound = 0
-		VBenergy[i].upBound = energy
+		power[i].lowBound = -RATING
+		power[i].upBound = 0
+		energy[i].lowBound = 0
+		energy[i].upBound = CAPACITY
 	pDemand = pulp.LpVariable("Peak Demand", lowBound=0)
 
 	# Objective function: Minimize peak demand
 	model += pDemand
 
 	# VB energy state as a function of VB power
-	model += VBenergy[0] == 0
+	model += energy[0] == CAPACITY
 	for i in range(1, 24):
-		model += VBenergy[i] == battEff * VBenergy[i - 1] + VBpower[i]
+		model += energy[i] == energy[i - 1] + power[i]
 	for i in range(24):
-		model += pDemand >= demand[i] + VBpower[i]
+		model += pDemand >= day_load[i] + power[i]
 	model.solve()
+
 	return (
-		[VBpower[i].varValue for i in range(24)],
-		[VBenergy[i].varValue for i in range(24)],
+		# heat([power[i].varValue for i in range(24)]),
+		[power[i].varValue for i in range(24)],
+		[energy[i].varValue for i in range(24)]
 	)
 
 def work(modelDir, inputDict):
@@ -172,7 +191,6 @@ def work(modelDir, inputDict):
 	out['batteryDischargekWMax'] = max(out['batteryDischargekW'])
 
 	# Battery State of Charge Graph
-	# Turn dc's SoC into a percentage, with dodFactor considered.
 	out['batterySoc'] = SoC = [t['battSoC']/battCapacity*100*dodFactor + (100-100*dodFactor) for t in dc]
 	# Estimate number of cyles the battery went through. Sums the percent of SoC.
 	cycleEquivalents = sum([SoC[i]-SoC[i+1] for i, x in enumerate(SoC[:-1]) if SoC[i+1] < SoC[i]]) / 100.0
@@ -180,8 +198,6 @@ def work(modelDir, inputDict):
 	out['batteryLife'] = batteryCycleLife / cycleEquivalents
 
 	# Cash Flow Graph
-	# inserting battery efficiency only into the cashflow calculation
-	# cashFlowCurve is $ in from peak shaving minus the cost to recharge the battery every day of the year
 	cashFlowCurve = [sum(ps)*demandCharge for year in range(projYears)]
 	cashFlowCurve.insert(0, -1 * cellCost * cellQuantity)  # insert initial investment
 	# simplePayback is also affected by the cost to recharge the battery every day of the year
@@ -204,6 +220,8 @@ def work(modelDir, inputDict):
 	return out
 
 def forecastWork(modelDir, ind):
+	import tensorflow as tf
+
 	''' Run the model in its directory.'''
 	(cellCapacity, dischargeRate, chargeRate, cellQuantity, cellCost) = \
 		[float(ind[x]) for x in ('cellCapacity', 'dischargeRate', 'chargeRate', 'cellQuantity', 'cellCost')]
@@ -219,19 +237,22 @@ def forecastWork(modelDir, ind):
 	o = {}
 
 	try:
-	 	with open(pJoin(modelDir, 'hist.csv'), 'w') as f:
-	 		f.write(ind['histCurve'].replace('\r', ''))
+		with open(pJoin(modelDir, 'hist.csv'), 'w') as f:
+			f.write(ind['histCurve'].replace('\r', ''))
 		df = pd.read_csv(pJoin(modelDir, 'hist.csv'))
 		assert df.shape[0] >= 26280 # must be longer than 3 years
-	 	assert df.shape[1] == 6
-		df['dates'] = df.apply(
-			lambda x: dt(
-				int(x['year']), 
-				int(x['month']), 
-				int(x['day']), 
-				int(x['hour'])), 
-			axis=1
-		)
+		if df.shape[1] == 6:
+			df['dates'] = df.apply(
+				lambda x: dt(
+					int(x['year']), 
+					int(x['month']), 
+					int(x['day']), 
+					int(x['hour'])), 
+				axis=1
+			)
+		else:
+			df = pd.read_csv(pJoin(modelDir, 'hist.csv'), parse_dates=['dates'])
+			df['month'] = df.dates.dt.month
 		df['dayOfYear'] = df['dates'].dt.dayofyear
 	except:
 		raise Exception("CSV file is incorrect format.")
@@ -240,20 +261,23 @@ def forecastWork(modelDir, ind):
 	# train model on previous data
 	all_X = fc.makeUsefulDf(df)
 	all_y = df['load']
-	predictions, accuracy = fc.neural_net_predictions(all_X, all_y, epochs=int(ind['epochs']))
+	if ind['newModel'] == 'True':
+		model = None 
+	else:
+		with open(pJoin(modelDir, 'neural_net.h5'), 'wb') as f:
+			f.write(ind['model'].decode('base64'))
+		model = tf.keras.models.load_model(pJoin(modelDir, 'neural_net.h5'))
+		# model = tf.keras.models.load_model(ind['model'])
+	predictions, accuracy = fc.neural_net_predictions(all_X, all_y, epochs=int(ind['epochs']), model=model, 
+		save_file=pJoin(modelDir, 'neural_net_model.h5'))
 
 	dailyLoadPredictions = [predictions[i:i+24] for i in range(0, len(predictions), 24)]	
 	weather = df['tempc'][-8760:]
 	dailyWeatherPredictions = [weather[i:i+24] for i in range(0, len(weather), 24)]
-	
-	month_h = list(df['month'][-8760:])
-	month = [month_h[i:i+24] for i in range(0, len(month_h), 24)]
-	month = [m[0]-1 for m in month]
 
 	# decide to implement VBAT every day for a year
 	VB_power, VB_energy = [], []
-	for i, (load24, temp24, m) in enumerate(zip(dailyLoadPredictions, dailyWeatherPredictions, month)):
-		peak = max(load24)
+	for i, (load24, temp24) in enumerate(zip(dailyLoadPredictions, dailyWeatherPredictions)):
 		vbp, vbe = pulp24hrBattery(load24, dischargeRate*cellQuantity, 
 			cellCapacity*cellQuantity, battEff)
 		VB_power.extend(vbp)
@@ -263,26 +287,6 @@ def forecastWork(modelDir, ind):
 	o['predictedLoad'] = predictions
 	o['trainAccuracy'] = 100 - round(accuracy['train'], 1)
 	o['testAccuracy'] = 100 - round(accuracy['test'], 1)
-	print 100 - round(accuracy['train'], 1)
-	print accuracy['train']
-
-	# PRECISION AND RECALL
-	# maxDays = []
-	# for month in range(1, 13):
-	# 	test = df[df['month'] == month]
-	# 	maxDays.append(test.loc[test['load'].idxmax()]['dayOfYear'])
-	
-	# shouldHaveDispatched = [False]*365
-	# for day in maxDays:
-	# 	shouldHaveDispatched[day] = True
-
-	# truePositive = len([b for b in [i and j for (i, j) in zip(dispatched, shouldHaveDispatched)] if b])
-	# falsePositive = len([b for b in [i and (not j) for (i, j) in zip(dispatched, shouldHaveDispatched)] if b])
-	# falseNegative = len([b for b in [(not i) and j for (i, j) in zip(dispatched, shouldHaveDispatched)] if b])
-	# o['precision'] = round(truePositive / float(truePositive + falsePositive) * 100, 2)
-	# o['recall'] = round(truePositive / float(truePositive + falseNegative) * 100, 2)
-	# o['number_of_dispatches'] = len([i for i in dispatched if i])
-	
 	# ---------------------- FINANCIAL ANALYSIS ----------------------------- #
 
 	# Calculate monthHours
@@ -293,11 +297,10 @@ def forecastWork(modelDir, ind):
 	finish = list(year.groupby('month').last()['hour'])
 	monthHours = [(s, f+1) for (s, f) in zip(start, finish)]
 
-	demand = list(all_y[-8760:])
+	demand = list(df['load'][-8760:])
 	peakDemand = [max(demand[s:f]) for s, f in monthHours] 
 	demandAdj = [d+p for d, p in zip(demand, VB_power)]
 	peakDemandAdj = [max(demandAdj[s:f]) for s, f in monthHours]
-	discharges = [f if f < 0 else 0 for f in VB_power]
 
 	# Monthly Cost Comparison Table
 	o['monthlyDemand'] = peakDemand
@@ -315,7 +318,7 @@ def forecastWork(modelDir, ind):
 	o['batterySoc'] = SoC = [100 - (e / battCapacity * 100) for e in VB_energy]
 	cycleEquivalents = sum([SoC[i]-SoC[i+1] for i, x in enumerate(SoC[:-1]) if SoC[i+1] < SoC[i]]) / 100.0
 	o['cycleEquivalents'] = cycleEquivalents
-	o['batteryLife'] = batteryCycleLife / cycleEquivalents
+	o['batteryLife'] = batteryCycleLife / (cycleEquivalents+10)
 
 	# Cash Flow Graph
 	cashFlowCurve = [sum(o['ps'])*demandCharge for year in range(projYears)]
@@ -327,7 +330,9 @@ def forecastWork(modelDir, ind):
 
 	battCostPerCycle = cellQuantity * cellCost / batteryCycleLife
 	lcoeTotCost = cycleEquivalents*retailCost + battCostPerCycle*cycleEquivalents
-	o['LCOE'] = lcoeTotCost / (cycleEquivalents*battCapacity)
+	o['LCOE'] = lcoeTotCost / (cycleEquivalents*battCapacity+10)
+
+	model
 
 	# Other
 	o['startDate'] = '2011-01-01'
@@ -339,8 +344,8 @@ def forecastWork(modelDir, ind):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		'batteryEfficiency': '92',
-		'inverterEfficiency': '97.5',
+		'batteryEfficiency': '100',
+		'inverterEfficiency': '100',
 		'cellCapacity': '7',
 		'discountRate': '2.5',
 		'created': '2015-06-12 17:20:39.308239',
@@ -349,7 +354,7 @@ def new(modelDir):
 		'chargeRate': '5',
 		'demandCurve': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','Texas_1yr_Load.csv')).read(),
 		'fileName': 'FrankScadaValidCSV_Copy.csv',
-		'dispatchStrategy': 'prediction', #'prediction', 
+		'dispatchStrategy': 'optimal', #'prediction', 
 		'cellCost': '7140',
 		'cellQuantity': '100',
 		'runTime': '0:00:03',
@@ -363,9 +368,12 @@ def new(modelDir):
 		# required if dispatch strategy is custom
 		'customDispatchStrategy': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','dispatchStrategy.csv')).read(),
 		# forecast
-		'epochs': '100',
+		'epochs': '1',
+		'newModel': "False",
+		'model': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','NCENT.h5')).read().encode("base64"),
+		'modelFileName': 'NCENT.h5',
 		'histFileName': 'd_Texas_17yr_TempAndLoad.csv',
-		"histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","d_Texas_17yr_TempAndLoad.csv"), 'rU').read(),
+		"histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_17yr_TempAndLoad.csv"), 'rU').read(),
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
@@ -383,6 +391,41 @@ if __name__ == '__main__':
 	_tests()
 
 '''
+def cap24(demand, power, energy, battEff):
+	# ignore battEff for now.
+	# assume batteries can recharge on a daily basis
+	# assume power <= energy
+
+	discharges = [power] * int(energy // power) + ([energy % power] if energy % power != 0 else [])
+	batt_power = [0]*24
+	demand_min_to_max = list(sorted(demand)) 
+	demand_max_to_min = list(reversed(sorted(demand))) 
+	for i, d in enumerate(discharges):
+		batt_power[demand.index(demand_max_to_min[i])] = -d
+		batt_power[demand.index(demand_min_to_max[i])] = d
+
+	batt_energy = [0]*24
+	for i, p in enumerate(batt_power):
+		batt_energy[i] = energy if i == 0 else batt_energy[i-1] + p
+
+	return batt_power, batt_energy 
+
+	# PRECISION AND RECALL
+	# maxDays = []
+	# for month in range(1, 13):
+	# 	test = df[df['month'] == month]
+	# 	maxDays.append(test.loc[test['load'].idxmax()]['dayOfYear'])
+	
+	# shouldHaveDispatched = [False]*365
+	# for day in maxDays:
+	# 	shouldHaveDispatched[day] = True
+
+	# truePositive = len([b for b in [i and j for (i, j) in zip(dispatched, shouldHaveDispatched)] if b])
+	# falsePositive = len([b for b in [i and (not j) for (i, j) in zip(dispatched, shouldHaveDispatched)] if b])
+	# falseNegative = len([b for b in [(not i) and j for (i, j) in zip(dispatched, shouldHaveDispatched)] if b])
+	# o['precision'] = round(truePositive / float(truePositive + falsePositive) * 100, 2)
+	# o['recall'] = round(truePositive / float(truePositive + falseNegative) * 100, 2)
+	# o['number_of_dispatches'] = len([i for i in dispatched if i])
 outDic {
 	startdate: str
 	stdout: "Success"
@@ -421,5 +464,40 @@ outDic {
 	# for month in range(12):
 	#   plt.axvline(hoursThroughTheMonth[month])
 	# plt.savefig(pJoin(modelDir,"plot.png"))
+
+def pulp24hrBattery(demand, power, energy, battEff):
+	# LP Variables
+	model = pulp.LpProblem("Daily demand charge minimization problem", pulp.LpMinimize)
+	VBpower = pulp.LpVariable.dicts(
+		"ChargingPower", range(24)
+	)  # decision variable of VB charging power; dim: 24 by 1
+	VBenergy = pulp.LpVariable.dicts(
+		"EnergyState", range(24)
+	)  # decision variable of VB energy state; dim: 24 by 1
+
+	for i in range(24):
+		VBpower[i].lowBound = -power
+		VBpower[i].upBound = power
+		VBenergy[i].lowBound = 0
+		VBenergy[i].upBound = energy
+	pDemand = pulp.LpVariable("Peak Demand", lowBound=0)
+
+	# Objective function: Minimize peak demand
+	model += pDemand
+
+	# VB energy state as a function of VB power
+	model += VBenergy[0] == 0
+	for i in range(1, 24):
+		model += VBenergy[i] == battEff * VBenergy[i - 1] + VBpower[i]
+	for i in range(24):
+		model += pDemand >= demand[i] + VBpower[i]
+	model.solve()
+	
+	print [VBpower[i].varValue for i in range(24)]
+
+	return (
+		[VBpower[i].varValue for i in range(24)],
+		[VBenergy[i].varValue for i in range(24)],
+	)
 
 '''

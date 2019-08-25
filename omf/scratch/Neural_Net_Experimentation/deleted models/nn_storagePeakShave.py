@@ -7,7 +7,7 @@ from numpy import npv
 import pandas as pd
 from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
-from omf import loadForecast as fc
+from omf import forecast as fc
 
 # Model metadata:
 modelName, template = metadata(__file__)

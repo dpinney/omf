@@ -6,7 +6,7 @@ from os.path import isdir, join as pJoin
 import pandas as pd
 from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
-from omf import loadForecast as lf
+from omf import forecast as lf
 import numpy as np
 from scipy.stats import norm
 import re
@@ -33,25 +33,6 @@ def work(modelDir, ind):
 	''' Model processing done here. '''
 	epochs = int(ind['epochs'])
 	o = {}  # See bottom of file for out's structure
-
-	# # serialize model to JSON
-	# model_json = model.to_json()
-	# with open("model.json", "w") as json_file:
-	#     json_file.write(model_json)
-	# # serialize weights to HDF5
-	# model.save_weights("model.h5")
-	# print("Saved model to disk")
-	 
-	# # later...
-	# if not (ind.get('model') is None):
-	# 	# load json and create model
-	# 	json_file = open('model.json', 'r')
-	# 	loaded_model_json = json_file.read()
-	# 	json_file.close()
-	# 	loaded_model = model_from_json(loaded_model_json)
-	# # load weights into new model
-	# loaded_model.load_weights("model.h5")
-	# print("Loaded model from disk")
 
 	try:
 	 	with open(pJoin(modelDir, 'hist.csv'), 'w') as f:
@@ -82,19 +63,19 @@ def work(modelDir, ind):
 	all_y = df['load']
 
 	#load prediction
-	tomorrow_load, model, tomorrow_accuracy = lf.neural_net_next_day(all_X, all_y, epochs=epochs)
+	tomorrow_load, model, tomorrow_accuracy = lf.neural_net_next_day(all_X, all_y, epochs=epochs, save_file=pJoin(modelDir, 'neural_net_1day.h5'))
 	# tomorrow_load = [13044.3369140625, 12692.4453125, 11894.0712890625, 13391.0185546875, 13378.373046875, 14098.5048828125, 14984.5, 15746.6845703125, 14677.6064453125, 14869.6953125, 14324.302734375, 13727.908203125, 13537.51171875, 12671.90234375, 13390.9970703125, 12111.166015625, 13539.05078125, 15298.7939453125, 14620.8369140625, 15381.9404296875, 15116.42578125, 13652.3974609375, 13599.5986328125, 12882.5185546875]
 	# tomorrow_accuracy = {'test': 4, 'train': 3}
 	o['tomorrow_load'] = tomorrow_load
-	o['startDate'] = "{}-{}-{}".format(tomorrow.year, tomorrow.month, tomorrow.day)
-	o['startDate_s'] = tomorrow.strftime("%A, %B %-m, %Y")
+	o['month_start'] = dt(tomorrow.year, tomorrow.month, 1).strftime("%A, %B %-d, %Y")
+	o['forecast_start'] = tomorrow.strftime("%A, %B %-d, %Y")
 	
 	# second day
 	df, second_day = lf.add_day(df, weather[24:48])
 	if second_day.month == tomorrow.month:
 		all_X = lf.makeUsefulDf(df, hours_prior=48, noise=5)
 		all_y = df['load']
-		two_day_predicted_load, two_day_model, two_day_load_accuracy = lf.neural_net_next_day(all_X, all_y, epochs=epochs, hours_prior=48)
+		two_day_predicted_load, two_day_model, two_day_load_accuracy = lf.neural_net_next_day(all_X, all_y, epochs=epochs, hours_prior=48, save_file=pJoin(modelDir, 'neural_net_2day.h5'))
 		two_day_peak = max(two_day_predicted_load)
 
 		# third day
@@ -102,7 +83,7 @@ def work(modelDir, ind):
 		if third_day.month == tomorrow.month:
 			all_X = lf.makeUsefulDf(df, hours_prior=72, noise=15)
 			all_y = df['load']
-			three_day_predicted_load, three_day_model, three_day_load_accuracy = lf.neural_net_next_day(all_X, all_y, epochs=epochs, hours_prior=72)
+			three_day_predicted_load, three_day_model, three_day_load_accuracy = lf.neural_net_next_day(all_X, all_y, epochs=epochs, hours_prior=72, save_file=pJoin(modelDir, 'neural_net_3day.h5'))
 			three_day_peak = max(three_day_predicted_load)
 		else:
 			three_day_peak = 0
@@ -115,13 +96,41 @@ def work(modelDir, ind):
 		three_day_load_accuracy = {'test': np.nan, 'train': np.nan}
 
 	tomorrow_peak = max(tomorrow_load)
-	o['predicted_peak'] = [highest_peak_this_month(df, tomorrow), tomorrow_peak, two_day_peak, three_day_peak]
+	m = df[(df['month'] == tomorrow.month) & (df['year'] != tomorrow.year) ]
+	o['quantile'] = round(m[m['load'] < tomorrow_peak].shape[0]/float(m.shape[0])*100, 2)
+	o['predicted_peak'] = [m['load'].median(), highest_peak_this_month(df, tomorrow), tomorrow_peak, two_day_peak, three_day_peak]
 	o['predicted_peak_limits'] = [
+		[m['load'].min(), m['load'].max()],
 		[0, 0],
 		[tomorrow_peak*(1 + tomorrow_accuracy['test']*.01), tomorrow_peak*(1 - tomorrow_accuracy['test']*.01)],
 		[two_day_peak*(1 + two_day_load_accuracy['test']*.01), two_day_peak*(1 - two_day_load_accuracy['test']*.01)],
 		[three_day_peak*(1 + three_day_load_accuracy['test']*.01), three_day_peak*(1 - three_day_load_accuracy['test']*.01)]
 	]
+
+	previous_months = [{
+		'year': y,
+		'load': m[m['year'] == y]['load'].tolist()
+	} for y in m.year.unique()]
+
+	# hard-code the input for highcharts
+	o['cats_pred'] = list(range(744)) ### FIX THIS
+
+	l = []
+	for d in previous_months:
+		l.append({
+			'name': d['year'],
+			'color': 'lightgrey',
+			'data': d['load'],
+			'type': 'line',
+			'opacity': .05,
+			'enableMouseTracking': False
+		})
+
+	load_leading_up = df[(df['month'] == tomorrow.month) & (df['year'] == tomorrow.year)]['load'].tolist()
+	l.append({'name': tomorrow.year, 'color': 'black', 'data': load_leading_up[:-72], 'type': 'line'})
+	l.append({'name':'forecast','color':'blue','data': [None]*(len(load_leading_up) - 72) + o['tomorrow_load'],'type': 'line'})
+
+	o['previous_months'] = l
 
 	o['load_test_accuracy'] = round(tomorrow_accuracy['test'], 2)
 	o['load_train_accuracy'] = round(tomorrow_accuracy['train'], 2)
@@ -153,10 +162,10 @@ def new(modelDir):
 		'created': '2015-06-12 17:20:39.308239',
 		'modelType': modelName,
 		'runTime': '0:01:03',
-		'epochs': '100',
+		'epochs': '1',
 		'autoFill': "off",
 		'histFileName': 'd_Texas_17yr_TempAndLoad.csv',
-		"histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","d_Texas_17yr_TempAndLoad.csv"), 'rU').read(),
+		"histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","d_Texas_17yr_TempAndLoad_Dec.csv"), 'rU').read(),
 		'tempFileName': '72hr_TexasTemp.csv',
 		'tempCurve': open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","72hr_TexasTemp.csv"), 'rU').read()
 	}

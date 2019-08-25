@@ -263,7 +263,7 @@
 		<div class="tab postRun">
 			<button id='firstTabButton1' class="tabLinks1 active" onclick="openTab(event, 'baseVoltageDrop', '1')">Base</button>
 			<button class="tabLinks1" onclick="openTab(event, 'loadVoltageDrop', '1')">With Load</button>
-			<!-- <button class="tabLinks1" onclick="openTab(event, 'controlledDiagram')">Controlled</button> -->
+			<button class="tabLinks1" onclick="openTab(event, 'REoptVoltageDrop', '1')">With Load and REopt</button>
 		</div>
 		<!-- Tab content -->
 		<div id="phaseUnbalanceDiagrams" class="postRun tabPlots">
@@ -276,10 +276,10 @@
 				<img id="loadVoltageDropChart" style="width:1000px;height:1000px;" />
 				<script type="text/javascript">gebi("loadVoltageDropChart").src = "data:image/png;base64," + allOutputData.loadVoltageDrop</script>
 			</div>
-			<!-- <div class="tightContent tabContent1 controlledDiagram">
-				<img id="controlled_image" style="width:1000px;height:1000px;" />
-				<script type="text/javascript">gebi("controlled_image").src = "data:image/png;base64," + allOutputData.controlled_image</script>
-			</div>	 -->
+			<div class="tightContent tabContent1 REoptVoltageDrop">
+				<img id="REoptVoltageDropChart" style="width:1000px;height:1000px;" />
+				<script type="text/javascript">gebi("REoptVoltageDropChart").src = "data:image/png;base64," + allOutputData.REoptVoltageDrop</script>
+			</div>
 		</div>
 		<script>document.getElementById('firstTabButton1').click();//Hack, get first tab to show.</script>
 		<!-- Protective Device Status Tables -->
@@ -288,7 +288,7 @@
 		<div class="tab postRun">
 			<button id='firstTabButton2' class="tabLinks2 active" onclick="openTab(event, 'baseProtDevTable', '2')">Base</button>
 			<button class="tabLinks2" onclick="openTab(event, 'loadProtDevTable', '2')">With Load</button>
-			<!-- <button class="tabLinks" onclick="openTab(event, 'controlledDiagram')">Controlled</button> -->
+			<button class="tabLinks2" onclick="openTab(event, 'REoptProtDevTable', '2')">With Load and REopt</button>
 		</div>
 		<!-- Tab content -->
 		<div id="protDevStatusDiagrams" class="postRun tabPlots">
@@ -303,10 +303,11 @@
 					{{ allOutputDataDict['loadProtDevTableHtml'] }}
 				</div>
 			</div>
-			<!-- <div class="tightContent tabContent controlledDiagram">
-				<img id="controlled_image" style="width:1000px;height:1000px;" />
-				<script type="text/javascript">gebi("controlled_image").src = "data:image/png;base64," + allOutputData.controlled_image</script>
-			</div>	 -->
+			<div class="tightContent tabContent2 REoptProtDevTable">
+				<div id="REoptProtDevStatus" class="tightContent tableContainer postRun" style="max-height:300px; overflow-y: scroll;">
+					{{ allOutputDataDict['REoptProtDevTableHtml'] }}
+				</div>
+			</div>
 		</div>
 		<script>document.getElementById('firstTabButton2').click();//Hack, get first tab to show.</script>
 		<!-- Load Shape Images -->
@@ -314,6 +315,7 @@
 		<!-- Tab links -->
 		<div class="tab postRun">
 			<button id='firstTabButton3' class="tabLinks3 active" onclick="openTab(event, 'loadShapeCarpetPlot', '3')">Combined Load Shape Carpet Plot</button>
+			<button class="tabLinks3" onclick="openTab(event, 'REoptCarpetPlot', '3')">Combined Load Shape Carpet Plot with REopt</button>
 			<button class="tabLinks3" onclick="openTab(event, 'maxDailyLoadShape', '3')">Maximum Daily Combined Load Shape</button>
 		</div>
 		<!-- Tab content -->
@@ -322,7 +324,10 @@
 				<img id="carpetPlotChart" style="width:1000px;height:auto;" />
 				<script type="text/javascript">gebi("carpetPlotChart").src = "data:image/png;base64," + allOutputData.carpetPlot</script>
 			</div>
-
+			<div class="tightContent tabContent3 REoptCarpetPlot">
+				<img id="REoptCarpetPlotChart" style="width:1000px;height:auto;" />
+				<script type="text/javascript">gebi("REoptCarpetPlotChart").src = "data:image/png;base64," + allOutputData.REoptCarpetPlot</script>
+			</div>
 			<div class="tightContent tabContent3 maxDailyLoadShape">
 				<img id="maxLoadShapeImg" style="width:1000px;height:auto;" />
 				<script type="text/javascript">gebi("maxLoadShapeImg").src = "data:image/png;base64," + allOutputData.maxLoadShape</script>

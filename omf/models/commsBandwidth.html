@@ -13,6 +13,14 @@
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 	<script>feederList={% if datastoreNames %}{{datastoreNames.publicFeeders | tojson}}{% else %}null{% endif %}</script>
+	<script type="text/javascript">
+		function editFeeder(modelName, feederNum) {
+			console.log("modelName:",modelName)
+			studyUser = allInputData.user
+			window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
+		}
+	</script>
+	</script>
 </head>
 <body onload="init()">
 	<div id="header">
@@ -37,6 +45,11 @@
 			<div class="shortInput">
 				<label>Model Name</label>
 				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+			</div>
+			<div class="shortInput">
+				<label>Feeder</label>
+				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
+				<input type="text" id="feederName1" name="feederName1" style="display:none">
 			</div>
 			<div class="shortInput runningInline postRunInline">
 				<label>User</label>
@@ -77,19 +90,6 @@
 			<div class="shortInput">
 				<label class="tooltip">Smart Meter Cost<span class="classic">Cost of smart meter installation (based on nodes labeled meter or triplex meter)</span></label>
 				<input type="text" id="smart_meter_cost" name="smart_meter_cost" pattern="^\d+\.?\d*$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Feeder<span class="classic">Select a feeder to model a communications network on top of.</span></label>
-				<select id="feederName1" name="feederName1">
-					<script type="text/javascript">
-						feederList.forEach(function(pubFeeder) {
-							let newEntry = pubFeeder['name'];
-							$("#feederName1").append(
-								$('<option></option>').val(pubFeeder['name']).html(newEntry));
-						});
-						$("#feederName1").val(allInputData.feederName1);
-					</script>
-				</select>
 			</div>
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>

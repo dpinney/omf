@@ -1,0 +1,136 @@
+<head>
+	<title>Open Modeling Framework</title>
+	<meta charset="utf-8">
+	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
+	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	<style>
+	/*Styles will go here*/
+	</style>
+	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
+	<!-- Library Imports -->
+	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
+	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
+	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+	<!-- Leaflet -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"	integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="	crossorigin=""/>
+	<script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
+	<!-- Data  Imports -->
+	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
+	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
+	<script>modelStatus="{{modelStatus}}"</script>
+	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
+</head>
+<body onload="init()">
+	<div id="header">
+		<div id="headInnerBlock">
+			<div id="menuLeft">
+				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
+				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
+			</div>
+		</div>
+	</div>
+	<div id="triangle-parent">
+		<div id="triangle-message">New Version<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
+		<div id="triangle-topright"></div>
+	</div>
+	<p class="reportTitle">Model Input</p>
+	<div id="input" class="content">
+		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+			<div class="shortInput">
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-outageCost" target="blank">Help?</a></label>
+				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Model Name</label>
+				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+			</div>
+			<div class="shortInput runningInline postRunInline">
+				<label>User</label>
+				<input type="text" id="user" name="user" readonly/>
+			</div>
+			<div class="shortInput runningInline postRunInline ">
+				<label>Created</label>
+				<input type="text" id="created" name="created" readonly/>
+			</div>
+			<div class="shortInput postRunInline">
+				<label>Run Time</label>
+				<input type="text" id="runTime" name="runTime" readonly/>
+			</div>
+			<div class="wideInput">
+				<p class="inputSectionHeader">Model Specifications</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Path to GLM<span class="classic">Please ignore. Will be deleted in future iterations.</span></label>
+				<input type="text" id="PATH_TO_OMD" name="PATH_TO_OMD">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Path to CSV<span class="classic">Please ignore. Will be deleted in future iterations.</span></label>
+				<input type="text" id="PATH_TO_CSV" name="PATH_TO_CSV">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Number of Customers<span class="classic">The number of meters on the feeder system.</span></label>
+				<input type="text" id="numberOfCustomers" name="numberOfCustomers">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Sustained Outage Threshold<span class="classic">The threshold for how many seconds an outage lasts before it is considered a sustained outage.</span></label>
+				<input type="text" id="sustainedOutageThreshold" name="sustainedOutageThreshold" pattern="^\d+\.?\d*$" required="required">
+			</div>
+			<div class="wideInput" style="text-align:right">
+				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
+				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
+				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
+				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
+				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
+				<!-- Function to send rendered html page to server proof of concept
+				<button id="save" class="stoppedInline postRunInline" type="button">Save Template</button>
+					<script>
+					$('#save').click(function() {
+						myhtml = $('html').html();
+						$.ajax({
+							type: "POST",
+							url: "{{pathPrefix}}/renderToFile",
+							data: {html:myhtml}
+						});
+					});
+				</script> -->
+			</div>
+		</form>
+	</div>
+	<div id ="runIndicator" class="content running">
+		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
+	</div>
+	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
+		<pre id='errorText' style='overflow-x:scroll'></pre>
+		<script type="text/javascript">
+		if (typeof(allInputData.stderr) !== 'undefined') {	
+			gebi('stopIndicator').style.visibility = 'visible'
+			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
+		</script>
+	</div>
+	<div id="output">
+		<p class="reportTitle postRun" style="page-break-before:always">Reliability Metrics</p>
+		<div id="statsCalc" class="tightContent postRun">
+			{{ allOutputDataDict['statsHtml'] }}
+		</div>
+		<p class="reportTitle postRun" style="page-break-before:always">Outage Map</p>
+		<div id="map" class="tightContent postRun"> <iframe srcdoc="{{ allOutputDataDict['outageMap'] }}" width="1000" height="540"></iframe>
+		</div>
+		<!-- TODO: Remove? -->
+		<!-- <script type="text/javascript">
+			// Global Highcharts settings.
+			Highcharts.setOptions({global:{useUTC:true}})
+			// Clean up the non-ISO date strings we get.
+			function dateOb(inStr) {return Date.parse(inStr.replace(/-/g,"/"))}
+			pointStart = dateOb(allOutputData.timeStamps[0])
+			pointInterval = dateOb(allOutputData.timeStamps[1]) - pointStart
+		</script> -->
+		<p class="reportTitle postRun">Raw Input and Output Files</p>
+		<div id="rawOutput" class="content postRun" style="margin-top:0px">
+			{% for name in allOutputDataDict['fileNames'] %}
+				{% if loop.index > 1 %}&mdash; {% endif %}<a href="/downloadModelData/{{allInputDataDict['user']}}/{{allInputDataDict['modelName']}}/{{name}}">{{name}}</a>
+			{% endfor %}
+		</div>
+	</div>
+</body>
