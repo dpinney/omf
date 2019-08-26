@@ -160,54 +160,21 @@ def netToMat(inNet, networkName):
 		matStr.append('\n')
 	return matStr
 
-def viz(pathToOmt, outputPath=None):
-	''' Open the network in our HTML visualization interface. '''
-	# HACK: make sure we have our homebrew binaries available.
-	# os.environ['PATH'] += os.pathsep + '/usr/local/bin'
-	# Load in the network.
-	# Set up temp directory and copy the network and viewer in to it.
-	if outputPath == None:
-		outputPath = tempfile.mkdtemp()
-	template_path = get_abs_path("templates/transEdit.html")
-	viewer_path = os.path.join(outputPath, "viewer.html")
-	shutil.copy(template_path, viewer_path)
-	# Rewrite the load lines in viewer.html
-	# Note: you can't just open the file in r+ mode because, based on the way the file is mapped to memory, you can only overwrite a line with another of exactly the same length.
-	for line in fileinput.input(viewer_path, inplace=1):
-		if line.lstrip().startswith("<script>networkData="):
-			print "<script>networkData={}</script>".format(get_file_contents(pathToOmt))
-		elif line.lstrip().startswith('<script type="text/javascript" src="/static/svg-pan-zoom.js">'):
-			print('<script type="text/javascript" src="{}"></script>'.format(get_abs_path("static/svg-pan-zoom.js")))
-		elif line.lstrip().startswith('<script type="text/javascript" src="/static/omf.js">'):
-			print('<script type="text/javascript" src="{}"></script>'.format(get_abs_path("static/omf.js")))
-		elif line.lstrip().startswith('<script type="text/javascript" src="/static/jquery-1.9.1.js">'):
-			print('<script type="text/javascript" src="{}"></script>'.format(get_abs_path("static/jquery-1.9.1.js")))
-		elif line.lstrip().startswith('<link rel="stylesheet" href="/static/omf.css"/>'):
-			print('<link rel="stylesheet" href="{}"/>'.format(get_abs_path("static/omf.css")))
-		elif line.lstrip().startswith('<link rel="shortcut icon" href="/static/favicon.ico"/>'):
-			print('<link rel="shortcut icon" href="{}"/>'.format(get_abs_path("static/favicon.ico")))
-		elif line.lstrip().startswith('{%'):
-			print '' # Remove the is_admin check for saving changes.
-		else:
-			print line.rstrip()
-	# os.system('open -a "Google Chrome" ' + '"file://' + tempDir + '/viewer.html"')
-	webbrowser.open_new("file://" + viewer_path)
-	##webbrowser.open_new("file://" + tempDir + '/viewer.html')
-
 def get_file_contents(filepath):
 	with open(filepath) as f: return f.read()
 
 def get_abs_path(relative_path):
 	return os.path.join(os.path.dirname(os.path.abspath(__file__)), relative_path)
 
-def get_HTML_interface_name(omt_filepath):
+def viz(omt_filepath, output_path=None, output_name="viewer.html", open_file=True):
 	"""
 	Get a path to an .omt file that was saved on the server after a grip API consumer POSTed their desired .omt file.
-	Render the .omt file data using the transEdit.html template and injected library code, then return HTML filename.
+	Render the .omt file data using the transEdit.html template and injected library code.
 	"""
-	filename = "viewer.html"
-	temp_dir = os.path.dirname(omt_filepath)
-	viewer_path = os.path.join(temp_dir, filename)
+	if output_path is None:
+		viewer_path = os.path.join(tempfile.mkdtemp(), output_name)
+	else:
+		viewer_path = os.path.join(output_path, output_name)
 	shutil.copy(os.path.join(os.path.dirname(__file__), "templates/transEdit.html"), viewer_path)
 	for line in fileinput.input(viewer_path, inplace=1):
 		if line.lstrip().startswith("<script>networkData="):
@@ -226,7 +193,9 @@ def get_HTML_interface_name(omt_filepath):
 			print ""
 		else:
 			print line.rstrip()
-	return filename
+	if open_file is True:
+		webbrowser.open_new("file://" + viewer_path)
+
 
 def _tests():
 	# Parse mat to dictionary.

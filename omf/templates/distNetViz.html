@@ -147,9 +147,6 @@
                 overflow: auto;
                 min-width: 450px;
             }
-            /*#milsoftInput {
-                width: 100%;
-            }*/
             #progressModalCancel {
                 background-color: crimson;
             }
@@ -179,13 +176,15 @@
                 padding: 20px;
                 border-radius: 10px;
 				background-color: #fefefe;
-                max-height: 80vh;
-                overflow: auto;
+                /*max-height: 80vh;*/
+                /*overflow: auto;*/
+                overflow: hidden;
                 max-width: 80vw;
+
 			}
-            .modalButtonSplit {
-                display: flex;
-                justify-content: space-around;
+            .modalContentButtons {
+                padding: 50px 0px 0px 0px;
+                text-align: center;
             }
             #feederListFlex {
                 display: flex;
@@ -259,10 +258,10 @@
             }
             .scrollableList {
                 overflow: auto;
-                max-height: 65vh;
+                max-height: 70vh;
                 list-style-type: none;
                 margin: 0px;
-                padding: 0;
+                padding: 0px 20px 0px 20px;
                 cursor: pointer;
             }
             .feederItem {
@@ -419,23 +418,28 @@
                     <div class="headerGroup">
                         <h4 class="menuHeading white">Edit &#x25BE</h4>
                         <ul id="editMenu" class="menu" style="display: none;">
-                            {% if showFileMenu %}
+                        {% if showFileMenu %}
                             <li data-web="ami">Add AMI Profiles...</li>
                             <li data-web="anonymize">Anonymization...</li>
-                            {% endif %}
                             <li>Attachments...</li>
-                            {% if showFileMenu %}
                             <li data-web="climate">Climate...</li>
-                            {% endif %}
                             <li>Find...</li>
-                            <li>Mass Add...</li>
-                            <li>Mass Edit...</li>
-                            {% if showFileMenu %}
+                            <li>Mass add...</li>
+                            <li>Mass edit...</li>
                             <li data-web="scada">Scada Loadshapes...</li>
-                            {% endif %}
-                            <li>Static Loads to Houses</li>
+                            <li>Static loads to houses</li>
+                            <li data-web="zillowHouse">Static loads to Zillow houses</li>
                             <li>Change opacity...</li>
-                            <li>Color Circuit...</li>
+                            <li>Color circuit...</li>
+                        {% else %}
+                            <li>Attachments...</li>
+                            <li>Find...</li>
+                            <li>Mass add...</li>
+                            <li>Mass edit...</li>
+                            <li>Static loads to houses</li>
+                            <li>Change opacity...</li>
+                            <li>Color circuit...</li>
+                        {% endif %}
                         </ul>
                     </div>
                     <div class="headerGroup">
@@ -447,16 +451,17 @@
                         <ul id="fileMenu" class="menu" style="display: none">
                             {% if showFileMenu %}
                             <li data-web="save">Save</li>
-                            {% endif %}
-                            <li>View Raw Data</li>
-                            {% if showFileMenu %}
+                            <li>View raw data</li>
                             <li data-web="rename">Rename</li>
-                            <li data-web="load">Load from Model...</li>
-                            <li data-web="new">New Blank Feeder...</li>
-                            <li data-web="windmil">Windmil Conversion...</li>
-                            <li data-web="gridlabd">GridLAB-D Conversion...</li>
-                            <li data-web="cyme">CYMDIST Conversion...</li>
-                            <li data-web="map">View on Map</li>
+                            <li data-web="load">Load from model...</li>
+                            <li data-web="new">New blank feeder...</li>
+                            <li data-web="windmil">Windmil conversion...</li>
+                            <li data-web="gridlabd">GridLAB-D conversion...</li>
+                            <li data-web="cyme">CYMDIST conversion...</li>
+                            <li data-web="map">View on map</li>
+                            {% else %}
+                            <li>View raw data</li>
+                            <li data-web="map">View on map</li>
                             {% endif %}
                         </ul>
                     </div>
@@ -484,18 +489,20 @@
                         <tr>
                             <td>
                                 <button id="findPrevious">Previous</button>
-                                <button id="findNext" style="margin-left:10px;">Next</button>
+                                <button id="findNext">Next</button>
                             </td>
-                            <td><button data-buttonfunction="toggle">Close</button></td>
                         </tr>
                     </table>
+                    <div class="modalContentButtons">
+                        <button data-buttonfunction="toggle">Close</button>
+                    </div>
                 </div>
             </div>
             <div id="progressModal" class="modal" style="display: none">
                 <div class="modalContent centered">
                     <img src="/static/spinner.gif">
                     <h2>text...</h2>
-                    <div class="modalButtonSplit">
+                    <div class="modalContentButtons">
                         <button class="deleteButton" data-buttonfunction="cancel" style="margin-right:300px;">Cancel</button>
                         <button data-buttonfunction="submit">OK</button>
                     </div>
@@ -514,7 +521,9 @@
                             <ul id="userFeederList" class="scrollableList"></ul>
                         </div>
                     </div>
-                    <button data-buttonfunction="toggle" style="margin-top: 15px;">Cancel</button>
+                    <div class="modalContentButtons">
+                        <button data-buttonfunction="toggle">Cancel</button>
+                    </div>
                 </div>
             </div>
             <div id="blankFeederModal" class="modal" style="display: none">
@@ -535,12 +544,12 @@
                                         <input type="text" required id="blankFeederInput" name="feederNameNew" class="modalInput"/>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td><button type="button" data-buttonfunction="toggle">Cancel</button></td>
-                                    <td><button type="submit" class="right">Create</button></td>
-                                </tr>
                             </tbody>
                         </table>
+                        <div class="modalContentButtons">
+                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="submit">Create</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -552,7 +561,6 @@
                         <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
                         <input type="hidden" id="feederNum" name="feederNum" value="{{thisFeederNum}}"/>
                         <input type="hidden" id="modelName" name="modelName" value="{{thisModelName}}"/>
-                        <!--<input type="hidden" name="referrer" value="distribution"/>-->
                         <table>
                             <tbody>
                                 <tr><th colspan="2">Milsoft Conversion</th></tr>
@@ -571,12 +579,12 @@
                                     <td>Equipment File (.seq)</td>
                                     <td><input type="file" required id="seqFile" name="seqFile" accept=".seq" class="modalInput"/></td>
                                 </tr>
-                                <tr>
-                                    <td><button type="button" data-buttonfunction="toggle">Cancel</button></td>
-                                    <td><button type="submit" class="right">Import</button></td>
-                                </tr>
                             </tbody>
                         </table> 
+                        <div class="modalContentButtons">
+                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="submit">Import</button>
+                        </div>
                     </form>
                 </div> 
             </div>
@@ -588,7 +596,6 @@
                         <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
                         <input type="hidden" id="feederNum" name="feederNum" value="{{thisFeederNum}}"/>
                         <input type="hidden" id="modelName" name="modelName" value="{{thisModelName}}"/>
-                        <!--<input type="hidden" name="referrer" value="distribution"/>-->
                         <table>
                             <tbody>
                                 <tr><th colspan="2">GridLab-D Conversion</th></tr>
@@ -603,12 +610,12 @@
                                     <td>Data File (.glm)</td>
                                     <td><input type="file" required id="csvFile" name="glmFile" accept=".glm" class="modalInput"/></td>
                                 </tr>
-                                <tr>
-                                    <td><button type="button" data-buttonfunction="toggle">Cancel</button></td>
-                                    <td><button type="submit" class="right">Import</button></td>
-                                </tr>
                             </tbody>
                         </table>
+                        <div class="modalContentButtons">
+                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="submit">Import</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -620,7 +627,6 @@
                         <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
                         <input type="hidden" id="feederNum" name="feederNum" value="{{thisFeederNum}}"/>
                         <input type="hidden" id="modelName" name="modelName" value="{{thisModelName}}"/>
-                        <!--<input type="hidden" name="referrer" value="distribution"/>-->
                         <table>
                             <tbody>
                                 <tr><th colspan="2">Cyme Conversion</th></tr>
@@ -635,12 +641,12 @@
                                     <td>Network File (.mdb)</td>
                                     <td><input type="file" required id="mdbNetFile" name="mdbNetFile" accept=".mdb" class="modalInput"/></td>
                                 </tr>
-                                <tr>
-                                    <td><button type="button" data-buttonfunction="toggle">Cancel</button></td>
-                                    <td><button type="submit" class="right">Import</button></td>
-                                </tr>
                             </tbody>
                         </table>
+                        <div class="modalContentButtons">
+                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="submit">Import</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -652,7 +658,6 @@
                         <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
                         <input type="hidden" id="feederNum" name="feederNum" value="{{thisFeederNum}}"/>
                         <input type="hidden" id="modelName" name="modelName" value="{{thisModelName}}"/>
-                        <!--<input type="hidden" name="referrer" value="distribution"/>-->
                         <table>
                             <tbody>
                                 <tr>
@@ -664,12 +669,12 @@
                                     <td><input type="file" required id="scadaFile" name="scadaFile" accept=".csv" class="modalInput"/></td>
                                 </tr>
                                 <tr><td colspan="100%">Note: Model "Simulation Start Date" should lie within the Scada load"s dates.</td></tr>
-                                <tr>
-                                    <td><button type="button" data-buttonfunction="toggle">Cancel</button></td>
-                                    <td><button type="submit" class="right">Import</button></td>
-                                </tr>
                             </tbody>
                         </table>
+                        <div class="modalContentButtons">
+                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="submit">Import</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -695,31 +700,31 @@
                                 <tr>
                                     <td colspan="100%">Note: Model "Simulation Start Date" should lie within the AMI profiles"s dates.</td>
                                 </tr>
-                                <tr>
-                                    <td><button type="button" data-buttonfunction="toggle">Cancel</button></td>
-                                    <td><button type="submit" class="right">Import</button></td>
-                                </tr>
+
                             </tbody>
                         </table>
+                        <div class="modalContentButtons">
+                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="submit">Import</button>
+                        </div>
                     </form>
                 </div>
             </div>
             <div id="climateModal" class="modal" style="display: none">
                 <div class="modalContent">
                     <!--I assume this is supposed to update THIS feeder with the climate data. Therefore, uniqObjName with {{thisOwner}} is correct.-->
-                    <form onsubmit="submitForm({formId:'climateForm', pollUrl:'/checkConversion/{{thisModelName}}/{{thisOwner}}'}); return false;"
+                    <form onsubmit="if (validateClimateModal()) { submitForm({formId:'climateForm', pollUrl:'/checkConversion/{{thisModelName}}/{{thisOwner}}'}) } return false;"
                     action="/climateChange/{{thisOwner}}/{{thisFeederName}}" id="climateForm">
                         <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
                         <!--<input type="hidden" id="feederNum" name="feederNum" value="{{thisFeederNum}}"/>-->
                         <input type="hidden" id="modelName" name="modelName" value="{{thisModelName}}"/>
-                        <!--<input type="hidden" name="referrer" value="distribution"/>-->
                         <table>
                             <tbody>
                                 <tr><th colspan="2">Climate Change</th></tr>
                                 <tr>
                                     <td>
                                         <input id="USCRNImport" type="radio" name="climateImportOption" value="USCRNImport">
-                                        <label for="USCRNImport">USCRN Import</label>
+                                        <label for="USCRNImport">USCRN import</label>
                                     </td>
                                 </tr>
                                 <tr>
@@ -733,19 +738,19 @@
                                 <tr>
                                     <td>
                                         <input id="tmyImport" type="radio" name="climateImportOption" value="tmyImport">
-                                        <label for="tmyImport">tmy Import</label>
+                                        <label for="tmyImport">tmy import</label>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><label for="zipCode">Zip Code:</label></td>
-                                    <td><input id="zipCode" type="text" name="zipCode" pattern="^\d{5}$" class="modalInput"></td>
-                                </tr>
-                                <tr>
-                                    <td><button type="button" data-buttonfunction="toggle">Cancel</button></td>
-                                    <td><button type="submit" class="right">Apply</button></td>
+                                    <td><label for="zipCode">ZIP Code:</label></td>
+                                    <td><input id="zipCode" type="text" name="zipCode" pattern="\d+" minlength=5 maxlength=5 class="modalInput"></td>
                                 </tr>
                             </tbody>
                         </table>
+                        <div class="modalContentButtons">
+                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="submit">Apply</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -756,7 +761,6 @@
                         <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
                         <!--<input type="hidden" id="feederNum" name="feederNum" value="{{thisFeederNum}}"/>-->
                         <input type="hidden" id="modelName" name="modelName" value="{{thisModelName}}"/>
-                        <!--<input type="hidden" name="referrer" value="distribution"/>-->
                         <table>
                             <tbody>
                                 <tr><th>Anonymization</th></tr>
@@ -828,14 +832,12 @@
                                         <input type="text" pattern="^[+-]?\d+(\.\d+)?$" name="noisePerc" class="modalInputLine"> [%]</label>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td>
-                                        <button type="button" data-buttonfunction="toggle">Cancel</button>
-                                        <button type="submit" class="right">Apply</button>
-                                    </td>
-                                </tr>
                             </tbody>
                         </table>
+                        <div class="modalContentButtons">
+                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="submit">Apply</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -857,19 +859,22 @@
                                 <td>With probability for each attachment (float between 0.0 and 1.0):</td>
                                 <td><input type="text" value="1.0" class="modalInput"/></td>
                             </tr>
-                            <tr>
-                                <td><button data-buttonfunction="cancel">Cancel</button></td>
-                                <td><button data-buttonfunction="submit" class="right">Apply</button></td>
-                            </tr>
+
                         </tbody>
                     </table>
+                    <div class="modalContentButtons">
+                        <button data-buttonfunction="cancel">Cancel</button>
+                        <button data-buttonfunction="submit">Apply</button>
+                    </div>
                 </div>
             </div>
             <div id="massAddSecondaryModal" class="modal" style="display: none;">
                 <div class="modalContent">
                     <h3></h3>
-                    <div id="componentTable" data-tableinsert></div>
-                    <div style="text-align:center; padding: 10px;">
+                    <!--<div id="componentTable" data-tableinsert></div>-->
+                    <div class="scrollableList" data-tableinsert></div>
+                    <!--<div style="text-align:center; padding: 10px;">-->
+                    <div class="modalContentButtons">
                         <button data-buttonfunction="cancel">Cancel</button>
                     </div>
                 </div>
@@ -910,12 +915,12 @@
                                 <td style="text-align: center">with value</td>
                                 <td><input type="text" id="newAttributeValue" pattern="^0\.\d+|1(\.0+)?$" class="modalInput"/></td>
                             </tr>
-                            <tr>
-                                <td><button data-buttonfunction="toggle">Cancel</button></td>
-                                <td colspan="3"><button onclick="massEdit();" class="right">Apply</button></td>
-                            </tr>
                         </tbody>
                     </table>
+                    <div class="modalContentButtons">
+                        <button data-buttonfunction="toggle">Cancel</button>
+                        <button onclick="massEdit();">Apply</button>
+                    </div>
                 </div>
             </div>
             <div id="attachmentsModal" class="modal" style="display: none">
@@ -924,12 +929,12 @@
                         <tbody>
                             <tr><th colspan="2">Attachments</th></tr>
                             <tr><td><select id="attachmentSelect"></select></td></tr>
-                            <tr>
-                                <td><button data-buttonfunction="toggle">Cancel</button></td>
-                                <td><button data-buttonfunction="toggle" onclick="editAttachment()">Select</button></td>
-                            </tr>
                         </tbody>
                     </table>
+                    <div class="modalContentButtons">
+                        <button data-buttonfunction="toggle">Cancel</button>
+                        <button data-buttonfunction="toggle" onclick="editAttachment()">Select</button>
+                    </div>
                 </div>
             </div>
             <div id="editAttachmentModal" class="modal" style="display: none">
@@ -938,18 +943,18 @@
                         <tbody>
                             <tr><td id="attachmentTd"></td></tr>
                             <tr><td><textarea rows="25" cols="80" id="editAttachmentBox"></textarea></td></tr>
-                            <tr>
-                                <td><button data-buttonfunction="toggle">Cancel</button></td>
-                                <td><button data-buttonfunction="toggle" onclick="saveAttachment();">Save</button></td>
-                            </tr>
                         </tbody>
                     </table>
+                    <div class="modalContentButtons">
+                        <button data-buttonfunction="toggle">Cancel</button>
+                        <button data-buttonfunction="toggle" onclick="saveAttachment();">Save</button>
+                    </div>
                 </div>
             </div>
             <div id="opacityModal" class="modal" style="display: none">
                 <div class="modalContent">
-                    <div data-tableinsert></div>
-                    <div class="centered fullPadded">
+                    <div class="scrollableList" data-tableinsert></div>
+                    <div class="modalContentButtons">
                         <button data-buttonfunction="toggle">Close</button>
                         <button onclick="gOpacityManager.reset();">Reset</button>
                     </div>
@@ -959,8 +964,8 @@
                 <div class="centered modalContent">
                     <h3>Color Circuit</h3>
                     <div class="fullPadded"><input type="file" multiple accept=".csv" class="modalInput"></div>
-                    <div data-tableinsert class="leftText vertFlex fullPadded"></div>
-                    <div class="fullPadded">
+                    <div class="scrollableList leftText fullPadded" data-tableinsert></div>
+                    <div class="modalContentButtons">
                         <button data-buttonfunction="toggle">Close</button>
                         <button data-buttonfunction="reset">Reset</button>
                     </div>
@@ -1041,9 +1046,112 @@ const treePrototype = {
     /**
      * tested.
      */
+    insert(treeObject) {
+        this.tree[treeObject.key] = treeObject.data;
+        this.treeMap.add(treeObject.key);
+    },
+
+    /**
+     * Replace an existing node in the tree with a copy of the component argument.
+     * 
+     * @param {string} key - the key of the existing object to replace.
+     * @param {Object} component - the component from which to make a copy to insert into the tree.
+     */
+    replaceNode(key, component) {
+        if (!isNumberString(key)) throw new Error("The key was not a string with a number value.");
+        component = deepCopy(component);
+        const component_relationship = getRelationship(component);
+        const oldObject = this.getObject(key);
+        const oldObject_relationship = getRelationship(oldObject);
+        if (component_relationship === "line") throw new Error("The replacement component is not a node.");
+        if (oldObject_relationship === "line") throw new Error(`The object with the key \"${key}\" is not a node.`);
+        if (component_relationship === "configurationNode") {
+            if (oldObject_relationship !== "configurationNode") {
+                throw new Error("Configuration nodes cannot be used to replace non-configuration nodes.");
+            }
+        } else {
+            component.name = component.object + key;
+        }
+        component.latitude = oldObject.latitude;
+        component.longitude = oldObject.longitude;
+        if (oldObject.parent == null) {
+            delete component.parent;
+        } else {
+            component.parent = oldObject.parent;
+        }
+        const children = this.treeMap.getChildKeys(key);
+        if (children != null) children.forEach(key => { this.getObject(key).parent = component.name; });
+        const lines = this.treeMap.getLineKeys(key);
+        if (lines != null) {
+            lines.forEach(key => {
+                const line = this.getObject(key);
+                if (line.to === oldObject.name) {
+                    line.to = component.name;
+                }
+                if (line.from === oldObject.name) {
+                    line.from = component.name;
+                }
+            });
+        }
+        this.treeMap.remove([key]);
+        this.tree[key] = component;
+        this.treeMap.add(key);
+    },
+
+    /** 
+     * tested.
+     */
+    isRemovable(key) {
+        this.getObject(key);
+        const children = this.treeMap.getChildKeys(key);
+        if (children != null) return false;
+        const lines = this.treeMap.getLineKeys(key);
+        if (lines != null) return false;
+        return true;
+    },
+
+    /**
+     * not tested.
+     * @param {Array} keys
+     */
+    remove(keys) {
+        this.treeMap.remove(keys);
+        keys.forEach(key => {
+            this.getObject(key);
+            delete this.tree[key];
+        });
+    },
+
+    /** 
+     * tested.
+     * Return an array of keys that need to be deleted as a result of deleting a tree object.
+     * 
+     * @param {string} key - the key of the tree object for which to find its deletable subtree.
+     * @param {Array} visited - contains keys of tree objects that have already been visited so the method dosen't * recurse infinitely in case of a cycle.
+     * @return {Array}
+     */
+    getSubtreeToRemove(key, visited = []) {
+        if (!Array.isArray(visited)) throw new Error("Visited argument must be an array");
+        visited.push(key);
+        const keySet = new Set();
+        const lines = this.treeMap.getLineKeys(key);
+        const children = this.treeMap.getChildKeys(key);
+        if (lines != null) lines.forEach(key => keySet.add(key));
+        if (children != null) children.forEach(key => keySet.add(key));
+        keySet.forEach(outerKey => {
+            if (!visited.includes(outerKey)) {
+                this.getSubtreeToRemove(outerKey, visited).forEach(innerKey => keySet.add(innerKey));
+            }
+        });
+        return Array.from(keySet);
+    },
+
+    /**
+     * tested.
+     */
     getObject(key) {
         const obj = this.tree[key];
-        if (obj == null) throw new Error(`getObject() failed. The object with the key "${key}" does not exist in the Tree.`);
+        if (obj == null) throw new Error(`The object with the key "${key}" does not exist in the tree.`);
         return this.tree[key];
     },
 
@@ -1119,64 +1227,7 @@ const treePrototype = {
             }
         });
         return pairedNodes;
-    },
-
-    /**
-     * tested.
-     */
-    insert(treeObject) {
-        this.tree[treeObject.key] = treeObject.data;
-        this.treeMap.add(treeObject.key);
-    },
-
-    /** 
-     * tested.
-     */
-    isDeletable(key) {
-        this.getObject(key);
-        const children = this.treeMap.getChildKeys(key);
-        if (children != null) return false;
-        const lines = this.treeMap.getLineKeys(key);
-        if (lines != null) return false;
-        return true;
-    },
-
-    /**
-     * not tested.
-     * @param {Array} keys
-     */
-    delete(keys) {
-        this.treeMap.remove(keys);
-        keys.forEach(key => {
-            this.getObject(key);
-            delete this.tree[key];
-        });
-    },
-
-    /** 
-     * tested.
-     * Return an array of keys that need to be deleted as a result of deleting a tree object.
-     * 
-     * @param {string} key - the key of the tree object for which to find its deletable subtree.
-     * @param {Array} visited - contains keys of tree objects that have already been visited so the method dosen't * recurse infinitely in case of a cycle.
-     * @return {Array}
-     */
-    getSubtreeToDelete(key, visited = []) {
-        if (!Array.isArray(visited)) throw new Error("Visited argument must be an array");
-        visited.push(key);
-        const keySet = new Set();
-        const lines = this.treeMap.getLineKeys(key);
-        const children = this.treeMap.getChildKeys(key);
-        if (lines != null) lines.forEach(key => keySet.add(key));
-        if (children != null) children.forEach(key => keySet.add(key));
-        keySet.forEach(outerKey => {
-            if (!visited.includes(outerKey)) {
-                this.getSubtreeToDelete(outerKey, visited).forEach(innerKey => keySet.add(innerKey));
-            }
-        });
-        return Array.from(keySet);
-    },
-
+    }
     /* Private methods */
 };
 
@@ -1877,8 +1928,8 @@ function createViewport(tree, svgContainer) {
         /* Override the default values set by "optionsDefaults" in svg-pan-zoom.js */
         dblClickZoomEnabled: false,
         zoomScaleSensitivity: 0.2,
-        minZoom: 0.1,
-		maxZoom: 500
+        minZoom: 0.01,
+		maxZoom: 800
     });
 }
 
@@ -1918,29 +1969,6 @@ function handleSelection(event) {
         } 
     }
 }
-
-//function hotkeys() {
-//	// Handle hotkey presses.
-//	let x;
-//	if (window.event) {
-//		// IE8 and earlier
-//		x = event.keyCode
-//	} else if (event.which) {
-//		// IE9/Firefox/Chrome/Opera/Safari
-//		x = event.which
-//	}
-//	var keychar = String.fromCharCode(x);
-//	if (event.target.type !== 'text') {
-//		// Dispatch the key:
-//		if (keychar == '-') {
-//			window.panZoom.zoomOut()
-//		} else if (keychar == '=') {
-//			window.panZoom.zoomIn()
-//		} else if (keychar =='m') {
-//            attachMoveSelectionListener();
-//		}
-//	}
-//}
 
 /**
  * Scale the thickness of all lines and size of all circles. This helps user see details.
@@ -2129,46 +2157,6 @@ function viewElement(key) {
 }
 
 //**************************************************
-// jQuery handling for distNetViz.py
-//**************************************************
-
-/** 
- * TODO: add unit tests?
- */
- function applyJQueryStyles() {
-    // Make stuff draggable
-    $("#findModal .modalContent").draggable();
-    $("#progressModal .modalContent").draggable();
-    $("#loadModal .modalContent").draggable();
-    $("#blankFeederModal .modalContent").draggable();
-    $("#milsoftModal .modalContent").draggable();
-    $("#gridlabdModal .modalContent").draggable();
-    $("#cymeModal .modalContent").draggable();
-    $("#scadaModal .modalContent").draggable();
-    $("#amiModal .modalContent").draggable();
-    $("#massAddModal .modalContent").draggable();
-    $("#massEditModal .modalContent").draggable();
-    $("#attachmentsModal .modalContent").draggable();
-    $("#editAttachmentModal .modalContent").draggable();
-    $("#colorModal .modalContent").draggable();
-    $("#massAddSecondaryModal .modalContent").draggable();
-    $("#climateModal .modalContent").draggable();
-    // Position the description table depending on whether or not it is draggable
-    //document.getElementById("descriptionTable").removeAttribute("style");
-    //document.getElementById("descriptionTable").style.left = "70vw";
-}
-
-/**
- * If this interface was rendered as a static file, and is not connected to the web server, restrict the functionality of the interface.
- */
-function disableWebFeatures() {
-    Array.from(document.querySelectorAll("[data-web]")).forEach(li => {
-        li.remove();
-    });
-    //document.getElementById("findModal").style.justifyContent = "left";
-}
-
-//**************************************************
 // Header menu functions
 //**************************************************
 
@@ -2280,20 +2268,42 @@ function insertLineComponent(keys, component) {
 //**************************************************
 
 function attachHandlers() {
-    componentHandlers();
-    fillFeederList(document.getElementById("publicFeederList"), gPublicFeeders, "public");
-    fillFeederList(document.getElementById("userFeederList"), gUserFeeders, gCurrentUser);
-    addFileMenuHandlers();
-    addEditMenuHandlers();
-    mouseHandler();
-    keyHandler();
-    headerHandlers();
-    fillClimateModalOptions();
-}
-
-function headerHandlers() {
+    addComponentHandlers();
+    addMouseHandlers();
+    addKeyHandlers();
     Array.from(document.querySelectorAll("div.headerGroup")).forEach(h => {
         h.addEventListener("click", toggleHeader);
+    });
+    const isStatic = interfaceIsStatic();
+    addModelViewerHandlers(isStatic);
+    {% if showFileMenu %}
+    addModelOwnerHandlers(isStatic);
+    {% endif %}
+    makeModalsDraggable();
+    prepareFindModal();
+    prepareColorModal();
+}
+
+function prepareFindModal() {
+    const searchInput = document.getElementById("searchInput");
+    searchInput.addEventListener("change", searchTerm);
+    document.getElementById("searchExactString").addEventListener("change", function() {
+        searchTerm.call(searchInput);
+    });
+    document.getElementById("searchSubstring").addEventListener("change", function() {
+        searchTerm.call(searchInput);
+    });
+    formatTable(document.getElementById("findModal").querySelector("table"));
+}
+
+function prepareColorModal() {
+    const colorModal = document.getElementById("colorModal");
+    const colorManager = createColorManager();
+    colorModal.querySelector("input[type='file']").addEventListener("change", async function() {
+        await colorManager.buildHTML(this.files);
+    });
+    colorModal.querySelector("button[data-buttonfunction='reset']").addEventListener("click", () => {
+        colorManager.removeColors();
     });
 }
 
@@ -2340,7 +2350,7 @@ function closeHeader() {
  */
 /* How do I handle component variations within the select? 
 */
-function componentHandlers() {
+function addComponentHandlers() {
     const ul = document.getElementById("componentList");
     alphabeticalForEach.bind(gComponentManager.getTypes())(type => {
 		const li = document.createElement("li");
@@ -2434,88 +2444,81 @@ function fillFeederList(ul, feeders, owner=null) {
 }
 
 /**
- * Doesn't need unit tests
+ * These features should be enabled for every user who views this model, whether they are an owner or not.
+ * @param {boolean} interfaceIsStatic - true if this interface was rendered outside of a web server context.
  */
-function addFileMenuHandlers() {
-    const menu = document.getElementById("fileMenu");
-    if (menu == null) return;
-    const save = menu.querySelector("li[data-web='save']");
-    if (save != null) save.addEventListener("click", () => saveFeeder(gWriteFeeder));
-    const rawData = Array.from(menu.querySelectorAll("li")).find(li => li.textContent.toLowerCase() === "view raw data");
-    if (rawData != null) rawData.addEventListener("click", downloadTextFile);
-    const rename = menu.querySelector("li[data-web='rename']");
-    if (rename != null) rename.addEventListener("click", getNewFeederName);
-    const load = menu.querySelector("li[data-web='load']");
-    if (load != null) load.addEventListener("click", () => toggleDisplay(document.getElementById("loadModal")));
-    const blank = menu.querySelector("li[data-web='new']");
-    if (blank != null) blank.addEventListener("click", () => toggleDisplay(document.getElementById("blankFeederModal")));
-    const windmil = menu.querySelector("li[data-web='windmil']");
-    if (windmil != null) windmil.addEventListener("click", () => toggleDisplay(document.getElementById("milsoftModal")));
-    const gridlabd = menu.querySelector("li[data-web='gridlabd']");
-    if (gridlabd != null) gridlabd.addEventListener("click", () => toggleDisplay(document.getElementById("gridlabdModal")));
-    const cyme = menu.querySelector("li[data-web='cyme']");
-    if (cyme != null) cyme.addEventListener("click", () => toggleDisplay(document.getElementById("cymeModal")));
-    const map = menu.querySelector("li[data-web='map']");
-    if (map != null) map.addEventListener("click", displayMap);
+function addModelViewerHandlers(interfaceIsStatic=true) {
+    const fileMenu = document.getElementById("fileMenu");
+    const fileMenuNodes = Array.from(fileMenu.querySelectorAll("li"));
+    const editMenu = document.getElementById("editMenu");
+    const editMenuNodes = Array.from(editMenu.querySelectorAll("li"));
+    // Add handlers to file menu
+    fileMenuNodes.find(li => li.textContent.toLowerCase() === "view raw data").addEventListener("click", downloadTextFile);
+    // Add handlers to edit menu
+    editMenuNodes.find(li => li.textContent.toLowerCase() === "attachments...").addEventListener("click", () => {
+        loadAttachments();
+        toggleDisplay(document.getElementById("attachmentsModal"));
+    });
+    editMenuNodes.find(li => li.textContent.toLowerCase() === "find...").addEventListener("click", () => {
+        toggleDisplay(document.getElementById("findModal"));
+        document.getElementById("searchInput").focus(); 
+    });
+    editMenuNodes.find(li => li.textContent.toLowerCase() === "mass add...").addEventListener("click", () => {
+        gAddManager.setupTargetSelect();
+        toggleDisplay(document.getElementById("massAddModal"));
+    });
+    editMenuNodes.find(li => li.textContent.toLowerCase() === "mass edit...").addEventListener("click", () => {
+        updateAttachTargets("massEditTargetSelect", gTree.tree);
+        toggleDisplay(document.getElementById("massEditModal"));
+    });
+    editMenuNodes.find(li => li.textContent.toLowerCase() === "change opacity...").addEventListener("click", () => {
+        gOpacityManager.update();
+        gOpacityManager.buildOpacityModal();
+    });
+    editMenuNodes.find(li => li.textContent.toLowerCase() === "color circuit...").addEventListener("click", () => {
+        toggleDisplay(document.getElementById("colorModal"));
+    });
+    editMenuNodes.find(li => li.textContent.toLowerCase() === "static loads to houses").addEventListener("click", convertStaticLoadsIntoHouses);
+    if (!interfaceIsStatic) {
+        fileMenu.querySelector("li[data-web='map']").addEventListener("click", () => {
+            window.open(`/displayMap/${gThisOwner}/${gThisModelName}/${gThisFeederNum}`, '_blank');
+        });
+    }
 }
 
-/** 
- * Need to refactor this based on data attributes!
+{% if showFileMenu %}
+/**
+ * These features should only be enabled for the owner of a model.
+ * @param {boolean} interfaceIsStatic - true if this interface was rendered outside of a web server context.
  */
-function addEditMenuHandlers() {
-    const menu = document.getElementById("editMenu");
-    if (menu == null) return;
-    const liArray = Array.from(menu.querySelectorAll("li"));
-    const ami = menu.querySelector("li[data-web='ami']");
-    if (ami != null) ami.addEventListener("click", () => toggleDisplay(document.getElementById("amiModal")));
-    const anonymize = menu.querySelector("li[data-web='anonymize']");
-    if (anonymize != null) anonymize.addEventListener("click", () => toggleDisplay(document.getElementById("anonymizeModal")));
-    const attachments = liArray.find(li => li.textContent.toLowerCase() === "attachments...");
-    if (attachments != null) {
-        attachments.addEventListener("click", () => {
-            loadAttachments();
-            toggleDisplay(document.getElementById("attachmentsModal"));
-        });
+function addModelOwnerHandlers(interfaceIsStatic=true) {
+    const fileMenu = document.getElementById("fileMenu");
+    const editMenu = document.getElementById("editMenu");
+    if (!interfaceIsStatic) {
+        // Add handlers to file menu
+        fileMenu.querySelector("li[data-web='save']").addEventListener("click", () => saveFeeder(gWriteFeeder));
+        fileMenu.querySelector("li[data-web='rename']").addEventListener("click", getNewFeederName);
+        fileMenu.querySelector("li[data-web='load']").addEventListener("click", () => toggleDisplay(document.getElementById("loadModal")));
+        fileMenu.querySelector("li[data-web='new']").addEventListener("click", () => toggleDisplay(document.getElementById("blankFeederModal")));
+        fileMenu.querySelector("li[data-web='windmil']").addEventListener("click", () => toggleDisplay(document.getElementById("milsoftModal")));
+        fileMenu.querySelector("li[data-web='gridlabd']").addEventListener("click", () => toggleDisplay(document.getElementById("gridlabdModal")));
+        fileMenu.querySelector("li[data-web='cyme']").addEventListener("click", () => toggleDisplay(document.getElementById("cymeModal")));
+        // Fill feeder lists
+        fillFeederList(document.getElementById("publicFeederList"), gPublicFeeders, "public");
+        fillFeederList(document.getElementById("userFeederList"), gUserFeeders, gCurrentUser);
+        // Prepare the climate modal
+        fillClimateModalOptions();
+        // Add handlers to edit menu
+        editMenu.querySelector("li[data-web='ami']").addEventListener("click", () => toggleDisplay(document.getElementById("amiModal")));
+        editMenu.querySelector("li[data-web='anonymize']").addEventListener("click", () => toggleDisplay(document.getElementById("anonymizeModal")));
+        editMenu.querySelector("li[data-web='climate']").addEventListener("click", () => toggleDisplay(document.getElementById("climateModal")));
+        editMenu.querySelector("li[data-web='scada']").addEventListener("click", () => toggleDisplay(document.getElementById("scadaModal")));
+        editMenu.querySelector("li[data-web='zillowHouse']").addEventListener("click", startZillowHouses);
     }
-    const climate = menu.querySelector("li[data-web='climate']");
-    if (climate != null) climate.addEventListener("click", () => toggleDisplay(document.getElementById("climateModal")));
-    const find = liArray.find(li => li.textContent.toLowerCase() === "find...");
-    if (find != null) {
-        find.addEventListener("click", () => {
-            toggleDisplay(document.getElementById("findModal"));
-            document.getElementById("searchInput").focus(); 
-        });
-    }
-    const massAdd = liArray.find(li => li.textContent.toLowerCase() === "mass add...");
-    if (massAdd != null) {
-        massAdd.addEventListener("click", () => {
-            gAddManager.setupTargetSelect();
-            toggleDisplay(document.getElementById("massAddModal"));
-        });
-    }
-    const massEdit = liArray.find(li => li.textContent.toLowerCase() === "mass edit...");
-    if (massEdit != null) {
-        massEdit.addEventListener("click", () => {
-            updateAttachTargets("massEditTargetSelect", gTree.tree);
-            toggleDisplay(document.getElementById("massEditModal"));
-        });
-    }
-    const scada = menu.querySelector("li[data-web='scada']");
-    if (scada != null) scada.addEventListener("click", () => toggleDisplay(document.getElementById("scadaModal")));
-    const staticLoads = liArray.find(li => li.textContent.toLowerCase() === "static loads to houses");
-    if (staticLoads != null) staticLoads.addEventListener("click", convertStaticLoadsIntoHouses);
-    const opacity = liArray.find(li => li.textContent.toLowerCase() === "change opacity...");
-    if (opacity != null) {
-        opacity.addEventListener("click", () => {
-            gOpacityManager.update();
-            gOpacityManager.buildOpacityModal();
-        });
-    }
-    const color = liArray.find(li => li.textContent.toLowerCase() === "color circuit...");
-    if (color != null) color.addEventListener("click", () => toggleDisplay(document.getElementById("colorModal")));
 }
+{% endif %}
 
-function mouseHandler() {
+function addMouseHandlers() {
     const svgContainerWrapper = document.getElementById("svgContainerWrapper");
     svgContainerWrapper.addEventListener("click", function(event) {
         handleSelection(event);
@@ -2539,7 +2542,7 @@ function mouseHandler() {
     });
 }
 
-function keyHandler() {
+function addKeyHandlers() {
     document.body.addEventListener("keydown", function(event) {
         if (event.target.tagName.toLowerCase() !== "input") {
             switch (event.key) {
@@ -2581,6 +2584,67 @@ function toggleDisplay(element) {
     }
 }
 
+function makeModalsDraggable() {
+    $("#findModal .modalContent").draggable();
+    $("#progressModal .modalContent").draggable();
+    $("#loadModal .modalContent").draggable();
+    $("#blankFeederModal .modalContent").draggable();
+    $("#milsoftModal .modalContent").draggable();
+    $("#gridlabdModal .modalContent").draggable();
+    $("#cymeModal .modalContent").draggable();
+    $("#scadaModal .modalContent").draggable();
+    $("#amiModal .modalContent").draggable();
+    $("#massAddModal .modalContent").draggable();
+    $("#massEditModal .modalContent").draggable();
+    $("#attachmentsModal .modalContent").draggable();
+    $("#editAttachmentModal .modalContent").draggable();
+    $("#colorModal .modalContent").draggable();
+    $("#massAddSecondaryModal .modalContent").draggable();
+    $("#climateModal .modalContent").draggable();
+    // Position the description table depending on whether or not it is draggable
+    //document.getElementById("descriptionTable").removeAttribute("style");
+    //document.getElementById("descriptionTable").style.left = "70vw";
+}
+
+/**
+ * TODO: add unit tests
+ */
+ function getMoveNodesFunction(objects, tBody=null, tObject=null) {
+    if (objects.length > 1 && tBody != null) throw new Error("Cannot update a description table when multiple nodes have been selected to be moved.");
+    const moveNodes = function(event) {
+        event.stopPropagation();
+        detachListener();
+        const coords = clickLatLon(event);
+        move(objects, coords);
+        if (tObject != null) {
+            if (objects.length !== 1) throw new Error("Can only update the tObject of a description table when moving a single object!");
+            tObject.data.longitude = objects[0].longitude;
+            tObject.data.latitude = objects[0].latitude;
+        }
+        if (tBody != null) {
+            Array.from(tBody.getElementsByTagName("input")).forEach(input => {
+                if (input.dataset.coordinate === "latitude") {
+                    input.value = gMaxLat - coords.y/gDrawScaleFactor;
+                } else if (input.dataset.coordinate === "longitude") {
+                    input.value = coords.x/gDrawScaleFactor + gMinLon;
+                }
+            });
+        }
+    };
+    return moveNodes
+}
+
+function detachListener() {
+    const element = document.getElementById("svgContainer");
+    element.setAttribute("style", "cursor: default");
+    element.onclick = null;
+}
+
+// Ignore drags, those should be handled by svg-panzoom.
+function detectDrag(event) {
+    return (gDownX !== event.clientX || gDownY !== event.clientY) ? true : false;
+}
+
 //**************************************************
 // Edit menu interface
 //**************************************************
@@ -2590,15 +2654,9 @@ Don't touch existing houses or their loads
 Don't ever replace regular load objects
 1) Delete triplex nodes (have NO parent) and replace them with houses that have randomly generated loads
 2) Replace triplex loads (have parent) with houses that have randomly generated loads
-
-triplex_loads AND triplex_nodes CAN have parents, but triplex_node usually won't
-triplex_load always has a parent
-
+- triplex_loads AND triplex_nodes CAN have parents, but triplex_nodes usually won't
+- triplex_load always has a parent
 -There are no files with both triplex loads and triplex nodes.
--File with triplex loads: ./omf/data/Model/public/Demo gridlabMulti scadaCalibration/Calibrated Feeder.omd
--File with triplex nodes: 
-    ./omf/data/Model/public/Demo gridlabMulti scadaCalibration/Uncalibrated Feeder.omd
-    ./omf/data/Model/public/Demo superModel/superModel Today.omd
 */
 function convertStaticLoadsIntoHouses() {
     const keys = Object.keys(gTree.tree).filter(key => {
@@ -2612,52 +2670,17 @@ function convertStaticLoadsIntoHouses() {
     let modal;
     modal = createProgressModal({
         startMessage: `Converting every triplex load and/or triplex node into a house with children. This could take a few seconds.`,
-        endMessage: `${keys.length} objects were converted into houses with children.`,
+        endMessage: `${keys.length} triplex objects were converted into houses with children.`,
         finishFunc: () => modal.hide()    
     });
     setTimeout(function() {
-        keys.forEach(key => { replaceLoadOrNodeWithHouse(key); });
+        keys.forEach(key => { 
+            gTree.replaceNode(key, gComponentManager.get("house", "R1_SingleFamilyHome_1990-2005"));
+            addLoadsToHouse(key);
+        });
         createSvgData(keys).draw(gViewport);
         modal.finish();
     }, 10);
-}
-
-/**
- * Keep: longitude, latitude, parent (if it doesn't have it, set it to null)
- * Change: name, object 
- * Delete: all of the old properties, old name in treeMap.name
- * Insert: all of the properties of house, new name in treeMap.name
- * Edit: 'parent' attribute of children (if any), 'from/to' attribute of lines (if any)
- * Don't touch: TreeMap is fine because it uses keys
- */
-function replaceLoadOrNodeWithHouse(key) {
-    const oldLoad = gTree.getObject(key);
-    const house = deepCopy(gComponentManager.get("house", "R1_SingleFamilyHome_1990-2005"));
-    house.longitude = oldLoad.longitude;
-    house.latitude = oldLoad.latitude;
-    if (oldLoad.parent == null) {
-        delete house.parent;
-    } else {
-        house.parent = oldLoad.parent;
-    }
-    house.name = "house" + key; // might need to change this
-    const children = gTree.treeMap.getChildKeys(key);
-    if (children != null) children.forEach(key => { gTree.getObject(key).parent = house.name; });
-    const lines = gTree.treeMap.getLineKeys(key);
-    if (lines != null) {
-        lines.forEach(key => {
-            const line = gTree.getObject(key);
-            if (line.to === oldLoad.name) {
-                line.to = house.name;
-            } else if (line.from === oldLoad.name) {
-                line.from = house.name;
-            }
-        });
-    }
-    gTree.treeMap.remove([key]);
-    gTree.tree[key] = house;
-    gTree.treeMap.add(key);
-    addLoadsToHouse(key);
 }
 
 function addLoadsToHouse(key) {
@@ -2864,7 +2887,7 @@ function massChange(keys, attributeKey, objectType) {
     keys.forEach(key => {
         treeObjectCopies.push(createTreeObject(key, gTree));
     });
-    createSvgData(keys).delete(gViewport);
+    createSvgData(keys).remove(gViewport);
     let count = keys.length;
     const unedited = [];
     treeObjectCopies.forEach(tObject => {
@@ -2944,11 +2967,14 @@ function editAttachment() {
 
 function saveAttachment() {
 	let name = document.getElementById("attachmentSelect").value;
-	gWriteFeeder.attachments[name] = document.getElementById("editAttachmentBox").value;
+    gWriteFeeder.attachments[name] = document.getElementById("editAttachmentBox").value;
+    alert("Attachment saved");
 }
 
+{% if showFileMenu %}
+
 /**
- * Subhourly data starts in 2006, although there are only 97 out of the 156 stations. We need subhourly data to get a wind speed measurement. A
+ * Subhourly data starts in 2006, although there are only 97 out of the 156 stations in 2006. We need subhourly data to get a wind speed measurement. A
  * few stations have really poor data quality.
  */
 function fillClimateModalOptions() {
@@ -2993,10 +3019,117 @@ function fillClimateModalOptions() {
     });
 }
 
+/**
+ * Start the server process to convert every triplex load and/or triplex node into a Zillow house.
+ */
+function startZillowHouses() {
+    const triplexObjects = Object.entries(gTree.tree).filter(([key, obj]) => 
+        obj.object === "triplex_load" || obj.object === "triplex_node"
+        ).map(([key, obj]) => 
+            ({ key: key, latitude: obj.latitude, longitude: obj.longitude })
+        );
+    if (triplexObjects.length === 0) {
+        alert("This data has no triplex load or triplex node objects that can be converted into Zillow houses.");
+        return;
+    }
+    const formData = new FormData();
+    formData.set("triplexObjects", JSON.stringify(triplexObjects));
+    formData.set("owner", gThisOwner);
+    formData.set("modelName", gThisModelName);
+    let cancelled = false
+    let modal;
+    modal = createProgressModal({
+        startMessage: "Submitting your triplex objects for conversion...",
+        endMessage: "",
+        finishFunc: () => modal.hide(),
+        cancelFunc: () => {
+            cancelled = true;
+            saveFeeder(gReadFeeder);
+        }
+    });
+    const request = $.ajax({
+        type: "POST",
+        url: "/zillowHouses",
+        data: formData,
+        processData: false,
+        contentType: false
+    }).done(function(data, text, jqXHR) {
+        if (!cancelled) {
+            pollZillowHouses();
+        }
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+        if (!cancelled) {
+            modal.endMessage = "Operation failed. We were unable to submit your triplex objects. Check the console for more information.";
+            modal.finish();
+            console.log(jqXHR.status); // 500
+            console.log(jqXHR.responseText); // Error message
+        }
+    });
+}
+
+/**
+ * Poll the server until the Zillow house information is ready for download.
+ */
+function pollZillowHouses() {
+    let cancelled = false;
+    let modal;
+    modal = createProgressModal({
+        startMessage: "Converting triplex objects into real-world Zillow houses. This could take many minutes...",
+        endMessage: "",
+        cancelFunc: () => {
+            cancelled = true;
+            modal.endMessage = "You cancelled the operation.";
+            modal.cancelButton.style.display = "none";
+            modal.finish();
+            // Don't re-save. No need to.
+        },
+        finishFunc: () => {
+            modal.hide();
+            // don't reload. No need to.
+        }
+    });
+    const formData = new FormData();
+    formData.set("owner", gThisOwner);
+    formData.set("modelName", gThisModelName);
+    const intervalId = setInterval(function() {
+        $.ajax({
+            type: "POST",
+            url: "/checkZillowHouses",
+            data: formData,
+            processData: false,
+            contentType: false
+        }).done(function(data, textStatus, jqXHR) { // textStatus is useless
+            if (!cancelled) {
+                if (jqXHR.status === 200) {
+                    clearInterval(intervalId);
+                    const keys = Object.keys(data);
+                    keys.forEach(key => {
+                        gTree.replaceNode(key, data[key]);
+                        gTree.tree[key].name = "zillow_house" + key;
+                    });
+                    createSvgData(keys).draw(gViewport); // redraw so nodes are proper color
+                    modal.endMessage = `Success. ${keys.length} triplex objects were converted into Zillow houses.`;
+                    modal.finish();
+                }
+            } else {
+                clearInterval(intervalId);
+                // No need to do anything else.
+            }
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+            clearInterval(intervalId);
+            if (!cancelled) {
+                modal.endMessage = "We were unable to get the house data to convert triplex objects into Zillow houses. Operation failed. Check the console for more information.";
+                modal.finish();
+                console.log(jqXHR.status); // 500
+                console.log(jqXHR.responseText); // server response
+            }
+        });
+    }, 5000);
+}
+
 //**************************************************
 // File menu interface
 //**************************************************
-{% if showFileMenu %}
 
 /** 
  * Used to save the new changes or undo an operation by resaving the old changes.
@@ -3021,7 +3154,8 @@ function saveFeeder(feeder) {
         postRequest.done(function() {
             modal.finish();
         }).fail(function() {
-            alert("The AJAX request failed to get a successful response from the server.")
+            modal.endMessage = "The server raised an internal exception during the save operation."
+            modal.finish();
         });
     } else if (feeder === gWriteFeeder) {
         let cancelled = false;
@@ -3038,12 +3172,17 @@ function saveFeeder(feeder) {
                 saveFeeder(gReadFeeder);
             }
         });
+        //modal.cancelButton.setAttribute("style", "display:none"); // make the cancel button invisible
         postRequest.done(function() {
             if (!cancelled) {
+                //modal.cancelButton.removeAttribute("style"); // make the cancel button visible
                 modal.finish();
             }
         }).fail(function() {
-            alert("The AJAX request failed to get a successful response from the server.")
+            if (!cancelled) {
+                modal.endMessage = "The server raised an internal exception during the save operation."
+                modal.finish();
+            }
         });
     }
 }
@@ -3055,6 +3194,10 @@ function saveFeeder(feeder) {
  * @param {string} owner - either "public" or the current user.
  */
 async function loadFeeder(serverFeederName, serverModelName, owner) {
+    if (feederNeedsSave()) {
+        alert("You have unsaved changes. Please save this feeder before loading a new feeder.");
+        return;
+    }
     let submitForm = false;
     await $.ajax({
         // I need to check if a user's feeder still exists.
@@ -3101,10 +3244,39 @@ async function loadFeeder(serverFeederName, serverModelName, owner) {
             modal.finish();
         }
     }).fail(function() {
-        alert("The AJAX request failed to get a successful response from the server.");
+        if (!cancelled) {
+            modal.endMessage = "The server raised an internal exception while loading the feeder."
+            modal.finish();
+        }
     });
 }
 
+function validateClimateModal() {
+    const modal = document.getElementById("climateForm");
+    const radioButtons = Array.from(modal.querySelectorAll("input[name='climateImportOption']:checked"));
+    if (radioButtons.length !== 1) {
+        alert("Please select a climate change option.");
+        return false;
+    }
+    if (radioButtons[0].value === "USCRNImport") {
+        if (modal.querySelector("select[id='uscrnYear']").value === "") {
+            alert("Please select a year for the USCRN import.");
+            return false;
+        }
+        if (modal.querySelector("select[id='uscrnStation']").value === "") {
+            alert("Please select a station for the USCRN import.");
+            return false;
+        }
+    } else if (radioButtons[0].value === "tmyImport") {
+        if (modal.querySelector("input[id='zipCode']").value === "") {
+            alert("Please enter a valid 5-digit ZIP Code.");
+            return false;
+        }
+    }
+    return true;
+}
+
+//TODO: check that gReadFeeder.equals(gWriteFeeder) are prompt user to save before initiating a file operation.
 /** 
  * Submit a from to do one of the following:
  * 1) Import a Milsoft, GridLAB-D, or CYME file into this .omd file.
@@ -3115,6 +3287,10 @@ async function loadFeeder(serverFeederName, serverModelName, owner) {
  * 6) Modify this .omd file with anonymization
  */
 async function submitForm({formId, pollUrl, inputId}) {
+    if (feederNeedsSave()) {
+        alert("You have unsaved changes. Please save your feeder before modifying it.");
+        return;
+    }
     let submitForm = true;
     if (inputId !== undefined) {
         // inputId was defined, therefore we need to check the file name on the server before submitting the form
@@ -3135,9 +3311,7 @@ async function submitForm({formId, pollUrl, inputId}) {
             alert("The AJAX request failed to get a successful response from the server");
         });
     }
-    if (submitForm === false) {
-        return;
-    }
+    if (submitForm === false) return;
     let cancelled = false;
     let modal;
     modal = createProgressModal({
@@ -3145,6 +3319,23 @@ async function submitForm({formId, pollUrl, inputId}) {
         endMessage: "Success. Your file was loaded into this feeder.",
         cancelFunc: () => {
             cancelled = true;
+            /* In cases where the initial operation changed the name of the .omd file on the server, we must rename the .omd file to its previous name
+            in order to completely undo the operation */
+            // scadaForm??? amiForm???
+            // no climateForm, no anonymizeForm
+            if (["blankFeederForm", "milsoftForm", "gridlabdForm", "cymeForm"].includes(formId)) {
+                let oldServerName;
+                if (formId === "blankFeederForm") {
+                    oldServerName = document.getElementById("blankFeederInput").value;
+                } else if (formId === "milsoftForm") {
+                    oldServerName = document.getElementById("milsoftInput").value;
+                } else if (formId === "gridlabdForm") {
+                    oldServerName = document.getElementById("gridlabdInput").value;
+                } else if (formId === "cymeForm") {
+                    oldServerName = document.getElementById("cymeInput").value;
+                }
+                renameFeeder(oldServerName, gThisFeederName, false);
+            }
             saveFeeder(gReadFeeder);
         },
         finishFunc: () => {
@@ -3169,7 +3360,10 @@ async function submitForm({formId, pollUrl, inputId}) {
                 modal.finish();
             }
         }).fail(function() {
-            alert("The AJAX request failed to get a successful response from the server");
+            if (!cancelled) {
+                modal.endMessage = "The server raised an internal exception during form submission."
+                modal.finish();
+            }
         });
     } else {
         formRequest.done(function(data) {
@@ -3198,15 +3392,18 @@ async function submitForm({formId, pollUrl, inputId}) {
                                     data += ".";
                                 }
                                 modal.endMessage = data + " Please click \"Cancel\" to undo the operation.";
-                                //console.log(data);
-                                //modal.endMessage = "There was a problem on the server. Check the console for more information. Please click \"Cancel\" to undo the operation.";
                                 modal.finish();
                             }
                         }
+                    } else {
+                        clearInterval(intervalId);
                     }
                 }).fail(function() {
                     clearInterval(intervalId);
-                    alert("The AJAX request failed to get a successful response from the server.")
+                    if (!cancelled) {
+                        modal.endMessage = "The server raised an internal exception during the file operation."
+                        modal.finish();
+                    }
                 });
             }, 5000);
         });
@@ -3214,71 +3411,76 @@ async function submitForm({formId, pollUrl, inputId}) {
 }
 
 async function getNewFeederName() {
-	if (JSON.stringify(gReadFeeder) !== JSON.stringify(gWriteFeeder)){
-		alert("You have unsaved changes. Please save the feeder before proceeding.")
-	} else {
-		let newName = prompt("Rename the feeder to", `${gThisFeederName}`);
-        while (/\W/.test(newName)) {
-            newName = prompt("Only letters, digits and underscore are allowed.\nPlease enter a different name", `${gThisFeederName}`);
-        }
-		if (newName != null) {
-            await $.ajax({
-                url: `/uniqObjName/Feeder/${gThisOwner}/${newName}/${gThisModelName}`//good because of course I am renaming THIS feeder file
-            }).done(function(data) {
-                if (data.exists) {
-                    alert(`You already have a feeder named "${newName}". Please choose a different name.`);
-                } else {
-                    renameFeeder(gThisFeederName, newName);
-                }
-            });
-		}
-	} 
-}
-
-async function renameFeeder(oldServerName, newName) {
-    let modal;
-    let cancelled = false;
-    if (newName === gThisFeederName) {
-        // We are undoing a previous rename operation
-        modal = createProgressModal({
-            startMessage: "Undoing the previous rename...",
-            endMessage: "Success. The previous rename operation was undone.",
-            finishFunc: () => {
-                modal.hide();
-            }
-         });
-    } else {
-        // We are using a new name
-        modal = createProgressModal({
-            startMessage:  "Renaming this feeder file...",
-            endMessage: "Success. This feeder file was renamed.",
-            cancelFunc: () => {
-                cancelled = true;
-                renameFeeder(newName, oldServerName);
-            },
-            finishFunc: () => {
-                // good
-                gThisFeederName = newName;
-                document.getElementById("menuLeft").querySelector("h4").textContent = newName;
-                modal.hide();
+    if (feederNeedsSave()) {
+		alert("You have unsaved changes. Please save the feeder before renaming.");
+        return;
+    }
+    let newName = prompt("Rename the feeder to", `${gThisFeederName}`);
+    while (/\W/.test(newName)) {
+        newName = prompt("Only letters, digits and underscore are allowed.\nPlease enter a different name", `${gThisFeederName}`);
+    }
+    if (newName != null) {
+        await $.ajax({
+            url: `/uniqObjName/Feeder/${gThisOwner}/${newName}/${gThisModelName}`//good because of course I am renaming THIS feeder file
+        }).done(function(data) {
+            if (data.exists) {
+                alert(`You already have a feeder named "${newName}". Please choose a different name.`);
+            } else {
+                renameFeeder(gThisFeederName, newName);
             }
         });
+    }
+}
+
+/**
+ * The modal shouldn't be shown when the rename operation is being used to undo a newBlankFeeder operation
+ */
+async function renameFeeder(oldServerName, newName, showModal=true) {
+    let modal = null;
+    let cancelled = false;
+    if (showModal === true) {
+        if (newName === gThisFeederName) {
+            // We are undoing a previous rename operation
+            modal = createProgressModal({
+                startMessage: "Undoing the previous rename...",
+                endMessage: "Success. The previous rename operation was undone.",
+                finishFunc: () => {
+                    modal.hide();
+                }
+            });
+        } else {
+            // We are using a new name
+            modal = createProgressModal({
+                startMessage:  "Renaming this feeder file...",
+                endMessage: "Success. This feeder file was renamed.",
+                cancelFunc: () => {
+                    cancelled = true;
+                    renameFeeder(newName, oldServerName);
+                },
+                finishFunc: () => {
+                    // good
+                    gThisFeederName = newName;
+                    document.getElementById("menuLeft").querySelector("h4").textContent = newName;
+                    modal.hide();
+                }
+            });
+        }
     }
     await $.ajax({
         url: `/renameFeeder/${gThisOwner}/${gThisModelName}/${oldServerName}/${newName}/${gThisFeederNum}`
     }).done(function(data) {
-        if (data === "Failure") {
-            alert("Rename operation failed.");
-        } else if (!cancelled) {
+        if (!cancelled && modal != null) {
+            if (data === "Failure") {
+                modal.endMessage = "Rename operation failed."
+            }
             modal.finish();
         }
     }).fail(function() {
-        alert("The AJAX request failed to get a successful response from the server.");
+        if (!cancelled && modal != null) {
+            modal.endMessage = "The server raised an internal exception during the rename operation."
+            modal.finish();
+        }
     });
-}
-
-function displayMap(){
-    window.open(`/displayMap/${gThisOwner}/${gThisModelName}/${gThisFeederNum}`, '_blank');
 }
 
 {% endif %}
@@ -3309,8 +3511,8 @@ const progressModalPrototype = {
 
 /**
  * Create a progress modal in 1 of 2 modes: First mode will show a cancel button which if clicked allows the operation to be undone. Second mode will
- * not show a cancel button. startMessage and finishFunc are required parameters. Sometimes you have to set with endMessage after the
- * progress modal has been constructed.
+ * not show a cancel button. startMessage and finishFunc are required parameters. Sometimes you have to set with endMessage after the progress modal
+ * has been constructed.
  * @param {Function} finishFunc - will be executed when the user clicks the "OK" button after an operation has completed
  */
 function createProgressModal({startMessage, endMessage, cancelFunc, finishFunc}) {
@@ -3554,7 +3756,7 @@ function getRelationship(obj) {
 }
 
 /** 
- * Return an object that is a copy of the argument object.
+ * Return an object that is a copy of the argument object. JSON.stringify() has many limitations so be careful!.
  * 
  * @param {Object} oldObject - the object to copy.
  * @return {Object} - a copy of the oldObject.
@@ -3782,6 +3984,20 @@ function preserveColorWithNewAlpha(e, alpha) {
         e.style[styleAttribute] = `rgba(${inlineColorValues}, ${alpha})`;
         return;
     }
+}
+
+/**
+ * Determine whether or not this interface was loaded as a static file or as part of a web server request.
+ */
+function interfaceIsStatic() {
+    return document.getElementById("panZoomInsert").textContent.trim() !== ""
+}
+
+/**
+ * Determine whether or not to force the user to save their feeder. This might not always be sufficient, due to the many limitations of using JSON.stringify().
+ */
+function feederNeedsSave() {
+    return JSON.stringify(gReadFeeder) !== JSON.stringify(gWriteFeeder);
 }
 
 //**************************************************
@@ -4577,7 +4793,7 @@ const svgDataPrototype = {
     /**
      * good. Doesn't need tests.
      */
-    delete(viewport) {
+    remove(viewport) {
         this.primaryKeySet.forEach(key => {
             const obj = this.tree.getObject(key);
             const relationship = getRelationship(obj);
@@ -4593,7 +4809,7 @@ const svgDataPrototype = {
             if (gSelection.hasId(key)) gSelection.remove(e);
             viewport.removeChild(e);
         });
-        this.tree.delete(Array.from(this.primaryKeySet));
+        this.tree.remove(Array.from(this.primaryKeySet));
     },
 
     /* Private methods */
@@ -4850,7 +5066,7 @@ function createTreeObject(input, tree) {
 }
 
 //**************************************************
-// Modal interface 
+// Modal functions 
 //**************************************************
 
 /**
@@ -4860,6 +5076,12 @@ function formatModal(modal) {
     Array.from(modal.querySelectorAll("td")).forEach(td => td.classList.add("fullPadded"));
     Array.from(modal.querySelectorAll("th")).forEach(th => th.classList.add("fullPadded"));
     Array.from(modal.querySelectorAll("button")).forEach(btn => btn.classList.add("modalButton"));
+    Array.from(modal.querySelectorAll("button[data-buttonfunction='toggle']")).forEach(btn => {
+        if (btn.textContent.toLowerCase() !== "select" && btn.textContent.toLowerCase() !== "save") {
+            btn.classList.add("deleteButton")
+        }
+    });
+    Array.from(modal.querySelectorAll("button[data-buttonfunction='cancel']")).forEach(btn => btn.classList.add("deleteButton"));
 }
 
 /**
@@ -4879,7 +5101,7 @@ function addModalHandlers(modal) {
 })();
 
 //**************************************************
-// Table interface 
+// Table classes 
 //**************************************************
 
 /**
@@ -5032,7 +5254,7 @@ function createDescriptionTable(id) {
         event.preventDefault();
         // Delete the object entirely just in case parent was changed, in order to delete the old parent-child line
         const svg = createSvgData([tObject.key]);
-        svg.delete(gViewport);
+        svg.remove(gViewport);
         gTree.insert(tObject);// re-insert the updated object. It is remapped in the process.
         svg.draw(gViewport);
         alert("Object saved");
@@ -5087,8 +5309,8 @@ const buttonPrototype = {
      */
     deleteObject() {
         const key = this.tObject.key;
-        if (gTree.isDeletable(key)) {
-            createSvgData([key]).delete(gViewport);
+        if (gTree.isRemovable(key)) {
+            createSvgData([key]).remove(gViewport);
             rebuildSelectionTable();
         } else {
             let msg = `If you click "ok", you will delete this object and all of its connected children and/or lines. `;
@@ -5101,9 +5323,9 @@ const buttonPrototype = {
                 msg += `Do you want to delete "${gTree.getObject(key).name}" and its lines: "${lines.join(", ")}"?`;
             }
             if (confirm(msg)) {
-                const keys = gTree.getSubtreeToDelete(key);
+                const keys = gTree.getSubtreeToRemove(key);
                 keys.push(key);
-                createSvgData(keys).delete(gViewport);
+                createSvgData(keys).remove(gViewport);
                 //console.log(document.getElementById("svgContainer").onclick);
                 rebuildSelectionTable();
             }
@@ -5133,7 +5355,7 @@ const buttonPrototype = {
 }
 
 /**
- * TODO: ad unit tests, DON'T remove tObject argument, remove tWrapper argument
+ * TODO: add unit tests, DON'T remove tObject argument, remove tWrapper argument
  */
 function createButton({action, tableBody=null, tObject=null}) {
     const button = Object.create(buttonPrototype);
@@ -5350,7 +5572,7 @@ const rowPrototype = {
             btn.innerHTML = "&#9587;"
             btn.setAttribute("class", "modalButton deleteButton"); 
             td.appendChild(btn);
-            btn.addEventListener("click", () => { this.delete() });
+            btn.addEventListener("click", () => { this.remove() });
         } 
         return td;
     },
@@ -5359,7 +5581,7 @@ const rowPrototype = {
      * TODO: update unit tests
      * Delete the row from the table. Delete the key from the map, if there was a map.
      */
-    delete() {
+    remove() {
         this.self.parentElement.removeChild(this.self);
         if (this.tObject != null) {
             delete this.tObject.data[this.key];
@@ -5406,96 +5628,26 @@ function createRow({key, value=null, tObject=null, deletable=false}) {
 }
 
 //**************************************************
-// Event listeners
-//**************************************************
-
-/**
- * TODO: add unit tests
- */
-function getMoveNodesFunction(objects, tBody=null, tObject=null) {
-    if (objects.length > 1 && tBody != null) throw new Error("Cannot update a description table when multiple nodes have been selected to be moved.");
-    const moveNodes = function(event) {
-        event.stopPropagation();
-        detachListener();
-        const coords = clickLatLon(event);
-        move(objects, coords);
-        if (tObject != null) {
-            if (objects.length !== 1) throw new Error("Can only update the tObject of a description table when moving a single object!");
-            tObject.data.longitude = objects[0].longitude;
-            tObject.data.latitude = objects[0].latitude;
-        }
-        if (tBody != null) {
-            Array.from(tBody.getElementsByTagName("input")).forEach(input => {
-                if (input.dataset.coordinate === "latitude") {
-                    input.value = gMaxLat - coords.y/gDrawScaleFactor;
-                } else if (input.dataset.coordinate === "longitude") {
-                    input.value = coords.x/gDrawScaleFactor + gMinLon;
-                }
-            });
-        }
-    };
-    return moveNodes
-}
-
-function detachListener() {
-    const element = document.getElementById("svgContainer");
-    element.setAttribute("style", "cursor: default");
-    element.onclick = null;
-}
-
-// Ignore drags, those should be handled by svg-panzoom.
-function detectDrag(event) {
-    return (gDownX !== event.clientX || gDownY !== event.clientY) ? true : false;
-}
-
-//**************************************************
 // Initialization
 //**************************************************
 
-function checkServerConversion() {
-    let modal;
-    modal = createProgressModal({
-        startMessage: "Checking for an in-progress server file conversion...",
-        endMessage: "Server file conversion has completed. Click \"OK\" to reload the page.",
-        finishFunc: () => reloadWrapper()
-    });
-    let reload = false;
-    return new Promise(function(resolve, reject) {
-        const intervalId = setInterval(function pollServer() {
-            $.ajax({
-                type: "POST",
-                url: "/checkConversion/{{thisModelName}}/{{thisOwner}}",
-            }).done((data) => {
-                if (data.exists === true) {
-                    // There is an in-progress file conversion. Need to reload the page when it's done.
-                    reload = true
-                    modal.self.querySelector("h2").textContent = "Waiting for an in-progress server file conversion to complete...";
-                } else if (data.exists === false) {
-                    if (reload) {
-                        // There was a previous in-progress conversion that just completed, so reload the page
-                        modal.finish()
-                    } else {
-                        // There was never an in-progress file conversion, so don't bother to reload the page
-                        clearInterval(intervalId)
-                        modal.hide()
-                        resolve()
-                    }
-                } else {
-                    // there was an error? Notify the user, proceed as normal.
-                    clearInterval(intervalId)
-                    modal.hide()
-                    reject("An error occurred on the server during the file conversion process. You may save your feeder to prevent this message from appearing.");
-                }
-            }).fail(() => {
-                clearInterval(intervalId);
-                modal.hide();
-                reject("The AJAX request failed to get a successful response from the server.");
-            });
-            return pollServer;
-        // Execute pollServer immediately once, then return it to setInterval so that it continues to execute every 5 seconds
-        }(), 5000)
-    });
+/**
+ * Initialize the interface. The order of the initialization functions matters. This is a function declaration instead of an automatically invoked
+ * function expression because the testing code needs to call this function.
+ */
+async function initializeInterface() {
+    if (!interfaceIsStatic()) {
+        try {
+            await checkServerConversion();
+        } catch (e) {
+            alert(e)
+        }
+    }
+    createInterface();
+    attachHandlers();
+    document.getElementById("loadingMessage").style.display = "none"
 }
+initializeInterface();
 
 function createSingletons() {
     gOpacityManager = createOpacityManager();
@@ -5513,56 +5665,64 @@ function createInterface() {
     createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
 }
 
-/**
- * Determine whether or not this interface was loaded as a static file or as part of a web server request.
- */
-function interfaceIsStatic() {
-    return document.getElementById("panZoomInsert").textContent.trim() !== ""
-}
-
-function prepareFindModal() {
-    const searchInput = document.getElementById("searchInput");
-    searchInput.addEventListener("change", searchTerm);
-    document.getElementById("searchExactString").addEventListener("change", function() {
-        searchTerm.call(searchInput);
+function checkServerConversion() {
+    let cancelled = false;
+    let reload = false;
+    let modal;
+    return new Promise(function(resolve, reject) {
+        modal = createProgressModal({
+            startMessage: "Checking for an in-progress server file conversion...",
+            endMessage: "Server file conversion has completed. Click \"OK\" to reload the page.",
+            finishFunc: () => reloadWrapper(),
+            cancelFunc: () => {
+                if (confirm("Are you sure you want to cancel the in-progress server file conversion?")) {
+                    cancelled = true;
+                    saveFeeder(gReadFeeder);
+                    resolve();
+                }
+            },
+        });
+        const intervalId = setInterval(function pollServer() {
+            $.ajax({
+                type: "POST",
+                url: "/checkConversion/{{thisModelName}}/{{thisOwner}}",
+            }).done((data) => {
+                if (!cancelled) {
+                    if (data.exists === true) {
+                        // There is an in-progress file conversion. Need to reload the page when it's done.
+                        reload = true
+                        modal.self.querySelector("h2").textContent = "Waiting for an in-progress server file conversion to complete...";
+                    } else if (data.exists === false) {
+                        if (reload) {
+                            // There was a previous in-progress conversion that just completed, so reload the page
+                            modal.finish();
+                        } else {
+                            // There was never an in-progress file conversion, so don't bother to reload the page
+                            clearInterval(intervalId);
+                            modal.hide();
+                            resolve();
+                        }
+                    } else {
+                        // there was an error? Notify the user, proceed as normal.
+                        clearInterval(intervalId);
+                        modal.hide();
+                        reject("An error occurred on the server during the file conversion process. You may save your feeder to prevent this message from appearing.");
+                    }
+                } else {
+                    clearInterval(intervalId);
+                }
+            }).fail(() => {
+                clearInterval(intervalId);
+                if (!cancelled) {
+                    modal.hide();
+                    reject("The server raised an internal exception while checking for an ongoing file operation.");
+                }
+            });
+            return pollServer;
+        // Execute pollServer immediately once, then return it to setInterval so that it continues to execute every 5 seconds
+        }(), 5000)
     });
-    document.getElementById("searchSubstring").addEventListener("change", function() {
-        searchTerm.call(searchInput);
-    });
 }
-
-function prepareColorModal() {
-    const colorModal = document.getElementById("colorModal");
-    const colorManager = createColorManager();
-    colorModal.querySelector("input[type='file']").addEventListener("change", async function() {
-        await colorManager.buildHTML(this.files);
-    });
-    colorModal.querySelector("button[data-buttonfunction='reset']").addEventListener("click", () => {
-        colorManager.removeColors();
-    });
-}
-
-/**
- * Initialize the interface. The order of the initialization functions matters. This is a function declaration instead of an automatically invoked
- * function expression because the testing code needs to call this function.
- */
-async function initializeInterface() {
-    if (!interfaceIsStatic()) {
-        try {
-            await checkServerConversion();
-        } catch (e) {
-            alert(e)
-        }
-    }
-    createInterface();
-    attachHandlers();
-    applyJQueryStyles();
-    if (interfaceIsStatic()) disableWebFeatures();
-    prepareFindModal();
-    prepareColorModal();
-    document.getElementById("loadingMessage").style.display = "none"
-}
-initializeInterface();
 
     //buildFeeder();
     //const t0 = performance.now();
