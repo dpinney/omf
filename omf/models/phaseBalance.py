@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from os.path import join as pJoin
 from shutil import copyfile
+import math
 
 # OMF imports 
 from omf.models import __neoMetaModel__
@@ -27,6 +28,13 @@ def motor_efficiency(x):
 def n(num):
 	return "{:,.2f}".format(num)
 
+def pf(real, var):
+	real, var = floats(real), floats(var)
+	return float(real) / math.sqrt(real**2 + var**2)
+
+def floats(f):
+	return float(f.replace(',', ''))
+
 def work(modelDir, ind):
 	''' Run the model in its directory. '''
 	o = {}
@@ -36,9 +44,6 @@ def work(modelDir, ind):
 	)
 
 	SIGN_CORRECTION = -1 if ind['pvConnection'] == 'Delta' else 1
-
-
-	price = float(ind['retailCost'])
 	
 	neato = False if ind.get("layoutAlgorithm", "geospatial") == "geospatial" else True
 	edgeColValue = ind.get("edgeCol", None) if ind.get("edgeCol") != "None" else None
@@ -166,8 +171,7 @@ def work(modelDir, ind):
 		o["solar_image"] = f.read().encode("base64")
 	os.rename(pJoin(modelDir, "voltDump.csv"), pJoin(modelDir, "voltDump_solar.csv"))
 
-	# --------------------------- SERVICE TABLE ----------------------------- #
-	price = float(ind['retailCost'])
+	# --------------------------- SERVICE TABLE ----------------------------- 
 	
 	df_invs = {}
 	sums = {}
@@ -215,6 +219,11 @@ def work(modelDir, ind):
 				_totals(pJoin(modelDir, 'load' + controlled_suffix + '.csv'), 'imag') + _totals(pJoin(modelDir, 'load_node' + controlled_suffix + '.csv'), 'imag')
 			)
 		}
+	}
+	o['service_cost']['power_factor'] = {
+		'base': n(pf(o['service_cost']['load']['base'], o['service_cost']['VARs']['base'])),
+		'solar': n(pf(o['service_cost']['load']['solar'], o['service_cost']['VARs']['solar'])),
+		'controlled': n(pf(o['service_cost']['load']['controlled'], o['service_cost']['VARs']['controlled'])),
 	}
 
 	# hack correction
@@ -271,6 +280,7 @@ def work(modelDir, ind):
 
 	motor_names = [motor for motor, r in df_v.iterrows()]
 
+	all_motor_unbalance = {}
 	for suffix in [base_suffix, solar_suffix, controlled_suffix]:
 		df_all_motors = pd.DataFrame()
 
@@ -290,6 +300,51 @@ def work(modelDir, ind):
 					n(r['voltA']), n(r['voltB']), n(r['voltC']), 
 					n(r['unbalance']), n(motor_efficiency(r['unbalance'])), "style='background:yellow'") 
 				for (i, r), (j, r2) in zip(df_all_motors.iterrows(), df_vs[suffix].iterrows())])
+		
+		all_motor_unbalance[suffix] = [r['unbalance'] for i, r in df_all_motors.iterrows()]
+
+	# ----------------------------------------------------------------------- #
+
+	# ---------------------------- COST TABLE ------------------------------- #
+	cost = float(ind['productionCost'])
+	revenue = float(ind['retailCost'])
+	pf_p = float(ind['pf_penalty'])
+	pf_t = float(ind['pf_threshold'])
+	motor_p = float(ind['motor_penalty'])
+	motor_t = float(ind['motor_threshold'])
+
+	o['cost_table'] = {
+		'energy_cost': {
+			'base': '-$' + n(cost*floats(o['service_cost']['load']['base'])),
+			'solar': '-$' + n(cost*floats(o['service_cost']['load']['solar'])),
+			'controlled': '-$' + n(cost*floats(o['service_cost']['load']['controlled'])),
+		},
+		'energy_revenue': {
+			'base': '$' + n(revenue*floats(o['service_cost']['load']['base'])),
+			'solar': '$' + n(revenue*floats(o['service_cost']['load']['solar'])),
+			'controlled': '$' + n(revenue*floats(o['service_cost']['load']['controlled'])),
+		},
+		'pf_penalty': {
+			'base': '-$' + n(pf_p if floats(o['service_cost']['power_factor']['base']) > pf_t else 0),
+			'solar': '-$' + n(pf_p if floats(o['service_cost']['power_factor']['solar']) > pf_t else 0),
+			'controlled': '-$' + n(pf_p if floats(o['service_cost']['power_factor']['controlled']) > pf_t else 0),
+		},
+		'motor_damage': {
+			'base': '-$' + n(motor_p*len([m for m in all_motor_unbalance['_base'] if m > motor_t])),
+			'solar': '-$' + n(motor_p*len([m for m in all_motor_unbalance['_solar'] if m > motor_t])),
+			'controlled': '-$' + n(motor_p*len([m for m in all_motor_unbalance['_controlled'] if m > motor_t])),
+		},
+		'motor_efficiency': {
+			'base': '####',
+			'solar': '####',
+			'controlled': '####',
+		},
+	}
+
+	print pf_t
+	print o['service_cost']['power_factor']['base']
+	print o['service_cost']['power_factor']['solar']
+	print o['service_cost']['power_factor']['controlled']
 	# ----------------------------------------------------------------------- #
 
 	if ind['pvConnection'] == 'Delta':
@@ -408,6 +463,11 @@ def new(modelDir):
 		"layoutAlgorithm": "geospatial", #forceDirected
 		"zipCode": "64735",
 		"retailCost": "0.05",
+		"productionCost": "0.03",
+		"pf_penalty": "50000", ### GET ACCURATE
+		"pf_threshold": ".8", ### GET ACCURATE
+		"motor_threshold": "2.5", ### GET ACCURATE
+		"motor_penalty": "3000000", ### GET ACCURATE
 		"discountRate": "7",
 		"edgeCol" : "None",
 		"nodeCol" : "perUnitVoltage",

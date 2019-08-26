@@ -122,8 +122,28 @@
 			</div>
 			<hr>
 			<div class="shortInput">
+				<label class="tooltip">Production Energy Cost ($/kWh)<span class="classic">####</span></label>
+				<input type="text" id="productionCost" name="retailCost" pattern="^\d+\.?\d*$" required="required"/>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Retail Energy Cost ($/kWh)<span class="classic">Residential rate.</span></label>
 				<input type="text" id="retailCost" name="retailCost" pattern="^\d+\.?\d*$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">PF Penalty<span class="classic">####</span></label>
+				<input type="text" id="pf_penalty" name="retailCost" pattern="^\d+\.?\d*$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">PF Threshold<span class="classic">####</span></label>
+				<input type="text" id="pf_threshold" name="retailCost" pattern="^\d+\.?\d*$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Motor rating<span class="classic">####</span></label>
+				<input type="text" id="motor_threshold" name="retailCost" pattern="^\d+\.?\d*$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Motor damage cost<span class="classic">####</span></label>
+				<input type="text" id="motor_penalty" name="retailCost" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Discount Rate (%)<span class="classic">Discount rate used in discounted cashflow analysis output.</span></label>
@@ -302,6 +322,55 @@
 					<td>{{allOutputDataDict['service_cost']['VARs']['base']}}</td>
 					<td>{{allOutputDataDict['service_cost']['VARs']['solar']}}</td>
 					<td>{{allOutputDataDict['service_cost']['VARs']['controlled']}}</td>
+				</tr>
+				<tr>
+					<td>Power Factor</td>
+					<td>{{allOutputDataDict['service_cost']['power_factor']['base']}}</td>
+					<td>{{allOutputDataDict['service_cost']['power_factor']['solar']}}</td>
+					<td>{{allOutputDataDict['service_cost']['power_factor']['controlled']}}</td>
+				</tr>
+			</table>
+			{% endif %}
+		</div>
+		<p class="reportTitle postRun" style="page-break-before:always">Financial Summary</p>
+		<div class="tightContent tableContainer postRun">
+			{% if allOutputDataDict %}
+			<table id="feederSummary">
+				<tr>
+					<th></th>
+					<th>Base Case</th>
+					<th>With Solar</th>
+					<th>Controlled Solar</th>
+				</tr>
+				<tr>
+					<td>Energy Cost</td>
+					<td>{{allOutputDataDict['cost_table']['energy_cost']['base']}}</td>
+					<td>{{allOutputDataDict['cost_table']['energy_cost']['solar']}}</td>
+					<td>{{allOutputDataDict['cost_table']['energy_cost']['controlled']}}</td>
+				</tr>
+				<tr>
+					<td>Energy Revenue</td>
+					<td>{{allOutputDataDict['cost_table']['energy_revenue']['base']}}</td>
+					<td>{{allOutputDataDict['cost_table']['energy_revenue']['solar']}}</td>
+					<td>{{allOutputDataDict['cost_table']['energy_revenue']['controlled']}}</td>
+				</tr>
+				<tr>
+					<td>PF Penalty</td>
+					<td>{{allOutputDataDict['cost_table']['pf_penalty']['base']}}</td>
+					<td>{{allOutputDataDict['cost_table']['pf_penalty']['solar']}}</td>
+					<td>{{allOutputDataDict['cost_table']['pf_penalty']['controlled']}}</td>
+				</tr>
+				<tr>
+					<td>Motor Damage</td>
+					<td>{{allOutputDataDict['cost_table']['motor_damage']['base']}}</td>
+					<td>{{allOutputDataDict['cost_table']['motor_damage']['solar']}}</td>
+					<td>{{allOutputDataDict['cost_table']['motor_damage']['controlled']}}</td>
+				</tr>
+				<tr>
+					<td>Motor Efficiency</td>
+					<td>{{allOutputDataDict['cost_table']['motor_efficiency']['base']}}</td>
+					<td>{{allOutputDataDict['cost_table']['motor_efficiency']['solar']}}</td>
+					<td>{{allOutputDataDict['cost_table']['motor_efficiency']['controlled']}}</td>
 				</tr>
 			</table>
 			{% endif %}
