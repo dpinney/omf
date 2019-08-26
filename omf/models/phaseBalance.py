@@ -334,17 +334,8 @@ def work(modelDir, ind):
 			'solar': '-$' + n(motor_p*len([m for m in all_motor_unbalance['_solar'] if m > motor_t])),
 			'controlled': '-$' + n(motor_p*len([m for m in all_motor_unbalance['_controlled'] if m > motor_t])),
 		},
-		'motor_efficiency': {
-			'base': '####',
-			'solar': '####',
-			'controlled': '####',
-		},
 	}
 
-	print pf_t
-	print o['service_cost']['power_factor']['base']
-	print o['service_cost']['power_factor']['solar']
-	print o['service_cost']['power_factor']['controlled']
 	# ----------------------------------------------------------------------- #
 
 	if ind['pvConnection'] == 'Delta':
@@ -464,10 +455,10 @@ def new(modelDir):
 		"zipCode": "64735",
 		"retailCost": "0.05",
 		"productionCost": "0.03",
-		"pf_penalty": "50000", ### GET ACCURATE
-		"pf_threshold": ".8", ### GET ACCURATE
-		"motor_threshold": "2.5", ### GET ACCURATE
-		"motor_penalty": "3000000", ### GET ACCURATE
+		"pf_penalty": "50000",
+		"pf_threshold": "0.8",
+		"motor_threshold": "2.5",
+		"motor_penalty": "3000000",
 		"discountRate": "7",
 		"edgeCol" : "None",
 		"nodeCol" : "perUnitVoltage",
