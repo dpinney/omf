@@ -547,14 +547,6 @@ def valueOfAdditionalRecloser(pathToGlm, workDir, lineFaultType, lineNameForRecl
 		new_html_str += "<tr><td><b>Outage Cost</b></td><td>"+str(initOutCost)+"</td><td>"+str(finOutCost)+"</td></tr>"
 		new_html_str +="""</tbody></table>"""
 
-		html_str = """
-			<div style="text-align:center">
-				<p style="padding-top:10px; padding-bottom:10px;">No-Recloser Lost kWh Sales:<span style="padding-left:1em">$"""+str(initCustCost)+"""</span><span style="padding-left:4em">With-Recloser Lost kWh Sales:<span style="padding-left:1em">$"""+str(finCustCost)+"""</span></span></p>
-				<p style="padding-top:10px; padding-bottom:10px;">No-Recloser Restoration Labor Cost:<span style="padding-left:1em">$"""+str(initRestCost)+"""</span><span style="padding-left:4em">With-Recloser Restoration Labor Cost:<span style="padding-left:1em">$"""+str(finRestCost)+"""</span></span></p>
-				<p style="padding-top:10px; padding-bottom:10px;">No-Recloser Restoration Hardware Cost:<span style="padding-left:1em">$"""+str(initHardCost)+"""</span><span style="padding-left:4em">With-Recloser Restoration Hardware Cost:<span style="padding-left:1em">$"""+str(finHardCost)+"""</span></span></p>
-				<p style="padding-top:10px; padding-bottom:10px;"><b>No-Recloser Outage Cost:<span style="padding-left:1em">$"""+str(initOutCost)+"""</span><span style="padding-left:4em">With-Recloser Outage Cost:<span style="padding-left:1em">$"""+str(finOutCost)+"""</span></span></b></p>
-			</div>"""
-
 		return new_html_str
 
 
@@ -585,6 +577,7 @@ def valueOfAdditionalRecloser(pathToGlm, workDir, lineFaultType, lineNameForRecl
 
 	fig1.add_trace(dataSaidi, row=1, col=1)
 	fig1.add_trace(dataMaifi, row=1, col=2)
+	fig1.layout.update(showlegend=False)
 
 	# stacked bar chart to show outage timeline without the recloser
 	row = 0
@@ -613,6 +606,7 @@ def valueOfAdditionalRecloser(pathToGlm, workDir, lineFaultType, lineNameForRecl
 	fig3 = go.Figure(data = graphData)
 	fig3.layout.update(
 		barmode='stack',
+		showlegend=False,
 		xaxis=go.layout.XAxis(
 			title=go.layout.xaxis.Title(text='Day of the year')
 		),
@@ -645,10 +639,10 @@ def valueOfAdditionalRecloser(pathToGlm, workDir, lineFaultType, lineNameForRecl
 		graphData.append(go.Bar(name='Fault ' + str(currCol+1), x = list(range(365)), y = data[:,currCol]))
 		currCol += 1
 	fig4 = go.Figure(data = graphData)
-	fig4.layout.update(barmode='stack', xaxis=go.layout.XAxis(title=go.layout.xaxis.Title(text='Day of the year')), yaxis=go.layout.YAxis(title=go.layout.yaxis.Title(text='Outage time (seconds)')))
+	fig4.layout.update(barmode='stack', showlegend=False, xaxis=go.layout.XAxis(title=go.layout.xaxis.Title(text='Day of the year')), yaxis=go.layout.YAxis(title=go.layout.yaxis.Title(text='Outage time (seconds)')))
 
 	# graph distribution data
-	fig2 = make_subplots(rows=1, cols=2, shared_yaxes=True)
+	fig2 = make_subplots(rows=1, cols=2, shared_yaxes=True, subplot_titles=('Failure Distribution', 'Restoration Distribution'))
 	
 	# graph failure distribution	
 	dataFail = distributiongraph(failureDistribution, failure_1, failure_2, 'Failure Distribution')
@@ -659,6 +653,7 @@ def valueOfAdditionalRecloser(pathToGlm, workDir, lineFaultType, lineNameForRecl
 	fig2['layout']['xaxis1'].update(title='Time to failure (seconds)')
 	fig2['layout']['xaxis2'].update(title='Time to restoration (seconds)')
 	fig2['layout']['yaxis1'].update(title='Probability distribution function')
+	fig2.layout.update(showlegend=False)
 	# feeder chart with recloser
 	outGraph = nx.Graph()
 	for key in tree1:
@@ -814,7 +809,7 @@ def new(modelDir):
 		'restorationDistribution': 'PARETO',
 		'restorationDistParam1': '1.0',
 		'restorationDistParam2': '1.0002778',
-		'maxFaultLength': '300',
+		'maxFaultLength': '30000',
 		'kwh_cost': '1',
 		'restoration_cost': '1',
 		'average_hardware_cost': '1',
