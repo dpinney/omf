@@ -124,6 +124,10 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustain
 		outFile.write("var geojson =")
 		json.dump(outageMap, outFile, indent=4)
 
+	#Save geojson dict to then read into outdata in work function below
+	with open(pJoin(workDir,'geoDict.js'),"w") as outFile:
+		json.dump(outageMap, outFile, indent=4)
+
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
 	outData = {}
@@ -141,6 +145,10 @@ def work(modelDir, inputDict):
 
 	with open(pJoin(modelDir,"geoJsonMap.html"),"rb") as inFile:
 		outData["outageMap"] = inFile.read()
+
+	#The geojson dictionary to load into the outageCost.py template
+	with open(pJoin(modelDir,"geoDict.js"),"rb") as inFile:
+		outData["geoDict"] = inFile.read()
 
 	# Stdout/stderr.
 	outData["stdout"] = "Success"

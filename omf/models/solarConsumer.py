@@ -235,7 +235,7 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		'modelType':modelName,
-		'zipCode':64735,
+		'zipCode':'64735',
 		'SystemSize':9,
 		'meteringType':
 			'netEnergyMetering', # Total cost reduced by total solar gen * retail rate.
