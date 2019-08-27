@@ -809,7 +809,7 @@ def new(modelDir):
 		'restorationDistribution': 'PARETO',
 		'restorationDistParam1': '1.0',
 		'restorationDistParam2': '1.0002778',
-		'maxFaultLength': '30000',
+		'maxFaultLength': '240',
 		'kwh_cost': '1',
 		'restoration_cost': '1',
 		'average_hardware_cost': '1',
