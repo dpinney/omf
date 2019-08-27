@@ -122,7 +122,13 @@
 		<div id="statsCalc" class="tightContent postRun">
 			{{ allOutputDataDict['statsHtml'] }}
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Outage Map</p>
+		<p class="reportTitle postRun">Outage Timeline</p>
+		<div id="timeline" class="tightContent postRun">
+			<div id="timelineChart" style="width:1000px"></div>
+			<script type="text/javascript">
+				Plotly.newPlot("timelineChart", JSON.parse(allOutputData["timelineData"]), JSON.parse(allOutputData["timelineLayout"]) || {})
+			</script>
+		</div>
 		<!-- Leaflet map directly inline with model-->
 		<div id="mapInsert"></div>
 		<script type="text/javascript">
@@ -144,11 +150,13 @@
 		}
 		function pointToLayerNode(feature, latlng) {
 			let fillColorValue = 'gray';
+			let rad = 3
 			if (feature.properties['pointColor']){
 				fillColorValue = feature.properties['pointColor'];
+				rad = 6;
 			}
 			return L.circleMarker(latlng, {
-				radius: 2,
+				radius: rad,
 				fillColor: fillColorValue,
 				color: "#000",
 				weight: 1,
@@ -206,6 +214,8 @@
 		geojsonLayer.addTo(map);
 	}
 	</script>
+
+
 		<!-- TODO: Remove? -->
 		<!-- <script type="text/javascript">
 			// Global Highcharts settings.
