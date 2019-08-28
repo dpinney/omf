@@ -300,13 +300,13 @@
             "filename": "37nodeVoltdump.csv"
         }, 
         "87": {
-            "phases": "\"ABCN\"", 
-            "from": "node709", 
-            "name": "recloser_1", 
-            "object": "recloser", 
-            "max_number_of_tries": "10000", 
-            "to": "node708", 
-            "retry_time": "1s"
+            "phases": "\"ABC\"",
+            "from": "node709",
+            "name": "node709-708",
+            "object": "underground_line",
+            "to": "node708",
+            "length": "500", 
+            "configuration": "lc_7231"
         }, 
         "84": {
             "phases": "\"ABC\"", 
