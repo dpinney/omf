@@ -130,33 +130,33 @@ def fullyDeEmbed(glmTree):
 		lenDiff = len(glmTree) - currLen
 
 def _mergeContigLinesOnce(tree):
-  ''' helper function for mergeContigLines.'''
-  obs = tree.values()
-  n2k = nameIndex(tree)
-  for o in obs:
-	if 'to' in o:
-		top = o
-		node = tree[n2k[o['to']]]
-		allBottoms = []
-		for o2 in obs:
-			if o2.get('from', None) == node['name']:
-				allBottoms.append(o2)
-		# print 'TOPLINE', o['name'], 'NODE', node['name'], len(allBottoms)
-		if len(allBottoms) == 1:
-			bottom = allBottoms[0]
-			if top.get('configuration','NTC') == bottom.get('configuration','NBC'):
-				# print 'MATCH!', top['name'], top['length'], bottom['name'], bottom['length'], 'TOTAL', float(top['length']) + float(bottom['length'])
-				# delete node and bottom line, make top line length = sum of both lines and connect to bottom to.
-				if ('length' in top) and ('length' in bottom):
-					newLen = float(top['length']) + float(bottom['length'])
-					try:
-						topTree = tree[n2k[o['name']]]
-						topTree['length'] = str(newLen)
-						topTree['to'] = bottom['to']
-						del tree[n2k[node['name']]]
-						del tree[n2k[bottom['name']]]
-					except:
-						continue #key weirdness
+	''' helper function for mergeContigLines.'''
+	obs = tree.values()
+	n2k = nameIndex(tree)
+	for o in obs:
+		if 'to' in o:
+			top = o
+			node = tree[n2k[o['to']]]
+			allBottoms = []
+			for o2 in obs:
+				if o2.get('from', None) == node['name']:
+					allBottoms.append(o2)
+			# print 'TOPLINE', o['name'], 'NODE', node['name'], len(allBottoms)
+			if len(allBottoms) == 1:
+				bottom = allBottoms[0]
+				if top.get('configuration','NTC') == bottom.get('configuration','NBC'):
+					# print 'MATCH!', top['name'], top['length'], bottom['name'], bottom['length'], 'TOTAL', float(top['length']) + float(bottom['length'])
+					# delete node and bottom line, make top line length = sum of both lines and connect to bottom to.
+					if ('length' in top) and ('length' in bottom):
+						newLen = float(top['length']) + float(bottom['length'])
+						try:
+							topTree = tree[n2k[o['name']]]
+							topTree['length'] = str(newLen)
+							topTree['to'] = bottom['to']
+							del tree[n2k[node['name']]]
+							del tree[n2k[bottom['name']]]
+						except:
+							continue #key weirdness
 
 def mergeContigLines(tree):
 	''' merge all lines that are across nodes and have the same config
