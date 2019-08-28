@@ -1,9 +1,11 @@
 import pandas as pd
+import numpy as np
 from omf import geo, feeder
 import re
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math, warnings
 import datetime
 import plotly as py
+import plotly.graph_objs as go
 from os.path import join as pJoin
 from jinja2 import Template
 from __neoMetaModel__ import *
@@ -25,7 +27,7 @@ def datetime_to_float(d):
 	return total_seconds	
 
 def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustainedOutageThreshold):
-	
+	' calculates outage metrics, plots a leaflet map of faults, and plots an outage timeline'
 	# check to see if work directory is specified; otherwise, create a temporary directory
 	if not workDir:
 		workDir = tempfile.mkdtemp()
@@ -48,7 +50,7 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustain
 	row_count_mc = mc.shape[0]
 	while row < row_count_mc:
 		if (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) > int(sustainedOutageThreshold):
-			entry = mc.loc[row, 'Meters Affected']
+			entry = str(mc.loc[row, 'Meters Affected'])
 			p = re.compile(r'\b\d+\b')  # Compile a pattern to capture float values
 			meters = [int(i) for i in p.findall(entry)]
 			customerInterruptionDurations += (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) * len(meters) / 3600
@@ -62,7 +64,7 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustain
 	customersAffected = 0
 	while row < row_count_mc:
 		if (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) > int(sustainedOutageThreshold):
-			entry = mc.loc[row, 'Meters Affected']
+			entry = str(mc.loc[row, 'Meters Affected'])
 			p = re.compile(r'\b\d+\b')  # Compile a pattern to capture float values
 			meters = [int(i) for i in p.findall(entry)]
 			customersAffected += len(meters)
@@ -80,7 +82,7 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustain
 	row = 0
 	while row < row_count_mc:
 		if (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) <= int(sustainedOutageThreshold):
-			entry = mc.loc[row, 'Meters Affected']
+			entry = str(mc.loc[row, 'Meters Affected'])
 			p = re.compile(r'\b\d+\b')  # Compile a pattern to capture float values
 			meters = [int(i) for i in p.findall(entry)]
 			sumCustomersAffected += len(meters)
@@ -107,6 +109,8 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustain
 	row_count_mc = mc.shape[0]
 	while row < row_count_mc:
 		entry = mc.loc[row, 'Location']
+		cause = mc.loc[row, 'Cause']
+		duration = datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))
 		p = re.compile(r'-?\d+\.\d+')  # Compile a pattern to capture integer values
 		coords = [float(i) for i in p.findall(entry)]
 		coord1 = coords[0]
@@ -114,7 +118,7 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustain
 		Dict = {}
 		Dict['geometry'] = {'type': 'Point', 'coordinates': [coord1, coord2]}
 		Dict['type'] = 'Feature'
-		Dict['properties'] = {'name': '<b>_Fault_' + str(row+1) + '</b><br>', 'pointColor': 'blue', 'popupContent': '<br>Fault start time: <b>' + str(mc.loc[row, 'Start']) + '</b><br> Fault end time: <b>' + str(mc.loc[row, 'Finish']) + '</b><br>Location: <b>' + str(coords) + '</b><br>Meters affected: <b>' + str(mc.loc[row, 'Meters Affected']) + '</b>.'}
+		Dict['properties'] = {'name': '<b>_Fault_' + str(row+1) + '</b><br>', 'pointColor': 'blue', 'popupContent': '<br>Fault start time: <b>' + str(mc.loc[row, 'Start']) + '</b><br> Fault duration: <b>' + str(duration) + ' seconds</b><br>Location: <b>' + str(coords) + '</b><br>Cause: <b>' + str(cause) + '</b><br>Meters affected: <b>' + str(mc.loc[row, 'Meters Affected']) + '</b>.'}
 		outageMap['features'].append(Dict)
 		row += 1
 	if not os.path.exists(workDir):
@@ -124,23 +128,73 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustain
 		outFile.write("var geojson =")
 		json.dump(outageMap, outFile, indent=4)
 
+	#Save geojson dict to then read into outdata in work function below
+	with open(pJoin(workDir,'geoDict.js'),"w") as outFile:
+		json.dump(outageMap, outFile, indent=4)
+
+	# stacked bar chart to show outage timeline
+	row = 0
+	date = [[] for _ in range(365)]
+	while row < row_count_mc:
+		dt = datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')
+		day = int(dt.strftime('%j')) - 1
+		date[day].append(datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S')))
+		row += 1
+	# convert array of durations into jagged numpy object
+	jaggedData = np.array(date)
+	# get lengths of each row of data
+	lens = np.array([len(i) for i in jaggedData])
+	# mask of valid places in each row to fill with zeros
+	mask = np.arange(lens.max()) < lens[:,None]
+	# setup output array and put elements from jaggedData into masked positions
+	data = np.zeros(mask.shape, dtype=jaggedData.dtype)
+	data[mask] = np.concatenate(jaggedData)
+	numCols = data.shape[1]
+	graphData = []
+	currCol = 0
+	while currCol < numCols:
+		graphData.append(go.Bar(name='Fault ' + str(currCol+1), x = list(range(365)), y = data[:,currCol]))
+		currCol += 1
+	timeline = go.Figure(data = graphData)
+	timeline.layout.update(
+		barmode='stack',
+		showlegend=False,
+		xaxis=go.layout.XAxis(
+			title=go.layout.xaxis.Title(text='Day of the year')
+		),
+		yaxis=go.layout.YAxis(
+			title=go.layout.yaxis.Title(text='Outage time (seconds)')
+		)
+	)
+	return {'timeline': timeline}
+
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
 	outData = {}
+
+	# Write in the feeder
+	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
+	inputDict["feederName1"] = feederName
 	#test the main functions of the program
 	plotOuts = outageCostAnalysis(
-		inputDict['PATH_TO_OMD'],
+		modelDir + '/' + feederName + '.omd', #OMD Path
 		inputDict['PATH_TO_CSV'],
 		modelDir, #Work directory.
 		inputDict['numberOfCustomers'],
-		inputDict['sustainedOutageThreshold']) #'1'
+		inputDict['sustainedOutageThreshold']) #'300'
 	
 	# Textual outputs of cost statistic
 	with open(pJoin(modelDir,"statsCalc.html"),"rb") as inFile:
 		outData["statsHtml"] = inFile.read()
 
-	with open(pJoin(modelDir,"geoJsonMap.html"),"rb") as inFile:
-		outData["outageMap"] = inFile.read()
+	#The geojson dictionary to load into the outageCost.py template
+	with open(pJoin(modelDir,"geoDict.js"),"rb") as inFile:
+		outData["geoDict"] = inFile.read()
+
+	# Plotly outputs
+	layoutOb = go.Layout()
+	outData["timelineData"] = json.dumps(plotOuts.get('timeline',{}), cls=py.utils.PlotlyJSONEncoder)
+	outData["timelineLayout"] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
 
 	# Stdout/stderr.
 	outData["stdout"] = "Success"
@@ -151,11 +205,16 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		"modelType": modelName,
-		"PATH_TO_OMD": omf.omfDir + '/static/publicFeeders/Olin Barre LatLon.omd',
-		"PATH_TO_CSV": omf.omfDir + '/scratch/smartSwitching/Outages.csv',
-		'numberOfCustomers': '60',
-		'sustainedOutageThreshold': '1'
+		"feederName1": "Olin Barre Fault",
+		"PATH_TO_CSV": omf.omfDir + '/scratch/smartSwitching/outagesNew1.csv',
+		'numberOfCustomers': '192',
+		'sustainedOutageThreshold': '300'
 	}
+	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
+	try:
+		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
+	except:
+		return False
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
 def _tests():

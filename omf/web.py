@@ -535,7 +535,6 @@ def checkConversion(modelName, owner=None):
 		if os.path.isfile(filepath):
 			with open(filepath) as f:
 				errorString = f.read()
-			# Don't delete the error file here. Do it in /saveFeeder (cancel) and next time a process runs
 			return errorString
 	# Check for process ID files AFTER checking for error files
 	for filename in ["ZPID.txt", "APID.txt", "WPID.txt", "NPID.txt", "CPID.txt"]:
@@ -989,7 +988,6 @@ def saveFeeder(owner, modelName, feederName, feederNum):
 			# The feeder_file should always exist, but just in case there was an error, we allow the recreation of the file
 			with open(feeder_file, "w") as outFile:
 				fcntl.flock(outFile, fcntl.LOCK_EX) # Get an exclusive lock
-				outFile.truncate()
 				json.dump(payload, outFile, indent=4) # This route is slow only because this line takes forever. We want the indentation so we keep this line
 				fcntl.flock(outFile, fcntl.LOCK_UN) # Release the exclusive lock
 	return 'Success'
@@ -1205,7 +1203,6 @@ def backgroundClimateChange(omdPath, owner, modelName):
 		try:
 			os.remove(pid_filepath)
 		except:
-			# If this process was killed, then /saveFeeder would have deleted WPID.txt already
 			pass
 	except Exception as e:
 		with open("data/Model/"+owner+"/"+modelName+"/error.txt", "w") as errorFile:
@@ -1326,7 +1323,6 @@ def background_zillow_houses(model_dir):
 @app.route("/checkZillowHouses", methods=["POST"])
 @flask_login.login_required
 def check_zillow_houses():
-	"""This route is not used to cancel the operation. /saveFeeder does that. This route only informs the user about the status of the operation"""
 	owner = request.form.get("owner")
 	model_name = request.form.get("modelName")
 	model_dir = os.path.join(_omfDir, "data/Model", owner, model_name)
