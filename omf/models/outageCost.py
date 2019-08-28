@@ -27,7 +27,7 @@ def datetime_to_float(d):
 	return total_seconds	
 
 def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustainedOutageThreshold):
-	
+	' calculates outage metrics, plots a leaflet map of faults, and plots an outage timeline'
 	# check to see if work directory is specified; otherwise, create a temporary directory
 	if not workDir:
 		workDir = tempfile.mkdtemp()
@@ -171,13 +171,17 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustain
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
 	outData = {}
+
+	# Write in the feeder
+	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
+	inputDict["feederName1"] = feederName
 	#test the main functions of the program
 	plotOuts = outageCostAnalysis(
-		inputDict['PATH_TO_OMD'],
+		modelDir + '/' + feederName + '.omd', #OMD Path
 		inputDict['PATH_TO_CSV'],
 		modelDir, #Work directory.
 		inputDict['numberOfCustomers'],
-		inputDict['sustainedOutageThreshold']) #'1'
+		inputDict['sustainedOutageThreshold']) #'300'
 	
 	# Textual outputs of cost statistic
 	with open(pJoin(modelDir,"statsCalc.html"),"rb") as inFile:
@@ -201,11 +205,16 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		"modelType": modelName,
-		"PATH_TO_OMD": omf.omfDir + '/static/publicFeeders/Olin Barre LatLon.omd',
+		"feederName1": "Olin Barre Fault",
 		"PATH_TO_CSV": omf.omfDir + '/scratch/smartSwitching/outagesNew1.csv',
 		'numberOfCustomers': '192',
 		'sustainedOutageThreshold': '300'
 	}
+	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
+	try:
+		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
+	except:
+		return False
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
 def _tests():

@@ -70,8 +70,16 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Path to GLM<span class="classic">Please ignore. Will be deleted in future iterations.</span></label>
-				<input type="text" id="PATH_TO_OMD" name="PATH_TO_OMD">
+				<label>Feeder</label>
+				<script type="text/javascript">
+				function editFeeder(modelName, feederNum) {
+					console.log("modelName:",modelName)
+					studyUser = allInputData.user
+					window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
+				}
+				</script>
+				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
+				<input type="text" id="feederName1" name="feederName1" style="display:none">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Path to CSV<span class="classic">Please ignore. Will be deleted in future iterations.</span></label>
@@ -134,7 +142,7 @@
 		<script type="text/javascript">
 		//Hack to stop leaflet from loading before geojson data loads 
 		if(modelStatus === "finished"){
-		mapHtml = '<p class="reportTitle">Outage Map</p><div id="mapHolder" class="tightContent"><div id="map"></div></div>';
+		mapHtml = '<p class="reportTitle">Outage Map (Faults Marked in Blue)</p><div id="mapHolder" class="tightContent"><div id="map"></div></div>';
 		gebi('mapInsert').innerHTML = mapHtml;
 		//Parse geojson dict (instead of reading from geojson.js - doesn't really matter if you want to load from geojson.js, was just quicker to prototype) 
 		var geojson = JSON.parse(allOutputData['geoDict']);
