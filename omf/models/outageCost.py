@@ -175,10 +175,13 @@ def work(modelDir, inputDict):
 	# Write in the feeder
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict["feederName1"] = feederName
-	#test the main functions of the program
+	# Run the main functions of the program
+	with open(pJoin(modelDir, inputDict['outageFileName']), 'w') as f:
+		pathToData = f.name
+		f.write(inputDict['outageData'])
 	plotOuts = outageCostAnalysis(
 		modelDir + '/' + feederName + '.omd', #OMD Path
-		inputDict['PATH_TO_CSV'],
+		pathToData,
 		modelDir, #Work directory.
 		inputDict['numberOfCustomers'],
 		inputDict['sustainedOutageThreshold']) #'300'
@@ -206,9 +209,10 @@ def new(modelDir):
 	defaultInputs = {
 		"modelType": modelName,
 		"feederName1": "Olin Barre Fault",
-		"PATH_TO_CSV": omf.omfDir + '/scratch/smartSwitching/outagesNew1.csv',
-		'numberOfCustomers': '192',
-		'sustainedOutageThreshold': '300'
+		"numberOfCustomers": "192",
+		"sustainedOutageThreshold": "300",
+		"outageFileName": "outagesNew1.csv",
+		"outageData": open(pJoin(__neoMetaModel__._omfDir,"scratch","smartSwitching","outagesNew1.csv"), "r").read(),
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:

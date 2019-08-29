@@ -82,8 +82,13 @@
 				<input type="text" id="feederName1" name="feederName1" style="display:none">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Path to CSV<span class="classic">Please ignore. Will be deleted in future iterations.</span></label>
-				<input type="text" id="PATH_TO_CSV" name="PATH_TO_CSV">
+				<label class="tooltip">Outage Data (.csv file)<span class="classic">Please see the documentation at the help link for the required format</span></label>
+				<input id="outageFile" type="file" style="display:none" onchange="handle_files(this.files,'outageData','outageFileName')">
+				<input id="outageData" name="outageData" type="hidden">
+				<div>
+					<label for="outageFile" class="fileButton">Choose File</label>
+					<input id="outageFileName" name="outageFileName" value='' readonly class="uploadFileName">
+				</div>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Number of Customers<span class="classic">The number of meters on the feeder system.</span></label>
