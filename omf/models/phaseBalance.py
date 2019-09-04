@@ -19,7 +19,7 @@ from omf.solvers.SteinmetzController import SteinmetzController
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = "Calculate phase unbalance and determine mitigation options."
-hidden = True
+# hidden = True
 
 
 def motor_efficiency(x):
@@ -320,14 +320,14 @@ def work(modelDir, ind):
 			'controlled': '-$' + n(cost*floats(o['service_cost']['load']['controlled'])),
 		},
 		'energy_revenue': {
-			'base': '$' + n(revenue*floats(o['service_cost']['load']['base'])),
-			'solar': '$' + n(revenue*floats(o['service_cost']['load']['solar'])),
-			'controlled': '$' + n(revenue*floats(o['service_cost']['load']['controlled'])),
+			'base': '$' + n(revenue*floats(o['service_cost']['load']['base']) - cost*floats(o['service_cost']['distributed_gen']['base'])),
+			'solar': '$' + n(revenue*floats(o['service_cost']['load']['solar']) - cost*floats(o['service_cost']['distributed_gen']['solar'])),
+			'controlled': '$' + n(revenue*floats(o['service_cost']['load']['controlled']) - cost*floats(o['service_cost']['distributed_gen']['controlled'])),
 		},
 		'pf_penalty': {
-			'base': '-$' + n(pf_p if floats(o['service_cost']['power_factor']['base']) > pf_t else 0),
-			'solar': '-$' + n(pf_p if floats(o['service_cost']['power_factor']['solar']) > pf_t else 0),
-			'controlled': '-$' + n(pf_p if floats(o['service_cost']['power_factor']['controlled']) > pf_t else 0),
+			'base': '-$' + n(pf_p if floats(o['service_cost']['power_factor']['base']) <= pf_t else 0),
+			'solar': '-$' + n(pf_p if floats(o['service_cost']['power_factor']['solar']) <= pf_t else 0),
+			'controlled': '-$' + n(pf_p if floats(o['service_cost']['power_factor']['controlled']) <= pf_t else 0),
 		},
 		'motor_damage': {
 			'base': '-$' + n(motor_p*len([m for m in all_motor_unbalance['_base'] if m > motor_t])),
@@ -456,7 +456,7 @@ def new(modelDir):
 		"retailCost": "0.05",
 		"productionCost": "0.03",
 		"pf_penalty": "50000",
-		"pf_threshold": "0.8",
+		"pf_threshold": "0.95",
 		"motor_threshold": "2.5",
 		"motor_penalty": "3000000",
 		"discountRate": "7",
