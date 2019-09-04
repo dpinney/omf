@@ -20,9 +20,19 @@
 
 
 	<script type="text/javascript">
-		function toggleCheckboxDisplay(checkboxName) {
-			$('.' + checkboxName + 'Display').toggle();
+
+		function checkboxDisplayInput(checkboxName) {
+			if ( $('#' + checkboxName ).prop('checked') == true ){
+				$('.' + checkboxName + 'DisplayInput').show();
+			} else { $('.' + checkboxName + 'DisplayInput').hide() }
 		}
+
+		function checkboxDisplay(checkboxName) {
+			if ( $('#' + checkboxName ).prop('checked') == true ){
+				$('.' + checkboxName + 'Display').show();
+			} else { $('.' + checkboxName + 'Display').hide() }
+		}
+
 		function populateTables() {
 			var list = document.getElementsByTagName("td");
 			for (var i = 0; i < list.length; i++) {
@@ -31,15 +41,35 @@
 		}
 
 		$(window).on('pageshow',function(){
-		    if (allOutputData['solar'] == 'off'){
-				$('.solarDisplay').hide();
+		    
+		    // use input data to set checkboxes unless output data exists
+		    // sometimes there will be no wind output even tho wind was selected in the input
+		    // so allways use output data for most relevant info
+		    dict = allInputData;
+		    if (allOutputData != null) { dict = allOutputData; }
+		    // set checkboxes appropriately
+			if (dict['solar'] == 'off') { $('#solar').prop('checked',false); } 
+			else { $('#solar').prop('checked',true); }
+			if (dict['wind'] == 'off') { $('#wind').prop('checked',false); } 
+			else { $('#wind').prop('checked',true); }
+			if (dict['battery'] == 'off') { $('#battery').prop('checked',false); } 
+			else { $('#battery').prop('checked',true); }
+
+			// toggle the displays of the appropriate outputs only once 
+			// the ouputs have been generated
+			if (allOutputData != null) {
+				checkboxDisplay('solar');
+				checkboxDisplay('wind');
+				checkboxDisplay('battery');
 			}
-			if (allOutputData['wind'] == 'off'){
-				$('.windDisplay').hide();
+
+			// otherwise only set the input displays
+			else {
+				checkboxDisplayInput('solar');
+				checkboxDisplayInput('wind');
+				checkboxDisplayInput('battery');
 			}
-			if (allOutputData['battery'] == 'off'){
-				$('.batteryDisplay').hide();
-			}
+
 		});
 
 
@@ -140,49 +170,49 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<input type="checkbox" name="solar" id="solar" value="on" checked onchange="toggleCheckboxDisplay('solar')">
+				<input type="checkbox" name="solar" id="solar" onchange="checkboxDisplayInput('solar')">
 				<label class="tooltip">Solar <span class="classic">Check the box if you want to include Solar generation in your microgrid.</span>
 				</label>
 			</div>
 			<div class="shortInput">
-				<input type="checkbox" name="wind" id="wind" value="on" checked onchange="toggleCheckboxDisplay('wind')">
+				<input type="checkbox" name="wind" id="wind" onchange="checkboxDisplayInput('wind')">
 				<label class="tooltip">Wind <span class="classic">Check the box if you want to include wind generation in your microgrid.</span>
 				</label>
 			</div>
 			<div class="shortInput">
-				<input type="checkbox" name="battery" id="battery" value="on" checked onchange="toggleCheckboxDisplay('battery')">
+				<input type="checkbox" name="battery" id="battery" onchange="checkboxDisplayInput('battery')">
 				<label class="tooltip">Battery <span class="classic">Check the box if you want to include battery storage in your microgrid.</span>
 				</label>
 			</div>
-			<div class="shortInput solarDisplay">
+			<div class="shortInput solarDisplayInput">
 				<label class="tooltip">Solar Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
-				<input type="text" id="solarCost" name="solarCost" pattern="^\d+\.?\d*?$" required="required" value="2000" />
+				<input type="text" id="solarCost" name="solarCost" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
-			<div class="shortInput solarDisplay">
+			<div class="shortInput solarDisplayInput">
 				<label class="tooltip">Minimum Solar Generation (kW)<span class="classic">Specify the minimum desired generation in kW.</span></label>
 				<input type="text" id="solarMin" name="solarMin" required="required"/>
 			</div>
-			<div class="shortInput windDisplay">
+			<div class="shortInput windDisplayInput">
 				<label class="tooltip">Wind Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
 				<input type="text" id="windCost" name="windCost" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
-			<div class="shortInput windDisplay">
+			<div class="shortInput windDisplayInput">
 				<label class="tooltip">Minimum Wind Generation (kW)<span class="classic">Specify the minimum desired generation in kW.</span></label>
 				<input type="text" id="windMin" name="windMin" required="required"/>
 			</div>
-			<div class="shortInput batteryDisplay">
+			<div class="shortInput batteryDisplayInput">
 				<label class="tooltip">Energy capacity cost ($/kWh)<span class="classic">Specify the cost in $/kWh.</span></label>
 				<input type="text" id="batteryEnergyCost" name="batteryEnergyCost" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
-			<div class="shortInput batteryDisplay">
+			<div class="shortInput batteryDisplayInput">
 				<label class="tooltip">Power capacity cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
 				<input type="text" id="batteryPowerCost" name="batteryPowerCost" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
-			<div class="shortInput BatteryDisplay">
+			<div class="shortInput BatteryDisplayInput">
 				<label class="tooltip">Minimum Power Cpacity (kW)<span class="classic">Specify the minimum desired battery capacity in kW.</span></label>
 				<input type="text" id="batteryPowerMin" name="batteryPowerMin" required="required"/>
 			</div>
-			<div class="shortInput BatteryDisplay">
+			<div class="shortInput BatteryDisplayInput">
 				<label class="tooltip">Minimum Energy Cpacity (kWh)<span class="classic">Specify the minimum desired battery capacity in kWh.</span></label>
 				<input type="text" id="batteryEnergyMin" name="batteryEnergyMin" required="required"/>
 			</div>

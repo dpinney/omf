@@ -205,7 +205,8 @@ def work(modelDir, inputDict):
 		y=outData['powerGridToLoad'],
 		line=dict( color=('red') ),
 		name="Load met by Grid",
-		showlegend=True)
+		showlegend=True,
+		stackgroup='one')
 	plotData.append(powerGridToLoad)
 
 	if solar == 'on':
@@ -213,7 +214,8 @@ def work(modelDir, inputDict):
 			x=x,
 			y=outData['powerPVToLoad'],
 			line=dict( color=('green') ),
-			name="Load met by Solar")
+			name="Load met by Solar",
+			stackgroup='one')
 		plotData.append(powerPVToLoad)
 
 	if battery == 'on':
@@ -221,7 +223,8 @@ def work(modelDir, inputDict):
 			x=x,
 			y=outData['powerBatteryToLoad'],
 			line=dict( color=('blue') ),
-			name="Load met by Battery")
+			name="Load met by Battery",
+			stackgroup='one')
 		plotData.append(powerBatteryToLoad)
 
 	if wind == 'on':
@@ -229,7 +232,8 @@ def work(modelDir, inputDict):
 			x=x,
 			y=outData['powerWindToLoad'],
 			line=dict( color=('yellow') ),
-			name="Load met by Wind")
+			name="Load met by Wind",
+			stackgroup='one')
 		plotData.append(powerWindToLoad)
 
 	plotlyLayout['yaxis'].update(title='Power (kW)')
@@ -240,18 +244,12 @@ def work(modelDir, inputDict):
 	plotData = []
 	if solar == 'on':
 		
-		powerPV = go.Scatter(
-			x=x,
-			y=outData['powerPV'],
-			line=dict( color=('red') ),
-			name="Solar Generation")
-		plotData.append(powerPV)
-
 		powerPVToLoad = go.Scatter(
 			x=x,
 			y=outData['powerPVToLoad'],
 			line=dict( color=('green') ),
-			name="olar used to meet Load")
+			name="Solar used to meet Load",
+			stackgroup='one')
 		plotData.append(powerPVToLoad)
 
 		if battery == 'on':
@@ -259,26 +257,29 @@ def work(modelDir, inputDict):
 				x=x,
 				y=outData['powerPVToBattery'],
 				line=dict( color=('yellow') ),
-				name="Solar used to charge Battery")
+				name="Solar used to charge Battery",
+				stackgroup='one')
 			plotData.append(powerPVToBattery)
+
+		powerPV = go.Scatter(
+			x=x,
+			y=outData['powerPV'],
+			line=dict( color=('red') ),
+			name="Solar Generation")
+		plotData.append(powerPV)
 
 	outData["solarData"] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 
 		
 	plotData = []
 	if wind == 'on':
-		powerWind = go.Scatter(
-			x=x,
-			y=outData['powerWind'],
-			line=dict( color=('red') ),
-			name="Wind Generation")
-		plotData.append(powerWind)
-
+		
 		powerWindToLoad = go.Scatter(
 			x=x,
 			y=outData['powerWindToLoad'],
 			line=dict( color=('green') ),
-			name="'Wind used to meet Load'")
+			name="Wind used to meet Load",
+			stackgroup='one')
 		plotData.append(powerWindToLoad)
 
 		if battery == 'on':
@@ -286,8 +287,16 @@ def work(modelDir, inputDict):
 				x=x,
 				y=outData['powerWindToBattery'],
 				line=dict( color=('yellow') ),
-				name="Wind used to charge Battery")
+				name="Wind used to charge Battery",
+				stackgroup='one')
 			plotData.append(powerWindToBattery)
+
+		powerWind = go.Scatter(
+			x=x,
+			y=outData['powerWind'],
+			line=dict( color=('red') ),
+			name="Wind Generation")
+		plotData.append(powerWind)
 
 	outData["windData"] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 
@@ -298,7 +307,8 @@ def work(modelDir, inputDict):
 			x=x,
 			y=outData['powerGridToBattery'],
 			line=dict( color=('red') ),
-			name="Grid")
+			name="Grid",
+			stackgroup='one')
 		plotData.append(powerGridToBattery)
 
 		if solar == 'on':
@@ -306,7 +316,8 @@ def work(modelDir, inputDict):
 				x=x,
 				y=outData['powerPVToBattery'],
 				line=dict( color=('green') ),
-				name="Solar")
+				name="Solar",
+				stackgroup='one')
 			plotData.append(powerPVToBattery)
 
 		if wind == 'on':
@@ -314,7 +325,8 @@ def work(modelDir, inputDict):
 				x=x,
 				y=outData['powerWindToBattery'],
 				line=dict( color=('yellow') ),
-				name="Wind")
+				name="Wind",
+				stackgroup='one')
 			plotData.append(powerWindToBattery)
 
 	outData["batteryData"] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
@@ -369,7 +381,7 @@ def new(modelDir):
 		"runTime": "",
 		"loadShape" : open(pJoin(omf.omfDir, "static", "testFiles", fName)).read(),
 		"solar" : "on",
-		"wind" : "None",
+		"wind" : "off",
 		"battery" : "on",
 		"fileName" : fName,
 		"latitude" : '39.7817',
