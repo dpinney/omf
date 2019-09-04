@@ -51,8 +51,7 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustain
 	while row < row_count_mc:
 		if (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) > int(sustainedOutageThreshold):
 			entry = str(mc.loc[row, 'Meters Affected'])
-			p = re.compile(r'\b\d+\b')  # Compile a pattern to capture float values
-			meters = [int(i) for i in p.findall(entry)]
+			meters = entry.split()
 			customerInterruptionDurations += (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) * len(meters) / 3600
 		row += 1
 
@@ -65,8 +64,7 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustain
 	while row < row_count_mc:
 		if (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) > int(sustainedOutageThreshold):
 			entry = str(mc.loc[row, 'Meters Affected'])
-			p = re.compile(r'\b\d+\b')  # Compile a pattern to capture float values
-			meters = [int(i) for i in p.findall(entry)]
+			meters = entry.split()
 			customersAffected += len(meters)
 		row += 1
 	SAIFI = float(customersAffected) / int(numberOfCustomers)
@@ -83,8 +81,7 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustain
 	while row < row_count_mc:
 		if (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) <= int(sustainedOutageThreshold):
 			entry = str(mc.loc[row, 'Meters Affected'])
-			p = re.compile(r'\b\d+\b')  # Compile a pattern to capture float values
-			meters = [int(i) for i in p.findall(entry)]
+			meters = entry.split()
 			sumCustomersAffected += len(meters)
 		row += 1
 
@@ -110,6 +107,8 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustain
 	while row < row_count_mc:
 		entry = mc.loc[row, 'Location']
 		cause = mc.loc[row, 'Cause']
+		lis = str(mc.loc[row, 'Meters Affected'])
+		meters = lis.split()
 		duration = datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))
 		p = re.compile(r'-?\d+\.\d+')  # Compile a pattern to capture integer values
 		coords = [float(i) for i in p.findall(entry)]
@@ -118,7 +117,7 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustain
 		Dict = {}
 		Dict['geometry'] = {'type': 'Point', 'coordinates': [coord1, coord2]}
 		Dict['type'] = 'Feature'
-		Dict['properties'] = {'name': '<b>_Fault_' + str(row+1) + '</b><br>', 'pointColor': 'blue', 'popupContent': '<br>Fault start time: <b>' + str(mc.loc[row, 'Start']) + '</b><br> Fault duration: <b>' + str(duration) + ' seconds</b><br>Location: <b>' + str(coords) + '</b><br>Cause: <b>' + str(cause) + '</b><br>Meters affected: <b>' + str(mc.loc[row, 'Meters Affected']) + '</b>.'}
+		Dict['properties'] = {'name': '<b>Fault_' + str(row+1) + '</b><br>', 'meters': str(mc.loc[row, 'Meters Affected']), 'pointColor': 'blue', 'popupContent': '<br>Fault start time: <b>' + str(mc.loc[row, 'Start']) + '</b><br> Fault duration: <b>' + str(duration) + ' seconds</b><br>Location: <b>' + str(coords) + '</b><br>Cause: <b>' + str(cause) + '</b>.<br>Count of Meters Affected: <b>' + str(len(meters)) + '</b>.'}
 		outageMap['features'].append(Dict)
 		row += 1
 	if not os.path.exists(workDir):
@@ -211,8 +210,8 @@ def new(modelDir):
 		"feederName1": "Olin Barre Fault",
 		"numberOfCustomers": "192",
 		"sustainedOutageThreshold": "300",
-		"outageFileName": "outagesNew1.csv",
-		"outageData": open(pJoin(__neoMetaModel__._omfDir,"scratch","smartSwitching","outagesNew1.csv"), "r").read(),
+		"outageFileName": "outagesNew3.csv",
+		"outageData": open(pJoin(__neoMetaModel__._omfDir,"scratch","smartSwitching","outagesNew3.csv"), "r").read(),
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:

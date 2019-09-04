@@ -152,15 +152,16 @@
 		//Parse geojson dict (instead of reading from geojson.js - doesn't really matter if you want to load from geojson.js, was just quicker to prototype) 
 		var geojson = JSON.parse(allOutputData['geoDict']);
 		console.log(geojson);
+
 		function onEachFeature(feature, layer) {
-			var popupContent = '';
-			for (const key in feature.properties) {
-				if (feature.properties.hasOwnProperty(key)) {
-					popupContent += feature.properties[key];
-					layer.bindPopup(popupContent);
-				}
+			var popup = '';
+			if (feature.properties['popupContent']){
+				popup += feature.properties['name']
+				popup += feature.properties['popupContent'];
+				layer.bindPopup(popup);
 			}
 		}
+
 		function pointToLayerNode(feature, latlng) {
 			let fillColorValue = 'gray';
 			let rad = 3
