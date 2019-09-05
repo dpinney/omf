@@ -35,7 +35,7 @@ modelName, template = metadata(__file__)
 hidden = False
 
 def pullOutValues(tree, workDir, sustainedOutageThreshold):
-	'helper function to pull out reliability metric data (SAIDI/SAIFI).'
+	'helper function which pulls out reliability metric data (SAIDI/SAIFI).'
 	attachments = []
 	# Run Gridlab.
 	if not workDir:
