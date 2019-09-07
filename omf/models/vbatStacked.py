@@ -47,16 +47,10 @@ def pyVbat(tempCurve, modelDir, i):
 def work(modelDir, ind):
 	out = {}
 	
-	try:
-		tempCurve = [float(x) for x in ind["tempCurve"].split('\n')]
-		gt_demand = [float(x) for x in ind["gt_demandCurve"].split('\n')] if ind["payment_structure"] == "gt" else []
-		with open(pJoin(modelDir, 'inputCsv.csv'), 'w') as f:
-			f.write(ind["inputCsv"].replace('\r', ''))
-	except:
-		raise Exception("CSV file is incorrect format. Please see valid format "
-			"definition at <a target='_blank' href = 'https://github.com/dpinney/"
-			"omf/wiki/Models-~-storagePeakShave#demand-file-csv-format'>\nOMF Wiki "
-			"storagePeakShave - Demand File CSV Format</a>")
+	tempCurve = [float(x) for x in ind["tempCurve"].split('\n') if x != '']
+	gt_demand = [float(x) for x in ind["gt_demandCurve"].split('\n')] if ind["payment_structure"] == "gt" else []
+	with open(pJoin(modelDir, 'inputCsv.csv'), 'w') as f:
+		f.write(ind["inputCsv"].replace('\r', ''))
 
 	input_df = pd.read_csv(pJoin(modelDir, 'inputCsv.csv'), index_col=['Hour'])
 	P_lower, P_upper, E_UL = pyVbat(tempCurve, modelDir, ind)
