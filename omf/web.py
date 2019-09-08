@@ -74,6 +74,7 @@ def getDataNames():
 # AUTHENTICATION AND USER FUNCTIONS
 ###################################################
 
+
 class User:
 	def __init__(self, jsonBlob): self.username = jsonBlob["username"]
 	# Required flask_login functions.
@@ -87,6 +88,7 @@ class User:
 		"""Returns current user's username"""
 		return flask_login.current_user.username
 
+
 def cryptoRandomString():
 	''' Generate a cryptographically secure random string for signing/encrypting cookies. '''
 	if 'COOKIE_KEY' in globals():
@@ -94,10 +96,12 @@ def cryptoRandomString():
 	else:
 		return hashlib.md5(str(random.random())+str(time.time())).hexdigest()
 
+
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login_page"
 app.secret_key = cryptoRandomString()
+
 
 def send_link(email, message, u={}):
 	''' Send message to email using Amazon SES. '''
@@ -118,17 +122,21 @@ def send_link(email, message, u={}):
 	except:
 		return "Failed"
 
+
 @login_manager.user_loader
 def load_user(username):
 	''' Required by flask_login to return instance of the current user '''
 	return User(json.load(open("./data/User/" + username + ".json")))
+
 
 def generate_csrf_token():
 	if "_csrf_token" not in session:
 		session["_csrf_token"] = cryptoRandomString()
 	return session["_csrf_token"]
 
+
 app.jinja_env.globals["csrf_token"] = generate_csrf_token
+
 
 @app.route("/login", methods = ["POST"])
 def login():
@@ -147,6 +155,7 @@ def login():
 	nextUrl = str(request.form.get("next","/"))
 	return redirect(nextUrl)
 
+
 @app.route("/login_page")
 def login_page():
 	nextUrl = str(request.args.get("next","/"))
@@ -154,10 +163,12 @@ def login_page():
 		return redirect(nextUrl)
 	return render_template("clusterLogin.html", next=nextUrl)
 
+
 @app.route("/logout")
 def logout():
 	flask_login.logout_user()
 	return redirect("/")
+
 
 @app.route("/deleteUser", methods=["POST"])
 @flask_login.login_required
@@ -330,20 +341,17 @@ def read_permission_function(func):
 			# Any user can view a public model
 			return func(*args, **kwargs)
 		else:
-			if owner == User.cu() or _is_authorized_model_viewer(model_metadata_path) or "admin" == User.cu():
+			if owner == User.cu() or _is_authorized_model_viewer(owner, model_name) or "admin" == User.cu():
 				# Only owners, authorized viewers, and the admin can view a user-owned model
 				return func(*args, **kwargs)
 		return redirect("/")
 	return wrapper
 
 
-def _is_authorized_model_viewer(model_metadata_filepath):
+def _is_authorized_model_viewer(owner, model_name):
 	"""Return True if the current user is authorized to view the specified model, else False."""
-	with open(model_metadata_filepath) as f:
-		fcntl.flock(f, fcntl.LOCK_SH)
-		data = json.load(f)
-		fcntl.flock(f, fcntl.LOCK_UN)
-	authorized_viewers = data.get("viewers")
+	model_metadata = get_model_metadata(owner, model_name)
+	authorized_viewers = model_metadata.get("viewers")
 	if authorized_viewers is not None and User.cu() in authorized_viewers:
 		return True
 	return False
@@ -462,7 +470,7 @@ def shareModel():
 	# Check for nonexistant users
 	emails = list(set(request.form.getlist("email"))) if len(request.form.getlist("email")) != 0 else None
 	if emails is not None:
-		invalid_emails = filter(lambda e: e == User.cu() or not os.path.isfile(os.path.join(_omfDir, "data/User", e + ".json")), emails)
+		invalid_emails = filter(lambda e: e == User.cu() or e == 'admin' or not os.path.isfile(os.path.join(_omfDir, "data/User", e + ".json")), emails)
 		if len(invalid_emails) != 0:
 			response = jsonify(invalid_emails)
 			response.status_code = 400
@@ -470,11 +478,7 @@ def shareModel():
 	# Load the list of old viewers
 	owner = request.form.get("user")
 	model_name = request.form.get("modelName")
-	filepath = os.path.join(_omfDir, "data/Model", owner, model_name, "allInputData.json")
-	with open(filepath) as f:
-		fcntl.flock(f, fcntl.LOCK_SH)
-		model_metadata = json.load(f)
-		fcntl.flock(f, fcntl.LOCK_UN)
+	model_metadata = get_model_metadata(owner, model_name)
 	old_viewers = model_metadata.get("viewers")
 	# If there are no new emails to add, and there are no old emails to remove, don't do anything
 	if emails is not None or old_viewers is not None:
@@ -482,58 +486,86 @@ def shareModel():
 			model_metadata["viewers"] = emails
 		elif old_viewers is not None:
 			del model_metadata["viewers"]
-		with open(filepath, 'w') as f:
-			fcntl.flock(f, fcntl.LOCK_EX)
+		filepath = os.path.join(_omfDir, "data/Model", owner, model_name, "allInputData.json")
+		with locked_open(filepath, 'r+') as f:
+			f.truncate()
 			json.dump(model_metadata, f, indent=4) # Could an email be a malicious string of code?
-			fcntl.flock(f, fcntl.LOCK_UN)
 		# All viewers who previously had access to this model, but had that access revoked, must have their JSON file updated
 		if old_viewers is not None:
 			for v in old_viewers:
 				if emails is None or v not in emails:
-					filepath = os.path.join(_omfDir, "data/User", v + ".json")
-					if os.path.isfile(filepath):
-						with open(filepath) as f:
-							fcntl.flock(f, fcntl.LOCK_SH)
-							viewer_metadata = json.load(f)
-							fcntl.flock(f, fcntl.LOCK_UN)
-						sharing_users = viewer_metadata.get("readonly_models")
-						if sharing_users is not None:
-							shared_models = sharing_users.get(owner)
-							if shared_models is not None and model_name in shared_models:
-								shared_models.remove(model_name)
-								if len(shared_models) == 0:
-									del sharing_users[owner]
-								if len(sharing_users.keys()) == 0:
-									del viewer_metadata["readonly_models"]
-								with open(filepath, 'w') as f:
-									fcntl.flock(f, fcntl.LOCK_EX)
-									json.dump(viewer_metadata, f)
-									fcntl.flock(f, fcntl.LOCK_SH)
+					revoke_viewership(owner, model_name, v)
 		# All viewers who were newly granted access to this model must have their JSON file updated
 		if emails is not None:
 			for e in emails:
-				filepath = os.path.join(_omfDir, "data/User", e + ".json")
-				if os.path.isfile(filepath):
-					with open(filepath) as f:
-						fcntl.flock(f, fcntl.LOCK_SH)
-						viewer_metadata = json.load(f)
-						fcntl.flock(f, fcntl.LOCK_UN)
-					if viewer_metadata.get("readonly_models") is None:
-						viewer_metadata["readonly_models"] = {}
-					sharing_users = viewer_metadata.get("readonly_models")
-					if sharing_users.get(owner) is None:
-						sharing_users[owner] = []
-					shared_models = sharing_users.get(owner)
-					if model_name not in shared_models:
-						shared_models.append(model_name) # Could model_name be a malicious string of code?
-						with open(filepath, 'w') as f:
-							fcntl.flock(f, fcntl.LOCK_EX)
-							json.dump(viewer_metadata, f, indent=4)
-							fcntl.flock(f, fcntl.LOCK_UN)
+				grant_viewership(owner, model_name, e)
 	response = jsonify(emails)
 	response.status_code = 200
 	return response
-	#return ("", 204)
+
+
+### NEW STUFF
+def revoke_viewership(owner, model_name, username):
+	"""Given a model named <model_name> of <owner>, revoke the ability of <username> to view the model in the dashboard"""
+	filepath = os.path.join(_omfDir, "data/User", username + ".json")
+	if os.path.isfile(filepath):
+		with locked_open(filepath) as f:
+			viewer_metadata = json.load(f)
+		sharing_users = viewer_metadata.get("readonly_models")
+		if sharing_users is not None:
+			shared_models = sharing_users.get(owner)
+			if shared_models is not None and model_name in shared_models:
+				shared_models.remove(model_name)
+				if len(shared_models) == 0:
+					del sharing_users[owner]
+				if len(sharing_users.keys()) == 0:
+					del viewer_metadata["readonly_models"]
+				with locked_open(filepath, 'r+') as f:
+					f.truncate()
+					json.dump(viewer_metadata, f)
+
+
+def grant_viewership(owner, model_name, username):
+	filepath = os.path.join(_omfDir, "data/User", username + ".json")
+	if os.path.isfile(filepath):
+		with locked_open(filepath) as f:
+			viewer_metadata = json.load(f)
+		if viewer_metadata.get("readonly_models") is None:
+			viewer_metadata["readonly_models"] = {}
+		sharing_users = viewer_metadata.get("readonly_models")
+		if sharing_users.get(owner) is None:
+			sharing_users[owner] = []
+		shared_models = sharing_users.get(owner)
+		if model_name not in shared_models:
+			shared_models.append(model_name) # Could model_name be a malicious string of code?
+			with locked_open(filepath, 'r+') as f:
+				f.truncate()
+				json.dump(viewer_metadata, f, indent=4)
+
+
+def get_model_metadata(owner, model_name):
+	filepath = os.path.join(_omfDir, "data/Model", owner, model_name, "allInputData.json")
+	with locked_open(filepath) as f:
+		model_metadata = json.load(f)
+	return model_metadata
+
+
+from contextlib import contextmanager
+@contextmanager
+def locked_open(filepath, mode='r'):
+	"""Open a file and also lock it depending on the file access mode"""
+	if mode in ['r', 'rb']:
+		lock_mode = fcntl.LOCK_SH
+	elif mode in ['r+', 'r+b', 'w', 'wb', 'w+', 'w+b', 'a', 'ab', 'a+', 'a+b']:
+		lock_mode = fcntl.LOCK_EX
+	else:
+		raise Exception("Unrecognized file access mode")
+	f = open(filepath, mode)
+	fcntl.flock(f, lock_mode)
+	yield f
+	fcntl.flock(f, fcntl.LOCK_UN)
+	f.close()
+### NEW STUFF
 
 
 ###################################################
@@ -543,16 +575,12 @@ def shareModel():
 
 def writeToInput(workDir, entry, key):
 	try:
-		with open(workDir + "/allInputData.json") as inJson:
-			fcntl.flock(inJson, fcntl.LOCK_SH)
+		with locked_open(workDir + '/allInputData.json') as inJson:
 			allInput = json.load(inJson)
-			fcntl.flock(inJson, fcntl.LOCK_UN)
 		allInput[key] = entry
-		with open(workDir+"/allInputData.json","r+") as inputFile:
-			fcntl.flock(inputFile, fcntl.LOCK_EX)
+		with locked_open(workDir + '/allInputData.json', 'r+') as inputFile:
 			inputFile.truncate()
 			json.dump(allInput, inputFile, indent=4)
-			fcntl.flock(inputFile, fcntl.LOCK_UN)
 	except:
 		return "Failed"
 
@@ -600,16 +628,12 @@ def networkGet(owner, modelName, networkNum):
 def distribution_get(owner, modelName, feeder_num):
 	"""Render the editing interface for distribution networks."""
 	model_dir = os.path.join(_omfDir, "data/Model", owner, modelName)
-	with open(model_dir + "/allInputData.json") as f:
-		fcntl.flock(f, fcntl.LOCK_SH)
+	with locked_open(model_dir + "/allInputData.json") as f:
 		feeder_dict = json.load(f)
-		fcntl.flock(f, fcntl.LOCK_UN)
 	feeder_name = feeder_dict.get('feederName' + str(feeder_num))
 	feeder_filepath = os.path.join(model_dir, feeder_name + ".omd")
-	with open(feeder_filepath) as f:
-		fcntl.flock(f, fcntl.LOCK_SH)
+	with locked_open(feeder_filepath) as f:
 		data = json.load(f)
-		fcntl.flock(f, fcntl.LOCK_UN)
 	passed_data = json.dumps(data)
 	component_json = get_components()
 	jasmine = spec = None
@@ -1132,17 +1156,13 @@ def saveFeeder(owner, modelName, feederName, feederNum):
 	payload = json.loads(request.form.to_dict().get("feederObjectJson","{}"))
 	feeder_file = os.path.join(model_dir, feederName + ".omd")
 	if os.path.isfile(feeder_file):
-		with open(feeder_file, "r+") as outFile:
-			fcntl.flock(outFile, fcntl.LOCK_EX) # Get an exclusive lock
+		with locked_open(feeder_file, 'r+') as outFile:
 			outFile.truncate()
 			json.dump(payload, outFile, indent=4) # This route is slow only because this line takes forever. We want the indentation so we keep this line
-			fcntl.flock(outFile, fcntl.LOCK_UN) # Release the exclusive lock
 	else:
 		# The feeder_file should always exist, but just in case there was an error, we allow the recreation of the file
-		with open(feeder_file, "w") as outFile:
-			fcntl.flock(outFile, fcntl.LOCK_EX) # Get an exclusive lock
+		with locked_open(feeder_file, 'w') as outFile:
 			json.dump(payload, outFile, indent=4) # This route is slow only because this line takes forever. We want the indentation so we keep this line
-			fcntl.flock(outFile, fcntl.LOCK_UN) # Release the exclusive lock
 	return 'Success'
 
 
@@ -1350,10 +1370,8 @@ def backgroundClimateChange(omdPath, owner, modelName):
 			feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'climate','name':'Climate','interpolate':'QUADRATIC', 'tmyfile':'climate.tmy2'}
 			with open(tmyFilePath) as tmyFile:
 				feederJson['attachments']['climate.tmy2'] = tmyFile.read()
-			with open(omdPath, 'w') as outFile:
-				fcntl.flock(outFile, fcntl.LOCK_EX)
+			with locked_open(omdPath, 'w') as outFile:
 				json.dump(feederJson, outFile, indent=4)
-				fcntl.flock(outFile, fcntl.LOCK_UN)
 		try:
 			os.remove(pid_filepath)
 		except:
@@ -1413,10 +1431,8 @@ def backgroundAnonymize(modelDir, omdPath, owner, modelName):
 			if request.form.get('addNoise'):
 				noisePerc = request.form.get('noisePerc')
 				anonymization.distAddNoise(inFeeder, noisePerc)
-		with open(omdPath, 'w') as outFile:
-			fcntl.flock(outFile, fcntl.LOCK_EX)
+		with locked_open(omdPath, 'w') as outFile:
 			json.dump(inFeeder, outFile, indent=4)
-			fcntl.flock(outFile, fcntl.LOCK_UN)
 		os.remove(pid_filepath)
 		if newNameKey:
 			return newNameKey
@@ -1686,10 +1702,19 @@ def root():
 def delete(objectType, objectName, owner):
 	''' Delete models or feeders. '''
 	if objectType == "Feeder":
-		os.remove("data/Model/" + owner + "/" + objectName + "/" + "feeder.omd")
+		filepath = "data/Model/" + owner + "/" + objectName + "/" + "feeder.omd"
+		if os.path.isfile(filepath):
+			os.remove(filepath)
 		return redirect("/#feeders")
 	elif objectType == "Model":
-		shutil.rmtree("data/Model/" + owner + "/" + objectName)
+		filepath = os.path.join(_omfDir, "data/Model", owner, objectName, "allInputData.json")
+		if os.path.isfile(filepath):
+			model_metadata = get_model_metadata(owner, objectName)
+			old_viewers = model_metadata.get("viewers")
+			if old_viewers is not None:
+				for v in old_viewers:
+					revoke_viewership(owner, objectName, v)
+			shutil.rmtree("data/Model/" + owner + "/" + objectName)
 	return redirect("/")
 
 
