@@ -1130,10 +1130,8 @@ def saveFeeder(owner, modelName, feederName, feederNum):
 		pid_filepath = os.path.join(model_dir, filename)
 		if os.path.isfile(pid_filepath):
 			try:
-				with open(pid_filepath) as f:
-					fcntl.flock(f, fcntl.LOCK_SH) # Get a shared lock
+				with locked_open(pid_filepath) as f:
 					pid = f.read()
-					fcntl.flock(f, fcntl.LOCK_UN) # Release the shared lock
 				os.remove(pid_filepath)
 				os.kill(int(pid), signal.SIGTERM)
 			except IOError as e:
@@ -1188,10 +1186,8 @@ def renameFeeder(owner, modelName, oldName, newName, feederNum):
 	old_feeder_filepath = os.path.join(model_dir_path, oldName + ".omd")
 	if os.path.isfile(new_feeder_filepath) or not os.path.isfile(old_feeder_filepath):
 		return "Failure"
-	with open(old_feeder_filepath) as f:
-		fcntl.flock(f, fcntl.LOCK_EX)
+	with locked_open(old_feeder_filepath, 'r+') as f:
 		os.rename(old_feeder_filepath, new_feeder_filepath)
-		fcntl.flock(f, fcntl.LOCK_UN)
 	writeToInput(model_dir_path, newName, 'feederName' + str(feederNum))
 	return 'Success'
 
@@ -1251,17 +1247,11 @@ def loadFeeder(frfeederName, frmodelName, modelName, feederNum, frUser, owner):
 		frmodelDir = "./static/publicFeeders"
 	#print "Entered loadFeeder with info: frfeederName %s, frmodelName: %s, modelName: %s, feederNum: %s"%(frfeederName, frmodelName, str(modelName), str(feederNum))
 	modelDir = "./data/Model/" + owner + "/" + modelName
-	with open(modelDir + "/allInputData.json") as inJson:
-		fcntl.flock(inJson, fcntl.LOCK_SH) # Get a shared lock
+	with locked_open(modelDir + "/allInputData.json") as inJson:
 		feederName = json.load(inJson).get('feederName' + str(feederNum))
-		fcntl.flock(inJson, fcntl.LOCK_UN) # Release the shared lock
-	with open(os.path.join(frmodelDir, frfeederName+'.omd'), "r") as inFeeder:
-		with open(os.path.join(modelDir, feederName+".omd"), "w") as outFile:
-			fcntl.flock(inFeeder, fcntl.LOCK_SH) # Get a shared lock
-			fcntl.flock(outFile, fcntl.LOCK_EX) # Get an exclusive lock
+	with locked_open(os.path.join(frmodelDir, frfeederName+'.omd')) as inFeeder:
+		with locked_open(os.path.join(modelDir, feederName+".omd"), "w") as outFile:
 			outFile.write(inFeeder.read())
-			fcntl.flock(outFile, fcntl.LOCK_UN) # Release the exclusive lock
-			fcntl.flock(inFeeder, fcntl.LOCK_UN) # Release the shared lock
 	if request.form.get("referrer") == "distribution":
 		return redirect(url_for("distribution_get", owner=owner, modelName=modelName, feeder_num=feederNum))
 	return redirect(url_for('feederGet', owner=owner, modelName=modelName, feederNum=feederNum))
@@ -1643,10 +1633,8 @@ def root():
 	allModels = publicModels + userModels
 	# Get models that have been shared with this user
 	filepath = os.path.join(_omfDir, "data/User", User.cu() + ".json")
-	with open(filepath) as f:
-		fcntl.flock(f, fcntl.LOCK_SH)
+	with locked_open(filepath) as f:
 		user_metadata = json.load(f)
-		fcntl.flock(f, fcntl.LOCK_UN)
 	sharing_users = user_metadata.get("readonly_models")
 	if sharing_users is not None:
 		shared_models = []
