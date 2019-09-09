@@ -5,7 +5,7 @@ from jinja2 import Template
 from multiprocessing import Process
 from passlib.hash import pbkdf2_sha512
 from functools import wraps
-import json, os, flask_login, hashlib, random, time, datetime as dt, shutil, boto.ses, csv, sys, platform
+import json, os, flask_login, hashlib, random, time, datetime as dt, shutil, boto.ses, csv, sys, platform, errno
 try:
 	import fcntl
 except:
@@ -106,7 +106,8 @@ app.secret_key = cryptoRandomString()
 def send_link(email, message, u={}):
 	''' Send message to email using Amazon SES. '''
 	try:
-		key = open("emailCredentials.key").read()
+		with open("emailCredentials.key") as f:
+			key = f.read()
 		c = boto.ses.connect_to_region("us-east-1",
 			aws_access_key_id="AKIAJLART4NXGCNFEJIQ",
 			aws_secret_access_key=key)
@@ -117,7 +118,8 @@ def send_link(email, message, u={}):
 		u["email"] = email
 		outDict = c.send_email("admin@omf.coop", "OMF Registration Link",
 			message.replace("reg_link", URL+"/register/"+email+"/"+reg_key), [email])
-		json.dump(u, open("data/User/"+email+".json", "w"), indent=4)
+		with open("data/User/"+email+".json", "w") as f:
+			json.dump(u, f, indent=4)
 		return "Success"
 	except:
 		return "Failed"
@@ -126,7 +128,9 @@ def send_link(email, message, u={}):
 @login_manager.user_loader
 def load_user(username):
 	''' Required by flask_login to return instance of the current user '''
-	return User(json.load(open("./data/User/" + username + ".json")))
+	with open("./data/User/" + username + ".json") as f:
+		data = json.load(f)
+	return User(data)
 
 
 def generate_csrf_token():
@@ -146,7 +150,8 @@ def login():
 	userJson = None
 	for u in safeListdir("./data/User/"):
 		if u.lower() == username.lower() + ".json":
-			userJson = json.load(open("./data/User/" + u))
+			with open("./data/User/" + u) as f:
+				userJson = json.load(f)
 			break
 	if userJson and pbkdf2_sha512.verify(password,
 			userJson["password_digest"]):
@@ -190,7 +195,8 @@ def new_user():
 	email = request.form.get("email")
 	if email == "": return "EMPTY"
 	if email in [f[0:-5] for f in safeListdir("data/User")]:
-		u = json.load(open("data/User/" + email + ".json"))
+		with open("data/User/" + email + ".json") as f:
+			u = json.load(f)
 		if u.get("password_digest") or not request.form.get("resend"):
 			return "Already Exists"
 	message = "Click the link below to register your account for the OMF.  This link will expire in 24 hours:\n\nreg_link"
@@ -199,7 +205,8 @@ def new_user():
 @app.route("/forgotPassword/<email>", methods=["GET"])
 def forgotpwd(email):
 	try:
-		user = json.load(open("data/User/" + email + ".json"))
+		with open("data/User/" + email + ".json") as f:
+			user = json.load(f)
 		message = "Click the link below to reset your password for the OMF.  This link will expire in 24 hours.\n\nreg_link"
 		code = send_link(email, message, user)
 		if code is "Success":
@@ -222,7 +229,8 @@ def fastNewUser(email):
 		with open("data/User/"+user["username"]+".json","w") as outFile:
 			json.dump(user, outFile, indent=4)
 		message = "Thank you for registering an account on OMF.coop.\n\nYour password is: " + randomPass + "\n\n You can change this password after logging in."
-		key = open("emailCredentials.key").read()
+		with open("emailCredentials.key") as f:
+			key = f.read()
 		c = boto.ses.connect_to_region("us-east-1", aws_access_key_id="AKIAJLART4NXGCNFEJIQ", aws_secret_access_key=key)
 		mailResult = c.send_email("admin@omf.coop", "OMF.coop User Account", message, [email])
 		nextUrl = str(request.args.get("next","/"))
@@ -233,7 +241,8 @@ def register(email, reg_key):
 	if flask_login.current_user.is_authenticated():
 		return redirect("/")
 	try:
-		user = json.load(open("data/User/" + email + ".json"))
+		with open("data/User/" + email + ".json") as f:
+			user = json.load(f)
 	except Exception:
 		user = None
 	if not (user and
@@ -427,10 +436,21 @@ def runModel():
 	del pData["modelName"]
 	modelDir = os.path.join(_omfDir, "data", "Model", user, modelName)
 	# Update the input file.
-	with open(os.path.join(modelDir, "allInputData.json"),"w") as inputFile:
-		json.dump(pData, inputFile, indent = 4)
+	filepath = os.path.join(modelDir, "allInputData.json")
+	with locked_open(filepath, 'r+') as f:
+		model_metadata = json.load(f)
+		f.truncate()
+		json.dump(pData, f, indent=4)
 	# Run and return.
 	modelModule.run(modelDir)
+	# If the model was previously shared, keep the shared users
+	viewers = model_metadata.get('viewers')
+	if viewers is not None:
+		with locked_open(filepath, 'r+') as f:
+			model_metadata = json.load(f)
+			model_metadata['viewers'] = viewers
+			f.truncate()
+			json.dump(model_metadata, f, indent=4)
 	return redirect("/model/" + user + "/" + modelName)
 
 
@@ -552,8 +572,8 @@ def get_model_metadata(owner, model_name):
 
 from contextlib import contextmanager
 @contextmanager
-def locked_open(filepath, mode='r'):
-	"""Open a file and also lock it depending on the file access mode"""
+def locked_open(filepath, mode='r', timeout=30):
+	"""Open a file and lock it depending on the file access mode. An error will be raised if the lock cannot be acquired within the timeout"""
 	if mode in ['r', 'rb']:
 		lock_mode = fcntl.LOCK_SH
 	elif mode in ['r+', 'r+b', 'w', 'wb', 'w+', 'w+b', 'a', 'ab', 'a+', 'a+b']:
@@ -561,10 +581,21 @@ def locked_open(filepath, mode='r'):
 	else:
 		raise Exception("Unrecognized file access mode")
 	f = open(filepath, mode)
-	fcntl.flock(f, lock_mode)
+	start_time = time.time()
+	while True:
+		try:
+			fcntl.flock(f, lock_mode | fcntl.LOCK_NB)
+			break
+		except IOError as e:
+			# Catch any IOError regarding the resource being unavailabe, but raise any other IOError
+			if e.errno != errno.EACCES and e.errno != errno.EAGAIN:
+				raise
+		if time.time() >= start_time + timeout:
+			raise IOError("{timeout}-second file lock timeout reached. Either a file-locking operation is taking more than {timeout} seconds "
+				"or there was a programmer error that would have resulted in permanent lock blocking.".format(timeout=timeout))
 	yield f
 	fcntl.flock(f, fcntl.LOCK_UN)
-	f.close()
+	f.close() 
 ### NEW STUFF
 
 
@@ -575,12 +606,11 @@ def locked_open(filepath, mode='r'):
 
 def writeToInput(workDir, entry, key):
 	try:
-		with locked_open(workDir + '/allInputData.json') as inJson:
-			allInput = json.load(inJson)
-		allInput[key] = entry
-		with locked_open(workDir + '/allInputData.json', 'r+') as inputFile:
-			inputFile.truncate()
-			json.dump(allInput, inputFile, indent=4)
+		with locked_open(workDir + '/allInputData.json', 'r+') as f:
+			allInput = json.load(f)
+			allInput[key] = entry
+			f.truncate()
+			json.dump(allInput, f, indent=4)
 	except:
 		return "Failed"
 
@@ -763,13 +793,13 @@ def milImportBackground(owner, modelName, feederName, feederNum, stdString, seqS
 		with open(feederDir) as feederFile:
 			feederTree =  json.load(feederFile)
 		if len(feederTree['tree']) < 12:
-			with open("data/Model/"+owner+"/"+modelName+"/gridError.txt", "w+") as errorFile:
+			with open("data/Model/"+owner+"/"+modelName+"/gridError.txt", "w") as errorFile:
 				errorFile.write('milError')
 		os.remove(pid_filepath)
 		removeFeeder(owner, modelName, feederNum)
 		writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
 	except Exception as error:
-		with open("data/Model/"+owner+"/"+modelName+"/gridError.txt", "w+") as errorFile:
+		with open("data/Model/"+owner+"/"+modelName+"/gridError.txt", "w") as errorFile:
 			errorFile.write("milError")
 
 
@@ -789,7 +819,7 @@ def matpowerImport(owner):
 	matFile = request.files["matFile"]
 	matFile.save(os.path.join("data/Model/"+owner+"/"+modelName,networkName+'.m'))
 	# TODO: Remove error files.
-	with open("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt", "w+") as conFile:
+	with open("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt", "w") as conFile:
 		conFile.write("WORKING")
 	importProc = Process(target=matImportBackground, args=[owner, modelName, networkName, networkNum])
 	importProc.start()
@@ -862,7 +892,7 @@ def gridlabImportBackground(owner, modelName, feederName, feederNum, glmString):
 		removeFeeder(owner, modelName, feederNum)
 		writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
 	except Exception as error:
-		with open("data/Model/"+owner+"/"+modelName+"/gridError.txt", "w+") as errorFile:
+		with open("data/Model/"+owner+"/"+modelName+"/gridError.txt", "w") as errorFile:
 			errorFile.write('glmError')
 
 
@@ -961,10 +991,9 @@ def backgroundLoadModelingAmi(owner, modelName, workDir, omdPath, amiPath):
 			pid_file.write(str(os.getpid()))
 		outDir = workDir + '/amiOutput/'
 		writeNewGlmAndPlayers(omdPath, amiPath, outDir)
-		modelDirec="data/Model/" + owner + "/" +  modelName
 		os.remove(pid_filepath)
 	except Exception as error:
-		with open("data/Model/"+owner+"/"+modelName+"/error.txt", "w+") as errorFile:
+		with open("data/Model/"+owner+"/"+modelName+"/error.txt", "w") as errorFile:
 			errorFile.write("amiError")
 
 
@@ -1009,7 +1038,7 @@ def cymeImportBackground(owner, modelName, feederName, feederNum, mdbFileName):
 		removeFeeder(owner, modelName, feederNum)
 		writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
 	except Exception as error:
-		with open("data/Model/"+owner+"/"+modelName+"/gridError.txt", "w+") as errorFile:
+		with open("data/Model/"+owner+"/"+modelName+"/gridError.txt", "w") as errorFile:
 			errorFile.write('cymeError')
 
 
@@ -1220,16 +1249,17 @@ def renameNetwork(owner, modelName, oldName, networkName, networkNum):
 def removeFeeder(owner, modelName, feederNum, feederName=None):
 	'''Remove a feeder from input data.'''
 	try:
-		modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
-		with open(modelDir + "/allInputData.json") as inJson:
-			allInput = json.load(inJson)
+		allInput = get_model_metadata(owner, modelName)
+		modelDir = os.path.join(_omfDir, "data/Model", owner, modelName)
 		try:
 			feederName = str(allInput.get('feederName'+str(feederNum)))
 			os.remove(os.path.join(modelDir, feederName +'.omd'))
-		except: print "Couldn't remove feeder file in web.removeFeeder()."
+		except: 
+			print "Couldn't remove feeder file in web.removeFeeder()."
 		allInput.pop("feederName"+str(feederNum))
-		with open(modelDir+"/allInputData.json","w") as inputFile:
-			json.dump(allInput, inputFile, indent=4)
+		with locked_open(modelDir+"/allInputData.json","r+") as f:
+			f.truncate()
+			json.dump(allInput, f, indent=4)
 		return 'Success'
 	except:
 		return 'Failed'
@@ -1262,9 +1292,7 @@ def loadFeeder(frfeederName, frmodelName, modelName, feederNum, frUser, owner):
 @write_permission_function
 def cleanUpFeeders(owner, modelName):
 	'''Go through allInputData and fix feeder Name keys'''
-	modelDir = "./data/Model/" + owner + "/" + modelName
-	with open(modelDir + "/allInputData.json") as inJson:
-		allInput = json.load(inJson)
+	allInput = get_model_metadata(owner, modelName)
 	feeders = {}
 	feederKeys = ['feederName1', 'feederName2', 'feederName3', 'feederName4', 'feederName5']
 	import pprint as pprint
@@ -1277,8 +1305,10 @@ def cleanUpFeeders(owner, modelName):
 	for i,key in enumerate(sorted(feeders)):
 		allInput['feederName'+str(i+1)] = feeders[key]
 	pprint.pprint(allInput)
-	with open(modelDir+"/allInputData.json","w") as inputFile:
-		json.dump(allInput, inputFile, indent = 4)
+	modelDir = "./data/Model/" + owner + "/" + modelName
+	with locked_open(modelDir+"/allInputData.json", "r+") as f:
+		f.truncate()
+		json.dump(allInput, f, indent=4)
 	return redirect("/model/" + owner + "/" + modelName)
 
 
@@ -1427,7 +1457,7 @@ def backgroundAnonymize(modelDir, omdPath, owner, modelName):
 		if newNameKey:
 			return newNameKey
 	except Exception as error:
-		with open("data/Model/"+owner+"/"+modelName+"/gridError.txt", "w+") as errorFile:
+		with open("data/Model/"+owner+"/"+modelName+"/gridError.txt", "w") as errorFile:
 			errorFile.write('anonymizeError')
 
 
