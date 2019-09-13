@@ -361,23 +361,52 @@
 			}
 		});
 
-		//geojson.features.forEach(function(feature1) {
-		//	if (feature1.properties['meters']) {
-		//		var feature1.properties['name'] = new L.FeatureGroup();
-		//		feature1.properties['name'].addLayer(feature1);
-		//		geojson.features.forEach(function(feature2){
-		//			if (feature1.properties['meters'].includes(feature2.properties['name'])) {
-		//				feature1.properties['name'].addLayer(feature2);
-		//			}					
-		//		});
+		//function clickFeature(e) {
+		//	if (typeof clickedFeature != 'undefined') {clickedFeature.setRadius(3);}
 
-		//	}
-		//})
+		//	var layer = e.target;
+		//	e.target.setRadius(5);
+		//	clickedFeature = e.target;
+		//	update(feature.properties.radius);
+		//}
 
-		var bounds = geojsonLayer.getBounds();
+		//var update = function(feature, latlng) {
+		//	return L.circleMarker(latlng)
+		//}
+
+		//function onEachFeature2(feature,layer) {
+		//	layer.on({click: clickFeature,})
+		//}
+
 		// Optional forcing of canvas renderer:
 		// var map = L.map('map', {renderer: L.canvas()}).fitBounds(bounds);
+		var bounds = geojsonLayer.getBounds();
 		var map = L.map('map').fitBounds(bounds);
+
+		//geojson.features.forEach(function(feature1) {
+		//	if (feature1.properties['meters']) {
+		//		var feature1.properties['name'] = new L.geoJSON(false, {
+		//			onEachFeature: onEachFeature2,
+		//			pointToLayer: function(feature, latlng) {
+		//				return L.circleMarker(latlng, {
+		//					radius: 3,
+		//					fillColor: 'gray',
+		//					color: '#000',
+		//					opacity : 1,
+		//					weight: 1.5,
+		//					fillOpacity: 1
+		//				});
+		//			}
+		//		});
+		//		feature1.properties['name'].addData(feature1);
+		//		geojson.features.forEach(function(feature2){
+		//			if (feature1.properties['meters'].includes(feature2.properties['name'])) {
+		//				feature1.properties['name'].addData(feature2);
+		//			}					
+		//		});
+		//	}
+		//});
+		
 		mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
 		L.tileLayer(
 			'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
