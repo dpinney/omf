@@ -77,24 +77,18 @@ def work(modelDir, inputDict):
 	''' Run the model in its directory.'''
 
 	out = {}
-	try:
-		with open(pJoin(modelDir, 'demand.csv'), 'w') as f:
-			f.write(inputDict['demandCurve'].replace('\r', ''))
-		with open(pJoin(modelDir, 'demand.csv')) as f:
-			demand = [float(r[0]) for r in csv.reader(f)]
-	 		assert len(demand) == 8760	
-		
-		with open(pJoin(modelDir, 'temp.csv'), 'w') as f:
-			lines = inputDict['tempCurve'].split('\n')
-			out["tempData"] = [float(x) if x != '999.0' else float(inputDict['setpoint']) for x in lines]
-			correctData = [x+'\n' if x != '999.0' else inputDict['setpoint']+'\n' for x in lines]
-			f.write(''.join(correctData))
-		assert len(correctData) == 8760
-	except:
-		raise Exception("CSV file is incorrect format. Please see valid format "
-			"definition at <a target='_blank' href = 'https://github.com/dpinney/"
-			"omf/wiki/Models-~-storagePeakShave#demand-file-csv-format'>\nOMF Wiki "
-			"storagePeakShave - Demand File CSV Format</a>")
+	with open(pJoin(modelDir, 'demand.csv'), 'w') as f:
+		f.write(inputDict['demandCurve'].replace('\r', ''))
+	with open(pJoin(modelDir, 'demand.csv')) as f:
+		demand = [float(r[0]) for r in csv.reader(f)]
+ 		assert len(demand) == 8760	
+	
+	with open(pJoin(modelDir, 'temp.csv'), 'w') as f:
+		lines = inputDict['tempCurve'].split('\n')
+		out["tempData"] = [float(x) if x != '999.0' else float(inputDict['setpoint']) for x in lines if x != '']
+		correctData = [x+'\n' if x != '999.0' else inputDict['setpoint']+'\n' for x in lines if x != '']
+		f.write(''.join(correctData))
+	assert len(correctData) == 8760
 	
 	# # created using calendar = {'1': 31, '2': 28, ..., '12': 31}
 	# m = [calendar[key]*24 for key in calendar]

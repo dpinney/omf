@@ -455,7 +455,6 @@ def run_fhec(ind, gt_demand, Input):
     output = []
     for hour in Input.index:
         var_output = {
-            'Date/Time': Input.loc[hour, "Date/Time"],
             'Hour': hour,
             'VB energy (kWh)': int(100*VBenergy[hour].varValue)/100,
             'VB power (kW)': int(100*VBpower[hour].varValue)/100,
@@ -624,7 +623,6 @@ def run_okec(ind, Input):
     output = []
     for hour in Input.index:
         var_output = {
-            'Date/Time': Input.loc[hour, "Date/Time"],
             'Hour': hour,
             'VB energy (kWh)': int(100*VBenergy[hour].varValue)/100,
             'VB power (kW)': int(100*VBpower[hour].varValue)/100,
