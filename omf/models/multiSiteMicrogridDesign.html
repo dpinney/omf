@@ -1,0 +1,474 @@
+<head>
+	
+	<title>Open Modeling Framework</title>
+	<meta charset="utf-8">
+	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
+	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	
+	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
+	
+	<!-- Library Imports -->
+	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
+	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+	
+	<!-- Data  Imports -->
+	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
+	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
+	<script>modelStatus="{{modelStatus}}"</script>
+	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
+
+
+	<script type="text/javascript">
+
+		function checkboxDisplayInput(checkboxName) {
+			if ( $('#' + checkboxName ).prop('checked') == true ){
+				$('.' + checkboxName + 'DisplayInput').show();
+			} else { $('.' + checkboxName + 'DisplayInput').hide() }
+		
+		}
+
+		function checkboxDisplay(checkboxName) {
+			if ( $('#' + checkboxName ).prop('checked') == true ){
+				$('.' + checkboxName + 'Display').show();
+			} else { $('.' + checkboxName + 'Display').hide() }
+		
+		}
+
+		function populateTables() {
+			var list = document.getElementsByTagName("td");
+			for (var i = 0; i < list.length; i++) {
+				list[i].innerHTML = allOutputData[list[i].id]
+			}
+		
+		}
+
+		function openTab(evt, tabName) {
+		    
+		    var i, tabContent, tabLinks;
+
+		    // Get all elements with class="tabContent" and hide them
+			$(".tabContent").hide();
+
+		    // Get all elements with class="tabLinks" and remove the class "active"
+		    tabLinks = document.getElementsByClassName("tabLinks");
+		    for (i = 0; i < tabLinks.length; i++) {
+		        tabLinks[i].className = tabLinks[i].className.replace(" active", "");
+		    }
+
+		    // Show the current tab, and add an "active" class to the button that opened the tab
+		    $("." + tabName).show();
+		    //gebi(tabName).style.display = "block";
+		    evt.currentTarget.className += " active";
+
+		}
+
+
+		function loadContent() {
+
+			var numCols = parseInt(allOutputData['numScenarios'], 10);
+			var content = '<p class="reportTitle" style="page-break-before:always">Microgrid Overview</p>'+
+				'<div id="" class="tightContent">'+
+					'<table>'+
+						'<tr>'+
+							'<th></th>'+
+							'<th>Total Savings (20 years)</th>'+
+							'<th class="solarDisplay">Recommended Solar (kW)</th>'+
+							'<th class="windDisplay">Recommended Wind (kW)</th>'+
+							'<th class="batteryDisplay">Recommended Battery Power (kW)</th>'+
+							'<th class="batteryDisplay">Recommended Battery Capacity (kWh)</th>'+
+							'<th>Average length of survived Outage (hours)</th>'+
+							'<th>Minimum length of survived Outage (hours)</th>'+
+							'<th>Maximum length of survived Outage (hours)</th>'+
+						'</tr>';
+
+			for (var i = 0; i < numCols ; i++) {
+
+				indexString = '' + (i+1);
+
+				row = '<tr >';
+				if (indexString == numCols) {
+					row += '<th>Single-site scenario</th>';
+				} else {
+					row += '<th>Building ' + indexString + '</th>';
+				}
+					
+				row += '<td id="savings' + indexString + '"></td>'+
+					'<td id="sizePV' + indexString + '"></td>'+
+					'<td id="sizeWind' + indexString + '"></td>'+
+					'<td id="powerBattery' + indexString + '"></td>'+
+					'<td id="capacityBattery' + indexString + '"></td>'+
+					'<td id="avgOutage' + indexString + '"></td>'+
+					'<td id="minOutage' + indexString + '"></td>'+
+					'<td id="maxOutage' + indexString + '"></td>'+
+					'</tr>';
+
+				content += row;
+
+			}
+
+			content += '</table></div>'+
+				'<div class="tab">';
+
+			for (var i = 0; i < numCols ; i++) {
+
+				indexString = '' + (i+1);
+
+				if (i==0) {
+					content += '<button class="tabLinks active" onclick="openTab(event, \'building' + indexString + '\')">Building ' + indexString + '</button>';
+				} else if (i == numCols-1) {
+					content += '<button class="tabLinks " onclick="openTab(event, \'building' + indexString + '\')">Single-site scenario</button>';
+				} else {
+					content += '<button class="tabLinks" onclick="openTab(event, \'building' + indexString + '\')">Building ' + indexString + '</button>';
+				}
+
+			}
+
+			content += '</div>';
+
+			for (var i = 0; i < numCols ; i++) {
+
+				indexString = '' + (i+1)
+
+				if (i==0) {
+					content += '<div class="building' + indexString + ' firstTab tabContent ">';
+				} else if (i == numCols-1) {
+					content += '<div class="building' + indexString + ' tabContent ">';
+				} else {
+					content += '<div class="building' + indexString + ' tabContent ">';
+				}
+
+				content += ''+
+					'<p class="reportTitle" style="page-break-before:always">Microgrid Financial Overview '+
+						'<a id="performa' + indexString + '">(Click here to download detailed ProForma analysis)</a>'+
+					'</p>'+
+					'<div id="" class="tightContent">'+
+						'<table>'+
+							'<tr>'+
+								'<th></th>'+
+								'<th>Business as Usual</th>'+
+								'<th>Microgrid</th>'+
+								'<th>Difference</th>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Demand Cost</th>'+
+								'<td id="demandCostBAU' + indexString + '"></td>'+
+								'<td id="demandCost' + indexString + '"></td>'+
+								'<td id="demandCostDiff' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Energy Cost</th>'+
+								'<td id="energyCostBAU' + indexString + '"></td>'+
+								'<td id="energyCost' + indexString + '"></td>'+
+								'<td id="energyCostDiff' + indexString + '"></td>'+
+							'</tr>'+
+
+							'<tr>'+
+								'<th>Total Cost</th>'+
+								'<td id="totalCostBAU' + indexString + '"></td>'+
+								'<td id="totalCost' + indexString + '"></td>'+
+								'<td id="totalCostDiff' + indexString + '"></td>'+
+							'</tr>'+
+						'</table>'+
+					'</div>'+
+					
+					'<p class="reportTitle" style="page-break-before:always">Load Overview</p>'+
+					'<div id="powerGenerationPlotly' + indexString + '" class="tightContent"></div>'+
+					
+					'<p class="solarDisplay reportTitle" style="page-break-before:always">Solar Generation</p>'+
+					'<div id="solarPlotly' + indexString + '" class="solarDisplay tightContent"></div>'+
+					
+					'<p class="windDisplay reportTitle" style="page-break-before:always">Wind Generation</p>'+
+					'<div id="windPlotly' + indexString + '" class="windDisplay tightContent"></div>'+
+					
+					'<p class="batteryDisplay reportTitle" style="page-break-before:always">Battery Charge Source</p>'+
+					'<div id="batteryPlotly' + indexString + '" class="batteryDisplay tightContent"></div>'+
+					
+					'<p class="batteryDisplay reportTitle" style="page-break-before:always">Battery Charge Percentage</p>'+
+					'<div id="batteryChargePlotly' + indexString + '" class="batteryDisplay tightContent"></div>'+
+					
+					'<p class="reportTitle" style="page-break-before:always">Resilience Overview</p>'+
+					'<div id="resiliencePlotly' + indexString + '" class="tightContent"></div>'+
+					
+					'<p class="reportTitle" style="page-break-before:always">Outage Survival Probability</p>'+
+					'<div id="resilienceProbPlotly' + indexString + '" class="tightContent"></div>	'+
+
+				'</div>';
+				
+			}
+
+			gebi('output').innerHTML = content;
+			$(".firstTab").css('display', 'block');
+			populateTables();
+
+			for (var i = 0; i < numCols ; i++) {
+
+				indexString = '' + (i+1);
+
+				var link = "https://developer.nrel.gov/api/reopt/v1/job/" + allOutputData['runID' + indexString] + '/proforma?api_key=' + allOutputData['apiKey' + indexString];
+				a = gebi('performa' + indexString);
+				a.href = link;
+				
+				Plotly.newPlot('powerGenerationPlotly' + indexString, JSON.parse(allOutputData['powerGenerationData' + indexString]), JSON.parse(allOutputData['plotlyLayout']) || {});
+				Plotly.newPlot('solarPlotly' + indexString, JSON.parse(allOutputData['solarData' + indexString]), JSON.parse(allOutputData['plotlyLayout']) || {});
+				Plotly.newPlot('windPlotly' + indexString, JSON.parse(allOutputData['windData' + indexString]), JSON.parse(allOutputData['plotlyLayout']) || {});
+				Plotly.newPlot('batteryPlotly' + indexString, JSON.parse(allOutputData['batteryData' + indexString]), JSON.parse(allOutputData['plotlyLayout']) || {});
+				Plotly.newPlot('batteryChargePlotly' + indexString, JSON.parse(allOutputData['batteryChargeData' + indexString]), JSON.parse(allOutputData['batteryChargeLayout' + indexString ]) || {});
+				Plotly.newPlot('resiliencePlotly' + indexString, JSON.parse(allOutputData['resilienceData' + indexString]), JSON.parse(allOutputData['resilienceLayout' + indexString]) || {});
+				Plotly.newPlot('resilienceProbPlotly' + indexString, JSON.parse(allOutputData['resilienceProbData' + indexString]), JSON.parse(allOutputData['resilienceProbLayout' + indexString]) || {});
+
+			}
+
+		}
+
+		$(window).on('pageshow',function(){
+		    
+		    // use input data to set checkboxes unless output data exists
+		    // sometimes there will be no wind output even tho wind was selected in the input
+		    // so allways use output data for most relevant info
+		    dict = allInputData;
+		    if (allOutputData != null) { dict = allOutputData; }
+		    // set checkboxes appropriately
+			if (dict['solar'] == 'off') { $('#solar').prop('checked',false); } 
+			else { $('#solar').prop('checked',true); }
+			if (dict['wind'] == 'off') { $('#wind').prop('checked',false); } 
+			else { $('#wind').prop('checked',true); }
+			if (dict['battery'] == 'off') { $('#battery').prop('checked',false); } 
+			else { $('#battery').prop('checked',true); }
+
+			// toggle the displays of the appropriate outputs only once 
+			// the ouputs have been generated
+			if (allOutputData != null) {
+				checkboxDisplay('solar');
+				checkboxDisplay('wind');
+				checkboxDisplay('battery');
+			}
+
+			// otherwise only set the input displays
+			else {
+				checkboxDisplayInput('solar');
+				checkboxDisplayInput('wind');
+				checkboxDisplayInput('battery');
+			}
+
+			loadContent();
+
+		});
+
+	</script>
+
+	<style type="text/css">
+		table { width: 100%; border-spacing: 2px; table-layout: fixed;  }
+		td,th { 
+			border: 1px;
+			border-style: solid;
+			border-color: black;
+			text-align: center;
+			vertical-align: center;
+			overflow-wrap: break-word
+		 }
+		.tab {
+		    overflow: hidden;
+		    margin-left: auto;
+		    margin-right: auto;
+		    width: 1000px;
+		    border-bottom: black;
+		    border-bottom-width: thin;
+		    border-bottom-style: solid;
+		}
+
+		.tab button {
+			color: black;
+		    background-color: inherit;
+		    float: left;
+		    border: none;
+		    outline: none;
+		    cursor: pointer;
+		    padding: 14px 16px;
+		    border-radius: 5px 5px 0px 0px;
+		}
+
+		.tab button:hover {
+		    background-color: white;
+		}
+
+		.tab button.active {
+		    background-color: seagreen;
+		    color: white;
+		}
+
+		.tabcontent {
+		    display: none;
+		} 
+	</style>
+	
+</head>
+
+<body onload="init()">
+	
+	<div id="header">
+		<div id="headInnerBlock">
+			<div id="menuLeft">
+				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
+				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
+			</div>
+		</div>
+	</div>
+
+	<div id="triangle-parent">
+		<div id="triangle-message">New Version<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
+		<div id="triangle-topright"></div>
+	</div>
+	
+	<p class="reportTitle">Model Input</p>
+	<div id="input" class="content">
+		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+			
+			<div class="shortInput">
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-disaggregation" target="blank">Help?</a></label>
+				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Model Name</label>
+				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+			</div>
+			<div class="shortInput runningInline postRunInline">
+				<label>User</label>
+				<input type="text" id="user" name="user" readonly/>
+			</div>
+			<div class="runningInline postRunInline shortInput">
+				<label>Created</label>
+				<input type="text" id="created" name="created" readonly/>
+			</div>
+			<div class="postRunInline shortInput">
+				<label>Run Time</label>
+				<input type="text" id="runTime" name="runTime" readonly/>
+			</div>
+
+			
+			<div class="wideInput">
+				<p class="inputSectionHeader">Microgrid Design Parameters</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Hourly Load Shape (.csv file)<span class="classic">Please enter the name of a .csv file representing the hourly load shape</span></label>
+				<input id="loadShapeFile" type="file" style="display:none" onchange="handle_files(this.files,'loadShape','fileName')">
+				<input id="loadShape" name="loadShape" type="hidden">
+				<div>
+					<label for="loadShapeFile" class="fileButton">Choose File</label>
+					<input id="fileName" name="fileName" readonly class="uploadFileName">	
+				</div>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Latitude<span class="classic">Specify the latitude of the load/grid.</span></label>
+				<input type="text" id="latitude" name="latitude" pattern="^\-?\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Longitude<span class="classic">Specify the longitude of the load/grid.</span></label>
+				<input type="text" id="longitude" name="longitude" pattern="^\-?\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Year<span class="classic">Specify the year to which the load shape values corresond.</span></label>
+				<input type="text" id="year" name="year" pattern="^\d{4}$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Cost of Energy ($/kWh)<span class="classic">Specify the energy cost in $/kWh.</span></label>
+				<input type="text" id="energyCost" name="energyCost" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Cost of Demand ($/kW)<span class="classic">Specify the demand cost in $/kW.</span></label>
+				<input type="text" id="demandCost" name="demandCost" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			
+			<div class="wideInput">
+				<p class="inputSectionHeader">Select your Technologies</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<input type="checkbox" name="solar" id="solar" onchange="checkboxDisplayInput('solar')">
+				<label class="tooltip">Solar <span class="classic">Check the box if you want to include Solar generation in your microgrid.</span>
+				</label>
+			</div>
+			<div class="shortInput">
+				<input type="checkbox" name="wind" id="wind" onchange="checkboxDisplayInput('wind')">
+				<label class="tooltip">Wind <span class="classic">Check the box if you want to include wind generation in your microgrid.</span>
+				</label>
+			</div>
+			<div class="shortInput">
+				<input type="checkbox" name="battery" id="battery" onchange="checkboxDisplayInput('battery')">
+				<label class="tooltip">Battery <span class="classic">Check the box if you want to include battery storage in your microgrid.</span>
+				</label>
+			</div>
+			<div class="shortInput solarDisplayInput">
+				<label class="tooltip">Solar Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
+				<input type="text" id="solarCost" name="solarCost" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput solarDisplayInput">
+				<label class="tooltip">Minimum Solar Generation (kW)<span class="classic">Specify the minimum desired generation in kW.</span></label>
+				<input type="text" id="solarMin" name="solarMin" required="required"/>
+			</div>
+			<div class="shortInput windDisplayInput">
+				<label class="tooltip">Wind Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
+				<input type="text" id="windCost" name="windCost" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput windDisplayInput">
+				<label class="tooltip">Minimum Wind Generation (kW)<span class="classic">Specify the minimum desired generation in kW.</span></label>
+				<input type="text" id="windMin" name="windMin" required="required"/>
+			</div>
+			<div class="shortInput batteryDisplayInput">
+				<label class="tooltip">Energy capacity cost ($/kWh)<span class="classic">Specify the cost in $/kWh.</span></label>
+				<input type="text" id="batteryEnergyCost" name="batteryEnergyCost" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput batteryDisplayInput">
+				<label class="tooltip">Power capacity cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
+				<input type="text" id="batteryPowerCost" name="batteryPowerCost" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput BatteryDisplayInput">
+				<label class="tooltip">Minimum Power Cpacity (kW)<span class="classic">Specify the minimum desired battery capacity in kW.</span></label>
+				<input type="text" id="batteryPowerMin" name="batteryPowerMin" required="required"/>
+			</div>
+			<div class="shortInput BatteryDisplayInput">
+				<label class="tooltip">Minimum Energy Cpacity (kWh)<span class="classic">Specify the minimum desired battery capacity in kWh.</span></label>
+				<input type="text" id="batteryEnergyMin" name="batteryEnergyMin" required="required"/>
+			</div>
+
+			<div class="wideInput">
+				<p class="inputSectionHeader">Resilence</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Critical Load Factor<span class="classic">The percent of typical load that must be met during a grid outage.</span></label>
+				<input type="number" id="criticalLoadFactor" name="criticalLoadFactor" min="0" max="100" required="required"/>
+			</div>
+
+			<div class="wideInput" style="text-align:right">
+				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
+				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
+				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
+				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
+				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
+			</div>
+		</form>
+	</div>
+
+	<div id ="runIndicator" class="content running">
+		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
+	</div>
+	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
+		<pre id='errorText' style='overflow-x:scroll'></pre>
+		<script type="text/javascript">
+		if (typeof(allInputData.stderr) !== 'undefined') {
+			gebi('stopIndicator').style.visibility = 'visible'
+			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
+		</script>
+	</div>
+
+	<div id="output">
+		<table>
+			<tr><th></th></tr>
+		</table>
+
+
+	</div>
+
+</body>
