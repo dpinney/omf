@@ -52,7 +52,7 @@ def work(modelDir, ind):
 		raise Exception("Load CSV file is incorrect format.")
 
 	try:
-		weather = [float(i) for i in ind['tempCurve'].split('\n')]
+		weather = [float(i) for i in ind['tempCurve'].split('\n') if i != '']
 		assert len(weather) == 72, "weather csv in wrong format"
 	except:
 		raise Exception(ind['tempCurve'])
