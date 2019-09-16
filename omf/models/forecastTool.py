@@ -14,7 +14,7 @@ import re
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = "This model predicts whether the following day will be a monthly peak."
-hidden = True
+# hidden = True
 
 def peak_likelihood(hist=None, tomorrow=None, tomorrow_std=None, two_day=None, two_day_std=None, three_day=None, three_day_std=None):
     A = norm(tomorrow, tomorrow_std).cdf(hist)
@@ -52,7 +52,7 @@ def work(modelDir, ind):
 		raise Exception("Load CSV file is incorrect format.")
 
 	try:
-		weather = [float(i) for i in ind['tempCurve'].split('\n')]
+		weather = [float(i) for i in ind['tempCurve'].split('\n') if i != '']
 		assert len(weather) == 72, "weather csv in wrong format"
 	except:
 		raise Exception(ind['tempCurve'])

@@ -25,12 +25,14 @@
 			if ( $('#' + checkboxName ).prop('checked') == true ){
 				$('.' + checkboxName + 'DisplayInput').show();
 			} else { $('.' + checkboxName + 'DisplayInput').hide() }
+		
 		}
 
 		function checkboxDisplay(checkboxName) {
 			if ( $('#' + checkboxName ).prop('checked') == true ){
 				$('.' + checkboxName + 'Display').show();
 			} else { $('.' + checkboxName + 'Display').hide() }
+		
 		}
 
 		function populateTables() {
@@ -38,6 +40,185 @@
 			for (var i = 0; i < list.length; i++) {
 				list[i].innerHTML = allOutputData[list[i].id]
 			}
+		
+		}
+
+		function openTab(evt, tabName) {
+		    
+		    var i, tabContent, tabLinks;
+
+		    // Get all elements with class="tabContent" and hide them
+			$(".tabContent").hide();
+
+		    // Get all elements with class="tabLinks" and remove the class "active"
+		    tabLinks = document.getElementsByClassName("tabLinks");
+		    for (i = 0; i < tabLinks.length; i++) {
+		        tabLinks[i].className = tabLinks[i].className.replace(" active", "");
+		    }
+
+		    // Show the current tab, and add an "active" class to the button that opened the tab
+		    $("." + tabName).show();
+		    //gebi(tabName).style.display = "block";
+		    evt.currentTarget.className += " active";
+
+		}
+
+
+		function loadContent() {
+
+			var numCols = parseInt(allOutputData['numScenarios'], 10);
+			var content = '<p class="reportTitle" style="page-break-before:always">Microgrid Overview</p>'+
+				'<div id="" class="tightContent">'+
+					'<table>'+
+						'<tr>'+
+							'<th></th>'+
+							'<th>Total Savings (20 years)</th>'+
+							'<th class="solarDisplay">Recommended Solar (kW)</th>'+
+							'<th class="windDisplay">Recommended Wind (kW)</th>'+
+							'<th class="batteryDisplay">Recommended Battery Power (kW)</th>'+
+							'<th class="batteryDisplay">Recommended Battery Capacity (kWh)</th>'+
+							'<th>Average length of survived Outage (hours)</th>'+
+							'<th>Minimum length of survived Outage (hours)</th>'+
+							'<th>Maximum length of survived Outage (hours)</th>'+
+						'</tr>';
+
+			for (var i = 0; i < numCols ; i++) {
+
+				indexString = '' + (i+1);
+
+				row = '<tr >';
+				if (indexString == numCols) {
+					row += '<th>Single-site scenario</th>';
+				} else {
+					row += '<th>Building ' + indexString + '</th>';
+				}
+					
+				row += '<td id="savings' + indexString + '"></td>'+
+					'<td id="sizePV' + indexString + '"></td>'+
+					'<td id="sizeWind' + indexString + '"></td>'+
+					'<td id="powerBattery' + indexString + '"></td>'+
+					'<td id="capacityBattery' + indexString + '"></td>'+
+					'<td id="avgOutage' + indexString + '"></td>'+
+					'<td id="minOutage' + indexString + '"></td>'+
+					'<td id="maxOutage' + indexString + '"></td>'+
+					'</tr>';
+
+				content += row;
+
+			}
+
+			content += '</table></div>'+
+				'<div class="tab">';
+
+			for (var i = 0; i < numCols ; i++) {
+
+				indexString = '' + (i+1);
+
+				if (i==0) {
+					content += '<button class="tabLinks active" onclick="openTab(event, \'building' + indexString + '\')">Building ' + indexString + '</button>';
+				} else if (i == numCols-1) {
+					content += '<button class="tabLinks " onclick="openTab(event, \'building' + indexString + '\')">Single-site scenario</button>';
+				} else {
+					content += '<button class="tabLinks" onclick="openTab(event, \'building' + indexString + '\')">Building ' + indexString + '</button>';
+				}
+
+			}
+
+			content += '</div>';
+
+			for (var i = 0; i < numCols ; i++) {
+
+				indexString = '' + (i+1)
+
+				if (i==0) {
+					content += '<div class="building' + indexString + ' firstTab tabContent ">';
+				} else if (i == numCols-1) {
+					content += '<div class="building' + indexString + ' tabContent ">';
+				} else {
+					content += '<div class="building' + indexString + ' tabContent ">';
+				}
+
+				content += ''+
+					'<p class="reportTitle" style="page-break-before:always">Microgrid Financial Overview '+
+						'<a id="performa' + indexString + '">(Click here to download detailed ProForma analysis)</a>'+
+					'</p>'+
+					'<div id="" class="tightContent">'+
+						'<table>'+
+							'<tr>'+
+								'<th></th>'+
+								'<th>Business as Usual</th>'+
+								'<th>Microgrid</th>'+
+								'<th>Difference</th>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Demand Cost</th>'+
+								'<td id="demandCostBAU' + indexString + '"></td>'+
+								'<td id="demandCost' + indexString + '"></td>'+
+								'<td id="demandCostDiff' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Energy Cost</th>'+
+								'<td id="energyCostBAU' + indexString + '"></td>'+
+								'<td id="energyCost' + indexString + '"></td>'+
+								'<td id="energyCostDiff' + indexString + '"></td>'+
+							'</tr>'+
+
+							'<tr>'+
+								'<th>Total Cost</th>'+
+								'<td id="totalCostBAU' + indexString + '"></td>'+
+								'<td id="totalCost' + indexString + '"></td>'+
+								'<td id="totalCostDiff' + indexString + '"></td>'+
+							'</tr>'+
+						'</table>'+
+					'</div>'+
+					
+					'<p class="reportTitle" style="page-break-before:always">Load Overview</p>'+
+					'<div id="powerGenerationPlotly' + indexString + '" class="tightContent"></div>'+
+					
+					'<p class="solarDisplay reportTitle" style="page-break-before:always">Solar Generation</p>'+
+					'<div id="solarPlotly' + indexString + '" class="solarDisplay tightContent"></div>'+
+					
+					'<p class="windDisplay reportTitle" style="page-break-before:always">Wind Generation</p>'+
+					'<div id="windPlotly' + indexString + '" class="windDisplay tightContent"></div>'+
+					
+					'<p class="batteryDisplay reportTitle" style="page-break-before:always">Battery Charge Source</p>'+
+					'<div id="batteryPlotly' + indexString + '" class="batteryDisplay tightContent"></div>'+
+					
+					'<p class="batteryDisplay reportTitle" style="page-break-before:always">Battery Charge Percentage</p>'+
+					'<div id="batteryChargePlotly' + indexString + '" class="batteryDisplay tightContent"></div>'+
+					
+					'<p class="reportTitle" style="page-break-before:always">Resilience Overview</p>'+
+					'<div id="resiliencePlotly' + indexString + '" class="tightContent"></div>'+
+					
+					'<p class="reportTitle" style="page-break-before:always">Outage Survival Probability</p>'+
+					'<div id="resilienceProbPlotly' + indexString + '" class="tightContent"></div>	'+
+
+				'</div>';
+				
+			}
+
+			gebi('output').innerHTML = content;
+			$(".firstTab").css('display', 'block');
+			populateTables();
+
+			for (var i = 0; i < numCols ; i++) {
+
+				indexString = '' + (i+1);
+
+				var link = "https://developer.nrel.gov/api/reopt/v1/job/" + allOutputData['runID' + indexString] + '/proforma?api_key=' + allOutputData['apiKey' + indexString];
+				a = gebi('performa' + indexString);
+				a.href = link;
+				
+				Plotly.newPlot('powerGenerationPlotly' + indexString, JSON.parse(allOutputData['powerGenerationData' + indexString]), JSON.parse(allOutputData['plotlyLayout']) || {});
+				Plotly.newPlot('solarPlotly' + indexString, JSON.parse(allOutputData['solarData' + indexString]), JSON.parse(allOutputData['plotlyLayout']) || {});
+				Plotly.newPlot('windPlotly' + indexString, JSON.parse(allOutputData['windData' + indexString]), JSON.parse(allOutputData['plotlyLayout']) || {});
+				Plotly.newPlot('batteryPlotly' + indexString, JSON.parse(allOutputData['batteryData' + indexString]), JSON.parse(allOutputData['plotlyLayout']) || {});
+				Plotly.newPlot('batteryChargePlotly' + indexString, JSON.parse(allOutputData['batteryChargeData' + indexString]), JSON.parse(allOutputData['batteryChargeLayout' + indexString ]) || {});
+				Plotly.newPlot('resiliencePlotly' + indexString, JSON.parse(allOutputData['resilienceData' + indexString]), JSON.parse(allOutputData['resilienceLayout' + indexString]) || {});
+				Plotly.newPlot('resilienceProbPlotly' + indexString, JSON.parse(allOutputData['resilienceProbData' + indexString]), JSON.parse(allOutputData['resilienceProbLayout' + indexString]) || {});
+
+			}
+
 		}
 
 		$(window).on('pageshow',function(){
@@ -70,8 +251,9 @@
 				checkboxDisplayInput('battery');
 			}
 
-		});
+			loadContent();
 
+		});
 
 	</script>
 
@@ -85,6 +267,39 @@
 			vertical-align: center;
 			overflow-wrap: break-word
 		 }
+		.tab {
+		    overflow: hidden;
+		    margin-left: auto;
+		    margin-right: auto;
+		    width: 1000px;
+		    border-bottom: black;
+		    border-bottom-width: thin;
+		    border-bottom-style: solid;
+		}
+
+		.tab button {
+			color: black;
+		    background-color: inherit;
+		    float: left;
+		    border: none;
+		    outline: none;
+		    cursor: pointer;
+		    padding: 14px 16px;
+		    border-radius: 5px 5px 0px 0px;
+		}
+
+		.tab button:hover {
+		    background-color: white;
+		}
+
+		.tab button.active {
+		    background-color: seagreen;
+		    color: white;
+		}
+
+		.tabcontent {
+		    display: none;
+		} 
 	</style>
 	
 </head>
@@ -249,132 +464,10 @@
 	</div>
 
 	<div id="output">
-		<p class="reportTitle postRun" style="page-break-before:always">Microgrid Overview</p>
-		<div id="" class="tightContent postRun">
-			<table>
-				<tr>
-					<th>Total Savings (20 years)</th>
-					<td id='savings'></td>
-				</tr>
-				<tr class="solarDisplay">
-					<th>Recommended Solar (kW)</th>
-					<td id='sizePV'></td>
-				</tr>
-				<tr class="windDisplay">
-					<th>Recommended Wind (kW)</th>
-					<td id='sizeWind'></td>
-				</tr>
-				<tr class="batteryDisplay">
-					<th>Recommended Battery Power (kW)</th>
-					<td id='powerBattery'></td>
-				</tr>
-				<tr class="batteryDisplay">
-					<th>Recommended Battery Capacity (kWh)</th>
-					<td id='capacityBattery'></td>
-				</tr>
-				<tr>
-					<th>Average length of survived Outage (hours)</th>
-					<td id='avgOutage'></td>
-				</tr>
-				<tr>
-					<th>Minimum length of survived Outage (hours)</th>
-					<td id='minOutage'></td>
-				</tr>
-				<tr>
-					<th>Maximum length of survived Outage (hours)</th>
-					<td id='maxOutage'></td>
-				</tr>
-			</table>
-		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Microgrid Financial Overview 
-			<a id='performa'>(Click here to download detailed ProForma analysis)</a>
-		</p>
-		<div id="" class="tightContent postRun">
-			<table>
-				<tr>
-					<th></th>
-					<th>Business as Usual</th>
-					<th>Microgrid</th>
-					<th>Difference</th>
-				</tr>
-				<tr>
-					<th>Demand Cost</th>
-					<td id='demandCostBAU'></td>
-					<td id='demandCost'></td>
-					<td id='demandCostDiff'></td>
-				</tr>
-				<tr>
-					<th>Energy Cost</th>
-					<td id='energyCostBAU'></td>
-					<td id='energyCost'></td>
-					<td id='energyCostDiff'></td>
-				</tr>
-				<!--
-				<tr>
-					<th>Fixed Cost</th>
-					<td id='fixedCostBAU'></td>
-					<td id='fixedCost'></td>
-					<td id='fixedCostDiff'></td>
-				</tr>
-				-->
-				<tr>
-					<th>Total Cost</th>	
-					<td id='totalCostBAU'></td>
-					<td id='totalCost'></td>
-					<td id='totalCostDiff'></td>
-				</tr>
-			</table>
-		</div>
-		
-		<script type="text/javascript"> 
-			populateTables(); 
-			var link = 'https://developer.nrel.gov/api/reopt/v1/job/' + allOutputData['runID'] + '/proforma?api_key=' + allOutputData['apiKey'];
-			a = gebi('performa');
-			a.href = link;
-		</script>
+		<table>
+			<tr><th></th></tr>
+		</table>
 
-
-		<p class="reportTitle postRun" style="page-break-before:always">Load Overview</p>
-		<div id="powerGenerationPlotly" class="tightContent postRun"></div>
-		<script type="text/javascript">
-			Plotly.newPlot("powerGenerationPlotly", JSON.parse(allOutputData["powerGenerationData"]), JSON.parse(allOutputData["plotlyLayout"]) || {})
-		</script>
-
-		<p class="solarDisplay reportTitle postRun" style="page-break-before:always">Solar Generation</p>
-		<div id="solarPlotly" class="solarDisplay tightContent postRun"></div>
-		<script type="text/javascript">
-			Plotly.newPlot("solarPlotly", JSON.parse(allOutputData["solarData"]), JSON.parse(allOutputData["plotlyLayout"]) || {})
-		</script>
-
-		<p class="windDisplay reportTitle postRun" style="page-break-before:always">Wind Generation</p>
-		<div id="windPlotly" class="windDisplay tightContent postRun"></div>
-		<script type="text/javascript">
-			Plotly.newPlot("windPlotly", JSON.parse(allOutputData["windData"]), JSON.parse(allOutputData["plotlyLayout"]) || {})
-		</script>
-
-		<p class="batteryDisplay reportTitle postRun" style="page-break-before:always">Battery Charge Source</p>
-		<div id="batteryPlotly" class="batteryDisplay tightContent postRun"></div>
-		<script type="text/javascript">
-			Plotly.newPlot("batteryPlotly", JSON.parse(allOutputData["batteryData"]), JSON.parse(allOutputData["plotlyLayout"]) || {})
-		</script>
-
-		<p class="batteryDisplay reportTitle postRun" style="page-break-before:always">Battery Charge Percentage</p>
-		<div id="batteryChargePlotly" class="batteryDisplay tightContent postRun"></div>
-		<script type="text/javascript">
-			Plotly.newPlot("batteryChargePlotly", JSON.parse(allOutputData["batteryChargeData"]), JSON.parse(allOutputData["batteryChargeLayout"]) || {})
-		</script>
-
-		<p class="reportTitle postRun" style="page-break-before:always">Resilience Overview</p>
-		<div id="resiliencePlotly" class="tightContent postRun"></div>
-		<script type="text/javascript">
-			Plotly.newPlot("resiliencePlotly", JSON.parse(allOutputData["resilienceData"]), JSON.parse(allOutputData["resilienceLayout"]) || {})
-		</script>
-
-		<p class="reportTitle postRun" style="page-break-before:always">Outage Survival Probability</p>
-		<div id="resilienceProbPlotly" class="tightContent postRun"></div>	
-		<script type="text/javascript">
-			Plotly.newPlot("resilienceProbPlotly", JSON.parse(allOutputData["resilienceProbData"]), JSON.parse(allOutputData["resilienceProbLayout"]) || {})
-		</script>
 
 	</div>
 

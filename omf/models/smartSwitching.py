@@ -35,7 +35,7 @@ modelName, template = metadata(__file__)
 hidden = False
 
 def pullOutValues(tree, workDir, sustainedOutageThreshold):
-	'helper function to pull out reliability metric data (SAIDI/SAIFI).'
+	'helper function which pulls out reliability metric data (SAIDI/SAIFI).'
 	attachments = []
 	# Run Gridlab.
 	if not workDir:
@@ -168,7 +168,7 @@ def setupSystem(pathToGlm, workDir, lineFaultType, failureDistribution, failure_
 		# Add eventgen object (the fault)
 		tree[str(biggestKey*10 + 1)] = {'object':'eventgen','name':'RandEvent','parent':'RelMetrics', 'target_group':'class=' + lineFaultType,'fault_type':faultType, 'failure_dist':failureDistribution, 'restoration_dist':restorationDistribution, 'failure_dist_param_1':failure_1, 'failure_dist_param_2':failure_2, 'restoration_dist_param_1':rest_1, 'restoration_dist_param_2':rest_2, 'max_outage_length':maxOutageLength + ' s'}
 		# Add fault_check object
-		tree[str(biggestKey*10 + 2)] = {'object':'fault_check','name':'test_fault','check_mode':'ONCHANGE', 'eventgen_object':'RandEvent', 'output_filename':'Fault_check_out.txt', 'strictly_radial': 'false'}
+		tree[str(biggestKey*10 + 2)] = {'object':'fault_check','name':'test_fault','check_mode':'ONCHANGE', 'eventgen_object':'RandEvent', 'output_filename':'Fault_check_out.txt', 'strictly_radial': 'true'}
 		# Add reliabilty metrics object
 		tree[str(biggestKey*10 + 3)] = {'object':'metrics', 'name':'RelMetrics', 'report_file':'Metrics_Output.csv', 'module_metrics_object':'PwrMetrics', 'metrics_of_interest':'"SAIFI,SAIDI,CAIDI,ASAI,MAIFI"', 'customer_group':'"groupid=METERTEST"', 'metric_interval':'0 s', 'report_interval':'1 yr'}
 		# Add power_metrics object
@@ -471,7 +471,7 @@ def bestLocationForRecloser(pathToGlm, workDir, lineFaultType, lineNameForReclos
 	py.offline.plot(figure2, filename= workDir + '/best_location_for_recloser_MAIFI', auto_open=False)
 
 def datetime_to_float(d):
-	'helper function to convert a datetime object to a float'
+	'helper function which convert a datetime object to a float'
 	epoch = datetime.datetime.utcfromtimestamp(0)
 	total_seconds = (d - epoch).total_seconds()
 	return total_seconds
