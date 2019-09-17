@@ -242,6 +242,11 @@ function init() {
 			catch (e){}
 		}
 	} 
+	if (allInputData != null) {
+		modelUser = allInputData["user"]
+	} else {
+		modelUser = "none"
+	}
 	// Depending on status, show different things.
 	if (modelStatus == "finished") {
 		console.log("FINISHED")
@@ -253,34 +258,24 @@ function init() {
 		$(".runningInline").css('display', 'inline-block')
 		$("input").prop("readonly", true)
 		$("select").prop("disabled", true)
+		if (modelUser !== currentUser && currentUser !== "admin") {
+			$("button#cancelButton").hide();
+		}
 	} else /* Stopped */ {
 		if (allInputData != null) {
 			$(".stopped").show()
 			$(".stoppedInline").show()
 		}
 	}
-	// Hide buttons we don't use:
-	if (allInputData != null) {
-		modelUser = allInputData["user"]
-	} else {
-		modelUser = "none"
-	}
+	// Hide buttons depending on whether the client is the model owner or a model viewer
 	$("button#deleteButton").hide();
 	$("button#shareButton").hide();
 	$("button#duplicateButton").show();
 	$("button#runButton").hide();
-	if (modelUser == "public") {
-		if (currentUser == "admin") {
-			$("button#deleteButton").show();
-			$("button#shareButton").show();
-			$("button#runButton").show();
-		}
-	} else {
-		if (modelUser == currentUser || currentUser == "admin") {
-			$("button#deleteButton").show();
-			$("button#shareButton").show();
-			$("button#runButton").show();
-		}
+	if (modelUser === currentUser || currentUser === "admin") {
+		$("button#deleteButton").show();
+		$("button#shareButton").show();
+		$("button#runButton").show();
 	}
 }
 
@@ -371,8 +366,8 @@ function shareModel() {
 	form.append(buttonDiv);
 	const submitButton = getSubmitButton();
 	buttonDiv.append(submitButton);
-	const cancelButton = getCloseButton();
-	buttonDiv.append(cancelButton);
+	const closeButton = getCloseButton();
+	buttonDiv.append(closeButton);
 	form.addEventListener("submit", e => {
 		e.preventDefault();
 		submitButton.disabled = true;
@@ -388,7 +383,7 @@ function shareModel() {
 		}).done(function(data, text, jqXHR) {
 			const emails = JSON.parse(jqXHR.responseText);
 			allInputData.viewers = emails;
-			cancelButton.click();
+			closeButton.click();
 			shareModel();
 			alert("Successfully updated your selection of shared users.");
 		}).fail(function(jqXHR, textStatus, errorThrown) {
@@ -422,14 +417,14 @@ function shareModel() {
 	}
 
 	function getCloseButton() {
-		const cancelButton = document.createElement("button");
-		cancelButton.textContent = "Close";
-		cancelButton.classList.add("deleteButton");
-		cancelButton.type = "button";
-		cancelButton.addEventListener("click", function() {
+		const closeButton = document.createElement("button");
+		closeButton.textContent = "Close";
+		closeButton.classList.add("deleteButton");
+		closeButton.type = "button";
+		closeButton.addEventListener("click", function() {
 			document.getElementById("emailModal").remove();
 		});
-		return cancelButton;
+		return closeButton;
 	}
 
 	function getEmailRow() {
