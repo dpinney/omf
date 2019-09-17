@@ -1,6 +1,7 @@
 import pytest, json, os
 from flask import url_for
 import omf
+from omf import omfDir
 from omf.web import app
 
 
@@ -238,3 +239,44 @@ class TestShareModel(object):
         with open(filepath) as f:
             user_metadata = json.load(f)
         assert user_metadata.get('readonly_models') is None
+    
+
+    def test_ownerSharesThenRunsModel_persistsModelMetadataChanges(self, client):
+        client.post('/shareModel', data={
+            'user': 'test',
+            'modelName': 'test_voltageDrop',
+            'email': ['123@email.com', 'abc@email.com']
+        })
+        model_dir = os.path.join(omfDir, 'data/Model/test/test_voltageDrop')
+        model_metadata_path = os.path.join(model_dir, 'allInputData.json')
+        with open(model_metadata_path) as f:
+            form_data = json.load(f)
+        assert sorted(form_data.get('viewers')) == sorted(['123@email.com', 'abc@email.com'])
+        # The 'user' is added in renderTemplate() of __neoMetaModel__.py. restoreInputs() in omf.json is responsible for placing the
+        # allInputData.json values into the HTML template. Then, the allInputData.json values are resubmitted to /runModel as pData through an HTML
+        # form
+        form_data['user'] = 'test'
+        with client as client:
+            rv = client.post('/runModel', data=form_data)
+            assert rv.status_code == 301 # why is this 301 instead of 302?
+            assert rv.headers.get("Location") == "http://localhost" + url_for('showModel', owner='test', modelName='test_voltageDrop')
+        # Running the model is asynchronous!
+        pid_filepath = os.path.join(model_dir, 'PPID.txt')
+        while not os.path.isfile(pid_filepath):
+            continue
+        assert os.path.isfile(pid_filepath) is True
+        while os.path.isfile(pid_filepath):
+            continue
+        with open(model_metadata_path) as f:
+            model_metadata = json.load(f)
+        assert sorted(model_metadata.get('viewers')) == sorted(['123@email.com', 'abc@email.com'])
+
+
+    def test_ownerSharesThenRunsModel_persistsUserMetadataChanges(self, client):
+        pass
+
+    def test_ownerSharesWithValidAndInvalidUsers_doesNotUpdateModelMetadata(self, client):
+        pass
+
+    def test_ownerSharesWithValidAndInvalidUsers_doesNotUpdateUserMetadata(self, client):
+        pass

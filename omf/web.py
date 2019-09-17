@@ -106,7 +106,7 @@ app.secret_key = cryptoRandomString()
 def send_link(email, message, u={}):
 	''' Send message to email using Amazon SES. '''
 	try:
-		with open("emailCredentials.key") as f:
+		with locked_open("emailCredentials.key") as f:
 			key = f.read()
 		c = boto.ses.connect_to_region("us-east-1",
 			aws_access_key_id="AKIAJLART4NXGCNFEJIQ",
@@ -435,22 +435,18 @@ def runModel():
 	modelName = pData["modelName"]
 	del pData["modelName"]
 	modelDir = os.path.join(_omfDir, "data", "Model", user, modelName)
-	# Update the input file.
+	# Get existing model viewers and add them to pData if they exist, then write pData to update allInputData.json
 	filepath = os.path.join(modelDir, "allInputData.json")
 	with locked_open(filepath, 'r+') as f:
 		model_metadata = json.load(f)
-		f.truncate()
+		viewers = model_metadata.get('viewers')
+		if viewers is not None:
+			pData['viewers'] = viewers
+		f.seek(0)
+		f.truncate(0)
 		json.dump(pData, f, indent=4)
-	# Run and return.
+	# Start a background process and return.
 	modelModule.run(modelDir)
-	# If the model was previously shared, keep the shared users
-	viewers = model_metadata.get('viewers')
-	if viewers is not None:
-		with locked_open(filepath, 'r+') as f:
-			model_metadata = json.load(f)
-			model_metadata['viewers'] = viewers
-			f.truncate()
-			json.dump(model_metadata, f, indent=4)
 	return redirect("/model/" + user + "/" + modelName)
 
 
@@ -508,7 +504,7 @@ def shareModel():
 			del model_metadata["viewers"]
 		filepath = os.path.join(_omfDir, "data/Model", owner, model_name, "allInputData.json")
 		with locked_open(filepath, 'r+') as f:
-			f.truncate()
+			f.truncate(0)
 			json.dump(model_metadata, f, indent=4) # Could an email be a malicious string of code?
 		# All viewers who previously had access to this model, but had that access revoked, must have their JSON file updated
 		if old_viewers is not None:
@@ -541,7 +537,7 @@ def revoke_viewership(owner, model_name, username):
 				if len(sharing_users.keys()) == 0:
 					del viewer_metadata["readonly_models"]
 				with locked_open(filepath, 'r+') as f:
-					f.truncate()
+					f.truncate(0)
 					json.dump(viewer_metadata, f)
 
 
@@ -559,7 +555,7 @@ def grant_viewership(owner, model_name, username):
 		if model_name not in shared_models:
 			shared_models.append(model_name) # Could model_name be a malicious string of code?
 			with locked_open(filepath, 'r+') as f:
-				f.truncate()
+				f.truncate(0)
 				json.dump(viewer_metadata, f, indent=4)
 
 
@@ -573,7 +569,7 @@ def get_model_metadata(owner, model_name):
 from contextlib import contextmanager
 @contextmanager
 def locked_open(filepath, mode='r', timeout=30):
-	"""Open a file and lock it depending on the file access mode. An error will be raised if the lock cannot be acquired within the timeout"""
+	"""Open a file and lock it depending on the file access mode. An IOError will be raised if the lock cannot be acquired within the timeout"""
 	if mode in ['r', 'rb']:
 		lock_mode = fcntl.LOCK_SH
 	elif mode in ['r+', 'r+b', 'w', 'wb', 'w+', 'w+b', 'a', 'ab', 'a+', 'a+b']:
@@ -609,7 +605,8 @@ def writeToInput(workDir, entry, key):
 		with locked_open(workDir + '/allInputData.json', 'r+') as f:
 			allInput = json.load(f)
 			allInput[key] = entry
-			f.truncate()
+			f.seek(0)
+			f.truncate(0)
 			json.dump(allInput, f, indent=4)
 	except:
 		return "Failed"
@@ -1184,7 +1181,7 @@ def saveFeeder(owner, modelName, feederName, feederNum):
 	feeder_file = os.path.join(model_dir, feederName + ".omd")
 	if os.path.isfile(feeder_file):
 		with locked_open(feeder_file, 'r+') as outFile:
-			outFile.truncate()
+			outFile.truncate(0)
 			json.dump(payload, outFile, indent=4) # This route is slow only because this line takes forever. We want the indentation so we keep this line
 	else:
 		# The feeder_file should always exist, but just in case there was an error, we allow the recreation of the file
@@ -1257,8 +1254,8 @@ def removeFeeder(owner, modelName, feederNum, feederName=None):
 		except: 
 			print "Couldn't remove feeder file in web.removeFeeder()."
 		allInput.pop("feederName"+str(feederNum))
-		with locked_open(modelDir+"/allInputData.json","r+") as f:
-			f.truncate()
+		with locked_open(modelDir+"/allInputData.json", "r+") as f:
+			f.truncate(0)
 			json.dump(allInput, f, indent=4)
 		return 'Success'
 	except:
@@ -1307,7 +1304,7 @@ def cleanUpFeeders(owner, modelName):
 	pprint.pprint(allInput)
 	modelDir = "./data/Model/" + owner + "/" + modelName
 	with locked_open(modelDir+"/allInputData.json", "r+") as f:
-		f.truncate()
+		f.truncate(0)
 		json.dump(allInput, f, indent=4)
 	return redirect("/model/" + owner + "/" + modelName)
 
@@ -1398,7 +1395,7 @@ def backgroundClimateChange(omdPath, owner, modelName):
 			pass
 	except Exception as e:
 		with open("data/Model/"+owner+"/"+modelName+"/error.txt", "w") as errorFile:
-			message = "climateError" if (e.message is None or e.message is "") else e.message
+			message = "climateError" if e.message == '' else e.message
 			errorFile.write(message)
 
 
@@ -1451,13 +1448,14 @@ def backgroundAnonymize(modelDir, omdPath, owner, modelName):
 			if request.form.get('addNoise'):
 				noisePerc = request.form.get('noisePerc')
 				anonymization.distAddNoise(inFeeder, noisePerc)
+		# Should be truncate! Right?
 		with locked_open(omdPath, 'w') as outFile:
 			json.dump(inFeeder, outFile, indent=4)
 		os.remove(pid_filepath)
 		if newNameKey:
 			return newNameKey
 	except Exception as error:
-		with open("data/Model/"+owner+"/"+modelName+"/gridError.txt", "w") as errorFile:
+		with locked_open("data/Model/"+owner+"/"+modelName+"/gridError.txt", "w") as errorFile:
 			errorFile.write('anonymizeError')
 
 
@@ -1476,7 +1474,7 @@ def zillow_houses():
 		os.remove(payload_filepath)
 	# Write the ZPID.txt file now so there is no way the client will get a 404 when they check for an ongoing process. Process hasn't started yet though.
 	zpid_filepath = os.path.join(model_dir, "ZPID.txt")
-	with open(zpid_filepath, 'w') as f:
+	with locked_open(zpid_filepath, 'w') as f:
 		f.write("")
 	importProc = Process(target=background_zillow_houses, args=[model_dir])
 	importProc.start()
@@ -1486,7 +1484,7 @@ def zillow_houses():
 def background_zillow_houses(model_dir):
 	try:
 		pid_filepath = os.path.join(model_dir, "ZPID.txt")
-		with open(pid_filepath, 'w') as pid_file:
+		with locked_open(pid_filepath, 'w') as pid_file:
 			pid_file.write(str(os.getpid()))
 		triplex_objects = json.loads(request.form.get("triplexObjects"))
 		#triplex_objects = request.form.get("triplexObjects") # error test
@@ -1503,12 +1501,12 @@ def background_zillow_houses(model_dir):
 			# The APIs we use require us to limit our requests to a maximum of 1 per second. Exceeding that throughput will get us IP banned faster.
 			time.sleep(1)
 		payload_filepath = os.path.join(model_dir, "zillow_houses.json")
-		with open(payload_filepath, 'w') as f:
+		with locked_open(payload_filepath, 'w') as f:
 			json.dump(zillow_houses, f)
 		os.remove(pid_filepath)
 	except Exception as e:
-		with open(os.path.join(model_dir, "error.txt"), 'w') as error_file:
-			message = "zillow_error" if e.message is None else e.message
+		with locked_open(os.path.join(model_dir, "error.txt"), 'w') as error_file:
+			message = "zillow_error" if e.message == '' else e.message
 			error_file.write(message)
 
 
@@ -1522,7 +1520,7 @@ def check_zillow_houses():
 	if owner == User.cu() or "admin" == User.cu():
 		error_filepath = os.path.join(model_dir, "error.txt")
 		if os.path.isfile(error_filepath):
-			with open(error_filepath) as f:
+			with locked_open(error_filepath) as f:
 				error_message = f.read()
 			return (error_message, 500)
 		pid_filepath = os.path.join(model_dir, "ZPID.txt")
@@ -1530,7 +1528,7 @@ def check_zillow_houses():
 			return ("", 202)
 		payload_filepath = os.path.join(model_dir, "zillow_houses.json")
 		if os.path.isfile(payload_filepath):
-			with open(payload_filepath) as f:
+			with locked_open(payload_filepath) as f:
 				data = json.load(f)
 			return jsonify(data)
 	abort(404)
@@ -1546,37 +1544,38 @@ def anonymizeTran(owner, networkName):
 	importProc = Process(target=backgroundAnonymizeTran, args =[modelDir, omtPath])
 	importProc.start()
 	pid = str(importProc.pid)
-	with open(modelDir + '/TPPID.txt', 'w+') as outFile:
+	with locked_open(modelDir + '/TPPID.txt', 'w') as outFile:
 		outFile.write(pid)
 	return 'Success'
 
 
 def backgroundAnonymizeTran(modelDir, omtPath):
-	with open(omtPath, 'r') as inFile:
+	with locked_open(omtPath, 'r') as inFile:
 		inNetwork = json.load(inFile)
-		# Name Options
-		nameOption = request.form.get('anonymizeNameOption')
-		if nameOption == 'pseudonymize':
-			newBusKey = anonymization.tranPseudomizeNames(inNetwork)
-		elif nameOption == 'randomize':
-			anonymization.tranRandomizeNames(inNetwork)
-		# Location Options
-		locOption = request.form.get('anonymizeLocationOption')
-		if locOption == 'translation':
-			translationRight = request.form.get('translateRight')
-			translationUp = request.form.get('translateUp')
-			rotation = request.form.get('rotate')
-			anonymization.tranTranslateLocations(inNetwork, translationRight, translationUp, rotation)
-		elif locOption == 'randomize':
-			anonymization.tranRandomizeLocations(inNetwork)
-		# Electrical Properties
-		if request.form.get('shuffleLoadGen'):
-			shufPerc = request.form.get('shufflePerc')
-			anonymization.tranShuffleLoadsAndGens(inNetwork, shufPerc)
-		if request.form.get('addNoise'):
-			noisePerc = request.form.get('noisePerc')
-			anonymization.tranAddNoise(inNetwork, noisePerc)
-	with open(omtPath, 'w') as outFile:
+	# Name Options
+	nameOption = request.form.get('anonymizeNameOption')
+	if nameOption == 'pseudonymize':
+		newBusKey = anonymization.tranPseudomizeNames(inNetwork)
+	elif nameOption == 'randomize':
+		anonymization.tranRandomizeNames(inNetwork)
+	# Location Options
+	locOption = request.form.get('anonymizeLocationOption')
+	if locOption == 'translation':
+		translationRight = request.form.get('translateRight')
+		translationUp = request.form.get('translateUp')
+		rotation = request.form.get('rotate')
+		anonymization.tranTranslateLocations(inNetwork, translationRight, translationUp, rotation)
+	elif locOption == 'randomize':
+		anonymization.tranRandomizeLocations(inNetwork)
+	# Electrical Properties
+	if request.form.get('shuffleLoadGen'):
+		shufPerc = request.form.get('shufflePerc')
+		anonymization.tranShuffleLoadsAndGens(inNetwork, shufPerc)
+	if request.form.get('addNoise'):
+		noisePerc = request.form.get('noisePerc')
+		anonymization.tranAddNoise(inNetwork, noisePerc)
+	with locked_open(omtPath, 'w') as outFile:
+		# I don't know if the outFile already exists or not, which is why I haven't switch to r+ and truncate()
 		json.dump(inNetwork, outFile, indent=4)
 	os.remove(modelDir + '/TPPID.txt')
 	if newBusKey:
@@ -1598,10 +1597,9 @@ def checkAnonymizeTran(owner, modelName):
 @read_permission_function
 def displayOmdMap(owner, modelName, feederNum):
 	'''Function to render omd on a leaflet map using a new template '''
+	feederDict = get_model_metadata(owner, modelName)
+	feederName = feederDict.get('feederName' + str(feederNum))
 	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
-	with open(os.path.join(modelDir, "allInputData.json"), "r") as jsonFile:
-		feederDict = json.load(jsonFile)
-		feederName = feederDict.get('feederName' + str(feederNum))
 	feederFile = os.path.join(modelDir, feederName + ".omd")
 	geojson = omf.geo.omdGeoJson(feederFile)
 	return render_template('geoJsonMap.html', geojson=geojson)
@@ -1612,14 +1610,14 @@ def displayOmdMap(owner, modelName, feederNum):
 @read_permission_function
 def commsMap(owner, modelName, feederNum):
 	'''Function to render omc on a leaflet map using a new template '''
+	feederDict = get_model_metadata(owner, modelName)
+	feederName = feederDict.get('feederName' + str(feederNum))
 	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
-	with open(os.path.join(modelDir, "allInputData.json"), "r") as jsonFile:
-		feederDict = json.load(jsonFile)
-		feederName = feederDict.get('feederName' + str(feederNum))
 	feederFile = os.path.join(modelDir, feederName + ".omc")
-	with open(feederFile) as commsGeoJson:
+	with locked_open(feederFile) as commsGeoJson:
 		geojson = json.load(commsGeoJson)
 	return render_template('commsNetViz.html', geojson=geojson, owner=owner, modelName=modelName, feederNum=feederNum, feederName=feederName)
+
 
 @app.route('/redisplayGrid', methods=["POST"])
 def redisplayGrid():
@@ -1680,7 +1678,7 @@ def root():
 	for mod in allModels:
 		try:
 			modPath = "data/Model/" + mod["owner"] + "/" + mod["name"]
-			allInput = json.load(open(modPath + "/allInputData.json"))
+			allInput = get_model_metadata(mod['owner'], mod['name'])
 			mod["runTime"] = allInput.get("runTime","")
 			mod["modelType"] = allInput.get("modelType","")
 			try:
