@@ -482,7 +482,10 @@ def duplicateModel(owner, modelName):
 @flask_login.login_required
 @write_permission_function
 def shareModel():
-	"""Never trust input from the user. I am writing user strings directly into sensitive model files and user JSON files without sanitizing them!"""
+	"""
+	Never trust input from the user. I am writing user strings directly into sensitive model files and user JSON files without sanitizing them!
+	Actually, everything that is entered must be a valid email. The root of any issues here would be due to not validating user sign-ups properly
+	"""
 	# Check for nonexistant users
 	emails = list(set(request.form.getlist("email"))) if len(request.form.getlist("email")) != 0 else None
 	if emails is not None:

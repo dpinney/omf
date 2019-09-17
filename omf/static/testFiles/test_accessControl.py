@@ -35,11 +35,20 @@ def client():
         rv = c.get('/newModel/cvrDynamic/' + model_name)
         assert rv.status_code == 302
         assert rv.headers.get("Location") == "http://localhost" + url_for('showModel', owner="test", modelName=model_name)
+    # Create two test users
+    test_users = ['first-test-user', 'second-test-user'] 
+    for username in test_users:
+        filepath = os.path.join(omfDir, 'data/User', username + '.json')
+        with open(filepath, 'w') as f:
+            f.write('{}')
     # Send client to test
     yield client
     # Cleanup
     client.post('/delete/Model/test/test_voltageDrop')
     client.post('/delete/Model/test/test_cvrDyn')
+    for username in test_users:
+        filepath = os.path.join(omfDir, 'data/User', username + '.json')
+        os.remove(filepath)
 
 
 class TestShareModel(object):
@@ -48,20 +57,20 @@ class TestShareModel(object):
         client.post('/shareModel', data={
             'user': 'test',
             'modelName': 'test_voltageDrop',
-            'email': ['abc@email.com', '123@email.com']
+            'email': ['second-test-user', 'first-test-user']
         })
         filepath = "data/Model/test/test_voltageDrop/allInputData.json"
         with open(filepath) as f:
             model_metadata = json.load(f)
-        assert sorted(model_metadata.get('viewers')) == sorted(['abc@email.com', '123@email.com'])
+        assert sorted(model_metadata.get('viewers')) == sorted(['second-test-user', 'first-test-user'])
 
     def test_ownerSharesWithUnauthorizedUsers_updatesUserMetadata(self, client):
         client.post('/shareModel', data={
             'user': 'test',
             'modelName': 'test_voltageDrop',
-            'email': ['abc@email.com', '123@email.com']
+            'email': ['second-test-user', 'first-test-user']
         })
-        for filename in ['123@email.com.json', 'abc@email.com.json']:
+        for filename in ['first-test-user.json', 'second-test-user.json']:
             filepath = "data/User/" + filename
             with open(filepath) as f:
                 user_metadata = json.load(f)
@@ -82,21 +91,21 @@ class TestShareModel(object):
             client.post('/shareModel', data={
                 'user': 'test',
                 'modelName': 'test_voltageDrop',
-                'email': ['abc@email.com', '123@email.com']
+                'email': ['second-test-user', 'first-test-user']
             })
         filepath = "data/Model/test/test_voltageDrop/allInputData.json"
         with open(filepath) as f:
             model_metadata = json.load(f)
-        assert sorted(model_metadata.get('viewers')) == sorted(['abc@email.com', '123@email.com']) 
+        assert sorted(model_metadata.get('viewers')) == sorted(['second-test-user', 'first-test-user']) 
 
     def test_ownerResharesWithAuthorizedUsers_doestNotUpdateUserMetadata(self, client):
         for _ in range(2):
             client.post('/shareModel', data={
                 'user': 'test',
                 'modelName': 'test_voltageDrop',
-                'email': ['abc@email.com', '123@email.com']
+                'email': ['second-test-user', 'first-test-user']
             })
-        for filename in ['123@email.com.json', 'abc@email.com.json']:
+        for filename in ['first-test-user.json', 'second-test-user.json']:
             filepath = os.path.join(os.path.abspath(omf.omfDir), "data/User", filename)
             with open(filepath) as f:
                 user_metadata = json.load(f)
@@ -110,7 +119,7 @@ class TestShareModel(object):
             client.post('/shareModel', data={
                 'user': 'test',
                 'modelName': model_name,
-                'email': ['abc@email.com', '123@email.com']
+                'email': ['second-test-user', 'first-test-user']
             })
         client.post('/shareModel', data={
             'user': 'test',
@@ -120,7 +129,7 @@ class TestShareModel(object):
         filepath = "data/Model/test/test_voltageDrop/allInputData.json"
         with open(filepath) as f:
             model_metadata = json.load(f)
-        assert sorted(model_metadata.get('viewers')) == sorted(['abc@email.com', '123@email.com'])
+        assert sorted(model_metadata.get('viewers')) == sorted(['second-test-user', 'first-test-user'])
         filepath = "data/Model/test/test_cvrDyn/allInputData.json"
         with open(filepath) as f:
             model_metadata = json.load(f)
@@ -132,14 +141,14 @@ class TestShareModel(object):
             client.post('/shareModel', data={
                 'user': 'test',
                 'modelName': model_name,
-                'email': ['abc@email.com', '123@email.com']
+                'email': ['second-test-user', 'first-test-user']
             })
         client.post('/shareModel', data={
             'user': 'test',
             'modelName': 'test_cvrDyn',
             'email': []
         })
-        for filename in ['123@email.com.json', 'abc@email.com.json']:
+        for filename in ['first-test-user.json', 'second-test-user.json']:
             filepath = "data/User/" + filename
             with open(filepath) as f:
                 user_metadata = json.load(f)
@@ -153,10 +162,10 @@ class TestShareModel(object):
             client.post('/shareModel', data={
                 'user': 'test',
                 'modelName': model_name,
-                'email': ['abc@email.com', '123@email.com']
+                'email': ['second-test-user', 'first-test-user']
             })
         client.post('/delete/Model/test/test_voltageDrop')
-        for filename in ['123@email.com.json', 'abc@email.com.json']:
+        for filename in ['first-test-user.json', 'second-test-user.json']:
             filepath = "data/User/" + filename
             with open(filepath) as f:
                 user_metadata = json.load(f)
@@ -168,7 +177,7 @@ class TestShareModel(object):
         client.post('/shareModel', data={
             'user': 'test',
             'modelName': 'test_voltageDrop',
-            'email': ['madeup@email.com']
+            'email': ['nonexistent-user']
         })
         filepath = "data/Model/test/test_voltageDrop/allInputData.json"
         with open(filepath) as f:
@@ -176,7 +185,7 @@ class TestShareModel(object):
         assert model_metadata.get('viewers') is None
 
     def test_ownerSharesWithNonexistentUsers_doesNotUpdateUserMetadata(self, client):
-        fake_user = 'madeup@email.com'
+        fake_user = 'nonexistent-user'
         client.post('/shareModel', data={
             'user': 'test',
             'modelName': 'test_voltageDrop',
@@ -245,20 +254,21 @@ class TestShareModel(object):
         client.post('/shareModel', data={
             'user': 'test',
             'modelName': 'test_voltageDrop',
-            'email': ['123@email.com', 'abc@email.com']
+            'email': ['first-test-user', 'second-test-user']
         })
         model_dir = os.path.join(omfDir, 'data/Model/test/test_voltageDrop')
         model_metadata_path = os.path.join(model_dir, 'allInputData.json')
         with open(model_metadata_path) as f:
             form_data = json.load(f)
-        assert sorted(form_data.get('viewers')) == sorted(['123@email.com', 'abc@email.com'])
-        # The 'user' is added in renderTemplate() of __neoMetaModel__.py. restoreInputs() in omf.json is responsible for placing the
-        # allInputData.json values into the HTML template. Then, the allInputData.json values are resubmitted to /runModel as pData through an HTML
+        assert sorted(form_data.get('viewers')) == sorted(['first-test-user', 'second-test-user'])
+        # The 'user' and 'modelName' are added in renderTemplate() of __neoMetaModel__.py. restoreInputs() in omf.json is responsible for placing the
+        # allInputData.json values into the HTML template. Then, the allInputData.json values are resubmitted to /runModel/ as pData through an HTML
         # form
         form_data['user'] = 'test'
+        form_data['modelName'] = 'test_voltageDrop'
         with client as client:
-            rv = client.post('/runModel', data=form_data)
-            assert rv.status_code == 301 # why is this 301 instead of 302?
+            rv = client.post('/runModel/', data=form_data)
+            assert rv.status_code == 302
             assert rv.headers.get("Location") == "http://localhost" + url_for('showModel', owner='test', modelName='test_voltageDrop')
         # Running the model is asynchronous!
         pid_filepath = os.path.join(model_dir, 'PPID.txt')
@@ -269,14 +279,69 @@ class TestShareModel(object):
             continue
         with open(model_metadata_path) as f:
             model_metadata = json.load(f)
-        assert sorted(model_metadata.get('viewers')) == sorted(['123@email.com', 'abc@email.com'])
+        assert sorted(model_metadata.get('viewers')) == sorted(['first-test-user', 'second-test-user'])
 
 
     def test_ownerSharesThenRunsModel_persistsUserMetadataChanges(self, client):
-        pass
+        client.post('/shareModel', data={
+            'user': 'test',
+            'modelName': 'test_voltageDrop',
+            'email': ['first-test-user', 'second-test-user']
+        })
+        # Check user metadata state
+        for filename in ['first-test-user.json', 'second-test-user.json']:
+            filepath = "data/User/" + filename
+            with open(filepath) as f:
+                user_metadata = json.load(f)
+                assert len(user_metadata.get('readonly_models')) == 1
+                assert len(user_metadata.get('readonly_models').get('test')) == 1
+                assert user_metadata.get('readonly_models').get('test')[0] == 'test_voltageDrop'
+        model_dir = os.path.join(omfDir, 'data/Model/test/test_voltageDrop')
+        model_metadata_path = os.path.join(model_dir, 'allInputData.json')
+        with open(model_metadata_path) as f:
+            form_data = json.load(f)
+        form_data['user'] = 'test'
+        form_data['modelName'] = 'test_voltageDrop'
+        with client as client:
+            rv = client.post('/runModel/', data=form_data)
+            assert rv.status_code == 302
+            assert rv.headers.get("Location") == "http://localhost" + url_for('showModel', owner='test', modelName='test_voltageDrop')
+        # Running the model is asynchronous!
+        pid_filepath = os.path.join(model_dir, 'PPID.txt')
+        while not os.path.isfile(pid_filepath):
+            continue
+        assert os.path.isfile(pid_filepath) is True
+        while os.path.isfile(pid_filepath):
+            continue
+        # Check user metadata state
+        for filename in ['first-test-user.json', 'second-test-user.json']:
+            filepath = "data/User/" + filename
+            with open(filepath) as f:
+                user_metadata = json.load(f)
+                assert len(user_metadata.get('readonly_models')) == 1
+                assert len(user_metadata.get('readonly_models').get('test')) == 1
+                assert user_metadata.get('readonly_models').get('test')[0] == 'test_voltageDrop'
 
     def test_ownerSharesWithValidAndInvalidUsers_doesNotUpdateModelMetadata(self, client):
-        pass
+        client.post('/shareModel', data={
+            'user': 'test',
+            'modelName': 'test_voltageDrop',
+            'email': ['second-test-user', 'first-test-user', 'nonexistent-user']
+        })
+        filepath = "data/Model/test/test_voltageDrop/allInputData.json"
+        with open(filepath) as f:
+            model_metadata = json.load(f)
+        assert model_metadata.get('viewers') is None
 
     def test_ownerSharesWithValidAndInvalidUsers_doesNotUpdateUserMetadata(self, client):
-        pass
+        client.post('/shareModel', data={
+            'user': 'test',
+            'modelName': 'test_voltageDrop',
+            'email': ['second-test-user', 'first-test-user', 'nonexistent-user']
+        })
+        for filename in ['first-test-user.json', 'second-test-user.json', 'nonexistent-user.json']:
+            filepath = "data/User/" + filename
+            if os.path.isfile(filepath):
+                with open(filepath) as f:
+                    user_metadata = json.load(f)
+                    assert user_metadata.get('readonly_models') is None
