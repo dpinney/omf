@@ -247,6 +247,16 @@ function init() {
 	} else {
 		modelUser = "none"
 	}
+	// Hide buttons depending on whether the client is the model owner or a model viewer
+	$("button#deleteButton").hide();
+	$("button#shareButton").hide();
+	$("button#duplicateButton").show();
+	$("button#runButton").hide();
+	if (modelUser === currentUser || currentUser === "admin") {
+		$("button#deleteButton").show();
+		$("button#runButton").show();
+		$("button#shareButton").show();
+	}
 	// Depending on status, show different things.
 	if (modelStatus == "finished") {
 		console.log("FINISHED")
@@ -258,6 +268,7 @@ function init() {
 		$(".runningInline").css('display', 'inline-block')
 		$("input").prop("readonly", true)
 		$("select").prop("disabled", true)
+		$("button#shareButton").hide();
 		if (modelUser !== currentUser && currentUser !== "admin") {
 			$("button#cancelButton").hide();
 		}
@@ -266,16 +277,6 @@ function init() {
 			$(".stopped").show()
 			$(".stoppedInline").show()
 		}
-	}
-	// Hide buttons depending on whether the client is the model owner or a model viewer
-	$("button#deleteButton").hide();
-	$("button#shareButton").hide();
-	$("button#duplicateButton").show();
-	$("button#runButton").hide();
-	if (modelUser === currentUser || currentUser === "admin") {
-		$("button#deleteButton").show();
-		$("button#shareButton").show();
-		$("button#runButton").show();
 	}
 }
 
@@ -388,14 +389,20 @@ function shareModel() {
 			alert("Successfully updated your selection of shared users.");
 		}).fail(function(jqXHR, textStatus, errorThrown) {
 			resetInvalidFlags();
-			// Mark invalid usernames
-			const invalidEmails = JSON.parse(jqXHR.responseText)
-			Array.from(tbody.getElementsByTagName("input")).forEach(input => {
-				if (invalidEmails.includes(input.value)) {
-					const td = input.parentElement.nextElementSibling;
-					td.removeAttribute("style");
-				}
-			});
+			if (jqXHR.status === 409) {
+				// Notify user that model is running
+				alert(jqXHR.responseText);
+			} else if (jqXHR.status === 400) {
+				// Mark invalid usernames
+				const invalidEmails = JSON.parse(jqXHR.responseText)
+				Array.from(tbody.getElementsByTagName("input")).forEach(input => {
+					if (invalidEmails.includes(input.value)) {
+						const td = input.parentElement.nextElementSibling;
+						td.removeAttribute("style");
+					}
+				});
+			}
+
 		}).always(function() {
 			submitButton.disabled = false;
 		});
@@ -412,7 +419,7 @@ function shareModel() {
 		const submitButton = document.createElement("button");
 		submitButton.type = "submit";
 		submitButton.style.marginRight = "14px";
-		submitButton.textContent = "Share";
+		submitButton.textContent = "Update Sharing";
 		return submitButton;
 	}
 
@@ -458,7 +465,7 @@ function shareModel() {
 	function getAddButton() {
 		const addButton = document.createElement("button");
 		addButton.type = "button";
-		addButton.textContent = "Add user";
+		addButton.textContent = "Add User";
 		addButton.addEventListener("click", function() {
 			const emailRow = getEmailRow();
 			tbody.prepend(emailRow);

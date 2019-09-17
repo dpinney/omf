@@ -345,3 +345,60 @@ class TestShareModel(object):
                 with open(filepath) as f:
                     user_metadata = json.load(f)
                     assert user_metadata.get('readonly_models') is None
+
+    def test_ownerSharesWhileModelIsRunning_doesNotUpdateModelMetadata(self, client):
+        model_dir = os.path.join(omfDir, 'data/Model/test/test_voltageDrop')
+        model_metadata_path = os.path.join(model_dir, 'allInputData.json')
+        with open(model_metadata_path) as f:
+            form_data = json.load(f)
+        form_data['user'] = 'test'
+        form_data['modelName'] = 'test_voltageDrop'
+        with client as client:
+            rv = client.post('/runModel/', data=form_data)
+            assert rv.status_code == 302
+            assert rv.headers.get("Location") == "http://localhost" + url_for('showModel', owner='test', modelName='test_voltageDrop')
+        # Running the model is asynchronous!
+        pid_filepath = os.path.join(model_dir, 'PPID.txt')
+        while not os.path.isfile(pid_filepath):
+            continue
+        assert os.path.isfile(pid_filepath) is True
+        rv = client.post('/shareModel', data={
+            'user': 'test',
+            'modelName': 'test_voltageDrop',
+            'email': ['first-test-user', 'second-test-user']
+        })
+        assert rv.status_code == 409
+        assert os.path.isfile(pid_filepath) is True
+        with open(model_metadata_path) as f:
+            model_metadata = json.load(f)
+        assert model_metadata.get('viewers') is None
+
+    def test_ownerSharesWhileModelIsRunning_doesNotUpdateUserMetadata(self, client):
+        model_dir = os.path.join(omfDir, 'data/Model/test/test_voltageDrop')
+        model_metadata_path = os.path.join(model_dir, 'allInputData.json')
+        with open(model_metadata_path) as f:
+            form_data = json.load(f)
+        form_data['user'] = 'test'
+        form_data['modelName'] = 'test_voltageDrop'
+        with client as client:
+            rv = client.post('/runModel/', data=form_data)
+            assert rv.status_code == 302
+            assert rv.headers.get("Location") == "http://localhost" + url_for('showModel', owner='test', modelName='test_voltageDrop')
+        # Running the model is asynchronous!
+        pid_filepath = os.path.join(model_dir, 'PPID.txt')
+        while not os.path.isfile(pid_filepath):
+            continue
+        assert os.path.isfile(pid_filepath) is True
+        rv = client.post('/shareModel', data={
+            'user': 'test',
+            'modelName': 'test_voltageDrop',
+            'email': ['first-test-user', 'second-test-user']
+        })
+        assert rv.status_code == 409
+        assert os.path.isfile(pid_filepath) is True
+        for filename in ['first-test-user.json', 'second-test-user.json']:
+            filepath = "data/User/" + filename
+            if os.path.isfile(filepath):
+                with open(filepath) as f:
+                    user_metadata = json.load(f)
+                    assert user_metadata.get('readonly_models') is None

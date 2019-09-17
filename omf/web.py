@@ -494,9 +494,14 @@ def shareModel():
 			response = jsonify(invalid_emails)
 			response.status_code = 400
 			return response
-	# Load the list of old viewers
+	# Check the state of the model
 	owner = request.form.get("user")
 	model_name = request.form.get("modelName")
+	from models import __neoMetaModel__
+	status = __neoMetaModel__.getStatus(os.path.join(_omfDir, 'data/Model', owner, model_name))
+	if status == 'running':
+		return ("The model cannot be shared while it is running. Please wait until the model finishes running.", 409)
+	# Load the list of old viewers
 	model_metadata = get_model_metadata(owner, model_name)
 	old_viewers = model_metadata.get("viewers")
 	# If there are no new emails to add, and there are no old emails to remove, don't do anything
