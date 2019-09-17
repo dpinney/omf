@@ -393,6 +393,7 @@ MODAL DIALOGS
 #emailModalContent td {
 	text-align: center;
 	padding: 7px 0px;
+	border: 0px;
 }
 
 #emailModalContent input {

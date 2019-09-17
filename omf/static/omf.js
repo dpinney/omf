@@ -247,16 +247,6 @@ function init() {
 	} else {
 		modelUser = "none"
 	}
-	// Hide buttons depending on whether the client is the model owner or a model viewer
-	$("button#deleteButton").hide();
-	$("button#shareButton").hide();
-	$("button#duplicateButton").show();
-	$("button#runButton").hide();
-	if (modelUser === currentUser || currentUser === "admin") {
-		$("button#deleteButton").show();
-		$("button#runButton").show();
-		$("button#shareButton").show();
-	}
 	// Depending on status, show different things.
 	if (modelStatus == "finished") {
 		console.log("FINISHED")
@@ -276,6 +266,18 @@ function init() {
 		if (allInputData != null) {
 			$(".stopped").show()
 			$(".stoppedInline").show()
+		}
+	}
+	// Hide buttons depending on whether the client is the model owner or a model viewer
+	$("button#deleteButton").hide();
+	$("button#shareButton").hide();
+	$("button#duplicateButton").show();
+	$("button#runButton").hide();
+	if (modelUser === currentUser || currentUser === "admin") {
+		$("button#deleteButton").show();
+		$("button#runButton").show();
+		if (modelStatus !== "running") {
+			$("button#shareButton").show();
 		}
 	}
 }
