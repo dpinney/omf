@@ -371,7 +371,7 @@ function shareModel() {
 	form.append(buttonDiv);
 	const submitButton = getSubmitButton();
 	buttonDiv.append(submitButton);
-	const cancelButton = getCancelButton();
+	const cancelButton = getCloseButton();
 	buttonDiv.append(cancelButton);
 	form.addEventListener("submit", e => {
 		e.preventDefault();
@@ -421,9 +421,9 @@ function shareModel() {
 		return submitButton;
 	}
 
-	function getCancelButton() {
+	function getCloseButton() {
 		const cancelButton = document.createElement("button");
-		cancelButton.textContent = "Cancel";
+		cancelButton.textContent = "Close";
 		cancelButton.classList.add("deleteButton");
 		cancelButton.type = "button";
 		cancelButton.addEventListener("click", function() {
