@@ -431,14 +431,25 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 				if (numPhases < 1) or (numPhases > 3):
 					numPhases = 1
 				linePhases[edge] = numPhases
+				protDevLabel = ""
+				protDevBlownStr = ""
+				if objType in protDevices.keys():
+					for phase in protDevFinalStatus[obname].keys():
+						if objType == 'fuse':
+							if protDevFinalStatus[obname][phase] == "BLOWN":
+								protDevBlownStr = "!"
+						else:
+							if protDevFinalStatus[obname][phase] == "OPEN":
+								protDevBlownStr = "!"
 				if objType == 'fuse':
-					edgeTupleProtDevs[coord] = 'F'
+					protDevLabel = 'F'
 				elif objType == 'switch':
-					edgeTupleProtDevs[coord] = 'S'
+					protDevLabel = 'S'
 				elif objType == 'recloser':
-					edgeTupleProtDevs[coord] = 'R'
+					protDevLabel = 'R'
 				elif objType == 'sectionalizer':
-					edgeTupleProtDevs[coord] = 'X'
+					protDevLabel = 'X'
+				edgeTupleProtDevs[coord] = protDevLabel + protDevBlownStr
 	#define which dict will be used for edge line color
 	edgeColors = edgeValsPU
 	#define which dict will be used for edge label
@@ -599,9 +610,6 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	# plt.clim(110,130)
 	if drawColorbar:
 		plt.colorbar()
-	# Also draw a table.
-	#TODO: factor this out and in to work().
-	#table = drawTable(initialStates=protDevInitStatus, finalStates=protDevFinalStatus, deviceTypes=protDevTypes)
 	return voltChart
 
 def glmToModel(glmPath, modelDir):
