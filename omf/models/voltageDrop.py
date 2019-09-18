@@ -16,6 +16,10 @@ plt.switch_backend('Agg')
 import omf.feeder as feeder
 from omf.solvers import gridlabd
 
+# dateutil imports
+from dateutil import parser
+from dateutil.relativedelta import *
+
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = "The voltageDrop model runs loadflow to show system voltages at all nodes."
@@ -28,7 +32,7 @@ def work(modelDir, inputDict):
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict["feederName1"] = feederName
 	# Create voltage drop plot.
-	# print "*DEBUG: feederName:", feederName
+	print "*DEBUG: feederName:", feederName
 	omd = json.load(open(pJoin(modelDir,feederName + '.omd')))
 	if inputDict.get("layoutAlgorithm", "geospatial") == "geospatial":
 		neato = False
@@ -75,7 +79,7 @@ def work(modelDir, inputDict):
 		outData["voltageDrop"] = inFile.read().encode("base64")
 	return outData
 
-def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, customColormap=False, rezSqIn=400, gldBinary=None, colorMin=None, colorMax=None):
+def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, faultLoc=None, faultType=None, customColormap=False, scaleMin=None, scaleMax=None, rezSqIn=400, simTime='2000-01-01 0:00:00', loadLoc=None):
 	''' Draw a color-coded map of the voltage drop on a feeder.
 	path is the full path to the GridLAB-D .glm file or OMF .omd file.
 	workDir is where GridLAB-D will run, if it's None then a temp dir is used.
@@ -85,6 +89,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	edgeLabs and nodeLabs properties must be either 'Name', 'Value', or None
 	edgeCol and nodeCol can be set to false to avoid coloring edges or nodes
 	customColormap=True means use a one that is nicely scaled to perunit values highlighting extremes.
+	faultType and faultLoc are the type of fault and the name of the line that it occurs on.
 	Returns a matplotlib object.'''
 	# Be quiet matplotlib:
 	warnings.filterwarnings("ignore")
@@ -97,6 +102,42 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 		attachments = omd.get('attachments',[])
 	else:
 		raise Exception('Invalid input file type. We require a .glm or .omd.')
+	#print path
+	# add fault object to tree
+	def safeInt(x):
+		try: return int(x)
+		except: return 0
+	biggestKey = max([safeInt(x) for x in tree.keys()])
+	# Add Reliability module
+	tree[str(biggestKey*10)] = {"module":"reliability","maximum_event_length":"18000","report_event_log":"true"}
+	CLOCK_START = simTime
+	dt_start = parser.parse(CLOCK_START)
+	dt_end = dt_start + relativedelta(seconds=+20)
+	CLOCK_END = str(dt_end)
+	CLOCK_RANGE = CLOCK_START + ',' + CLOCK_END
+	if faultType != None:
+		# Add eventgen object (the fault)
+		tree[str(biggestKey*10 + 1)] = {"object":"eventgen","name":"ManualEventGen","parent":"RelMetrics", "fault_type":faultType, "manual_outages":faultLoc + ',' + CLOCK_RANGE} # TODO: change CLOCK_RANGE to read the actual start and stop time, not just hard-coded
+		# Add fault_check object
+		tree[str(biggestKey*10 + 2)] = {"object":"fault_check","name":"test_fault","check_mode":"ONCHANGE", "eventgen_object":"ManualEventGen", "output_filename":"Fault_check_out.txt"}
+		# Add reliabilty metrics object
+		tree[str(biggestKey*10 + 3)] = {"object":"metrics", "name":"RelMetrics", "report_file":"Metrics_Output.csv", "module_metrics_object":"PwrMetrics", "metrics_of_interest":'"SAIFI,SAIDI,CAIDI,ASAI,MAIFI"', "customer_group":'"groupid=METERTEST"', "metric_interval":"5 h", "report_interval":"5 h"}
+		# Add power_metrics object
+		tree[str(biggestKey*10 + 4)] = {"object":"power_metrics","name":"PwrMetrics","base_time_value":"1 h"}
+		
+		# HACK: set groupid for all meters so outage stats are collected.
+		noMeters = True
+		for key in tree:
+			if tree[key].get('object','') in ['meter', 'triplex_meter']:
+				tree[key]['groupid'] = "METERTEST"
+				noMeters = False
+		if noMeters:
+			raise Exception("No meters detected on the circuit. Please add at least one meter to allow for collection of outage statistics.")
+	for key in tree:
+		if 'clock' in tree[key]:
+			tree[key]['starttime'] = "'" + CLOCK_START + "'"
+			tree[key]['stoptime'] = "'" + CLOCK_END + "'"
+	
 	# dictionary to hold info on lines present in glm
 	edge_bools = dict.fromkeys(['underground_line','overhead_line','triplex_line','transformer','regulator', 'fuse', 'switch'], False)
 	# Map to speed up name lookups.
@@ -120,13 +161,9 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 			edge_bools['switch'] = True
 		if tree[key].get("argument","") == "\"schedules.glm\"" or tree[key].get("tmyfile","") != "":
 			del tree[key]
-	# Make sure we have a voltDump:
-	def safeInt(x):
-		try: return int(x)
-		except: return 0
-	biggestKey = max([safeInt(x) for x in tree.keys()])
-	tree[str(biggestKey*10)] = {"object":"voltdump","filename":"voltDump.csv"}
-	tree[str(biggestKey*10 + 1)] = {"object":"currdump","filename":"currDump.csv"}
+	# Make sure we have a voltage dump and current dump:
+	tree[str(biggestKey*10 + 5)] = {"object":"voltdump","filename":"voltDump.csv"}
+	tree[str(biggestKey*10 + 6)] = {"object":"currdump","filename":"currDump.csv"}
 	# Line rating dumps
 	tree[omf.feeder.getMaxKey(tree) + 1] = {
 		'module': 'tape'
@@ -136,16 +173,92 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 			tree[omf.feeder.getMaxKey(tree) + 1] = {
 				'object':'group_recorder', 
 				'group':'"class='+key+'"',
-				'limit':1,
 				'property':'continuous_rating',
 				'file':key+'_cont_rating.csv'
 			}
+	#Record initial status readout of each fuse/recloser/switch/sectionalizer before running
+	# Reminder: fuse objects have 'phase_X_status' instead of 'phase_X_state'
+	protDevices = dict.fromkeys(['fuse', 'recloser', 'switch', 'sectionalizer'], False)
+	#dictionary of protective device initial states for each phase
+	protDevInitStatus = {}
+	#dictionary of protective devices final states for each phase after running Gridlab-D
+	protDevFinalStatus = {}
+	#dictionary of protective device types to help the testing and debugging process
+	protDevTypes = {}
+	protDevOpModes = {}
+	for key in tree:
+		obj = tree[key]
+		obType = obj.get('object')
+		if obType in protDevices.keys():
+			obName = obj.get('name', '')
+			protDevTypes[obName] = obType
+			if obType != 'fuse':
+				protDevOpModes[obName] = obj.get('operating_mode', 'INDIVIDUAL')
+			protDevices[obType] = True
+			protDevInitStatus[obName] = {}
+			protDevFinalStatus[obName] = {}
+			for phase in ['A', 'B', 'C']:
+				if obType != 'fuse':
+					phaseState = obj.get('phase_' + phase + '_state','CLOSED')
+				else:
+					phaseState = obj.get('phase_' + phase + '_status','GOOD')
+				if phase in obj.get('phases', ''):
+					protDevInitStatus[obName][phase] = phaseState
+	#print protDevInitStatus
+
+	#Create a recorder for protective device states
+	for key in protDevices.keys():
+		if protDevices[key]:
+			for phase in ['A', 'B', 'C']:
+				if key != 'fuse':
+					tree[omf.feeder.getMaxKey(tree) + 1] = {
+						'object':'group_recorder', 
+						'group':'"class='+key+'"',
+						'property':'phase_' + phase + '_state',
+						'file':key + '_phase_' + phase + '_state.csv'
+					}
+				else:
+					tree[omf.feeder.getMaxKey(tree) + 1] = {
+						'object':'group_recorder', 
+						'group':'"class='+key+'"',
+						'property':'phase_' + phase + '_status',
+						'file':key + '_phase_' + phase + '_state.csv'
+					}
+
 	# Run Gridlab.
 	if not workDir:
 		workDir = tempfile.mkdtemp()
-		# print '@@@@@@', workDir
-	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir, gldBinary=gldBinary)
-	# read voltDump values into a dictionary.
+		print '@@@@@@', workDir
+	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
+	
+	#Record final status readout of each fuse/recloser/switch/sectionalizer after running
+	for key in protDevices.keys():
+		if protDevices[key]:
+			for phase in ['A', 'B', 'C']:
+				with open(pJoin(workDir,key+'_phase_'+phase+'_state.csv'),'r') as statusFile:
+					reader = csv.reader(statusFile)
+					# loop past the header, 
+					keys = []
+					vals = []
+					for row in reader:
+						if '# timestamp' in row:
+							keys = row
+							i = keys.index('# timestamp')
+							keys.pop(i)
+							vals = reader.next()
+							vals.pop(i)
+					for pos,key2 in enumerate(keys):
+						protDevFinalStatus[key2][phase] = vals[pos]
+	#print protDevFinalStatus
+
+	#compare initial and final states of protective devices
+	#quick compare to see if they are equal
+	#print cmp(protDevInitStatus, protDevFinalStatus)
+	#find which values changed
+	changedStates = {}
+
+
+	#read voltDump values into a dictionary.
 	try:
 		dumpFile = open(pJoin(workDir,'voltDump.csv'),'r')
 	except:
@@ -153,6 +266,9 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	reader = csv.reader(dumpFile)
 	reader.next() # Burn the header.
 	keys = reader.next()
+	
+	
+
 	voltTable = []
 	for row in reader:
 		rowDict = {}
@@ -205,7 +321,8 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 		return math.ceil(math.log10(x+1))
 	def avg(l):
 		''' Average of a list of ints or floats. '''
-		return sum(l)/len(l)
+		# HACK: add a small value to the denominator to avoid divide by zero for out of service locations (i.e. zero voltage).
+		return sum(l)/(len(l) + 0.00000000000000001)
 	# Detect the feeder nominal voltage:
 	for key in tree:
 		ob = tree[key]
@@ -252,9 +369,12 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 			voltImbal = maxDiff/avgVolts
 			voltImbalances[nodeName] = float("{0:.2f}".format(voltImbal))
 		# Use float("{0:.2f}".format(avg(allVolts))) if displaying the node labels
+	nodeLoadNames = {}
 	nodeNames = {}
 	for key in nodeVolts.keys():
 		nodeNames[key] = key
+		if key == loadLoc:
+			nodeLoadNames[key] = "LOAD: " + key
 	# find edge currents by parsing currdump
 	edgeCurrentSum = {}
 	edgeCurrentMax = {}
@@ -278,12 +398,18 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	edgeTuplePower = {}
 	#edgeTupleNames = dict with to-from tuples as keys and names as values for debugging
 	edgeTupleNames = {}
-	#edgeTupleNames = dict with to-from tuples as keys and names as values for debugging
+	#edgeTupleFaultNames = dict with to-from tuples as keys and the name of the Fault as the only value
+	edgeTupleFaultNames = {}
+	#edgeTupleProtDevs = dict with to-from tuples as keys and the initial of the type of protective device as the value
+	edgeTupleProtDevs = {}
+	#linePhases = dictionary containing the number of phases on each line for line-width purposes
+	linePhases = {}
 	edgePower = {}
 	for edge in edgeCurrentSum:
 		for obj in tree.values():
 			obname = obj.get('name','').replace('"','')
 			if obname == edge:
+				objType = obj.get('object')
 				nodeFrom = obj.get('from')
 				nodeTo = obj.get('to')
 				coord = (nodeFrom, nodeTo)
@@ -298,6 +424,32 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 				edgeValsPU[edge] = edgePerUnitVal
 				edgeTupleValsPU[coord] = "{0:.2f}".format(edgePerUnitVal)
 				edgeTupleNames[coord] = edge
+				if faultLoc == edge:
+					edgeTupleFaultNames[coord] = "FAULT: " + edge
+				phaseStr = obj.get('phases','').replace('"','').replace('N','').replace('S','')
+				numPhases = len(phaseStr)
+				if (numPhases < 1) or (numPhases > 3):
+					numPhases = 1
+				linePhases[edge] = numPhases
+				protDevLabel = ""
+				protDevBlownStr = ""
+				if objType in protDevices.keys():
+					for phase in protDevFinalStatus[obname].keys():
+						if objType == 'fuse':
+							if protDevFinalStatus[obname][phase] == "BLOWN":
+								protDevBlownStr = "!"
+						else:
+							if protDevFinalStatus[obname][phase] == "OPEN":
+								protDevBlownStr = "!"
+				if objType == 'fuse':
+					protDevLabel = 'F'
+				elif objType == 'switch':
+					protDevLabel = 'S'
+				elif objType == 'recloser':
+					protDevLabel = 'R'
+				elif objType == 'sectionalizer':
+					protDevLabel = 'X'
+				edgeTupleProtDevs[coord] = protDevLabel + protDevBlownStr
 	#define which dict will be used for edge line color
 	edgeColors = edgeValsPU
 	#define which dict will be used for edge label
@@ -323,25 +475,26 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 		positions = graphviz_layout(cleanG, prog='neato')
 	else:
 		positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
-		
-		remove_nodes = [n for n in fGraph if fGraph.node[n].get('pos', (0, 0)) == (0, 0)]
-		positions = {k: v for k, v in positions.iteritems() if k not in remove_nodes}
-		
-		remove_edges = [e for e in fGraph.edges(remove_nodes)]
-		edgeNames = [e for e in edgeNames if e != remove_edges]
-		
-		fGraph.remove_nodes_from(remove_nodes)
-
 	#create custom colormap
 	if customColormap:
-		custom_cm = matplotlib.colors.LinearSegmentedColormap.from_list('custColMap',[(0.0,'blue'),(0.15,'darkgray'),(0.7,'darkgray'),(1.0,'red')])
+		if scaleMin != None and scaleMax != None:
+			scaleDif = scaleMax - scaleMin
+			custom_cm = matplotlib.colors.LinearSegmentedColormap.from_list('custColMap',[(scaleMin,'blue'),(scaleMin+(0.12*scaleDif),'darkgray'),(scaleMin+(0.56*scaleDif),'darkgray'),(scaleMin+(0.8*scaleDif),'red')])
+			vmin = scaleMin
+			vmax = scaleMax
+		else:
+			custom_cm = matplotlib.colors.LinearSegmentedColormap.from_list('custColMap',[(0.0,'blue'),(0.15,'darkgray'),(0.7,'darkgray'),(1.0,'red')])
+			vmin = 0
+			vmax = 1.25
 		custom_cm.set_under(color='black')
-		vmin = 0 if colorMin is None else colorMin
-		vmax = 1.25 if colorMax is None else colorMax
 	else:
 		custom_cm = plt.cm.get_cmap('viridis')
-		vmin = None if colorMin is None else colorMin
-		vmax = None if colorMax is None else colorMax
+		if scaleMin != None and scaleMax != None:
+			vmin = scaleMin
+			vmax = scaleMax
+		else:
+			vmin = None
+			vmax = None
 	drawColorbar = False
 	emptyColors = {}
 	#draw edges with or without colors
@@ -364,18 +517,17 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 			print "WARNING: edgeCol property must be 'Current', 'Power', 'Rating', 'PercentOfRating', or None"
 	else:
 		edgeList = [emptyColors.get(n,.6) for n in edgeNames]
-	
 	edgeIm = nx.draw_networkx_edges(fGraph,
 		pos = positions,
-		# edge_color = edgeList,
-		width = 1,
-		# edge_cmap = custom_cm
-	)
-
+		edge_color = edgeList,
+		width = [linePhases.get(n,1) for n in edgeNames],
+		edge_cmap = custom_cm)
 	#draw edge labels
 	if edgeLabs != None:
 		if edgeLabs == "Name":
 			edgeLabels = edgeTupleNames
+		elif edgeLabs == "Fault":
+			edgeLabels = edgeTupleFaultNames
 		elif edgeLabs == "Value":
 			if edgeCol == "Current":
 				edgeLabels = edgeTupleCurrents
@@ -388,6 +540,8 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 			else:
 				edgeLabels = None
 				print "WARNING: edgeCol property cannot be set to None when edgeLabs property is set to 'Value'"
+		elif edgeLabs == "ProtDevs":
+			edgeLabels = edgeTupleProtDevs
 		else:
 			edgeLabs = None
 			print "WARNING: edgeLabs property must be either 'Name', 'Value', or None"
@@ -403,13 +557,12 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 			drawColorbar = True
 		elif nodeCol == "VoltageImbalance":
 			nodeList = [voltImbalances.get(n,1) for n in fGraph.nodes()]
-			print nodeList
 			drawColorbar = True
 		elif nodeCol == "perUnitVoltage":
 			nodeList = [nodeVoltsPU.get(n,.5) for n in fGraph.nodes()]
 			drawColorbar = True
 		elif nodeCol == "perUnit120Voltage":
-			nodeList = [nodeVoltsPU120.get(n,60) for n in fGraph.nodes()]
+			nodeList = [nodeVoltsPU120.get(n,120) for n in fGraph.nodes()]
 			drawColorbar = True
 		else:
 			nodeList = [emptyColors.get(n,1) for n in fGraph.nodes()]
@@ -442,6 +595,9 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 			else:
 				nodeLabels = None
 				print "WARNING: nodeCol property cannot be set to None when nodeLabs property is set to 'Value'"
+		#HACK: add hidden node label option for displaying specified load name
+		elif nodeLabs == "Load":
+			nodeLabels = nodeLoadNames
 		else:
 			nodeLabs = None
 			print "WARNING: nodeLabs property must be either 'Name', 'Value', or None"
@@ -450,7 +606,6 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 			pos = positions,
 			labels = nodeLabels,
 			font_size = 8)
-
 	plt.sci(nodeIm)
 	# plt.clim(110,130)
 	if drawColorbar:
@@ -460,6 +615,8 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 def glmToModel(glmPath, modelDir):
 	''' One shot model creation from glm. '''
 	tree = omf.feeder.parse(glmPath)
+	print "glmPath:    " + glmPath
+	print "modelDir:   " + modelDir
 	# Run powerflow. First name the folder for it.
 	# Remove old copy of the model.
 	shutil.rmtree(modelDir, ignore_errors=True)
