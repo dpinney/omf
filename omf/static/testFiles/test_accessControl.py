@@ -48,7 +48,8 @@ def client():
     client.post('/delete/Model/test/test_cvrDyn')
     for username in test_users:
         filepath = os.path.join(omfDir, 'data/User', username + '.json')
-        os.remove(filepath)
+        if os.path.isfile(filepath):
+            os.remove(filepath)
 
 
 class TestShareModel(object):
@@ -402,3 +403,28 @@ class TestShareModel(object):
                 with open(filepath) as f:
                     user_metadata = json.load(f)
                     assert user_metadata.get('readonly_models') is None
+
+    def test_ownerRevokesViewershipFromNonexistentUser_updatesModelMetadata(self, client):
+        """
+        It's possible that a model owner can share with a user, and then that user can be deleted. In such a case, the allInputData.json file should
+        be able to be updated to remove such a deleted user.
+        """
+        rv = client.post('/shareModel', data={
+            'user': 'test',
+            'modelName': 'test_voltageDrop',
+            'email': ['first-test-user', 'second-test-user']
+        })
+        assert rv.status_code == 200
+        with open(os.path.join(omfDir, 'data/Model/test/test_voltageDrop/allInputData.json')) as f:
+            model_metadata = json.load(f)
+            assert sorted(model_metadata.get('viewers')) == sorted(['first-test-user', 'second-test-user'])
+        os.remove(os.path.join(omfDir, 'data/User', 'first-test-user.json'))
+        rv = client.post('/shareModel', data={
+            'user': 'test',
+            'modelName': 'test_voltageDrop',
+            'email': ['second-test-user']
+        })
+        assert rv.status_code == 200
+        with open(os.path.join(omfDir, 'data/Model/test/test_voltageDrop/allInputData.json')) as f:
+            model_metadata = json.load(f)
+            assert model_metadata.get('viewers') == ['second-test-user']
