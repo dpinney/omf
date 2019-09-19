@@ -2578,6 +2578,72 @@ describe("Unit tests", function() {
                 });
             });
         });
+
+        describe("fillFeederList()", function() {
+
+            it("should not append a <li> element to the <ul> element for this feeder", function() {
+                const ul = document.createElement("ul");
+                const thisModelName = "this_model";
+                const thisFeederName = "this_feeder";
+                const feeders = [
+                    {
+                        model: "some_other_model",
+                        name: "some_other_feeder"
+                    },
+                    {
+                        model: thisModelName,
+                        name: thisFeederName
+                    }
+                ];
+                fillFeederList(ul, feeders, 'this_owner', thisModelName, thisFeederName);
+                expect(ul.children.length).toEqual(1);
+                expect(ul.children[0].innerHTML).toEqual('<strong>some_other_feeder</strong> from <br>"some_other_model"');
+            });
+
+            describe("If two different models have a feeder with the same name", function() {
+
+                it("should append a <li> element to the <ul> element for each feeder", function() {
+                    const ul = document.createElement("ul");
+                    const feeders = [
+                        {
+                            model: "some_other_model",
+                            name: "some_other_feeder"
+                        },
+                        {
+                            model: "a_different_model",
+                            name: "some_other_feeder"
+                        }
+                    ];
+                    fillFeederList(ul, feeders, 'this_owner', 'this_model', 'this_feeder');
+                    expect(ul.children.length).toEqual(2);
+                    const sortedChildren = Array.from(ul.children).sort();
+                    expect(sortedChildren[0].innerHTML).toEqual('<strong>some_other_feeder</strong> from <br>"some_other_model"');
+                    expect(sortedChildren[1].innerHTML).toEqual('<strong>some_other_feeder</strong> from <br>"a_different_model"');
+                });
+            });
+
+            describe("If a different model has a feeder with the same name as this feeder", function() {
+
+                it("should append a <li> element for that feeder only", function() {
+                    const ul = document.createElement("ul");
+                    const thisModelName = "this_model";
+                    const thisFeederName = "this_feeder";
+                    const feeders = [
+                        {
+                            model: "some_other_model",
+                            name: thisFeederName
+                        },
+                        {
+                            model: thisModelName,
+                            name: thisFeederName
+                        }
+                    ];
+                    fillFeederList(ul, feeders, 'this_owner', thisModelName, thisFeederName);
+                    expect(ul.children.length).toEqual(1);
+                    expect(ul.children[0].innerHTML).toEqual('<strong>this_feeder</strong> from <br>"some_other_model"');
+                });
+            });
+        });
     });
     /*
     //I shouldn't be testing these, except in cases where I should
@@ -2989,156 +3055,6 @@ describe("Unit tests", function() {
     */
 });// Unit tests
 
-/*
-//Run each test inside this block one at a time, i.e. uncomment one it() function at a time and only run one describe block at a time
-xdescribe("Integration tests that require the environment to be prepared correctly and that should be run one at a time", function() {
-
-        let originalTimeout;
-        beforeEach(function() {
-            originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-            jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000;
-        });
-    
-        afterEach(function() {
-            jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
-        });
-
-//    xdescribe("loadFeeder()", function() {
-//
-//        xit("should have its underlying XMLHttpRequest be opened properly before sending", async function() {
-//            const spy = spyOn(XMLHttpRequest.prototype, "send").and.callThrough();
-//            const spy2 = spyOn(Ajax.prototype, "send").and.callThrough();
-//            await loadFeeder("ABEC Columbia", "publicFeeders", "public");
-//
-//            console.log("Ajax send was called: " + spy2.calls.count());
-//            console.log("xmlhttprequest send was called: " + spy.calls.count());
-//            console.log(spy.calls.all());
-//        });
-//
-//        xit("should have its checkFileExists FileOperation resolve successfully", async function() {
-//            const spy = spyOn(Promise.prototype, "then").and.callThrough();
-//            await loadFeeder("ABEC Columbia", "publicFeeders", "public");
-//
-//            console.log(spy.calls.all());
-//            //console.log("count was: " + spy.calls.count());
-//            //expect()
-//        });
-//
-//        xit("should show a sensible error message to the user in case an unrecoverable error occurs", function() {
-//
-//        });
-//
-//        xit("should call saveFeeder if something goes wrong")
-//    });
-
-    xdescribe("saveFeeder()", function() {
-
-        xdescribe("if not cancelled", function() {
-
-            xit("should send 1 XMLHttpRequest that receives a successful server response", async function() {
-                spyOn(window, "reloadWrapper");
-                const spy = spyOn(Promise.prototype, "then").and.callThrough();
-                await saveFeeder();
-                spy.calls.first().object.then(function(xhr) {
-                    console.log(xhr);
-                    expect(xhr.readyState).toEqual(4);
-                    expect(xhr.status >= 200 && xhr.status < 400).toBeTruthy();
-                    expect(xhr.responseURL).not.toEqual("");
-                });
-            });
-
-            xit("should refresh the browser", async function() {
-                const spy = spyOn(window, "reloadWrapper");
-                await saveFeeder();
-                expect(spy).toHaveBeenCalled();
-            });
-
-            // Send the writeFeeder because we overwrite the server's .omd file with the new writes that the user has made.
-            xit("should send writeFeeder to the server in the first ajax request", async function() {
-                spyOn(window, "reloadWrapper");
-                const spy = spyOn(XMLHttpRequest.prototype, "send").and.callThrough();
-                //Modify the writeFeeder, but not the readFeeder.
-                writeFeeder["TestingKey"] = { prop: "testing object"};
-                await saveFeeder();
-                const feeder = JSON.parse(spy.calls.first().args[0].get("feederObjectJson"));
-                expect(feeder).toEqual(writeFeeder);
-                expect(feeder).not.toEqual(readFeeder);
-            });
-        });
-    });
-
-    xdescribe("submitForm()", function() {
-
-        xdescribe("if submitting the blankFeeder form", function() {
-
-            xdescribe("if not canceled", function() {
-
-                //it("should send 2 XMLHttpRequests that receive successful responses from the server", async function() {
-                //    spyOn(window, "reloadWrapper");
-                //    const spy = spyOn(Promise.prototype, "then").and.callThrough();
-                //    document.getElementById("blankFeederInput").value = "Test file name";
-                //    await submitForm("blankFeederInput", "blankFeederForm");
-
-                //    //console.log(spy.calls.all());
-                //    //expect(spy.calls.count()).toEqual(3);
-
-                //    let requests = 0;
-                //    for (let i = 0; i <= 2; i++) {
-                //        const promise = spy.calls.all()[i].object;
-                //        console.log(promise);
-                //        promise.then(function(xhr) {
-                //            //console.log(xhr);
-                //            if (xhr instanceof XMLHttpRequest) {
-                //                requests++;
-                //            }
-                //        });
-                //    }
-                //    return expect(requests).toEqual(2);
-
-                //    for (let i = 0; i <= 2; i++) {
-                //        if (i == 0 || i == 2) {
-                //            spy.calls.all()[i].object.then(function(xhr) {
-                //                console.log(xhr);
-                //                expect(xhr.readyState).toEqual(4);
-                //                expect(xhr.status >= 200 && xhr.status < 400).toBeTruthy();
-                //                expect(xhr.responseURL).not.toEqual("");
-                //            });
-                //        } 
-                //    }
-                //});
-
-                xit("should refresh the browser", async function() {
-                    const spy = spyOn(window, "reloadWrapper");
-                    document.getElementById("blankFeederInput").value = "Test file name";
-                    await submitForm("blankFeederInput", "blankFeederForm");
-                    expect(spy).toHaveBeenCalled();
-                });
-            });
-        });
-
-        xdescribe("if submitting milsoft form", function() {
-
-            describe ("if not canceled", function() {
-
-            });
-        });
-
-        xdescribe("if submitting gridlab form", function() {
-
-            xdescribe("if not canceled", function() {
-
-            });
-        });
-
-        xdescribe("if submitting cyme form", function() {
-
-            xdescribe("if not canceled", function() {
-
-            });
-        });
-    });
-});
-*/
 /* This is used to display the jasmine reporter.
  */
 setTimeout(

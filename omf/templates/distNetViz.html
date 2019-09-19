@@ -1015,7 +1015,7 @@
 "use strict";
 let gThisFeederName = "{% if thisFeederName %}{{ thisFeederName | safe }}{% else %}null{% endif %}";
 const gThisFeederNum = {% if thisFeederNum %}{{ thisFeederNum | safe }}{% else %}null{% endif %}; 
-const gThisModelName = "{% if thisModelName %}{{ thisModelName | safe }}{% else %}null{% endif %}"; 
+let gThisModelName = "{% if thisModelName %}{{ thisModelName | safe }}{% else %}null{% endif %}"; 
 const gThisOwner = "{% if thisOwner %}{{ thisOwner | safe }}{% else %}null{% endif %}"; 
 const gCurrentUser = "{% if currentUser %}{{ currentUser | safe }}{% else %}null{% endif %}"
 const gPublicFeeders = {% if publicFeeders %}{{ publicFeeders | safe }}{% else %}null{% endif %};
@@ -2417,29 +2417,30 @@ function getAddComponentFunction(component) {
 }
 
 /** 
- * TODO: add unit-tests
+ * Fill a list with feeders that the user can load into this feeder
  * @param {Element} ul - An html element where the list will be attached.
  * @param {Array} feeders - An array of objects, where each object has properties "model" and "name", or null. 
  * @param {string} owner - Either "public" or the current user.
  */
-function fillFeederList(ul, feeders, owner=null) {
+function fillFeederList(ul, feeders, owner, thisModelName, thisFeederName) {
     if (feeders == null) return; // sometimes the user has no feeders
     if (ul == null) return; // there is no ul if we don't show the file menu
-    const sortedNames = feeders.map(feeder => feeder.name.toLowerCase()).sort();
-    sortedNames.forEach(lowercaseName => {
-        const feeder = feeders.find(feeder => {
-            return feeder.name.toLowerCase() === lowercaseName;
+    const sortedNames = [...new Set(feeders.map(feeder => feeder.name.toLowerCase()))].sort();
+    sortedNames.forEach(name => {
+        const feeder_ary = feeders.filter(f => f.name.toLowerCase() === name);
+        feeder_ary.forEach(f => {
+            if (f.model !== thisModelName || f.name !== thisFeederName) {
+                const li = document.createElement("li");
+                li.classList.add("feederItem");
+                li.innerHTML = `<strong>${f.name}</strong> from <br>"${f.model}"`;
+                li.addEventListener("click", function() {
+                    // What is the feeder.model for a public feeder? It's "publicFeeders". Do feeders not have their own owner property? No they
+                    // don't. That's why I have a separate owner variable 
+                    loadFeeder(f.name, f.model, owner);
+                });
+                ul.append(li);
+            }
         });
-        if (feeder.name != gThisFeederName) {
-            const li = document.createElement("li");
-            li.classList.add("feederItem");
-            li.innerHTML = `<strong>${feeder.name}</strong> from <br>"${feeder.model}"`;
-            li.addEventListener("click", function() {
-                /* What is the feeder.model for a public feeder? It's "publicFeeders". Do feeders not have their own owner property? No they don't */
-                loadFeeder(feeder.name, feeder.model, owner);
-            });
-            ul.append(li);
-        }
     });
 }
 
@@ -2504,8 +2505,8 @@ function addModelOwnerHandlers(interfaceIsStatic=true) {
         fileMenu.querySelector("li[data-web='gridlabd']").addEventListener("click", () => toggleDisplay(document.getElementById("gridlabdModal")));
         fileMenu.querySelector("li[data-web='cyme']").addEventListener("click", () => toggleDisplay(document.getElementById("cymeModal")));
         // Fill feeder lists
-        fillFeederList(document.getElementById("publicFeederList"), gPublicFeeders, "public");
-        fillFeederList(document.getElementById("userFeederList"), gUserFeeders, gCurrentUser);
+        fillFeederList(document.getElementById("publicFeederList"), gPublicFeeders, "public", gThisModelName, gThisFeederName);
+        fillFeederList(document.getElementById("userFeederList"), gUserFeeders, gCurrentUser, gThisModelName, gThisFeederName);
         // Prepare the climate modal
         fillClimateModalOptions();
         // Add handlers to edit menu
