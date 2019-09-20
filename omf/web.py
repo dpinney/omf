@@ -910,66 +910,65 @@ def gridlabImportBackground(owner, modelName, feederName, feederNum, glmString):
 @flask_login.login_required
 @write_permission_function
 def scadaLoadshape(owner, feederName):
-	loadName = 'calibration'
 	#feederNum = request.form.get("feederNum",1)
+	loadName = 'calibration'
 	modelName = request.form.get("modelName","")
-	modelDir = os.path.join(os.path.dirname(__file__), "data/Model", owner, modelName)
 	# delete calibration csv, calibration folder, and error file if they exist
-	if os.path.isfile(modelDir + "/error.txt"):
-		os.remove(modelDir + "/error.txt")
-	if os.path.isfile(modelDir + "/calibration.csv"):
-		os.remove(modelDir + "/calibration.csv")
-	workDir = modelDir + "/calibration"
-	if os.path.isdir(workDir):
-		shutil.rmtree(workDir)
-		#shutil.rmtree("data/Model/" + owner + "/" +  modelName + "/calibration")
-	file = request.files['scadaFile']
-	file.save(os.path.join("data/Model/"+owner+"/"+modelName,loadName+".csv"))
-	if not os.path.isdir(modelDir+'/calibration/gridlabD'):
-		os.makedirs(modelDir+'/calibration/gridlabD')
-	feederPath = modelDir+"/"+feederName+".omd"
-	scadaPath = modelDir+"/"+loadName+".csv"
-	# TODO: parse the csv using .csv library, set simStartDate to earliest timeStamp, length to number of rows, units to difference between first 2
-	# timestamps (which is a function in datetime library). We'll need a link to the docs in the import dialog and a short blurb saying how the CSV
-	# should be built.
-	with open(scadaPath) as csv_file:
-		#reader = csv.DictReader(csvFile, delimiter='\t')
-		rows = [row for row in csv.DictReader(csv_file)]
-		#reader = csv.DictReader(csvFile)
-		#rows = [row for row in reader]
-	firstDateTime = dt.datetime.strptime(rows[1]["timestamp"], "%m/%d/%Y %H:%M:%S")
-	secondDateTime = dt.datetime.strptime(rows[2]["timestamp"], "%m/%d/%Y %H:%M:%S")
-	csvLength = len(rows)
-	units = (secondDateTime - firstDateTime).total_seconds()
-	if abs(units/3600) == 1.0:
-		simLengthUnits = 'hours'
-	simDate = firstDateTime
-	simStartDate = {"Date":simDate,"timeZone":"PST"}
-	simLength = csvLength
+	filepaths = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in 'error.txt', 'calibration.csv', 'calibration']
+	for fp in filepaths:
+		if os.path.isfile(fp):
+			os.remove(fp)
+		elif os.path.isdir(fp):
+			shutil.rmtree(fp)
+	request.files['scadaFile'].save(os.path.join(_omfDir, 'data', 'Model', owner, modelName, loadName + '.csv'))
+	dirpath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'calibration', 'gridlabD')
+	if not os.path.isdir(dirpath):
+		os.makedirs(dirpath)
 	# Run omf calibrate in background
-	importProc = Process(target=backgroundScadaLoadshape, args =[owner, modelName, workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, "FBS", (0.05,5), 5])
+	importProc = Process(target=backgroundScadaLoadshape, args=[owner, modelName, feederName, loadName])
 	importProc.start()
 	return 'Success'
 
 
-def backgroundScadaLoadshape(owner, modelName, workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, solver, calibrateError, trim):
+def backgroundScadaLoadshape(owner, modelName, feederName, loadName):
 	# heavy lifting background process/omfCalibrate and then deletes PID file
 	try:
-		pid_filepath = os.path.join(_omfDir, "data/Model", owner, modelName, "CPID.txt")
-		with open(pid_filepath, 'w') as pid_file:
+		pid_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'CPID.txt')
+		with locked_open(pid_filepath, 'w') as pid_file:
 			pid_file.write(str(os.getpid()))
+		workDir, feederPath, scadaPath, modelDir = [
+			os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in ['calibration', feederName + '.omd', loadName + '.csv', '']
+		]
+		# TODO: parse the csv using .csv library, set simStartDate to earliest timeStamp, length to number of rows, units to difference between first 2
+		# timestamps (which is a function in datetime library). We'll need a link to the docs in the import dialog and a short blurb saying how the CSV
+		# should be built.
+		with locked_open(scadaPath) as csv_file:
+			#reader = csv.DictReader(csvFile, delimiter='\t')
+			rows = [row for row in csv.DictReader(csv_file)]
+			#reader = csv.DictReader(csvFile)
+			#rows = [row for row in reader]
+		firstDateTime = dt.datetime.strptime(rows[1]["timestamp"], "%m/%d/%Y %H:%M:%S")
+		secondDateTime = dt.datetime.strptime(rows[2]["timestamp"], "%m/%d/%Y %H:%M:%S")
+		csvLength = len(rows)
+		units = (secondDateTime - firstDateTime).total_seconds()
+		if abs(units/3600) == 1.0:
+			simLengthUnits = 'hours'
+		simDate = firstDateTime
+		simStartDate = {"Date":simDate, "timeZone":"PST"}
+		simLength = csvLength
+		solver = 'FBS'
+		calibrateError = (0.05, 5)
+		trim = 5
 		omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, solver, calibrateError, trim)
-		modelDirec="data/Model/" + owner + "/" +  modelName
 		# move calibrated file to model folder, old omd files are backedup
 		if feederPath.endswith('.omd'):
-			os.rename(feederPath, feederPath+".backup")
-		os.rename(workDir+'/calibratedFeeder.omd',feederPath)
+			os.rename(feederPath, feederPath + '.backup')
+		os.rename(os.path.join(workDir, 'calibratedFeeder.omd'), feederPath)
 		# shutil.move(workDir+"/"+feederFileName, modelDirec)
 		os.remove(pid_filepath)
 	except Exception as error:
-		modelDirec="data/Model/" + owner + "/" +  modelName
-		errorString = ''.join(error)
-		with open(modelDirec+'/error.txt',"w+") as errorFile:
+		#errorString = ''.join(error)
+		with locked_open(os.path.join(modelDir, 'error.txt'), 'w') as errorFile:
 		 	errorFile.write("The CSV used is incorrectly formatted. Please refer to the OMF Wiki for CSV formatting information. The Wiki can be access by clicking the Help button on the toolbar.")
 
 
@@ -977,33 +976,25 @@ def backgroundScadaLoadshape(owner, modelName, workDir, feederPath, scadaPath, s
 @flask_login.login_required
 @write_permission_function
 def loadModelingAmi(owner, feederName):
-	#loadName = 'ami'
 	#feederNum = request.form.get('feederNum', 1)
+	loadName = 'ami'
 	modelName = request.form.get('modelName', '')
 	filepaths = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in 'amiError.txt', 'amiLoad.csv']
 	for fp in filepaths:
 		if os.path.isfile(fp):
 			os.remove(fp)
-	request.files['amiFile'].save(os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'ami.csv'))
-	#omdPath, amiPath = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in feederName + '.omd', loadName + 'csv']
-	#modelDir = "data/Model/"+owner+"/"+modelName
-	#omdPath = modelDir+"/"+feederName+".omd"
-	#amiPath = modelDir+"/"+loadName+".csv"
-	#importProc = Process(target=backgroundLoadModelingAmi, args =[owner, modelName, omdPath, amiPath])
-	importProc = Process(target=backgroundLoadModelingAmi, args =[owner, modelName, feederName])
+	request.files['amiFile'].save(os.path.join(_omfDir, 'data', 'Model', owner, modelName, loadName + '.csv'))
+	importProc = Process(target=backgroundLoadModelingAmi, args=[owner, modelName, feederName, loadName])
 	importProc.start()
 	return 'Success'
 
 
-def backgroundLoadModelingAmi(owner, modelName, feederName):
-#def backgroundLoadModelingAmi(owner, modelName, workDir, omdPath, amiPath):
+def backgroundLoadModelingAmi(owner, modelName, feederName, loadName):
 	try:
 		pid_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'APID.txt')
 		with locked_open(pid_filepath, 'w') as pid_file:
 			pid_file.write(str(os.getpid()))
-		#outDir = workDir + '/amiOutput/'
-		#outDir = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'amiOutput')
-		omdPath, amiPath, outDir = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in [feederName + '.omd', 'ami.csv', 'amiOutput']]
+		omdPath, amiPath, outDir = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in feederName + '.omd', loadName + 'csv', 'amiOutput']
 		writeNewGlmAndPlayers(omdPath, amiPath, outDir)
 		os.remove(pid_filepath)
 	except Exception:
