@@ -103,6 +103,14 @@
 				<input type="text" id="causeFilter" name="causeFilter" pattern="^.*$" required="required">
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Minimum Time Filter<span class="classic">Filter the fault data shown by leaflet map based on a lower bound on the time the faults can occur.</span></label>
+				<input type="text" id="timeMinFilter" name="timeMinFilter" pattern="^.*$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Maximum Time Filter<span class="classic">Filter the fault data shown by leaflet map based on an upper bound on the time the faults can occur.</span></label>
+				<input type="text" id="timeMaxFilter" name="timeMaxFilter" pattern="^.*$" required="required">
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Minimum Meter Filter<span class="classic">Filter the fault data shown by leaflet map based on a minimum number of meters affected by the fault.</span></label>
 				<input type="text" id="meterMinFilter" name="meterMinFilter" pattern="^\d+\.?\d*$" required="required">
 			</div>
@@ -117,61 +125,6 @@
 			<div class="shortInput">
 				<label class="tooltip">Maximum Duration Filter<span class="classic">Filter the fault data shown by leaflet map based on a maximum in fault duration (in seconds).</span></label>
 				<input type="text" id="durationMaxFilter" name="durationMaxFilter" pattern="^\d+\.?\d*$" required="required">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Month Filter<span class="classic">Filter the fault data shown by leaflet map by a specific month.</span></label>
-				<select id="monthFilter" name="monthFilter" />
-					<option value="0">Select month</option>
-					<option value="01">January</option>
-					<option value="02">February</option>
-					<option value="03">March</option>
-					<option value="04">April</option>
-					<option value="05">May</option>
-					<option value="06">June</option>
-					<option value="07">July</option>
-					<option value="08">August</option>
-					<option value="09">September</option>
-					<option value="10">October</option>
-					<option value="11">November</option>
-					<option value="12">December</option>
-				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Day Filter<span class="classic">Filter the fault data shown by leaflet map by a specific day.</span></label>
-				<select id="dayFilter" name="dayFilter" />
-					<option value="0">Select day</option>
-					<option value="01">01</option>
-					<option value="02">02</option>
-					<option value="03">03</option>
-					<option value="04">04</option>
-					<option value="05">05</option>
-					<option value="06">06</option>
-					<option value="07">07</option>
-					<option value="08">08</option>
-					<option value="09">09</option>
-					<option value="10">10</option>
-					<option value="11">11</option>
-					<option value="12">12</option>
-					<option value="13">13</option>
-					<option value="14">14</option>
-					<option value="15">15</option>
-					<option value="16">16</option>
-					<option value="17">17</option>
-					<option value="18">18</option>
-					<option value="19">19</option>
-					<option value="20">20</option>
-					<option value="21">21</option>
-					<option value="22">22</option>
-					<option value="23">23</option>
-					<option value="24">24</option>
-					<option value="25">25</option>
-					<option value="26">26</option>
-					<option value="27">27</option>
-					<option value="28">28</option>
-					<option value="29">29</option>
-					<option value="30">30</option>
-					<option value="31">31</option>
-				</select>
 			</div>
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
@@ -237,10 +190,9 @@
 			dur = feature.properties['duration'];
 			causeFilter = feature.properties['causeFilter'];
 			cause = feature.properties['cause'];
-			monthFilter = feature.properties['monthFilter'];
-			month = feature.properties['month'];
-			dayFilter = feature.properties['dayFilter'];
-			day = feature.properties['day'];
+			time = feature.properties['time'];
+			timeMin = feature.properties['timeMin'];
+			timeMax = feature.properties['timeMax'];
 			thisMeter = false;
 			if (minMeter > maxMeter)
 				return false;
@@ -270,29 +222,14 @@
 			if (thisCause == false) {
 				return false;
 			}
-			if (monthFilter != '0') {
-				if (dayFilter != '0') {
-					if (day == dayFilter && month == monthFilter) {
-						return true;
-					}
-					else return false;
-				}
-				else {
-					if (monthFilter == month) {
-						return true;
-					}
-					else return false;
-				}
-			}
-			else {
-				if (dayFilter != '0') {
-					if (dayFilter == day) {
-						return true;
-					}
-					else return false;
-				}
-				else return true;
-			}
+			thisTime = false;
+			if (timeMin > timeMax)
+				return false;
+			if (time > timeMax || time < timeMin)
+				thisTime = false;
+			else thisTime = true;
+			if (thisTime == false)
+				return false;
 			return true;
 		}
 

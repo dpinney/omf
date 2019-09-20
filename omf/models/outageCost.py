@@ -26,7 +26,7 @@ def datetime_to_float(d):
 	total_seconds = (d - epoch).total_seconds()
 	return total_seconds	
 
-def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustainedOutageThreshold, causeFilter, monthFilter, dayFilter, meterMinFilter, meterMaxFilter, durationMinFilter, durationMaxFilter):
+def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustainedOutageThreshold, causeFilter, timeMinFilter, timeMaxFilter, meterMinFilter, meterMaxFilter, durationMinFilter, durationMaxFilter):
 	' calculates outage metrics, plots a leaflet map of faults, and plots an outage timeline'
 	# check to see if work directory is specified; otherwise, create a temporary directory
 	if not workDir:
@@ -110,9 +110,11 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustain
 		lis = str(mc.loc[row, 'Meters Affected'])
 		meters = lis.split()
 		duration = datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))
-		dt = datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')
-		day = dt.strftime('%d')
-		month = dt.strftime('%m')
+		time = datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S'))
+		timeMin = datetime_to_float(datetime.datetime.strptime(timeMinFilter, '%Y-%m-%d %H:%M:%S'))
+		timeMax = datetime_to_float(datetime.datetime.strptime(timeMaxFilter, '%Y-%m-%d %H:%M:%S'))
+		print(timeMin)
+		print(timeMax)
 		meterCount = len(meters)
 		p = re.compile(r'-?\d+\.\d+')  # Compile a pattern to capture integer values
 		coords = [float(i) for i in p.findall(entry)]
@@ -121,7 +123,7 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustain
 		Dict = {}
 		Dict['geometry'] = {'type': 'Point', 'coordinates': [coord1, coord2]}
 		Dict['type'] = 'Feature'
-		Dict['properties'] = {'name': 'Fault_' + str(row+1), 'meterCount': int(meterCount), 'meterMinFilter': int(meterMinFilter), 'meterMaxFilter': int(meterMaxFilter), 'cause': str(cause), 'causeFilter': causeFilter, 'month': month, 'monthFilter': monthFilter, 'day': day, 'dayFilter': dayFilter, 'duration': int(duration), 'durationMinFilter': int(durationMinFilter), 'durationMaxFilter': int(durationMaxFilter), 'meters': str(mc.loc[row, 'Meters Affected']), 'pointColor': 'blue', 'popupContent': '<br><br>Fault start time: <b>' + str(mc.loc[row, 'Start']) + '</b><br> Fault duration: <b>' + str(duration) + ' seconds</b><br>Location: <b>' + str(coords) + '</b><br>Cause: <b>' + str(cause) + '</b><br>Meters Affected: <b><br>' + str(mc.loc[row, 'Meters Affected']) + '</b><br>Count of Meters Affected: <b>' + str(len(meters)) + '</b>.'}
+		Dict['properties'] = {'name': 'Fault_' + str(row+1), 'meterCount': int(meterCount), 'time': time, 'timeMin':timeMin, 'timeMax':timeMax, 'meterMinFilter': int(meterMinFilter), 'meterMaxFilter': int(meterMaxFilter), 'cause': str(cause), 'causeFilter': causeFilter, 'duration': int(duration), 'durationMinFilter': int(durationMinFilter), 'durationMaxFilter': int(durationMaxFilter), 'meters': str(mc.loc[row, 'Meters Affected']), 'pointColor': 'blue', 'popupContent': '<br><br>Fault start time: <b>' + str(mc.loc[row, 'Start']) + '</b><br> Fault duration: <b>' + str(duration) + ' seconds</b><br>Location: <b>' + str(coords) + '</b><br>Cause: <b>' + str(cause) + '</b><br>Meters Affected: <b><br>' + str(mc.loc[row, 'Meters Affected']) + '</b><br>Count of Meters Affected: <b>' + str(len(meters)) + '</b>.'}
 		outageMap['features'].append(Dict)
 		row += 1
 	if not os.path.exists(workDir):
@@ -189,8 +191,8 @@ def work(modelDir, inputDict):
 		inputDict['numberOfCustomers'],
 		inputDict['sustainedOutageThreshold'],
 		inputDict['causeFilter'],
-		inputDict['monthFilter'],
-		inputDict['dayFilter'],
+		inputDict['timeMinFilter'],
+		inputDict['timeMaxFilter'],
 		inputDict['meterMinFilter'],
 		inputDict['meterMaxFilter'],
 		inputDict['durationMinFilter'],
@@ -222,8 +224,8 @@ def new(modelDir):
 		"numberOfCustomers": "192",
 		"sustainedOutageThreshold": "300",
 		"causeFilter": "bird",
-		"monthFilter": "0",
-		"dayFilter": "0",
+		"timeMinFilter": "2000-01-01 00:00:01",
+		"timeMaxFilter": "2000-05-06 00:00:30",
 		"meterMinFilter": "0",
 		"meterMaxFilter": "10",
 		"durationMinFilter": "200",
