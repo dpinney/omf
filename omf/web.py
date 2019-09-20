@@ -818,40 +818,37 @@ def milImportBackground(owner, modelName, feederName, feederNum, stdString, seqS
 @write_permission_function
 def matpowerImport(owner):
 	''' API for importing a MATPOWER network. '''
-	modelName = request.form.get("modelName","")
-	networkName = str(request.form.get("networkNameM","network1"))
-	networkNum = request.form.get("networkNum",1)
+	modelName = request.form.get('modelName', '')
+	model_dir, con_file_path = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in '', 'ZPID.txt']
 	# Delete existing .m files to not clutter model.
-	path = "data/Model/"+owner+"/"+modelName
-	fileList = safeListdir(path)
-	for file in fileList:
-		if file.endswith(".m"): os.remove(path+"/"+file)
-	matFile = request.files["matFile"]
-	matFile.save(os.path.join("data/Model/"+owner+"/"+modelName,networkName+'.m'))
+	for filename in safeListdir(model_dir):
+		if filename.endswith(".m"):
+			os.remove(os.path.join(model_dir, filename))
 	# TODO: Remove error files.
-	with open("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt", "w") as conFile:
+	with locked_open(con_file_path, 'w') as conFile:
 		conFile.write("WORKING")
-	importProc = Process(target=matImportBackground, args=[owner, modelName, networkName, networkNum])
+	importProc = Process(target=matImportBackground, args=[owner, modelName])
 	importProc.start()
 	return 'Success'
 
 
-def matImportBackground(owner, modelName, networkName, networkNum):
+def matImportBackground(owner, modelName):
 	''' Function to run in the background for Milsoft import. '''
 	try:
-		modelDir = "data/Model/"+owner+"/"+modelName
-		networkDir = modelDir+"/"+networkName+".m"
-		newNet = network.parse(networkDir, filePath=True)
+		networkName = str(request.form.get('networkNameM', 'network1'))
+		network_filepath, model_dir, pid_filepath = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in [networkName + '.m', '', 'ZPID.txt']]
+		request.files['matFile'].save(network_filepath)
+		newNet = network.parse(network_filepath, filePath=True)
 		network.layout(newNet)
-		try: os.remove(networkDir)
-		except: pass
-		with open(networkDir.replace('.m','.omt'), "w") as outFile:
-			json.dump(newNet, outFile, indent=4)
-		os.remove("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
+		with locked_open(network_filepath, 'w') as f:
+			json.dump(newNet, f, indent=4)
+		os.rename(network_filepath, os.path.join(model_dir, networkName + '.omt'))
+		os.remove(pid_filepath)
+		networkNum = request.form.get("networkNum", 1)
 		removeNetwork(owner, modelName, networkNum)
-		writeToInput(modelDir, networkName, 'networkName'+str(networkNum))
+		writeToInput(model_dir, networkName, 'networkName' + str(networkNum))
 	except:
-		os.remove("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
+		os.remove(pid_filepath)
 
 
 @app.route("/gridlabdImport/<owner>", methods=["POST"])
@@ -860,49 +857,47 @@ def matImportBackground(owner, modelName, networkName, networkNum):
 def gridlabdImport(owner):
 	'''This function is used for gridlabdImporting'''
 	modelName = request.form.get("modelName","")
-	feederName = str(request.form.get("feederNameG",""))
-	feederNum = request.form.get("feederNum",1)
-	glm = request.files['glmFile']
+	error_path, modelDir = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in 'gridError.txt', '']
 	# Delete exisitng .std and .seq, .glm files to not clutter model file
-	path = "data/Model/"+owner+"/"+modelName
-	fileList = safeListdir(path)
-	for file in fileList:
-		if file.endswith(".glm") or file.endswith(".std") or file.endswith(".seq"):
-			os.remove(path+"/"+file)
-	# Save .glm file to model folder
-	glm.save(os.path.join("data/Model/"+owner+"/"+modelName,feederName+'.glm'))
-	with open("data/Model/"+owner+"/"+modelName+'/'+feederName+'.glm') as glmFile:
-		glmString = glmFile.read()
-	if os.path.isfile("data/Model/"+owner+"/"+modelName+"/gridError.txt"):
-		os.remove("data/Model/"+owner+"/"+modelName+"/gridError.txt")
-	importProc = Process(target=gridlabImportBackground, args=[owner, modelName, feederName, feederNum, glmString])
+	for filename in safeListdir(modelDir):
+		if filename.endswith(".glm") or filename.endswith(".std") or filename.endswith(".seq"):
+			os.remove(os.path.join(modelDir, filename))
+	if os.path.isfile(error_path):
+		os.remove(error_path)
+	importProc = Process(target=gridlabImportBackground, args=[owner, modelName])
 	importProc.start()
 	return 'Success'
 
 
-def gridlabImportBackground(owner, modelName, feederName, feederNum, glmString):
+def gridlabImportBackground(owner, modelName):
+#def gridlabImportBackground(owner, modelName, feederName, feederNum, glmString):
 	''' Function to run in the background for Milsoft import. '''
 	try:
-		pid_filepath = os.path.join(_omfDir, "data/Model", owner, modelName, "ZPID.txt")
-		with open(pid_filepath, 'w') as pid_file:
+		feederName = str(request.form.get("feederNameG",""))
+		feeder_path, glm_path, modelDir, pid_filepath = [
+			os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in [feederName + '.omd', feederName + '.glm', '', 'ZPID.txt']
+		]
+		with locked_open(pid_filepath, 'w') as pid_file:
 			pid_file.write(str(os.getpid()))
-		modelDir = "data/Model/"+owner+"/"+modelName
-		feederDir = modelDir+"/"+feederName+".omd"
+		# Save .glm file to model folder
+		request.files['glmFile'].save(glm_path)
+		with locked_open(glm_path) as glmFile:
+			glmString = glmFile.read()
 		newFeeder = dict(**feeder.newFeederWireframe)
 		newFeeder["tree"] = feeder.parse(glmString, False)
 		if not omf.distNetViz.contains_coordinates(newFeeder["tree"]):
 			omf.distNetViz.insert_coordinates(newFeeder["tree"])
-		with open("./static/schedules.glm","r") as schedFile:
+		with locked_open(os.path.join(_omfDir, 'static', 'schedules.glm')) as schedFile:
 			newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
-		try: os.remove(feederDir)
-		except: pass
-		with open(feederDir, "w") as outFile:
-			json.dump(newFeeder, outFile, indent=4)
+		with locked_open(feeder_path, 'w') as f: # Use 'w' mode because we're creating a new .omd file according to feederName
+			json.dump(newFeeder, f, indent=4)
 		os.remove(pid_filepath)
+		feederNum = request.form.get("feederNum", 1)
 		removeFeeder(owner, modelName, feederNum)
-		writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
-	except Exception as error:
-		with open("data/Model/"+owner+"/"+modelName+"/gridError.txt", "w") as errorFile:
+		writeToInput(modelDir, feederName, 'feederName' + str(feederNum))
+	except Exception: 
+		filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'gridError.txt')
+		with locked_open(filepath, 'w') as errorFile:
 			errorFile.write('glmError')
 
 
@@ -969,7 +964,8 @@ def backgroundScadaLoadshape(owner, modelName, feederName, loadName):
 	except Exception as error:
 		#errorString = ''.join(error)
 		with locked_open(os.path.join(modelDir, 'error.txt'), 'w') as errorFile:
-		 	errorFile.write("The CSV used is incorrectly formatted. Please refer to the OMF Wiki for CSV formatting information. The Wiki can be access by clicking the Help button on the toolbar.")
+		 	errorFile.write('The CSV used is incorrectly formatted. Please refer to the OMF Wiki for CSV formatting information. '
+				'The Wiki can be access by clicking the Help button on the toolbar.')
 
 
 @app.route("/loadModelingAmi/<owner>/<feederName>", methods=["POST"])
