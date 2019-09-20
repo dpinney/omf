@@ -21,6 +21,11 @@ modelName, template = metadata(__file__)
 tooltip = "Calculate phase unbalance and determine mitigation options."
 # hidden = True
 
+def get_loss_items(tree):
+	s = set()
+	for i, d in tree.iteritems():
+		s.add(d.get('object', ''))
+	return [x for x in s if x in ['transformer', 'underground_line', 'overhead_line', 'triplex_line']]
 
 def motor_efficiency(x):
 	return 100 - (.0179 + .402*x + .134*x**2) # curve fit from data from NREL analysis
@@ -186,6 +191,8 @@ def work(modelDir, ind):
 			df_invs[suffix][phase] = df
 			sums[suffix] += complex(df['real'].sum(), df['imag'].sum())
 
+	loss_items = get_loss_items(tree_base)
+
 	o['service_cost'] = {
 		'load': {
 			'base': n(_totals(pJoin(modelDir, 'load' + base_suffix + '.csv'), 'real') + _totals(pJoin(modelDir, 'load_node' + base_suffix + '.csv'), 'real')),
@@ -199,23 +206,23 @@ def work(modelDir, ind):
 		},
 		'losses': {
 			'base': n(sum([_totals(pJoin(modelDir, 'Zlosses_' + loss + base_suffix + '.csv'), 'real') for loss in 
-				['transformer', 'underground_line', 'overhead_line', 'triplex_line']])),
+				loss_items])),
 			'solar': n(sum([_totals(pJoin(modelDir, 'Zlosses_' + loss + solar_suffix + '.csv'), 'real') for loss in 
-				['transformer', 'underground_line', 'overhead_line', 'triplex_line']])),
+				loss_items])),
 			'controlled':n(sum([_totals(pJoin(modelDir, 'Zlosses_' + loss + controlled_suffix + '.csv'), 'real') for loss in 
-				['transformer', 'underground_line', 'overhead_line', 'triplex_line']])),
+				loss_items])),
 		},
 		'VARs': {
 			'base': n(sum([_totals(pJoin(modelDir, 'Zlosses_' + loss + base_suffix + '.csv'), 'imag') for loss in 
-				['transformer', 'underground_line', 'overhead_line', 'triplex_line']]) + sums[base_suffix].imag +
+				loss_items]) + sums[base_suffix].imag +
 				_totals(pJoin(modelDir, 'load' + base_suffix + '.csv'), 'imag') + _totals(pJoin(modelDir, 'load_node' + base_suffix + '.csv'), 'imag')
 			),
 			'solar': n(sum([_totals(pJoin(modelDir, 'Zlosses_' + loss + solar_suffix + '.csv'), 'imag') for loss in 
-				['transformer', 'underground_line', 'overhead_line', 'triplex_line']]) + sums[solar_suffix].imag +
+				loss_items]) + sums[solar_suffix].imag +
 				_totals(pJoin(modelDir, 'load' + solar_suffix + '.csv'), 'imag') + _totals(pJoin(modelDir, 'load_node' + solar_suffix + '.csv'), 'imag')
 			),
 			'controlled': n(sum([_totals(pJoin(modelDir, 'Zlosses_' + loss + controlled_suffix + '.csv'), 'imag') for loss in 
-				['transformer', 'underground_line', 'overhead_line', 'triplex_line']]) + sums[controlled_suffix].imag +
+				loss_items]) + sums[controlled_suffix].imag +
 				_totals(pJoin(modelDir, 'load' + controlled_suffix + '.csv'), 'imag') + _totals(pJoin(modelDir, 'load_node' + controlled_suffix + '.csv'), 'imag')
 			)
 		}
@@ -349,6 +356,8 @@ def _addCollectors(tree, suffix=None, pvConnection=None):
 		if 'object' in x and ('load' in x['object'].lower() or 'node' in x['object'].lower()) and all([phase in x['phases'] for phase in 'ABC']):
 			x['groupid'] = 'threePhase'
 
+	loss_items = get_loss_items(tree)
+
 	# load on system and inverters
 	all_power = 'sum(power_A.real),sum(power_A.imag),sum(power_B.real),sum(power_B.imag),sum(power_C.real),sum(power_C.imag)'
 	
@@ -361,7 +370,7 @@ def _addCollectors(tree, suffix=None, pvConnection=None):
 	
 	# Loss across system
 	all_losses = 'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)'
-	for loss in ['transformer', 'underground_line', 'overhead_line', 'triplex_line']:
+	for loss in loss_items:
 		tree[len(tree)] = {'property': all_losses, 'object': 'collector', 'group': 'class='+loss, 'limit': '0', 'file': 'Zlosses_'+loss + suffix +'.csv'}
 
 	if suffix not in ['_controlled', '_solar'] or pvConnection == 'Wye':
@@ -449,6 +458,8 @@ def new(modelDir):
 		"criticalNode": 'R1-12-47-1_node_17',
 		# "feederName1": "phase_balance_test_2",
 		# "criticalNode": 'R1-12-47-2_node_28',
+		# "feederName1": 'bavarian',
+		# "criticalNode": "node61362179654T61363120638_C", #node1730149060
 		"modelType": modelName,
 		"runTime": "",
 		"layoutAlgorithm": "geospatial", #forceDirected
