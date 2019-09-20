@@ -236,6 +236,7 @@ def fastNewUser(email):
 		nextUrl = str(request.args.get("next","/"))
 		return redirect(nextUrl)
 
+
 @app.route("/register/<email>/<reg_key>", methods=["GET", "POST"])
 def register(email, reg_key):
 	if flask_login.current_user.is_authenticated():
@@ -263,6 +264,7 @@ def register(email, reg_key):
 		return "Passwords must both match and you must accept the Terms of Use and Privacy Policy. Please go back and try again."
 	return redirect("/")
 
+
 @app.route("/changepwd", methods=["POST"])
 @flask_login.login_required
 def changepwd():
@@ -278,6 +280,7 @@ def changepwd():
 			return "not_match"
 	else:
 		return "not_auth"
+
 
 @app.route("/adminControls")
 @flask_login.login_required
@@ -298,6 +301,7 @@ def adminControls():
 			user["status"] = "emailExpired"
 	return render_template("adminControls.html", users = users)
 
+
 @app.route("/omfStats")
 @flask_login.login_required
 def omfStats():
@@ -305,6 +309,7 @@ def omfStats():
 	if User.cu() != "admin":
 		return redirect("/")
 	return render_template("omfStats.html")
+
 
 @app.route("/regenOmfStats")
 @flask_login.login_required
@@ -316,11 +321,13 @@ def regenOmfStats():
 	genImagesProc.start()
 	return redirect("/omfStats")
 
+
 @app.route("/myaccount")
 @flask_login.login_required
 def myaccount():
 	''' Render account info for any user. '''
 	return render_template("myaccount.html", user=User.cu())
+
 
 @app.route("/robots.txt")
 def static_from_root():
@@ -328,32 +335,30 @@ def static_from_root():
 
 
 def read_permission_function(func):
-	"""Run the route if the user has read permission for the model, otherwise redirect to home page."""
+	"""Run the route if the user has read permission for the model and the model exists, otherwise redirect to home page."""
 	@wraps(func)
 	def wrapper(*args, **kwargs):
-		owner = kwargs.get("owner")
+		owner = kwargs.get('owner') if kwargs.get('owner') is not None else request.form.get('user')
 		if owner is None:
-			owner = request.form.get("user")
-		if owner is None:
-			# The "owner" could not be determined which means someone is attemping unauthorized access or the front end isn't formatting its request properly
 			return redirect("/")
-		model_name = kwargs.get("modelName")
+		model_name = kwargs.get('modelName') if kwargs.get('modelName') is not None else request.form.get('modelName')
 		if model_name is None:
-			model_name = request.form.get("modelName")
-		if model_name is None:
-			# Unable to determine the model
 			return redirect("/")
-		model_metadata_path = os.path.join(_omfDir, "data/Model", owner, model_name, "allInputData.json")
+		if model_name == 'publicFeeders':
+			# Public feeders in the static/publicFeeders directory have no model associated with them, so they are a special case. Public feeders are
+			# accessed from a variety of routes, including uniqObjName and loadFeeder. Any user can read from a public feeder.
+			return func(*args, **kwargs)
+		# Check for the existence of the model. This is not strictly the task of this function, but it is convenient to check here
+		model_metadata_path = os.path.join(_omfDir, 'data/Model', owner, model_name, 'allInputData.json')
 		if not os.path.isfile(model_metadata_path):
-			return redirect("/")
-		if owner == "public":
+			return redirect('/')
+		if owner == 'public':
 			# Any user can view a public model
 			return func(*args, **kwargs)
-		else:
-			if owner == User.cu() or _is_authorized_model_viewer(owner, model_name) or "admin" == User.cu():
-				# Only owners, authorized viewers, and the admin can view a user-owned model
-				return func(*args, **kwargs)
-		return redirect("/")
+		if owner == User.cu() or _is_authorized_model_viewer(owner, model_name) or "admin" == User.cu():
+			# Only owners, authorized viewers, and the admin can view a user-owned model
+			return func(*args, **kwargs)
+		return redirect('/')
 	return wrapper
 
 
@@ -972,33 +977,38 @@ def backgroundScadaLoadshape(owner, modelName, workDir, feederPath, scadaPath, s
 @flask_login.login_required
 @write_permission_function
 def loadModelingAmi(owner, feederName):
-	loadName = 'ami'
-	feederNum = request.form.get("feederNum",1)
-	modelName = request.form.get("modelName","")
-	if os.path.isfile("data/Model/" + owner + "/" +  modelName + "/amiError.txt"):
-		os.remove("data/Model/" + owner + "/" +  modelName + "/amiError.txt")
-	if os.path.isfile("data/Model/" + owner + "/" +  modelName + "/amiLoad.csv"):
-		os.remove("data/Model/" + owner + "/" +  modelName + "/amiLoad.csv")
-	file = request.files['amiFile']
-	file.save(os.path.join("data/Model/"+owner+"/"+modelName,loadName+".csv"))
-	modelDir = "data/Model/"+owner+"/"+modelName
-	omdPath = modelDir+"/"+feederName+".omd"
-	amiPath = modelDir+"/"+loadName+".csv"
-	importProc = Process(target=backgroundLoadModelingAmi, args =[owner, modelName, modelDir, omdPath, amiPath])
+	#loadName = 'ami'
+	#feederNum = request.form.get('feederNum', 1)
+	modelName = request.form.get('modelName', '')
+	filepaths = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in 'amiError.txt', 'amiLoad.csv']
+	for fp in filepaths:
+		if os.path.isfile(fp):
+			os.remove(fp)
+	request.files['amiFile'].save(os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'ami.csv'))
+	#omdPath, amiPath = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in feederName + '.omd', loadName + 'csv']
+	#modelDir = "data/Model/"+owner+"/"+modelName
+	#omdPath = modelDir+"/"+feederName+".omd"
+	#amiPath = modelDir+"/"+loadName+".csv"
+	#importProc = Process(target=backgroundLoadModelingAmi, args =[owner, modelName, omdPath, amiPath])
+	importProc = Process(target=backgroundLoadModelingAmi, args =[owner, modelName, feederName])
 	importProc.start()
 	return 'Success'
 
 
-def backgroundLoadModelingAmi(owner, modelName, workDir, omdPath, amiPath):
+def backgroundLoadModelingAmi(owner, modelName, feederName):
+#def backgroundLoadModelingAmi(owner, modelName, workDir, omdPath, amiPath):
 	try:
-		pid_filepath = os.path.join(_omfDir, "data/Model", owner, modelName, "APID.txt")
-		with open(pid_filepath, 'w') as pid_file:
+		pid_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'APID.txt')
+		with locked_open(pid_filepath, 'w') as pid_file:
 			pid_file.write(str(os.getpid()))
-		outDir = workDir + '/amiOutput/'
+		#outDir = workDir + '/amiOutput/'
+		#outDir = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'amiOutput')
+		omdPath, amiPath, outDir = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in [feederName + '.omd', 'ami.csv', 'amiOutput']]
 		writeNewGlmAndPlayers(omdPath, amiPath, outDir)
 		os.remove(pid_filepath)
-	except Exception as error:
-		with open("data/Model/"+owner+"/"+modelName+"/error.txt", "w") as errorFile:
+	except Exception:
+		filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'error.txt')
+		with locked_open(filepath, "w") as errorFile:
 			errorFile.write("amiError")
 
 
@@ -1025,25 +1035,25 @@ def cymeImport(owner):
 def cymeImportBackground(owner, modelName, feederName, feederNum, mdbFileName):
 	''' Function to run in the background for Milsoft import. '''
 	try:
-		pid_filepath = os.path.join(_omfDir, "data/Model", owner, modelName, "ZPID.txt")
-		with open(pid_filepath, 'w') as pid_file:
-			pid_file.write(str(os.getpid()))
-		modelDir = "data/Model/"+owner+"/"+modelName+"/"
-		feederDir = modelDir+"/"+feederName+".omd"
-		newFeeder = dict(**feeder.newFeederWireframe)
 		print mdbFileName
+		pid_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'ZPID.txt')
+		with locked_open(pid_filepath, 'w') as pid_file:
+			pid_file.write(str(os.getpid()))
+		modelDir = os.path.join(_omfDir, 'data', 'Model', owner, modelName)
+		newFeeder = dict(**feeder.newFeederWireframe)
 		newFeeder["tree"] = cymeToGridlab.convertCymeModel(modelDir + mdbFileName, modelDir)
-		with open("./static/schedules.glm","r") as schedFile:
-			newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
-		try: os.remove(feederDir)
-		except: pass
-		with open(feederDir, "w") as outFile:
-			json.dump(newFeeder, outFile, indent=4)
+		with locked_open(os.path.join(_omfDir, 'static', 'schedules.glm')) as schedFile:
+			newFeeder["attachments"] = {"schedules.glm": schedFile.read()}
+		feeder_filepath = os.path.join(modelDir, feederName + '.omd')
+		# Use 'w' mode becuase the feederName is the name of a completely NEW feeder file
+		with locked_open(feeder_filepath, 'w') as f: 
+			json.dump(newFeeder, f, indent=4)
 		os.remove(pid_filepath)
-		removeFeeder(owner, modelName, feederNum)
-		writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
-	except Exception as error:
-		with open("data/Model/"+owner+"/"+modelName+"/gridError.txt", "w") as errorFile:
+		removeFeeder(owner, modelName, feederNum) # remove the old feeder file that had the same feeder number
+		writeToInput(modelDir, feederName, 'feederName' + str(feederNum))
+	except Exception:
+		filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'gridError.txt')
+		with locked_open(filepath, 'w') as errorFile:
 			errorFile.write('cymeError')
 
 
@@ -1053,15 +1063,16 @@ def cymeImportBackground(owner, modelName, feederName, feederNum, mdbFileName):
 def newSimpleFeeder(owner, modelName, feederNum=1, writeInput=False, feederName='feeder1'):
 	modelDir = os.path.join(_omfDir, "data", "Model", owner, modelName)
 	for i in range(2,6):
-		if not os.path.isfile(os.path.join(modelDir,feederName+'.omd')):
-			with open("./static/SimpleFeeder.json", "r") as simpleFeederFile:
-				with open(os.path.join(modelDir, feederName+".omd"), "w") as outFile:
-					outFile.write(simpleFeederFile.read())
+		if not os.path.isfile(os.path.join(modelDir, feederName + '.omd')):
+			with locked_open(os.path.join(_omfDir, 'static', 'SimpleFeeder.json')) as f:
+				feeder_string = f.read()
+			with locked_open(os.path.join(modelDir, feederName + '.omd'), 'w') as f:
+				f.write(feeder_string)
 			break
 		else:
-			feederName = 'feeder'+str(i)
+			feederName = 'feeder' + str(i)
 	if writeInput:
-		writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
+		writeToInput(modelDir, feederName, 'feederName' + str(feederNum))
 	return 'Success'
 
 
@@ -1070,14 +1081,17 @@ def newSimpleFeeder(owner, modelName, feederNum=1, writeInput=False, feederName=
 @write_permission_function
 def newSimpleNetwork(owner, modelName, networkNum=1, writeInput=False, networkName='network1'):
 	modelDir = os.path.join(_omfDir, "data", "Model", owner, modelName)
-	for i in range(2,6):
-		if not os.path.isfile(os.path.join(modelDir,networkName+'.omt')):
-			with open("./static/SimpleNetwork.json", "r") as simpleNetworkFile:
-				with open(os.path.join(modelDir, networkName+".omt"), "w") as outFile:
-					outFile.write(simpleNetworkFile.read())
+	for i in range(2, 6):
+		if not os.path.isfile(os.path.join(modelDir, networkName + '.omt')):
+			with locked_open(os.path.join(_omfDir, 'static', 'SimpleNetwork.json')) as f:
+				network_string = f.read()
+			with locked_open(os.path.join(modelDir, networkName + '.omt'), 'w') as f:
+				f.write(network_string)
 			break
-		else: networkName = 'network'+str(i)
-	if writeInput: writeToInput(modelDir, networkName, 'networkName'+str(networkNum))
+		else:
+			networkName = 'network' + str(i)
+	if writeInput:
+		writeToInput(modelDir, networkName, 'networkName' + str(networkNum))
 	return 'Success'
 
 
@@ -1129,7 +1143,8 @@ def newBlankNetwork(owner):
 @read_permission_function
 def feederData(owner, modelName, feederName, modelFeeder=False):
 	#MAYBEFIX: fix modelFeeder capability.
-	with open("data/Model/" + owner + "/" + modelName + "/" + feederName + ".omd", "r") as feedFile:
+	filepath = os.path.join(_omfDir, 'data/Model', owner, modelName, feederName + '.omd')
+	with locked_open(filepath) as feedFile:
 		return feedFile.read()
 
 
@@ -1137,7 +1152,8 @@ def feederData(owner, modelName, feederName, modelFeeder=False):
 @flask_login.login_required
 @read_permission_function
 def networkData(owner, modelName, networkName):
-	with open("data/Model/" + owner + "/" + modelName + "/" + networkName + ".omt", "r") as netFile:
+	filepath = os.path.join(_omfDir, 'data/Model', owner, modelName, networkName + '.omt')
+	with locked_open(filepath) as netFile:
 		thisNet = json.load(netFile)
 	return json.dumps(thisNet)
 	# return jsonify(netFile.read())
@@ -1185,16 +1201,16 @@ def saveFeeder(owner, modelName, feederName, feederNum):
 				else:
 					raise
 	writeToInput(model_dir, feederName, 'feederName' + str(feederNum))
-	payload = json.loads(request.form.to_dict().get("feederObjectJson","{}"))
+	payload = json.loads(request.form.get('feederObjectJson', '{}'))
 	feeder_file = os.path.join(model_dir, feederName + ".omd")
 	if os.path.isfile(feeder_file):
-		with locked_open(feeder_file, 'r+') as outFile:
-			outFile.truncate(0)
-			json.dump(payload, outFile, indent=4) # This route is slow only because this line takes forever. We want the indentation so we keep this line
+		with locked_open(feeder_file, 'r+') as f:
+			f.truncate(0)
+			json.dump(payload, f, indent=4) # This route is slow only because this line takes forever. We want the indentation so we keep this line
 	else:
 		# The feeder_file should always exist, but just in case there was an error, we allow the recreation of the file
-		with locked_open(feeder_file, 'w') as outFile:
-			json.dump(payload, outFile, indent=4) # This route is slow only because this line takes forever. We want the indentation so we keep this line
+		with locked_open(feeder_file, 'w') as f:
+			json.dump(payload, f, indent=4)
 	return 'Success'
 
 
@@ -1204,9 +1220,11 @@ def saveFeeder(owner, modelName, feederName, feederNum):
 def saveNetwork(owner, modelName, networkName):
 	''' Save network data. '''
 	print "Saving network for:%s, with model: %s, and network: %s"%(owner, modelName, networkName)
-	with open("data/Model/" + owner + "/" + modelName + "/" + networkName + ".omt", "w") as outFile:
-		payload = json.loads(request.form.to_dict().get("networkObjectJson","{}"))
-		json.dump(payload, outFile, indent=4)
+	filepath = os.path.join(_omfDir, 'data/Model', owner, modelName, networkName + '.omt')
+	payload = json.loads(request.form.get('networkObjectJson', '{}'))
+	with locked_open(filepath, 'r+') as f:
+		f.truncate(0)	
+		json.dump(payload, f, indent=4)
 	return 'Success'
 
 
@@ -1220,7 +1238,7 @@ def renameFeeder(owner, modelName, oldName, newName, feederNum):
 	old_feeder_filepath = os.path.join(model_dir_path, oldName + ".omd")
 	if os.path.isfile(new_feeder_filepath) or not os.path.isfile(old_feeder_filepath):
 		return "Failure"
-	with locked_open(old_feeder_filepath, 'r+') as f:
+	with locked_open(old_feeder_filepath, 'r+'):
 		os.rename(old_feeder_filepath, new_feeder_filepath)
 	writeToInput(model_dir_path, newName, 'feederName' + str(feederNum))
 	return 'Success'
@@ -1231,19 +1249,14 @@ def renameFeeder(owner, modelName, oldName, newName, feederNum):
 @write_permission_function
 def renameNetwork(owner, modelName, oldName, networkName, networkNum):
 	''' rename a feeder. '''
-	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
-	networkDir = os.path.join(modelDir, networkName+'.omt')
-	oldnetworkDir = os.path.join(modelDir, oldName+'.omt')
-	if not os.path.isfile(networkDir) and os.path.isfile(oldnetworkDir):
-		with open(oldnetworkDir, "r") as networkIn:
-			with open(networkDir, "w") as outFile:
-				outFile.write(networkIn.read())
-	elif os.path.isfile(networkDir):
-		return 'Failure'
-	elif not os.path.isfile(oldnetworkDir):
-		return 'Failure'
-	os.remove(oldnetworkDir)
-	writeToInput(modelDir, networkName, 'networkName'+str(networkNum))
+	model_dir_path = os.path.join(_omfDir, "data","Model", owner, modelName)
+	new_network_filepath = os.path.join(model_dir_path, networkName + '.omt')
+	old_network_filepath = os.path.join(model_dir_path, oldName + '.omt')
+	if os.path.isfile(new_network_filepath) or not os.path.isfile(old_network_filepath):
+		return "Failure"
+	with locked_open(old_network_filepath, 'r+'):
+		os.rename(old_network_filepath, new_network_filepath)
+	writeToInput(model_dir_path, networkName, 'networkName' + str(networkNum))
 	return 'Success'
 
 
@@ -1255,14 +1268,14 @@ def removeFeeder(owner, modelName, feederNum, feederName=None):
 	'''Remove a feeder from input data.'''
 	try:
 		allInput = get_model_metadata(owner, modelName)
-		modelDir = os.path.join(_omfDir, "data/Model", owner, modelName)
+		modelDir = os.path.join(_omfDir, 'data', 'Model', owner, modelName)
 		try:
 			feederName = str(allInput.get('feederName'+str(feederNum)))
 			os.remove(os.path.join(modelDir, feederName +'.omd'))
 		except: 
 			print "Couldn't remove feeder file in web.removeFeeder()."
-		allInput.pop("feederName"+str(feederNum))
-		with locked_open(modelDir+"/allInputData.json", "r+") as f:
+		allInput.pop("feederName" + str(feederNum))
+		with locked_open(os.path.join(modelDir, 'allInputData.json'), 'r+') as f:
 			f.truncate(0)
 			json.dump(allInput, f, indent=4)
 		return 'Success'
@@ -1277,16 +1290,19 @@ def loadFeeder(frfeederName, frmodelName, modelName, feederNum, frUser, owner):
 	'''Load a feeder from one model to another.'''
 	if frUser != "public":
 		frUser = User.cu()
-		frmodelDir = "./data/Model/" + frUser + "/" + frmodelName
+		frmodelDir = os.path.join(_omfDir, 'data/Model', frUser, frmodelName)
 	elif frUser == "public":
-		frmodelDir = "./static/publicFeeders"
+		frmodelDir = os.path.join(_omfDir, 'static/publicFeeders')
 	#print "Entered loadFeeder with info: frfeederName %s, frmodelName: %s, modelName: %s, feederNum: %s"%(frfeederName, frmodelName, str(modelName), str(feederNum))
-	modelDir = "./data/Model/" + owner + "/" + modelName
-	with locked_open(modelDir + "/allInputData.json") as inJson:
-		feederName = json.load(inJson).get('feederName' + str(feederNum))
-	with locked_open(os.path.join(frmodelDir, frfeederName+'.omd')) as inFeeder:
-		with locked_open(os.path.join(modelDir, feederName+".omd"), "w") as outFile:
-			outFile.write(inFeeder.read())
+	# I can't use shutil.copyfile() becasue I need locks on the source and destination file
+	#shutil.copyfile(os.path.join(frmodelDir, frfeederName + '.omd'), os.path.join(modelDir, feederName + '.omd'))
+	with locked_open(os.path.join(frmodelDir, frfeederName + '.omd')) as inFeeder:
+		feeder_string = inFeeder.read()
+	modelDir = os.path.join(_omfDir, 'data/Model', owner, modelName)
+	feederName = get_model_metadata(owner, modelName).get('feederName' + str(feederNum))
+	with locked_open(os.path.join(modelDir, feederName + '.omd'), 'r+') as outFile:
+		outFile.truncate(0)
+		outFile.write(feeder_string)
 	if request.form.get("referrer") == "distribution":
 		return redirect(url_for("distribution_get", owner=owner, modelName=modelName, feeder_num=feederNum))
 	return redirect(url_for('feederGet', owner=owner, modelName=modelName, feederNum=feederNum))
@@ -1311,10 +1327,10 @@ def cleanUpFeeders(owner, modelName):
 		allInput['feederName'+str(i+1)] = feeders[key]
 	pprint.pprint(allInput)
 	modelDir = "./data/Model/" + owner + "/" + modelName
-	with locked_open(modelDir+"/allInputData.json", "r+") as f:
+	with locked_open(modelDir + "/allInputData.json", "r+") as f:
 		f.truncate(0)
 		json.dump(allInput, f, indent=4)
-	return redirect("/model/" + owner + "/" + modelName)
+	return redirect(url_for('showModel', owner=owner, modelName=modelName))
 
 
 @app.route("/removeNetwork/<owner>/<modelName>/<networkNum>", methods=["GET","POST"])
@@ -1324,16 +1340,17 @@ def cleanUpFeeders(owner, modelName):
 def removeNetwork(owner, modelName, networkNum, networkName=None):
 	'''Remove a network from input data.'''
 	try:
+		allInput = get_model_metadata(owner, modelName)
 		modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
-		with open(modelDir + "/allInputData.json") as inJson:
-			allInput = json.load(inJson)
 		try:
 			networkName = str(allInput.get('networkName'+str(networkNum)))
 			os.remove(os.path.join(modelDir, networkName +'.omt'))
-		except: print "Couldn't remove network file in web.removeNetwork()."
+		except: 
+			print "Couldn't remove network file in web.removeNetwork()."
 		allInput.pop("networkName"+str(networkNum))
-		with open(modelDir+"/allInputData.json","w") as inputFile:
-			json.dump(allInput, inputFile, indent = 4)
+		with locked_open(modelDir + "/allInputData.json", 'r+') as f:
+			f.truncate(0)
+			json.dump(allInput, f, indent=4)
 		return 'Success'
 	except:
 		return 'Failed'
@@ -1364,7 +1381,7 @@ def climateChange(owner, feederName):
 def backgroundClimateChange(omdPath, owner, modelName):
 	try:
 		pid_filepath = os.path.join(_omfDir, "data/Model", owner, modelName, "WPID.txt")
-		with open(pid_filepath, 'w') as pid_file:
+		with locked_open(pid_filepath, 'w') as pid_file:
 			pid_file.write(str(os.getpid()))
 		importOption = request.form.get('climateImportOption')
 		if importOption is None:
@@ -1380,29 +1397,30 @@ def backgroundClimateChange(omdPath, owner, modelName):
 			weather.attachHistoricalWeather(omdPath, year, station)
 		elif importOption == 'tmyImport':
 			# Old calibration logic. Preserve for the sake of the 'tmyImport' option
-			with open(omdPath, 'r') as inFile:
+			with locked_open(omdPath, 'r') as inFile:
 				feederJson = json.load(inFile)
-				for key in feederJson['tree'].keys():
-					if (feederJson['tree'][key].get('object') == 'climate') or (feederJson['tree'][key].get('name') == 'weatherReader'):
-						del feederJson['tree'][key]
-				for key in feederJson['attachments'].keys():
-					if (key.endswith('.tmy2')) or (key == 'weatherAirport.csv'):
-						del feederJson['attachments'][key]
+			for key in feederJson['tree'].keys():
+				if (feederJson['tree'][key].get('object') == 'climate') or (feederJson['tree'][key].get('name') == 'weatherReader'):
+					del feederJson['tree'][key]
+			for key in feederJson['attachments'].keys():
+				if (key.endswith('.tmy2')) or (key == 'weatherAirport.csv'):
+					del feederJson['attachments'][key]
 			# Old tmy2 weather operation
 			zipCode = request.form.get('zipCode')
 			climateName = weather.zipCodeToClimateName(zipCode)
 			tmyFilePath = 'data/Climate/' + climateName + '.tmy2'
 			feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'climate','name':'Climate','interpolate':'QUADRATIC', 'tmyfile':'climate.tmy2'}
-			with open(tmyFilePath) as tmyFile:
+			with locked_open(tmyFilePath) as tmyFile:
 				feederJson['attachments']['climate.tmy2'] = tmyFile.read()
-			with locked_open(omdPath, 'w') as outFile:
-				json.dump(feederJson, outFile, indent=4)
+			with locked_open(omdPath, 'r+') as f:
+				f.truncate(0)
+				json.dump(feederJson, f, indent=4)
 		try:
 			os.remove(pid_filepath)
 		except:
 			pass
 	except Exception as e:
-		with open("data/Model/"+owner+"/"+modelName+"/error.txt", "w") as errorFile:
+		with locked_open("data/Model/"+owner+"/"+modelName+"/error.txt", "w") as errorFile:
 			message = "climateError" if e.message == '' else e.message
 			errorFile.write(message)
 
@@ -1422,43 +1440,43 @@ def anonymize(owner, feederName):
 def backgroundAnonymize(modelDir, omdPath, owner, modelName):
 	try:
 		pid_filepath = os.path.join(_omfDir, "data/Model", owner, modelName, "NPID.txt")
-		with open(pid_filepath, 'w') as pid_file:
+		with locked_open(pid_filepath, 'w') as pid_file:
 			pid_file.write(str(os.getpid()))
-		with open(omdPath, 'r') as inFile:
+		with locked_open(omdPath, 'r') as inFile:
 			inFeeder = json.load(inFile)
-			# Name Option
-			nameOption = request.form.get('anonymizeNameOption')
-			newNameKey = None
-			if nameOption == 'pseudonymize':
-				newNameKey = anonymization.distPseudomizeNames(inFeeder)
-			elif nameOption == 'randomize':
-				anonymization.distRandomizeNames(inFeeder)
-			# Location Option
-			locOption = request.form.get('anonymizeLocationOption')
-			if locOption == 'translation':
-				translationRight = request.form.get('translateRight')
-				translationUp = request.form.get('translateUp')
-				rotation = request.form.get('rotate')
-				anonymization.distTranslateLocations(inFeeder, translationRight, translationUp, rotation)
-			elif locOption == 'randomize':
-				anonymization.distRandomizeLocations(inFeeder)
-			elif locOption == 'forceLayout':
-				omf.distNetViz.insert_coordinates(inFeeder["tree"])
-			# Electrical Properties
-			if request.form.get('modifyLengthSize'):
-				anonymization.distModifyTriplexLengths(inFeeder)
-				anonymization.distModifyConductorLengths(inFeeder)
-			if request.form.get('smoothLoadGen'):
-				anonymization.distSmoothLoads(inFeeder)
-			if request.form.get('shuffleLoadGen'):
-				shufPerc = request.form.get('shufflePerc')
-				anonymization.distShuffleLoads(inFeeder, shufPerc)
-			if request.form.get('addNoise'):
-				noisePerc = request.form.get('noisePerc')
-				anonymization.distAddNoise(inFeeder, noisePerc)
-		# Should be truncate! Right?
-		with locked_open(omdPath, 'w') as outFile:
-			json.dump(inFeeder, outFile, indent=4)
+		# Name Option
+		nameOption = request.form.get('anonymizeNameOption')
+		newNameKey = None
+		if nameOption == 'pseudonymize':
+			newNameKey = anonymization.distPseudomizeNames(inFeeder)
+		elif nameOption == 'randomize':
+			anonymization.distRandomizeNames(inFeeder)
+		# Location Option
+		locOption = request.form.get('anonymizeLocationOption')
+		if locOption == 'translation':
+			translationRight = request.form.get('translateRight')
+			translationUp = request.form.get('translateUp')
+			rotation = request.form.get('rotate')
+			anonymization.distTranslateLocations(inFeeder, translationRight, translationUp, rotation)
+		elif locOption == 'randomize':
+			anonymization.distRandomizeLocations(inFeeder)
+		elif locOption == 'forceLayout':
+			omf.distNetViz.insert_coordinates(inFeeder["tree"])
+		# Electrical Properties
+		if request.form.get('modifyLengthSize'):
+			anonymization.distModifyTriplexLengths(inFeeder)
+			anonymization.distModifyConductorLengths(inFeeder)
+		if request.form.get('smoothLoadGen'):
+			anonymization.distSmoothLoads(inFeeder)
+		if request.form.get('shuffleLoadGen'):
+			shufPerc = request.form.get('shufflePerc')
+			anonymization.distShuffleLoads(inFeeder, shufPerc)
+		if request.form.get('addNoise'):
+			noisePerc = request.form.get('noisePerc')
+			anonymization.distAddNoise(inFeeder, noisePerc)
+		with locked_open(omdPath, 'r+') as f:
+			f.truncate(0)
+			json.dump(inFeeder, f, indent=4)
 		os.remove(pid_filepath)
 		if newNameKey:
 			return newNameKey
@@ -1482,8 +1500,8 @@ def zillow_houses():
 		os.remove(payload_filepath)
 	# Write the ZPID.txt file now so there is no way the client will get a 404 when they check for an ongoing process. Process hasn't started yet though.
 	zpid_filepath = os.path.join(model_dir, "ZPID.txt")
-	with locked_open(zpid_filepath, 'w') as f:
-		f.write("")
+	with locked_open(zpid_filepath, 'w'):
+		pass
 	importProc = Process(target=background_zillow_houses, args=[model_dir])
 	importProc.start()
 	return ""
@@ -1753,7 +1771,7 @@ def downloadModelData(owner, modelName, fullPath):
 @app.route("/uniqObjName/<objtype>/<owner>/<name>")
 @app.route("/uniqObjName/<objtype>/<owner>/<name>/<modelName>")
 @flask_login.login_required
-@read_permission_function # This route needs read permissions be duplicate model uses it
+@read_permission_function # This route needs read permissions because duplicate model uses it
 def uniqObjName(objtype, owner, name, modelName=False):
 	"""Checks if a given object type/owner/name is unique. More like checks if a file exists on the server"""
 	print "Entered uniqobjname", owner, name, modelName
