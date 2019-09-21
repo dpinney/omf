@@ -471,16 +471,17 @@ def cancelModel():
 @read_permission_function
 def duplicateModel(owner, modelName):
 	newName = request.form.get("newName","")
-	destinationPath = "./data/Model/" + User.cu() + "/" + newName
-	shutil.copytree("./data/Model/" + owner + "/" + modelName, destinationPath)
-	with open(destinationPath + "/allInputData.json","r") as inFile:
-		inData = json.load(inFile)
-	if inData.get("viewers") is not None:
-		del inData["viewers"]
-	inData["created"] = str(dt.datetime.now())
-	with open(destinationPath + "/allInputData.json","w") as outFile:
-		json.dump(inData, outFile, indent=4)
-	return redirect("/model/" + User.cu() + "/" + newName)
+	destination_path = os.path.join(_omfDir, 'data', 'Model', User.cu(), newName)
+	shutil.copytree(os.path.join(_omfDir, 'data', 'Model', owner, modelName), destination_path)
+	with locked_open(os.path.join(destination_path, 'allInputData.json')) as f:
+		new_model_metadata = json.load(f)
+	if new_model_metadata.get('viewers') is not None:
+		del new_model_metadata['viewers']
+	new_model_metadata['created'] = str(dt.datetime.now())
+	with locked_open(os.path.join(destination_path, 'allInputData.json'), 'r+') as f:
+		f.truncate(0)
+		json.dump(new_model_metadata, f, indent=4)
+	return redirect(url_for('showModel', owner=User.cu(), modelName=newName))
 
 
 @app.route("/shareModel", methods=["POST"])
@@ -494,7 +495,7 @@ def shareModel():
 	# Check for nonexistant users
 	emails = list(set(request.form.getlist("email"))) if len(request.form.getlist("email")) != 0 else None
 	if emails is not None:
-		invalid_emails = filter(lambda e: e == User.cu() or e == 'admin' or not os.path.isfile(os.path.join(_omfDir, "data/User", e + ".json")), emails)
+		invalid_emails = filter(lambda e: e == User.cu() or e == 'admin' or not os.path.isfile(os.path.join(_omfDir, 'data', 'User', e + '.json')), emails)
 		if len(invalid_emails) != 0:
 			response = jsonify(invalid_emails)
 			response.status_code = 400
@@ -503,7 +504,7 @@ def shareModel():
 	owner = request.form.get("user")
 	model_name = request.form.get("modelName")
 	from models import __neoMetaModel__
-	status = __neoMetaModel__.getStatus(os.path.join(_omfDir, 'data/Model', owner, model_name))
+	status = __neoMetaModel__.getStatus(os.path.join(_omfDir, 'data', 'Model', owner, model_name))
 	if status == 'running':
 		return ("The model cannot be shared while it is running. Please wait until the model finishes running.", 409)
 	# Load the list of old viewers
@@ -515,7 +516,7 @@ def shareModel():
 			model_metadata["viewers"] = emails
 		elif old_viewers is not None:
 			del model_metadata["viewers"]
-		filepath = os.path.join(_omfDir, "data/Model", owner, model_name, "allInputData.json")
+		filepath = os.path.join(_omfDir, 'data', 'Model', owner, model_name, 'allInputData.json')
 		with locked_open(filepath, 'r+') as f:
 			f.truncate(0)
 			json.dump(model_metadata, f, indent=4) # Could an email be a malicious string of code?
@@ -533,10 +534,9 @@ def shareModel():
 	return response
 
 
-### NEW STUFF
 def revoke_viewership(owner, model_name, username):
 	"""Given a model named <model_name> of <owner>, revoke the ability of <username> to view the model in the dashboard"""
-	filepath = os.path.join(_omfDir, "data/User", username + ".json")
+	filepath = os.path.join(_omfDir, 'data', 'User', username + ".json")
 	if os.path.isfile(filepath):
 		with locked_open(filepath) as f:
 			viewer_metadata = json.load(f)
@@ -555,7 +555,7 @@ def revoke_viewership(owner, model_name, username):
 
 
 def grant_viewership(owner, model_name, username):
-	filepath = os.path.join(_omfDir, "data/User", username + ".json")
+	filepath = os.path.join(_omfDir, 'data', 'User', username + '.json')
 	if os.path.isfile(filepath):
 		with locked_open(filepath) as f:
 			viewer_metadata = json.load(f)
@@ -605,7 +605,6 @@ def locked_open(filepath, mode='r', timeout=30):
 	yield f
 	fcntl.flock(f, fcntl.LOCK_UN)
 	f.close() 
-### NEW STUFF
 
 
 ###################################################

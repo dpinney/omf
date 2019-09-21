@@ -1,8 +1,9 @@
-import pytest, json, os
+import pytest, json, os, shutil
 from flask import url_for
 import omf
 from omf import omfDir
 from omf.web import app
+from passlib.hash import pbkdf2_sha512
 
 
 """Integration tests for access control functionality"""
@@ -17,14 +18,14 @@ def client():
     app.config['TESTING'] = True
     client = app.test_client()
     model_name = 'test_voltageDrop'
-    # Log the test user in
+    # Log the test user in as the user named 'test'
     rv = client.post('/login', data={
         'username': 'test',
         'password': 'test'
     })
     assert rv.headers.get("Location") == "http://localhost/"
     assert rv.status_code == 302
-    # Create two test models
+    # Create two test models that belong to the 'test' user
     with client as c:
         model_name = 'test_voltageDrop'
         rv = c.get('/newModel/voltageDrop/' + model_name)
@@ -35,17 +36,26 @@ def client():
         rv = c.get('/newModel/cvrDynamic/' + model_name)
         assert rv.status_code == 302
         assert rv.headers.get("Location") == "http://localhost" + url_for('showModel', owner="test", modelName=model_name)
-    # Create two test users
+    # Create two new test users
     test_users = ['first-test-user', 'second-test-user'] 
     for username in test_users:
         filepath = os.path.join(omfDir, 'data/User', username + '.json')
+        data = json.dumps({
+            'username': username,
+            'password_digest': pbkdf2_sha512.encrypt(username)
+        })
         with open(filepath, 'w') as f:
-            f.write('{}')
+            f.write(data)
     # Send client to test
     yield client
     # Cleanup
-    client.post('/delete/Model/test/test_voltageDrop')
-    client.post('/delete/Model/test/test_cvrDyn')
+     #Posting to /delete provides 'nicer' cleanup, but I should use shutil instead
+    #client.post('/delete/Model/test/test_voltageDrop')
+    #client.post('/delete/Model/test/test_cvrDyn')
+    for model_name in ['test_voltageDrop', 'test_cvrDyn']:
+        model_path = os.path.join(omfDir, 'data', 'Model', 'test', model_name)
+        if os.path.isdir(model_path):
+            shutil.rmtree(model_path)
     for username in test_users:
         filepath = os.path.join(omfDir, 'data/User', username + '.json')
         if os.path.isfile(filepath):
@@ -428,3 +438,31 @@ class TestShareModel(object):
         with open(os.path.join(omfDir, 'data/Model/test/test_voltageDrop/allInputData.json')) as f:
             model_metadata = json.load(f)
             assert model_metadata.get('viewers') == ['second-test-user']
+
+    def test_authorizedViewerDuplicatesModel_duplicatedModelDoesNotInheritSharingPermissions(self, client):
+        rv = client.post('/shareModel', data={
+            'user': 'test',
+            'modelName': 'test_voltageDrop',
+            'email': ['first-test-user', 'second-test-user']
+        })
+        assert rv.status_code == 200
+        with open(os.path.join(omfDir, 'data/Model/test/test_voltageDrop/allInputData.json')) as f:
+            model_metadata = json.load(f)
+            assert sorted(model_metadata.get('viewers')) == sorted(['first-test-user', 'second-test-user'])
+        new_client = app.test_client()
+        rv = new_client.post('/login', data={
+            'username': 'first-test-user',
+            'password': 'first-test-user'
+        }) 
+        assert rv.headers.get("Location") == "http://localhost/"
+        assert rv.status_code == 302
+        new_model_name = 'duplicated_test_voltageDrop'
+        rv = new_client.post('/duplicateModel/test/test_voltageDrop/', data={
+            'newName': new_model_name
+        })
+        assert rv.status_code == 302
+        assert rv.headers.get("Location") == 'http://localhost/model/first-test-user/' + new_model_name
+        with open(os.path.join(omfDir, 'data/Model/first-test-user/' + new_model_name + '/allInputData.json')) as f:
+            model_metadata = json.load(f)
+            assert model_metadata.get('viewers') is None 
+        shutil.rmtree(os.path.join(omfDir, 'data', 'Model', 'first-test-user'))
