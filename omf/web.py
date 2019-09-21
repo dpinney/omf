@@ -615,7 +615,7 @@ def locked_open(filepath, mode='r', timeout=30):
 
 def writeToInput(workDir, entry, key):
 	try:
-		with locked_open(workDir + '/allInputData.json', 'r+') as f:
+		with locked_open(os.path.join(workDir, 'allInputData.json'), 'r+') as f:
 			allInput = json.load(f)
 			allInput[key] = entry
 			f.seek(0)
@@ -633,8 +633,7 @@ def feederGet(owner, modelName, feederNum):
 	allData = getDataNames()
 	yourFeeders = allData["feeders"]
 	publicFeeders = allData["publicFeeders"]
-	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
-	feederName = json.load(open(modelDir + "/allInputData.json")).get('feederName'+str(feederNum))
+	feederName = get_model_metadata(owner, modelName).get('feederName' + str(feederNum))
 	# MAYBEFIX: fix modelFeeder
 	return render_template(
 		"gridEdit.html", feeders=yourFeeders, publicFeeders=publicFeeders, modelName=modelName, feederName=feederName,
@@ -651,13 +650,14 @@ def networkGet(owner, modelName, networkNum):
 	allData = getDataNames()
 	yourNetworks = allData["networks"]
 	publicNetworks = allData["networks"]
-	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
-	networkName = json.load(open(modelDir + "/allInputData.json")).get('networkName1')
-	networkPath = modelDir + "/" + networkName + ".omt"
-	with open(modelDir + "/" + networkName + ".omt", "r") as netFile:
-		networkData = json.dumps(json.load(netFile))
+	networkName = get_model_metadata(owner, modelName).get('networkName1')
+	network_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, networkName + '.omt')
+	with locked_open(network_filepath) as f:
+		data = json.load(f)
+	networkData = json.dumps(data)
 	#Currently unused template variables: networks, publicNetworks, currUser, 
-	return render_template("transEdit.html", networks=yourNetworks, publicNetworks=publicNetworks, modelName=modelName, networkData=networkData, networkName=networkName, networkNum=networkNum, ref=request.referrer, is_admin=User.cu()=="admin", public=owner=="public",
+	return render_template("transEdit.html", networks=yourNetworks, publicNetworks=publicNetworks, modelName=modelName, networkData=networkData,
+		networkName=networkName, networkNum=networkNum, ref=request.referrer, is_admin=User.cu()=="admin", public=owner=="public",
 		currUser=User.cu(), owner=owner)
 
 
@@ -667,14 +667,12 @@ def networkGet(owner, modelName, networkNum):
 @read_permission_function
 def distribution_get(owner, modelName, feeder_num):
 	"""Render the editing interface for distribution networks."""
-	model_dir = os.path.join(_omfDir, "data/Model", owner, modelName)
-	with locked_open(model_dir + "/allInputData.json") as f:
-		feeder_dict = json.load(f)
+	feeder_dict = get_model_metadata(owner, modelName)
 	feeder_name = feeder_dict.get('feederName' + str(feeder_num))
-	feeder_filepath = os.path.join(model_dir, feeder_name + ".omd")
+	feeder_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, feeder_name + '.omd')
 	with locked_open(feeder_filepath) as f:
 		data = json.load(f)
-	passed_data = json.dumps(data)
+	feeder = json.dumps(data)
 	component_json = get_components()
 	jasmine = spec = None
 	if request.path.endswith("/test") and User.cu() == "admin":
@@ -688,10 +686,9 @@ def distribution_get(owner, modelName, feeder_num):
 		dictionary['model'] = str(dictionary['model'])
 		dictionary['name'] = str(dictionary['name'])
 	public_feeders = all_data["publicFeeders"]
-	#show_file_menu = User.cu() == "admin" or owner != "public"
 	show_file_menu = User.cu() == owner or User.cu() == "admin"
 	return render_template(
-		"distNetViz.html", thisFeederData=passed_data, thisFeederName=feeder_name, thisFeederNum=feeder_num,
+		"distNetViz.html", thisFeederData=feeder, thisFeederName=feeder_name, thisFeederNum=feeder_num,
 		thisModelName=modelName, thisOwner=owner, components=component_json, jasmine=jasmine, spec=spec,
 		publicFeeders=public_feeders, userFeeders=user_feeders, showFileMenu=show_file_menu, currentUser=User.cu()
 	)
@@ -699,11 +696,11 @@ def distribution_get(owner, modelName, feeder_num):
 
 def load_test_files(file_names):
 	"""Load the JavaScript unit-test files into a string and return the string"""
-	with open(os.path.join(_omfDir, "static", "lib", "jasmine-3.3.0", "scriptTags.html"), "r") as f:
+	with locked_open(os.path.join(_omfDir, "static", "lib", "jasmine-3.3.0", "scriptTags.html")) as f:
 		jasmine = f.read()
 	spec = ""
 	for name in file_names:
-		with open(os.path.join(_omfDir, "static", "testFiles", name), "r") as f:
+		with locked_open(os.path.join(_omfDir, "static", "testFiles", name)) as f:
 			spec += f.read()
 	return {"jasmine": jasmine, "spec": spec}
 
@@ -711,13 +708,13 @@ def load_test_files(file_names):
 @app.route("/getComponents/")
 @flask_login.login_required
 def get_components():
-	directory = "data/Component/"
+	directory = os.path.join(_omfDir, 'data', 'Component')
 	components = {}
 	for dirpath, dirnames, file_names in os.walk(directory):
 		for name in file_names:
 			if name.endswith(".json"):
 				path = os.path.join(dirpath, name)
-				with open(path) as f:
+				with locked_open(path) as f:
 					components[name[0:-5]] = json.load(f) # Load the file as a regular object into the dictionary
 	return json.dumps(components) # Turn the dictionary of objects into a string
 
