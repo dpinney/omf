@@ -733,25 +733,19 @@ def checkConversion(modelName, owner=None):
 	failed and the client should be notified.
 	"""
 	print modelName
-	#if User.cu() == "admin":
-	#	if owner is None:
-	#		owner = User.cu()
-	#else:
-	#	# owner is not always the current user, sometimes it's "public"
-	#	owner = User.cu()
 	# First check for error files
-	for filename in ["gridError.txt", "error.txt", "weatherError.txt"]:
-		filepath = os.path.join(_omfDir, "data/Model", owner, modelName, filename)
+	for filename in ['gridError.txt', 'error.txt', 'weatherError.txt']:
+		filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename)
 		if os.path.isfile(filepath):
-			with open(filepath) as f:
+			with locked_open(filepath) as f:
 				errorString = f.read()
 			return errorString
 	# Check for process ID files AFTER checking for error files
 	for filename in ["ZPID.txt", "APID.txt", "WPID.txt", "NPID.txt", "CPID.txt"]:
-		filepath = os.path.join(_omfDir, "data/Model", owner, modelName, filename)
+		filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename)
 		if os.path.isfile(filepath):
 			return jsonify(exists=True)
-	return jsonify(exists=False)		
+	return jsonify(exists=False)
 
 
 @app.route("/milsoftImport/<owner>", methods=["POST"])
@@ -760,56 +754,51 @@ def checkConversion(modelName, owner=None):
 def milsoftImport(owner):
 	''' API for importing a milsoft feeder. '''
 	modelName = request.form.get("modelName","")
-	feederName = str(request.form.get("feederNameM","feeder"))
-	modelFolder = "data/Model/"+owner+"/"+modelName
-	feederNum = request.form.get("feederNum",1)
+	model_dir, error_filepath = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in '', 'gridError.txt']
 	# Delete exisitng .std and .seq, .glm files to not clutter model file
-	path = "data/Model/"+owner+"/"+modelName
-	fileList = safeListdir(path)
-	for file in fileList:
-		if file.endswith(".glm") or file.endswith(".std") or file.endswith(".seq"):
-			os.remove(path+"/"+file)
-	stdFile = request.files.get("stdFile")
-	seqFile = request.files.get("seqFile")
-	stdFile.save(os.path.join(modelFolder,feederName+'.std'))
-	seqFile.save(os.path.join(modelFolder,feederName+'.seq'))
-	if os.path.isfile("data/Model/"+owner+"/"+modelName+"/gridError.txt"):
-		os.remove("data/Model/"+owner+"/"+modelName+"/gridError.txt")
-	with open("data/Model/"+owner+"/"+modelName+'/'+feederName+'.std') as stdInput:
-		stdString = stdInput.read()
-	with open("data/Model/"+owner+"/"+modelName+'/'+feederName+'.seq') as seqInput:
-		seqString = seqInput.read()
-	importProc = Process(target=milImportBackground, args=[owner, modelName, feederName, feederNum, stdString, seqString])
+	for filename in safeListdir(model_dir):
+		if filename.endswith(".glm") or filename.endswith(".std") or filename.endswith(".seq"):
+			os.remove(os.path.join(model_dir, filename))
+	if os.path.isfile(error_filepath):
+		os.remove(error_filepath)
+	importProc = Process(target=milImportBackground, args=[owner, modelName])
 	importProc.start()
 	return 'Success'
 
 
-def milImportBackground(owner, modelName, feederName, feederNum, stdString, seqString):
+def milImportBackground(owner, modelName):
 	''' Function to run in the background for Milsoft import. '''
 	try:
-		pid_filepath = os.path.join(_omfDir, "data/Model", owner, modelName, "ZPID.txt")
-		with open(pid_filepath, "w") as pid_file:
+		feederName = str(request.form.get("feederNameM","feeder"))
+		std_filepath, seq_filepath, pid_filepath, feeder_filepath, model_dir, error_filepath = [
+			os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in [
+				feederName + '.std', feederName + '.seq', 'ZPID.txt', feederName + '.omd', '', 'gridError.txt'
+			]
+		]
+		request.files.get('stdFile').save(std_filepath)
+		request.files.get('seqFile').save(seq_filepath)
+		with locked_open(std_filepath) as f:
+			stdString = f.read()
+		with locked_open(seq_filepath) as f:
+			seqString = f.read()
+		with locked_open(pid_filepath, 'w') as pid_file:
 			pid_file.write(str(os.getpid()))
-		modelDir = "data/Model/"+owner+"/"+modelName
-		feederDir = modelDir+"/"+feederName+".omd"
 		newFeeder = dict(**feeder.newFeederWireframe)
 		newFeeder["tree"] = milToGridlab.convert(stdString, seqString)
-		with open("./static/schedules.glm","r") as schedFile:
-			newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
-		try: os.remove(feederDir)
-		except: pass
-		with open(feederDir, "w") as outFile:
-			json.dump(newFeeder, outFile, indent=4)
-		with open(feederDir) as feederFile:
-			feederTree =  json.load(feederFile)
+		with locked_open(os.path.join(_omfDir, 'static', 'schedules.glm')) as schedFile:
+			newFeeder['attachments'] = {'schedules.glm':schedFile.read()}
+		with locked_open(feeder_filepath, 'w') as f:
+			json.dump(newFeeder, f, indent=4)
+		feederTree = newFeeder
 		if len(feederTree['tree']) < 12:
-			with open("data/Model/"+owner+"/"+modelName+"/gridError.txt", "w") as errorFile:
+			with locked_open(error_filepath, 'w') as errorFile:
 				errorFile.write('milError')
 		os.remove(pid_filepath)
+		feederNum = request.form.get("feederNum",1)
 		removeFeeder(owner, modelName, feederNum)
-		writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
-	except Exception as error:
-		with open("data/Model/"+owner+"/"+modelName+"/gridError.txt", "w") as errorFile:
+		writeToInput(model_dir, feederName, 'feederName' + str(feederNum))
+	except Exception: 
+		with locked_open(error_filepath, 'w') as errorFile:
 			errorFile.write("milError")
 
 
@@ -836,7 +825,9 @@ def matImportBackground(owner, modelName):
 	''' Function to run in the background for Milsoft import. '''
 	try:
 		networkName = str(request.form.get('networkNameM', 'network1'))
-		network_filepath, model_dir, pid_filepath = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in [networkName + '.m', '', 'ZPID.txt']]
+		network_filepath, model_dir, pid_filepath = [
+			os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in [networkName + '.m', '', 'ZPID.txt']
+		]
 		request.files['matFile'].save(network_filepath)
 		newNet = network.parse(network_filepath, filePath=True)
 		network.layout(newNet)
@@ -1236,14 +1227,14 @@ def renameFeeder(owner, modelName, oldName, newName, feederNum):
 @write_permission_function
 def renameNetwork(owner, modelName, oldName, networkName, networkNum):
 	''' rename a feeder. '''
-	model_dir_path = os.path.join(_omfDir, "data","Model", owner, modelName)
-	new_network_filepath = os.path.join(model_dir_path, networkName + '.omt')
-	old_network_filepath = os.path.join(model_dir_path, oldName + '.omt')
+	model_dir, new_network_filepath, old_network_filepath = [
+		os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in '', networkName + '.omt', oldName + '.omt'
+	]
 	if os.path.isfile(new_network_filepath) or not os.path.isfile(old_network_filepath):
 		return "Failure"
 	with locked_open(old_network_filepath, 'r+'):
 		os.rename(old_network_filepath, new_network_filepath)
-	writeToInput(model_dir_path, networkName, 'networkName' + str(networkNum))
+	writeToInput(model_dir, networkName, 'networkName' + str(networkNum))
 	return 'Success'
 
 
@@ -1280,7 +1271,7 @@ def loadFeeder(frfeederName, frmodelName, modelName, feederNum, frUser, owner):
 		frmodelDir = os.path.join(_omfDir, 'data/Model', frUser, frmodelName)
 	elif frUser == "public":
 		frmodelDir = os.path.join(_omfDir, 'static/publicFeeders')
-	#print "Entered loadFeeder with info: frfeederName %s, frmodelName: %s, modelName: %s, feederNum: %s"%(frfeederName, frmodelName, str(modelName), str(feederNum))
+	print "Entered loadFeeder with info: frfeederName %s, frmodelName: %s, modelName: %s, feederNum: %s"%(frfeederName, frmodelName, str(modelName), str(feederNum))
 	# I can't use shutil.copyfile() becasue I need locks on the source and destination file
 	#shutil.copyfile(os.path.join(frmodelDir, frfeederName + '.omd'), os.path.join(modelDir, feederName + '.omd'))
 	with locked_open(os.path.join(frmodelDir, frfeederName + '.omd')) as inFeeder:
@@ -1348,26 +1339,24 @@ def removeNetwork(owner, modelName, networkNum, networkName=None):
 @write_permission_function
 def climateChange(owner, feederName):
 	model_name = request.form.get('modelName')
-	model_dir = 'data/Model/' + owner + '/' + model_name
-	omdPath = model_dir + '/' + feederName + '.omd'
 	# Remove files that could be left over from a previous run
 	filepaths = [
-		os.path.join(model_dir, "error.txt"),
-		os.path.join(model_dir, "weatherAirport.csv"), # Old deleted historical weather option
-		os.path.join(model_dir, "uscrn-weather-data.csv")
+		os.path.join(_omfDir, 'data', 'Model', owner, model_name, filename) for filename in ['error.txt', 'weatherAirport.csv', 'uscrn-weather-data.csv']
 	]
 	for fp in filepaths:
 		if os.path.isfile(fp):
 			os.remove(fp)
 	# Don't bother writing WPID.txt here because /checkConversion doesn't distinguish between non-started processes and non-existant processes
-	importProc = Process(target=backgroundClimateChange, args=[omdPath, owner, model_name])
+	importProc = Process(target=backgroundClimateChange, args=[owner, model_name, feederName])
 	importProc.start()
 	return "Success"
 
 
-def backgroundClimateChange(omdPath, owner, modelName):
+def backgroundClimateChange(owner, modelName, feederName):
 	try:
-		pid_filepath = os.path.join(_omfDir, "data/Model", owner, modelName, "WPID.txt")
+		omdPath, pid_filepath, error_filepath = [
+			os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in [feederName + '.omd', 'WPID.txt', 'error.txt']
+		]
 		with locked_open(pid_filepath, 'w') as pid_file:
 			pid_file.write(str(os.getpid()))
 		importOption = request.form.get('climateImportOption')
@@ -1384,7 +1373,7 @@ def backgroundClimateChange(omdPath, owner, modelName):
 			weather.attachHistoricalWeather(omdPath, year, station)
 		elif importOption == 'tmyImport':
 			# Old calibration logic. Preserve for the sake of the 'tmyImport' option
-			with locked_open(omdPath, 'r') as inFile:
+			with locked_open(omdPath) as inFile:
 				feederJson = json.load(inFile)
 			for key in feederJson['tree'].keys():
 				if (feederJson['tree'][key].get('object') == 'climate') or (feederJson['tree'][key].get('name') == 'weatherReader'):
@@ -1407,7 +1396,7 @@ def backgroundClimateChange(omdPath, owner, modelName):
 		except:
 			pass
 	except Exception as e:
-		with locked_open("data/Model/"+owner+"/"+modelName+"/error.txt", "w") as errorFile:
+		with locked_open(error_filepath, 'w') as errorFile:
 			message = "climateError" if e.message == '' else e.message
 			errorFile.write(message)
 
@@ -1762,17 +1751,18 @@ def downloadModelData(owner, modelName, fullPath):
 def uniqObjName(objtype, owner, name, modelName=False):
 	"""Checks if a given object type/owner/name is unique. More like checks if a file exists on the server"""
 	print "Entered uniqobjname", owner, name, modelName
-	if objtype == "Model":
-		path = "data/Model/" + owner + "/" + name
-	elif objtype == "Feeder":
+	path_prefix = os.path.join(_omfDir, 'data', 'Model', owner)
+	if objtype == 'Model':
+		path = os.path.join(path_prefix, name)
+	elif objtype == 'Feeder':
 		if name == 'feeder':
 			return jsonify(exists=True)
-		if owner != "public":
-			path = "./data/Model/" + owner + "/" + modelName + "/" + name + ".omd"
+		if owner != 'public':
+			path = os.path.join(path_prefix, modelName, name + '.omd')
 		else:
-			path = "static/publicFeeders/" + name + ".omd"
-	elif objtype == "Network":
-		path = "data/Model/" + owner + "/" + modelName + "/" + name + ".omt"
+			path = os.path.join(_omfDir, 'static', 'publicFeeders', name + '.omd')
+	elif objtype == 'Network':
+		path = os.path.join(path_prefix, modelName, name + '.omt')
 		if name == 'feeder':
 			return jsonify(exists=True)
 	return jsonify(exists=os.path.exists(path))
