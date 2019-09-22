@@ -388,6 +388,12 @@ MODAL DIALOGS
 	/* The width of the table is throwing the width of the td's out of whack */
 	width: 80%;
 	margin: 16px auto;
+	border: 0px;
+}
+
+#emailModalContent tbody, #emailModalContent tr {
+	border: 0px;
+	background: none;
 }
 
 #emailModalContent td {
