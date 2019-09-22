@@ -118,7 +118,7 @@ def send_link(email, message, u={}):
 		u["email"] = email
 		outDict = c.send_email("admin@omf.coop", "OMF Registration Link",
 			message.replace("reg_link", URL+"/register/"+email+"/"+reg_key), [email])
-		with open("data/User/"+email+".json", "w") as f:
+		with locked_open(os.path.join(_omfDir, 'data', 'User', email + '.json'), 'w') as f:
 			json.dump(u, f, indent=4)
 		return "Success"
 	except:
@@ -128,7 +128,7 @@ def send_link(email, message, u={}):
 @login_manager.user_loader
 def load_user(username):
 	''' Required by flask_login to return instance of the current user '''
-	with open("./data/User/" + username + ".json") as f:
+	with locked_open(os.path.join(_omfDir, 'data', 'User', username + '.json')) as f:
 		data = json.load(f)
 	return User(data)
 
@@ -145,16 +145,14 @@ app.jinja_env.globals["csrf_token"] = generate_csrf_token
 @app.route("/login", methods = ["POST"])
 def login():
 	''' Authenticate a user and send them to the URL they requested. '''
-	username, password, remember = map(request.form.get, ["username",
-		"password", "remember"])
+	username, password, remember = map(request.form.get, ["username", "password", "remember"])
 	userJson = None
-	for u in safeListdir("./data/User/"):
+	for u in safeListdir(os.path.join(_omfDir, 'data', 'User')):
 		if u.lower() == username.lower() + ".json":
-			with open("./data/User/" + u) as f:
+			with locked_open(os.path.join(_omfDir, 'data', 'User', u)) as f:
 				userJson = json.load(f)
 			break
-	if userJson and pbkdf2_sha512.verify(password,
-			userJson["password_digest"]):
+	if userJson and pbkdf2_sha512.verify(password, userJson["password_digest"]):
 		user = User(userJson)
 		flask_login.login_user(user, remember = remember == "on")
 	nextUrl = str(request.form.get("next","/"))
@@ -190,22 +188,24 @@ def deleteUser():
 	print "SUCCESFULLY DELETE USER", username
 	return "Success"
 
+
 @app.route("/new_user", methods=["POST"])
 def new_user():
 	email = request.form.get("email")
 	if email == "": return "EMPTY"
-	if email in [f[0:-5] for f in safeListdir("data/User")]:
-		with open("data/User/" + email + ".json") as f:
+	if email in [f[0:-5] for f in safeListdir(os.path.join(_omfDir, 'data', 'User'))]:
+		with locked_open(os.path.join(_omfDir, 'data', 'User', email + '.json')) as f:
 			u = json.load(f)
 		if u.get("password_digest") or not request.form.get("resend"):
 			return "Already Exists"
 	message = "Click the link below to register your account for the OMF.  This link will expire in 24 hours:\n\nreg_link"
 	return send_link(email, message)
 
+
 @app.route("/forgotPassword/<email>", methods=["GET"])
 def forgotpwd(email):
 	try:
-		with open("data/User/" + email + ".json") as f:
+		with locked_open(os.path.join(_omfDir, 'data', 'User', email + '.json')) as f:
 			user = json.load(f)
 		message = "Click the link below to reset your password for the OMF.  This link will expire in 24 hours.\n\nreg_link"
 		code = send_link(email, message, user)
@@ -217,19 +217,20 @@ def forgotpwd(email):
 		print "ERROR: failed to password reset user", email, "with exception", e
 		return "We do not have a record of a user with that email address. Please click back and create an account."
 
+
 @app.route("/fastNewUser/<email>")
 def fastNewUser(email):
 	''' Create a new user, email them their password, and immediately create a new model for them.'''
-	if email in [f[0:-5] for f in safeListdir("data/User")]:
+	if email in [f[0:-5] for f in safeListdir(os.path.join(_omfDir, 'data', 'User'))]:
 		return "User with email {} already exists. Please log in or go back and use the 'Forgot Password' link. Or use a different email address.".format(email)
 	else:
 		randomPass = ''.join([random.choice('abcdefghijklmnopqrstuvwxyz') for x in range(15)])
 		user = {"username":email, "password_digest":pbkdf2_sha512.encrypt(randomPass)}
 		flask_login.login_user(User(user))
-		with open("data/User/"+user["username"]+".json","w") as outFile:
-			json.dump(user, outFile, indent=4)
+		with locked_open(os.path.join(_omfDir, 'data', 'User', user['username'] + '.json'), 'w') as f:
+			json.dump(user, f, indent=4)
 		message = "Thank you for registering an account on OMF.coop.\n\nYour password is: " + randomPass + "\n\n You can change this password after logging in."
-		with open("emailCredentials.key") as f:
+		with locked_open('emailCredentials.key') as f: # Need an absolute path here eventually
 			key = f.read()
 		c = boto.ses.connect_to_region("us-east-1", aws_access_key_id="AKIAJLART4NXGCNFEJIQ", aws_secret_access_key=key)
 		mailResult = c.send_email("admin@omf.coop", "OMF.coop User Account", message, [email])
@@ -242,7 +243,7 @@ def register(email, reg_key):
 	if flask_login.current_user.is_authenticated():
 		return redirect("/")
 	try:
-		with open("data/User/" + email + ".json") as f:
+		with locked_open(os.path.join(_omfDir, 'data', 'User', email + '.json')) as f:
 			user = json.load(f)
 	except Exception:
 		user = None
@@ -258,8 +259,8 @@ def register(email, reg_key):
 		user["username"] = email
 		user["password_digest"] = pbkdf2_sha512.encrypt(password)
 		flask_login.login_user(User(user))
-		with open("data/User/"+user["username"]+".json","w") as outFile:
-			json.dump(user, outFile, indent=4)
+		with locked_open(os.path.join(_omfDir, 'data', 'User', user['username'] + '.json'), 'w') as f: # Need 'w' mode to create new users? I would prefer r+ mode
+			json.dump(user, f, indent=4)
 	else:
 		return "Passwords must both match and you must accept the Terms of Use and Privacy Policy. Please go back and try again."
 	return redirect("/")
@@ -268,13 +269,16 @@ def register(email, reg_key):
 @app.route("/changepwd", methods=["POST"])
 @flask_login.login_required
 def changepwd():
-	old_pwd, new_pwd, conf_pwd = map(request.form.get, ["old_pwd", "new_pwd", "conf_pwd"])
-	user = json.load(open("./data/User/" + User.cu() + ".json"))
+	old_pwd, new_pwd, conf_pwd = map(request.form.get, ['old_pwd', 'new_pwd', 'conf_pwd'])
+	user_filepath = os.path.join(_omfDir, 'data', 'User', User.cu() + '.json')
+	with locked_open(user_filepath) as f:
+		user = json.load(f)
 	if pbkdf2_sha512.verify(old_pwd, user["password_digest"]):
 		if new_pwd == conf_pwd:
 			user["password_digest"] = pbkdf2_sha512.encrypt(new_pwd)
-			with open("./data/User/" + User.cu() + ".json","w") as outFile:
-				json.dump(user, outFile, indent=4)
+			with locked_open(user_filepath, 'r+') as f:
+				f.truncate(0)
+				json.dump(user, f, indent=4)
 			return "Success"
 		else:
 			return "not_match"
@@ -288,10 +292,10 @@ def adminControls():
 	''' Render admin controls. '''
 	if User.cu() != "admin":
 		return redirect("/")
-	users = [{"username":f[0:-5]} for f in safeListdir("data/User")
-		if f not in ["admin.json","public.json"]]
+	users = [{'username':f[0:-5]} for f in safeListdir(os.path.join(_omfDir, 'data', 'User')) if f not in ['admin.json', 'public.json']]
 	for user in users:
-		userDict = json.load(open("data/User/" + user["username"] + ".json"))
+		with locked_open(os.path.join(_omfDir, 'data', 'User', user['username'] + '.json')) as f:
+			userDict = json.load(f)
 		tStamp = userDict.get("timestamp","")
 		if userDict.get("password_digest"):
 			user["status"] = "Registered"
@@ -403,11 +407,9 @@ def write_permission_function(func):
 @read_permission_function
 def showModel(owner, modelName):
 	''' Render a model template with saved data. '''
-	modelDir = "./data/Model/" + owner + "/" + modelName
-	with open(modelDir + "/allInputData.json") as inJson:
-		modelType = json.load(inJson).get("modelType","")
+	modelType = get_model_metadata(owner, modelName)
 	thisModel = getattr(models, modelType)
-	return thisModel.renderTemplate(modelDir, absolutePaths=False, datastoreNames=getDataNames())
+	return thisModel.renderTemplate(os.path.join(_omfDir, 'data', 'Model', owner, modelName), absolutePaths=False, datastoreNames=getDataNames())
 
 
 @app.route("/newModel/<modelType>/<modelName>", methods=["POST","GET"])
@@ -1573,7 +1575,7 @@ def backgroundAnonymizeTran(modelDir, omtPath):
 		noisePerc = request.form.get('noisePerc')
 		anonymization.tranAddNoise(inNetwork, noisePerc)
 	with locked_open(omtPath, 'w') as outFile:
-		# I don't know if the outFile already exists or not, which is why I haven't switch to r+ and truncate()
+		# I don't know if the outFile already exists or not, which is why I haven't switched to r+ and truncate()
 		json.dump(inNetwork, outFile, indent=4)
 	os.remove(modelDir + '/TPPID.txt')
 	if newBusKey:
