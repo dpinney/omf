@@ -490,10 +490,6 @@ def duplicateModel(owner, modelName):
 @flask_login.login_required
 @write_permission_function
 def shareModel():
-	"""
-	Never trust input from the user. I am writing user strings directly into sensitive model files and user JSON files without sanitizing them!
-	Actually, everything that is entered must be a valid email. The root of any issues here would be due to not validating user sign-ups properly
-	"""
 	# Check for nonexistant users
 	emails = list(set(request.form.getlist("email"))) if len(request.form.getlist("email")) != 0 else None
 	if emails is not None:
@@ -1616,6 +1612,7 @@ def commsMap(owner, modelName, feederNum):
 
 
 @app.route('/redisplayGrid', methods=["POST"])
+@flask_login.login_required
 def redisplayGrid():
 	'''Redisplay comms grid on edits'''
 	geoDict = request.get_json()
@@ -1631,11 +1628,14 @@ def redisplayGrid():
 	geoJson = omf.comms.graphGeoJson(nxG)
 	return jsonify(newgeojson=geoJson)
 
+
 @app.route('/saveCommsMap/<owner>/<modelName>/<feederName>/<feederNum>', methods=["POST"])
+@flask_login.login_required
+@write_permission_function
 def saveCommsMap(owner, modelName, feederName, feederNum):
 	try:
 		geoDict = request.get_json()
-		model_dir = os.path.join(_omfDir, "data/Model", owner, modelName)
+		model_dir = os.path.join(_omfDir, 'data', 'Model', owner, modelName)
 		omf.comms.saveOmc(geoDict, model_dir, feederName)
 		return jsonify(savemessage='Communications network saved')
 	except:
