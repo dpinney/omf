@@ -966,7 +966,6 @@ def loadModelingAmi(owner, feederName):
 	for fp in filepaths:
 		if os.path.isfile(fp):
 			os.remove(fp)
-	request.files['amiFile'].save(os.path.join(_omfDir, 'data', 'Model', owner, modelName, loadName + '.csv'))
 	importProc = Process(target=backgroundLoadModelingAmi, args=[owner, modelName, feederName, loadName])
 	importProc.start()
 	return 'Success'
@@ -974,16 +973,17 @@ def loadModelingAmi(owner, feederName):
 
 def backgroundLoadModelingAmi(owner, modelName, feederName, loadName):
 	try:
-		pid_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'APID.txt')
+		pid_filepath, ami_filepath, omdPath, outDir, error_filepath = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in 
+			['APID.txt', loadName + '.csv', feederName + '.omd', 'amiOutput', 'error.txt']
+		]
+		request.files['amiFile'].save(ami_filepath)
 		with locked_open(pid_filepath, 'w') as pid_file:
 			pid_file.write(str(os.getpid()))
-		omdPath, amiPath, outDir = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in feederName + '.omd', loadName + 'csv', 'amiOutput']
-		writeNewGlmAndPlayers(omdPath, amiPath, outDir)
+		writeNewGlmAndPlayers(omdPath, ami_filepath, outDir)
 		os.remove(pid_filepath)
 	except Exception:
-		filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'error.txt')
-		with locked_open(filepath, "w") as errorFile:
-			errorFile.write("amiError")
+		with locked_open(error_filepath, 'w') as errorFile:
+			errorFile.write('amiError')
 
 
 # TODO: Check if rename mdb files worked
