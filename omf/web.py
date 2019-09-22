@@ -583,7 +583,7 @@ def get_model_metadata(owner, model_name):
 
 from contextlib import contextmanager
 @contextmanager
-def locked_open(filepath, mode='r', timeout=30):
+def locked_open(filepath, mode='r', timeout=180):
 	"""Open a file and lock it depending on the file access mode. An IOError will be raised if the lock cannot be acquired within the timeout"""
 	if mode in ['r', 'rb']:
 		lock_mode = fcntl.LOCK_SH
@@ -603,7 +603,7 @@ def locked_open(filepath, mode='r', timeout=30):
 				raise
 		if time.time() >= start_time + timeout:
 			raise IOError("{timeout}-second file lock timeout reached. Either a file-locking operation is taking more than {timeout} seconds "
-				"or there was a programmer error that would have resulted in permanent lock blocking.".format(timeout=timeout))
+				"or there was a programmer error that would have resulted in deadlock.".format(timeout=timeout))
 	yield f
 	fcntl.flock(f, fcntl.LOCK_UN)
 	f.close() 
