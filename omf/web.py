@@ -993,41 +993,39 @@ def backgroundLoadModelingAmi(owner, modelName, feederName, loadName):
 def cymeImport(owner):
 	''' API for importing a cyme feeder. '''
 	modelName = request.form.get("modelName","")
-	feederName = str(request.form.get("feederNameC",""))
-	feederNum = request.form.get("feederNum",1)
-	modelFolder = "data/Model/"+owner+"/"+modelName
-	mdbFileObject = request.files["mdbNetFile"]
-	# Saves .mdb files to model folder
-	mdbFileObject.save(os.path.join(modelFolder,mdbFileObject.filename))
-	if os.path.isfile("data/Model/"+owner+"/"+modelName+"/gridError.txt"):
-		os.remove("data/Model/"+owner+"/"+modelName+"/gridError.txt")
-	importProc = Process(target=cymeImportBackground, args=[owner, modelName, feederName, feederNum, mdbFileObject.filename])
+	error_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'gridError.txt')
+	if os.path.isfile(error_filepath):
+		os.remove(error_filepath)
+	importProc = Process(target=cymeImportBackground, args=[owner, modelName])
 	importProc.start()
 	return 'Success'
 
 
-def cymeImportBackground(owner, modelName, feederName, feederNum, mdbFileName):
+def cymeImportBackground(owner, modelName):
 	''' Function to run in the background for Milsoft import. '''
 	try:
-		print mdbFileName
-		pid_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'ZPID.txt')
+		mdbFileObject = request.files["mdbNetFile"]
+		feederName = str(request.form.get("feederNameC",""))
+		pid_filepath, error_filepath, mdb_filepath, feeder_filepath, modelDir = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in 
+			['ZPID.txt', 'gridError.txt', mdbFileObject.filename, feederName + '.omd', '']
+		]
+		mdbFileObject.save(mdb_filepath)
+		print mdbFileObject.filename
 		with locked_open(pid_filepath, 'w') as pid_file:
 			pid_file.write(str(os.getpid()))
-		modelDir = os.path.join(_omfDir, 'data', 'Model', owner, modelName)
 		newFeeder = dict(**feeder.newFeederWireframe)
-		newFeeder["tree"] = cymeToGridlab.convertCymeModel(modelDir + mdbFileName, modelDir)
+		newFeeder["tree"] = cymeToGridlab.convertCymeModel(mdb_filepath, modelDir)
 		with locked_open(os.path.join(_omfDir, 'static', 'schedules.glm')) as schedFile:
 			newFeeder["attachments"] = {"schedules.glm": schedFile.read()}
-		feeder_filepath = os.path.join(modelDir, feederName + '.omd')
 		# Use 'w' mode becuase the feederName is the name of a completely NEW feeder file
 		with locked_open(feeder_filepath, 'w') as f: 
 			json.dump(newFeeder, f, indent=4)
 		os.remove(pid_filepath)
+		feederNum = request.form.get("feederNum",1)
 		removeFeeder(owner, modelName, feederNum) # remove the old feeder file that had the same feeder number
 		writeToInput(modelDir, feederName, 'feederName' + str(feederNum))
 	except Exception:
-		filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'gridError.txt')
-		with locked_open(filepath, 'w') as errorFile:
+		with locked_open(error_filepath, 'w') as errorFile:
 			errorFile.write('cymeError')
 
 
