@@ -407,7 +407,7 @@ def write_permission_function(func):
 @read_permission_function
 def showModel(owner, modelName):
 	''' Render a model template with saved data. '''
-	modelType = get_model_metadata(owner, modelName)
+	modelType = get_model_metadata(owner, modelName).get('modelType', '')
 	thisModel = getattr(models, modelType)
 	return thisModel.renderTemplate(os.path.join(_omfDir, 'data', 'Model', owner, modelName), absolutePaths=False, datastoreNames=getDataNames())
 
@@ -767,11 +767,9 @@ def milsoftImport(owner):
 def milImportBackground(owner, modelName):
 	''' Function to run in the background for Milsoft import. '''
 	try:
-		feederName = str(request.form.get("feederNameM","feeder"))
-		std_filepath, seq_filepath, pid_filepath, feeder_filepath, model_dir, error_filepath = [
-			os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in [
-				feederName + '.std', feederName + '.seq', 'ZPID.txt', feederName + '.omd', '', 'gridError.txt'
-			]
+		feederName = str(request.form.get('feederNameM', 'feeder'))
+		std_filepath, seq_filepath, pid_filepath, feeder_filepath, model_dir, error_filepath = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in 
+			[feederName + '.std', feederName + '.seq', 'ZPID.txt', feederName + '.omd', '', 'gridError.txt']
 		]
 		request.files.get('stdFile').save(std_filepath)
 		request.files.get('seqFile').save(seq_filepath)
@@ -1718,9 +1716,9 @@ def root():
 def delete(objectType, objectName, owner):
 	''' Delete models or feeders. '''
 	if objectType == "Feeder":
-		filepath = "data/Model/" + owner + "/" + objectName + "/" + "feeder.omd"
-		if os.path.isfile(filepath):
-			os.remove(filepath)
+		feeder_filepath = os.path.join(_omfDir, 'data', 'Model', owner, objectName, 'feeder.omd')
+		if os.path.isfile(feeder_filepath):
+			os.remove(feeder_filepath)
 		return redirect("/#feeders")
 	elif objectType == "Model":
 		filepath = os.path.join(_omfDir, "data/Model", owner, objectName, "allInputData.json")
@@ -1730,7 +1728,7 @@ def delete(objectType, objectName, owner):
 			if old_viewers is not None:
 				for v in old_viewers:
 					revoke_viewership(owner, objectName, v)
-			shutil.rmtree("data/Model/" + owner + "/" + objectName)
+			shutil.rmtree(os.path.join(_omfDir, 'data', 'Model', owner, objectName))
 	return redirect("/")
 
 
