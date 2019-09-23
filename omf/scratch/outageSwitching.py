@@ -9,6 +9,7 @@ import matplotlib
 import scipy.stats as stats
 from plotly import tools
 import plotly as py
+import json
 import plotly.graph_objs as go
 import plotly.figure_factory as ff
 from plotly.tools import make_subplots
@@ -16,7 +17,6 @@ from networkx.drawing.nx_agraph import graphviz_layout
 import networkx as nx
 import itertools as it
 from shutil import copyfile
-from omf.models import voltageDrop as vd
 from __neoMetaModel__ import *
 from omf.models import __neoMetaModel__
 import random
@@ -137,9 +137,11 @@ def manualOutageStats(numberOfCustomers, mc_orig, sustainedOutageThreshold):
 	return SAIDI, SAIFI, MAIFI
 
 
-def setupSystem(pathToGlm, workDir, lineFaultType, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType):
+def setupSystem(pathToGlm, pathToCsv, workDir, lineFaultType, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType):
 	'helper function to set-up reliability module on a glm given its path'
 	tree = omf.feeder.parse(pathToGlm)
+	mc = pd.read_csv(pathToCsv)
+	
 	#add fault object to tree
 	nodeLabs='Name'
 	edgeLabs=None
@@ -164,16 +166,30 @@ def setupSystem(pathToGlm, workDir, lineFaultType, failureDistribution, failure_
 	dt_end = dt_start + relativedelta(months=+12, weeks=+1, day=0, hour=0, minute=0, second=0)
 	CLOCK_END = str(dt_end)
 	CLOCK_RANGE = CLOCK_START + ',' + CLOCK_END
+	index = 1
 	if faultType != None:
+		row = 0
+		row_count_mc = mc.shape[0]
+		manualOutages = ''
+		while row < mc.shape[0]:
+			if (row != 0):
+				manualOutages += ', '
+			manualOutages += str(mc.loc[row, 'Object Name'])
+			manualOutages += ', '
+			manualOutages += str(mc.loc[row, 'Start'])
+			manualOutages += ', '
+			manualOutages += str(mc.loc[row, 'Finish'])
+			row += 1
 		# Add eventgen object (the fault)
-		tree[str(biggestKey*10 + 1)] = {'object':'eventgen','name':'RandEvent','parent':'RelMetrics', 'target_group':'class=' + lineFaultType,'fault_type':faultType, 'failure_dist':failureDistribution, 'restoration_dist':restorationDistribution, 'failure_dist_param_1':failure_1, 'failure_dist_param_2':failure_2, 'restoration_dist_param_1':rest_1, 'restoration_dist_param_2':rest_2, 'max_outage_length':maxOutageLength + ' s'}
+		tree[str(biggestKey*10 + 1)] = {'object':'eventgen','name':'ManualEventGen','parent':'RelMetrics','fault_type':faultType, "manual_outages":manualOutages}
 		# Add fault_check object
-		tree[str(biggestKey*10 + 2)] = {'object':'fault_check','name':'test_fault','check_mode':'ONCHANGE', 'eventgen_object':'RandEvent', 'output_filename':'Fault_check_out.txt', 'strictly_radial': 'true'}
+		tree[str(biggestKey*10 + 2)] = {'object':'fault_check','name':'test_fault','check_mode':'ONCHANGE', 'eventgen_object':'ManualEventGen', 'output_filename':'Fault_check_out_' + str(row)+ '.txt', 'strictly_radial': 'true'}
 		# Add reliabilty metrics object
 		tree[str(biggestKey*10 + 3)] = {'object':'metrics', 'name':'RelMetrics', 'report_file':'Metrics_Output.csv', 'module_metrics_object':'PwrMetrics', 'metrics_of_interest':'"SAIFI,SAIDI,CAIDI,ASAI,MAIFI"', 'customer_group':'"groupid=METERTEST"', 'metric_interval':'0 s', 'report_interval':'1 yr'}
 		# Add power_metrics object
 		tree[str(biggestKey*10 + 4)] = {'object':'power_metrics','name':'PwrMetrics','base_time_value':'1 h'}
-		
+		with open('result.json', 'w') as fp:
+			json.dump(tree, fp)
 		tree2 = tree.copy()
 
 		#add meters to the tree
@@ -342,10 +358,10 @@ def protection(tree):
 	return tree
 
 
-def recloserAnalysis(pathToGlm, workDir, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType, sustainedOutageThreshold):
+def recloserAnalysis(pathToGlm, pathToCsv, workDir, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType, sustainedOutageThreshold):
 	'function that returns a .csv of the random faults generated and the SAIDI/SAIFI values for a given glm, line for recloser, and distribution data'
 	
-	tree, workDir, biggestKey, index = setupSystem(pathToGlm, workDir, lineFaultType, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType)
+	tree, workDir, biggestKey, index = setupSystem(pathToGlm, pathToCsv, workDir, lineFaultType, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType)
 
 	numberOfCustomers, noReclSAIFI, noReclSAIDI, noReclMAIFI, mc1 = pullOutValues(tree, workDir, sustainedOutageThreshold)
 	#add a recloser
@@ -369,10 +385,10 @@ def recloserAnalysis(pathToGlm, workDir, lineFaultType, lineNameForRecloser, fai
 		'recl-MAIFI':reclMAIFI
 	}
 
-def optimalRecloserAnalysis(pathToGlm, workDir, lineFaultType, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType, sustainedOutageThreshold):
+def optimalRecloserAnalysis(pathToGlm, pathToCsv, workDir, lineFaultType, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType, sustainedOutageThreshold):
 	'function that finds the optimal placement for an additional recloser. WARNING: time-intensive'
 
-	tree, workDir, biggestKey, index = setupSystem(pathToGlm, workDir, lineFaultType, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType)
+	tree, workDir, biggestKey, index = setupSystem(pathToGlm, pathToCsv, workDir, lineFaultType, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType)
 
 	numberOfCustomers, noReclSAIFI, noReclSAIDI, noReclMAIFI, mc = pullOutValues(tree, workDir, sustainedOutageThreshold)
 
@@ -424,51 +440,6 @@ def optimalRecloserAnalysis(pathToGlm, workDir, lineFaultType, failureDistributi
 		'recl-MAIFI':bestMAIFI
 	}
 
-def bestLocationForRecloser(pathToGlm, workDir, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType, sustainedOutageThreshold):
-	'finds the best location for a new recloser in a feeder system. WARNING: takes a lot of time to run'
-
-	# check to see if work directory is specified; otherwise, create a temporary directory
-	if not workDir:
-		workDir = tempfile.mkdtemp()
-		print '@@@@@@', workDir
-
-	# pull out data from recloser and optimal recloser analyses
-	numberOfCustomers, mc1, mc2, tree1, test11, test12 = recloserAnalysis(pathToGlm, workDir, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType, sustainedOutageThreshold)
-	
-	# create bar plots of data
-	row11 = sorted(test11)
-	col11 = [value for (key, value) in sorted(test11.items())]
-	trace11 = go.Bar(x = row11, y = col11, name = 'SAIDI SAIFI Recloser Analysis')
-
-	row12 = sorted(test12)
-	col12 = [value for (key, value) in sorted(test12.items())]
-	trace12 = go.Bar(x = row12, y = col12, name = 'MAIFI Recloser Analysis')
-
-	bestSAIDI, bestSAIFI, bestMAIFI, tree2, test21, test22 = optimalRecloserAnalysis(pathToGlm, workDir, lineFaultType, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType, sustainedOutageThreshold)
-	
-	row21 = sorted(test21)
-	col21 = [value for (key, value) in sorted(test21.items())]
-	trace21 = go.Bar(x = row21, y = col21, name= 'SAIDI SAIFI Optimal Recloser Analysis')
-
-	row22 = sorted(test22)
-	col22 = [value for (key, value) in sorted(test22.items())]
-	trace22 = go.Bar(x = row22, y = col22, name= 'MAIFI Optimal Recloser Analysis')
-
-	# print best locations based on each value calculated
-	print('Best location based on SAIDI = ' + str(bestSAIDI))
-	print('Best location based on SAIFI = ' + str(bestSAIFI))
-	print('Best location based on MAIFI = ' + str(bestMAIFI))
-
-	# save plots
-	data1 = [trace11, trace21]
-	layout1 = go.Layout(barmode='group', title='SAIDI/SAIFI Analysis')
-	figure1 = go.Figure(data=data1, layout=layout1)
-	py.offline.plot(figure1, filename= workDir + '/best_location_for_recloser_SAIDI_SAIFI', auto_open=False)
-	
-	data2 = [trace12, trace22]
-	layout2 = go.Layout(barmode='group', title='MAIFI Analysis')
-	figure2 = go.Figure(data=data2, layout=layout2)
-	py.offline.plot(figure2, filename= workDir + '/best_location_for_recloser_MAIFI', auto_open=False)
 
 def datetime_to_float(d):
 	'helper function which convert a datetime object to a float'
@@ -476,11 +447,11 @@ def datetime_to_float(d):
 	total_seconds = (d - epoch).total_seconds()
 	return total_seconds
 
-def valueOfAdditionalRecloser(pathToGlm, workDir, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, kwh_cost, restoration_cost, average_hardware_cost, simTime, faultType, sustainedOutageThreshold):
+def valueOfAdditionalRecloser(pathToGlm, pathToCsv, workDir, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, kwh_cost, restoration_cost, average_hardware_cost, simTime, faultType, sustainedOutageThreshold):
 	'analyzes the value of adding an additional recloser to a feeder system'
 	
 	# perform analyses on the glm
-	numberOfCustomers, mc1, mc2, tree1, test1, test2 = recloserAnalysis(pathToGlm, workDir, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType, sustainedOutageThreshold)
+	numberOfCustomers, mc1, mc2, tree1, test1, test2 = recloserAnalysis(pathToGlm, pathToCsv, workDir, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType, sustainedOutageThreshold)
 
 	# check to see if work directory is specified
 	if not workDir:
@@ -744,6 +715,25 @@ def distributiongraph(dist, param_1, param_2, nameOfGraph):
 		trace = go.Scatter(x=x, y=dist, name=nameOfGraph)
 	return trace
 
+valueOfAdditionalRecloser("C:/Users/granb/omf/omf/static/publicFeeders" + '/' + "Olin Barre Fault" + '.glm',
+		"C:/Users/granb/omf/omf/scratch/SmartSwitching/outagesNew3.csv",
+		None,
+		'underground_line',
+		"18098",
+		'EXPONENTIAL',
+		'3.858e-7',
+		'0.0',
+		'PARETO',
+		'1.0',
+		'1.0002778',
+		'240',
+		'1',
+		'1',
+		'1',
+		'2000-01-01 0:00:00',
+		'TLG',
+		'60')
+
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
 	outData = {}
@@ -754,6 +744,7 @@ def work(modelDir, inputDict):
 	#test the main functions of the program
 	plotOuts = valueOfAdditionalRecloser(
 		modelDir + '/' + feederName + '.glm', #GLM Path
+		inputDict['pathToCsv'],
 		modelDir, #Work directory.
 		inputDict['lineTypeForFaults'],
 		inputDict['recloserLocation'],
@@ -800,9 +791,10 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		"modelType": modelName,
-		"feederName1": "ieee37nodeFaultTester",
+		"feederName1": "Olin Barre Fault",
+		"pathToCsv": "C:/Users/granb/omf/omf/scratch/SmartSwitching/outagesNew3.csv",
 		"lineTypeForFaults": 'underground_line',
-		"recloserLocation": "node730-709",
+		"recloserLocation": "18098",
 		'failureDistribution': 'EXPONENTIAL',
 		'failureDistParam1': '3.858e-7',
 		'failureDistParam2':'0.0',

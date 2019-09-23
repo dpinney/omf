@@ -87,3 +87,23 @@ than the nodes (maybe green?). Right now they are red.
 Expected behavior: The outages are green, or some other different color!
 Workaround/fix:Turns out that geoJsonMap.html includes a template that tells exactly which property one must include to change the color!
 	Discussion: Thanks Erik!
+
+Actual behavior: I want to have the leaflet map shown in the browser when the outageCost model is run. iframe does not seem to work.
+Expected behavior: The leaflet map appears in the browser, embedded in the page.
+Workaround/fix: Use an inline version of the map, rather than iframe. This way, we can load all the points in directly from the json file rather than creating an html file and reading that into the webpage.
+	Discussion: This might create a few other errors that need to be worked around... namely, the next error.
+
+Actual behavior: Filtering the map should be possible by including a filtering section with headers in the leaflet map html code. However, since the map is loaded using inline into the webpage, this is not possible. The filters will be outside the map since we have no frame, and cannot be referenced by the map.
+Expected behavior: We have a way to filter the data on the leaflet map, preferably directly on the map.
+Workaround/fix: While not quite what we expected to be able to do, it works to put the filter data in the model inputs section.
+	Discussion: While this workaround is functional, it would still be preferable to eventually have the filters directly on the leaflet map, since this implementation requires the entire model to be rerun every time the filtering data is updated. The cost is not too high, however, since the model runs fairly quickly.
+
+Actual behavior: Adding too many outages to the "manual_outages" field of an eventgen object in GridLab-D results in the error "buffer exhaustion reading 71 lines past line 12528".
+Expected behavior: Adding all the manual faults over the period of a year results in GridLab-D generating results as expected.
+Workaround/fix: ?
+	Discussion: According to a post on the forum, this is likely occurring because only so much text can be provided in a single object before the buffer overruns. Further support of this theory: only inputting the first fault leads to the program working as expected. Tried to make multiple fault objects, but got the error: "Only one fault_check object is supported at this time." Perhaps it would work to split the faults up by month, then add all the stats together? We note that creating a distribution from the data is likely not ideal, as there will be similar issues as in model 1; namely, there will be high variance in distributions before and after the recloser is added due to the random seed. 
+
+Actual behavior: Recloser cannot currently be made to act as a normal line.
+Expected behavior: Recloser can be made to act as a normal line using the 'retry_time' argument, "the time to wait in seconds before trying to close after a fault condition is detected," and setting this to a very high value.
+Workaround/fix: Wait for the next GridLab-D update?
+	Discussion: GridLab-D will supposedly make use of this argument in future versions. Other arguments, involve the recloser trying to reclose after it has already opened (given a fault).

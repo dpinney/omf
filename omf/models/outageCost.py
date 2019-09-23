@@ -26,7 +26,7 @@ def datetime_to_float(d):
 	total_seconds = (d - epoch).total_seconds()
 	return total_seconds	
 
-def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustainedOutageThreshold):
+def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustainedOutageThreshold, causeFilter, timeMinFilter, timeMaxFilter, meterMinFilter, meterMaxFilter, durationMinFilter, durationMaxFilter):
 	' calculates outage metrics, plots a leaflet map of faults, and plots an outage timeline'
 	# check to see if work directory is specified; otherwise, create a temporary directory
 	if not workDir:
@@ -51,8 +51,7 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustain
 	while row < row_count_mc:
 		if (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) > int(sustainedOutageThreshold):
 			entry = str(mc.loc[row, 'Meters Affected'])
-			p = re.compile(r'\b\d+\b')  # Compile a pattern to capture float values
-			meters = [int(i) for i in p.findall(entry)]
+			meters = entry.split()
 			customerInterruptionDurations += (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) * len(meters) / 3600
 		row += 1
 
@@ -65,8 +64,7 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustain
 	while row < row_count_mc:
 		if (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) > int(sustainedOutageThreshold):
 			entry = str(mc.loc[row, 'Meters Affected'])
-			p = re.compile(r'\b\d+\b')  # Compile a pattern to capture float values
-			meters = [int(i) for i in p.findall(entry)]
+			meters = entry.split()
 			customersAffected += len(meters)
 		row += 1
 	SAIFI = float(customersAffected) / int(numberOfCustomers)
@@ -83,8 +81,7 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustain
 	while row < row_count_mc:
 		if (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) <= int(sustainedOutageThreshold):
 			entry = str(mc.loc[row, 'Meters Affected'])
-			p = re.compile(r'\b\d+\b')  # Compile a pattern to capture float values
-			meters = [int(i) for i in p.findall(entry)]
+			meters = entry.split()
 			sumCustomersAffected += len(meters)
 		row += 1
 
@@ -110,7 +107,15 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustain
 	while row < row_count_mc:
 		entry = mc.loc[row, 'Location']
 		cause = mc.loc[row, 'Cause']
+		lis = str(mc.loc[row, 'Meters Affected'])
+		meters = lis.split()
 		duration = datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))
+		time = datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S'))
+		timeMin = datetime_to_float(datetime.datetime.strptime(timeMinFilter, '%Y-%m-%d %H:%M:%S'))
+		timeMax = datetime_to_float(datetime.datetime.strptime(timeMaxFilter, '%Y-%m-%d %H:%M:%S'))
+		print(timeMin)
+		print(timeMax)
+		meterCount = len(meters)
 		p = re.compile(r'-?\d+\.\d+')  # Compile a pattern to capture integer values
 		coords = [float(i) for i in p.findall(entry)]
 		coord1 = coords[0]
@@ -118,7 +123,7 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustain
 		Dict = {}
 		Dict['geometry'] = {'type': 'Point', 'coordinates': [coord1, coord2]}
 		Dict['type'] = 'Feature'
-		Dict['properties'] = {'name': '<b>_Fault_' + str(row+1) + '</b><br>', 'pointColor': 'blue', 'popupContent': '<br>Fault start time: <b>' + str(mc.loc[row, 'Start']) + '</b><br> Fault duration: <b>' + str(duration) + ' seconds</b><br>Location: <b>' + str(coords) + '</b><br>Cause: <b>' + str(cause) + '</b><br>Meters affected: <b>' + str(mc.loc[row, 'Meters Affected']) + '</b>.'}
+		Dict['properties'] = {'name': 'Fault_' + str(row+1), 'meterCount': int(meterCount), 'time': time, 'timeMin':timeMin, 'timeMax':timeMax, 'meterMinFilter': int(meterMinFilter), 'meterMaxFilter': int(meterMaxFilter), 'cause': str(cause), 'causeFilter': causeFilter, 'duration': int(duration), 'durationMinFilter': int(durationMinFilter), 'durationMaxFilter': int(durationMaxFilter), 'meters': str(mc.loc[row, 'Meters Affected']), 'pointColor': 'blue', 'popupContent': '<br><br>Fault start time: <b>' + str(mc.loc[row, 'Start']) + '</b><br> Fault duration: <b>' + str(duration) + ' seconds</b><br>Location: <b>' + str(coords) + '</b><br>Cause: <b>' + str(cause) + '</b><br>Meters Affected: <b><br>' + str(mc.loc[row, 'Meters Affected']) + '</b><br>Count of Meters Affected: <b>' + str(len(meters)) + '</b>.'}
 		outageMap['features'].append(Dict)
 		row += 1
 	if not os.path.exists(workDir):
@@ -175,13 +180,23 @@ def work(modelDir, inputDict):
 	# Write in the feeder
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict["feederName1"] = feederName
-	#test the main functions of the program
+	# Run the main functions of the program
+	with open(pJoin(modelDir, inputDict['outageFileName']), 'w') as f:
+		pathToData = f.name
+		f.write(inputDict['outageData'])
 	plotOuts = outageCostAnalysis(
 		modelDir + '/' + feederName + '.omd', #OMD Path
-		inputDict['PATH_TO_CSV'],
+		pathToData,
 		modelDir, #Work directory.
 		inputDict['numberOfCustomers'],
-		inputDict['sustainedOutageThreshold']) #'300'
+		inputDict['sustainedOutageThreshold'],
+		inputDict['causeFilter'],
+		inputDict['timeMinFilter'],
+		inputDict['timeMaxFilter'],
+		inputDict['meterMinFilter'],
+		inputDict['meterMaxFilter'],
+		inputDict['durationMinFilter'],
+		inputDict['durationMaxFilter'])
 	
 	# Textual outputs of cost statistic
 	with open(pJoin(modelDir,"statsCalc.html"),"rb") as inFile:
@@ -206,9 +221,17 @@ def new(modelDir):
 	defaultInputs = {
 		"modelType": modelName,
 		"feederName1": "Olin Barre Fault",
-		"PATH_TO_CSV": omf.omfDir + '/scratch/smartSwitching/outagesNew1.csv',
-		'numberOfCustomers': '192',
-		'sustainedOutageThreshold': '300'
+		"numberOfCustomers": "192",
+		"sustainedOutageThreshold": "300",
+		"causeFilter": "bird",
+		"timeMinFilter": "2000-01-01 00:00:01",
+		"timeMaxFilter": "2000-05-06 00:00:30",
+		"meterMinFilter": "0",
+		"meterMaxFilter": "10",
+		"durationMinFilter": "200",
+		"durationMaxFilter": "100000",
+		"outageFileName": "outagesNew3.csv",
+		"outageData": open(pJoin(__neoMetaModel__._omfDir,"scratch","smartSwitching","outagesNew3.csv"), "r").read(),
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:

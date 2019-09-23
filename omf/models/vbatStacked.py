@@ -14,7 +14,7 @@ from solvers import VB
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = "Calculate the energy storage capacity for a collection of thermostatically controlled loads."
-hidden = True
+# hidden = True
 
 def n(num):
 	return "${:,.2f}".format(num)
@@ -47,16 +47,10 @@ def pyVbat(tempCurve, modelDir, i):
 def work(modelDir, ind):
 	out = {}
 	
-	try:
-		tempCurve = [float(x) for x in ind["tempCurve"].split('\n')]
-		gt_demand = [float(x) for x in ind["gt_demandCurve"].split('\n')] if ind["payment_structure"] == "gt" else []
-		with open(pJoin(modelDir, 'inputCsv.csv'), 'w') as f:
-			f.write(ind["inputCsv"].replace('\r', ''))
-	except:
-		raise Exception("CSV file is incorrect format. Please see valid format "
-			"definition at <a target='_blank' href = 'https://github.com/dpinney/"
-			"omf/wiki/Models-~-storagePeakShave#demand-file-csv-format'>\nOMF Wiki "
-			"storagePeakShave - Demand File CSV Format</a>")
+	tempCurve = [float(x) for x in ind["tempCurve"].split('\n') if x != '']
+	gt_demand = [float(x) for x in ind["gt_demandCurve"].split('\n')] if ind["payment_structure"] == "gt" else []
+	with open(pJoin(modelDir, 'inputCsv.csv'), 'w') as f:
+		f.write(ind["inputCsv"].replace('\r', ''))
 
 	input_df = pd.read_csv(pJoin(modelDir, 'inputCsv.csv'), index_col=['Hour'])
 	P_lower, P_upper, E_UL = pyVbat(tempCurve, modelDir, ind)
@@ -152,8 +146,11 @@ def work(modelDir, ind):
 
 	out['startDate'] = str(dt(2001, 1, 1))
 	days_dispatched_arbitrage = [not all([x == 0 for x in out["VBpower"][i:i+24]]) for i in range(0, len(out["VBpower"]), 24)]
-	days_dispatched_regulation = [not all([x == 0 for x in out["regulation"][i:i+24]]) for i in range(0, len(out["regulation"]), 24)]
+	days_dispatched_regulation = ([not all([x == 0 for x in out["regulation"][i:i+24]]) for i in range(0, len(out["regulation"]), 24)] 
+		if 'Regulation (kW)' in output_df else [False]*len(days_dispatched_arbitrage))
+	
 	days_dispatched = [a or b for a, b in zip(days_dispatched_regulation, days_dispatched_arbitrage)]
+
 	out['dispatchDates'] = [[str(dt(2001, 1, 1, 12, 0, 0) + timedelta(days=i)), 0] for i in range(365) if days_dispatched[i]]
 	out['totalDispatches'] = len(out['dispatchDates'])
 
@@ -170,11 +167,11 @@ def new(modelDir):
 		"use_deferral": "on",
 		"use_arbitrage": "on",
 		"use_regulation": "on",
-		"userHourLimit": "8760",
+		"userHourLimit": "2400",
 		"energyReserve": "1",
 		# VB inputs
 		"number_devices": "2000",
-		"load_type": "2",
+		"load_type": "1",
 		"power": "5.6",
 		"capacitance": "2",
 		"resistance": "2",
@@ -186,7 +183,7 @@ def new(modelDir):
 		"unitDeviceCost":"20",
 		"unitUpkeepCost":"2",
 		# By dispatch
-		"payment_structure": "gt", # "ppm"
+		"payment_structure": "ppm", # "ppm"
 		# ppm
 		"annual_peak_charge": "100",
 		"avg_demand_charge": "120",
@@ -198,7 +195,7 @@ def new(modelDir):
 		"gt_demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","fhec_2017_gt.csv")).read(),
 		"gt_demandCurveFileName": "fhec_2017_gt.csv",
 		# Deferral
-		"transformerThreshold": "2500",
+		"transformerThreshold": "3500",
 		"avoidedCost": "2000000",
 		"yearsToReplace": "2",
 		"carryingCost": "7",
