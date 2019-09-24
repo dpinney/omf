@@ -76,8 +76,8 @@ def work(modelDir, ind):
 		pJoin(modelDir, "_base.glm"), workDir=modelDir, neatoLayout=neato, 
 		edgeCol=edgeColValue, nodeCol=nodeColValue, nodeLabs=nodeLabsValue, 
 		edgeLabs=edgeLabsValue, customColormap=customColormapValue, rezSqIn=int(ind["rezSqIn"]), 
-			colorMin=float(ind['colorMin']) if ind['colorMin'].lower() != 'auto' else None, 
-			colorMax=float(ind['colorMax']) if ind['colorMax'].lower() != 'auto' else None
+			scaleMin=float(ind['colorMin']) if ind['colorMin'].lower() != 'auto' else None, 
+			scaleMax=float(ind['colorMax']) if ind['colorMax'].lower() != 'auto' else None
 	).savefig(pJoin(modelDir,"output" + base_suffix + ".png"))
 	with open(pJoin(modelDir,"output" + base_suffix + ".png"),"rb") as f:
 		o["base_image"] = f.read().encode("base64")
@@ -460,6 +460,8 @@ def new(modelDir):
 		# "criticalNode": 'R1-12-47-2_node_28',
 		# "feederName1": 'bavarian',
 		# "criticalNode": "node61362179654T61363120638_C", #node1730149060
+		# "feederName1": 'turkey',
+		# "criticalNode": "TURKEY FORD", #node1730149060
 		"modelType": modelName,
 		"runTime": "",
 		"layoutAlgorithm": "geospatial", #forceDirected
