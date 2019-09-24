@@ -136,8 +136,8 @@ def work(modelDir, ind):
 		pJoin(modelDir, "_controlled.glm"), workDir=modelDir, neatoLayout=neato, 
 		edgeCol=edgeColValue, nodeCol=nodeColValue, nodeLabs=nodeLabsValue, 
 		edgeLabs=edgeLabsValue, customColormap=customColormapValue, rezSqIn=int(ind["rezSqIn"]), 
-			colorMin=float(ind['colorMin']) if ind['colorMin'] != 'auto' else None,
-			colorMax=float(ind['colorMax']) if ind['colorMax'] != 'auto' else None
+			scaleMin=float(ind['colorMin']) if ind['colorMin'] != 'auto' else None,
+			scaleMax=float(ind['colorMax']) if ind['colorMax'] != 'auto' else None
 	).savefig(pJoin(modelDir,"output" + controlled_suffix + ".png"))
 	with open(pJoin(modelDir,"output" + controlled_suffix + ".png"),"rb") as f:
 		o["controlled_image"] = f.read().encode("base64")
@@ -169,8 +169,8 @@ def work(modelDir, ind):
 		pJoin(modelDir, "_solar.glm"), workDir=modelDir, neatoLayout=neato, 
 		edgeCol=edgeColValue, nodeCol=nodeColValue, nodeLabs=nodeLabsValue, 
 		edgeLabs=edgeLabsValue, customColormap=customColormapValue, rezSqIn=int(ind["rezSqIn"]), 
-			colorMin=float(ind['colorMin']) if ind['colorMin'] != 'auto' else None,
-			colorMax=float(ind['colorMax']) if ind['colorMax'] != 'auto' else None
+			scaleMin=float(ind['colorMin']) if ind['colorMin'] != 'auto' else None,
+			scaleMax=float(ind['colorMax']) if ind['colorMax'] != 'auto' else None
 	).savefig(pJoin(modelDir,"output" + solar_suffix + ".png"))
 	with open(pJoin(modelDir,"output" + solar_suffix + ".png"),"rb") as f:
 		o["solar_image"] = f.read().encode("base64")
