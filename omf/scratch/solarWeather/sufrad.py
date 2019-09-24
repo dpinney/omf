@@ -10,9 +10,9 @@ def getSurfradSites():
 	siteLines = sitesRaw.split('\r\n')
 	return [x[56:] for x in siteLines if '_' in x and '->' not in x]
 
-def getSurfradYears(site, year):
-	URL = 'ftp://aftp.cmdl.noaa.gov/data/radiation/surfrad/{}/{}/'.format(site, year)
-	FILE = 'tbl19001.dat' #first day of 201X?
+def getRadiationYears(radiation_type, site, year):
+	URL = 'ftp://aftp.cmdl.noaa.gov/data/radiation/{}/{}/{}/'.format(radiation_type, site, year)
+	#FILE = 'tbl19001.dat' - example
 	# Get directory contents.
 	dirReq = urllib2.Request(URL)
 	dirRes = urllib2.urlopen(dirReq)
@@ -40,20 +40,28 @@ def getSurfradYears(site, year):
 	return accum
 
 #Create tsv file from dict 
-def create_tsv(data, site, year):
+def create_tsv(data, radiation_type, site, year):
 	column_count = len(data[0])
-	output = csv.DictWriter(open('SURFRAD-{}-{}.tsv'.format(site, year), 'w'), fieldnames=['col{}'.format(x) for x in range(column_count)], delimiter='\t')
+	output = csv.DictWriter(open('{}-{}-{}.tsv'.format(radiation_type, site, year), 'w'), fieldnames=['col{}'.format(x) for x in range(column_count)], delimiter='\t')
 	for item in data:
 	 	output.writerow(item)
 
-#wrapper - need to refactor
-def get_sufrad(site, year):
-	allYears = getSurfradYears(site, year)
-	create_tsv(allYears, site, year)
+'''Get solard or surfrad data. Optional export to csv with out_file option'''
+def get_radiation_data(radiation_type, site, year, out_file=None):
+	allYears = getRadiationYears(radiation_type, site, year)
+	if out_file is not None:
+		create_tsv(allYears, radiation_type, site, year)
+	else:
+		return allYears
 
-get_sufrad('Boulder_CO', 2019)
+get_radiation_data('surfrad', 'Boulder_CO', 2019)
+get_radiation_data('solrad', 'bis', 2019)
+
+
 
 '''
+Surfrad data
+
 ====HEADERS====
 station_name	character	station name, e. g., Goodwin Creek
 latitude		real		latitude in decimal degrees (e. g., 40.80)
@@ -90,4 +98,3 @@ elevation		integer		elevation above sea level in meters
 26	winddir			real		wind direction (degrees, clockwise from north)
 27	pressure		real		station pressure (mb)
 '''
-

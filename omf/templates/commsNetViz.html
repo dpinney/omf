@@ -239,13 +239,13 @@
 	var bounds = geojsonLayer.getBounds();
 	// Optional forcing of canvas renderer:
 	var map = L.map('map', {renderer: L.canvas()}).fitBounds(bounds);
-	// LayerGroup might be a good option here
 	mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
-	L.tileLayer(
-		'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+	var tileLayer = L.tileLayer(
+		'http://tile.memomaps.de/tilegen/{z}/{x}/{y}.png', {
 		attribution: '&copy; ' + mapLink + ' Contributors',
-		maxZoom: 20,
-		}).addTo(map);
+		maxZoom: 18,
+		});
+	tileLayer.addTo(map);
 	L.control.scale().addTo(map);
 	geojsonLayer.addTo(map);
 
@@ -514,6 +514,42 @@
 	saveOmcFile.innerHTML = 'Save omc file';
 	document.getElementById('toolDiv').appendChild(saveOmcFile);
 	saveOmcFile.addEventListener('click', function(){saveCommsMap()});
+
+	//to do create a loop to automate process for additonal controls
+	var sateliteTiles = L.DomUtil.create('button');
+	L.DomEvent.disableClickPropagation(sateliteTiles);
+	sateliteTiles.id = 'sateliteTiles';
+	sateliteTiles.classList.add('mapControl');
+	sateliteTiles.innerHTML = 'Satelite View';
+	document.getElementById('toolDiv').appendChild(sateliteTiles);
+	sateliteTiles.addEventListener('click', function(){viewSatelite()});
+
+	var roadTiles = L.DomUtil.create('button');
+	L.DomEvent.disableClickPropagation(roadTiles);
+	roadTiles.id = 'roadTiles';
+	roadTiles.classList.add('mapControl');
+	roadTiles.innerHTML = 'Road View';
+	document.getElementById('toolDiv').appendChild(roadTiles);
+	roadTiles.addEventListener('click', function(){viewRoads()});
+
+	function viewSatelite(){
+		map.eachLayer(function(layer) {
+		    if( layer instanceof L.TileLayer ){
+		    	layer.setUrl('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
+		   		map.attributionControl.removeAttribution('&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> Contributors');
+		    	map.attributionControl.addAttribution('&copy; Source: Esri, DigitalGlobe, GeoEye, i-cubed, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AEX, Getmapping, Aerogrid, IGN, IGP, swisstopo, and the GIS User Community.');
+		    }
+		});
+	}
+	function viewRoads(){
+		map.eachLayer(function(layer) {
+		    if( layer instanceof L.TileLayer ){
+		    	layer.setUrl('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+		    	map.attributionControl.addAttribution('&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> Contributors');
+		    	map.attributionControl.removeAttribution('&copy; Source: Esri, DigitalGlobe, GeoEye, i-cubed, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AEX, Getmapping, Aerogrid, IGN, IGP, swisstopo, and the GIS User Community.');
+		    }
+		});
+	}
 
 </script>
 </body>
