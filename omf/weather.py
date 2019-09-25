@@ -10,7 +10,7 @@ from datetime import timedelta, datetime
 from dateutil.parser import parse as parse_dt
 from urllib2 import urlopen
 from omf import feeder
-
+from math import cos, asin, sqrt
 
 def pullAsos(year, station, datatype):
 	'''This model pulls hourly data for a specified year and ASOS station. 
@@ -292,6 +292,18 @@ def _tests():
 	# # Testing DarkSky
 	# pullDarksky(2018, 36.64, -93.30, 'temperature', path = tmpdir)
 	# print 'Darksky data pulled to ' + tmpdir
+	# Testing tmy3
+	#tmy3_pull(nearest_tmy3_station(41, -78), out_file='tmy3_test.csv')
+	# Testing getRadiationYears
+	#get_radiation_data('surfrad', 'Boulder_CO', 2019)
+	#get_radiation_data('solrad', 'bis', 2019)
+	#Testing NSRDB
+	#get_nrsdb_data('psm',-99.49218,43.83452,'2017', 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56', interval=60, out_file='psm.csv')
+	#print(get_nrsdb_data('psm',-99.49218,43.83452,'2017', 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56', interval=60))
+	#get_nrsdb_data('psm_tmy',-99.49218,43.83452,'tdy-2017', 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56', out_file='psm_tmy.csv')
+	#print(get_nrsdb_data('psm_tmy',-99.49218,43.83452,'tdy-2017', 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56'))
+	#get_nrsdb_data('suny',77.1679,22.1059,'2014', 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56', out_file='suny.csv')
+	#get_nrsdb_data('spectral_tmy',77.08007,20.79720,'tmy', 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56', out_file='spectral_tmy.csv')
 
 
 ########################
@@ -720,6 +732,159 @@ class USCRNDataType(object):
 		if self.transformation_function is not None:
 			return self.transformation_function(value)
 		return value
+
+'''Pull TMY3 data based on usafn. Use nearest_tmy3_station function to get a close by tmy3 station based on latitude/longitude coordinates '''
+def tmy3_pull(usafn_number, out_file=None):
+	url = 'https://rredc.nrel.gov/solar/old_data/nsrdb/1991-2005/data/tmy3'
+	file_name = '{}TYA.CSV'.format(usafn_number)
+	file_path = os.path.join(url, file_name)
+	data = requests.get(file_path)
+	if out_file is not None:
+		csv_lines = data.iter_lines()
+		reader = csv.reader(csv_lines, delimiter=',')
+		if out_file is not None:
+			with open(out_file, 'w') as csvfile:
+				#can use following to skip first line to line up headers
+				#reader.next()
+				for i in reader:
+					csvwriter = csv.writer(csvfile, delimiter=',')
+					csvwriter.writerow(i)
+	else:
+		return resp
+
+'''Return nearest USAFN stattion based on latlon'''
+def nearest_tmy3_station(latitude, longitude):
+	url = 'https://rredc.nrel.gov/solar/old_data/nsrdb/1991-2005/tmy3'
+	file_name = 'TMY3_StationsMeta.csv'
+	file_path = os.path.join(url, file_name)
+	data = requests.get(file_path)
+	csv_lines = data.iter_lines()
+	reader = csv.DictReader(csv_lines, delimiter=',')
+	#SHould file be local?
+	#with open('TMY3_StationsMeta.csv', 'r') as metafile:
+	#reader = csv.DictReader(metafile, delimiter=',')
+	tmy3_stations = [station for station in reader]
+	nearest = min(tmy3_stations, key=lambda station: lat_lon_diff(latitude, station['Latitude'], longitude, station['Longitude']))
+	return nearest['USAF']
+
+def lat_lon_diff(lat1, lat2, lon1, lon2):
+	'''Get the distance between two sets of latlon coordinates'''
+	dist = sqrt((float(lat1) - float(lat2))**2 + (float(lon1) - float(lon2))**2)
+	return dist
+
+class NSRDB():
+	def __init__(self, data_set, longitude, latitude, year, api_key, utc='true', leap_day='false', email='erikjamestalbot@gmail.com', interval=None):
+		self.base_url = 'https://developer.nrel.gov'
+		self.data_set = data_set
+		self.params = {}
+		self.params['api_key'] = api_key
+		#wkt will be one point to use csv option - may need another call to get correct wkt value: https://developer.nrel.gov/docs/solar/nsrdb/nsrdb_data_query/
+		self.params['wkt'] = self.latlon_to_wkt(longitude, latitude)
+		#names will be one value to use csv option
+		self.params['names'] = str(year)
+		#note utc must be either 'true' or 'false' as a string, not True or False Boolean value
+		self.params['utc'] = utc
+		self.params['leap_day'] = leap_day
+		self.params['email'] = email
+		self.interval = interval
+
+	def latlon_to_wkt(self, longitude, latitude):
+		if latitude < -90 or latitude > 90:
+			raise('invalid latitude')
+		elif longitude < -180 or longitude > 180:
+			raise('invalid longitude')  
+		return 'POINT({} {})'.format(longitude, latitude)
+
+	def create_url(self, route):
+		return os.path.join(self.base_url, route)
+
+	#physical solar model
+	def psm(self):
+		self.params['interval'] = self.interval
+		route = 'api/solar/nsrdb_psm3_download.csv'
+		self.request_url = self.create_url(route)
+
+	#physical solar model v3 tsm
+	def psm_tmy(self):
+		route = 'api/nsrdb_api/solar/nsrdb_psm3_tmy_download.csv'
+		self.request_url = self.create_url(route)
+
+	#SUNY international
+	def suny(self):
+		route = 'api/solar/suny_india_download.csv'
+		self.request_url = self.create_url(route)
+
+	#spectral tmy
+	def spectral_tmy(self):
+		route = 'api/nsrdb_api/solar/spectral_tmy_india_download.csv'
+		self.request_url = self.create_url(route)
+
+	#makes api request based on inputs and returns the response object
+	def execute_query(self):
+		set_query = getattr(self, self.data_set)
+		set_query()
+		resp = requests.get(self.request_url, params=self.params)
+		return resp
+
+'''Create nrsdb factory and execute query. Optional output to file or return the response object.'''
+def get_nrsdb_data(data_set, longitude, latitude, year, api_key, utc='true', leap_day='false', email='erikjamestalbot@gmail.com', interval=None, out_file=None):
+	nrsdb_factory = NSRDB(data_set, longitude, latitude, year, api_key, utc=utc, leap_day=leap_day, email=email, interval=interval)
+	data = nrsdb_factory.execute_query()
+	csv_lines = data.iter_lines()
+	reader = csv.reader(csv_lines, delimiter=',')
+	if out_file is not None:
+		with open(out_file, 'w') as csvfile:
+			for i in reader:
+				csvwriter = csv.writer(csvfile, delimiter=',')
+				csvwriter.writerow(i)
+	else:
+		#Maybe change depending on what's easy/flexible but this gives good display
+		return data.text
+
+'''Pull solard or surfrad data and aggregate into a year'''
+def getRadiationYears(radiation_type, site, year):
+	URL = 'ftp://aftp.cmdl.noaa.gov/data/radiation/{}/{}/{}/'.format(radiation_type, site, year)
+	#FILE = 'tbl19001.dat' - example
+	# Get directory contents.
+	dirReq = urllib2.Request(URL)
+	dirRes = urllib2.urlopen(dirReq)
+	dirLines = dirRes.read().split('\r\n')
+	allFileNames = [x[56:] for x in dirLines if x!='']
+	accum = []
+	for fName in ['tbl19001.dat']:
+		req = urllib2.Request(URL + fName)
+		response = urllib2.urlopen(req)
+		page = response.read()
+		lines = page.split('\n')
+		siteName = lines[0]
+		latLonVersion = lines[1].split()
+		data = [x.split() for x in lines[2:]]
+		minuteIntervals = ['0']
+		hourlyReads = [x for x in data if len(x) >= 5 and x[5] in minuteIntervals]
+		hourlyReadsSub = [
+			{
+				'col{}'.format(c):row[c] for c in range(len(row))
+			}
+			for row in hourlyReads
+		]
+		accum.extend(hourlyReadsSub)
+		print('processed file {}'.format(fName))
+	return accum
+
+#Create tsv file from dict 
+def create_tsv(data, radiation_type, site, year):
+	column_count = len(data[0])
+	output = csv.DictWriter(open('{}-{}-{}.tsv'.format(radiation_type, site, year), 'w'), fieldnames=['col{}'.format(x) for x in range(column_count)], delimiter='\t')
+	for item in data:
+	 	output.writerow(item)
+
+'''Get solard or surfrad data. Optional export to csv with out_file option'''
+def get_radiation_data(radiation_type, site, year, out_file=None):
+	allYears = getRadiationYears(radiation_type, site, year)
+	if out_file is not None:
+		create_tsv(allYears, radiation_type, site, year)
+	else:
+		return allYears
 
 
 if __name__ == "__main__":
