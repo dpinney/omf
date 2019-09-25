@@ -145,4 +145,10 @@
 			<script type="text/javascript">gebi("voltageDropChart").src = "data:image/png;base64," + allOutputData.voltageDrop</script>
 		</div>
 	</div>
+	<p class="reportTitle postRun"><b>Raw Input and Output Files</b></p>
+	<div id="rawOutput" class="content postRun" style="margin-top:0px">
+		{% for name in allOutputDataDict['fileNames'] %}
+			{% if loop.index > 1 %}&mdash; {% endif %}<a href="/downloadModelData/{{allInputDataDict['user']}}/{{allInputDataDict['modelName']}}/{{name}}">{{name}}</a>
+		{% endfor %}
+	</div>
 </body>
