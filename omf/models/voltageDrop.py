@@ -232,25 +232,27 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 	
 	#Record final status readout of each fuse/recloser/switch/sectionalizer after running
-	for key in protDevices.keys():
-		if protDevices[key]:
-			for phase in ['A', 'B', 'C']:
-				with open(pJoin(workDir,key+'_phase_'+phase+'_state.csv'),'r') as statusFile:
-					reader = csv.reader(statusFile)
-					# loop past the header, 
-					keys = []
-					vals = []
-					for row in reader:
-						if '# timestamp' in row:
-							keys = row
-							i = keys.index('# timestamp')
-							keys.pop(i)
-							vals = reader.next()
-							vals.pop(i)
-					for pos,key2 in enumerate(keys):
-						protDevFinalStatus[key2][phase] = vals[pos]
+	try:
+		for key in protDevices.keys():
+			if protDevices[key]:
+				for phase in ['A', 'B', 'C']:
+					with open(pJoin(workDir,key+'_phase_'+phase+'_state.csv'),'r') as statusFile:
+						reader = csv.reader(statusFile)
+						# loop past the header, 
+						keys = []
+						vals = []
+						for row in reader:
+							if '# timestamp' in row:
+								keys = row
+								i = keys.index('# timestamp')
+								keys.pop(i)
+								vals = reader.next()
+								vals.pop(i)
+						for pos,key2 in enumerate(keys):
+							protDevFinalStatus[key2][phase] = vals[pos]
+	except:
+		pass
 	#print protDevFinalStatus
-
 	#compare initial and final states of protective devices
 	#quick compare to see if they are equal
 	#print cmp(protDevInitStatus, protDevFinalStatus)
@@ -475,6 +477,11 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 		positions = graphviz_layout(cleanG, prog='neato')
 	else:
 		positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
+		remove_nodes = [n for n in fGraph if fGraph.node[n].get('pos', (0, 0)) == (0, 0)]
+ 		positions = {k: v for k, v in positions.iteritems() if k not in remove_nodes}
+ 		remove_edges = [e for e in fGraph.edges(remove_nodes)]
+ 		edgeNames = [e for e in edgeNames if e != remove_edges]
+ 		fGraph.remove_nodes_from(remove_nodes)
 	#create custom colormap
 	if customColormap:
 		if scaleMin != None and scaleMax != None:
