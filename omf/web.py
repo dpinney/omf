@@ -5,7 +5,7 @@ from jinja2 import Template
 from multiprocessing import Process
 from passlib.hash import pbkdf2_sha512
 from functools import wraps
-import json, os, flask_login, hashlib, random, time, datetime as dt, shutil, boto.ses, csv, sys, platform, errno
+import json, os, flask_login, hashlib, random, time, datetime as dt, shutil, boto.ses, csv, sys, platform, errno, io
 try:
 	import fcntl
 except:
@@ -106,7 +106,7 @@ app.secret_key = cryptoRandomString()
 def send_link(email, message, u={}):
 	''' Send message to email using Amazon SES. '''
 	try:
-		with locked_open("emailCredentials.key") as f:
+		with open("emailCredentials.key") as f:
 			key = f.read()
 		c = boto.ses.connect_to_region("us-east-1",
 			aws_access_key_id="AKIAJLART4NXGCNFEJIQ",
@@ -230,7 +230,7 @@ def fastNewUser(email):
 		with locked_open(os.path.join(_omfDir, 'data', 'User', user['username'] + '.json'), 'w') as f:
 			json.dump(user, f, indent=4)
 		message = "Thank you for registering an account on OMF.coop.\n\nYour password is: " + randomPass + "\n\n You can change this password after logging in."
-		with locked_open('emailCredentials.key') as f: # Need an absolute path here eventually
+		with open('emailCredentials.key') as f:
 			key = f.read()
 		c = boto.ses.connect_to_region("us-east-1", aws_access_key_id="AKIAJLART4NXGCNFEJIQ", aws_secret_access_key=key)
 		mailResult = c.send_email("admin@omf.coop", "OMF.coop User Account", message, [email])
@@ -579,15 +579,21 @@ def get_model_metadata(owner, model_name):
 
 from contextlib import contextmanager
 @contextmanager
-def locked_open(filepath, mode='r', timeout=180):
-	"""Open a file and lock it depending on the file access mode. An IOError will be raised if the lock cannot be acquired within the timeout"""
+def locked_open(filepath, mode='r', timeout=180, io_open=False, **io_open_args):
+	"""
+	Open a file and lock it depending on the file access mode. An IOError will be raised if the lock cannot be acquired within the timeout.
+	- Either regular open() or io.open() can be used with this function
+	"""
 	if mode in ['r', 'rb']:
 		lock_mode = fcntl.LOCK_SH
 	elif mode in ['r+', 'r+b', 'w', 'wb', 'w+', 'w+b', 'a', 'ab', 'a+', 'a+b']:
 		lock_mode = fcntl.LOCK_EX
 	else:
 		raise Exception("Unrecognized file access mode")
-	f = open(filepath, mode)
+	if io_open:
+		f = io.open(filepath, mode, **io_open_args)
+	else:
+		f = open(filepath, mode)
 	start_time = time.time()
 	while True:
 		try:
@@ -693,11 +699,11 @@ def distribution_get(owner, modelName, feeder_num):
 
 def load_test_files(file_names):
 	"""Load the JavaScript unit-test files into a string and return the string"""
-	with locked_open(os.path.join(_omfDir, "static", "lib", "jasmine-3.3.0", "scriptTags.html")) as f:
+	with open(os.path.join(_omfDir, "static", "lib", "jasmine-3.3.0", "scriptTags.html")) as f:
 		jasmine = f.read()
 	spec = ""
 	for name in file_names:
-		with locked_open(os.path.join(_omfDir, "static", "testFiles", name)) as f:
+		with open(os.path.join(_omfDir, "static", "testFiles", name)) as f:
 			spec += f.read()
 	return {"jasmine": jasmine, "spec": spec}
 
@@ -769,9 +775,9 @@ def milImportBackground(owner, modelName):
 		]
 		request.files.get('stdFile').save(std_filepath)
 		request.files.get('seqFile').save(seq_filepath)
-		with locked_open(std_filepath) as f:
+		with open(std_filepath) as f:
 			stdString = f.read()
-		with locked_open(seq_filepath) as f:
+		with open(seq_filepath) as f:
 			seqString = f.read()
 		with locked_open(pid_filepath, 'w') as pid_file:
 			pid_file.write(str(os.getpid()))
@@ -1032,7 +1038,7 @@ def newSimpleFeeder(owner, modelName, feederNum=1, writeInput=False, feederName=
 	modelDir = os.path.join(_omfDir, "data", "Model", owner, modelName)
 	for i in range(2,6):
 		if not os.path.isfile(os.path.join(modelDir, feederName + '.omd')):
-			with locked_open(os.path.join(_omfDir, 'static', 'SimpleFeeder.json')) as f:
+			with open(os.path.join(_omfDir, 'static', 'SimpleFeeder.json')) as f:
 				feeder_string = f.read()
 			with locked_open(os.path.join(modelDir, feederName + '.omd'), 'w') as f:
 				f.write(feeder_string)
@@ -1051,7 +1057,7 @@ def newSimpleNetwork(owner, modelName, networkNum=1, writeInput=False, networkNa
 	modelDir = os.path.join(_omfDir, "data", "Model", owner, modelName)
 	for i in range(2, 6):
 		if not os.path.isfile(os.path.join(modelDir, networkName + '.omt')):
-			with locked_open(os.path.join(_omfDir, 'static', 'SimpleNetwork.json')) as f:
+			with open(os.path.join(_omfDir, 'static', 'SimpleNetwork.json')) as f:
 				network_string = f.read()
 			with locked_open(os.path.join(modelDir, networkName + '.omt'), 'w') as f:
 				f.write(network_string)
@@ -1767,5 +1773,4 @@ if __name__ == "__main__":
 		os.environ['no_proxy'] = '*' # Workaround for macOS fork behavior with multiprocessing and urllib.
 	template_files = ["templates/"+ x  for x in safeListdir("templates")]
 	model_files = ["models/" + x for x in safeListdir("models")]
-	#app.run(debug=True, host="0.0.0.0", extra_files=template_files + model_files)
-	app.run(debug=True, host="0.0.0.0", extra_files=model_files)
+	app.run(debug=True, host="0.0.0.0", extra_files=template_files + model_files)
