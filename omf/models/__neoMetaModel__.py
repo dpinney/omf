@@ -197,18 +197,14 @@ def getStatus(modelDir):
 		modFiles = os.listdir(modelDir)
 	except:
 		modFiles = []
-	hasInput = "allInputData.json" in modFiles
 	hasPID = "PPID.txt" in modFiles
 	hasOutput = "allOutputData.json" in modFiles
-	if hasInput and not hasOutput and not hasPID:
-		return "stopped"
-	elif hasInput and not hasOutput and hasPID:
-		return "running"
-	elif hasInput and hasOutput and not hasPID:
-		return "finished"
+	if hasPID:
+		return 'running'
+	elif hasOutput:
+		return 'finished'
 	else:
-		# Broken! Make the safest choice:
-		return "stopped"
+		return 'stopped'
 
 def new(modelDir, defaultInputs):
 	''' Create a new instance of a model. Returns true on success, false on failure. '''
