@@ -247,40 +247,54 @@ function init() {
 	} else {
 		modelUser = "none"
 	}
-	// Depending on status, show different things.
-	if (modelStatus == "finished") {
+	// Display elements based on model status
+	if (modelStatus === "finished") {
 		console.log("FINISHED")
 		$(".postRun").css('display', 'block')
 		$(".postRunInline").css('display', 'inline-block')
-	} else if (modelStatus == "running") {
+	} else if (modelStatus === "running") {
 		console.log("RUNNING")
 		$(".running").css('display', 'block')
 		$(".runningInline").css('display', 'inline-block')
 		$("input").prop("readonly", true)
 		$("select").prop("disabled", true)
-		$("button#shareButton").hide();
-		if (modelUser !== currentUser && currentUser !== "admin") {
-			$("button#cancelButton").hide();
-		}
-	} else /* Stopped */ {
+	} else {
+		// stopped
 		if (allInputData != null) {
 			$(".stopped").show()
 			$(".stoppedInline").show()
 		}
 	}
-	// Hide buttons depending on whether the client is the model owner or a model viewer
+	/**
+	 * Everyone can see the "duplicate" button, but only if the model is "finished" or stopped"
+	 * Only model owners (and admin) can see the "share" button, but only if the model is "stopped" or "finished"
+	 * Only model owners (and admin) can see the "run" button, but only if the model is "stopped" or "finished"
+	 * Only model owners (and admin) can see the "delete" button, at ALL times
+	 * Only model owners (and admin) can see the "cancel run" button, but only if the model is "running"
+	 * Other stuff must display in accordance with the model status, the current viewer notwithstanding
+	 */
 	$("button#deleteButton").hide();
 	$("button#shareButton").hide();
-	$("button#duplicateButton").show();
+	$("button#duplicateButton").hide();
 	$("button#runButton").hide();
-	if (modelUser === currentUser || currentUser === "admin") {
+	$("button#cancelButton").hide();
+	// Display elements based on model status and user authorization
+	if (modelStatus === "finished" || modelStatus === "stopped") {
+		// Anyone can see the duplicate button
+		$("button#duplicateButton").show();
+	}
+	if (modelUser === currentUser || currentUser === "admin") { 
 		$("button#deleteButton").show();
-		$("button#runButton").show();
-		if (modelStatus !== "running") {
+		if (modelStatus == "stopped" || modelStatus == "finished") {
 			$("button#shareButton").show();
+			$("button#runButton").show();
+		} else {
+			// running
+			$("button#cancelButton").show();
 		}
 	}
 }
+	
 
 function restoreInputs() {
 	// Restore all the input values that were used and stored in allInputData.json
