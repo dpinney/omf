@@ -733,8 +733,8 @@ class USCRNDataType(object):
 			return self.transformation_function(value)
 		return value
 
-'''Pull TMY3 data based on usafn. Use nearest_tmy3_station function to get a close by tmy3 station based on latitude/longitude coordinates '''
 def tmy3_pull(usafn_number, out_file=None):
+	'''Pull TMY3 data based on usafn. Use nearest_tmy3_station function to get a close by tmy3 station based on latitude/longitude coordinates '''
 	url = 'https://rredc.nrel.gov/solar/old_data/nsrdb/1991-2005/data/tmy3'
 	file_name = '{}TYA.CSV'.format(usafn_number)
 	file_path = os.path.join(url, file_name)
@@ -750,10 +750,10 @@ def tmy3_pull(usafn_number, out_file=None):
 					csvwriter = csv.writer(csvfile, delimiter=',')
 					csvwriter.writerow(i)
 	else:
-		return resp
+		return data
 
-'''Return nearest USAFN stattion based on latlon'''
 def nearest_tmy3_station(latitude, longitude):
+'''Return nearest USAFN stattion based on latlon'''
 	url = 'https://rredc.nrel.gov/solar/old_data/nsrdb/1991-2005/tmy3'
 	file_name = 'TMY3_StationsMeta.csv'
 	file_path = os.path.join(url, file_name)
@@ -768,12 +768,13 @@ def nearest_tmy3_station(latitude, longitude):
 	return nearest['USAF']
 
 def lat_lon_diff(lat1, lat2, lon1, lon2):
-	'''Get the distance between two sets of latlon coordinates'''
+	'''Get the euclidean distance between two sets of latlon coordinates'''
 	dist = sqrt((float(lat1) - float(lat2))**2 + (float(lon1) - float(lon2))**2)
 	return dist
 
 class NSRDB():
-	def __init__(self, data_set, longitude, latitude, year, api_key, utc='true', leap_day='false', email='erikjamestalbot@gmail.com', interval=None):
+	'''Data pull factory for nsrdb data sets '''
+	def __init__(self, data_set, longitude, latitude, year, api_key, utc='true', leap_day='false', email='admin@omf.coop', interval=None):
 		self.base_url = 'https://developer.nrel.gov'
 		self.data_set = data_set
 		self.params = {}
@@ -826,8 +827,8 @@ class NSRDB():
 		resp = requests.get(self.request_url, params=self.params)
 		return resp
 
-'''Create nrsdb factory and execute query. Optional output to file or return the response object.'''
-def get_nrsdb_data(data_set, longitude, latitude, year, api_key, utc='true', leap_day='false', email='erikjamestalbot@gmail.com', interval=None, out_file=None):
+def get_nrsdb_data(data_set, longitude, latitude, year, api_key, utc='true', leap_day='false', email='admin@omf.coop', interval=None, out_file=None):
+	'''Create nrsdb factory and execute query. Optional output to file or return the response object.'''
 	nrsdb_factory = NSRDB(data_set, longitude, latitude, year, api_key, utc=utc, leap_day=leap_day, email=email, interval=interval)
 	data = nrsdb_factory.execute_query()
 	csv_lines = data.iter_lines()
@@ -841,8 +842,8 @@ def get_nrsdb_data(data_set, longitude, latitude, year, api_key, utc='true', lea
 		#Maybe change depending on what's easy/flexible but this gives good display
 		return data.text
 
-'''Pull solard or surfrad data and aggregate into a year'''
 def getRadiationYears(radiation_type, site, year):
+	'''Pull solard or surfrad data and aggregate into a year'''
 	URL = 'ftp://aftp.cmdl.noaa.gov/data/radiation/{}/{}/{}/'.format(radiation_type, site, year)
 	#FILE = 'tbl19001.dat' - example
 	# Get directory contents.
@@ -851,7 +852,7 @@ def getRadiationYears(radiation_type, site, year):
 	dirLines = dirRes.read().split('\r\n')
 	allFileNames = [x[56:] for x in dirLines if x!='']
 	accum = []
-	for fName in ['tbl19001.dat']:
+	for fName in allFileNames:
 		req = urllib2.Request(URL + fName)
 		response = urllib2.urlopen(req)
 		page = response.read()
@@ -871,15 +872,15 @@ def getRadiationYears(radiation_type, site, year):
 		print('processed file {}'.format(fName))
 	return accum
 
-#Create tsv file from dict 
 def create_tsv(data, radiation_type, site, year):
+	'''Create tsv file from dict '''
 	column_count = len(data[0])
 	output = csv.DictWriter(open('{}-{}-{}.tsv'.format(radiation_type, site, year), 'w'), fieldnames=['col{}'.format(x) for x in range(column_count)], delimiter='\t')
 	for item in data:
 	 	output.writerow(item)
 
-'''Get solard or surfrad data. Optional export to csv with out_file option'''
 def get_radiation_data(radiation_type, site, year, out_file=None):
+	'''Get solard or surfrad data. Optional export to csv with out_file option'''
 	allYears = getRadiationYears(radiation_type, site, year)
 	if out_file is not None:
 		create_tsv(allYears, radiation_type, site, year)
