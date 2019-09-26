@@ -753,7 +753,7 @@ def tmy3_pull(usafn_number, out_file=None):
 		return data
 
 def nearest_tmy3_station(latitude, longitude):
-'''Return nearest USAFN stattion based on latlon'''
+	'''Return nearest USAFN stattion based on latlon'''
 	url = 'https://rredc.nrel.gov/solar/old_data/nsrdb/1991-2005/tmy3'
 	file_name = 'TMY3_StationsMeta.csv'
 	file_path = os.path.join(url, file_name)
