@@ -389,6 +389,7 @@ MODAL DIALOGS
 	width: 80%;
 	margin: 16px auto;
 	border: 0px;
+	table-layout: auto;
 }
 
 #emailModalContent tbody, #emailModalContent tr {
