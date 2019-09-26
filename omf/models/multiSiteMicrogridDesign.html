@@ -441,6 +441,19 @@
 				<label class="tooltip">Critical Load Factor<span class="classic">The percent of typical load that must be met during a grid outage.</span></label>
 				<input type="number" id="criticalLoadFactor" name="criticalLoadFactor" min="0" max="100" required="required"/>
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Pre-existing Generator Size (kW)<span class="classic">Specify the total capacity of any pre-existing generators in kWh.</span></label>
+				<input type="text" id="genSize" name="genSize" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Available Generator Fuel (gallons)<span class="classic">Specify the amount of fuel available for any pre-existing generators in gallons.</span></label>
+				<input type="text" id="fuelAvailable" name="fuelAvailable" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Minimum Generator Loading<span class="classic">The percent of load that must be met by the generator during a grid outage.</span></label>
+				<input type="number" id="minGenLoading" name="minGenLoading" min="0" max="100" required="required"/>
+			</div>
+			
 
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
