@@ -62,6 +62,9 @@ def work(modelDir, inputDict):
 	windMin = float(inputDict['windMin'])
 	batteryPowerMin = float(inputDict['batteryPowerMin'])
 	batteryEnergyMin = float(inputDict['batteryEnergyMin'])
+	fuelAvailable = float(inputDict['fuelAvailable'])
+	genSize = float(inputDict['genSize'])
+	minGenLoading = float(inputDict['minGenLoading'])
 	#outageStart = int(inputDict['outageStart'])
 	#outageEnd = outageStart + indexStringnt(inputDict['outageDuration'])
 	#if outageEnd > 8759:
@@ -120,6 +123,11 @@ def work(modelDir, inputDict):
 						"installed_cost_us_dollars_per_kw": windCost,
 						"min_kw": windMin
 
+					},
+					"Generator": {
+						"fuel_avail_gal": fuelAvailable,
+						"min_turn_down_pct": minGenLoading,
+						"existing_kw": genSize
 					}
 				}
 			}
@@ -414,11 +422,10 @@ def new(modelDir):
 		"windMin": 0,
 		"batteryPowerMin": 0,
 		"batteryEnergyMin": 0,
-		"outageDate" : "2001-01-01",
-		"outageHour" : "0",
-		"outageDuration" : "1",
 		"criticalLoadFactor" : "50",
-		"outageType" : "once"
+		"fuelAvailable": "0",
+		"genSize": "0",
+		"minGenLoading": "0"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
