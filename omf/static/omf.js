@@ -242,36 +242,59 @@ function init() {
 			catch (e){}
 		}
 	} 
-	// Depending on status, show different things.
-	if (modelStatus == "finished") {
-		console.log("FINISHED")
-		$(".postRun").css('display', 'block')
-		$(".postRunInline").css('display', 'inline-block')
-	} else if (modelStatus == "running") {
-		console.log("RUNNING")
-		$(".running").css('display', 'block')
-		$(".runningInline").css('display', 'inline-block')
-		$("input").prop("readonly", true)
-		$("select").prop("disabled", true)
-	} else /* Stopped */ {
-		if (allInputData != null) {
-			$(".stopped").show()
-			$(".stoppedInline").show()
-		}
-	}
-	// Hide buttons we don't use:
 	if (allInputData != null) {
 		modelUser = allInputData["user"]
 	} else {
 		modelUser = "none"
 	}
-	if (modelUser == "public" && currentUser != "admin") {
-		$("button#deleteButton").hide();
-		$("button#publishButton").hide();
+	// Display elements based on model status
+	if (modelStatus === "finished") {
+		console.log("FINISHED")
+		$(".postRun").css('display', 'block')
+		$(".postRunInline").css('display', 'inline-block')
+	} else if (modelStatus === "running") {
+		console.log("RUNNING")
+		$(".running").css('display', 'block')
+		$(".runningInline").css('display', 'inline-block')
+		$("input").prop("readonly", true)
+		$("select").prop("disabled", true)
+	} else {
+		// stopped
+		if (allInputData != null) {
+			$(".stopped").show()
+			$(".stoppedInline").show()
+		}
+	}
+	/**
+	 * Everyone can see the "duplicate" button, but only if the model is "finished" or stopped"
+	 * Only model owners (and admin) can see the "share" button, but only if the model is "stopped" or "finished"
+	 * Only model owners (and admin) can see the "run" button, but only if the model is "stopped" or "finished"
+	 * Only model owners (and admin) can see the "delete" button, at ALL times
+	 * Only model owners (and admin) can see the "cancel run" button, but only if the model is "running"
+	 * Other stuff must display in accordance with the model status, the current viewer notwithstanding
+	 */
+	$("button#deleteButton").hide();
+	$("button#shareButton").hide();
+	$("button#duplicateButton").hide();
+	$("button#runButton").hide();
+	$("button#cancelButton").hide();
+	// Display elements based on model status and user authorization
+	if (modelStatus === "finished" || modelStatus === "stopped") {
+		// Anyone can see the duplicate button
 		$("button#duplicateButton").show();
-		$("button#runButton").hide();
+	}
+	if (modelUser === currentUser || currentUser === "admin") { 
+		$("button#deleteButton").show();
+		if (modelStatus == "stopped" || modelStatus == "finished") {
+			$("button#shareButton").show();
+			$("button#runButton").show();
+		} else {
+			// running
+			$("button#cancelButton").show();
+		}
 	}
 }
+	
 
 function restoreInputs() {
 	// Restore all the input values that were used and stored in allInputData.json
@@ -310,20 +333,160 @@ function deleteModel() {
 	}
 }
 
-function publishModel() {
-	newName = prompt("Publish a copy with name", allInputData.modelName)
-	while (! /^[\w\s]+$/.test(newName)){
-		newName = prompt("Public a copy with new name, only letters, digits and underscore are allowed in the model name.\nPlease rename your new model", allInputData.modelName)
+/**
+ *
+ */
+function shareModel() {
+	const viewers = allInputData.viewers == null ? [] : allInputData.viewers;
+	const modal = document.createElement("div");
+	modal.id = "emailModal";
+	const modalContent = document.createElement("div");
+	modalContent.id = "emailModalContent";
+	modal.append(modalContent);
+	// Add title and instructions
+	const h = document.createElement("h1");
+	h.textContent = "Share";
+	modalContent.append(h);
+	const p = document.createElement("p");
+	p.textContent = "As the model owner, you may view, duplicate, run, share, and delete this model. " + 
+		"Users that you choose to share with may only view and duplicate this model.";
+	modalContent.append(p);
+	const privacyIndicator = document.createElement("p");
+	if (viewers.length === 0) {
+		privacyIndicator.textContent = "The model is currently private."
+	} else {
+		privacyIndicator.textContent = "The model is currently shared."
 	}
-	if (newName) {
-		$.ajax({url:"/uniqObjName/Model/public/" + newName}).done(function(data) {
-			if (data.exists) {
-				alert("There is already a public Model named " + newName)
-				publishModel()
-			} else {
-				post_to_url("/publishModel/" + allInputData.user + "/" + allInputData.modelName+"/", {"newName":newName})
+	modalContent.append(privacyIndicator);
+	// Create form and table
+	const form = document.createElement("form");
+	modalContent.append(form);
+	const div = document.createElement("div");
+	div.classList.add("tableContainer");
+	form.append(div);
+	
+	const table = document.createElement("table");
+	div.append(table);
+	const tbody = document.createElement("tbody");
+	table.append(tbody);
+	for (const email of viewers) {
+		const row = getEmailRow()
+		row.querySelector("input[name='email']").value = email;
+		tbody.append(row);
+	}
+	// Add add button
+	const addButton = getAddButton();
+	form.append(addButton);
+	// Add buttons
+	const buttonDiv = document.createElement("div");
+	buttonDiv.classList.add("buttonDiv");
+	form.append(buttonDiv);
+	const submitButton = getSubmitButton();
+	buttonDiv.append(submitButton);
+	const closeButton = getCloseButton();
+	buttonDiv.append(closeButton);
+	form.addEventListener("submit", e => {
+		e.preventDefault();
+		submitButton.disabled = true;
+		const formData = new FormData(form);
+		formData.set("user", allInputData.user);
+		formData.set("modelName", allInputData.modelName);
+		$.ajax({
+			type: "POST",
+			url: "/shareModel",
+			data: formData,
+			processData: false,
+			contentType: false
+		}).done(function(data, text, jqXHR) {
+			const emails = JSON.parse(jqXHR.responseText);
+			allInputData.viewers = emails;
+			closeButton.click();
+			shareModel();
+			alert("Successfully updated your selection of shared users.");
+		}).fail(function(jqXHR, textStatus, errorThrown) {
+			resetInvalidFlags();
+			if (jqXHR.status === 409) {
+				// Notify user that model is running
+				alert(jqXHR.responseText);
+			} else if (jqXHR.status === 400) {
+				// Mark invalid usernames
+				const invalidEmails = JSON.parse(jqXHR.responseText)
+				Array.from(tbody.getElementsByTagName("input")).forEach(input => {
+					if (invalidEmails.includes(input.value)) {
+						const td = input.parentElement.nextElementSibling;
+						td.removeAttribute("style");
+					}
+				});
 			}
-		})
+
+		}).always(function() {
+			submitButton.disabled = false;
+		});
+	});
+	document.body.prepend(modal);
+
+	function resetInvalidFlags() {
+		Array.from(tbody.querySelectorAll("td[data-isinvalid='true']")).forEach(td => {
+			td.style.display = "none";
+		});
+	}
+
+	function getSubmitButton() {
+		const submitButton = document.createElement("button");
+		submitButton.type = "submit";
+		submitButton.style.marginRight = "14px";
+		submitButton.textContent = "Update Sharing";
+		return submitButton;
+	}
+
+	function getCloseButton() {
+		const closeButton = document.createElement("button");
+		closeButton.textContent = "Close";
+		closeButton.classList.add("deleteButton");
+		closeButton.type = "button";
+		closeButton.addEventListener("click", function() {
+			document.getElementById("emailModal").remove();
+		});
+		return closeButton;
+	}
+
+	function getEmailRow() {
+		const row = document.createElement("tr");
+		let cell = document.createElement("td");
+		row.append(cell);
+		const deleteButton = document.createElement("button");
+		deleteButton.type = "button";
+		deleteButton.classList.add("deleteButton");
+		deleteButton.innerHTML = "&#9587;"
+		deleteButton.addEventListener("click", function() {
+			row.remove();
+		});
+		cell.append(deleteButton);
+		cell = document.createElement("td");
+		row.append(cell);
+		const input = document.createElement("input");
+		input.type = "text";
+		input.name = "email";
+		input.required = true; // don't let the user submit an empty string as an email
+		cell.append(input);
+		cell = document.createElement("td");
+		cell.textContent = "Invalid username";
+		cell.dataset.isinvalid = "true";
+		cell.style.display = "none";
+		row.append(cell);
+		input.addEventListener("change", () => { cell.style.display = "none"; })
+		return row;
+	}
+
+	function getAddButton() {
+		const addButton = document.createElement("button");
+		addButton.type = "button";
+		addButton.textContent = "Add User";
+		addButton.addEventListener("click", function() {
+			const emailRow = getEmailRow();
+			tbody.prepend(emailRow);
+		});
+		return addButton;
 	}
 }
 
@@ -376,14 +539,18 @@ function createModelName(modelType, modelName) {
 		modelName = prompt("Only letters, digits and underscore are allowed in the model name.\nPlease rename your new model")
 	}
 	if (modelName) {
-		$.ajax({url:"/uniqObjName/Model/" + username + "/" + modelName}).done(function(data) {
+		$.ajax({
+			url:"/uniqObjName/Model/" + username + "/" + modelName
+		}).done(function(data) {
 			if (data.exists) {
 				alert("There is already a model named " + modelName)
 				createModelName(modelType, modelName)
 			} else {
 				post_to_url("/newModel" + "/"+ modelType + "/" + modelName)
 			}
-		})
+		}).fail(function(jqXHR, textStatus, errorThrown) {
+			alert("AJAX request failed to get a successful response from the server.");
+		});
 	}
 }
 	
