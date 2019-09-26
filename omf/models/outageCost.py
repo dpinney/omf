@@ -113,8 +113,8 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustain
 		time = datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S'))
 		timeMin = datetime_to_float(datetime.datetime.strptime(timeMinFilter, '%Y-%m-%d %H:%M:%S'))
 		timeMax = datetime_to_float(datetime.datetime.strptime(timeMaxFilter, '%Y-%m-%d %H:%M:%S'))
-		print(timeMin)
-		print(timeMax)
+		# print(timeMin)
+		# print(timeMax)
 		meterCount = len(meters)
 		p = re.compile(r'-?\d+\.\d+')  # Compile a pattern to capture integer values
 		coords = [float(i) for i in p.findall(entry)]
