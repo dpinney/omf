@@ -97,16 +97,18 @@ def work(modelDir, ind):
 
 	tomorrow_peak = max(tomorrow_load)
 	m = df[(df['month'] == tomorrow.month) & (df['year'] != tomorrow.year) ]
-	o['quantile'] = round(m[m['load'] < tomorrow_peak].shape[0]/float(m.shape[0])*100, 2)
-	o['predicted_peak'] = [m['load'].median(), highest_peak_this_month(df, tomorrow), tomorrow_peak, two_day_peak, three_day_peak]
+	hourly = m
+	m = m.groupby(m.dates.dt.date)['load'].max()
+	o['quantile'] = round(m[m < tomorrow_peak].shape[0]/float(m.shape[0])*100, 2)
+	o['predicted_peak'] = [m.median(), highest_peak_this_month(df, tomorrow), tomorrow_peak, two_day_peak, three_day_peak]
 	o['predicted_peak_limits'] = [
-		[m['load'].min(), m['load'].max()],
+		[m.min(), m.max()],
 		[0, 0],
 		[tomorrow_peak*(1 + tomorrow_accuracy['test']*.01), tomorrow_peak*(1 - tomorrow_accuracy['test']*.01)],
 		[two_day_peak*(1 + two_day_load_accuracy['test']*.01), two_day_peak*(1 - two_day_load_accuracy['test']*.01)],
 		[three_day_peak*(1 + three_day_load_accuracy['test']*.01), three_day_peak*(1 - three_day_load_accuracy['test']*.01)]
 	]
-
+	m = hourly
 	previous_months = [{
 		'year': y,
 		'load': m[m['year'] == y]['load'].tolist()
