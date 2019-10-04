@@ -521,9 +521,6 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 			print "WARNING: edgeCol property must be 'Current', 'Power', 'Rating', 'PercentOfRating', or None"
 	else:
 		edgeList = [emptyColors.get(n,.6) for n in edgeNames]
-	# !!!!! 2457 3051 <built-in function len>
-	print dir(fGraph)
-	print '!!!!!', len(positions), len(edgeList)#, len(fGraph.edges)
 	edgeIm = nx.draw_networkx_edges(
 		fGraph,
 		pos = positions,
