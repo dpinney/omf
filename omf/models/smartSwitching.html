@@ -124,11 +124,11 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Failure Dist. Param. 1<span class="classic">First parameter for failure distribution.</span></label>
-				<input type="text" id="failureDistParam1" name="failureDistParam1" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="failureDistParam1" name="failureDistParam1" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Failure Dist. Param. 2<span class="classic">Second parameter for failure distribution.</span></label>
-				<input type="text" id="failureDistParam2" name="failureDistParam2" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="failureDistParam2" name="failureDistParam2" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Restoration Distribution<span class="classic">Distribution for the restoration generation function.</span></label>
@@ -147,11 +147,11 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Restoration Dist. Param. 1<span class="classic">First parameter for restoration distribution.</span></label>
-				<input type="text" id="restorationDistParam1" name="restorationDistParam1" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="restorationDistParam1" name="restorationDistParam1" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Restoration Dist. Param. 2<span class="classic">Second parameter for restoration distribution.</span></label>
-				<input type="text" id="restorationDistParam2" name="restorationDistParam2" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="restorationDistParam2" name="restorationDistParam2" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Maximum Fault Length<span class="classic">A global maximum (in seconds) on the amount of time for which any fault can occur.</span></label>
@@ -183,7 +183,7 @@
 			</div>
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
+				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
 				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
 				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
 				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
