@@ -18,7 +18,7 @@ from omf.solvers import gridlabd
 # Model metadata:
 tooltip = "outageCost calculates reliability metrics and creates a leaflet graph based on data from an input csv file."
 modelName, template = metadata(__file__)
-hidden = True
+hidden = False
 
 def datetime_to_float(d):
 	'helper function to convert a datetime object to a float'
@@ -113,8 +113,8 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, numberOfCustomers, sustain
 		time = datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S'))
 		timeMin = datetime_to_float(datetime.datetime.strptime(timeMinFilter, '%Y-%m-%d %H:%M:%S'))
 		timeMax = datetime_to_float(datetime.datetime.strptime(timeMaxFilter, '%Y-%m-%d %H:%M:%S'))
-		print(timeMin)
-		print(timeMax)
+		# print(timeMin)
+		# print(timeMax)
 		meterCount = len(meters)
 		p = re.compile(r'-?\d+\.\d+')  # Compile a pattern to capture integer values
 		coords = [float(i) for i in p.findall(entry)]

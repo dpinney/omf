@@ -18,38 +18,6 @@
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 	<!-- Global Functions -->
 	<script type="text/javascript">
-		function init() {
-			// If we have input, put it back.
-			if (allInputData != null) {
-				restoreInputs()
-				$("#modelName").prop("readonly", true)
-			}
-			if (allOutputData != null) {
-				if (allOutputData['oldVersion'] == true) {
-					document.getElementById("triangle-parent").style.visibility = "visible";
-				}
-			}
-			// Depending on status, show different things.
-			if (modelStatus == "finished") {
-				console.log("FINISHED")
-				$(".postRun").css('display', 'block')
-				$(".postRunInline").css('display', 'inline-block')
-			} else if (modelStatus == "running") {
-				console.log("RUNNING")
-				$(".running").css('display', 'block')
-				$(".runningInline").css('display', 'inline-block')
-				$("input").prop("readonly", true)
-				$("select").prop("disabled", true)
-			} else /* Stopped */ {
-				if (allInputData != null) {
-					$(".stopped").show()
-					$(".stoppedInline").show()
-				} else {
-					alert("Error encountered: please be a hero and post a screenshot to https://github.com/dpinney/omf/issues")
-					console.log("*****MAJOR ERROR: THIS MEANS ALLINPUTDATA WAS DELETED*****")
-				}
-			}
-		}
 		function editFeeder(modelName, feederNum) {
 			console.log("modelName:",modelName)
 			studyUser = allInputData.user
@@ -145,7 +113,7 @@
 			</div>
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
+				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
 				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
 				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
 				<button id="runButton" class="postRunInline stoppedInline" type="submit">Run Model</button>

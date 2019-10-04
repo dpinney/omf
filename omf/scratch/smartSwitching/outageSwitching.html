@@ -51,7 +51,7 @@
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-smartSwitching" target="blank">Help?</a></label>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-outageSwitching" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
@@ -96,66 +96,8 @@
 				</div>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Line for Faults<span class="classic">The type of line on which the random faults can occur.</span></label>
-				<select id="lineTypeForFaults" name="lineTypeForFaults" />
-					<option value="underground_line">Underground Lines</option>
-					<option value="overhead_line">Overhead Lines</option>
-					<option value="triplex_line">Triplex Lines</option>
-				</select>
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">Recloser Location<span class="classic">Location where recloser is added.</span></label>
 				<input type="text" id="recloserLocation" name="recloserLocation">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Failure Distribution<span class="classic">Distribution for the failure generation function.</span></label>
-				<select id="failureDistribution" name="failureDistribution" />
-					<option value="UNIFORM">Uniform</option>
-					<option value="NORMAL">Normal</option>
-					<option value="BERNOULLI">Bernoulli</option>
-					<option value="LOGNORMAL">Lognormal</option>
-					<option value="PARETO">Pareto</option>
-					<option value="EXPONENTIAL">Exponential</option>
-					<option value="WEIBULL">Weibull</option>
-					<option value="GAMMA">Gamma</option>
-					<option value="BETA">Beta</option>
-					<option value="TRIANGLE">Triangle</option>
-				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Failure Dist. Param. 1<span class="classic">First parameter for failure distribution.</span></label>
-				<input type="text" id="failureDistParam1" name="failureDistParam1" required="required">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Failure Dist. Param. 2<span class="classic">Second parameter for failure distribution.</span></label>
-				<input type="text" id="failureDistParam2" name="failureDistParam2" required="required">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Restoration Distribution<span class="classic">Distribution for the restoration generation function.</span></label>
-				<select id="restorationDistribution" name="restorationDistribution" />
-					<option value="UNIFORM">Uniform</option>
-					<option value="NORMAL">Normal</option>
-					<option value="BERNOULLI">Bernoulli</option>
-					<option value="LOGNORMAL">Lognormal</option>
-					<option value="PARETO">Pareto</option>
-					<option value="EXPONENTIAL">Exponential</option>
-					<option value="WEIBULL">Weibull</option>
-					<option value="GAMMA">Gamma</option>
-					<option value="BETA">Beta</option>
-					<option value="TRIANGLE">Triangle</option>
-				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Restoration Dist. Param. 1<span class="classic">First parameter for restoration distribution.</span></label>
-				<input type="text" id="restorationDistParam1" name="restorationDistParam1" required="required">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Restoration Dist. Param. 2<span class="classic">Second parameter for restoration distribution.</span></label>
-				<input type="text" id="restorationDistParam2" name="restorationDistParam2" required="required">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Maximum Fault Length<span class="classic">A global maximum (in seconds) on the amount of time for which any fault can occur.</span></label>
-				<input type="text" id="maxFaultLength" name="maxFaultLength">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">KWH Cost<span class="classic">KWH cost parameter for calculating outage costs.</span></label>
@@ -183,7 +125,7 @@
 			</div>
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
+				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
 				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
 				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
 				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
@@ -237,13 +179,6 @@
 			<div id="fig1Chart" style="width:1000px"></div>
 			<script type="text/javascript">
 				Plotly.newPlot("fig1Chart", JSON.parse(allOutputData["fig1Data"]), JSON.parse(allOutputData["fig1Layout"]) || {})
-			</script>
-		</div>
-		<p class="reportTitle postRun">Outage Distribution Data</p>
-		<div id="fig2" class="tightContent postRun">
-			<div id="fig2Chart" style="width:1000px"></div>
-			<script type="text/javascript">
-				Plotly.newPlot("fig2Chart", JSON.parse(allOutputData["fig2Data"]), JSON.parse(allOutputData["fig2Layout"]) || {})
 			</script>
 		</div>
 		<p class="reportTitle postRun">Outage Timeline</p>

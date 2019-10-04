@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib
+import math
 import scipy.stats as stats
 from plotly import tools
 import plotly as py
@@ -15,6 +16,7 @@ from plotly.tools import make_subplots
 from networkx.drawing.nx_agraph import graphviz_layout
 import networkx as nx
 import itertools as it
+from omf import geo
 from shutil import copyfile
 from omf.models import voltageDrop as vd
 from __neoMetaModel__ import *
@@ -34,7 +36,7 @@ tooltip = "smartSwitching gives the expected reliability improvement from adding
 modelName, template = metadata(__file__)
 hidden = False
 
-def pullOutValues(tree, workDir, sustainedOutageThreshold, lineNameForRecloser):
+def pullOutValuesSmart(tree, workDir, sustainedOutageThreshold, lineNameForRecloser):
 	'helper function which pulls out reliability metric data (SAIDI/SAIFI).'
 	attachments = []
 	# Run Gridlab.
@@ -88,11 +90,11 @@ def pullOutValues(tree, workDir, sustainedOutageThreshold, lineNameForRecloser):
 	mc = mc.rename(columns={'Metric Interval Event #': 'Task', 'Starting DateTime (YYYY-MM-DD hh:mm:ss)': 'Start', 'Ending DateTime (YYYY-MM-DD hh:mm:ss)': 'Finish'})
 	
 	# find SAIDI/SAIFI/MAIFI measures by calculating manually based on a given sustained outage threshold
-	SAIDI_returned, SAIFI_returned, MAIFI_returned = manualOutageStats(numberOfCustomers, mc, sustainedOutageThreshold, lineNameForRecloser)
+	SAIDI_returned, SAIFI_returned, MAIFI_returned = manualOutageStatsSmart(numberOfCustomers, mc, sustainedOutageThreshold, lineNameForRecloser)
 
 	return numberOfCustomers, SAIFI_returned, SAIDI_returned, MAIFI_returned, mc
 
-def manualOutageStats(numberOfCustomers, mc_orig, sustainedOutageThreshold, lineNameForRecloser):
+def manualOutageStatsSmart(numberOfCustomers, mc_orig, sustainedOutageThreshold, lineNameForRecloser):
 	'function which manually computes outage stats given a threshold for a sustained outage'
 	# copy DataFrame so original object remains unchanged
 	mc = pd.DataFrame.copy(mc_orig, deep=True)
@@ -140,7 +142,7 @@ def manualOutageStats(numberOfCustomers, mc_orig, sustainedOutageThreshold, line
 	return SAIDI, SAIFI, MAIFI
 
 
-def setupSystem(seed, pathToGlm, workDir):
+def setupSystemSmart(seed, pathToGlm, workDir):
 	'helper function to set-up reliability module on a glm given its path'
 	tree = omf.feeder.parse(pathToGlm)
 	#add fault object to tree
@@ -160,7 +162,7 @@ def setupSystem(seed, pathToGlm, workDir):
 	
 	return tree, workDir, biggestKey
 
-def protection(tree, index, biggestKey, CLOCK_START, CLOCK_END):
+def protectionSmart(tree, index, biggestKey, CLOCK_START, CLOCK_END):
 	'create dictionary of protective devices'
 	
 	tree2 = tree.copy()
@@ -325,46 +327,214 @@ def protection(tree, index, biggestKey, CLOCK_START, CLOCK_END):
 								}
 	return tree
 
-def recloserAnalysis(pathToGlm, workDir, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType, sustainedOutageThreshold):
-	'function that returns a .csv of the random faults generated and the SAIDI/SAIFI values for a given glm, line for recloser, and distribution data'
+def pullOutValuesOutage(tree, workDir, sustainedOutageThreshold):
+	'helper function which pulls out reliability metric data (SAIDI/SAIFI).'
+	attachments = []
+	# Run Gridlab.
+	if not workDir:
+		workDir = tempfile.mkdtemp()
+		print '@@@@@@', workDir
+	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
+
+	#Pull out number of customers
+	numberOfCustomers = 0.0
+	with open(workDir + '/Metrics_Output.csv', 'rb') as csvfile:
+		file = csv.reader(csvfile)
+		for line in file:
+			k = 0
+			while k < len(line):
+				if 'Number of customers' in line[k]:
+					for i in line[k].split():
+						try:
+							numberOfCustomers = float(i)
+							break
+						except:
+							continue
+		# old way of finding SAIDI/SAIFI... manual calculation is better as it allows an input of threshold for sustained outage 
+				#if 'SAIFI' in line[k]:
+				#	for i in line[k].split():
+				#		try:
+				#			SAIFI_returned = float(i)
+				#			break
+				#		except:
+				#			continue
+				#if 'SAIDI' in line[k]:
+				#	for i in line[k].split():
+				#		try:
+				#			SAIDI_returned = float(i)
+				#			break
+				#		except:
+				#			continue
+				k += 1
+
+	def get_footer(file_):
+		'helper function returning the length of a variable footer'
+		with open(file_) as f:
+			g = it.dropwhile(lambda x: 'SAIFI' not in x, f)
+			footer_len = len([i for i, _ in enumerate(g)])
+		return footer_len
+
+	# return the Metrics_Output fault data for a year, without any extra data in a cvs format
+	footer_len = get_footer(workDir + '/Metrics_Output.csv')
+	row_count = sum(1 for row in csv.reader(open(workDir + '/Metrics_Output.csv'))) - footer_len - 8
+	mc = pd.read_csv(workDir + '/Metrics_Output.csv', skiprows=6, nrows=row_count)
+	mc = mc.rename(columns={'Metric Interval Event #': 'Task', 'Starting DateTime (YYYY-MM-DD hh:mm:ss)': 'Start', 'Ending DateTime (YYYY-MM-DD hh:mm:ss)': 'Finish'})
+
+	# find SAIDI/SAIFI/MAIFI measures by calculating manually based on a given sustained outage threshold
+	SAIDI_returned, SAIFI_returned, MAIFI_returned = manualOutageStatsOutage(numberOfCustomers, mc, sustainedOutageThreshold)
+
+	return numberOfCustomers, SAIFI_returned, SAIDI_returned, MAIFI_returned, mc
+
+def manualOutageStatsOutage(numberOfCustomers, mc_orig, sustainedOutageThreshold):
+	'function which manually computes outage stats given a threshold for a sustained outage'
+	# copy DataFrame so original object remains unchanged
+	mc = pd.DataFrame.copy(mc_orig, deep=True)
+
+	# calculate SAIDI
+	customerInterruptionDurations = 0.0
+	row = 0
+	row_count_mc = mc.shape[0]
+	while row < row_count_mc:
+		if (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) > int(sustainedOutageThreshold):
+			customerInterruptionDurations += (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) * int(mc.loc[row, 'Number customers affected']) / 3600
+		row += 1
+
+	SAIDI = customerInterruptionDurations / numberOfCustomers
+
+	# calculate SAIFI
+	row = 0
+	totalInterruptions = 0.0
+	customersAffected = 0
+	while row < row_count_mc:
+		if (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) > int(sustainedOutageThreshold):
+			customersAffected += int(mc.loc[row, 'Number customers affected'])
+		row += 1
+	SAIFI = float(customersAffected) / numberOfCustomers
+
+	# calculate CAIDI
+	CAIDI = SAIDI / SAIFI
+
+	# calculate ASAI
+	ASAI = (numberOfCustomers * 8760 - customerInterruptionDurations) / (numberOfCustomers * 8760)
+
+	# calculate MAIFI
+	sumCustomersAffected = 0.0
+	row = 0
+	while row < row_count_mc:
+		if (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) <= int(sustainedOutageThreshold):
+			sumCustomersAffected += int(mc.loc[row, 'Number customers affected'])
+		row += 1
+
+	MAIFI = sumCustomersAffected / numberOfCustomers
+
+	return SAIDI, SAIFI, MAIFI
+
+def manualOutageObject(pathToOmd, pathToCsv):
+	'helper function which takes in a feeder system and set of manual outages, and returns a set of GridLab-D manual outage objects'
+
+	def nodeToCoords(outageMap, nodeName):
+		'get the latitude and longitude of a given node in string format'
+		coords = ''
+		for key in outageMap['features']:
+			if (nodeName in key['properties'].get('name','')):
+				current = key['geometry']['coordinates']
+				p = re.compile(r'-?\d+\.\d+')  # Compile a pattern to capture integer values
+				array = [float(i) for i in p.findall(str(current))]
+				coord1 = array[0]
+				coord2 = array[1]
+				coords = str(coord1) + ' ' + str(coord2)
+		return coords
+
+	def locationToName(location, lines):
+		'get the name of the line component associated with a given location (lat/lon)'
+		p = re.compile(r'\d+\.\d+')  # Compile a pattern to capture float values
+		coord = [float(i) for i in p.findall(location)]  # Convert strings to float
+		coordLat = coord[0]
+		coordLon = coord[1]
+		# get the coordinates of the two points that make up the edges of the line
+		row_count_lines = lines.shape[0]
+		row = 0
+		while row < row_count_lines:
+			p = re.compile(r'\d+\.\d+')  # Compile a pattern to capture float values
+			coord1 = [float(i) for i in p.findall(lines.loc[row, 'coords1'])]  # Convert strings to float
+			coord1Lat = coord1[0]
+			coord1Lon = coord1[1]
+			p = re.compile(r'\d+\.\d+')  # Compile a pattern to capture float values
+			coord2 = [float(i) for i in p.findall(lines.loc[row, 'coords2'])]  # Convert strings to float
+			coord2Lat = coord2[0]
+			coord2Lon = coord2[1]
+			# use the triangle property to see if the new point lies on the line
+			dist1 = math.sqrt((coordLat - coord1Lat)**2 + (coordLon - coord1Lon)**2)
+			dist2 = math.sqrt((coord2Lat - coordLat)**2 + (coord2Lon - coordLon)**2)
+			dist3 = math.sqrt((coord2Lat - coord1Lat)**2 + (coord2Lon - coord1Lon)**2)
+			#threshold value just in case the component is not exactly in between the two points given
+			threshold = 10e-10
+			# triangle property with threshold
+			if (dist1 + dist2 - dist3) < threshold:
+				name = lines.loc[row, 'line_name']
+				return name
+			row += 1
+		# if the location does not lie on any line, return 'None' (good for error testing)
+		name = 'None'
+		return name
+	# create a DataFrame with the line name and the coordinates of its edges
+	with open(pathToOmd) as inFile:
+		tree = json.load(inFile)['tree']
+	outageMap = geo.omdGeoJson(pathToOmd, conversion = False)
+	mc = pd.read_csv(pathToCsv)
+	with open('lines.csv', mode='w') as lines:
+		fieldnames = ['line_name', 'coords1', 'coords2']
+		writer = csv.DictWriter(lines, fieldnames)
+
+		writer.writeheader()
+
+		for key in tree.keys():
+			obtype = tree[key].get("object","")
+			if obtype == 'underground_line' or obtype == 'overhead_line' or obtype == 'triplex_line':
+				writer.writerow({'line_name': tree[key]['name'], 'coords1': nodeToCoords(outageMap, tree[key]['from']), 'coords2': nodeToCoords(outageMap, tree[key]['to'])})
+
+	lines.close()
+
+	lines = pd.read_csv('lines.csv')
+
+	# create DataFrame with all the necessary info to create a manual GridLAB-D object
+	with open('gridlabd.csv', mode='w') as gld:
+
+		fieldnames = ['Start', 'Finish', 'Object Name']
+		writer = csv.DictWriter(gld, fieldnames)
+
+		writer.writeheader()
+
+		row = 0
+		row_count_mc = mc.shape[0]
+		while row < row_count_mc:
+			writer.writerow({'Start': mc.loc[row, 'Start'], 'Finish': mc.loc[row, 'Finish'], 'Object Name': locationToName(str(mc.loc[row, 'Location']), lines)})
+			row += 1
+	gld.close()
+	gld = pd.read_csv('gridlabd.csv')
+	return gld
+
+def setupSystemOutage(pathToGlm, pathToCsv, workDir, lineNameForRecloser, simTime, faultType):
+	'helper function to set-up reliability module on a glm given its path'
+	tree = omf.feeder.parse(pathToGlm)
+	pathToOmd = pathToGlm[:-4] + '.omd'
+	mc = manualOutageObject(pathToOmd, pathToCsv)
 	
+	#add fault object to tree
+	nodeLabs='Name'
+	edgeLabs=None
+
+	def safeInt(x):
+		try: return int(x)
+		except: return 0
+
+	biggestKey = max([safeInt(x) for x in tree.keys()])
+	smallestKey = min(tree, key=tree.get)
+	currentKey = smallestKey
+	while tree.get(str(currentKey)) != None:
+		currentKey += 1
 	seed = np.random.randint(1,1000)
-	
-	tree1, workDir, biggestKey = setupSystem(seed, pathToGlm, workDir)
-
-	# Add Reliability module
-	tree1[str(biggestKey*10)] = {'module':'reliability','maximum_event_length':'18000','report_event_log':'true'}
-	index = 1
-	CLOCK_START = simTime
-	dt_start = parser.parse(CLOCK_START)
-	dt_end = dt_start + relativedelta(months=+12, weeks=+1, day=0, hour=0, minute=0, second=0)
-	CLOCK_END = str(dt_end)
-	CLOCK_RANGE = CLOCK_START + ',' + CLOCK_END
-	if faultType != None:
-		# Add eventgen object (the fault)
-		tree1[str(biggestKey*10 + index)] = {'object':'eventgen','name':'RandEvent','parent':'RelMetrics', 'target_group':'class=' + lineFaultType,'fault_type':faultType, 'failure_dist':failureDistribution, 'restoration_dist':restorationDistribution, 'failure_dist_param_1':failure_1, 'failure_dist_param_2':failure_2, 'restoration_dist_param_1':rest_1, 'restoration_dist_param_2':rest_2, 'max_outage_length':maxOutageLength + ' s'}
-		# Add fault_check object
-		tree1[str(biggestKey*10 + index + 1)] = {'object':'fault_check','name':'test_fault','check_mode':'ONCHANGE', 'eventgen_object':'RandEvent', 'output_filename':'Fault_check_out.txt', 'strictly_radial': 'true'}
-		# Add reliabilty metrics object
-		tree1[str(biggestKey*10 + index + 2)] = {'object':'metrics', 'name':'RelMetrics', 'report_file':'Metrics_Output.csv', 'module_metrics_object':'PwrMetrics', 'metrics_of_interest':'"SAIFI,SAIDI,CAIDI,ASAI,MAIFI"', 'customer_group':'"groupid=METERTEST"', 'metric_interval':'0 s', 'report_interval':'1 yr'}
-		# Add power_metrics object
-		tree1[str(biggestKey*10 + index + 3)] = {'object':'power_metrics','name':'PwrMetrics','base_time_value':'1 h'}
-
-	tree1 = protection(tree1, index, biggestKey, CLOCK_START, CLOCK_END)
-
-	numberOfCustomers, noReclSAIFI, noReclSAIDI, noReclMAIFI, mc1 = pullOutValues(tree1, workDir, sustainedOutageThreshold, lineNameForRecloser)
-
-	tree, workDir, biggestKey = setupSystem(seed, pathToGlm, workDir)
-
-	index = 1
-
-	tree2 = tree.copy()
-	#add a recloser
-	for key in tree2:
-		if tree2[key].get('name', '') == lineNameForRecloser:
-			tree[str(biggestKey*10 + index)] = {'object':'recloser','phases':tree[key]['phases'],'name':tree[key]['name'] + '_addedRecloser' , 'from':tree[key]['from'], 'to':tree[key]['to'], 'retry_time': '1 s', 'max_number_of_tries': '3'}
-			del tree[key]
-			index = index + 1
+	tree[str(currentKey)] = {'omftype': '#set', 'argument': 'randomseed=' + str(seed)}
 
 	# Add Reliability module
 	tree[str(biggestKey*10)] = {'module':'reliability','maximum_event_length':'18000','report_event_log':'true'}
@@ -374,23 +544,26 @@ def recloserAnalysis(pathToGlm, workDir, lineFaultType, lineNameForRecloser, fai
 	dt_end = dt_start + relativedelta(months=+12, weeks=+1, day=0, hour=0, minute=0, second=0)
 	CLOCK_END = str(dt_end)
 	CLOCK_RANGE = CLOCK_START + ',' + CLOCK_END
+	index = 1
 	if faultType != None:
-		row_count_mc1 = mc1.shape[0]
-
+		
+		row_count_mc = mc.shape[0]
+		
+		index = 1
 		row = 0
-		while row < row_count_mc1:
+		while row < row_count_mc:
 			
 			#if (datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S').month == 1):
-			if (str(mc1.loc[row, 'Object Name']) != lineNameForRecloser):
+			if (str(mc.loc[row, 'Object Name']) != lineNameForRecloser and str(mc.loc[row, 'Object Name']) != '21003'):
 				manualOutages = ''
-				manualOutages += str(mc1.loc[row, 'Object Name'])
+				manualOutages += str(mc.loc[row, 'Object Name'])
 				manualOutages += ', '
 				#print(str(mc.loc[row, 'Start']))
-				manualOutages += str(mc1.loc[row, 'Start'])
+				manualOutages += str(mc.loc[row, 'Start'])
 				manualOutages += ', '
 				#print(str(mc.loc[row, 'Finish']))
-				manualOutages += str(mc1.loc[row, 'Finish'])
-				tree[str(biggestKey*10 + index)] = {'object':'eventgen','name':'ManualEventGen_' + str(row + 1),'parent':'RelMetrics','fault_type':faultType, "manual_outages": '"' + manualOutages + '"'}
+				manualOutages += str(mc.loc[row, 'Finish'])
+				tree[str(biggestKey*10 + index)] = {'object':'eventgen','name':'ManualEventGen_' + str(index),'parent':'RelMetrics','fault_type':faultType, "manual_outages": '"' + manualOutages + '"'}
 				index += 1
 			row += 1
 
@@ -402,18 +575,304 @@ def recloserAnalysis(pathToGlm, workDir, lineFaultType, lineNameForRecloser, fai
 		tree[str(biggestKey*10 + index + 2)] = {'object':'metrics', 'name':'RelMetrics', 'report_file':'Metrics_Output.csv', 'module_metrics_object':'PwrMetrics', 'metrics_of_interest':'"SAIFI,SAIDI,CAIDI,ASAI,MAIFI"', 'customer_group':'"groupid=METERTEST"', 'metric_interval':'0 s', 'report_interval':'1 yr'}
 		# Add power_metrics object
 		tree[str(biggestKey*10 + index + 3)] = {'object':'power_metrics','name':'PwrMetrics','base_time_value':'1 h'}
+		tree2 = tree.copy()
 
-	tree = protection(tree, index, biggestKey, CLOCK_START, CLOCK_END)
+		#add meters to the tree
+		index = 7 + index
+		for key in tree2:
+			if tree2[key].get('object','') in ['load']:
+				if 'parent' not in tree2[key]:
+					tree[str(biggestKey*10 + index)] = {'object':'meter','groupid':'METERTEST','phases':tree2[key]['phases'],'name':tree2[key]['name'] + '_meter' ,'nominal_voltage':tree2[key]['nominal_voltage'],'parent':tree2[key]['name']}
+					index = index + 1
 
-	# HACK: add a recloser to the first tree and graph to avoid extra data from manual outages
-	tree2 = tree1.copy()
-	#add a recloser
-	for key in tree2:
-		if tree2[key].get('name', '') == lineNameForRecloser:
-			tree1[str(biggestKey*10 + 999)] = {'object':'recloser','phases':tree1[key]['phases'],'name':tree1[key]['name'] + '_addedRecloser' , 'from':tree1[key]['from'], 'to':tree1[key]['to'], 'retry_time': '1 s', 'max_number_of_tries': '3'}
-			del tree1[key]
+		# HACK: set groupid for all meters so outage stats are collected.
+		noMeters = True
+		for key in tree:
+			if tree[key].get('object','') in ['meter', 'triplex_meter']:
+				tree[key]['groupid'] = "METERTEST"
+				noMeters = False
+		if noMeters:
+			raise Exception("No meters detected on the circuit. Please add at least one meter to allow for collection of outage statistics.")
+	for key in tree:
+		if 'clock' in tree[key]:
+			tree[key]['starttime'] = "'" + CLOCK_START + "'"
+			tree[key]['stoptime'] = "'" + CLOCK_END + "'"
+	
+	# dictionary to hold info on lines present in glm
+	edge_bools = dict.fromkeys(['underground_line','overhead_line','triplex_line','transformer','regulator', 'fuse', 'switch'], False)
+	# Map to speed up name lookups.
+	nameToIndex = {tree[key].get('name',''):key for key in tree.keys()}
+	# Get rid of schedules and climate and check for all edge types:
+	for key in tree.keys():
+		obtype = tree[key].get("object","")
+		if obtype == 'underground_line':
+			edge_bools['underground_line'] = True
+		elif obtype == 'overhead_line':
+			edge_bools['overhead_line'] = True
+		elif obtype == 'triplex_line':
+			edge_bools['triplex_line'] = True
+		elif obtype == 'transformer':
+			edge_bools['transformer'] = True
+		elif obtype == 'regulator':
+			edge_bools['regulator'] = True
+		elif obtype == 'fuse':
+			edge_bools['fuse'] = True
+		elif obtype == 'switch':
+			edge_bools['switch'] = True
+		if tree[key].get("argument","") == '"schedules.glm"' or tree[key].get("tmyfile","") != "":
+			del tree[key]
+	
+	# create volt and current line dumps for debugging purposes
+	tree[str(biggestKey*10 + index + 1)] = {"object":"voltdump","filename":"voltDump.csv"}
+	tree[str(biggestKey*10 + index + 2)] = {"object":"currdump","filename":"currDump.csv"}
+	
+	# Line rating dumps
+	tree[omf.feeder.getMaxKey(tree) + 1] = {
+		'module': 'tape'
+	}
+	for key in edge_bools.keys():
+		if edge_bools[key]:
+			tree[omf.feeder.getMaxKey(tree) + 1] = {
+				'object':'group_recorder', 
+				'group':'"class='+key+'"',
+				'property':'continuous_rating',
+				'file':key+'_cont_rating.csv'
+			}
 
-	numberOfCustomers, reclSAIFI, reclSAIDI, reclMAIFI, mc2 = pullOutValues(tree, workDir, sustainedOutageThreshold, lineNameForRecloser)
+	#Record initial status readout of each fuse/recloser/switch/sectionalizer before running
+	# Reminder: fuse objects have 'phase_X_status' instead of 'phase_X_state'
+	protDevices = dict.fromkeys(['fuse', 'recloser', 'switch', 'sectionalizer'], False)
+	#dictionary of protective device initial states for each phase
+	protDevInitStatus = {}
+	#dictionary of protective devices final states for each phase after running Gridlab-D
+	protDevFinalStatus = {}
+	#dictionary of protective device types to help the testing and debugging process
+	protDevTypes = {}
+	protDevOpModes = {}
+	for key in tree:
+		obj = tree[key]
+		obType = obj.get('object')
+		if obType in protDevices.keys():
+			obName = obj.get('name', '')
+			protDevTypes[obName] = obType
+			if obType != 'fuse':
+				protDevOpModes[obName] = obj.get('operating_mode', 'INDIVIDUAL')
+			protDevices[obType] = True
+			protDevInitStatus[obName] = {}
+			protDevFinalStatus[obName] = {}
+			for phase in ['A', 'B', 'C']:
+				if obType != 'fuse':
+					phaseState = obj.get('phase_' + phase + '_state','CLOSED')
+				else:
+					phaseState = obj.get('phase_' + phase + '_status','GOOD')
+				if phase in obj.get('phases', ''):
+					protDevInitStatus[obName][phase] = phaseState
+
+	#Create a recorder for protective device states
+	for key in protDevices.keys():
+		if protDevices[key]:
+			for phase in ['A', 'B', 'C']:
+				if key != 'fuse':
+					tree[omf.feeder.getMaxKey(tree) + 1] = {
+						'object':'group_recorder', 
+						'group':'"class='+key+'"',
+						'property':'phase_' + phase + '_state',
+						'file':key + '_phase_' + phase + '_state.csv'
+					}
+				else:
+					tree[omf.feeder.getMaxKey(tree) + 1] = {
+						'object':'group_recorder', 
+						'group':'"class='+key+'"',
+						'property':'phase_' + phase + '_status',
+						'file':key + '_phase_' + phase + '_state.csv'
+					}
+
+	
+	return tree, workDir, biggestKey, index
+
+def protectionOutage(tree):
+	'create dictionary of protective devices'
+	# Record initial status readout of each fuse/recloser/switch/sectionalizer before running
+	# Reminder: fuse objects have 'phase_X_status' instead of 'phase_X_state'
+	protDevices = dict.fromkeys(['fuse', 'recloser', 'switch', 'sectionalizer'], False)
+	#dictionary of protective device initial states for each phase
+	protDevInitStatus = {}
+	#dictionary of protective devices final states for each phase after running Gridlab-D
+	protDevFinalStatus = {}
+	#dictionary of protective device types to help the testing and debugging process
+	protDevTypes = {}
+	protDevOpModes = {}
+	for key in tree:
+		obj = tree[key]
+		obType = obj.get('object')
+		if obType in protDevices.keys():
+			obName = obj.get('name', '')
+			protDevTypes[obName] = obType
+			if obType != 'fuse':
+				protDevOpModes[obName] = obj.get('operating_mode', 'INDIVIDUAL')
+	
+			protDevices[obType] = True
+			protDevInitStatus[obName] = {}
+			protDevFinalStatus[obName] = {}
+			for phase in ['A', 'B', 'C']:
+				if obType != 'fuse':
+					phaseState = obj.get('phase_' + phase + '_state','CLOSED')
+				else:
+					phaseState = obj.get('phase_' + phase + '_status','GOOD')
+				if phase in obj.get('phases', ''):
+					protDevInitStatus[obName][phase] = phaseState
+	
+	#Create a recorder for protective device states
+	for key in protDevices.keys():
+		if protDevices[key]:
+			for phase in ['A', 'B', 'C']:
+				if key != 'fuse':
+					tree[omf.feeder.getMaxKey(tree) + 1] = {
+									'object':'group_recorder', 
+									'group':'"class='+key+'"',
+									'property':'phase_' + phase + '_state',
+									'file':key + '_phase_' + phase + '_state.csv'
+								}
+				else:
+					tree[omf.feeder.getMaxKey(tree) + 1] = {
+									'object':'group_recorder', 
+									'group':'"class='+key+'"',
+									'property':'phase_' + phase + '_status',
+									'file':key + '_phase_' + phase + '_state.csv'
+								}
+	return tree
+
+def recloserAnalysis(pathToGlm, pathToCsv, workDir, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType, sustainedOutageThreshold):
+	'function that returns a .csv of the random faults generated and the SAIDI/SAIFI values for a given glm, line for recloser, and distribution data'
+	
+	seed = np.random.randint(1,1000)
+
+	if pathToCsv == None:
+	
+		tree1, workDir, biggestKey = setupSystemSmart(seed, pathToGlm, workDir)
+
+		# Add Reliability module
+		tree1[str(biggestKey*10)] = {'module':'reliability','maximum_event_length':'18000','report_event_log':'true'}
+		index = 1
+		CLOCK_START = simTime
+		dt_start = parser.parse(CLOCK_START)
+		dt_end = dt_start + relativedelta(months=+12, weeks=+1, day=0, hour=0, minute=0, second=0)
+		CLOCK_END = str(dt_end)
+		CLOCK_RANGE = CLOCK_START + ',' + CLOCK_END
+		if faultType != None:
+			# Add eventgen object (the fault)
+			tree1[str(biggestKey*10 + index)] = {'object':'eventgen','name':'RandEvent','parent':'RelMetrics', 'target_group':'class=' + lineFaultType,'fault_type':faultType, 'failure_dist':failureDistribution, 'restoration_dist':restorationDistribution, 'failure_dist_param_1':failure_1, 'failure_dist_param_2':failure_2, 'restoration_dist_param_1':rest_1, 'restoration_dist_param_2':rest_2, 'max_outage_length':maxOutageLength + ' s'}
+			# Add fault_check object
+			tree1[str(biggestKey*10 + index + 1)] = {'object':'fault_check','name':'test_fault','check_mode':'ONCHANGE', 'eventgen_object':'RandEvent', 'output_filename':'Fault_check_out.txt', 'strictly_radial': 'true'}
+			# Add reliabilty metrics object
+			tree1[str(biggestKey*10 + index + 2)] = {'object':'metrics', 'name':'RelMetrics', 'report_file':'Metrics_Output.csv', 'module_metrics_object':'PwrMetrics', 'metrics_of_interest':'"SAIFI,SAIDI,CAIDI,ASAI,MAIFI"', 'customer_group':'"groupid=METERTEST"', 'metric_interval':'0 s', 'report_interval':'1 yr'}
+			# Add power_metrics object
+			tree1[str(biggestKey*10 + index + 3)] = {'object':'power_metrics','name':'PwrMetrics','base_time_value':'1 h'}
+
+		tree1 = protectionSmart(tree1, index, biggestKey, CLOCK_START, CLOCK_END)
+
+		numberOfCustomers, noReclSAIFI, noReclSAIDI, noReclMAIFI, mc1 = pullOutValuesSmart(tree1, workDir, sustainedOutageThreshold, lineNameForRecloser)
+
+		tree, workDir, biggestKey = setupSystemSmart(seed, pathToGlm, workDir)
+
+		index = 1
+
+		tree2 = tree.copy()
+		#add a recloser
+		for key in tree2:
+			if tree2[key].get('name', '') == lineNameForRecloser:
+				tree[str(biggestKey*10 + index)] = {'object':'recloser','phases':tree[key]['phases'],'name':tree[key]['name'] + '_addedRecloser' , 'from':tree[key]['from'], 'to':tree[key]['to'], 'retry_time': '1 s', 'max_number_of_tries': '3'}
+				del tree[key]
+				index = index + 1
+
+		# Add Reliability module
+		tree[str(biggestKey*10)] = {'module':'reliability','maximum_event_length':'18000','report_event_log':'true'}
+	
+		CLOCK_START = simTime
+		dt_start = parser.parse(CLOCK_START)
+		dt_end = dt_start + relativedelta(months=+12, weeks=+1, day=0, hour=0, minute=0, second=0)
+		CLOCK_END = str(dt_end)
+		CLOCK_RANGE = CLOCK_START + ',' + CLOCK_END
+		if faultType != None:
+			row_count_mc1 = mc1.shape[0]
+
+			row = 0
+			while row < row_count_mc1:
+			
+				#if (datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S').month == 1):
+				if (str(mc1.loc[row, 'Object Name']) != lineNameForRecloser):
+					manualOutages = ''
+					manualOutages += str(mc1.loc[row, 'Object Name'])
+					manualOutages += ', '
+					#print(str(mc.loc[row, 'Start']))
+					manualOutages += str(mc1.loc[row, 'Start'])
+					manualOutages += ', '
+					#print(str(mc.loc[row, 'Finish']))
+					manualOutages += str(mc1.loc[row, 'Finish'])
+					tree[str(biggestKey*10 + index)] = {'object':'eventgen','name':'ManualEventGen_' + str(row + 1),'parent':'RelMetrics','fault_type':faultType, "manual_outages": '"' + manualOutages + '"'}
+					index += 1
+				row += 1
+
+			# Add eventgen object (the fault)
+		
+			# Add fault_check object
+			tree[str(biggestKey*10 + index + 1)] = {'object':'fault_check','name':'test_fault','check_mode':'ONCHANGE', 'eventgen_object':'ManualEventGen_1', 'output_filename':'Fault_check_out.txt', 'strictly_radial': 'true'}
+			# Add reliabilty metrics object
+			tree[str(biggestKey*10 + index + 2)] = {'object':'metrics', 'name':'RelMetrics', 'report_file':'Metrics_Output.csv', 'module_metrics_object':'PwrMetrics', 'metrics_of_interest':'"SAIFI,SAIDI,CAIDI,ASAI,MAIFI"', 'customer_group':'"groupid=METERTEST"', 'metric_interval':'0 s', 'report_interval':'1 yr'}
+			# Add power_metrics object
+			tree[str(biggestKey*10 + index + 3)] = {'object':'power_metrics','name':'PwrMetrics','base_time_value':'1 h'}
+
+		tree = protectionSmart(tree, index, biggestKey, CLOCK_START, CLOCK_END)
+
+		# HACK: add a recloser to the first tree and graph to avoid extra data from manual outages
+		tree2 = tree1.copy()
+		#add a recloser
+		for key in tree2:
+			if tree2[key].get('name', '') == lineNameForRecloser:
+				tree1[str(biggestKey*10 + 999)] = {'object':'recloser','phases':tree1[key]['phases'],'name':tree1[key]['name'] + '_addedRecloser' , 'from':tree1[key]['from'], 'to':tree1[key]['to'], 'retry_time': '1 s', 'max_number_of_tries': '3'}
+				del tree1[key]
+
+		numberOfCustomers, reclSAIFI, reclSAIDI, reclMAIFI, mc2 = pullOutValuesSmart(tree, workDir, sustainedOutageThreshold, lineNameForRecloser)
+
+	else:
+		tree, workDir, biggestKey, index = setupSystemOutage(pathToGlm, pathToCsv, workDir, lineNameForRecloser, simTime, faultType)
+
+		tree = protectionOutage(tree)
+
+		numberOfCustomers, noReclSAIFI, noReclSAIDI, noReclMAIFI, mc1 = pullOutValuesOutage(tree, workDir, sustainedOutageThreshold)
+	
+		tree, workDir, biggestKey, index = setupSystemOutage(pathToGlm, pathToCsv, workDir, lineNameForRecloser, simTime, faultType)
+
+		#add a recloser
+		for key in tree:
+			if tree[key].get('name', '') == lineNameForRecloser:
+				tree[str(biggestKey*10 + index)] = {'object':'recloser','phases':tree[key]['phases'],'name':tree[key]['name'] + '_addedRecloser' , 'from':tree[key]['from'], 'to':tree[key]['to'], 'retry_time': '1 s', 'max_number_of_tries': '3'}
+				del tree[key]
+				index = index + 1
+	
+		tree = protectionOutage(tree)
+	
+		numberOfCustomers, reclSAIFI, reclSAIDI, reclMAIFI, mc2 = pullOutValuesOutage(tree, workDir, sustainedOutageThreshold)
+
+		tree1, workDir, biggestKey = setupSystemSmart(seed, pathToGlm, workDir)
+
+		tree1[str(biggestKey*10)] = {'module':'reliability','maximum_event_length':'18000','report_event_log':'true'}
+		index = 1
+		CLOCK_START = simTime
+		dt_start = parser.parse(CLOCK_START)
+		dt_end = dt_start + relativedelta(months=+12, weeks=+1, day=0, hour=0, minute=0, second=0)
+		CLOCK_END = str(dt_end)
+		CLOCK_RANGE = CLOCK_START + ',' + CLOCK_END
+
+		tree1 = protectionSmart(tree1, index, biggestKey, CLOCK_START, CLOCK_END)
+		# HACK: add a recloser to the first tree and graph to avoid extra data from manual outages
+		tree2 = tree1.copy()
+		#add a recloser
+		for key in tree2:
+			if tree2[key].get('name', '') == lineNameForRecloser:
+				tree1[str(biggestKey*10 + 999)] = {'object':'recloser','phases':tree1[key]['phases'],'name':tree1[key]['name'] + '_addedRecloser' , 'from':tree1[key]['from'], 'to':tree1[key]['to'], 'retry_time': '1 s', 'max_number_of_tries': '3'}
+				del tree1[key]
+
 	return numberOfCustomers, mc1, mc2, tree1, {
 		'noRecl-SAIDI':noReclSAIDI,
 		'noRecl-SAIFI':noReclSAIFI,
@@ -431,20 +890,26 @@ def datetime_to_float(d):
 	total_seconds = (d - epoch).total_seconds()
 	return total_seconds
 
-def valueOfAdditionalRecloser(pathToGlm, workDir, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, kwh_cost, restoration_cost, average_hardware_cost, simTime, faultType, sustainedOutageThreshold):
+def valueOfAdditionalRecloser(pathToGlm, pathToCsv, workDir, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, kwh_cost, restoration_cost, average_hardware_cost, simTime, faultType, sustainedOutageThreshold):
 	'analyzes the value of adding an additional recloser to a feeder system'
 	
 	# perform analyses on the glm
-	numberOfCustomers, mc1, mc2, tree1, test1, test2 = recloserAnalysis(pathToGlm, workDir, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType, sustainedOutageThreshold)
+	numberOfCustomers, mc1, mc2, tree1, test1, test2 = recloserAnalysis(pathToGlm, pathToCsv, workDir, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType, sustainedOutageThreshold)
 
 	# check to see if work directory is specified
 	if not workDir:
 		workDir = tempfile.mkdtemp()
 		print '@@@@@@', workDir
 
-	# Find SAIDI/SAIFI/MAIFI manually from Metrics_Output
-	manualNoReclSAIDI, manualNoReclSAIFI, manualNoReclMAIFI = manualOutageStats(numberOfCustomers, mc1, sustainedOutageThreshold, lineNameForRecloser)
-	manualReclSAIDI, manualReclSAIFI, manualReclMAIFI = manualOutageStats(numberOfCustomers, mc2, sustainedOutageThreshold, lineNameForRecloser)
+	if pathToCsv == None:
+		# Find SAIDI/SAIFI/MAIFI manually from Metrics_Output
+		manualNoReclSAIDI, manualNoReclSAIFI, manualNoReclMAIFI = manualOutageStatsSmart(numberOfCustomers, mc1, sustainedOutageThreshold, lineNameForRecloser)
+		manualReclSAIDI, manualReclSAIFI, manualReclMAIFI = manualOutageStatsSmart(numberOfCustomers, mc2, sustainedOutageThreshold, lineNameForRecloser)
+
+	else:
+		# Find SAIDI/SAIFI/MAIFI manually from Metrics_Output
+		manualNoReclSAIDI, manualNoReclSAIFI, manualNoReclMAIFI = manualOutageStatsOutage(numberOfCustomers, mc1, sustainedOutageThreshold)
+		manualReclSAIDI, manualReclSAIFI, manualReclMAIFI = manualOutageStatsOutage(numberOfCustomers, mc2, sustainedOutageThreshold)
 
 	# calculate average consumption over the feeder system given meter data
 	numberOfMeters = 0
@@ -666,6 +1131,7 @@ def distributiongraph(dist, param_1, param_2, nameOfGraph):
 		trace = go.Scatter(x=x, y=dist, name=nameOfGraph)
 	return trace
 
+
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
 	outData = {}
@@ -674,8 +1140,15 @@ def work(modelDir, inputDict):
 	inputDict["feederName1"] = feederName
 	omf.feeder.omdToGlm(modelDir + '/' + feederName + '.omd', modelDir)
 	#test the main functions of the program
+	if inputDict['outageFileName'] == None:
+		pathToData = None
+	else:
+		with open(pJoin(modelDir, inputDict['outageFileName']), 'w') as f:
+			pathToData = f.name
+			f.write(inputDict['outageData'])
 	plotOuts = valueOfAdditionalRecloser(
 		modelDir + '/' + feederName + '.glm', #GLM Path
+		pathToData,
 		modelDir, #Work directory.
 		inputDict['lineTypeForFaults'],
 		inputDict['recloserLocation'],
@@ -722,7 +1195,7 @@ def new(modelDir):
 		"modelType": modelName,
 		"feederName1": "ieee37nodeFaultTester",
 		"lineTypeForFaults": 'underground_line',
-		"recloserLocation": "node730-709",
+		"recloserLocation": "node709-708",
 		'failureDistribution': 'EXPONENTIAL',
 		'failureDistParam1': '3.858e-7',
 		'failureDistParam2':'0.0',
@@ -735,7 +1208,9 @@ def new(modelDir):
 		'average_hardware_cost': '1',
 		'simTime': '2000-01-01 0:00:00',
 		'faultType': 'TLG',
-		'sustainedOutageThreshold': '60'
+		'sustainedOutageThreshold': '60',
+		"outageFileName": "outagesNew5.csv",
+		"outageData": open(pJoin(__neoMetaModel__._omfDir,"scratch","smartSwitching","outagesNew5.csv"), "r").read(),
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
