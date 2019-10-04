@@ -18,7 +18,7 @@ from omf.solvers import gridlabd
 # Model metadata:
 tooltip = "outageCost calculates reliability metrics and creates a leaflet graph based on data from an input csv file."
 modelName, template = metadata(__file__)
-hidden = True
+hidden = False
 
 def datetime_to_float(d):
 	'helper function to convert a datetime object to a float'
