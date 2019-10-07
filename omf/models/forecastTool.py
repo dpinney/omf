@@ -38,7 +38,8 @@ def work(modelDir, ind):
 	 	with open(pJoin(modelDir, 'hist.csv'), 'w') as f:
 	 		f.write(ind['histCurve'].replace('\r', ''))
 		df = pd.read_csv(pJoin(modelDir, 'hist.csv'))
-		assert df.shape[0] >= 26280 # must be longer than 3 years
+		assert df.shape[0] >= 26280, 'At least 3 years of data is required'
+
 	 	if 'dates' not in df.columns:
 		 	df['dates'] = df.apply(
 				lambda x: dt(
@@ -58,6 +59,11 @@ def work(modelDir, ind):
 		raise Exception(ind['tempCurve'])
 
 	# ---------------------- MAKE PREDICTIONS ------------------------------- #
+
+	d = dict(df.groupby(df.dates.dt.date)['dates'].count())
+	df = df[df['dates'].dt.date.apply(lambda x: d[x] == 24)] # find all non-24
+	df = df.sort_values('dates')
+
 	df, tomorrow = lf.add_day(df, weather[:24])
 	all_X = lf.makeUsefulDf(df)
 	all_y = df['load']
@@ -170,6 +176,10 @@ def new(modelDir):
 		"histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","d_Texas_17yr_TempAndLoad_Dec.csv"), 'rU').read(),
 		'tempFileName': '72hr_TexasTemp.csv',
 		'tempCurve': open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","72hr_TexasTemp.csv"), 'rU').read()
+		# 'histFileName': 'nload_hist.csv',
+		# "histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","load_hist.csv"), 'rU').read(),
+		# 'tempFileName': 'weather_forecast.csv',
+		# 'tempCurve': open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","weather_forecast.csv"), 'rU').read()
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
