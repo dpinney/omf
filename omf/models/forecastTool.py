@@ -38,7 +38,8 @@ def work(modelDir, ind):
 	 	with open(pJoin(modelDir, 'hist.csv'), 'w') as f:
 	 		f.write(ind['histCurve'].replace('\r', ''))
 		df = pd.read_csv(pJoin(modelDir, 'hist.csv'))
-		assert df.shape[0] >= 26280 # must be longer than 3 years
+		assert df.shape[0] >= 26280, 'At least 3 years of data is required'
+
 	 	if 'dates' not in df.columns:
 		 	df['dates'] = df.apply(
 				lambda x: dt(
@@ -58,6 +59,11 @@ def work(modelDir, ind):
 		raise Exception(ind['tempCurve'])
 
 	# ---------------------- MAKE PREDICTIONS ------------------------------- #
+
+	d = dict(df.groupby(df.dates.dt.date)['dates'].count())
+	df = df[df['dates'].dt.date.apply(lambda x: d[x] == 24)] # find all non-24
+	df = df.sort_values('dates')
+
 	df, tomorrow = lf.add_day(df, weather[:24])
 	all_X = lf.makeUsefulDf(df)
 	all_y = df['load']
@@ -97,16 +103,18 @@ def work(modelDir, ind):
 
 	tomorrow_peak = max(tomorrow_load)
 	m = df[(df['month'] == tomorrow.month) & (df['year'] != tomorrow.year) ]
-	o['quantile'] = round(m[m['load'] < tomorrow_peak].shape[0]/float(m.shape[0])*100, 2)
-	o['predicted_peak'] = [m['load'].median(), highest_peak_this_month(df, tomorrow), tomorrow_peak, two_day_peak, three_day_peak]
+	hourly = m
+	m = m.groupby(m.dates.dt.date)['load'].max()
+	o['quantile'] = round(m[m < tomorrow_peak].shape[0]/float(m.shape[0])*100, 2)
+	o['predicted_peak'] = [m.median(), highest_peak_this_month(df, tomorrow), tomorrow_peak, two_day_peak, three_day_peak]
 	o['predicted_peak_limits'] = [
-		[m['load'].min(), m['load'].max()],
+		[m.min(), m.max()],
 		[0, 0],
 		[tomorrow_peak*(1 + tomorrow_accuracy['test']*.01), tomorrow_peak*(1 - tomorrow_accuracy['test']*.01)],
 		[two_day_peak*(1 + two_day_load_accuracy['test']*.01), two_day_peak*(1 - two_day_load_accuracy['test']*.01)],
 		[three_day_peak*(1 + three_day_load_accuracy['test']*.01), three_day_peak*(1 - three_day_load_accuracy['test']*.01)]
 	]
-
+	m = hourly
 	previous_months = [{
 		'year': y,
 		'load': m[m['year'] == y]['load'].tolist()
@@ -168,6 +176,10 @@ def new(modelDir):
 		"histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","d_Texas_17yr_TempAndLoad_Dec.csv"), 'rU').read(),
 		'tempFileName': '72hr_TexasTemp.csv',
 		'tempCurve': open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","72hr_TexasTemp.csv"), 'rU').read()
+		# 'histFileName': 'nload_hist.csv',
+		# "histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","load_hist.csv"), 'rU').read(),
+		# 'tempFileName': 'weather_forecast.csv',
+		# 'tempCurve': open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","weather_forecast.csv"), 'rU').read()
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
