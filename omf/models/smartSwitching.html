@@ -96,6 +96,13 @@
 				</div>
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Generate Random Faults?<span class="classic">If yes, generate a random set of faults using a distribution; if no, use the input .csv file to generate faults manually.</span></label>
+				<select id="generateRandomFaults" name="generateRandomFaults" />
+					<option value='True'>Yes</option>
+					<option value='False'>No</option>
+				</select>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Line for Faults<span class="classic">The type of line on which the random faults can occur.</span></label>
 				<select id="lineTypeForFaults" name="lineTypeForFaults" />
 					<option value="underground_line">Underground Lines</option>

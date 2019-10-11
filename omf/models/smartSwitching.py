@@ -36,6 +36,13 @@ tooltip = "smartSwitching gives the expected reliability improvement from adding
 modelName, template = metadata(__file__)
 hidden = False
 
+def get_footer(file_):
+	'helper function returning the length of a variable footer'
+	with open(file_) as f:
+		g = it.dropwhile(lambda x: 'SAIFI' not in x, f)
+		footer_len = len([i for i, _ in enumerate(g)])
+	return footer_len
+
 def pullOutValuesSmart(tree, workDir, sustainedOutageThreshold, lineNameForRecloser):
 	'helper function which pulls out reliability metric data (SAIDI/SAIFI).'
 	attachments = []
@@ -59,29 +66,7 @@ def pullOutValuesSmart(tree, workDir, sustainedOutageThreshold, lineNameForReclo
 							break
 						except:
 							continue
-		# old way of finding SAIDI/SAIFI... manual calculation is better as it allows an input of threshold for sustained outage 
-				#if 'SAIFI' in line[k]:
-				#	for i in line[k].split():
-				#		try:
-				#			SAIFI_returned = float(i)
-				#			break
-				#		except:
-				#			continue
-				#if 'SAIDI' in line[k]:
-				#	for i in line[k].split():
-				#		try:
-				#			SAIDI_returned = float(i)
-				#			break
-				#		except:
-				#			continue
 				k += 1
-
-	def get_footer(file_):
-		'helper function returning the length of a variable footer'
-		with open(file_) as f:
-			g = it.dropwhile(lambda x: 'SAIFI' not in x, f)
-			footer_len = len([i for i, _ in enumerate(g)])
-		return footer_len
 
 	# return the Metrics_Output fault data for a year, without any extra data in a cvs format
 	footer_len = get_footer(workDir + '/Metrics_Output.csv')
@@ -350,29 +335,7 @@ def pullOutValuesOutage(tree, workDir, sustainedOutageThreshold):
 							break
 						except:
 							continue
-		# old way of finding SAIDI/SAIFI... manual calculation is better as it allows an input of threshold for sustained outage 
-				#if 'SAIFI' in line[k]:
-				#	for i in line[k].split():
-				#		try:
-				#			SAIFI_returned = float(i)
-				#			break
-				#		except:
-				#			continue
-				#if 'SAIDI' in line[k]:
-				#	for i in line[k].split():
-				#		try:
-				#			SAIDI_returned = float(i)
-				#			break
-				#		except:
-				#			continue
 				k += 1
-
-	def get_footer(file_):
-		'helper function returning the length of a variable footer'
-		with open(file_) as f:
-			g = it.dropwhile(lambda x: 'SAIFI' not in x, f)
-			footer_len = len([i for i, _ in enumerate(g)])
-		return footer_len
 
 	# return the Metrics_Output fault data for a year, without any extra data in a cvs format
 	footer_len = get_footer(workDir + '/Metrics_Output.csv')
@@ -429,7 +392,7 @@ def manualOutageStatsOutage(numberOfCustomers, mc_orig, sustainedOutageThreshold
 
 	return SAIDI, SAIFI, MAIFI
 
-def manualOutageObject(pathToOmd, pathToCsv):
+def manualOutageObject(pathToOmd, pathToCsv, workDir):
 	'helper function which takes in a feeder system and set of manual outages, and returns a set of GridLab-D manual outage objects'
 
 	def nodeToCoords(outageMap, nodeName):
@@ -447,7 +410,7 @@ def manualOutageObject(pathToOmd, pathToCsv):
 
 	def locationToName(location, lines):
 		'get the name of the line component associated with a given location (lat/lon)'
-		p = re.compile(r'\d+\.\d+')  # Compile a pattern to capture float values
+		p = re.compile(r'-?\d+\.\d+')  # Compile a pattern to capture float values
 		coord = [float(i) for i in p.findall(location)]  # Convert strings to float
 		coordLat = coord[0]
 		coordLon = coord[1]
@@ -455,11 +418,11 @@ def manualOutageObject(pathToOmd, pathToCsv):
 		row_count_lines = lines.shape[0]
 		row = 0
 		while row < row_count_lines:
-			p = re.compile(r'\d+\.\d+')  # Compile a pattern to capture float values
+			p = re.compile(r'-?\d+\.\d+')  # Compile a pattern to capture float values
 			coord1 = [float(i) for i in p.findall(lines.loc[row, 'coords1'])]  # Convert strings to float
 			coord1Lat = coord1[0]
 			coord1Lon = coord1[1]
-			p = re.compile(r'\d+\.\d+')  # Compile a pattern to capture float values
+			p = re.compile(r'-?\d+\.\d+')  # Compile a pattern to capture float values
 			coord2 = [float(i) for i in p.findall(lines.loc[row, 'coords2'])]  # Convert strings to float
 			coord2Lat = coord2[0]
 			coord2Lon = coord2[1]
@@ -477,12 +440,13 @@ def manualOutageObject(pathToOmd, pathToCsv):
 		# if the location does not lie on any line, return 'None' (good for error testing)
 		name = 'None'
 		return name
+
 	# create a DataFrame with the line name and the coordinates of its edges
 	with open(pathToOmd) as inFile:
 		tree = json.load(inFile)['tree']
 	outageMap = geo.omdGeoJson(pathToOmd, conversion = False)
 	mc = pd.read_csv(pathToCsv)
-	with open('lines.csv', mode='w') as lines:
+	with open(workDir + '/lines.csv', mode='w') as lines:
 		fieldnames = ['line_name', 'coords1', 'coords2']
 		writer = csv.DictWriter(lines, fieldnames)
 
@@ -495,10 +459,10 @@ def manualOutageObject(pathToOmd, pathToCsv):
 
 	lines.close()
 
-	lines = pd.read_csv('lines.csv')
+	lines = pd.read_csv(workDir + '/lines.csv')
 
-	# create DataFrame with all the necessary info to create a manual GridLAB-D object
-	with open('gridlabd.csv', mode='w') as gld:
+	# create DataFrame with all the necessary info to create a manual GridLAB-D
+	with open(workDir + '/gridlabd.csv', mode='w') as gld:
 
 		fieldnames = ['Start', 'Finish', 'Object Name']
 		writer = csv.DictWriter(gld, fieldnames)
@@ -511,14 +475,14 @@ def manualOutageObject(pathToOmd, pathToCsv):
 			writer.writerow({'Start': mc.loc[row, 'Start'], 'Finish': mc.loc[row, 'Finish'], 'Object Name': locationToName(str(mc.loc[row, 'Location']), lines)})
 			row += 1
 	gld.close()
-	gld = pd.read_csv('gridlabd.csv')
+	gld = pd.read_csv(workDir + '/gridlabd.csv')
 	return gld
 
 def setupSystemOutage(pathToGlm, pathToCsv, workDir, lineNameForRecloser, simTime, faultType):
 	'helper function to set-up reliability module on a glm given its path'
 	tree = omf.feeder.parse(pathToGlm)
 	pathToOmd = pathToGlm[:-4] + '.omd'
-	mc = manualOutageObject(pathToOmd, pathToCsv)
+	mc = manualOutageObject(pathToOmd, pathToCsv, workDir)
 	
 	#add fault object to tree
 	nodeLabs='Name'
@@ -742,12 +706,12 @@ def protectionOutage(tree):
 								}
 	return tree
 
-def recloserAnalysis(pathToGlm, pathToCsv, workDir, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType, sustainedOutageThreshold):
+def recloserAnalysis(pathToGlm, pathToCsv, workDir, generateRandomFaults, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType, sustainedOutageThreshold):
 	'function that returns a .csv of the random faults generated and the SAIDI/SAIFI values for a given glm, line for recloser, and distribution data'
 	
 	seed = np.random.randint(1,1000)
 
-	if pathToCsv == None:
+	if generateRandomFaults == 'True':
 	
 		tree1, workDir, biggestKey = setupSystemSmart(seed, pathToGlm, workDir)
 
@@ -890,18 +854,18 @@ def datetime_to_float(d):
 	total_seconds = (d - epoch).total_seconds()
 	return total_seconds
 
-def valueOfAdditionalRecloser(pathToGlm, pathToCsv, workDir, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, kwh_cost, restoration_cost, average_hardware_cost, simTime, faultType, sustainedOutageThreshold):
+def valueOfAdditionalRecloser(pathToGlm, pathToCsv, workDir, generateRandomFaults, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, kwh_cost, restoration_cost, average_hardware_cost, simTime, faultType, sustainedOutageThreshold):
 	'analyzes the value of adding an additional recloser to a feeder system'
 	
 	# perform analyses on the glm
-	numberOfCustomers, mc1, mc2, tree1, test1, test2 = recloserAnalysis(pathToGlm, pathToCsv, workDir, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType, sustainedOutageThreshold)
+	numberOfCustomers, mc1, mc2, tree1, test1, test2 = recloserAnalysis(pathToGlm, pathToCsv, workDir, generateRandomFaults, lineFaultType, lineNameForRecloser, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType, sustainedOutageThreshold)
 
 	# check to see if work directory is specified
 	if not workDir:
 		workDir = tempfile.mkdtemp()
 		print '@@@@@@', workDir
 
-	if pathToCsv == None:
+	if generateRandomFaults == 'True':
 		# Find SAIDI/SAIFI/MAIFI manually from Metrics_Output
 		manualNoReclSAIDI, manualNoReclSAIFI, manualNoReclMAIFI = manualOutageStatsSmart(numberOfCustomers, mc1, sustainedOutageThreshold, lineNameForRecloser)
 		manualReclSAIDI, manualReclSAIFI, manualReclMAIFI = manualOutageStatsSmart(numberOfCustomers, mc2, sustainedOutageThreshold, lineNameForRecloser)
@@ -1140,16 +1104,14 @@ def work(modelDir, inputDict):
 	inputDict["feederName1"] = feederName
 	omf.feeder.omdToGlm(modelDir + '/' + feederName + '.omd', modelDir)
 	#test the main functions of the program
-	if inputDict['outageFileName'] == None:
-		pathToData = None
-	else:
-		with open(pJoin(modelDir, inputDict['outageFileName']), 'w') as f:
-			pathToData = f.name
-			f.write(inputDict['outageData'])
+	with open(pJoin(modelDir, inputDict['outageFileName']), 'w') as f:
+		pathToData = f.name
+		f.write(inputDict['outageData'])
 	plotOuts = valueOfAdditionalRecloser(
 		modelDir + '/' + feederName + '.glm', #GLM Path
 		pathToData,
 		modelDir, #Work directory.
+		inputDict['generateRandomFaults'], #'True'
 		inputDict['lineTypeForFaults'],
 		inputDict['recloserLocation'],
 		inputDict['failureDistribution'], #'EXPONENTIAL',
@@ -1194,6 +1156,7 @@ def new(modelDir):
 	defaultInputs = {
 		"modelType": modelName,
 		"feederName1": "ieee37nodeFaultTester",
+		"generateRandomFaults": "False",
 		"lineTypeForFaults": 'underground_line',
 		"recloserLocation": "node709-708",
 		'failureDistribution': 'EXPONENTIAL',
