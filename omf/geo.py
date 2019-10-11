@@ -531,12 +531,7 @@ def latLonValidation(inGraph):
 
 def openInBrowser(pathToFile):
 	'''Helper function for mapOmd. Try popular web browsers first because png might open in native application. Othwerwise use default program as fallback'''
-	popularBrowsers = ['google-chrome', 'chrome', 'firefox', 'safari', 'windows-default']
-	for browser in webbrowser._tryorder:
-		if browser in popularBrowsers:
-			webbrowser.get(browser).open_new(pathToFile)
-			return
-	webbrowser.open_new(pathToFile)
+	webbrowser.open_new('file://' + os.path.abspath(pathToFile))
 
 def showOnMap(geoJson):
 	'''Open a browser to display a geoJSON object on a map.'''
@@ -554,7 +549,7 @@ def _tests():
 	e2, n2 = latLonToStatePlane(lat, lon, epsg=2205)
 	print (e2, n2) # (249.24197527189972, 1186.1488466408398)
 	#mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png', openBrowser=True, conversion=False)
-	#mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html', openBrowser=True, conversion=False)
+	# mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html', openBrowser=True, conversion=False)
 	#showOnMap(hullOfOmd('static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
 	#showOnMap(simplifiedOmdShape('static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
 	# showOnMap(omdGeoJson('static/publicFeeders/Olin Barre LatLon.omd', conversion=False))

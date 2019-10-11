@@ -97,24 +97,24 @@ def CreateStreamInfo(glmFileName, sourceNode):
 					isNode = True
 				elif 'object transformer' in line.strip() or 'object fuse' in line.strip():
 					isGeneralLine = True
-				elif '_line:' in line.strip():
+				elif '_line' in line.strip():
 					isLine = True
 			elif 'phases ' in line.strip():
 				if isNode == True:
 					#isNodeThreePhase = True
-					temp_phase = line.strip().strip('phase ').strip(';')
+					temp_phase = line.strip().strip('phase').strip().strip(';')
 			elif 'from ' in line.strip():
-				tempConnectivity['from'] = line.strip().strip('from ').strip(';')
+				tempConnectivity['from'] = line.strip().strip('from').strip().strip(';')
 				hasConn = True
 			elif 'to ' in line.strip():
-				tempConnectivity['to'] = line.strip().strip('to ').strip(';')
+				tempConnectivity['to'] = line.strip().strip('to').strip().strip(';')
 				hasConn = True
 			elif 'name ' in line.strip():
-				temp_name = line.strip().strip('name ').strip(';')
+				temp_name = line.strip().strip('name').strip().strip(';')
 			elif 'parent ' in line.strip():
 				if isNode == True:
 					# meters/triplex meter to node and triplex_node 
-					tempConnectivity['from'] = line.strip().strip('parent ').strip(';')
+					tempConnectivity['from'] = line.strip().strip('parent').strip().strip(';')
 					tempConnectivity['to'] = temp_name
 					hasConn = True
 					# print 'parent conn:', tempConnectivity['from'], tempConnectivity['to']
@@ -168,7 +168,7 @@ def CreateStreamInfo(glmFileName, sourceNode):
 		elemToRemove = []
 		# find leaves for each root
 		for root in rootNodes:
-			initLen = len(connectivity)
+			#initLen = len(connectivity)
 			leafDic[root] = []
 			for elem in connectivity:
 				# record root-leaf relationship
@@ -296,6 +296,37 @@ def GetCloestUpstreamNode(inputItem, nPhaseQualifierList, streamInfo):
 			return root
 		leafNode = root
 	return leafNode
+
+
+def FindSlack(sourceFileName):
+	temp_Name = ''
+	sourceNode = ''
+	IsSwing = 0
+	IsNode = 0
+	with open(sourceFileName,'r') as fp:
+		content = fp.readlines()
+		
+		for line in content:
+			
+			if 'object' in line.strip():
+				IsSwing = 0
+				if 'node' in line.strip():
+					IsNode = 1
+				else :
+					IsNode = 0
+				continue
+			
+			if IsNode == 1 :
+				if 'name' in line.strip():
+					temp_Name = line.strip().strip("name ").strip(";")
+				if 'SWING' in line.strip():
+					IsSwing = 1
+					
+			if '}' in line.strip() and IsSwing == 1:
+				sourceNode = temp_Name
+				break
+				
+	return sourceNode
 def GetDeltaPVdata(sourceFileName,streamInfo):
 	PV = []
 	PV_index = {}
@@ -336,7 +367,7 @@ def GetDeltaPVdata(sourceFileName,streamInfo):
 					PV_rating = int(line.strip().strip("rated_power ").strip(";"))
 					Q_max = math.sqrt(PV_rating**2-P_out**2)
 				if '}' in line.strip():
-					parent_name = GetCloestUpstreamNode(parent_temp, ['ABCN'], streamInfo)
+					parent_name = GetCloestUpstreamNode(parent_temp, ['ABCN','ABC'], streamInfo)
 					PV.append(PV_information(parent_name,phase_temp,PV_rating,P_out,Q_max,name_temp,0.0))
 					PV_index[name_temp] = len(PV) - 1
 					IsTrpMeter = 0
@@ -986,17 +1017,19 @@ def SteinmetzController(sourceFileName,connectionPV,criticalNode,iterNum,objecti
 	#os.system(cmdString_out)
 
 def testing():
-	#example 1
-	# sourceFileName = 'R1-12.47-1-AddSolar-Wye.glm'
-	# criticalNode = 'R1-12-47-1_node_17'
-
-	#example 2
-	sourceFileName = 'R1-12.47-2-AddSolar-Wye.glm'
-	criticalNode= 'R1-12-47-2_node_28'
-
 	curDir = os.getcwd()
-	destDir = curDir+'/MPUPV output file'
-	SteinmetzController(sourceFileName,'Delta',criticalNode,5,'VUF',destDir)
+	destDir = curDir+'/output'
+
+	# criticalNode= 'nodeOH5041-S1689OH15730'
+	# sourceFileName = curDir + '/original_glm/turkey_o.glm'
+
+	# sourceFileName = curDir + '/original_glm/swaec_o.glm'
+	# criticalNode = 'nodespan_192258span_177328'
+
+	# sourceFileName = curDir + '/original_glm/bavarian_o.glm'
+	# criticalNode = 'node2283458290'
+
+	SteinmetzController(sourceFileName,'Delta',criticalNode, 5,'VUF',destDir)
 
 if __name__ == '__main__':
 	testing()

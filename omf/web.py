@@ -14,7 +14,7 @@ except:
 	def flock(fd, op):
 		return
 	fcntl.flock = flock
-	(fcntl.LOCK_EX, fcntl.LOCK_SH, fcntl.LOCK_UN, fcntl.LOCK_NB) = (None, None, None, None)
+	(fcntl.LOCK_EX, fcntl.LOCK_SH, fcntl.LOCK_UN, fcntl.LOCK_NB) = (0, 0, 0, 0)
 import models, feeder, network, milToGridlab, cymeToGridlab, signal, weather, anonymization
 import omf
 from omf.calibrate import omfCalibrate
