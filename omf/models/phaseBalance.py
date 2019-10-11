@@ -30,12 +30,12 @@ def get_loss_items(tree):
 def motor_efficiency(x):
 	return 100 - (.0179 + .402*x + .134*x**2) # curve fit from data from NREL analysis
 
-def n(num):
-	return "{:,.2f}".format(num)
-
 def pf(real, var):
 	real, var = floats(real), floats(var)
 	return float(real) / math.sqrt(real**2 + var**2)
+
+def n(num):
+	return "{:,.2f}".format(num)
 
 def floats(f):
 	return float(f.replace(',', ''))
@@ -462,10 +462,10 @@ def _totals(filename, component=None):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		# "feederName1": "phase_balance_test",
-		# "criticalNode": 'R1-12-47-1_node_17',
-		# "pvConnection": 'Wye',
-		# "layoutAlgorithm": "geospatial",
+		"feederName1": "phase_balance_test",
+		"criticalNode": 'R1-12-47-1_node_17',
+		"pvConnection": 'Wye',
+		"layoutAlgorithm": "geospatial",
 		# ---------------------------------------- #
 		# "feederName1": "phase_balance_test_2",
 		# "criticalNode": 'R1-12-47-2_node_28',
@@ -477,10 +477,10 @@ def new(modelDir):
 		# "pvConnection": 'Delta',
 		# "layoutAlgorithm": "geospatial",
 		# ---------------------------------------- #
-		"feederName1": 'turkey_solar',
-		"criticalNode": "nodeOH5041-S1689OH15730",
-		"pvConnection": 'Wye',
-		"layoutAlgorithm": "geospatial",
+		# "feederName1": 'turkey_solar',
+		# "criticalNode": "nodeOH5041-S1689OH15730",
+		# "pvConnection": 'Wye',
+		# "layoutAlgorithm": "geospatial",
 		# ---------------------------------------- #
 		# "feederName1": 'swaec',
 		# "criticalNode": "nodespan_192258span_177328",
