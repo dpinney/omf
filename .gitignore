@@ -36,3 +36,5 @@ gridlabd.dmg
 omf/omf.error.log
 *.pem
 omf/solvers/nilmtk/*
+omf/static/testFiles/bavarian_solar.omd
+omf/static/testFiles/turkey_solar.omd
