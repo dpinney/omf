@@ -683,7 +683,7 @@ def _tests():
 	# Pre-run.
 	# renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc)
+	# runForeground(modelLoc)
 	# Show the output.
 	renderAndShow(modelLoc)
 
