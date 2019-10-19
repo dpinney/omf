@@ -786,7 +786,10 @@ def SteinmetzController(sourceFileName,connectionPV,criticalNode,iterNum,objecti
 		
 		#print PV_A_total_rating/10000, PV_B_total_rating/10000, PV_C_total_rating/10000
 		cmdString = 'gridlabd ' + '"' + outputFileName + '"'
-		os.system(cmdString)
+		for i in range(6):
+			outCode = os.system(cmdString)
+			if outCode == 0:
+				break
 
 		# Read .csv from gridlabd to get voltage and current information at node 17
 		voltage  = ReadVoltage(voltageFileName)
@@ -862,7 +865,10 @@ def SteinmetzController(sourceFileName,connectionPV,criticalNode,iterNum,objecti
 
 				ChangeGlmFileWye(inputFileName,outputFileName,PV,PV_index)
 				cmdString = 'gridlabd ' + '"' + outputFileName + '"'
-				os.system(cmdString)
+				for i in range(6):
+					outCode = os.system(cmdString)
+					if outCode == 0:
+						break
 			
 				#update voltage and current information from gridlabd				   
 				voltage = ReadVoltage(voltageFileName)
@@ -912,7 +918,11 @@ def SteinmetzController(sourceFileName,connectionPV,criticalNode,iterNum,objecti
 					PV_C_total_rating = PV_C_total_rating + PV[m].Rating
 		
 		cmdString = 'gridlabd ' + '"' + outputFileName + '"'
-		os.system(cmdString)
+		for i in range(6):
+			outCode = os.system(cmdString)
+			if outCode == 0:
+				break
+		# os.system(cmdString)
 
 		# Read .csv from gridlabd to get voltage and current information at node 17
 		voltage  = ReadVoltage(voltageFileName)
@@ -987,7 +997,11 @@ def SteinmetzController(sourceFileName,connectionPV,criticalNode,iterNum,objecti
 								PV[m].Q_Out = -Q_C_each
 				ChangeGlmFileDelta(inputFileName,outputFileName,PV,PV_index)
 				cmdString = 'gridlabd ' + '"' + outputFileName + '"'
-				os.system(cmdString)
+				for i in range(6):
+					outCode = os.system(cmdString)
+					if outCode == 0:
+						break
+				# os.system(cmdString)
 			
 				#update voltage and current information from gridlabd				   
 				voltage = ReadVoltage(voltageFileName)

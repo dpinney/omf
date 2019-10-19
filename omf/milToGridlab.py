@@ -786,7 +786,7 @@ def convert(stdString, seqString, rescale=True):
 			if 'object' in parent.keys():
 				return parent['object']
 			else:
-				pass # print parent
+				pass
 		def phaseMerge(*arg):
 			concated = ''.join(arg)
 			return ''.join(sorted(set(concated)))
@@ -956,7 +956,6 @@ def convert(stdString, seqString, rescale=True):
 					line_segment1['to'] = node12['name']
 				except:
 					pass
-					# print 'ERRRRRR', node12
 				line_segment2['name'] = glm_dict[y]['name'] + '_LINESG2'
 				line_segment2['length'] = str(float(glm_dict[y]['length'])*3/4)
 				line_segment2['from'] = node12['name']
@@ -1215,13 +1214,13 @@ def convert(stdString, seqString, rescale=True):
 		dechain(nameMaps)
 
 		#Debug: print the amount of collapse:
-		# print 'WORKING ON ' + compName
-		# print 'Mappings:'
-		# print len(nameMaps)
-		# print 'Real configs:'
-		# print len(realConfigs)
-		# print 'Total:'
-		# print len(nameMaps) + len(realConfigs)
+		#'WORKING ON ' + compName
+		#'Mappings:'
+		#len(nameMaps)
+		#'Real configs:'
+		#len(realConfigs)
+		#'Total:'
+		#len(nameMaps) + len(realConfigs)
 
 		nameDictMap = {x[0]:x[1] for x in nameMaps}
 
@@ -1482,7 +1481,7 @@ def islandCount(tree, csv = True, csv_min_lines = 2):
 		if parental and parental in toViset:
 			island_roots.remove(unvisited)
 		elif parental:
-			print unvisited
+			pass
 	island_sizes = []
 	for island_root in island_roots:
 		island_sizes.append( count(island_root, toViset) )	
