@@ -111,7 +111,7 @@ def randomFault(pathToCsv, faultsGenerated):
 	return faults
 
 def locationMap(mc, neighbors, gridLines):
-	'Create a location heatmap, where the 2D space is partitioned into a set of lattices. The function for the heat map is inversely proportional to the distance of the nth neighbor from each point in the lattice.'
+	'Create a location heatmap, where the 2D space is partitioned into a lattice. The function for the heat map is inversely proportional to the distance of the nth neighbor from each point in the lattice.'
 	# lists to hold the latitudes, longitudes, and coordinate pairs of each fault location
 	longitudes = []
 	latitudes = []
@@ -643,7 +643,7 @@ def new(modelDir):
 	defaultInputs = {
 		"modelType": modelName,
 		"feederName1": "Olin Barre Fault",
-		"generateRandom": "2",
+		"generateRandom": "1",
 		"numberOfCustomers": "192",
 		"sustainedOutageThreshold": "300",
 		"causeFilter": "0",
@@ -657,8 +657,8 @@ def new(modelDir):
 		"durationMaxFilter": "100000",
 		"outageFileName": "outagesNew3.csv",
 		"neighborsStr": "5",
-		"gridLinesStr": "100",
-		"faultsGeneratedStr": "100",
+		"gridLinesStr": "10",
+		"faultsGeneratedStr": "10",
 		"outageData": open(pJoin(__neoMetaModel__._omfDir,"scratch","smartSwitching","outagesNew3.csv"), "r").read(),
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
