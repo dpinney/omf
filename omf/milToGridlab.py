@@ -1793,6 +1793,11 @@ def _writeResultsCsv(testOutput, outName):
 		w.writeheader()
 		w.writerows(testOutput)
 
+
+def voltDistribution(pathToGlm, pathToVoltdumpCsv):
+	pass
+
+
 def _tests(
 	keepFiles=True,
 	wipeBefore=False,
@@ -1806,6 +1811,7 @@ def _tests(
 			omf.omfDir + '/data/Climate/KY-LEXINGTON.tmy2', 'r'
 		).read(),
 	},
+	pathToVoltdumpCsv='',
 ):
 	''' Test convert every windmil feeder we have (in static/testFiles). '''
 	# testFiles = [('INEC-RENOIR.std','INEC.seq'), ('INEC-GRAHAM.std','INEC.seq'),
@@ -1835,20 +1841,30 @@ def _tests(
 	for stdString, seqString in testFiles:
 		# Output data structure.
 		currentResults = {}
-		currentResults['circuit_name'] = stdString 
-		cur_start_time = time.time() 
+		currentResults['circuit_name'] = stdString
+		cur_start_time = time.time()
 		try:
 			# Convert the std+seq and write it out.
 			with open(pJoin(openPrefix,stdString),'r') as stdFile, open(pJoin(openPrefix,seqString),'r') as seqFile:
 				# Catch warnings too:
 				with warnings.catch_warnings(record=True) as caught_warnings:
-					outGlm = convert(stdFile.read(),seqFile.read())
-				currentResults['all_warnings'] = ';'.join([str(x.message) for x in caught_warnings])
-			with open(outPrefix + stdString.replace('.std','.glm'),'w') as outFile:
+					outGlm = convert(stdFile.read(), seqFile.read())
+				if pathToVoltdumpCsv:
+					next_key = max(outGlm.keys()) + 1
+					outGlm[next_key] = {
+						'object': 'voltdump',
+						'filename': pathToVoltdumpCsv.format(
+							stdString.replace('.std', '')
+						),
+					}
+				currentResults['all_warnings'] = ';'.join(
+					[str(x.message) for x in caught_warnings]
+				)
+			with open(outPrefix + stdString.replace('.std', '.glm'), 'w') as outFile:
 				outFile.seek(0)
 				outFile.write(feeder.sortedWrite(outGlm))
 				outFile.truncate()
-				outFileStats = os.stat(outPrefix + stdString.replace('.std','.glm') )
+				outFileStats = os.stat(outPrefix + stdString.replace('.std', '.glm'))
 			print 'WROTE GLM FOR', stdString
 			# Write the size of the files as a indicator of how good the conversion was.
 			inFileStats = os.stat(pJoin(openPrefix,stdString))
