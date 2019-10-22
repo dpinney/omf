@@ -44,7 +44,7 @@ def convert(stdString, seqString, rescale=True):
 		for row in hardwareStats:
 			if row[0] == deviceName:
 				return row
-		return None	
+		return None
 	# Use a default for nominal voltage, but try to set it to the source voltage if possible.
 	nominal_voltage = 14400
 	for ob in components:
@@ -688,7 +688,7 @@ def convert(stdString, seqString, rescale=True):
 				percent_z = _safeGet(trans_config, 6, 3)
 				x_r_ratio = _safeGet(trans_config, 9, 5)
 			# Set the shunt impedance
-			try: 
+			try:
 				f_no_load_loss = float(no_load_loss)
 			except:
 				f_no_load_loss = 0.0
@@ -732,7 +732,7 @@ def convert(stdString, seqString, rescale=True):
 			except:
 				transConfig['power_rating'] = '500.0'
 			return transformer
-		
+
 		# Simple lookup table for which function we need to apply:
 		objectToFun = {
 			1 : convertOhLine,
@@ -1330,19 +1330,19 @@ def stdSeqToGlm(seqPath, stdPath, glmPath):
 		outFile.write(omf.feeder.sortedWrite(tree))
 
 def missingConductorsFix(tree):
-	'''Fixes the missing conductors issue in the tree'''	
+	'''Fixes the missing conductors issue in the tree'''
 	### CHECK IF THERE ARE LINE CONFIGS WITHOUT ANY CONDUCTORS ###
 	empty_line_configs = dict()
 	#get line configs missing conductors (dict maps name to key w/in tree)
 	for k,v in tree.iteritems():
 		if v.get('object') == 'line_configuration' and not any('conductor' in vk for vk in v.keys()):
 			empty_line_configs[v['name']] = k
-	
+
 	#get keys of lines missing conductors
 	empty_lines = [k for k,v in tree.iteritems() if 'line' in v.get('object','') and v.get('configuration') in empty_line_configs]
-	
+
 	for line_key in empty_lines:
-		#find sibling lines 
+		#find sibling lines
 		mom_node = tree[line_key]['from']
 		dotter_node = tree[line_key]['to']
 		brother_key = None
@@ -1353,7 +1353,7 @@ def missingConductorsFix(tree):
 				if mom_node == v.get('from','') or dotter_node == v.get('to',''):
 					brother_key = k
 					break
-				if mom_node == v.get('to', ''): 
+				if mom_node == v.get('to', ''):
 					grandpa_key = k
 				if dotter_node == v.get('from', ''):
 					grandson_key = k
@@ -1374,18 +1374,18 @@ def missingConductorsFix(tree):
 			for k,v in tree.iteritems():
 				if v.get('from') in ggma_node_names:
 					cousin_node_names.append(v.get('to'))
-			
+
 			for k,v in tree.iteritems():
 				if v.get('from') in cousin_node_names and v['object'] == tree[line_key]['object'] and k not in empty_lines:
 					nearby = k
 					break
-		
+
 		if not nearby:
-			#second cousins failed us so check the whole tree for a usable config 
+			#second cousins failed us so check the whole tree for a usable config
 			for k,v in tree.iteritems():
 				if v.get('object') == tree[line_key]['object'] and k not in empty_lines:
 					nearby = k
-		
+
 		if not nearby:
 			#there is no usable line_config in the whole tree, so we use our default conductor and stick it in the current line_config
 			#find our line config's key and check if we've already inserted our default conductor
@@ -1404,10 +1404,10 @@ def missingConductorsFix(tree):
 				while( conductor_key in tree.keys() ):
 					conductor_key -= 1
 				tree[conductor_key] = default_equipment[ tree[line_key]['object'] + '_conductor' ]
-			
+
 			for phase in tree[line_key]['phases']:
 				tree[lc_key]['conductor_' + phase] = tree[conductor_key]['name']
-			
+
 			continue
 
 		#grab the conductor from the line configuration
@@ -1428,7 +1428,7 @@ def missingConductorsFix(tree):
 	namesToKeys = getNamesToKeys(tree)
 
 	buggy_lines = dict() #maps buggy lines to their line config keys
-	
+
 	for k, line in tree.iteritems():
 		if 'line' in line.get('object',''):
 			try:
@@ -1484,7 +1484,7 @@ def islandCount(tree, csv = True, csv_min_lines = 2):
 			pass
 	island_sizes = []
 	for island_root in island_roots:
-		island_sizes.append( count(island_root, toViset) )	
+		island_sizes.append( count(island_root, toViset) )
 	island_roots.insert(0, main_root)
 	island_sizes.insert(0, main_size)
 	if csv and len(island_roots) > csv_min_lines:
@@ -1503,7 +1503,7 @@ def phasingMismatchFix(tree, intermittent_drop_range=5):
 	'''Fixes phase mismatch errors in the tree'''
 	#for k,v in tree.iteritems():
 	#	if v.get('name') == 'NODE150020':
-	#		print v 
+	#		print v
 	#		tree[k]['phases'] = 'B'
 	#		break
 
@@ -1552,8 +1552,8 @@ def phasingMismatchFix(tree, intermittent_drop_range=5):
 				if not (kid_phases <= current_phases):
 					ancestry = [current_node]
 					dropped = False
-					# We check (intermittent_drop_range) generations above the current_node to see if the phase gained in kid_phases  was dropped within 
-					# that range. Ancestry is our listy boi of the nodes within (intermittent_drop_range) generations. If we decide that the phases were 
+					# We check (intermittent_drop_range) generations above the current_node to see if the phase gained in kid_phases  was dropped within
+					# that range. Ancestry is our listy boi of the nodes within (intermittent_drop_range) generations. If we decide that the phases were
 					# intermittently dropped, then we will overwrite the phases where they were dropped (the nodes in ancestry).
 					# If we decide that the phases were not intermittentely dropped then we set the kid_phases equal to the current_phases
 					for j in range(intermittent_drop_range):
@@ -1596,7 +1596,7 @@ def phasingMismatchFix(tree, intermittent_drop_range=5):
 	root_name_list = [ tree[key].get('name', 'name_not_found') for key in [current_node] + new_roots ]
 	for root in new_roots:
 		_phaseFix(tree, root, toViset)
-	
+
 	tree = missingPowerFix(tree)
 	return tree
 
@@ -1794,19 +1794,24 @@ def _writeResultsCsv(testOutput, outName):
 		w.writerows(testOutput)
 
 def _tests(
-		keepFiles = True,
-		wipeBefore = False,
-		openPrefix = omf.omfDir + '/static/testFiles/',
-		outPrefix = omf.omfDir + '/scratch/milToGridlabTests/',
-		testFiles = [('Olin-Barre.std','Olin.seq'), ('Olin-Brown.std','Olin.seq')],
-		totalLength = 121,
-		testAttachments = {'schedules.glm':'', 'climate.tmy2':open(omf.omfDir + '/data/Climate/KY-LEXINGTON.tmy2','r').read()},
-	):
+	keepFiles=True,
+	wipeBefore=False,
+	openPrefix=omf.omfDir + '/static/testFiles/',
+	outPrefix=omf.omfDir + '/scratch/milToGridlabTests/',
+	testFiles=[('Olin-Barre.std', 'Olin.seq'), ('Olin-Brown.std', 'Olin.seq')],
+	totalLength=121,
+	testAttachments={
+		'schedules.glm': '',
+		'climate.tmy2': open(
+			omf.omfDir + '/data/Climate/KY-LEXINGTON.tmy2', 'r'
+		).read(),
+	},
+):
 	''' Test convert every windmil feeder we have (in static/testFiles). '''
 	# testFiles = [('INEC-RENOIR.std','INEC.seq'), ('INEC-GRAHAM.std','INEC.seq'),
 	#   ('Olin-Barre.std','Olin.seq'), ('Olin-Brown.std','Olin.seq'),
 	#   ('ABEC-FRANK.std','ABEC.seq'), ('ABEC-COLUMBIA.std','ABEC.seq'),('OMF_Norfork1.std', 'OMF_Norfork1.seq'),('UE yadkin tabernacle.std','UE yadkin tabernacle.seq')]
-	# setlocale lives here to avoid changing it globally 
+	# setlocale lives here to avoid changing it globally
 	# locale.setlocale(locale.LC_ALL, 'en_US')
 	# Variables for the testing.
 	allResults = []
