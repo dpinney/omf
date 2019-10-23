@@ -99,6 +99,14 @@
 				</select>
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Data to be Graphed<span class="classic">This input decides whether the faults dictated by the input .csv file, the random faults generated, or all faults will be graphed on the leaflet plot.</span></label>
+				<select id="graphData" name="graphData" />
+					<option value="0">Graph All Faults</option>
+					<option value="1">Graph Original Faults</option>
+					<option value="2">Graph Generated Faults</option>
+				</select>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Number of Customers<span class="classic">The number of meters on the feeder system.</span></label>
 				<input type="text" id="numberOfCustomers" name="numberOfCustomers">
 			</div>
@@ -220,11 +228,11 @@
 		</script>
 	</div>
 	<div id="output">
-		<p class="reportTitle postRun" style="page-break-before:always">Reliability Metrics</p>
+		<p class="reportTitle postRun" style="page-break-before:always">Reliability Metrics for Input Data</p>
 		<div id="statsCalc" class="tightContent postRun">
 			{{ allOutputDataDict['statsHtml'] }}
 		</div>
-		<p class="reportTitle postRun">Outage Timeline</p>
+		<p class="reportTitle postRun">Outage Timeline for Input Data</p>
 		<div id="timeline" class="tightContent postRun">
 			<div id="timelineChart" style="width:1000px"></div>
 			<script type="text/javascript">
@@ -236,7 +244,7 @@
 		<script type="text/javascript">
 		//Hack to stop leaflet from loading before geojson data loads 
 		if(modelStatus === "finished"){
-		mapHtml = '<p class="reportTitle">Outage Map (Faults Marked in Blue)</p><div id="mapHolder" class="tightContent"><div id="map"></div></div>';
+		mapHtml = '<p class="reportTitle">Outage Map (Original Faults Marked in Blue, New Faults Marked in Red)</p><div id="mapHolder" class="tightContent"><div id="map"></div></div>';
 		gebi('mapInsert').innerHTML = mapHtml;
 		//Parse geojson dict (instead of reading from geojson.js - doesn't really matter if you want to load from geojson.js, was just quicker to prototype) 
 		var geojson = JSON.parse(allOutputData['geoDict']);

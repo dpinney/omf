@@ -36,20 +36,20 @@ def heatMap(mc):
 	row_count_mc = mc.shape[0]
 	row = 0
 	while row < row_count_mc:
-		causefault = (mc.loc[row, 'Cause'], mc.loc[row, 'Implemented Fault Type'])
+		causefault = (mc.loc[row, 'Cause'], mc.loc[row, 'Fault Type'])
 		# comp type will store which causes and fault types can occur for a given line type
-		if mc.loc[row, 'Object type'] in compType.keys():
-			if causefault not in compType[mc.loc[row, 'Object type']]['causes']:
-				compType[mc.loc[row, 'Object type']]['causes'].append(causefault)
+		if mc.loc[row, 'Component Type'] in compType.keys():
+			if causefault not in compType[mc.loc[row, 'Component Type']]['causes']:
+				compType[mc.loc[row, 'Component Type']]['causes'].append(causefault)
 		else:
-			compType[mc.loc[row, 'Object type']] = {}
-			compType[mc.loc[row, 'Object type']]['causes'] = []
-			compType[mc.loc[row, 'Object type']]['causes'].append(causefault)
+			compType[mc.loc[row, 'Component Type']] = {}
+			compType[mc.loc[row, 'Component Type']]['causes'] = []
+			compType[mc.loc[row, 'Component Type']]['causes'].append(causefault)
 		# location of the faults as well as the component type, since the latter is completely dependent on the former (if we have no locations for the components)
-		if (mc.loc[row, 'Location'] + ' ' + mc.loc[row, 'Object type']) in location.keys():
-			location[mc.loc[row, 'Location'] + ' ' + mc.loc[row, 'Object type']] += 1
+		if (mc.loc[row, 'Location'] + ' ' + mc.loc[row, 'Component Type']) in location.keys():
+			location[mc.loc[row, 'Location'] + ' ' + mc.loc[row, 'Component Type']] += 1
 		else:
-			location[mc.loc[row, 'Location'] + ' ' + mc.loc[row, 'Object type']] = 1
+			location[mc.loc[row, 'Location'] + ' ' + mc.loc[row, 'Component Type']] = 1
 		# causes and fault types for the faults (note dependency again)
 		if causefault in cause.keys():
 			cause[causefault] += 1
@@ -175,20 +175,20 @@ def heatMapRefined(mc):
 	row_count_mc = mc.shape[0]
 	row = 0
 	while row < row_count_mc:
-		causefault = (mc.loc[row, 'Cause'], mc.loc[row, 'Implemented Fault Type'])
+		causefault = (mc.loc[row, 'Cause'], mc.loc[row, 'Fault Type'])
 		# component types for faults
-		if mc.loc[row, 'Object type'] in componentType.keys():
-			componentType[mc.loc[row, 'Object type']] += 1
+		if mc.loc[row, 'Component Type'] in componentType.keys():
+			componentType[mc.loc[row, 'Component Type']] += 1
 		else:
-			componentType[mc.loc[row, 'Object type']] = 1
+			componentType[mc.loc[row, 'Component Type']] = 1
 		# comp type will store which causes and fault types can occur for a given line type
-		if mc.loc[row, 'Object type'] in compType.keys():
-			if causefault not in compType[mc.loc[row, 'Object type']]['causes']:
-				compType[mc.loc[row, 'Object type']]['causes'].append(causefault)
+		if mc.loc[row, 'Component Type'] in compType.keys():
+			if causefault not in compType[mc.loc[row, 'Component Type']]['causes']:
+				compType[mc.loc[row, 'Component Type']]['causes'].append(causefault)
 		else:
-			compType[mc.loc[row, 'Object type']] = {}
-			compType[mc.loc[row, 'Object type']]['causes'] = []
-			compType[mc.loc[row, 'Object type']]['causes'].append(causefault)
+			compType[mc.loc[row, 'Component Type']] = {}
+			compType[mc.loc[row, 'Component Type']]['causes'] = []
+			compType[mc.loc[row, 'Component Type']]['causes'].append(causefault)
 
 		# causes and fault types for the faults
 		if causefault in cause.keys():
@@ -348,7 +348,7 @@ def randomFaultsRefined(pathToCsv, pathToOmd, workDir, neighbors, gridLines, fau
 	faults = pd.DataFrame(data)
 	return faults
 
-def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, numberOfCustomers, sustainedOutageThreshold, causeFilter, componentTypeFilter, faultTypeFilter, timeMinFilter, timeMaxFilter, meterMinFilter, meterMaxFilter, durationMinFilter, durationMaxFilter, neighborsStr, gridLinesStr, faultsGeneratedStr):
+def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData, numberOfCustomers, sustainedOutageThreshold, causeFilter, componentTypeFilter, faultTypeFilter, timeMinFilter, timeMaxFilter, meterMinFilter, meterMaxFilter, durationMinFilter, durationMaxFilter, neighborsStr, gridLinesStr, faultsGeneratedStr):
 	' calculates outage metrics, plots a leaflet map of faults, and plots an outage timeline'
 	# check to see if work directory is specified; otherwise, create a temporary directory
 	if not workDir:
@@ -428,56 +428,58 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, numberOfCu
 
 	mc = pd.read_csv(pathToCsv)
 
-	row = 0
-	row_count_mc = mc.shape[0]
-	while row < row_count_mc:
-		entry = mc.loc[row, 'Location']
-		p = re.compile(r'-?\d+\.\d+')  # Compile a pattern to capture integer values
-		coords = [float(i) for i in p.findall(entry)]
-		coord1 = coords[0]
-		coord2 = coords[1]
-		if 'Cause' in mc.columns:
-			cause = mc.loc[row, 'Cause']
-		else:
-			cause = 'None'
-		if 'Meters Affected' in mc.columns:
-			lis = str(mc.loc[row, 'Meters Affected'])
-			meters = lis.split()
-			meterCount = len(meters)
-		else:
-			meters = []
-			meterCount = 0
-			meterMinFilter = -10e10
-			meterMaxFilter = 10e10
+	# Graph input fault data if the user requests
+	if (graphData == '0' or graphData == '1'):
+		row = 0
+		row_count_mc = mc.shape[0]
+		while row < row_count_mc:
+			entry = mc.loc[row, 'Location']
+			p = re.compile(r'-?\d+\.\d+')  # Compile a pattern to capture integer values
+			coords = [float(i) for i in p.findall(entry)]
+			coord1 = coords[0]
+			coord2 = coords[1]
+			if 'Cause' in mc.columns:
+				cause = mc.loc[row, 'Cause']
+			else:
+				cause = 'None'
+			if 'Meters Affected' in mc.columns:
+				lis = str(mc.loc[row, 'Meters Affected'])
+				meters = lis.split()
+				meterCount = len(meters)
+			else:
+				meters = []
+				meterCount = 0
+				meterMinFilter = -10e10
+				meterMaxFilter = 10e10
 
-		if 'Start' in mc.columns:		
-			duration = datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))
-			time = datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S'))
-			timeMin = datetime_to_float(datetime.datetime.strptime(timeMinFilter, '%Y-%m-%d %H:%M:%S'))
-			timeMax = datetime_to_float(datetime.datetime.strptime(timeMaxFilter, '%Y-%m-%d %H:%M:%S'))
-		else:
-			duration = 0.0
-			time = 0.0
-			timeMin = -10e10
-			timeMax = 10e10
-			durationMinFilter = -10e10
-			durationMaxFilter = 10e10
-		if 'component_type' in mc.columns:
-			componentType = mc.loc[row, 'component_type']
-		else:
-			componentType = 'None'
-		if 'fault_type' in mc.columns:
-			faultType = mc.loc[row, 'fault_type']
-		else:
-			faultType = 'None'
+			if 'Start' in mc.columns:		
+				duration = datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))
+				time = datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S'))
+				timeMin = datetime_to_float(datetime.datetime.strptime(timeMinFilter, '%Y-%m-%d %H:%M:%S'))
+				timeMax = datetime_to_float(datetime.datetime.strptime(timeMaxFilter, '%Y-%m-%d %H:%M:%S'))
+			else:
+				duration = 0.0
+				time = 0.0
+				timeMin = -10e10
+				timeMax = 10e10
+				durationMinFilter = -10e10
+				durationMaxFilter = 10e10
+			if 'component_type' in mc.columns:
+				componentType = mc.loc[row, 'component_type']
+			else:
+				componentType = 'None'
+			if 'fault_type' in mc.columns:
+				faultType = mc.loc[row, 'fault_type']
+			else:
+				faultType = 'None'
 
-		Dict = {}
-		Dict['geometry'] = {'type': 'Point', 'coordinates': [coord1, coord2]}
-		Dict['type'] = 'Feature'
-		Dict['properties'] = {'name': 'Old_Fault_' + str(row+1), 'meterCount': int(meterCount), 'time': time, 'timeMin':timeMin, 'timeMax':timeMax, 'meterMinFilter': int(meterMinFilter), 'meterMaxFilter': int(meterMaxFilter), 'cause': str(cause), 'componentType': str(componentType), 'faultType': str(faultType), 'componentFilter':str(componentTypeFilter), 'faultFilter': str(faultTypeFilter), 'causeFilter': causeFilter, 'duration': int(duration), 'durationMinFilter': int(durationMinFilter), 'durationMaxFilter': int(durationMaxFilter), 'meters': str(mc.loc[row, 'Meters Affected']), 'pointColor': 'blue', 'popupContent': '<br><br>Fault start time: <b>' + str(mc.loc[row, 'Start']) + '</b><br> Fault duration: <b>' + str(duration) + ' seconds</b><br>Location: <b>' + str(coords) + '</b><br>Cause: <b>' + str(cause) + '</b><br>Meters Affected: <b><br>' + str(mc.loc[row, 'Meters Affected']) + '</b><br>Count of Meters Affected: <b>' + str(len(meters)) + '</b><br>Line Type: <b>' + str(componentType) + '</b><br>Fault Type: <b>' + str(faultType) + '</b>.'}
-		outageMap['features'].append(Dict)
-		row += 1
-
+			Dict = {}
+			Dict['geometry'] = {'type': 'Point', 'coordinates': [coord1, coord2]}
+			Dict['type'] = 'Feature'
+			Dict['properties'] = {'name': 'Old_Fault_' + str(row+1), 'meterCount': int(meterCount), 'time': time, 'timeMin':timeMin, 'timeMax':timeMax, 'meterMinFilter': int(meterMinFilter), 'meterMaxFilter': int(meterMaxFilter), 'cause': str(cause), 'componentType': str(componentType), 'faultType': str(faultType), 'componentFilter':str(componentTypeFilter), 'faultFilter': str(faultTypeFilter), 'causeFilter': causeFilter, 'duration': int(duration), 'durationMinFilter': int(durationMinFilter), 'durationMaxFilter': int(durationMaxFilter), 'meters': str(mc.loc[row, 'Meters Affected']), 'pointColor': 'blue', 'popupContent': '<br><br>Fault start time: <b>' + str(mc.loc[row, 'Start']) + '</b><br> Fault duration: <b>' + str(duration) + ' seconds</b><br>Location: <b>' + str(coords) + '</b><br>Cause: <b>' + str(cause) + '</b><br>Meters Affected: <b><br>' + str(mc.loc[row, 'Meters Affected']) + '</b><br>Count of Meters Affected: <b>' + str(len(meters)) + '</b><br>Line Type: <b>' + str(componentType) + '</b><br>Fault Type: <b>' + str(faultType) + '</b>.'}
+			outageMap['features'].append(Dict)
+			row += 1
+	# generate new fault data if the user requests
 	if generateRandom == '2':
 		neighbors = int(neighborsStr)
 		gridLines = int(gridLinesStr)
@@ -486,7 +488,8 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, numberOfCu
 	if generateRandom == '1':
 		faultsGenerated = int(faultsGeneratedStr)
 		mc1 = randomFault(pathToCsv, faultsGenerated)
-	if (generateRandom == '2' or generateRandom == '1'):
+	# graph the generated faults if the user requests
+	if ((generateRandom == '2' or generateRandom == '1') and (graphData == '0' or graphData == '2')):
 		row = 0
 		row_count_mc1 = mc1.shape[0]
 		while row < row_count_mc1:
@@ -605,6 +608,7 @@ def work(modelDir, inputDict):
 		pathToData,
 		modelDir, #Work directory.
 		inputDict['generateRandom'],
+		inputDict['graphData'],
 		inputDict['numberOfCustomers'],
 		inputDict['sustainedOutageThreshold'],
 		inputDict['causeFilter'],
@@ -644,17 +648,18 @@ def new(modelDir):
 		"modelType": modelName,
 		"feederName1": "Olin Barre Fault",
 		"generateRandom": "1",
+		"graphData": "0",
 		"numberOfCustomers": "192",
 		"sustainedOutageThreshold": "300",
 		"causeFilter": "0",
 		"componentTypeFilter": "All",
 		"faultTypeFilter": "All",
 		"timeMinFilter": "2000-01-01 00:00:01",
-		"timeMaxFilter": "2000-12-31 00:00:30",
+		"timeMaxFilter": "2000-06-15 00:00:30",
 		"meterMinFilter": "0",
-		"meterMaxFilter": "1000",
-		"durationMinFilter": "0",
-		"durationMaxFilter": "100000",
+		"meterMaxFilter": "10",
+		"durationMinFilter": "150",
+		"durationMaxFilter": "1000000",
 		"outageFileName": "outagesNew3.csv",
 		"neighborsStr": "5",
 		"gridLinesStr": "10",
@@ -683,7 +688,7 @@ def _tests():
 	# Pre-run.
 	# renderAndShow(modelLoc)
 	# Run the model.
-	# runForeground(modelLoc)
+	runForeground(modelLoc)
 	# Show the output.
 	renderAndShow(modelLoc)
 
