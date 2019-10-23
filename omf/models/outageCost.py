@@ -33,6 +33,8 @@ def heatMap(mc):
 	compType = {}
 	location = {}
 	cause = {}
+	start = {}
+	duration = {}
 	row_count_mc = mc.shape[0]
 	row = 0
 	while row < row_count_mc:
@@ -55,20 +57,52 @@ def heatMap(mc):
 			cause[causefault] += 1
 		else:
 			cause[causefault] = 1
+		# start and end times for faults (note: if start exists, assume finish also exists)
+		if 'Start' in mc.columns:
+			if mc.loc[row, 'Start'] in start.keys():
+				start[mc.loc[row, 'Start']] += 1
+			else:
+				start[mc.loc[row, 'Start']] = 1
+			if 'Finish' in mc.columns:
+				if datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S')) in duration.keys():
+					duration[datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))] += 1
+				else:
+					duration[datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))] = 1
 		row += 1
 	# find the total number of faults that occur in each dictionary
 	totalCause = sum(cause.itervalues(), 0.0)
+	totalStart = sum(start.itervalues(), 0.0)
 	totalLocation = sum(location.itervalues(), 0.0)
+	totalDuration = sum(duration.itervalues(), 0.0)
 
 	# create a heat map by dividing the number of each individual item by the total number found
 	location = {k: v / totalLocation for k, v in location.iteritems()}
 	cause = {k: v / totalCause for k, v in cause.iteritems()}
+	start = {k: v / totalStart for k, v in start.iteritems()}
+	duration = {k: v / totalDuration for k, v in duration.iteritems()}
 
 	# create a single dictionary to store heat map data
 	heatMap = {}
-	heatMap['compType'] = compType
-	heatMap['location'] = location
-	heatMap['cause'] = cause
+	if bool(compType):
+		heatMap['compType'] = compType
+	else:
+		print('"Component Type" is missing from input data.')
+	if bool(location):
+		heatMap['location'] = location
+	else:
+		print('"Location" is missing from input data.')
+	if bool(cause):
+		heatMap['cause'] = cause
+	else:
+		print('"Cause" is missing from input data.')
+	if bool(start):
+		heatMap['start'] = start
+	else:
+		print('"Start" is missing from input data.')
+	if bool(duration):
+		heatMap['duration'] = duration
+	else:
+		print('"Finish" is missing from input data.')
 
 	return heatMap
 
@@ -80,12 +114,21 @@ def randomFault(pathToCsv, faultsGenerated):
 	locations = []
 	causes = []
 	fault_types = []
+	starts = []
+	finishes = []
 	faultNumber = 0
 	while faultNumber < faultsGenerated:
 		# choose a random location
 		chooseLocationString = np.random.choice(heatmap['location'].keys(), replace=True, p=heatmap['location'].values())
 		chooseLocation = chooseLocationString.split()
 		location = str(chooseLocation[0]) + ' ' + str(chooseLocation[1])
+		if heatmap['start']:
+			start = np.random.choice(heatmap['start'].keys(), replace=True, p=heatmap['start'].values())
+			if heatmap['duration']:
+				epoch = datetime.datetime.utcfromtimestamp(0)
+				duration = np.random.choice(heatmap['duration'].keys(), replace=True, p=heatmap['duration'].values())
+				start = str(start)
+				finish = str(datetime.datetime.strptime(start, "%Y-%m-%d %H:%M:%S") + datetime.timedelta(seconds=duration))
 		# Note: for this method, component type is completely dependent on location
 		compType = str(chooseLocation[2])
 		# choose a cause and fault type that is possible (dependency), given the component type
@@ -104,9 +147,15 @@ def randomFault(pathToCsv, faultsGenerated):
 		locations.append(location)
 		component_types.append(compType)
 		causes.append(causefault[0])
+		starts.append(start)
+		finishes.append(finish)
 		fault_types.append(causefault[1])
 		faultNumber += 1
-	data = {'component_type': component_types, 'Location': locations, 'Cause': causes, 'fault_type': fault_types}
+
+	if (heatmap['start'] and heatmap['duration']):	
+		data = {'Start': starts, 'Finish': finishes, 'component_type': component_types, 'Location': locations, 'Cause': causes, 'fault_type': fault_types}
+	else:
+		data = {'component_type': component_types, 'Location': locations, 'Cause': causes, 'fault_type': fault_types}
 	faults = pd.DataFrame(data)
 	return faults
 
@@ -655,15 +704,15 @@ def new(modelDir):
 		"componentTypeFilter": "All",
 		"faultTypeFilter": "All",
 		"timeMinFilter": "2000-01-01 00:00:01",
-		"timeMaxFilter": "2000-06-15 00:00:30",
+		"timeMaxFilter": "2000-12-15 00:00:30",
 		"meterMinFilter": "0",
-		"meterMaxFilter": "10",
-		"durationMinFilter": "150",
+		"meterMaxFilter": "100",
+		"durationMinFilter": "130",
 		"durationMaxFilter": "1000000",
 		"outageFileName": "outagesNew3.csv",
 		"neighborsStr": "5",
 		"gridLinesStr": "10",
-		"faultsGeneratedStr": "10",
+		"faultsGeneratedStr": "100",
 		"outageData": open(pJoin(__neoMetaModel__._omfDir,"scratch","smartSwitching","outagesNew3.csv"), "r").read(),
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
