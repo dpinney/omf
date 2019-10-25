@@ -13,6 +13,7 @@ omf/emailCredentials.key
 **/.DS_Store
 omf/octave-workspace
 omf/omf.log
+omf/scratch/gridState/
 # But include a few things:
 !omf/data/Model/public/*
 !omf/data/Feeder/public/*

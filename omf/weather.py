@@ -323,12 +323,20 @@ def attachHistoricalWeather(omd_path, year, station):
 	:type station: str
 	"""
 	csv_path = os.path.join(os.path.dirname(omd_path), "uscrn-weather-data.csv")
-	write_USCRN_csv(csv_path, year, station)
+	temperature = USCRNDataType(8, -9999.0, flag_index=None, transformation_function=lambda x: round(_celsius_to_fahrenheit(x), 1))
+	humidity = USCRNDataType(26, -9999, flag_index=27, transformation_function=lambda x: round((x / float(100)), 2))
+	solar_dir = USCRNDataType(13, -99999, flag_index=14, transformation_function=lambda x: int(round(_watts_per_meter_sq_to_watts_per_ft_sq(x) * 0.75, 0)))
+	solar_diff = USCRNDataType(13, -99999, flag_index=14, transformation_function=lambda x: int(round(_watts_per_meter_sq_to_watts_per_ft_sq(x) * 0.25, 0)))
+	solar_global = USCRNDataType(13, -99999, flag_index=14, transformation_function=lambda x: int(round(_watts_per_meter_sq_to_watts_per_ft_sq(x), 0)))
+	hourly_data_types = [temperature, humidity, solar_dir, solar_diff, solar_global]
+	wind_speed = USCRNDataType(21, -99.00, flag_index=22, transformation_function=lambda x: round(x, 2))
+	subhourly_data_types = [wind_speed]
+	_write_USCRN_csv(csv_path, year, station, hourly_data_types, subhourly_data_types)
 	start_date = datetime(year, 1, 1)
-	calibrate_omd(start_date, omd_path, csv_path)
+	_calibrate_omd(start_date, omd_path, csv_path)
 
 
-def calibrate_omd(start_date, omd_path, csv_path):
+def _calibrate_omd(start_date, omd_path, csv_path):
 	"""
 	Modify an .omd file so that it will run in GridLAB-D with the CSV of USCRN weather data.
 
@@ -370,7 +378,7 @@ def calibrate_omd(start_date, omd_path, csv_path):
 		json.dump(omd, f, indent=4)
 
 
-def write_USCRN_csv(csv_path, year, station):
+def _write_USCRN_csv(csv_path, year, station, hourly_data_types, subhourly_data_types):
 	"""
 	Get data as .txt files from the USCRN server, process the data, and write the processed data to a CSV.
 
@@ -382,34 +390,67 @@ def write_USCRN_csv(csv_path, year, station):
 	:type station: str
 	"""
 	# Get hourly data and process it
-	hourly_rows = get_USCRN_data(year, station, "hourly")
+	hourly_rows = _get_USCRN_data(year, station, "hourly")
 	if hourly_rows is None:
 		raise Exception("Failed to get USCRN data for year \"{}\" and station \"{}\"".format(year, station))
-	data_types = get_hourly_USCRNDataTypes()
-	first_valid_row = get_first_valid_row(hourly_rows, data_types)
-	last_valid_row = get_first_valid_row(hourly_rows, data_types, reverse=True)
-	if first_valid_row is None or last_valid_row is None:
-		raise Exception("Relevant hourly data values are missing from the USCRN data for year: \"{}\" and station: \"{}\"".format(year, station))
-	hourly_processed_data = extract_data(first_valid_row, last_valid_row, hourly_rows, data_types, is_subhourly_data=False)
+	if hourly_data_types is not None:
+		first_valid_row = _get_first_valid_row(hourly_rows, hourly_data_types)
+		last_valid_row = _get_first_valid_row(hourly_rows, hourly_data_types, reverse=True)
+		if first_valid_row is None or last_valid_row is None:
+			raise ValueError("Relevant hourly data values are missing from the USCRN data for year: \"{}\" and station: \"{}\"".format(year, station))
+		hourly_processed_data = _extract_data(first_valid_row, last_valid_row, hourly_rows, hourly_data_types, is_subhourly_data=False)
+	else:
+		hourly_processed_data = None
 	# Get subhourly data and process it
-	subhourly_rows = get_USCRN_data(year, station, "subhourly")
+	subhourly_rows = _get_USCRN_data(year, station, "subhourly")
 	if subhourly_rows is None:
-		raise Exception("Failed to get USCRN data for year \"{}\" and station \"{}\"".format(year, station))
-	data_types = get_subhourly_USCRNDataTypes()
-	first_valid_row = get_first_valid_row(subhourly_rows, data_types)
-	last_valid_row = get_first_valid_row(subhourly_rows, data_types, reverse=True)
-	if first_valid_row is None or last_valid_row is None:
-		raise Exception("Relevant subhourly data values are missing from the USCRN data for year: \"{}\" and station: \"{}\"".format(year, station))
-	subhourly_processed_data = extract_data(first_valid_row, last_valid_row, subhourly_rows, data_types, is_subhourly_data=True)
+		raise ValueError("Failed to get USCRN data for year \"{}\" and station \"{}\"".format(year, station))
+	if subhourly_data_types is not None:
+		first_valid_row = _get_first_valid_row(subhourly_rows, subhourly_data_types)
+		last_valid_row = _get_first_valid_row(subhourly_rows, subhourly_data_types, reverse=True)
+		if first_valid_row is None or last_valid_row is None:
+			raise ValueError("Relevant subhourly data values are missing from the USCRN data for year: \"{}\" and station: \"{}\"".format(year, station))
+		subhourly_processed_data = _extract_data(first_valid_row, last_valid_row, subhourly_rows, subhourly_data_types, is_subhourly_data=True)
+	else:
+		subhourly_processed_data = None
 	# Merge the hourly and subhourly data
-	all_data = merge_hourly_subhourly(hourly_processed_data, subhourly_processed_data, 1)
+	if hourly_processed_data is not None and subhourly_processed_data is not None:
+		all_data = _merge_hourly_subhourly(hourly_processed_data, subhourly_processed_data, 1)
+	else:
+		if hourly_processed_data is not None:
+			all_data = hourly_processed_data
+		elif subhourly_processed_data is not None:
+			all_data = subhourly_processed_data
+		else:
+			raise ValueError('There was no processed data to write to the CSV')
 	# Write the CSV
 	with open(csv_path, 'w') as f:
 		writer = csv.writer(f)
 		writer.writerows(all_data)
 
 
-def get_USCRN_data(year, station, frequency):
+#def get_hourly_USCRNDataTypes():
+#	"""Return a list of the USCRNDataTypes that we want to extract from a USCRN .txt file of hourly data."""
+#	utc_date = USCRNDataType(1, -9999.0)
+#	utc_time = USCRNDataType(2, -9999.0)
+#	temperature = USCRNDataType(8, -9999.0)
+#	return [utc_date, utc_time, temperature]
+#	#temperature = USCRNDataType(8, -9999.0, flag_index=None, transformation_function=lambda x: round(_celsius_to_fahrenheit(x), 1))
+#	#humidity = USCRNDataType(26, -9999, flag_index=27, transformation_function=lambda x: round((x / float(100)), 2))
+#	#solar_dir = USCRNDataType(13, -99999, flag_index=14, transformation_function=lambda x: int(round(_watts_per_meter_sq_to_watts_per_ft_sq(x) * 0.75, 0)))
+#	#solar_diff = USCRNDataType(13, -99999, flag_index=14, transformation_function=lambda x: int(round(_watts_per_meter_sq_to_watts_per_ft_sq(x) * 0.25, 0)))
+#	#solar_global = USCRNDataType(13, -99999, flag_index=14, transformation_function=lambda x: int(round(_watts_per_meter_sq_to_watts_per_ft_sq(x), 0)))
+#	#return [temperature, humidity, solar_dir, solar_diff, solar_global]
+
+
+#def get_subhourly_USCRNDataTypes():
+#	"""Return the USCRNDataTypes that we want to extract from a USCRN .txt file of subhourly data."""
+#	#wind_speed = USCRNDataType(21, -99.00, flag_index=22, transformation_function=lambda x: round(x, 2))
+#	#return [wind_speed]
+#	return
+
+
+def _get_USCRN_data(year, station, frequency):
 	"""Get a .txt file from the USCRN server and return the data as a list of lists."""
 	url = "https://www1.ncdc.noaa.gov/pub/data/uscrn/products/"
 	if frequency == "hourly":
@@ -424,32 +465,16 @@ def get_USCRN_data(year, station, frequency):
 	return [re.split("\s+", line) for line in r.text.splitlines()]
 
 
-def get_hourly_USCRNDataTypes():
-	"""Return a list of the USCRNDataTypes that we want to extract from a USCRN .txt file of hourly data."""
-	temperature = USCRNDataType(8, -9999.0, flag_index=None, transformation_function=lambda x: round(celsius_to_fahrenheit(x), 1))
-	humidity = USCRNDataType(26, -9999, flag_index=27, transformation_function=lambda x: round((x / float(100)), 2))
-	solar_dir = USCRNDataType(13, -99999, flag_index=14, transformation_function=lambda x: int(round(watts_per_meter_sq_to_watts_per_ft_sq(x) * 0.75, 0)))
-	solar_diff = USCRNDataType(13, -99999, flag_index=14, transformation_function=lambda x: int(round(watts_per_meter_sq_to_watts_per_ft_sq(x) * 0.25, 0)))
-	solar_global = USCRNDataType(13, -99999, flag_index=14, transformation_function=lambda x: int(round(watts_per_meter_sq_to_watts_per_ft_sq(x), 0)))
-	return [temperature, humidity, solar_dir, solar_diff, solar_global]
-
-
-def get_subhourly_USCRNDataTypes():
-	"""Return the USCRNDataTypes that we want to extract from a USCRN .txt file of subhourly data."""
-	wind_speed = USCRNDataType(21, -99.00, flag_index=22, transformation_function=lambda x: round(x, 2))
-	return [wind_speed]
-
-
-def str_to_num(data):
+def _str_to_num(data):
 	"""Convert a string to its int or float equivalent."""
 	if type(data) is str or type(data) is unicode:
-		if get_precision(data) == 0:
+		if _get_precision(data) == 0:
 			return int(data)
 		return float(data)
 	return data
 
 
-def get_precision(data):
+def _get_precision(data):
 	"""Get the decimal precision of a number as an int."""
 	if type(data) is not str and type(data) is not unicode:
 		data = str(data)
@@ -458,7 +483,7 @@ def get_precision(data):
 	return len(re.split("[.]", data)[1])
 
 
-def get_processed_row(data_types, row):
+def _get_processed_row(data_types, row):
 	"""
 	Extract the datum for each USCRNDataType from the row of raw data into a new row.
 
@@ -473,11 +498,11 @@ def get_processed_row(data_types, row):
 	"""
 	processed_row = []
 	for d_type in data_types:
-		processed_row.append(d_type.get_value(row))
+		processed_row.append(d_type._get_value(row))
 	return processed_row
 
 
-def add_row_to_hourly_avg(row, hourly_avg):
+def _add_row_to_hourly_avg(row, hourly_avg):
 	"""
 	Add the values from a row of subhourly data into the row that represents the hourly average of the subhourly measurements.
 
@@ -491,13 +516,13 @@ def add_row_to_hourly_avg(row, hourly_avg):
 	for j in range(len(row)):
 		val = row[j]
 		try:
-			val = str_to_num(val)
+			val = _str_to_num(val)
 			hourly_avg[j] += val
 		except:
 			hourly_avg[j] = val
 
 
-def get_first_valid_row(rows, data_types, reverse=False):
+def _get_first_valid_row(rows, data_types, reverse=False):
 	"""
 	Iterate over the USCRN .txt file represented as a list of lists and return the first row that has all valid data for the given USCRNDataTypes.
 
@@ -517,13 +542,13 @@ def get_first_valid_row(rows, data_types, reverse=False):
 	for row in rows:
 		valid = True
 		for d_type in data_types:
-			if not d_type.is_valid(row):
+			if not d_type._is_valid(row):
 				valid = False	
 		if valid:
 			return row
 
 
-def extract_data(first_valid_row, last_valid_row, rows, data_types, is_subhourly_data=False):
+def _extract_data(first_valid_row, last_valid_row, rows, data_types, is_subhourly_data=False):
 	"""
 	Extract the desired columns of data from the USCRN .txt file that is represented as a list of lists.
 
@@ -547,43 +572,43 @@ def extract_data(first_valid_row, last_valid_row, rows, data_types, is_subhourly
 	for i in range(len(rows)):
 		row = rows[i]
 		for d_type in data_types:
-			if not d_type.is_valid(row):
-				end_row_index, next_valid_value = d_type.get_next_valid_value(rows, i)
+			if not d_type._is_valid(row):
+				end_row_index, next_valid_value = d_type._get_next_valid_value(rows, i)
 				if end_row_index is None:
 					end_row_index = len(rows) - 1
-					next_valid_value = str_to_num(last_valid_row[d_type.data_index])
-				d_type.correct_data(rows, i, end_row_index - 1, str_to_num(most_recent_valid_row[d_type.data_index]), next_valid_value)
+					next_valid_value = _str_to_num(last_valid_row[d_type.data_index])
+				d_type._correct_data(rows, i, end_row_index - 1, _str_to_num(most_recent_valid_row[d_type.data_index]), next_valid_value)
 		most_recent_valid_row = row
 		if is_subhourly_data:
-			add_row_to_hourly_avg(row, hourly_avg)
+			_add_row_to_hourly_avg(row, hourly_avg)
 			if (i + 1) % 12 == 0:
 				for j in range(len(row)):
 					try:
 						hourly_avg[j] = hourly_avg[j] / float(12)
 					except:
 						pass
-				processed_data.append(get_processed_row(data_types, hourly_avg))
+				processed_data.append(_get_processed_row(data_types, hourly_avg))
 				hourly_avg = [0] * len(row)
 		else:
-			processed_data.append(get_processed_row(data_types, row))
+			processed_data.append(_get_processed_row(data_types, row))
 	return processed_data
 
 
-def watts_per_meter_sq_to_watts_per_ft_sq(w_m_sq):
+def _watts_per_meter_sq_to_watts_per_ft_sq(w_m_sq):
 	"""Convert a W/m^2 measurements to a W/ft^2 measurement."""
 	if type(w_m_sq) is str or type(w_m_sq) is unicode:
-		w_m_sq = str_to_num(w_m_sq)
+		w_m_sq = _str_to_num(w_m_sq)
 	return (w_m_sq / ((1 / .3048) ** 2))
 
 
-def celsius_to_fahrenheit(c):
+def _celsius_to_fahrenheit(c):
 	"""Convert a celsius measurement to a fahrenheit measurement."""
 	if type(c) is str or type(c) is unicode:
-		c = str_to_num(c)
+		c = _str_to_num(c)
 	return c * 9 / float(5) + 32
 
 
-def merge_hourly_subhourly(hourly, subhourly, insert_idx):
+def _merge_hourly_subhourly(hourly, subhourly, insert_idx):
 	"""
 	Merge the hourly and subhourly USCRN data into a single list of lists and add datetimes and add a header row for GridLAB-D. 
 
@@ -619,12 +644,11 @@ def merge_hourly_subhourly(hourly, subhourly, insert_idx):
 class USCRNDataType(object):
 	"""
 	Each instance of this class represents a particular column of data that we want to parse, validate, and retrieve from the .txt file. The
-	programmer need only create instances of this class, append them to a list, and pass that list to the extract_data() function that is in this
-	module. The programmer shouldn't need to use any of the methods in the class directly. Due to the behavior of get_processed_rows() that is called
-	within extract_data(), the ordering of the USCRNDataTypes inside of the list that is passed to extract_data() will determine the ordering of the CSV
+	programmer need only create instances of this class, append them to a list, and pass that list to the _extract_data() function that is in this
+	module. The programmer shouldn't need to use any of the methods in the class directly. Due to the behavior of _get_processed_rows() that is called
+	within _extract_data(), the ordering of the USCRNDataTypes inside of the list that is passed to _extract_data() will determine the ordering of the CSV
 	columns.
 	"""
-
 
 	def __init__(self, data_index, missing_data_value, flag_index=None, transformation_function=None):
 		"""
@@ -644,29 +668,27 @@ class USCRNDataType(object):
 		"""
 		self.data_index = int(data_index)
 		if type(missing_data_value) is str or type(missing_data_value) is unicode:
-			missing_data_value = str_to_num(missing_data_value)
+			missing_data_value = _str_to_num(missing_data_value)
 		self.missing_data_value = missing_data_value
 		if flag_index is not None:
 			flag_index = int(flag_index)
 		self.flag_index = flag_index
 		self.transformation_function = transformation_function
 
-
-	def is_valid(self, row):
+	def _is_valid(self, row):
 		"""
 		Return True if the row has a valid datum value for this USCRNDataType, otherwise False.
 
 		:param row: a row of data from the USCRN .txt file
 		:rtype: bool
 		"""
-		if str_to_num(row[self.data_index]) == self.missing_data_value:
+		if _str_to_num(row[self.data_index]) == self.missing_data_value:
 			return False
-		if self.flag_index is not None and str_to_num(row[self.flag_index]) != 0:
+		if self.flag_index is not None and _str_to_num(row[self.flag_index]) != 0:
 			return False
 		return True
 
-
-	def get_next_valid_value(self, rows, start_row_idx):
+	def _get_next_valid_value(self, rows, start_row_idx):
 		"""
 		Return the next valid value for this USCRNDataType and the row index at which is was found.
 
@@ -679,18 +701,16 @@ class USCRNDataType(object):
 		"""
 		for i in range(start_row_idx, len(rows)):
 			row = rows[i]
-			if self.is_valid(row):
-				return (i, str_to_num(row[self.data_index]))
+			if self._is_valid(row):
+				return (i, _str_to_num(row[self.data_index]))
 		return (None, None)
 
-
-	def correct_data(self, rows, start_row_idx, end_row_idx, initial_val, final_val):
+	def _correct_data(self, rows, start_row_idx, end_row_idx, initial_val, final_val):
 		"""
 		Parse the rows specified by the starting and ending row indexes, and modify the datum corresponding to this USCRNDataType in each row.
 
 		The datum in each row is modified according to a linear interpolation between the initial_val and final_val. start_row_idx and end_row_idx are
 		both inclusive of modification.
-
 		:param rows: a list of lists that represents the USCRN .txt file
 		:param start_row_idx: the index of the first row to start modifying data
 		:type start_row_idx: int
@@ -702,10 +722,10 @@ class USCRNDataType(object):
 		start_row_idx = int(start_row_idx)
 		end_row_idx = int(end_row_idx)
 		if type(initial_val) is str:
-			initial_val = str_to_num(initial_val)
+			initial_val = _str_to_num(initial_val)
 		if type(final_val) is str:
-			final_val = str_to_num(final_val)
-		precision = get_precision(initial_val)
+			final_val = _str_to_num(final_val)
+		precision = _get_precision(initial_val)
 		increment = (1.0 * final_val - initial_val) / (end_row_idx - start_row_idx + 2)
 		count = 1
 		for i in range(start_row_idx, end_row_idx + 1):
@@ -718,8 +738,7 @@ class USCRNDataType(object):
 				row[self.flag_index] = 0
 			count += 1
 
-
-	def get_value(self, row):
+	def _get_value(self, row):
 		"""
 		Return the datum stored in the USCRN .txt file for this USCRNDataType at the specified row.
 
@@ -728,10 +747,11 @@ class USCRNDataType(object):
 		"""
 		value = row[self.data_index]
 		if type(value) is str or type(value) is unicode:
-			value = str_to_num(value)
+			value = _str_to_num(value)
 		if self.transformation_function is not None:
 			return self.transformation_function(value)
 		return value
+
 
 def tmy3_pull(usafn_number, out_file=None):
 	'''Pull TMY3 data based on usafn. Use nearest_tmy3_station function to get a close by tmy3 station based on latitude/longitude coordinates '''
@@ -889,4 +909,9 @@ def get_radiation_data(radiation_type, site, year, out_file=None):
 
 
 if __name__ == "__main__":
-	_tests()
+	#_tests()
+	utc_date = USCRNDataType(1, -9999.0)
+	utc_time = USCRNDataType(2, -9999.0)
+	temperature = USCRNDataType(8, -9999.0)
+	hourly = [utc_date, utc_time, temperature]
+	_write_USCRN_csv('/Users/austinchang/pycharm/omf/omf/scratch/gridState/current-nc-temps.csv', 2019, 'NC_Durham_11_W', hourly, None)
