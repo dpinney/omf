@@ -107,3 +107,29 @@ Actual behavior: Recloser cannot currently be made to act as a normal line.
 Expected behavior: Recloser can be made to act as a normal line using the 'retry_time' argument, "the time to wait in seconds before trying to close after a fault condition is detected," and setting this to a very high value.
 Workaround/fix: Wait for the next GridLab-D update?
 	Discussion: GridLab-D will supposedly make use of this argument in future versions. Other arguments, involve the recloser trying to reclose after it has already opened (given a fault).
+
+Actual behavior: Many .glm files in the omf do not run correctly when converted directly over from a .omd file. For instance, when Olin Barre Fault is converted over, it gives the following error:
+"WARNING  [INIT] : object name '21003' does not follow strict naming rules and may not link correctly during load time
+ERROR    [INIT] : weather file 'climate.tmy2' access failed
+ERROR    [INIT] : init_by_deferral(): object Climate initialization failed
+ERROR    [INIT] : model initialization failed
+FATAL    [INIT] : shutdown after simulation stopped prematurely
+FATAL    [INIT] : environment startup failed: Invalid argument
+WARNING  [INIT] : last warning message was repeated 775 times"
+
+Olin Barre Geo gives the following error:
+"WARNING  [INIT] : object name '21003' does not follow strict naming rules and may not link correctly during load time
+ERROR    [INIT] : weather file 'climate.tmy2' access failed
+ERROR    [INIT] : init_by_deferral(): object Climate initialization failed
+ERROR    [INIT] : model initialization failed
+FATAL    [INIT] : shutdown after simulation stopped prematurely
+FATAL    [INIT] : environment startup failed: Invalid argument
+WARNING  [INIT] : last warning message was repeated 776 times"
+
+Expected behavior: Our .glm files should be able to run without shutting down prematurely.
+Workaround/fix: For now, I am restricted to using .glm files that work when run, seemingly none of the Olin Barre * files...
+	Discussion: What is causing these files to stop prematurely? It would be preferable if we could use the feeder systems that we have.
+
+Actual behavior: All my models give the error: "AttributeError: '' object has no attribute 'LOCK_NB'"
+Expected behavior: models run as normal
+Workaround/fix: Did something change in the larger omf?

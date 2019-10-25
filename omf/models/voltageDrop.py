@@ -229,8 +229,12 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	if not workDir:
 		workDir = tempfile.mkdtemp()
 		print '@@@@@@', workDir
-	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
-	
+	for i in range(6):
+		gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
+		#HACK: workaround for shoddy macOS gridlabd build.
+		if 'error when setting parent' not in gridlabOut.get('stderr','OOPS'):
+			break
+
 	#Record final status readout of each fuse/recloser/switch/sectionalizer after running
 	try:
 		for key in protDevices.keys():
@@ -465,10 +469,6 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	plt.axis('off')
 	voltChart.gca().set_aspect('equal')
 	plt.tight_layout()
-	# Need to get edge names from pairs of connected node names.
-	edgeNames = []
-	for e in fGraph.edges():
-		edgeNames.append((fGraph.edge[e[0]][e[1]].get('name','BLANK')).replace('"',''))
 	#set axes step equal
 	if neatoLayout:
 		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
@@ -476,12 +476,13 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 		cleanG.add_nodes_from(fGraph)
 		positions = graphviz_layout(cleanG, prog='neato')
 	else:
-		positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
 		remove_nodes = [n for n in fGraph if fGraph.node[n].get('pos', (0, 0)) == (0, 0)]
- 		positions = {k: v for k, v in positions.iteritems() if k not in remove_nodes}
- 		remove_edges = [e for e in fGraph.edges(remove_nodes)]
- 		edgeNames = [e for e in edgeNames if e != remove_edges]
- 		fGraph.remove_nodes_from(remove_nodes)
+		fGraph.remove_nodes_from(remove_nodes)
+		positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
+	# Need to get edge names from pairs of connected node names.
+	edgeNames = []
+	for e in fGraph.edges():
+		edgeNames.append((fGraph.edge[e[0]][e[1]].get('name','BLANK')).replace('"',''))
 	#create custom colormap
 	if customColormap:
 		if scaleMin != None and scaleMax != None:
@@ -524,11 +525,13 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 			print "WARNING: edgeCol property must be 'Current', 'Power', 'Rating', 'PercentOfRating', or None"
 	else:
 		edgeList = [emptyColors.get(n,.6) for n in edgeNames]
-	edgeIm = nx.draw_networkx_edges(fGraph,
+	edgeIm = nx.draw_networkx_edges(
+		fGraph,
 		pos = positions,
 		edge_color = edgeList,
 		width = [linePhases.get(n,1) for n in edgeNames],
-		edge_cmap = custom_cm)
+		edge_cmap = custom_cm
+	)
 	#draw edge labels
 	if edgeLabs != None:
 		if edgeLabs == "Name":

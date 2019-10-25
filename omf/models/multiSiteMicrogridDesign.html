@@ -22,10 +22,16 @@
 	<script type="text/javascript">
 
 		function checkboxDisplayInput(checkboxName) {
+			
 			if ( $('#' + checkboxName ).prop('checked') == true ){
 				$('.' + checkboxName + 'DisplayInput').show();
 			} else { $('.' + checkboxName + 'DisplayInput').hide() }
-		
+			
+			if (allOutputData != null) {
+				checkboxDisplay(checkboxName);
+			}
+
+			
 		}
 
 		function checkboxDisplay(checkboxName) {
@@ -223,12 +229,18 @@
 		}
 
 		$(window).on('pageshow',function(){
-		    
+
 		    // use input data to set checkboxes unless output data exists
 		    // sometimes there will be no wind output even tho wind was selected in the input
 		    // so allways use output data for most relevant info
 		    dict = allInputData;
 		    if (allOutputData != null) { dict = allOutputData; }
+
+
+		    console.log(dict)
+
+
+
 		    // set checkboxes appropriately
 			if (dict['solar'] == 'off') { $('#solar').prop('checked',false); } 
 			else { $('#solar').prop('checked',true); }

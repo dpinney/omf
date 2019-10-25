@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>GeoJSON Map</title>
+<head>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" integrity="sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ=="
+		crossorigin="" />
+	<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js" integrity="sha512-A7vV8IFfih/D732iSSKi20u/ooOfj/AGehOKq0f4vLT1Zr2Y+RX7C+w8A1gaSasGtRUZpF/NZgzSAu4/Gc41Lg=="
+		crossorigin=""></script>
+		<link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.css" />
+		<script src="https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.js"></script>
+</head>
+	<style>html, body {
+		width: 100%;
+		height: 100%;
+		margin: 0;
+		padding: 0;}
+	</style>
+	<style>#map{
+		position: relative;
+		width: 100.0%;
+		height: 100.0%;
+		left: 0.0%;
+		top: 0.0%;
+		}
+	</style>
+</head>
+<body>
+	<div id="map"></div>
+	<script type="text/javascript">
+	var map = L.map('map');
+	mapLink = 'Mapbox';
+	L.tileLayer(
+		'https://{s}.tiles.mapbox.com/v4/mapbox.landsat-live/{z}/{x}/{y}.jpg?access_token=pk.eyJ1IjoiZWp0YWxib3QiLCJhIjoiY2ptMHBlOGdjMmZlaTNwb2dwMHE2Mm54NCJ9.xzceVNmAZy49SyFDb3UMaw', {
+		attribution: 'landsat-live',
+		maxZoom: 18,
+		}).addTo(map);
+	L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
+	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+	maxZoom: 18
+	}).addTo(map);
+	map.setView([-34.9, 150.644], 10);
+	L.control.scale().addTo(map);
+	//base 
+    var baseUrl = 'https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png';
+    var baseAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+    var base = L.tileLayer(baseUrl, { maxZoom: 18, attribution: baseAttrib });
+    var drawnItems = L.featureGroup().addTo(map);
+
+    //satelite
+    var landsatUrl = 'https://{s}.tiles.mapbox.com/v4/mapbox.landsat-live/{z}/{x}/{y}.jpg?access_token=pk.eyJ1IjoiZWp0YWxib3QiLCJhIjoiY2ptMHBlOGdjMmZlaTNwb2dwMHE2Mm54NCJ9.xzceVNmAZy49SyFDb3UMaw';
+    var landsatAttrib = 'landsat-live';
+    var landsat = L.tileLayer(landsatUrl, { maxZoom: 18, attribution: landsatAttrib });
+
+    //Options to toggle between maps added to layers
+    L.control.layers({
+        'base': base.addTo(map),
+        'landsat': landsat.addTo(map), 
+    }, { 'drawlayer': drawnItems }, { position: 'topleft', collapsed: false }).addTo(map);
+    map.addControl(new L.Control.Draw({
+        edit: {
+            featureGroup: drawnItems,
+            poly: {
+                allowIntersection: false
+            }
+        },
+        draw: {
+            polygon: {
+                allowIntersection: false,
+                showArea: true
+            }
+        }
+    }));
+
+    map.on(L.Draw.Event.CREATED, function (event) {
+        var layer = event.layer;
+
+        drawnItems.addLayer(layer);
+    });
+</script>
+</body>
+</html>

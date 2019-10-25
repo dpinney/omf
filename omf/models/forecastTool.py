@@ -7,6 +7,10 @@ import pandas as pd
 from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
 from omf import forecast as lf
+try:
+	import tensorflow as tf
+except:
+	pass
 import numpy as np
 from scipy.stats import norm
 import re
@@ -38,7 +42,8 @@ def work(modelDir, ind):
 	 	with open(pJoin(modelDir, 'hist.csv'), 'w') as f:
 	 		f.write(ind['histCurve'].replace('\r', ''))
 		df = pd.read_csv(pJoin(modelDir, 'hist.csv'))
-		assert df.shape[0] >= 26280 # must be longer than 3 years
+		assert df.shape[0] >= 26280, 'At least 3 years of data is required'
+
 	 	if 'dates' not in df.columns:
 		 	df['dates'] = df.apply(
 				lambda x: dt(
@@ -58,14 +63,27 @@ def work(modelDir, ind):
 		raise Exception(ind['tempCurve'])
 
 	# ---------------------- MAKE PREDICTIONS ------------------------------- #
+
+	d = dict(df.groupby(df.dates.dt.date)['dates'].count())
+	df = df[df['dates'].dt.date.apply(lambda x: d[x] == 24)] # find all non-24
+	df = df.sort_values('dates')
+
 	df, tomorrow = lf.add_day(df, weather[:24])
 	all_X = lf.makeUsefulDf(df)
 	all_y = df['load']
 
+	if ind['newModel'] == 'False':
+		for day in ['one_day_model', 'two_day_model', 'three_day_model']:
+			with open(pJoin(modelDir, ind[day+'_filename']), 'wb') as f:
+					f.write(ind[day].decode('base64'))
+
 	#load prediction
-	tomorrow_load, model, tomorrow_accuracy = lf.neural_net_next_day(all_X, all_y, epochs=epochs, save_file=pJoin(modelDir, 'neural_net_1day.h5'))
-	# tomorrow_load = [13044.3369140625, 12692.4453125, 11894.0712890625, 13391.0185546875, 13378.373046875, 14098.5048828125, 14984.5, 15746.6845703125, 14677.6064453125, 14869.6953125, 14324.302734375, 13727.908203125, 13537.51171875, 12671.90234375, 13390.9970703125, 12111.166015625, 13539.05078125, 15298.7939453125, 14620.8369140625, 15381.9404296875, 15116.42578125, 13652.3974609375, 13599.5986328125, 12882.5185546875]
-	# tomorrow_accuracy = {'test': 4, 'train': 3}
+	tomorrow_load, model, tomorrow_accuracy = lf.neural_net_next_day(
+		all_X, all_y, 
+		epochs=epochs, save_file=pJoin(modelDir, 'one_day_model.h5'),
+		model=(None if ind['newModel'] == 'True' else tf.keras.models.load_model(pJoin(modelDir, ind['one_day_model_filename'])))
+	)
+
 	o['tomorrow_load'] = tomorrow_load
 	o['month_start'] = dt(tomorrow.year, tomorrow.month, 1).strftime("%A, %B %-d, %Y")
 	o['forecast_start'] = tomorrow.strftime("%A, %B %-d, %Y")
@@ -75,7 +93,12 @@ def work(modelDir, ind):
 	if second_day.month == tomorrow.month:
 		all_X = lf.makeUsefulDf(df, hours_prior=48, noise=5)
 		all_y = df['load']
-		two_day_predicted_load, two_day_model, two_day_load_accuracy = lf.neural_net_next_day(all_X, all_y, epochs=epochs, hours_prior=48, save_file=pJoin(modelDir, 'neural_net_2day.h5'))
+		two_day_predicted_load, two_day_model, two_day_load_accuracy = lf.neural_net_next_day(
+			all_X, all_y, 
+			epochs=epochs, hours_prior=48, 
+			save_file=pJoin(modelDir, 'two_day_model.h5'),
+			model=(None if ind['newModel'] == 'True' else tf.keras.models.load_model(pJoin(modelDir, ind['two_day_model_filename'])))
+		)
 		two_day_peak = max(two_day_predicted_load)
 
 		# third day
@@ -83,7 +106,12 @@ def work(modelDir, ind):
 		if third_day.month == tomorrow.month:
 			all_X = lf.makeUsefulDf(df, hours_prior=72, noise=15)
 			all_y = df['load']
-			three_day_predicted_load, three_day_model, three_day_load_accuracy = lf.neural_net_next_day(all_X, all_y, epochs=epochs, hours_prior=72, save_file=pJoin(modelDir, 'neural_net_3day.h5'))
+			three_day_predicted_load, three_day_model, three_day_load_accuracy = lf.neural_net_next_day(
+				all_X, all_y, 
+				epochs=epochs, hours_prior=72, 
+				save_file=pJoin(modelDir, 'three_day_model.h5'),
+				model=(None if ind['newModel'] == 'True' else tf.keras.models.load_model(pJoin(modelDir, ind['three_day_model_filename'])))
+			)
 			three_day_peak = max(three_day_predicted_load)
 		else:
 			three_day_peak = 0
@@ -97,16 +125,18 @@ def work(modelDir, ind):
 
 	tomorrow_peak = max(tomorrow_load)
 	m = df[(df['month'] == tomorrow.month) & (df['year'] != tomorrow.year) ]
-	o['quantile'] = round(m[m['load'] < tomorrow_peak].shape[0]/float(m.shape[0])*100, 2)
-	o['predicted_peak'] = [m['load'].median(), highest_peak_this_month(df, tomorrow), tomorrow_peak, two_day_peak, three_day_peak]
+	hourly = m
+	m = m.groupby(m.dates.dt.date)['load'].max()
+	o['quantile'] = round(m[m < tomorrow_peak].shape[0]/float(m.shape[0])*100, 2)
+	o['predicted_peak'] = [m.median(), highest_peak_this_month(df, tomorrow), tomorrow_peak, two_day_peak, three_day_peak]
 	o['predicted_peak_limits'] = [
-		[m['load'].min(), m['load'].max()],
+		[m.min(), m.max()],
 		[0, 0],
 		[tomorrow_peak*(1 + tomorrow_accuracy['test']*.01), tomorrow_peak*(1 - tomorrow_accuracy['test']*.01)],
 		[two_day_peak*(1 + two_day_load_accuracy['test']*.01), two_day_peak*(1 - two_day_load_accuracy['test']*.01)],
 		[three_day_peak*(1 + three_day_load_accuracy['test']*.01), three_day_peak*(1 - three_day_load_accuracy['test']*.01)]
 	]
-
+	m = hourly
 	previous_months = [{
 		'year': y,
 		'load': m[m['year'] == y]['load'].tolist()
@@ -162,12 +192,21 @@ def new(modelDir):
 		'created': '2015-06-12 17:20:39.308239',
 		'modelType': modelName,
 		'runTime': '0:01:03',
-		'epochs': '1',
+		'epochs': '10',
 		'autoFill': "off",
 		'histFileName': 'd_Texas_17yr_TempAndLoad.csv',
 		"histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","d_Texas_17yr_TempAndLoad_Dec.csv"), 'rU').read(),
 		'tempFileName': '72hr_TexasTemp.csv',
-		'tempCurve': open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","72hr_TexasTemp.csv"), 'rU').read()
+		'tempCurve': open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","72hr_TexasTemp.csv"), 'rU').read(),
+		
+		# upload models
+		'newModel': 'False',
+		'one_day_model': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','one_day_model.h5')).read().encode("base64"),
+		'one_day_model_filename': 'one_day_model.h5',
+		'two_day_model': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','two_day_model.h5')).read().encode("base64"),
+		'two_day_model_filename': 'two_day_model.h5',
+		'three_day_model': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','three_day_model.h5')).read().encode("base64"),
+		'three_day_model_filename': 'three_day_model.h5',
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 

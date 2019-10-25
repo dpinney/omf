@@ -14,7 +14,7 @@ except:
 	def flock(fd, op):
 		return
 	fcntl.flock = flock
-	(fcntl.LOCK_EX, fcntl.LOCK_SH, fcntl.LOCK_UN) = (None, None, None)
+	(fcntl.LOCK_EX, fcntl.LOCK_SH, fcntl.LOCK_UN, fcntl.LOCK_NB) = (0, 0, 0, 0)
 import models, feeder, network, milToGridlab, cymeToGridlab, signal, weather, anonymization
 import omf
 from omf.calibrate import omfCalibrate
@@ -1595,12 +1595,16 @@ def checkAnonymizeTran(owner, modelName):
 @read_permission_function
 def displayOmdMap(owner, modelName, feederNum):
 	'''Function to render omd on a leaflet map using a new template '''
-	feederDict = get_model_metadata(owner, modelName)
-	feederName = feederDict.get('feederName' + str(feederNum))
-	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
-	feederFile = os.path.join(modelDir, feederName + ".omd")
-	geojson = omf.geo.omdGeoJson(feederFile)
-	return render_template('geoJsonMap.html', geojson=geojson)
+	#handle geoJsonFeatures.js load so it doesn't throw 500 error - this line is there to load geojson variable when not rendering with flask
+	if feederNum == 'geoJsonFeatures.js':
+		return ""
+	else:
+		feederDict = get_model_metadata(owner, modelName)
+		feederName = feederDict.get('feederName' + str(feederNum))
+		modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
+		feederFile = os.path.join(modelDir, feederName + ".omd")
+		geojson = omf.geo.omdGeoJson(feederFile)
+		return render_template('geoJsonMap.html', geojson=geojson)
 
 
 @app.route('/commsMap/<owner>/<modelName>/<feederNum>', methods=["GET"])
@@ -1608,13 +1612,17 @@ def displayOmdMap(owner, modelName, feederNum):
 @read_permission_function
 def commsMap(owner, modelName, feederNum):
 	'''Function to render omc on a leaflet map using a new template '''
-	feederDict = get_model_metadata(owner, modelName)
-	feederName = feederDict.get('feederName' + str(feederNum))
-	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
-	feederFile = os.path.join(modelDir, feederName + ".omc")
-	with locked_open(feederFile) as commsGeoJson:
-		geojson = json.load(commsGeoJson)
-	return render_template('commsNetViz.html', geojson=geojson, owner=owner, modelName=modelName, feederNum=feederNum, feederName=feederName)
+	#handle commsGeoJson.js load so it doesn't throw 500 error - this line is there to load geojson variable when not rendering with flask
+	if feederNum == 'commsGeoJson.js':
+		return ""
+	else:
+		feederDict = get_model_metadata(owner, modelName)
+		feederName = feederDict.get('feederName' + str(feederNum))
+		modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
+		feederFile = os.path.join(modelDir, feederName + ".omc")
+		with locked_open(feederFile) as commsGeoJson:
+			geojson = json.load(commsGeoJson)
+		return render_template('commsNetViz.html', geojson=geojson, owner=owner, modelName=modelName, feederNum=feederNum, feederName=feederName)
 
 
 @app.route('/redisplayGrid', methods=["POST"])

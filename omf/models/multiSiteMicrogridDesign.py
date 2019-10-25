@@ -33,6 +33,10 @@ def work(modelDir, inputDict):
 	else: 
 		battery = 'on'
 
+	outData['solar'] = solar
+	outData['wind'] = wind
+	outData['battery'] = battery
+
 	# Setting up the loadShape file.
 	with open(pJoin(modelDir,"loadShape.csv"),"w") as loadShapeFile:
 		loadShapeFile.write(inputDict['loadShape'])
@@ -197,8 +201,6 @@ def work(modelDir, inputDict):
 			outData['powerWind' + indexString] = resultsSubset['Wind']['year_one_power_production_series_kw']
 			outData['powerWindToBattery' + indexString] = resultsSubset['Wind']['year_one_to_battery_series_kw']
 			outData['powerWindToLoad' + indexString] = resultsSubset['Wind']['year_one_to_load_series_kw']
-			if outData['powerWindToLoad' + indexString] is None:
-				wind = 'off'
 		else:
 			outData['sizeWind' + indexString] = 0
 		
@@ -210,10 +212,6 @@ def work(modelDir, inputDict):
 		outData['survivalProbY' + indexString] = resultsResilience['probs_of_surviving']
 		outData['runID' + indexString] = runID
 		outData['apiKey' + indexString] = 'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9'
-
-		outData['solar' + indexString] = solar
-		outData['wind' + indexString] = wind
-		outData['battery' + indexString] = battery
 
 		#Set plotly layout ---------------------------------------------------------------
 		plotlyLayout = go.Layout(
@@ -234,7 +232,8 @@ def work(modelDir, inputDict):
 			line=dict( color=('red') ),
 			name="Load met by Grid",
 			showlegend=True,
-			stackgroup='one')
+			stackgroup='one',
+			mode='none')
 		plotData.append(powerGridToLoad)
 
 		if solar == 'on':
@@ -243,7 +242,8 @@ def work(modelDir, inputDict):
 				y=outData['powerPVToLoad' + indexString],
 				line=dict( color=('green') ),
 				name="Load met by Solar",
-				stackgroup='one')
+				stackgroup='one',
+				mode='none')
 			plotData.append(powerPVToLoad)
 
 		if battery == 'on':
@@ -252,7 +252,8 @@ def work(modelDir, inputDict):
 				y=outData['powerBatteryToLoad' + indexString],
 				line=dict( color=('blue') ),
 				name="Load met by Battery",
-				stackgroup='one')
+				stackgroup='one',
+				mode='none')
 			plotData.append(powerBatteryToLoad)
 
 		if wind == 'on':
@@ -261,7 +262,8 @@ def work(modelDir, inputDict):
 				y=outData['powerWindToLoad' + indexString],
 				line=dict( color=('yellow') ),
 				name="Load met by Wind",
-				stackgroup='one')
+				stackgroup='one',
+				mode='none')
 			plotData.append(powerWindToLoad)
 
 		plotlyLayout['yaxis'].update(title='Power (kW)')
@@ -277,7 +279,8 @@ def work(modelDir, inputDict):
 				y=outData['powerPVToLoad' + indexString],
 				line=dict( color=('green') ),
 				name="Solar used to meet Load",
-				stackgroup='one')
+				stackgroup='one',
+				mode='none')
 			plotData.append(powerPVToLoad)
 
 			if battery == 'on':
@@ -286,15 +289,16 @@ def work(modelDir, inputDict):
 					y=outData['powerPVToBattery' + indexString],
 					line=dict( color=('yellow') ),
 					name="Solar used to charge Battery",
-					stackgroup='one')
+					stackgroup='one',
+					mode='none')
 				plotData.append(powerPVToBattery)
 
-			powerPV = go.Scatter(
-				x=x,
-				y=outData['powerPV' + indexString],
-				line=dict( color=('red') ),
-				name="Solar Generation")
-			plotData.append(powerPV)
+			# powerPV = go.Scatter(
+			# 	x=x,
+			# 	y=outData['powerPV' + indexString],
+			# 	line=dict( color=('red') ),
+			# 	name="Solar Generation")
+			# plotData.append(powerPV)
 
 		outData["solarData" + indexString] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 
@@ -307,7 +311,8 @@ def work(modelDir, inputDict):
 				y=outData['powerWindToLoad' + indexString],
 				line=dict( color=('green') ),
 				name="Wind used to meet Load",
-				stackgroup='one')
+				stackgroup='one',
+				mode='none')
 			plotData.append(powerWindToLoad)
 
 			if battery == 'on':
@@ -316,15 +321,16 @@ def work(modelDir, inputDict):
 					y=outData['powerWindToBattery' + indexString],
 					line=dict( color=('yellow') ),
 					name="Wind used to charge Battery",
-					stackgroup='one')
+					stackgroup='one',
+					mode='none')
 				plotData.append(powerWindToBattery)
 
-			powerWind = go.Scatter(
-				x=x,
-				y=outData['powerWind' + indexString],
-				line=dict( color=('red') ),
-				name="Wind Generation")
-			plotData.append(powerWind)
+			# powerWind = go.Scatter(
+			# 	x=x,
+			# 	y=outData['powerWind' + indexString],
+			# 	line=dict( color=('red') ),
+			# 	name="Wind Generation")
+			# plotData.append(powerWind)
 
 		outData["windData"  + indexString] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 
@@ -336,7 +342,8 @@ def work(modelDir, inputDict):
 				y=outData['powerGridToBattery' + indexString],
 				line=dict( color=('red') ),
 				name="Grid",
-				stackgroup='one')
+				stackgroup='one',
+				mode='none')
 			plotData.append(powerGridToBattery)
 
 			if solar == 'on':
@@ -345,7 +352,8 @@ def work(modelDir, inputDict):
 					y=outData['powerPVToBattery' + indexString],
 					line=dict( color=('green') ),
 					name="Solar",
-					stackgroup='one')
+					stackgroup='one',
+					mode='none')
 				plotData.append(powerPVToBattery)
 
 			if wind == 'on':
@@ -354,7 +362,8 @@ def work(modelDir, inputDict):
 					y=outData['powerWindToBattery' + indexString],
 					line=dict( color=('yellow') ),
 					name="Wind",
-					stackgroup='one')
+					stackgroup='one',
+					mode='none')
 				plotData.append(powerWindToBattery)
 
 		outData["batteryData" + indexString] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)

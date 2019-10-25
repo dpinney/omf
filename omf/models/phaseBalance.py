@@ -10,6 +10,9 @@ import math
 # OMF imports 
 from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
+# OMF imports 
+import omf.feeder as feeder
+from omf.solvers import gridlabd
 from omf.models.voltageDrop import drawPlot as voltagePlot
 import omf.feeder as feeder
 from omf.solvers import gridlabd
@@ -30,12 +33,12 @@ def get_loss_items(tree):
 def motor_efficiency(x):
 	return 100 - (.0179 + .402*x + .134*x**2) # curve fit from data from NREL analysis
 
-def n(num):
-	return "{:,.2f}".format(num)
-
 def pf(real, var):
 	real, var = floats(real), floats(var)
 	return float(real) / math.sqrt(real**2 + var**2)
+
+def n(num):
+	return "{:,.2f}".format(num)
 
 def floats(f):
 	return float(f.replace(',', ''))
@@ -82,27 +85,6 @@ def work(modelDir, ind):
 	with open(pJoin(modelDir,"output" + base_suffix + ".png"),"rb") as f:
 		o["base_image"] = f.read().encode("base64")
 	os.rename(pJoin(modelDir, "voltDump.csv"), pJoin(modelDir, "voltDump_base.csv"))
-
-	# ---------------------------- SOLAR CHART ----------------------------- #
-	# with open(pJoin(modelDir, [x for x in os.listdir(modelDir) if x.endswith('.omd')][0])) as f:
-	# 	tree_solar = json.load(f)['tree']
-
-	# solar_suffix = "_solar"
-	# tree_solar = _addCollectors(tree_solar, suffix=solar_suffix, pvConnection=ind['pvConnection'])
-	# with open(modelDir + '/_solar.glm', 'w') as f:
-	# 	treeString = feeder.sortedWrite(tree_solar)
-	# 	f.write(treeString)
-	
-	# voltagePlot(
-	# 	pJoin(modelDir, "_solar.glm"), workDir=modelDir, neatoLayout=neato, 
-	# 	edgeCol=edgeColValue, nodeCol=nodeColValue, nodeLabs=nodeLabsValue, 
-	# 	edgeLabs=edgeLabsValue, customColormap=customColormapValue, rezSqIn=int(ind["rezSqIn"]), 
-	# 		colorMin=float(ind['colorMin']) if ind['colorMin'] != 'auto' else None,
-	# 		colorMax=float(ind['colorMax']) if ind['colorMax'] != 'auto' else None
-	# ).savefig(pJoin(modelDir,"output" + solar_suffix + ".png"))
-	# with open(pJoin(modelDir,"output" + solar_suffix + ".png"),"rb") as f:
-	# 	o["solar_image"] = f.read().encode("base64")
-	# os.rename(pJoin(modelDir, "voltDump.csv"), pJoin(modelDir, "voltDump_solar.csv"))
 	
 	# ---------------------------- CONTROLLED CHART ----------------------------- #
 	
@@ -143,7 +125,7 @@ def work(modelDir, ind):
 		o["controlled_image"] = f.read().encode("base64")
 	os.rename(pJoin(modelDir, "voltDump.csv"), pJoin(modelDir, "voltDump_controlled.csv"))
 	
-	# ------ SOLAR TAKE 2
+	# ---------------------------- SOLAR CHART ----------------------------- #
 
 	if ind["pvConnection"] == 'Delta':
 		glmPath = pJoin(modelDir, 'input_NewDeltaPV_Start.glm')
@@ -278,7 +260,7 @@ def work(modelDir, ind):
 		df_v = pd.DataFrame()
 		for phase in ['A', 'B', 'C']:
 			df_phase = _readCSV(pJoin(modelDir, 'threephase_VA_'+ phase + suffix + '.csv'))
-			df_phase.columns = [phase + '_' + c for c in df_phase.columns]
+			df_phase.columns = [phase + '_' + str(c) for c in df_phase.columns]
 			if df_v.shape[0] == 0:
 				df_v = df_phase
 			else:
@@ -349,6 +331,7 @@ def work(modelDir, ind):
 		o['inverter_header'] = "<tr><th>Name</th><th>AB (VA)</th><th>BC (VA)</th><th>AC (VA)</th><th>AB (VA)</th><th>BC (VA)</th><th>AC (VA)</th></tr>"
 	else:
 		o['inverter_header'] = "<tr><th>Name</th><th>A (VA)</th><th>B (VA)</th><th>C (VA)</th><th>A (VA)</th><th>B (VA)</th><th>C (VA)</th></tr>"
+		
 	return o
 
 def _addCollectors(tree, suffix=None, pvConnection=None):
@@ -373,19 +356,26 @@ def _addCollectors(tree, suffix=None, pvConnection=None):
 	for loss in loss_items:
 		tree[len(tree)] = {'property': all_losses, 'object': 'collector', 'group': 'class='+loss, 'limit': '0', 'file': 'Zlosses_'+loss + suffix +'.csv'}
 
+	solar_A, solar_B, solar_C = False, False, False
 	if suffix not in ['_controlled', '_solar'] or pvConnection == 'Wye':
 		for x in tree.values():
 			if x.get('object', '') == 'inverter':
 				if 'A' in x['phases']:
 					x['groupid'] = 'PVA'
+					solar_A = True
 				elif 'B' in x['phases']:
 					x['groupid'] = 'PVB'
+					solar_B = True
 				elif 'C' in x['phases']:
 					x['groupid'] = 'PVC'
+					solar_C = True
 
-		tree[len(tree)] = {'property':'VA_Out', 'object':'group_recorder', 'group':'class=inverter AND groupid=PVA', 'limit':'1', 'file':'all_inverters_VA_Out_AC_A' + suffix + '.csv'}
-		tree[len(tree)] = {'property':'VA_Out', 'object':'group_recorder', 'group':'class=inverter AND groupid=PVB', 'limit':'1', 'file':'all_inverters_VA_Out_AC_B' + suffix + '.csv'}
-		tree[len(tree)] = {'property':'VA_Out', 'object':'group_recorder', 'group':'class=inverter AND groupid=PVC', 'limit':'1', 'file':'all_inverters_VA_Out_AC_C' + suffix + '.csv'}
+		if solar_A:
+			tree[len(tree)] = {'property':'VA_Out', 'object':'group_recorder', 'group':'class=inverter AND groupid=PVA', 'limit':'1', 'file':'all_inverters_VA_Out_AC_A' + suffix + '.csv'}
+		if solar_B: 
+			tree[len(tree)] = {'property':'VA_Out', 'object':'group_recorder', 'group':'class=inverter AND groupid=PVB', 'limit':'1', 'file':'all_inverters_VA_Out_AC_B' + suffix + '.csv'}
+		if solar_C:
+			tree[len(tree)] = {'property':'VA_Out', 'object':'group_recorder', 'group':'class=inverter AND groupid=PVC', 'limit':'1', 'file':'all_inverters_VA_Out_AC_C' + suffix + '.csv'}
 		
 	else:
 		tree[len(tree)] = {'property':'constant_power_A', 'object':'group_recorder', 'group':'class=load AND groupid=PV', 'limit':'1', 'file':'all_inverters_VA_Out_AC_A' + suffix + '.csv'}
@@ -454,17 +444,33 @@ def _totals(filename, component=None):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"feederName1": "phase_balance_test",
-		"criticalNode": 'R1-12-47-1_node_17',
-		# "feederName1": "phase_balance_test_2",
-		# "criticalNode": 'R1-12-47-2_node_28',
-		# "feederName1": 'bavarian',
-		# "criticalNode": "node61362179654T61363120638_C", #node1730149060
-		# "feederName1": 'turkey',
-		# "criticalNode": "TURKEY FORD", #node1730149060
+		# "feederName1": "phase_balance_test",
+		# "criticalNode": 'R1-12-47-1_node_17',
+		# "pvConnection": 'Wye',
+		# "layoutAlgorithm": "geospatial",
+		# ---------------------------------------- #
+		"feederName1": "phase_balance_test_2",
+		"criticalNode": 'R1-12-47-2_node_28',
+		"pvConnection": 'Delta',
+		"layoutAlgorithm": "forceDirected",
+		# ---------------------------------------- #
+		# "feederName1": 'bavarian_solar',
+		# "criticalNode": "node2283458290",
+		# "pvConnection": 'Delta',
+		# "layoutAlgorithm": "geospatial",
+		# ---------------------------------------- #
+		# "feederName1": 'turkey_solar',
+		# "criticalNode": "nodeOH5041-S1689OH15730",
+		# "pvConnection": 'Delta',
+		# "layoutAlgorithm": "geospatial",
+		# ---------------------------------------- #
+		# "feederName1": 'swaec',
+		# "criticalNode": "nodespan_192258span_177328",
+		# "pvConnection": 'Wye',
+		# "layoutAlgorithm": "geospatial",
+		# ---------------------------------------- #
 		"modelType": modelName,
 		"runTime": "",
-		"layoutAlgorithm": "geospatial", #forceDirected
 		"zipCode": "64735",
 		"retailCost": "0.05",
 		"productionCost": "0.03",
@@ -503,62 +509,3 @@ def _debugging():
 
 if __name__ == '__main__':
 	_debugging()
-
-# sourceFileName = pJoin(modelDir, '_controlled.glm')
-# copyfile(pJoin(__neoMetaModel__._omfDir, "static", "testFiles", 'R1-12.47-1-AddSolar-Wye.glm'), sourceFileName)
-# glmPath = pJoin(modelDir, '_controlled.glm') 
-# omdPath = pJoin(modelDir, 'phase_balance_test.omd')
-# feeder.glmToOmd(glmPath, omdPath)
-
-# sourceFileName = pJoin(modelDir, '_controlled.glm')
-# copyfile(pJoin(__neoMetaModel__._omfDir, "static", "testFiles", 'phase_balance_test_2.glm'), sourceFileName)
-# glmPath = pJoin(modelDir, '_controlled.glm') 
-# omdPath = pJoin(modelDir, 'phase_balance_test_2.omd')
-# feeder.glmToOmd(glmPath, omdPath)
-
-# Copy spcific climate data into model directory (I think this is unnecessary?)
-# ind["climateName"] = zipCodeToClimateName(ind["zipCode"])
-# shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", ind["climateName"] + ".tmy2"), 
-# 	pJoin(modelDir, "climate.tmy2"))
-
-# def _readCollectorCSV(filename):
-# 	dataDictionary = {}
-# 	with open(filename, 'r') as csvFile:
-# 		reader = csv.reader(csvFile)
-# 		for row in reader:
-# 			if '# property.. timestamp' in row:
-# 				key_row = row
-# 				value_row = reader.next()
-# 				for pos, key in enumerate(key_row):
-# 					if key == '# property.. timestamp':
-# 						continue
-# 					dataDictionary[key] = value_row[pos]
-# 	return dataDictionary
-
-	# # Three phase motor loads.
-	# tree[len(tree)] = {
-	# 	'property': all_power,
-	# 	'object': 'collector',
-	# 	'group': 'class=load AND groupid=threePhase', 
-	# 	'limit': '0', 
-	# 	'file': 'threephaseload.csv'
-	# } #TODO: delete me
-
-# chart = voltPlot(omd, workDir=modelDir, neatoLayout=neato)
-
-# def _readGroupRecorderCSV( filename ):
-# 	dataDictionary = {}
-# 	with open(filename,'r') as csvFile:
-# 		reader = csv.reader(csvFile)
-# 		# loop past the header, 
-# 		[keys,vals] = [[],[]]
-# 		for row in reader:
-# 			if '# timestamp' in row:
-# 				keys = row
-# 				i = keys.index('# timestamp')
-# 				keys.pop(i)
-# 				vals = reader.next()
-# 				vals.pop(i)
-# 		for pos,key in enumerate(keys):
-# 			dataDictionary[key] = vals[pos]
-# 	return dataDictionary
