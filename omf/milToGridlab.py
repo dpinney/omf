@@ -1793,10 +1793,30 @@ def _writeResultsCsv(testOutput, outName):
 		w.writeheader()
 		w.writerows(testOutput)
 
-
 def voltDistribution(pathToGlm, pathToVoltdumpCsv):
-	pass
+	node_name, pu_voltage = [], []
+	with open(pathToVoltdumpCsv, 'r') as f:
+		w = csv.reader(f)
+		for i in range(2):
+			next(w)
+		for row in w:
+			if len(row) != 7:
+				continue
 
+			pu, cnt = 0, 0
+
+			for i in range(3):
+				real = float(row[i*2+1])
+				imag = float(row[i*2+2])
+				tmp = abs(complex(real, imag))
+				if tmp:
+					cnt += 1
+				pu += tmp
+
+			if cnt:
+				node_name.append(row[0])
+				pu_voltage.append(pu/cnt)
+	return node_name, pu_voltage
 
 def _tests(
 	keepFiles=True,
