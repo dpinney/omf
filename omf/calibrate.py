@@ -252,7 +252,7 @@ def attachVolts(workDir, feederPath, voltVectorA, voltVectorB, voltVectorC, simS
 		tree[voltplayerKeyC] = voltageObC
 		# Adjust time and run output.
 		feeder.adjustTime(tree, simLength, simLengthUnits, firstDateTime.strftime("%Y-%m-%d %H:%M:%S"))
-		output = gridlabd.runInFilesystem(tree, keepFiles=True, workDir=pJoin(workDir,"gridlabD"))
+		output = gridlabd.runInFilesystem(tree, attachments=feederJson.get('attachments', {}), keepFiles=True, workDir=pJoin(workDir,"gridlabD"))
 		# Write the output.
 		with open(pJoin(workDir,"calibratedFeeder.omd"),"w") as outJson:
 			playerStringA = open(pJoin(pJoin(workDir,"gridlabD"),"phaseAVoltage.player")).read()
