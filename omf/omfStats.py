@@ -97,7 +97,11 @@ def modelDatabaseStats(dataFilePath, outFilePath):
 	ax = plt.gca()
 	ax.set_xlim(-0.2, len(yearUsers.values()))
 	ax = plt.gca()
-	ax.set_title('New Users on omf.coop by Year \nGenerated: ' + datetime.now().strftime('%Y-%m-%d'))
+	nowString = datetime.now().strftime('%Y-%m-%d')
+	lowerUsers = [x.lower() for x in list(users)]
+	orgPairs = [x.split('@') for x in lowerUsers]
+	orgs = set([x[-1] for x in orgPairs if len(x)>1])
+	ax.set_title('New Users on omf.coop by Year. Total: {}, Orgs:{}\nGenerated: {}'.format(len(users), len(orgs), nowString))
 	plt.xticks([x + 0.4 for x in xRanges2], yearUsers.keys())
 	plt.subplots_adjust(bottom=0.2)
 	# Plot the model counts.
@@ -131,6 +135,7 @@ def trafficLogStats(logsPath, outFilePath):
 	IPCount = collections.Counter()
 	userCount = collections.Counter()
 	users = set()  # Create set of users to prevent duplications.
+	locs = []
 	# Process the log file to generate hit and session counts.
 	# Filter out lines containing these strings.
 	for line in lines:
@@ -140,6 +145,8 @@ def trafficLogStats(logsPath, outFilePath):
 			ip = geolite2.lookup(words[0])
 		except:
 			ip = None
+		if ip is not None and ip.location is not None:
+			locs.append(ip.location)
 		if ip is not None and ip.country is not None:
 			if ip.country == 'XK':
 				IPCount["Kosovo"] += 1
@@ -162,9 +169,9 @@ def trafficLogStats(logsPath, outFilePath):
 		try:
 			dtStr = words[3][1:].replace(':', ' ', 1)
 			dt = parseDt(dtStr)
-			accessDt = str(dt.year) + '-' + str(dt.month).zfill(2)
+			accessDt = str(dt.year)[-2:] + '-' + str(dt.month).zfill(2)
 		except:
-			accessDt = '2019-01'
+			accessDt = '19-01'
 		# Is this is a unique viewer?
 		ipStr = words[0]
 		if ipStr not in users:
@@ -174,6 +181,9 @@ def trafficLogStats(logsPath, outFilePath):
 		# No matter what, we update the monthly count.
 		monthCount[accessDt] += 1
 		userCount[ipStr] += 1
+	# Output any lat/lons we found
+	with open('./scratch/ipLocDatabase.txt','w') as iplFile:
+		iplFile.writelines(locs)
 	# Set up plotting:
 	plt.figure(figsize=(15, 15))
 	ggColors = [x['color'] for x in plt.rcParams['axes.prop_cycle']]
