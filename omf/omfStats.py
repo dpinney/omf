@@ -183,7 +183,8 @@ def trafficLogStats(logsPath, outFilePath):
 		userCount[ipStr] += 1
 	# Output any lat/lons we found
 	with open('./scratch/ipLocDatabase.txt','w') as iplFile:
-		iplFile.writelines(locs)
+		for L in locs:
+			iplFile.write(str(L) + '\n')
 	# Set up plotting:
 	plt.figure(figsize=(15, 15))
 	ggColors = [x['color'] for x in plt.rcParams['axes.prop_cycle']]
