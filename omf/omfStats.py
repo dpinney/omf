@@ -18,9 +18,35 @@ from iso3166 import countries
 import zipfile
 import omf
 from dateutil.parser import parse as parseDt
+from jinja2 import Template
 # from REPIC import REPIC
 
 plt.style.use('ggplot')
+
+# Template for map:
+template = Template(
+'''
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico">
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin="">
+	<script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
+</head>
+<body style="margin:0px">
+	<div id="mapid" style="width:100%; height:100%"></div>
+	<script>
+		var mymap = L.map('mapid').setView([3,0], 3);
+		L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+			maxZoom: 18,
+			id: 'mapbox.streets'
+		}).addTo(mymap);
+		L.marker([51.5, -0.09]).addTo(mymap).bindPopup("TBD");
+		{% for mark in markers %}L.marker({{mark}}).addTo(mymap).bindPopup("TBD");
+		{% endfor %}
+	</script>
+</body>
+''')
 
 def genModelDatabase(outPath):
 	'''Translates all models on serer to .tsv file'''
@@ -185,6 +211,14 @@ def trafficLogStats(logsPath, outFilePath):
 	with open('./scratch/ipLocDatabase.txt','w') as iplFile:
 		for L in locs:
 			iplFile.write(str(L) + '\n')
+	# Read the IP locations and clean up their foramtting.
+	with open('./scratch/ipLocDatabase.txt', 'r') as locFile:
+		markers = locFile.readlines()
+		markers = list(set(markers))
+		markers = [x.replace('\n','').replace('(','[').replace(')',']') for x in markers]
+	# Render the HTML map of IP locations
+	with open('./static/ipLoc.html', 'w') as f2:
+		f2.write(template.render(markers=markers))
 	# Set up plotting:
 	plt.figure(figsize=(15, 15))
 	ggColors = [x['color'] for x in plt.rcParams['axes.prop_cycle']]
