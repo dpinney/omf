@@ -21,10 +21,10 @@ tooltip = "This model predicts whether the following day will be a monthly peak.
 # hidden = True
 
 def peak_likelihood(hist=None, tomorrow=None, tomorrow_std=None, two_day=None, two_day_std=None, three_day=None, three_day_std=None):
-    A = norm(tomorrow, tomorrow_std).cdf(hist)
-    B = norm(0, 1).cdf(-(tomorrow - two_day) / ((tomorrow_std**2 + two_day_std**2)**.5))
-    C = norm(0, 1).cdf(-(tomorrow - three_day) / ((tomorrow_std**2 + three_day_std**2)**.5))
-    return round((1 - A)*(1 - B)*(1 - C)*100, 2)
+	A = norm(tomorrow, tomorrow_std).cdf(hist)
+	B = norm(0, 1).cdf(-(tomorrow - two_day) / ((tomorrow_std**2 + two_day_std**2)**.5))
+	C = norm(0, 1).cdf(-(tomorrow - three_day) / ((tomorrow_std**2 + three_day_std**2)**.5))
+	return round((1 - A)*(1 - B)*(1 - C)*100, 2)
 
 def highest_peak_this_month(df, predicted_day):
 	y = predicted_day.year
@@ -33,19 +33,54 @@ def highest_peak_this_month(df, predicted_day):
 	return_v = df[(df['year'] == y) & (df['month'] == m) & (df['day'] != d)]['load'].max()
 	return 0 if np.isnan(return_v) else return_v
 
+def autofill(df):
+	def estimate(df, last_dt, hour, item):
+		prev_d = last_dt - datetime.timedelta(days=1)
+		prev_w = last_dt - datetime.timedelta(days=7)
+
+		df_pd = df[df.dates.dt.date == prev_d.date()]
+		df_pw = df[df.dates.dt.date == prev_w.date()]
+
+		est_pd = float(df_pd[df_pd['hour'] == hour][item])
+		est_pw = float(df_pw[df_pw['hour'] == hour][item])
+
+		return (est_pd + est_pw)/2
+
+	
+	last_dt = df.dates.max()
+	if last_dt.hour != 23:
+		ds_to_add = []
+		for hour in range(last_dt.hour+1, 24):
+			load = estimate(df, last_dt, hour, 'load')
+			weather = estimate(df, last_dt, hour, 'tempc')
+			d = {
+				'load': load, 
+				'tempc': weather, 
+				'year': last_dt.year,
+				'day': last_dt.day, 
+				'hour': hour, 
+				'month': last_dt.month, 
+				'dates': dt(last_dt.year, last_dt.month, last_dt.day, hour)
+			}
+			ds_to_add.append(d)
+
+		return df.append(ds_to_add, ignore_index=True)
+	else:
+		return df
+
 def work(modelDir, ind):
 	''' Model processing done here. '''
 	epochs = int(ind['epochs'])
 	o = {}  # See bottom of file for out's structure
 
 	try:
-	 	with open(pJoin(modelDir, 'hist.csv'), 'w') as f:
-	 		f.write(ind['histCurve'].replace('\r', ''))
+		with open(pJoin(modelDir, 'hist.csv'), 'w') as f:
+			f.write(ind['histCurve'].replace('\r', ''))
 		df = pd.read_csv(pJoin(modelDir, 'hist.csv'))
 		assert df.shape[0] >= 26280, 'At least 3 years of data is required'
 
-	 	if 'dates' not in df.columns:
-		 	df['dates'] = df.apply(
+		if 'dates' not in df.columns:
+			df['dates'] = df.apply(
 				lambda x: dt(
 					int(x['year']), 
 					int(x['month']), 
@@ -64,9 +99,10 @@ def work(modelDir, ind):
 
 	# ---------------------- MAKE PREDICTIONS ------------------------------- #
 
-	d = dict(df.groupby(df.dates.dt.date)['dates'].count())
-	df = df[df['dates'].dt.date.apply(lambda x: d[x] == 24)] # find all non-24
 	df = df.sort_values('dates')
+	d = dict(df.groupby(df.dates.dt.date)['dates'].count())
+	df = autofill(df)
+	df = df[df['dates'].dt.date.apply(lambda x: d[x] == 24)] # find all non-24
 
 	df, tomorrow = lf.add_day(df, weather[:24])
 	all_X = lf.makeUsefulDf(df)
@@ -184,6 +220,15 @@ def work(modelDir, ind):
 
 	o['stderr'] = ''
 
+	# re-input values
+	ind['newModel'] = 'False',
+	ind['one_day_model'] = open(pJoin(modelDir,'one_day_model.h5')).read().encode("base64"),
+	ind['one_day_model_filename'] = 'one_day_model.h5',
+	ind['two_day_model'] = open(pJoin(modelDir,'two_day_model.h5')).read().encode("base64"),
+	ind['two_day_model_filename'] = 'two_day_model.h5',
+	ind['three_day_model'] = open(pJoin(modelDir,'three_day_model.h5')).read().encode("base64"),
+	ind['three_day_model_filename'] = 'three_day_model.h5',
+
 	return o
 
 def new(modelDir):
@@ -192,13 +237,17 @@ def new(modelDir):
 		'created': '2015-06-12 17:20:39.308239',
 		'modelType': modelName,
 		'runTime': '0:01:03',
-		'epochs': '10',
-		'autoFill': "off",
-		'histFileName': 'd_Texas_17yr_TempAndLoad.csv',
-		"histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","d_Texas_17yr_TempAndLoad_Dec.csv"), 'rU').read(),
+		'epochs': '1',
+		# 'autoFill': "off",
+		# 'histFileName': 'd_Texas_17yr_TempAndLoad_Dec.csv',
+		# "histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","d_Texas_17yr_TempAndLoad_Dec.csv"), 'rU').read(),
 		'tempFileName': '72hr_TexasTemp.csv',
 		'tempCurve': open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","72hr_TexasTemp.csv"), 'rU').read(),
 		
+		# autofill
+		'histFileName': 'Texas_1pm.csv',
+		"histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_1pm.csv"), 'rU').read(),		
+
 		# upload models
 		'newModel': 'False',
 		'one_day_model': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','one_day_model.h5')).read().encode("base64"),
