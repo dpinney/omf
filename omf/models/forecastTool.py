@@ -15,12 +15,9 @@ import numpy as np
 from scipy.stats import norm
 import re
 
-# tes
-
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = "This model predicts whether the following day will be a monthly peak."
-# hidden = True
 
 def peak_likelihood(hist=None, tomorrow=None, tomorrow_std=None, two_day=None, two_day_std=None, three_day=None, three_day_std=None):
 	A = norm(tomorrow, tomorrow_std).cdf(hist)
@@ -102,8 +99,8 @@ def work(modelDir, ind):
 	# ---------------------- MAKE PREDICTIONS ------------------------------- #
 
 	df = df.sort_values('dates')
-	d = dict(df.groupby(df.dates.dt.date)['dates'].count())
 	df = autofill(df)
+	d = dict(df.groupby(df.dates.dt.date)['dates'].count())
 	df = df[df['dates'].dt.date.apply(lambda x: d[x] == 24)] # find all non-24
 
 	df, tomorrow = lf.add_day(df, weather[:24])
