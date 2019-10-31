@@ -15,7 +15,7 @@ import numpy as np
 from scipy.stats import norm
 import re
 
-# test
+# tes
 
 # Model metadata:
 modelName, template = metadata(__file__)
