@@ -1,7 +1,13 @@
 import pandas as pd
 import numpy as np
+import scipy
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import LabelEncoder
+from sklearn import datasets
 from scipy import spatial
+import scipy.stats as st
 import random
+import warnings
 from omf import geo, feeder
 import re
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math, warnings
@@ -28,6 +34,142 @@ def datetime_to_float(d):
 	total_seconds = (d - epoch).total_seconds()
 	return total_seconds	
 
+def generateDistribution(mc, test, faultsGenerated):
+	numberDurations = int(faultsGenerated)
+	mc['duration'] = 0
+
+	row_count_mc = mc.shape[0]
+	row = 0
+	while row < row_count_mc:
+		duration = float(datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S')))
+		mc.loc[row, 'duration'] = duration
+		row += 1
+
+	enc = LabelEncoder()
+	label = enc.fit(mc['duration'])
+	mc2 = label.transform(mc['duration'])
+	#c = StandardScaler()
+	#mc22 = mc2.reshape(-1, 1)
+	#sc.fit(mc22)
+	#mc2_std = sc.transform(mc22)
+	#mc2_std = mc2_std.flatten()
+	#del mc22
+
+	#Note: flattening is not good for skewed data...
+	mc2_std = mc2
+
+	dist_names = ['norm', 
+				  'weibull_min',
+				  'pareto',
+				  'uniform',
+				  'beta',
+				  'gamma',
+				  'expon',
+				  'lognorm',
+				  'triang',
+				  'dweibull']
+	size = len(mc2_std)
+	x = np.arange(len(mc2))
+	dist_results = []
+	chi_square = []
+	p_values = []
+
+	percentile_bins = np.linspace(0, 100, num=75, endpoint=True)
+	percentile_cutoffs = np.percentile(mc2_std, percentile_bins)
+	mc2_std_range = [mc2_std.min(),mc2_std.max()]
+	observed_frequency, bins = (np.histogram(mc2_std, bins = percentile_cutoffs, range=range))
+	cumulative_observed_frequency = np.cumsum(observed_frequency)
+	cumulative_observed_frequency = [x or 10e-100 for x in cumulative_observed_frequency]
+
+	for dist_name in dist_names:
+		dist = getattr(st, dist_name)
+		param = dist.fit(mc2_std)
+		
+		# Applying the Kolmogorov-Smirnov test
+		D, p = st.kstest(mc2_std, dist_name, args=param)
+		p_values.append(p)
+
+		# get expected counts in percentile bins based on cdf
+		cdf_fitted = dist.cdf(percentile_cutoffs, *param[:-2], loc=param[-2], scale=param[-1])
+		expected_frequency = []
+		for bin in range(len(percentile_bins)-1):
+			expected_cdf_area = cdf_fitted[bin+1] - cdf_fitted[bin]
+			expected_frequency.append(expected_cdf_area)
+
+		# calculate chi-squared
+		expected_frequency = np.array(expected_frequency) * size
+		cumulative_expected_frequency = np.cumsum(expected_frequency)
+
+		chisq = sum(((cumulative_expected_frequency - cumulative_observed_frequency)**2) / cumulative_observed_frequency)
+		chi_square.append(chisq)
+
+		dist_results.append((dist_name, p))
+
+	results = pd.DataFrame()
+	results['Distribution'] = dist_names
+	results['chi_square'] = chi_square
+	results['p_value'] = p_values
+	results.sort_values([test], inplace=True)
+
+
+	# Get the top distribution
+	if test == 'p_value':
+		dist = results['Distribution'].iloc[0]
+	if test == 'chi_square':
+		dist = results['Distribution'].iloc[9]
+
+	# Set up distribution and store distribution paraemters
+	best = getattr(st, dist)
+	param = best.fit(mc2)
+
+	number = 0
+	newDurations = []
+	while number < numberDurations:
+		newEntry = -1
+		if dist == 'norm':
+			while newEntry < 0:
+				newEntry = scipy.stats.norm.rvs(param[0], param[1])
+			newDurations.append(newEntry)
+		if dist == 'expon':
+			while newEntry < 0:
+				newEntry = scipy.stats.expon.rvs(param[0], param[1])
+			newDurations.append(newEntry)
+		if dist == 'dweibull':
+			while newEntry < 0:
+				newEntry = scipy.stats.dweibull.rvs(param[0], param[1], param[2])
+			newDurations.append(newEntry)
+		if dist == 'weibull_min':
+			while newEntry < 0:
+				newEntry = scipy.stats.weibull_min.rvs(param[0], param[1], param[2])
+			newDurations.append(newEntry)
+ 		if dist == 'pareto':
+			while newEntry < 0:
+				newEntry = scipy.stats.pareto.rvs(param[0], param[1], param[2])
+			newDurations.append(newEntry)
+		if dist == 'uniform':
+			while newEntry < 0:
+				newEntry = scipy.stats.uniform.rvs(param[0], param[1])
+			newDurations.append(newEntry)
+		if dist == 'triang':
+			while newEntry < 0:
+				newEntry = scipy.stats.triang.rvs(param[0], param[1], param[2])
+			newDurations.append(newEntry)
+		if dist == 'beta':
+			while newEntry < 0:
+				newEntry = scipy.stats.beta.rvs(param[0], param[1], param[2], param[3])
+			newDurations.append(newEntry)
+		if dist == 'gamma':
+			while newEntry < 0:
+				newEntry = scipy.stats.gamma.rvs(param[0], param[1], param[2], param[3])
+			newDurations.append(newEntry)
+		if dist == 'lognorm':
+			while newEntry < 0:
+				newEntry = scipy.stats.lognorm.rvs(param[0], param[1], param[2])
+			newDurations.append(newEntry)
+		number += 1
+
+	return newDurations
+
 def heatMap(mc):
 	'create a heat map based on input DataFrame with location, component type, fault type, and cause'
 	compType = {}
@@ -38,36 +180,37 @@ def heatMap(mc):
 	row_count_mc = mc.shape[0]
 	row = 0
 	while row < row_count_mc:
-		causefault = (mc.loc[row, 'Cause'], mc.loc[row, 'Fault Type'])
-		# comp type will store which causes and fault types can occur for a given line type
-		if mc.loc[row, 'Component Type'] in compType.keys():
-			if causefault not in compType[mc.loc[row, 'Component Type']]['causes']:
-				compType[mc.loc[row, 'Component Type']]['causes'].append(causefault)
-		else:
-			compType[mc.loc[row, 'Component Type']] = {}
-			compType[mc.loc[row, 'Component Type']]['causes'] = []
-			compType[mc.loc[row, 'Component Type']]['causes'].append(causefault)
-		# location of the faults as well as the component type, since the latter is completely dependent on the former (if we have no locations for the components)
-		if (mc.loc[row, 'Location'] + ' ' + mc.loc[row, 'Component Type']) in location.keys():
-			location[mc.loc[row, 'Location'] + ' ' + mc.loc[row, 'Component Type']] += 1
-		else:
-			location[mc.loc[row, 'Location'] + ' ' + mc.loc[row, 'Component Type']] = 1
-		# causes and fault types for the faults (note dependency again)
-		if causefault in cause.keys():
-			cause[causefault] += 1
-		else:
-			cause[causefault] = 1
-		# start and end times for faults (note: if start exists, assume finish also exists)
-		if 'Start' in mc.columns:
-			if mc.loc[row, 'Start'] in start.keys():
-				start[mc.loc[row, 'Start']] += 1
+		if mc.loc[row, 'Fault Type'] != 'None':
+			causefault = (mc.loc[row, 'Cause'], mc.loc[row, 'Fault Type'])
+			# comp type will store which causes and fault types can occur for a given line type
+			if mc.loc[row, 'Component Type'] in compType.keys():
+				if causefault not in compType[mc.loc[row, 'Component Type']]['causes']:
+					compType[mc.loc[row, 'Component Type']]['causes'].append(causefault)
 			else:
-				start[mc.loc[row, 'Start']] = 1
-			if 'Finish' in mc.columns:
-				if datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S')) in duration.keys():
-					duration[datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))] += 1
+				compType[mc.loc[row, 'Component Type']] = {}
+				compType[mc.loc[row, 'Component Type']]['causes'] = []
+				compType[mc.loc[row, 'Component Type']]['causes'].append(causefault)
+			# location of the faults as well as the component type and meters affected, since the latter two are completely dependent on the former (if we have no locations for the components)
+			if (mc.loc[row, 'Location'] + ' ' + mc.loc[row, 'Component Type'] + ' ' + mc.loc[row, 'Meters Affected']) in location.keys():
+				location[mc.loc[row, 'Location'] + ' ' + mc.loc[row, 'Component Type'] + ' ' + mc.loc[row, 'Meters Affected']] += 1
+			else:
+				location[mc.loc[row, 'Location'] + ' ' + mc.loc[row, 'Component Type'] + ' ' + mc.loc[row, 'Meters Affected']] = 1
+			# causes and fault types for the faults (note dependency again)
+			if causefault in cause.keys():
+				cause[causefault] += 1
+			else:
+				cause[causefault] = 1
+			# start and end times for faults (note: if start exists, assume finish also exists)
+			if 'Start' in mc.columns:
+				if mc.loc[row, 'Start'] in start.keys():
+					start[mc.loc[row, 'Start']] += 1
 				else:
-					duration[datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))] = 1
+					start[mc.loc[row, 'Start']] = 1
+				if 'Finish' in mc.columns:
+					if datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S')) in duration.keys():
+						duration[datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))] += 1
+					else:
+						duration[datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))] = 1
 		row += 1
 	# find the total number of faults that occur in each dictionary
 	totalCause = sum(cause.itervalues(), 0.0)
@@ -106,17 +249,20 @@ def heatMap(mc):
 
 	return heatMap
 
-def randomFault(pathToCsv, faultsGenerated):
+def randomFault(pathToCsv, faultsGenerated, test):
 	'using an input csv file with outage data, create a heat map object and generate a random fault'
 	mc = pd.read_csv(pathToCsv)
 	heatmap = heatMap(mc)
 	component_types = []
 	locations = []
+	metersaffected = []
 	causes = []
 	fault_types = []
 	starts = []
 	finishes = []
 	faultNumber = 0
+	if (test == 'chi_square' or test == 'p_value'):
+		newDurations = generateDistribution(mc, test, faultsGenerated)
 	while faultNumber < faultsGenerated:
 		# choose a random location
 		chooseLocationString = np.random.choice(heatmap['location'].keys(), replace=True, p=heatmap['location'].values())
@@ -125,12 +271,22 @@ def randomFault(pathToCsv, faultsGenerated):
 		if heatmap['start']:
 			start = np.random.choice(heatmap['start'].keys(), replace=True, p=heatmap['start'].values())
 			if heatmap['duration']:
-				epoch = datetime.datetime.utcfromtimestamp(0)
-				duration = np.random.choice(heatmap['duration'].keys(), replace=True, p=heatmap['duration'].values())
-				start = str(start)
-				finish = str(datetime.datetime.strptime(start, "%Y-%m-%d %H:%M:%S") + datetime.timedelta(seconds=duration))
+				if (test == 'chi_square' or test == 'p_value'):
+					duration = np.float64(math.ceil(newDurations[faultNumber]))
+					start = str(start)
+					finish = str(datetime.datetime.strptime(start, "%Y-%m-%d %H:%M:%S") + datetime.timedelta(seconds=duration))
+				else:
+					duration = np.random.choice(heatmap['duration'].keys(), replace=True, p=heatmap['duration'].values())
+					start = str(start)
+					finish = str(datetime.datetime.strptime(start, "%Y-%m-%d %H:%M:%S") + datetime.timedelta(seconds=duration))
 		# Note: for this method, component type is completely dependent on location
 		compType = str(chooseLocation[2])
+		
+		# draw out meters affected
+		meterdata = chooseLocation[3:len(chooseLocation)]
+		metersaff = ' '
+		metersaff.join(meterdata)
+
 		# choose a cause and fault type that is possible (dependency), given the component type
 		causeChosen = False
 		while causeChosen == False:
@@ -149,13 +305,14 @@ def randomFault(pathToCsv, faultsGenerated):
 		causes.append(causefault[0])
 		starts.append(start)
 		finishes.append(finish)
+		metersaffected.append(meterdata)
 		fault_types.append(causefault[1])
 		faultNumber += 1
 
 	if (heatmap['start'] and heatmap['duration']):	
-		data = {'Start': starts, 'Finish': finishes, 'component_type': component_types, 'Location': locations, 'Cause': causes, 'fault_type': fault_types}
+		data = {'Start': starts, 'Finish': finishes, 'component_type': component_types, 'Location': locations, 'Cause': causes, 'fault_type': fault_types, 'Meters Affected': metersaffected}
 	else:
-		data = {'component_type': component_types, 'Location': locations, 'Cause': causes, 'fault_type': fault_types}
+		data = {'component_type': component_types, 'Location': locations, 'Cause': causes, 'fault_type': fault_types, 'Meters Affected': metersaffected}
 	faults = pd.DataFrame(data)
 	return faults
 
@@ -220,6 +377,8 @@ def heatMapRefined(mc):
 	componentType = {}
 	compType = {}
 	cause = {}
+	start = {}
+	duration = {}
 	#faultType = {}
 	row_count_mc = mc.shape[0]
 	row = 0
@@ -239,6 +398,18 @@ def heatMapRefined(mc):
 			compType[mc.loc[row, 'Component Type']]['causes'] = []
 			compType[mc.loc[row, 'Component Type']]['causes'].append(causefault)
 
+		# start and end times for faults (note: if start exists, assume finish also exists)
+		if 'Start' in mc.columns:
+			if mc.loc[row, 'Start'] in start.keys():
+				start[mc.loc[row, 'Start']] += 1
+			else:
+				start[mc.loc[row, 'Start']] = 1
+			if 'Finish' in mc.columns:
+				if datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S')) in duration.keys():
+					duration[datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))] += 1
+				else:
+					duration[datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))] = 1
+
 		# causes and fault types for the faults
 		if causefault in cause.keys():
 			cause[causefault] += 1
@@ -248,20 +419,41 @@ def heatMapRefined(mc):
 	# find the total number of faults that occur in each dictionary
 	totalCause = sum(cause.itervalues(), 0.0)
 	totalComponentType = sum(componentType.itervalues(), 0.0)
+	totalStart = sum(start.itervalues(), 0.0)
+	totalDuration = sum(duration.itervalues(), 0.0)
 
 	# create a heat map by dividing the number of each individual item by the total number found
 	cause = {k: v / totalCause for k, v in cause.iteritems()}
 	componentType = {k: v / totalComponentType for k, v in componentType.iteritems()}
+	start = {k: v / totalStart for k, v in start.iteritems()}
+	duration = {k: v / totalDuration for k, v in duration.iteritems()}
 
 	# create a single dictionary to store heat map data
 	heatMap = {}
-	heatMap['compType'] = compType
-	heatMap['componentType'] = componentType
-	heatMap['cause'] = cause
+	if bool(componentType):
+		heatMap['componentType'] = componentType
+	else:
+		print('"Component Type" is missing from input data.')
+	if bool(compType):
+		heatMap['compType'] = compType
+	else:
+		print('"CompType is missing from input data.')
+	if bool(cause):
+		heatMap['cause'] = cause
+	else:
+		print('"Cause" is missing from input data.')
+	if bool(start):
+		heatMap['start'] = start
+	else:
+		print('"Start" is missing from input data.')
+	if bool(duration):
+		heatMap['duration'] = duration
+	else:
+		print('"Finish" is missing from input data.')
 
 	return heatMap
 
-def randomFaultsRefined(pathToCsv, pathToOmd, workDir, neighbors, gridLines, faultsGenerated):
+def randomFaultsRefined(pathToCsv, pathToOmd, workDir, neighbors, gridLines, faultsGenerated, test):
 	'Function that generates a DataFrame with a set of faults based on an original set of data and which selects the location using the lattice method'
 	
 	# Check that we're in the proper directory
@@ -278,12 +470,28 @@ def randomFaultsRefined(pathToCsv, pathToOmd, workDir, neighbors, gridLines, fau
 	locations = []
 	causes = []
 	fault_types = []
+	starts = []
+	finishes = []
+	if (test == 'chi_square' or test == 'p_value'):
+		newDurations = generateDistribution(mc, test, faultsGenerated)
 	# Generate a set number of new faults.
 	faultNumber = 0
 	while faultNumber < faultsGenerated:
 		# Randomly select the component type based on heatmap data.
 		component = np.random.choice(heatMap['componentType'].keys(), replace=True, p=heatMap['componentType'].values())
 		compType = component
+
+		if heatMap['start']:
+			start = np.random.choice(heatMap['start'].keys(), replace=True, p=heatMap['start'].values())
+			if heatMap['duration']:
+				if (test == 'chi_square' or test == 'p_value'):
+					duration = np.float64(math.ceil(newDurations[faultNumber]))
+					start = str(start)
+					finish = str(datetime.datetime.strptime(start, "%Y-%m-%d %H:%M:%S") + datetime.timedelta(seconds=duration))
+				else:
+					duration = np.random.choice(heatMap['duration'].keys(), replace=True, p=heatMap['duration'].values())
+					start = str(start)
+					finish = str(datetime.datetime.strptime(start, "%Y-%m-%d %H:%M:%S") + datetime.timedelta(seconds=duration))
 
 		# Randomly select a lattice location based on location heatmap data.
 		locRandom = random.uniform(0, 1)
@@ -391,13 +599,19 @@ def randomFaultsRefined(pathToCsv, pathToOmd, workDir, neighbors, gridLines, fau
 		locations.append(trueLocation)
 		component_types.append(component)
 		causes.append(causefault[0])
+		starts.append(start)
+		finishes.append(finish)
 		fault_types.append(causefault[1])
 		faultNumber += 1
-	data = {'component_type': component_types, 'Location': locations, 'Cause': causes, 'fault_type': fault_types}
+
+	if (heatMap['start'] and heatMap['duration']):	
+		data = {'Start': starts, 'Finish': finishes, 'component_type': component_types, 'Location': locations, 'Cause': causes, 'fault_type': fault_types}
+	else:
+		data = {'component_type': component_types, 'Location': locations, 'Cause': causes, 'fault_type': fault_types}
 	faults = pd.DataFrame(data)
 	return faults
 
-def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData, numberOfCustomers, sustainedOutageThreshold, causeFilter, componentTypeFilter, faultTypeFilter, timeMinFilter, timeMaxFilter, meterMinFilter, meterMaxFilter, durationMinFilter, durationMaxFilter, neighborsStr, gridLinesStr, faultsGeneratedStr):
+def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData, numberOfCustomers, sustainedOutageThreshold, causeFilter, componentTypeFilter, faultTypeFilter, timeMinFilter, timeMaxFilter, meterMinFilter, meterMaxFilter, durationMinFilter, durationMaxFilter, neighborsStr, gridLinesStr, faultsGeneratedStr, test):
 	' calculates outage metrics, plots a leaflet map of faults, and plots an outage timeline'
 	# check to see if work directory is specified; otherwise, create a temporary directory
 	if not workDir:
@@ -413,10 +627,8 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData,
 			</div>"""
 		return html_str
 
-	mc = pd.read_csv(pathToCsv)
-
-	# calculate SAIDI
-	if 'Start' in mc.columns:
+	def stats(mc):
+		# calculate SAIDI
 		customerInterruptionDurations = 0.0
 		row = 0
 		row_count_mc = mc.shape[0]
@@ -442,8 +654,10 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData,
 		SAIFI = float(customersAffected) / int(numberOfCustomers)
 
 		# calculate CAIDI
-		CAIDI = SAIDI / SAIFI
-
+		if (SAIDI != 0):
+			CAIDI = SAIDI / SAIFI
+		else: CAIDI = 'Check sustained outage threshold'
+	
 		# calculate ASAI
 		ASAI = (int(numberOfCustomers) * 8760 - customerInterruptionDurations) / (int(numberOfCustomers) * 8760)
 
@@ -458,6 +672,13 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData,
 			row += 1
 
 		MAIFI = sumCustomersAffected / int(numberOfCustomers)
+
+		return SAIDI, SAIFI, CAIDI, ASAI, MAIFI
+
+	mc = pd.read_csv(pathToCsv)
+
+	if 'Start' in mc.columns:
+		SAIDI, SAIFI, CAIDI, ASAI, MAIFI = stats(mc)
 
 		# make the format nice and save as .html
 		metrics = statsCalc(
@@ -533,10 +754,10 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData,
 		neighbors = int(neighborsStr)
 		gridLines = int(gridLinesStr)
 		faultsGenerated = int(faultsGeneratedStr)
-		mc1 = randomFaultsRefined(pathToCsv, pathToOmd, workDir, neighbors, gridLines, faultsGenerated)
+		mc1 = randomFaultsRefined(pathToCsv, pathToOmd, workDir, neighbors, gridLines, faultsGenerated, test)
 	if generateRandom == '1':
 		faultsGenerated = int(faultsGeneratedStr)
-		mc1 = randomFault(pathToCsv, faultsGenerated)
+		mc1 = randomFault(pathToCsv, faultsGenerated, test)
 	# graph the generated faults if the user requests
 	if ((generateRandom == '2' or generateRandom == '1') and (graphData == '0' or graphData == '2')):
 		row = 0
@@ -561,7 +782,7 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData,
 				meterCount = 0
 				meterMinFilter = -10e10
 				meterMaxFilter = 10e10
-			if 'Start' in mc1.columns:		
+			if 'Start' in mc1.columns:
 				duration = datetime_to_float(datetime.datetime.strptime(mc1.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc1.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))
 				time = datetime_to_float(datetime.datetime.strptime(mc1.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S'))
 				timeMin = datetime_to_float(datetime.datetime.strptime(timeMinFilter, '%Y-%m-%d %H:%M:%S'))
@@ -575,6 +796,7 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData,
 				durationMinFilter = -10e10
 				durationMaxFilter = 10e10
 				start = ''
+				
 
 			if 'component_type' in mc1.columns:
 				componentType = mc1.loc[row, 'component_type']
@@ -592,6 +814,49 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData,
 			outageMap['features'].append(Dict)
 			row += 1
 
+		# stacked bar chart to show outage timeline for generated random faults
+		if 'Start' in mc1.columns:
+			if 'Meters Affected' in mc1.columns:
+				SAIDI1, SAIFI1, CAIDI1, ASAI1, MAIFI1 = stats(mc1)
+				print('Reliability Metrics for the new outages:\nSAIDI: ' + str(SAIDI1) + '\nSAIFI: ' + str(SAIFI1) + '\nCAIDI: ' + str(CAIDI1) + '\nASAI: ' + str(ASAI1) + '\nMAIFI: ' + str(MAIFI1))
+			else:
+				print('There is no data on number of meters affected for the new outages.')
+			row = 0
+			date = [[] for _ in range(365)]
+			while row < row_count_mc1:
+				dt = datetime.datetime.strptime(mc1.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')
+				day = int(dt.strftime('%j')) - 1
+				date[day].append(datetime_to_float(datetime.datetime.strptime(mc1.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc1.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S')))
+				row += 1
+			# convert array of durations into jagged numpy object
+			jaggedData = np.array(date)
+			# get lengths of each row of data
+			lens = np.array([len(i) for i in jaggedData])
+			# mask of valid places in each row to fill with zeros
+			mask = np.arange(lens.max()) < lens[:,None]
+			# setup output array and put elements from jaggedData into masked positions
+			data = np.zeros(mask.shape, dtype=jaggedData.dtype)
+			data[mask] = np.concatenate(jaggedData)
+			numCols = data.shape[1]
+			graphData = []
+			currCol = 0
+			while currCol < numCols:
+				graphData.append(go.Bar(name='Fault ' + str(currCol+1), x = list(range(365)), y = data[:,currCol]))
+				currCol += 1
+			timeline1 = go.Figure(data = graphData)
+			timeline1.layout.update(
+				barmode='stack',
+				showlegend=False,
+				xaxis=go.layout.XAxis(
+					title=go.layout.xaxis.Title(text='Day of the year')
+				),
+				yaxis=go.layout.YAxis(
+					title=go.layout.yaxis.Title(text='Outage time (seconds)')
+				)
+			)
+		else: timeline1 = None
+	else: timeline1 = None
+
 	if not os.path.exists(workDir):
 		os.makedirs(workDir)
 	shutil.copy(omf.omfDir + '/templates/geoJsonMap.html', workDir)
@@ -603,7 +868,7 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData,
 	with open(pJoin(workDir,'geoDict.js'),"w") as outFile:
 		json.dump(outageMap, outFile, indent=4)
 
-	# stacked bar chart to show outage timeline
+	# stacked bar chart to show outage timeline for input .csv data
 	if 'Start' in mc.columns:
 		row = 0
 		date = [[] for _ in range(365)]
@@ -638,8 +903,11 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData,
 				title=go.layout.yaxis.Title(text='Outage time (seconds)')
 			)
 		)
-	else: timeline = None
-	return {'timeline': timeline}
+	else:
+		timeline = None
+		print('There is no time data for the new outages.')
+
+	return {'timeline': timeline, 'timeline1': timeline1}
 
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
@@ -671,7 +939,8 @@ def work(modelDir, inputDict):
 		inputDict['durationMaxFilter'],
 		inputDict['neighborsStr'],
 		inputDict['gridLinesStr'],
-		inputDict['faultsGeneratedStr'])
+		inputDict['faultsGeneratedStr'],
+		inputDict['test'])
 	
 	# Textual outputs of cost statistic
 	with open(pJoin(modelDir,"statsCalc.html"),"rb") as inFile:
@@ -685,6 +954,8 @@ def work(modelDir, inputDict):
 	layoutOb = go.Layout()
 	outData["timelineData"] = json.dumps(plotOuts.get('timeline',{}), cls=py.utils.PlotlyJSONEncoder)
 	outData["timelineLayout"] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
+	outData["timeline1Data"] = json.dumps(plotOuts.get('timeline1',{}), cls=py.utils.PlotlyJSONEncoder)
+	outData["timeline1Layout"] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
 
 	# Stdout/stderr.
 	outData["stdout"] = "Success"
@@ -699,7 +970,7 @@ def new(modelDir):
 		"generateRandom": "1",
 		"graphData": "0",
 		"numberOfCustomers": "192",
-		"sustainedOutageThreshold": "300",
+		"sustainedOutageThreshold": "200",
 		"causeFilter": "0",
 		"componentTypeFilter": "All",
 		"faultTypeFilter": "All",
@@ -711,8 +982,9 @@ def new(modelDir):
 		"durationMaxFilter": "1000000",
 		"outageFileName": "outagesNew3.csv",
 		"neighborsStr": "5",
-		"gridLinesStr": "10",
-		"faultsGeneratedStr": "100",
+		"gridLinesStr": "100",
+		"faultsGeneratedStr": "1000",
+		"test": "p_value",
 		"outageData": open(pJoin(__neoMetaModel__._omfDir,"scratch","smartSwitching","outagesNew3.csv"), "r").read(),
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)

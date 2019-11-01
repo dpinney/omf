@@ -92,7 +92,7 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Generate Faults?<span class="classic">This input decides whether random faults will be generated and shown on the leaflet map. It is also possible to generate faults using two different methods. Check the wiki to read about how these methods differ.</span></label>
-				<select id="generateFaults" name="generateFaults" />
+				<select id="generateRandom" name="generateRandom" />
 					<option value="0">No New Faults</option>
 					<option value="1">Simple Method</option>
 					<option value="2">Lattice Method</option>
@@ -195,6 +195,14 @@
 				<label class="tooltip">Number of Grid Lines<span class="classic">If the lattice method is used to generate random faults, this input dictates how many grid lines will be used when creating the lattice and generating the heat map for location of outages.</span></label>
 				<input type="text" id="gridLinesStr" name="gridLinesStr">
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Duration Distribution Generator<span class="classic">If time data is provided by the user and random faults are generated, this input dictates the method by which the new duration data will be generated.</span></label>
+				<select id="test" name="test" />
+					<option value="0">Input Durations</option>
+					<option value="chi_square">Chi-Squared Test</option>
+					<option value="p_value">Kolmogorov-Smirnov Test</option>
+				</select>
+			</div>
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
@@ -237,6 +245,13 @@
 			<div id="timelineChart" style="width:1000px"></div>
 			<script type="text/javascript">
 				Plotly.newPlot("timelineChart", JSON.parse(allOutputData["timelineData"]), JSON.parse(allOutputData["timelineLayout"]) || {})
+			</script>
+		</div>
+		<p class="reportTitle postRun">Outage Timeline for Randomly Generated Faults</p>
+		<div id="timeline1" class="tightContent postRun">
+			<div id="timeline1Chart" style="width:1000px"></div>
+			<script type="text/javascript">
+				Plotly.newPlot("timeline1Chart", JSON.parse(allOutputData["timeline1Data"]), JSON.parse(allOutputData["timeline1Layout"]) || {})
 			</script>
 		</div>
 		<!-- Leaflet map directly inline with model-->
