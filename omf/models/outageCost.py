@@ -122,6 +122,8 @@ def generateDistribution(mc, test, faultsGenerated):
 	best = getattr(st, dist)
 	param = best.fit(mc2)
 
+	print('Distribution used for generating faults: ' + str(dist))
+
 	number = 0
 	newDurations = []
 	while number < numberDurations:
@@ -978,7 +980,7 @@ def new(modelDir):
 		"timeMaxFilter": "2000-12-15 00:00:30",
 		"meterMinFilter": "0",
 		"meterMaxFilter": "100",
-		"durationMinFilter": "130",
+		"durationMinFilter": "150",
 		"durationMaxFilter": "1000000",
 		"outageFileName": "outagesNew3.csv",
 		"neighborsStr": "5",
