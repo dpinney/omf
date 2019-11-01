@@ -6,6 +6,7 @@ from omf.solvers import gridlabd
 from dateutil.tz import tzlocal
 from matplotlib import pyplot as plt
 from pytz import reference
+import numpy as np
 import omf
 import omf.feeder as feeder
 import omf.geo as geo
@@ -1794,7 +1795,11 @@ def _writeResultsCsv(testOutput, outName):
 		w.writerows(testOutput)
 
 def voltDistribution(pathToGlm, pathToVoltdumpCsv):
-	node_name, pu_voltage = [], []
+	with open(pathToGlm, 'r') as f:
+		tree = omf.feeder.parse(pathToGlm)
+	ntk = getNamesToKeys(tree)
+
+	pu_voltage = []
 	with open(pathToVoltdumpCsv, 'r') as f:
 		w = csv.reader(f)
 		for i in range(2):
@@ -1803,20 +1808,36 @@ def voltDistribution(pathToGlm, pathToVoltdumpCsv):
 			if len(row) != 7:
 				continue
 
-			pu, cnt = 0, 0
-
+			# compute average voltage
+			v_sum, cnt = 0, 0
 			for i in range(3):
 				real = float(row[i*2+1])
 				imag = float(row[i*2+2])
-				tmp = abs(complex(real, imag))
-				if tmp:
-					cnt += 1
-				pu += tmp
+				mag = abs(complex(real, imag))
+				v_sum += mag
+				cnt += 1 if mag else 0
 
-			if cnt:
-				node_name.append(row[0])
-				pu_voltage.append(pu/cnt)
-	return node_name, pu_voltage
+			# determine nominal voltage
+			key = ntk[row[0]]
+			if 'nominal_voltage' in tree[key]:
+				nom = float(tree[key]['nominal_voltage'])
+				pu_voltage.append(v_sum/cnt/nom if cnt else 0)
+			else:
+				print tree[key]
+	return pu_voltage
+
+def crappyhist(a, path, bins=50, width=80):
+	# from @tammoippen on github
+	a = np.asarray(a)
+	h, b = np.histogram(a, bins)
+	with open(path, 'w') as f:
+		for i in range (0, bins):
+			print >>f, '{:12.5f}  | {:{width}s} {}'.format(
+					b[i],
+					'#'*int(width*h[i]/np.amax(h)),
+					h[i],
+					width=width
+			)
 
 def _tests(
 	keepFiles=True,
@@ -1831,8 +1852,9 @@ def _tests(
 			omf.omfDir + '/data/Climate/KY-LEXINGTON.tmy2', 'r'
 		).read(),
 	},
-	pathToVoltdumpCsv='',
+	pathToVoltdumpCsv='{}_VD.csv',
 ):
+	from tempfile import mkdtemp
 	''' Test convert every windmil feeder we have (in static/testFiles). '''
 	# testFiles = [('INEC-RENOIR.std','INEC.seq'), ('INEC-GRAHAM.std','INEC.seq'),
 	#   ('Olin-Barre.std','Olin.seq'), ('Olin-Brown.std','Olin.seq'),
@@ -1857,6 +1879,8 @@ def _tests(
 		except:
 			# Couldn't create.
 			pass
+
+	gridlab_workDir = mkdtemp() if pathToVoltdumpCsv else None
 	# Run all the tests.
 	for stdString, seqString in testFiles:
 		# Output data structure.
@@ -1870,6 +1894,9 @@ def _tests(
 				with warnings.catch_warnings(record=True) as caught_warnings:
 					outGlm = convert(stdFile.read(), seqFile.read())
 				if pathToVoltdumpCsv:
+					voltdumpFilename = pathToVoltdumpCsv.format(
+						stdString.replace('.std', '')
+					)
 					next_key = max(outGlm.keys()) + 1
 					outGlm[next_key] = {
 						'object': 'voltdump',
@@ -1915,7 +1942,8 @@ def _tests(
 		try:
 			# Run powerflow on the GLM.
 			currentResults['gridlabd_error_code'] = 'Processing'
-			output = gridlabd.runInFilesystem(outGlm, attachments=testAttachments, keepFiles=False)
+			output = gridlabd.runInFilesystem(outGlm, attachments=testAttachments, keepFiles=False, workDir = gridlab_workDir)
+			print output
 			if output['stderr'].startswith('ERROR'):
 				# Catch GridLAB-D's errors:
 				currentResults['gridlabd_error_code'] = output['stderr'].replace('\n',' ')
@@ -1930,6 +1958,22 @@ def _tests(
 		except Exception as e:
 			print 'POWERFLOW FAILED', stdString
 			currentResults['powerflow_success'] = False
+		if pathToVoltdumpCsv:
+			try:
+				# Analyze volt dump
+				vpu = voltDistribution(
+						outPrefix + stdString.replace('.std', '.glm'),
+						pJoin(gridlab_workDir, voltdumpFilename)
+				)
+				currentResults['perc_voltage_in_range'] = "%0.3f" % (sum(1.0 for v in vpu if 0.9<=v<=1.1)/len(vpu))
+				crappyhist(
+						vpu,
+						outPrefix + stdString.replace('.std', '_voltage_hist.txt')
+				)
+				print 'COMPLETED VOLT DUMP ANALYSIS ON', stdString
+			except Exception as e:
+				currentResults['percent_voltage_in_range'] = np.nan
+				print 'VOLT DUMP ANALYSIS FAILED ON', stdString, '(%s)' % e
 		# Write stats for all tests.
 		currentResults['conversion_time_seconds'] = time.time() - cur_start_time
 		_writeResultsCsv([currentResults], outPrefix + stdString.replace('.std','.csv'))
