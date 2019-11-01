@@ -157,6 +157,7 @@ def work(modelDir, inputDict):
 	
 	#calculate and display EV Charging Demand image, carpet plot image of 8760 load shapes
 	maxLoadValue, demandImg, carpetPlotImg, hourlyConValue, combinedLoadShapeValue = plotEVShape(
+		modelDir,
 		numVehicles = numVehiclesValue,
 		chargeRate = chargeRateValue, 
 		batterySize = batterySizeValue, 
@@ -514,7 +515,7 @@ def plotMaxLoadShape(loadShape=None, combined_load=None, hourly_con=None, REopt_
 
 	return maxLoadShape(day_shape, hourly_con, day_shape_REopt), carpet_plot(base_shape_REopt, hourly_con)
 
-def plotEVShape(numVehicles=None, chargeRate=None, batterySize=None, startHour=None, endHour=None, chargeLimit=None, minCharge=None, maxCharge=None, loadShape=None, rezSqIn=None):
+def plotEVShape(modelDir, numVehicles=None, chargeRate=None, batterySize=None, startHour=None, endHour=None, chargeLimit=None, minCharge=None, maxCharge=None, loadShape=None, rezSqIn=None):
 	shapes = []
 	for i in range(numVehicles):
 		# Random arrival
@@ -576,7 +577,7 @@ def plotEVShape(numVehicles=None, chargeRate=None, batterySize=None, startHour=N
 	for i in range(8760):
 		com_load = base_shape[i] + hourly_con[i % 24]
 		combined.append(com_load)
-	with open('output - evInterconnection combined load shapes.csv', 'w') as outFile:
+	with open(pJoin(modelDir,'output - evInterconnection combined load shapes.csv'), 'w') as outFile:
 		for row in combined:
 			outFile.write(str(row) + '\n')
 

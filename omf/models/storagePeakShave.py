@@ -190,6 +190,9 @@ def work(modelDir, inputDict):
 	out['batteryDischargekW'] = [d-b for d, b in zip(out['demand'], out['demandAfterBattery'])]
 	out['batteryDischargekWMax'] = max(out['batteryDischargekW'])
 
+	with open(pJoin(modelDir, 'batteryDispatch.txt'), 'w') as f:
+		f.write('\n'.join([str(x) for x in out['batteryDischargekW']]) + '\n')
+
 	# Battery State of Charge Graph
 	out['batterySoc'] = SoC = [t['battSoC']/battCapacity*100*dodFactor + (100-100*dodFactor) for t in dc]
 	# Estimate number of cyles the battery went through. Sums the percent of SoC.
@@ -314,6 +317,9 @@ def forecastWork(modelDir, ind):
 	o['batteryDischargekW'] = VB_power
 	o['batteryDischargekWMax'] = max(VB_power)
 
+	with open(pJoin(modelDir, 'batteryDispatch.txt'), 'w') as f:
+		f.write('\n'.join([str(x) for x in o['batteryDischargekW']]) + '\n')
+
 	batteryCycleLife = float(ind['batteryCycleLife'])
 	o['batterySoc'] = SoC = [100 - (e / battCapacity * 100) for e in VB_energy]
 	cycleEquivalents = sum([SoC[i]-SoC[i+1] for i, x in enumerate(SoC[:-1]) if SoC[i+1] < SoC[i]]) / 100.0
@@ -331,8 +337,6 @@ def forecastWork(modelDir, ind):
 	battCostPerCycle = cellQuantity * cellCost / batteryCycleLife
 	lcoeTotCost = cycleEquivalents*retailCost + battCostPerCycle*cycleEquivalents
 	o['LCOE'] = lcoeTotCost / (cycleEquivalents*battCapacity+10)
-
-	model
 
 	# Other
 	o['startDate'] = '2011-01-01'
@@ -354,7 +358,8 @@ def new(modelDir):
 		'chargeRate': '5',
 		'demandCurve': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','Texas_1yr_Load.csv')).read(),
 		'fileName': 'FrankScadaValidCSV_Copy.csv',
-		'dispatchStrategy': 'optimal', #'prediction', 
+		# 'dispatchStrategy': 'prediction', 
+		'dispatchStrategy': 'optimal', 
 		'cellCost': '7140',
 		'cellQuantity': '100',
 		'runTime': '0:00:03',
@@ -389,115 +394,3 @@ def _tests():
 
 if __name__ == '__main__':
 	_tests()
-
-'''
-def cap24(demand, power, energy, battEff):
-	# ignore battEff for now.
-	# assume batteries can recharge on a daily basis
-	# assume power <= energy
-
-	discharges = [power] * int(energy // power) + ([energy % power] if energy % power != 0 else [])
-	batt_power = [0]*24
-	demand_min_to_max = list(sorted(demand)) 
-	demand_max_to_min = list(reversed(sorted(demand))) 
-	for i, d in enumerate(discharges):
-		batt_power[demand.index(demand_max_to_min[i])] = -d
-		batt_power[demand.index(demand_min_to_max[i])] = d
-
-	batt_energy = [0]*24
-	for i, p in enumerate(batt_power):
-		batt_energy[i] = energy if i == 0 else batt_energy[i-1] + p
-
-	return batt_power, batt_energy 
-
-	# PRECISION AND RECALL
-	# maxDays = []
-	# for month in range(1, 13):
-	# 	test = df[df['month'] == month]
-	# 	maxDays.append(test.loc[test['load'].idxmax()]['dayOfYear'])
-	
-	# shouldHaveDispatched = [False]*365
-	# for day in maxDays:
-	# 	shouldHaveDispatched[day] = True
-
-	# truePositive = len([b for b in [i and j for (i, j) in zip(dispatched, shouldHaveDispatched)] if b])
-	# falsePositive = len([b for b in [i and (not j) for (i, j) in zip(dispatched, shouldHaveDispatched)] if b])
-	# falseNegative = len([b for b in [(not i) and j for (i, j) in zip(dispatched, shouldHaveDispatched)] if b])
-	# o['precision'] = round(truePositive / float(truePositive + falsePositive) * 100, 2)
-	# o['recall'] = round(truePositive / float(truePositive + falseNegative) * 100, 2)
-	# o['number_of_dispatches'] = len([i for i in dispatched if i])
-outDic {
-	startdate: str
-	stdout: "Success"
-	batteryDischargekWMax: float
-	batteryDischargekw: [8760] float
-	monthlyDemandRed: [12] float
-	ps: [12] float
-	demandAfterBattery: [8760] float
-	SPP: float
-	kwhtoRecharge [12] float
-	LCOE: float
-	batteryLife: float
-	cumulativeCashflow: [12] float
-	batterySoc: [8760] float
-	demand: [8760] float
-	benefitMonthly: [12] float
-	netCashflow: [12] float
-	costtoRecharge: [12] float
-	months: [12] (strings)
-	monthlyDemand: [12] float
-	cycleEquivalents: float
-	stderr: ""
-	NPV: float
-	benefitNet: 12
-}
-
-# insert into work()
-	# ------------------------ DEBUGGING TOOLS ----------------------- #
-	# import matplotlib.pyplot as plt 
-	# dcThroughTheMonth = [[t for t in iter(dc) if t['month']<=x] for x in range(12)]
-	# hoursThroughTheMonth = [len(dcThroughTheMonth[month]) for month in range(12)]
-	# # Output some matplotlib results as well.
-	# plt.plot([t['power'] for t in dc])
-	# plt.plot([t['netpower'] for t in dc])
-	# plt.plot([t['battSoC'] for t in dc])
-	# for month in range(12):
-	#   plt.axvline(hoursThroughTheMonth[month])
-	# plt.savefig(pJoin(modelDir,"plot.png"))
-
-def pulp24hrBattery(demand, power, energy, battEff):
-	# LP Variables
-	model = pulp.LpProblem("Daily demand charge minimization problem", pulp.LpMinimize)
-	VBpower = pulp.LpVariable.dicts(
-		"ChargingPower", range(24)
-	)  # decision variable of VB charging power; dim: 24 by 1
-	VBenergy = pulp.LpVariable.dicts(
-		"EnergyState", range(24)
-	)  # decision variable of VB energy state; dim: 24 by 1
-
-	for i in range(24):
-		VBpower[i].lowBound = -power
-		VBpower[i].upBound = power
-		VBenergy[i].lowBound = 0
-		VBenergy[i].upBound = energy
-	pDemand = pulp.LpVariable("Peak Demand", lowBound=0)
-
-	# Objective function: Minimize peak demand
-	model += pDemand
-
-	# VB energy state as a function of VB power
-	model += VBenergy[0] == 0
-	for i in range(1, 24):
-		model += VBenergy[i] == battEff * VBenergy[i - 1] + VBpower[i]
-	for i in range(24):
-		model += pDemand >= demand[i] + VBpower[i]
-	model.solve()
-	
-	print [VBpower[i].varValue for i in range(24)]
-
-	return (
-		[VBpower[i].varValue for i in range(24)],
-		[VBenergy[i].varValue for i in range(24)],
-	)
-
-'''

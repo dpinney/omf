@@ -83,6 +83,43 @@
 				<label class="tooltip">Epochs<span class="classic">How many times would you like the prediction software to iterate? Approximately 1 minute per 10 epochs. Program will stop early if no improvement is seen within 10 epochs.</span></label>
 				<input type="text" id="epochs" name="epochs">
 			</div>
+			<hr>
+			<!-- newModel, 1day_model, two_day_model, three_day_model -->
+			<div class="shortInput">
+				<label class="tooltip">New Model?<span class="classic">Would you like to run new neural net models (True) or use the model loaded?</span></label>
+				<select id="newModel" name="newModel" />
+					<option value="True">True</option>
+					<option value="False">False</option>
+				</select>
+			</div>
+			<br>
+			<div class="shortInput">
+				<label class="tooltip">One-day model upload<span class="classic">.h5 file of neural network</span></label>
+				<input id="one_modelFile" type="file" style="display:none" onchange="handle_files(this.files,'one_day_model','one_day_model_filename')">
+				<input id="one_day_model" name="one_day_model" type="hidden">
+				<div>
+					<label for="one_modelFile" class="fileButton">Choose File</label>
+					<input id="one_day_model_filename" name="one_day_model_filename" value='' readonly class="uploadFileName">
+				</div>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Two-day model upload<span class="classic">.h5 file of neural network</span></label>
+				<input id="two_modelFile" type="file" style="display:none" onchange="handle_files(this.files,'two_day_model','two_day_model_filename')">
+				<input id="two_day_model" name="two_day_model" type="hidden">
+				<div>
+					<label for="two_modelFile" class="fileButton">Choose File</label>
+					<input id="two_day_model_filename" name="two_day_model_filename" value='' readonly class="uploadFileName">
+				</div>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Three-day model upload<span class="classic">.h5 file of neural network</span></label>
+				<input id="three_modelFile" type="file" style="display:none" onchange="handle_files(this.files,'three_day_model','three_day_model_filename')">
+				<input id="three_day_model" name="three_day_model" type="hidden">
+				<div>
+					<label for="three_modelFile" class="fileButton">Choose File</label>
+					<input id="three_day_model_filename" name="three_day_model_filename" value='' readonly class="uploadFileName">
+				</div>
+			</div>
 			<!-- <div class="shortInput">
 				<label class="tooltip">AutoFill<span class="classic">Given an incomplete CSV, AutoFill will use averages to fill the rest of the day's input. Error will be thrown if incomplete and AutoFill off.</span></label>
 				<select id="autoFill" name="autoFill">

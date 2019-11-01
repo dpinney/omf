@@ -604,14 +604,16 @@ def neural_net_predictions(all_X, all_y, epochs=100, model=None, save_file=None)
 
 	return [float(f) for f in model.predict(all_X[-8760:])], accuracy
 
-def neural_net_next_day(all_X, all_y, epochs=100, hours_prior=24, save_file=None):
+def neural_net_next_day(all_X, all_y, epochs=100, hours_prior=24, save_file=None, model=None):
 	all_X_n, all_y_n = all_X[:-hours_prior], all_y[:-hours_prior]
 	X_train = all_X_n[:-8760]
 	y_train = all_y_n[:-8760]
 	X_test = all_X_n[-8760:]
 	y_test = all_y_n[-8760:]
 
-	model = train_neural_net(X_train, y_train, epochs)
+	if model == None:
+		model = train_neural_net(X_train, y_train, epochs)
+
 
 	predictions_test = [float(f) for f in model.predict(X_test)]
 	train = [float(f) for f in model.predict(X_train)]
@@ -620,7 +622,8 @@ def neural_net_next_day(all_X, all_y, epochs=100, hours_prior=24, save_file=None
 		'train': MAPE(train, y_train)
 	}
 
-	model.fit(X_test, y_test, epochs=epochs, verbose=0)
+	if model == None:
+		model.fit(X_test, y_test, epochs=epochs, verbose=0)
 
 	predictions = [float(f) for f in model.predict(all_X[-24:])]
 
