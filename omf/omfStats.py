@@ -18,9 +18,35 @@ from iso3166 import countries
 import zipfile
 import omf
 from dateutil.parser import parse as parseDt
+from jinja2 import Template
 # from REPIC import REPIC
 
 plt.style.use('ggplot')
+
+# Template for map:
+template = Template(
+'''
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico">
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin="">
+	<script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
+</head>
+<body style="margin:0px">
+	<div id="mapid" style="width:100%; height:100%"></div>
+	<script>
+		var mymap = L.map('mapid').setView([3,0], 3);
+		L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+			maxZoom: 18,
+			id: 'mapbox.streets'
+		}).addTo(mymap);
+		L.marker([51.5, -0.09]).addTo(mymap).bindPopup("TBD");
+		{% for mark in markers %}L.marker({{mark}}).addTo(mymap).bindPopup("TBD");
+		{% endfor %}
+	</script>
+</body>
+''')
 
 def genModelDatabase(outPath):
 	'''Translates all models on serer to .tsv file'''
@@ -97,7 +123,11 @@ def modelDatabaseStats(dataFilePath, outFilePath):
 	ax = plt.gca()
 	ax.set_xlim(-0.2, len(yearUsers.values()))
 	ax = plt.gca()
-	ax.set_title('New Users on omf.coop by Year \nGenerated: ' + datetime.now().strftime('%Y-%m-%d'))
+	nowString = datetime.now().strftime('%Y-%m-%d')
+	lowerUsers = [x.lower() for x in list(users)]
+	orgPairs = [x.split('@') for x in lowerUsers]
+	orgs = set([x[-1] for x in orgPairs if len(x)>1])
+	ax.set_title('New Users on omf.coop by Year. Total: {}, Orgs:{}\nGenerated: {}'.format(len(users), len(orgs), nowString))
 	plt.xticks([x + 0.4 for x in xRanges2], yearUsers.keys())
 	plt.subplots_adjust(bottom=0.2)
 	# Plot the model counts.
@@ -131,6 +161,7 @@ def trafficLogStats(logsPath, outFilePath):
 	IPCount = collections.Counter()
 	userCount = collections.Counter()
 	users = set()  # Create set of users to prevent duplications.
+	locs = []
 	# Process the log file to generate hit and session counts.
 	# Filter out lines containing these strings.
 	for line in lines:
@@ -140,6 +171,8 @@ def trafficLogStats(logsPath, outFilePath):
 			ip = geolite2.lookup(words[0])
 		except:
 			ip = None
+		if ip is not None and ip.location is not None:
+			locs.append(ip.location)
 		if ip is not None and ip.country is not None:
 			if ip.country == 'XK':
 				IPCount["Kosovo"] += 1
@@ -162,9 +195,9 @@ def trafficLogStats(logsPath, outFilePath):
 		try:
 			dtStr = words[3][1:].replace(':', ' ', 1)
 			dt = parseDt(dtStr)
-			accessDt = str(dt.year) + '-' + str(dt.month).zfill(2)
+			accessDt = str(dt.year)[-2:] + '-' + str(dt.month).zfill(2)
 		except:
-			accessDt = '2019-01'
+			accessDt = '19-01'
 		# Is this is a unique viewer?
 		ipStr = words[0]
 		if ipStr not in users:
@@ -174,6 +207,18 @@ def trafficLogStats(logsPath, outFilePath):
 		# No matter what, we update the monthly count.
 		monthCount[accessDt] += 1
 		userCount[ipStr] += 1
+	# Output any lat/lons we found
+	with open('./scratch/ipLocDatabase.txt','w') as iplFile:
+		for L in locs:
+			iplFile.write(str(L) + '\n')
+	# Read the IP locations and clean up their foramtting.
+	with open('./scratch/ipLocDatabase.txt', 'r') as locFile:
+		markers = locFile.readlines()
+		markers = list(set(markers))
+		markers = [x.replace('\n','').replace('(','[').replace(')',']') for x in markers]
+	# Render the HTML map of IP locations
+	with open('./static/ipLoc.html', 'w') as f2:
+		f2.write(template.render(markers=markers))
 	# Set up plotting:
 	plt.figure(figsize=(15, 15))
 	ggColors = [x['color'] for x in plt.rcParams['axes.prop_cycle']]

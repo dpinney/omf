@@ -11,7 +11,7 @@
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
-	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+	<script src="https://cdn.plot.ly/plotly-1.50.1.min.js"></script>
 	<!-- Leaflet -->
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"	integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="	crossorigin=""/>
 	<script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
@@ -195,6 +195,14 @@
 				<label class="tooltip">Number of Grid Lines<span class="classic">If the lattice method is used to generate random faults, this input dictates how many grid lines will be used when creating the lattice and generating the heat map for location of outages.</span></label>
 				<input type="text" id="gridLinesStr" name="gridLinesStr">
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Duration Distribution Generator<span class="classic">If time data is provided by the user and random faults are generated, this input dictates the method by which the new duration data will be generated.</span></label>
+				<select id="test" name="test" />
+					<option value="0">Input Durations</option>
+					<option value="chi_square">Chi-Squared Test</option>
+					<option value="p_value">Kolmogorov-Smirnov Test</option>
+				</select>
+			</div>
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
@@ -237,6 +245,13 @@
 			<div id="timelineChart" style="width:1000px"></div>
 			<script type="text/javascript">
 				Plotly.newPlot("timelineChart", JSON.parse(allOutputData["timelineData"]), JSON.parse(allOutputData["timelineLayout"]) || {})
+			</script>
+		</div>
+		<p class="reportTitle postRun">Outage Timeline for Randomly Generated Faults</p>
+		<div id="timeline1" class="tightContent postRun">
+			<div id="timeline1Chart" style="width:1000px"></div>
+			<script type="text/javascript">
+				Plotly.newPlot("timeline1Chart", JSON.parse(allOutputData["timeline1Data"]), JSON.parse(allOutputData["timeline1Layout"]) || {})
 			</script>
 		</div>
 		<!-- Leaflet map directly inline with model-->
