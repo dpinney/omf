@@ -1799,7 +1799,7 @@ def voltDistribution(pathToGlm, pathToVoltdumpCsv):
 		tree = omf.feeder.parse(pathToGlm)
 	ntk = getNamesToKeys(tree)
 
-	pu_voltage = []
+	pu_voltage, na_count = [], 0
 	with open(pathToVoltdumpCsv, 'r') as f:
 		w = csv.reader(f)
 		for i in range(2):
@@ -1818,13 +1818,13 @@ def voltDistribution(pathToGlm, pathToVoltdumpCsv):
 				cnt += 1 if mag else 0
 
 			# determine nominal voltage
-			key = ntk[row[0]]
-			if 'nominal_voltage' in tree[key]:
+			key = ntk.get(row[0])
+			if key and 'nominal_voltage' in tree[key]:
 				nom = float(tree[key]['nominal_voltage'])
 				pu_voltage.append(v_sum/cnt/nom if cnt else 0)
 			else:
-				print tree[key]
-	return pu_voltage
+				na_count += 1
+	return pu_voltage, na_count
 
 def crappyhist(a, path, bins=50, width=80):
 	# from @tammoippen on github
@@ -1852,7 +1852,7 @@ def _tests(
 			omf.omfDir + '/data/Climate/KY-LEXINGTON.tmy2', 'r'
 		).read(),
 	},
-	pathToVoltdumpCsv='{}_VD.csv',
+	voltdumpCsvName='{}_VD.csv',
 ):
 	from tempfile import mkdtemp
 	''' Test convert every windmil feeder we have (in static/testFiles). '''
@@ -1880,7 +1880,7 @@ def _tests(
 			# Couldn't create.
 			pass
 
-	gridlab_workDir = mkdtemp() if pathToVoltdumpCsv else None
+	gridlab_workDir = mkdtemp() if voltdumpCsvName else None
 	# Run all the tests.
 	for stdString, seqString in testFiles:
 		# Output data structure.
@@ -1893,16 +1893,14 @@ def _tests(
 				# Catch warnings too:
 				with warnings.catch_warnings(record=True) as caught_warnings:
 					outGlm = convert(stdFile.read(), seqFile.read())
-				if pathToVoltdumpCsv:
-					voltdumpFilename = pathToVoltdumpCsv.format(
+				if voltdumpCsvName:
+					voltdumpCsvName = voltdumpCsvName.format(
 						stdString.replace('.std', '')
 					)
 					next_key = max(outGlm.keys()) + 1
 					outGlm[next_key] = {
 						'object': 'voltdump',
-						'filename': pathToVoltdumpCsv.format(
-							stdString.replace('.std', '')
-						),
+						'filename': voltdumpCsvName,
 					}
 				currentResults['all_warnings'] = ';'.join(
 					[str(x.message) for x in caught_warnings]
@@ -1943,6 +1941,8 @@ def _tests(
 			# Run powerflow on the GLM.
 			currentResults['gridlabd_error_code'] = 'Processing'
 			output = gridlabd.runInFilesystem(outGlm, attachments=testAttachments, keepFiles=False, workDir = gridlab_workDir)
+			if voltdumpCsvName:
+				del output[voltdumpCsvName]
 			print output
 			if output['stderr'].startswith('ERROR'):
 				# Catch GridLAB-D's errors:
@@ -1958,22 +1958,24 @@ def _tests(
 		except Exception as e:
 			print 'POWERFLOW FAILED', stdString
 			currentResults['powerflow_success'] = False
-		if pathToVoltdumpCsv:
+		if voltdumpCsvName:
 			try:
 				# Analyze volt dump
-				vpu = voltDistribution(
+				vpu, na_count = voltDistribution(
 						outPrefix + stdString.replace('.std', '.glm'),
-						pJoin(gridlab_workDir, voltdumpFilename)
+						pJoin(gridlab_workDir, voltdumpCsvName)
 				)
-				currentResults['perc_voltage_in_range'] = "%0.3f" % (sum(1.0 for v in vpu if 0.9<=v<=1.1)/len(vpu))
+				currentResults['perc_voltage_in_range'] = "%0.3f" % (sum(1.0 for v in vpu if 0.8<=v<=1.2)/len(vpu))
+				currentResults['missing_nominal_voltage_cnt'] = na_count
 				crappyhist(
 						vpu,
 						outPrefix + stdString.replace('.std', '_voltage_hist.txt')
 				)
 				print 'COMPLETED VOLT DUMP ANALYSIS ON', stdString
 			except Exception as e:
-				currentResults['percent_voltage_in_range'] = np.nan
-				print 'VOLT DUMP ANALYSIS FAILED ON', stdString, '(%s)' % e
+				currentResults['perc_voltage_in_range'] = "NaN"
+				currentResults['missing_nominal_voltage_cnt'] = "NaN"
+				print 'VOLT DUMP ANALYSIS FAILED ON', stdString, type(e)
 		# Write stats for all tests.
 		currentResults['conversion_time_seconds'] = time.time() - cur_start_time
 		_writeResultsCsv([currentResults], outPrefix + stdString.replace('.std','.csv'))
