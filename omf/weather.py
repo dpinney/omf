@@ -914,4 +914,3 @@ if __name__ == "__main__":
 	utc_time = USCRNDataType(2, -9999.0)
 	temperature = USCRNDataType(8, -9999.0)
 	hourly = [utc_date, utc_time, temperature]
-	_write_USCRN_csv('/Users/austinchang/pycharm/omf/omf/scratch/gridState/current-nc-temps.csv', 2019, 'NC_Durham_11_W', hourly, None)
