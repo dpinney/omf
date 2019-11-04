@@ -122,7 +122,7 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Production Energy Cost ($/kWh)<span class="classic">####</span></label>
+				<label class="tooltip">Production Energy Cost ($/kWh)<span class="classic"></span></label>
 				<input type="text" id="productionCost" name="productionCost" required="required"/>
 			</div>
 			<div class="shortInput">
@@ -130,19 +130,19 @@
 				<input type="text" id="retailCost" name="retailCost" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">PF Penalty<span class="classic">####</span></label>
+				<label class="tooltip">PF Penalty<span class="classic">Annual power factor penalty</span></label>
 				<input type="text" id="pf_penalty" name="pf_penalty" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">PF Threshold<span class="classic">####</span></label>
+				<label class="tooltip">PF Threshold<span class="classic">Threshold over which a penalty would be charged</span></label>
 				<input type="text" id="pf_threshold" name="pf_threshold" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Motor rating<span class="classic">####</span></label>
+				<label class="tooltip">Motor rating<span class="classic">Unbalance threshold over which the motor would be damaged</span></label>
 				<input type="text" id="motor_threshold" name="motor_threshold" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Motor damage cost<span class="classic">####</span></label>
+				<label class="tooltip">Motor damage cost<span class="classic">How much a damaged motor would cost utility</span></label>
 				<input type="text" id="motor_penalty" name="motor_penalty" required="required"/>
 			</div>
 			<div class="shortInput">
@@ -329,6 +329,12 @@
 					<td>{{allOutputDataDict['service_cost']['power_factor']['solar']}}</td>
 					<td>{{allOutputDataDict['service_cost']['power_factor']['controlled']}}</td>
 				</tr>
+				<tr>
+					<td>Max Derating</td>
+					<td>{{allOutputDataDict['service_cost']['motor_derating']['base']}}%</td>
+					<td>{{allOutputDataDict['service_cost']['motor_derating']['solar']}}%</td>
+					<td>{{allOutputDataDict['service_cost']['motor_derating']['controlled']}}%</td>
+				</tr>
 			</table>
 			{% endif %}
 		</div>
@@ -398,7 +404,7 @@
 						<th>B (V)</th>
 						<th>C (V)</th>
 						<th>Unbalance</th>
-						<th>Motor Efficiency</th>
+						<th>Motor Derating</th>
 					</tr>
 				</thead>
 				{{allOutputDataDict['motor_table_base']}}

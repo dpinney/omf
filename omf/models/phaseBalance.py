@@ -31,7 +31,7 @@ def get_loss_items(tree):
 	return [x for x in s if x in ['transformer', 'underground_line', 'overhead_line', 'triplex_line']]
 
 def motor_efficiency(x):
-	return 100 - (.0179 + .402*x + .134*x**2) # curve fit from data from NREL analysis
+	return .0179 + .402*x + .134*x**2 # curve fit from data from NREL analysis
 
 def pf(real, var):
 	real, var = floats(real), floats(var)
@@ -207,7 +207,9 @@ def work(modelDir, ind):
 				loss_items]) + sums[controlled_suffix].imag +
 				_totals(pJoin(modelDir, 'load' + controlled_suffix + '.csv'), 'imag') + _totals(pJoin(modelDir, 'load_node' + controlled_suffix + '.csv'), 'imag')
 			)
-		}
+		},
+		# Motor derating below.
+		'motor_derating': {}
 	}
 	o['service_cost']['power_factor'] = {
 		'base': n(pf(o['service_cost']['load']['base'], o['service_cost']['VARs']['base'])),
@@ -291,6 +293,8 @@ def work(modelDir, ind):
 				for (i, r), (j, r2) in zip(df_all_motors.iterrows(), df_vs[suffix].iterrows())])
 		
 		all_motor_unbalance[suffix] = [r['unbalance'] for i, r in df_all_motors.iterrows()]
+
+		o['service_cost']['motor_derating'][suffix[1:]] = n(df_all_motors['unbalance'].apply(motor_efficiency).max())
 
 	# ----------------------------------------------------------------------- #
 
@@ -444,15 +448,15 @@ def _totals(filename, component=None):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		# "feederName1": "phase_balance_test",
-		# "criticalNode": 'R1-12-47-1_node_17',
-		# "pvConnection": 'Wye',
-		# "layoutAlgorithm": "geospatial",
+		"feederName1": "phase_balance_test",
+		"criticalNode": 'R1-12-47-1_node_17',
+		"pvConnection": 'Wye',
+		"layoutAlgorithm": "geospatial",
 		# ---------------------------------------- #
-		"feederName1": "phase_balance_test_2",
-		"criticalNode": 'R1-12-47-2_node_28',
-		"pvConnection": 'Delta',
-		"layoutAlgorithm": "forceDirected",
+		# "feederName1": "phase_balance_test_2",
+		# "criticalNode": 'R1-12-47-2_node_28',
+		# "pvConnection": 'Delta',
+		# "layoutAlgorithm": "forceDirected",
 		# ---------------------------------------- #
 		# "feederName1": 'bavarian_solar',
 		# "criticalNode": "node2283458290",
