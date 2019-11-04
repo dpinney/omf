@@ -335,6 +335,12 @@
 					<td>{{allOutputDataDict['service_cost']['motor_derating']['solar']}}%</td>
 					<td>{{allOutputDataDict['service_cost']['motor_derating']['controlled']}}%</td>
 				</tr>
+				<tr>
+					<td>Average Expected Motor Lifespan (Years)</td>
+					<td>{{allOutputDataDict['service_cost']['lifespan']['base']}}</td>
+					<td>{{allOutputDataDict['service_cost']['lifespan']['solar']}}</td>
+					<td>{{allOutputDataDict['service_cost']['lifespan']['controlled']}}</td>
+				</tr>
 			</table>
 			{% endif %}
 		</div>
@@ -405,6 +411,7 @@
 						<th>C (V)</th>
 						<th>Unbalance</th>
 						<th>Motor Derating</th>
+						<th>Expected Lifespan (Years)</th>
 					</tr>
 				</thead>
 				{{allOutputDataDict['motor_table_base']}}
@@ -422,7 +429,8 @@
 						<th>B (V)</th>
 						<th>C (V)</th>
 						<th>Unbalance</th>
-						<th>Motor Efficiency</th>
+						<th>Motor Derating</th>
+						<th>Expected Lifespan (Years)</th>
 					</tr>
 				</thead>
 				{{allOutputDataDict['motor_table_solar']}}
@@ -441,7 +449,8 @@
 						<th>B (V)</th>
 						<th>C (V)</th>
 						<th>Unbalance</th>
-						<th>Motor Efficiency</th>
+						<th>Motor Derating</th>
+						<th>Expected Lifespan (Years)</th>
 					</tr>
 				</thead>
 				{{allOutputDataDict['motor_table_controlled']}}

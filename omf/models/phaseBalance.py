@@ -33,6 +33,9 @@ def get_loss_items(tree):
 def motor_efficiency(x):
 	return .0179 + .402*x + .134*x**2 # curve fit from data from NREL analysis
 
+def lifespan(x):
+	return 19.8*math.exp(-.679*x) # curve fit from data from NREL analysis
+
 def pf(real, var):
 	real, var = floats(real), floats(var)
 	return float(real) / math.sqrt(real**2 + var**2)
@@ -208,8 +211,9 @@ def work(modelDir, ind):
 				_totals(pJoin(modelDir, 'load' + controlled_suffix + '.csv'), 'imag') + _totals(pJoin(modelDir, 'load_node' + controlled_suffix + '.csv'), 'imag')
 			)
 		},
-		# Motor derating below.
-		'motor_derating': {}
+		# Motor derating and lifespan below.
+		'motor_derating': {},
+		'lifespan': {}
 	}
 	o['service_cost']['power_factor'] = {
 		'base': n(pf(o['service_cost']['load']['base'], o['service_cost']['VARs']['base'])),
@@ -279,22 +283,23 @@ def work(modelDir, ind):
 		
 		o['motor_table' + suffix] = ''.join([(
 			"<tr>"
-				"<td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td><td>{5}</td><td>{6}</td><td>{7}</td>"
+				"<td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td><td>{5}</td><td>{6}</td><td>{7}</td><td>{8}</td>"
 			"</tr>" 
 				if r['node_name'] != ind['criticalNode'] else 
 			"<tr>"
-				"<td {8}>{0}</td><td {8}>{1}</td><td {8}>{2}</td><td {8}>{3}</td><td {8}>{4}</td><td {8}>{5}</td><td {8}>{6}</td><td {8}>{7}</td>"
+				"<td {9}>{0}</td><td {9}>{1}</td><td {9}>{2}</td><td {9}>{3}</td><td {9}>{4}</td><td {9}>{5}</td><td {9}>{6}</td><td {9}>{7}</td><td {9}>{8}</td>"
 			"</tr>"
 		).format(r['node_name'], 
 					n(r2['A_real'] + r2['B_real'] + r2['C_real']),
 					n(r2['A_imag'] + r2['B_imag'] + r2['C_imag']),
 					n(r['voltA']), n(r['voltB']), n(r['voltC']), 
-					n(r['unbalance']), n(motor_efficiency(r['unbalance'])), "style='background:yellow'") 
+					n(r['unbalance']), n(motor_efficiency(r['unbalance'])), n(lifespan(r['unbalance'])), "style='background:yellow'") 
 				for (i, r), (j, r2) in zip(df_all_motors.iterrows(), df_vs[suffix].iterrows())])
 		
 		all_motor_unbalance[suffix] = [r['unbalance'] for i, r in df_all_motors.iterrows()]
 
 		o['service_cost']['motor_derating'][suffix[1:]] = n(df_all_motors['unbalance'].apply(motor_efficiency).max())
+		o['service_cost']['lifespan'][suffix[1:]] = n(df_all_motors['unbalance'].apply(lifespan).mean())
 
 	# ----------------------------------------------------------------------- #
 
