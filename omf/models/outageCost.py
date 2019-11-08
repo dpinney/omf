@@ -32,7 +32,113 @@ def datetime_to_float(d):
 	'helper function to convert a datetime object to a float'
 	epoch = datetime.datetime.utcfromtimestamp(0)
 	total_seconds = (d - epoch).total_seconds()
-	return total_seconds	
+	return total_seconds
+
+def locationToName(location, lines):
+	'get the name of the line component associated with a given location (lat/lon)'
+	p = re.compile(r'-?\d+\.\d+')  # Compile a pattern to capture float values
+	coord = [float(i) for i in p.findall(location)]  # Convert strings to float
+	coordLat = coord[0]
+	coordLon = coord[1]
+	# get the coordinates of the two points that make up the edges of the line
+	row_count_lines = lines.shape[0]
+	row = 0
+	while row < row_count_lines:
+		p = re.compile(r'-?\d+\.\d+')  # Compile a pattern to capture float values
+		coord1 = [float(i) for i in p.findall(lines.loc[row, 'coords1'])]  # Convert strings to float
+		coord1Lat = coord1[0]
+		coord1Lon = coord1[1]
+		p = re.compile(r'-?\d+\.\d+')  # Compile a pattern to capture float values
+		coord2 = [float(i) for i in p.findall(lines.loc[row, 'coords2'])]  # Convert strings to float
+		coord2Lat = coord2[0]
+		coord2Lon = coord2[1]
+		# use the triangle property to see if the new point lies on the line
+		dist1 = math.sqrt((coordLat - coord1Lat)**2 + (coordLon - coord1Lon)**2)
+		dist2 = math.sqrt((coord2Lat - coordLat)**2 + (coord2Lon - coordLon)**2)
+		dist3 = math.sqrt((coord2Lat - coord1Lat)**2 + (coord2Lon - coord1Lon)**2)
+		#threshold value just in case the component is not exactly in between the two points given
+		threshold = 10e-5
+		# triangle property with threshold
+		if (dist1 + dist2 - dist3) < threshold:
+			name = lines.loc[row, 'line_name']
+			return name
+		row += 1
+	# if the location does not lie on any line, return 'None' (good for error testing)
+	name = 'None'
+	return name
+
+def nodeToCoords(outageMap, nodeName):
+	'get the latitude and longitude of a given node in string format'
+	coords = ''
+	for key in outageMap['features']:
+		if (nodeName in key['properties'].get('name','')):
+			current = key['geometry']['coordinates']
+			p = re.compile(r'-?\d+\.\d+')  # Compile a pattern to capture float values
+			array = [float(i) for i in p.findall(str(current))]
+			coord1 = array[0]
+			coord2 = array[1]
+			coords = str(coord1) + ' ' + str(coord2)
+	return coords
+
+def nearestLine(location, lines, component):
+	'Get the latitude/longitude of the line component closest to a given location, given the component type'
+	minDist = 10e10
+	trueLatitude = 0.0
+	trueLongitude = 0.0
+	# Separate the location string into latitude and longitude (floats)
+	p = re.compile(r'-?\d+\.\d+')  # Compile a pattern to capture float values
+	coord = [float(i) for i in p.findall(location)]  # Convert strings to float
+	x3 = coord[0]
+	y3 = coord[1]
+	# get the coordinates of the two points that make up the edges of the line
+	row_count_lines = lines.shape[0]
+	row = 0
+	# iterate through all line components
+	while row < row_count_lines:
+		# get the coordinates of the points on the edge of a line component
+		p = re.compile(r'-?\d+\.\d+')  # Compile a pattern to capture float values
+		coord1 = [float(i) for i in p.findall(lines.loc[row, 'coords1'])]  # Convert strings to float
+		x1 = coord1[0]
+		y1 = coord1[1]
+		p = re.compile(r'-?\d+\.\d+')  # Compile a pattern to capture float values
+		coord2 = [float(i) for i in p.findall(lines.loc[row, 'coords2'])]  # Convert strings to float
+		x2 = coord2[0]
+		y2 = coord2[1]
+		# make sure we have a line component
+		if x1 != x2 or y1 != y2:
+			# find the distance between the point and the given line
+			# Note: the point is closest to the line at the tangent to the line that passes through the point
+			# In other words, the dot product of the tangent and the line is zero.
+			u = ((x3 - x1)*(x2 - x1) + (y3 - y1)*(y2 - y1)) / (math.sqrt((x2 - x1)**2 + (y2 - y1)**2))
+			# Get point of intersection of tangent line
+			x = x1 + u*(x2 - x1)
+			y = y1 + u*(y2 - y1)
+			# find distance between point of intersection and the point under consideration
+			distance = math.sqrt((x - x3)**2 + (y - y3)**2)
+			# if this distance is smaller than any seen so far, use it!
+			if distance < minDist:
+				minDist = distance
+				trueLatitude = x
+				trueLongitude = y
+		row += 1
+	return (str(trueLatitude) + ' ' + str(trueLongitude))
+
+def generateMultiple(mc):
+	if 'Start' in mc.columns:
+		row = 0
+		row_count_mc = mc.shape[0]
+		date = [[] for _ in range(365)]
+		print(date)
+		while row < row_count_mc:
+			dt = datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')
+			day = int(dt.strftime('%j')) - 1
+			date[day].append(datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S')))
+			row += 1
+		dayDurations = [None] * 365
+
+
+	else:
+		print('"Start" is not present in the input data.')
 
 def generateDistribution(mc, test, faultsGenerated):
 	numberDurations = int(faultsGenerated)
@@ -48,14 +154,7 @@ def generateDistribution(mc, test, faultsGenerated):
 	enc = LabelEncoder()
 	label = enc.fit(mc['duration'])
 	mc2 = label.transform(mc['duration'])
-	#c = StandardScaler()
-	#mc22 = mc2.reshape(-1, 1)
-	#sc.fit(mc22)
-	#mc2_std = sc.transform(mc22)
-	#mc2_std = mc2_std.flatten()
-	#del mc22
-
-	#Note: flattening is not good for skewed data...
+	np.ndarray.sort(mc2)
 	mc2_std = mc2
 
 	dist_names = ['norm', 
@@ -74,7 +173,7 @@ def generateDistribution(mc, test, faultsGenerated):
 	chi_square = []
 	p_values = []
 
-	percentile_bins = np.linspace(0, 100, num=75, endpoint=True)
+	percentile_bins = np.linspace(0, 100, num=50, endpoint=True)
 	percentile_cutoffs = np.percentile(mc2_std, percentile_bins)
 	mc2_std_range = [mc2_std.min(),mc2_std.max()]
 	observed_frequency, bins = (np.histogram(mc2_std, bins = percentile_cutoffs, range=range))
@@ -111,6 +210,7 @@ def generateDistribution(mc, test, faultsGenerated):
 	results['p_value'] = p_values
 	results.sort_values([test], inplace=True)
 
+	print(results)
 
 	# Get the top distribution
 	if test == 'p_value':
@@ -127,6 +227,7 @@ def generateDistribution(mc, test, faultsGenerated):
 	number = 0
 	newDurations = []
 	while number < numberDurations:
+		# we only want positive durations
 		newEntry = -1
 		if dist == 'norm':
 			while newEntry < 0:
@@ -172,17 +273,39 @@ def generateDistribution(mc, test, faultsGenerated):
 
 	return newDurations
 
-def heatMap(mc):
+def heatMap(mc, test):
 	'create a heat map based on input DataFrame with location, component type, fault type, and cause'
 	compType = {}
 	location = {}
 	cause = {}
 	start = {}
 	duration = {}
+	durCause = {}
+	durTime = {}
+	durLocation = {}
 	row_count_mc = mc.shape[0]
 	row = 0
 	while row < row_count_mc:
 		if mc.loc[row, 'Fault Type'] != 'None':
+			if (test == 'dependent' and 'Finish' in mc.columns and 'Start' in mc.columns):
+				thisDuration = datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))
+			# start and end times for faults (note: if start exists, assume finish also exists)
+			if 'Start' in mc.columns:
+				if mc.loc[row, 'Start'] in start.keys():
+					start[mc.loc[row, 'Start']] += 1
+					if (test == 'dependent' and 'Finish' in mc.columns):
+						durTime[str(mc.loc[row, 'Start'])] += (' ' + str(thisDuration))
+				else:
+					start[mc.loc[row, 'Start']] = 1
+					if (test == 'dependent' and 'Finish' in mc.columns):
+						durTime[str(mc.loc[row, 'Start'])] = (str(thisDuration))
+				if 'Finish' in mc.columns:
+					if test != 'dependent':
+						if datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S')) in duration.keys():
+							duration[datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))] += 1
+						else:
+							duration[datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))] = 1
+
 			causefault = (mc.loc[row, 'Cause'], mc.loc[row, 'Fault Type'])
 			# comp type will store which causes and fault types can occur for a given line type
 			if mc.loc[row, 'Component Type'] in compType.keys():
@@ -195,36 +318,34 @@ def heatMap(mc):
 			# location of the faults as well as the component type and meters affected, since the latter two are completely dependent on the former (if we have no locations for the components)
 			if (mc.loc[row, 'Location'] + ' ' + mc.loc[row, 'Component Type'] + ' ' + mc.loc[row, 'Meters Affected']) in location.keys():
 				location[mc.loc[row, 'Location'] + ' ' + mc.loc[row, 'Component Type'] + ' ' + mc.loc[row, 'Meters Affected']] += 1
+				if ('Finish' in mc.columns and test == 'dependent'):
+					durLocation[str(mc.loc[row, 'Location'])] += (' ' + str(thisDuration))
 			else:
 				location[mc.loc[row, 'Location'] + ' ' + mc.loc[row, 'Component Type'] + ' ' + mc.loc[row, 'Meters Affected']] = 1
-			# causes and fault types for the faults (note dependency again)
+				if ('Finish' in mc.columns and test == 'dependent'):
+					durLocation[str(mc.loc[row, 'Location'])] = (str(thisDuration))
+			# causes and fault types for the faults
 			if causefault in cause.keys():
 				cause[causefault] += 1
+				if ('Finish' in mc.columns and test == 'dependent'):
+					durCause[str(causefault)] += (' ' + str(thisDuration)) 
 			else:
 				cause[causefault] = 1
-			# start and end times for faults (note: if start exists, assume finish also exists)
-			if 'Start' in mc.columns:
-				if mc.loc[row, 'Start'] in start.keys():
-					start[mc.loc[row, 'Start']] += 1
-				else:
-					start[mc.loc[row, 'Start']] = 1
-				if 'Finish' in mc.columns:
-					if datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S')) in duration.keys():
-						duration[datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))] += 1
-					else:
-						duration[datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))] = 1
+				if ('Finish' in mc.columns and test == 'dependent'):
+					durCause[str(causefault)] = str(thisDuration)
 		row += 1
-	# find the total number of faults that occur in each dictionary
-	totalCause = sum(cause.itervalues(), 0.0)
-	totalStart = sum(start.itervalues(), 0.0)
-	totalLocation = sum(location.itervalues(), 0.0)
-	totalDuration = sum(duration.itervalues(), 0.0)
 
+	# find the total number of faults that occur in each dictionary
 	# create a heat map by dividing the number of each individual item by the total number found
-	location = {k: v / totalLocation for k, v in location.iteritems()}
+	totalCause = sum(cause.itervalues(), 0.0)
 	cause = {k: v / totalCause for k, v in cause.iteritems()}
+	totalStart = sum(start.itervalues(), 0.0)
 	start = {k: v / totalStart for k, v in start.iteritems()}
-	duration = {k: v / totalDuration for k, v in duration.iteritems()}
+	if test != 'dependent':
+		totalDuration = sum(duration.itervalues(), 0.0)
+		duration = {k: v / totalDuration for k, v in duration.iteritems()}
+	totalLocation = sum(location.itervalues(), 0.0)
+	location = {k: v / totalLocation for k, v in location.iteritems()}
 
 	# create a single dictionary to store heat map data
 	heatMap = {}
@@ -244,17 +365,18 @@ def heatMap(mc):
 		heatMap['start'] = start
 	else:
 		print('"Start" is missing from input data.')
-	if bool(duration):
-		heatMap['duration'] = duration
-	else:
-		print('"Finish" is missing from input data.')
+	if test != 'dependent':
+		if bool(duration):
+			heatMap['duration'] = duration
+		else:
+			print('"Finish" is missing from input data.')
 
-	return heatMap
+	return heatMap, durCause, durTime, durLocation
 
 def randomFault(pathToCsv, faultsGenerated, test):
 	'using an input csv file with outage data, create a heat map object and generate a random fault'
 	mc = pd.read_csv(pathToCsv)
-	heatmap = heatMap(mc)
+	heatmap, durCause, durTime, durLocation = heatMap(mc, test)
 	component_types = []
 	locations = []
 	metersaffected = []
@@ -272,15 +394,16 @@ def randomFault(pathToCsv, faultsGenerated, test):
 		location = str(chooseLocation[0]) + ' ' + str(chooseLocation[1])
 		if heatmap['start']:
 			start = np.random.choice(heatmap['start'].keys(), replace=True, p=heatmap['start'].values())
-			if heatmap['duration']:
-				if (test == 'chi_square' or test == 'p_value'):
-					duration = np.float64(math.ceil(newDurations[faultNumber]))
-					start = str(start)
-					finish = str(datetime.datetime.strptime(start, "%Y-%m-%d %H:%M:%S") + datetime.timedelta(seconds=duration))
-				else:
-					duration = np.random.choice(heatmap['duration'].keys(), replace=True, p=heatmap['duration'].values())
-					start = str(start)
-					finish = str(datetime.datetime.strptime(start, "%Y-%m-%d %H:%M:%S") + datetime.timedelta(seconds=duration))
+			if test != 'dependent':
+				if heatmap['duration']:
+					if (test == 'chi_square' or test == 'p_value'):
+						duration = np.float64(math.ceil(newDurations[faultNumber]))
+						start = str(start)
+						finish = str(datetime.datetime.strptime(start, "%Y-%m-%d %H:%M:%S") + datetime.timedelta(seconds=duration))
+					else:
+						duration = np.random.choice(heatmap['duration'].keys(), replace=True, p=heatmap['duration'].values())
+						start = str(start)
+						finish = str(datetime.datetime.strptime(start, "%Y-%m-%d %H:%M:%S") + datetime.timedelta(seconds=duration))
 		# Note: for this method, component type is completely dependent on location
 		compType = str(chooseLocation[2])
 		
@@ -302,6 +425,45 @@ def randomFault(pathToCsv, faultsGenerated, test):
 			if chooseCause in heatmap['compType'][compType]['causes']:
 				causefault = chooseCause
 				causeChosen = True
+		# If we want to generate durations assuming dependency of variables		
+		if test == 'dependent':
+			def _ss(data):
+				"""Return sum of square deviations of sequence data."""
+				c = sum(data) / len(data)
+				ss = sum((x-c)**2 for x in data)
+				return ss
+
+			def stddev(data):
+				"""Compute the sample standard deviation."""
+				n = len(data)
+				if n < 2:
+					return 0
+				ss = _ss(data)
+				pvar = ss/(n-1)
+				return pvar**0.5
+
+			causeDurList = list(durCause[str(causefault)].split(' '))
+			causeDurList = [float(i) for i in causeDurList]
+			avgCause = sum(causeDurList) / len(causeDurList)
+			stdCause = stddev(causeDurList)
+
+			timeDurList = list(durTime[str(start)].split(' '))
+			timeDurList = [float(i) for i in timeDurList]
+			avgTime = sum(timeDurList) / len(timeDurList)
+			stdTime = stddev(timeDurList)
+
+			locationDurList = list(durLocation[str(location)].split(' '))
+			locationDurList = [float(i) for i in locationDurList]
+			avgLocation = sum(locationDurList) / len(locationDurList)
+			stdLocation = stddev(locationDurList)
+
+			avgDuration = (avgCause + avgTime + avgLocation) / 3
+			stdDuration = (stdCause + stdTime + stdLocation) / 3
+			duration = -1
+			while duration < 0:
+				duration = np.random.normal(loc=avgDuration, scale=stdDuration/1000)
+			finish = str(datetime.datetime.strptime(start, "%Y-%m-%d %H:%M:%S") + datetime.timedelta(seconds=math.ceil(duration)))
+
 		locations.append(location)
 		component_types.append(compType)
 		causes.append(causefault[0])
@@ -309,27 +471,30 @@ def randomFault(pathToCsv, faultsGenerated, test):
 		finishes.append(finish)
 		metersaffected.append(meterdata)
 		fault_types.append(causefault[1])
-		faultNumber += 1
-
-	if (heatmap['start'] and heatmap['duration']):	
-		data = {'Start': starts, 'Finish': finishes, 'component_type': component_types, 'Location': locations, 'Cause': causes, 'fault_type': fault_types, 'Meters Affected': metersaffected}
-	else:
-		data = {'component_type': component_types, 'Location': locations, 'Cause': causes, 'fault_type': fault_types, 'Meters Affected': metersaffected}
+		faultNumber += 1	
+	
+	data = {'Start': starts, 'Finish': finishes, 'Component Type': component_types, 'Location': locations, 'Cause': causes, 'Fault Type': fault_types, 'Meters Affected': metersaffected}
+	
 	faults = pd.DataFrame(data)
 	return faults
 
-def locationMap(mc, neighbors, gridLines):
+def locationMap(mc, gridLines, lines, test):
 	'Create a location heatmap, where the 2D space is partitioned into a lattice. The function for the heat map is inversely proportional to the distance of the nth neighbor from each point in the lattice.'
 	# lists to hold the latitudes, longitudes, and coordinate pairs of each fault location
 	longitudes = []
 	latitudes = []
 	coords = []
+	lineNameMeters = {}
+	durLocation = {}
+	coordDuration = []
 	
 	# populate the lists
 	row = 0
 	row_count_mc = mc.shape[0]
 	while row < row_count_mc:
 		locString = mc.loc[row, 'Location']
+		metersAffected = mc.loc[row, 'Meters Affected']
+		tempDuration = datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))
 		p = re.compile(r'-?\d+\.\d+')  # Compile a pattern to capture integer values
 		coord = [float(i) for i in p.findall(locString)]
 		latitude = coord[0]
@@ -337,6 +502,10 @@ def locationMap(mc, neighbors, gridLines):
 		latitudes.append(latitude)
 		longitudes.append(longitude)
 		coords.append(coord)
+		coordDuration.append(tempDuration)
+		lineName = locationToName(locString, lines)
+		if lineName not in lineNameMeters.keys():
+			lineNameMeters[str(lineName)] = metersAffected
 		row += 1
 
 	# Pull out the minimum and maximum latitudes/longitudes of each fault.
@@ -362,29 +531,53 @@ def locationMap(mc, neighbors, gridLines):
 			point.append(xv[i])
 			point.append(yv[j])
 			distances, indices = spatial.KDTree(coords).query(point, k=int(4), p=2)
-			if neighbors > 1:
-				nth_distance.append(1/max(distances))
-			else:
-				nth_distance.append(1/distances)
+			nth_distance.append(1/max(distances))
+			if test == 'dependent':
+				if (str(xv[i]) + ' ' + str(yv[j])) in durLocation.keys():
+					durLocation[str(xv[i]) + ' ' + str(yv[j])] += (' ' + str(coordDuration[indices.item(0)]))
+				else:
+					durLocation[str(xv[i]) + ' ' + str(yv[j])] = str(coordDuration[indices.item(0)])
 			i += 1
 		j += 1
 	# normalize
 	total_distance = sum(nth_distance)
 	nth_distance[:] = [x / total_distance for x in nth_distance]
 
-	return nth_distance, xv, yv
+	return nth_distance, xv, yv, lineNameMeters, durLocation
 
-def heatMapRefined(mc):
+def heatMapRefined(mc, test):
 	'create a heat map based on input DataFrame with component type, fault type, and cause'
 	componentType = {}
 	compType = {}
 	cause = {}
 	start = {}
 	duration = {}
+	durCause = {}
+	durTime = {}
 	#faultType = {}
 	row_count_mc = mc.shape[0]
 	row = 0
 	while row < row_count_mc:
+		
+		if ('Finish' in mc.columns and 'Start' in mc.columns and test == 'dependent'):
+			thisDuration = datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))
+		# start and end times for faults (note: if start exists, assume finish also exists)
+		if 'Start' in mc.columns:
+			if mc.loc[row, 'Start'] in start.keys():
+				start[mc.loc[row, 'Start']] += 1
+				if (test == 'dependent' and 'Finish' in mc.columns):
+					durTime[str(mc.loc[row, 'Start'])] += (' ' + str(thisDuration))
+			else:
+				start[mc.loc[row, 'Start']] = 1
+				if (test == 'dependent' and 'Finish' in mc.columns):
+					durTime[str(mc.loc[row, 'Start'])] = str(thisDuration)
+			if 'Finish' in mc.columns:
+				if test != 'dependent':
+					if datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S')) in duration.keys():
+						duration[datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))] += 1
+					else:
+						duration[datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))] = 1
+
 		causefault = (mc.loc[row, 'Cause'], mc.loc[row, 'Fault Type'])
 		# component types for faults
 		if mc.loc[row, 'Component Type'] in componentType.keys():
@@ -400,35 +593,27 @@ def heatMapRefined(mc):
 			compType[mc.loc[row, 'Component Type']]['causes'] = []
 			compType[mc.loc[row, 'Component Type']]['causes'].append(causefault)
 
-		# start and end times for faults (note: if start exists, assume finish also exists)
-		if 'Start' in mc.columns:
-			if mc.loc[row, 'Start'] in start.keys():
-				start[mc.loc[row, 'Start']] += 1
-			else:
-				start[mc.loc[row, 'Start']] = 1
-			if 'Finish' in mc.columns:
-				if datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S')) in duration.keys():
-					duration[datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))] += 1
-				else:
-					duration[datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))] = 1
-
 		# causes and fault types for the faults
 		if causefault in cause.keys():
 			cause[causefault] += 1
+			if ('Finish' in mc.columns and test == 'dependent'):
+				durCause[str(causefault)] += (' ' + str(thisDuration)) 
 		else:
 			cause[causefault] = 1
+			if ('Finish' in mc.columns and test == 'dependent'):
+				durCause[str(causefault)] = str(thisDuration)
 		row += 1
 	# find the total number of faults that occur in each dictionary
-	totalCause = sum(cause.itervalues(), 0.0)
-	totalComponentType = sum(componentType.itervalues(), 0.0)
-	totalStart = sum(start.itervalues(), 0.0)
-	totalDuration = sum(duration.itervalues(), 0.0)
-
 	# create a heat map by dividing the number of each individual item by the total number found
+	totalCause = sum(cause.itervalues(), 0.0)
 	cause = {k: v / totalCause for k, v in cause.iteritems()}
+	totalComponentType = sum(componentType.itervalues(), 0.0)
 	componentType = {k: v / totalComponentType for k, v in componentType.iteritems()}
+	totalStart = sum(start.itervalues(), 0.0)
 	start = {k: v / totalStart for k, v in start.iteritems()}
-	duration = {k: v / totalDuration for k, v in duration.iteritems()}
+	if test != 'dependent':
+		totalDuration = sum(duration.itervalues(), 0.0)
+		duration = {k: v / totalDuration for k, v in duration.iteritems()}
 
 	# create a single dictionary to store heat map data
 	heatMap = {}
@@ -448,14 +633,15 @@ def heatMapRefined(mc):
 		heatMap['start'] = start
 	else:
 		print('"Start" is missing from input data.')
-	if bool(duration):
-		heatMap['duration'] = duration
-	else:
-		print('"Finish" is missing from input data.')
+	if test != 'dependent':
+		if bool(duration):
+			heatMap['duration'] = duration
+		else:
+			print('"Finish" is missing from input data.')
 
-	return heatMap
+	return heatMap, durCause, durTime
 
-def randomFaultsRefined(pathToCsv, pathToOmd, workDir, neighbors, gridLines, faultsGenerated, test):
+def randomFaultsRefined(pathToCsv, pathToOmd, workDir, gridLines, faultsGenerated, test, component):
 	'Function that generates a DataFrame with a set of faults based on an original set of data and which selects the location using the lattice method'
 	
 	# Check that we're in the proper directory
@@ -465,8 +651,44 @@ def randomFaultsRefined(pathToCsv, pathToOmd, workDir, neighbors, gridLines, fau
 
 	# Create heatmaps for location and the other three parameters
 	mc = pd.read_csv(pathToCsv)
-	nth_distance, xv, yv = locationMap(mc, neighbors, gridLines)
-	heatMap = heatMapRefined(mc)
+	# create a DataFrame with the line name and the coordinates of its edges
+	with open(pathToOmd) as inFile:
+		tree = json.load(inFile)['tree']
+	outageMap = geo.omdGeoJson(pathToOmd, conversion = False)
+	with open(workDir + '/lines.csv', mode='w') as lines:
+
+		fieldnames = ['line_name', 'coords1', 'coords2']
+		writer = csv.DictWriter(lines, fieldnames)
+
+		writer.writeheader()
+
+		for key in tree.keys():
+			obtype = tree[key].get("object","")
+			if obtype == 'underground_line' or obtype == 'overhead_line' or obtype == 'triplex_line':
+				writer.writerow({'line_name': tree[key]['name'], 'coords1': nodeToCoords(outageMap, tree[key]['from']), 'coords2': nodeToCoords(outageMap, tree[key]['to'])})
+
+	lines.close()
+	lines = pd.read_csv(workDir + '/lines.csv')
+
+	nth_distance, xv, yv, lineNameMeters, durLocation = locationMap(mc, gridLines, lines, test)
+
+	with open(workDir + '/faultLines.csv', mode='w') as faultLines:
+
+		fieldnames = ['line_name', 'coords1', 'coords2']
+		writer = csv.DictWriter(faultLines, fieldnames)
+
+		writer.writeheader()
+
+		for key in tree.keys():
+			obtype = tree[key].get("object","")
+			if obtype == 'underground_line' or obtype == 'overhead_line' or obtype == 'triplex_line':
+				if str(tree[key]['name']) in lineNameMeters.keys():
+					writer.writerow({'line_name': tree[key]['name'], 'coords1': nodeToCoords(outageMap, tree[key]['from']), 'coords2': nodeToCoords(outageMap, tree[key]['to'])})
+
+	faultLines.close()
+
+	faultLines = pd.read_csv(workDir + '/faultLines.csv')
+	heatMap, durCause, durTime = heatMapRefined(mc, test)
 	# Create lists to store the new outage data.
 	component_types = []
 	locations = []
@@ -474,23 +696,20 @@ def randomFaultsRefined(pathToCsv, pathToOmd, workDir, neighbors, gridLines, fau
 	fault_types = []
 	starts = []
 	finishes = []
+	metersData = []
 	if (test == 'chi_square' or test == 'p_value'):
 		newDurations = generateDistribution(mc, test, faultsGenerated)
 	# Generate a set number of new faults.
 	faultNumber = 0
 	while faultNumber < faultsGenerated:
-		# Randomly select the component type based on heatmap data.
-		component = np.random.choice(heatMap['componentType'].keys(), replace=True, p=heatMap['componentType'].values())
-		compType = component
-
 		if heatMap['start']:
 			start = np.random.choice(heatMap['start'].keys(), replace=True, p=heatMap['start'].values())
-			if heatMap['duration']:
-				if (test == 'chi_square' or test == 'p_value'):
-					duration = np.float64(math.ceil(newDurations[faultNumber]))
-					start = str(start)
-					finish = str(datetime.datetime.strptime(start, "%Y-%m-%d %H:%M:%S") + datetime.timedelta(seconds=duration))
-				else:
+			if (test == 'chi_square' or test == 'p_value'):
+				duration = np.float64(math.ceil(newDurations[faultNumber]))
+				start = str(start)
+				finish = str(datetime.datetime.strptime(start, "%Y-%m-%d %H:%M:%S") + datetime.timedelta(seconds=duration))
+			else:
+				if test != 'dependent':
 					duration = np.random.choice(heatMap['duration'].keys(), replace=True, p=heatMap['duration'].values())
 					start = str(start)
 					finish = str(datetime.datetime.strptime(start, "%Y-%m-%d %H:%M:%S") + datetime.timedelta(seconds=duration))
@@ -507,82 +726,15 @@ def randomFaultsRefined(pathToCsv, pathToOmd, workDir, neighbors, gridLines, fau
 		longitudeChosen = yv[entry / gridLines]
 		location = str(latitudeChosen) + ' ' + str(longitudeChosen)
 
-		def nodeToCoords(outageMap, nodeName):
-			'get the latitude and longitude of a given node in string format'
-			coords = ''
-			for key in outageMap['features']:
-				if (nodeName in key['properties'].get('name','')):
-					current = key['geometry']['coordinates']
-					p = re.compile(r'-?\d+\.\d+')  # Compile a pattern to capture float values
-					array = [float(i) for i in p.findall(str(current))]
-					coord1 = array[0]
-					coord2 = array[1]
-					coords = str(coord1) + ' ' + str(coord2)
-			return coords
-
-		def nearestLine(location, lines, component):
-			'Get the latitude/longitude of the line component closest to a given location, given the component type'
-			minDist = 10e10
-			trueLatitude = 0.0
-			trueLongitude = 0.0
-			# Separate the location string into latitude and longitude (floats)
-			p = re.compile(r'-?\d+\.\d+')  # Compile a pattern to capture float values
-			coord = [float(i) for i in p.findall(location)]  # Convert strings to float
-			x3 = coord[0]
-			y3 = coord[1]
-			# get the coordinates of the two points that make up the edges of the line
-			row_count_lines = lines.shape[0]
-			row = 0
-			# iterate through all line components
-			while row < row_count_lines:
-				# get the coordinates of the points on the edge of a line component
-				p = re.compile(r'-?\d+\.\d+')  # Compile a pattern to capture float values
-				coord1 = [float(i) for i in p.findall(lines.loc[row, 'coords1'])]  # Convert strings to float
-				x1 = coord1[0]
-				y1 = coord1[1]
-				p = re.compile(r'-?\d+\.\d+')  # Compile a pattern to capture float values
-				coord2 = [float(i) for i in p.findall(lines.loc[row, 'coords2'])]  # Convert strings to float
-				x2 = coord2[0]
-				y2 = coord2[1]
-				# make sure we have a line component
-				if x1 != x2 or y1 != y2:
-					# find the distance between the point and the given line
-					# Note: the point is closest to the line at the tangent to the line that passes through the point
-					# In other words, the dot product of the tangent and the line is zero.
-					u = ((x3 - x1)*(x2 - x1) + (y3 - y1)*(y2 - y1)) / (math.sqrt((x2 - x1)**2 + (y2 - y1)**2))
-					# Get point of intersection of tangent line
-					x = x1 + u*(x2 - x1)
-					y = y1 + u*(y2 - y1)
-					# find distance between point of intersection and the point under consideration
-					distance = math.sqrt((x - x3)**2 + (y - y3)**2)
-					# if this distance is smaller than any seen so far, use it!
-					if distance < minDist:
-						minDist = distance
-						trueLatitude = x
-						trueLongitude = y
-				row += 1
-			return (str(trueLatitude) + ' ' + str(trueLongitude))
-
-		# create a DataFrame with the line name and the coordinates of its edges
-		with open(pathToOmd) as inFile:
-			tree = json.load(inFile)['tree']
-		outageMap = geo.omdGeoJson(pathToOmd, conversion = False)
-		with open(workDir + '/lines.csv', mode='w') as lines:
-			fieldnames = ['coords1', 'coords2']
-			writer = csv.DictWriter(lines, fieldnames)
-
-			writer.writeheader()
-
-			for key in tree.keys():
-				obtype = tree[key].get("object","")
-				if obtype == component:
-					writer.writerow({'coords1': nodeToCoords(outageMap, tree[key]['from']), 'coords2': nodeToCoords(outageMap, tree[key]['to'])})
-
-		lines.close()
-		lines = pd.read_csv(workDir + '/lines.csv')
-		# get a location that lies on a line, based on the location heat map generated
-		trueLocation = nearestLine(location, lines, component)	
-		
+		# get a location that lies on a line, based on the location heat map generated, then estimate the meters affected based on nearby lines
+		# Note: if the line in question has meters affected data, just use that. Otherwise, approximation is necessary
+		trueLocation = nearestLine(location, lines, component)
+		nearestLocMeters = nearestLine(location, faultLines, component)
+		if 'Meters Affected' in mc.columns:
+			if str(locationToName(nearestLocMeters, faultLines)) in lineNameMeters.keys():
+				metersAffected = lineNameMeters[str(locationToName(nearestLocMeters, faultLines))]
+			else:
+				metersAffected = 'None'
 		# choose a cause and fault type that are possible using the heatmap, given the component type
 		causeChosen = False
 		while causeChosen == False:
@@ -593,27 +745,65 @@ def randomFaultsRefined(pathToCsv, pathToOmd, workDir, neighbors, gridLines, fau
 				if rand <= total:
 					chooseCause = k
 					break
-			if chooseCause in heatMap['compType'][compType]['causes']:
+			if chooseCause in heatMap['compType'][component]['causes']:
 				causefault = chooseCause
 				causeChosen = True
 		
+		# If we want to generate durations assuming dependency of variables		
+		if test == 'dependent':
+			def _ss(data):
+				"""Return sum of square deviations of sequence data."""
+				c = sum(data) / len(data)
+				ss = sum((x-c)**2 for x in data)
+				return ss
+
+			def stddev(data):
+				"""Compute the sample standard deviation."""
+				n = len(data)
+				if n < 2:
+					return 0
+				ss = _ss(data)
+				pvar = ss/(n-1)
+				return pvar**0.5
+
+			causeDurList = list(durCause[str(causefault)].split(' '))
+			causeDurList = [float(i) for i in causeDurList]
+			avgCause = sum(causeDurList) / len(causeDurList)
+			stdCause = stddev(causeDurList)
+
+			timeDurList = list(durTime[str(start)].split(' '))
+			timeDurList = [float(i) for i in timeDurList]
+			avgTime = sum(timeDurList) / len(timeDurList)
+			stdTime = stddev(timeDurList)
+
+			locationDurList = list(durLocation[str(location)].split(' '))
+			locationDurList = [float(i) for i in locationDurList]
+			avgLocation = sum(locationDurList) / len(locationDurList)
+			stdLocation = stddev(locationDurList)
+
+			avgDuration = (avgCause + avgTime + avgLocation) / 3
+			stdDuration = (stdCause + stdTime + stdLocation) / 3
+			duration = -1
+			while duration < 0:
+				duration = np.random.normal(loc=avgDuration, scale=stdDuration/1000)
+			finish = str(datetime.datetime.strptime(start, "%Y-%m-%d %H:%M:%S") + datetime.timedelta(seconds=math.ceil(duration)))
+
 		# Add this fault to the set of faults.
 		locations.append(trueLocation)
 		component_types.append(component)
 		causes.append(causefault[0])
+		metersData.append(metersAffected)
 		starts.append(start)
 		finishes.append(finish)
 		fault_types.append(causefault[1])
 		faultNumber += 1
+	
+	data = {'Start': starts, 'Finish': finishes, 'Component Type': component_types, 'Location': locations, 'Cause': causes, 'Fault Type': fault_types, 'Meters Affected': metersData}
 
-	if (heatMap['start'] and heatMap['duration']):	
-		data = {'Start': starts, 'Finish': finishes, 'component_type': component_types, 'Location': locations, 'Cause': causes, 'fault_type': fault_types}
-	else:
-		data = {'component_type': component_types, 'Location': locations, 'Cause': causes, 'fault_type': fault_types}
 	faults = pd.DataFrame(data)
 	return faults
 
-def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData, numberOfCustomers, sustainedOutageThreshold, causeFilter, componentTypeFilter, faultTypeFilter, timeMinFilter, timeMaxFilter, meterMinFilter, meterMaxFilter, durationMinFilter, durationMaxFilter, neighborsStr, gridLinesStr, faultsGeneratedStr, test):
+def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData, numberOfCustomers, sustainedOutageThreshold, causeFilter, componentTypeFilter, faultTypeFilter, timeMinFilter, timeMaxFilter, meterMinFilter, meterMaxFilter, durationMinFilter, durationMaxFilter, gridLinesStr, faultsGeneratedStr, test):
 	' calculates outage metrics, plots a leaflet map of faults, and plots an outage timeline'
 	# check to see if work directory is specified; otherwise, create a temporary directory
 	if not workDir:
@@ -736,12 +926,12 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData,
 				timeMax = 10e10
 				durationMinFilter = -10e10
 				durationMaxFilter = 10e10
-			if 'component_type' in mc.columns:
-				componentType = mc.loc[row, 'component_type']
+			if 'Component Type' in mc.columns:
+				componentType = mc.loc[row, 'Component Type']
 			else:
 				componentType = 'None'
-			if 'fault_type' in mc.columns:
-				faultType = mc.loc[row, 'fault_type']
+			if 'Fault Type' in mc.columns:
+				faultType = mc.loc[row, 'Fault Type']
 			else:
 				faultType = 'None'
 
@@ -753,10 +943,9 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData,
 			row += 1
 	# generate new fault data if the user requests
 	if generateRandom == '2':
-		neighbors = int(neighborsStr)
 		gridLines = int(gridLinesStr)
 		faultsGenerated = int(faultsGeneratedStr)
-		mc1 = randomFaultsRefined(pathToCsv, pathToOmd, workDir, neighbors, gridLines, faultsGenerated, test)
+		mc1 = randomFaultsRefined(pathToCsv, pathToOmd, workDir, gridLines, faultsGenerated, test, componentTypeFilter)
 	if generateRandom == '1':
 		faultsGenerated = int(faultsGeneratedStr)
 		mc1 = randomFault(pathToCsv, faultsGenerated, test)
@@ -798,14 +987,13 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData,
 				durationMinFilter = -10e10
 				durationMaxFilter = 10e10
 				start = ''
-				
 
-			if 'component_type' in mc1.columns:
-				componentType = mc1.loc[row, 'component_type']
+			if 'Component Type' in mc1.columns:
+				componentType = mc1.loc[row, 'Component Type']
 			else:
 				componentType = 'None'
-			if 'fault_type' in mc1.columns:
-				faultType = mc1.loc[row, 'fault_type']
+			if 'Fault Type' in mc1.columns:
+				faultType = mc1.loc[row, 'Fault Type']
 			else:
 				faultType = 'None'
 
@@ -939,7 +1127,6 @@ def work(modelDir, inputDict):
 		inputDict['meterMaxFilter'],
 		inputDict['durationMinFilter'],
 		inputDict['durationMaxFilter'],
-		inputDict['neighborsStr'],
 		inputDict['gridLinesStr'],
 		inputDict['faultsGeneratedStr'],
 		inputDict['test'])
@@ -974,19 +1161,18 @@ def new(modelDir):
 		"numberOfCustomers": "192",
 		"sustainedOutageThreshold": "200",
 		"causeFilter": "0",
-		"componentTypeFilter": "All",
+		"componentTypeFilter": "overhead_line",
 		"faultTypeFilter": "All",
 		"timeMinFilter": "2000-01-01 00:00:01",
 		"timeMaxFilter": "2000-12-15 00:00:30",
 		"meterMinFilter": "0",
 		"meterMaxFilter": "100",
-		"durationMinFilter": "150",
+		"durationMinFilter": "130",
 		"durationMaxFilter": "1000000",
 		"outageFileName": "outagesNew3.csv",
-		"neighborsStr": "5",
 		"gridLinesStr": "100",
 		"faultsGeneratedStr": "1000",
-		"test": "p_value",
+		"test": "dependent",
 		"outageData": open(pJoin(__neoMetaModel__._omfDir,"scratch","smartSwitching","outagesNew3.csv"), "r").read(),
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
