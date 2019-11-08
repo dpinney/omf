@@ -34,7 +34,7 @@ def motor_efficiency(x):
 	return .0179 + .402*x + .134*x**2 # curve fit from data from NREL analysis
 
 def lifespan(x):
-	return 19.8*math.exp(-.679*x) # curve fit from data from NREL analysis
+	return 20-19.8*math.exp(-.679*x) # curve fit from data from NREL analysis
 
 def pf(real, var):
 	real, var = floats(real), floats(var)
