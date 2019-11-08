@@ -8,6 +8,30 @@ newFeederWireframe = {"links":[],"hiddenLinks":[],"nodes":[],"hiddenNodes":[],
 	"layoutVars":{"theta":"0.8","gravity":"0.01","friction":"0.9","linkStrength":"5",
 	"linkDistance":"5","charge":"-5"},"attachments":{}}
 
+def load(inPath, attachPaths=[]):
+	'''Load a .omd or .glm file in to an in-memory feeder object.
+	If you're loading a .glm and it has #include attachments, specify those paths in the optional argument.
+	'''
+	if inPath.endswith('.omd'):
+		with open(inPath, 'r') as inFile:
+			return json.load(inFile)
+	elif inPath.endswith('.glm'):
+		tree = parse(inPath)
+		omd = dict(newFeederWireframe)
+		omd['tree'] = tree
+		for attPath in attachPaths:
+			fname = os.path.basename(attPath)
+			with open(attPath, 'r') as attFile:
+				omd['attachments'][fname] = attFile.read()
+		return omd
+	else:
+		raise Exception('Unsupported filetype at path ' + inPath)
+
+def save(inOmd, outPath):
+	'''Save an in-memory OMD to a file, nicely formatted.'''
+	with open(outPath, 'w') as outFile:
+		json.dump(inOmd, outFile, indent=4)
+
 def parse(inputStr, filePath=True):
 	''' Parse a GLM into an omf.feeder tree. This is so we can walk the tree, change things in bulk, etc.
 	Input can be a filepath or GLM string.

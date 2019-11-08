@@ -28,6 +28,8 @@ sudo python2 -m pip install ipykernel
 # Installing the kernelspec with sudo, but don't use sudo. There is only one user per container, so a system-wide kernelspec vs. a user-specific
 # kernelspec is irrelevant regardless
 python2 -m ipykernel install --user
+# Install requirements.txt again because matplotlib doesn't install
+sudo pip install -r requirements.txt
 # Restore the original GridState environment
 sudo mv /usr/local/bin/python.bkp /usr/local/bin/python
 sudo mv /usr/local/bin/pip.bkp /usr/local/bin/pip

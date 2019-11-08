@@ -6,6 +6,7 @@ from omf.solvers import gridlabd
 from dateutil.tz import tzlocal
 from matplotlib import pyplot as plt
 from pytz import reference
+import numpy as np
 import omf
 import omf.feeder as feeder
 import omf.geo as geo
@@ -44,7 +45,7 @@ def convert(stdString, seqString, rescale=True):
 		for row in hardwareStats:
 			if row[0] == deviceName:
 				return row
-		return None	
+		return None
 	# Use a default for nominal voltage, but try to set it to the source voltage if possible.
 	nominal_voltage = 14400
 	for ob in components:
@@ -688,7 +689,7 @@ def convert(stdString, seqString, rescale=True):
 				percent_z = _safeGet(trans_config, 6, 3)
 				x_r_ratio = _safeGet(trans_config, 9, 5)
 			# Set the shunt impedance
-			try: 
+			try:
 				f_no_load_loss = float(no_load_loss)
 			except:
 				f_no_load_loss = 0.0
@@ -732,7 +733,7 @@ def convert(stdString, seqString, rescale=True):
 			except:
 				transConfig['power_rating'] = '500.0'
 			return transformer
-		
+
 		# Simple lookup table for which function we need to apply:
 		objectToFun = {
 			1 : convertOhLine,
@@ -1330,19 +1331,19 @@ def stdSeqToGlm(seqPath, stdPath, glmPath):
 		outFile.write(omf.feeder.sortedWrite(tree))
 
 def missingConductorsFix(tree):
-	'''Fixes the missing conductors issue in the tree'''	
+	'''Fixes the missing conductors issue in the tree'''
 	### CHECK IF THERE ARE LINE CONFIGS WITHOUT ANY CONDUCTORS ###
 	empty_line_configs = dict()
 	#get line configs missing conductors (dict maps name to key w/in tree)
 	for k,v in tree.iteritems():
 		if v.get('object') == 'line_configuration' and not any('conductor' in vk for vk in v.keys()):
 			empty_line_configs[v['name']] = k
-	
+
 	#get keys of lines missing conductors
 	empty_lines = [k for k,v in tree.iteritems() if 'line' in v.get('object','') and v.get('configuration') in empty_line_configs]
-	
+
 	for line_key in empty_lines:
-		#find sibling lines 
+		#find sibling lines
 		mom_node = tree[line_key]['from']
 		dotter_node = tree[line_key]['to']
 		brother_key = None
@@ -1353,7 +1354,7 @@ def missingConductorsFix(tree):
 				if mom_node == v.get('from','') or dotter_node == v.get('to',''):
 					brother_key = k
 					break
-				if mom_node == v.get('to', ''): 
+				if mom_node == v.get('to', ''):
 					grandpa_key = k
 				if dotter_node == v.get('from', ''):
 					grandson_key = k
@@ -1374,18 +1375,18 @@ def missingConductorsFix(tree):
 			for k,v in tree.iteritems():
 				if v.get('from') in ggma_node_names:
 					cousin_node_names.append(v.get('to'))
-			
+
 			for k,v in tree.iteritems():
 				if v.get('from') in cousin_node_names and v['object'] == tree[line_key]['object'] and k not in empty_lines:
 					nearby = k
 					break
-		
+
 		if not nearby:
-			#second cousins failed us so check the whole tree for a usable config 
+			#second cousins failed us so check the whole tree for a usable config
 			for k,v in tree.iteritems():
 				if v.get('object') == tree[line_key]['object'] and k not in empty_lines:
 					nearby = k
-		
+
 		if not nearby:
 			#there is no usable line_config in the whole tree, so we use our default conductor and stick it in the current line_config
 			#find our line config's key and check if we've already inserted our default conductor
@@ -1404,10 +1405,10 @@ def missingConductorsFix(tree):
 				while( conductor_key in tree.keys() ):
 					conductor_key -= 1
 				tree[conductor_key] = default_equipment[ tree[line_key]['object'] + '_conductor' ]
-			
+
 			for phase in tree[line_key]['phases']:
 				tree[lc_key]['conductor_' + phase] = tree[conductor_key]['name']
-			
+
 			continue
 
 		#grab the conductor from the line configuration
@@ -1428,7 +1429,7 @@ def missingConductorsFix(tree):
 	namesToKeys = getNamesToKeys(tree)
 
 	buggy_lines = dict() #maps buggy lines to their line config keys
-	
+
 	for k, line in tree.iteritems():
 		if 'line' in line.get('object',''):
 			try:
@@ -1484,7 +1485,7 @@ def islandCount(tree, csv = True, csv_min_lines = 2):
 			pass
 	island_sizes = []
 	for island_root in island_roots:
-		island_sizes.append( count(island_root, toViset) )	
+		island_sizes.append( count(island_root, toViset) )
 	island_roots.insert(0, main_root)
 	island_sizes.insert(0, main_size)
 	if csv and len(island_roots) > csv_min_lines:
@@ -1503,7 +1504,7 @@ def phasingMismatchFix(tree, intermittent_drop_range=5):
 	'''Fixes phase mismatch errors in the tree'''
 	#for k,v in tree.iteritems():
 	#	if v.get('name') == 'NODE150020':
-	#		print v 
+	#		print v
 	#		tree[k]['phases'] = 'B'
 	#		break
 
@@ -1552,8 +1553,8 @@ def phasingMismatchFix(tree, intermittent_drop_range=5):
 				if not (kid_phases <= current_phases):
 					ancestry = [current_node]
 					dropped = False
-					# We check (intermittent_drop_range) generations above the current_node to see if the phase gained in kid_phases  was dropped within 
-					# that range. Ancestry is our listy boi of the nodes within (intermittent_drop_range) generations. If we decide that the phases were 
+					# We check (intermittent_drop_range) generations above the current_node to see if the phase gained in kid_phases  was dropped within
+					# that range. Ancestry is our listy boi of the nodes within (intermittent_drop_range) generations. If we decide that the phases were
 					# intermittently dropped, then we will overwrite the phases where they were dropped (the nodes in ancestry).
 					# If we decide that the phases were not intermittentely dropped then we set the kid_phases equal to the current_phases
 					for j in range(intermittent_drop_range):
@@ -1596,7 +1597,7 @@ def phasingMismatchFix(tree, intermittent_drop_range=5):
 	root_name_list = [ tree[key].get('name', 'name_not_found') for key in [current_node] + new_roots ]
 	for root in new_roots:
 		_phaseFix(tree, root, toViset)
-	
+
 	tree = missingPowerFix(tree)
 	return tree
 
@@ -1793,20 +1794,72 @@ def _writeResultsCsv(testOutput, outName):
 		w.writeheader()
 		w.writerows(testOutput)
 
+def voltDistribution(pathToGlm, pathToVoltdumpCsv):
+	with open(pathToGlm, 'r') as f:
+		tree = omf.feeder.parse(pathToGlm)
+	ntk = getNamesToKeys(tree)
+
+	pu_voltage, na_count = [], 0
+	with open(pathToVoltdumpCsv, 'r') as f:
+		w = csv.reader(f)
+		for i in range(2):
+			next(w)
+		for row in w:
+			if len(row) != 7:
+				continue
+
+			# compute average voltage
+			v_sum, cnt = 0, 0
+			for i in range(3):
+				real = float(row[i*2+1])
+				imag = float(row[i*2+2])
+				mag = abs(complex(real, imag))
+				v_sum += mag
+				cnt += 1 if mag else 0
+
+			# determine nominal voltage
+			key = ntk.get(row[0])
+			if key and 'nominal_voltage' in tree[key]:
+				nom = float(tree[key]['nominal_voltage'])
+				pu_voltage.append(v_sum/cnt/nom if cnt else 0)
+			else:
+				na_count += 1
+	return pu_voltage, na_count
+
+def crappyhist(a, path, bins=50, width=80):
+	# from @tammoippen on github
+	a = np.asarray(a)
+	h, b = np.histogram(a, bins)
+	with open(path, 'w') as f:
+		for i in range (0, bins):
+			print >>f, '{:12.5f}  | {:{width}s} {}'.format(
+					b[i],
+					'#'*int(width*h[i]/np.amax(h)),
+					h[i],
+					width=width
+			)
+
 def _tests(
-		keepFiles = True,
-		wipeBefore = False,
-		openPrefix = omf.omfDir + '/static/testFiles/',
-		outPrefix = omf.omfDir + '/scratch/milToGridlabTests/',
-		testFiles = [('Olin-Barre.std','Olin.seq'), ('Olin-Brown.std','Olin.seq')],
-		totalLength = 121,
-		testAttachments = {'schedules.glm':'', 'climate.tmy2':open(omf.omfDir + '/data/Climate/KY-LEXINGTON.tmy2','r').read()},
-	):
+	keepFiles=True,
+	wipeBefore=False,
+	openPrefix=omf.omfDir + '/static/testFiles/',
+	outPrefix=omf.omfDir + '/scratch/milToGridlabTests/',
+	testFiles=[('Olin-Barre.std', 'Olin.seq'), ('Olin-Brown.std', 'Olin.seq')],
+	totalLength=121,
+	testAttachments={
+		'schedules.glm': '',
+		'climate.tmy2': open(
+			omf.omfDir + '/data/Climate/KY-LEXINGTON.tmy2', 'r'
+		).read(),
+	},
+	voltdumpCsvName='{}_VD.csv',
+):
+	from tempfile import mkdtemp
 	''' Test convert every windmil feeder we have (in static/testFiles). '''
 	# testFiles = [('INEC-RENOIR.std','INEC.seq'), ('INEC-GRAHAM.std','INEC.seq'),
 	#   ('Olin-Barre.std','Olin.seq'), ('Olin-Brown.std','Olin.seq'),
 	#   ('ABEC-FRANK.std','ABEC.seq'), ('ABEC-COLUMBIA.std','ABEC.seq'),('OMF_Norfork1.std', 'OMF_Norfork1.seq'),('UE yadkin tabernacle.std','UE yadkin tabernacle.seq')]
-	# setlocale lives here to avoid changing it globally 
+	# setlocale lives here to avoid changing it globally
 	# locale.setlocale(locale.LC_ALL, 'en_US')
 	# Variables for the testing.
 	allResults = []
@@ -1826,24 +1879,37 @@ def _tests(
 		except:
 			# Couldn't create.
 			pass
+
+	gridlab_workDir = mkdtemp() if voltdumpCsvName else None
 	# Run all the tests.
 	for stdString, seqString in testFiles:
 		# Output data structure.
 		currentResults = {}
-		currentResults['circuit_name'] = stdString 
-		cur_start_time = time.time() 
+		currentResults['circuit_name'] = stdString
+		cur_start_time = time.time()
 		try:
 			# Convert the std+seq and write it out.
 			with open(pJoin(openPrefix,stdString),'r') as stdFile, open(pJoin(openPrefix,seqString),'r') as seqFile:
 				# Catch warnings too:
 				with warnings.catch_warnings(record=True) as caught_warnings:
-					outGlm = convert(stdFile.read(),seqFile.read())
-				currentResults['all_warnings'] = ';'.join([str(x.message) for x in caught_warnings])
-			with open(outPrefix + stdString.replace('.std','.glm'),'w') as outFile:
+					outGlm = convert(stdFile.read(), seqFile.read())
+				if voltdumpCsvName:
+					voltdumpCsvName = voltdumpCsvName.format(
+						stdString.replace('.std', '')
+					)
+					next_key = max(outGlm.keys()) + 1
+					outGlm[next_key] = {
+						'object': 'voltdump',
+						'filename': voltdumpCsvName,
+					}
+				currentResults['all_warnings'] = ';'.join(
+					[str(x.message) for x in caught_warnings]
+				)
+			with open(outPrefix + stdString.replace('.std', '.glm'), 'w') as outFile:
 				outFile.seek(0)
 				outFile.write(feeder.sortedWrite(outGlm))
 				outFile.truncate()
-				outFileStats = os.stat(outPrefix + stdString.replace('.std','.glm') )
+				outFileStats = os.stat(outPrefix + stdString.replace('.std', '.glm'))
 			print 'WROTE GLM FOR', stdString
 			# Write the size of the files as a indicator of how good the conversion was.
 			inFileStats = os.stat(pJoin(openPrefix,stdString))
@@ -1874,7 +1940,10 @@ def _tests(
 		try:
 			# Run powerflow on the GLM.
 			currentResults['gridlabd_error_code'] = 'Processing'
-			output = gridlabd.runInFilesystem(outGlm, attachments=testAttachments, keepFiles=False)
+			output = gridlabd.runInFilesystem(outGlm, attachments=testAttachments, keepFiles=False, workDir = gridlab_workDir)
+			if voltdumpCsvName:
+				del output[voltdumpCsvName]
+			print output
 			if output['stderr'].startswith('ERROR'):
 				# Catch GridLAB-D's errors:
 				currentResults['gridlabd_error_code'] = output['stderr'].replace('\n',' ')
@@ -1889,6 +1958,24 @@ def _tests(
 		except Exception as e:
 			print 'POWERFLOW FAILED', stdString
 			currentResults['powerflow_success'] = False
+		if voltdumpCsvName:
+			try:
+				# Analyze volt dump
+				vpu, na_count = voltDistribution(
+						outPrefix + stdString.replace('.std', '.glm'),
+						pJoin(gridlab_workDir, voltdumpCsvName)
+				)
+				currentResults['perc_voltage_in_range'] = "%0.3f" % (sum(1.0 for v in vpu if 0.8<=v<=1.2)/len(vpu))
+				currentResults['missing_nominal_voltage_cnt'] = na_count
+				crappyhist(
+						vpu,
+						outPrefix + stdString.replace('.std', '_voltage_hist.txt')
+				)
+				print 'COMPLETED VOLT DUMP ANALYSIS ON', stdString
+			except Exception as e:
+				currentResults['perc_voltage_in_range'] = "NaN"
+				currentResults['missing_nominal_voltage_cnt'] = "NaN"
+				print 'VOLT DUMP ANALYSIS FAILED ON', stdString, type(e)
 		# Write stats for all tests.
 		currentResults['conversion_time_seconds'] = time.time() - cur_start_time
 		_writeResultsCsv([currentResults], outPrefix + stdString.replace('.std','.csv'))
