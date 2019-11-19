@@ -637,5 +637,34 @@ def _tests():
 	# Contig line merging test
 	mergeContigLines(tree)
 
+def graph_test_delete():
+	import datetime
+	#with open('static/publicFeeders/trip37.omd') as inFile:
+	#	tree = json.load(inFile)['tree']
+	#nxG = treeToNxGraph(tree)
+
+	glm_path = '/Users/austinchang/Desktop/testfiles/grip-api/slowResponse/ABEC-Columbia.glm'
+	#glm_path = '/private/var/folders/h2/hmm8l_b53k59k0_l5q0sjypm0000gn/T/tmpWwtf1p/in.glm'
+	#glm_path = '/Users/austinchang/pycharm/omf/omf/static/testFiles/PEC.glm'
+	feed = parse(glm_path)
+	nxG = treeToNxGraph(feed)
+
+	# These lines don't seem to affect anything
+	#plt.clf()
+	#plt.close()
+
+	#latLonNxGraph(nxG, showPlot=False) 
+	latLonNxGraph(nxG, neatoLayout=True, showPlot=False)
+	#plt.savefig('/Users/austinchang/Desktop/latlongraph' + datetime.datetime.now().strftime('%c') + '.png')
+
+
+def background_delete():
+	import multiprocessing
+	p = multiprocessing.Process(target=graph_test_delete)
+	p.start()
+
+
 if __name__ == '__main__':
-	_tests()
+	#_tests()
+	#graph_test_delete()
+	background_delete()
