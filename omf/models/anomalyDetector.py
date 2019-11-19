@@ -1,5 +1,5 @@
 """ Anomaly detection. """
-import os, sys, shutil, csv, StringIO, hashlib
+import os, sys, shutil, csv, StringIO, hashlib, plotly
 import omf.anomalyDetection
 import numpy as np
 import pandas as pd
@@ -8,15 +8,18 @@ from os.path import isdir, join as pJoin
 from numpy import npv
 from omf.models import __neoMetaModel__
 from __neoMetaModel__ import *
+import matplotlib.pyplot as plt
+from sklearn.neighbors import LocalOutlierFactor
+from sklearn.ensemble import IsolationForest
+import plotly.graph_objs as go
+
 
 # Model metadata:
 modelName, template = metadata(__file__)
 tooltip = ('Detect anomalies in meter data.')
-hidden = True
+hidden = False
 
-def work(modelDir, inputDict):
-	""" Model processing done here. """
-
+def workProphet(modelDir, inputDict):
 	cached_file_name = "input_data_{}.csv".format(inputDict["confidence"])
 	cached_file_path = pJoin(modelDir, cached_file_name)
 
@@ -98,9 +101,97 @@ def work(modelDir, inputDict):
 	out["startDate"] = inputDict["startDate"]
 	return out
 
+def workLof(modelDir, inputDict):
+	
+	neighbors = int(inputDict['neighbors'])
+	contamination = float(inputDict['contaminationLof'])
+	if contamination == 0:
+		contamination = 'auto'
+	clf = LocalOutlierFactor(n_neighbors=neighbors, contamination=contamination)
+	
+	# load our csv to df
+	f = StringIO.StringIO(inputDict["file"])
+	df = pd.read_csv(f)
+	datapoints = df.to_numpy()
+
+	maxVals = np.max(datapoints, axis=0)
+	maxVals = np.tile( maxVals, (datapoints.shape[0],1) )
+	normalizedDatapoints = np.divide(datapoints,maxVals)
+
+	labels = clf.fit_predict(normalizedDatapoints)
+	scores = clf.negative_outlier_factor_
+
+	plotData = []
+	x = np.arange(0,datapoints.shape[0])
+	data = go.Scatter( x=x, y=datapoints[:,0], name='data', mode='lines+markers' ) 
+	plotData.append(data)
+	outliers = go.Scatter( x=x[labels!=1], y=datapoints[labels!=1, 0], name='outliers', 
+		mode='markers' ) 
+	plotData.append(outliers)
+
+	return plotData
+
+def workIso(modelDir, inputDict):
+
+	samples = float(inputDict['samples'])
+	estimators = int(inputDict['estimators'])
+	contamination = float(inputDict['contaminationIso'])
+	if contamination == 0:
+		contamination = 'auto'
+	clf =  IsolationForest(max_samples=samples,	n_estimators=estimators, 
+		contamination=contamination, behaviour='new', random_state=42)
+
+	# load our csv to df
+	f = StringIO.StringIO(inputDict["file"])
+	df = pd.read_csv(f)
+	datapoints = df.to_numpy()
+
+	maxVals = np.max(datapoints, axis=0)
+	maxVals = np.tile( maxVals, (datapoints.shape[0],1) )
+	normalizedDatapoints = np.divide(datapoints,maxVals)
+
+	labels = clf.fit_predict(normalizedDatapoints)
+	scores = clf.score_samples(normalizedDatapoints)
+
+	plotData = []
+	x = np.arange(0,datapoints.shape[0])
+	data = go.Scatter( x=x, y=datapoints[:,0], name='data', mode='lines+markers' ) 
+	plotData.append(data)
+	outliers = go.Scatter( x=x[labels!=1], y=datapoints[labels!=1, 0], name='outliers',
+		mode='markers' ) 
+	plotData.append(outliers)
+
+	return plotData
+
+def workSAX(modelDir, inputDict):
+	pass
+
+
+def work(modelDir, inputDict):
+	""" Model processing done here. """
+
+	"""if inputDict['algorithm'] == 'prophet':
+		outData = workProphet(modelDir, inputDict)
+	elif inputDict['algorithm'] == 'lof':
+		outData = workLOF(modelDir, inputDict)
+	elif inputDict['algorithm'] == 'isoForest':
+		outData = workIsoForest(modelDir, inputDict)
+	elif inputDict['algorithm'] == 'sax':
+		outData = workSAX(modelDir, inputDict)
+	"""
+
+	outData = workProphet(modelDir, inputDict)
+	plotData = workLof(modelDir, inputDict)
+	outData['plotLof'] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
+	plotData = workIso(modelDir, inputDict)
+	outData['plotIso'] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
+	
+	return outData
+
 
 def new(modelDir):
 	""" Create a new instance of this model. Returns true on success, false on failure. """
+	fName = "ERCOT_south_shortened.csv";
 	defaultInputs = {
 		"created": "2015-06-12 17:20:39.308239",
 		"modelType": modelName,
@@ -109,13 +200,18 @@ def new(modelDir):
 				__neoMetaModel__._omfDir,
 				"static",
 				"testFiles",
-				"ERCOT_south_shortened.csv",
+				fName,
 			)
 		).read(),
-		"fileName": "ERCOT_south_shortened.csv",
+		"fileName": fName,
 		"confidence": "0.99",
 		"norm_confidence": "0.90",
 		"startDate": "2002-01-01",
+		"contaminationLof": "0",
+		"contaminationIso": "0",
+		"neighbors": "20",
+		"estimators": "100",
+		"samples":"0.1"
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
