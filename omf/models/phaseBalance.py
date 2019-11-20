@@ -28,7 +28,8 @@ def get_loss_items(tree):
 	s = set()
 	for i, d in tree.iteritems():
 		s.add(d.get('object', ''))
-	return [x for x in s if x in ['transformer', 'underground_line', 'overhead_line', 'triplex_line']]
+	return [l for l in ['transformer', 'underground_line', 'overhead_line', 'triplex_line'] if any([l in x for x in s])]
+	# return [x for x in s if any([l in x for l in ])]
 
 def motor_efficiency(x):
 	return .0179 + .402*x + .134*x**2 # curve fit from data from NREL analysis
