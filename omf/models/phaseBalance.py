@@ -492,7 +492,7 @@ def new(modelDir):
 		# "layoutAlgorithm": "geospatial",
 		# ---------------------------------------- #
 		"strategy": "constant",
-		"constant_value": "400",
+		"constant_value": "-400",
 		"modelType": modelName,
 		"runTime": "",
 		"zipCode": "64735",
