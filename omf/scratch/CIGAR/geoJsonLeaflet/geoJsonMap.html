@@ -26,15 +26,16 @@
 <body>
 	<div id="map"></div>
 	<script>var geojson={% if geojson %}{{geojson | tojson}}{% else %}null{% endif %}</script>
+	<script type="text/javascript" src="MN_Roads.js"></script>
 	<script type="text/javascript" src="MN_Chargers.js"></script>
 	<script type="text/javascript">
 	function convertToGeoJSON(inputArray) {
 		var props = inputArray[0];
-		var geojsonObject = {
-			"type":"FeatureCollection",
-			"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::4269" } },
-			"features":[]
-		};
+		// var geojsonObject = {
+		// 	"type":"FeatureCollection",
+		// 	"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::4269" } },
+		// 	"features":[]
+		// };
 		for (var i = 1; i < inputArray.length; i++) {
 			var item = inputArray[i];
 			var latitude = item[0];
@@ -44,7 +45,7 @@
 				"properties": {},
 				"geometry": {
 					"type":"Point",
-					"coordinates": [latitude, longitude]
+					"coordinates": [longitude, latitude]
 				}
 			};
 			if (props.length > 2) {
@@ -53,9 +54,9 @@
 					geojsonFeature["properties"][props2[x]] = item[x];
 				}
 			}
-			geojsonObject["features"].push(geojsonFeature);
+			geojson["features"].push(geojsonFeature);
 		}
-		return geojsonObject;
+		// return geojsonObject;
 	}
 	function onEachFeature(feature, layer) {
 		var popupContent = '';
@@ -100,7 +101,7 @@
 			}
 		}
 	}
-	var geojson = convertToGeoJSON(chargers);
+	convertToGeoJSON(chargers);
 	geojsonLayer = L.geoJSON(false, {
 				pointToLayer: pointToLayerNode,
 				onEachFeature: onEachFeature,
