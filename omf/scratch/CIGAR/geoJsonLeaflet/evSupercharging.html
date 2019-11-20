@@ -7,8 +7,8 @@
 		crossorigin="" />
 	<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js" integrity="sha512-A7vV8IFfih/D732iSSKi20u/ooOfj/AGehOKq0f4vLT1Zr2Y+RX7C+w8A1gaSasGtRUZpF/NZgzSAu4/Gc41Lg=="
 		crossorigin=""></script>
-		<link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.css" />
-		<script src="https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.js"></script>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.css" />
+	<script src="https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.js"></script>
 </head>
 	<style>html, body {
 		width: 100%;
@@ -27,7 +27,10 @@
 </head>
 <body>
 	<div id="map"></div>
+    <script>var geojson={% if geojson %}{{geojson | tojson}}{% else %}null{% endif %}</script>
+    <script type="text/javascript" src="geoJsonFeatures.js"></script>
 	<script type="text/javascript">
+    function geoJsonToJson()
 	var map = L.map('map');
 	mapLink = 'Mapbox';
 	L.tileLayer(
