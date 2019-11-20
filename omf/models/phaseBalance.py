@@ -46,6 +46,10 @@ def n(num):
 def floats(f):
 	return float(f.replace(',', ''))
 
+def change_complex(x, new_imag):
+	m = complex(x)
+	return "{}+{}j".format(m.real, new_imag) if new_imag > 0 else "{}{}j".format(m.real, new_imag)
+
 def work(modelDir, ind):
 	''' Run the model in its directory. '''
 	o = {}
@@ -107,9 +111,18 @@ def work(modelDir, ind):
 	with open(omdPath) as f:
 		tree_controlled = json.load(f)['tree']
 	
+	new_imag = float(ind['constant_value'])
 	for k, v in tree_controlled.iteritems():
 		if ('PV' in v.get('groupid', '')) and v.get('object', '') == 'load':
+			if v.get('constant_power_C', '') != '':
+				v['constant_power_C'] = change_complex(v['constant_power_C'], new_imag)
+			elif v.get('constant_power_B', '') != '':
+				v['constant_power_B'] = change_complex(v['constant_power_B'], new_imag)
+			elif v.get('constant_power_A', '') != '':
+				v['constant_power_A'] = change_complex(v['constant_power_A'], new_imag)
+			
 			v['groupid'] = 'PV'
+
 
 	tree_controlled = _addCollectors(tree_controlled, suffix=controlled_suffix, pvConnection=ind['pvConnection'])
 	
@@ -478,6 +491,8 @@ def new(modelDir):
 		# "pvConnection": 'Wye',
 		# "layoutAlgorithm": "geospatial",
 		# ---------------------------------------- #
+		"strategy": "constant",
+		"constant_value": "400",
 		"modelType": modelName,
 		"runTime": "",
 		"zipCode": "64735",
