@@ -179,7 +179,7 @@ def generateData(pathToOmd, workDir, inputData, outputData):
 
 #feeder.glmToOmd('C:/Users/granb/omf/omf/scratch/CIGAR/test_large-R5-35.00-1.glm_CLEAN.glm', 'C:/Users/granb/omf/omf/scratch/CIGAR/test_large-R5-35.00-1.glm_CLEAN.omd', attachFilePaths=[])
 inputData, outputData = generateData('C:/Users/granb/omf/omf/static/publicFeeders/ieee37nodeFaultTester.omd', None, None, None)
-inputData, outputData = generateData('C:/Users/granb/omf/omf/scratch/CIGAR/test_ieee123nodeBetter.omd', None, inputData, outputData)
+inputData, outputData = generateData('C:/Users/granb/omf/omf/scratch/smartSwitching/test_ieee123nodeBetter.omd', None, inputData, outputData)
 #inputData, outputData = generateData('C:/Users/granb/omf/omf/scratch/CIGAR/test_large-R5-35.00-1.glm_CLEAN.omd', None, inputData, outputData)
 
 print(inputData)
