@@ -1,9 +1,7 @@
 import pandas as pd
 import numpy as np
 import scipy
-from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import LabelEncoder
-from sklearn import datasets
 from scipy import spatial
 import scipy.stats as st
 import random
@@ -373,7 +371,7 @@ def heatMap(mc, test):
 
 	return heatMap, durCause, durTime, durLocation
 
-def randomFault(pathToCsv, faultsGenerated, test):
+def randomFault(pathToCsv, faultsGenerated, test, depDist):
 	'using an input csv file with outage data, create a heat map object and generate a random fault'
 	mc = pd.read_csv(pathToCsv)
 	heatmap, durCause, durTime, durLocation = heatMap(mc, test)
@@ -442,23 +440,40 @@ def randomFault(pathToCsv, faultsGenerated, test):
 				pvar = ss/(n-1)
 				return pvar**0.5
 
-			causeDurList = list(durCause[str(causefault)].split(' '))
-			causeDurList = [float(i) for i in causeDurList]
-			avgCause = sum(causeDurList) / len(causeDurList)
-			stdCause = stddev(causeDurList)
+			avgDuration = 0.0
+			stdDuration = 0.0
 
-			timeDurList = list(durTime[str(start)].split(' '))
-			timeDurList = [float(i) for i in timeDurList]
-			avgTime = sum(timeDurList) / len(timeDurList)
-			stdTime = stddev(timeDurList)
+			if (depDist == '0' or depDist == '1' or depDist == '2' or depDist == '4'):
+				causeDurList = list(durCause[str(causefault)].split(' '))
+				causeDurList = [float(i) for i in causeDurList]
+				avgCause = sum(causeDurList) / len(causeDurList)
+				stdCause = stddev(causeDurList)
+				avgDuration += avgCause
+				stdDuration += stdCause
 
-			locationDurList = list(durLocation[str(location)].split(' '))
-			locationDurList = [float(i) for i in locationDurList]
-			avgLocation = sum(locationDurList) / len(locationDurList)
-			stdLocation = stddev(locationDurList)
+			if (depDist == '0' or depDist == '1' or depDist == '3' or depDist == '5'):
+				timeDurList = list(durTime[str(start)].split(' '))
+				timeDurList = [float(i) for i in timeDurList]
+				avgTime = sum(timeDurList) / len(timeDurList)
+				stdTime = stddev(timeDurList)
+				avgDuration += avgTime
+				stdDuration += stdTime
 
-			avgDuration = (avgCause + avgTime + avgLocation) / 3
-			stdDuration = (stdCause + stdTime + stdLocation) / 3
+			if (depDist == '0' or depDist == '2' or depDist == '3' or depDist == '6'):
+				locationDurList = list(durLocation[str(location)].split(' '))
+				locationDurList = [float(i) for i in locationDurList]
+				avgLocation = sum(locationDurList) / len(locationDurList)
+				stdLocation = stddev(locationDurList)
+				avgDuration += avgLocation
+				stdDuration += stdLocation
+
+			if depDist == '0':
+				avgDuration = avgDuration / 3
+				stdDuration = stdDuration / 3
+			if (depDist == '1' or depDist == '2' or depDist == '3'):
+				avgDuration = avgDuration / 2
+				stdDuration = stdDuration / 2
+
 			duration = -1
 			while duration < 0:
 				duration = np.random.normal(loc=avgDuration, scale=stdDuration/1000)
@@ -641,7 +656,7 @@ def heatMapRefined(mc, test):
 
 	return heatMap, durCause, durTime
 
-def randomFaultsRefined(pathToCsv, pathToOmd, workDir, gridLines, faultsGenerated, test, component):
+def randomFaultsRefined(pathToCsv, pathToOmd, workDir, gridLines, faultsGenerated, test, component, depDist):
 	'Function that generates a DataFrame with a set of faults based on an original set of data and which selects the location using the lattice method'
 	
 	# Check that we're in the proper directory
@@ -766,23 +781,40 @@ def randomFaultsRefined(pathToCsv, pathToOmd, workDir, gridLines, faultsGenerate
 				pvar = ss/(n-1)
 				return pvar**0.5
 
-			causeDurList = list(durCause[str(causefault)].split(' '))
-			causeDurList = [float(i) for i in causeDurList]
-			avgCause = sum(causeDurList) / len(causeDurList)
-			stdCause = stddev(causeDurList)
+			avgDuration = 0.0
+			stdDuration = 0.0
 
-			timeDurList = list(durTime[str(start)].split(' '))
-			timeDurList = [float(i) for i in timeDurList]
-			avgTime = sum(timeDurList) / len(timeDurList)
-			stdTime = stddev(timeDurList)
+			if (depDist == '0' or depDist == '1' or depDist == '2' or depDist == '4'):
+				causeDurList = list(durCause[str(causefault)].split(' '))
+				causeDurList = [float(i) for i in causeDurList]
+				avgCause = sum(causeDurList) / len(causeDurList)
+				stdCause = stddev(causeDurList)
+				avgDuration += avgCause
+				stdDuration += stdCause
 
-			locationDurList = list(durLocation[str(location)].split(' '))
-			locationDurList = [float(i) for i in locationDurList]
-			avgLocation = sum(locationDurList) / len(locationDurList)
-			stdLocation = stddev(locationDurList)
+			if (depDist == '0' or depDist == '1' or depDist == '3' or depDist == '5'):
+				timeDurList = list(durTime[str(start)].split(' '))
+				timeDurList = [float(i) for i in timeDurList]
+				avgTime = sum(timeDurList) / len(timeDurList)
+				stdTime = stddev(timeDurList)
+				avgDuration += avgTime
+				stdDuration += stdTime
 
-			avgDuration = (avgCause + avgTime + avgLocation) / 3
-			stdDuration = (stdCause + stdTime + stdLocation) / 3
+			if (depDist == '0' or depDist == '2' or depDist == '3' or depDist == '6'):
+				locationDurList = list(durLocation[str(location)].split(' '))
+				locationDurList = [float(i) for i in locationDurList]
+				avgLocation = sum(locationDurList) / len(locationDurList)
+				stdLocation = stddev(locationDurList)
+				avgDuration += avgLocation
+				stdDuration += stdLocation
+
+			if depDist == '0':
+				avgDuration = avgDuration / 3
+				stdDuration = stdDuration / 3
+			if (depDist == '1' or depDist == '2' or depDist == '3'):
+				avgDuration = avgDuration / 2
+				stdDuration = stdDuration / 2
+
 			duration = -1
 			while duration < 0:
 				duration = np.random.normal(loc=avgDuration, scale=stdDuration/1000)
@@ -803,7 +835,7 @@ def randomFaultsRefined(pathToCsv, pathToOmd, workDir, gridLines, faultsGenerate
 	faults = pd.DataFrame(data)
 	return faults
 
-def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData, numberOfCustomers, sustainedOutageThreshold, causeFilter, componentTypeFilter, faultTypeFilter, timeMinFilter, timeMaxFilter, meterMinFilter, meterMaxFilter, durationMinFilter, durationMaxFilter, gridLinesStr, faultsGeneratedStr, test):
+def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData, numberOfCustomers, sustainedOutageThreshold, causeFilter, componentTypeFilter, faultTypeFilter, timeMinFilter, timeMaxFilter, meterMinFilter, meterMaxFilter, durationMinFilter, durationMaxFilter, gridLinesStr, faultsGeneratedStr, test, depDist):
 	' calculates outage metrics, plots a leaflet map of faults, and plots an outage timeline'
 	# check to see if work directory is specified; otherwise, create a temporary directory
 	if not workDir:
@@ -848,7 +880,7 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData,
 		# calculate CAIDI
 		if (SAIDI != 0):
 			CAIDI = SAIDI / SAIFI
-		else: CAIDI = 'Check sustained outage threshold'
+		else: CAIDI = 'Error: Check sustained outage threshold'
 	
 		# calculate ASAI
 		ASAI = (int(numberOfCustomers) * 8760 - customerInterruptionDurations) / (int(numberOfCustomers) * 8760)
@@ -945,10 +977,10 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData,
 	if generateRandom == '2':
 		gridLines = int(gridLinesStr)
 		faultsGenerated = int(faultsGeneratedStr)
-		mc1 = randomFaultsRefined(pathToCsv, pathToOmd, workDir, gridLines, faultsGenerated, test, componentTypeFilter)
+		mc1 = randomFaultsRefined(pathToCsv, pathToOmd, workDir, gridLines, faultsGenerated, test, componentTypeFilter, depDist)
 	if generateRandom == '1':
 		faultsGenerated = int(faultsGeneratedStr)
-		mc1 = randomFault(pathToCsv, faultsGenerated, test)
+		mc1 = randomFault(pathToCsv, faultsGenerated, test, depDist)
 	# graph the generated faults if the user requests
 	if ((generateRandom == '2' or generateRandom == '1') and (graphData == '0' or graphData == '2')):
 		row = 0
@@ -1129,7 +1161,8 @@ def work(modelDir, inputDict):
 		inputDict['durationMaxFilter'],
 		inputDict['gridLinesStr'],
 		inputDict['faultsGeneratedStr'],
-		inputDict['test'])
+		inputDict['test'],
+		inputDict['depDist'])
 	
 	# Textual outputs of cost statistic
 	with open(pJoin(modelDir,"statsCalc.html"),"rb") as inFile:
@@ -1167,12 +1200,13 @@ def new(modelDir):
 		"timeMaxFilter": "2000-12-15 00:00:30",
 		"meterMinFilter": "0",
 		"meterMaxFilter": "100",
-		"durationMinFilter": "130",
+		"durationMinFilter": "120",
 		"durationMaxFilter": "1000000",
 		"outageFileName": "outagesNew3.csv",
 		"gridLinesStr": "100",
 		"faultsGeneratedStr": "1000",
 		"test": "dependent",
+		"depDist": "0",
 		"outageData": open(pJoin(__neoMetaModel__._omfDir,"scratch","smartSwitching","outagesNew3.csv"), "r").read(),
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)

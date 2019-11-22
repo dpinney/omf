@@ -200,6 +200,18 @@
 					<option value="dependent">Dependent Normal Distributions</option>
 				</select>
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Dependent Variables for Distribution<span class="classic">If new distribution data is generated using the dependent normal distributions, this input dictates the variables on which the duration data is dependent.</span></label>
+				<select id="depDist" name="depDist" />
+					<option value="0">Cause/time/location</option>
+					<option value="1">Cause/time</option>
+					<option value="2">Cause/location</option>
+					<option value="3">Time/location</option>
+					<option value="4">Cause</option>
+					<option value="5">Time</option>
+					<option value="6">Location</option>
+				</select>
+			</div>
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
