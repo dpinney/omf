@@ -11,9 +11,10 @@ XXX Implement the rest of the routes.
 OOO Add an option to test against the container.
 '''
 
+
 #import webbrowser
-import io, os, omf, grip, requests, pytest
-from multiprocessing import Process
+#from multiprocessing import Process
+import io, os, omf, grip, requests, pytest, json
 import omf
 
 # Start the server.
@@ -22,36 +23,341 @@ import omf
 # Shouldn't I join() here? Block the execution of the testing code until the server process finishes. Well, the server process never finishes.
 # Can I send some kind of signal? I'll worry about that later. Just do something.
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="module") # The client should only be created once
 def client():
     # testing must be set to true on the Flask application
     grip.app.config['TESTING'] = True
     # create a test client with built-in Flask code
     client = grip.app.test_client()
-    # The client should only be created once
-    print("Client created")
     # 'yield' instead of 'return' due to how fixtures work in pytest
     yield client
-    # Could put teardown code below if needed
+    # Could put teardown code here if needed
 
-all_routes = [
-    ("/oneLineGridlab"),
-    ("/milsoftToGridlab"),
-    ("/cymeToGridlab"),
-    ("/gridlabRun"),
-    ("/gridlabdToGfm"),
-    ("/runGfm"),
-    ("/samRun"),
-    ("/transmissionMatToOmt"),
-    #("/transmissionPowerflow"),
-    ("/transmissionViz")
+post_routes = [
+    '/oneLineGridlab',
+    '/milsoftToGridlab',
+    '/cymeToGridlab',
+    '/gridlabRun',
+    '/gridlabdToGfm',
+    '/runGfm',
+    '/samRun',
+    '/transmissionMatToOmt',
+    '/transmissionPowerflow',
+    '/transmissionViz',
+    '/distributionViz'
 ]
 
-@pytest.mark.parametrize("url_route", all_routes)
-def test_getRequest_returns405(url_route, client):
+
+@pytest.mark.parametrize('url_route', post_routes) # Apply this test to all routes
+def test_GETRequestToPOSTRoute_returns405(url_route, client):
     response = client.get(url_route)
     assert response.status_code == 405
 
+
+class TestOneLineGridlab(object):
+
+    def test_GLMHasNoCoordinates_and_useLatLonsIsTrue_returns422_and_returnsProperJSON(self, client):
+        filename = 'test_ieee123nodeBetter.glm' 
+        glm_path = os.path.join(os.path.dirname(__file__), filename)
+        with open(glm_path) as f:
+            b_io = io.BytesIO(f.read())
+        data = {
+            'glm': (b_io, filename),
+            'useLatLons': 'True'
+        }
+        response = client.post("/oneLineGridlab", data=data)
+        assert response.status_code == 422
+        response_data = json.loads(response.data)
+        assert response_data == {
+            u'job': {
+                u'state': u'failed'
+            },
+            u'errors': [{
+                u'http code': 422,
+                u'source': {u'useLatLons': u'True'},
+                u'title': u'Invalid Parameter Value Combination',
+                u'detail': (u"Since the submitted GLM contained no coordinates, 'useLatLons' must be 'False' because "
+                    "artificial coordinates must be used to draw the GLM.")
+            }]
+        }
+
+    def test_omittedUseLatLonsFormParameter_returns400_and_returnsProperJSON(self, client):
+        filename = 'test_ieee123nodeBetter.glm' 
+        glm_path = os.path.join(os.path.dirname(__file__), filename)
+        with open(glm_path) as f:
+            b_io = io.BytesIO(f.read())
+        data = {
+            'glm': (b_io, filename),
+        }
+        response = client.post("/oneLineGridlab", data=data)
+        assert response.status_code == 400
+        response_data = json.loads(response.data)
+        assert response_data == {
+            u'job': {
+                u'state': u'failed'
+            },
+            u'errors': [{
+                u'http code': 400,
+                u'source': {u'useLatLons': None},
+                u'title': u'Invalid Parameter Value',
+                u'detail': u"The parameter 'useLatLons' of type '<type 'bool'>' is required, but it was not submitted."
+            }]
+        }
+
+    def test_omittedGLMFile_returns400_and_returnsProperJSON(self, client):
+        data = {
+            'glm': None,
+            'useLatLons': True
+        }
+        response = client.post("/oneLineGridlab", data=data)
+        assert response.status_code == 400
+        response_data = json.loads(response.data)
+        assert response_data == {
+            u'job': {
+                u'state': u'failed'
+            },
+            u'errors': [{
+                u'http code': 400,
+                u'source': {u'glm': None},
+                u'title': u'Invalid Parameter Value',
+                u"detail": u"The parameter 'glm' of type 'file' is required, but it was not submitted."
+            }]
+        }
+
+    def test_useLatLonsFormParameterIsTheStringtrue_returns400(self, client):
+        filename = 'test_ieee123nodeBetter.glm' 
+        glm_path = os.path.join(os.path.dirname(__file__), filename)
+        with open(glm_path) as f:
+            b_io = io.BytesIO(f.read())
+        data = {
+            'glm': (b_io, filename),
+            'useLatLons': 'true'
+        }
+        response = client.post("/oneLineGridlab", data=data)
+        assert response.status_code == 400
+        response_data = json.loads(response.data)
+        assert response_data == {
+            u'job': {
+                u'state': u'failed'
+            },
+            u'errors': [{
+                u'http code': 400,
+                u'source': {u'useLatLons': u'true'},
+                u'title': u'Invalid Parameter Value',
+                u"detail": u"The parameter 'useLatLons' could not be converted into the required type '<type 'bool'>'."
+            }]
+        } 
+
+    def test_useLatLonsFormParameterIsTheStringfalse_returns400(self, client):
+        filename = 'test_ieee123nodeBetter.glm' 
+        glm_path = os.path.join(os.path.dirname(__file__), filename)
+        with open(glm_path) as f:
+            b_io = io.BytesIO(f.read())
+        data = {
+            'glm': (b_io, filename),
+            'useLatLons': 'false'
+        }
+        response = client.post("/oneLineGridlab", data=data)
+        assert response.status_code == 400
+        response_data = json.loads(response.data)
+        assert response_data == {
+            u'job': {
+                u'state': u'failed'
+            },
+            u'errors': [{
+                u'http code': 400,
+                u'source': {u'useLatLons': u'false'},
+                u'title': u'Invalid Parameter Value',
+                u'detail': u"The parameter 'useLatLons' could not be converted into the required type '<type 'bool'>'."
+            }]
+        } 
+
+    def xtest_(self):
+        pass # How do deal with asynchonous nature?
+
+
+class TestMilsoftToGridlab(object):
+
+    def test_omittedSEQFile_returns400_and_returnsProperJSON(self, client):
+        std_path = os.path.join(omf.omfDir, "static/testFiles/IEEE13.std")
+        with open(std_path) as f:
+            b_io_std = io.BytesIO(f.read())
+        data = {"std": (b_io_std, "IEEE13.std")}
+        response = client.post("/milsoftToGridlab", data=data)
+        assert response.status_code == 400
+        response_data = json.loads(response.data)
+        assert response_data == {
+            u'job': {
+                u'state': u'failed'
+            },
+            u'errors': [{
+                u'http code': 400,
+                u'source': {u'seq': None},
+                u'title': u'Invalid Parameter Value',
+                u'detail': u"The parameter 'seq' of type 'file' is required, but it was not submitted."
+            }]
+        }
+
+    def test_omittedSTDFile_returns400_and_returnsProperJSON(self, client):
+        seq_path = os.path.join(omf.omfDir, "static/testFiles/IEEE13.seq") 
+        with open(seq_path) as f:
+            b_io_seq = io.BytesIO(f.read())
+        data = {"seq": (b_io_seq, "IEEE13.seq")}
+        response = client.post("/milsoftToGridlab", data=data)
+        assert response.status_code == 400
+        response_data = json.loads(response.data)
+        assert response_data == {
+            u'job': {
+                u'state': u'failed'
+            },
+            u'errors': [{
+                u'http code': 400,
+                u'source': {u'std': None},
+                u'title': u'Invalid Parameter Value',
+                u'detail': u"The parameter 'std' of type 'file' is required, but it was not submitted."
+            }]
+        }
+
+
+class TestCymeToGridlab(object):
+
+    def test_omittedMDBFile_returns400_and_returnsProperJSON(self, client):
+        #mdb_path = os.path.join(omf.omfDir, "static/testFiles/IEEE13.mdb")
+        #with open(mdb_path) as f:
+        #    b_io = io.BytesIO(f.read())
+        #data = {"mdb": (b_io, "IEEE13.mdb")}
+        data = {}
+        response = client.post("/cymeToGridlab", data=data)
+        assert response.status_code == 400
+        response_data = json.loads(response.data)
+        assert response_data == {
+            u'job': {
+                u'state': u'failed'
+            },
+            u'errors': [{
+                u'http code': 400,
+                u'source': {u'mdb': None},
+                u'title': u'Invalid Parameter Value',
+                u'detail': u"The parameter 'mdb' of type 'file' is required, but it was not submitted."
+            }]
+        }
+
+
+class TestGridlabRun(object):
+
+    def test_omittedGLMFile_returns400_and_returnsProperJSON(self, client):
+        data = {}
+        response = client.post("/gridlabRun", data=data)
+        assert response.status_code == 400
+        response_data = json.loads(response.data)
+        assert response_data == {
+            u'job': {
+                u'state': u'failed'
+            },
+            u'errors': [{
+                u'http code': 400,
+                u'source': {u'glm': None},
+                u'title': u'Invalid Parameter Value',
+                u'detail': u"The parameter 'glm' of type 'file' is required, but it was not submitted."
+            }]
+        }
+
+class TestGridlabdToGfm(object):
+
+    def test_phaseVariationAboveMaxBound_returns400_and_returnsProperJSON(self, client):
+        filename = "test_ieee123nodeBetter.glm" 
+        glm_path = os.path.join(os.path.dirname(__file__), filename)
+        with open(glm_path) as f:
+            b_io = io.BytesIO(f.read())
+        data = {
+            "glm": (b_io, filename),
+            "phase_variation": "1.01",
+        }
+        response = client.post("/gridlabdToGfm", data=data)
+        assert response.status_code == 400
+        response_data = json.loads(response.data)
+        assert response_data == {
+            u'job': {
+                u'state': u'failed'
+            },
+            u'errors': [{
+                u'http code': 400,
+                u'source': {u'phase_variation': 1.01},
+                u'title': u'Invalid Parameter Value',
+                u'detail': u"The parameter 'phase_variation' was greater than the maximum bound of '1'."
+            }]
+        }
+
+
+class TestRunGfm(object):
+    pass
+
+
+class TestSamRun(object):
+    
+    def test_derateBelowMinBound_returns400_and_returnsProperJSON(self, client):
+        tmy2_path = os.path.join(omf.omfDir, "data/Climate/CA-SAN_FRANCISCO.tmy2")
+        with open(tmy2_path) as f:
+            b_io = io.BytesIO(f.read())
+        data = {
+            "tmy2": (b_io, "CA-SAN_FRANCISCO.tmy2"),
+            "derate": -.01,
+        }
+        response = client.post("/samRun", data=data)
+        assert response.status_code == 400
+        response_data = json.loads(response.data)
+        assert response_data == {
+            u'job': {
+                u'state': u'failed'
+            },
+            u'errors': [{
+                u'http code': 400,
+                u'source': {u'derate': -0.01},
+                u'title': u'Invalid Parameter Value',
+                u'detail': u"The parameter 'derate' was less than the minimum bound of '0'."
+            }]
+        }
+
+
+class TestTransmissionMatToOmt(object):
+    pass
+
+
+class TestTransmissionPowerflow(object):
+
+    def test_algorithmNotInAllowedValues_returns400_and_returnsProperJSON(self, client):
+        with open(os.path.join(omf.omfDir, "static/testFiles/case9.omt")) as f:
+            b_io = io.BytesIO(f.read())
+        data = {
+            "omt": (b_io, "case9.omt"),
+            'algorithm': 'foobar'
+        }
+        response = client.post("/transmissionPowerflow", data=data)
+        assert response.status_code == 400
+        response_data = json.loads(response.data)
+        assert response_data == {
+            u'job': {
+                u'state': u'failed'
+            },
+            u'errors': [{
+                u'http code': 400,
+                u'source': {u'algorithm': u'foobar'},
+                u'title': u'Invalid Parameter Value',
+                u'detail': u"The parameter 'algorithm' was not one of the allowed values: '('NR', 'FDXB', 'FDBX', 'GS')'."
+            }]
+        }
+
+
+class TestTransmissionViz(object):
+    pass
+
+
+class TestDistributionViz(object):
+    pass
+
+
+# v1.0 tests
+'''
 @pytest.mark.parametrize("url_route", all_routes)
 def test_postMissingFiles_returns400(url_route, client):
     response = client.post(url_route)
@@ -66,8 +372,8 @@ class TestOneLineGridlab(object):
         with open(glm_path) as f:
             b_io = io.BytesIO(f.read())
         data = {
-            "glm": (b_io, filename),
-            "useLatLons": True
+            'glm': (b_io, filename),
+            'useLatLons': True
         }
         response = client.post("/oneLineGridlab", data=data)
         assert response.status_code == 200
@@ -97,7 +403,8 @@ class TestOneLineGridlab(object):
         }
         response = client.post("/oneLineGridlab", data=data)
         assert response.status_code == 415
-
+'''
+'''
 class TestMilsoftToGridlab(object):
 
     # Should return a 202
@@ -361,6 +668,7 @@ class TestTransmissionViz(object):
         }
         response = client.post("/transmissionViz", data=data)
         assert response.status_code == 415
+'''
 
 
 
