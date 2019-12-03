@@ -153,7 +153,7 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat, openBrowser=False, conversion=
 			geoJsonDict = omdGeoJson(pathToOmdFile, conversion=True)
 		if not os.path.exists(outputPath):
 			os.makedirs(outputPath)
-		shutil.copy('templates/geoJsonMap.html', outputPath)
+		shutil.copy(omf.omfDir + '/templates/geoJsonMap.html', outputPath)
 		with open(pJoin(outputPath,'geoJsonFeatures.js'),"w") as outFile:
 			outFile.write("var geojson =")
 			json.dump(geoJsonDict, outFile, indent=4)
@@ -536,7 +536,7 @@ def openInBrowser(pathToFile):
 def showOnMap(geoJson):
 	'''Open a browser to display a geoJSON object on a map.'''
 	tempDir = tempfile.mkdtemp()
-	shutil.copy('templates/geoJsonMap.html', tempDir)
+	shutil.copy(omf.omfDir + '/templates/geoJsonMap.html', tempDir)
 	with open(pJoin(tempDir,'geoJsonFeatures.js'),"w") as outFile:
 		outFile.write("var geojson =")
 		json.dump(geoJson, outFile, indent=4)
