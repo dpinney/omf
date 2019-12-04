@@ -54,9 +54,9 @@ def test_GETRequestToPOSTRoute_returns405(url_route, client):
     assert response.status_code == 405
 
 
-class TestOneLineGridlab(object):
+class Test_oneLineGridlab_start(object):
 
-    def test_GLMHasNoCoordinates_and_useLatLonsIsTrue_returns422_and_returnsProperJSON(self, client):
+    def test_GLMHasNoCoordinates_and_useLatLonsIsTrue_returns422_and_returnsCorrectJSON(self, client):
         filename = 'test_ieee123nodeBetter.glm' 
         glm_path = os.path.join(os.path.dirname(__file__), filename)
         with open(glm_path) as f:
@@ -81,7 +81,7 @@ class TestOneLineGridlab(object):
             }]
         }
 
-    def test_omittedUseLatLonsFormParameter_returns400_and_returnsProperJSON(self, client):
+    def test_omittedUseLatLonsFormParameter_returns400_and_returnsCorrectJSON(self, client):
         filename = 'test_ieee123nodeBetter.glm' 
         glm_path = os.path.join(os.path.dirname(__file__), filename)
         with open(glm_path) as f:
@@ -104,7 +104,7 @@ class TestOneLineGridlab(object):
             }]
         }
 
-    def test_omittedGLMFile_returns400_and_returnsProperJSON(self, client):
+    def test_omittedGLMFile_returns400_and_returnsCorrectJSON(self, client):
         data = {
             'glm': None,
             'useLatLons': True
@@ -172,13 +172,34 @@ class TestOneLineGridlab(object):
             }]
         } 
 
-    def xtest_(self):
-        pass # How do deal with asynchonous nature?
+
+class Test_oneLineGridlab_status(object):
+    pass
 
 
-class TestMilsoftToGridlab(object):
+class Test_oneLineGridlab_download(object):
 
-    def test_omittedSEQFile_returns400_and_returnsProperJSON(self, client):
+    def test_glmHasNoCoordinates_returnsCorrectPNG(self):
+        filename = 'test_ieee123nodeBetter.glm' 
+        test_file_path = os.path.join(os.path.dirname(__file__), filename)
+        with open(test_file_path) as f:
+            b_io = io.BytesIO(f.read())
+        data = {
+            'glm': (b_io, filename),
+            'useLatLons': False
+        }
+        response = client.post('/oneLineGridlab', data=data)
+        #assert response.status_code == 200
+        assert response.mimetype == 'image/png'
+        assert response.content_length == 50394
+
+    def test_glmHasCoordinates_returnsCorrectPNG(self):
+        pass
+
+
+class Test_milsoftToGridlab_start(object):
+
+    def test_omittedSEQFile_returns400_and_returnsCorrectJSON(self, client):
         std_path = os.path.join(omf.omfDir, "static/testFiles/IEEE13.std")
         with open(std_path) as f:
             b_io_std = io.BytesIO(f.read())
@@ -198,7 +219,7 @@ class TestMilsoftToGridlab(object):
             }]
         }
 
-    def test_omittedSTDFile_returns400_and_returnsProperJSON(self, client):
+    def test_omittedSTDFile_returns400_and_returnsCorrectJSON(self, client):
         seq_path = os.path.join(omf.omfDir, "static/testFiles/IEEE13.seq") 
         with open(seq_path) as f:
             b_io_seq = io.BytesIO(f.read())
@@ -219,9 +240,17 @@ class TestMilsoftToGridlab(object):
         }
 
 
+class Test_milsoftToGridlab_status(object):
+    pass
+
+
+class Test_milsoftToGridlab_download(object):
+    pass
+
+
 class TestCymeToGridlab(object):
 
-    def test_omittedMDBFile_returns400_and_returnsProperJSON(self, client):
+    def test_omittedMDBFile_returns400_and_returnsCorrectJSON(self, client):
         #mdb_path = os.path.join(omf.omfDir, "static/testFiles/IEEE13.mdb")
         #with open(mdb_path) as f:
         #    b_io = io.BytesIO(f.read())
@@ -245,7 +274,7 @@ class TestCymeToGridlab(object):
 
 class TestGridlabRun(object):
 
-    def test_omittedGLMFile_returns400_and_returnsProperJSON(self, client):
+    def test_omittedGLMFile_returns400_and_returnsCorrectJSON(self, client):
         data = {}
         response = client.post("/gridlabRun", data=data)
         assert response.status_code == 400
@@ -264,7 +293,7 @@ class TestGridlabRun(object):
 
 class TestGridlabdToGfm(object):
 
-    def test_phaseVariationAboveMaxBound_returns400_and_returnsProperJSON(self, client):
+    def test_phaseVariationAboveMaxBound_returns400_and_returnsCorrectJSON(self, client):
         filename = "test_ieee123nodeBetter.glm" 
         glm_path = os.path.join(os.path.dirname(__file__), filename)
         with open(glm_path) as f:
@@ -295,7 +324,7 @@ class TestRunGfm(object):
 
 class TestSamRun(object):
     
-    def test_derateBelowMinBound_returns400_and_returnsProperJSON(self, client):
+    def test_derateBelowMinBound_returns400_and_returnsCorrectJSON(self, client):
         tmy2_path = os.path.join(omf.omfDir, "data/Climate/CA-SAN_FRANCISCO.tmy2")
         with open(tmy2_path) as f:
             b_io = io.BytesIO(f.read())
@@ -325,7 +354,7 @@ class TestTransmissionMatToOmt(object):
 
 class TestTransmissionPowerflow(object):
 
-    def test_algorithmNotInAllowedValues_returns400_and_returnsProperJSON(self, client):
+    def test_algorithmNotInAllowedValues_returns400_and_returnsCorrectJSON(self, client):
         with open(os.path.join(omf.omfDir, "static/testFiles/case9.omt")) as f:
             b_io = io.BytesIO(f.read())
         data = {
