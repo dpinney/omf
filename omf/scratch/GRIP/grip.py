@@ -736,7 +736,7 @@ def transmissionMatToOmt_start(temp_dir):
 @try_except
 def transmissionMatToOmt(temp_dir):
 	'''
-	Convert a MATPOWER .mat input into a JSON .omt transmission circuit format and return the .omt.
+	Convert a MATPOWER .mat or .m input into a JSON .omt transmission circuit format and return the .omt.
 
 	Form parameters:
 	:param matpower: a MATPOWER .mat file.
