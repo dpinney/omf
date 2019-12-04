@@ -5,19 +5,18 @@ LABEL maintainer="<david.pinney@nreca.coop>"
 
 # Install and setup OMF reqs
 RUN apt-get -y update && apt-get install -y python sudo vim
-RUN mkdir /home/omf
-# TODO: just move install.py and run to setup environment then move the rest. Makes this more cacheable.
-COPY install.py /home/omf/
-COPY requirements.txt /home/omf/
-COPY setup.py /home/omf/
-COPY omf/scratch/GRIP/grip.py /home/omf/omf/
-RUN cd /home/omf/ && python install.py
-# Put the rest of the source in there.
-COPY omf /home/omf/omf
+WORKDIR /home/omf
+COPY install.py .
+COPY requirements.txt .
+COPY setup.py .
+# Only re-run the environment installation if install.py, requirements.txt, or setup.py changed (takes a long time)
+RUN python install.py
 # Install requirements with pip again because install.py doesn't do everything for some reason
-RUN cd /home/omf/ && pip install -r requirements.txt
-
-# Run the OMF
+RUN pip install -r requirements.txt
+# Copy in all needed source code
 WORKDIR /home/omf/omf
+COPY omf .
+COPY omf/scratch/GRIP/grip.py .
+COPY omf/scratch/GRIP/grip_config.py .
 ENTRYPOINT ["python"]
 CMD ["-m", "grip"]

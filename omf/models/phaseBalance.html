@@ -154,6 +154,17 @@
 			</div>
 			<hr>
 			<div class="shortInput">
+				<label class="tooltip">Strategy<span class="classic">What strategy would you like to deploy?</span></label>
+				<select id="strategy" name="strategy">
+					<option value="constant">constant</option>
+					<option value="decentralizede">decentralizede</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Constant Value<span class="classic">If constant strategy, what's the number of VARs?</span></label>
+				<input type="text" id="constant_value" name="constant_value" required="required"/>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
 				<input type="text" id="zipCode" name="zipCode" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
 			</div>
@@ -175,7 +186,7 @@
 				<label class="tooltip">Critical Node<span class="classic">What node should we minimize?</span></label>
 				<input type="text" id="criticalNode" name="criticalNode" required="required"/>
 			</div>
-						<div class="shortInput">
+			<div class="shortInput">
 				<label class="tooltip">Iterations<span class="classic">How many iterations should be run</span></label>
 				<input type="text" id="iterations" name="iterations" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
@@ -324,7 +335,7 @@
 					<td>{{allOutputDataDict['service_cost']['VARs']['controlled']}}</td>
 				</tr>
 				<tr>
-					<td>Power Factor</td>
+					<td>Substation Power Factor</td>
 					<td>{{allOutputDataDict['service_cost']['power_factor']['base']}}</td>
 					<td>{{allOutputDataDict['service_cost']['power_factor']['solar']}}</td>
 					<td>{{allOutputDataDict['service_cost']['power_factor']['controlled']}}</td>
@@ -411,7 +422,7 @@
 						<th>C (V)</th>
 						<th>Unbalance</th>
 						<th>Motor Derating</th>
-						<th>Expected Lifespan (Years)</th>
+						<th>Expected Motor Lifetime Reduction (Years)</th>
 					</tr>
 				</thead>
 				{{allOutputDataDict['motor_table_base']}}
@@ -430,7 +441,7 @@
 						<th>C (V)</th>
 						<th>Unbalance</th>
 						<th>Motor Derating</th>
-						<th>Expected Lifespan (Years)</th>
+						<th>Expected Motor Lifetime Reduction (Years)</th>
 					</tr>
 				</thead>
 				{{allOutputDataDict['motor_table_solar']}}
@@ -450,7 +461,7 @@
 						<th>C (V)</th>
 						<th>Unbalance</th>
 						<th>Motor Derating</th>
-						<th>Expected Lifespan (Years)</th>
+						<th>Expected Motor Lifetime Reduction (Years)</th>
 					</tr>
 				</thead>
 				{{allOutputDataDict['motor_table_controlled']}}
