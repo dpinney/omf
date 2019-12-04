@@ -72,14 +72,6 @@ def _get_failure_time(temp_dir):
 	return (None, None)
 
 
-'''
-# TODO: implement PID system to terminate processes (maybe never do this). We do it for web.py
-# Figure out a way to see how many processes are running on the server for testing?
-# Start process is allowed to contain validation logic because I would never want to start a process without validating the input, and if I did, the
-# arguments are optional!
-'''
-
-
 def _validate_input(input_metadata):
 	'''TODO'''
 	name = input_metadata['name']
