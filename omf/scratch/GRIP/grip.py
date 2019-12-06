@@ -5,7 +5,7 @@ from functools import wraps
 from multiprocessing import Process
 import matplotlib.pyplot as plt
 from flask import Flask, request, send_from_directory, make_response, json, abort, redirect, url_for, jsonify
-from config import Config
+from grip_config import Config
 
 
 app = Flask(__name__)
@@ -70,14 +70,6 @@ def _get_failure_time(temp_dir):
 			shutil.rmtree(temp_dir)
 		return (stopped_at, msg)
 	return (None, None)
-
-
-'''
-# TODO: implement PID system to terminate processes (maybe never do this). We do it for web.py
-# Figure out a way to see how many processes are running on the server for testing?
-# Start process is allowed to contain validation logic because I would never want to start a process without validating the input, and if I did, the
-# arguments are optional!
-'''
 
 
 def _validate_input(input_metadata):
@@ -332,7 +324,7 @@ def milsoftToGridlab_start(temp_dir):
 @try_except
 def milsoftToGridlab(temp_dir):
 	'''
-	Create a GLM file from the two input files and return it.
+	Convert a Milsoft Windmil ASCII export (.std & .seq) in to a GridLAB-D .glm and return the .glm.
 
 	Form parameters:
 	:param std: an STD file.
@@ -384,7 +376,7 @@ def cymeToGridlab_start(temp_dir):
 @try_except
 def cymeToGridlab(temp_dir):
 	'''
-	Create a GLM file from the MDB file and return the GLM.
+	Convert an Eaton Cymdist .mdb export in to a GridLAB-D .glm and return the .glm.
 
 	Form parameters:
 	:param mdb: a MDB file.
@@ -431,7 +423,7 @@ def gridlabRun_start(temp_dir):
 @try_except
 def gridlabRun(temp_dir):
 	'''
-	Run a GridLAB-D model and return the results as JSON.
+	Run a .glm through GridLAB-D and return the results as JSON.
 
 	Form parameters:
 	:param glm: a GLM file.
@@ -492,7 +484,8 @@ def gridlabdToGfm_start(temp_dir):
 @try_except
 def gridlabdToGfm(temp_dir):
 	'''
-	Convert the GridLAB-D model to a GFM model. Return the new id for the converted model. Note that this is not the main fragility model for GRIP.
+	Convert a GridLAB-D model (i.e. .glm file) into a LANL ANSI General Fragility Model and return the GFM model as JSON. Note that this is not the
+	main fragility model for GRIP.
 
 	Form parameters:
 	:param glm: a GLM file.
@@ -569,8 +562,8 @@ def runGfm_start(temp_dir):
 @try_except
 def runGfm(temp_dir):
 	'''
-	Return JSON from running LANL's General Fragility Model (GFM) on the input model and .asc hazard field. Note that this is not the main fragility
-	model for GRIP. 
+	Calculate distribution damage using a LANL ANSI General Fragility Model file (i.e. a .gfm) along with a hazard field file (i.e. a .asc file) and
+	return the results as JSON. Note that this is not the main fragility model for GRIP. 
 
 	Form parameters:
 	:param gfm: a GFM file.
@@ -743,16 +736,16 @@ def transmissionMatToOmt_start(temp_dir):
 @try_except
 def transmissionMatToOmt(temp_dir):
 	'''
-	Convert the .m matpower model to an OMT (JSON-based) model. Return the OMT.
+	Convert a MATPOWER .mat or .m input into a JSON .omt transmission circuit format and return the .omt.
 
 	Form parameters:
-	:param matpower: a MATPOWER file.
+	:param matpower: a MATPOWER .mat file.
 
 	Details:
 	:OMF function: omf.network.parse()
 	:run-time: maybe a couple minutes.
 	'''
-	mat_path = os.path.join(temp_dir, "input.m")
+	mat_path = os.path.join(temp_dir, "input.mat")
 	request.files["matpower"].save(mat_path)
 	omt_json = omf.network.parse(mat_path, filePath=True)
 	if omt_json == {"baseMVA":"100.0","mpcVersion":"2.0","bus":{},"gen":{}, "branch":{}}:
@@ -800,7 +793,7 @@ def transmissionPowerflow_start(temp_dir):
 @try_except
 def transmissionPowerflow(temp_dir):
 	'''
-	Run powerflow.
+	Run ACOPF for a .omt transmission circuit.
 
 	Form parameters:
 	:param omt: an OMT file.
@@ -877,10 +870,10 @@ def transmissionViz_start(temp_dir):
 @try_except
 def transmissionViz(temp_dir):
 	'''
-	Return an HTML interface visualizing the .omt file. 
+	Generate an interactive and editable one line diagram of a transmission network and return it as an HTML file.
 
 	Form parameters:
-	:param omt: an OMT file.
+	:param omt: an .omt file.
 
 	Details:
 	:OMF function: omf.network.viz().
@@ -925,10 +918,10 @@ def distributionViz_start(temp_dir):
 @try_except
 def distributionViz(temp_dir):
 	'''
-	Return an HTML interface visualizing the .omd file. 
+	Generate an interactive and editable one line diagram of a distribution network and return it as an HTML file.
 
 	Form parameters:
-	:param omd: an OMD file.
+	:param omd: a .omd file.
 
 	Details:
 	:OMF function: omf.distNetViz.viz().
