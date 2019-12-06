@@ -16,6 +16,7 @@ OOO Add an option to test against the container.
 #from multiprocessing import Process
 import io, os, omf, grip, requests, pytest, json
 import omf
+from flask import url_for
 
 # Start the server.
 #p = Process(target=grip.serve, args=())
@@ -124,14 +125,15 @@ class Test_oneLineGridlab_start(object):
             }]
         }
 
-    def test_useLatLonsFormParameterIsTheStringtrue_returns400(self, client):
+    @pytest.mark.parametrize('useLatLons', ('true', 'false', 5, None))
+    def test_useLatLonsFormParameterIsNotTheStringTrueNorFalse_returns400(self, client, useLatLons):
         filename = 'test_ieee123nodeBetter.glm' 
         glm_path = os.path.join(os.path.dirname(__file__), filename)
         with open(glm_path) as f:
             b_io = io.BytesIO(f.read())
         data = {
             'glm': (b_io, filename),
-            'useLatLons': 'true'
+            'useLatLons': useLatLons
         }
         response = client.post("/oneLineGridlab", data=data)
         assert response.status_code == 400
@@ -142,33 +144,9 @@ class Test_oneLineGridlab_start(object):
             },
             u'errors': [{
                 u'http code': 400,
-                u'source': {u'useLatLons': u'true'},
+                u'source': {u'useLatLons': unicode(useLatLons)},
                 u'title': u'Invalid Parameter Value',
                 u"detail": u"The parameter 'useLatLons' could not be converted into the required type '<type 'bool'>'."
-            }]
-        } 
-
-    def test_useLatLonsFormParameterIsTheStringfalse_returns400(self, client):
-        filename = 'test_ieee123nodeBetter.glm' 
-        glm_path = os.path.join(os.path.dirname(__file__), filename)
-        with open(glm_path) as f:
-            b_io = io.BytesIO(f.read())
-        data = {
-            'glm': (b_io, filename),
-            'useLatLons': 'false'
-        }
-        response = client.post("/oneLineGridlab", data=data)
-        assert response.status_code == 400
-        response_data = json.loads(response.data)
-        assert response_data == {
-            u'job': {
-                u'state': u'failed'
-            },
-            u'errors': [{
-                u'http code': 400,
-                u'source': {u'useLatLons': u'false'},
-                u'title': u'Invalid Parameter Value',
-                u'detail': u"The parameter 'useLatLons' could not be converted into the required type '<type 'bool'>'."
             }]
         } 
 
@@ -177,9 +155,23 @@ class Test_oneLineGridlab_status(object):
     pass
 
 
-class Test_oneLineGridlab_download(object):
+class xTest_oneLineGridlab_download(object):
+    pass
 
-    def test_glmHasNoCoordinates_returnsCorrectPNG(self):
+    def test_glmHasNoCoordinates_returnsCorrectPNG(self, client):
+        '''
+        TODO: Two approaches:
+        1) Spy on mkdtemp(). Send a GET request to onelineGridlab as normal. Instead of polling, send the GET request to onelineGridlab_download when
+           I detect the temp_dir has the desired arguments. This isn't any better than the second approach, and is in fact just a worse integration
+           test.
+            - If this were a real unit test of onelineGridlab_download itself, I would just be creating a fake file in the temp_dir and make sure that
+              onelineGridlab_download would return it. Since the logic of onelineGridlab_download is so simple, it doesn't make sense to unit test this
+        2) POST to /onlineGridlab as normal. Get the response JSON (This is an integration test, which isn't a bad thing). 
+            - Poll the status URL until I get the download URL, then GET the download URL and inspect the contents
+            - Can't use asyncio because the status page returns immediately. Or can I? Can I conditionally advance an asyncIO web request? Say,
+              advance if the resposne wasn't 404? But the point of asycIO is to only wait for the web request to return, so I don't think I can do
+              this. All this would do (if it were possible) is push the polling logic into asycIO itself
+        '''
         filename = 'test_ieee123nodeBetter.glm' 
         test_file_path = os.path.join(os.path.dirname(__file__), filename)
         with open(test_file_path) as f:
@@ -188,13 +180,14 @@ class Test_oneLineGridlab_download(object):
             'glm': (b_io, filename),
             'useLatLons': False
         }
-        response = client.post('/oneLineGridlab', data=data)
+        response = client.get(url_for("oneLineGridlab_download", temp_dir=temp_dir))
+        #response = client.post('/oneLineGridlab', data=data)
         #assert response.status_code == 200
         assert response.mimetype == 'image/png'
         assert response.content_length == 50394
 
-    def test_glmHasCoordinates_returnsCorrectPNG(self):
-        pass
+    #def test_glmHasCoordinates_returnsCorrectPNG(self):
+    #    pass
 
 
 class Test_milsoftToGridlab_start(object):
