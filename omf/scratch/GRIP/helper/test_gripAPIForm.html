@@ -1,0 +1,262 @@
+<head>
+    <style>
+        td {
+            border: 1px solid black;
+            padding: 10px;
+        }
+        table {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <p>Form notes:</p>
+    <ul>
+        <li>This is a very basic HTML form to demonstrate the functionality of the GRIP API. This form is not guaranteed to always have the correct parameters that should be submitted to the GRIP API.</li>
+        <li>The form is set to work with the localhost only. This can of course be changed.</li> 
+    </ul>
+    <p>API notes:</p>
+    <ul>
+    </ul>
+    <table>
+        <tr>
+            <td>
+                <form enctype='multipart/form-data' action="http://127.0.0.1:5100/oneLineGridlab" method="post">
+                    <h1>oneLineGridlab</h1>
+                    <div>
+                        glm
+                        <input type="file" accept=".glm" name="glm"/>
+                    </div>
+                    <br>
+                    Use lat lons?
+                    <div>
+                        True
+                        <input type="radio" name="useLatLons" value="True">
+                    </div>
+                    <div>
+                        False
+                        <input type="radio" name="useLatLons" value="False">
+                    </div>
+                    <br>
+                    <button type="submit">Submit job</button>
+                </form>
+            </td>
+            <td>
+                <form enctype='multipart/form-data' action="http://127.0.0.1:5100/milsoftToGridlab" method="post">
+                    <h1>milsoftToGridlab</h1>
+                    <div>
+                        seq
+                        <input type="file" accept=".seq" name="seq"/>
+                    </div>
+                    <div>
+                        std
+                        <input type="file" accept=".std" name="std"/>
+                    </div>
+                    <br>
+                    <button type="submit">Submit job</button>
+                </form>
+            </td>
+            <td>
+                <form enctype='multipart/form-data' action="http://127.0.0.1:5100/cymeToGridlab" method="post">
+                    <h1>cymeToGridlab</h1>
+                    <div>
+                        mdb
+                        <input type="file" accept=".mdb" name="mdb"/>
+                    </div>
+                    <br>
+                    <button type="submit">Submit job</button>
+                </form>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <form enctype='multipart/form-data' action="http://127.0.0.1:5100/gridlabRun" method="post">
+                    <h1>gridlabRun</h1>
+                    <div>
+                        glm
+                        <input type="file" accept=".glm" name="glm"/>
+                    </div>
+                    <br>
+                    <button type="submit">Submit job</button>
+                </form>
+            </td>
+            <td>
+                <form enctype='multipart/form-data' action="http://127.0.0.1:5100/gridlabdToGfm" method="post">
+                    <h1>gridlabdToGfm</h1>
+                    <div>
+                        glm
+                        <input type="file" accept=".glm" name="glm"/>
+                    </div>
+                    <div>
+                        phase variation
+                        <input type="text" name="phase_variation" value="0.15">
+                    </div>
+                    <div>
+                        chance constraint
+                        <input type="text" name="chance_constraint" value="1.0">
+                    </div> 
+                    <div>
+                        critical load met
+                        <input type="text" name="critical_load_met" value="0.98">
+                    </div>
+                    <div>
+                        total load met
+                        <input type="text" name="total_load_met" value="0.5">
+                    </div>
+                    <div>
+                        max dg per generator
+                        <input type="text" name="max_dg_per_generator" value="0.5">
+                    </div>
+                    <div>
+                        dg unit cost
+                        <input type="text" name="dg_unit_cost" value="1000000.0">
+                    </div>
+                    <div>
+                        generator candidates
+                        <input type="text" name="generator_candidates" value="">
+                    </div>
+                    <div>
+                        critical loads
+                        <input type="text" name="critical_loads" value="">
+                    </div>
+                    <br>
+                    <button type="submit">Submit job</button>
+                </form>
+            </td>
+            <td>
+                <form enctype='multipart/form-data' action="http://127.0.0.1:5100/runGfm" method="post">
+                    <h1>runGfm</h1>
+                    <div>
+                        gfm
+                        <input type="file" accept=".gfm" name="gfm"/>
+                    </div>
+                    <div>
+                        asc
+                        <input type="file" accept=".asc" name="asc"/>
+                    </div>
+                    <br>
+                    <button type="submit">Submit job</button>
+                </form>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <form enctype='multipart/form-data' action="http://127.0.0.1:5100/samRun" method="post">
+                    <h1>samRun</h1>
+                    <div>
+                        tmy2
+                        <input type="file" accept=".tmy2" name="tmy2">
+                    </div>
+                    <div>
+                        System size
+                        <input type="text" name="system_size" value="10.0">
+                    </div>
+                    <div>
+                        Derate
+                        <input type="text" name="derate" value="0.77">
+                    </div>
+                    <div>
+                        Track mode
+                        <input type="text" name="track_mode" value="0.0">
+                    </div>
+                    <div>
+                        azimuth
+                        <input type="text" name="azimuth" value="180.0">
+                    </div>
+                    <div>
+                        tilt eq lat
+                        <input type="text" name="tilt_eq_lat" value="1.0">
+                    </div>
+                    <div>
+                        tilt
+                        <input type="text" name="tilt" value="45.0">
+                    </div>
+                    <div>
+                        rotlim
+                        <input type="text" name="rotlim" value="45.0">
+                    </div>
+                    <div>
+                        gamma
+                        <input type="text" name="gamma" value="-0.45">
+                    </div>
+                    <div>
+                        inv eff
+                        <input type="text" name="inv_eff" value="0.95">
+                    </div>
+                    <div>
+                        w stow
+                        <input type="text" name="w_stow" value="100">
+                    </div>
+                    <br>
+                    <button type="submit">Submit job</button>
+                </form>
+            </td>
+            <td>
+                <form enctype='multipart/form-data' action="http://127.0.0.1:5100/transmissionMatToOmt" method="post">
+                    <h1>transmissionMatToOmt</h1>
+                    <div>
+                        matpower
+                        <input type="file" accept=".m" name="matpower"/>
+                    </div>
+                    <br>
+                    <button type="submit">Submit job</button>
+                </form>
+            </td>
+            <td>
+                <form enctype='multipart/form-data' action="http://127.0.0.1:5100/transmissionPowerflow" method="post">
+                    <h1>transmissionPowerflow</h1>
+                    <div>
+                        omt
+                        <input type="file" accept=".omt" name="omt">
+                    </div>
+                    <div>
+                        Algorithm
+                        <input type="text" name="algorithm">
+                    </div>
+                    <div>
+                        Model
+                        <input type="text" name="model">
+                    </div>
+                    <div>
+                        Tolerance
+                        <input type="text" name="tolerance">
+                    </div>
+                    <div>
+                        Iteration
+                        <input type="text" name="iteration">
+                    </div>
+                    <div>
+                        GenLimits
+                        <input type="text" name="genLimits">
+                    </div>
+                    <br>
+                    <button type="submit">Submit job</button>
+                </form>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <form enctype='multipart/form-data' action="http://127.0.0.1:5100/transmissionViz" method="post">
+                    <h1>transmissionViz</h1>
+                    <div>
+                        omt
+                        <input type="file" accept=".omt" name="omt"/>
+                    </div>
+                    <br>
+                    <button type="submit">Submit job</button>
+                </form>
+            </td>
+            <td>
+                <form enctype='multipart/form-data' action="http://127.0.0.1:5100/distributionViz" method="post">
+                    <h1>distributionViz</h1>
+                    <div>
+                        omd
+                        <input type="file" accept=".omd" name="omd"/>
+                    </div>
+                    <br>
+                    <button type="submit">Submit job</button>
+                </form>
+            </td>
+        </tr>
+    </table>
+</body>

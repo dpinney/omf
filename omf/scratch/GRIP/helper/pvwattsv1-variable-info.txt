@@ -1,0 +1,335 @@
+- https://sam.nrel.gov/images/web_page_files/ssc_guide.pdf#table.6
+- https://sam.nrel.gov/images/web_page_files/ssc_guide.pdf#subsection.3.4
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~ pvwattsv1 module variable information ~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- There are 6 required input variables: 
+    - file_name (e.g. daggett.tm2)
+    - system_size (e.g. 4)
+    - derate (e.g. 0.77)
+    - track_mode (e.g. 0)
+    - azimuth (e.g. 180)
+    - tilt (e.g. 20)
+- There are 46 total possible input variables
+
+Name: file_name
+Label: local weather file path
+Units: 
+Meta: 
+Group: Weather
+Entry description: file_name
+
+Name: system_size
+Label: Nameplate capacity
+Units: kW
+Meta: 
+Group: PVWatts
+Entry description: system_size
+
+Name: derate
+Label: System derate value
+Units: frac
+Meta: 
+Group: PVWatts
+Entry description: derate
+
+Name: track_mode
+Label: Tracking mode
+Units: 0/1/2/3
+Meta: Fixed,1Axis,2Axis,AziAxis
+Group: PVWatts
+Entry description: track_mode
+
+Name: azimuth
+Label: Azimuth angle
+Units: deg
+Meta: E=90,S=180,W=270
+Group: PVWatts
+Entry description: azimuth
+
+Name: tilt
+Label: Tilt angle
+Units: deg
+Meta: H=0,V=90
+Group: PVWatts
+Entry description: tilt
+
+Name: tilt_eq_lat
+Label: Tilt=latitude override
+Units: 0/1
+Meta: 
+Group: PVWatts
+Entry description: tilt_eq_lat
+
+Name: shading_hourly
+Label: Hourly beam shading factors
+Units: 
+Meta: 
+Group: PVWatts
+Entry description: shading_hourly
+
+Name: shading_mxh
+Label: Month x Hour beam shading factors
+Units: 
+Meta: 
+Group: PVWatts
+Entry description: shading_mxh
+
+Name: shading_azal
+Label: Azimuth x altitude beam shading factors
+Units: 
+Meta: 
+Group: PVWatts
+Entry description: shading_azal
+
+Name: shading_diff
+Label: Diffuse shading factor
+Units: 
+Meta: 
+Group: PVWatts
+Entry description: shading_diff
+
+Name: enable_user_poa
+Label: Enable user-defined POA irradiance input
+Units: 0/1
+Meta: 
+Group: PVWatts
+Entry description: enable_user_poa
+
+Name: user_poa
+Label: User-defined POA irradiance
+Units: W/m2
+Meta: 
+Group: PVWatts
+Entry description: user_poa
+
+Name: rotlim
+Label: Tracker rotation limit (+/- 1 axis)
+Units: deg
+Meta: 
+Group: PVWatts
+Entry description: rotlim
+
+Name: t_noct
+Label: Nominal operating cell temperature
+Units: C
+Meta: 
+Group: PVWatts
+Entry description: t_noct
+
+Name: t_ref
+Label: Reference cell temperature
+Units: C
+Meta: 
+Group: PVWatts
+Entry description: t_ref
+
+Name: gamma
+Label: Max power temperature coefficient
+Units: %/C
+Meta: 
+Group: PVWatts
+Entry description: gamma
+
+Name: inv_eff
+Label: Inverter efficiency at rated power
+Units: frac
+Meta: 
+Group: PVWatts
+Entry description: inv_eff
+
+Name: fd
+Label: Diffuse fraction
+Units: 0..1
+Meta: 
+Group: PVWatts
+Entry description: fd
+
+Name: i_ref
+Label: Rating condition irradiance
+Units: W/m2
+Meta: 
+Group: PVWatts
+Entry description: i_ref
+
+Name: poa_cutin
+Label: Min reqd irradiance for operation
+Units: W/m2
+Meta: 
+Group: PVWatts
+Entry description: poa_cutin
+
+Name: w_stow
+Label: Wind stow speed
+Units: m/s
+Meta: 
+Group: PVWatts
+Entry description: w_stow
+
+Name: gh
+Label: Global horizontal irradiance
+Units: W/m2
+Meta: 
+Group: PVWatts
+Entry description: gh
+
+Name: dn
+Label: Beam irradiance
+Units: W/m2
+Meta: 
+Group: PVWatts
+Entry description: dn
+
+Name: df
+Label: Diffuse irradiance
+Units: W/m2
+Meta: 
+Group: PVWatts
+Entry description: df
+
+Name: tamb
+Label: Ambient temperature
+Units: C
+Meta: 
+Group: PVWatts
+Entry description: tamb
+
+Name: tdew
+Label: Dew point temperature
+Units: C
+Meta: 
+Group: PVWatts
+Entry description: tdew
+
+Name: wspd
+Label: Wind speed
+Units: m/s
+Meta: 
+Group: PVWatts
+Entry description: wspd
+
+Name: poa
+Label: Plane of array irradiance
+Units: W/m2
+Meta: 
+Group: PVWatts
+Entry description: poa
+
+Name: tcell
+Label: Module temperature
+Units: C
+Meta: 
+Group: PVWatts
+Entry description: tcell
+
+Name: dc
+Label: DC array output
+Units: Wdc
+Meta: 
+Group: PVWatts
+Entry description: dc
+
+Name: ac
+Label: AC system output
+Units: Wac
+Meta: 
+Group: PVWatts
+Entry description: ac
+
+Name: shad_beam_factor
+Label: Shading factor for beam radiation
+Units: 
+Meta: 
+Group: PVWatts
+Entry description: shad_beam_factor
+
+Name: poa_monthly
+Label: Plane of array irradiance
+Units: kWh/m2
+Meta: 
+Group: PVWatts
+Entry description: poa_monthly
+
+Name: solrad_monthly
+Label: Daily average solar irradiance
+Units: kWh/m2/day
+Meta: 
+Group: PVWatts
+Entry description: solrad_monthly
+
+Name: dc_monthly
+Label: DC array output
+Units: kWhdc
+Meta: 
+Group: PVWatts
+Entry description: dc_monthly
+
+Name: ac_monthly
+Label: AC system output
+Units: kWhac
+Meta: 
+Group: PVWatts
+Entry description: ac_monthly
+
+Name: solrad_annual
+Label: Daily average solar irradiance
+Units: kWh/m2/day
+Meta: 
+Group: PVWatts
+Entry description: solrad_annual
+
+Name: ac_annual
+Label: Annual AC system output
+Units: kWhac
+Meta: 
+Group: PVWatts
+Entry description: ac_annual
+
+Name: location
+Label: Location ID
+Units: 
+Meta: 
+Group: PVWatts
+Entry description: location
+
+Name: city
+Label: City
+Units: 
+Meta: 
+Group: PVWatts
+Entry description: city
+
+Name: state
+Label: State
+Units: 
+Meta: 
+Group: PVWatts
+Entry description: state
+
+Name: lat
+Label: Latitude
+Units: deg
+Meta: 
+Group: PVWatts
+Entry description: lat
+
+Name: lon
+Label: Longitude
+Units: deg
+Meta: 
+Group: PVWatts
+Entry description: lon
+
+Name: tz
+Label: Time zone
+Units: hr
+Meta: 
+Group: PVWatts
+Entry description: tz
+
+Name: elev
+Label: Site elevation
+Units: m
+Meta: 
+Group: PVWatts
+Entry description: elev

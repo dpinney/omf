@@ -122,7 +122,7 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Production Energy Cost ($/kWh)<span class="classic">####</span></label>
+				<label class="tooltip">Production Energy Cost ($/kWh)<span class="classic"></span></label>
 				<input type="text" id="productionCost" name="productionCost" required="required"/>
 			</div>
 			<div class="shortInput">
@@ -130,19 +130,19 @@
 				<input type="text" id="retailCost" name="retailCost" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">PF Penalty<span class="classic">####</span></label>
+				<label class="tooltip">PF Penalty<span class="classic">Annual power factor penalty</span></label>
 				<input type="text" id="pf_penalty" name="pf_penalty" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">PF Threshold<span class="classic">####</span></label>
+				<label class="tooltip">PF Threshold<span class="classic">Threshold over which a penalty would be charged</span></label>
 				<input type="text" id="pf_threshold" name="pf_threshold" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Motor rating<span class="classic">####</span></label>
+				<label class="tooltip">Motor rating<span class="classic">Unbalance threshold over which the motor would be damaged</span></label>
 				<input type="text" id="motor_threshold" name="motor_threshold" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Motor damage cost<span class="classic">####</span></label>
+				<label class="tooltip">Motor damage cost<span class="classic">How much a damaged motor would cost utility</span></label>
 				<input type="text" id="motor_penalty" name="motor_penalty" required="required"/>
 			</div>
 			<div class="shortInput">
@@ -153,6 +153,17 @@
 				<p class="inputSectionHeader">Controller Parameters</p>
 			</div>
 			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Strategy<span class="classic">What strategy would you like to deploy?</span></label>
+				<select id="strategy" name="strategy">
+					<option value="constant">constant</option>
+					<option value="decentralizede">decentralizede</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Constant Value<span class="classic">If constant strategy, what's the number of VARs?</span></label>
+				<input type="text" id="constant_value" name="constant_value" required="required"/>
+			</div>
 			<div class="shortInput">
 				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
 				<input type="text" id="zipCode" name="zipCode" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
@@ -175,7 +186,7 @@
 				<label class="tooltip">Critical Node<span class="classic">What node should we minimize?</span></label>
 				<input type="text" id="criticalNode" name="criticalNode" required="required"/>
 			</div>
-						<div class="shortInput">
+			<div class="shortInput">
 				<label class="tooltip">Iterations<span class="classic">How many iterations should be run</span></label>
 				<input type="text" id="iterations" name="iterations" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
@@ -300,19 +311,19 @@
 					<th>Controlled Solar</th>
 				</tr>
 				<tr>
-					<td>Load (kWh)</td>
+					<td>Load (kW)</td>
 					<td>{{allOutputDataDict['service_cost']['load']['base']}}</td>
 					<td>{{allOutputDataDict['service_cost']['load']['solar']}}</td>
 					<td>{{allOutputDataDict['service_cost']['load']['controlled']}}</td>
 				</tr>
 				<tr>
-					<td>Distributed Generation (kWh)</td>
+					<td>Distributed Generation (kW)</td>
 					<td>{{allOutputDataDict['service_cost']['distributed_gen']['base']}}</td>
 					<td>{{allOutputDataDict['service_cost']['distributed_gen']['solar']}}</td>
 					<td>{{allOutputDataDict['service_cost']['distributed_gen']['controlled']}}</td>
 				</tr>
 				<tr>
-					<td>Losses (kWh)</td>
+					<td>Losses (kW)</td>
 					<td>{{allOutputDataDict['service_cost']['losses']['base']}}</td>
 					<td>{{allOutputDataDict['service_cost']['losses']['solar']}}</td>
 					<td>{{allOutputDataDict['service_cost']['losses']['controlled']}}</td>
@@ -324,10 +335,22 @@
 					<td>{{allOutputDataDict['service_cost']['VARs']['controlled']}}</td>
 				</tr>
 				<tr>
-					<td>Power Factor</td>
+					<td>Substation Power Factor</td>
 					<td>{{allOutputDataDict['service_cost']['power_factor']['base']}}</td>
 					<td>{{allOutputDataDict['service_cost']['power_factor']['solar']}}</td>
 					<td>{{allOutputDataDict['service_cost']['power_factor']['controlled']}}</td>
+				</tr>
+				<tr>
+					<td>Max Derating</td>
+					<td>{{allOutputDataDict['service_cost']['motor_derating']['base']}}%</td>
+					<td>{{allOutputDataDict['service_cost']['motor_derating']['solar']}}%</td>
+					<td>{{allOutputDataDict['service_cost']['motor_derating']['controlled']}}%</td>
+				</tr>
+				<tr>
+					<td>Average Expected Motor Lifetime Reduction (Years)</td>
+					<td>{{allOutputDataDict['service_cost']['lifespan']['base']}}</td>
+					<td>{{allOutputDataDict['service_cost']['lifespan']['solar']}}</td>
+					<td>{{allOutputDataDict['service_cost']['lifespan']['controlled']}}</td>
 				</tr>
 			</table>
 			{% endif %}
@@ -398,7 +421,8 @@
 						<th>B (V)</th>
 						<th>C (V)</th>
 						<th>Unbalance</th>
-						<th>Motor Efficiency</th>
+						<th>Motor Derating</th>
+						<th>Expected Motor Lifetime Reduction (Years)</th>
 					</tr>
 				</thead>
 				{{allOutputDataDict['motor_table_base']}}
@@ -416,7 +440,8 @@
 						<th>B (V)</th>
 						<th>C (V)</th>
 						<th>Unbalance</th>
-						<th>Motor Efficiency</th>
+						<th>Motor Derating</th>
+						<th>Expected Motor Lifetime Reduction (Years)</th>
 					</tr>
 				</thead>
 				{{allOutputDataDict['motor_table_solar']}}
@@ -435,7 +460,8 @@
 						<th>B (V)</th>
 						<th>C (V)</th>
 						<th>Unbalance</th>
-						<th>Motor Efficiency</th>
+						<th>Motor Derating</th>
+						<th>Expected Motor Lifetime Reduction (Years)</th>
 					</tr>
 				</thead>
 				{{allOutputDataDict['motor_table_controlled']}}

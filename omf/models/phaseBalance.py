@@ -28,10 +28,13 @@ def get_loss_items(tree):
 	s = set()
 	for i, d in tree.iteritems():
 		s.add(d.get('object', ''))
-	return [x for x in s if x in ['transformer', 'underground_line', 'overhead_line', 'triplex_line']]
+	return [l for l in ['transformer', 'underground_line', 'overhead_line', 'triplex_line'] if any([l in x for x in s])]
 
 def motor_efficiency(x):
-	return 100 - (.0179 + .402*x + .134*x**2) # curve fit from data from NREL analysis
+	return .0179 + .402*x + .134*x**2 # curve fit from data from NREL analysis
+
+def lifespan(x):
+	return 20-19.8*math.exp(-.679*x) # curve fit from data from NREL analysis
 
 def pf(real, var):
 	real, var = floats(real), floats(var)
@@ -42,6 +45,10 @@ def n(num):
 
 def floats(f):
 	return float(f.replace(',', ''))
+
+def change_complex(x, new_imag):
+	m = complex(x)
+	return "{}+{}j".format(m.real, new_imag) if new_imag > 0 else "{}{}j".format(m.real, new_imag)
 
 def work(modelDir, ind):
 	''' Run the model in its directory. '''
@@ -104,9 +111,19 @@ def work(modelDir, ind):
 	with open(omdPath) as f:
 		tree_controlled = json.load(f)['tree']
 	
+	new_imag = float(ind['constant_value'])
 	for k, v in tree_controlled.iteritems():
 		if ('PV' in v.get('groupid', '')) and v.get('object', '') == 'load':
+			if ind['strategy'] == 'constant':
+				if v.get('constant_power_C', '') != '':
+					v['constant_power_C'] = change_complex(v['constant_power_C'], new_imag)
+				elif v.get('constant_power_B', '') != '':
+					v['constant_power_B'] = change_complex(v['constant_power_B'], new_imag)
+				elif v.get('constant_power_A', '') != '':
+					v['constant_power_A'] = change_complex(v['constant_power_A'], new_imag)
+			
 			v['groupid'] = 'PV'
+
 
 	tree_controlled = _addCollectors(tree_controlled, suffix=controlled_suffix, pvConnection=ind['pvConnection'])
 	
@@ -207,7 +224,10 @@ def work(modelDir, ind):
 				loss_items]) + sums[controlled_suffix].imag +
 				_totals(pJoin(modelDir, 'load' + controlled_suffix + '.csv'), 'imag') + _totals(pJoin(modelDir, 'load_node' + controlled_suffix + '.csv'), 'imag')
 			)
-		}
+		},
+		# Motor derating and lifespan below.
+		'motor_derating': {},
+		'lifespan': {}
 	}
 	o['service_cost']['power_factor'] = {
 		'base': n(pf(o['service_cost']['load']['base'], o['service_cost']['VARs']['base'])),
@@ -277,20 +297,23 @@ def work(modelDir, ind):
 		
 		o['motor_table' + suffix] = ''.join([(
 			"<tr>"
-				"<td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td><td>{5}</td><td>{6}</td><td>{7}</td>"
+				"<td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td><td>{5}</td><td>{6}</td><td>{7}</td><td>{8}</td>"
 			"</tr>" 
 				if r['node_name'] != ind['criticalNode'] else 
 			"<tr>"
-				"<td {8}>{0}</td><td {8}>{1}</td><td {8}>{2}</td><td {8}>{3}</td><td {8}>{4}</td><td {8}>{5}</td><td {8}>{6}</td><td {8}>{7}</td>"
+				"<td {9}>{0}</td><td {9}>{1}</td><td {9}>{2}</td><td {9}>{3}</td><td {9}>{4}</td><td {9}>{5}</td><td {9}>{6}</td><td {9}>{7}</td><td {9}>{8}</td>"
 			"</tr>"
 		).format(r['node_name'], 
 					n(r2['A_real'] + r2['B_real'] + r2['C_real']),
 					n(r2['A_imag'] + r2['B_imag'] + r2['C_imag']),
 					n(r['voltA']), n(r['voltB']), n(r['voltC']), 
-					n(r['unbalance']), n(motor_efficiency(r['unbalance'])), "style='background:yellow'") 
+					n(r['unbalance']), n(motor_efficiency(r['unbalance'])), n(lifespan(r['unbalance'])), "style='background:yellow'") 
 				for (i, r), (j, r2) in zip(df_all_motors.iterrows(), df_vs[suffix].iterrows())])
 		
 		all_motor_unbalance[suffix] = [r['unbalance'] for i, r in df_all_motors.iterrows()]
+
+		o['service_cost']['motor_derating'][suffix[1:]] = n(df_all_motors['unbalance'].apply(motor_efficiency).max())
+		o['service_cost']['lifespan'][suffix[1:]] = n(df_all_motors['unbalance'].apply(lifespan).mean())
 
 	# ----------------------------------------------------------------------- #
 
@@ -444,15 +467,15 @@ def _totals(filename, component=None):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		# "feederName1": "phase_balance_test",
-		# "criticalNode": 'R1-12-47-1_node_17',
-		# "pvConnection": 'Wye',
-		# "layoutAlgorithm": "geospatial",
+		"feederName1": "phase_balance_test",
+		"criticalNode": 'R1-12-47-1_node_17',
+		"pvConnection": 'Wye',
+		"layoutAlgorithm": "geospatial",
 		# ---------------------------------------- #
-		"feederName1": "phase_balance_test_2",
-		"criticalNode": 'R1-12-47-2_node_28',
-		"pvConnection": 'Delta',
-		"layoutAlgorithm": "forceDirected",
+		# "feederName1": "phase_balance_test_2",
+		# "criticalNode": 'R1-12-47-2_node_28',
+		# "pvConnection": 'Delta',
+		# "layoutAlgorithm": "forceDirected",
 		# ---------------------------------------- #
 		# "feederName1": 'bavarian_solar',
 		# "criticalNode": "node2283458290",
@@ -469,6 +492,8 @@ def new(modelDir):
 		# "pvConnection": 'Wye',
 		# "layoutAlgorithm": "geospatial",
 		# ---------------------------------------- #
+		"strategy": "",
+		"constant_value": "-400",
 		"modelType": modelName,
 		"runTime": "",
 		"zipCode": "64735",
