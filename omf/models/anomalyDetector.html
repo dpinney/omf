@@ -39,6 +39,7 @@
 		}
 
 		$(window).on('pageshow',function(){
+			Plotly.newPlot( 'plotSax', JSON.parse(allOutputData['plotSax']) );
 			Plotly.newPlot( 'plotLof', JSON.parse(allOutputData['plotLof']) );
 			Plotly.newPlot( 'plotIso', JSON.parse(allOutputData['plotIso']) );
 		});
@@ -162,10 +163,21 @@
 				</div>
 			</div>
 
-			<script type="text/javascript">
-				//$('.algoInputs').hide();
-				//$('.prophetInputs').show();
-			</script>
+
+			<div class="wideInput">
+				<p class="inputSectionHeader">SAX-Sequitur specific Parameters</p>
+			</div>
+			<hr>
+			<div class="algoInputs saxInputs">
+				<div class="shortInput" >
+					<label class="tooltip">Normailzation Window Size<span class="classic">The number of datapoints to consider for normalizing data shapes.</span></label>
+					<input type="number"  id="windowSize" name="windowSize" min="1" step="1"/>
+				</div>
+				<div class="shortInput" >
+					<label class="tooltip">Alphabet Size<span class="classic">The number of symbols to use to approximate the signal, the larger the number the less the algorithm with generalize (must be between 3 and 20)</span></label>
+					<input type="number"  id="alphabetSize" name="alphabetSize" min="3" max="20" step="1"/>
+				</div>
+			</div>
 
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
@@ -377,5 +389,8 @@
 
 	<p class="reportTitle postRun" style="page-break-before:always">Isolation Forest</p>
 	<div id="plotIso" class="tightContent postRun"></div>
+
+	<p class="reportTitle postRun" style="page-break-before:always">SAX-Sequitur</p>
+	<div id="plotSax" class="tightContent postRun"></div>
 
 </body>

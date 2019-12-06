@@ -1,4 +1,4 @@
 #!/bin/sh
-docker stop grip_run
-docker rm grip_run
-#docker rmi grip
+docker stop omf_grip_run
+docker rm omf_grip_run
+#docker rmi omf_grip

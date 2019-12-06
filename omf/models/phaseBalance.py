@@ -29,7 +29,6 @@ def get_loss_items(tree):
 	for i, d in tree.iteritems():
 		s.add(d.get('object', ''))
 	return [l for l in ['transformer', 'underground_line', 'overhead_line', 'triplex_line'] if any([l in x for x in s])]
-	# return [x for x in s if any([l in x for l in ])]
 
 def motor_efficiency(x):
 	return .0179 + .402*x + .134*x**2 # curve fit from data from NREL analysis
@@ -115,12 +114,13 @@ def work(modelDir, ind):
 	new_imag = float(ind['constant_value'])
 	for k, v in tree_controlled.iteritems():
 		if ('PV' in v.get('groupid', '')) and v.get('object', '') == 'load':
-			if v.get('constant_power_C', '') != '':
-				v['constant_power_C'] = change_complex(v['constant_power_C'], new_imag)
-			elif v.get('constant_power_B', '') != '':
-				v['constant_power_B'] = change_complex(v['constant_power_B'], new_imag)
-			elif v.get('constant_power_A', '') != '':
-				v['constant_power_A'] = change_complex(v['constant_power_A'], new_imag)
+			if ind['strategy'] == 'constant':
+				if v.get('constant_power_C', '') != '':
+					v['constant_power_C'] = change_complex(v['constant_power_C'], new_imag)
+				elif v.get('constant_power_B', '') != '':
+					v['constant_power_B'] = change_complex(v['constant_power_B'], new_imag)
+				elif v.get('constant_power_A', '') != '':
+					v['constant_power_A'] = change_complex(v['constant_power_A'], new_imag)
 			
 			v['groupid'] = 'PV'
 
@@ -492,7 +492,7 @@ def new(modelDir):
 		# "pvConnection": 'Wye',
 		# "layoutAlgorithm": "geospatial",
 		# ---------------------------------------- #
-		"strategy": "constant",
+		"strategy": "",
 		"constant_value": "-400",
 		"modelType": modelName,
 		"runTime": "",

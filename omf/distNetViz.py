@@ -53,17 +53,12 @@ def insert_coordinates(tree):
 
 
 def contains_coordinates(tree):
-	# type: (dict) -> bool
 	"""Return True if the dictionary contains latitude and longitude data, otherwise False."""
-	# If there is zero lat/lon info, do force layout by default.
-	lat_lon_count = 0
 	for key in tree:
 		for sub_key in ['latitude', 'longitude']:
 			if sub_key in tree[key]:
-				lat_lon_count += 1
-	if lat_lon_count == 0:
-		return False
-	return True
+				return True
+	return False
 
 def get_components():
 	directory = os.path.join(omf.omfDir, "data/Component")
