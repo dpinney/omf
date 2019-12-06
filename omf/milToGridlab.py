@@ -33,7 +33,7 @@ def _lineDistances(x1,x2,y1,y2):
 def convert(stdString, seqString, rescale=True):
 	''' Take in a .std and .seq strings from Milsoft and spit out a json dict. Rescale to a small size if rescale=True. '''
 	start_time = time.time()
-	# print('*** Start Conversion', time.time()-start_time)
+	warnings.warn('*** Start Conversion %0.3f' % (time.time()-start_time))
 	# Get all components from the .std:
 	components = _csvToArray(stdString)[1:]
 	# Get all hardware stats from the .seq. We dropped the first rows which are metadata (n.b. there are no headers).
@@ -64,7 +64,7 @@ def convert(stdString, seqString, rescale=True):
 			for component in components:
 				x_list.append(float(component[5]))
 				y_list.append(float(component[6]))
-			# print 'coordinate boundaries:', min(x_list), max(x_list), min(y_list), max(y_list)
+			warnings.warn('coordinate boundaries: %d %d %d %d' % (min(x_list), max(x_list), min(y_list), max(y_list)))
 			# according to convert function  f(x) = a * x + b
 			x_a = x_pixel_range / (max(x_list) - min(x_list))
 			x_b = -x_a * min(x_list)
@@ -851,7 +851,7 @@ def convert(stdString, seqString, rescale=True):
 		return True
 
 	# Fix the connectivity:
-	# print('*** Connectivity fixing start', time.time()-start_time)
+	warnings.warn('*** Connectivity fixing start %0.3f' % (time.time()-start_time))
 	guidToIndex = {convertedComponents[index].get('guid',''):index for index in xrange(len(convertedComponents))}
 	for comp in convertedComponents:
 		fixCompConnectivity(comp)
@@ -863,7 +863,7 @@ def convert(stdString, seqString, rescale=True):
 	for key in glmTree.keys():
 		# if ('from' in glmTree[key].keys() and 'to' not in glmTree[key].keys()) or ('to' in glmTree[key].keys() and 'from' not in glmTree[key].keys()):
 		if glmTree[key]['object'] in ['overhead_line','underground_line','regulator','transformer','switch','fuse'] and ('to' not in glmTree[key].keys() or 'from' not in glmTree[key].keys()):
-			# print 'Object borked connectivity', glmTree[key]['name'], glmTree[key]['object']
+			warnings.warn('Object borked connectivity %s %s' % (glmTree[key]['name'], glmTree[key]['object']))
 			del glmTree[key]
 
 	#Strip guids:
@@ -895,7 +895,7 @@ def convert(stdString, seqString, rescale=True):
 		else:
 			return False
 
-	# print('*** Link phase fixing', time.time()-start_time)
+	warnings.warn('*** Link phase fixing %0.3f' % (time.time()-start_time))
 	for key in glmTree:
 		fixLinkPhases(glmTree[key])
 
@@ -934,7 +934,7 @@ def convert(stdString, seqString, rescale=True):
 	# WARNING: this code creates broken GLMs. Disabled by default.
 	glmTree = convDistLoadLines(glmTree)
 	# Fix nominal voltage
-	# print('*** Nominal voltage fixing', time.time()-start_time)
+	warnings.warn('*** Nominal voltage fixing %0.3f' % (time.time()-start_time))
 
 	# Make sure we have the latest index.
 	nameToIndex = {glmTree[key].get('name',''):key for key in glmTree}
@@ -970,7 +970,7 @@ def convert(stdString, seqString, rescale=True):
 								glm_dict[x][key]['band_width'] =  (bandWidthRegulator * nominalVoltageSwing) / 120
 			except:
 				pass
-				# print "\n   Couldn't set regulator_configuration to the swing bus nominal_voltage."
+				warnings.warn("\n   Couldn't set regulator_configuration to the swing bus nominal_voltage.")
 
 	parent_voltage = {}
 	current_parents = len(parent_voltage)
@@ -999,7 +999,7 @@ def convert(stdString, seqString, rescale=True):
 		if 'object' in glmTree[x].keys() and glmTree[x]['object'] in del_nom_volt_list and 'nominal_voltage' in glmTree[x].keys():
 			del glmTree[x]['nominal_voltage']
 
-	# print('*** Secondary system fixing', time.time()-start_time)
+	warnings.warn('*** Secondary system fixing %0.3f' % (time.time()-start_time))
 	def secondarySystemFix(glm):
 		def unused_key(dic, key_multiplier):
 			free_key = (int(max(dic.keys())/key_multiplier) + 1)*key_multiplier
@@ -1193,7 +1193,7 @@ def convert(stdString, seqString, rescale=True):
 				if line['configuration'] in nameDictMap.keys(): line['configuration'] = nameDictMap[line['configuration']]
 
 	# Fully disembed and remove duplicate configuration objects:
-	# print('*** Disembed and dedup', time.time()-start_time)
+	warnings.warn('*** Disembed and dedup %0.3f' % (time.time()-start_time))
 	feeder.fullyDeEmbed(glmTree)
 	dedupGlm('transformer_configuration', glmTree)
 	dedupGlm('regulator_configuration', glmTree)
@@ -1237,7 +1237,7 @@ def convert(stdString, seqString, rescale=True):
 				thisOb['latitude'] = str(float(parentOb['latitude']) + random.uniform(-5,5))
 				thisOb['longitude'] = str(float(parentOb['longitude']) + random.uniform(-5,5))
 	# Final Output
-	# print('*** DONE!', time.time()-start_time)
+	warnings.warn('*** DONE! %0.3f' % (time.time()-start_time))
 	# 8B research fixes
 	glmTree = phasingMismatchFix(glmTree)
 	glmTree = missingConductorsFix(glmTree)
@@ -1623,7 +1623,7 @@ def getRelatives(tree, node_or_line, parent=False):
 
 	if parent and listy:
 		if len(listy) > 1:
-			print 'Object with multiple parents detected. Note that this is not fully supported.'
+			warnings.warn('Object with multiple parents detected. Note that this is not fully supported.')
 			return listy
 		return listy[0]
 	return listy
@@ -1650,7 +1650,7 @@ def fixOrphanedLoads(tree):
 		size = int(size)
 		if size == 1:
 			if obj_type != 'load':
-				print 'size 1 island of type ' + obj_type
+				warnings.warn('size 1 island of type ' + obj_type)
 				continue
 			del tree[key]
 			size_1_del += 1
@@ -1658,10 +1658,10 @@ def fixOrphanedLoads(tree):
 		if size == 2:
 			kiddo = getRelatives(tree, key)[0]
 			if tree[kiddo]['object'] != 'load':
-				print 'size 2 island with kid of type ' + tree[kiddo]['object']
+				warnings.warn('size 2 island with kid of type ' + tree[kiddo]['object'])
 				continue
 			if obj_type != 'node':
-				print 'size 2 island with root of type ' + obj_type
+				warnings.warn('size 2 island with root of type ' + obj_type)
 				continue
 			del tree[key], tree[kiddo]
 			size_2_del += 1
@@ -1672,7 +1672,7 @@ def fixOrphanedLoads(tree):
 				next_from = current_from + '_' + P
 				if namesToKeys.get(next_from):
 					tree[key]['from'] = next_from
-	print '%d size 1 deletions and %d size 2 deletions' % ( size_1_del, size_2_del )
+	warnings.warn('%d size 1 deletions and %d size 2 deletions' % ( size_1_del, size_2_del ))
 	return tree
 
 def rewriteStatePlaneToLatLon(tree, epsg = None):
@@ -1694,7 +1694,7 @@ def _latCount(name):
 			nameCount += 1
 			if 'latitude' in outGlm[key]:
 				myLatCount += 1
-	print name, 'COUNT', nameCount, 'LAT COUNT', latCount, 'SUCCESS RATE', 1.0*latCount/nameCount
+	warnings.warn(name, 'COUNT', nameCount, 'LAT COUNT', latCount, 'SUCCESS RATE', 1.0*latCount/nameCount)
 
 default_equipment = {
 	'underground_line_conductor': {
@@ -1784,6 +1784,7 @@ def _tests(
 		).read(),
 	},
 	voltdumpCsvName='{}_VD.csv',
+	logAllWarnings=False
 ):
 	from tempfile import mkdtemp
 	''' Test convert every windmil feeder we have (in static/testFiles). '''
@@ -1823,7 +1824,12 @@ def _tests(
 			with open(pJoin(openPrefix,stdString),'r') as stdFile, open(pJoin(openPrefix,seqString),'r') as seqFile:
 				# Catch warnings too:
 				with warnings.catch_warnings(record=True) as caught_warnings:
+					warnings.simplefilter("always")
 					outGlm = convert(stdFile.read(), seqFile.read())
+				if logAllWarnings:
+					currentResults['all_warnings'] = ';'.join(
+						[str(x.message) for x in caught_warnings]
+					)
 				if voltdumpCsvName:
 					voltdumpCsvName = voltdumpCsvName.format(
 						stdString.replace('.std', '')
@@ -1833,9 +1839,6 @@ def _tests(
 						'object': 'voltdump',
 						'filename': voltdumpCsvName,
 					}
-				currentResults['all_warnings'] = ';'.join(
-					[str(x.message) for x in caught_warnings]
-				)
 			with open(outPrefix + stdString.replace('.std', '.glm'), 'w') as outFile:
 				outFile.seek(0)
 				outFile.write(feeder.sortedWrite(outGlm))
