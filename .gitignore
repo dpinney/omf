@@ -38,3 +38,5 @@ omf/omf.error.log
 omf/solvers/nilmtk/*
 omf/static/testFiles/bavarian_solar.omd
 omf/static/testFiles/turkey_solar.omd
+.idea/
+

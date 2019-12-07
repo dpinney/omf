@@ -16,6 +16,7 @@ OOO Add an option to test against the container.
 #from multiprocessing import Process
 import io, os, omf, grip, requests, pytest, json
 import omf
+from flask import url_for
 
 # Start the server.
 #p = Process(target=grip.serve, args=())
@@ -54,9 +55,9 @@ def test_GETRequestToPOSTRoute_returns405(url_route, client):
     assert response.status_code == 405
 
 
-class TestOneLineGridlab(object):
+class Test_oneLineGridlab_start(object):
 
-    def test_GLMHasNoCoordinates_and_useLatLonsIsTrue_returns422_and_returnsProperJSON(self, client):
+    def test_GLMHasNoCoordinates_and_useLatLonsIsTrue_returns422_and_returnsCorrectJSON(self, client):
         filename = 'test_ieee123nodeBetter.glm' 
         glm_path = os.path.join(os.path.dirname(__file__), filename)
         with open(glm_path) as f:
@@ -81,7 +82,7 @@ class TestOneLineGridlab(object):
             }]
         }
 
-    def test_omittedUseLatLonsFormParameter_returns400_and_returnsProperJSON(self, client):
+    def test_omittedUseLatLonsFormParameter_returns400_and_returnsCorrectJSON(self, client):
         filename = 'test_ieee123nodeBetter.glm' 
         glm_path = os.path.join(os.path.dirname(__file__), filename)
         with open(glm_path) as f:
@@ -104,7 +105,7 @@ class TestOneLineGridlab(object):
             }]
         }
 
-    def test_omittedGLMFile_returns400_and_returnsProperJSON(self, client):
+    def test_omittedGLMFile_returns400_and_returnsCorrectJSON(self, client):
         data = {
             'glm': None,
             'useLatLons': True
@@ -124,14 +125,15 @@ class TestOneLineGridlab(object):
             }]
         }
 
-    def test_useLatLonsFormParameterIsTheStringtrue_returns400(self, client):
+    @pytest.mark.parametrize('useLatLons', ('true', 'false', 5, None))
+    def test_useLatLonsFormParameterIsNotTheStringTrueNorFalse_returns400(self, client, useLatLons):
         filename = 'test_ieee123nodeBetter.glm' 
         glm_path = os.path.join(os.path.dirname(__file__), filename)
         with open(glm_path) as f:
             b_io = io.BytesIO(f.read())
         data = {
             'glm': (b_io, filename),
-            'useLatLons': 'true'
+            'useLatLons': useLatLons
         }
         response = client.post("/oneLineGridlab", data=data)
         assert response.status_code == 400
@@ -142,43 +144,55 @@ class TestOneLineGridlab(object):
             },
             u'errors': [{
                 u'http code': 400,
-                u'source': {u'useLatLons': u'true'},
+                u'source': {u'useLatLons': unicode(useLatLons)},
                 u'title': u'Invalid Parameter Value',
                 u"detail": u"The parameter 'useLatLons' could not be converted into the required type '<type 'bool'>'."
             }]
         } 
 
-    def test_useLatLonsFormParameterIsTheStringfalse_returns400(self, client):
+
+class Test_oneLineGridlab_status(object):
+    pass
+
+
+class xTest_oneLineGridlab_download(object):
+    pass
+
+    def test_glmHasNoCoordinates_returnsCorrectPNG(self, client):
+        '''
+        TODO: Two approaches:
+        1) Spy on mkdtemp(). Send a GET request to onelineGridlab as normal. Instead of polling, send the GET request to onelineGridlab_download when
+           I detect the temp_dir has the desired arguments. This isn't any better than the second approach, and is in fact just a worse integration
+           test.
+            - If this were a real unit test of onelineGridlab_download itself, I would just be creating a fake file in the temp_dir and make sure that
+              onelineGridlab_download would return it. Since the logic of onelineGridlab_download is so simple, it doesn't make sense to unit test this
+        2) POST to /onlineGridlab as normal. Get the response JSON (This is an integration test, which isn't a bad thing). 
+            - Poll the status URL until I get the download URL, then GET the download URL and inspect the contents
+            - Can't use asyncio because the status page returns immediately. Or can I? Can I conditionally advance an asyncIO web request? Say,
+              advance if the resposne wasn't 404? But the point of asycIO is to only wait for the web request to return, so I don't think I can do
+              this. All this would do (if it were possible) is push the polling logic into asycIO itself
+        '''
         filename = 'test_ieee123nodeBetter.glm' 
-        glm_path = os.path.join(os.path.dirname(__file__), filename)
-        with open(glm_path) as f:
+        test_file_path = os.path.join(os.path.dirname(__file__), filename)
+        with open(test_file_path) as f:
             b_io = io.BytesIO(f.read())
         data = {
             'glm': (b_io, filename),
-            'useLatLons': 'false'
+            'useLatLons': False
         }
-        response = client.post("/oneLineGridlab", data=data)
-        assert response.status_code == 400
-        response_data = json.loads(response.data)
-        assert response_data == {
-            u'job': {
-                u'state': u'failed'
-            },
-            u'errors': [{
-                u'http code': 400,
-                u'source': {u'useLatLons': u'false'},
-                u'title': u'Invalid Parameter Value',
-                u'detail': u"The parameter 'useLatLons' could not be converted into the required type '<type 'bool'>'."
-            }]
-        } 
+        response = client.get(url_for("oneLineGridlab_download", temp_dir=temp_dir))
+        #response = client.post('/oneLineGridlab', data=data)
+        #assert response.status_code == 200
+        assert response.mimetype == 'image/png'
+        assert response.content_length == 50394
 
-    def xtest_(self):
-        pass # How do deal with asynchonous nature?
+    #def test_glmHasCoordinates_returnsCorrectPNG(self):
+    #    pass
 
 
-class TestMilsoftToGridlab(object):
+class Test_milsoftToGridlab_start(object):
 
-    def test_omittedSEQFile_returns400_and_returnsProperJSON(self, client):
+    def test_omittedSEQFile_returns400_and_returnsCorrectJSON(self, client):
         std_path = os.path.join(omf.omfDir, "static/testFiles/IEEE13.std")
         with open(std_path) as f:
             b_io_std = io.BytesIO(f.read())
@@ -198,7 +212,7 @@ class TestMilsoftToGridlab(object):
             }]
         }
 
-    def test_omittedSTDFile_returns400_and_returnsProperJSON(self, client):
+    def test_omittedSTDFile_returns400_and_returnsCorrectJSON(self, client):
         seq_path = os.path.join(omf.omfDir, "static/testFiles/IEEE13.seq") 
         with open(seq_path) as f:
             b_io_seq = io.BytesIO(f.read())
@@ -219,9 +233,17 @@ class TestMilsoftToGridlab(object):
         }
 
 
+class Test_milsoftToGridlab_status(object):
+    pass
+
+
+class Test_milsoftToGridlab_download(object):
+    pass
+
+
 class TestCymeToGridlab(object):
 
-    def test_omittedMDBFile_returns400_and_returnsProperJSON(self, client):
+    def test_omittedMDBFile_returns400_and_returnsCorrectJSON(self, client):
         #mdb_path = os.path.join(omf.omfDir, "static/testFiles/IEEE13.mdb")
         #with open(mdb_path) as f:
         #    b_io = io.BytesIO(f.read())
@@ -245,7 +267,7 @@ class TestCymeToGridlab(object):
 
 class TestGridlabRun(object):
 
-    def test_omittedGLMFile_returns400_and_returnsProperJSON(self, client):
+    def test_omittedGLMFile_returns400_and_returnsCorrectJSON(self, client):
         data = {}
         response = client.post("/gridlabRun", data=data)
         assert response.status_code == 400
@@ -264,7 +286,7 @@ class TestGridlabRun(object):
 
 class TestGridlabdToGfm(object):
 
-    def test_phaseVariationAboveMaxBound_returns400_and_returnsProperJSON(self, client):
+    def test_phaseVariationAboveMaxBound_returns400_and_returnsCorrectJSON(self, client):
         filename = "test_ieee123nodeBetter.glm" 
         glm_path = os.path.join(os.path.dirname(__file__), filename)
         with open(glm_path) as f:
@@ -295,7 +317,7 @@ class TestRunGfm(object):
 
 class TestSamRun(object):
     
-    def test_derateBelowMinBound_returns400_and_returnsProperJSON(self, client):
+    def test_derateBelowMinBound_returns400_and_returnsCorrectJSON(self, client):
         tmy2_path = os.path.join(omf.omfDir, "data/Climate/CA-SAN_FRANCISCO.tmy2")
         with open(tmy2_path) as f:
             b_io = io.BytesIO(f.read())
@@ -325,7 +347,7 @@ class TestTransmissionMatToOmt(object):
 
 class TestTransmissionPowerflow(object):
 
-    def test_algorithmNotInAllowedValues_returns400_and_returnsProperJSON(self, client):
+    def test_algorithmNotInAllowedValues_returns400_and_returnsCorrectJSON(self, client):
         with open(os.path.join(omf.omfDir, "static/testFiles/case9.omt")) as f:
             b_io = io.BytesIO(f.read())
         data = {
