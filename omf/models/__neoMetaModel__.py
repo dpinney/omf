@@ -29,7 +29,7 @@ def heavyProcessing(modelDir):
 			inputDict = json.load(f)
 		# Remove old outputs.
 		try: os.remove(pJoin(modelDir,"allOutputData.json"))
-		except Exception, e: pass
+		except Exception as e: pass
 		# Get the function and run it.
 		work = getattr(omf.models, inputDict['modelType']).work
 		#This grabs the new outData model
@@ -38,7 +38,7 @@ def heavyProcessing(modelDir):
 		# If input range wasn't valid delete output, write error to disk.
 		cancel(modelDir)
 		thisErr = traceback.format_exc()
-		print 'ERROR IN MODEL', modelDir, thisErr
+		print('ERROR IN MODEL', modelDir, thisErr)
 		inputDict['stderr'] = thisErr
 		with locked_open(os.path.join(modelDir,'stderr.txt'),'w') as errorFile:
 			errorFile.write(thisErr)
@@ -79,13 +79,13 @@ def run(modelDir):
 	backProc.start()
 	with locked_open(pJoin(modelDir, "PPID.txt"),"w+") as pPidFile:
 		pPidFile.write(str(backProc.pid))
-	print "SENT TO BACKGROUND", modelDir
+	print("SENT TO BACKGROUND", modelDir)
 
 def runForeground(modelDir):
 	''' Run all model work immediately in the same thread. '''
 	with locked_open(pJoin(modelDir, "PPID.txt"),"w+") as pPidFile:
 		pPidFile.write('-999') # HACK: put in an invalid PID to indicate the model is running.
-	print "FOREGROUND RUNNING", modelDir
+	print("FOREGROUND RUNNING", modelDir)
 	heavyProcessing(modelDir)
 
 def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
@@ -131,9 +131,9 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 			#If the hashes match, mark the model as up to date
 			else:	
 				outJson['oldVersion'] = False
-		except (UnboundLocalError, KeyError), e:
-			print(traceback.print_exc())
-			print('error:' + str(e))
+		except (UnboundLocalError, KeyError) as e:
+			print((traceback.print_exc()))
+			print(('error:' + str(e)))
 	except IOError:
 		allOutputData = None
 		outJson = None
@@ -171,25 +171,25 @@ def renderTemplateToFile(modelDir, datastoreNames={}):
 					with io.open(_omfDir + "/static"+ matchObj.group(2), 'r', encoding='utf-8') as yFile:
 						ttempfile = yFile.readlines()
 					tmp = '<script>'+sourceFile+'</script>'
-					inlineTemplate.write(unicode('<script>'))
+					inlineTemplate.write(str('<script>'))
 					for i in ttempfile:
 						try:
 							inlineTemplate.write(i)
 						except (UnicodeEncodeError):
 							print(i)
-					inlineTemplate.write(unicode('</script>'))
+					inlineTemplate.write(str('</script>'))
 				elif styleTags:
 					with io.open(_omfDir + "/static"+ matchObj.group(2), 'r', encoding='utf-8') as yFile:
 						ttempfile = yFile.readlines()
-					inlineTemplate.write(unicode('<style>'))
+					inlineTemplate.write(str('<style>'))
 					for i in ttempfile:
 						try:
 							inlineTemplate.write(i)
 						except (UnicodeEncodeError):
 							print(i)
-					inlineTemplate.write(unicode('</style>'))
+					inlineTemplate.write(str('</style>'))
 				else:
-					inlineTemplate.write(unicode(line))
+					inlineTemplate.write(str(line))
 
 def getStatus(modelDir):
 	''' Is the model stopped, running or finished? '''
@@ -229,7 +229,7 @@ def cancel(modelDir):
 			pid = int(pidFile.read())
 		# print "pid " + str(pid)
 		os.kill(pid, 15)
-		print "PID KILLED"
+		print("PID KILLED")
 	except:
 		pass
 	# Kill runForeground process
@@ -237,7 +237,7 @@ def cancel(modelDir):
 		with locked_open(pJoin(modelDir, "PPID.txt"), "r") as pPidFile:
 			pPid = int(pPidFile.read())
 		os.kill(pPid, 15)
-		print "PPID KILLED"
+		print("PPID KILLED")
 	except:
 		pass
 	# Remove PID, PPID, and allOutputData file if existed
@@ -246,7 +246,7 @@ def cancel(modelDir):
 			os.remove(pJoin(modelDir,fName))
 		except:
 			pass
-	print "CANCELED", modelDir
+	print("CANCELED", modelDir)
 
 def roundSig(x, sig=3):
 	''' Round to a given number of sig figs. '''
