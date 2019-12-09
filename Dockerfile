@@ -10,7 +10,7 @@ RUN mkdir /home/omf
 COPY install.py /home/omf/
 COPY requirements.txt /home/omf/
 COPY setup.py /home/omf/
-RUN cd /home/omf/; python install.py
+RUN cd /home/omf/; python install.py; pip install -r requirements.txt;
 
 # Run the OMF
 VOLUME ["/home/omf/omf/"]
