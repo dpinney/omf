@@ -25,6 +25,18 @@
 </head>
 <body>
 	<div id="map"></div>
+	<div id="controlBox">
+		<form>
+			<select id="range-selector" name="range">
+				<option value="">Select range:</option>
+				<option value="1">75m</option>
+				<option value="2">84m</option>
+				<option value="3">100m</option>
+				<option value="4">230m</option>
+				<option value="5">265m</option>
+			</select>
+		</form>
+	</div>
 	<script>var geojson={% if geojson %}{{geojson | tojson}}{% else %}null{% endif %}</script>
 	<script type="text/javascript" src="MN_Roads.js"></script>
 	<script type="text/javascript" src="MN_Chargers.js"></script>
@@ -78,7 +90,23 @@
 			color: "#000",
 			weight: 1,
 			opacity: 1,
-			fillOpacity: 0.8
+			fillOpacity: 0.6
+		});
+	}
+
+	function pointToLayerCircleNode(feature, latlng) {
+		let fillColorValue = 'yellow';
+		if (feature.properties['pointColor']){
+			fillColorValue = feature.properties['pointColor'];
+		}
+		return L.circle(latlng, {
+			radius: 120701,
+			color: fillColorValue,
+			fillColor: fillColorValue,
+			color: "#000",
+			weight: 1,
+			opacity: 1,
+			fillOpacity: 0.4
 		});
 	}
 
@@ -107,9 +135,15 @@
 				onEachFeature: onEachFeature,
 				style: lineStyle,
 			});
+	radiusLayer = L.geoJSON(false, {
+				pointToLayer: pointToLayerCircleNode,
+				onEachFeature: onEachFeature,
+				style: lineStyle,
+			});
 	geojson.features.forEach(function(feature){
 		if (feature.geometry['type'] == 'Point'){
 			geojsonLayer.addData(feature);
+			radiusLayer.addData(feature);
 		}
 		else if (feature.geometry['type'] == 'LineString'){
 			geojsonLayer.addData(feature);
@@ -130,6 +164,7 @@
 		}).addTo(map);
 	L.control.scale().addTo(map);
 	geojsonLayer.addTo(map);
+	radiusLayer.addTo(map);
 </script>
 </body>
 </html>
