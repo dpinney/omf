@@ -1,13 +1,11 @@
 ''' Run OpenDSS and plot the results for arbitrary circuits. '''
 
-from argparse import ArgumentParser
-import time
 import opendssdirect as dss
 import pandas as pd
 import matplotlib.pyplot as plt
 import networkx as nx
 import math
-import os, shutil
+import os
 
 def runDSS(filename):
 	''' Run DSS file and set export path.'''
@@ -222,15 +220,14 @@ def capacityPlot():
 	plt.clf()
 
 if __name__ == "__main__":
-	# Files
+	# Make core output
 	FNAME = 'ieee37.dss'
-	# Make some output
 	runDSS(FNAME)
 	# Generate plots
-	voltagePlots()
-	currentPlots()
+	# voltagePlots()
+	# currentPlots()
 	networkPlot()
-	THD()
-	dynamicPlot(1, 10)
-	faultPlot()
-	capacityPlot()
+	# THD()
+	# dynamicPlot(1, 10)
+	# faultPlot()
+	# capacityPlot()

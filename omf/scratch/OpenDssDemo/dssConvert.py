@@ -1,54 +1,33 @@
+# Prereq: `pip install 'git+https://github.com/NREL/ditto.git@master#egg=ditto[all]'`
 import os
 import sys
-import argparse
 from ditto.store import Store
-from ditto.readers.gridlabd.read import Reader as GReader
-from ditto.writers.gridlabd.write import Writer as GWriter
-from ditto.readers.opendss.read import Reader as OReader
-from ditto.writers.opendss.write import Writer as OWriter
+from ditto.readers.opendss.read import Reader as dReader
+from ditto.writers.opendss.write import Writer as dWriter
+from ditto.readers.gridlabd.read import Reader as gReader
+from ditto.writers.gridlabd.write import Writer as gWriter
 
-
-def gridLabToDSS(args):
+def gridLabToDSS(inFile):
 	''' Convert gridlab file to dss. ''' 
-	m = Store()
-	reader = GReader(input_file=args.infile)
-	writer = GWriter(output_path='.')
-	reader.parse(m)
-	writer.write(m)
-	print ("DSS FILE WRITTEN")
+	model = Store()
+	# HACK: the gridlab reader can't handle brace syntax that ditto itself  writes...
+	# command = 'sed -i -E "s/(\\w)\\{/\\1 \\{/" ' + inFile
+	# os.system(command)
+	gld_reader = gReader(input_file = inFile)
+	gld_reader.parse(model)
+	model.set_names()
+	dss_writer = dWriter(output_path=".")
+	dss_writer.write(model)
 
-def dssToGridLab(args):
+def dssToGridLab(inFile, busCoords=None):
 	''' Convert dss file to gridlab. '''
-	m = Store()
-	reader = OReader(master_file=args.infile, buscoordinates_file=args.buscoords)
-	writer = Writer(output_path='.')
-	reader.parse(m)
-	writer.write(m)
-	print ("GRIDLAB-D FILE WRITTEN")
-
-def is_valid_file(filename):
-	''' Make sure path is valid. ''' 
-	if not os.path.exists(filename):
-		parser.error("THE FILE %s DOES NOT EXIST" % filename)
-	return
+	model = Store()
+	dss_reader = dReader(master_file = inFile)
+	dss_reader.parse(model)
+	model.set_names()
+	glm_writer = gWriter(output_path=".")
+	glm_writer.write(model)
 
 if __name__ == '__main__':
-	
-	# Use a dictionary to get different functions directly from command line arguments.
-	function_map = {'gtd': gridLabToDSS, 'dtg': dssToGridLab}
-	
-	# Set up arg parse.
-	parser = argparse.ArgumentParser()
-	parser.add_argument("conversion", choices=function_map.keys())
-	parser.add_argument("infile", help="input filename")
-	parser.add_argument("--buscoords", help="input coordinates for DSS")
-	args = parser.parse_args()
-	# DSS files might require bus coordinates, for example.
-	try:
-		if args.conversion == 'dtg' and 'buscoords' not in vars(args):
-			parser.error('REQUIRES BUS COORDINATES.')
-		is_valid_file(args.infile)
-		func = function_map[args.conversion]
-		func(args)
-	except KeyError:
-		print ("CONVERSION NOT SUPPORTED BY SCRIPT.")
+	# dssToGridLab('ieee37.dss')
+	gridLabToDSS('Model.glm')
