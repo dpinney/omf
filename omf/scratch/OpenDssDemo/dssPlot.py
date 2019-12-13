@@ -15,7 +15,8 @@ def runDSS(filename):
 	dss.run_command('Redirect ' + filename)
 	dss.run_command('Solve') # Ensure there is no seg fault for specialized plots.
 
-def createRadii(coords):
+def createRadii():
+	coords = pd.read_csv('coords.csv', header=None)
 	coords.columns = ['Element', 'X', 'Y']
 	hyp = []
 	for index, row in coords.iterrows():
@@ -25,8 +26,7 @@ def createRadii(coords):
 
 def voltagePlots():
 	''' Voltage plotting routine.'''
-	base_coords = pd.read_csv('coords.csv', header=None)
-	volt_coord = createRadii(base_coords)
+	volt_coord = createRadii()
 	dss.run_command('Export voltages volts.csv') # Generate voltage plots.
 	voltage = pd.read_csv('volts.csv') 
 	volt_coord.columns = ['Bus', 'X', 'Y', 'radius']
@@ -51,8 +51,7 @@ def voltagePlots():
 
 def currentPlots():
 	''' Current plotting function.'''
-	base_coords = pd.read_csv('coords.csv', header=None)
-	curr_coord = createRadii(base_coords)
+	curr_coord = createRadii()
 	dss.run_command('Export current currents.csv')
 	current = pd.read_csv('currents.csv')
 	curr_coord.columns = ['Index', 'X', 'Y', 'radius'] # DSS buses don't have current, but are connected to it. 
@@ -75,7 +74,6 @@ def networkPlot():
 	coords = pd.read_csv('coords.csv', header=None)
 	volts = pd.read_csv('volts.csv')
 	coords.columns = ['Bus', 'X', 'Y']
-	print coords
 	G = nx.Graph() # Declare networkx object.
 	pos = {}
 	# Get the coordinates.
@@ -114,8 +112,7 @@ def networkPlot():
 
 def THD():
 	''' Calculate and plot harmonics. '''
-	base_coords = pd.read_csv('coords.csv', header=None)
-	bus_coords = createRadii(base_coords)
+	bus_coords = createRadii()
 	dss.run_command('Solve mode=harmonics')
 	dss.run_command('Export voltages voltharmonics.csv')
 	voltHarmonics = pd.read_csv('voltharmonics.csv')
@@ -172,8 +169,7 @@ def dynamicPlot(time_step, iterations):
 
 def faultPlot():
 	''' Plot fault study. ''' 
-	base_coords = pd.read_csv('coords.csv', header=None)
-	bus_coord = createRadii(base_coords)
+	bus_coord = createRadii()
 	dss.run_command('Solve Mode=FaultStudy')
 	dss.run_command('Export fault faults.csv')
 	faultData = pd.read_csv('faults.csv')
@@ -203,8 +199,7 @@ def faultPlot():
 def capacityPlot():
 	''' Plot power vs. distance '''
 	# Generate radii(?)
-	base_coords = pd.read_csv('coords.csv', header=None)
-	coords = createRadii(base_coords)
+	coords = createRadii()
 	dss.run_command('Export Capacity capacity.csv')
 	capacityData = pd.read_csv('capacity.csv')
 	coords.columns = ['Index', 'X', 'Y', 'radius']
@@ -232,10 +227,10 @@ if __name__ == "__main__":
 	# Make some output
 	runDSS(FNAME)
 	# Generate plots
-	# voltagePlots()
-	# currentPlots()
+	voltagePlots()
+	currentPlots()
 	networkPlot()
-	# THD()
-	# dynamicPlot(1, 10)
-	# faultPlot()
-	# capacityPlot()
+	THD()
+	dynamicPlot(1, 10)
+	faultPlot()
+	capacityPlot()
