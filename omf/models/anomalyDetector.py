@@ -348,7 +348,7 @@ def workSAX(modelDir, inputDict):
 	                occurances )
 
 	def sequitur(stringArray, encodingGrammar, decodingGrammar, ruleNum, occurances):
-    
+
 	    ruleString = str(ruleNum)
 	    while len(stringArray) > 1:
 
@@ -395,16 +395,38 @@ def workSAX(modelDir, inputDict):
 
 	def getCounts(stringSeq, decodingGrammar):
 
-	    counts = np.ones([len(stringSeq.split(' ')),1])
+	    repeats = np.zeros([len(stringSeq.split(' ')),1])
 	    occurances = {}
 
-	    for key in decodingGrammar.keys():
-	        occurances[key] = findAll(stringSeq,decodingGrammar[key])
-	        for location in occurances[key]:
-	                counts[location] += 1
+	    numReplacements = 1
+	    while numReplacements != 0:
+	        numReplacements = 0
+	        for key in decodingGrammar.keys():
+	            value = decodingGrammar[key]
+	            for word in value.split(' '):
+	                replacement = decodingGrammar.get(word)
+	                if replacement is not None:
+	                    numReplacements += 1
+	                    decodingGrammar[key] = value.replace(word, replacement)
 
-	    return (counts, occurances)
-	   
+	    originalAlphabet = list(set(stringSeq))
+	    for letter in originalAlphabet:
+	        if letter != ' ':
+	            decodingGrammar[letter] = letter
+
+	    for key in decodingGrammar.keys():
+	        value = decodingGrammar[key]
+	        occurances[value] = findAll(stringSeq,decodingGrammar[key])
+	        for location in occurances[value]:
+	                repeats[location] += len(occurances[value])
+
+	    # the occurance of the whole string is also counted above,
+	    # so remove this count from the total
+	    repeats[0] -= 1
+
+	    return (repeats, occurances)
+
+
 	# load our csv to df
 	f = StringIO.StringIO(inputDict["file"])
 	df = pd.read_csv(f, header=None)
@@ -424,12 +446,12 @@ def workSAX(modelDir, inputDict):
 
 	sys.setrecursionlimit(1000)
 	(saxArray, decodingGrammar) = sequitur(saxArray, {}, {}, 0, {})
-	(counts, occurances) = getCounts(saxString, decodingGrammar)
+	(repeats, occurances) = getCounts(saxString, decodingGrammar)
 
 	plotData = []
-	x = np.arange(0,datapoints[:len(counts),0].shape[0])
-	data = go.Bar(x=x, y=datapoints[:len(counts),0], 
-		marker={'color': counts[:,0], 'colorbar': {'title': 'occurances'},
+	x = np.arange(0,datapoints[:len(repeats),0].shape[0])
+	data = go.Bar(x=x, y=datapoints[:len(repeats),0], 
+		marker={'color': repeats[:,0], 'colorbar': {'title': 'repeats'},
 		'colorscale': 'thermal', 'showscale':True})
 	plotData.append(data)
 
