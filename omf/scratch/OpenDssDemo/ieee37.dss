@@ -80,7 +80,7 @@ New Load.S722c      Bus1=722.3.1 Phases=1 Conn=Delta Model=4 kV=  4.800 kW=  21.
 New Load.S724b      Bus1=724.2.3 Phases=1 Conn=Delta Model=2 kV=  4.800 kW=  42.0 kVAR=  21.0
 New Load.S725b      Bus1=725.2.3 Phases=1 Conn=Delta Model=1 kV=  4.800 kW=  42.0 kVAR=  21.0
 New Load.S727c      Bus1=727.3.1 Phases=1 Conn=Delta Model=1 kV=  4.800 kW=  42.0 kVAR=  21.0
-New Load.S728       Bus1=728   Phases=3 Conn=Delta Model=1 kV=  4.800 kW= 126.0 kVAR=  63.0
+New Load.S728       Bus1=728     Phases=3 Conn=Delta Model=1 kV=  4.800 kW= 126.0 kVAR=  63.0
 New Load.S729a      Bus1=729.1.2 Phases=1 Conn=Delta Model=4 kV=  4.800 kW=  42.0 kVAR=  21.0
 New Load.S730c      Bus1=730.3.1 Phases=1 Conn=Delta Model=2 kV=  4.800 kW=  85.0 kVAR=  40.0
 New Load.S731b      Bus1=731.2.3 Phases=1 Conn=Delta Model=2 kV=  4.800 kW=  85.0 kVAR=  40.0
@@ -97,14 +97,54 @@ New Load.S742a      Bus1=742.1.2 Phases=1 Conn=Delta Model=2 kV=  4.800 kW=   8.
 New Load.S742b      Bus1=742.2.3 Phases=1 Conn=Delta Model=2 kV=  4.800 kW=  85.0 kVAR=  40.0
 New Load.S744a      Bus1=744.1.2 Phases=1 Conn=Delta Model=1 kV=  4.800 kW=  42.0 kVAR=  21.0
 
+! Add some bus coordinates.
+MakeBusList
+SetBusXY Bus=sourcebus	X=0.00	Y=0.02
+SetBusXY Bus=799R		X=0.00	Y=0.00
+SetBusXY Bus=799		X=0.00	Y=0.01
+SetBusXY Bus=701		X=0.00	Y=-1.85
+SetBusXY Bus=702		X=0.00	Y=-2.81
+SetBusXY Bus=703		X=0.00	Y=-4.13
+SetBusXY Bus=704		X=0.88	Y=-2.81
+SetBusXY Bus=705		X=-0.40	Y=-2.81
+SetBusXY Bus=706		X=1.68	Y=-3.41
+SetBusXY Bus=707		X=1.68	Y=-1.89
+SetBusXY Bus=708		X=-0.32	Y=-4.93
+SetBusXY Bus=709		X=0.00	Y=-4.93
+SetBusXY Bus=710		X=-0.84	Y=-5.81
+SetBusXY Bus=711		X=0.48	Y=-6.45
+SetBusXY Bus=712		X=-0.40	Y=-2.57
+SetBusXY Bus=713		X=0.36	Y=-2.81
+SetBusXY Bus=714		X=0.88	Y=-2.89
+SetBusXY Bus=718		X=0.88	Y=-3.41
+SetBusXY Bus=720		X=1.68	Y=-2.81
+SetBusXY Bus=722		X=1.56	Y=-1.89
+SetBusXY Bus=724		X=1.68	Y=-1.13
+SetBusXY Bus=725		X=1.68	Y=-3.69
+SetBusXY Bus=727		X=-0.24	Y=-4.13
+SetBusXY Bus=728		X=-0.52	Y=-4.33
+SetBusXY Bus=729		X=-0.80	Y=-4.13
+SetBusXY Bus=730		X=0.00	Y=-4.73
+SetBusXY Bus=731		X=0.60	Y=-4.93
+SetBusXY Bus=732		X=-0.64	Y=-4.93
+SetBusXY Bus=733		X=-0.32	Y=-5.25
+SetBusXY Bus=734		X=-0.32	Y=-5.81
+SetBusXY Bus=735		X=-0.84	Y=-6.01
+SetBusXY Bus=736		X=-0.84	Y=-4.53
+SetBusXY Bus=737		X=-0.32	Y=-6.45
+SetBusXY Bus=738		X=0.08	Y=-6.45
+SetBusXY Bus=740		X=0.48	Y=-6.25
+SetBusXY Bus=741		X=0.88	Y=-6.45
+SetBusXY Bus=742		X=-0.72	Y=-2.81
+SetBusXY Bus=744		X=-0.52	Y=-4.13
+SetBusXY Bus=775		X=0.00	Y=-4.94
+
+! Calculations
 Set VoltageBases = "230,4.8,0.48"
 CalcVoltageBases
 Export BusCoords coords.csv
-
-
-
-calcincmatrix_o
-Export IncMatrix     ! Exports the incidence branch to node matrix (only the non-zero elements and their coordinates)
-Export IncMatrixRow links.csv  ! Exports the name of the rows (link branches)
-Export IncMatrixCols ! Exports the name of the cols (buses)
+!calcincmatrix_o
+!Export IncMatrix     ! Exports the incidence branch to node matrix (only the non-zero elements and their coordinates)
+!Export IncMatrixRow links.csv  ! Exports the name of the rows (link branches)
+!Export IncMatrixCols ! Exports the name of the cols (buses)
 
