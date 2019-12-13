@@ -99,17 +99,17 @@
 					<label for="inputFile" class="fileButton">Choose File</label>
 					<input id="fileName" name="fileName" value='' readonly class="uploadFileName">
 				</div>
-			</div>
-
-			<div class="wideInput">
-				<p class="inputSectionHeader">Prophet specific Parameters</p>
-			</div>
-			<hr>
-			<div class="algoInputs prophetInputs">
 				<div class="shortInput" >
 					<label>Is the format of this file forecastLoad compliant?</label>
 					<input type="checkbox"  id="demandTempBool" name="demandTempBool" checked/>
 				</div>
+			</div>
+
+			<div class="wideInput">
+				<p class="inputSectionHeader">Prophet Parameters</p>
+			</div>
+			<hr>
+			<div class="algoInputs prophetInputs">
 				<div class="shortInput" >
 					<label>Dependent variable column name</label>
 					<input type="text"  id="yLabel" name="yLabel" />
@@ -118,10 +118,24 @@
 					<label>Data Start Date (YYYY-MM-DD)</label>
 					<input type="text"  id="startDate" name="startDate" pattern="^\d\d\d\d-\d\d-\d\d$"/>
 				</div>
+			</div>
+			<div class="wideInput">
+				<p class="inputSectionHeader">Eliptic Envelope Parameters</p>
+			</div>
+			<hr>
+			<div class="algoInputs elipticInputs">
+			
 				<div class="shortInput" >
 					<label>Gaussian level for Elliptic Envelope (&lt; 1)</label>
 					<input type="number"  id="norm_confidence" name="norm_confidence" min="0.01" max="1" step="any"/>
 				</div>
+			</div>
+			<div class="wideInput">
+				<p class="inputSectionHeader">Peak Forecast T-test Parameters</p>
+			</div>
+			<hr>
+			<div class="algoInputs tTestInputs">
+			
 				<div class="shortInput" >
 					<label>Anomalous confidence level (&lt; 1)</label>
 					<input type="number"  id="confidence" name="confidence" min="0.5" max="1" step="any"/>

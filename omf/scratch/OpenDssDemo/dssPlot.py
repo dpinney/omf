@@ -1,35 +1,20 @@
 ''' Run OpenDSS and plot the results for arbitrary circuits. '''
 
-from argparse import ArgumentParser
-
-import time
 import opendssdirect as dss
 import pandas as pd
 import matplotlib.pyplot as plt
 import networkx as nx
 import math
-import os, shutil
+import os
 
-def runDSS(filename):  
+def runDSS(filename):
 	''' Run DSS file and set export path.'''
 	dss.run_command('set datapath=' + os.getcwd())
 	dss.run_command('Redirect ' + filename)
 	dss.run_command('Solve') # Ensure there is no seg fault for specialized plots.
 
-def packagePlots(dirname):
-	''' Move all png files to individual folder. Ensure that the working folder is free of png files beforehand.'''
-	# Stream all plots to their own folders to avoid cluttering the workspace. 
-	os.chdir(os.getcwd())
-	if not os.path.isdir(dirname):
-		os.mkdir(dirname)
-	files = os.listdir(os.getcwd())
-	sourcePath = os.getcwd()
-	destPath = os.getcwd() + '/' + str(dirname)
-	for file in files: # Each plotting function calls this function individually, so it is relatively safe to move all png files. 
-		if file.endswith('.png'):
-			shutil.move(os.path.join(sourcePath,file), os.path.join(destPath, file))
-
-def createRadii(coords):
+def createRadii():
+	coords = pd.read_csv('coords.csv', header=None)
 	coords.columns = ['Element', 'X', 'Y']
 	hyp = []
 	for index, row in coords.iterrows():
@@ -37,9 +22,9 @@ def createRadii(coords):
 	coords['radius'] = hyp
 	return coords
 
-
-def voltagePlots(volt_coord):
+def voltagePlots():
 	''' Voltage plotting routine.'''
+	volt_coord = createRadii()
 	dss.run_command('Export voltages volts.csv') # Generate voltage plots.
 	voltage = pd.read_csv('volts.csv') 
 	volt_coord.columns = ['Bus', 'X', 'Y', 'radius']
@@ -60,11 +45,11 @@ def voltagePlots(volt_coord):
 		plt.title('Voltage profile for phase ' + str(i))
 		plt.savefig('Magnitude Profile ' + str(i) + '.png') # Actual voltages.
 		plt.clf()
-	packagePlots('voltagePlots')
 	plt.clf()
 
-def currentPlots(curr_coord):
+def currentPlots():
 	''' Current plotting function.'''
+	curr_coord = createRadii()
 	dss.run_command('Export current currents.csv')
 	current = pd.read_csv('currents.csv')
 	curr_coord.columns = ['Index', 'X', 'Y', 'radius'] # DSS buses don't have current, but are connected to it. 
@@ -79,45 +64,41 @@ def currentPlots(curr_coord):
 			plt.title('Current profile for ' + cur_ind)
 			plt.savefig('Profile ' + str(i) +'.png')
 			plt.clf()
-	packagePlots('currentPlots')
 	plt.clf()
 
-def networkPlot(coords):
+def networkPlot():
 	''' Plot the physical topology of the circuit. '''
 	dss.run_command('Export voltages volts.csv')
+	coords = pd.read_csv('coords.csv', header=None)
 	volts = pd.read_csv('volts.csv')
-	coords.columns = ['Bus', 'X', 'Y', 'radius']
+	coords.columns = ['Bus', 'X', 'Y']
 	G = nx.Graph() # Declare networkx object.
 	pos = {}
-	for index, row in coords.iterrows(): # Get the coordinates.
- 		if row['Bus'] == '799R':
-			row['Bus'] = '799r'
-		if row['Bus'] == 'SOURCEBUS':
-			row['Bus'] = 'SourceBus'
-		G.add_node(row['Bus'])
-		pos[row['Bus']] = (row['X'], row['Y'])
-
-	volt_values = {}
-	labels = {}
-	for index, row in volts.iterrows(): # We'll color the nodes according to voltage. FIX: pu1?
-		if row['Bus'] == '799R':
-			row['Bus'] = '799r'
-		if row['Bus'] == 'SOURCEBUS':
-			row['Bus'] = 'SourceBus'
-		volt_values[row['Bus']] = row[' pu1']
-		labels[row['Bus']] = row['Bus']
-
-
-	colorCode = [volt_values[node] for node in G.nodes()]
-
-	lines = dss.utils.lines_to_dataframe() # Get the connecting edges using Pandas.
+	# Get the coordinates.
+	for index, row in coords.iterrows():
+		try:
+			bus_name = str(int(row['Bus']))
+		except:
+			bus_name = row['Bus']
+		G.add_node(bus_name)
+		pos[bus_name] = (row['X'], row['Y'])
+ 	# Get the connecting edges using Pandas.
+	lines = dss.utils.lines_to_dataframe()
 	edges = []
-	for index, row in lines.iterrows(): # For 799R, you need four charactesr. The others all have a period at the end, so splice that.
-		bus1 = row['Bus1'][:4].replace('.', '')
-		bus2 = row['Bus2'][:4].replace('.', '')
+	for index, row in lines.iterrows():
+		#HACK: dss upercases everything in the outputs.
+		bus1 = row['Bus1'][:4].upper().replace('.', '')
+		bus2 = row['Bus2'][:4].upper().replace('.', '')
 		edges.append((bus1, bus2))
 	G.add_edges_from(edges)
-
+	# We'll color the nodes according to voltage.
+	volt_values = {}
+	labels = {}
+	for index, row in volts.iterrows():
+		volt_values[row['Bus']] = row[' pu1']
+		labels[row['Bus']] = row['Bus']
+	colorCode = [volt_values.get(node, 0.0) for node in G.nodes()]
+	# Start drawing.
 	nodes = nx.draw_networkx_nodes(G, pos, node_color=colorCode) # We must seperate this to create a mappable object for colorbar.
 	edges = nx.draw_networkx_edges(G, pos)
 	nx.draw_networkx_labels(G, pos, labels) # We'll draw the labels seperately.
@@ -125,12 +106,11 @@ def networkPlot(coords):
 	plt.xlabel('Distance [m]')
 	plt.title('Network Voltage Layout')
 	plt.savefig('networkPlot.png')
-	packagePlots('networkPlots')
 	plt.clf()
 
-
-def THD(bus_coords):
+def THD():
 	''' Calculate and plot harmonics. '''
+	bus_coords = createRadii()
 	dss.run_command('Solve mode=harmonics')
 	dss.run_command('Export voltages voltharmonics.csv')
 	voltHarmonics = pd.read_csv('voltharmonics.csv')
@@ -144,9 +124,7 @@ def THD(bus_coords):
 	plt.ylabel('THD [Percentage]')
 	plt.title('Total Harmonic Distortion')
 	plt.savefig('THD.png')
-	packagePlots('THD')
 	plt.clf()
-
 
 def dynamicPlot(time_step, iterations):
 	''' Do a dynamic, long-term study of the powerflow. time_step is in seconds. '''
@@ -184,12 +162,12 @@ def dynamicPlot(time_step, iterations):
 	plt.ylabel('Power [kW]')
 	plt.title('Dynamic Simulation Power Plot')
 	plt.savefig('DynamicPowerPlot.png')
-	packagePlots('DynamicPlots')
 	os.system('rm dynamicvolt* dynamiccurrent*')
 
 
-def faultPlot(bus_coord):
+def faultPlot():
 	''' Plot fault study. ''' 
+	bus_coord = createRadii()
 	dss.run_command('Solve Mode=FaultStudy')
 	dss.run_command('Export fault faults.csv')
 	faultData = pd.read_csv('faults.csv')
@@ -214,11 +192,12 @@ def faultPlot(bus_coord):
 	plt.axis([-1, 6, 0, 8000])
 	plt.title('Fault Study')
 	plt.savefig('L-L.png')
-	packagePlots('FaultPlots')
 	plt.clf()
 
-def capacityPlot(coords):
+def capacityPlot():
 	''' Plot power vs. distance '''
+	# Generate radii(?)
+	coords = createRadii()
 	dss.run_command('Export Capacity capacity.csv')
 	capacityData = pd.read_csv('capacity.csv')
 	coords.columns = ['Index', 'X', 'Y', 'radius']
@@ -238,30 +217,17 @@ def capacityPlot(coords):
 	plt.ylabel('Maximum transformer percentage (One-side)')
 	plt.title('Capacity Simulation')
 	plt.savefig('CurrentLoad.png')
-	packagePlots('capacityPlots')
 	plt.clf()
 
 if __name__ == "__main__":
-	start = time.time()
-	parser = ArgumentParser(description='Plotting options for DSS files.')
-	parser.add_argument("-f", "--file", required=True, help="DSS file.")
-	parser.add_argument("-c", "--coordinates", help="Optional coordinates argument")
-	args = vars(parser.parse_args())
-	filename = args['file']
-	base_coords = None
-	if args['coordinates']:
-		coordFile = args['coordinates']
-		base_coords = pd.read_csv(coordFile, header=None)
-	else:
-		try:
-			dss.run_command('Export BusCoords coords.csv')
-			base_coords = pd.read_csv('coords.csv', header=None)
-		except OSError as e:
-			if e.errno == errno.EEXIST:
-				print "Error: coodinate file not created properly. Perhaps you need to set your OpenDSS data path correctly?"
-			else:
-				raise Exception('Could not read file')
-	runDSS(filename)
-	full_coords = createRadii(base_coords)
-	dynamicPlot(1, 10)
-	print("--- %s seconds ---" % (time.time() - start)) # Check performace.
+	# Make core output
+	FNAME = 'ieee37.dss'
+	runDSS(FNAME)
+	# Generate plots
+	# voltagePlots()
+	# currentPlots()
+	networkPlot()
+	# THD()
+	# dynamicPlot(1, 10)
+	# faultPlot()
+	# capacityPlot()
