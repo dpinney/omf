@@ -7,12 +7,12 @@ import networkx as nx
 import math
 import os
 
-
-def runDSS(filePath):
-	''' Run DSS file and set export path.'''
-	dss.run_command('set datapath=' + os.getcwd())
-	dss.run_command('Redirect ' + filePath)
-	dss.run_command('Solve') # Ensure there is no seg fault for specialized plots.
+def runDSS(dssFilePath, workDir=None):
+	''' Run DSS file and set export path. '''
+	dssFileLoc = os.path.dirname(os.path.abspath(dssFilePath))
+	dss.run_command('set datapath=' + dssFileLoc)
+	dss.run_command('Redirect ' + dssFilePath)
+	dss.run_command('Solve')
 
 def generateCoordinates():
 	coords = pd.read_csv('coords.csv', header=None)
@@ -75,8 +75,8 @@ def networkPlot():
 	volts = pd.read_csv('volts.csv')
 	coords.columns = ['Bus', 'X', 'Y']
 	G = nx.Graph()
-	pos = {}
 	# Get the coordinates.
+	pos = {}
 	for index, row in coords.iterrows():
 		try:
 			bus_name = str(int(row['Bus']))
@@ -173,7 +173,7 @@ def faultPlot():
 	dss.run_command('Solve Mode=FaultStudy')
 	dss.run_command('Export fault faults.csv')
 	faultData = pd.read_csv('faults.csv')
-	bus_coord.columns = ['Bus', 'X', 'Y', 'radius'] # Add defined column names.
+	bus_coord.columns = ['Bus', 'X', 'Y', 'radius']
 	faultDF = pd.concat([bus_coord, faultData], axis=1)
 	faultDF.columns = faultDF.columns.str.strip()
 	plt.axis([-1, 6, 0, 8000])
