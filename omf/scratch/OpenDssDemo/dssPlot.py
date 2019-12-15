@@ -15,6 +15,7 @@ def runDSS(dssFilePath, workDir=None):
 	dss.run_command('Solve')
 
 def generateCoordinates():
+	dss.run_command('Export BusCoords coords.csv')
 	coords = pd.read_csv('coords.csv', header=None)
 	coords.columns = ['Element', 'X', 'Y']
 	hyp = []
@@ -71,9 +72,9 @@ def currentPlots():
 def networkPlot():
 	''' Plot the physical topology of the circuit. '''
 	dss.run_command('Export voltages volts.csv')
-	coords = pd.read_csv('coords.csv', header=None)
+	coords = generateCoordinates()
 	volts = pd.read_csv('volts.csv')
-	coords.columns = ['Bus', 'X', 'Y']
+	coords.columns = ['Bus', 'X', 'Y', 'radius']
 	G = nx.Graph()
 	# Get the coordinates.
 	pos = {}
@@ -211,8 +212,8 @@ if __name__ == "__main__":
 	FNAME = 'ieee37.dss'
 	runDSS(FNAME)
 	# Generate plots
-	networkPlot()
-	# voltagePlots()
+	# networkPlot()
+	voltagePlots()
 	# THD()
 	# dynamicPlot(1, 10)
 	# faultPlot()

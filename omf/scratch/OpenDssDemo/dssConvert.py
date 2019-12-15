@@ -6,12 +6,13 @@ from ditto.readers.opendss.read import Reader as dReader
 from ditto.writers.opendss.write import Writer as dWriter
 from ditto.readers.gridlabd.read import Reader as gReader
 from ditto.writers.gridlabd.write import Writer as gWriter
+from collections import OrderedDict
 
 def gridLabToDSS(inFilePath, outFilePath):
 	''' Convert gridlab file to dss. ''' 
 	model = Store()
-	# HACK: the gridlab reader can't handle brace syntax that ditto itself  writes...
-	# command = 'sed -i -E "s/(\\w)\\{/\\1 \\{/" ' + inFilePath
+	# HACK: the gridlab reader can't handle brace syntax that ditto itself writes...
+	# command = 'sed -i -E "s/{/ {/" ' + inFilePath
 	# os.system(command)
 	gld_reader = gReader(input_file = inFilePath)
 	gld_reader.parse(model)
@@ -32,10 +33,56 @@ def dssToGridLab(inFilePath, outFilePath, busCoords=None):
 	glm_writer.write(model)
 
 def dssToTree(pathToDss):
-	pass #TODO: implement
+	''' Convert a .dss file to an in-memory, OMF-compatible "tree" object.
+	Note that we only support a VERY specifically-formatted DSS file.'''
+	# Ingest file.
+	with open(pathToDss, 'r') as dssFile:
+		contents = dssFile.readlines()
+	# Clean up the file.
+	for i, line in enumerate(contents):
+		# Remove whitespace.
+		contents[i] = line.strip()
+		# Comment removal
+		bangLoc = line.find('!')
+		if bangLoc != -1:
+			contents[i] = line[:bangLoc]
+		# Join using the tilde (~) syntax
+		if line.startswith('~'):
+			# Look back to find the first line with content.
+			for j in range(i - 1, 0, -1):
+				if contents[j] != '':
+					contents[j] = contents[j] + contents[i].replace('~', ' ')
+					contents[i] = ''
+					break
+	# Drop blank lines
+	contents = [x for x in contents if x != '']
+	# Lex it
+	for i, line in enumerate(contents):
+		#HACK: only support white space separation of attributes.
+		contents[i] = line.split()
+		# HACK: only support = assignment of values.
+		from collections import OrderedDict 
+		ob = OrderedDict() 
+		ob['!CMD'] = contents[i][0]
+		if len(contents[i]) > 1:
+			for j in range(1, len(contents[i])):
+				k,v = contents[i][j].split('=')
+				ob[k] = v
+		contents[i] = ob
+	# Print
+	# for line in contents:
+	# 	print line
+	return contents
 
-def treeToDss(treeObject):
-	pass #TODO: implement
+def treeToDss(treeObject, outputPath):
+	outFile = open(outputPath, 'w')
+	for ob in treeObject:
+		line = ob['!CMD']
+		for key in ob:
+			if key not in ['!CMD']:
+				line = line + ' ' + key + '=' + ob[key]
+		outFile.write(line + '\n')
+	outFile.close()
 
 def schemaConvert(treeObject, kind):
 	validKinds = ['DSS-to-GLD', 'GLD-to-DSS']
@@ -44,5 +91,8 @@ def schemaConvert(treeObject, kind):
 	pass #TODO: maybe implement?
 
 if __name__ == '__main__':
-	dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
+	tree = dssToTree('ieee37.dss')
+	treeToDss(tree, 'ieee37p.dss')
+	# dssToMem('ieee37.dss')
+	# dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
 	# gridLabToDSS('Model.glm', 'ieee37-round-trip.dss') # this fails miserably
