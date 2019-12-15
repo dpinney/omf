@@ -44,5 +44,5 @@ def schemaConvert(treeObject, kind):
 	pass #TODO: maybe implement?
 
 if __name__ == '__main__':
-	dssToGridLab('ieee37.dss', 'Model.glm')
-	# gridLabToDSS('Model.glm', 'ieee37-round-trip.dss') #this fails miserably
+	dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
+	# gridLabToDSS('Model.glm', 'ieee37-round-trip.dss') # this fails miserably
