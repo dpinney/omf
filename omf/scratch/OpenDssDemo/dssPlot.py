@@ -194,17 +194,14 @@ def capacityPlot():
 	capacityData = pd.read_csv('capacity.csv')
 	coords.columns = ['Index', 'X', 'Y', 'radius']
 	capacityDF = pd.concat([coords, capacityData], axis=1)
-
 	fig, ax1 = plt.subplots()
 	ax1.set_xlabel('Distance From Source [Miles]')
 	ax1.set_ylabel('Power [kW]')
 	ax1.scatter(capacityDF['radius'], capacityData[' kW'], label='Power')
-	# ax1.tick_params(axis='y', labelcolor=color)
 	ax2 = ax1.twinx()
 	ax2.set_ylabel('Maximum transformer percentage (One-side)')
 	ax2.scatter(capacityDF['radius'], capacityDF.iloc[:, 2]+capacityDF.iloc[:, 3], label='Transformer Loading', color='red')
-	# ax2.tick_params(axis='y', labelcolor=color)
-	fig.tight_layout()  # otherwise the right y-label is slightly clipped
+	fig.tight_layout() # otherwise the right y-label is slightly clipped
 	fig.legend()
 	plt.savefig('Capacity Profile.png')
 	plt.clf()
