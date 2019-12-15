@@ -29,5 +29,5 @@ def dssToGridLab(inFile, busCoords=None):
 	glm_writer.write(model)
 
 if __name__ == '__main__':
-	# dssToGridLab('ieee37.dss')
+	dssToGridLab('ieee37.dss')
 	gridLabToDSS('Model.glm')
