@@ -6,7 +6,6 @@
 # #####################################################################
 
 
-from __future__ import print_function
 import string, sys, struct, math, os
 from ctypes import *
 
