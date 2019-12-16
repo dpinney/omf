@@ -1,1 +1,1 @@
-import csss
+import omf.solvers.CSSS.csss
