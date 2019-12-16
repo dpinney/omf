@@ -1,14 +1,11 @@
 ''' Code for running Gridlab and getting results into pythonic data structures. '''
 
-from __future__ import print_function
 import sys, os, subprocess, platform, re, datetime, shutil, traceback, math, time, tempfile, json
 from os.path import join as pJoin
 from copy import deepcopy
 
 # OMF imports.
 import omf
-
-# _myDir = os.path.dirname(os.path.abspath(__file__))
 
 def checkStatus(modelDir):
 	'''Reads a current gridlabD simulation time from stdErr.txt,
@@ -26,16 +23,16 @@ def checkStatus(modelDir):
 			gridlabDTest = gridlabDTime.split('\r')
 			gridlabDTest = gridlabDTest[len(gridlabDTest)-1]
 			gridlabDTimeFormatted = gridlabDTest.split('Processing ')[1].split('PST...')[0].lstrip().rstrip()
-			gridlabDTimeFormatted = datetime.datetime.strptime(gridlabDTimeFormatted, '%Y-%m-%d %H:%M:%S')	
-			print("\n   gridlabDTime=", gridlabDTimeFormatted)							
+			gridlabDTimeFormatted = datetime.datetime.strptime(gridlabDTimeFormatted, '%Y-%m-%d %H:%M:%S')
+			print("\n   gridlabDTime=", gridlabDTimeFormatted)
 			difference = (endDate - gridlabDTimeFormatted)
 			print("\n   difference=", difference)
 			if simLengthUnits == 'hours':
-				floatPercentageStatus = -1*(difference.total_seconds()/3600)/(float(simLength)) + 1.0
+				floatPercentageStatus = -1 * difference.total_seconds()/3600/simLength + 1.0
 			elif simLengthUnits == 'days':
-				floatPercentageStatus = -1*(difference.total_seconds()/86400)/(float(simLength)) + 1.0
+				floatPercentageStatus = -1 * difference.total_seconds()/86400/simLength + 1.0
 			elif simLengthUnits == 'minutes':
-				floatPercentageStatus = -1*(difference.total_seconds()/60)/(float(simLength)) + 1.0
+				floatPercentageStatus = -1 * difference.total_seconds()/60/simLength + 1.0
 		except:
 			print("\n   No std error file, passing.")
 			floatPercentageStatus = 0.0
@@ -60,7 +57,8 @@ def checkStatus(modelDir):
 		elif simLengthUnits == "days":
 			endDate = startDate + datetime.timedelta(days=float(simLength))
 		return endDate
-	inputDict = json.load(open(pJoin(modelDir, "allInputData.json")))	
+	with open(pJoin(modelDir, "allInputData.json")) as f:
+		inputDict = json.load(f)
 	(simStartDate, simLength, simLengthUnits) = \
 				[inputDict[x] for x in ('simStartDate', 'simLength', 'simLengthUnits')]
 	startDate = datetime.datetime.strptime(simStartDate, '%Y-%m-%d')
@@ -195,7 +193,7 @@ def _strClean(x):
 			return 0.0
 		else:
 			floatConv = map(float, matches[0])
-			squares = map(lambda x:x**2, floatConv)
+			squares = [x**2 for x in floatConv]
 			return math.sqrt(sum(squares))
 	elif re.findall('^([+-]?\d+\.?\d*e?[+-]?\d*)$',x) != []:
 		matches = re.findall('([+-]?\d+\.?\d*e?[+-]?\d*)',x)
@@ -212,8 +210,8 @@ def csvToArray(fileName):
 	with open(fileName) as openfile:
 		data = openfile.read()
 	lines = data.splitlines()
-	array = map(lambda x:x.split(','), lines)
-	cleanArray = [map(_strClean, x) for x in array]
+	array = [x.split(',') for x in lines]
+	cleanArray = [list(map(_strClean, x)) for x in array]
 	# Magic number 8 is the number of header rows in each GridlabD csv.
 	arrayNoHeaders = cleanArray[8:]
 	# Drop the timestamp column:
