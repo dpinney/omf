@@ -6,6 +6,7 @@
 # #####################################################################
 
 
+from __future__ import print_function
 import string, sys, struct, math, os
 from ctypes import *
 
@@ -27,7 +28,7 @@ class SSCAPI():
 	elif sys.platform == 'linux2':
 		_dll = CDLL(os.path.join(myDir,"ssc64.so"))
 	else:
-		print "Platform not supported ", sys.platform
+		print("Platform not supported ", sys.platform)
 	# print "\n   _dll chosen=", _dll, "(for ", sys.platform, ")"
 	
 
