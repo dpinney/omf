@@ -19,27 +19,29 @@
 		width: 100.0%;
 		height: 100.0%;
 		left: 0.0%;
-		top: 0.0%;
-		}
+		top: 0.0%;}
+
+		#controlBox{
+		position: fixed;
+		top: 10px;
+		right: 10px;
+		width: 175px;
+		border: 2px solid #777;
+		background: rgba(255, 255, 255, 0.5);
+		font: 12px/1.5 "Helvetica Neue", Arial, Helvetica, sans-serif;
+		z-index: 400;}
 	</style>
 </head>
 <body>
 	<div id="map"></div>
 	<div id="controlBox">
-		<form>
-			<select id="range-selector" name="range">
-				<option value="">Select range:</option>
-				<option value="1">75m</option>
-				<option value="2">84m</option>
-				<option value="3">100m</option>
-				<option value="4">230m</option>
-				<option value="5">265m</option>
-			</select>
-		</form>
+		<p style="text-align:center">EV Range: <input type="number" min="0" value="100" style="width:50px" id="radiusInput"> miles</p>
+		<!-- <input type="submit"> -->
 	</div>
 	<script>var geojson={% if geojson %}{{geojson | tojson}}{% else %}null{% endif %}</script>
 	<script type="text/javascript" src="MN_Roads.js"></script>
 	<script type="text/javascript" src="MN_Chargers.js"></script>
+	<script src="https://code.jquery.com/jquery-3.1.0.js"></script>
 	<script type="text/javascript">
 	function convertToGeoJSON(inputArray) {
 		var props = inputArray[0];
@@ -100,7 +102,7 @@
 			fillColorValue = feature.properties['pointColor'];
 		}
 		return L.circle(latlng, {
-			radius: 120701,
+			radius: 160934,
 			color: fillColorValue,
 			fillColor: fillColorValue,
 			color: "#000",
@@ -154,8 +156,8 @@
 	});
 	var bounds = geojsonLayer.getBounds();
 	// Optional forcing of canvas renderer:
-	// var map = L.map('map', {renderer: L.canvas()}).fitBounds(bounds);
-	var map = L.map('map').fitBounds(bounds);
+	var map = L.map('map', {renderer: L.canvas()}).fitBounds(bounds);
+	// var map = L.map('map').fitBounds(bounds);
 	mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
 	L.tileLayer(
 		'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -165,6 +167,17 @@
 	L.control.scale().addTo(map);
 	geojsonLayer.addTo(map);
 	radiusLayer.addTo(map);
+
+	var radiusId = document.getElementById("radiusInput");
+	var radiusVal = radiusId.value * 1609.34;
+
+	$('#radiusInput').on('change', function(event) {
+		radiusVal = event.target.value * 1609.34;
+		radiusLayer.eachLayer(function(layer){
+			layer.setRadius(radiusVal);
+		});
+	});
+
 </script>
 </body>
 </html>
