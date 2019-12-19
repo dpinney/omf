@@ -1,5 +1,6 @@
 ''' Web server for model-oriented OMF interface. '''
 
+from __future__ import print_function
 from flask import (Flask, send_from_directory, request, redirect, render_template, session, abort, jsonify, url_for)
 from jinja2 import Template
 from multiprocessing import Process
@@ -183,9 +184,9 @@ def deleteUser():
 	try:
 		shutil.rmtree("data/Model/" + username)
 	except Exception, e:
-		print "USER DATA DELETION FAILED FOR", e
+		print("USER DATA DELETION FAILED FOR", e)
 	os.remove("data/User/" + username + ".json")
-	print "SUCCESFULLY DELETE USER", username
+	print("SUCCESFULLY DELETE USER", username)
 	return "Success"
 
 
@@ -214,7 +215,7 @@ def forgotpwd(email):
 		else:
 			raise Exception
 	except Exception, e:
-		print "ERROR: failed to password reset user", email, "with exception", e
+		print("ERROR: failed to password reset user", email, "with exception", e)
 		return "We do not have a record of a user with that email address. Please click back and create an account."
 
 
@@ -732,7 +733,7 @@ def checkConversion(modelName, owner=None):
 	conversion hasn't started yet or 2) the conversion is finished because the ZPID.txt file is gone. If an error file exists, the the conversion
 	failed and the client should be notified.
 	"""
-	print modelName
+	print(modelName)
 	# First check for error files
 	for filename in ['gridError.txt', 'error.txt', 'weatherError.txt']:
 		filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename)
@@ -1012,7 +1013,7 @@ def cymeImportBackground(owner, modelName):
 			['ZPID.txt', 'gridError.txt', mdbFileObject.filename, feederName + '.omd', '']
 		]
 		mdbFileObject.save(mdb_filepath)
-		print mdbFileObject.filename
+		print(mdbFileObject.filename)
 		with locked_open(pid_filepath, 'w') as pid_file:
 			pid_file.write(str(os.getpid()))
 		newFeeder = dict(**feeder.newFeederWireframe)
@@ -1081,7 +1082,7 @@ def newBlankFeeder(owner):
 	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
 	try:
 		os.remove("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
-		print "removed, ", ("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
+		print("removed, ", ("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt"))
 	except: pass
 	removeFeeder(owner, modelName, feederNum)
 	newSimpleFeeder(owner, modelName, feederNum, False, feederName)
@@ -1103,7 +1104,7 @@ def newBlankNetwork(owner):
 	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
 	try:
 		os.remove("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
-		print "removed, ", ("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
+		print("removed, ", ("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt"))
 	except: pass
 	removeNetwork(owner, modelName, networkNum)
 	newSimpleNetwork(owner, modelName, networkNum, False, networkName)
@@ -1138,7 +1139,7 @@ def networkData(owner, modelName, networkName):
 @write_permission_function
 def saveFeeder(owner, modelName, feederName, feederNum):
 	"""Save feeder data. Also used for cancelling a file import, file conversion, or feeder-load overwrite."""
-	print "Saving feeder for:%s, with model: %s, and feeder: %s"%(owner, modelName, feederName)
+	print("Saving feeder for:%s, with model: %s, and feeder: %s"%(owner, modelName, feederName))
 	model_dir = os.path.join(_omfDir, "data/Model", owner, modelName)
 	for filename in ["gridError.txt", "error.txt", "weatherError.txt"]:
 		error_file = os.path.join(model_dir, filename)
@@ -1193,7 +1194,7 @@ def saveFeeder(owner, modelName, feederName, feederNum):
 @write_permission_function
 def saveNetwork(owner, modelName, networkName):
 	''' Save network data. '''
-	print "Saving network for:%s, with model: %s, and network: %s"%(owner, modelName, networkName)
+	print("Saving network for:%s, with model: %s, and network: %s"%(owner, modelName, networkName))
 	filepath = os.path.join(_omfDir, 'data/Model', owner, modelName, networkName + '.omt')
 	payload = json.loads(request.form.get('networkObjectJson', '{}'))
 	with locked_open(filepath, 'r+') as f:
@@ -1247,7 +1248,7 @@ def removeFeeder(owner, modelName, feederNum, feederName=None):
 			feederName = str(allInput.get('feederName'+str(feederNum)))
 			os.remove(os.path.join(modelDir, feederName +'.omd'))
 		except: 
-			print "Couldn't remove feeder file in web.removeFeeder()."
+			print("Couldn't remove feeder file in web.removeFeeder().")
 		allInput.pop("feederName" + str(feederNum))
 		with locked_open(os.path.join(modelDir, 'allInputData.json'), 'r+') as f:
 			f.truncate(0)
@@ -1267,7 +1268,7 @@ def loadFeeder(frfeederName, frmodelName, modelName, feederNum, frUser, owner):
 		frmodelDir = os.path.join(_omfDir, 'data/Model', frUser, frmodelName)
 	elif frUser == "public":
 		frmodelDir = os.path.join(_omfDir, 'static/publicFeeders')
-	print "Entered loadFeeder with info: frfeederName %s, frmodelName: %s, modelName: %s, feederNum: %s"%(frfeederName, frmodelName, str(modelName), str(feederNum))
+	print("Entered loadFeeder with info: frfeederName %s, frmodelName: %s, modelName: %s, feederNum: %s"%(frfeederName, frmodelName, str(modelName), str(feederNum)))
 	# I can't use shutil.copyfile() becasue I need locks on the source and destination file
 	#shutil.copyfile(os.path.join(frmodelDir, frfeederName + '.omd'), os.path.join(modelDir, feederName + '.omd'))
 	with locked_open(os.path.join(frmodelDir, frfeederName + '.omd')) as inFeeder:
@@ -1320,7 +1321,7 @@ def removeNetwork(owner, modelName, networkNum, networkName=None):
 			networkName = str(allInput.get('networkName'+str(networkNum)))
 			os.remove(os.path.join(modelDir, networkName +'.omt'))
 		except: 
-			print "Couldn't remove network file in web.removeNetwork()."
+			print("Couldn't remove network file in web.removeNetwork().")
 		allInput.pop("networkName"+str(networkNum))
 		with locked_open(modelDir + "/allInputData.json", 'r+') as f:
 			f.truncate(0)
@@ -1758,7 +1759,7 @@ def downloadModelData(owner, modelName, fullPath):
 @read_permission_function # This route needs read permissions because duplicate model uses it
 def uniqObjName(objtype, owner, name, modelName=False):
 	"""Checks if a given object type/owner/name is unique. More like checks if a file exists on the server"""
-	print "Entered uniqobjname", owner, name, modelName
+	print("Entered uniqobjname", owner, name, modelName)
 	path_prefix = os.path.join(_omfDir, 'data', 'Model', owner)
 	if objtype == 'Model':
 		path = os.path.join(path_prefix, name)
