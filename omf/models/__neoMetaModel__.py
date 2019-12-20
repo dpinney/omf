@@ -1,10 +1,12 @@
 """ Common functions for all models """
 
-import json, os, sys, tempfile, webbrowser, math, shutil, datetime, omf, multiprocessing, traceback, hashlib, traceback, re, io
+import json, os, sys, tempfile, webbrowser, math, shutil, datetime, multiprocessing, traceback, hashlib, traceback, re, io
 from jinja2 import Template
 from os.path import join as pJoin
 from os.path import split as pSplit
+import omf.models
 from omf.web import locked_open
+
 
 # Locational variables so we don't have to rely on OMF being in the system path.
 _myDir = os.path.dirname(os.path.abspath(__file__))
@@ -159,7 +161,7 @@ def renderTemplateToFile(modelDir, datastoreNames={}):
 		baseTemplate.write(renderTemplate(modelDir, absolutePaths=False))
 		baseTemplate.flush()
 		baseTemplate.seek(0)
-		with locked_open(pJoin(modelDir,'inlineTemplate.html'), 'w', encoding='utf-8', io_open=True) as inlineTemplate:
+		with locked_open(pJoin(modelDir,'inlineTemplate.html'), 'w', encoding='utf-8') as inlineTemplate:
 			for line in baseTemplate:
 				#add backslash to regex between signle and double quote
 				matchObj = re.match( r"(.*)/static(.+?)(['\"])(.+?)", line, re.M|re.I)
@@ -168,26 +170,26 @@ def renderTemplateToFile(modelDir, datastoreNames={}):
 				if scriptTags:
 					with open(_omfDir + "/static"+ matchObj.group(2)) as f:
 						sourceFile = f.read() 
-					with io.open(_omfDir + "/static"+ matchObj.group(2), 'r', encoding='utf-8') as yFile:
+					with open(_omfDir + "/static"+ matchObj.group(2), 'r', encoding='utf-8') as yFile:
 						ttempfile = yFile.readlines()
 					tmp = '<script>'+sourceFile+'</script>'
-					inlineTemplate.write(str('<script>'))
+					inlineTemplate.write('<script>')
 					for i in ttempfile:
 						try:
 							inlineTemplate.write(i)
 						except (UnicodeEncodeError):
 							print(i)
-					inlineTemplate.write(str('</script>'))
+					inlineTemplate.write('</script>')
 				elif styleTags:
-					with io.open(_omfDir + "/static"+ matchObj.group(2), 'r', encoding='utf-8') as yFile:
+					with open(_omfDir + "/static"+ matchObj.group(2), 'r', encoding='utf-8') as yFile:
 						ttempfile = yFile.readlines()
-					inlineTemplate.write(str('<style>'))
+					inlineTemplate.write('<style>')
 					for i in ttempfile:
 						try:
 							inlineTemplate.write(i)
 						except (UnicodeEncodeError):
 							print(i)
-					inlineTemplate.write(str('</style>'))
+					inlineTemplate.write('</style>')
 				else:
 					inlineTemplate.write(str(line))
 
