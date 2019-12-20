@@ -1,12 +1,14 @@
 ''' Web server for model-oriented OMF interface. '''
 
-from __future__ import print_function
-from flask import (Flask, send_from_directory, request, redirect, render_template, session, abort, jsonify, url_for)
-from jinja2 import Template
+import json, os, hashlib, random, time, datetime as dt, shutil, csv, sys, platform, errno, io, signal
+from contextlib import contextmanager
 from multiprocessing import Process
 from passlib.hash import pbkdf2_sha512
 from functools import wraps
-import json, os, flask_login, hashlib, random, time, datetime as dt, shutil, boto.ses, csv, sys, platform, errno, io
+from flask import (Flask, send_from_directory, request, redirect, render_template, session, abort, jsonify, url_for)
+import flask_login, boto.ses
+from flask_compress import Compress
+from jinja2 import Template
 try:
 	import fcntl
 except:
@@ -16,12 +18,11 @@ except:
 		return
 	fcntl.flock = flock
 	(fcntl.LOCK_EX, fcntl.LOCK_SH, fcntl.LOCK_UN, fcntl.LOCK_NB) = (0, 0, 0, 0)
-import models, feeder, network, milToGridlab, cymeToGridlab, signal, weather, anonymization
 import omf
+from omf import models, feeder, network, milToGridlab, cymeToGridlab, weather, anonymization
 from omf.calibrate import omfCalibrate
 from omf.omfStats import genAllImages
 from omf.loadModelingAmi import writeNewGlmAndPlayers
-from flask_compress import Compress
 
 app = Flask("web")
 Compress(app)
@@ -183,7 +184,7 @@ def deleteUser():
 	# Clean up user data.
 	try:
 		shutil.rmtree("data/Model/" + username)
-	except Exception, e:
+	except Exception as e:
 		print("USER DATA DELETION FAILED FOR", e)
 	os.remove("data/User/" + username + ".json")
 	print("SUCCESFULLY DELETE USER", username)
@@ -214,7 +215,7 @@ def forgotpwd(email):
 			return "We have sent a password reset link to " + email
 		else:
 			raise Exception
-	except Exception, e:
+	except Exception as e:
 		print("ERROR: failed to password reset user", email, "with exception", e)
 		return "We do not have a record of a user with that email address. Please click back and create an account."
 
@@ -494,7 +495,7 @@ def shareModel():
 	# Check for nonexistant users
 	emails = list(set(request.form.getlist("email"))) if len(request.form.getlist("email")) != 0 else None
 	if emails is not None:
-		invalid_emails = filter(lambda e: e == User.cu() or e == 'admin' or not os.path.isfile(os.path.join(_omfDir, 'data', 'User', e + '.json')), emails)
+		invalid_emails = [e for e in emails if e == User.cu() or e == 'admin' or not os.path.isfile(os.path.join(_omfDir, 'data', 'User', e + '.json'))]
 		if len(invalid_emails) != 0:
 			response = jsonify(invalid_emails)
 			response.status_code = 400
@@ -502,8 +503,7 @@ def shareModel():
 	# Check the state of the model
 	owner = request.form.get("user")
 	model_name = request.form.get("modelName")
-	from models import __neoMetaModel__
-	status = __neoMetaModel__.getStatus(os.path.join(_omfDir, 'data', 'Model', owner, model_name))
+	status = models.__neoMetaModel__.getStatus(os.path.join(_omfDir, 'data', 'Model', owner, model_name))
 	if status == 'running':
 		return ("The model cannot be shared while it is running. Please wait until the model finishes running.", 409)
 	# Load the list of old viewers
@@ -578,23 +578,18 @@ def get_model_metadata(owner, model_name):
 	return model_metadata
 
 
-from contextlib import contextmanager
 @contextmanager
-def locked_open(filepath, mode='r', timeout=180, io_open=False, **io_open_args):
+#def locked_open(filepath, mode='r', timeout=180, io_open=True, **io_open_args):
+def locked_open(filepath, mode='r', timeout=180, **io_open_args):
 	"""
 	Open a file and lock it depending on the file access mode. An IOError will be raised if the lock cannot be acquired within the timeout.
 	- Either regular open() or io.open() can be used with this function
 	"""
-	if mode in ['r', 'rb']:
+	if 'r' in mode and '+' not in mode:
 		lock_mode = fcntl.LOCK_SH
-	elif mode in ['r+', 'r+b', 'w', 'wb', 'w+', 'w+b', 'a', 'ab', 'a+', 'a+b']:
+	else:
 		lock_mode = fcntl.LOCK_EX
-	else:
-		raise Exception("Unrecognized file access mode")
-	if io_open:
-		f = io.open(filepath, mode, **io_open_args)
-	else:
-		f = open(filepath, mode)
+	f = open(filepath, mode, **io_open_args)
 	start_time = time.time()
 	while True:
 		try:
@@ -755,7 +750,7 @@ def checkConversion(modelName, owner=None):
 def milsoftImport(owner):
 	''' API for importing a milsoft feeder. '''
 	modelName = request.form.get("modelName","")
-	model_dir, error_filepath = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in '', 'gridError.txt']
+	model_dir, error_filepath = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in ('', 'gridError.txt')]
 	# Delete exisitng .std and .seq, .glm files to not clutter model file
 	for filename in safeListdir(model_dir):
 		if filename.endswith(".glm") or filename.endswith(".std") or filename.endswith(".seq"):
@@ -771,8 +766,13 @@ def milImportBackground(owner, modelName):
 	''' Function to run in the background for Milsoft import. '''
 	try:
 		feederName = str(request.form.get('feederNameM', 'feeder'))
-		std_filepath, seq_filepath, pid_filepath, feeder_filepath, model_dir, error_filepath = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in 
-			[feederName + '.std', feederName + '.seq', 'ZPID.txt', feederName + '.omd', '', 'gridError.txt']
+		std_filepath, seq_filepath, pid_filepath, feeder_filepath, model_dir, error_filepath = [
+			os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in
+				[feederName + '.std',
+				feederName + '.seq',
+				'ZPID.txt',
+				feederName + '.omd',
+				'', 'gridError.txt']
 		]
 		request.files.get('stdFile').save(std_filepath)
 		request.files.get('seqFile').save(seq_filepath)
@@ -807,7 +807,7 @@ def milImportBackground(owner, modelName):
 def matpowerImport(owner):
 	''' API for importing a MATPOWER network. '''
 	modelName = request.form.get('modelName', '')
-	model_dir, con_file_path = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in '', 'ZPID.txt']
+	model_dir, con_file_path = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in ('', 'ZPID.txt')]
 	# Delete existing .m files to not clutter model.
 	for filename in safeListdir(model_dir):
 		if filename.endswith(".m"):
@@ -847,7 +847,7 @@ def matImportBackground(owner, modelName):
 def gridlabdImport(owner):
 	'''This function is used for gridlabdImporting'''
 	modelName = request.form.get("modelName","")
-	error_path, modelDir = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in 'gridError.txt', '']
+	error_path, modelDir = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in ('gridError.txt', '')]
 	# Delete exisitng .std and .seq, .glm files to not clutter model file
 	for filename in safeListdir(modelDir):
 		if filename.endswith(".glm") or filename.endswith(".std") or filename.endswith(".seq"):
@@ -899,7 +899,7 @@ def scadaLoadshape(owner, feederName):
 	loadName = 'calibration'
 	modelName = request.form.get("modelName","")
 	# delete calibration csv, calibration folder, and error file if they exist
-	filepaths = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in 'error.txt', 'calibration.csv', 'calibration']
+	filepaths = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in ('error.txt', 'calibration.csv', 'calibration')]
 	for fp in filepaths:
 		if os.path.isfile(fp):
 			os.remove(fp)
@@ -927,7 +927,7 @@ def backgroundScadaLoadshape(owner, modelName, feederName, loadName):
 		# TODO: parse the csv using .csv library, set simStartDate to earliest timeStamp, length to number of rows, units to difference between first 2
 		# timestamps (which is a function in datetime library). We'll need a link to the docs in the import dialog and a short blurb saying how the CSV
 		# should be built.
-		with locked_open(scadaPath) as csv_file:
+		with locked_open(scadaPath, newline='') as csv_file:
 			#reader = csv.DictReader(csvFile, delimiter='\t')
 			rows = [row for row in csv.DictReader(csv_file)]
 			#reader = csv.DictReader(csvFile)
@@ -965,7 +965,7 @@ def loadModelingAmi(owner, feederName):
 	#feederNum = request.form.get('feederNum', 1)
 	loadName = 'ami'
 	modelName = request.form.get('modelName', '')
-	filepaths = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in 'amiError.txt', 'amiLoad.csv']
+	filepaths = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in ('amiError.txt', 'amiLoad.csv')]
 	for fp in filepaths:
 		if os.path.isfile(fp):
 			os.remove(fp)
@@ -1225,7 +1225,7 @@ def renameFeeder(owner, modelName, oldName, newName, feederNum):
 def renameNetwork(owner, modelName, oldName, networkName, networkNum):
 	''' rename a feeder. '''
 	model_dir, new_network_filepath, old_network_filepath = [
-		os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in '', networkName + '.omt', oldName + '.omt'
+		os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in ('', networkName + '.omt', oldName + '.omt')
 	]
 	if os.path.isfile(new_network_filepath) or not os.path.isfile(old_network_filepath):
 		return "Failure"
