@@ -18486,7 +18486,7 @@
             "property": "\"switchA,switchB,switchC,voltage_A.real,voltage_A.imag,voltage_B.real,voltage_B.imag,voltage_C.real,voltage_C.imag\""
         }, 
         "2087": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_1", 
@@ -18510,7 +18510,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2089": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_2", 
@@ -18521,7 +18521,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2090": {
             "name": "test_solar_2", 
@@ -18534,7 +18534,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2091": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_3", 
@@ -18545,7 +18545,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2092": {
             "name": "test_solar_3", 
@@ -18558,7 +18558,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2093": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_4", 
@@ -18569,7 +18569,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2094": {
             "name": "test_solar_4", 
@@ -18582,7 +18582,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2095": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_5", 
@@ -18593,7 +18593,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2096": {
             "name": "test_solar_5", 
@@ -18606,7 +18606,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2097": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_6", 
@@ -18617,7 +18617,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2098": {
             "name": "test_solar_6", 
@@ -18630,7 +18630,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2099": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_7", 
@@ -18641,7 +18641,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2100": {
             "name": "test_solar_7", 
@@ -18654,7 +18654,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2101": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_8", 
@@ -18665,7 +18665,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2102": {
             "name": "test_solar_8", 
@@ -18678,7 +18678,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2103": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_9", 
@@ -18689,7 +18689,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2104": {
             "name": "test_solar_9", 
@@ -18702,7 +18702,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2105": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_10", 
@@ -18713,7 +18713,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2106": {
             "name": "test_solar_10", 
@@ -18726,7 +18726,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2107": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_11", 
@@ -18737,7 +18737,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2108": {
             "name": "test_solar_11", 
@@ -18750,7 +18750,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2109": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_12", 
@@ -18761,7 +18761,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2110": {
             "name": "test_solar_12", 
@@ -18774,7 +18774,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2111": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_13", 
@@ -18785,7 +18785,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2112": {
             "name": "test_solar_13", 
@@ -18798,7 +18798,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2113": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_14", 
@@ -18809,7 +18809,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2114": {
             "name": "test_solar_14", 
@@ -18822,7 +18822,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2115": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_15", 
@@ -18846,7 +18846,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2117": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_16", 
@@ -18857,7 +18857,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2118": {
             "name": "test_solar_16", 
@@ -18870,7 +18870,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2119": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_17", 
@@ -18881,7 +18881,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2120": {
             "name": "test_solar_17", 
@@ -18894,7 +18894,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2121": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_18", 
@@ -18918,7 +18918,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2123": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_19", 
@@ -18929,7 +18929,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2124": {
             "name": "test_solar_19", 
@@ -18942,7 +18942,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2125": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_20", 
@@ -18953,7 +18953,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2126": {
             "name": "test_solar_20", 
@@ -18966,7 +18966,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2127": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_21", 
@@ -18977,7 +18977,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2128": {
             "name": "test_solar_21", 
@@ -18990,7 +18990,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2129": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_22", 
@@ -19001,7 +19001,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2130": {
             "name": "test_solar_22", 
@@ -19014,7 +19014,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2131": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_23", 
@@ -19025,7 +19025,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2132": {
             "name": "test_solar_23", 
@@ -19038,7 +19038,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2133": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_24", 
@@ -19049,7 +19049,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2134": {
             "name": "test_solar_24", 
@@ -19062,7 +19062,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2135": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_25", 
@@ -19073,7 +19073,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2136": {
             "name": "test_solar_25", 
@@ -19086,7 +19086,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2137": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_26", 
@@ -19097,7 +19097,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2138": {
             "name": "test_solar_26", 
@@ -19110,7 +19110,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2139": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_27", 
@@ -19121,7 +19121,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2140": {
             "name": "test_solar_27", 
@@ -19134,7 +19134,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2141": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_28", 
@@ -19145,7 +19145,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2142": {
             "name": "test_solar_28", 
@@ -19158,7 +19158,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2143": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_29", 
@@ -19169,7 +19169,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2144": {
             "name": "test_solar_29", 
@@ -19182,7 +19182,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2145": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_30", 
@@ -19206,7 +19206,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2147": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_31", 
@@ -19217,7 +19217,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2148": {
             "name": "test_solar_31", 
@@ -19230,7 +19230,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2149": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_32", 
@@ -19241,7 +19241,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2150": {
             "name": "test_solar_32", 
@@ -19254,7 +19254,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2151": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_33", 
@@ -19265,7 +19265,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2152": {
             "name": "test_solar_33", 
@@ -19278,7 +19278,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2153": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_34", 
@@ -19289,7 +19289,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2154": {
             "name": "test_solar_34", 
@@ -19302,7 +19302,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2155": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_35", 
@@ -19313,7 +19313,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2156": {
             "name": "test_solar_35", 
@@ -19326,7 +19326,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2157": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_36", 
@@ -19337,7 +19337,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2158": {
             "name": "test_solar_36", 
@@ -19350,7 +19350,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2159": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_37", 
@@ -19361,7 +19361,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2160": {
             "name": "test_solar_37", 
@@ -19374,7 +19374,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2161": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_38", 
@@ -19385,7 +19385,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2162": {
             "name": "test_solar_38", 
@@ -19398,7 +19398,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2163": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_39", 
@@ -19409,7 +19409,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2164": {
             "name": "test_solar_39", 
@@ -19422,7 +19422,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2165": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_40", 
@@ -19433,7 +19433,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2166": {
             "name": "test_solar_40", 
@@ -19446,7 +19446,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2167": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_41", 
@@ -19457,7 +19457,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2168": {
             "name": "test_solar_41", 
@@ -19470,7 +19470,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2169": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_42", 
@@ -19494,7 +19494,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2171": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_43", 
@@ -19505,7 +19505,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2172": {
             "name": "test_solar_43", 
@@ -19518,7 +19518,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2173": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_44", 
@@ -19529,7 +19529,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2174": {
             "name": "test_solar_44", 
@@ -19542,7 +19542,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2175": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_45", 
@@ -19553,7 +19553,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2176": {
             "name": "test_solar_45", 
@@ -19566,7 +19566,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2177": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_46", 
@@ -19577,7 +19577,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2178": {
             "name": "test_solar_46", 
@@ -19590,7 +19590,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2179": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_47", 
@@ -19601,7 +19601,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2180": {
             "name": "test_solar_47", 
@@ -19614,7 +19614,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2181": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_48", 
@@ -19638,7 +19638,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2183": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_49", 
@@ -19649,7 +19649,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2184": {
             "name": "test_solar_49", 
@@ -19662,7 +19662,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2185": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_50", 
@@ -19673,7 +19673,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2186": {
             "name": "test_solar_50", 
@@ -19686,7 +19686,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2187": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_51", 
@@ -19697,7 +19697,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2188": {
             "name": "test_solar_51", 
@@ -19710,7 +19710,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2189": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_52", 
@@ -19721,7 +19721,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2190": {
             "name": "test_solar_52", 
@@ -19734,7 +19734,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2191": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_53", 
@@ -19745,7 +19745,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2192": {
             "name": "test_solar_53", 
@@ -19758,7 +19758,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2193": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_54", 
@@ -19769,7 +19769,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2194": {
             "name": "test_solar_54", 
@@ -19782,7 +19782,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2195": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_55", 
@@ -19806,7 +19806,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2197": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_56", 
@@ -19817,7 +19817,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2198": {
             "name": "test_solar_56", 
@@ -19830,7 +19830,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2199": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_57", 
@@ -19841,7 +19841,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2200": {
             "name": "test_solar_57", 
@@ -19854,7 +19854,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2201": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_58", 
@@ -19865,7 +19865,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2202": {
             "name": "test_solar_58", 
@@ -19878,7 +19878,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2203": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_59", 
@@ -19889,7 +19889,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2204": {
             "name": "test_solar_59", 
@@ -19902,7 +19902,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2205": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_60", 
@@ -19913,7 +19913,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2206": {
             "name": "test_solar_60", 
@@ -19926,7 +19926,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2207": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_61", 
@@ -19937,7 +19937,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2208": {
             "name": "test_solar_61", 
@@ -19950,7 +19950,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2209": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_62", 
@@ -19961,7 +19961,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2210": {
             "name": "test_solar_62", 
@@ -19974,7 +19974,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2211": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_63", 
@@ -19985,7 +19985,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2212": {
             "name": "test_solar_63", 
@@ -19998,7 +19998,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2213": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_64", 
@@ -20009,7 +20009,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2214": {
             "name": "test_solar_64", 
@@ -20022,7 +20022,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2215": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_65", 
@@ -20033,7 +20033,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2216": {
             "name": "test_solar_65", 
@@ -20046,7 +20046,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2217": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_66", 
@@ -20057,7 +20057,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2218": {
             "name": "test_solar_66", 
@@ -20070,7 +20070,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2219": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_67", 
@@ -20081,7 +20081,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2220": {
             "name": "test_solar_67", 
@@ -20094,7 +20094,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2221": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_68", 
@@ -20105,7 +20105,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2222": {
             "name": "test_solar_68", 
@@ -20118,7 +20118,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2223": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_69", 
@@ -20142,7 +20142,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2225": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_70", 
@@ -20166,7 +20166,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2227": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_71", 
@@ -20177,7 +20177,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2228": {
             "name": "test_solar_71", 
@@ -20190,7 +20190,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2229": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_72", 
@@ -20201,7 +20201,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2230": {
             "name": "test_solar_72", 
@@ -20214,7 +20214,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2231": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_73", 
@@ -20225,7 +20225,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2232": {
             "name": "test_solar_73", 
@@ -20238,7 +20238,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2233": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_74", 
@@ -20249,7 +20249,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2234": {
             "name": "test_solar_74", 
@@ -20262,7 +20262,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2235": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_75", 
@@ -20273,7 +20273,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2236": {
             "name": "test_solar_75", 
@@ -20286,7 +20286,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2237": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_76", 
@@ -20297,7 +20297,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2238": {
             "name": "test_solar_76", 
@@ -20310,7 +20310,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2239": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_77", 
@@ -20321,7 +20321,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2240": {
             "name": "test_solar_77", 
@@ -20334,7 +20334,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2241": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_78", 
@@ -20345,7 +20345,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2242": {
             "name": "test_solar_78", 
@@ -20358,7 +20358,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2243": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_79", 
@@ -20369,7 +20369,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2244": {
             "name": "test_solar_79", 
@@ -20382,7 +20382,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2245": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_80", 
@@ -20406,7 +20406,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2247": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_81", 
@@ -20417,7 +20417,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2248": {
             "name": "test_solar_81", 
@@ -20430,7 +20430,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2249": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_82", 
@@ -20441,7 +20441,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2250": {
             "name": "test_solar_82", 
@@ -20454,7 +20454,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2251": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_83", 
@@ -20465,7 +20465,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2252": {
             "name": "test_solar_83", 
@@ -20478,7 +20478,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2253": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_84", 
@@ -20502,7 +20502,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2255": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_85", 
@@ -20513,7 +20513,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2256": {
             "name": "test_solar_85", 
@@ -20526,7 +20526,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2257": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_86", 
@@ -20550,7 +20550,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2259": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_87", 
@@ -20574,7 +20574,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2261": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_88", 
@@ -20585,7 +20585,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2262": {
             "name": "test_solar_88", 
@@ -20598,7 +20598,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2263": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_89", 
@@ -20609,7 +20609,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2264": {
             "name": "test_solar_89", 
@@ -20622,7 +20622,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2265": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_90", 
@@ -20646,7 +20646,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2267": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_91", 
@@ -20657,7 +20657,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2268": {
             "name": "test_solar_91", 
@@ -20670,7 +20670,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2269": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_92", 
@@ -20681,7 +20681,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2270": {
             "name": "test_solar_92", 
@@ -20694,7 +20694,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2271": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_93", 
@@ -20705,7 +20705,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2272": {
             "name": "test_solar_93", 
@@ -20718,7 +20718,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2273": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_94", 
@@ -20729,7 +20729,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2274": {
             "name": "test_solar_94", 
@@ -20742,7 +20742,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2275": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_95", 
@@ -20753,7 +20753,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2276": {
             "name": "test_solar_95", 
@@ -20766,7 +20766,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2277": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_96", 
@@ -20777,7 +20777,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2278": {
             "name": "test_solar_96", 
@@ -20790,7 +20790,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2279": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_97", 
@@ -20801,7 +20801,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2280": {
             "name": "test_solar_97", 
@@ -20814,7 +20814,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2281": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_98", 
@@ -20825,7 +20825,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2282": {
             "name": "test_solar_98", 
@@ -20838,7 +20838,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2283": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_99", 
@@ -20849,7 +20849,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2284": {
             "name": "test_solar_99", 
@@ -20862,7 +20862,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2285": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_100", 
@@ -20873,7 +20873,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2286": {
             "name": "test_solar_100", 
@@ -20886,7 +20886,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2287": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_101", 
@@ -20910,7 +20910,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2289": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_102", 
@@ -20921,7 +20921,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2290": {
             "name": "test_solar_102", 
@@ -20934,7 +20934,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2291": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_103", 
@@ -20945,7 +20945,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2292": {
             "name": "test_solar_103", 
@@ -20958,7 +20958,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2293": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_104", 
@@ -20982,7 +20982,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2295": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_105", 
@@ -20993,7 +20993,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2296": {
             "name": "test_solar_105", 
@@ -21006,7 +21006,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2297": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_106", 
@@ -21017,7 +21017,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2298": {
             "name": "test_solar_106", 
@@ -21030,7 +21030,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2299": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_107", 
@@ -21041,7 +21041,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2300": {
             "name": "test_solar_107", 
@@ -21054,7 +21054,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2301": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_108", 
@@ -21065,7 +21065,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2302": {
             "name": "test_solar_108", 
@@ -21078,7 +21078,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2303": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_109", 
@@ -21089,7 +21089,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2304": {
             "name": "test_solar_109", 
@@ -21102,7 +21102,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2305": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_110", 
@@ -21113,7 +21113,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2306": {
             "name": "test_solar_110", 
@@ -21126,7 +21126,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2307": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_111", 
@@ -21137,7 +21137,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2308": {
             "name": "test_solar_111", 
@@ -21150,7 +21150,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2309": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_112", 
@@ -21174,7 +21174,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2311": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_113", 
@@ -21185,7 +21185,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2312": {
             "name": "test_solar_113", 
@@ -21198,7 +21198,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2313": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_114", 
@@ -21222,7 +21222,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2315": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_115", 
@@ -21233,7 +21233,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2316": {
             "name": "test_solar_115", 
@@ -21246,7 +21246,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2317": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_116", 
@@ -21257,7 +21257,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2318": {
             "name": "test_solar_116", 
@@ -21270,7 +21270,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2319": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_117", 
@@ -21281,7 +21281,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2320": {
             "name": "test_solar_117", 
@@ -21294,7 +21294,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2321": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_118", 
@@ -21305,7 +21305,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2322": {
             "name": "test_solar_118", 
@@ -21318,7 +21318,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2323": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_119", 
@@ -21329,7 +21329,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2324": {
             "name": "test_solar_119", 
@@ -21342,7 +21342,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2325": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_120", 
@@ -21353,7 +21353,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2326": {
             "name": "test_solar_120", 
@@ -21366,7 +21366,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2327": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_121", 
@@ -21377,7 +21377,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2328": {
             "name": "test_solar_121", 
@@ -21390,7 +21390,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2329": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_122", 
@@ -21401,7 +21401,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2330": {
             "name": "test_solar_122", 
@@ -21414,7 +21414,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2331": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_123", 
@@ -21425,7 +21425,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2332": {
             "name": "test_solar_123", 
@@ -21438,7 +21438,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2333": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_124", 
@@ -21462,7 +21462,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2335": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_125", 
@@ -21486,7 +21486,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2337": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_126", 
@@ -21497,7 +21497,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2338": {
             "name": "test_solar_126", 
@@ -21510,7 +21510,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2339": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_127", 
@@ -21521,7 +21521,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2340": {
             "name": "test_solar_127", 
@@ -21534,7 +21534,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2341": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_128", 
@@ -21545,7 +21545,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2342": {
             "name": "test_solar_128", 
@@ -21558,7 +21558,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2343": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_129", 
@@ -21569,7 +21569,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2344": {
             "name": "test_solar_129", 
@@ -21582,7 +21582,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2345": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_130", 
@@ -21593,7 +21593,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2346": {
             "name": "test_solar_130", 
@@ -21606,7 +21606,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2347": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_131", 
@@ -21617,7 +21617,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2348": {
             "name": "test_solar_131", 
@@ -21630,7 +21630,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2349": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_132", 
@@ -21641,7 +21641,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2350": {
             "name": "test_solar_132", 
@@ -21654,7 +21654,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2351": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_133", 
@@ -21665,7 +21665,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2352": {
             "name": "test_solar_133", 
@@ -21678,7 +21678,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2353": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_134", 
@@ -21689,7 +21689,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2354": {
             "name": "test_solar_134", 
@@ -21702,7 +21702,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2355": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_135", 
@@ -21713,7 +21713,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2356": {
             "name": "test_solar_135", 
@@ -21726,7 +21726,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2357": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_136", 
@@ -21737,7 +21737,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2358": {
             "name": "test_solar_136", 
@@ -21750,7 +21750,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2359": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_137", 
@@ -21761,7 +21761,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2360": {
             "name": "test_solar_137", 
@@ -21774,7 +21774,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2361": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_138", 
@@ -21785,7 +21785,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2362": {
             "name": "test_solar_138", 
@@ -21798,7 +21798,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2363": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_139", 
@@ -21809,7 +21809,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2364": {
             "name": "test_solar_139", 
@@ -21822,7 +21822,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2365": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_140", 
@@ -21833,7 +21833,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2366": {
             "name": "test_solar_140", 
@@ -21846,7 +21846,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2367": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_141", 
@@ -21857,7 +21857,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2368": {
             "name": "test_solar_141", 
@@ -21870,7 +21870,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2369": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_142", 
@@ -21881,7 +21881,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2370": {
             "name": "test_solar_142", 
@@ -21894,7 +21894,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2371": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_143", 
@@ -21905,7 +21905,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2372": {
             "name": "test_solar_143", 
@@ -21918,7 +21918,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2373": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_144", 
@@ -21929,7 +21929,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2374": {
             "name": "test_solar_144", 
@@ -21942,7 +21942,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2375": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_145", 
@@ -21953,7 +21953,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2376": {
             "name": "test_solar_145", 
@@ -21966,7 +21966,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2377": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_146", 
@@ -21977,7 +21977,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2378": {
             "name": "test_solar_146", 
@@ -21990,7 +21990,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2379": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_147", 
@@ -22001,7 +22001,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2380": {
             "name": "test_solar_147", 
@@ -22014,7 +22014,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2381": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_148", 
@@ -22025,7 +22025,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2382": {
             "name": "test_solar_148", 
@@ -22038,7 +22038,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2383": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_149", 
@@ -22049,7 +22049,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2384": {
             "name": "test_solar_149", 
@@ -22062,7 +22062,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2385": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_150", 
@@ -22073,7 +22073,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2386": {
             "name": "test_solar_150", 
@@ -22086,7 +22086,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2387": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_151", 
@@ -22097,7 +22097,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2388": {
             "name": "test_solar_151", 
@@ -22110,7 +22110,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2389": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_152", 
@@ -22121,7 +22121,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2390": {
             "name": "test_solar_152", 
@@ -22134,7 +22134,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2391": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_153", 
@@ -22145,7 +22145,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2392": {
             "name": "test_solar_153", 
@@ -22158,7 +22158,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2393": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_154", 
@@ -22169,7 +22169,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2394": {
             "name": "test_solar_154", 
@@ -22182,7 +22182,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2395": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_155", 
@@ -22193,7 +22193,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2396": {
             "name": "test_solar_155", 
@@ -22206,7 +22206,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2397": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_156", 
@@ -22217,7 +22217,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2398": {
             "name": "test_solar_156", 
@@ -22230,7 +22230,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2399": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_157", 
@@ -22241,7 +22241,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2400": {
             "name": "test_solar_157", 
@@ -22254,7 +22254,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2401": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_158", 
@@ -22265,7 +22265,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2402": {
             "name": "test_solar_158", 
@@ -22278,7 +22278,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2403": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_159", 
@@ -22289,7 +22289,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2404": {
             "name": "test_solar_159", 
@@ -22302,7 +22302,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2405": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_160", 
@@ -22313,7 +22313,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2406": {
             "name": "test_solar_160", 
@@ -22326,7 +22326,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2407": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_161", 
@@ -22337,7 +22337,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2408": {
             "name": "test_solar_161", 
@@ -22350,7 +22350,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2409": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_162", 
@@ -22361,7 +22361,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2410": {
             "name": "test_solar_162", 
@@ -22374,7 +22374,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2411": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_163", 
@@ -22385,7 +22385,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2412": {
             "name": "test_solar_163", 
@@ -22398,7 +22398,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2413": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_164", 
@@ -22409,7 +22409,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2414": {
             "name": "test_solar_164", 
@@ -22422,7 +22422,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2415": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_165", 
@@ -22433,7 +22433,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2416": {
             "name": "test_solar_165", 
@@ -22446,7 +22446,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2417": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_166", 
@@ -22457,7 +22457,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2418": {
             "name": "test_solar_166", 
@@ -22470,7 +22470,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2419": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_167", 
@@ -22481,7 +22481,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2420": {
             "name": "test_solar_167", 
@@ -22494,7 +22494,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2421": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_168", 
@@ -22505,7 +22505,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2422": {
             "name": "test_solar_168", 
@@ -22518,7 +22518,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2423": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_169", 
@@ -22529,7 +22529,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2424": {
             "name": "test_solar_169", 
@@ -22542,7 +22542,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2425": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_170", 
@@ -22553,7 +22553,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2426": {
             "name": "test_solar_170", 
@@ -22566,7 +22566,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2427": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_171", 
@@ -22590,7 +22590,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2429": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_172", 
@@ -22614,7 +22614,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2431": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_173", 
@@ -22625,7 +22625,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2432": {
             "name": "test_solar_173", 
@@ -22638,7 +22638,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2433": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_174", 
@@ -22662,7 +22662,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2435": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_175", 
@@ -22673,7 +22673,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2436": {
             "name": "test_solar_175", 
@@ -22686,7 +22686,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2437": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_176", 
@@ -22697,7 +22697,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2438": {
             "name": "test_solar_176", 
@@ -22710,7 +22710,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2439": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_177", 
@@ -22721,7 +22721,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2440": {
             "name": "test_solar_177", 
@@ -22734,7 +22734,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2441": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_178", 
@@ -22745,7 +22745,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2442": {
             "name": "test_solar_178", 
@@ -22758,7 +22758,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2443": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_179", 
@@ -22769,7 +22769,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2444": {
             "name": "test_solar_179", 
@@ -22782,7 +22782,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2445": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_180", 
@@ -22793,7 +22793,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2446": {
             "name": "test_solar_180", 
@@ -22806,7 +22806,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2447": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_181", 
@@ -22817,7 +22817,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2448": {
             "name": "test_solar_181", 
@@ -22830,7 +22830,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2449": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_182", 
@@ -22854,7 +22854,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2451": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_183", 
@@ -22865,7 +22865,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2452": {
             "name": "test_solar_183", 
@@ -22878,7 +22878,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2453": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_184", 
@@ -22902,7 +22902,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2455": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_185", 
@@ -22913,7 +22913,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2456": {
             "name": "test_solar_185", 
@@ -22926,7 +22926,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2457": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_186", 
@@ -22937,7 +22937,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2458": {
             "name": "test_solar_186", 
@@ -22950,7 +22950,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2459": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_187", 
@@ -22961,7 +22961,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2460": {
             "name": "test_solar_187", 
@@ -22974,7 +22974,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2461": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_188", 
@@ -22985,7 +22985,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2462": {
             "name": "test_solar_188", 
@@ -22998,7 +22998,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2463": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_189", 
@@ -23022,7 +23022,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2465": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_190", 
@@ -23033,7 +23033,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2466": {
             "name": "test_solar_190", 
@@ -23046,7 +23046,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2467": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_191", 
@@ -23057,7 +23057,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2468": {
             "name": "test_solar_191", 
@@ -23070,7 +23070,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2469": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_192", 
@@ -23081,7 +23081,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2470": {
             "name": "test_solar_192", 
@@ -23094,7 +23094,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2471": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_193", 
@@ -23105,7 +23105,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2472": {
             "name": "test_solar_193", 
@@ -23118,7 +23118,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2473": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_194", 
@@ -23129,7 +23129,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2474": {
             "name": "test_solar_194", 
@@ -23142,7 +23142,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2475": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_195", 
@@ -23153,7 +23153,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2476": {
             "name": "test_solar_195", 
@@ -23166,7 +23166,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2477": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_196", 
@@ -23177,7 +23177,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2478": {
             "name": "test_solar_196", 
@@ -23190,7 +23190,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2479": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_197", 
@@ -23201,7 +23201,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2480": {
             "name": "test_solar_197", 
@@ -23214,7 +23214,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2481": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_198", 
@@ -23225,7 +23225,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2482": {
             "name": "test_solar_198", 
@@ -23238,7 +23238,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2483": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_199", 
@@ -23249,7 +23249,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2484": {
             "name": "test_solar_199", 
@@ -23262,7 +23262,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2485": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_200", 
@@ -23273,7 +23273,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2486": {
             "name": "test_solar_200", 
@@ -23286,7 +23286,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2487": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_201", 
@@ -23297,7 +23297,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2488": {
             "name": "test_solar_201", 
@@ -23310,7 +23310,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2489": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_202", 
@@ -23321,7 +23321,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2490": {
             "name": "test_solar_202", 
@@ -23334,7 +23334,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2491": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_203", 
@@ -23358,7 +23358,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2493": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_204", 
@@ -23382,7 +23382,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2495": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_205", 
@@ -23393,7 +23393,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2496": {
             "name": "test_solar_205", 
@@ -23406,7 +23406,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2497": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_206", 
@@ -23417,7 +23417,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2498": {
             "name": "test_solar_206", 
@@ -23430,7 +23430,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2499": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_207", 
@@ -23441,7 +23441,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2500": {
             "name": "test_solar_207", 
@@ -23454,7 +23454,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2501": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_208", 
@@ -23465,7 +23465,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2502": {
             "name": "test_solar_208", 
@@ -23478,7 +23478,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2503": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_209", 
@@ -23489,7 +23489,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2504": {
             "name": "test_solar_209", 
@@ -23502,7 +23502,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2505": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_210", 
@@ -23513,7 +23513,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2506": {
             "name": "test_solar_210", 
@@ -23526,7 +23526,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2507": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_211", 
@@ -23537,7 +23537,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2508": {
             "name": "test_solar_211", 
@@ -23550,7 +23550,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2509": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_212", 
@@ -23561,7 +23561,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2510": {
             "name": "test_solar_212", 
@@ -23574,7 +23574,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2511": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_213", 
@@ -23598,7 +23598,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2513": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_214", 
@@ -23609,7 +23609,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2514": {
             "name": "test_solar_214", 
@@ -23622,7 +23622,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2515": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_215", 
@@ -23646,7 +23646,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2517": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_216", 
@@ -23657,7 +23657,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2518": {
             "name": "test_solar_216", 
@@ -23670,7 +23670,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2519": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_217", 
@@ -23681,7 +23681,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2520": {
             "name": "test_solar_217", 
@@ -23694,7 +23694,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2521": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_218", 
@@ -23705,7 +23705,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2522": {
             "name": "test_solar_218", 
@@ -23718,7 +23718,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2523": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_219", 
@@ -23729,7 +23729,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2524": {
             "name": "test_solar_219", 
@@ -23742,7 +23742,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2525": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_220", 
@@ -23753,7 +23753,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2526": {
             "name": "test_solar_220", 
@@ -23766,7 +23766,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2527": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_221", 
@@ -23777,7 +23777,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2528": {
             "name": "test_solar_221", 
@@ -23790,7 +23790,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2529": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_222", 
@@ -23814,7 +23814,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2531": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_223", 
@@ -23825,7 +23825,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2532": {
             "name": "test_solar_223", 
@@ -23838,7 +23838,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2533": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_224", 
@@ -23849,7 +23849,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2534": {
             "name": "test_solar_224", 
@@ -23862,7 +23862,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2535": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_225", 
@@ -23873,7 +23873,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2536": {
             "name": "test_solar_225", 
@@ -23886,7 +23886,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2537": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_226", 
@@ -23897,7 +23897,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2538": {
             "name": "test_solar_226", 
@@ -23910,7 +23910,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2539": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_227", 
@@ -23921,7 +23921,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2540": {
             "name": "test_solar_227", 
@@ -23934,7 +23934,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2541": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_228", 
@@ -23958,7 +23958,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2543": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_229", 
@@ -23969,7 +23969,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2544": {
             "name": "test_solar_229", 
@@ -23982,7 +23982,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2545": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_230", 
@@ -23993,7 +23993,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2546": {
             "name": "test_solar_230", 
@@ -24006,7 +24006,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2547": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_231", 
@@ -24030,7 +24030,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2549": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_232", 
@@ -24054,7 +24054,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2551": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_233", 
@@ -24065,7 +24065,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2552": {
             "name": "test_solar_233", 
@@ -24078,7 +24078,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2553": {
-            "P_Out": "5000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_234", 
@@ -24089,7 +24089,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2554": {
             "name": "test_solar_234", 
@@ -24102,7 +24102,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2555": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_235", 
@@ -24113,7 +24113,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2556": {
             "name": "test_solar_235", 
@@ -24126,7 +24126,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2557": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_236", 
@@ -24137,7 +24137,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2558": {
             "name": "test_solar_236", 
@@ -24150,7 +24150,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2559": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_237", 
@@ -24161,7 +24161,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2560": {
             "name": "test_solar_237", 
@@ -24174,7 +24174,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2561": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_238", 
@@ -24185,7 +24185,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2562": {
             "name": "test_solar_238", 
@@ -24198,7 +24198,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2563": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_239", 
@@ -24209,7 +24209,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2564": {
             "name": "test_solar_239", 
@@ -24222,7 +24222,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2565": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_240", 
@@ -24233,7 +24233,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2566": {
             "name": "test_solar_240", 
@@ -24246,7 +24246,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2567": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_241", 
@@ -24257,7 +24257,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2568": {
             "name": "test_solar_241", 
@@ -24270,7 +24270,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2569": {
-            "P_Out": "3000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_242", 
@@ -24281,7 +24281,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2570": {
             "name": "test_solar_242", 
@@ -24294,7 +24294,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2571": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_243", 
@@ -24305,7 +24305,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2572": {
             "name": "test_solar_243", 
@@ -24318,7 +24318,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2573": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_244", 
@@ -24329,7 +24329,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2574": {
             "name": "test_solar_244", 
@@ -24342,7 +24342,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2575": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_245", 
@@ -24353,7 +24353,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "11000"
+            "rated_power": "10000"
         }, 
         "2576": {
             "name": "test_solar_245", 
@@ -24366,7 +24366,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2577": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_246", 
@@ -24377,7 +24377,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "15000"
+            "rated_power": "10000"
         }, 
         "2578": {
             "name": "test_solar_246", 
@@ -24390,7 +24390,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2579": {
-            "P_Out": "1000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_247", 
@@ -24401,7 +24401,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "14000"
+            "rated_power": "10000"
         }, 
         "2580": {
             "name": "test_solar_247", 
@@ -24414,7 +24414,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2581": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_248", 
@@ -24425,7 +24425,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2582": {
             "name": "test_solar_248", 
@@ -24438,7 +24438,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2583": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "CS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_249", 
@@ -24449,7 +24449,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "12000"
+            "rated_power": "10000"
         }, 
         "2584": {
             "name": "test_solar_249", 
@@ -24462,7 +24462,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2585": {
-            "P_Out": "2000", 
+            "P_Out": "10000", 
             "phases": "BS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_250", 
@@ -24473,7 +24473,7 @@
             "Q_Out": "0.0", 
             "generator_mode": "SUPPLY_DRIVEN", 
             "power_factor": "1.0", 
-            "rated_power": "13000"
+            "rated_power": "10000"
         }, 
         "2586": {
             "name": "test_solar_250", 
@@ -24486,7 +24486,7 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
         "2587": {
-            "P_Out": "4000", 
+            "P_Out": "10000", 
             "phases": "AS", 
             "four_quadrant_control_mode": "CONSTANT_PQ", 
             "name": "test_solar_inverter_251", 

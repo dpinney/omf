@@ -33,7 +33,7 @@ def _lineDistances(x1,x2,y1,y2):
 def convert(stdString, seqString, rescale=True):
 	''' Take in a .std and .seq strings from Milsoft and spit out a json dict. Rescale to a small size if rescale=True. '''
 	start_time = time.time()
-	# print('*** Start Conversion', time.time()-start_time)
+	warnings.warn('*** Start Conversion %0.3f' % (time.time()-start_time))
 	# Get all components from the .std:
 	components = _csvToArray(stdString)[1:]
 	# Get all hardware stats from the .seq. We dropped the first rows which are metadata (n.b. there are no headers).
@@ -64,7 +64,7 @@ def convert(stdString, seqString, rescale=True):
 			for component in components:
 				x_list.append(float(component[5]))
 				y_list.append(float(component[6]))
-			# print 'coordinate boundaries:', min(x_list), max(x_list), min(y_list), max(y_list)
+			warnings.warn('coordinate boundaries: %d %d %d %d' % (min(x_list), max(x_list), min(y_list), max(y_list)))
 			# according to convert function  f(x) = a * x + b
 			x_a = x_pixel_range / (max(x_list) - min(x_list))
 			x_b = -x_a * min(x_list)
@@ -387,12 +387,12 @@ def convert(stdString, seqString, rescale=True):
 				}
 			# Check to see if there is distributed load on the line
 			# WARNING: distributed load broken in GridLAB-D. Disabled for now.
-			# if 'A' in overhead['phases'] and (ohLineList[19] != '0' or ohLineList[22] != '0'):
-			#	 overhead['distributed_load_A'] = float(ohLineList[19])*1000 + float(ohLineList[22])*1000j
-			# if 'B' in overhead['phases'] and (ohLineList[20] != '0' or ohLineList[23] != '0'):
-			#	 overhead['distributed_load_B'] = float(ohLineList[20])*1000 + float(ohLineList[23])*1000j
-			# if 'C' in overhead['phases'] and (ohLineList[21] != '0' or ohLineList[24] != '0'):
-			#	 overhead['distributed_load_C'] = float(ohLineList[21])*1000 + float(ohLineList[24])*1000j
+			if 'A' in overhead['phases'] and (ohLineList[19] != '0' or ohLineList[22] != '0'):
+				overhead['distributed_load_A'] = float(ohLineList[19])*1000 + float(ohLineList[22])*1000j
+			if 'B' in overhead['phases'] and (ohLineList[20] != '0' or ohLineList[23] != '0'):
+				overhead['distributed_load_B'] = float(ohLineList[20])*1000 + float(ohLineList[23])*1000j
+			if 'C' in overhead['phases'] and (ohLineList[21] != '0' or ohLineList[24] != '0'):
+				 overhead['distributed_load_C'] = float(ohLineList[21])*1000 + float(ohLineList[24])*1000j
 			return overhead
 
 		def convertUgLine(ugLineList):
@@ -539,12 +539,12 @@ def convert(stdString, seqString, rescale=True):
 						'insulation_relative_permitivitty' : insulation_relative_permitivity
 					}
 			# Check to see if there is distributed load on the line
-			# if 'A' in underground['phases'] and (ugLineList[19] != '0' or ugLineList[22] != '0'):
-			#	 underground['distributed_load_A'] = float(ugLineList[19])*1000 + (float(ugLineList[22]))*1000j
-			# if 'B' in underground['phases'] and (ugLineList[20] != '0' or ugLineList[23] != '0'):
-			#	 underground['distributed_load_B'] = float(ugLineList[20])*1000 + (float(ugLineList[23]))*1000j
-			# if 'C' in underground['phases'] and (ugLineList[21] != '0' or ugLineList[24] != '0'):
-			#	 underground['distributed_load_C'] = float(ugLineList[21])*1000 + (float(ugLineList[24]))*1000j
+			if 'A' in underground['phases'] and (ugLineList[19] != '0' or ugLineList[22] != '0'):
+			    underground['distributed_load_A'] = float(ugLineList[19])*1000 + (float(ugLineList[22]))*1000j
+			if 'B' in underground['phases'] and (ugLineList[20] != '0' or ugLineList[23] != '0'):
+			    underground['distributed_load_B'] = float(ugLineList[20])*1000 + (float(ugLineList[23]))*1000j
+			if 'C' in underground['phases'] and (ugLineList[21] != '0' or ugLineList[24] != '0'):
+			    underground['distributed_load_C'] = float(ugLineList[21])*1000 + (float(ugLineList[24]))*1000j
 			return underground
 
 		def convertRegulator(regList):
@@ -851,7 +851,7 @@ def convert(stdString, seqString, rescale=True):
 		return True
 
 	# Fix the connectivity:
-	# print('*** Connectivity fixing start', time.time()-start_time)
+	warnings.warn('*** Connectivity fixing start %0.3f' % (time.time()-start_time))
 	guidToIndex = {convertedComponents[index].get('guid',''):index for index in xrange(len(convertedComponents))}
 	for comp in convertedComponents:
 		fixCompConnectivity(comp)
@@ -863,7 +863,7 @@ def convert(stdString, seqString, rescale=True):
 	for key in glmTree.keys():
 		# if ('from' in glmTree[key].keys() and 'to' not in glmTree[key].keys()) or ('to' in glmTree[key].keys() and 'from' not in glmTree[key].keys()):
 		if glmTree[key]['object'] in ['overhead_line','underground_line','regulator','transformer','switch','fuse'] and ('to' not in glmTree[key].keys() or 'from' not in glmTree[key].keys()):
-			# print 'Object borked connectivity', glmTree[key]['name'], glmTree[key]['object']
+			warnings.warn('Object borked connectivity %s %s' % (glmTree[key]['name'], glmTree[key]['object']))
 			del glmTree[key]
 
 	#Strip guids:
@@ -895,115 +895,46 @@ def convert(stdString, seqString, rescale=True):
 		else:
 			return False
 
-	# print('*** Link phase fixing', time.time()-start_time)
+	warnings.warn('*** Link phase fixing %0.3f' % (time.time()-start_time))
 	for key in glmTree:
 		fixLinkPhases(glmTree[key])
 
 	# Convert lines with distributed load
 	def convDistLoadLines(glm_dict):
-		last_key = len(glm_dict)
+		last_key = max(glm_dict.keys())
 		# Grab all the keys of overhead or underground lines that have distributed loads
 		dl_line_keys = [x for x in glm_dict if 'distributed_load_A' in glm_dict[x] or 'distributed_load_B' in glm_dict[x] or 'distributed_load_C' in glm_dict[x]]
+		warnings.warn("##### %d DISTRIBUTED THINGS ARE HAPPENING" % len(dl_line_keys))
 		for y in dl_line_keys:
-			# create an intermedate node and two loads
-			# first find from node object and to node
-			node12 = None
-			load1 = None
-			load2 = None
+			load = None
 			for x in glm_dict.keys():
 				try:
-					if 'name' in glm_dict[x] and glm_dict[x].get('name','') == glm_dict[y].get('from',''):
-						node12 = copy.deepcopy(glm_dict[x])
-						load1 = copy.deepcopy(glm_dict[x])
-						if 'bustype' in glm_dict[x]:
-							del node12['bustype']
-							del load1['bustype']
-					if 'name' in glm_dict[x] and glm_dict[x]['name'] == glm_dict[y]['to']:
-						load2 = copy.deepcopy(glm_dict[x])
+					if glm_dict[x].get('name') == glm_dict[y]['to']:
+						load = copy.deepcopy(glm_dict[x])
 				except:
 					pass
-			if node12 != None and load1 != None and load2 != None:
-				node12['name'] = 'node_' + glm_dict[y]['name'] + '_1'
-				node12['phases'] = glm_dict[y]['phases']
-				load1['name'] = glm_dict[y]['name'] + '_distributed_load_1'
-				load1['parent'] = node12['name']
-				load1['phases'] = node12['phases']
-				load1['object'] = 'load'
-				load1['load_class'] = 'C'
-				load2['name'] = glm_dict[y]['name'] + '_distributed_load_2'
-				load2['parent'] = glm_dict[y]['to']
-				load2['phases'] = node12['phases']
-				load2['object'] = 'load'
-				load2['load_class'] = 'C'
-				# split the load by 2/3 and 1/3
-				if 'distributed_load_A' in glm_dict[y]:
-					load1['constant_power_A'] = str(glm_dict[y]['distributed_load_A'].real*2/3) + ('+' if glm_dict[y]['distributed_load_A'].imag >= 0.0 else '-') + str(abs(glm_dict[y]['distributed_load_A'].imag*2/3)) + 'j'
-					load2['constant_power_A'] = str(glm_dict[y]['distributed_load_A'].real/3) + ('+' if glm_dict[y]['distributed_load_A'].imag >= 0.0 else '-') + str(abs(glm_dict[y]['distributed_load_A'].imag/3)) + 'j'
-					del glm_dict[y]['distributed_load_A']
-				if 'distributed_load_B' in glm_dict[y]:
-					load1['constant_power_B'] = str(glm_dict[y]['distributed_load_B'].real*2/3) + ('+' if glm_dict[y]['distributed_load_B'].imag >= 0.0 else '-') + str(abs(glm_dict[y]['distributed_load_B'].imag*2/3)) + 'j'
-					load2['constant_power_B'] = str(glm_dict[y]['distributed_load_B'].real/3) + ('+' if glm_dict[y]['distributed_load_B'].imag >= 0.0 else '-') + str(abs(glm_dict[y]['distributed_load_B'].imag/3)) + 'j'
-					del glm_dict[y]['distributed_load_B']
-				if 'distributed_load_C' in glm_dict[y]:
-					load1['constant_power_C'] = str(glm_dict[y]['distributed_load_C'].real*2/3) + ('+' if glm_dict[y]['distributed_load_C'].imag >= 0.0 else '-') + str(abs(glm_dict[y]['distributed_load_C'].imag*2/3)) + 'j'
-					load2['constant_power_C'] = str(glm_dict[y]['distributed_load_C'].real/3) + ('+' if glm_dict[y]['distributed_load_C'].imag >= 0.0 else '-') + str(abs(glm_dict[y]['distributed_load_C'].imag/3)) + 'j'
-					del glm_dict[y]['distributed_load_C']
-				#Split line into two line segments, 1/4 long and 3/4 long
-				line_segment1 = copy.deepcopy(glm_dict[y])
-				line_segment2 = copy.deepcopy(glm_dict[y])
-				line_segment1['name'] = glm_dict[y]['name'] + '_LINESEG1'
-				line_segment1['length'] = str(float(glm_dict[y]['length'])/4)
-				try:
-					line_segment1['to'] = node12['name']
-				except:
-					pass
-				line_segment2['name'] = glm_dict[y]['name'] + '_LINESG2'
-				line_segment2['length'] = str(float(glm_dict[y]['length'])*3/4)
-				line_segment2['from'] = node12['name']
-				#Rename all embedded objects
-				for a in line_segment1.keys():
-					if type(line_segment1[a]) is dict:
-						line_segment1[a]['name'] = line_segment1['name'] + '-LINECONFIG'
-						for b in line_segment1[a].keys():
-							if type(line_segment1[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment1[a][b] and line_segment1[a][b]['omfEmbeddedConfigObject'] == 'spacing object line_spacing':
-								line_segment1[a][b]['name'] = line_segment1['name'] + '-LINESPACING'
-							elif type(line_segment1[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment1[a][b] and 'conductor_A' in line_segment1[a][b]['omfEmbeddedConfigObject']:
-								line_segment1[a][b]['name'] = line_segment1['name'] + '-CONDUCTOR_A'
-							elif type(line_segment1[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment1[a][b] and 'conductor_B' in line_segment1[a][b]['omfEmbeddedConfigObject']:
-								line_segment1[a][b]['name'] = line_segment1['name'] + '-CONDUCTOR_B'
-							elif type(line_segment1[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment1[a][b] and 'conductor_C' in line_segment1[a][b]['omfEmbeddedConfigObject']:
-								line_segment1[a][b]['name'] = line_segment1['name'] + '-CONDUCTOR_C'
-							elif type(line_segment1[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment1[a][b] and 'conductor_N' in line_segment1[a][b]['omfEmbeddedConfigObject']:
-								line_segment1[a][b]['name'] = line_segment1['name'] + '-CONDUCTOR_N'
-				for a in line_segment2.keys():
-					if type(line_segment2[a]) is dict:
-						line_segment2[a]['name'] = line_segment2['name'] + '-LINECONFIG'
-						for b in line_segment2[a].keys():
-							if type(line_segment2[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment2[a][b] and line_segment2[a][b]['omfEmbeddedConfigObject'] == 'spacing object line_spacing':
-								line_segment2[a][b]['name'] = line_segment2['name'] + '-LINESPACING'
-							elif type(line_segment2[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment2[a][b] and 'conductor_A' in line_segment2[a][b]['omfEmbeddedConfigObject']:
-								line_segment2[a][b]['name'] = line_segment2['name'] + '-CONDUCTOR_A'
-							elif type(line_segment2[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment2[a][b] and 'conductor_B' in line_segment2[a][b]['omfEmbeddedConfigObject']:
-								line_segment2[a][b]['name'] = line_segment2['name'] + '-CONDUCTOR_B'
-							elif type(line_segment2[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment2[a][b] and 'conductor_C' in line_segment2[a][b]['omfEmbeddedConfigObject']:
-								line_segment2[a][b]['name'] = line_segment2['name'] + '-CONDUCTOR_C'
-							elif type(line_segment2[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment2[a][b] and 'conductor_N' in line_segment2[a][b]['omfEmbeddedConfigObject']:
-								line_segment2[a][b]['name'] = line_segment2['name'] + '-CONDUCTOR_N'
-				glm_dict[y] = line_segment1
-				glm_dict[last_key*subObCount] = node12
-				last_key += 1
-				glm_dict[last_key*subObCount] = load1
-				last_key += 1
-				glm_dict[last_key*subObCount] = line_segment2
-				last_key += 1
-				glm_dict[last_key*subObCount] = load2
-				last_key += 1
+			if load != None:
+				load['name'] = glm_dict[y]['name'] + '_distributed_load'
+				load['parent'] = glm_dict[y]['to']
+				load['phases'] = glm_dict[y]['phases']
+				load['object'] = 'load'
+				load['load_class'] = 'C'
+				for ph in "ABC":
+					if 'distributed_load_' + ph in glm_dict[y]:
+						load['constant_power_' + ph] = (
+								str(glm_dict[y]['distributed_load_' + ph].real)
+								+ ('+' if glm_dict[y]['distributed_load_' + ph].imag >= 0.0 else '-')
+								+ str(abs(glm_dict[y]['distributed_load_' + ph].imag))
+								+ 'j'
+							)
+						del glm_dict[y]['distributed_load_' + ph]
+				glm_dict[last_key*subObCount] = load
 		return glm_dict
 
 	# WARNING: this code creates broken GLMs. Disabled by default.
-	# glmTree = convDistLoadLines(glmTree)
+	glmTree = convDistLoadLines(glmTree)
 	# Fix nominal voltage
-	# print('*** Nominal voltage fixing', time.time()-start_time)
+	warnings.warn('*** Nominal voltage fixing %0.3f' % (time.time()-start_time))
 
 	# Make sure we have the latest index.
 	nameToIndex = {glmTree[key].get('name',''):key for key in glmTree}
@@ -1039,7 +970,7 @@ def convert(stdString, seqString, rescale=True):
 								glm_dict[x][key]['band_width'] =  (bandWidthRegulator * nominalVoltageSwing) / 120
 			except:
 				pass
-				# print "\n   Couldn't set regulator_configuration to the swing bus nominal_voltage."
+				warnings.warn("\n   Couldn't set regulator_configuration to the swing bus nominal_voltage.")
 
 	parent_voltage = {}
 	current_parents = len(parent_voltage)
@@ -1068,7 +999,7 @@ def convert(stdString, seqString, rescale=True):
 		if 'object' in glmTree[x].keys() and glmTree[x]['object'] in del_nom_volt_list and 'nominal_voltage' in glmTree[x].keys():
 			del glmTree[x]['nominal_voltage']
 
-	# print('*** Secondary system fixing', time.time()-start_time)
+	warnings.warn('*** Secondary system fixing %0.3f' % (time.time()-start_time))
 	def secondarySystemFix(glm):
 		def unused_key(dic, key_multiplier):
 			free_key = (int(max(dic.keys())/key_multiplier) + 1)*key_multiplier
@@ -1262,7 +1193,7 @@ def convert(stdString, seqString, rescale=True):
 				if line['configuration'] in nameDictMap.keys(): line['configuration'] = nameDictMap[line['configuration']]
 
 	# Fully disembed and remove duplicate configuration objects:
-	# print('*** Disembed and dedup', time.time()-start_time)
+	warnings.warn('*** Disembed and dedup %0.3f' % (time.time()-start_time))
 	feeder.fullyDeEmbed(glmTree)
 	dedupGlm('transformer_configuration', glmTree)
 	dedupGlm('regulator_configuration', glmTree)
@@ -1306,7 +1237,7 @@ def convert(stdString, seqString, rescale=True):
 				thisOb['latitude'] = str(float(parentOb['latitude']) + random.uniform(-5,5))
 				thisOb['longitude'] = str(float(parentOb['longitude']) + random.uniform(-5,5))
 	# Final Output
-	# print('*** DONE!', time.time()-start_time)
+	warnings.warn('*** DONE! %0.3f' % (time.time()-start_time))
 	# 8B research fixes
 	glmTree = phasingMismatchFix(glmTree)
 	glmTree = missingConductorsFix(glmTree)
@@ -1692,7 +1623,7 @@ def getRelatives(tree, node_or_line, parent=False):
 
 	if parent and listy:
 		if len(listy) > 1:
-			print 'Object with multiple parents detected. Note that this is not fully supported.'
+			warnings.warn('Object with multiple parents detected. Note that this is not fully supported.')
 			return listy
 		return listy[0]
 	return listy
@@ -1719,7 +1650,7 @@ def fixOrphanedLoads(tree):
 		size = int(size)
 		if size == 1:
 			if obj_type != 'load':
-				print 'size 1 island of type ' + obj_type
+				warnings.warn('size 1 island of type ' + obj_type)
 				continue
 			del tree[key]
 			size_1_del += 1
@@ -1727,10 +1658,10 @@ def fixOrphanedLoads(tree):
 		if size == 2:
 			kiddo = getRelatives(tree, key)[0]
 			if tree[kiddo]['object'] != 'load':
-				print 'size 2 island with kid of type ' + tree[kiddo]['object']
+				warnings.warn('size 2 island with kid of type ' + tree[kiddo]['object'])
 				continue
 			if obj_type != 'node':
-				print 'size 2 island with root of type ' + obj_type
+				warnings.warn('size 2 island with root of type ' + obj_type)
 				continue
 			del tree[key], tree[kiddo]
 			size_2_del += 1
@@ -1741,7 +1672,7 @@ def fixOrphanedLoads(tree):
 				next_from = current_from + '_' + P
 				if namesToKeys.get(next_from):
 					tree[key]['from'] = next_from
-	print '%d size 1 deletions and %d size 2 deletions' % ( size_1_del, size_2_del )
+	warnings.warn('%d size 1 deletions and %d size 2 deletions' % ( size_1_del, size_2_del ))
 	return tree
 
 def rewriteStatePlaneToLatLon(tree, epsg = None):
@@ -1763,7 +1694,7 @@ def _latCount(name):
 			nameCount += 1
 			if 'latitude' in outGlm[key]:
 				myLatCount += 1
-	print name, 'COUNT', nameCount, 'LAT COUNT', latCount, 'SUCCESS RATE', 1.0*latCount/nameCount
+	warnings.warn(name, 'COUNT', nameCount, 'LAT COUNT', latCount, 'SUCCESS RATE', 1.0*latCount/nameCount)
 
 default_equipment = {
 	'underground_line_conductor': {
@@ -1853,6 +1784,7 @@ def _tests(
 		).read(),
 	},
 	voltdumpCsvName='{}_VD.csv',
+	logAllWarnings=False
 ):
 	from tempfile import mkdtemp
 	''' Test convert every windmil feeder we have (in static/testFiles). '''
@@ -1892,7 +1824,12 @@ def _tests(
 			with open(pJoin(openPrefix,stdString),'r') as stdFile, open(pJoin(openPrefix,seqString),'r') as seqFile:
 				# Catch warnings too:
 				with warnings.catch_warnings(record=True) as caught_warnings:
+					warnings.simplefilter("always")
 					outGlm = convert(stdFile.read(), seqFile.read())
+				if logAllWarnings:
+					currentResults['all_warnings'] = ';'.join(
+						[str(x.message) for x in caught_warnings]
+					)
 				if voltdumpCsvName:
 					voltdumpCsvName = voltdumpCsvName.format(
 						stdString.replace('.std', '')
@@ -1902,9 +1839,6 @@ def _tests(
 						'object': 'voltdump',
 						'filename': voltdumpCsvName,
 					}
-				currentResults['all_warnings'] = ';'.join(
-					[str(x.message) for x in caught_warnings]
-				)
 			with open(outPrefix + stdString.replace('.std', '.glm'), 'w') as outFile:
 				outFile.seek(0)
 				outFile.write(feeder.sortedWrite(outGlm))
@@ -1941,7 +1875,7 @@ def _tests(
 			# Run powerflow on the GLM.
 			currentResults['gridlabd_error_code'] = 'Processing'
 			output = gridlabd.runInFilesystem(outGlm, attachments=testAttachments, keepFiles=False, workDir = gridlab_workDir)
-			if voltdumpCsvName:
+			if voltdumpCsvName in output:
 				del output[voltdumpCsvName]
 			print output
 			if output['stderr'].startswith('ERROR'):
