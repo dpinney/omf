@@ -6,7 +6,7 @@ from multiprocessing import Process
 from passlib.hash import pbkdf2_sha512
 from functools import wraps
 from flask import (Flask, send_from_directory, request, redirect, render_template, session, abort, jsonify, url_for)
-import flask_login, boto.ses
+import flask_login, boto3
 from flask_compress import Compress
 from jinja2 import Template
 try:
@@ -96,7 +96,7 @@ def cryptoRandomString():
 	if 'COOKIE_KEY' in globals():
 		return COOKIE_KEY
 	else:
-		return hashlib.md5(str(random.random())+str(time.time())).hexdigest()
+		return hashlib.md5(str(random.random()).encode('utf-8') + str(time.time()).encode('utf-8')).hexdigest()
 
 
 login_manager = flask_login.LoginManager()
@@ -105,21 +105,32 @@ login_manager.login_view = "login_page"
 app.secret_key = cryptoRandomString()
 
 
-def send_link(email, message, u={}):
-	''' Send message to email using Amazon SES. '''
+def _send_email(recipient, subject, message):
+	with open('emailCredentials.key') as f:
+		key = f.read()
+	c = boto3.client('ses', aws_access_key_id='AKIAJLART4NXGCNFEJIQ', aws_secret_access_key=key, region_name='us-east-1')
+	email_content = {
+		'Source': 'admin@omf.coop',
+		'Destination': {'ToAddresses': [email]},
+		'Message': {
+			'Subject': {'Data': subject, 'Charset': 'UTF-8'},
+			'Body': {'Text': {'Data': message, 'Charset': 'UTF-8' }}
+		}
+	}
+	c.send_email(**email_content)
+
+
+def send_link(email, message, u=None):
+	'''Send message to email using Amazon SES.'''
+	if u is None:
+		u = {}
 	try:
-		with open("emailCredentials.key") as f:
-			key = f.read()
-		c = boto.ses.connect_to_region("us-east-1",
-			aws_access_key_id="AKIAJLART4NXGCNFEJIQ",
-			aws_secret_access_key=key)
-		reg_key = hashlib.md5(str(time.time())+str(random.random())).hexdigest()
+		_send_email(email, 'OMF Registration Link', message.replace('reg_link', URL + '/register/' + email + '/' + reg_key))
+		reg_key = hashlib.md5(str(random.random()).encode('utf-8') + str(time.time()).encode('utf-8')).hexdigest()
 		u["reg_key"] = reg_key
 		u["timestamp"] = dt.datetime.strftime(dt.datetime.now(), format="%c")
 		u["registered"] = False
 		u["email"] = email
-		outDict = c.send_email("admin@omf.coop", "OMF Registration Link",
-			message.replace("reg_link", URL+"/register/"+email+"/"+reg_key), [email])
 		with locked_open(os.path.join(_omfDir, 'data', 'User', email + '.json'), 'w') as f:
 			json.dump(u, f, indent=4)
 		return "Success"
@@ -232,10 +243,7 @@ def fastNewUser(email):
 		with locked_open(os.path.join(_omfDir, 'data', 'User', user['username'] + '.json'), 'w') as f:
 			json.dump(user, f, indent=4)
 		message = "Thank you for registering an account on OMF.coop.\n\nYour password is: " + randomPass + "\n\n You can change this password after logging in."
-		with open('emailCredentials.key') as f:
-			key = f.read()
-		c = boto.ses.connect_to_region("us-east-1", aws_access_key_id="AKIAJLART4NXGCNFEJIQ", aws_secret_access_key=key)
-		mailResult = c.send_email("admin@omf.coop", "OMF.coop User Account", message, [email])
+		_send_email(email, 'OMF.coop User Account', message)
 		nextUrl = str(request.args.get("next","/"))
 		return redirect(nextUrl)
 
