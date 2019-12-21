@@ -1,5 +1,6 @@
 ''' Functions for manipulting electrical distribution feeder models. '''
 
+from __future__ import print_function
 import datetime, copy, os, re, warnings, networkx as nx, json, matplotlib
 from matplotlib import pyplot as plt
 
@@ -591,19 +592,19 @@ def _tests():
 	tokens = ['clock','{','clockey','valley','}','object','house','{','name','myhouse',';',
 		'object','ZIPload','{','inductance','bigind',';','power','newpower','}','size','234sqft','}']
 	obType = type(_parseTokenList(tokens))
-	print 'Parsed tokens into object of type:', obType
+	print('Parsed tokens into object of type:', obType)
 	assert obType is dict
 	# GLM parsing test.
 	smsTree = parse('scratch/simpleMarket/sms.glm', filePath=True)
 	keyLen = len(smsTree.keys())
-	print 'Parsed a test glm file with', keyLen, 'keys.'
+	print('Parsed a test glm file with', keyLen, 'keys.')
 	assert keyLen == 41
 	# Recorder Attachment Test
 	with open('static/publicFeeders/Olin Barre Geo.omd') as inFile:
 		tree = json.load(inFile)['tree']
 	attachRecorders(tree, 'Regulator', 'object', 'regulator')
 	attachRecorders(tree, 'Voltage', 'object', 'node')
-	print 'All the objects after recorder attach: ', set([ob.get('object','') for ob in tree.values()])
+	print('All the objects after recorder attach: ', set([ob.get('object','') for ob in tree.values()]))
 	# Testing The De-Embedding
 	with open('static/publicFeeders/13 Node Embedded DO NOT SAVE.omd') as inFile:
 		tree = json.load(inFile)['tree']
@@ -613,7 +614,7 @@ def _tests():
 		for subOb in ob.values():
 			if type(subOb) == 'dict':
 				embeddedDicts += 1
-	print 'Number of objects still embedded:', embeddedDicts
+	print('Number of objects still embedded:', embeddedDicts)
 	assert embeddedDicts == 0, 'Some objects failed to disembed.'
 	# groupSwingKids test
 	with open('static/publicFeeders/13 Node Ref Feeder Flat.omd') as inFile:
@@ -621,14 +622,14 @@ def _tests():
 	groupSwingKids(tree)
 	for ob in tree.values():
 		if ob.get('object','') == 'collector':
-			print 'Swing collector:', ob
+			print('Swing collector:', ob)
 	# Time Adjustment Test
 	with open('static/publicFeeders/Simple Market System.omd') as inFile:
 		tree = json.load(inFile)['tree']
 	adjustTime(tree, 100, 'hours', '2000-09-01')
 	for ob in tree.values():
 		if ob.get('object','') in ['recorder','collector']:
-			print 'Time-adjusted collector:', ob 
+			print('Time-adjusted collector:', ob) 
 	# Graph Test
 	with open('static/publicFeeders/Olin Barre Geo.omd') as inFile:
 		tree = json.load(inFile)['tree']
