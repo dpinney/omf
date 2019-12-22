@@ -13,15 +13,16 @@ def runAllTests(startingdir):
 	the_errors = 0
 	misfires = {}
 	for item in os.listdir("."):
-		with open(item) as f:
-			file_content = f.read()
-		if item not in IGNORE_FILES and item.endswith(".py") and "def _tests():" in file_content:
-			print("********** TESTING", item, "************")
-			p = subprocess.Popen(["python", item], stderr=subprocess.PIPE)
-			p.wait()
-			if p.returncode:
-				the_errors += 1
-				misfires[os.path.join(os.getcwd(), item)] = p.stderr.read()
+		if item not in IGNORE_FILES and item.endswith(".py"):
+			with open(item) as f:
+				file_content = f.read()
+			if 'def _tests():' in file_content:
+				print("********** TESTING", item, "************")
+				p = subprocess.Popen(["python", item], stderr=subprocess.PIPE)
+				p.wait()
+				if p.returncode:
+					the_errors += 1
+					misfires[os.path.join(os.getcwd(), item)] = p.stderr.read()
 		elif os.path.isdir(item) and item not in IGNORE_DIRS:
 			nextdirs.append(os.path.join(os.getcwd(), item))
 	for d in nextdirs:
