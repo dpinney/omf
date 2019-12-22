@@ -3,6 +3,7 @@ This contains the loadForecast algorithms
 
 """
 
+from __future__ import print_function
 import math, pulp
 import numpy as np
 import pandas as pd
@@ -401,7 +402,7 @@ class svmNextDayPeakTime:
 			"r2_score": r2_score,
 		}
 		if metric not in metric_string_to_function.keys():
-			print "Metric not recognized"
+			print("Metric not recognized")
 			return np.nan
 		df = pd.read_csv(csv).dropna()
 		y = df.tmr_peak_time
