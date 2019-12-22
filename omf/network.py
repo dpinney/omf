@@ -1,10 +1,8 @@
 ''' Functions for manipulating electrical transmission network models. '''
 
-from __future__ import print_function
 import datetime, copy, os, re, warnings, networkx as nx, json, math, tempfile, shutil, fileinput, webbrowser
 from os.path import join as pJoin
 from matplotlib import pyplot as plt
-import omf
 # import matpower
 
 def parse(inputStr, filePath=True):
@@ -51,17 +49,21 @@ def _dictConversion(inputStr, filePath=True):
 	for i,line in enumerate(data):
 		if todo!=None:
 			# Parse lines.
-			line = line.translate(None,'\r;\n')
+			line = line.translate({
+				ord('\r'): None,
+				ord('\n'): None,
+				ord(';'): None
+			})
 			if "]" in line:
 				todo = None
 			if todo in ['bus','gen','bus','branch']:
 				line = line.split('\t')
 			else:
 				line = line.split(' ')
-			line = filter(lambda a: a!= '', line)
+			line = [a for a in line if a != '']
 			if todo=="version":
-				version = line[-1][1]
-				if version<2:
+				version = float(line[-1][1])
+				if version < 2:
 					print("MATPOWER VERSION MUST BE 2: %s"%(version))
 					break
 				todo = None
@@ -103,7 +105,7 @@ def netToNxGraph(inNet):
 	''' Convert network.omt to networkx graph. '''
 	outGraph = nx.Graph()
 	for compType in ['bus','gen','branch']:
-		for idNum, item in inNet[compType].iteritems():
+		for idNum, item in inNet[compType].items():
 			if 'fbus' in item.keys():
 				outGraph.add_edge(item['fbus'],item['tbus'],attr_dict={'type':'branch'})
 			elif compType=='bus':
@@ -121,7 +123,7 @@ def latlonToNet(inGraph, inNet):
 	cleanG = nx.Graph(inGraph.edges())
 	cleanG.add_nodes_from(inGraph)
 	pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
-	for idnum, item in inNet['bus'].iteritems():
+	for idnum, item in inNet['bus'].items():
 		obName = item.get('bus_i')
 		thisPos = pos.get(obName, None)
 		if thisPos != None:
@@ -162,7 +164,8 @@ def netToMat(inNet, networkName):
 	return matStr
 
 def get_file_contents(filepath):
-	with open(filepath) as f: return f.read()
+	with open(filepath) as f:
+		return f.read()
 
 def get_abs_path(relative_path):
 	return os.path.join(os.path.dirname(os.path.abspath(__file__)), relative_path)
@@ -179,15 +182,15 @@ def viz(omt_filepath, output_path=None, output_name="viewer.html", open_file=Tru
 	shutil.copy(os.path.join(os.path.dirname(__file__), "templates/transEdit.html"), viewer_path)
 	for line in fileinput.input(viewer_path, inplace=1):
 		if line.lstrip().startswith("<script>networkData="):
-			print(("<script>networkData={}</script>".format(get_file_contents(omt_filepath))))
+			print("<script>networkData={}</script>".format(get_file_contents(omt_filepath)))
 		elif line.lstrip().startswith('<script type="text/javascript" src="/static/svg-pan-zoom.js">'):
-			print(('<script type="text/javascript">{}</script>'.format(get_file_contents(os.path.join(os.path.dirname(__file__), "static/svg-pan-zoom.js")))))
+			print('<script type="text/javascript">{}</script>'.format(get_file_contents(os.path.join(os.path.dirname(__file__), "static/svg-pan-zoom.js"))))
 		elif line.lstrip().startswith('<script type="text/javascript" src="/static/omf.js">'):
-			print(('<script type="text/javascript">{}</script>'.format(get_file_contents(os.path.join(os.path.dirname(__file__), "static/omf.js")))))
+			print('<script type="text/javascript">{}</script>'.format(get_file_contents(os.path.join(os.path.dirname(__file__), "static/omf.js"))))
 		elif line.lstrip().startswith('<script type="text/javascript" src="/static/jquery-1.9.1.js">'):
-			print(('<script type="text/javascript">{}</script>'.format(get_file_contents(os.path.join(os.path.dirname(__file__), "static/jquery-1.9.1.js")))))
+			print('<script type="text/javascript">{}</script>'.format(get_file_contents(os.path.join(os.path.dirname(__file__), "static/jquery-1.9.1.js"))))
 		elif line.lstrip().startswith('<link rel="stylesheet" href="/static/omf.css"/>'):
-			print(('<style>{}</style>'.format(get_file_contents(os.path.join(os.path.dirname(__file__), "static/omf.css")))))
+			print('<style>{}</style>'.format(get_file_contents(os.path.join(os.path.dirname(__file__), "static/omf.css"))))
 		elif line.lstrip().startswith('<link rel="shortcut icon" href="/static/favicon.ico"/>'):
 			print('<link rel="shortcut icon" href="data:image/x-icon;base64,AAABAAEAEBAQAAAAAAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAioqKAGlpaQDU1NQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIiIiIiIiIAAgACAAIAAgACAzIzMjMyMwIDAgMCAwIDAiIiIiIiIgMCAwEDAgMCAwIDMTMyMzIzAgMBAwIDAgMCIiIiIiIiAwIDAQMCAwIDAgMxMzIzMjMCAwEDAgMCAwIiIiIiIiIDAAMAAwADAAMAAzMzMzMzMwAAAAAAAAAAAABwAAd3cAAEABAABVVQAAAAUAAFVVAABAAQAAVVUAAAAFAABVVQAAQAEAAFVVAAAABQAA3d0AAMABAAD//wAA"/>')
 		elif line.lstrip().startswith('{%'):
@@ -201,7 +204,7 @@ def viz(omt_filepath, output_path=None, output_name="viewer.html", open_file=Tru
 def _tests():
 	# Parse mat to dictionary.
 	networkName = 'case9'
-	networkJson = parse(pJoin(omf.omfDir,'solvers','matpower5.1',networkName+'.m'), filePath=True)
+	networkJson = parse(os.path.join(os.path.dirname(__file__), 'solvers', 'matpower5.1', networkName + '.m'), filePath=True)
 	keyLen = len(networkJson.keys())
 	print('Parsed MAT file with %s buses, %s generators, and %s branches.'%(len(networkJson['bus']),len(networkJson['gen']),len(networkJson['branch'])))
 	# Use python nxgraph to add lat/lon to .omt.json.
@@ -226,5 +229,5 @@ def _tests():
 	#viz(os.path.join(os.path.dirname(__file__), "static/SimpleNetwork.json")
 
 if __name__ == '__main__':
-	viz(os.path.join(os.path.dirname(__file__), "static/SimpleNetwork.json"))
-	#_tests()
+	#viz(os.path.join(os.path.dirname(__file__), "static/SimpleNetwork.json"))
+	_tests()
