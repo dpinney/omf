@@ -1,3 +1,4 @@
+from __future__ import print_function
 class AlertAgent(object):
 	__slots__ = 'agentName', 'alertTime'
 	# e.g. "2000-00-03 12:00:00"
@@ -8,7 +9,7 @@ class AlertAgent(object):
 
 	def readStep(self, time):
 		if time == self.alertTime:
-			print '!!!!!Alerting because it is now ', self.alertTime, '!!!!!!!'
+			print('!!!!!Alerting because it is now ', self.alertTime, '!!!!!!!')
 			return [{'cmd':'readClock'}]
 		return []
 
