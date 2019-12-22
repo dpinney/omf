@@ -1,5 +1,6 @@
 ''' Functions for anonymizing data in OMF distribution and transmission systems.'''
 
+from __future__ import print_function
 import json, math, random, datetime, os
 from os.path import join as pJoin
 
@@ -190,7 +191,7 @@ def distAddNoise(inFeeder, noisePerc):
 		for prop in inFeeder['tree'][key]:
 			# Scramble valid properties
 			if prop in ['latitude', 'longitude','climate', 'ambient_temperature']:
-				print prop
+				print(prop)
 				val = inFeeder['tree'][key][prop]
 				try:
 					parseVal = float(val)
@@ -303,7 +304,7 @@ def distShuffleLoads(inFeeder, shufPerc):
 
 def distModifyTriplexLengths(inFeeder):
 	''' Modifies triplex line length and diameter properties while preserving original impedance in the inFeeder distribution system. '''
-	print "distModifyTriplexLengths activated!"
+	print("distModifyTriplexLengths activated!")
 	tLookup = {}
 	for key in inFeeder['tree']:
 		tDict = {}
@@ -599,7 +600,7 @@ def tranAddNoise(inNetwork, noisePerc):
 							randVal = parseVal + parseVal * randNoise 
 							inNetwork[array][i][key] = str(randVal)
 						except ValueError:
-							print 'error'
+							print('error')
 							continue
 			arrayId += 1
 
