@@ -1,5 +1,6 @@
 ''' Functions for manipulating electrical transmission network models. '''
 
+from __future__ import print_function
 import datetime, copy, os, re, warnings, networkx as nx, json, math, tempfile, shutil, fileinput, webbrowser
 from os.path import join as pJoin
 from matplotlib import pyplot as plt
@@ -61,7 +62,7 @@ def _dictConversion(inputStr, filePath=True):
 			if todo=="version":
 				version = line[-1][1]
 				if version<2:
-					print "MATPOWER VERSION MUST BE 2: %s"%(version)
+					print("MATPOWER VERSION MUST BE 2: %s"%(version))
 					break
 				todo = None
 			elif todo=="mva":
@@ -178,21 +179,21 @@ def viz(omt_filepath, output_path=None, output_name="viewer.html", open_file=Tru
 	shutil.copy(os.path.join(os.path.dirname(__file__), "templates/transEdit.html"), viewer_path)
 	for line in fileinput.input(viewer_path, inplace=1):
 		if line.lstrip().startswith("<script>networkData="):
-			print("<script>networkData={}</script>".format(get_file_contents(omt_filepath)))
+			print(("<script>networkData={}</script>".format(get_file_contents(omt_filepath))))
 		elif line.lstrip().startswith('<script type="text/javascript" src="/static/svg-pan-zoom.js">'):
-			print('<script type="text/javascript">{}</script>'.format(get_file_contents(os.path.join(os.path.dirname(__file__), "static/svg-pan-zoom.js"))))
+			print(('<script type="text/javascript">{}</script>'.format(get_file_contents(os.path.join(os.path.dirname(__file__), "static/svg-pan-zoom.js")))))
 		elif line.lstrip().startswith('<script type="text/javascript" src="/static/omf.js">'):
-			print('<script type="text/javascript">{}</script>'.format(get_file_contents(os.path.join(os.path.dirname(__file__), "static/omf.js"))))
+			print(('<script type="text/javascript">{}</script>'.format(get_file_contents(os.path.join(os.path.dirname(__file__), "static/omf.js")))))
 		elif line.lstrip().startswith('<script type="text/javascript" src="/static/jquery-1.9.1.js">'):
-			print('<script type="text/javascript">{}</script>'.format(get_file_contents(os.path.join(os.path.dirname(__file__), "static/jquery-1.9.1.js"))))
+			print(('<script type="text/javascript">{}</script>'.format(get_file_contents(os.path.join(os.path.dirname(__file__), "static/jquery-1.9.1.js")))))
 		elif line.lstrip().startswith('<link rel="stylesheet" href="/static/omf.css"/>'):
-			print('<style>{}</style>'.format(get_file_contents(os.path.join(os.path.dirname(__file__), "static/omf.css"))))
+			print(('<style>{}</style>'.format(get_file_contents(os.path.join(os.path.dirname(__file__), "static/omf.css")))))
 		elif line.lstrip().startswith('<link rel="shortcut icon" href="/static/favicon.ico"/>'):
 			print('<link rel="shortcut icon" href="data:image/x-icon;base64,AAABAAEAEBAQAAAAAAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAioqKAGlpaQDU1NQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIiIiIiIiIAAgACAAIAAgACAzIzMjMyMwIDAgMCAwIDAiIiIiIiIgMCAwEDAgMCAwIDMTMyMzIzAgMBAwIDAgMCIiIiIiIiAwIDAQMCAwIDAgMxMzIzMjMCAwEDAgMCAwIiIiIiIiIDAAMAAwADAAMAAzMzMzMzMwAAAAAAAAAAAABwAAd3cAAEABAABVVQAAAAUAAFVVAABAAQAAVVUAAAAFAABVVQAAQAEAAFVVAAAABQAA3d0AAMABAAD//wAA"/>')
 		elif line.lstrip().startswith('{%'):
-			print ""
+			print("")
 		else:
-			print line.rstrip()
+			print(line.rstrip())
 	if open_file is True:
 		webbrowser.open_new("file://" + viewer_path)
 
@@ -202,7 +203,7 @@ def _tests():
 	networkName = 'case9'
 	networkJson = parse(pJoin(omf.omfDir,'solvers','matpower5.1',networkName+'.m'), filePath=True)
 	keyLen = len(networkJson.keys())
-	print 'Parsed MAT file with %s buses, %s generators, and %s branches.'%(len(networkJson['bus']),len(networkJson['gen']),len(networkJson['branch']))
+	print('Parsed MAT file with %s buses, %s generators, and %s branches.'%(len(networkJson['bus']),len(networkJson['gen']),len(networkJson['branch'])))
 	# Use python nxgraph to add lat/lon to .omt.json.
 	nxG = netToNxGraph(networkJson)
 	networkJson = latlonToNet(nxG, networkJson)
