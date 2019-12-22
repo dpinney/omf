@@ -3,7 +3,6 @@ This contains the loadForecast algorithms
 
 """
 
-from __future__ import print_function
 import math, pulp
 import numpy as np
 import pandas as pd
@@ -124,7 +123,7 @@ def exponentiallySmoothedForecast(rawData, alpha, beta):
 	The second column rawData[:][1] holds the hourly temperature for one year
 	"""
 	forecasted = [None] * 2 * 24
-	actual = [rawData[i][0] for i in xrange(2 * 24)]
+	actual = [rawData[i][0] for i in range(2 * 24)]
 	smotted = [None] * 2 * 24
 	tronds = [None] * 2 * 24
 
@@ -307,23 +306,23 @@ def _cleanse_params(params):
 	"""Fills in default values for a single model's params"""
 	has_lists = False
 	ret = _default_params.copy()
-	for k, v in params.iteritems():
+	for k, v in params.items():
 		if k == "peakTimeRegressor":
 			# overwrite morning & afternoon
-			for kwarg, kwvalue in v.iteritems():
+			for kwarg, kwvalue in v.items():
 				if type(kwvalue) is list:
 					has_lists = True
 				ret["peakTimeRegressorMorning"][kwarg] = kwvalue
 				ret["peakTimeRegressorAfternoon"][kwarg] = kwvalue
 		else:
-			for kwarg, kwvalue in v.iteritems():
+			for kwarg, kwvalue in v.items():
 				if type(kwvalue) is list:
 					has_lists = True
 				ret[k][kwarg] = kwvalue
 
 	if has_lists:
-		for k, v in params.iteritems():
-			for l, w in v.iteritems():
+		for k, v in params.items():
+			for l, w in v.items():
 				if type(w) is not list:
 					ret[k][l] = [w]
 
