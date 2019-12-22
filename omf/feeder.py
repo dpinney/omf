@@ -1,7 +1,7 @@
 ''' Functions for manipulting electrical distribution feeder models. '''
 
-from __future__ import print_function
 import datetime, copy, os, re, warnings, networkx as nx, json, matplotlib
+from functools import reduce
 from matplotlib import pyplot as plt
 
 # Wireframe for new feeder objects:
@@ -69,18 +69,20 @@ def glmToOmd(glmPath, omdPath, attachFilePaths=[]):
 	# Add attachment files.
 	for attPath in attachFilePaths:
 		dirs, fname = os.path.split(attPath)
-		omf['attachments'][fname] = open(attPath).read()
+		with open(attPath) as f:
+			omf['attachments'][fname] = f.read()
 	with open(omdPath, 'w') as outFile:
 		json.dump(omd, outFile, indent=4)
 
 def omdToGlm(omdPath, outDir):
 	''' Write an .omd to a .glm and associated files. '''
 	# Read the omd
-	omd = json.load(open(omdPath))
+	with open(omdPath) as f:
+		omd = json.load(f)
 	# Write attachments and glm.
 	attachments = omd.get('attachments','')
 	for attach in attachments:
-		with open (os.path.join(outDir, attach),'w') as attachFile:
+		with open(os.path.join(outDir, attach),'w') as attachFile:
 			attachFile.write(attachments[attach])
 	# Write the glm.
 	glmString = sortedWrite(omd['tree'])
@@ -156,7 +158,7 @@ def fullyDeEmbed(glmTree):
 
 def _mergeContigLinesOnce(tree):
 	''' helper function for mergeContigLines.'''
-	obs = tree.values()
+	obs = list(tree.values())
 	n2k = nameIndex(tree)
 	for o in obs:
 		if 'to' in o:
@@ -361,7 +363,7 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False, showPlot=False):
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
 	# Draw nodes and optional labels.
 	nx.draw_networkx_nodes(inGraph,pos,
-						   nodelist=pos.keys(),
+						   nodelist=list(pos.keys()),
 						   node_color=[_obToCol(inGraph.node[n].get('type','underground_line')) for n in inGraph],
 						   linewidths=0,
 						   node_size=40)
@@ -397,7 +399,7 @@ def _tokenizeGlm(inputStr, filePath=True):
 	# Tokenize around semicolons, braces and whitespace.
 	tokenized = re.split(r'(;|\}|\{|\s)',data)
 	# Get rid of whitespace strings.
-	basicList = filter(lambda x:x!='' and x!=' ', tokenized)
+	basicList = [x for x in tokenized if x != '' and x != ' ']
 	return basicList
 
 def _parseTokenList(tokenList):
@@ -629,7 +631,7 @@ def _tests():
 	adjustTime(tree, 100, 'hours', '2000-09-01')
 	for ob in tree.values():
 		if ob.get('object','') in ['recorder','collector']:
-			print('Time-adjusted collector:', ob) 
+			print('Time-adjusted collector:', ob)
 	# Graph Test
 	with open('static/publicFeeders/Olin Barre Geo.omd') as inFile:
 		tree = json.load(inFile)['tree']
@@ -638,34 +640,6 @@ def _tests():
 	# Contig line merging test
 	mergeContigLines(tree)
 
-def graph_test_delete():
-	import datetime
-	#with open('static/publicFeeders/trip37.omd') as inFile:
-	#	tree = json.load(inFile)['tree']
-	#nxG = treeToNxGraph(tree)
-
-	glm_path = '/Users/austinchang/Desktop/testfiles/grip-api/slowResponse/ABEC-Columbia.glm'
-	#glm_path = '/private/var/folders/h2/hmm8l_b53k59k0_l5q0sjypm0000gn/T/tmpWwtf1p/in.glm'
-	#glm_path = '/Users/austinchang/pycharm/omf/omf/static/testFiles/PEC.glm'
-	feed = parse(glm_path)
-	nxG = treeToNxGraph(feed)
-
-	# These lines don't seem to affect anything
-	#plt.clf()
-	#plt.close()
-
-	#latLonNxGraph(nxG, showPlot=False) 
-	latLonNxGraph(nxG, neatoLayout=True, showPlot=False)
-	#plt.savefig('/Users/austinchang/Desktop/latlongraph' + datetime.datetime.now().strftime('%c') + '.png')
-
-
-def background_delete():
-	import multiprocessing
-	p = multiprocessing.Process(target=graph_test_delete)
-	p.start()
-
 
 if __name__ == '__main__':
-	#_tests()
-	#graph_test_delete()
-	background_delete()
+	_tests()
