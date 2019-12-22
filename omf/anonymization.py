@@ -1,6 +1,5 @@
 ''' Functions for anonymizing data in OMF distribution and transmission systems.'''
 
-from __future__ import print_function
 import json, math, random, datetime, os
 from os.path import join as pJoin
 
@@ -66,7 +65,7 @@ def distRandomizeNames(inFeeder):
 	''' Replace all names in the inFeeder distribution system with a random ID number. '''
 	#Works, tested, even when addnoise used
 	newNameKey = {}
-	allKeys = range(len(inFeeder['tree'].keys()))
+	allKeys = list(range(len(inFeeder['tree'].keys())))
 	random.shuffle(allKeys)
 	# Create nameKey dictionary
 	for count, key in enumerate(inFeeder['tree']):
@@ -155,7 +154,7 @@ def distTranslateLocations(inFeeder, translationRight, translationUp, rotation):
 			inFeeder['tree'][key]['latitude']=latitude+translationUp
 	#Find composite midpoint to rotate around. It is the average point of the feeder's extrema
 	#Find greatest Lat, least lat, great lon, least lon, then midpoint
-	for key, value1 in inFeeder['tree'].iteritems():
+	for key, value1 in inFeeder['tree'].items():
 		if 'latitude' in value1:
 			if value1['latitude']>biggestLat:
 				biggestLat = value1['latitude']
@@ -166,8 +165,8 @@ def distTranslateLocations(inFeeder, translationRight, translationUp, rotation):
 				biggestLon = value1['longitude']
 			if value1['longitude'] < smallestLon:
 				smallestLat = value1['longitude']
-	midLon = float((biggestLon + smallestLon))/2
-	midLat = float((biggestLat +smallestLat))/2
+	midLon = (biggestLon + smallestLon) / 2
+	midLat = (biggestLat + smallestLat) / 2
 	#Rotate
 	for key in inFeeder['tree']:
 		if ('longitude' in inFeeder['tree'][key]) or ('latitude' in inFeeder['tree'][key]):
@@ -447,7 +446,7 @@ def distSmoothLoads(inFeeder):
 			except:
 				continue
 			agList.append([agDate, agHour, agAmount])
-	agZip = zip(*agList)
+	agZip = list(zip(*agList))
 	for i in range(len(agZip[0])):
 		date = str(agZip[0][i])
 		hr = str(agZip[1][i])
@@ -558,7 +557,7 @@ def tranTranslateLocations(inNetwork, translationRight, translationUp, rotation)
 			inNetwork['bus'][i]['latitude']=latitude+translationUp
 	#Find composite midpoint to rotate around. It is the average point of the feeder's extrema
 	#Find greatest Lat, least lat, great lon, least lon, then midpoint
-	for key, value1 in inNetwork['bus'].iteritems():
+	for key, value1 in inNetwork['bus'].items():
 		if 'latitude' in value1:
 			if value1['latitude']>biggestLat:
 				biggestLat = value1['latitude']
@@ -569,8 +568,8 @@ def tranTranslateLocations(inNetwork, translationRight, translationUp, rotation)
 				biggestLon = value1['longitude']
 			if value1['longitude'] < smallestLon:
 				smallestLat = value1['longitude']
-	midLon = float((biggestLon + smallestLon))/2
-	midLat = float((biggestLat +smallestLat))/2
+	midLon = (biggestLon + smallestLon) / 2
+	midLat = (biggestLat + smallestLat) / 2
 	#Rotate
 	for i in inNetwork['bus']:
 		if ('longitude' in inNetwork['bus'][i]) or ('latitude' in inNetwork['bus'][i]):
