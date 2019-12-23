@@ -4,6 +4,7 @@ Source options include NOAA's USCRN, Iowa State University's METAR, and Weather 
 '''
 
 
+from __future__ import print_function
 import os, urllib, urllib2, requests, csv, re, json
 from os.path import join as pJoin
 from datetime import timedelta, datetime
@@ -99,9 +100,9 @@ def pullDarksky(year, lat, lon, datatype, units='si', api_key = os.environ.get('
 				in_csv = [row for row in reader]
 			index = in_csv[0].index(datatype)
 		except IndexError:
-			print 'Requested datatype not present in cache, an attempt will be made to fetch from the API'
+			print('Requested datatype not present in cache, an attempt will be made to fetch from the API')
 		except IOError:
-			print 'Cache not found, data will be fetched from the API'	
+			print('Cache not found, data will be fetched from the API')	
 	#now we begin the actual scraping
 
 	#behold: a convoluted way to get a list of days in a year
@@ -208,7 +209,7 @@ def _pullWeatherWunderground(start, end, airport, workDir):
 		try:
 			f = urllib.urlretrieve(address, filename)
 		except:
-			print("ERROR: unable to get data from URL " + address)
+			print(("ERROR: unable to get data from URL " + address))
 			continue # Just try to grab the next one.
 		work_day = work_day + timedelta(days = 1) # Advance one day
 
@@ -222,7 +223,7 @@ def airportCodeToLatLon(airport):
 		for m in list(csv.reader(f))[1:]:
 			if m[0] == airport:
 				return (m[1], m[2])
-	print 'Airport not found: ', airport
+	print('Airport not found: ', airport)
 	lat = float(raw_input('Please enter latitude manually:'))
 	lon = float(raw_input('Please enter longitude manually:'))
 	return (lat, lon)
@@ -273,7 +274,7 @@ def zipCodeToClimateName(zipCode):
 
 
 def _tests():
-	print 'weather.py tests currently disabled to keep them from sending too many HTTP requests.'
+	print('weather.py tests currently disabled to keep them from sending too many HTTP requests.')
 	# from tempfile import mkdtemp
 	# tmpdir = mkdtemp()
 	# print "Beginning to test weather.py in", tmpdir
@@ -889,7 +890,7 @@ def getRadiationYears(radiation_type, site, year):
 			for row in hourlyReads
 		]
 		accum.extend(hourlyReadsSub)
-		print('processed file {}'.format(fName))
+		print(('processed file {}'.format(fName)))
 	return accum
 
 def create_tsv(data, radiation_type, site, year):
