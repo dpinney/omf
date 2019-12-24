@@ -1,14 +1,13 @@
 ''' Convert a Milsoft Windmil feeder model into an OMF-compatible version. '''
-from __future__ import print_function
-import os, feeder, csv, random, math, copy, locale, json, traceback, shutil, time, datetime, warnings, gc
-from StringIO import StringIO
+import os, csv, random, math, copy, locale, json, traceback, shutil, time, datetime, warnings, gc
 from os.path import join as pJoin
-from omf.solvers import gridlabd
+from io import StringIO
 from dateutil.tz import tzlocal
 from matplotlib import pyplot as plt
 from pytz import reference
 import numpy as np
 import omf
+from omf.solvers import gridlabd
 import omf.feeder as feeder
 import omf.geo as geo
 
@@ -397,7 +396,7 @@ def convert(stdString, seqString, rescale=True):
 			return overhead
 
 		def convertUgLine(ugLineList):
-			for i in xrange(len(ugLineList)):
+			for i in range(len(ugLineList)):
 				if ugLineList[i] == '':
 					ugLineList[i] = '0'
 			myIndex = components.index(objectList)*subObCount
@@ -763,7 +762,7 @@ def convert(stdString, seqString, rescale=True):
 	convertedComponents = [obConvert(x) for x in components]
 
 	# First, make an index to massively speed up lookups.
-	nameToIndex = {convertedComponents[index].get('name',''):index for index in xrange(len(convertedComponents))}
+	nameToIndex = {convertedComponents[index].get('name',''):index for index in range(len(convertedComponents))}
 	def fixCompConnectivity(comp):
 		''' Rejigger the connectivity attributes to work with Gridlab '''
 		# Different object connectivity classes:
@@ -853,7 +852,7 @@ def convert(stdString, seqString, rescale=True):
 
 	# Fix the connectivity:
 	warnings.warn('*** Connectivity fixing start %0.3f' % (time.time()-start_time))
-	guidToIndex = {convertedComponents[index].get('guid',''):index for index in xrange(len(convertedComponents))}
+	guidToIndex = {convertedComponents[index].get('guid',''):index for index in range(len(convertedComponents))}
 	for comp in convertedComponents:
 		fixCompConnectivity(comp)
 
@@ -861,7 +860,7 @@ def convert(stdString, seqString, rescale=True):
 	glmTree = {(1+convertedComponents.index(x))*subObCount:x for x in convertedComponents}
 
 	#MAYBEFIX: REMOVE THIS DISASTER HERE AND FIGURE OUT WHY SOME LINKS ARE MALFORMED
-	for key in glmTree.keys():
+	for key in list(glmTree.keys()):
 		# if ('from' in glmTree[key].keys() and 'to' not in glmTree[key].keys()) or ('to' in glmTree[key].keys() and 'from' not in glmTree[key].keys()):
 		if glmTree[key]['object'] in ['overhead_line','underground_line','regulator','transformer','switch','fuse'] and ('to' not in glmTree[key].keys() or 'from' not in glmTree[key].keys()):
 			warnings.warn('Object borked connectivity %s %s' % (glmTree[key]['name'], glmTree[key]['object']))
@@ -963,7 +962,7 @@ def convert(stdString, seqString, rescale=True):
 				if 'SWING' in glm_dict[x].values():
 					nominalVoltageSwing = float(glm_dict[x]['nominal_voltage'])
 				if 'regulator' in glm_dict[x].values():
-					for key, value in glm_dict[x].iteritems():
+					for key, value in glm_dict[x].items():
 						if 'band_center' in glm_dict[x][key]:
 							bandWidthRegulator = float(glm_dict[x][key]['band_width'])
 							if (glm_dict[x][key]['band_center'] != nominalVoltageSwing):
@@ -992,7 +991,7 @@ def convert(stdString, seqString, rescale=True):
 		if 'object' in glmTree[x].keys() and glmTree[x]['object'] == 'regulator':
 			for y in glmTree[x].keys():
 				if type(glmTree[x][y]) is dict:
-					glmTree[x][y]['power_transducer_ratio'] = str(float(glmTree[x].get('nominal_voltage', 14400))/120)
+					glmTree[x][y]['power_transducer_ratio'] = str(float(glmTree[x].get('nominal_voltage', 14400)) / 120)
 
 	# Delete nominal_voltage from link objects
 	del_nom_volt_list = ['overhead_line', 'underground_line', 'regulator', 'transformer', 'switch', 'fuse', 'ZIPload', 'diesel_dg']
@@ -1123,21 +1122,24 @@ def convert(stdString, seqString, rescale=True):
 			return newX==newY
 		def dupToTup(inList):
 			# Go through a list of components, and given two identicals (up to name) in a row, replace the first one with (name1, name2).
-			for i in xrange(0,len(inList)-1):
+			for i in range(0,len(inList)-1):
 				if isSameMinusName(inList[i], inList[i+1]):
 					inList[i] = (inList[i]['name'], inList[i+1]['name'])
 				else:
 					pass
 		def dechain(tupleList):
 			# Go backwards through a list of tuples and change e.g. (1,2),(2,3),(3,4) into (1,4),(2,4),(3,4).
-			for i in xrange(len(tupleList)-1,0,-1):
+			for i in range(len(tupleList)-1,0,-1):
 				if tupleList[i][0] == tupleList[i-1][1]:
 					tupleList[i-1] = (tupleList[i-1][0], tupleList[i][1])
 				else:
 					pass
 
 		# sort the components, ignoring their names:
-		compList = sorted([glmRef[x] for x in glmRef if 'object' in glmRef[x] and glmRef[x]['object']==compName], key=lambda x:{val:x[val] for val in x if val != 'name'})
+		compList = sorted(
+			[glmRef[x] for x in glmRef if 'object' in glmRef[x] and glmRef[x]['object'] == compName],
+			key=lambda x: str({val: x[val] for val in x if val != 'name'})
+		)
 
 		dupToTup(compList)
 
@@ -1158,13 +1160,13 @@ def convert(stdString, seqString, rescale=True):
 		nameDictMap = {x[0]:x[1] for x in nameMaps}
 
 		# Killing duplicate objects
-		iterKeys = glmRef.keys()
+		iterKeys = list(glmRef.keys())
 		for x in iterKeys:
 			if 'name' in glmRef[x] and glmRef[x]['name'] in nameDictMap.keys():
 				del glmRef[x]
 
 		# Rewiring all objects
-		iterKeys = glmRef.keys()
+		iterKeys = list(glmRef.keys())
 		if compName == 'transformer_configuration':
 			transformers = [glmRef[x] for x in glmRef if 'object' in glmRef[x] and glmRef[x]['object'] == 'transformer']
 			for tranny in transformers:
@@ -1217,7 +1219,7 @@ def convert(stdString, seqString, rescale=True):
 		{"omftype": "module", "argument": "climate"},
 		{"object":"climate", "name":"Climate", "interpolate": "QUADRATIC", "tmyfile": "climate.tmy2"}
 	]
-	for headId in xrange(len(genericHeaders)):
+	for headId in range(len(genericHeaders)):
 		glmTree[headId] = genericHeaders[headId]
 
 	# Go through and put lat/lons on meters and loads.
@@ -1247,11 +1249,13 @@ def convert(stdString, seqString, rescale=True):
 
 def stdSeqToGlm(seqPath, stdPath, glmPath):
 	'''Convert a pair of .std and .seq files directly to .glm'''
-	stdString = open(stdPath).read()
-	seqString = open(seqPath).read()
+	with open(stdPath) as f:
+		stdString = f.read()
+	with open(seqPath) as f:
+		seqString = f.read()
 	tree = convert(stdString, seqString)
 	# Remove climate and schedules to enforce running one timestep.
-	for key in tree.keys():
+	for key in list(tree.keys()):
 		obj = tree[key]
 		if 'omftype' in obj and obj['omftype']=='#include':
 			del tree[key]
@@ -1267,12 +1271,12 @@ def missingConductorsFix(tree):
 	### CHECK IF THERE ARE LINE CONFIGS WITHOUT ANY CONDUCTORS ###
 	empty_line_configs = dict()
 	#get line configs missing conductors (dict maps name to key w/in tree)
-	for k,v in tree.iteritems():
+	for k,v in tree.items():
 		if v.get('object') == 'line_configuration' and not any('conductor' in vk for vk in v.keys()):
 			empty_line_configs[v['name']] = k
 
 	#get keys of lines missing conductors
-	empty_lines = [k for k,v in tree.iteritems() if 'line' in v.get('object','') and v.get('configuration') in empty_line_configs]
+	empty_lines = [k for k,v in tree.items() if 'line' in v.get('object','') and v.get('configuration') in empty_line_configs]
 
 	for line_key in empty_lines:
 		#find sibling lines
@@ -1281,7 +1285,7 @@ def missingConductorsFix(tree):
 		brother_key = None
 		grandpa_key = None
 		grandson_key = None
-		for k,v in tree.iteritems():
+		for k,v in tree.items():
 			if k not in empty_lines and tree[line_key]['object'] == v.get('object'):
 				if mom_node == v.get('from','') or dotter_node == v.get('to',''):
 					brother_key = k
@@ -1300,22 +1304,22 @@ def missingConductorsFix(tree):
 			#AKA second cousin lines
 			#first we need to get the parent's cousin's nodes
 			ggma_node_names = []
-			for k,v in tree.iteritems():
+			for k,v in tree.items():
 				if 'line' in v.get('object','') and mom_node == v.get('to'):
 					ggma_node_names.append(v.get('from'))
 			cousin_node_names = [] #dict(name: [] for name in ggma_node_names)
-			for k,v in tree.iteritems():
+			for k,v in tree.items():
 				if v.get('from') in ggma_node_names:
 					cousin_node_names.append(v.get('to'))
 
-			for k,v in tree.iteritems():
+			for k,v in tree.items():
 				if v.get('from') in cousin_node_names and v['object'] == tree[line_key]['object'] and k not in empty_lines:
 					nearby = k
 					break
 
 		if not nearby:
 			#second cousins failed us so check the whole tree for a usable config
-			for k,v in tree.iteritems():
+			for k,v in tree.items():
 				if v.get('object') == tree[line_key]['object'] and k not in empty_lines:
 					nearby = k
 
@@ -1324,7 +1328,7 @@ def missingConductorsFix(tree):
 			#find our line config's key and check if we've already inserted our default conductor
 			default_name = default_equipment[ tree[line_key]['object'] + '_conductor' ]['name']
 			not_inserted = True
-			for k, v in tree.iteritems():
+			for k, v in tree.items():
 				if v.get('name') == tree[line_key]['configuration']:
 					lc_key = k
 				if v.get('name') == default_name:
@@ -1345,11 +1349,11 @@ def missingConductorsFix(tree):
 
 		#grab the conductor from the line configuration
 		nearby_line_config = tree[nearby]['configuration']
-		for k, v in tree.iteritems():
+		for k, v in tree.items():
 			if nearby_line_config == v.get('name'):
 				nearby_line_config = v
 				break
-		conductor = [v for k,v in v.iteritems() if 'conductor' in k][0]
+		conductor = [v for k,v in v.items() if 'conductor' in k][0]
 
 		#assign the empty line config this conductor
 		for phase in tree[line_key].get('phases'):
@@ -1362,7 +1366,7 @@ def missingConductorsFix(tree):
 
 	buggy_lines = dict() #maps buggy lines to their line config keys
 
-	for k, line in tree.iteritems():
+	for k, line in tree.items():
 		if 'line' in line.get('object',''):
 			try:
 				line_config_key = namesToKeys[line['configuration']]
@@ -1372,7 +1376,7 @@ def missingConductorsFix(tree):
 				if not tree[line_config_key].get('conductor_' + phase):
 					buggy_lines[k] = line_config_key
 
-	for line_key, line_config_key in buggy_lines.iteritems():
+	for line_key, line_config_key in buggy_lines.items():
 		for attr in tree[line_config_key]:
 			if 'conductor' in attr:
 				existing_cond = attr
@@ -1430,7 +1434,7 @@ def islandCount(tree, csv = True, csv_min_lines = 2):
 	elif csv:
 		return ''
 	else:
-		return sum([ 1 if island_sizes[i] > 1 else 0 for i in xrange(len(island_roots)) ])
+		return sum([ 1 if island_sizes[i] > 1 else 0 for i in range(len(island_roots)) ])
 
 def phasingMismatchFix(tree, intermittent_drop_range=5):
 	'''Fixes phase mismatch errors in the tree'''
@@ -1539,7 +1543,7 @@ def missingPowerFix(tree):
 	namesToKeys = getNamesToKeys(tree)
 	incorrect_phases = dict() #maps configkey_phase to transformer keys
 
-	for k,v in tree.iteritems():
+	for k,v in tree.items():
 		if 'transformer' == v.get('object'):
 			config_key = namesToKeys[ v['configuration'] ]
 			for phase in v.get('phases'):
@@ -1552,7 +1556,7 @@ def missingPowerFix(tree):
 					except KeyError:
 						incorrect_phases[key] = [k]
 	#create clones of existing transformer configs with the phase of the power rating swapped
-	for config_key_phase, transformers in incorrect_phases.iteritems():
+	for config_key_phase, transformers in incorrect_phases.items():
 		config_key = int(config_key_phase.split('_')[0])
 		phase = config_key_phase.split('_')[1]
 		clone_key = config_key
@@ -1561,7 +1565,7 @@ def missingPowerFix(tree):
 		tree[clone_key] = deepcopy(tree[config_key])
 		tree[clone_key]['name'] += '_{}'.format(phase)
 		pr = None
-		for attr, value in tree[clone_key].iteritems():
+		for attr, value in tree[clone_key].items():
 			if attr != 'power_rating' and 'power' in attr and '_rating' in attr: #attr is 'power{}_rating'
 				pr = attr
 				break
@@ -1578,7 +1582,7 @@ def missingPowerFix(tree):
 
 def getRootKey(tree):
 	'''Returns the key of the tree's root (the substation)'''
-	for k,v in tree.iteritems():
+	for k,v in tree.items():
 		if v.get('bustype'):
 			if not getRelatives(tree, k, parent=True):
 				return k
@@ -1590,7 +1594,7 @@ def getRelatives(tree, node_or_line, parent=False):
 	if tree[node_or_line].get('object') in ['node', 'triplex_meter']:
 		searchStr = 'to' if parent else 'from'
 		node = node_or_line
-		for k,v in tree.iteritems():
+		for k,v in tree.items():
 			if v.get(searchStr) == tree[node].get('name'):
 				listy.append(k)
 				#if parent:
@@ -1601,7 +1605,7 @@ def getRelatives(tree, node_or_line, parent=False):
 	elif tree[node_or_line].get('object') in ['load', 'triplex_node', 'capacitor'] and parent:
 		parent_name = tree[node_or_line].get('parent')
 		if parent_name:
-			for k,v in tree.iteritems():
+			for k,v in tree.items():
 				if v.get('name') == parent_name:
 					return k
 		else:
@@ -1615,7 +1619,7 @@ def getRelatives(tree, node_or_line, parent=False):
 		except KeyError:
 			return []
 
-		for k,v in tree.iteritems():
+		for k,v in tree.items():
 			if v.get('name') == name:
 				listy.append(k)
 				break
@@ -1632,7 +1636,7 @@ def getRelatives(tree, node_or_line, parent=False):
 def getNamesToKeys(tree):
 	'''Returns a dictionary of names to keys for the tree'''
 	ntk = dict()
-	for k,v in tree.iteritems():
+	for k,v in tree.items():
 		if v.get('name'):
 			ntk[v['name']] = k
 	return ntk
@@ -1721,7 +1725,7 @@ default_equipment = {
 }
 
 def _writeResultsCsv(testOutput, outName):
-	with open(outName, 'w') as f:
+	with open(outName, 'w', newline='') as f:
 		w = csv.DictWriter(f, testOutput[0].keys(), delimiter=',', lineterminator='\n')
 		w.writeheader()
 		w.writerows(testOutput)
@@ -1732,7 +1736,7 @@ def voltDistribution(pathToGlm, pathToVoltdumpCsv):
 	ntk = getNamesToKeys(tree)
 
 	pu_voltage, na_count = [], 0
-	with open(pathToVoltdumpCsv, 'r') as f:
+	with open(pathToVoltdumpCsv, 'r', newline='') as f:
 		w = csv.reader(f)
 		for i in range(2):
 			next(w)
@@ -1778,15 +1782,14 @@ def _tests(
 	outPrefix=omf.omfDir + '/scratch/milToGridlabTests/',
 	testFiles=[('Olin-Barre.std', 'Olin.seq'), ('Olin-Brown.std', 'Olin.seq')],
 	totalLength=121,
-	testAttachments={
-		'schedules.glm': '',
-		'climate.tmy2': open(
-			omf.omfDir + '/data/Climate/KY-LEXINGTON.tmy2', 'r'
-		).read(),
-	},
+	testAttachments={'schedules.glm': '','climate.tmy2': None},
 	voltdumpCsvName='{}_VD.csv',
 	logAllWarnings=False
 ):
+	if testAttachments.get('climate.tmy2') is None:
+		with open(omf.omfDir + '/data/Climate/KY-LEXINGTON.tmy2') as f:
+			testAttachments['climate.tmy2'] = f.read()
+
 	from tempfile import mkdtemp
 	''' Test convert every windmil feeder we have (in static/testFiles). '''
 	# testFiles = [('INEC-RENOIR.std','INEC.seq'), ('INEC-GRAHAM.std','INEC.seq'),
