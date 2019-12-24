@@ -210,23 +210,32 @@ def _tests():
 	# Use python nxgraph to add lat/lon to .omt.json.
 	nxG = netToNxGraph(networkJson)
 	networkJson = latlonToNet(nxG, networkJson)
-	# with open(pJoin(os.getcwd(),'scratch','transmission','outData',networkName+'.omt'),'w') as inFile:
-	# 	json.dump(networkJson, inFile, indent=4)
-	# print 'Wrote network to: %s'%(pJoin(os.getcwd(),'scratch','transmission',"outData",networkName+".omt"))
+	import tempfile
+	temp_dir = tempfile.mkdtemp()
+	omt_path = os.path.join(temp_dir, networkName + '.omt')
+	with open(omt_path,'w') as inFile:
+	#with open(pJoin(os.getcwd(),'scratch','transmission','outData',networkName+'.omt'),'w') as inFile:
+		json.dump(networkJson, inFile, indent=4)
+	print('Wrote network to: %s' % (omt_path))
+	#print('Wrote network to: %s'%(pJoin(os.getcwd(),'scratch','transmission','outData',networkName+'.omt')))
 	# Convert back to .mat and run matpower.
 	matStr = netToMat(networkJson, networkName)
-	# with open(pJoin(os.getcwd(),'scratch','transmission',"outData",networkName+".m"),"w") as outMat:
-	# 	for row in matStr: outMat.write(row)
-	# print 'Converted .omt back to .m at: %s'%(pJoin(os.getcwd(),'scratch','transmission',"outData",networkName+".m"))
-	# inputDict = {
-	# 	"algorithm" : "FDBX",
-	# 	"model" : "DC",
-	# 	"iteration" : 10,
-	# 	"tolerance" : math.pow(10,-8),
-	# 	"genLimits" : 0,
-	# 	}
-	# matpower.runSim(pJoin(os.getcwd(),'scratch','transmission',"outData",networkName), inputDict, debug=False)
-	#viz(os.path.join(os.path.dirname(__file__), "static/SimpleNetwork.json")
+	mat_path = os.path.join(temp_dir, networkName + '.m')
+	with open(mat_path, 'w') as outMat:
+	#with open(pJoin(os.getcwd(),'scratch','transmission','outData',networkName+'.m'),'w') as outMat:
+		for row in matStr: outMat.write(row)
+	print('Converted .omt back to .m at: %s' % (mat_path))
+	#print('Converted .omt back to .m at: %s'%(pJoin(os.getcwd(),'scratch','transmission','outData',networkName+'.m')))
+	#inputDict = {
+	#	'algorithm' : 'FDBX',
+	#	'model' : 'DC',
+	#	'iteration' : 10,
+	#	'tolerance' : math.pow(10,-8),
+	#	'genLimits' : 0,
+	#	}
+	#matpower.runSim(os.path.join(temp_dir, networkName), inputDict, debug=False)
+	#matpower.runSim(pJoin(os.getcwd(),'scratch','transmission','outData',networkName), inputDict, debug=False)
+	#viz(os.path.join(os.path.dirname(__file__), 'static/SimpleNetwork.json')
 
 if __name__ == '__main__':
 	#viz(os.path.join(os.path.dirname(__file__), "static/SimpleNetwork.json"))
