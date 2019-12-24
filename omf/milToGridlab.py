@@ -1,4 +1,5 @@
 ''' Convert a Milsoft Windmil feeder model into an OMF-compatible version. '''
+from __future__ import print_function
 import os, feeder, csv, random, math, copy, locale, json, traceback, shutil, time, datetime, warnings, gc
 from StringIO import StringIO
 from os.path import join as pJoin
@@ -1763,12 +1764,12 @@ def crappyhist(a, path, bins=50, width=80):
 	h, b = np.histogram(a, bins)
 	with open(path, 'w') as f:
 		for i in range (0, bins):
-			print >>f, '{:12.5f}  | {:{width}s} {}'.format(
+			print('{:12.5f}  | {:{width}s} {}'.format(
 					b[i],
 					'#'*int(width*h[i]/np.amax(h)),
 					h[i],
 					width=width
-			)
+			), file=f)
 
 def _tests(
 	keepFiles=True,
@@ -1844,7 +1845,7 @@ def _tests(
 				outFile.write(feeder.sortedWrite(outGlm))
 				outFile.truncate()
 				outFileStats = os.stat(outPrefix + stdString.replace('.std', '.glm'))
-			print 'WROTE GLM FOR', stdString
+			print('WROTE GLM FOR', stdString)
 			# Write the size of the files as a indicator of how good the conversion was.
 			inFileStats = os.stat(pJoin(openPrefix,stdString))
 			inFileSize = inFileStats.st_size
@@ -1854,7 +1855,7 @@ def _tests(
 			currentResults['std_size_mb'] = inFileSize / 1000.0 / 1000.0
 			currentResults['number_of_load_obj'] = len([x for x in outGlm if outGlm[x].get('object','') in ['load','triplex_load','triplex_node']])
 		except:
-			print 'FAILED CONVERTING', stdString
+			print('FAILED CONVERTING', stdString)
 			currentResults['glm_size_as_perc_of_std'] = 0.0
 		try:
 			# Draw the GLM.
@@ -1866,10 +1867,10 @@ def _tests(
 			plt.close()
 			del x
 			gc.collect()
-			print 'DREW GLM OF', stdString
+			print('DREW GLM OF', stdString)
 			currentResults['drawing_success'] = True
 		except:
-			print 'FAILED DRAWING', stdString
+			print('FAILED DRAWING', stdString)
 			currentResults['drawing_success'] = False
 		try:
 			# Run powerflow on the GLM.
@@ -1877,7 +1878,7 @@ def _tests(
 			output = gridlabd.runInFilesystem(outGlm, attachments=testAttachments, keepFiles=False, workDir = gridlab_workDir)
 			if voltdumpCsvName in output:
 				del output[voltdumpCsvName]
-			print output
+			print(output)
 			if output['stderr'].startswith('ERROR'):
 				# Catch GridLAB-D's errors:
 				currentResults['gridlabd_error_code'] = output['stderr'].replace('\n',' ')
@@ -1887,10 +1888,10 @@ def _tests(
 				outFile.seek(0)
 				json.dump(output, outFile, indent=4)
 				outFile.truncate()
-			print 'RAN GRIDLAB ON', stdString
+			print('RAN GRIDLAB ON', stdString)
 			currentResults['powerflow_success'] = True
 		except Exception as e:
-			print 'POWERFLOW FAILED', stdString
+			print('POWERFLOW FAILED', stdString)
 			currentResults['powerflow_success'] = False
 		if voltdumpCsvName:
 			try:
@@ -1905,11 +1906,11 @@ def _tests(
 						vpu,
 						outPrefix + stdString.replace('.std', '_voltage_hist.txt')
 				)
-				print 'COMPLETED VOLT DUMP ANALYSIS ON', stdString
+				print('COMPLETED VOLT DUMP ANALYSIS ON', stdString)
 			except Exception as e:
 				currentResults['perc_voltage_in_range'] = "NaN"
 				currentResults['missing_nominal_voltage_cnt'] = "NaN"
-				print 'VOLT DUMP ANALYSIS FAILED ON', stdString, type(e)
+				print('VOLT DUMP ANALYSIS FAILED ON', stdString, type(e))
 		# Write stats for all tests.
 		currentResults['conversion_time_seconds'] = time.time() - cur_start_time
 		_writeResultsCsv([currentResults], outPrefix + stdString.replace('.std','.csv'))
@@ -1920,4 +1921,4 @@ def _tests(
 	return allResults
 
 if __name__ == "__main__":
-	print _tests()
+	print(_tests())
