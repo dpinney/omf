@@ -12,7 +12,7 @@ from datetime import timedelta, datetime
 from math import cos, asin, sqrt
 import requests
 from dateutil.parser import parse as parse_dt
-#from omf import feeder
+from omf import feeder
 
 def pullAsos(year, station, datatype):
 	'''This model pulls hourly data for a specified year and ASOS station. 

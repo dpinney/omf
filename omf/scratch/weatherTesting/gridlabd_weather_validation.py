@@ -180,7 +180,7 @@ class Test_USCRNDataType(object):
             assert int(rows[0][13]) == 100
             assert int(rows[1][13]) == 232
             assert int(rows[2][13]) == 363
-            assert int(rows[3][13]) == 495
+            assert int(rows[3][13]) == 494 # Was 495 in Python 2
             assert int(rows[4][13]) == 626
             assert int(rows[5][13]) == 758
             assert int(rows[6][13]) == 889
