@@ -6,20 +6,21 @@ from omf.weather import USCRNDataType
 
 class Test_GetPrecision(object):
 
-
     def test_3DigitPrecision_returns3(self):
         data = "-99.000"
         assert aGosedWeather._get_precision(data) == 3
-
 
     def test_1DigitPrecision_returns1(self):
         data = "25.2"
         assert aGosedWeather._get_precision(data) == 1
 
-
     def test_0DigitPrecision_returns0(self):
         data = "100"
         assert aGosedWeather._get_precision(data) == 0
+
+    def test_10DigitPrecision_returns10(self):
+        data = '1234567890.0987654321'
+        assert aGosedWeather._get_precision(data) == 10
 
 
 class Test_StrToNum(object):
@@ -41,9 +42,11 @@ class Test_StrToNum(object):
     def test_int_returnsInt(self):
         assert aGosedWeather._str_to_num(5) == 5
 
+    def test_stringOfLengthyFloat_returnsFloat(self):
+        assert aGosedWeather._str_to_num('1234567890.0987654321') == 1234567890.0987654321
+
 
 class Test_WattsPerMeterSqToWattsPerFtSq(object):
-
 
     def test_returnsFloat(self):
         w_m_sq = 889
@@ -53,7 +56,6 @@ class Test_WattsPerMeterSqToWattsPerFtSq(object):
 
 class Test_CelsiusToFahrenheit(object):
 
-
     def test_returnsFloat(self):
         c = 25.3
         f = aGosedWeather._celsius_to_fahrenheit(c)
@@ -62,40 +64,34 @@ class Test_CelsiusToFahrenheit(object):
 
 class Test_USCRNDataType(object):
 
-
     class Test_IsValid(object):
-
 
         def test_missingDataAndValidFlag_returnsFalse(self):
             line = "0 1 2 3 4 5  6   7 8 9 10 11 12 -99999 0 15 0 -99999 0 U -9999.0 0 -9999.0 0 -9999.0 0 -9999 0 -99.000 -99.000 -99.000 -99.000 -99.000 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0"
-            row = re.split("\s+", line)
+            row = re.split(r"\s+", line)
             solarad = USCRNDataType(13, -99999, 14)
             assert solarad._is_valid(row) is False
-
     
         def test_missingDataAndInvalidFlag_returnsFalse(self):
             line = "0 1 2 3 4 5  6   7 8 9 10 11 12 -99999 3 15 0 -99999 0 U -9999.0 0 -9999.0 0 -9999.0 0 -9999 0 -99.000 -99.000 -99.000 -99.000 -99.000 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0"
-            row = re.split("\s+", line)
+            row = re.split(r"\s+", line)
             solarad = USCRNDataType(13, -99999, 14)
             assert solarad._is_valid(row) is False
-
 
         def test_validDataAndValidFlag_returnsTrue(self):
             line = "0 1 2 3 4 5  6   7 8 9 10 11 12 700 0 15 0 -99999 0 U -9999.0 0 -9999.0 0 -9999.0 0 -9999 0 -99.000 -99.000 -99.000 -99.000 -99.000 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0"
-            row = re.split("\s+", line)
+            row = re.split(r"\s+", line)
             solarad = USCRNDataType(13, -99999, 14)
             assert solarad._is_valid(row) is True
 
-
         def test_validDataAndInvalidFlag_returnsFalse(self):
             line = "0 1 2 3 4 5  6   7 8 9 10 11 12 700 3 15 0 -99999 0 U -9999.0 0 -9999.0 0 -9999.0 0 -9999 0 -99.000 -99.000 -99.000 -99.000 -99.000 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0"
-            row = re.split("\s+", line)
+            row = re.split(r"\s+", line)
             solarad = USCRNDataType(13, -99999, 14)
             assert solarad._is_valid(row) is False
-
     
-    class Test_GetNextValidValue(object):
 
+    class Test_GetNextValidValue(object):
 
         def test_validValueExistsInLaterRow_returnsNumericTuple(self):
             lines = """63838 20170515 1100 20170515 0600 -9.000  -84.75   38.09 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0 -99999 0 -99999 0 -99999 0 U -9999.0 0 -9999.0 0 -9999.0 0 -9999 0 -99.000 -99.000 -99.000 -99.000 -99.000 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0
@@ -107,12 +103,11 @@ class Test_USCRNDataType(object):
 63838 20170515 1700 20170515 1200  2.422  -84.75   38.09    25.1    24.4    25.2    23.6     0.0    889 0    929 0    853 0 C    38.9 0    39.7 0    37.2 0    54 0   0.337   0.335   0.349   0.293   0.396    20.2    19.8    18.3    17.0    15.2
 63838 20170515 1800 20170515 1300  2.422  -84.75   38.09    25.1    25.2    25.6    24.8     0.0    934 0    978 0     79 0 C    38.9 0    40.2 0    37.6 0    52 0   0.334   0.328   0.340   0.297   0.414    21.1    20.7    18.5    16.9    15.2
 63838 20170515 1900 20170515 1400  2.422  -84.75   38.09    26.1    25.7    26.1    25.1     0.0    856 0    994 0    226 0 C    38.7 0    40.9 0    34.7 0    51 0   0.333   0.328   0.347   0.291   0.396    22.1    21.6    18.6    16.9    15.2"""
-            rows = [re.split("\s+", line) for line in lines.splitlines()]
+            rows = [re.split(r"\s+", line) for line in lines.splitlines()]
             solarad = USCRNDataType(13, -99999, 14)
             end_index, end_val = solarad._get_next_valid_value(rows, 0)
             assert end_index == 6
             assert end_val == 889
-
 
         def test_validValueExistsInCurrentRow_returnsNumericTuple(self):
             lines = """63838 20170515 1100 20170515 0600 -9.000  -84.75   38.09 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0 -99999 0 -99999 0 -99999 0 U -9999.0 0 -9999.0 0 -9999.0 0 -9999 0 -99.000 -99.000 -99.000 -99.000 -99.000 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0
@@ -124,12 +119,11 @@ class Test_USCRNDataType(object):
 63838 20170515 1700 20170515 1200  2.422  -84.75   38.09    25.1    24.4    25.2    23.6     0.0    889 0    929 0    853 0 C    38.9 0    39.7 0    37.2 0    54 0   0.337   0.335   0.349   0.293   0.396    20.2    19.8    18.3    17.0    15.2
 63838 20170515 1800 20170515 1300  2.422  -84.75   38.09    25.1    25.2    25.6    24.8     0.0    934 0    978 0     79 0 C    38.9 0    40.2 0    37.6 0    52 0   0.334   0.328   0.340   0.297   0.414    21.1    20.7    18.5    16.9    15.2
 63838 20170515 1900 20170515 1400  2.422  -84.75   38.09    26.1    25.7    26.1    25.1     0.0    856 0    994 0    226 0 C    38.7 0    40.9 0    34.7 0    51 0   0.333   0.328   0.347   0.291   0.396    22.1    21.6    18.6    16.9    15.2"""
-            rows = [re.split("\s+", line) for line in lines.splitlines()]
+            rows = [re.split(r"\s+", line) for line in lines.splitlines()]
             solarad = USCRNDataType(13, -99999, 14)
             end_index, end_val = solarad._get_next_valid_value(rows, 7)
             assert end_index == 7
             assert end_val == 934     
-
 
         def test_noValueExists_returnsNoneTuple(self):
             lines = """63838 20170515 1100 20170515 0600 -9.000  -84.75   38.09 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0 -99999 0 -99999 0 -99999 0 U -9999.0 0 -9999.0 0 -9999.0 0 -9999 0 -99.000 -99.000 -99.000 -99.000 -99.000 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0
@@ -141,15 +135,13 @@ class Test_USCRNDataType(object):
 63838 20170515 1700 20170515 1200  2.422  -84.75   38.09    25.1    24.4    25.2    23.6     0.0    889 3    929 0    853 0 C    38.9 0    39.7 0    37.2 0    54 0   0.337   0.335   0.349   0.293   0.396    20.2    19.8    18.3    17.0    15.2
 63838 20170515 1800 20170515 1300  2.422  -84.75   38.09    25.1    25.2    25.6    24.8     0.0    934 3    978 0     79 0 C    38.9 0    40.2 0    37.6 0    52 0   0.334   0.328   0.340   0.297   0.414    21.1    20.7    18.5    16.9    15.2
 63838 20170515 1900 20170515 1400  2.422  -84.75   38.09    26.1    25.7    26.1    25.1     0.0    856 3    994 0    226 0 C    38.7 0    40.9 0    34.7 0    51 0   0.333   0.328   0.347   0.291   0.396    22.1    21.6    18.6    16.9    15.2"""
-            rows = [re.split("\s+", line) for line in lines.splitlines()]
+            rows = [re.split(r"\s+", line) for line in lines.splitlines()]
             solarad = USCRNDataType(13, -99999, 14)
             end_index, end_val = solarad._get_next_valid_value(rows, 0)
             assert end_index == None
             assert end_val == None
 
-
     class Test_CorrectColumn(object):
-
 
         def test_USCRNDataTypeHasNoFlagIndex_performsLinearInterpolation(self):
             lines = """63838 20170515 1100 20170515 0600 -9.000  -84.75   38.09 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0 100 0 -99999 0 -99999 0 U -9999.0 0 -9999.0 0 -9999.0 0 -9999 0 -99.000 -99.000 -99.000 -99.000 -99.000 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0
@@ -161,7 +153,7 @@ class Test_USCRNDataType(object):
 63838 20170515 1700 20170515 1200  2.422  -84.75   38.09    25.1    24.4    25.2    23.6     0.0    889 0    929 0    853 0 C    38.9 0    39.7 0    37.2 0    54 0   0.337   0.335   0.349   0.293   0.396    20.2    19.8    18.3    17.0    15.2
 63838 20170515 1800 20170515 1300  2.422  -84.75   38.09    25.1    25.2    25.6    24.8     0.0    934 0    978 0     79 0 C    38.9 0    40.2 0    37.6 0    52 0   0.334   0.328   0.340   0.297   0.414    21.1    20.7    18.5    16.9    15.2
 63838 20170515 1900 20170515 1400  2.422  -84.75   38.09    26.1    25.7    26.1    25.1     0.0    856 0    994 0    226 0 C    38.7 0    40.9 0    34.7 0    51 0   0.333   0.328   0.347   0.291   0.396    22.1    21.6    18.6    16.9    15.2"""
-            rows = [re.split("\s+", line) for line in lines.splitlines()]
+            rows = [re.split(r"\s+", line) for line in lines.splitlines()]
             t_calc = USCRNDataType(8, -9999.0)
             t_calc._correct_data(rows, 0, 5, 0.1, 25.1) # 0.1 is made up. Pretend it comes from the previous year
             assert float(rows[0][8]) == 3.7
@@ -171,7 +163,6 @@ class Test_USCRNDataType(object):
             assert float(rows[4][8]) == 18.0
             assert float(rows[5][8]) == 21.5
             assert float(rows[6][8]) == 25.1
-
 
         def test_USCRNDataTypeHasFlagIndex_performsLinearInterpolation(self):
             lines = """63838 20170515 1100 20170515 0600 -9.000  -84.75   38.09 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0 100 0 -99999 0 -99999 0 U -9999.0 0 -9999.0 0 -9999.0 0 -9999 0 -99.000 -99.000 -99.000 -99.000 -99.000 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0
@@ -183,7 +174,7 @@ class Test_USCRNDataType(object):
 63838 20170515 1700 20170515 1200  2.422  -84.75   38.09    25.1    24.4    25.2    23.6     0.0    889 0    929 0    853 0 C    38.9 0    39.7 0    37.2 0    54 0   0.337   0.335   0.349   0.293   0.396    20.2    19.8    18.3    17.0    15.2
 63838 20170515 1800 20170515 1300  2.422  -84.75   38.09    25.1    25.2    25.6    24.8     0.0    934 0    978 0     79 0 C    38.9 0    40.2 0    37.6 0    52 0   0.334   0.328   0.340   0.297   0.414    21.1    20.7    18.5    16.9    15.2
 63838 20170515 1900 20170515 1400  2.422  -84.75   38.09    26.1    25.7    26.1    25.1     0.0    856 0    994 0    226 0 C    38.7 0    40.9 0    34.7 0    51 0   0.333   0.328   0.347   0.291   0.396    22.1    21.6    18.6    16.9    15.2"""
-            rows = [re.split("\s+", line) for line in lines.splitlines()]
+            rows = [re.split(r"\s+", line) for line in lines.splitlines()]
             solarad = USCRNDataType(13, -99999, 14)
             solarad._correct_data(rows, 1, 5, 100, 889)
             assert int(rows[0][13]) == 100
@@ -193,8 +184,6 @@ class Test_USCRNDataType(object):
             assert int(rows[4][13]) == 626
             assert int(rows[5][13]) == 758
             assert int(rows[6][13]) == 889
-
-
 
         def test_USCRNDataTypeHasFlagIndex_performsFlagCorrection(self):
             lines = """63838 20170515 1100 20170515 0600 -9.000  -84.75   38.09 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0 100 0 -99999 0 -99999 0 U -9999.0 0 -9999.0 0 -9999.0 0 -9999 0 -99.000 -99.000 -99.000 -99.000 -99.000 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0
@@ -206,7 +195,7 @@ class Test_USCRNDataType(object):
 63838 20170515 1700 20170515 1200  2.422  -84.75   38.09    25.1    24.4    25.2    23.6     0.0    889 0    929 0    853 0 C    38.9 0    39.7 0    37.2 0    54 0   0.337   0.335   0.349   0.293   0.396    20.2    19.8    18.3    17.0    15.2
 63838 20170515 1800 20170515 1300  2.422  -84.75   38.09    25.1    25.2    25.6    24.8     0.0    934 0    978 0     79 0 C    38.9 0    40.2 0    37.6 0    52 0   0.334   0.328   0.340   0.297   0.414    21.1    20.7    18.5    16.9    15.2
 63838 20170515 1900 20170515 1400  2.422  -84.75   38.09    26.1    25.7    26.1    25.1     0.0    856 0    994 0    226 0 C    38.7 0    40.9 0    34.7 0    51 0   0.333   0.328   0.347   0.291   0.396    22.1    21.6    18.6    16.9    15.2"""
-            rows = [re.split("\s+", line) for line in lines.splitlines()]
+            rows = [re.split(r"\s+", line) for line in lines.splitlines()]
             solarad = USCRNDataType(13, -99999, 14)
             solarad._correct_data(rows, 1, 5, 100, 889)
             assert float(rows[0][14]) == 0
@@ -220,23 +209,20 @@ class Test_USCRNDataType(object):
 
     class Test_GetValue(object):
 
-
         def test_hasNoTransformationFunction_returnsData(self):
             line = "63838 20170515 1800 20170515 1300  2.422  -84.75   38.09    25.1    25.2    25.6    24.8     0.0    934 0    978 0     79 0 C    38.9 0    40.2 0    37.6 0    52 0   0.334   0.328   0.340   0.297   0.414    21.1    20.7    18.5    16.9    15.2"
-            row = re.split("\s+", line)
+            row = re.split(r"\s+", line)
             solarad = USCRNDataType(13, -99999, 14)
             assert solarad._get_value(row) == 934
 
-
         def test_hasTransformationFunction_returnsTransformedData(self):
             line = "63838 20170515 1800 20170515 1300  2.422  -84.75   38.09    25.1    25.2    25.6    24.8     0.0    934 0    978 0     79 0 C    38.9 0    40.2 0    37.6 0    52 0   0.334   0.328   0.340   0.297   0.414    21.1    20.7    18.5    16.9    15.2"
-            row = re.split("\s+", line)
+            row = re.split(r"\s+", line)
             solar_diff = USCRNDataType(13, -99999, 14, lambda x: x * 0.25)
             assert solar_diff._get_value(row) == (934 * 0.25)
 
 
 class Test_GetFirstValidRow(object):
-
 
     def test_chronologicalOrder_returnsEarliestValidRow(self):
         lines = """63838 20170515 1300 20170515 0800 -9.000  -84.75   38.09 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0 -99999 0 -99999 0 -99999 0 U -9999.0 0 -9999.0 0 -9999.0 0 -9999 0 -99.000 -99.000 -99.000 -99.000 -99.000 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0
@@ -245,13 +231,12 @@ class Test_GetFirstValidRow(object):
 63838 20170515 1600 20170515 1100  2.422  -84.75   38.09 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0    843 3    853 3    704 3 C    13.0 3    37.2 3     0.0 3 -9999 0 -99.000 -99.000 -99.000 -99.000 -99.000 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0
 63838 20170515 1700 20170515 1200  2.422  -84.75   38.09    25.3    24.4    25.2    23.6     0.0    889 0    929 0    853 0 C    38.9 0    39.7 0    37.2 0    54 0   0.337   0.335   0.349   0.293   0.396    20.2    19.8    18.3    17.0    15.2
 63838 20170515 1800 20170515 1300  2.422  -84.75   38.09    25.1    25.2    25.6    24.8     0.0    934 0    978 0     79 0 C    38.9 0    40.2 0    37.6 0    52 0   0.334   0.328   0.340   0.297   0.414    21.1    20.7    18.5    16.9    15.2"""
-        rows = [re.split("\s+", line) for line in lines.splitlines()]
+        rows = [re.split(r"\s+", line) for line in lines.splitlines()]
         solarad = USCRNDataType(13, -99999, 14)
         t_calc = USCRNDataType(8, -9999.0)
         dts = [solarad, t_calc]
-        first_valid_row = re.split("\s+", "63838 20170515 1700 20170515 1200  2.422  -84.75   38.09    25.3    24.4    25.2    23.6     0.0    889 0    929 0    853 0 C    38.9 0    39.7 0    37.2 0    54 0   0.337   0.335   0.349   0.293   0.396    20.2    19.8    18.3    17.0    15.2")
+        first_valid_row = re.split(r"\s+", "63838 20170515 1700 20170515 1200  2.422  -84.75   38.09    25.3    24.4    25.2    23.6     0.0    889 0    929 0    853 0 C    38.9 0    39.7 0    37.2 0    54 0   0.337   0.335   0.349   0.293   0.396    20.2    19.8    18.3    17.0    15.2")
         assert aGosedWeather._get_first_valid_row(rows, dts) == first_valid_row
-
 
     def test_reverseChronologicalOrder_returnsLatestValidRow(self):
         lines = """63838 20170515 1300 20170515 0800 -9.000  -84.75   38.09 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0 -99999 0 -99999 0 -99999 0 U -9999.0 0 -9999.0 0 -9999.0 0 -9999 0 -99.000 -99.000 -99.000 -99.000 -99.000 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0
@@ -260,20 +245,19 @@ class Test_GetFirstValidRow(object):
 63838 20170515 1600 20170515 1100  2.422  -84.75   38.09 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0    843 3    853 3    704 3 C    13.0 3    37.2 3     0.0 3 -9999 0 -99.000 -99.000 -99.000 -99.000 -99.000 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0
 63838 20170515 1700 20170515 1200  2.422  -84.75   38.09    25.3    24.4    25.2    23.6     0.0    889 0    929 0    853 0 C    38.9 0    39.7 0    37.2 0    54 0   0.337   0.335   0.349   0.293   0.396    20.2    19.8    18.3    17.0    15.2
 63838 20170515 1800 20170515 1300  2.422  -84.75   38.09    25.1    25.2    25.6    24.8     0.0    934 0    978 0     79 0 C    38.9 0    40.2 0    37.6 0    52 0   0.334   0.328   0.340   0.297   0.414    21.1    20.7    18.5    16.9    15.2"""
-        rows = [re.split("\s+", line) for line in lines.splitlines()]
+        rows = [re.split(r"\s+", line) for line in lines.splitlines()]
         solarad = USCRNDataType(13, -99999, 14)
         t_calc = USCRNDataType(8, -9999.0)
         dts = [solarad, t_calc]
-        last_valid_row = re.split("\s+", "63838 20170515 1800 20170515 1300  2.422  -84.75   38.09    25.1    25.2    25.6    24.8     0.0    934 0    978 0     79 0 C    38.9 0    40.2 0    37.6 0    52 0   0.334   0.328   0.340   0.297   0.414    21.1    20.7    18.5    16.9    15.2")
+        last_valid_row = re.split(r"\s+", "63838 20170515 1800 20170515 1300  2.422  -84.75   38.09    25.1    25.2    25.6    24.8     0.0    934 0    978 0     79 0 C    38.9 0    40.2 0    37.6 0    52 0   0.334   0.328   0.340   0.297   0.414    21.1    20.7    18.5    16.9    15.2")
         assert aGosedWeather._get_first_valid_row(rows, dts, reverse=True) == last_valid_row
 
 
 class Test_GetProcessedRow(object):
 
-
     def test_orderOfDataTypes_matchesOrderOfProcessedRowData(self):
         line = "63838 20170515 1700 20170515 1200  2.422  -84.75   38.09    25.3    24.4    25.2    23.6     0.0    889 0    929 0    853 0 C    38.9 0    39.7 0    37.2 0    54 0   0.337   0.335   0.349   0.293   0.396    20.2    19.8    18.3    17.0    15.2"
-        row = re.split("\s+", line)
+        row = re.split(r"\s+", line)
         #datetime
         temperature = USCRNDataType(8, -9999.0, transformation_function=lambda x: round(aGosedWeather._celsius_to_fahrenheit(x), 1))
         #wind_speed
@@ -287,9 +271,7 @@ class Test_GetProcessedRow(object):
 
 class Test_ExtactData(object):
 
-
     class Test_HourlyData(object):
-
 
         def test_allValidData_returnsProcessedData(self):
             lines = """63838 20170914 1400 20170914 0900  2.422  -84.75   38.09    16.9    16.4    16.9    16.2     0.0    116 0    198 0     80 0 C    16.6 0    17.3 0    16.2 0    94 0   0.382   0.363   0.333   0.308   0.402    18.7    19.0    19.1    19.5    19.7
@@ -303,7 +285,7 @@ class Test_ExtactData(object):
 63838 20170914 2200 20170914 1700  2.422  -84.75   38.09    21.1    21.1    21.4    21.0     0.0    213 0    327 0    130 0 C    21.5 0    22.1 0    21.0 0    71 0   0.375   0.360   0.338   0.307   0.398    20.5    20.6    19.6    19.5    19.6
 63838 20170914 2300 20170914 1800  2.422  -84.75   38.09    20.5    20.9    21.1    20.5     0.0    116 0    213 0     43 0 C    21.0 0    21.9 0    19.7 0    73 0   0.379   0.358   0.339   0.307   0.400    20.6    20.7    19.8    19.5    19.7
 63838 20170915 0000 20170914 1900  2.422  -84.75   38.09    19.7    20.3    20.7    19.7     0.0     38 0    116 0      0 0 C    19.0 0    20.8 0    16.9 0    77 0   0.378   0.355   0.337   0.310   0.404    20.6    20.7    19.9    19.5    19.7"""
-            rows = [re.split("\s+", line) for line in lines.splitlines()]
+            rows = [re.split(r"\s+", line) for line in lines.splitlines()]
             first_valid_row = rows[0]
             last_valid_row = rows[len(rows) - 1]
             temperature = USCRNDataType(8, -9999.0)
@@ -324,7 +306,6 @@ class Test_ExtactData(object):
                 [19.7, 77, 38]
             ]
 
-
         def test_sequentialInvalidData_returnsProcessedAndCorrectedData(self):
             lines = """3838 20170321 1400 20170321 0900  2.422  -84.75   38.09    10.0     9.5    10.0     9.2     0.0     68 0    139 0     30 0 C     9.5 0    10.4 0     8.9 0    89 0   0.300   0.303   0.323   0.312   0.409     7.4     7.5     7.5     7.6     8.4
 63838 20170321 1500 20170321 1000  2.422  -84.75   38.09    10.6    10.3    10.6    10.0     0.0    118 0    162 0     80 0 C    10.8 0    11.3 0    10.4 0    84 0   0.301   0.305   0.322   0.311   0.408     7.6     7.7     7.5     7.5     8.4
@@ -334,7 +315,7 @@ class Test_ExtactData(object):
 63838 20170321 1900 20170321 1400  2.422  -84.75   38.09 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0    685 3   1105 3    302 3 C    19.7 3    26.5 3     0.0 3 -9999 0 -99.000 -99.000 -99.000 -99.000 -99.000 -9999.0 -9999.0 -9999.0 -9999.0 -9999.0
 63838 20170321 2000 20170321 1500  2.422  -84.75   38.09    14.6    14.4    14.9    13.8     0.0    608 0    770 0    357 0 C    22.3 0    24.2 0    20.0 0    62 0   0.296   0.302   0.322   0.311   0.408     9.8     9.6     7.9     7.6     8.4
 63838 20170321 2100 20170321 1600  2.422  -84.75   38.09    15.3    14.8    15.3    14.5     0.0    405 0    610 0    291 0 C    19.7 0    21.8 0    17.7 0    58 0   0.295   0.302   0.320   0.311   0.408    10.3    10.1     8.1     7.6     8.4"""
-            rows = [re.split("\s+", line) for line in lines.splitlines()]
+            rows = [re.split(r"\s+", line) for line in lines.splitlines()]
             first_valid_row = rows[0]
             last_valid_row = rows[7]
             temperature = USCRNDataType(8, -9999.0)
@@ -351,7 +332,6 @@ class Test_ExtactData(object):
                 [14.6, 62, 608],
                 [15.3, 58, 405]
             ]
-
         
         def test_nonsequentialInvalidData_returnsProcessedAndCorrectedData(self):
             lines = """63838 20170320 2100 20170320 1600  2.422  -84.75   38.09    17.3    16.2    17.3    14.9     0.0    488 0    584 0    166 0 C    17.8 0    19.4 0    16.2 0    46 0   0.302   0.304   0.322   0.309   0.403     7.5     7.3     6.7     7.3     8.4
@@ -366,7 +346,7 @@ class Test_ExtactData(object):
 63838 20170321 0600 20170321 0100  2.422  -84.75   38.09     9.6     9.9    10.9     9.2     0.0      0 0      0 0      0 0 C     6.3 0     6.8 0     5.7 0 -9999 0   0.300   0.305   0.322   0.308   0.407     7.7     8.0     7.6     7.4     8.4
 63838 20170321 0700 20170321 0200  2.422  -84.75   38.09     9.0     9.5    10.0     9.0     0.0      0 0      0 0      0 0 C     5.9 0     6.6 0     5.3 0    79 0   0.301   0.303   0.322   0.310   0.406     7.7     7.8     7.6     7.5     8.4
 63838 20170321 0800 20170321 0300  2.422  -84.75   38.09     9.1     8.9     9.3     8.3     0.0      0 0      0 0      0 0 C     6.4 0     7.3 0     5.2 0    83 0   0.302   0.304   0.323   0.308   0.404     7.6     7.6     7.6     7.4     8.4"""
-            rows = [re.split("\s+", line) for line in lines.splitlines()]
+            rows = [re.split(r"\s+", line) for line in lines.splitlines()]
             first_valid_row = rows[0]
             last_valid_row = rows[len(rows) - 1]
             temperature = USCRNDataType(8, -9999.0)
@@ -390,7 +370,6 @@ class Test_ExtactData(object):
 
 
     class Test_SubhourlyData(object):
-
 
         def test_allValidData_returnsAveragedProcessedData(self):
             lines = """63838 20170105 0135 20170104 2035      2  -84.75   38.09    -5.4     0.0      0 0    -6.4 C 0    67 0   0.351     5.7  1192 0   2.06 0
@@ -417,7 +396,7 @@ class Test_ExtactData(object):
 63838 20170105 0320 20170104 2220      2  -84.75   38.09    -4.8     0.0      0 0    -4.2 C 0    67 0   0.350     5.2  1195 0   2.29 0
 63838 20170105 0325 20170104 2225      2  -84.75   38.09    -4.7     0.0      0 0    -4.3 C 0    67 0   0.351     5.2  1193 0   2.53 0
 63838 20170105 0330 20170104 2230      2  -84.75   38.09    -4.7     0.0      0 0    -4.3 C 0    66 0   0.351     5.2  1195 0   2.61 0"""
-            rows = [re.split("\s+", line) for line in lines.splitlines()]
+            rows = [re.split(r"\s+", line) for line in lines.splitlines()]
             first_valid_row = rows[0]
             last_valid_row = rows[len(rows) - 1]
             wind_speed = USCRNDataType(21, -99.00, 22, lambda x: round(x, 2))
@@ -426,7 +405,6 @@ class Test_ExtactData(object):
                 [2.17],
                 [2.31]
             ]
-
 
         def test_invalidData_returnsAveragedAndCorrectedProcessedData(self):
             lines = """63838 20170105 0135 20170104 2035      2  -84.75   38.09    -5.4     0.0      0 0    -6.4 C 0    67 0   0.351     5.7  1192 0   2.06 0
@@ -453,7 +431,7 @@ class Test_ExtactData(object):
 63838 20170105 0320 20170104 2220      2  -84.75   38.09    -4.8     0.0      0 0    -4.2 C 0    67 0   0.350     5.2  1195 0   2.29 0
 63838 20170105 0325 20170104 2225      2  -84.75   38.09    -4.7     0.0      0 0    -4.3 C 0    67 0   0.351     5.2  1193 0   2.53 0
 63838 20170105 0330 20170104 2230      2  -84.75   38.09    -4.7     0.0      0 0    -4.3 C 0    66 0   0.351     5.2  1195 0   2.61 0"""
-            rows = [re.split("\s+", line) for line in lines.splitlines()]
+            rows = [re.split(r"\s+", line) for line in lines.splitlines()]
             first_valid_row = rows[0]
             last_valid_row = rows[len(rows) - 1]
             wind_speed = USCRNDataType(21, -99.00, 22, lambda x: round(x, 2))
@@ -465,7 +443,6 @@ class Test_ExtactData(object):
 
 
 class Test_MergeHourlySubhourly(object):
-
 
     def test_multipleElementLists_returnMergedRowsWithCombinedLengthPlusDatetime(self):
         hourly = [
@@ -485,7 +462,6 @@ class Test_MergeHourlySubhourly(object):
             ["1:1:1:0:0", 1, 2, 2, 2, 1, 1, 1, 1],
             ["1:1:2:0:0", 1, 2, 2, 2, 1, 1, 1, 1]
         ]
-
 
     def test_singleElementList_returnsMergedRowsWithCombinedLengthPlusDatetime(self):
         hourly = [

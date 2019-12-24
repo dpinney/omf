@@ -4,14 +4,15 @@ Source options include NOAA's USCRN, Iowa State University's METAR, and Weather 
 '''
 
 
-from __future__ import print_function
-import os, urllib, urllib2, requests, csv, re, json
+import os, csv, re, json
+from urllib.request import urlretrieve # Might be depreciated in future versions of Python 3
+from urllib.request import Request, urlopen
 from os.path import join as pJoin
 from datetime import timedelta, datetime
-from dateutil.parser import parse as parse_dt
-from urllib2 import urlopen
-from omf import feeder
 from math import cos, asin, sqrt
+import requests
+from dateutil.parser import parse as parse_dt
+#from omf import feeder
 
 def pullAsos(year, station, datatype):
 	'''This model pulls hourly data for a specified year and ASOS station. 
@@ -40,24 +41,24 @@ def pullAsos(year, station, datatype):
 
 
 def pullAsosStations(filePath):
-    """Build a station list for the ASOS data. Put them in filePath with their details. """
-    stations = []
-    states = """AK AL AR AZ CA CO CT DE FL GA HI IA ID IL IN KS KY LA MA MD ME
-     MI MN MO MS MT NC ND NE NH NJ NM NV NY OH OK OR PA RI SC SD TN TX UT VA VT
-     WA WI WV WY"""
-    networks = []
-    for state in states.split():
-        networks.append("%s_ASOS" % (state,))
-    with open(filePath, 'wb') as csvfile:
-    	fieldnames = ['Station Id', 'Station Name', 'County', 'State', 'Latitude', 'Longitude', 'Elevation', 'Time Zone']
-    	csvwriter = csv.DictWriter(csvfile, delimiter=',', fieldnames=fieldnames)
-    	for network in networks:
+	"""Build a station list for the ASOS data. Put them in filePath with their details. """
+	stations = []
+	states = """AK AL AR AZ CA CO CT DE FL GA HI IA ID IL IN KS KY LA MA MD ME
+	 MI MN MO MS MT NC ND NE NH NJ NM NV NY OH OK OR PA RI SC SD TN TX UT VA VT
+	 WA WI WV WY"""
+	networks = []
+	for state in states.split():
+		networks.append("%s_ASOS" % (state,))
+	with open(filePath, 'w',  newline='') as csvfile:
+		fieldnames = ['Station Id', 'Station Name', 'County', 'State', 'Latitude', 'Longitude', 'Elevation', 'Time Zone']
+		csvwriter = csv.DictWriter(csvfile, delimiter=',', fieldnames=fieldnames)
+		for network in networks:
 			current = []
 			current.append(network)
 			uri = ("https://mesonet.agron.iastate.edu/"
 			"geojson/network/%s.geojson") % (network,)
-			data = urlopen(uri)
-			jdict = json.load(data)
+			with urlopen(uri) as f:
+				jdict = json.load(f)
 			#map attribute to entry in csv
 			csvwriter.writeheader()
 			for site in jdict['features']:
@@ -73,7 +74,7 @@ def pullAsosStations(filePath):
 				csvwriter.writerow(currentSite)
 
 
-def pullDarksky(year, lat, lon, datatype, units='si', api_key = os.environ.get('DARKSKY',''), path = None):
+def pullDarksky(year, lat, lon, datatype, units='si', api_key=os.environ.get('DARKSKY',''), path = None):
 	'''Returns hourly weather data from the DarkSky API as array.
 
 	* For more on the DarkSky API: https://darksky.net/dev/docs#overview
@@ -88,14 +89,13 @@ def pullDarksky(year, lat, lon, datatype, units='si', api_key = os.environ.get('
 	from pandas import date_range
 	lat, lon = float(lat), float(lon)
 	int(year) # if year isn't castable... something's up
-
 	coords = '%0.2f,%0.2f' % (lat, lon) # this gets us 11.1 km unc <https://gis.stackexchange.com/questions/8650/measuring-accuracy-of-latitude-and-longitude>
 	if path:
 		assert os.path.isdir(path), 'Path does not exist'
 		filename = coords + "_" + str(year) + ".csv"
 		filename = pJoin(path, filename)
 		try:
-			with open(filename, 'rb') as csvfile:
+			with open(filename, 'r', newline='') as csvfile:
 				reader = csv.reader(csvfile)
 				in_csv = [row for row in reader]
 			index = in_csv[0].index(datatype)
@@ -103,35 +103,30 @@ def pullDarksky(year, lat, lon, datatype, units='si', api_key = os.environ.get('
 			print('Requested datatype not present in cache, an attempt will be made to fetch from the API')
 		except IOError:
 			print('Cache not found, data will be fetched from the API')	
-	#now we begin the actual scraping
-
-	#behold: a convoluted way to get a list of days in a year
+	# Now we begin the actual scraping. Behold: a convoluted way to get a list of days in a year
 	times = list(date_range('{}-01-01'.format(year), '{}-12-31'.format(year)))
 	#time.isoformat() has no tzinfo in this case, so darksky parses it as local time
 	urls = ['https://api.darksky.net/forecast/%s/%s,%s?exclude=daily&units=%s' % ( api_key, coords, time.isoformat(), units ) for time in times]
-	data = [requests.get(url).json() for url in urls]
-
+	data = [requests.get(url).json() for url in urls] # all requests return 400 and "Poorly formatted request" probably because I don't have the API key
 	#a fun little annoyance: let's de-unicode those strings
-	def ascii_me(obj):
-		if isinstance(obj, unicode):
-			return obj.encode('ascii','ignore')
-		if isinstance(obj, list):
-			return map(ascii_me, obj)
-		if isinstance(obj, dict):
-			new_dict = dict()
-			for k, v in obj.iteritems():
-				k = k.encode('ascii','ignore') if type(k) is type(u'') else k
-				new_dict[k] = ascii_me(v)
-			return new_dict
-		else:
-			return obj
-
-	data = ascii_me(data)
+	#def ascii_me(obj):
+	#	if isinstance(obj, unicode):
+	#		return obj.encode('ascii','ignore')
+	#	if isinstance(obj, list):
+	#		return map(ascii_me, obj)
+	#	if isinstance(obj, dict):
+	#		new_dict = dict()
+	#		for k, v in obj.iteritems():
+	#			k = k.encode('ascii','ignore') if type(k) is type(u'') else k
+	#			new_dict[k] = ascii_me(v)
+	#		return new_dict
+	#	else:
+	#		return obj
+	#data = ascii_me(data)
 	out = []
-	
 	if path:
 			# determine the columns from the first day of data
-			columns = data[0]['hourly']['data'][0].keys()
+			columns = list(data[0]['hourly']['data'][0].keys())
 			out_csv = [columns]
 	# parse our json-dict
 	for day in data:
@@ -139,9 +134,8 @@ def pullDarksky(year, lat, lon, datatype, units='si', api_key = os.environ.get('
 			if path:
 				out_csv.append( [hour.get(key) for key in columns] )
 			out.append(hour.get(datatype))
-
 	if path:
-		with open(filename, 'wb') as csvfile:
+		with open(filename, 'w', newline='') as csvfile:
 			writer = csv.writer(csvfile)
 			for row in out_csv:
 				writer.writerow(row)
@@ -207,9 +201,9 @@ def _pullWeatherWunderground(start, end, airport, workDir):
 		if os.path.isfile(filename):
 			continue # We have the file already, don't re-download it.
 		try:
-			f = urllib.urlretrieve(address, filename)
+			f = urlretrieve(address, filename)
 		except:
-			print(("ERROR: unable to get data from URL " + address))
+			print("ERROR: unable to get data from URL " + address)
 			continue # Just try to grab the next one.
 		work_day = work_day + timedelta(days = 1) # Advance one day
 
@@ -219,13 +213,13 @@ def airportCodeToLatLon(airport):
 		Dataset: https://opendata.socrata.com/dataset/Airport-Codes-mapped-
 			to-Latitude-Longitude-in-the-/rxrh-4cxm '''
 	omfDir = os.path.dirname(os.path.abspath(__file__))
-	with open(pJoin(omfDir, 'static/Airports.csv')) as f:
+	with open(pJoin(omfDir, 'static/Airports.csv'), newline='') as f:
 		for m in list(csv.reader(f))[1:]:
 			if m[0] == airport:
 				return (m[1], m[2])
 	print('Airport not found: ', airport)
-	lat = float(raw_input('Please enter latitude manually:'))
-	lon = float(raw_input('Please enter longitude manually:'))
+	lat = float(input('Please enter latitude manually:'))
+	lon = float(input('Please enter longitude manually:'))
 	return (lat, lon)
 
 
@@ -236,11 +230,11 @@ def zipCodeToClimateName(zipCode):
 		instead of NYC.
 	* Zip code lat/lon/city/state data taken from https://www.gaslampmedia.com
 		/download-zip-code-latitude-longitude-city-state-county-csv/ '''
-	assert isinstance(zipCode, basestring), "To prevent leading zero errors, input zipcode as string"
+	assert isinstance(zipCode, str), "To prevent leading zero errors, input zipcode as string"
 	omfDir = os.path.dirname(os.path.abspath(__file__))
 	zipCsvPath = pJoin(omfDir, "static", "zip_codes_altered.csv")
 	# Find the state, city, lat, lon for given zipcode
-	with open(zipCsvPath, 'rt') as f:
+	with open(zipCsvPath, 'r', newline='') as f:
 		try:
 			'''All zipcodes are unique. len(row) will be either 1 or 0. Error 
 				would be raised by calling the zero index on an empty array.'''
@@ -250,7 +244,7 @@ def zipCodeToClimateName(zipCode):
 		zipState = row[4]
 		ziplatlon = row[1], row[2]
 	# Collect data from every zipcode in state
-	with open(zipCsvPath, 'rt') as f:
+	with open(zipCsvPath, 'r', newline='') as f:
 		cityData = [r for r in csv.reader(f) if r[4] == zipState]
 	# Collect all names of cities with data from state. Remove the state abbr. from beginning and '.tmy2' from end.
 	citiesInState = [cn[3:-5] for cn in os.listdir(pJoin(omfDir, 'data', 'Climate')) if zipState == cn[:2]]
@@ -273,38 +267,7 @@ def zipCodeToClimateName(zipCode):
 	return '{}-{}'.format(zipState, foundCity)
 
 
-def _tests():
-	print('weather.py tests currently disabled to keep them from sending too many HTTP requests.')
-	# from tempfile import mkdtemp
-	# tmpdir = mkdtemp()
-	# print "Beginning to test weather.py in", tmpdir
-	# print zipCodeToClimateName('75001')
-	# print zipCodeToClimateName('07030')
-	# print zipCodeToClimateName('64735')
-	# assert ('MO-KANSAS_CITY', 30) == zipCodeToClimateName('64735')
-	# print airportCodeToLatLon("IAD")
-	# # Testing USCRN
-	# pullUscrn('2017', 'KY_Versailles_3_NNW', 'T_CALC')
-	# print 'USCRN (NOAA) data pulled to ' + tmpdir
-	# # Testing ASOS
-	# pullAsos('2017','CHO', 'tmpc')
-	# print 'ASOS (Iowa) data pulled to ' + tmpdir
-	# pullAsosStations('./asosStationTable.csv')
-	# # Testing DarkSky
-	# pullDarksky(2018, 36.64, -93.30, 'temperature', path = tmpdir)
-	# print 'Darksky data pulled to ' + tmpdir
-	# Testing tmy3
-	#tmy3_pull(nearest_tmy3_station(41, -78), out_file='tmy3_test.csv')
-	# Testing getRadiationYears
-	#get_radiation_data('surfrad', 'Boulder_CO', 2019)
-	#get_radiation_data('solrad', 'bis', 2019)
-	#Testing NSRDB
-	#get_nrsdb_data('psm',-99.49218,43.83452,'2017', 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56', interval=60, out_file='psm.csv')
-	#print(get_nrsdb_data('psm',-99.49218,43.83452,'2017', 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56', interval=60))
-	#get_nrsdb_data('psm_tmy',-99.49218,43.83452,'tdy-2017', 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56', out_file='psm_tmy.csv')
-	#print(get_nrsdb_data('psm_tmy',-99.49218,43.83452,'tdy-2017', 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56'))
-	#get_nrsdb_data('suny',77.1679,22.1059,'2014', 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56', out_file='suny.csv')
-	#get_nrsdb_data('spectral_tmy',77.08007,20.79720,'tmy', 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56', out_file='spectral_tmy.csv')
+
 
 
 ########################
@@ -325,7 +288,7 @@ def attachHistoricalWeather(omd_path, year, station):
 	"""
 	csv_path = os.path.join(os.path.dirname(omd_path), "uscrn-weather-data.csv")
 	temperature = USCRNDataType(8, -9999.0, flag_index=None, transformation_function=lambda x: round(_celsius_to_fahrenheit(x), 1))
-	humidity = USCRNDataType(26, -9999, flag_index=27, transformation_function=lambda x: round((x / float(100)), 2))
+	humidity = USCRNDataType(26, -9999, flag_index=27, transformation_function=lambda x: round(x / 100, 2))
 	solar_dir = USCRNDataType(13, -99999, flag_index=14, transformation_function=lambda x: int(round(_watts_per_meter_sq_to_watts_per_ft_sq(x) * 0.75, 0)))
 	solar_diff = USCRNDataType(13, -99999, flag_index=14, transformation_function=lambda x: int(round(_watts_per_meter_sq_to_watts_per_ft_sq(x) * 0.25, 0)))
 	solar_global = USCRNDataType(13, -99999, flag_index=14, transformation_function=lambda x: int(round(_watts_per_meter_sq_to_watts_per_ft_sq(x), 0)))
@@ -425,30 +388,9 @@ def _write_USCRN_csv(csv_path, year, station, hourly_data_types, subhourly_data_
 		else:
 			raise ValueError('There was no processed data to write to the CSV')
 	# Write the CSV
-	with open(csv_path, 'w') as f:
+	with open(csv_path, 'w', newline='') as f:
 		writer = csv.writer(f)
 		writer.writerows(all_data)
-
-
-#def get_hourly_USCRNDataTypes():
-#	"""Return a list of the USCRNDataTypes that we want to extract from a USCRN .txt file of hourly data."""
-#	utc_date = USCRNDataType(1, -9999.0)
-#	utc_time = USCRNDataType(2, -9999.0)
-#	temperature = USCRNDataType(8, -9999.0)
-#	return [utc_date, utc_time, temperature]
-#	#temperature = USCRNDataType(8, -9999.0, flag_index=None, transformation_function=lambda x: round(_celsius_to_fahrenheit(x), 1))
-#	#humidity = USCRNDataType(26, -9999, flag_index=27, transformation_function=lambda x: round((x / float(100)), 2))
-#	#solar_dir = USCRNDataType(13, -99999, flag_index=14, transformation_function=lambda x: int(round(_watts_per_meter_sq_to_watts_per_ft_sq(x) * 0.75, 0)))
-#	#solar_diff = USCRNDataType(13, -99999, flag_index=14, transformation_function=lambda x: int(round(_watts_per_meter_sq_to_watts_per_ft_sq(x) * 0.25, 0)))
-#	#solar_global = USCRNDataType(13, -99999, flag_index=14, transformation_function=lambda x: int(round(_watts_per_meter_sq_to_watts_per_ft_sq(x), 0)))
-#	#return [temperature, humidity, solar_dir, solar_diff, solar_global]
-
-
-#def get_subhourly_USCRNDataTypes():
-#	"""Return the USCRNDataTypes that we want to extract from a USCRN .txt file of subhourly data."""
-#	#wind_speed = USCRNDataType(21, -99.00, flag_index=22, transformation_function=lambda x: round(x, 2))
-#	#return [wind_speed]
-#	return
 
 
 def _get_USCRN_data(year, station, frequency):
@@ -468,7 +410,7 @@ def _get_USCRN_data(year, station, frequency):
 
 def _str_to_num(data):
 	"""Convert a string to its int or float equivalent."""
-	if type(data) is str or type(data) is unicode:
+	if isinstance(data, str):
 		if _get_precision(data) == 0:
 			return int(data)
 		return float(data)
@@ -477,7 +419,7 @@ def _str_to_num(data):
 
 def _get_precision(data):
 	"""Get the decimal precision of a number as an int."""
-	if type(data) is not str and type(data) is not unicode:
+	if not isinstance(data, str):
 		data = str(data)
 	if data.find(".") == -1:
 		return 0
@@ -585,7 +527,7 @@ def _extract_data(first_valid_row, last_valid_row, rows, data_types, is_subhourl
 			if (i + 1) % 12 == 0:
 				for j in range(len(row)):
 					try:
-						hourly_avg[j] = hourly_avg[j] / float(12)
+						hourly_avg[j] = hourly_avg[j] / 12
 					except:
 						pass
 				processed_data.append(_get_processed_row(data_types, hourly_avg))
@@ -597,16 +539,16 @@ def _extract_data(first_valid_row, last_valid_row, rows, data_types, is_subhourl
 
 def _watts_per_meter_sq_to_watts_per_ft_sq(w_m_sq):
 	"""Convert a W/m^2 measurements to a W/ft^2 measurement."""
-	if type(w_m_sq) is str or type(w_m_sq) is unicode:
+	if isinstance(w_m_sq, str):
 		w_m_sq = _str_to_num(w_m_sq)
 	return (w_m_sq / ((1 / .3048) ** 2))
 
 
 def _celsius_to_fahrenheit(c):
 	"""Convert a celsius measurement to a fahrenheit measurement."""
-	if type(c) is str or type(c) is unicode:
+	if isinstance(c, str):
 		c = _str_to_num(c)
-	return c * 9 / float(5) + 32
+	return c * 9 / 5 + 32
 
 
 def _merge_hourly_subhourly(hourly, subhourly, insert_idx):
@@ -668,7 +610,7 @@ class USCRNDataType(object):
 		:type transformation_function: function
 		"""
 		self.data_index = int(data_index)
-		if type(missing_data_value) is str or type(missing_data_value) is unicode:
+		if isinstance(missing_data_value, str):
 			missing_data_value = _str_to_num(missing_data_value)
 		self.missing_data_value = missing_data_value
 		if flag_index is not None:
@@ -747,7 +689,7 @@ class USCRNDataType(object):
 		:rtype: int or float
 		"""
 		value = row[self.data_index]
-		if type(value) is str or type(value) is unicode:
+		if isinstance(value, str):
 			value = _str_to_num(value)
 		if self.transformation_function is not None:
 			return self.transformation_function(value)
@@ -761,10 +703,10 @@ def tmy3_pull(usafn_number, out_file=None):
 	file_path = os.path.join(url, file_name)
 	data = requests.get(file_path)
 	if out_file is not None:
-		csv_lines = data.iter_lines()
+		csv_lines = [line.decode() for line in data.iter_lines()]
 		reader = csv.reader(csv_lines, delimiter=',')
 		if out_file is not None:
-			with open(out_file, 'w') as csvfile:
+			with open(out_file, 'w', newline='') as csvfile:
 				#can use following to skip first line to line up headers
 				#reader.next()
 				for i in reader:
@@ -779,7 +721,7 @@ def nearest_tmy3_station(latitude, longitude):
 	file_name = 'TMY3_StationsMeta.csv'
 	file_path = os.path.join(url, file_name)
 	data = requests.get(file_path)
-	csv_lines = data.iter_lines()
+	csv_lines = [line.decode() for line in data.iter_lines()]
 	reader = csv.DictReader(csv_lines, delimiter=',')
 	#SHould file be local?
 	#with open('TMY3_StationsMeta.csv', 'r') as metafile:
@@ -848,14 +790,14 @@ class NSRDB():
 		resp = requests.get(self.request_url, params=self.params)
 		return resp
 
-def get_nrsdb_data(data_set, longitude, latitude, year, api_key, utc='true', leap_day='false', email='admin@omf.coop', interval=None, out_file=None):
+def get_nrsdb_data(data_set, longitude, latitude, year, api_key, utc='true', leap_day='false', email='admin@omf.coop', interval=None, filename=None):
 	'''Create nrsdb factory and execute query. Optional output to file or return the response object.'''
 	nrsdb_factory = NSRDB(data_set, longitude, latitude, year, api_key, utc=utc, leap_day=leap_day, email=email, interval=interval)
 	data = nrsdb_factory.execute_query()
-	csv_lines = data.iter_lines()
+	csv_lines = [line.decode() for line in data.iter_lines()]
 	reader = csv.reader(csv_lines, delimiter=',')
-	if out_file is not None:
-		with open(out_file, 'w') as csvfile:
+	if filename is not None:
+		with open(filename, 'w', newline='') as csvfile:
 			for i in reader:
 				csvwriter = csv.writer(csvfile, delimiter=',')
 				csvwriter.writerow(i)
@@ -868,37 +810,34 @@ def getRadiationYears(radiation_type, site, year):
 	URL = 'ftp://aftp.cmdl.noaa.gov/data/radiation/{}/{}/{}/'.format(radiation_type, site, year)
 	#FILE = 'tbl19001.dat' - example
 	# Get directory contents.
-	dirReq = urllib2.Request(URL)
-	dirRes = urllib2.urlopen(dirReq)
-	dirLines = dirRes.read().split('\r\n')
+	dirReq = Request(URL)
+	with urlopen(dirReq) as f:
+		text = f.read()
+	dirLines = [bytes_.decode() for bytes_ in text.split(b'\r\n')]
 	allFileNames = [x[56:] for x in dirLines if x!='']
 	accum = []
 	for fName in allFileNames:
-		req = urllib2.Request(URL + fName)
-		response = urllib2.urlopen(req)
-		page = response.read()
-		lines = page.split('\n')
+		req = Request(URL + fName)
+		with urlopen(req) as f:
+			page = f.read()
+		lines = [bytes_.decode() for bytes_ in page.split(b'\n')]
 		siteName = lines[0]
 		latLonVersion = lines[1].split()
 		data = [x.split() for x in lines[2:]]
 		minuteIntervals = ['0']
 		hourlyReads = [x for x in data if len(x) >= 5 and x[5] in minuteIntervals]
-		hourlyReadsSub = [
-			{
-				'col{}'.format(c):row[c] for c in range(len(row))
-			}
-			for row in hourlyReads
-		]
+		hourlyReadsSub = [{'col{}'.format(c): row[c] for c in range(len(row))} for row in hourlyReads]
 		accum.extend(hourlyReadsSub)
-		print(('processed file {}'.format(fName)))
+		print('processed file {}'.format(fName))
 	return accum
 
 def create_tsv(data, radiation_type, site, year):
 	'''Create tsv file from dict '''
 	column_count = len(data[0])
-	output = csv.DictWriter(open('{}-{}-{}.tsv'.format(radiation_type, site, year), 'w'), fieldnames=['col{}'.format(x) for x in range(column_count)], delimiter='\t')
-	for item in data:
-	 	output.writerow(item)
+	with open('{}-{}-{}.tsv'.format(radiation_type, site, year), 'w') as f:
+		output = csv.DictWriter(f, fieldnames=['col{}'.format(x) for x in range(column_count)], delimiter='\t')
+		for item in data:
+			output.writerow(item)
 
 def get_radiation_data(radiation_type, site, year, out_file=None):
 	'''Get solard or surfrad data. Optional export to csv with out_file option'''
@@ -909,9 +848,40 @@ def get_radiation_data(radiation_type, site, year, out_file=None):
 		return allYears
 
 
+def _tests():
+	print('weather.py tests currently disabled to keep them from sending too many HTTP requests.')
+	#from tempfile import mkdtemp
+	#tmpdir = mkdtemp()
+	#print("Beginning to test weather.py in", tmpdir)
+	## Testing zipCodeToClimateName (Certain cases fail)
+	#print(zipCodeToClimateName('75001'))
+	#print(zipCodeToClimateName('07030')) # Doesn't work
+	#print(zipCodeToClimateName('64735'))
+	#assert ('MO-KANSAS_CITY', 30) == zipCodeToClimateName('64735') # Assertion Fails
+	#print(airportCodeToLatLon("IAD"))
+	## Testing USCRN (Works)
+	#print('USCRN (NOAA) data pulled to ' + tmpdir)
+	#data = pullUscrn('2017', 'KY_Versailles_3_NNW', 'T_CALC') # Does not write to a file by itself
+	## Testing ASOS (Works)
+	#pullAsos('2017','CHO', 'tmpc') # Does not write to a file by itself
+	#print('ASOS (Iowa) data pulled to ' + tmpdir)
+	#pullAsosStations(os.path.join(tmpdir, 'asosStationTable.csv'))
+	## Testing DarkSky (Works as long as you have an API key)
+	#pullDarksky(2018, 36.64, -93.30, 'temperature', path=tmpdir)
+	#print('Darksky data pulled to ' + tmpdir)
+	## Testing tmy3 (Works)
+	#tmy3_pull(nearest_tmy3_station(41, -78), out_file=os.path.join(tmpdir, 'tmy3_test.csv'))
+	## Testing getRadiationYears (Works, but not used anywhere)
+	#get_radiation_data('surfrad', 'Boulder_CO', 2019, True)
+	#get_radiation_data('solrad', 'bis', 2019)
+	## Testing NSRDB (Works, but not usd anywhere)
+	#get_nrsdb_data('psm',-99.49218,43.83452,'2017', 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56', interval=60, filename=os.path.join(tmpdir, 'psm.csv'))
+	#print(get_nrsdb_data('psm',-99.49218,43.83452,'2017', 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56', interval=60))
+	#get_nrsdb_data('psm_tmy',-99.49218,43.83452,'tdy-2017', 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56', filename='psm_tmy.csv')
+	#print(get_nrsdb_data('psm_tmy',-99.49218,43.83452,'tdy-2017', 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56'))
+	#get_nrsdb_data('suny',77.1679,22.1059,'2014', 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56', filename='suny.csv')
+	#get_nrsdb_data('spectral_tmy',77.08007,20.79720,'tmy', 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56', filename='spectral_tmy.csv')
+
+
 if __name__ == "__main__":
-	#_tests()
-	utc_date = USCRNDataType(1, -9999.0)
-	utc_time = USCRNDataType(2, -9999.0)
-	temperature = USCRNDataType(8, -9999.0)
-	hourly = [utc_date, utc_time, temperature]
+	_tests()
