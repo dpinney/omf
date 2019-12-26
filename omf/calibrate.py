@@ -1,3 +1,4 @@
+from __future__ import print_function
 import csv, datetime as dt, json, tempfile
 from matplotlib import pyplot as plt
 import os
@@ -122,8 +123,8 @@ def omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLen
 	def runPowerflowIter(tree,scadaSubPower):
 		'''Runs powerflow once, then iterates.'''
 		# Run initial powerflow to get power.
-		print "Starting calibration."
-		print "Goal of calibration: Error: %s, Iterations: <%s, trim: %s"%(calibrateError[0], calibrateError[1], trim)		
+		print("Starting calibration.")
+		print("Goal of calibration: Error: %s, Iterations: <%s, trim: %s"%(calibrateError[0], calibrateError[1], trim))		
 		output = gridlabd.runInFilesystem(tree, keepFiles=True, workDir=pJoin(workDir,"gridlabD"))
 		outRealPow = output["caliSub.csv"]["measured_real_power"][trim:simLength]
 		outImagPower = output["caliSub.csv"]["measured_reactive_power"][trim:simLength]
@@ -133,11 +134,11 @@ def omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLen
 		nextPower = outAppPowerKw
 		error = (sum(outRealPow)/1000-sum(scadaSubPower))/sum(scadaSubPower)
 		iteration = 1
-		print "First error:", error
+		print("First error:", error)
 		while abs(error)>calibrateError[0] and iteration<calibrateError[1]:
 			# Run calibration and iterate up to 5 times.
 			SCAL_CONST = sum(scadaSubPower)/sum(nextPower)
-			print "Calibrating & running again... Error: %s, Iteration: %s, SCAL_CONST: %s"%(str(round(abs(error*100),6)), str(iteration), round(SCAL_CONST,6))
+			print("Calibrating & running again... Error: %s, Iteration: %s, SCAL_CONST: %s"%(str(round(abs(error*100),6)), str(iteration), round(SCAL_CONST,6)))
 			newPlayData = []
 			with open(pJoin(pJoin(workDir,"gridlabD"), lastFile), "r") as playerFile:
 				for line in playerFile:
@@ -162,7 +163,7 @@ def omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLen
 		else:
 			if iteration==1: outRealPowIter = outRealPow
 			SCAL_CONST = 1.0
-		print "Calibration done: Error: %s, Iteration: %s, SCAL_CONST: %s"%(str(round(abs(error*100),2)), str(iteration), round(SCAL_CONST,2))		
+		print("Calibration done: Error: %s, Iteration: %s, SCAL_CONST: %s"%(str(round(abs(error*100),2)), str(iteration), round(SCAL_CONST,2)))		
 		return outRealPow, outRealPowIter, lastFile, iteration
 	outRealPow, outRealPowIter, lastFile, iteration = runPowerflowIter(tree,scadaSubPower[trim:simLength])
 	caliPowVectors = [[float(element) for element in scadaSubPower[trim:simLength]], [float(element)/1000 for element in outRealPow], [float(element)/1000 for element in outRealPowIter]]
@@ -174,7 +175,7 @@ def omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLen
 	caliPowVectors[0] = caliPowVectors[0][:minCaliPowVecLen]
 	caliPowVectors[1] = caliPowVectors[1][:minCaliPowVecLen]
 	caliPowVectors[2] = caliPowVectors[2][:minCaliPowVecLen]
-	print "Len:", len(caliPowVectors[0]), len(caliPowVectors[1]), len(caliPowVectors[2])
+	print("Len:", len(caliPowVectors[0]), len(caliPowVectors[1]), len(caliPowVectors[2]))
 	plotLine(workDir, caliPowVectors, chartData, simStartDate['Date']+dt.timedelta(hours=trim), simLengthUnits)
 	# Write the final output.
 	with open(pJoin(workDir,"calibratedFeeder.omd"),"w") as outJson:
@@ -265,7 +266,7 @@ def attachVolts(workDir, feederPath, voltVectorA, voltVectorB, voltVectorC, simS
 			json.dump(feederJson, outJson, indent=4)
 		return pJoin(workDir,"calibratedFeeder.omd"), True
 	except:
-		print "Failed to run gridlabD with voltage players."
+		print("Failed to run gridlabD with voltage players.")
 		return "", False
 
 def plotLine(workDir, powerVec, chartData, startTime, simLengthUnits):
@@ -307,11 +308,11 @@ def plotLine(workDir, powerVec, chartData, startTime, simLengthUnits):
 	plt.close()
 
 def _tests():
-	print "Beginning to test calibrate.py"
+	print("Beginning to test calibrate.py")
 	workDir = tempfile.mkdtemp()
 	try: os.mkdir(pJoin(workDir,"gridlabD"))
 	except: pass	
-	print "Currently working in: ", workDir
+	print("Currently working in: ", workDir)
 	scadaPath = pJoin("static","testFiles", "FrankScada.csv")
 	feederPath = pJoin("static", "publicFeeders","ABEC Frank pre calib.omd")
 	simDate = dt.datetime.strptime("4/13/2011 09:00:00", "%m/%d/%Y %H:%M:%S") # Spring peak.
@@ -319,13 +320,13 @@ def _tests():
 	simLength = 24
 	simLengthUnits = 'hours'
 	error, trim = (0.05, 5), 1
-	print "Simulation Date:", simStartDate['Date'], "for", str(simLength), "hours."
+	print("Simulation Date:", simStartDate['Date'], "for", str(simLength), "hours.")
 	voltVectorA = [random.uniform(7380,7620) for x in range(0,8760)]
 	voltVectorC = [-random.uniform(3699,3780) for x in range(0, 8760)]
 	voltVectorB = [-random.uniform(3699,3795) for x in range(0, 8760)]
-	print "Running gridlabD with voltage players."
+	print("Running gridlabD with voltage players.")
 	voltFeederPath, outcome = attachVolts(workDir, feederPath, voltVectorA, voltVectorB, voltVectorC, simStartDate, simLength, simLengthUnits)
-	print os.system("gridlabd --version")
+	print(os.system("gridlabd --version"))
 	# try: 
 	# 	assert None == omfCalibrate(workDir, voltFeederPath, scadaPath, simStartDate, simLength, simLengthUnits, "FBS", error, trim), "feeder calibration failed"
 	# 	print "\n  Success! Ran calibrate with voltage players!"
