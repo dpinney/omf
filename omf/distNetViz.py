@@ -2,9 +2,11 @@
 Load an OMF feeder in to the new viewer.
 """
 
-from __future__ import print_function
-import tempfile, shutil, os, fileinput, json, networkx as nx, platform, omf.feeder as feeder, webbrowser, sys
+import tempfile, shutil, os, fileinput, json, platform, webbrowser, sys
+import networkx as nx
+from jinja2 import Template
 import omf
+from omf import feeder
 
 
 def main():
@@ -112,50 +114,51 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.h
 	with open(omf.omfDir + '/static/jquery-ui.min.css', 'r') as jquery_css_file:
 		jquery_css_data = jquery_css_file.read()
 	# TEMPLATE HACKING
-	from jinja2 import Template
-	templateCont = open(omf.omfDir + '/templates/distNetViz.html', 'r+').read()
-	templateString = templateCont.encode('utf-8')
+	with open(omf.omfDir + '/templates/distNetViz.html') as f:
+		templateString = f.read()
 	template = Template(templateString)
 	def id():
 		return ""
 	component_json = get_components()
 	rend = template.render(thisFeederData=json.dumps(thisFeed), thisFeederName=pathToOmdOrGlm, thisFeederNum=1,
 		thisModelName="Local Filesystem", thisOwner="NONE", components=component_json, jasmine=None, spec=None,
-		publicFeeders=[], userFeeders=[], csrf_token=id, showFileMenu=True, currentUser=None
+		publicFeeders=[], userFeeders=[], csrf_token=id, showFileMenu=False, currentUser=None
 	)
 	with open(tempDir + '/' + outputName, 'w') as outFile:
 		outFile.write(rend)
 	# Insert the panZoom library.
-	# Note: you can't juse open the file in r+ mode because, based on the way the file is mapped to memory, you can only overwrite a line with another of exactly the same length.
-	for line in fileinput.input(tempDir + '/' + outputName, inplace=1):
-		if line.lstrip().startswith('<link rel="stylesheet" href="/static/jquery-ui.min.css">'):
-			print("")
-		elif line.lstrip().startswith('<script type="text/javascript" src="/static/jquery.js"></script>'):
-			print("")
-		elif line.lstrip().startswith('<script type="text/javascript" src="/static/jquery-ui.min.js"></script>'):
-			print("")
-		elif line.lstrip().startswith('<script type="text/javascript" src="/static/svg-pan-zoom.js"></script>'):
-			print("")
-		elif line.lstrip().startswith('<script type="text/javascript" src="/static/chroma.min.js"></script>'):
-			print("")
-		elif line.lstrip().startswith('<script type="text/javascript" src="/static/papaparse.min.js"></script>'):
-			print("")
-		elif line.lstrip().startswith('<link rel="shortcut icon" href="/static/favicon.ico"/>'):
-			print('<link rel="shortcut icon" href="data:image/x-icon;base64,AAABAAEAEBAQAAAAAAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAioqKAGlpaQDU1NQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIiIiIiIiIAAgACAAIAAgACAzIzMjMyMwIDAgMCAwIDAiIiIiIiIgMCAwEDAgMCAwIDMTMyMzIzAgMBAwIDAgMCIiIiIiIiAwIDAQMCAwIDAgMxMzIzMjMCAwEDAgMCAwIiIiIiIiIDAAMAAwADAAMAAzMzMzMzMwAAAAAAAAAAAABwAAd3cAAEABAABVVQAAAAUAAFVVAABAAQAAVVUAAAAFAABVVQAAQAEAAFVVAAAABQAA3d0AAMABAAD//wAA"/>')
-		elif line.lstrip().startswith('<script id="panZoomInsert">'):
-			print('<script id="panZoomInsert">\n' + pzData) # load up the new feeder.
-		elif line.lstrip().startswith('<script id="chromaInsert">'):
-			print('<script id="chromaInsert">\n' + chromaData)
-		elif line.lstrip().startswith('<script id="papaParseInsert">'):
-			print('<script id="papaParseInsert">\n' + papaData)
-		elif line.lstrip().startswith('<script id="jqueryInsert">'):
-			print('<script id="jqueryInsert">\n' + jquery_data)
-		elif line.lstrip().startswith('<script id="jqueryUiInsert">'):
-			print('<script id="jqueryUiInsert">\n' + jquery_ui_data)
-		elif line.lstrip().startswith('<style id="jqueryCssInsert">'):
-			print('<style id="jqueryCssInsert">\n' + jquery_css_data)
-		else:
-			print(line.rstrip())
+	# Note: you can't juse open the file in r+ mode because, based on the way the file is mapped to memory, you can only overwrite a line with another
+	# of exactly the same length.
+	with fileinput.input(tempDir + '/' + outputName, inplace=1) as f:
+		for line in f:
+			if line.lstrip().startswith('<link rel="stylesheet" href="/static/jquery-ui.min.css">'):
+				print("")
+			elif line.lstrip().startswith('<script type="text/javascript" src="/static/jquery.js"></script>'):
+				print("")
+			elif line.lstrip().startswith('<script type="text/javascript" src="/static/jquery-ui.min.js"></script>'):
+				print("")
+			elif line.lstrip().startswith('<script type="text/javascript" src="/static/svg-pan-zoom.js"></script>'):
+				print("")
+			elif line.lstrip().startswith('<script type="text/javascript" src="/static/chroma.min.js"></script>'):
+				print("")
+			elif line.lstrip().startswith('<script type="text/javascript" src="/static/papaparse.min.js"></script>'):
+				print("")
+			elif line.lstrip().startswith('<link rel="shortcut icon" href="/static/favicon.ico"/>'):
+				print('<link rel="shortcut icon" href="data:image/x-icon;base64,AAABAAEAEBAQAAAAAAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAioqKAGlpaQDU1NQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIiIiIiIiIAAgACAAIAAgACAzIzMjMyMwIDAgMCAwIDAiIiIiIiIgMCAwEDAgMCAwIDMTMyMzIzAgMBAwIDAgMCIiIiIiIiAwIDAQMCAwIDAgMxMzIzMjMCAwEDAgMCAwIiIiIiIiIDAAMAAwADAAMAAzMzMzMzMwAAAAAAAAAAAABwAAd3cAAEABAABVVQAAAAUAAFVVAABAAQAAVVUAAAAFAABVVQAAQAEAAFVVAAAABQAA3d0AAMABAAD//wAA"/>')
+			elif line.lstrip().startswith('<script id="panZoomInsert">'):
+				print('<script id="panZoomInsert">\n' + pzData) # load up the new feeder.
+			elif line.lstrip().startswith('<script id="chromaInsert">'):
+				print('<script id="chromaInsert">\n' + chromaData)
+			elif line.lstrip().startswith('<script id="papaParseInsert">'):
+				print('<script id="papaParseInsert">\n' + papaData)
+			elif line.lstrip().startswith('<script id="jqueryInsert">'):
+				print('<script id="jqueryInsert">\n' + jquery_data)
+			elif line.lstrip().startswith('<script id="jqueryUiInsert">'):
+				print('<script id="jqueryUiInsert">\n' + jquery_ui_data)
+			elif line.lstrip().startswith('<style id="jqueryCssInsert">'):
+				print('<style id="jqueryCssInsert">\n' + jquery_css_data)
+			else:
+				print(line.rstrip())
 	# os.system('open -a "Google Chrome" ' + '"file://' + tempDir + '/' + outputName"')
 	# webbrowser.open_new("file://" + tempDir + '/' + outputName)
 	if open_file:
