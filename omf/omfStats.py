@@ -6,19 +6,14 @@ Runtime: about 30 seconds.
 OOO Think about what to do with the error log.
 '''
 
-import os
-import csv
-import json
-from matplotlib import pyplot as plt
-import time
+import os, csv, json, time, collections, zipfile
 from datetime import datetime
-import collections
+from matplotlib import pyplot as plt
 from geoip import geolite2
 from iso3166 import countries
-import zipfile
-import omf
 from dateutil.parser import parse as parseDt
 from jinja2 import Template
+import omf
 # from REPIC import REPIC
 
 plt.style.use('ggplot')
@@ -51,14 +46,14 @@ template = Template(
 def genModelDatabase(outPath):
 	'''Translates all models on serer to .tsv file'''
 	modelDir = os.path.join(omf.omfDir, 'data', 'Model')
-	with open(outPath, 'wb') as statsFile:
+	with open(outPath, 'w', newline='') as statsFile:
 		writer = csv.writer(statsFile, delimiter='\t', lineterminator='\n')
 		writer.writerow(['Owner', 'Model Name', 'Type', 'Runtime (H:M:S)', 'Status', 'Created'])
 		for owner in [x for x in os.listdir(modelDir) if not x.startswith('.')]:
 			ownerDir = os.path.join(modelDir, owner)
 			for project in [x for x in os.listdir(ownerDir) if not x.startswith('.')]:
 				projectDir = os.path.join(ownerDir, project)
-				with open((projectDir + '/allInputData.json')) as j:
+				with open(projectDir + '/allInputData.json') as j:
 					jData = json.load(j)
 				created = jData.get('created','2014-07-15 12:00:00').split('.')[0]
 				if 'runTime' in jData:
@@ -68,17 +63,18 @@ def genModelDatabase(outPath):
 
 def genAllImages():
 	'''Creates tsv database of models and images from log'''
-	model_db_path = './scratch/modelDatabase.tsv'
+	path_prefix = os.path.dirname(__file__)
+	model_db_path = os.path.join(path_prefix, 'scratch/modelDatabase.tsv')
 	genModelDatabase(model_db_path)  # Overwrite is good.
-	modelDatabaseStats(model_db_path, './static/model_db_stats.png')
-	trafficLogStats('./omf.access.log', './static/traffic_log_stats.png')
+	modelDatabaseStats(model_db_path, os.path.join(path_prefix, 'static/model_db_stats.png'))
+	trafficLogStats(os.path.join(path_prefix, 'omf.access.log'), os.path.join(path_prefix, 'static/traffic_log_stats.png'))
 
 def modelDatabaseStats(dataFilePath, outFilePath):
 	# Last run:
 	# REPIC(time.strftime("%c"))  #OUTPUT: Mon Nov 26 15:34:39 2018
 	# Import the data.
 	models = []
-	with open(dataFilePath, 'r') as inFile:
+	with open(dataFilePath, 'r', newline='') as inFile:
 		reader = csv.DictReader(inFile, delimiter='\t')
 		for row in reader:
 			models.append(row)
@@ -118,8 +114,8 @@ def modelDatabaseStats(dataFilePath, outFilePath):
 	# Plot users over time
 	plt.figure(figsize=(15, 8))
 	plt.subplot(2, 1, 1)
-	xRanges2 = range(len(yearUsers.values()))
-	plt.bar(xRanges2, yearUsers.values(), align='edge')
+	xRanges2 = list(range(len(yearUsers.values())))
+	plt.bar(xRanges2, list(yearUsers.values()), align='edge')
 	ax = plt.gca()
 	ax.set_xlim(-0.2, len(yearUsers.values()))
 	ax = plt.gca()
@@ -128,16 +124,16 @@ def modelDatabaseStats(dataFilePath, outFilePath):
 	orgPairs = [x.split('@') for x in lowerUsers]
 	orgs = set([x[-1] for x in orgPairs if len(x)>1])
 	ax.set_title('New Users on omf.coop by Year. Total: {}, Orgs:{}\nGenerated: {}'.format(len(users), len(orgs), nowString))
-	plt.xticks([x + 0.4 for x in xRanges2], yearUsers.keys())
+	plt.xticks([x + 0.4 for x in xRanges2], list(yearUsers.keys()))
 	plt.subplots_adjust(bottom=0.2)
 	# Plot the model counts.
 	plt.subplot(2, 1, 2)
-	xRanges = range(len(modelCounts.values()))
-	plt.bar(xRanges, modelCounts.values(), align='edge')
+	xRanges = list(range(len(modelCounts.values())))
+	plt.bar(xRanges, list(modelCounts.values()), align='edge')
 	ax = plt.gca()
 	ax.set_title("Count of Models on omf.coop by Type")
 	ax.set_xlim(-0.2, len(modelCounts.values()))
-	plt.xticks([x + 0.4 for x in xRanges], modelCounts.keys(), rotation='vertical')
+	plt.xticks([x + 0.4 for x in xRanges], list(modelCounts.keys()), rotation='vertical')
 	plt.subplots_adjust(bottom=0.2)
 	plt.savefig(outFilePath)
 
@@ -145,10 +141,10 @@ def trafficLogStats(logsPath, outFilePath):
 	# Read in a file containing the full access log.
 	if logsPath.endswith('.zip'):
 		# Support for reading zipped logs.
-		zfile = zipfile.ZipFile(logsPath, 'r')
-		fname = [x for x in zfile.namelist() if '/' not in x][0]
-		zcontent = zfile.open(fname)
-		lines = zcontent.readlines()
+		with zipfile.ZipFile(logsPath, 'r') as zfile:
+			fname = [x for x in zfile.namelist() if '/' not in x][0]
+			with zfile.open(fname) as zcontent_file:
+				lines = zcontent_file.readlines()
 	else:
 		# Support for plain text logs.
 		logfile = open(logsPath, 'r')
@@ -208,16 +204,16 @@ def trafficLogStats(logsPath, outFilePath):
 		monthCount[accessDt] += 1
 		userCount[ipStr] += 1
 	# Output any lat/lons we found
-	with open('./scratch/ipLocDatabase.txt','w') as iplFile:
+	with open(os.path.join(os.path.dirname(__file__), 'scratch/ipLocDatabase.txt'), 'w') as iplFile:
 		for L in locs:
 			iplFile.write(str(L) + '\n')
 	# Read the IP locations and clean up their foramtting.
-	with open('./scratch/ipLocDatabase.txt', 'r') as locFile:
+	with open(os.path.join(os.path.dirname(__file__), 'scratch/ipLocDatabase.txt'), 'r') as locFile:
 		markers = locFile.readlines()
 		markers = list(set(markers))
 		markers = [x.replace('\n','').replace('(','[').replace(')',']') for x in markers]
 	# Render the HTML map of IP locations
-	with open('./static/ipLoc.html', 'w') as f2:
+	with open(os.path.join(os.path.dirname(__file__), 'static/ipLoc.html'), 'w') as f2:
 		f2.write(template.render(markers=markers))
 	# Set up plotting:
 	plt.figure(figsize=(15, 15))
@@ -229,8 +225,8 @@ def trafficLogStats(logsPath, outFilePath):
 	totalSessions = "{:,}".format(sum(log.values()))
 	creationTime = datetime.now().strftime('%Y-%m-%d')
 	ax.set_title('Session Count By Month. Total: ' + totalSessions + '\nGenerated: ' + creationTime)
-	barRange = range(len(log))
-	plt.bar(barRange, log.values(), align='center')
+	barRange = list(range(len(log)))
+	plt.bar(barRange, list(log.values()), align='center')
 	plt.xticks(barRange, [x.replace('/', '\n') for x in log.keys()])
 	plt.axis('tight')
 	# Hit counts by month:
@@ -238,8 +234,8 @@ def trafficLogStats(logsPath, outFilePath):
 	plt.subplot(3, 1, 2)
 	ax = plt.gca()
 	ax.set_title('Hit Count By Month. Total: ' + "{:,}".format(sum(log.values())))
-	barRange = range(len(log))
-	plt.bar(barRange, log.values(), align='center')
+	barRange = list(range(len(log)))
+	plt.bar(barRange, list(log.values()), align='center')
 	plt.xticks(barRange, [x.replace('/', '\n') for x in log.keys()])
 	plt.axis('tight')
 	# Plot the hits per user histogram:
@@ -249,7 +245,7 @@ def trafficLogStats(logsPath, outFilePath):
 	userValues = list(pair[1] for pair in userElements)
 	title = 'Histogram of Hits Per User'
 	plt.title(title)
-	plt.hist(userValues, bins=range(0, 50, 5))
+	plt.hist(userValues, bins=list(range(0, 50, 5)))
 	# Country hit counts:
 	log = collections.OrderedDict(sorted(IPCount.items(), key=lambda x: x[1], reverse=True))
 	countryTotal = str(len(log))
@@ -261,7 +257,7 @@ def trafficLogStats(logsPath, outFilePath):
 	title = 'Hits by Country. Total Countries: ' + countryTotal
 	ax.set_title(title)
 	people = [x[0:14] for x in log.keys()]
-	y_pos = range(len(people))
+	y_pos = list(range(len(people)))
 	performance = [x for x in log.values()]
 	ax.barh(y_pos, performance, align='center')
 	ax.set_yticks(y_pos)
