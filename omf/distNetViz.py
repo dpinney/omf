@@ -2,6 +2,7 @@
 Load an OMF feeder in to the new viewer.
 """
 
+from __future__ import print_function
 import tempfile, shutil, os, fileinput, json, networkx as nx, platform, omf.feeder as feeder, webbrowser, sys
 import omf
 
@@ -11,22 +12,22 @@ def main():
 	argCount = len(sys.argv)
 	errorMessage = 'Incorrect inputs. Usage: distNetViz -f <Path_to_feeder.glm or .omd>'
 	if argCount == 1:
-		print 'Running tests. Normal usage: distNetViz -f <Path_to_feeder.glm or .omd>'
+		print('Running tests. Normal usage: distNetViz -f <Path_to_feeder.glm or .omd>')
 		FEEDER_PATH = omf.omfDir + '/static/publicFeeders/Simple Market System.omd'
 		DO_FORCE_LAYOUT = True
 	elif argCount == 2:
-		print 'Beginning display of ' + sys.argv[1]
+		print('Beginning display of ' + sys.argv[1])
 		DO_FORCE_LAYOUT = False
 		FEEDER_PATH = sys.argv[1]
 	elif argCount == 3:
-		print 'Force laying out and displaying ' + sys.argv[2]
+		print('Force laying out and displaying ' + sys.argv[2])
 		if sys.argv[1] == '-f':
 			DO_FORCE_LAYOUT = True
 		else:
-			print errorMessage
+			print(errorMessage)
 		FEEDER_PATH = sys.argv[2]
 	elif argCount > 3:
-		print errorMessage
+		print(errorMessage)
 	viz(FEEDER_PATH, forceLayout=DO_FORCE_LAYOUT, outputPath=None)
 
 
@@ -128,33 +129,33 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.h
 	# Note: you can't juse open the file in r+ mode because, based on the way the file is mapped to memory, you can only overwrite a line with another of exactly the same length.
 	for line in fileinput.input(tempDir + '/' + outputName, inplace=1):
 		if line.lstrip().startswith('<link rel="stylesheet" href="/static/jquery-ui.min.css">'):
-			print ""
+			print("")
 		elif line.lstrip().startswith('<script type="text/javascript" src="/static/jquery.js"></script>'):
-			print ""
+			print("")
 		elif line.lstrip().startswith('<script type="text/javascript" src="/static/jquery-ui.min.js"></script>'):
-			print ""
+			print("")
 		elif line.lstrip().startswith('<script type="text/javascript" src="/static/svg-pan-zoom.js"></script>'):
-			print ""
+			print("")
 		elif line.lstrip().startswith('<script type="text/javascript" src="/static/chroma.min.js"></script>'):
-			print ""
+			print("")
 		elif line.lstrip().startswith('<script type="text/javascript" src="/static/papaparse.min.js"></script>'):
-			print ""
+			print("")
 		elif line.lstrip().startswith('<link rel="shortcut icon" href="/static/favicon.ico"/>'):
 			print('<link rel="shortcut icon" href="data:image/x-icon;base64,AAABAAEAEBAQAAAAAAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAioqKAGlpaQDU1NQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIiIiIiIiIAAgACAAIAAgACAzIzMjMyMwIDAgMCAwIDAiIiIiIiIgMCAwEDAgMCAwIDMTMyMzIzAgMBAwIDAgMCIiIiIiIiAwIDAQMCAwIDAgMxMzIzMjMCAwEDAgMCAwIiIiIiIiIDAAMAAwADAAMAAzMzMzMzMwAAAAAAAAAAAABwAAd3cAAEABAABVVQAAAAUAAFVVAABAAQAAVVUAAAAFAABVVQAAQAEAAFVVAAAABQAA3d0AAMABAAD//wAA"/>')
 		elif line.lstrip().startswith('<script id="panZoomInsert">'):
-			print '<script id="panZoomInsert">\n' + pzData # load up the new feeder.
+			print('<script id="panZoomInsert">\n' + pzData) # load up the new feeder.
 		elif line.lstrip().startswith('<script id="chromaInsert">'):
-			print '<script id="chromaInsert">\n' + chromaData
+			print('<script id="chromaInsert">\n' + chromaData)
 		elif line.lstrip().startswith('<script id="papaParseInsert">'):
-			print '<script id="papaParseInsert">\n' + papaData
+			print('<script id="papaParseInsert">\n' + papaData)
 		elif line.lstrip().startswith('<script id="jqueryInsert">'):
-			print '<script id="jqueryInsert">\n' + jquery_data
+			print('<script id="jqueryInsert">\n' + jquery_data)
 		elif line.lstrip().startswith('<script id="jqueryUiInsert">'):
-			print '<script id="jqueryUiInsert">\n' + jquery_ui_data
+			print('<script id="jqueryUiInsert">\n' + jquery_ui_data)
 		elif line.lstrip().startswith('<style id="jqueryCssInsert">'):
-			print '<style id="jqueryCssInsert">\n' + jquery_css_data
+			print('<style id="jqueryCssInsert">\n' + jquery_css_data)
 		else:
-			print line.rstrip()
+			print(line.rstrip())
 	# os.system('open -a "Google Chrome" ' + '"file://' + tempDir + '/' + outputName"')
 	# webbrowser.open_new("file://" + tempDir + '/' + outputName)
 	if open_file:
