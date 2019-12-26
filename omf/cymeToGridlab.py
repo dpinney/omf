@@ -21,22 +21,18 @@ conductors is the full path to a .csv file containing conductor information for 
 Note that db_network and db_equipment can be the same file is both network and equipment databases were exported to one .mdb file from CYME.
 """
 
-from __future__ import print_function
-import feeder, csv, random, math, copy, subprocess, locale, tempfile, traceback
-from os.path import join as pJoin
-import warnings
-from StringIO import StringIO
-import sys, os, json, traceback, shutil
-from omf.solvers import gridlabd
-from pathlib import Path
-import matplotlib
 
-matplotlib.pyplot.switch_backend("Agg")
+import csv, random, math, copy, subprocess, locale, tempfile, warnings, sys, os, json, traceback, shutil, platform
+from os.path import join as pJoin
+import matplotlib
 from matplotlib import pyplot as plt
 import numpy as np
 from numpy.linalg import inv
-import platform
+from omf.solvers import gridlabd
+from omf import feeder
 
+
+matplotlib.pyplot.switch_backend("Agg")
 m2ft = 1.0 / 0.3048  # Conversion factor for meters to feet
 
 
@@ -44,10 +40,10 @@ def flatten(*args, **kwargs):
 	dicty = dict(*args, **kwargs)
 	for arg in args:
 		if isinstance(arg, dict):
-			for k, v in arg.iteritems():
+			for k, v in arg.items():
 				dicty[k] = v
 	if kwargs:
-		for k, v in kwargs.iteritems():
+		for k, v in kwargs.items():
 			dicty[k] = v
 	return dicty
 
@@ -56,19 +52,19 @@ def _csvDump(database_file, modelDir):
 	# Get the list of table names with "mdb-tables"
 	if platform.system() == "Linux" or platform.system() == "Darwin":
 		table_names = subprocess.Popen(
-			["mdb-tables", "-1", database_file], stdout=subprocess.PIPE
+			["mdb-tables", "-1", database_file], stdout=subprocess.PIPE, text=True
 		).communicate()[0]
-		tables = table_names.split("\n")
+		tables = table_names.split('\n')
 		if not os.path.isdir((pJoin(modelDir, "cymeCsvDump"))):
 			os.makedirs((pJoin(modelDir, "cymeCsvDump")))
 			# Dump each table as a CSV file using "mdb-export",
 			# converting " " in table names to "_" for the CSV filenames.
 		for table in tables:
 			if table != "":
-				filename = table.replace(" ", "_") + ".csv"
+				filename = table.replace(' ', '_') + '.csv'
 				f = open(pJoin(modelDir, "cymeCsvDump", filename), "w+")
 				contents = subprocess.Popen(
-					["mdb-export", database_file, table], stdout=subprocess.PIPE
+					["mdb-export", database_file, table], stdout=subprocess.PIPE, text=True
 				).communicate()[0]
 				f.write(contents)
 				f.close()
@@ -81,9 +77,9 @@ def _csvDump(database_file, modelDir):
 		os.chdir(modelDir)
 		database_file = database_file.split("\\")[-1]
 		table_names = subprocess.Popen(
-			["bash", "-c", "mdb-tables -1 " + database_file], stdout=subprocess.PIPE
+			["bash", "-c", "mdb-tables -1 " + database_file], stdout=subprocess.PIPE, text=True
 		).communicate()[0]
-		tables = table_names.split("\n")
+		tables = table_names.split('\n')
 		if not os.path.isdir((pJoin(modelDir, "cymeCsvDump"))):
 			os.makedirs((pJoin(modelDir, "cymeCsvDump")))
 			# Dump each table as a CSV file using "mdb-export",
@@ -93,8 +89,7 @@ def _csvDump(database_file, modelDir):
 				filename = table.replace(" ", "_") + ".csv"
 				file = open(pJoin(modelDir, "cymeCsvDump", filename), "w+")
 				contents = subprocess.Popen(
-					["bash", "-c", "mdb-export " + database_file + " " + table],
-					stdout=subprocess.PIPE,
+					["bash", "-c", "mdb-export " + database_file + " " + table], stdout=subprocess.PIPE, text=True
 				).communicate()[0]
 				file.write(contents)
 				file.close()
@@ -102,12 +97,13 @@ def _csvDump(database_file, modelDir):
 
 
 def _findNetworkId(csvFile):
-	csvDict = csv.DictReader(open(csvFile, "r"))
 	networks = []
-	for row in csvDict:
-		networks.append(row["NetworkId"])
-		# HACK: For multi-source networks (Titanium), select the second source
-		# Need to find a way to do this better
+	with open(csvFile, newline='') as f:
+		csvDict = csv.DictReader(f)
+		for row in csvDict:
+			networks.append(row["NetworkId"])
+			# HACK: For multi-source networks (Titanium), select the second source
+			# Need to find a way to do this better
 	if len(networks) > 1:
 		return networks[1]
 	else:
@@ -172,7 +168,7 @@ def _convertLoadClass(class_from_db):
 
 def _csvToArray(csvFileName):
 	""" Simple .csv data ingester. """
-	with open(csvFileName, "r") as csvFile:
+	with open(csvFileName, newline='') as csvFile:
 		csvReader = csv.reader(csvFile)
 		outArray = []
 		for row in csvReader:
@@ -186,15 +182,17 @@ def _csvToDictList(csvFileName, feederId):
 	mapped = []
 	deleteRows = []
 	content = []
-	sourceFile = csv.reader(open(csvFileName))
-	header = sourceFile.next()
-	csvDict = csv.DictReader(open(csvFileName, "r"))
-	for row in csvDict:
-		# Equipment files, all equipment gets added
-		if "NetworkId" not in header:
-			mapped.append(flatten(row))
-		elif row["NetworkId"] == feederId:
-			mapped.append(flatten(row))
+	with open(csvFileName, newline='') as f:
+		sourceFile = csv.reader(f)
+		header = next(sourceFile)
+	with open(csvFileName, newline='') as f:
+		csvDict = csv.DictReader(f)
+		for row in csvDict:
+			# Equipment files, all equipment gets added
+			if "NetworkId" not in header:
+				mapped.append(flatten(row))
+			elif row["NetworkId"] == feederId:
+				mapped.append(flatten(row))
 	return mapped
 
 
@@ -508,7 +506,7 @@ def _readOverheadByPhase(feederId, modelDir):
 				tmp = float(row["Length"]) * m2ft
 				data_dict[device_no]["length"] = tmp if tmp != 0 else 1.0
 
-				for key, config in olc.iteritems():
+				for key, config in olc.items():
 					if overheadLineConfiguration == config:
 						data_dict[device_no]["configuration"] = key
 				if data_dict[device_no]["configuration"] is None:
@@ -772,7 +770,7 @@ def _splitLinkObjects(sectionDict, deviceDict, linkDict, overheadDict, undergrou
 
 def _findParents(sectionDict, deviceDict, loadDict):
 	"""store parent information for load type objects"""
-	for lineId, loaddevices in loadDict.iteritems():
+	for lineId, loaddevices in loadDict.items():
 		# if it's not a list, put it into a list on len 1
 		loaddevices = loaddevices if type(loaddevices) == list else [loaddevices]
 		for loaddevice in loaddevices:
@@ -976,7 +974,7 @@ def _readShuntCapacitor(feederId, modelDir):
 		# if shunt capacitor table has KVARBC as a column use this block:
 		for row in shuntcapacitor_db:
 			device_no = _fixName(row["DeviceNumber"])
-			if not row.has_key("EquipmentId"):
+			if "EquipmentId" not in row:
 				row["EquipmentId"] = "DEFAULT"
 			eq_id = _fixName(row["EquipmentId"])
 
@@ -2054,7 +2052,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 	fromNodes = []
 	toNodes = []
 	cleanToNodes = []
-	for link, section in cymsection.iteritems():
+	for link, section in cymsection.items():
 		if "from" in section:
 			if section["from"] not in fromNodes:
 				fromNodes.append(section["from"])
@@ -2070,7 +2068,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 	nislands = len(islandNodes)
 	while nislands != islands:
 		islands = len(islandNodes)
-		for link, section in cymsection.iteritems():
+		for link, section in cymsection.items():
 			if "from" in section.keys():
 				if section["from"] in islandNodes and section["to"] not in islandNodes:
 					islandNodes.add(section["to"])
@@ -2078,7 +2076,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 
 	deleteSections = set()
 	for node in islandNodes:
-		for link, section in cymsection.iteritems():
+		for link, section in cymsection.items():
 			if (
 				node == section["from"] or node == section["to"]
 			) and link not in deleteSections:
@@ -2094,7 +2092,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 		"""
 
 	# Group each type of device.
-	for device, value in cymsectiondevice.iteritems():
+	for device, value in cymsectiondevice.items():
 		dType = value["device_type"]
 		sName = value["section_name"]
 
@@ -2230,7 +2228,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 	for link in cymsection.keys():
 		if "from" in cymsection[link].keys() and "to" in cymsection[link].keys():
 			if {cymsection[link]["from"], cymsection[link]["to"]} in fromTo:
-				for key, value in cymsectiondevice.iteritems():
+				for key, value in cymsectiondevice.items():
 					if value["section_name"] == link:
 						parallelLinks.append(key)
 						break
@@ -2497,7 +2495,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 	}
 
 	# Create overhead line dictionaries
-	for dev_key, dev_dict in cymsectiondevice.iteritems():
+	for dev_key, dev_dict in cymsectiondevice.items():
 		if dev_dict["device_type"] == 3:
 			if dev_key not in cymoverheadbyphase.keys():
 				print("There is no line spec for ", dev_key, " in the network database provided.\n")
@@ -3100,7 +3098,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 		{"module": "residential", "implicit_enduses": "NONE"},
 		{"solver_method": "NR", "NR_iteration_limit": "50", "module": "powerflow"},
 	]
-	for headId in xrange(len(genericHeaders)):
+	for headId in range(len(genericHeaders)):
 		glmTree[headId] = genericHeaders[headId]
 	key = len(glmTree)
 	objectList = [
@@ -3156,7 +3154,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 			glmTree[x]["parent"] = "n" + glmTree[x]["parent"]
 			# FINISHED CONVERSION FROM THE DATABASES****************************************************************************************************************************************************
 			# Deletign malformed lniks
-	for key in glmTree.keys():
+	for key in list(glmTree.keys()):
 		if (
 			"object" in glmTree[key].keys()
 			and glmTree[key]["object"]
@@ -3404,9 +3402,9 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 
 def _tests(keepFiles=True):
 	testFile = ["IEEE13.mdb"]
-	inputDir = "./static/testFiles/"
+	inputDir = os.path.join(os.path.dirname(__file__), 'static/testFiles/')
 	# outputDir = tempfile.mkdtemp()
-	outputDir = "./scratch/cymeToGridlabTests/"
+	outputDir = os.path.join(os.path.dirname(__file__), 'scratch/cymeToGridlabTests/')
 	exceptionCount = 0
 	try:
 		shutil.rmtree(outputDir)
@@ -3421,9 +3419,8 @@ def _tests(keepFiles=True):
 			cyme_base = convertCymeModel(inputDir + db_network, inputDir)
 			glmString = feeder.sortedWrite(cyme_base)
 			testFilename = db_network[:-4]
-			gfile = open(inputDir + testFilename + ".glm", "w")
-			gfile.write(glmString)
-			gfile.close()
+			with open(inputDir + testFilename + ".glm", 'w') as f:
+				f.write(glmString)
 			inFileStats = os.stat(pJoin(inputDir, db_network))
 			outFileStats = os.stat(pJoin(inputDir, testFilename + ".glm"))
 			inFileSize = inFileStats.st_size
@@ -3434,12 +3431,12 @@ def _tests(keepFiles=True):
 				resultsFile.write("WROTE GLM FOR " + testFilename + "\n")
 				resultsFile.write(
 					"Input .mdb File Size: "
-					+ str(locale.format("%d", inFileSize, grouping=True))
+					+ str(locale.format_string("%d", inFileSize, grouping=True))
 					+ "\n"
 				)
 				resultsFile.write(
 					"Output .glm File Size: "
-					+ str(locale.format("%d", outFileSize, grouping=True))
+					+ str(locale.format_string("%d", outFileSize, grouping=True))
 					+ "\n"
 				)
 		except:
