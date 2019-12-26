@@ -1,16 +1,12 @@
-from __future__ import print_function
-import csv, datetime as dt, json, tempfile
-from matplotlib import pyplot as plt
-import os
+import csv, datetime as dt, json, tempfile, os, random
 from os.path import join as pJoin
-# OMF imports
-import omf.feeder as feeder
-from omf.solvers import gridlabd
-import random
-# Plotting
 import numpy as np
+# Plotting
 import matplotlib
 from matplotlib import pyplot as plt
+# OMF imports
+from omf import feeder
+from omf.solvers import gridlabd
 
 def omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, solver="FBS", calibrateError=(0.05,5), trim=5):
 	'''calibrates a feeder and saves the calibrated tree at a location.
@@ -124,7 +120,7 @@ def omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLen
 		'''Runs powerflow once, then iterates.'''
 		# Run initial powerflow to get power.
 		print("Starting calibration.")
-		print("Goal of calibration: Error: %s, Iterations: <%s, trim: %s"%(calibrateError[0], calibrateError[1], trim))		
+		print("Goal of calibration: Error: %s, Iterations: <%s, trim: %s"%(calibrateError[0], calibrateError[1], trim))
 		output = gridlabd.runInFilesystem(tree, keepFiles=True, workDir=pJoin(workDir,"gridlabD"))
 		outRealPow = output["caliSub.csv"]["measured_real_power"][trim:simLength]
 		outImagPower = output["caliSub.csv"]["measured_reactive_power"][trim:simLength]
@@ -163,7 +159,7 @@ def omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLen
 		else:
 			if iteration==1: outRealPowIter = outRealPow
 			SCAL_CONST = 1.0
-		print("Calibration done: Error: %s, Iteration: %s, SCAL_CONST: %s"%(str(round(abs(error*100),2)), str(iteration), round(SCAL_CONST,2)))		
+		print("Calibration done: Error: %s, Iteration: %s, SCAL_CONST: %s"%(str(round(abs(error*100),2)), str(iteration), round(SCAL_CONST,2)))
 		return outRealPow, outRealPowIter, lastFile, iteration
 	outRealPow, outRealPowIter, lastFile, iteration = runPowerflowIter(tree,scadaSubPower[trim:simLength])
 	caliPowVectors = [[float(element) for element in scadaSubPower[trim:simLength]], [float(element)/1000 for element in outRealPow], [float(element)/1000 for element in outRealPowIter]]
@@ -178,8 +174,9 @@ def omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLen
 	print("Len:", len(caliPowVectors[0]), len(caliPowVectors[1]), len(caliPowVectors[2]))
 	plotLine(workDir, caliPowVectors, chartData, simStartDate['Date']+dt.timedelta(hours=trim), simLengthUnits)
 	# Write the final output.
+	with open(pJoin(pJoin(workDir,"gridlabD"),lastFile)) as f:
+		playerString = f.read()
 	with open(pJoin(workDir,"calibratedFeeder.omd"),"w") as outJson:
-		playerString = open(pJoin(pJoin(workDir,"gridlabD"),lastFile)).read()
 		feederJson["attachments"][lastFile] = playerString
 		feederJson["tree"] = tree
 		json.dump(feederJson, outJson, indent=4)
@@ -187,7 +184,7 @@ def omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLen
 
 def _processScadaData(workDir,scadaPath, simStartDate, simLengthUnits):
 	'''generate a SCADA player file from raw SCADA data'''
-	with open(scadaPath,"r") as scadaFile:
+	with open(scadaPath, newline='') as scadaFile:
 		scadaReader = csv.DictReader(scadaFile, delimiter='\t')
 		allData = [row for row in scadaReader]
 	scadaSubPower = [float(row["power"]) for row in allData]
@@ -255,10 +252,13 @@ def attachVolts(workDir, feederPath, voltVectorA, voltVectorB, voltVectorC, simS
 		feeder.adjustTime(tree, simLength, simLengthUnits, firstDateTime.strftime("%Y-%m-%d %H:%M:%S"))
 		output = gridlabd.runInFilesystem(tree, attachments=feederJson.get('attachments', {}), keepFiles=True, workDir=pJoin(workDir,"gridlabD"))
 		# Write the output.
+		with open(pJoin(pJoin(workDir,"gridlabD"),"phaseAVoltage.player")) as f:
+			playerStringA = f.read()
+		with open(pJoin(pJoin(workDir,"gridlabD"),"phaseBVoltage.player")) as f:
+			playerStringB = f.read()
+		with open(pJoin(pJoin(workDir,"gridlabD"),"phaseCVoltage.player")) as f:
+			playerStringC = f.read()
 		with open(pJoin(workDir,"calibratedFeeder.omd"),"w") as outJson:
-			playerStringA = open(pJoin(pJoin(workDir,"gridlabD"),"phaseAVoltage.player")).read()
-			playerStringB = open(pJoin(pJoin(workDir,"gridlabD"),"phaseBVoltage.player")).read()
-			playerStringC = open(pJoin(pJoin(workDir,"gridlabD"),"phaseCVoltage.player")).read()
 			feederJson["attachments"]["phaseAVoltage.player"] = playerStringA
 			feederJson["attachments"]["phaseBVoltage.player"] = playerStringB
 			feederJson["attachments"]["phaseCVoltage.player"] = playerStringC
@@ -313,8 +313,8 @@ def _tests():
 	try: os.mkdir(pJoin(workDir,"gridlabD"))
 	except: pass	
 	print("Currently working in: ", workDir)
-	scadaPath = pJoin("static","testFiles", "FrankScada.csv")
-	feederPath = pJoin("static", "publicFeeders","ABEC Frank pre calib.omd")
+	scadaPath = pJoin(os.path.dirname(__file__), "static","testFiles", "FrankScada.csv")
+	feederPath = pJoin(os.path.dirname(__file__), "static", "publicFeeders","ABEC Frank pre calib.omd")
 	simDate = dt.datetime.strptime("4/13/2011 09:00:00", "%m/%d/%Y %H:%M:%S") # Spring peak.
 	simStartDate = {"Date":simDate,"timeZone":"PST"}
 	simLength = 24
