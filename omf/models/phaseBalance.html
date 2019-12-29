@@ -122,7 +122,7 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Production Energy Cost ($/kWh)<span class="classic"></span></label>
+				<label class="tooltip">Production Energy Cost ($/kWh)<span class="classic">Production rate.</span></label>
 				<input type="text" id="productionCost" name="productionCost" required="required"/>
 			</div>
 			<div class="shortInput">
@@ -157,12 +157,12 @@
 				<label class="tooltip">Strategy<span class="classic">What strategy would you like to deploy?</span></label>
 				<select id="strategy" name="strategy">
 					<option value="constant">constant</option>
-					<option value="decentralizede">decentralizede</option>
+					<option value="decentralized">decentralized</option>
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Constant Value<span class="classic">If constant strategy, what's the number of VARs?</span></label>
-				<input type="text" id="constant_value" name="constant_value" required="required"/>
+				<label class="tooltip">Constant Power Factor<span class="classic">If constant strategy, what's the preferred power factor?</span></label>
+				<input type="text" id="constant_pf" name="constant_pf" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>

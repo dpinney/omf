@@ -46,9 +46,13 @@ def n(num):
 def floats(f):
 	return float(f.replace(',', ''))
 
-def change_complex(x, new_imag):
+def respect_pf(x, constant_pf):
 	m = complex(x)
-	return "{}+{}j".format(m.real, new_imag) if new_imag > 0 else "{}{}j".format(m.real, new_imag)
+	rating_VA = m.real
+	newWatts = constant_pf * rating_VA
+	newVARs = math.sqrt(rating_VA**2 - newWatts**2)
+	new_complex = complex(newWatts, newVARs)
+	return "{}+{}j".format(new_complex.real, new_complex.imag) if constant_pf > 0 else "{}{}j".format(new_complex.real, new_complex.imag)
 
 def work(modelDir, ind):
 	''' Run the model in its directory. '''
@@ -111,16 +115,16 @@ def work(modelDir, ind):
 	with open(omdPath) as f:
 		tree_controlled = json.load(f)['tree']
 	
-	new_imag = float(ind['constant_value'])
+	constant_pf = float(ind['constant_pf'])
 	for k, v in tree_controlled.iteritems():
 		if ('PV' in v.get('groupid', '')) and v.get('object', '') == 'load':
 			if ind['strategy'] == 'constant':
 				if v.get('constant_power_C', '') != '':
-					v['constant_power_C'] = change_complex(v['constant_power_C'], new_imag)
+					v['constant_power_C'] = respect_pf(v['constant_power_C'], constant_pf)
 				elif v.get('constant_power_B', '') != '':
-					v['constant_power_B'] = change_complex(v['constant_power_B'], new_imag)
+					v['constant_power_B'] = respect_pf(v['constant_power_B'], constant_pf)
 				elif v.get('constant_power_A', '') != '':
-					v['constant_power_A'] = change_complex(v['constant_power_A'], new_imag)
+					v['constant_power_A'] = respect_pf(v['constant_power_A'], constant_pf)
 			
 			v['groupid'] = 'PV'
 
@@ -299,7 +303,7 @@ def work(modelDir, ind):
 			"<tr>"
 				"<td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td><td>{5}</td><td>{6}</td><td>{7}</td><td>{8}</td>"
 			"</tr>" 
-				if r['node_name'] != ind['criticalNode'] else 
+				if r['node_name'] != ind['criticalNode'] or ind['strategy'] == 'constant' else 
 			"<tr>"
 				"<td {9}>{0}</td><td {9}>{1}</td><td {9}>{2}</td><td {9}>{3}</td><td {9}>{4}</td><td {9}>{5}</td><td {9}>{6}</td><td {9}>{7}</td><td {9}>{8}</td>"
 			"</tr>"
@@ -492,8 +496,8 @@ def new(modelDir):
 		# "pvConnection": 'Wye',
 		# "layoutAlgorithm": "geospatial",
 		# ---------------------------------------- #
-		"strategy": "",
-		"constant_value": "-400",
+		"strategy": "constant", # decentralized
+		"constant_pf": ".95",
 		"modelType": modelName,
 		"runTime": "",
 		"zipCode": "64735",
