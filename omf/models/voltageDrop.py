@@ -1,5 +1,6 @@
 ''' Graph the voltage drop on a feeder. '''
 
+from __future__ import print_function
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math, warnings
 import traceback
 from os.path import join as pJoin
@@ -32,7 +33,7 @@ def work(modelDir, inputDict):
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict["feederName1"] = feederName
 	# Create voltage drop plot.
-	print "*DEBUG: feederName:", feederName
+	print("*DEBUG: feederName:", feederName)
 	omd = json.load(open(pJoin(modelDir,feederName + '.omd')))
 	if inputDict.get("layoutAlgorithm", "geospatial") == "geospatial":
 		neato = False
@@ -228,7 +229,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	# Run Gridlab.
 	if not workDir:
 		workDir = tempfile.mkdtemp()
-		print '@@@@@@', workDir
+		print('@@@@@@', workDir)
 	for i in range(6):
 		gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 		#HACK: workaround for shoddy macOS gridlabd build.
@@ -522,7 +523,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 			drawColorbar = True
 		else:
 			edgeList = [emptyColors.get(n,.6) for n in edgeNames]
-			print "WARNING: edgeCol property must be 'Current', 'Power', 'Rating', 'PercentOfRating', or None"
+			print("WARNING: edgeCol property must be 'Current', 'Power', 'Rating', 'PercentOfRating', or None")
 	else:
 		edgeList = [emptyColors.get(n,.6) for n in edgeNames]
 	edgeIm = nx.draw_networkx_edges(
@@ -549,12 +550,12 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 				edgeLabels = edgeTupleValsPU
 			else:
 				edgeLabels = None
-				print "WARNING: edgeCol property cannot be set to None when edgeLabs property is set to 'Value'"
+				print("WARNING: edgeCol property cannot be set to None when edgeLabs property is set to 'Value'")
 		elif edgeLabs == "ProtDevs":
 			edgeLabels = edgeTupleProtDevs
 		else:
 			edgeLabs = None
-			print "WARNING: edgeLabs property must be either 'Name', 'Value', or None"
+			print("WARNING: edgeLabs property must be either 'Name', 'Value', or None")
 	if edgeLabs != None:
 		edgeLabelsIm = nx.draw_networkx_edge_labels(fGraph,
 			pos = positions,
@@ -576,7 +577,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 			drawColorbar = True
 		else:
 			nodeList = [emptyColors.get(n,1) for n in fGraph.nodes()]
-			print "WARNING: nodeCol property must be 'Voltage', 'VoltageImbalance', 'perUnitVoltage', 'perUnit120Voltage', or None"
+			print("WARNING: nodeCol property must be 'Voltage', 'VoltageImbalance', 'perUnitVoltage', 'perUnit120Voltage', or None")
 	else:
 		nodeList = [emptyColors.get(n,.6) for n in fGraph.nodes()]
 
@@ -604,13 +605,13 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 				nodeLabels = nodeVoltsPU120
 			else:
 				nodeLabels = None
-				print "WARNING: nodeCol property cannot be set to None when nodeLabs property is set to 'Value'"
+				print("WARNING: nodeCol property cannot be set to None when nodeLabs property is set to 'Value'")
 		#HACK: add hidden node label option for displaying specified load name
 		elif nodeLabs == "Load":
 			nodeLabels = nodeLoadNames
 		else:
 			nodeLabs = None
-			print "WARNING: nodeLabs property must be either 'Name', 'Value', or None"
+			print("WARNING: nodeLabs property must be either 'Name', 'Value', or None")
 	if nodeLabs != None:
 		nodeLabelsIm = nx.draw_networkx_labels(fGraph,
 			pos = positions,
@@ -625,8 +626,8 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 def glmToModel(glmPath, modelDir):
 	''' One shot model creation from glm. '''
 	tree = omf.feeder.parse(glmPath)
-	print "glmPath:    " + glmPath
-	print "modelDir:   " + modelDir
+	print("glmPath:    " + glmPath)
+	print("modelDir:   " + modelDir)
 	# Run powerflow. First name the folder for it.
 	# Remove old copy of the model.
 	shutil.rmtree(modelDir, ignore_errors=True)
