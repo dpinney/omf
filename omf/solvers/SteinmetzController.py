@@ -1,19 +1,16 @@
 # imports
-from __future__ import print_function
-import os
-import random as rand
-import math
-import numpy
+import os, random as rand, math, glob, shutil, tempfile
 from shutil import copyfile
-import glob,shutil
+import numpy
+
 def moveAndCreateDir(sourcePath, dstDir):
-    if os.path.isdir(dstDir) == False:
-        os.makedirs(dstDir)
-    else:
+	if os.path.isdir(dstDir) == False:
+		os.makedirs(dstDir)
+	else:
 		shutil.rmtree(dstDir)
 		os.makedirs(dstDir)
 
-    shutil.copy(sourcePath, dstDir)
+	shutil.copy(sourcePath, dstDir)
 
 class PV_information:
 	Parent = ""
@@ -194,7 +191,7 @@ def CreateStreamInfo(glmFileName, sourceNode):
 
 
 # find general upstream node
-def GetUpstreamNodes(targetNode, nPhaseQualifierList, streamInfo):			
+def GetUpstreamNodes(targetNode, nPhaseQualifierList, streamInfo):
 # find upstream nodes of the target node
 # go to source, collect leaves along the path
 # TODO: validate nodePhaseList
@@ -365,7 +362,7 @@ def GetDeltaPVdata(sourceFileName,streamInfo):
 				if 'P_Out' in line.strip():
 					P_out = int(line.strip().strip("P_Out").strip(' ').strip(";"))
 				if 'rated_power' in line.strip():
-					PV_rating = int(line.strip().strip("rated_power").strip(' ').strip(";"))					
+					PV_rating = int(line.strip().strip("rated_power").strip(' ').strip(";"))
 				if '}' in line.strip():
 					parent_name = GetCloestUpstreamNode(parent_temp, ['ABCN','ABC','ACB','BAC','BCA','CAB','CBA'], streamInfo)
 					Q_max = math.sqrt(PV_rating**2-P_out**2)
@@ -415,33 +412,33 @@ def CreateDeltaPVfile(sourceFileName,PV):
 
 
 def SteinmetzDeltaQ_VUF(voltage,current,Q_pre):
-    Q = {}
-    voltage_A = voltage['A']
-    voltage_B = voltage['B']
-    voltage_C = voltage['C']
+	Q = {}
+	voltage_A = voltage['A']
+	voltage_B = voltage['B']
+	voltage_C = voltage['C']
 
-    current_A = current['A']
-    current_B = current['B']
-    current_C = current['C']
+	current_A = current['A']
+	current_B = current['B']
+	current_C = current['C']
 
-    voltage_AB = voltage_A - voltage_B
-    voltage_BC = voltage_B - voltage_C
-    voltage_AC = voltage_C - voltage_A
+	voltage_AB = voltage_A - voltage_B
+	voltage_BC = voltage_B - voltage_C
+	voltage_AC = voltage_C - voltage_A
 
-    current_AB = 2.0/3*current_A+1.0/3*current_C
-    current_BC = 1.0/3*current_A+2.0/3*current_B
-    current_AC = 1.0/3*current_B+2.0/3*current_C
+	current_AB = 2.0/3*current_A+1.0/3*current_C
+	current_BC = 1.0/3*current_A+2.0/3*current_B
+	current_AC = 1.0/3*current_B+2.0/3*current_C
 
-    power_AB = voltage_AB * current_AB.conjugate() - complex(0,Q_pre['AB'])
-    power_BC = voltage_BC * current_BC.conjugate() - complex(0,Q_pre['BC'])
-    power_AC = voltage_AC * current_AC.conjugate() - complex(0,Q_pre['AC'])
+	power_AB = voltage_AB * current_AB.conjugate() - complex(0,Q_pre['AB'])
+	power_BC = voltage_BC * current_BC.conjugate() - complex(0,Q_pre['BC'])
+	power_AC = voltage_AC * current_AC.conjugate() - complex(0,Q_pre['AC'])
 
-    Q['AB'] = 1.0/3*(-2*power_AB.imag + power_BC.imag + power_AC.imag + math.sqrt(3)*power_BC.real - math.sqrt(3)*power_AC.real)
-    Q['BC'] = 1.0/3*(power_AB.imag -2*power_BC.imag + power_AC.imag + math.sqrt(3)*power_AC.real - math.sqrt(3)*power_AB.real)
-    Q['AC'] = 1.0/3*(power_AB.imag + power_BC.imag -2* power_AC.imag + math.sqrt(3)*power_AB.real - math.sqrt(3)*power_BC.real)
+	Q['AB'] = 1.0/3*(-2*power_AB.imag + power_BC.imag + power_AC.imag + math.sqrt(3)*power_BC.real - math.sqrt(3)*power_AC.real)
+	Q['BC'] = 1.0/3*(power_AB.imag -2*power_BC.imag + power_AC.imag + math.sqrt(3)*power_AC.real - math.sqrt(3)*power_AB.real)
+	Q['AC'] = 1.0/3*(power_AB.imag + power_BC.imag -2* power_AC.imag + math.sqrt(3)*power_AB.real - math.sqrt(3)*power_BC.real)
 
-    
-    return Q
+
+	return Q
 
 # Steinmetz circuit design (Wye) to decrease VUF
 def SteinmetzWyeQ_VUF(voltage,current,Q_pre):
@@ -664,8 +661,8 @@ def ChangeGlmFileDelta(inputFileName,outputFileName,PV,PV_index):
 		tempString = ''
 		power_string = ''
 		for line in contentIn:
-            # write by object block
-            # identify object
+	# write by object block
+	# identify object
 			if 'object load' in line.strip():
 				isLoad = 1
 			elif '}' in line.strip():
@@ -673,9 +670,9 @@ def ChangeGlmFileDelta(inputFileName,outputFileName,PV,PV_index):
 				isPV = 0
 				power_string = ''
 			else:
-                # not load, just copy
-				pass                       
-            # within load    
+		# not load, just copy
+				pass
+	# within load
 			if isLoad == 1:
 				if 'name' in line.strip():
 					load_name = line.strip().strip('name').strip(' ').strip(';')
@@ -683,7 +680,7 @@ def ChangeGlmFileDelta(inputFileName,outputFileName,PV,PV_index):
 					isPV = 1
 					m = PV_index[load_name]
 					#print complex(-PV[m].P_Out,-PV[m].Q_Out)
-					power_string = complexToString(complex(-PV[m].P_Out,-PV[m].Q_Out))      
+					power_string = complexToString(complex(-PV[m].P_Out,-PV[m].Q_Out))
 				if isPV == 1 and 'constant_power' in line.strip():
 					line = '\t' + line.strip(';').split()[0] + ' ' + power_string + ';\n'
 			tempString = tempString + line
@@ -768,7 +765,7 @@ def SteinmetzController(sourceFileName,connectionPV,criticalNode,iterNum,objecti
 
 	if connectionPV == 'Wye':
 		inputStartFileName = sourceFileName.strip('.glm') + '_Wye_Start.glm'
-		copyfile(outputFileName,inputStartFileName)		
+		copyfile(outputFileName,inputStartFileName)
 		AddPVWyeRecorder(inputStartFileName,'_base')
 		PV,PV_index = GetWyePVdata(outputFileName)
 		
@@ -871,9 +868,9 @@ def SteinmetzController(sourceFileName,connectionPV,criticalNode,iterNum,objecti
 					if outCode == 0:
 						break
 			
-				#update voltage and current information from gridlabd				   
+				#update voltage and current information from gridlabd
 				voltage = ReadVoltage(voltageFileName)
-				current = ReadCurrent(currentFileName)						
+				current = ReadCurrent(currentFileName)
 				VUF[iter+1] = abs(voltage['A'] + a ** 2 * voltage['B'] + a * voltage['C'])/abs(voltage['A'] + a * voltage['B'] + a**2 * voltage['C']) *100
 				#print abs(voltage['A']-voltage['B']),abs(voltage['B']-voltage['C']),abs(voltage['C']-voltage['A'])
 				#print 'Final VUF at', criticalNode, '{:.5E}'.format(VUF[iter+1]), '%'
@@ -1038,21 +1035,22 @@ def SteinmetzController(sourceFileName,connectionPV,criticalNode,iterNum,objecti
 
 def testing():
 	#example 1
-	#sourceFileName = 'R1-12.47-1-AddSolar-Wye.glm'
-	#criticalNode = 'R1-12-47-1_node_17'
+	sourceFileName = os.path.abspath(os.path.join(os.path.dirname(__file__), '../static/testFiles/R1-12.47-1-AddSolar-Wye.glm'))
+	criticalNode = 'R1-12-47-1_node_17'
 
 	#example 2
-	#sourceFileName = 'R1-12.47-2-AddSolar-Wye.glm'
+	#sourceFileName = os.path.join(path_prefix, 'R1-12.47-2-AddSolar-Wye.glm')
 	#criticalNode= 'R1-12-47-2_node_21'
 
-
-	sourceFileName = 'turkey_solar.glm'
-	criticalNode= 'nodeOH9975-S1862OH29955x2'
+	#sourceFileName = 'turkey_solar.glm'
+	#criticalNode= 'nodeOH9975-S1862OH29955x2'
 
 	#sourceFileName = 'bavarian_solar.glm'
 	#criticalNode= 'node2246822703'
-	curDir = os.getcwd()
-	destDir = curDir+'/MPUPV output file'
+	#curDir = os.getcwd()
+	#destDir = curDir+'/MPUPV output file'
+	destDir = tempfile.mkdtemp()
+	print('Testing MPUPV in:', destDir)
 	SteinmetzController(sourceFileName,'Delta',criticalNode,5,'VUF',destDir)
 
 if __name__ == '__main__':
