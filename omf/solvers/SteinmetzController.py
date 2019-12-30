@@ -1,4 +1,5 @@
 # imports
+from __future__ import print_function
 import os
 import random as rand
 import math
@@ -138,7 +139,7 @@ def CreateStreamInfo(glmFileName, sourceNode):
 					if isGeneralLine == True:
 						gLinesDic[temp_name] = set([tempConnectivity['from'], tempConnectivity['to']])
 				elif searchFlag != 0 and hasConn == True:
-					print 'dangling line!'
+					print('dangling line!')
 					dangLineCnt = dangLineCnt + 1
 				# reset flags
 				searchFlag = 0
@@ -286,7 +287,7 @@ def GetCloestUpstreamNode(inputItem, nPhaseQualifierList, streamInfo):
 			targetNode = connNodes[0]
 	else:
 		# TODO: other input items or invalid input
-		print 'Input item invalid or not supported'
+		print('Input item invalid or not supported')
 		return
 	leafNode = targetNode
 	while streamInfo.RootDic[leafNode] != 'SOURCE':
