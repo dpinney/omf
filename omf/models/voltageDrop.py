@@ -1,28 +1,27 @@
 ''' Graph the voltage drop on a feeder. '''
 
-from __future__ import print_function
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math, warnings
-import traceback
+import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math, warnings, traceback, base64
 from os.path import join as pJoin
 from jinja2 import Template
-from matplotlib import pyplot as plt
 import matplotlib
-from networkx.drawing.nx_agraph import graphviz_layout
+from matplotlib import pyplot as plt
 import networkx as nx
-from omf.models import __neoMetaModel__
-from __neoMetaModel__ import *
+from networkx.drawing.nx_agraph import graphviz_layout
+
 plt.switch_backend('Agg')
 
 # OMF imports 
-import omf.feeder as feeder
+import omf
+from omf import feeder
 from omf.solvers import gridlabd
+from omf.models import __neoMetaModel__
 
 # dateutil imports
 from dateutil import parser
 from dateutil.relativedelta import *
 
 # Model metadata:
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = "The voltageDrop model runs loadflow to show system voltages at all nodes."
 hidden = False
 
@@ -34,7 +33,8 @@ def work(modelDir, inputDict):
 	inputDict["feederName1"] = feederName
 	# Create voltage drop plot.
 	print("*DEBUG: feederName:", feederName)
-	omd = json.load(open(pJoin(modelDir,feederName + '.omd')))
+	with open(pJoin(modelDir,feederName + '.omd')) as f:
+		omd = json.load(f)
 	if inputDict.get("layoutAlgorithm", "geospatial") == "geospatial":
 		neato = False
 	else:
@@ -77,7 +77,7 @@ def work(modelDir, inputDict):
 		rezSqIn = int(inputDict["rezSqIn"]))
 	chart.savefig(pJoin(modelDir,"output.png"))
 	with open(pJoin(modelDir,"output.png"),"rb") as inFile:
-		outData["voltageDrop"] = inFile.read().encode("base64")
+		outData["voltageDrop"] = base64.standard_b64encode(inFile.read()).decode('ascii')
 	return outData
 
 def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, faultLoc=None, faultType=None, customColormap=False, scaleMin=None, scaleMax=None, rezSqIn=400, simTime='2000-01-01 0:00:00', loadLoc=None):
@@ -95,10 +95,11 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	# Be quiet matplotlib:
 	warnings.filterwarnings("ignore")
 	if path.endswith('.glm'):
-		tree = omf.feeder.parse(path)
+		tree = feeder.parse(path)
 		attachments = []
 	elif path.endswith('.omd'):
-		omd = json.load(open(path))
+		with open(path) as f:
+			omd = json.load(f)
 		tree = omd.get('tree', {})
 		attachments = omd.get('attachments',[])
 	else:
@@ -144,7 +145,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	# Map to speed up name lookups.
 	nameToIndex = {tree[key].get('name',''):key for key in tree.keys()}
 	# Get rid of schedules and climate and check for all edge types:
-	for key in tree.keys():
+	for key in list(tree.keys()):
 		obtype = tree[key].get("object","")
 		if obtype == 'underground_line':
 			edge_bools['underground_line'] = True
@@ -166,12 +167,12 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	tree[str(biggestKey*10 + 5)] = {"object":"voltdump","filename":"voltDump.csv"}
 	tree[str(biggestKey*10 + 6)] = {"object":"currdump","filename":"currDump.csv"}
 	# Line rating dumps
-	tree[omf.feeder.getMaxKey(tree) + 1] = {
+	tree[feeder.getMaxKey(tree) + 1] = {
 		'module': 'tape'
 	}
 	for key in edge_bools.keys():
 		if edge_bools[key]:
-			tree[omf.feeder.getMaxKey(tree) + 1] = {
+			tree[feeder.getMaxKey(tree) + 1] = {
 				'object':'group_recorder', 
 				'group':'"class='+key+'"',
 				'property':'continuous_rating',
@@ -212,14 +213,14 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 		if protDevices[key]:
 			for phase in ['A', 'B', 'C']:
 				if key != 'fuse':
-					tree[omf.feeder.getMaxKey(tree) + 1] = {
+					tree[feeder.getMaxKey(tree) + 1] = {
 						'object':'group_recorder', 
 						'group':'"class='+key+'"',
 						'property':'phase_' + phase + '_state',
 						'file':key + '_phase_' + phase + '_state.csv'
 					}
 				else:
-					tree[omf.feeder.getMaxKey(tree) + 1] = {
+					tree[feeder.getMaxKey(tree) + 1] = {
 						'object':'group_recorder', 
 						'group':'"class='+key+'"',
 						'property':'phase_' + phase + '_status',
@@ -231,7 +232,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 		workDir = tempfile.mkdtemp()
 		print('@@@@@@', workDir)
 	for i in range(6):
-		gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
+		gridlabOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 		#HACK: workaround for shoddy macOS gridlabd build.
 		if 'error when setting parent' not in gridlabOut.get('stderr','OOPS'):
 			break
@@ -241,7 +242,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 		for key in protDevices.keys():
 			if protDevices[key]:
 				for phase in ['A', 'B', 'C']:
-					with open(pJoin(workDir,key+'_phase_'+phase+'_state.csv'),'r') as statusFile:
+					with open(pJoin(workDir, key + '_phase_' + phase + '_state.csv'), newline='') as statusFile:
 						reader = csv.reader(statusFile)
 						# loop past the header, 
 						keys = []
@@ -251,7 +252,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 								keys = row
 								i = keys.index('# timestamp')
 								keys.pop(i)
-								vals = reader.next()
+								vals = next(reader)
 								vals.pop(i)
 						for pos,key2 in enumerate(keys):
 							protDevFinalStatus[key2][phase] = vals[pos]
@@ -263,30 +264,25 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	#print cmp(protDevInitStatus, protDevFinalStatus)
 	#find which values changed
 	changedStates = {}
-
-
 	#read voltDump values into a dictionary.
 	try:
-		dumpFile = open(pJoin(workDir,'voltDump.csv'),'r')
+		with open(pJoin(workDir, 'voltDump.csv'), newline='') as dumpFile:
+			reader = csv.reader(dumpFile)
+			next(reader) # Burn the header.
+			keys = next(reader)
+			voltTable = []
+			for row in reader:
+				rowDict = {}
+				for pos,key in enumerate(keys):
+					rowDict[key] = row[pos]
+				voltTable.append(rowDict)
 	except:
 		raise Exception('GridLAB-D failed to run with the following errors:\n' + gridlabOut['stderr'])
-	reader = csv.reader(dumpFile)
-	reader.next() # Burn the header.
-	keys = reader.next()
-	
-	
-
-	voltTable = []
-	for row in reader:
-		rowDict = {}
-		for pos,key in enumerate(keys):
-			rowDict[key] = row[pos]
-		voltTable.append(rowDict)
 	# read currDump values into a dictionary
-	with open(pJoin(workDir,'currDump.csv'),'r') as currDumpFile:
+	with open(pJoin(workDir, 'currDump.csv'), newline='') as currDumpFile:
 		reader = csv.reader(currDumpFile)
-		reader.next() # Burn the header.
-		keys = reader.next()
+		next(reader) # Burn the header.
+		keys = next(reader)
 		currTable = []
 		for row in reader:
 			rowDict = {}
@@ -298,7 +294,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	rating_in_VA = []
 	for key1 in edge_bools.keys():
 		if edge_bools[key1]:		
-			with open(pJoin(workDir,key1+'_cont_rating.csv'),'r') as ratingFile:
+			with open(pJoin(workDir, key1 + '_cont_rating.csv'), newline='') as ratingFile:
 				reader = csv.reader(ratingFile)
 				# loop past the header, 
 				keys = []
@@ -308,7 +304,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 						keys = row
 						i = keys.index('# timestamp')
 						keys.pop(i)
-						vals = reader.next()
+						vals = next(reader)
 						vals.pop(i)
 				for pos,key2 in enumerate(keys):
 					lineRatings[key2] = abs(float(vals[pos]))
@@ -462,7 +458,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	#define which dict will be used for edge label
 	edgeLabels = edgeTupleValsPU
 	# Build the graph.
-	fGraph = omf.feeder.treeToNxGraph(tree)
+	fGraph = feeder.treeToNxGraph(tree)
 	# TODO: consider whether we can set figsize dynamically.
 	wlVal = int(math.sqrt(float(rezSqIn)))
 	voltChart = plt.figure(figsize=(wlVal, wlVal))
@@ -625,18 +621,18 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 
 def glmToModel(glmPath, modelDir):
 	''' One shot model creation from glm. '''
-	tree = omf.feeder.parse(glmPath)
+	tree = feeder.parse(glmPath)
 	print("glmPath:    " + glmPath)
 	print("modelDir:   " + modelDir)
 	# Run powerflow. First name the folder for it.
 	# Remove old copy of the model.
 	shutil.rmtree(modelDir, ignore_errors=True)
 	# Create the model directory.
-	omf.models.voltageDrop.new(modelDir)
+	new(modelDir)
 	# Create the .omd.
 	os.remove(modelDir + '/Olin Barre Geo.omd')
 	with open(modelDir + '/Olin Barre Geo.omd','w') as omdFile:
-		omd = dict(omf.feeder.newFeederWireframe)
+		omd = dict(feeder.newFeederWireframe)
 		omd['tree'] = tree
 		json.dump(omd, omdFile, indent=4)
 
@@ -690,9 +686,9 @@ def _debugging():
 	# Pre-run.
 	# renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc)
+	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_debugging()
