@@ -53,10 +53,10 @@ def heavyProcessing(modelDir):
 		#Get current file hashes and dd to the output
 		with open(pJoin(_myDir, modelType+".html")) as f:
 			htmlFile = f.read()
-		currentHtmlHash = hashlib.sha256(htmlFile).hexdigest()
+		currentHtmlHash = hashlib.sha256(htmlFile.encode('utf-8')).hexdigest()
 		with open(pJoin(_myDir, modelType+".py")) as f:
 			pythonFile = f.read()
-		currentPythonHash = hashlib.sha256(pythonFile).hexdigest()
+		currentPythonHash = hashlib.sha256(pythonFile.encode('utf-8')).hexdigest()
 		outData['htmlHash'] = currentHtmlHash
 		outData['pythonHash'] = currentPythonHash
 		outData['oldVersion'] = False
@@ -108,10 +108,10 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 		# Get hashes for model python and html files 
 		with open(pJoin(_myDir, modelType+".html")) as f:
 			htmlFile = f.read()
-		currentHtmlHash = hashlib.sha256(htmlFile).hexdigest()
+		currentHtmlHash = hashlib.sha256(htmlFile.encode('utf-8')).hexdigest()
 		with open(pJoin(_myDir, modelType+".py")) as f:
 			pythonFile = f.read()
-		currentPythonHash = hashlib.sha256(pythonFile).hexdigest()
+		currentPythonHash = hashlib.sha256(pythonFile.encode('utf-8')).hexdigest()
 	except IOError:
 		allInputData = None
 		inJson = None
@@ -150,14 +150,14 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 
 def renderAndShow(modelDir, datastoreNames={}):
 	''' Render and open a template (blank or with output) in a local browser. '''
-	with tempfile.NamedTemporaryFile(suffix=".html", delete=False) as temp:
+	with tempfile.NamedTemporaryFile('w', suffix=".html", delete=False) as temp:
 		temp.write(renderTemplate(modelDir, absolutePaths=True))
 		temp.flush()
 		webbrowser.open("file://" + temp.name)
 
 def renderTemplateToFile(modelDir, datastoreNames={}):
 	''' Render and open a template (blank or with output) in a local browser. '''
-	with tempfile.NamedTemporaryFile(suffix=".html", delete=False) as baseTemplate:
+	with tempfile.NamedTemporaryFile('w', suffix=".html", delete=False) as baseTemplate:
 		baseTemplate.write(renderTemplate(modelDir, absolutePaths=False))
 		baseTemplate.flush()
 		baseTemplate.seek(0)
