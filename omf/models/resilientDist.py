@@ -1,4 +1,5 @@
 ''' Run micot-GFM, micot-RDT, and GridLAB-D to determine an optimal distribution resiliency investment. '''
+from __future__ import print_function
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math
 import traceback
 import platform, re
@@ -470,7 +471,7 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir, feederName + '.omd'), "r") as jsonIn:
 		feederModel = json.load(jsonIn)
 	# Create GFM input file.
-	print "RUNNING GFM FOR", modelDir
+	print("RUNNING GFM FOR", modelDir)
 	critLoads = inputDict['criticalLoads']
 	gfmInputTemplate = {
 		'phase_variation' : float(inputDict['phaseVariation']),
@@ -528,7 +529,7 @@ def work(modelDir, inputDict):
 		with open(pJoin(rdtInputFilePath), "w") as rdtInputFile:
 			json.dump(rdtJson, rdtInputFile, indent=4)
 	# Run GridLAB-D first time to generate xrMatrices.
-	print "RUNNING 1ST GLD RUN FOR", modelDir
+	print("RUNNING 1ST GLD RUN FOR", modelDir)
 	omdPath = pJoin(modelDir, feederName + ".omd")
 	with open(omdPath, "r") as omd:
 		omd = json.load(omd)
@@ -622,7 +623,7 @@ def work(modelDir, inputDict):
 	with open(rdtInputFilePath, "w") as outFile:
 		json.dump(rdtJson, outFile, indent=4)
 	# Run RDT.
-	print "RUNNING RDT FOR", modelDir
+	print("RUNNING RDT FOR", modelDir)
 	rdtOutFile = modelDir + '/rdtOutput.json'
 	rdtSolverFolder = pJoin(__neoMetaModel__._omfDir,'solvers','rdt')
 	rdtJarPath = pJoin(rdtSolverFolder,'micot-rdt.jar')
@@ -638,7 +639,7 @@ def work(modelDir, inputDict):
 		rdtOut = json.loads(rdtRawOut)
 		json.dump(rdtOut, outFile, indent = 4)
 	# Generate and run 2nd copy of GridLAB-D model with changes specified by RDT.
-	print "RUNNING 2ND GLD RUN FOR", modelDir
+	print("RUNNING 2ND GLD RUN FOR", modelDir)
 	feederCopy = copy.deepcopy(feederModel)
 	lineSwitchList = []
 	edgeLabels = {}
