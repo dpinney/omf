@@ -96,6 +96,15 @@
 				</div>
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Training Data (.csv file)<span class="classic">Please see the documentation at the help link for the required format</span></label>
+				<input id="trainingFile" type="file" style="display:none" onchange="handle_files(this.files,'trainingData','trainingFileName')">
+				<input id="trainingData" name="trainingData" type="hidden">
+				<div>
+					<label for="trainingFile" class="fileButton">Choose File</label>
+					<input id="trainingFileName" name="trainingFileName" value='' readonly class="uploadFileName">
+				</div>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Use Distance?<span class="classic">If yes, use distance data to help determine the accuracy of the feeder's connectivity.</span></label>
 				<select id="useDist" name="useDist" />
 					<option value='True'>Yes</option>
@@ -167,6 +176,10 @@
 		<p class="reportTitle postRun" style="page-break-before:always">Connectivity Tests and Accuracy</p>
 		<div id="outageCostCalc" class="tightContent postRun">
 			{{ allOutputDataDict['statsCalc'] }}
+		</div>
+		<p class="reportTitle postRun" style="page-break-before:always">Support Vector Machine Results</p>
+		<div id="outageCostCalc" class="tightContent postRun">
+			{{ allOutputDataDict['svmCalc'] }}
 		</div>
 		<!-- TODO: Remove? -->
 		<!-- <script type="text/javascript">
