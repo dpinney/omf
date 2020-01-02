@@ -49,7 +49,7 @@ def pullOutValuesSmart(tree, workDir, sustainedOutageThreshold, lineNameForReclo
 	# Run Gridlab.
 	if not workDir:
 		workDir = tempfile.mkdtemp()
-		print '@@@@@@', workDir
+		print('@@@@@@', workDir)
 	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 
 	#Pull out number of customers
@@ -318,7 +318,7 @@ def pullOutValuesOutage(tree, workDir, sustainedOutageThreshold):
 	# Run Gridlab.
 	if not workDir:
 		workDir = tempfile.mkdtemp()
-		print '@@@@@@', workDir
+		print('@@@@@@', workDir)
 	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 
 	#Pull out number of customers
@@ -863,7 +863,7 @@ def valueOfAdditionalRecloser(pathToGlm, pathToCsv, workDir, generateRandomFault
 	# check to see if work directory is specified
 	if not workDir:
 		workDir = tempfile.mkdtemp()
-		print '@@@@@@', workDir
+		print('@@@@@@', workDir)
 
 	if generateRandomFaults == 'True':
 		# Find SAIDI/SAIFI/MAIFI manually from Metrics_Output
