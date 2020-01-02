@@ -662,7 +662,7 @@ def randomFaultsRefined(pathToCsv, pathToOmd, workDir, gridLines, faultsGenerate
 	# Check that we're in the proper directory
 	if not workDir:
 		workDir = tempfile.mkdtemp()
-		print '@@@@@@', workDir
+		print('@@@@@@', workDir)
 
 	# Create heatmaps for location and the other three parameters
 	mc = pd.read_csv(pathToCsv)
@@ -840,7 +840,7 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData,
 	# check to see if work directory is specified; otherwise, create a temporary directory
 	if not workDir:
 		workDir = tempfile.mkdtemp()
-		print '@@@@@@', workDir
+		print('@@@@@@', workDir)
 	
 	# calculate outage stats
 	def statsCalc(saidi=None, saifi=None, caidi=None, asai=None, maifi=None):
