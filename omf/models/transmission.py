@@ -71,7 +71,7 @@ def work(modelDir, inputDict):
 		mpoptArg = "mpopt = mpoption("+pfArg+", "+modelArg+", "+pfItArg+", "+pfTolArg+", "+pfEnflArg+"); "
 		command = "octave -p " + matPath + "--no-gui --eval \""+mpoptArg+"runpf('"+pJoin(modelDir,matFileName)+"', mpopt)\" > \"" + pJoin(modelDir,"matout.txt") + "\""
 		proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
-		print command
+		print(command)
 		(out, err) = proc.communicate()
 	imgSrc = pJoin(__neoMetaModel__._omfDir,'scratch','transmission','inData')
 	# Read matout.txt and parse into outData.
