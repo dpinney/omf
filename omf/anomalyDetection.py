@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 import pandas as pd
 try:
@@ -18,7 +19,7 @@ def train_prophet(df, modelDir, confidence=0.99):
 		m.fit(df)
 
 		# Predict the future.
-	print "PREDICTING!"
+	print("PREDICTING!")
 	future = m.make_future_dataframe(periods=0)
 	forecast = m.predict(future)
 	# Merge in the historical data.
