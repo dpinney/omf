@@ -1,20 +1,18 @@
 ''' Powerflow results for one Gridlab instance. '''
 
-from __future__ import print_function
-import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, math
-import multiprocessing
+import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, math, multiprocessing, traceback
 from os.path import join as pJoin
 from os.path import split as pSplit
+from functools import reduce
 from jinja2 import Template
-import traceback
+from flask import session
 
 # OMF imports
 import omf
-import omf.feeder as feeder
+from omf import feeder
+import omf.web
 from omf.solvers import gridlabd
 from omf.weather import zipCodeToClimateName
-from flask import session
-import web
 
 # Model metadata:
 fileName = os.path.basename(__file__)
@@ -35,7 +33,8 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 	If modelDir is valid, render results post-model-run.
 	If absolutePaths, the HTML can be opened without a server. '''
 	try:
-		inJson = json.load(open(pJoin(modelDir,"allInputData.json")))
+		with open(pJoin(modelDir,"allInputData.json")) as f:
+			inJson = json.load(f)
 		modelPath, modelName = pSplit(modelDir)
 		deepPath, user = pSplit(modelPath)
 		inJson["modelName"] = modelName
@@ -46,7 +45,8 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 	except IOError:
 		allInputData = None
 	try:
-		allOutputData = open(pJoin(modelDir,"allOutputData.json")).read()
+		with open(pJoin(modelDir,"allOutputData.json")) as f:
+			allOutputData = f.read()
 	except IOError:
 		allOutputData = None
 	if absolutePaths:
@@ -60,7 +60,7 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 
 def renderAndShow(modelDir, datastoreNames={}):
 	''' Render and open a template (blank or with output) in a local browser. '''
-	with tempfile.NamedTemporaryFile(suffix=".html", delete=False) as temp:
+	with tempfile.NamedTemporaryFile('w', suffix=".html", delete=False) as temp:
 		temp.write(renderTemplate(modelDir, absolutePaths=True))
 		temp.flush()
 		webbrowser.open("file://" + temp.name)
@@ -123,7 +123,8 @@ def run(modelDir):
 	''' Run the model in a separate process. web.py calls this to run the model.
 	This function will return fast, but results take a while to hit the file system.'''
 	# Check whether model exist or not
-	inputDict = json.load(open(pJoin(modelDir, 'allInputData.json')))
+	with open(pJoin(modelDir, 'allInputData.json')) as f:
+		inputDict = json.load(f)
 	# If we are re-running, remove output:
 	try:
 		os.remove(pJoin(modelDir,"allOutputData.json"))
@@ -137,7 +138,8 @@ def run(modelDir):
 
 def runForeground(modelDir):
 	''' Run the model in its directory. WARNING: GRIDLAB CAN TAKE HOURS TO COMPLETE. '''
-	inputDict = json.load(open(pJoin(modelDir, 'allInputData.json')))
+	with open(pJoin(modelDir, 'allInputData.json')) as f:
+		inputDict = json.load(f)
 	print("STARTING TO RUN", modelDir)
 	beginTime = datetime.datetime.now()
 	# Get prepare of data and clean workspace if re-run, If re-run remove all the data in the subfolders
@@ -152,7 +154,7 @@ def runForeground(modelDir):
 	for feederName in feederNames:
 		try:
 			os.remove(pJoin(modelDir, feederName, "allOutputData.json"))
-		except Exception, e:
+		except Exception as e:
 			pass
 		if not os.path.isdir(pJoin(modelDir, feederName)):
 			os.makedirs(pJoin(modelDir, feederName)) # create subfolders for feeders
@@ -163,7 +165,8 @@ def runForeground(modelDir):
 			pJoin(modelDir, feederName, "climate.tmy2"))
 		try:
 			startTime = datetime.datetime.now()
-			feederJson = json.load(open(pJoin(modelDir, feederName, "feeder.omd")))
+			with open(pJoin(modelDir, feederName, "feeder.omd")) as f:
+				feederJson = json.load(f)
 			tree = feederJson["tree"]
 			# Set up GLM with correct time and recorders:
 			feeder.attachRecorders(tree, "Regulator", "object", "regulator")
@@ -337,7 +340,7 @@ def runForeground(modelDir):
 		output["timeStamps"] = feederOutput.get("timeStamps", [])
 		output["climate"] = feederOutput.get("climate", [])
 		# Add feederNames to output so allInputData feederName changes don't cause output rendering to disappear.
-		for key, feederName in inputDict.iteritems():
+		for key, feederName in inputDict.items():
 			if 'feederName' in key:
 				output[key] = feederName
 		with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
@@ -352,13 +355,14 @@ def runForeground(modelDir):
 			print("\n    EMAIL ALERT ON")
 			email = session['user_id']
 			try:
-				user = json.load(open("data/User/" + email + ".json"))
+				with open("data/User/" + email + ".json") as f:
+					user = json.load(f)
 				modelPath, modelName = pSplit(modelDir)
 				message = "The model " + "<i>" + str(modelName) + "</i>" + " has successfully completed running. It ran for a total of " + str(inputDict["runTime"]) + " seconds from " + str(beginTime) + ", to " + str(finishTime) + "."
-				return web.send_link(email, message, user)
-			except Exception, e:
+				return omf.web.send_link(email, message, user)
+			except Exception as e:
 				print("ERROR: Failed sending model status email to user: ", email, ", with exception: \n", e)
-	except Exception, e:
+	except Exception as e:
 		# If input range wasn't valid delete output, write error to disk.
 		cancel(modelDir)
 		thisErr = traceback.format_exc()
@@ -372,11 +376,12 @@ def runForeground(modelDir):
 		email = 'NoEmail'
 		try:
 			email = session['user_id']
-			user = json.load(open("data/User/" + email + ".json"))
+			with open("data/User/" + email + ".json") as f:
+				user = json.load(f)
 			modelPath, modelName = pSplit(modelDir)
 			message = "The model " + "<i>" + str(modelName) + "</i>" + " has failed to complete running. It ran for a total of " + str(inputDict["runTime"]) + " seconds from " + str(beginTime) + ", to " + str(finishTime) + "."
-			return web.send_link(email, message, user)
-		except Exception, e:
+			return omf.web.send_link(email, message, user)
+		except Exception as e:
 			print("ERROR: Failed sending model status email to user: ", email, ", with exception: \n", e)
 
 
@@ -396,12 +401,12 @@ def aggSeries(timeStamps, timeSeries, func, level):
 	# Different substring depending on what level we aggregate to:
 	if level=='months': endPos = 7
 	elif level=='days': endPos = 10
-	combo = zip(timeStamps, timeSeries)
+	combo = list(zip(timeStamps, timeSeries))
 	# Group by level:
 	groupedCombo = _groupBy(combo, lambda x1,x2: x1[0][0:endPos]==x2[0][0:endPos])
 	# Get rid of the timestamps:
 	groupedRaw = [[pair[1] for pair in group] for group in groupedCombo]
-	return map(func, groupedRaw)
+	return list(map(func, groupedRaw))
 
 def _pyth(x,y):
 	''' Compute the third side of a triangle--BUT KEEP SIGNS THE SAME FOR DG. '''
@@ -412,11 +417,11 @@ def _pyth(x,y):
 def vecPyth(vx,vy):
 	''' Pythagorean theorem for pairwise elements from two vectors. '''
 	rows = zip(vx,vy)
-	return map(lambda x:_pyth(*x), rows)
+	return [_pyth(*x) for x in rows]
 
 def vecSum(*args):
 	''' Add n vectors. '''
-	return map(sum,zip(*args))
+	return list(map(sum, zip(*args)))
 
 def _prod(inList):
 	''' Product of all values in a list. '''
@@ -424,17 +429,17 @@ def _prod(inList):
 
 def vecProd(*args):
 	''' Multiply n vectors. '''
-	return map(_prod, zip(*args))
+	return list(map(_prod, zip(*args)))
 
 def threePhasePowFac(ra,rb,rc,ia,ib,ic):
 	''' Get power factor for a row of threephase volts and amps. Gridlab-specific. '''
 	pfRow = lambda row:math.cos(math.atan((row[0]+row[1]+row[2])/(row[3]+row[4]+row[5])))
-	rows = zip(ra,rb,rc,ia,ib,ic)
-	return map(pfRow, rows)
+	rows = list(zip(ra,rb,rc,ia,ib,ic))
+	return list(map(pfRow, rows))
 
 def roundSeries(ser):
 	''' Round everything in a vector to 4 sig figs. '''
-	return map(lambda x:roundSig(x,4), ser)
+	return list(map(lambda x: roundSig(x,4), ser))
 
 def _groupBy(inL, func):
 	''' Take a list and func, and group items in place comparing with func. Make sure the func is an equivalence relation, or your brain will hurt. '''
