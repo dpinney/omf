@@ -1,14 +1,14 @@
 ''' Comms Bandwidth Model '''
 
-import json, os, sys, tempfile, datetime, shutil, tempfile, networkx as nx
+import json, os, sys, tempfile, datetime, shutil, tempfile
 from os.path import join as pJoin
+import networkx as nx
 from omf.models import __neoMetaModel__
-from __neoMetaModel__ import *
 from omf import comms
 
 # Model metadata:
 tooltip = "Calculate the bandwidth requirements for a communications system on a feeder"
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = True
 
 def work(modelDir, inputDict):
@@ -108,11 +108,11 @@ def _tests():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc)
+	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_tests()
