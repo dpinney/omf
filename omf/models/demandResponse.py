@@ -1,15 +1,13 @@
 ''' Calculate the costs and benefits of Time of Use (TOU) program from a distribution utility perspective. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime, traceback, csv, warnings, calendar, math, operator
+import json, shutil, datetime, csv, calendar, math, operator, copy
 from os.path import join as pJoin
-from dateutil.parser import parse
+#from dateutil.parser import parse
 from numpy import npv
-from jinja2 import Template
 from omf.models import __neoMetaModel__
-from __neoMetaModel__ import *
 
 # Model metadata:
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = "The demandResponse model takes in historical demand data (hourly for a year) and calculates what demand changes in residential customers could be expected due to demand response programs. "
 
 def work(modelDir, inputDict):
@@ -17,8 +15,8 @@ def work(modelDir, inputDict):
 	outData = {}
 	# Get variables.
 	lifeSpan = int(inputDict.get('lifeSpan',25))
-	lifeYears = range(1, 1 + lifeSpan)
-	hours = range(0, 24)
+	lifeYears = list(range(1, 1 + lifeSpan))
+	hours = list(range(0, 24))
 	DrTechCost = float(inputDict.get('DrPurchInstallCost'))
 	demandCharge = float(inputDict.get('demandCharge'))
 	retailCost = float(inputDict.get('retailCost'))
@@ -53,7 +51,7 @@ def work(modelDir, inputDict):
 		demandFile.write(inputDict['demandCurve'])
 	try:
 		demandList = []
-		with open(pJoin(modelDir,"demand.csv")) as inFile:
+		with open(pJoin(modelDir,"demand.csv"), newline='') as inFile:
 			reader = csv.reader(inFile)
 			for row in reader:
 				demandList.append(row) #######demandList.append({'datetime': parse(row['timestamp']), 'power': float(row['power'])})
@@ -385,6 +383,9 @@ def DLC(DLCDict):
 
 def _prismTests():
 	# Run Direct Load Control sim.
+	with open('./test_load.csv') as f:
+		orig_load = [float(x) for x in f.readlines()]
+	orig_load_copy = copy.deepcopy(orig_load)
 	outputs = DLC({
 		'residenceCount': 2000,
 		'whPercentage': 0.30,
@@ -395,7 +396,7 @@ def _prismTests():
 		'hvacDutyCycle': 0.3,
 		'whControlHours': [0, 1, 2, 3, 4],
 		'hvacControlHours': [6, 7, 8, 9,10],
-		'origLoad': [float(x) for x in open('./test_load.csv').readlines()] }) # 8760 load values
+		'origLoad': orig_load}) # 8760 load values
 	# Run PRISM.
 	outputs2 = prism({
 		'rateStructure': '2tierCPP', # options: 2tierCPP, PTR, 24hourly
@@ -415,16 +416,18 @@ def _prismTests():
 		#'rate24hourly': [0.12, 0.054, 0.01, 0.04, 0.172, 0.436, 0.764, 1.086, 1.367, 1.569, 1.714, 1.805, 1.880, 1.923, 1.960, 2, 1.998, 1.895, 1.806, 1.757, 1.538, 1.089, 0.662, 0.313],
 		'ratePTR': 2.65, # Only required for PTR. $/kWh payment to customers for demand reduction on PTR days. Value is entered as a positive value, just like the other rate values, even though it is a rebate.
 		'numCPPDays': 10, # Number of CPP days in a cooling season. Only required for 2tierCPP
-		'origLoad': [float(x) for x in open('./test_load.csv').readlines()] }) # 8760 load values
+		'origLoad': orig_load_copy}) # 8760 load values
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidCSV_Copy.csv")) as f:
+		demand_curve = f.read()
 	defaultInputs = {
 		"modelType": modelName,
 		"retailCost": "0.1",
 		"WholesaleEnergyCost": "0.07",
 		"fileName":"FrankScadaValidCSV_Copy.csv",
-		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidCSV_Copy.csv")).read(),
+		"demandCurve": demand_curve,
 		"DrPurchInstallCost": "100000",
 		"runTime": "0:00:03",
 		"SubstitutionPriceElasticity": "-0.09522",
@@ -460,11 +463,11 @@ def _tests():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc)
+	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_tests()
