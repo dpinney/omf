@@ -50,10 +50,18 @@ def floats(f):
 def respect_pf(x, constant_pf):
 	m = complex(x)
 	rating_VA = m.real
-	newWatts = constant_pf * rating_VA
-	newVARs = math.sqrt(rating_VA**2 - newWatts**2)
-	new_complex = complex(newWatts, newVARs)
-	return "{}+{}j".format(new_complex.real, new_complex.imag) if constant_pf > 0 else "{}{}j".format(new_complex.real, new_complex.imag)
+	if constant_pf < 1:
+		# Lagging PF setting on inverters.
+		newWatts = constant_pf * rating_VA
+		newVARs = math.sqrt(rating_VA**2 - newWatts**2)
+		new_complex = complex(newWatts, newVARs)
+		return "{}+{}j".format(new_complex.real, new_complex.imag)
+	elif constant_pf > 1:
+		# Leaing PF setting on inverters.
+		newWatts = (2 - constant_pf) * rating_VA
+		newVARs = math.sqrt(rating_VA**2 - newWatts**2)
+		new_complex = complex(newWatts, newVARs)
+		return "{}{}j".format(new_complex.real, new_complex.imag)
 
 def work(modelDir, ind):
 	''' Run the model in its directory. '''
@@ -522,7 +530,7 @@ def new(modelDir):
 		# "layoutAlgorithm": "geospatial",
 		# ---------------------------------------- #
 		"strategy": "constant", # decentralized
-		"constant_pf": ".95",
+		"constant_pf": "1.10",
 		"modelType": modelName,
 		"runTime": "",
 		"zipCode": "64735",
