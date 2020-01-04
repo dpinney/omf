@@ -1,24 +1,19 @@
 ''' Calculate CVR impacts using a targetted set of dynamic loadflows. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess
-import math, re, traceback, csv, calendar, random
-import multiprocessing
-from copy import deepcopy
+import json, os, webbrowser, shutil, math, calendar
+from datetime import datetime as dt, timedelta
 from os.path import join as pJoin
 from jinja2 import Template
 from matplotlib import pyplot as plt
-from datetime import datetime as dt, timedelta
-from omf.models import __neoMetaModel__
-from __neoMetaModel__ import *
 
 # OMF imports
-import omf.feeder as feeder
-import omf.calibrate as calibrate
+from omf.models import __neoMetaModel__
+from omf import feeder
 from omf.solvers import gridlabd
 
 # Model metadata:
 tooltip = 'The cvrDynamic model calculates the expected costs and benefits for implementing conservation voltage reduction on a given feeder circuit.'
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 
 def work(modelDir,inputDict):
 	'''This reads a glm file, changes the method of powerflow and reruns'''
@@ -158,10 +153,10 @@ def work(modelDir,inputDict):
 	#total real and imaginary losses as a function of time
 	def vecSum(u,v):
 		''' Add vectors u and v element-wise. Return has len <= len(u) and <=len(v). '''
-		return map(sum, zip(u,v))
+		return list(map(sum, zip(u,v)))
 	def zeroVec(length):
 		''' Give a zero vector of input length. '''
-		return [0 for x in xrange(length)]
+		return [0 for x in range(length)]
 	(realLoss, imagLoss, realLossnew, imagLossnew) = (zeroVec(int(HOURS)) for x in range(4))
 	for device in ['ZlossesOverhead.csv','ZlossesTransformer.csv','ZlossesUnderground.csv']:
 		for letter in ['A','B','C']:
@@ -191,14 +186,14 @@ def work(modelDir,inputDict):
 		if capKeys != []:
 			switch[letter] = output['ZcapSwitch' + str(int(capKeys[0])) + '.csv']['switch'+ letter]
 			switchnew[letter] = output1['NewZcapSwitch' + str(int(capKeys[0])) + '.csv']['switch'+ letter]
-		volt[letter] = map(returnMag,output['ZsubstationBottom.csv']['voltage_'+letter])
-		voltnew[letter] = map(returnMag,output1['NewZsubstationBottom.csv']['voltage_'+letter])
-	lowVoltage = map(divby2,output['ZvoltageJiggle.csv']['min(voltage_12.mag)'])
-	lowVoltagenew = map(divby2,output1['NewZvoltageJiggle.csv']['min(voltage_12.mag)'])
-	meanVoltage = map(divby2,output['ZvoltageJiggle.csv']['mean(voltage_12.mag)'])
-	meanVoltagenew = map(divby2,output1['NewZvoltageJiggle.csv']['mean(voltage_12.mag)'])
-	highVoltage = map(divby2,output['ZvoltageJiggle.csv']['max(voltage_12.mag)'])
-	highVoltagenew = map(divby2,output1['NewZvoltageJiggle.csv']['max(voltage_12.mag)'])
+		volt[letter] = list(map(returnMag,output['ZsubstationBottom.csv']['voltage_'+letter]))
+		voltnew[letter] = list(map(returnMag,output1['NewZsubstationBottom.csv']['voltage_'+letter]))
+	lowVoltage = list(map(divby2,output['ZvoltageJiggle.csv']['min(voltage_12.mag)']))
+	lowVoltagenew = list(map(divby2,output1['NewZvoltageJiggle.csv']['min(voltage_12.mag)']))
+	meanVoltage = list(map(divby2,output['ZvoltageJiggle.csv']['mean(voltage_12.mag)']))
+	meanVoltagenew = list(map(divby2,output1['NewZvoltageJiggle.csv']['mean(voltage_12.mag)']))
+	highVoltage = list(map(divby2,output['ZvoltageJiggle.csv']['max(voltage_12.mag)']))
+	highVoltagenew = list(map(divby2,output1['NewZvoltageJiggle.csv']['max(voltage_12.mag)']))
 	#energy calculations
 	whEnergy = []
 	whLosses = []
@@ -377,7 +372,7 @@ def work(modelDir,inputDict):
 		previndex = index2
 	#money charts
 	fig = plt.figure('cost benefit barchart',figsize=(10,8))
-	ticks = range(len(simMonthList))
+	ticks = list(range(len(simMonthList)))
 	ticks1 = [element+0.15 for element in ticks]
 	ticks2 = [element+0.30 for element in ticks]
 	eld = [energyLostDollars[month] for month in simMonthList]
@@ -537,11 +532,11 @@ def _tests():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc)
+	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_tests()
