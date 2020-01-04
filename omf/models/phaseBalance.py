@@ -37,7 +37,8 @@ def lifespan(x):
 	return 20-19.8*math.exp(-.679*x) # curve fit from data from NREL analysis
 
 def pf(real, var):
-	real, var = floats(real), floats(var)
+	real = floats(real) if type(real) == str else float(real)
+	var = floats(var) if type(var) == str else float(var)
 	return float(real) / math.sqrt(real**2 + var**2)
 
 def n(num):
@@ -233,10 +234,16 @@ def work(modelDir, ind):
 		'motor_derating': {},
 		'lifespan': {}
 	}
+
+	sub_df = {
+		'base': _readCSV('substation_power' + base_suffix + '.csv', voltage=False),
+		'solar': _readCSV('substation_power' + solar_suffix + '.csv', voltage=False),
+		'controlled': _readCSV('substation_power' + controlled_suffix + '.csv', voltage=False),
+	}
 	o['service_cost']['power_factor'] = {
-		'base': n(pf(o['service_cost']['load']['base'], o['service_cost']['VARs']['base'])),
-		'solar': n(pf(o['service_cost']['load']['solar'], o['service_cost']['VARs']['solar'])),
-		'controlled': n(pf(o['service_cost']['load']['controlled'], o['service_cost']['VARs']['controlled'])),
+		'base': n(pf(sub_df['base']['real'].sum(), sub_df['base']['imag'].sum())),
+		'solar': n(pf(sub_df['solar']['real'].sum(), sub_df['solar']['imag'].sum())),
+		'controlled': n(pf(sub_df['controlled']['real'].sum(), sub_df['controlled']['imag'].sum()))
 	}
 
 	# hack correction
@@ -409,6 +416,23 @@ def _addCollectors(tree, suffix=None, pvConnection=None):
 		tree[len(tree)] = {'property':'constant_power_B', 'object':'group_recorder', 'group':'class=load AND groupid=PV', 'limit':'1', 'file':'all_inverters_VA_Out_AC_B' + suffix + '.csv'}
 		tree[len(tree)] = {'property':'constant_power_C', 'object':'group_recorder', 'group':'class=load AND groupid=PV', 'limit':'1', 'file':'all_inverters_VA_Out_AC_C' + suffix + '.csv'}
 
+
+	substation = None
+	for x in tree.values():
+		if x.get('bustype', '') == 'SWING':
+			substation = x['name']
+			x['object'] = 'meter'
+	assert substation != None, "substation not found"
+
+	tree[len(tree)] = {
+		'object': 'recorder',
+		'parent': substation,
+		'interval': '10',
+		'limit': '1440',
+		'file': 'substation_power' + suffix + '.csv',
+		'property': 'measured_power_A,measured_power_B,measured_power_C'
+	}
+
 	return tree
 
 def _turnOffSolar(tree):
@@ -448,10 +472,11 @@ def unbalanceI(r):
 	maxDiff = max([abs(a-b), abs(a-c), abs(b-c)])
 	return maxDiff/avgVolts*100
 
-def _readCSV(filename):
+def _readCSV(filename, voltage=True):
 	df = pd.read_csv(filename, skiprows=8)
 	df = df.T
-	df = df[df.columns[:-2]]
+	if voltage:
+		df = df[df.columns[:-2]]
 	df = df[~df.index.str.startswith('#')]
 	df[0] = [complex(i) if i != '+0+0i' else complex(0) for i in df[0]]
 	df['imag'] = df[0].imag.astype(float)
