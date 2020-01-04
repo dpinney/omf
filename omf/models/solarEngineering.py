@@ -1,26 +1,23 @@
 ''' Powerflow results for one Gridlab instance. '''
 
-import json, os, sys, tempfile, csv, webbrowser, time, shutil, datetime, subprocess, math, gc, networkx as nx,  numpy as np
+import json, os, csv, shutil, datetime, math, gc
+from functools import reduce
+import numpy as np
 import networkx as nx
 from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
 import matplotlib
 matplotlib.pyplot.switch_backend('Agg')
-import multiprocessing
 from os.path import join as pJoin
-from os.path import split as pSplit
-from jinja2 import Template
-import traceback
-from omf.models import __neoMetaModel__
-from __neoMetaModel__ import *
 
 # OMF imports
-import omf.feeder as feeder
+from omf import feeder
+from omf.models import __neoMetaModel__
 from omf.solvers import gridlabd
 from omf.weather import zipCodeToClimateName
 
 # Model metadata:
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = "The solarEngineering model shows users the technical system impacts of solar on a feeder including DG power generated, regulator tap changes, capacitor activation, and meter voltages. "
 hidden = False
 
@@ -32,7 +29,8 @@ def work(modelDir, inputDict):
 	inputDict["climateName"] = zipCodeToClimateName(inputDict["zipCode"])
 	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
 		pJoin(modelDir, "climate.tmy2"))
-	feederJson = json.load(open(pJoin(modelDir, feederName + '.omd')))
+	with open(pJoin(modelDir, feederName + '.omd')) as f:
+		feederJson = json.load(f)
 	tree = feederJson["tree"]
 	# Set up GLM with correct time and recorders:
 	feeder.attachRecorders(tree, "Regulator", "object", "regulator")
@@ -270,11 +268,11 @@ def work(modelDir, inputDict):
 	# Loop through voltDump for swingbus voltages
 	subData = []
 	downData = []
-	with open(pJoin(modelDir,"subVoltsA.csv")) as subFile:
+	with open(pJoin(modelDir,"subVoltsA.csv"), newline='') as subFile:
 		reader = csv.reader(subFile)
 		subData = [x for x in reader]
 	if downLineNode != 'None':
-		with open(pJoin(modelDir,"firstDownlineVoltsA.csv")) as downFile:
+		with open(pJoin(modelDir,"firstDownlineVoltsA.csv"), newline='') as downFile:
 			reader = csv.reader(downFile)
 			downData = [x for x in reader]
 	FIRST_DATA_ROW = 9
@@ -365,7 +363,10 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 	for step, stamp in enumerate(rawOut['aVoltDump.csv']['# timestamp']):
 		# Build voltage map.
 		nodeVolts[step] = {}
-		for nodeName in [x for x in rawOut.get('aVoltDump.csv',{}).keys() + rawOut.get('1nVoltDump.csv',{}).keys() + rawOut.get('1mVoltDump.csv',{}).keys() if x != '# timestamp']:
+		for nodeName in [x for x in
+			list(rawOut.get('aVoltDump.csv',{}).keys()) + list(rawOut.get('1nVoltDump.csv',{}).keys()) + list(rawOut.get('1mVoltDump.csv',{}).keys())
+			if x != '# timestamp'
+		]:
 			allVolts = []
 			for phase in ['a','b','c','1n','2n','1m','2m']:
 				try:
@@ -504,12 +505,12 @@ def aggSeries(timeStamps, timeSeries, func, level):
 	# Different substring depending on what level we aggregate to:
 	if level=='months': endPos = 7
 	elif level=='days': endPos = 10
-	combo = zip(timeStamps, timeSeries)
+	combo = list(zip(timeStamps, timeSeries))
 	# Group by level:
 	groupedCombo = _groupBy(combo, lambda x1,x2: x1[0][0:endPos]==x2[0][0:endPos])
 	# Get rid of the timestamps:
 	groupedRaw = [[pair[1] for pair in group] for group in groupedCombo]
-	return map(func, groupedRaw)
+	return list(map(func, groupedRaw))
 
 def _pyth(x,y):
 	''' Compute the third side of a triangle--BUT KEEP SIGNS THE SAME FOR DG. '''
@@ -524,11 +525,11 @@ def _digits(x):
 def vecPyth(vx,vy):
 	''' Pythagorean theorem for pairwise elements from two vectors. '''
 	rows = zip(vx,vy)
-	return map(lambda x:_pyth(*x), rows)
+	return [_pyth(*x) for x in rows]
 
 def vecSum(*args):
 	''' Add n vectors. '''
-	return map(sum,zip(*args))
+	return list(map(sum,zip(*args)))
 
 def _prod(inList):
 	''' Product of all values in a list. '''
@@ -536,17 +537,17 @@ def _prod(inList):
 
 def vecProd(*args):
 	''' Multiply n vectors. '''
-	return map(_prod, zip(*args))
+	return list(map(_prod, zip(*args)))
 
 def threePhasePowFac(ra,rb,rc,ia,ib,ic):
 	''' Get power factor for a row of threephase volts and amps. Gridlab-specific. '''
 	pfRow = lambda row:math.cos(math.atan((row[0]+row[1]+row[2])/(row[3]+row[4]+row[5])))
 	rows = zip(ra,rb,rc,ia,ib,ic)
-	return map(pfRow, rows)
+	return list(map(pfRow, rows))
 
 def roundSeries(ser):
 	''' Round everything in a vector to 4 sig figs. '''
-	return map(lambda x:roundSig(x,4), ser)
+	return [roundSig(x,4) for x in ser]
 
 def _groupBy(inL, func):
 	''' Take a list and func, and group items in place comparing with func. Make sure the func is an equivalence relation, or your brain will hurt. '''
@@ -595,11 +596,11 @@ def _tests():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc)
+	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_tests()
