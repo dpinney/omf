@@ -1,22 +1,22 @@
 """ Anomaly detection. """
-import os, sys, shutil, csv, StringIO, hashlib, plotly
-import omf.anomalyDetection
-import numpy as np
-import pandas as pd
-from datetime import datetime as dt, timedelta
+import os, sys, shutil, csv, hashlib, plotly, json
 from os.path import isdir, join as pJoin
+from io import StringIO
+from datetime import datetime as dt, timedelta
+import numpy as np
 from numpy import npv
-from omf.models import __neoMetaModel__
-from __neoMetaModel__ import *
+import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.neighbors import LocalOutlierFactor
 from sklearn.ensemble import IsolationForest
 import plotly.graph_objs as go
 import plotly.express as px
+from omf import anomalyDetection
+from omf.models import __neoMetaModel__
 
 
 # Model metadata:
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = ('Detect anomalies in meter data.')
 hidden = False
 
@@ -52,15 +52,15 @@ def workProphet(modelDir, inputDict):
 	out = {}
 
 	# load our csv to df
-	f = StringIO.StringIO(inputDict["file"])
+	f = StringIO(inputDict["file"])
 	header = csv.Sniffer().has_header(f.read(1024))
 	header = 0 if header else None
 	f.seek(0)
 	df = pd.read_csv(f, header = header)
 
 	if inputDict.get("demandTempBool"):
-		# nn_bool, nn_actual, nn_pred, nn_lower, nn_upper = omf.anomalyDetection.t_test(df, modelDir, inputDict["startDate"], confidence)
-		pk_bool, pk_actual, pk_time = omf.anomalyDetection.t_test(df, modelDir, inputDict["startDate"], confidence, model="nextDayPeakKatrina")
+		# nn_bool, nn_actual, nn_pred, nn_lower, nn_upper = anomalyDetection.t_test(df, modelDir, inputDict["startDate"], confidence)
+		pk_bool, pk_actual, pk_time = anomalyDetection.t_test(df, modelDir, inputDict["startDate"], confidence, model="nextDayPeakKatrina")
 		katrina_outliers = [
 			(time, demand) if out_bool else None
 			for time, out_bool, demand in zip(pk_time, pk_bool, pk_actual)
@@ -77,19 +77,22 @@ def workProphet(modelDir, inputDict):
 		start=inputDict["startDate"], freq="H", periods=df.shape[0]
 	)
 
-	prophet_df = omf.anomalyDetection.prophet(
+	prophet_df = anomalyDetection.prophet(
 		df[["ds", "y"]], modelDir, confidence=confidence, cached=cached
 	)
 
-	elliptic_df = omf.anomalyDetection.elliptic_envelope(df, modelDir, float(inputDict["norm_confidence"]))
+	elliptic_df = anomalyDetection.elliptic_envelope(df, modelDir, float(inputDict["norm_confidence"]))
 
-	out["y"] = list(prophet_df.y.values)
-	out["yhat"] = list(prophet_df.yhat.values)
-	out["yhat_upper"] = list(prophet_df.yhat_upper.values)
-	out["yhat_lower"] = list(prophet_df.yhat_lower.values)
-	out["prophet_outlier"] = list(prophet_df.outlier.values.astype(int))
+	out["y"] = prophet_df.y.values.tolist()
+	out["yhat"] = prophet_df.yhat.values.tolist()
+	out["yhat_upper"] = prophet_df.yhat_upper.values.tolist()
+	out["yhat_lower"] = prophet_df.yhat_lower.values.tolist()
+	out["prophet_outlier"] = prophet_df.outlier.values.tolist()
+
 	if elliptic_df is not None:
-		out["elliptic_outlier"] = list(elliptic_df.outlier.astype(int))
+		# This might be wrong, IDK
+		out["elliptic_outlier"] = elliptic_df.outlier.values.tolist()
+
 	if inputDict.get("demandTempBool"):
 		"""
 		out["nn_outlier"] = list(nn_bool.astype(int))
@@ -111,7 +114,7 @@ def workLof(modelDir, inputDict):
 	clf = LocalOutlierFactor(n_neighbors=neighbors, contamination=contamination)
 	
 	# load our csv to df
-	f = StringIO.StringIO(inputDict["file"])
+	f = StringIO(inputDict["file"])
 	df = pd.read_csv(f)
 	datapoints = df.to_numpy()
 
@@ -143,7 +146,7 @@ def workIso(modelDir, inputDict):
 		contamination=contamination, behaviour='new', random_state=42)
 
 	# load our csv to df
-	f = StringIO.StringIO(inputDict["file"])
+	f = StringIO(inputDict["file"])
 	df = pd.read_csv(f)
 	datapoints = df.to_numpy()
 
@@ -401,7 +404,7 @@ def workSAX(modelDir, inputDict):
 	    numReplacements = 1
 	    while numReplacements != 0:
 	        numReplacements = 0
-	        for key in decodingGrammar.keys():
+	        for key in list(decodingGrammar.keys()):
 	            value = decodingGrammar[key]
 	            for word in value.split(' '):
 	                replacement = decodingGrammar.get(word)
@@ -428,7 +431,7 @@ def workSAX(modelDir, inputDict):
 
 
 	# load our csv to df
-	f = StringIO.StringIO(inputDict["file"])
+	f = StringIO(inputDict["file"])
 	df = pd.read_csv(f, header=None)
 	datapoints = df.to_numpy()
 
@@ -475,18 +478,13 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	""" Create a new instance of this model. Returns true on success, false on failure. """
-	fName = "ERCOT_south_shortened.csv";
+	fName = "ERCOT_south_shortened.csv"
+	with open(pJoin(__neoMetaModel__._omfDir, "static", "testFiles", fName)) as f:
+		file_ = f.read()
 	defaultInputs = {
 		"created": "2015-06-12 17:20:39.308239",
 		"modelType": modelName,
-		"file": open(
-			pJoin(
-				__neoMetaModel__._omfDir,
-				"static",
-				"testFiles",
-				fName,
-			)
-		).read(),
+		"file": file_,
 		"fileName": fName,
 		"confidence": "0.99",
 		"norm_confidence": "0.90",
@@ -515,8 +513,8 @@ def _tests():
 	if isdir(modelLoc):
 		shutil.rmtree(modelLoc)
 	new(modelLoc)  # Create New.
-	runForeground(modelLoc)  # Run the model.
-	renderAndShow(modelLoc)  # Show the output.
+	__neoMetaModel__.runForeground(modelLoc)  # Run the model.
+	__neoMetaModel__.renderAndShow(modelLoc)  # Show the output.
 
 
 if __name__ == "__main__":
