@@ -1,14 +1,16 @@
-from __future__ import division
-from pyproj import Proj, transform, Geod
-import webbrowser
-import omf, json, warnings, networkx as nx, matplotlib, numpy as np, os, shutil, math, requests, tempfile, random
-from matplotlib import pyplot as plt
-from omf.feeder import _obToCol
-from scipy.spatial import ConvexHull, Delaunay
+import json, warnings, os, shutil, math, tempfile, random, webbrowser
 from os.path import join as pJoin
-from sklearn.cluster import KMeans
-from flask import Flask, send_file, render_template
 from collections import defaultdict
+from flask import Flask, send_file, render_template
+import requests
+from pyproj import Proj, transform, Geod
+import matplotlib
+from matplotlib import pyplot as plt
+from scipy.spatial import ConvexHull, Delaunay
+from sklearn.cluster import KMeans
+import networkx as nx
+import numpy as np
+
 
 def treeToNxGraph(inTree):
 	''' Convert feeder tree to networkx graph. '''
@@ -427,8 +429,8 @@ def omcToNxg(omc, fromFile=False):
 			geoJsonDict = json.load(omcFile)
 	else:
 		geoJsonDict = omc
-	geoNodes = list(filter(lambda x: x['geometry']['type'] == 'Point', geoJsonDict['features']))
-	geoEdges = list(filter(lambda x: x['geometry']['type'] == 'LineString', geoJsonDict['features']))
+	geoNodes = [x for x in geoJsonDict['features'] if x['geometry']['type'] == 'Point']
+	geoEdges = [x for x in geoJsonDict['features'] if x['geometry']['type'] == 'LineString']
 	for node in geoNodes:
 		node_attrs = {
 			'substation': node['properties']['substation'],
