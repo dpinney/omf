@@ -1,24 +1,26 @@
 ''' perform analysis pertaining to the addition of a DER interconnection on a feeder. '''
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess
-import datetime as dt, csv, math, warnings
-import traceback
+import json, os, tempfile, shutil, csv, math, warnings, random, copy, base64, platform
 from os.path import join as pJoin
-from jinja2 import Template
-from matplotlib import pyplot as plt
-import matplotlib
-from networkx.drawing.nx_agraph import graphviz_layout
 import networkx as nx
-from omf.models import __neoMetaModel__
-from __neoMetaModel__ import *
-import random, copy
-plt.switch_backend('Agg')
+from networkx.drawing.nx_agraph import graphviz_layout
+import matplotlib
+
+# Hack: Agg backend doesn't work for interactivity. Switch to something we can use:
+if platform.system() == 'Darwin':
+	matplotlib.use('TkAgg')
+	import matplotlib.pyplot as plt
+	#plt.switch_backend('MacOSX')
+else:
+	from matplotlib import pyplot as plt
+	plt.switch_backend('Agg')
 
 # OMF imports 
-import omf.feeder as feeder
+from omf import feeder
+from omf.models import __neoMetaModel__
 from omf.solvers import gridlabd
 
 # Model metadata:
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = ('The derInterconnection model runs the key modelling and analysis steps involved '
 	'in a DER Impact Study including Load Flow computations, Short Circuit analysis, '
 	'and Effective Grounding screenings.')
@@ -32,7 +34,8 @@ def work(modelDir, inputDict):
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict['feederName1'] = feederName
 	
-	omd = json.load(open(pJoin(modelDir,feederName + '.omd')))
+	with open(pJoin(modelDir,feederName + '.omd')) as f:
+		omd = json.load(f)
 	if inputDict.get('layoutAlgorithm', 'geospatial') == 'geospatial':
 		neato = False
 	else:
@@ -40,10 +43,11 @@ def work(modelDir, inputDict):
 
 	path = pJoin(modelDir,feederName + '.omd')
 	if path.endswith('.glm'):
-		tree = omf.feeder.parse(path)
+		tree = feeder.parse(path)
 		attachments = []
 	elif path.endswith('.omd'):
-		omd = json.load(open(path))
+		with open(path) as f:
+			omd = json.load(f)
 		tree = omd.get('tree', {})
 		attachments = omd.get('attachments',[])
 	else:
@@ -52,7 +56,7 @@ def work(modelDir, inputDict):
 	# dictionary to hold info on lines present in glm
 	edge_bools = dict.fromkeys(['underground_line','overhead_line','triplex_line','transformer','regulator', 'fuse', 'switch'], False)
 	# Get rid of schedules and climate and check for all edge types:
-	for key in tree.keys():
+	for key in list(tree.keys()):
 		obtype = tree[key].get('object','')
 		if obtype == 'underground_line':
 			edge_bools['underground_line'] = True
@@ -82,10 +86,10 @@ def work(modelDir, inputDict):
 	tree[str(biggestKey*10 + 1)] = {'object':'currdump','filename':'currDump.csv'}
 	
 	# Line rating dumps
-	tree[omf.feeder.getMaxKey(tree) + 1] = {'module': 'tape'}
+	tree[feeder.getMaxKey(tree) + 1] = {'module': 'tape'}
 	for key in edge_bools.keys():
 		if edge_bools[key]:
-			tree[omf.feeder.getMaxKey(tree) + 1] = {
+			tree[feeder.getMaxKey(tree) + 1] = {
 				'object':'group_recorder', 
 				'group':'"class='+key+'"',
 				'limit':1,
@@ -94,7 +98,7 @@ def work(modelDir, inputDict):
 			}
 
 	if edge_bools['regulator']:
-		tree[omf.feeder.getMaxKey(tree) + 1] = {
+		tree[feeder.getMaxKey(tree) + 1] = {
 			'object':'group_recorder', 
 			'group':'"class=regulator"',
 			'limit':1000,
@@ -103,7 +107,7 @@ def work(modelDir, inputDict):
 			'interval':0
 		}
 
-		tree[omf.feeder.getMaxKey(tree) + 1] = {
+		tree[feeder.getMaxKey(tree) + 1] = {
 			'object':'group_recorder', 
 			'group':'"class=regulator"',
 			'limit':1000,
@@ -112,7 +116,7 @@ def work(modelDir, inputDict):
 			'interval':0
 		}
 
-		tree[omf.feeder.getMaxKey(tree) + 1] = {
+		tree[feeder.getMaxKey(tree) + 1] = {
 			'object':'group_recorder', 
 			'group':'"class=regulator"',
 			'limit':1000,
@@ -229,19 +233,19 @@ def work(modelDir, inputDict):
 			chart = drawPlot(tree,nodeDict=data['nodeVolts'], neatoLayout=neato)
 			chart.savefig(pJoin(modelDir, filename + 'Chart.png'))
 			with open(pJoin(modelDir,filename + 'Chart.png'),'rb') as inFile:
-				outData[filename] = inFile.read().encode('base64')
+				outData[filename] = base64.standard_b64encode(inFile.read()).decode('ascii')
 
 			filename = 'currentDer' + der + loadCondition
 			chart = drawPlot(tree,nodeDict=data['edgeCurrentSum'], neatoLayout=neato)
 			chart.savefig(pJoin(modelDir, filename + 'Chart.png'))
 			with open(pJoin(modelDir,filename + 'Chart.png'),'rb') as inFile:
-				outData[filename] = inFile.read().encode('base64')
+				outData[filename] = base64.standard_b64encode(inFile.read()).decode('ascii')
 
 			filename = 'thermalDer' + der + loadCondition
 			chart = drawPlot(tree,nodeDict=data['edgeValsPU'], neatoLayout=neato)
 			chart.savefig(pJoin(modelDir, filename + 'Chart.png'))
 			with open(pJoin(modelDir,filename + 'Chart.png'),'rb') as inFile:
-				outData[filename] = inFile.read().encode('base64')
+				outData[filename] = base64.standard_b64encode(inFile.read()).decode('ascii')
 
 			# calculate max and min voltage and track badwidth violations
 			[maxVoltsLocation, maxVoltsVal] = ['',0]
@@ -399,7 +403,7 @@ def work(modelDir, inputDict):
 		chart = drawPlot(tree,nodeDict=flicker, neatoLayout=neato)
 		chart.savefig(pJoin(modelDir,filename + 'Chart.png'))
 		with open(pJoin(modelDir,filename + 'Chart.png'),"rb") as inFile:
-			outData[filename] = inFile.read().encode("base64")
+			outData[filename] = base64.standard_b64encode(inFile.read()).decode('ascii')
 
 		# save max flicker info to output dictionary
 		outData['maxFlicker'+loadCondition] = [maxFlickerLocation, maxFlickerVal]
@@ -423,7 +427,7 @@ def createTreeWithFault( tree, faultType, faultLocation, startTime, stopTime ):
 	faultType = '"'+faultType+'"'
 	outageParams = '"'+faultLocation+','+startTime.replace('\'','') + \
 		','+stopTime.replace('\'','')+'"'
-	treeCopy[omf.feeder.getMaxKey(treeCopy) + 1] = {
+	treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
 		'object': 'eventgen',
 		'name': 'ManualEventGen',
 		'parent': 'RelMetrics',
@@ -431,7 +435,7 @@ def createTreeWithFault( tree, faultType, faultLocation, startTime, stopTime ):
 		'manual_outages': str(outageParams)
 	}
 
-	treeCopy[omf.feeder.getMaxKey(treeCopy) + 1] = {
+	treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
 		'object': 'fault_check ',
 		'name': 'test_fault',
 		'check_mode': 'ONCHANGE',
@@ -439,7 +443,7 @@ def createTreeWithFault( tree, faultType, faultLocation, startTime, stopTime ):
 		'output_filename': 'Fault_check_out.txt'
 	}
 
-	treeCopy[omf.feeder.getMaxKey(treeCopy) + 1] = {
+	treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
 		'object': 'metrics',
 		'name': 'RelMetrics',
 		'report_file': 'Metrics_Output.csv',
@@ -450,7 +454,7 @@ def createTreeWithFault( tree, faultType, faultLocation, startTime, stopTime ):
 		'report_interval': '5 h'
 	}
 
-	treeCopy[omf.feeder.getMaxKey(treeCopy) + 1] = {
+	treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
 		'object': 'power_metrics',
 		'name': 'PwrMetrics',
 		'base_time_value': '1 h'
@@ -461,7 +465,7 @@ def createTreeWithFault( tree, faultType, faultLocation, startTime, stopTime ):
 def readGroupRecorderCSV( filename ):
 
 	dataDictionary = {}
-	with open(filename,'r') as csvFile:
+	with open(filename, newline='') as csvFile:
 		reader = csv.reader(csvFile)
 		# loop past the header, 
 		[keys,vals] = [[],[]]
@@ -470,7 +474,7 @@ def readGroupRecorderCSV( filename ):
 				keys = row
 				i = keys.index('# timestamp')
 				keys.pop(i)
-				vals = reader.next()
+				vals = next(reader)
 				vals.pop(i)
 		for pos,key in enumerate(keys):
 			dataDictionary[key] = vals[pos]
@@ -483,28 +487,28 @@ def runGridlabAndProcessData(tree, attachments, edge_bools, workDir=False):
 	if not workDir:
 		workDir = tempfile.mkdtemp()
 		# print '@@@@@@', workDir
-	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
+	gridlabOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 
 	# read voltDump values into a dictionary.
 	try:
-		dumpFile = open(pJoin(workDir,'voltDump.csv'),'r')
+		with open(pJoin(workDir,'voltDump.csv'), newline='') as dumpFile:
+			reader = csv.reader(dumpFile)
+			next(reader) # Burn the header.
+			keys = next(reader)
+			voltTable = []
+			for row in reader:
+				rowDict = {}
+				for pos,key in enumerate(keys):
+					rowDict[key] = row[pos]
+				voltTable.append(rowDict)
 	except:
 		raise Exception('GridLAB-D failed to run with the following errors:\n' + gridlabOut['stderr'])
-	reader = csv.reader(dumpFile)
-	reader.next() # Burn the header.
-	keys = reader.next()
-	voltTable = []
-	for row in reader:
-		rowDict = {}
-		for pos,key in enumerate(keys):
-			rowDict[key] = row[pos]
-		voltTable.append(rowDict)
 
 	# read currDump values into a dictionary
-	with open(pJoin(workDir,'currDump.csv'),'r') as currDumpFile:
+	with open(pJoin(workDir,'currDump.csv'), newline='') as currDumpFile:
 		reader = csv.reader(currDumpFile)
-		reader.next() # Burn the header.
-		keys = reader.next()
+		next(reader) # Burn the header.
+		keys = next(reader)
 		currTable = []
 		for row in reader:
 			rowDict = {}
@@ -516,7 +520,7 @@ def runGridlabAndProcessData(tree, attachments, edge_bools, workDir=False):
 	lineRatings = {}
 	for key1 in edge_bools.keys():
 		if edge_bools[key1]:		
-			with open(pJoin(workDir,key1+'_cont_rating.csv'),'r') as ratingFile:
+			with open(pJoin(workDir,key1+'_cont_rating.csv'), newline='') as ratingFile:
 				reader = csv.reader(ratingFile)
 				keys = []
 				vals = []
@@ -525,7 +529,7 @@ def runGridlabAndProcessData(tree, attachments, edge_bools, workDir=False):
 						keys = row
 						i = keys.index('# timestamp')
 						keys.pop(i)
-						vals = reader.next()
+						vals = next(reader)
 						vals.pop(i)
 				for pos,key2 in enumerate(keys):
 					lineRatings[key2] = abs(float(vals[pos]))				
@@ -617,7 +621,7 @@ def drawPlot(tree, nodeDict=None, edgeDict=None, edgeLabsDict=None, displayLabs=
 	warnings.filterwarnings('ignore')
 
 	# Build the graph.
-	fGraph = omf.feeder.treeToNxGraph(tree)
+	fGraph = feeder.treeToNxGraph(tree)
 	# TODO: consider whether we can set figsize dynamically.
 	wlVal = int(math.sqrt(float(rezSqIn)))
 
@@ -709,16 +713,16 @@ def drawPlot(tree, nodeDict=None, edgeDict=None, edgeLabsDict=None, displayLabs=
 
 def glmToModel(glmPath, modelDir):
 	''' One shot model creation from glm. '''
-	tree = omf.feeder.parse(glmPath)
+	tree = feeder.parse(glmPath)
 	# Run powerflow. First name the folder for it.
 	# Remove old copy of the model.
 	shutil.rmtree(modelDir, ignore_errors=True)
 	# Create the model directory.
-	omf.models.derInterconnection.new(modelDir)
+	new(modelDir)
 	# Create the .omd.
 	os.remove(modelDir + '/Olin Barre Geo.omd')
 	with open(modelDir + '/Olin Barre Geo.omd','w') as omdFile:
-		omd = dict(omf.feeder.newFeederWireframe)
+		omd = dict(feeder.newFeederWireframe)
 		omd['tree'] = tree
 		json.dump(omd, omdFile, indent=4)
 
@@ -749,7 +753,9 @@ def new(modelDir):
 	return creationCode
 
 def _testingPlot():
-	PREFIX = omf.omfDir + '/scratch/CIGAR/'
+	PREFIX = os.path.join(os.path.dirname(__file__), '../scratch/CIGAR/')
+	#PREFIX = omf.omfDir + '/scratch/CIGAR/'
+
 	FNAME = 'test_base_R4-25.00-1.glm_CLEAN.glm'
 	# FNAME = 'test_Exercise_4_2_1.glm'
 	# FNAME = 'test_ieee37node.glm'
@@ -757,11 +763,13 @@ def _testingPlot():
 	# FNAME = 'test_large-R5-35.00-1.glm_CLEAN.glm'c
 	# FNAME = 'test_medium-R4-12.47-1.glm_CLEAN.glm'
 	# FNAME = 'test_smsSingle.glm'
-	# Hack: Agg backend doesn't work for interactivity. Switch to something we can use:
-	# plt.switch_backend('MacOSX')
+
+	tree = feeder.parse(PREFIX + FNAME)
+	chart = drawPlot(tree, neatoLayout=True, perUnitScale=False, rezSqIn=400)
 	#chart = drawPlot(PREFIX + FNAME, neatoLayout=True, edgeCol=True, nodeLabs="Voltage", edgeLabs="Current", perUnitScale=False, rezSqIn=400)
-	#chart.savefig(PREFIX + "YO_WHATS_GOING_ON.png")
-	#plt.show()
+
+	chart.savefig(PREFIX + "YO_WHATS_GOING_ON.png")
+	plt.show()
 
 def _debugging():
 	# Location
@@ -777,10 +785,10 @@ def _debugging():
 	# Pre-run.
 	# renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc)
+	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_debugging()
-	# _testingPlot()
+	#_testingPlot()
