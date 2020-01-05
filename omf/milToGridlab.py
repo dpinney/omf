@@ -1775,14 +1775,70 @@ def crappyhist(a, path, bins=50, width=80):
 					width=width
 			), file=f)
 
+def split(fileToSplit, pathToDir=None):
+	'''Splits a large STD into many smaller STDs'''
+	from tempfile import mkdtemp
+	if not pathToDir:
+		pathToDir = mkdtemp()
+		print("Split milFiles are in %s" % pathToDir)
+
+	def extend(nodeSet, node):
+		# add a node and all descendants to a set
+		nodeSet.add(name_to_index[node])
+
+		for kid in parent_to_kids.get(node, []):
+			if kid in parent_to_kids.keys():
+				extend(nodeSet, kid)
+			else:
+				nodeSet.add(name_to_index[kid])
+
+	parent_to_kids = dict()
+	name_to_index = dict()
+	rows = list()
+	noots = dict()
+
+	with open(fileToSplit, 'r') as f:
+		header = f.next()
+		for i, line in enumerate(f):
+			rows.append(line)
+			line = line.split(',')
+			me, pa = line[0], line[3]
+			name_to_index[me] = i
+			if pa in parent_to_kids.keys():
+				parent_to_kids[pa].append(me)
+			else:
+				parent_to_kids[pa] = [me]
+
+	for noot in parent_to_kids["ROOT"]:
+		members = set() # set of indices of interest
+		extend(members, noot)
+
+		if len(members) <= 1:
+			continue
+
+		with open(pJoin(pathToDir, noot.replace("/", "-") + '.std'), 'w') as f:
+			f.write(header)
+			for i, row in enumerate(rows):
+				if i in members:
+					f.write(row)
+
 def _tests(
 	keepFiles=True,
 	wipeBefore=False,
 	openPrefix=omf.omfDir + '/static/testFiles/',
 	outPrefix=omf.omfDir + '/scratch/milToGridlabTests/',
 	testFiles=[('Olin-Barre.std', 'Olin.seq'), ('Olin-Brown.std', 'Olin.seq')],
-	totalLength=121,
-	testAttachments={'schedules.glm': '','climate.tmy2': None},
+# My changes
+	#totalLength=121, # Delete this
+	testAttachments={'schedules.glm': '','climate.tmy2': None}, # Keep this
+# Incoming changes v Delete these
+#	testAttachments={
+#		'schedules.glm': '',
+#		'climate.tmy2': open(
+#			omf.omfDir + '/data/Climate/KY-LEXINGTON.tmy2', 'r'
+#		).read(),
+#	},
+# Incoming changes ^
 	voltdumpCsvName='{}_VD.csv',
 	logAllWarnings=False
 ):
@@ -1797,6 +1853,7 @@ def _tests(
 	#   ('ABEC-FRANK.std','ABEC.seq'), ('ABEC-COLUMBIA.std','ABEC.seq'),('OMF_Norfork1.std', 'OMF_Norfork1.seq'),('UE yadkin tabernacle.std','UE yadkin tabernacle.seq')]
 	# setlocale lives here to avoid changing it globally
 	# locale.setlocale(locale.LC_ALL, 'en_US')
+
 	# Variables for the testing.
 	allResults = []
 	# Create the work directory.
@@ -1819,6 +1876,7 @@ def _tests(
 	gridlab_workDir = mkdtemp() if voltdumpCsvName else None
 	# Run all the tests.
 	for stdString, seqString in testFiles:
+		outFilePrefix = pJoin(outPrefix, stdString)[:-4]
 		# Output data structure.
 		currentResults = {}
 		currentResults['circuit_name'] = stdString
@@ -1843,12 +1901,18 @@ def _tests(
 						'object': 'voltdump',
 						'filename': voltdumpCsvName,
 					}
-			with open(outPrefix + stdString.replace('.std', '.glm'), 'w') as outFile:
+			with open(outFilePrefix + ".glm", 'w') as outFile:
 				outFile.seek(0)
 				outFile.write(feeder.sortedWrite(outGlm))
 				outFile.truncate()
-				outFileStats = os.stat(outPrefix + stdString.replace('.std', '.glm'))
+# My changes
+			#	outFileStats = os.stat(outPrefix + stdString.replace('.std', '.glm'))
+			#print('WROTE GLM FOR', stdString)
+# Incoming changes v
+				outFileStats = os.stat(outFilePrefix + ".glm")
 			print('WROTE GLM FOR', stdString)
+
+# Incoming changes ^
 			# Write the size of the files as a indicator of how good the conversion was.
 			inFileStats = os.stat(pJoin(openPrefix,stdString))
 			inFileSize = inFileStats.st_size
@@ -1865,7 +1929,7 @@ def _tests(
 			# But first make networkx cool it with the warnings.
 			myGraph = feeder.treeToNxGraph(outGlm)
 			x = feeder.latLonNxGraph(myGraph, neatoLayout=False)
-			plt.savefig(outPrefix + stdString.replace('.std','.png'))
+			plt.savefig(outFilePrefix + ".png")
 			# Clear memory since matplotlib likes to eat a lot.
 			plt.close()
 			del x
@@ -1887,7 +1951,7 @@ def _tests(
 				currentResults['gridlabd_error_code'] = output['stderr'].replace('\n',' ')
 				raise Exception
 			# Dump powerflow results.
-			with open(outPrefix + stdString.replace('.std','.json'),'w') as outFile:
+			with open(outFilePrefix + ".json", 'w') as outFile:
 				outFile.seek(0)
 				json.dump(output, outFile, indent=4)
 				outFile.truncate()
@@ -1900,14 +1964,14 @@ def _tests(
 			try:
 				# Analyze volt dump
 				vpu, na_count = voltDistribution(
-						outPrefix + stdString.replace('.std', '.glm'),
+						outFilePrefix + ".glm",
 						pJoin(gridlab_workDir, voltdumpCsvName)
 				)
 				currentResults['perc_voltage_in_range'] = "%0.3f" % (sum(1.0 for v in vpu if 0.8<=v<=1.2)/len(vpu))
 				currentResults['missing_nominal_voltage_cnt'] = na_count
 				crappyhist(
 						vpu,
-						outPrefix + stdString.replace('.std', '_voltage_hist.txt')
+						outFilePrefix + '_voltage_hist.txt'
 				)
 				print('COMPLETED VOLT DUMP ANALYSIS ON', stdString)
 			except Exception as e:
@@ -1916,7 +1980,7 @@ def _tests(
 				print('VOLT DUMP ANALYSIS FAILED ON', stdString, type(e))
 		# Write stats for all tests.
 		currentResults['conversion_time_seconds'] = time.time() - cur_start_time
-		_writeResultsCsv([currentResults], outPrefix + stdString.replace('.std','.csv'))
+		_writeResultsCsv([currentResults], outFilePrefix + ".csv")
 		# Append to multi-circuit output and continue.
 		allResults.append(currentResults)
 	if not keepFiles:
