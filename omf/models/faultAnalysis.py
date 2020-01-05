@@ -1,27 +1,22 @@
 ''' Graph the voltage drop on a feeder. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math, warnings
-import traceback
+import json, os, shutil, csv, warnings, base64
 from os.path import join as pJoin
-from jinja2 import Template
 from matplotlib import pyplot as plt
-import matplotlib
-from networkx.drawing.nx_agraph import graphviz_layout
-import networkx as nx
 from omf.models import __neoMetaModel__
-from __neoMetaModel__ import *
 from omf.models.voltageDrop import drawPlot
-plt.switch_backend('Agg')
-
-# OMF imports 
-import omf.feeder as feeder
-from omf.solvers import gridlabd
+#plt.switch_backend('Agg')
 
 # dateutil imports
 from dateutil import parser
 from dateutil.relativedelta import *
+
+# OMF imports
+from omf import feeder
+from omf.solvers import gridlabd
+
 # Model metadata:
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = "Injects faults in to circuits and measures fault currents, voltages, and protective device response."
 hidden = False
 
@@ -33,7 +28,8 @@ def work(modelDir, inputDict):
 	inputDict["feederName1"] = feederName
 	# Create voltage drop plot.
 	# print "*DEBUG: feederName:", feederName
-	omd = json.load(open(pJoin(modelDir,feederName + '.omd')))
+	with open(pJoin(modelDir,feederName + '.omd')) as f:
+		omd = json.load(f)
 	if inputDict.get("layoutAlgorithm", "geospatial") == "geospatial":
 		neato = False
 	else:
@@ -99,8 +95,7 @@ def work(modelDir, inputDict):
 		workDir = modelDir)
 	chart.savefig(pJoin(modelDir, "output.png"))
 	with open(pJoin(modelDir, "output.png"),"rb") as inFile:
-		outData["voltageDrop"] = inFile.read().encode("base64")
-
+		outData["voltageDrop"] = base64.standard_b64encode(inFile.read()).decode('ascii')
 	table = drawTable(
 		pJoin(modelDir,feederName + ".omd"),
 		workDir = modelDir)
@@ -159,7 +154,8 @@ def drawTable(path, workDir=None):
 		tree = omf.feeder.parse(path)
 		attachments = []
 	elif path.endswith('.omd'):
-		omd = json.load(open(path))
+		with open(path) as f:
+			omd = json.load(f)
 		tree = omd.get('tree', {})
 		attachments = omd.get('attachments',[])
 	else:
@@ -196,7 +192,7 @@ def drawTable(path, workDir=None):
 	for key in protDevices.keys():
 		if protDevices[key]:
 			for phase in ['A', 'B', 'C']:
-				with open(pJoin(workDir,key+'_phase_'+phase+'_state.csv'),'r') as statusFile:
+				with open(pJoin(workDir,key+'_phase_'+phase+'_state.csv'), newline='') as statusFile:
 					reader = csv.reader(statusFile)
 					# loop past the header, 
 					keys = []
@@ -206,7 +202,7 @@ def drawTable(path, workDir=None):
 							keys = row
 							i = keys.index('# timestamp')
 							keys.pop(i)
-							vals = reader.next()
+							vals = next(reader)
 							vals.pop(i)
 					for pos,key2 in enumerate(keys):
 						protDevFinalStatus[key2][phase] = vals[pos]
@@ -275,9 +271,9 @@ def _debugging():
 	# Pre-run.
 	# renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc)
+	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_debugging()
