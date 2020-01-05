@@ -1828,17 +1828,7 @@ def _tests(
 	openPrefix=omf.omfDir + '/static/testFiles/',
 	outPrefix=omf.omfDir + '/scratch/milToGridlabTests/',
 	testFiles=[('Olin-Barre.std', 'Olin.seq'), ('Olin-Brown.std', 'Olin.seq')],
-# My changes
-	#totalLength=121, # Delete this
-	testAttachments={'schedules.glm': '','climate.tmy2': None}, # Keep this
-# Incoming changes v Delete these
-#	testAttachments={
-#		'schedules.glm': '',
-#		'climate.tmy2': open(
-#			omf.omfDir + '/data/Climate/KY-LEXINGTON.tmy2', 'r'
-#		).read(),
-#	},
-# Incoming changes ^
+	testAttachments={'schedules.glm': '','climate.tmy2': None},
 	voltdumpCsvName='{}_VD.csv',
 	logAllWarnings=False
 ):
@@ -1905,14 +1895,8 @@ def _tests(
 				outFile.seek(0)
 				outFile.write(feeder.sortedWrite(outGlm))
 				outFile.truncate()
-# My changes
-			#	outFileStats = os.stat(outPrefix + stdString.replace('.std', '.glm'))
-			#print('WROTE GLM FOR', stdString)
-# Incoming changes v
 				outFileStats = os.stat(outFilePrefix + ".glm")
 			print('WROTE GLM FOR', stdString)
-
-# Incoming changes ^
 			# Write the size of the files as a indicator of how good the conversion was.
 			inFileStats = os.stat(pJoin(openPrefix,stdString))
 			inFileSize = inFileStats.st_size
