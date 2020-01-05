@@ -515,8 +515,8 @@ def makeUsefulDf(df, noise=2.5, hours_prior=24):
 		return m1 | m2
 
 	this_directory = os.path.dirname(os.path.realpath(__file__))
-	with open(pJoin(this_directory, 'static', 'testFiles', 'holidays.pickle')) as f:
-		nerc6 = pickle.load(f)
+	with open(pJoin(this_directory, 'static', 'testFiles', 'holidays.pickle'), 'rb') as f:
+		nerc6 = pickle.load(f, encoding='latin_1') # Is this the right codec? It might be cp1252
 
 	
 	if 'dates' not in df.columns:
