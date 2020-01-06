@@ -1,17 +1,15 @@
-import matplotlib, warnings, csv, json, plotly
+import warnings, csv, json, plotly
 from os.path import join as pJoin
-from matplotlib import pyplot as plt
-from omf.models import __neoMetaModel__
-from __neoMetaModel__ import *
-from omf.solvers.REopt import run as runREopt
-from omf.solvers.REopt import runResilience as runResilienceREopt
 import numpy as np
 import plotly.graph_objs as go
+import omf
+from omf.models import __neoMetaModel__
+import omf.solvers.REopt as reopt
 
 warnings.filterwarnings('ignore')
 
 # Model metadata:
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = "The microGridDesign model uses a 1yr load profile to determine the most economical combination of solar, wind, and storage technologies to use in a microgrid. The model also provides basic resiliency analysis."
 hidden = False
 
@@ -43,7 +41,7 @@ def work(modelDir, inputDict):
 
 	try:
 		loadShape = []
-		with open(pJoin(modelDir,"loadShape.csv")) as inFile:
+		with open(pJoin(modelDir,"loadShape.csv"), newline='') as inFile:
 			reader = csv.reader(inFile)
 			for row in reader:
 				loadShape.append(row) 
@@ -148,12 +146,12 @@ def work(modelDir, inputDict):
 			json.dump(scenario, jsonFile)
 
 		# Run REopt API script
-		runREopt(pJoin(modelDir, 'Scenario_test_POST.json'), pJoin(modelDir, 'results.json'))
+		reopt.run(pJoin(modelDir, 'Scenario_test_POST.json'), pJoin(modelDir, 'results.json'))
 		with open(pJoin(modelDir, 'results.json')) as jsonFile:
 			results = json.load(jsonFile)
 		
 		runID = results['outputs']['Scenario']['run_uuid']
-		runResilienceREopt(runID, pJoin(modelDir, 'resultsResilience.json'))
+		reopt.runResilience(runID, pJoin(modelDir, 'resultsResilience.json'))
 		with open(pJoin(modelDir, 'resultsResilience.json')) as jsonFile:
 			resultsResilience = json.load(jsonFile)
 
@@ -223,7 +221,7 @@ def work(modelDir, inputDict):
 				orientation="h")
 			)
 		
-		x = range(len(outData['powerGridToLoad' + indexString]))
+		x = list(range(len(outData['powerGridToLoad' + indexString])))
 
 		plotData = []
 		powerGridToLoad = go.Scatter(
@@ -410,10 +408,12 @@ def work(modelDir, inputDict):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	fName = "input - 2 col, 200 Employee Office, Springfield Illinois, 2001.csv"
+	with open(pJoin(omf.omfDir, "static", "testFiles", fName)) as f:
+		load_shape = f.read()
 	defaultInputs = {
 		"modelType": modelName,
 		"runTime": "",
-		"loadShape" : open(pJoin(omf.omfDir, "static", "testFiles", fName)).read(),
+		"loadShape" : load_shape,
 		"solar" : "on",
 		"wind" : "off",
 		"battery" : "on",
@@ -457,9 +457,9 @@ def _debugging():
 	# Pre-run.
 	# renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc)
+	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_debugging()
