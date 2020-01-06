@@ -1,32 +1,24 @@
 ''' Calculate phase unbalance and determine mitigation options. '''
 
-import json, os, shutil, csv
+import json, os, shutil, math, base64
+from os.path import join as pJoin
 import numpy as np
 import pandas as pd
-from os.path import join as pJoin
-from shutil import copyfile
-import math
 
 # OMF imports 
 from omf.models import __neoMetaModel__
-from __neoMetaModel__ import *
-# OMF imports 
-import omf.feeder as feeder
-from omf.solvers import gridlabd
-from omf.models.voltageDrop import drawPlot as voltagePlot
-import omf.feeder as feeder
-from omf.solvers import gridlabd
-from omf.weather import zipCodeToClimateName
-from omf.solvers.SteinmetzController import SteinmetzController
+from omf import feeder
+from omf.models import voltageDrop
+from omf.solvers import SteinmetzController
 
 # Model metadata:
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = "Calculate phase unbalance and determine mitigation options."
 # hidden = True
 
 def get_loss_items(tree):
 	s = set()
-	for i, d in tree.iteritems():
+	for i, d in tree.items():
 		s.add(d.get('object', ''))
 	return [l for l in ['transformer', 'underground_line', 'overhead_line', 'triplex_line'] if any([l in x for x in s])]
 
@@ -95,7 +87,7 @@ def work(modelDir, ind):
 		treeString = feeder.sortedWrite(tree_base)
 		f.write(treeString)
 	
-	voltagePlot(
+	voltageDrop.drawPlot(
 		pJoin(modelDir, "_base.glm"), workDir=modelDir, neatoLayout=neato, 
 		edgeCol=edgeColValue, nodeCol=nodeColValue, nodeLabs=nodeLabsValue, 
 		edgeLabs=edgeLabsValue, customColormap=customColormapValue, rezSqIn=int(ind["rezSqIn"]), 
@@ -103,14 +95,14 @@ def work(modelDir, ind):
 			scaleMax=float(ind['colorMax']) if ind['colorMax'].lower() != 'auto' else None
 	).savefig(pJoin(modelDir,"output" + base_suffix + ".png"))
 	with open(pJoin(modelDir,"output" + base_suffix + ".png"),"rb") as f:
-		o["base_image"] = f.read().encode("base64")
+		o['base_image'] = base64.standard_b64encode(f.read()).decode()
 	os.rename(pJoin(modelDir, "voltDump.csv"), pJoin(modelDir, "voltDump_base.csv"))
 	
 	# ---------------------------- CONTROLLED CHART ----------------------------- #
 	
 	controlled_suffix = '_controlled'
 	
-	SteinmetzController(pJoin(modelDir, 'input.glm'), 
+	SteinmetzController.SteinmetzController(pJoin(modelDir, 'input.glm'),
 		ind['pvConnection'], ind['criticalNode'], 
 		int(ind['iterations']), ind['objectiveFunction'], modelDir)
 
@@ -125,7 +117,7 @@ def work(modelDir, ind):
 		tree_controlled = json.load(f)['tree']
 	
 	constant_pf = float(ind['constant_pf'])
-	for k, v in tree_controlled.iteritems():
+	for k, v in tree_controlled.items():
 		if ('PV' in v.get('groupid', '')) and v.get('object', '') == 'load':
 			if ind['strategy'] == 'constant':
 				if v.get('constant_power_C', '') != '':
@@ -144,7 +136,7 @@ def work(modelDir, ind):
 		treeString = feeder.sortedWrite(tree_controlled)
 		f.write(treeString)
 	
-	voltagePlot(
+	voltageDrop.drawPlot(
 		pJoin(modelDir, "_controlled.glm"), workDir=modelDir, neatoLayout=neato, 
 		edgeCol=edgeColValue, nodeCol=nodeColValue, nodeLabs=nodeLabsValue, 
 		edgeLabs=edgeLabsValue, customColormap=customColormapValue, rezSqIn=int(ind["rezSqIn"]), 
@@ -152,7 +144,8 @@ def work(modelDir, ind):
 			scaleMax=float(ind['colorMax']) if ind['colorMax'] != 'auto' else None
 	).savefig(pJoin(modelDir,"output" + controlled_suffix + ".png"))
 	with open(pJoin(modelDir,"output" + controlled_suffix + ".png"),"rb") as f:
-		o["controlled_image"] = f.read().encode("base64")
+		o['controlled_image'] = base64.standard_b64encode(f.read()).decode()
+
 	os.rename(pJoin(modelDir, "voltDump.csv"), pJoin(modelDir, "voltDump_controlled.csv"))
 	
 	# ---------------------------- SOLAR CHART ----------------------------- #
@@ -167,7 +160,7 @@ def work(modelDir, ind):
 	with open(omdPath) as f:
 		tree_solar = json.load(f)['tree']
 
-	for k, v in tree_solar.iteritems():
+	for k, v in tree_solar.items():
 		if ('PV' in v.get('groupid', '')) and v.get('object', '') == 'load':
 			v['groupid'] = 'PV'
 
@@ -177,7 +170,7 @@ def work(modelDir, ind):
 		treeString = feeder.sortedWrite(tree_solar)
 		f.write(treeString)
 	
-	voltagePlot(
+	voltageDrop.drawPlot(
 		pJoin(modelDir, "_solar.glm"), workDir=modelDir, neatoLayout=neato, 
 		edgeCol=edgeColValue, nodeCol=nodeColValue, nodeLabs=nodeLabsValue, 
 		edgeLabs=edgeLabsValue, customColormap=customColormapValue, rezSqIn=int(ind["rezSqIn"]), 
@@ -185,7 +178,8 @@ def work(modelDir, ind):
 			scaleMax=float(ind['colorMax']) if ind['colorMax'] != 'auto' else None
 	).savefig(pJoin(modelDir,"output" + solar_suffix + ".png"))
 	with open(pJoin(modelDir,"output" + solar_suffix + ".png"),"rb") as f:
-		o["solar_image"] = f.read().encode("base64")
+		o['solar_image'] = base64.standard_b64encode(f.read()).decode()
+
 	os.rename(pJoin(modelDir, "voltDump.csv"), pJoin(modelDir, "voltDump_solar.csv"))
 
 	# --------------------------- SERVICE TABLE ----------------------------- 
@@ -444,7 +438,7 @@ def _addCollectors(tree, suffix=None, pvConnection=None):
 	return tree
 
 def _turnOffSolar(tree):
-	for k, v in tree.iteritems():
+	for k, v in tree.items():
 		if v.get("object", "") in ["solar", "inverter"]:
 			tree[k]["generator_status"] = "OFFLINE"
 	return tree
@@ -565,9 +559,9 @@ def _debugging():
 	if os.path.isdir(modelLoc):
 		shutil.rmtree(modelLoc)
 	new(modelLoc)
-	renderAndShow(modelLoc)
-	runForeground(modelLoc)
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
+	__neoMetaModel__.runForeground(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_debugging()
