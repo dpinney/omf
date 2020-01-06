@@ -1,18 +1,16 @@
 ''' Calculate solar photovoltaic system output using PVWatts. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime, traceback
+import json, shutil, datetime
 from os.path import join as pJoin
-from omf.models import __neoMetaModel__
-from __neoMetaModel__ import *
 
 # OMF imports
-import omf.feeder as feeder
+from omf.models import __neoMetaModel__
 from omf.solvers import nrelsam2013
 from omf.weather import zipCodeToClimateName
 
 # Model metadata:
 tooltip = "The pvWatts model runs the NREL pvWatts tool for quick estimation of solar panel output."
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
@@ -23,11 +21,11 @@ def work(modelDir, inputDict):
 	ssc = nrelsam2013.SSCAPI()
 	dat = ssc.ssc_data_create()
 	# Required user inputs.
-	ssc.ssc_data_set_string(dat, "file_name", modelDir + "/climate.tmy2")
-	ssc.ssc_data_set_number(dat, "system_size", float(inputDict["systemSize"]))
-	ssc.ssc_data_set_number(dat, "derate", 0.01 * float(inputDict["nonInverterEfficiency"]))
-	ssc.ssc_data_set_number(dat, "track_mode", float(inputDict["trackingMode"]))
-	ssc.ssc_data_set_number(dat, "azimuth", float(inputDict["azimuth"]))
+	ssc.ssc_data_set_string(dat, b'file_name', bytes(modelDir + '/climate.tmy2', 'ascii'))
+	ssc.ssc_data_set_number(dat, b'system_size', float(inputDict['systemSize']))
+	ssc.ssc_data_set_number(dat, b'derate', 0.01 * float(inputDict['nonInverterEfficiency']))
+	ssc.ssc_data_set_number(dat, b'track_mode', float(inputDict['trackingMode']))
+	ssc.ssc_data_set_number(dat, b'azimuth', float(inputDict['azimuth']))
 	# Advanced inputs with defaults.
 	if (inputDict.get("tilt",0) == "-"):
 		tilt_eq_lat = 1.0
@@ -35,12 +33,12 @@ def work(modelDir, inputDict):
 	else:
 		tilt_eq_lat = 0.0
 		manualTilt = float(inputDict.get("tilt",0))
-	ssc.ssc_data_set_number(dat, "tilt_eq_lat", tilt_eq_lat)
-	ssc.ssc_data_set_number(dat, "tilt", manualTilt)
-	ssc.ssc_data_set_number(dat, "rotlim", float(inputDict["rotlim"]))
-	ssc.ssc_data_set_number(dat, "gamma", -1 * float(inputDict["gamma"]))
-	ssc.ssc_data_set_number(dat, "inv_eff", 0.01 * float(inputDict["inverterEfficiency"]))
-	ssc.ssc_data_set_number(dat, "w_stow", float(inputDict["w_stow"]))
+	ssc.ssc_data_set_number(dat, b'tilt_eq_lat', tilt_eq_lat)
+	ssc.ssc_data_set_number(dat, b'tilt', manualTilt)
+	ssc.ssc_data_set_number(dat, b'rotlim', float(inputDict['rotlim']))
+	ssc.ssc_data_set_number(dat, b'gamma', -1 * float(inputDict['gamma']))
+	ssc.ssc_data_set_number(dat, b'inv_eff', 0.01 * float(inputDict['inverterEfficiency']))
+	ssc.ssc_data_set_number(dat, b'w_stow', float(inputDict['w_stow']))
 	# Complicated optional inputs that we could enable later.
 	# ssc.ssc_data_set_array(dat, 'shading_hourly', ...) 	# Hourly beam shading factors
 	# ssc.ssc_data_set_matrix(dat, 'shading_mxh', ...) 		# Month x Hour beam shading factors
@@ -55,7 +53,7 @@ def work(modelDir, inputDict):
 	# ssc.ssc_data_set_number(dat, "i_ref", float(inputDict["i_ref"]))
 	# ssc.ssc_data_set_number(dat, "poa_cutin", float(inputDict["poa_cutin"]))
 	# Run PV system simulation.
-	mod = ssc.ssc_module_create("pvwattsv1")
+	mod = ssc.ssc_module_create(b'pvwattsv1')
 	ssc.ssc_module_exec(mod, dat)
 	# Setting options for start time.
 	simLengthUnits = inputDict.get("simLengthUnits","")
@@ -72,11 +70,11 @@ def work(modelDir, inputDict):
 		datetime.datetime.strptime(startDateTime[0:19],"%Y-%m-%d %H:%M:%S") + 
 		datetime.timedelta(**{simLengthUnits:x}),"%Y-%m-%d %H:%M:%S") + " UTC" for x in range(int(inputDict["simLength"]))]
 	# Geodata output.
-	outData["city"] = ssc.ssc_data_get_string(dat, "city")
-	outData["state"] = ssc.ssc_data_get_string(dat, "state")
-	outData["lat"] = ssc.ssc_data_get_number(dat, "lat")
-	outData["lon"] = ssc.ssc_data_get_number(dat, "lon")
-	outData["elev"] = ssc.ssc_data_get_number(dat, "elev")
+	outData['city'] = ssc.ssc_data_get_string(dat, b'city').decode()
+	outData['state'] = ssc.ssc_data_get_string(dat, b'state').decode()
+	outData['lat'] = ssc.ssc_data_get_number(dat, b'lat')
+	outData['lon'] = ssc.ssc_data_get_number(dat, b'lon')
+	outData['elev'] = ssc.ssc_data_get_number(dat, b'elev')
 	# Weather output.
 	outData["climate"] = {}
 	outData["climate"]["Plane of Array Irradiance (W/m^2)"] = agg("poa", avg)
@@ -101,22 +99,22 @@ def _aggData(key, aggFun, simStartDate, simLength, simLengthUnits, ssc, dat):
 	# pick a common year, ignoring the leap year, it won't affect to calculate the initHour
 	d = datetime.datetime(2013, int(u[5:7]),int(u[8:10])) 
 	# first day of the year	
-	sd = datetime.datetime(2013, 01, 01) 
+	sd = datetime.datetime(2013, 1, 1)
 	# convert difference of datedelta object to number of hours 
 	initHour = int((d-sd).total_seconds()/3600)
-	fullData = ssc.ssc_data_get_array(dat, key)
+	fullData = ssc.ssc_data_get_array(dat, bytes(key, 'ascii'))
 	if simLengthUnits == "days":
 		multiplier = 24
 	else:
 		multiplier = 1
-	hourData = [fullData[(initHour+i)%8760] for i in xrange(simLength*multiplier)]
+	hourData = [fullData[(initHour+i)%8760] for i in range(simLength*multiplier)]
 	if simLengthUnits == "minutes":
 		pass
 	elif simLengthUnits == "hours":
 		return hourData
 	elif simLengthUnits == "days":
-		split = [hourData[x:x+24] for x in xrange(simLength)]
-		return map(aggFun, split)
+		split = [hourData[x:x+24] for x in range(simLength)]
+		return list(map(aggFun, split))
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
@@ -152,11 +150,11 @@ def _tests():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc)
+	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_tests()
