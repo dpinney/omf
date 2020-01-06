@@ -1,29 +1,22 @@
+import random, re, datetime, json, os, tempfile, shutil, csv, math
+from os.path import join as pJoin
 import pandas as pd
 import numpy as np
 import scipy
-from sklearn.preprocessing import LabelEncoder
 from scipy import spatial
 import scipy.stats as st
-import random
-import warnings
-from omf import geo, feeder
-import re
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math, warnings
-import datetime
+from sklearn.preprocessing import LabelEncoder
 import plotly as py
 import plotly.graph_objs as go
-from os.path import join as pJoin
-from jinja2 import Template
-from __neoMetaModel__ import *
-from omf.models import __neoMetaModel__
-
 # OMF imports
-import omf.feeder as feeder
+import omf
+from omf import geo
 from omf.solvers import gridlabd
+from omf.models import __neoMetaModel__
 
 # Model metadata:
 tooltip = "outageCost calculates reliability metrics and creates a leaflet graph based on data from an input csv file."
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = False
 
 def datetime_to_float(d):
@@ -155,16 +148,18 @@ def generateDistribution(mc, test, faultsGenerated):
 	np.ndarray.sort(mc2)
 	mc2_std = mc2
 
-	dist_names = ['norm', 
-				  'weibull_min',
-				  'pareto',
-				  'uniform',
-				  'beta',
-				  'gamma',
-				  'expon',
-				  'lognorm',
-				  'triang',
-				  'dweibull']
+	dist_names = [
+		'norm',
+		'weibull_min',
+		'pareto',
+		'uniform',
+		'beta',
+		'gamma',
+		'expon',
+		'lognorm',
+		'triang',
+		'dweibull'
+	]
 	size = len(mc2_std)
 	x = np.arange(len(mc2))
 	dist_results = []
@@ -243,7 +238,7 @@ def generateDistribution(mc, test, faultsGenerated):
 			while newEntry < 0:
 				newEntry = scipy.stats.weibull_min.rvs(param[0], param[1], param[2])
 			newDurations.append(newEntry)
- 		if dist == 'pareto':
+		if dist == 'pareto':
 			while newEntry < 0:
 				newEntry = scipy.stats.pareto.rvs(param[0], param[1], param[2])
 			newDurations.append(newEntry)
@@ -335,15 +330,15 @@ def heatMap(mc, test):
 
 	# find the total number of faults that occur in each dictionary
 	# create a heat map by dividing the number of each individual item by the total number found
-	totalCause = sum(cause.itervalues(), 0.0)
-	cause = {k: v / totalCause for k, v in cause.iteritems()}
-	totalStart = sum(start.itervalues(), 0.0)
-	start = {k: v / totalStart for k, v in start.iteritems()}
+	totalCause = sum(cause.values(), 0.0)
+	cause = {k: v / totalCause for k, v in cause.items()}
+	totalStart = sum(start.values(), 0.0)
+	start = {k: v / totalStart for k, v in start.items()}
 	if test != 'dependent':
-		totalDuration = sum(duration.itervalues(), 0.0)
-		duration = {k: v / totalDuration for k, v in duration.iteritems()}
-	totalLocation = sum(location.itervalues(), 0.0)
-	location = {k: v / totalLocation for k, v in location.iteritems()}
+		totalDuration = sum(duration.values(), 0.0)
+		duration = {k: v / totalDuration for k, v in duration.items()}
+	totalLocation = sum(location.values(), 0.0)
+	location = {k: v / totalLocation for k, v in location.items()}
 
 	# create a single dictionary to store heat map data
 	heatMap = {}
@@ -387,11 +382,11 @@ def randomFault(pathToCsv, faultsGenerated, test, depDist):
 		newDurations = generateDistribution(mc, test, faultsGenerated)
 	while faultNumber < faultsGenerated:
 		# choose a random location
-		chooseLocationString = np.random.choice(heatmap['location'].keys(), replace=True, p=heatmap['location'].values())
+		chooseLocationString = np.random.choice(list(heatmap['location'].keys()), replace=True, p=list(heatmap['location'].values()))
 		chooseLocation = chooseLocationString.split()
 		location = str(chooseLocation[0]) + ' ' + str(chooseLocation[1])
 		if heatmap['start']:
-			start = np.random.choice(heatmap['start'].keys(), replace=True, p=heatmap['start'].values())
+			start = np.random.choice(list(heatmap['start'].keys()), replace=True, p=list(heatmap['start'].values()))
 			if test != 'dependent':
 				if heatmap['duration']:
 					if (test == 'chi_square' or test == 'p_value'):
@@ -399,7 +394,7 @@ def randomFault(pathToCsv, faultsGenerated, test, depDist):
 						start = str(start)
 						finish = str(datetime.datetime.strptime(start, "%Y-%m-%d %H:%M:%S") + datetime.timedelta(seconds=duration))
 					else:
-						duration = np.random.choice(heatmap['duration'].keys(), replace=True, p=heatmap['duration'].values())
+						duration = np.random.choice(list(heatmap['duration'].keys()), replace=True, p=list(heatmap['duration'].values()))
 						start = str(start)
 						finish = str(datetime.datetime.strptime(start, "%Y-%m-%d %H:%M:%S") + datetime.timedelta(seconds=duration))
 		# Note: for this method, component type is completely dependent on location
@@ -620,15 +615,15 @@ def heatMapRefined(mc, test):
 		row += 1
 	# find the total number of faults that occur in each dictionary
 	# create a heat map by dividing the number of each individual item by the total number found
-	totalCause = sum(cause.itervalues(), 0.0)
-	cause = {k: v / totalCause for k, v in cause.iteritems()}
-	totalComponentType = sum(componentType.itervalues(), 0.0)
-	componentType = {k: v / totalComponentType for k, v in componentType.iteritems()}
-	totalStart = sum(start.itervalues(), 0.0)
-	start = {k: v / totalStart for k, v in start.iteritems()}
+	totalCause = sum(cause.values(), 0.0)
+	cause = {k: v / totalCause for k, v in cause.items()}
+	totalComponentType = sum(componentType.values(), 0.0)
+	componentType = {k: v / totalComponentType for k, v in componentType.items()}
+	totalStart = sum(start.values(), 0.0)
+	start = {k: v / totalStart for k, v in start.items()}
 	if test != 'dependent':
-		totalDuration = sum(duration.itervalues(), 0.0)
-		duration = {k: v / totalDuration for k, v in duration.iteritems()}
+		totalDuration = sum(duration.values(), 0.0)
+		duration = {k: v / totalDuration for k, v in duration.items()}
 
 	# create a single dictionary to store heat map data
 	heatMap = {}
@@ -670,7 +665,7 @@ def randomFaultsRefined(pathToCsv, pathToOmd, workDir, gridLines, faultsGenerate
 	with open(pathToOmd) as inFile:
 		tree = json.load(inFile)['tree']
 	outageMap = geo.omdGeoJson(pathToOmd, conversion = False)
-	with open(workDir + '/lines.csv', mode='w') as lines:
+	with open(workDir + '/lines.csv', mode='w', newline='') as lines:
 
 		fieldnames = ['line_name', 'coords1', 'coords2']
 		writer = csv.DictWriter(lines, fieldnames)
@@ -687,7 +682,7 @@ def randomFaultsRefined(pathToCsv, pathToOmd, workDir, gridLines, faultsGenerate
 
 	nth_distance, xv, yv, lineNameMeters, durLocation = locationMap(mc, gridLines, lines, test)
 
-	with open(workDir + '/faultLines.csv', mode='w') as faultLines:
+	with open(workDir + '/faultLines.csv', mode='w', newline='') as faultLines:
 
 		fieldnames = ['line_name', 'coords1', 'coords2']
 		writer = csv.DictWriter(faultLines, fieldnames)
@@ -718,14 +713,14 @@ def randomFaultsRefined(pathToCsv, pathToOmd, workDir, gridLines, faultsGenerate
 	faultNumber = 0
 	while faultNumber < faultsGenerated:
 		if heatMap['start']:
-			start = np.random.choice(heatMap['start'].keys(), replace=True, p=heatMap['start'].values())
+			start = np.random.choice(list(heatMap['start'].keys()), replace=True, p=(heatMap['start'].values()))
 			if (test == 'chi_square' or test == 'p_value'):
 				duration = np.float64(math.ceil(newDurations[faultNumber]))
 				start = str(start)
 				finish = str(datetime.datetime.strptime(start, "%Y-%m-%d %H:%M:%S") + datetime.timedelta(seconds=duration))
 			else:
 				if test != 'dependent':
-					duration = np.random.choice(heatMap['duration'].keys(), replace=True, p=heatMap['duration'].values())
+					duration = np.random.choice(list(heatMap['duration'].keys()), replace=True, p=(heatMap['duration'].values()))
 					start = str(start)
 					finish = str(datetime.datetime.strptime(start, "%Y-%m-%d %H:%M:%S") + datetime.timedelta(seconds=duration))
 
@@ -1166,11 +1161,11 @@ def work(modelDir, inputDict):
 	
 	# Textual outputs of cost statistic
 	with open(pJoin(modelDir,"statsCalc.html"),"rb") as inFile:
-		outData["statsHtml"] = inFile.read()
+		outData["statsHtml"] = inFile.read().decode()
 
 	#The geojson dictionary to load into the outageCost.py template
 	with open(pJoin(modelDir,"geoDict.js"),"rb") as inFile:
-		outData["geoDict"] = inFile.read()
+		outData["geoDict"] = inFile.read().decode()
 
 	# Plotly outputs
 	layoutOb = go.Layout()
@@ -1186,6 +1181,8 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	with open(pJoin(__neoMetaModel__._omfDir,"scratch","smartSwitching","outagesNew3.csv")) as f:
+		outage_data = f.read()
 	defaultInputs = {
 		"modelType": modelName,
 		"feederName1": "Olin Barre Fault",
@@ -1207,7 +1204,7 @@ def new(modelDir):
 		"faultsGeneratedStr": "1000",
 		"test": "dependent",
 		"depDist": "0",
-		"outageData": open(pJoin(__neoMetaModel__._omfDir,"scratch","smartSwitching","outagesNew3.csv"), "r").read(),
+		"outageData": outage_data
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
@@ -1231,9 +1228,9 @@ def _tests():
 	# Pre-run.
 	# renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc)
+	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_tests()
