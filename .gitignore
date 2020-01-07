@@ -39,4 +39,6 @@ omf/solvers/nilmtk/*
 omf/static/testFiles/bavarian_solar.omd
 omf/static/testFiles/turkey_solar.omd
 .idea/
-
+omf/scratch/modelDatabase.tsv
+omf/static/ipLoc.html
+omf/static/model_db_stats.png

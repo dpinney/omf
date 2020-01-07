@@ -7,16 +7,17 @@ import networkx as nx
 import math
 import os
 
-def runDSS(dssFilePath, workDir=None):
+def runDSS(dssFilePath):
 	''' Run DSS file and set export path. '''
-	dssFileLoc = os.path.dirname(os.path.abspath(dssFilePath))
-	dss.run_command('set datapath=' + dssFileLoc)
-	dss.run_command('Redirect ' + dssFilePath)
+	# Get paths because openDss doesn't like relative paths.
+	fullPath = os.path.abspath(dssFilePath)
+	dssFileLoc = os.path.dirname(fullPath)
+	dss.run_command('Clear')
+	dss.run_command('Redirect ' + fullPath)
 	dss.run_command('Solve')
-
-def generateCoordinates():
-	dss.run_command('Export BusCoords coords.csv')
-	coords = pd.read_csv('coords.csv', header=None)
+	# also generate coordinates.
+	x = dss.run_command('Export BusCoords ' + dssFileLoc + '/coords.csv')
+	coords = pd.read_csv(dssFileLoc + '/coords.csv', header=None)
 	coords.columns = ['Element', 'X', 'Y']
 	hyp = []
 	for index, row in coords.iterrows():
@@ -24,11 +25,13 @@ def generateCoordinates():
 	coords['radius'] = hyp
 	return coords
 
-def voltagePlots(PU=True):
+def voltagePlot(filePath, PU=True):
 	''' Voltage plotting routine.'''
-	volt_coord = generateCoordinates()
-	dss.run_command('Export voltages volts.csv') # Generate voltage plots.
-	voltage = pd.read_csv('volts.csv') 
+	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
+	volt_coord = runDSS(filePath)
+	dss.run_command('Export voltages ' + dssFileLoc + '/volts.csv')
+	# Generate voltage plots.
+	voltage = pd.read_csv(dssFileLoc + '/volts.csv')
 	volt_coord.columns = ['Bus', 'X', 'Y', 'radius']
 	voltageDF = pd.merge(volt_coord, voltage, on='Bus') # Merge on the bus axis so that all data is in one frame.
 	plt.title('Voltage Profile')
@@ -39,7 +42,7 @@ def voltagePlots(PU=True):
 			plt.scatter(voltageDF['radius'], voltageDF[volt_ind], label='Phase ' + str(i))
 		plt.ylabel('Voltage [PU]')
 		plt.legend()
-		plt.savefig('Voltage Profile [PU].png')
+		plt.savefig(dssFileLoc + '/Voltage Profile [PU].png')
 	else:
 		# plt.axis([1, 7, 2000, 3000]) # Ignore sourcebus-much greater-for overall magnitude.
 		for i in range(1, 4): 
@@ -47,14 +50,15 @@ def voltagePlots(PU=True):
 			plt.scatter(voltageDF['radius'], voltageDF[mag_ind], label='Phase ' + str(i))
 		plt.ylabel('Voltage [V]')
 		plt.legend()
-		plt.savefig('Voltage Profile [V].png')
+		plt.savefig(dssFileLoc + '/Voltage Profile [V].png')
 	plt.clf()
 
-def currentPlots():
+def currentPlot(filePath):
 	''' Current plotting function.'''
-	curr_coord = generateCoordinates()
-	dss.run_command('Export current currents.csv')
-	current = pd.read_csv('currents.csv')
+	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
+	curr_coord = runDSS(filePath)
+	dss.run_command('Export currents ' + dssFileLoc + '/currents.csv')
+	current = pd.read_csv(dssFileLoc + '/currents.csv')
 	curr_coord.columns = ['Index', 'X', 'Y', 'radius'] # DSS buses don't have current, but are connected to it. 
 	curr_hyp = []
 	currentDF = pd.concat([curr_coord, current], axis=1)
@@ -66,14 +70,15 @@ def currentPlots():
 			cur_ind = ' I' + str(i) + '_' + str(j)
 			plt.scatter(currentDF['radius'], currentDF[cur_ind], label=cur_ind)
 	plt.legend()
-	plt.savefig('Current Profile.png')
+	plt.savefig(dssFileLoc + '/Current Profile.png')
 	plt.clf()
 
-def networkPlot():
+def networkPlot(filePath):
 	''' Plot the physical topology of the circuit. '''
-	dss.run_command('Export voltages volts.csv')
-	coords = generateCoordinates()
-	volts = pd.read_csv('volts.csv')
+	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
+	coords = runDSS(filePath)
+	dss.run_command('Export voltages ' + dssFileLoc + '/volts.csv')
+	volts = pd.read_csv(dssFileLoc + '/volts.csv')
 	coords.columns = ['Bus', 'X', 'Y', 'radius']
 	G = nx.Graph()
 	# Get the coordinates.
@@ -104,19 +109,27 @@ def networkPlot():
 	# Start drawing.
 	nodes = nx.draw_networkx_nodes(G, pos, node_color=colorCode)
 	edges = nx.draw_networkx_edges(G, pos)
-	nx.draw_networkx_labels(G, pos, labels)
+	nx.draw_networkx_labels(G, pos, labels, font_size=8)
 	plt.colorbar(nodes)
 	plt.xlabel('Distance [m]')
 	plt.title('Network Voltage Layout')
-	plt.savefig('networkPlot.png')
+	plt.savefig(dssFileLoc + '/networkPlot.png')
 	plt.clf()
 
-def THD():
+def THD(filePath):
 	''' Calculate and plot total harmonic distortion. '''
-	bus_coords = generateCoordinates()
+	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
+	bus_coords = runDSS(filePath)
 	dss.run_command('Solve mode=harmonics')
-	dss.run_command('Export voltages voltharmonics.csv')
-	voltHarmonics = pd.read_csv('voltharmonics.csv')
+	dss.run_command('Export voltages ' + dssFileLoc + '/voltharmonics.csv')
+	# Clean up temp file.
+	try:
+		base = os.path.basename(filePath)
+		fnameMinusExt = os.path.splitext(base)[0]
+		os.remove('{}_SavedVoltages.dbl'.format(fnameMinusExt))
+	except:
+		pass
+	voltHarmonics = pd.read_csv(dssFileLoc + '/voltharmonics.csv')
 	bus_coords.columns = ['Bus', 'X', 'Y', 'radius']
 	voltHarmonics.columns.str.strip()
 	for index, row in voltHarmonics.iterrows():
@@ -126,26 +139,29 @@ def THD():
 	plt.xlabel('Distance from Source [miles]')
 	plt.ylabel('THD [Percentage]')
 	plt.title('Total Harmonic Distortion')
-	plt.savefig('THD.png')
+	plt.savefig(dssFileLoc + '/THD.png')
 	plt.clf()
 
-def dynamicPlot(time_step, iterations):
+
+def dynamicPlot(filePath, time_step, iterations):
 	''' Do a dynamic, long-term study of the powerflow. time_step is in seconds. '''
+	dssFileLoc = os.path.dirname(os.path.abspath(filePath))	
+	runDSS(filePath)
 	dss.run_command('Solve')
 	dynamicCommand = 'Solve mode=dynamics stepsize=%d number=%d' % (time_step, iterations)
 	dss.run_command(dynamicCommand)
 	for i in range(iterations):
-		voltString = 'Export voltages dynamicVolt%d.csv' % i
-		currentString = 'Export currents dynamicCurrent%d.csv' % i
+		voltString = 'Export voltages ' + dssFileLoc + '/dynamicVolt%d.csv' % i
+		currentString = 'Export currents ' + dssFileLoc + '/dynamicCurrent%d.csv' % i
 		dss.run_command(voltString)
 		dss.run_command(currentString)
 	powerData = []
 	for j in range(iterations):
 		curVolt = 'dynamicvolt%d.csv' % j
 		curCurrent = 'dynamiccurrent%d.csv' % j
-		voltProfile = pd.read_csv(curVolt)
+		voltProfile = pd.read_csv(dssFileLoc + '/' + curVolt)
 		voltProfile.columns = voltProfile.columns.str.replace(' ', '')
-		curProfile = pd.read_csv(curCurrent)
+		curProfile = pd.read_csv(dssFileLoc + '/' + curCurrent)
 		curProfile.columns = curProfile.columns.str.replace(' ', '')
 		sourceVoltage = voltProfile.loc[voltProfile['Bus'] == 'SOURCEBUS']
 		sourceCurrent = curProfile.loc[curProfile['Element'] == 'Vsource.SOURCE']
@@ -164,16 +180,17 @@ def dynamicPlot(time_step, iterations):
 	plt.xlabel('Time [s]')
 	plt.ylabel('Power [kW]')
 	plt.title('Dynamic Simulation Power Plot')
-	plt.savefig('DynamicPowerPlot.png')
-	os.system('rm dynamicvolt* dynamiccurrent*')
+	plt.savefig(dssFileLoc + '/DynamicPowerPlot.png')
+	os.system('rm ' + dssFileLoc + '/dynamicvolt* ' + dssFileLoc + '/dynamiccurrent*')
 
 
-def faultPlot():
+def faultPlot(filePath):
 	''' Plot fault study. ''' 
-	bus_coord = generateCoordinates()
+	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
+	bus_coord = runDSS(filePath)
 	dss.run_command('Solve Mode=FaultStudy')
-	dss.run_command('Export fault faults.csv')
-	faultData = pd.read_csv('faults.csv')
+	dss.run_command('Export fault ' + dssFileLoc + '/faults.csv')
+	faultData = pd.read_csv(dssFileLoc + '/faults.csv')
 	bus_coord.columns = ['Bus', 'X', 'Y', 'radius']
 	faultDF = pd.concat([bus_coord, faultData], axis=1)
 	faultDF.columns = faultDF.columns.str.strip()
@@ -185,14 +202,15 @@ def faultPlot():
 	plt.scatter(faultDF['radius'], faultDF['1-Phase'], label='1-Phase to Ground')
 	plt.scatter(faultDF['radius'], faultDF['L-L'], label='Line-to-Line')
 	plt.legend()
-	plt.savefig('Fault Currents.png')
+	plt.savefig(dssFileLoc + '/Fault Currents.png')
 	plt.clf()
 
-def capacityPlot():
+def capacityPlot(filePath):
 	''' Plot power vs. distance '''
-	coords = generateCoordinates()
-	dss.run_command('Export Capacity capacity.csv')
-	capacityData = pd.read_csv('capacity.csv')
+	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
+	coords = runDSS(filePath)
+	dss.run_command('Export Capacity ' + dssFileLoc + '/capacity.csv')
+	capacityData = pd.read_csv(dssFileLoc + '/capacity.csv')
 	coords.columns = ['Index', 'X', 'Y', 'radius']
 	capacityDF = pd.concat([coords, capacityData], axis=1)
 	fig, ax1 = plt.subplots()
@@ -204,18 +222,19 @@ def capacityPlot():
 	ax2.scatter(capacityDF['radius'], capacityDF.iloc[:, 2]+capacityDF.iloc[:, 3], label='Transformer Loading', color='red')
 	fig.tight_layout() # otherwise the right y-label is slightly clipped
 	fig.legend()
-	plt.savefig('Capacity Profile.png')
+	plt.savefig(dssFileLoc + '/Capacity Profile.png')
 	plt.clf()
 
 if __name__ == "__main__":
 	# Make core output
-	FNAME = 'ieee37.dss'
-	runDSS(FNAME)
-	# Generate plots
-	# networkPlot()
-	voltagePlots()
-	# THD()
-	# dynamicPlot(1, 10)
-	# faultPlot()
-	# currentPlots()
-	# capacityPlot()
+	FPATH = 'test/ieee37.dss'
+	# Just run DSS
+	# runDSS(FPATH)
+	# Generate plots, note output is in FPATH dir.
+	voltagePlot(FPATH)
+	# currentPlot(FPATH)
+	# networkPlot(FPATH)
+	# THD(FPATH)
+	# dynamicPlot(FPATH, 1, 10)
+	# faultPlot(FPATH)
+	# capacityPlot(FPATH)
