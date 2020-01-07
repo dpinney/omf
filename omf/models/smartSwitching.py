@@ -1,31 +1,19 @@
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math, warnings
-import traceback
+import json, os, tempfile, shutil, csv, math, itertools, base64, re, datetime
 from os.path import join as pJoin
-from jinja2 import Template
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
-import matplotlib
-import math
 import scipy.stats as stats
-from plotly import tools
 import plotly as py
 import plotly.graph_objs as go
-import plotly.figure_factory as ff
 from plotly.tools import make_subplots
-from networkx.drawing.nx_agraph import graphviz_layout
 import networkx as nx
-import itertools as it
-from omf import geo
-from shutil import copyfile
-from omf.models import voltageDrop as vd
-from __neoMetaModel__ import *
-from omf.models import __neoMetaModel__
-import random
 
 # OMF imports
-import omf.feeder as feeder
-from omf.solvers import gridlabd
+import omf
+import omf.feeder
+import omf.geo
+from omf.models import __neoMetaModel__
 
 # dateutil imports
 from dateutil import parser
@@ -33,13 +21,13 @@ from dateutil.relativedelta import *
 
 # Model metadata:
 tooltip = "smartSwitching gives the expected reliability improvement from adding reclosers to a circuit."
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = False
 
 def get_footer(file_):
 	'helper function returning the length of a variable footer'
 	with open(file_) as f:
-		g = it.dropwhile(lambda x: 'SAIFI' not in x, f)
+		g = itertools.dropwhile(lambda x: 'SAIFI' not in x, f)
 		footer_len = len([i for i, _ in enumerate(g)])
 	return footer_len
 
@@ -54,7 +42,7 @@ def pullOutValuesSmart(tree, workDir, sustainedOutageThreshold, lineNameForReclo
 
 	#Pull out number of customers
 	numberOfCustomers = 0.0
-	with open(workDir + '/Metrics_Output.csv', 'rb') as csvfile:
+	with open(workDir + '/Metrics_Output.csv', newline='') as csvfile:
 		file = csv.reader(csvfile)
 		for line in file:
 			k = 0
@@ -70,7 +58,8 @@ def pullOutValuesSmart(tree, workDir, sustainedOutageThreshold, lineNameForReclo
 
 	# return the Metrics_Output fault data for a year, without any extra data in a cvs format
 	footer_len = get_footer(workDir + '/Metrics_Output.csv')
-	row_count = sum(1 for row in csv.reader(open(workDir + '/Metrics_Output.csv'))) - footer_len - 8
+	with open(workDir + '/Metrics_Output.csv', newline='') as f:
+		row_count = sum(1 for row in csv.reader(f)) - footer_len - 8
 	mc = pd.read_csv(workDir + '/Metrics_Output.csv', skiprows=6, nrows=row_count)
 	mc = mc.rename(columns={'Metric Interval Event #': 'Task', 'Starting DateTime (YYYY-MM-DD hh:mm:ss)': 'Start', 'Ending DateTime (YYYY-MM-DD hh:mm:ss)': 'Finish'})
 	
@@ -139,7 +128,7 @@ def setupSystemSmart(seed, pathToGlm, workDir):
 		except: return 0
 
 	biggestKey = max([safeInt(x) for x in tree.keys()])
-	smallestKey = min(tree, key=tree.get)
+	smallestKey = min(tree, key=lambda k: str(tree.get(k)))
 	currentKey = smallestKey
 	while tree.get(str(currentKey)) != None:
 		currentKey += 1
@@ -178,7 +167,7 @@ def protectionSmart(tree, index, biggestKey, CLOCK_START, CLOCK_END):
 	# Map to speed up name lookups.
 	nameToIndex = {tree[key].get('name',''):key for key in tree.keys()}
 	# Get rid of schedules and climate and check for all edge types:
-	for key in tree.keys():
+	for key in list(tree.keys()):
 		obtype = tree[key].get("object","")
 		if obtype == 'underground_line':
 			edge_bools['underground_line'] = True
@@ -323,7 +312,7 @@ def pullOutValuesOutage(tree, workDir, sustainedOutageThreshold):
 
 	#Pull out number of customers
 	numberOfCustomers = 0.0
-	with open(workDir + '/Metrics_Output.csv', 'rb') as csvfile:
+	with open(workDir + '/Metrics_Output.csv', newline='') as csvfile:
 		file = csv.reader(csvfile)
 		for line in file:
 			k = 0
@@ -339,7 +328,8 @@ def pullOutValuesOutage(tree, workDir, sustainedOutageThreshold):
 
 	# return the Metrics_Output fault data for a year, without any extra data in a cvs format
 	footer_len = get_footer(workDir + '/Metrics_Output.csv')
-	row_count = sum(1 for row in csv.reader(open(workDir + '/Metrics_Output.csv'))) - footer_len - 8
+	with open(workDir + '/Metrics_Output.csv', newline='') as f:
+		row_count = sum(1 for row in csv.reader(f)) - footer_len - 8
 	mc = pd.read_csv(workDir + '/Metrics_Output.csv', skiprows=6, nrows=row_count)
 	mc = mc.rename(columns={'Metric Interval Event #': 'Task', 'Starting DateTime (YYYY-MM-DD hh:mm:ss)': 'Start', 'Ending DateTime (YYYY-MM-DD hh:mm:ss)': 'Finish'})
 
@@ -444,9 +434,9 @@ def manualOutageObject(pathToOmd, pathToCsv, workDir):
 	# create a DataFrame with the line name and the coordinates of its edges
 	with open(pathToOmd) as inFile:
 		tree = json.load(inFile)['tree']
-	outageMap = geo.omdGeoJson(pathToOmd, conversion = False)
+	outageMap = omf.geo.omdGeoJson(pathToOmd, conversion = False)
 	mc = pd.read_csv(pathToCsv)
-	with open(workDir + '/lines.csv', mode='w') as lines:
+	with open(workDir + '/lines.csv', mode='w', newline='') as lines:
 		fieldnames = ['line_name', 'coords1', 'coords2']
 		writer = csv.DictWriter(lines, fieldnames)
 
@@ -462,7 +452,7 @@ def manualOutageObject(pathToOmd, pathToCsv, workDir):
 	lines = pd.read_csv(workDir + '/lines.csv')
 
 	# create DataFrame with all the necessary info to create a manual GridLAB-D
-	with open(workDir + '/gridlabd.csv', mode='w') as gld:
+	with open(workDir + '/gridlabd.csv', mode='w', newline='') as gld:
 
 		fieldnames = ['Start', 'Finish', 'Object Name']
 		writer = csv.DictWriter(gld, fieldnames)
@@ -491,9 +481,8 @@ def setupSystemOutage(pathToGlm, pathToCsv, workDir, lineNameForRecloser, simTim
 	def safeInt(x):
 		try: return int(x)
 		except: return 0
-
 	biggestKey = max([safeInt(x) for x in tree.keys()])
-	smallestKey = min(tree, key=tree.get)
+	smallestKey = min(tree, key=lambda k: str(tree.get(k)))
 	currentKey = smallestKey
 	while tree.get(str(currentKey)) != None:
 		currentKey += 1
@@ -567,7 +556,7 @@ def setupSystemOutage(pathToGlm, pathToCsv, workDir, lineNameForRecloser, simTim
 	# Map to speed up name lookups.
 	nameToIndex = {tree[key].get('name',''):key for key in tree.keys()}
 	# Get rid of schedules and climate and check for all edge types:
-	for key in tree.keys():
+	for key in list(tree.keys()):
 		obtype = tree[key].get("object","")
 		if obtype == 'underground_line':
 			edge_bools['underground_line'] = True
@@ -1024,7 +1013,7 @@ def valueOfAdditionalRecloser(pathToGlm, pathToCsv, workDir, generateRandomFault
 				try: outGraph.node[item['name']]['pos']=(float(item.get('latitude',0)),float(item.get('longitude',0)))
 				except: outGraph.node[item['name']]['pos']=(0.0,0.0)
 			elif 'from' in item.keys():
-				myPhase = feeder._phaseCount(item.get('phases','AN'))
+				myPhase = omf.feeder._phaseCount(item.get('phases','AN'))
 				outGraph.add_edge(item['from'],item['to'],attr_dict={'name':item.get('name',''),'type':item['object'],'phases':myPhase})
 			elif item['name'] in outGraph:
 				# Edge already led to node's addition, so just set the attributes:
@@ -1034,7 +1023,7 @@ def valueOfAdditionalRecloser(pathToGlm, pathToCsv, workDir, generateRandomFault
 			if 'latitude' in item.keys() and 'longitude' in item.keys():
 				try: outGraph.node.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
 				except: outGraph.node.get(item['name'],{})['pos']=(0.0,0.0)
-	feeder.latLonNxGraph(outGraph, labels=True, neatoLayout=True, showPlot=True)
+	omf.feeder.latLonNxGraph(outGraph, labels=True, neatoLayout=True, showPlot=True)
 	plt.savefig(workDir + '/feeder_chart')
 	return {'costStatsHtml': costStatsHtml, 'fig1': fig1, 'fig2': fig2, 'fig3': fig3}
 
@@ -1131,11 +1120,11 @@ def work(modelDir, inputDict):
 	
 	# Textual outputs of cost statistic
 	with open(pJoin(modelDir,"costStatsCalc.html"),"rb") as inFile:
-		outData["costStatsHtml"] = inFile.read()
+		outData["costStatsHtml"] = base64.standard_b64encode(inFile.read()).decode()
 	
 	# Image outputs.
 	with open(pJoin(modelDir,"feeder_chart.png"),"rb") as inFile:
-		outData["feeder_chart.png"] = inFile.read().encode("base64")
+		outData["feeder_chart.png"] = base64.standard_b64encode(inFile.read()).decode()
 	
 	# Plotly outputs.
 	layoutOb = go.Layout()
@@ -1153,6 +1142,8 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	with open(pJoin(__neoMetaModel__._omfDir,"scratch","smartSwitching","outagesNew5.csv")) as f:
+		outage_data = f.read()
 	defaultInputs = {
 		"modelType": modelName,
 		"feederName1": "ieee37nodeFaultTester",
@@ -1173,7 +1164,7 @@ def new(modelDir):
 		'faultType': 'TLG',
 		'sustainedOutageThreshold': '60',
 		"outageFileName": "outagesNew5.csv",
-		"outageData": open(pJoin(__neoMetaModel__._omfDir,"scratch","smartSwitching","outagesNew5.csv"), "r").read(),
+		"outageData": outage_data
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
@@ -1196,9 +1187,9 @@ def _tests():
 	# Pre-run.
 	# renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc)
+	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_tests()
