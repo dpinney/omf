@@ -1,8 +1,7 @@
 ''' Graph the voltage drop on a feeder. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math, warnings, traceback, base64
+import json, os, tempfile, shutil, csv, math, warnings, base64
 from os.path import join as pJoin
-from jinja2 import Template
 import matplotlib
 from matplotlib import pyplot as plt
 import networkx as nx
@@ -12,7 +11,7 @@ plt.switch_backend('Agg')
 
 # OMF imports 
 import omf
-from omf import feeder
+import omf.feeder
 from omf.solvers import gridlabd
 from omf.models import __neoMetaModel__
 
@@ -95,7 +94,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	# Be quiet matplotlib:
 	warnings.filterwarnings("ignore")
 	if path.endswith('.glm'):
-		tree = feeder.parse(path)
+		tree = omf.feeder.parse(path)
 		attachments = []
 	elif path.endswith('.omd'):
 		with open(path) as f:
@@ -167,12 +166,12 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	tree[str(biggestKey*10 + 5)] = {"object":"voltdump","filename":"voltDump.csv"}
 	tree[str(biggestKey*10 + 6)] = {"object":"currdump","filename":"currDump.csv"}
 	# Line rating dumps
-	tree[feeder.getMaxKey(tree) + 1] = {
+	tree[omf.feeder.getMaxKey(tree) + 1] = {
 		'module': 'tape'
 	}
 	for key in edge_bools.keys():
 		if edge_bools[key]:
-			tree[feeder.getMaxKey(tree) + 1] = {
+			tree[omf.feeder.getMaxKey(tree) + 1] = {
 				'object':'group_recorder', 
 				'group':'"class='+key+'"',
 				'property':'continuous_rating',
@@ -213,14 +212,14 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 		if protDevices[key]:
 			for phase in ['A', 'B', 'C']:
 				if key != 'fuse':
-					tree[feeder.getMaxKey(tree) + 1] = {
+					tree[omf.feeder.getMaxKey(tree) + 1] = {
 						'object':'group_recorder', 
 						'group':'"class='+key+'"',
 						'property':'phase_' + phase + '_state',
 						'file':key + '_phase_' + phase + '_state.csv'
 					}
 				else:
-					tree[feeder.getMaxKey(tree) + 1] = {
+					tree[omf.feeder.getMaxKey(tree) + 1] = {
 						'object':'group_recorder', 
 						'group':'"class='+key+'"',
 						'property':'phase_' + phase + '_status',
@@ -458,7 +457,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	#define which dict will be used for edge label
 	edgeLabels = edgeTupleValsPU
 	# Build the graph.
-	fGraph = feeder.treeToNxGraph(tree)
+	fGraph = omf.feeder.treeToNxGraph(tree)
 	# TODO: consider whether we can set figsize dynamically.
 	wlVal = int(math.sqrt(float(rezSqIn)))
 	voltChart = plt.figure(figsize=(wlVal, wlVal))
@@ -621,7 +620,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 
 def glmToModel(glmPath, modelDir):
 	''' One shot model creation from glm. '''
-	tree = feeder.parse(glmPath)
+	tree = omf.feeder.parse(glmPath)
 	print("glmPath:    " + glmPath)
 	print("modelDir:   " + modelDir)
 	# Run powerflow. First name the folder for it.
@@ -632,7 +631,7 @@ def glmToModel(glmPath, modelDir):
 	# Create the .omd.
 	os.remove(modelDir + '/Olin Barre Geo.omd')
 	with open(modelDir + '/Olin Barre Geo.omd','w') as omdFile:
-		omd = dict(feeder.newFeederWireframe)
+		omd = dict(omf.feeder.newFeederWireframe)
 		omd['tree'] = tree
 		json.dump(omd, omdFile, indent=4)
 
