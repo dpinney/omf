@@ -1,27 +1,19 @@
 ''' A model skeleton for future models: Calculates the sum of two integers. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime, traceback, csv, requests
-import multiprocessing
-from os.path import join as pJoin
-from jinja2 import Template
-from omf.models import __neoMetaModel__
-from __neoMetaModel__ import *
-
-#SolarDisagg imports
-import numpy as np
-import scipy
-import StringIO
-import datetime
+import json, shutil, datetime, csv, requests
+from io import StringIO
 from collections import OrderedDict
+from os.path import join as pJoin
+import numpy as np
 
 # OMF imports
-sys.path.append(__neoMetaModel__._omfDir)
-from omf.weather import pullAsos
-from omf.solvers import CSSS
-import CSSS.csss.SolarDisagg as SolarDisagg
+from omf.models import __neoMetaModel__
+#from omf.solvers import CSSS
+#import CSSS.csss.SolarDisagg as SolarDisagg
+from omf.solvers.CSSS.csss import SolarDisagg
 
 # Model metadata:
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = True
 
 def work(modelDir, inputDict):
@@ -44,7 +36,7 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir, inputDict['meterFileName']),'w') as loadTempFile:
 		loadTempFile.write(inputDict['meterData'])
 	try:
-		with open(pJoin(modelDir, inputDict['meterFileName']), 'r') as csvfile:
+		with open(pJoin(modelDir, inputDict['meterFileName']), newline='') as csvfile:
 			csvreader = csv.reader(csvfile, delimiter=',')
 			meterNames = next(csvreader)
 			csvreader = csv.reader(csvfile, delimiter=',',quoting=csv.QUOTE_NONNUMERIC)
@@ -60,7 +52,7 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir, inputDict['solarFileName']),'w') as loadTempFile:
 		loadTempFile.write(inputDict['solarData'])
 	try:
-		with open(pJoin(modelDir, inputDict['solarFileName']), 'r') as csvfile:
+		with open(pJoin(modelDir, inputDict['solarFileName']), newline='') as csvfile:
 			csvreader = csv.reader(csvfile, delimiter=',',quoting=csv.QUOTE_NONNUMERIC)
 			for row in csvreader:
 				solarproxy_csv.append(row)
@@ -80,14 +72,14 @@ def work(modelDir, inputDict):
 	startDate = datetime.datetime.strptime(inputDict.get("year"), "%Y-%m-%d")
 	#Use 90 day interval for now
 	endDate = datetime.datetime.strftime(startDate + datetime.timedelta(days=90), "%Y-%m-%d")
-	flike = StringIO.StringIO(pullAsosRevised(inputDict.get("year"),inputDict.get("asosStation"), 'tmpf', end=endDate))
-	with open(pJoin(modelDir,inputDict['weatherFileName']),'w') as loadTempFile:
+	flike = StringIO(pullAsosRevised(inputDict.get("year"),inputDict.get("asosStation"), 'tmpf', end=endDate))
+	with open(pJoin(modelDir,inputDict['weatherFileName']),'w', newline='') as loadTempFile:
 		csvwriter = csv.writer(loadTempFile, delimiter=',')
 		next(csv.reader(flike))
 		for row in csv.reader(flike):
 			csvwriter.writerow(row)
 	try:
-		with open(pJoin(modelDir,inputDict['weatherFileName']), 'r') as csvfile:
+		with open(pJoin(modelDir,inputDict['weatherFileName']), newline='') as csvfile:
 			#next(csv.reader(flike))
 			for row in csv.reader(csvfile):
 				if row[2] != 'M':
@@ -210,7 +202,7 @@ def work(modelDir, inputDict):
 	loadLocations=[]
 	with open(pJoin(modelDir, inputDict['latLonFileName']),'w') as loadTempFile:
 		loadTempFile.write(inputDict['latLonData'])
-	with open(pJoin(modelDir, inputDict['latLonFileName']), 'r') as csvfile:
+	with open(pJoin(modelDir, inputDict['latLonFileName']), newline='') as csvfile:
 		csvreader = csv.DictReader(csvfile, fieldnames=('netLoadName', 'netLoadLat', 'netLoadLon') , delimiter=',')
 		for row in csvreader:
 			loadLocations.append({'netLoadName': row['netLoadName'], 'netLoadLat': row['netLoadLat'], 'netLoadLon': row['netLoadLon']})
@@ -236,16 +228,24 @@ def new(modelDir):
 	solarDataFile = "solar_proxy_three_month.csv"
 	latLonDataFile = "lat_lon_data_plus.csv"
 	weatherDataFile = "asos_three_month.csv"
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles",meterDataFile)) as f:
+		meter_data = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles",solarDataFile)) as f:
+		solar_data = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles",weatherDataFile)) as f:
+		weather_data = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles",latLonDataFile)) as f:
+		lat_lon_data = f.read()
 	defaultInputs = {
 		"user" : "admin",
 		"modelType": modelName,
-		"meterData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles",meterDataFile)).read(),
+		"meterData": meter_data,
 		"meterFileName": meterDataFile,
-		"solarData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles",solarDataFile)).read(),
+		"solarData": solar_data,
 		"solarFileName": solarDataFile,
-		"weatherData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles",weatherDataFile)).read(),
+		"weatherData": weather_data,
 		"weatherFileName": weatherDataFile,
-		"latLonData": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles",latLonDataFile)).read(),
+		"latLonData": lat_lon_data,
 		"latLonFileName": latLonDataFile,
 		"asosStation": "CHO",
 		"year": "2017-01-01",
@@ -294,11 +294,11 @@ def _tests():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 	# # Run the model.
-	runForeground(modelLoc)
+	__neoMetaModel__.runForeground(modelLoc)
 	# # Show the output.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_tests()
