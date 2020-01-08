@@ -3,10 +3,9 @@
 import sys, shutil, csv, math
 from os.path import isdir, join as pJoin
 from omf.models import __neoMetaModel__
-from __neoMetaModel__ import *
 
 # Model metadata:
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = ("The storageDeferral model calculates the amount of energy storage "
 	"capacity needed to reduce the load on a substation transformer or line "
 	"below a user-defined limit.")
@@ -38,7 +37,7 @@ def work(modelDir, inputDict):
 	
 	dc = []
 	try:	
-		with open(pJoin(modelDir,'demand.csv')) as f:
+		with open(pJoin(modelDir,'demand.csv'), newline='') as f:
 			for r in csv.reader(f):
 				dc.append({	'power': abs(float(r[0])),
 							'excessDemand': abs(float(r[0])) - threshold,
@@ -136,6 +135,8 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","negativeDemand.csv")) as f:
+		demand_curve = f.read()
 	defaultInputs = {
 		"batteryEfficiency": "92",
 		"retailCost": "0.06",
@@ -146,7 +147,8 @@ def new(modelDir):
 		"modelType": modelName,
 		"chargeRate": "5",
 		#"deferralType": "subTransformer", "demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidCSV_Copy.csv")).read(),
-		"deferralType": "line", "demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","negativeDemand.csv")).read(),
+		"deferralType": "line",
+		"demandCurve": demand_curve,
 		"fileName": "FrankScadaValidCSV_Copy.csv",
 		"cellCost": "7140",
 		"dodFactor":"100",
@@ -164,9 +166,9 @@ def _tests():
 	if isdir(modelLoc):
 		shutil.rmtree(modelLoc)
 	new(modelLoc) # Create New.
-	renderAndShow(modelLoc) # Pre-run.
-	runForeground(modelLoc) # Run the model.	
-	renderAndShow(modelLoc) # Show the output.
+	__neoMetaModel__.renderAndShow(modelLoc) # Pre-run.
+	__neoMetaModel__.runForeground(modelLoc) # Run the model.
+	__neoMetaModel__.renderAndShow(modelLoc) # Show the output.
 
 if __name__ == '__main__':
 	_tests()
