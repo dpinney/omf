@@ -1,6 +1,6 @@
 ''' Calculate the costs and benefits of energy storage from a distribution utility perspective. '''
 
-import os, sys, shutil, csv
+import sys, shutil, csv, base64
 from datetime import datetime as dt, timedelta
 import pulp
 from os.path import isdir, join as pJoin
@@ -8,11 +8,10 @@ from numpy import npv
 import pandas as pd
 
 from omf.models import __neoMetaModel__
-from __neoMetaModel__ import *
 from omf import forecast as fc
 
 # Model metadata:
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = ("The storagePeakShave model calculates the value of a distribution utility " 
 	"deploying energy storage based on three possible battery dispatch strategies.")
 
@@ -97,7 +96,7 @@ def work(modelDir, inputDict):
 	dc = [] # main data table
 	try:
 		dates = [(dt(2011, 1, 1) + timedelta(hours=1)*x) for x in range(8760)]
-		with open(pJoin(modelDir, 'demand.csv')) as f:
+		with open(pJoin(modelDir, 'demand.csv'), newline='') as f:
 			reader = csv.reader(f)
 			for row, date in zip(reader, dates):
 				dc.append({	'power': float(row[0]), # row is a list of length 1
@@ -151,7 +150,7 @@ def work(modelDir, inputDict):
 			r['battSoC'] = SoC
 	elif dispatchStrategy == 'customDispatch':
 		try:
-			with open(pJoin(modelDir,'dispatchStrategy.csv')) as f:
+			with open(pJoin(modelDir,'dispatchStrategy.csv'), newline='') as f:
 				reader = csv.reader(f)
 				for d, r in zip(dc, reader):
 					d['dispatch'] = int(r[0])
@@ -268,7 +267,8 @@ def forecastWork(modelDir, ind):
 		model = None 
 	else:
 		with open(pJoin(modelDir, 'neural_net.h5'), 'wb') as f:
-			f.write(ind['model'].decode('base64'))
+			#f.write(ind['model'].decode('base64'))
+			f.write(base64.standard_b64decode(bytes(ind['model'], 'ascii')))
 		model = tf.keras.models.load_model(pJoin(modelDir, 'neural_net.h5'))
 		# model = tf.keras.models.load_model(ind['model'])
 	predictions, accuracy = fc.neural_net_predictions(all_X, all_y, epochs=int(ind['epochs']), model=model, 
@@ -347,6 +347,14 @@ def forecastWork(modelDir, ind):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','Texas_1yr_Load.csv')) as f:
+		demand_curve = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','dispatchStrategy.csv')) as f:
+		custom_dispatch_strategy = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','NCENT.h5'), 'rb') as f:
+		model = base64.standard_b64encode(f.read()).decode('ascii')
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_17yr_TempAndLoad.csv")) as f:
+		hist_curve = f.read()
 	defaultInputs = {
 		'batteryEfficiency': '100',
 		'inverterEfficiency': '100',
@@ -356,7 +364,7 @@ def new(modelDir):
 		'dischargeRate': '5',
 		'modelType': modelName,
 		'chargeRate': '5',
-		'demandCurve': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','Texas_1yr_Load.csv')).read(),
+		'demandCurve': demand_curve,
 		'fileName': 'FrankScadaValidCSV_Copy.csv',
 		# 'dispatchStrategy': 'prediction', 
 		'dispatchStrategy': 'optimal', 
@@ -371,14 +379,14 @@ def new(modelDir):
 		'endPeakHour': '22',
 		'batteryCycleLife': '5000',
 		# required if dispatch strategy is custom
-		'customDispatchStrategy': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','dispatchStrategy.csv')).read(),
+		'customDispatchStrategy': custom_dispatch_strategy,
 		# forecast
 		'epochs': '1',
 		'newModel': "False",
-		'model': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','NCENT.h5')).read().encode("base64"),
+		'model': model,
 		'modelFileName': 'NCENT.h5',
 		'histFileName': 'd_Texas_17yr_TempAndLoad.csv',
-		"histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_17yr_TempAndLoad.csv"), 'rU').read(),
+		"histCurve": hist_curve
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
@@ -388,9 +396,9 @@ def _tests():
 	if isdir(modelLoc):
 		shutil.rmtree(modelLoc)	
 	new(modelLoc)  # Create New.
-	renderAndShow(modelLoc)  # Pre-run.
-	runForeground(modelLoc)  # Run the model.
-	renderAndShow(modelLoc)  # Show the output.
+	__neoMetaModel__.renderAndShow(modelLoc)  # Pre-run.
+	__neoMetaModel__.runForeground(modelLoc)  # Run the model.
+	__neoMetaModel__.renderAndShow(modelLoc)  # Show the output.
 
 if __name__ == '__main__':
 	_tests()
