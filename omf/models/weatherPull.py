@@ -1,14 +1,12 @@
 ''' Get power and energy limits from PNNL VirtualBatteries (VBAT) load model.'''
-import json, shutil, math, requests, csv, __neoMetaModel__
+import json, shutil, csv
 from os.path import isdir, join as pJoin
-from jinja2 import Template
-from __neoMetaModel__ import *
-from dateutil.parser import parse as parseDt
-from datetime import datetime as dt
-from omf.weather import pullAsos, pullUscrn
+
+from omf.models import __neoMetaModel__
+import omf.weather
 
 # Model metadata:
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = "Download historical weather data for a given location for use in other models."
 hidden = False
 
@@ -18,8 +16,8 @@ def work(modelDir, inputDict):
 	station = inputDict['stationASOS'] if source == 'ASOS' else inputDict['stationUSCRN']
 	parameter = inputDict['weatherParameterASOS'] if source == 'ASOS' else inputDict['weatherParameterUSCRN']
 	inputs = [inputDict['year'], station, parameter]
-	data = pullAsos(*inputs) if source == 'ASOS' else pullUscrn(*inputs)
-	with open(pJoin(modelDir,'weather.csv'), 'w') as f:
+	data = omf.weather.pullAsos(*inputs) if source == 'ASOS' else omf.weather.pullUscrn(*inputs)
+	with open(pJoin(modelDir,'weather.csv'), 'w', newline='') as f:
 		csv.writer(f).writerows([[x] for x in data])
 	return {
 		'rawData': data,
@@ -45,12 +43,12 @@ def _tests():
 	if isdir(modelLoc):
 		shutil.rmtree(modelLoc)
 	new(modelLoc) # Create New.
-	renderAndShow(modelLoc) # Pre-run.
+	__neoMetaModel__.renderAndShow(modelLoc) # Pre-run.
 	try:
-		runForeground(modelLoc) # Run the model.
+		__neoMetaModel__.runForeground(modelLoc) # Run the model.
 	except:
 		pass # Just ignore errors because sometimes HTTP requests fail.
-	renderAndShow(modelLoc) # Show the output.
+	__neoMetaModel__.renderAndShow(modelLoc) # Show the output.
 
 if __name__ == '__main__':
 	_tests()
