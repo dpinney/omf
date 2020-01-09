@@ -1,10 +1,9 @@
 """
 function for polling reopt api results url
 """
+import json, time
 import requests
-import json
-import time
-from logger import log
+import omf.solvers.REopt.logger as logger
 
 
 def poller(url, poll_interval=2):
@@ -17,7 +16,7 @@ def poller(url, poll_interval=2):
     key_error_count = 0
     key_error_threshold = 4
     status = "Optimizing..."
-    log.info("Polling {} for results with interval of {}s...".format(url, poll_interval))
+    logger.log.info("Polling {} for results with interval of {}s...".format(url, poll_interval))
     while True:
 
         resp = requests.get(url=url)
@@ -27,9 +26,9 @@ def poller(url, poll_interval=2):
             status = resp_dict['outputs']['Scenario']['status']
         except KeyError:
             key_error_count += 1
-            log.info('KeyError count: {}'.format(key_error_count))
+            logger.log.info('KeyError count: {}'.format(key_error_count))
             if key_error_count > key_error_threshold:
-                log.info('Breaking polling loop due to KeyError count threshold of {} exceeded.'
+                logger.log.info('Breaking polling loop due to KeyError count threshold of {} exceeded.'
                          .format(key_error_threshold))
                 break
 
