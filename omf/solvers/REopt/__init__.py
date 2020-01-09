@@ -1,7 +1,7 @@
-import requests
 import json
-from logger import log
-from results_poller import poller
+import requests
+import omf.solvers.REopt.logger as logger
+import omf.solvers.REopt.results_poller as results_poller
 
 def run(inJSONPath, outputPath):
 	API_KEY = 'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9'  # REPLACE WITH YOUR API KEY
@@ -15,23 +15,23 @@ def run(inJSONPath, outputPath):
 	resp = requests.post(post_url, json=post)
 
 	if not resp.ok:
-		log.error("Status code {}. {}".format(resp.status_code, resp.content))
+		logger.log.error("Status code {}. {}".format(resp.status_code, resp.content))
 	else:
-		log.info("Response OK from {}.".format(post_url))
+		logger.log.info("Response OK from {}.".format(post_url))
 		run_id_dict = json.loads(resp.text)
 
 		try:
 			run_id = run_id_dict['run_uuid']
 		except KeyError:
 			msg = "Response from {} did not contain run_uuid.".format(post_url)
-			log.error(msg)
+			logger.log.error(msg)
 			raise KeyError(msg)
 
-		results = poller(url=results_url.replace('<run_uuid>', run_id))
+		results = results_poller.poller(url=results_url.replace('<run_uuid>', run_id))
 		with open(outputPath, 'w') as fp:
 			json.dump(obj=results, fp=fp, indent=4)
 
-		log.info("Saved results to {}".format(outputPath))
+		logger.log.info("Saved results to {}".format(outputPath))
 
 def runResilience(runID, outputPath):
 	API_KEY = 'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9'  # REPLACE WITH YOUR API KEY
@@ -42,15 +42,15 @@ def runResilience(runID, outputPath):
 	resp = requests.get(results_url)
 
 	if not resp.ok:
-		log.error("Status code {}. {}".format(resp.status_code, resp.content))
+		logger.log.error("Status code {}. {}".format(resp.status_code, resp.content))
 	else:
-		log.info("Response OK from {}.".format(results_url))
-        respDict = json.loads(resp.text)
+		logger.log.info("Response OK from {}.".format(results_url))
+		respDict = json.loads(resp.text)
 
 	with open(outputPath, 'w') as fp:
 		json.dump(obj=respDict, fp=fp, indent=4)
 
-	log.info("Saved results to {}".format(outputPath))
+	logger.log.info("Saved results to {}".format(outputPath))
 
 
 def _test():
@@ -58,5 +58,3 @@ def _test():
 
 if __name__ == '__main__':
 	_test()
-
-
