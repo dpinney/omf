@@ -39,8 +39,8 @@ def coordsFromString(entry):
 
 def locationToName(location, lines):
 	'get the name of the line component associated with a given location (lat/lon)'
-	coordLat, coordLon, coord = coordsFromString(location)
 	# get the coordinates of the two points that make up the edges of the line
+	coordLat, coordLon, coord = coordsFromString(location)
 	row_count_lines = lines.shape[0]
 	row = 0
 	while row < row_count_lines:
@@ -117,7 +117,6 @@ def generateMultiple(mc):
 			date[day].append(datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S')))
 			row += 1
 		dayDurations = [None] * 365
-
 	else:
 		print('"Start" is not present in the input data.')
 
@@ -330,52 +329,73 @@ def createMap(cause, start, test, duration, compType):
 	return heatMap
 
 def dependentDurationDistribution(depDist, durCause, causefault, durTime, start, durLocation, location):
+	'create dependent duration distributions'
 	def _ss(data):
 		"""Return sum of square deviations of sequence data."""
 		c = sum(data) / len(data)
 		ss = sum((x-c)**2 for x in data)
 		return ss
 
-	def stddev(data):
+	def variance(data):
 		"""Compute the sample standard deviation."""
 		n = len(data)
 		if n < 2:
 			return 0
 		ss = _ss(data)
 		pvar = ss/(n-1)
-		return pvar**0.5
+		return pvar
 
+	# initialize the average and standard deviation
 	avgDuration = 0.0
 	stdDuration = 0.0
+	s1 = 0.0
+	s2 = 0.0
 
 	def depDistData(durEntry, entry, avgDuration, stdDuration):
+		'calculate the median duration and the standard deviation based on dependence of a given variable'
 		durList = list(durEntry[str(entry)].split(' '))
 		durList = [float(i) for i in durList]
-		avg = sum(durList) / len(durList)
-		std = stddev(durList)
-		avgDuration += avg
-		stdDuration += std
-		return avgDuration, stdDuration
+		n = len(durList)
+		s = sorted(durList)
+		# HACK: use median because the data is skewed
+		med = (sum(s[n//2-1:n//2+1])/2.0, s[n//2])[n % 2] if n else None
+		# variance still gives an estimation we will later fit to our data
+		var = variance(durList)
+		avgDuration += med
+		stdDuration = var**0.5
+		return avgDuration, med, var, stdDuration
 
+	# duration dependence on cause
 	if (depDist == '0' or depDist == '1' or depDist == '2' or depDist == '4'):
-		avgDuration, stdDuration = depDistData(durCause, causefault, avgDuration, stdDuration)
-
+		avgDuration, med1, var1, stdDuration = depDistData(durCause, causefault, avgDuration, stdDuration)
+	else: med1, var1 = 0.0
+	# duration dependence on time
 	if (depDist == '0' or depDist == '1' or depDist == '3' or depDist == '5'):
-		avgDuration, stdDuration = depDistData(durTime, start, avgDuration, stdDuration)
-
+		avgDuration, med2, var2, stdDuration = depDistData(durTime, start, avgDuration, stdDuration)
+	else: med2, var2 = 0.0
+	# duration dependence on location
 	if (depDist == '0' or depDist == '2' or depDist == '3' or depDist == '6'):
-		avgDuration, stdDuration = depDistData(durLocation, location, avgDuration, stdDuration)
+		avgDuration, med3, var3, stdDuration = depDistData(durLocation, location, avgDuration, stdDuration)
+	else: med3, var3 = 0.0
 
+	# find the 'total' the average and standard deviation based on how many variables are dependent
 	if depDist == '0':
 		avgDuration = avgDuration / 3
-		stdDuration = stdDuration / 3
+		s1 = var1 + var2 + var3
+		s2 = (med1 - avgDuration)**2 + (med2 - avgDuration)**2 + (med3 - avgDuration)**2
+		var = (s1 + s2) / 3
+		stdDuration = var**0.5
 	if (depDist == '1' or depDist == '2' or depDist == '3'):
 		avgDuration = avgDuration / 2
-		stdDuration = stdDuration / 2
+		s1 = var1 + var2 + var3
+		s2 = (med1 - avgDuration)**2 + (med2 - avgDuration)**2 + (med3 - avgDuration)**2 - avgDuration**2
+		var = (s1 + s2) / 2
+		stdDuration = var**0.5
 
+	# only use positive durations
 	duration = -1
 	while duration < 0:
-		duration = np.random.normal(loc=avgDuration, scale=stdDuration/1000)
+		duration = np.random.normal(loc=avgDuration, scale=stdDuration/100)
 	finish = str(datetime.datetime.strptime(start, "%Y-%m-%d %H:%M:%S") + datetime.timedelta(seconds=math.ceil(duration)))	
 	return finish
 
@@ -1065,8 +1085,8 @@ def new(modelDir):
 	defaultInputs = {
 		'modelType': modelName,
 		'feederName1': 'OlinBarreGeo',
-		'generateRandom': '1',
-		'graphData': '0',
+		'generateRandom': '2',
+		'graphData': '2',
 		'numberOfCustomers': '192',
 		'sustainedOutageThreshold': '200',
 		'causeFilter': '0',
