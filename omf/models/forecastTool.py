@@ -175,9 +175,7 @@ def work(modelDir, ind):
 		'load': m[m['year'] == y]['load'].tolist()
 	} for y in m.year.unique()]
 
-	# hard-code the input for highcharts
-	o['cats_pred'] = list(range(744)) ### FIX THIS
-
+	# ---------------------- FORMAT FOR DISPLAY ------------------------------- #
 	l = []
 	for d in previous_months:
 		l.append({
@@ -191,7 +189,23 @@ def work(modelDir, ind):
 
 	load_leading_up = df[(df['month'] == tomorrow.month) & (df['year'] == tomorrow.year)]['load'].tolist()
 	l.append({'name': tomorrow.year, 'color': 'black', 'data': load_leading_up[:-72], 'type': 'line'})
-	l.append({'name':'forecast','color':'blue','data': [None]*(len(load_leading_up) - 72) + o['tomorrow_load'],'type': 'line'})
+	l.append({'name':'forecast','color':'blue','data': [None]*(len(load_leading_up) - 72) + o['tomorrow_load'],'type': 'line', 'zIndex': 5})
+
+	# add uncertainty
+
+	l.append({
+		'name': 'uncertainty',
+		'color': '#D57560',
+		'opacity': 0.05,
+		'data': [None]*(len(load_leading_up) - 72) + [x*round(tomorrow_accuracy['test'], 2)*.01*2 for x in o['tomorrow_load']],
+	})
+
+	l.append({
+		'id': 'transparent',
+        'color': 'rgba(255,255,255,0)',
+        'data': [None]*(len(load_leading_up) - 72) + [x*(1-round(tomorrow_accuracy['test'], 2)*.01) for x in o['tomorrow_load']]
+	})
+	
 
 	o['previous_months'] = l
 
