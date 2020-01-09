@@ -1,4 +1,4 @@
-import omf.feeder as feeder
+from omf import feeder
 
 feed = feeder.parse('./Taxonomy_Feeders-solar/GC-12.47-1-solarAdd.glm')
 feeder.attachRecorders(feed, 'Inverter', 'object', 'inverter')
