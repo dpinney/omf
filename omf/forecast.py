@@ -580,7 +580,7 @@ def train_neural_net(X_train, y_train, epochs):
 		metrics=["mean_absolute_error", "mean_squared_error"],
 	)
 
-	early_stop = tf.keras.callbacks.EarlyStopping(monitor="mean_absolute_error", patience=20)
+	early_stop = tf.keras.callbacks.EarlyStopping(monitor="loss", patience=20)
 
 	history = model.fit(X_train, y_train, epochs=epochs, verbose=0, callbacks=[early_stop])
 
