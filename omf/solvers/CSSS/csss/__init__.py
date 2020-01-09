@@ -7,6 +7,3 @@ This package contains the basic library modules, methods, classes and
 attributes to perform Contextually Supervise Source Separation, and the subset
 of this problem: Solar Disaggregation.
 """
-
-from CSSS import *
-import SolarDisagg as SolarDisagg
