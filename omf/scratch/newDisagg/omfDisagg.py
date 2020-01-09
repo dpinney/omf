@@ -4,31 +4,22 @@ Use new solar disagg code to in an 'omf model' style script for potly output as 
 
 '''
 
-from __future__ import division
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime, traceback, csv, requests
-#import multiprocessing
+import time, csv, pickle
 from os.path import join as pJoin
-#from jinja2 import Template
 #from omf.models import __neoMetaModel__
-#from __neoMetaModel__ import *
 
 #SolarDisagg imports
 import numpy as np
-import StringIO
-import datetime
-from collections import OrderedDict
 import pandas as pd
-import time 
 from decimal import *
-from scipy import stats
 import scipy as sc
-import pickle
 
 # OMF imports
+from omf.scratch.newDisagg import CSSS
 #sys.path.append(__neoMetaModel__._omfDir)
 #from omf.weather import pullAsos
 #from omf.solvers.newCSSS import CSSS
-from CSSS import CSSS
+#from CSSS import CSSS
 
 # Model metadata:
 #modelName, template = metadata(__file__)
@@ -361,7 +352,7 @@ def work():
 	#with open(pJoin(modelDir, inputDict['reactivePowerFileName']),'w') as loadTempFile:
 	#	loadTempFile.write(inputDict['reativePowerData'])
 	try:
-		with open(reactivePowerDataFile, 'r') as csvfile:
+		with open(reactivePowerDataFile, newline='') as csvfile:
 			#csvreader = csv.reader(csvfile, delimiter=',')
 			#meterNames = next(csvreader)
 			csvreader = csv.reader(csvfile, quoting=csv.QUOTE_NONNUMERIC)
@@ -378,7 +369,7 @@ def work():
 	#with open(pJoin(modelDir, inputDict['solarFileName']),'w') as loadTempFile:
 	#	loadTempFile.write(inputDict['solarData'])
 	try:
-		with open(solarDataFile, 'r') as csvfile:
+		with open(solarDataFile, newline='') as csvfile:
 			csvreader = csv.reader(csvfile, quoting=csv.QUOTE_NONNUMERIC)
 			for row in csvreader:
 				solarproxy_csv.append(row)
@@ -391,7 +382,7 @@ def work():
 	#with open(pJoin(modelDir, inputDict['realPowerFileName']),'w') as loadTempFile:
 	#	loadTempFile.write(inputDict['realPowerData'])
 	try:
-		with open(realPowerDataFile, 'r') as csvfile:
+		with open(realPowerDataFile, newline='') as csvfile:
 			csvreader = csv.reader(csvfile, quoting=csv.QUOTE_NONNUMERIC)
 			for row in csvreader:
 				real_power_csv.append(row)
@@ -405,7 +396,7 @@ def work():
 	#with open(pJoin(modelDir, inputDict['weatherFileName']),'w') as loadTempFile:
 	#	loadTempFile.write(inputDict['weatherData'])
 	try:
-		with open(weatherDataFile, 'r') as csvfile:
+		with open(weatherDataFile, newline='') as csvfile:
 			csvreader = csv.reader(csvfile, quoting=csv.QUOTE_NONNUMERIC)
 			for row in csvreader:
 				weather_csv.append(row)
@@ -516,7 +507,7 @@ def work():
 	windEdges = [minHour+k*windStep for k in range(numWind)]
 	Iraux = buildMat(dfAux,numDays,'IrradianceProxy',1,windEdges,False)
 	N=len(dfAux)
-	CSSS_solar = CSSS(np.array(dfAux['Real_Power_Total']))
+	CSSS_solar = CSSS.CSSS(np.array(dfAux['Real_Power_Total']))
 	#print(Qaux.shape)
 	#print(Iraux.shape)
 	if (simCase=='A'):
