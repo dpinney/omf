@@ -1,13 +1,14 @@
-from __future__ import division
-from pyproj import Proj, transform
-import webbrowser
-import omf, json, warnings, networkx as nx, matplotlib, numpy as np, os, shutil, math, requests, tempfile, random
-from matplotlib import pyplot as plt
-from omf.feeder import _obToCol
-from scipy.spatial import ConvexHull
+import json, os, shutil, math, tempfile, random, webbrowser
 from os.path import join as pJoin
+from pyproj import Proj, transform
+import requests
+import networkx as nx
+import numpy as np
+from matplotlib import pyplot as plt
+from scipy.spatial import ConvexHull
 from sklearn.cluster import KMeans
 from flask import Flask, send_file, render_template
+import omf
 
 # Source: https://github.com/fitnr/stateplane/blob/master/stateplane/dicts.py
 # These are NAD83 EPSG identifiers.
