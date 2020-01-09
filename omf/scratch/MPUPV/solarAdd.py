@@ -1,9 +1,9 @@
-import omf.feeder as feeder
-from omf.solvers.gridlabd import runInFilesystem
+from omf import feeder
+import omf.solvers.gridlabd
 
 feed = feeder.parse('GC-12.47-1.glm')
 maxKey = feeder.getMaxKey(feed)
-print (feed[1])
+print(feed[1])
 feed[maxKey + 1] = {
 	'object': 'node', 'name': 'test_solar_node', 'phases': 'ABCN', 
 	'nominal_voltage': '7200'
@@ -35,7 +35,7 @@ feed[maxKey + 6] = {
 	'file': 'GC-addSolar-voltages.csv', 'interval': '60', 'limit': '1440' 
 }
 
-runInFilesystem(feed, keepFiles = True, workDir = '.', glmName = 'GC-solarAdd.glm')
+omf.solvers.gridlabd.runInFilesystem(feed, keepFiles = True, workDir = '.', glmName = 'GC-solarAdd.glm')
 '''
 output = open('GC-solarAdd.glm', 'w')
 output.write(feeder.write(feed))
