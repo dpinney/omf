@@ -1,7 +1,6 @@
 import os
-import random as rand
-import omf.feeder as feeder
-from omf.solvers.gridlabd import runInFilesystem
+import random
+from omf import feeder
 
 def addRandomSolar(feed, item, count):
 	'''Adds a solar inverter and panel set, assgined to A, B, or C phase randomly'''
@@ -9,7 +8,7 @@ def addRandomSolar(feed, item, count):
 	maxKey = feeder.getMaxKey(feed)
 	feed[maxKey + 1] = {
 	'object': 'inverter', 'name': 'new_solar_' + str(count), 'parent': feed[item]['name'],
-	'phases': rand.choice(phase_list) +'S', 'inverter_type': 'PWM', 'power_factor': '1.0', 
+	'phases': random.choice(phase_list) +'S', 'inverter_type': 'PWM', 'power_factor': '1.0',
 	'generator_status': 'ONLINE', 'generator_mode': 'CONSTANT_PF'
 					}
 	feed[maxKey + 2] = {
