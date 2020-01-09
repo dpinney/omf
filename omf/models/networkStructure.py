@@ -32,7 +32,7 @@ from dateutil import parser
 from dateutil.relativedelta import *
 
 # Model metadata:
-tooltip = "networkStructure determines whether connectivity information is correct, given voltage and/or distance information."
+tooltip = 'networkStructure determines whether connectivity information is correct, given voltage and/or distance information.'
 modelName, template = metadata(__file__)
 hidden = True
 	
@@ -61,36 +61,6 @@ def generateData(pathToOmd, pathToCsv, workDir, useDist, useVolt):
 		workDir = tempfile.mkdtemp()
 		print '@@@@@@', workDir
 
-	# HACK: use GridLAB-D to generate new voltage data
-	# if useVolt == 'True':
-		# def safeInt(x):
-				# try: return int(x)
-				# except: return 0
-
-	# 	biggestKey = max([safeInt(x) for x in tree.keys()])
-
-	# 	CLOCK_START = '2000-01-01 0:00:00'
-	# 	dt_start = parser.parse(CLOCK_START)
-	# 	dt_end = dt_start + relativedelta(day=0, hour=0, minute=5, second=0)
-	# 	CLOCK_END = str(dt_end)
-	# 	CLOCK_RANGE = CLOCK_START + ',' + CLOCK_END
-
-	# 	index = 1
-	# 	for key in tree:
-	# 		if 'clock' in tree[key]:
-	# 			tree[key]['starttime'] = "'" + CLOCK_START + "'"
-	# 			tree[key]['stoptime'] = "'" + CLOCK_END + "'"
-
-	# 	# create volt and current line dumps
-	# 	tree[str(biggestKey*10 + index)] = {"object":"voltdump","filename":"voltDump.csv", 'runtime': 'INIT'}
-
-	# 	attachments = []
-	# 	# Run Gridlab.
-	# 	if not workDir:
-	# 		workDir = tempfile.mkdtemp()
-	# 		print '@@@@@@', workDir
-	# 	gridlabOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
-
 	# create outageMap to get the distance data for the given feeder system and actual connectivity data
 	outageMap = geo.omdGeoJson(pathToOmd, conversion = False)
 
@@ -103,7 +73,7 @@ def generateData(pathToOmd, pathToCsv, workDir, useDist, useVolt):
 			writer.writeheader()
 
 			for key in tree.keys():
-				obtype = tree[key].get("object","")
+				obtype = tree[key].get('object','')
 				if obtype.startswith('node') or obtype.startswith('load') or obtype.startswith('capacitor') or obtype.startswith('meter') or obtype.startswith('triplex_node') or obtype.startswith('triplex_meter'):
 					coord1, coord2 = nodeToCoords(outageMap, tree[key]['name'])
 					writer.writerow({'node_name': tree[key]['name'], 'coord1': coord1, 'coord2': coord2})
@@ -117,7 +87,7 @@ def generateData(pathToOmd, pathToCsv, workDir, useDist, useVolt):
 		writer.writeheader()
 
 		for key in tree.keys():
-			obtype = tree[key].get("object","")
+			obtype = tree[key].get('object','')
 			if obtype.startswith('underground_line') or obtype.startswith('overhead_line') or obtype.startswith('triplex_line') or obtype.startswith('switch') or obtype.startswith('recloser') or obtype.startswith('transformer') or obtype.startswith('fuse'):
 				if 'from' in tree[key].keys() and 'to' in tree[key].keys():
 					writer.writerow({'first_node': tree[key]['from'], 'second_node': tree[key]['to']})
@@ -128,25 +98,29 @@ def generateData(pathToOmd, pathToCsv, workDir, useDist, useVolt):
 
 	# HACK: read in location data and remove the nodes that are not listed as being connected to any other nodes based on connectivity data
 	# the point of this is to make sure that we are finding a viable MST of the largest subgraph representing the system as possible	
-	if useDist == 'True':
-		nodes = pd.read_csv(workDir + '/nodes.csv')
-
+	def deleteBad(mc):
+		'helper function which deletes all nodes that are not connected from the input dataframe'
 		row = 0
-		number_of_nodes = nodes.shape[0]
+		number_of_nodes = mc.shape[0]
 		# create a list of bad nodes, the nodes that aren't connected to the rest of the system
 		bad_nodes = []
 		while row < number_of_nodes:
-			if (not connectivity['first_node'].str.contains(nodes.loc[row, 'node_name']).any()) and (not connectivity['second_node'].str.contains(nodes.loc[row, 'node_name']).any()):
-				bad_nodes.append(nodes.loc[row, 'node_name'])
+			if (not connectivity['first_node'].str.contains(mc.loc[row, 'node_name']).any()) and (not connectivity['second_node'].str.contains(mc.loc[row, 'node_name']).any()):
+				bad_nodes.append(mc.loc[row, 'node_name'])
 			row += 1
 
 		# delete all bad nodes
 		row = 0
 		number_of_bad = len(bad_nodes)
 		while row < number_of_bad:
-			delete_row = nodes[nodes['node_name']==bad_nodes[row]].index
-			nodes = nodes.drop(delete_row)
+			delete_row = mc[mc['node_name']==bad_nodes[row]].index
+			mc = mc.drop(delete_row)
 			row += 1
+		return mc
+
+	if useDist == 'True':
+		nodes = pd.read_csv(workDir + '/nodes.csv')
+		nodes = deleteBad(nodes)
 	
 		nodes.dropna()
 		# sort the location data in alphabetical order for further abstraction
@@ -157,19 +131,7 @@ def generateData(pathToOmd, pathToCsv, workDir, useDist, useVolt):
 	# HACK: remove bad nodes from voltage data in a similar method to how they were removed from distance data
 	if useVolt == 'True':
 		volt = pd.read_csv(pathToCsv)
-		row = 0
-		number_of_volt = volt.shape[0]
-		bad_nodes = []
-		while row < number_of_volt:
-			if (not connectivity['first_node'].str.contains(volt.loc[row, 'node_name']).any()) and (not connectivity['second_node'].str.contains(volt.loc[row, 'node_name']).any()):
-				bad_nodes.append(volt.loc[row, 'node_name'])
-			row += 1
-		number_of_bad = len(bad_nodes)
-		row = 0
-		while row < number_of_bad:
-			delete_row = volt[volt['node_name']==bad_nodes[row]].index
-			volt = volt.drop(delete_row)
-			row += 1
+		volt = deleteBad(volt)
 
 		if useDist == 'True':
 			number_of_nodes = nodes.shape[0]
@@ -214,22 +176,20 @@ def generateData(pathToOmd, pathToCsv, workDir, useDist, useVolt):
 		row += 1
 
 	# using NodeToInt, create a 2d list that represents the actual connectivity of the system
-	outputData = [[0] * row_count for i in range(row_count)]
+	outputData = [[100] * row_count for i in range(row_count)]
 	connectivity_count = connectivity.shape[0]
 	row = 0
 	while row < connectivity_count:
 		first = NodeToInt[connectivity.loc[row]['first_node']]
 		second = NodeToInt[connectivity.loc[row]['second_node']]
-		outputData[first][second] = -1
-		outputData[second][first] = -1
+		outputData[first][second] = 1
+		outputData[second][first] = 1
 		row += 1
 
 	# create 2d lists (representing adjacency matrices) to store distance and voltage difference data between each of the nodes
 	inputDataDist = [[0 for x in range(row_count)] for y in range(row_count)]
 	inputDataVolt = [[0 for x in range(row_count)] for y in range(row_count)]
 
-	print(nodes)
-	print(volt)
 	# populate the 2d lists/adjacency matrices
 	row = 0
 	while row < row_count:
@@ -317,10 +277,8 @@ def testingSimple(testPath, pathToCsv, workDir, useDist, useVolt):
 	'visualize the different MSTs based on distance data, voltage data, and actual connectivity'
 	
 	# generate date
-	# feeder.glmToOmd('C:/Users/granb/omf/omf/solvers/gridlabdnew/taxonomy_feeders/autotest/test_R1-12.47-2.glm', 'C:/Users/granb/omf/omf/scratch/smartSwitching/test_R1-12.47-2.omd', attachFilePaths=[])
-	# nodes, tree, workDir, inputDataDist, inputDataVolt, outputData = generateData(omf.omfDir + '/scratch/smartSwitching/test_ieee123nodeBetter.omd', None, None, None)
 	nodes, volt, tree, workDir, inputDataDist, inputDataVolt, outputData = generateData(testPath, pathToCsv, workDir, useDist, useVolt)
-	# nodes, tree, workDir, inputDataDist, inputDataVolt, outputData = generateData(omf.omfDir + '/scratch/smartSwitching/test_R1-12.47-2.omd', None, None, None)
+	
 	if useDist == 'True':
 		size = len(inputDataDist)
 	else:
@@ -344,21 +302,29 @@ def testingSimple(testPath, pathToCsv, workDir, useDist, useVolt):
 	for val in actual:
 		actualMST[val[0]][val[1]] = 1
 
-	def graph(graphname, mst, referenceMST):
+	def graph(graphname, mst, referenceMST, tree):
 		'create a networkx graph of expected connectivity, given the tree of a .omd file and a MST'
-		plt.close()
+		plt.close('all')
 		outGraph = nx.Graph()
-		# populate the graph with nodes
 		for key in tree:
 			item = tree[key]
 			if 'name' in item.keys():
 				obType = item.get('object')
-				if 'parent' in item.keys():
+				reclDevices = dict.fromkeys(['recloser'], False)
+				if (obType in reclDevices.keys() and 'addedRecloser' in item.get('name', '')):
+					# HACK: set the recloser as a swingNode in order to make it hot pink
+					outGraph.add_edge(item['from'],item['to'], attr_dict={'type':'swingNode'})
+				elif (obType in reclDevices.keys() and 'addedRecloser' not in item.get('name','')):
+					outGraph.add_edge(item['from'],item['to'])
+				elif 'parent' in item.keys() and obType not in reclDevices:
 					outGraph.add_edge(item['name'],item['parent'], attr_dict={'type':'parentChild','phases':1})
 					outGraph.node[item['name']]['type']=item['object']
 					# Note that attached houses via gridEdit.html won't have lat/lon values, so this try is a workaround.
 					try: outGraph.node[item['name']]['pos']=(float(item.get('latitude',0)),float(item.get('longitude',0)))
 					except: outGraph.node[item['name']]['pos']=(0.0,0.0)
+				elif 'from' in item.keys():
+					myPhase = feeder._phaseCount(item.get('phases','AN'))
+					# outGraph.add_edge(item['from'],item['to'],attr_dict={'name':item.get('name',''),'type':item['object'],'phases':myPhase})
 				elif item['name'] in outGraph:
 					# Edge already led to node's addition, so just set the attributes:
 					outGraph.node[item['name']]['type']=item['object']
@@ -367,6 +333,7 @@ def testingSimple(testPath, pathToCsv, workDir, useDist, useVolt):
 				if 'latitude' in item.keys() and 'longitude' in item.keys():
 					try: outGraph.node.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
 					except: outGraph.node.get(item['name'],{})['pos']=(0.0,0.0)
+		 
 		# populate the graph with edges
 		size = len(referenceMST)
 		row = 0
@@ -396,9 +363,9 @@ def testingSimple(testPath, pathToCsv, workDir, useDist, useVolt):
 		plt.savefig(workDir + graphname)
 
 	# graph the actual, distance, and voltage MSTs
-	graph('/actual_graph.png', actualMST, actualMST)
-	graph('/distance_graph.png', distMST, actualMST)
-	graph('/voltage_graph.png', voltMST, actualMST)
+	graph('/actual_graph.png', actualMST, actualMST, tree)
+	graph('/distance_graph.png', distMST, actualMST, tree)
+	graph('/voltage_graph.png', voltMST, actualMST, tree)
 
 	# initialize lists to store 1d versions of the adjacency matrices (useful for learning with an SVM)
 	X_test = []
@@ -420,16 +387,7 @@ def testingSimple(testPath, pathToCsv, workDir, useDist, useVolt):
 			y_test.append(actualMST[row][column])
 			column += 1
 		row += 1
-
-	# print(xdistMST1D)
-	# print(xvoltMST1D)
-	# print(y_test)
-
-	#print('DistDif1:',expectedDist.difference(actual))
-	#print('DistDif2:',actual.difference(expectedDist))
-
-	#print('VoltDif1:',expectedVolt.difference(actual))
-	#print('VoltDif2:',actual.difference(expectedVolt))
+	
 	# calculate the accuracy ratings between distance/voltage and actual connectivity data
 	# ie what percentage of connectivity was the same
 	distanceAccuracy = 1.0 - (abs(float(len(actual.difference(expectedDist)))))/float(len(actual))
@@ -471,7 +429,7 @@ def testingSimple(testPath, pathToCsv, workDir, useDist, useVolt):
 			distanceTest = distanceTest,
 			voltageTest = voltageTest)
 
-	with open(pJoin(workDir, "statsCalc.html"), "w") as statsFile:
+	with open(pJoin(workDir, 'statsCalc.html'), 'w') as statsFile:
 		statsFile.write(connectivityStats)
 
 	return {'X_test': X_test, 'y_test': y_test, 'distanceAccuracy': distanceAccuracy, 'distanceSigma': distanceSigma, 'voltageAccuracy': voltageAccuracy, 'voltageSigma': voltageSigma}, X_test, y_test
@@ -528,7 +486,7 @@ def work(modelDir, inputDict):
 	outData = {}
 	# Write the feeder
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
-	inputDict["feederName1"] = feederName
+	inputDict['feederName1'] = feederName
 
 	with open(pJoin(modelDir, inputDict['voltageFileName']), 'w') as f:
 		pathToData = f.name
@@ -555,9 +513,6 @@ def work(modelDir, inputDict):
 		while row < row_count_mc:
 			X_train, y_train = createTrainingData(omf.omfDir + str(mc.loc[row]['omd_path']), omf.omfDir + str(mc.loc[row]['csv_path']), modelDir, X_train, y_train, inputDict['useDist'], inputDict['useVolt'])
 			row += 1
-
-		# X_train, y_train = createTrainingData(omf.omfDir + '/static/publicFeeders/test_ieee123nodeBetter.omd', omf.omfDir + '/scratch/smartSwitching/volttest_ieee123nodeBetter.csv', modelDir, X_train, y_train, inputDict['useDist'], inputDict['useVolt'])
-		# X_train, y_train = createTrainingData(omf.omfDir + '/static/publicFeeders/test_R1-12.47-3.omd', omf.omfDir + '/scratch/smartSwitching/volttest_R1-12.47-3.csv', modelDir, X_train, y_train, inputDict['useDist'], inputDict['useVolt'])
 
 		# turn data in numpy arrays
 		X_train = array(X_train)
@@ -588,51 +543,51 @@ def work(modelDir, inputDict):
 				precision = precision,
 				recall = recall)
 
-		with open(pJoin(modelDir, "svmCalc.html"), "w") as statsFile:
+		with open(pJoin(modelDir, 'svmCalc.html'), 'w') as statsFile:
 			statsFile.write(svmStats)
 
 	# Image outputs.
-	with open(pJoin(modelDir,"distance_graph.png"),"rb") as inFile:
-		outData["distance_graph.png"] = inFile.read().encode("base64")
-	with open(pJoin(modelDir,"voltage_graph.png"),"rb") as inFile:
-		outData["voltage_graph.png"] = inFile.read().encode("base64")
-	with open(pJoin(modelDir,"actual_graph.png"),"rb") as inFile:
-		outData["actual_graph.png"] = inFile.read().encode("base64")
+	with open(pJoin(modelDir,'distance_graph.png'),'rb') as inFile:
+		outData['distance_graph.png'] = inFile.read().encode('base64')
+	with open(pJoin(modelDir,'voltage_graph.png'),'rb') as inFile:
+		outData['voltage_graph.png'] = inFile.read().encode('base64')
+	with open(pJoin(modelDir,'actual_graph.png'),'rb') as inFile:
+		outData['actual_graph.png'] = inFile.read().encode('base64')
 
 	# Textual outputs of cost statistic
-	with open(pJoin(modelDir,"statsCalc.html"),"rb") as inFile:
-		outData["statsCalc"] = inFile.read()
-	with open(pJoin(modelDir,"svmCalc.html"),"rb") as inFile:
-		outData["svmCalc"] = inFile.read()
+	with open(pJoin(modelDir,'statsCalc.html'),'rb') as inFile:
+		outData['statsCalc'] = inFile.read()
+	with open(pJoin(modelDir,'svmCalc.html'),'rb') as inFile:
+		outData['svmCalc'] = inFile.read()
 
 	# Stdout/stderr.
-	outData["stdout"] = "Success"
-	outData["stderr"] = ""
+	outData['stdout'] = 'Success'
+	outData['stderr'] = ''
 	return outData
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"modelType": modelName,
-		"feederName1": "ieee37NodeFaultTester",
-		"useDist": "True",
-		"useVolt": "True",
-		"useSVM": "True",
-		"voltageFileName": "volt1.csv",
-		"voltageData": open(pJoin(__neoMetaModel__._omfDir,"scratch","smartSwitching","volt1.csv"), "r").read(),
-		"trainingFileName": "training.csv",
-		"trainingData": open(pJoin(__neoMetaModel__._omfDir,"scratch","smartSwitching","training.csv"), "r").read(),
+		'modelType': modelName,
+		'feederName1': 'ieee37NodeFaultTester',
+		'useDist': 'True',
+		'useVolt': 'True',
+		'useSVM': 'True',
+		'voltageFileName': 'volt1.csv',
+		'voltageData': open(pJoin(__neoMetaModel__._omfDir,'scratch','smartSwitching','volt1.csv'), 'r').read(),
+		'trainingFileName': 'training.csv',
+		'trainingData': open(pJoin(__neoMetaModel__._omfDir,'scratch','smartSwitching','training.csv'), 'r').read(),
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
-		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
+		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', defaultInputs['feederName1']+'.omd'), pJoin(modelDir, defaultInputs['feederName1']+'.omd'))
 	except:
 		return False
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
 def _tests():
 	# Location
-	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
+	modelLoc = pJoin(__neoMetaModel__._omfDir,'data','Model','admin','Automated Testing of ' + modelName)
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
