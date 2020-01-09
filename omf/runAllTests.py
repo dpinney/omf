@@ -1,8 +1,6 @@
 ''' Walk the /omf/ directory, run _tests() in all modules. '''
 
-import os, sys, subprocess, imp
-from os.path import join as pJoin
-from os.path import split as pSplit
+import os, sys, subprocess
 
 IGNORE_DIRS = ["data", ".git", "static", "templates", "testFiles", "scratch"]
 IGNORE_FILES = ["runAllTests.py"] # to avoid infinite loop.
