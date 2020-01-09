@@ -1,6 +1,8 @@
-import os, signal, urllib, urllib2, subprocess, time, warnings, webbrowser
+import subprocess, time, warnings
+from urllib import request
 from datetime import datetime, timedelta
-from httplib import BadStatusLine
+#import webbrowser, os
+from http.client import BadStatusLine
 import omf
 
 def parseDt(dtString):
@@ -202,12 +204,14 @@ class GridLabWorld(object):
 		try:
 			# HACK: we don't need full URL encoding right?
 			niceUrl = self.baseUrl + 'control/pauseat=' + targetTime.replace(' ','%20')
-			urllib2.urlopen(niceUrl).read()
+			with request.urlopen(niceUrl) as f:
+				f.read()
 			currentTime = None
 			while currentTime != targetTime:
 				time.sleep(0.2)
 				#HACK: Read clock and also drop the timezone because it causes problems.
-				currentTime = urllib2.urlopen(self.baseUrl + 'raw/clock').read()[0:-4]
+				with request.urlopen(self.baseUrl + 'raw/clock') as f:
+					currentTime = (f.read()[0:-4]).decode()
 		except:
 			warnings.warn("Wait until " + targetTime + " failed!")
 
@@ -215,7 +219,8 @@ class GridLabWorld(object):
 		'Read a value from the GLD simulation.'
 		try:
 			# print obName + "  " + propName
-			return urllib2.urlopen(self.baseUrl + 'raw/' + obName + '/' + propName).read()
+			with request.urlopen(self.baseUrl + 'raw/' + obName + '/' + propName) as f:
+				return f.read()
 		except:
 			warnings.warn("Failed to read " + propName + " of " + obName)
 			return "ERROR"
@@ -223,7 +228,8 @@ class GridLabWorld(object):
 	def readClock(self):
 		'Read the clock'
 		try:
-			return urllib2.urlopen(self.baseUrl + 'raw/clock').read()
+			with request.urlopen(self.baseUrl + 'raw/clock') as f:
+				return f.read()
 		except:
 			warnings.warn("Failed to read the clock.")
 			return "ERROR"
@@ -231,28 +237,31 @@ class GridLabWorld(object):
 	def shutdown(self):
 		'Stop simulation.'
 		try:
-			urllib2.urlopen(self.baseUrl + 'control/shutdown').read()
+			with request.urlopen(self.baseUrl + 'control/shutdown') as f:
+				f.read()
 		except:
 			# For those hard-to-stop servers.
 			self.procObject.kill()
 		# Final output
-		print '===GRIDLAB-D STDOUT==='
+		print('===GRIDLAB-D STDOUT===')
 		# self.procObject.stdout.flush()
-		print self.procObject.stdout.read().strip()
-		print '===GRIDLAB-D STDERR==='
+		print(self.procObject.stdout.read().strip())
+		print('===GRIDLAB-D STDERR===')
 		# self.procObject.stderr.flush()
-		print self.procObject.stderr.read()
+		print(self.procObject.stderr.read())
 
 	def resume(self):
 		try:
-			return urllib2.urlopen(self.baseUrl + 'control/resume').read()
+			with request.urlopen(self.baseUrl + 'control/resume') as f:
+				f.read()
 		except:
 			warnings.warn("Resume failed!")
 
 	def write(self, obName, propName, value):
 		'Write a value back to the simulation'
 		try:
-			urllib2.urlopen(self.baseUrl + 'raw/' + obName + '/' + propName + '=' + value).read()
+			with request.urlopen(self.baseUrl + 'raw/' + obName + '/' + propName + '=' + value) as f:
+				f.read()
 			return "WRITE_SUCCESS"
 		except:
 			warnings.warn("Failed to write " + value + " to " + propName + " of " + obName)
@@ -265,7 +274,8 @@ class GridLabWorld(object):
 		# Wait for the dang server to start up and simulate.
 		while timeout > 0:
 			try:
-				x = urllib2.urlopen(self.baseUrl + 'raw/clock').read()
+				with request.urlopen(self.baseUrl + 'raw/clock') as f:
+					x = f.read()
 				# print 'clock', type(x), x
 				if x != 'ERROR':
 					return
@@ -282,70 +292,70 @@ def _test1():
 	glw = GridLabWorld('6267', 'localhost', omf.omfDir + '/scratch/CIGAR/test_smsSingle.glm', '2000-01-02 00:00:00')
 	glw.start()
 	# Read the clock, solar output voltage, battery state of charge, and inverter voltage input.
-	print '* Reading clock:', glw.readClock()
-	print '* Bunch of requests:', glw.doRequests([{'cmd':'read', 'obName':'solar_1', 'propName':'V_Out'},{'cmd':'readClock'}])
-	print '* Reading solar_1 output voltage (V_Out):', glw.read('solar_1', 'V_Out')
+	print('* Reading clock:', glw.readClock())
+	print('* Bunch of requests:', glw.doRequests([{'cmd':'read', 'obName':'solar_1', 'propName':'V_Out'},{'cmd':'readClock'}]))
+	print('* Reading solar_1 output voltage (V_Out):', glw.read('solar_1', 'V_Out'))
 	# print '* Reading battery_1 state of charge:', glw.read('battery_1' + 'battery_state')
-	print '* Reading inverter_1 input voltage (V_In):', glw.read('inverter_1','V_In')
+	print('* Reading inverter_1 input voltage (V_In):', glw.read('inverter_1','V_In'))
 	# Step the simulation.
 	glw.waitUntil('2000-01-02 12:00:00')
-	print '* Stepped ahead 12 hours.'
+	print('* Stepped ahead 12 hours.')
 	# Get the value and clock again.
-	print '* Reading solar_1 output voltage (V_Out):', glw.read('solar_1','V_Out')
+	print('* Reading solar_1 output voltage (V_Out):', glw.read('solar_1','V_Out'))
 	#	print '* Reading battery_1 state of charge:', glw.read('battery_1' + 'battery_state')
-	print '* Reading inverter_1 input voltage (V_In):', glw.read('inverter_1','V_In')
-	print '* Reading clock again:', glw.readClock()
+	print('* Reading inverter_1 input voltage (V_In):', glw.read('inverter_1','V_In'))
+	print('* Reading clock again:', glw.readClock())
 	# # Set a value.
 	glw.write('waterheater1','temperature','110.0')
-	print '* Setting temp to 110.'
+	print('* Setting temp to 110.')
 	# Finish the simulation and see final values.
-	print '* Resuming simulation.'
+	print('* Resuming simulation.')
 	glw.resume()
-	print '* Reading solar_1 output volatage (V_Out):', glw.read('solar_1','V_Out')
-	print '* Reading final temp:', glw.read('waterheater1','temperature')
+	print('* Reading solar_1 output volatage (V_Out):', glw.read('solar_1','V_Out'))
+	print('* Reading final temp:', glw.read('waterheater1','temperature'))
 	#	print '* Reading battery_1 state of charge:', glw.read('battery_1' + 'battery_state')
-	print '* Reading inverter_1 input voltage (V_In):', glw.read('inverter_1','V_In')
+	print('* Reading inverter_1 input voltage (V_In):', glw.read('inverter_1','V_In'))
 	# Stop the simulation.
 	glw.shutdown()
 
 def _test2():
 	# test with AlertAgent, ReadAttackAgent
-	import cyberAttack
+	from omf import cyberAttack
 	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':omf.omfDir + '/scratch/CIGAR/test_smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 12:00:00', 'stepSizeSeconds':3600} #error with having 
 	agents = [cyberAttack.AlertAgent('AlertAgent', '2000-01-03 12:00:00')] 
-	print 'Starting co-sim with 1 agent.'
+	print('Starting co-sim with 1 agent.')
 	coord = Coordinator(agents, cosimProps)
 	# print coord.drawResults()
 
 def _test3():
 	# test with AlertAgent, ReadAttackAgent
-	import cyberAttack
+	from omf import cyberAttack
 	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':omf.omfDir + '/scratch/CIGAR/test_smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
 	agents = [
 		cyberAttack.AlertAgent('AlertAgent', '2000-01-03 12:00:00'),
 		cyberAttack.ReadAttackAgent('ReadAttackAgent', '2000-01-02 10:00:00', 'tm_1', 'measured_power')
 	]
-	print 'Starting co-sim with 2 agents.'
+	print('Starting co-sim with 2 agents.')
 	coord = Coordinator(agents, cosimProps)
-	print coord.drawResults()
+	print(coord.drawResults())
 
 def _test4():
 	# test with AlertAgent, ReadAttackAgent, and ReadAttackIntervalAgent
-	import cyberAttack
+	from omf import cyberAttack
 	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':omf.omfDir + '/scratch/CIGAR/test_smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
 	agents = [
 		cyberAttack.AlertAgent('2000-01-03 04:00:00'),
 		cyberAttack.ReadAttackAgent('2000-01-02 10:00:00', 'tm_1', 'measured_power'),
 		cyberAttack.ReadIntervalAttackAgent('2000-01-02 08:00:00', '2000-01-03 08:00:00', 'tm_1', 'measured_real_energy')
 	]
-	print 'Starting co-sim with 3 agents.'
+	print('Starting co-sim with 3 agents.')
 	coord = Coordinator(agents, cosimProps)
-	print coord.drawResults()
+	print(coord.drawResults())
 
 def _test5():
 	# test with AlertAgent, ReadAttackAgent, ReadIntervalAttackAgent, and WriteAttackAgent
 	# shows how WriteAttackAgent and WriteIntervalAttackAgent interact with ReadAttackAgent and ReadIntervalAttackAgent
-	import cyberAttack
+	from omf import cyberAttack
 	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':omf.omfDir + '/scratch/CIGAR/test_smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
 	agents = []
 	agents.append(cyberAttack.AlertAgent('Joe', '2000-01-03 04:00:00'))
@@ -356,49 +366,49 @@ def _test5():
 	agents.append(cyberAttack.ReadIntervalAttackAgent('Dan2.0', '2000-01-03 12:00:00', '2000-01-04 12:00:00', 'tm_2', 'measured_reactive_power'))
 	agents.append(cyberAttack.DefendByValueAgent('Dan.biz', 'battery_1', 'generator_status', 'ONLINE'))
 	agents.append(cyberAttack.WriteAttackAgent('Alice', '2000-01-01 04:00:00', 'battery_1', 'generator_status', 'OFFLINE'))
-	print 'Starting co-sim with 8 agents.'
+	print('Starting co-sim with 8 agents.')
 	coord = Coordinator(agents, cosimProps)
 	# print coord.drawResults()
-	print coord.drawPrettyResults()
+	print(coord.drawPrettyResults())
 
 def _test6():
-	import cyberAttack
+	from omf import cyberAttack
 	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':omf.omfDir + '/scratch/CIGAR/test_smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
 	agents = []
 	agents.append(cyberAttack.DefendByValueAgent('defendAreaAgent', 'solar_2', 'area', '+323 sf'))
 	agents.append(cyberAttack.CopycatAgent('copycat1', '2000-01-02 12:00:00', 'solar_1', 'area', [{'obNameToPaste':'solar_2', 'obPropToPaste': 'area'}]))
 	#agents.append(cyberAttack.ReadIntervalAttackAgent('2000-01-02 06:00:00', '2000-01-02 18:00:00', 'inverter_2', 'V_In'))
-	print 'Starting co-sim with a DefendByValueAgent and a CopycatAgent.'
+	print('Starting co-sim with a DefendByValueAgent and a CopycatAgent.')
 	coord = Coordinator(agents, cosimProps)
-	print coord.drawPrettyResults()
+	print(coord.drawPrettyResults())
 
 def _test7():
 	# test with ReadMultAttackAgent
-	import cyberAttack
+	from omf import cyberAttack
 	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':omf.omfDir + '/scratch/CIGAR/test_smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
 	agents = [cyberAttack.ReadMultAttackAgent('ReadMult', '2000-01-01 01:00:00', 'tm_1', ['measured_power','measured_real_energy'])]
-	print 'Starting co-sim with 1 ReadMultAttackAgent.'
+	print('Starting co-sim with 1 ReadMultAttackAgent.')
 	coord = Coordinator(agents, cosimProps)
-	print coord.drawPrettyResults()
+	print(coord.drawPrettyResults())
 
 def _test8():
 	# test with ReadMultAttackAgent and WriteMultAttackAgent
-	import cyberAttack
+	from omf import cyberAttack
 	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':omf.omfDir + '/scratch/CIGAR/test_smsSingle.glm', 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
 	agents = []
 	agents.append(cyberAttack.ReadMultAttackAgent('ReadMultAttackAgent_1', '2000-01-01 01:00:00', 'tm_1', ['measured_power','measured_real_energy']))
 	agents.append(cyberAttack.WriteMultAttackAgent('WriteMultAttackAgent_1', '2000-01-01 02:00:00', 'tm_1', [{'obPropToAttack':'measured_power', 'value':'0.0'}, {'obPropToAttack':'measured_real_energy', 'value':'0.0'}]))
-	print 'Starting co-sim with 1 ReadMultAttackAgent and 1 WriteMultAttackAgent.'
+	print('Starting co-sim with 1 ReadMultAttackAgent and 1 WriteMultAttackAgent.')
 	coord = Coordinator(agents, cosimProps)
-	print coord.drawPrettyResults()
+	print(coord.drawPrettyResults())
 
 def _testfault():
-	import cyberAttack
+	from omf import cyberAttack
 	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':omf.omfDir + '/scratch/CIGAR/test_Exercise_4_2_1.glm', 'startTime':'2000-01-01 05:00:00','endTime':'2000-01-01 05:30:00', 'stepSizeSeconds':60}
 	agents = []
 	agents.append(cyberAttack.ReadIntervalAttackAgent('FaultChecker', '2000-01-01 05:02:00', '2000-01-01 05:12:00', 'node711-741', 'conductor_resistance'))
 	coord = Coordinator(agents, cosimProps)
-	print coord.drawPrettyResults()
+	print(coord.drawPrettyResults())
 
 if __name__ == '__main__':
 	_test1()
