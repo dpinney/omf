@@ -206,6 +206,10 @@ def _strClean(x):
 	else:
 		return x
 
+def runToCompletionForMacOS():
+	#TODO: port repeated running code from Kevin in here.
+	pass
+
 def csvToArray(fileName):
 	''' Take a Gridlab-export csv filename, return a list of timeseries vectors.'''
 	with open(fileName) as openfile:
