@@ -55,12 +55,19 @@ def insert_coordinates(tree):
 			tree[key]['latitude'] = thisPos[1]
 
 
-def contains_coordinates(tree):
-	"""Return True if the dictionary contains latitude and longitude data, otherwise False."""
+def contains_valid_coordinates(tree):
+	'''
+	Return True if the tree contains at least one object with a latitude or longitude property that can be parsed as a float, otherwise False.
+	'''
 	for key in tree:
 		for sub_key in ['latitude', 'longitude']:
 			if sub_key in tree[key]:
-				return True
+				try:
+					float(tree[key][sub_key])
+				except:
+					return False
+				else:
+					return True
 	return False
 
 def get_components():
@@ -89,7 +96,7 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.h
 	if forceLayout:
 		print('forceLayout was set to True, so force layout is applied regardless of coordinate detection.')
 		insert_coordinates(tree)
-	elif not contains_coordinates(tree):
+	elif not contains_valid_coordinates(tree):
 		print('Warning: no lat/lon coordinates detected, so force layout required.')
 		insert_coordinates(tree)
 	# Set up temp directory and copy the feeder and viewer in to it.
