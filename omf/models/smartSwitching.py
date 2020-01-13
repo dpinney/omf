@@ -32,7 +32,7 @@ from dateutil import parser
 from dateutil.relativedelta import *
 
 # Model metadata:
-tooltip = "smartSwitching gives the expected reliability improvement from adding reclosers to a circuit."
+tooltip = 'smartSwitching gives the expected reliability improvement from adding reclosers to a circuit.'
 modelName, template = metadata(__file__)
 hidden = False
 
@@ -164,10 +164,10 @@ def protectionSmart(tree, index, biggestKey, CLOCK_START, CLOCK_END):
 	noMeters = True
 	for key in tree:
 		if tree[key].get('object','') in ['meter', 'triplex_meter']:
-			tree[key]['groupid'] = "METERTEST"
+			tree[key]['groupid'] = 'METERTEST'
 			noMeters = False
 	if noMeters:
-		raise Exception("No meters detected on the circuit. Please add at least one meter to allow for collection of outage statistics.")
+		raise Exception('No meters detected on the circuit. Please add at least one meter to allow for collection of outage statistics.')
 	for key in tree:
 		if 'clock' in tree[key]:
 			tree[key]['starttime'] = "'" + CLOCK_START + "'"
@@ -179,7 +179,7 @@ def protectionSmart(tree, index, biggestKey, CLOCK_START, CLOCK_END):
 	nameToIndex = {tree[key].get('name',''):key for key in tree.keys()}
 	# Get rid of schedules and climate and check for all edge types:
 	for key in tree.keys():
-		obtype = tree[key].get("object","")
+		obtype = tree[key].get('object','')
 		if obtype == 'underground_line':
 			edge_bools['underground_line'] = True
 		elif obtype == 'overhead_line':
@@ -194,12 +194,12 @@ def protectionSmart(tree, index, biggestKey, CLOCK_START, CLOCK_END):
 			edge_bools['fuse'] = True
 		elif obtype == 'switch':
 			edge_bools['switch'] = True
-		if tree[key].get("argument","") == '"schedules.glm"' or tree[key].get("tmyfile","") != "":
+		if tree[key].get('argument','') == '"schedules.glm"' or tree[key].get('tmyfile','') != '':
 			del tree[key]
 	
 	# create volt and current line dumps for debugging purposes
-	tree[str(biggestKey*10 + index + 1)] = {"object":"voltdump","filename":"voltDump.csv"}
-	tree[str(biggestKey*10 + index + 2)] = {"object":"currdump","filename":"currDump.csv"}
+	tree[str(biggestKey*10 + index + 1)] = {'object':'voltdump','filename':'voltDump.csv'}
+	tree[str(biggestKey*10 + index + 2)] = {'object':'currdump','filename':'currDump.csv'}
 	
 	# Line rating dumps
 	tree[omf.feeder.getMaxKey(tree) + 1] = {
@@ -453,7 +453,7 @@ def manualOutageObject(pathToOmd, pathToCsv, workDir):
 		writer.writeheader()
 
 		for key in tree.keys():
-			obtype = tree[key].get("object","")
+			obtype = tree[key].get('object','')
 			if obtype == 'underground_line' or obtype == 'overhead_line' or obtype == 'triplex_line':
 				writer.writerow({'line_name': tree[key]['name'], 'coords1': nodeToCoords(outageMap, tree[key]['from']), 'coords2': nodeToCoords(outageMap, tree[key]['to'])})
 
@@ -518,7 +518,7 @@ def setupSystemOutage(pathToGlm, pathToCsv, workDir, lineNameForRecloser, simTim
 		while row < row_count_mc:
 			
 			#if (datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S').month == 1):
-			if (str(mc.loc[row, 'Object Name']) != lineNameForRecloser and str(mc.loc[row, 'Object Name']) != '21003'):
+			if (str(mc.loc[row, 'Object Name']) != lineNameForRecloser):
 				manualOutages = ''
 				manualOutages += str(mc.loc[row, 'Object Name'])
 				manualOutages += ', '
@@ -553,10 +553,10 @@ def setupSystemOutage(pathToGlm, pathToCsv, workDir, lineNameForRecloser, simTim
 		noMeters = True
 		for key in tree:
 			if tree[key].get('object','') in ['meter', 'triplex_meter']:
-				tree[key]['groupid'] = "METERTEST"
+				tree[key]['groupid'] = 'METERTEST'
 				noMeters = False
 		if noMeters:
-			raise Exception("No meters detected on the circuit. Please add at least one meter to allow for collection of outage statistics.")
+			raise Exception('No meters detected on the circuit. Please add at least one meter to allow for collection of outage statistics.')
 	for key in tree:
 		if 'clock' in tree[key]:
 			tree[key]['starttime'] = "'" + CLOCK_START + "'"
@@ -568,7 +568,7 @@ def setupSystemOutage(pathToGlm, pathToCsv, workDir, lineNameForRecloser, simTim
 	nameToIndex = {tree[key].get('name',''):key for key in tree.keys()}
 	# Get rid of schedules and climate and check for all edge types:
 	for key in tree.keys():
-		obtype = tree[key].get("object","")
+		obtype = tree[key].get('object','')
 		if obtype == 'underground_line':
 			edge_bools['underground_line'] = True
 		elif obtype == 'overhead_line':
@@ -583,12 +583,12 @@ def setupSystemOutage(pathToGlm, pathToCsv, workDir, lineNameForRecloser, simTim
 			edge_bools['fuse'] = True
 		elif obtype == 'switch':
 			edge_bools['switch'] = True
-		if tree[key].get("argument","") == '"schedules.glm"' or tree[key].get("tmyfile","") != "":
+		if tree[key].get('argument','') == '"schedules.glm"' or tree[key].get('tmyfile','') != '':
 			del tree[key]
 	
 	# create volt and current line dumps for debugging purposes
-	tree[str(biggestKey*10 + index + 1)] = {"object":"voltdump","filename":"voltDump.csv"}
-	tree[str(biggestKey*10 + index + 2)] = {"object":"currdump","filename":"currDump.csv"}
+	tree[str(biggestKey*10 + index + 1)] = {'object':'voltdump','filename':'voltDump.csv'}
+	tree[str(biggestKey*10 + index + 2)] = {'object':'currdump','filename':'currDump.csv'}
 	
 	# Line rating dumps
 	tree[omf.feeder.getMaxKey(tree) + 1] = {
@@ -927,10 +927,10 @@ def valueOfAdditionalRecloser(pathToGlm, pathToCsv, workDir, generateRandomFault
 					</tr>
 				</thead>
 				<tbody>"""
-		new_html_str += "<tr><td><b>Lost kWh Sales</b></td><td>"+str(initCustCost)+"</td><td>"+str(finCustCost)+"</td></tr>"
-		new_html_str += "<tr><td><b>Restoration Labor Cost</b></td><td>"+str(initRestCost)+"</td><td>"+str(finRestCost)+"</td></tr>"
-		new_html_str += "<tr><td><b>Restoration Hardware Cost</b></td><td>"+str(initHardCost)+"</td><td>"+str(finHardCost)+"</td></tr>"
-		new_html_str += "<tr><td><b>Outage Cost</b></td><td>"+str(initOutCost)+"</td><td>"+str(finOutCost)+"</td></tr>"
+		new_html_str += '<tr><td><b>Lost kWh Sales</b></td><td>'+str(initCustCost)+'</td><td>'+str(finCustCost)+'</td></tr>'
+		new_html_str += '<tr><td><b>Restoration Labor Cost</b></td><td>'+str(initRestCost)+'</td><td>'+str(finRestCost)+'</td></tr>'
+		new_html_str += '<tr><td><b>Restoration Hardware Cost</b></td><td>'+str(initHardCost)+'</td><td>'+str(finHardCost)+'</td></tr>'
+		new_html_str += '<tr><td><b>Outage Cost</b></td><td>'+str(initOutCost)+'</td><td>'+str(finOutCost)+'</td></tr>'
 		new_html_str +="""</tbody></table>"""
 
 		return new_html_str
@@ -945,7 +945,7 @@ def valueOfAdditionalRecloser(pathToGlm, pathToCsv, workDir, generateRandomFault
 		finHardCost = finalHardwareCost,
 		initOutCost = initialOutageCost,
 		finOutCost = finalOutageCost)
-	with open(pJoin(workDir, "costStatsCalc.html"), "w") as costFile:
+	with open(pJoin(workDir, 'costStatsCalc.html'), 'w') as costFile:
 		costFile.write(costStatsHtml)
 
 	# bar chart to show change in SAIDI/SAIFI values
@@ -1101,7 +1101,7 @@ def work(modelDir, inputDict):
 	outData = {}
 	# Write the feeder
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
-	inputDict["feederName1"] = feederName
+	inputDict['feederName1'] = feederName
 	omf.feeder.omdToGlm(modelDir + '/' + feederName + '.omd', modelDir)
 	#test the main functions of the program
 	with open(pJoin(modelDir, inputDict['outageFileName']), 'w') as f:
@@ -1130,35 +1130,35 @@ def work(modelDir, inputDict):
 	#bestLocationForRecloser(omf.omfDir + '/scratch/CIGAR/test_ieee37nodeFaultTester.glm', None, 'underground_line', 'node709-708', 'EXPONENTIAL', '3.858e-7', '0.0', 'PARETO', '1.0', '1.0002778', '432000 s', '2000-01-01 0:00:00', 'TLG', '300')
 	
 	# Textual outputs of cost statistic
-	with open(pJoin(modelDir,"costStatsCalc.html"),"rb") as inFile:
-		outData["costStatsHtml"] = inFile.read()
+	with open(pJoin(modelDir,'costStatsCalc.html'),'rb') as inFile:
+		outData['costStatsHtml'] = inFile.read()
 	
 	# Image outputs.
-	with open(pJoin(modelDir,"feeder_chart.png"),"rb") as inFile:
-		outData["feeder_chart.png"] = inFile.read().encode("base64")
+	with open(pJoin(modelDir,'feeder_chart.png'),'rb') as inFile:
+		outData['feeder_chart.png'] = inFile.read().encode('base64')
 	
 	# Plotly outputs.
 	layoutOb = go.Layout()
-	outData["fig1Data"] = json.dumps(plotOuts.get('fig1',{}), cls=py.utils.PlotlyJSONEncoder)
-	outData["fig1Layout"] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
-	outData["fig2Data"] = json.dumps(plotOuts.get('fig2',{}), cls=py.utils.PlotlyJSONEncoder)
-	outData["fig2Layout"] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
-	outData["fig3Data"] = json.dumps(plotOuts.get('fig3',{}), cls=py.utils.PlotlyJSONEncoder)
-	outData["fig3Layout"] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
+	outData['fig1Data'] = json.dumps(plotOuts.get('fig1',{}), cls=py.utils.PlotlyJSONEncoder)
+	outData['fig1Layout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
+	outData['fig2Data'] = json.dumps(plotOuts.get('fig2',{}), cls=py.utils.PlotlyJSONEncoder)
+	outData['fig2Layout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
+	outData['fig3Data'] = json.dumps(plotOuts.get('fig3',{}), cls=py.utils.PlotlyJSONEncoder)
+	outData['fig3Layout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
 
 	# Stdout/stderr.
-	outData["stdout"] = "Success"
-	outData["stderr"] = ""
+	outData['stdout'] = 'Success'
+	outData['stderr'] = ''
 	return outData
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"modelType": modelName,
-		"feederName1": "ieee37nodeFaultTester",
-		"generateRandomFaults": "False",
-		"lineTypeForFaults": 'underground_line',
-		"recloserLocation": "node709-708",
+		'modelType': modelName,
+		'feederName1': 'ieee37nodeFaultTester',
+		'generateRandomFaults': 'False',
+		'lineTypeForFaults': 'underground_line',
+		'recloserLocation': 'node709-708',
 		'failureDistribution': 'EXPONENTIAL',
 		'failureDistParam1': '3.858e-7',
 		'failureDistParam2':'0.0',
@@ -1172,19 +1172,19 @@ def new(modelDir):
 		'simTime': '2000-01-01 0:00:00',
 		'faultType': 'TLG',
 		'sustainedOutageThreshold': '60',
-		"outageFileName": "outagesNew5.csv",
-		"outageData": open(pJoin(__neoMetaModel__._omfDir,"scratch","smartSwitching","outagesNew5.csv"), "r").read(),
+		'outageFileName': 'outagesNew5.csv',
+		'outageData': open(pJoin(__neoMetaModel__._omfDir,'scratch','smartSwitching','outagesNew5.csv'), 'r').read(),
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
-		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
+		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', defaultInputs['feederName1']+'.omd'), pJoin(modelDir, defaultInputs['feederName1']+'.omd'))
 	except:
 		return False
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
 def _tests():
 	# Location
-	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
+	modelLoc = pJoin(__neoMetaModel__._omfDir,'data','Model','admin','Automated Testing of ' + modelName)
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)

@@ -241,11 +241,12 @@ def _validate_oneLineGridlab(temp_dir):
 	'''TODO'''
 	glm_path = os.path.join(temp_dir, 'in.glm')
 	request.files['glm'].save(glm_path)
-	if not omf.distNetViz.contains_coordinates(omf.feeder.parse(glm_path)) and request.form['useLatLons'] == 'True':
+	tree = omf.feeder.parse(glm_path)
+	if not omf.distNetViz.contains_valid_coordinates(tree) and request.form['useLatLons'] == 'True':
 		return (
 			{'useLatLons': 'True'},
-			("Since the submitted GLM contained no coordinates, 'useLatLons' must be 'False' because artificial coordinates must be used to draw"
-			" the GLM.")
+			("Since the submitted GLM contained no coordinates, or the coordinates could not be parsed as floats, "
+				"'useLatLons' must be 'False' because artificial coordinates must be used to draw the GLM.")
 		)
 	return (None, None)
 

@@ -77,8 +77,33 @@ class Test_oneLineGridlab_start(object):
                 u'http code': 422,
                 u'source': {u'useLatLons': u'True'},
                 u'title': u'Invalid Parameter Value Combination',
-                u'detail': (u"Since the submitted GLM contained no coordinates, 'useLatLons' must be 'False' because "
-                    "artificial coordinates must be used to draw the GLM.")
+                u'detail': (u"Since the submitted GLM contained no coordinates, or the coordinates could not be parsed as floats, "
+                    "'useLatLons' must be 'False' because artificial coordinates must be used to draw the GLM.")
+            }]
+        }
+
+    def test_GLMHasInvalidCoordinates_and_useLatLonsIsTrue_returns422_and_returnsCorrectJSON(self, client):
+        filename = 'ieee123_pole_vulnerability.glm'
+        glm_path = os.path.join(os.path.dirname(__file__), filename)
+        with open(glm_path) as f:
+            b_io = io.BytesIO(f.read())
+        data = {
+            'glm': (b_io, filename),
+            'useLatLons': 'True'
+        }
+        response = client.post("/oneLineGridlab", data=data)
+        assert response.status_code == 422
+        response_data = json.loads(response.data)
+        assert response_data == {
+            u'job': {
+                u'state': u'failed'
+            },
+            u'errors': [{
+                u'http code': 422,
+                u'source': {u'useLatLons': u'True'},
+                u'title': u'Invalid Parameter Value Combination',
+                u'detail': (u"Since the submitted GLM contained no coordinates, or the coordinates could not be parsed as floats, "
+                    "'useLatLons' must be 'False' because artificial coordinates must be used to draw the GLM.")
             }]
         }
 

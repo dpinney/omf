@@ -874,7 +874,7 @@ def gridlabImportBackground(owner, modelName):
 			glmString = glmFile.read()
 		newFeeder = dict(**feeder.newFeederWireframe)
 		newFeeder["tree"] = feeder.parse(glmString, False)
-		if not omf.distNetViz.contains_coordinates(newFeeder["tree"]):
+		if not omf.distNetViz.contains_valid_coordinates(newFeeder["tree"]):
 			omf.distNetViz.insert_coordinates(newFeeder["tree"])
 		with locked_open(os.path.join(_omfDir, 'static', 'schedules.glm')) as schedFile:
 			newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
