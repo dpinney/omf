@@ -14,5 +14,5 @@ __all__ = [x.replace('.py','') for x in os.listdir(_myDir)
 # for name in __all__: exec('import ' + name)
 
 # HACK: manual import for now due to incompatibility of Debian and NREL SAM 2015.
-from omf.solvers import gridlabd
-from omf.solvers import nrelsam2013
+#from omf.solvers import gridlabd
+#from omf.solvers import nrelsam2013
