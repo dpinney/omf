@@ -11,4 +11,5 @@ __all__ = [x.replace('.py','') for x in os.listdir(_myDir)
 	if x.endswith('.py') and not x.startswith('__')]
 
 # Import of all the sub-modules:
+# We have to keep this line of code because of the use of getattr()
 for name in __all__: exec('from omf.models import ' + name)
