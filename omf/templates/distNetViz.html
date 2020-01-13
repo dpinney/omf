@@ -2484,6 +2484,8 @@ function addModelViewerHandlers(interfaceIsStatic=true) {
         fileMenu.querySelector("li[data-web='map']").addEventListener("click", () => {
             window.open(`/displayMap/${gThisOwner}/${gThisModelName}/${gThisFeederNum}`, '_blank');
         });
+    } else {
+        fileMenu.querySelector("li[data-web='map']").remove()
     }
 }
 
