@@ -32,6 +32,11 @@ def save(inOmd, outPath):
 	with open(outPath, 'w') as outFile:
 		json.dump(inOmd, outFile, indent=4)
 
+def dump(inTree, outPath):
+	''' Just dump a .glm in a file. '''
+	with open(outPath, 'w') as outFile:
+		outFile.write(write(inTree))
+
 def parse(inputStr, filePath=True):
 	''' Parse a GLM into an omf.feeder tree. This is so we can walk the tree, change things in bulk, etc.
 	Input can be a filepath or GLM string.
@@ -259,6 +264,42 @@ def groupSwingKids(tree):
 		insert['file'] = 'SwingKids_' + obType + '.csv'
 		tree[biggestKey] = insert
 		biggestKey += 1
+
+def removeNumberRefs(tree):
+	''' Mutate a tree to remove the number ref names like "node:13".
+	Replaces them with regular names and fixes all the references. '''
+	# Generate map subValName -> Key
+	subValToKeys = {}
+	for key in tree.keys():
+		obj = tree[key]
+		for sub_key in obj:
+			val = obj[sub_key]
+			if type(val) is dict:
+				continue # avoid sub-dicts.
+			if val in subValToKeys:
+				subValToKeys[val].append(key)
+			else:
+				subValToKeys[val] = [key]
+	# Rewrite the references.
+	for key in tree.keys():
+		obj = tree[key]
+		obType = obj.get('object','')
+		if ':' in obType:
+			# If it's missing a name, give it one.
+			goodType = obType[0:obType.find(':')]
+			if 'name' not in obj:
+				goodName = obType.replace(':', '_')
+				obj['name'] = goodName
+			else:
+				goodName = obj['name']
+			obj['object'] = goodType
+			# Rewrite all the bad obj:number references
+			badRefs = subValToKeys.get(obType,[])
+			for key in badRefs:
+				for subkey in tree[key]:
+					val = tree[key][subkey]
+					if val == obType and subkey != 'object':
+						tree[key][subkey] = goodName
 
 def treeToNxGraph(inTree):
 	''' Convert feeder tree to networkx graph. '''
