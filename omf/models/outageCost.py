@@ -688,14 +688,14 @@ def randomFaultsRefined(pathToCsv, pathToOmd, workDir, gridLines, faultsGenerate
 	faultNumber = 0
 	while faultNumber < faultsGenerated:
 		if heatMap['start']:
-			start = np.random.choice(list(heatMap['start'].keys()), replace=True, p=(heatMap['start'].values()))
+			start = np.random.choice(list(heatMap['start'].keys()), replace=True, p=(list(heatMap['start'].values())))
 			if (test == 'chi_square' or test == 'p_value'):
 				duration = np.float64(math.ceil(newDurations[faultNumber]))
 				start = str(start)
 				finish = str(datetime.datetime.strptime(start, "%Y-%m-%d %H:%M:%S") + datetime.timedelta(seconds=duration))
 			else:
 				if test != 'dependent':
-					duration = np.random.choice(list(heatMap['duration'].keys()), replace=True, p=(heatMap['duration'].values()))
+					duration = np.random.choice(list(heatMap['duration'].keys()), replace=True, p=(list(heatMap['duration'].values())))
 					start = str(start)
 					finish = str(datetime.datetime.strptime(start, "%Y-%m-%d %H:%M:%S") + datetime.timedelta(seconds=duration))
 
@@ -708,7 +708,7 @@ def randomFaultsRefined(pathToCsv, pathToOmd, workDir, gridLines, faultsGenerate
 			total += nth_distance[entry]
 		# Get latitude and longitude by converting the 1D index to a 2D index.
 		latitudeChosen = xv[entry % gridLines]
-		longitudeChosen = yv[entry / gridLines]
+		longitudeChosen = yv[entry // gridLines]
 		location = str(latitudeChosen) + ' ' + str(longitudeChosen)
 
 		# get a location that lies on a line, based on the location heat map generated, then estimate the meters affected based on nearby lines
@@ -1110,9 +1110,9 @@ def new(modelDir):
 		outage_data = f.read()
 	defaultInputs = {
 		'modelType': modelName,
-		'feederName1': 'OlinBarreGeo',
+		'feederName1': 'Olin Barre Fault',
 		'generateRandom': '2',
-		'graphData': '2'
+		'graphData': '2',
 		'numberOfCustomers': '192',
 		'sustainedOutageThreshold': '200',
 		'causeFilter': '0',
