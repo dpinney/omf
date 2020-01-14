@@ -1,13 +1,8 @@
-import json, warnings, os, shutil, math, tempfile, random, webbrowser
+import json, os, shutil, math, tempfile, random, webbrowser
 from os.path import join as pJoin
 from collections import defaultdict
-from flask import Flask, send_file, render_template
-import requests
 from pyproj import Proj, transform, Geod
-import matplotlib
-from matplotlib import pyplot as plt
 from scipy.spatial import ConvexHull, Delaunay
-from sklearn.cluster import KMeans
 import networkx as nx
 import numpy as np
 
