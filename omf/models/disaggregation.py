@@ -1,6 +1,7 @@
 import subprocess, pickle, warnings, os, base64, pathlib
 from os.path import join as pJoin
 from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 warnings.filterwarnings('ignore')
 
