@@ -8,8 +8,9 @@ import pandas as pd
 import numpy as np
 from numpy import npv
 
-from omf.models import __neoMetaModel__
 from omf.solvers import VB
+from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
