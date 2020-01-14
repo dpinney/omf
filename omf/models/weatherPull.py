@@ -1,9 +1,10 @@
 ''' Get power and energy limits from PNNL VirtualBatteries (VBAT) load model.'''
-import json, shutil, csv
+import shutil, csv
 from os.path import isdir, join as pJoin
 
-from omf.models import __neoMetaModel__
 import omf.weather
+from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
