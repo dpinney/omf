@@ -1,12 +1,13 @@
 ''' Calculate solar photovoltaic system output using PVWatts. '''
 
-import json, shutil, datetime
+import shutil, datetime
 from os.path import join as pJoin
 
 # OMF imports
-from omf.models import __neoMetaModel__
+import omf.weather
 from omf.solvers import nrelsam2013
-from omf.weather import zipCodeToClimateName
+from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
 tooltip = "The pvWatts model runs the NREL pvWatts tool for quick estimation of solar panel output."
@@ -14,7 +15,7 @@ modelName, template = __neoMetaModel__.metadata(__file__)
 
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
-	inputDict["climateName"] = zipCodeToClimateName(inputDict["zipCode"])
+	inputDict["climateName"] = omf.weather.zipCodeToClimateName(inputDict["zipCode"])
 	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 
 		pJoin(modelDir, "climate.tmy2"))
 	# Set up SAM data structures.
