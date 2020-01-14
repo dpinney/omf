@@ -9,15 +9,16 @@ from networkx.drawing.nx_agraph import graphviz_layout
 
 plt.switch_backend('Agg')
 
-# OMF imports 
-import omf
-import omf.feeder
-from omf.solvers import gridlabd
-from omf.models import __neoMetaModel__
-
 # dateutil imports
 from dateutil import parser
 from dateutil.relativedelta import *
+
+# OMF imports 
+import omf
+import omf.feeder
+import omf.solvers.gridlabd
+from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
@@ -231,7 +232,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 		workDir = tempfile.mkdtemp()
 		print('@@@@@@', workDir)
 	for i in range(6):
-		gridlabOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
+		gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 		#HACK: workaround for shoddy macOS gridlabd build.
 		if 'error when setting parent' not in gridlabOut.get('stderr','OOPS'):
 			break
