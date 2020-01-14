@@ -9,10 +9,11 @@ from flask import session
 
 # OMF imports
 import omf
-from omf import feeder
+import omf.feeder
+import omf.weather
 import omf.web
-from omf.solvers import gridlabd
-from omf.weather import zipCodeToClimateName
+import omf.solvers.gridlabd
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
 fileName = os.path.basename(__file__)
@@ -160,7 +161,7 @@ def runForeground(modelDir):
 			os.makedirs(pJoin(modelDir, feederName)) # create subfolders for feeders
 		shutil.copy(pJoin(modelDir, feederName + ".omd"),
 			pJoin(modelDir, feederName, "feeder.omd"))
-		inputDict["climateName"] = zipCodeToClimateName(inputDict["zipCode"])
+		inputDict["climateName"] = omf.weather.zipCodeToClimateName(inputDict["zipCode"])
 		shutil.copy(pJoin(_omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
 			pJoin(modelDir, feederName, "climate.tmy2"))
 		try:
@@ -169,21 +170,21 @@ def runForeground(modelDir):
 				feederJson = json.load(f)
 			tree = feederJson["tree"]
 			# Set up GLM with correct time and recorders:
-			feeder.attachRecorders(tree, "Regulator", "object", "regulator")
-			feeder.attachRecorders(tree, "Capacitor", "object", "capacitor")
-			feeder.attachRecorders(tree, "Inverter", "object", "inverter")
-			feeder.attachRecorders(tree, "Windmill", "object", "windturb_dg")
-			feeder.attachRecorders(tree, "CollectorVoltage", None, None)
-			feeder.attachRecorders(tree, "Climate", "object", "climate")
-			feeder.attachRecorders(tree, "OverheadLosses", None, None)
-			feeder.attachRecorders(tree, "UndergroundLosses", None, None)
-			feeder.attachRecorders(tree, "TriplexLosses", None, None)
-			feeder.attachRecorders(tree, "TransformerLosses", None, None)
-			feeder.groupSwingKids(tree)
-			feeder.adjustTime(tree=tree, simLength=float(inputDict["simLength"]),
+			omf.feeder.attachRecorders(tree, "Regulator", "object", "regulator")
+			omf.feeder.attachRecorders(tree, "Capacitor", "object", "capacitor")
+			omf.feeder.attachRecorders(tree, "Inverter", "object", "inverter")
+			omf.feeder.attachRecorders(tree, "Windmill", "object", "windturb_dg")
+			omf.feeder.attachRecorders(tree, "CollectorVoltage", None, None)
+			omf.feeder.attachRecorders(tree, "Climate", "object", "climate")
+			omf.feeder.attachRecorders(tree, "OverheadLosses", None, None)
+			omf.feeder.attachRecorders(tree, "UndergroundLosses", None, None)
+			omf.feeder.attachRecorders(tree, "TriplexLosses", None, None)
+			omf.feeder.attachRecorders(tree, "TransformerLosses", None, None)
+			omf.feeder.groupSwingKids(tree)
+			omf.feeder.adjustTime(tree=tree, simLength=float(inputDict["simLength"]),
 				simLengthUnits=inputDict["simLengthUnits"], simStartDate=inputDict["simStartDate"])
 			# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
-			rawOut = gridlabd.runInFilesystem(tree, attachments=feederJson["attachments"],
+			rawOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=feederJson["attachments"],
 				keepFiles=True, workDir=pJoin(modelDir, feederName))
 			cleanOut = {}
 			# Std Err and Std Out
