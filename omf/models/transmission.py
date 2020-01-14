@@ -9,8 +9,9 @@ import matplotlib
 import matplotlib.cm as cm
 from matplotlib import pyplot as plt
 
+import omf.network
 from omf.models import __neoMetaModel__
-from omf import network
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
@@ -34,7 +35,7 @@ def work(modelDir, inputDict):
 		networkJson = json.load(f)
 	matName = 'matIn'
 	matFileName = matName + '.m'
-	matStr = network.netToMat(networkJson, matName)
+	matStr = omf.network.netToMat(networkJson, matName)
 	with open(pJoin(modelDir, matFileName),"w") as outMat:
 		for row in matStr: outMat.write(row)		
 	# Build the MATPOWER command.
