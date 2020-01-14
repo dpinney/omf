@@ -7,8 +7,9 @@ from os.path import isdir, join as pJoin
 from numpy import npv
 import pandas as pd
 
-from omf.models import __neoMetaModel__
 from omf import forecast as fc
+from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
