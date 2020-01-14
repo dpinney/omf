@@ -3,9 +3,6 @@
 import json, math, random, datetime, os
 from os.path import join as pJoin
 
-omfDir=os.path.dirname(os.path.dirname(__file__))
-
-
 # DISTRIBUTION FEEDER FUNCTIONS
 def distPseudomizeNames(inFeeder):
 	''' Replace all names in the inFeeder distribution system with pseudonames composed from the object type and a random ID. Return a key with name and ID pairs. '''
@@ -661,7 +658,7 @@ def _tests():
 		('Simple Market System AnonTest.omd', 'simpleMarket_distTranslateLocations.omd', lambda inFeeder: distTranslateLocations(inFeeder, translationRight=20, translationUp=20, rotation=20)), # Works
 		('Simple Market System AnonTest.omd', 'simpleMarket_distAddNoise.omd', lambda inFeeder: distAddNoise(inFeeder, noisePerc=50)), # This only affects longitude and latitude because they are the only non-string numeric properties
 		('Simple Market System AnonTest.omd', 'simpleMarket_distShuffleLoads.omd', lambda inFeeder: distShuffleLoads(inFeeder, shufPerc=100)), # It changes the "parent" property, so I guess it's working
-		('Simple Market System AnonTest.omd', 'simpleMarket_distModifyTriplexLengths.omd', distModifyTriplexLengths), # Changes lengths of triple_lines
+		('Simple Market System AnonTest.omd', 'simpleMarket_distModifyTriplexLengths.omd', distModifyTriplexLengths), # Changes lengths of triplex_lines
 		('Olin Barre GH.omd', 'olinBarreGH_distModifyConductorLengths.omd', distModifyConductorLengths), # Changes resistance and geometric_mean_radius of line_conductor objects
 		#('Simple Market System AnonTest.omd', 'simpleMarket_distSmoothLoads.omd', distSmoothLoads), # Not working. Requires a calibrated feeder (see omf.calibrate)
 		('SimpleNetwork.json', '118_tranPseudomizeNames.omt', tranPseudomizeNames), # Works
@@ -671,12 +668,13 @@ def _tests():
 		('SimpleNetwork.json', 'case9_transAddNoise.omt', lambda inNetwork: tranAddNoise(inNetwork, noisePerc=100)), # Works. Changes almost every property
 		('SimpleNetwork.json', '118_tranShuffleLoadsAndGens.omt', lambda inNetwork: tranShuffleLoadsAndGens(inNetwork, shufPerc=100)) # Only changes the 'Pd' property of some objects
 	]
+	omfDir = os.path.abspath(os.path.dirname(__file__))
 	for o in operations:
 		input_filename = o[0]
 		if input_filename.split('.')[-1] == 'omd':
-			input_filepath = os.path.join(omfDir, 'omf', 'static', 'publicFeeders', input_filename)
+			input_filepath = os.path.join(omfDir, 'static', 'publicFeeders', input_filename)
 		else:
-			input_filepath = os.path.join(omfDir, 'omf', 'static', input_filename)
+			input_filepath = os.path.join(omfDir, 'static', input_filename)
 		with open(input_filepath) as f:
 			feeder_or_network = json.load(f)
 		o[2](feeder_or_network)
