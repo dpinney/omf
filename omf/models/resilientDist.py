@@ -10,9 +10,9 @@ import networkx as nx
 
 # OMF imports
 import omf
-from omf import feeder
+import omf.feeder, omf.weather
 from omf.models import __neoMetaModel__
-from omf.weather import zipCodeToClimateName
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
@@ -327,7 +327,7 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 		if aLat is None and aLon is None and aFrom is None:
 			 tree.pop(key)
 	# Create and save the graphic.
-	inGraph = feeder.treeToNxGraph(tree)
+	inGraph = omf.feeder.treeToNxGraph(tree)
 	labels=True
 	neatoLayout=False 
 	showPlot=False
@@ -553,7 +553,7 @@ def work(modelDir, inputDict):
 		with open(os.path.join(modelDir, fileName),'w') as file:
 			file.write(omd['attachments'][fileName])
 	#Wire in the file the user specifies via zipcode.
-	climateFileName = zipCodeToClimateName(inputDict["simulationZipCode"])
+	climateFileName = omf.weather.zipCodeToClimateName(inputDict["simulationZipCode"])
 	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
 	# Platform specific binaries for GridLAB-D First Run.
 	if platform.system() == "Linux":
