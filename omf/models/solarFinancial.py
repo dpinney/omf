@@ -6,9 +6,10 @@ from numpy import irr, npv
 import xlwt
 
 # OMF imports
-from omf.models import __neoMetaModel__
+import omf.weather
 from omf.solvers import nrelsam2013
-from omf.weather import zipCodeToClimateName
+from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
@@ -18,7 +19,7 @@ hidden = False
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	# Copy spcific climate data into model directory
-	inputDict["climateName"] = zipCodeToClimateName(inputDict["zipCode"])
+	inputDict["climateName"] = omf.weather.zipCodeToClimateName(inputDict["zipCode"])
 	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 
 		pJoin(modelDir, "climate.tmy2"))
 	# Set up SAM data structures.
