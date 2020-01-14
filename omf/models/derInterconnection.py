@@ -15,9 +15,10 @@ else:
 	plt.switch_backend('Agg')
 
 # OMF imports 
-from omf import feeder
+import omf.feeder
+import omf.solvers.gridlabd
 from omf.models import __neoMetaModel__
-from omf.solvers import gridlabd
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
@@ -43,7 +44,7 @@ def work(modelDir, inputDict):
 
 	path = pJoin(modelDir,feederName + '.omd')
 	if path.endswith('.glm'):
-		tree = feeder.parse(path)
+		tree = omf.feeder.parse(path)
 		attachments = []
 	elif path.endswith('.omd'):
 		with open(path) as f:
@@ -86,10 +87,10 @@ def work(modelDir, inputDict):
 	tree[str(biggestKey*10 + 1)] = {'object':'currdump','filename':'currDump.csv'}
 	
 	# Line rating dumps
-	tree[feeder.getMaxKey(tree) + 1] = {'module': 'tape'}
+	tree[omf.feeder.getMaxKey(tree) + 1] = {'module': 'tape'}
 	for key in edge_bools.keys():
 		if edge_bools[key]:
-			tree[feeder.getMaxKey(tree) + 1] = {
+			tree[omf.feeder.getMaxKey(tree) + 1] = {
 				'object':'group_recorder', 
 				'group':'"class='+key+'"',
 				'limit':1,
@@ -98,7 +99,7 @@ def work(modelDir, inputDict):
 			}
 
 	if edge_bools['regulator']:
-		tree[feeder.getMaxKey(tree) + 1] = {
+		tree[omf.feeder.getMaxKey(tree) + 1] = {
 			'object':'group_recorder', 
 			'group':'"class=regulator"',
 			'limit':1000,
@@ -107,7 +108,7 @@ def work(modelDir, inputDict):
 			'interval':0
 		}
 
-		tree[feeder.getMaxKey(tree) + 1] = {
+		tree[omf.feeder.getMaxKey(tree) + 1] = {
 			'object':'group_recorder', 
 			'group':'"class=regulator"',
 			'limit':1000,
@@ -116,7 +117,7 @@ def work(modelDir, inputDict):
 			'interval':0
 		}
 
-		tree[feeder.getMaxKey(tree) + 1] = {
+		tree[omf.feeder.getMaxKey(tree) + 1] = {
 			'object':'group_recorder', 
 			'group':'"class=regulator"',
 			'limit':1000,
@@ -427,7 +428,7 @@ def createTreeWithFault( tree, faultType, faultLocation, startTime, stopTime ):
 	faultType = '"'+faultType+'"'
 	outageParams = '"'+faultLocation+','+startTime.replace('\'','') + \
 		','+stopTime.replace('\'','')+'"'
-	treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
+	treeCopy[omf.feeder.getMaxKey(treeCopy) + 1] = {
 		'object': 'eventgen',
 		'name': 'ManualEventGen',
 		'parent': 'RelMetrics',
@@ -435,7 +436,7 @@ def createTreeWithFault( tree, faultType, faultLocation, startTime, stopTime ):
 		'manual_outages': str(outageParams)
 	}
 
-	treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
+	treeCopy[omf.feeder.getMaxKey(treeCopy) + 1] = {
 		'object': 'fault_check ',
 		'name': 'test_fault',
 		'check_mode': 'ONCHANGE',
@@ -443,7 +444,7 @@ def createTreeWithFault( tree, faultType, faultLocation, startTime, stopTime ):
 		'output_filename': 'Fault_check_out.txt'
 	}
 
-	treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
+	treeCopy[omf.feeder.getMaxKey(treeCopy) + 1] = {
 		'object': 'metrics',
 		'name': 'RelMetrics',
 		'report_file': 'Metrics_Output.csv',
@@ -454,7 +455,7 @@ def createTreeWithFault( tree, faultType, faultLocation, startTime, stopTime ):
 		'report_interval': '5 h'
 	}
 
-	treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
+	treeCopy[omf.feeder.getMaxKey(treeCopy) + 1] = {
 		'object': 'power_metrics',
 		'name': 'PwrMetrics',
 		'base_time_value': '1 h'
@@ -487,7 +488,7 @@ def runGridlabAndProcessData(tree, attachments, edge_bools, workDir=False):
 	if not workDir:
 		workDir = tempfile.mkdtemp()
 		# print '@@@@@@', workDir
-	gridlabOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
+	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 
 	# read voltDump values into a dictionary.
 	try:
@@ -621,7 +622,7 @@ def drawPlot(tree, nodeDict=None, edgeDict=None, edgeLabsDict=None, displayLabs=
 	warnings.filterwarnings('ignore')
 
 	# Build the graph.
-	fGraph = feeder.treeToNxGraph(tree)
+	fGraph = omf.feeder.treeToNxGraph(tree)
 	# TODO: consider whether we can set figsize dynamically.
 	wlVal = int(math.sqrt(float(rezSqIn)))
 
@@ -713,7 +714,7 @@ def drawPlot(tree, nodeDict=None, edgeDict=None, edgeLabsDict=None, displayLabs=
 
 def glmToModel(glmPath, modelDir):
 	''' One shot model creation from glm. '''
-	tree = feeder.parse(glmPath)
+	tree = omf.feeder.parse(glmPath)
 	# Run powerflow. First name the folder for it.
 	# Remove old copy of the model.
 	shutil.rmtree(modelDir, ignore_errors=True)
@@ -722,7 +723,7 @@ def glmToModel(glmPath, modelDir):
 	# Create the .omd.
 	os.remove(modelDir + '/Olin Barre Geo.omd')
 	with open(modelDir + '/Olin Barre Geo.omd','w') as omdFile:
-		omd = dict(feeder.newFeederWireframe)
+		omd = dict(omf.feeder.newFeederWireframe)
 		omd['tree'] = tree
 		json.dump(omd, omdFile, indent=4)
 
@@ -764,7 +765,7 @@ def _testingPlot():
 	# FNAME = 'test_medium-R4-12.47-1.glm_CLEAN.glm'
 	# FNAME = 'test_smsSingle.glm'
 
-	tree = feeder.parse(PREFIX + FNAME)
+	tree = omf.feeder.parse(PREFIX + FNAME)
 	chart = drawPlot(tree, neatoLayout=True, perUnitScale=False, rezSqIn=400)
 	#chart = drawPlot(PREFIX + FNAME, neatoLayout=True, edgeCol=True, nodeLabs="Voltage", edgeLabs="Current", perUnitScale=False, rezSqIn=400)
 
