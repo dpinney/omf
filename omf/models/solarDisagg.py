@@ -7,10 +7,9 @@ from os.path import join as pJoin
 import numpy as np
 
 # OMF imports
+import omf.solvers.CSSS.csss.SolarDisagg as SolarDisagg
 from omf.models import __neoMetaModel__
-#from omf.solvers import CSSS
-#import CSSS.csss.SolarDisagg as SolarDisagg
-from omf.solvers.CSSS.csss import SolarDisagg
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
